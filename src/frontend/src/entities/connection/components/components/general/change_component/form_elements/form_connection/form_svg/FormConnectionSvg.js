@@ -12,20 +12,20 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
-import { withTranslation } from 'react-i18next';
-import TechnicalLayout from './layouts/TechnicalLayout';
-import Details from './details/Details';
-import styles from '@entity/connection/components/themes/default/content/connections/connection_overview_2.scss';
-import { mapItemsToClasses } from '@change_component/form_elements/form_connection/form_svg/utils';
-import CreateElementPanel from '@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/CreateElementPanel';
-import { setCurrentTechnicalItem, setConnectionData, clearCurrentLogs } from '@entity/connection/redux_toolkit/slices/ConnectionSlice';
-import { setModalConnectionData, setModalCurrentTechnicalItem } from '@entity/connection/redux_toolkit/slices/ModalConnectionSlice';
 import { LocalStorage } from '@application/classes/LocalStorage';
-import CConnection from '@entity/connection/components/classes/components/content/connection/CConnection';
+import CreateElementPanel from '@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/CreateElementPanel';
 import LogPanel from '@change_component/form_elements/form_connection/form_svg/layouts/logs/LogPanel';
+import { mapItemsToClasses } from '@change_component/form_elements/form_connection/form_svg/utils';
+import CConnection from '@entity/connection/components/classes/components/content/connection/CConnection';
+import styles from '@entity/connection/components/themes/default/content/connections/connection_overview_2.scss';
+import { clearCurrentLogs, setConnectionData, setCurrentTechnicalItem } from '@entity/connection/redux_toolkit/slices/ConnectionSlice';
+import { setModalConnectionData, setModalCurrentTechnicalItem } from '@entity/connection/redux_toolkit/slices/ModalConnectionSlice';
+import React, { Component } from 'react';
+import { withTranslation } from 'react-i18next';
+import { connect } from 'react-redux';
+import Details from './details/Details';
 import ButtonPanel from './layouts/button_panel/ButtonPanel';
+import TechnicalLayout from './layouts/TechnicalLayout';
 
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
@@ -156,7 +156,6 @@ class FormConnectionSvg extends Component {
       createElementPanelConnectorType,
       createElementPanelPosition,
     } = this.state;
-    console.log(connection.getObject())
     return (
       <div
         className={`${styles.connection_editor}`}

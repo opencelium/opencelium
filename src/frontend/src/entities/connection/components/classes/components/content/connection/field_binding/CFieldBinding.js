@@ -61,13 +61,21 @@ export default class CFieldBinding{
         bindingItem1 = this.convertBindingItem(bindingItem1);
         bindingItem2 = this.convertBindingItem(bindingItem2);
     
-        let field1 = bindingItem1.field.replace(/^body\.\$\.|header\.\$\./, '');
-        let field2 = bindingItem2.field.replace(/^body\.\$\.|header\.\$\./, '');
+        const field1 = (bindingItem1.field || '').replace(/^body\.\$\.|header\.\$\./, '');
+        const field2 = (bindingItem2.field || '').replace(/^body\.\$\.|header\.\$\./, '');
+    
+        const bothHaveFields = !!field1 && !!field2;
+        const bothHaveTypes = !!bindingItem1.type && !!bindingItem2.type;
+    
+        if (!bothHaveFields || !bothHaveTypes) {
+            return bindingItem1.color === bindingItem2.color;
+        }
     
         return field1 === field2 &&
                bindingItem1.color === bindingItem2.color &&
                bindingItem1.type === bindingItem2.type;
     }
+    
     
 
     get from(){

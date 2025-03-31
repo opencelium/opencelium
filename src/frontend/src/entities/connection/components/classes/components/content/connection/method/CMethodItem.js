@@ -81,23 +81,46 @@ export default class CMethodItem{
     }
 
     cleanReferenceAtPath(path, references) {
-        const keys = path.split('.');
+        const rawKeys = path.split('.');
+        const keys = rawKeys.filter(key => key !== '$');
+    
+        let startIndex = 0;
+        if (keys[0] === 'body') startIndex++;
+    
+        const relevantKeys = keys.slice(startIndex);
+    
         let current = this.request.body.fields;
         let isFieldExist = true;
-        for (let i = 0; i < keys.length - 1; i++) {
-            if (!(keys[i] in current)) {
+    
+        for (let i = 0; i < relevantKeys.length - 1; i++) {
+            if (!(relevantKeys[i] in current)) {
                 isFieldExist = false;
             }
-            current = current[keys[i]];
+            current = current[relevantKeys[i]];
         }
-        if(isFieldExist) {
-            for(let i = 0;i < references.length; i++) {
-                current[keys[keys.length - 1]] = current[keys[keys.length - 1]].split(`${references[i]};`).join('');
-                current[keys[keys.length - 1]] = current[keys[keys.length - 1]].split(`;${references[i]}`).join('');
-                current[keys[keys.length - 1]] = current[keys[keys.length - 1]].split(`${references[i]}`).join('');
+    
+        if (isFieldExist) {
+            const lastKey = relevantKeys[relevantKeys.length - 1];
+            for (let i = 0; i < references.length; i++) {
+                current[lastKey] = current[lastKey].split(`${references[i]};`).join('');
+                current[lastKey] = current[lastKey].split(`;${references[i]}`).join('');
+                current[lastKey] = current[lastKey].split(`${references[i]}`).join('');
             }
         }
+        if (Array.isArray(this.request.header)) {
+            this.request.header.forEach(headerItem => {
+                if (typeof headerItem.value === 'string') {
+                    for (let i = 0; i < references.length; i++) {
+                        headerItem.value = headerItem.value
+                            .split(`${references[i]};`).join('')
+                            .split(`;${references[i]}`).join('')
+                            .split(references[i]).join('');
+                    }
+                }
+            });
+        }
     }
+    
 
     cleanBodyFromReference(fieldBinding, methodColor, references) {
         const fieldPaths = fieldBinding.reduce((acc, item) => {
