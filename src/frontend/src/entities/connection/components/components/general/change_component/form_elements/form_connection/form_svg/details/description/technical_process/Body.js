@@ -77,21 +77,26 @@ class Body extends React.Component {
 
 	getCurrentBindingItem(fieldName) {
 		const { connection, method } = this.props;
+		// Удаляем префиксы и преобразуем точечную нотацию в скобочную (например, "States.0" → "States[0]")
+		let normalizedFieldName = fieldName
+			.replace(/^body\.\$\./, '')
+			.replace(/^header\.\$\./, '')
+			.replace(/\.([0-9]+)/g, '[$1]');
+		
 		return connection.fieldBinding.find((item) => {
 			return (
 				item.to.findIndex((elem) => {
 					let name = elem.field
 						.replace(/^body\.\$\./, '')
-						.replace(/^header\.\$\./, '');
-					let normalizedFieldName = fieldName
-						.replace(/^body\.\$\./, '')
-						.replace(/^header\.\$\./, '');
-								
+						.replace(/^header\.\$\./, '')
+						.replace(/\.([0-9]+)/g, '[$1]');
+						console.log(name, normalizedFieldName)
 					return elem.color === method.color && name === normalizedFieldName;
 				}) !== -1
 			);
 		});
 	}
+	
 
 	setCurrentEnhancementClickingOnPointer(e, value, fieldName = '') {
 		const { connection, connector, method } = this.props;

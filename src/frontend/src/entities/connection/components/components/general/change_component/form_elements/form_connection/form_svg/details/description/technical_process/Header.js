@@ -63,16 +63,18 @@ class Header extends React.Component {
 
 	getCurrentBindingItem(fieldName) {
 		const { connection, method } = this.props;
+		let normalizedFieldName = fieldName
+			.replace(/^body\.\$\./, '')
+			.replace(/^header\.\$\./, '')
+			.replace(/\.([0-9]+)/g, '[$1]');
+		
 		return connection.fieldBinding.find((item) => {
 			return (
 				item.to.findIndex((elem) => {
 					let name = elem.field
 						.replace(/^body\.\$\./, '')
-						.replace(/^header\.\$\./, '');
-					let normalizedFieldName = fieldName
-						.replace(/^body\.\$\./, '')
-						.replace(/^header\.\$\./, '');
-
+						.replace(/^header\.\$\./, '')
+						.replace(/\.([0-9]+)/g, '[$1]');
 					return elem.color === method.color && name === normalizedFieldName;
 				}) !== -1
 			);
