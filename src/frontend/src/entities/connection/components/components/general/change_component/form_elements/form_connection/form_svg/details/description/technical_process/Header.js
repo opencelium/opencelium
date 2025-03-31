@@ -47,6 +47,10 @@ class Header extends React.Component {
 		if (setCurrentInfo) setCurrentInfo(nameOfCurrentInfo);
 		updateConnection(connection);
 		this.setState({
+			currentEnhancement: null,
+			currentFieldName: '',
+			isToggledIcon: true,
+			isToggledReferenceIcon: false,
 			isHeaderVisible: !this.state.isHeaderVisible,
 		});
 	}
@@ -59,17 +63,18 @@ class Header extends React.Component {
 
 	getCurrentBindingItem(fieldName) {
 		const { connection, method } = this.props;
-
+		let normalizedFieldName = fieldName
+			.replace(/^body\.\$\./, '')
+			.replace(/^header\.\$\./, '')
+			.replace(/\.([0-9]+)/g, '[$1]');
+		
 		return connection.fieldBinding.find((item) => {
 			return (
 				item.to.findIndex((elem) => {
 					let name = elem.field
 						.replace(/^body\.\$\./, '')
-						.replace(/^header\.\$\./, '');
-					let normalizedFieldName = fieldName
-						.replace(/^body\.\$\./, '')
-						.replace(/^header\.\$\./, '');
-
+						.replace(/^header\.\$\./, '')
+						.replace(/\.([0-9]+)/g, '[$1]');
 					return elem.color === method.color && name === normalizedFieldName;
 				}) !== -1
 			);
@@ -163,7 +168,7 @@ class Header extends React.Component {
 			<JsonBody
 				target='header'
 				ref={this.JsonBodyRef}
-				id={'description_body'}
+				id={'description_header'}
 				isDraft={isDraft}
 				isFullHeight={!isToggledReferenceIcon}
 				readOnly={readOnly}

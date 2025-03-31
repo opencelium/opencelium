@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.template.service;
 
+import com.becon.opencelium.backend.configuration.OpenCeliumProps;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.exception.WrongEncode;
@@ -26,9 +27,15 @@ import com.becon.opencelium.backend.resource.template.CtionTemplateResource;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.utility.FileNameUtils;
+import com.becon.opencelium.backend.version_manager.EntityUpdater;
 import com.becon.opencelium.backend.version_manager.EntityVersionManager;
+import com.becon.opencelium.backend.version_manager.backup.FileBackupManager;
+import com.becon.opencelium.backend.version_manager.base.Utils;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -48,16 +55,23 @@ import java.util.stream.Stream;
 
 @Service
 public class TemplateServiceImp implements TemplateService {
+    private static final Logger log = LoggerFactory.getLogger(TemplateServiceImp.class);
     private final ConnectionService connectionService;
     private final Mapper<ConnectionOldDTO, CtionTemplateResource> mapper;
     private final Mapper<ConnectionDTO, ConnectionOldDTO> oldDTOMapper;
     private final Environment environment;
+    private final OpenCeliumProps ocProps;
+    private final EntityUpdater<Template> templateEntityUpdater;
+    private final ObjectMapper objectMapper;
 
-    public TemplateServiceImp(@Qualifier("connectionServiceImp") ConnectionService connectionService, Mapper<ConnectionOldDTO, CtionTemplateResource> mapper, Mapper<ConnectionDTO, ConnectionOldDTO> oldDTOMapper, Environment environment, EntityVersionManager entityVersionManager) {
+    public TemplateServiceImp(@Qualifier("connectionServiceImp") ConnectionService connectionService, Mapper<ConnectionOldDTO, CtionTemplateResource> mapper, Mapper<ConnectionDTO, ConnectionOldDTO> oldDTOMapper, Environment environment, EntityVersionManager entityVersionManager, OpenCeliumProps ocProps, @Qualifier("objectMapper") ObjectMapper objectMapper) {
         this.connectionService = connectionService;
         this.mapper = mapper;
         this.oldDTOMapper = oldDTOMapper;
         this.environment = environment;
+        this.ocProps = ocProps;
+        this.templateEntityUpdater = entityVersionManager.getUpdater(Template.class);
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -86,13 +100,16 @@ public class TemplateServiceImp implements TemplateService {
 
     @Override
     public void save(Template template) {
+        save(template, template.getTemplateId() + ".json");
+    }
+
+    public void save(Template template, String fileName) {
         try {
             String id = template.getTemplateId();
-            String filename = id + ".json";
             ObjectMapper objectMapper = new ObjectMapper();
             template.setTemplateId(id);
             String json = objectMapper.writeValueAsString(template);
-            FileWriter jsonTemplate = new FileWriter(PathConstant.TEMPLATE + filename);
+            FileWriter jsonTemplate = new FileWriter(PathConstant.TEMPLATE + fileName);
             jsonTemplate.write(json);
             jsonTemplate.close();
         } catch (IOException e) {
@@ -145,6 +162,35 @@ public class TemplateServiceImp implements TemplateService {
         templateResource.setTemplateId(UUID.randomUUID().toString());
         templateResource.setVersion(environment.getProperty("opencelium.version", ""));
         return templateResource;
+    }
+
+    @Override
+    public void updateTemplatesToCurrentVersion() {
+        Map<String, Template> templateMap = getAllAsMap();
+        for (Map.Entry<String, Template> entry : templateMap.entrySet()) {
+            String fileName = entry.getKey();
+            Template template = entry.getValue();
+            Template backup;
+            try {
+                backup = objectMapper.readValue(objectMapper.writeValueAsString(template), Template.class);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+
+            if (Utils.compare(ocProps.getVersion(), template.getVersion()) > 0) {
+                try {
+                    String oldVersion = template.getVersion();
+                    templateEntityUpdater.updateToCurrentVersion(template)
+                            .ifUpdated(x -> {
+                                FileBackupManager.doBackup(backup, oldVersion, ocProps.getVersion());
+                                save(template, fileName);
+                            });
+                    log.info("Template[id={}, name={}] is successfully updated to {} version", template.getTemplateId(), template.getName(), ocProps.getVersion());
+                } catch (Exception e) {
+                    log.error("Failed to update Template[id={}, name={}]", template.getTemplateId(), template.getName(), e);
+                }
+            }
+        }
     }
 
     @Override

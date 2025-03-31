@@ -16,10 +16,11 @@
 
 package com.becon.opencelium.backend.database.mysql.entity;
 
+import com.becon.opencelium.backend.constant.EntityNames;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "enhancement")
+@Table(name = EntityNames.ENHANCEMENT)
 public class Enhancement {
 
     @Id
