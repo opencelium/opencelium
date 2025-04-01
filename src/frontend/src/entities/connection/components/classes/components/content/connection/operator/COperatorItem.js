@@ -65,11 +65,7 @@ export default class COperatorItem{
             this.condition.rightStatement.color = DEFAULT_COLOR;
         }
         if (this.expression.indexOf(methodColor) !== -1 && this._connection) {
-            debugger;
-            const cleanedExpression = this._connection.cleanUIFromReferences(this._uiId, methodColor);
-            if (cleanedExpression) {
-                this._expression = this._connection.cleanUIFromReferences(this._uiId, methodColor);
-            }
+            this._expression = this._connection.cleanUIFromReferences(this, methodColor);
         }
     }
     cleanFromReference(methodColor) {

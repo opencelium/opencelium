@@ -649,15 +649,22 @@ export default class CConnection{
         }
     }
 
-    cleanUIFromReferences(uiId, color) {
-        const index = this._ui.operators.findIndex(o => o.id === uiId);
+    cleanUIFromReferences(item, color) {
+        const index = this._ui.operators.findIndex(o => o.id === item.uiId);
         if (index !== -1) {
             const updatedTree = this.cleanUIItemsFromReference(this.ui.operators[index], color);
             const updatedOperators = [...this._ui.operators];
-            updatedOperators[index] = updatedTree;
-            this._ui = {...this.ui, operators: updatedOperators};
-            return jsonToString(updatedTree, 'if');
+            if (!updatedTree) {
+                updatedOperators.splice(index, 1);
+                this._ui = {...this.ui, operators: updatedOperators};
+                return '';
+            } else {
+                updatedOperators[index] = updatedTree;
+                this._ui = {...this.ui, operators: updatedOperators};
+                return jsonToString(updatedTree, item.type);
+            }
         }
+        return item.expression;
     }
 
     cleanUIItemsFromReference(item, color) {
