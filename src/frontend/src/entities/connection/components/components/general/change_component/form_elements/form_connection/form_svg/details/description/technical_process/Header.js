@@ -240,6 +240,7 @@ class Header extends React.Component {
 									fieldName
 								)
 							}
+							location='header'
 						/>
 					)}
 					<div>

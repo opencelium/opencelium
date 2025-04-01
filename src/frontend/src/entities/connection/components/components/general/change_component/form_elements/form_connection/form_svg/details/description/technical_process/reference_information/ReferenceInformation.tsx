@@ -19,14 +19,21 @@ const ReferenceInformation: FC<ReferenceInformationProps> = ({
 	onReferenceClick,
 	isToggledIcon,
 	toggleIcon,
+	location
 }) => {
 	const [fieldBindings, setFieldBindings] = useState<CFieldBinding[]>([]);
 	const extractReferences = () => {
-		setFieldBindings(connection.getFieldBindingsByMethod(method));
+		const allBindings = connection.getFieldBindingsByMethod(method);
+		const filteredBindings = allBindings.filter(binding => {
+			if (!binding.to.length) return false;
+			const toField = binding.to[0].field;
+			return toField.startsWith(location);
+		});
+		setFieldBindings(filteredBindings);
 	};
 	useEffect(() => {
 		extractReferences();
-	}, [body, method]);
+	}, [body, method, location]);
 	useEffect(() => {
 		if (fieldBindings.length === 0 && isToggledIcon === true) {
 			toggleIcon(!isToggledIcon);

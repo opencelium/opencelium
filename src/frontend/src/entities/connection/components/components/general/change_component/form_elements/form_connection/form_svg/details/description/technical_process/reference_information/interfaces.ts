@@ -1,5 +1,5 @@
-import CMethodItem from "@classes/content/connection/method/CMethodItem";
 import CConnection from "@classes/content/connection/CConnection";
+import CMethodItem from "@classes/content/connection/method/CMethodItem";
 
 export interface ReferenceInformationProps {
     body: any,
@@ -8,6 +8,7 @@ export interface ReferenceInformationProps {
     onReferenceClick: (fieldName: string) => void,
     isToggledIcon: boolean,
     toggleIcon: (isToggledIcon: boolean) => void,
+    location: 'body' | 'header';
 }
 
 export interface Reference {

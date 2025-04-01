@@ -343,6 +343,7 @@ class Body extends React.Component {
 									fieldName
 								)
 							}
+							location='body'
 						/>
 					)}
 					<div>
