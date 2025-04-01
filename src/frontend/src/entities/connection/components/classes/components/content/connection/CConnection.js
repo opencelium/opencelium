@@ -610,43 +610,49 @@ export default class CConnection{
         return connector.addMethod(method, mode);
     }
 
-    removeConnectorMethod(connectorType, method, withRefactorIndexes = true, withCleanFieldBinding = true, shouldCleanReference = true){
+    removeConnectorMethod(connectorType, method, withRefactorIndexes = true, withCleanFieldBinding = true, shouldCleanReference = true) {
         let connector = null;
-        let bindingItem = {from: [], to: []};
-        switch(connectorType){
+    
+        switch (connectorType) {
             case CONNECTOR_FROM:
                 connector = this._fromConnector;
-                bindingItem.from.push({color: method.color});
                 break;
             case CONNECTOR_TO:
                 connector = this._toConnector;
-                bindingItem.to.push({color: method.color});
                 break;
             default:
                 return;
         }
-        let color = method.color;
-        let references = [];
+    
+        const color = method.color;
         this.addRestColor(color);
-        const filteredFieldBinding = this.fieldBinding.filter(item => {
-            const fromHasColor = item.from.some(el => {
-                if(el.color === color) {
+    
+        const relatedFieldBindings = this._fieldBinding.filter(binding =>
+            binding.from.some(el => el.color === color) ||
+            binding.to.some(el => el.color === color)
+        );
+    
+        const references = [];
+        relatedFieldBindings.forEach(binding => {
+            binding.from.forEach(el => {
+                if (el.color === color) {
                     references.push(el.getReference());
                 }
-                return el.color === color
             });
-            //const toHasColor = item.to.some(el => el.color === color);
-            return fromHasColor/* || toHasColor*/;
-        })
-        if(withCleanFieldBinding){
-            this.cleanFieldBinding(connectorType, bindingItem);
+        });
+    
+        if (withCleanFieldBinding) {
+            this.cleanFieldBinding(connectorType, relatedFieldBindings);
         }
+    
         connector.removeMethod(method, withRefactorIndexes);
+    
         if (shouldCleanReference) {
-            this._fromConnector.cleanFromReference(filteredFieldBinding, color, references);
-            this._toConnector.cleanFromReference(filteredFieldBinding, color, references);
+            this._fromConnector.cleanFromReference(relatedFieldBindings, color, references);
+            this._toConnector.cleanFromReference(relatedFieldBindings, color, references);
         }
     }
+    
 
     removeConnectorOperator(connectorType, operator, withCleanFieldBinding, shouldCleanReference = true){
         let connector = null;
@@ -765,50 +771,33 @@ export default class CConnection{
         return false;
     }
 
-    cleanFieldBinding(connectorType, bindingItem){
-        for(let i = this._fieldBinding.length - 1; i >= 0; i--) {
-            let item = null;
-            let connectorTypeBinding = [];
-            switch(connectorType){
-                case CONNECTOR_FROM:
-                    connectorTypeBinding = this._fieldBinding[i].from;
-                    item = bindingItem.from[0];
-                    break;
-                case CONNECTOR_TO:
-                    connectorTypeBinding = this._fieldBinding[i].to;
-                    item = bindingItem.to[0];
-                    break;
-            }
-            if(item !== null) {
-                for (let j = connectorTypeBinding.length - 1; j >= 0; j--) {
-                    if (CFieldBinding.compareTwoBindingItems(item, connectorTypeBinding[j])) {
-                        for(let k = j; k < connectorTypeBinding.length; k++){
-                            if(k === j){
-                                this._fieldBinding[i].enhancement.expertCode = replaceVariables(this._fieldBinding[i].enhancement.expertCode, {[`VAR_${k}`]: CEnhancement.generateNotExistVar()});
-                            } else{
-                                this._fieldBinding[i].enhancement.expertCode = replaceVariables(this._fieldBinding[i].enhancement.expertCode, {[`VAR_${k}`]: `VAR_${k - 1}`});
-                            }
-                        }
-                        connectorTypeBinding.splice(j, 1);
-                        break;
-                    }
-                }
-                if ((connectorType === CONNECTOR_FROM && connectorTypeBinding.length === 0)
-                ||(this._fieldBinding[i].from.length === 0 && this._fieldBinding[i].to.length === 0)) {
-                    this._fieldBinding.splice(i, 1);
-                } else {
-                    this._fieldBinding[i].enhancement.updateExpertVar();
-
+    cleanFieldBinding(connectorType, relatedFieldBindings = []) {    
+        for (let i = this._fieldBinding.length - 1; i >= 0; i--) {
+            const binding = this._fieldBinding[i];
+            let connectorTypeBinding = connectorType === CONNECTOR_FROM ? binding.from : binding.to;
+    
+            for (let j = connectorTypeBinding.length - 1; j >= 0; j--) {
+                const currentBindingItem = connectorTypeBinding[j];
+    
+                const match = relatedFieldBindings.some(relBinding =>
+                    relBinding.from.concat(relBinding.to).some(compareItem =>
+                        CFieldBinding.compareTwoBindingItems(compareItem, currentBindingItem)
+                    )
+                );
+    
+                if (match) {
+                    connectorTypeBinding.splice(j, 1);
                 }
             }
-        }
-
-        for(let i = this._fieldBinding.length - 1; i >= 0; i--) {
-            if (this._fieldBinding[i].to.length === 0) {
+    
+            if (binding.from.length === 0 && binding.to.length === 0) {
                 this._fieldBinding.splice(i, 1);
+            } else {
+                binding.enhancement.updateExpertVar();
             }
         }
     }
+    
 
     removeDuplicatesFromFieldBinding(){
         this.fieldBinding = this.fieldBinding.filter((binding1, index, self) => {

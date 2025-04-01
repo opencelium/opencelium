@@ -1,7 +1,7 @@
-import React, {useEffect, useState} from "react";
-import Select from "react-select";
-import {DeepSelectProps} from "@app_component/operator_builder/reference_generator/props";
 import DeepSelectOption from "@app_component/operator_builder/reference_generator/DeepSelectOption";
+import { DeepSelectProps } from "@app_component/operator_builder/reference_generator/props";
+import React, { useEffect, useState } from "react";
+import Select from "react-select";
 
 // Define the structure of nested data
 type DataStructure = {
@@ -34,6 +34,11 @@ const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, bui
      */
     const getNestedOptions = (path: string): OptionType[] => {
         const keys = path.split(".");
+        const method = builderProps.connection.getMethodByColor(color);
+
+        if (!method || !method.response || !method.response.success || !method.response.success.body) {
+            return [];
+        }
         let currentData: DataStructure | null = !color ? {} : builderProps
             .connection
             .getMethodByColor(color)
@@ -158,13 +163,13 @@ const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, bui
 
     useEffect(() => {
         if (color && builderProps.connection) {
-            const newOptions = builderProps
-                .connection
-                .getMethodByColor(color)
-                .response
-                .success
-                .getFields(searchValue, builderProps.connector)
-            setAllOptions(getNestedOptions(''));
+            const method = builderProps.connection.getMethodByColor(color);
+            if (method) {
+                const newOptions = method.response.success.getFields(searchValue, builderProps.connector);
+                setAllOptions(getNestedOptions(''));
+            } else {
+                setAllOptions([]);
+            }
         }
     }, [color/*, searchValue*/]);
     return (
