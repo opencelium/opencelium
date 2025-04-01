@@ -7,10 +7,10 @@ import OperatorTypeFactory from "@app_component/operator_builder/classes/Operato
 
 const OperatorBuilder = (props: OperatorBuilderProps) => {
     const existedTree = useMemo(() => {
-        if (!props.operator) {
+        if (!props.item) {
             return {};
         }
-        const operator = props.connector.getOperatorByIndex(props.operator.index);
+        const operator = props.connector.getOperatorByIndex(props.item.index);
         let generatedTree;
         if (operator?.expression && !operator.uiId) {
             generatedTree = (new OperatorTypeFactory(props.type)).generateTreeByExpression(operator.expression);
@@ -18,11 +18,11 @@ const OperatorBuilder = (props: OperatorBuilderProps) => {
         const foundTree = props.connection.ui?.operators.find((o: any) => o.id === operator?.uiId);
         const initialTree = (new OperatorTypeFactory(props.type)).getInitialTree();
         return generatedTree || foundTree || {...initialTree, id: generateUUID()};
-    }, [props.operator, props.connection]);
+    }, [props.item, props.connection]);
     const [tree, setTree] = useState<GroupProps>(existedTree);
     const updateOperator = () => {
         const connector = props.connection.getConnectorByType(props.connector.getConnectorType());
-        const operatorItem = connector.getOperatorByIndex(props.operator.index);
+        const operatorItem = connector.getOperatorByIndex(props.item.index);
         const jsonToStringResult = jsonToString(tree, props.type);
         operatorItem.expression = jsonToStringResult.result;
         operatorItem.uiId = tree.id;
@@ -36,7 +36,7 @@ const OperatorBuilder = (props: OperatorBuilderProps) => {
             props.connection.setError({
                 data: {
                     connectorId: props.connector.id,
-                    index: props.operator.index,
+                    index: props.item.index,
                     location: '',
                     message: 'Invalid data'
                 }
@@ -46,7 +46,7 @@ const OperatorBuilder = (props: OperatorBuilderProps) => {
     }
     return (
         <div style={{margin: 20}}>
-            <Group builderProps={props} isInitial={true} hasNext={false} updateGroup={(newGroup) => setTree({...newGroup})} group={tree}/>
+            <Group type={props.type} connectionEditor={props} isInitial={true} hasNext={false} updateGroup={(newGroup) => setTree({...newGroup})} group={tree}/>
             {/*<p>
                 {jsonToString(tree, props.type).result}
             </p>*/}

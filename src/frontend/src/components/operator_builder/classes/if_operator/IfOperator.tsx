@@ -38,16 +38,16 @@ export default class IfOperator {
     }
 
     static getRuleComponent(props: RuleUIProps): any {
-        const {rule, updateRule, hasNext, builderProps} = props;
+        const {rule, updateRule, hasNext, connectionEditor} = props;
         return (
             <React.Fragment>
-                <ReferenceGenerator builderProps={builderProps} reference={rule?.properties?.leftField || ''} setValue={(leftField) => {
+                <ReferenceGenerator connectionEditor={connectionEditor} reference={rule?.properties?.leftField || ''} setReference={(leftField) => {
                     updateRule({...rule, properties: {...rule?.properties, leftField, operator: '', rightField: ''}})
                 }}/>
                 {rule?.properties?.leftField &&
                     <React.Fragment>
                         <OperatorSelect
-                            type={builderProps.type}
+                            type={OperatorType.If}
                             operator={rule?.properties?.operator || ''}
                             updateOperator={(operator) => {
                                 updateRule({...rule, properties: {...rule?.properties, operator, rightField: ''}})
@@ -55,9 +55,9 @@ export default class IfOperator {
                         />
                         {rule?.properties?.operator && isBinaryOperator(rule.properties.operator) &&
                             <ReferenceGenerator
-                                builderProps={builderProps}
+                                connectionEditor={connectionEditor}
                                 reference={rule?.properties?.rightField || ''}
-                                setValue={(rightField) => {
+                                setReference={(rightField) => {
                                     updateRule({...rule, properties: {...rule?.properties, rightField}})
                                 }}
                             />

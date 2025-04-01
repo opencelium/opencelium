@@ -82,7 +82,6 @@ const LicenseManagement: FC<IForm> = ({}) => {
                 handleClick={() => dispatch(generateActivateRequest())}
             />
         );
-        actions.push(<ImportCreditsComponent key={'upload'}/>);
         actions.push(<ImportLicenseComponent key={'upload_license'}/>);
     } else {
         if (authUser.userDetail.themeSync && (!currentSubscription || Subscription.isFree(currentSubscription))) {

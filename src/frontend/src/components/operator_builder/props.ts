@@ -2,6 +2,7 @@ import {LoopOperatorName, OperatorName} from "./interfaces/OperatorName";
 import CConnection from "@classes/content/connection/CConnection";
 import CConnectorItem from "@classes/content/connection/CConnectorItem";
 import COperatorItem from "@classes/content/connection/operator/COperatorItem";
+import CMethodItem from "@classes/content/connection/method/CMethodItem";
 
 export interface RulePropertyProps {
     leftField: string,
@@ -23,7 +24,8 @@ export interface RuleProps {
 }
 export interface RuleUIProps extends UpdateRuleProps, Omit<RuleStyleProps, "isLoop">{
     rule: RuleProps,
-    builderProps: OperatorBuilderProps
+    connectionEditor: ConnectionEditorProps,
+    type: OperatorType,
 }
 export interface RuleStyleProps {
     hasNext: boolean,
@@ -37,13 +39,15 @@ export enum OperatorType {
     Loop= 'loop',
     If= 'if'
 }
-export interface OperatorBuilderProps {
+export interface ConnectionEditorProps {
     connection: CConnection,
     connector: CConnectorItem,
-    operator: COperatorItem,
+    item: COperatorItem | CMethodItem,
     updateConnection: any,
-    type: OperatorType,
 
+}
+export interface OperatorBuilderProps extends ConnectionEditorProps {
+    type: OperatorType,
 }
 export interface GroupProps {
     id: string,
@@ -57,7 +61,8 @@ export interface GroupHeaderStyleProps {
 export type ChildProps = RuleProps | GroupProps;
 export interface GroupUIProps extends UpdateGroupProps, GroupStyleProps{
     group: GroupProps,
-    builderProps: OperatorBuilderProps
+    connectionEditor: ConnectionEditorProps
+    type: OperatorType,
 }
 export interface GroupHeaderUIProps extends UpdateGroupProps{
     group: GroupProps,

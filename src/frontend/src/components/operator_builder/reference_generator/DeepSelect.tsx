@@ -1,20 +1,17 @@
-import DeepSelectOption from "@app_component/operator_builder/reference_generator/DeepSelectOption";
 import { DeepSelectProps } from "@app_component/operator_builder/reference_generator/props";
 import React, { useEffect, useState } from "react";
 import Select from "react-select";
 
-// Define the structure of nested data
 type DataStructure = {
     [key: string]: DataStructure | null | DataStructure[] | any;
 };
 
-// Define options type for react-select
 interface OptionType {
     label: string;
     value: string;
 }
 
-const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, builderProps}) => {
+const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, connectionEditor}) => {
     const [searchValue, setSearchValue] = useState<string>(field);
     const [selectedOption, setSelectedOption] = useState<OptionType | null>(undefined);
     const [filteredOptions, setFilteredOptions] = useState<OptionType[]>([]);
@@ -22,24 +19,14 @@ const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, bui
     const [iterators, setIterators] = useState<string[]>([]);
     const [menuIsOpen, toggleMenu] = useState<boolean>(false);
     useEffect(() => {
-        setIterators(builderProps.connector.getPreviousIterators());
-    }, [builderProps.connector]);
+        setIterators(connectionEditor.connector.getPreviousIterators());
+    }, [connectionEditor.connector]);
     useEffect(() => {
         setAllOptions(getNestedOptions(''));
     }, []);
-    /**
-     * Recursively find sub-options from the nested data based on the given path.
-     * @param path The current input value representing a search path.
-     * @returns An array of sub-options or an empty array if no further options exist.
-     */
     const getNestedOptions = (path: string): OptionType[] => {
         const keys = path.split(".");
-        const method = builderProps.connection.getMethodByColor(color);
-
-        if (!method || !method.response || !method.response.success || !method.response.success.body) {
-            return [];
-        }
-        let currentData: DataStructure | null = !color ? {} : builderProps
+        let currentData: DataStructure | null = !color ? {} : connectionEditor
             .connection
             .getMethodByColor(color)
             .response
@@ -49,30 +36,23 @@ const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, bui
 
         for (let i = 0; i < keys.length; i++) {
             const key = keys[i];
-
             if (key === "") {
-                break; // Avoid processing empty keys from accidental trailing dots
+                break;
             }
-
             if (i === keys.length - 1) {
-                // Store the last part to use for filtering
                 lastKeyPart = key;
             }
-
             if (currentData && typeof currentData === "object" && key in currentData) {
                 currentData = currentData[key];
                 lastValidPath += (lastValidPath ? "." : "") + key;
             } else if (Array.isArray(currentData) && (key === "[0]" || key === "[*]" || iterators.includes(key.slice(1, -1)))) {
-                // Navigate into the first element if `[0]` is selected
                 currentData = currentData[0];
                 lastValidPath += (lastValidPath ? "." : "") + key;
             } else {
                 break;
             }
         }
-
         if (Array.isArray(currentData)) {
-            // If the current data is an array, show special options
             return [
                 { label: "First element of the array", value: `${lastValidPath ? `${lastValidPath}.` : ''}[0]` },
                 { label: "The whole array", value: `${lastValidPath ? `${lastValidPath}.` : ''}[*]` },
@@ -84,7 +64,7 @@ const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, bui
         }
         if (currentData && typeof currentData === "object") {
             return Object.keys(currentData)
-                .filter((key) => key.startsWith(lastKeyPart)) // Partial match filtering
+                .filter((key) => key.startsWith(lastKeyPart))
                 .map((key) => ({
                     label: key,
                     value: lastValidPath === '' ? key : `${lastValidPath}.${key}`,
@@ -94,28 +74,20 @@ const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, bui
         return [];
     };
 
-    /**
-     * Handles input changes and updates options accordingly.
-     * @param input The search input string.
-     * @param actionMeta Metadata about how input was changed.
-     */
     const handleInputChange = (input: string, actionMeta: { action: string }) => {
         if (actionMeta.action === "input-change") {
             setSearchValue(input);
 
             if (input === "") {
-                setSelectedOption(null); // Reset selected option when input is cleared
+                setSelectedOption(null);
             }
             if (input.includes(".")) {
-                // Fetch nested options if input contains a dot
-
                 if (input.endsWith(".[0]") || input.endsWith(".[*]") || iterators.some(it => input.endsWith(`.[${it}]`))) {
                     setFilteredOptions(getNestedOptions(`${input}.`));
                 } else {
                     setFilteredOptions(getNestedOptions(input));
                 }
             } else {
-                // Filter from top-level options
                 setFilteredOptions(
                     allOptions.filter((option: any) =>
                         option.label.toLowerCase().startsWith(input.toLowerCase())
@@ -125,10 +97,6 @@ const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, bui
         }
     };
 
-    /**
-     * Handles selection of an option and updates state.
-     * @param selectedOption The option selected from the dropdown.
-     */
     const handleChange = (selectedOption: OptionType | null) => {
         setSelectedOption(selectedOption);
         if (selectedOption) {
@@ -162,16 +130,10 @@ const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, bui
     }, [allOptions]);
 
     useEffect(() => {
-        if (color && builderProps.connection) {
-            const method = builderProps.connection.getMethodByColor(color);
-            if (method) {
-                const newOptions = method.response.success.getFields(searchValue, builderProps.connector);
-                setAllOptions(getNestedOptions(''));
-            } else {
-                setAllOptions([]);
-            }
+        if (color && connectionEditor.connection) {
+            setAllOptions(getNestedOptions(''));
         }
-    }, [color/*, searchValue*/]);
+    }, [color]);
     return (
         <div>
             <Select
@@ -189,11 +151,11 @@ const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, bui
                 styles={{
                     control: (base) => ({
                         ...base,
-                        opacity: 1, // Ensure the input is visible
+                        opacity: 1,
                     }),
                     singleValue: (base) => ({
                         ...base,
-                        opacity: 1, // Prevents the selected value from fading out
+                        opacity: 1,
                     }),
                     input: (base) => ({
                         ...base,
@@ -205,7 +167,6 @@ const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, bui
                 }}
                 menuPortalTarget={document.body}
                 menuPosition="absolute"
-                //components={{ Option: DeepSelectOption }}
             />
         </div>
     );

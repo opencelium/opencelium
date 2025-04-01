@@ -1,24 +1,24 @@
-import {OperatorBuilderProps} from "@app_component/operator_builder/props";
+import {ConnectionEditorProps} from "@app_component/operator_builder/props";
 
 export interface ReferenceGeneratorProps {
-    setValue: (newValue: string) => void,
+    setReference: (reference: string) => void,
     addField?: any,
     reference: string,
-    builderProps: OperatorBuilderProps,
+    connectionEditor: ConnectionEditorProps,
     id?: string,
 }
 
 export interface MethodSelectProps {
     onMethodSelect: (color: string) => void,
     methodColor: string,
-    builderProps: OperatorBuilderProps,
+    connectionEditor: ConnectionEditorProps,
 }
 
 export interface DeepSelectProps {
     onValueSelect: (value: string) => void,
     field: string,
     color: string,
-    builderProps: OperatorBuilderProps,
+    connectionEditor: ConnectionEditorProps,
 }
 export type ReferenceType = 'constant' | 'direct' | 'webhook';
 export interface ReferenceSwitcherProps {

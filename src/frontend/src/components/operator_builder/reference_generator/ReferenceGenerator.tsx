@@ -11,7 +11,7 @@ import ReferenceFactory from "@app_component/operator_builder/classes/references
 import WebhookReference from "@app_component/operator_builder/classes/references/WebhookReference";
 import InputText from "@app_component/base/input/text/InputText";
 
-const ReferenceGenerator = ({reference, setValue, builderProps}: ReferenceGeneratorProps) => {
+const ReferenceGenerator = ({reference, setReference, connectionEditor}: ReferenceGeneratorProps) => {
     const [color, setColor] = useState<string>('');
     const [currentField, setCurrentField] = useState<string>('');
     const [referenceType, updateReferenceType] = useState<ReferenceType>('direct');
@@ -35,7 +35,7 @@ const ReferenceGenerator = ({reference, setValue, builderProps}: ReferenceGenera
         if (currentField !== '') {
             newReference = ReferenceFactory.getReference(referenceType, currentField, color, 'response');
             if (newReference !== reference) {
-                setValue(newReference);
+                setReference(newReference);
             }
         }
     }
@@ -72,8 +72,8 @@ const ReferenceGenerator = ({reference, setValue, builderProps}: ReferenceGenera
             <ReferenceSwitcher referenceType={referenceType} changeReferenceType={changeReferenceType}/>
             {referenceType === 'direct' &&
                 <React.Fragment>
-                    <MethodSelect builderProps={builderProps} methodColor={color} onMethodSelect={onColorSelect}/>
-                    <DeepSelect color={color} builderProps={builderProps} field={currentField} onValueSelect={onFieldSelect}/>
+                    <MethodSelect connectionEditor={connectionEditor} methodColor={color} onMethodSelect={onColorSelect}/>
+                    <DeepSelect color={color} connectionEditor={connectionEditor} field={currentField} onValueSelect={onFieldSelect}/>
                 </React.Fragment>
             }
             {referenceType === 'webhook' && <WebhookGenerator value={Webhook.extractFromSnippet(currentField)} style={{float: 'left'}} onSelect={(webhookValue) => {
