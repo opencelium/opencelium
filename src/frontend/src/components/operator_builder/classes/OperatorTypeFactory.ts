@@ -5,9 +5,6 @@ import IfOperatorsConfigGenerator from "@app_component/operator_builder/classes/
 import LoopOperatorsConfigGenerator
     from "@app_component/operator_builder/classes/loop_operator/LoopOperatorsConfigGenerator";
 import {OptionType} from "@app_component/operator_builder/interfaces/IBaseOperator";
-import {
-    LoopOperatorName,
-} from "@app_component/operator_builder/interfaces/OperatorName";
 
 export default class OperatorTypeFactory {
     type: OperatorType;

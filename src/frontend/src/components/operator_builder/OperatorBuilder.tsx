@@ -49,8 +49,8 @@ const OperatorBuilder = (props: OperatorBuilderProps) => {
             <Group type={props.type} connectionEditor={props} isInitial={true} hasNext={false} updateGroup={(newGroup) => setTree({...newGroup})} group={tree}/>
             {/*<p>
                 {jsonToString(tree, props.type).result}
-            </p>*/}
-            {/*<pre>
+            </p>
+            <pre>
                 {JSON.stringify(tree, null, 2)}
             </pre>*/}
             <SaveOperatorButton

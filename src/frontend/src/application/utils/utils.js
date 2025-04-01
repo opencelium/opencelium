@@ -21,6 +21,8 @@ import {ResponseMessages} from "../requests/interfaces/IResponse";
 import {Application} from "../classes/Application";
 import crypto from "crypto";
 import {Range} from "ace-builds";
+import {GroupProps, OperatorType, RuleProps} from "@app_component/operator_builder/props";
+import OperatorTypeFactory from "@app_component/operator_builder/classes/OperatorTypeFactory";
 
 //TODO rename utils.js into utils.tsx
 /**
@@ -1170,4 +1172,35 @@ export const getDateFormat = (timestamp, settings = {hasHours: true, hasMinutes:
         seconds = `0${seconds}`;
     }
     return `${date.getDate()}. ${monthNames[date.getMonth()]} ${date.getFullYear()}${(settings.hasMinutes || settings.hasHours || settings.hasSeconds) ? ',' : ''} ${settings.hasHours ? hours : ''}${settings.hasMinutes ? `:${minutes}` : ''}${settings.hasSeconds ? `:${seconds}` : ''}`
+}
+export function jsonToString(json, type) {
+    if (json.type === 'rule') {
+        const { leftField, operator, rightField } = json.properties || {};
+        const isNotValid = (new OperatorTypeFactory(type)).isExpressionNotValid({leftField, operator, rightField});
+        const result = (new OperatorTypeFactory(type)).getExpressionFormat({leftField, operator, rightField});
+        return { result, isNotValid };
+    }
+
+    if (json.type === 'group' && json.items) {
+        const conjunction = json.properties?.conjunction?.toUpperCase();
+        let isNotValid = false;
+        let itemsString = json.items.map(item => {
+            const { result, isNotValid: itemInvalid } = jsonToString(item, type);
+            if (itemInvalid) isNotValid = true;
+            return result;
+        });
+        if (conjunction) {
+            itemsString = itemsString.join(` ${conjunction} `);
+        } else {
+            itemsString = itemsString.join('');
+        }
+        switch (type) {
+            case 'loop':
+                return { result: itemsString, isNotValid };
+            case 'if':
+                return { result: `(${itemsString})`, isNotValid };
+        }
+    }
+
+    return { result: '', isNotValid: true };
 }

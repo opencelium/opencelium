@@ -69,7 +69,6 @@ const LicenseManagement: FC<IForm> = ({}) => {
     useEffect(() => {
         if (activatingFreeLicense === API_REQUEST_STATE.FINISH) {
             dispatch(getCurrentSubscription());
-            console.log('get subscription after activatingFreeLicense')
         }
     }, [activatingFreeLicense]);
     const actions = []

@@ -50,5 +50,5 @@ ButtonOnlyIconTooltip.args = {
     tooltip: 'Button with Icon',
     position: 'bottom',
     target: 'button',
-    component: <TemplateWithTheme id={'button'} icon={'face'} hasBackground={false} color={ColorTheme.Black} onClick={() => {console.log('Pressed!')}}/>,
+    component: <TemplateWithTheme id={'button'} icon={'face'} hasBackground={false} color={ColorTheme.Black} onClick={() => {}}/>,
 }

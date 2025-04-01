@@ -82,7 +82,7 @@ class Body extends React.Component {
 			.replace(/^body\.\$\./, '')
 			.replace(/^header\.\$\./, '')
 			.replace(/\.([0-9]+)/g, '[$1]');
-		
+
 		return connection.fieldBinding.find((item) => {
 			return (
 				item.to.findIndex((elem) => {
@@ -90,13 +90,12 @@ class Body extends React.Component {
 						.replace(/^body\.\$\./, '')
 						.replace(/^header\.\$\./, '')
 						.replace(/\.([0-9]+)/g, '[$1]');
-						console.log(name, normalizedFieldName)
 					return elem.color === method.color && name === normalizedFieldName;
 				}) !== -1
 			);
 		});
 	}
-	
+
 
 	setCurrentEnhancementClickingOnPointer(e, value, fieldName = '') {
 		const { connection, connector, method } = this.props;

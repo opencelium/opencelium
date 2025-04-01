@@ -13,15 +13,12 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { consoleLog, isId, replaceVariables } from "@application/utils/utils";
-import CAggregator from "@classes/content/connection/data_aggregator/CAggregator";
-import CEnhancement from "@classes/content/connection/field_binding/CEnhancement";
+import {consoleLog, isId, jsonToString} from "@application/utils/utils";
 import CMethodItem from "@classes/content/connection/method/CMethodItem";
 import COperatorItem from "@classes/content/connection/operator/COperatorItem";
 import { RESPONSE_FAIL, RESPONSE_SUCCESS } from "../invoker/response/CResponse";
 import CConnectorItem, { CONNECTOR_FROM, CONNECTOR_TO, OUTSIDE_ITEM } from "./CConnectorItem";
 import CTemplate from "./CTemplate";
-import CBindingItem from "./field_binding/CBindingItem";
 import CFieldBinding from "./field_binding/CFieldBinding";
 import { STATEMENT_REQUEST, STATEMENT_RESPONSE } from "./operator/CStatement";
 
@@ -81,11 +78,11 @@ export default class CConnection{
         if(toConnector !== null){
             toConnector.connectorType = CONNECTOR_TO;
         }
-        this._fromConnector = CConnectorItem.createConnectorItem(fromConnector);
+        this._fromConnector = CConnectorItem.createConnectorItem(fromConnector, this);
         if(toConnector !== null && this._fromConnector instanceof CConnectorItem) {
             toConnector.shiftXForSvgItems = this._fromConnector.getShiftXOfSvgItems();
         }
-        this._toConnector = CConnectorItem.createConnectorItem(toConnector);
+        this._toConnector = CConnectorItem.createConnectorItem(toConnector, this);
         this._fieldBinding = this.convertFieldBindingItems(fieldBindingItems);
         this._template = this.convertTemplate(template);
         this._allTemplates = [];
@@ -611,7 +608,7 @@ export default class CConnection{
 
     removeConnectorMethod(connectorType, method, withRefactorIndexes = true, withCleanFieldBinding = true, shouldCleanReference = true) {
         let connector = null;
-    
+
         switch (connectorType) {
             case CONNECTOR_FROM:
                 connector = this._fromConnector;
@@ -622,15 +619,15 @@ export default class CConnection{
             default:
                 return;
         }
-    
+
         const color = method.color;
         this.addRestColor(color);
-    
+
         const relatedFieldBindings = this._fieldBinding.filter(binding =>
             binding.from.some(el => el.color === color) ||
             binding.to.some(el => el.color === color)
         );
-    
+
         const references = [];
         relatedFieldBindings.forEach(binding => {
             binding.from.forEach(el => {
@@ -639,19 +636,52 @@ export default class CConnection{
                 }
             });
         });
-    
+
         if (withCleanFieldBinding) {
             this.cleanFieldBinding(connectorType, relatedFieldBindings);
         }
-    
+
         connector.removeMethod(method, withRefactorIndexes);
-    
+
         if (shouldCleanReference) {
             this._fromConnector.cleanFromReference(relatedFieldBindings, color, references);
             this._toConnector.cleanFromReference(relatedFieldBindings, color, references);
         }
     }
-    
+
+    cleanUIFromReferences(uiId, color) {
+        const index = this._ui.operators.findIndex(o => o.id === uiId);
+        if (index !== -1) {
+            const updatedTree = this.cleanUIItemsFromReference(this.ui.operators[index], color);
+            const updatedOperators = [...this._ui.operators];
+            updatedOperators[index] = updatedTree;
+            this._ui = {...this.ui, operators: updatedOperators};
+            return jsonToString(updatedTree, 'if');
+        }
+    }
+
+    cleanUIItemsFromReference(item, color) {
+        if (!item) return undefined;
+        if (item.type === 'rule') {
+            const { leftField, rightField } = item.properties || {};
+            const containsColor =
+                (leftField && leftField.includes(color)) ||
+                (rightField && rightField.includes(color));
+            return containsColor ? undefined : item;
+        }
+        if (item.type === 'group') {
+            const filteredItems = (item.items || [])
+                .map(child => this.cleanUIItemsFromReference(child, color))
+                .filter(child => child !== undefined);
+            if (filteredItems.length === 0) return undefined;
+            return {
+                ...item,
+                items: filteredItems
+            };
+        }
+        return item;
+    }
+
 
     removeConnectorOperator(connectorType, operator, withCleanFieldBinding, shouldCleanReference = true){
         let connector = null;
@@ -690,6 +720,14 @@ export default class CConnection{
         if (index !== -1) {
             uiOperators.splice(index, 1)
             this._ui = {operators: uiOperators};
+        }
+    }
+    setUIOperators(operators) {
+        if (this._ui) {
+            this._ui = {
+                ...this._ui,
+                operators: [...operators],
+            }
         }
     }
     addFromConnectorOperator(operator, mode = OUTSIDE_ITEM){
@@ -770,25 +808,25 @@ export default class CConnection{
         return false;
     }
 
-    cleanFieldBinding(connectorType, relatedFieldBindings = []) {    
+    cleanFieldBinding(connectorType, relatedFieldBindings = []) {
         for (let i = this._fieldBinding.length - 1; i >= 0; i--) {
             const binding = this._fieldBinding[i];
             let connectorTypeBinding = connectorType === CONNECTOR_FROM ? binding.from : binding.to;
-    
+
             for (let j = connectorTypeBinding.length - 1; j >= 0; j--) {
                 const currentBindingItem = connectorTypeBinding[j];
-    
+
                 const match = relatedFieldBindings.some(relBinding =>
                     relBinding.from.concat(relBinding.to).some(compareItem =>
                         CFieldBinding.compareTwoBindingItems(compareItem, currentBindingItem)
                     )
                 );
-    
+
                 if (match) {
                     connectorTypeBinding.splice(j, 1);
                 }
             }
-    
+
             if (binding.from.length === 0 && binding.to.length === 0) {
                 this._fieldBinding.splice(i, 1);
             } else {
@@ -796,7 +834,7 @@ export default class CConnection{
             }
         }
     }
-    
+
 
     removeDuplicatesFromFieldBinding(){
         this.fieldBinding = this.fieldBinding.filter((binding1, index, self) => {
@@ -860,7 +898,6 @@ export default class CConnection{
                         }
                     }
                     newFieldBinding = CFieldBinding.createFieldBinding({from: bindingItem.from, to: bindingItem.to});
-                    console.log('first add', newFieldBinding)
                     this._fieldBinding.push(newFieldBinding);
                     for(let i = 0; i < this._fieldBinding.length; i++) {
                         if(this._fieldBinding[i].to.length === 1 && this._fieldBinding[i].from.length === 0){

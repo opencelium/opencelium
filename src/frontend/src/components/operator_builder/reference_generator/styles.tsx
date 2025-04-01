@@ -3,9 +3,6 @@ import {
     ReferenceGeneratorStyleProps,
     ReferenceSwitcherStyleProps
 } from "@app_component/operator_builder/reference_generator/props";
-import {
-    TransitionEffect
-} from "@change_component/form_elements/form_connection/form_svg/details/description/operator/Condition";
 import Button from "@app_component/base/button/Button";
 
 export const ReferenceGeneratorContainer = styled.div<ReferenceGeneratorStyleProps>`
@@ -38,7 +35,7 @@ export const ReferenceSwitcherContainer = styled.div<ReferenceSwitcherStyleProps
     margin-top: -10px;
     padding-bottom: 9px;
     overflow: hidden;
-    transition: ${TransitionEffect},
+    transition: width 0.3s ease 0s;
 `;
 
 export const UpdateParamButton = styled(Button)`

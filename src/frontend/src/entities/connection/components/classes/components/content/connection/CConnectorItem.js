@@ -67,8 +67,10 @@ export default class CConnectorItem{
 
     constructor(
         connectorId = 0, title = '', icon, invoker = null, methods = [], operators = [],
-        connectorType = '', shiftXForSvgItems = 0, currentItemIndex = '', svgItems = [], arrows = [], sslCert = false){
+        connectorType = '', shiftXForSvgItems = 0, currentItemIndex = '', svgItems = [], arrows = [], sslCert = false,
+        connection = null){
         this._id = isId(connectorId) ? connectorId : 0;
+        this._connection = connection;
         this._title = title === '' ? 'Please, choose connector' : title;
         this._icon = isString(icon) ? icon : '';
         this._invoker = this.convertInvoker(invoker);
@@ -86,7 +88,7 @@ export default class CConnectorItem{
         this.setSvgItems();
     }
 
-    static createConnectorItem(connectorItem){
+    static createConnectorItem(connectorItem, connection){
         let connectorId = connectorItem && connectorItem.hasOwnProperty('connectorId') ? connectorItem.connectorId : 0;
         let title = connectorItem && connectorItem.hasOwnProperty('title') ? connectorItem.title : '';
         let icon = connectorItem && connectorItem.hasOwnProperty('icon') ? connectorItem.icon : '';
@@ -99,7 +101,7 @@ export default class CConnectorItem{
         let svgItems = connectorItem && connectorItem.hasOwnProperty('svgItems') ? connectorItem.svgItems : [];
         let arrows = connectorItem && connectorItem.hasOwnProperty('arrows') ? connectorItem.arrows : [];
         let sslCert = connectorItem && connectorItem.hasOwnProperty('sslCert') ? connectorItem.sslCert : false;
-        return new CConnectorItem(connectorId, title, icon, invoker, methods, operators, connectorType, shiftXForSvgItems, currentItemIndex, svgItems, arrows, sslCert);
+        return new CConnectorItem(connectorId, title, icon, invoker, methods, operators, connectorType, shiftXForSvgItems, currentItemIndex, svgItems, arrows, sslCert, connection);
     }
 
     static hasIcon(icon){
@@ -740,7 +742,7 @@ export default class CConnectorItem{
 
     convertOperator(operator){
         if(!(operator instanceof COperatorItem)) {
-            return COperatorItem.createOperatorItem(operator, this);
+            return COperatorItem.createOperatorItem(operator, this._connection);
         }
         return operator;
     }

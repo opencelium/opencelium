@@ -67,7 +67,6 @@ const ImportTemplateButton: FC<ImportTemplateButtonProps> =
     }, [checkingTemplateId])
     useEffect(() => {
         if (startImporting) {
-            console.log(templateFile);
             dispatch(checkTemplateId(templateFile.name.toString().substr(0, templateFile.name.length - 5)));
         }
     }, [startImporting]);

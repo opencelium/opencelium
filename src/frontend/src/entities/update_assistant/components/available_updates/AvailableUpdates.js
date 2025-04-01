@@ -326,7 +326,6 @@ class AvailableUpdates extends React.Component{
                         <tbody>
                             {this.renderOldUpdates()}
                             {updates.available.map(version => {
-                                console.log(version);
                                 const isAlreadyDownloaded = activeMode === ONLINE_UPDATE && offlineUpdates.findIndex(u => u.name === version.name) !== -1;
                                 return (
                                     <tr key={version.name}>

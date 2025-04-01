@@ -15,7 +15,6 @@
 
 import CCondition, {FUNCTIONAL_OPERATORS_FOR_LOOP} from "./CCondition";
 import CStatement, {DEFAULT_COLOR} from "./CStatement";
-import {RESPONSE_SUCCESS} from "@classes/content/invoker/response/CResponse";
 
 export const IF_OPERATOR = 'if';
 export const LOOP_OPERATOR = 'loop';
@@ -25,7 +24,7 @@ export const LOOP_OPERATOR = 'loop';
  */
 export default class COperatorItem{
 
-    constructor(index = '', type = '', condition = null, error = null, isMinimized = false, isToggled = false, iterator = '', dataAggregator = null, expression = '', uiId = ''){
+    constructor(index = '', type = '', condition = null, error = null, isMinimized = false, isToggled = false, iterator = '', dataAggregator = null, expression = '', uiId = '', connection){
         this._uniqueIndex = `${new Date().getTime()}_${Math.random(10000)}`;
         this._index = index;
         this._type = this.checkType(type) ? type : '';
@@ -39,9 +38,10 @@ export default class COperatorItem{
         this._dataAggregator = dataAggregator;
         this._expression = expression;
         this._uiId = uiId;
+        this._connection = connection;
     }
 
-    static createOperatorItem(operatorItem){
+    static createOperatorItem(operatorItem, connection){
         let index = operatorItem && operatorItem.hasOwnProperty('index') ? operatorItem.index : '';
         let type = operatorItem && operatorItem.hasOwnProperty('type') ? operatorItem.type : '';
         let condition = operatorItem && operatorItem.hasOwnProperty('condition') ? operatorItem.condition : null;
@@ -52,7 +52,7 @@ export default class COperatorItem{
         let dataAggregator = operatorItem && operatorItem.hasOwnProperty('dataAggregator') ? operatorItem.dataAggregator : null;
         let expression = operatorItem && operatorItem.hasOwnProperty('expression') ? operatorItem.expression : '';
         let uiId = operatorItem && operatorItem.hasOwnProperty('uiId') ? operatorItem.uiId : '';
-        return new COperatorItem(index, type, condition, error, isMinimized, isToggled, iterator, dataAggregator, expression, uiId);
+        return new COperatorItem(index, type, condition, error, isMinimized, isToggled, iterator, dataAggregator, expression, uiId, connection);
     }
 
     cleanConditionFromReference(methodColor) {
@@ -64,8 +64,14 @@ export default class COperatorItem{
         if(this.condition.rightStatement.color === methodColor) {
             this.condition.rightStatement.color = DEFAULT_COLOR;
         }
+        if (this.expression.indexOf(methodColor) !== -1 && this._connection) {
+            debugger;
+            const cleanedExpression = this._connection.cleanUIFromReferences(this._uiId, methodColor);
+            if (cleanedExpression) {
+                this._expression = this._connection.cleanUIFromReferences(this._uiId, methodColor);
+            }
+        }
     }
-
     cleanFromReference(methodColor) {
         this.cleanConditionFromReference(methodColor);
     }
