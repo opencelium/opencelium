@@ -18,8 +18,8 @@ public class SchedulerWebSocketHandler implements WebSocketEventHandler {
     }
 
     @Override
-    public WebSocketTopicType getEventType() {
-        return WebSocketTopicType.SCHEDULER;
+    public WebSocketHandlerType getEventType() {
+        return WebSocketHandlerType.SCHEDULER;
     }
 
     /**
