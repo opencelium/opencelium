@@ -9,12 +9,11 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.Random;
 
 @Component
-public class Connection43MngUpdater implements ConnectionMngUpdater {
+public class Connection44MngUpdater implements ConnectionMngUpdater {
 
-    private static final UpdaterVersion currentVersion = UpdaterVersion.VERSION_4_3;
+    private static final UpdaterVersion currentVersion = UpdaterVersion.VERSION_4_4;
 
     @Override
     public Wrapper<ConnectionMng> updateToCurrentVersion(ConnectionMng connection) {

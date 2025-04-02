@@ -3,12 +3,10 @@ package com.becon.opencelium.backend.configuration;
 import com.becon.opencelium.backend.execution.socket.SocketConstant;
 import com.becon.opencelium.backend.execution.socket.handler.WebSocketEventHandler;
 import com.becon.opencelium.backend.execution.socket.handler.WebSocketTopicHandlerFactory;
-import com.becon.opencelium.backend.execution.socket.handler.WebSocketTopicType;
+import com.becon.opencelium.backend.execution.socket.handler.WebSocketHandlerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.server.ServerHttpRequest;
-import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.config.ChannelRegistration;
@@ -17,13 +15,8 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
-import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.*;
-import org.springframework.web.socket.server.HandshakeInterceptor;
-import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.Map;
 import java.util.function.Consumer;
 
 
@@ -43,7 +36,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
      * Configure the message broker for handling STOMP messages.
      * Enables a simple in-memory broker and sets the application destination prefix.
      */
-
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.enableSimpleBroker(SocketConstant.DESTINATION_PREFIX);
@@ -57,7 +49,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint(SocketConstant.PATH)
                 .setAllowedOriginPatterns("*")
-                .addInterceptors(myHandler())
                 .withSockJS();
     }
 
@@ -67,29 +58,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureWebSocketTransport(WebSocketTransportRegistration registry) {
         WebSocketMessageBrokerConfigurer.super.configureWebSocketTransport(registry);
-    }
-
-    /**
-     * Handshake interceptor that extracts information from the initial HTTP handshake request.
-     * In this case, it extracts the 'schedulerId' parameter and stores it in the session attributes.
-     */
-    private HandshakeInterceptor myHandler() {
-        return new HttpSessionHandshakeInterceptor() {
-            @Override
-            public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
-                // Extract `schedulerId` from WebSocket connection URL (e.g., ws://server/socket?schedulerId=123)
-                String ins = UriComponentsBuilder.fromUri(request.getURI()).build()
-                        .getQueryParams().getFirst("schedulerId");
-                if (ins == null) {
-                    throw new RuntimeException("schedulerId for websocket not found");
-                }
-                int schedulerId = Integer.parseInt(ins);
-                // // Store the schedulerId in the WebSocket session attributes for later use.
-                attributes.put("schedulerId", schedulerId);
-//                logger.info("Scheduler with id = " + schedulerId + " is set for websocket connection after handshake");
-                return super.beforeHandshake(request, response, wsHandler, attributes);
-            }
-        };
     }
 
     /**
@@ -117,7 +85,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 // If an action is defined, determine the topic type and retrieve the matching handler.
                 if (handlerAction != null) {
                     // Automatically detect the topic type based on headers or session attributes.
-                    WebSocketTopicType topicType = WebSocketTopicType.detectTopic(accessor);
+                    WebSocketHandlerType topicType = WebSocketHandlerType.detectHandler(accessor);
                     // Retrieve the handler corresponding to the detected topic type.
                     WebSocketEventHandler webSocketEventHandler = handlerFactory.getHandler(topicType);
                     // Execute the determined action (connect/disconnect) on the retrieved handler.

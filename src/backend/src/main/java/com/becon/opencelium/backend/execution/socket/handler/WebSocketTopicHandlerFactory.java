@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class WebSocketTopicHandlerFactory {
 
-    private final Map<WebSocketTopicType, WebSocketEventHandler> handlers = new ConcurrentHashMap<>();
+    private final Map<WebSocketHandlerType, WebSocketEventHandler> handlers = new ConcurrentHashMap<>();
 
     public WebSocketTopicHandlerFactory(List<WebSocketEventHandler> webSocketEventHandlers) {
         for (WebSocketEventHandler handler : webSocketEventHandlers) {
@@ -17,7 +17,7 @@ public class WebSocketTopicHandlerFactory {
         }
     }
 
-    public WebSocketEventHandler getHandler(WebSocketTopicType eventType) {
+    public WebSocketEventHandler getHandler(WebSocketHandlerType eventType) {
         return handlers.get(eventType); // Retrieve handler instantly
     }
 }

@@ -10,9 +10,9 @@ import org.springframework.stereotype.Component;
 import java.util.Objects;
 
 @Component
-public class Enhancement43Updater implements EnhancementUpdater {
+public class Enhancement44Updater implements EnhancementUpdater {
 
-    private static final UpdaterVersion currentVersion = UpdaterVersion.VERSION_4_3;
+    private static final UpdaterVersion currentVersion = UpdaterVersion.VERSION_4_4;
 
     @Override
     public Wrapper<Enhancement> updateToCurrentVersion(Enhancement enhancement) {
