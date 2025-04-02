@@ -8,7 +8,7 @@ public enum UpdaterVersion {
 
     NO_VERSION("-1"), // default
     VERSION_4_0("4.0"),
-    VERSION_4_3("4.3");
+    VERSION_4_4("4.4");
 
     private final String version;
 

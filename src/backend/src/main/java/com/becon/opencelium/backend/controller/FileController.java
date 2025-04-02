@@ -16,8 +16,7 @@
 
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.application.assistant.AssistantServiceImp;
-import com.becon.opencelium.backend.application.assistant.UpdatePackageServiceImp;
+import com.becon.opencelium.backend.configuration.OpenCeliumProps;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
@@ -39,6 +38,9 @@ import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.template.service.TemplateServiceImp;
 import com.becon.opencelium.backend.utility.FileNameUtils;
 import com.becon.opencelium.backend.utility.Xml;
+import com.becon.opencelium.backend.version_manager.EntityUpdater;
+import com.becon.opencelium.backend.version_manager.EntityVersionManager;
+import com.becon.opencelium.backend.version_manager.Wrapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -48,6 +50,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -84,40 +88,31 @@ import java.util.zip.ZipInputStream;
 @RequestMapping(value = "/storage")
 public class FileController {
 
-    @Autowired
-    private UserDetailServiceImpl userDetailService;
+    private static final Logger log = LoggerFactory.getLogger(FileController.class);
 
-    @Autowired
-    private UserServiceImpl userService;
-
-    @Autowired
-    private UserRoleServiceImpl userRoleService;
-
-    @Autowired
-    private TemplateServiceImp templateService;
-
-    @Autowired
-    private ConnectorServiceImp connectorService;
-
-    @Autowired
-    private AssistantServiceImp assistantServiceImp;
-
-    @Autowired
-    private UpdatePackageServiceImp updatePackageServiceImp;
-
-    @Autowired
-    private InvokerServiceImp invokerServiceImp;
-
-//    @Autowired
-//    private InvokerContainer invokerContainer;
-
+    private final UserDetailServiceImpl userDetailService;
+    private final UserServiceImpl userService;
+    private final UserRoleServiceImpl userRoleService;
+    private final TemplateServiceImp templateService;
+    private final ConnectorServiceImp connectorService;
+    private final InvokerServiceImp invokerServiceImp;
     private final UserStorageService storageService;
     private final Mapper<Connector, ConnectorResource> connectorMapper;
+    private final EntityUpdater<Template> templateUpdater;
+    private final OpenCeliumProps ocProps;
 
     @Autowired
-    public FileController(UserStorageService storageService, Mapper<Connector, ConnectorResource> connectorMapper) {
+    public FileController(UserDetailServiceImpl userDetailService, UserServiceImpl userService, UserRoleServiceImpl userRoleService, TemplateServiceImp templateService, ConnectorServiceImp connectorService, InvokerServiceImp invokerServiceImp, UserStorageService storageService, Mapper<Connector, ConnectorResource> connectorMapper, EntityVersionManager versionManager, OpenCeliumProps ocProps) {
+        this.userDetailService = userDetailService;
+        this.userService = userService;
+        this.userRoleService = userRoleService;
+        this.templateService = templateService;
+        this.connectorService = connectorService;
+        this.invokerServiceImp = invokerServiceImp;
         this.storageService = storageService;
         this.connectorMapper = connectorMapper;
+        templateUpdater = versionManager.getUpdater(Template.class);
+        this.ocProps = ocProps;
     }
 
     @Operation(summary = "Uploads profile picture of a user by provided user email")
@@ -244,7 +239,10 @@ public class FileController {
             //Generate new file name
             ObjectMapper objectMapper = new ObjectMapper();
             Template template = objectMapper.readValue(file.getBytes(), Template.class);
-            if(template.getTemplateId() != null && templateService.existsById(template.getTemplateId())){
+
+            updateTemplate(template);
+
+            if (template.getTemplateId() != null && templateService.existsById(template.getTemplateId())) {
                 templateService.deleteById(template.getTemplateId());
                 id = template.getTemplateId();
             } else {
@@ -257,20 +255,20 @@ public class FileController {
             URI uri = getUri(id + ".json");
             FileDTO fileDTO = new FileDTO(id, uri.toString());
             return ResponseEntity.ok().body(fileDTO);
-        } catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     @Operation(summary = "Uploads templates in zip file")
     @ApiResponses(value = {
-            @ApiResponse( responseCode = "200",
+            @ApiResponse(responseCode = "200",
                     description = "Template has been successfully uploaded",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = FileDTO.class)))),
-            @ApiResponse( responseCode = "401",
+            @ApiResponse(responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-            @ApiResponse( responseCode = "500",
+            @ApiResponse(responseCode = "500",
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
@@ -289,8 +287,9 @@ public class FileController {
                 ZipInputStream zis = new ZipInputStream(inputStream);
                 ObjectMapper objectMapper = new ObjectMapper();
                 ZipEntry zipEntry;
+                List<Template> templates = new ArrayList<>();
                 while ((zipEntry = zis.getNextEntry()) != null) {
-                    if(zipEntry.isDirectory() || !zipEntry.getName().endsWith(".json")) {
+                    if (zipEntry.isDirectory() || !zipEntry.getName().endsWith(".json")) {
                         continue;
                     }
                     //Generate new file name
@@ -298,17 +297,21 @@ public class FileController {
                     String jsonContent = new String(zis.readAllBytes(), StandardCharsets.UTF_8);
                     Template template = objectMapper.readValue(jsonContent, Template.class);
                     template.setTemplateId(id);
-                    // Save file in storage
-                    templateService.save(template);
-                    URI uri = getUri(id + ".json");
-                    FileDTO fileDTO = new FileDTO(id, uri.toString());
-                    files.add(fileDTO);
+                    updateTemplate(template);
+                    templates.add(template);
                 }
                 zis.close();
+
+                templates.forEach(tmpl -> {
+                    templateService.save(tmpl);
+                    URI uri = getUri(tmpl.getTemplateId() + ".json");
+                    FileDTO fileDTO = new FileDTO(tmpl.getTemplateId(), uri.toString());
+                    files.add(fileDTO);
+                });
             } else {
                 throw new RuntimeException("Zip file is required");
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
@@ -556,6 +559,17 @@ public class FileController {
         }
         catch (IOException e) {
             throw new StorageException("Failed to read stored files", e);
+        }
+    }
+
+    private void updateTemplate(Template template){
+        try {
+            Wrapper<Template> updated = templateUpdater.updateToCurrentVersion(template);
+            template.setVersion(updated.getNewVersion());
+            log.info("Template[id={}, name={}] is successfully updated to {} version", template.getTemplateId(), template.getName(), ocProps.getVersion());
+        } catch (Exception e) {
+            log.error("Failed to update Template[id={}, name={}]", template.getTemplateId(), template.getName(), e);
+            throw new RuntimeException("INVALID_TEMPLATE");
         }
     }
 }
