@@ -661,7 +661,7 @@ export default class CConnection{
             } else {
                 updatedOperators[index] = updatedTree;
                 this._ui = {...this.ui, operators: updatedOperators};
-                return jsonToString(updatedTree, item.type);
+                return jsonToString(updatedTree, item.type).result;
             }
         }
         return item.expression;
