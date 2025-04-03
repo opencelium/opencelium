@@ -41,17 +41,27 @@ const MethodSelect: React.FC<MethodSelectProps> = ({onMethodSelect, methodColor,
     };
 
     const formatOptionLabel = ({ label, color }: OptionType) => (
-        <div style={{ display: "flex", alignItems: "center" }}>
-      <span
-          style={{
-              width: 12,
-              height: 12,
-              borderRadius: "50%",
-              backgroundColor: color,
-              marginRight: 10,
-          }}
-      ></span>
-            {label}
+        <div style={{ display: "flex", alignItems: "center" }} title={label}>
+            <span
+              style={{
+                  width: 12,
+                  height: 12,
+                  borderRadius: "50%",
+                  backgroundColor: color,
+                  marginRight: 10,
+              }}
+            ></span>
+            <span
+                style={{
+                    textOverflow: 'ellipsis',
+                    maxWidth: '99px',
+                    whiteSpace: 'nowrap',
+                    display: 'block',
+                    overflow: 'hidden'
+                }}
+            >
+                {label}
+            </span>
         </div>
     );
 

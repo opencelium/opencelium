@@ -37,6 +37,7 @@ const ImportTemplateButton: FC<ImportTemplateButtonProps> =
     const [startImporting, setStartImporting] = useState<boolean>(false);
     const [showDialog, setShowDialog] = useState<boolean>(false);
     const [showConfirmation, toggleConfirmation] = useState<boolean>(false);
+    const [startCheckingTemplate, toggleCheckingTemplate] = useState<boolean>(false);
     const toggleDialog = () => {
         setShowDialog(!showDialog);
         setStartImporting(false);
@@ -57,17 +58,19 @@ const ImportTemplateButton: FC<ImportTemplateButtonProps> =
 
     }
     useEffect(() => {
-        if (checkingTemplateId === API_REQUEST_STATE.FINISH) {
+        if (checkingTemplateId === API_REQUEST_STATE.FINISH && startCheckingTemplate) {
             if (isCurrentTemplateHasUniqueId === TRIPLET_STATE.TRUE) {
                 toggleConfirmation(true);
             } else {
                 importFile();
             }
+            toggleCheckingTemplate(false);
         }
     }, [checkingTemplateId])
     useEffect(() => {
         if (startImporting) {
             dispatch(checkTemplateId(templateFile.name.toString().substr(0, templateFile.name.length - 5)));
+            toggleCheckingTemplate(true);
         }
     }, [startImporting]);
     return (
