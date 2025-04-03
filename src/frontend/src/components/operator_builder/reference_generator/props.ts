@@ -12,7 +12,7 @@ export interface ReferenceGeneratorProps {
     actionButtonTooltip?: string;
     actionButtonValue?: string;
     submitEdit?: any;
-    ref?: any,
+    endpointReference?: boolean;
 }
 
 export interface MethodSelectProps {
@@ -39,4 +39,5 @@ export interface ReferenceGeneratorStyleProps {
     referenceType: ReferenceType,
     isAbsolute?: boolean;
     parent?: boolean;
+    endpointReference?: boolean;
 }

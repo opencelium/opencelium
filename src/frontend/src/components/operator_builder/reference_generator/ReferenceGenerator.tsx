@@ -25,7 +25,7 @@ const ReferenceGenerator = ({
 	actionButtonValue,
 	submitEdit,
 	id,
-	ref,
+	endpointReference = false
 }: ReferenceGeneratorProps) => {
 	const [color, setColor] = useState<string>('');
 	const [currentField, setCurrentField] = useState<string>('');
@@ -152,16 +152,18 @@ const ReferenceGenerator = ({
 	const renderGenerator = () => {
 		return (
 			<ReferenceGeneratorContainer
-				ref={ref}
 				referenceType={referenceType}
 				style={containerStyle}
 				isAbsolute={isAbsolute}
 				parent={parent}
+				endpointReference={endpointReference}
 			>
-				<ReferenceSwitcher
+				{!endpointReference &&
+					<ReferenceSwitcher
 					referenceType={referenceType}
 					changeReferenceType={changeReferenceType}
 				/>
+				}
 				{referenceType === 'direct' && (
 					<React.Fragment>
 						<MethodSelect
