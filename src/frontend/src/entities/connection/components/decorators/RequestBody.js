@@ -13,6 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import ReferenceGenerator from '@app_component/operator_builder/reference_generator/ReferenceGenerator';
 import { isJsonString, isNumber, isString, subArrayToString } from "@application/utils/utils";
 import { markFieldNameAsArray } from "@change_component//form_elements/form_connection/form_methods/help";
 import Enhancement from "@change_component/form_elements/form_connection/form_methods/mapping/enhancement/Enhancement";
@@ -172,7 +173,7 @@ export function RequestBody(CRequestType){
 					 * to update body or header
 					 */
 					updateData(data) {
-
+						console.log(data)
 						const {
 							connection,
 							connector,
@@ -385,7 +386,7 @@ export function RequestBody(CRequestType){
 								<Component
 									{...componentProps}
 									openEnhancement={(a, b) => this.openEnhancement(a, b)}
-									updateBody={(a) => this.updateData(a)}
+									updateBody={(a) => (this.updateData(a), console.log(a))}
 									PointerComponent={{
 										getComponent: (params) => {
 											return <Pointer {...params} connection={connection} />;
@@ -414,24 +415,42 @@ export function RequestBody(CRequestType){
 															selectId,
 															editCancel,
 														} = params;
+														const connectionEditor = {
+															connection,
+															connector,
+															item: method,
+															updateConnection: updateEntity
+														}
 														return (
-															<ParamGenerator
-																ref={this.paramGenerator}
-																selectId={selectId}
-																connection={connection}
-																connector={connector}
-																method={method}
-																readOnly={readOnly}
-																addParam={(a) => this.updateData(a)}
-																isVisible={true}
-																submitEdit={submitEdit}
-																editCancel={editCancel}
+															// <ParamGenerator
+															// 	ref={this.paramGenerator}
+															// 	selectId={selectId}
+															// 	connection={connection}
+															// 	connector={connector}
+															// 	method={method}
+															// 	readOnly={readOnly}
+															// 	addParam={(a) => (this.updateData(a), console.log(a))}
+															// 	isVisible={true}
+															// 	submitEdit={submitEdit}
+															// 	editCancel={editCancel}
+															// 	id={`${id}_reference_component`}
+															// 	isAbsolute={CRequestType.isAbsolute()}
+															// 	parent={CRequestType.getParent(textarea)}
+															// 	hasArrowIcon={true}
+															// 	updateConnection={updateEntity}
+															// 	headerParamGenerator={target}
+															// />
+															<ReferenceGenerator
+																connectionEditor={connectionEditor}
 																id={`${id}_reference_component`}
-																isAbsolute={CRequestType.isAbsolute()}
+																setReference={(a) => (this.updateData(a), console.log(a))}
+																reference=''
 																parent={CRequestType.getParent(textarea)}
-																hasArrowIcon={true}
-																updateConnection={updateEntity}
-																headerParamGenerator={target}
+																isAbsolute={CRequestType.isAbsolute()}
+																manualAdd={true}
+																actionButtonTooltip='Add'
+																actionButtonValue='add'
+																submitEdit={submitEdit}
 															/>
 														);
 													},

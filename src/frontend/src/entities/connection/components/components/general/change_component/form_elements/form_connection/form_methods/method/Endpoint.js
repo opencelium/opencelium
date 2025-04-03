@@ -19,6 +19,7 @@ import ContentEditable from 'react-contenteditable';
 import { renderToString } from 'react-dom/server';
 import { connect } from 'react-redux';
 
+import ReferenceGenerator from '@app_component/operator_builder/reference_generator/ReferenceGenerator';
 import { freeStringFromAmp, getCaretPositionOfDivEditable, setFocusByCaretPositionInDivEditable } from "@application/utils/utils";
 import QueryString from "@change_component/form_elements/form_connection/form_methods/method/query_string/QueryString";
 import CMethodItem from "@entity/connection/components/classes/components/content/connection/method/CMethodItem";
@@ -294,6 +295,14 @@ class Endpoint extends Component{
         this.hasAdded = true;
     }
 
+    normalizeReference = (ref) => {
+        if (ref.startsWith('{%') && ref.endsWith('%}')) {
+          return ref.slice(2, -2);
+        }
+        return ref;
+      };
+      
+
     render(){
         const {connection, connector, method, readOnly, theme, isParamGeneratorArrowVisible, isParamGeneratorAlwaysVisible, updateEntity} = this.props;
         const {contentEditableValue, actionButtonTooltip, actionButtonValue, caretPosition} = this.state;
@@ -312,42 +321,66 @@ class Endpoint extends Component{
         if(theme && theme.hasOwnProperty('queryInput')){
             themeQueryInput = theme.queryInput;
         }
+        const connectionEditor = {
+            connection,
+            connector,
+            item: method,
+            updateConnection: updateEntity
+        }
         return (
-            <div>
-                <ToolboxThemeInput className={themeQueryInput} label={'Query'} labelClassName={hasError ? styles.method_endpoint_label_has_error : ''}>
-                    <div
-                        id={this.getEndpointIdName()}
-                        ref={this.endpointValue}
-                        dangerouslySetInnerHTML={{__html: htmlValue}}
-                        contentEditable={!readOnly}
-                        onInput={(a) => this.onChangeEndpoint(a)}
-                        onMouseDown={(a) => {this.setCaretPosition(a)}}
-                        onMouseUp={(a) => {this.setCaretPosition(a)}}
-                        onKeyDown={(a) => this.setCaretPosition(a)}
-                        onKeyUp={(a) => this.setCaretPosition(a)}
-                        onBlur={(a) => this.saveEndpoint(a)}
-                        onKeyPress={(a) => this.limitEndpointInputOnKeyPress(a)}
-                        className={`${styles.method_endpoint_content_editable}`}
-                        style={contentEditableStyles}
-                    />
-                    <ParamGenerator
-                        updateConnection={(a) => updateEntity(a)}
-                        connection={connection}
-                        connector={connector}
-                        method={method}
-                        addParam={(a) => this.addParam(a)}
-                        readOnly={readOnly}
-                        actionButtonTooltip={actionButtonTooltip}
-                        actionButtonValue={actionButtonValue}
-                        theme={theme}
-                        isArrowVisible={isParamGeneratorArrowVisible}
-                        isAlwaysVisible={isParamGeneratorAlwaysVisible}
-                        ref={this.paramGeneratorRef}
-                        hasNotType={true}
-                    />
-                </ToolboxThemeInput>
-            </div>
-        );
+					<div>
+						<ToolboxThemeInput
+							className={themeQueryInput}
+							label={'Query'}
+							labelClassName={
+								hasError ? styles.method_endpoint_label_has_error : ''
+							}
+						>
+							<div
+								id={this.getEndpointIdName()}
+								ref={this.endpointValue}
+								dangerouslySetInnerHTML={{ __html: htmlValue }}
+								contentEditable={!readOnly}
+								onInput={(a) => this.onChangeEndpoint(a)}
+								onMouseDown={(a) => {
+									this.setCaretPosition(a);
+								}}
+								onMouseUp={(a) => {
+									this.setCaretPosition(a);
+								}}
+								onKeyDown={(a) => this.setCaretPosition(a)}
+								onKeyUp={(a) => this.setCaretPosition(a)}
+								onBlur={(a) => this.saveEndpoint(a)}
+								onKeyPress={(a) => this.limitEndpointInputOnKeyPress(a)}
+								className={`${styles.method_endpoint_content_editable}`}
+								style={contentEditableStyles}
+							/>
+							{/* <ParamGenerator
+								updateConnection={(a) => updateEntity(a)}
+								connection={connection}
+								connector={connector}
+								method={method}
+								addParam={(a) => (this.addParam(a), console.log(a))}
+								readOnly={readOnly}
+								actionButtonTooltip={actionButtonTooltip}
+								actionButtonValue={actionButtonValue}
+								theme={theme}
+								isArrowVisible={isParamGeneratorArrowVisible}
+								isAlwaysVisible={isParamGeneratorAlwaysVisible}
+								ref={this.paramGeneratorRef}
+								hasNotType={true}
+							/> */}
+							<ReferenceGenerator
+								connectionEditor={connectionEditor}
+                                setReference={(a) => this.addParam(this.normalizeReference(a))}
+                                manualAdd={true}
+                                actionButtonTooltip={actionButtonTooltip}
+								actionButtonValue={actionButtonValue}
+                                isAbsolute={true}
+							/>
+						</ToolboxThemeInput>
+					</div>
+				);
     }
 }
 
