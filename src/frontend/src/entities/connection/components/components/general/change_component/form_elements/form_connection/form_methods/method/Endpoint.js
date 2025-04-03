@@ -377,6 +377,7 @@ class Endpoint extends Component{
                                 actionButtonTooltip={actionButtonTooltip}
 								actionButtonValue={actionButtonValue}
                                 isAbsolute={true}
+                                endpointReference={true}
 							/>
 						</ToolboxThemeInput>
 					</div>

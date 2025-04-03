@@ -30,6 +30,11 @@ export const ReferenceGeneratorContainer = styled.div<ReferenceGeneratorStylePro
 		`
         grid-template-columns: 30px 180px 200px 30px;
     `}
+	${({ referenceType, isAbsolute, endpointReference }) =>
+		referenceType === 'direct' && isAbsolute && endpointReference &&
+		`
+        grid-template-columns: 180px 200px 30px;
+    `}
     ${({ referenceType }) =>
 		referenceType === 'webhook' &&
 		`
