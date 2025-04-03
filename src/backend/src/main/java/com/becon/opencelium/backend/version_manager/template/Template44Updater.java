@@ -23,14 +23,14 @@ import java.util.Map;
 import java.util.Objects;
 
 @Component
-public class Template43Updater implements TemplateUpdater {
+public class Template44Updater implements TemplateUpdater {
 
-    private static final UpdaterVersion currentVersion = UpdaterVersion.VERSION_4_3;
+    private static final UpdaterVersion currentVersion = UpdaterVersion.VERSION_4_4;
     private final Template40Updater template40Updater;
     private final ObjectMapper objectMapper;
     private final Mapper<ConditionMng, ConditionDTO> conditionMapper;
 
-    public Template43Updater(Template40Updater template40Updater, ObjectMapper objectMapper, Mapper<ConditionMng, ConditionDTO> conditionMapper) {
+    public Template44Updater(Template40Updater template40Updater, ObjectMapper objectMapper, Mapper<ConditionMng, ConditionDTO> conditionMapper) {
         this.template40Updater = template40Updater;
         this.objectMapper = objectMapper;
         this.conditionMapper = conditionMapper;

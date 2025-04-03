@@ -9,7 +9,7 @@ import java.util.function.Function;
  * Each constant is associated with a detection function that determines if a given
  * {@link StompHeaderAccessor} matches the criteria for that topic.
  */
-public enum WebSocketTopicType {
+public enum WebSocketHandlerType {
     // The SCHEDULER topic is detected if the session attributes contain a key "schedulerId".
     SCHEDULER(accessor -> Objects.requireNonNull(accessor.getSessionAttributes()).containsKey("schedulerId")),
     // The SUPPORT_FILE topic is detected if the session attributes contain a key "supportFile".
@@ -23,7 +23,7 @@ public enum WebSocketTopicType {
      *
      * @param detectionFunction a function that checks if a StompHeaderAccessor matches this topic type.
      */
-    WebSocketTopicType(Function<StompHeaderAccessor, Boolean> detectionFunction) {
+    WebSocketHandlerType(Function<StompHeaderAccessor, Boolean> detectionFunction) {
         this.detectionFunction = detectionFunction;
     }
 
@@ -45,8 +45,8 @@ public enum WebSocketTopicType {
      * @return the detected WebSocketTopicType.
      * @throws RuntimeException if no matching topic type is found.
      */
-    public static WebSocketTopicType detectTopic(StompHeaderAccessor accessor) {
-        return java.util.Arrays.stream(WebSocketTopicType.values())
+    public static WebSocketHandlerType detectHandler(StompHeaderAccessor accessor) {
+        return java.util.Arrays.stream(WebSocketHandlerType.values())
                 .filter(topic -> topic.matches(accessor))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Topic not found in query"));

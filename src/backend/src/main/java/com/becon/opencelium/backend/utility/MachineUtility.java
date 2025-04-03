@@ -46,7 +46,7 @@ public class MachineUtility {
             byte[] macBytes = networkInterface.getHardwareAddress();
 
             if (macBytes == null) {
-                return "";
+                return "0";
             }
 
             // Convert the byte array to a readable MAC address format

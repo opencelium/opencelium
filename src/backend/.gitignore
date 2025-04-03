@@ -15,6 +15,7 @@ src/main/resources/invoker/jdisc.xml
 src/main/resources/invoker/fake_invoker.xml
 src/main/resources/support-files
 src/main/resources/updating-backup
+src/main/resources/backup
 src/test/
 src/test/java/com/becon/opencelium/backend/ApplicationTests.java
 !src/test/OCELTest.java

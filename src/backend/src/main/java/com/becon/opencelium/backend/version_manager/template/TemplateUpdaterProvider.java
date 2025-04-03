@@ -22,7 +22,7 @@ public class TemplateUpdaterProvider {
     public EntityUpdater<Template> getUpdater(final UpdaterVersion version) {
         return switch (version) {
             case VERSION_4_0 -> templateUpdaters.get(lowerFirstChar(Template40Updater.class.getSimpleName()));
-            case VERSION_4_3 -> templateUpdaters.get(lowerFirstChar(Template43Updater.class.getSimpleName()));
+            case VERSION_4_4 -> templateUpdaters.get(lowerFirstChar(Template44Updater.class.getSimpleName()));
             default -> new DefaultUpdater<>();
         };
     }
