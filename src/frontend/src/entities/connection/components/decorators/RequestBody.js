@@ -449,9 +449,12 @@ export function RequestBody(CRequestType){
 																parent={CRequestType.getParent(textarea)}
 																isAbsolute={CRequestType.isAbsolute()}
 																manualAdd={true}
-																actionButtonTooltip='Add'
+																actionButtonTooltip='Add Reference'
 																actionButtonValue='add'
 																submitEdit={submitEdit}
+																editCancel={editCancel}
+																bodyReference={target === 'body'}
+																headerReference={target === 'header'}
 															/>
 														);
 													},

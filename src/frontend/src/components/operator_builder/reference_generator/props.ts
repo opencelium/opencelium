@@ -12,7 +12,10 @@ export interface ReferenceGeneratorProps {
     actionButtonTooltip?: string;
     actionButtonValue?: string;
     submitEdit?: any;
+    editCancel?: any;
     endpointReference?: boolean;
+    bodyReference?: boolean;
+    headerReference?: boolean;
 }
 
 export interface MethodSelectProps {
@@ -31,9 +34,11 @@ export type ReferenceType = 'constant' | 'direct' | 'webhook';
 export interface ReferenceSwitcherProps {
     referenceType: ReferenceType;
     changeReferenceType: (referenceType: ReferenceType) => void,
+    hasNotConstant: boolean,
 }
 export interface ReferenceSwitcherStyleProps {
     isHidden?: boolean;
+    hasNotConstant: boolean;
 }
 export interface ReferenceGeneratorStyleProps {
     referenceType: ReferenceType,

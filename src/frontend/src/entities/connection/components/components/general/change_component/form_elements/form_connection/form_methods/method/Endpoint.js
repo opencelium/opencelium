@@ -50,7 +50,7 @@ class Endpoint extends Component{
             contentEditableValue: props.method.request.endpoint,
             caretPosition: -1,
             currentKeyCode: '',
-            actionButtonTooltip: 'Add',
+            actionButtonTooltip: 'Add Reference',
             actionButtonValue: 'add',
             isCaretPositionFocusedOnReference: false,
         }
@@ -176,10 +176,10 @@ class Endpoint extends Component{
         }
         if(CEndpoint.isCaretPositionFocusedOnReference(caretPosition, contentEditableValue, requiredInvokerData)){
             isCaretPositionFocusedOnReference = true;
-            actionButtonTooltip = 'Replace';
+            actionButtonTooltip = 'Replace Reference';
             actionButtonValue = 'autorenew';
         } else{
-            actionButtonTooltip = 'Add';
+            actionButtonTooltip = 'Add Reference';
             actionButtonValue = 'add';
         }
         this.setState({
@@ -301,7 +301,7 @@ class Endpoint extends Component{
         }
         return ref;
       };
-      
+
 
     render(){
         const {connection, connector, method, readOnly, theme, isParamGeneratorArrowVisible, isParamGeneratorAlwaysVisible, updateEntity} = this.props;

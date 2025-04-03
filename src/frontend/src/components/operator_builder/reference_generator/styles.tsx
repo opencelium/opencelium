@@ -46,15 +46,14 @@ export const ReferenceGeneratorContainer = styled.div<ReferenceGeneratorStylePro
         grid-template-columns: 30px 380px 30px;
     `}
     gap: 10px;
-		${({ isAbsolute }) =>
+		${({ isAbsolute, endpointReference}) =>
 			isAbsolute &&
 			`
 				background: #fff;
 				position: absolute;
 				z-index: 10000;
 				padding: 5px;
-				box-shadow: rgba(0, 0, 0, 0.14) 0 0 0 0, #9f9f9f 0 1px 7px 1px,
-					rgba(0, 0, 0, 0.22) 0 1px 1px 0;
+				${!endpointReference ? 'box-shadow: rgba(0, 0, 0, 0.14) 0 0 0 0, #9f9f9f 0 1px 7px 1px, rgba(0, 0, 0, 0.22) 0 1px 1px 0;' : ''}
 			`
 		}
 		${({ isAbsolute, parent }) =>
@@ -73,9 +72,9 @@ export const ConstantContainer = styled.div`
 export const ReferenceSwitcherContainer = styled.div<ReferenceSwitcherStyleProps>`
     float: left;
     display: ${({isHidden}) => isHidden ? 'none' : 'grid'};
-    height: 47px;
+    height: ${({hasNotConstant}) => hasNotConstant ? '37px' : '47px'};
     margin-top: -10px;
-    padding-bottom: 9px;
+    padding-bottom: ${({hasNotConstant}) => hasNotConstant ? '0' : '9px'};
     overflow: hidden;
     transition: width 0.3s ease 0s;
 `;

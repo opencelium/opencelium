@@ -43,6 +43,9 @@
   background: transparent;
   border: none;
   padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 //icon, tooltip, button themes
 .disable_theme{
