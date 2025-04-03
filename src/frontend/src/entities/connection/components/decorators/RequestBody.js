@@ -422,25 +422,26 @@ export function RequestBody(CRequestType){
 															updateConnection: updateEntity
 														}
 														return (
-															// <ParamGenerator
-															// 	ref={this.paramGenerator}
-															// 	selectId={selectId}
-															// 	connection={connection}
-															// 	connector={connector}
-															// 	method={method}
-															// 	readOnly={readOnly}
-															// 	addParam={(a) => (this.updateData(a), console.log(a))}
-															// 	isVisible={true}
-															// 	submitEdit={submitEdit}
-															// 	editCancel={editCancel}
-															// 	id={`${id}_reference_component`}
-															// 	isAbsolute={CRequestType.isAbsolute()}
-															// 	parent={CRequestType.getParent(textarea)}
-															// 	hasArrowIcon={true}
-															// 	updateConnection={updateEntity}
-															// 	headerParamGenerator={target}
-															// />
+															/*<ParamGenerator
+																ref={this.paramGenerator}
+																selectId={selectId}
+																connection={connection}
+																connector={connector}
+																method={method}
+																readOnly={readOnly}
+																addParam={(a) => (this.updateData(a), console.log(a))}
+																isVisible={true}
+																submitEdit={submitEdit}
+																editCancel={editCancel}
+																id={`${id}_reference_component`}
+																isAbsolute={CRequestType.isAbsolute()}
+																parent={CRequestType.getParent(textarea)}
+																hasArrowIcon={true}
+																updateConnection={updateEntity}
+																headerParamGenerator={target}
+															/>*/
 															<ReferenceGenerator
+																ref={this.paramGenerator}
 																connectionEditor={connectionEditor}
 																id={`${id}_reference_component`}
 																setReference={(a) => (this.updateData(a), console.log(a))}
@@ -455,7 +456,7 @@ export function RequestBody(CRequestType){
 														);
 													},
 													id: `${id}_reference_component`,
-													self: this.paramGenerator,
+													self: {current: 1},
 											  }
 											: null
 									}

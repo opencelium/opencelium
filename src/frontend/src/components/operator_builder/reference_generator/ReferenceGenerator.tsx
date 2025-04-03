@@ -23,7 +23,9 @@ const ReferenceGenerator = ({
 	manualAdd = false,
 	actionButtonTooltip,
 	actionButtonValue,
-	submitEdit
+	submitEdit,
+	id,
+	ref,
 }: ReferenceGeneratorProps) => {
 	const [color, setColor] = useState<string>('');
 	const [currentField, setCurrentField] = useState<string>('');
@@ -34,7 +36,17 @@ const ReferenceGenerator = ({
 		top: 0,
 		left: 0,
 	});
-
+	useEffect(() => {
+		return () => {
+			let elem = document.getElementById(id);
+			if(elem){
+				elem.innerText = '';
+			}
+		}
+	}, [])
+	useEffect(() => {
+		setIdValue();
+	}, [currentField]);
 	useEffect(() => {
 		if (parent && isAbsolute) {
 			const { top, left } = findTopLeft(parent);
@@ -75,15 +87,33 @@ const ReferenceGenerator = ({
 	};
 	const getComputedReference = () => {
 		if (currentField !== '') {
-			return ReferenceFactory.getReference(
+			let reference = ReferenceFactory.getReference(
 				referenceType,
 				currentField,
 				color,
 				'response'
 			);
+			if (reference.length > 3) {
+				if (reference.indexOf('{%') === 0 && reference[reference.length - 2] === '%' && reference[reference.length - 1] === '}') {
+					reference = reference.substring(2, reference.length - 2);
+				}
+			}
+			return reference;
 		}
 		return '';
 	};
+
+	const setIdValue = () => {
+		const computedRef = getComputedReference();
+		let elem = document.getElementById(id);
+		if (computedRef !== '') {
+			if (elem) {
+				elem.innerText = computedRef;
+				console.log(elem)
+			}
+		}
+	}
+
 	useEffect(() => {
 		if (reference) {
 			const referenceInstance = ReferenceFactory.createReferenceInstance(
@@ -118,10 +148,11 @@ const ReferenceGenerator = ({
 	const containerStyle = parent && isAbsolute
 		? { top: coords.top + 10, left: coords.left }
 		: {};
-    
+
 	const renderGenerator = () => {
 		return (
 			<ReferenceGeneratorContainer
+				ref={ref}
 				referenceType={referenceType}
 				style={containerStyle}
 				isAbsolute={isAbsolute}
@@ -179,9 +210,9 @@ const ReferenceGenerator = ({
 							}
 							else{
 								const computedRef = getComputedReference();
-							if (computedRef) {
-								setReference(computedRef);
-							}
+								if (computedRef) {
+									setReference(computedRef);
+								}
 							}
 						}}
 					/>

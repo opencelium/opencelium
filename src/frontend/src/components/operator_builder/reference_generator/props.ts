@@ -12,6 +12,7 @@ export interface ReferenceGeneratorProps {
     actionButtonTooltip?: string;
     actionButtonValue?: string;
     submitEdit?: any;
+    ref?: any,
 }
 
 export interface MethodSelectProps {
