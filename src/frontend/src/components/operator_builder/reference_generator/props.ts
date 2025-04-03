@@ -1,11 +1,17 @@
-import {ConnectionEditorProps} from "@app_component/operator_builder/props";
+import { ConnectionEditorProps } from "@app_component/operator_builder/props";
 
 export interface ReferenceGeneratorProps {
     setReference: (reference: string) => void,
     addField?: any,
-    reference: string,
+    reference?: string,
     connectionEditor: ConnectionEditorProps,
     id?: string,
+    parent?: any;
+    isAbsolute?: boolean;
+    manualAdd?: boolean;
+    actionButtonTooltip?: string;
+    actionButtonValue?: string;
+    submitEdit?: any;
 }
 
 export interface MethodSelectProps {
@@ -30,4 +36,6 @@ export interface ReferenceSwitcherStyleProps {
 }
 export interface ReferenceGeneratorStyleProps {
     referenceType: ReferenceType,
+    isAbsolute?: boolean;
+    parent?: boolean;
 }
