@@ -173,7 +173,6 @@ export function RequestBody(CRequestType){
 					 * to update body or header
 					 */
 					updateData(data) {
-						console.log(data)
 						const {
 							connection,
 							connector,
@@ -386,7 +385,7 @@ export function RequestBody(CRequestType){
 								<Component
 									{...componentProps}
 									openEnhancement={(a, b) => this.openEnhancement(a, b)}
-									updateBody={(a) => (this.updateData(a), console.log(a))}
+									updateBody={(a) => (this.updateData(a))}
 									PointerComponent={{
 										getComponent: (params) => {
 											return <Pointer {...params} connection={connection} />;
@@ -429,7 +428,7 @@ export function RequestBody(CRequestType){
 																connector={connector}
 																method={method}
 																readOnly={readOnly}
-																addParam={(a) => (this.updateData(a), console.log(a))}
+																addParam={(a) => (this.updateData(a))}
 																isVisible={true}
 																submitEdit={submitEdit}
 																editCancel={editCancel}
@@ -444,7 +443,7 @@ export function RequestBody(CRequestType){
 																ref={this.paramGenerator}
 																connectionEditor={connectionEditor}
 																id={`${id}_reference_component`}
-																setReference={(a) => (this.updateData(a), console.log(a))}
+																setReference={(a) => (this.updateData(a))}
 																reference=''
 																parent={CRequestType.getParent(textarea)}
 																isAbsolute={CRequestType.isAbsolute()}
