@@ -360,7 +360,7 @@ class Endpoint extends Component{
 								connection={connection}
 								connector={connector}
 								method={method}
-								addParam={(a) => (this.addParam(a), console.log(a))}
+								addParam={(a) => (this.addParam(a))}
 								readOnly={readOnly}
 								actionButtonTooltip={actionButtonTooltip}
 								actionButtonValue={actionButtonValue}

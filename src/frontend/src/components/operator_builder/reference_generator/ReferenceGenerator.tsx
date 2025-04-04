@@ -6,17 +6,17 @@ import { findTopLeft } from '@application/utils/utils';
 import WebhookGenerator from '@change_component/form_elements/form_connection/form_methods/method/WebhookGenerator';
 import TooltipFontIcon from '@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon';
 import Webhook from '@root/classes/Webhook';
-import React, {useEffect, useRef, useState} from 'react';
+import {
+	addCloseParamGeneratorNavigation,
+	removeCloseParamGeneratorNavigation
+} from "@root/components/utils/key_navigation";
+import React, { useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import DirectReference from '../classes/references/DirectReference';
 import DeepSelect from './DeepSelect';
 import MethodSelect from './MethodSelect';
 import { ReferenceGeneratorProps, ReferenceType } from './props';
 import { ConstantContainer, ReferenceGeneratorContainer } from './styles';
-import {
-	addCloseParamGeneratorNavigation,
-	removeCloseParamGeneratorNavigation
-} from "@root/components/utils/key_navigation";
 
 const ReferenceGenerator = ({
 	reference,

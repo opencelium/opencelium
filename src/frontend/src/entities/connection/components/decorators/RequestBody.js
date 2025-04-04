@@ -428,7 +428,7 @@ export function RequestBody(CRequestType){
 																connector={connector}
 																method={method}
 																readOnly={readOnly}
-																addParam={(a) => (this.updateData(a), console.log(a))}
+																addParam={(a) => (this.updateData(a))}
 																isVisible={true}
 																submitEdit={submitEdit}
 																editCancel={editCancel}

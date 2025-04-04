@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {consoleLog, isId, jsonToString} from "@application/utils/utils";
+import { consoleLog, isId, jsonToString } from "@application/utils/utils";
 import CMethodItem from "@classes/content/connection/method/CMethodItem";
 import COperatorItem from "@classes/content/connection/operator/COperatorItem";
 import { RESPONSE_FAIL, RESPONSE_SUCCESS } from "../invoker/response/CResponse";
@@ -816,24 +816,30 @@ export default class CConnection{
     }
 
     cleanFieldBinding(connectorType, relatedFieldBindings = []) {
+        if (!Array.isArray(relatedFieldBindings)) {
+            relatedFieldBindings = [relatedFieldBindings];
+        }
+    
         for (let i = this._fieldBinding.length - 1; i >= 0; i--) {
             const binding = this._fieldBinding[i];
             let connectorTypeBinding = connectorType === CONNECTOR_FROM ? binding.from : binding.to;
-
+    
             for (let j = connectorTypeBinding.length - 1; j >= 0; j--) {
                 const currentBindingItem = connectorTypeBinding[j];
-
-                const match = relatedFieldBindings.some(relBinding =>
-                    relBinding.from.concat(relBinding.to).some(compareItem =>
+    
+                const match = relatedFieldBindings.some(relBinding => {
+                    const from = Array.isArray(relBinding.from) ? relBinding.from : [];
+                    const to = Array.isArray(relBinding.to) ? relBinding.to : [];
+                    return from.concat(to).some(compareItem =>
                         CFieldBinding.compareTwoBindingItems(compareItem, currentBindingItem)
-                    )
-                );
-
+                    );
+                });
+    
                 if (match) {
                     connectorTypeBinding.splice(j, 1);
                 }
             }
-
+    
             if (binding.from.length === 0 && binding.to.length === 0) {
                 this._fieldBinding.splice(i, 1);
             } else {
@@ -841,6 +847,7 @@ export default class CConnection{
             }
         }
     }
+    
 
 
     removeDuplicatesFromFieldBinding(){
