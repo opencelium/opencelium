@@ -45,7 +45,6 @@ interface ViewProps{
     isRefreshing?: boolean,
     shouldBeUpdated?: boolean,
     hasPaginationProps: boolean,
-    decreasePage: any,
 }
 
 interface ListViewProps extends ViewProps{

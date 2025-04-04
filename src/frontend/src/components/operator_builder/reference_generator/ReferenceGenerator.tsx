@@ -156,7 +156,6 @@ const ReferenceGenerator = ({
 		if (computedRef !== '') {
 			if (elem) {
 				elem.innerText = computedRef;
-				console.log(elem)
 			}
 		}
 	}

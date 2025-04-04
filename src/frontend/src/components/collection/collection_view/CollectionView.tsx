@@ -120,9 +120,10 @@ const CollectionView: FC<CollectionViewProps> =
                     }
                 }
                 setEntitiesPerPage(newEntitiesPerPage);
-                setTotalPages(Math.ceil(collection.filteredEntities.length / newEntitiesPerPage));
+                const newTotalPages = Math.ceil(collection.filteredEntities.length / newEntitiesPerPage);
+                setTotalPages(newTotalPages);
             }
-        }, [currentPage, searchValue, applicationViewType, gridViewType, collection.entities.length, shouldBeUpdated, filterData]);
+        }, [currentPage, searchValue, applicationViewType, gridViewType, collection.entities.length, collection.filteredEntities.length, shouldBeUpdated, filterData]);
         useEffect(() => {
             if (paginationProps?.totalPages && paginationProps.totalPages !== totalPages) {
                 setTotalPages(paginationProps.totalPages);
@@ -133,11 +134,6 @@ const CollectionView: FC<CollectionViewProps> =
                 setChecks([]);
             }
         }, [collection.deletingEntitiesState]);
-        const decreasePage = () => {
-            if (currentPage > 1 && !paginationProps) {
-                setPage(currentPage - 1);
-            }
-        }
         const onChangeViewType = (newViewType: ViewType) => {
             setIsRefreshing(true);
             setTimeout(() => {
@@ -227,7 +223,6 @@ const CollectionView: FC<CollectionViewProps> =
                                 filterData={filterData}
                                 onListRowClick={onListRowClick}
                                 hasPaginationProps={!!paginationProps}
-                                decreasePage={decreasePage}
                             />}
                         {applicationViewType === ViewType.GRID &&
                             <Grid
@@ -240,7 +235,6 @@ const CollectionView: FC<CollectionViewProps> =
                                 isRefreshing={isRefreshing}
                                 shouldBeUpdated={shouldBeUpdated}
                                 hasPaginationProps={!!paginationProps}
-                                decreasePage={decreasePage}
                             />
                         }
                     </div>
