@@ -21,6 +21,7 @@ public class OcLogger<T extends LogMessage> {
     private final T logEntity; // log entity
     private final SimpMessagingTemplate simpMessagingTemplate; // sends messages to user via websocket
     private final Logger logger;
+    private boolean executionFailed = false;
 
     public static final String LOG_LOCATION = "src/main/resources/logs";
 
@@ -55,13 +56,15 @@ public class OcLogger<T extends LogMessage> {
             fileAppender.setEncoder(encoder);
             fileAppender.start();
 
-            ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("OcLogger-" + loggerId);
+            ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(loggerId);
             logger.addAppender(fileAppender);
             logger.setAdditive(false); // do not pass message to parent, just write to the file
 
             this.logger = logger;
         } else {
             this.logger = LoggerFactory.getLogger(c);
+
+            logAndSend("------------------- PRE --------------------");
         }
     }
 
@@ -74,6 +77,14 @@ public class OcLogger<T extends LogMessage> {
             });
 
             classicLogger.detachAndStopAllAppenders();
+
+            return;
+        }
+
+        if (executionFailed) {
+            logAndSend("------------------- EXCEPTION --------------------");
+        } else {
+            logAndSend("------------------- POST --------------------");
         }
     }
 
@@ -87,15 +98,13 @@ public class OcLogger<T extends LogMessage> {
     }
 
     public void logAndSend(Exception e){
+        this.executionFailed = true;
+
         Consumer<Exception> printStrategy = x -> {
             logger.error(e.getMessage(), e);
         };
 
         logAndSend(printStrategy, e);
-
-        if (!log2File) {
-            throw new RuntimeException(e);
-        }
     }
 
 
@@ -105,7 +114,7 @@ public class OcLogger<T extends LogMessage> {
             return;
         }
 
-        if (debugMode) {
+        if (!debugMode) {
             return;
         }
 

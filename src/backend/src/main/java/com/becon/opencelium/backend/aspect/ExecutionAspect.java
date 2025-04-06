@@ -127,10 +127,6 @@ public class ExecutionAspect {
         long execId = initExecutionObj(schedulerId);
         jobDataMap.put("execId", execId);
 
-        if (data == null || !data.isCreateZip()) {
-            logger.info("------------------- PRE --------------------");
-        }
-
         List<EventNotification> eventNotifications = schedulerService.getAllNotifications(schedulerId);
         triggerNotifications(eventNotifications, "pre", null);
     }
@@ -158,8 +154,6 @@ public class ExecutionAspect {
 
             // delete temporarily created scheduler
             schedulerService.deleteById(schedulerId);
-        } else {
-            logger.info("------------------- POST --------------------");
         }
 
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
@@ -190,8 +184,6 @@ public class ExecutionAspect {
 
             // delete temporarily created scheduler
             schedulerService.deleteById(schedulerId);
-        } else {
-            logger.info("------------------- EXCEPTION --------------------");
         }
 
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);

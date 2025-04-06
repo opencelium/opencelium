@@ -60,6 +60,8 @@ public class ConnectionExecutor {
             toEx.start();
         } catch (Exception e) {
             logger.logAndSend(e);
+
+            throw e;
         } finally {
             logger.close(); // release resources
         }
