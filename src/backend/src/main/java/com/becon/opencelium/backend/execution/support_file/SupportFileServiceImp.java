@@ -33,9 +33,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static com.becon.opencelium.backend.execution.logger.OcLogger.LOG_LOCATION;
-import static com.becon.opencelium.backend.utility.FileUtility.clear;
 import static com.becon.opencelium.backend.utility.FileUtility.create;
 import static com.becon.opencelium.backend.utility.FileUtility.delete;
+import static com.becon.opencelium.backend.utility.FileUtility.enforceLimit;
+import static com.becon.opencelium.backend.utility.FileUtility.toFilename;
 import static com.becon.opencelium.backend.utility.FileUtility.toPath;
 
 @Service
@@ -75,9 +76,8 @@ public class SupportFileServiceImp implements SupportFileService {
             // Create base directory to store support files:
             create(base);
 
-            // Create base directory to store log files temporarily:
+            // Create base directory to store log files:
             create(LOG_LOCATION);
-//            clear(LOG_LOCATION);
 
             logger.info("Base folders have been setup for support and log files.");
         } catch (IOException e) {
@@ -189,8 +189,8 @@ public class SupportFileServiceImp implements SupportFileService {
     @Transactional(readOnly = true)
     public void collectFiles(Long connectionId, long executionId, String timestamp, String type) {
         // create temporary file collection directory:
-        String zipFileName = timestamp + "_" + connectionId + "_" + type + "_" + executionId + ".zip";
-        Path zipFilePath = toPath(base, connectionId.toString(), zipFileName);
+        String zipFilename = toFilename(timestamp, connectionId, type, executionId, "zip");
+        Path zipFilePath = toPath(base, connectionId.toString(), zipFilename);
 
         // create parent directories if not exists:
         try {
@@ -224,24 +224,25 @@ public class SupportFileServiceImp implements SupportFileService {
                 addToZip(zipOutputStream, toInvoker, toConnector.getInvoker() + ".xml");
             }
 
-            // Add log file, then delete it from temporary location:
-            String filename = timestamp + "_" + connectionId + "_" + executionId + ".log";
-            Path filePath = toPath(LOG_LOCATION, filename);
-            addToZip(zipOutputStream, filePath.toFile(), filename);
+            // copy temporary uncategorized log file into zip, then delete it:
+            Path filePath = toPath(LOG_LOCATION, toFilename(timestamp, connectionId, "u", executionId, "log"));
+            addToZip(zipOutputStream, filePath.toFile(), toFilename(timestamp, connectionId, type, executionId, "log"));
             delete(filePath);
         } catch (IOException e) {
             logger.error("Failed to create support file for connectionId = '" + connectionId + "'");
             throw new RuntimeException(e);
         } finally {
-//            int fileLimit = "s".equals(type) ? successFileLimit : failFileLimit;
-//            enforceLimit(zipFilePath.getParent(), connectionId + "_" + type + "_support", fileLimit);
+            int fileLimit = "s".equals(type) ? successFileLimit : failFileLimit;
+            enforceLimit(base, connectionId, type, fileLimit);
         }
     }
 
     @Override
-    public void deleteSupportFile(String zipFileName) {
-        String connectionId = zipFileName.substring(0, zipFileName.indexOf('_'));
-        Path zipPath =  toPath(base, connectionId, zipFileName);
+    public void deleteSupportFile(String zipFilename) {
+        String dateRemoved = zipFilename.substring(17);
+        String connectionId = dateRemoved.substring(0, dateRemoved.indexOf('_'));
+        Path zipPath =  toPath(base, connectionId, zipFilename);
+
         try {
             delete(zipPath);
         } catch (IOException e) {
@@ -289,35 +290,6 @@ public class SupportFileServiceImp implements SupportFileService {
             }
 
             zipOutputStream.closeEntry();
-        }
-    }
-
-    private void enforceLimit(Path base, String prefix, int limit) {
-        try (Stream<Path> stream = Files.list(base)) {
-            List<Path> matchingDirs = stream
-                    .filter(path -> Files.isRegularFile(path) && path.getFileName().toString().startsWith(prefix))
-                    .sorted((p1, p2) -> {
-                        long time1 = extractTime(p1.getFileName().toString(), prefix);
-                        long time2 = extractTime(p2.getFileName().toString(), prefix);
-
-                        return Long.compare(time1, time2);
-                    })
-                    .toList();
-
-            for (int i = 0; i < matchingDirs.size() - limit; i++) {
-                delete(matchingDirs.get(i));
-            }
-        } catch (IOException e) {
-            logger.error("Failed to enforce file limit for folder = " + base);
-            throw new RuntimeException(e);
-        }
-    }
-
-    private long extractTime(String dirName, String prefix) {
-        try {
-            return Long.parseLong(dirName.substring(prefix.length()));
-        } catch (NumberFormatException e) {
-            return Long.MAX_VALUE;
         }
     }
 }

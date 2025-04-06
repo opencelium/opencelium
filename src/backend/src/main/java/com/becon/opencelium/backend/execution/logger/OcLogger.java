@@ -38,9 +38,9 @@ public class OcLogger<T extends LogMessage> {
 
         if (log2File) {
             String loggerId = String.format("%d-%d", executionId, connectionId);
-            String filename = timestamp + "_" + connectionId + "_" + executionId + ".log";
+            String filename = FileUtility.toFilename(timestamp, connectionId, "u", executionId, "log");
 
-            // setup loggerConfiguration to create separate files:
+            // create temporary log file in base log directory: type = u (uncategorized), not s (success) or f (fail):
             Path filePath = FileUtility.toPath(LOG_LOCATION, filename);
             LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
             FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
