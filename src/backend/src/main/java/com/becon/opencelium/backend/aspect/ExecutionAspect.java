@@ -18,8 +18,25 @@ package com.becon.opencelium.backend.aspect;
 
 import com.becon.opencelium.backend.constant.AggrConst;
 import com.becon.opencelium.backend.constant.AppYamlPath;
-import com.becon.opencelium.backend.database.mysql.entity.*;
-import com.becon.opencelium.backend.database.mysql.service.*;
+import com.becon.opencelium.backend.database.mysql.entity.Argument;
+import com.becon.opencelium.backend.database.mysql.entity.Connection;
+import com.becon.opencelium.backend.database.mysql.entity.DataAggregator;
+import com.becon.opencelium.backend.database.mysql.entity.EventContent;
+import com.becon.opencelium.backend.database.mysql.entity.EventNotification;
+import com.becon.opencelium.backend.database.mysql.entity.EventRecipient;
+import com.becon.opencelium.backend.database.mysql.entity.Execution;
+import com.becon.opencelium.backend.database.mysql.entity.ExecutionArgument;
+import com.becon.opencelium.backend.database.mysql.entity.LastExecution;
+import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
+import com.becon.opencelium.backend.database.mysql.entity.Subscription;
+import com.becon.opencelium.backend.database.mysql.entity.User;
+import com.becon.opencelium.backend.database.mysql.service.ConnectionServiceImp;
+import com.becon.opencelium.backend.database.mysql.service.DataAggregatorService;
+import com.becon.opencelium.backend.database.mysql.service.ExecutionService;
+import com.becon.opencelium.backend.database.mysql.service.LastExecutionService;
+import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
+import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
+import com.becon.opencelium.backend.database.mysql.service.UserService;
 import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.execution.JSHttpObject;
 import com.becon.opencelium.backend.execution.notification.EmailServiceImpl;
@@ -136,8 +153,8 @@ public class ExecutionAspect {
 
         if (data.isCreateZip()) {
             Long connectionId = (Long) context.get("connectionId");
-            long timestamp = (long) context.get("timestamp");
-            supportFileService.collectFiles(connectionId ,timestamp, "s");
+            String timestamp = (String) context.get("timestamp");
+            supportFileService.collectFiles(connectionId, execId, timestamp, "s");
 
             // delete temporarily created scheduler
             schedulerService.deleteById(schedulerId);
@@ -168,8 +185,8 @@ public class ExecutionAspect {
 
         if (data.isCreateZip()) {
             Long connectionId = (Long) context.get("connectionId");
-            long timestamp = (long) context.get("timestamp");
-            supportFileService.collectFiles(connectionId, timestamp, "e");
+            String timestamp = (String) context.get("timestamp");
+            supportFileService.collectFiles(connectionId, execId, timestamp, "f");
 
             // delete temporarily created scheduler
             schedulerService.deleteById(schedulerId);

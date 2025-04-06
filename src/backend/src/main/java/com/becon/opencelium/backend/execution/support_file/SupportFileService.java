@@ -8,6 +8,6 @@ public interface SupportFileService {
     List<SupportFile> connectionSupportFileList(Long connectionId);
     File getSupportFile(Long connectionId, String zipFileName);
     File getSupportFile(Long connectionId);
-    void collectFiles(Long connectionId, long timestamp, String type);
+    void collectFiles(Long connectionId, long executionId, String timestamp, String type);
     void deleteSupportFile(String zipFileName);
 }

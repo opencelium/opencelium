@@ -5,6 +5,7 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
 import com.becon.opencelium.backend.execution.socket.SocketConstant;
+import com.becon.opencelium.backend.resource.execution.LoggerConfiguration;
 import com.becon.opencelium.backend.utility.FileUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,24 +15,32 @@ import java.nio.file.Path;
 import java.util.function.Consumer;
 
 public class OcLogger<T extends LogMessage> {
-    private boolean isWebsocket; // if true then sends logs through websocket;
-    private boolean enable = true; // if false then disables logs;
+    private final boolean debugMode;
+    private final boolean log2File;
+    private final boolean webSocket; // if true then sends logs through websocket;
     private final T logEntity; // log entity
-    private final boolean createZip;
     private final SimpMessagingTemplate simpMessagingTemplate; // sends messages to user via websocket
     private final Logger logger;
 
     public static final String LOG_LOCATION = "src/main/resources/logs";
 
-    public OcLogger(boolean isWebsocket, SimpMessagingTemplate simpMessagingTemplate, T logEntity, boolean createZip, String loggerId, Class<?> c) {
-        this.isWebsocket = isWebsocket;
+    public OcLogger(
+            LoggerConfiguration loggerConfiguration, T logEntity, SimpMessagingTemplate simpMessagingTemplate,
+            long connectionId, String timestamp, long executionId, Class<?> c
+            ) {
+        this.debugMode = loggerConfiguration.isDebugMode();
+        this.log2File = loggerConfiguration.isLog2File();
+        this.webSocket = loggerConfiguration.isWSocketOpen();
+
         this.simpMessagingTemplate = simpMessagingTemplate;
         this.logEntity = logEntity;
-        this.createZip = createZip;
 
-        if (createZip) {
-            // setup logger to create separate files:
-            Path filePath = FileUtility.toPath(LOG_LOCATION, loggerId + ".log");
+        if (log2File) {
+            String loggerId = String.format("%d-%d", executionId, connectionId);
+            String filename = timestamp + "_" + connectionId + "_" + executionId + ".log";
+
+            // setup loggerConfiguration to create separate files:
+            Path filePath = FileUtility.toPath(LOG_LOCATION, filename);
             LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
             FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
             fileAppender.setName("FileAppender-" + loggerId);
@@ -57,7 +66,7 @@ public class OcLogger<T extends LogMessage> {
     }
 
     public void close() {
-        if (createZip && logger instanceof ch.qos.logback.classic.Logger classicLogger) {
+        if (log2File && logger instanceof ch.qos.logback.classic.Logger classicLogger) {
             classicLogger.iteratorForAppenders().forEachRemaining(appender -> {
                 if (appender instanceof FileAppender) {
                     appender.stop();
@@ -72,16 +81,6 @@ public class OcLogger<T extends LogMessage> {
         return logEntity;
     }
 
-    public OcLogger<T> disable() {
-        enable = false;
-        return this;
-    }
-
-    public OcLogger<T> enable() {
-        enable = true;
-        return this;
-    }
-
     public void logAndSend(String message){
         Consumer<String> printStrategy = logger::info;
         logAndSend(printStrategy, message);
@@ -93,19 +92,24 @@ public class OcLogger<T extends LogMessage> {
         };
 
         logAndSend(printStrategy, e);
+
+        if (!log2File) {
+            throw new RuntimeException(e);
+        }
     }
 
 
     private <E> void logAndSend(Consumer<E> t, E message) {
-        if (createZip) {
+        if (log2File) {
             t.accept(message);
             return;
         }
 
-        if (!enable) {
+        if (debugMode) {
             return;
         }
-        if (isWebsocket) {
+
+        if (webSocket) {
             logEntity.setMessage(message);
             simpMessagingTemplate.convertAndSend(SocketConstant.DESTINATION_EXECUTION_LOG, logEntity);
         } else {

@@ -187,9 +187,9 @@ public class SupportFileServiceImp implements SupportFileService {
 
     @Override
     @Transactional(readOnly = true)
-    public void collectFiles(Long connectionId, long timestamp, String type) {
+    public void collectFiles(Long connectionId, long executionId, String timestamp, String type) {
         // create temporary file collection directory:
-        String zipFileName = connectionId + "_" + type + "_support_" + timestamp + ".zip";
+        String zipFileName = timestamp + "_" + connectionId + "_" + type + "_" + executionId + ".zip";
         Path zipFilePath = toPath(base, connectionId.toString(), zipFileName);
 
         // create parent directories if not exists:
@@ -225,16 +225,16 @@ public class SupportFileServiceImp implements SupportFileService {
             }
 
             // Add log file, then delete it from temporary location:
-            String fileName = String.format("%d_%d.log", connectionId, timestamp);
-            Path filePath = toPath(LOG_LOCATION, fileName);
-            addToZip(zipOutputStream, filePath.toFile(), fileName);
+            String filename = timestamp + "_" + connectionId + "_" + executionId + ".log";
+            Path filePath = toPath(LOG_LOCATION, filename);
+            addToZip(zipOutputStream, filePath.toFile(), filename);
             delete(filePath);
         } catch (IOException e) {
             logger.error("Failed to create support file for connectionId = '" + connectionId + "'");
             throw new RuntimeException(e);
         } finally {
-            int fileLimit = "s".equals(type) ? successFileLimit : failFileLimit;
-            enforceLimit(zipFilePath.getParent(), connectionId + "_" + type + "_support", fileLimit);
+//            int fileLimit = "s".equals(type) ? successFileLimit : failFileLimit;
+//            enforceLimit(zipFilePath.getParent(), connectionId + "_" + type + "_support", fileLimit);
         }
     }
 
