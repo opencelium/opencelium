@@ -77,7 +77,7 @@ public class SupportFileServiceImp implements SupportFileService {
 
             // Create base directory to store log files temporarily:
             create(LOG_LOCATION);
-            clear(LOG_LOCATION);
+//            clear(LOG_LOCATION);
 
             logger.info("Base folders have been setup for support and log files.");
         } catch (IOException e) {
@@ -172,7 +172,7 @@ public class SupportFileServiceImp implements SupportFileService {
     @Override
     public File getSupportFile(Long connectionId) {
         // try to find successful execution support file by pattern
-        String filePattern =  connectionId + "_s_support_*.zip";
+        String filePattern =  "*_" + connectionId + "_s_*.zip";
 
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(toPath(base, connectionId.toString()), filePattern)) {
             for (Path path : stream) {
