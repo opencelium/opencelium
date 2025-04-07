@@ -13,9 +13,9 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {FC, useEffect} from 'react';
-import {Pagination as ReactPagination, PaginationItem, PaginationLink} from "reactstrap";
-import {PaginationProps} from "./interfaces";
+import React, { FC, useEffect } from 'react';
+import { PaginationItem, PaginationLink, Pagination as ReactPagination } from "reactstrap";
+import { PaginationProps } from "./interfaces";
 
 //must be odd
 const MAX_PAGES = 5;
@@ -42,7 +42,7 @@ const Pagination: FC<PaginationProps> =
         if(currentPage > total){
             setCurrentPage(total);
         }
-    }, [total])
+    }, [total, currentPage])
     for(let i = startIndex; i <= endIndex; i++){
         paginationItems.push(
             <PaginationItem key={i} active={currentPage === i}>
@@ -88,5 +88,6 @@ Pagination.defaultProps = {
 
 
 export {
-    Pagination,
+    Pagination
 };
+

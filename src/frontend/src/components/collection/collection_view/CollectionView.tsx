@@ -13,36 +13,36 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {FC, useEffect, useState} from 'react';
-import {withTheme} from 'styled-components';
-import {Application} from "@application/classes/Application";
-import {useAppDispatch} from "@application/utils/store";
-import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
-import {
-    setViewType as setViewTypeGlobally,
-    setGridViewType as setGridViewTypeGlobally,
-    setSearchFields, setCurrentPages
-} from "@application/redux_toolkit/slices/ApplicationSlice";
-import ErrorBoundary from "@app_component/base/error_boundary/ErrorBoundary";
-import CollectionLoading from "@app_component/base/loading/CollectionLoading";
-import InputText from "@app_component/base/input/text/InputText";
-import { TooltipButton } from '@app_component/base/tooltip_button/TooltipButton';
 import Button from "@app_component/base/button/Button";
+import ErrorBoundary from "@app_component/base/error_boundary/ErrorBoundary";
+import InputText from "@app_component/base/input/text/InputText";
+import CollectionLoading from "@app_component/base/loading/CollectionLoading";
+import { TooltipButton } from '@app_component/base/tooltip_button/TooltipButton';
 import Filter from "@app_component/collection/filter/Filter";
-import {ColorTheme} from "@style/Theme";
-import {Pagination} from "../Pagination";
-import {GridViewMenu, GridViewType} from "../GridViewMenu";
-import {List} from "./List";
-import {CollectionViewProps} from "./interfaces";
-import {ActionsStyled, CollectionViewStyled, TopSectionStyled, ViewSectionStyled} from "./styles";
-import {Grid} from "./Grid";
-import Title from "../collection_title/Title";
-import {BadRequest} from "@app_component/default_pages/bad_request/BadRequest";
-import {debounce} from "@application/utils/utils";
+import { BadRequest } from "@app_component/default_pages/bad_request/BadRequest";
+import { Application } from "@application/classes/Application";
+import { API_REQUEST_STATE } from "@application/interfaces/IApplication";
+import {
+    setCurrentPages,
+    setGridViewType as setGridViewTypeGlobally,
+    setSearchFields,
+    setViewType as setViewTypeGlobally
+} from "@application/redux_toolkit/slices/ApplicationSlice";
+import { useAppDispatch } from "@application/utils/store";
+import { debounce } from "@application/utils/utils";
 import CategoryTabs from '@entity/category/components/category_tabs/CategoryTabs';
 import LicenseAlertMessage from "@entity/dashboard/components/license_alert_message/LicenseAlertMessage";
-import LicenseAlertMessageForSchedules
-    from "@entity/dashboard/components/license_alert_message/LicenseAlertMessageForSchedules";
+import LicenseAlertMessageForSchedules from "@entity/dashboard/components/license_alert_message/LicenseAlertMessageForSchedules";
+import { ColorTheme } from "@style/Theme";
+import React, { FC, useEffect, useState } from 'react';
+import { withTheme } from 'styled-components';
+import { GridViewMenu, GridViewType } from "../GridViewMenu";
+import { Pagination } from "../Pagination";
+import Title from "../collection_title/Title";
+import { Grid } from "./Grid";
+import { List } from "./List";
+import { CollectionViewProps } from "./interfaces";
+import { ActionsStyled, CollectionViewStyled, TopSectionStyled, ViewSectionStyled } from "./styles";
 
 const LIST_VIEW_ENTITIES_NUMBER = 10;
 
@@ -78,7 +78,11 @@ const CollectionView: FC<CollectionViewProps> =
         const [checks, setChecks] = useState<any>({});
         const [entitiesPerPage, setEntitiesPerPage] = useState(LIST_VIEW_ENTITIES_NUMBER)
         const [currentPage, setCurrentPage] = useState(paginationProps?.page + 1 ? paginationProps.page + 1 : searchValuePropertyName ? currentPages[searchValuePropertyName] || 1 : 1);
-        const [totalPages, setTotalPages] = useState(!!paginationProps ? paginationProps.totalPages : Math.ceil(collection.entities.length / entitiesPerPage))
+         const [totalPages, setTotalPages] = useState(
+               !!paginationProps
+                 ? paginationProps.totalPages
+                 : Math.ceil(((filterData ? collection.filteredEntities.length : collection.entities.length) || 0) / entitiesPerPage)
+             );
         let applicationViewType = viewType;
         if(defaultViewType !== ''){
             applicationViewType = defaultViewType;
@@ -103,8 +107,8 @@ const CollectionView: FC<CollectionViewProps> =
         useEffect(() => {
             if (!paginationProps) {
                 let newEntitiesPerPage = LIST_VIEW_ENTITIES_NUMBER;
-                if(applicationViewType === ViewType.GRID){
-                    switch(gridViewType){
+                if (applicationViewType === ViewType.GRID) {
+                    switch (gridViewType) {
                         case 2:
                             newEntitiesPerPage = 6;
                             break;
@@ -123,7 +127,22 @@ const CollectionView: FC<CollectionViewProps> =
                 const newTotalPages = Math.ceil(collection.filteredEntities.length / newEntitiesPerPage);
                 setTotalPages(newTotalPages);
             }
-        }, [currentPage, searchValue, applicationViewType, gridViewType, collection.entities.length, collection.filteredEntities.length, shouldBeUpdated, filterData]);
+        }, [searchValue, applicationViewType, gridViewType, collection.filteredEntities.length, shouldBeUpdated, filterData]);
+
+        useEffect(() => {
+            if (!paginationProps) {
+                const visibleEntities = collection.getEntitiesByPage(
+                    searchValue,
+                    currentPage,
+                    entitiesPerPage,
+                    filterData
+                );
+                if (visibleEntities.length === 0 && currentPage > 1) {
+                    setCurrentPage(1);
+                }
+            }
+        }, [collection.filteredEntities.length, currentPage, searchValue, entitiesPerPage, filterData, paginationProps]);
+
         useEffect(() => {
             if (paginationProps?.totalPages && paginationProps.totalPages !== totalPages) {
                 setTotalPages(paginationProps.totalPages);
@@ -260,7 +279,7 @@ CollectionView.defaultProps = {
 
 
 export {
-    CollectionView,
+    CollectionView
 };
 
 export default withTheme(CollectionView);
