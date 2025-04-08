@@ -2,6 +2,8 @@ package com.becon.opencelium.backend.resource.template;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.util.Map;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CtionTemplateResource {
 
@@ -12,6 +14,7 @@ public class CtionTemplateResource {
     private CtorTemplateResource fromConnector;
     private CtorTemplateResource toConnector;
     private Object fieldBinding;
+    private Map<String, Object> ui;
 
     public Long getNodeId() {
         return nodeId;
@@ -67,5 +70,13 @@ public class CtionTemplateResource {
 
     public void setFieldBinding(Object fieldBinding) {
         this.fieldBinding = fieldBinding;
+    }
+
+    public Map<String, Object> getUi() {
+        return ui;
+    }
+
+    public void setUi(Map<String, Object> ui) {
+        this.ui = ui;
     }
 }
