@@ -34,7 +34,7 @@ import CategoryTabs from '@entity/category/components/category_tabs/CategoryTabs
 import LicenseAlertMessage from "@entity/dashboard/components/license_alert_message/LicenseAlertMessage";
 import LicenseAlertMessageForSchedules from "@entity/dashboard/components/license_alert_message/LicenseAlertMessageForSchedules";
 import { ColorTheme } from "@style/Theme";
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useRef, useState } from 'react';
 import { withTheme } from 'styled-components';
 import { GridViewMenu, GridViewType } from "../GridViewMenu";
 import { Pagination } from "../Pagination";
@@ -76,17 +76,35 @@ const CollectionView: FC<CollectionViewProps> =
         const [isFilterVisible, toggleFilter] = useState<boolean>(false);
         const [filterData, setFilterData] = useState(defaultFilterData);
         const [checks, setChecks] = useState<any>({});
-        const [entitiesPerPage, setEntitiesPerPage] = useState(LIST_VIEW_ENTITIES_NUMBER)
-        const [currentPage, setCurrentPage] = useState(paginationProps?.page + 1 ? paginationProps.page + 1 : searchValuePropertyName ? currentPages[searchValuePropertyName] || 1 : 1);
-         const [totalPages, setTotalPages] = useState(
-               !!paginationProps
-                 ? paginationProps.totalPages
-                 : Math.ceil(((filterData ? collection.filteredEntities.length : collection.entities.length) || 0) / entitiesPerPage)
-             );
+        const [entitiesPerPage, setEntitiesPerPage] = useState(LIST_VIEW_ENTITIES_NUMBER);
+        const getInitialPage = () => {
+            if (paginationProps?.page != null) {
+                return paginationProps.page + 1;
+            }
+            if (searchValuePropertyName) {
+                const storedPage = localStorage.getItem('page_' + searchValuePropertyName);
+                if (storedPage) {
+                    return Number(storedPage);
+                }
+                return currentPages[searchValuePropertyName] || 1;
+            }
+            return 1;
+        };
+        const [currentPage, setCurrentPage] = useState(getInitialPage());
+        const [totalPages, setTotalPages] = useState(
+            !!paginationProps
+                ? paginationProps.totalPages
+                : Math.ceil(((filterData ? collection.filteredEntities.length : collection.entities.length) || 0) / entitiesPerPage)
+        );
         let applicationViewType = viewType;
         if(defaultViewType !== ''){
             applicationViewType = defaultViewType;
         }
+        useEffect(() => {
+            if (searchValuePropertyName) {
+                localStorage.setItem('page_' + searchValuePropertyName, currentPage.toString());
+            }
+        }, [currentPage, searchValuePropertyName]);
         useEffect(() => {
             if(searchValuePropertyName){
                 debounce(() => {dispatch(setSearchFields({[searchValuePropertyName]: searchValue}))})();
@@ -129,8 +147,14 @@ const CollectionView: FC<CollectionViewProps> =
             }
         }, [searchValue, applicationViewType, gridViewType, collection.filteredEntities.length, shouldBeUpdated, filterData]);
 
+        const initialLoad = useRef(true);
+
         useEffect(() => {
             if (!paginationProps) {
+                if (initialLoad.current) {
+                    initialLoad.current = false;
+                    return;
+                }
                 const visibleEntities = collection.getEntitiesByPage(
                     searchValue,
                     currentPage,
@@ -138,10 +162,17 @@ const CollectionView: FC<CollectionViewProps> =
                     filterData
                 );
                 if (visibleEntities.length === 0 && currentPage > 1) {
-                    setCurrentPage(1);
+                    setCurrentPage(currentPage - 1);
                 }
             }
-        }, [collection.filteredEntities.length, currentPage, searchValue, entitiesPerPage, filterData, paginationProps]);
+        }, [
+            collection.filteredEntities.length,
+            currentPage,
+            searchValue,
+            entitiesPerPage,
+            filterData,
+            paginationProps
+        ]);
 
         useEffect(() => {
             if (paginationProps?.totalPages && paginationProps.totalPages !== totalPages) {
