@@ -6,13 +6,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class FileUtility {
+import static com.becon.opencelium.backend.execution.logger.OcLogger.LOG_LOCATION;
+
+public class LogFileUtility {
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm");
 
     public static Path toPath(String base, String... sub) {
@@ -50,6 +53,19 @@ public class FileUtility {
             for (int i = 0; i < matchingDirs.size() - limit; i++) {
                 delete(matchingDirs.get(i));
             }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void move(String timestamp, Long connectionId, String type, long executionId) {
+        Path sourcePath = toPath(LOG_LOCATION, toFilename(timestamp, connectionId, "u", executionId, "log"));
+        Path destinationPath = toPath(LOG_LOCATION, connectionId.toString(), toFilename(timestamp, connectionId, type, executionId, "log"));
+
+        try {
+            Files.createDirectories(destinationPath.getParent());
+
+            Files.move(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

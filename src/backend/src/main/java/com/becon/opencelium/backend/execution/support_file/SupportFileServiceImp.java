@@ -33,11 +33,11 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static com.becon.opencelium.backend.execution.logger.OcLogger.LOG_LOCATION;
-import static com.becon.opencelium.backend.utility.FileUtility.create;
-import static com.becon.opencelium.backend.utility.FileUtility.delete;
-import static com.becon.opencelium.backend.utility.FileUtility.enforceLimit;
-import static com.becon.opencelium.backend.utility.FileUtility.toFilename;
-import static com.becon.opencelium.backend.utility.FileUtility.toPath;
+import static com.becon.opencelium.backend.utility.LogFileUtility.create;
+import static com.becon.opencelium.backend.utility.LogFileUtility.delete;
+import static com.becon.opencelium.backend.utility.LogFileUtility.enforceLimit;
+import static com.becon.opencelium.backend.utility.LogFileUtility.toFilename;
+import static com.becon.opencelium.backend.utility.LogFileUtility.toPath;
 
 @Service
 public class SupportFileServiceImp implements SupportFileService {

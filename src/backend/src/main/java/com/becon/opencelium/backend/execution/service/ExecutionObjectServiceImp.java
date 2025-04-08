@@ -61,7 +61,7 @@ public class ExecutionObjectServiceImp implements ExecutionObjectService {
 
         LoggerConfiguration loggerConfiguration = new LoggerConfiguration();
         loggerConfiguration.setDebugMode(scheduler.getDebugMode());
-        loggerConfiguration.setLog2File(data.isCreateZip()); // TODO: handle setting this variable
+        loggerConfiguration.setLog2File(true);
         loggerConfiguration.setWSocketOpen(schedulerService.isWebSocketRequired(scheduleId));
         executionObj.setLoggerConfiguration(loggerConfiguration);
 

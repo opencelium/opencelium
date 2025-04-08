@@ -6,7 +6,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
 import com.becon.opencelium.backend.execution.socket.SocketConstant;
 import com.becon.opencelium.backend.resource.execution.LoggerConfiguration;
-import com.becon.opencelium.backend.utility.FileUtility;
+import com.becon.opencelium.backend.utility.LogFileUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -38,10 +38,10 @@ public class OcLogger<T extends LogMessage> {
 
         if (log2File) {
             String loggerId = String.format("%d-%d", executionId, connectionId);
-            String filename = FileUtility.toFilename(timestamp, connectionId, "u", executionId, "log");
+            String filename = LogFileUtility.toFilename(timestamp, connectionId, "u", executionId, "log");
 
             // create temporary log file in base log directory: type = u (uncategorized), not s (success) or f (fail):
-            Path filePath = FileUtility.toPath(LOG_LOCATION, filename);
+            Path filePath = LogFileUtility.toPath(LOG_LOCATION, filename);
             LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
             FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
             fileAppender.setName("FileAppender-" + loggerId);

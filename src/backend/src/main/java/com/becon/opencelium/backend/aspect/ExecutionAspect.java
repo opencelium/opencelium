@@ -45,6 +45,7 @@ import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.execution.support_file.SupportFileService;
 import com.becon.opencelium.backend.quartz.JobExecutor;
 import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
+import com.becon.opencelium.backend.utility.LogFileUtility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.AfterThrowing;
@@ -154,6 +155,15 @@ public class ExecutionAspect {
 
             // delete temporarily created scheduler
             schedulerService.deleteById(schedulerId);
+        } else {
+            Long connectionId = (Long) context.get("connectionId");
+            String timestamp = (String) context.get("timestamp");
+//            // TODO: cleanup scheduler and connection:
+//            //  move logfile to its required folder under connectionId
+//            // delete temporarily created scheduler
+//            schedulerService.deleteById(schedulerId);
+
+            LogFileUtility.move(timestamp, connectionId, "s", execId);
         }
 
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
@@ -184,6 +194,15 @@ public class ExecutionAspect {
 
             // delete temporarily created scheduler
             schedulerService.deleteById(schedulerId);
+        } else {
+            Long connectionId = (Long) context.get("connectionId");
+            String timestamp = (String) context.get("timestamp");
+//            // TODO: cleanup scheduler and connection:
+//            //  move logfile to its required folder under connectionId
+//            // delete temporarily created scheduler
+//            schedulerService.deleteById(schedulerId);
+
+            LogFileUtility.move(timestamp, connectionId, "f", execId);
         }
 
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
