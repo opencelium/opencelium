@@ -86,7 +86,7 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
 
             // increments current_usage in subscription and saves entity in current_usage_history.
             String connectionName = executionObj.getConnection().getConnectionName();
-            if (connectionName != null && !connectionName.contains("!*test_connection_") && !data.isCreateZip()) {
+            if (connectionName != null && !connectionName.contains("!*test_connection_") && data.getExecType() != QuartzJobScheduler.TriggerType.SUPPORT_FILE) {
                 long operationUsage = executor.getOperations().stream().mapToInt(o -> o.getRequests().size()).sum();
                 logger.info("Operation usage for Connection {} is {}", connectionName, operationUsage);
                 subscriptionService.updateUsage(activeSub.getId(), executionObj.getConnection(), operationUsage, startTime);

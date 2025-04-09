@@ -148,6 +148,8 @@ public class QuartzJobScheduler implements SchedulingStrategy {
                         .build();
                 quartzScheduler.scheduleJob(jobDetail, trigger);
             }
+        } catch (JobPersistenceException e) {
+            retry(scheduler, 1);
         } catch (SchedulerException e) {
             throw new RuntimeException(e);
         }
@@ -184,7 +186,7 @@ public class QuartzJobScheduler implements SchedulingStrategy {
         final String jobName = getJobName(scheduler);
         final JobKey jobKey = new JobKey(jobName, "connection");
 
-        ScheduleData data = new ScheduleData(scheduler.getId(), TriggerType.SCHEDULER, rules);
+        ScheduleData data = new ScheduleData(scheduler.getId(), TriggerType.SUPPORT_FILE, rules);
         JobDataMap jobDataMap = new JobDataMap();
         jobDataMap.put("data", data);
 
@@ -279,8 +281,23 @@ public class QuartzJobScheduler implements SchedulingStrategy {
         return scheduler.getConnection().getId() + "-" + scheduler.getId();
     }
 
-    enum TriggerType {
-        SCHEDULER, WEBHOOK
+    private void retry(Scheduler scheduler, int times) {
+        if (times == 0) {
+            return;
+        }
+
+        try {
+            deleteJob(scheduler);
+            addJob(scheduler);
+
+            runJob(scheduler);
+        } catch (Exception e) {
+            retry(scheduler, times - 1);
+        }
+    }
+
+    public enum TriggerType {
+        SCHEDULER, WEBHOOK, SUPPORT_FILE, EXECUTION_TEST
     }
 
     public static class ScheduleData implements Serializable {
@@ -288,7 +305,6 @@ public class QuartzJobScheduler implements SchedulingStrategy {
         private TriggerType execType;
         private Map<String, Object> queryParams;
         private List<MaskingRule> rules = new ArrayList<>();
-        private boolean createZip;
 
         public ScheduleData(int scheduleId, TriggerType execType) {
             this(scheduleId, execType, new HashMap<>());
@@ -304,7 +320,6 @@ public class QuartzJobScheduler implements SchedulingStrategy {
             this.scheduleId = scheduleId;
             this.execType = execType;
             this.rules = rules;
-            this.createZip = true;
         }
 
         public int getScheduleId() {
@@ -333,10 +348,6 @@ public class QuartzJobScheduler implements SchedulingStrategy {
 
         public List<MaskingRule> getRules() {
             return rules;
-        }
-
-        public boolean isCreateZip() {
-            return createZip;
         }
     }
 }

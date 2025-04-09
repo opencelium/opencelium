@@ -148,7 +148,7 @@ public class ExecutionAspect {
         List<Operation> operations = (List<Operation>) context.get("operationsEx");
         executeAggregator(operations, execId);
 
-        if (data.isCreateZip()) {
+        if (data.getExecType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE) {
             Long connectionId = (Long) context.get("connectionId");
             String timestamp = (String) context.get("timestamp");
             supportFileService.collectFiles(connectionId, execId, timestamp, "s");
@@ -187,7 +187,7 @@ public class ExecutionAspect {
         List<Operation> operations = (List<Operation>) context.get("operationsEx");
         executeAggregator(operations, execId);
 
-        if (data.isCreateZip()) {
+        if (data.getExecType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE) {
             Long connectionId = (Long) context.get("connectionId");
             String timestamp = (String) context.get("timestamp");
             supportFileService.collectFiles(connectionId, execId, timestamp, "f");
