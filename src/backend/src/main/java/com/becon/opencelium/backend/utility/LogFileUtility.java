@@ -60,7 +60,7 @@ public class LogFileUtility {
         }
     }
 
-    public static void move(String timestamp, Long connectionId, String type, long executionId) {
+    public static void move(Long connectionId, long executionId, String timestamp, String type) {
         Path sourcePath = toPath(LOG_LOCATION, toFilename(timestamp, connectionId, "u", executionId, "log"));
         Path destinationPath = toPath(LOG_LOCATION, connectionId.toString(), toFilename(timestamp, connectionId, type, executionId, "log"));
 

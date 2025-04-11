@@ -148,7 +148,15 @@ public class ExecutionAspect {
         List<Operation> operations = (List<Operation>) context.get("operationsEx");
         executeAggregator(operations, execId);
 
-        if (data.getExecType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE) {
+        if (data.getExecType() == QuartzJobScheduler.TriggerType.EXECUTION_TEST) {
+            Scheduler scheduler = schedulerService.getById(schedulerId);
+            Long connectionId = scheduler.getConnection().getId();
+
+            // delete temporarily created scheduler
+            schedulerService.deleteById(schedulerId);
+            // delete temporarily created connection
+            connectionServiceImp.deleteById(connectionId);
+        } else if (data.getExecType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE) {
             Long connectionId = (Long) context.get("connectionId");
             String timestamp = (String) context.get("timestamp");
             supportFileService.collectFiles(connectionId, execId, timestamp, "s");
@@ -159,7 +167,8 @@ public class ExecutionAspect {
             Long connectionId = (Long) context.get("connectionId");
             String timestamp = (String) context.get("timestamp");
 
-            LogFileUtility.move(timestamp, connectionId, "s", execId);
+            // move temporarily log file under /connectionId folder
+            LogFileUtility.move(connectionId, execId, timestamp, "s");
         }
 
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
@@ -183,7 +192,15 @@ public class ExecutionAspect {
         List<Operation> operations = (List<Operation>) context.get("operationsEx");
         executeAggregator(operations, execId);
 
-        if (data.getExecType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE) {
+        if (data.getExecType() == QuartzJobScheduler.TriggerType.EXECUTION_TEST) {
+            Scheduler scheduler = schedulerService.getById(schedulerId);
+            Long connectionId = scheduler.getConnection().getId();
+
+            // delete temporarily created scheduler
+            schedulerService.deleteById(schedulerId);
+            // delete temporarily created connection
+            connectionServiceImp.deleteById(connectionId);
+        } else if (data.getExecType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE) {
             Long connectionId = (Long) context.get("connectionId");
             String timestamp = (String) context.get("timestamp");
             supportFileService.collectFiles(connectionId, execId, timestamp, "f");
@@ -194,7 +211,8 @@ public class ExecutionAspect {
             Long connectionId = (Long) context.get("connectionId");
             String timestamp = (String) context.get("timestamp");
 
-            LogFileUtility.move(timestamp, connectionId, "f", execId);
+            // move temporarily log file under /connectionId folder
+            LogFileUtility.move(connectionId, execId, timestamp, "f");
         }
 
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
