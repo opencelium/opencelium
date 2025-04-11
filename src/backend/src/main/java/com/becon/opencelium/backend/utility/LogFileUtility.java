@@ -1,5 +1,7 @@
 package com.becon.opencelium.backend.utility;
 
+import com.becon.opencelium.backend.execution.support_file.SupportFileServiceImp;
+
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -68,6 +70,9 @@ public class LogFileUtility {
             Files.move(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            int fileLimit = "s".equals(type) ? SupportFileServiceImp.LOG_FILE_SUCCESS_LIMIT : SupportFileServiceImp.LOG_FILE_FAIL_LIMIT;
+            enforceLimit(LOG_LOCATION, connectionId, type, fileLimit);
         }
     }
 

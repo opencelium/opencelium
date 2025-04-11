@@ -50,12 +50,18 @@ public class SupportFileServiceImp implements SupportFileService {
     @Value("${opencelium.support.file.directory:src/main/resources/support-files}")
     private String base;
     @Value("${opencelium.support.file.limit.success:1}")
-    private int successFileLimit;
+    private int supportFileSuccessLimit;
     @Value("${opencelium.support.file.limit.fail:5}")
-    private int failFileLimit;
+    private int supportFileFailLimit;
+    @Value("${opencelium.log.retention.per-connection.success:2}")
+    private int logFileSuccessLimit;
+    @Value("${opencelium.log.retention.per-connection.fail:3}")
+    private int logFileFailLimit;
 
     public static final String GET_URL = "/connection/support-file/%d/%s";
     private static final Logger logger = LoggerFactory.getLogger(SupportFileService.class);
+    public static int LOG_FILE_SUCCESS_LIMIT;
+    public static int LOG_FILE_FAIL_LIMIT;
 
     public SupportFileServiceImp (
             ConnectionService connectionSqlService,
@@ -78,6 +84,8 @@ public class SupportFileServiceImp implements SupportFileService {
 
             // Create base directory to store log files:
             create(LOG_LOCATION);
+            LOG_FILE_SUCCESS_LIMIT = logFileSuccessLimit;
+            LOG_FILE_FAIL_LIMIT = logFileFailLimit;
 
             logger.info("Base folders have been setup for support and log files.");
         } catch (IOException e) {
@@ -232,7 +240,7 @@ public class SupportFileServiceImp implements SupportFileService {
             logger.error("Failed to create support file for connectionId = '" + connectionId + "'");
             throw new RuntimeException(e);
         } finally {
-            int fileLimit = "s".equals(type) ? successFileLimit : failFileLimit;
+            int fileLimit = "s".equals(type) ? supportFileSuccessLimit : supportFileFailLimit;
             enforceLimit(base, connectionId, type, fileLimit);
         }
     }

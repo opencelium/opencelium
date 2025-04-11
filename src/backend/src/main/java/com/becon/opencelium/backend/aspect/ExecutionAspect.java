@@ -158,10 +158,6 @@ public class ExecutionAspect {
         } else {
             Long connectionId = (Long) context.get("connectionId");
             String timestamp = (String) context.get("timestamp");
-//            // TODO: cleanup scheduler and connection:
-//            //  move logfile to its required folder under connectionId
-//            // delete temporarily created scheduler
-//            schedulerService.deleteById(schedulerId);
 
             LogFileUtility.move(timestamp, connectionId, "s", execId);
         }
@@ -197,10 +193,6 @@ public class ExecutionAspect {
         } else {
             Long connectionId = (Long) context.get("connectionId");
             String timestamp = (String) context.get("timestamp");
-//            // TODO: cleanup scheduler and connection:
-//            //  move logfile to its required folder under connectionId
-//            // delete temporarily created scheduler
-//            schedulerService.deleteById(schedulerId);
 
             LogFileUtility.move(timestamp, connectionId, "f", execId);
         }

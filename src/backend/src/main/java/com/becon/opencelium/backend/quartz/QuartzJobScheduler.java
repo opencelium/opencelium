@@ -6,8 +6,21 @@ import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
 import com.becon.opencelium.backend.exception.SchedulerNotFoundException;
-import org.quartz.*;
+import org.quartz.CronExpression;
+import org.quartz.CronScheduleBuilder;
+import org.quartz.CronTrigger;
+import org.quartz.JobBuilder;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobKey;
+import org.quartz.JobPersistenceException;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
+import org.quartz.TriggerKey;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -301,6 +314,9 @@ public class QuartzJobScheduler implements SchedulingStrategy {
     }
 
     public static class ScheduleData implements Serializable {
+        @Serial
+        private static final long serialVersionUID = -4832151527292528069L;
+
         private int scheduleId;
         private TriggerType execType;
         private Map<String, Object> queryParams;
