@@ -4,6 +4,7 @@ export interface ReferenceGeneratorProps {
     setReference: (reference: string) => void,
     addField?: any,
     reference?: string,
+    isBuilder: boolean,
     connectionEditor: ConnectionEditorProps,
     id?: string,
     parent?: any;

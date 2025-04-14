@@ -33,6 +33,7 @@ const ReferenceGenerator = ({
 	endpointReference = false,
 	bodyReference = false,
 	headerReference = false,
+	isBuilder = false,
 	style = {},
 }: ReferenceGeneratorProps) => {
 	const [color, setColor] = useState<string>('');
@@ -118,7 +119,9 @@ const ReferenceGenerator = ({
 	const onColorSelect = (newColor: string) => {
 		setColor(newColor);
 		setCurrentField('');
-		setReference('');
+		if (isBuilder) {
+			setReference('');
+		}
 	};
 	const onFieldSelect = (newField: string) => {
 		setCurrentField(newField);
