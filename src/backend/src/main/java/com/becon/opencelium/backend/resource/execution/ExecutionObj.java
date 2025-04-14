@@ -6,7 +6,7 @@ public class ExecutionObj {
     private Map<String, Object> webhookVars;
     private ConnectionEx connection;
     private ProxyEx proxy;
-    private Logger logger;
+    private LoggerConfiguration loggerConfiguration;
 
     public ExecutionObj() {
     }
@@ -35,11 +35,11 @@ public class ExecutionObj {
         this.connection = connection;
     }
 
-    public Logger getLogger() {
-        return logger;
+    public LoggerConfiguration getLoggerConfiguration() {
+        return loggerConfiguration;
     }
 
-    public void setLogger(Logger logger) {
-        this.logger = logger;
+    public void setLoggerConfiguration(LoggerConfiguration loggerConfiguration) {
+        this.loggerConfiguration = loggerConfiguration;
     }
 }

@@ -27,22 +27,22 @@ public class ConnectionExecutor {
     private final OcLogger<ExecutionLog> logger;
     private final MaskingService masking;
     private final ProxyEx proxy;
-    private final boolean createZip;
     private ExecutionManager executionManager;
 
-    public ConnectionExecutor(ExecutionObj executionObj, List<MaskingRule> rules, boolean createZip, long timestamp, SimpMessagingTemplate simpMessagingTemplate) {
+    public ConnectionExecutor(
+            ExecutionObj executionObj, long executionId, String timestamp,
+            List<MaskingRule> rules, SimpMessagingTemplate simpMessagingTemplate
+    ) {
         this.webhookVars = executionObj.getWebhookVars();
         this.connection = executionObj.getConnection();
         this.proxy = executionObj.getProxy();
         this.masking = new MaskingServiceImp(rules);
-        this.createZip = createZip;
 
-        String loggerId = String.format("%d_%d", executionObj.getConnection().getConnectionId(), timestamp);
-        this.logger = new OcLogger<>(executionObj.getLogger().isWSocketOpen(), simpMessagingTemplate, new ExecutionLog(), createZip, loggerId, ConnectionExecutor.class);
-
-        if (!executionObj.getLogger().isDebugMode()) {
-            logger.disable();
-        }
+        // logging files related setup
+        this.logger = new OcLogger<>(
+                executionObj.getLoggerConfiguration(), new ExecutionLog(), simpMessagingTemplate,
+                connection.getConnectionId(), timestamp, executionId, ConnectionExecutor.class
+        );
     }
 
     public void start() {
@@ -61,9 +61,7 @@ public class ConnectionExecutor {
         } catch (Exception e) {
             logger.logAndSend(e);
 
-            if (!createZip) {
-                throw e;
-            }
+            throw e;
         } finally {
             logger.close(); // release resources
         }

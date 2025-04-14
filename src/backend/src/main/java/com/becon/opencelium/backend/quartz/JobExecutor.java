@@ -17,16 +17,15 @@
 package com.becon.opencelium.backend.quartz;
 
 import com.becon.opencelium.backend.database.mysql.entity.Subscription;
-import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
 import com.becon.opencelium.backend.execution.ConnectionExecutor;
 import com.becon.opencelium.backend.execution.service.ExecutionObjectService;
 import com.becon.opencelium.backend.execution.service.ExecutionObjectServiceImp;
 import com.becon.opencelium.backend.resource.execution.ExecutionObj;
+import com.becon.opencelium.backend.utility.LogFileUtility;
 import org.quartz.InterruptableJob;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -35,7 +34,6 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.Map;
 
 @Component
@@ -43,22 +41,20 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
     private final ExecutionObjectService executionObjectService;
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final SubscriptionService subscriptionService;
-    private final ConnectionService connectionService;
     private final Logger logger = LoggerFactory.getLogger(JobExecutor.class);
 
     private volatile Thread thread;
 
     public JobExecutor(@Qualifier("executionObjectServiceImp") ExecutionObjectServiceImp executionObjectService,
                        @Qualifier("subscriptionServiceImpl") SubscriptionService subscriptionService,
-                       SimpMessagingTemplate simpMessagingTemplate, ConnectionService connectionService) {
+                       SimpMessagingTemplate simpMessagingTemplate) {
         this.executionObjectService = executionObjectService;
         this.simpMessagingTemplate = simpMessagingTemplate;
         this.subscriptionService = subscriptionService;
-        this.connectionService = connectionService;
     }
 
     @Override
-    public void executeInternal(JobExecutionContext context) throws JobExecutionException {
+    public void executeInternal(JobExecutionContext context) {
         thread = Thread.currentThread();
         Subscription activeSub = subscriptionService.getActiveSubs();
         if (!subscriptionService.isValid(activeSub)) {
@@ -67,19 +63,20 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
             return;
         }
         context.getMergedJobDataMap().put("licenseIsValid", true);
+
         try {
-            long timestamp = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC); // execution start time
+            String timestamp = LocalDateTime.now().format(LogFileUtility.FORMATTER);
 
             JobDataMap dataMap = context.getMergedJobDataMap();
             QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) dataMap.get("data");
+            long execId = dataMap.getLong("execId");
             // old schedulers do not have 'data' object.
             if (data == null) {
                 data = getData(dataMap);
                 context.getMergedJobDataMap().put("data", data);
             }
             ExecutionObj executionObj = executionObjectService.buildObj(data);
-//            List<MaskingRule> rules = connectionService.getAllRules(executionObj.getConnection().getConnectionId());
-            ConnectionExecutor executor = new ConnectionExecutor(executionObj, data.getRules(), data.isCreateZip(), timestamp, simpMessagingTemplate);
+            ConnectionExecutor executor = new ConnectionExecutor(executionObj, execId, timestamp, data.getRules(), simpMessagingTemplate);
 
             context.put("connectionId", executionObj.getConnection().getConnectionId());
             context.put("timestamp", timestamp);
@@ -89,7 +86,7 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
 
             // increments current_usage in subscription and saves entity in current_usage_history.
             String connectionName = executionObj.getConnection().getConnectionName();
-            if (connectionName != null && !connectionName.contains("!*test_connection_") && !data.isCreateZip()) {
+            if (connectionName != null && !connectionName.contains("!*test_connection_") && data.getExecType() != QuartzJobScheduler.TriggerType.SUPPORT_FILE) {
                 long operationUsage = executor.getOperations().stream().mapToInt(o -> o.getRequests().size()).sum();
                 logger.info("Operation usage for Connection {} is {}", connectionName, operationUsage);
                 subscriptionService.updateUsage(activeSub.getId(), executionObj.getConnection(), operationUsage, startTime);
