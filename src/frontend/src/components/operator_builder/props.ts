@@ -20,6 +20,7 @@ export interface GroupPropertyProps {
 export interface RuleProps {
     id: string,
     type: 'rule',
+    error?: string,
     properties?: RulePropertyProps,
 }
 export interface RuleUIProps extends UpdateRuleProps, Omit<RuleStyleProps, "isLoop">{
@@ -52,13 +53,14 @@ export interface OperatorBuilderProps extends ConnectionEditorProps {
 export interface GroupProps {
     id: string,
     type: 'group',
+    error?: string,
     properties?: GroupPropertyProps,
     items?: ChildProps[],
 }
+export type ChildProps = RuleProps | GroupProps;
 export interface GroupHeaderStyleProps {
     hasItems?: boolean,
 }
-export type ChildProps = RuleProps | GroupProps;
 export interface GroupUIProps extends UpdateGroupProps, GroupStyleProps{
     group: GroupProps,
     connectionEditor: ConnectionEditorProps
@@ -81,3 +83,7 @@ export interface OperatorSelectProps {
     operator: OperatorName | LoopOperatorName | '',
     updateOperator: (newOperatorName: OperatorName | '') => void,
 }
+export type ValidationResult<T extends GroupProps | RuleProps> = {
+    node: T;
+    isValid: boolean;
+};

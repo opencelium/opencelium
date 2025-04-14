@@ -44,7 +44,7 @@ import { List } from "./List";
 import { CollectionViewProps } from "./interfaces";
 import { ActionsStyled, CollectionViewStyled, TopSectionStyled, ViewSectionStyled } from "./styles";
 
-const LIST_VIEW_ENTITIES_NUMBER = 10;
+const LIST_VIEW_ENTITIES_NUMBER = 3;
 
 export enum ViewType{
     LIST= 'LIST',

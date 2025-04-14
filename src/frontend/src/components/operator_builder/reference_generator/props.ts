@@ -16,6 +16,7 @@ export interface ReferenceGeneratorProps {
     endpointReference?: boolean;
     bodyReference?: boolean;
     headerReference?: boolean;
+    style?: any,
 }
 
 export interface MethodSelectProps {

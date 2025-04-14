@@ -33,6 +33,7 @@ const ReferenceGenerator = ({
 	endpointReference = false,
 	bodyReference = false,
 	headerReference = false,
+	style = {},
 }: ReferenceGeneratorProps) => {
 	const [color, setColor] = useState<string>('');
 	const [currentField, setCurrentField] = useState<string>('');
@@ -46,18 +47,26 @@ const ReferenceGenerator = ({
 	const ref: any = useRef();
 	const webhookRef: any = useRef();
 	useEffect(() => {
-
-		addCloseParamGeneratorNavigation(this);
-		document.addEventListener('mousedown', handleClickOutside);
-		document.addEventListener('keydown', handleEscKey);
-		return () => {
-			let elem = document.getElementById(id);
-			if(elem){
-				elem.innerText = '';
+		if (!reference) {
+			setColor('');
+			setCurrentField('');
+			updateReferenceType('direct');
+		}
+	}, [reference])
+	useEffect(() => {
+		if (parent) {
+			addCloseParamGeneratorNavigation(this);
+			document.addEventListener('mousedown', handleClickOutside);
+			document.addEventListener('keydown', handleEscKey);
+			return () => {
+				let elem = document.getElementById(id);
+				if (elem) {
+					elem.innerText = '';
+				}
+				removeCloseParamGeneratorNavigation(this);
+				document.removeEventListener('mousedown', handleClickOutside);
+				document.removeEventListener('keydown', handleEscKey);
 			}
-			removeCloseParamGeneratorNavigation(this);
-			document.removeEventListener('mousedown', handleClickOutside);
-			document.removeEventListener('keydown', handleEscKey);
 		}
 	}, [])
 	useEffect(() => {
@@ -109,6 +118,7 @@ const ReferenceGenerator = ({
 	const onColorSelect = (newColor: string) => {
 		setColor(newColor);
 		setCurrentField('');
+		setReference('');
 	};
 	const onFieldSelect = (newField: string) => {
 		setCurrentField(newField);
@@ -199,7 +209,7 @@ const ReferenceGenerator = ({
 		return (
 			<ReferenceGeneratorContainer
 				referenceType={referenceType}
-				style={containerStyle}
+				style={{...containerStyle, ...style}}
 				isAbsolute={isAbsolute}
 				parent={parent}
 				endpointReference={endpointReference}

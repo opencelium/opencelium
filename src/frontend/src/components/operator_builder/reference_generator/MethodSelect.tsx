@@ -83,6 +83,8 @@ const MethodSelect: React.FC<MethodSelectProps> = ({onMethodSelect, methodColor,
                 flatOptions = options;
             }
             setSelectedOption(flatOptions.find((o: OptionType) => o.color === methodColor));
+        } else {
+            setSelectedOption(null);
         }
     }, [methodColor])
     return (

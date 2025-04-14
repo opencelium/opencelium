@@ -819,14 +819,14 @@ export default class CConnection{
         if (!Array.isArray(relatedFieldBindings)) {
             relatedFieldBindings = [relatedFieldBindings];
         }
-    
+
         for (let i = this._fieldBinding.length - 1; i >= 0; i--) {
             const binding = this._fieldBinding[i];
             let connectorTypeBinding = connectorType === CONNECTOR_FROM ? binding.from : binding.to;
-    
+
             for (let j = connectorTypeBinding.length - 1; j >= 0; j--) {
                 const currentBindingItem = connectorTypeBinding[j];
-    
+
                 const match = relatedFieldBindings.some(relBinding => {
                     const from = Array.isArray(relBinding.from) ? relBinding.from : [];
                     const to = Array.isArray(relBinding.to) ? relBinding.to : [];
@@ -834,12 +834,12 @@ export default class CConnection{
                         CFieldBinding.compareTwoBindingItems(compareItem, currentBindingItem)
                     );
                 });
-    
+
                 if (match) {
                     connectorTypeBinding.splice(j, 1);
                 }
             }
-    
+
             if (binding.from.length === 0 && binding.to.length === 0) {
                 this._fieldBinding.splice(i, 1);
             } else {
@@ -847,7 +847,7 @@ export default class CConnection{
             }
         }
     }
-    
+
 
 
     removeDuplicatesFromFieldBinding(){

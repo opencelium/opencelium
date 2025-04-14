@@ -1,9 +1,10 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useMemo, useState} from 'react';
 import Group from './Group';
-import {GroupProps, OperatorBuilderProps} from './props';
+import {ChildProps, GroupProps, OperatorBuilderProps, RuleProps, ValidationResult} from './props';
 import {generateUUID, jsonToString} from "./utils";
 import {SaveOperatorButton} from "@app_component/operator_builder/styles";
 import OperatorTypeFactory from "@app_component/operator_builder/classes/OperatorTypeFactory";
+import {LoopOperatorName, UnaryOperatorName} from "@app_component/operator_builder/interfaces/OperatorName";
 
 const OperatorBuilder = (props: OperatorBuilderProps) => {
     const existedTree = useMemo(() => {
@@ -20,7 +21,86 @@ const OperatorBuilder = (props: OperatorBuilderProps) => {
         return generatedTree || foundTree || {...initialTree, id: generateUUID()};
     }, [props.item, props.connection]);
     const [tree, setTree] = useState<GroupProps>(existedTree);
+    const validateGroup = (group: GroupProps): string | undefined => {
+        if (!group.items || group.items.length === 0) {
+            return `There are no rules in this group.`;
+        }
+        if (group.items.length === 1) {
+            if (group.properties?.conjunction !== undefined) {
+                return `Group with one item must not have conjunction. Conjunction: ${group.properties.conjunction}`;
+            }
+        } else {
+            if (group.properties?.conjunction === undefined) {
+                return `Group with multiple conditions must have a conjunction. Conjunction is missing.`;
+            }
+        }
+        return undefined;
+    };
+
+    const validateRule = (rule: RuleProps): string | undefined => {
+        if (!rule.properties) {
+            return `Rule is not defined.`;
+        }
+        if (!rule.properties.leftField) {
+            return `Left field is missing.`;
+        }
+        if (!rule.properties.operator) {
+            return `Operator is missing.`;
+        }
+        //@ts-ignore
+        if (rule.properties.operator === LoopOperatorName.For || Object.values(UnaryOperatorName).indexOf(rule.properties.operator) !== -1) {
+            if (!!rule.properties.rightField) {
+                return `Right field must not be set for this operator: ${rule.properties.operator}.`;
+            }
+        } else {
+            if (!rule.properties.rightField) {
+                return `Right field is missing.`;
+            }
+        }
+        return undefined;
+    };
+    const validateAndUpdateTree = (
+        node: GroupProps | RuleProps
+    ): ValidationResult<GroupProps | RuleProps> => {
+        if (node.type === 'group') {
+            const groupError = validateGroup(node);
+            let updatedItems: ChildProps[] = [];
+            let allChildrenValid = true;
+
+            for (const item of node.items ?? []) {
+                const result = validateAndUpdateTree(item);
+                updatedItems.push(result.node);
+                if (!result.isValid) {
+                    allChildrenValid = false;
+                }
+            }
+
+            return {
+                node: {
+                    ...node,
+                    error: groupError,
+                    items: updatedItems,
+                },
+                isValid: !groupError && allChildrenValid,
+            };
+        } else {
+            const ruleError = validateRule(node);
+            return {
+                node: {
+                    ...node,
+                    error: ruleError,
+                },
+                isValid: !ruleError,
+            };
+        }
+    };
+
     const updateOperator = () => {
+        const result = validateAndUpdateTree(tree);
+        setTree(result.node as GroupProps);
+        if (!result.isValid) {
+            return;
+        }
         const connector = props.connection.getConnectorByType(props.connector.getConnectorType());
         const operatorItem = connector.getOperatorByIndex(props.item.index);
         const jsonToStringResult = jsonToString(tree, props.type);

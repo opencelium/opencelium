@@ -56,7 +56,6 @@ export const IfGroupContainer = styled.div<GroupStyleProps>`
     border: 1px solid #DCC896;
     border-radius: 5px;
     padding-bottom: 10px;
-    overflow-x: auto;
     ${({isInitial}) => !isInitial ? `
     &:before {
         border-width: 0 0 2px 2px;
@@ -71,7 +70,9 @@ export const IfGroupContainer = styled.div<GroupStyleProps>`
         left: -13.5px;
         width: 13px;
     }
-    ` : ''}
+    ` : `
+    overflow-x: auto;
+    `}
     ${({hasNext}) => hasNext ? `
     &:after {
         content: "";
@@ -118,6 +119,10 @@ export const ActionsContainer = styled.div`
 export const ActionButton = styled(Button)`
 
 `;
+export const ErrorMessage = styled.p`
+    color: rgb(155, 46, 46);
+    font-size: 12px;
+`;
 export const DeleteButtonContainer = styled.div`
     flex: 1;
     display: flex;
@@ -127,10 +132,12 @@ export const DeleteButton = styled(TooltipButton)`
 `;
 export const ConjunctionAndButton = styled(Button)`
     z-index: 1;
+    opacity: 1 !important;
     border-radius: 5px 0 0 5px;
 `;
 export const ConjunctionOrButton = styled(Button)`
     z-index: 1;
+    opacity: 1 !important;
     border-radius: 0 5px 5px 0;
 `;
 export const SaveOperatorButton = styled(Button)`
