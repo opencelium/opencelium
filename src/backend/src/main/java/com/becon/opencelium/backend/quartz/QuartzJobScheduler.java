@@ -6,6 +6,7 @@ import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
 import com.becon.opencelium.backend.exception.SchedulerNotFoundException;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.quartz.*;
 
 import java.io.Serializable;
@@ -135,7 +136,7 @@ public class QuartzJobScheduler implements SchedulingStrategy {
         try {
             boolean isPresent = quartzScheduler.checkExists(jobKey);
             if (isPresent) {
-                quartzScheduler.scheduleJob(trigger);
+                quartzScheduler.scheduleJob(trigger); // <- error occurs here
             } else {
                 ScheduleData data = new ScheduleData(scheduler.getId(), TriggerType.SCHEDULER);
                 JobDataMap jobDataMap = new JobDataMap() {{
@@ -148,6 +149,7 @@ public class QuartzJobScheduler implements SchedulingStrategy {
                         .build();
                 quartzScheduler.scheduleJob(jobDetail, trigger);
             }
+            //TODO: Catching JobPersistenceException. Remove old scheduler by jobKey add new one
         } catch (SchedulerException e) {
             throw new RuntimeException(e);
         }
@@ -289,6 +291,7 @@ public class QuartzJobScheduler implements SchedulingStrategy {
         private Map<String, Object> queryParams;
         private List<MaskingRule> rules = new ArrayList<>();
         private boolean createZip;
+        private String newTestField; // new field for testing
 
         public ScheduleData(int scheduleId, TriggerType execType) {
             this(scheduleId, execType, new HashMap<>());
@@ -337,6 +340,14 @@ public class QuartzJobScheduler implements SchedulingStrategy {
 
         public boolean isCreateZip() {
             return createZip;
+        }
+
+        public String getNewTestField() {
+            return newTestField;
+        }
+
+        public void setNewTestField(String newTestField) {
+            this.newTestField = newTestField;
         }
     }
 }
