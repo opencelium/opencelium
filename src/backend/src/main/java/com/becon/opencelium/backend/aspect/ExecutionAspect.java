@@ -18,8 +18,25 @@ package com.becon.opencelium.backend.aspect;
 
 import com.becon.opencelium.backend.constant.AggrConst;
 import com.becon.opencelium.backend.constant.AppYamlPath;
-import com.becon.opencelium.backend.database.mysql.entity.*;
-import com.becon.opencelium.backend.database.mysql.service.*;
+import com.becon.opencelium.backend.database.mysql.entity.Argument;
+import com.becon.opencelium.backend.database.mysql.entity.Connection;
+import com.becon.opencelium.backend.database.mysql.entity.DataAggregator;
+import com.becon.opencelium.backend.database.mysql.entity.EventContent;
+import com.becon.opencelium.backend.database.mysql.entity.EventNotification;
+import com.becon.opencelium.backend.database.mysql.entity.EventRecipient;
+import com.becon.opencelium.backend.database.mysql.entity.Execution;
+import com.becon.opencelium.backend.database.mysql.entity.ExecutionArgument;
+import com.becon.opencelium.backend.database.mysql.entity.LastExecution;
+import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
+import com.becon.opencelium.backend.database.mysql.entity.Subscription;
+import com.becon.opencelium.backend.database.mysql.entity.User;
+import com.becon.opencelium.backend.database.mysql.service.ConnectionServiceImp;
+import com.becon.opencelium.backend.database.mysql.service.DataAggregatorService;
+import com.becon.opencelium.backend.database.mysql.service.ExecutionService;
+import com.becon.opencelium.backend.database.mysql.service.LastExecutionService;
+import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
+import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
+import com.becon.opencelium.backend.database.mysql.service.UserService;
 import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.execution.JSHttpObject;
 import com.becon.opencelium.backend.execution.notification.EmailServiceImpl;
@@ -28,6 +45,7 @@ import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.execution.support_file.SupportFileService;
 import com.becon.opencelium.backend.quartz.JobExecutor;
 import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
+import com.becon.opencelium.backend.utility.LogFileUtility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.AfterThrowing;
@@ -110,10 +128,6 @@ public class ExecutionAspect {
         long execId = initExecutionObj(schedulerId);
         jobDataMap.put("execId", execId);
 
-        if (data == null || !data.isCreateZip()) {
-            logger.info("------------------- PRE --------------------");
-        }
-
         List<EventNotification> eventNotifications = schedulerService.getAllNotifications(schedulerId);
         triggerNotifications(eventNotifications, "pre", null);
     }
@@ -134,15 +148,27 @@ public class ExecutionAspect {
         List<Operation> operations = (List<Operation>) context.get("operationsEx");
         executeAggregator(operations, execId);
 
-        if (data.isCreateZip()) {
+        if (data.getExecType() == QuartzJobScheduler.TriggerType.EXECUTION_TEST) {
+            Scheduler scheduler = schedulerService.getById(schedulerId);
+            Long connectionId = scheduler.getConnection().getId();
+
+            // delete temporarily created scheduler
+            schedulerService.deleteById(schedulerId);
+            // delete temporarily created connection
+            connectionServiceImp.deleteById(connectionId);
+        } else if (data.getExecType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE) {
             Long connectionId = (Long) context.get("connectionId");
-            long timestamp = (long) context.get("timestamp");
-            supportFileService.collectFiles(connectionId ,timestamp, "s");
+            String timestamp = (String) context.get("timestamp");
+            supportFileService.collectFiles(connectionId, execId, timestamp, "s");
 
             // delete temporarily created scheduler
             schedulerService.deleteById(schedulerId);
         } else {
-            logger.info("------------------- POST --------------------");
+            Long connectionId = (Long) context.get("connectionId");
+            String timestamp = (String) context.get("timestamp");
+
+            // move temporarily log file under /connectionId folder
+            LogFileUtility.move(connectionId, execId, timestamp, "s");
         }
 
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
@@ -166,15 +192,27 @@ public class ExecutionAspect {
         List<Operation> operations = (List<Operation>) context.get("operationsEx");
         executeAggregator(operations, execId);
 
-        if (data.isCreateZip()) {
+        if (data.getExecType() == QuartzJobScheduler.TriggerType.EXECUTION_TEST) {
+            Scheduler scheduler = schedulerService.getById(schedulerId);
+            Long connectionId = scheduler.getConnection().getId();
+
+            // delete temporarily created scheduler
+            schedulerService.deleteById(schedulerId);
+            // delete temporarily created connection
+            connectionServiceImp.deleteById(connectionId);
+        } else if (data.getExecType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE) {
             Long connectionId = (Long) context.get("connectionId");
-            long timestamp = (long) context.get("timestamp");
-            supportFileService.collectFiles(connectionId, timestamp, "e");
+            String timestamp = (String) context.get("timestamp");
+            supportFileService.collectFiles(connectionId, execId, timestamp, "f");
 
             // delete temporarily created scheduler
             schedulerService.deleteById(schedulerId);
         } else {
-            logger.info("------------------- EXCEPTION --------------------");
+            Long connectionId = (Long) context.get("connectionId");
+            String timestamp = (String) context.get("timestamp");
+
+            // move temporarily log file under /connectionId folder
+            LogFileUtility.move(connectionId, execId, timestamp, "f");
         }
 
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);

@@ -41,7 +41,7 @@ export default class IfOperator {
         const {rule, updateRule, hasNext, connectionEditor} = props;
         return (
             <React.Fragment>
-                <ReferenceGenerator connectionEditor={connectionEditor} reference={rule?.properties?.leftField || ''} setReference={(leftField) => {
+                <ReferenceGenerator connectionEditor={connectionEditor} reference={rule?.properties?.leftField || ''} setReference={(leftField: string) => {
                     updateRule({...rule, properties: {...rule?.properties, leftField, operator: '', rightField: ''}})
                 }}/>
                 {rule?.properties?.leftField &&
@@ -57,7 +57,7 @@ export default class IfOperator {
                             <ReferenceGenerator
                                 connectionEditor={connectionEditor}
                                 reference={rule?.properties?.rightField || ''}
-                                setReference={(rightField) => {
+                                setReference={(rightField: string) => {
                                     updateRule({...rule, properties: {...rule?.properties, rightField}})
                                 }}
                             />

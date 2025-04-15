@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.execution.support_file;
 
-import com.becon.opencelium.backend.utility.FileUtility;
+import com.becon.opencelium.backend.utility.LogFileUtility;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -76,14 +76,14 @@ class SupportFileServiceImpTest {
         when(path4.getFileName()).thenReturn(Path.of("9_e_support_1741014004.zip")); // Newest
 
 
-        // FileUtility::delete method should be called only once on path1:
-        try (MockedStatic<FileUtility> utility = mockStatic(FileUtility.class)) {
+        // LogFileUtility::delete method should be called only once on path1:
+        try (MockedStatic<LogFileUtility> utility = mockStatic(LogFileUtility.class)) {
             ReflectionTestUtils.invokeMethod(supportFileService, "enforceLimit", mockBasePath, "9_e_support", 3);
 
-            utility.verify(() -> FileUtility.delete(path1), times(1)); // Oldest file is deleted
-            utility.verify(() -> FileUtility.delete(path2), times(0));
-            utility.verify(() -> FileUtility.delete(path3), times(0));
-            utility.verify(() -> FileUtility.delete(path4), times(0));
+            utility.verify(() -> LogFileUtility.delete(path1), times(1)); // Oldest file is deleted
+            utility.verify(() -> LogFileUtility.delete(path2), times(0));
+            utility.verify(() -> LogFileUtility.delete(path3), times(0));
+            utility.verify(() -> LogFileUtility.delete(path4), times(0));
         }
     }
 }

@@ -45,7 +45,6 @@ const List: FC<ListViewProps> =
         isCard,
         onListRowClick,
         hasPaginationProps,
-        decreasePage,
     }) => {
     const [sortTypes, setSortTypes] = useState<any>({});
     const [visibleEntities, setVisibleEntities] = useState([]);
@@ -65,11 +64,11 @@ const List: FC<ListViewProps> =
             defineIsAllChecked(checks, newVisibleEntities);
         }
     }, [currentPage, searchValue, sortTypes, entitiesPerPage, collection.entities.length, shouldBeUpdated, filterData]);
-    useEffect(() => {
+/*    useEffect(() => {
         if (visibleEntities.length === 0) {
             decreasePage();
         }
-    }, [visibleEntities]);
+    }, [visibleEntities]);*/
     const toggleCheckAll = (newIsAllChecked: boolean) => {
         let newChecks : any = {};
         for (let i = 0; i < visibleEntities.length; i++) {

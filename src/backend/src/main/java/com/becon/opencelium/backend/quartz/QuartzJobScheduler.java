@@ -6,9 +6,21 @@ import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
 import com.becon.opencelium.backend.exception.SchedulerNotFoundException;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.quartz.*;
+import org.quartz.CronExpression;
+import org.quartz.CronScheduleBuilder;
+import org.quartz.CronTrigger;
+import org.quartz.JobBuilder;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobKey;
+import org.quartz.JobPersistenceException;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
+import org.quartz.TriggerKey;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -136,7 +148,7 @@ public class QuartzJobScheduler implements SchedulingStrategy {
         try {
             boolean isPresent = quartzScheduler.checkExists(jobKey);
             if (isPresent) {
-                quartzScheduler.scheduleJob(trigger); // <- error occurs here
+                quartzScheduler.scheduleJob(trigger);
             } else {
                 ScheduleData data = new ScheduleData(scheduler.getId(), TriggerType.SCHEDULER);
                 JobDataMap jobDataMap = new JobDataMap() {{
@@ -149,7 +161,8 @@ public class QuartzJobScheduler implements SchedulingStrategy {
                         .build();
                 quartzScheduler.scheduleJob(jobDetail, trigger);
             }
-            //TODO: Catching JobPersistenceException. Remove old scheduler by jobKey add new one
+        } catch (JobPersistenceException e) {
+            retry(scheduler, 1);
         } catch (SchedulerException e) {
             throw new RuntimeException(e);
         }
@@ -186,7 +199,7 @@ public class QuartzJobScheduler implements SchedulingStrategy {
         final String jobName = getJobName(scheduler);
         final JobKey jobKey = new JobKey(jobName, "connection");
 
-        ScheduleData data = new ScheduleData(scheduler.getId(), TriggerType.SCHEDULER, rules);
+        ScheduleData data = new ScheduleData(scheduler.getId(), TriggerType.SUPPORT_FILE, rules);
         JobDataMap jobDataMap = new JobDataMap();
         jobDataMap.put("data", data);
 
@@ -281,17 +294,33 @@ public class QuartzJobScheduler implements SchedulingStrategy {
         return scheduler.getConnection().getId() + "-" + scheduler.getId();
     }
 
-    enum TriggerType {
-        SCHEDULER, WEBHOOK
+    private void retry(Scheduler scheduler, int times) {
+        if (times == 0) {
+            return;
+        }
+
+        try {
+            deleteJob(scheduler);
+            addJob(scheduler);
+
+            runJob(scheduler);
+        } catch (Exception e) {
+            retry(scheduler, times - 1);
+        }
+    }
+
+    public enum TriggerType {
+        SCHEDULER, WEBHOOK, SUPPORT_FILE, EXECUTION_TEST
     }
 
     public static class ScheduleData implements Serializable {
+        @Serial
+        private static final long serialVersionUID = -4832151527292528069L;
+
         private int scheduleId;
         private TriggerType execType;
         private Map<String, Object> queryParams;
         private List<MaskingRule> rules = new ArrayList<>();
-        private boolean createZip;
-        private String newTestField; // new field for testing
 
         public ScheduleData(int scheduleId, TriggerType execType) {
             this(scheduleId, execType, new HashMap<>());
@@ -307,7 +336,6 @@ public class QuartzJobScheduler implements SchedulingStrategy {
             this.scheduleId = scheduleId;
             this.execType = execType;
             this.rules = rules;
-            this.createZip = true;
         }
 
         public int getScheduleId() {
@@ -336,18 +364,6 @@ public class QuartzJobScheduler implements SchedulingStrategy {
 
         public List<MaskingRule> getRules() {
             return rules;
-        }
-
-        public boolean isCreateZip() {
-            return createZip;
-        }
-
-        public String getNewTestField() {
-            return newTestField;
-        }
-
-        public void setNewTestField(String newTestField) {
-            this.newTestField = newTestField;
         }
     }
 }

@@ -13,19 +13,19 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { configureStore, combineReducers } from '@reduxjs/toolkit'
-import logger from 'redux-logger'
-import {TypedUseSelectorHook, useDispatch, useSelector} from "react-redux";
-import {createStateSyncMiddleware, withReduxStateSync} from "redux-state-sync";
-import {reducers, middlewares as EntitiesMiddlewares, syncStateConfig} from '@entity/index';
-import authReducer from '../redux_toolkit/slices/AuthSlice';
+import { middlewares as EntitiesMiddlewares, reducers, syncStateConfig } from '@entity/index';
+import { combineReducers, configureStore } from '@reduxjs/toolkit';
+import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
+import logger from 'redux-logger';
+import { createStateSyncMiddleware, withReduxStateSync } from "redux-state-sync";
 import applicationReducer from '../redux_toolkit/slices/ApplicationSlice';
+import authReducer from '../redux_toolkit/slices/AuthSlice';
 import checkConnectionReducer from '../redux_toolkit/slices/CheckConnectionSlice';
 
-import {ICommonState} from "../interfaces/core";
-import {authMiddleware} from "./middlewares/auth";
-import {notificationMiddleware} from "./middlewares/notification";
-import {applicationMiddleware} from "./middlewares/application";
+import { ICommonState } from "../interfaces/core";
+import { applicationMiddleware } from "./middlewares/application";
+import { authMiddleware } from "./middlewares/auth";
+import { notificationMiddleware } from "./middlewares/notification";
 const syncConfig: any = {
     whitelist: [
         ...syncStateConfig.whiteList,
@@ -47,7 +47,7 @@ const middlewares = [
 ]
 
 if(process.env.isDevelopment){
-     middlewares.unshift(logger);
+    //  middlewares.unshift(logger);
 }
 
 export const setupStore = () => {

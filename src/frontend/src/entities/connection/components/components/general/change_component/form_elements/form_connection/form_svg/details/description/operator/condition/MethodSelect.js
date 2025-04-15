@@ -13,14 +13,13 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
 import Select from "@entity/connection/components/components/general/basic_components/inputs/Select";
-import {components} from "react-select";
+import PropTypes from 'prop-types';
+import React from 'react';
+import { components } from "react-select";
 
 const CustomSingleValue = (props) => {
     const Component = components.SingleValue;
-    console.log(props);
     return <Component {...props}  style={{...props.style, backgroundColor: props.data.color, borderRadius: '3px', padding: '2px'}}/>
 };
 class MethodSelect extends React.Component{

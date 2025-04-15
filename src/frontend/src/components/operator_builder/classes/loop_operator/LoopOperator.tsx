@@ -54,7 +54,7 @@ export default class LoopOperator {
                     }}
                 />
                 {rule?.properties?.operator && <React.Fragment>
-                    <ReferenceGenerator connectionEditor={connectionEditor} reference={rule?.properties?.leftField || ''} setReference={(leftField) => {
+                    <ReferenceGenerator connectionEditor={connectionEditor} reference={rule?.properties?.leftField || ''} setReference={(leftField: string) => {
                         updateRule({...rule, properties: {...rule?.properties, leftField, rightField: ''}})
                     }}/>
                     {rule?.properties?.leftField &&
@@ -63,7 +63,7 @@ export default class LoopOperator {
                                 <ReferenceGenerator
                                     connectionEditor={connectionEditor}
                                     reference={rule?.properties?.rightField || ''}
-                                    setReference={(rightField) => {
+                                    setReference={(rightField: string) => {
                                         updateRule({...rule, properties: {...rule?.properties, rightField}})
                                     }}
                                 />

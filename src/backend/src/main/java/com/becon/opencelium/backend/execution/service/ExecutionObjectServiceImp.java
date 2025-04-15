@@ -11,7 +11,7 @@ import com.becon.opencelium.backend.mapper.execution.ConnectionExMapper;
 import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
 import com.becon.opencelium.backend.resource.execution.ConnectionEx;
 import com.becon.opencelium.backend.resource.execution.ExecutionObj;
-import com.becon.opencelium.backend.resource.execution.Logger;
+import com.becon.opencelium.backend.resource.execution.LoggerConfiguration;
 import com.becon.opencelium.backend.resource.execution.ProxyEx;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
@@ -59,10 +59,11 @@ public class ExecutionObjectServiceImp implements ExecutionObjectService {
         ProxyEx proxy = new ProxyEx(host, port, user, password);
         executionObj.setProxy(proxy);
 
-        Logger logger = new Logger();
-        logger.setDebugMode(scheduler.getDebugMode());
-        logger.setWSocketOpen(schedulerService.isWebSocketRequired(scheduleId));
-        executionObj.setLogger(logger);
+        LoggerConfiguration loggerConfiguration = new LoggerConfiguration();
+        loggerConfiguration.setDebugMode(scheduler.getDebugMode());
+        loggerConfiguration.setLog2File(data.getExecType() != QuartzJobScheduler.TriggerType.EXECUTION_TEST);
+        loggerConfiguration.setWSocketOpen(schedulerService.isWebSocketRequired(scheduleId));
+        executionObj.setLoggerConfiguration(loggerConfiguration);
 
         return executionObj;
     }
