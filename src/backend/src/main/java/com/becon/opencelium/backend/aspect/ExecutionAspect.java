@@ -168,7 +168,8 @@ public class ExecutionAspect {
             String timestamp = (String) context.get("timestamp");
 
             // move temporarily log file under /connectionId folder
-            LogFileUtility.move(connectionId, execId, timestamp, "s");
+            int fileLimit = env.getProperty(AppYamlPath.LOG_FILE_SUCCESS_LIMIT, Integer.class, 2);
+            LogFileUtility.move(connectionId, execId, timestamp, "s", fileLimit);
         }
 
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
@@ -212,7 +213,8 @@ public class ExecutionAspect {
             String timestamp = (String) context.get("timestamp");
 
             // move temporarily log file under /connectionId folder
-            LogFileUtility.move(connectionId, execId, timestamp, "f");
+            int fileLimit = env.getProperty(AppYamlPath.LOG_FILE_FAIL_LIMIT, Integer.class, 3);
+            LogFileUtility.move(connectionId, execId, timestamp, "f", fileLimit);
         }
 
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
