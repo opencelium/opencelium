@@ -1,4 +1,4 @@
-import React, {ChangeEvent, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import Button from "@app_component/base/button/Button";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import License from "@entity/license_management/classes/License";
@@ -7,7 +7,7 @@ import {IActivateLicenseForm, UploadType} from "@entity/license_management/inter
 import Dialog from "@basic_components/Dialog";
 
 const ImportLicenseComponent = () => {
-    const {activatingLicense, generatingActivateRequest} = License.getReduxState();
+    const {activatingLicense} = License.getReduxState();
     const [showDialog, toggleDialog] = useState<boolean>(false);
     const UploadTokenForm = ActivateLicenseForm.createState<IActivateLicenseForm>();
     const TokenFile = UploadTokenForm.getFile({propertyName: "tokenFile", props: {
@@ -51,7 +51,7 @@ const ImportLicenseComponent = () => {
                 label={'Import License'}
                 icon={'file_upload'}
                 handleClick={() => toggleDialog(true)}
-                isLoading={generatingActivateRequest === API_REQUEST_STATE.START}
+                isLoading={activatingLicense === API_REQUEST_STATE.START}
             />
         </div>
     )

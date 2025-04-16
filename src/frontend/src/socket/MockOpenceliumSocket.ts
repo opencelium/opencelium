@@ -1,17 +1,18 @@
+// mockSocket.ts
 import { EventEmitter } from "events";
 
 class MockSocketClient extends EventEmitter {
     connected = true;
 
-    emit(event: string, ...args: any[]) {
-        super.emit(event, ...args);
+    emit(event: string, ...args: any[]): boolean {
+        return super.emit(event, ...args);
     }
 
-    on(event: string, listener: (...args: any[]) => void) {
+    on(event: string, listener: (...args: any[]) => void): this {
         return super.on(event, listener);
     }
 
-    off(event: string, listener: (...args: any[]) => void) {
+    off(event: string, listener: (...args: any[]) => void): this {
         return super.off(event, listener);
     }
 

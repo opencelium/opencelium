@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useMemo } from "react";
 import { getSocket } from "./socket";
-import {mockSocket} from "./MockSocket";
+import {mockSocket} from "./MockOpenceliumSocket";
 
 const SocketContext = createContext(null);
 

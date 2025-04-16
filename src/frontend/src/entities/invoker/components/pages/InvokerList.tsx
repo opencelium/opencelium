@@ -23,7 +23,7 @@ import {InvokerListProps} from "./interfaces";
 import Invokers from "../../collections/Invokers";
 import {Invoker} from "../../classes/Invoker";
 import { InvokerPermissions } from '../../constants';
-import {mockSocket} from "../../../../socket/MockSocket";
+import {mockSocket} from "../../../../socket/MockOpenceliumSocket";
 
 const InvokerList: FC<InvokerListProps> = permission(InvokerPermissions.READ)(({}) => {
     const dispatch = useAppDispatch();
