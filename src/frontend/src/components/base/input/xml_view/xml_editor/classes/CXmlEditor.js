@@ -159,7 +159,7 @@ export default class CXmlEditor extends CBodyEditor{
     }
 
     static convertToBodyFormat(bodyData){
-        return bodyData.convertToBackendXml();
+        return bodyData instanceof CXmlEditor ? bodyData.convertToBackendXml() : (new CXmlEditor(bodyData)).convertToBackendXml();
     }
 
     static convertForFieldBinding(xmlEditor){
