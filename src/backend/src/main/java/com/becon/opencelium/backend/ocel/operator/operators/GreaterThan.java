@@ -24,7 +24,7 @@ public class GreaterThan implements BinaryOperator {
 
     @Override
     public boolean isValidOperand(SidesType sidesType, Object operand) {
-        return operand instanceof Number || operand instanceof String date && DateUtils.isDate(date);
+        return operand instanceof Number || operand instanceof String str && (ValueUtils.isNumber(str) || DateUtils.isDate(str));
     }
 
     @Override

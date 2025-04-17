@@ -21,7 +21,7 @@ public class DenyList implements BinaryOperator {
         }
         if (o1 instanceof String val && o2 instanceof List<?> list) {
             for (Object o : list) {
-                if (Objects.equals(o, o1))
+                if (Objects.equals(o, val))
                     return false;
             }
             return true;
