@@ -1,19 +1,23 @@
 package com.becon.opencelium.backend.execution.log_managing.core;
 
+import com.becon.opencelium.backend.execution.log_managing.enums.LogEntryType;
+
 import java.util.Map;
 
 public class ParsedLogLine {
-    private String scope;
+    private LogEntryType entryType;
     private String indexPath;
-    private String parentPath;
     private Map<String, Object> properties;
+    private long size;
 
-    public String getScope() {
-        return scope;
+    //---- GETTER and SETTERS ----//
+
+    public LogEntryType getEntryType() {
+        return entryType;
     }
 
-    public void setScope(String scope) {
-        this.scope = scope;
+    public void setEntryType(LogEntryType entryType) {
+        this.entryType = entryType;
     }
 
     public String getIndexPath() {
@@ -24,19 +28,19 @@ public class ParsedLogLine {
         this.indexPath = indexPath;
     }
 
-    public String getParentPath() {
-        return parentPath;
-    }
-
-    public void setParentPath(String parentPath) {
-        this.parentPath = parentPath;
-    }
-
     public Map<String, Object> getProperties() {
         return properties;
     }
 
     public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
+    }
+
+    public long getSize() {
+        return size;
+    }
+
+    public void setSize(long size) {
+        this.size = size;
     }
 }
