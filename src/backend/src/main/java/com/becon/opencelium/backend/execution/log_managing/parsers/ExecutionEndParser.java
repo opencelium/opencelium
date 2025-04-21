@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.execution.log_managing.parsers;
 
+import com.becon.opencelium.backend.execution.log_managing.commons.LogConstants;
 import com.becon.opencelium.backend.execution.log_managing.commons.LogEntryType;
 import com.becon.opencelium.backend.execution.log_managing.commons.LogParsingException;
 import com.becon.opencelium.backend.execution.log_managing.commons.PropDescriptor;
@@ -43,7 +44,7 @@ public class ExecutionEndParser implements LogLineParser {
     }
 
     private Set<PropDescriptor> requiredProperties() {
-        return Set.of(of("id"));
+        return Set.of(of(LogConstants.ID));
     }
 
     private Map<String, Object> parseDeeply(Map<String, String> props) {
