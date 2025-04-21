@@ -5,6 +5,7 @@ import com.becon.opencelium.backend.execution.log_managing.core.ExecutionContext
 import com.becon.opencelium.backend.execution.log_managing.core.LogAggregationEngine;
 import com.becon.opencelium.backend.execution.log_managing.core.LogLineParser;
 import com.becon.opencelium.backend.execution.log_managing.core.ParsedLogLine;
+import com.becon.opencelium.backend.execution.log_managing.parsers.*;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
@@ -46,9 +47,21 @@ public class LogAggregationDispatcher implements LogAggregationEngine {
 
     private Set<LogLineParser> registerParsers() {
         Set<LogLineParser> parsers = new HashSet<>();
-
-        // TODO: OC-1086, Register parsers here
-
+        parsers.add(new ExecutionStartParser());
+        parsers.add(new ExecutionEndParser());
+        parsers.add(new IfStartParser());
+        parsers.add(new IfResultParser());
+        parsers.add(new IfEndParser());
+        parsers.add(new LoopStartParser());
+        parsers.add(new LoopEndParser());
+        parsers.add(new MethodStartParser());
+        parsers.add(new MethodEndParser());
+        parsers.add(new RequestParser());
+        parsers.add(new RequestHeaderParser());
+        parsers.add(new RequestPayloadParser());
+        parsers.add(new ResponseParser());
+        parsers.add(new ResponseHeaderParser());
+        parsers.add(new ResponsePayloadParser());
         return parsers;
     }
 }
