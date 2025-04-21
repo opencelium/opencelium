@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.execution.log_managing.core;
 
-import com.becon.opencelium.backend.execution.log_managing.enums.LogEntryType;
+import com.becon.opencelium.backend.execution.log_managing.commons.LogEntryType;
 
 import java.util.Map;
 
