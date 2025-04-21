@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.execution.log_managing.parsers;
 
+import com.becon.opencelium.backend.execution.log_managing.commons.LogConstants;
 import com.becon.opencelium.backend.execution.log_managing.commons.LogParsingException;
 import com.becon.opencelium.backend.execution.log_managing.commons.PropDescriptor;
 import com.becon.opencelium.backend.execution.log_managing.core.LogLineParser;
@@ -43,9 +44,9 @@ public class ExecutionStartParser implements LogLineParser {
 
     private Set<PropDescriptor> requiredProperties() {
         return Set.of(
-                of("id"),
-                of("connectionId"),
-                of("flowchartId")
+                of(LogConstants.ID),
+                of(LogConstants.CONNECTION_ID),
+                of(LogConstants.FLOWCHART_ID)
         );
     }
 

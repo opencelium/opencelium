@@ -13,4 +13,7 @@ public interface LogConstants {
     String RESPONSE_TIME = "responseTime";
     String EXPRESSION = "expression";
     String RESULT = "result";
+    String ID = "id";
+    String CONNECTION_ID = "connectionId";
+    String FLOWCHART_ID = "flowchartId";
 }
