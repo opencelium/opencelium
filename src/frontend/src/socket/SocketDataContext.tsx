@@ -18,7 +18,8 @@ export const SocketDataProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
     const { connectionLogs } = useConnectionLogsSocket(socket);
     const { supportFiles } = useSupportFilesSocket(socket);
     const { currentSubscription } = useCurrentSubscriptionSocket(socket);
-
+    console.log(`isConnected: ${isConnected}`)
+    console.log(`authValid: ${authValid}`)
     useEffect(() => {
         if (!socket) return;
 

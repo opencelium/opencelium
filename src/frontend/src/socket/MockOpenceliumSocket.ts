@@ -1,4 +1,3 @@
-// mockSocket.ts
 import { EventEmitter } from "events";
 
 class MockSocketClient extends EventEmitter {

@@ -25,9 +25,11 @@ import {App} from "@app_component/App";
 
 import "@style/css/react_grid_layout.css";
 import "@style/css/react_crop.css";
+import SocketDevTools from "./socket/dev-tools/SocketDevTools";
 
 ReactDOM.render(
     <Provider store={store}>
+        <SocketDevTools/>
         <App/>
     </Provider>,
     document.getElementById("root"));
