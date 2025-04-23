@@ -1,0 +1,21 @@
+.toggleButton {
+	background: none;
+	border: none;
+	cursor: pointer;
+	color: #939395;
+	font-size: 20px;
+	padding: 0;
+	width: 40px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+@keyframes spin {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}

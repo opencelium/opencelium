@@ -1,0 +1,44 @@
+import React from 'react';
+import { Trace } from '../../../connection/requests/models/ConnectionLog';
+import MethodTrace from './MethodTrace/MethodTrace';
+import { OperatorTrace } from './OperatorTrace/OperatorTrace';
+
+interface TraceItemProps {
+	trace: Trace;
+	connectorId: string;
+	executionId: string;
+	connectionId: string;
+}
+
+export const TraceItem: React.FC<TraceItemProps> = ({
+	trace,
+	connectorId,
+	executionId,
+	connectionId,
+}) => {
+	if (trace.logType === 'method') {
+		return (
+			<MethodTrace
+				trace={trace}
+				connectorId={connectorId}
+				executionId={executionId}
+				connectionId={connectionId}
+			/>
+		);
+	}
+
+	if (trace.logType === 'operator') {
+		return (
+			<OperatorTrace
+				trace={trace}
+				connectorId={connectorId}
+				executionId={executionId}
+				connectionId={connectionId}
+			/>
+		);
+	}
+
+	return null;
+};
+
+export default TraceItem;

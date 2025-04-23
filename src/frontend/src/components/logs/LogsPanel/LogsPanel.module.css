@@ -1,0 +1,32 @@
+.logsPanel {
+	padding: 8px;
+	font-family: 'Open Sans';
+}
+
+.logsPanelContainer:not(:last-child){
+	margin-bottom: 10px;
+}
+
+.logsPanelHeader {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+	border-bottom: 1px solid #eeeeee;
+	margin-bottom: 10px;
+}
+
+.logsPanelTitle {
+	margin: 0 0 5px;
+	color: #888888;
+}
+
+.deleteLogsButton {
+	position: absolute;
+	right: 0;
+	border: none;
+	background: none;
+	color: #91b9dd;
+	font-size: 20px;
+	cursor: pointer;
+}
