@@ -7,6 +7,9 @@ import {useSocketData} from "../../../../socket/SocketDataContext";
 const LicenseAlertMessage = () => {
     const {currentSubscription} = useSocketData();
     const hasApiLimit = Subscription.hasReachedLimit(currentSubscription);
+    if (currentSubscription === undefined) {
+        return null;
+    }
     if (currentSubscription === null) {
         return (
             <Alert color="danger" style={{marginTop: 20, marginBottom: 0}}>

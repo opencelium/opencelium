@@ -4,10 +4,16 @@ import {Button} from "reactstrap";
 
 const FakeCurrentSchedules = () => {
     const fakeZeroSchedules = () => {
-        mockSocket.emit("current-schedules", true);
+        mockSocket.emit("current-schedules", []);
     };
     const fakeOneSchedule = () => {
-        mockSocket.emit("current-schedules", false);
+        mockSocket.emit("current-schedules", [{
+            schedulerId: 0,
+            title: 'new schedule',
+            avgDuration: 10000,
+            fromConnector: 'from connector',
+            toConnector: 'to connector'
+        }]);
     };
 
     return (

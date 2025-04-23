@@ -256,7 +256,7 @@ const CollectionView: FC<CollectionViewProps> =
                     }
                     {collection.name === "schedules" && <CategoryTabs setCurrentPage={setCurrentPage} readOnly/>}
                     {collection.name === "connections" && <CategoryTabs setCurrentPage={setCurrentPage}/>}
-                    <div style={{marginTop: hasTopBar ? '0' : '20px'}}>
+                    <div style={{marginTop: hasTopBar ? '0' : collection.name === "schedules" ? 0 : '20px'}}>
                         {applicationViewType === ViewType.LIST &&
                             <List
                                 isCard={isListViewCard}

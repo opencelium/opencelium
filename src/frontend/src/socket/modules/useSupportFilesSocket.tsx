@@ -2,16 +2,17 @@ import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 
 export const useSupportFilesSocket = (socket: Socket | null) => {
-    const [supportFiles, setSupportFiles] = useState<any[]>([]);
-
+    const [hasNewSupportFile, setHasNewSupportFile] = useState<boolean>(false);
     useEffect(() => {
         if (!socket) return;
-        const handleLog = (logs: any) => setSupportFiles(logs);
+        const handleLog = () => {
+            setHasNewSupportFile(true);
+        }
         socket.on("support-files", handleLog);
         return () => {
             socket.off("support-files", handleLog);
         };
     }, [socket]);
 
-    return { supportFiles };
+    return { hasNewSupportFile, setHasNewSupportFile };
 };

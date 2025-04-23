@@ -78,7 +78,7 @@ const ProgressBarElement: FC<ProgressBarElementProps> =
         setTimeout(() => {
             if (progress < 100) {
                 if(progression[localIterator] + progress > progress) {
-                    setProgress(progression[localIterator] + progress)
+                    setProgress((prevState) => progression[localIterator] + prevState)
                 }
             }
             setLocalIterator(localIterator + 1);

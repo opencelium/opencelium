@@ -4,13 +4,43 @@ import {mockSocket} from "../MockOpenceliumSocket";
 
 const FakeCurrentSubscription = () => {
     const fakeHasSubscription = () => {
-        mockSocket.emit("current-subscription", true);
+        mockSocket.emit("current-subscription", {
+            "subId": "66e981a1061e985b595b7505",
+            "licenseId": "66e981a1061e985b595b7508",
+            "type": "free",
+            "startDate": 1640995200000,
+            "endDate": 0,
+            "duration": "-",
+            "totalOperationUsage": 25000,
+            "currentOperationUsage": 0,
+            "active": true,
+            "monthPeriod": {
+                "startDate": 1743465600000,
+                "endDate": 1746057599999
+            },
+            "extraOps": null
+        });
     };
     const fakeHasExpiredSubscription = () => {
-        mockSocket.emit("current-subscription", false);
+        mockSocket.emit("current-subscription", {
+            "subId": "66e981a1061e985b595b7505",
+            "licenseId": "66e981a1061e985b595b7508",
+            "type": "free",
+            "startDate": 1640995200000,
+            "endDate": 0,
+            "duration": "-",
+            "totalOperationUsage": 25000,
+            "currentOperationUsage": 25020,
+            "active": true,
+            "monthPeriod": {
+                "startDate": 1743465600000,
+                "endDate": 1746057599999
+            },
+            "extraOps": null
+        });
     };
     const fakeHasNoSubscription = () => {
-        mockSocket.emit("current-subscription", false);
+        mockSocket.emit("current-subscription", null);
     };
 
     return (
