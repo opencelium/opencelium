@@ -1,17 +1,14 @@
 import React, { useState } from 'react';
-import { FaTrash } from 'react-icons/fa';
-import { useAppDispatch, useAppSelector } from '../../storeHooks';
-import { deleteLogs } from '../connection/redux_toolkit/action_creators/ConnectionLogCreators';
-import { ConnectionLog } from '../connection/requests/models/ConnectionLog';
 import ConnectorPanel from './ConnectorPanel/ConnectorPanel';
 import styles from './LogsPanel.module.css';
-
-const TrashIcon = FaTrash as React.FC<React.SVGProps<SVGSVGElement>>;
-
+import {deleteLogs} from "@root/redux_toolkit/action_creators/ConnectionLogCreators";
+import {RootState, useAppDispatch, useAppSelector} from "@application/utils/store";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+export const ShowIndexPath = false;
 const LogsPanel: React.FC = () => {
   const dispatch = useAppDispatch();
 
-  const connectionLog = useAppSelector((state) => state.connectionLog) as ConnectionLog;
+  const connectionLog = useAppSelector((state: RootState) => state.connectionLogReducer);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDeleteLogs = async (executionId: string, connectionId: string) => {
@@ -32,7 +29,7 @@ const LogsPanel: React.FC = () => {
             disabled={isDeleting}
             className={styles.deleteLogsButton}
           >
-            {isDeleting ? 'Deleting...' : <TrashIcon />}
+            {isDeleting ? 'Deleting...' : <TooltipFontIcon size={14} tooltip={'Delete'} value={'delete'} className={styles.remove_icon} onClick={() => {}}/>}
           </button>
         </div>
         <div>

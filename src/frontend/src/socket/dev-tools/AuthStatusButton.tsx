@@ -12,7 +12,7 @@ const FakeAuthStatus = () => {
 
     return (
         <div>
-            <h6>
+            <h6 style={{textAlign: 'center'}}>
                 Auth
             </h6>
             <div style={{display: 'flex', gap: 10}}>

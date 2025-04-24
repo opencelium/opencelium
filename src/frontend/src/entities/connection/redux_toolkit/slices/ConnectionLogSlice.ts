@@ -1,11 +1,9 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import {
-	ConnectionLog,
-	ConnectorLog,
+	ConnectionLog, ConnectionSocketLog,
 	MethodTrace,
 	OperatorTrace,
-	Trace,
-} from '../../../connection/requests/models/ConnectionLog';
+} from '@root/requests/models/ConnectionLog';
 import {
 	deleteLogs,
 	getMethodTrace,
@@ -14,7 +12,7 @@ import {
 
 export interface ConnectionLogState extends ConnectionLog {}
 
-const initialState: ConnectionLogState = {
+export const initialState: ConnectionLogState = {
 	connectionId: '13',
 	executionId: '26',
 	connectors: [
@@ -298,6 +296,11 @@ const initialState: ConnectionLogState = {
 		},
 	],
 };
+/*{
+	connectionId: '',
+	executionId: '',
+	connectors: [],
+};*/
 
 interface CleanTracePayload {
 	connectorId: string;
@@ -308,6 +311,30 @@ export const connectionLogSlice = createSlice({
 	name: 'connectionLog',
 	initialState,
 	reducers: {
+		addSocketLog: (state, action: PayloadAction<ConnectionSocketLog>) => {
+			const {executionId, connectionId, connectorId, connectorName, ...newTrace} = action.payload;
+			if (state.executionId === action.payload.executionId && state.connectionId === action.payload.connectionId) {
+				let hasConnector = false;
+				state.connectors.forEach((connector) => {
+					if (connector.id === action.payload.connectorId) {
+						hasConnector = true;
+						connector.traces.push(newTrace);
+						return;
+					}
+				});
+				if (!hasConnector) {
+					state.connectors.push({
+						id: connectorId,
+						name: connectorName,
+						traces: [newTrace],
+					})
+				}
+			} else {
+				state.executionId = executionId;
+				state.connectionId = connectionId;
+				state.connectors = [{id: connectorId, name: connectorName, traces: [newTrace]}]
+			}
+		},
 		cleanMethodTrace: (state, action: PayloadAction<CleanTracePayload>) => {
 			const { connectorId, indexPath } = action.payload;
 			state.connectors.forEach((connector) => {
@@ -400,6 +427,8 @@ export const connectionLogSlice = createSlice({
 	},
 });
 
-export const { cleanMethodTrace, cleanOperatorTrace } =
+export const {
+	cleanMethodTrace, cleanOperatorTrace, addSocketLog,
+} =
 	connectionLogSlice.actions;
 export default connectionLogSlice.reducer;

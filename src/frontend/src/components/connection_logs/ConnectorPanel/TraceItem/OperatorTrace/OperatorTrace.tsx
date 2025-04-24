@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { useAppDispatch } from '../../../../../storeHooks';
-import { getOperatorTrace } from '../../../../connection/redux_toolkit/action_creators/ConnectionLogCreators';
-import { cleanOperatorTrace } from '../../../../connection/redux_toolkit/slices/ConnectionLogSlice';
-import { OperatorTrace as OperatorTraceType } from '../../../../connection/requests/models/ConnectionLog';
+import { OperatorTrace as OperatorTraceType } from '@root/requests/models/ConnectionLog';
 import ToggleButton from '../ToggleButton/ToggleButton';
 import TraceItem from '../TraceItem';
 import styles from './OperatorTrace.module.css';
+import {useAppDispatch} from "@application/utils/store";
+import {getOperatorTrace} from "@root/redux_toolkit/action_creators/ConnectionLogCreators";
+import {cleanOperatorTrace} from "@root/redux_toolkit/slices/ConnectionLogSlice";
+import {ShowIndexPath} from "@app_component/connection_logs/LogsPanel";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 
 interface Props {
 	trace: OperatorTraceType;
@@ -91,33 +93,42 @@ export const OperatorTrace: React.FC<Props> = ({
 	};
 
 	return (
-		<div>
-			<div style={{ display: 'flex', alignItems: 'center' }}>
-				<ToggleButton
-					loading={loading}
-					expanded={expanded}
-					onClick={handleToggle}
-				/>
-				<span className={styles.operatorType}>{trace.info.type}</span>
-				<span style={{ marginLeft: 8 }}>{trace.indexPath}</span>
+		<div style={{cursor: 'pointer'}} onClick={handleToggle}>
+			<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+				<div style={{display: 'flex'}}>
+					<ToggleButton
+						loading={loading}
+						expanded={expanded}
+						onClick={handleToggle}
+					/>
+					<span className={styles.operatorType}>{trace.info.type}</span>
+					{ShowIndexPath && <span style={{ marginLeft: 8 }}>{trace.indexPath}</span>}
+					{trace.info.type === 'if' && <span>
+						{trace.conditionStatement}
+					</span>}
+				</div>
 				{trace.info.type === 'if' && (
 					<span style={{ marginLeft: 8 }}>
-						Condition: {trace.conditionStatement}, Result:{' '}
 						{trace.info.conditionResult ? 'true' : 'false'}
 					</span>
 				)}
 				{trace.info.type === 'loop' && (
-					<div style={{ marginLeft: 8 }}>
+					<div style={{ display: 'flex', alignItems: 'center' }}>
 						<span>
-							Iteration: {iterationIndex} / {trace.info.iteration.total}
+							Index {iterationIndex} - {trace.info.iteration.total}
 						</span>
-
-						<button onClick={handlePrevIteration} style={{ marginLeft: 8 }}>
-							Prev
-						</button>
-						<button onClick={handleNextIteration} style={{ marginLeft: 4 }}>
-							Next
-						</button>
+						<TooltipFontIcon
+							size={16}
+							tooltip={'Previous'}
+							value={'arrow_left'}
+							onClick={() => {}}
+						/>
+						<TooltipFontIcon
+							size={16}
+							tooltip={'Next'}
+							value={'arrow_right'}
+							onClick={() => {}}
+						/>
 					</div>
 				)}
 			</div>

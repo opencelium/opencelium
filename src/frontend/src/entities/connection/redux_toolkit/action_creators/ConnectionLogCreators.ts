@@ -1,12 +1,12 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { ConnectionLogRequest } from '../../../connection/requests/classes/ConnectionLogRequest';
+import { ConnectionLogRequest } from '@root/requests/classes/ConnectionLogRequest';
 import {
 	DeleteLogsRequest,
 	GetMethodTraceRequest,
 	GetMethodTraceResponse,
 	GetOperatorTraceRequest,
 	GetOperatorTraceResponse,
-} from '../../../connection/requests/interfaces/IConnectionLog';
+} from '@root/requests/interfaces/IConnectionLog';
 
 const connectionLogRequest = new ConnectionLogRequest();
 
@@ -33,3 +33,9 @@ export const deleteLogs = createAsyncThunk<void, DeleteLogsRequest>(
 		return;
 	}
 );
+
+export default {
+	getMethodTrace,
+	getOperatorTrace,
+	deleteLogs,
+}

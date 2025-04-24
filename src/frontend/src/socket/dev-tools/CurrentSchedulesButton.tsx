@@ -18,7 +18,7 @@ const FakeCurrentSchedules = () => {
 
     return (
         <div>
-            <h6>Current Schedules</h6>
+            <h6 style={{textAlign: 'center'}}>Current Schedules</h6>
             <div style={{display: 'flex', gap: 10}}>
                 <Button onClick={fakeZeroSchedules}>has 0 schedules</Button>
                 <Button onClick={fakeOneSchedule}>has 1 schedule</Button>

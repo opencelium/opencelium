@@ -32,7 +32,7 @@ export class ConnectionLogRequest implements IConnectionLogRequest {
 			{
 				logType: 'operator',
 				indexPath: request.indexPath,
-				conditionStatement: 'if (x > 0)',
+				conditionStatement: 'x > 0',
 				info: {
 					type: 'if',
 					conditionResult: true,

@@ -1,17 +1,31 @@
 import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
+import {ConnectionSocketLog} from "@root/requests/models/ConnectionLog";
+import {useAppDispatch} from "@application/utils/store";
+import {addSocketLog} from "@root/redux_toolkit/slices/ConnectionLogSlice";
 
 export const useConnectionLogsSocket = (socket: Socket | null) => {
-    const [connectionLogs, setConnectionLogs] = useState<any[]>([]);
+    const dispatch = useAppDispatch();
+    const [connectionLog, setConnectionLog] = useState<ConnectionSocketLog | undefined>(undefined);
+
+    useEffect(() => {
+        console.log(connectionLog);
+        if (connectionLog) {
+            dispatch(addSocketLog(connectionLog));
+            setConnectionLog(undefined);
+        }
+    }, [connectionLog]);
 
     useEffect(() => {
         if (!socket) return;
-        const handleLog = (log: any) => setConnectionLogs((prev) => [...prev, log]);
-        socket.on("connection-logs", handleLog);
+        const handleLog = (log: ConnectionSocketLog) => {
+            setConnectionLog(log);
+        }
+        socket.on("connection-log", handleLog);
         return () => {
-            socket.off("connection-logs", handleLog);
+            socket.off("connection-log", handleLog);
         };
     }, [socket]);
 
-    return { connectionLogs };
+    return { connectionLog };
 };

@@ -9,7 +9,7 @@ const FakeSupportFiles = () => {
 
     return (
         <div>
-            <h6>
+            <h6 style={{textAlign: 'center'}}>
                 Support files
             </h6>
             <div>

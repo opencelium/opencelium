@@ -8,6 +8,11 @@
 .methodTraceRightSide {
 	display: flex;
 	align-items: center;
+	justify-content: end;
+	margin-right: 5px;
+}
+.methodTraceRightSide {
+	gap: 5px;
 }
 
 .methodType {
@@ -16,6 +21,8 @@
 	text-align: center;
 	text-transform: uppercase;
 	color: #fff;
+	border-radius: 3px;
+	font-size: 14px;
 }
 
 .methodUrl {
@@ -31,22 +38,12 @@
 	display: inline-block;
 	text-align: center;
 	font-weight: bold;
-	margin-right: 5px;
 	position: relative;
 	border-radius: 4px;
-}
-
-.methodStatus::after {
-	content: '|';
-	position: absolute;
-	color: #424242;
-	right: -10px;
-	top: 0;
+	font-size: 12px;
 }
 
 .methodTime {
-	margin-left: 5px;
-	margin-right: 20px;
 }
 
 .requestResponseContainer {

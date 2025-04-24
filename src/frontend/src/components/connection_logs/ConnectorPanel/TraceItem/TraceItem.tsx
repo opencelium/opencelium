@@ -1,7 +1,7 @@
 import React from 'react';
-import { Trace } from '../../../connection/requests/models/ConnectionLog';
 import MethodTrace from './MethodTrace/MethodTrace';
 import { OperatorTrace } from './OperatorTrace/OperatorTrace';
+import {Trace} from "@root/requests/models/ConnectionLog";
 
 interface TraceItemProps {
 	trace: Trace;

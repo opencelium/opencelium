@@ -94,7 +94,7 @@ class FontIcon extends Component{
                         <img alt={''} src={value} className={iconClassName} width={size} height={size} style={{...iconStyles}} onClick={onClick} id={id}/>
                     :
                         <ToolboxFontIcon value={value} className={className}
-                                         style={{...iconStyles, fontSize: size}} {...props} onClick={onClick}
+                                         style={{display: 'flex', ...iconStyles, fontSize: size}} {...props} onClick={onClick}
                                          id={id}/>
                     }
                 </span>

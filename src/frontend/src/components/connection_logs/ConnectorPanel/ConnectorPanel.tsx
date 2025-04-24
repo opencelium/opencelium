@@ -1,7 +1,7 @@
 import React from 'react';
-import { ConnectorLog } from '../../connection/requests/models/ConnectionLog';
 import styles from './ConnectorPanel.module.css';
 import TraceItem from './TraceItem/TraceItem';
+import {ConnectorLog} from "@root/requests/models/ConnectionLog";
 
 interface ConnectorPanelProps {
 	connector: ConnectorLog;

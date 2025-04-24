@@ -21,20 +21,18 @@ export const SocketDataProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
     const [authValid, setAuthValid] = useState(true);
 
     const { currentSchedules } = useCurrentSchedulesSocket(socket);
-    const { connectionLogs } = useConnectionLogsSocket(socket);
+    const { connectionLog } = useConnectionLogsSocket(socket);
     const { hasNewSupportFile, setHasNewSupportFile } = useSupportFilesSocket(socket);
     const { currentSubscription } = useCurrentSubscriptionSocket(socket);
 
     const handleConnect = () => {
+        console.log('socket is connected')
         setIsConnected(true);
     }
     const handleDisconnect = () => {
+        console.log('socket is disconnected')
         setIsConnected(false);
     }
-    useEffect(() => {
-        dispatch(getCurrentSubscription());
-    }, []);
-
     useEffect(() => {
         if (!socket.connected) {
             if (authUser) {
@@ -89,7 +87,7 @@ export const SocketDataProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
                 isConnected,
                 authValid,
                 currentSchedules,
-                connectionLogs,
+                connectionLog,
                 hasNewSupportFile,
                 currentSubscription,
                 socket,

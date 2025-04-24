@@ -45,7 +45,7 @@ const FakeCurrentSubscription = () => {
 
     return (
         <div>
-            <h6>
+            <h6 style={{textAlign: 'center'}}>
                 Current Subscription
             </h6>
             <div style={{display: 'flex', gap: 10}}>

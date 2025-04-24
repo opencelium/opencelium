@@ -1,19 +1,30 @@
-import React from "react";
+import React, {useState} from "react";
 import {mockSocket} from "../MockOpenceliumSocket";
 import {Button} from "reactstrap";
+import {MockLogs} from "./connection_logs_mock";
 
 const FakeConnectionLogs = () => {
-    const getFirstLevelLogs = () => {
-        mockSocket.emit("connection-logs", true);
+    const [isDisabled, toggleDisabled] = useState<boolean>(false);
+    const getFirstLevelLogs = (index: number) => {
+        mockSocket.emit("connection-log", MockLogs[index]);
+        setTimeout(() => {
+            if (index < MockLogs.length - 1) {
+                getFirstLevelLogs(index + 1)
+            } else {
+                toggleDisabled(false)
+            }
+        }, 1000)
+        toggleDisabled(true);
+        console.log(`First Level Log ${index + 1}`)
     };
 
     return (
         <div>
-            <h6>
+            <h6 style={{textAlign: 'center'}}>
                 Connection Logs
             </h6>
             <div>
-                <Button onClick={getFirstLevelLogs}>Get first level logs</Button>
+                <Button disabled={isDisabled} onClick={() => getFirstLevelLogs(0)}>Get first level logs</Button>
             </div>
         </div>
     );

@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import AceEditor from 'react-ace';
 import { Nav, NavItem, NavLink, TabContent, TabPane } from 'reactstrap';
-import { useAppDispatch } from '../../../../../storeHooks';
-import { getMethodTrace } from '../../../../connection/redux_toolkit/action_creators/ConnectionLogCreators';
-import { cleanMethodTrace } from '../../../../connection/redux_toolkit/slices/ConnectionLogSlice';
-import { MethodTrace as MethodTraceType } from '../../../../connection/requests/models/ConnectionLog';
+import { MethodTrace as MethodTraceType } from '@root/requests/models/ConnectionLog';
 import ToggleButton from '../ToggleButton/ToggleButton';
 import styles from './MethodTrace.module.css';
 
 import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/mode-xml';
 import 'ace-builds/src-noconflict/theme-textmate';
+import {useAppDispatch} from "@application/utils/store";
+import {getMethodTrace} from "@root/redux_toolkit/action_creators/ConnectionLogCreators";
+import {cleanMethodTrace} from "@root/redux_toolkit/slices/ConnectionLogSlice";
+import {ShowIndexPath} from "@app_component/connection_logs/LogsPanel";
 
 interface MethodTraceProps {
 	trace: MethodTraceType;
@@ -104,7 +105,7 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 	const responseMode = responseBody ? detectAceMode(responseBody) : 'json';
 
 	return (
-		<div>
+		<div style={{cursor: 'pointer'}} onClick={handleToggle}>
 			<div className={styles.methodTrace}>
 				<div className={styles.methodTraceLeftSide}>
 					<ToggleButton
@@ -113,15 +114,18 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 						onClick={handleToggle}
 					/>
 					<div
-						style={{ backgroundColor: methodColor }}
+						style={{backgroundColor: methodColor}}
 						className={styles.methodType}
 					>
 						{trace.httpMethod}
 					</div>
+
+					{ShowIndexPath && <div style={{marginLeft: 8}}>{trace.indexPath}</div>}
 					<div className={styles.methodUrl}>{trace.url}</div>
 				</div>
 				<div className={styles.methodTraceRightSide}>
 					<div className={styles.methodStatus}>{trace.statusCode}</div>
+					<div>{"|"}</div>
 					<div className={styles.methodTime}>{trace.executionTime} ms</div>
 				</div>
 			</div>

@@ -1,3 +1,13 @@
+interface BaseSocketLog {
+	executionId: string;
+	connectionId: string;
+	connectorId: string;
+	connectorName: string;
+}
+export type ConnectionSocketLog =
+| (MethodTrace & BaseSocketLog)
+| (OperatorTrace & BaseSocketLog);
+
 export interface ConnectionLog {
 	executionId: string;
 	connectionId: string;

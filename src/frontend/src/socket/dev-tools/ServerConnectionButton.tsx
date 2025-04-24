@@ -12,7 +12,7 @@ const FakeServerConnection = () => {
 
     return (
         <div>
-            <h6>
+            <h6 style={{textAlign: 'center'}}>
                 Server Connection
             </h6>
             <div style={{display: 'flex', gap: 10}}>
