@@ -6,6 +6,7 @@ import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.enums.SupportFileStatus;
+import com.becon.opencelium.backend.execution.socket.SocketConstant;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
@@ -16,6 +17,7 @@ import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +49,7 @@ public class SupportFileServiceImp implements SupportFileService {
     private final Mapper<ConnectionDTO, ConnectionOldDTO> dto2OldDtoMapper;
     private final ConnectorService connectorSqlService;
     private final InvokerService invokerService;
+    private final SimpMessagingTemplate simpMessagingTemplate;
     private final String base;
     private final int supportFileSuccessLimit;
     private final int supportFileFailLimit;
@@ -59,13 +62,14 @@ public class SupportFileServiceImp implements SupportFileService {
             Mapper<ConnectionOldDTO, CtionTemplateResource> oldDto2ResourceMapper,
             Mapper<ConnectionDTO, ConnectionOldDTO> dto2OldDtoMapper,
             ConnectorService connectorSqlService, InvokerService invokerService,
-            Environment env
+            SimpMessagingTemplate simpMessagingTemplate, Environment env
     ) {
         this.connectionSqlService = connectionSqlService;
         this.oldDto2ResourceMapper = oldDto2ResourceMapper;
         this.dto2OldDtoMapper = dto2OldDtoMapper;
         this.connectorSqlService = connectorSqlService;
         this.invokerService = invokerService;
+        this.simpMessagingTemplate = simpMessagingTemplate;
 
         // initialize application property related variables
         this.base = env.getProperty(AppYamlPath.SUPPORT_FILE_BASE_DIRECTORY, String.class, "src/main/resources/support-files");
@@ -203,6 +207,7 @@ public class SupportFileServiceImp implements SupportFileService {
             throw new RuntimeException(e);
         }
 
+        String connectionTitle = null;
         try (
                 FileOutputStream fos = new FileOutputStream(zipFilePath.toFile());
                 ZipOutputStream zipOutputStream = new ZipOutputStream(fos)
@@ -212,6 +217,7 @@ public class SupportFileServiceImp implements SupportFileService {
             // Add Connection resource template as a JSON file:
             ConnectionOldDTO oldDTO = dto2OldDtoMapper.toDTO(dto);
             CtionTemplateResource template = oldDto2ResourceMapper.toDTO(oldDTO);
+            connectionTitle = template.getTitle();
             addToZip(zipOutputStream, template, "connection_template.json");
 
             // Add invoker files:
@@ -231,7 +237,18 @@ public class SupportFileServiceImp implements SupportFileService {
             Path filePath = toPath(LOG_LOCATION, toFilename(timestamp, connectionId, "u", executionId, "log"));
             addToZip(zipOutputStream, filePath.toFile(), toFilename(timestamp, connectionId, type, executionId, "log"));
             delete(filePath);
-        } catch (IOException e) {
+
+            // send success notification vie websocket
+            String filename = toFilename(timestamp, connectionId, type, executionId, "zip");
+            String message = "Support file successfully generated.";
+            SupportFile notification = new SupportFile(connectionId, connectionTitle, filename, SupportFileStatus.SUPPORT_FILE_GENERATED, message);
+            simpMessagingTemplate.convertAndSend(SocketConstant.DESTINATION_SUPPORT_FILE, notification);
+        } catch (Exception e) {
+            // send fail notification vie websocket
+            String message = "Support file generation failed: " + e.getMessage();
+            SupportFile notification = new SupportFile(connectionId, connectionTitle, null, SupportFileStatus.SUPPORT_FILE_FAILED, message);
+            simpMessagingTemplate.convertAndSend(SocketConstant.DESTINATION_SUPPORT_FILE, notification);
+
             logger.error("Failed to create support file for connectionId = '" + connectionId + "'");
             throw new RuntimeException(e);
         } finally {
