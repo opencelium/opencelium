@@ -8,7 +8,6 @@ import com.becon.opencelium.backend.execution.log_managing.commons.LogTrackerTyp
 import com.becon.opencelium.backend.execution.log_managing.core.ExecutionContextManager;
 import com.becon.opencelium.backend.execution.log_managing.core.LogElementTracker;
 import com.becon.opencelium.backend.execution.log_managing.core.ParsedLogLine;
-import com.becon.opencelium.backend.execution.log_managing.trackers.LogTrackerFactory;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -46,7 +45,7 @@ public class SimpleExecutionContextManager implements ExecutionContextManager {
         ExecutionContext executionContext = executionContexts.get(executionId);
         if (parsedLog.getEntryType().isStartingNewStack()) {
 
-            LogElementTracker tracker = LogTrackerFactory.initTracker(trackerType);
+            LogElementTracker tracker = null; // TODO : initialize tracker, OC-1088
             tracker.onStart(parsedLog, executionContext.currentOffset.get());
 
             executionContext.currentOffset.getAndUpdate(x -> x + parsedLog.getSize());
