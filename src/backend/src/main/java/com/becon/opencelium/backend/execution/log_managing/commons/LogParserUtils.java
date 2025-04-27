@@ -29,7 +29,7 @@ public class LogParserUtils {
 
                 result.put(prop.key(), value);
             } else if (prop.required()) {
-                throw LogParsingException.missingRequiredProperty(prop.key(), line);
+                throw LogProcessingException.missingRequiredProperty(prop.key(), line);
             }
         }
 
@@ -51,7 +51,7 @@ public class LogParserUtils {
         try {
             return (Map<String, Object>) mapper.readValue(data, Map.class);
         } catch (JsonProcessingException e) {
-            throw LogParsingException.cantReadData(data);
+            throw LogProcessingException.cantReadData(data);
         }
     }
 }
