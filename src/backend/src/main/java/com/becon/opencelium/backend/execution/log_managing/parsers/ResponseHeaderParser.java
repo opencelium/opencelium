@@ -37,6 +37,7 @@ public class ResponseHeaderParser implements LogLineParser {
         return pll;
     }
 
+<<<<<<< HEAD
     /**
      * Defines the set of properties that must be present in the log line.
      *
@@ -44,6 +45,28 @@ public class ResponseHeaderParser implements LogLineParser {
      */
     private static Set<PropDescriptor> requiredProperties() {
         return Set.of(of(LogPropertyKeys.DATA));
+=======
+    private Set<PropDescriptor> requiredProperties() {
+        return Set.of(of(LogConstants.RESPONSE_HEADER));
+    }
+
+    private Map<String, Object> parseDeeply(Map<String, String> props) {
+        return props.entrySet().stream()
+                .map(entry -> {
+                    String key = entry.getKey();
+                    String value = entry.getValue();
+
+                    Object parsedValue;
+                    if (LogConstants.RESPONSE_HEADER.equals(key)) {
+                        parsedValue = LogParserUtils.parseMap(entry.getValue());
+                    } else {
+                        parsedValue = value;
+                    }
+
+                    return Map.entry(key, parsedValue);
+                })
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+>>>>>>> cf58b7068 ([Modified] OC-1086 #comment Specified common data property with separate names due to its belonging component #time 15m)
     }
 
 }
