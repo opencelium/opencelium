@@ -1,12 +1,14 @@
 package com.becon.opencelium.backend.execution.log_managing;
 
 import com.becon.opencelium.backend.database.mongodb.entity.LogMetaData;
+import com.becon.opencelium.backend.execution.log_managing.commons.ElementsLinkedList;
+import com.becon.opencelium.backend.execution.log_managing.commons.LogConstants;
 import com.becon.opencelium.backend.execution.log_managing.commons.LogProcessingException;
 import com.becon.opencelium.backend.execution.log_managing.commons.LogTrackerType;
 import com.becon.opencelium.backend.execution.log_managing.core.ExecutionContextManager;
 import com.becon.opencelium.backend.execution.log_managing.core.LogElementTracker;
 import com.becon.opencelium.backend.execution.log_managing.core.ParsedLogLine;
-import com.becon.opencelium.backend.utility.IndexPathUtils;
+import com.becon.opencelium.backend.execution.log_managing.trackers.LogTrackerFactory;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,15 +36,17 @@ public class SimpleExecutionContextManager implements ExecutionContextManager {
     }
 
     private void initNewExecution(String executionId, ParsedLogLine parsedLog) {
-        executionContexts.put(executionId, new ExecutionContext(parsedLog.getSize()));
+        String connectionId = (String) parsedLog.getProperties().get(LogConstants.CONNECTION_ID);
+        String flowchartId = (String) parsedLog.getProperties().get(LogConstants.FLOWCHART_ID);
+        executionContexts.put(executionId, new ExecutionContext(parsedLog.getSize(), connectionId, flowchartId));
     }
 
     private Optional<LogMetaData> processExecution(String executionId, ParsedLogLine parsedLog) {
         LogTrackerType trackerType = LogTrackerType.fromLogEntry(parsedLog.getEntryType());
+        ExecutionContext executionContext = executionContexts.get(executionId);
         if (parsedLog.getEntryType().isStartingNewStack()) {
-            ExecutionContext executionContext = executionContexts.get(executionId);
 
-            LogElementTracker tracker = null; // TODO : initialize tracker, OC-1088
+            LogElementTracker tracker = LogTrackerFactory.initTracker(trackerType);
             tracker.onStart(parsedLog, executionContext.currentOffset.get());
 
             executionContext.currentOffset.getAndUpdate(x -> x + parsedLog.getSize());
@@ -60,7 +64,12 @@ public class SimpleExecutionContextManager implements ExecutionContextManager {
 
             if (parsedLog.getEntryType().isEndingStack()) {
                 root.dropLast();
-                return Optional.of(tracker.onEnd(parsedLog));
+                LogMetaData metaData = tracker.onEnd(parsedLog);
+                metaData.setExecutionId(executionId);
+                metaData.setConnectionId(executionContext.connectionId);
+                metaData.setFlowchartId(executionContext.flowchartId);
+                metaData.setParentPath(root.getLastIndexPath());
+                return Optional.of(metaData);
             } else {
                 executionContexts.get(executionId).currentOffset.getAndUpdate(x -> x + parsedLog.getSize());
                 tracker.onContent(parsedLog);
@@ -77,86 +86,13 @@ public class SimpleExecutionContextManager implements ExecutionContextManager {
 
     private static class ExecutionContext {
         private final AtomicLong currentOffset;
+        private final String connectionId;
+        private final String flowchartId;
 
-        private ExecutionContext(Long currentOffset) {
+        private ExecutionContext(Long currentOffset, String connectionId, String flowchartId) {
             this.currentOffset = new AtomicLong(currentOffset);
-        }
-    }
-
-    private static class ElementsLinkedList<E> {
-        private Node<E> head;
-        private Node<E> tail;
-
-        public ElementsLinkedList(String indexPath, E data) {
-            head = new Node<>(null, null, indexPath, data);
-            tail = head;
-        }
-
-        public void addLast(String indexPath, E data) {
-            if (Objects.isNull(head)) {
-                head = new Node<>(null, null, indexPath, data);
-                tail = head;
-                return;
-            }
-
-            if (IndexPathUtils.compare(tail.indexPath, indexPath) >= 0) {
-                List<String> paths = walkAndCollectIndexPath(head);
-                paths.add(indexPath);
-                throw LogProcessingException.wrongIndexPathSequenceFound(paths);
-            }
-
-            Node<E> newNode = new Node<>(null, null, indexPath, data);
-            tail.next = newNode;
-            newNode.prev = tail;
-        }
-
-        private List<String> walkAndCollectIndexPath(Node<E> head) {
-            if (Objects.isNull(head)) {
-                return Collections.emptyList();
-            }
-
-            List<String> paths = new ArrayList<>();
-            Node<E> dummy = head;
-            while (dummy != null) {
-                paths.add(dummy.indexPath);
-                dummy = dummy.next;
-            }
-            return paths;
-        }
-
-        public E searchAndGetData(String indexPath) {
-            Node<E> dummmy = head;
-            while (dummmy != null) {
-                if (Objects.equals(dummmy.indexPath, indexPath)) {
-                    return dummmy.data;
-                }
-                dummmy = dummmy.next;
-            }
-            return null;
-        }
-
-        public void dropLast() {
-            Node<E> prev = tail.prev;
-            if (Objects.isNull(prev)) {
-                head = null;
-                tail = null;
-            }
-            prev.next = null;
-            tail = prev;
-        }
-    }
-
-    private static class Node<E> {
-        private Node<E> next;
-        private Node<E> prev;
-        private final String indexPath;
-        private final E data;
-
-        public Node(Node<E> next, Node<E> prev, String indexPath, E data) {
-            this.next = next;
-            this.prev = prev;
-            this.indexPath = indexPath;
-            this.data = data;
+            this.connectionId = connectionId;
+            this.flowchartId = flowchartId;
         }
     }
 }
