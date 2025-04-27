@@ -24,9 +24,9 @@ public class LogMetaData {
 
     private String parentPath;
 
-    private String startOffset;
+    private Long startOffset;
 
-    private String endOffset;
+    private Long endOffset;
 
     private Map<String, Object> meta;
 
@@ -86,19 +86,19 @@ public class LogMetaData {
         this.parentPath = parentPath;
     }
 
-    public String getStartOffset() {
+    public Long getStartOffset() {
         return startOffset;
     }
 
-    public void setStartOffset(String startOffset) {
+    public void setStartOffset(Long startOffset) {
         this.startOffset = startOffset;
     }
 
-    public String getEndOffset() {
+    public Long getEndOffset() {
         return endOffset;
     }
 
-    public void setEndOffset(String endOffset) {
+    public void setEndOffset(Long endOffset) {
         this.endOffset = endOffset;
     }
 
