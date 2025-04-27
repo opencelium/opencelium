@@ -45,7 +45,7 @@ public class RequestPayloadParser implements LogLineParser {
     }
 
     private Set<PropDescriptor> requiredProperties() {
-        return Set.of(of(LogConstants.DATA));
+        return Set.of(of(LogConstants.REQUEST_BODY));
     }
 
     private Map<String, Object> parseDeeply(Map<String, String> props) {
@@ -55,7 +55,7 @@ public class RequestPayloadParser implements LogLineParser {
                     String value = entry.getValue();
 
                     Object parsedValue;
-                    if (LogConstants.DATA.equals(key)) {
+                    if (LogConstants.REQUEST_BODY.equals(key)) {
                         parsedValue = LogParserUtils.parseMap(entry.getValue());
                     } else {
                         parsedValue = value;
