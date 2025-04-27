@@ -8,6 +8,7 @@ import com.becon.opencelium.backend.execution.log_managing.core.ParsedLogLine;
 import com.becon.opencelium.backend.execution.log_managing.commons.LogEntryType;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -54,6 +55,9 @@ public class IfStartParser implements LogLineParser {
     private Map<String, Object> parseDeeply(Map<String, String> props) {
         return props.entrySet().stream()
                 .map(entry -> {
+                    if (Objects.equals(entry.getKey(), LogConstants.INDEX_PATH)) {
+                        return null;
+                    }
                     String key = entry.getKey();
                     String value = entry.getValue();
 
@@ -70,6 +74,7 @@ public class IfStartParser implements LogLineParser {
 
                     return Map.entry(key, parsedValue);
                 })
+                .filter(Objects::nonNull)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

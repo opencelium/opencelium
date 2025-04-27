@@ -45,8 +45,6 @@ public class IfResultParser implements LogLineParser {
 
     private Set<PropDescriptor> requiredProperties() {
         return Set.of(
-                of(LogConstants.INDEX_PATH),
-                of(LogConstants.LOOP_INDEX, false),
                 of(LogConstants.EXPRESSION),
                 of(LogConstants.RESULT)
         );
