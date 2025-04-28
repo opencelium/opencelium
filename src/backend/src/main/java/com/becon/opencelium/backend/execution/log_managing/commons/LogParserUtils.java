@@ -14,10 +14,11 @@ public class LogParserUtils {
     private static final ObjectMapper mapper = new ObjectMapper();
 
     public static Map<String, String> extractKeyValuePairs(String line, Set<PropDescriptor> props) {
+        //TODO: enhance parsing object values
         Map<String, String> result = new HashMap<>();
 
         for (PropDescriptor prop : props) {
-            String regex = prop.key() + "=((\"[^\"]*\")|[^\\s\"]+)";
+            String regex = prop.key() + "=((\"[^\"]*\")|(\\{.*?})|[^\\s\"]+)";
             Pattern pattern = Pattern.compile(regex);
             Matcher matcher = pattern.matcher(line);
 
