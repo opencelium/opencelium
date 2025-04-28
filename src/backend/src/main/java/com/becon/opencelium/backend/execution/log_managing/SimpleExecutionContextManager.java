@@ -50,9 +50,11 @@ public class SimpleExecutionContextManager implements ExecutionContextManager {
 
             executionContext.currentOffset.getAndUpdate(x -> x + parsedLog.getSize());
 
-            trackersList.computeIfAbsent(executionId, id -> new ElementsLinkedList<>(parsedLog.getIndexPath(), tracker))
-                    .addLast(parsedLog.getIndexPath(), tracker);
-
+            if (trackersList.containsKey(executionId)) {
+                trackersList.get(executionId).addLast(parsedLog.getIndexPath(), tracker);
+            } else {
+                trackersList.put(executionId, new ElementsLinkedList<>(parsedLog.getIndexPath(), tracker));
+            }
             return Optional.empty();
         } else {
             ElementsLinkedList<LogElementTracker> root = Optional.ofNullable(trackersList.get(executionId))
