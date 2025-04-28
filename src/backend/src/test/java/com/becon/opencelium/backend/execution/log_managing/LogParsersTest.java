@@ -134,7 +134,7 @@ public class LogParsersTest {
 
     @Test
     public void testLoopStartParserOnSuccess() {
-        String line = "2025-04-11T10:42:31.123Z scope=LOOP_START indexPath=0 type=loop loopIterator=i expression=\"$.arr[*]\"";
+        String line = "2025-04-11T10:42:31.123Z scope=LOOP_START indexPath=0 type=loop loopIterator=i expression=\"$.arr[*]\" loopCount=3";
         assertEquals(Boolean.TRUE, loopStartParser.supports(line));
 
         ParsedLogLine parsed = assertDoesNotThrow(() -> loopStartParser.parse(line));
@@ -148,16 +148,18 @@ public class LogParsersTest {
         assertEquals("loop", parsed.getProperties().get(LogConstants.TYPE));
         assertEquals("$.arr[*]", parsed.getProperties().get(LogConstants.EXPRESSION));
         assertEquals("i", parsed.getProperties().get(LogConstants.LOOP_ITERATOR));
+        assertEquals(3, parsed.getProperties().get(LogConstants.LOOP_COUNT));
     }
 
     @Test
     public void testLoopStartParserOnFailure() {
         assertEquals(Boolean.FALSE, loopStartParser.supports("2025-04-11T10:42:31.123Z scope=LOOP_END"));
 
-        assertThrows(LogProcessingException.class, () -> loopStartParser.parse("scope=LOOP_START loopIterator=i type=loop expression=\"$.arr[*]\""));
-        assertThrows(LogProcessingException.class, () -> loopStartParser.parse("scope=LOOP_START loopIterator=i indexPath=0 expression=\"$.arr[*]\""));
-        assertThrows(LogProcessingException.class, () -> loopStartParser.parse("scope=LOOP_START loopIterator=i indexPath=0 type=loop"));
-        assertThrows(LogProcessingException.class, () -> loopStartParser.parse("scope=LOOP_START indexPath=0 type=loop expression=\"$.arr[*]\""));
+        assertThrows(LogProcessingException.class, () -> loopStartParser.parse("scope=LOOP_START loopCount=3 loopIterator=i type=loop expression=\"$.arr[*]\""));
+        assertThrows(LogProcessingException.class, () -> loopStartParser.parse("scope=LOOP_START loopCount=3 loopIterator=i indexPath=0 expression=\"$.arr[*]\""));
+        assertThrows(LogProcessingException.class, () -> loopStartParser.parse("scope=LOOP_START loopCount=3 loopIterator=i indexPath=0 type=loop"));
+        assertThrows(LogProcessingException.class, () -> loopStartParser.parse("scope=LOOP_START loopCount=3 indexPath=0 type=loop expression=\"$.arr[*]\""));
+        assertThrows(LogProcessingException.class, () -> loopStartParser.parse("scope=LOOP_START loopIterator=i indexPath=0 type=loop expression=\"$.arr[*]\""));
     }
 
     @Test

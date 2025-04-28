@@ -69,7 +69,7 @@ public class LogTrackersTest {
         LogElementTracker loopTracker = new LoopTracker();
         long startOffset = 0;
 
-        loopTracker.onStart(loopStartParser.parse("2025-04-11T10:42:31.123Z scope=LOOP_START indexPath=0 type=loop loopIterator=i expression=\"$.arr[*]\""), startOffset);
+        loopTracker.onStart(loopStartParser.parse("2025-04-11T10:42:31.123Z scope=LOOP_START indexPath=0 type=loop loopIterator=i expression=\"$.arr[*]\" loopCount=3"), startOffset);
         LogMetaData metaData = loopTracker.onEnd(loopEndParser.parse("2025-04-11T10:42:31.123Z scope=LOOP_END indexPath=0"));
 
         assertNotNull(metaData);
@@ -83,6 +83,7 @@ public class LogTrackersTest {
         assertEquals("loop", meta.get(LogConstants.TYPE));
         assertEquals("i", meta.get(LogConstants.LOOP_ITERATOR));
         assertEquals("$.arr[*]", meta.get(LogConstants.EXPRESSION));
+        assertEquals(3, meta.get(LogConstants.LOOP_COUNT));
     }
 
     @Test
