@@ -60,7 +60,7 @@ public class SimpleExecutionContextManager implements ExecutionContextManager {
             ElementsLinkedList<LogElementTracker> root = Optional.ofNullable(trackersList.get(executionId))
                     .orElseThrow(() -> LogProcessingException.noExecutionInitialized(executionId));
 
-            LogElementTracker tracker = Optional.ofNullable(root.searchAndGetData(parsedLog.getIndexPath()))
+            LogElementTracker tracker = Optional.ofNullable(root.getLastData())
                     .orElseThrow(() -> LogProcessingException.noTrackerInitialized(parsedLog.getEntryType(), parsedLog.getIndexPath()));
 
             if (parsedLog.getEntryType().isEndingStack()) {
