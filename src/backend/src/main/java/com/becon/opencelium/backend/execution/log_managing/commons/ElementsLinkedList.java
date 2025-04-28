@@ -39,6 +39,7 @@ public class ElementsLinkedList<E> {
         if (Objects.isNull(prev)) {
             head = null;
             tail = null;
+            return;
         }
         prev.next = null;
         tail = prev;
