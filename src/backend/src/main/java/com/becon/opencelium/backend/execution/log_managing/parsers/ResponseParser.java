@@ -51,6 +51,22 @@ public class ResponseParser implements LogLineParser {
 
     private Map<String, Object> parseDeeply(Map<String, String> props) {
         return props.entrySet().stream()
+                .map(entry -> {
+                    if (LogConstants.RESPONSE_TIME.equals(entry.getKey())) {
+                        try {
+                            return Map.entry(entry.getKey(), Integer.parseInt(entry.getValue()));
+                        } catch (NumberFormatException e) {
+                            throw LogProcessingException.invalidValueForProperty(entry.getKey(), entry.getValue());
+                        }
+                    } else if (LogConstants.STATUS.equals(entry.getKey())) {
+                        try {
+                            return Map.entry(entry.getKey(), Integer.parseInt(entry.getValue()));
+                        } catch (NumberFormatException e) {
+                            throw LogProcessingException.invalidValueForProperty(entry.getKey(), entry.getValue());
+                        }
+                    }
+                    return entry;
+                })
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
