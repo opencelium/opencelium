@@ -45,9 +45,6 @@ public class IfResultParser implements LogLineParser {
 
     private Set<PropDescriptor> requiredProperties() {
         return Set.of(
-                of(LogConstants.INDEX_PATH),
-                of(LogConstants.LOOP_INDEX, false),
-                of(LogConstants.EXPRESSION),
                 of(LogConstants.RESULT)
         );
     }
@@ -55,21 +52,14 @@ public class IfResultParser implements LogLineParser {
     private Map<String, Object> parseDeeply(Map<String, String> props) {
         return props.entrySet().stream()
                 .map(entry -> {
-                    String key = entry.getKey();
-                    String value = entry.getValue();
-
-                    Object parsedValue;
-                    if (LogConstants.LOOP_INDEX.equals(key)) {
+                    if (LogConstants.RESULT.equals(entry.getKey())) {
                         try {
-                            parsedValue = Integer.parseInt(value);
-                        } catch (NumberFormatException e) {
-                            throw LogProcessingException.invalidLoopIndex(value);
+                            return Map.entry(entry.getKey(), Boolean.parseBoolean(entry.getValue()));
+                        } catch (Exception e) {
+                            throw LogProcessingException.invalidValueForProperty(LogConstants.RESULT, entry.getValue());
                         }
-                    } else {
-                        parsedValue = value;
                     }
-
-                    return Map.entry(key, parsedValue);
+                    return entry;
                 })
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }

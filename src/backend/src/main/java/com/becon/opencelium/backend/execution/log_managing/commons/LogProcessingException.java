@@ -27,11 +27,15 @@ public class LogProcessingException extends RuntimeException {
         return new LogProcessingException("No execution initialized with : " + executionId);
     }
 
-    public static LogProcessingException noTrackerInitialized(LogEntryType entryType, String indexPath ) {
+    public static LogProcessingException noTrackerInitialized(LogEntryType entryType, String indexPath) {
         return new LogProcessingException("%s[indexPath=%s] isn't initialized".formatted(LogTrackerType.fromLogEntry(entryType).name(), indexPath));
     }
 
     public static LogProcessingException wrongIndexPathSequenceFound(List<String> paths) {
         return new LogProcessingException("Wrong indexPathSequenceFound : %s".formatted(paths.toString()));
+    }
+
+    public static LogProcessingException invalidValueForProperty(String key, Object value) {
+        return new LogProcessingException("Invalid value for property : %s=%s".formatted(key, value.toString()));
     }
 }
