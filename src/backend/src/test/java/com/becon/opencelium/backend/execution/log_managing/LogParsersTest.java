@@ -95,7 +95,7 @@ public class LogParsersTest {
 
     @Test
     public void testIfResultParserOnSuccess() {
-        String line = "2025-04-11T10:42:31.123Z scope=IF_RESULT expression=\"$.a == 'x'\" result=true";
+        String line = "2025-04-11T10:42:31.123Z section=IF_RESULT expression=\"$.a == 'x'\" result=true";
         assertEquals(Boolean.TRUE, ifResultParser.supports(line));
 
         ParsedLogLine parsed = assertDoesNotThrow(() -> ifResultParser.parse(line));
@@ -112,8 +112,8 @@ public class LogParsersTest {
     public void testIfResultParserOnFailure() {
         assertEquals(Boolean.FALSE, ifResultParser.supports("2025-04-11T10:42:31.123Z scope=IF_START"));
 
-        assertThrows(LogProcessingException.class, () -> ifResultParser.parse("scope=IF_RESULT expression=$.a == 'x'"));
-        assertThrows(LogProcessingException.class, () -> ifResultParser.parse("scope=IF_RESULT result=true"));
+        assertThrows(LogProcessingException.class, () -> ifResultParser.parse("section=IF_RESULT expression=$.a == 'x'"));
+        assertThrows(LogProcessingException.class, () -> ifResultParser.parse("section=IF_RESULT result=true"));
     }
 
     @Test
