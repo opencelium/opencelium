@@ -95,25 +95,22 @@ public class LogParsersTest {
 
     @Test
     public void testIfResultParserOnSuccess() {
-        String line = "2025-04-11T10:42:31.123Z section=IF_RESULT expression=\"$.a == 'x'\" result=true";
+        String line = "2025-04-11T10:42:31.123Z section=IF_RESULT result=true";
         assertEquals(Boolean.TRUE, ifResultParser.supports(line));
 
         ParsedLogLine parsed = assertDoesNotThrow(() -> ifResultParser.parse(line));
 
         assertEquals(LogEntryType.IF_RESULT, parsed.getEntryType());
         assertEquals(line.getBytes().length, parsed.getSize());
-        assertNotNull(parsed.getProperties().get(LogConstants.EXPRESSION));
         assertNotNull(parsed.getProperties().get(LogConstants.RESULT));
-        assertEquals("$.a == 'x'", parsed.getProperties().get(LogConstants.EXPRESSION));
-        assertEquals("true", parsed.getProperties().get(LogConstants.RESULT));
+        assertEquals(true, parsed.getProperties().get(LogConstants.RESULT));
     }
 
     @Test
     public void testIfResultParserOnFailure() {
         assertEquals(Boolean.FALSE, ifResultParser.supports("2025-04-11T10:42:31.123Z scope=IF_START"));
 
-        assertThrows(LogProcessingException.class, () -> ifResultParser.parse("section=IF_RESULT expression=$.a == 'x'"));
-        assertThrows(LogProcessingException.class, () -> ifResultParser.parse("section=IF_RESULT result=true"));
+        assertThrows(LogProcessingException.class, () -> ifResultParser.parse("section=IF_RESULT"));
     }
 
     @Test
@@ -281,7 +278,7 @@ public class LogParsersTest {
 
     @Test
     public void testResponseParserOnSuccess() {
-        String line = "2025-04-11T10:42:31.123Z section=RESPONSE status=200 responseTime=20ms";
+        String line = "2025-04-11T10:42:31.123Z section=RESPONSE status=200 responseTime=20";
         assertEquals(Boolean.TRUE, responseParser.supports(line));
 
         ParsedLogLine parsed = assertDoesNotThrow(() -> responseParser.parse(line));
@@ -289,15 +286,15 @@ public class LogParsersTest {
         assertEquals(LogEntryType.RESPONSE, parsed.getEntryType());
         assertNotNull(parsed.getProperties().get(LogConstants.STATUS));
         assertNotNull(parsed.getProperties().get(LogConstants.RESPONSE_TIME));
-        assertEquals("200", parsed.getProperties().get(LogConstants.STATUS));
-        assertEquals("20ms", parsed.getProperties().get(LogConstants.RESPONSE_TIME));
+        assertEquals(200, parsed.getProperties().get(LogConstants.STATUS));
+        assertEquals(20, parsed.getProperties().get(LogConstants.RESPONSE_TIME));
     }
 
     @Test
     public void testResponseParserOnFailure() {
         assertEquals(Boolean.FALSE, responseParser.supports("2025-04-11T10:42:31.123Z section=REQUEST"));
 
-        assertThrows(LogProcessingException.class, () -> responseParser.parse("section=RESPONSE responseTime=20ms"));
+        assertThrows(LogProcessingException.class, () -> responseParser.parse("section=RESPONSE responseTime=20"));
         assertThrows(LogProcessingException.class, () -> responseParser.parse("section=RESPONSE status=200"));
     }
 
