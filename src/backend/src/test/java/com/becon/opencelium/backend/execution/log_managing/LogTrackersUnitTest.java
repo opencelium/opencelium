@@ -14,7 +14,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class LogTrackersTest {
+public class LogTrackersUnitTest {
 
     private final LogLineParser ifStartParser = new IfStartParser();
     private final LogLineParser ifResultParser = new IfResultParser();

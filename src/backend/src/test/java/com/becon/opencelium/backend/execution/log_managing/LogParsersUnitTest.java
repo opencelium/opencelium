@@ -8,11 +8,9 @@ import com.becon.opencelium.backend.execution.log_managing.core.ParsedLogLine;
 import com.becon.opencelium.backend.execution.log_managing.parsers.*;
 import org.junit.jupiter.api.Test;
 
-import java.util.Map;
-
 import static org.junit.jupiter.api.Assertions.*;
 
-public class LogParsersTest {
+public class LogParsersUnitTest {
     private final LogLineParser executionStartParser = new ExecutionStartParser();
     private final LogLineParser executionEndParser = new ExecutionEndParser();
     private final LogLineParser ifStartParser = new IfStartParser();
