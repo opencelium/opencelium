@@ -6,6 +6,7 @@ public interface LogConstants {
     String FUNCTION = "function";
     String LOOP_INDEX = "loopIndex";
     String LOOP_ITERATOR = "loopIterator";
+    String LOOP_COUNT = "loopCount";
     String URL = "url";
     String HTTP_METHOD = "httpMethod";
     String DATA = "data";

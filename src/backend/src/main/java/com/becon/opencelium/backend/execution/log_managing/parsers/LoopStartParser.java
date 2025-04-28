@@ -50,6 +50,7 @@ public class LoopStartParser implements LogLineParser {
                 of(LogConstants.TYPE),
                 of(LogConstants.LOOP_INDEX, false),
                 of(LogConstants.LOOP_ITERATOR),
+                of(LogConstants.LOOP_COUNT),
                 of(LogConstants.EXPRESSION)
         );
     }
@@ -65,6 +66,12 @@ public class LoopStartParser implements LogLineParser {
 
                     Object parsedValue;
                     if (LogConstants.LOOP_INDEX.equals(key)) {
+                        try {
+                            parsedValue = Integer.parseInt(value);
+                        } catch (NumberFormatException e) {
+                            throw LogProcessingException.invalidLoopIndex(value);
+                        }
+                    }else if (LogConstants.LOOP_COUNT.equals(key)) {
                         try {
                             parsedValue = Integer.parseInt(value);
                         } catch (NumberFormatException e) {
