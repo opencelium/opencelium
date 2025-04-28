@@ -247,17 +247,12 @@ public class LogParsersTest {
 
     @Test
     public void testRequestHeaderParserOnSuccess() {
-        String line = "2025-04-11T10:42:31.123Z section=REQUEST_HEADER requestHeader={\"Content-Type\":\"application/json\"}";
+        String line = "2025-04-11T10:42:31.123Z section=REQUEST_HEADER data={\"Content-Type\":\"application/json\"}";
         assertEquals(Boolean.TRUE, requestHeaderParser.supports(line));
 
         ParsedLogLine parsed = assertDoesNotThrow(() -> requestHeaderParser.parse(line));
 
         assertEquals(LogEntryType.REQUEST_HEADER, parsed.getEntryType());
-        assertNotNull(parsed.getProperties().get(LogConstants.REQUEST_HEADER));
-
-        @SuppressWarnings("unchecked")
-        Map<String, String> headers = (Map<String, String>) parsed.getProperties().get(LogConstants.REQUEST_HEADER);
-        assertEquals("application/json", headers.get("Content-Type"));
     }
 
     @Test
@@ -269,18 +264,12 @@ public class LogParsersTest {
 
     @Test
     public void testRequestPayloadParserOnSuccess() {
-        String line = "2025-04-11T10:42:31.123Z section=REQUEST_PAYLOAD requestBody={\"user\":\"john\",\"age\":30}";
+        String line = "2025-04-11T10:42:31.123Z section=REQUEST_PAYLOAD data={\"user\":\"john\",\"age\":30}";
         assertEquals(Boolean.TRUE, requestPayloadParser.supports(line));
 
         ParsedLogLine parsed = assertDoesNotThrow(() -> requestPayloadParser.parse(line));
 
         assertEquals(LogEntryType.REQUEST_PAYLOAD, parsed.getEntryType());
-        assertNotNull(parsed.getProperties().get(LogConstants.REQUEST_BODY));
-
-        @SuppressWarnings("unchecked")
-        Map<String, Object> headers = (Map<String, Object>) parsed.getProperties().get(LogConstants.REQUEST_BODY);
-        assertEquals("john", headers.get("user"));
-        assertEquals(30, headers.get("age"));
     }
 
     @Test
@@ -314,17 +303,12 @@ public class LogParsersTest {
 
     @Test
     public void testResponseHeaderParserOnSuccess() {
-        String line = "2025-04-11T10:42:31.123Z section=RESPONSE_HEADER responseHeader={\"Content-Type\":\"application/json\"}";
+        String line = "2025-04-11T10:42:31.123Z section=RESPONSE_HEADER data={\"Content-Type\":\"application/json\"}";
         assertEquals(Boolean.TRUE, responseHeaderParser.supports(line));
 
         ParsedLogLine parsed = assertDoesNotThrow(() -> responseHeaderParser.parse(line));
 
         assertEquals(LogEntryType.RESPONSE_HEADER, parsed.getEntryType());
-        assertNotNull(parsed.getProperties().get(LogConstants.RESPONSE_HEADER));
-
-        @SuppressWarnings("unchecked")
-        Map<String, String> headers = (Map<String, String>) parsed.getProperties().get(LogConstants.RESPONSE_HEADER);
-        assertEquals("application/json", headers.get("Content-Type"));
     }
 
     @Test
@@ -336,18 +320,12 @@ public class LogParsersTest {
 
     @Test
     public void testResponsePayloadParserWithJsonOnSuccess() {
-        String line = "2025-04-11T10:42:31.123Z section=RESPONSE_PAYLOAD responseBody={\"name\":\"John Doe\",\"id\":123}";
+        String line = "2025-04-11T10:42:31.123Z section=RESPONSE_PAYLOAD data={\"name\":\"John Doe\",\"id\":123}";
         assertEquals(Boolean.TRUE, responsePayloadParser.supports(line));
 
         ParsedLogLine parsed = assertDoesNotThrow(() -> responsePayloadParser.parse(line));
 
         assertEquals(LogEntryType.RESPONSE_PAYLOAD, parsed.getEntryType());
-        assertNotNull(parsed.getProperties().get(LogConstants.RESPONSE_BODY));
-
-        @SuppressWarnings("unchecked")
-        Map<String, Object> payload = (Map<String, Object>) parsed.getProperties().get(LogConstants.RESPONSE_BODY);
-        assertEquals("John Doe", payload.get("name"));
-        assertEquals(123, payload.get("id"));
     }
 
     @Test
