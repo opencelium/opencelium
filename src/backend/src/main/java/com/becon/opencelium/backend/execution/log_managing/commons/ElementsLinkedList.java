@@ -32,6 +32,7 @@ public class ElementsLinkedList<E> {
         Node<E> newNode = new Node<>(null, null, indexPath, data);
         tail.next = newNode;
         newNode.prev = tail;
+        tail = newNode;
     }
 
     public void dropLast() {
