@@ -2,7 +2,7 @@ package com.becon.opencelium.backend.execution.log_managing.parsers;
 
 import com.becon.opencelium.backend.execution.log_managing.commons.LogParserUtils;
 import com.becon.opencelium.backend.execution.log_managing.commons.LogConstants;
-import com.becon.opencelium.backend.execution.log_managing.commons.LogParsingException;
+import com.becon.opencelium.backend.execution.log_managing.commons.LogProcessingException;
 import com.becon.opencelium.backend.execution.log_managing.commons.PropDescriptor;
 import com.becon.opencelium.backend.execution.log_managing.core.LogLineParser;
 import com.becon.opencelium.backend.execution.log_managing.core.ParsedLogLine;
@@ -33,7 +33,7 @@ public class RequestHeaderParser implements LogLineParser {
     @Override
     public ParsedLogLine parse(String line) {
         if (!supports(line)) {
-            throw LogParsingException.unsupportedLine(line, entryType);
+            throw LogProcessingException.unsupportedLine(line, entryType);
         }
         Map<String, String> props = extractKeyValuePairs(line, requiredProperties);
         ParsedLogLine pll = new ParsedLogLine();
@@ -45,7 +45,7 @@ public class RequestHeaderParser implements LogLineParser {
     }
 
     private Set<PropDescriptor> requiredProperties() {
-        return Set.of(of(LogConstants.DATA));
+        return Set.of(of(LogConstants.REQUEST_HEADER));
     }
 
     private Map<String, Object> parseDeeply(Map<String, String> props) {
@@ -55,7 +55,7 @@ public class RequestHeaderParser implements LogLineParser {
                     String value = entry.getValue();
 
                     Object parsedValue;
-                    if (LogConstants.DATA.equals(key)) {
+                    if (LogConstants.REQUEST_HEADER.equals(key)) {
                         parsedValue = LogParserUtils.parseMap(entry.getValue());
                     } else {
                         parsedValue = value;

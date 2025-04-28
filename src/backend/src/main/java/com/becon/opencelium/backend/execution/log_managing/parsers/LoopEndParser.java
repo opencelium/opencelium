@@ -1,7 +1,7 @@
 package com.becon.opencelium.backend.execution.log_managing.parsers;
 
 import com.becon.opencelium.backend.execution.log_managing.commons.LogConstants;
-import com.becon.opencelium.backend.execution.log_managing.commons.LogParsingException;
+import com.becon.opencelium.backend.execution.log_managing.commons.LogProcessingException;
 import com.becon.opencelium.backend.execution.log_managing.commons.PropDescriptor;
 import com.becon.opencelium.backend.execution.log_managing.core.LogLineParser;
 import com.becon.opencelium.backend.execution.log_managing.core.ParsedLogLine;
@@ -32,7 +32,7 @@ public class LoopEndParser implements LogLineParser {
     @Override
     public ParsedLogLine parse(String line) {
         if (!supports(line)) {
-            throw LogParsingException.unsupportedLine(line, entryType);
+            throw LogProcessingException.unsupportedLine(line, entryType);
         }
         Map<String, String> props = extractKeyValuePairs(line, requiredProperties);
         ParsedLogLine pll = new ParsedLogLine();
