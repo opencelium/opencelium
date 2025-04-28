@@ -8,10 +8,7 @@ public interface LogConstants {
     String LOOP_ITERATOR = "loopIterator";
     String URL = "url";
     String HTTP_METHOD = "httpMethod";
-    String REQUEST_BODY = "requestBody";
-    String RESPONSE_BODY = "responseBody";
-    String REQUEST_HEADER = "requestHeader";
-    String RESPONSE_HEADER = "responseHeader";
+    String DATA = "data";
     String STATUS = "status";
     String RESPONSE_TIME = "responseTime";
     String EXPRESSION = "expression";
