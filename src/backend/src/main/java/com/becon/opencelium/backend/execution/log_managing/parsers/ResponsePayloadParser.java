@@ -36,8 +36,6 @@ public class ResponsePayloadParser implements LogLineParser {
         pll.setSize(line.getBytes(StandardCharsets.UTF_8).length);
         return pll;
     }
-
-<<<<<<< HEAD
     /**
      * Defines the set of properties that must be present in the log line.
      *
@@ -45,28 +43,5 @@ public class ResponsePayloadParser implements LogLineParser {
      */
     private static Set<PropDescriptor> requiredProperties() {
         return Set.of(of(LogPropertyKeys.DATA, PropertyParsers::parseData));
-=======
-    private Set<PropDescriptor> requiredProperties() {
-        return Set.of(of(LogConstants.RESPONSE_BODY));
     }
-
-    private Map<String, Object> parseDeeply(Map<String, String> props) {
-        return props.entrySet().stream()
-                .map(entry -> {
-                    String key = entry.getKey();
-                    String value = entry.getValue();
-
-                    Object parsedValue;
-                    if (LogConstants.RESPONSE_BODY.equals(key)) {
-                        parsedValue = LogParserUtils.parseMap(entry.getValue());
-                    } else {
-                        parsedValue = value;
-                    }
-
-                    return Map.entry(key, parsedValue);
-                })
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
->>>>>>> cf58b7068 ([Modified] OC-1086 #comment Specified common data property with separate names due to its belonging component #time 15m)
-    }
-
 }
