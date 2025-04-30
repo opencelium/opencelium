@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.execution.log_managing.commons;
 
-public interface LogConstants {
+public interface LogPropertyKeys {
     String INDEX_PATH = "indexPath";
     String TYPE = "type";
     String FUNCTION = "function";

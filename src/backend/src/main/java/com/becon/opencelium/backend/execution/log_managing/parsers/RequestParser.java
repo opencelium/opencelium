@@ -1,12 +1,13 @@
 package com.becon.opencelium.backend.execution.log_managing.parsers;
 
-import com.becon.opencelium.backend.execution.log_managing.commons.LogConstants;
+import com.becon.opencelium.backend.execution.log_managing.commons.LogPropertyKeys;
 import com.becon.opencelium.backend.execution.log_managing.commons.LogProcessingException;
 import com.becon.opencelium.backend.execution.log_managing.commons.PropDescriptor;
 import com.becon.opencelium.backend.execution.log_managing.core.LogLineParser;
 import com.becon.opencelium.backend.execution.log_managing.core.ParsedLogLine;
 import com.becon.opencelium.backend.execution.log_managing.commons.LogEntryType;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -18,10 +19,10 @@ import static com.becon.opencelium.backend.execution.log_managing.commons.PropDe
 public class RequestParser implements LogLineParser {
 
     private static final LogEntryType entryType = LogEntryType.REQUEST;
-    private final Set<PropDescriptor> requiredProperties;
+    private static final Set<PropDescriptor> requiredProperties;
 
-    public RequestParser() {
-        this.requiredProperties = requiredProperties();
+    static {
+        requiredProperties = requiredProperties();
     }
 
     @Override
@@ -39,20 +40,30 @@ public class RequestParser implements LogLineParser {
         pll.setEntryType(entryType);
         pll.setProperties(parseDeeply(props));
         pll.setIndexPath(null);
-        pll.setSize(line.getBytes().length);
+        pll.setSize(line.getBytes(StandardCharsets.UTF_8).length);
         return pll;
     }
 
-    private Set<PropDescriptor> requiredProperties() {
-        return Set.of(
-                of(LogConstants.URL),
-                of(LogConstants.HTTP_METHOD)
-        );
-    }
-
+    /**
+     * Filters only concrete properties and converts them to their precise type that it is supposed to be
+     *
+     * @return a Map of key, and precise value
+     */
     private Map<String, Object> parseDeeply(Map<String, String> props) {
         return props.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    /**
+     * Defines the set of properties that must be present in the log line.
+     *
+     * @return a Set containing required property descriptors
+     */
+    private static Set<PropDescriptor> requiredProperties() {
+        return Set.of(
+                of(LogPropertyKeys.URL),
+                of(LogPropertyKeys.HTTP_METHOD)
+        );
     }
 
 }
