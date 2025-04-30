@@ -36,6 +36,6 @@ public class LogProcessingException extends RuntimeException {
     }
 
     public static LogProcessingException invalidValueForProperty(String key, Object value) {
-        return new LogProcessingException("Invalid value for property : %s=%s".formatted(key, value.toString()));
+        return new LogProcessingException("Invalid value for property : %s=%s".formatted(key, value));
     }
 }
