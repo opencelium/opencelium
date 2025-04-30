@@ -1,12 +1,13 @@
 package com.becon.opencelium.backend.execution.log_managing.parsers;
 
-import com.becon.opencelium.backend.execution.log_managing.commons.LogConstants;
+import com.becon.opencelium.backend.execution.log_managing.commons.LogPropertyKeys;
 import com.becon.opencelium.backend.execution.log_managing.commons.LogProcessingException;
 import com.becon.opencelium.backend.execution.log_managing.commons.PropDescriptor;
 import com.becon.opencelium.backend.execution.log_managing.core.LogLineParser;
 import com.becon.opencelium.backend.execution.log_managing.core.ParsedLogLine;
 import com.becon.opencelium.backend.execution.log_managing.commons.LogEntryType;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -17,10 +18,10 @@ import static com.becon.opencelium.backend.execution.log_managing.commons.PropDe
 public class ResponseParser implements LogLineParser {
 
     private static final LogEntryType entryType = LogEntryType.RESPONSE;
-    private final Set<PropDescriptor> requiredProperties;
+    private static final Set<PropDescriptor> requiredProperties;
 
-    public ResponseParser() {
-        this.requiredProperties = requiredProperties();
+    static {
+        requiredProperties = requiredProperties();
     }
 
     @Override
@@ -38,27 +39,25 @@ public class ResponseParser implements LogLineParser {
         pll.setEntryType(entryType);
         pll.setProperties(parseDeeply(props));
         pll.setIndexPath(null);
-        pll.setSize(line.getBytes().length);
+        pll.setSize(line.getBytes(StandardCharsets.UTF_8).length);
         return pll;
     }
 
-    private Set<PropDescriptor> requiredProperties() {
-        return Set.of(
-                of(LogConstants.STATUS),
-                of(LogConstants.RESPONSE_TIME)
-        );
-    }
-
+    /**
+     * Filters only concrete properties and converts them to their precise type that it is supposed to be
+     *
+     * @return a Map of key, and precise value
+     */
     private Map<String, Object> parseDeeply(Map<String, String> props) {
         return props.entrySet().stream()
                 .map(entry -> {
-                    if (LogConstants.RESPONSE_TIME.equals(entry.getKey())) {
+                    if (LogPropertyKeys.RESPONSE_TIME.equals(entry.getKey())) {
                         try {
                             return Map.entry(entry.getKey(), Integer.parseInt(entry.getValue()));
                         } catch (NumberFormatException e) {
                             throw LogProcessingException.invalidValueForProperty(entry.getKey(), entry.getValue());
                         }
-                    } else if (LogConstants.STATUS.equals(entry.getKey())) {
+                    } else if (LogPropertyKeys.STATUS.equals(entry.getKey())) {
                         try {
                             return Map.entry(entry.getKey(), Integer.parseInt(entry.getValue()));
                         } catch (NumberFormatException e) {
@@ -68,6 +67,18 @@ public class ResponseParser implements LogLineParser {
                     return entry;
                 })
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    /**
+     * Defines the set of properties that must be present in the log line.
+     *
+     * @return a Set containing required property descriptors
+     */
+    private static Set<PropDescriptor> requiredProperties() {
+        return Set.of(
+                of(LogPropertyKeys.STATUS),
+                of(LogPropertyKeys.RESPONSE_TIME)
+        );
     }
 
 }

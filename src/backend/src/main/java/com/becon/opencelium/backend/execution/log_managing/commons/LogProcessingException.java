@@ -8,7 +8,7 @@ public class LogProcessingException extends RuntimeException {
     }
 
     public static LogProcessingException unsupportedLine(String line, LogEntryType entryType) {
-        return new LogProcessingException(entryType.getTitle() + " parser doesn't support this log : " + line);
+        return new LogProcessingException("%s parser doesn't support this log : %s".formatted(entryType.getTitle(), line));
     }
 
     public static LogProcessingException invalidLoopIndex(String value) {
@@ -16,15 +16,15 @@ public class LogProcessingException extends RuntimeException {
     }
 
     public static LogProcessingException cantReadData(String data) {
-        return new LogProcessingException("Can't read data : " + data);
+        return new LogProcessingException("Can't read data : %s".formatted(data));
     }
 
     public static LogProcessingException missingRequiredProperty(String key, String line) {
-        return new LogProcessingException("Missing required property : " + key + ". Log : " + line);
+        return new LogProcessingException("Missing required property : %s. Log : %s".formatted(key, line));
     }
 
     public static LogProcessingException noExecutionInitialized(String executionId) {
-        return new LogProcessingException("No execution initialized with : " + executionId);
+        return new LogProcessingException("No execution initialized with ID : %s".formatted(executionId));
     }
 
     public static LogProcessingException noTrackerInitialized(LogEntryType entryType, String indexPath) {

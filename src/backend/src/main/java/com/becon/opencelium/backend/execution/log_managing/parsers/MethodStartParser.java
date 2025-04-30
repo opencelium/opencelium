@@ -1,12 +1,13 @@
 package com.becon.opencelium.backend.execution.log_managing.parsers;
 
 import com.becon.opencelium.backend.execution.log_managing.commons.LogProcessingException;
-import com.becon.opencelium.backend.execution.log_managing.commons.LogConstants;
+import com.becon.opencelium.backend.execution.log_managing.commons.LogPropertyKeys;
 import com.becon.opencelium.backend.execution.log_managing.commons.PropDescriptor;
 import com.becon.opencelium.backend.execution.log_managing.core.LogLineParser;
 import com.becon.opencelium.backend.execution.log_managing.core.ParsedLogLine;
 import com.becon.opencelium.backend.execution.log_managing.commons.LogEntryType;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -17,10 +18,10 @@ import static com.becon.opencelium.backend.execution.log_managing.commons.PropDe
 public class MethodStartParser implements LogLineParser {
 
     private static final LogEntryType entryType = LogEntryType.METHOD_START;
-    private final Set<PropDescriptor> requiredProperties;
+    private static final Set<PropDescriptor> requiredProperties;
 
-    public MethodStartParser() {
-        this.requiredProperties = requiredProperties();
+    static {
+        requiredProperties = requiredProperties();
     }
 
     @Override
@@ -37,19 +38,16 @@ public class MethodStartParser implements LogLineParser {
         ParsedLogLine pll = new ParsedLogLine();
         pll.setEntryType(entryType);
         pll.setProperties(parseDeeply(props));
-        pll.setIndexPath(props.get(LogConstants.INDEX_PATH));
-        pll.setSize(line.getBytes().length);
+        pll.setIndexPath(props.get(LogPropertyKeys.INDEX_PATH));
+        pll.setSize(line.getBytes(StandardCharsets.UTF_8).length);
         return pll;
     }
 
-    private Set<PropDescriptor> requiredProperties() {
-        return Set.of(
-                of(LogConstants.INDEX_PATH),
-                of(LogConstants.FUNCTION),
-                of(LogConstants.LOOP_INDEX, false)
-        );
-    }
-
+    /**
+     * Filters only concrete properties and converts them to their precise type that it is supposed to be
+     *
+     * @return a Map of key, and precise value
+     */
     private Map<String, Object> parseDeeply(Map<String, String> props) {
         return props.entrySet().stream()
                 .map(entry -> {
@@ -57,7 +55,7 @@ public class MethodStartParser implements LogLineParser {
                     String value = entry.getValue();
 
                     Object parsedValue;
-                    if (LogConstants.LOOP_INDEX.equals(key)) {
+                    if (LogPropertyKeys.LOOP_INDEX.equals(key)) {
                         try {
                             parsedValue = Integer.parseInt(value);
                         } catch (NumberFormatException e) {
@@ -70,5 +68,18 @@ public class MethodStartParser implements LogLineParser {
                     return Map.entry(key, parsedValue);
                 })
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    /**
+     * Defines the set of properties that must be present in the log line.
+     *
+     * @return a Set containing required property descriptors
+     */
+    private static Set<PropDescriptor> requiredProperties() {
+        return Set.of(
+                of(LogPropertyKeys.INDEX_PATH),
+                of(LogPropertyKeys.FUNCTION),
+                of(LogPropertyKeys.LOOP_INDEX, false)
+        );
     }
 }

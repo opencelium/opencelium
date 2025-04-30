@@ -1,13 +1,14 @@
 package com.becon.opencelium.backend.execution.log_managing.parsers;
 
 import com.becon.opencelium.backend.execution.log_managing.commons.LogParserUtils;
-import com.becon.opencelium.backend.execution.log_managing.commons.LogConstants;
+import com.becon.opencelium.backend.execution.log_managing.commons.LogPropertyKeys;
 import com.becon.opencelium.backend.execution.log_managing.commons.LogProcessingException;
 import com.becon.opencelium.backend.execution.log_managing.commons.PropDescriptor;
 import com.becon.opencelium.backend.execution.log_managing.core.LogLineParser;
 import com.becon.opencelium.backend.execution.log_managing.core.ParsedLogLine;
 import com.becon.opencelium.backend.execution.log_managing.commons.LogEntryType;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -19,10 +20,10 @@ import static com.becon.opencelium.backend.execution.log_managing.commons.PropDe
 public class RequestHeaderParser implements LogLineParser {
 
     private static final LogEntryType entryType = LogEntryType.REQUEST_HEADER;
-    private final Set<PropDescriptor> requiredProperties;
+    private static final Set<PropDescriptor> requiredProperties;
 
-    public RequestHeaderParser() {
-        this.requiredProperties = requiredProperties();
+    static {
+        requiredProperties = requiredProperties();
     }
 
     @Override
@@ -40,14 +41,15 @@ public class RequestHeaderParser implements LogLineParser {
         pll.setEntryType(entryType);
         pll.setProperties(parseDeeply(props));
         pll.setIndexPath(null);
-        pll.setSize(line.getBytes().length);
+        pll.setSize(line.getBytes(StandardCharsets.UTF_8).length);
         return pll;
     }
 
-    private Set<PropDescriptor> requiredProperties() {
-        return Set.of(of(LogConstants.DATA));
-    }
-
+    /**
+     * Filters only concrete properties and converts them to their precise type that it is supposed to be
+     *
+     * @return a Map of key, and precise value
+     */
     private Map<String, Object> parseDeeply(Map<String, String> props) {
         return props.entrySet().stream()
                 .map(entry -> {
@@ -55,7 +57,7 @@ public class RequestHeaderParser implements LogLineParser {
                     String value = entry.getValue();
 
                     Object parsedValue;
-                    if (LogConstants.DATA.equals(key)) {
+                    if (LogPropertyKeys.DATA.equals(key)) {
                         parsedValue = LogParserUtils.parseMap(entry.getValue());
                     } else {
                         parsedValue = value;
@@ -64,6 +66,15 @@ public class RequestHeaderParser implements LogLineParser {
                     return Map.entry(key, parsedValue);
                 })
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    /**
+     * Defines the set of properties that must be present in the log line.
+     *
+     * @return a Set containing required property descriptors
+     */
+    private static Set<PropDescriptor> requiredProperties() {
+        return Set.of(of(LogPropertyKeys.DATA));
     }
 
 }
