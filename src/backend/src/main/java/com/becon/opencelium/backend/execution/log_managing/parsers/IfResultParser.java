@@ -53,11 +53,10 @@ public class IfResultParser implements LogLineParser {
         return props.entrySet().stream()
                 .map(entry -> {
                     if (LogPropertyKeys.RESULT.equals(entry.getKey())) {
-                        try {
+                        if (entry.getValue() != null && (entry.getValue().equals("true") || entry.getValue().equals("false"))) {
                             return Map.entry(entry.getKey(), Boolean.parseBoolean(entry.getValue()));
-                        } catch (Exception e) {
-                            throw LogProcessingException.invalidValueForProperty(LogPropertyKeys.RESULT, entry.getValue());
                         }
+                        throw LogProcessingException.invalidValueForProperty(LogPropertyKeys.RESULT, entry.getValue());
                     }
                     return entry;
                 })
