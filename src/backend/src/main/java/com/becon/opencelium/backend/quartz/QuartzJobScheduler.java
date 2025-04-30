@@ -169,6 +169,31 @@ public class QuartzJobScheduler implements SchedulingStrategy {
     }
 
     @Override
+    public void runJob(Scheduler scheduler, String channelId) {
+        final String jobName = getJobName(scheduler);
+        final JobKey jobKey = new JobKey(jobName, "connection");
+
+        ScheduleData data = new ScheduleData(scheduler.getId(), TriggerType.EXECUTION_TEST);
+        JobDataMap jobDataMap = new JobDataMap();
+        jobDataMap.put("data", data);
+
+        TriggerKey triggerKey = getTriggerKey(scheduler, true);
+
+        Trigger trigger = TriggerBuilder.newTrigger()
+                .forJob(jobKey)
+                .withIdentity(triggerKey)
+                .usingJobData(jobDataMap)
+                .startNow()
+                .build();
+
+        try {
+            quartzScheduler.scheduleJob(trigger);
+        } catch (SchedulerException e) {
+            throw new RuntimeException("Error scheduling job", e);
+        }
+    }
+
+    @Override
     public void runJob(Scheduler scheduler, Map<String, Object> webhookVars) {
         final String jobName = getJobName(scheduler);
         final JobKey jobKey = new JobKey(jobName, "connection");

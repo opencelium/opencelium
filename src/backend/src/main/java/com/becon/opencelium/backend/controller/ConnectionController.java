@@ -18,6 +18,7 @@ package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
 import com.becon.opencelium.backend.constant.AppYamlPath;
+import com.becon.opencelium.backend.constant.Constant;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
@@ -68,6 +69,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
@@ -228,6 +230,44 @@ public class ConnectionController {
 
         connectionService.update(connection, connectionMng);
         return ResponseEntity.ok(connectionOldDTOMapper.toDTO(connectionService.getFullConnection(connectionId)));
+    }
+
+    @Operation(summary = "Tests connection execution by temporarily creating new connection and scheduler.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Connection execution has been successfully tested",
+                    content = @Content(schema = @Schema(implementation = ConnectionOldDTO.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PostMapping(path = "/execution/test", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> test(@RequestBody ConnectionOldDTO connectionOldDTO, @RequestParam String channelId) throws Exception {
+        // create temporary connection, will be deleted after execution finished
+        connectionOldDTO.setTitle("!*test_connection_" + System.currentTimeMillis() + "_" + connectionOldDTO.getTitle());
+        ConnectionDTO connectionDTO = connectionOldDTOMapper.toEntity(connectionOldDTO);
+        Connection connection = connectionMapper.toEntity(connectionDTO);
+        ConnectionMng connectionMng = connectionMngMapper.toEntity(connectionDTO);
+        ConnectionMng savedConnection = connectionService.save(connection, connectionMng);
+        Long connectionId = savedConnection.getConnectionId();
+
+        // create temporary scheduler for above connection, will be deleted after execution finished
+        SchedulerRequestResource resource = new SchedulerRequestResource();
+        resource.setConnectionId(connectionId);
+        resource.setTitle("!*test_schedule_" + System.currentTimeMillis());
+        resource.setStatus(true);
+        resource.setCronExp(Constant.NEVER_TRIGGERED_CRON);
+        resource.setDebugMode(true);
+
+        Scheduler scheduler = schedulerService.toEntity(resource);
+        schedulerService.save(scheduler);
+
+        schedulerService.startNow(scheduler, channelId);
+
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Deletes a connection by provided connection ID")
@@ -697,7 +737,7 @@ public class ConnectionController {
         resource.setConnectionId(connectionId);
         resource.setTitle(connectionId + "_" + UUID.randomUUID());
         resource.setStatus(true);
-        resource.setCronExp("59 59 23 31 12 ? 2123");
+        resource.setCronExp(Constant.NEVER_TRIGGERED_CRON);
         resource.setDebugMode(true);
 
         Scheduler scheduler = schedulerService.toEntity(resource);

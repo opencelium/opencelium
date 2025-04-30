@@ -235,6 +235,11 @@ public class SchedulerServiceImp implements SchedulerService {
     }
 
     @Override
+    public void startNow(Scheduler scheduler, String channelId) {
+        schedulingStrategy.runJob(scheduler, channelId);
+    }
+
+    @Override
     public void startNow(Scheduler scheduler, Map<String, Object> webhook) throws Exception {
         schedulingStrategy.runJob(scheduler, webhook);
     }
