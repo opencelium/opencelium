@@ -6,18 +6,22 @@ import org.springframework.stereotype.Component;
 @Component
 public class WebSocketNotificationService {
     private final SimpMessagingTemplate simpMessagingTemplate;
-    private boolean open = false;
+    private boolean on = false;
 
     public WebSocketNotificationService(SimpMessagingTemplate simpMessagingTemplate) {
         this.simpMessagingTemplate = simpMessagingTemplate;
     }
 
-    public void setOpen(boolean open) {
-        this.open = open;
+    public void setOn() {
+        this.on = true;
+    }
+
+    public void setOff() {
+        this.on = false;
     }
 
     public <E> void send(String destination, E message) {
-        if (open) {
+        if (on) {
             simpMessagingTemplate.convertAndSend(destination, message);
         }
     }
