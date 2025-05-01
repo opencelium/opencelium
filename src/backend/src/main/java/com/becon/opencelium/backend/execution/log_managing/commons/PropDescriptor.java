@@ -37,7 +37,7 @@ public class PropDescriptor {
         return required;
     }
 
-    public Function<String, Object> getValueParser() {
+    public Function<String, Object> valueParser() {
         return valueParser;
     }
 }

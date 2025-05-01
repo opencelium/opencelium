@@ -1,6 +1,8 @@
 package com.becon.opencelium.backend.execution.log_managing.commons;
 
 public interface LogPropertyKeys {
+    String SECTION = "section";
+    String SCOPE = "scope";
     String INDEX_PATH = "indexPath";
     String TYPE = "type";
     String FUNCTION = "function";
