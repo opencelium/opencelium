@@ -5,7 +5,6 @@ import com.becon.opencelium.backend.execution.log_managing.core.LogLineParser;
 import com.becon.opencelium.backend.execution.log_managing.core.ParsedLogLine;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.Set;
 
 import static com.becon.opencelium.backend.execution.log_managing.commons.LogParserUtils.*;
@@ -30,10 +29,9 @@ public class ResponseParser implements LogLineParser {
         if (!supports(line)) {
             throw LogProcessingException.unsupportedLine(line, entryType);
         }
-        Map<String, String> props = extractKeyValuePairs(line, requiredProperties);
         ParsedLogLine pll = new ParsedLogLine();
         pll.setEntryType(entryType);
-        pll.setProperties(PropertyParsers.applyParsing(requiredProperties, props));
+        pll.setProperties(LogParserUtils.extractOutermostProperties(line, requiredProperties));
         pll.setIndexPath(null);
         pll.setSize(line.getBytes(StandardCharsets.UTF_8).length);
         return pll;

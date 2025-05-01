@@ -1,10 +1,16 @@
 package com.becon.opencelium.backend.execution.log_managing.commons;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
+
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class PropertyParsers {
+
+    private static final ObjectMapper mapper = new ObjectMapper();
+    public static final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 
     public static Integer parseInteger(String key, String value) {
         try {
@@ -12,16 +18,6 @@ public class PropertyParsers {
         } catch (NumberFormatException e) {
             throw LogProcessingException.invalidValueForProperty(key, value);
         }
-    }
-
-    public static Map<String, Object> applyParsing(Set<PropDescriptor> descriptors, Map<String, String> properties) {
-        return properties.entrySet().stream()
-                .map(x -> descriptors.stream()
-                        .filter(y -> y.key().equals(x.getKey()))
-                        .findFirst()
-                        .map(z -> Map.entry(x.getKey(), z.getValueParser().apply(x.getValue())))
-                        .orElseGet(() -> Map.entry(x.getKey(), x.getValue()))
-                ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     public static Boolean parseBoolean(String key, String value) {
@@ -32,7 +28,20 @@ public class PropertyParsers {
     }
 
     public static Object parseData(String data) {
-        // TODO: implement
+        if (StringUtils.isBlank(data)) {
+            return data;
+        }
+
+        // JSON
+        if (data.charAt(0) == '{' && data.charAt(data.length() - 1) == '}') {
+            try {
+                return mapper.readValue(data, Map.class);
+            } catch (JsonProcessingException e) {
+                return data;
+            }
+        }
+
+        // TODO: handle xml format
         return data;
     }
 }

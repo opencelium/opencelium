@@ -32,7 +32,7 @@ public class ExecutionStartParser implements LogLineParser {
         }
         ParsedLogLine pll = new ParsedLogLine();
         pll.setEntryType(entryType);
-        pll.setProperties(PropertyParsers.applyParsing(requiredProperties, extractKeyValuePairs(line, requiredProperties)));
+        pll.setProperties(LogParserUtils.extractOutermostProperties(line, requiredProperties));
         pll.setIndexPath(null);
         pll.setSize(line.getBytes(StandardCharsets.UTF_8).length);
         return pll;
