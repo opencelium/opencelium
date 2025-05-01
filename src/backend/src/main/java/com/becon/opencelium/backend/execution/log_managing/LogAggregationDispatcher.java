@@ -27,16 +27,21 @@ public class LogAggregationDispatcher implements LogAggregationEngine {
 
     @Override
     public void processLine(String executionId, String line) {
-        findParser(line).ifPresentOrElse(parser -> {
-            ParsedLogLine parsed = parser.parse(line);
+        try {
+            findParser(line).ifPresentOrElse(parser -> {
+                ParsedLogLine parsed = parser.parse(line);
 
-            contextManager.track(executionId, parsed)
-                    .ifPresent(logMetaDataService::save);
-        }, () -> {
+                contextManager.track(executionId, parsed)
+                        .ifPresent(logMetaDataService::save);
+            }, () -> {
+                contextManager.tryHandleNotStructuredLine(executionId, line);
+
+                throw new RuntimeException("No parser found for the log line: %s".formatted(line));
+            });
+        } catch (Exception e) {
             contextManager.cleanUp(executionId);
-
-            throw new RuntimeException("No parser found for the log line: %s".formatted(line));
-        });
+            throw e;
+        }
     }
 
     private Optional<LogLineParser> findParser(String line) {

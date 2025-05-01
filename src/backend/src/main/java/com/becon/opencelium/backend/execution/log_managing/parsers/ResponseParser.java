@@ -1,16 +1,12 @@
 package com.becon.opencelium.backend.execution.log_managing.parsers;
 
-import com.becon.opencelium.backend.execution.log_managing.commons.LogPropertyKeys;
-import com.becon.opencelium.backend.execution.log_managing.commons.LogProcessingException;
-import com.becon.opencelium.backend.execution.log_managing.commons.PropDescriptor;
+import com.becon.opencelium.backend.execution.log_managing.commons.*;
 import com.becon.opencelium.backend.execution.log_managing.core.LogLineParser;
 import com.becon.opencelium.backend.execution.log_managing.core.ParsedLogLine;
-import com.becon.opencelium.backend.execution.log_managing.commons.LogEntryType;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.becon.opencelium.backend.execution.log_managing.commons.LogParserUtils.*;
 import static com.becon.opencelium.backend.execution.log_managing.commons.PropDescriptor.of;
@@ -37,36 +33,10 @@ public class ResponseParser implements LogLineParser {
         Map<String, String> props = extractKeyValuePairs(line, requiredProperties);
         ParsedLogLine pll = new ParsedLogLine();
         pll.setEntryType(entryType);
-        pll.setProperties(parseDeeply(props));
+        pll.setProperties(PropertyParsers.applyParsing(requiredProperties, props));
         pll.setIndexPath(null);
         pll.setSize(line.getBytes(StandardCharsets.UTF_8).length);
         return pll;
-    }
-
-    /**
-     * Filters only concrete properties and converts them to their precise type that it is supposed to be
-     *
-     * @return a Map of key, and precise value
-     */
-    private Map<String, Object> parseDeeply(Map<String, String> props) {
-        return props.entrySet().stream()
-                .map(entry -> {
-                    if (LogPropertyKeys.RESPONSE_TIME.equals(entry.getKey())) {
-                        try {
-                            return Map.entry(entry.getKey(), Integer.parseInt(entry.getValue()));
-                        } catch (NumberFormatException e) {
-                            throw LogProcessingException.invalidValueForProperty(entry.getKey(), entry.getValue());
-                        }
-                    } else if (LogPropertyKeys.STATUS.equals(entry.getKey())) {
-                        try {
-                            return Map.entry(entry.getKey(), Integer.parseInt(entry.getValue()));
-                        } catch (NumberFormatException e) {
-                            throw LogProcessingException.invalidValueForProperty(entry.getKey(), entry.getValue());
-                        }
-                    }
-                    return entry;
-                })
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     /**
@@ -76,8 +46,8 @@ public class ResponseParser implements LogLineParser {
      */
     private static Set<PropDescriptor> requiredProperties() {
         return Set.of(
-                of(LogPropertyKeys.STATUS),
-                of(LogPropertyKeys.RESPONSE_TIME)
+                of(LogPropertyKeys.STATUS, x -> PropertyParsers.parseInteger(x, LogPropertyKeys.STATUS)),
+                of(LogPropertyKeys.RESPONSE_TIME, x -> PropertyParsers.parseInteger(x, LogPropertyKeys.RESPONSE_TIME))
         );
     }
 

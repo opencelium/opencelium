@@ -7,4 +7,6 @@ public interface ExecutionContextManager {
     Optional<LogMetaData> track(String executionId, ParsedLogLine line);
 
     void cleanUp(String execId);
+
+    void tryHandleNotStructuredLine(String executionId, String line);
 }
