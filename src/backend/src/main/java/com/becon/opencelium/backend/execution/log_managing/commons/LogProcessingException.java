@@ -38,4 +38,8 @@ public class LogProcessingException extends RuntimeException {
     public static LogProcessingException invalidValueForProperty(String key, Object value) {
         return new LogProcessingException("Invalid value for property : %s=%s".formatted(key, value));
     }
+
+    public static LogProcessingException invalidLoopCount(String loopCount) {
+        return new LogProcessingException("Invalid loopCount : %s".formatted(loopCount));
+    }
 }

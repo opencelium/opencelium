@@ -1,16 +1,12 @@
 package com.becon.opencelium.backend.execution.log_managing.parsers;
 
-import com.becon.opencelium.backend.execution.log_managing.commons.LogPropertyKeys;
-import com.becon.opencelium.backend.execution.log_managing.commons.LogProcessingException;
-import com.becon.opencelium.backend.execution.log_managing.commons.PropDescriptor;
+import com.becon.opencelium.backend.execution.log_managing.commons.*;
 import com.becon.opencelium.backend.execution.log_managing.core.LogLineParser;
 import com.becon.opencelium.backend.execution.log_managing.core.ParsedLogLine;
-import com.becon.opencelium.backend.execution.log_managing.commons.LogEntryType;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.becon.opencelium.backend.execution.log_managing.commons.LogParserUtils.extractEntryType;
 import static com.becon.opencelium.backend.execution.log_managing.commons.LogParserUtils.extractKeyValuePairs;
@@ -38,37 +34,10 @@ public class IfStartParser implements LogLineParser {
         Map<String, String> props = extractKeyValuePairs(line, requiredProperties);
         ParsedLogLine pll = new ParsedLogLine();
         pll.setEntryType(entryType);
-        pll.setProperties(parseDeeply(props));
+        pll.setProperties(PropertyParsers.applyParsing(requiredProperties, props));
         pll.setIndexPath(props.get(LogPropertyKeys.INDEX_PATH));
         pll.setSize(line.getBytes(StandardCharsets.UTF_8).length);
         return pll;
-    }
-
-    /**
-     * Filters only concrete properties and converts them to their precise type that it is supposed to be
-     *
-     * @return a Map of key, and precise value
-     */
-    private Map<String, Object> parseDeeply(Map<String, String> props) {
-        return props.entrySet().stream()
-                .map(entry -> {
-                    String key = entry.getKey();
-                    String value = entry.getValue();
-
-                    Object parsedValue;
-                    if (LogPropertyKeys.LOOP_INDEX.equals(key)) {
-                        try {
-                            parsedValue = Integer.parseInt(value);
-                        } catch (NumberFormatException e) {
-                            throw LogProcessingException.invalidLoopIndex(value);
-                        }
-                    } else {
-                        parsedValue = value;
-                    }
-
-                    return Map.entry(key, parsedValue);
-                })
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     /**
@@ -79,7 +48,7 @@ public class IfStartParser implements LogLineParser {
     private static Set<PropDescriptor> requiredProperties() {
         return Set.of(
                 of(LogPropertyKeys.INDEX_PATH),
-                of(LogPropertyKeys.LOOP_INDEX, false),
+                of(LogPropertyKeys.LOOP_INDEX, false, x -> PropertyParsers.parseInteger(x, LogPropertyKeys.LOOP_INDEX)),
                 of(LogPropertyKeys.EXPRESSION)
         );
     }

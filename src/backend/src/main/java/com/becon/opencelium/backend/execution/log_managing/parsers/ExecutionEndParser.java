@@ -1,16 +1,11 @@
 package com.becon.opencelium.backend.execution.log_managing.parsers;
 
-import com.becon.opencelium.backend.execution.log_managing.commons.LogPropertyKeys;
-import com.becon.opencelium.backend.execution.log_managing.commons.LogEntryType;
-import com.becon.opencelium.backend.execution.log_managing.commons.LogProcessingException;
-import com.becon.opencelium.backend.execution.log_managing.commons.PropDescriptor;
+import com.becon.opencelium.backend.execution.log_managing.commons.*;
 import com.becon.opencelium.backend.execution.log_managing.core.LogLineParser;
 import com.becon.opencelium.backend.execution.log_managing.core.ParsedLogLine;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.becon.opencelium.backend.execution.log_managing.commons.LogParserUtils.extractEntryType;
 import static com.becon.opencelium.backend.execution.log_managing.commons.LogParserUtils.extractKeyValuePairs;
@@ -38,20 +33,10 @@ public class ExecutionEndParser implements LogLineParser {
         }
         ParsedLogLine pll = new ParsedLogLine();
         pll.setEntryType(entryType);
-        pll.setProperties(parseDeeply(extractKeyValuePairs(line, requiredProperties)));
+        pll.setProperties(PropertyParsers.applyParsing(requiredProperties, extractKeyValuePairs(line, requiredProperties)));
         pll.setIndexPath(null);
         pll.setSize(line.getBytes(StandardCharsets.UTF_8).length);
         return pll;
-    }
-
-    /**
-     * Filters only concrete properties and converts them to their precise type that it is supposed to be
-     *
-     * @return a Map of key, and precise value
-     */
-    private Map<String, Object> parseDeeply(Map<String, String> props) {
-        return props.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     /**

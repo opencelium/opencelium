@@ -12,6 +12,8 @@ import java.util.regex.Pattern;
 public class LogParserUtils {
 
     private static final ObjectMapper mapper = new ObjectMapper();
+    private static final Pattern SCOPE_PATTERN = Pattern.compile("scope=(\\S+)"); // scope value must not contain spaces
+    private static final Pattern SECTION_PATTERN = Pattern.compile("section=(\\S+)"); // section value must not contain spaces
 
     public static Map<String, String> extractKeyValuePairs(String line, Set<PropDescriptor> props) {
         Map<String, String> result = new HashMap<>();
@@ -38,10 +40,13 @@ public class LogParserUtils {
 
 
     public static LogEntryType extractEntryType(String line) {
-        Pattern pattern = Pattern.compile("(scope|section)=(\\S+)");
-        Matcher matcher = pattern.matcher(line);
+        Matcher matcher = SECTION_PATTERN.matcher(line);
         if (matcher.find()) {
-            return LogEntryType.getByTitleOrElseNull(matcher.group(2));
+            return LogEntryType.getByTitleOrElseNull(matcher.group(1));
+        }
+        matcher = SCOPE_PATTERN.matcher(line);
+        if (matcher.find()) {
+            return LogEntryType.getByTitleOrElseNull(matcher.group(1));
         }
         return null;
     }
