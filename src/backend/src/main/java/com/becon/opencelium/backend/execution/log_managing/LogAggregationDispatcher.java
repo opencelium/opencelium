@@ -33,11 +33,7 @@ public class LogAggregationDispatcher implements LogAggregationEngine {
 
                 contextManager.track(executionId, parsed)
                         .ifPresent(logMetaDataService::save);
-            }, () -> {
-                contextManager.tryHandleNotStructuredLine(executionId, line);
-
-                throw new RuntimeException("No parser found for the log line: %s".formatted(line));
-            });
+            }, () -> contextManager.tryHandleNotStructuredLine(executionId, line));
         } catch (Exception e) {
             contextManager.cleanUp(executionId);
             throw e;
