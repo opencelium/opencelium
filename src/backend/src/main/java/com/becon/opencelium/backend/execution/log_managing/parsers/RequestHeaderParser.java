@@ -1,21 +1,23 @@
 package com.becon.opencelium.backend.execution.log_managing.parsers;
 
-import com.becon.opencelium.backend.execution.log_managing.commons.LogConstants;
-import com.becon.opencelium.backend.execution.log_managing.commons.LogProcessingException;
-import com.becon.opencelium.backend.execution.log_managing.commons.PropDescriptor;
+import com.becon.opencelium.backend.execution.log_managing.commons.*;
 import com.becon.opencelium.backend.execution.log_managing.core.LogLineParser;
 import com.becon.opencelium.backend.execution.log_managing.core.ParsedLogLine;
-import com.becon.opencelium.backend.execution.log_managing.commons.LogEntryType;
 
-import java.util.Collections;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
 import static com.becon.opencelium.backend.execution.log_managing.commons.LogParserUtils.extractEntryType;
-import static com.becon.opencelium.backend.execution.log_managing.commons.LogParserUtils.extractKeyValuePairs;
+import static com.becon.opencelium.backend.execution.log_managing.commons.PropDescriptor.of;
 
 public class RequestHeaderParser implements LogLineParser {
 
     private static final LogEntryType entryType = LogEntryType.REQUEST_HEADER;
+    private static final Set<PropDescriptor> requiredProperties;
+
+    static {
+        requiredProperties = requiredProperties();
+    }
 
     @Override
     public boolean supports(String line) {
@@ -27,14 +29,21 @@ public class RequestHeaderParser implements LogLineParser {
         if (!supports(line)) {
             throw LogProcessingException.unsupportedLine(line, entryType);
         }
-
-        extractKeyValuePairs(line, Set.of(PropDescriptor.of(LogConstants.DATA)));
-
         ParsedLogLine pll = new ParsedLogLine();
         pll.setEntryType(entryType);
-        pll.setProperties(Collections.emptyMap());
+        pll.setProperties(LogParserUtils.extractOutermostProperties(line, requiredProperties));
         pll.setIndexPath(null);
-        pll.setSize(line.getBytes().length);
+        pll.setSize(line.getBytes(StandardCharsets.UTF_8).length);
         return pll;
     }
+
+    /**
+     * Defines the set of properties that must be present in the log line.
+     *
+     * @return a Set containing required property descriptors
+     */
+    private static Set<PropDescriptor> requiredProperties() {
+        return Set.of(of(LogPropertyKeys.DATA, PropertyParsers::parseData));
+    }
+
 }

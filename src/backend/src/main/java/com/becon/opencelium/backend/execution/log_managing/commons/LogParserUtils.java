@@ -1,57 +1,154 @@
 package com.becon.opencelium.backend.execution.log_managing.commons;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.*;
 
 public class LogParserUtils {
 
-    private static final ObjectMapper mapper = new ObjectMapper();
-
-    public static Map<String, String> extractKeyValuePairs(String line, Set<PropDescriptor> props) {
-        Map<String, String> result = new HashMap<>();
-
-        for (PropDescriptor prop : props) {
-            String regex = prop.key() + "=((\"[^\"]*\")|[^\\s\"]+)";
-            Pattern pattern = Pattern.compile(regex);
-            Matcher matcher = pattern.matcher(line);
-
-            if (matcher.find()) {
-                String rawValue = matcher.group(1);
-                String value = rawValue.startsWith("\"") && rawValue.endsWith("\"")
-                        ? rawValue.substring(1, rawValue.length() - 1)
-                        : rawValue;
-
-                result.put(prop.key(), value);
-            } else if (prop.required()) {
-                throw LogProcessingException.missingRequiredProperty(prop.key(), line);
-            }
-        }
-
-        return result;
-    }
-
-
     public static LogEntryType extractEntryType(String line) {
-        Pattern pattern = Pattern.compile("(scope|section)=(\\S+)");
-        Matcher matcher = pattern.matcher(line);
-        if (matcher.find()) {
-            return LogEntryType.getByTitleOrElseNull(matcher.group(2));
+        Map<String, Object> result = extractOutermostProperties(line, Collections.emptySet(), true);
+        Object section = result.get(LogPropertyKeys.SECTION);
+        if (section != null) {
+            return LogEntryType.getByTitleOrElseNull((String) section);
+        }
+        Object scope = result.get(LogPropertyKeys.SCOPE);
+        if (scope != null) {
+            return LogEntryType.getByTitleOrElseNull((String) scope);
         }
         return null;
     }
 
-    @SuppressWarnings("unchecked")
-    public static Map<String, Object> parseMap(String data) {
-        try {
-            return (Map<String, Object>) mapper.readValue(data, Map.class);
-        } catch (JsonProcessingException e) {
-            throw LogProcessingException.cantReadData(data);
+    public static Map<String, Object> extractOutermostProperties(String line, Set<PropDescriptor> props) {
+        return extractOutermostProperties(line, props, false);
+    }
+
+    public static Map<String, Object> extractOutermostProperties(String line, Set<PropDescriptor> props, boolean onlySectionOrScope) {
+        // TODO: handle xml format
+        Map<String, Object> result = new HashMap<>();
+
+        String currentProp = null;
+
+        int startCurrentPropIndex = -1;
+        int startCurrentPropValueIndex = -1;
+
+        Stack<Character> prefixSuffixStack = new Stack<>();
+
+        char[] chars = line.toCharArray();
+
+        for (int i = 0; i < chars.length; i++) {
+            if (i == chars.length - 1) {
+                if (currentProp != null && startCurrentPropValueIndex != -1) {
+                    if (onlySectionOrScope && (LogPropertyKeys.SECTION.equals(currentProp) || LogPropertyKeys.SCOPE.equals(currentProp))) {
+                        return Map.of(currentProp, line.substring(startCurrentPropValueIndex));
+                    }
+                    checkAndPutToMap(currentProp, line.substring(startCurrentPropValueIndex), result, props);
+                }
+            }
+
+            if (prefixSuffixStack.isEmpty()) {
+
+                if (chars[i] == '=') {
+
+                    if (startCurrentPropIndex != -1) {
+
+                        if (isData(chars, i - 1)) {
+                            checkAndPutToMap(LogPropertyKeys.DATA, line.substring(i + 1), result, props);
+                            break;
+                        }
+
+                        if (i < chars.length - 1) {
+                            if (chars[i + 1] == '"') {
+                                prefixSuffixStack.push('"');
+                            } else if (chars[i + 1] == '[') {
+                                prefixSuffixStack.push(']');
+                            } else if (chars[i + 1] == '{') {
+                                prefixSuffixStack.push('}');
+                            }
+                            startCurrentPropValueIndex = i + 1;
+                            currentProp = line.substring(startCurrentPropIndex, i);
+                            startCurrentPropIndex = -1;
+                            i++;
+                        } else {
+                            checkAndPutToMap(line.substring(startCurrentPropIndex, i), StringUtils.EMPTY, result, props);
+                        }
+                    }
+                } else if (Character.isWhitespace(chars[i])) {
+                    if (startCurrentPropValueIndex != -1) {
+                        if (onlySectionOrScope && (LogPropertyKeys.SECTION.equals(currentProp) || LogPropertyKeys.SCOPE.equals(currentProp))) {
+                            return Map.of(currentProp, line.substring(startCurrentPropValueIndex, i));
+                        }
+                        checkAndPutToMap(currentProp, line.substring(startCurrentPropValueIndex, i), result, props);
+                        startCurrentPropValueIndex = -1;
+                    }
+                    startCurrentPropIndex = -1;
+                    currentProp = null;
+                } else if (isValidCharacter(chars[i])) {
+                    if (startCurrentPropIndex == -1 && startCurrentPropValueIndex == -1) {
+                        startCurrentPropIndex = i;
+                    } else if (currentProp != null && startCurrentPropValueIndex == -1) {
+                        startCurrentPropValueIndex = i;
+                    }
+                }
+            } else {
+                if (chars[i] == '"') {
+                    Character peeked = prefixSuffixStack.peek();
+                    if (peeked.equals('"')) {
+                        checkAndPutToMap(currentProp, line.substring(startCurrentPropValueIndex, i + 1), result, props);
+                        startCurrentPropValueIndex = -1;
+                        currentProp = null;
+                        prefixSuffixStack.pop();
+                    }
+                } else if (chars[i] == ']') {
+                    Character peeked = prefixSuffixStack.peek();
+                    if (peeked.equals(']')) {
+                        checkAndPutToMap(currentProp, line.substring(startCurrentPropValueIndex, i + 1), result, props);
+                        startCurrentPropValueIndex = -1;
+                        currentProp = null;
+                        prefixSuffixStack.pop();
+                    }
+                } else if (chars[i] == '}') {
+                    Character peeked = prefixSuffixStack.peek();
+                    if (peeked.equals('}')) {
+                        checkAndPutToMap(currentProp, line.substring(startCurrentPropValueIndex, i + 1), result, props);
+                        startCurrentPropValueIndex = -1;
+                        currentProp = null;
+                        prefixSuffixStack.pop();
+                    }
+                }
+            }
         }
+
+        result.forEach((key, value) -> {
+            if (props.stream().noneMatch(prop -> key.equals(prop.key()))) {
+                throw LogProcessingException.missingRequiredProperty(key, line);
+            }
+        });
+
+        return result;
+    }
+
+    private static void checkAndPutToMap(String key, String value, Map<String, Object> result, Set<PropDescriptor> props) {
+        props.stream()
+                .filter(x -> Objects.equals(x.key(), key))
+                .findFirst()
+                .ifPresent(x -> result.put(key, x.valueParser().apply(value)));
+    }
+
+    private static boolean isValidCharacter(char ch) {
+        return Character.isAlphabetic(ch) || Character.isDigit(ch) || ch == '_';
+    }
+
+    private static boolean isData(char[] chars, int i) {
+        int length = LogPropertyKeys.DATA.length();
+        if (i - length >= -1) {
+            for (int j = 0; j < length; j++) {
+                if (LogPropertyKeys.DATA.charAt(j) != chars[i - length + j + 1]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
     }
 }

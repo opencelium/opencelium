@@ -2,7 +2,7 @@ package com.becon.opencelium.backend.execution.log_managing;
 
 import com.becon.opencelium.backend.database.mongodb.entity.LogMetaData;
 import com.becon.opencelium.backend.execution.log_managing.commons.ElementsLinkedList;
-import com.becon.opencelium.backend.execution.log_managing.commons.LogConstants;
+import com.becon.opencelium.backend.execution.log_managing.commons.LogPropertyKeys;
 import com.becon.opencelium.backend.execution.log_managing.commons.LogProcessingException;
 import com.becon.opencelium.backend.execution.log_managing.commons.LogTrackerType;
 import com.becon.opencelium.backend.execution.log_managing.core.ExecutionContextManager;
@@ -10,6 +10,7 @@ import com.becon.opencelium.backend.execution.log_managing.core.LogElementTracke
 import com.becon.opencelium.backend.execution.log_managing.core.ParsedLogLine;
 import com.becon.opencelium.backend.execution.log_managing.trackers.LogTrackerFactory;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -35,30 +36,56 @@ public class SimpleExecutionContextManager implements ExecutionContextManager {
         }
     }
 
+    @Override
+    public void cleanUp(String execId) {
+        executionContexts.remove(execId);
+        trackersList.remove(execId);
+    }
+
+    @Override
+    public synchronized void tryHandleNotStructuredLine(String executionId, String line) {
+        ExecutionContext executionContext = Optional.ofNullable(executionContexts.get(executionId))
+                .orElseThrow(() -> LogProcessingException.noExecutionInitialized(executionId));
+
+        ElementsLinkedList<LogElementTracker> root = Optional.ofNullable(trackersList.get(executionId))
+                .orElseThrow(() -> LogProcessingException.noExecutionInitialized(executionId));
+
+        LogElementTracker tracker = Optional.ofNullable(root.getLastData())
+                .orElseThrow(() -> LogProcessingException.noTrackerInitialized(line));
+
+        tracker.onNotStructuredLine(line);
+        executionContext.currentOffset.getAndUpdate(x -> x + line.getBytes(StandardCharsets.UTF_8).length);
+    }
+
     private void initNewExecution(String executionId, ParsedLogLine parsedLog) {
-        String connectionId = (String) parsedLog.getProperties().get(LogConstants.CONNECTION_ID);
-        String flowchartId = (String) parsedLog.getProperties().get(LogConstants.FLOWCHART_ID);
+        String connectionId = (String) parsedLog.getProperties().get(LogPropertyKeys.CONNECTION_ID);
+        String flowchartId = (String) parsedLog.getProperties().get(LogPropertyKeys.FLOWCHART_ID);
         executionContexts.put(executionId, new ExecutionContext(parsedLog.getSize(), connectionId, flowchartId));
     }
 
     private Optional<LogMetaData> processExecution(String executionId, ParsedLogLine parsedLog) {
         LogTrackerType trackerType = LogTrackerType.fromLogEntry(parsedLog.getEntryType());
-        ExecutionContext executionContext = executionContexts.get(executionId);
+
+        ExecutionContext executionContext = Optional.ofNullable(executionContexts.get(executionId))
+                .orElseThrow(() -> LogProcessingException.noExecutionInitialized(executionId));
+
         if (parsedLog.getEntryType().isStartingNewStack()) {
             LogElementTracker tracker = LogTrackerFactory.initTracker(trackerType);
             tracker.onStart(parsedLog, executionContext.currentOffset.get());
 
             executionContext.currentOffset.getAndUpdate(x -> x + parsedLog.getSize());
 
-            trackersList.computeIfAbsent(executionId, id -> new ElementsLinkedList<>(parsedLog.getIndexPath(), tracker))
-                    .addLast(parsedLog.getIndexPath(), tracker);
-
+            if (trackersList.containsKey(executionId)) {
+                trackersList.get(executionId).addLast(parsedLog.getIndexPath(), tracker);
+            } else {
+                trackersList.put(executionId, new ElementsLinkedList<>(parsedLog.getIndexPath(), tracker));
+            }
             return Optional.empty();
         } else {
             ElementsLinkedList<LogElementTracker> root = Optional.ofNullable(trackersList.get(executionId))
                     .orElseThrow(() -> LogProcessingException.noExecutionInitialized(executionId));
 
-            LogElementTracker tracker = Optional.ofNullable(root.searchAndGetData(parsedLog.getIndexPath()))
+            LogElementTracker tracker = Optional.ofNullable(root.getLastData())
                     .orElseThrow(() -> LogProcessingException.noTrackerInitialized(parsedLog.getEntryType(), parsedLog.getIndexPath()));
 
             executionContext.currentOffset.getAndUpdate(x -> x + parsedLog.getSize());
@@ -77,12 +104,6 @@ public class SimpleExecutionContextManager implements ExecutionContextManager {
                 return Optional.empty();
             }
         }
-    }
-
-    @Override
-    public void cleanUp(String execId) {
-        executionContexts.remove(execId);
-        trackersList.remove(execId);
     }
 
     private static class ExecutionContext {

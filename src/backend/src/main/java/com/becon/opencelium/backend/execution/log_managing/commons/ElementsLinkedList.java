@@ -32,17 +32,7 @@ public class ElementsLinkedList<E> {
         Node<E> newNode = new Node<>(null, null, indexPath, data);
         tail.next = newNode;
         newNode.prev = tail;
-    }
-
-    public E searchAndGetData(String indexPath) {
-        Node<E> dummmy = head;
-        while (dummmy != null) {
-            if (Objects.equals(dummmy.indexPath, indexPath)) {
-                return dummmy.data;
-            }
-            dummmy = dummmy.next;
-        }
-        return null;
+        tail = newNode;
     }
 
     public void dropLast() {
@@ -50,6 +40,7 @@ public class ElementsLinkedList<E> {
         if (Objects.isNull(prev)) {
             head = null;
             tail = null;
+            return;
         }
         prev.next = null;
         tail = prev;
@@ -71,6 +62,10 @@ public class ElementsLinkedList<E> {
             dummy = dummy.next;
         }
         return paths;
+    }
+
+    public E getLastData() {
+        return tail == null ? null : tail.data;
     }
 
     private static class Node<E> {
