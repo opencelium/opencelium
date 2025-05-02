@@ -38,10 +38,15 @@ import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
 import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
 import com.becon.opencelium.backend.database.mysql.service.UserService;
 import com.becon.opencelium.backend.enums.LangEnum;
+import com.becon.opencelium.backend.enums.SupportFileStatus;
 import com.becon.opencelium.backend.execution.JSHttpObject;
 import com.becon.opencelium.backend.execution.notification.EmailServiceImpl;
 import com.becon.opencelium.backend.execution.notification.IncomingWebhookService;
 import com.becon.opencelium.backend.execution.oc721.Operation;
+import com.becon.opencelium.backend.execution.socket.Connection2WebSocketChannelMapping;
+import com.becon.opencelium.backend.execution.socket.SocketConstant;
+import com.becon.opencelium.backend.execution.socket.WebSocketNotificationService;
+import com.becon.opencelium.backend.execution.support_file.SupportFile;
 import com.becon.opencelium.backend.execution.support_file.SupportFileService;
 import com.becon.opencelium.backend.quartz.JobExecutor;
 import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
@@ -89,6 +94,8 @@ public class ExecutionAspect {
     private final LastExecutionService lastExecutionService;
     private final DataAggregatorService dataAggregatorService;
     private final SupportFileService supportFileService;
+    private final WebSocketNotificationService socketNotificationService;
+    private final Connection2WebSocketChannelMapping connection2ChannelMapping;
     private final SubscriptionService subscriptionService;
 
     public ExecutionAspect(
@@ -101,7 +108,9 @@ public class ExecutionAspect {
             IncomingWebhookService incomingWebhookService,
             EmailServiceImpl emailService,
             Environment env,
-            SupportFileService supportFileService) {
+            SupportFileService supportFileService,
+            WebSocketNotificationService socketNotificationService,
+            Connection2WebSocketChannelMapping connection2ChannelMapping) {
         this.schedulerService = schedulerService;
         this.userService = userService;
         this.incomingWebhookService = incomingWebhookService;
@@ -112,6 +121,8 @@ public class ExecutionAspect {
         this.dataAggregatorService = dataAggregatorService;
         this.supportFileService = supportFileService;
         this.subscriptionService = subscriptionService;
+        this.socketNotificationService = socketNotificationService;
+        this.connection2ChannelMapping = connection2ChannelMapping;
     }
 
     @Before("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
@@ -156,6 +167,8 @@ public class ExecutionAspect {
             schedulerService.deleteById(schedulerId);
             // delete temporarily created connection
             connectionServiceImp.deleteById(connectionId);
+            // remove mapping
+            connection2ChannelMapping.remove(connectionId);
         } else if (data.getExecType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE) {
             Long connectionId = (Long) context.get("connectionId");
             String timestamp = (String) context.get("timestamp");
@@ -201,6 +214,8 @@ public class ExecutionAspect {
             schedulerService.deleteById(schedulerId);
             // delete temporarily created connection
             connectionServiceImp.deleteById(connectionId);
+            // remove mapping
+            connection2ChannelMapping.remove(connectionId);
         } else if (data.getExecType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE) {
             Long connectionId = (Long) context.get("connectionId");
             String timestamp = (String) context.get("timestamp");

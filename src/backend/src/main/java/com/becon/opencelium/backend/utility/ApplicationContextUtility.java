@@ -16,21 +16,30 @@
 
 package com.becon.opencelium.backend.utility;
 
+import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ApplicationContextUtility implements ApplicationContextAware {
+    private static ApplicationContext context;
 
-    private static ApplicationContextUtility context;
+    @Override
+    public void setApplicationContext(@NotNull ApplicationContext context) throws BeansException {
+        this.context = context;
+    }
 
-    public static <T extends Object> T getBean (Class<T> beanClass) {
+    public static <T> T getBean(Class<T> beanClass) {
         return context.getBean(beanClass);
     }
 
-    @Override
-    public void setApplicationContext(org.springframework.context.ApplicationContext applicationContext) throws BeansException {
-        this.context = context;
+    public static <T> T getBean(String name, Class<T> beanClass) {
+        return context.getBean(name, beanClass);
+    }
+
+    public static ApplicationContext getApplicationContext() {
+        return context;
     }
 }

@@ -27,6 +27,7 @@ import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
+import com.becon.opencelium.backend.execution.socket.Connection2WebSocketChannelMapping;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.ApiDataResource;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
@@ -90,6 +91,7 @@ public class ConnectionController {
     private final ConnectionService connectionService;
     private final ConnectionMngService connectionMngService;
     private final SchedulerService schedulerService;
+    private final Connection2WebSocketChannelMapping connection2ChannelMapping;
     private final Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper;
     private final Mapper<Connection, ConnectionDTO> connectionMapper;
     private final Mapper<Connection, ConnectionResource> connectionResourceMapper;
@@ -98,7 +100,9 @@ public class ConnectionController {
 
     public ConnectionController(
             Environment environment,
-            SchedulerService schedulerService, Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper,
+            SchedulerService schedulerService,
+            Connection2WebSocketChannelMapping connection2ChannelMapping,
+            Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper,
             Mapper<Connection, ConnectionDTO> connectionMapper,
             Mapper<Connection, ConnectionResource> connectionResourceMapper,
             Mapper<ConnectionDTO, ConnectionOldDTO> connectionOldDTOMapper,
@@ -108,6 +112,7 @@ public class ConnectionController {
     ) {
         this.environment = environment;
         this.schedulerService = schedulerService;
+        this.connection2ChannelMapping = connection2ChannelMapping;
         this.connectionService = connectionService;
         this.connectionMngMapper = connectionMngMapper;
         this.connectionMapper = connectionMapper;
@@ -264,6 +269,8 @@ public class ConnectionController {
 
         Scheduler scheduler = schedulerService.toEntity(resource);
         schedulerService.save(scheduler);
+
+        connection2ChannelMapping.add(connectionId, channelId);
 
         schedulerService.startNow(scheduler, channelId);
 
