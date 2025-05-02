@@ -18,4 +18,9 @@ public class SimpleExecutionContextManager implements ExecutionContextManager {
     @Override
     public void cleanUp(String execId) {
     }
+
+    @Override
+    public void tryHandleNotStructuredLine(String executionId, String line) {
+
+    }
 }
