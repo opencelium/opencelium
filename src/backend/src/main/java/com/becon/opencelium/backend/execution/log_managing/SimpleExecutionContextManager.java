@@ -96,4 +96,9 @@ public class SimpleExecutionContextManager implements ExecutionContextManager {
             this.flowchartId = flowchartId;
         }
     }
+
+    @Override
+    public void tryHandleNotStructuredLine(String executionId, String line) {
+
+    }
 }

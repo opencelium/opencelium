@@ -1,11 +1,14 @@
 package com.becon.opencelium.backend.execution.log_managing.commons;
 
-public interface LogConstants {
+public interface LogPropertyKeys {
+    String SECTION = "section";
+    String SCOPE = "scope";
     String INDEX_PATH = "indexPath";
     String TYPE = "type";
     String FUNCTION = "function";
     String LOOP_INDEX = "loopIndex";
     String LOOP_ITERATOR = "loopIterator";
+    String LOOP_COUNT = "loopCount";
     String URL = "url";
     String HTTP_METHOD = "httpMethod";
     String DATA = "data";

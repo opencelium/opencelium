@@ -1,15 +1,11 @@
 package com.becon.opencelium.backend.execution.log_managing.parsers;
 
-import com.becon.opencelium.backend.execution.log_managing.commons.LogConstants;
-import com.becon.opencelium.backend.execution.log_managing.commons.LogProcessingException;
-import com.becon.opencelium.backend.execution.log_managing.commons.PropDescriptor;
+import com.becon.opencelium.backend.execution.log_managing.commons.*;
 import com.becon.opencelium.backend.execution.log_managing.core.LogLineParser;
 import com.becon.opencelium.backend.execution.log_managing.core.ParsedLogLine;
-import com.becon.opencelium.backend.execution.log_managing.commons.LogEntryType;
 
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.becon.opencelium.backend.execution.log_managing.commons.LogParserUtils.*;
 import static com.becon.opencelium.backend.execution.log_managing.commons.PropDescriptor.of;
@@ -18,10 +14,10 @@ public class ExecutionStartParser implements LogLineParser {
 
     private static final LogEntryType entryType = LogEntryType.EXECUTION_START;
 
-    private final Set<PropDescriptor> requiredProperties;
+    private static final Set<PropDescriptor> requiredProperties;
 
-    public ExecutionStartParser() {
-        this.requiredProperties = requiredProperties();
+    static {
+        requiredProperties = requiredProperties();
     }
 
     @Override
@@ -36,22 +32,22 @@ public class ExecutionStartParser implements LogLineParser {
         }
         ParsedLogLine pll = new ParsedLogLine();
         pll.setEntryType(entryType);
-        pll.setProperties(parseDeeply(extractKeyValuePairs(line, requiredProperties)));
+        pll.setProperties(LogParserUtils.extractOutermostProperties(line, requiredProperties));
         pll.setIndexPath(null);
-        pll.setSize(line.getBytes().length);
+        pll.setSize(line.getBytes(StandardCharsets.UTF_8).length);
         return pll;
     }
 
-    private Set<PropDescriptor> requiredProperties() {
+    /**
+     * Defines the set of properties that must be present in the log line.
+     *
+     * @return a Set containing required property descriptors
+     */
+    private static Set<PropDescriptor> requiredProperties() {
         return Set.of(
-                of(LogConstants.ID),
-                of(LogConstants.CONNECTION_ID),
-                of(LogConstants.FLOWCHART_ID)
+                of(LogPropertyKeys.ID),
+                of(LogPropertyKeys.CONNECTION_ID),
+                of(LogPropertyKeys.FLOWCHART_ID)
         );
-    }
-
-    private Map<String, Object> parseDeeply(Map<String, String> props) {
-        return props.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }
