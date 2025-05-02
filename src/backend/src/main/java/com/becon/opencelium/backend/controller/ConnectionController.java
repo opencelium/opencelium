@@ -79,6 +79,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -251,6 +252,14 @@ public class ConnectionController {
     })
     @PostMapping(path = "/execution/test", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> test(@RequestBody ConnectionOldDTO connectionOldDTO, @RequestParam String channelId) throws Exception {
+        // check if there is no running job for given connection
+        schedulerService.getAllRunningJobs().forEach(job -> {
+            String schedulerTitle = job.getTitle();
+            if (schedulerTitle.startsWith("!*test_schedule_") && schedulerTitle.endsWith(connectionOldDTO.getTitle())) {
+                throw new RuntimeException("Concurrent test executions for the same connection");
+            }
+        });
+
         // create temporary connection, will be deleted after execution finished
         connectionOldDTO.setTitle("!*test_connection_" + System.currentTimeMillis() + "_" + connectionOldDTO.getTitle());
         ConnectionDTO connectionDTO = connectionOldDTOMapper.toEntity(connectionOldDTO);
