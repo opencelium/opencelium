@@ -31,8 +31,10 @@ public class NotificationWebSocketHandler implements WebSocketEventHandler {
 
         boolean registered = registry.register(userId, sessionId);
         if (!registered) {
-            logger.error("WebSocket session already active for userId = " + userId);
-            throw new IllegalStateException("WebSocket session already active for userId = " + userId);
+            String message = "WebSocket session already active for userId = " + userId + ", sessionId = " + sessionId;
+
+            logger.warn(message);
+            throw new IllegalStateException(message);
         } else {
             notificationService.setOn();
             logger.info("WebSocket session has been registered, userId = " + userId + ", sessionId = " + sessionId);
