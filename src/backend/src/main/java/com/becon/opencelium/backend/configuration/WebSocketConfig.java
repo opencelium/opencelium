@@ -1,6 +1,5 @@
 package com.becon.opencelium.backend.configuration;
 
-import com.becon.opencelium.backend.execution.socket.SocketConstant;
 import com.becon.opencelium.backend.execution.socket.WebSocketHandshakeInterceptor;
 import com.becon.opencelium.backend.execution.socket.handler.WebSocketEventHandler;
 import com.becon.opencelium.backend.security.JwtTokenUtil;
@@ -17,6 +16,10 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketTransportRegistration;
+
+import static com.becon.opencelium.backend.execution.socket.SocketConstant.EXECUTION_DESTINATION_PREFIX;
+import static com.becon.opencelium.backend.execution.socket.SocketConstant.NOTIFICATION_DESTINATION_PREFIX;
+import static com.becon.opencelium.backend.execution.socket.SocketConstant.PATH;
 
 @Configuration
 @EnableWebSocketMessageBroker
@@ -35,7 +38,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
      */
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker(SocketConstant.DESTINATION_PREFIX);
+        registry.enableSimpleBroker(EXECUTION_DESTINATION_PREFIX, NOTIFICATION_DESTINATION_PREFIX);
         registry.setApplicationDestinationPrefixes("/oc");
     }
 
@@ -44,7 +47,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
      */
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint(SocketConstant.PATH)
+        registry.addEndpoint(PATH)
                 .setAllowedOriginPatterns("*")
                 .addInterceptors(new WebSocketHandshakeInterceptor(jwtTokenUtil))
                 .withSockJS();

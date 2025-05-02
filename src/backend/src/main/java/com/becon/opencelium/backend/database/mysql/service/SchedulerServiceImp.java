@@ -61,7 +61,6 @@ public class SchedulerServiceImp implements SchedulerService {
     private final SchedulerRepository schedulerRepository;
     private final NotificationRepository notificationRepository;
     private final Mapper<Connection, ConnectionDTO> connectionMapper;
-//    private final SchedulerRegisterSession schedulerRegisterSession;
 
 
     public SchedulerServiceImp(

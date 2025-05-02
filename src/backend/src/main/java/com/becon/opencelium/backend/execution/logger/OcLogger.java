@@ -126,7 +126,7 @@ public class OcLogger<T extends LogMessage> {
             logEntity.setMessage(message);
 
             String channelId = connection2ChannelMapping.getChannelId(connectionId);
-            socketNotificationService.send(SocketConstant.DESTINATION_EXECUTION_LOG + "/" + channelId, logEntity);
+            socketNotificationService.send(SocketConstant.LOGS_DESTINATION + "/" + channelId, logEntity);
         } else {
             t.accept(message);
         }
