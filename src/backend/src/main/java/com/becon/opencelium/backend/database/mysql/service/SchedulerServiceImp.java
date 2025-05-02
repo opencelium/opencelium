@@ -74,7 +74,6 @@ public class SchedulerServiceImp implements SchedulerService {
             SchedulerRepository schedulerRepository,
             NotificationRepository notificationRepository,
             SchedulerFactoryBean schedulerFactoryBean,
-//            SchedulerRegisterSession schedulerRegisterSession,
             Mapper<Connection, ConnectionDTO> connectionMapper
     ) {
         this.connectionService = connectionService;
@@ -87,7 +86,6 @@ public class SchedulerServiceImp implements SchedulerService {
         this.schedulerRepository = schedulerRepository;
         this.connectionMapper = connectionMapper;
         this.connectorService = connectorService;
-//        this.schedulerRegisterSession = schedulerRegisterSession;
     }
 
     @Override
@@ -156,12 +154,6 @@ public class SchedulerServiceImp implements SchedulerService {
     public Scheduler getById(int id) {
         return schedulerRepository.findById(id)
                 .orElseThrow(() -> new SchedulerNotFoundException(id));
-    }
-
-    @Override
-    public boolean isWebSocketRequired(int schedulerId) {
-//        return schedulerRegisterSession.isSchedulerActive(schedulerId);
-        return true;
     }
 
     @Override
