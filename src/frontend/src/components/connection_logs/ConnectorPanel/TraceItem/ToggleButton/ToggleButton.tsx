@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './ToggleButton.module.css';
-import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import FontIcon from "@basic_components/FontIcon";
 
 interface ToggleButtonProps {
 	loading: boolean;
@@ -13,9 +13,9 @@ const ToggleButton: React.FC<ToggleButtonProps> = ({
 	expanded,
 	onClick,
 }) => {
-	const icon = <TooltipFontIcon
+	const icon =
+		<FontIcon
 			size={16}
-			tooltip={'Next'}
 			isLoading={loading}
 			value={expanded ? 'keyboard_arrow_down' : 'keyboard_arrow_right'}
 			onClick={() => {}}

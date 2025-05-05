@@ -15,7 +15,6 @@ const FakeConnectionLogs = () => {
             }
         }, 1000)
         toggleDisabled(true);
-        console.log(`First Level Log ${index + 1}`)
     };
 
     return (

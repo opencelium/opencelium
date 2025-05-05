@@ -24,6 +24,7 @@ const ConnectorPanel: React.FC<ConnectorPanelProps> = ({
 						connectorId={connector.id}
 						executionId={executionId}
 						connectionId={connectionId}
+						iterationIndexes={[]}
 					/>
 				</div>
 			))}

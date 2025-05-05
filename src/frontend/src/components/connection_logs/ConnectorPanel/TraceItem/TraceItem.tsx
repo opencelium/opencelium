@@ -8,6 +8,7 @@ interface TraceItemProps {
 	connectorId: string;
 	executionId: string;
 	connectionId: string;
+	iterationIndexes: number[];
 }
 
 export const TraceItem: React.FC<TraceItemProps> = ({
@@ -15,6 +16,7 @@ export const TraceItem: React.FC<TraceItemProps> = ({
 	connectorId,
 	executionId,
 	connectionId,
+	iterationIndexes,
 }) => {
 	if (trace.logType === 'method') {
 		return (
@@ -34,6 +36,7 @@ export const TraceItem: React.FC<TraceItemProps> = ({
 				connectorId={connectorId}
 				executionId={executionId}
 				connectionId={connectionId}
+				iterationIndexes={iterationIndexes}
 			/>
 		);
 	}

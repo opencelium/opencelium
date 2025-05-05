@@ -79,10 +79,10 @@ class FontIcon extends Component{
                 <button ref={myRef ? myRef : this.icon} disabled={disabled} className={`${styles.clear_button} ${theme} ${className}`} style={{...sizeStyle}} onClick={disabled ? () => {} : onClick} id={id} onFocus={onButtonFocus} onBlur={onButtonBlur}>
                     {isImageValue
                     ?
-                        <img alt={''} src={value} className={iconClassName} width={size} height={size} style={{...iconStyles}}/>
+                        <img alt={''} src={value} className={iconClassName} width={size} height={size} style={{...iconStyles, cursor: disabled ? 'default' : 'pointer',}}/>
                     :
                         <ToolboxFontIcon value={value} className={iconClassName} {...props}
-                                         style={{...iconStyles, fontSize: size}}/>
+                                         style={{...iconStyles, cursor: disabled ? 'default' : 'pointer', fontSize: size}}/>
                     }
                 </button>
             );

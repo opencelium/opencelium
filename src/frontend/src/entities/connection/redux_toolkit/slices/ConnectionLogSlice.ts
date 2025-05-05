@@ -9,299 +9,16 @@ import {
 	getMethodTrace,
 	getOperatorTrace,
 } from '../action_creators/ConnectionLogCreators';
+import {findAndUpdateTrace} from "@root/utils/utils";
 
-export interface ConnectionLogState extends ConnectionLog {}
+export interface ConnectionLogState extends ConnectionLog {
+}
 
 export const initialState: ConnectionLogState = {
-	connectionId: '13',
-	executionId: '26',
-	connectors: [
-		{
-			id: '1',
-			name: 'i-doit',
-			traces: [
-				{
-					logType: 'method',
-					httpMethod: 'GET',
-					executionTime: 42,
-					indexPath: '0',
-					url: 'https://i-doit.api.de',
-					statusCode: 200,
-					requestDetails: {
-						headers: {
-							Authorization: '{token}',
-							'Content-Type': 'application/x-www-form-urlencoded',
-						},
-						body: {
-							role: '#C77E7E.(response).body.$.data',
-							name: '',
-							id: '',
-							units: [],
-							department: '',
-						},
-					},
-					responseDetails: {
-						headers: {
-							Authorization: '{token}',
-							'Content-Type': 'application/x-www-form-urlencoded',
-						},
-						body: {
-							role: '#C77E7E.(response).body.$.data',
-							name: '',
-							id: '',
-							units: [],
-							department: '',
-						},
-					},
-				},
-				{
-					logType: 'operator',
-					indexPath: '1',
-					conditionStatement: 'for {%#FFCFB5.(response).body.$.[*]%}',
-					info: {
-						type: 'loop',
-						iteration: {
-							current: 1,
-							total: 50,
-						},
-					},
-					traces: [
-						{
-							logType: 'operator',
-							indexPath: '1_0',
-							conditionStatement:
-								'({%#C77E7E.(response).body.$.data%} IsEmpty)',
-							info: {
-								type: 'if',
-								conditionResult: true,
-							},
-							traces: [],
-						},
-						{
-							logType: 'method',
-							httpMethod: 'POST',
-							executionTime: 42,
-							indexPath: '1_1',
-							url: 'https://i-doit.api.de/post-method',
-							statusCode: 200,
-							requestDetails: {
-								headers: {
-									Authorization: '{token}',
-									'Content-Type': 'application/x-www-form-urlencoded',
-								},
-								body: {
-									role: '#C77E7E.(response).body.$.data',
-									name: '',
-									id: '',
-									units: [],
-									department: '',
-								},
-							},
-							responseDetails: {
-								headers: {
-									Authorization: '{token}',
-									'Content-Type': 'application/x-www-form-urlencoded',
-								},
-								body: {
-									networkName: '',
-									unitID: '',
-								},
-							},
-						},
-					],
-				},
-			],
-		},
-		{
-			id: '2',
-			name: 'otrs',
-			traces: [
-				{
-					logType: 'method',
-					httpMethod: 'POST',
-					executionTime: 42,
-					indexPath: '0',
-					url: 'https://otrs.api.de',
-					statusCode: 200,
-					requestDetails: {
-						headers: {
-							Authorization: '{token}',
-							'Content-Type': 'application/x-www-form-urlencoded',
-						},
-						body: {
-							role: '#C77E7E.(response).body.$.data',
-							name: '',
-							id: '',
-							units: [],
-							department: '',
-						},
-					},
-					responseDetails: {
-						headers: {
-							Authorization: '{token}',
-							'Content-Type': 'application/x-www-form-urlencoded',
-						},
-						body: {
-							role: '#C77E7E.(response).body.$.data',
-							name: '',
-							id: '',
-							units: [],
-							department: '',
-						},
-					},
-				},
-				{
-					logType: 'operator',
-					indexPath: '1',
-					conditionStatement: 'for {%#FFCFB5.(response).body.$.[*]%}',
-					info: {
-						type: 'loop',
-						iteration: {
-							current: 1,
-							total: 50,
-						},
-					},
-					traces: [
-						{
-							logType: 'operator',
-							indexPath: '1_0',
-							conditionStatement:
-								'({%#C77E7E.(response).body.$.data%} IsEmpty)',
-							info: {
-								type: 'if',
-								conditionResult: true,
-							},
-							traces: [
-								{
-									logType: 'operator',
-									indexPath: '1_0_0',
-									conditionStatement:
-										'({%#C77E7E.(response).body.$.data%} IsEmpty)',
-									info: {
-										type: 'if',
-										conditionResult: true,
-									},
-									traces: [
-										{
-											logType: 'operator',
-											indexPath: '1_0_0_0',
-											conditionStatement:
-												'({%#C77E7E.(response).body.$.data%} IsEmpty)',
-											info: {
-												type: 'if',
-												conditionResult: true,
-											},
-											traces: [],
-										},
-									],
-								},
-								{
-									logType: 'method',
-									httpMethod: 'PUT',
-									executionTime: 42,
-									indexPath: '1_0_0_1',
-									url: 'https://otrs.api.de/put-method',
-									statusCode: 200,
-									requestDetails: {
-										headers: {
-											Authorization: '{token}',
-											'Content-Type': 'application/x-www-form-urlencoded',
-										},
-										body: {
-											role: '#C77E7E.(response).body.$.data',
-											name: '',
-											id: '',
-											units: [],
-											department: '',
-										},
-									},
-									responseDetails: {
-										headers: {
-											Authorization: '{token}',
-											'Content-Type': 'application/x-www-form-urlencoded',
-										},
-										body: {
-											networkName: '',
-											unitID: '',
-										},
-									},
-								},
-								{
-									logType: 'method',
-									httpMethod: 'DELETE',
-									executionTime: 42,
-									indexPath: '1_0_0_2',
-									url: 'https://otrs.api.de/delete-method',
-									statusCode: 200,
-									requestDetails: {
-										headers: {
-											Authorization: '{token}',
-											'Content-Type': 'application/x-www-form-urlencoded',
-										},
-										body: {
-											role: '#C77E7E.(response).body.$.data',
-											name: '',
-											id: '',
-											units: [],
-											department: '',
-										},
-									},
-									responseDetails: {
-										headers: {
-											Authorization: '{token}',
-											'Content-Type': 'application/x-www-form-urlencoded',
-										},
-										body: {
-											networkName: '',
-											unitID: '',
-										},
-									},
-								},
-							],
-						},
-						{
-							logType: 'method',
-							httpMethod: 'POST',
-							executionTime: 42,
-							indexPath: '1_1',
-							url: 'https://otrs.api.de/post-method',
-							statusCode: 200,
-							requestDetails: {
-								headers: {
-									Authorization: '{token}',
-									'Content-Type': 'application/x-www-form-urlencoded',
-								},
-								body: {
-									role: '#C77E7E.(response).body.$.data',
-									name: '',
-									id: '',
-									units: [],
-									department: '',
-								},
-							},
-							responseDetails: {
-								headers: {
-									Authorization: '{token}',
-									'Content-Type': 'application/x-www-form-urlencoded',
-								},
-								body: {
-									networkName: '',
-									unitID: '',
-								},
-							},
-						},
-					],
-				},
-			],
-		},
-	],
-};
-/*{
 	connectionId: '',
 	executionId: '',
 	connectors: [],
-};*/
-
+};
 interface CleanTracePayload {
 	connectorId: string;
 	indexPath: string;
@@ -364,64 +81,47 @@ export const connectionLogSlice = createSlice({
 	},
 	extraReducers: (builder) => {
 		builder.addCase(getMethodTrace.fulfilled, (state, action) => {
-			const { connectorId, indexPath, connectionId } = action.meta.arg;
-			if (state.connectionId !== connectionId) return;
-			const connector = state.connectors.find((c) => c.id === connectorId);
-			if (connector) {
-				const trace = connector.traces.find(
-					(t) => t.logType === 'method' && t.indexPath === indexPath
-				) as MethodTrace | undefined;
-				if (trace) {
-					trace.requestDetails = action.payload.request;
-					trace.responseDetails = action.payload.response;
-				} else {
-					const newTrace: MethodTrace = {
-						logType: 'method',
-						indexPath,
-						httpMethod: 'GET',
-						statusCode: 200,
-						url: '',
-						executionTime: 0,
-						requestDetails: action.payload.request,
-						responseDetails: action.payload.response,
-					};
-					connector.traces.push(newTrace);
-				}
+			const { connectorId, indexPath, executionId } = action.meta.arg;
+			if (!action.payload.requestDetails){
+				console.log(indexPath)
 			}
+			const {requestDetails, responseDetails} = action.payload;
+			if (state.executionId !== executionId) return;
+			const connector = state.connectors.find(c => c.id === connectorId);
+			if (!connector) return;
+
+			findAndUpdateTrace(connector.traces, indexPath, (trace) => {
+				if (trace.logType === 'method') {
+					(trace as MethodTrace).requestDetails = requestDetails;
+					(trace as MethodTrace).responseDetails = responseDetails;
+					return true;
+				}
+				return false;
+			});
 		});
 		builder.addCase(getOperatorTrace.fulfilled, (state, action) => {
-			const { connectorId, indexPath, connectionId } = action.meta.arg;
-			if (state.connectionId !== connectionId) return;
-			const connector = state.connectors.find((c) => c.id === connectorId);
-			if (connector) {
-				const trace = connector.traces.find(
-					(t) => t.logType === 'operator' && t.indexPath === indexPath
-				) as OperatorTrace | undefined;
-				if (trace) {
-					trace.traces = [...trace.traces, ...action.payload.logs];
-				} else {
-					const operatorItem = action.payload.logs.find(
-						(item) => item.logType === 'operator'
-					) as OperatorTrace | undefined;
-					const newTrace: OperatorTrace = {
-						logType: 'operator',
-						indexPath,
-						conditionStatement: operatorItem?.conditionStatement ?? '',
-						info: operatorItem?.info ?? {
-							type: 'if',
-							conditionResult: false,
-						},
-						traces: action.payload.logs,
-					};
-					connector.traces.push(newTrace);
-				}
+			const { connectorId, indexPath, executionId } = action.meta.arg;
+			if (!action.payload.traces){
+				console.log(indexPath)
 			}
+			const {traces} = action.payload;
+			if (state.executionId !== executionId) return;
+			const connector = state.connectors.find(c => c.id === connectorId);
+			if (!connector) return;
+			findAndUpdateTrace(connector.traces, indexPath, (trace) => {
+				if (trace.logType === 'operator') {
+					(trace as OperatorTrace).traces = traces;
+					return true;
+				}
+				return false;
+			});
 		});
-
 		builder.addCase(deleteLogs.fulfilled, (state, action) => {
 			const { connectionId } = action.meta.arg;
 			if (state.connectionId === connectionId) {
 				state.connectors = [];
+				state.connectionId = '';
+				state.executionId = '';
 			}
 		});
 	},

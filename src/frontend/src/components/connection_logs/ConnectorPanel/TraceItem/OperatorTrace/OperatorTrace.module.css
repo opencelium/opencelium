@@ -1,6 +1,31 @@
-.operatorType {
+.trace {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	cursor: pointer;
+}
+
+.type {
 	font-weight: bold;
 	width: 60px;
 	text-align: center;
 	text-transform: uppercase;
+}
+.traceLeftSide {
+	display: flex;
+}
+.ifTraceRightSide {
+	margin-left: 8px;
+	cursor: text;
+}
+.loopTraceRightSide {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	cursor: text;
+}
+.expandedContainer {
+	margin-top: 4px;
+	border-left: 1px dashed #aaa;
+	padding-left: 8px;
 }

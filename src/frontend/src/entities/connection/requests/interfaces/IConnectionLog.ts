@@ -15,16 +15,16 @@ export interface GetTraceRequest {
 export interface GetMethodTraceRequest extends GetTraceRequest {}
 
 export interface GetMethodTraceResponse {
-	request: HttpRequestLog;
-	response: HttpResponseLog;
+	requestDetails: HttpRequestLog;
+	responseDetails: HttpResponseLog;
 }
 
-export interface GetOperatorTraceRequest extends GetTraceRequest {
-	iterationIndex?: number;
+export interface GetOperatorTraceRequest extends Omit<GetTraceRequest, "connectionId"> {
+	iterationIndexes?: number[];
 }
 
 export interface GetOperatorTraceResponse {
-	logs: (MethodTrace | OperatorTrace)[];
+	traces: (MethodTrace | OperatorTrace)[];
 }
 
 export interface DeleteLogsRequest {

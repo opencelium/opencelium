@@ -1,17 +1,12 @@
 import {
-	DeleteLogsRequest,
-	GetMethodTraceRequest,
 	GetMethodTraceResponse,
-	GetOperatorTraceRequest,
 	GetOperatorTraceResponse,
 } from './IConnectionLog';
+import {AxiosResponse} from "axios";
+import {IResponse} from "@application/requests/interfaces/IResponse";
 
 export interface IConnectionLogRequest {
-	getMethodTrace(
-		request: GetMethodTraceRequest
-	): Promise<GetMethodTraceResponse>;
-	getOperatorTrace(
-		request: GetOperatorTraceRequest
-	): Promise<GetOperatorTraceResponse>;
-	deleteLogs(request: DeleteLogsRequest): Promise<void>;
+	getMethodTrace(): Promise<AxiosResponse<GetMethodTraceResponse>>;
+	getOperatorTrace(): Promise<AxiosResponse<GetOperatorTraceResponse>>;
+	deleteLogs(): Promise<AxiosResponse<IResponse>>;
 }

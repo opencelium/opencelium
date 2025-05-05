@@ -9,7 +9,6 @@ export const useConnectionLogsSocket = (socket: Socket | null) => {
     const [connectionLog, setConnectionLog] = useState<ConnectionSocketLog | undefined>(undefined);
 
     useEffect(() => {
-        console.log(connectionLog);
         if (connectionLog) {
             dispatch(addSocketLog(connectionLog));
             setConnectionLog(undefined);

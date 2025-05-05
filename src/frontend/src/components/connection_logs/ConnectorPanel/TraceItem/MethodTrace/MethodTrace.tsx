@@ -71,7 +71,7 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 			setLoading(false);
 			setExpanded(true);
 		} else {
-			dispatch(cleanMethodTrace({ connectorId, indexPath: trace.indexPath }));
+			await dispatch(cleanMethodTrace({ connectorId, indexPath: trace.indexPath }));
 			setExpanded(false);
 		}
 	};
@@ -105,8 +105,8 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 	const responseMode = responseBody ? detectAceMode(responseBody) : 'json';
 
 	return (
-		<div style={{cursor: 'pointer'}} onClick={handleToggle}>
-			<div className={styles.methodTrace}>
+		<div>
+			<div className={styles.methodTrace} onClick={handleToggle}>
 				<div className={styles.methodTraceLeftSide}>
 					<ToggleButton
 						loading={loading}
@@ -123,7 +123,7 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 					{ShowIndexPath && <div style={{marginLeft: 8}}>{trace.indexPath}</div>}
 					<div className={styles.methodUrl}>{trace.url}</div>
 				</div>
-				<div className={styles.methodTraceRightSide}>
+				<div className={styles.methodTraceRightSide} onClick={(e: any) => {e.preventDefault(); e.stopPropagation();}}>
 					<div className={styles.methodStatus}>{trace.statusCode}</div>
 					<div>{"|"}</div>
 					<div className={styles.methodTime}>{trace.executionTime} ms</div>
