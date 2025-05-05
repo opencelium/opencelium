@@ -23,7 +23,11 @@ public class WebSocketHandshakeInterceptor implements HandshakeInterceptor {
             String jwt = token.substring(7);
 
             int userId = jwtTokenUtil.extractUserId(jwt);
+            String username = jwtTokenUtil.extractPrincipal(jwt);
+
+            // populate necessary attributes
             attributes.put("userId", userId);
+            attributes.put("username", username);
 
             return true;
         }

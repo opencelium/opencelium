@@ -6,23 +6,25 @@ import org.springframework.stereotype.Component;
 @Component
 public class WebSocketNotificationService {
     private final SimpMessagingTemplate simpMessagingTemplate;
-    private boolean on = false;
+    private final Connection2WebSocketChannelMapping connection2ChannelMapping;
 
-    public WebSocketNotificationService(SimpMessagingTemplate simpMessagingTemplate) {
+    public WebSocketNotificationService(
+            SimpMessagingTemplate simpMessagingTemplate,
+            Connection2WebSocketChannelMapping connection2ChannelMapping) {
         this.simpMessagingTemplate = simpMessagingTemplate;
+        this.connection2ChannelMapping = connection2ChannelMapping;
     }
 
-    public void setOn() {
-        this.on = true;
-    }
+    public <E> void sendLog(long connectionId, E message) {
+        String channelId = connection2ChannelMapping.getChannelId(connectionId);
 
-    public void setOff() {
-        this.on = false;
-    }
-
-    public <E> void send(String destination, E message) {
-        if (on) {
-            simpMessagingTemplate.convertAndSend(destination, message);
+        if (channelId != null) {
+            // channelId exists if websocket connection is established and open
+            simpMessagingTemplate.convertAndSend(SocketConstant.LOGS_DESTINATION + "/" + channelId, message);
         }
+    }
+
+    public <E> void sendUserNotification(int userId, E message) {
+        simpMessagingTemplate.convertAndSendToUser("user", "destination", message);
     }
 }

@@ -4,8 +4,6 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
-import com.becon.opencelium.backend.execution.socket.Connection2WebSocketChannelMapping;
-import com.becon.opencelium.backend.execution.socket.SocketConstant;
 import com.becon.opencelium.backend.execution.socket.WebSocketNotificationService;
 import com.becon.opencelium.backend.resource.execution.LoggerConfiguration;
 import com.becon.opencelium.backend.utility.ApplicationContextUtility;
@@ -22,7 +20,6 @@ public class OcLogger<T extends LogMessage> {
     private final boolean webSocket; // if true then sends logs through websocket;
     private final T logEntity; // log entity
     private final WebSocketNotificationService socketNotificationService;
-    private final Connection2WebSocketChannelMapping connection2ChannelMapping;
     private final long connectionId;
     private final Logger logger;
     private boolean executionFailed = false;
@@ -36,7 +33,6 @@ public class OcLogger<T extends LogMessage> {
         this.webSocket = loggerConfiguration.isWSocketOpen();
 
         this.socketNotificationService = ApplicationContextUtility.getBean(WebSocketNotificationService.class);
-        this.connection2ChannelMapping = ApplicationContextUtility.getBean(Connection2WebSocketChannelMapping.class);
         this.connectionId = connectionId;
         this.logEntity = logEntity;
 
@@ -124,9 +120,7 @@ public class OcLogger<T extends LogMessage> {
 
         if (webSocket) {
             logEntity.setMessage(message);
-
-            String channelId = connection2ChannelMapping.getChannelId(connectionId);
-            socketNotificationService.send(SocketConstant.LOGS_DESTINATION + "/" + channelId, logEntity);
+            socketNotificationService.sendLog(connectionId, logEntity);
         } else {
             t.accept(message);
         }

@@ -19,10 +19,6 @@ public class Connection2WebSocketChannelMapping {
     }
 
     public String getChannelId(Long connectionId) {
-        if (mapping.containsKey(connectionId)) {
-            return mapping.get(connectionId);
-        } else {
-            throw new RuntimeException("No mapping found for connectionId = " + connectionId);
-        }
+        return mapping.getOrDefault(connectionId, null);
     }
 }
