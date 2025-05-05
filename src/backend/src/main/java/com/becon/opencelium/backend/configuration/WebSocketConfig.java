@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.configuration;
 
 import com.becon.opencelium.backend.execution.socket.SocketConstant;
+import com.becon.opencelium.backend.execution.socket.WebSocketHandshakeInterceptor;
 import com.becon.opencelium.backend.execution.socket.handler.WebSocketEventHandler;
 import com.becon.opencelium.backend.execution.socket.handler.WebSocketTopicHandlerFactory;
 import com.becon.opencelium.backend.execution.socket.handler.WebSocketHandlerType;
@@ -15,7 +16,10 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
-import org.springframework.web.socket.config.annotation.*;
+import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
+import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
+import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+import org.springframework.web.socket.config.annotation.WebSocketTransportRegistration;
 
 import java.util.function.Consumer;
 
@@ -49,6 +53,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint(SocketConstant.PATH)
                 .setAllowedOriginPatterns("*")
+                .addInterceptors(new WebSocketHandshakeInterceptor()) // populate session attributes
                 .withSockJS();
     }
 

@@ -1,10 +1,13 @@
 package com.becon.opencelium.backend.execution.support_file;
 
+import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.enums.SupportFileStatus;
+import com.becon.opencelium.backend.execution.socket.SocketConstant;
+import com.becon.opencelium.backend.execution.socket.WebSocketNotificationService;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
@@ -14,7 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,34 +49,32 @@ public class SupportFileServiceImp implements SupportFileService {
     private final Mapper<ConnectionDTO, ConnectionOldDTO> dto2OldDtoMapper;
     private final ConnectorService connectorSqlService;
     private final InvokerService invokerService;
-
-    @Value("${opencelium.support.file.directory:src/main/resources/support-files}")
-    private String base;
-    @Value("${opencelium.support.file.limit.success:1}")
-    private int supportFileSuccessLimit;
-    @Value("${opencelium.support.file.limit.fail:5}")
-    private int supportFileFailLimit;
-    @Value("${opencelium.log.retention.per-connection.success:2}")
-    private int logFileSuccessLimit;
-    @Value("${opencelium.log.retention.per-connection.fail:3}")
-    private int logFileFailLimit;
+    private final WebSocketNotificationService notificationService;
+    private final String base;
+    private final int supportFileSuccessLimit;
+    private final int supportFileFailLimit;
 
     public static final String GET_URL = "/connection/support-file/%d/%s";
     private static final Logger logger = LoggerFactory.getLogger(SupportFileService.class);
-    public static int LOG_FILE_SUCCESS_LIMIT;
-    public static int LOG_FILE_FAIL_LIMIT;
 
     public SupportFileServiceImp (
             ConnectionService connectionSqlService,
             Mapper<ConnectionOldDTO, CtionTemplateResource> oldDto2ResourceMapper,
             Mapper<ConnectionDTO, ConnectionOldDTO> dto2OldDtoMapper,
-            ConnectorService connectorSqlService, InvokerService invokerService
+            ConnectorService connectorSqlService, InvokerService invokerService,
+            WebSocketNotificationService notificationService, Environment env
     ) {
         this.connectionSqlService = connectionSqlService;
         this.oldDto2ResourceMapper = oldDto2ResourceMapper;
         this.dto2OldDtoMapper = dto2OldDtoMapper;
         this.connectorSqlService = connectorSqlService;
         this.invokerService = invokerService;
+        this.notificationService = notificationService;
+
+        // initialize application property related variables
+        this.base = env.getProperty(AppYamlPath.SUPPORT_FILE_BASE_DIRECTORY, String.class, "src/main/resources/support-files");
+        this.supportFileSuccessLimit = env.getProperty(AppYamlPath.SUPPORT_FILE_SUCCESS_LIMIT, Integer.class, 1);
+        this.supportFileFailLimit = env.getProperty(AppYamlPath.SUPPORT_FILE_FAIL_LIMIT, Integer.class, 5);
     }
 
     @PostConstruct
@@ -84,8 +85,6 @@ public class SupportFileServiceImp implements SupportFileService {
 
             // Create base directory to store log files:
             create(LOG_LOCATION);
-            LOG_FILE_SUCCESS_LIMIT = logFileSuccessLimit;
-            LOG_FILE_FAIL_LIMIT = logFileFailLimit;
 
             logger.info("Base folders have been setup for support and log files.");
         } catch (IOException e) {
@@ -208,6 +207,7 @@ public class SupportFileServiceImp implements SupportFileService {
             throw new RuntimeException(e);
         }
 
+        String connectionTitle = null;
         try (
                 FileOutputStream fos = new FileOutputStream(zipFilePath.toFile());
                 ZipOutputStream zipOutputStream = new ZipOutputStream(fos)
@@ -217,6 +217,7 @@ public class SupportFileServiceImp implements SupportFileService {
             // Add Connection resource template as a JSON file:
             ConnectionOldDTO oldDTO = dto2OldDtoMapper.toDTO(dto);
             CtionTemplateResource template = oldDto2ResourceMapper.toDTO(oldDTO);
+            connectionTitle = template.getTitle();
             addToZip(zipOutputStream, template, "connection_template.json");
 
             // Add invoker files:
@@ -236,7 +237,18 @@ public class SupportFileServiceImp implements SupportFileService {
             Path filePath = toPath(LOG_LOCATION, toFilename(timestamp, connectionId, "u", executionId, "log"));
             addToZip(zipOutputStream, filePath.toFile(), toFilename(timestamp, connectionId, type, executionId, "log"));
             delete(filePath);
-        } catch (IOException e) {
+
+            // send success notification vie websocket
+            String filename = toFilename(timestamp, connectionId, type, executionId, "zip");
+            String message = "Support file successfully generated.";
+            SupportFile notification = new SupportFile(connectionId, connectionTitle, filename, SupportFileStatus.SUPPORT_FILE_GENERATED, message);
+            notificationService.send(SocketConstant.DESTINATION_SUPPORT_FILE, notification);
+        } catch (Exception e) {
+            // send fail notification vie websocket
+            String message = "Support file generation failed: " + e.getMessage();
+            SupportFile notification = new SupportFile(connectionId, connectionTitle, null, SupportFileStatus.SUPPORT_FILE_FAILED, message);
+            notificationService.send(SocketConstant.DESTINATION_SUPPORT_FILE, notification);
+
             logger.error("Failed to create support file for connectionId = '" + connectionId + "'");
             throw new RuntimeException(e);
         } finally {

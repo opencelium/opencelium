@@ -39,7 +39,7 @@ class Reference extends Component{
         const {id, translate, ReferenceComponent} = this.props;
         return (
             <ToolboxThemeInput label={translate('XML_EDITOR.TAG.TYPE.REFERENCE_VALUE')} inputElementClassName={styles.multiselect_label}>
-                <div style={{position: 'relative'}}>{ReferenceComponent.getComponent({submitEdit: () => this.add(), selectId: id})}</div>
+                <div style={{position: 'relative', marginTop: '5px'}}>{ReferenceComponent.getComponent({submitEdit: () => this.add(), isAbsolute: true, selectId: id})}</div>
             </ToolboxThemeInput>
         );
     }
