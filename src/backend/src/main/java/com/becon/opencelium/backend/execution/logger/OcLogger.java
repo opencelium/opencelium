@@ -120,7 +120,7 @@ public class OcLogger<T extends LogMessage> {
 
         if (webSocket) {
             logEntity.setMessage(message);
-            socketNotificationService.sendLog(connectionId, logEntity);
+            socketNotificationService.send(connectionId, logEntity);
         } else {
             t.accept(message);
         }

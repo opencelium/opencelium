@@ -15,7 +15,11 @@ public class WebSocketNotificationService {
         this.connection2ChannelMapping = connection2ChannelMapping;
     }
 
-    public <E> void sendLog(long connectionId, E message) {
+    public <E> void send(String destination, E message) {
+        simpMessagingTemplate.convertAndSend(destination, message);
+    }
+
+    public <E> void send(long connectionId, E message) {
         String channelId = connection2ChannelMapping.getChannelId(connectionId);
 
         if (channelId != null) {
@@ -24,7 +28,7 @@ public class WebSocketNotificationService {
         }
     }
 
-    public <E> void sendUserNotification(int userId, E message) {
+    public <E> void send2User(String username, E message) {
         simpMessagingTemplate.convertAndSendToUser("user", "destination", message);
     }
 }
