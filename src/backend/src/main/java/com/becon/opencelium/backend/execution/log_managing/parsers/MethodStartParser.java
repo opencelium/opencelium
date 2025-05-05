@@ -46,7 +46,7 @@ public class MethodStartParser implements LogLineParser {
         return Set.of(
                 of(LogPropertyKeys.INDEX_PATH),
                 of(LogPropertyKeys.FUNCTION),
-                of(LogPropertyKeys.LOOP_INDEX, false, x -> PropertyParsers.parseInteger(x, LogPropertyKeys.LOOP_INDEX))
+                of(LogPropertyKeys.LOOP_INDEX, false, x -> PropertyParsers.parseInteger(LogPropertyKeys.LOOP_INDEX, x))
         );
     }
 }
