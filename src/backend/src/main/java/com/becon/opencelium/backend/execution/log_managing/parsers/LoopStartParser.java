@@ -46,9 +46,9 @@ public class LoopStartParser implements LogLineParser {
         return Set.of(
                 of(LogPropertyKeys.INDEX_PATH),
                 of(LogPropertyKeys.TYPE),
-                of(LogPropertyKeys.LOOP_INDEX, false, x -> PropertyParsers.parseInteger(x, LogPropertyKeys.LOOP_INDEX)),
+                of(LogPropertyKeys.LOOP_INDEX, false, x -> PropertyParsers.parseInteger(LogPropertyKeys.LOOP_INDEX, x)),
                 of(LogPropertyKeys.LOOP_ITERATOR),
-                of(LogPropertyKeys.LOOP_COUNT, x -> PropertyParsers.parseInteger(x, LogPropertyKeys.LOOP_COUNT)),
+                of(LogPropertyKeys.LOOP_COUNT, x -> PropertyParsers.parseInteger(LogPropertyKeys.LOOP_COUNT, x)),
                 of(LogPropertyKeys.EXPRESSION)
         );
     }

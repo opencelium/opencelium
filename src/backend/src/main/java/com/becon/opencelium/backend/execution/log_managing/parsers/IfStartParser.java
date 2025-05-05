@@ -45,7 +45,7 @@ public class IfStartParser implements LogLineParser {
     private static Set<PropDescriptor> requiredProperties() {
         return Set.of(
                 of(LogPropertyKeys.INDEX_PATH),
-                of(LogPropertyKeys.LOOP_INDEX, false, x -> PropertyParsers.parseInteger(x, LogPropertyKeys.LOOP_INDEX)),
+                of(LogPropertyKeys.LOOP_INDEX, false, x -> PropertyParsers.parseInteger(LogPropertyKeys.LOOP_INDEX, x)),
                 of(LogPropertyKeys.EXPRESSION)
         );
     }

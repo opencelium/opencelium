@@ -44,8 +44,8 @@ public class ResponseParser implements LogLineParser {
      */
     private static Set<PropDescriptor> requiredProperties() {
         return Set.of(
-                of(LogPropertyKeys.STATUS, x -> PropertyParsers.parseInteger(x, LogPropertyKeys.STATUS)),
-                of(LogPropertyKeys.RESPONSE_TIME, x -> PropertyParsers.parseInteger(x, LogPropertyKeys.RESPONSE_TIME))
+                of(LogPropertyKeys.STATUS, x -> PropertyParsers.parseInteger(LogPropertyKeys.STATUS, x)),
+                of(LogPropertyKeys.RESPONSE_TIME, x -> PropertyParsers.parseInteger(LogPropertyKeys.RESPONSE_TIME, x))
         );
     }
 
