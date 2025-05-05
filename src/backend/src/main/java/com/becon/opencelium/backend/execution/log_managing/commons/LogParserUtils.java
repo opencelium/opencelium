@@ -99,7 +99,7 @@ public class LogParserUtils {
                 if (chars[i] == '"') {
                     Character peeked = prefixSuffixStack.peek();
                     if (peeked.equals('"')) {
-                        checkAndPutToMap(currentProp, line.substring(startCurrentPropValueIndex, i + 1), result, props);
+                        checkAndPutToMap(currentProp, line.substring(startCurrentPropValueIndex + 1, i), result, props);
                         startCurrentPropValueIndex = -1;
                         currentProp = null;
                         prefixSuffixStack.pop();
