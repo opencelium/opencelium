@@ -68,7 +68,12 @@ public class LogParserUtils {
                             startCurrentPropValueIndex = i + 1;
                             currentProp = line.substring(startCurrentPropIndex, i);
                             startCurrentPropIndex = -1;
-                            i++;
+
+                            if (i == chars.length - 2) {
+                                checkAndPutToMap(currentProp, line.substring(i + 1), result, props);
+                            } else {
+                                i++;
+                            }
                         } else {
                             checkAndPutToMap(line.substring(startCurrentPropIndex, i), StringUtils.EMPTY, result, props);
                         }
