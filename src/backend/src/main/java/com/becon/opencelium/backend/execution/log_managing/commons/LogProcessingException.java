@@ -38,4 +38,8 @@ public class LogProcessingException extends RuntimeException {
     public static LogProcessingException unsupportedLineFound(String line) {
         return new LogProcessingException("Unsupported line found : %s".formatted(line));
     }
+
+    public static RuntimeException missingRequiredLogPart(LogEntryType missing, LogEntryType ending) {
+        return new LogProcessingException("%s part is missing before ending : %s".formatted(missing.getTitle(), ending.getTitle()));
+    }
 }
