@@ -32,14 +32,14 @@ import {SocketProvider} from "./socket/SocketContext";
 
 ReactDOM.render(
     <Provider store={store}>
-        <SocketProvider>
+        {/*<SocketProvider>
             <SocketDataProvider>
                 <SocketDevTools/>
                 <hr style={{marginTop: 20, marginBottom: 20}}/>
                 <LogsPanel/>
             </SocketDataProvider>
-        </SocketProvider>
-        {/*<App/>*/}
+        </SocketProvider>*/}
+        <App/>
     </Provider>,
     document.getElementById("root"));
 

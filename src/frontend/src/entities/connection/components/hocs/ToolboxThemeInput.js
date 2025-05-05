@@ -16,7 +16,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import FontIcon from "@entity/connection/components/components/general/basic_components/FontIcon";
-import theme from "react-toolbox/lib/input/theme.css";
+import theme from "@style/css/toolbox.module.css";
 import styles from "@entity/connection/components/themes/default/hocs.scss";
 import basicComponentsStyles from "@entity/connection/components/themes/default/general/basic_components.scss";
 import {isString} from "@application/utils/utils";
@@ -30,6 +30,7 @@ class ToolboxThemeInput extends React.Component{
 
     render(){
         const {icon, tourStep, style, label, required, iconClassName, hasFocusStyle, className, isFocused, labelClassName, inputElementClassName, iconTooltip, tooltipTourStep, inputElementText, inputElementStyle, hideInput, error, ...props} = this.props;
+        console.log(theme);
         return(
             <div className={`${className} ${icon !== '' ? theme.withIcon : ''} ${label !== '' ? theme.input : ''} ${styles.toolbox_theme_input} ${hasFocusStyle ? styles.input : ''} ${tourStep ? tourStep : ''}`} style={style} {...props}>
                 {label !== '' && <div style={inputElementStyle} className={`${theme.inputElement} ${theme.filled} ${styles.label} ${inputElementClassName} ${hideInput ? styles.hide_label : ''}`}>{inputElementText}</div>}
