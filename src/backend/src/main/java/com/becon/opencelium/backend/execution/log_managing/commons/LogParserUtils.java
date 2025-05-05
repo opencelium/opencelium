@@ -119,9 +119,9 @@ public class LogParserUtils {
             }
         }
 
-        result.forEach((key, value) -> {
-            if (props.stream().noneMatch(prop -> key.equals(prop.key()))) {
-                throw LogProcessingException.missingRequiredProperty(key, line);
+        props.forEach(prop -> {
+            if (prop.required() && result.entrySet().stream().noneMatch(x -> prop.key().equals(x.getKey()))) {
+                throw LogProcessingException.missingRequiredProperty(prop.key(), line);
             }
         });
 
