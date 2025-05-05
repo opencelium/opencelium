@@ -28,7 +28,7 @@ public class WebSocketNotificationService {
         }
     }
 
-    public <E> void send2User(String username, E message) {
-        simpMessagingTemplate.convertAndSendToUser("user", "destination", message);
+    public <E> void send2User(String username, String destination, E message) {
+        simpMessagingTemplate.convertAndSendToUser(username, destination, message);
     }
 }

@@ -19,6 +19,7 @@ public class NotificationWebSocketHandler implements WebSocketEventHandler {
     public void handleConnect(StompHeaderAccessor accessor) {
         String sessionId = accessor.getSessionId();
         Integer userId = (Integer) accessor.getSessionAttributes().get("userId");
+        String username = (String) accessor.getSessionAttributes().get("username");
 
         if (userId == null || sessionId == null) {
             logger.error("Missing userId or sessionId in STOMP headers.");
@@ -32,6 +33,7 @@ public class NotificationWebSocketHandler implements WebSocketEventHandler {
             logger.warn(message);
             throw new IllegalStateException(message);
         } else {
+            registry.addUsername(userId, username);
             logger.info("WebSocket session has been registered, userId = " + userId + ", sessionId = " + sessionId);
         }
     }
