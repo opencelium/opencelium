@@ -11,9 +11,13 @@ import java.security.Principal;
 @Component
 public class WebSocketSubscriptionEventListener {
     private final WebSocketUserSubscriptionRegistry userSubscriptionRegistry;
+    private final WebSocketNotificationQueue notificationQueue;
 
-    public WebSocketSubscriptionEventListener(WebSocketUserSubscriptionRegistry userSubscriptionRegistry) {
+    public WebSocketSubscriptionEventListener(
+            WebSocketUserSubscriptionRegistry userSubscriptionRegistry,
+            WebSocketNotificationQueue notificationQueue) {
         this.userSubscriptionRegistry = userSubscriptionRegistry;
+        this.notificationQueue = notificationQueue;
     }
 
     @EventListener
@@ -24,6 +28,7 @@ public class WebSocketSubscriptionEventListener {
 
         if (principal != null && destination != null) {
             userSubscriptionRegistry.add(principal.getName(), destination);
+            notificationQueue.check(principal.getName());
         }
     }
 

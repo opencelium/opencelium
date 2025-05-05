@@ -42,4 +42,14 @@ public class WebSocketSessionRegistry {
     public String getUsername(int userId) {
         return usernames.get(userId);
     }
+
+    public int getUserId(String username) {
+        for (Map.Entry<Integer, String> entry : usernames.entrySet()) {
+            if (entry.getValue().equals(username)) {
+                return entry.getKey();
+            }
+        }
+
+        return -1;
+    }
 }
