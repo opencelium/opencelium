@@ -20,6 +20,7 @@ import org.springframework.web.socket.config.annotation.WebSocketTransportRegist
 import static com.becon.opencelium.backend.execution.socket.SocketConstant.EXECUTION_DESTINATION_PREFIX;
 import static com.becon.opencelium.backend.execution.socket.SocketConstant.NOTIFICATION_DESTINATION_PREFIX;
 import static com.becon.opencelium.backend.execution.socket.SocketConstant.PATH;
+import static com.becon.opencelium.backend.execution.socket.SocketConstant.SCHEDULER_DESTINATION_PREFIX;
 
 @Configuration
 @EnableWebSocketMessageBroker
@@ -38,7 +39,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
      */
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker(EXECUTION_DESTINATION_PREFIX, NOTIFICATION_DESTINATION_PREFIX);
+        registry.enableSimpleBroker(
+                EXECUTION_DESTINATION_PREFIX,
+                NOTIFICATION_DESTINATION_PREFIX,
+                SCHEDULER_DESTINATION_PREFIX
+        );
         registry.setApplicationDestinationPrefixes("/oc");
         registry.setUserDestinationPrefix("/user");
     }
