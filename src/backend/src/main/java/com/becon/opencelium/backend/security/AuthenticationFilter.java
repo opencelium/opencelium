@@ -19,18 +19,25 @@ package com.becon.opencelium.backend.security;
 import com.becon.opencelium.backend.configuration.LdapProperties;
 import com.becon.opencelium.backend.constant.SecurityConstant;
 import com.becon.opencelium.backend.database.mysql.entity.Session;
+import com.becon.opencelium.backend.database.mysql.entity.Subscription;
 import com.becon.opencelium.backend.database.mysql.entity.User;
 import com.becon.opencelium.backend.database.mysql.entity.UserDetail;
 import com.becon.opencelium.backend.database.mysql.entity.UserRole;
 import com.becon.opencelium.backend.database.mysql.service.SessionService;
+import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
 import com.becon.opencelium.backend.database.mysql.service.TotpService;
 import com.becon.opencelium.backend.database.mysql.service.UserRoleService;
 import com.becon.opencelium.backend.database.mysql.service.UserService;
 import com.becon.opencelium.backend.enums.AuthMethod;
 import com.becon.opencelium.backend.enums.LangEnum;
+import com.becon.opencelium.backend.execution.socket.SocketConstant;
+import com.becon.opencelium.backend.execution.socket.WebSocketNotificationQueue;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
+import com.becon.opencelium.backend.resource.subs.SubsDTO;
 import com.becon.opencelium.backend.resource.user.TotpResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
+import com.becon.opencelium.backend.subscription.dto.LicenseKey;
+import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
 import com.becon.opencelium.backend.utility.EmailUtility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
@@ -81,6 +88,10 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     @Autowired
     private LdapProperties properties;
+    @Autowired
+    private SubscriptionService subscriptionService;
+    @Autowired
+    private WebSocketNotificationQueue notificationQueue;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationFilter.class);
 
@@ -137,6 +148,8 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
             response.getWriter().write(payload);
             response.addHeader(HttpHeaders.AUTHORIZATION, SecurityConstant.BEARER + " " + token);
+
+            sendSubscriptionNotification();
         }
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
@@ -156,6 +169,17 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         response.setContentType("application/json");
         response.getWriter().write(payload);
         response.setStatus(HttpStatus.FORBIDDEN.value());
+    }
+
+    protected void sendSubscriptionNotification() {
+        Subscription subscription = subscriptionService.getActiveSubs();
+        if (subscription != null) {
+            String licenseKeyRaw = subscription.getLicenseKey();
+            LicenseKey licenseKey = LicenseKeyUtility.decrypt(licenseKeyRaw);
+
+            SubsDTO subsDTO = subscriptionService.toDto(licenseKey, subscription);
+            notificationQueue.addMessage(SocketConstant.NOTIFICATION_DESTINATION, subsDTO);
+        }
     }
 
 
