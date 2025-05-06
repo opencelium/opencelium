@@ -7,6 +7,6 @@ public interface SocketConstant {
     String LOGS_DESTINATION = "/execution/logs"; // WebSocket topic for execution logs
     String SUPPORT_FILE_DESTINATION = "/execution/support-file"; // WebSocket topic for support file
 
-    String NOTIFICATION_DESTINATION_PREFIX = "/queue/subscription"; // Message broker prefix for user specific notification
-    String NOTIFICATION_DESTINATION = "/queue/subscription"; // WebSocket topic for  user specific subscription notification
+    String NOTIFICATION_DESTINATION_PREFIX = "/subscription"; // Message broker prefix for user notifications
+    String NOTIFICATION_DESTINATION = "/subscription"; // WebSocket topic for user subscription notifications
 }

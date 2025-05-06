@@ -11,7 +11,6 @@ public class WebsocketMessageController {
     @MessageMapping("/scheduler")
     @SendTo("/execution/logs")
     public String broadcastLogs(@Payload String message) {
-        System.out.println(message + "hello");
         return message;
     }
 }

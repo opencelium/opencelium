@@ -9,48 +9,42 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Component
 public class WebSocketNotificationQueue {
-    private final Map<Integer, Queue<String>> userNotifications = new ConcurrentHashMap<>();
-    private final WebSocketSessionRegistry sessionRegistry;
+    private final Map<String, Queue<String>> destinationMessages = new ConcurrentHashMap<>();
     private final WebSocketUserSubscriptionRegistry subscriptionRegistry;
     private final WebSocketNotificationService notificationService;
 
     public WebSocketNotificationQueue(
-            WebSocketSessionRegistry sessionRegistry,
             WebSocketUserSubscriptionRegistry subscriptionRegistry,
             WebSocketNotificationService notificationService) {
-        this.sessionRegistry = sessionRegistry;
         this.subscriptionRegistry = subscriptionRegistry;
         this.notificationService = notificationService;
     }
 
-    public void addMessage(int userId, String message) {
-        String username = sessionRegistry.getUsername(userId);
-
-        userNotifications
-                .computeIfAbsent(userId, id -> new ConcurrentLinkedQueue<>())
+    public void addMessage(String destination, String message) {
+        destinationMessages
+                .computeIfAbsent(destination, dest -> new ConcurrentLinkedQueue<>())
                 .offer(message);
 
-        // if user is subscribed then send messages
-        while (subscriptionRegistry.isSubscribed(username, SocketConstant.NOTIFICATION_DESTINATION) && (hasMessages(userId))){
-            notificationService.send2User(username, SocketConstant.NOTIFICATION_DESTINATION, getMessage(userId));
+        // if there is a message for specific destination then send it
+        while (subscriptionRegistry.hasSubscription(destination) && (hasMessages(destination))){
+            notificationService.send(destination, getMessage(destination));
         }
     }
 
-    public String getMessage(int userId) {
-        Queue<String> messages = userNotifications.get(userId);
+    public String getMessage(String destination) {
+        Queue<String> messages = destinationMessages.get(destination);
         return (messages != null) ? messages.poll() : null;
     }
 
-    public boolean hasMessages(int userId) {
-        Queue<String> queue = userNotifications.get(userId);
+    public boolean hasMessages(String destination) {
+        Queue<String> queue = destinationMessages.get(destination);
         return queue != null && !queue.isEmpty();
     }
 
-    public void check(String username) {
-        int userId = sessionRegistry.getUserId(username);
-
-        while (subscriptionRegistry.isSubscribed(username, SocketConstant.NOTIFICATION_DESTINATION) && (hasMessages(userId))){
-            notificationService.send2User(username, SocketConstant.NOTIFICATION_DESTINATION, getMessage(userId));
+    public void check(String destination) {
+        // if there is a message for specific destination then send it
+        while (subscriptionRegistry.hasSubscription(destination) && (hasMessages(destination))){
+            notificationService.send(destination, getMessage(destination));
         }
     }
 }

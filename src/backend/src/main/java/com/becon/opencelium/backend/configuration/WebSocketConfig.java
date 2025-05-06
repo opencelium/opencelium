@@ -1,6 +1,5 @@
 package com.becon.opencelium.backend.configuration;
 
-import com.becon.opencelium.backend.execution.socket.WebSocketHandshakeHandler;
 import com.becon.opencelium.backend.execution.socket.WebSocketHandshakeInterceptor;
 import com.becon.opencelium.backend.execution.socket.handler.WebSocketEventHandler;
 import com.becon.opencelium.backend.security.JwtTokenUtil;
@@ -51,8 +50,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint(PATH)
                 .setAllowedOriginPatterns("*")
-                .setHandshakeHandler(new WebSocketHandshakeHandler()) // sets Principal based on username attribute value
-                .addInterceptors(new WebSocketHandshakeInterceptor(jwtTokenUtil)) // populate attributes [userId, username]
+                .addInterceptors(new WebSocketHandshakeInterceptor(jwtTokenUtil)) // populate attribute [userId]
                 .withSockJS();
     }
 

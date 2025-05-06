@@ -8,20 +8,24 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class WebSocketUserSubscriptionRegistry {
-    private final Map<String, Set<String>> userSubscriptions = new ConcurrentHashMap<>();
+    private final Map<Integer, Set<String>> userSubscriptions = new ConcurrentHashMap<>();
 
-    public synchronized boolean add(String username, String destination) {
+    public synchronized boolean add(int userId, String destination) {
         return userSubscriptions
-                .computeIfAbsent(username, k -> ConcurrentHashMap.newKeySet())
+                .computeIfAbsent(userId, k -> ConcurrentHashMap.newKeySet())
                 .add(destination);
     }
 
-    public void remove(String username) {
-        userSubscriptions.remove(username);
+    public void remove(int userId, String destination) {
+        userSubscriptions.get(userId).remove(destination);
     }
 
-    public boolean isSubscribed(String username, String destination) {
-        Set<String> destinations = userSubscriptions.get(username);
-        return destinations != null && destinations.contains(destination);
+    public void remove(int userId) {
+        userSubscriptions.remove(userId);
+    }
+
+    public boolean hasSubscription(String destination) {
+        return userSubscriptions.values().stream()
+                .anyMatch(set -> set.contains(destination));
     }
 }

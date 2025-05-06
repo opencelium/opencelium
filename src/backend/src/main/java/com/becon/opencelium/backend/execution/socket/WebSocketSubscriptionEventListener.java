@@ -6,8 +6,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
-import java.security.Principal;
-
 @Component
 public class WebSocketSubscriptionEventListener {
     private final WebSocketUserSubscriptionRegistry userSubscriptionRegistry;
@@ -23,22 +21,25 @@ public class WebSocketSubscriptionEventListener {
     @EventListener
     public void handleSubscribeEvent(SessionSubscribeEvent event) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
-        Principal principal = accessor.getUser();
         String destination = accessor.getDestination();
+        Integer userId = (Integer) accessor.getSessionAttributes().get("userId");
 
-        if (principal != null && destination != null) {
-            userSubscriptionRegistry.add(principal.getName(), destination);
-            notificationQueue.check(principal.getName());
+        if (destination != null) {
+            userSubscriptionRegistry.add(userId, destination);
+            notificationQueue.check(destination);
         }
     }
 
     @EventListener
     public void handleDisconnectEvent(SessionDisconnectEvent event) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
-        Principal principal = accessor.getUser();
+        String destination = accessor.getDestination();
+        Integer userId = (Integer) accessor.getSessionAttributes().get("userId");
 
-        if (principal != null) {
-            userSubscriptionRegistry.remove(principal.getName());
+        if (destination != null) {
+            userSubscriptionRegistry.remove(userId, destination);
+        } else {
+            userSubscriptionRegistry.remove(userId);
         }
     }
 }

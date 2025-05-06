@@ -27,8 +27,4 @@ public class WebSocketNotificationService {
             simpMessagingTemplate.convertAndSend(SocketConstant.LOGS_DESTINATION + "/" + channelId, message);
         }
     }
-
-    public <E> void send2User(String username, String destination, E message) {
-        simpMessagingTemplate.convertAndSendToUser(username, destination, message);
-    }
 }
