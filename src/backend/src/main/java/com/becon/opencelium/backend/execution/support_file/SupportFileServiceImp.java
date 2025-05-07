@@ -242,12 +242,12 @@ public class SupportFileServiceImp implements SupportFileService {
             String filename = toFilename(timestamp, connectionId, type, executionId, "zip");
             String message = "Support file successfully generated.";
             SupportFile notification = new SupportFile(connectionId, connectionTitle, filename, SupportFileStatus.SUPPORT_FILE_GENERATED, message);
-            notificationService.send(SocketConstant.DESTINATION_SUPPORT_FILE, notification);
+            notificationService.send(SocketConstant.SUPPORT_FILE_DESTINATION, notification);
         } catch (Exception e) {
             // send fail notification vie websocket
             String message = "Support file generation failed: " + e.getMessage();
             SupportFile notification = new SupportFile(connectionId, connectionTitle, null, SupportFileStatus.SUPPORT_FILE_FAILED, message);
-            notificationService.send(SocketConstant.DESTINATION_SUPPORT_FILE, notification);
+            notificationService.send(SocketConstant.SUPPORT_FILE_DESTINATION, notification);
 
             logger.error("Failed to create support file for connectionId = '" + connectionId + "'");
             throw new RuntimeException(e);

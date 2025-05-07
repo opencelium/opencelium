@@ -87,6 +87,8 @@ public class TotpAuthenticationFilter extends AuthenticationFilter {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.getWriter().write(payload);
         response.addHeader(HttpHeaders.AUTHORIZATION, SecurityConstant.BEARER + " " + token);
+
+        sendSubscriptionNotification();
     }
 
     @Override

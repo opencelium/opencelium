@@ -42,9 +42,13 @@ import com.becon.opencelium.backend.execution.JSHttpObject;
 import com.becon.opencelium.backend.execution.notification.EmailServiceImpl;
 import com.becon.opencelium.backend.execution.notification.IncomingWebhookService;
 import com.becon.opencelium.backend.execution.oc721.Operation;
+import com.becon.opencelium.backend.execution.socket.Connection2WebSocketChannelMapping;
+import com.becon.opencelium.backend.execution.socket.SocketConstant;
+import com.becon.opencelium.backend.execution.socket.WebSocketNotificationService;
 import com.becon.opencelium.backend.execution.support_file.SupportFileService;
 import com.becon.opencelium.backend.quartz.JobExecutor;
 import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
+import com.becon.opencelium.backend.resource.schedule.RunningJobsResource;
 import com.becon.opencelium.backend.utility.LogFileUtility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -89,7 +93,9 @@ public class ExecutionAspect {
     private final LastExecutionService lastExecutionService;
     private final DataAggregatorService dataAggregatorService;
     private final SupportFileService supportFileService;
+    private final Connection2WebSocketChannelMapping connection2ChannelMapping;
     private final SubscriptionService subscriptionService;
+    private final WebSocketNotificationService notificationService;
 
     public ExecutionAspect(
             @Qualifier("schedulerServiceImp") SchedulerService schedulerService,
@@ -101,7 +107,9 @@ public class ExecutionAspect {
             IncomingWebhookService incomingWebhookService,
             EmailServiceImpl emailService,
             Environment env,
-            SupportFileService supportFileService) {
+            SupportFileService supportFileService,
+            Connection2WebSocketChannelMapping connection2ChannelMapping,
+            WebSocketNotificationService notificationService) {
         this.schedulerService = schedulerService;
         this.userService = userService;
         this.incomingWebhookService = incomingWebhookService;
@@ -112,6 +120,8 @@ public class ExecutionAspect {
         this.dataAggregatorService = dataAggregatorService;
         this.supportFileService = supportFileService;
         this.subscriptionService = subscriptionService;
+        this.connection2ChannelMapping = connection2ChannelMapping;
+        this.notificationService = notificationService;
     }
 
     @Before("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
@@ -130,6 +140,8 @@ public class ExecutionAspect {
 
         List<EventNotification> eventNotifications = schedulerService.getAllNotifications(schedulerId);
         triggerNotifications(eventNotifications, "pre", null);
+
+        sendRunningJobsNotification();
     }
 
     @AfterReturning("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
@@ -156,6 +168,8 @@ public class ExecutionAspect {
             schedulerService.deleteById(schedulerId);
             // delete temporarily created connection
             connectionServiceImp.deleteById(connectionId);
+            // remove mapping
+            connection2ChannelMapping.remove(connectionId);
         } else if (data.getExecType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE) {
             Long connectionId = (Long) context.get("connectionId");
             String timestamp = (String) context.get("timestamp");
@@ -174,6 +188,8 @@ public class ExecutionAspect {
 
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
         triggerNotifications(en, "post", null);
+
+        sendRunningJobsNotification();
     }
 
     @AfterThrowing(pointcut = "execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)",
@@ -201,6 +217,8 @@ public class ExecutionAspect {
             schedulerService.deleteById(schedulerId);
             // delete temporarily created connection
             connectionServiceImp.deleteById(connectionId);
+            // remove mapping
+            connection2ChannelMapping.remove(connectionId);
         } else if (data.getExecType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE) {
             Long connectionId = (Long) context.get("connectionId");
             String timestamp = (String) context.get("timestamp");
@@ -219,6 +237,8 @@ public class ExecutionAspect {
 
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
         triggerNotifications(en, "alert", ex);
+
+        sendRunningJobsNotification();
     }
 
     private long initExecutionObj(int schedulerId) {
@@ -498,5 +518,12 @@ public class ExecutionAspect {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private void sendRunningJobsNotification() {
+        try {
+            List<RunningJobsResource> allRunningJobs = schedulerService.getAllRunningJobs();
+            notificationService.send(SocketConstant.SCHEDULER_DESTINATION, allRunningJobs);
+        } catch (Exception e) {}
     }
 }
