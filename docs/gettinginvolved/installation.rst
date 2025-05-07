@@ -3,7 +3,7 @@ Installation
 ##################
 
 .. note::
-	| Please check the software requirements, before installing OC.
+	| Please all check the software requirements, before installing OC.
 	| 
 	| If you have changed the original umask on you linux server, 
 	| please set additional permissions to /opt/opencelium. 
