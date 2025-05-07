@@ -26,6 +26,8 @@ public interface ExceptionConstant {
     String GROUP_NOT_FOUND = "GROUP_NOT_FOUND";
     String ROLE_ALREADY_EXIST = "ROLE_ALREADY_EXIST";
     String UNSUPPORTED_HEADER_AUTH_TYPE = "UNSUPPORTED_HEADER_AUTH_TYPE";
+    String MASTER_PASSWORD_REQUIRED = "MASTER_PASSWORD_REQUIRED";
+    String REQUIRED_DATA_NOT_FOUND = "REQUIRED_DATA_NOT_FOUND";
 
     // ----------------------------------------- Storage Controller --------------------------------------- //
 

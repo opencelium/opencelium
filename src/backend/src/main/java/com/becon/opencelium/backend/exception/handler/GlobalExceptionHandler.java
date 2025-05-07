@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.exception.handler;
 
+import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.ocel.exception.InvalidExpressionException;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import org.springframework.http.HttpStatus;
@@ -16,18 +17,29 @@ import java.util.Date;
 public class GlobalExceptionHandler {
     @ExceptionHandler(value = NoHandlerFoundException.class)
     @ResponseStatus(HttpStatus.BAD_GATEWAY)
-    public ResponseEntity<?> handleNoHandlerFoundException(NoHandlerFoundException ex) {
+    public ResponseEntity<ErrorResource> handleNoHandlerFoundException(NoHandlerFoundException ex) {
         ErrorResource errorResource = new ErrorResource(ex, HttpStatus.BAD_GATEWAY);
         return ResponseEntity.badRequest().body(errorResource);
     }
 
     @ExceptionHandler(InvalidExpressionException.class)
-    public ResponseEntity<?> handleInvalidExpressionException(InvalidExpressionException ex) {
+    public ResponseEntity<ErrorResource> handleInvalidExpressionException(InvalidExpressionException ex) {
         ErrorResource errorResource = new ErrorResource();
         errorResource.setMessage(ex.getMessage());
         errorResource.setError(ex.getErrorCode().getCode());
         errorResource.setTimestamp(Date.from(Instant.now()));
         errorResource.setStatus(HttpStatus.BAD_REQUEST);
         return ResponseEntity.badRequest().body(errorResource);
+    }
+
+    @ExceptionHandler(GeneralServiceException.class)
+    public ResponseEntity<ErrorResource> handleGeneralException(GeneralServiceException ex) {
+        ErrorResource errorResource = new ErrorResource();
+        errorResource.setMessage(ex.getMessage());
+        errorResource.setError(ex.getError());
+        errorResource.setTimestamp(Date.from(Instant.now()));
+        errorResource.setStatus(ex.getStatus());
+        return ResponseEntity.status(ex.getStatus())
+                .body(errorResource);
     }
 }

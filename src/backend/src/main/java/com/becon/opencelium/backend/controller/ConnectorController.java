@@ -16,11 +16,15 @@
 
 package com.becon.opencelium.backend.controller;
 
+import com.becon.opencelium.backend.commons.ThreadLocalSingleton;
+import com.becon.opencelium.backend.constant.ExceptionConstant;
+import com.becon.opencelium.backend.constant.ExceptionMessages;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.exception.CommunicationFailedException;
 import com.becon.opencelium.backend.exception.ConnectorAlreadyExistsException;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
+import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
@@ -61,7 +65,7 @@ public class ConnectorController {
 
     public ConnectorController(
             @Qualifier("connectorServiceImp") ConnectorService connectorService,
-            @Qualifier("invokerServiceImp")InvokerService invokerService,
+            @Qualifier("invokerServiceImp") InvokerService invokerService,
             @Qualifier("connectionServiceImp") ConnectionService connectionService,
             Mapper<Connector, ConnectorResource> connectorResourceMapper
     ) {
@@ -145,22 +149,37 @@ public class ConnectorController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> update(@PathVariable int id, @RequestBody ConnectorResource connectorResource) {
-
-        if (!connectorService.existsById(id)) {
-            throw new ConnectorNotFoundException(id);
-        }
-
-        Connector connector = connectorService.findById(id).orElseThrow(() -> new ConnectorNotFoundException(id));
+    public ResponseEntity<ConnectorResource> update(@PathVariable Integer id, @RequestBody ConnectorResource connectorResource) {
+        Connector connector = connectorService.getById(id);
 
         if (connectorService.existByTitle(connectorResource.getTitle()) && !connector.getTitle().equals(connectorResource.getTitle())) {
             throw new ConnectorAlreadyExistsException(connectorResource.getTitle());
         }
         connectorResource.setConnectorId(id);
         Connector entity = connectorResourceMapper.toEntity(connectorResource);
-        connectorService.save(entity);
+        connectorService.update(connector, entity);
 
-        return ResponseEntity.ok().body(connectorResourceMapper.toDTO(entity));
+        return ResponseEntity.ok()
+                .body(connectorResourceMapper.toDTO(entity));
+    }
+
+    @Operation(summary = "Modifies connector's required data")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Connector has been successfully modified"),
+    })
+    @PutMapping(path = "/{id}/required-data")
+    public ResponseEntity<ConnectorResource> updateRequiredData(
+            @PathVariable Integer id,
+            @RequestBody ConnectorResource connectorResource) {
+        if (Boolean.FALSE.equals(ThreadLocalSingleton.hasMasterPassword())) {
+            throw new GeneralServiceException(HttpStatus.FORBIDDEN, ExceptionConstant.MASTER_PASSWORD_REQUIRED, ExceptionMessages.MASTER_PASSWORD_REQUIRED);
+        }
+
+        Connector connector = connectorService.getById(id);
+
+        connectorService.updateRequestData(connector, connectorResource.getRequestData());
+
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Deletes a connector in the system by providing connector ID")

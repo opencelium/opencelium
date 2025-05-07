@@ -22,6 +22,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface ConnectorService {
@@ -55,4 +56,7 @@ public interface ConnectorService {
 
     List<RequestData> buildRequestData(Connector connector);
 
+    void update(Connector connector, Connector newConnector);
+
+    void updateRequestData(Connector connector, Map<String, String> requestData);
 }

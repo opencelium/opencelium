@@ -16,10 +16,13 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
+import com.becon.opencelium.backend.constant.ExceptionConstant;
+import com.becon.opencelium.backend.constant.ExceptionMessages;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.RequestData;
 import com.becon.opencelium.backend.database.mysql.repository.ConnectorRepository;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
+import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.execution.rdata.RequiredDataService;
 import com.becon.opencelium.backend.execution.rdata.RequiredDataServiceImp;
 import com.becon.opencelium.backend.invoker.InvokerRequestBuilder;
@@ -28,13 +31,13 @@ import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.utility.crypto.Encoder;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ConnectorServiceImp implements ConnectorService {
@@ -91,7 +94,7 @@ public class ConnectorServiceImp implements ConnectorService {
     public void saveAll(List<Connector> connectors) {
         connectors.forEach(this::encrypt);
         connectors.forEach(c -> {
-            c.getRequestData().forEach(r->r.setConnector(c));
+            c.getRequestData().forEach(r -> r.setConnector(c));
             requestDataService.saveAll(c.getRequestData());
             c.setRequestData(new ArrayList<>());
         });
@@ -131,8 +134,6 @@ public class ConnectorServiceImp implements ConnectorService {
         }
         return list;
     }
-
-
 
     @Override
     public List<Connector> findAll() {
@@ -189,6 +190,65 @@ public class ConnectorServiceImp implements ConnectorService {
             rqsd.setValue(value);
         });
         return requestData;
+    }
+
+    @Override
+    public void update(Connector connector, Connector newConnector) {
+        newConnector.setRequestData(connector.getRequestData());
+        newConnector.setId(connector.getId());
+        connectorRepository.save(newConnector);
+    }
+
+    @Override
+    @Transactional
+    public void updateRequestData(Connector connector, Map<String, String> newRequestDataMap) {
+        List<RequestData> existingList = connector.getRequestData();
+
+        // Create a map of existing RequestData for quick lookup by field
+        Map<String, RequestData> existingMap = existingList.stream()
+                .collect(Collectors.toMap(RequestData::getField, rd -> rd));
+
+        // A map of  RequiredData from a invoker to check an availability and visibility of requestData
+        Map<String, RequiredData> requiredDataMapFromInvoker = invokerService.findByName(connector.getInvoker())
+                .getRequiredData()
+                .stream()
+                .collect(Collectors.toMap(RequiredData::getName, rd -> rd));
+
+        // Prepare new list to assign to connector
+        List<RequestData> updatedList = new ArrayList<>();
+
+        // Handle additions and updates
+        for (Map.Entry<String, String> entry : newRequestDataMap.entrySet()) {
+            String field = entry.getKey();
+            String value = entry.getValue();
+
+            RequestData existing = existingMap.get(field);
+            if (existing != null) {
+                // Update existing if value changed
+                existing.setValue(value);
+
+                updatedList.add(existing);
+                existingMap.remove(field); // Mark as processed
+            } else {
+                RequiredData requiredData = Optional.ofNullable(requiredDataMapFromInvoker.get(field))
+                        .orElseThrow(() -> new GeneralServiceException(ExceptionConstant.REQUIRED_DATA_NOT_FOUND, ExceptionMessages.REQUIRED_DAT_NOT_FOUND.formatted(field)));
+
+                // Add new entry
+                RequestData newData = new RequestData();
+                newData.setField(field);
+                newData.setValue(value);
+                newData.setVisibility(requiredData.getVisibility());
+                newData.setConnector(connector);
+                updatedList.add(newData);
+            }
+        }
+
+        // Anything left in existingMap was not in new data → remove it
+        for (RequestData obsolete : existingMap.values()) {
+            requestDataService.deleteById(obsolete.getId());
+        }
+
+        requestDataService.saveAll(updatedList);
     }
 
     private void addFieldIfNotExists(List<RequestData> requestData, RequiredData rqd) {

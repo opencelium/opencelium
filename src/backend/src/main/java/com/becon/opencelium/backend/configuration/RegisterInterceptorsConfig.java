@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.configuration;
 
-import com.becon.opencelium.backend.configuration.interceptors.UserInterceptor;
+import com.becon.opencelium.backend.configuration.interceptors.MasterPasswordInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -12,17 +12,17 @@ import java.util.List;
 @Configuration
 public class RegisterInterceptorsConfig extends WebMvcConfigurationSupport {
 
-    private static final List<String> USER_INTERCEPT_PATHS = List.of("/**");
+    private static final List<String> MASTER_PASSWORD_SUPPORTING_INTERCEPT_PATHS = List.of("/connector/**");
 
-    private final UserInterceptor userInterceptor;
+    private final MasterPasswordInterceptor masterPasswordInterceptor;
 
-    public RegisterInterceptorsConfig(UserInterceptor userInterceptor) {
-        this.userInterceptor = userInterceptor;
+    public RegisterInterceptorsConfig(MasterPasswordInterceptor masterPasswordInterceptor) {
+        this.masterPasswordInterceptor = masterPasswordInterceptor;
     }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(userInterceptor).addPathPatterns(USER_INTERCEPT_PATHS);
+        registry.addInterceptor(masterPasswordInterceptor).addPathPatterns(MASTER_PASSWORD_SUPPORTING_INTERCEPT_PATHS);
     }
 
     @Override
