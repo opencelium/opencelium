@@ -7,7 +7,12 @@ import org.apache.commons.lang3.StringUtils;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.util.Map;
 
+/**
+ * Utility class providing common parsing methods for log property values.
+ */
 public class PropertyParsers {
+
+    private PropertyParsers() {}
 
     private static final ObjectMapper mapper = new ObjectMapper();
     public static final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();

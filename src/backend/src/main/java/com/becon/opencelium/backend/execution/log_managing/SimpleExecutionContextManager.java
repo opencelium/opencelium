@@ -56,6 +56,11 @@ public class SimpleExecutionContextManager implements ExecutionContextManager {
         executionContext.currentOffset.getAndUpdate(x -> x + line.getBytes(StandardCharsets.UTF_8).length);
     }
 
+    // ** PRIVATE SECTION ** //
+
+    /**
+     * Initializes a new execution context with the given log line
+     */
     private void initNewExecution(String executionId, ParsedLogLine parsedLog) {
         String connectionId = (String) parsedLog.getProperties().get(LogPropertyKeys.CONNECTION_ID);
         String flowchartId = (String) parsedLog.getProperties().get(LogPropertyKeys.FLOWCHART_ID);
@@ -104,6 +109,9 @@ public class SimpleExecutionContextManager implements ExecutionContextManager {
         }
     }
 
+    /**
+     * Holds metadata for an execution session, including current offset and identifiers.
+     */
     private static class ExecutionContext {
         private final AtomicLong currentOffset;
         private final String connectionId;
