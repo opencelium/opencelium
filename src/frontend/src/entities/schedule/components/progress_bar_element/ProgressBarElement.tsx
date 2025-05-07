@@ -24,9 +24,6 @@ import {
     ProgressBarSectionStyled, ProgressBarStyled, ProgressBarTitleStyled, ProgressBarToStyled
 } from './styles';
 import {shuffle} from "@application/utils/utils";
-import Button from "@basic_components/buttons/Button";
-import {PermissionTooltipButton} from "@app_component/base/button/PermissionButton";
-import {ColorTheme} from "@style/Theme";
 import {TextSize} from "@app_component/base/text/interfaces";
 import {TooltipButton} from "@app_component/base/tooltip_button/TooltipButton";
 import {useAppDispatch} from "@application/utils/store";

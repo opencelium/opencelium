@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {createContext, useContext, useEffect, useRef, useState} from "react";
 import { useSocket } from "./SocketContext";
 import { useCurrentSchedulesSocket } from "./modules/useCurrentSchedulesSocket";
 import { useConnectionLogsSocket } from "./modules/useConnectionLogsSocket";
@@ -6,7 +6,6 @@ import {SocketDataContextType} from "./interfaces";
 import {useSupportFilesSocket} from "./modules/useSupportFilesSocket";
 import {useCurrentSubscriptionSocket} from "./modules/useCurrentSubscriptionSocket";
 import {useAppDispatch} from "@application/utils/store";
-import {getCurrentSubscription} from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
 import {Auth} from "@application/classes/Auth";
 import {addNotification} from "@application/redux_toolkit/slices/ApplicationSlice";
 import {NotificationType} from "@application/interfaces/INotification";
@@ -25,47 +24,50 @@ export const SocketDataProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
     const { hasNewSupportFile, setHasNewSupportFile } = useSupportFilesSocket(socket);
     const { currentSubscription } = useCurrentSubscriptionSocket(socket);
 
-    const handleConnect = () => {
-        console.log('socket is connected')
-        setIsConnected(true);
-    }
-    const handleDisconnect = () => {
-        console.log('socket is disconnected')
-        setIsConnected(false);
-    }
+    const isConnectedReference: any = useRef();
+    isConnectedReference.current = isConnected;
     useEffect(() => {
-        if (!socket.connected) {
-            if (authUser) {
-                socket.connect();
+        return () => {
+            if (socket && socket.connected) {
+                socket.deactivate().then(() => console.log("🧹 Socket deactivated"));
+            }
+        };
+    }, []);
+    useEffect(() => {
+        console.log('isConnected', isConnected)
+    }, [isConnected])
+
+    useEffect(() => {
+        if (authUser) {
+            if (!authValid) {
+                setAuthValid(true);
             }
         } else {
-            if (!isConnected) {
-                handleConnect();
+            if (authValid) {
+                setAuthValid(false);
             }
         }
     }, [authUser]);
 
     useEffect(() => {
-        if (!socket) return;
-        const handleAuth = (valid: boolean) => setAuthValid(valid);
-
-        socket.on("connect", handleConnect);
-        socket.on("disconnect", handleDisconnect);
-        socket.on("auth-status", handleAuth);
-        if (!socket.connected) {
-            socket.connect();
-        } else {
-            handleConnect();
+        if (socket && authUser && !socket.connected) {
+            socket.onConnect = () => {
+                console.log("STOMP connected");
+                if (!isConnected){
+                    setIsConnected(true);
+                }
+            };
+            socket.onDisconnect = () => {
+                console.log("STOMP disconnected");
+                if (isConnected) {
+                    setIsConnected(false);
+                }
+            };
+            if (!socket.connected) {
+                socket.activate();
+            }
         }
-
-        return () => {
-            socket.off("connect", handleConnect);
-            socket.off("disconnect", handleDisconnect);
-            socket.off("auth-status", handleAuth);
-            socket.disconnect();
-        };
-    }, [socket]);
-
+    }, [authUser, socket]);
     useEffect(() => {
         if (hasNewSupportFile) {
             const date = new Date();
@@ -84,7 +86,7 @@ export const SocketDataProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
     return (
         <SocketDataContext.Provider
             value={{
-                isConnected,
+                isConnected: isConnectedReference,
                 authValid,
                 currentSchedules,
                 connectionLog,

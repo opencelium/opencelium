@@ -14,7 +14,6 @@
  */
 
 import React, {FC, useEffect} from 'react';
-import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {LogoutProps} from "@application/interfaces/IAuth";
 import {logout} from "@application/redux_toolkit/slices/AuthSlice";
 import Dialog from "@app_component/base/dialog/Dialog";
@@ -22,24 +21,17 @@ import LoginFormInputs from "@app_component/default_pages/login/LoginFormInputs"
 import {ResponseMessages} from "@application/requests/interfaces/IResponse";
 import {useAppDispatch} from "@application/utils/store";
 import {useSocketData} from "../../../socket/SocketDataContext";
-import {Auth} from "@application/classes/Auth";
 
 const CheckConnectionComponent: FC =
     ({
          children,
     }) => {
         const dispatch = useAppDispatch();
-        const {authUser} = Auth.getReduxState();
-        const {isConnected, authValid, socket} = useSocketData();
+        const {isConnected, authValid} = useSocketData();
         const exit = () => {
             const logoutProps: LogoutProps = {wasAccessDenied: true, message: ResponseMessages.UNSUPPORTED_HEADER_AUTH_TYPE};
             dispatch(logout(logoutProps));
         }
-        useEffect(() => {
-            if (authUser) {
-                socket.emit("auth-status", true);
-            }
-        }, [authUser]);
         return (
             <Dialog
                 actions={[]}

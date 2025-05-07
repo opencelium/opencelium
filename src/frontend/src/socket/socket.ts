@@ -1,19 +1,35 @@
-import { io, Socket } from "socket.io-client";
+import { Client } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
 import {Urls} from "@entity/application/requests/classes/url";
 import {store} from "@application/utils/store";
 
-let socket: Socket | null = null;
+let socketClient: Client | null = null;
+
+export const SocketAppPrefix = '/oc';
+export const SocketUserPrefix = '/user';
 
 export const getSocket = () => {
     const token = store.getState().authReducer.authUser?.token;
-    if (!socket && token) {
-        socket = io(`${Urls.baseUrl}websocket?token=${token}`, {
-            transports: ["websocket"],
-            autoConnect: false,
-            /*auth: {
-                token: localStorage.getItem("auth_token"),
-            },*/
+    console.log(token);
+    if (!socketClient && token) {
+        const webSocket = new SockJS(`${Urls.socketServer}websocket?token=${token}`);
+        socketClient = new Client({
+            webSocketFactory: () => webSocket,
+            reconnectDelay: 5000,
+            debug: (str: string) => {
+                console.log('[STOMP DEBUG]', str);
+            },
+
+            // Optional: catch WebSocket/STOMP errors
+            onStompError: (frame) => {
+                console.error('[STOMP ERROR]', frame.headers['message'], frame.body);
+            },
+
+            onWebSocketError: (event) => {
+                console.error('[WS ERROR]', event);
+            },
         });
+        console.log('SocketClient.Init', socketClient);
     }
-    return socket;
+    return socketClient;
 };

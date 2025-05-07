@@ -2,6 +2,7 @@ import SubscriptionModel from "@entity/license_management/requests/models/Subscr
 import ModelCurrentSchedule from "@entity/schedule/requests/models/CurrentSchedule";
 import {Socket} from "socket.io-client";
 import {ConnectionSocketLog} from "@root/requests/models/ConnectionLog";
+import {Client} from "@stomp/stompjs";
 
 export interface SocketDataContextType {
     isConnected: boolean;
@@ -10,5 +11,5 @@ export interface SocketDataContextType {
     connectionLog: ConnectionSocketLog | undefined;
     hasNewSupportFile: boolean,
     currentSubscription: SubscriptionModel,
-    socket: Socket,
+    socket: Client,
 }
