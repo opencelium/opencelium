@@ -159,6 +159,7 @@ class Body extends React.Component {
 		const { currentFieldName } = this.state;
 		const { connection, updateConnection } = this.props;
 		let currentEntity = entity === null ? connection : entity;
+		// console.log('connection', connection)
 		updateConnection(currentEntity);
 		if (currentFieldName !== '') {
 			let bindingItem = this.getCurrentBindingItem(currentFieldName);

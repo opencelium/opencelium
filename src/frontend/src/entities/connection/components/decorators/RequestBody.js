@@ -13,6 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import CXmlEditor from '@app_component/base/input/xml_view/xml_editor/classes/CXmlEditor';
 import ReferenceGenerator from '@app_component/operator_builder/reference_generator/ReferenceGenerator';
 import { isJsonString, isNumber, isString, subArrayToString } from "@application/utils/utils";
 import { markFieldNameAsArray } from "@change_component//form_elements/form_connection/form_methods/help";
@@ -182,17 +183,21 @@ export function RequestBody(CRequestType){
 						} = this.props;
 						connector.setCurrentItem(method);
 
-						const transformedData = {
+						const transformedData = data instanceof CXmlEditor ? data : {
 							...data,
 							new_value: transformDataFields(data.new_value, 'body'),
 							updated_src: transformDataFields(data.updated_src, 'body'),
 						};
 
+						console.log(transformedData)
+
+						const fieldBindingData = CRequestType.convertForFieldBinding(transformedData)
+						
 						CRequestType.updateFieldsBinding(
 							connection,
 							connector,
 							method,
-							CRequestType.convertForFieldBinding(transformedData),
+							fieldBindingData,
 							target
 						);
 
@@ -205,7 +210,7 @@ export function RequestBody(CRequestType){
 								CRequestType.convertToBodyFormat(transformedData)
 							);
 						}
-
+						console.log(connection)
 						updateEntity();
 					}
 
@@ -458,7 +463,7 @@ export function RequestBody(CRequestType){
 														);
 													},
 													id: `${id}_reference_component`,
-													self: {current: 1},
+													self: this.paramGenerator,
 											  }
 											: null
 									}

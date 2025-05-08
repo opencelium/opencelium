@@ -13,11 +13,11 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {xml2js} from 'xml-js';
-import {isArray, isString} from "@application/utils/utils";
-import {CBodyEditor} from "@classes/general/basic_components/CBodyEditor";
-import CTag from "./CTag";
+import { isArray, isString } from "@application/utils/utils";
+import { CBodyEditor } from "@classes/general/basic_components/CBodyEditor";
+import { xml2js } from 'xml-js';
 import CProperty from "./CProperty";
+import CTag from "./CTag";
 
 export default class CXmlEditor extends CBodyEditor{
     constructor(xml) {
@@ -159,7 +159,8 @@ export default class CXmlEditor extends CBodyEditor{
     }
 
     static convertToBodyFormat(bodyData){
-        return bodyData instanceof CXmlEditor ? bodyData.convertToBackendXml() : (new CXmlEditor(bodyData)).convertToBackendXml();
+        const bodyFormat = bodyData instanceof CXmlEditor ? bodyData.convertToBackendXml() : (new CXmlEditor(bodyData)).convertToBackendXml();
+        return bodyFormat;
     }
 
     static convertForFieldBinding(xmlEditor){

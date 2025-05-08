@@ -836,7 +836,7 @@
   text-align: center;
   top: 0;
   min-width: 250px;
-  max-width: 450px;
+  max-width: 490px;
   right: 0;
   z-index: 10000;
   animation: APopupInputAppear .25s;
@@ -890,7 +890,7 @@
 .change_tag_popup{
   @extend .change_popup;
   min-width: 250px;
-  max-width: 450px;
+  max-width: 490px;
   right: 0;
 }
 .property_hovered:hover{
