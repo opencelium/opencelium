@@ -7,7 +7,7 @@ import {
 import {
 	deleteLogs,
 	getMethodTrace,
-	getOperatorTrace,
+	getOperatorTrace, testConnection,
 } from '../action_creators/ConnectionLogCreators';
 import {findAndUpdateTrace} from "@root/utils/utils";
 

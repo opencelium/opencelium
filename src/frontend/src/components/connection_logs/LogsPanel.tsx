@@ -1,14 +1,24 @@
 import React, { useState } from 'react';
 import ConnectorPanel from './ConnectorPanel/ConnectorPanel';
-import styles from './LogsPanel.module.css';
 import {deleteLogs} from "@root/redux_toolkit/action_creators/ConnectionLogCreators";
 import {RootState, useAppDispatch, useAppSelector} from "@application/utils/store";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import {Connection} from "@root/classes/Connection";
+import {
+  ClearButtonStyled,
+  HeaderStyled, LogPanelStyled, TopStyled
+} from "@change_component/form_elements/form_connection/form_svg/layouts/logs/styles";
+import {TextSize} from "@app_component/base/text/interfaces";
+import {Application} from "@application/classes/Application";
 export const ShowIndexPath = false;
 const LogsPanel: React.FC = () => {
   const dispatch = useAppDispatch();
 
   const connectionLog = useAppSelector((state: RootState) => state.connectionLogReducer);
+  const {
+    logPanelHeight, isDetailsOpened
+  } = Connection.getReduxState();
+  const {isFullScreen} = Application.getReduxState();
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDeleteLogs = async (executionId: string, connectionId: string) => {
@@ -18,21 +28,22 @@ const LogsPanel: React.FC = () => {
   };
 
   return (
-    <div className={styles.logsPanel}>
-      <div className={styles.logsPanelContainer}>
-        <div className={styles.logsPanelHeader}>
-          <h2 className={styles.logsPanelTitle}>Logs</h2>
-          <button
-            onClick={() =>
-              handleDeleteLogs(connectionLog.executionId, connectionLog.connectionId)
-            }
-            disabled={isDeleting}
-            className={styles.deleteLogsButton}
-          >
-            {isDeleting ? 'Deleting...' : <TooltipFontIcon size={14} tooltip={'Delete'} value={'delete'} className={styles.remove_icon} onClick={() => {}}/>}
-          </button>
-        </div>
-        <div>
+    <React.Fragment>
+        <TopStyled logPanelHeight={logPanelHeight}>
+          {logPanelHeight !== 0 && <HeaderStyled id={'test_execution_process'} value={'Logs'} width={isDetailsOpened ? 'calc(100% - 300px)' : '100%'}/>}
+          {logPanelHeight !== 0 && <ClearButtonStyled
+              right={isDetailsOpened ? isFullScreen ? 312 : 300 : isFullScreen ? 12 : 2}
+              iconSize={TextSize.Size_20}
+              position={'right'}
+              isDisabled={isDeleting || connectionLog.connectors.length === 0}
+              icon={'delete'}
+              tooltip={'Clear Logs'}
+              target={`clear_log_panel`}
+              hasBackground={false}
+              handleClick={() => handleDeleteLogs(connectionLog.executionId, connectionLog.connectionId)}
+          />}
+        </TopStyled>
+      <LogPanelStyled id={'connection_current_logs'} isFullScreen={isFullScreen} noLogs={connectionLog.connectors.length === 0} isDetailsOpened={isDetailsOpened} logPanelHeight={logPanelHeight}>
           {connectionLog.connectors.map((connector) => (
             <ConnectorPanel
               key={connector.id}
@@ -41,9 +52,8 @@ const LogsPanel: React.FC = () => {
               connectionId={connectionLog.connectionId}
             />
           ))}
-        </div>
-      </div>
-    </div>
+      </LogPanelStyled>
+    </React.Fragment>
   );
 };
 

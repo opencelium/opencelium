@@ -1,7 +1,6 @@
 import React, {createContext, useContext, useEffect, useRef, useState} from "react";
 import { useSocket } from "./SocketContext";
 import { useCurrentSchedulesSocket } from "./modules/useCurrentSchedulesSocket";
-import { useConnectionLogsSocket } from "./modules/useConnectionLogsSocket";
 import {SocketDataContextType} from "./interfaces";
 import {useSupportFilesSocket} from "./modules/useSupportFilesSocket";
 import {useCurrentSubscriptionSocket} from "./modules/useCurrentSubscriptionSocket";
@@ -20,7 +19,6 @@ export const SocketDataProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
     const [authValid, setAuthValid] = useState(true);
 
     const { currentSchedules } = useCurrentSchedulesSocket(socket);
-    const { connectionLog } = useConnectionLogsSocket(socket);
     const { hasNewSupportFile, setHasNewSupportFile } = useSupportFilesSocket(socket);
     const { currentSubscription } = useCurrentSubscriptionSocket(socket);
 
@@ -89,7 +87,6 @@ export const SocketDataProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
                 isConnected: isConnectedReference,
                 authValid,
                 currentSchedules,
-                connectionLog,
                 hasNewSupportFile,
                 currentSubscription,
                 socket,

@@ -30,3 +30,27 @@
 	font-size: 20px;
 	cursor: pointer;
 }
+
+.testConnectionTitle {
+	opacity: 1 !important;
+	padding: 15px 14.3px !important;
+	right: 0;
+	border-right: none;
+	span {
+		&:first-child {
+			transform: scale(2);
+		}
+		&:last-child {
+			color: #000;
+			font-weight: unset;
+			font-size: 20px;
+		}
+	}
+
+	&:disabled span:first-child {
+		transform: scale(1);
+	}
+	&:disabled span:last-child {
+		color: #fff;
+	}
+}

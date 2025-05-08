@@ -56,8 +56,23 @@ export const deleteLogs = createAsyncThunk<void, DeleteLogsRequest>(
 	}
 );
 
+export const testConnection = createAsyncThunk<void, {connection: any, channelId?: string}>(
+	'connectionLog/test-connection',
+	async (data, thunkAPI) => {
+		try {
+			const params = data.channelId ? `?channelId=${data.channelId}` : '';
+			const connectionLogRequest = new ConnectionLogRequest({endpoint: `/execution/test${params}`});
+			await connectionLogRequest.testConnection(data.connection);
+			return;
+		} catch(e){
+			return thunkAPI.rejectWithValue(errorHandler(e));
+		}
+	}
+);
+
 export default {
 	getMethodTrace,
 	getOperatorTrace,
 	deleteLogs,
+	testConnection,
 }

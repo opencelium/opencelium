@@ -8,7 +8,6 @@ export interface SocketDataContextType {
     isConnected: boolean;
     authValid: boolean;
     currentSchedules: ModelCurrentSchedule[];
-    connectionLog: ConnectionSocketLog | undefined;
     hasNewSupportFile: boolean,
     currentSubscription: SubscriptionModel,
     socket: Client,

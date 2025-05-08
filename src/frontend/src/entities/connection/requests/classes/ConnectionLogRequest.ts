@@ -24,4 +24,9 @@ export class ConnectionLogRequest extends Request implements IConnectionLogReque
 	async deleteLogs(): Promise<AxiosResponse<IResponse>> {
 		return super.delete<IResponse>();
 	}
+
+	async testConnection(connection: any): Promise<AxiosResponse<IResponse>> {
+		this.url = 'connection';
+		return super.post<IResponse>(connection);
+	}
 }

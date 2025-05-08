@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {FC, useEffect, useState} from 'react';
+import React, {FC, useEffect, useRef, useState} from 'react';
 import {withTheme} from 'styled-components';
 import { ProgressBarElementProps } from './interfaces';
 import {
@@ -33,6 +33,7 @@ const ProgressBarElement: FC<ProgressBarElementProps> =
     ({
         schedule,
         iterator,
+        theme,
     }) => {
     const dispatch = useAppDispatch();
     const calculateStep = () => {
@@ -62,8 +63,11 @@ const ProgressBarElement: FC<ProgressBarElementProps> =
             if(sum + value > 100){
                 value = 100 - sum;
             }
-            result.push(value);
             sum += value;
+            if (sum >= 95) {
+                break;
+            }
+            result.push(value);
         }
         return result;
     }
@@ -71,15 +75,18 @@ const ProgressBarElement: FC<ProgressBarElementProps> =
     const [steps] = useState(calculateStep());
     const [progression] = useState(calculateProgression());
     const [localIterator, setLocalIterator] = useState(0);
+    const progressRef: any = useRef();
+    progressRef.current = progress;
     const simulateProgress = () => {
         setTimeout(() => {
-            if (progress < 100) {
-                if(progression[localIterator] + progress > progress) {
+            if (progressRef.current < 95) {
+                if(progression[localIterator] + progressRef.current > progressRef.current) {
+                    //setProgress(progression[localIterator] + progress)
                     setProgress((prevState) => progression[localIterator] + prevState)
                 }
+                setLocalIterator(localIterator + 1);
+                simulateProgress();
             }
-            setLocalIterator(localIterator + 1);
-            simulateProgress();
         }, steps[localIterator]);
     }
     useEffect(() => {
@@ -98,10 +105,8 @@ const ProgressBarElement: FC<ProgressBarElementProps> =
                         position: 'relative'
                     }}>
                         <ProgressBarStyled
-                            type="linear"
-                            mode="determinate"
                             value={progress}
-                            buffer={100}
+                            color={theme?.progressBarElement?.background}
                         />
                         <ProgressBarTitleStyled>{schedule.title}</ProgressBarTitleStyled>
                     </div>

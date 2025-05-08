@@ -5,7 +5,8 @@ import ModelCurrentSchedule from "@entity/schedule/requests/models/CurrentSchedu
 import {SocketAppPrefix} from "../socket";
 
 export const useSupportFilesSocket = (socket: Client | null) => {
-    const [hasNewSupportFile, setHasNewSupportFile] = useState<boolean>(false);    const subscriptionRef = useRef<() => void>();
+    const [hasNewSupportFile, setHasNewSupportFile] = useState<boolean>(false);
+    const subscriptionRef = useRef<() => void>();
 
     useEffect(() => {
         if (!socket || !socket.connected) return;

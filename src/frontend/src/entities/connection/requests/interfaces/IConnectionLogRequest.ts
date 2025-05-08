@@ -9,4 +9,5 @@ export interface IConnectionLogRequest {
 	getMethodTrace(): Promise<AxiosResponse<GetMethodTraceResponse>>;
 	getOperatorTrace(): Promise<AxiosResponse<GetOperatorTraceResponse>>;
 	deleteLogs(): Promise<AxiosResponse<IResponse>>;
+	testConnection(connection: any): Promise<AxiosResponse<IResponse>>;
 }

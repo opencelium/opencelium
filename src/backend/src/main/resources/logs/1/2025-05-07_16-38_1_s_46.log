@@ -1,0 +1,2216 @@
+07-05-2025 16:38:22.232 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 0 =======================
+07-05-2025 16:38:22.232 [34mINFO [0;39m - Function: GetAllUser -- next function: null -- next operator: 1 -- index: 0
+07-05-2025 16:38:22.232 [34mINFO [0;39m - Http Method: GET
+07-05-2025 16:38:22.233 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user/all"
+07-05-2025 16:38:22.234 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ]
+}
+07-05-2025 16:38:22.234 [34mINFO [0;39m - Body: 
+07-05-2025 16:38:22.234 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:22.306 [34mINFO [0;39m - Response: [ {
+  "id" : 1,
+  "name" : "Felonious Gru",
+  "role" : "manager",
+  "department" : "software",
+  "units" : [ "00E0C523FF77", "00E0C523F919", "00E0C523FF83", "00E0C523F2A9" ]
+}, {
+  "id" : 2,
+  "name" : "Kevin",
+  "role" : "minion",
+  "department" : "construction",
+  "units" : [ "00E0C523F4E4", "00E0C523F7F0", "00E0C523F4AC", "00E0C523F47D", "00E0C523F03B" ]
+}, {
+  "id" : 3,
+  "name" : "Bob",
+  "role" : "minion",
+  "department" : "construction",
+  "units" : [ "00E0C523EF8F", "00E0C523F35D", "00E0C523F964", "C81F66AEA00D", "C81F66AEEF27", "C81F66ADC745" ]
+}, {
+  "id" : 4,
+  "name" : "Stuart",
+  "role" : "minion",
+  "department" : "construction",
+  "units" : [ "00E0C523F3D7", "00E0C523FA94" ]
+}, {
+  "id" : 5,
+  "name" : "Felonious Gru",
+  "role" : "manager",
+  "department" : "software",
+  "units" : [ "00E0C523FF77", "00E0C523F919", "00E0C523FF83", "00E0C523F2A9" ]
+}, {
+  "id" : 6,
+  "name" : "Kevin",
+  "role" : "minion",
+  "department" : "construction",
+  "units" : [ "00E0C523F4E4", "00E0C523F7F0", "00E0C523F4AC", "00E0C523F47D", "00E0C523F03B" ]
+}, {
+  "id" : 7,
+  "name" : "Bob",
+  "role" : "minion",
+  "department" : "construction",
+  "units" : [ "00E0C523EF8F", "00E0C523F35D", "00E0C523F964", "C81F66AEA00D", "C81F66AEEF27", "C81F66ADC745" ]
+}, {
+  "id" : 8,
+  "name" : "Stuart",
+  "role" : "minion",
+  "department" : "construction",
+  "units" : [ "00E0C523F3D7", "00E0C523FA94" ]
+}, {
+  "id" : 9,
+  "name" : "Bob",
+  "role" : "minion",
+  "department" : "construction",
+  "units" : [ "00E0C523EF8F", "00E0C523F35D", "00E0C523F964", "C81F66AEA00D", "C81F66AEEF27", "C81F66ADC745" ]
+}, {
+  "id" : 10,
+  "name" : "Stuart",
+  "role" : "minion",
+  "department" : "construction",
+  "units" : [ "00E0C523F3D7", "00E0C523FA94" ]
+} ]
+07-05-2025 16:38:22.306 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 0 =======================
+07-05-2025 16:38:22.307 [34mINFO [0;39m - ======================= FOR START -- INDEX: 1 =======================
+07-05-2025 16:38:22.307 [34mINFO [0;39m - LOOP_OPERATOR_RESULT: NOT_EMPTY -- index: 1
+07-05-2025 16:38:22.307 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 0
+07-05-2025 16:38:22.307 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_0 =======================
+07-05-2025 16:38:22.307 [34mINFO [0;39m - Function: AddUser -- next function: null -- next operator: 1_1 -- index: 1_0
+07-05-2025 16:38:22.307 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:22.307 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:22.309 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:22.309 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:22.309 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:22.374 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:22.374 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_0 =======================
+07-05-2025 16:38:22.375 [34mINFO [0;39m - ======================= FOR START -- INDEX: 1_1 =======================
+07-05-2025 16:38:22.375 [34mINFO [0;39m - LOOP_OPERATOR_RESULT: NOT_EMPTY -- index: 1_1
+07-05-2025 16:38:22.375 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 0
+07-05-2025 16:38:22.375 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:22.375 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:22.376 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:22.377 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:22.378 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:22.378 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:22.378 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:22.441 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:22.441 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:22.441 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 1
+07-05-2025 16:38:22.441 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:22.441 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:22.442 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:22.443 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:22.443 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:22.444 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:22.444 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:22.509 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:22.510 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:22.510 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 2
+07-05-2025 16:38:22.510 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:22.510 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:22.511 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:22.511 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:22.512 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:22.513 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:22.513 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:22.578 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:22.578 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:22.578 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 3
+07-05-2025 16:38:22.578 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:22.578 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:22.580 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:22.580 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:22.580 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:22.580 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:22.580 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:22.644 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:22.644 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:22.644 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 4
+07-05-2025 16:38:22.645 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:22.645 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:22.646 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:22.646 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:22.646 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:22.646 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:22.646 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:22.710 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:22.710 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:22.710 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 5
+07-05-2025 16:38:22.710 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:22.710 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:22.710 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:22.710 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:22.711 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:22.712 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:22.713 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:22.776 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:22.776 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:22.776 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 6
+07-05-2025 16:38:22.776 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:22.776 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:22.777 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:22.777 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:22.777 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:22.777 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:22.777 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:22.843 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:22.843 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:22.843 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 7
+07-05-2025 16:38:22.843 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:22.843 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:22.843 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:22.844 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:22.844 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:22.844 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:22.844 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:22.907 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:22.907 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:22.907 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 8
+07-05-2025 16:38:22.907 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:22.907 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:22.907 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:22.907 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:22.909 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:22.909 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:22.909 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:22.974 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:22.974 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:22.974 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 9
+07-05-2025 16:38:22.974 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:22.974 [34mINFO [0;39m - Function: AddUser -- next function: null -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:22.975 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:22.975 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:22.975 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:22.976 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:22.976 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:23.048 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:23.048 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:23.048 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:23.048 [34mINFO [0;39m - Operator: -- next function: 1_0 -- next operator: null -- type: loop -- index: 1_1
+07-05-2025 16:38:23.048 [34mINFO [0;39m - ======================= for {%#FFCFB5.(response).body.$.[*]%} END -- INDEX: 1_1 =======================
+07-05-2025 16:38:23.048 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 1
+07-05-2025 16:38:23.048 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_0 =======================
+07-05-2025 16:38:23.048 [34mINFO [0;39m - Function: AddUser -- next function: null -- next operator: 1_1 -- index: 1_0
+07-05-2025 16:38:23.049 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:23.049 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:23.050 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:23.051 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:23.051 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:23.132 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:23.132 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_0 =======================
+07-05-2025 16:38:23.132 [34mINFO [0;39m - ======================= FOR START -- INDEX: 1_1 =======================
+07-05-2025 16:38:23.132 [34mINFO [0;39m - LOOP_OPERATOR_RESULT: NOT_EMPTY -- index: 1_1
+07-05-2025 16:38:23.132 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 0
+07-05-2025 16:38:23.132 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:23.133 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:23.133 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:23.133 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:23.134 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:23.135 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:23.135 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:23.209 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:23.209 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:23.209 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 1
+07-05-2025 16:38:23.209 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:23.209 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:23.209 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:23.209 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:23.209 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:23.209 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:23.209 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:23.280 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:23.280 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:23.280 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 2
+07-05-2025 16:38:23.280 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:23.280 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:23.280 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:23.281 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:23.281 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:23.281 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:23.281 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:23.358 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:23.358 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:23.358 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 3
+07-05-2025 16:38:23.358 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:23.358 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:23.358 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:23.358 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:23.358 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:23.358 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:23.358 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:23.431 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:23.431 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:23.431 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 4
+07-05-2025 16:38:23.431 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:23.431 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:23.431 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:23.432 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:23.432 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:23.432 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:23.432 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:23.510 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:23.510 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:23.510 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 5
+07-05-2025 16:38:23.510 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:23.510 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:23.510 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:23.510 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:23.510 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:23.510 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:23.510 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:23.591 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:23.591 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:23.591 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 6
+07-05-2025 16:38:23.591 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:23.591 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:23.592 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:23.592 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:23.592 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:23.593 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:23.593 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:23.664 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:23.664 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:23.664 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 7
+07-05-2025 16:38:23.664 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:23.664 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:23.664 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:23.664 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:23.665 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:23.665 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:23.665 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:23.731 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:23.731 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:23.731 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 8
+07-05-2025 16:38:23.731 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:23.731 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:23.731 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:23.731 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:23.731 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:23.731 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:23.731 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:23.803 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:23.803 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:23.803 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 9
+07-05-2025 16:38:23.803 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:23.803 [34mINFO [0;39m - Function: AddUser -- next function: null -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:23.803 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:23.803 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:23.803 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:23.803 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:23.803 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:23.869 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:23.869 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:23.869 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:23.869 [34mINFO [0;39m - Operator: -- next function: 1_0 -- next operator: null -- type: loop -- index: 1_1
+07-05-2025 16:38:23.869 [34mINFO [0;39m - ======================= for {%#FFCFB5.(response).body.$.[*]%} END -- INDEX: 1_1 =======================
+07-05-2025 16:38:23.869 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 2
+07-05-2025 16:38:23.869 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_0 =======================
+07-05-2025 16:38:23.869 [34mINFO [0;39m - Function: AddUser -- next function: null -- next operator: 1_1 -- index: 1_0
+07-05-2025 16:38:23.869 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:23.870 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:23.870 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:23.870 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:23.870 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:23.938 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:23.938 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_0 =======================
+07-05-2025 16:38:23.938 [34mINFO [0;39m - ======================= FOR START -- INDEX: 1_1 =======================
+07-05-2025 16:38:23.938 [34mINFO [0;39m - LOOP_OPERATOR_RESULT: NOT_EMPTY -- index: 1_1
+07-05-2025 16:38:23.938 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 0
+07-05-2025 16:38:23.938 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:23.938 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:23.938 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:23.938 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:23.938 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:23.938 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:23.938 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:24.006 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:24.006 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:24.006 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 1
+07-05-2025 16:38:24.006 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:24.006 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:24.006 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:24.006 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:24.006 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:24.006 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:24.006 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:24.076 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:24.076 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:24.076 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 2
+07-05-2025 16:38:24.076 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:24.076 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:24.076 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:24.078 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:24.078 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:24.078 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:24.078 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:24.155 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:24.156 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:24.156 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 3
+07-05-2025 16:38:24.156 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:24.156 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:24.157 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:24.157 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:24.159 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:24.159 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:24.159 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:24.229 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:24.230 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:24.230 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 4
+07-05-2025 16:38:24.230 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:24.230 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:24.230 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:24.230 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:24.231 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:24.231 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:24.231 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:24.309 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:24.309 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:24.309 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 5
+07-05-2025 16:38:24.309 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:24.309 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:24.310 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:24.310 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:24.310 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:24.310 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:24.310 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:24.383 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:24.383 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:24.383 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 6
+07-05-2025 16:38:24.383 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:24.383 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:24.383 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:24.383 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:24.385 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:24.386 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:24.386 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:24.466 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:24.466 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:24.466 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 7
+07-05-2025 16:38:24.467 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:24.467 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:24.467 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:24.467 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:24.469 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:24.470 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:24.470 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:24.559 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:24.560 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:24.560 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 8
+07-05-2025 16:38:24.560 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:24.560 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:24.561 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:24.561 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:24.562 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:24.562 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:24.562 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:24.666 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:24.666 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:24.666 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 9
+07-05-2025 16:38:24.666 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:24.666 [34mINFO [0;39m - Function: AddUser -- next function: null -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:24.667 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:24.667 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:24.668 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:24.668 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:24.668 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:24.775 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:24.775 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:24.775 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:24.775 [34mINFO [0;39m - Operator: -- next function: 1_0 -- next operator: null -- type: loop -- index: 1_1
+07-05-2025 16:38:24.775 [34mINFO [0;39m - ======================= for {%#FFCFB5.(response).body.$.[*]%} END -- INDEX: 1_1 =======================
+07-05-2025 16:38:24.775 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 3
+07-05-2025 16:38:24.775 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_0 =======================
+07-05-2025 16:38:24.775 [34mINFO [0;39m - Function: AddUser -- next function: null -- next operator: 1_1 -- index: 1_0
+07-05-2025 16:38:24.775 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:24.776 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:24.776 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:24.776 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:24.776 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:24.859 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:24.860 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_0 =======================
+07-05-2025 16:38:24.860 [34mINFO [0;39m - ======================= FOR START -- INDEX: 1_1 =======================
+07-05-2025 16:38:24.860 [34mINFO [0;39m - LOOP_OPERATOR_RESULT: NOT_EMPTY -- index: 1_1
+07-05-2025 16:38:24.860 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 0
+07-05-2025 16:38:24.860 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:24.860 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:24.860 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:24.860 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:24.860 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:24.860 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:24.860 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:24.934 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:24.934 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:24.934 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 1
+07-05-2025 16:38:24.934 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:24.934 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:24.934 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:24.934 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:24.934 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:24.936 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:24.936 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:25.012 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:25.012 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:25.012 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 2
+07-05-2025 16:38:25.012 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:25.012 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:25.012 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:25.012 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:25.012 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:25.012 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:25.012 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:25.087 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:25.087 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:25.087 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 3
+07-05-2025 16:38:25.087 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:25.087 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:25.087 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:25.087 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:25.089 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:25.089 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:25.089 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:25.170 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:25.170 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:25.170 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 4
+07-05-2025 16:38:25.170 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:25.170 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:25.170 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:25.170 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:25.171 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:25.171 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:25.171 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:25.253 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:25.253 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:25.253 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 5
+07-05-2025 16:38:25.253 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:25.253 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:25.253 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:25.253 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:25.254 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:25.254 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:25.254 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:25.330 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:25.330 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:25.330 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 6
+07-05-2025 16:38:25.330 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:25.330 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:25.330 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:25.331 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:25.331 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:25.331 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:25.331 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:25.406 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:25.406 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:25.406 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 7
+07-05-2025 16:38:25.406 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:25.406 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:25.406 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:25.406 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:25.406 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:25.406 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:25.406 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:25.481 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:25.481 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:25.481 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 8
+07-05-2025 16:38:25.481 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:25.481 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:25.481 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:25.481 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:25.482 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:25.482 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:25.482 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:25.558 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:25.558 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:25.558 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 9
+07-05-2025 16:38:25.558 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:25.558 [34mINFO [0;39m - Function: AddUser -- next function: null -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:25.558 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:25.558 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:25.558 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:25.559 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:25.559 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:25.638 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:25.638 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:25.638 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:25.638 [34mINFO [0;39m - Operator: -- next function: 1_0 -- next operator: null -- type: loop -- index: 1_1
+07-05-2025 16:38:25.638 [34mINFO [0;39m - ======================= for {%#FFCFB5.(response).body.$.[*]%} END -- INDEX: 1_1 =======================
+07-05-2025 16:38:25.638 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 4
+07-05-2025 16:38:25.638 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_0 =======================
+07-05-2025 16:38:25.638 [34mINFO [0;39m - Function: AddUser -- next function: null -- next operator: 1_1 -- index: 1_0
+07-05-2025 16:38:25.638 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:25.638 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:25.638 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:25.638 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:25.638 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:25.711 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:25.711 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_0 =======================
+07-05-2025 16:38:25.712 [34mINFO [0;39m - ======================= FOR START -- INDEX: 1_1 =======================
+07-05-2025 16:38:25.712 [34mINFO [0;39m - LOOP_OPERATOR_RESULT: NOT_EMPTY -- index: 1_1
+07-05-2025 16:38:25.712 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 0
+07-05-2025 16:38:25.712 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:25.712 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:25.712 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:25.712 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:25.712 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:25.712 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:25.712 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:25.782 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:25.782 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:25.782 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 1
+07-05-2025 16:38:25.782 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:25.782 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:25.782 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:25.782 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:25.782 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:25.782 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:25.782 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:25.851 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:25.851 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:25.851 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 2
+07-05-2025 16:38:25.851 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:25.851 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:25.851 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:25.851 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:25.851 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:25.851 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:25.851 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:25.923 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:25.923 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:25.923 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 3
+07-05-2025 16:38:25.923 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:25.923 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:25.923 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:25.923 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:25.923 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:25.923 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:25.923 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:25.990 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:25.990 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:25.990 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 4
+07-05-2025 16:38:25.990 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:25.990 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:25.991 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:25.991 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:25.991 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:25.991 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:25.991 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:26.062 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:26.062 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:26.062 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 5
+07-05-2025 16:38:26.062 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:26.062 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:26.062 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:26.062 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:26.063 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:26.063 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:26.063 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:26.136 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:26.136 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:26.136 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 6
+07-05-2025 16:38:26.136 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:26.136 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:26.136 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:26.136 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:26.137 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:26.137 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:26.137 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:26.208 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:26.208 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:26.208 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 7
+07-05-2025 16:38:26.208 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:26.208 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:26.208 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:26.208 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:26.208 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:26.208 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:26.208 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:26.281 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:26.281 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:26.281 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 8
+07-05-2025 16:38:26.281 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:26.281 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:26.281 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:26.283 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:26.283 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:26.283 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:26.283 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:26.358 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:26.358 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:26.358 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 9
+07-05-2025 16:38:26.358 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:26.358 [34mINFO [0;39m - Function: AddUser -- next function: null -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:26.358 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:26.358 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:26.359 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:26.359 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:26.359 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:26.437 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:26.437 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:26.437 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:26.437 [34mINFO [0;39m - Operator: -- next function: 1_0 -- next operator: null -- type: loop -- index: 1_1
+07-05-2025 16:38:26.437 [34mINFO [0;39m - ======================= for {%#FFCFB5.(response).body.$.[*]%} END -- INDEX: 1_1 =======================
+07-05-2025 16:38:26.437 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 5
+07-05-2025 16:38:26.437 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_0 =======================
+07-05-2025 16:38:26.437 [34mINFO [0;39m - Function: AddUser -- next function: null -- next operator: 1_1 -- index: 1_0
+07-05-2025 16:38:26.438 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:26.438 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:26.438 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:26.438 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:26.438 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:26.511 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:26.511 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_0 =======================
+07-05-2025 16:38:26.511 [34mINFO [0;39m - ======================= FOR START -- INDEX: 1_1 =======================
+07-05-2025 16:38:26.511 [34mINFO [0;39m - LOOP_OPERATOR_RESULT: NOT_EMPTY -- index: 1_1
+07-05-2025 16:38:26.511 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 0
+07-05-2025 16:38:26.511 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:26.511 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:26.511 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:26.511 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:26.512 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:26.512 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:26.512 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:26.587 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:26.587 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:26.587 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 1
+07-05-2025 16:38:26.587 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:26.587 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:26.587 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:26.587 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:26.587 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:26.587 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:26.587 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:26.663 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:26.663 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:26.663 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 2
+07-05-2025 16:38:26.663 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:26.663 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:26.663 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:26.663 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:26.663 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:26.663 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:26.663 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:26.735 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:26.735 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:26.735 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 3
+07-05-2025 16:38:26.735 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:26.735 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:26.735 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:26.735 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:26.736 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:26.736 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:26.736 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:26.804 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:26.804 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:26.804 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 4
+07-05-2025 16:38:26.804 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:26.804 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:26.804 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:26.804 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:26.804 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:26.804 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:26.804 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:26.877 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:26.877 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:26.877 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 5
+07-05-2025 16:38:26.877 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:26.877 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:26.877 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:26.879 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:26.879 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:26.879 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:26.879 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:26.950 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:26.950 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:26.950 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 6
+07-05-2025 16:38:26.950 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:26.950 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:26.950 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:26.950 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:26.950 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:26.950 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:26.950 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:27.021 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:27.022 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:27.022 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 7
+07-05-2025 16:38:27.022 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:27.022 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:27.022 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:27.022 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:27.022 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:27.022 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:27.022 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:27.092 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:27.094 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:27.094 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 8
+07-05-2025 16:38:27.094 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:27.094 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:27.094 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:27.094 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:27.094 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:27.094 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:27.094 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:27.162 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:27.162 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:27.162 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 9
+07-05-2025 16:38:27.162 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:27.162 [34mINFO [0;39m - Function: AddUser -- next function: null -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:27.162 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:27.162 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:27.162 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:27.163 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:27.163 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:27.233 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:27.233 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:27.233 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:27.233 [34mINFO [0;39m - Operator: -- next function: 1_0 -- next operator: null -- type: loop -- index: 1_1
+07-05-2025 16:38:27.233 [34mINFO [0;39m - ======================= for {%#FFCFB5.(response).body.$.[*]%} END -- INDEX: 1_1 =======================
+07-05-2025 16:38:27.233 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 6
+07-05-2025 16:38:27.233 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_0 =======================
+07-05-2025 16:38:27.233 [34mINFO [0;39m - Function: AddUser -- next function: null -- next operator: 1_1 -- index: 1_0
+07-05-2025 16:38:27.235 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:27.236 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:27.237 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:27.237 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:27.237 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:27.307 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:27.307 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_0 =======================
+07-05-2025 16:38:27.307 [34mINFO [0;39m - ======================= FOR START -- INDEX: 1_1 =======================
+07-05-2025 16:38:27.307 [34mINFO [0;39m - LOOP_OPERATOR_RESULT: NOT_EMPTY -- index: 1_1
+07-05-2025 16:38:27.307 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 0
+07-05-2025 16:38:27.307 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:27.307 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:27.307 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:27.307 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:27.308 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:27.308 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:27.308 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:27.377 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:27.377 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:27.377 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 1
+07-05-2025 16:38:27.377 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:27.377 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:27.377 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:27.377 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:27.377 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:27.377 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:27.377 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:27.452 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:27.452 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:27.452 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 2
+07-05-2025 16:38:27.452 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:27.452 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:27.453 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:27.453 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:27.453 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:27.453 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:27.453 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:27.524 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:27.524 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:27.524 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 3
+07-05-2025 16:38:27.524 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:27.524 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:27.524 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:27.524 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:27.524 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:27.524 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:27.524 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:27.595 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:27.595 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:27.595 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 4
+07-05-2025 16:38:27.595 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:27.595 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:27.595 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:27.595 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:27.595 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:27.595 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:27.595 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:27.672 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:27.672 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:27.672 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 5
+07-05-2025 16:38:27.672 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:27.672 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:27.673 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:27.673 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:27.673 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:27.673 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:27.673 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:27.739 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:27.739 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:27.739 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 6
+07-05-2025 16:38:27.739 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:27.739 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:27.739 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:27.739 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:27.739 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:27.739 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:27.739 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:27.804 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:27.804 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:27.804 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 7
+07-05-2025 16:38:27.804 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:27.804 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:27.804 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:27.804 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:27.804 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:27.804 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:27.804 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:27.873 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:27.873 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:27.873 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 8
+07-05-2025 16:38:27.873 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:27.873 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:27.873 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:27.873 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:27.873 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:27.873 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:27.873 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:27.938 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:27.938 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:27.938 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 9
+07-05-2025 16:38:27.938 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:27.938 [34mINFO [0;39m - Function: AddUser -- next function: null -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:27.938 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:27.938 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:27.939 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:27.939 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:27.939 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:28.003 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:28.003 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:28.003 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:28.003 [34mINFO [0;39m - Operator: -- next function: 1_0 -- next operator: null -- type: loop -- index: 1_1
+07-05-2025 16:38:28.003 [34mINFO [0;39m - ======================= for {%#FFCFB5.(response).body.$.[*]%} END -- INDEX: 1_1 =======================
+07-05-2025 16:38:28.003 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 7
+07-05-2025 16:38:28.003 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_0 =======================
+07-05-2025 16:38:28.003 [34mINFO [0;39m - Function: AddUser -- next function: null -- next operator: 1_1 -- index: 1_0
+07-05-2025 16:38:28.003 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:28.003 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:28.003 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:28.004 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:28.004 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:28.069 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:28.069 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_0 =======================
+07-05-2025 16:38:28.070 [34mINFO [0;39m - ======================= FOR START -- INDEX: 1_1 =======================
+07-05-2025 16:38:28.070 [34mINFO [0;39m - LOOP_OPERATOR_RESULT: NOT_EMPTY -- index: 1_1
+07-05-2025 16:38:28.070 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 0
+07-05-2025 16:38:28.070 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:28.070 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:28.070 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:28.070 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:28.070 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:28.070 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:28.070 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:28.137 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:28.137 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:28.137 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 1
+07-05-2025 16:38:28.137 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:28.137 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:28.137 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:28.137 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:28.138 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:28.138 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:28.138 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:28.205 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:28.206 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:28.206 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 2
+07-05-2025 16:38:28.206 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:28.206 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:28.206 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:28.206 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:28.206 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:28.206 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:28.206 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:28.272 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:28.272 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:28.272 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 3
+07-05-2025 16:38:28.272 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:28.272 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:28.272 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:28.272 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:28.272 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:28.272 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:28.272 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:28.345 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:28.345 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:28.345 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 4
+07-05-2025 16:38:28.345 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:28.345 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:28.345 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:28.345 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:28.346 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:28.346 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:28.346 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:28.414 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:28.414 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:28.414 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 5
+07-05-2025 16:38:28.414 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:28.414 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:28.416 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:28.416 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:28.417 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:28.417 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:28.417 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:28.488 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:28.488 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:28.488 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 6
+07-05-2025 16:38:28.488 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:28.488 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:28.488 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:28.488 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:28.488 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:28.488 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:28.488 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:28.555 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:28.555 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:28.555 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 7
+07-05-2025 16:38:28.555 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:28.555 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:28.555 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:28.555 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:28.555 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:28.555 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:28.555 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:28.622 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:28.622 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:28.622 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 8
+07-05-2025 16:38:28.622 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:28.622 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:28.622 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:28.622 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:28.622 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:28.624 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:28.624 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:28.688 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:28.688 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:28.688 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 9
+07-05-2025 16:38:28.688 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:28.688 [34mINFO [0;39m - Function: AddUser -- next function: null -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:28.688 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:28.688 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:28.688 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:28.688 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:28.688 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:28.756 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:28.756 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:28.756 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:28.756 [34mINFO [0;39m - Operator: -- next function: 1_0 -- next operator: null -- type: loop -- index: 1_1
+07-05-2025 16:38:28.756 [34mINFO [0;39m - ======================= for {%#FFCFB5.(response).body.$.[*]%} END -- INDEX: 1_1 =======================
+07-05-2025 16:38:28.756 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 8
+07-05-2025 16:38:28.756 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_0 =======================
+07-05-2025 16:38:28.756 [34mINFO [0;39m - Function: AddUser -- next function: null -- next operator: 1_1 -- index: 1_0
+07-05-2025 16:38:28.756 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:28.756 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:28.758 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:28.758 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:28.758 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:28.823 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:28.823 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_0 =======================
+07-05-2025 16:38:28.823 [34mINFO [0;39m - ======================= FOR START -- INDEX: 1_1 =======================
+07-05-2025 16:38:28.823 [34mINFO [0;39m - LOOP_OPERATOR_RESULT: NOT_EMPTY -- index: 1_1
+07-05-2025 16:38:28.823 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 0
+07-05-2025 16:38:28.823 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:28.823 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:28.823 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:28.823 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:28.823 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:28.823 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:28.823 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:28.887 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:28.887 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:28.887 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 1
+07-05-2025 16:38:28.887 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:28.887 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:28.888 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:28.888 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:28.888 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:28.888 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:28.888 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:28.952 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:28.952 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:28.952 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 2
+07-05-2025 16:38:28.952 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:28.952 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:28.952 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:28.952 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:28.952 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:28.952 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:28.952 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:29.017 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:29.017 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:29.017 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 3
+07-05-2025 16:38:29.017 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:29.017 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:29.017 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:29.017 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:29.017 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:29.017 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:29.017 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:29.082 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:29.082 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:29.082 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 4
+07-05-2025 16:38:29.082 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:29.082 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:29.082 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:29.082 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:29.083 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:29.083 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:29.083 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:29.149 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:29.150 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:29.150 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 5
+07-05-2025 16:38:29.150 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:29.150 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:29.151 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:29.151 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:29.152 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:29.152 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:29.152 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:29.223 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:29.223 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:29.223 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 6
+07-05-2025 16:38:29.223 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:29.223 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:29.223 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:29.223 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:29.223 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:29.223 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:29.223 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:29.293 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:29.293 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:29.293 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 7
+07-05-2025 16:38:29.293 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:29.293 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:29.293 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:29.293 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:29.293 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:29.293 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:29.293 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:29.364 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:29.364 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:29.364 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 8
+07-05-2025 16:38:29.364 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:29.364 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:29.364 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:29.364 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:29.364 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:29.364 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:29.364 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:29.438 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:29.438 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:29.438 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 9
+07-05-2025 16:38:29.438 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:29.438 [34mINFO [0;39m - Function: AddUser -- next function: null -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:29.438 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:29.438 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:29.438 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:29.438 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:29.438 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:29.505 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:29.505 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:29.505 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:29.505 [34mINFO [0;39m - Operator: -- next function: 1_0 -- next operator: null -- type: loop -- index: 1_1
+07-05-2025 16:38:29.505 [34mINFO [0;39m - ======================= for {%#FFCFB5.(response).body.$.[*]%} END -- INDEX: 1_1 =======================
+07-05-2025 16:38:29.505 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 9
+07-05-2025 16:38:29.505 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_0 =======================
+07-05-2025 16:38:29.505 [34mINFO [0;39m - Function: AddUser -- next function: null -- next operator: 1_1 -- index: 1_0
+07-05-2025 16:38:29.505 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:29.505 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:29.505 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:29.505 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:29.505 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:29.576 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:29.576 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_0 =======================
+07-05-2025 16:38:29.576 [34mINFO [0;39m - ======================= FOR START -- INDEX: 1_1 =======================
+07-05-2025 16:38:29.576 [34mINFO [0;39m - LOOP_OPERATOR_RESULT: NOT_EMPTY -- index: 1_1
+07-05-2025 16:38:29.576 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 0
+07-05-2025 16:38:29.576 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:29.576 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:29.576 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:29.576 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:29.576 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:29.576 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:29.576 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:29.648 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:29.648 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:29.648 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 1
+07-05-2025 16:38:29.648 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:29.648 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:29.648 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:29.648 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:29.648 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:29.648 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:29.648 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:29.716 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:29.716 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:29.716 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 2
+07-05-2025 16:38:29.716 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:29.716 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:29.716 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:29.716 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:29.716 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:29.716 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:29.716 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:29.783 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:29.783 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:29.783 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 3
+07-05-2025 16:38:29.783 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:29.783 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:29.783 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:29.783 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:29.783 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:29.783 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:29.783 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:29.850 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:29.850 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:29.850 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 4
+07-05-2025 16:38:29.850 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:29.850 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:29.850 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:29.850 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:29.851 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:29.851 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:29.851 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:29.917 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:29.917 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:29.917 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 5
+07-05-2025 16:38:29.917 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:29.917 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:29.919 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:29.919 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:29.919 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:29.919 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:29.919 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:29.985 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:29.986 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:29.986 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 6
+07-05-2025 16:38:29.986 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:29.986 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:29.986 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:29.986 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:29.986 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:29.986 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:29.986 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:30.062 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:30.063 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:30.063 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 7
+07-05-2025 16:38:30.063 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:30.063 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:30.063 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:30.063 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:30.063 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:30.063 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:30.063 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:30.137 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:30.137 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:30.137 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 8
+07-05-2025 16:38:30.137 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:30.137 [34mINFO [0;39m - Function: AddUser -- next function: 1_1_0 -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:30.137 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:30.137 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:30.137 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:30.137 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:30.137 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:30.211 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:30.211 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:30.211 [34mINFO [0;39m - Loop: {%#FFCFB5.(response).body.$.[*]%} -------- index: 9
+07-05-2025 16:38:30.211 [34mINFO [0;39m - ======================= API OPERATION START -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:30.211 [34mINFO [0;39m - Function: AddUser -- next function: null -- next operator: null -- index: 1_1_0
+07-05-2025 16:38:30.211 [34mINFO [0;39m - Http Method: POST
+07-05-2025 16:38:30.211 [34mINFO [0;39m - URL: "http://localhost:8085/api/json/user"
+07-05-2025 16:38:30.211 [34mINFO [0;39m - Header: {
+  "Authorization" : [ "Basic YWRtaW46MTIzNA==" ],
+  "Content-Type" : [ "application/x-www-form-urlencoded" ]
+}
+07-05-2025 16:38:30.212 [34mINFO [0;39m - Body: {
+  "role" : [ "" ],
+  "name" : [ "" ],
+  "id" : [ "" ],
+  "units" : [ null ],
+  "department" : [ "" ]
+}
+07-05-2025 16:38:30.212 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:30.286 [34mINFO [0;39m - Response: 
+07-05-2025 16:38:30.286 [34mINFO [0;39m - ======================= API OPERATION END -- INDEX: 1_1_0 =======================
+07-05-2025 16:38:30.286 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:30.286 [34mINFO [0;39m - Operator: -- next function: null -- next operator: null -- type: loop -- index: 1_1
+07-05-2025 16:38:30.286 [34mINFO [0;39m - ======================= for {%#FFCFB5.(response).body.$.[*]%} END -- INDEX: 1_1 =======================
+07-05-2025 16:38:30.286 [34mINFO [0;39m - ============================================================================
+07-05-2025 16:38:30.286 [34mINFO [0;39m - Operator: -- next function: null -- next operator: null -- type: loop -- index: 1
+07-05-2025 16:38:30.286 [34mINFO [0;39m - ======================= for {%#FFCFB5.(response).body.$.[*]%} END -- INDEX: 1 =======================

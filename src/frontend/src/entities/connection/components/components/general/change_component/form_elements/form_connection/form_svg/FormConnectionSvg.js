@@ -26,6 +26,7 @@ import { connect } from 'react-redux';
 import Details from './details/Details';
 import ButtonPanel from './layouts/button_panel/ButtonPanel';
 import TechnicalLayout from './layouts/TechnicalLayout';
+import LogsPanel from '../../../../../../../../../components/connection_logs/LogsPanel';
 
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
@@ -203,7 +204,8 @@ class FormConnectionSvg extends Component {
           />
         )}
         <ButtonPanel readOnly={data.readOnly} data={data} entity={entity} updateEntity={updateEntity} currentTechnicalItem={currentTechnicalItem} setCurrentTechnicalItem={setCurrentTechnicalItem} />
-        <LogPanel />
+{/*        <LogPanel />*/}
+        <LogsPanel/>
       </div>
     );
   }
