@@ -11,6 +11,7 @@ import {generateUUID} from "@app_component/operator_builder/utils";
 import {useSocketData} from "../../socket/SocketDataContext";
 import {ConnectionSocketLog} from "@root/requests/models/ConnectionLog";
 import {addSocketLog} from "@root/redux_toolkit/slices/ConnectionLogSlice";
+import {Button} from "@app_component/base/button/Button";
 
 const TestConnectionButton = ({validateLogic}: any) => {
     const dispatch = useAppDispatch();
@@ -74,11 +75,9 @@ const TestConnectionButton = ({validateLogic}: any) => {
         }
     }
     return (
-        <TooltipButton
+        <Button
+            id={'test_connection_button'}
             className={styles.testConnectionTitle}
-            target={`test_connection_button`}
-            position={'bottom'}
-            tooltip={'Test'}
             hasBackground={true}
             background={isTesting ? ColorTheme.Blue : ColorTheme.White}
             color={isTesting ? ColorTheme.White : ColorTheme.Gray}
@@ -86,8 +85,6 @@ const TestConnectionButton = ({validateLogic}: any) => {
             handleClick={generateChannelId}
             icon={isTesting ? "stop" : "play_arrow"}
             loadingSize={TextSize.Size_14}
-            isDisabled={isTesting}
-            isLoading={isTesting}
             label="Test run"
             size={TextSize.Size_12}
         />
