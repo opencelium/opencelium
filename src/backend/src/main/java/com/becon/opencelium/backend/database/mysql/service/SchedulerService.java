@@ -58,6 +58,7 @@ public interface SchedulerService {
     void terminate(Integer schedulerId);
 
     List<RunningJobsResource> getAllRunningJobs() throws Exception;
+    List<RunningJobsResource> getAllRunningJobsExcludingOne(int schedulerId);
     List<EventNotification> getAllNotifications(int schedulerId);
     Optional<EventNotification> getNotification(int notificationId);
     EventNotification toNotificationEntity(NotificationResource resource);

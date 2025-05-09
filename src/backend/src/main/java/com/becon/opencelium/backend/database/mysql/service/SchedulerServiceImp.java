@@ -282,6 +282,29 @@ public class SchedulerServiceImp implements SchedulerService {
     }
 
     @Override
+    public List<RunningJobsResource> getAllRunningJobsExcludingOne(int schedulerId) {
+        Map<Long, Integer> runningJobs = schedulingStrategy.getRunningJobs();
+        List<RunningJobsResource> runningJobsResources = new ArrayList<>();
+        runningJobs.forEach((connId, schedId) -> {
+            if (schedulerId != schedId) {
+                RunningJobsResource jobsResource = new RunningJobsResource();
+                Scheduler scheduler = getById(schedId);
+                jobsResource.setSchedulerId(scheduler.getId());
+                jobsResource.setTitle(scheduler.getTitle());
+                Connection connection = connectionService.getById(connId);
+
+                Connector fromCotr = connectorService.getById(connection.getFromConnector());
+                Connector toCtor = connectorService.getById(connection.getToConnector());
+                jobsResource.setToConnector(toCtor.getTitle());
+                jobsResource.setFromConnector(fromCotr.getTitle());
+                runningJobsResources.add(jobsResource);
+            }
+        });
+
+        return runningJobsResources;
+    }
+
+    @Override
     public List<EventNotification> getAllNotifications(int schedulerId) {
         return notificationRepository.findBySchedulerId(schedulerId);
     }
