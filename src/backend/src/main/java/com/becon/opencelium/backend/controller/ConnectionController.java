@@ -41,6 +41,7 @@ import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
 import com.becon.opencelium.backend.resource.connection.old.ConnectionOldDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.request.SchedulerRequestResource;
+import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -283,7 +284,10 @@ public class ConnectionController {
 
         schedulerService.startNow(scheduler, channelId);
 
-        return ResponseEntity.ok().build();
+        // return schedulerId
+        SchedulerResource schedulerResource = new SchedulerResource();
+        schedulerResource.setSchedulerId(scheduler.getId());
+        return ResponseEntity.ok(schedulerResource);
     }
 
     @Operation(summary = "Deletes a connection by provided connection ID")
