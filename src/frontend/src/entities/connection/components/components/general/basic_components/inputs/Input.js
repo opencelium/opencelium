@@ -13,13 +13,14 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {Component} from 'react';
-import {connect} from 'react-redux';
-import {Input as ToolboxInput} from "react-toolbox/lib/input";
-import styles from '@entity/connection/components/themes/default/general/basic_components.scss';
-import {formatHtmlId, getThemeClass, setFocusById} from "@application/utils/utils";
+import { formatHtmlId, getThemeClass, setFocusById } from "@application/utils/utils";
 import CVoiceControl from "@entity/connection/components/classes/voice_control/CVoiceControl";
 import Loading from "@entity/connection/components/components/general/app/Loading";
+import styles from '@entity/connection/components/themes/default/general/basic_components.scss';
+import toolboxTheme from "@style/css/toolbox/input.module.css";
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import { Input as ToolboxInput } from "react-toolbox/lib/input";
 
 function mapStateToProps(state){
     const authUser = state.authReducer.authUser;
@@ -90,7 +91,7 @@ class Input extends Component{
 
     renderPopupElement(){
         const {authUser, onChange, onBlur, isPopupInput, className, popupInputStyles, isPopupMultiline, popupRows, ...props} = this.props;
-        let {...popupInputTheme} = this.props.theme;
+        l
         const {isVisiblePopupInput} = this.state;
         let classNames = [
             'highlighted_input_input_element',
@@ -99,7 +100,15 @@ class Input extends Component{
             'input_icon',
         ];
         classNames = getThemeClass({classNames, authUser, styles});
-        popupInputTheme = {...popupInputTheme, inputElement: styles[classNames.highlighted_input_input_element], bar: styles[classNames.input_bar], icon: styles[classNames.input_icon]};
+        const defaultPopupInputTheme = {
+            inputElement: styles[classNames.highlighted_input_input_element], 
+            bar: styles[classNames.input_bar], 
+            icon: styles[classNames.input_icon]
+        };
+        const mergedPopupTheme = this.mergeThemes(toolboxTheme, {
+            ...(this.props.theme || {}),
+            ...defaultPopupInputTheme,
+        });
         if(!isVisiblePopupInput){
             return null;
         }
@@ -116,7 +125,7 @@ class Input extends Component{
                                 multiline={isPopupMultiline}
                                 rows={popupRows}
                                 className={className}
-                                theme={popupInputTheme}
+                                theme={mergedPopupTheme}
                                 onChange={onChange}
                                 onBlur={(a) => this.onBlur(a)}
                                 onKeyDown={(a) => this.onKeyDown(a)}
@@ -128,6 +137,20 @@ class Input extends Component{
                 }
             </div>
         );
+    }
+
+    mergeThemes(toolboxTheme, customTheme) {
+        const merged = { ...toolboxTheme };
+
+        for (const key in customTheme) {
+            if (merged[key]) {
+                merged[key] = `${merged[key]} ${customTheme[key]}`;
+            } else {
+                merged[key] = customTheme[key];
+            }
+        }
+
+        return merged;
     }
 
     render(){
@@ -156,6 +179,7 @@ class Input extends Component{
         theme.icon = icon;
         theme.error = error;
         theme.errored = errored;
+        const mergedTheme = this.mergeThemes(toolboxTheme, (theme || {}));
         if(!isPopupInput){
             return (
                 <div style={{position: 'relative'}}>
@@ -163,7 +187,7 @@ class Input extends Component{
                     <ToolboxInput
                         {...props}
                         className={className}
-                        theme={theme}
+                        theme={mergedTheme}
                         onClick={null}
                         onChange={onChange}
                         onBlur={(a) => this.onBlur(a)}
@@ -178,7 +202,7 @@ class Input extends Component{
                 <ToolboxInput
                     {...props}
                     className={className}
-                    theme={theme}
+                    theme={mergedTheme}
                     onClick={() => this.showPopupInput()}
                     onFocus={() => this.showPopupInput()}
                     onChange={null}
