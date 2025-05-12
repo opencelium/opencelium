@@ -101,7 +101,7 @@ export default class CXmlEditor extends CBodyEditor{
         return null;
     }
 
-    static setLastEditElement(item, value, prevValue, mode){
+    static setLastEditElement(item, value, prevValue, mode, xml){
         let namespaces = [];
         let parent = null;
         let name = '';
@@ -145,8 +145,9 @@ export default class CXmlEditor extends CBodyEditor{
                 }
             }
         }
-        if(parent){
-            parent.lastEditElement = {
+        const oldXml = xml || parent;
+        if(oldXml){
+            oldXml.lastEditElement = {
                 namespaces,
                 value,
                 prevValue,

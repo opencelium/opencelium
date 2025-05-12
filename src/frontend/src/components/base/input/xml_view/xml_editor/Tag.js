@@ -201,7 +201,7 @@ class Tag extends Component{
     }
 
     renderProperties(){
-        const {translate, tag, update, readOnly, ReferenceComponent} = this.props;
+        const {translate, tag, update, readOnly, ReferenceComponent, xml} = this.props;
         return tag.properties.map(property => {
             return(
                 <Property
@@ -212,6 +212,7 @@ class Tag extends Component{
                     update={update}
                     readOnly={readOnly}
                     ReferenceComponent={ReferenceComponent}
+                    xml={xml}
                 />
             );
         })
@@ -308,7 +309,7 @@ class Tag extends Component{
                         {hasAddTagPopup && !readOnly && <ChangeTag xml={xml} translate={translate} correspondedId={`${tag.uniqueIndex}_add_tag`} parent={tag} tag={addTag} change={update} close={() => this.hideAddTagPopup()} mode={'add'} ReferenceComponent={ReferenceComponent}/>}
                         {this.renderProperties()}
                         {hasAddPropertyIcon && !readOnly && <TooltipFontIcon size={14} id={`${tag.uniqueIndex}_add_property`} tooltip={translate('XML_EDITOR.ADD_PROPERTY')} value={'add_circle_outline'} className={styles.add_property_icon} onClick={() => this.showAddPropertyPopup()}/>}
-                        {hasAddPropertyPopup && !readOnly && <ChangeProperty tag={tag} translate={translate} correspondedId={`${tag.uniqueIndex}_add_property`} property={property} change={(a) => this.addProperty(a)} close={() => this.hideAddPropertyPopup()} mode={'add'} ReferenceComponent={ReferenceComponent}/>}
+                        {hasAddPropertyPopup && !readOnly && <ChangeProperty xml={xml} tag={tag} translate={translate} correspondedId={`${tag.uniqueIndex}_add_property`} property={property} change={(a) => this.addProperty(a)} close={() => this.hideAddPropertyPopup()} mode={'add'} ReferenceComponent={ReferenceComponent}/>}
                         {!tag.tags && <span className={styles.bracket}>{isDeclaration ? '?' : '/'}</span>}
                         <span className={styles.bracket}>{'>'}</span>
                         {hasDeleteTagIcon && !readOnly && <TooltipFontIcon size={14} tooltip={translate('XML_EDITOR.DELETE_TAG')} value={'delete'} className={styles.delete_icon} onClick={deleteTag ? deleteTag : null} style={{paddingLeft: hasAddTagIcon && tag.valueType !== TAG_VALUE_TYPES.TEXT && !isDeclaration ? '32px' : '16px'}}/>}

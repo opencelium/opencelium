@@ -82,7 +82,7 @@ class ChangeProperty extends Component{
      */
     change(doClose = true){
         const {name, value, references, isReference} = this.state;
-        const {translate, change, property, close, mode, ReferenceComponent} = this.props;
+        const {translate, change, property, close, mode, ReferenceComponent, xml} = this.props;
         let newReferences = references;
         if(name === ''){
             alert(translate('XML_EDITOR.PROPERTY.VALIDATIONS.REQUIRED_NAME'));
@@ -99,6 +99,7 @@ class ChangeProperty extends Component{
             let referenceDiv = document.getElementById(ReferenceComponent.id);
             referenceDiv.innerText = '';
         }
+        CXmlEditor.setLastEditElement(property, value, prevValue, mode, xml);
         switch(mode){
             case 'add':
                 change(property);
@@ -107,7 +108,6 @@ class ChangeProperty extends Component{
                 change();
                 break;
         }
-        CXmlEditor.setLastEditElement(property, value, prevValue, mode);
         if(doClose) {
             close();
         } else{
