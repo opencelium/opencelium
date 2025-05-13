@@ -60,6 +60,7 @@ public class SchedulerServiceImp implements SchedulerService {
     private final SchedulingStrategy schedulingStrategy;
     private final SchedulerRepository schedulerRepository;
     private final NotificationRepository notificationRepository;
+    private final ExecutionServiceImp executionServiceImp;
     private final Mapper<Connection, ConnectionDTO> connectionMapper;
 
 
@@ -73,6 +74,7 @@ public class SchedulerServiceImp implements SchedulerService {
             SchedulerRepository schedulerRepository,
             NotificationRepository notificationRepository,
             SchedulerFactoryBean schedulerFactoryBean,
+            ExecutionServiceImp executionServiceImp,
             Mapper<Connection, ConnectionDTO> connectionMapper
     ) {
         this.connectionService = connectionService;
@@ -83,6 +85,7 @@ public class SchedulerServiceImp implements SchedulerService {
         this.schedulingStrategy = SchedulerFactory.createQuartzScheduler(schedulerFactoryBean.getScheduler());
         this.notificationRepository = notificationRepository;
         this.schedulerRepository = schedulerRepository;
+        this.executionServiceImp = executionServiceImp;
         this.connectionMapper = connectionMapper;
         this.connectorService = connectorService;
     }
@@ -270,14 +273,47 @@ public class SchedulerServiceImp implements SchedulerService {
             Scheduler scheduler = getById(schedId);
             jobsResource.setSchedulerId(scheduler.getId());
             jobsResource.setTitle(scheduler.getTitle());
-            Connection connection = connectionService.getById(connId);
 
+            // TODO: need to rework calculation of avg time
+            double avg = executionServiceImp.getAvgDurationOfExecution(schedId);
+            jobsResource.setAvgDuration(avg);
+
+            Connection connection = connectionService.getById(connId);
             Connector fromCotr = connectorService.getById(connection.getFromConnector());
             Connector toCtor = connectorService.getById(connection.getToConnector());
             jobsResource.setToConnector(toCtor.getTitle());
             jobsResource.setFromConnector(fromCotr.getTitle());
+
             runningJobsResources.add(jobsResource);
         });
+        return runningJobsResources;
+    }
+
+    @Override
+    public List<RunningJobsResource> getAllRunningJobsExcludingOne(int schedulerId) {
+        Map<Long, Integer> runningJobs = schedulingStrategy.getRunningJobs();
+        List<RunningJobsResource> runningJobsResources = new ArrayList<>();
+        runningJobs.forEach((connId, schedId) -> {
+            if (schedulerId != schedId) {
+                RunningJobsResource jobsResource = new RunningJobsResource();
+                Scheduler scheduler = getById(schedId);
+                jobsResource.setSchedulerId(scheduler.getId());
+                jobsResource.setTitle(scheduler.getTitle());
+
+                // TODO: need to rework calculation of avg time
+                double avg = executionServiceImp.getAvgDurationOfExecution(schedId);
+                jobsResource.setAvgDuration(avg);
+
+                Connection connection = connectionService.getById(connId);
+                Connector fromCotr = connectorService.getById(connection.getFromConnector());
+                Connector toCtor = connectorService.getById(connection.getToConnector());
+                jobsResource.setToConnector(toCtor.getTitle());
+                jobsResource.setFromConnector(fromCotr.getTitle());
+
+                runningJobsResources.add(jobsResource);
+            }
+        });
+
         return runningJobsResources;
     }
 

@@ -189,7 +189,7 @@ public class ExecutionAspect {
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
         triggerNotifications(en, "post", null);
 
-        sendRunningJobsNotification();
+        sendRunningJobsNotification(schedulerId);
     }
 
     @AfterThrowing(pointcut = "execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)",
@@ -238,7 +238,7 @@ public class ExecutionAspect {
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
         triggerNotifications(en, "alert", ex);
 
-        sendRunningJobsNotification();
+        sendRunningJobsNotification(schedulerId);
     }
 
     private long initExecutionObj(int schedulerId) {
@@ -525,5 +525,10 @@ public class ExecutionAspect {
             List<RunningJobsResource> allRunningJobs = schedulerService.getAllRunningJobs();
             notificationService.send(SocketConstant.SCHEDULER_DESTINATION, allRunningJobs);
         } catch (Exception e) {}
+    }
+
+    private void sendRunningJobsNotification(int schedulerId) {
+        List<RunningJobsResource> allRunningJobs = schedulerService.getAllRunningJobsExcludingOne(schedulerId);
+        notificationService.send(SocketConstant.SCHEDULER_DESTINATION, allRunningJobs);
     }
 }
