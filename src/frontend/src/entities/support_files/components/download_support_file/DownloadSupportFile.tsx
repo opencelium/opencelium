@@ -35,8 +35,8 @@ const DownloadSupportFile: FC<DownloadSupportFileProps> =
         const [isDownloading, setIsDownloading] = useState<boolean>(false);
 
         const supportFileTimeStamp = useMemo(() => {
-            const errorSupportFileInstance = new SupportFileResponseClass(supportFileResponse, 'error');
-            const successSupportFileInstance = new SupportFileResponseClass(supportFileResponse, 'success');
+            const errorSupportFileInstance = new SupportFileResponseClass(supportFileResponse, 'f');
+            const successSupportFileInstance = new SupportFileResponseClass(supportFileResponse, 's');
             const instance = errorSupportFileInstance.supportFileObject ? errorSupportFileInstance : successSupportFileInstance;
             return instance.supportFileObject.timestamp;
         }, [supportFileResponse])

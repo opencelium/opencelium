@@ -30,6 +30,7 @@ const CurrentSchedules: FC<CurrentSchedulesProps> =
     const dispatch = useAppDispatch();
     const {currentSchedules} = useSocketData();
     const preProps: any[] = usePrevious({currentSchedules}) || [];
+    console.log(currentSchedules);
     useEffect(() => {
         let ids = [];
         let index = -1;

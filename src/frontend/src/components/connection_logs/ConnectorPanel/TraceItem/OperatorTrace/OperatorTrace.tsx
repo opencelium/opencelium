@@ -27,7 +27,6 @@ export const OperatorTrace: React.FC<Props> = ({
 	connectionId,
 	iterationIndexes,
 }) => {
-	console.log(`Operator ${trace.indexPath}: ${iterationIndexes.join(', ')}`)
 	const dispatch = useAppDispatch();
 	const [expanded, setExpanded] = useState(false);
 	const [loading, setLoading] = useState(false);

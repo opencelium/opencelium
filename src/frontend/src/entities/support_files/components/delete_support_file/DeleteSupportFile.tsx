@@ -38,8 +38,8 @@ const DeleteSupportFile: FC<DeleteSupportFileProps> =
             dispatch(deleteSupportFile(supportFileResponse.supportFile));
         }
         const supportFileTimeStamp = useMemo(() => {
-            const errorSupportFileInstance = new SupportFileResponseClass(supportFileResponse, 'error');
-            const successSupportFileInstance = new SupportFileResponseClass(supportFileResponse, 'success');
+            const errorSupportFileInstance = new SupportFileResponseClass(supportFileResponse, 'f');
+            const successSupportFileInstance = new SupportFileResponseClass(supportFileResponse, 's');
             const instance = errorSupportFileInstance.supportFileObject ? errorSupportFileInstance : successSupportFileInstance;
             return instance.supportFileObject.timestamp;
         }, [supportFileResponse])

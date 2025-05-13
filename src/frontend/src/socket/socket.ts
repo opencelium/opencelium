@@ -10,7 +10,6 @@ export const SocketUserPrefix = '/user';
 
 export const getSocket = () => {
     const token = store.getState().authReducer.authUser?.token;
-    console.log(token);
     if (!socketClient && token) {
         const webSocket = new SockJS(`${Urls.socketServer}websocket?token=${token}`);
         socketClient = new Client({

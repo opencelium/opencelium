@@ -30,7 +30,6 @@ class ToolboxThemeInput extends React.Component{
 
     render(){
         const {icon, tourStep, style, label, required, iconClassName, hasFocusStyle, className, isFocused, labelClassName, inputElementClassName, iconTooltip, tooltipTourStep, inputElementText, inputElementStyle, hideInput, error, ...props} = this.props;
-        console.log(theme);
         return(
             <div className={`${className} ${icon !== '' ? theme.withIcon : ''} ${label !== '' ? theme.input : ''} ${styles.toolbox_theme_input} ${hasFocusStyle ? styles.input : ''} ${tourStep ? tourStep : ''}`} style={style} {...props}>
                 {label !== '' && <div style={inputElementStyle} className={`${theme.inputElement} ${theme.filled} ${styles.label} ${inputElementClassName} ${hideInput ? styles.hide_label : ''}`}>{inputElementText}</div>}

@@ -82,9 +82,6 @@ export const connectionLogSlice = createSlice({
 	extraReducers: (builder) => {
 		builder.addCase(getMethodTrace.fulfilled, (state, action) => {
 			const { connectorId, indexPath, executionId } = action.meta.arg;
-			if (!action.payload.requestDetails){
-				console.log(indexPath)
-			}
 			const {requestDetails, responseDetails} = action.payload;
 			if (state.executionId !== executionId) return;
 			const connector = state.connectors.find(c => c.id === connectorId);
@@ -101,9 +98,6 @@ export const connectionLogSlice = createSlice({
 		});
 		builder.addCase(getOperatorTrace.fulfilled, (state, action) => {
 			const { connectorId, indexPath, executionId } = action.meta.arg;
-			if (!action.payload.traces){
-				console.log(indexPath)
-			}
 			const {traces} = action.payload;
 			if (state.executionId !== executionId) return;
 			const connector = state.connectors.find(c => c.id === connectorId);

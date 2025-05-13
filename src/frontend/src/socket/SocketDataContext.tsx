@@ -8,6 +8,7 @@ import {useAppDispatch} from "@application/utils/store";
 import {Auth} from "@application/classes/Auth";
 import {addNotification} from "@application/redux_toolkit/slices/ApplicationSlice";
 import {NotificationType} from "@application/interfaces/INotification";
+import {notifyAboutNewSupportFile} from "@root/redux_toolkit/slices/SupportFileSlice";
 
 const SocketDataContext = createContext<SocketDataContextType | undefined>(undefined);
 
@@ -68,15 +69,7 @@ export const SocketDataProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
     }, [authUser, socket]);
     useEffect(() => {
         if (hasNewSupportFile) {
-            const date = new Date();
-            dispatch(addNotification({
-                id: date.getTime(),
-                type: NotificationType.SUCCESS,
-                title: 'OC',
-                actionType: '',
-                createdTime: date.getTime().toString(),
-                params: {message: 'The new support file was generated.'}
-            }))
+            dispatch(notifyAboutNewSupportFile())
             setHasNewSupportFile(false);
         }
     }, [hasNewSupportFile])

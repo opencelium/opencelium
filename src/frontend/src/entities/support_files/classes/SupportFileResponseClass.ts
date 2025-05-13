@@ -15,27 +15,25 @@ export default class SupportFileResponseClass {
         this.type = type;
         this.supportFileObject = this.convertFilenameIntoObject(this.supportFile)
     }
-
-    getSplitter(): string {
-        switch(this.type) {
-            case 'error':
-                return '_e_support_';
-            case 'success':
-                return '_s_support_';
-        }
-    }
     convertFilenameIntoObject(filename: string): SupportFileObject | undefined {
         try {
-            const filenameSplit = filename.split(this.getSplitter());
-            if (filenameSplit.length !== 2) {
+            const regex = /\/(\d+)\/(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}_\d+)_([sf])_(\d+)\.zip$/;
+            const match = filename.match(regex);
+            if (!match) {
+                throw new Error("Path does not match expected format");
+            }
+            const [, connectionIdStr, datetimeStr, status, executionIdStr] = match;
+            if (status !== this.type) {
                 return undefined;
             }
-            const timestamp = getDateFormat(+`${filenameSplit[1].substring(0, filenameSplit[1].length - '.zip'.length)}000`);
-            return {
-                path: filename,
-                connectionId: filenameSplit[0],
-                timestamp,
-            }
+            const [datePart, timePart] = datetimeStr.split('_');
+            const datetime = new Date(`${datePart}T${timePart.replace('-', ':')}:00`);
+            const timestamp = getDateFormat(datetime);
+                return {
+                    path: filename,
+                    connectionId: connectionIdStr,
+                    timestamp,
+                }
         } catch (e) {
             throw e;
         }
