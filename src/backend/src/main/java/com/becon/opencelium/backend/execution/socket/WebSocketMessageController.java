@@ -6,7 +6,7 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 
 @Controller
-public class WebsocketMessageController {
+public class WebSocketMessageController {
 
     @MessageMapping("/scheduler")
     @SendTo("/execution/logs")

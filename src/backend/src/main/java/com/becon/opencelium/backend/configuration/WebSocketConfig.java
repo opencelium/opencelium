@@ -1,7 +1,8 @@
 package com.becon.opencelium.backend.configuration;
 
+import com.becon.opencelium.backend.execution.socket.WebSocketHandshakeHandler;
 import com.becon.opencelium.backend.execution.socket.WebSocketHandshakeInterceptor;
-import com.becon.opencelium.backend.execution.socket.handler.WebSocketEventHandler;
+import com.becon.opencelium.backend.execution.socket.WebSocketEventHandler;
 import com.becon.opencelium.backend.security.JwtTokenUtil;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
@@ -21,6 +22,7 @@ import static com.becon.opencelium.backend.execution.socket.SocketConstant.EXECU
 import static com.becon.opencelium.backend.execution.socket.SocketConstant.NOTIFICATION_DESTINATION_PREFIX;
 import static com.becon.opencelium.backend.execution.socket.SocketConstant.PATH;
 import static com.becon.opencelium.backend.execution.socket.SocketConstant.SCHEDULER_DESTINATION_PREFIX;
+import static com.becon.opencelium.backend.execution.socket.SocketConstant.USER_SESSION_DESTINATION_PREFIX;
 
 @Configuration
 @EnableWebSocketMessageBroker
@@ -42,7 +44,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.enableSimpleBroker(
                 EXECUTION_DESTINATION_PREFIX,
                 NOTIFICATION_DESTINATION_PREFIX,
-                SCHEDULER_DESTINATION_PREFIX
+                SCHEDULER_DESTINATION_PREFIX,
+                USER_SESSION_DESTINATION_PREFIX
         );
         registry.setApplicationDestinationPrefixes("/oc");
         registry.setUserDestinationPrefix("/user");
@@ -55,7 +58,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint(PATH)
                 .setAllowedOriginPatterns("*")
-                .addInterceptors(new WebSocketHandshakeInterceptor(jwtTokenUtil)) // populate attribute [userId]
+                .setHandshakeHandler(new WebSocketHandshakeHandler()) // sets Principal based on principal attribute value
+                .addInterceptors(new WebSocketHandshakeInterceptor(jwtTokenUtil)) // populate attribute [userId, username, oc-sessionId]
                 .withSockJS();
     }
 

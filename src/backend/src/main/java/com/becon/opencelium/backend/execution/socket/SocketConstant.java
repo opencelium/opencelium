@@ -12,4 +12,7 @@ public interface SocketConstant {
 
     String SCHEDULER_DESTINATION_PREFIX = "/scheduler/running/all";
     String SCHEDULER_DESTINATION = "/scheduler/running/all";
+
+    String USER_SESSION_DESTINATION_PREFIX = "/session";
+    String USER_SESSION_DESTINATION = "/session";
 }
