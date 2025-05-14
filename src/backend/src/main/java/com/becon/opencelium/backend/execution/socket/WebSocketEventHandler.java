@@ -2,6 +2,7 @@ package com.becon.opencelium.backend.execution.socket;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
@@ -10,13 +11,15 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static com.becon.opencelium.backend.execution.socket.SocketConstant.USER_SESSION_DESTINATION;
+
 @Component
 public class WebSocketEventHandler {
     private final Map<Integer, Session> sessions = new ConcurrentHashMap<>();
     private final SimpMessagingTemplate messagingTemplate;
     private static final Logger logger = LoggerFactory.getLogger(WebSocketEventHandler.class);
 
-    public WebSocketEventHandler(SimpMessagingTemplate messagingTemplate) {
+    public WebSocketEventHandler(@Lazy SimpMessagingTemplate messagingTemplate) {
         this.messagingTemplate = messagingTemplate;
     }
 
@@ -36,12 +39,12 @@ public class WebSocketEventHandler {
             Session existing = sessions.get(userId);
 
             if (potential.equals(existing)) {
-                String message = "WebSocket session already active for userId = " + userId + ", wsSessionId = " + wsSessionId;
+                String message = "WebSocket session already active for userId = " + userId + ", wsSessionId = " + existing.wsSessionId;
 
                 logger.warn(message);
                 throw new IllegalStateException(message);
             } else {
-                messagingTemplate.convertAndSendToUser(principal, "/session", Event.of("FORCE_LOGOUT", "New login detected"));
+                messagingTemplate.convertAndSendToUser(existing.principal, USER_SESSION_DESTINATION, Event.of("FORCE_LOGOUT", "New login detected"));
                 sessions.remove(userId);
                 logger.info("Existing WebSocket session has been found, userId = " + userId + ", wsSessionId = " + existing.wsSessionId);
             }
