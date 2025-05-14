@@ -46,22 +46,22 @@ public class WebSocketEventHandler {
             } else {
                 messagingTemplate.convertAndSendToUser(existing.principal, USER_SESSION_DESTINATION, Event.of("FORCE_LOGOUT", "New login detected"));
                 sessions.remove(userId);
-                logger.info("Existing WebSocket session has been found, userId = " + userId + ", wsSessionId = " + existing.wsSessionId);
+                logger.info("Unregistering from existing WebSocket session, userId = {}, wsSessionId = {}", userId, existing.wsSessionId);
             }
         }
 
         // register new Session for user
         sessions.put(userId, potential);
-        logger.info("WebSocket session has been registered, userId = " + userId + ", wsSessionId = " + wsSessionId);
+        logger.info("WebSocket session has been registered, userId = {}, wsSessionId = {}", userId, wsSessionId);
     }
 
     public void handleDisconnect(StompHeaderAccessor accessor) {
         Integer userId = (Integer) accessor.getSessionAttributes().get("userId");
         String wsSessionId = accessor.getSessionId();
 
-        if (sessions.containsKey(userId)) {
+        if (sessions.containsKey(userId) && Objects.equals(wsSessionId, sessions.get(userId).wsSessionId)) {
             sessions.remove(userId);
-            logger.info("WebSocket session has been unregistered, userId = " + userId + ", wsSessionId = " + wsSessionId);
+            logger.info("WebSocket session has been unregistered, userId = {}, wsSessionId = {}", userId, wsSessionId);
         }
     }
 
