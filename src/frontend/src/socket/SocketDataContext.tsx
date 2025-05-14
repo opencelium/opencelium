@@ -9,6 +9,7 @@ import {Auth} from "@application/classes/Auth";
 import {addNotification} from "@application/redux_toolkit/slices/ApplicationSlice";
 import {NotificationType} from "@application/interfaces/INotification";
 import {notifyAboutNewSupportFile} from "@root/redux_toolkit/slices/SupportFileSlice";
+import ModelCurrentSchedule from "@entity/schedule/requests/models/CurrentSchedule";
 
 const SocketDataContext = createContext<SocketDataContextType | undefined>(undefined);
 
@@ -22,12 +23,14 @@ export const SocketDataProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
     const { currentSchedules } = useCurrentSchedulesSocket(socket);
     const { hasNewSupportFile, setHasNewSupportFile } = useSupportFilesSocket(socket);
     const { currentSubscription } = useCurrentSubscriptionSocket(socket);
+    const userSessionSubscriptionRef = useRef<() => void>();
 
     const isConnectedReference: any = useRef();
     isConnectedReference.current = isConnected;
     useEffect(() => {
         return () => {
             if (socket && socket.connected) {
+                userSessionSubscriptionRef.current?.();
                 socket.deactivate().then(() => console.log("🧹 Socket deactivated"));
             }
         };
@@ -55,6 +58,19 @@ export const SocketDataProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
                 if (!isConnected){
                     setIsConnected(true);
                 }
+                const userSessionSubscription = socket.subscribe(`/user/session`, (message) => {
+                    const data = JSON.parse(message.body)
+                    console.log('/user/session', data);
+                    if (data.event === 'FORCE_LOGOUT') {
+                        socket.deactivate();
+                        setIsConnected(false);
+                    }
+                });
+                userSessionSubscriptionRef.current = () => {
+                    userSessionSubscription.unsubscribe();
+                    userSessionSubscriptionRef.current = undefined;
+                    console.log("🧹 Unsubscribed from /user/session");
+                };
             };
             socket.onDisconnect = () => {
                 console.log("STOMP disconnected");
@@ -77,7 +93,7 @@ export const SocketDataProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
     return (
         <SocketDataContext.Provider
             value={{
-                isConnected: isConnectedReference,
+                isConnected: isConnectedReference.current,
                 authValid,
                 currentSchedules,
                 hasNewSupportFile,
