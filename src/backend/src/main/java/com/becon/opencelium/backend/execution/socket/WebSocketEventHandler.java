@@ -1,24 +1,24 @@
-package com.becon.opencelium.backend.execution.socket.handler;
+package com.becon.opencelium.backend.execution.socket;
 
-import com.becon.opencelium.backend.execution.socket.WebSocketSessionRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
 
 @Component
-public class NotificationWebSocketHandler implements WebSocketEventHandler {
+public class WebSocketEventHandler {
     private final WebSocketSessionRegistry registry;
-    private static final Logger logger = LoggerFactory.getLogger(NotificationWebSocketHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(WebSocketEventHandler.class);
 
-    public NotificationWebSocketHandler(WebSocketSessionRegistry registry) {
+    public WebSocketEventHandler(WebSocketSessionRegistry registry) {
         this.registry = registry;
     }
 
-    @Override
     public void handleConnect(StompHeaderAccessor accessor) {
         String sessionId = accessor.getSessionId();
         Integer userId = (Integer) accessor.getSessionAttributes().get("userId");
+        String principal = (String) accessor.getSessionAttributes().get("principal");
+        String ocSessionId = (String) accessor.getSessionAttributes().get("ocSessionId");
 
         if (userId == null || sessionId == null) {
             logger.error("Missing userId or sessionId in STOMP headers.");
@@ -36,7 +36,6 @@ public class NotificationWebSocketHandler implements WebSocketEventHandler {
         }
     }
 
-    @Override
     public void handleDisconnect(StompHeaderAccessor accessor) {
         String sessionId = accessor.getSessionId();
         Integer userId = (Integer) accessor.getSessionAttributes().get("userId");
