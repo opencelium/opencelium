@@ -50,7 +50,7 @@ export interface IConnectorForm extends IConnectorText, IConnectorTextarea, ICon
     update: (title?: string) => boolean;
     deleteById: () => boolean;
     reduxState?: ConnectorState;
-    getCredentials: (props: InputTextProps) => any;
+    getCredentials: (props: InputTextProps, hasMasking: boolean) => any;
     getPoustModel: () => ModelConnectorPoust;
 }
 

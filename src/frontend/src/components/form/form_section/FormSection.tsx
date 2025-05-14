@@ -20,6 +20,7 @@ import {Label} from "./label/Label";
 import { FormSectionProps } from './interfaces';
 import { FormSectionStyled } from './styles';
 import {Loading} from "@app_component/base/loading/Loading";
+import OverlayFormSection from "@app_component/form/form_section/overlay/OverlayFormSection";
 
 const FormSection: FC<FormSectionProps> =
     ({
@@ -29,6 +30,7 @@ const FormSection: FC<FormSectionProps> =
         dependencies,
         children,
         padding,
+        OverlayComponent,
         inputsStyle,
     }) => {
     let isVisible = true;
@@ -42,6 +44,7 @@ const FormSection: FC<FormSectionProps> =
         <FormSectionStyled position={position} overflow={overflow} isVisible={isVisible} padding={padding ? padding : `${hasLabel ? '50px' : '20px'} 30px 20px 10px`} margin={`${hasLabel ? '31px' : '0'} 0 0`}>
             {hasLabel && <Label {...label} position={'absolute'}/>}
             <Inputs style={inputsStyle}>{children}</Inputs>
+            {OverlayComponent && <OverlayFormSection component={OverlayComponent}/>}
         </FormSectionStyled>
     )
 }

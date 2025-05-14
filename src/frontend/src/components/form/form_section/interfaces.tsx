@@ -20,6 +20,7 @@ interface FormSectionProps{
     theme?: ITheme,
     label?: LabelProps,
     hasFullWidthInForm?: boolean,
+    OverlayComponent?: any,
     dependencies?: boolean[],
     padding?: string,
     overflow?: string,

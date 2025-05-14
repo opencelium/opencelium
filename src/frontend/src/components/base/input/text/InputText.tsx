@@ -52,12 +52,13 @@ const InputText: FC<InputTextProps> = ({
     paddingRight,
     checkBackground,
     errorBottom,
+    isVisibilityTrue,
     ...props
 }) => {
     if(!isVisible){
         return null;
     }
-    const [checked, onCheck] = useState<boolean>(false);
+    const [checked, onCheck] = useState<boolean>(isVisibilityTrue);
     const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
         if(!readOnly) {
             onCheck(!checked);

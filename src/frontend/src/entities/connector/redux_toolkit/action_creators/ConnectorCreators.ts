@@ -19,6 +19,7 @@ import {IEntityWithImage} from "@application/requests/interfaces/IRequest";
 import {errorHandler} from "@application/utils/utils";
 import {ConnectorRequest} from "../../requests/classes/Connector";
 import ModelConnectorPoust from "../../requests/models/ConnectorPoust";
+import ModelConnector from "@entity/connector/requests/models/Connector";
 
 
 export const testRequestData = createAsyncThunk(
@@ -133,8 +134,26 @@ export const getConnectorById = createAsyncThunk(
     'connector/get/byId',
     async(connectorId: number, thunkAPI) => {
         try {
+            // @ts-ignore
+            let masterPassword = thunkAPI.getState().connectorReducer.masterPassword;
             const request = new ConnectorRequest({endpoint: `/${connectorId}`});
-            const response = await request.getConnectorById();
+            const response = await request.getConnectorById({headers: {'master_password': masterPassword}});
+            return response.data;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+
+export const getConnectorCredentials = createAsyncThunk(
+    'connector/get/credentials',
+    async(connector: ModelConnector, thunkAPI) => {
+        try {
+            // @ts-ignore
+            let masterPassword = thunkAPI.getState().connectorReducer.masterPassword;
+            return {...connector, requestData: {...connector.requestData, password: 'test'}}
+            const request = new ConnectorRequest({endpoint: `/${connector.connectorId}`});
+            const response = await request.getConnectorCredentials({headers: {'master_password': masterPassword}});
             return response.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
@@ -210,6 +229,26 @@ export const deleteConnectorImage = createAsyncThunk(
     }
 )
 
+export const checkMasterPassword = createAsyncThunk(
+    'connector/check/master-password',
+    async(password: string, thunkAPI) => {
+        try {
+            const request = new ConnectorRequest();
+            if (password === 'test') {
+                return password;
+            } else if (password === '') {
+                throw {message: "MASTER_PASSWORD_NOT_EXIST"}
+            } else {
+                throw {message: "MASTER_PASSWORD_WRONG"}
+            }
+            await request.checkMasterPassword({headers: {'master_password': password}});
+            return password;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+
 export default {
     testRequestData,
     checkConnectorTitle,
@@ -221,4 +260,6 @@ export default {
     deleteConnectorsById,
     uploadConnectorImage,
     deleteConnectorImage,
+    checkMasterPassword,
+    getConnectorCredentials,
 }

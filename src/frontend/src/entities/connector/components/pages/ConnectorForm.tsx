@@ -28,18 +28,24 @@ import {getAllInvokers} from "@entity/invoker/redux_toolkit/action_creators/Invo
 import FormComponent from "@app_component/form/form/Form";
 import {Connector} from "../../classes/Connector";
 import {IConnector} from "../../interfaces/IConnector";
-import {testRequestData,} from "../../redux_toolkit/action_creators/ConnectorCreators";
+import {
+    getConnectorById,
+    getConnectorCredentials,
+    testRequestData,
+} from "../../redux_toolkit/action_creators/ConnectorCreators";
 import { setCurrentConnector } from "../../redux_toolkit/slices/ConnectorSlice";
+import MasterPasswordInput from "@entity/connector/components/master_password_input/MasterPasswordInput";
 
 
 const ConnectorForm: FC<IForm> = ({isAdd, isUpdate}) => {
     const {
         gettingConnector, currentConnector, addingConnector, checkingConnectorTitle, isCurrentConnectorHasUniqueTitle,
-        isCurrentConnectorHasInvalidRequestData, testingRequestData, updatingConnector, error,
+        isCurrentConnectorHasInvalidRequestData, testingRequestData, updatingConnector, error, masterPassword,
     } = Connector.getReduxState();
     const dispatch = useAppDispatch();
     const {gettingInvokers, invokers} = Invoker.getReduxState();
     const [shouldNavigateToConnection, setShouldNavigateToConnection] = useState<boolean>(false);
+    const [hasMasking, setHasMasking] = useState<boolean>(isUpdate && !masterPassword);
     const invokerOptions: OptionProps[] = invokers.map(invoker => {return {label: invoker.name, value: invoker.name, data: invoker.requiredData}});
     const didMount = useRef(false);
     let navigate = useNavigate();
@@ -53,7 +59,7 @@ const ConnectorForm: FC<IForm> = ({isAdd, isUpdate}) => {
     }
     const connector = Connector.createState<IConnector>({id: connectorId}, isAdd ? null : currentConnector);
     const credentialErrorMessage = isCurrentConnectorHasInvalidRequestData === TRIPLET_STATE.TRUE ? 'Wrong credential data' : '';
-    const Credentials = connector.getCredentials({error: credentialErrorMessage});
+    const Credentials = connector.getCredentials({error: credentialErrorMessage}, hasMasking);
     useEffect(() => {
         if(shouldFetchConnector){
             connector.getById()
@@ -78,6 +84,10 @@ const ConnectorForm: FC<IForm> = ({isAdd, isUpdate}) => {
     },[addingConnector, updatingConnector]);
     const test = () => {
         dispatch(testRequestData(connector.getPoustModel()));
+    }
+    const onSuccessMasterPassword = () => {
+        setHasMasking(false);
+        dispatch(getConnectorCredentials(connector.getPoustModel()));
     }
     const TitleInput = connector.getText({
         propertyName: "title", props: {autoFocus: true, icon: 'title', label: 'Title', required: true, isLoading: checkingConnectorTitle === API_REQUEST_STATE.START, error: isCurrentConnectorHasUniqueTitle === TRIPLET_STATE.FALSE ? 'The title is already in use' : ''}
@@ -149,16 +159,16 @@ const ConnectorForm: FC<IForm> = ({isAdd, isUpdate}) => {
                 {SslCertInput}
                 {Icon}
             </FormSection>,
-            <FormSection label={{value: 'Credentials'}} dependencies={[!connector.invokerSelect]}>
+            <FormSection label={{value: 'Credentials'}} dependencies={[!connector.invokerSelect]} OverlayComponent={hasMasking ? <MasterPasswordInput onSuccess={onSuccessMasterPassword}/> : null}>
                 {Credentials}
-                <Button
+                {!hasMasking && <Button
                     float={'right'}
                     key={'add_button'}
                     label={'Test'}
                     icon={'refresh'}
                     handleClick={test}
                     isLoading={testingRequestData === API_REQUEST_STATE.START}
-                />
+                />}
             </FormSection>
         ]
     }

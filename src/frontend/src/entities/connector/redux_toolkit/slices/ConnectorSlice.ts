@@ -21,11 +21,12 @@ import {API_REQUEST_STATE, TRIPLET_STATE} from "@application/interfaces/IApplica
 import {
     addConnector,
     checkConnectorTitle,
+    checkMasterPassword,
     deleteConnectorById,
     deleteConnectorImage,
     deleteConnectorsById,
     getAllConnectors,
-    getConnectorById,
+    getConnectorById, getConnectorCredentials,
     testRequestData,
     updateConnector,
     uploadConnectorImage
@@ -47,6 +48,8 @@ export interface ConnectorState extends ICommonState{
     deletingConnectorsById: API_REQUEST_STATE,
     uploadingConnectorImage: API_REQUEST_STATE,
     deletingConnectorImage: API_REQUEST_STATE,
+    checkingMasterPassword: API_REQUEST_STATE,
+    masterPassword: string,
     currentConnector: ModelConnector,
 }
 
@@ -64,6 +67,8 @@ const initialState: ConnectorState = {
     deletingConnectorsById: API_REQUEST_STATE.INITIAL,
     uploadingConnectorImage: API_REQUEST_STATE.INITIAL,
     deletingConnectorImage: API_REQUEST_STATE.INITIAL,
+    checkingMasterPassword: API_REQUEST_STATE.INITIAL,
+    masterPassword: '',
     currentConnector: null,
     ...CommonState,
 }
@@ -233,6 +238,30 @@ export const connectorSlice = createSlice({
         },
         [deleteConnectorImage.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.deletingConnectorImage = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [checkMasterPassword.pending.type]: (state) => {
+            state.checkingMasterPassword = API_REQUEST_STATE.START;
+        },
+        [checkMasterPassword.fulfilled.type]: (state, action: PayloadAction<string>) => {
+            state.checkingMasterPassword = API_REQUEST_STATE.FINISH;
+            state.masterPassword = action.payload;
+            state.error = null;
+        },
+        [checkMasterPassword.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.checkingMasterPassword = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [getConnectorCredentials.pending.type]: (state) => {
+            state.gettingConnector = API_REQUEST_STATE.START;
+        },
+        [getConnectorCredentials.fulfilled.type]: (state, action: PayloadAction<ModelConnector>) => {
+            state.gettingConnector = API_REQUEST_STATE.FINISH;
+            state.currentConnector = action.payload;
+            state.error = null;
+        },
+        [getConnectorCredentials.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.gettingConnector = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
     }

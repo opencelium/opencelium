@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {AxiosResponse} from "axios";
+import {AxiosRequestConfig, AxiosResponse} from "axios";
 import Request from "@entity/application/requests/classes/Request";
 import {IRequestSettings} from "@application/requests/interfaces/IRequest";
 import {IResponse} from "@application/requests/interfaces/IResponse";
@@ -36,8 +36,12 @@ export class ConnectorRequest extends Request implements IConnectorRequest{
         return super.get<IResponse>();
     }
 
-    async getConnectorById(): Promise<AxiosResponse<ModelConnector>>{
-        return super.get<ModelConnector>();
+    async getConnectorById(settings?: AxiosRequestConfig): Promise<AxiosResponse<ModelConnector>>{
+        return super.get<ModelConnector>(settings);
+    }
+
+    async getConnectorCredentials(settings?: AxiosRequestConfig): Promise<AxiosResponse<ModelConnector>>{
+        return super.get<ModelConnector>(settings);
     }
 
     async getAllConnectors(): Promise<AxiosResponse<ModelConnector[] | null>>{
@@ -68,5 +72,10 @@ export class ConnectorRequest extends Request implements IConnectorRequest{
 
     async deleteConnectorImage(): Promise<AxiosResponse<IResponse>>{
         return super.delete<IResponse>();
+    }
+
+    async checkMasterPassword(settings: AxiosRequestConfig): Promise<AxiosResponse<IResponse>>{
+        this.endpoint = '/master-password/status'
+        return super.get<IResponse>(settings);
     }
 }
