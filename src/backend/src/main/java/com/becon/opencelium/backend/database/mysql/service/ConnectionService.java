@@ -90,4 +90,6 @@ public interface ConnectionService {
     void deleteRule(long connectionId, long ruleId);
 
     void updateConnectionsToCurrentVersion();
+
+    void verifyMasterPassword(String masterPassword);
 }

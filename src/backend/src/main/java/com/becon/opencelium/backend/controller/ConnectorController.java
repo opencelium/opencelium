@@ -19,6 +19,7 @@ package com.becon.opencelium.backend.controller;
 import com.becon.opencelium.backend.commons.ThreadLocalSingleton;
 import com.becon.opencelium.backend.constant.ExceptionConstant;
 import com.becon.opencelium.backend.constant.ExceptionMessages;
+import com.becon.opencelium.backend.constant.HeaderConstants;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.exception.CommunicationFailedException;
@@ -31,6 +32,7 @@ import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
+import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -179,6 +181,18 @@ public class ConnectorController {
 
         connectorService.updateRequestData(connector, connectorResource.getRequestData());
 
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Verifies Master Password")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully verified")
+    })
+    @PutMapping(path = "/master-password/verify")
+    public ResponseEntity<?> verifyMasterPassword(
+            @RequestHeader(name = HeaderConstants.MASTER_PASSWORD, required = false) String masterPassword) {
+
+        connectionService.verifyMasterPassword(masterPassword);
         return ResponseEntity.ok().build();
     }
 
