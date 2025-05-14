@@ -58,5 +58,5 @@ public interface ConnectorService {
 
     void update(Connector connector, Connector newConnector);
 
-    void updateRequestData(Connector connector, Map<String, String> requestData);
+    void updateRequestData(Integer id, Map<String, String> requestData);
 }

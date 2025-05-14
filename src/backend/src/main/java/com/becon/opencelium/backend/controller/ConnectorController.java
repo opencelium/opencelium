@@ -167,19 +167,17 @@ public class ConnectorController {
 
     @Operation(summary = "Modifies connector's required data")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Connector has been successfully modified"),
+            @ApiResponse(responseCode = "200", description = "Connector's required data has been successfully modified"),
     })
     @PutMapping(path = "/{id}/required-data")
     public ResponseEntity<ConnectorResource> updateRequiredData(
             @PathVariable Integer id,
-            @RequestBody ConnectorResource connectorResource) {
-        if (Boolean.FALSE.equals(ThreadLocalSingleton.hasMasterPassword())) {
-            throw new GeneralServiceException(HttpStatus.FORBIDDEN, ExceptionConstant.MASTER_PASSWORD_REQUIRED, ExceptionMessages.MASTER_PASSWORD_REQUIRED);
-        }
+            @RequestBody Map<String, String> requiredData,
+            @RequestHeader(name = HeaderConstants.MASTER_PASSWORD, required = false) String masterPassword
+    ) {
+        connectionService.verifyMasterPassword(masterPassword);
 
-        Connector connector = connectorService.getById(id);
-
-        connectorService.updateRequestData(connector, connectorResource.getRequestData());
+        connectorService.updateRequestData(id, requiredData);
 
         return ResponseEntity.ok().build();
     }

@@ -201,11 +201,12 @@ public class ConnectorServiceImp implements ConnectorService {
 
     @Override
     @Transactional
-    public void updateRequestData(Connector connector, Map<String, String> newRequestDataMap) {
-        List<RequestData> existingList = connector.getRequestData();
+    public void updateRequestData(Integer id, Map<String, String> newRequestDataMap) {
+
+        Connector connector = getById(id);
 
         // Create a map of existing RequestData for quick lookup by field
-        Map<String, RequestData> existingMap = existingList.stream()
+        Map<String, RequestData> existingMap = connector.getRequestData().stream()
                 .collect(Collectors.toMap(RequestData::getField, rd -> rd));
 
         // A map of  RequiredData from a invoker to check an availability and visibility of requestData
@@ -231,7 +232,7 @@ public class ConnectorServiceImp implements ConnectorService {
                 existingMap.remove(field); // Mark as processed
             } else {
                 RequiredData requiredData = Optional.ofNullable(requiredDataMapFromInvoker.get(field))
-                        .orElseThrow(() -> new GeneralServiceException(ExceptionConstant.REQUIRED_DATA_NOT_FOUND, ExceptionMessages.REQUIRED_DAT_NOT_FOUND.formatted(field)));
+                        .orElseThrow(() -> new GeneralServiceException(ExceptionConstant.REQUIRED_DATA_NOT_FOUND, ExceptionMessages.REQUIRED_DATA_NOT_FOUND.formatted(field)));
 
                 // Add new entry
                 RequestData newData = new RequestData();
