@@ -8,9 +8,9 @@ src/main/resources/templates/**
 assistant/
 src/main/resources/application.yml
 src/main/resources/upload-dir
-src/main/resources/invoker
-src/main/resources/support-files
-src/main/resources/logs
+src/main/resources/invoker/**
+src/main/resources/support-files/**
+src/main/resources/logs/**
 src/main/resources/updating-backup
 src/main/resources/backup
 src/test/
