@@ -175,7 +175,7 @@ public class ConnectorController {
             @RequestBody Map<String, String> requiredData,
             @RequestHeader(name = HeaderConstants.MASTER_PASSWORD, required = false) String masterPassword
     ) {
-        connectionService.verifyMasterPassword(masterPassword);
+        connectorService.verifyMasterPassword(masterPassword);
 
         connectorService.updateRequestData(id, requiredData);
 
@@ -190,7 +190,7 @@ public class ConnectorController {
     public ResponseEntity<?> verifyMasterPassword(
             @RequestHeader(name = HeaderConstants.MASTER_PASSWORD, required = false) String masterPassword) {
 
-        connectionService.verifyMasterPassword(masterPassword);
+        connectorService.verifyMasterPassword(masterPassword);
         return ResponseEntity.ok().build();
     }
 

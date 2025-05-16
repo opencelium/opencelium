@@ -33,7 +33,6 @@ import com.becon.opencelium.backend.database.mysql.repository.ConnectionReposito
 import com.becon.opencelium.backend.database.mysql.repository.MaskingRuleRepository;
 import com.becon.opencelium.backend.enums.Action;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
-import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
@@ -43,7 +42,6 @@ import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.becon.opencelium.backend.version_manager.EntityUpdater;
 import com.becon.opencelium.backend.version_manager.EntityVersionManager;
-import com.becon.opencelium.backend.version_manager.Wrapper;
 import com.becon.opencelium.backend.version_manager.backup.MongoDbBackupService;
 import com.becon.opencelium.backend.version_manager.backup.MysqlBackupService;
 import com.becon.opencelium.backend.version_manager.base.Utils;
@@ -54,8 +52,6 @@ import net.minidev.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,9 +65,6 @@ import java.util.stream.Collectors;
 @Service
 public class ConnectionServiceImp implements ConnectionService {
     private static final Logger log = LoggerFactory.getLogger(ConnectionServiceImp.class);
-
-    @Value("${" + AppYamlPath.CONNECTOR_MASTER_PASSWORD + "}")
-    private String masterPassword;
 
     private final ConnectionRepository connectionRepository;
     private final ConnectorService connectorService;
@@ -571,31 +564,6 @@ public class ConnectionServiceImp implements ConnectionService {
             }
         }
         connectionRepository.updateVersion(ocProps.getVersion());
-    }
-
-    @Override
-    public void verifyMasterPassword(String masterPassword) {
-        if (Objects.isNull(masterPassword)) {
-            throw new GeneralServiceException(
-                    HttpStatus.BAD_REQUEST,
-                    ExceptionConstant.MASTER_PASSWORD_IS_MISSING_IN_HEADER,
-                    ExceptionMessages.MASTER_PASSWORD_IS_MISSING_IN_HEADER
-            );
-        }
-        if (Objects.isNull(this.masterPassword)) {
-            throw new GeneralServiceException(
-                    HttpStatus.BAD_REQUEST,
-                    ExceptionConstant.MASTER_PASSWORD_NOT_EXIST,
-                    ExceptionMessages.MASTER_PASSWORD_NOT_EXIST
-            );
-        }
-        if (!Objects.equals(this.masterPassword, masterPassword)) {
-            throw new GeneralServiceException(
-                    HttpStatus.BAD_REQUEST,
-                    ExceptionConstant.MASTER_PASSWORD_WRONG,
-                    ExceptionMessages.MASTER_PASSWORD_WRONG
-            );
-        }
     }
 
     // --------------------------------------------------------------------------------------------------------------------------------------------------------

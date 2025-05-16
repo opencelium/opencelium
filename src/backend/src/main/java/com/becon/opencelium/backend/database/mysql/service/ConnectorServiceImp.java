@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
+import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.constant.ExceptionConstant;
 import com.becon.opencelium.backend.constant.ExceptionMessages;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
@@ -33,6 +34,8 @@ import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.utility.crypto.Encoder;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +44,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class ConnectorServiceImp implements ConnectorService {
+
+    @Value("${" + AppYamlPath.CONNECTOR_MASTER_PASSWORD + "}")
+    private String masterPassword;
 
     private final ConnectorRepository connectorRepository;
     private final InvokerService invokerService;
@@ -200,56 +206,53 @@ public class ConnectorServiceImp implements ConnectorService {
     }
 
     @Override
-    @Transactional
-    public void updateRequestData(Integer id, Map<String, String> newRequestDataMap) {
+    public void updateRequestData(Integer connectorId, Map<String, String> newRequestDataMap) {
 
-        Connector connector = getById(id);
+        Connector connector = getById(connectorId);
 
         // Create a map of existing RequestData for quick lookup by field
         Map<String, RequestData> existingMap = connector.getRequestData().stream()
                 .collect(Collectors.toMap(RequestData::getField, rd -> rd));
 
-        // A map of  RequiredData from a invoker to check an availability and visibility of requestData
-        Map<String, RequiredData> requiredDataMapFromInvoker = invokerService.findByName(connector.getInvoker())
-                .getRequiredData()
-                .stream()
-                .collect(Collectors.toMap(RequiredData::getName, rd -> rd));
-
-        // Prepare new list to assign to connector
-        List<RequestData> updatedList = new ArrayList<>();
-
-        // Handle additions and updates
+        // Handle updates
         for (Map.Entry<String, String> entry : newRequestDataMap.entrySet()) {
             String field = entry.getKey();
             String value = entry.getValue();
 
             RequestData existing = existingMap.get(field);
-            if (existing != null) {
-                // Update existing if value changed
-                existing.setValue(value);
-
-                updatedList.add(existing);
-                existingMap.remove(field); // Mark as processed
-            } else {
-                RequiredData requiredData = Optional.ofNullable(requiredDataMapFromInvoker.get(field))
-                        .orElseThrow(() -> new GeneralServiceException(ExceptionConstant.REQUIRED_DATA_NOT_FOUND, ExceptionMessages.REQUIRED_DATA_NOT_FOUND.formatted(field)));
-
-                // Add new entry
-                RequestData newData = new RequestData();
-                newData.setField(field);
-                newData.setValue(value);
-                newData.setVisibility(requiredData.getVisibility());
-                newData.setConnector(connector);
-                updatedList.add(newData);
+            if (existing == null) {
+                throw new GeneralServiceException(ExceptionConstant.REQUIRED_DATA_NOT_FOUND, ExceptionMessages.REQUIRED_DATA_NOT_FOUND.formatted(field));
             }
+
+            existing.setValue(value);
         }
 
-        // Anything left in existingMap was not in new data → remove it
-        for (RequestData obsolete : existingMap.values()) {
-            requestDataService.deleteById(obsolete.getId());
-        }
+        requestDataService.saveAll(connector.getRequestData());
+    }
 
-        requestDataService.saveAll(updatedList);
+    @Override
+    public void verifyMasterPassword(String masterPassword) {
+        if (Objects.isNull(masterPassword)) {
+            throw new GeneralServiceException(
+                    HttpStatus.BAD_REQUEST,
+                    ExceptionConstant.MASTER_PASSWORD_IS_MISSING_IN_HEADER,
+                    ExceptionMessages.MASTER_PASSWORD_IS_MISSING_IN_HEADER
+            );
+        }
+        if (Objects.isNull(this.masterPassword)) {
+            throw new GeneralServiceException(
+                    HttpStatus.BAD_REQUEST,
+                    ExceptionConstant.MASTER_PASSWORD_NOT_EXIST,
+                    ExceptionMessages.MASTER_PASSWORD_NOT_EXIST
+            );
+        }
+        if (!Objects.equals(this.masterPassword, masterPassword)) {
+            throw new GeneralServiceException(
+                    HttpStatus.BAD_REQUEST,
+                    ExceptionConstant.MASTER_PASSWORD_WRONG,
+                    ExceptionMessages.MASTER_PASSWORD_WRONG
+            );
+        }
     }
 
     private void addFieldIfNotExists(List<RequestData> requestData, RequiredData rqd) {
