@@ -16,17 +16,23 @@
 
 package com.becon.opencelium.backend.controller;
 
+import com.becon.opencelium.backend.commons.ThreadLocalSingleton;
+import com.becon.opencelium.backend.constant.ExceptionConstant;
+import com.becon.opencelium.backend.constant.ExceptionMessages;
+import com.becon.opencelium.backend.constant.HeaderConstants;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.exception.CommunicationFailedException;
 import com.becon.opencelium.backend.exception.ConnectorAlreadyExistsException;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
+import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
+import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -61,7 +67,7 @@ public class ConnectorController {
 
     public ConnectorController(
             @Qualifier("connectorServiceImp") ConnectorService connectorService,
-            @Qualifier("invokerServiceImp")InvokerService invokerService,
+            @Qualifier("invokerServiceImp") InvokerService invokerService,
             @Qualifier("connectionServiceImp") ConnectionService connectionService,
             Mapper<Connector, ConnectorResource> connectorResourceMapper
     ) {
@@ -145,22 +151,47 @@ public class ConnectorController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> update(@PathVariable int id, @RequestBody ConnectorResource connectorResource) {
-
-        if (!connectorService.existsById(id)) {
-            throw new ConnectorNotFoundException(id);
-        }
-
-        Connector connector = connectorService.findById(id).orElseThrow(() -> new ConnectorNotFoundException(id));
+    public ResponseEntity<ConnectorResource> update(@PathVariable Integer id, @RequestBody ConnectorResource connectorResource) {
+        Connector connector = connectorService.getById(id);
 
         if (connectorService.existByTitle(connectorResource.getTitle()) && !connector.getTitle().equals(connectorResource.getTitle())) {
             throw new ConnectorAlreadyExistsException(connectorResource.getTitle());
         }
         connectorResource.setConnectorId(id);
         Connector entity = connectorResourceMapper.toEntity(connectorResource);
-        connectorService.save(entity);
+        connectorService.update(connector, entity);
 
-        return ResponseEntity.ok().body(connectorResourceMapper.toDTO(entity));
+        return ResponseEntity.ok()
+                .body(connectorResourceMapper.toDTO(entity));
+    }
+
+    @Operation(summary = "Modifies connector's required data")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Connector's required data has been successfully modified"),
+    })
+    @PutMapping(path = "/{id}/required-data")
+    public ResponseEntity<ConnectorResource> updateRequiredData(
+            @PathVariable Integer id,
+            @RequestBody Map<String, String> requiredData,
+            @RequestHeader(name = HeaderConstants.MASTER_PASSWORD, required = false) String masterPassword
+    ) {
+        connectorService.verifyMasterPassword(masterPassword);
+
+        connectorService.updateRequestData(id, requiredData);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Verifies Master Password")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully verified")
+    })
+    @PutMapping(path = "/master-password/verify")
+    public ResponseEntity<?> verifyMasterPassword(
+            @RequestHeader(name = HeaderConstants.MASTER_PASSWORD, required = false) String masterPassword) {
+
+        connectorService.verifyMasterPassword(masterPassword);
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Deletes a connector in the system by providing connector ID")

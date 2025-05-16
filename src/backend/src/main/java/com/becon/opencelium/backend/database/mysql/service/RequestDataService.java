@@ -29,6 +29,8 @@ public interface RequestDataService {
     List<RequestData> saveAll(List<RequestData> requestData);
     void prepare();
 
+    void deleteById(int id);
+
 //    List<RequestData> toEntity(Map<String, String> resource);
 //    Map<String, String> toResource(List<RequestData>  requestData);
 }

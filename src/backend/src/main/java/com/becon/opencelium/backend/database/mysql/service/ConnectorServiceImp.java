@@ -16,10 +16,14 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
+import com.becon.opencelium.backend.constant.AppYamlPath;
+import com.becon.opencelium.backend.constant.ExceptionConstant;
+import com.becon.opencelium.backend.constant.ExceptionMessages;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.RequestData;
 import com.becon.opencelium.backend.database.mysql.repository.ConnectorRepository;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
+import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.execution.rdata.RequiredDataService;
 import com.becon.opencelium.backend.execution.rdata.RequiredDataServiceImp;
 import com.becon.opencelium.backend.invoker.InvokerRequestBuilder;
@@ -28,16 +32,21 @@ import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.utility.crypto.Encoder;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ConnectorServiceImp implements ConnectorService {
+
+    @Value("${" + AppYamlPath.CONNECTOR_MASTER_PASSWORD + "}")
+    private String masterPassword;
 
     private final ConnectorRepository connectorRepository;
     private final InvokerService invokerService;
@@ -91,7 +100,7 @@ public class ConnectorServiceImp implements ConnectorService {
     public void saveAll(List<Connector> connectors) {
         connectors.forEach(this::encrypt);
         connectors.forEach(c -> {
-            c.getRequestData().forEach(r->r.setConnector(c));
+            c.getRequestData().forEach(r -> r.setConnector(c));
             requestDataService.saveAll(c.getRequestData());
             c.setRequestData(new ArrayList<>());
         });
@@ -131,8 +140,6 @@ public class ConnectorServiceImp implements ConnectorService {
         }
         return list;
     }
-
-
 
     @Override
     public List<Connector> findAll() {
@@ -189,6 +196,63 @@ public class ConnectorServiceImp implements ConnectorService {
             rqsd.setValue(value);
         });
         return requestData;
+    }
+
+    @Override
+    public void update(Connector connector, Connector newConnector) {
+        newConnector.setRequestData(connector.getRequestData());
+        newConnector.setId(connector.getId());
+        connectorRepository.save(newConnector);
+    }
+
+    @Override
+    public void updateRequestData(Integer connectorId, Map<String, String> newRequestDataMap) {
+
+        Connector connector = getById(connectorId);
+
+        // Create a map of existing RequestData for quick lookup by field
+        Map<String, RequestData> existingMap = connector.getRequestData().stream()
+                .collect(Collectors.toMap(RequestData::getField, rd -> rd));
+
+        // Handle updates
+        for (Map.Entry<String, String> entry : newRequestDataMap.entrySet()) {
+            String field = entry.getKey();
+            String value = entry.getValue();
+
+            RequestData existing = existingMap.get(field);
+            if (existing == null) {
+                throw new GeneralServiceException(ExceptionConstant.REQUIRED_DATA_NOT_FOUND, ExceptionMessages.REQUIRED_DATA_NOT_FOUND.formatted(field));
+            }
+
+            existing.setValue(value);
+        }
+
+        requestDataService.saveAll(connector.getRequestData());
+    }
+
+    @Override
+    public void verifyMasterPassword(String masterPassword) {
+        if (Objects.isNull(masterPassword)) {
+            throw new GeneralServiceException(
+                    HttpStatus.BAD_REQUEST,
+                    ExceptionConstant.MASTER_PASSWORD_IS_MISSING_IN_HEADER,
+                    ExceptionMessages.MASTER_PASSWORD_IS_MISSING_IN_HEADER
+            );
+        }
+        if (Objects.isNull(this.masterPassword)) {
+            throw new GeneralServiceException(
+                    HttpStatus.BAD_REQUEST,
+                    ExceptionConstant.MASTER_PASSWORD_NOT_EXIST,
+                    ExceptionMessages.MASTER_PASSWORD_NOT_EXIST
+            );
+        }
+        if (!Objects.equals(this.masterPassword, masterPassword)) {
+            throw new GeneralServiceException(
+                    HttpStatus.BAD_REQUEST,
+                    ExceptionConstant.MASTER_PASSWORD_WRONG,
+                    ExceptionMessages.MASTER_PASSWORD_WRONG
+            );
+        }
     }
 
     private void addFieldIfNotExists(List<RequestData> requestData, RequiredData rqd) {

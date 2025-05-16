@@ -102,4 +102,9 @@ public class RequestDataServiceImp implements RequestDataService {
             }
         }
     }
+
+    @Override
+    public void deleteById(int id) {
+        requestDataRepository.deleteById(id);
+    }
 }
