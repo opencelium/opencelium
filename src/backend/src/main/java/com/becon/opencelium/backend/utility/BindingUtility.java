@@ -49,7 +49,7 @@ public class BindingUtility {
                         method.getRequest().setEndpoint(method.getRequest().getEndpoint().replace("{%" + fb.getId() + "%}", getRefOfFBForPath(fb.getFrom())));
                     }
                     if (method.getRequest().getHeader() != null) {
-                                for (Map.Entry<String, String> entry : method.getRequest().getHeader().entrySet()) {
+                        for (Map.Entry<String, String> entry : method.getRequest().getHeader().entrySet()) {
                             if (entry.getValue().equals("#{%" + fb.getId() + "%}")) {
                                 entry.setValue(getRefOfFBForHeader(fb.getFrom()));
                                 break;
@@ -309,7 +309,12 @@ public class BindingUtility {
                         if (fieldPaths.isEmpty()) {
                             map.put(ocValue, putIdToBody(map.get(ocValue), id));
                         } else {
-                            map.put(ocAttributes, putIdToBody(map.get(ocAttributes), id));
+                            if (map.get(ocAttributes) instanceof Map<?, ?>) {
+                                Map<String, Object> ocAttrObj = (Map<String, Object>) map.get(ocAttributes);
+                                String attrName = fieldPaths.get(0).substring(1);
+                                ocAttrObj.put(attrName, putIdToBody(ocAttrObj.get(attrName), id));
+                                map.put(ocAttributes, ocAttrObj);
+                            }
                         }
                         return map;
                     } else {
