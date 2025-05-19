@@ -262,7 +262,8 @@ public class ConnectionController {
         });
 
         // create temporary connection, will be deleted after execution finished
-        connectionOldDTO.setTitle("!*test_connection_" + System.currentTimeMillis() + "_" + connectionOldDTO.getTitle());
+        String postfix = System.currentTimeMillis() + "_" + connectionOldDTO.getTitle();
+        connectionOldDTO.setTitle("!*test_connection_" + postfix);
         ConnectionDTO connectionDTO = connectionOldDTOMapper.toEntity(connectionOldDTO);
         Connection connection = connectionMapper.toEntity(connectionDTO);
         ConnectionMng connectionMng = connectionMngMapper.toEntity(connectionDTO);
@@ -272,7 +273,7 @@ public class ConnectionController {
         // create temporary scheduler for above connection, will be deleted after execution finished
         SchedulerRequestResource resource = new SchedulerRequestResource();
         resource.setConnectionId(connectionId);
-        resource.setTitle("!*test_schedule_" + System.currentTimeMillis());
+        resource.setTitle("!*test_schedule_" + postfix);
         resource.setStatus(true);
         resource.setCronExp(Constant.NEVER_TRIGGERED_CRON);
         resource.setDebugMode(true);
@@ -752,6 +753,9 @@ public class ConnectionController {
     })
     @PostMapping(path = "/execute/{connectionId}/support-file")
     public ResponseEntity<?> executeWithSupportFile(@PathVariable long connectionId, @RequestBody List<RuleDTO> ruleDTOs) {
+        // check if connection is being executed currently
+        schedulerService.throwIfConnectionIsBeingExecuted(connectionId);
+
         // create temporary scheduler, will be deleted after execution finished
         SchedulerRequestResource resource = new SchedulerRequestResource();
         resource.setConnectionId(connectionId);
