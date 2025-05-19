@@ -32,6 +32,7 @@ const CheckConnectionComponent: FC =
             const logoutProps: LogoutProps = {wasAccessDenied: true, message: ResponseMessages.UNSUPPORTED_HEADER_AUTH_TYPE};
             dispatch(logout(logoutProps));
         }
+        console.log(`CheckConnectionComponent: ${isConnected}`)
         return (
             <Dialog
                 actions={[]}

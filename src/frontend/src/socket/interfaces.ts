@@ -5,7 +5,7 @@ import {ConnectionSocketLog} from "@root/requests/models/ConnectionLog";
 import {Client} from "@stomp/stompjs";
 
 export interface SocketDataContextType {
-    isConnected: boolean;
+    isConnected: any;
     authValid: boolean;
     currentSchedules: ModelCurrentSchedule[];
     hasNewSupportFile: boolean,
