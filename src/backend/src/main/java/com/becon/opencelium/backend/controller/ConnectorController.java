@@ -186,7 +186,7 @@ public class ConnectorController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully verified")
     })
-    @PutMapping(path = "/master-password/status")
+    @GetMapping(path = "/master-password/status")
     public ResponseEntity<?> verifyMasterPassword(
             @RequestHeader(name = HeaderConstants.MASTER_PASSWORD, required = false) String masterPassword) {
 
