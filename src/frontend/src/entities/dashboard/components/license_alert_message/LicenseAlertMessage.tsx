@@ -1,22 +1,16 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import {Alert} from "reactstrap";
 import {Link} from "react-router-dom";
 import Subscription from "@entity/license_management/classes/Subscription";
-import {getCurrentSubscription} from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
-import {useAppDispatch} from "@application/utils/store";
-import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
+import {useSocketData} from "../../../../socket/SocketDataContext";
 
 const LicenseAlertMessage = () => {
-    const dispatch = useAppDispatch();
-    const {currentSubscription, gettingCurrentSubscription} = Subscription.getReduxState();
+    const {currentSubscription} = useSocketData();
     const hasApiLimit = Subscription.hasReachedLimit(currentSubscription);
-    useEffect(() => {
-        dispatch(getCurrentSubscription())
-    }, [])
-    if (!currentSubscription) {
-        if (gettingCurrentSubscription !== API_REQUEST_STATE.FINISH) {
-            return null;
-        }
+    if (currentSubscription === undefined) {
+        return null;
+    }
+    if (currentSubscription === null) {
         return (
             <Alert color="danger" style={{marginTop: 20, marginBottom: 0}}>
                 {"Your OpenCelium is currently not licensed. Please, click "}

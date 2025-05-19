@@ -14,7 +14,9 @@
  */
 
 import ConnectionInterpolations from './connection';
+import SupportFileInterpolations from './support_file';
 
 export default {
     ...ConnectionInterpolations,
+    ...SupportFileInterpolations,
 }

@@ -17,6 +17,7 @@ import ActionCreators from "../../redux_toolkit/action_creators";
 import {getAndUpdateConnectionTitle, getAndUpdateConnectionDescription} from "@root/redux_toolkit/action_creators/ConnectionCreators";
 import { syncInvokers } from "@entity/connection/redux_toolkit/slices/EditorSlice";
 import { requestRemoteApi } from "@entity/connection/redux_toolkit/action_creators/EditorCreators";
+import {notifyAboutNewSupportFile} from "@root/redux_toolkit/slices/SupportFileSlice";
 
 const {
     testConnection, addConnection,
@@ -42,6 +43,7 @@ export default {
         [deleteConnectionById.fulfilled.type]: "The connection <1><0>{{title}}</0></1> was successfully removed",
         [deleteConnectionsById.fulfilled.type]: "The selected connections were successfully removed",
         [syncInvokers.type]: "Synchronized successfully",
+        [notifyAboutNewSupportFile.type]: "The new <1><0>{{title}}</0></1> was generated.",
         [requestRemoteApi.fulfilled.type]: "The test request was successfully fulfilled",
     },
     rejected: {/*

@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {FC, useEffect, useState} from 'react';
+import React, {FC, useEffect, useRef, useState} from 'react';
 import {withTheme} from 'styled-components';
 import { ProgressBarElementProps } from './interfaces';
 import {
@@ -23,10 +23,6 @@ import {
     ProgressBarIteratorStyled,
     ProgressBarSectionStyled, ProgressBarStyled, ProgressBarTitleStyled, ProgressBarToStyled
 } from './styles';
-import {shuffle} from "@application/utils/utils";
-import Button from "@basic_components/buttons/Button";
-import {PermissionTooltipButton} from "@app_component/base/button/PermissionButton";
-import {ColorTheme} from "@style/Theme";
 import {TextSize} from "@app_component/base/text/interfaces";
 import {TooltipButton} from "@app_component/base/tooltip_button/TooltipButton";
 import {useAppDispatch} from "@application/utils/store";
@@ -36,59 +32,33 @@ const ProgressBarElement: FC<ProgressBarElementProps> =
     ({
         schedule,
         iterator,
+        theme,
     }) => {
     const dispatch = useAppDispatch();
-    const calculateStep = () => {
-        let {avgDuration} = schedule;
-        if(avgDuration === 0){
-            avgDuration = 7000;
-        }
-        avgDuration = avgDuration / 1000;
-        let result = [];
-        const localSteps = [[400, 600], [500, 500], [1000, 0]];
-        for(let i = 0; i < avgDuration; i++){
-            let index = parseInt(`${Math.random() * (0 - 3) + 3}`);
-            result.push(localSteps[index][0]);
-            if(localSteps[index][1] !== 0) {
-                result.push(localSteps[index][1]);
-            }
-        }
-        return shuffle(result);
-    }
-    const calculateProgression = () => {
-        const stepsAmount = steps.length;
-        let result = [];
-        let progressIterator = parseInt(`${95 / stepsAmount}`);
-        let sum = 0;
-        for(let i = 0; i < stepsAmount; i++){
-            let value = sum >= 95 ? 1 : progressIterator * parseInt(`${Math.random() * (1 - 3) + 3}`);
-            if(sum + value > 100){
-                value = 100 - sum;
-            }
-            result.push(value);
-            sum += value;
-        }
-        return result;
-    }
     const [progress, setProgress] = useState(0);
-    const [steps] = useState(calculateStep());
-    const [progression] = useState(calculateProgression());
-    const [localIterator, setLocalIterator] = useState(0);
-    const simulateProgress = () => {
-        setTimeout(() => {
-            if (progress < 100) {
-                if(progression[localIterator] + progress > progress) {
-                    setProgress(progression[localIterator] + progress)
-                }
-            }
-            setLocalIterator(localIterator + 1);
-            simulateProgress();
-        }, steps[localIterator]);
-    }
+    const targetProgress = 98;
+
     useEffect(() => {
-        simulateProgress();
-    }, [])
-    return (
+        const intervalTime = 100;
+        let totalSeconds = schedule.avgDuration || 7000;
+        totalSeconds = totalSeconds / 1000;
+        const increment = (targetProgress / totalSeconds) * (intervalTime / 1000);
+
+        const interval = setInterval(() => {
+            setProgress(prev => {
+                const next = prev + increment;
+                if (next >= targetProgress) {
+                    clearInterval(interval);
+                    return targetProgress;
+                }
+                return next;
+            });
+        }, intervalTime);
+
+        return () => clearInterval(interval);
+    }, []);
+
+        return (
         <ProgressBarElementStyled >
             <ProgressBarIteratorStyled>{iterator}.</ProgressBarIteratorStyled>
             <ProgressBarSectionStyled>
@@ -101,10 +71,8 @@ const ProgressBarElement: FC<ProgressBarElementProps> =
                         position: 'relative'
                     }}>
                         <ProgressBarStyled
-                            type="linear"
-                            mode="determinate"
                             value={progress}
-                            buffer={100}
+                            color={theme?.progressBarElement?.background}
                         />
                         <ProgressBarTitleStyled>{schedule.title}</ProgressBarTitleStyled>
                     </div>

@@ -4,4 +4,4 @@ export interface SupportFileObject {
     path: string,
 }
 
-export type SupportFileType = 'success' | 'error';
+export type SupportFileType = 's' | 'f';

@@ -25,10 +25,18 @@ import {App} from "@app_component/App";
 
 import "@style/css/react_grid_layout.css";
 import "@style/css/react_crop.css";
+import SocketDevTools from "./socket/dev-tools/SocketDevTools";
+import LogsPanel from "@app_component/connection_logs/LogsPanel";
+import {SocketDataProvider} from "./socket/SocketDataContext";
+import {SocketProvider} from "./socket/SocketContext";
 
 ReactDOM.render(
     <Provider store={store}>
-        <App/>
+        <SocketProvider>
+            <SocketDataProvider>
+                <App/>
+            </SocketDataProvider>
+        </SocketProvider>
     </Provider>,
     document.getElementById("root"));
 

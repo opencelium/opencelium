@@ -149,7 +149,7 @@ export class Connector extends HookStateClass implements IConnector{
         return super.getInputTextarea<IConnectorTextarea, InputTextareaProps>(data);
     }
 
-    getCredentials({error}: InputTextProps): any[]{
+    getCredentials({error}: InputTextProps, hasMasking: boolean): any[]{
         let credentials: any[] = [];
         if(this.invokerSelect) {
             const keys = Object.keys(this.invokerSelect.data);
@@ -167,6 +167,7 @@ export class Connector extends HookStateClass implements IConnector{
                 }
                 credentials.push(<InputText
                     id={`input_${credentialName}`}
+                    isVisibilityTrue={hasMasking}
                     readOnly={this._readOnly}
                     error={errorMessage}
                     key={credentialName}
@@ -177,7 +178,7 @@ export class Connector extends HookStateClass implements IConnector{
                     // @ts-ignore
                     onChange={(e:ChangeEvent<HTMLInputElement>) => {this.validations[`_${keys[i]}`] = ''; this[`updateRequestData`](this, {...this.requestData, [credentialName]: e.target.value})}}
                     // @ts-ignore
-                    value={this.requestData && this.requestData[credentialName] !== undefined ? this.requestData[credentialName] : this.invokerSelect.data[key]}
+                    value={hasMasking ? '*******************************' : this.requestData && this.requestData[credentialName] !== undefined ? this.requestData[credentialName] : this.invokerSelect.data[key]}
                 />);
             })
         }

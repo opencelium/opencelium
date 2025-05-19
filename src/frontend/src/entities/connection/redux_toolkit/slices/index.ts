@@ -19,6 +19,7 @@ import modalConnectionReducer from './ModalConnectionSlice';
 import graphQLReducer from './GraphQLSlice';
 import ruleReducer from './RuleSlice';
 import supportFileReducer from './SupportFileSlice';
+import connectionLogReducer from './ConnectionLogSlice';
 
 export default {
     connectionReducer,
@@ -27,5 +28,6 @@ export default {
     graphQLReducer,
     ruleReducer,
     supportFileReducer,
+    connectionLogReducer,
 }
 

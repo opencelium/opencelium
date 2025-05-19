@@ -30,6 +30,7 @@ import {checkMongoDB} from "@entity/external_application/redux_toolkit/action_cr
 import { Category } from '@entity/category/classes/Category';
 import {getAllMetaConnections} from "@root/redux_toolkit/action_creators/ConnectionCreators";
 import { Connection } from '@entity/connection/classes/Connection';
+import {getCurrentSubscription} from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
 
 const ScheduleList: FC<ScheduleListProps> = permission(SchedulePermissions.READ)(({hasTopBar, isReadonly, hasTitle, hasNotAlert}) => {
     const dispatch = useAppDispatch();
@@ -52,6 +53,7 @@ const ScheduleList: FC<ScheduleListProps> = permission(SchedulePermissions.READ)
         dispatch(getAllMetaConnections());
         dispatch(getAllSchedules());
         dispatch(checkMongoDB());
+        dispatch(getCurrentSubscription());
     }, [])
     useEffect(() => {
         setShouldBeUpdated(!shouldBeUpdated);

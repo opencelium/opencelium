@@ -113,7 +113,7 @@ const getConfig = ({isBuild, envVar}) => {
                                 import: true,
                                 modules: {
                                     exportLocalsConvention: "camelCase",
-                                    auto: (resourcePath) => resourcePath.endsWith("theme.css"),
+                                    auto: true,
                                     localIdentName: '[path][name]__[local]--[hash:base64:5]',
                                 },
                             }

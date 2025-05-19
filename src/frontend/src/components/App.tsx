@@ -31,6 +31,8 @@ import {LocalStorage} from "@application/classes/LocalStorage";
 import {getLogoName} from "@application/redux_toolkit/action_creators/ApplicationCreators";
 import {isArray} from "@application/utils/utils";
 import {Loading} from "@app_component/base/loading/Loading";
+import {SocketProvider} from "../socket/SocketContext";
+import {SocketDataProvider} from "../socket/SocketDataContext";
 
 
 const App = ({}) => {
@@ -90,12 +92,16 @@ const App = ({}) => {
         return <div style={{marginTop: 200}}><Loading/></div>
     }
     return (
-        <ThemeProvider theme={appTheme}>
-            <BrowserRouter>
-                <Global/>
-                {getRoutes()}
-            </BrowserRouter>
-        </ThemeProvider>
+        <SocketProvider>
+            <SocketDataProvider>
+                <ThemeProvider theme={appTheme}>
+                    <BrowserRouter>
+                        <Global/>
+                        {getRoutes()}
+                    </BrowserRouter>
+                </ThemeProvider>
+            </SocketDataProvider>
+        </SocketProvider>
     )
 }
 

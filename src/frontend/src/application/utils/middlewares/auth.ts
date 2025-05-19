@@ -56,7 +56,6 @@ export const authMiddleware: Middleware<{}, RootState> = storeApi => next => act
     if (login.fulfilled.type === action.type || setLoginInfo.type === action.type) {
         const storage = LocalStorage.getStorage(true);
         storage.set('authUser', action.payload);
-        dispatch(checkConnection());
         dispatch(setQrCode(''));
         dispatch(setSecretKey(''));
         setTimeout(() => dispatch(checkMongoDB()), 1000);

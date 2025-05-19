@@ -13,62 +13,29 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {FC, Suspense, useEffect, useState} from 'react';
-import {useAppDispatch} from "@application/utils/store";
-import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
+import React, {FC, useEffect} from 'react';
 import {LogoutProps} from "@application/interfaces/IAuth";
 import {logout} from "@application/redux_toolkit/slices/AuthSlice";
 import Dialog from "@app_component/base/dialog/Dialog";
 import LoginFormInputs from "@app_component/default_pages/login/LoginFormInputs";
 import {ResponseMessages} from "@application/requests/interfaces/IResponse";
-import { Auth } from '@application/classes/Auth';
-import CheckConnection from "@application/classes/CheckConnection";
-import {checkConnection} from "@application/redux_toolkit/action_creators/CheckConnectionCreators";
+import {useAppDispatch} from "@application/utils/store";
+import {useSocketData} from "../../../socket/SocketDataContext";
 
 const CheckConnectionComponent: FC =
     ({
          children,
-     }) => {
+    }) => {
         const dispatch = useAppDispatch();
-        const {isAuth} = Auth.getReduxState();
-        const {checkingConnection} = CheckConnection.getReduxState();
-        const [timerId, setTimerId] = useState(null);
+        const {isConnected, authValid} = useSocketData();
         const exit = () => {
-            clear();
             const logoutProps: LogoutProps = {wasAccessDenied: true, message: ResponseMessages.UNSUPPORTED_HEADER_AUTH_TYPE};
             dispatch(logout(logoutProps));
         }
-        const clear = () => {
-            if (timerId) {
-                clearInterval(timerId);
-                setTimerId(null);
-            }
-        }
-        useEffect(() => {
-            return () => {
-                clear();
-            }
-        }, [timerId])
-        useEffect(() => {
-            if(!isAuth){
-                clear();
-            }
-        }, [isAuth])
-        useEffect(() => {
-            if(checkingConnection === API_REQUEST_STATE.ERROR && timerId){
-                clear();
-            }
-            if(checkingConnection !== API_REQUEST_STATE.ERROR && !timerId){
-                const id = setInterval(() => {
-                    dispatch(checkConnection());
-                }, 5000);
-                setTimerId(id);
-            }
-        }, [checkingConnection])
         return (
             <Dialog
                 actions={[]}
-                active={checkingConnection === API_REQUEST_STATE.ERROR && timerId === null}
+                active={!authValid || !isConnected}
                 toggle={exit}
                 title={''}
                 hasNoBody={true}

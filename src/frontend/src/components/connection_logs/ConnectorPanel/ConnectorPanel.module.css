@@ -1,0 +1,16 @@
+.connectorPanel:not(:last-child) {
+	margin-bottom: 10px;
+}
+
+.connectorPanelTitle {
+	margin: 0 0 10px;
+}
+
+.traceItemContainer {
+	padding-right: 5px;
+	border: 1px solid #ECDCE6;
+}
+
+.traceItemContainer:not(:last-child) {
+	border-bottom: none;
+}

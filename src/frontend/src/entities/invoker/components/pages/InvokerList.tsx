@@ -23,11 +23,21 @@ import {InvokerListProps} from "./interfaces";
 import Invokers from "../../collections/Invokers";
 import {Invoker} from "../../classes/Invoker";
 import { InvokerPermissions } from '../../constants';
+import {mockSocket} from "../../../../socket/MockOpenceliumSocket";
 
 const InvokerList: FC<InvokerListProps> = permission(InvokerPermissions.READ)(({}) => {
     const dispatch = useAppDispatch();
     const {gettingInvokers, invokers, deletingInvokersById, uploadingInvokerImage} = Invoker.getReduxState();
     const [shouldBeUpdated, setShouldBeUpdated] = useState(false);
+
+    useEffect(() => {
+        mockSocket.emit("connect");
+        mockSocket.emit("auth-status", true);
+        mockSocket.emit("job-status", [
+            { id: "1", name: "Test Job", status: "running" },
+        ]);
+        mockSocket.emit("api-log", "GET /api/test - 200 OK");
+    }, []);
     useEffect(() => {
         dispatch(getAllInvokers());
     }, [])

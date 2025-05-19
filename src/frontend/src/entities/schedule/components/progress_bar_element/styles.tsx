@@ -13,10 +13,10 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ProgressBar from 'react-toolbox/lib/progress_bar';
 import styled from "styled-components";
 import chroma from "chroma-js";
 import { ITheme } from '@style/Theme';
+import {Progress} from "reactstrap";
 
 const ProgressBarElementStyled = styled.div`
     height: 33px;
@@ -84,19 +84,8 @@ const ProgressBarToStyled = styled.div`
     }
 `;
 
-const ProgressBarStyled = styled(ProgressBar)`
-    height: 33px !important;
-    border-radius: 0.25rem;
-    float: left;
-    &> div{
-        & span:first-child{
-            background-color: ${({theme}: {theme: ITheme}) => theme?.progressBarElement?.background ? chroma(theme.progressBarElement.background).alpha(0.4).toString() : '#c6cbe9'};
-            background-image: none;
-        }
-        & span:last-child{
-            background-color: ${({theme}: {theme: ITheme}) => theme?.progressBarElement?.background || '#3f51b5'};
-        }
-    }
+const ProgressBarStyled = styled(Progress)`
+    height: 33px;
 `;
 
 export {

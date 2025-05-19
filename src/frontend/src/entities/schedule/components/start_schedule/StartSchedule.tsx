@@ -6,11 +6,12 @@ import {TextSize} from "@app_component/base/text/interfaces";
 import {useAppDispatch} from "@application/utils/store";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {getCurrentSubscription} from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
+import currentSubscription from "@entity/license_management/components/subscriptions/CurrentSubscription";
 
 const StartSchedule = ({entity, scheduleModel, componentPermission}: any) => {
     const dispatch = useAppDispatch();
-    const {currentSubscriptionOnlyForSchedules} = Subscription.getReduxState();
-    const isDisabled = Subscription.hasReachedLimit(currentSubscriptionOnlyForSchedules);
+    const {currentSubscription} = Subscription.getReduxState();
+    const isDisabled = Subscription.hasReachedLimit(currentSubscription);
     return (
         <PermissionTooltipButton
             target={`start_entity_${entity.id.toString()}`}

@@ -54,7 +54,9 @@ export const supportFileSlice = createSlice({
     reducers: {
         clearSupportFileResponses: (state) => {
             state.supportFileResponses = [];
-        }
+        },
+        notifyAboutNewSupportFile:  (state) => {
+        },
     },
     extraReducers: {
         [downloadSupportFile.pending.type]: (state) => {
@@ -131,7 +133,7 @@ export const supportFileSlice = createSlice({
 })
 
 export const {
-    clearSupportFileResponses,
+    clearSupportFileResponses,notifyAboutNewSupportFile
 } = supportFileSlice.actions;
 
 export default supportFileSlice.reducer;

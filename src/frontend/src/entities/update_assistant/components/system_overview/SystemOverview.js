@@ -20,7 +20,7 @@ import { Row, Col, Container } from "react-grid-system";
 import {ListComponent} from "@entity/connection/components/decorators/ListComponent";
 import styles from "@entity/connection/components/themes/default/content/update_assistant/main";
 import Translate from "@entity/connection/components/components/general/app/Translate";
-import theme from "react-toolbox/lib/input/theme.css";
+import theme from "@style/css/toolbox/input.module.css";
 import basicComponentsStyles from "@entity/connection/components/themes/default/general/basic_components";
 import {checkAllExternalApplications as fetchSystemRequirements} from "@entity/external_application/redux_toolkit/action_creators/ExternalApplicationCreators";
 import {checkApplicationBeforeUpdate as checkResetFiles} from "@entity/update_assistant/redux_toolkit/action_creators/UpdateAssistantCreators";

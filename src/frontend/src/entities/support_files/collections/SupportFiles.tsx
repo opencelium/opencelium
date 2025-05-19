@@ -52,8 +52,8 @@ class SupportFiles extends ListCollection<SupportFileResponseProps>{
             propertyKey: 'timestamp',
             width: '20%',
             getValue: (entity: SupportFileResponse) => {
-                const errorSupportFileInstance = new SupportFileResponseClass(entity, 'error');
-                const successSupportFileInstance = new SupportFileResponseClass(entity, 'success');
+                const errorSupportFileInstance = new SupportFileResponseClass(entity, 'f');
+                const successSupportFileInstance = new SupportFileResponseClass(entity, 's');
                 let timestamp = errorSupportFileInstance.supportFileObject?.timestamp || '-';
                 if (timestamp === '-') {
                     timestamp = successSupportFileInstance.supportFileObject?.timestamp || '-';
@@ -68,8 +68,8 @@ class SupportFiles extends ListCollection<SupportFileResponseProps>{
             width: '10%',
             replace: true,
             getValue: (entity: SupportFileResponse) => {
-                const errorSupportFileInstance = new SupportFileResponseClass(entity, 'error');
-                const successSupportFileInstance = new SupportFileResponseClass(entity, 'success');
+                const errorSupportFileInstance = new SupportFileResponseClass(entity, 'f');
+                const successSupportFileInstance = new SupportFileResponseClass(entity, 's');
                 let hasError = !!errorSupportFileInstance.supportFileObject;
                 let background = hasError ? '#f5c3c3' : '#c3f5c3';
                 return (

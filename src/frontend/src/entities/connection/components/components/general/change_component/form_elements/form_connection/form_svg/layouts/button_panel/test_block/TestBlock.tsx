@@ -14,11 +14,10 @@
  */
 
 import React from "react";
-import TestConnectionButton from "@change_component/form_elements/form_connection/form_svg/details/TestConnection";
 import { withTheme } from "styled-components";
-import { TestBlockProps } from "./interfaces";
 import { TestBlockStyled } from "./styles";
 import { useAppSelector } from "@application/utils/store";
+import TestConnectionButton from "@app_component/connection_logs/TestConnectionButton";
 
 const TestBlock = ({data, theme}:{data?: any, theme: any}) => {
   const { isButtonPanelOpened } = useAppSelector(
@@ -27,7 +26,7 @@ const TestBlock = ({data, theme}:{data?: any, theme: any}) => {
 
   return (
     <TestBlockStyled isButtonPanelOpened={isButtonPanelOpened}>
-      <TestConnectionButton data={data}/>
+      <TestConnectionButton validateLogic={data.validateLogic}/>
     </TestBlockStyled>
   );
 };

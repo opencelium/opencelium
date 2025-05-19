@@ -79,7 +79,9 @@ export class CNotification implements INotification{
             messageData.message = interpolations[interpolationName](this.type, dispatch, navigate, this.params);
         } else{
             if(this.params?.message){
-                if(i18next.exists(`${translationKey}.${this.params.message}`)){
+                if (this.actionType === '') {
+                    messageData.message = this.params.message;
+                } else if(i18next.exists(`${translationKey}.${this.params.message}`)){
                     messageData.message = `${translationKey}.${this.params.message}`;
                 } else if(i18next.exists(`${translationKey}.__DEFAULT__`)) {
                     messageData.message = `${translationKey}.__DEFAULT__`;

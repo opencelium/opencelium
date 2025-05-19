@@ -1,4 +1,5 @@
 {
+  "include": ["src"],
   "compilerOptions": {
     "baseUrl": "./",
     "outDir": "./dist/",
@@ -34,13 +35,11 @@
       "@decorators/*": ["/src/entities/connection/components/decorators/*"],
       "@epics/*": ["/src/entities/connection/components/epics/*"],
       "@validations/*": ["/src/entities/connection/components/validations/*"],
-      "@update_assistant/*": ["/src/components/update_assistant/*"]
+      "@update_assistant/*": ["/src/components/update_assistant/*"],
+      "crypto": [
+        "node_modules/crypto-js"
+      ]
     }
   },
-  "baseUrl": "./",
-  "paths": {
-    "crypto": [
-      "node_modules/crypto-js"
-    ]
-  }
+  "baseUrl": "./"
 }

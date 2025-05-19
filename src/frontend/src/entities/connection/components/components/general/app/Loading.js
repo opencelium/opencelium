@@ -56,7 +56,7 @@ class Loading extends Component{
             classNames = getThemeClass({classNames, authUser, styles});
             loadingClassName = styles[classNames.loading];
         }
-        let divStyle = {};
+        let divStyle = {display: 'flex'};
         if(spinnerStyle && spinnerStyle.hasOwnProperty('width')){
             divStyle.width = spinnerStyle.width;
         }

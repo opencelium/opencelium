@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {AxiosResponse} from "axios";
+import {AxiosRequestConfig, AxiosResponse} from "axios";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 import ModelConnectorPoust from "../models/ConnectorPoust";
 import ModelConnector from "../models/Connector";
@@ -26,7 +26,10 @@ export interface IConnectorRequest{
     checkConnectorTitle(): Promise<AxiosResponse<IResponse>>,
 
     //to get connector by id
-    getConnectorById(): Promise<AxiosResponse<ModelConnector>>,
+    getConnectorById(settings?: AxiosRequestConfig): Promise<AxiosResponse<ModelConnector>>,
+
+    //to get connector credentials
+    getConnectorCredentials(settings?: AxiosRequestConfig): Promise<AxiosResponse<ModelConnector>>,
 
     //to get all connectors of authorized user
     getAllConnectors(): Promise<AxiosResponse<ModelConnector[] | null>>,
@@ -51,4 +54,7 @@ export interface IConnectorRequest{
     */
     //to delete image of connector
     deleteConnectorImage(): Promise<AxiosResponse<any>>,
+
+    //to check master password
+    checkMasterPassword(settings: AxiosRequestConfig): Promise<AxiosResponse<IResponse>>,
 }

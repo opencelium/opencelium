@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^1.6.1",
+    "@stomp/stompjs": "^7.1.1",
     "@types/jsonwebtoken": "^9.0.0",
     "@types/lodash": "^4.14.182",
     "@types/react": "^17.0.43",
@@ -29,6 +30,7 @@
     "@types/stompjs": "^2.3.5",
     "@types/styled-components": "^5.1.14",
     "@types/uuid": "^10.0.0",
+    "@types/vis": "^4.21.27",
     "ace-builds": "^1.24.1",
     "axios": "^1.8.3",
     "chroma-js": "^2.1.2",

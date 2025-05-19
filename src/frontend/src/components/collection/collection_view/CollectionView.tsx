@@ -32,7 +32,6 @@ import { useAppDispatch } from "@application/utils/store";
 import { debounce } from "@application/utils/utils";
 import CategoryTabs from '@entity/category/components/category_tabs/CategoryTabs';
 import LicenseAlertMessage from "@entity/dashboard/components/license_alert_message/LicenseAlertMessage";
-import LicenseAlertMessageForSchedules from "@entity/dashboard/components/license_alert_message/LicenseAlertMessageForSchedules";
 import { ColorTheme } from "@style/Theme";
 import React, { FC, useEffect, useRef, useState } from 'react';
 import { withTheme } from 'styled-components';
@@ -226,7 +225,7 @@ const CollectionView: FC<CollectionViewProps> =
             <ErrorBoundary>
                 <CollectionViewStyled>
                     {hasTitle && <Title title={collection.title}/>}
-                    {!hasNotAlert ? collection.name === 'schedules' ? <LicenseAlertMessageForSchedules/> : <LicenseAlertMessage/> : null}
+                    {!hasNotAlert ? <LicenseAlertMessage/> : null}
                     {hasTopBar && <TopSectionStyled hasViewSection={hasViewSection}>
                         <ActionsStyled>
                             {collection.getTopActions(applicationViewType, checkedIds)}
@@ -257,7 +256,7 @@ const CollectionView: FC<CollectionViewProps> =
                     }
                     {collection.name === "schedules" && <CategoryTabs setCurrentPage={setCurrentPage} readOnly/>}
                     {collection.name === "connections" && <CategoryTabs setCurrentPage={setCurrentPage}/>}
-                    <div style={{marginTop: hasTopBar ? '0' : '20px'}}>
+                    <div style={{marginTop: hasTopBar ? '0' : collection.name === "schedules" ? 0 : '20px'}}>
                         {applicationViewType === ViewType.LIST &&
                             <List
                                 isCard={isListViewCard}

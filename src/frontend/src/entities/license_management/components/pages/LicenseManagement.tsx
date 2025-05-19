@@ -45,6 +45,7 @@ const LicenseManagement: FC<IForm> = ({}) => {
     const {
         status, activatingLicense,
         deletingLicense, activatingFreeLicense,
+        generatingActivateRequest,
     } = License.getReduxState();
     useEffect(() => {
         if (authUser.userDetail.themeSync) {
@@ -78,6 +79,7 @@ const LicenseManagement: FC<IForm> = ({}) => {
                 key={'download'}
                 icon={'file_download'}
                 label={'Generate Activation Request'}
+                isLoading={generatingActivateRequest === API_REQUEST_STATE.START}
                 handleClick={() => dispatch(generateActivateRequest())}
             />
         );

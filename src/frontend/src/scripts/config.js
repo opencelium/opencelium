@@ -3,7 +3,7 @@ window.config = {
         urlInfo: {
             port: {
                 api: 9090,
-                socket: 8082,
+                socket: 9090,
                 kibana: 5601,
             },
             dev: {
