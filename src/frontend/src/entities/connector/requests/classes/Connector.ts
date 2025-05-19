@@ -56,6 +56,10 @@ export class ConnectorRequest extends Request implements IConnectorRequest{
         return super.put<ModelConnector>(connector);
     }
 
+    async updateRequestData(requestData: any, settings: AxiosRequestConfig): Promise<AxiosResponse<IResponse>>{
+        return super.put<IResponse>(requestData, settings);
+    }
+
     async deleteConnectorById(): Promise<AxiosResponse<IResponse>>{
         return super.delete<IResponse>();
     }
@@ -75,7 +79,7 @@ export class ConnectorRequest extends Request implements IConnectorRequest{
     }
 
     async checkMasterPassword(settings: AxiosRequestConfig): Promise<AxiosResponse<IResponse>>{
-        this.endpoint = '/master-password/status'
-        return super.get<IResponse>(settings);
+        this.endpoint = '/master-password/verify'
+        return super.put<IResponse>({}, settings);
     }
 }

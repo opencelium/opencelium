@@ -2,12 +2,19 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import {Urls} from "@entity/application/requests/classes/url";
 import {store} from "@application/utils/store";
+import {generateUUID} from "@app_component/operator_builder/utils";
 
 let socketClient: Client | null = null;
 
 export const SocketAppPrefix = '/oc';
-export const SocketUserPrefix = '/user';
-
+export function getBrowserId(): string {
+    let id = localStorage.getItem("browser-id");
+    if (!id) {
+        id = generateUUID();
+        localStorage.setItem("browser-id", id);
+    }
+    return id;
+}
 export const getSocket = () => {
     const token = store.getState().authReducer.authUser?.token;
     if (!socketClient && token) {
@@ -15,6 +22,10 @@ export const getSocket = () => {
         socketClient = new Client({
             webSocketFactory: () => webSocket,
             reconnectDelay: 5000,
+            connectHeaders: {
+                "client-id": `${Date.now()}-${Math.random()}`,
+                browserId: getBrowserId(),
+            },
             debug: (str: string) => {
                 console.log('[STOMP DEBUG]', str);
             },

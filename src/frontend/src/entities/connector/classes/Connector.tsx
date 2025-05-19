@@ -259,11 +259,11 @@ export class Connector extends HookStateClass implements IConnector{
         return isValid;
     }
 
-    validateAdd(){
+    validateAdd(shouldCheckRequestData: boolean){
         this.isFocused = false;
         const isValidTitle = this.validateTitle();
         const isValidInvoker = this.validateInvoker();
-        const isValidRequestData = this.validateRequestData();
+        const isValidRequestData = shouldCheckRequestData ? this.validateRequestData() : true;
         return isValidTitle && isValidInvoker && isValidRequestData;
     }
 
@@ -272,18 +272,27 @@ export class Connector extends HookStateClass implements IConnector{
         return this.validateId(this.id);
     }
 
-    @App.dispatch(addConnector, {mapping: (connector: IConnector):IEntityWithImage<ModelConnectorPoust> => { return {entityData: connector.getPoustModel(), iconFile: connector.iconFile, shouldDeleteIcon: connector.shouldDeleteIcon};}})
+    @App.dispatch(addConnector, {mapping: (connector: IConnector):IEntityWithImage<ModelConnectorPoust> => { return {entityData: connector.getPoustModel(true), iconFile: connector.iconFile, shouldDeleteIcon: connector.shouldDeleteIcon};}})
     add(): boolean{
-        return this.validateAdd();
+        return this.validateAdd(false);
     }
 
-    @App.dispatch(updateConnector, {mapping: (connector: IConnector):IEntityWithImage<ModelConnectorPoust> => { return {entityData: connector.getPoustModel(), iconFile: connector.iconFile, shouldDeleteIcon: connector.shouldDeleteIcon};}})
+    @App.dispatch(updateConnector, {mapping: (connector: IConnector):IEntityWithImage<ModelConnectorPoust> => { return {entityData: connector.getPoustModel(false), iconFile: connector.iconFile, shouldDeleteIcon: connector.shouldDeleteIcon};}})
     update(title?: string): boolean{
         if(title){
             this.title = title;
             return true;
         }
-        return this.validateId(this.id) && this.validateAdd();
+        return this.validateId(this.id) && this.validateAdd(false);
+    }
+
+    @App.dispatch(updateConnector, {mapping: (connector: IConnector):IEntityWithImage<ModelConnectorPoust> => { return {entityData: connector.getPoustModel(true), iconFile: connector.iconFile, shouldDeleteIcon: connector.shouldDeleteIcon};}})
+    updateWithCredentials(title?: string): boolean{
+        if(title){
+            this.title = title;
+            return true;
+        }
+        return this.validateId(this.id) && this.validateAdd(true);
     }
 
     @App.dispatch<IConnector>(deleteConnectorById, {mapping: (connector: IConnector) => {return connector.id;}, hasNoValidation: true})
@@ -291,7 +300,7 @@ export class Connector extends HookStateClass implements IConnector{
         return this.validateId(this.id);
     }
 
-    getPoustModel(): ModelConnectorPoust{
+    getPoustModel(hasRequestData: boolean): ModelConnectorPoust{
         const requestData: any = {};
         for(let param in this.requestData) {
             requestData[param] = this.requestData[param].trim();
@@ -300,10 +309,12 @@ export class Connector extends HookStateClass implements IConnector{
             title: this.title,
             description: this.description,
             invoker: {name: this.invokerSelect.value.toString()},
-            requestData: requestData,
             sslCert: this.sslCert,
             timeout: this.timeout,
         };
+        if (hasRequestData) {
+            mappedConnector.requestData = requestData;
+        }
         if(this.id !== 0){
             return {
                 connectorId: this.id,

@@ -83,11 +83,11 @@ const ConnectorForm: FC<IForm> = ({isAdd, isUpdate}) => {
         }
     },[addingConnector, updatingConnector]);
     const test = () => {
-        dispatch(testRequestData(connector.getPoustModel()));
+        dispatch(testRequestData(connector.getPoustModel(true)));
     }
     const onSuccessMasterPassword = () => {
         setHasMasking(false);
-        dispatch(getConnectorCredentials(connector.getPoustModel()));
+        dispatch(getConnectorCredentials(connector.getPoustModel(true)));
     }
     const TitleInput = connector.getText({
         propertyName: "title", props: {autoFocus: true, icon: 'title', label: 'Title', required: true, isLoading: checkingConnectorTitle === API_REQUEST_STATE.START, error: isCurrentConnectorHasUniqueTitle === TRIPLET_STATE.FALSE ? 'The title is already in use' : ''}
@@ -127,7 +127,7 @@ const ConnectorForm: FC<IForm> = ({isAdd, isUpdate}) => {
         href={'/connectors'}
     />];
     if(isAdd || isUpdate){
-        let handleAddClick = isAdd ? () => {setShouldNavigateToConnection(false); connector.add()} : () => connector.update();
+        let handleAddClick = isAdd ? () => {setShouldNavigateToConnection(false); connector.add()} : hasMasking ? () => connector.update() : () => connector.updateWithCredentials();
         let handleAddAndGoToConnection = () => {setShouldNavigateToConnection(true); connector.add()};
         if(isAdd) {
             actions.unshift(<Button

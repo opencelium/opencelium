@@ -104,7 +104,7 @@ export const updateConnector = createAsyncThunk(
                     return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.CONNECTOR_EXISTS}));
                 }
             }
-            if(typeof hasCheck === 'undefined' || hasCheck){
+            if(entityData.requestData && typeof hasCheck === 'undefined' || hasCheck){
                 const testDataRequest = new ConnectorRequest({endpoint: '/check'});
                 const responseDataRequest = await testDataRequest.testRequestData(entityData);
                 if(responseDataRequest.data.message === ResponseMessages.CONNECTOR_COMMUNICATION_FAILED || parseInt(responseDataRequest.data.status.toString()) > 299){
@@ -113,6 +113,12 @@ export const updateConnector = createAsyncThunk(
             }
             const updateConnectorRequest = new ConnectorRequest({endpoint: `/${entityData.connectorId}`});
             let response: any = await updateConnectorRequest.updateConnector(entityData);
+            // @ts-ignore
+            let masterPassword = thunkAPI.getState().connectorReducer.masterPassword;
+            if (masterPassword && entityData.requestData) {
+                const updateRequestDataRequest = new ConnectorRequest({endpoint: `/${entityData.connectorId}/required-data`});
+                await updateRequestDataRequest.updateRequestData(entityData.requestData, {headers: {'master_password': masterPassword}});
+            }
             if(iconFile){
                 let data: FormData = new FormData();
                 data.append('connectorId', entityData.connectorId.toString());
@@ -151,7 +157,6 @@ export const getConnectorCredentials = createAsyncThunk(
         try {
             // @ts-ignore
             let masterPassword = thunkAPI.getState().connectorReducer.masterPassword;
-            return {...connector, requestData: {...connector.requestData, password: 'test'}}
             const request = new ConnectorRequest({endpoint: `/${connector.connectorId}`});
             const response = await request.getConnectorCredentials({headers: {'master_password': masterPassword}});
             return response.data;
@@ -234,17 +239,10 @@ export const checkMasterPassword = createAsyncThunk(
     async(password: string, thunkAPI) => {
         try {
             const request = new ConnectorRequest();
-            if (password === 'test') {
-                return password;
-            } else if (password === '') {
-                throw {message: "MASTER_PASSWORD_NOT_EXIST"}
-            } else {
-                throw {message: "MASTER_PASSWORD_WRONG"}
-            }
             await request.checkMasterPassword({headers: {'master_password': password}});
             return password;
         } catch(e){
-            return thunkAPI.rejectWithValue(errorHandler(e));
+            return thunkAPI.rejectWithValue({message: e.response.data.error});
         }
     }
 )

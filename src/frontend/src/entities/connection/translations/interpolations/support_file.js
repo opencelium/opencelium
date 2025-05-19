@@ -26,7 +26,6 @@ const NOTIFY_NEW_SUPPORT_FILE = (responseType, dispatch, navigate, params) => {
         </InterpolateTranslation>
     );
 }
-console.log(getActionWithoutType(notifyAboutNewSupportFile.type));
 export default {
     [getActionWithoutType(notifyAboutNewSupportFile.type)]: NOTIFY_NEW_SUPPORT_FILE,
 }

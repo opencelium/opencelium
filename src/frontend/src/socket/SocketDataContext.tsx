@@ -6,10 +6,7 @@ import {useSupportFilesSocket} from "./modules/useSupportFilesSocket";
 import {useCurrentSubscriptionSocket} from "./modules/useCurrentSubscriptionSocket";
 import {useAppDispatch} from "@application/utils/store";
 import {Auth} from "@application/classes/Auth";
-import {addNotification} from "@application/redux_toolkit/slices/ApplicationSlice";
-import {NotificationType} from "@application/interfaces/INotification";
 import {notifyAboutNewSupportFile} from "@root/redux_toolkit/slices/SupportFileSlice";
-import ModelCurrentSchedule from "@entity/schedule/requests/models/CurrentSchedule";
 
 const SocketDataContext = createContext<SocketDataContextType | undefined>(undefined);
 
@@ -31,16 +28,13 @@ export const SocketDataProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
         return () => {
             if (socket && socket.connected) {
                 userSessionSubscriptionRef.current?.();
-                socket.deactivate().then(() => console.log("🧹 Socket deactivated"));
+                socket.deactivate();
             }
         };
     }, []);
-    useEffect(() => {
-        console.log('isConnected', isConnected)
-    }, [isConnected])
 
     useEffect(() => {
-        if (authUser) {
+        if (authUser?.token) {
             if (!authValid) {
                 setAuthValid(true);
             }
@@ -49,51 +43,48 @@ export const SocketDataProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
                 setAuthValid(false);
             }
         }
-    }, [authUser]);
+    }, [authUser?.token]);
 
     useEffect(() => {
-        if (socket && authUser && !socket.connected) {
-            socket.onConnect = () => {
-                console.log("STOMP connected");
-                if (!isConnected){
-                    setIsConnected(true);
-                }
-                const userSessionSubscription = socket.subscribe(`/user/session`, (message) => {
-                    const data = JSON.parse(message.body)
-                    console.log('/user/session', data);
-                    if (data.event === 'FORCE_LOGOUT') {
-                        socket.deactivate();
-                        setIsConnected(false);
-                    }
-                });
-                userSessionSubscriptionRef.current = () => {
-                    userSessionSubscription.unsubscribe();
-                    userSessionSubscriptionRef.current = undefined;
-                    console.log("🧹 Unsubscribed from /user/session");
-                };
-            };
-            socket.onDisconnect = () => {
-                console.log("STOMP disconnected");
-                if (isConnected) {
+        if (!socket || !authUser?.token) return;
+
+        const alreadyConnected = socket.connected;
+
+        socket.onConnect = () => {
+            setIsConnected(true);
+            const userSessionSubscription = socket.subscribe(`/user/session`, (message) => {
+                const data = JSON.parse(message.body)
+                console.log('/user/session', data);
+                if (data.event === 'FORCE_LOGOUT') {
+                    socket.deactivate();
                     setIsConnected(false);
                 }
+            });
+            userSessionSubscriptionRef.current = () => {
+                userSessionSubscription.unsubscribe();
+                userSessionSubscriptionRef.current = undefined;
+                console.log("🧹 Unsubscribed from /user/session");
             };
-            if (!socket.connected) {
-                socket.activate();
-            }
+        };
+        socket.onDisconnect = () => {
+            setIsConnected(false);
+        };
+
+        if (!alreadyConnected) {
+            socket.activate();
         }
-    }, [authUser, socket]);
+    }, [authUser?.token, socket]);
     useEffect(() => {
         if (hasNewSupportFile) {
             dispatch(notifyAboutNewSupportFile())
             setHasNewSupportFile(false);
         }
     }, [hasNewSupportFile])
-
+    console.log(isConnected);
     return (
         <SocketDataContext.Provider
             value={{
-                isConnected: isConnectedReference.current,
+                isConnected,
                 authValid,
                 currentSchedules,
                 hasNewSupportFile,

@@ -40,6 +40,9 @@ export interface IConnectorRequest{
     //to update connector
     updateConnector(connector: ModelConnectorPoust): Promise<AxiosResponse<ModelConnector>>,
 
+    //to update request data
+    updateRequestData(requestData: any, settings: AxiosRequestConfig): Promise<AxiosResponse<IResponse>>,
+
     //to delete connector by id
     deleteConnectorById(): Promise<AxiosResponse<IResponse>>,
 

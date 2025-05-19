@@ -59,7 +59,6 @@ const DELETE_CONNECTION = (responseType, dispatch, navigate, params) => {
         </InterpolateTranslation>
     );
 }
-console.log(getActionWithoutType(addConnection.fulfilled.type))
 export default {
     [getActionWithoutType(addConnection.fulfilled.type)]: ADD_CONNECTION,
     [getActionWithoutType(updateConnection.fulfilled.type)]: UPDATE_CONNECTION,

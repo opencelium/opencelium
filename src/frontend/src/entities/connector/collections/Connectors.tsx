@@ -47,7 +47,7 @@ class Connectors extends ListCollection<ConnectorProps>{
             width: '20%',
             getValue: (entity: IConnector) => {
                 return(
-                    <InlineEditInput maxLength={100} isInProcess={this.updatingConnector === API_REQUEST_STATE.START} updateValue={(newValue) => this.dispatch(updateConnector({hasCheck: false, entityData: {...entity.getPoustModel(), title: newValue}}))} initialValue={entity.title}/>
+                    <InlineEditInput maxLength={100} isInProcess={this.updatingConnector === API_REQUEST_STATE.START} updateValue={(newValue) => this.dispatch(updateConnector({hasCheck: false, entityData: {...entity.getPoustModel(true), title: newValue}}))} initialValue={entity.title}/>
                 )
             }
         },
@@ -56,7 +56,7 @@ class Connectors extends ListCollection<ConnectorProps>{
             width: '30%',
             getValue: (entity: IConnector) => {
                 return(
-                    <InlineEditInput maxLength={250} isInProcess={this.updatingConnector === API_REQUEST_STATE.START} updateValue={(newValue) => this.dispatch(updateConnector({hasCheck: false, entityData: {...entity.getPoustModel(), description: newValue}}))} initialValue={entity.description}/>
+                    <InlineEditInput maxLength={250} isInProcess={this.updatingConnector === API_REQUEST_STATE.START} updateValue={(newValue) => this.dispatch(updateConnector({hasCheck: false, entityData: {...entity.getPoustModel(true), description: newValue}}))} initialValue={entity.description}/>
                 )
             }
         },

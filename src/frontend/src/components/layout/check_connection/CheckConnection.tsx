@@ -27,16 +27,18 @@ const CheckConnectionComponent: FC =
          children,
     }) => {
         const dispatch = useAppDispatch();
-        const {isConnected, authValid} = useSocketData();
+        const socketData = useSocketData();
         const exit = () => {
             const logoutProps: LogoutProps = {wasAccessDenied: true, message: ResponseMessages.UNSUPPORTED_HEADER_AUTH_TYPE};
             dispatch(logout(logoutProps));
         }
-        console.log(`CheckConnectionComponent: ${isConnected}`)
+        if (!socketData?.socket) {
+            return null;
+        }
         return (
             <Dialog
                 actions={[]}
-                active={!authValid || !isConnected}
+                active={!socketData.authValid || !socketData.isConnected}
                 toggle={exit}
                 title={''}
                 hasNoBody={true}

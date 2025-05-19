@@ -61,7 +61,7 @@ const MasterPasswordInput = ({onSuccess}: MasterPasswordProps) => {
     }
     return (
         <MasterPasswordContainer>
-            <InputText
+            <div style={{width: '300px'}}><InputText
                 id={`master_password`}
                 autoFocus={true}
                 icon={'key'}
@@ -72,8 +72,7 @@ const MasterPasswordInput = ({onSuccess}: MasterPasswordProps) => {
                     setError('');
                 }}
                 error={error}
-                width={300}
-            />
+            /></div>
             <Button
                 style={{height: '35px'}}
                 key={'send_button'}
