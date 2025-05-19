@@ -8,13 +8,9 @@ src/main/resources/templates/**
 assistant/
 src/main/resources/application.yml
 src/main/resources/upload-dir
-src/main/resources/invoker/i-doit.xml
-src/main/resources/invoker/baramundi.xml
-src/main/resources/invoker/lansweeper.xml
-src/main/resources/invoker/jdisc.xml
-src/main/resources/invoker/adaxes.xml
-src/main/resources/invoker/fake_invoker.xml
-src/main/resources/support-files
+src/main/resources/invoker/**
+src/main/resources/support-files/**
+src/main/resources/logs/**
 src/main/resources/updating-backup
 src/main/resources/backup
 src/test/

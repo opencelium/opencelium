@@ -18,6 +18,7 @@ package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
 import com.becon.opencelium.backend.constant.AppYamlPath;
+import com.becon.opencelium.backend.constant.Constant;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
@@ -26,6 +27,7 @@ import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
+import com.becon.opencelium.backend.execution.socket.Connection2WebSocketChannelMapping;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.ApiDataResource;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
@@ -39,6 +41,7 @@ import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
 import com.becon.opencelium.backend.resource.connection.old.ConnectionOldDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.request.SchedulerRequestResource;
+import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -68,6 +71,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
@@ -76,6 +80,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -88,6 +93,7 @@ public class ConnectionController {
     private final ConnectionService connectionService;
     private final ConnectionMngService connectionMngService;
     private final SchedulerService schedulerService;
+    private final Connection2WebSocketChannelMapping connection2ChannelMapping;
     private final Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper;
     private final Mapper<Connection, ConnectionDTO> connectionMapper;
     private final Mapper<Connection, ConnectionResource> connectionResourceMapper;
@@ -96,7 +102,9 @@ public class ConnectionController {
 
     public ConnectionController(
             Environment environment,
-            SchedulerService schedulerService, Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper,
+            SchedulerService schedulerService,
+            Connection2WebSocketChannelMapping connection2ChannelMapping,
+            Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper,
             Mapper<Connection, ConnectionDTO> connectionMapper,
             Mapper<Connection, ConnectionResource> connectionResourceMapper,
             Mapper<ConnectionDTO, ConnectionOldDTO> connectionOldDTOMapper,
@@ -106,6 +114,7 @@ public class ConnectionController {
     ) {
         this.environment = environment;
         this.schedulerService = schedulerService;
+        this.connection2ChannelMapping = connection2ChannelMapping;
         this.connectionService = connectionService;
         this.connectionMngMapper = connectionMngMapper;
         this.connectionMapper = connectionMapper;
@@ -228,6 +237,57 @@ public class ConnectionController {
 
         connectionService.update(connection, connectionMng);
         return ResponseEntity.ok(connectionOldDTOMapper.toDTO(connectionService.getFullConnection(connectionId)));
+    }
+
+    @Operation(summary = "Tests connection execution by temporarily creating new connection and scheduler.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Connection execution has been successfully tested",
+                    content = @Content(schema = @Schema(implementation = ConnectionOldDTO.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PostMapping(path = "/execution/test", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> test(@RequestBody ConnectionOldDTO connectionOldDTO, @RequestParam String channelId) throws Exception {
+        // check if there is no running job for given connection
+        schedulerService.getAllRunningJobs().forEach(job -> {
+            String schedulerTitle = job.getTitle();
+            if (schedulerTitle.startsWith("!*test_schedule_") && schedulerTitle.endsWith(connectionOldDTO.getTitle())) {
+                throw new RuntimeException("Concurrent test executions for the same connection");
+            }
+        });
+
+        // create temporary connection, will be deleted after execution finished
+        connectionOldDTO.setTitle("!*test_connection_" + System.currentTimeMillis() + "_" + connectionOldDTO.getTitle());
+        ConnectionDTO connectionDTO = connectionOldDTOMapper.toEntity(connectionOldDTO);
+        Connection connection = connectionMapper.toEntity(connectionDTO);
+        ConnectionMng connectionMng = connectionMngMapper.toEntity(connectionDTO);
+        ConnectionMng savedConnection = connectionService.save(connection, connectionMng);
+        Long connectionId = savedConnection.getConnectionId();
+
+        // create temporary scheduler for above connection, will be deleted after execution finished
+        SchedulerRequestResource resource = new SchedulerRequestResource();
+        resource.setConnectionId(connectionId);
+        resource.setTitle("!*test_schedule_" + System.currentTimeMillis());
+        resource.setStatus(true);
+        resource.setCronExp(Constant.NEVER_TRIGGERED_CRON);
+        resource.setDebugMode(true);
+
+        Scheduler scheduler = schedulerService.toEntity(resource);
+        schedulerService.save(scheduler);
+
+        connection2ChannelMapping.add(connectionId, channelId);
+
+        schedulerService.startNow(scheduler, channelId);
+
+        // return schedulerId
+        SchedulerResource schedulerResource = new SchedulerResource();
+        schedulerResource.setSchedulerId(scheduler.getId());
+        return ResponseEntity.ok(schedulerResource);
     }
 
     @Operation(summary = "Deletes a connection by provided connection ID")
@@ -697,7 +757,7 @@ public class ConnectionController {
         resource.setConnectionId(connectionId);
         resource.setTitle(connectionId + "_" + UUID.randomUUID());
         resource.setStatus(true);
-        resource.setCronExp("59 59 23 31 12 ? 2123");
+        resource.setCronExp(Constant.NEVER_TRIGGERED_CRON);
         resource.setDebugMode(true);
 
         Scheduler scheduler = schedulerService.toEntity(resource);

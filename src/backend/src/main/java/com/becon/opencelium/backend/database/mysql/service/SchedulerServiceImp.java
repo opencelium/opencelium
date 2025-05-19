@@ -25,7 +25,6 @@ import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.repository.NotificationRepository;
 import com.becon.opencelium.backend.database.mysql.repository.SchedulerRepository;
 import com.becon.opencelium.backend.exception.SchedulerNotFoundException;
-import com.becon.opencelium.backend.execution.socket.SchedulerRegisterSession;
 import com.becon.opencelium.backend.factory.SchedulerFactory;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.quartz.SchedulingStrategy;
@@ -61,8 +60,8 @@ public class SchedulerServiceImp implements SchedulerService {
     private final SchedulingStrategy schedulingStrategy;
     private final SchedulerRepository schedulerRepository;
     private final NotificationRepository notificationRepository;
+    private final ExecutionServiceImp executionServiceImp;
     private final Mapper<Connection, ConnectionDTO> connectionMapper;
-    private final SchedulerRegisterSession schedulerRegisterSession;
 
 
     public SchedulerServiceImp(
@@ -75,7 +74,7 @@ public class SchedulerServiceImp implements SchedulerService {
             SchedulerRepository schedulerRepository,
             NotificationRepository notificationRepository,
             SchedulerFactoryBean schedulerFactoryBean,
-            SchedulerRegisterSession schedulerRegisterSession,
+            ExecutionServiceImp executionServiceImp,
             Mapper<Connection, ConnectionDTO> connectionMapper
     ) {
         this.connectionService = connectionService;
@@ -86,9 +85,9 @@ public class SchedulerServiceImp implements SchedulerService {
         this.schedulingStrategy = SchedulerFactory.createQuartzScheduler(schedulerFactoryBean.getScheduler());
         this.notificationRepository = notificationRepository;
         this.schedulerRepository = schedulerRepository;
+        this.executionServiceImp = executionServiceImp;
         this.connectionMapper = connectionMapper;
         this.connectorService = connectorService;
-        this.schedulerRegisterSession = schedulerRegisterSession;
     }
 
     @Override
@@ -157,11 +156,6 @@ public class SchedulerServiceImp implements SchedulerService {
     public Scheduler getById(int id) {
         return schedulerRepository.findById(id)
                 .orElseThrow(() -> new SchedulerNotFoundException(id));
-    }
-
-    @Override
-    public boolean isWebSocketRequired(int schedulerId) {
-        return schedulerRegisterSession.isSchedulerActive(schedulerId);
     }
 
     @Override
@@ -235,6 +229,11 @@ public class SchedulerServiceImp implements SchedulerService {
     }
 
     @Override
+    public void startNow(Scheduler scheduler, String channelId) {
+        schedulingStrategy.runJob(scheduler, channelId);
+    }
+
+    @Override
     public void startNow(Scheduler scheduler, Map<String, Object> webhook) throws Exception {
         schedulingStrategy.runJob(scheduler, webhook);
     }
@@ -274,14 +273,47 @@ public class SchedulerServiceImp implements SchedulerService {
             Scheduler scheduler = getById(schedId);
             jobsResource.setSchedulerId(scheduler.getId());
             jobsResource.setTitle(scheduler.getTitle());
-            Connection connection = connectionService.getById(connId);
 
+            // TODO: need to rework calculation of avg time
+            double avg = executionServiceImp.getAvgDurationOfExecution(schedId);
+            jobsResource.setAvgDuration(avg);
+
+            Connection connection = connectionService.getById(connId);
             Connector fromCotr = connectorService.getById(connection.getFromConnector());
             Connector toCtor = connectorService.getById(connection.getToConnector());
             jobsResource.setToConnector(toCtor.getTitle());
             jobsResource.setFromConnector(fromCotr.getTitle());
+
             runningJobsResources.add(jobsResource);
         });
+        return runningJobsResources;
+    }
+
+    @Override
+    public List<RunningJobsResource> getAllRunningJobsExcludingOne(int schedulerId) {
+        Map<Long, Integer> runningJobs = schedulingStrategy.getRunningJobs();
+        List<RunningJobsResource> runningJobsResources = new ArrayList<>();
+        runningJobs.forEach((connId, schedId) -> {
+            if (schedulerId != schedId) {
+                RunningJobsResource jobsResource = new RunningJobsResource();
+                Scheduler scheduler = getById(schedId);
+                jobsResource.setSchedulerId(scheduler.getId());
+                jobsResource.setTitle(scheduler.getTitle());
+
+                // TODO: need to rework calculation of avg time
+                double avg = executionServiceImp.getAvgDurationOfExecution(schedId);
+                jobsResource.setAvgDuration(avg);
+
+                Connection connection = connectionService.getById(connId);
+                Connector fromCotr = connectorService.getById(connection.getFromConnector());
+                Connector toCtor = connectorService.getById(connection.getToConnector());
+                jobsResource.setToConnector(toCtor.getTitle());
+                jobsResource.setFromConnector(fromCotr.getTitle());
+
+                runningJobsResources.add(jobsResource);
+            }
+        });
+
         return runningJobsResources;
     }
 

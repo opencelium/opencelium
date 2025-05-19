@@ -13,7 +13,6 @@ import com.becon.opencelium.backend.resource.execution.ConnectionEx;
 import com.becon.opencelium.backend.resource.execution.ExecutionObj;
 import com.becon.opencelium.backend.resource.execution.ProxyEx;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
@@ -30,8 +29,8 @@ public class ConnectionExecutor {
     private ExecutionManager executionManager;
 
     public ConnectionExecutor(
-            ExecutionObj executionObj, long executionId, String timestamp,
-            List<MaskingRule> rules, SimpMessagingTemplate simpMessagingTemplate
+            ExecutionObj executionObj, long executionId,
+            String timestamp, List<MaskingRule> rules
     ) {
         this.webhookVars = executionObj.getWebhookVars();
         this.connection = executionObj.getConnection();
@@ -40,7 +39,7 @@ public class ConnectionExecutor {
 
         // logging files related setup
         this.logger = new OcLogger<>(
-                executionObj.getLoggerConfiguration(), new ExecutionLog(), simpMessagingTemplate,
+                executionObj.getLoggerConfiguration(), new ExecutionLog(),
                 connection.getConnectionId(), timestamp, executionId, ConnectionExecutor.class
         );
     }

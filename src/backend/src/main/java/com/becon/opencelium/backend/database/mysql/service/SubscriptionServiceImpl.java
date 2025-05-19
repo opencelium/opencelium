@@ -2,16 +2,21 @@ package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.constant.SubscriptionConstant;
-import com.becon.opencelium.backend.database.mysql.entity.*;
+import com.becon.opencelium.backend.database.mysql.entity.ActivationRequest;
+import com.becon.opencelium.backend.database.mysql.entity.ExtraOps;
+import com.becon.opencelium.backend.database.mysql.entity.OperationUsageHistory;
+import com.becon.opencelium.backend.database.mysql.entity.OperationUsageHistoryDetail;
+import com.becon.opencelium.backend.database.mysql.entity.Subscription;
 import com.becon.opencelium.backend.database.mysql.repository.SubscriptionRepository;
 import com.becon.opencelium.backend.enums.ActivReqStatus;
+import com.becon.opencelium.backend.execution.socket.SocketConstant;
+import com.becon.opencelium.backend.execution.socket.WebSocketNotificationQueue;
 import com.becon.opencelium.backend.quartz.ResetLimitsJob;
 import com.becon.opencelium.backend.resource.execution.ConnectionEx;
 import com.becon.opencelium.backend.resource.subs.SubsDTO;
 import com.becon.opencelium.backend.subscription.dto.ExtraOpsDTO;
 import com.becon.opencelium.backend.subscription.dto.LicenseKey;
 import com.becon.opencelium.backend.subscription.enums.ExtraOpsStatus;
-import com.becon.opencelium.backend.subscription.quartz.QuartzCronUpdater;
 import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
 import com.becon.opencelium.backend.subscription.utility.MonthPeriod;
 import com.becon.opencelium.backend.utility.MachineUtility;
@@ -30,36 +35,35 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class SubscriptionServiceImpl implements SubscriptionService {
 
     private final SubscriptionRepository subscriptionRepository;
     private final Scheduler scheduler;
-    private final ConnectionService connectionService;
     private final OperationUsageHistoryService operationUsageHistoryService;
     private final OperationUsageHistoryDetailService operationUsageHistoryDetailService;
     private final ActivationRequestService activationRequestService;
     private final ExtraOpsService extraOpsService;
+    private final WebSocketNotificationQueue notificationQueue;
     private final Logger logger = LoggerFactory.getLogger(SubscriptionServiceImpl.class);
 
 
 
     public SubscriptionServiceImpl(SubscriptionRepository subscriptionRepository,
                                    Scheduler scheduler,
-                                   @Qualifier("connectionServiceImp") ConnectionService connectionService,
                                    @Qualifier("operationUsageHistoryServiceImpl") OperationUsageHistoryService operationUsageHistoryService,
                                    @Qualifier("operationUsageHistoryDetailServiceImp") OperationUsageHistoryDetailService operationUsageHistoryDetailService,
                                    @Qualifier("extraOpsServiceImp") ExtraOpsService extraOpsService,
-                                   @Qualifier("activationRequestServiceImp") ActivationRequestService activationRequestService) {
+                                   @Qualifier("activationRequestServiceImp") ActivationRequestService activationRequestService,
+                                   WebSocketNotificationQueue notificationQueue) {
         this.subscriptionRepository = subscriptionRepository;
         this.scheduler = scheduler;
-        this.connectionService =connectionService;
         this.operationUsageHistoryService = operationUsageHistoryService;
         this.operationUsageHistoryDetailService = operationUsageHistoryDetailService;
         this.activationRequestService = activationRequestService;
         this.extraOpsService = extraOpsService;
+        this.notificationQueue = notificationQueue;
     }
 
     @Override
@@ -300,6 +304,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             remain = Math.abs(remain);
             extraOpsService.updateExtraOpsForSubscription(sub, remain);
         }
+
+        sendNotification();
     }
 
     @Override
@@ -444,5 +450,16 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     private boolean hasExtra(Subscription sub) {
         return sub.getExtraOpsList() != null && !sub.getExtraOpsList().isEmpty();
+    }
+
+    protected void sendNotification() {
+        Subscription subscription = getActiveSubs();
+        if (subscription != null) {
+            String licenseKeyRaw = subscription.getLicenseKey();
+            LicenseKey licenseKey = LicenseKeyUtility.decrypt(licenseKeyRaw);
+
+            SubsDTO subsDTO = toDto(licenseKey, subscription);
+            notificationQueue.addMessage(SocketConstant.NOTIFICATION_DESTINATION, subsDTO);
+        }
     }
 }

@@ -4,12 +4,12 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
-import com.becon.opencelium.backend.execution.socket.SocketConstant;
+import com.becon.opencelium.backend.execution.socket.WebSocketNotificationService;
 import com.becon.opencelium.backend.resource.execution.LoggerConfiguration;
+import com.becon.opencelium.backend.utility.ApplicationContextUtility;
 import com.becon.opencelium.backend.utility.LogFileUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.nio.file.Path;
 import java.util.function.Consumer;
@@ -19,21 +19,21 @@ public class OcLogger<T extends LogMessage> {
     private final boolean log2File;
     private final boolean webSocket; // if true then sends logs through websocket;
     private final T logEntity; // log entity
-    private final SimpMessagingTemplate simpMessagingTemplate; // sends messages to user via websocket
+    private final WebSocketNotificationService socketNotificationService;
+    private final long connectionId;
     private final Logger logger;
     private boolean executionFailed = false;
 
     public static final String LOG_LOCATION = "src/main/resources/logs";
 
-    public OcLogger(
-            LoggerConfiguration loggerConfiguration, T logEntity, SimpMessagingTemplate simpMessagingTemplate,
-            long connectionId, String timestamp, long executionId, Class<?> c
-            ) {
+    public OcLogger(LoggerConfiguration loggerConfiguration, T logEntity,
+                    long connectionId, String timestamp, long executionId, Class<?> c) {
         this.debugMode = loggerConfiguration.isDebugMode();
         this.log2File = loggerConfiguration.isLog2File();
         this.webSocket = loggerConfiguration.isWSocketOpen();
 
-        this.simpMessagingTemplate = simpMessagingTemplate;
+        this.socketNotificationService = ApplicationContextUtility.getBean(WebSocketNotificationService.class);
+        this.connectionId = connectionId;
         this.logEntity = logEntity;
 
         if (log2File) {
@@ -120,7 +120,7 @@ public class OcLogger<T extends LogMessage> {
 
         if (webSocket) {
             logEntity.setMessage(message);
-            simpMessagingTemplate.convertAndSend(SocketConstant.DESTINATION_EXECUTION_LOG, logEntity);
+            socketNotificationService.send(connectionId, logEntity);
         } else {
             t.accept(message);
         }

@@ -1,8 +1,18 @@
 package com.becon.opencelium.backend.execution.socket;
 
 public interface SocketConstant {
-    String DESTINATION_EXECUTION_LOG = "/execution/logs"; // WebSocket topic for execution logs
-    String DESTINATION_SUPPORT_FILE = "/execution/support-file"; // WebSocket topic for support file
     String PATH = "/websocket"; // WebSocket connection endpoint
-    String DESTINATION_PREFIX = "/execution"; // Message broker prefix
+
+    String EXECUTION_DESTINATION_PREFIX = "/execution"; // Message broker prefix for execution
+    String LOGS_DESTINATION = "/execution/logs"; // WebSocket topic for execution logs
+    String SUPPORT_FILE_DESTINATION = "/execution/support-file"; // WebSocket topic for support file
+
+    String NOTIFICATION_DESTINATION_PREFIX = "/subscription"; // Message broker prefix for user notifications
+    String NOTIFICATION_DESTINATION = "/subscription"; // WebSocket topic for user subscription notifications
+
+    String SCHEDULER_DESTINATION_PREFIX = "/scheduler/running/all";
+    String SCHEDULER_DESTINATION = "/scheduler/running/all";
+
+    String USER_SESSION_DESTINATION_PREFIX = "/session";
+    String USER_SESSION_DESTINATION = "/session";
 }

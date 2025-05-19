@@ -49,6 +49,7 @@ public interface SchedulerService {
     SchedulerResource toResource(Scheduler entity);
 
     void startNow(Scheduler scheduler);
+    void startNow(Scheduler scheduler, String channelId);
     void startNow(Scheduler scheduler, Map<String, Object> queryMap) throws Exception;
     void startNow(Scheduler scheduler, List<MaskingRule> rules);
     void saveEntity(Scheduler scheduler);
@@ -57,6 +58,7 @@ public interface SchedulerService {
     void terminate(Integer schedulerId);
 
     List<RunningJobsResource> getAllRunningJobs() throws Exception;
+    List<RunningJobsResource> getAllRunningJobsExcludingOne(int schedulerId);
     List<EventNotification> getAllNotifications(int schedulerId);
     Optional<EventNotification> getNotification(int notificationId);
     EventNotification toNotificationEntity(NotificationResource resource);
@@ -65,5 +67,4 @@ public interface SchedulerService {
     void deleteNotificationById(int id);
 
     Scheduler getById(int id);
-    boolean isWebSocketRequired(int schedulerId);
 }

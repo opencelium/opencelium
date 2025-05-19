@@ -29,7 +29,6 @@ import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
@@ -39,17 +38,14 @@ import java.util.Map;
 @Component
 public class JobExecutor extends QuartzJobBean implements InterruptableJob {
     private final ExecutionObjectService executionObjectService;
-    private final SimpMessagingTemplate simpMessagingTemplate;
     private final SubscriptionService subscriptionService;
     private final Logger logger = LoggerFactory.getLogger(JobExecutor.class);
 
     private volatile Thread thread;
 
     public JobExecutor(@Qualifier("executionObjectServiceImp") ExecutionObjectServiceImp executionObjectService,
-                       @Qualifier("subscriptionServiceImpl") SubscriptionService subscriptionService,
-                       SimpMessagingTemplate simpMessagingTemplate) {
+                       @Qualifier("subscriptionServiceImpl") SubscriptionService subscriptionService) {
         this.executionObjectService = executionObjectService;
-        this.simpMessagingTemplate = simpMessagingTemplate;
         this.subscriptionService = subscriptionService;
     }
 
@@ -76,7 +72,7 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
                 context.getMergedJobDataMap().put("data", data);
             }
             ExecutionObj executionObj = executionObjectService.buildObj(data);
-            ConnectionExecutor executor = new ConnectionExecutor(executionObj, execId, timestamp, data.getRules(), simpMessagingTemplate);
+            ConnectionExecutor executor = new ConnectionExecutor(executionObj, execId, timestamp, data.getRules());
 
             context.put("connectionId", executionObj.getConnection().getConnectionId());
             context.put("timestamp", timestamp);

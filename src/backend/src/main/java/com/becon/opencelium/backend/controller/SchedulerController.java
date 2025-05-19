@@ -20,6 +20,8 @@ import com.becon.opencelium.backend.database.mysql.entity.EventNotification;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.service.SchedulerServiceImp;
 import com.becon.opencelium.backend.database.mysql.service.WebhookServiceImp;
+import com.becon.opencelium.backend.execution.socket.SocketConstant;
+import com.becon.opencelium.backend.execution.socket.WebSocketNotificationService;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.notification.NotificationResource;
@@ -56,6 +58,8 @@ public class SchedulerController {
 
     @Autowired
     private WebhookServiceImp webhookServiceImp;
+    @Autowired
+    private WebSocketNotificationService notificationService;
 
     @Operation(summary = "Retrieves a list of schedulers from database")
     @ApiResponses(value = {
@@ -74,6 +78,11 @@ public class SchedulerController {
         List<Scheduler> schedulers = schedulerService.findAll();
         List<SchedulerResource> scheduleList = schedulers.stream()
             .map(s -> schedulerService.toResource(s)).collect(Collectors.toList());
+
+        // send notification about all running jobs
+        List<RunningJobsResource> allRunningJobs = schedulerService.getAllRunningJobs();
+        notificationService.send(SocketConstant.SCHEDULER_DESTINATION, allRunningJobs);
+
         return ResponseEntity.ok(scheduleList);
     }
 

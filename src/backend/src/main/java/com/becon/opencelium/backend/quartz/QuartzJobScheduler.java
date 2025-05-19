@@ -53,7 +53,7 @@ public class QuartzJobScheduler implements SchedulingStrategy {
                 throw new RuntimeException("JOB_ALREADY_EXISTS");
             }
 
-            TriggerKey triggerKey = new TriggerKey(String.valueOf(scheduler.getId()), String.valueOf(scheduler.getConnection().getId()));
+            TriggerKey triggerKey = getTriggerKey(scheduler, false);
 
             ScheduleData data = new ScheduleData(scheduler.getId(), TriggerType.SCHEDULER);
             JobDataMap jobDataMap = new JobDataMap() {{
@@ -87,10 +87,11 @@ public class QuartzJobScheduler implements SchedulingStrategy {
         JobKey jobKey = new JobKey(jobName, "connection");
 
         try {
-            if (!quartzScheduler.checkExists(jobKey))
-//                throw new RuntimeException("JOB_NOT_FOUND");
+            boolean deleted = quartzScheduler.deleteJob(jobKey); //Deleting a job and unScheduling all of its Triggers
+
+            if (!deleted) {
                 System.err.println("JOB_NOT_FOUND");
-            quartzScheduler.deleteJob(jobKey); //Deleting a job and unScheduling all of its Triggers
+            }
         } catch (SchedulerException e) {
             throw new RuntimeException(e);
         }
@@ -115,8 +116,7 @@ public class QuartzJobScheduler implements SchedulingStrategy {
         }
 
         try {
-            Trigger currTrigger = quartzScheduler
-                    .getTrigger(new TriggerKey(String.valueOf(updated.getId()), String.valueOf(updated.getConnection().getId())));
+            Trigger currTrigger = quartzScheduler.getTrigger(getTriggerKey(updated, false));
             if (currTrigger == null) {
                 throw new RuntimeException("JOB_NOT_FOUND");
             }
@@ -138,7 +138,7 @@ public class QuartzJobScheduler implements SchedulingStrategy {
         final String jobName = getJobName(scheduler);
         final JobKey jobKey = new JobKey(jobName, "connection");
 
-        TriggerKey triggerKey = new TriggerKey("FIRES_ONCE-" + System.currentTimeMillis() + "-" + scheduler.getId(), String.valueOf(scheduler.getConnection().getId()));
+        TriggerKey triggerKey = getTriggerKey(scheduler, true);
         Trigger trigger = newTrigger()
                 .forJob(jobKey)
                 .withIdentity(triggerKey)
@@ -169,6 +169,31 @@ public class QuartzJobScheduler implements SchedulingStrategy {
     }
 
     @Override
+    public void runJob(Scheduler scheduler, String channelId) {
+        final String jobName = getJobName(scheduler);
+        final JobKey jobKey = new JobKey(jobName, "connection");
+
+        ScheduleData data = new ScheduleData(scheduler.getId(), TriggerType.EXECUTION_TEST);
+        JobDataMap jobDataMap = new JobDataMap();
+        jobDataMap.put("data", data);
+
+        TriggerKey triggerKey = getTriggerKey(scheduler, true);
+
+        Trigger trigger = TriggerBuilder.newTrigger()
+                .forJob(jobKey)
+                .withIdentity(triggerKey)
+                .usingJobData(jobDataMap)
+                .startNow()
+                .build();
+
+        try {
+            quartzScheduler.scheduleJob(trigger);
+        } catch (SchedulerException e) {
+            throw new RuntimeException("Error scheduling job", e);
+        }
+    }
+
+    @Override
     public void runJob(Scheduler scheduler, Map<String, Object> webhookVars) {
         final String jobName = getJobName(scheduler);
         final JobKey jobKey = new JobKey(jobName, "connection");
@@ -177,8 +202,7 @@ public class QuartzJobScheduler implements SchedulingStrategy {
         JobDataMap jobDataMap = new JobDataMap();
         jobDataMap.put("data", data);
 
-        TriggerKey triggerKey = new TriggerKey("FIRES_ONCE-" + System.currentTimeMillis() + "-" + scheduler.getId(),
-                String.valueOf(scheduler.getConnection().getId()));
+        TriggerKey triggerKey = getTriggerKey(scheduler, true);
 
         Trigger trigger = TriggerBuilder.newTrigger()
                 .forJob(jobKey)
@@ -203,8 +227,7 @@ public class QuartzJobScheduler implements SchedulingStrategy {
         JobDataMap jobDataMap = new JobDataMap();
         jobDataMap.put("data", data);
 
-        TriggerKey triggerKey = new TriggerKey("FIRES_ONCE-" + System.currentTimeMillis() + "-" + scheduler.getId(),
-                String.valueOf(scheduler.getConnection().getId()));
+        TriggerKey triggerKey = getTriggerKey(scheduler, true);
 
         Trigger trigger = TriggerBuilder.newTrigger()
                 .forJob(jobKey)
@@ -278,6 +301,7 @@ public class QuartzJobScheduler implements SchedulingStrategy {
             if (!quartzScheduler.checkExists(jobKey)) {
                 return;
             }
+
             quartzScheduler.interrupt(jobKey);
         } catch (SchedulerException e) {
             throw new RuntimeException(e);
@@ -288,10 +312,18 @@ public class QuartzJobScheduler implements SchedulingStrategy {
         if (scheduler == null || scheduler.getId() == 0) {
             throw new SchedulerNotFoundException(0);
         }
+
         if (scheduler.getConnection() == null || scheduler.getConnection().getId() == null) {
             throw new ConnectionNotFoundException(0L);
         }
+
         return scheduler.getConnection().getId() + "-" + scheduler.getId();
+    }
+
+    private TriggerKey getTriggerKey(Scheduler scheduler, boolean fireOnce) {
+        String name = (fireOnce ? "FIRES_ONCE-" + System.currentTimeMillis() + "-" : "") + scheduler.getId();
+
+        return new TriggerKey(name, Long.toString(scheduler.getConnection().getId()));
     }
 
     private void retry(Scheduler scheduler, int times) {

@@ -10,6 +10,7 @@ public interface SchedulingStrategy {
     void deleteJob(Scheduler scheduler);
     void rescheduleJob(Scheduler scheduler, Long oldCon);
     void runJob(Scheduler scheduler);
+    void runJob(Scheduler scheduler, String channelId);
     void runJob(Scheduler scheduler, Map<String, Object> webhookVars);
     void runJob(Scheduler scheduler, List<MaskingRule> rules);
     void resumeJob(Scheduler scheduler);

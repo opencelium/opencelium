@@ -121,7 +121,7 @@ public abstract class HelperMapper {
 
     @Named("getFieldBindings")
     public List<FieldBindingDTO> getFieldBindings(List<Enhancement> enhancements) {
-        if(enhancements == null){
+        if (enhancements == null) {
             return Collections.emptyList();
         }
         List<FieldBindingDTO> list = new ArrayList<>(enhancements.size());
@@ -158,14 +158,13 @@ public abstract class HelperMapper {
     public List<RequestData> processRequestData(ConnectorResource dto) {
         List<RequestData> requestData = requestDataMapper.toEntity(dto.getRequestData());
         if (requestData == null)
-            return new ArrayList<>();
+            return Collections.emptyList();
+
+        Connector connector = new Connector();
+        connector.setId(dto.getConnectorId());
+
         requestData.forEach(r -> {
-            RequestData data = requestDataService.findByConnectorIdAndField(dto.getConnectorId(), r.getField()).orElse(null);
-            if (data != null) {
-                r.setId(data.getId());
-            }
-            Connector connector = new Connector();
-            connector.setId(dto.getConnectorId());
+            requestDataService.findByConnectorIdAndField(dto.getConnectorId(), r.getField()).ifPresent(data -> r.setId(data.getId()));
             r.setConnector(connector);
         });
 
