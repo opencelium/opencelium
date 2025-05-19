@@ -253,15 +253,12 @@ export const connectorSlice = createSlice({
             state.error = action.payload;
         },
         [getConnectorCredentials.pending.type]: (state) => {
-            state.gettingConnector = API_REQUEST_STATE.START;
         },
         [getConnectorCredentials.fulfilled.type]: (state, action: PayloadAction<ModelConnector>) => {
-            state.gettingConnector = API_REQUEST_STATE.FINISH;
             state.currentConnector = action.payload;
             state.error = null;
         },
         [getConnectorCredentials.rejected.type]: (state, action: PayloadAction<IResponse>) => {
-            state.gettingConnector = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
     }
