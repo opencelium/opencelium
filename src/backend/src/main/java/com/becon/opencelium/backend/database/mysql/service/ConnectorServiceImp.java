@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
+import com.becon.opencelium.backend.configuration.ConnectorProps;
 import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.constant.ExceptionConstant;
 import com.becon.opencelium.backend.constant.ExceptionMessages;
@@ -45,20 +46,19 @@ import java.util.stream.Collectors;
 @Service
 public class ConnectorServiceImp implements ConnectorService {
 
-    @Value("${" + AppYamlPath.CONNECTOR_MASTER_PASSWORD + "}")
-    private String masterPassword;
-
+    private final ConnectorProps connectorProps;
     private final ConnectorRepository connectorRepository;
     private final InvokerService invokerService;
     private final Encoder encoder;
     private final RequestDataService requestDataService;
 
     public ConnectorServiceImp(
-            ConnectorRepository connectorRepository,
+            ConnectorProps connectorProps, ConnectorRepository connectorRepository,
             @Qualifier("invokerServiceImp") InvokerService invokerService,
             @Qualifier("requestDataServiceImp") RequestDataServiceImp requestDataService,
             Encoder encoder
     ) {
+        this.connectorProps = connectorProps;
         this.connectorRepository = connectorRepository;
         this.invokerService = invokerService;
         this.encoder = encoder;
@@ -239,14 +239,14 @@ public class ConnectorServiceImp implements ConnectorService {
                     ExceptionMessages.MASTER_PASSWORD_IS_MISSING_IN_HEADER
             );
         }
-        if (Objects.isNull(this.masterPassword)) {
+        if (Objects.isNull(connectorProps.getMasterPassword())) {
             throw new GeneralServiceException(
                     HttpStatus.BAD_REQUEST,
                     ExceptionConstant.MASTER_PASSWORD_NOT_EXIST,
                     ExceptionMessages.MASTER_PASSWORD_NOT_EXIST
             );
         }
-        if (!Objects.equals(this.masterPassword, masterPassword)) {
+        if (!Objects.equals(connectorProps.getMasterPassword(), masterPassword)) {
             throw new GeneralServiceException(
                     HttpStatus.BAD_REQUEST,
                     ExceptionConstant.MASTER_PASSWORD_WRONG,
