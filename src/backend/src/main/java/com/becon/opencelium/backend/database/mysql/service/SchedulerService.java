@@ -52,6 +52,7 @@ public interface SchedulerService {
     void startNow(Scheduler scheduler, String channelId);
     void startNow(Scheduler scheduler, Map<String, Object> queryMap) throws Exception;
     void startNow(Scheduler scheduler, List<MaskingRule> rules);
+    void throwIfConnectionIsBeingExecuted(long connectionId);
     void saveEntity(Scheduler scheduler);
     void disable(Scheduler scheduler);
     void enable(Scheduler scheduler);

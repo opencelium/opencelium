@@ -225,22 +225,33 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Override
     public synchronized void startNow(Scheduler scheduler) {
+        throwIfConnectionIsBeingExecuted(scheduler.getConnection().getId());
         schedulingStrategy.runJob(scheduler);
     }
 
     @Override
     public void startNow(Scheduler scheduler, String channelId) {
+        // Connections' duplicate execution has been checked in controller level
         schedulingStrategy.runJob(scheduler, channelId);
     }
 
     @Override
     public void startNow(Scheduler scheduler, Map<String, Object> webhook) throws Exception {
+        throwIfConnectionIsBeingExecuted(scheduler.getConnection().getId());
         schedulingStrategy.runJob(scheduler, webhook);
     }
 
     @Override
     public void startNow(Scheduler scheduler, List<MaskingRule> rules) {
+        // Connections' duplicate execution has been checked in controller level
         schedulingStrategy.runJob(scheduler, rules);
+    }
+
+    @Override
+    public void throwIfConnectionIsBeingExecuted(long connectionId) {
+        if (schedulingStrategy.getRunningJobs().containsKey(connectionId)) {
+            throw new RuntimeException("Connection with id = " + connectionId + " is currently being executed");
+        }
     }
 
     @Override
