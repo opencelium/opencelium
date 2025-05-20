@@ -159,7 +159,7 @@ export const getConnectorCredentials = createAsyncThunk(
             let masterPassword = thunkAPI.getState().connectorReducer.masterPassword;
             const request = new ConnectorRequest({endpoint: `/${connector.connectorId}`});
             const response = await request.getConnectorCredentials({headers: {'master_password': masterPassword}});
-            return response.data;
+            return {...connector, requestData: response.data.requestData};
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }

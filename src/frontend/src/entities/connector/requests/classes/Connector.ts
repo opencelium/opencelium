@@ -79,7 +79,7 @@ export class ConnectorRequest extends Request implements IConnectorRequest{
     }
 
     async checkMasterPassword(settings: AxiosRequestConfig): Promise<AxiosResponse<IResponse>>{
-        this.endpoint = '/master-password/verify'
-        return super.put<IResponse>({}, settings);
+        this.endpoint = '/master-password/status'
+        return super.get<IResponse>(settings);
     }
 }
