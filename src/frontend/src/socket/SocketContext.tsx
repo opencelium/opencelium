@@ -13,7 +13,13 @@ export const SocketProvider: React.FC<React.PropsWithChildren<{}>> = ({ children
 
     const resetSocket = () => {
         console.log('reset socket')
-        socketRef.current = getSocket();
+        if (socketRef.current && socketRef.current.connected) {
+            socketRef.current.deactivate().then(() => {
+                socketRef.current = getSocket();
+            });
+        } else {
+            socketRef.current = getSocket();
+        }
     }
 
     return (

@@ -57,7 +57,7 @@ export const authSlice = createSlice({
         setIsAboutToLogout: (state, action: PayloadAction<TRIPLET_STATE>) => {
             state.isAboutToLogout = action.payload;
             if (action.payload) {
-                state.authUser = {...state.authUser, token: ''};
+                state.authUser = {...state.authUser, id: -1};
             }
         },
         logout: (state, action: PayloadAction<LogoutProps>) => {

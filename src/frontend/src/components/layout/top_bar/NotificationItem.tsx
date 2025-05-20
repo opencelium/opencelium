@@ -43,11 +43,26 @@ const NotificationItem: FC<NotificationItemProps> =
         calloutMessage = <Text value={calloutMessage} transKey={calloutMessage} size={TextSize.Size_12}/>
     }
     useEffect(() => {
+        let isMounted = true;
+        let timeout: NodeJS.Timeout;
         if(notificationAmount < notifications.length){
-            setLastNotification(notifications.length > 0 ? new CNotification(notifications[0]) : null);
-            setTimeout(() => setLastNotification(null), 3000)
+            if (isMounted) {
+                setLastNotification(notifications.length > 0 ? new CNotification(notifications[0]) : null);
+            }
+            timeout = setTimeout(() => {
+                if (isMounted) {
+                    setLastNotification(null)
+                };
+            }, 3000)
         }
         setNotificationAmount(notifications.length);
+
+        return () => {
+            isMounted = false; // 🔹 размонтирован
+            if (timeout) {
+                clearTimeout(timeout);
+            }
+        };
     },[notifications.length]);
     const isDisabled = notifications.length === 0;
     const notificationAmountText = notificationAmount > 99 ? `+99` : notificationAmount;

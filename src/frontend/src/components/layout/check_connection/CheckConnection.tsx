@@ -35,12 +35,12 @@ const CheckConnectionComponent: FC =
             dispatch(logout(logoutProps));
         }
         useEffect(() => {
-            if (authUser?.token) {
-                if (isAboutToLogout) {
+            if (authUser?.id !== -1) {
+                if (isAboutToLogout === TRIPLET_STATE.TRUE) {
                     dispatch(setIsAboutToLogout(TRIPLET_STATE.FALSE));
                 }
             }
-        }, [authUser?.token]);
+        }, [authUser?.id]);
         return (
             <Dialog
                 actions={[]}

@@ -9,7 +9,6 @@ export const useCurrentSchedulesSocket = (socket: Client | null) => {
     const [currentSchedules, setCurrentSchedules] = useState<ModelCurrentSchedule[]>([]);
     const subscriptionRef = useRef<() => void>();
     const setSubscription = () => {
-        console.log("try subscribe to /scheduler/running/all");
         if (subscriptionRef.current) {
             return;
         }
@@ -40,5 +39,5 @@ export const useCurrentSchedulesSocket = (socket: Client | null) => {
         }
     }, [isAboutToLogout]);
 
-    return { currentSchedules };
+    return { currentSchedules, setCurrentSchedules };
 };

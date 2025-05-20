@@ -9,6 +9,7 @@ import {Auth} from "@application/classes/Auth";
 import {notifyAboutNewSupportFile} from "@root/redux_toolkit/slices/SupportFileSlice";
 import {setIsAboutToLogout} from "@application/redux_toolkit/slices/AuthSlice";
 import {TRIPLET_STATE} from "@application/interfaces/IApplication";
+import {disableSocket} from "./socket";
 
 const SocketDataContext = createContext<SocketDataContextType | undefined>(undefined);
 
@@ -19,7 +20,7 @@ export const SocketDataProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
     const [isConnected, setIsConnected] = useState(false);
     const [authValid, setAuthValid] = useState(true);
 
-    const { currentSchedules } = useCurrentSchedulesSocket(socket);
+    const { currentSchedules, setCurrentSchedules,  } = useCurrentSchedulesSocket(socket);
     const { hasNewSupportFile, setHasNewSupportFile } = useSupportFilesSocket(socket);
     const { currentSubscription } = useCurrentSubscriptionSocket(socket);
     const userSessionSubscriptionRef = useRef<() => void>();
@@ -58,9 +59,11 @@ export const SocketDataProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
                 const data = JSON.parse(message.body)
                 console.log('/user/session', data);
                 if (data.event === 'FORCE_LOGOUT') {
-                    dispatch(setIsAboutToLogout(TRIPLET_STATE.TRUE));
                     socket.deactivate().then(() => {
                         console.log("🧹 Deactivated");
+                        dispatch(setIsAboutToLogout(TRIPLET_STATE.TRUE));
+                        setCurrentSchedules([]);
+                        disableSocket();
                     });
                 }
             });
