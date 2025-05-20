@@ -37,6 +37,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 public class ConnectorExecutor {
     private final ExpressionProcessor expressionProcessor;
@@ -74,12 +75,11 @@ public class ConnectorExecutor {
     public void start() {
         logger.getLogEntity().setType(LogType.INFO);
         logger.getLogEntity().setConnector(new ConnectorLog(connector.getName(), direction));
-
-        // set id of currently executing connector
         executionManager.setCurrentCtorId(connector.getId());
 
         int headPointer = 0;
 
+        logger.logAndSend("phase=FLOWCHART_START fchartId=" + connector.getId());
         while (headPointer < executables.size()) {
             int tailPointer = getTailPointer(headPointer);
 
@@ -87,6 +87,7 @@ public class ConnectorExecutor {
 
             headPointer = tailPointer + 1;
         }
+        logger.logAndSend("phase=FLOWCHART_END fchartId=" + connector.getId());
     }
 
     private void execute(int headPointer, int tailPointer) {
@@ -96,34 +97,47 @@ public class ConnectorExecutor {
 
         // points to the end of the operator body
         int tail = getTailPointer(headPointer);
+        String index = getIndex(executables.get(headPointer));
 
         if (executables.get(headPointer) instanceof OperationDTO operation) {
+            logger.getLogEntity().setMethodData(new MethodData(operation.getOperationId()));
+            logger.logAndSend(String.format("phase=OPERATION_START indexPath=%s name=\"%s\" %s", index, operation.getName(), getLoopData()));
             if (headPointer != tail) {
                 throw new RuntimeException("Methods cannot have body");
             }
 
-            // set up logger and masking for the current operation
-            logger.getLogEntity().setMethodData(new MethodData(operation.getOperationId()));
-
             executeOperation(operation);
 
-            // clean up after operation execution
+            logger.logAndSend(String.format("phase=OPERATION_END indexPath=%s name=\"%s\" %s", index, operation.getName(), getLoopData()));
             logger.getLogEntity().setMethodData(null);
         } else if (executables.get(headPointer) instanceof OperatorEx operator) {
             if (Objects.equals(operator.getType(), "if")) {
-                boolean result = (Boolean) expressionProcessor.evaluate(
-                        operator.getExpression(),
-                        executionManager::getValue,
-                        logger,
-                        masking
-                );
+                logger.logAndSend(String.format("phase=IF_START indexPath=%s expression=[%s] %s", index, operator.getExpression(), getLoopData()));
+
+                boolean result;
+                try {
+                    result = (Boolean) expressionProcessor.evaluate(
+                            operator.getExpression(),
+                            executionManager::getValue,
+                            logger,
+                            masking
+                        );
+
+                    logger.logAndSend("segment=IF_RESULT data=" + result);
+                } catch (RuntimeException e) {
+                    logger.logAndSend("segment=IF_RESULT data=unknown");
+                    throw e;
+                }
 
                 if (result) {
                     // if result is true, then execute if operators' body
                     execute(headPointer + 1, tail);
                 }
+                logger.logAndSend(String.format("phase=IF_END indexPath=%s %s", index, getLoopData()));
             } else {
                 Loop loop = Loop.fromEx(operator);
+                logger.logAndSend(String.format("phase=LOOP_START indexPath=%s expression=\"%s\" %s", index, loop.getRef(), getLoopData()));
+
                 Object referencedList = executionManager.getValue(loop.getRef());
                 List<String> list = new ArrayList<>();
 
@@ -152,20 +166,19 @@ public class ConnectorExecutor {
                     loop.setIndex(i);
                     loop.setValue(list.get(i));
 
-                    // if length !=0, then execute loop operators' body,
-                    // there will be a circle if current run is not last one
+                    // if length !=0, then execute loop operators' body
                     execute(headPointer + 1, tail);
                 }
 
                 // remove executed loops' data
                 executionManager.getLoops().remove(loop);
+                logger.logAndSend(String.format("phase=LOOP_END indexPath=%s %s", index, getLoopData()));
             }
-
         } else {
             throw new RuntimeException("Wrong type is supplied");
         }
 
-        // we already executed operations'/operators' body, now start executing next body'
+        // we already executed operations'/operators' body, now start executing next body
         execute(tail + 1, tailPointer);
     }
 
@@ -268,6 +281,24 @@ public class ConnectorExecutor {
         }
 
         return headPointer - 1;
+    }
+
+    public String getLoopData() {
+        List<Loop> loops = executionManager.getLoops();
+        if (loops.isEmpty()) {
+            return "";
+        }
+
+        // loopIterator="i,j" loopIndex="0,1"
+        String loopIterator = loops.stream()
+                .map(Loop::getIterator)
+                .collect(Collectors.joining(","));
+
+        String loopIndex = loops.stream()
+                .map(loop -> String.valueOf(loop.getIndex()))
+                .collect(Collectors.joining(","));
+
+        return String.format("loopIterator=\"%s\" loopIndex=\"%s\"", loopIterator, loopIndex);
     }
 
     private static Comparator<Object> getComparator() {
