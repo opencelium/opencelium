@@ -26,7 +26,7 @@ export const getSocket = () => {
                 "client-id": `${Date.now()}-${Math.random()}`,
                 browserId: getBrowserId(),
             },
-            debug: (str: string) => {
+            /*debug: (str: string) => {
                 console.log('[STOMP DEBUG]', str);
             },
 
@@ -37,7 +37,7 @@ export const getSocket = () => {
 
             onWebSocketError: (event) => {
                 console.error('[WS ERROR]', event);
-            },
+            },*/
         });
         console.log('SocketClient.Init', socketClient);
     }

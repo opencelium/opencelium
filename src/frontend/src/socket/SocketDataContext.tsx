@@ -7,13 +7,15 @@ import {useCurrentSubscriptionSocket} from "./modules/useCurrentSubscriptionSock
 import {useAppDispatch} from "@application/utils/store";
 import {Auth} from "@application/classes/Auth";
 import {notifyAboutNewSupportFile} from "@root/redux_toolkit/slices/SupportFileSlice";
+import {setIsAboutToLogout} from "@application/redux_toolkit/slices/AuthSlice";
+import {TRIPLET_STATE} from "@application/interfaces/IApplication";
 
 const SocketDataContext = createContext<SocketDataContextType | undefined>(undefined);
 
 export const SocketDataProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
-    const socket = useSocket();
+    const {socket, resetSocket} = useSocket();
     const dispatch = useAppDispatch();
-    const {authUser} = Auth.getReduxState();
+    const {authUser, isAboutToLogout} = Auth.getReduxState();
     const [isConnected, setIsConnected] = useState(false);
     const [authValid, setAuthValid] = useState(true);
 
@@ -44,10 +46,10 @@ export const SocketDataProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
             }
         }
     }, [authUser?.token]);
-
-    useEffect(() => {
-        if (!socket || !authUser?.token) return;
-
+    const connect = () => {
+        console.log('connect socket')
+        console.log(socket);
+        if (!socket) return;
         const alreadyConnected = socket.connected;
 
         socket.onConnect = () => {
@@ -56,10 +58,13 @@ export const SocketDataProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
                 const data = JSON.parse(message.body)
                 console.log('/user/session', data);
                 if (data.event === 'FORCE_LOGOUT') {
-                    socket.deactivate();
-                    setIsConnected(false);
+                    dispatch(setIsAboutToLogout(TRIPLET_STATE.TRUE));
+                    socket.deactivate().then(() => {
+                        console.log("🧹 Deactivated");
+                    });
                 }
             });
+            console.log("✅ Subscribed to /user/session");
             userSessionSubscriptionRef.current = () => {
                 userSessionSubscription.unsubscribe();
                 userSessionSubscriptionRef.current = undefined;
@@ -73,14 +78,27 @@ export const SocketDataProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
         if (!alreadyConnected) {
             socket.activate();
         }
+    }
+    useEffect(() => {
+        if (!authUser?.token) return;
+        connect();
     }, [authUser?.token, socket]);
+    useEffect(() => {
+        switch(isAboutToLogout) {
+            case TRIPLET_STATE.TRUE:
+                break;
+            case TRIPLET_STATE.FALSE:
+                resetSocket();
+                connect();
+                break;
+        }
+    }, [isAboutToLogout])
     useEffect(() => {
         if (hasNewSupportFile) {
             dispatch(notifyAboutNewSupportFile())
             setHasNewSupportFile(false);
         }
     }, [hasNewSupportFile])
-    console.log(isConnected);
     return (
         <SocketDataContext.Provider
             value={{

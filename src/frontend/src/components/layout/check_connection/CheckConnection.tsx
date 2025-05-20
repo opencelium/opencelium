@@ -15,30 +15,36 @@
 
 import React, {FC, useEffect} from 'react';
 import {LogoutProps} from "@application/interfaces/IAuth";
-import {logout} from "@application/redux_toolkit/slices/AuthSlice";
+import {logout, setIsAboutToLogout} from "@application/redux_toolkit/slices/AuthSlice";
 import Dialog from "@app_component/base/dialog/Dialog";
 import LoginFormInputs from "@app_component/default_pages/login/LoginFormInputs";
 import {ResponseMessages} from "@application/requests/interfaces/IResponse";
 import {useAppDispatch} from "@application/utils/store";
 import {useSocketData} from "../../../socket/SocketDataContext";
+import {Auth} from "@application/classes/Auth";
+import {TRIPLET_STATE} from "@application/interfaces/IApplication";
 
 const CheckConnectionComponent: FC =
     ({
          children,
     }) => {
+        const {isAboutToLogout, authUser} = Auth.getReduxState();
         const dispatch = useAppDispatch();
-        const socketData = useSocketData();
         const exit = () => {
             const logoutProps: LogoutProps = {wasAccessDenied: true, message: ResponseMessages.UNSUPPORTED_HEADER_AUTH_TYPE};
             dispatch(logout(logoutProps));
         }
-        if (!socketData?.socket) {
-            return null;
-        }
+        useEffect(() => {
+            if (authUser?.token) {
+                if (isAboutToLogout) {
+                    dispatch(setIsAboutToLogout(TRIPLET_STATE.FALSE));
+                }
+            }
+        }, [authUser?.token]);
         return (
             <Dialog
                 actions={[]}
-                active={!socketData.authValid || !socketData.isConnected}
+                active={isAboutToLogout === TRIPLET_STATE.TRUE}
                 toggle={exit}
                 title={''}
                 hasNoBody={true}

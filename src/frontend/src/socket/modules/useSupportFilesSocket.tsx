@@ -3,12 +3,14 @@ import { Socket } from "socket.io-client";
 import {Client} from "@stomp/stompjs";
 import ModelCurrentSchedule from "@entity/schedule/requests/models/CurrentSchedule";
 import {SocketAppPrefix} from "../socket";
+import {Auth} from "@application/classes/Auth";
 
 export const useSupportFilesSocket = (socket: Client | null) => {
+    const {isAboutToLogout} = Auth.getReduxState();
     const [hasNewSupportFile, setHasNewSupportFile] = useState<boolean>(false);
     const subscriptionRef = useRef<() => void>();
+    const setSubscription = () => {
 
-    useEffect(() => {
         if (!socket || !socket.connected) return;
         if (subscriptionRef.current) {
             return;
@@ -24,10 +26,20 @@ export const useSupportFilesSocket = (socket: Client | null) => {
             subscriptionRef.current = undefined;
             console.log("🧹 Unsubscribed from /execution/support-file");
         };
+    }
+    useEffect(() => {
+        setSubscription();
         return () => {
             subscriptionRef.current?.();
         };
     }, [socket?.connected]);
+    useEffect(() => {
+        if (isAboutToLogout) {
+            subscriptionRef.current?.();
+        } else {
+            setSubscription();
+        }
+    }, [isAboutToLogout]);
 
     return { hasNewSupportFile, setHasNewSupportFile };
 };

@@ -2,17 +2,22 @@ import React, {createContext, useContext, useRef} from "react";
 import { getSocket } from "./socket";
 import {Client} from "@stomp/stompjs";
 
-const SocketContext = createContext<Client | null>(null);
+const SocketContext = createContext<{socket: Client | null, resetSocket: () => void,}>({socket: null, resetSocket: () => {}});
 
 export const SocketProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
     const socketRef = useRef<Client | null>(null);
 
     if (!socketRef.current) {
-        socketRef.current = getSocket(); // <-- создаётся один раз навсегда
+        socketRef.current = getSocket();
+    }
+
+    const resetSocket = () => {
+        console.log('reset socket')
+        socketRef.current = getSocket();
     }
 
     return (
-        <SocketContext.Provider value={socketRef.current}>
+        <SocketContext.Provider value={{socket: socketRef.current, resetSocket}}>
             {children}
         </SocketContext.Provider>
     );

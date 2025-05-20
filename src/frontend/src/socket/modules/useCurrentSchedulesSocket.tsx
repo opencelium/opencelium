@@ -2,12 +2,14 @@ import {useEffect, useRef, useState} from "react";
 import ModelCurrentSchedule from "@entity/schedule/requests/models/CurrentSchedule";
 import {Client} from "@stomp/stompjs";
 import {SocketAppPrefix} from "../socket";
+import {Auth} from "@application/classes/Auth";
 
 export const useCurrentSchedulesSocket = (socket: Client | null) => {
+    const {isAboutToLogout} = Auth.getReduxState();
     const [currentSchedules, setCurrentSchedules] = useState<ModelCurrentSchedule[]>([]);
     const subscriptionRef = useRef<() => void>();
-
-    useEffect(() => {
+    const setSubscription = () => {
+        console.log("try subscribe to /scheduler/running/all");
         if (subscriptionRef.current) {
             return;
         }
@@ -23,10 +25,20 @@ export const useCurrentSchedulesSocket = (socket: Client | null) => {
             subscriptionRef.current = undefined;
             console.log("🧹 Unsubscribed from /scheduler/running/all");
         };
+    }
+    useEffect(() => {
+        setSubscription()
         return () => {
             subscriptionRef.current?.();
         };
     }, [socket?.connected]);
+    useEffect(() => {
+        if (isAboutToLogout){
+            subscriptionRef.current?.();
+        } else {
+            setSubscription()
+        }
+    }, [isAboutToLogout]);
 
     return { currentSchedules };
 };

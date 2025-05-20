@@ -29,6 +29,7 @@ export interface AuthState extends ICommonState{
     isAuth: boolean,
     expTime: number,
     sessionId: string,
+    isAboutToLogout: TRIPLET_STATE,
     logining: API_REQUEST_STATE,
     logouting: API_REQUEST_STATE,
     isSessionExpired: boolean,
@@ -41,6 +42,7 @@ const initialState: AuthState = {
     isAuth: !!authUser,
     expTime: authUser ? authUser.expTime : 0,
     sessionId: '',
+    isAboutToLogout: TRIPLET_STATE.INITIAL,
     logining: API_REQUEST_STATE.INITIAL,
     logouting: API_REQUEST_STATE.INITIAL,
     isSessionExpired: true,
@@ -52,6 +54,12 @@ export const authSlice = createSlice({
     name: 'auth',
     initialState,
     reducers: {
+        setIsAboutToLogout: (state, action: PayloadAction<TRIPLET_STATE>) => {
+            state.isAboutToLogout = action.payload;
+            if (action.payload) {
+                state.authUser = {...state.authUser, token: ''};
+            }
+        },
         logout: (state, action: PayloadAction<LogoutProps>) => {
             state.logouting = API_REQUEST_STATE.FINISH;
             state.error = null;
@@ -59,6 +67,7 @@ export const authSlice = createSlice({
             state.authUser = null;
             state.wasAccessDenied = action.payload?.wasAccessDenied || false;
             state.message = action.payload?.message || '';
+            state.isAboutToLogout = TRIPLET_STATE.INITIAL;
             state.sessionId = '';
         },
         updateAuthUser: (state, action: PayloadAction<IAuthUser>) => {
@@ -71,6 +80,7 @@ export const authSlice = createSlice({
             state.isAuth = true;
             state.authUser = action.payload;
             state.wasAccessDenied = false;
+            state.isAboutToLogout = TRIPLET_STATE.INITIAL;
         },
         setSessionId: (state, action: PayloadAction<string>) => {
             state.sessionId = '';
@@ -102,6 +112,6 @@ export const authSlice = createSlice({
 })
 
 export const {
-    logout, updateAuthUser,
+    logout, updateAuthUser, setIsAboutToLogout,
     setLoginInfo, setSessionId } = authSlice.actions
 export default authSlice.reducer;
