@@ -13,19 +13,20 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {Component} from 'react';
-import PropTypes from 'prop-types';
-import Property from "@app_component/base/input/xml_view/xml_editor/Property";
-import styles from './basic_components.scss';
-import CTag, {TAG_VALUE_TYPES} from "./classes/CTag";
-import {checkReferenceFormat, isString} from "@application/utils/utils";
-import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
-import CProperty from "./classes/CProperty";
 import ChangeProperty from "@app_component/base/input/xml_view/xml_editor/ChangeProperty";
 import ChangeTag from "@app_component/base/input/xml_view/xml_editor/ChangeTag";
+import Property from "@app_component/base/input/xml_view/xml_editor/Property";
 import ReferenceValues from "@app_component/base/input/xml_view/xml_editor/ReferenceValues";
+import { OnReferenceClickContext } from "@app_component/base/input/xml_view/xml_editor/XmlEditor";
+import { checkReferenceFormat, isString } from "@application/utils/utils";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import { update } from 'lodash';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import styles from './basic_components.scss';
+import CProperty from "./classes/CProperty";
+import CTag, { TAG_VALUE_TYPES } from "./classes/CTag";
 import CXmlEditor from "./classes/CXmlEditor";
-import {OnReferenceClickContext} from "@app_component/base/input/xml_view/xml_editor/XmlEditor";
 
 const XML_TAG_INDENT = 15;
 
@@ -175,10 +176,10 @@ class Tag extends Component{
     /**
      * to minimize or maximize tag
      */
-    toggleTag(){
-        const {tag, update} = this.props;
+    toggleTag() {
+        const { tag } = this.props;
         tag.minimized = !tag.minimized;
-        update();
+        this.forceUpdate();
     }
 
     /**

@@ -189,8 +189,6 @@ export function RequestBody(CRequestType){
 							updated_src: transformDataFields(data.updated_src, 'body'),
 						};
 
-						console.log(transformedData)
-
 						const fieldBindingData = CRequestType.convertForFieldBinding(transformedData)
 						
 						CRequestType.updateFieldsBinding(
@@ -210,7 +208,6 @@ export function RequestBody(CRequestType){
 								CRequestType.convertToBodyFormat(transformedData)
 							);
 						}
-						console.log(connection)
 						updateEntity();
 					}
 
