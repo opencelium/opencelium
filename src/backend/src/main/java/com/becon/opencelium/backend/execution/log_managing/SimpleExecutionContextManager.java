@@ -8,6 +8,7 @@ import com.becon.opencelium.backend.execution.log_managing.commons.LogTrackerTyp
 import com.becon.opencelium.backend.execution.log_managing.core.ExecutionContextManager;
 import com.becon.opencelium.backend.execution.log_managing.core.LogElementTracker;
 import com.becon.opencelium.backend.execution.log_managing.core.ParsedLogLine;
+import com.becon.opencelium.backend.execution.log_managing.trackers.LogTrackerFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -74,8 +75,7 @@ public class SimpleExecutionContextManager implements ExecutionContextManager {
                 .orElseThrow(() -> LogProcessingException.noExecutionInitialized(executionId));
 
         if (parsedLog.getEntryType().isStartingNewStack()) {
-
-            LogElementTracker tracker = null; // TODO : initialize tracker, OC-1088
+            LogElementTracker tracker = LogTrackerFactory.initTracker(trackerType);
             tracker.onStart(parsedLog, executionContext.currentOffset.get());
 
             executionContext.currentOffset.getAndUpdate(x -> x + parsedLog.getSize());
@@ -93,6 +93,8 @@ public class SimpleExecutionContextManager implements ExecutionContextManager {
             LogElementTracker tracker = Optional.ofNullable(root.getLastData())
                     .orElseThrow(() -> LogProcessingException.noTrackerInitialized(parsedLog.getEntryType(), parsedLog.getIndexPath()));
 
+            executionContext.currentOffset.getAndUpdate(x -> x + parsedLog.getSize());
+
             if (parsedLog.getEntryType().isEndingStack()) {
                 root.dropLast();
                 LogMetaData metaData = tracker.onEnd(parsedLog);
@@ -100,9 +102,9 @@ public class SimpleExecutionContextManager implements ExecutionContextManager {
                 metaData.setConnectionId(executionContext.connectionId);
                 metaData.setFlowchartId(executionContext.flowchartId);
                 metaData.setParentPath(root.getLastIndexPath());
+                metaData.setEndOffset(executionContext.currentOffset.get());
                 return Optional.of(metaData);
             } else {
-                executionContexts.get(executionId).currentOffset.getAndUpdate(x -> x + parsedLog.getSize());
                 tracker.onContent(parsedLog);
                 return Optional.empty();
             }
