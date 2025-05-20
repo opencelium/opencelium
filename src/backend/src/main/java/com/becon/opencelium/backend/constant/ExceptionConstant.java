@@ -31,6 +31,8 @@ public interface ExceptionConstant {
     String MASTER_PASSWORD_NOT_EXIST = "MASTER_PASSWORD_NOT_EXIST";
     String MASTER_PASSWORD_WRONG = "MASTER_PASSWORD_WRONG";
     String REQUIRED_DATA_NOT_FOUND = "REQUIRED_DATA_NOT_FOUND";
+    String LOG_NOT_FOUND = "LOG_NOT_FOUND";
+    String INTERNAL_ERROR = "INTERNAL_ERROR";
 
     // ----------------------------------------- Storage Controller --------------------------------------- //
 
