@@ -3,7 +3,9 @@ package com.becon.opencelium.backend.mapper.mysql;
 import com.becon.opencelium.backend.commons.ThreadLocalSingleton;
 import com.becon.opencelium.backend.database.mysql.entity.RequestData;
 import com.becon.opencelium.backend.mapper.base.Mapper;
+
 import java.util.Collections;
+
 import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.Named;
 
@@ -32,7 +34,7 @@ public interface RequestDataMapper extends Mapper<List<RequestData>, Map<String,
         boolean mpNotValid = Boolean.FALSE.equals(ThreadLocalSingleton.hasMasterPassword());
 
         return entity.stream()
-                .map(x -> !"public".equals(x.getVisibility()) && mpNotValid
+                .map(x -> mpNotValid
                         ? Map.entry(x.getField(), StringUtils.EMPTY)
                         : Map.entry(x.getField(), x.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
