@@ -196,6 +196,7 @@ public class ConnectorExecutor {
         executionManager.setPagination(pagination);
 
         boolean hasMore = false;
+        long duration = 0;
         RequestEntity<?> requestEntity;
         ResponseEntity<?> responseEntity;
         do {
@@ -216,15 +217,16 @@ public class ConnectorExecutor {
                 }
             }
 
-            logger.logAndSend("Http Method: " + requestEntity.getMethod());
-            logger.logAndSend(masking.applyMask(uri, toRef.apply("request", "url")));
-            logger.logAndSend(masking.applyMask(requestEntity.getHeaders(), toRef.apply("request", "header")));
-            logger.logAndSend(masking.applyMask(requestEntity.getBody(), toRef.apply("request", "body")));
+            logger.logAndSend(String.format("segment=REQUEST url=%s http_method=%s", masking.applyMask(uri, toRef.apply("request", "url")), requestEntity.getMethod()));
+            logger.logAndSend(String.format("segment=REQUEST_HEADER data=%s", masking.applyMask(requestEntity.getHeaders(), toRef.apply("request", "header"))));
+            logger.logAndSend(String.format("segment=REQUEST_PAYLOAD data=%s", masking.applyMask(requestEntity.getBody(), toRef.apply("request", "body"))));
 
             HttpEntity<Object> httpEntity = new HttpEntity<>(requestEntity.getBody(), requestEntity.getHeaders());
             Class<?> responseType = getResponseType(dto);
 
+            long startTime = System.currentTimeMillis();
             responseEntity = this.restTemplate.exchange(uri, requestEntity.getMethod(), httpEntity, responseType);
+            duration += (System.currentTimeMillis() - startTime);
 
             if (pagination != null) {
                 pagination.updateParamValues(responseEntity, responseType);
@@ -242,7 +244,9 @@ public class ConnectorExecutor {
             pagination = null;
             executionManager.setPagination(pagination);
         }
-        logger.logAndSend(masking.applyMask(responseEntity.getBody(), toRef.apply("response", "body")));
+        logger.logAndSend(String.format("segment=RESPONSE status=%d duration=%dms", responseEntity.getStatusCode().value(), duration));
+        logger.logAndSend(String.format("segment=RESPONSE_HEADER data=%s", masking.applyMask(responseEntity.getHeaders(), toRef.apply("response", "header"))));
+        logger.logAndSend(String.format("segment=RESPONSE_PAYLOAD data=%s", masking.applyMask(responseEntity.getBody(), toRef.apply("response", "body"))));
 
         Operation operation = executionManager.findOperationByColor(dto.getOperationId())
                 .orElseGet(() -> {
