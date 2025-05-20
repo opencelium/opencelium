@@ -1,12 +1,18 @@
 package com.becon.opencelium.backend.utility;
 
+import com.becon.opencelium.backend.commons.FileDescriptor;
+import com.becon.opencelium.backend.constant.ExceptionConstant;
+import com.becon.opencelium.backend.constant.ExceptionMessages;
+import com.becon.opencelium.backend.exception.GeneralServiceException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.StandardCopyOption;
+import java.io.InputStream;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -17,6 +23,9 @@ import static com.becon.opencelium.backend.execution.logger.OcLogger.LOG_LOCATIO
 
 public class LogFileUtility {
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm");
+
+    private static final Logger log = LogManager.getLogger(LogFileUtility.class);
+    private static final String LOG_FILE_NAME_RGX = "\\d+_\\d+_\\S+_%d\\.log";
 
     public static Path toPath(String base, String... sub) {
         Path path = Paths.get(base, sub);
@@ -91,6 +100,45 @@ public class LogFileUtility {
         }
     }
 
+    public static FileDescriptor getLogFile(Long executionId) {
+        Path logFolder = toPath(LOG_LOCATION);
+
+        String fileNameRgx = String.format(LOG_FILE_NAME_RGX, executionId);
+
+        try (Stream<Path> stream = Files.walk(logFolder, FileVisitOption.FOLLOW_LINKS)) {
+
+            return stream
+                    .filter(x -> x.getFileName().toString().matches(fileNameRgx))
+                    .findFirst()
+                    .map(LogFileUtility::readFile)
+                    .orElseThrow(() -> new GeneralServiceException(ExceptionConstant.LOG_NOT_FOUND, ExceptionMessages.LOG_NOT_FOUND.formatted(executionId)));
+
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+
+            throw new GeneralServiceException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    ExceptionConstant.INTERNAL_ERROR,
+                    ExceptionMessages.UNKNOWN_ERROR
+            );
+        }
+    }
+
+    private static FileDescriptor readFile(Path path) {
+        try (InputStream in = new FileInputStream(path.toFile())) {
+            return FileDescriptor.of(
+                    in.readAllBytes(),
+                    path.getFileName().toString(),
+                    MediaType.APPLICATION_OCTET_STREAM_VALUE
+            );
+        } catch (IOException e) {
+            throw new GeneralServiceException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    ExceptionConstant.INTERNAL_ERROR,
+                    ExceptionMessages.UNKNOWN_ERROR
+            );
+        }
+    }
 
     private static LocalDateTime extractTime(Path path) {
         String filename = path.getFileName().toString();

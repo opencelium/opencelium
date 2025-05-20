@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.controller;
 
+import com.becon.opencelium.backend.commons.FileDescriptor;
 import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
 import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.constant.Constant;
@@ -43,6 +44,7 @@ import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.request.SchedulerRequestResource;
 import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
+import com.becon.opencelium.backend.utility.LogFileUtility;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatch;
@@ -80,7 +82,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -160,7 +161,7 @@ public class ConnectionController {
         List<Connection> connections = connectionService.findAll();
         List<ConnectionResource> connectionResources = connectionResourceMapper.toDTOAll(connections);
         //unnecessary fields
-        connectionResources.forEach(c->{
+        connectionResources.forEach(c -> {
             c.getFromConnector().setRequestData(null);
             c.getFromConnector().getInvoker().setOperations(null);
             c.getFromConnector().getInvoker().setRequiredData(null);
@@ -289,6 +290,20 @@ public class ConnectionController {
         SchedulerResource schedulerResource = new SchedulerResource();
         schedulerResource.setSchedulerId(scheduler.getId());
         return ResponseEntity.ok(schedulerResource);
+    }
+
+    @Operation(summary = "Retrieves a log file with given executionId")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved", content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE))
+    })
+    @GetMapping("/execution/{executionId}")
+    public ResponseEntity<byte[]> getExecutionLogs(@PathVariable Long executionId) {
+
+        FileDescriptor logFile = LogFileUtility.getLogFile(executionId);
+
+        return ResponseEntity.ok()
+                .headers(logFile.buildHeaders())
+                .body(logFile.getData());
     }
 
     @Operation(summary = "Deletes a connection by provided connection ID")
@@ -581,13 +596,13 @@ public class ConnectionController {
 
     @Operation(summary = "Removes webhook")
     @ApiResponses(value = {
-            @ApiResponse( responseCode = "204",
+            @ApiResponse(responseCode = "204",
                     description = "Webhook has been successfully deleted",
                     content = @Content),
-            @ApiResponse( responseCode = "401",
+            @ApiResponse(responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-            @ApiResponse( responseCode = "500",
+            @ApiResponse(responseCode = "500",
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
@@ -656,7 +671,7 @@ public class ConnectionController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PostMapping(path="/{connectionId}/rule/list", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/{connectionId}/rule/list", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<RuleDTO>> saveRuleList(@PathVariable long connectionId, @RequestBody List<RuleDTO> dtos) throws Exception {
         final URI uri = MvcUriComponentsBuilder
                 .fromController(getClass())
@@ -677,7 +692,7 @@ public class ConnectionController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @PostMapping(path="/{connectionId}/rule", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/{connectionId}/rule", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<RuleDTO> saveRule(@PathVariable long connectionId, @RequestBody RuleDTO dto) throws Exception {
         final URI uri = MvcUriComponentsBuilder
                 .fromController(getClass())
