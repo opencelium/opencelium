@@ -152,17 +152,11 @@ public class ConnectorController {
     })
     @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ConnectorResource> update(@PathVariable Integer id, @RequestBody ConnectorResource connectorResource) {
-        Connector connector = connectorService.getById(id);
-
-        if (connectorService.existByTitle(connectorResource.getTitle()) && !connector.getTitle().equals(connectorResource.getTitle())) {
-            throw new ConnectorAlreadyExistsException(connectorResource.getTitle());
-        }
-        connectorResource.setConnectorId(id);
-        Connector entity = connectorResourceMapper.toEntity(connectorResource);
-        connectorService.update(connector, entity);
-
-        return ResponseEntity.ok()
-                .body(connectorResourceMapper.toDTO(entity));
+        return ResponseEntity.ok(
+                connectorResourceMapper.toDTO(
+                        connectorService.update(id, connectorResource)
+                )
+        );
     }
 
     @Operation(summary = "Modifies connector's required data")
