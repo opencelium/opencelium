@@ -39,7 +39,6 @@ import java.util.Objects;
 import java.util.function.BiFunction;
 
 public class ConnectorExecutor {
-
     private final ExpressionProcessor expressionProcessor;
     private final Connector connector;
     private final ExecutionManager executionManager;
@@ -48,7 +47,6 @@ public class ConnectorExecutor {
     private final OcLogger<ExecutionLog> logger;
     private final MaskingService masking;
     private final String direction;
-    private static final String BREAK = "======================= %s %s -- INDEX: %s =======================";
 
     public ConnectorExecutor(ConnectorEx connectorEx, ExecutionManager executionManager, RestTemplate restTemplate, OcLogger<ExecutionLog> logger, MaskingService masking, String direction) {
         this.expressionProcessor = ExpressionProcessorFactory.get(ProcessorType.POSTFIX);
@@ -85,23 +83,19 @@ public class ConnectorExecutor {
         while (headPointer < executables.size()) {
             int tailPointer = getTailPointer(headPointer);
 
-            execute(headPointer, tailPointer, false, -1, -1);
+            execute(headPointer, tailPointer);
 
             headPointer = tailPointer + 1;
         }
     }
 
-    private void execute(int headPointer, int tailPointer, boolean hasCircle, int loopHead, int loopTail) {
+    private void execute(int headPointer, int tailPointer) {
         if (headPointer > tailPointer) {
             return;
         }
 
         // points to the end of the operator body
         int tail = getTailPointer(headPointer);
-        // holds index of current executable
-        String index = getIndex(executables.get(headPointer));
-        // holds [next function index, next operator index] for current executable
-        String[] next = getNextIndex(headPointer, hasCircle, loopHead, loopTail);
 
         if (executables.get(headPointer) instanceof OperationDTO operation) {
             if (headPointer != tail) {
@@ -110,43 +104,28 @@ public class ConnectorExecutor {
 
             // set up logger and masking for the current operation
             logger.getLogEntity().setMethodData(new MethodData(operation.getOperationId()));
-            logger.logAndSend(String.format(BREAK, "API OPERATION", "START", index));
-            logger.logAndSend(String.format(
-                    "Function: %s -- next function: %s -- next operator: %s -- index: %s",
-                    operation.getName(), next[0], next[1], index
-            ));
 
             executeOperation(operation);
 
-            logger.logAndSend(String.format(BREAK, "API OPERATION", "END", index));
             // clean up after operation execution
             logger.getLogEntity().setMethodData(null);
         } else if (executables.get(headPointer) instanceof OperatorEx operator) {
             if (Objects.equals(operator.getType(), "if")) {
-                logger.logAndSend(String.format(BREAK, operator.getExpression(), "START", index));
-                logger.logAndSend(String.format(
-                        "=============== %s =============== -- next function: %s -- next operator: %s -- index: %s",
-                        operator.getExpression(), next[0], next[1], index
-                ));
-
                 boolean result = (Boolean) expressionProcessor.evaluate(
                         operator.getExpression(),
                         executionManager::getValue,
                         logger,
                         masking
                 );
-                logger.logAndSend("OPERATOR_RESULT: " + (result ? "TRUE" : "FALSE") + " -- index: " + index);
 
                 if (result) {
                     // if result is true, then execute if operators' body
-                    execute(headPointer + 1, tail, hasCircle, loopHead, loopTail);
+                    execute(headPointer + 1, tail);
                 }
             } else {
                 Loop loop = Loop.fromEx(operator);
                 Object referencedList = executionManager.getValue(loop.getRef());
                 List<String> list = new ArrayList<>();
-
-                logger.logAndSend(String.format(BREAK, loop.getOperator().toString().toUpperCase(), "START", index));
 
                 if (ObjectUtils.isEmpty(referencedList)) {
                     // if list empty just do nothing
@@ -166,31 +145,20 @@ public class ConnectorExecutor {
                 }
 
                 int length = list.size();
-                logger.logAndSend("LOOP_OPERATOR_RESULT: " + (length == 0 ? "EMPTY" : "NOT_EMPTY") + " -- index: " + index);
 
                 executionManager.getLoops().add(loop);
                 for (int i = 0; i < length; i++) {
-                    logger.logAndSend("Loop: " + loop.getRef() + " -------- index: " + i);
-
                     // update currently executing loops' data
                     loop.setIndex(i);
                     loop.setValue(list.get(i));
 
                     // if length !=0, then execute loop operators' body,
                     // there will be a circle if current run is not last one
-                    execute(headPointer + 1, tail, i < length - 1, headPointer, tail);
+                    execute(headPointer + 1, tail);
                 }
 
                 // remove executed loops' data
                 executionManager.getLoops().remove(loop);
-                // log after executing operator
-                next = getNextIndex(tail, hasCircle, loopHead, loopTail);
-                logger.logAndSend("============================================================================");
-                logger.logAndSend(String.format(
-                        "Operator: -- next function: %s -- next operator: %s -- type: %s -- index: %s",
-                        next[0], next[1], operator.getType(), index)
-                );
-                logger.logAndSend(String.format(BREAK, operator.getExpression(), "END", index));
             }
 
         } else {
@@ -198,7 +166,7 @@ public class ConnectorExecutor {
         }
 
         // we already executed operations'/operators' body, now start executing next body'
-        execute(tail + 1, tailPointer, hasCircle, loopHead, loopTail);
+        execute(tail + 1, tailPointer);
     }
 
     private void executeOperation(OperationDTO dto) {
@@ -239,7 +207,6 @@ public class ConnectorExecutor {
             logger.logAndSend(masking.applyMask(uri, toRef.apply("request", "url")));
             logger.logAndSend(masking.applyMask(requestEntity.getHeaders(), toRef.apply("request", "header")));
             logger.logAndSend(masking.applyMask(requestEntity.getBody(), toRef.apply("request", "body")));
-            logger.logAndSend("============================================================================");
 
             HttpEntity<Object> httpEntity = new HttpEntity<>(requestEntity.getBody(), requestEntity.getHeaders());
             Class<?> responseType = getResponseType(dto);
@@ -301,28 +268,6 @@ public class ConnectorExecutor {
         }
 
         return headPointer - 1;
-    }
-
-    private String[] getNextIndex(int lastExecuted, boolean hasCircle, int loopHead, int loopTail) {
-        String[] result = {"null", "null"};
-        Object next;
-        if (hasCircle && lastExecuted == loopTail) {
-            next = executables.get(loopHead + 1);
-        } else if (lastExecuted + 1 < executables.size()) {
-            next = executables.get(lastExecuted + 1);
-        } else {
-            return result;
-        }
-
-        String index = getIndex(next);
-
-        if (next instanceof OperationDTO) {
-            result[0] = index;
-        } else {
-            result[1] = index;
-        }
-
-        return result;
     }
 
     private static Comparator<Object> getComparator() {
