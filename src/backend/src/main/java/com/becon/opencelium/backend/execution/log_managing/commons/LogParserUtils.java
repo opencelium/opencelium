@@ -4,8 +4,27 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 
+/**
+ * Utility class for parsing structured log lines and extracting metadata properties such as section, scope, or custom keys
+ */
 public class LogParserUtils {
 
+    private LogParserUtils() {
+        // Prevent instantiation
+    }
+
+    /**
+     * Extracts the {@link LogEntryType} from a log line by checking for the "section" or "scope" properties.
+     *
+     * @param line the log line
+     * @return a corresponding {@link LogEntryType}, or null if not found or unrecognized
+     * <p>
+     * Example:
+     * <br/>
+     * scope=METHOD_START indexPath=1 -> METHOD_START
+     * <br/>
+     * section=REQUEST url={url} -> REQUEST
+     */
     public static LogEntryType extractEntryType(String line) {
         Map<String, Object> result = extractOutermostProperties(line, Collections.emptySet(), true);
         Object section = result.get(LogPropertyKeys.SECTION);
@@ -19,11 +38,22 @@ public class LogParserUtils {
         return null;
     }
 
+    /**
+     * Extracts all top-level properties from a structured log line using the provided property descriptors.
+     * Supports extracting top-level properties from a line in a key-value format. Nested or complex values in brackets or braces are respected.
+     * <p><strong>Usage example:</strong></p>
+     * <pre>{@code
+     * String line = "section=REQUEST url=http://localhost:8080";
+     *
+     * Map<String, Object> extracted = LogParserUtils.extractOutermostProperties(line, props);
+     * System.out.println(extracted.get("url"));  // Outputs: "http://localhost:8080"
+     * }</pre>
+     */
     public static Map<String, Object> extractOutermostProperties(String line, Set<PropDescriptor> props) {
         return extractOutermostProperties(line, props, false);
     }
 
-    public static Map<String, Object> extractOutermostProperties(String line, Set<PropDescriptor> props, boolean onlySectionOrScope) {
+    private static Map<String, Object> extractOutermostProperties(String line, Set<PropDescriptor> props, boolean onlySectionOrScope) {
         // TODO: handle xml format
         Map<String, Object> result = new HashMap<>();
 
@@ -68,7 +98,12 @@ public class LogParserUtils {
                             startCurrentPropValueIndex = i + 1;
                             currentProp = line.substring(startCurrentPropIndex, i);
                             startCurrentPropIndex = -1;
-                            i++;
+
+                            if (i == chars.length - 2) {
+                                checkAndPutToMap(currentProp, line.substring(i + 1), result, props);
+                            } else {
+                                i++;
+                            }
                         } else {
                             checkAndPutToMap(line.substring(startCurrentPropIndex, i), StringUtils.EMPTY, result, props);
                         }
@@ -94,7 +129,7 @@ public class LogParserUtils {
                 if (chars[i] == '"') {
                     Character peeked = prefixSuffixStack.peek();
                     if (peeked.equals('"')) {
-                        checkAndPutToMap(currentProp, line.substring(startCurrentPropValueIndex, i + 1), result, props);
+                        checkAndPutToMap(currentProp, line.substring(startCurrentPropValueIndex + 1, i), result, props);
                         startCurrentPropValueIndex = -1;
                         currentProp = null;
                         prefixSuffixStack.pop();
@@ -119,9 +154,9 @@ public class LogParserUtils {
             }
         }
 
-        result.forEach((key, value) -> {
-            if (props.stream().noneMatch(prop -> key.equals(prop.key()))) {
-                throw LogProcessingException.missingRequiredProperty(key, line);
+        props.forEach(prop -> {
+            if (prop.required() && result.entrySet().stream().noneMatch(x -> prop.key().equals(x.getKey()))) {
+                throw LogProcessingException.missingRequiredProperty(prop.key(), line);
             }
         });
 

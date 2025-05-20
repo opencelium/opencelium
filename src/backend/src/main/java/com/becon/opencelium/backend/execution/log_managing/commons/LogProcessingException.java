@@ -11,14 +11,6 @@ public class LogProcessingException extends RuntimeException {
         return new LogProcessingException("%s parser doesn't support this log : %s".formatted(entryType.getTitle(), line));
     }
 
-    public static LogProcessingException invalidLoopIndex(String value) {
-        return new LogProcessingException("Invalid loopIndex : %s".formatted(value));
-    }
-
-    public static LogProcessingException cantReadData(String data) {
-        return new LogProcessingException("Can't read data : %s".formatted(data));
-    }
-
     public static LogProcessingException missingRequiredProperty(String key, String line) {
         return new LogProcessingException("Missing required property : %s. Log : %s".formatted(key, line));
     }
@@ -39,7 +31,11 @@ public class LogProcessingException extends RuntimeException {
         return new LogProcessingException("Invalid value for property : %s=%s".formatted(key, value));
     }
 
-    public static LogProcessingException invalidLoopCount(String loopCount) {
-        return new LogProcessingException("Invalid loopCount : %s".formatted(loopCount));
+    public static LogProcessingException noTrackerInitialized(String line) {
+        return new LogProcessingException("No tracker initialized with ID : %s".formatted(line));
+    }
+
+    public static LogProcessingException unsupportedLineFound(String line) {
+        return new LogProcessingException("Unsupported line found : %s".formatted(line));
     }
 }

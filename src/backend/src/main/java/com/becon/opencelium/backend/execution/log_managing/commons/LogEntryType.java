@@ -3,30 +3,30 @@ package com.becon.opencelium.backend.execution.log_managing.commons;
 import java.util.Arrays;
 
 public enum LogEntryType {
-    EXECUTION_START("EXECUTION_START", 1, 2),
-    EXECUTION_END("EXECUTION_END", 2, -1),
-    METHOD_START("METHOD_START", 3, 4),
-    METHOD_END("METHOD_END", 4, -1),
-    REQUEST("REQUEST", 5, -1),
-    REQUEST_HEADER("REQUEST_HEADER", 6, -1),
-    REQUEST_PAYLOAD("REQUEST_PAYLOAD", 7, -1),
-    RESPONSE("RESPONSE", 8, -1),
-    RESPONSE_HEADER("RESPONSE_HEADER", 9, -1),
-    RESPONSE_PAYLOAD("RESPONSE_PAYLOAD", 10, -1),
-    LOOP_START("LOOP_START", 11, 12),
-    LOOP_END("LOOP_END", 12, -1),
-    IF_START("IF_START", 13, 14),
-    IF_END("IF_END", 14, -1),
-    IF_RESULT("IF_RESULT", 15, -1);
+    EXECUTION_START("EXECUTION_START", true, false),
+    EXECUTION_END("EXECUTION_END", false, true),
+    METHOD_START("METHOD_START", true, false),
+    METHOD_END("METHOD_END", false, true),
+    REQUEST("REQUEST", false, false),
+    REQUEST_HEADER("REQUEST_HEADER", false, false),
+    REQUEST_PAYLOAD("REQUEST_PAYLOAD", false, false),
+    RESPONSE("RESPONSE", false, false),
+    RESPONSE_HEADER("RESPONSE_HEADER", false, false),
+    RESPONSE_PAYLOAD("RESPONSE_PAYLOAD", false, false),
+    LOOP_START("LOOP_START", true, false),
+    LOOP_END("LOOP_END", false, true),
+    IF_START("IF_START", true, false),
+    IF_END("IF_END", false, true),
+    IF_RESULT("IF_RESULT", false, false);
 
     private final String title;
-    private final int code;
-    private final int tailCode;
+    private final boolean startingNewStack;
+    private final boolean endingStack;
 
-    LogEntryType(String title, int code, int tailCode) {
+    LogEntryType(String title, boolean startingNewStack, boolean endingStack) {
         this.title = title;
-        this.code = code;
-        this.tailCode = tailCode;
+        this.startingNewStack = startingNewStack;
+        this.endingStack = endingStack;
     }
 
     public static LogEntryType getByTitleOrElseNull(String title) {
@@ -40,11 +40,11 @@ public enum LogEntryType {
         return title;
     }
 
-    public int getCode() {
-        return code;
+    public boolean isStartingNewStack() {
+        return startingNewStack;
     }
 
-    public int getTailCode() {
-        return tailCode;
+    public boolean isEndingStack() {
+        return endingStack;
     }
 }
