@@ -17,12 +17,12 @@
 package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.configuration.ConnectorProps;
-import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.constant.ExceptionConstant;
 import com.becon.opencelium.backend.constant.ExceptionMessages;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.RequestData;
 import com.becon.opencelium.backend.database.mysql.repository.ConnectorRepository;
+import com.becon.opencelium.backend.exception.ConnectorAlreadyExistsException;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.execution.rdata.RequiredDataService;
@@ -32,10 +32,9 @@ import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
+import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.utility.crypto.Encoder;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -199,10 +198,26 @@ public class ConnectorServiceImp implements ConnectorService {
     }
 
     @Override
-    public void update(Connector connector, Connector newConnector) {
-        newConnector.setRequestData(connector.getRequestData());
-        newConnector.setId(connector.getId());
-        connectorRepository.save(newConnector);
+    public Connector update(Integer connectorId, ConnectorResource connectorResource) {
+        Connector connector = connectorRepository.findById(connectorId)
+                .orElseThrow(() -> new ConnectorNotFoundException(connectorId));
+
+        if (existByTitle(connectorResource.getTitle()) && !connector.getTitle().equals(connectorResource.getTitle())) {
+            throw new ConnectorAlreadyExistsException(connectorResource.getTitle());
+        }
+
+        // requestData and invoker can't be updated
+        connector.setTitle(connectorResource.getTitle());
+        connector.setIcon(connectorResource.getIcon());
+        connector.setDescription(connectorResource.getDescription());
+        connector.setSslValidation(connectorResource.isSslCert());
+        connector.setTimeout(connectorResource.getTimeout());
+
+        connectorRepository.save(connector);
+
+        decrypt(connector);
+
+        return connector;
     }
 
     @Override
@@ -224,7 +239,7 @@ public class ConnectorServiceImp implements ConnectorService {
                 throw new GeneralServiceException(ExceptionConstant.REQUIRED_DATA_NOT_FOUND, ExceptionMessages.REQUIRED_DATA_NOT_FOUND.formatted(field));
             }
 
-            existing.setValue(value);
+            existing.setValue(encoder.encrypt(value));
         }
 
         requestDataService.saveAll(connector.getRequestData());

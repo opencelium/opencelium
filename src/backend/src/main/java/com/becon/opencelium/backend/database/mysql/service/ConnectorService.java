@@ -18,6 +18,7 @@ package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.RequestData;
+import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.http.ResponseEntity;
 
@@ -56,7 +57,7 @@ public interface ConnectorService {
 
     List<RequestData> buildRequestData(Connector connector);
 
-    void update(Connector connector, Connector newConnector);
+    Connector update(Integer connectorId, ConnectorResource connectorResource);
 
     void updateRequestData(Integer connectorId, Map<String, String> requestData);
 
