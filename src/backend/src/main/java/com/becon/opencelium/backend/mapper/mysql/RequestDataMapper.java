@@ -3,12 +3,13 @@ package com.becon.opencelium.backend.mapper.mysql;
 import com.becon.opencelium.backend.commons.ThreadLocalSingleton;
 import com.becon.opencelium.backend.database.mysql.entity.RequestData;
 import com.becon.opencelium.backend.mapper.base.Mapper;
+import java.util.Collections;
+import org.apache.commons.lang3.StringUtils;
 import org.mapstruct.Named;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @org.mapstruct.Mapper(
         componentModel = "spring"
@@ -26,13 +27,14 @@ public interface RequestDataMapper extends Mapper<List<RequestData>, Map<String,
 
     @Named("toDTO")
     default Map<String, String> toDTO(List<RequestData> entity) {
-        if (entity == null) return null;
+        if (entity == null) return Collections.emptyMap();
 
-        Stream<RequestData> stream = entity.stream();
-        if (Boolean.FALSE.equals(ThreadLocalSingleton.hasMasterPassword())) {
-            stream = stream.filter(field -> "public".equals(field.getVisibility()));
-        }
+        boolean mpNotValid = Boolean.FALSE.equals(ThreadLocalSingleton.hasMasterPassword());
 
-        return stream.collect(Collectors.toMap(RequestData::getField, RequestData::getValue));
+        return entity.stream()
+                .map(x -> !"public".equals(x.getVisibility()) && mpNotValid
+                        ? Map.entry(x.getField(), StringUtils.EMPTY)
+                        : Map.entry(x.getField(), x.getValue()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }
