@@ -36,6 +36,7 @@ public class ResponseHeaderParser implements LogLineParser {
         pll.setSize(line.getBytes(StandardCharsets.UTF_8).length);
         return pll;
     }
+
     /**
      * Defines the set of properties that must be present in the log line.
      *
@@ -44,4 +45,5 @@ public class ResponseHeaderParser implements LogLineParser {
     private static Set<PropDescriptor> requiredProperties() {
         return Set.of(of(LogPropertyKeys.DATA));
     }
+
 }

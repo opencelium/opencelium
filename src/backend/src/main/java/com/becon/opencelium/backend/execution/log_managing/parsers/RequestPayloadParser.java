@@ -44,4 +44,5 @@ public class RequestPayloadParser implements LogLineParser {
     private static Set<PropDescriptor> requiredProperties() {
         return Set.of(of(LogPropertyKeys.DATA, PropertyParsers::parseData));
     }
+
 }

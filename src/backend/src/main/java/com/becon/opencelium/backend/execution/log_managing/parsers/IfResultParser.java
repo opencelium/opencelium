@@ -43,11 +43,8 @@ public class IfResultParser implements LogLineParser {
      * @return a Set containing required property descriptors
      */
     private static Set<PropDescriptor> requiredProperties() {
-//        return Set.of(
-//                of(LogPropertyKeys.RESULT, x -> PropertyParsers.parseBoolean(LogPropertyKeys.RESULT, x))
-//                of(LogConstants.EXPRESSION),
-//                of(LogConstants.RESULT)
-//        );
-        return null;
+        return Set.of(
+                of(LogPropertyKeys.RESULT, x -> PropertyParsers.parseBoolean(LogPropertyKeys.RESULT, x))
+        );
     }
 }
