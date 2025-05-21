@@ -31,6 +31,7 @@ import { Category } from '@entity/category/classes/Category';
 import {getAllMetaConnections} from "@root/redux_toolkit/action_creators/ConnectionCreators";
 import { Connection } from '@entity/connection/classes/Connection';
 import {getCurrentSubscription} from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
+import ViewLogs from "@entity/schedule/components/view_logs/ViewLogs";
 
 const ScheduleList: FC<ScheduleListProps> = permission(SchedulePermissions.READ)(({hasTopBar, isReadonly, hasTitle, hasNotAlert}) => {
     const dispatch = useAppDispatch();
@@ -63,6 +64,7 @@ const ScheduleList: FC<ScheduleListProps> = permission(SchedulePermissions.READ)
         <React.Fragment>
             <CollectionView defaultViewType={ViewType.LIST} hasNotAlert={hasNotAlert} hasViewSection={false} hasTopBar={hasTopBar} hasTitle={hasTitle} shouldBeUpdated={shouldBeUpdated} collection={CSchedules} isLoading={gettingAllSchedules === API_REQUEST_STATE.START} componentPermission={SchedulePermissions}/>
             {gettingAllSchedules === API_REQUEST_STATE.FINISH && <CurrentSchedules/>}
+            <ViewLogs/>
         </React.Fragment>
     )
 })

@@ -67,6 +67,7 @@ export interface ScheduleState extends ICommonState{
     deletingSchedulesById: API_REQUEST_STATE,
     terminatingExecution: API_REQUEST_STATE,
     gettingLogsByExecutionId: API_REQUEST_STATE,
+    currentExecutionLogs: {executionId: string, logs: string},
     gettingWebhook: API_REQUEST_STATE,
     deletingWebhook: API_REQUEST_STATE,
     currentSchedule: ModelSchedule,
@@ -98,6 +99,7 @@ const initialState: ScheduleState = {
     deletingWebhook: API_REQUEST_STATE.INITIAL,
     terminatingExecution: API_REQUEST_STATE.INITIAL,
     gettingLogsByExecutionId: API_REQUEST_STATE.INITIAL,
+    currentExecutionLogs: {executionId: '', logs: ''},
     currentSchedule: null,
     testSchedule: null,
     ...CommonState,
@@ -108,6 +110,9 @@ export const scheduleSlice = createSlice({
     initialState,
     reducers: {
         copyWebhookToClipboard: (state) => {
+        },
+        setCurrentExecutionLogs: (state, action) => {
+            state.currentExecutionLogs = action.payload;
         },
         setCurrentSchedule: (state, action) => {
             state.currentSchedule = action.payload;
@@ -396,8 +401,9 @@ export const scheduleSlice = createSlice({
         [getLogsByExecutionId.pending.type]: (state) => {
             state.gettingLogsByExecutionId = API_REQUEST_STATE.START;
         },
-        [getLogsByExecutionId.fulfilled.type]: (state, action: PayloadAction<IResponse>) => {
+        [getLogsByExecutionId.fulfilled.type]: (state, action: PayloadAction<{executionId: string, logs: string}>) => {
             state.gettingLogsByExecutionId = API_REQUEST_STATE.FINISH;
+            state.currentExecutionLogs = action.payload;
             state.error = null;
         },
         [getLogsByExecutionId.rejected.type]: (state, action: PayloadAction<IResponse>) => {
@@ -409,6 +415,7 @@ export const scheduleSlice = createSlice({
 
 export const {
     copyWebhookToClipboard, setCurrentSchedule, setInitialTestScheduleState,
+    setCurrentExecutionLogs,
 } = scheduleSlice.actions;
 
 export const actions = {
