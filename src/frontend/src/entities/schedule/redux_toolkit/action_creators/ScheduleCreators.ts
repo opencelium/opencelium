@@ -316,6 +316,19 @@ export const terminateExecution = createAsyncThunk(
     }
 )
 
+export const getLogsByExecutionId = createAsyncThunk(
+    'schedule/logs/executionId',
+    async(executionId: string, thunkAPI) => {
+        try {
+            const request = new ScheduleRequest({url: 'connection', endpoint: `/execution/${executionId}`});
+            const response = await request.getLogsByExecutionId();
+            console.log(response.data);
+        } catch(e){
+            return thunkAPI.rejectWithValue({message: e.response.data.error});
+        }
+    }
+)
+
 export default {
     checkScheduleTitle,
     switchScheduleStatus,
@@ -336,4 +349,5 @@ export default {
     deleteTestScheduleById,
     deleteSchedulesById,
     terminateExecution,
+    getLogsByExecutionId,
 }

@@ -16,11 +16,20 @@
 import styled from "styled-components";
 import {ScheduleDataAppearance} from "@style/animations";
 import {LastSuccessExecutionStyledProps} from "./interfaces";
+import Icon from "@app_component/base/icon/Icon";
 
 const LastSuccessExecutionStyled = styled.div<LastSuccessExecutionStyledProps>`
     ${({isRefreshing}) => isRefreshing ? ScheduleDataAppearance : ''}
 `;
 
+const LoadingIcon = styled(Icon)`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 24px;
+`
 export {
     LastSuccessExecutionStyled,
+    LoadingIcon,
 }

@@ -14,20 +14,43 @@
  */
 
 import React, {FC, useEffect, useState} from 'react';
-import {withTheme} from 'styled-components';
+import {useTheme, withTheme} from 'styled-components';
 import {Urls} from "@entity/application/requests/classes/url";
 import {usePrevious} from "@application/utils/hooks/usePrevious";
 import {convertTimeForSchedulerList} from "@application/utils/utils";
 import { LastSuccessExecutionProps } from './interfaces';
-import {LastSuccessExecutionStyled} from "./styles";
+import {LastSuccessExecutionStyled, LoadingIcon} from "./styles";
+import {Schedule} from "@entity/schedule/classes/Schedule";
+import {useAppDispatch} from "@application/utils/store";
+import {getLogsByExecutionId} from "@entity/schedule/redux_toolkit/action_creators/ScheduleCreators";
+import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
+import Icon from "@app_component/base/icon/Icon";
 
 const LastSuccessExecution: FC<LastSuccessExecutionProps> =
     ({
         schedule,
         hasElasticSearch,
+        theme,
     }) => {
+        const dispatch = useAppDispatch()
+        const {gettingLogsByExecutionId} = Schedule.getReduxState();
+        const [startGettingLogs, setStartGettingLogs] = useState<boolean>(false);
         const prevProps: any = usePrevious({schedule}) || [];
         const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+        const getLogs = (executionId: string) => {
+            setStartGettingLogs(true);
+            dispatch(getLogsByExecutionId(executionId));
+        }
+        useEffect(() => {
+            if (startGettingLogs) {
+                switch(gettingLogsByExecutionId) {
+                    case API_REQUEST_STATE.FINISH:
+                    case API_REQUEST_STATE.ERROR:
+                        setStartGettingLogs(false);
+                        break;
+                }
+            }
+        }, [gettingLogsByExecutionId]);
         useEffect(() => {
             if(prevProps.schedule?.lastExecution?.success?.taId !== schedule?.lastExecution?.success?.taId && typeof prevProps.schedule !== 'undefined') {
                 setIsRefreshing(true);
@@ -47,7 +70,7 @@ const LastSuccessExecution: FC<LastSuccessExecutionProps> =
                 if(hasElasticSearch){
                     taIdComponent = <a id={`last_success_${schedule.id}`} href={url} target={'_blank'}>#{executionId}</a>;
                 } else{
-                    taIdComponent = <span>{`#${executionId}`}</span>;
+                    taIdComponent = startGettingLogs ? <LoadingIcon loadingSize={'16px'} color={theme?.menu?.background || '#000'} name={' '} isLoading={true}/> : <span id={'clickable'} style={{cursor: 'pointer', textDecoration: 'underline'}} onClick={() => getLogs(executionId)}>{`#${executionId}`}</span>;
                 }
             }
             return (

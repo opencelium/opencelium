@@ -39,7 +39,7 @@ const DefaultListRaw: FC<DefaultListRawProps> =
                     let element = e.target;
                     if(element && e.detail === 1) {
                         while (true) {
-                            if(element.onclick || element.tagName.toLowerCase() === 'input' || element.tagName.toLowerCase() === 'textarea'){
+                            if(element.id === 'clickable' || element.onclick || element.tagName.toLowerCase() === 'input' || element.tagName.toLowerCase() === 'textarea'){
                                 break;
                             } else{
                                 if(element.id === id){

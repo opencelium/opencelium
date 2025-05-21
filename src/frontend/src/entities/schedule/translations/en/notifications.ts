@@ -15,6 +15,7 @@
 
 import ActionCreators from "../../redux_toolkit/action_creators";
 import {actions} from '../../redux_toolkit/slices/ScheduleSlice';
+import {getLogsByExecutionId} from "@entity/schedule/redux_toolkit/action_creators/ScheduleCreators";
 
 const {
     addSchedule, disableSchedules, enableSchedules, switchScheduleStatus, startSchedule, deleteScheduleById,
@@ -30,6 +31,7 @@ const {
 export default {
     fulfilled: {
         [addNotificationToSelectedSchedules.fulfilled.type]: "The notification was successfully added to selected schedules",
+        [getLogsByExecutionId.fulfilled.type]: "The log was successfully fetched.",
         [addNotification.fulfilled.type]: "The notification was successfully added",
         [updateNotification.fulfilled.type]: "The notification was successfully updated",
         [addSchedule.fulfilled.type]: "The schedule <1><0>{{title}}</0></1> was successfully added",
@@ -49,6 +51,10 @@ export default {
 
     },
     rejected: {
+        [getLogsByExecutionId.fulfilled.type]: {
+            "__DEFAULT__": "The log was not fetched.",
+            "LOG_NOT_FOUND": "The log is not found.",
+        },
         [addNotificationToSelectedSchedules.rejected.type]: {
             "__DEFAULT__": "The notification was not added",
         },

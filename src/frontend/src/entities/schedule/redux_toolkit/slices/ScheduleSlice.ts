@@ -30,6 +30,7 @@ import {
     enableSchedules,
     getAllSchedules,
     getCurrentSchedules,
+    getLogsByExecutionId,
     getScheduleById,
     getSchedulesById,
     startSchedule,
@@ -65,6 +66,7 @@ export interface ScheduleState extends ICommonState{
     deletingTestScheduleById: API_REQUEST_STATE,
     deletingSchedulesById: API_REQUEST_STATE,
     terminatingExecution: API_REQUEST_STATE,
+    gettingLogsByExecutionId: API_REQUEST_STATE,
     gettingWebhook: API_REQUEST_STATE,
     deletingWebhook: API_REQUEST_STATE,
     currentSchedule: ModelSchedule,
@@ -95,6 +97,7 @@ const initialState: ScheduleState = {
     gettingWebhook: API_REQUEST_STATE.INITIAL,
     deletingWebhook: API_REQUEST_STATE.INITIAL,
     terminatingExecution: API_REQUEST_STATE.INITIAL,
+    gettingLogsByExecutionId: API_REQUEST_STATE.INITIAL,
     currentSchedule: null,
     testSchedule: null,
     ...CommonState,
@@ -388,6 +391,17 @@ export const scheduleSlice = createSlice({
         },
         [terminateExecution.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.terminatingExecution = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [getLogsByExecutionId.pending.type]: (state) => {
+            state.gettingLogsByExecutionId = API_REQUEST_STATE.START;
+        },
+        [getLogsByExecutionId.fulfilled.type]: (state, action: PayloadAction<IResponse>) => {
+            state.gettingLogsByExecutionId = API_REQUEST_STATE.FINISH;
+            state.error = null;
+        },
+        [getLogsByExecutionId.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.gettingLogsByExecutionId = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
     }

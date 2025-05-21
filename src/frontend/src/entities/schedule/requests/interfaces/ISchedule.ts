@@ -75,4 +75,6 @@ export interface IScheduleRequest{
     deleteSchedulesById(scheduleIds: number[]): Promise<AxiosResponse<number[]>>,
 
     terminateExecution(): Promise<AxiosResponse<IResponse>>,
+
+    getLogsByExecutionId(): Promise<AxiosResponse<Blob>>,
 }

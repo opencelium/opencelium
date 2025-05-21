@@ -36,7 +36,7 @@ import {
 import {deleteWebhook, getWebhook} from "../redux_toolkit/action_creators/WebhookCreators";
 import {copyWebhookToClipboard} from "../redux_toolkit/slices/ScheduleSlice";
 import {SchedulePermissions} from "../constants";
-import {LastSuccessExecution} from "../components/last_success_execution/LastSuccessExecution";
+import LastSuccessExecution from "../components/last_success_execution/LastSuccessExecution";
 import ScheduleNotificationsIcon
     from "../components/schedule_notifications_icon/ScheduleNotificationsIcon";
 import {ExecutionStatus} from "../components/execution_status/ExecutionStatus";
