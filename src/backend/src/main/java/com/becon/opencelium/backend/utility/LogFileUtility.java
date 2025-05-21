@@ -25,7 +25,7 @@ public class LogFileUtility {
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm");
 
     private static final Logger log = LogManager.getLogger(LogFileUtility.class);
-    private static final String LOG_FILE_NAME_RGX = ".+_.+_.+_.+_%d\\.log";
+    private static final String LOG_FILE_NAME_RGX = ".+_.+_.+_.+_\\d+\\.log";
 
     public static Path toPath(String base, String... sub) {
         Path path = Paths.get(base, sub);
@@ -102,13 +102,10 @@ public class LogFileUtility {
 
     public static FileDescriptor getLogFile(Long executionId) {
         Path logFolder = toPath(LOG_LOCATION);
-
-        String fileNameRgx = String.format(LOG_FILE_NAME_RGX, executionId);
-
         try (Stream<Path> stream = Files.walk(logFolder, FileVisitOption.FOLLOW_LINKS)) {
 
             return stream
-                    .filter(x -> x.getFileName().toString().matches(fileNameRgx))
+                    .filter(x -> x.getFileName().toString().matches(LOG_FILE_NAME_RGX) && x.getFileName().toString().endsWith("%d.log".formatted(executionId)))
                     .findFirst()
                     .map(LogFileUtility::readFile)
                     .orElseThrow(() -> new GeneralServiceException(ExceptionConstant.LOG_NOT_FOUND, ExceptionMessages.LOG_NOT_FOUND.formatted(executionId)));
