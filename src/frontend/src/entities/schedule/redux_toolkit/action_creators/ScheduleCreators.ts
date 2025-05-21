@@ -322,9 +322,36 @@ export const getLogsByExecutionId = createAsyncThunk(
         try {
             const request = new ScheduleRequest({url: 'connection', endpoint: `/execution/${executionId}`});
             const response = await request.getLogsByExecutionId();
-            console.log(response.data);
+            const blob = new Blob([response.data]);
+            const fileSizeInMB = blob.size / (1024 * 1024);
+            if (fileSizeInMB > 100) {
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+
+                // Optional: set filename if content-disposition header is available
+                const contentDisposition = response.headers['content-disposition'];
+                let filename = 'downloaded-file';
+
+                if (contentDisposition && contentDisposition.includes('filename=')) {
+                    filename = contentDisposition
+                        .split('filename=')[1]
+                        .replace(/['"]/g, '');
+                }
+
+                link.href = url;
+                link.setAttribute('download', filename);
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                window.URL.revokeObjectURL(url);
+                return {executionId: '', logs: ''};
+            } else {
+                const logs = await blob.text();
+                return {executionId, logs};
+            }
         } catch(e){
-            return thunkAPI.rejectWithValue({message: e.response.data.error});
+            console.log(e);
+            return thunkAPI.rejectWithValue({message: e?.response?.data?.error || e.message});
         }
     }
 )

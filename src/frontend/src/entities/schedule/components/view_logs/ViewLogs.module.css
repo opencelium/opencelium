@@ -1,0 +1,8 @@
+.modal-dialog {
+    max-width: 90%;
+}
+.modal-body {
+    overflow: hidden;
+    height: 500px;
+    display: grid;
+}

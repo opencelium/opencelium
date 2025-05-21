@@ -76,5 +76,5 @@ export interface IScheduleRequest{
 
     terminateExecution(): Promise<AxiosResponse<IResponse>>,
 
-    getLogsByExecutionId(): Promise<AxiosResponse<Blob>>,
+    getLogsByExecutionId(): Promise<AxiosResponse<string>>,
 }

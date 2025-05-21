@@ -97,7 +97,7 @@ export class ScheduleRequest extends Request implements IScheduleRequest{
         return super.get<IResponse>();
     }
 
-    async getLogsByExecutionId(): Promise<AxiosResponse<Blob>>{
-        return super.get<Blob>();
+    async getLogsByExecutionId(): Promise<AxiosResponse<string>>{
+        return super.get<string>({headers: {responseType: 'blob'}});
     }
 }

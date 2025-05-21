@@ -51,7 +51,7 @@ export default {
 
     },
     rejected: {
-        [getLogsByExecutionId.fulfilled.type]: {
+        [getLogsByExecutionId.rejected.type]: {
             "__DEFAULT__": "The log was not fetched.",
             "LOG_NOT_FOUND": "The log is not found.",
         },
