@@ -53,7 +53,7 @@ public class MaskingServiceImp implements MaskingService {
             }
         }
 
-        return getPrefix(ref) + result;
+        return result;
     }
 
     private static String toJsonElseString(Object message) {
@@ -88,25 +88,5 @@ public class MaskingServiceImp implements MaskingService {
         }
 
         return false;
-    }
-
-    private String getPrefix(String ref) {
-        if (ref.contains("(request).url") && ref.length() == 21) {
-            return "URL: ";
-        }
-
-        if (ref.contains("(request).header") && ref.length() == 24) {
-            return "Header: ";
-        }
-
-        if (ref.contains("(request).body") && ref.length() == 22) {
-            return "Body: ";
-        }
-
-        if (ref.contains("(response).body") && ref.length() == 23) {
-            return "Response: ";
-        }
-
-        return ref + ": ";
     }
 }

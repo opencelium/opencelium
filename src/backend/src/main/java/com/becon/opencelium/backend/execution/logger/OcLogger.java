@@ -17,12 +17,12 @@ import java.util.function.Consumer;
 public class OcLogger<T extends LogMessage> {
     private final boolean debugMode;
     private final boolean log2File;
-    private final boolean webSocket; // if true then sends logs through websocket;
-    private final T logEntity; // log entity
+    private final boolean webSocket;
+    private final T logEntity;
     private final WebSocketNotificationService socketNotificationService;
+    private final long executionId;
     private final long connectionId;
     private final Logger logger;
-    private boolean executionFailed = false;
 
     public static final String LOG_LOCATION = "src/main/resources/logs";
 
@@ -33,10 +33,11 @@ public class OcLogger<T extends LogMessage> {
         this.webSocket = loggerConfiguration.isWSocketOpen();
 
         this.socketNotificationService = ApplicationContextUtility.getBean(WebSocketNotificationService.class);
+        this.executionId = executionId;
         this.connectionId = connectionId;
         this.logEntity = logEntity;
 
-        if (log2File) {
+        if (log2File && debugMode) {
             String loggerId = String.format("%d-%d", executionId, connectionId);
             String filename = LogFileUtility.toFilename(timestamp, connectionId, "u", executionId, "log");
 
@@ -63,12 +64,14 @@ public class OcLogger<T extends LogMessage> {
             this.logger = logger;
         } else {
             this.logger = LoggerFactory.getLogger(c);
-
-            logAndSend("------------------- PRE --------------------");
         }
+
+        logAndSend(String.format("phase=EXECUTION_START id=%d connectionId=%d", executionId, connectionId));
     }
 
     public void close() {
+        logAndSend(String.format("phase=EXECUTION_END id=%d connectionId=%d", executionId, connectionId));
+
         if (log2File && logger instanceof ch.qos.logback.classic.Logger classicLogger) {
             classicLogger.iteratorForAppenders().forEachRemaining(appender -> {
                 if (appender instanceof FileAppender) {
@@ -77,14 +80,6 @@ public class OcLogger<T extends LogMessage> {
             });
 
             classicLogger.detachAndStopAllAppenders();
-
-            return;
-        }
-
-        if (executionFailed) {
-            logAndSend("------------------- EXCEPTION --------------------");
-        } else {
-            logAndSend("------------------- POST --------------------");
         }
     }
 
@@ -98,8 +93,6 @@ public class OcLogger<T extends LogMessage> {
     }
 
     public void logAndSend(Exception e){
-        this.executionFailed = true;
-
         Consumer<Exception> printStrategy = x -> {
             logger.error(e.getMessage(), e);
         };
@@ -109,12 +102,12 @@ public class OcLogger<T extends LogMessage> {
 
 
     private <E> void logAndSend(Consumer<E> t, E message) {
-        if (log2File) {
-            t.accept(message);
+        if (!debugMode) {
             return;
         }
 
-        if (!debugMode) {
+        if (log2File) {
+            t.accept(message);
             return;
         }
 

@@ -143,8 +143,10 @@ public class PostfixEvaluator implements Evaluator {
 
             Object result = referenceExtractor.apply(rawValue);
             if (Objects.nonNull(logger) && Objects.nonNull(masking)) {
-                logger.logAndSend(masking.applyMask(result, rawValue));
+                String maskedResult = masking.applyMask(result, rawValue);
+                logger.logAndSend(String.format("segment=IF_REF ref='%s' data=%s", rawValue, maskedResult));
             }
+
             return result;
         }
         return rawValueParser.parse(rawValue);
