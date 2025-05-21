@@ -25,7 +25,7 @@ public class LogFileUtility {
     public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm");
 
     private static final Logger log = LogManager.getLogger(LogFileUtility.class);
-    private static final String LOG_FILE_NAME_RGX = "\\d+_\\d+_\\S+_%d\\.log";
+    private static final String LOG_FILE_NAME_RGX = ".+_.+_.+_.+_%d\\.log";
 
     public static Path toPath(String base, String... sub) {
         Path path = Paths.get(base, sub);
