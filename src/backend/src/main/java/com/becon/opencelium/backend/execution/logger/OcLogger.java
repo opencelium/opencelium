@@ -51,7 +51,7 @@ public class OcLogger<T extends LogMessage> {
 
             PatternLayoutEncoder encoder = new PatternLayoutEncoder();
             encoder.setContext(context);
-            encoder.setPattern("%d{dd-MM-yyyy HH:mm:ss.SSS} %highlight(%-5level) - %msg%n");
+            encoder.setPattern("%d{dd-MM-yyyy HH:mm:ss.SSS} - %msg%n");
             encoder.start();
 
             fileAppender.setEncoder(encoder);

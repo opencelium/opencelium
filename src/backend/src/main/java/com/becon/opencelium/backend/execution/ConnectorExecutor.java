@@ -112,7 +112,7 @@ public class ConnectorExecutor {
             logger.getLogEntity().setMethodData(null);
         } else if (executables.get(headPointer) instanceof OperatorEx operator) {
             if (Objects.equals(operator.getType(), "if")) {
-                logger.logAndSend(String.format("phase=IF_START indexPath=%s expression=[%s] %s", index, operator.getExpression(), getLoopData()));
+                logger.logAndSend(String.format("phase=IF_START indexPath=%s expression=(%s) %s", index, operator.getExpression(), getLoopData()));
 
                 boolean result;
                 try {
@@ -136,7 +136,7 @@ public class ConnectorExecutor {
                 logger.logAndSend(String.format("phase=IF_END indexPath=%s %s", index, getLoopData()));
             } else {
                 Loop loop = Loop.fromEx(operator);
-                logger.logAndSend(String.format("phase=LOOP_START indexPath=%s expression=\"%s\" %s", index, loop.getRef(), getLoopData()));
+                logger.logAndSend(String.format("phase=LOOP_START indexPath=%s expression=(%s) %s", index, loop.getRef(), getLoopData()));
 
                 Object referencedList = executionManager.getValue(loop.getRef());
                 List<String> list = new ArrayList<>();
