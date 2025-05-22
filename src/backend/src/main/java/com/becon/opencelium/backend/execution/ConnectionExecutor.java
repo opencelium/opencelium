@@ -2,6 +2,8 @@ package com.becon.opencelium.backend.execution;
 
 import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
 import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
+import com.becon.opencelium.backend.enums.LogType;
+import com.becon.opencelium.backend.execution.logger.msg.ConnectorLog;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.oc721.Connector;
 import com.becon.opencelium.backend.execution.oc721.FieldBind;
@@ -26,6 +28,7 @@ public class ConnectionExecutor {
     private final OcLogger<ExecutionLog> logger;
     private final MaskingService masking;
     private final ProxyEx proxy;
+    private final long executionId;
     private ExecutionManager executionManager;
 
     public ConnectionExecutor(
@@ -35,6 +38,7 @@ public class ConnectionExecutor {
         this.webhookVars = executionObj.getWebhookVars();
         this.connection = executionObj.getConnection();
         this.proxy = executionObj.getProxy();
+        this.executionId = executionId;
         this.masking = new MaskingServiceImp(rules);
 
         // logging files related setup
@@ -51,17 +55,34 @@ public class ConnectionExecutor {
 
         executionManager = new ExecutionManagerImpl(webhookVars, source, target, fieldBind);
 
-        ConnectorExecutor sourceEx = new ConnectorExecutor(connection.getSource(), executionManager, getRestTemplate(source), logger, masking, "CONN1");
-        ConnectorExecutor toEx = new ConnectorExecutor(connection.getTarget(), executionManager, getRestTemplate(target), logger, masking, "CONN2");
+        ConnectorExecutor sourceEx = new ConnectorExecutor(connection.getSource(), executionManager, getRestTemplate(source), logger, masking);
+        ConnectorExecutor targetEx = new ConnectorExecutor(connection.getTarget(), executionManager, getRestTemplate(target), logger, masking);
 
+        int connectorId = -1;
         try {
+            logger.logAndSend(String.format("phase=EXECUTION_START id=%d connectionId=%d", executionId, connection.getConnectionId()));
+
+            logger.getLogEntity().setType(LogType.INFO);
+
+            connectorId = source.getId();
+            logger.getLogEntity().setConnector(new ConnectorLog(source.getName(), "CONN1"));
+            logger.logAndSend("phase=FLOWCHART_START fchartId=" + connectorId);
             sourceEx.start();
-            toEx.start();
+            logger.logAndSend("phase=FLOWCHART_END fchartId=" + connectorId);
+
+            connectorId = target.getId();
+            logger.getLogEntity().setConnector(new ConnectorLog(target.getName(), "CONN2"));
+            logger.logAndSend("phase=FLOWCHART_START fchartId=" + connectorId);
+            targetEx.start();
+            logger.logAndSend("phase=FLOWCHART_END fchartId=" + connectorId);
         } catch (Exception e) {
             logger.logAndSend(e);
+            // in case of exception 'connectorId' has been initialized with lastly executed Connector.id
+            logger.logAndSend("phase=FLOWCHART_END fchartId=" + connectorId);
 
             throw e;
         } finally {
+            logger.logAndSend(String.format("phase=EXECUTION_END id=%d connectionId=%d", executionId, connection.getConnectionId()));
             logger.close(); // release resources
         }
     }
