@@ -20,7 +20,6 @@ public class OcLogger<T extends LogMessage> {
     private final boolean webSocket;
     private final T logEntity;
     private final WebSocketNotificationService socketNotificationService;
-    private final long executionId;
     private final long connectionId;
     private final Logger logger;
 
@@ -33,7 +32,6 @@ public class OcLogger<T extends LogMessage> {
         this.webSocket = loggerConfiguration.isWSocketOpen();
 
         this.socketNotificationService = ApplicationContextUtility.getBean(WebSocketNotificationService.class);
-        this.executionId = executionId;
         this.connectionId = connectionId;
         this.logEntity = logEntity;
 
@@ -51,7 +49,7 @@ public class OcLogger<T extends LogMessage> {
 
             PatternLayoutEncoder encoder = new PatternLayoutEncoder();
             encoder.setContext(context);
-            encoder.setPattern("%d{dd-MM-yyyy HH:mm:ss.SSS} %highlight(%-5level) - %msg%n");
+            encoder.setPattern("%d{dd-MM-yyyy HH:mm:ss.SSS} - %msg%n");
             encoder.start();
 
             fileAppender.setEncoder(encoder);
@@ -65,13 +63,9 @@ public class OcLogger<T extends LogMessage> {
         } else {
             this.logger = LoggerFactory.getLogger(c);
         }
-
-        logAndSend(String.format("phase=EXECUTION_START id=%d connectionId=%d", executionId, connectionId));
     }
 
     public void close() {
-        logAndSend(String.format("phase=EXECUTION_END id=%d connectionId=%d", executionId, connectionId));
-
         if (log2File && logger instanceof ch.qos.logback.classic.Logger classicLogger) {
             classicLogger.iteratorForAppenders().forEachRemaining(appender -> {
                 if (appender instanceof FileAppender) {

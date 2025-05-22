@@ -1,10 +1,8 @@
 package com.becon.opencelium.backend.execution;
 
-import com.becon.opencelium.backend.enums.LogType;
 import com.becon.opencelium.backend.enums.OpType;
 import com.becon.opencelium.backend.enums.RelationalOperator;
 import com.becon.opencelium.backend.execution.builder.RequestEntityBuilder;
-import com.becon.opencelium.backend.execution.logger.msg.ConnectorLog;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.logger.msg.MethodData;
 import com.becon.opencelium.backend.execution.oc721.Connector;
@@ -47,15 +45,13 @@ public class ConnectorExecutor {
     private final List<Object> executables;
     private final OcLogger<ExecutionLog> logger;
     private final MaskingService masking;
-    private final String direction;
 
-    public ConnectorExecutor(ConnectorEx connectorEx, ExecutionManager executionManager, RestTemplate restTemplate, OcLogger<ExecutionLog> logger, MaskingService masking, String direction) {
+    public ConnectorExecutor(ConnectorEx connectorEx, ExecutionManager executionManager, RestTemplate restTemplate, OcLogger<ExecutionLog> logger, MaskingService masking) {
         this.expressionProcessor = ExpressionProcessorFactory.get(ProcessorType.POSTFIX);
         this.executionManager = executionManager;
         this.restTemplate = restTemplate;
         this.logger = logger;
         this.masking = masking;
-        this.direction = direction;
 
         this.executables = new ArrayList<>();
         if (Objects.nonNull(connectorEx.getMethods())) {
@@ -73,13 +69,9 @@ public class ConnectorExecutor {
     }
 
     public void start() {
-        logger.getLogEntity().setType(LogType.INFO);
-        logger.getLogEntity().setConnector(new ConnectorLog(connector.getName(), direction));
         executionManager.setCurrentCtorId(connector.getId());
 
         int headPointer = 0;
-
-        logger.logAndSend("phase=FLOWCHART_START fchartId=" + connector.getId());
         while (headPointer < executables.size()) {
             int tailPointer = getTailPointer(headPointer);
 
@@ -87,7 +79,6 @@ public class ConnectorExecutor {
 
             headPointer = tailPointer + 1;
         }
-        logger.logAndSend("phase=FLOWCHART_END fchartId=" + connector.getId());
     }
 
     private void execute(int headPointer, int tailPointer) {
@@ -112,7 +103,7 @@ public class ConnectorExecutor {
             logger.getLogEntity().setMethodData(null);
         } else if (executables.get(headPointer) instanceof OperatorEx operator) {
             if (Objects.equals(operator.getType(), "if")) {
-                logger.logAndSend(String.format("phase=IF_START indexPath=%s expression=[%s] %s", index, operator.getExpression(), getLoopData()));
+                logger.logAndSend(String.format("phase=IF_START indexPath=%s expression=(%s) %s", index, operator.getExpression(), getLoopData()));
 
                 boolean result;
                 try {
@@ -136,7 +127,7 @@ public class ConnectorExecutor {
                 logger.logAndSend(String.format("phase=IF_END indexPath=%s %s", index, getLoopData()));
             } else {
                 Loop loop = Loop.fromEx(operator);
-                logger.logAndSend(String.format("phase=LOOP_START indexPath=%s expression=\"%s\" %s", index, loop.getRef(), getLoopData()));
+                logger.logAndSend(String.format("phase=LOOP_START indexPath=%s expression=(%s) %s", index, loop.getRef(), getLoopData()));
 
                 Object referencedList = executionManager.getValue(loop.getRef());
                 List<String> list = new ArrayList<>();

@@ -66,7 +66,7 @@ public class MaskingServiceImp implements MaskingService {
         }
 
         try {
-            return new ObjectMapper().writer().withDefaultPrettyPrinter().writeValueAsString(message);
+            return new ObjectMapper().writeValueAsString(message);
         } catch (Exception e) {
             return message.toString();
         }
