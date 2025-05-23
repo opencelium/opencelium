@@ -91,10 +91,4 @@ public class WebSocketEventHandler {
             return this.wsSessionIds.remove(wsSession);
         }
     }
-
-    private record Event(String event, String reason){
-        static Event of(String event, String reason) {
-            return new Event(event, reason);
-        }
-    }
 }
