@@ -30,6 +30,7 @@ import com.becon.opencelium.backend.database.mysql.service.UserRoleService;
 import com.becon.opencelium.backend.database.mysql.service.UserService;
 import com.becon.opencelium.backend.enums.AuthMethod;
 import com.becon.opencelium.backend.enums.LangEnum;
+import com.becon.opencelium.backend.execution.socket.Event;
 import com.becon.opencelium.backend.execution.socket.SocketConstant;
 import com.becon.opencelium.backend.execution.socket.WebSocketNotificationQueue;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
@@ -50,6 +51,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -67,6 +69,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.becon.opencelium.backend.execution.socket.SocketConstant.USER_SESSION_DESTINATION;
 
 @Component
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
@@ -92,6 +96,8 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private SubscriptionService subscriptionService;
     @Autowired
     private WebSocketNotificationQueue notificationQueue;
+    @Autowired
+    protected SimpMessagingTemplate messagingTemplate;
 
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationFilter.class);
 
@@ -149,6 +155,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             response.getWriter().write(payload);
             response.addHeader(HttpHeaders.AUTHORIZATION, SecurityConstant.BEARER + " " + token);
 
+            messagingTemplate.convertAndSendToUser(user.getPrincipal(), USER_SESSION_DESTINATION, Event.of("FORCE_LOGOUT", "New login detected"));
             sendSubscriptionNotification();
         }
 
