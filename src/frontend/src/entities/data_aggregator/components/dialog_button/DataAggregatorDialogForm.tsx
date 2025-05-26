@@ -76,7 +76,7 @@ const DataAggregatorDialogForm:FC<AggregatorFormProps> =
     const [items, setItems] = useState<OptionProps[]>([]);
     const [args, setArgs] = useState(currentAggregator?.args || []);
     const [argsError, setArgsError] = useState<string>('');
-    const initialScript = CAggregator.splitVariablesFromScript(currentAggregator?.script || '');
+    const initialScript = CAggregator.splitVariablesFromScript(currentAggregator?.script || '', formType === 'update');
     const [variables, setVariables] = useState<string>(initialScript.variables || '');
     const [scriptSegment, setScriptSegment] = useState<string>(initialScript.scriptSegment || CAggregator.getScriptSegmentComment());
     const [scriptSegmentError, setScriptSegmentError] = useState<string>('');

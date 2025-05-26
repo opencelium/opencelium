@@ -63,7 +63,7 @@ const DataAggregatorDialogForm:FC<IForm> =
         const [nameError, setNameError] = useState<string>('');
         const [args, setArgs] = useState(currentAggregator?.args || []);
         const [argsError, setArgsError] = useState<string>('');
-        const initialScript = CAggregator.splitVariablesFromScript(currentAggregator?.script || '');
+        const initialScript = CAggregator.splitVariablesFromScript(currentAggregator?.script || '', isUpdate);
         const [variables, setVariables] = useState<string>(initialScript.variables || '');
         const [scriptSegment, updateScriptSegment] = useState<string>(initialScript.scriptSegment || CAggregator.getScriptSegmentComment());
         const [scriptSegmentError, setScriptSegmentError] = useState<string>('');
@@ -104,7 +104,7 @@ const DataAggregatorDialogForm:FC<IForm> =
                 if (args !== currentAggregator.args) {
                     setArgs(currentAggregator.args);
                 }
-                const initialScript = CAggregator.splitVariablesFromScript(currentAggregator.script || '');
+                const initialScript = CAggregator.splitVariablesFromScript(currentAggregator.script || '', isUpdate);
                 if (variables !== initialScript.variables) {
                     setVariables(initialScript.variables);
                 }

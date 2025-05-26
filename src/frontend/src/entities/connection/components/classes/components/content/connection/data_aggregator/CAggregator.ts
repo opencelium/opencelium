@@ -65,7 +65,8 @@ export default class CAggregator implements ModelDataAggregator{
         return `OC_ARG_NOT_EXIST`;
     }
 
-    static getVariablesComment(): string{
+    static getVariablesComment(isUpdate: boolean): string{
+        if (isUpdate) return '';
         return `/* \n\tHere are variables that came from arguments and can be used\n\tin the script. All responses of the method are stored in Responses \n\tvariable. 
 \t\tThe response has next structure: 
 \t\tsuccess - for success response
@@ -81,13 +82,13 @@ export default class CAggregator implements ModelDataAggregator{
 \tIn this section you can define a logic of your script. \n*/\n`;
     }
 
-    static splitVariablesFromScript(script: string): {variables: string, scriptSegment: string}{
+    static splitVariablesFromScript(script: string, isUpdate: boolean): {variables: string, scriptSegment: string}{
         let scriptSplit = script ? script.split('\n\n') : [];
         if(scriptSplit.length === 0){
-            return {variables: this.getVariablesComment(), scriptSegment: ''};
+            return {variables: this.getVariablesComment(isUpdate), scriptSegment: ''};
         }
         return {
-            variables: `${this.getVariablesComment()}${scriptSplit[0]}`,
+            variables: `${this.getVariablesComment(isUpdate)}${scriptSplit[0]}`,
             scriptSegment: subArrayToString(scriptSplit, '\n\n', 1, scriptSplit.length),
         }
     }

@@ -7,9 +7,11 @@ import {useCurrentSubscriptionSocket} from "./modules/useCurrentSubscriptionSock
 import {useAppDispatch} from "@application/utils/store";
 import {Auth} from "@application/classes/Auth";
 import {notifyAboutNewSupportFile} from "@root/redux_toolkit/slices/SupportFileSlice";
-import {setIsAboutToLogout} from "@application/redux_toolkit/slices/AuthSlice";
+import {setIsAboutToLogout, updateAuthUser} from "@application/redux_toolkit/slices/AuthSlice";
 import {TRIPLET_STATE} from "@application/interfaces/IApplication";
 import {disableSocket} from "./socket";
+import IAuthUser from "@entity/user/interfaces/IAuthUser";
+import {LocalStorage} from "@application/classes/LocalStorage";
 
 const SocketDataContext = createContext<SocketDataContextType | undefined>(undefined);
 
@@ -27,6 +29,30 @@ export const SocketDataProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
 
     const isConnectedReference: any = useRef();
     isConnectedReference.current = isConnected;
+
+    const sessionChannel = useRef<BroadcastChannel>();
+
+    useEffect(() => {
+        sessionChannel.current = new BroadcastChannel('session-events');
+
+        sessionChannel.current.onmessage = (event) => {
+            if (event.data.type === 'SESSION_UPDATE') {
+                if (event.data.payload.action === 'RELOGIN') {
+                    console.log('📣 Received RELOGIN from another tab');
+
+                    const storage = LocalStorage.getStorage(true);
+                    const authUser: IAuthUser = storage.get('authUser');
+                    dispatch(updateAuthUser(authUser))
+                    connect();
+                }
+            }
+        };
+
+        return () => {
+            sessionChannel.current?.close();
+        };
+    }, []);
+
     useEffect(() => {
         return () => {
             if (socket && socket.connected) {
@@ -91,6 +117,10 @@ export const SocketDataProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
             case TRIPLET_STATE.TRUE:
                 break;
             case TRIPLET_STATE.FALSE:
+                sessionChannel.current?.postMessage({
+                    type: 'SESSION_UPDATE',
+                    payload: { action: 'RELOGIN' }
+                });
                 resetSocket();
                 connect();
                 break;

@@ -186,7 +186,7 @@ class TechnicalProcessDescription extends React.Component {
                         return <div style={{color: errorColor, width: '100%'}}>{error}</div>
                     }) : null
                 }
-                <Col xs={12} className={styles.col} id="response_label">
+                <Col xs={12} className={styles.col} style={{display: 'flex'}} id="response_label">
                     <b>{`Response`}</b>
                     <TooltipFontIcon tooltipPosition={'right'} className={styles.response_toggle_icon} onClick={(a) => this.toggleResponseVisibleIcon(a)} tooltip={isResponseVisible ? 'Hide' : 'Show'} value={isResponseVisible ? 'arrow_drop_up' : 'arrow_drop_down'}/>
                 </Col>
@@ -196,12 +196,12 @@ class TechnicalProcessDescription extends React.Component {
                         <Col xs={12} className={`${styles.col} ${styles.entry_padding}`}><b>{`Success`}</b></Col>
                         <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Status:`}</Col>
                         <Col xs={8} className={`${styles.col}`}>{successResponse.status}</Col>
-                        <Header nameOfCurrentInfo={'success_header'} isCurrentInfo={currentInfo === 'success_header'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} items={successResponse.header}/>
+                        <Header readOnly={true} hasEnhancement={false} connection={connection} updateConnection={(a) => this.updateConnection(a)} method={methodItem} connector={connector} nameOfCurrentInfo={'success_header'} isCurrentInfo={currentInfo === 'success_header'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} items={successResponse.header}/>
                         <Body hasEnhancement={false} toggleBodyDialog={toggleResponseSuccessBodyDialog} isBodyDialogOpened={isResponseSuccessDialogOpened} nameOfCurrentInfo={'success_body'} isCurrentInfo={currentInfo === 'success_body'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} source={successResponse.getBodyFields()} readOnly={true} connection={connection} connector={connector} updateConnection={(a) => this.updateConnection(a)} method={methodItem} bodyTitle={'Response. Success data'}/>
                         <Col style={{marginTop: '10px'}} xs={12} className={`${styles.col} ${styles.entry_padding}`}><b>{`Fail`}</b></Col>
                         <Col xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Status:`}</Col>
                         <Col xs={8} className={`${styles.col}`}>{failResponse.status}</Col>
-                        <Header nameOfCurrentInfo={'fail_header'} isCurrentInfo={currentInfo === 'fail_header'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} items={failResponse.header}/>
+                        <Header readOnly={true} hasEnhancement={false} connection={connection} updateConnection={(a) => this.updateConnection(a)} method={methodItem} connector={connector} nameOfCurrentInfo={'fail_header'} isCurrentInfo={currentInfo === 'fail_header'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} items={failResponse.header}/>
                         <Body hasEnhancement={false} toggleBodyDialog={toggleResponseFailBodyDialog} isBodyDialogOpened={isResponseFailDialogOpened} nameOfCurrentInfo={'fail_body'} isCurrentInfo={currentInfo === 'fail_body'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} source={failResponse.getBodyFields()} readOnly={true} connection={connection} connector={connector} updateConnection={(a) => this.updateConnection(a)} method={methodItem} bodyTitle={'Response. Fail data'}/>
                     </Row>
                 </Col>
