@@ -3,6 +3,8 @@ package com.becon.opencelium.backend.execution.logger;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -12,8 +14,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.becon.opencelium.backend.utility.LogFileUtility.toPath;
 
@@ -26,11 +26,14 @@ public class LogStorageManager {
     public List<String> readBlock(String execId, long startOffset, long endOffset) {
         Path logfile = getLogFileByExecutionId(execId);
 
-        try (Stream<String> linesStream = Files.lines(logfile)) {
-            return linesStream
-                    .skip(startOffset - 1L)
-                    .limit(endOffset - startOffset + 1L)
-                    .collect(Collectors.toList());
+        try (RandomAccessFile raf = new RandomAccessFile(logfile.toFile(), "r")) {
+            long length = endOffset - startOffset;
+            byte[] buffer = new byte[(int) length];
+            raf.seek(startOffset);
+            raf.readFully(buffer);
+            String content = new String(buffer, StandardCharsets.UTF_8);
+
+            return List.of(content.split("\\R"));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -66,6 +69,7 @@ public class LogStorageManager {
         }
 
         if (logfile[0] == null) {
+            // TODO: search from base, file might be still being written by logger
             throw new RuntimeException("Log file not found for executionId = " + executionId);
         }
 
