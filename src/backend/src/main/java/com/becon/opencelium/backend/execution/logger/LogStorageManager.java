@@ -66,6 +66,11 @@ public class LogStorageManager {
 
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                    // for 'unknown' type only search root directory
+                    if (!file.getParent().equals(root)) {
+                        return FileVisitResult.CONTINUE;
+                    }
+
                     String filename = file.getFileName().toString();
                     if (filename.endsWith(".log")) {
                         Matcher matcher = FILE_NAME_PATTERN.matcher(filename);
