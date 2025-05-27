@@ -102,7 +102,6 @@ public class OcLogger<T extends LogMessage> {
 
         if (log2File) {
             t.accept(message);
-            return;
         }
 
         if (webSocket) {
