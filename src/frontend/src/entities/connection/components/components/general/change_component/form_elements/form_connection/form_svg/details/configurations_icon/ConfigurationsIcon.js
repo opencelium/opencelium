@@ -39,6 +39,7 @@ import InputSelect from "@app_component/base/input/select/InputSelect";
 import {Category} from "@entity/category/classes/Category";
 import {getAllCategories} from "@entity/category/redux_toolkit/action_creators/CategoryCreators";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
+import Validation from "@application/classes/Validation";
 
 function mapStateToProps(state, props) {
   const { connectionOverview, connection } = mapItemsToClasses(state, props.isModal);
@@ -273,7 +274,7 @@ class ConfigurationsIcon extends React.Component {
                       id={`settings_input_title`}
                       icon={'title'}
                       label={'Title'}
-                      maxLength={256}
+                      maxLength={Validation.TextLength.Short}
                       onChange={(e) => this.setTitle(e.target.value)}
                       value={title}
                       error={validationMessageTitle}
@@ -288,6 +289,7 @@ class ConfigurationsIcon extends React.Component {
                       onChange={(e) => this.setDescription(e.target.value)}
                       value={description}
                       readOnly={readOnly}
+                      maxLength={Validation.TextLength.Medium}
                   />
 
                   <InputSelect

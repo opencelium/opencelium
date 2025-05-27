@@ -25,6 +25,8 @@ import {
     CancelIcon,
     EditIcon
 } from "@change_component/form_elements/form_connection/form_svg/details/description/Icons";
+import Validation from "@application/classes/Validation";
+import InputText from "@app_component/base/input/text/InputText";
 
 
 @connect(null, {}, null, {forwardRef: true})
@@ -100,13 +102,14 @@ class Label extends React.Component{
     render(){
         const {isMouseOver, isEditOn, labelValue} = this.state;
         const {label, readOnly, text} = this.props;
+        console.log(readOnly)
         return(
             <React.Fragment>
                 <Col id={text} xs={4} className={styles.col}>{text}</Col>
-                <Col id={`${text}_option`} xs={8} className={styles.col} onMouseOver={(a) => this.mouseOver(a)} onMouseLeave={(a) => this.mouseLeave(a)}>
+                <Col id={`${text}_option`} style={{display: 'flex'}} xs={8} className={styles.col} onMouseOver={(a) => this.mouseOver(a)} onMouseLeave={(a) => this.mouseLeave(a)}>
                     {isEditOn
                     ?
-                        <Input id={'details_label'} placeholder={label} value={labelValue} onChange={(a) => this.setLabelValue(a)} theme={{input: styles.label_input, inputElement: styles.label_input_element}}/>
+                        <InputText id={'details_label'} minHeight={'37px'} className={styles.details_label} maxLength={Validation.TextLength.Short} placeholder={label} value={labelValue} onChange={(e) => this.setLabelValue(e.target.value)} style={{padding: '0 !important'}}/>
                     :
                         <span className={styles.value}>{label === '' ? 'is empty' : label}</span>
                     }

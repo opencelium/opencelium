@@ -30,6 +30,7 @@ import {
 import { setCurrentSchedule } from "../../redux_toolkit/slices/ScheduleSlice";
 import {Schedule} from "../../classes/Schedule";
 import {ISchedule} from "../../interfaces/ISchedule";
+import Validation from "@application/classes/Validation";
 
 
 const ScheduleForm: FC<IForm> = ({isAdd, isView, isUpdate}) => {
@@ -81,7 +82,7 @@ const ScheduleForm: FC<IForm> = ({isAdd, isView, isUpdate}) => {
         }
     }, [gettingScheduleById])
     const TitleInput = schedule.getText({
-        propertyName: "title", props: {autoFocus: !isView, icon: 'title', label: 'Title', required: true}
+        propertyName: "title", props: {maxLength: Validation.TextLength.Short, autoFocus: !isView, icon: 'title', label: 'Title', required: true}
     })
     const ConnectionForm = schedule.getSelect({propertyName: 'connectionSelect', props: {
         icon: 'sync_alt',

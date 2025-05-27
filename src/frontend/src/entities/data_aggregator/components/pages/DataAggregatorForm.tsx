@@ -27,6 +27,7 @@ import {
 import {useAppDispatch} from "@application/utils/store";
 import {useNavigate, useParams} from "react-router";
 import { clearError as clearDataAggregatorError } from '@entity/data_aggregator/redux_toolkit/slices/DataAggregatorSlice';
+import Validation from "@application/classes/Validation";
 
 const getStaticWordCompleter = (variables: string[]) => {
     return {
@@ -246,6 +247,7 @@ const DataAggregatorDialogForm:FC<IForm> =
                 <FormSection label={{value: 'General Data'}}>
                     <InputText
                         id={`input_aggregator_name`}
+                        maxLength={Validation.TextLength.Short}
                         autoFocus={true}
                         required={true}
                         readOnly={readOnly}

@@ -284,6 +284,12 @@ $DASHED_COLOR: #58854d;
 	border-right: 1px solid #eee;
 	border-left: 2px solid #eee;
 }
+.details_label {
+	input {
+		padding-top: 0 !important;
+		padding-bottom: 0 !important;
+	}
+}
 .details_left {
 	@extend .details;
 	left: 0;
@@ -593,6 +599,7 @@ $DASHED_COLOR: #58854d;
 	}
 
 	.edit_icon {
+		display: flex;
 		position: absolute;
 		right: 0;
 		background: white;
@@ -600,6 +607,7 @@ $DASHED_COLOR: #58854d;
 		height: unset !important;
 	}
 	.apply_icon {
+		display: flex;
 		position: absolute;
 		right: 15px;
 		background: white;
@@ -607,6 +615,7 @@ $DASHED_COLOR: #58854d;
 		height: unset !important;
 	}
 	.cancel_icon {
+		display: flex;
 		position: absolute;
 		right: 0;
 		background: white;
@@ -682,7 +691,7 @@ $DASHED_COLOR: #58854d;
 	width: 90vw;
 }
 .header_dialog_body{
-	
+
 }
 .body_dialog {
 	min-width: 45vw;

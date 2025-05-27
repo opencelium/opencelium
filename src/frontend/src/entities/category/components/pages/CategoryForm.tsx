@@ -28,6 +28,7 @@ import { ICategory } from "@entity/category/interfaces/ICategory";
 import {getAllCategories} from "@entity/category/redux_toolkit/action_creators/CategoryCreators";
 import {useAppDispatch} from "@application/utils/store";
 import {setCurrentCategory} from "@entity/category/redux_toolkit/slices/CategorySlice";
+import Validation from "@application/classes/Validation";
 
 const CategoryForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
     const {
@@ -85,7 +86,7 @@ const CategoryForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
         }
     },[addingCategory, updatingCategory]);
     const NameInput = category.getText({
-        propertyName: "name", props: {autoFocus: !isView, icon: 'title', label: 'Name', required: true, isLoading: checkingCategoryName === API_REQUEST_STATE.START, error: isCurrentCategoryHasUniqueName === TRIPLET_STATE.FALSE ? 'Must be unique' : ''}
+        propertyName: "name", props: {maxLength: Validation.TextLength.Short, autoFocus: !isView, icon: 'title', label: 'Name', required: true, isLoading: checkingCategoryName === API_REQUEST_STATE.START, error: isCurrentCategoryHasUniqueName === TRIPLET_STATE.FALSE ? 'Must be unique' : ''}
     })
     const ParentCategory = category.getSelect({propertyName: 'parentSelect', props: {
         icon: 'category',

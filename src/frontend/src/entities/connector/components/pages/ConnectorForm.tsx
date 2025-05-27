@@ -35,6 +35,7 @@ import {
 } from "../../redux_toolkit/action_creators/ConnectorCreators";
 import { setCurrentConnector } from "../../redux_toolkit/slices/ConnectorSlice";
 import MasterPasswordInput from "@entity/connector/components/master_password_input/MasterPasswordInput";
+import Validation from "@application/classes/Validation";
 
 
 const ConnectorForm: FC<IForm> = ({isAdd, isUpdate}) => {
@@ -90,10 +91,10 @@ const ConnectorForm: FC<IForm> = ({isAdd, isUpdate}) => {
         dispatch(getConnectorCredentials(connector.getPoustModel(true)));
     }
     const TitleInput = connector.getText({
-        propertyName: "title", props: {autoFocus: true, icon: 'title', label: 'Title', required: true, isLoading: checkingConnectorTitle === API_REQUEST_STATE.START, error: isCurrentConnectorHasUniqueTitle === TRIPLET_STATE.FALSE ? 'The title is already in use' : ''}
+        propertyName: "title", props: {maxLength: Validation.TextLength.Short, autoFocus: true, icon: 'title', label: 'Title', required: true, isLoading: checkingConnectorTitle === API_REQUEST_STATE.START, error: isCurrentConnectorHasUniqueTitle === TRIPLET_STATE.FALSE ? 'The title is already in use' : ''}
     })
     const DescriptionInput = connector.getTextarea({
-        propertyName: "description", props: {label: "Description"}
+        propertyName: "description", props: {maxLength: Validation.TextLength.Medium, label: "Description"}
     })
     const InvokerComponent = connector.getSelect({propertyName: 'invokerSelect', props: {
         icon: 'description',

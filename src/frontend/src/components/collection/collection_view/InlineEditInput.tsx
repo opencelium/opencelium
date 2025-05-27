@@ -75,11 +75,12 @@ const InlineEditInput: FC<InlineEditInputProps> =
     //TODO: auto height of the textarea - check in firefox
     //const rows = textareaElement ? Math.round(textareaElement.scrollHeight / 25) : inlineValueRef.current ? Math.round(inlineValueRef.current.offsetHeight / 25) : 3;
     const rows = 3;
+    const shortInitialValue = initialValue.length > 64 ? `${initialValue.substr(0, 64)}...` : initialValue;
     return (
         <div style={{position: showEditor ? 'relative' : 'unset'}}>
             <span ref={inlineValueRef} style={{color: showEditor ? 'white' : 'black'}} onDoubleClick={() => {
                 toggleEditor(true);
-            }}>{initialValue === '' ? '-' : initialValue}</span>
+            }}>{shortInitialValue === '' ? '-' : shortInitialValue}</span>
             {showEditor &&
                 <React.Fragment>
                     <BackgroundStyled/>

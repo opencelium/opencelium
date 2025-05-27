@@ -34,6 +34,7 @@ import DefaultListRaw from "@app_component/collection/default_list_raw/DefaultLi
 import {DuplicateIcon} from "../components/components/duplicate_icon/DuplicateIcon";
 import {DownloadIcon} from "../components/components/download_icon/DownloadIcon";
 import AddConnectionButton from "../components/components/add_connection/AddConnectionButton";
+import Validation from "@application/classes/Validation";
 
 class Connections extends ListCollection<ConnectionProps>{
     name: string = 'connections';
@@ -48,7 +49,7 @@ class Connections extends ListCollection<ConnectionProps>{
             getValue: (entity: IConnection) => {
                 return(
                     <InlineEditInput
-                        maxLength={100}
+                        maxLength={Validation.TextLength.Short}
                         isInProcess={this.updatingConnection === API_REQUEST_STATE.START}
                         updateValue={(newValue) => {
                             if(newValue !== entity.title){
@@ -63,7 +64,7 @@ class Connections extends ListCollection<ConnectionProps>{
             getValue: (entity: IConnection) => {
                 return(
                     <InlineEditInput
-                        maxLength={250}
+                        maxLength={Validation.TextLength.Medium}
                         isInProcess={this.updatingConnection === API_REQUEST_STATE.START}
                         updateValue={(newValue) => {
                             this.dispatch(getAndUpdateConnectionDescription({...entity, description: newValue}))

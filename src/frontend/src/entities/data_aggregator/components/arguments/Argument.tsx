@@ -7,6 +7,7 @@ import {TextSize} from "@app_component/base/text/interfaces";
 import {setFocusById} from "@application/utils/utils";
 import {useAppDispatch} from "@application/utils/store";
 import {deleteArgument as deleteArgumentById} from '../../redux_toolkit/action_creators/DataAggregatorCreators';
+import Validation from "@application/classes/Validation";
 
 
 const Argument:FC<ArgumentProps> =
@@ -75,6 +76,7 @@ const Argument:FC<ArgumentProps> =
                         onChange={(e) => changeName(e.target.value)}
                         value={name}
                         minHeight={30}
+                        maxLength={Validation.TextLength.Short}
                         label={'Name'}
                         error={nameError}
                         errorBottom={'-15px'}
@@ -88,6 +90,7 @@ const Argument:FC<ArgumentProps> =
                         onChange={(e) => setDescription(e.target.value)}
                         value={description}
                         label={"Description"}
+                        maxLength={Validation.TextLength.Long}
                     />
                 </FormContainer>
                 {!isView &&

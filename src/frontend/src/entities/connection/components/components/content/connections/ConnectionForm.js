@@ -44,6 +44,7 @@ import { Category } from "@entity/category/classes/Category";
 import Webhook from "@root/classes/Webhook";
 import {jsonToString} from "@app_component/operator_builder/utils";
 import {OperatorType} from "@app_component/operator_builder/props";
+import Validation from "@application/classes/Validation";
 
 /**
  * common component to add and update Connection
@@ -653,13 +654,14 @@ export function ConnectionForm(type) {
                                 ...INPUTS.CONNECTION_TITLE,
                                 error: validationMessages.title,
                                 label: t(`${this.translationKey}.FORM.TITLE`),
-                                maxLength: 256,
+                                maxLength: Validation.TextLength.Short,
                                 required: true,
                                 readOnly: this.isView,
                             },
                             {...INPUTS.DESCRIPTION,
                                 label: t(`${this.translationKey}.FORM.DESCRIPTION`),
                                 readOnly: this.isView,
+                                maxLength: Validation.TextLength.Medium,
                             },
                             this.getFirstConnectorFormSection(),
                         ],

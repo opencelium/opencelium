@@ -34,6 +34,7 @@ import UserDetail from "../../classes/UserDetail";
 import IUserDetail from "../../interfaces/IUserDetail";
 import {UserImageStyled} from "../../components/pages/UserImage";
 import {UserPermissions} from "../../constants";
+import Validation from "@application/classes/Validation";
 
 
 
@@ -78,17 +79,17 @@ const UserForm: FC<IForm> = permission<IForm>(UserPermissions.CREATE)(({isAdd, i
         options: [{autoFocus: true, label: 'Mr', value: 'mr', checked: true, key: 'mr'}, {label: 'Mrs', value: 'mrs', checked: false, key: 'mrs'}],
     }})
     const UserDetailsInputs = user.userDetail.getTexts([
-        {propertyName: "name", props: {icon: 'perm_identity', label: "Name", maxLength: 128, required: true}},
-        {propertyName: "surname", props: {icon: 'perm_identity', label: "Surname", maxLength: 128, required: true}},
-        {propertyName: "department", props: {icon: 'people', label: "Department"}},
-        {propertyName: "organization", props: {icon: 'domain', label: "Organization"}},
-        {propertyName: "phoneNumber", props: {icon: "phone", label: "Phone Number"}},
+        {propertyName: "name", props: {maxLength: Validation.TextLength.Short, icon: 'perm_identity', label: "Name", required: true}},
+        {propertyName: "surname", props: {maxLength: Validation.TextLength.Short, icon: 'perm_identity', label: "Surname", required: true}},
+        {propertyName: "department", props: {maxLength: Validation.TextLength.Short, icon: 'people', label: "Department"}},
+        {propertyName: "organization", props: {maxLength: Validation.TextLength.Short, icon: 'domain', label: "Organization"}},
+        {propertyName: "phoneNumber", props: {maxLength: Validation.TextLength.PhoneNumber, icon: "phone", label: "Phone Number"}},
     ]);
     const Avatar = user.userDetail.getFile({propertyName: "profilePictureFile", props:{label: "Avatar",}});
     const Credentials = user.getTexts([
-        {propertyName: "email", props: {error: isCurrentUserHasUniqueEmail === TRIPLET_STATE.FALSE ? 'The email is already in use' : '', icon: 'email', label: "Email", maxLength: 255, required: true, isLoading: checkingUserEmail === API_REQUEST_STATE.START}},
-        {propertyName: "password", props: {isVisible: !isView, icon: 'vpn_key', label: "Password", maxLength: 64, type: InputTextType.Password, required: true}},
-        {propertyName: "repeatPassword", props: {isVisible: !isView, icon: 'vpn_key', label: "Repeat Password", type: InputTextType.Password, maxLength: 64, required: true}},
+        {propertyName: "email", props: {error: isCurrentUserHasUniqueEmail === TRIPLET_STATE.FALSE ? 'The email is already in use' : '', icon: 'email', label: "Email", maxLength: Validation.TextLength.Email, required: true, isLoading: checkingUserEmail === API_REQUEST_STATE.START}},
+        {propertyName: "password", props: {isVisible: !isView, icon: 'vpn_key', label: "Password", maxLength: Validation.TextLength.Tiny, type: InputTextType.Password, required: true}},
+        {propertyName: "repeatPassword", props: {isVisible: !isView, icon: 'vpn_key', label: "Repeat Password", type: InputTextType.Password, maxLength: Validation.TextLength.Tiny, required: true}},
     ]);
     const UserGroupComponent = user.getSelect({propertyName: 'userGroupSelect', props: {
         icon: 'supervised_user_circle',

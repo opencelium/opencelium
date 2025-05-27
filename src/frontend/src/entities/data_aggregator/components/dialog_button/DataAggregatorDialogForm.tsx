@@ -23,6 +23,7 @@ import {CheckboxStyled, TextStyled} from "@app_component/base/input/file/styles"
 import {CDataAggregator} from "@entity/data_aggregator/classes/CDataAggregator";
 import {API_REQUEST_STATE, TRIPLET_STATE} from '@application/interfaces/IApplication';
 import Select from "@basic_components/inputs/Select";
+import Validation from "@application/classes/Validation";
 
 const getStaticWordCompleter = (variables: string[]) => {
     return {
@@ -199,6 +200,7 @@ const DataAggregatorDialogForm:FC<AggregatorFormProps> =
                         autoFocus={true}
                         required={true}
                         readOnly={readOnly}
+                        maxLength={Validation.TextLength.Short}
                         onChange={(e) => changeName(e.target.value)}
                         value={name}
                         icon={'person'}

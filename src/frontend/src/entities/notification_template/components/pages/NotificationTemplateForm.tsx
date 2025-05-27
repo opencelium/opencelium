@@ -36,6 +36,7 @@ import {getMarker} from "@application/utils/utils";
 import CAggregator from "@classes/content/connection/data_aggregator/CAggregator";
 import { getAllTools } from "@entity/schedule/redux_toolkit/action_creators/ToolCreators";
 import Tool from "@entity/schedule/classes/Tool";
+import Validation from "@application/classes/Validation";
 
 
 const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
@@ -116,7 +117,7 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
         }
     },[addingNotificationTemplate, updatingNotificationTemplate]);
     const NameInput = notificationTemplate.getText({
-        propertyName: "name", props: {autoFocus: !isView, icon: 'title', label: 'Name', required: true, isLoading: checkingNotificationTemplateName === API_REQUEST_STATE.START, error: isCurrentNotificationTemplateHasUniqueName === TRIPLET_STATE.FALSE ? 'Must be unique' : ''}
+        propertyName: "name", props: {maxLength: Validation.TextLength.Short, autoFocus: !isView, icon: 'title', label: 'Name', required: true, isLoading: checkingNotificationTemplateName === API_REQUEST_STATE.START, error: isCurrentNotificationTemplateHasUniqueName === TRIPLET_STATE.FALSE ? 'Must be unique' : ''}
     })
     const Type = notificationTemplate.getSelect({propertyName: 'typeSelect', props: {
             icon: 'mail',
@@ -126,7 +127,7 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
             isLoading: gettingAllTools === API_REQUEST_STATE.START
         }})
     const SubjectInput = notificationTemplate.content.getText({
-        propertyName: "subject", props: {icon: 'subject', label: 'Subject', required: true}
+        propertyName: "subject", props: {maxLength: Validation.TextLength.Short, icon: 'subject', label: 'Subject', required: true}
     })
     const BodyInput = notificationTemplate.content.getTextarea({
         propertyName: "body", props: {icon: 'feed', label: 'Body', required: true, height: `calc(100% - 67px)`, style: {height: 'calc(100% - 37px)'}}
