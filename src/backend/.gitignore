@@ -8,7 +8,14 @@ src/main/resources/templates/**
 assistant/
 src/main/resources/application.yml
 src/main/resources/upload-dir
+
+# invoker folder
+## ignore everything in the invoker folder
 src/main/resources/invoker/**
+## but not readme.txt
+!src/main/resources/invoker/
+!src/main/resources/invoker/README.md
+
 src/main/resources/support-files/**
 src/main/resources/logs/**
 src/main/resources/updating-backup
