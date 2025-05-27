@@ -20,14 +20,14 @@ import static com.becon.opencelium.backend.utility.LogFileUtility.toPath;
 @Service
 public class LogStorageManager {
     private static final Pattern FILE_NAME_PATTERN = Pattern.compile(
-            "\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}_.+_(f|s)_(.+)\\.log"
+            "\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}_.+_(u|f|s)_(.+)\\.log"
     );
 
     public List<String> readBlock(String execId, long startOffset, long endOffset) {
         Path logfile = getLogFileByExecutionId(execId);
 
         try (RandomAccessFile raf = new RandomAccessFile(logfile.toFile(), "r")) {
-            long length = endOffset - startOffset;
+            long length = Math.max(endOffset - startOffset, 0);
             byte[] buffer = new byte[(int) length];
             raf.seek(startOffset);
             raf.readFully(buffer);
@@ -41,7 +41,7 @@ public class LogStorageManager {
 
 
     private Path getLogFileByExecutionId(String executionId) {
-        Path[] logfile = {null};
+        Path[] logfiles = {null, null}; // {'fail' or 'success', 'unknown'}
         Path root = toPath(OcLogger.LOG_LOCATION);
 
         try {
@@ -53,7 +53,7 @@ public class LogStorageManager {
                             for (Path path : stream) {
                                 Matcher matcher = FILE_NAME_PATTERN.matcher(path.getFileName().toString());
                                 if (matcher.matches() && matcher.group(2).equals(executionId)) {
-                                    logfile[0] = path;
+                                    logfiles[0] = path;
                                     return FileVisitResult.TERMINATE;
                                 }
                             }
@@ -63,16 +63,30 @@ public class LogStorageManager {
                     }
                     return FileVisitResult.CONTINUE;
                 }
+
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                    String filename = file.getFileName().toString();
+                    if (filename.endsWith(".log")) {
+                        Matcher matcher = FILE_NAME_PATTERN.matcher(filename);
+                        if (matcher.matches() && matcher.group(2).equals(executionId)) {
+                            logfiles[1] = file;
+                        }
+                    }
+
+                    return FileVisitResult.CONTINUE;
+                }
             });
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        if (logfile[0] == null) {
-            // TODO: search from base, file might be still being written by logger
+        if (logfiles[0] != null) {
+            return logfiles[0];
+        } else if (logfiles[1] != null) {
+            return logfiles[1];
+        } else {
             throw new RuntimeException("Log file not found for executionId = " + executionId);
         }
-
-        return logfile[0];
     }
 }
