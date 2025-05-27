@@ -22,6 +22,8 @@ import {setFocusById} from "@application/utils/utils";
 import {addConnection, checkConnectionTitle} from "@root/redux_toolkit/action_creators/ConnectionCreators";
 import {getAllConnectors} from "@entity/connector/redux_toolkit/action_creators/ConnectorCreators";
 import {getTemplatesByConnectors} from "@entity/template/redux_toolkit/action_creators/TemplateCreators";
+import {Category} from "@entity/category/classes/Category";
+import {getAllCategories} from "@entity/category/redux_toolkit/action_creators/CategoryCreators";
 
 function AddConnectionButton({ theme, direction, ...args }: DropdownMenuProps & {theme?: any}) {
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -31,6 +33,7 @@ function AddConnectionButton({ theme, direction, ...args }: DropdownMenuProps & 
     const {addingConnection, currentConnection, checkingConnectionTitle, isCurrentConnectionHasUniqueTitle} = Connection.getReduxState();
     const {templates, gettingTemplates} = useAppSelector((state: RootState) => state.templateReducer);
     const {connectors, gettingConnectors} = Connector.getReduxState();
+    const {categories, gettingCategories} = Category.getReduxState();
     const [isOpened, setIsOpened] = useState<boolean>(false);
     const [title, setTitle] = useState<string>('');
     const [fromConnector, setFromConnector] = useState(null);
@@ -40,6 +43,8 @@ function AddConnectionButton({ theme, direction, ...args }: DropdownMenuProps & 
     const [validateMessageFromConnector, setValidateMessageFromConnector] = useState('');
     const [validateMessageToConnector, setValidateMessageToConnector] = useState('');
     const [validateMessageTemplate, setValidateMessageTemplate] = useState('');
+    const [category, setCategory] = useState(null);
+    const [categoryOptions, setCategoryOptions] = useState([]);
     const fromConnectorOptions = connectors.map((connector: any) => {return {label: connector.title, value: connector.connectorId}});
     const toConnectorOptions = connectors.map((connector: any) => {return {label: connector.title, value: connector.connectorId}});
     const templateOptions = templates.map(t => {
@@ -110,18 +115,30 @@ function AddConnectionButton({ theme, direction, ...args }: DropdownMenuProps & 
     }
     const createConnection = () => {
         if(startAdding) {
-            dispatch(addConnection({
+            const newConnection = {
                 ...template.content,
                 title: title,
-            }));
+            }
+            if (category) {
+                newConnection.categoryId = category.value;
+            }
+            dispatch(addConnection(newConnection));
         }
     }
+    useEffect(() => {
+        dispatch(getAllCategories());
+    }, [])
     useEffect(() => {
         if(addingConnection === API_REQUEST_STATE.FINISH && startAdding) {
             toggleForm();
             setStartAdding(false);
         }
     }, [addingConnection])
+    useEffect(() => {
+        if (gettingCategories === API_REQUEST_STATE.FINISH) {
+            setCategoryOptions(Category.getOptionsForCategorySelect(categories));
+        }
+    }, [gettingCategories]);
     useEffect(() => {
         if(isOpened) {
             dispatch(getAllConnectors());
@@ -209,6 +226,16 @@ function AddConnectionButton({ theme, direction, ...args }: DropdownMenuProps & 
                             icon={'device_hub'}
                             label={'Template'}
                             options={templateOptions}
+                        />
+                        <InputSelect
+                            id={'input_quick_category'}
+                            value={category}
+                            onChange={(a) => setCategory(a)}
+                            options={categoryOptions}
+                            placeholder={'Choose category'}
+                            icon={'category'}
+                            label={'Category'}
+                            categoryList={true}
                         />
                     </React.Fragment>
                 }
