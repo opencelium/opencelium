@@ -32,6 +32,7 @@ import {
     InfoStyled
 } from './styles';
 import {EmptyList} from "../EmptyList";
+import {Urls} from "@entity/application/requests/classes/url";
 
 const Grid: FC<ViewProps> =
     ({
@@ -76,7 +77,8 @@ const Grid: FC<ViewProps> =
                 // @ts-ignore
                 const subtitle = collection.gridProps?.subtitle ? isString(collection.gridProps.subtitle) ? entity[collection.gridProps.subtitle] : collection.gridProps.subtitle(entity) : '';
                 // @ts-ignore
-                const imageSrc = collection.gridProps?.image ? isString(collection.gridProps.image) ? entity[collection.gridProps.image] : collection.gridProps.image(entity) : '';
+                let imageSrc = collection.gridProps?.image ? isString(collection.gridProps.image) ? entity[collection.gridProps.image] : collection.gridProps.image(entity) : '';
+                imageSrc = `${Urls.baseUrl}${imageSrc}`;
                 const hasImage = !!collection.gridProps?.image;
                 const hasImageComponent = !!collection.gridProps?.getImageComponent;
                 const link = collection.hasCardLink ? entity.link : '';

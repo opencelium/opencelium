@@ -64,7 +64,7 @@ class Connectors extends ListCollection<ConnectorProps>{
     ];
     gridProps = {
         title: 'title',
-        image: (connector: IConnector) => {return Application.isValidImageUrl(connector.icon) ? connector.icon : connector.invoker.icon;},
+        image: (connector: IConnector) => {const icon = Application.isValidImageUrl(connector.icon) ? connector.icon : connector.invoker.icon; return icon.split('./').join('');},
     };
     translations = {
         title: 'Title',
