@@ -594,3 +594,60 @@ CREATE TABLE extra_ops (
         FOREIGN KEY (subscription_id)
         REFERENCES subscription(id)
 );
+
+--changeset 4.5:1 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE `role` MODIFY COLUMN `name` VARCHAR(255) NOT NULL;
+
+--changeset 4.5:2 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE `role` MODIFY COLUMN `description` VARCHAR(5000) DEFAULT NULL;
+
+--changeset 4.5:3 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE `scheduler` MODIFY COLUMN `title` VARCHAR(255) DEFAULT NULL;
+
+--changeset 4.5:4 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE `detail` MODIFY COLUMN `department` VARCHAR(255) DEFAULT NULL;
+
+--changeset 4.5:5 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE `user` MODIFY COLUMN `email` VARCHAR(255) NOT NULL;
+
+--changeset 4.5:6 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE `detail` MODIFY COLUMN `name` VARCHAR(255) DEFAULT NULL;
+
+--changeset 4.5:7 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE `detail` MODIFY COLUMN `organization` VARCHAR(255) DEFAULT NULL;
+
+--changeset 4.5:8 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE `detail` MODIFY COLUMN `phone_number` VARCHAR(30) DEFAULT NULL;
+
+--changeset 4.5:9 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE `detail` MODIFY COLUMN `surname` VARCHAR(255) DEFAULT NULL;
+
+--changeset 4.5:10 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE `connection` MODIFY COLUMN `description` VARCHAR(5000) DEFAULT NULL;
+
+--changeset 4.5:11 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE `connection` MODIFY COLUMN `title` VARCHAR(255) DEFAULT NULL;
+
+--changeset 4.5:12 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE `connector` MODIFY COLUMN `description` VARCHAR(5000) DEFAULT NULL;
+
+--changeset 4.5:13 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE `connector` MODIFY COLUMN `invoker` VARCHAR(255) DEFAULT NULL;
+
+--changeset 4.5:14 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE `data_aggregator` MODIFY COLUMN `script` TEXT;
+
+--changeset 4.5:15 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE `enhancement` MODIFY COLUMN `script` VARCHAR(5000) DEFAULT NULL;
+
+--changeset 4.5:16 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE `event_content` MODIFY COLUMN `subject` VARCHAR(255) NOT NULL;
+
+--changeset 4.5:17 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE `event_content` MODIFY COLUMN `body` VARCHAR(5000) DEFAULT NULL;
+
+--changeset 4.5:18 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE `event_message` MODIFY COLUMN `name` VARCHAR(255) NOT NULL;
+
+--changeset 4.5:19 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE `event_notification` MODIFY COLUMN `name` VARCHAR(255) DEFAULT NULL;
