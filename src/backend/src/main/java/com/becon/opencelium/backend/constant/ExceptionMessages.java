@@ -10,4 +10,7 @@ public interface ExceptionMessages {
     String MASTER_PASSWORD_WRONG = "Invalid master password";
     String LOG_NOT_FOUND = "Log not found for execution: %d";
     String UNKNOWN_ERROR = "Unknown error";
+    String INVALID_LOOP_INDEX = "loopIndex is not valid : %s";
+    String LOG_ELEMENT_NOT_FOUND_WITH_INDEX_PATH = "Log element not found with indexPath: %s";
+    String LOOP_INDEX_IS_REQUIRED = "loopIndex is required";
 }
