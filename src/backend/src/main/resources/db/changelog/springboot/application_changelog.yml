@@ -63,3 +63,18 @@ versions:
         operation: add
         value: 4.4
         path: opencelium.version
+  - version: 4.5
+    changes:
+      - changeset: 1
+        operation: add
+        value: 4.5
+        path: opencelium.version
+      - changeset: 2
+        operation: add
+        value: https://service.opencelium.io
+        path: opencelium.service_portal.base_url
+      - changeset: 3
+        operation: add
+        value: 127.0.0.1
+        path: server.address
+

@@ -7,6 +7,7 @@
 #                                                                         #
 ###########################################################################
 server:
+  address: 127.0.0.1
   port: 9090
 #  ssl:
 #    enabled: true
@@ -219,7 +220,7 @@ opencelium:
   installation:
     type: sources
   service_portal:
-    base_url: "https://api.serviceportal.com"
+    base_url: https://service.opencelium.io
     token: "your-token-here"
 #  support:
 #    file:
