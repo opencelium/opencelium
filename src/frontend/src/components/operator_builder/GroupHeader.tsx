@@ -6,9 +6,10 @@ import {
     ActionsContainer,
     ConjunctionAndButton,
     ConjunctionContainer,
-    ConjunctionOrButton, DeleteButton, ErrorMessage,
-    GroupHeaderContainer
+    ConjunctionOrButton, DeleteButton,
+    GroupHeaderContainer, GroupHeaderErrorContainer
 } from "@app_component/operator_builder/styles";
+import {ErrorColor} from "@app_component/operator_builder/OperatorBuilder";
 
 const GroupHeader = ({updateGroup, deleteGroup, group}: GroupHeaderUIProps) => {
     const [showActions, toggleActions] = useState<boolean>(false);
@@ -27,7 +28,7 @@ const GroupHeader = ({updateGroup, deleteGroup, group}: GroupHeaderUIProps) => {
                     properties: {
                         ...group.properties,
                         conjunction: undefined,
-                    }
+                    },
                 })
             }
         }
@@ -36,6 +37,7 @@ const GroupHeader = ({updateGroup, deleteGroup, group}: GroupHeaderUIProps) => {
         const items = group?.items || [];
         updateGroup({
             ...group,
+            error: '',
             items: [
                 ...items,
                 {
@@ -49,6 +51,7 @@ const GroupHeader = ({updateGroup, deleteGroup, group}: GroupHeaderUIProps) => {
         const items = group?.items || [];
         updateGroup({
             ...group,
+            error: '',
             items: [
                 ...items,
                 {
@@ -64,10 +67,11 @@ const GroupHeader = ({updateGroup, deleteGroup, group}: GroupHeaderUIProps) => {
     const setConjunction = (conjunction: Conjunction) => {
         updateGroup({
             ...group,
+            error: '',
             properties: {
                 ...group.properties,
                 conjunction: group.properties.conjunction === conjunction ? undefined : conjunction,
-            }
+            },
         })
     }
     const onMouseOver = () => {
@@ -88,15 +92,19 @@ const GroupHeader = ({updateGroup, deleteGroup, group}: GroupHeaderUIProps) => {
         conjunctionAndStyle.backgroundColor = '#d2d0ca';
         conjunctionOrStyle.backgroundColor = '#d2d0ca';
     }
+    if (!!group.error) {
+        conjunctionAndStyle.backgroundColor = ErrorColor;
+        conjunctionOrStyle.backgroundColor = ErrorColor;
+    }
     return (
         <GroupHeaderContainer hasItems={hasItems || false} onMouseOver={onMouseOver} onMouseLeave={onMouseLeave}>
             <ConjunctionContainer>
                 <ConjunctionAndButton label={'AND'} style={conjunctionAndStyle} isDisabled={isConjunctionDisabled} handleClick={() => setConjunction(Conjunction.AND)}/>
                 <ConjunctionOrButton label={'OR'} style={conjunctionOrStyle} isDisabled={isConjunctionDisabled} handleClick={() => setConjunction(Conjunction.OR)}/>
-                {!!group.error && <ErrorMessage style={{height: '100%', justifyContent: 'center', alignItems: 'center', display: 'flex', marginLeft: '5px'}}>{group.error}</ErrorMessage>}
             </ConjunctionContainer>
+            {!!group.error && <GroupHeaderErrorContainer className={'error-scroll-target'} style={{color: ErrorColor}}>{group.error}</GroupHeaderErrorContainer>}
             {showActions && <ActionsContainer>
-                <ActionButton label={'Add Rule'} handleClick={addRule}/>
+                <ActionButton label={'Add Condition'} handleClick={addRule}/>
                 <ActionButton label={'Add Group'} handleClick={addGroup}/>
                 {deleteGroup && <DeleteButton icon={'delete'} tooltip={'Delete'} target={`delete_${group.id}`} handleClick={() => deleteGroup(group.id)} hasBackground={false}/>}
             </ActionsContainer>}

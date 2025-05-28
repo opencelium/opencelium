@@ -32,7 +32,8 @@ const Group = ({updateGroup, deleteGroup, group, isInitial, hasNext, connectionE
                                             ...group,
                                             items: group.items.filter(i => {
                                                 return i.id !== groupId;
-                                            })
+                                            }),
+                                            error: '',
                                         })
                                     }}
                                     group={item}
@@ -57,7 +58,8 @@ const Group = ({updateGroup, deleteGroup, group, isInitial, hasNext, connectionE
                                             ...group,
                                             items: group.items.filter((i) => {
                                                 return i.id !== ruleId;
-                                            })
+                                            }),
+                                            error: '',
                                         })
                                     }}
                                 />;

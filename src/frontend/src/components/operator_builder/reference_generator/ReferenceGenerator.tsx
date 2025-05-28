@@ -34,6 +34,7 @@ const ReferenceGenerator = ({
 	bodyReference = false,
 	headerReference = false,
 	isBuilder = false,
+	error = '',
 	style = {},
 }: ReferenceGeneratorProps) => {
 	const [color, setColor] = useState<string>('');
@@ -228,11 +229,13 @@ const ReferenceGenerator = ({
 				{referenceType === 'direct' && (
 					<React.Fragment>
 						<MethodSelect
+							error={error}
 							connectionEditor={connectionEditor}
 							methodColor={color}
 							onMethodSelect={onColorSelect}
 						/>
 						<DeepSelect
+							error={error}
 							color={color}
 							connectionEditor={connectionEditor}
 							field={currentField}

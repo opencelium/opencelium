@@ -82,6 +82,7 @@ export interface OperatorSelectProps {
     type: OperatorType,
     operator: OperatorName | LoopOperatorName | '',
     updateOperator: (newOperatorName: OperatorName | '') => void,
+    error?: string,
 }
 export type ValidationResult<T extends GroupProps | RuleProps> = {
     node: T;

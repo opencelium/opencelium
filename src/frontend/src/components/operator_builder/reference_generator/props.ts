@@ -5,6 +5,7 @@ export interface ReferenceGeneratorProps {
     addField?: any,
     reference?: string,
     isBuilder: boolean,
+    error?: string,
     connectionEditor: ConnectionEditorProps,
     id?: string,
     parent?: any;
@@ -24,6 +25,7 @@ export interface MethodSelectProps {
     onMethodSelect: (color: string) => void,
     methodColor: string,
     connectionEditor: ConnectionEditorProps,
+    error?: string,
 }
 
 export interface DeepSelectProps {
@@ -31,6 +33,7 @@ export interface DeepSelectProps {
     field: string,
     color: string,
     connectionEditor: ConnectionEditorProps,
+    error?: string,
 }
 export type ReferenceType = 'constant' | 'direct' | 'webhook';
 export interface ReferenceSwitcherProps {

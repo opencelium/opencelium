@@ -6,6 +6,7 @@ import {SaveOperatorButton} from "@app_component/operator_builder/styles";
 import OperatorTypeFactory from "@app_component/operator_builder/classes/OperatorTypeFactory";
 import {LoopOperatorName, UnaryOperatorName} from "@app_component/operator_builder/interfaces/OperatorName";
 
+export const ErrorColor = '#a42525';
 const OperatorBuilder = (props: OperatorBuilderProps) => {
     const existedTree = useMemo(() => {
         if (!props.item) {
@@ -95,20 +96,41 @@ const OperatorBuilder = (props: OperatorBuilderProps) => {
         }
     };
 
+    const scrollToFirstElement = () => {
+        setTimeout(() => {
+            const dialogContent = document.querySelector('#modal_Condition').parentElement;
+            const targetElement = dialogContent?.querySelector('.error-scroll-target');
+
+            if (dialogContent instanceof HTMLElement && targetElement instanceof HTMLElement) {
+                const dialogContentRect = dialogContent.getBoundingClientRect();
+                const targetElementRect = targetElement.getBoundingClientRect();
+
+                const relativeOffset = targetElementRect.top - dialogContentRect.top;
+
+                dialogContent.scrollTo({
+                    top: dialogContent.scrollTop + relativeOffset - 60, // +100px below the target
+                    behavior: 'smooth',
+                });
+            }
+        }, 100)
+    };
+
     const updateOperator = () => {
         const result = validateAndUpdateTree(tree);
         setTree(result.node as GroupProps);
         if (!result.isValid) {
+            scrollToFirstElement();
             return;
         }
+        const checkedTree = result.node as GroupProps;
         const connector = props.connection.getConnectorByType(props.connector.getConnectorType());
         const operatorItem = connector.getOperatorByIndex(props.item.index);
-        const jsonToStringResult = jsonToString(tree, props.type);
+        const jsonToStringResult = jsonToString(checkedTree, props.type);
         operatorItem.expression = jsonToStringResult.result;
-        operatorItem.uiId = tree.id;
+        operatorItem.uiId = checkedTree.id;
         let operators: any = props.connection?.ui?.operators || [];
-        const isOperatorExist = operators.findIndex((o: any) => o.id === tree.id) !== -1;
-        operators = isOperatorExist ? operators.map((operator: any) => operator.id === tree.id ? tree : operator) : [...operators, tree];
+        const isOperatorExist = operators.findIndex((o: any) => o.id === checkedTree.id) !== -1;
+        operators = isOperatorExist ? operators.map((operator: any) => operator.id === checkedTree.id ? checkedTree : operator) : [...operators, checkedTree];
         props.connection.ui = {
             operators,
         }
@@ -125,7 +147,7 @@ const OperatorBuilder = (props: OperatorBuilderProps) => {
         props.updateConnection(props.connection);
     }
     return (
-        <div style={{margin: 20}}>
+        <div style={{margin: "0 20px 20px"}} id={'operator-builder'}>
             <Group type={props.type} connectionEditor={props} isInitial={true} hasNext={false} updateGroup={(newGroup) => setTree({...newGroup})} group={tree}/>
             {/*<p>
                 {jsonToString(tree, props.type).result}

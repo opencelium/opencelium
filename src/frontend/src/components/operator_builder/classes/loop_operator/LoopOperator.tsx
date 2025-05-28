@@ -47,25 +47,27 @@ export default class LoopOperator {
         return (
             <div style={{display: 'flex', justifyContent: 'left', width: '100%'}}>
                 <OperatorSelect
+                    error={rule.error}
                     type={OperatorType.Loop}
                     operator={rule?.properties?.operator || ''}
                     updateOperator={(operator) => {
-                        updateRule({...rule, properties: {...rule?.properties, operator, leftField: '', rightField: ''}})
+                        updateRule({...rule, error: '', properties: {...rule?.properties, operator, leftField: '', rightField: ''}})
                     }}
                 />
                 {rule?.properties?.operator && <React.Fragment>
-                    <ReferenceGenerator isBuilder style={{marginLeft: '10px'}} connectionEditor={connectionEditor} reference={rule?.properties?.leftField || ''} setReference={(leftField: string) => {
-                        updateRule({...rule, properties: {...rule?.properties, leftField, rightField: ''}})
+                    <ReferenceGenerator error={rule.error} isBuilder style={{marginLeft: '10px'}} connectionEditor={connectionEditor} reference={rule?.properties?.leftField || ''} setReference={(leftField: string) => {
+                        updateRule({...rule, error: '', properties: {...rule?.properties, leftField, rightField: ''}})
                     }}/>
                     {rule?.properties?.leftField &&
                         <React.Fragment>
                             {rule?.properties?.operator === LoopOperatorName.SplitString &&
                                 <ReferenceGenerator
+                                    error={rule.error}
                                     style={{marginLeft: '10px'}}
                                     connectionEditor={connectionEditor}
                                     reference={rule?.properties?.rightField || ''}
                                     setReference={(rightField: string) => {
-                                        updateRule({...rule, properties: {...rule?.properties, rightField}})
+                                        updateRule({...rule, error: '', properties: {...rule?.properties, rightField}})
                                     }}
                                     isBuilder
                                 />

@@ -41,25 +41,27 @@ export default class IfOperator {
         const {rule, updateRule, hasNext, connectionEditor} = props;
         return (
             <React.Fragment>
-                <ReferenceGenerator isBuilder connectionEditor={connectionEditor} reference={rule?.properties?.leftField || ''} setReference={(leftField: string) => {
-                    updateRule({...rule, properties: {...rule?.properties, leftField, operator: '', rightField: ''}})
+                <ReferenceGenerator error={rule.error} isBuilder connectionEditor={connectionEditor} reference={rule?.properties?.leftField || ''} setReference={(leftField: string) => {
+                    updateRule({...rule, error: '', properties: {...rule?.properties, leftField, operator: '', rightField: ''}})
                 }}/>
                 {rule?.properties?.leftField &&
                     <React.Fragment>
                         <OperatorSelect
+                            error={rule.error}
                             type={OperatorType.If}
                             operator={rule?.properties?.operator || ''}
                             updateOperator={(operator) => {
-                                updateRule({...rule, properties: {...rule?.properties, operator, rightField: ''}})
+                                updateRule({...rule, error: '', properties: {...rule?.properties, operator, rightField: ''}})
                             }}
                         />
                         {rule?.properties?.operator && isBinaryOperator(rule.properties.operator) &&
                             <ReferenceGenerator
                                 isBuilder
+                                error={rule.error}
                                 connectionEditor={connectionEditor}
                                 reference={rule?.properties?.rightField || ''}
                                 setReference={(rightField: string) => {
-                                    updateRule({...rule, properties: {...rule?.properties, rightField}})
+                                    updateRule({...rule, error: '', properties: {...rule?.properties, rightField}})
                                 }}
                             />
                         }

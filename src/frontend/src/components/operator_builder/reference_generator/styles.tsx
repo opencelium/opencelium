@@ -69,14 +69,21 @@ export const ReferenceGeneratorContainer = styled.div<ReferenceGeneratorStylePro
 export const ConstantContainer = styled.div`
 `;
 
-export const ReferenceSwitcherContainer = styled.div<ReferenceSwitcherStyleProps>`
+export const ReferenceSwitchersContainer = styled.div<ReferenceSwitcherStyleProps>`
     float: left;
-    display: ${({isHidden}) => isHidden ? 'none' : 'grid'};
+    display: ${({isHidden}) => isHidden ? 'none' : 'grid'};/*
     height: ${({hasNotConstant}) => hasNotConstant ? '37px' : '47px'};
     margin-top: -10px;
-    padding-bottom: ${({hasNotConstant}) => hasNotConstant ? '0' : '9px'};
+    padding-bottom: ${({hasNotConstant}) => hasNotConstant ? '0' : '9px'};*/
     overflow: hidden;
     transition: width 0.3s ease 0s;
+`;
+
+export const ReferenceSwitcherContainer = styled.div`
+	height: 14px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 `;
 
 export const UpdateParamButton = styled(Button)`

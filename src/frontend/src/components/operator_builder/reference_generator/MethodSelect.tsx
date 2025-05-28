@@ -1,7 +1,9 @@
-import React, {useEffect, useMemo, useState} from "react";
+import React, {useEffect, useMemo, useRef, useState} from "react";
 import Select, { SingleValue, StylesConfig } from "react-select";
 import {MethodSelectProps} from "@app_component/operator_builder/reference_generator/props";
 import {flattenOptions} from "@app_component/operator_builder/utils";
+import {ErrorColor} from "@app_component/operator_builder/OperatorBuilder";
+import {ErrorMessage} from "@app_component/operator_builder/styles";
 
 interface OptionType {
     label: string;
@@ -9,7 +11,8 @@ interface OptionType {
     color: string;
 }
 
-const MethodSelect: React.FC<MethodSelectProps> = ({onMethodSelect, methodColor, connectionEditor}) => {
+const MethodSelect: React.FC<MethodSelectProps> = ({onMethodSelect, methodColor, connectionEditor, error}) => {
+    const ref = useRef<HTMLDivElement>(null);
     const options = useMemo(() => {
         if (!connectionEditor.connection){
             return [];
@@ -17,11 +20,12 @@ const MethodSelect: React.FC<MethodSelectProps> = ({onMethodSelect, methodColor,
         return connectionEditor.connection.getOptionsForMethods(connectionEditor.connector, connectionEditor.item, {isKeyConsidered: false, exceptCurrent: false})
     },[connectionEditor]);
     const [selectedOption, setSelectedOption] = useState<OptionType | null>(methodColor ? options.find((o: any) => o.color === methodColor) : null);
+    const hasError = !!error && !methodColor;
     const customStyles: StylesConfig<OptionType, false> = {
         control: (provided, state) => ({
             ...provided,
             color: "black",
-            borderColor: state.isFocused ? "#666" : "#ccc",
+            borderColor: hasError ? ErrorColor : state.isFocused ? "#666" : "#ccc",
             boxShadow: state.isFocused ? "0 0 5px rgba(0, 0, 0, 0.2)" : "none",
             "&:hover": {
                 borderColor: "#666",
@@ -88,17 +92,20 @@ const MethodSelect: React.FC<MethodSelectProps> = ({onMethodSelect, methodColor,
         }
     }, [methodColor])
     return (
-        <Select
-            placeholder={'Select Method...'}
-            options={options}
-            value={selectedOption}
-            onChange={handleChange}
-            styles={customStyles}
-            getOptionLabel={(option) => option.label}
-            formatOptionLabel={formatOptionLabel}
-            menuPortalTarget={document.body}
-            menuPosition="absolute"
-        />
+        <div ref={ref}>
+            <Select
+                placeholder={'Select Method...'}
+                options={options}
+                value={selectedOption}
+                onChange={handleChange}
+                styles={customStyles}
+                getOptionLabel={(option) => option.label}
+                formatOptionLabel={formatOptionLabel}
+                menuPortalTarget={document.body}
+                menuPosition="absolute"
+            />
+            {hasError && <ErrorMessage className={'error-scroll-target'} style={{color: ErrorColor, position: 'absolute', left: ref.current?.offsetLeft, bottom: -15}}>{`${error}`}</ErrorMessage>}
+        </div>
     );
 };
 
