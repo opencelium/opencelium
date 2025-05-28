@@ -34,7 +34,7 @@ export default class IfOperator {
 
     static isExpressionNotValid(ruleProps: RulePropertyProps): boolean {
         const {operator, rightField, leftField} = ruleProps;
-        return !leftField || !operator || (rightField === undefined && Object.values(UnaryOperatorName).indexOf(operator as UnaryOperatorName) !== -1);
+        return !leftField || !operator || (!rightField && Object.values(UnaryOperatorName).indexOf(operator as UnaryOperatorName) === -1);
     }
 
     static getRuleComponent(props: RuleUIProps): any {
