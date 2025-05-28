@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {copyStringToClipboard, isArray, isString} from "@application/utils/utils";
+import { copyStringToClipboard, isArray, isString } from "@application/utils/utils";
 import CProperty from "./CProperty";
 import CXmlEditor from "./CXmlEditor";
 
@@ -242,25 +242,27 @@ export default class CTag{
         consoleError('Such tag value type does not exist');
     }
 
-    getNamespaces(){
-        let namespaces = [];
-        let parent = this._parent;
-        let prevIndex = this._uniqueIndex;
-        let isPrevItemArray = this.isArray;
-        while(true){
-            if(isPrevItemArray && namespaces.length > 0){
-                let index = parent.tags.findIndex(tag => tag._uniqueIndex === prevIndex);
-                namespaces[0] += `[${index}]`;
+    getNamespaces() {
+        const namespaces = [undefined];
+        let path = [];
+
+        let current = this;
+        while (current && !(current instanceof CXmlEditor)) {
+            let name = current.name;
+
+            if (current.isArray && current.parent?.tags) {
+                const siblings = current.parent.tags.filter(tag => tag.name === name);
+                const index = siblings.findIndex(tag => tag._uniqueIndex === current._uniqueIndex);
+                if (index !== -1) {
+                    name += `[${index}]`;
+                }
             }
-            namespaces.unshift(parent.name);
-            if(parent instanceof CXmlEditor) {
-                break;
-            }
-            prevIndex = parent._uniqueIndex;
-            isPrevItemArray = parent.isArray;
-            parent = parent.parent;
+
+            path.unshift(name);
+            current = current.parent;
         }
-        return namespaces;
+    
+        return namespaces.concat(path);
     }
 
     get parent(){

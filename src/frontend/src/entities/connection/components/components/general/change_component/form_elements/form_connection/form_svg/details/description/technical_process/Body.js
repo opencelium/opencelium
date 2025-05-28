@@ -77,7 +77,6 @@ class Body extends React.Component {
 
 	getCurrentBindingItem(fieldName) {
 		const { connection, method } = this.props;
-		// Удаляем префиксы и преобразуем точечную нотацию в скобочную (например, "States.0" → "States[0]")
 		let normalizedFieldName = fieldName
 			.replace(/^body\.\$\./, '')
 			.replace(/^header\.\$\./, '')
@@ -121,7 +120,12 @@ class Body extends React.Component {
 					fieldName += '.';
 				}
 			}
-			fieldName += value.variable.name;
+			const lastNamespace = value.namespace[value.namespace.length - 1];
+			if (value.variable.name !== lastNamespace) {
+				fieldName += value.variable.name;
+			} else {
+				fieldName = fieldName.slice(0, -1);
+			}
 			bindingItem = this.getCurrentBindingItem(fieldName);
 		} else {
 			bindingItem = connection.fieldBinding.find((item) => {

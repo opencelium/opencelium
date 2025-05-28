@@ -50,4 +50,5 @@ export interface ReferenceGeneratorStyleProps {
     isAbsolute?: boolean;
     parent?: boolean;
     endpointReference?: boolean;
+    manualAdd?: boolean;
 }

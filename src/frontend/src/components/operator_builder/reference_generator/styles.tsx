@@ -15,8 +15,8 @@ export const ReferenceGeneratorContainer = styled.div<ReferenceGeneratorStylePro
 		`
         grid-template-columns: 30px 380px;
     `}
-	${({ referenceType, isAbsolute }) =>
-		referenceType === 'constant' && isAbsolute &&
+	${({ referenceType, isAbsolute, manualAdd }) =>
+		referenceType === 'constant' && (isAbsolute || manualAdd) &&
 		`
         grid-template-columns: 30px 380px 30px;
     `}
@@ -25,8 +25,8 @@ export const ReferenceGeneratorContainer = styled.div<ReferenceGeneratorStylePro
 		`
         grid-template-columns: 30px 180px 200px;
     `}
-	${({ referenceType, isAbsolute }) =>
-		referenceType === 'direct' && isAbsolute &&
+	${({ referenceType, isAbsolute, manualAdd }) =>
+		referenceType === 'direct' && (isAbsolute || manualAdd) &&
 		`
         grid-template-columns: 30px 180px 200px 30px;
     `}
@@ -40,8 +40,8 @@ export const ReferenceGeneratorContainer = styled.div<ReferenceGeneratorStylePro
 		`
         grid-template-columns: 30px 380px;
     `}
-    ${({ referenceType, isAbsolute }) =>
-		referenceType === 'webhook' && isAbsolute &&
+    ${({ referenceType, isAbsolute, manualAdd }) =>
+		referenceType === 'webhook' && (isAbsolute || manualAdd) &&
 		`
         grid-template-columns: 30px 380px 30px;
     `}

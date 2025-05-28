@@ -13,13 +13,13 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {Component} from 'react';
-import PropTypes from 'prop-types';
-import appStyles from './basic_components.scss';
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
-import CTag from "./classes/CTag";
+import { ATTRIBUTES_MARK } from "@classes/content/invoker/CBody";
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import appStyles from './basic_components.scss';
 import CProperty from "./classes/CProperty";
-import {ATTRIBUTES_MARK} from "@classes/content/invoker/CBody";
+import CTag from "./classes/CTag";
 
 
 /**
@@ -47,7 +47,6 @@ class ReferenceValues extends Component{
                 let namespace = tag.getNamespaces();
                 let name = tag.name;
                 if(property){
-                    namespace.push(name);
                     name = `${ATTRIBUTES_MARK}${property.name}`;
                     e.preventDefault();
                 }

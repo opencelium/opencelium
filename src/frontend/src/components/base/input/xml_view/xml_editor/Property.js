@@ -13,17 +13,17 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {Component} from 'react';
-import PropTypes from 'prop-types';
-import styles from './basic_components.scss';
-import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
-import CTag from "./classes/CTag";
-import CProperty from "./classes/CProperty";
 import ChangeProperty from "@app_component/base/input/xml_view/xml_editor/ChangeProperty";
-import {checkReferenceFormat} from "@application/utils/utils";
 import ReferenceValues from "@app_component/base/input/xml_view/xml_editor/ReferenceValues";
+import { OnReferenceClickContext } from "@app_component/base/input/xml_view/xml_editor/XmlEditor";
+import { checkReferenceFormat } from "@application/utils/utils";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import styles from './basic_components.scss';
+import CProperty from "./classes/CProperty";
+import CTag from "./classes/CTag";
 import CXmlEditor from "./classes/CXmlEditor";
-import {OnReferenceClickContext} from "@app_component/base/input/xml_view/xml_editor/XmlEditor";
 
 /**
  * Property component for XmlEditor
@@ -104,17 +104,17 @@ class Property extends Component{
 
     render() {
         const {hasRemoveIcon, hasUpdatePopup} = this.state;
-        const {translate, property, update, readOnly, ReferenceComponent, tag} = this.props;
+        const {translate, property, update, readOnly, ReferenceComponent, tag, xml} = this.props;
         return(
             <span style={{position: 'relative', display: 'inline-block'}}>
-                <span id={`${property.uniqueIndex}_property`} className={`${styles.property} ${!readOnly ? styles.property_hovered : ''}`}>
-                    <span className={styles.name} onMouseOver={!readOnly ? () => this.showRemoveIcon() : null} onMouseLeave={() => this.hideRemoveIcon()} onClick={!readOnly ? () => this.showUpdatePopup() : null}>{property.name}</span>
+                <span id={`${property.uniqueIndex}_property`} className={`${styles.property} ${!readOnly ? styles.property_hovered : ''}`} onMouseOver={!readOnly ? () => this.showRemoveIcon() : null} onMouseLeave={() => this.hideRemoveIcon()}>
+                    <span className={styles.name}  onClick={!readOnly ? () => this.showUpdatePopup() : null}>{property.name}</span>
                     {this.renderValue()}
                     {hasRemoveIcon && !readOnly && <TooltipFontIcon size={14} tooltip={translate('XML_EDITOR.DELETE_ATTRIBUTE')} value={'delete'} className={styles.remove_icon} onClick={() => this.removeProperty()}/>}
                 </span>
                 {
                     hasUpdatePopup && !readOnly &&
-                        <ChangeProperty tag={tag} translate={translate} correspondedId={`${property.uniqueIndex}_property`} property={property} change={update} close={() => this.hideUpdatePopup()}
+                        <ChangeProperty xml={xml} tag={tag} translate={translate} correspondedId={`${property.uniqueIndex}_property`} property={property} change={update} close={() => this.hideUpdatePopup()}
                                         mode={'update'} ReferenceComponent={ReferenceComponent}/>
                 }
             </span>
