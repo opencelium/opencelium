@@ -398,6 +398,7 @@ export function ConnectionForm(type) {
                         }*/
                         const uiTree = entity.ui?.operators.find(o => o.id === operator.uiId);
                         if (uiTree) {
+                            console.log(uiTree);
                             const jsonToStringResult = jsonToString(uiTree, operator.type);
                             if (jsonToStringResult.isNotValid){
                                 operatorErrors.push('Some data is undefined.');
