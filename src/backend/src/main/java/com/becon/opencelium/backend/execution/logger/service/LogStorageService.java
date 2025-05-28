@@ -1,5 +1,6 @@
-package com.becon.opencelium.backend.execution.logger;
+package com.becon.opencelium.backend.execution.logger.service;
 
+import com.becon.opencelium.backend.execution.logger.OcLogger;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -17,12 +18,26 @@ import java.util.stream.Stream;
 
 import static com.becon.opencelium.backend.utility.LogFileUtility.toPath;
 
+/**
+ * LogStorageService is responsible for locating and reading raw log lines from log files.
+ * Assumes log files are organized in directories with numeric names,
+ * and file names follow a convention: yyyy-MM-dd_HH-mm_<tag>_(f|s)_<executionId>.log
+ */
 @Service
-public class LogStorageManager {
+public class LogStorageService {
+    // Pattern to match log file names and extract executionId
     private static final Pattern FILE_NAME_PATTERN = Pattern.compile(
             "\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}_.+_(f|s)_(.+)\\.log"
     );
 
+    /**
+     * Reads a specific block of log lines for a given executionId.
+     *
+     * @param execId the executionId to identify the log file
+     * @param startOffset line number to start reading (1-based)
+     * @param endOffset line number to stop reading (inclusive)
+     * @return list of log lines in the given range
+     */
     public List<String> readBlock(String execId, long startOffset, long endOffset) {
         Path logfile = getLogFileByExecutionId(execId);
 
@@ -36,7 +51,13 @@ public class LogStorageManager {
         }
     }
 
-
+    /**
+     * Locates the log file that contains logs for the given executionId.
+     * Searches all numeric-named directories under OcLogger.LOG_LOCATION.
+     *
+     * @param executionId ID of the execution to match in the file name
+     * @return Path to the matched log file
+     */
     private Path getLogFileByExecutionId(String executionId) {
         Path[] logfile = {null};
         Path root = toPath(OcLogger.LOG_LOCATION);
