@@ -169,7 +169,7 @@ const DuplicateIcon: FC<DuplicateIconProps> =
         }
     }
     useEffect(() => {
-        getAllCategories();
+        dispatch(getAllCategories());
     }, [])
     useEffect(() => {
         if (gettingCategories === API_REQUEST_STATE.FINISH) {

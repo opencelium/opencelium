@@ -13,19 +13,20 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {Component} from 'react';
-import PropTypes from 'prop-types';
-import Property from "@app_component/base/input/xml_view/xml_editor/Property";
-import styles from './basic_components.scss';
-import CTag, {TAG_VALUE_TYPES} from "./classes/CTag";
-import {checkReferenceFormat, isString} from "@application/utils/utils";
-import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
-import CProperty from "./classes/CProperty";
 import ChangeProperty from "@app_component/base/input/xml_view/xml_editor/ChangeProperty";
 import ChangeTag from "@app_component/base/input/xml_view/xml_editor/ChangeTag";
+import Property from "@app_component/base/input/xml_view/xml_editor/Property";
 import ReferenceValues from "@app_component/base/input/xml_view/xml_editor/ReferenceValues";
+import { OnReferenceClickContext } from "@app_component/base/input/xml_view/xml_editor/XmlEditor";
+import { checkReferenceFormat, isString } from "@application/utils/utils";
+import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import { update } from 'lodash';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import styles from './basic_components.scss';
+import CProperty from "./classes/CProperty";
+import CTag, { TAG_VALUE_TYPES } from "./classes/CTag";
 import CXmlEditor from "./classes/CXmlEditor";
-import {OnReferenceClickContext} from "@app_component/base/input/xml_view/xml_editor/XmlEditor";
 
 const XML_TAG_INDENT = 15;
 
@@ -175,10 +176,10 @@ class Tag extends Component{
     /**
      * to minimize or maximize tag
      */
-    toggleTag(){
-        const {tag, update} = this.props;
+    toggleTag() {
+        const { tag } = this.props;
         tag.minimized = !tag.minimized;
-        update();
+        this.forceUpdate();
     }
 
     /**
@@ -201,7 +202,7 @@ class Tag extends Component{
     }
 
     renderProperties(){
-        const {translate, tag, update, readOnly, ReferenceComponent} = this.props;
+        const {translate, tag, update, readOnly, ReferenceComponent, xml} = this.props;
         return tag.properties.map(property => {
             return(
                 <Property
@@ -212,6 +213,7 @@ class Tag extends Component{
                     update={update}
                     readOnly={readOnly}
                     ReferenceComponent={ReferenceComponent}
+                    xml={xml}
                 />
             );
         })
@@ -308,7 +310,7 @@ class Tag extends Component{
                         {hasAddTagPopup && !readOnly && <ChangeTag xml={xml} translate={translate} correspondedId={`${tag.uniqueIndex}_add_tag`} parent={tag} tag={addTag} change={update} close={() => this.hideAddTagPopup()} mode={'add'} ReferenceComponent={ReferenceComponent}/>}
                         {this.renderProperties()}
                         {hasAddPropertyIcon && !readOnly && <TooltipFontIcon size={14} id={`${tag.uniqueIndex}_add_property`} tooltip={translate('XML_EDITOR.ADD_PROPERTY')} value={'add_circle_outline'} className={styles.add_property_icon} onClick={() => this.showAddPropertyPopup()}/>}
-                        {hasAddPropertyPopup && !readOnly && <ChangeProperty tag={tag} translate={translate} correspondedId={`${tag.uniqueIndex}_add_property`} property={property} change={(a) => this.addProperty(a)} close={() => this.hideAddPropertyPopup()} mode={'add'} ReferenceComponent={ReferenceComponent}/>}
+                        {hasAddPropertyPopup && !readOnly && <ChangeProperty xml={xml} tag={tag} translate={translate} correspondedId={`${tag.uniqueIndex}_add_property`} property={property} change={(a) => this.addProperty(a)} close={() => this.hideAddPropertyPopup()} mode={'add'} ReferenceComponent={ReferenceComponent}/>}
                         {!tag.tags && <span className={styles.bracket}>{isDeclaration ? '?' : '/'}</span>}
                         <span className={styles.bracket}>{'>'}</span>
                         {hasDeleteTagIcon && !readOnly && <TooltipFontIcon size={14} tooltip={translate('XML_EDITOR.DELETE_TAG')} value={'delete'} className={styles.delete_icon} onClick={deleteTag ? deleteTag : null} style={{paddingLeft: hasAddTagIcon && tag.valueType !== TAG_VALUE_TYPES.TEXT && !isDeclaration ? '32px' : '16px'}}/>}

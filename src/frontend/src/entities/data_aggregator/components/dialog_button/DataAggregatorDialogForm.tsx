@@ -1,7 +1,7 @@
 import Button from '@app_component/base/button/Button';
 import {
-  CheckboxStyled,
-  TextStyled,
+	CheckboxStyled,
+	TextStyled,
 } from '@app_component/base/input/file/styles';
 import Input from '@app_component/base/input/Input';
 import { OptionProps } from '@app_component/base/input/select/interfaces';
@@ -9,14 +9,15 @@ import InputText from '@app_component/base/input/text/InputText';
 import { getReactXmlStyles } from '@app_component/base/input/xml_view/styles';
 import { TextSize } from '@app_component/base/text/interfaces';
 import LimitedAceEditor from '@app_component/limited_ace_editor/LimitedAceEditor';
+import Validation from '@application/classes/Validation';
 import {
-  API_REQUEST_STATE,
-  TRIPLET_STATE,
+	API_REQUEST_STATE,
+	TRIPLET_STATE,
 } from '@application/interfaces/IApplication';
 import {
-  getMarker,
-  replaceVariables,
-  setFocusById,
+	getMarker,
+	replaceVariables,
+	setFocusById,
 } from '@application/utils/utils';
 import Select from '@basic_components/inputs/Select';
 import CAggregator from '@classes/content/connection/data_aggregator/CAggregator';
@@ -28,10 +29,10 @@ import AddArgument from '../arguments/AddArgument';
 import Arguments from '../arguments/Arguments';
 import { AggregatorFormProps } from './interfaces';
 import {
-  ActionButtonContainer,
-  AggregatorFormContainer,
-  ArgumentFormContainer,
-  FormContainer,
+	ActionButtonContainer,
+	AggregatorFormContainer,
+	ArgumentFormContainer,
+	FormContainer,
 } from './styles';
 
 const getStaticWordCompleter = (variables: string[]) => {
@@ -272,6 +273,7 @@ const DataAggregatorDialogForm: FC<AggregatorFormProps> = ({
 						icon={'person'}
 						label={'Name'}
 						error={nameError}
+						maxLength={Validation.TextLength.Short}
 					/>
 					{!readOnly && (
 						<React.Fragment>

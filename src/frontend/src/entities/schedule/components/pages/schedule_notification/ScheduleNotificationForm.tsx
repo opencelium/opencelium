@@ -32,6 +32,7 @@ import { clearCurrentNotification } from "@entity/schedule/redux_toolkit/slices/
 import IncomingWebhook from "@entity/schedule/classes/IncomingWebhook";
 import {getIncomingWebhook} from "@entity/schedule/redux_toolkit/action_creators/IncomingWebhookCreators";
 import { clearWebhook } from "@entity/schedule/redux_toolkit/slices/IncomingWebhookSlice";
+import Validation from "@application/classes/Validation";
 
 
 const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
@@ -112,7 +113,7 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
         }
     },[addingNotification, updatingNotification]);
     const TitleInput = notification.getText({
-        propertyName: "name", props: {autoFocus: true, icon: 'person', label: 'Name', required: true, isLoading: checkingNotificationName === API_REQUEST_STATE.START, error: isCurrentNotificationHasUniqueName === TRIPLET_STATE.FALSE ? 'The title must be unique' : ''}
+        propertyName: "name", props: {maxLength: Validation.TextLength.Short, autoFocus: true, icon: 'person', label: 'Name', required: true, isLoading: checkingNotificationName === API_REQUEST_STATE.START, error: isCurrentNotificationHasUniqueName === TRIPLET_STATE.FALSE ? 'The title must be unique' : ''}
     })
     const IncomingWebhookInput = notification.getText({
         propertyName: "incomingWebhook", props: {icon: 'link', label: 'Webhook', isLoading: gettingWebhook === API_REQUEST_STATE.START}

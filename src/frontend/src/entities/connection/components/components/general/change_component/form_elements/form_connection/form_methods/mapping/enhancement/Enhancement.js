@@ -29,6 +29,7 @@ import {
 	SourceFieldStyled,
 	SourceMethodNameStyled,
 } from '../../../form_svg/details/description/technical_process/reference_information/styles';
+import Validation from "@application/classes/Validation";
 
 /**
  * Enhancement Component
@@ -94,12 +95,14 @@ class Enhancement extends Component {
 	/**
 	 * to update expert code
 	 */
-	updateExpertCode(code) {
-		const { setEnhancement } = this.props;
-		let { enhancement } = this.props;
-		enhancement.expertCode = code;
-		setEnhancement(enhancement);
-		this.setState({ expertCode: code });
+	updateExpertCode(code, e) {
+		if (code.length <= Validation.TextLength.Short) {
+			const { setEnhancement } = this.props;
+			let { enhancement } = this.props;
+			enhancement.expertCode = code;
+			setEnhancement(enhancement);
+			this.setState({ expertCode: code });
+		}
 	}
 
 	renderExpertVar(input) {
@@ -165,13 +168,14 @@ class Enhancement extends Component {
 				</FieldBindingsBlockStyled>
 				<Input
 					readOnly={readOnly}
-					value={'script'}
+					value={expertCode}
 					label={'Script'}
 					icon={'javascript'}
 					display={'grid'}
 					hasUnderline={false}
 					labelMargin='-25px 0 0 0'
 					height={`calc(100% - 100px)`}
+					maxLength={Validation.TextLength.Short}
 				>
 					<LimitedAceEditor
 						maxLength={255}
@@ -186,7 +190,7 @@ class Enhancement extends Component {
 						markers={markers}
 						mode='javascript'
 						theme='tomorrow'
-						onChange={(a) => this.updateExpertCode(a)}
+						onChange={(newCode, e) => this.updateExpertCode(newCode, e)}
 						name='enhancement_code'
 						editorProps={{ $blockScrolling: true }}
 						showPrintMargin={true}
@@ -249,6 +253,7 @@ class Enhancement extends Component {
 										onChange={(e) => this.updateDescription(e.target.value)}
 										name={'Description'}
 										value={description}
+										maxLength={Validation.TextLength.Medium}
 									/>
 								</Col>
 							</Row>

@@ -13,16 +13,16 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import OperatorTypeFactory from "@app_component/operator_builder/classes/OperatorTypeFactory";
+import { GroupProps, OperatorType, RuleProps } from "@app_component/operator_builder/props";
+import { Range } from "ace-builds";
+import crypto from "crypto";
+import _ from "lodash";
+import React, { ReactElement, useEffect, useRef } from "react";
 import ReactDOM from 'react-dom';
 import ReactDOMServer from "react-dom/server";
-import React, {ReactElement, useEffect, useRef} from "react";
-import _ from "lodash";
-import {ResponseMessages} from "../requests/interfaces/IResponse";
-import {Application} from "../classes/Application";
-import crypto from "crypto";
-import {Range} from "ace-builds";
-import {GroupProps, OperatorType, RuleProps} from "@app_component/operator_builder/props";
-import OperatorTypeFactory from "@app_component/operator_builder/classes/OperatorTypeFactory";
+import { Application } from "../classes/Application";
+import { ResponseMessages } from "../requests/interfaces/IResponse";
 
 //TODO rename utils.js into utils.tsx
 /**
@@ -412,45 +412,58 @@ export function freeStringFromAmp(innerText){
 /**
  * to check the references format in connections
  */
-export function checkReferenceFormat(value, isStrict = false){
-    let result = false;
-    let pointers = [];
-    let counter = 0;
-    if(value !== '#' && typeof value === 'string') {
-        pointers = value.split(';');
-        if(pointers.length > 0) {
-            for(let i = 0; i < pointers.length; i++) {
-                let pointer = pointers[i];
-                let splitPointer = pointer.split('.');
-                if (splitPointer.length > 3) {
-                    if (splitPointer[0][0] === '#') {
-                        if (splitPointer[0].length === 7) {
-                            if (splitPointer[1].substring(1, splitPointer[1].length - 1) === 'response'
-                                || splitPointer[1].substring(1, splitPointer[1].length - 1) === 'request') {
-                                if (splitPointer[2] === 'success' || splitPointer[2] === 'fail') {
-                                    if (splitPointer[3].length > 0) {
-                                        result = true;
-                                        counter++;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    } else{
-        if(value === '#' && !isStrict){
-            result = true;
-        } else{
-            result = false;
-        }
-    }
-    if(result && counter === pointers.length){
-        return true;
-    } else{
-        return false;
-    }
+export function checkReferenceFormat(value, isStrict = false) {
+	let result = false;
+	let pointers = [];
+	let counter = 0;
+
+	if (value !== '#' && typeof value === 'string') {
+		pointers = value.split(';');
+
+		for (let i = 0; i < pointers.length; i++) {
+			let pointer = pointers[i];
+			let splitPointer = pointer.split('.');
+
+			if (splitPointer.length >= 5) {
+				const [colorPart, typePart, scopePart, dollarPart] = splitPointer;
+
+				if (colorPart.startsWith('#') && colorPart.length === 7) {
+					const type = typePart.slice(1, -1);
+					if (type === 'response' || type === 'request') {
+						if (
+							(scopePart === 'body' || scopePart === 'header') &&
+							dollarPart === '$' &&
+							splitPointer[4].length > 0
+						) {
+							result = true;
+							counter++;
+							continue;
+						}
+					}
+				}
+			}
+
+			if (splitPointer.length > 3) {
+				if (splitPointer[0][0] === '#' && splitPointer[0].length === 7) {
+					if (
+						splitPointer[1].substring(1, splitPointer[1].length - 1) === 'response' ||
+						splitPointer[1].substring(1, splitPointer[1].length - 1) === 'request'
+					) {
+						if (splitPointer[2] === 'success' || splitPointer[2] === 'fail') {
+							if (splitPointer[3].length > 0) {
+								result = true;
+								counter++;
+							}
+						}
+					}
+				}
+			}
+		}
+	} else {
+		result = value === '#' && !isStrict;
+	}
+
+	return result && counter === pointers.length;
 }
 
 /**

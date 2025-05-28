@@ -2,12 +2,14 @@ import styled from 'styled-components';
 import Button from "@app_component/base/button/Button";
 import {GroupHeaderStyleProps, GroupStyleProps, RuleStyleProps} from "@app_component/operator_builder/props";
 import {TooltipButton} from "@app_component/base/tooltip_button/TooltipButton";
+import {ErrorColor} from "@app_component/operator_builder/OperatorBuilder";
 
 export const RuleContainer = styled.div<RuleStyleProps>`
     position: relative;
     display: flex;
     background: #fff;
     border-radius: 5px;
+    align-items: center;
     gap: 10px;
     ${({isLoop}) => isLoop ?
     `
@@ -120,8 +122,7 @@ export const ActionButton = styled(Button)`
 
 `;
 export const ErrorMessage = styled.p`
-    color: rgb(155, 46, 46);
-    font-size: 12px;
+    font-size: 13px;
 `;
 export const DeleteButtonContainer = styled.div`
     flex: 1;
@@ -140,6 +141,15 @@ export const ConjunctionOrButton = styled(Button)`
     opacity: 1 !important;
     border-radius: 0 5px 5px 0;
 `;
+export const GroupHeaderErrorContainer = styled(ErrorMessage)`
+    position: absolute;
+    bottom: -18px;
+    left: 25px;
+    margin: 0;
+    justify-content: center;
+    align-items: end;
+    display: flex;
+`
 export const SaveOperatorButton = styled(Button)`
     float: right;
     margin-top: 30px;

@@ -28,6 +28,7 @@ import {OptionProps} from "@app_component/base/input/select/interfaces";
 import FormSection from "@app_component/form/form_section/FormSection";
 import {UserGroup} from "../../classes/UserGroup";
 import {IUserGroup} from "../../interfaces/IUserGroup";
+import Validation from "@application/classes/Validation";
 
 const UserGroupForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
     const dispatch = useAppDispatch();
@@ -66,10 +67,10 @@ const UserGroupForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
         }
     },[addingUserGroup, updatingUserGroup]);
     const NameInput = userGroup.getText({
-        propertyName: "name", props: {autoFocus: !isView, required: true, icon: 'person', label: 'Name', isLoading: checkingUserGroupName === API_REQUEST_STATE.START, error: isCurrentUserGroupHasUniqueName === TRIPLET_STATE.FALSE ? 'The name is already in use' : ''}
+        propertyName: "name", props: {maxLength: Validation.TextLength.Short, autoFocus: !isView, required: true, icon: 'person', label: 'Name', isLoading: checkingUserGroupName === API_REQUEST_STATE.START, error: isCurrentUserGroupHasUniqueName === TRIPLET_STATE.FALSE ? 'The name is already in use' : ''}
     })
     const DescriptionInput = userGroup.getTextarea({
-        propertyName: "description", props: {icon: "notes", label: "Description"}
+        propertyName: "description", props: {maxLength: Validation.TextLength.Medium, icon: "notes", label: "Description"}
     })
     const Avatar = userGroup.getFile({propertyName: "iconFile", props: {label: "Icon",}});
     const Components = userGroup.getSelect({propertyName: 'componentsSelect', props: {

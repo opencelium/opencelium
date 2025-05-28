@@ -28,12 +28,14 @@ const BackgroundStyled = styled.div`
 `;
 
 const InlineEditInputStyled = styled.div`
-    z-index: 1;
-    justify-content: center;
+
     position: absolute;
-    display: flex;
     top: 0;
-    width: 100%;
+    left: 0;
+    z-index: 1000; /* больше, чем у таблицы */
+    background: white;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    width: 300px;
     & textarea{
     }
     &>div{

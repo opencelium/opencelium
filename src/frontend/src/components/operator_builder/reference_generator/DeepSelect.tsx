@@ -1,6 +1,8 @@
 import { DeepSelectProps } from "@app_component/operator_builder/reference_generator/props";
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useRef, useState} from "react";
 import Select from "react-select";
+import {ErrorColor} from "@app_component/operator_builder/OperatorBuilder";
+import {ErrorMessage} from "@app_component/operator_builder/styles";
 
 type DataStructure = {
     [key: string]: DataStructure | null | DataStructure[] | any;
@@ -11,13 +13,15 @@ interface OptionType {
     value: string;
 }
 
-const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, connectionEditor}) => {
+const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, connectionEditor, error}) => {
+    const ref = useRef<HTMLDivElement>(null);
     const [searchValue, setSearchValue] = useState<string>(field);
     const [selectedOption, setSelectedOption] = useState<OptionType | null>(undefined);
     const [filteredOptions, setFilteredOptions] = useState<OptionType[]>([]);
     const [allOptions, setAllOptions] = useState<OptionType[]>([]);
     const [iterators, setIterators] = useState<string[]>([]);
     const [menuIsOpen, toggleMenu] = useState<boolean>(false);
+    const hasError = !!error && !field && !!color;
     useEffect(() => {
         setIterators(connectionEditor.connector.getPreviousIterators());
     }, [connectionEditor.connector]);
@@ -135,7 +139,7 @@ const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, con
         }
     }, [color]);
     return (
-        <div>
+        <div ref={ref}>
             <Select
                 placeholder={'Select Field...'}
                 options={filteredOptions}
@@ -149,8 +153,9 @@ const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, con
                 menuIsOpen={menuIsOpen}
                 isDisabled={!color}
                 styles={{
-                    control: (base) => ({
+                    control: (base, state) => ({
                         ...base,
+                        borderColor: hasError ? ErrorColor : state.isFocused ? "#666" : "#ccc",
                         opacity: 1,
                     }),
                     singleValue: (base) => ({
@@ -168,6 +173,7 @@ const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, con
                 menuPortalTarget={document.body}
                 menuPosition="absolute"
             />
+            {hasError && <ErrorMessage className={'error-scroll-target'} style={{color: ErrorColor, position: 'absolute', left: ref.current?.offsetLeft, bottom: -15}}>{`${error}`}</ErrorMessage>}
         </div>
     );
 };

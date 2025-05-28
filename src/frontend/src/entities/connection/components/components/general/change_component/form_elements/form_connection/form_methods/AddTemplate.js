@@ -28,6 +28,7 @@ import InputText from "@app_component/base/input/text/InputText";
 import InputTextarea from "@app_component/base/input/textarea/InputTextarea";
 import { TooltipButton } from "@app_component/base/tooltip_button/TooltipButton";
 import { ColorTheme } from "@style/Theme";
+import Validation from "@application/classes/Validation";
 
 
 function mapStateToProps(state){
@@ -113,7 +114,7 @@ class AddTemplate extends Component{
         const {visibleAddTemplateDialog, addTemplateName, addTemplateDescription, validateMessageName} = this.state;
         const {data, disabled, iconProps, buttonProps, tooltipButtonProps} = this.props;
         const {templateLabels} = data;
-        
+
         if(!templateLabels){
             return null;
         }
@@ -122,16 +123,16 @@ class AddTemplate extends Component{
                 {iconProps && <TooltipFontIcon {...iconProps} turquoiseTheme isButton onClick={(a) => this.toggleAddTemplateDialog(a)} disabled={disabled}/>}
                 {}
                 {buttonProps && !tooltipButtonProps && <Button {...buttonProps} onClick={(a) => this.toggleAddTemplateDialog(a)} disabled={disabled}/>}
-                {tooltipButtonProps && 
-                <TooltipButton 
-                    position={tooltipButtonProps.position} 
-                    icon={tooltipButtonProps.icon} 
-                    tooltip={tooltipButtonProps.tooltip} 
-                    target={tooltipButtonProps.target} 
-                    hasBackground={tooltipButtonProps.hasBackground} 
-                    background={!visibleAddTemplateDialog ? ColorTheme.White : ColorTheme.Blue} 
-                    color={!visibleAddTemplateDialog ? ColorTheme.Gray : ColorTheme.White} 
-                    padding={tooltipButtonProps.padding} 
+                {tooltipButtonProps &&
+                <TooltipButton
+                    position={tooltipButtonProps.position}
+                    icon={tooltipButtonProps.icon}
+                    tooltip={tooltipButtonProps.tooltip}
+                    target={tooltipButtonProps.target}
+                    hasBackground={tooltipButtonProps.hasBackground}
+                    background={!visibleAddTemplateDialog ? ColorTheme.White : ColorTheme.Blue}
+                    color={!visibleAddTemplateDialog ? ColorTheme.Gray : ColorTheme.White}
+                    padding={tooltipButtonProps.padding}
                     handleClick={(a) => this.toggleAddTemplateDialog(a)}/>}
                 <Dialog
                     actions={[{label: 'Ok', onClick: (a) => this.addTemplate(a), id: 'add_template_ok'}, {label: 'Cancel', onClick: (a) => this.toggleAddTemplateDialog(a), id: 'add_template_cancel'}]}
@@ -143,6 +144,7 @@ class AddTemplate extends Component{
                     <div>
                         <InputText
                             id={'template_name'}
+                            maxLength={Validation.TextLength.Short}
                             error={validateMessageName}
                             onChange={(e) => this.changeAddTemplateName(e.target.value)}
                             value={addTemplateName}
@@ -154,6 +156,7 @@ class AddTemplate extends Component{
                         />
                         <InputTextarea
                             id={'template_description'}
+                            maxLength={Validation.TextLength.Medium}
                             onChange={(e) => this.changeAddTemplateDescription(e.target.value)}
                             value={addTemplateDescription}
                             label={'Description'}

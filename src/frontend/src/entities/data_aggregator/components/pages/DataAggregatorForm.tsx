@@ -6,29 +6,29 @@ import FormComponent from '@app_component/form/form/Form';
 import FormSection from '@app_component/form/form_section/FormSection';
 import LimitedAceEditor from '@app_component/limited_ace_editor/LimitedAceEditor';
 import { Form } from '@application/classes/Form';
+import Validation from '@application/classes/Validation';
 import {
-  API_REQUEST_STATE,
-  TRIPLET_STATE,
+	API_REQUEST_STATE,
+	TRIPLET_STATE,
 } from '@application/interfaces/IApplication';
 import { IForm } from '@application/interfaces/IForm';
 import { useAppDispatch } from '@application/utils/store';
 import {
-  getMarker,
-  replaceVariables,
-  setFocusById,
+	getMarker,
+	replaceVariables,
+	setFocusById,
 } from '@application/utils/utils';
 import CAggregator from '@classes/content/connection/data_aggregator/CAggregator';
 import { CDataAggregator } from '@entity/data_aggregator/classes/CDataAggregator';
 import { clearError as clearDataAggregatorError } from '@entity/data_aggregator/redux_toolkit/slices/DataAggregatorSlice';
 import { ModelArgument } from '@entity/data_aggregator/requests/models/DataAggregator';
-import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
-import AceEditor from 'react-ace';
+import React, { FC, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { withTheme } from 'styled-components';
 import {
-  addAggregator,
-  getAggregatorById,
-  updateAggregator,
+	addAggregator,
+	getAggregatorById,
+	updateAggregator,
 } from '../../redux_toolkit/action_creators/DataAggregatorCreators';
 import AddArgument from '../arguments/AddArgument';
 import Arguments from '../arguments/Arguments';
@@ -333,6 +333,7 @@ const DataAggregatorDialogForm: FC<IForm> = ({
 					icon={'person'}
 					label={'Name'}
 					error={nameError}
+					maxLength={Validation.TextLength.Short}
 				/>
 				<Input
 					errorBottom={'-20px'}

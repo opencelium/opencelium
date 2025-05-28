@@ -32,6 +32,7 @@ import ModelConnector from "../requests/models/Connector";
 import {ConnectorPermissions} from "../constants";
 import {InlineEditInput} from "@app_component/collection/collection_view/InlineEditInput";
 import DefaultListRaw from "@app_component/collection/default_list_raw/DefaultListRaw";
+import Validation from "@application/classes/Validation";
 
 class Connectors extends ListCollection<ConnectorProps>{
     name: string = 'connectors';
@@ -47,7 +48,7 @@ class Connectors extends ListCollection<ConnectorProps>{
             width: '20%',
             getValue: (entity: IConnector) => {
                 return(
-                    <InlineEditInput maxLength={100} isInProcess={this.updatingConnector === API_REQUEST_STATE.START} updateValue={(newValue) => this.dispatch(updateConnector({hasCheck: false, entityData: {...entity.getPoustModel(true), title: newValue}}))} initialValue={entity.title}/>
+                    <InlineEditInput maxLength={Validation.TextLength.Short} isInProcess={this.updatingConnector === API_REQUEST_STATE.START} updateValue={(newValue) => this.dispatch(updateConnector({hasCheck: false, entityData: {...entity.getPoustModel(true), title: newValue}}))} initialValue={entity.title}/>
                 )
             }
         },
@@ -56,7 +57,7 @@ class Connectors extends ListCollection<ConnectorProps>{
             width: '30%',
             getValue: (entity: IConnector) => {
                 return(
-                    <InlineEditInput maxLength={250} isInProcess={this.updatingConnector === API_REQUEST_STATE.START} updateValue={(newValue) => this.dispatch(updateConnector({hasCheck: false, entityData: {...entity.getPoustModel(true), description: newValue}}))} initialValue={entity.description}/>
+                    <InlineEditInput maxLength={Validation.TextLength.Medium} isInProcess={this.updatingConnector === API_REQUEST_STATE.START} updateValue={(newValue) => this.dispatch(updateConnector({hasCheck: false, entityData: {...entity.getPoustModel(true), description: newValue}}))} initialValue={entity.description}/>
                 )
             }
         },
@@ -64,7 +65,7 @@ class Connectors extends ListCollection<ConnectorProps>{
     ];
     gridProps = {
         title: 'title',
-        image: (connector: IConnector) => {return Application.isValidImageUrl(connector.icon) ? connector.icon : connector.invoker.icon;},
+        image: (connector: IConnector) => {const icon = Application.isValidImageUrl(connector.icon) ? connector.icon : connector.invoker.icon; return icon.split('./').join('');},
     };
     translations = {
         title: 'Title',

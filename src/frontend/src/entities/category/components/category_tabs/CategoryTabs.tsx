@@ -33,6 +33,7 @@ import {CategoryModel, CategoryModelCreate} from "@entity/category/requests/mode
 import { CategoryTabsProps } from "./interfaces";
 import Checkbox from "@entity/connection/components/components/general/basic_components/inputs/Checkbox";
 import {getAllMetaConnections} from "@root/redux_toolkit/action_creators/ConnectionCreators";
+import Validation from "@application/classes/Validation";
 
 const AllCategoriesTab: any = {name: 'All', parentCategory: null, subCategories: []};
 
@@ -98,6 +99,7 @@ const CategoryTabs: FC<CategoryTabsProps> = ({setCurrentPage, readOnly = false})
   const NameInput = category.getText({
     propertyName: "name",
     props: {
+      maxLength: Validation.TextLength.Short,
       icon: 'title',
       label: 'Name',
       required: true,

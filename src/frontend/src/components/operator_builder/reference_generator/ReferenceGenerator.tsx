@@ -10,7 +10,7 @@ import {
 	addCloseParamGeneratorNavigation,
 	removeCloseParamGeneratorNavigation
 } from "@root/components/utils/key_navigation";
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useImperativeHandle, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import DirectReference from '../classes/references/DirectReference';
 import DeepSelect from './DeepSelect';
@@ -18,7 +18,7 @@ import MethodSelect from './MethodSelect';
 import { ReferenceGeneratorProps, ReferenceType } from './props';
 import { ConstantContainer, ReferenceGeneratorContainer } from './styles';
 
-const ReferenceGenerator = ({
+const ReferenceGenerator = React.forwardRef(({
 	reference,
 	setReference,
 	connectionEditor,
@@ -34,8 +34,9 @@ const ReferenceGenerator = ({
 	bodyReference = false,
 	headerReference = false,
 	isBuilder = false,
+	error = '',
 	style = {},
-}: ReferenceGeneratorProps) => {
+}: ReferenceGeneratorProps, ref) => {
 	const [color, setColor] = useState<string>('');
 	const [currentField, setCurrentField] = useState<string>('');
 	const [referenceType, updateReferenceType] = useState<ReferenceType>(
@@ -45,7 +46,7 @@ const ReferenceGenerator = ({
 		top: 0,
 		left: 0,
 	});
-	const ref: any = useRef();
+	const referenceRef: any = useRef();
 	const webhookRef: any = useRef();
 	useEffect(() => {
 		if (!reference) {
@@ -98,7 +99,7 @@ const ReferenceGenerator = ({
 				return;
 			}
 		}
-		if (ref.current && !ref.current.contains(event.target)
+		if (referenceRef.current && !referenceRef.current.contains(event.target)
 			&& (!webhookRef.current || !webhookRef.current.contains(event.target))
 			&& (!webhookGeneratorElem || !webhookGeneratorElem.contains(event.target))
 			&& (!webhookGeneratorFade || !webhookGeneratorFade.contains(event.target))
@@ -172,6 +173,9 @@ const ReferenceGenerator = ({
 			}
 		}
 	}
+	useImperativeHandle(ref, () => ({
+    setIdValue
+  }));
 
 	useEffect(() => {
 		if (reference) {
@@ -216,7 +220,8 @@ const ReferenceGenerator = ({
 				isAbsolute={isAbsolute}
 				parent={parent}
 				endpointReference={endpointReference}
-				ref={ref}
+				ref={referenceRef}
+				manualAdd={manualAdd}
 			>
 				{!endpointReference &&
 					<ReferenceSwitcher
@@ -228,11 +233,13 @@ const ReferenceGenerator = ({
 				{referenceType === 'direct' && (
 					<React.Fragment>
 						<MethodSelect
+							error={error}
 							connectionEditor={connectionEditor}
 							methodColor={color}
 							onMethodSelect={onColorSelect}
 						/>
 						<DeepSelect
+							error={error}
 							color={color}
 							connectionEditor={connectionEditor}
 							field={currentField}
@@ -293,6 +300,6 @@ const ReferenceGenerator = ({
 	} else {
 		return renderGenerator();
 	}
-};
+});
 
 export default ReferenceGenerator;

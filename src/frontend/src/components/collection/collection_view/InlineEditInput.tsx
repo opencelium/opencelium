@@ -8,6 +8,7 @@ import {toggleNotificationPanel} from "@application/redux_toolkit/slices/Applica
 import {useEventListener} from "@application/utils/utils";
 import {NotificationPanelStyled} from "@app_component/layout/notification_panel/styles";
 import InputTextarea from "@app_component/base/input/textarea/InputTextarea";
+import {createPortal} from "react-dom";
 
 const InlineEditInput: FC<InlineEditInputProps> =
     ({
@@ -75,19 +76,28 @@ const InlineEditInput: FC<InlineEditInputProps> =
     //TODO: auto height of the textarea - check in firefox
     //const rows = textareaElement ? Math.round(textareaElement.scrollHeight / 25) : inlineValueRef.current ? Math.round(inlineValueRef.current.offsetHeight / 25) : 3;
     const rows = 3;
+    const shortInitialValue = initialValue.length > 64 ? `${initialValue.substr(0, 64)}...` : initialValue;
     return (
         <div style={{position: showEditor ? 'relative' : 'unset'}}>
             <span ref={inlineValueRef} style={{color: showEditor ? 'white' : 'black'}} onDoubleClick={() => {
                 toggleEditor(true);
-            }}>{initialValue === '' ? '-' : initialValue}</span>
+            }}>{shortInitialValue === '' ? '-' : shortInitialValue}</span>
             {showEditor &&
                 <React.Fragment>
                     <BackgroundStyled/>
-                    <InlineEditInputStyled ref={inlineInputRef}>
-                        <InputTextarea placeholder={'Title'} error={validationMessage} id={'inline_edit_input'} maxLength={maxLength} onKeyDown={(e) => onKeyDown(e)} onChange={(e) => setInputValue(e.target.value)} value={inputValue}/>
-                        <Button isLoading={isInProcess} isDisabled={isInProcess} iconSize={TextSize.Size_12} right={-45} top={0} position={'absolute'} icon={'check'} handleClick={update}/>
-                        <Button isDisabled={isInProcess} iconSize={TextSize.Size_12} right={rows > 1 ? -45 : -86} top={rows > 1 ? '28px' : 0} position={'absolute'} icon={'cancel'} handleClick={() => cancel()}/>
-                    </InlineEditInputStyled>
+
+                    {createPortal(
+                        <InlineEditInputStyled ref={inlineInputRef} style={{
+                            position: 'absolute',
+                            top: inlineValueRef.current?.getBoundingClientRect().top + window.scrollY,
+                            left: inlineValueRef.current?.getBoundingClientRect().left + window.scrollX,
+                            zIndex: 9999
+                        }}>
+                            <InputTextarea placeholder={'Title'} error={validationMessage} id={'inline_edit_input'} maxLength={maxLength} onKeyDown={(e) => onKeyDown(e)} onChange={(e) => setInputValue(e.target.value)} value={inputValue}/>
+                            <Button isLoading={isInProcess} isDisabled={isInProcess} iconSize={TextSize.Size_12} right={-45} top={0} position={'absolute'} icon={'check'} handleClick={update}/>
+                            <Button isDisabled={isInProcess} iconSize={TextSize.Size_12} right={rows > 1 ? -45 : -86} top={rows > 1 ? '28px' : 0} position={'absolute'} icon={'cancel'} handleClick={() => cancel()}/>
+                        </InlineEditInputStyled>
+                    , document.getElementById('inline_edit_input_portal')!)}
                 </React.Fragment>
             }
         </div>
