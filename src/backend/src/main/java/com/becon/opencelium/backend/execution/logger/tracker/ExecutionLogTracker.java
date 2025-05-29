@@ -1,9 +1,9 @@
 package com.becon.opencelium.backend.execution.logger.tracker;
 
-import com.becon.opencelium.backend.database.mongodb.entity.ParsedLogBlockDocument;
+import com.becon.opencelium.backend.database.mongodb.entity.LogMetaData;
 import com.becon.opencelium.backend.execution.logger.enums.LogLineValue;
 import com.becon.opencelium.backend.execution.logger.parser.entity.ParsedLogLine;
-import com.becon.opencelium.backend.execution.logger.service.ParsedLogBlockService;
+import com.becon.opencelium.backend.execution.logger.service.LogMetaDataService;
 
 /**
  * ExecutionLogTracker is responsible for tracking the state and lifecycle of a single execution.
@@ -21,12 +21,12 @@ public class ExecutionLogTracker implements ExecutionTracker {
     private final Long connectionId;
     private Integer flowchartId;
 
-    private final ParsedLogBlockService blockService;
+    private final LogMetaDataService logMetaDataService;
 
-    public ExecutionLogTracker(String executionId, long connectionId, ParsedLogBlockService blockService) {
+    public ExecutionLogTracker(String executionId, long connectionId, LogMetaDataService logMetaDataService) {
         this.executionId = executionId;
         this.connectionId = connectionId;
-        this.blockService = blockService;
+        this.logMetaDataService = logMetaDataService;
     }
 
     /**
@@ -38,7 +38,7 @@ public class ExecutionLogTracker implements ExecutionTracker {
      * @param line ParsedLogLine containing phase information and properties
      */
     @Override
-    public void handleParsedLine(ParsedLogLine line) {
+    public LogMetaData handleParsedLine(ParsedLogLine line) {
         LogLineValue value = line.getValue();
 
         // 1. Set current flowchart ID if FLOWCHART_START is encountered
@@ -47,20 +47,24 @@ public class ExecutionLogTracker implements ExecutionTracker {
         }
 
         // 2. Ignore the line if we haven't seen a FLOWCHART_START yet
-        if (flowchartId == null) return;
+        if (flowchartId == null) {
+            throw new RuntimeException(String.format("FlowchartId %d not found in line %s ", flowchartId, line));
+        }
 
         // 3. Enrich line with execution, connection, and flowchart context
-        ParsedLogBlockDocument parsedLogBlockDocument = blockService.fromParsedLogLine(line,
+        LogMetaData logMetaData = logMetaDataService.fromParsedLogLine(line,
                 executionId, connectionId, flowchartId);
 
         // 4. If this is a *_START phase, persist new block with startOffset
         if (value.name().endsWith("_START")) {
-            blockService.saveStartBlock(parsedLogBlockDocument);
+            logMetaDataService.saveStartBlock(logMetaData);
         }
 
         // 5. If this is a *_END phase, update the existing block's endOffset
         if (value.name().endsWith("_END")) {
-            blockService.updateEndOffset(parsedLogBlockDocument);
+            logMetaDataService.updateEndOffset(logMetaData);
         }
+
+        return logMetaData;
     }
 }

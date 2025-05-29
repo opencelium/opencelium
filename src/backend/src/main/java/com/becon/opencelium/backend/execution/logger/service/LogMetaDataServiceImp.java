@@ -1,7 +1,7 @@
 package com.becon.opencelium.backend.execution.logger.service;
 
-import com.becon.opencelium.backend.database.mongodb.entity.ParsedLogBlockDocument;
-import com.becon.opencelium.backend.database.mongodb.repository.ParsedLogBlockRepository;
+import com.becon.opencelium.backend.database.mongodb.entity.LogMetaData;
+import com.becon.opencelium.backend.database.mongodb.repository.MetaDataLogRepository;
 import com.becon.opencelium.backend.execution.logger.parser.entity.ParsedLogLine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,13 +12,13 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * ParsedLogBlockService handles persistence and enrichment of parsed execution blocks (e.g. IF, LOOP, METHOD).
+ * LogMetaDataServiceImp handles persistence and enrichment of parsed execution blocks (e.g. IF, LOOP, METHOD).
  */
 @Service
-public class ParsedLogBlockService implements ParsedBlockService {
+public class LogMetaDataServiceImp implements LogMetaDataService {
 
     @Autowired
-    private ParsedLogBlockRepository parsedLogBlockRepository;
+    private MetaDataLogRepository metaDataLogRepository;
 
     /**
      * Saves a new block document for a *_START log line.
@@ -27,9 +27,9 @@ public class ParsedLogBlockService implements ParsedBlockService {
      * @param block the parsed block metadata to store
      */
     @Override
-    public void saveStartBlock(ParsedLogBlockDocument block) {
+    public void saveStartBlock(LogMetaData block) {
         block.setCreatedAt(Instant.now());
-        parsedLogBlockRepository.save(block);
+        metaDataLogRepository.save(block);
     }
 
     /**
@@ -40,18 +40,29 @@ public class ParsedLogBlockService implements ParsedBlockService {
      * @param block the END block (only startOffset contains the correct ending offset)
      */
     @Override
-    public void updateEndOffset(ParsedLogBlockDocument block) {
-        Optional<ParsedLogBlockDocument> optional = parsedLogBlockRepository.findByConnectionIdAndExecutionIdAndFlowchartIdAndIndexPath(
-                block.getConnectionId(),
-                block.getExecutionId(),
-                block.getFlowchartId(),
-                block.getIndexPath()
-        );
+    public void updateEndOffset(LogMetaData block) {
+        Optional<LogMetaData> optional;
+        if (block.getProperties().containsKey("loopIndex")) {
+            optional = metaDataLogRepository.findByExecutionConnectionFlowchartIndexPathAndLoopIndex(
+                    block.getConnectionId(),
+                    block.getExecutionId(),
+                    block.getFlowchartId(),
+                    block.getIndexPath(),
+                    block.getProperties().get("loopIndex").toString()
+            );
+        } else {
+            optional = metaDataLogRepository.findByConnectionIdAndExecutionIdAndFlowchartIdAndIndexPath(
+                    block.getConnectionId(),
+                    block.getExecutionId(),
+                    block.getFlowchartId(),
+                    block.getIndexPath()
+            );
+        }
 
         optional.ifPresent(b -> {
-            // only gStartOffset are initialized during mapping from ParsedLogLine to ParsedLogBlockDocument
+            // only StartOffset are initialized during mapping from ParsedLogLine to ParsedLogBlockDocument
             b.setEndOffset(block.getStartOffset());
-            parsedLogBlockRepository.save(block);
+            metaDataLogRepository.save(b);
         });
     }
 
@@ -66,9 +77,9 @@ public class ParsedLogBlockService implements ParsedBlockService {
      * @return the enriched document ready to persist
      */
     @Override
-    public ParsedLogBlockDocument fromParsedLogLine(ParsedLogLine line, String executionId,
-                                                    Long connectionId, int flowchartId) {
-        ParsedLogBlockDocument doc = new ParsedLogBlockDocument();
+    public LogMetaData fromParsedLogLine(ParsedLogLine line, String executionId,
+                                         Long connectionId, int flowchartId) {
+        LogMetaData doc = new LogMetaData();
 
         doc.setExecutionId(executionId);
         doc.setConnectionId(connectionId);
@@ -77,8 +88,8 @@ public class ParsedLogBlockService implements ParsedBlockService {
         doc.setIndexPath(line.getIndexPath());
         doc.setStartOffset(line.getOffset());
 
-        doc.setLogLineType(line.getLogLineType().name());
-        doc.setValue(line.getValue().name());
+        doc.setLogLineType(line.getLogLineType());
+        doc.setValue(line.getValue());
 
         // Copy properties as-is for now (can be enhanced for nested structures)
         Map<String, Object> props = new LinkedHashMap<>();

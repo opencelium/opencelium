@@ -4,6 +4,7 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
+import com.becon.opencelium.backend.database.mongodb.entity.LogMetaData;
 import com.becon.opencelium.backend.execution.socket.WebSocketNotificationService;
 import com.becon.opencelium.backend.resource.execution.LoggerConfiguration;
 import com.becon.opencelium.backend.utility.ApplicationContextUtility;
@@ -24,6 +25,7 @@ public class OcLogger<T extends LogMessage> {
     private final boolean webSocket;
     private final T logEntity;
     private final WebSocketNotificationService socketNotificationService;
+    private final LogLineDispatcher logLineDispatcher;
     private final long connectionId;
     private final Path filepath;
     private final Logger logger;
@@ -37,6 +39,7 @@ public class OcLogger<T extends LogMessage> {
         this.webSocket = loggerConfiguration.isWSocketOpen();
 
         this.socketNotificationService = ApplicationContextUtility.getBean(WebSocketNotificationService.class);
+        this.logLineDispatcher = ApplicationContextUtility.getBean(LogLineDispatcher.class);
         this.connectionId = connectionId;
         this.logEntity = logEntity;
 
@@ -118,8 +121,9 @@ public class OcLogger<T extends LogMessage> {
 
         if (webSocket) {
             logEntity.setMessage(message);
-            // TODO: share (startOffset, message) with necessary service
-            socketNotificationService.send(connectionId, logEntity);
+            LogMetaData logMetaData = logLineDispatcher.dispatch(message.toString(), startOffset).orElse(null);
+            Object obj = logLineDispatcher.toDto(logMetaData);
+            socketNotificationService.send(connectionId, obj);
         } else {
             t.accept(message);
         }

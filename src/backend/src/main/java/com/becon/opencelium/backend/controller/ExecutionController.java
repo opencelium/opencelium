@@ -2,11 +2,9 @@ package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.constant.ExceptionConstant;
 import com.becon.opencelium.backend.constant.ExceptionMessages;
-import com.becon.opencelium.backend.database.mongodb.service.LogMetaDataService;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.execution.log_managing.resource.MetaDataListDto;
-import com.becon.opencelium.backend.resource.connector.ConnectorResource;
-import com.becon.opencelium.backend.resource.error.ErrorResource;
+import com.becon.opencelium.backend.execution.logger.service.LogMetaDataService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -40,7 +38,7 @@ public class ExecutionController {
     })
     @GetMapping("/{executionId}/meta/list")
     public ResponseEntity<List<MetaDataListDto>> getMetaDataList(@PathVariable String executionId) {
-        return ResponseEntity.ok(logMetaDataService.getMetaDataList(executionId));
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Returns child metadata elements of the specified indexPath")
@@ -58,9 +56,7 @@ public class ExecutionController {
     ) {
         checkLoopIndex(loopIndex);
 
-        return ResponseEntity.ok(
-                logMetaDataService.getMetaDataList(executionId, connectorId, indexPath, loopIndex)
-        );
+        return ResponseEntity.ok().build();
     }
 
     private void checkLoopIndex(String loopIndex) {

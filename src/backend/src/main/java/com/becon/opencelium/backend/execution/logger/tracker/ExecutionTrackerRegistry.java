@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.execution.logger.tracker;
 
-import com.becon.opencelium.backend.execution.logger.service.ParsedLogBlockService;
+import com.becon.opencelium.backend.execution.logger.service.LogMetaDataService;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -18,10 +18,10 @@ public class ExecutionTrackerRegistry {
 
     // Stores active trackers keyed by executionId
     private final Map<String, ExecutionLogTracker> managers = new ConcurrentHashMap<>();
-    private final ParsedLogBlockService blockService;
+    private final LogMetaDataService logMetaDataService;
 
-    public ExecutionTrackerRegistry(ParsedLogBlockService blockService) {
-        this.blockService = blockService;
+    public ExecutionTrackerRegistry(LogMetaDataService logMetaDataService) {
+        this.logMetaDataService = logMetaDataService;
     }
 
     /**
@@ -32,7 +32,7 @@ public class ExecutionTrackerRegistry {
      * @return an existing or newly created ExecutionLogTracker
      */
     public ExecutionLogTracker getOrCreate(String executionId, Long connectionId) {
-        return managers.computeIfAbsent(executionId, id -> new ExecutionLogTracker(executionId, connectionId, blockService));
+        return managers.computeIfAbsent(executionId, id -> new ExecutionLogTracker(executionId, connectionId, logMetaDataService));
     }
 
     /**

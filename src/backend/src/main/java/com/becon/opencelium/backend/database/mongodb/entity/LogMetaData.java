@@ -1,34 +1,35 @@
 package com.becon.opencelium.backend.database.mongodb.entity;
 
+import com.becon.opencelium.backend.execution.logger.enums.LogLineType;
+import com.becon.opencelium.backend.execution.logger.enums.LogLineValue;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.FieldType;
-import org.springframework.data.mongodb.core.mapping.MongoId;
 
+import java.time.Instant;
 import java.util.Map;
 
 @Document(collection = "log_meta_data")
+@CompoundIndex(name = "exec_connection_flowchart_indexPath_idx",
+        def = "{'executionId': 1, 'connectionId': 1, 'flowchartId': 1, 'indexPath': 1}")
 public class LogMetaData {
-
-    @MongoId(targetType = FieldType.OBJECT_ID)
+    @Id
     private String id;
 
+    private Long connectionId;
     private String executionId;
-
-    private String connectionId;
-
-    private String flowchartId;
-
-    private String type;
+    private Integer flowchartId;
 
     private String indexPath;
-
-    private String parentPath;
-
     private Long startOffset;
-
     private Long endOffset;
 
-    private Map<String, Object> meta;
+    private LogLineType logLineType; // PHASE
+    private LogLineValue value;       // e.g., LOOP_START, IF_END
+
+    private Map<String, Object> properties;
+
+    private Instant createdAt;
 
     public String getId() {
         return id;
@@ -36,6 +37,14 @@ public class LogMetaData {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public Long getConnectionId() {
+        return connectionId;
+    }
+
+    public void setConnectionId(Long connectionId) {
+        this.connectionId = connectionId;
     }
 
     public String getExecutionId() {
@@ -46,28 +55,12 @@ public class LogMetaData {
         this.executionId = executionId;
     }
 
-    public String getConnectionId() {
-        return connectionId;
-    }
-
-    public void setConnectionId(String connectionId) {
-        this.connectionId = connectionId;
-    }
-
-    public String getFlowchartId() {
+    public Integer getFlowchartId() {
         return flowchartId;
     }
 
-    public void setFlowchartId(String flowchartId) {
+    public void setFlowchartId(Integer flowchartId) {
         this.flowchartId = flowchartId;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     public String getIndexPath() {
@@ -78,19 +71,11 @@ public class LogMetaData {
         this.indexPath = indexPath;
     }
 
-    public String getParentPath() {
-        return parentPath;
-    }
-
-    public void setParentPath(String parentPath) {
-        this.parentPath = parentPath;
-    }
-
-    public Long getStartOffset() {
+    public long getStartOffset() {
         return startOffset;
     }
 
-    public void setStartOffset(Long startOffset) {
+    public void setStartOffset(long startOffset) {
         this.startOffset = startOffset;
     }
 
@@ -102,11 +87,35 @@ public class LogMetaData {
         this.endOffset = endOffset;
     }
 
-    public Map<String, Object> getMeta() {
-        return meta;
+    public LogLineType getLogLineType() {
+        return logLineType;
     }
 
-    public void setMeta(Map<String, Object> meta) {
-        this.meta = meta;
+    public void setLogLineType(LogLineType logLineType) {
+        this.logLineType = logLineType;
+    }
+
+    public LogLineValue getValue() {
+        return value;
+    }
+
+    public void setValue(LogLineValue value) {
+        this.value = value;
+    }
+
+    public Map<String, Object> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Map<String, Object> properties) {
+        this.properties = properties;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
     }
 }

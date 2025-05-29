@@ -5,7 +5,7 @@ public enum LogLineCategory {
     FLOWCHART,
     OPERATION,
     LOOP,
-    CONDITIONAL,
+    IF,
     REQUEST,
     RESPONSE,
     HEADER,
@@ -18,7 +18,7 @@ public enum LogLineCategory {
             case FLOWCHART_START, FLOWCHART_END -> FLOWCHART;
             case OPERATION_START, OPERATION_END -> OPERATION;
             case LOOP_START, LOOP_END -> LOOP;
-            case IF_START, IF_END -> CONDITIONAL;
+            case IF_START, IF_END -> IF;
             case REQUEST -> REQUEST;
             case RESPONSE -> RESPONSE;
             case REQUEST_HEADER, RESPONSE_HEADER -> HEADER;
