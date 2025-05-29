@@ -19,7 +19,7 @@ import com.becon.opencelium.backend.execution.logger.service.LogMetaDataService;
 public class ExecutionLogTracker implements ExecutionTracker {
     private final String executionId;
     private final Long connectionId;
-    private Integer flowchartId;
+    private String flowchartId;
 
     private final LogMetaDataService logMetaDataService;
 
@@ -43,7 +43,7 @@ public class ExecutionLogTracker implements ExecutionTracker {
 
         // 1. Set current flowchart ID if FLOWCHART_START is encountered
         if (value == LogLineValue.FLOWCHART_START) {
-            this.flowchartId = Integer.parseInt(line.getProperties().get("fchartId"));
+            this.flowchartId = line.getProperties().get("fchartId");
         }
 
         // 2. Ignore the line if we haven't seen a FLOWCHART_START yet

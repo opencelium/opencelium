@@ -9,5 +9,5 @@ public interface LogMetaDataService {
     void updateEndOffset(LogMetaData block);
 
     LogMetaData fromParsedLogLine(ParsedLogLine line, String executionId,
-                                  Long connectionId, int flowchartId);
+                                  Long connectionId, String flowchartId);
 }

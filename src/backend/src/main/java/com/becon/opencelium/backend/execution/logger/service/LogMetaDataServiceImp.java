@@ -78,7 +78,7 @@ public class LogMetaDataServiceImp implements LogMetaDataService {
      */
     @Override
     public LogMetaData fromParsedLogLine(ParsedLogLine line, String executionId,
-                                         Long connectionId, int flowchartId) {
+                                         Long connectionId, String flowchartId) {
         LogMetaData doc = new LogMetaData();
 
         doc.setExecutionId(executionId);

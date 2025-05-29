@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface MetaDataLogRepository extends MongoRepository<LogMetaData, String> {
     Optional<LogMetaData> findByConnectionIdAndExecutionIdAndFlowchartIdAndIndexPath(
-            Long connectionId, String executionId, Integer flowchartId, String indexPath
+            Long connectionId, String executionId, String flowchartId, String indexPath
     );
 
     @Query("""
@@ -23,7 +23,7 @@ public interface MetaDataLogRepository extends MongoRepository<LogMetaData, Stri
     Optional<LogMetaData> findByExecutionConnectionFlowchartIndexPathAndLoopIndex(
             Long connectionId,
             String executionId,
-            Integer flowchartId,
+            String flowchartId,
             String indexPath,
             String loopIndex
     );

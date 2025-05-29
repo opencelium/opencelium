@@ -18,7 +18,7 @@ public class LogMetaData {
 
     private Long connectionId;
     private String executionId;
-    private Integer flowchartId;
+    private String flowchartId;
 
     private String indexPath;
     private Long startOffset;
@@ -55,11 +55,11 @@ public class LogMetaData {
         this.executionId = executionId;
     }
 
-    public Integer getFlowchartId() {
+    public String getFlowchartId() {
         return flowchartId;
     }
 
-    public void setFlowchartId(Integer flowchartId) {
+    public void setFlowchartId(String flowchartId) {
         this.flowchartId = flowchartId;
     }
 
