@@ -59,26 +59,29 @@ public class ConnectionExecutor {
         ConnectorExecutor targetEx = new ConnectorExecutor(connection.getTarget(), executionManager, getRestTemplate(target), logger, masking);
 
         int connectorId = -1;
+        String fchartId = "";
         try {
             logger.logAndSend(String.format("phase=EXECUTION_START id=%d connectionId=%d", executionId, connection.getConnectionId()));
 
             logger.getLogEntity().setType(LogType.INFO);
 
+            fchartId = source.getFchartId();
             connectorId = source.getId();
             logger.getLogEntity().setConnector(new ConnectorLog(source.getName(), "CONN1"));
-            logger.logAndSend("phase=FLOWCHART_START fchartId=" + connectorId);
+            logger.logAndSend(String.format("phase=FLOWCHART_START fchartId=%s connectorId=%d", fchartId, connectorId));
             sourceEx.start();
-            logger.logAndSend("phase=FLOWCHART_END fchartId=" + connectorId);
+            logger.logAndSend(String.format("phase=FLOWCHART_END fchartId=%s connectorId=%d", fchartId, connectorId));
 
+            fchartId = target.getFchartId();
             connectorId = target.getId();
             logger.getLogEntity().setConnector(new ConnectorLog(target.getName(), "CONN2"));
-            logger.logAndSend("phase=FLOWCHART_START fchartId=" + connectorId);
+            logger.logAndSend(String.format("phase=FLOWCHART_START fchartId=%s connectorId=%d", fchartId, connectorId));
             targetEx.start();
-            logger.logAndSend("phase=FLOWCHART_END fchartId=" + connectorId);
+            logger.logAndSend(String.format("phase=FLOWCHART_END fchartId=%s connectorId=%d", fchartId, connectorId));
         } catch (Exception e) {
             logger.logAndSend(e);
             // in case of exception 'connectorId' has been initialized with lastly executed Connector.id
-            logger.logAndSend("phase=FLOWCHART_END fchartId=" + connectorId);
+            logger.logAndSend(String.format("phase=FLOWCHART_END fchartId=%s connectorId=%d", fchartId, connectorId));
 
             throw e;
         } finally {
