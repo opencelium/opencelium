@@ -19,7 +19,7 @@ public class Connector {
     public static Connector fromEx(ConnectorEx connectorEx) {
         Connector result = new Connector();
         result.setId(connectorEx.getId());
-        result.setFchartId("unknown");
+        result.setFchartId(connectorEx.getFchartId());
         result.setName(connectorEx.getName());
         result.setInvoker(connectorEx.getInvoker());
         result.setSslCert(connectorEx.isSslCert());

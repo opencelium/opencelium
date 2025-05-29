@@ -24,9 +24,15 @@ import java.util.List;
 public class ConnectorMng {
     @Field(name = "connector_id")
     private Integer connectorId;
+
+    @Field(name = "fchart_id")
+    private String fchartId;
+
     private String title;
+
     @DBRef
     private List<MethodMng> methods;
+
     @DBRef
     private List<OperatorMng> operators;
 
@@ -39,6 +45,14 @@ public class ConnectorMng {
 
     public void setConnectorId(Integer connectorId) {
         this.connectorId = connectorId;
+    }
+
+    public String getFchartId() {
+        return fchartId;
+    }
+
+    public void setFchartId(String fchartId) {
+        this.fchartId = fchartId;
     }
 
     public String getTitle() {
