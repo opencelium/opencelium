@@ -7,6 +7,7 @@ import java.util.Map;
 
 public class ConnectorEx {
     private int id;
+    private String fchartId;
     private String name;
     private boolean sslCert;
     private int timeout;
@@ -98,5 +99,13 @@ public class ConnectorEx {
 
     public void setPagination(Pagination pagination) {
         this.pagination = pagination;
+    }
+
+    public String getFchartId() {
+        return fchartId;
+    }
+
+    public void setFchartId(String fchartId) {
+        this.fchartId = fchartId;
     }
 }
