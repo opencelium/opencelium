@@ -1,19 +1,24 @@
-import React, { useState } from 'react';
-import ConnectorPanel from './ConnectorPanel/ConnectorPanel';
-import {deleteLogs} from "@root/redux_toolkit/action_creators/ConnectionLogCreators";
-import {RootState, useAppDispatch, useAppSelector} from "@application/utils/store";
+import { TextSize } from "@app_component/base/text/interfaces";
+import { Application } from "@application/classes/Application";
+import { RootState, useAppDispatch, useAppSelector } from "@application/utils/store";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
-import {Connection} from "@root/classes/Connection";
 import {
   ClearButtonStyled,
   HeaderStyled, LogPanelStyled, TopStyled
 } from "@change_component/form_elements/form_connection/form_svg/layouts/logs/styles";
-import {TextSize} from "@app_component/base/text/interfaces";
-import {Application} from "@application/classes/Application";
+import { Connection } from "@root/classes/Connection";
+import { deleteLogs } from "@root/redux_toolkit/action_creators/ConnectionLogCreators";
+import { ITheme } from '@style/Theme';
+import React, { useState } from 'react';
+import ConnectorPanel from './ConnectorPanel/ConnectorPanel';
 export const ShowIndexPath = false;
-const LogsPanel: React.FC = () => {
-  const dispatch = useAppDispatch();
 
+interface LogsPanelProps {
+  theme?: ITheme;
+}
+
+const LogsPanel: React.FC<LogsPanelProps> = ({theme}) => {
+  const dispatch = useAppDispatch();
   const connectionLog = useAppSelector((state: RootState) => state.connectionLogReducer);
   const {
     logPanelHeight, isDetailsOpened
@@ -50,6 +55,7 @@ const LogsPanel: React.FC = () => {
               connector={connector}
               executionId={connectionLog.executionId}
               connectionId={connectionLog.connectionId}
+              theme={theme}
             />
           ))}
       </LogPanelStyled>

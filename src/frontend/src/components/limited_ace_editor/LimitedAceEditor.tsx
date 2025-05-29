@@ -28,10 +28,10 @@ import { LimitedAceEditorContainer, LimitedAceEditorCounter } from './styles';
 
 const LimitedAceEditor = React.forwardRef<any, LimitedAceEditorProps>(
 	(props, ref) => {
-		console.log(props);
 		const {
 			maxLength,
 			mode,
+			editorTheme,
 			theme,
 			value,
 			fontSize,
@@ -67,58 +67,36 @@ const LimitedAceEditor = React.forwardRef<any, LimitedAceEditorProps>(
 
 		useEffect(() => {
 			const editor = editorRef.current?.editor;
-			if (!editor || readOnly) return;
+			if (!editor || readOnly || typeof maxLength !== 'number') return;
 
-			const handleBeforeInput = (e: any) => {
+			const session = editor.getSession();
+			let lastValue = editor.getValue();
+
+			const handleSessionChange = () => {
 				const current = editor.getValue();
-				const selectionLength = editor.session.getTextRange(
-					editor.getSelectionRange()
-				).length;
-				const incomingLength = typeof e.data === 'string' ? e.data.length : 0;
-				if (current.length - selectionLength + incomingLength > maxLength) {
-					e.preventDefault();
+
+				if (current.length > maxLength) {
+					const selection = editor.getSelectionRange();
+					const newValue = current.slice(0, maxLength);
+					editor.setValue(newValue, -1);
+					editor.moveCursorToPosition(selection.end);
+
+					setCurrentValue(newValue);
+					onChange?.(newValue);
+				} else {
+					setCurrentValue(current);
+					onChange?.(current);
 				}
+
+				lastValue = editor.getValue();
 			};
 
-			const handlePaste = (e: any) => {
-				const clipboard = e.clipboardData.getData('text');
-				const current = editor.getValue();
-				const selectionLength = editor.session.getTextRange(
-					editor.getSelectionRange()
-				).length;
-
-				if (current.length - selectionLength + clipboard.length > maxLength) {
-					e.preventDefault();
-				}
-			};
-
-			const el = editor.textInput.getElement();
-			el.addEventListener('beforeinput', handleBeforeInput);
-			el.addEventListener('paste', handlePaste);
+			session.on('change', handleSessionChange);
 
 			return () => {
-				el.removeEventListener('beforeinput', handleBeforeInput);
-				el.removeEventListener('paste', handlePaste);
+				session.off('change', handleSessionChange);
 			};
-		}, [maxLength, readOnly]);
-
-		const handleChange = (newValue: string) => {
-			if (typeof maxLength === 'number' && newValue.length > maxLength) {
-				const trimmed = newValue.slice(0, maxLength);
-				setCurrentValue(trimmed);
-				onChange(trimmed);
-				return;
-			}
-
-			if (newValue.length <= maxLength) {
-				setCurrentValue(newValue);
-				onChange(newValue);
-			} else {
-				const trimmed = newValue.slice(0, maxLength);
-				setCurrentValue(trimmed);
-				onChange(trimmed);
-			}
-		};
+		}, [maxLength, readOnly, onChange]);
 
 		return (
 			<LimitedAceEditorContainer>
@@ -126,6 +104,7 @@ const LimitedAceEditor = React.forwardRef<any, LimitedAceEditorProps>(
 					<LimitedAceEditorCounter
 						top={counterStyles?.top}
 						right={counterStyles?.right}
+						theme={theme}
 					>
 						{currentValue?.length || 0}/{maxLength}
 					</LimitedAceEditorCounter>
@@ -133,7 +112,7 @@ const LimitedAceEditor = React.forwardRef<any, LimitedAceEditorProps>(
 				<AceEditor
 					ref={editorRef}
 					mode={mode}
-					theme={theme}
+					theme={editorTheme}
 					value={currentValue}
 					fontSize={fontSize}
 					showPrintMargin={showPrintMargin}
@@ -152,7 +131,6 @@ const LimitedAceEditor = React.forwardRef<any, LimitedAceEditorProps>(
 					placeholder={placeholder}
 					cursorStart={cursorStart}
 					focus={focus}
-					onChange={handleChange}
 					onBlur={onBlur}
 				/>
 			</LimitedAceEditorContainer>

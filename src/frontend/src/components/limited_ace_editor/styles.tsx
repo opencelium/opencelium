@@ -13,6 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { ITheme } from '@style/Theme';
 import styled from 'styled-components';
 import { LimitedAceEditorCounterProps } from './interfaces';
 
@@ -25,9 +26,9 @@ const LimitedAceEditorCounter = styled.div<LimitedAceEditorCounterProps>`
 	top: ${({ top }) => top || '-20px'};
 	right: ${({ right }) => right || '0'};
 	font-size: 12px;
-	color: #888888;
+	color: ${({ theme }: { theme: ITheme }) =>
+		theme ? theme?.input?.text?.color?.quite : '#888888'};
 	z-index: 1;
 `;
 
 export { LimitedAceEditorContainer, LimitedAceEditorCounter };
-
