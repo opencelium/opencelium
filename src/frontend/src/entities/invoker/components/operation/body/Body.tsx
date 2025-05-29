@@ -71,7 +71,8 @@ const Body: FC<BodyProps> = ({
 				}}
 				counterStyles={{ top: '0' }}
 				mode={format}
-				theme='textmate'
+				theme={theme}
+				editorTheme='textmate'
 				name='body'
 				fontSize={14}
 				showPrintMargin={false}

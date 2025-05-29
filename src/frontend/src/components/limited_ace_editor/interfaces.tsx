@@ -13,9 +13,12 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { ITheme } from '@style/Theme';
+
 export interface LimitedAceEditorProps {
 	maxLength?: number;
 	mode?: string;
+	editorTheme?: any;
 	theme?: any;
 	value?: string;
 	fontSize?: number;
@@ -46,4 +49,5 @@ export interface LimitedAceEditorProps {
 export interface LimitedAceEditorCounterProps {
 	top?: string;
 	right?: string;
+	theme?: ITheme;
 }

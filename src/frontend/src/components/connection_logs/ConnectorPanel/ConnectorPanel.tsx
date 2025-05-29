@@ -1,18 +1,21 @@
+import { ConnectorLog } from "@root/requests/models/ConnectionLog";
+import { ITheme } from '@style/Theme';
 import React from 'react';
 import styles from './ConnectorPanel.module.css';
 import TraceItem from './TraceItem/TraceItem';
-import {ConnectorLog} from "@root/requests/models/ConnectionLog";
 
 interface ConnectorPanelProps {
 	connector: ConnectorLog;
 	executionId: string;
 	connectionId: string;
+	theme?: ITheme;
 }
 
 const ConnectorPanel: React.FC<ConnectorPanelProps> = ({
 	connector,
 	executionId,
 	connectionId,
+	theme
 }) => {
 	return (
 		<div className={styles.connectorPanel}>
@@ -25,6 +28,7 @@ const ConnectorPanel: React.FC<ConnectorPanelProps> = ({
 						executionId={executionId}
 						connectionId={connectionId}
 						iterationIndexes={[]}
+						theme={theme}
 					/>
 				</div>
 			))}

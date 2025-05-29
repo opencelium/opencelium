@@ -13,26 +13,24 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {FC, useEffect, useRef, useState} from 'react';
-import {ColorTheme} from "@style/Theme";
-import {cleanString, useEventListener} from "@application/utils/utils";
-import Input from "../Input";
-import {InputSelectProps, OptionProps} from './interfaces';
-import {
-    OptionsStyled,
-    SelectStyled,
-    ToggleStyled,
-    TextStyled,
-    SearchInputStyled,
-    EmptyOptionsStyled,
-    MultipleValuesStyled,
-    InputContainerStyled, LineStyled,
-} from "./styles";
-import {Option} from "./Option";
+import { CheckboxStyled } from "@app_component/base/input/file/styles";
+import { capitalize, cleanString, sortAlphabeticallyByKey, useEventListener } from "@application/utils/utils";
+import { ColorTheme } from "@style/Theme";
+import React, { FC, useEffect, useRef, useState } from 'react';
 import Button from "../../button/Button";
-import { capitalize } from '@application/utils/utils';
-import { sortAlphabeticallyByKey } from '@application/utils/utils';
-import {CheckboxStyled} from "@app_component/base/input/file/styles";
+import Input from "../Input";
+import { InputSelectProps, OptionProps } from './interfaces';
+import { Option } from "./Option";
+import {
+    EmptyOptionsStyled,
+    InputContainerStyled, LineStyled,
+    MultipleValuesStyled,
+    OptionsStyled,
+    SearchInputStyled,
+    SelectStyled,
+    TextStyled,
+    ToggleStyled,
+} from "./styles";
 
 const InputSelect: FC<InputSelectProps> = ({
     id,
@@ -95,13 +93,24 @@ const InputSelect: FC<InputSelectProps> = ({
     }
     useEventListener('mousedown', checkIfClickedOutside, window, isToggled);
     const filterOptions = (searchValue: string) => {
-        if(isMultiple){
-            // @ts-ignore
-            setLocalOptions(source.filter(option => multipleValue.findIndex(v => v.value === option.value) === -1 && !cleanString(option.label.toString()).indexOf(cleanString(searchValue)) !== -1));
-        } else{
-            setLocalOptions(source.filter(option => cleanString(option.label.toString()).indexOf(cleanString(searchValue)) !== -1));
+        const normalizedSearch = cleanString(searchValue);
+
+        if (isMultiple) {
+            setLocalOptions(
+                source.filter(option =>
+                    multipleValue.findIndex(v => v.value === option.value) === -1 &&
+                    cleanString(option.label.toString()).includes(normalizedSearch)
+                )
+            );
+        } else {
+            setLocalOptions(
+                source.filter(option =>
+                    cleanString(option.label.toString()).includes(normalizedSearch)
+                )
+            );
         }
-    }
+    };
+
     const filter = (e: any) => {
         setSearchValue(e.target.value);
         // @ts-ignore
@@ -294,9 +303,16 @@ const InputSelect: FC<InputSelectProps> = ({
                 {
                     localOptions.length > 0 ? sortAlphabeticallyByKey(localOptions, 'label').map((option:any, key:any) => {
                         return (
-                            <Option key={option.value}
+                            <Option 
+                                key={`${option.value}_${option.label}_${key}`}
                                 onKeyDown={(e: any) => focusNextOption(e, option)}
-                                isCurrent={isMultiple ? false : currentOption && option.value === currentOption.value || option.value === searchValue}
+                                isCurrent={
+                                    isMultiple
+                                        ? false
+                                        : currentOption &&
+                                        option.value === currentOption.value &&
+                                        option.label === currentOption.label
+                                    }
                                 tabIndex={isToggled ? 0 : -1}
                                 onClick={() => setOption(option)}
                                 {...option}

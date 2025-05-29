@@ -382,7 +382,8 @@ const DataAggregatorDialogForm: FC<IForm> = ({
 							marginBottom: 0,
 						}}
 						mode='javascript'
-						theme='tomorrow'
+						theme={theme}
+						editorTheme='tomorrow'
 						name='input_aggregator_script'
 						editorProps={{ $blockScrolling: true }}
 						showPrintMargin={true}
@@ -411,17 +412,18 @@ const DataAggregatorDialogForm: FC<IForm> = ({
 					/>
 					<LimitedAceEditor
 						maxLength={255}
-						counterStyles={{ top: '45px' }}
 						markers={markers}
 						ref={scriptSegmentRef}
 						style={{
 							...getReactXmlStyles(styleProps),
 							marginLeft: '50px',
 							marginBottom: 20,
-							marginTop: 0,
+							marginTop: 20,
 						}}
+						counterStyles={{ top: '0' }}
 						mode='javascript'
-						theme='tomorrow'
+						theme={theme}
+						editorTheme='tomorrow'
 						onChange={changeScriptSegment}
 						name='input_aggregator_script'
 						editorProps={{ $blockScrolling: true }}

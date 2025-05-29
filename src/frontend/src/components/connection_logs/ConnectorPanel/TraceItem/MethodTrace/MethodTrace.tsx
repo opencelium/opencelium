@@ -9,12 +9,14 @@ import LimitedAceEditor from '@app_component/limited_ace_editor/LimitedAceEditor
 import { useAppDispatch } from '@application/utils/store';
 import { getMethodTrace } from '@root/redux_toolkit/action_creators/ConnectionLogCreators';
 import { cleanMethodTrace } from '@root/redux_toolkit/slices/ConnectionLogSlice';
+import { ITheme } from '@style/Theme';
 
 interface MethodTraceProps {
 	trace: MethodTraceType;
 	connectorId: string;
 	executionId: string;
 	connectionId: string;
+	theme: ITheme;
 }
 
 function getMethodColor(httpMethod: MethodTraceType['httpMethod']): string {
@@ -41,6 +43,7 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 	connectorId,
 	executionId,
 	connectionId,
+	theme
 }) => {
 	const dispatch = useAppDispatch();
 	const [expanded, setExpanded] = useState<boolean>(false);
@@ -172,7 +175,8 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 								<LimitedAceEditor
 									maxLength={255}
 									mode='json'
-									theme='textmate'
+									theme={theme}
+									editorTheme='textmate'
 									value={requestHeaders}
 									fontSize={14}
 									showPrintMargin={false}
@@ -188,7 +192,8 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 								<LimitedAceEditor
 									maxLength={255}
 									mode={requestMode}
-									theme='textmate'
+									theme={theme}
+									editorTheme='textmate'
 									value={requestBody}
 									fontSize={14}
 									showPrintMargin={false}
@@ -236,7 +241,8 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 								<LimitedAceEditor
 									maxLength={255}
 									mode='json'
-									theme='textmate'
+									theme={theme}
+									editorTheme='textmate'
 									value={responseHeaders}
 									fontSize={14}
 									showPrintMargin={false}
@@ -252,7 +258,8 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 								<LimitedAceEditor
 									maxLength={255}
 									mode={responseMode}
-									theme='textmate'
+									theme={theme}
+									editorTheme='textmate'
 									value={responseBody}
 									fontSize={14}
 									showPrintMargin={false}

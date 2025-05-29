@@ -23,10 +23,10 @@ import { setModalConnectionData, setModalCurrentTechnicalItem } from '@entity/co
 import React, { Component } from 'react';
 import { withTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
+import LogsPanel from '../../../../../../../../../components/connection_logs/LogsPanel';
 import Details from './details/Details';
 import ButtonPanel from './layouts/button_panel/ButtonPanel';
 import TechnicalLayout from './layouts/TechnicalLayout';
-import LogsPanel from '../../../../../../../../../components/connection_logs/LogsPanel';
 
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
@@ -150,7 +150,8 @@ class FormConnectionSvg extends Component {
       isFullScreen,
       entity,
       updateEntity,
-      setCurrentTechnicalItem
+      setCurrentTechnicalItem,
+      theme
     } = this.props;
     const {
       isCreateElementPanelOpened,
@@ -205,7 +206,7 @@ class FormConnectionSvg extends Component {
         )}
         <ButtonPanel readOnly={data.readOnly} data={data} entity={entity} updateEntity={updateEntity} currentTechnicalItem={currentTechnicalItem} setCurrentTechnicalItem={setCurrentTechnicalItem} />
 {/*        <LogPanel />*/}
-        <LogsPanel/>
+        <LogsPanel theme={theme}/>
       </div>
     );
   }

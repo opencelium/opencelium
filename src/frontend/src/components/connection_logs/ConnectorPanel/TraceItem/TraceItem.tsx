@@ -1,7 +1,8 @@
+import { Trace } from "@root/requests/models/ConnectionLog";
+import { ITheme } from '@style/Theme';
 import React from 'react';
 import MethodTrace from './MethodTrace/MethodTrace';
 import { OperatorTrace } from './OperatorTrace/OperatorTrace';
-import {Trace} from "@root/requests/models/ConnectionLog";
 
 interface TraceItemProps {
 	trace: Trace;
@@ -9,6 +10,7 @@ interface TraceItemProps {
 	executionId: string;
 	connectionId: string;
 	iterationIndexes: number[];
+	theme?: ITheme;
 }
 
 export const TraceItem: React.FC<TraceItemProps> = ({
@@ -17,6 +19,7 @@ export const TraceItem: React.FC<TraceItemProps> = ({
 	executionId,
 	connectionId,
 	iterationIndexes,
+	theme
 }) => {
 	if (trace.logType === 'method') {
 		return (
@@ -25,6 +28,7 @@ export const TraceItem: React.FC<TraceItemProps> = ({
 				connectorId={connectorId}
 				executionId={executionId}
 				connectionId={connectionId}
+				theme={theme}
 			/>
 		);
 	}

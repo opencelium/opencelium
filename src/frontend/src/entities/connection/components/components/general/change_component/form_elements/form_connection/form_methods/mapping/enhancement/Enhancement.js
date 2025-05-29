@@ -17,6 +17,7 @@ import Input from '@app_component/base/input/Input';
 import InputTextarea from '@app_component/base/input/textarea/InputTextarea';
 import { getReactXmlStyles } from '@app_component/base/input/xml_view/styles';
 import LimitedAceEditor from '@app_component/limited_ace_editor/LimitedAceEditor';
+import Validation from "@application/classes/Validation";
 import { getMarker, setFocusById } from '@application/utils/utils';
 import CEnhancement from '@classes/content/connection/field_binding/CEnhancement';
 import TooltipFontIcon from '@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon';
@@ -29,7 +30,6 @@ import {
 	SourceFieldStyled,
 	SourceMethodNameStyled,
 } from '../../../form_svg/details/description/technical_process/reference_information/styles';
-import Validation from "@application/classes/Validation";
 
 /**
  * Enhancement Component
@@ -143,7 +143,7 @@ class Enhancement extends Component {
 
 	renderEnhancement() {
 		const { expertVar, markers } = this.state;
-		let { readOnly } = this.props;
+		let { readOnly, theme } = this.props;
 		let { expertCode } = this.state;
 
 		const styleProps = {
@@ -189,7 +189,8 @@ class Enhancement extends Component {
 						}}
 						markers={markers}
 						mode='javascript'
-						theme='tomorrow'
+						editorTheme='tomorrow'
+						theme={theme}
 						onChange={(newCode, e) => this.updateExpertCode(newCode, e)}
 						name='enhancement_code'
 						editorProps={{ $blockScrolling: true }}
