@@ -13,47 +13,47 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { Component } from "react";
-import PropTypes from "prop-types";
-import { connect } from "react-redux";
 import { setFullScreen as setFullScreenFormSection } from "@application/redux_toolkit/slices/ApplicationSlice";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import { connect } from "react-redux";
 
-import FormInput from "./form_elements/FormInput";
-import FormSelect from "./form_elements/FormSelect";
-import FormInputImage from "./form_elements/FormInputImage";
-import FormSelectDescription from "./form_elements/FormSelectDescription";
-import FormMultiSelect from "./form_elements/FormMultiSelect";
-import FormSecretInput from "./form_elements/FormSecretInput";
-import FormConnectors from "./form_elements/form_connection/form_connectors/FormConnectors";
-import FormMethods from "./form_elements/form_connection/form_methods/FormMethods";
 import { findTopLeft, isString } from "@application/utils/utils";
-import FormMode from "./form_elements/form_connection/FormMode";
-import FormConnectionTitle from "./form_elements/form_connection/FormTitle";
-import FormUserTitle from "./form_elements/FormUserTitle";
-import FormInvokerName from "./form_elements/form_invoker/FormName";
-import FormInvokerDescription from "./form_elements/form_invoker/FormDescription";
-import FormInvokerHint from "./form_elements/form_invoker/FormHint";
-import FormInvokerIcon from "./form_elements/form_invoker/FormIcon";
-import FormAuthentication from "./form_elements/form_invoker/FormAuthentication";
-import FormConnection from "./form_elements/form_invoker/FormConnection";
-import FormOperations from "./form_elements/form_invoker/FormOperations";
-import FormNotificationTemplateName from "./form_elements/form_notification_template/FormName";
-import FormNotificationTemplateType from "./form_elements/form_notification_template/FormType";
-import FormContent from "./form_elements/form_notification_template/FormContent";
 import FormComponent from "@change_component/form_elements/FormComponent";
 import FormConnectionSvg from "@change_component/form_elements/form_connection/form_svg/FormConnectionSvg";
 import FormCategory from "./form_elements/FormCategory";
+import FormInput from "./form_elements/FormInput";
+import FormInputImage from "./form_elements/FormInputImage";
+import FormMultiSelect from "./form_elements/FormMultiSelect";
+import FormSecretInput from "./form_elements/FormSecretInput";
+import FormSelect from "./form_elements/FormSelect";
+import FormSelectDescription from "./form_elements/FormSelectDescription";
+import FormUserTitle from "./form_elements/FormUserTitle";
+import FormMode from "./form_elements/form_connection/FormMode";
+import FormConnectionTitle from "./form_elements/form_connection/FormTitle";
+import FormConnectors from "./form_elements/form_connection/form_connectors/FormConnectors";
+import FormMethods from "./form_elements/form_connection/form_methods/FormMethods";
+import FormAuthentication from "./form_elements/form_invoker/FormAuthentication";
+import FormConnection from "./form_elements/form_invoker/FormConnection";
+import FormInvokerDescription from "./form_elements/form_invoker/FormDescription";
+import FormInvokerHint from "./form_elements/form_invoker/FormHint";
+import FormInvokerIcon from "./form_elements/form_invoker/FormIcon";
+import FormInvokerName from "./form_elements/form_invoker/FormName";
+import FormOperations from "./form_elements/form_invoker/FormOperations";
+import FormContent from "./form_elements/form_notification_template/FormContent";
+import FormNotificationTemplateName from "./form_elements/form_notification_template/FormName";
+import FormNotificationTemplateType from "./form_elements/form_notification_template/FormType";
 
-import styles from "@entity/connection/components/themes/default/general/form_component.scss";
-import TestButton from "@change_component/form_elements/TestButton";
-import TooltipFontIcon from "@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon";
+import { Label } from "@app_component/form/form_section/label/Label";
+import FormSwitch from "@change_component/form_elements/FormSwitch";
+import FormUserGroupIcon from "@change_component/form_elements/FormUserGroupIcon";
 import FormUserGroupView from "@change_component/form_elements/FormUserGroupView";
 import FormUserPhoto from "@change_component/form_elements/FormUserPhoto";
-import FormUserGroupIcon from "@change_component/form_elements/FormUserGroupIcon";
-import FormSwitch from "@change_component/form_elements/FormSwitch";
-import { Label } from "@app_component/form/form_section/label/Label";
-import { FormSectionIconsStyled } from "./styles";
+import TestButton from "@change_component/form_elements/TestButton";
+import TooltipFontIcon from "@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon";
+import styles from "@entity/connection/components/themes/default/general/form_component.scss";
 import { withTheme } from "styled-components";
+import { FormSectionIconsStyled } from "./styles";
 
 export const ModalContext = React.createContext({
   isModal: false,
@@ -73,7 +73,6 @@ function mapStateToProps(state) {
 class FormSection extends Component {
   constructor(props) {
     super(props);
-
     this.state = {
       isFormSectionMinimized: false,
     };
@@ -97,7 +96,7 @@ class FormSection extends Component {
    * to map Field Inputs correspondingly
    */
   mapInputs(data, key) {
-    const { entity, updateEntity, clearValidationMessage } = this.props;
+    const { entity, updateEntity, clearValidationMessage, theme } = this.props;
     switch (data.type) {
       case "select+description":
         return (
@@ -218,6 +217,7 @@ class FormSection extends Component {
               entity={entity}
               updateEntity={updateEntity}
               data={data}
+              theme={theme}
             />
           </ModalContext.Provider>
         );

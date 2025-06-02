@@ -1,23 +1,22 @@
-import React, { useState } from 'react';
-import AceEditor from 'react-ace';
-import { Nav, NavItem, NavLink, TabContent, TabPane } from 'reactstrap';
 import { MethodTrace as MethodTraceType } from '@root/requests/models/ConnectionLog';
+import React, { useState } from 'react';
+import { Nav, NavItem, NavLink, TabContent, TabPane } from 'reactstrap';
 import ToggleButton from '../ToggleButton/ToggleButton';
 import styles from './MethodTrace.module.css';
 
-import 'ace-builds/src-noconflict/mode-json';
-import 'ace-builds/src-noconflict/mode-xml';
-import 'ace-builds/src-noconflict/theme-textmate';
-import {useAppDispatch} from "@application/utils/store";
-import {getMethodTrace} from "@root/redux_toolkit/action_creators/ConnectionLogCreators";
-import {cleanMethodTrace} from "@root/redux_toolkit/slices/ConnectionLogSlice";
-import {ShowIndexPath} from "@app_component/connection_logs/LogsPanel";
+import { ShowIndexPath } from '@app_component/connection_logs/LogsPanel';
+import LimitedAceEditor from '@app_component/limited_ace_editor/LimitedAceEditor';
+import { useAppDispatch } from '@application/utils/store';
+import { getMethodTrace } from '@root/redux_toolkit/action_creators/ConnectionLogCreators';
+import { cleanMethodTrace } from '@root/redux_toolkit/slices/ConnectionLogSlice';
+import { ITheme } from '@style/Theme';
 
 interface MethodTraceProps {
 	trace: MethodTraceType;
 	connectorId: string;
 	executionId: string;
 	connectionId: string;
+	theme: ITheme;
 }
 
 function getMethodColor(httpMethod: MethodTraceType['httpMethod']): string {
@@ -44,6 +43,7 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 	connectorId,
 	executionId,
 	connectionId,
+	theme
 }) => {
 	const dispatch = useAppDispatch();
 	const [expanded, setExpanded] = useState<boolean>(false);
@@ -71,7 +71,9 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 			setLoading(false);
 			setExpanded(true);
 		} else {
-			await dispatch(cleanMethodTrace({ connectorId, indexPath: trace.indexPath }));
+			await dispatch(
+				cleanMethodTrace({ connectorId, indexPath: trace.indexPath })
+			);
 			setExpanded(false);
 		}
 	};
@@ -114,18 +116,26 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 						onClick={handleToggle}
 					/>
 					<div
-						style={{backgroundColor: methodColor}}
+						style={{ backgroundColor: methodColor }}
 						className={styles.methodType}
 					>
 						{trace.httpMethod}
 					</div>
 
-					{ShowIndexPath && <div style={{marginLeft: 8}}>{trace.indexPath}</div>}
+					{ShowIndexPath && (
+						<div style={{ marginLeft: 8 }}>{trace.indexPath}</div>
+					)}
 					<div className={styles.methodUrl}>{trace.url}</div>
 				</div>
-				<div className={styles.methodTraceRightSide} onClick={(e: any) => {e.preventDefault(); e.stopPropagation();}}>
+				<div
+					className={styles.methodTraceRightSide}
+					onClick={(e: any) => {
+						e.preventDefault();
+						e.stopPropagation();
+					}}
+				>
 					<div className={styles.methodStatus}>{trace.statusCode}</div>
-					<div>{"|"}</div>
+					<div>{'|'}</div>
 					<div className={styles.methodTime}>{trace.executionTime} ms</div>
 				</div>
 			</div>
@@ -162,9 +172,11 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 						</Nav>
 						<TabContent activeTab={activeRequestTab}>
 							<TabPane tabId='header'>
-								<AceEditor
+								<LimitedAceEditor
+									maxLength={255}
 									mode='json'
-									theme='textmate'
+									theme={theme}
+									editorTheme='textmate'
 									value={requestHeaders}
 									fontSize={14}
 									showPrintMargin={false}
@@ -177,9 +189,11 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 								/>
 							</TabPane>
 							<TabPane tabId='body'>
-								<AceEditor
+								<LimitedAceEditor
+									maxLength={255}
 									mode={requestMode}
-									theme='textmate'
+									theme={theme}
+									editorTheme='textmate'
 									value={requestBody}
 									fontSize={14}
 									showPrintMargin={false}
@@ -224,9 +238,11 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 						</Nav>
 						<TabContent activeTab={activeResponseTab}>
 							<TabPane tabId='header'>
-								<AceEditor
+								<LimitedAceEditor
+									maxLength={255}
 									mode='json'
-									theme='textmate'
+									theme={theme}
+									editorTheme='textmate'
 									value={responseHeaders}
 									fontSize={14}
 									showPrintMargin={false}
@@ -239,9 +255,11 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 								/>
 							</TabPane>
 							<TabPane tabId='body'>
-								<AceEditor
+								<LimitedAceEditor
+									maxLength={255}
 									mode={responseMode}
-									theme='textmate'
+									theme={theme}
+									editorTheme='textmate'
 									value={responseBody}
 									fontSize={14}
 									showPrintMargin={false}

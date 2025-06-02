@@ -13,20 +13,20 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import {connect} from 'react-redux';
-import {Col} from "react-grid-system";
-import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2";
-import {setFocusById} from "@application/utils/utils";
-import Input from "@entity/connection/components/components/general/basic_components/inputs/Input";
+import InputText from "@app_component/base/input/text/InputText";
+import Validation from "@application/classes/Validation";
+import { setFocusById } from "@application/utils/utils";
 import {
     ApplyIcon,
     CancelIcon,
     EditIcon
 } from "@change_component/form_elements/form_connection/form_svg/details/description/Icons";
-import Validation from "@application/classes/Validation";
-import InputText from "@app_component/base/input/text/InputText";
+import Input from "@entity/connection/components/components/general/basic_components/inputs/Input";
+import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2";
+import PropTypes from 'prop-types';
+import React from 'react';
+import { Col } from "react-grid-system";
+import { connect } from 'react-redux';
 
 
 @connect(null, {}, null, {forwardRef: true})
@@ -102,7 +102,6 @@ class Label extends React.Component{
     render(){
         const {isMouseOver, isEditOn, labelValue} = this.state;
         const {label, readOnly, text} = this.props;
-        console.log(readOnly)
         return(
             <React.Fragment>
                 <Col id={text} xs={4} className={styles.col}>{text}</Col>

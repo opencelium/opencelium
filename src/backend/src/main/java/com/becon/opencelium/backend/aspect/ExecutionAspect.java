@@ -160,27 +160,25 @@ public class ExecutionAspect {
         List<Operation> operations = (List<Operation>) context.get("operationsEx");
         executeAggregator(operations, execId);
 
+        String timestamp = (String) context.get("timestamp");
+        Long connectionId = (Long) context.get("connectionId");
         if (data.getExecType() == QuartzJobScheduler.TriggerType.EXECUTION_TEST) {
-            Scheduler scheduler = schedulerService.getById(schedulerId);
-            Long connectionId = scheduler.getConnection().getId();
-
             // delete temporarily created scheduler
             schedulerService.deleteById(schedulerId);
             // delete temporarily created connection
             connectionServiceImp.deleteById(connectionId);
             // remove mapping
             connection2ChannelMapping.remove(connectionId);
+
+            // move temporarily log file under /connectionId folder
+            int fileLimit = env.getProperty(AppYamlPath.LOG_FILE_SUCCESS_LIMIT, Integer.class, 2);
+            LogFileUtility.move(connectionId, execId, timestamp, "s", fileLimit);
         } else if (data.getExecType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE) {
-            Long connectionId = (Long) context.get("connectionId");
-            String timestamp = (String) context.get("timestamp");
             supportFileService.collectFiles(connectionId, execId, timestamp, "s");
 
             // delete temporarily created scheduler
             schedulerService.deleteById(schedulerId);
         } else {
-            Long connectionId = (Long) context.get("connectionId");
-            String timestamp = (String) context.get("timestamp");
-
             // move temporarily log file under /connectionId folder
             int fileLimit = env.getProperty(AppYamlPath.LOG_FILE_SUCCESS_LIMIT, Integer.class, 2);
             LogFileUtility.move(connectionId, execId, timestamp, "s", fileLimit);
@@ -209,27 +207,25 @@ public class ExecutionAspect {
         List<Operation> operations = (List<Operation>) context.get("operationsEx");
         executeAggregator(operations, execId);
 
+        String timestamp = (String) context.get("timestamp");
+        Long connectionId = (Long) context.get("connectionId");
         if (data.getExecType() == QuartzJobScheduler.TriggerType.EXECUTION_TEST) {
-            Scheduler scheduler = schedulerService.getById(schedulerId);
-            Long connectionId = scheduler.getConnection().getId();
-
             // delete temporarily created scheduler
             schedulerService.deleteById(schedulerId);
             // delete temporarily created connection
             connectionServiceImp.deleteById(connectionId);
             // remove mapping
             connection2ChannelMapping.remove(connectionId);
+
+            // move temporarily log file under /connectionId folder
+            int fileLimit = env.getProperty(AppYamlPath.LOG_FILE_FAIL_LIMIT, Integer.class, 3);
+            LogFileUtility.move(connectionId, execId, timestamp, "f", fileLimit);
         } else if (data.getExecType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE) {
-            Long connectionId = (Long) context.get("connectionId");
-            String timestamp = (String) context.get("timestamp");
             supportFileService.collectFiles(connectionId, execId, timestamp, "f");
 
             // delete temporarily created scheduler
             schedulerService.deleteById(schedulerId);
         } else {
-            Long connectionId = (Long) context.get("connectionId");
-            String timestamp = (String) context.get("timestamp");
-
             // move temporarily log file under /connectionId folder
             int fileLimit = env.getProperty(AppYamlPath.LOG_FILE_FAIL_LIMIT, Integer.class, 3);
             LogFileUtility.move(connectionId, execId, timestamp, "f", fileLimit);

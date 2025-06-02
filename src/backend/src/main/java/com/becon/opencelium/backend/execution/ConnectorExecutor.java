@@ -127,8 +127,6 @@ public class ConnectorExecutor {
                 logger.logAndSend(String.format("phase=IF_END indexPath=%s %s", index, getLoopData()));
             } else {
                 Loop loop = Loop.fromEx(operator);
-                logger.logAndSend(String.format("phase=LOOP_START indexPath=%s expression=(%s) %s", index, loop.getRef(), getLoopData()));
-
                 Object referencedList = executionManager.getValue(loop.getRef());
                 List<String> list = new ArrayList<>();
 
@@ -151,6 +149,7 @@ public class ConnectorExecutor {
 
                 int length = list.size();
 
+                logger.logAndSend(String.format("phase=LOOP_START indexPath=%s expression=(%s) size=%d iterator=\"%s\" %s", index, loop.getRef(), length, loop.getIterator(), getLoopData()));
                 executionManager.getLoops().add(loop);
                 for (int i = 0; i < length; i++) {
                     // update currently executing loops' data

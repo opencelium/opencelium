@@ -7,6 +7,7 @@ import java.util.Map;
 
 public class Connector {
     private Integer id;
+    private String fchartId;
     private String name;
     private String invoker;
     private boolean sslCert;
@@ -15,13 +16,10 @@ public class Connector {
     private Pagination pagination;
     private Map<String, String> requiredData;
 
-    public Integer getId() {
-        return id;
-    }
-
     public static Connector fromEx(ConnectorEx connectorEx) {
         Connector result = new Connector();
         result.setId(connectorEx.getId());
+        result.setFchartId(connectorEx.getFchartId());
         result.setName(connectorEx.getName());
         result.setInvoker(connectorEx.getInvoker());
         result.setSslCert(connectorEx.isSslCert());
@@ -33,8 +31,20 @@ public class Connector {
         return result;
     }
 
+    public Integer getId() {
+        return id;
+    }
+
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public String getFchartId() {
+        return fchartId;
+    }
+
+    public void setFchartId(String fchartId) {
+        this.fchartId = fchartId;
     }
 
     public String getName() {

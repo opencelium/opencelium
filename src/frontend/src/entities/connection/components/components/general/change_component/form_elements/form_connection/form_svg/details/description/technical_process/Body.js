@@ -251,7 +251,7 @@ class Body extends React.Component {
 
 	renderEnhancement() {
 		const { currentEnhancement, isOpenedEnhancement } = this.state;
-		const { readOnly, connection, method } = this.props;
+		const { readOnly, connection, method, theme } = this.props;
 		const enhancementElement = (
 			<Enhancement
 				method={method}
@@ -261,6 +261,7 @@ class Body extends React.Component {
 				enhancement={{ ...currentEnhancement }}
 				setEnhancement={(a) => this.setCurrentEnhancement(a)}
 				isOpenedEnhancement={isOpenedEnhancement}
+				theme={theme}
 			/>
 		);
 		if (!currentEnhancement) {

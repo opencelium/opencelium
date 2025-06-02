@@ -33,6 +33,7 @@ public interface ExceptionConstant {
     String REQUIRED_DATA_NOT_FOUND = "REQUIRED_DATA_NOT_FOUND";
     String LOG_NOT_FOUND = "LOG_NOT_FOUND";
     String INTERNAL_ERROR = "INTERNAL_ERROR";
+    String INVALID_DATA = "INVALID_DATA";
 
     // ----------------------------------------- Storage Controller --------------------------------------- //
 

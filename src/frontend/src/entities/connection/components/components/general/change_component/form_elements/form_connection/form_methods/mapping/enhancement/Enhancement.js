@@ -13,31 +13,23 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import PropTypes from 'prop-types';
-import React, { ChangeEvent, Component } from 'react';
-import AceEditor from 'react-ace';
-
-import 'ace-builds/src-noconflict/mode-javascript';
-import 'ace-builds/src-noconflict/snippets/javascript';
-import 'ace-builds/src-noconflict/theme-tomorrow';
-
-import { Col, Row } from 'react-grid-system';
-
 import Input from '@app_component/base/input/Input';
 import InputTextarea from '@app_component/base/input/textarea/InputTextarea';
 import { getReactXmlStyles } from '@app_component/base/input/xml_view/styles';
+import LimitedAceEditor from '@app_component/limited_ace_editor/LimitedAceEditor';
+import Validation from "@application/classes/Validation";
 import { getMarker, setFocusById } from '@application/utils/utils';
 import CEnhancement from '@classes/content/connection/field_binding/CEnhancement';
 import TooltipFontIcon from '@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import { Col, Row } from 'react-grid-system';
 import {
-	FieldBindingBlockStyled,
 	FieldBindingsBlockStyled,
 	ReferenceBlockStyled,
 	SourceFieldStyled,
 	SourceMethodNameStyled,
-	TargetFieldStyled,
 } from '../../../form_svg/details/description/technical_process/reference_information/styles';
-import Validation from "@application/classes/Validation";
 
 /**
  * Enhancement Component
@@ -134,7 +126,9 @@ class Enhancement extends Component {
 				<ReferenceBlockStyled key={key} style={{ margin: '5px 0' }}>
 					<span>{`${item.var} equals to `}</span>
 					<SourceFieldStyled style={{ color: item.color }}>
-						{item.prop[item.prop.length - 1] === '.' ? item.prop.substring(0, item.prop.length - 1) : item.prop}
+						{item.prop[item.prop.length - 1] === '.'
+							? item.prop.substring(0, item.prop.length - 1)
+							: item.prop}
 					</SourceFieldStyled>
 					<span>{' field of method '}</span>
 					<SourceMethodNameStyled style={{ background: item.color }}>
@@ -149,11 +143,10 @@ class Enhancement extends Component {
 
 	renderEnhancement() {
 		const { expertVar, markers } = this.state;
-		let { readOnly, isOpenedEnhancement } = this.props;
+		let { readOnly, theme } = this.props;
 		let { expertCode } = this.state;
 
 		const styleProps = {
-			marginTop: '25px',
 			display: 'inline-block',
 			width: 'calc(100% - 50px)',
 			marginLeft: '46px',
@@ -184,7 +177,8 @@ class Enhancement extends Component {
 					height={`calc(100% - 100px)`}
 					maxLength={Validation.TextLength.Short}
 				>
-					<AceEditor
+					<LimitedAceEditor
+						maxLength={255}
 						ref={this.props.enhancementRef}
 						style={{
 							...getReactXmlStyles({ ...styleProps, marginTop: '0' }),
@@ -195,7 +189,8 @@ class Enhancement extends Component {
 						}}
 						markers={markers}
 						mode='javascript'
-						theme='tomorrow'
+						editorTheme='tomorrow'
+						theme={theme}
 						onChange={(newCode, e) => this.updateExpertCode(newCode, e)}
 						name='enhancement_code'
 						editorProps={{ $blockScrolling: true }}

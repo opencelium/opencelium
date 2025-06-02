@@ -4,6 +4,7 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
+import com.becon.opencelium.backend.database.mongodb.entity.LogMetaData;
 import com.becon.opencelium.backend.execution.socket.WebSocketNotificationService;
 import com.becon.opencelium.backend.resource.execution.LoggerConfiguration;
 import com.becon.opencelium.backend.utility.ApplicationContextUtility;
@@ -11,6 +12,10 @@ import com.becon.opencelium.backend.utility.LogFileUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Consumer;
 
@@ -20,7 +25,9 @@ public class OcLogger<T extends LogMessage> {
     private final boolean webSocket;
     private final T logEntity;
     private final WebSocketNotificationService socketNotificationService;
+    private final LogLineDispatcher logLineDispatcher;
     private final long connectionId;
+    private final Path filepath;
     private final Logger logger;
 
     public static final String LOG_LOCATION = "src/main/resources/logs";
@@ -32,6 +39,7 @@ public class OcLogger<T extends LogMessage> {
         this.webSocket = loggerConfiguration.isWSocketOpen();
 
         this.socketNotificationService = ApplicationContextUtility.getBean(WebSocketNotificationService.class);
+        this.logLineDispatcher = ApplicationContextUtility.getBean(LogLineDispatcher.class);
         this.connectionId = connectionId;
         this.logEntity = logEntity;
 
@@ -40,16 +48,18 @@ public class OcLogger<T extends LogMessage> {
             String filename = LogFileUtility.toFilename(timestamp, connectionId, "u", executionId, "log");
 
             // create temporary log file in base log directory: type = u (uncategorized), not s (success) or f (fail):
-            Path filePath = LogFileUtility.toPath(LOG_LOCATION, filename);
+            this.filepath = LogFileUtility.toPath(LOG_LOCATION, filename);
+
             LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
             FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
             fileAppender.setName("FileAppender-" + loggerId);
             fileAppender.setContext(context);
-            fileAppender.setFile(filePath.toString());
+            fileAppender.setFile(filepath.toString());
 
             PatternLayoutEncoder encoder = new PatternLayoutEncoder();
             encoder.setContext(context);
             encoder.setPattern("%d{dd-MM-yyyy HH:mm:ss.SSS} - %msg%n");
+            encoder.setCharset(StandardCharsets.UTF_8);
             encoder.start();
 
             fileAppender.setEncoder(encoder);
@@ -61,6 +71,7 @@ public class OcLogger<T extends LogMessage> {
 
             this.logger = logger;
         } else {
+            this.filepath = null;
             this.logger = LoggerFactory.getLogger(c);
         }
     }
@@ -100,16 +111,41 @@ public class OcLogger<T extends LogMessage> {
             return;
         }
 
+        long startOffset = -1;
         if (log2File) {
+            // evaluate startOffset before writing to a logfile
+            startOffset = getStartOffset();
+
             t.accept(message);
-            return;
         }
 
         if (webSocket) {
             logEntity.setMessage(message);
-            socketNotificationService.send(connectionId, logEntity);
+            LogMetaData logMetaData = logLineDispatcher.dispatch(message.toString(), startOffset).orElse(null);
+            Object obj = logLineDispatcher.toDto(logMetaData);
+            socketNotificationService.send(connectionId, obj);
         } else {
             t.accept(message);
+        }
+    }
+
+    private long getStartOffset() {
+        try {
+            return evaluateUsingFiles();
+        } catch (IOException e) {
+            return evaluateUsingRAF();
+        }
+    }
+
+    private long evaluateUsingFiles() throws IOException {
+        return Files.size(filepath);
+    }
+
+    private long evaluateUsingRAF() {
+        try (RandomAccessFile raf = new RandomAccessFile(filepath.toFile(), "r")) {
+            return raf.length();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }
