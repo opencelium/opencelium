@@ -13,7 +13,7 @@ export const ReferenceGeneratorContainer = styled.div<ReferenceGeneratorStylePro
 	${({ referenceType }) =>
 		referenceType === 'constant' &&
 		`
-        grid-template-columns: 30px 380px;
+        grid-template-columns: 30px 390px;
     `}
 	${({ referenceType, isAbsolute, manualAdd }) =>
 		referenceType === 'constant' && (isAbsolute || manualAdd) &&
@@ -38,7 +38,7 @@ export const ReferenceGeneratorContainer = styled.div<ReferenceGeneratorStylePro
     ${({ referenceType }) =>
 		referenceType === 'webhook' &&
 		`
-        grid-template-columns: 30px 380px;
+        grid-template-columns: 30px 390px;
     `}
     ${({ referenceType, isAbsolute, manualAdd }) =>
 		referenceType === 'webhook' && (isAbsolute || manualAdd) &&
