@@ -1,20 +1,10 @@
 {
-  "PORT": {
-    "APPLICATION": "0",
-    "API": 9090,
-    "SOCKET": 9090,
-    "KIBANA": 5601,
-    "NEO4J": 7474
+  "server": {
+    "port": "",
+    "endpoint": "/api/"
   },
-  "DEV": {
-    "PORT": 8888
-  },
-  "PROTOCOL": "",
-  "HOSTNAME": "",
-  "HTTPS": {
-    "cert": "path_to_cert",
-    "key": "path_to_key",
-    "ca": "path_to_ca"
-  },
-  "SERVER_ENDPOINT": ""
+  "socket": {
+    "port": "",
+    "endpoint": "/ws"
+  }
 }
