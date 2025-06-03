@@ -1,12 +1,14 @@
 package com.becon.opencelium.backend.database.mongodb.entity;
 
+import com.becon.opencelium.backend.execution.logger.enums.PhaseCategory;
+import com.becon.opencelium.backend.execution.logger.enums.LogMetaDataStatus;
 import com.becon.opencelium.backend.execution.logger.enums.LogLineType;
-import com.becon.opencelium.backend.execution.logger.enums.LogLineValue;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.Map;
 
 @Document(collection = "log_meta_data")
@@ -20,14 +22,15 @@ public class LogMetaData {
     private String executionId;
     private String flowchartId;
 
+    private LogMetaDataStatus status;
     private String indexPath;
     private Long startOffset;
     private Long endOffset;
 
     private LogLineType logLineType; // PHASE
-    private LogLineValue value;       // e.g., LOOP_START, IF_END
+    private PhaseCategory type;       // e.g., LOOP, IF
 
-    private Map<String, Object> properties;
+    private Map<String, Object> properties = new HashMap<>();
 
     private Instant createdAt;
 
@@ -63,6 +66,18 @@ public class LogMetaData {
         this.flowchartId = flowchartId;
     }
 
+    public LogMetaDataStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(LogMetaDataStatus status) {
+        this.status = status;
+    }
+
+    public void setStartOffset(Long startOffset) {
+        this.startOffset = startOffset;
+    }
+
     public String getIndexPath() {
         return indexPath;
     }
@@ -95,12 +110,12 @@ public class LogMetaData {
         this.logLineType = logLineType;
     }
 
-    public LogLineValue getValue() {
-        return value;
+    public PhaseCategory getType() {
+        return type;
     }
 
-    public void setValue(LogLineValue value) {
-        this.value = value;
+    public void setType(PhaseCategory type) {
+        this.type = type;
     }
 
     public Map<String, Object> getProperties() {
