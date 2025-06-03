@@ -5,6 +5,9 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
 import com.becon.opencelium.backend.database.mongodb.entity.LogMetaData;
+import com.becon.opencelium.backend.execution.logger.enums.LogLineType;
+import com.becon.opencelium.backend.execution.logger.parser.ParsedLogLineBuilder;
+import com.becon.opencelium.backend.execution.logger.parser.entity.ParsedLogLine;
 import com.becon.opencelium.backend.execution.socket.WebSocketNotificationService;
 import com.becon.opencelium.backend.resource.execution.LoggerConfiguration;
 import com.becon.opencelium.backend.utility.ApplicationContextUtility;
@@ -17,6 +20,7 @@ import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public class OcLogger<T extends LogMessage> {
@@ -29,6 +33,7 @@ public class OcLogger<T extends LogMessage> {
     private final long connectionId;
     private final Path filepath;
     private final Logger logger;
+    ParsedLogLineBuilder parsedLogLineBuilder;
 
     public static final String LOG_LOCATION = "src/main/resources/logs";
 
@@ -39,7 +44,8 @@ public class OcLogger<T extends LogMessage> {
         this.webSocket = loggerConfiguration.isWSocketOpen();
 
         this.socketNotificationService = ApplicationContextUtility.getBean(WebSocketNotificationService.class);
-        this.logLineDispatcher = ApplicationContextUtility.getBean(LogLineDispatcher.class);
+        this.parsedLogLineBuilder = ApplicationContextUtility.getBean(ParsedLogLineBuilder.class);
+        this.logLineDispatcher = new LogLineDispatcher();
         this.connectionId = connectionId;
         this.logEntity = logEntity;
 
@@ -120,10 +126,13 @@ public class OcLogger<T extends LogMessage> {
         }
 
         if (webSocket) {
-            logEntity.setMessage(message);
-            LogMetaData logMetaData = logLineDispatcher.dispatch(message.toString(), startOffset).orElse(null);
-            Object obj = logLineDispatcher.toDto(logMetaData);
-            socketNotificationService.send(connectionId, obj);
+            ParsedLogLine parsedLine = parsedLogLineBuilder.build(message.toString(), startOffset);
+            Optional<LogMetaData> logMetaData = logLineDispatcher.dispatch(parsedLine);
+
+            if (logMetaData.isPresent() && (logMetaData.get().getLogLineType() == LogLineType.PHASE)) {
+                Object obj = logLineDispatcher.toDto(logMetaData.get());
+                socketNotificationService.send(connectionId, obj);
+            }
         } else {
             t.accept(message);
         }

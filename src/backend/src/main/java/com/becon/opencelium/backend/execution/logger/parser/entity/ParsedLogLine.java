@@ -1,7 +1,7 @@
 package com.becon.opencelium.backend.execution.logger.parser.entity;
 
 import com.becon.opencelium.backend.execution.logger.enums.LogLineType;
-import com.becon.opencelium.backend.execution.logger.enums.LogLineValue;
+import com.becon.opencelium.backend.execution.logger.enums.LogLineStage;
 
 import java.util.Map;
 
@@ -13,8 +13,7 @@ import java.util.Map;
 public class ParsedLogLine {
 
     private LogLineType logLineType;        // PHASE or SEGMENT
-    private LogLineValue value;             // e.g., "FLOWCHART_START", "REQUEST"
-    private String indexPath;               // like 0_0, 1, 1_0, 1_1
+    private LogLineStage stage;             // e.g., "FLOWCHART_START", "REQUEST"
     private long offset;
     private Map<String, String> properties; // Other key-value fields (e.g., url, data, status)
 
@@ -26,20 +25,12 @@ public class ParsedLogLine {
         this.logLineType = logLineType;
     }
 
-    public LogLineValue getValue() {
-        return value;
+    public LogLineStage getStage() {
+        return stage;
     }
 
-    public void setValue(LogLineValue value) {
-        this.value = value;
-    }
-
-    public String getIndexPath() {
-        return indexPath;
-    }
-
-    public void setIndexPath(String indexPath) {
-        this.indexPath = indexPath;
+    public void setStage(LogLineStage stage) {
+        this.stage = stage;
     }
 
     public long getOffset() {
@@ -62,8 +53,7 @@ public class ParsedLogLine {
     public String toString() {
         return "ParsedLogLine{" +
                 "logLineType=" + logLineType +
-                ", value=" + value +
-                ", indexPath='" + indexPath + '\'' +
+                ", value=" + stage +
                 ", offset=" + offset +
                 ", properties=" + properties +
                 '}';
