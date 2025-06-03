@@ -99,7 +99,7 @@ public class OcLogger<T extends LogMessage> {
 
     public void logAndSend(Exception e){
         Consumer<Exception> printStrategy = x -> {
-            logger.error(e.getMessage(), e);
+            logger.error("segment=EXCEPTION data=" + e.getMessage(), e);
         };
 
         logAndSend(printStrategy, e);
@@ -124,8 +124,6 @@ public class OcLogger<T extends LogMessage> {
             LogMetaData logMetaData = logLineDispatcher.dispatch(message.toString(), startOffset).orElse(null);
             Object obj = logLineDispatcher.toDto(logMetaData);
             socketNotificationService.send(connectionId, obj);
-        } else {
-            t.accept(message);
         }
     }
 

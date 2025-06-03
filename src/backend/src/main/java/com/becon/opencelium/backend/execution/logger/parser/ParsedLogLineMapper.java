@@ -4,7 +4,6 @@ import com.becon.opencelium.backend.execution.logger.enums.LogLineType;
 import com.becon.opencelium.backend.execution.logger.enums.LogLineValue;
 import com.becon.opencelium.backend.execution.logger.parser.entity.ParsedLogLine;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
