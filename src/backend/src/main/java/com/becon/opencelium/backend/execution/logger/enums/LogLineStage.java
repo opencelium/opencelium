@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.execution.logger.enums;
 
-public enum LogLineValue {
+public enum LogLineStage {
     // PHASE values
     EXECUTION_START,
     EXECUTION_END,
@@ -19,10 +19,11 @@ public enum LogLineValue {
     REQUEST_PAYLOAD,
     RESPONSE,
     RESPONSE_HEADER,
-    RESPONSE_PAYLOAD;
+    RESPONSE_PAYLOAD,
+    EXCEPTION;
 
-    public static LogLineValue fromString(String value) {
-        for (LogLineValue v : values()) {
+    public static LogLineStage fromString(String value) {
+        for (LogLineStage v : values()) {
             if (v.name().equalsIgnoreCase(value)) {
                 return v;
             }
