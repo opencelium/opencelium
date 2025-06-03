@@ -31,7 +31,7 @@ export const APP_STATUS_UP = 'UP';
 
 const baseUrl = `${protocol}//${hostname}/`;
 const baseUrlApi = `${protocol}//${hostname}/`;
-const socketServer = `${protocol}//${hostname}:9090/`;
+const socketServer = `${protocol}//${hostname}/`;
 const kibanaUrl = `${protocol}//${hostname}:5601/app/kibana`;
 export const Urls = {
     baseUrl,

@@ -10,7 +10,7 @@ export const SocketAppPrefix = '/oc';
 export const getSocket = () => {
     const token = store.getState().authReducer.authUser?.token;
     if (!socketClient && token) {
-        const webSocket = new SockJS(`${Urls.socketServer}websocket?token=${token}`);
+        const webSocket = new SockJS(`${Urls.socketServer}?token=${token}`);
         socketClient = new Client({
             webSocketFactory: () => webSocket,
             reconnectDelay: 5000,

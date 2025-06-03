@@ -18,48 +18,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const webpack = require('webpack');
-const fs = require("fs");
-const SETTINGS = require('./public/settings.json');
 
-function getHttpsSettings(){
-    let https = false;
-    if(SETTINGS.hasOwnProperty('HTTPS')){
-        if(typeof SETTINGS.HTTPS === 'boolean'){
-            https = SETTINGS.HTTPS;
-        } else{
-            https = {};
-            if(SETTINGS.HTTPS.hasOwnProperty('key')){
-                if(fs.existsSync(SETTINGS.HTTPS.key)){
-                    https.key = fs.readFileSync(SETTINGS.HTTPS.key);
-                } else{
-                    console.log('There is no Key file for https connection.')
-                }
-            } else{
-                console.log('There is no Key Parameter for https connection in settings.json file.')
-            }
-            if(SETTINGS.HTTPS.hasOwnProperty('cert')){
-                if(fs.existsSync(SETTINGS.HTTPS.cert)) {
-                    https.cert = fs.readFileSync(SETTINGS.HTTPS.cert);
-                } else{
-                    console.log('There is no Cert file for https connection.')
-                }
-            } else{
-                console.log('There is no Cert Parameter for https connection in settings.json file.')
-            }
-            if(SETTINGS.HTTPS.hasOwnProperty('ca')){
-                if(fs.existsSync(SETTINGS.HTTPS.ca)) {
-                    https.ca = fs.readFileSync(SETTINGS.HTTPS.ca);
-                } else{
-                    console.log('There is no Ca file for https connection.')
-                }
-            }
-            if(!https.hasOwnProperty('key') || !https.hasOwnProperty('cert')){
-                https = false;
-            }
-        }
-    }
-    return https;
-}
 const getConfig = ({isBuild, envVar}) => {
     const copyWebpackPluginSettings = {};
     copyWebpackPluginSettings.patterns = [
@@ -206,12 +165,12 @@ const getConfig = ({isBuild, envVar}) => {
                 "Access-Control-Allow-Origin": "*"
             },
             compress: true,
-            port: (SETTINGS && SETTINGS.DEV && SETTINGS.DEV.PORT) ? SETTINGS.DEV.PORT : 8888,
+            port: 8888,
             open: true,
             liveReload: true,
             historyApiFallback: true,
             allowedHosts: 'all',
-            https: getHttpsSettings(),
+            https: false,
         },
         plugins: [
             new HtmlWebpackPlugin({
