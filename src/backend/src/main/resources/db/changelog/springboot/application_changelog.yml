@@ -77,4 +77,8 @@ versions:
         operation: add
         value: 127.0.0.1
         path: server.address
+      - changeset: 4
+        operation: add
+        value: /websocket
+        path: websocket.endpoint
 
