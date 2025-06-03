@@ -4,6 +4,7 @@ import com.becon.opencelium.backend.execution.socket.WebSocketHandshakeHandler;
 import com.becon.opencelium.backend.execution.socket.WebSocketHandshakeInterceptor;
 import com.becon.opencelium.backend.execution.socket.WebSocketEventHandler;
 import com.becon.opencelium.backend.security.JwtTokenUtil;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -29,6 +30,8 @@ import static com.becon.opencelium.backend.execution.socket.SocketConstant.USER_
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private final WebSocketEventHandler eventHandler;
     private final JwtTokenUtil jwtTokenUtil;
+    @Value("${websocket.endpoint}")
+    private String websocketEndpoint;
 
     public WebSocketConfig(WebSocketEventHandler eventHandler, JwtTokenUtil jwtTokenUtil) {
         this.eventHandler = eventHandler;
@@ -56,7 +59,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
      */
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint(PATH)
+        registry.addEndpoint(websocketEndpoint)
                 .setAllowedOriginPatterns("*")
                 .setHandshakeHandler(new WebSocketHandshakeHandler()) // sets Principal based on principal attribute value
                 .addInterceptors(new WebSocketHandshakeInterceptor(jwtTokenUtil)) // populate attribute [userId, username, oc-sessionId]
