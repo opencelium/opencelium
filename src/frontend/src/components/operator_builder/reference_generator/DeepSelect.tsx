@@ -147,7 +147,6 @@ const DeepSelect: React.FC<DeepSelectProps> = ({color, onValueSelect, field, con
                 onInputChange={handleInputChange}
                 onChange={handleChange}
                 value={selectedOption}
-                isClearable
                 onFocus={() => {if (!menuIsOpen) toggleMenu(true)}}
                 onBlur={() => {if (menuIsOpen) toggleMenu(false)}}
                 menuIsOpen={menuIsOpen}

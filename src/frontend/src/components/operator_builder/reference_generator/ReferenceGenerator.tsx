@@ -50,7 +50,7 @@ const ReferenceGenerator = React.forwardRef(({
 	const webhookRef: any = useRef();
 	useEffect(() => {
 		if (!reference) {
-			setColor('');
+			//setColor('');
 			setCurrentField('');
 			updateReferenceType('direct');
 		}
