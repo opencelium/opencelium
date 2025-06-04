@@ -9,7 +9,7 @@ const ReferenceSwitcher = ({referenceType, changeReferenceType, hasNotConstant =
     return (
         <ReferenceSwitchersContainer hasNotConstant={hasNotConstant}>
             {!hasNotConstant && <ReferenceSwitcherContainer title={'method'} onClick={() => changeReferenceType('constant')}>
-                <span style={{fontSize: '14px'}} className="mdi mdi-code-string"></span>
+                <span style={{fontSize: '14px'}} className="mdi mdi-alpha-c-circle"></span>
                 <input style={{height: '10px'}} type={'radio'} checked={referenceType === 'constant'}
                        onChange={() => changeReferenceType('constant')}/>
             </ReferenceSwitcherContainer>}

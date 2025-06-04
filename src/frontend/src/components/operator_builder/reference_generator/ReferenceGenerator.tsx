@@ -50,7 +50,7 @@ const ReferenceGenerator = React.forwardRef(({
 	const webhookRef: any = useRef();
 	useEffect(() => {
 		if (!reference) {
-			setColor('');
+			//setColor('');
 			setCurrentField('');
 			updateReferenceType('direct');
 		}
@@ -260,6 +260,7 @@ const ReferenceGenerator = React.forwardRef(({
 				{referenceType === 'constant' && (
 					<ConstantContainer>
 						<InputText
+							inputHeight={'40px'}
 							minHeight={'35px'}
 							value={currentField}
 							onChange={(e) => setCurrentField(e.target.value)}

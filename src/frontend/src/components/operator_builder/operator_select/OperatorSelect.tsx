@@ -18,9 +18,19 @@ const OperatorSelect: React.FC<OperatorSelectProps> = ({error, type, operator, u
     useEffect(() => {
         const newOperator = selectedOption?.value as OperatorName || '';
         if (operator !== newOperator){
-            updateOperator(newOperator)
+            if (operator === '' && selectedOption === null) {
+
+            } else {
+                updateOperator(newOperator)
+            }
         }
-    }, [selectedOption])
+    }, [selectedOption]);
+    useEffect(() => {
+        if (!operator) {
+            setSelectedOption(null);
+        }
+    }, [operator])
+    console.log('selectedOption', selectedOption)
     return (
         <div style={{minWidth: '200px'}} ref={ref}>
             <Select
