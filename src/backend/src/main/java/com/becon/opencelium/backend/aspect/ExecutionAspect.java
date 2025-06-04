@@ -267,16 +267,17 @@ public class ExecutionAspect {
             le.setSuccessStartTime(execution.getStartTime());
             le.setSuccessEndTime(execution.getEndTime());
             le.setSuccessExecutionId(execution.getId());
+            le.setSuccessHasLog(schedulerDebugMode);
         } else {
             le.setFailDuration(execution.getEndTime().getTime() - execution.getStartTime().getTime());
             le.setFailStartTime(execution.getStartTime());
             le.setFailEndTime(execution.getEndTime());
             le.setFailExecutionId(execution.getId());
+            le.setFailHasLog(schedulerDebugMode);
         }
         if (le.getScheduler() == null) {
             le.setScheduler(execution.getScheduler());
         }
-        le.setHasLog(schedulerDebugMode);
         lastExecutionService.save(le);
     }
 

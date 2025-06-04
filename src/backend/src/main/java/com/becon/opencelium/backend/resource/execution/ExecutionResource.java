@@ -43,6 +43,7 @@ public class ExecutionResource {
                 this.endTime = lastExecution.getSuccessEndTime().getTime();
             }
             this.duration = lastExecution.getSuccessDuration();
+            this.hasLog = lastExecution.isSuccessHasLog();
         }
         else {
             this.taId = lastExecution.getScheduler().getId() + "-" + lastExecution.getFailExecutionId();
@@ -54,7 +55,7 @@ public class ExecutionResource {
                 this.endTime = lastExecution.getFailEndTime().getTime();
             }
             this.duration = lastExecution.getFailDuration();
-            this.hasLog = lastExecution.isHasLog();
+            this.hasLog = lastExecution.isFailHasLog();
         }
     }
 
