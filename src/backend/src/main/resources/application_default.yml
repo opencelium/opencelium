@@ -9,6 +9,8 @@
 server:
   address: 127.0.0.1
   port: 9090
+websocket:
+  endpoint: /websocket
 #  ssl:
 #    enabled: true
 #    key-store-type: PKCS12
@@ -191,7 +193,7 @@ management:
       show-details: always
 
 opencelium:
-  version: 4.4
+  version: 4.5
   ###########################################################################
   #                                                                         #
   #   Is customizable                                                       #
