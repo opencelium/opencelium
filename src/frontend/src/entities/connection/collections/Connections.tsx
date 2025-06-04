@@ -42,6 +42,7 @@ class Connections extends ListCollection<ConnectionProps>{
     title = 'Connections';
     keyPropName: ConnectionProps ='id';
     getListRawUrl = (entity: IConnection) => `${entity.id}/update`;
+    listStyles = {borderTopLeftRadius: '0px'};
     ListRawComponent = DefaultListRaw;
     sortingProps: ConnectionProps[] = ['title'];
     listProps: ListProp<ConnectionProps>[] = [

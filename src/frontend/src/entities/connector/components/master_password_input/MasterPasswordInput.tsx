@@ -50,10 +50,10 @@ const MasterPasswordInput = ({onSuccess}: MasterPasswordProps) => {
         return (
             <PromptContainer>
                 <p style={{textAlign: 'center'}}>
-                    {"Please, set the master password in the"}
+                    {"We could not find a master password. To show this information,"}
                 </p>
                 <p style={{textAlign: 'center'}}>
-                    {"application.yml file to show this information."}
+                    {"please set the master password in the application.yml file."}
                 </p>
                 <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                     <Button
