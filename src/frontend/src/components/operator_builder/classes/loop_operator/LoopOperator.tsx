@@ -64,6 +64,7 @@ export default class LoopOperator {
                                 <ReferenceGenerator
                                     error={rule.error}
                                     style={{marginLeft: '10px'}}
+                                    operator={rule.properties?.operator || ''}
                                     connectionEditor={connectionEditor}
                                     reference={rule?.properties?.rightField || ''}
                                     setReference={(rightField: string) => {

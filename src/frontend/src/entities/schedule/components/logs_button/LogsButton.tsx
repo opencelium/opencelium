@@ -107,10 +107,10 @@ const LogsButton = ({schedule}: {schedule: ISchedule}) => {
                 size={TextSize.Size_20}
             />
             <Dialog
-                actions={[{label: 'Start collection logs', isLoading: startAction && generatingLogs === API_REQUEST_STATE.START, onClick: startCollectingLogs, id: 'get_logs_button'}, {label: 'Cancel', onClick: () => toggle(false), id: 'cancel_button'}]}
+                actions={[{label: 'Create Support-Logs', isLoading: startAction && generatingLogs === API_REQUEST_STATE.START, onClick: startCollectingLogs, id: 'get_logs_button'}, {label: 'Cancel', onClick: () => toggle(false), id: 'cancel_button'}]}
                 active={isToggled}
                 toggle={() => toggle(!isToggled)}
-                title={"Get Logs"}
+                title={"Support-Logs"}
                 styles={{modal: {minWidth: '650px'}, body: {minHeight: '400px'}}}
             >
                 <LogsButtonStyled>

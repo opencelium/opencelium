@@ -28,61 +28,65 @@ import LessThanOrEqual from "@app_component/operator_builder/classes/if_operator
 import GreaterThan from "@app_component/operator_builder/classes/if_operator/types/GreaterThan";
 import GreaterThanOrEqualTo from "@app_component/operator_builder/classes/if_operator/types/GreaterThanOrEqual";
 import OperatorsConfigGenerator from "@app_component/operator_builder/classes/OperatorsConfigGenerator";
+import IfBaseOperator from "@app_component/operator_builder/classes/if_operator/IfBaseOperator";
 
 export default class IfOperatorsConfigGenerator extends OperatorsConfigGenerator {
 
     constructor() {
         super(Object.values(AllOperatorNames));
     }
-    getOption(operatorName: OperatorName): OptionType {
+    getOperatorClass(operatorName: OperatorName): IfBaseOperator {
         switch (operatorName) {
             case UnaryOperatorName.IsEmpty:
-                return (new IsEmpty()).getOption();
+                return new IsEmpty();
             case UnaryOperatorName.NotEmpty:
-                return (new IsNotEmpty()).getOption();
+                return new IsNotEmpty();
             case UnaryOperatorName.IsNull:
-                return (new IsNull()).getOption();
+                return new IsNull();
             case UnaryOperatorName.NotNull:
-                return (new IsNotNull()).getOption();
+                return new IsNotNull();
             case BinaryOperatorName.Equal:
-                return (new Equal()).getOption();
+                return new Equal();
             case BinaryOperatorName.NotEqual:
-                return (new NotEqual()).getOption();
+                return new NotEqual();
             case BinaryOperatorName.LessThan:
-                return (new LessThan()).getOption();
+                return new LessThan();
             case BinaryOperatorName.LessThanOrEqualTo:
-                return (new LessThanOrEqual()).getOption();
+                return new LessThanOrEqual();
             case BinaryOperatorName.GreaterThan:
-                return (new GreaterThan()).getOption();
+                return new GreaterThan();
             case BinaryOperatorName.GreaterThanOrEqualTo:
-                return (new GreaterThanOrEqualTo()).getOption();
+                return new GreaterThanOrEqualTo();
             case BinaryOperatorName.Contains:
-                return (new Contains()).getOption();
+                return new Contains();
             case BinaryOperatorName.NotContains:
-                return (new NotContains()).getOption();
+                return new NotContains();
             case BinaryOperatorName.ContainsSubStr:
-                return (new ContainsSubStr()).getOption();
+                return new ContainsSubStr();
             case BinaryOperatorName.NotContainsSubStr:
-                return (new NotContainsSubStr()).getOption();
+                return new NotContainsSubStr();
             case BinaryOperatorName.AllowList:
-                return (new AllowList()).getOption();
+                return new AllowList();
             case BinaryOperatorName.DenyList:
-                return (new DenyList()).getOption();
+                return new DenyList();
             case BinaryOperatorName.IsTypeOf:
-                return (new IsTypeOf()).getOption();
+                return new IsTypeOf();
             case BinaryOperatorName.Like:
-                return (new Like()).getOption();
+                return new Like();
             case BinaryOperatorName.NotLike:
-                return (new NotLike()).getOption();
+                return new NotLike();
             case BinaryOperatorName.Matches:
-                return (new Matches()).getOption();
+                return new Matches();
             case BinaryOperatorName.PropertyExists:
-                return (new PropertyExists()).getOption();
+                return new PropertyExists();
             case BinaryOperatorName.PropertyNotExists:
-                return (new PropertyNotExists()).getOption();
+                return new PropertyNotExists();
             case BinaryOperatorName.RegEx:
-                return (new RegEx()).getOption();
+                return new RegEx();
         }
+    }
+    getOption(operatorName: OperatorName): OptionType {
+        return (this.getOperatorClass(operatorName)).getOption();
     }
 
     getOptions(operatorNames: OperatorName[]): OptionType[] {
