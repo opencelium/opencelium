@@ -87,7 +87,7 @@ public class LdapVerificationServiceImpl implements LdapVerificationService {
 
             // user has read access to directory ?
             title = "User credentials";
-            message = checkAdminCredentials(config.getUrls(), config.getUsername(), config.getPassword(), config.getTimeout(), false);
+            message = checkAdminCredentials(config.getUrls(), config.getUsername(), config.getPassword(), config.getTimeout(), true);
             messages.add(LdapVerificationMessageDTO.of(title, message));
 
             // count users under userDN
