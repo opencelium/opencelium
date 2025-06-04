@@ -126,13 +126,8 @@ public class OcLogger<T extends LogMessage> {
         }
 
         if (webSocket) {
-            ParsedLogLine parsedLine = parsedLogLineBuilder.build(message.toString(), startOffset);
-            Optional<LogMetaData> logMetaData = logLineDispatcher.dispatch(parsedLine);
-
-            if (logMetaData.isPresent() && (logMetaData.get().getLogLineType() == LogLineType.PHASE)) {
-                Object obj = logLineDispatcher.toDto(logMetaData.get());
-                socketNotificationService.send(connectionId, obj);
-            }
+            logEntity.setMessage(message);
+            socketNotificationService.send(connectionId, logEntity);
         } else {
             t.accept(message);
         }

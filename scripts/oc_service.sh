@@ -1,4 +1,4 @@
-xflol#!/bin/bash
+#!/bin/bash
 #
 #  Copyright (C) <2023>  <becon GmbH>
 #  
