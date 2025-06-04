@@ -10,6 +10,8 @@ import com.becon.opencelium.backend.execution.logger.tracker.ExecutionTrackerImp
 import java.util.Map;
 import java.util.Optional;
 
+import static com.becon.opencelium.backend.execution.logger.enums.LogLineStage.*;
+
 /**
  * LogLineDispatcher is responsible for routing parsed log lines to the appropriate ExecutionTracker.
  *
@@ -20,26 +22,32 @@ import java.util.Optional;
  */
 public class LogLineDispatcher {
     private final ThreadLocal<ExecutionTracker> tls = new ThreadLocal<>();
+
     public Optional<LogMetaData> dispatch(ParsedLogLine parsedLine) {
         return dispatch(parsedLine, LogProcessingMode.METADATA);
     }
 
     public Optional<LogMetaData> dispatch(ParsedLogLine parsedLine, LogProcessingMode mode) {
-        if (parsedLine.getStage() == LogLineStage.EXECUTION_START) {
-            Map<String, String> props = parsedLine.getProperties();
-            String execId = props.get("id");
-            String connId = props.get("connectionId");
-            tls.set(new ExecutionTrackerImpl(execId, connId, mode));
-            return Optional.empty();
-        }
-        if (parsedLine.getStage() == LogLineStage.EXECUTION_END) {
-            ExecutionTracker tracker = tls.get();
-            if (tracker != null) {
-                tracker.handleParsedLine(parsedLine);
+        Map<String, String> props = parsedLine.getProperties();
+        String execId, connId, flowId;
+        switch (parsedLine.getStage()) {
+            case EXECUTION_START -> {
+                execId = props.get("id");
+                connId = props.get("connectionId");
+                tls.set(new ExecutionTrackerImpl(execId, connId, null, mode));
+                return Optional.empty();
             }
-            tls.remove();
-            return Optional.empty();
+            case EXECUTION_END -> {
+                ExecutionTracker tracker = tls.get();
+                if (tracker != null) {
+                    tracker.handleParsedLine(parsedLine);
+                }
+                tls.remove();
+                return Optional.empty();
+            }
+            default -> Optional.empty();
         }
+
         ExecutionTracker tracker = tls.get();
         return (tracker == null) ? Optional.empty() : tracker.handleParsedLine(parsedLine);
     }

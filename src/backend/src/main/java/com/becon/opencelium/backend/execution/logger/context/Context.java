@@ -1,36 +1,46 @@
 package com.becon.opencelium.backend.execution.logger.context;
 
+import com.becon.opencelium.backend.execution.logger.enums.LogLineStage;
 import com.becon.opencelium.backend.execution.logger.enums.LogLineType;
 import com.becon.opencelium.backend.execution.logger.parser.entity.ParsedLogLine;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Context {
-    private final ParsedLogLine logLine;
+    private final LogLineStage stage;
+    private final Map<String, String> startProps = new HashMap<>();
     private final List<ParsedLogLine> segments = new ArrayList<>();
-    private final List<Context> children = new ArrayList<>();
+//    private final List<Context> children = new ArrayList<>();
 
-    protected Context(ParsedLogLine logLine) {
-        this.logLine = logLine;
+    protected Context(LogLineStage stage) {
+        this.stage = stage;
     }
 
-    public List<ParsedLogLine> getSegments() {
-        return segments;
+    public LogLineStage getStartType() {
+        return stage;
+    }
+
+    public Map<String, String> getStartProps() {
+        return startProps;
     }
 
     public List<Context> getChildren() {
         return children;
     }
 
-    public void addSegment(ParsedLogLine segLine) {
-        if (segLine.getLogLineType() != LogLineType.PHASE) {
-            System.out.println("You are trying to add phase");
-            return;
-        }
-        segments.add(segLine);
+    public List<Segment> getSegments() {
+        return segments;
     }
 
-    public void addChild(Context child) {
-        children.add(child);
+//    /** Add a nested child context (e.g., a loop inside an operation). */
+//    public void addChild(Context child) {
+//        children.add(child);
+//    }
+
+    /** Add a segment (e.g., REQUEST, RESPONSE) if in FULL mode. */
+    public void addSegment(Segment seg) {
+        segments.add(seg);
     }
 }
