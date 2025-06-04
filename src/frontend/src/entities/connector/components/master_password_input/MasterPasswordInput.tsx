@@ -5,7 +5,7 @@ import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import Button from "@app_component/base/button/Button";
 import {Connector} from "@entity/connector/classes/Connector";
 import {checkMasterPassword} from "@entity/connector/redux_toolkit/action_creators/ConnectorCreators";
-import {MasterPasswordContainer} from "@entity/connector/components/master_password_input/styles";
+import {MasterPasswordContainer, PromptContainer} from "@entity/connector/components/master_password_input/styles";
 import {MasterPasswordProps} from "@entity/connector/components/master_password_input/interfaces";
 
 const MasterPasswordInput = ({onSuccess}: MasterPasswordProps) => {
@@ -28,7 +28,7 @@ const MasterPasswordInput = ({onSuccess}: MasterPasswordProps) => {
                     break;
                 case API_REQUEST_STATE.ERROR:
                     setStartSending(false);
-                    switch(reduxError.message) {
+                    switch(reduxError?.message) {
                         case 'MASTER_PASSWORD_WRONG':
                             setError('The master password is wrong.');
                             break;
@@ -42,7 +42,7 @@ const MasterPasswordInput = ({onSuccess}: MasterPasswordProps) => {
     }, [checkingMasterPassword])
     if(showPrompt) {
         return (
-            <div>
+            <PromptContainer>
                 <p style={{textAlign: 'center'}}>
                     {"Please, set the master password in the"}
                 </p>
@@ -56,7 +56,7 @@ const MasterPasswordInput = ({onSuccess}: MasterPasswordProps) => {
                         handleClick={() => togglePrompt(false)}
                     />
                 </div>
-            </div>
+            </PromptContainer>
         )
     }
     return (
