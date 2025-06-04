@@ -225,10 +225,6 @@ public class TemplateServiceImp implements TemplateService {
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
             Template template = objectMapper.readValue(contentBuilder.toString(), Template.class);
-
-            templateEntityUpdater.updateFrom(template, template.getVersion())
-                    .ifUpdated(this::save);
-
             return Optional.of(template);
         } catch (Exception e) {
             throw new RuntimeException("ERROR while converting from json to Template object");
@@ -248,11 +244,6 @@ public class TemplateServiceImp implements TemplateService {
                         try (Stream<String> stream = Files.lines(Paths.get(path.toString()), StandardCharsets.UTF_8)) {
                             stream.forEach(s -> contentBuilder.append(s).append("\n"));
 //                            System.out.println(Paths.get(path.toString()).getFileName().toString());
-                            Template template = objectMapper.readValue(contentBuilder.toString(), Template.class);
-
-                            templateEntityUpdater.updateFrom(template, template.getVersion())
-                                    .ifUpdated(this::save);
-
                             return objectMapper.readValue(contentBuilder.toString(), Template.class);
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -277,10 +268,6 @@ public class TemplateServiceImp implements TemplateService {
                 try (Stream<String> stream = Files.lines(filePath, StandardCharsets.UTF_8)) {
                     stream.forEach(s -> contentBuilder.append(s).append("\n"));
                     Template template = objectMapper.readValue(contentBuilder.toString(), Template.class);
-
-                    templateEntityUpdater.updateFrom(template, template.getVersion())
-                            .ifChanged(this::save);
-
                     files.put(filePath.getFileName().toString(), template);
                 } catch (Exception e) {
                     e.printStackTrace();
