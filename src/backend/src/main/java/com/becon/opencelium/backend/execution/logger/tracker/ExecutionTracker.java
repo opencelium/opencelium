@@ -9,6 +9,4 @@ import java.util.Optional;
 public interface ExecutionTracker {
 
     Optional<LogMetaData> handleParsedLine(ParsedLogLine parsedLine);
-
-    void setFlowId();
 }

@@ -22,8 +22,7 @@ public class ExecutionTrackerImpl implements ExecutionTracker{
     private final LogProcessingMode mode;
 
     private final ContextManager contextManager;
-    // Map PHASE → its corresponding MetadataBuilder strategy.
-    private final Map<LogLineStage, MetadataBuilder<? extends Context>> builderMap;
+
 
     public ExecutionTrackerImpl(String execId, String connId,String flowId, LogProcessingMode mode) {
         this.execId = execId;
