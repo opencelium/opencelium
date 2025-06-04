@@ -68,7 +68,7 @@ public class LdapController {
         result.setUserDN(properties.getUserSearchBase());
         result.setGroupDN(properties.getGroupSearchBase());
         result.setUsername(properties.getUsername());
-        result.setPassword(properties.getPassword());
+        result.setPassword("[PROTECTED]");
         result.setTimeout(properties.getTimeout());
         result.setUserSearchFilter(properties.getUserSearchFilter());
         result.setGroupSearchFilter(properties.getGroupSearchFilter());
