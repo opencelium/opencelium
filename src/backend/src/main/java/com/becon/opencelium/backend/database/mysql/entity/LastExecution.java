@@ -59,8 +59,8 @@ public class LastExecution {
     @Column(name = "f_execution_id")
     private long failExecutionId;
 
-    @Column(name = "has_log_file")
-    private boolean hasLogFile;
+    @Column(name = "has_log")
+    private boolean hasLog;
 
     public long getId() {
         return id;
@@ -142,11 +142,11 @@ public class LastExecution {
         this.failExecutionId = failExecutionId;
     }
 
-    public boolean isHasLogFile() {
-        return hasLogFile;
+    public boolean isHasLog() {
+        return hasLog;
     }
 
-    public void setHasLogFile(boolean hasLogFile) {
-        this.hasLogFile = hasLogFile;
+    public void setHasLog(boolean hasLog) {
+        this.hasLog = hasLog;
     }
 }

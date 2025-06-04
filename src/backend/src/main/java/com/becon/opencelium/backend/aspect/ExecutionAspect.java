@@ -276,7 +276,7 @@ public class ExecutionAspect {
         if (le.getScheduler() == null) {
             le.setScheduler(execution.getScheduler());
         }
-        le.setHasLogFile(schedulerDebugMode);
+        le.setHasLog(schedulerDebugMode);
         lastExecutionService.save(le);
     }
 
