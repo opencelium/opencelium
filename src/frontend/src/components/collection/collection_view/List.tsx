@@ -45,6 +45,7 @@ const List: FC<ListViewProps> =
         isCard,
         onListRowClick,
         hasPaginationProps,
+        hasTabs,
     }) => {
     const [sortTypes, setSortTypes] = useState<any>({});
     const [visibleEntities, setVisibleEntities] = useState([]);
@@ -111,8 +112,12 @@ const List: FC<ListViewProps> =
         collection.sort(sortingProp, sortType);
         setSortTypes({...sortTypes, [sortingProp]: sortType})
     }
+    const hasTabsStyles = {borderTopLeftRadius: '0 !important'};
     const CardComponent = isCard ? Card : React.Fragment;
-    const cardProps = isCard ? {padding: '10px', margin: '0 0 20px 0', isRefreshing, overflow: 'auto', style: collection.listStyles} : {};
+    let cardProps = isCard ? {padding: '10px', margin: '0 0 20px 0', isRefreshing, overflow: 'auto', style: collection.listStyles} : {};
+    if (hasTabs) {
+        cardProps.style = {...cardProps.style, ...hasTabsStyles};
+    }
     return (
         <CardComponent {...cardProps}>
             {visibleEntities.length === 0

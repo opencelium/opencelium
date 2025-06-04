@@ -272,6 +272,7 @@ const CollectionView: FC<CollectionViewProps> =
                                 filterData={filterData}
                                 onListRowClick={onListRowClick}
                                 hasPaginationProps={!!paginationProps}
+                                hasTabs={['schedules', 'connections'].indexOf(collection.name) !== -1}
                             />}
                         {applicationViewType === ViewType.GRID &&
                             <Grid

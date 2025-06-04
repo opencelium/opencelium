@@ -54,6 +54,7 @@ interface ListViewProps extends ViewProps{
     isCard?: boolean,
     onListRowClick?: (entity: any) => void,
     hasPaginationProps: boolean,
+    hasTabs?: boolean,
 }
 
 interface CollectionViewProps{
