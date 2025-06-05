@@ -36,12 +36,20 @@ export default class OperatorsConfigGenerator {
         if (!match) {
             return null;
         }
+        let leftField = match[1];
+        if (leftField.startsWith(`'`) && leftField.endsWith(`'`)) {
+            leftField = leftField.substring(1, leftField.length - 1);
+        }
         const properties: RulePropertyProps = {
-            leftField: match[1],
+            leftField,
             operator: match[5] as OperatorName,
         }
         if (match[6]) {
-            properties.rightField = match[6] === `''` ? EmptyString : match[6];
+            let rightField = match[6];
+            if (rightField.startsWith(`'`) && rightField.endsWith(`'`)) {
+                rightField = rightField.substring(1, rightField.length - 1);
+            }
+            properties.rightField = rightField === '' ? EmptyString : rightField;
         }
         return {
             id: generateUUID(),

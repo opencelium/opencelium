@@ -31,6 +31,7 @@ import InputTextarea from "@app_component/base/input/textarea/InputTextarea";
 import IfBaseOperator from "@app_component/operator_builder/classes/if_operator/IfBaseOperator";
 import LoopBaseOperator from "@app_component/operator_builder/classes/loop_operator/LoopBaseOperator";
 import Select, {StylesConfig} from "react-select";
+import Like from "@app_component/operator_builder/classes/if_operator/types/Like";
 
 export const EmptyString = '&nbsp'
 const ReferenceGenerator = React.forwardRef(({
@@ -181,7 +182,7 @@ const ReferenceGenerator = React.forwardRef(({
 		setCurrentField(newField);
 	};
 	const isLikeOperator = (): boolean => {
-		return referenceType !== 'webhook' && (BinaryOperatorName.Like === operator || BinaryOperatorName.NotLike === operator)
+		return referenceType !== 'webhook' && Like.isLikeOperator(operator)
 	}
 	useImperativeHandle(ref, () => ({
 		setIdValue
@@ -191,21 +192,21 @@ const ReferenceGenerator = React.forwardRef(({
 			case 'constant':
 				if (hasOpenPerc) {
 					if (currentField && currentField[0] !== '%') {
-						setCurrentField(currentField === EmptyString ? '%' : `%${currentField}`)
+						//setCurrentField(currentField === EmptyString ? '%' : `%${currentField}`)
 					}
 				} else {
 					if (currentField && currentField[0] === '%') {
-						setCurrentField(currentField.substring(1));
+						//setCurrentField(currentField.substring(1));
 					}
 				}
 				break;
 			case 'direct':
 				if (hasOpenPerc) {
-					if (reference && reference[0] !== '%') {
+					if (reference && !reference.startsWith('%')) {
 						setReference(reference === EmptyString ? '%' : `%${reference}`)
 					}
 				} else {
-					if (reference && reference[0] === '%') {
+					if (reference && reference.startsWith('%')) {
 						setReference(reference.substring(1));
 					}
 				}
@@ -217,21 +218,21 @@ const ReferenceGenerator = React.forwardRef(({
 			case 'constant':
 				if (hasClosedPerc) {
 					if (currentField && currentField[currentField.length - 1] !== '%') {
-						setCurrentField(currentField === EmptyString ? '%' : `${currentField}%`)
+						//setCurrentField(currentField === EmptyString ? '%' : `${currentField}%`)
 					}
 				} else {
 					if (currentField && currentField[currentField.length - 1] === '%') {
-						setCurrentField(currentField.substring(0, currentField.length - 1));
+						//setCurrentField(currentField.substring(0, currentField.length - 1));
 					}
 				}
 				break;
 			case 'direct':
 				if (hasClosedPerc) {
-					if (reference && reference[reference.length - 1] !== '%') {
+					if (reference && !reference.endsWith('%')) {
 						setReference(reference === EmptyString ? '%' : `${reference}%`)
 					}
 				} else {
-					if (reference && reference[reference.length - 1] === '%') {
+					if (reference && reference.endsWith('%')) {
 						setReference(reference.substring(0, reference.length - 1));
 					}
 				}
@@ -313,20 +314,20 @@ const ReferenceGenerator = React.forwardRef(({
 					} else {
 						if (isLikeOperator()) {
 							if (hasOpenPerc) {
-								if (reference[0] !== '%') {
+								if (!reference.startsWith('%')) {
 									setReference(`%${reference}`)
 								}
 							} else {
-								if (reference[0] === '%') {
+								if (reference.startsWith('%')) {
 									toggleOpenPerc(true);
 								}
 							}
 							if (hasClosedPerc) {
-								if (reference[reference.length - 1] !== '%') {
+								if (!reference.endsWith('%')) {
 									setReference(`${reference}%`)
 								}
 							} else {
-								if (reference[reference.length - 1] === '%') {
+								if (reference.endsWith('%')) {
 									toggleClosedPerc(true);
 								}
 							}

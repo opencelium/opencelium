@@ -1,7 +1,7 @@
 import {GroupProps, OperatorType, RulePropertyProps, RuleUIProps} from "@app_component/operator_builder/props";
 import {
     AllOperatorNames,
-    OperatorName,
+    BinaryOperatorName,
     UnaryOperatorName
 } from "@app_component/operator_builder/interfaces/OperatorName";
 import {generateUUID, getEnumKeyByValue, isBinaryOperator} from "@app_component/operator_builder/utils";
@@ -9,6 +9,7 @@ import ReferenceGenerator, {EmptyString} from "@app_component/operator_builder/r
 import React from "react";
 import OperatorSelect from "@app_component/operator_builder/operator_select/OperatorSelect";
 import ReferenceFactory from "@app_component/operator_builder/classes/references/ReferenceFactory";
+import Like from "@app_component/operator_builder/classes/if_operator/types/Like";
 
 export default class IfOperator {
     type = OperatorType.If;
@@ -40,12 +41,32 @@ export default class IfOperator {
 
     static getRuleComponent(props: RuleUIProps): any {
         const {rule, updateRule, hasNext, connectionEditor} = props;
+        let leftField = rule?.properties?.leftField;
+        let rightField = rule?.properties?.rightField;
+        const isLikeOperator = Like.isLikeOperator(rule.properties?.operator);
+        if (isLikeOperator) {
+            const leftFieldWithoutQuotes = leftField.startsWith('"') && leftField.endsWith('"') ? leftField.substring(1, leftField.length - 1) : leftField;
+            if (leftField !== leftFieldWithoutQuotes) {
+                if (!!(ReferenceFactory.createReferenceInstance(leftFieldWithoutQuotes))){
+                    leftField = leftFieldWithoutQuotes;
+                }
+            }
+            const rightFieldWithoutQuotes = rightField.startsWith('"') && rightField.endsWith('"') ? rightField.substring(1, rightField.length - 1) : rightField;
+            if (rightField !== rightFieldWithoutQuotes) {
+                if (!!(ReferenceFactory.createReferenceInstance(rightFieldWithoutQuotes))){
+                    rightField = rightFieldWithoutQuotes;
+                }
+            }
+        }
         return (
             <React.Fragment>
-                <ReferenceGenerator error={rule.error} isBuilder connectionEditor={connectionEditor} reference={rule?.properties?.leftField || ''} setReference={(leftField: string) => {
-                    updateRule({...rule, error: '', properties: {...rule?.properties, leftField, operator: '', rightField: EmptyString}})
+                <ReferenceGenerator error={rule.error} isBuilder connectionEditor={connectionEditor} reference={leftField || ''} setReference={(leftField: string) => {
+                        if (isLikeOperator && !!(ReferenceFactory.createReferenceInstance(leftField))) {
+                            leftField = `"${leftField}"`;
+                        }
+                        updateRule({...rule, error: '', properties: {...rule?.properties, leftField, operator: '', rightField: EmptyString}})
                 }}/>
-                {rule?.properties?.leftField &&
+                {leftField &&
                     <React.Fragment>
                         <OperatorSelect
                             error={rule.error}
@@ -61,8 +82,11 @@ export default class IfOperator {
                                 error={rule.error}
                                 operator={rule.properties?.operator || ''}
                                 connectionEditor={connectionEditor}
-                                reference={rule?.properties?.rightField || ''}
+                                reference={rightField || ''}
                                 setReference={(rightField: string) => {
+                                    if (isLikeOperator && !!(ReferenceFactory.createReferenceInstance(rightField))) {
+                                        rightField = `"${rightField}"`;
+                                    }
                                     updateRule({...rule, error: '', properties: {...rule?.properties, rightField}})
                                 }}
                             />
