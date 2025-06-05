@@ -5,7 +5,7 @@ import {
     UnaryOperatorName
 } from "@app_component/operator_builder/interfaces/OperatorName";
 import {generateUUID, getEnumKeyByValue, isBinaryOperator} from "@app_component/operator_builder/utils";
-import ReferenceGenerator from "@app_component/operator_builder/reference_generator/ReferenceGenerator";
+import ReferenceGenerator, {EmptyString} from "@app_component/operator_builder/reference_generator/ReferenceGenerator";
 import React from "react";
 import OperatorSelect from "@app_component/operator_builder/operator_select/OperatorSelect";
 import ReferenceFactory from "@app_component/operator_builder/classes/references/ReferenceFactory";
@@ -25,11 +25,12 @@ export default class IfOperator {
     static getExpressionFormat(ruleProps: RulePropertyProps): string {
         const {rightField, leftField, operator} = ruleProps;
         const operatorName = getEnumKeyByValue(AllOperatorNames,  operator);
+        const isUnary = Object.values(UnaryOperatorName).indexOf(operator as UnaryOperatorName) !== -1
         const isLeftFieldReference = leftField && !!(ReferenceFactory.createReferenceInstance(leftField));
         const isRightFieldReference = rightField && !!(ReferenceFactory.createReferenceInstance(rightField));
         const leftExpression = isLeftFieldReference ? leftField : `'${leftField}'`;
-        const rightExpression = isRightFieldReference ? rightField : `'${rightField}'`;
-        return rightField ? `${leftExpression} ${operatorName} ${rightExpression}` : `${leftExpression} ${operatorName}`;
+        const rightExpression = isRightFieldReference ? rightField : rightField === EmptyString ? `''` : `'${rightField}'`;
+        return rightField && !isUnary ? `${leftExpression} ${operatorName} ${rightExpression}` : `${leftExpression} ${operatorName}`;
     }
 
     static isExpressionNotValid(ruleProps: RulePropertyProps): boolean {
@@ -42,7 +43,7 @@ export default class IfOperator {
         return (
             <React.Fragment>
                 <ReferenceGenerator error={rule.error} isBuilder connectionEditor={connectionEditor} reference={rule?.properties?.leftField || ''} setReference={(leftField: string) => {
-                    updateRule({...rule, error: '', properties: {...rule?.properties, leftField, operator: '', rightField: ''}})
+                    updateRule({...rule, error: '', properties: {...rule?.properties, leftField, operator: '', rightField: EmptyString}})
                 }}/>
                 {rule?.properties?.leftField &&
                     <React.Fragment>
@@ -51,7 +52,7 @@ export default class IfOperator {
                             type={OperatorType.If}
                             operator={rule?.properties?.operator || ''}
                             updateOperator={(operator) => {
-                                updateRule({...rule, error: '', properties: {...rule?.properties, operator, rightField: ''}})
+                                updateRule({...rule, error: '', properties: {...rule?.properties, operator, rightField: EmptyString}})
                             }}
                         />
                         {rule?.properties?.operator && isBinaryOperator(rule.properties.operator) &&

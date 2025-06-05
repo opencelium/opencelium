@@ -53,6 +53,7 @@ export interface ReferenceGeneratorStyleProps {
     parent?: boolean;
     endpointReference?: boolean;
     manualAdd?: boolean;
+    isLikeOperator?: boolean;
 }
 
 export enum ConstantComponentType {

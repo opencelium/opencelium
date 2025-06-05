@@ -11,18 +11,19 @@ import {
 	addCloseParamGeneratorNavigation,
 	removeCloseParamGeneratorNavigation
 } from "@root/components/utils/key_navigation";
-import React, {useEffect, useImperativeHandle, useMemo, useRef, useState} from 'react';
+import React, {useEffect, useImperativeHandle, useRef, useState} from 'react';
 import ReactDOM from 'react-dom';
 import DirectReference from '../classes/references/DirectReference';
 import DeepSelect from './DeepSelect';
 import MethodSelect from './MethodSelect';
 import {ConstantComponentType, ConstantSelectOptions, ReferenceGeneratorProps, ReferenceType} from './props';
-import {ConstantContainer, ReferenceGeneratorContainer} from './styles';
+import {ConstantContainer, LikePercentageContainer, ReferenceGeneratorContainer} from './styles';
 import IfOperatorsConfigGenerator from "@app_component/operator_builder/classes/if_operator/IfOperatorsConfigGenerator";
 import LoopOperatorsConfigGenerator
 	from "@app_component/operator_builder/classes/loop_operator/LoopOperatorsConfigGenerator";
 import {
 	AllOperatorNames,
+	BinaryOperatorName,
 	LoopOperatorName,
 	OperatorName
 } from "@app_component/operator_builder/interfaces/OperatorName";
@@ -30,8 +31,8 @@ import InputTextarea from "@app_component/base/input/textarea/InputTextarea";
 import IfBaseOperator from "@app_component/operator_builder/classes/if_operator/IfBaseOperator";
 import LoopBaseOperator from "@app_component/operator_builder/classes/loop_operator/LoopBaseOperator";
 import Select, {StylesConfig} from "react-select";
-import {ErrorColor} from "@app_component/operator_builder/OperatorBuilder";
 
+export const EmptyString = '&nbsp'
 const ReferenceGenerator = React.forwardRef(({
 	reference,
 	setReference,
@@ -54,6 +55,8 @@ const ReferenceGenerator = React.forwardRef(({
 }: ReferenceGeneratorProps, ref) => {
 	const [color, setColor] = useState<string>('');
 	const [currentField, setCurrentField] = useState<string>('');
+	const [hasOpenPerc, toggleOpenPerc] = useState<boolean>(false);
+	const [hasClosedPerc, toggleClosedPerc] = useState<boolean>(false);
 	const getOperatorClass = () => {
 		let newOperatorClass;
 		if (Object.values(LoopOperatorName).includes(operator as LoopOperatorName)) {
@@ -83,91 +86,10 @@ const ReferenceGenerator = React.forwardRef(({
 			updateReferenceType(newOperatorClass.defaultRefType);
 		}
 	}
-	useEffect(() => {
-		if (operator) {
-			onUpdateOperator();
-		}
-	}, [operator]);
-	useEffect(() => {
-		if (parent) {
-			addCloseParamGeneratorNavigation(this);
-			document.addEventListener('mousedown', handleClickOutside);
-			document.addEventListener('keydown', handleEscKey);
-			return () => {
-				let elem = document.getElementById(id);
-				if (elem) {
-					elem.innerText = '';
-				}
-				removeCloseParamGeneratorNavigation(this);
-				document.removeEventListener('mousedown', handleClickOutside);
-				document.removeEventListener('keydown', handleEscKey);
-			}
-		}
-	}, [])
-	useEffect(() => {
-		setIdValue();
-	}, [currentField]);
-	useEffect(() => {
-		if (parent && isAbsolute) {
-			const { top, left } = findTopLeft(parent);
-			setCoords({ top, left });
-		}
-	}, [parent, isAbsolute]);
 
-	const handleEscKey = (event: any) => {
-		if (editCancel && event.key === 'Escape' || event.keyCode === 27) {
-			editCancel();
-		}
-	}
-	const handleClickOutside = (event: any) => {
-		const addParamElem = document.getElementById('add_param_dialog');
-		const addParamFade = addParamElem ? addParamElem.parentElement : null;
-		const updateParamElem = document.getElementById('update_param_dialog');
-		const updateParamFade = updateParamElem ? updateParamElem.parentElement : null;
-		const webhookGeneratorElem = document.getElementById('webhook_generator_dialog');
-		const webhookGeneratorFade = webhookGeneratorElem ? webhookGeneratorElem.parentElement : null;
-		const selectSearch = document.getElementById(`param_generator_${connectionEditor.item.index}`);
-		if (selectSearch) {
-			if (document.activeElement?.id === selectSearch.id){
-				return;
-			}
-		}
-		if (referenceRef.current && !referenceRef.current.contains(event.target)
-			&& (!webhookRef.current || !webhookRef.current.contains(event.target))
-			&& (!webhookGeneratorElem || !webhookGeneratorElem.contains(event.target))
-			&& (!webhookGeneratorFade || !webhookGeneratorFade.contains(event.target))
-			&& (!addParamElem || !addParamElem.contains(event.target))
-			&& (!addParamFade || !addParamFade.contains(event.target))
-			&& (!updateParamElem || !updateParamElem.contains(event.target))
-			&& (!updateParamFade || !updateParamFade.contains(event.target))) {
-			if(editCancel) {
-				editCancel();
-			}
-		}
-	}
-	const changeReferenceType = (newReferenceType: ReferenceType) => {
-		updateReferenceType(newReferenceType);
-		setColor('');
-		setCurrentField('');
-	};
-	const onColorSelect = (newColor: string) => {
-		setColor(newColor);
-		setCurrentField('');
-		if (isBuilder) {
-			setReference('');
-		}
-	};
-	const onFieldSelect = (newField: string) => {
-		setCurrentField(newField);
-	};
-	useEffect(() => {
-		if(!manualAdd){
-			applyReference();
-		}
-	}, [currentField, manualAdd]);
 	const applyReference = () => {
-		let newReference = '';
 		if (currentField !== '') {
+			let newReference = '';
 			newReference = ReferenceFactory.getReference(
 				referenceType,
 				currentField,
@@ -206,9 +128,175 @@ const ReferenceGenerator = React.forwardRef(({
 			}
 		}
 	}
+
+
+	const handleEscKey = (event: any) => {
+		if (editCancel && event.key === 'Escape' || event.keyCode === 27) {
+			editCancel();
+		}
+	}
+	const handleClickOutside = (event: any) => {
+		const addParamElem = document.getElementById('add_param_dialog');
+		const addParamFade = addParamElem ? addParamElem.parentElement : null;
+		const updateParamElem = document.getElementById('update_param_dialog');
+		const updateParamFade = updateParamElem ? updateParamElem.parentElement : null;
+		const webhookGeneratorElem = document.getElementById('webhook_generator_dialog');
+		const webhookGeneratorFade = webhookGeneratorElem ? webhookGeneratorElem.parentElement : null;
+		const selectSearch = document.getElementById(`param_generator_${connectionEditor.item.index}`);
+		if (selectSearch) {
+			if (document.activeElement?.id === selectSearch.id){
+				return;
+			}
+		}
+		if (referenceRef.current && !referenceRef.current.contains(event.target)
+			&& (!webhookRef.current || !webhookRef.current.contains(event.target))
+			&& (!webhookGeneratorElem || !webhookGeneratorElem.contains(event.target))
+			&& (!webhookGeneratorFade || !webhookGeneratorFade.contains(event.target))
+			&& (!addParamElem || !addParamElem.contains(event.target))
+			&& (!addParamFade || !addParamFade.contains(event.target))
+			&& (!updateParamElem || !updateParamElem.contains(event.target))
+			&& (!updateParamFade || !updateParamFade.contains(event.target))) {
+			if(editCancel) {
+				editCancel();
+			}
+		}
+	}
+	const changeReferenceType = (newReferenceType: ReferenceType) => {
+		updateReferenceType(newReferenceType);
+		setColor('');
+		if (newReferenceType === 'constant') {
+			setCurrentField(EmptyString);
+		} else {
+			setCurrentField('');
+		}
+	};
+	const onColorSelect = (newColor: string) => {
+		setColor(newColor);
+		setCurrentField('');
+		if (isBuilder) {
+			setReference('');
+		}
+	};
+	const onFieldSelect = (newField: string) => {
+		setCurrentField(newField);
+	};
+	const isLikeOperator = (): boolean => {
+		return referenceType !== 'webhook' && (BinaryOperatorName.Like === operator || BinaryOperatorName.NotLike === operator)
+	}
 	useImperativeHandle(ref, () => ({
-    setIdValue
-  }));
+		setIdValue
+	}));
+	useEffect(() => {
+		switch(referenceType) {
+			case 'constant':
+				if (hasOpenPerc) {
+					if (currentField && currentField[0] !== '%') {
+						setCurrentField(currentField === EmptyString ? '%' : `%${currentField}`)
+					}
+				} else {
+					if (currentField && currentField[0] === '%') {
+						setCurrentField(currentField.substring(1));
+					}
+				}
+				break;
+			case 'direct':
+				if (hasOpenPerc) {
+					if (reference && reference[0] !== '%') {
+						setReference(reference === EmptyString ? '%' : `%${reference}`)
+					}
+				} else {
+					if (reference && reference[0] === '%') {
+						setReference(reference.substring(1));
+					}
+				}
+				break;
+		}
+	}, [hasOpenPerc]);
+	useEffect(() => {
+		switch (referenceType) {
+			case 'constant':
+				if (hasClosedPerc) {
+					if (currentField && currentField[currentField.length - 1] !== '%') {
+						setCurrentField(currentField === EmptyString ? '%' : `${currentField}%`)
+					}
+				} else {
+					if (currentField && currentField[currentField.length - 1] === '%') {
+						setCurrentField(currentField.substring(0, currentField.length - 1));
+					}
+				}
+				break;
+			case 'direct':
+				if (hasClosedPerc) {
+					if (reference && reference[reference.length - 1] !== '%') {
+						setReference(reference === EmptyString ? '%' : `${reference}%`)
+					}
+				} else {
+					if (reference && reference[reference.length - 1] === '%') {
+						setReference(reference.substring(0, reference.length - 1));
+					}
+				}
+				break;
+			case 'webhook':
+				break;
+		}
+	}, [hasClosedPerc]);
+	useEffect(() => {
+		if (hasOpenPerc) {
+			toggleOpenPerc(false);
+		}
+		if (hasClosedPerc) {
+			toggleClosedPerc(false);
+		}
+	}, [referenceType]);
+	useEffect(() => {
+		if (operator) {
+			onUpdateOperator();
+		}
+	}, [operator]);
+	useEffect(() => {
+		if (parent) {
+			addCloseParamGeneratorNavigation(this);
+			document.addEventListener('mousedown', handleClickOutside);
+			document.addEventListener('keydown', handleEscKey);
+			return () => {
+				let elem = document.getElementById(id);
+				if (elem) {
+					elem.innerText = '';
+				}
+				removeCloseParamGeneratorNavigation(this);
+				document.removeEventListener('mousedown', handleClickOutside);
+				document.removeEventListener('keydown', handleEscKey);
+			}
+		}
+	}, [])
+	useEffect(() => {
+		setIdValue();
+		if (referenceType === 'constant') {
+			if (isLikeOperator()) {
+				if (!hasOpenPerc) {
+					if (currentField[0] === '%') {
+						toggleOpenPerc(true);
+					}
+				}
+				if (!hasClosedPerc) {
+					if (currentField.length > 1 && currentField[currentField.length - 1] === '%') {
+						toggleClosedPerc(true);
+					}
+				}
+			}
+		}
+	}, [currentField]);
+	useEffect(() => {
+		if (parent && isAbsolute) {
+			const { top, left } = findTopLeft(parent);
+			setCoords({ top, left });
+		}
+	}, [parent, isAbsolute]);
+	useEffect(() => {
+		if(!manualAdd){
+			applyReference();
+		}
+	}, [currentField, manualAdd]);
 
 	useEffect(() => {
 		if (reference) {
@@ -222,6 +310,27 @@ const ReferenceGenerator = React.forwardRef(({
 					setCurrentField(referenceData.field);
 					if (referenceType !== 'direct') {
 						updateReferenceType('direct');
+					} else {
+						if (isLikeOperator()) {
+							if (hasOpenPerc) {
+								if (reference[0] !== '%') {
+									setReference(`%${reference}`)
+								}
+							} else {
+								if (reference[0] === '%') {
+									toggleOpenPerc(true);
+								}
+							}
+							if (hasClosedPerc) {
+								if (reference[reference.length - 1] !== '%') {
+									setReference(`${reference}%`)
+								}
+							} else {
+								if (reference[reference.length - 1] === '%') {
+									toggleClosedPerc(true);
+								}
+							}
+						}
 					}
 				}
 				if (referenceInstance instanceof WebhookReference) {
@@ -239,8 +348,10 @@ const ReferenceGenerator = React.forwardRef(({
 				}
 			}
 		} else {
-			setCurrentField('');
-			onUpdateOperator();
+			//if (reference !== EmptyString) {
+				//setCurrentField('');
+				//onUpdateOperator();
+			//}
 		}
 	}, [reference]);
 
@@ -250,6 +361,18 @@ const ReferenceGenerator = React.forwardRef(({
 	const customSelectStyles: StylesConfig<ConstantSelectOptions, false> = {
 		menuPortal: (base) => ({ ...base, zIndex: 10000 }),
 	};
+	//const isLikeOperator = false;
+	let inputTextValue = currentField === EmptyString ? '' : currentField;
+	if (isLikeOperator()) {
+		if (inputTextValue) {
+			if (inputTextValue[0] === '%') {
+				inputTextValue = inputTextValue.substring(1);
+			}
+			if (inputTextValue[inputTextValue.length - 1] === '%') {
+				inputTextValue = inputTextValue.substring(0, inputTextValue.length - 1);
+			}
+		}
+	}
 	const renderGenerator = () => {
 		return (
 			<ReferenceGeneratorContainer
@@ -260,6 +383,7 @@ const ReferenceGenerator = React.forwardRef(({
 				endpointReference={endpointReference}
 				ref={referenceRef}
 				manualAdd={manualAdd}
+				isLikeOperator={isLikeOperator()}
 			>
 				{!endpointReference &&
 					<ReferenceSwitcher
@@ -268,6 +392,11 @@ const ReferenceGenerator = React.forwardRef(({
 						changeReferenceType={changeReferenceType}
 					/>
 				}
+				{isLikeOperator() && <LikePercentageContainer hasSign={hasOpenPerc} onClick={() => {
+					toggleOpenPerc(!hasOpenPerc)
+				}}>
+					<div>%</div>
+				</LikePercentageContainer>}
 				{referenceType === 'direct' && (
 					<React.Fragment>
 						<MethodSelect
@@ -302,7 +431,7 @@ const ReferenceGenerator = React.forwardRef(({
 							<InputTextarea
 								style={{resize: 'vertical'}}
 								minHeight={'35px'}
-								value={currentField}
+								value={currentField === EmptyString ? '' : currentField}
 								onChange={(e) => setCurrentField(e.target.value)}
 								placeholder={operatorClass?.placeholder || 'Constant'}
 							/>
@@ -320,13 +449,16 @@ const ReferenceGenerator = React.forwardRef(({
 							<InputText
 								inputHeight={'40px'}
 								minHeight={'35px'}
-								value={currentField}
-								onChange={(e) => setCurrentField(e.target.value)}
+								value={inputTextValue}
+								onChange={(e) => setCurrentField(`${hasOpenPerc ? '%' : ''}${e.target.value}${hasClosedPerc ? '%' : ''}`)}
 								placeholder={operatorClass?.placeholder || 'Constant'}
 							/>
 						}
 					</ConstantContainer>
 				)}
+				{isLikeOperator() && <LikePercentageContainer hasSign={hasClosedPerc} onClick={() => toggleClosedPerc(!hasClosedPerc)}>
+					<div>%</div>
+				</LikePercentageContainer>}
 				{manualAdd && (
 					<TooltipFontIcon
 						id={`param_generator_add_${connectionEditor.connector.getConnectorType()}_${

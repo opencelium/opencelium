@@ -7,6 +7,7 @@ import {
 import DirectReference from "@app_component/operator_builder/classes/references/DirectReference";
 import WebhookReference from "@app_component/operator_builder/classes/references/WebhookReference";
 import {generateUUID} from "@app_component/operator_builder/utils";
+import {EmptyString} from "@app_component/operator_builder/reference_generator/ReferenceGenerator";
 
 export default class OperatorsConfigGenerator {
 
@@ -18,17 +19,17 @@ export default class OperatorsConfigGenerator {
 
     generateTreeByExpression(expression: string): GroupProps {
         let allOperators = Object.values(this.operatorsNames).join('|');
-        const anyStringRegExp = "'.*?'";
+        const anyStringRegExp = /'.*?'/;
         const regex = new RegExp(
             `^(${ // Left field
                 String.raw`${DirectReference.getRegex().source}` + // direct_reference
                 `|${WebhookReference.getRegex().source}` + // webhook_reference
-                `|${anyStringRegExp}` // string
+                `|${anyStringRegExp.source}` // string
             })\\s+(${allOperators})` + // Operator
             `(?:\\s+(${ // Right field (optional)
                 String.raw`${DirectReference.getRegex().source}` + // direct_reference
                 `|${WebhookReference.getRegex().source}` + // webhook_reference
-                `|${anyStringRegExp}` // string
+                `|${anyStringRegExp.source}` // string
             }))?$`
         );
         const match = expression.match(regex);
@@ -40,7 +41,7 @@ export default class OperatorsConfigGenerator {
             operator: match[5] as OperatorName,
         }
         if (match[6]) {
-            properties.rightField = match[6];
+            properties.rightField = match[6] === `''` ? EmptyString : match[6];
         }
         return {
             id: generateUUID(),

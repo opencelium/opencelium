@@ -9,7 +9,7 @@ export default class DirectReference extends BaseReference {
     }
 
     static getRegex(): RegExp {
-        return /\{%(#[0-9A-Fa-f]{6})\.\((request|response)\)\.body\.\$\.(.*?)%\}/;
+        return /%?\{%(#[0-9A-Fa-f]{6})\.\((request|response)\)\.body\.\$\.(.*?)%\}%?/;
     }
 
     extractData(): DirectReferenceData | null {

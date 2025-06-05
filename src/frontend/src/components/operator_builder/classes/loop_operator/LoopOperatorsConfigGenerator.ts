@@ -24,12 +24,12 @@ export default class LoopOperatorsConfigGenerator extends OperatorsConfigGenerat
     }
     generateTreeByForExpression(expression: string): GroupProps {
         let allOperators = Object.values([LoopOperatorName.For, LoopOperatorName.ForIn]).join('|');
-        const anyStringRegExp = "'.*?'";
+        const anyStringRegExp = /'.*?'/;
         const regex = new RegExp(
             `^(${allOperators})\\s+(${ // Operator first, then Left field
                 String.raw`${DirectReference.getRegex().source}` + // direct_reference
                 `|${WebhookReference.getRegex().source}` + // webhook_reference
-                `|${anyStringRegExp}` // string
+                `|${anyStringRegExp.source}` // string
             })$`
         );
         const match = expression.match(regex);
