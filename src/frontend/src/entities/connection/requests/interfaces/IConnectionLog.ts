@@ -27,6 +27,10 @@ export interface GetOperatorTraceResponse {
 	traces: (MethodTrace | OperatorTrace)[];
 }
 
+export interface TestConnectionResponse {
+	schedulerId: number,
+}
+
 export interface DeleteLogsRequest {
 	executionId: string;
 	connectionId: string;

@@ -45,6 +45,7 @@ export interface IExecutionState{
     endTime: number,
     startTime: number,
     taId: string,
+    hasLog: boolean,
 }
 
 export interface ILastExecution{

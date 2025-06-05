@@ -2,6 +2,29 @@
 Changelog
 *********
 
+4.5
+========
+
+:Date: June 6, 2025
+
+Features
+--------
+
+* Support file generation
+* Field mapping in the request header
+* Operators with AND and OR support
+* Connector setting protected by master password
+
+Fixes
+--------
+
+* AllowList is not working with integers (OC-999)
+* Check counter of the operation usage (OC-992)
+* Saving an aggregator adds duplicate comments (OC-1119)
+* API-Request body doesn't support ARRAY type (OC-978)
+* Error: Enhancement Not Found (OC-998)
+
+
 4.4
 ========
 

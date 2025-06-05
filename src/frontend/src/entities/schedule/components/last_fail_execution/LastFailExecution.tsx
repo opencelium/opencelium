@@ -71,7 +71,15 @@ const LastFailExecution: FC<LastFailExecutionProps> =
                 if(hasElasticSearch){
                     taIdComponent = <a id={`last_fail_${schedule.id}`} href={url} target={'_blank'}>#{executionId}</a>;
                 } else{
-                    taIdComponent = startGettingLogs ? <LoadingIcon loadingSize={'16px'} color={theme?.menu?.background || '#000'} name={' '} isLoading={true}/> : <span id={'clickable'} style={{cursor: 'pointer', textDecoration: 'underline'}} onClick={() => getLogs(executionId)}>{`#${executionId}`}</span>;
+                    if (schedule.lastExecution.fail.hasLog) {
+                        taIdComponent = startGettingLogs ?
+                            <LoadingIcon loadingSize={'16px'} color={theme?.menu?.background || '#000'} name={' '}
+                                         isLoading={true}/> :
+                            <span id={'clickable'} style={{cursor: 'pointer', textDecoration: 'underline'}}
+                                  onClick={() => getLogs(executionId)}>{`#${executionId}`}</span>;
+                    } else {
+                        taIdComponent = <span>{`#${executionId}`}</span>
+                    }
                 }
             }
             return (
