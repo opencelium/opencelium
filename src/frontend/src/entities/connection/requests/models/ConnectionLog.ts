@@ -7,7 +7,11 @@ interface BaseSocketLog {
 export type ConnectionSocketLog =
 | (MethodTrace & BaseSocketLog)
 | (OperatorTrace & BaseSocketLog);
-
+export interface ConnectionTextLog {
+	message: string,
+	type: 'INFO',
+	datetime: string,
+}
 export interface ConnectionLog {
 	executionId: string;
 	connectionId: string;
