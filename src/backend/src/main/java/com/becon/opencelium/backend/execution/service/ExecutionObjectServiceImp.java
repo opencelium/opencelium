@@ -61,8 +61,7 @@ public class ExecutionObjectServiceImp implements ExecutionObjectService {
 
         LoggerConfiguration loggerConfiguration = new LoggerConfiguration();
         loggerConfiguration.setDebugMode(scheduler.getDebugMode());
-        loggerConfiguration.setLog2File(true);
-        loggerConfiguration.setWSocketOpen(data.getExecType() == QuartzJobScheduler.TriggerType.EXECUTION_TEST);
+        loggerConfiguration.setTriggerType(data.getExecType());
         executionObj.setLoggerConfiguration(loggerConfiguration);
 
         return executionObj;

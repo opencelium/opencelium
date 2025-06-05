@@ -148,7 +148,6 @@ public class ExecutionAspect {
     public void sendAfter(JobExecutionContext context) {
         JobDataMap jobDataMap = context.getMergedJobDataMap();
         boolean licenseIsValid = jobDataMap.getBoolean("licenseIsValid");
-        boolean debugMode = jobDataMap.getBoolean("Scheduler.debugMode");
         if (!licenseIsValid) {
             return;
         }
@@ -156,14 +155,14 @@ public class ExecutionAspect {
         QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
         int schedulerId = data.getScheduleId();
 
-
         long execId = jobDataMap.getLong("execId");
-        updateExecutionObj(execId, true, debugMode);
+        updateExecutionObj(execId, true);
         List<Operation> operations = (List<Operation>) context.get("operationsEx");
         executeAggregator(operations, execId);
 
         String timestamp = (String) context.get("timestamp");
         Long connectionId = (Long) context.get("connectionId");
+        boolean debugMode = schedulerService.getById(schedulerId).getDebugMode();
         if (data.getExecType() == QuartzJobScheduler.TriggerType.EXECUTION_TEST) {
             // delete temporarily created scheduler
             schedulerService.deleteById(schedulerId);
@@ -172,18 +171,16 @@ public class ExecutionAspect {
             // remove mapping
             connection2ChannelMapping.remove(connectionId);
 
-            // move temporarily log file under /connectionId folder
-            int fileLimit = env.getProperty(AppYamlPath.LOG_FILE_SUCCESS_LIMIT, Integer.class, 2);
-            LogFileUtility.move(connectionId, execId, timestamp, "s", fileLimit);
+            // move temporarily log file under /connectionId folder if debug is enabled
+            move(connectionId, execId, timestamp, "s", debugMode);
         } else if (data.getExecType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE) {
             supportFileService.collectFiles(connectionId, execId, timestamp, "s");
 
             // delete temporarily created scheduler
             schedulerService.deleteById(schedulerId);
         } else {
-            // move temporarily log file under /connectionId folder
-            int fileLimit = env.getProperty(AppYamlPath.LOG_FILE_SUCCESS_LIMIT, Integer.class, 2);
-            LogFileUtility.move(connectionId, execId, timestamp, "s", fileLimit);
+            // move temporarily log file under /connectionId folder if debug is enabled
+            move(connectionId, execId, timestamp, "s", debugMode);
         }
 
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
@@ -196,7 +193,6 @@ public class ExecutionAspect {
             throwing = "ex")
     public void sendAlert(JobExecutionContext context, Exception ex) {
         JobDataMap jobDataMap = context.getMergedJobDataMap();
-        boolean debugMode = jobDataMap.getBoolean("Scheduler.debugMode");
         boolean licenseIsValid = jobDataMap.getBoolean("licenseIsValid");
         if (!licenseIsValid) {
             return;
@@ -206,12 +202,13 @@ public class ExecutionAspect {
         int schedulerId = data.getScheduleId();
 
         long execId = jobDataMap.getLong("execId");
-        updateExecutionObj(execId, false, debugMode);
+        updateExecutionObj(execId, false);
         List<Operation> operations = (List<Operation>) context.get("operationsEx");
         executeAggregator(operations, execId);
 
         String timestamp = (String) context.get("timestamp");
         Long connectionId = (Long) context.get("connectionId");
+        boolean debugMode = schedulerService.getById(schedulerId).getDebugMode();
         if (data.getExecType() == QuartzJobScheduler.TriggerType.EXECUTION_TEST) {
             // delete temporarily created scheduler
             schedulerService.deleteById(schedulerId);
@@ -220,18 +217,16 @@ public class ExecutionAspect {
             // remove mapping
             connection2ChannelMapping.remove(connectionId);
 
-            // move temporarily log file under /connectionId folder
-            int fileLimit = env.getProperty(AppYamlPath.LOG_FILE_FAIL_LIMIT, Integer.class, 3);
-            LogFileUtility.move(connectionId, execId, timestamp, "f", fileLimit);
+            // move temporarily log file under /connectionId folder if debug is enabled
+            move(connectionId, execId, timestamp, "f", debugMode);
         } else if (data.getExecType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE) {
             supportFileService.collectFiles(connectionId, execId, timestamp, "f");
 
             // delete temporarily created scheduler
             schedulerService.deleteById(schedulerId);
         } else {
-            // move temporarily log file under /connectionId folder
-            int fileLimit = env.getProperty(AppYamlPath.LOG_FILE_FAIL_LIMIT, Integer.class, 3);
-            LogFileUtility.move(connectionId, execId, timestamp, "f", fileLimit);
+            // move temporarily log file under /connectionId folder if debug is enabled
+            move(connectionId, execId, timestamp, "f", debugMode);
         }
 
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
@@ -250,7 +245,7 @@ public class ExecutionAspect {
                 .getId();
     }
 
-    private void updateExecutionObj(long execId, boolean success, boolean schedulerDebugMode) {
+    private void updateExecutionObj(long execId, boolean success) {
         Execution execution = executionService.getById(execId);
         execution.setEndTime(new Date());
         execution.setStatus(success ? "S" : "F");
@@ -267,13 +262,11 @@ public class ExecutionAspect {
             le.setSuccessStartTime(execution.getStartTime());
             le.setSuccessEndTime(execution.getEndTime());
             le.setSuccessExecutionId(execution.getId());
-            le.setSuccessHasLog(schedulerDebugMode);
         } else {
             le.setFailDuration(execution.getEndTime().getTime() - execution.getStartTime().getTime());
             le.setFailStartTime(execution.getStartTime());
             le.setFailEndTime(execution.getEndTime());
             le.setFailExecutionId(execution.getId());
-            le.setFailHasLog(schedulerDebugMode);
         }
         if (le.getScheduler() == null) {
             le.setScheduler(execution.getScheduler());
@@ -531,5 +524,17 @@ public class ExecutionAspect {
     private void sendRunningJobsNotification(int schedulerId) {
         List<RunningJobsResource> allRunningJobs = schedulerService.getAllRunningJobsExcludingOne(schedulerId);
         notificationService.send(SocketConstant.SCHEDULER_DESTINATION, allRunningJobs);
+    }
+
+    private void move(Long connectionId, long execId, String timestamp, String type, boolean debugMode) {
+        if (debugMode) {
+            int fileLimit;
+            if ("s".equals(type)) {
+                fileLimit = env.getProperty(AppYamlPath.LOG_FILE_SUCCESS_LIMIT, Integer.class, 2);
+            } else {
+                fileLimit = env.getProperty(AppYamlPath.LOG_FILE_FAIL_LIMIT, Integer.class, 3);
+            }
+            LogFileUtility.move(connectionId, execId, timestamp, type, fileLimit);
+        }
     }
 }
