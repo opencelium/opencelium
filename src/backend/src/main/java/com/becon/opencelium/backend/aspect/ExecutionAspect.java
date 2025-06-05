@@ -164,6 +164,7 @@ public class ExecutionAspect {
 
         String timestamp = (String) context.get("timestamp");
         Long connectionId = (Long) context.get("connectionId");
+        boolean debugMode = schedulerService.getById(schedulerId).getDebugMode();
         if (data.getExecType() == QuartzJobScheduler.TriggerType.EXECUTION_TEST) {
             // delete temporarily created scheduler
             schedulerService.deleteById(schedulerId);
@@ -172,18 +173,16 @@ public class ExecutionAspect {
             // remove mapping
             connection2ChannelMapping.remove(connectionId);
 
-            // move temporarily log file under /connectionId folder
-            int fileLimit = env.getProperty(AppYamlPath.LOG_FILE_SUCCESS_LIMIT, Integer.class, 2);
-            LogFileUtility.move(connectionId, execId, timestamp, "s", fileLimit);
+            // move temporarily log file under /connectionId folder if debug is enabled
+            move(connectionId, execId, timestamp, "s", debugMode);
         } else if (data.getExecType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE) {
             supportFileService.collectFiles(connectionId, execId, timestamp, "s");
 
             // delete temporarily created scheduler
             schedulerService.deleteById(schedulerId);
         } else {
-            // move temporarily log file under /connectionId folder
-            int fileLimit = env.getProperty(AppYamlPath.LOG_FILE_SUCCESS_LIMIT, Integer.class, 2);
-            LogFileUtility.move(connectionId, execId, timestamp, "s", fileLimit);
+            // move temporarily log file under /connectionId folder if debug is enabled
+            move(connectionId, execId, timestamp, "s", debugMode);
         }
 
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
@@ -212,6 +211,7 @@ public class ExecutionAspect {
 
         String timestamp = (String) context.get("timestamp");
         Long connectionId = (Long) context.get("connectionId");
+        boolean debugMode = schedulerService.getById(schedulerId).getDebugMode();
         if (data.getExecType() == QuartzJobScheduler.TriggerType.EXECUTION_TEST) {
             // delete temporarily created scheduler
             schedulerService.deleteById(schedulerId);
@@ -220,18 +220,16 @@ public class ExecutionAspect {
             // remove mapping
             connection2ChannelMapping.remove(connectionId);
 
-            // move temporarily log file under /connectionId folder
-            int fileLimit = env.getProperty(AppYamlPath.LOG_FILE_FAIL_LIMIT, Integer.class, 3);
-            LogFileUtility.move(connectionId, execId, timestamp, "f", fileLimit);
+            // move temporarily log file under /connectionId folder if debug is enabled
+            move(connectionId, execId, timestamp, "f", debugMode);
         } else if (data.getExecType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE) {
             supportFileService.collectFiles(connectionId, execId, timestamp, "f");
 
             // delete temporarily created scheduler
             schedulerService.deleteById(schedulerId);
         } else {
-            // move temporarily log file under /connectionId folder
-            int fileLimit = env.getProperty(AppYamlPath.LOG_FILE_FAIL_LIMIT, Integer.class, 3);
-            LogFileUtility.move(connectionId, execId, timestamp, "f", fileLimit);
+            // move temporarily log file under /connectionId folder if debug is enabled
+            move(connectionId, execId, timestamp, "f", debugMode);
         }
 
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
@@ -531,5 +529,17 @@ public class ExecutionAspect {
     private void sendRunningJobsNotification(int schedulerId) {
         List<RunningJobsResource> allRunningJobs = schedulerService.getAllRunningJobsExcludingOne(schedulerId);
         notificationService.send(SocketConstant.SCHEDULER_DESTINATION, allRunningJobs);
+    }
+
+    private void move(Long connectionId, long execId, String timestamp, String type, boolean debugMode) {
+        if (debugMode) {
+            int fileLimit;
+            if ("s".equals(type)) {
+                fileLimit = env.getProperty(AppYamlPath.LOG_FILE_SUCCESS_LIMIT, Integer.class, 2);
+            } else {
+                fileLimit = env.getProperty(AppYamlPath.LOG_FILE_FAIL_LIMIT, Integer.class, 3);
+            }
+            LogFileUtility.move(connectionId, execId, timestamp, type, fileLimit);
+        }
     }
 }
