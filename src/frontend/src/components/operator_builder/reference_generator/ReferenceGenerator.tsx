@@ -288,6 +288,7 @@ const ReferenceGenerator = React.forwardRef(({
 				{referenceType === 'webhook' && (
 					<WebhookGenerator
 						ref={webhookRef}
+						error={error}
 						value={Webhook.extractFromSnippet(currentField)}
 						style={{ float: 'left' }}
 						onSelect={(webhookValue) => {
