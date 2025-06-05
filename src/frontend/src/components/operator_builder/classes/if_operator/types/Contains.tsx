@@ -6,6 +6,6 @@ import {BinaryOperatorName} from "../../../interfaces/OperatorName";
 export default class Contains extends IfBaseOperator{
 
     constructor() {
-        super({name: BinaryOperatorName.Contains})
+        super({name: BinaryOperatorName.Contains, placeholder: 'contains'})
     }
 }

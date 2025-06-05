@@ -112,7 +112,7 @@ const List: FC<ListViewProps> =
         setSortTypes({...sortTypes, [sortingProp]: sortType})
     }
     const CardComponent = isCard ? Card : React.Fragment;
-    const cardProps = isCard ? {padding: '10px', margin: '0 0 20px 0', isRefreshing, overflow: 'auto', style: collection.listStyles} : {};
+    let cardProps = isCard ? {padding: '10px', margin: '0 0 20px 0', isRefreshing, overflow: 'auto', style: collection.listStyles} : {};
     return (
         <CardComponent {...cardProps}>
             {visibleEntities.length === 0

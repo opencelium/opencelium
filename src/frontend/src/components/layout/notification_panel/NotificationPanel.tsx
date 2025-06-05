@@ -57,7 +57,7 @@ const NotificationPanel: FC<NotificationPanelProps> = ({theme}) => {
     useEventListener('mousedown', checkIfClickedOutside, window, isNotificationPanelOpened);
     return (
         <NotificationPanelStyled ref={panelRef} isOpened={isNotificationPanelOpened}>
-            <CloseButtonStyled color={ColorTheme.Black} target={'notification_panel_close'} tooltip={'Close'} size={20} hasBackground={false} icon={'close'} onClick={() => dispatch(toggleNotificationPanel())}/>
+            <CloseButtonStyled tabIndex={isNotificationPanelOpened ? 0 : -1} color={ColorTheme.Black} target={'notification_panel_close'} tooltip={'Close'} size={20} hasBackground={false} icon={'close'} onClick={() => dispatch(toggleNotificationPanel())}/>
             <Text value={<PanelTitleStyled>{"Notifications"}</PanelTitleStyled>}/>
             {!hasNotifications ?
                 <div>There are no notifications</div>

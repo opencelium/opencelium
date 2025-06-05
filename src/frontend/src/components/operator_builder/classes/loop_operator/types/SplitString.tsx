@@ -4,6 +4,10 @@ import {LoopOperatorName} from "@app_component/operator_builder/interfaces/Opera
 export default class SplitString extends LoopBaseOperator{
 
     constructor() {
-        super({name: LoopOperatorName.SplitString})
+        super({
+            name: LoopOperatorName.SplitString,
+            placeholder: 'Splitter',
+            defaultRefType: 'constant',
+        })
     }
 }

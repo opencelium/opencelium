@@ -2,21 +2,35 @@ import InputText from '@app_component/base/input/text/InputText';
 import ReferenceFactory from '@app_component/operator_builder/classes/references/ReferenceFactory';
 import WebhookReference from '@app_component/operator_builder/classes/references/WebhookReference';
 import ReferenceSwitcher from '@app_component/operator_builder/reference_generator/ReferenceSwitcher';
-import { findTopLeft } from '@application/utils/utils';
+import {findTopLeft} from '@application/utils/utils';
 import WebhookGenerator from '@change_component/form_elements/form_connection/form_methods/method/WebhookGenerator';
-import TooltipFontIcon from '@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon';
+import TooltipFontIcon
+	from '@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon';
 import Webhook from '@root/classes/Webhook';
 import {
 	addCloseParamGeneratorNavigation,
 	removeCloseParamGeneratorNavigation
 } from "@root/components/utils/key_navigation";
-import React, { useEffect, useImperativeHandle, useRef, useState } from 'react';
+import React, {useEffect, useImperativeHandle, useMemo, useRef, useState} from 'react';
 import ReactDOM from 'react-dom';
 import DirectReference from '../classes/references/DirectReference';
 import DeepSelect from './DeepSelect';
 import MethodSelect from './MethodSelect';
-import { ReferenceGeneratorProps, ReferenceType } from './props';
-import { ConstantContainer, ReferenceGeneratorContainer } from './styles';
+import {ConstantComponentType, ConstantSelectOptions, ReferenceGeneratorProps, ReferenceType} from './props';
+import {ConstantContainer, ReferenceGeneratorContainer} from './styles';
+import IfOperatorsConfigGenerator from "@app_component/operator_builder/classes/if_operator/IfOperatorsConfigGenerator";
+import LoopOperatorsConfigGenerator
+	from "@app_component/operator_builder/classes/loop_operator/LoopOperatorsConfigGenerator";
+import {
+	AllOperatorNames,
+	LoopOperatorName,
+	OperatorName
+} from "@app_component/operator_builder/interfaces/OperatorName";
+import InputTextarea from "@app_component/base/input/textarea/InputTextarea";
+import IfBaseOperator from "@app_component/operator_builder/classes/if_operator/IfBaseOperator";
+import LoopBaseOperator from "@app_component/operator_builder/classes/loop_operator/LoopBaseOperator";
+import Select, {StylesConfig} from "react-select";
+import {ErrorColor} from "@app_component/operator_builder/OperatorBuilder";
 
 const ReferenceGenerator = React.forwardRef(({
 	reference,
@@ -36,25 +50,44 @@ const ReferenceGenerator = React.forwardRef(({
 	isBuilder = false,
 	error = '',
 	style = {},
+	operator,
 }: ReferenceGeneratorProps, ref) => {
 	const [color, setColor] = useState<string>('');
 	const [currentField, setCurrentField] = useState<string>('');
+	const getOperatorClass = () => {
+		let newOperatorClass;
+		if (Object.values(LoopOperatorName).includes(operator as LoopOperatorName)) {
+			const operatorsConfigGenerator = new LoopOperatorsConfigGenerator();
+			newOperatorClass = operatorsConfigGenerator.getOperatorClass(operator as LoopOperatorName);
+		}
+		if (Object.values(AllOperatorNames).includes(operator as OperatorName)) {
+			const operatorsConfigGenerator = new IfOperatorsConfigGenerator();
+			newOperatorClass = operatorsConfigGenerator.getOperatorClass(operator as OperatorName);
+		}
+		return newOperatorClass;
+	}
 	const [referenceType, updateReferenceType] = useState<ReferenceType>(
-		'direct'
+		getOperatorClass()?.defaultRefType || 'direct',
 	);
 	const [coords, setCoords] = useState<{ top: number; left: number }>({
 		top: 0,
 		left: 0,
 	});
+	const [operatorClass, setOperatorClass] = useState<IfBaseOperator | LoopBaseOperator>();
 	const referenceRef: any = useRef();
 	const webhookRef: any = useRef();
-	useEffect(() => {
-		if (!reference) {
-			//setColor('');
-			setCurrentField('');
-			updateReferenceType('direct');
+	const onUpdateOperator = () => {
+		const newOperatorClass = getOperatorClass();
+		setOperatorClass(newOperatorClass);
+		if (newOperatorClass?.defaultRefType) {
+			updateReferenceType(newOperatorClass.defaultRefType);
 		}
-	}, [reference])
+	}
+	useEffect(() => {
+		if (operator) {
+			onUpdateOperator();
+		}
+	}, [operator]);
 	useEffect(() => {
 		if (parent) {
 			addCloseParamGeneratorNavigation(this);
@@ -205,13 +238,18 @@ const ReferenceGenerator = React.forwardRef(({
 					updateReferenceType('constant');
 				}
 			}
+		} else {
+			setCurrentField('');
+			onUpdateOperator();
 		}
 	}, [reference]);
 
 	const containerStyle = parent && isAbsolute
 		? { top: coords.top + 10, left: coords.left }
 		: {};
-
+	const customSelectStyles: StylesConfig<ConstantSelectOptions, false> = {
+		menuPortal: (base) => ({ ...base, zIndex: 10000 }),
+	};
 	const renderGenerator = () => {
 		return (
 			<ReferenceGeneratorContainer
@@ -259,13 +297,33 @@ const ReferenceGenerator = React.forwardRef(({
 				)}
 				{referenceType === 'constant' && (
 					<ConstantContainer>
-						<InputText
-							inputHeight={'40px'}
-							minHeight={'35px'}
-							value={currentField}
-							onChange={(e) => setCurrentField(e.target.value)}
-							placeholder={'Constant'}
-						/>
+						{operatorClass?.defaultConstantType === ConstantComponentType.Textarea ?
+							<InputTextarea
+								style={{resize: 'vertical'}}
+								minHeight={'35px'}
+								value={currentField}
+								onChange={(e) => setCurrentField(e.target.value)}
+								placeholder={operatorClass?.placeholder || 'Constant'}
+							/>
+							:
+							operatorClass?.defaultConstantType === ConstantComponentType.Select ?
+								<Select
+									value={operatorClass?.selectOptions.find(option => option.value === currentField)}
+									onChange={(selected) => setCurrentField(selected.value)}
+									options={operatorClass?.selectOptions || []}
+									styles={customSelectStyles}
+									menuPortalTarget={document.body}
+									menuPosition="absolute"
+								/>
+							:
+							<InputText
+								inputHeight={'40px'}
+								minHeight={'35px'}
+								value={currentField}
+								onChange={(e) => setCurrentField(e.target.value)}
+								placeholder={operatorClass?.placeholder || 'Constant'}
+							/>
+						}
 					</ConstantContainer>
 				)}
 				{manualAdd && (

@@ -7,6 +7,7 @@ import {Connector} from "@entity/connector/classes/Connector";
 import {checkMasterPassword} from "@entity/connector/redux_toolkit/action_creators/ConnectorCreators";
 import {MasterPasswordContainer, PromptContainer} from "@entity/connector/components/master_password_input/styles";
 import {MasterPasswordProps} from "@entity/connector/components/master_password_input/interfaces";
+import {onEnter, setFocusById} from "@application/utils/utils";
 
 const MasterPasswordInput = ({onSuccess}: MasterPasswordProps) => {
     const dispatch = useAppDispatch();
@@ -40,18 +41,23 @@ const MasterPasswordInput = ({onSuccess}: MasterPasswordProps) => {
             }
         }
     }, [checkingMasterPassword])
+    useEffect(() => {
+        if (showPrompt) {
+            setFocusById('close_prompt_button');
+        }
+    }, [showPrompt]);
     if(showPrompt) {
         return (
             <PromptContainer>
                 <p style={{textAlign: 'center'}}>
-                    {"Please, set the master password in the"}
+                    {"We could not find a master password. To show this information,"}
                 </p>
                 <p style={{textAlign: 'center'}}>
-                    {"application.yml file to show this information."}
+                    {"please set the master password in the application.yml file."}
                 </p>
                 <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                     <Button
-                        key={'close_prompt_button'}
+                        id={'close_prompt_button'}
                         label={'Close'}
                         handleClick={() => togglePrompt(false)}
                     />
@@ -61,18 +67,21 @@ const MasterPasswordInput = ({onSuccess}: MasterPasswordProps) => {
     }
     return (
         <MasterPasswordContainer>
-            <div style={{width: '300px'}}><InputText
-                id={`master_password`}
-                autoFocus={true}
-                icon={'key'}
-                placeholder={'Enter your Master Password'}
-                required={true}
-                onChange={(e:ChangeEvent<HTMLInputElement>) => {
-                    setPassword(e.target.value);
-                    setError('');
-                }}
-                error={error}
-            /></div>
+            <div style={{width: '300px'}}>
+                <InputText
+                    id={`master_password`}
+                    autoFocus={true}
+                    icon={'key'}
+                    placeholder={'Enter your Master Password'}
+                    required={true}
+                    onKeyDown={(e) => onEnter(e, send)}
+                    onChange={(e:ChangeEvent<HTMLInputElement>) => {
+                        setPassword(e.target.value);
+                        setError('');
+                    }}
+                    error={error}
+                />
+            </div>
             <Button
                 style={{height: '35px'}}
                 key={'send_button'}

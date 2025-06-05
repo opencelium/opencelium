@@ -58,6 +58,7 @@ export default class IfOperator {
                             <ReferenceGenerator
                                 isBuilder
                                 error={rule.error}
+                                operator={rule.properties?.operator || ''}
                                 connectionEditor={connectionEditor}
                                 reference={rule?.properties?.rightField || ''}
                                 setReference={(rightField: string) => {

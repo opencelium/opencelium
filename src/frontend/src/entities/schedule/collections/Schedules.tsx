@@ -56,6 +56,7 @@ class Schedules extends ListCollection<ScheduleProps>{
     entities: ISchedule[];
     title = 'Schedules';
     keyPropName: ScheduleProps ='id';
+    listStyles = {borderTopLeftRadius: '0px'};
     getListRawUrl = (entity: ISchedule) => `/schedules/${entity.id}/update`;
     ListRawComponent = DefaultListRaw;
     sortingProps: ScheduleProps[] = ['title'];

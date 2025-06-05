@@ -1,4 +1,5 @@
 import { ConnectionEditorProps } from "@app_component/operator_builder/props";
+import {LoopOperatorName, OperatorName} from "@app_component/operator_builder/interfaces/OperatorName";
 
 export interface ReferenceGeneratorProps {
     setReference: (reference: string) => void,
@@ -6,6 +7,7 @@ export interface ReferenceGeneratorProps {
     reference?: string,
     isBuilder: boolean,
     error?: string,
+    operator?: OperatorName | LoopOperatorName | '',
     connectionEditor: ConnectionEditorProps,
     id?: string,
     parent?: any;
@@ -51,4 +53,15 @@ export interface ReferenceGeneratorStyleProps {
     parent?: boolean;
     endpointReference?: boolean;
     manualAdd?: boolean;
+}
+
+export enum ConstantComponentType {
+    Text= 'text',
+    Textarea= 'textarea',
+    Select= 'select' ,
+}
+
+export interface ConstantSelectOptions {
+    label: string,
+    value: string,
 }

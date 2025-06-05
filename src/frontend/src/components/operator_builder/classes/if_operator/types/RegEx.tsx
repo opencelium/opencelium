@@ -6,6 +6,10 @@ import {BinaryOperatorName} from "../../../interfaces/OperatorName";
 export default class RegEx extends IfBaseOperator{
 
     constructor() {
-        super({name: BinaryOperatorName.RegEx})
+        super({
+            name: BinaryOperatorName.RegEx,
+            placeholder: 'Regular Expression',
+            defaultRefType: 'constant',
+        })
     }
 }

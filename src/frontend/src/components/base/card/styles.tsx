@@ -30,7 +30,10 @@ const CardStyled = styled.div<CardProps>`
     padding: ${({padding, isVisible}) => isVisible ? padding || 0 : 0};
     margin: ${({margin, isVisible}) => isVisible ? margin || 0 : 0};
     transition: opacity 0.4s;
-    border-radius: 5px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
     box-shadow: 0 1px 3px rgb(0 0 0 / 12%), 0 1px 2px rgb(0 0 0 / 24%);
     position: relative;
     ${({isRefreshing}) => isRefreshing ? 'opacity: 0;' : 'opacity: 1;'}
