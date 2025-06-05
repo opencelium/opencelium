@@ -26,6 +26,7 @@ public class ExecutionResource {
     private long startTime;
     private long endTime;
     private long duration;
+    private boolean hasLog;
 
     public ExecutionResource() {
     }
@@ -42,6 +43,7 @@ public class ExecutionResource {
                 this.endTime = lastExecution.getSuccessEndTime().getTime();
             }
             this.duration = lastExecution.getSuccessDuration();
+            this.hasLog = lastExecution.isSuccessHasLog();
         }
         else {
             this.taId = lastExecution.getScheduler().getId() + "-" + lastExecution.getFailExecutionId();
@@ -53,6 +55,7 @@ public class ExecutionResource {
                 this.endTime = lastExecution.getFailEndTime().getTime();
             }
             this.duration = lastExecution.getFailDuration();
+            this.hasLog = lastExecution.isFailHasLog();
         }
     }
 
@@ -86,5 +89,13 @@ public class ExecutionResource {
 
     public void setDuration(long duration) {
         this.duration = duration;
+    }
+
+    public boolean isHasLog() {
+        return hasLog;
+    }
+
+    public void setHasLog(boolean hasLog) {
+        this.hasLog = hasLog;
     }
 }

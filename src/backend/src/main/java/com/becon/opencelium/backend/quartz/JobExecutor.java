@@ -75,6 +75,7 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
             ConnectionExecutor executor = new ConnectionExecutor(executionObj, execId, timestamp, data.getRules());
 
             context.put("connectionId", executionObj.getConnection().getConnectionId());
+            context.getMergedJobDataMap().put("Scheduler.debugMode", executionObj.getLoggerConfiguration().isDebugMode());
             context.put("timestamp", timestamp);
             long startTime = System.currentTimeMillis();
             executor.start();
