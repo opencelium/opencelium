@@ -15,7 +15,6 @@ import {
 import DenyList from "./types/DenyList";
 import IsTypeOf from "./types/IsTypeOf";
 import Like from "./types/Like";
-import Matches from "./types/Matches";
 import AllowList from "./types/AllowList";
 import NotLike from "./types/NotLike";
 import RegEx from "./types/RegEx";
@@ -75,8 +74,6 @@ export default class IfOperatorsConfigGenerator extends OperatorsConfigGenerator
                 return new Like();
             case BinaryOperatorName.NotLike:
                 return new NotLike();
-            case BinaryOperatorName.Matches:
-                return new Matches();
             case BinaryOperatorName.PropertyExists:
                 return new PropertyExists();
             case BinaryOperatorName.PropertyNotExists:
