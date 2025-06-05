@@ -128,8 +128,6 @@ public class OcLogger<T extends LogMessage> {
         if (webSocket) {
             logEntity.setMessage(message);
             socketNotificationService.send(connectionId, logEntity);
-        } else {
-            t.accept(message);
         }
     }
 
