@@ -8,5 +8,5 @@ import java.util.Optional;
 
 public interface ExecutionTracker {
 
-    Optional<LogMetaData> handleParsedLine(ParsedLogLine parsedLine);
+//    Optional<LogMetaData> handleParsedLine(ParsedLogLine parsedLine);
 }
