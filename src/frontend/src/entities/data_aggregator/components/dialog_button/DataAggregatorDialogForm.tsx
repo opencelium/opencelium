@@ -426,7 +426,7 @@ const DataAggregatorDialogForm: FC<AggregatorFormProps> = ({
 							}}
 						/>
 						<LimitedAceEditor
-							maxLength={255}
+							maxLength={Validation.TextLength.Long}
 							markers={markers}
 							ref={scriptSegmentRef}
 							style={{
