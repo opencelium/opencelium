@@ -148,7 +148,6 @@ public class ExecutionAspect {
     public void sendAfter(JobExecutionContext context) {
         JobDataMap jobDataMap = context.getMergedJobDataMap();
         boolean licenseIsValid = jobDataMap.getBoolean("licenseIsValid");
-        boolean debugMode = jobDataMap.getBoolean("Scheduler.debugMode");
         if (!licenseIsValid) {
             return;
         }
@@ -156,9 +155,8 @@ public class ExecutionAspect {
         QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
         int schedulerId = data.getScheduleId();
 
-
         long execId = jobDataMap.getLong("execId");
-        updateExecutionObj(execId, true, debugMode);
+        updateExecutionObj(execId, true);
         List<Operation> operations = (List<Operation>) context.get("operationsEx");
         executeAggregator(operations, execId);
 
@@ -195,7 +193,6 @@ public class ExecutionAspect {
             throwing = "ex")
     public void sendAlert(JobExecutionContext context, Exception ex) {
         JobDataMap jobDataMap = context.getMergedJobDataMap();
-        boolean debugMode = jobDataMap.getBoolean("Scheduler.debugMode");
         boolean licenseIsValid = jobDataMap.getBoolean("licenseIsValid");
         if (!licenseIsValid) {
             return;
@@ -205,7 +202,7 @@ public class ExecutionAspect {
         int schedulerId = data.getScheduleId();
 
         long execId = jobDataMap.getLong("execId");
-        updateExecutionObj(execId, false, debugMode);
+        updateExecutionObj(execId, false);
         List<Operation> operations = (List<Operation>) context.get("operationsEx");
         executeAggregator(operations, execId);
 
@@ -248,7 +245,7 @@ public class ExecutionAspect {
                 .getId();
     }
 
-    private void updateExecutionObj(long execId, boolean success, boolean schedulerDebugMode) {
+    private void updateExecutionObj(long execId, boolean success) {
         Execution execution = executionService.getById(execId);
         execution.setEndTime(new Date());
         execution.setStatus(success ? "S" : "F");
@@ -265,13 +262,11 @@ public class ExecutionAspect {
             le.setSuccessStartTime(execution.getStartTime());
             le.setSuccessEndTime(execution.getEndTime());
             le.setSuccessExecutionId(execution.getId());
-            le.setSuccessHasLog(schedulerDebugMode);
         } else {
             le.setFailDuration(execution.getEndTime().getTime() - execution.getStartTime().getTime());
             le.setFailStartTime(execution.getStartTime());
             le.setFailEndTime(execution.getEndTime());
             le.setFailExecutionId(execution.getId());
-            le.setFailHasLog(schedulerDebugMode);
         }
         if (le.getScheduler() == null) {
             le.setScheduler(execution.getScheduler());
