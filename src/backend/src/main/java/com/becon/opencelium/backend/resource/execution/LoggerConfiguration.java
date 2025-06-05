@@ -1,9 +1,10 @@
 package com.becon.opencelium.backend.resource.execution;
 
+import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
+
 public class LoggerConfiguration {
     private boolean debugMode;
-    private boolean log2File;
-    private boolean isWSocketOpen;
+    private QuartzJobScheduler.TriggerType triggerType;
 
     public boolean isDebugMode() {
         return debugMode;
@@ -13,19 +14,11 @@ public class LoggerConfiguration {
         this.debugMode = debugMode;
     }
 
-    public boolean isLog2File() {
-        return log2File;
+    public QuartzJobScheduler.TriggerType getTriggerType() {
+        return triggerType;
     }
 
-    public void setLog2File(boolean log2File) {
-        this.log2File = log2File;
-    }
-
-    public boolean isWSocketOpen() {
-        return isWSocketOpen;
-    }
-
-    public void setWSocketOpen(boolean WSocketOpen) {
-        isWSocketOpen = WSocketOpen;
+    public void setTriggerType(QuartzJobScheduler.TriggerType triggerType) {
+        this.triggerType = triggerType;
     }
 }
