@@ -126,9 +126,6 @@ function AddConnectionButton({ theme, direction, ...args }: DropdownMenuProps & 
         }
     }
     useEffect(() => {
-        dispatch(getAllCategories());
-    }, [])
-    useEffect(() => {
         if(addingConnection === API_REQUEST_STATE.FINISH && startAdding) {
             toggleForm();
             setStartAdding(false);
@@ -161,6 +158,12 @@ function AddConnectionButton({ theme, direction, ...args }: DropdownMenuProps & 
             setStartAdding(false);
         }
     }, [checkingConnectionTitle])
+
+    useEffect(() => {
+        if (dropdownOpen) {
+            dispatch(getAllCategories());
+        }
+    }, [dropdownOpen]);
 
     const toggle = () => setDropdownOpen((prevState) => !prevState);
 
@@ -236,6 +239,7 @@ function AddConnectionButton({ theme, direction, ...args }: DropdownMenuProps & 
                             icon={'category'}
                             label={'Category'}
                             categoryList={true}
+                            isLoading={gettingCategories === API_REQUEST_STATE.START}
                         />
                     </React.Fragment>
                 }

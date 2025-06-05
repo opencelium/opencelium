@@ -350,7 +350,7 @@ class Body extends React.Component {
 							location='body'
 						/>
 					)}
-					<div>
+					<div style={{position: 'relative'}}>
 						<div>
 							<b>{bodyTitle}</b>
 							<TooltipFontIcon

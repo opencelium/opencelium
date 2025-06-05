@@ -166,7 +166,24 @@ const ConnectorForm: FC<IForm> = ({isAdd, isUpdate}) => {
                 {SslCertInput}
                 {Icon}
             </FormSection>,
-            <FormSection label={{value: 'Credentials'}} dependencies={[!connector.invokerSelect]} OverlayComponent={hasMasking ? <MasterPasswordInput onSuccess={onSuccessMasterPassword}/> : null}>
+            <FormSection
+                label={{value: 'Credentials'}}
+                dependencies={[!connector.invokerSelect]}
+                 OverlayComponent={
+                hasMasking ?
+                    <div style={{
+                        display: 'flex',
+                        width: '100%',
+                        height: '100%',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        paddingTop: '150px',
+                        position: 'absolute',
+                        top: '150px',
+                    }}>
+                        <MasterPasswordInput onSuccess={onSuccessMasterPassword}/>
+                    </div> : null
+                }>
                 {Credentials}
                 {!hasMasking && <Button
                     float={'right'}

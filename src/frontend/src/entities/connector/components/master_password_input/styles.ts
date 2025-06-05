@@ -8,7 +8,7 @@ export const MasterPasswordContainer = styled.div`
     box-shadow: 0 1px 3px rgb(0 0 0 / 12%), 0 1px 2px rgb(0 0 0 / 24%);
     background-color: #fff;
     position: absolute;
-    top: 150px;
+    top: 0;
 `;
 
 export const PromptContainer = styled.div`
