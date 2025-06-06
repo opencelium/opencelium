@@ -58,7 +58,7 @@ const LimitedAceEditor = React.forwardRef<any, LimitedAceEditorProps>(
 
 		const [currentValue, setCurrentValue] = useState(value);
 		const editorRef = useRef<any>(null);
-
+		const [isFocused, toggleFocus] = useState<boolean>(false);
 		useImperativeHandle(ref, () => editorRef.current, []);
 
 		useEffect(() => {
@@ -100,7 +100,7 @@ const LimitedAceEditor = React.forwardRef<any, LimitedAceEditorProps>(
 
 		return (
 			<LimitedAceEditorContainer>
-				{maxLength && typeof maxLength === 'number' && (
+				{isFocused && maxLength && typeof maxLength === 'number' && (
 					<LimitedAceEditorCounter
 						top={counterStyles?.top}
 						right={counterStyles?.right}
@@ -110,6 +110,7 @@ const LimitedAceEditor = React.forwardRef<any, LimitedAceEditorProps>(
 					</LimitedAceEditorCounter>
 				)}
 				<AceEditor
+					onFocus={() => toggleFocus(true)}
 					ref={editorRef}
 					mode={mode}
 					theme={editorTheme}
@@ -131,7 +132,7 @@ const LimitedAceEditor = React.forwardRef<any, LimitedAceEditorProps>(
 					placeholder={placeholder}
 					cursorStart={cursorStart}
 					focus={focus}
-					onBlur={onBlur}
+					onBlur={(e: any) => {toggleFocus(false); onBlur();}}
 				/>
 			</LimitedAceEditorContainer>
 		);

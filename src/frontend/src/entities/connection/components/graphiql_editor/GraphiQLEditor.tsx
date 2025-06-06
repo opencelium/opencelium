@@ -22,11 +22,14 @@ import {graphQLLogin} from "@entity/connection/redux_toolkit/action_creators/Gra
 // @ts-ignore
 import {GraphQLRequestProps} from "../@requestInterface/graphql/IGraphQL";
 import {GraphiQLEditorProps} from "@entity/connection/components/graphiql_editor/interfaces";
-import {GraphiQLEditorStyled, ShortcutStyled} from "@entity/connection/components/graphiql_editor/styles";
+import {GraphiQLEditorStyled, ShortcutStyled, MasterPasswordContainer} from "@entity/connection/components/graphiql_editor/styles";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import Loading from "@app_component/base/loading/Loading";
 import GraphiQLContext from "@root/components/classes/graphiql/GraphiQLContext";
 import Hint from "@app_component/base/hint/Hint";
+import MasterPasswordInput from "@entity/connector/components/master_password_input/MasterPasswordInput";
+import {Connector} from "@entity/connector/classes/Connector";
+import {getConnectorById} from "@entity/connector/redux_toolkit/action_creators/ConnectorCreators";
 
 const GraphiQLEditor: FC<GraphiQLEditorProps> =
     ({
@@ -37,28 +40,48 @@ const GraphiQLEditor: FC<GraphiQLEditorProps> =
     }) => {
         const dispatch = useAppDispatch();
         const {accessToken, logining} = GraphQL.getReduxState();
+        const {masterPassword, currentConnector, gettingConnector} = Connector.getReduxState();
         const [shouldRevokeToken, setShouldRevokeToken] = useState(false);
+        const [startGettingConnector, setStartGettingConnector] = useState<boolean>(false);
+        const [startLogining, setStartLogining] = useState<boolean>(true);
         const sslOn = connector.sslCert;
         useEffect(() => {
-            dispatch(graphQLLogin(connector));
-        }, []);
+            if (masterPassword) {
+                dispatch(getConnectorById(connector.connectorId));
+                setStartGettingConnector(true);
+            } else {
+                setStartLogining(false);
+            }
+        }, [masterPassword]);
+        useEffect(() => {
+            if (startGettingConnector && gettingConnector === API_REQUEST_STATE.FINISH) {
+                setStartGettingConnector(false);
+                dispatch(graphQLLogin(currentConnector));
+            }
+        }, [gettingConnector])
         useEffect(() => {
             if(shouldRevokeToken && logining !== API_REQUEST_STATE.ERROR){
-                dispatch(graphQLLogin(connector));
+                dispatch(graphQLLogin(currentConnector));
                 setShouldRevokeToken(false);
             }
         }, [shouldRevokeToken]);
         useEffect(() => {
-            if(logining === API_REQUEST_STATE.FINISH && query !== ''){
-                const executeButton: HTMLButtonElement = document.querySelector('div.execute-button-wrap > button');
-                if(executeButton){
-                    executeButton.click();
+            if(logining === API_REQUEST_STATE.FINISH){
+                setStartLogining(false);
+                if (query !== '') {
+                    const executeButton: HTMLButtonElement = document.querySelector('div.execute-button-wrap > button');
+                    if (executeButton) {
+                        executeButton.click();
+                    }
                 }
+            }
+            if (logining === API_REQUEST_STATE.ERROR) {
+                setStartLogining(false);
             }
         }, [logining])
         const graphQLFetcher = async (graphQLParams: FetcherParams) => {
-            const requestProps: GraphQLRequestProps = {url: connector.requestData.url, accessToken, sslOn, ...graphQLParams};
-            let request = new GraphiQLContext(connector);
+            const requestProps: GraphQLRequestProps = {url: currentConnector.requestData.url, accessToken, sslOn, ...graphQLParams};
+            let request = new GraphiQLContext(currentConnector);
             const response = await request.query(requestProps);
             const result: any = response.data;
             if(result && result.errors && result.errors.length > 0 && result.errors[0].extensions && result.errors[0].extensions.causes && result.errors[0].extensions.causes.length > 0 &&  result.errors[0].extensions.causes[0].error){
@@ -76,8 +99,11 @@ const GraphiQLEditor: FC<GraphiQLEditorProps> =
         if(logining === API_REQUEST_STATE.ERROR){
             return <div>Please, check your connection</div>;
         }
-        if(accessToken === '' || logining === API_REQUEST_STATE.START){
+        if(startLogining){
             return <div style={{height: '100%', display: 'grid', placeItems: 'center'}}><Loading/></div>;
+        }
+        if (!startLogining && accessToken === '') {
+            return <MasterPasswordContainer><MasterPasswordInput onSuccess={() => {}}/></MasterPasswordContainer>;
         }
         return (
             <GraphiQLEditorStyled>

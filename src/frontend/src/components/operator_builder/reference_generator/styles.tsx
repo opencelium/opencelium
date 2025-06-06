@@ -5,6 +5,22 @@ import {
 } from "@app_component/operator_builder/reference_generator/props";
 import styled from 'styled-components';
 
+export const LikePercentageContainer = styled.div<{hasSign: boolean,}>`
+	&>div{
+		opacity: ${({hasSign}) => hasSign ? 1 : 0.5};
+		font-weight: ${({hasSign}) => hasSign ? 'bold' : 'normal'};
+		display: flex;
+		justify-content: center;
+		height: 100%;
+		align-items: center;
+	}
+	&>div:hover{
+		cursor: pointer;
+	}
+	&>div:active{
+		font-weight: 500;
+	}
+`;
 export const ReferenceGeneratorContainer = styled.div<ReferenceGeneratorStyleProps>`
 	display: grid;
 	justify-content: center;
@@ -14,6 +30,11 @@ export const ReferenceGeneratorContainer = styled.div<ReferenceGeneratorStylePro
 		referenceType === 'constant' &&
 		`
         grid-template-columns: 30px 390px;
+    `}
+	${({ referenceType, isLikeOperator }) =>
+		referenceType === 'constant' && isLikeOperator &&
+		`
+        grid-template-columns: 30px 10px 350px 10px;
     `}
 	${({ referenceType, isAbsolute, manualAdd }) =>
 		referenceType === 'constant' && (isAbsolute || manualAdd) &&
@@ -25,6 +46,11 @@ export const ReferenceGeneratorContainer = styled.div<ReferenceGeneratorStylePro
 		`
         grid-template-columns: 30px 180px 200px;
     `}
+	${({ referenceType, isLikeOperator }) =>
+		referenceType === 'direct' && isLikeOperator && 
+		`
+        grid-template-columns: 30px 10px 180px 150px 10px;
+    `}
 	${({ referenceType, isAbsolute, manualAdd }) =>
 		referenceType === 'direct' && (isAbsolute || manualAdd) &&
 		`
@@ -35,10 +61,15 @@ export const ReferenceGeneratorContainer = styled.div<ReferenceGeneratorStylePro
 		`
         grid-template-columns: 180px 200px 30px;
     `}
-    ${({ referenceType }) =>
+	${({ referenceType }) =>
 		referenceType === 'webhook' &&
 		`
         grid-template-columns: 30px 390px;
+    `}
+	${({ referenceType, isLikeOperator }) =>
+		referenceType === 'webhook' && isLikeOperator &&
+		`
+        grid-template-columns: 30px 10px 350px 10px;
     `}
     ${({ referenceType, isAbsolute, manualAdd }) =>
 		referenceType === 'webhook' && (isAbsolute || manualAdd) &&

@@ -22,6 +22,7 @@ import { ResponseFormat } from '@entity/invoker/requests/models/Body';
 import React, { FC, useEffect, useState } from 'react';
 import { withTheme } from 'styled-components';
 import { BodyProps } from '../interfaces';
+import Validation from "@application/classes/Validation";
 
 const Body: FC<BodyProps> = ({
 	updateBody,
@@ -63,7 +64,7 @@ const Body: FC<BodyProps> = ({
 			marginBottom={'20px'}
 		>
 			<LimitedAceEditor
-				maxLength={255}
+				maxLength={Validation.TextLength.Long}
 				style={{
 					...getReactXmlStyles(styleProps),
 					marginLeft: '50px',

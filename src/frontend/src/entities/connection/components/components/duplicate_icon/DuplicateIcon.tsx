@@ -169,9 +169,6 @@ const DuplicateIcon: FC<DuplicateIconProps> =
         }
     }
     useEffect(() => {
-        dispatch(getAllCategories());
-    }, [])
-    useEffect(() => {
         if (gettingCategories === API_REQUEST_STATE.FINISH) {
             const newCategory = listConnection.categoryId ? categories.find(c => c.id === listConnection.categoryId) : null;
             setCategoryOptions(Category.getOptionsForCategorySelect(categories));
@@ -182,6 +179,7 @@ const DuplicateIcon: FC<DuplicateIconProps> =
         if(isOpened) {
             dispatch(getConnectionById(listConnection.id));
             dispatch(getAllConnectors());
+            dispatch(getAllCategories());
         }
     },[isOpened ])
 
@@ -246,6 +244,7 @@ const DuplicateIcon: FC<DuplicateIconProps> =
                             icon={'category'}
                             label={'Category'}
                             categoryList={true}
+                            isLoading={gettingCategories === API_REQUEST_STATE.START}
                         />
                     </React.Fragment>
                 }

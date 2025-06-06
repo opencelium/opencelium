@@ -28,6 +28,7 @@ import {
     IContentTextarea,
 } from '../interfaces/INotificationTemplate';
 import { NotificationTemplateState } from '../redux_toolkit/slices/NotificationTemplateSlice';
+import Validation from "@application/classes/Validation";
 
 export class Content extends HookStateClass implements IContent {
 	static reduxState?: NotificationTemplateState;
@@ -99,7 +100,7 @@ export class Content extends HookStateClass implements IContent {
 			>
 				<LimitedAceEditor
 					{...props}
-					maxLength={255}
+					maxLength={Validation.TextLength.Long}
 					style={{ ...styleProps }}
 					mode={'text'}
 					theme='textmate'
