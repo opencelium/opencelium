@@ -49,6 +49,7 @@ const TestConnectionButton = ({validateLogic}: any) => {
                 dispatch(addTextLog({...data, datetime: formatDate(new Date())}));
                 if (data.message.indexOf('phase=EXECUTION_END') !== -1) {
                     setIsTesting(false);
+                    subscriptionRef.current?.();
                 }
             });
             console.log("✅ Subscribed to /execution/logs");
