@@ -154,15 +154,15 @@ public class ExecutionAspect {
 
         QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
         int schedulerId = data.getScheduleId();
+        boolean debugMode = schedulerService.getById(schedulerId).getDebugMode();
 
         long execId = jobDataMap.getLong("execId");
-        updateExecutionObj(execId, true);
+        updateExecutionObj(execId, true, debugMode);
         List<Operation> operations = (List<Operation>) context.get("operationsEx");
         executeAggregator(operations, execId);
 
         String timestamp = (String) context.get("timestamp");
         Long connectionId = (Long) context.get("connectionId");
-        boolean debugMode = schedulerService.getById(schedulerId).getDebugMode();
         if (data.getExecType() == QuartzJobScheduler.TriggerType.EXECUTION_TEST) {
             // delete temporarily created scheduler
             schedulerService.deleteById(schedulerId);
@@ -200,15 +200,15 @@ public class ExecutionAspect {
 
         QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
         int schedulerId = data.getScheduleId();
+        boolean debugMode = schedulerService.getById(schedulerId).getDebugMode();
 
         long execId = jobDataMap.getLong("execId");
-        updateExecutionObj(execId, false);
+        updateExecutionObj(execId, false, debugMode);
         List<Operation> operations = (List<Operation>) context.get("operationsEx");
         executeAggregator(operations, execId);
 
         String timestamp = (String) context.get("timestamp");
         Long connectionId = (Long) context.get("connectionId");
-        boolean debugMode = schedulerService.getById(schedulerId).getDebugMode();
         if (data.getExecType() == QuartzJobScheduler.TriggerType.EXECUTION_TEST) {
             // delete temporarily created scheduler
             schedulerService.deleteById(schedulerId);
@@ -245,7 +245,7 @@ public class ExecutionAspect {
                 .getId();
     }
 
-    private void updateExecutionObj(long execId, boolean success) {
+    private void updateExecutionObj(long execId, boolean success, boolean hasLog) {
         Execution execution = executionService.getById(execId);
         execution.setEndTime(new Date());
         execution.setStatus(success ? "S" : "F");
@@ -261,11 +261,13 @@ public class ExecutionAspect {
             le.setSuccessDuration(execution.getEndTime().getTime() - execution.getStartTime().getTime());
             le.setSuccessStartTime(execution.getStartTime());
             le.setSuccessEndTime(execution.getEndTime());
+            le.setSuccessHasLog(hasLog);
             le.setSuccessExecutionId(execution.getId());
         } else {
             le.setFailDuration(execution.getEndTime().getTime() - execution.getStartTime().getTime());
             le.setFailStartTime(execution.getStartTime());
             le.setFailEndTime(execution.getEndTime());
+            le.setFailHasLog(hasLog);
             le.setFailExecutionId(execution.getId());
         }
         if (le.getScheduler() == null) {
