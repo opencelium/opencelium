@@ -36,6 +36,7 @@ import {
 import { setCurrentConnector } from "../../redux_toolkit/slices/ConnectorSlice";
 import MasterPasswordInput from "@entity/connector/components/master_password_input/MasterPasswordInput";
 import Validation from "@application/classes/Validation";
+import {setFocusById} from "@application/utils/utils";
 
 
 const ConnectorForm: FC<IForm> = ({isAdd, isUpdate}) => {
@@ -70,6 +71,11 @@ const ConnectorForm: FC<IForm> = ({isAdd, isUpdate}) => {
             dispatch(setCurrentConnector(null));
         }
     },[]);
+    useEffect(() => {
+        if (!hasMasking) {
+            setFocusById('test_button')
+        }
+    }, [hasMasking]);
     useEffect(() => {
         if (didMount.current) {
             if(error === null && (isAdd && addingConnector === API_REQUEST_STATE.FINISH || isUpdate && updatingConnector === API_REQUEST_STATE.FINISH)){
@@ -160,11 +166,28 @@ const ConnectorForm: FC<IForm> = ({isAdd, isUpdate}) => {
                 {SslCertInput}
                 {Icon}
             </FormSection>,
-            <FormSection label={{value: 'Credentials'}} dependencies={[!connector.invokerSelect]} OverlayComponent={hasMasking ? <MasterPasswordInput onSuccess={onSuccessMasterPassword}/> : null}>
+            <FormSection
+                label={{value: 'Credentials'}}
+                dependencies={[!connector.invokerSelect]}
+                 OverlayComponent={
+                hasMasking ?
+                    <div style={{
+                        display: 'flex',
+                        width: '100%',
+                        height: '100%',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        paddingTop: '150px',
+                        position: 'absolute',
+                        top: '150px',
+                    }}>
+                        <MasterPasswordInput onSuccess={onSuccessMasterPassword}/>
+                    </div> : null
+                }>
                 {Credentials}
                 {!hasMasking && <Button
                     float={'right'}
-                    key={'add_button'}
+                    id={'test_button'}
                     label={'Test'}
                     icon={'refresh'}
                     handleClick={test}

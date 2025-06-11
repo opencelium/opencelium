@@ -167,6 +167,7 @@ export class Connector extends HookStateClass implements IConnector{
                 }
                 credentials.push(<InputText
                     id={`input_${credentialName}`}
+                    tabIndex={hasMasking ? -1 : 0}
                     isVisibilityTrue={hasMasking}
                     readOnly={this._readOnly}
                     error={errorMessage}

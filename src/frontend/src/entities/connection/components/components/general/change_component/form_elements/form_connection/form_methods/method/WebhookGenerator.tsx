@@ -1,4 +1,4 @@
-import React, {forwardRef, useEffect, useMemo, useState} from 'react';
+import React, {forwardRef, useEffect, useMemo, useRef, useState} from 'react';
 import {components} from 'react-select';
 import { Connection } from '@entity/connection/classes/Connection';
 //@ts-ignore
@@ -15,9 +15,17 @@ import {
     TypeSelectStyled
 } from "@change_component/form_elements/form_connection/form_methods/method/WebhookGeneratorStyles";
 import {getWebhookTypes} from "@entity/schedule/redux_toolkit/action_creators/WebhookCreators";
+import {ErrorMessage} from "@app_component/operator_builder/styles";
+import {ErrorColor} from "@app_component/operator_builder/OperatorBuilder";
 
 
-const WebhookGenerator = forwardRef(({onSelect, readOnly, style, value}: {onSelect: (webhook: string) => void, readOnly?: boolean, style: any, value?: string}, ref) => {
+const WebhookGenerator =
+    forwardRef(({
+        onSelect, readOnly, style, value, error
+    }: {
+        onSelect: (webhook: string) => void, error?: string, readOnly?: boolean, style: any, value?: string
+    }, ref) => {
+    const containerRef = useRef<HTMLDivElement>(null);
     const dispatch = useAppDispatch();
     const {webhooks, webhookTypes} = Connection.getReduxState();
     const typeOptions = useMemo(() => {
@@ -31,6 +39,7 @@ const WebhookGenerator = forwardRef(({onSelect, readOnly, style, value}: {onSele
     const [typeError, setTypeError] = useState('');
     const [isAdded, setIsAdded] = useState<boolean>(false);
     const [currentWebhook, setCurrentWebhook] = useState(value ? webhooks.find(w => w.value === value) : null);
+    const hasError = !!error && !value;
     useEffect(() => {
         dispatch(getWebhookTypes());
     }, [])
@@ -120,7 +129,7 @@ const WebhookGenerator = forwardRef(({onSelect, readOnly, style, value}: {onSele
     };
     const options: any[] = [...webhooks];
     return (
-        <div style={style}>
+        <div style={style} ref={containerRef}>
             <Select
                 id={`param_generator_select_webhook`}
                 name={'...'}
@@ -153,6 +162,11 @@ const WebhookGenerator = forwardRef(({onSelect, readOnly, style, value}: {onSele
                     option.component ? option.value : option.value
                 }
                 styles={{
+                    control: (base: any, state: any) => ({
+                        ...base,
+                        borderColor: hasError ? ErrorColor : state.isFocused ? "#666" : "#ccc",
+                        opacity: 1,
+                    }),
                     menuPortal: (base: any) => ({ ...base, zIndex: 10000 }),
                 }}
                 components={{
@@ -179,6 +193,7 @@ const WebhookGenerator = forwardRef(({onSelect, readOnly, style, value}: {onSele
                     },
                 }}
             />
+            {hasError && <ErrorMessage className={'error-scroll-target'} style={{color: ErrorColor, position: 'absolute', left: containerRef.current?.offsetLeft, bottom: -15}}>{`${error}`}</ErrorMessage>}
             <Dialog
                 id={'webhook_generator_dialog'}
                 actions={[{label: 'Ok', onClick: add, id: 'add_webhook_ok'}, {

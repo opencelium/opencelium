@@ -15,6 +15,16 @@
 
 import styled from "styled-components";
 
+export const MasterPasswordContainer = styled.div`
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    top: 100px;
+    left: 0;
+    height: 100%;
+    width: 100%;
+`;
 const GraphiQLEditorStyled = styled.div`
     height: calc(100% - 80px);
     margin-top: 10px;

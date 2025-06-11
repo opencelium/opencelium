@@ -8,6 +8,7 @@ import {GroupProps, RulePropertyProps} from "@app_component/operator_builder/pro
 import DirectReference from "@app_component/operator_builder/classes/references/DirectReference";
 import WebhookReference from "@app_component/operator_builder/classes/references/WebhookReference";
 import {generateUUID} from "@app_component/operator_builder/utils";
+import LoopBaseOperator from "@app_component/operator_builder/classes/loop_operator/LoopBaseOperator";
 
 export default class LoopOperatorsConfigGenerator extends OperatorsConfigGenerator {
 
@@ -23,12 +24,12 @@ export default class LoopOperatorsConfigGenerator extends OperatorsConfigGenerat
     }
     generateTreeByForExpression(expression: string): GroupProps {
         let allOperators = Object.values([LoopOperatorName.For, LoopOperatorName.ForIn]).join('|');
-        const anyStringRegExp = "'.*?'";
+        const anyStringRegExp = /'.*?'/;
         const regex = new RegExp(
             `^(${allOperators})\\s+(${ // Operator first, then Left field
                 String.raw`${DirectReference.getRegex().source}` + // direct_reference
                 `|${WebhookReference.getRegex().source}` + // webhook_reference
-                `|${anyStringRegExp}` // string
+                `|${anyStringRegExp.source}` // string
             })$`
         );
         const match = expression.match(regex);
@@ -54,15 +55,18 @@ export default class LoopOperatorsConfigGenerator extends OperatorsConfigGenerat
             ]
         };
     }
-    getOption(operatorName: LoopOperatorName): OptionType {
+    getOperatorClass(operatorName: LoopOperatorName): LoopBaseOperator {
         switch (operatorName) {
             case LoopOperatorName.For:
-                return (new For()).getOption();
+                return new For();
             case LoopOperatorName.ForIn:
-                return (new ForIn()).getOption();
+                return new ForIn();
             case LoopOperatorName.SplitString:
-                return (new SplitString()).getOption();
+                return new SplitString();
         }
+    }
+    getOption(operatorName: LoopOperatorName): OptionType {
+        return this.getOperatorClass(operatorName).getOption();
     }
 
     getOptions(operatorNames: LoopOperatorName[]): OptionType[] {

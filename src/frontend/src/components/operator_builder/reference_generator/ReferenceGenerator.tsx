@@ -2,22 +2,38 @@ import InputText from '@app_component/base/input/text/InputText';
 import ReferenceFactory from '@app_component/operator_builder/classes/references/ReferenceFactory';
 import WebhookReference from '@app_component/operator_builder/classes/references/WebhookReference';
 import ReferenceSwitcher from '@app_component/operator_builder/reference_generator/ReferenceSwitcher';
-import { findTopLeft } from '@application/utils/utils';
+import {findTopLeft} from '@application/utils/utils';
 import WebhookGenerator from '@change_component/form_elements/form_connection/form_methods/method/WebhookGenerator';
-import TooltipFontIcon from '@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon';
+import TooltipFontIcon
+	from '@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon';
 import Webhook from '@root/classes/Webhook';
 import {
 	addCloseParamGeneratorNavigation,
 	removeCloseParamGeneratorNavigation
 } from "@root/components/utils/key_navigation";
-import React, { useEffect, useImperativeHandle, useRef, useState } from 'react';
+import React, {useEffect, useImperativeHandle, useRef, useState} from 'react';
 import ReactDOM from 'react-dom';
 import DirectReference from '../classes/references/DirectReference';
 import DeepSelect from './DeepSelect';
 import MethodSelect from './MethodSelect';
-import { ReferenceGeneratorProps, ReferenceType } from './props';
-import { ConstantContainer, ReferenceGeneratorContainer } from './styles';
+import {ConstantComponentType, ConstantSelectOptions, ReferenceGeneratorProps, ReferenceType} from './props';
+import {ConstantContainer, LikePercentageContainer, ReferenceGeneratorContainer} from './styles';
+import IfOperatorsConfigGenerator from "@app_component/operator_builder/classes/if_operator/IfOperatorsConfigGenerator";
+import LoopOperatorsConfigGenerator
+	from "@app_component/operator_builder/classes/loop_operator/LoopOperatorsConfigGenerator";
+import {
+	AllOperatorNames,
+	BinaryOperatorName,
+	LoopOperatorName,
+	OperatorName
+} from "@app_component/operator_builder/interfaces/OperatorName";
+import InputTextarea from "@app_component/base/input/textarea/InputTextarea";
+import IfBaseOperator from "@app_component/operator_builder/classes/if_operator/IfBaseOperator";
+import LoopBaseOperator from "@app_component/operator_builder/classes/loop_operator/LoopBaseOperator";
+import Select, {StylesConfig} from "react-select";
+import Like from "@app_component/operator_builder/classes/if_operator/types/Like";
 
+export const EmptyString = '&nbsp'
 const ReferenceGenerator = React.forwardRef(({
 	reference,
 	setReference,
@@ -36,105 +52,45 @@ const ReferenceGenerator = React.forwardRef(({
 	isBuilder = false,
 	error = '',
 	style = {},
+	operator,
 }: ReferenceGeneratorProps, ref) => {
 	const [color, setColor] = useState<string>('');
 	const [currentField, setCurrentField] = useState<string>('');
+	const [hasOpenPerc, toggleOpenPerc] = useState<boolean>(false);
+	const [hasClosedPerc, toggleClosedPerc] = useState<boolean>(false);
+	const getOperatorClass = () => {
+		let newOperatorClass;
+		if (Object.values(LoopOperatorName).includes(operator as LoopOperatorName)) {
+			const operatorsConfigGenerator = new LoopOperatorsConfigGenerator();
+			newOperatorClass = operatorsConfigGenerator.getOperatorClass(operator as LoopOperatorName);
+		}
+		if (Object.values(AllOperatorNames).includes(operator as OperatorName)) {
+			const operatorsConfigGenerator = new IfOperatorsConfigGenerator();
+			newOperatorClass = operatorsConfigGenerator.getOperatorClass(operator as OperatorName);
+		}
+		return newOperatorClass;
+	}
 	const [referenceType, updateReferenceType] = useState<ReferenceType>(
-		'direct'
+		getOperatorClass()?.defaultRefType || 'direct',
 	);
 	const [coords, setCoords] = useState<{ top: number; left: number }>({
 		top: 0,
 		left: 0,
 	});
+	const [operatorClass, setOperatorClass] = useState<IfBaseOperator | LoopBaseOperator>();
 	const referenceRef: any = useRef();
 	const webhookRef: any = useRef();
-	useEffect(() => {
-		if (!reference) {
-			setColor('');
-			setCurrentField('');
-			updateReferenceType('direct');
+	const onUpdateOperator = () => {
+		const newOperatorClass = getOperatorClass();
+		setOperatorClass(newOperatorClass);
+		if (newOperatorClass?.defaultRefType) {
+			updateReferenceType(newOperatorClass.defaultRefType);
 		}
-	}, [reference])
-	useEffect(() => {
-		if (parent) {
-			addCloseParamGeneratorNavigation(this);
-			document.addEventListener('mousedown', handleClickOutside);
-			document.addEventListener('keydown', handleEscKey);
-			return () => {
-				let elem = document.getElementById(id);
-				if (elem) {
-					elem.innerText = '';
-				}
-				removeCloseParamGeneratorNavigation(this);
-				document.removeEventListener('mousedown', handleClickOutside);
-				document.removeEventListener('keydown', handleEscKey);
-			}
-		}
-	}, [])
-	useEffect(() => {
-		setIdValue();
-	}, [currentField]);
-	useEffect(() => {
-		if (parent && isAbsolute) {
-			const { top, left } = findTopLeft(parent);
-			setCoords({ top, left });
-		}
-	}, [parent, isAbsolute]);
+	}
 
-	const handleEscKey = (event: any) => {
-		if (editCancel && event.key === 'Escape' || event.keyCode === 27) {
-			editCancel();
-		}
-	}
-	const handleClickOutside = (event: any) => {
-		const addParamElem = document.getElementById('add_param_dialog');
-		const addParamFade = addParamElem ? addParamElem.parentElement : null;
-		const updateParamElem = document.getElementById('update_param_dialog');
-		const updateParamFade = updateParamElem ? updateParamElem.parentElement : null;
-		const webhookGeneratorElem = document.getElementById('webhook_generator_dialog');
-		const webhookGeneratorFade = webhookGeneratorElem ? webhookGeneratorElem.parentElement : null;
-		const selectSearch = document.getElementById(`param_generator_${connectionEditor.item.index}`);
-		if (selectSearch) {
-			if (document.activeElement?.id === selectSearch.id){
-				return;
-			}
-		}
-		if (referenceRef.current && !referenceRef.current.contains(event.target)
-			&& (!webhookRef.current || !webhookRef.current.contains(event.target))
-			&& (!webhookGeneratorElem || !webhookGeneratorElem.contains(event.target))
-			&& (!webhookGeneratorFade || !webhookGeneratorFade.contains(event.target))
-			&& (!addParamElem || !addParamElem.contains(event.target))
-			&& (!addParamFade || !addParamFade.contains(event.target))
-			&& (!updateParamElem || !updateParamElem.contains(event.target))
-			&& (!updateParamFade || !updateParamFade.contains(event.target))) {
-			if(editCancel) {
-				editCancel();
-			}
-		}
-	}
-	const changeReferenceType = (newReferenceType: ReferenceType) => {
-		updateReferenceType(newReferenceType);
-		setColor('');
-		setCurrentField('');
-	};
-	const onColorSelect = (newColor: string) => {
-		setColor(newColor);
-		setCurrentField('');
-		if (isBuilder) {
-			setReference('');
-		}
-	};
-	const onFieldSelect = (newField: string) => {
-		setCurrentField(newField);
-	};
-	useEffect(() => {
-		if(!manualAdd){
-			applyReference();
-		}
-	}, [currentField, manualAdd]);
 	const applyReference = () => {
-		let newReference = '';
 		if (currentField !== '') {
+			let newReference = '';
 			newReference = ReferenceFactory.getReference(
 				referenceType,
 				currentField,
@@ -173,9 +129,175 @@ const ReferenceGenerator = React.forwardRef(({
 			}
 		}
 	}
+
+
+	const handleEscKey = (event: any) => {
+		if (editCancel && event.key === 'Escape' || event.keyCode === 27) {
+			editCancel();
+		}
+	}
+	const handleClickOutside = (event: any) => {
+		const addParamElem = document.getElementById('add_param_dialog');
+		const addParamFade = addParamElem ? addParamElem.parentElement : null;
+		const updateParamElem = document.getElementById('update_param_dialog');
+		const updateParamFade = updateParamElem ? updateParamElem.parentElement : null;
+		const webhookGeneratorElem = document.getElementById('webhook_generator_dialog');
+		const webhookGeneratorFade = webhookGeneratorElem ? webhookGeneratorElem.parentElement : null;
+		const selectSearch = document.getElementById(`param_generator_${connectionEditor.item.index}`);
+		if (selectSearch) {
+			if (document.activeElement?.id === selectSearch.id){
+				return;
+			}
+		}
+		if (referenceRef.current && !referenceRef.current.contains(event.target)
+			&& (!webhookRef.current || !webhookRef.current.contains(event.target))
+			&& (!webhookGeneratorElem || !webhookGeneratorElem.contains(event.target))
+			&& (!webhookGeneratorFade || !webhookGeneratorFade.contains(event.target))
+			&& (!addParamElem || !addParamElem.contains(event.target))
+			&& (!addParamFade || !addParamFade.contains(event.target))
+			&& (!updateParamElem || !updateParamElem.contains(event.target))
+			&& (!updateParamFade || !updateParamFade.contains(event.target))) {
+			if(editCancel) {
+				editCancel();
+			}
+		}
+	}
+	const changeReferenceType = (newReferenceType: ReferenceType) => {
+		updateReferenceType(newReferenceType);
+		setColor('');
+		if (newReferenceType === 'constant') {
+			setCurrentField(EmptyString);
+		} else {
+			setCurrentField('');
+		}
+	};
+	const onColorSelect = (newColor: string) => {
+		setColor(newColor);
+		setCurrentField('');
+		if (isBuilder) {
+			setReference('');
+		}
+	};
+	const onFieldSelect = (newField: string) => {
+		setCurrentField(newField);
+	};
+	const isLikeOperator = (): boolean => {
+		return referenceType !== 'webhook' && Like.isLikeOperator(operator)
+	}
 	useImperativeHandle(ref, () => ({
-    setIdValue
-  }));
+		setIdValue
+	}));
+	useEffect(() => {
+		switch(referenceType) {
+			case 'constant':
+				if (hasOpenPerc) {
+					if (currentField && currentField[0] !== '%') {
+						//setCurrentField(currentField === EmptyString ? '%' : `%${currentField}`)
+					}
+				} else {
+					if (currentField && currentField[0] === '%') {
+						//setCurrentField(currentField.substring(1));
+					}
+				}
+				break;
+			case 'direct':
+				if (hasOpenPerc) {
+					if (reference && !reference.startsWith('%')) {
+						setReference(reference === EmptyString ? '%' : `%${reference}`)
+					}
+				} else {
+					if (reference && reference.startsWith('%')) {
+						setReference(reference.substring(1));
+					}
+				}
+				break;
+		}
+	}, [hasOpenPerc]);
+	useEffect(() => {
+		switch (referenceType) {
+			case 'constant':
+				if (hasClosedPerc) {
+					if (currentField && currentField[currentField.length - 1] !== '%') {
+						//setCurrentField(currentField === EmptyString ? '%' : `${currentField}%`)
+					}
+				} else {
+					if (currentField && currentField[currentField.length - 1] === '%') {
+						//setCurrentField(currentField.substring(0, currentField.length - 1));
+					}
+				}
+				break;
+			case 'direct':
+				if (hasClosedPerc) {
+					if (reference && !reference.endsWith('%')) {
+						setReference(reference === EmptyString ? '%' : `${reference}%`)
+					}
+				} else {
+					if (reference && reference.endsWith('%')) {
+						setReference(reference.substring(0, reference.length - 1));
+					}
+				}
+				break;
+			case 'webhook':
+				break;
+		}
+	}, [hasClosedPerc]);
+	useEffect(() => {
+		if (hasOpenPerc) {
+			toggleOpenPerc(false);
+		}
+		if (hasClosedPerc) {
+			toggleClosedPerc(false);
+		}
+	}, [referenceType]);
+	useEffect(() => {
+		if (operator) {
+			onUpdateOperator();
+		}
+	}, [operator]);
+	useEffect(() => {
+		if (parent) {
+			addCloseParamGeneratorNavigation(this);
+			document.addEventListener('mousedown', handleClickOutside);
+			document.addEventListener('keydown', handleEscKey);
+			return () => {
+				let elem = document.getElementById(id);
+				if (elem) {
+					elem.innerText = '';
+				}
+				removeCloseParamGeneratorNavigation(this);
+				document.removeEventListener('mousedown', handleClickOutside);
+				document.removeEventListener('keydown', handleEscKey);
+			}
+		}
+	}, [])
+	useEffect(() => {
+		setIdValue();
+		if (referenceType === 'constant') {
+			if (isLikeOperator()) {
+				if (!hasOpenPerc) {
+					if (currentField[0] === '%') {
+						toggleOpenPerc(true);
+					}
+				}
+				if (!hasClosedPerc) {
+					if (currentField.length > 1 && currentField[currentField.length - 1] === '%') {
+						toggleClosedPerc(true);
+					}
+				}
+			}
+		}
+	}, [currentField]);
+	useEffect(() => {
+		if (parent && isAbsolute) {
+			const { top, left } = findTopLeft(parent);
+			setCoords({ top, left });
+		}
+	}, [parent, isAbsolute]);
+	useEffect(() => {
+		if(!manualAdd){
+			applyReference();
+		}
+	}, [currentField, manualAdd]);
 
 	useEffect(() => {
 		if (reference) {
@@ -189,6 +311,27 @@ const ReferenceGenerator = React.forwardRef(({
 					setCurrentField(referenceData.field);
 					if (referenceType !== 'direct') {
 						updateReferenceType('direct');
+					} else {
+						if (isLikeOperator()) {
+							if (hasOpenPerc) {
+								if (!reference.startsWith('%')) {
+									setReference(`%${reference}`)
+								}
+							} else {
+								if (reference.startsWith('%')) {
+									toggleOpenPerc(true);
+								}
+							}
+							if (hasClosedPerc) {
+								if (!reference.endsWith('%')) {
+									setReference(`${reference}%`)
+								}
+							} else {
+								if (reference.endsWith('%')) {
+									toggleClosedPerc(true);
+								}
+							}
+						}
 					}
 				}
 				if (referenceInstance instanceof WebhookReference) {
@@ -205,13 +348,32 @@ const ReferenceGenerator = React.forwardRef(({
 					updateReferenceType('constant');
 				}
 			}
+		} else {
+			//if (reference !== EmptyString) {
+				//setCurrentField('');
+				//onUpdateOperator();
+			//}
 		}
 	}, [reference]);
 
 	const containerStyle = parent && isAbsolute
 		? { top: coords.top + 10, left: coords.left }
 		: {};
-
+	const customSelectStyles: StylesConfig<ConstantSelectOptions, false> = {
+		menuPortal: (base) => ({ ...base, zIndex: 10000 }),
+	};
+	//const isLikeOperator = false;
+	let inputTextValue = currentField === EmptyString ? '' : currentField;
+	if (isLikeOperator()) {
+		if (inputTextValue) {
+			if (inputTextValue[0] === '%') {
+				inputTextValue = inputTextValue.substring(1);
+			}
+			if (inputTextValue[inputTextValue.length - 1] === '%') {
+				inputTextValue = inputTextValue.substring(0, inputTextValue.length - 1);
+			}
+		}
+	}
 	const renderGenerator = () => {
 		return (
 			<ReferenceGeneratorContainer
@@ -222,6 +384,7 @@ const ReferenceGenerator = React.forwardRef(({
 				endpointReference={endpointReference}
 				ref={referenceRef}
 				manualAdd={manualAdd}
+				isLikeOperator={isLikeOperator()}
 			>
 				{!endpointReference &&
 					<ReferenceSwitcher
@@ -230,6 +393,11 @@ const ReferenceGenerator = React.forwardRef(({
 						changeReferenceType={changeReferenceType}
 					/>
 				}
+				{isLikeOperator() && <LikePercentageContainer hasSign={hasOpenPerc} onClick={() => {
+					toggleOpenPerc(!hasOpenPerc)
+				}}>
+					<div>%</div>
+				</LikePercentageContainer>}
 				{referenceType === 'direct' && (
 					<React.Fragment>
 						<MethodSelect
@@ -250,6 +418,7 @@ const ReferenceGenerator = React.forwardRef(({
 				{referenceType === 'webhook' && (
 					<WebhookGenerator
 						ref={webhookRef}
+						error={error}
 						value={Webhook.extractFromSnippet(currentField)}
 						style={{ float: 'left' }}
 						onSelect={(webhookValue) => {
@@ -259,14 +428,38 @@ const ReferenceGenerator = React.forwardRef(({
 				)}
 				{referenceType === 'constant' && (
 					<ConstantContainer>
-						<InputText
-							minHeight={'35px'}
-							value={currentField}
-							onChange={(e) => setCurrentField(e.target.value)}
-							placeholder={'Constant'}
-						/>
+						{operatorClass?.defaultConstantType === ConstantComponentType.Textarea ?
+							<InputTextarea
+								style={{resize: 'vertical'}}
+								minHeight={'35px'}
+								value={currentField === EmptyString ? '' : currentField}
+								onChange={(e) => setCurrentField(e.target.value)}
+								placeholder={operatorClass?.placeholder || 'Constant'}
+							/>
+							:
+							operatorClass?.defaultConstantType === ConstantComponentType.Select ?
+								<Select
+									value={operatorClass?.selectOptions.find(option => option.value === currentField)}
+									onChange={(selected) => setCurrentField(selected.value)}
+									options={operatorClass?.selectOptions || []}
+									styles={customSelectStyles}
+									menuPortalTarget={document.body}
+									menuPosition="absolute"
+								/>
+							:
+							<InputText
+								inputHeight={'40px'}
+								minHeight={'35px'}
+								value={inputTextValue}
+								onChange={(e) => setCurrentField(`${hasOpenPerc ? '%' : ''}${e.target.value}${hasClosedPerc ? '%' : ''}`)}
+								placeholder={operatorClass?.placeholder || 'Constant'}
+							/>
+						}
 					</ConstantContainer>
 				)}
+				{isLikeOperator() && <LikePercentageContainer hasSign={hasClosedPerc} onClick={() => toggleClosedPerc(!hasClosedPerc)}>
+					<div>%</div>
+				</LikePercentageContainer>}
 				{manualAdd && (
 					<TooltipFontIcon
 						id={`param_generator_add_${connectionEditor.connector.getConnectorType()}_${

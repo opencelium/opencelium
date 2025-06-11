@@ -11,10 +11,10 @@ import java.util.Objects;
 public class DenyList implements BinaryOperator {
     @Override
     public Object apply(Object o1, Object o2) throws ApplyOperatorException {
-        if (o1 instanceof String && o2 instanceof String) {
+        if (o2 instanceof String) {
             String[] split = ((String) o2).split(",");
             for (String s : split) {
-                if (Objects.equals(s, o1))
+                if (Objects.equals(s, o1.toString()))
                     return false;
             }
             return true;

@@ -36,7 +36,7 @@ const LoginFormInputs = ({isAuth, hasAnimation}: {isAuth: boolean, hasAnimation?
             paddingTop: isAuth ? '0' : '20px',
             paddingLeft: '5px',
             paddingRight: '5px',
-            placeholder: 'Username',
+            placeholder: 'Email',
             paddingLeftInput: '5px',
             paddingRightInput: '5px',
             errorBottom: '3px',

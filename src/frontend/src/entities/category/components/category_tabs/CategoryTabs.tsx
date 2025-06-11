@@ -62,7 +62,7 @@ const CategoryTabs: FC<CategoryTabsProps> = ({setCurrentPage, readOnly = false})
   useEffect(() => {
     if(gettingCategories === API_REQUEST_STATE.FINISH || addingCategory === API_REQUEST_STATE.FINISH || deletingCategoryById === API_REQUEST_STATE.FINISH) {
       const newTabs = activeCategory ? categories.filter((c: CategoryModel) => activeCategory.subCategories.indexOf(c.id) !== -1) : categories.filter((category: CategoryModel) => !category.parentCategory);
-      setTabs([AllCategoriesTab, ...newTabs]);
+      setTabs([...newTabs]);
     }
     if (addingCategory === API_REQUEST_STATE.FINISH) {
       category.name = '';
@@ -137,7 +137,7 @@ const CategoryTabs: FC<CategoryTabsProps> = ({setCurrentPage, readOnly = false})
     if(tabName !== 'All'){
       if(tab.subCategories){
         const matchedCategories = categories.filter((category: CategoryModel) => tab.subCategories.includes(category.id));
-        setTabs([AllCategoriesTab, ...matchedCategories])
+        setTabs([...matchedCategories])
         dispatch(setActiveTab('All'));
       }
       else{
@@ -149,7 +149,7 @@ const CategoryTabs: FC<CategoryTabsProps> = ({setCurrentPage, readOnly = false})
       const newActiveCategory = activeCategory && activeCategory.parentCategory ? categories.find((c: CategoryModel) => c.id === activeCategory.parentCategory.id) : null;
       const categoriesWithNullParent = categories.filter((category: CategoryModel) => !category.parentCategory);
       const newTabs = !newActiveCategory ? categoriesWithNullParent : categories.filter((c: CategoryModel) => newActiveCategory.subCategories.indexOf(c.id) !== -1)
-      setTabs([AllCategoriesTab, ...newTabs])
+      setTabs([...newTabs])
       dispatch(setActiveTab('All'));
       dispatch(setActiveCategory(newActiveCategory));
     }
@@ -192,7 +192,7 @@ const CategoryTabs: FC<CategoryTabsProps> = ({setCurrentPage, readOnly = false})
     if(breadcrumb !== 'All'){
       if(tab.subCategories){
         const matchedCategories = categories.filter((category: CategoryModel) => tab.subCategories.includes(category.id));
-        setTabs([AllCategoriesTab, ...matchedCategories])
+        setTabs([...matchedCategories])
         dispatch(setActiveTab('All'));
       }
       else{
@@ -202,7 +202,7 @@ const CategoryTabs: FC<CategoryTabsProps> = ({setCurrentPage, readOnly = false})
     }
     else{
       const categoriesWithNullParent = categories.filter((category: CategoryModel) => !category.parentCategory);
-      setTabs([AllCategoriesTab, ...categoriesWithNullParent])
+      setTabs([...categoriesWithNullParent])
       dispatch(setActiveTab('All'));
       dispatch(setActiveCategory(null));
     }

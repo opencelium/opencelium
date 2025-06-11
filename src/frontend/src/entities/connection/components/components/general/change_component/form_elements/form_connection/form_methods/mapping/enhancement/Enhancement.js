@@ -175,10 +175,9 @@ class Enhancement extends Component {
 					hasUnderline={false}
 					labelMargin='-25px 0 0 0'
 					height={`calc(100% - 100px)`}
-					maxLength={Validation.TextLength.Short}
 				>
 					<LimitedAceEditor
-						maxLength={255}
+						maxLength={Validation.TextLength.Long}
 						ref={this.props.enhancementRef}
 						style={{
 							...getReactXmlStyles({ ...styleProps, marginTop: '0' }),

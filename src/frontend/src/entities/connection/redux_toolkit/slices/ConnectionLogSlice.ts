@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import {
-	ConnectionLog, ConnectionSocketLog,
+	ConnectionLog, ConnectionSocketLog, ConnectionTextLog,
 	MethodTrace,
 	OperatorTrace,
 } from '@root/requests/models/ConnectionLog';
@@ -12,12 +12,16 @@ import {
 import {findAndUpdateTrace} from "@root/utils/utils";
 
 export interface ConnectionLogState extends ConnectionLog {
+	textLogs: ConnectionTextLog[],
+	schedulerId: number,
 }
 
 export const initialState: ConnectionLogState = {
+	schedulerId: undefined,
 	connectionId: '',
 	executionId: '',
 	connectors: [],
+	textLogs: [],
 };
 interface CleanTracePayload {
 	connectorId: string;
@@ -28,6 +32,12 @@ export const connectionLogSlice = createSlice({
 	name: 'connectionLog',
 	initialState,
 	reducers: {
+		addTextLog: (state, action: PayloadAction<ConnectionTextLog>) => {
+			state.textLogs.push(action.payload)
+		},
+		clearTextLog: (state) => {
+			state.textLogs = [];
+		},
 		addSocketLog: (state, action: PayloadAction<ConnectionSocketLog>) => {
 			const {executionId, connectionId, connectorId, connectorName, ...newTrace} = action.payload;
 			if (state.executionId === action.payload.executionId && state.connectionId === action.payload.connectionId) {
@@ -65,7 +75,6 @@ export const connectionLogSlice = createSlice({
 				}
 			});
 		},
-
 		cleanOperatorTrace: (state, action: PayloadAction<CleanTracePayload>) => {
 			const { connectorId, indexPath } = action.payload;
 			state.connectors.forEach((connector) => {
@@ -80,6 +89,9 @@ export const connectionLogSlice = createSlice({
 		},
 	},
 	extraReducers: (builder) => {
+		builder.addCase(testConnection.fulfilled, (state, action) => {
+			state.schedulerId = action.payload.schedulerId;
+		});
 		builder.addCase(getMethodTrace.fulfilled, (state, action) => {
 			const { connectorId, indexPath, executionId } = action.meta.arg;
 			const {requestDetails, responseDetails} = action.payload;
@@ -123,6 +135,7 @@ export const connectionLogSlice = createSlice({
 
 export const {
 	cleanMethodTrace, cleanOperatorTrace, addSocketLog,
+	addTextLog, clearTextLog,
 } =
 	connectionLogSlice.actions;
 export default connectionLogSlice.reducer;

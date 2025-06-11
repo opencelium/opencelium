@@ -6,6 +6,10 @@ import {BinaryOperatorName} from "../../../interfaces/OperatorName";
 export default class PropertyExists extends IfBaseOperator{
 
     constructor() {
-        super({name: BinaryOperatorName.PropertyExists})
+        super({
+            name: BinaryOperatorName.PropertyExists,
+            placeholder: 'Property',
+            defaultRefType: 'constant',
+        })
     }
 }

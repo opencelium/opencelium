@@ -4,11 +4,9 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
-import com.becon.opencelium.backend.database.mongodb.entity.LogMetaData;
-import com.becon.opencelium.backend.execution.logger.enums.LogLineType;
 import com.becon.opencelium.backend.execution.logger.parser.ParsedLogLineBuilder;
-import com.becon.opencelium.backend.execution.logger.parser.entity.ParsedLogLine;
 import com.becon.opencelium.backend.execution.socket.WebSocketNotificationService;
+import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
 import com.becon.opencelium.backend.resource.execution.LoggerConfiguration;
 import com.becon.opencelium.backend.utility.ApplicationContextUtility;
 import com.becon.opencelium.backend.utility.LogFileUtility;
@@ -20,13 +18,12 @@ import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 public class OcLogger<T extends LogMessage> {
     private final boolean debugMode;
-    private final boolean log2File;
     private final boolean webSocket;
+    private final boolean supportFile;
     private final T logEntity;
     private final WebSocketNotificationService socketNotificationService;
     private final LogLineDispatcher logLineDispatcher;
@@ -40,8 +37,8 @@ public class OcLogger<T extends LogMessage> {
     public OcLogger(LoggerConfiguration loggerConfiguration, T logEntity,
                     long connectionId, String timestamp, long executionId, Class<?> c) {
         this.debugMode = loggerConfiguration.isDebugMode();
-        this.log2File = loggerConfiguration.isLog2File();
-        this.webSocket = loggerConfiguration.isWSocketOpen();
+        this.webSocket = loggerConfiguration.getTriggerType() == QuartzJobScheduler.TriggerType.EXECUTION_TEST;
+        this.supportFile = loggerConfiguration.getTriggerType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE;
 
         this.socketNotificationService = ApplicationContextUtility.getBean(WebSocketNotificationService.class);
         this.parsedLogLineBuilder = ApplicationContextUtility.getBean(ParsedLogLineBuilder.class);
@@ -49,41 +46,36 @@ public class OcLogger<T extends LogMessage> {
         this.connectionId = connectionId;
         this.logEntity = logEntity;
 
-        if (log2File && debugMode) {
-            String loggerId = String.format("%d-%d", executionId, connectionId);
-            String filename = LogFileUtility.toFilename(timestamp, connectionId, "u", executionId, "log");
+        // set up the logger to create temporary log file in base log directory: type = u (uncategorized), not s (success) or f (fail):
+        String loggerId = String.format("%d-%d", executionId, connectionId);
+        String filename = LogFileUtility.toFilename(timestamp, connectionId, "u", executionId, "log");
 
-            // create temporary log file in base log directory: type = u (uncategorized), not s (success) or f (fail):
-            this.filepath = LogFileUtility.toPath(LOG_LOCATION, filename);
+        this.filepath = LogFileUtility.toPath(LOG_LOCATION, filename);
 
-            LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-            FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
-            fileAppender.setName("FileAppender-" + loggerId);
-            fileAppender.setContext(context);
-            fileAppender.setFile(filepath.toString());
+        LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+        FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
+        fileAppender.setName("FileAppender-" + loggerId);
+        fileAppender.setContext(context);
+        fileAppender.setFile(filepath.toString());
 
-            PatternLayoutEncoder encoder = new PatternLayoutEncoder();
-            encoder.setContext(context);
-            encoder.setPattern("%d{dd-MM-yyyy HH:mm:ss.SSS} - %msg%n");
-            encoder.setCharset(StandardCharsets.UTF_8);
-            encoder.start();
+        PatternLayoutEncoder encoder = new PatternLayoutEncoder();
+        encoder.setContext(context);
+        encoder.setPattern("%d{dd-MM-yyyy HH:mm:ss.SSS} - %msg%n");
+        encoder.setCharset(StandardCharsets.UTF_8);
+        encoder.start();
 
-            fileAppender.setEncoder(encoder);
-            fileAppender.start();
+        fileAppender.setEncoder(encoder);
+        fileAppender.start();
 
-            ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(loggerId);
-            logger.addAppender(fileAppender);
-            logger.setAdditive(false); // do not pass message to parent, just write to the file
+        ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(loggerId);
+        logger.addAppender(fileAppender);
+        logger.setAdditive(false); // do not pass message to parent, just write to the file
 
-            this.logger = logger;
-        } else {
-            this.filepath = null;
-            this.logger = LoggerFactory.getLogger(c);
-        }
+        this.logger = logger;
     }
 
     public void close() {
-        if (log2File && logger instanceof ch.qos.logback.classic.Logger classicLogger) {
+        if (logger instanceof ch.qos.logback.classic.Logger classicLogger) {
             classicLogger.iteratorForAppenders().forEachRemaining(appender -> {
                 if (appender instanceof FileAppender) {
                     appender.stop();
@@ -91,6 +83,15 @@ public class OcLogger<T extends LogMessage> {
             });
 
             classicLogger.detachAndStopAllAppenders();
+        }
+
+        if (!debugMode && !supportFile) {
+            // debugMode = false && supportFile = false then there is nothing in logfile
+            // so just delete it
+
+            try {
+                LogFileUtility.delete(filepath);
+            } catch (IOException e) {}
         }
     }
 
@@ -113,10 +114,10 @@ public class OcLogger<T extends LogMessage> {
 
 
     private <E> void logAndSend(Consumer<E> t, E message) {
-        if (!debugMode) {
+        if (!debugMode && !supportFile) {
             return;
         }
-
+      
         long startOffset = -1;
         if (log2File) {
             // evaluate startOffset before writing to a logfile

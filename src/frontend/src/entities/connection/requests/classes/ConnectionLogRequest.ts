@@ -1,6 +1,6 @@
 import {
 	GetMethodTraceResponse,
-	GetOperatorTraceResponse,
+	GetOperatorTraceResponse, TestConnectionResponse,
 } from '../interfaces/IConnectionLog';
 import { IConnectionLogRequest } from '../interfaces/IConnectionLogRequest';
 import Request from "@entity/application/requests/classes/Request";
@@ -25,8 +25,8 @@ export class ConnectionLogRequest extends Request implements IConnectionLogReque
 		return super.delete<IResponse>();
 	}
 
-	async testConnection(connection: any): Promise<AxiosResponse<IResponse>> {
+	async testConnection(connection: any): Promise<AxiosResponse<TestConnectionResponse>> {
 		this.url = 'connection';
-		return super.post<IResponse>(connection);
+		return super.post<TestConnectionResponse>(connection);
 	}
 }

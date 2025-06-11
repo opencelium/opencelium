@@ -5,7 +5,7 @@ import {
 	GetMethodTraceRequest,
 	GetMethodTraceResponse,
 	GetOperatorTraceResponse,
-	GetOperatorTraceRequest,
+	GetOperatorTraceRequest, TestConnectionResponse,
 } from '@root/requests/interfaces/IConnectionLog';
 import {errorHandler, timeout} from "@application/utils/utils";
 import {Methods, Operators} from "../../../../socket/dev-tools/connection_logs_mock";
@@ -56,14 +56,14 @@ export const deleteLogs = createAsyncThunk<void, DeleteLogsRequest>(
 	}
 );
 
-export const testConnection = createAsyncThunk<void, {connection: any, channelId?: string}>(
+export const testConnection = createAsyncThunk<TestConnectionResponse, {connection: any, channelId?: string}>(
 	'connectionLog/test-connection',
 	async (data, thunkAPI) => {
 		try {
 			const params = data.channelId ? `?channelId=${data.channelId}` : '';
 			const connectionLogRequest = new ConnectionLogRequest({endpoint: `/execution/test${params}`});
-			await connectionLogRequest.testConnection(data.connection);
-			return;
+			const response = await connectionLogRequest.testConnection(data.connection);
+			return response.data;
 		} catch(e){
 			return thunkAPI.rejectWithValue(errorHandler(e));
 		}

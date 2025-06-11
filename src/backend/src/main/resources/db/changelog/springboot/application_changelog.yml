@@ -75,6 +75,10 @@ versions:
         path: opencelium.service_portal.base_url
       - changeset: 3
         operation: add
-        value: 127.0.0.1
+        value: "127.0.0.1"
         path: server.address
+      - changeset: 4
+        operation: add
+        value: /websocket
+        path: websocket.endpoint
 

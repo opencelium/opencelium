@@ -10,6 +10,7 @@ import { useAppDispatch } from '@application/utils/store';
 import { getMethodTrace } from '@root/redux_toolkit/action_creators/ConnectionLogCreators';
 import { cleanMethodTrace } from '@root/redux_toolkit/slices/ConnectionLogSlice';
 import { ITheme } from '@style/Theme';
+import Validation from "@application/classes/Validation";
 
 interface MethodTraceProps {
 	trace: MethodTraceType;
@@ -173,7 +174,7 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 						<TabContent activeTab={activeRequestTab}>
 							<TabPane tabId='header'>
 								<LimitedAceEditor
-									maxLength={255}
+									maxLength={Validation.TextLength.Long}
 									mode='json'
 									theme={theme}
 									editorTheme='textmate'

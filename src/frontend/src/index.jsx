@@ -27,14 +27,17 @@ import "@style/css/react_grid_layout.css";
 import "@style/css/react_crop.css";
 import {SocketDataProvider} from "./socket/SocketDataContext";
 import {SocketProvider} from "./socket/SocketContext";
+import SettingsLoader from "./SettingsLoader";
 
 ReactDOM.render(
     <Provider store={store}>
-        <SocketProvider>
-            <SocketDataProvider>
-                <App/>
-            </SocketDataProvider>
-        </SocketProvider>
+        <SettingsLoader>
+            <SocketProvider>
+                <SocketDataProvider>
+                    <App/>
+                </SocketDataProvider>
+            </SocketProvider>
+        </SettingsLoader>
     </Provider>,
     document.getElementById("root"));
 

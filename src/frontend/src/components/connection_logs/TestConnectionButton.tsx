@@ -9,17 +9,30 @@ import {setFullScreen} from "@application/redux_toolkit/slices/ApplicationSlice"
 import {LogPanelHeight, setButtonPanelVisibility, setLogPanelHeight} from "@root/redux_toolkit/slices/ConnectionSlice";
 import {generateUUID} from "@app_component/operator_builder/utils";
 import {useSocketData} from "../../socket/SocketDataContext";
-import {ConnectionSocketLog} from "@root/requests/models/ConnectionLog";
-import {addSocketLog} from "@root/redux_toolkit/slices/ConnectionLogSlice";
+import {ConnectionSocketLog, ConnectionTextLog} from "@root/requests/models/ConnectionLog";
+import {addSocketLog, addTextLog, clearTextLog} from "@root/redux_toolkit/slices/ConnectionLogSlice";
 import {Button} from "@app_component/base/button/Button";
+import {terminateExecution} from "@entity/schedule/redux_toolkit/action_creators/ScheduleCreators";
+function formatDate(date: Date): string {
+    const pad = (n: number, length = 2) => n.toString().padStart(length, '0');
 
+    const year = date.getFullYear();
+    const month = pad(date.getMonth() + 1); // months are zero-based
+    const day = pad(date.getDate());
+    const hours = pad(date.getHours());
+    const minutes = pad(date.getMinutes());
+    const seconds = pad(date.getSeconds());
+    const milliseconds = pad(date.getMilliseconds(), 3);
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
+}
 const TestConnectionButton = ({validateLogic}: any) => {
     const dispatch = useAppDispatch();
     const {socket} = useSocketData();
     const [isTesting, setIsTesting] = useState(false);
     const [channelId, setChannelId] = useState<string>(undefined);
     const {connection} = useAppSelector((state: RootState) => state.connectionReducer);
-    const {executionId, connectionId} = useAppSelector((state: RootState) => state.connectionLogReducer);
+    const {executionId, connectionId, schedulerId} = useAppSelector((state: RootState) => state.connectionLogReducer);
     const subscriptionRef = useRef<() => void>();
 
     useEffect(() => {
@@ -29,9 +42,14 @@ const TestConnectionButton = ({validateLogic}: any) => {
                 return;
             }
             const subscription = socket.subscribe(`/execution/logs/${channelId}`, (message) => {
-                const data = JSON.parse(message.body) as ConnectionSocketLog;
+                //const data = JSON.parse(message.body) as ConnectionSocketLog;
+                const data = JSON.parse(message.body) as ConnectionTextLog;
                 console.log('Socket.ConnectionLogs', data);
-                dispatch(addSocketLog(data));
+                //dispatch(addSocketLog(data));
+                dispatch(addTextLog({...data, datetime: formatDate(new Date())}));
+                if (data.message.indexOf('phase=EXECUTION_END') !== -1) {
+                    setIsTesting(false);
+                }
             });
             console.log("✅ Subscribed to /execution/logs");
             subscriptionRef.current = () => {
@@ -47,6 +65,7 @@ const TestConnectionButton = ({validateLogic}: any) => {
 
     const startTest = () => {
         if (channelId) {
+            dispatch(clearTextLog());
             if (executionId && connectionId) {
                 dispatch(deleteLogs({executionId, connectionId}));
             }
@@ -60,10 +79,10 @@ const TestConnectionButton = ({validateLogic}: any) => {
 
     const stopTest = () => {
         setChannelId('');
-        dispatch(setFullScreen(false));
-        dispatch(setButtonPanelVisibility(true));
-        dispatch(setLogPanelHeight(0));
-        //dispatch(testConnection({connection, channelId: generateUUID()}));
+        //dispatch(setFullScreen(false));
+        //dispatch(setButtonPanelVisibility(true));
+        //dispatch(setLogPanelHeight(0));
+        dispatch(terminateExecution(schedulerId));
         setIsTesting(false);
     }
 
@@ -82,7 +101,7 @@ const TestConnectionButton = ({validateLogic}: any) => {
             background={isTesting ? ColorTheme.Blue : ColorTheme.White}
             color={isTesting ? ColorTheme.White : ColorTheme.Gray}
             padding="2px 10px"
-            handleClick={generateChannelId}
+            handleClick={isTesting ? stopTest : generateChannelId}
             icon={isTesting ? "stop" : "play_arrow"}
             loadingSize={TextSize.Size_14}
             label="Test run"

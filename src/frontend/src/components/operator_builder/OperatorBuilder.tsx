@@ -5,6 +5,8 @@ import {generateUUID, jsonToString} from "./utils";
 import {SaveOperatorButton} from "@app_component/operator_builder/styles";
 import OperatorTypeFactory from "@app_component/operator_builder/classes/OperatorTypeFactory";
 import {LoopOperatorName, UnaryOperatorName} from "@app_component/operator_builder/interfaces/OperatorName";
+import {EmptyString} from "@app_component/operator_builder/reference_generator/ReferenceGenerator";
+import Button from '@app_component/base/button/Button';
 
 export const ErrorColor = '#a42525';
 const OperatorBuilder = (props: OperatorBuilderProps) => {
@@ -21,6 +23,7 @@ const OperatorBuilder = (props: OperatorBuilderProps) => {
         const initialTree = (new OperatorTypeFactory(props.type)).getInitialTree();
         return generatedTree || foundTree || {...initialTree, id: generateUUID()};
     }, [props.item, props.connection]);
+    const [showDetails, toggleDetails] = useState<boolean>(false);
     const [tree, setTree] = useState<GroupProps>(existedTree);
     const validateGroup = (group: GroupProps): string | undefined => {
         if (!group.items || group.items.length === 0) {
@@ -50,13 +53,13 @@ const OperatorBuilder = (props: OperatorBuilderProps) => {
         }
         //@ts-ignore
         if (rule.properties.operator === LoopOperatorName.For || Object.values(UnaryOperatorName).indexOf(rule.properties.operator) !== -1) {
-            if (!!rule.properties.rightField) {
+            if (!!rule.properties.rightField && rule.properties.rightField !== EmptyString) {
                 return `Right field must not be set for this operator: ${rule.properties.operator}.`;
             }
         } else {
-            if (!rule.properties.rightField) {
+            /*if (!rule.properties.rightField) {
                 return `Right field is missing.`;
-            }
+            }*/
         }
         return undefined;
     };
@@ -149,16 +152,17 @@ const OperatorBuilder = (props: OperatorBuilderProps) => {
     return (
         <div style={{margin: "0 20px 20px"}} id={'operator-builder'}>
             <Group type={props.type} connectionEditor={props} isInitial={true} hasNext={false} updateGroup={(newGroup) => setTree({...newGroup})} group={tree}/>
-            {/*<p>
+            {showDetails && <React.Fragment><p>
                 {jsonToString(tree, props.type).result}
             </p>
             <pre>
                 {JSON.stringify(tree, null, 2)}
-            </pre>*/}
+            </pre></React.Fragment>}
             <SaveOperatorButton
                 label={'Save'}
                 handleClick={updateOperator}
             />
+            <Button handleClick={() => toggleDetails(!showDetails)} label={'Show details'} style={{opacity: 0, float: 'right', marginTop: '30px', marginRight: '30px'}}/>
         </div>
     )
 }

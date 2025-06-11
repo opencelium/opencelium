@@ -651,3 +651,7 @@ ALTER TABLE `event_message` MODIFY COLUMN `name` VARCHAR(255) NOT NULL;
 
 --changeset 4.5:19 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 ALTER TABLE `event_notification` MODIFY COLUMN `name` VARCHAR(255) DEFAULT NULL;
+
+--changeset 4.5:20 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE last_execution ADD COLUMN IF NOT EXISTS s_has_log tinyint(4) DEFAULT 0;
+ALTER TABLE last_execution ADD COLUMN IF NOT EXISTS f_has_log tinyint(4) DEFAULT 0;

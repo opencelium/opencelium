@@ -47,6 +47,9 @@ public class LastExecution {
     @Column(name = "s_execution_id")
     private long successExecutionId;
 
+    @Column(name = "s_has_log")
+    private boolean successHasLog;
+
     @Column(name = "f_start_time")
     private Date failStartTime;
 
@@ -58,6 +61,9 @@ public class LastExecution {
 
     @Column(name = "f_execution_id")
     private long failExecutionId;
+
+    @Column(name = "f_has_log")
+    private boolean failHasLog;
 
     public long getId() {
         return id;
@@ -137,5 +143,21 @@ public class LastExecution {
 
     public void setFailExecutionId(long failExecutionId) {
         this.failExecutionId = failExecutionId;
+    }
+
+    public boolean isSuccessHasLog() {
+        return successHasLog;
+    }
+
+    public void setSuccessHasLog(boolean successHasLog) {
+        this.successHasLog = successHasLog;
+    }
+
+    public boolean isFailHasLog() {
+        return failHasLog;
+    }
+
+    public void setFailHasLog(boolean failHasLog) {
+        this.failHasLog = failHasLog;
     }
 }

@@ -19,11 +19,12 @@ import { LimitedAceEditorCounterProps } from './interfaces';
 
 const LimitedAceEditorContainer = styled.div`
 	position: relative;
+	height: 100%;
 `;
 
 const LimitedAceEditorCounter = styled.div<LimitedAceEditorCounterProps>`
 	position: absolute;
-	top: ${({ top }) => top || '-20px'};
+	bottom: -10px;
 	right: ${({ right }) => right || '0'};
 	font-size: 12px;
 	color: ${({ theme }: { theme: ITheme }) =>
