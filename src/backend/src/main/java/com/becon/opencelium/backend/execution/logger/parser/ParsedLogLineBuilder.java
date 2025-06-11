@@ -10,11 +10,6 @@ public class ParsedLogLineBuilder {
     private final LogLineParser parser;
     private final ParsedLogLineMapper mapper;
 
-    public ParsedLogLineBuilder() {
-        this.parser = new FlexiblePatternLogParser();
-        this.mapper = new ParsedLogLineMapper();
-    }
-
     public ParsedLogLineBuilder(LogLineParser parser, ParsedLogLineMapper mapper) {
         this.parser = parser;
         this.mapper = mapper;

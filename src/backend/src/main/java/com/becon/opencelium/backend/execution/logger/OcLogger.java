@@ -106,7 +106,7 @@ public class OcLogger<T extends LogMessage> {
 
     public void logAndSend(Exception e){
         Consumer<Exception> printStrategy = x -> {
-            logger.error(e.getMessage(), e);
+            logger.error("segment=EXCEPTION data=" + e.getMessage(), e);
         };
 
         logAndSend(printStrategy, e);
@@ -117,14 +117,23 @@ public class OcLogger<T extends LogMessage> {
         if (!debugMode && !supportFile) {
             return;
         }
+      
+        long startOffset = -1;
+        if (log2File) {
+            // evaluate startOffset before writing to a logfile
+            startOffset = getStartOffset();
 
-        // evaluate startOffset before writing to a logfile
-        long startOffset = getStartOffset();
-        t.accept(message);
-
+            t.accept(message);
+        }
+        
         if (webSocket) {
-            logEntity.setMessage(message);
-            socketNotificationService.send(connectionId, logEntity);
+            ParsedLogLine parsedLine = parsedLogLineBuilder.build(message.toString(), startOffset);
+            Optional<LogMetaData> logMetaData = logLineDispatcher.dispatch(parsedLine);
+
+            if (logMetaData.isPresent() && (logMetaData.get().getLogLineType() == LogLineType.PHASE)) {
+                Object obj = logLineDispatcher.toDto(logMetaData.get());
+                socketNotificationService.send(connectionId, obj);
+            }
         }
     }
 

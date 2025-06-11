@@ -1,9 +1,11 @@
 package com.becon.opencelium.backend.execution.logger.parser;
 
+import com.becon.opencelium.backend.execution.logger.service.LogStorageService;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,6 +19,7 @@ import java.util.regex.Pattern;
  */
 @Component
 public class FlexiblePatternLogParser implements LogLineParser {
+    private final LogStorageService logStorageService;
 
     // Pattern for timestamps in format: dd-MM-yyyy HH:mm:ss.SSS
     private static final Pattern TIMESTAMP_PATTERN = Pattern.compile("\\b\\d{2}-\\d{2}-\\d{4} \\d{2}:\\d{2}:\\d{2}\\.\\d{3}\\b");
@@ -30,6 +33,15 @@ public class FlexiblePatternLogParser implements LogLineParser {
             "(\\w+)=((?:\"[^\"]*\")|(?:\\{[^}]*\\})|(?:\\S+))"
     );
 
+    // Pattern to validate log line:
+    private static final Pattern HAS_PHASE_SEGMENT = Pattern.compile(
+            "(?m)^(?:(?!\").)*?\\b(?:segment|phase)=[^\\s]+.*$"
+    );
+
+    public FlexiblePatternLogParser(LogStorageService logStorageService) {
+        this.logStorageService = logStorageService;
+    }
+
     /**
      * Checks if this parser supports the given line format.
      * It considers a line supported if it has at least a timestamp,
@@ -39,9 +51,9 @@ public class FlexiblePatternLogParser implements LogLineParser {
     public boolean supports(String line) {
         boolean hasTimestamp = TIMESTAMP_PATTERN.matcher(line).find();
         boolean hasLogLevel = LOG_LEVEL_PATTERN.matcher(line).find();
-        boolean hasKeyValue = KV_PATTERN.matcher(line).find();
+        boolean hasPhaseSegment = HAS_PHASE_SEGMENT.matcher(line).find();
 
-        return hasTimestamp || hasLogLevel || hasKeyValue;
+        return hasTimestamp || hasLogLevel || hasPhaseSegment;
     }
 
     /**
@@ -88,6 +100,31 @@ public class FlexiblePatternLogParser implements LogLineParser {
 
         return result;
     }
+
+    @Override
+    public List<String> readLines(String executionId, long startOffset, long endOffset) {
+        List<String> result = new ArrayList<>();
+
+        List<String> block = logStorageService.readBlock(executionId, startOffset, endOffset);
+
+        int left = 0, right = 0;
+        StringBuilder current;
+
+        while (right < block.size()) {
+            current = new StringBuilder(block.get(left)); // at this line always left = right, store current line
+            right++; // move right pointer to check if it is continuation
+            while(right < block.size() && !supports(block.get(right))) {
+                current.append("\n").append(block.get(right));
+                right++;
+            }
+
+            result.add(current.toString()); // add generated line to result
+            left = right;
+        }
+
+        return result;
+    }
+
 
     /**
      * Removes a portion of a string from start to end index (exclusive),
