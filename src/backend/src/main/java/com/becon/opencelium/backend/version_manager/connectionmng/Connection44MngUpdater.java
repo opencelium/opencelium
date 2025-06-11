@@ -2,6 +2,7 @@ package com.becon.opencelium.backend.version_manager.connectionmng;
 
 import com.becon.opencelium.backend.database.mongodb.entity.*;
 import com.becon.opencelium.backend.ocel.OCExpressionHelper;
+import com.becon.opencelium.backend.ocel.operator.OperatorEnum;
 import com.becon.opencelium.backend.version_manager.Wrapper;
 import com.becon.opencelium.backend.version_manager.base.*;
 import io.micrometer.common.util.StringUtils;
@@ -71,7 +72,16 @@ public class Connection44MngUpdater implements ConnectionMngUpdater {
                 if (!StringUtils.isBlank(rightStatement.getType())) {
                     rightStatement.setField(Version43Utils.replace(rightStatement.getField(), changed, true, Objects.equals(rightStatement.getType(), "header")));
                 }
+            } else if (Objects.equals(OperatorEnum.EQUAL_TO.getName(), condition.getRelationalOperator()) || Objects.equals(OperatorEnum.NOT_EQUAL_TO.getName(), condition.getRelationalOperator())) {
+                rightStatement = new StatementMng();
+                rightStatement.setColor("");
+                rightStatement.setField("");
+                rightStatement.setType("");
+                rightStatement.setRightPropertyValue("");
+
+                condition.setRightStatement(rightStatement);
             }
+
             String exp = OCExpressionHelper.buildExp(operator.getCondition());
             if (Objects.nonNull(exp)) {
                 operator.setExpression(exp);
