@@ -263,7 +263,7 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
                         }
                         case "body" -> {
                             String field = PathAndReferenceUtility.getActualPathOfBody(toField.getField());
-                            List<String> fieldPaths = PathAndReferenceUtility.splitByDelimiter(field, '.', true);
+                            List<String> fieldPaths = PathAndReferenceUtility.splitByDelimiter(field, '.', true, true);
                             Map<String, Object> boundFields = BindingUtility.doWithBody(method.getRequest().getBody(), fieldPaths, fb.getId(), method.getRequest().getBody().getFormat());
                             method.getRequest().getBody().setFields(boundFields);
                         }
