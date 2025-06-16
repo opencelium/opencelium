@@ -11,10 +11,10 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
-@Document(collection = "log_meta_data")
+@Document(collection = "log_data")
 @CompoundIndex(name = "exec_connection_flowchart_indexPath_idx",
         def = "{'executionId': 1, 'connectionId': 1, 'flowchartId': 1, 'indexPath': 1}")
-public class LogMetaData {
+public class LogData {
     @Id
     private String id;
 

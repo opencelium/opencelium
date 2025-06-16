@@ -4,7 +4,10 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
+import com.becon.opencelium.backend.database.mongodb.entity.LogData;
+import com.becon.opencelium.backend.execution.logger.enums.LogLineType;
 import com.becon.opencelium.backend.execution.logger.parser.ParsedLogLineBuilder;
+import com.becon.opencelium.backend.execution.logger.parser.entity.ParsedLogLine;
 import com.becon.opencelium.backend.execution.socket.WebSocketNotificationService;
 import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
 import com.becon.opencelium.backend.resource.execution.LoggerConfiguration;
@@ -18,6 +21,7 @@ import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public class OcLogger<T extends LogMessage> {
@@ -117,18 +121,14 @@ public class OcLogger<T extends LogMessage> {
         if (!debugMode && !supportFile) {
             return;
         }
-      
-        long startOffset = -1;
-        if (log2File) {
-            // evaluate startOffset before writing to a logfile
-            startOffset = getStartOffset();
 
-            t.accept(message);
-        }
-        
+        // evaluate startOffset before writing to a logfile
+        long startOffset = getStartOffset();
+        t.accept(message);
+
         if (webSocket) {
             ParsedLogLine parsedLine = parsedLogLineBuilder.build(message.toString(), startOffset);
-            Optional<LogMetaData> logMetaData = logLineDispatcher.dispatch(parsedLine);
+            Optional<LogData> logData = logLineDispatcher.dispatch(parsedLine);
 
             if (logMetaData.isPresent() && (logMetaData.get().getLogLineType() == LogLineType.PHASE)) {
                 Object obj = logLineDispatcher.toDto(logMetaData.get());

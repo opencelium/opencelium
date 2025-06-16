@@ -1,13 +1,13 @@
 package com.becon.opencelium.backend.database.mongodb.repository;
 
-import com.becon.opencelium.backend.database.mongodb.entity.LogMetaData;
+import com.becon.opencelium.backend.database.mongodb.entity.LogData;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
 import java.util.Optional;
 
-public interface MetaDataLogRepository extends MongoRepository<LogMetaData, String> {
-    Optional<LogMetaData> findByConnectionIdAndExecutionIdAndFlowchartIdAndIndexPath(
+public interface MetaDataLogRepository extends MongoRepository<LogData, String> {
+    Optional<LogData> findByConnectionIdAndExecutionIdAndFlowchartIdAndIndexPath(
             Long connectionId, String executionId, String flowchartId, String indexPath
     );
 
@@ -20,7 +20,7 @@ public interface MetaDataLogRepository extends MongoRepository<LogMetaData, Stri
             'properties.loopIndex': ?4
         }
     """)
-    Optional<LogMetaData> findByExecutionConnectionFlowchartIndexPathAndLoopIndex(
+    Optional<LogData> findByExecutionConnectionFlowchartIndexPathAndLoopIndex(
             Long connectionId,
             String executionId,
             String flowchartId,

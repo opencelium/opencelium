@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.execution.logger.service;
 
-import com.becon.opencelium.backend.database.mongodb.entity.LogMetaData;
+import com.becon.opencelium.backend.database.mongodb.entity.LogData;
 import com.becon.opencelium.backend.database.mongodb.repository.MetaDataLogRepository;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseCategory;
 import com.becon.opencelium.backend.execution.logger.parser.entity.ParsedLogLine;
@@ -33,7 +33,7 @@ public class LogMetaDataServiceImp implements LogMetaDataService {
      * @param block the parsed block metadata to store
      */
     @Override
-    public void saveStartBlock(LogMetaData block) {
+    public void saveStartBlock(LogData block) {
         block.setCreatedAt(Instant.now());
         metaDataLogRepository.save(block);
     }
@@ -46,8 +46,8 @@ public class LogMetaDataServiceImp implements LogMetaDataService {
      * @param block the END block (only startOffset contains the correct ending offset)
      */
     @Override
-    public void updateEndOffset(LogMetaData block) {
-        Optional<LogMetaData> optional;
+    public void updateEndOffset(LogData block) {
+        Optional<LogData> optional;
         if (block.getProperties().containsKey("loopIndex")) {
             optional = metaDataLogRepository.findByExecutionConnectionFlowchartIndexPathAndLoopIndex(
                     block.getConnectionId(),
@@ -84,9 +84,9 @@ public class LogMetaDataServiceImp implements LogMetaDataService {
      * @return the enriched document ready to persist
      */
     @Override
-    public LogMetaData fromParsedLogLine(ParsedLogLine line, String executionId,
-                                         Long connectionId, String flowchartId) {
-        LogMetaData doc = new LogMetaData();
+    public LogData fromParsedLogLine(ParsedLogLine line, String executionId,
+                                     Long connectionId, String flowchartId) {
+        LogData doc = new LogData();
 
         doc.setExecutionId(executionId);
         doc.setConnectionId(connectionId);
