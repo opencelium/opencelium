@@ -67,17 +67,33 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
             fieldBindingMngService.bind(connectionMng); // also saves to db
             if (connectionMng.getFromConnector() != null) {
                 if (connectionMng.getFromConnector().getMethods() != null) {
+
+                    // Set Id to null to ensure a new method is created instead of updating an existing one with the same Id
+                    connectionMng.getFromConnector().getMethods().forEach(method -> method.setId(null));
+
                     connectionMng.getFromConnector().setMethods(methodMngService.saveAll(connectionMng.getFromConnector().getMethods()));
                 }
                 if (connectionMng.getFromConnector().getOperators() != null) {
+
+                    // Set Id to null to ensure a new operator is created instead of updating an existing one with the same Id
+                    connectionMng.getFromConnector().getOperators().forEach(op -> op.setId(null));
+
                     connectionMng.getFromConnector().setOperators(operatorMngService.saveAll(connectionMng.getFromConnector().getOperators()));
                 }
             }
             if (connectionMng.getToConnector() != null) {
                 if (connectionMng.getToConnector().getMethods() != null) {
+
+                    // Set Id to null to ensure a new method is created instead of updating an existing one with the same Id
+                    connectionMng.getToConnector().getMethods().forEach(method -> method.setId(null));
+
                     connectionMng.getToConnector().setMethods(methodMngService.saveAll(connectionMng.getToConnector().getMethods()));
                 }
                 if (connectionMng.getToConnector().getOperators() != null) {
+
+                    // Set Id to null to ensure a new operator is created instead of updating an existing one with the same Id
+                    connectionMng.getToConnector().getOperators().forEach(op -> op.setId(null));
+
                     connectionMng.getToConnector().setOperators(operatorMngService.saveAll(connectionMng.getToConnector().getOperators()));
                 }
             }
@@ -148,7 +164,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
                 if (Objects.nonNull(connectionMng.getToConnector().getMethods())) {
                     connectionMng.getToConnector().setMethods(methodMngService.saveAll(connectionMng.getToConnector().getMethods()));
                 }
-                if (Objects.nonNull( connectionMng.getToConnector().getOperators())) {
+                if (Objects.nonNull(connectionMng.getToConnector().getOperators())) {
                     connectionMng.getToConnector().setOperators(operatorMngService.saveAll(connectionMng.getToConnector().getOperators()));
                 }
             }
