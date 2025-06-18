@@ -155,10 +155,10 @@ public class PathAndReferenceUtility {
     }
 
     public static List<String> splitByDelimiter(String path, char delim) {
-        return splitByDelimiter(path, delim, false);
+        return splitByDelimiter(path, delim, false, false);
     }
 
-    public static List<String> splitByDelimiter(String path, char delim, boolean hasBracket) {
+    public static List<String> splitByDelimiter(String path, char delim, boolean hasBracket, boolean returnOpenedBracket) {
         if (path == null || path.isEmpty()) {
             return Collections.emptyList();
         }
@@ -277,7 +277,10 @@ public class PathAndReferenceUtility {
                 }
             }
         }
-        return res;
+
+        return returnOpenedBracket
+                ? openWrappedBrackets(res)
+                : res;
     }
 
     public static List<String> parseBracketNotationPath(String path) {
@@ -347,5 +350,29 @@ public class PathAndReferenceUtility {
 
     public static String rebuildReference(String color, String type, String field) {
         return color + ".(" + type + ")" + (field == null ? "" : "." + field);
+    }
+
+    /**
+     * Input : [['address.street'], id, name]
+     * <p>
+     * Output : [address.street, id, name]
+     */
+    private static List<String> openWrappedBrackets(List<String> parts) {
+        return parts.stream()
+                .map(PathAndReferenceUtility::openWrappedBracket)
+                .toList();
+    }
+
+    /**
+     * Input : ['address.street']
+     * Output : address.street
+     * <p>
+     * Input : name
+     * Output : name
+     */
+    private static String openWrappedBracket(String path) {
+        return path.startsWith(PRE_BRACKET) && path.endsWith(SUF_BRACKET)
+                ? path.substring(PRE_BRACKET.length(), path.length() - SUF_BRACKET.length())
+                : path;
     }
 }
