@@ -520,7 +520,8 @@ public class ConnectionServiceImp implements ConnectionService {
         boolean gotBackup = false;
         for (Long id : ids) {
             Connection connection = getById(id);
-            if (Utils.compare(ocProps.getVersion(), connection.getOcVersion()) > 0) {
+            if (Utils.compare(ocProps.getVersion(), connection.getOcVersion()) > 0 && !isTestConnection(connection.getTitle())) {
+
                 if (!gotBackup) {
                     try {
                         mysqlBackupService.backup(EntityNames.ENHANCEMENT);
@@ -575,6 +576,10 @@ public class ConnectionServiceImp implements ConnectionService {
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
     // private methods
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    private boolean isTestConnection(String title) {
+        return title != null && title.matches(RegExpression.TEST_CONNECTION_REGEX);
+    }
 
     private void extractVars(Object json, List<String> varList) {
         if (json instanceof JSONObject jsonObject) {
