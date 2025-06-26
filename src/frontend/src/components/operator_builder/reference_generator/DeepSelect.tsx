@@ -157,7 +157,17 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 	useEffect(() => {
 		const unwrapped =
 			field
-				?.replace(/\['(.*?)'\]/g, (_, val) => {
+				?.replace(/\['(.*?)'\]/g, (match, val, offset, str) => {
+					const prevChar = str[offset - 1];
+
+					if (prevChar === '.') {
+						return val;
+					}
+
+					if (offset === 0) {
+						return val;
+					}
+
 					return `.${val}`;
 				})
 				.replace(/\.\./g, '.') || '';
