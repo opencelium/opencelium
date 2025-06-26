@@ -155,10 +155,12 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 		}
 	}, [selectedOption]);
 	useEffect(() => {
-		let unwrapped = field;
-		if (field?.startsWith("['") && field?.endsWith("']")) {
-			unwrapped = field.slice(2, -2);
-		}
+		const unwrapped =
+			field
+				?.replace(/\['(.*?)'\]/g, (_, val) => {
+					return `.${val}`;
+				})
+				.replace(/\.\./g, '.') || '';
 
 		if (unwrapped !== searchValue) {
 			handleInputChange(unwrapped, { action: 'input-change' });
