@@ -1217,3 +1217,33 @@ export function jsonToString(json, type) {
 
     return { result: '', isNotValid: true };
 }
+
+export function wrapField(fullPath) {
+	if (/\['.*'\]$/.test(fullPath)) return fullPath;
+
+	const match = fullPath.match(/^(body\.\$\.|header\.\$\.)(.+)$/);
+	if (!match) return fullPath;
+
+	const prefix = match[1];
+	const rest = match[2];
+
+	const arrayMatch = rest.match(/^(\[[^\]]+\]\.)(.+)$/);
+	if (arrayMatch) {
+		const pre = arrayMatch[1];
+		const post = arrayMatch[2];
+		if (post.includes('.') || post.includes('@')) {
+			return `${prefix}${pre}['${post}']`;
+		}
+		return `${prefix}${pre}${post}`;
+	}
+
+	if (rest.includes('.') || rest.includes('@')) {
+		return `${prefix}['${rest}']`;
+	}
+
+	return fullPath;
+}
+
+export function unwrapField(field) {
+  return field.replace(/\['(.*?)'\]/g, '$1');
+}

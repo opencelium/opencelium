@@ -14,7 +14,7 @@ import {
 	OperatorName,
 } from '@app_component/operator_builder/interfaces/OperatorName';
 import ReferenceSwitcher from '@app_component/operator_builder/reference_generator/ReferenceSwitcher';
-import { findTopLeft } from '@application/utils/utils';
+import { findTopLeft, wrapField } from '@application/utils/utils';
 import WebhookGenerator from '@change_component/form_elements/form_connection/form_methods/method/WebhookGenerator';
 import TooltipFontIcon from '@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon';
 import Webhook from '@root/classes/Webhook';
@@ -107,34 +107,12 @@ const ReferenceGenerator = React.forwardRef(
 			}
 		};
 
-		function wrapComplexVar(field: string): string {
-			if (/\['.*'\]$/.test(field)) return field;
-
-			const match = field.match(/^(\[[^\]]+\]\.)(.+)/);
-			if (match) {
-				const prefix = match[1];
-				const rest = match[2];
-
-				if (rest.includes('.')) {
-					return `${prefix}['${rest}']`;
-				} else {
-					return field;
-				}
-			}
-
-			if (field.includes('.')) {
-				return `['${field}']`;
-			}
-
-			return field;
-		}
-
 		const applyReference = () => {
 			if (currentField !== '') {
 				let newReference = '';
 				newReference = ReferenceFactory.getReference(
 					referenceType,
-					wrapComplexVar(currentField),
+					wrapField(currentField),
 					color,
 					'response'
 				);
@@ -147,7 +125,7 @@ const ReferenceGenerator = React.forwardRef(
 			if (currentField !== '') {
 				let reference = ReferenceFactory.getReference(
 					referenceType,
-					wrapComplexVar(currentField),
+					wrapField(currentField),
 					color,
 					'response'
 				);

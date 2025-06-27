@@ -132,7 +132,12 @@ const LimitedAceEditor = React.forwardRef<any, LimitedAceEditorProps>(
 					placeholder={placeholder}
 					cursorStart={cursorStart}
 					focus={focus}
-					onBlur={(e: any) => {toggleFocus(false); onBlur();}}
+					onBlur={(e: any) => {
+						toggleFocus(false);
+						if (typeof onBlur === 'function') {
+							onBlur();
+						}
+					}}
 				/>
 			</LimitedAceEditorContainer>
 		);

@@ -13,6 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { wrapField } from '@application/utils/utils';
 import {
 	putAsterixInEmptyBrackets,
 	transformDataFields,
@@ -24,7 +25,9 @@ import {
 export default class CBindingItem {
 	constructor(color = '', field = '', type = '') {
 		this._color = color;
-		this._field = putAsterixInEmptyBrackets(transformDataFields(field));
+		this._field = putAsterixInEmptyBrackets(
+			transformDataFields(wrapField(field))
+		);
 		this._type = type;
 	}
 
@@ -35,7 +38,7 @@ export default class CBindingItem {
 				: '';
 		let field =
 			bindingItem && bindingItem.hasOwnProperty('field')
-				? transformDataFields(bindingItem.field)
+				? transformDataFields(wrapField(bindingItem.field))
 				: '';
 		let type =
 			bindingItem && bindingItem.hasOwnProperty('type') ? bindingItem.type : '';

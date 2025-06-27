@@ -22,7 +22,6 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 }) => {
 	const ref = useRef<HTMLDivElement>(null);
 	const [searchValue, setSearchValue] = useState<string>(field);
-	console.log(searchValue);
 	const [selectedOption, setSelectedOption] = useState<OptionType | null>(
 		undefined
 	);
