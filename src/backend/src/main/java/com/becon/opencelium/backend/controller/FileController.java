@@ -111,21 +111,21 @@ public class FileController {
         this.invokerServiceImp = invokerServiceImp;
         this.storageService = storageService;
         this.connectorMapper = connectorMapper;
-        templateUpdater = versionManager.getUpdater(Template.class);
+        this.templateUpdater = versionManager.getUpdater(Template.class);
         this.ocProps = ocProps;
     }
 
     @Operation(summary = "Uploads profile picture of a user by provided user email")
     @ApiResponses(value = {
-        @ApiResponse( responseCode = "200",
-                description = "Profile picture has been successfully uploaded",
-                content = @Content),
-        @ApiResponse( responseCode = "401",
-                description = "Unauthorized",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-        @ApiResponse( responseCode = "500",
-                description = "Internal Error",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "200",
+                    description = "Profile picture has been successfully uploaded",
+                    content = @Content),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(value = "/profilePicture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> profilePictureUpload(@RequestParam("file") MultipartFile file,
@@ -166,15 +166,15 @@ public class FileController {
 
     @Operation(summary = "Uploads role's(group) icon by provided user role(group) ID")
     @ApiResponses(value = {
-        @ApiResponse( responseCode = "200",
-                description = "Profile picture has been successfully uploaded",
-                content = @Content),
-        @ApiResponse( responseCode = "401",
-                description = "Unauthorized",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-        @ApiResponse( responseCode = "500",
-                description = "Internal Error",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "200",
+                    description = "Profile picture has been successfully uploaded",
+                    content = @Content),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(path = "/groupIcon", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> groupPictureUpload(@RequestParam("file") MultipartFile file,
@@ -214,15 +214,15 @@ public class FileController {
 
     @Operation(summary = "Uploads template json file")
     @ApiResponses(value = {
-        @ApiResponse( responseCode = "200",
-                description = "Template has been successfully uploaded",
-                content = @Content(schema = @Schema(implementation = FileDTO.class))),
-        @ApiResponse( responseCode = "401",
-                description = "Unauthorized",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-        @ApiResponse( responseCode = "500",
-                description = "Internal Error",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "200",
+                    description = "Template has been successfully uploaded",
+                    content = @Content(schema = @Schema(implementation = FileDTO.class))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(value = "/template", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file) {
@@ -320,15 +320,15 @@ public class FileController {
 
     @Operation(summary = "Uploads invoker xml file")
     @ApiResponses(value = {
-        @ApiResponse( responseCode = "200",
-                description = "Invoker has been successfully uploaded",
-                content = @Content(schema = @Schema(implementation = FileDTO.class))),
-        @ApiResponse( responseCode = "401",
-                description = "Unauthorized",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-        @ApiResponse( responseCode = "500",
-                description = "Internal Error",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "200",
+                    description = "Invoker has been successfully uploaded",
+                    content = @Content(schema = @Schema(implementation = FileDTO.class))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(path = "/invoker", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadInvoker(@RequestParam("file") MultipartFile file) {
@@ -447,15 +447,15 @@ public class FileController {
 
     @Operation(summary = "Uploads connector json file")
     @ApiResponses(value = {
-        @ApiResponse( responseCode = "200",
-                description = "Connector has been successfully uploaded",
-                content = @Content(schema = @Schema(implementation = ConnectorResource.class))),
-        @ApiResponse( responseCode = "401",
-                description = "Unauthorized",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-        @ApiResponse( responseCode = "500",
-                description = "Internal Error",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "200",
+                    description = "Connector has been successfully uploaded",
+                    content = @Content(schema = @Schema(implementation = ConnectorResource.class))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(value = "/connector", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> connectorUpload(@RequestParam("file") MultipartFile file,
@@ -564,9 +564,11 @@ public class FileController {
 
     private void updateTemplate(Template template){
         try {
-            Wrapper<Template> updated = templateUpdater.updateToCurrentVersion(template);
-            template.setVersion(updated.getNewVersion());
-            log.info("Template[id={}, name={}] is successfully updated to {} version", template.getTemplateId(), template.getName(), ocProps.getVersion());
+            templateUpdater.updateToCurrentVersion(template)
+                    .ifUpdated(temp -> {
+                        log.info("Template[id={}, name={}] is successfully updated to {} version", template.getTemplateId(), template.getName(), ocProps.getVersion());
+                    });
+            template.setVersion(ocProps.getVersion());
         } catch (Exception e) {
             log.error("Failed to update Template[id={}, name={}]", template.getTemplateId(), template.getName(), e);
             throw new RuntimeException("INVALID_TEMPLATE");
