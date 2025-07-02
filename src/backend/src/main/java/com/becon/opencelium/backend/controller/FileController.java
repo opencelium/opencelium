@@ -117,15 +117,15 @@ public class FileController {
 
     @Operation(summary = "Uploads profile picture of a user by provided user email")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Profile picture has been successfully uploaded",
-                    content = @Content),
-            @ApiResponse(responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-            @ApiResponse(responseCode = "500",
-                    description = "Internal Error",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "200",
+                description = "Profile picture has been successfully uploaded",
+                content = @Content),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(value = "/profilePicture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> profilePictureUpload(@RequestParam("file") MultipartFile file,
@@ -134,7 +134,7 @@ public class FileController {
         String extension = FileNameUtils.getExtension(file.getOriginalFilename());
 
         // Check image extension. It should be JPEG, PNG or JPG
-        if (!checkImageExtension(extension)) {
+        if (!checkImageExtension(extension)){
             throw new StorageException("File should be jpg or png");
         }
 
@@ -148,7 +148,7 @@ public class FileController {
         UserDetail userDetail = user.getUserDetail();
 
         // If profile has an old picture, delete the picture from storage
-        if (userDetail.getProfilePicture() != null) {
+        if (userDetail.getProfilePicture() != null ){
             storageService.delete(userDetail.getProfilePicture());
         }
 
@@ -166,15 +166,15 @@ public class FileController {
 
     @Operation(summary = "Uploads role's(group) icon by provided user role(group) ID")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Profile picture has been successfully uploaded",
-                    content = @Content),
-            @ApiResponse(responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-            @ApiResponse(responseCode = "500",
-                    description = "Internal Error",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "200",
+                description = "Profile picture has been successfully uploaded",
+                content = @Content),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(path = "/groupIcon", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> groupPictureUpload(@RequestParam("file") MultipartFile file,
@@ -184,7 +184,7 @@ public class FileController {
         String extension = FileNameUtils.getExtension(file.getOriginalFilename());
         Objects.requireNonNull(extension);
         // Check image extension. It should be JPEG, PNG or JPG
-        if (!checkImageExtension(extension)) {
+        if (!checkImageExtension(extension)){
             throw new StorageException("File should be jpg or png");
         }
 
@@ -196,7 +196,7 @@ public class FileController {
         String newFilename = UUID.randomUUID() + "." + extension;
 
         // If user group has an old image, delete the picture from files
-        if (userRole.getIcon() != null) {
+        if (userRole.getIcon() != null){
             storageService.delete(userRole.getIcon());
         }
 
@@ -214,15 +214,15 @@ public class FileController {
 
     @Operation(summary = "Uploads template json file")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Template has been successfully uploaded",
-                    content = @Content(schema = @Schema(implementation = FileDTO.class))),
-            @ApiResponse(responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-            @ApiResponse(responseCode = "500",
-                    description = "Internal Error",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "200",
+                description = "Template has been successfully uploaded",
+                content = @Content(schema = @Schema(implementation = FileDTO.class))),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(value = "/template", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file) {
@@ -232,7 +232,7 @@ public class FileController {
             throw new RuntimeException("Extension not found");
         }
         try {
-            if (!checkJsonExtension(extension)) {
+            if (!checkJsonExtension(extension)){
                 throw new StorageException("File should be JSON");
             }
             String id;
@@ -320,15 +320,15 @@ public class FileController {
 
     @Operation(summary = "Uploads invoker xml file")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Invoker has been successfully uploaded",
-                    content = @Content(schema = @Schema(implementation = FileDTO.class))),
-            @ApiResponse(responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-            @ApiResponse(responseCode = "500",
-                    description = "Internal Error",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "200",
+                description = "Invoker has been successfully uploaded",
+                content = @Content(schema = @Schema(implementation = FileDTO.class))),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(path = "/invoker", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadInvoker(@RequestParam("file") MultipartFile file) {
@@ -349,7 +349,8 @@ public class FileController {
             String name = xml.getValueByXPath("//invoker/name");
             FileDTO fileDTO = new FileDTO(name);
             return ResponseEntity.ok(fileDTO);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             invokerServiceImp.delete(FileNameUtils.removeExtension(filename));
             throw new StorageException("Failed to store file " + filename, e);
         }
@@ -357,13 +358,13 @@ public class FileController {
 
     @Operation(summary = "Uploads zip file that contains invoker files")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
+            @ApiResponse( responseCode = "200",
                     description = "Invoker has been successfully uploaded",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = FileDTO.class)))),
-            @ApiResponse(responseCode = "401",
+            @ApiResponse( responseCode = "401",
                     description = "Unauthorized",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-            @ApiResponse(responseCode = "500",
+            @ApiResponse( responseCode = "500",
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
@@ -389,7 +390,7 @@ public class FileController {
                 ZipInputStream zis = new ZipInputStream(inputStream);
                 ZipEntry zipEntry;
                 while ((zipEntry = zis.getNextEntry()) != null) {
-                    if (zipEntry.isDirectory() || !zipEntry.getName().endsWith(".xml")) {
+                    if(zipEntry.isDirectory() || !zipEntry.getName().endsWith(".xml")) {
                         continue;
                     }
                     Xml xml = saveXmlFile(zis, zipEntry.getName());
@@ -433,7 +434,7 @@ public class FileController {
         byte[] buffer = new byte[1024];
         int bytesRead;
         try {
-            while ((bytesRead = originInputStream.read(buffer)) > -1) {
+            while ((bytesRead = originInputStream.read(buffer)) > -1 ) {
                 baos.write(buffer, 0, bytesRead);
             }
         } catch (IOException e) {
@@ -446,15 +447,15 @@ public class FileController {
 
     @Operation(summary = "Uploads connector json file")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Connector has been successfully uploaded",
-                    content = @Content(schema = @Schema(implementation = ConnectorResource.class))),
-            @ApiResponse(responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-            @ApiResponse(responseCode = "500",
-                    description = "Internal Error",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "200",
+                description = "Connector has been successfully uploaded",
+                content = @Content(schema = @Schema(implementation = ConnectorResource.class))),
+        @ApiResponse( responseCode = "401",
+                description = "Unauthorized",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+        @ApiResponse( responseCode = "500",
+                description = "Internal Error",
+                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(value = "/connector", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> connectorUpload(@RequestParam("file") MultipartFile file,
@@ -465,7 +466,7 @@ public class FileController {
         // Get extension
         String extension = FileNameUtils.getExtension(file.getOriginalFilename());
         Objects.requireNonNull(extension);
-        if (!checkImageExtension(extension)) {
+        if (!checkImageExtension(extension)){
             throw new StorageException("File should be jpg or png");
         }
 
@@ -478,13 +479,13 @@ public class FileController {
             connectorService.save(connector);
             ConnectorResource resource = connectorMapper.toDTO(connector);
             return ResponseEntity.ok().body(resource);
-        } catch (Exception e) {
+        } catch (Exception e){
             throw new RuntimeException(e);
         }
     }
 
-    private boolean checkJsonExtension(String extension) {
-        if (!(extension.equals("json") || extension.equals("JSON"))) {
+    private boolean checkJsonExtension(String extension){
+        if (!(extension.equals("json") || extension.equals("JSON"))){
             return false;
         }
         return true;
@@ -504,9 +505,9 @@ public class FileController {
         return ResponseEntity.notFound().build();
     }
 
-    private boolean checkImageExtension(String extension) {
+    private boolean checkImageExtension(String extension){
         if (!(extension.equals("jpeg") || extension.equals("png")
-                || extension.equals("jpg"))) {
+                || extension.equals("jpg"))){
             return false;
         }
         return true;
@@ -538,7 +539,7 @@ public class FileController {
         return uriComponents.toUri();
     }
 
-    private List<Document> getAllInvokers() {
+    private List<Document> getAllInvokers(){
         Path location = Paths.get(PathConstant.INVOKER);
         try {
             Stream<Path> allInvokers = Files.walk(location, 1)
@@ -550,16 +551,18 @@ public class FileController {
                         try {
                             DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
                             return dBuilder.parse(file);
-                        } catch (Exception e) {
+                        }
+                        catch (Exception e){
                             throw new RuntimeException(e);
                         }
                     }).collect(Collectors.toList());
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new StorageException("Failed to read stored files", e);
         }
     }
 
-    private void updateTemplate(Template template) {
+    private void updateTemplate(Template template){
         try {
             templateUpdater.updateToCurrentVersion(template)
                     .ifUpdated(temp -> {
