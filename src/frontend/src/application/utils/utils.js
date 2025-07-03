@@ -1227,22 +1227,33 @@ export function wrapField(fullPath) {
 	const prefix = match[1];
 	const rest = match[2];
 
-	const arrayMatch = rest.match(/^(\[[^\]]+\]\.)(.+)$/);
-	if (arrayMatch) {
-		const pre = arrayMatch[1];
-		const post = arrayMatch[2];
-		if (post.includes('.') || post.includes('@')) {
-			return `${prefix}${pre}['${post}']`;
+	const rawParts = rest.split('.');
+	let result = '';
+
+	for (let i = 0; i < rawParts.length; i++) {
+		const part = rawParts[i];
+
+		const isArrayIndex = /^\d+$/.test(part);
+		const needsWrapping = part.includes('.') || part.includes('@');
+
+		if (isArrayIndex) {
+			result += `[${part}]`;
+		} else if (needsWrapping) {
+			if (result && !result.endsWith('.') && !result.endsWith(']')) {
+				result += '.';
+			}
+			result += `['${part}']`;
+		} else {
+			if (result && !result.endsWith('.')) {
+				result += '.';
+			}
+			result += part;
 		}
-		return `${prefix}${pre}${post}`;
 	}
 
-	if (rest.includes('.') || rest.includes('@')) {
-		return `${prefix}['${rest}']`;
-	}
-
-	return fullPath;
+	return prefix + result;
 }
+
 
 export function unwrapField(field) {
   return field.replace(/\['(.*?)'\]/g, '$1');
