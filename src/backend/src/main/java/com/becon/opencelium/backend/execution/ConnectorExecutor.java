@@ -19,7 +19,6 @@ import com.becon.opencelium.backend.resource.execution.ConnectorEx;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.resource.execution.OperatorEx;
 import com.becon.opencelium.backend.resource.execution.ResponseDTO;
-import com.becon.opencelium.backend.utility.MediaTypeUtility;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
@@ -30,12 +29,16 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
+
+import static com.becon.opencelium.backend.utility.MediaTypeUtility.isBinaryCompatible;
+import static com.becon.opencelium.backend.utility.MediaTypeUtility.isJsonCompatible;
 
 public class ConnectorExecutor {
     private final ExpressionProcessor expressionProcessor;
@@ -188,6 +191,7 @@ public class ConnectorExecutor {
         boolean hasMore = false;
         long duration = 0;
         RequestEntity<?> requestEntity;
+        Class<?> responseType;
         ResponseEntity<?> responseEntity;
         do {
             requestEntity = RequestEntityBuilder.start()
@@ -212,7 +216,7 @@ public class ConnectorExecutor {
             logger.logAndSend(String.format("segment=REQUEST_PAYLOAD data=%s", masking.applyMask(requestEntity.getBody(), toRef.apply("request", "body"))));
 
             HttpEntity<Object> httpEntity = new HttpEntity<>(requestEntity.getBody(), requestEntity.getHeaders());
-            Class<?> responseType = getResponseType(dto);
+            responseType = getResponseType(dto);
 
             long startTime = System.currentTimeMillis();
             responseEntity = this.restTemplate.exchange(uri, requestEntity.getMethod(), httpEntity, responseType);
@@ -223,6 +227,15 @@ public class ConnectorExecutor {
                 hasMore = pagination.hasMore();
             }
         } while (hasMore);
+
+        if (responseType.equals(byte[].class)) {
+            byte[] fileBytes = (byte[]) responseEntity.getBody();
+            String base64Encoded = Base64.getEncoder().encodeToString(fileBytes);
+
+            responseEntity = new ResponseEntity<>(base64Encoded,
+                    responseEntity.getHeaders(),
+                    responseEntity.getStatusCode());
+        }
 
         if (pagination != null) {
             String paginatedBody = pagination.findParam(PageParam.RESULT).getValue();
@@ -262,7 +275,13 @@ public class ConnectorExecutor {
             }
         }
 
-        return MediaTypeUtility.isJsonCompatible(mediaType) ? Object.class : String.class;
+        if (isJsonCompatible(mediaType)) {
+            return Object.class;
+        } else if (isBinaryCompatible(mediaType)) {
+            return byte[].class;
+        } else {
+            return String.class;
+        }
     }
 
     private int getTailPointer(int headPointer) {
