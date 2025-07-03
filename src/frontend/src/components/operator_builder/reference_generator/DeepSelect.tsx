@@ -105,23 +105,26 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 			if (input === '') {
 				setSelectedOption(null);
 			}
+			let newOptions: OptionType[] = [];
 			if (input.includes('.')) {
 				if (
 					input.endsWith('.[0]') ||
 					input.endsWith('.[*]') ||
 					iterators.some((it) => input.endsWith(`.[${it}]`))
 				) {
-					setFilteredOptions(getNestedOptions(`${input}.`));
+					newOptions = getNestedOptions(`${input}.`);
 				} else {
-					setFilteredOptions(getNestedOptions(input));
+					newOptions = getNestedOptions(input);
 				}
 			} else {
-				setFilteredOptions(
-					allOptions.filter((option: any) =>
-						option.label.toLowerCase().startsWith(input.toLowerCase())
-					)
+				newOptions = allOptions.filter((option: any) =>
+					option.label.toLowerCase().startsWith(input.toLowerCase())
 				);
 			}
+			if (input && !newOptions.find(opt => opt.value === input)) {
+				newOptions = [{ label: input, value: input }, ...newOptions];
+			}
+			setFilteredOptions(newOptions);
 		}
 	};
 
@@ -129,6 +132,7 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 		setSelectedOption(selectedOption);
 		if (selectedOption) {
 			setSearchValue(selectedOption.value);
+			onValueSelect(selectedOption.value);
 			if (
 				selectedOption &&
 				(selectedOption.value.endsWith('.[0]') ||
