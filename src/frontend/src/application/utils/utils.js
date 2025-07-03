@@ -161,7 +161,7 @@ const DEBUGGER_LOGS = false;
 export function isNumber(number){
     return !isNaN(number);
 }
-export function consoleLog(value){
+export function consoleLog(...value){
     if(DEBUGGER_LOGS) {
         console.log(value);
     }

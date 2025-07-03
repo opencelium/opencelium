@@ -6,6 +6,7 @@ import {Client} from "@stomp/stompjs";
 import ModelCurrentSchedule from "@entity/schedule/requests/models/CurrentSchedule";
 import {SocketAppPrefix} from "../socket";
 import {Auth} from "@application/classes/Auth";
+import {consoleLog} from "@application/utils/utils";
 
 export const useCurrentSubscriptionSocket = (socket: Client | null) => {
     const {isAboutToLogout} = Auth.getReduxState();
@@ -19,14 +20,14 @@ export const useCurrentSubscriptionSocket = (socket: Client | null) => {
         }
         const subscription = socket.subscribe("/subscription", (message) => {
             const data = JSON.parse(message.body) as SubscriptionModel;
-            console.log("📩 Socket.CurrentSubscription", data);
+            consoleLog("📩 Socket.CurrentSubscription", data);
             setCurrentSubscription(data);
         });
-        console.log("✅ Subscribed to /subscription");
+        consoleLog("✅ Subscribed to /subscription");
         subscriptionRef.current = () => {
             subscription.unsubscribe();
             subscriptionRef.current = undefined;
-            console.log("🧹 Unsubscribed from /subscription");
+            consoleLog("🧹 Unsubscribed from /subscription");
         };
     }
     useEffect(() => {

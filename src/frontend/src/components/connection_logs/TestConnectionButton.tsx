@@ -13,6 +13,7 @@ import {ConnectionSocketLog, ConnectionTextLog} from "@root/requests/models/Conn
 import {addSocketLog, addTextLog, clearTextLog} from "@root/redux_toolkit/slices/ConnectionLogSlice";
 import {Button} from "@app_component/base/button/Button";
 import {terminateExecution} from "@entity/schedule/redux_toolkit/action_creators/ScheduleCreators";
+import {consoleLog} from "@application/utils/utils";
 function formatDate(date: Date): string {
     const pad = (n: number, length = 2) => n.toString().padStart(length, '0');
 
@@ -44,7 +45,7 @@ const TestConnectionButton = ({validateLogic}: any) => {
             const subscription = socket.subscribe(`/execution/logs/${channelId}`, (message) => {
                 //const data = JSON.parse(message.body) as ConnectionSocketLog;
                 const data = JSON.parse(message.body) as ConnectionTextLog;
-                console.log('Socket.ConnectionLogs', data);
+                consoleLog('Socket.ConnectionLogs', data);
                 //dispatch(addSocketLog(data));
                 dispatch(addTextLog({...data, datetime: formatDate(new Date())}));
                 if (data.message.indexOf('phase=EXECUTION_END') !== -1) {
@@ -52,11 +53,11 @@ const TestConnectionButton = ({validateLogic}: any) => {
                     subscriptionRef.current?.();
                 }
             });
-            console.log("✅ Subscribed to /execution/logs");
+            consoleLog("✅ Subscribed to /execution/logs");
             subscriptionRef.current = () => {
                 subscription.unsubscribe();
                 subscriptionRef.current = undefined;
-                console.log("🧹 Unsubscribed from /execution/logs");
+                consoleLog("🧹 Unsubscribed from /execution/logs");
             };
             startTest();
         } else {
