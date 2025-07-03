@@ -14,7 +14,7 @@ import {
 	OperatorName,
 } from '@app_component/operator_builder/interfaces/OperatorName';
 import ReferenceSwitcher from '@app_component/operator_builder/reference_generator/ReferenceSwitcher';
-import { findTopLeft, wrapField } from '@application/utils/utils';
+import { findTopLeft } from '@application/utils/utils';
 import WebhookGenerator from '@change_component/form_elements/form_connection/form_methods/method/WebhookGenerator';
 import TooltipFontIcon from '@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon';
 import Webhook from '@root/classes/Webhook';
@@ -112,7 +112,7 @@ const ReferenceGenerator = React.forwardRef(
 				let newReference = '';
 				newReference = ReferenceFactory.getReference(
 					referenceType,
-					wrapField(currentField),
+					currentField,
 					color,
 					'response'
 				);
@@ -125,7 +125,7 @@ const ReferenceGenerator = React.forwardRef(
 			if (currentField !== '') {
 				let reference = ReferenceFactory.getReference(
 					referenceType,
-					wrapField(currentField),
+					currentField,
 					color,
 					'response'
 				);

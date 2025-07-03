@@ -1218,7 +1218,7 @@ export function jsonToString(json, type) {
     return { result: '', isNotValid: true };
 }
 
-export function wrapField(fullPath) {
+export function wrapField(fullPath, namespace = []) {
 	if (/\['.*'\]$/.test(fullPath)) return fullPath;
 
 	const match = fullPath.match(/^(body\.\$\.|header\.\$\.)(.+)$/);
@@ -1227,32 +1227,32 @@ export function wrapField(fullPath) {
 	const prefix = match[1];
 	const rest = match[2];
 
-	const rawParts = rest.split('.');
-	let result = '';
-
-	for (let i = 0; i < rawParts.length; i++) {
-		const part = rawParts[i];
-
-		const isArrayIndex = /^\d+$/.test(part);
-		const needsWrapping = part.includes('.') || part.includes('@');
-
-		if (isArrayIndex) {
-			result += `[${part}]`;
-		} else if (needsWrapping) {
-			if (result && !result.endsWith('.') && !result.endsWith(']')) {
-				result += '.';
-			}
-			result += `['${part}']`;
-		} else {
-			if (result && !result.endsWith('.')) {
-				result += '.';
-			}
-			result += part;
-		}
+	const restParts = rest.split('.');
+	if (
+		namespace.length > 0 &&
+		restParts.length >= namespace.length &&
+		namespace.every((part, i) => restParts[i] === part)
+	) {
+		return fullPath;
 	}
 
-	return prefix + result;
+	const arrayMatch = rest.match(/^(\[[^\]]+\]\.)(.+)$/);
+	if (arrayMatch) {
+		const pre = arrayMatch[1];
+		const post = arrayMatch[2];
+		if (post.includes('.') || post.includes('@')) {
+			return `${prefix}${pre}['${post}']`;
+		}
+		return `${prefix}${pre}${post}`;
+	}
+
+	if (rest.includes('.') || rest.includes('@')) {
+		return `${prefix}['${rest}']`;
+	}
+
+	return fullPath;
 }
+
 
 
 export function unwrapField(field) {

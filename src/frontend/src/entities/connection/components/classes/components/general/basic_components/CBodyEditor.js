@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { consoleLog, isNumber, isString } from "@application/utils/utils";
+import { isNumber, isString, wrapField } from "@application/utils/utils";
 import {
     convertFieldNameForBackend,
     markFieldNameAsArray
@@ -51,6 +51,7 @@ export class CBodyEditor{
             }
     
             item.type = 'request';
+            item.field = wrapField(item.field, parents);
             let toBindingItems = [CBindingItem.createBindingItem(item)];
     
             let fromBindingItems = [];
@@ -65,6 +66,7 @@ export class CBodyEditor{
                         newItem.field = bindingItemSplitted.slice(2, bindingItemSplitted.length).join('.');
     
                         newItem.field = newItem.field.replace(/^header\.\$/, 'body.$');
+                        newItem.field = wrapField(newItem.field);
                         fromBindingItems.push(CBindingItem.createBindingItem(newItem));
                     }
                     break;
