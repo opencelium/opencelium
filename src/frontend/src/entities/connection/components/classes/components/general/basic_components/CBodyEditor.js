@@ -66,7 +66,7 @@ export class CBodyEditor{
                         newItem.field = bindingItemSplitted.slice(2, bindingItemSplitted.length).join('.');
     
                         newItem.field = newItem.field.replace(/^header\.\$/, 'body.$');
-                        newItem.field = wrapField(newItem.field);
+                        newItem.field = wrapField(newItem.field, parents);
                         fromBindingItems.push(CBindingItem.createBindingItem(newItem));
                     }
                     break;

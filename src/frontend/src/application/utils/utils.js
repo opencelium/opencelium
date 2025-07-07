@@ -1218,42 +1218,129 @@ export function jsonToString(json, type) {
     return { result: '', isNotValid: true };
 }
 
-export function wrapField(fullPath, namespace = []) {
-	if (/\['.*'\]$/.test(fullPath)) return fullPath;
+export function wrapField(path, namespaces = []) {
+  const rawParts = [];
+  let currentChunk = '';
+  let inBracket = false;
+  for (const ch of path) {
+    if (ch === '[' && !inBracket) {
+      inBracket = true; currentChunk += ch;
+    } else if (ch === ']' && inBracket) {
+      inBracket = false; currentChunk += ch;
+    } else if (ch === '.' && !inBracket) {
+      rawParts.push(currentChunk); currentChunk = '';
+    } else {
+      currentChunk += ch;
+    }
+  }
+  if (currentChunk) rawParts.push(currentChunk);
 
-	const match = fullPath.match(/^(body\.\$\.|header\.\$\.)(.+)$/);
-	if (!match) return fullPath;
+  const prefixParts = [];
+  let idx = 0;
+  if (
+    rawParts[0] && (rawParts[0] === 'body' || rawParts[0] === 'header') &&
+    rawParts[1] === '$'
+  ) {
+    prefixParts.push(rawParts[0], rawParts[1]);
+    idx = 2;
+  }
 
-	const prefix = match[1];
-	const rest = match[2];
+  const afterPrefix = rawParts.slice(idx);
+  let tokens = afterPrefix;
+  if (afterPrefix.length && (/^\[\d+\]$/.test(afterPrefix[0]) || afterPrefix[0] === '[*]')) {
+    prefixParts.push(afterPrefix[0]);
+    tokens = afterPrefix.slice(1);
+  }
 
-	const restParts = rest.split('.');
-	if (
-		namespace.length > 0 &&
-		restParts.length >= namespace.length &&
-		namespace.every((part, i) => restParts[i] === part)
-	) {
-		return fullPath;
-	}
+  function isPlain(name) {
+    if (name === 'body' || name === '$') return false;
+    if (/^\[\d+\]$/.test(name) || name === '[*]') return false;
+    if (/^\['.*'\]$/.test(name)) return false;
+    return true;
+  }
 
-	const arrayMatch = rest.match(/^(\[[^\]]+\]\.)(.+)$/);
-	if (arrayMatch) {
-		const pre = arrayMatch[1];
-		const post = arrayMatch[2];
-		if (post.includes('.') || post.includes('@')) {
-			return `${prefix}${pre}['${post}']`;
-		}
-		return `${prefix}${pre}${post}`;
-	}
+  if (
+    namespaces.length === 0 &&
+    (
+      (tokens.length > 1 && tokens.every(isPlain)) ||
+      (tokens[0] === '$' && tokens.length > 2 && tokens.slice(1).every(isPlain))
+    )
+  ) {
+    const entire = `['${tokens.join('.') }']`;
+    return [...prefixParts, entire].join('.');
+  }
 
-	if (rest.includes('.') || rest.includes('@')) {
-		return `${prefix}['${rest}']`;
-	}
+  const singleNs = new Set(namespaces.filter(ns => !ns.includes('.')));
 
-	return fullPath;
+  const wrapped = [];
+  let i = 0;
+  while (i < tokens.length) {
+    let matchedFull = false;
+    for (const ns of namespaces) {
+      const parts = ns.split('.');
+      if (tokens.slice(i, i + parts.length).join('.') === parts.join('.')) {
+        wrapped.push(parts.length === 1 ? parts[0] : `['${ns}']`);
+        i += parts.length;
+        matchedFull = true;
+        break;
+      }
+    }
+    if (matchedFull) continue;
+
+    if (
+      wrapped.length === 0 &&
+      prefixParts.length >= 2 &&
+      i + 1 < tokens.length &&
+      isPlain(tokens[i]) &&
+      isPlain(tokens[i+1])
+    ) {
+      wrapped.push(`['${tokens[i]}.${tokens[i+1]}']`);
+      i += 2;
+      continue;
+    }
+
+    const prev = wrapped[wrapped.length - 1];
+    if (
+      prev !== undefined &&
+      singleNs.has(prev) &&
+      i + 1 < tokens.length &&
+      isPlain(tokens[i]) &&
+      isPlain(tokens[i+1])
+    ) {
+      wrapped.push(`['${tokens[i]}.${tokens[i+1]}']`);
+      i += 2;
+      continue;
+    }
+
+    if (
+      namespaces.length === 0 &&
+      prev !== undefined &&
+      (/^\[\d+\]$/.test(prev) || prev === '[*]') &&
+      i + 1 < tokens.length &&
+      isPlain(tokens[i]) &&
+      isPlain(tokens[i+1])
+    ) {
+      wrapped.push(`['${tokens[i]}.${tokens[i+1]}']`);
+      i += 2;
+      continue;
+    }
+
+    const part = tokens[i++];
+    if (
+      part === 'body' || part === '$' ||
+      /^\[\d+\]$/.test(part) || part === '[*]' ||
+      /^\['.*'\]$/.test(part)
+    ) {
+      wrapped.push(part);
+    } else if (part.includes('.') || part.includes('$')) {
+      wrapped.push(`['${part}']`);
+    } else {
+      wrapped.push(part);
+    }
+  }
+
+  return [...prefixParts, ...wrapped].join('.');
 }
-
-
 
 export function unwrapField(field) {
   return field.replace(/\['(.*?)'\]/g, '$1');
