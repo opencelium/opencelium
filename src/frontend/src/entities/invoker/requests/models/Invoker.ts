@@ -24,4 +24,5 @@ export default interface ModelInvoker{
     name: string;
     operations: ModelOperation[];
     requiredData: string[];
+    hasManualSync?: boolean;
 }
