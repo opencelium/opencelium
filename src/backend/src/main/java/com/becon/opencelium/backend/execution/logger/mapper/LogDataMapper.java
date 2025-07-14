@@ -48,9 +48,9 @@ public class LogDataMapper {
         return props.entrySet().stream()
                 .filter(e -> e.getKey() != null)
                 .collect(Collectors.toMap(
-                        e -> e.getKey().name(),           // Convert LogLineKey to String
+                        e -> e.getKey().name().toLowerCase(Locale.ROOT),           // Convert LogLineKey to String
                         e -> e.getValue() != null ? e.getValue().toString() : "",
-                        (v1, v2) -> v2.toLowerCase(Locale.ROOT),
+                        (v1, v2) -> v2,
                         LinkedHashMap::new
                 ));
     }
