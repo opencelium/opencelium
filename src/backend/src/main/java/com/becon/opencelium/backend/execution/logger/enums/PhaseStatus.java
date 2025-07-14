@@ -1,5 +1,5 @@
 package com.becon.opencelium.backend.execution.logger.enums;
 
-public enum LogMetaDataStatus {
+public enum PhaseStatus {
     PENDING, COMPLETE, FAIL
 }

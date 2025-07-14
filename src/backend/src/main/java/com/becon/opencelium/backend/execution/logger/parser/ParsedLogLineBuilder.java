@@ -1,5 +1,7 @@
 package com.becon.opencelium.backend.execution.logger.parser;
 
+import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
+import com.becon.opencelium.backend.execution.logger.mapper.ParsedLogLineMapper;
 import com.becon.opencelium.backend.execution.logger.parser.entity.ParsedLogLine;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +24,7 @@ public class ParsedLogLineBuilder {
 
     // Fully builds a ParsedLogLine from a raw log line.
     public ParsedLogLine build(String line, long offset) {
-        Map<String, String> parsed = parser.parse(line);
+        Map<LogLineKey, String> parsed = parser.parse(line);
         return mapper.map(parsed, offset);
     }
 }

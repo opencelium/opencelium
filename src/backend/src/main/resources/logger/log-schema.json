@@ -1,0 +1,60 @@
+{
+  "LIGHTWEIGHT": {
+    "OPERATION" : {
+      "emitOn": "OPERATION_END",
+      "properties": ["name", "indexPath", "loopIndex", "loopIterator"],
+      "segments": {
+        "REQUEST": ["url", "http_method"],
+        "RESPONSE": ["status", "duration"],
+        "EXCEPTION": ["data"]
+      }
+    },
+    "IF" : {
+      "emitOn": "IF_RESULT",
+      "properties" : ["indexPath", "expression", "loopIndex", "loopIterator"],
+      "segments" : {
+        "IF_RESULT": ["data"],
+        "EXCEPTION": ["data"]
+      }
+    },
+    "LOOP" : {
+      "emitOn": "LOOP_START",
+      "properties" : ["indexPath", "expression", "iterator", "loopIndex", "loopIterator"],
+      "segments" : {
+        "EXCEPTION": ["data"]
+      }
+    }
+  },
+  "DETAILED": {
+    "OPERATION" : {
+      "emitOn": "OPERATION_END",
+      "properties": ["name", "indexPath", "loopIndex", "loopIterator"],
+      "segments": {
+        "REQUEST": ["url", "http_method"],
+        "REQUEST_HEADER": ["data"],
+        "REQUEST_PAYLOAD": ["data"],
+        "RESPONSE": ["status", "duration"],
+        "RESPONSE_HEADER": ["data"],
+        "RESPONSE_PAYLOAD": ["data"],
+        "EXCEPTION": ["data"]
+      }
+    },
+    "IF" : {
+      "emitOn": "IF_RESULT",
+      "properties" : ["indexPath", "expression", "loopIndex", "loopIterator"],
+      "segments" : {
+        "IF_RESULT": ["data"],
+        "IF_REF": ["ref", "data"],
+        "EXCEPTION": ["data"]
+      }
+    },
+    "LOOP" : {
+      "emitOn": "LOOP_REF",
+      "properties" : ["indexPath", "expression", "iterator", "loopIndex", "loopIterator"],
+      "segments" : {
+        "LOOP_REF": ["data"],
+        "EXCEPTION": ["data"]
+      }
+    }
+  }
+}

@@ -1,8 +1,11 @@
 package com.becon.opencelium.backend.database.mongodb.entity;
 
 import com.becon.opencelium.backend.execution.logger.enums.PhaseCategory;
-import com.becon.opencelium.backend.execution.logger.enums.LogMetaDataStatus;
+import com.becon.opencelium.backend.execution.logger.enums.PhaseStatus;
 import com.becon.opencelium.backend.execution.logger.enums.LogLineType;
+import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
+import com.mongodb.lang.NonNull;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -13,7 +16,8 @@ import java.util.Map;
 
 @Document(collection = "log_data")
 @CompoundIndex(name = "exec_connection_flowchart_indexPath_idx",
-        def = "{'executionId': 1, 'connectionId': 1, 'flowchartId': 1, 'indexPath': 1}")
+        def = "{'executionId': 1, 'connectionId': 1, 'flowchartId': 1, 'indexPath': 1}",
+        unique = true)
 public class LogData {
     @Id
     private String id;
@@ -22,7 +26,7 @@ public class LogData {
     private String executionId;
     private String flowchartId;
 
-    private LogMetaDataStatus status;
+    private PhaseStatus status;
     private String indexPath;
     private Long startOffset;
     private Long endOffset;
@@ -30,7 +34,7 @@ public class LogData {
     private LogLineType logLineType; // PHASE
     private PhaseCategory type;       // e.g., LOOP, IF
 
-    private Map<String, Object> properties = new HashMap<>();
+    private Map<LogLineKey, Object> properties = new HashMap<>();
 
     private Instant createdAt;
 
@@ -66,11 +70,11 @@ public class LogData {
         this.flowchartId = flowchartId;
     }
 
-    public LogMetaDataStatus getStatus() {
+    public PhaseStatus getStatus() {
         return status;
     }
 
-    public void setStatus(LogMetaDataStatus status) {
+    public void setStatus(PhaseStatus status) {
         this.status = status;
     }
 
@@ -118,11 +122,11 @@ public class LogData {
         this.type = type;
     }
 
-    public Map<String, Object> getProperties() {
+    public Map<LogLineKey, Object> getProperties() {
         return properties;
     }
 
-    public void setProperties(Map<String, Object> properties) {
+    public void setProperties(Map<LogLineKey, Object> properties) {
         this.properties = properties;
     }
 

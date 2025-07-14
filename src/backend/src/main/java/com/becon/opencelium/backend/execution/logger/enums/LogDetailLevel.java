@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.execution.logger.enums;
 
-public enum LogProcessingMode {
-    METADATA,
-    FULL
+public enum LogDetailLevel {
+    LIGHTWEIGHT,
+    DETAILED
 }

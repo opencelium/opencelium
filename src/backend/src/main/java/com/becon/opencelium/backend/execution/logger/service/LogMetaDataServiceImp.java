@@ -2,7 +2,11 @@ package com.becon.opencelium.backend.execution.logger.service;
 
 import com.becon.opencelium.backend.database.mongodb.entity.LogData;
 import com.becon.opencelium.backend.database.mongodb.repository.MetaDataLogRepository;
+import com.becon.opencelium.backend.execution.logger.dto.LogDataDTO;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseCategory;
+import com.becon.opencelium.backend.execution.logger.enums.PhaseType;
+import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
+import com.becon.opencelium.backend.execution.logger.mapper.LogDataMapper;
 import com.becon.opencelium.backend.execution.logger.parser.entity.ParsedLogLine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,12 +23,21 @@ import java.util.Set;
 @Service
 public class LogMetaDataServiceImp implements LogMetaDataService {
     // Fields commonly known and excluded from "properties"
-    private static final Set<String> EXCLUDED_KEYS = Set.of(
-            "timestamp", "log_level", "msg", "segment", "phase", "indexPath", "fchartId"
+    private static final Set<LogLineKey> EXCLUDED_KEYS = Set.of(
+            LogLineKey.TIMESTAMP,
+            LogLineKey.LOG_LEVEL,
+            LogLineKey.MESSAGE,
+            LogLineKey.SEGMENT,
+            LogLineKey.PHASE,
+            LogLineKey.INDEX_PATH,
+            LogLineKey.FLOWCHART_ID
     );
 
     @Autowired
     private MetaDataLogRepository metaDataLogRepository;
+
+    @Autowired
+    private LogDataMapper logDataMapper;
 
     /**
      * Saves a new block document for a *_START log line.
@@ -33,7 +46,7 @@ public class LogMetaDataServiceImp implements LogMetaDataService {
      * @param block the parsed block metadata to store
      */
     @Override
-    public void saveStartBlock(LogData block) {
+    public void saveNewBlock(LogData block) {
         block.setCreatedAt(Instant.now());
         metaDataLogRepository.save(block);
     }
@@ -46,31 +59,35 @@ public class LogMetaDataServiceImp implements LogMetaDataService {
      * @param block the END block (only startOffset contains the correct ending offset)
      */
     @Override
-    public void updateEndOffset(LogData block) {
-        Optional<LogData> optional;
-        if (block.getProperties().containsKey("loopIndex")) {
-            optional = metaDataLogRepository.findByExecutionConnectionFlowchartIndexPathAndLoopIndex(
-                    block.getConnectionId(),
-                    block.getExecutionId(),
-                    block.getFlowchartId(),
-                    block.getIndexPath(),
-                    block.getProperties().get("loopIndex").toString()
-            );
-        } else {
-            optional = metaDataLogRepository.findByConnectionIdAndExecutionIdAndFlowchartIdAndIndexPath(
-                    block.getConnectionId(),
-                    block.getExecutionId(),
-                    block.getFlowchartId(),
-                    block.getIndexPath()
-            );
+    public void updateExistingBlock(LogData block) {
+        Optional<LogData> existing = findExistingBlock(block);
+        if (existing.isEmpty()) {
+            // fallback: either log, throw, or insert as new
+            block.setCreatedAt(Instant.now());
+            metaDataLogRepository.save(block);
+            return;
         }
 
-        optional.ifPresent(b -> {
-            // only StartOffset are initialized during mapping from ParsedLogLine to ParsedLogBlockDocument
-            b.setEndOffset(block.getStartOffset());
-            b.setStatus(block.getStatus());
-            metaDataLogRepository.save(b);
-        });
+        LogData dbBlock = existing.get();
+        dbBlock.setEndOffset(block.getStartOffset());
+        dbBlock.setStatus(block.getStatus());
+        metaDataLogRepository.save(dbBlock);
+    }
+
+    @Override
+    public void save(LogData block) {
+        switch (block.getStatus()) {
+            case PENDING -> saveNewBlock(block);
+            case COMPLETE, FAIL -> updateExistingBlock(block);
+            default -> throw new IllegalStateException(
+                    "Unexpected status: " + block.getStatus()
+            );
+        }
+    }
+
+    @Override
+    public Optional<LogDataDTO> toDto(LogData logData) {
+        return Optional.of(logDataMapper.toDto(logData));
     }
 
     /**
@@ -92,15 +109,15 @@ public class LogMetaDataServiceImp implements LogMetaDataService {
         doc.setConnectionId(connectionId);
         doc.setFlowchartId(flowchartId);
 
-        doc.setIndexPath(line.getProperties().get("indexPath"));
+        doc.setIndexPath(line.getProperties().get(LogLineKey.INDEX_PATH));
         doc.setStartOffset(line.getOffset());
 
-        doc.setLogLineType(line.getLogLineType());
-        doc.setType(PhaseCategory.fromValue(line.getStage()));
+        doc.setLogLineType(line.getType());
+        doc.setType(PhaseCategory.fromValue((PhaseType) line.getStage()));
 
         // Include all other unknown fields in the 'properties' map
-        Map<String, Object> props = new LinkedHashMap<>();
-        for (Map.Entry<String, String> entry : line.getProperties().entrySet()) {
+        Map<LogLineKey, Object> props = new LinkedHashMap<>();
+        for (Map.Entry<LogLineKey, String> entry : line.getProperties().entrySet()) {
             if (!EXCLUDED_KEYS.contains(entry.getKey())) {
                 props.put(entry.getKey(), entry.getValue());
             }
@@ -109,5 +126,25 @@ public class LogMetaDataServiceImp implements LogMetaDataService {
         doc.setProperties(props);
         doc.setCreatedAt(Instant.now());
         return doc;
+    }
+
+    // --------------------------------------- Private Functions ----------------------------------------------
+    private Optional<LogData> findExistingBlock(LogData block) {
+        if (block.getProperties().containsKey(LogLineKey.LOOP_INDEX)) {
+            return metaDataLogRepository.findByExecutionConnectionFlowchartIndexPathAndLoopIndex(
+                    block.getConnectionId(),
+                    block.getExecutionId(),
+                    block.getFlowchartId(),
+                    block.getIndexPath(),
+                    block.getProperties().get(LogLineKey.LOOP_INDEX).toString()
+            );
+        } else {
+            return metaDataLogRepository.findByConnectionIdAndExecutionIdAndFlowchartIdAndIndexPath(
+                    block.getConnectionId(),
+                    block.getExecutionId(),
+                    block.getFlowchartId(),
+                    block.getIndexPath()
+            );
+        }
     }
 }

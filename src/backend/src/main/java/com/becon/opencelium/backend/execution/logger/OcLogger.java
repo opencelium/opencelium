@@ -4,10 +4,8 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
-import com.becon.opencelium.backend.database.mongodb.entity.LogData;
-import com.becon.opencelium.backend.execution.logger.enums.LogLineType;
+import com.becon.opencelium.backend.execution.logger.dto.LogDataDTO;
 import com.becon.opencelium.backend.execution.logger.parser.ParsedLogLineBuilder;
-import com.becon.opencelium.backend.execution.logger.parser.entity.ParsedLogLine;
 import com.becon.opencelium.backend.execution.socket.WebSocketNotificationService;
 import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
 import com.becon.opencelium.backend.resource.execution.LoggerConfiguration;
@@ -17,7 +15,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.RandomAccessFile;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,7 +34,6 @@ public class OcLogger<T extends LogMessage> {
     private final long connectionId;
     private final Path filepath;
     private final Logger logger;
-    ParsedLogLineBuilder parsedLogLineBuilder;
 
     public static final String LOG_LOCATION = "src/main/resources/logs";
 
@@ -45,7 +44,6 @@ public class OcLogger<T extends LogMessage> {
         this.supportFile = loggerConfiguration.getTriggerType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE;
 
         this.socketNotificationService = ApplicationContextUtility.getBean(WebSocketNotificationService.class);
-        this.parsedLogLineBuilder = ApplicationContextUtility.getBean(ParsedLogLineBuilder.class);
         this.logLineDispatcher = new LogLineDispatcher();
         this.connectionId = connectionId;
         this.logEntity = logEntity;
@@ -109,11 +107,10 @@ public class OcLogger<T extends LogMessage> {
     }
 
     public void logAndSend(Exception e){
-        Consumer<Exception> printStrategy = x -> {
-            logger.error("segment=EXCEPTION data=" + e.getMessage(), e);
-        };
-
-        logAndSend(printStrategy, e);
+        String stackTrace = getStackTraceAsString(e);
+        String logMessage = "segment=EXCEPTION data=" + stackTrace;
+        Consumer<String> printStrategy = logger::info;
+        logAndSend(printStrategy, logMessage);
     }
 
 
@@ -127,12 +124,9 @@ public class OcLogger<T extends LogMessage> {
         t.accept(message);
 
         if (webSocket) {
-            ParsedLogLine parsedLine = parsedLogLineBuilder.build(message.toString(), startOffset);
-            Optional<LogData> logData = logLineDispatcher.dispatch(parsedLine);
-
-            if (logMetaData.isPresent() && (logMetaData.get().getLogLineType() == LogLineType.PHASE)) {
-                Object obj = logLineDispatcher.toDto(logMetaData.get());
-                socketNotificationService.send(connectionId, obj);
+            Optional<LogDataDTO> logData = logLineDispatcher.dispatch(message.toString(), startOffset);
+            if (logData.isPresent()) {
+                socketNotificationService.send(connectionId, logData);
             }
         }
     }
@@ -155,5 +149,11 @@ public class OcLogger<T extends LogMessage> {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String getStackTraceAsString(Throwable e) {
+        StringWriter sw = new StringWriter();
+        e.printStackTrace(new PrintWriter(sw));
+        return sw.toString();
     }
 }
