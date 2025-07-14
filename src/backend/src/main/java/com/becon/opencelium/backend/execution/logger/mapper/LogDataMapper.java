@@ -7,10 +7,7 @@ import com.becon.opencelium.backend.execution.logger.enums.PhaseStatus;
 import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -53,7 +50,7 @@ public class LogDataMapper {
                 .collect(Collectors.toMap(
                         e -> e.getKey().name(),           // Convert LogLineKey to String
                         e -> e.getValue() != null ? e.getValue().toString() : "",
-                        (v1, v2) -> v2,
+                        (v1, v2) -> v2.toLowerCase(Locale.ROOT),
                         LinkedHashMap::new
                 ));
     }
