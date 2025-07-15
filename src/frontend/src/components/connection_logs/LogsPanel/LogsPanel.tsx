@@ -10,6 +10,8 @@ import { ITheme } from '@style/Theme';
 import React, { useState } from 'react';
 import {clearTextLog} from "@root/redux_toolkit/slices/ConnectionLogSlice";
 import LogViewer from "@app_component/connection_logs/TextLog";
+import {deleteLogs} from "@root/redux_toolkit/action_creators/ConnectionLogCreators";
+import ConnectorPanel from "@app_component/connection_logs/ConnectorPanel/ConnectorPanel";
 export const ShowIndexPath = false;
 
 interface LogsPanelProps {
@@ -18,17 +20,17 @@ interface LogsPanelProps {
 
 const LogsPanel: React.FC<LogsPanelProps> = ({theme}) => {
   const dispatch = useAppDispatch();
-  const {textLogs} = useAppSelector((state: RootState) => state.connectionLogReducer);
+  const {textLogs, executionId, connectors} = useAppSelector((state: RootState) => state.connectionLogReducer);
   const {
     logPanelHeight, isDetailsOpened
   } = Connection.getReduxState();
   const {isFullScreen} = Application.getReduxState();
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleDeleteLogs = async (/*executionId: string, connectionId: string*/) => {
-    /*setIsDeleting(true);
-    await dispatch(deleteLogs({ executionId, connectionId }));
-    setIsDeleting(false);*/
+  const handleDeleteLogs = async (executionId: string) => {
+    setIsDeleting(true);
+    await dispatch(deleteLogs({ executionId }));
+    setIsDeleting(false);
     dispatch(clearTextLog());
   };
 
@@ -46,31 +48,29 @@ const LogsPanel: React.FC<LogsPanelProps> = ({theme}) => {
               tooltip={'Clear Logs'}
               target={`clear_log_panel`}
               hasBackground={false}
-              handleClick={() => handleDeleteLogs(/*executionId, connectionId*/)}
+              handleClick={() => handleDeleteLogs(executionId)}
           />}
         </TopStyled>
       <LogPanelStyled id={'connection_current_logs'} isFullScreen={isFullScreen} noLogs={textLogs.length === 0} isDetailsOpened={isDetailsOpened} logPanelHeight={logPanelHeight}>
-        <div style={{display: 'grid', gap: 10}}>
+        {/*<div style={{display: 'grid', gap: 10}}>
         {
           textLogs.map(log => {
             return (
                 <React.Fragment>
-                  {/*<div>{`${log.datetime} ${log.type} ${log.message}`}</div>*/}
                   <LogViewer logText={`${log.datetime} ${log.type} ${log.message}`}/>
                 </React.Fragment>
             )
           })
         }
-        </div>
-          {/*{connectionLog.connectors.map((connector) => (
+        </div>*/}
+          {connectors.map((connector) => (
             <ConnectorPanel
-              key={connector.id}
+              key={connector.flowId}
               connector={connector}
-              executionId={connectionLog.executionId}
-              connectionId={connectionLog.connectionId}
+              executionId={executionId}
               theme={theme}
             />
-          ))}*/}
+          ))}
       </LogPanelStyled>
     </React.Fragment>
   );

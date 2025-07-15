@@ -1,30 +1,33 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import {
-	ConnectionLog, ConnectionSocketLog, ConnectionTextLog,
-	MethodTrace,
-	OperatorTrace,
+	ConnectionSocketLog,
+	ConnectionTextLog,
+	ConnectorLog,
+	DetailedMethodSegment,
+	LightSegment,
 } from '@root/requests/models/ConnectionLog';
 import {
 	deleteLogs,
-	getMethodTrace,
-	getOperatorTrace, testConnection,
+	getDetailedMethod,
+	getDetailedOperator, getOperatorChildren, testConnection,
 } from '../action_creators/ConnectionLogCreators';
 import {findAndUpdateTrace} from "@root/utils/utils";
 
-export interface ConnectionLogState extends ConnectionLog {
-	textLogs: ConnectionTextLog[],
+export interface ConnectionLogState {
+	executionId: string,
 	schedulerId: number,
+	connectors: ConnectorLog[],
+	textLogs: ConnectionTextLog[],
 }
 
 export const initialState: ConnectionLogState = {
 	schedulerId: undefined,
-	connectionId: '',
 	executionId: '',
 	connectors: [],
 	textLogs: [],
 };
 interface CleanTracePayload {
-	connectorId: string;
+	flowId: string;
 	indexPath: string;
 }
 
@@ -38,50 +41,51 @@ export const connectionLogSlice = createSlice({
 		clearTextLog: (state) => {
 			state.textLogs = [];
 		},
-		addSocketLog: (state, action: PayloadAction<ConnectionSocketLog>) => {
-			const {executionId, connectionId, connectorId, connectorName, ...newTrace} = action.payload;
-			if (state.executionId === action.payload.executionId && state.connectionId === action.payload.connectionId) {
+		addSocketLog: (state, action: PayloadAction<ConnectionSocketLog<LightSegment>>) => {
+			const {executionId, flowId, connectorName, ...newTrace} = action.payload;
+			if (state.executionId === action.payload.executionId) {
 				let hasConnector = false;
 				state.connectors.forEach((connector) => {
-					if (connector.id === action.payload.connectorId) {
+					if (connector.flowId === action.payload.flowId) {
 						hasConnector = true;
-						connector.traces.push(newTrace);
+						connector.traces.push(action.payload);
 						return;
 					}
 				});
 				if (!hasConnector) {
 					state.connectors.push({
-						id: connectorId,
+						flowId,
 						name: connectorName,
-						traces: [newTrace],
+						traces: [action.payload],
 					})
 				}
 			} else {
 				state.executionId = executionId;
-				state.connectionId = connectionId;
-				state.connectors = [{id: connectorId, name: connectorName, traces: [newTrace]}]
+				state.connectors = [{flowId, name: connectorName, traces: [action.payload]}]
 			}
 		},
 		cleanMethodTrace: (state, action: PayloadAction<CleanTracePayload>) => {
-			const { connectorId, indexPath } = action.payload;
+			const { flowId, indexPath } = action.payload;
 			state.connectors.forEach((connector) => {
-				if (connector.id === connectorId) {
+				if (connector.flowId === flowId) {
 					connector.traces.forEach((trace) => {
-						if (trace.logType === 'method' && trace.indexPath === indexPath) {
-							delete (trace as MethodTrace).requestDetails;
-							delete (trace as MethodTrace).responseDetails;
+						if (trace.type === 'OPERATION' && trace.indexPath === indexPath) {
+							delete (trace as ConnectionSocketLog<DetailedMethodSegment>).segment.request.header;
+							delete (trace as ConnectionSocketLog<DetailedMethodSegment>).segment.request.payload;
+							delete (trace as ConnectionSocketLog<DetailedMethodSegment>).segment.response.header;
+							delete (trace as ConnectionSocketLog<DetailedMethodSegment>).segment.response.payload;
 						}
 					});
 				}
 			});
 		},
 		cleanOperatorTrace: (state, action: PayloadAction<CleanTracePayload>) => {
-			const { connectorId, indexPath } = action.payload;
+			const { flowId, indexPath } = action.payload;
 			state.connectors.forEach((connector) => {
-				if (connector.id === connectorId) {
+				if (connector.flowId === flowId) {
 					connector.traces.forEach((trace) => {
-						if (trace.logType === 'operator' && trace.indexPath === indexPath) {
-							(trace as OperatorTrace).traces = [];
+						if ((trace.type === 'IF' || trace.type === 'LOOP') && trace.indexPath === indexPath) {
+							trace.children = [];
 						}
 					});
 				}
@@ -92,42 +96,54 @@ export const connectionLogSlice = createSlice({
 		builder.addCase(testConnection.fulfilled, (state, action) => {
 			state.schedulerId = action.payload.schedulerId;
 		});
-		builder.addCase(getMethodTrace.fulfilled, (state, action) => {
-			const { connectorId, indexPath, executionId } = action.meta.arg;
-			const {requestDetails, responseDetails} = action.payload;
+		builder.addCase(getDetailedMethod.fulfilled, (state, action) => {
+			const { flowId, indexPath, executionId } = action.meta.arg;
+			const {segment} = action.payload;
 			if (state.executionId !== executionId) return;
-			const connector = state.connectors.find(c => c.id === connectorId);
+			const connector = state.connectors.find(c => c.flowId === flowId);
 			if (!connector) return;
-
 			findAndUpdateTrace(connector.traces, indexPath, (trace) => {
-				if (trace.logType === 'method') {
-					(trace as MethodTrace).requestDetails = requestDetails;
-					(trace as MethodTrace).responseDetails = responseDetails;
+				if (trace.type === 'OPERATION') {
+					trace.segment = segment;
 					return true;
 				}
 				return false;
 			});
 		});
-		builder.addCase(getOperatorTrace.fulfilled, (state, action) => {
-			const { connectorId, indexPath, executionId } = action.meta.arg;
-			const {traces} = action.payload;
+		builder.addCase(getDetailedOperator.fulfilled, (state, action) => {
+			const { flowId, indexPath, executionId } = action.meta.arg;
+			const {segment} = action.payload;
 			if (state.executionId !== executionId) return;
-			const connector = state.connectors.find(c => c.id === connectorId);
+			const connector = state.connectors.find(c => c.flowId === flowId);
 			if (!connector) return;
 			findAndUpdateTrace(connector.traces, indexPath, (trace) => {
-				if (trace.logType === 'operator') {
-					(trace as OperatorTrace).traces = traces;
+				if (trace.type === 'LOOP' || trace.type === 'IF') {
+					trace.segment = segment;
+					return true;
+				}
+				return false;
+			});
+		});
+		builder.addCase(getOperatorChildren.fulfilled, (state, action) => {
+			const { flowId, indexPath, executionId, loopIndex } = action.meta.arg;
+			if (state.executionId !== executionId) return;
+			const connector = state.connectors.find(c => c.flowId === flowId);
+			if (!connector) return;
+			findAndUpdateTrace(connector.traces, indexPath, (trace) => {
+				if (trace.type === 'LOOP' || trace.type === 'IF') {
+					trace.children = action.payload;
 					return true;
 				}
 				return false;
 			});
 		});
 		builder.addCase(deleteLogs.fulfilled, (state, action) => {
-			const { connectionId } = action.meta.arg;
-			if (state.connectionId === connectionId) {
-				state.connectors = [];
-				state.connectionId = '';
+			const { executionId } = action.meta.arg;
+			if (state.executionId === executionId) {
 				state.executionId = '';
+				state.schedulerId = undefined;
+				state.connectors = [];
+				state.textLogs = [];
 			}
 		});
 	},

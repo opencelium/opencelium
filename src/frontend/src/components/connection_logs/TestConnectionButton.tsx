@@ -1,16 +1,15 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {ColorTheme} from "@style/Theme";
 import {TextSize} from "@app_component/base/text/interfaces";
-import {TooltipButton} from "@app_component/base/tooltip_button/TooltipButton";
 import {RootState, useAppDispatch, useAppSelector} from "@application/utils/store";
 import {deleteLogs, testConnection} from "@root/redux_toolkit/action_creators/ConnectionLogCreators";
-import styles from './LogsPanel.module.css';
+import styles from './LogsPanel/LogsPanel.module.css';
 import {setFullScreen} from "@application/redux_toolkit/slices/ApplicationSlice";
 import {LogPanelHeight, setButtonPanelVisibility, setLogPanelHeight} from "@root/redux_toolkit/slices/ConnectionSlice";
 import {generateUUID} from "@app_component/operator_builder/utils";
 import {useSocketData} from "../../socket/SocketDataContext";
-import {ConnectionSocketLog, ConnectionTextLog} from "@root/requests/models/ConnectionLog";
-import {addSocketLog, addTextLog, clearTextLog} from "@root/redux_toolkit/slices/ConnectionLogSlice";
+import {ConnectionSocketLog, LightSegment} from "@root/requests/models/ConnectionLog";
+import {addSocketLog, clearTextLog} from "@root/redux_toolkit/slices/ConnectionLogSlice";
 import {Button} from "@app_component/base/button/Button";
 import {terminateExecution} from "@entity/schedule/redux_toolkit/action_creators/ScheduleCreators";
 function formatDate(date: Date): string {
@@ -32,7 +31,7 @@ const TestConnectionButton = ({validateLogic}: any) => {
     const [isTesting, setIsTesting] = useState(false);
     const [channelId, setChannelId] = useState<string>(undefined);
     const {connection} = useAppSelector((state: RootState) => state.connectionReducer);
-    const {executionId, connectionId, schedulerId} = useAppSelector((state: RootState) => state.connectionLogReducer);
+    const {executionId, schedulerId} = useAppSelector((state: RootState) => state.connectionLogReducer);
     const subscriptionRef = useRef<() => void>();
 
     useEffect(() => {
@@ -42,14 +41,15 @@ const TestConnectionButton = ({validateLogic}: any) => {
                 return;
             }
             const subscription = socket.subscribe(`/execution/logs/${channelId}`, (message) => {
-                //const data = JSON.parse(message.body) as ConnectionSocketLog;
-                const data = JSON.parse(message.body) as ConnectionTextLog;
+                const data = JSON.parse(message.body) as ConnectionSocketLog<LightSegment>;
                 console.log('Socket.ConnectionLogs', data);
-                //dispatch(addSocketLog(data));
+                dispatch(addSocketLog(data));
+                /*const data = JSON.parse(message.body) as ConnectionTextLog;
+                console.log('Socket.ConnectionLogs', data);
                 dispatch(addTextLog({...data, datetime: formatDate(new Date())}));
                 if (data.message.indexOf('phase=EXECUTION_END') !== -1) {
                     setIsTesting(false);
-                }
+                }*/
             });
             console.log("✅ Subscribed to /execution/logs");
             subscriptionRef.current = () => {
@@ -66,8 +66,8 @@ const TestConnectionButton = ({validateLogic}: any) => {
     const startTest = () => {
         if (channelId) {
             dispatch(clearTextLog());
-            if (executionId && connectionId) {
-                dispatch(deleteLogs({executionId, connectionId}));
+            if (executionId) {
+                dispatch(deleteLogs({executionId}));
             }
             dispatch(setFullScreen(true));
             dispatch(setButtonPanelVisibility(false));

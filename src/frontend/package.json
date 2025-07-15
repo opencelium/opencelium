@@ -1,6 +1,6 @@
 {
   "name": "opencelium",
-  "version": "4.3",
+  "version": "4.5",
   "description": "OpenSource API-Hub",
   "private": true,
   "main": "src/index.jsx",

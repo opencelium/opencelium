@@ -1,26 +1,28 @@
-import { MethodTrace as MethodTraceType } from '@root/requests/models/ConnectionLog';
+import {
+	ConnectionSocketLog,
+	DetailedMethodSegment, HttpMethodType, MethodRequest,
+} from '@root/requests/models/ConnectionLog';
 import React, { useState } from 'react';
 import { Nav, NavItem, NavLink, TabContent, TabPane } from 'reactstrap';
 import ToggleButton from '../ToggleButton/ToggleButton';
 import styles from './MethodTrace.module.css';
 
-import { ShowIndexPath } from '@app_component/connection_logs/LogsPanel';
 import LimitedAceEditor from '@app_component/limited_ace_editor/LimitedAceEditor';
 import { useAppDispatch } from '@application/utils/store';
-import { getMethodTrace } from '@root/redux_toolkit/action_creators/ConnectionLogCreators';
 import { cleanMethodTrace } from '@root/redux_toolkit/slices/ConnectionLogSlice';
 import { ITheme } from '@style/Theme';
 import Validation from "@application/classes/Validation";
+import {getDetailedMethod} from "@root/redux_toolkit/action_creators/ConnectionLogCreators";
+import {ShowIndexPath} from "@app_component/connection_logs/LogsPanel/LogsPanel";
 
 interface MethodTraceProps {
-	trace: MethodTraceType;
-	connectorId: string;
+	trace: ConnectionSocketLog<DetailedMethodSegment>;
+	flowId: string;
 	executionId: string;
-	connectionId: string;
 	theme: ITheme;
 }
 
-function getMethodColor(httpMethod: MethodTraceType['httpMethod']): string {
+function getMethodColor(httpMethod: HttpMethodType): string {
 	switch (httpMethod) {
 		case 'POST':
 			return '#10a54a';
@@ -41,9 +43,8 @@ function detectAceMode(content: string): 'json' | 'xml' {
 
 const MethodTrace: React.FC<MethodTraceProps> = ({
 	trace,
-	connectorId,
+	flowId,
 	executionId,
-	connectionId,
 	theme
 }) => {
 	const dispatch = useAppDispatch();
@@ -62,46 +63,45 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 		if (!expanded) {
 			setLoading(true);
 			await dispatch(
-				getMethodTrace({
+				getDetailedMethod({
 					executionId,
-					connectionId,
-					connectorId,
+					flowId,
 					indexPath: trace.indexPath,
 				})
 			);
 			setLoading(false);
 			setExpanded(true);
 		} else {
-			await dispatch(
-				cleanMethodTrace({ connectorId, indexPath: trace.indexPath })
+			dispatch(
+				cleanMethodTrace({flowId, indexPath: trace.indexPath})
 			);
 			setExpanded(false);
 		}
 	};
 
-	const methodColor = getMethodColor(trace.httpMethod);
+	const methodColor = getMethodColor(trace.segment.request.http_method);
 
-	const requestDetails = trace.requestDetails;
-	const responseDetails = trace.responseDetails;
+	const requestDetails = trace.segment.request;
+	const responseDetails = trace.segment.response;
 
 	const requestHeaders = requestDetails
-		? JSON.stringify(requestDetails.headers, null, 2)
+		? JSON.stringify(requestDetails.header, null, 2)
 		: '';
 	const requestBody =
-		requestDetails && requestDetails.body
-			? typeof requestDetails.body === 'string'
-				? requestDetails.body
-				: JSON.stringify(requestDetails.body, null, 2)
+		requestDetails && requestDetails.payload
+			? typeof requestDetails.payload === 'string'
+				? requestDetails.payload
+				: JSON.stringify(requestDetails.payload, null, 2)
 			: '';
 
 	const responseHeaders = responseDetails
-		? JSON.stringify(responseDetails.headers, null, 2)
+		? JSON.stringify(responseDetails.header, null, 2)
 		: '';
 	const responseBody =
-		responseDetails && responseDetails.body
-			? typeof responseDetails.body === 'string'
-				? responseDetails.body
-				: JSON.stringify(responseDetails.body, null, 2)
+		responseDetails && responseDetails.payload
+			? typeof responseDetails.payload === 'string'
+				? responseDetails.payload
+				: JSON.stringify(responseDetails.payload, null, 2)
 			: '';
 
 	const requestMode = requestBody ? detectAceMode(requestBody) : 'json';
@@ -120,13 +120,13 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 						style={{ backgroundColor: methodColor }}
 						className={styles.methodType}
 					>
-						{trace.httpMethod}
+						{trace.segment.request.http_method}
 					</div>
 
 					{ShowIndexPath && (
 						<div style={{ marginLeft: 8 }}>{trace.indexPath}</div>
 					)}
-					<div className={styles.methodUrl}>{trace.url}</div>
+					<div className={styles.methodUrl}>{trace.segment.request.url}</div>
 				</div>
 				<div
 					className={styles.methodTraceRightSide}
@@ -135,9 +135,9 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 						e.stopPropagation();
 					}}
 				>
-					<div className={styles.methodStatus}>{trace.statusCode}</div>
+					<div className={styles.methodStatus}>{trace.segment.response.status}</div>
 					<div>{'|'}</div>
-					<div className={styles.methodTime}>{trace.executionTime} ms</div>
+					<div className={styles.methodTime}>{trace.segment.response.duration}</div>
 				</div>
 			</div>
 
