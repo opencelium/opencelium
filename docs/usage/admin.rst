@@ -83,37 +83,84 @@ Once all details are complete, the user can be added by clicking the “Add” b
 Groups
 """""""""""""""""
 
-Group or User Group is a set of users with defined permissions. The grid
-view displays names of groups, whereas the list view has more information,
-like: description and components.
-
-|image_group_0|
-
-Opening view of the group you will see the description and a table of
-permissions to the corresponding component.
+The “Group” panel contains all groups created in OpenCelium. A group or
+user group is a group of users with certain authorizations. The list view
+shows the name of a group, a description and the assigned components for
+which the respective group is authorized.Group or User Group is a set of
+users with defined permissions. The functions for viewing and deleting
+a group are available on the right-hand side of each list entry.
 
 |image_group_1|
 
-Adding/Updating group consists of three steps: general data, components
-and permissions. General data step has three input fields: *name*,
-*description* and *icon*. The *name* is a required field.
+Clicking on a list entry opens the detailed view of the respective group
+in view mode, which consists of three categories:
+
+   * Group Details
+   * Components
+   * Permissions
+
+The group details contain name of the group and a brief description.
 
 |image_group_2|
 
-Components step has one required multiselect field - *components*. There
-are 9 components in total: My Profile, User, User Group, Connector,
-Connection, Schedule, Dashboard, App, Invoker. You can select several values
-clicking on the items and undo clicking on the **x**.
+The category with the components shows the different components which have
+been assigned to this group.
 
 |image_group_3|
 
-The last permissions step has a table of permissions related to
-components that were chosen. It is required, so you should check at
-least one permission. You check what user can do with a component:
-create, read, update, or delete. The admin column just checks all
-permissions for the corresponding row.
+The category with the permissions shows the different permissions per component
+a user within this group has. A distinction is made between Create, Read, Write
+and Delete. A plus sign (+) means that the rights for the respective component
+are available, whereas a minus sign (-) indicates that the rights for the component
+have not been assigned.
 
 |image_group_4|
+
+To add a new group, click on the “Add Group" button in the group panel. 
+
+|image_group_5|
+
+An empty input mask opens in which all details must be entered. All fields
+marked with an asterisk (*) are mandatory. Creating a new groups consists of three
+parts: group details, components and permissions.
+
+Please enter a *name* and a *description* for the new group. Additionally, you can upload
+an *icon* for the new group too. The *name* is a mandatory field.
+
+|image_group_6|
+
+Next, you have to select the components which you want to assign to this new group. Open
+the drop down list and select the desired components. In total there are the following
+components available:
+
+   * App
+   * Connection
+   * Connector
+   * Dashboard
+   * Invoker
+   * Myprofile
+   * Schedule
+   * User
+   * Usergroup
+
+|image_group_7|
+
+Every selected component will be listed in a row. Clicking on the "X" removes the
+component again.
+
+|image_group_8|
+
+The section with the permissions shows a table of the permissions related to the previously
+selected components. You have to set the permission for at least one component to get the
+new group created. Please tick the checkboxes in order to define what a user is allowed to do
+with the respective component (create, read, update, or delete). The column admin just checks all
+permissions for the corresponding row.
+
+|image_group_9|
+
+Once all details are complete, the group can be added by clicking the “Add” button.
+
+|image_group_10|
 
 External Applications
 """""""""""""""""
@@ -211,29 +258,57 @@ Click on *Migrate* to start data migration.
    :width: 200
 .. |image_user_1| image:: ../img/user/OC_users_user_list.png
    :align: middle
+   :width: 600
 .. |image_user_2| image:: ../img/user/OC_users_user_details.png
    :align: middle
+   :width: 400
 .. |image_user_3| image:: ../img/user/OC_users_credentials.png
    :align: middle
+   :width: 400
 .. |image_user_4| image:: ../img/user/OC_users_user_group.png
    :align: middle
+   :width: 400
 .. |image_user_5| image:: ../img/user/OC_users_button_add_user.png
    :align: middle
    :height: 30
 .. |image_user_6| image:: ../img/user/OC_users_add_user_details.png
    :align: middle
+   :width: 600
 .. |image_user_7| image:: ../img/user/OC_users_button_add.png
    :align: middle
    :height: 30
 
-.. |image_group_1| image:: ../img/group/image2.png
+.. |image_group_1| image:: ../img/group/OC_groups_group_list.png
    :align: middle
-.. |image_group_2| image:: ../img/group/image3.png
+   :width: 600
+.. |image_group_2| image:: ../img/group/OC_groups_details.png
    :align: middle
-.. |image_group_3| image:: ../img/group/image4.png
+   :width: 400
+.. |image_group_3| image:: ../img/group/OC_groups_components.png
    :align: middle
-.. |image_group_4| image:: ../img/group/image5.png
+   :width: 400
+.. |image_group_4| image:: ../img/group/OC_groups_permissions.png
    :align: middle
+   :width: 400
+.. |image_group_5| image:: ../img/group/OC_groups_button_add_group.png
+   :align: middle
+   :height: 30
+.. |image_group_6| image:: ../img/group/OC_groups_add_group_details.png
+   :align: middle
+   :width: 400
+.. |image_group_7| image:: ../img/group/OC_groups_add_group_add_components.png
+   :align: middle
+   :width: 400 
+.. |image_group_8| image:: ../img/group/OC_groups_add_group_components.png
+   :align: middle
+   :width: 400
+.. |image_group_9| image:: ../img/group/OC_groups_add_group_permissions.png
+   :align: middle
+   :width: 400   
+.. |image_group_10| image:: ../img/group/OC_groups_button_add.png
+   :align: middle
+   :height: 30
+
 
 
 .. |image_update_assistant_0| image:: ../img/update_assistant/0.png
