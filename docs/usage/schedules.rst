@@ -52,6 +52,11 @@ on the "**x**" on the right side.
 
 |image_schedules_2|
 
+|image17|
+
+Adding a new schedule
+"""""""""""""""""
+
 To add a new job for the scheduler click on the button "Add Schedule". 
 
 |image_schedules_3|
@@ -131,11 +136,6 @@ After creating the notification you will see a list of notifications and search 
 by name, event or notification type. Also, you can update or delete the corresponding notification,
 if you mouse over on one of them and click on the icon.
 
-Current triggering schedules are displayed down after the list. You can follow the process.
-
-|image17|
-
-If you click on the *x* icon, you will interrupt the current job.
 
 .. |image_schedules_1| image:: ../img/schedule/OC_schedules_list.png
    :align: middle
@@ -175,6 +175,10 @@ If you click on the *x* icon, you will interrupt the current job.
    :height: 21
 .. |image_schedules_17| image:: ../img/schedule/OC_schedules_icon_copy_webhook.png
    :height: 21
+
+.. |image17| image:: ../img/schedule/17.png
+   :align: middle
+   :width: 600
       
 .. |image1| image:: ../img/schedule/1.png
    :width: 30
@@ -200,8 +204,7 @@ If you click on the *x* icon, you will interrupt the current job.
    :width: 400
 .. |image14| image:: ../img/schedule/14.png
    :width: 30
-.. |image17| image:: ../img/schedule/17.png
-   :align: middle
+
 .. |image20| image:: ../img/schedule/20.png
 .. |image24| image:: ../img/schedule/24.png
    :width: 120
