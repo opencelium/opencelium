@@ -1,54 +1,108 @@
 ##################
-Scheduler
+Schedules
 ##################
 
-Scheduler defines when and what connection should be performed. All CRUD
-actions are on one page. To add a new job for scheduler you need to fill
-out 2 required fields: *title*, *connection*; and two optional fields: *logs*
-and *cron expression*. As a default logs are deactivated.
+The *Schedules* panel shows an overview of all schedules that have been set up. In
+general, a schedule defines which connection should be performed when. All CRUD 
+actions are one one page. The list view shows the following information for each
+connection:
 
-|image_1|
+   * **Status**
+      * **grey**: connections without Cron-job
+      * **green**: last run was successful
+      * **red**: last run was unsuccessful
+   * Name of the **connection**
+   * **Cron** expression
+   * Date and time of the last **successful run** of the connection
+   * Date and time of the last **unsuccessful run** of the connection
+   * **Duration** of the last successful run
+   * Switch for activating/deactivating the **logs**
+   * **Webhook**
 
-The definition of the cron expression can be done easily with the cron generator
-|image10|. Here you can choose the exactly or each timestamp when the job should
-be triggered. Setting all data, you will see a list of the nearest triggering timestamps.
-
-|image11|
-
-The list of schedules displays next information: *status, connection title, cron*,
-time of *last success* trigger, time of *last failed* trigger, *duration* time, *logs*
-and *webhook*. Above the list you can see the categories. These are categories defined
+Above the list you can see the categories. These are categories defined
 on the :ref:`connection page <usage-connection>`. You cannot modify them
-here. All displayed schedules are filtered by the corresponded connection category.
+here. All displayed schedules can be filtered by the corresponded connection category.
 
-|image0|
+|image_schedules_1|
 
-If the background of status is grey, it means that job does not have cron expression,
-if green - last performance was successful and red, if it was failed.
+The logs could be enabled/disabled directly here clicking on the toggle button.
 
 |image13|
 
-The logs could be enabled/disabled directly here clicking on the switcher.
-
 If the schedule contains webhook, it could be copied clicking on the icon: |image4|.
-The url is stored in the buffer. Now you can paste it where you need.
+The url is stored in the clipboard. Now you can paste it where you need.
 
-The *Action* column has five additional icons:
+The *Action* column has six additional icons:
 
-|image10| - *edit*
+|image_schedules_10| - *edit*
 
-|image3|- *start* job (immediately)
+|image_schedules_11|- *start* job (immediately)
 
-|image1| - *webhook*
+|image_schedules_12| - *webhook*
 
-|image2| - *notifications*
+|image_schedules_13| - *notifications*
 
-|image14| - *delete*
+|image_schedules_14| - *logs*
 
-Clicking on the *webhook* the application creates a webhook for the specific connection.
-Due to it the user can trigger this connection using only url.
+|image_schedules_15| - *delete*
 
-Notification
+Below the list view, the progress of a connection is displayed if it has been started
+manually or automatically by a trigger. A running connection can be canceled by clicking
+on the "**x**" on the right side.
+
+|image_schedules_2|
+
+To add a new job for the scheduler click on the button "Add Schedule". 
+
+|image_schedules_3|
+
+An empty mask opens where you have to enter the following information:
+
+   * **title** (mandatory)
+   * **connection** (mandatory)
+   * **logs** (optional, disabled by default)
+   * **cron expression** (optional)
+
+|image_schedules_4|
+
+The *title* is displayed in the list of the Schedules panel. It should be descriptive to
+make it easy to identify the correct schedule.
+
+Activate the *logs* if required; they are deactivated by default to avoid unnecessary
+logging. The logging function can also be activated later if required.
+
+Use the search function or the drop down list to select one existing *connection*. The
+description of the connections is displayed as well to make the identification of the
+correct connection more easy.
+
+|image_schedules_5|
+
+The definition of the cron expression can be done easily with the cron generator
+|image_schedules_10|. Here you can choose the exactly or each timestamp when the job should
+be triggered. Setting all data, you will see a list of the nearest triggering timestamps.
+
+|image_schedules_6|
+
+As soon as all required settings have been made click on the button "Add" sto save the
+schedule.
+
+|image_schedules_7|
+
+Webhook
+"""""""""""""""""
+A *webhook* allows a connection to be triggered using a URL that is called up. A
+webhook can be created for each schedule by clicking on the corresponding action for creating
+a webhook |image_schedules_12|.
+
+If a webhook has been created for a schedule, this can be seen from the corresponding
+icon |image_schedules_17| in the column *Webhook*.
+
+Clicking on the icon |image_schedules_17| copies the URL of the webhook to the clipboard so that it can be
+inserted at the desired location.
+
+Clicking on the icon |image_schedules_16| disables the webhook for the respective schedule again.
+
+Notifications
 """""""""""""""""
 
 *Notification* is such a feature that allows you to be notified via emails or webhooks when
@@ -83,11 +137,45 @@ Current triggering schedules are displayed down after the list. You can follow t
 
 If you click on the *x* icon, you will interrupt the current job.
 
+.. |image_schedules_1| image:: ../img/schedule/OC_schedules_list.png
+   :align: middle
+   :width: 600
+.. |image_schedules_2| image:: ../img/schedule/OC_schedules_current_job.png
+   :align: middle
+   :width: 600
+.. |image_schedules_3| image:: ../img/schedule/OC_schedules_button_add_schedule.png
+   :align: middle
+   :height: 30
+.. |image_schedules_4| image:: ../img/schedule/OC_schedules_add_general_data.png
+   :align: middle
+   :width: 400
+.. |image_schedules_5| image:: ../img/schedule/OC_schedules_add_connection.png
+   :align: middle
+   :width: 400
+.. |image_schedules_6| image:: ../img/schedule/OC_schedules_cron_generator.png
+   :align: middle
+   :width: 400
+.. |image_schedules_7| image:: ../img/schedule/OC_schedules_button_add.png
+   :align: middle
+   :height: 30
 
-.. |image_1| image:: ../img/schedule/-1.png
-   :align: middle
-.. |image0| image:: ../img/schedule/0.png
-   :align: middle
+.. |image_schedules_10| image:: ../img/schedule/OC_schedules_icon_edit.png
+   :height: 21
+.. |image_schedules_11| image:: ../img/schedule/OC_schedules_icon_play.png
+   :height: 21
+.. |image_schedules_12| image:: ../img/schedule/OC_schedules_icon_webhook.png
+   :height: 21
+.. |image_schedules_13| image:: ../img/schedule/OC_schedules_icon_notification.png
+   :height: 21
+.. |image_schedules_14| image:: ../img/schedule/OC_schedules_icon_logs.png
+   :height: 21
+.. |image_schedules_15| image:: ../img/schedule/OC_schedules_icon_trash.png
+   :height: 21
+.. |image_schedules_16| image:: ../img/schedule/OC_schedules_icon_disable_webhook.png
+   :height: 21
+.. |image_schedules_17| image:: ../img/schedule/OC_schedules_icon_copy_webhook.png
+   :height: 21
+      
 .. |image1| image:: ../img/schedule/1.png
    :width: 30
 .. |image2| image:: ../img/schedule/2.png
@@ -107,8 +195,6 @@ If you click on the *x* icon, you will interrupt the current job.
    :width: 400
 .. |image10| image:: ../img/schedule/10.png
    :width: 30
-.. |image11| image:: ../img/schedule/11.png
-   :align: middle
 .. |image13| image:: ../img/schedule/13.png
    :align: middle
    :width: 400
