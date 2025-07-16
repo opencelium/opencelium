@@ -9,7 +9,7 @@ export default class DenyList extends IfBaseOperator{
     constructor() {
         super({
             name: BinaryOperatorName.DenyList,
-            placeholder: '%[item1, item2]%',
+            placeholder: '%item1,item2%,%item3%',
             defaultRefType: 'constant',
             defaultConstantType: ConstantComponentType.Textarea,
         })

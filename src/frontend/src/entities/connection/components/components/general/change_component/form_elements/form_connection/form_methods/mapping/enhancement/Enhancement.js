@@ -96,7 +96,7 @@ class Enhancement extends Component {
 	 * to update expert code
 	 */
 	updateExpertCode(code, e) {
-		if (code.length <= Validation.TextLength.Short) {
+		if (code.length <= Validation.TextLength.Long) {
 			const { setEnhancement } = this.props;
 			let { enhancement } = this.props;
 			enhancement.expertCode = code;

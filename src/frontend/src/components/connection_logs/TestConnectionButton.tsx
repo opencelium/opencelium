@@ -12,6 +12,7 @@ import {ConnectionSocketLog, LightSegment} from "@root/requests/models/Connectio
 import {addSocketLog, clearTextLog} from "@root/redux_toolkit/slices/ConnectionLogSlice";
 import {Button} from "@app_component/base/button/Button";
 import {terminateExecution} from "@entity/schedule/redux_toolkit/action_creators/ScheduleCreators";
+import {consoleLog} from "@application/utils/utils";
 function formatDate(date: Date): string {
     const pad = (n: number, length = 2) => n.toString().padStart(length, '0');
 
@@ -44,18 +45,18 @@ const TestConnectionButton = ({validateLogic}: any) => {
                 const data = JSON.parse(message.body) as ConnectionSocketLog<LightSegment>;
                 console.log('Socket.ConnectionLogs', data);
                 dispatch(addSocketLog(data));
-                /*const data = JSON.parse(message.body) as ConnectionTextLog;
-                console.log('Socket.ConnectionLogs', data);
-                dispatch(addTextLog({...data, datetime: formatDate(new Date())}));
-                if (data.message.indexOf('phase=EXECUTION_END') !== -1) {
+
+                /*
+                if (data.type === 'EXECUTION') {
                     setIsTesting(false);
+                    subscriptionRef.current?.();
                 }*/
             });
-            console.log("✅ Subscribed to /execution/logs");
+            consoleLog("✅ Subscribed to /execution/logs");
             subscriptionRef.current = () => {
                 subscription.unsubscribe();
                 subscriptionRef.current = undefined;
-                console.log("🧹 Unsubscribed from /execution/logs");
+                consoleLog("🧹 Unsubscribed from /execution/logs");
             };
             startTest();
         } else {

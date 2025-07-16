@@ -2,6 +2,7 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import {Urls} from "@entity/application/requests/classes/url";
 import {store} from "@application/utils/store";
+import {consoleLog} from "@application/utils/utils";
 
 let socketClient: Client | null = null;
 
@@ -18,7 +19,7 @@ export const getSocket = () => {
                 "client-id": `${Date.now()}-${Math.random()}`,
             },
             debug: (str: string) => {
-                console.log('[STOMP DEBUG]', str);
+                consoleLog('[STOMP DEBUG]', str);
             },
 
             // Optional: catch WebSocket/STOMP errors
@@ -30,7 +31,7 @@ export const getSocket = () => {
                 console.error('[WS ERROR]', event);
             },
         });
-        console.log('SocketClient.Init', socketClient);
+        consoleLog('SocketClient.Init', socketClient);
     }
     return socketClient;
 };
