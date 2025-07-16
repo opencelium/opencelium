@@ -37,62 +37,58 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 		setAllOptions(getNestedOptions(''));
 	}, []);
 	const getNestedOptions = (path: string): OptionType[] => {
-		const keys = path.split('.');
+		const keys = path.match(/[^.[\]]+|\[\*]|\[\d+]|\[\w+]/g) || [];
+
 		let currentData: DataStructure | null = !color
 			? {}
 			: connectionEditor.connection.getMethodByColor(color).response.success
 					.body.fields;
+
 		let lastValidPath = '';
-		let lastKeyPart = '';
 
 		for (let i = 0; i < keys.length; i++) {
 			const key = keys[i];
-			if (key === '') {
-				break;
-			}
-			if (i === keys.length - 1) {
-				lastKeyPart = key;
-			}
+			if (key === '') break;
+
+			const isArrayAccess = key.startsWith('[') && key.endsWith(']');
+			const isIterator = isArrayAccess && iterators.includes(key.slice(1, -1));
+
 			if (
+				Array.isArray(currentData) &&
+				(key === '[*]' || key === '[0]' || isIterator)
+			) {
+				currentData = currentData[0];
+			} else if (
 				currentData &&
 				typeof currentData === 'object' &&
 				key in currentData
 			) {
-				currentData = currentData[key];
-				lastValidPath += (lastValidPath ? '.' : '') + key;
-			} else if (
-				Array.isArray(currentData) &&
-				(key === '[0]' || key === '[*]' || iterators.includes(key.slice(1, -1)))
-			) {
-				currentData = currentData[0];
-				lastValidPath += (lastValidPath ? '.' : '') + key;
+				currentData = (currentData as DataStructure)[key] as DataStructure;
 			} else {
 				break;
 			}
+
+			lastValidPath = lastValidPath
+				? lastValidPath + (key.startsWith('[') ? key : `.${key}`)
+				: key;
 		}
+
 		if (Array.isArray(currentData)) {
 			return [
-				{
-					label: 'First element of the array',
-					value: `${lastValidPath ? `${lastValidPath}.` : ''}[0]`,
-				},
-				{
-					label: 'The whole array',
-					value: `${lastValidPath ? `${lastValidPath}.` : ''}[*]`,
-				},
+				{ label: 'First element of the array', value: `${lastValidPath}[0]` },
+				{ label: 'The whole array', value: `${lastValidPath}[*]` },
 				...iterators.map((it) => ({
 					label: `(${it} loop)`,
-					value: `${lastValidPath ? `${lastValidPath}.` : ''}[${it}]`,
+					value: `${lastValidPath}[${it}]`,
 				})),
 			];
 		}
+
 		if (currentData && typeof currentData === 'object') {
-			return Object.keys(currentData)
-				.filter((key) => key.startsWith(lastKeyPart))
-				.map((key) => ({
-					label: key,
-					value: lastValidPath === '' ? key : `${lastValidPath}.${key}`,
-				}));
+			return Object.keys(currentData).map((key) => ({
+				label: key,
+				value: lastValidPath === '' ? key : `${lastValidPath}.${key}`,
+			}));
 		}
 
 		return [];
@@ -104,57 +100,29 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 
 			if (input === '') {
 				setSelectedOption(null);
+				return;
 			}
-			let newOptions: OptionType[] = [];
-			if (input.includes('.')) {
-				if (
-					input.endsWith('.[0]') ||
-					input.endsWith('.[*]') ||
-					iterators.some((it) => input.endsWith(`.[${it}]`))
-				) {
-					newOptions = getNestedOptions(`${input}.`);
-				} else {
-					newOptions = getNestedOptions(input);
-				}
-			} else {
-				newOptions = allOptions.filter((option: any) =>
-					option.label.toLowerCase().startsWith(input.toLowerCase())
-				);
-			}
-			if (input && !newOptions.find(opt => opt.value === input)) {
-				newOptions = [{ label: input, value: input }, ...newOptions];
-			}
-			setFilteredOptions(newOptions);
+
+			setFilteredOptions(getNestedOptions(input));
 		}
 	};
 
-	const handleChange = (selectedOption: OptionType | null) => {
-		setSelectedOption(selectedOption);
-		if (selectedOption) {
-			setSearchValue(selectedOption.value);
-			onValueSelect(selectedOption.value);
-			if (
-				selectedOption &&
-				(selectedOption.value.endsWith('.[0]') ||
-					selectedOption.value.endsWith('.[*]') ||
-					iterators.some((it) => selectedOption.value.endsWith(`.[${it}]`)))
-			) {
-				setFilteredOptions(getNestedOptions(`${selectedOption.value}.`));
-			} else {
-				setFilteredOptions(getNestedOptions(selectedOption?.value || ''));
-			}
+	const handleChange = (selected: OptionType | null) => {
+		setSelectedOption(selected);
+
+		if (selected) {
+			setSearchValue(selected.value);
+			setFilteredOptions(getNestedOptions(selected.value));
 		} else {
 			setSearchValue('');
 			setFilteredOptions(allOptions);
 		}
 	};
 	useEffect(() => {
-		if (selectedOption !== undefined) {
-			if (selectedOption) {
-				onValueSelect(selectedOption.value);
-			} else {
-				onValueSelect('');
-			}
+		if (selectedOption === null && searchValue) {
+			onValueSelect(searchValue);
+		} else if (selectedOption) {
+			onValueSelect(selectedOption.value);
 		}
 	}, [selectedOption]);
 	useEffect(() => {
@@ -202,6 +170,9 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 					if (!menuIsOpen) toggleMenu(true);
 				}}
 				onBlur={() => {
+					if (!selectedOption && searchValue) {
+						onValueSelect(searchValue);
+					}
 					if (menuIsOpen) toggleMenu(false);
 				}}
 				menuIsOpen={menuIsOpen}
