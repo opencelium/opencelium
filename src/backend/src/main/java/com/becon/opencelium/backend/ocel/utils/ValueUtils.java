@@ -4,7 +4,8 @@ import java.math.BigDecimal;
 
 public class ValueUtils {
 
-    private ValueUtils() {}
+    private ValueUtils() {
+    }
 
     public static double compareTo(Number n1, Number n2) {
         if (n1 == null || n2 == null) return n1 == null ? -n2.doubleValue() : n1.doubleValue();
@@ -45,10 +46,18 @@ public class ValueUtils {
         } else if (o instanceof Double d) {
             return d;
         } else if (o instanceof String number) {
-            if (number.contains(".")) {
-                return Double.parseDouble(number);
+            BigDecimal bd;
+            try {
+                bd = new BigDecimal(number.trim());
+
+                if (bd.abs().compareTo(BigDecimal.valueOf(Double.MAX_VALUE)) > 0) {
+                    throw new RuntimeException("Value exceeds : " + number);
+                }
+
+                return bd;
+            } catch (Exception e) {
+                throw new RuntimeException("Cannot convert " + o + " to a number");
             }
-            return Integer.parseInt(number);
         }
         throw new RuntimeException("Cannot convert " + o + " to a number");
     }
