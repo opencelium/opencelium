@@ -19,6 +19,15 @@ public class ValueUtils {
     }
 
     public static boolean isNumberStr(String element) {
+        if (element == null || element.trim().isEmpty()) {
+            return false;
+        }
+
+        // Reject numbers with leading zeros (except "0" or decimal formats like "0.5")
+        if (element.matches("^-?0[0-9]+.*")) {
+            return false;
+        }
+
         BigDecimal bigDecimal;
         try {
             bigDecimal = new BigDecimal(element);
