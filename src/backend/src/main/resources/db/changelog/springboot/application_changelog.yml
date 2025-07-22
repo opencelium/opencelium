@@ -81,4 +81,11 @@ versions:
         operation: add
         value: /websocket
         path: websocket.endpoint
-
+      - changeset: 5
+        operation: add
+        value: '*/30 * * * * *' # never triggered cron
+        path: opencelium.online_services.invoker_sync.time
+      - changeset: 6
+        operation: add
+        value: false
+        path: opencelium.online_services.invoker_sync.active

@@ -658,3 +658,11 @@ ALTER TABLE last_execution ADD COLUMN IF NOT EXISTS f_has_log tinyint(4) DEFAULT
 
 --changeset 4.5:21 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 ALTER TABLE `enhancement` MODIFY COLUMN `script` TEXT DEFAULT NULL;
+
+--changeset 4.5:22 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+CREATE TABLE IF NOT EXISTS invoker_sync (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    invoker_name TEXT NOT NULL,
+    invoker_content_hmac TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
