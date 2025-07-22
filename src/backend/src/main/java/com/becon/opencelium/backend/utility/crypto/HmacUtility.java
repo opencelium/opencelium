@@ -23,6 +23,19 @@ public class HmacUtility {
         }
     }
 
+    public static String encode(byte[] data) {
+        try {
+            Mac mac = Mac.getInstance(HMAC_ALGO);
+            SecretKeySpec secretKeySpec = new SecretKeySpec(SECRET_KEY.getBytes(), HMAC_ALGO);
+            mac.init(secretKeySpec);
+
+            byte[] hmacBytes = mac.doFinal(data);
+            return Base64.getEncoder().encodeToString(hmacBytes);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static boolean verify(String data, String hmac) {
         try {
             String computedHmac = encode(data);

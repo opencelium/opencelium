@@ -45,7 +45,7 @@ public class InvokerSync {
     private String invokerContentHmac;
 
     @Column(name = "has_manual_sync")
-    private String hasManualSync;
+    private boolean hasManualSync;
 
     @JsonIgnore
     @CreationTimestamp
@@ -84,11 +84,11 @@ public class InvokerSync {
         this.createdAt = createdAt;
     }
 
-    public String getHasManualSync() {
+    public boolean isHasManualSync() {
         return hasManualSync;
     }
 
-    public void setHasManualSync(String hasManualSync) {
+    public void setHasManualSync(boolean hasManualSync) {
         this.hasManualSync = hasManualSync;
     }
 }

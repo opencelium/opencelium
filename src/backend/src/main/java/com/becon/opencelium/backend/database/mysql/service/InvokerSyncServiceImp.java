@@ -27,7 +27,7 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
         repository.findById(id)
                 .ifPresent(entity -> {
                     entity.setInvokerContentHmac(sync.getInvokerContentHmac());
-                    entity.setHasManualSync(sync.getHasManualSync());
+                    entity.setHasManualSync(sync.isHasManualSync());
                 });
     }
 
