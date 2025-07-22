@@ -42,7 +42,10 @@ public class InvokerSync {
     private String invokerName;
 
     @Column(name = "invoker_content_hmac")
-    private boolean invokerContentHmac;
+    private String invokerContentHmac;
+
+    @Column(name = "has_manual_sync")
+    private String hasManualSync;
 
     @JsonIgnore
     @CreationTimestamp
@@ -65,11 +68,11 @@ public class InvokerSync {
         this.invokerName = invokerName;
     }
 
-    public boolean isInvokerContentHmac() {
+    public String getInvokerContentHmac() {
         return invokerContentHmac;
     }
 
-    public void setInvokerContentHmac(boolean invokerContentHmac) {
+    public void setInvokerContentHmac(String invokerContentHmac) {
         this.invokerContentHmac = invokerContentHmac;
     }
 
@@ -79,5 +82,13 @@ public class InvokerSync {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getHasManualSync() {
+        return hasManualSync;
+    }
+
+    public void setHasManualSync(String hasManualSync) {
+        this.hasManualSync = hasManualSync;
     }
 }
