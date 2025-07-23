@@ -33,7 +33,7 @@ public class LogData {
     private LogLineType logLineType; // PHASE
     private PhaseCategory type;       // e.g., LOOP, IF
 
-    private Map<LogLineKey, Object> properties = new HashMap<>();
+    private Map<String, Object> properties = new HashMap<>();
     private Map<String, Object> segments = new HashMap<>();
     private LogDataError error;
 
@@ -131,11 +131,11 @@ public class LogData {
         this.type = type;
     }
 
-    public Map<LogLineKey, Object> getProperties() {
+    public Map<String, Object> getProperties() {
         return properties;
     }
 
-    public void setProperties(Map<LogLineKey, Object> properties) {
+    public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
     }
 

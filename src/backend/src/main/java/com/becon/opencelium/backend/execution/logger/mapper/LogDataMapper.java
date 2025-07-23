@@ -28,13 +28,13 @@ public class LogDataMapper {
         dto.setConnectorName(src.getConnectorName());
 
         // Filter only top-level properties (excluding segments and error fields)
-        Map<LogLineKey, Object> allProps = src.getProperties();
+        Map<String, Object> allProps = src.getProperties();
         Map<String, Object> allSegments = src.getSegments();
         Map<String, Object> baseProps = new LinkedHashMap<>();
         Map<String, Object> baseSegments = new LinkedHashMap<>();
 
-        for (Map.Entry<LogLineKey, Object> entry : allProps.entrySet()) {
-            String key = entry.getKey().name().toLowerCase(Locale.ROOT);
+        for (Map.Entry<String, Object> entry : allProps.entrySet()) {
+            String key = entry.getKey().toLowerCase(Locale.ROOT);
             baseProps.put(key, entry.getValue());
         }
 
