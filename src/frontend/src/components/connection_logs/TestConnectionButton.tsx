@@ -9,7 +9,7 @@ import {LogPanelHeight, setButtonPanelVisibility, setLogPanelHeight} from "@root
 import {generateUUID} from "@app_component/operator_builder/utils";
 import {useSocketData} from "../../socket/SocketDataContext";
 import {ConnectionSocketLog, LightSegment} from "@root/requests/models/ConnectionLog";
-import {addSocketLog, clearTextLog} from "@root/redux_toolkit/slices/ConnectionLogSlice";
+import {addSocketLog, clearTextLog, setIsTesting} from "@root/redux_toolkit/slices/ConnectionLogSlice";
 import {Button} from "@app_component/base/button/Button";
 import {terminateExecution} from "@entity/schedule/redux_toolkit/action_creators/ScheduleCreators";
 import {consoleLog} from "@application/utils/utils";
@@ -29,11 +29,11 @@ function formatDate(date: Date): string {
 const TestConnectionButton = ({validateLogic}: any) => {
     const dispatch = useAppDispatch();
     const {socket} = useSocketData();
-    const [isTesting, setIsTesting] = useState(false);
     const [channelId, setChannelId] = useState<string>(undefined);
     const {connection} = useAppSelector((state: RootState) => state.connectionReducer);
-    const {executionId, schedulerId} = useAppSelector((state: RootState) => state.connectionLogReducer);
-    let previousLogMessage: ConnectionSocketLog<LightSegment> ;
+    const {executionId, schedulerId, isTesting} = useAppSelector((state: RootState) => state.connectionLogReducer);
+    let previousLogMessage: ConnectionSocketLog<LightSegment>;
+    let isFromConnectorCompleted: boolean = false, isToConnectorCompleted: boolean = false;
     const subscriptionRef = useRef<() => void>();
 
     useEffect(() => {
@@ -44,9 +44,22 @@ const TestConnectionButton = ({validateLogic}: any) => {
             }
             const subscription = socket.subscribe(`/execution/logs/${channelId}`, (message) => {
                 const data = JSON.parse(message.body) as ConnectionSocketLog<LightSegment>;
+                isToConnectorCompleted = false;
                 console.log('Socket.ConnectionLogs', data);
+                if (data.type === 'FLOWCHART' && data.status === 'COMPLETE') {
+                    if (!isFromConnectorCompleted) {
+                        isFromConnectorCompleted = true;
+                    } else {
+                        if (!isToConnectorCompleted) {
+                            isToConnectorCompleted = true;
+                        }
+                    }
+                    if (isFromConnectorCompleted && isToConnectorCompleted) {
+                        dispatch(setIsTesting(false));
+                        subscriptionRef.current?.();
+                    }
+                }
                 let hasNewLoopIndex = false;
-                let isLoopComplete = false;
                 if (!!data.properties.loopIndex && previousLogMessage.properties.loopIndex !== data.properties.loopIndex) {
                     hasNewLoopIndex = true;
                 }
@@ -55,13 +68,10 @@ const TestConnectionButton = ({validateLogic}: any) => {
                 }
                 dispatch(addSocketLog({data, settings: {hasNewLoopIndex}}));
                 previousLogMessage = data;
-                if (data.type === 'EXECUTION' && data.status === 'COMPLETE') {
-                    setIsTesting(false);
-                    subscriptionRef.current?.();
-                }
             });
             consoleLog("✅ Subscribed to /execution/logs");
             subscriptionRef.current = () => {
+                setChannelId('');
                 subscription.unsubscribe();
                 subscriptionRef.current = undefined;
                 consoleLog("🧹 Unsubscribed from /execution/logs");
@@ -82,7 +92,7 @@ const TestConnectionButton = ({validateLogic}: any) => {
             dispatch(setButtonPanelVisibility(false));
             dispatch(setLogPanelHeight(LogPanelHeight.High));
             dispatch(testConnection({connection, channelId}));
-            setIsTesting(true);
+            dispatch(setIsTesting(true));
         }
     }
 
@@ -92,7 +102,7 @@ const TestConnectionButton = ({validateLogic}: any) => {
         //dispatch(setButtonPanelVisibility(true));
         //dispatch(setLogPanelHeight(0));
         dispatch(terminateExecution(schedulerId));
-        setIsTesting(false);
+        dispatch(setIsTesting(false));
     }
 
     const generateChannelId = () => {

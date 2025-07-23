@@ -23,7 +23,7 @@ interface LightMethodSegment {
 export type HttpMethodType = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 export interface MethodRequest {
 	url: string,
-	httpMethod: HttpMethodType,
+	http_method: HttpMethodType,
 }
 interface MethodResponse {
 	status: string,

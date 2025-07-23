@@ -18,6 +18,7 @@ export interface ConnectionLogState {
 	schedulerId: number,
 	connectors: ConnectorLog[],
 	textLogs: ConnectionTextLog[],
+	isTesting: boolean,
 }
 
 export const initialState: ConnectionLogState = {
@@ -25,6 +26,7 @@ export const initialState: ConnectionLogState = {
 	executionId: '',
 	connectors: [],
 	textLogs: [],
+	isTesting: false,
 };
 interface CleanTracePayload {
 	flowId: string;
@@ -35,11 +37,19 @@ export const connectionLogSlice = createSlice({
 	name: 'connectionLog',
 	initialState,
 	reducers: {
+		setIsTesting: (state, action: PayloadAction<boolean>) => {
+			state.isTesting = action.payload;
+		},
 		addTextLog: (state, action: PayloadAction<ConnectionTextLog>) => {
 			state.textLogs.push(action.payload)
 		},
 		clearTextLog: (state) => {
 			state.textLogs = [];
+		},
+		clearSocketLog: (state) => {
+			state.schedulerId = undefined;
+			state.executionId = '';
+			state.connectors = [];
 		},
 		addSocketLog: (state, action: PayloadAction<{data: ConnectionSocketLog<LightSegment>, settings: {hasNewLoopIndex: boolean}}>) => {
 			const {executionId, flowId, connectorName, ...newTrace} = action.payload.data;
@@ -164,7 +174,8 @@ export const connectionLogSlice = createSlice({
 
 export const {
 	cleanMethodTrace, cleanOperatorTrace, addSocketLog,
-	addTextLog, clearTextLog,
+	addTextLog, clearTextLog, clearSocketLog,
+	setIsTesting,
 } =
 	connectionLogSlice.actions;
 export default connectionLogSlice.reducer;

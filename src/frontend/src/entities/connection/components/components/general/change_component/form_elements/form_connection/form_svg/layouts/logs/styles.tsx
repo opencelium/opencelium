@@ -43,6 +43,12 @@ export const LogPanelStyled = styled.div<{isFullScreen: boolean, noLogs: boolean
     ` : ''}
 `;
 
+export const EmptyLogsStyled = styled.h3`
+    color: #ccc;
+    text-align: center;
+    margin-top: 50px;
+`;
+
 export const HeaderStyled = styled(Text)`
     user-select: none;
     text-align: center;
