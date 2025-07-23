@@ -37,7 +37,7 @@ public enum LogLineKey {
      */
     NAME("name"),
     URL("url"),
-    HTTP_METHOD("httpMethod"),
+    HTTP_METHOD("http_method"),
     HTTP_STATUS("status"),
     DURATION("duration"),
 
