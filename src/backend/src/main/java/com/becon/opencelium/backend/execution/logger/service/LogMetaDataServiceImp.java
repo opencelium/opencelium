@@ -130,13 +130,13 @@ public class LogMetaDataServiceImp implements LogMetaDataService {
 
     // --------------------------------------- Private Functions ----------------------------------------------
     private Optional<LogData> findExistingBlock(LogData block) {
-        if (block.getProperties().containsKey(LogLineKey.LOOP_INDEX)) {
+        if (block.getProperties().containsKey(LogLineKey.LOOP_INDEX.getSrcName())) {
             return metaDataLogRepository.findByExecutionConnectionFlowIdIndexPathAndLoopIndex(
                     block.getConnectionId(),
                     block.getExecutionId(),
                     block.getFlowId(),
                     block.getIndexPath(),
-                    block.getProperties().get(LogLineKey.LOOP_INDEX).toString()
+                    block.getProperties().get(LogLineKey.LOOP_INDEX.getSrcName()).toString()
             );
         } else {
             return metaDataLogRepository.findByConnectionIdAndExecutionIdAndFlowIdAndIndexPath(

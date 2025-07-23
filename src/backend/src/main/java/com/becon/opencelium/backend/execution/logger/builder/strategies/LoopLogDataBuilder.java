@@ -7,7 +7,6 @@ import com.becon.opencelium.backend.execution.logger.context.SegmentContext;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseCategory;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseType;
 import com.becon.opencelium.backend.execution.logger.enums.LogLineType;
-import com.becon.opencelium.backend.execution.logger.enums.SegmentType;
 import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
 
 import java.util.*;
@@ -44,10 +43,10 @@ public class LoopLogDataBuilder implements PhaseBuilder {
 
         // 4) Merge segment data into properties
         if (!agg.refs.isEmpty()) {
-            flatProps.put(LogLineKey.REF.name(), agg.refs);
+            flatProps.put(LogLineKey.REF.getSrcName(), agg.refs);
         }
         if (!agg.error.isBlank()) {
-            flatProps.put(LogLineKey.EXCEPTION.name(), agg.error);
+            flatProps.put(LogLineKey.EXCEPTION.getSrcName(), agg.error);
         }
 
         logData.setProperties(flatProps);
@@ -61,7 +60,7 @@ public class LoopLogDataBuilder implements PhaseBuilder {
         return props.entrySet().stream()
                 .filter(e -> excludeKey(e.getKey()))
                 .collect(Collectors.toMap(
-                        e -> e.getKey().name(),    // use the enum name as the String key
+                        e -> e.getKey().getSrcName(),    // use the enum name as the String key
                         Map.Entry::getValue,       // the original String value
                         (a, b) -> b,               // on duplicate key, keep the latter
                         LinkedHashMap::new         // preserve insertion order
