@@ -4,9 +4,7 @@ import com.becon.opencelium.backend.database.mongodb.entity.LogData;
 import com.becon.opencelium.backend.database.mongodb.entity.LogDataError;
 import com.becon.opencelium.backend.execution.logger.dto.ErrorInfoDTO;
 import com.becon.opencelium.backend.execution.logger.dto.LogDataDTO;
-import com.becon.opencelium.backend.execution.logger.enums.PhaseStatus;
 import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
-import org.apache.juli.logging.Log;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -67,7 +65,7 @@ public class LogDataMapper {
         return props.entrySet().stream()
                 .filter(e -> e.getKey() != null)
                 .collect(Collectors.toMap(
-                        e -> e.getKey().name().toLowerCase(Locale.ROOT),           // Convert LogLineKey to String
+                        e -> e.getKey().getSrcName(),           // Convert LogLineKey to String
                         e -> e.getValue() != null ? e.getValue().toString() : "",
                         (v1, v2) -> v2,
                         LinkedHashMap::new

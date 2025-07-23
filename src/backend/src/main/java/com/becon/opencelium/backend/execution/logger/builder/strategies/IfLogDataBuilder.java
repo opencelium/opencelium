@@ -42,7 +42,7 @@ public class IfLogDataBuilder implements PhaseBuilder {
 
         // 4) Assemble segment object
         Map<String, Object> segment = new LinkedHashMap<>();
-        if (!agg.refs.isEmpty())    segment.put(LogLineKey.REF.name(), agg.refs);
+        if (!agg.refs.isEmpty())    segment.put(LogLineKey.REF.getSrcName(), agg.refs);
         if (agg.ifResult != null)   segment.put("value", agg.ifResult);
         logData.setSegments(segment);
 
@@ -59,7 +59,7 @@ public class IfLogDataBuilder implements PhaseBuilder {
         return props.entrySet().stream()
                 .filter(e -> excludeKey(e.getKey()))
                 .collect(Collectors.toMap(
-                        e -> e.getKey().name(),    // use the enum name as the String key
+                        e -> e.getKey().getSrcName(),    // use the enum name as the String key
                         Map.Entry::getValue,       // the original String value
                         (a, b) -> b,               // on duplicate key, keep the latter
                         LinkedHashMap::new         // preserve insertion order
