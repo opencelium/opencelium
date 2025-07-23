@@ -3,7 +3,6 @@ package com.becon.opencelium.backend.execution.logger.builder.strategies;
 import com.becon.opencelium.backend.database.mongodb.entity.LogData;
 import com.becon.opencelium.backend.execution.logger.builder.PhaseBuilder;
 import com.becon.opencelium.backend.execution.logger.context.PhaseContext;
-import com.becon.opencelium.backend.execution.logger.enums.LogDetailLevel;
 import com.becon.opencelium.backend.execution.logger.enums.LogLineType;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseCategory;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseType;
@@ -20,7 +19,7 @@ public class DefaultLogDataBuilder implements PhaseBuilder {
         logData.setId(UUID.randomUUID().toString());
         logData.setExecutionId(execId);
         logData.setConnectionId(connId);
-        logData.setFlowchartId(context.getProperties().get(LogLineKey.FLOWCHART_ID));
+        logData.setFlowId(context.getProperties().get(LogLineKey.FLOWCHART_ID));
         logData.setStatus(context.getStatus());
         logData.setIndexPath(context.getProperties().get(LogLineKey.INDEX_PATH));
         logData.setStartOffset(context.getParsedLogLine().getOffset());

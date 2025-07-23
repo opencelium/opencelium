@@ -68,20 +68,20 @@ public class ConnectionExecutor {
             fchartId = source.getFchartId();
             connectorId = source.getId();
             logger.getLogEntity().setConnector(new ConnectorLog(source.getName(), "CONN1"));
-            logger.logAndSend(String.format("phase=FLOWCHART_START fchartId=%s connectorId=%d", fchartId, connectorId));
+            logger.logAndSend(String.format("phase=FLOWCHART_START flowId=%s connectorId=%d connectorName=%s", fchartId, connectorId, source.getName()));
             sourceEx.start();
-            logger.logAndSend(String.format("phase=FLOWCHART_END fchartId=%s connectorId=%d", fchartId, connectorId));
+            logger.logAndSend(String.format("phase=FLOWCHART_END flowId=%s connectorId=%d connectorName=%s", fchartId, connectorId, source.getName()));
 
             fchartId = target.getFchartId();
             connectorId = target.getId();
             logger.getLogEntity().setConnector(new ConnectorLog(target.getName(), "CONN2"));
-            logger.logAndSend(String.format("phase=FLOWCHART_START fchartId=%s connectorId=%d", fchartId, connectorId));
+            logger.logAndSend(String.format("phase=FLOWCHART_START flowId=%s connectorId=%d connectorName=%s", fchartId, connectorId, source.getName()));
             targetEx.start();
-            logger.logAndSend(String.format("phase=FLOWCHART_END fchartId=%s connectorId=%d", fchartId, connectorId));
+            logger.logAndSend(String.format("phase=FLOWCHART_END flowId=%s connectorId=%d connectorName=%s", fchartId, connectorId, source.getName()));
         } catch (Exception e) {
             logger.logAndSend(e);
             // in case of exception 'connectorId' has been initialized with lastly executed Connector.id
-            logger.logAndSend(String.format("phase=FLOWCHART_END fchartId=%s connectorId=%d", fchartId, connectorId));
+            logger.logAndSend(String.format("phase=FLOWCHART_END flowId=%s connectorId=%d connectorName=%s", fchartId, connectorId, source.getName()));
 
             throw e;
         } finally {
