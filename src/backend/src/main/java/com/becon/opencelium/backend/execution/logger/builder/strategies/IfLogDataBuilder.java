@@ -65,6 +65,7 @@ public class IfLogDataBuilder implements PhaseBuilder {
 
     private boolean excludeKey(LogLineKey key) {
         return !Set.of(
+                LogLineKey.CONNECTOR_NAME,
                 LogLineKey.INDEX_PATH,
                 LogLineKey.FLOWCHART_ID
         ).contains(key);
