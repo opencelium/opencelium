@@ -123,7 +123,7 @@ export const OperatorTrace: React.FC<Props> = ({
 				{isLoop && (
 					<div className={styles.loopTraceRightSide} onClick={(e: any) => {e.preventDefault(); e.stopPropagation();}}>
 						<span>
-							Index {iterationIndex} - {(trace.properties as LoopOperatorProperty).size}
+							{iterationIndex} - {(trace.properties as LoopOperatorProperty).size}
 						</span>
 						<FontIcon
 							isButton={true}

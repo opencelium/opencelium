@@ -23,7 +23,7 @@ interface LightMethodSegment {
 export type HttpMethodType = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 export interface MethodRequest {
 	url: string,
-	http_method: HttpMethodType,
+	httpMethod: HttpMethodType,
 }
 interface MethodResponse {
 	status: string,
@@ -53,8 +53,8 @@ interface DetailedLoopOperatorSegment extends LightLoopOperatorSegment {
 }
 export type DetailedOperatorSegment = DetailedIfOperatorSegment | DetailedLoopOperatorSegment;
 interface BaseChildProperty {
-	loop_index?: string,
-	loop_iterator?: string,
+	loopIndex?: string,
+	loopIterator?: string,
 }
 interface BaseOperatorProperty extends BaseChildProperty{
 	expression: string,

@@ -79,7 +79,7 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 		}
 	};
 
-	const methodColor = getMethodColor(trace?.segment?.request?.http_method);
+	const methodColor = getMethodColor(trace?.segment?.request?.httpMethod);
 
 	const requestDetails = trace.segment.request;
 	const responseDetails = trace.segment.response;
@@ -120,7 +120,7 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 						style={{ backgroundColor: methodColor }}
 						className={styles.methodType}
 					>
-						{trace?.segment?.request?.http_method || ''}
+						{trace?.segment?.request?.httpMethod || ''}
 					</div>
 
 					{ShowIndexPath && (
