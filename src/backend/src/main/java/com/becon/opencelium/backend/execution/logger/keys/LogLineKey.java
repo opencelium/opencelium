@@ -24,7 +24,7 @@ public enum LogLineKey {
 
     /** Optional properties of a log line that do not have a key and are created during the parsing process. */
     TIMESTAMP("timestamp"),
-    LOG_LEVEL("log_level"),
+    LOG_LEVEL("logLevel"),
     MESSAGE("msg"),
 
     /** Shared keys reused across multiple categories */
@@ -37,7 +37,7 @@ public enum LogLineKey {
      */
     NAME("name"),
     URL("url"),
-    HTTP_METHOD("http_method"),
+    HTTP_METHOD("httpMethod"),
     HTTP_STATUS("status"),
     DURATION("duration"),
 
