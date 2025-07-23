@@ -176,9 +176,9 @@ Notifications
 The *notifications* are a feature that allows you to be informed about certain events via e-mail
 or webhook. The available events are pre, post and altert.
 
-**pre** - notification is triggered **before** the schedule
-**post** - notification is triggered **after** the schedule
-**altert** - notification is triggered in the **event of an error**.
+   * **pre** - notification is triggered **before** the schedule
+   * **post** - notification is triggered **after** the schedule
+   * **altert** - notification is triggered in the **event of an error**.
 
 .. note::
    The aggregator only applies for post events.
@@ -189,7 +189,7 @@ list by clicking on the checkboxes and click on the “**Notification**” butto
 |image_notifications_1|
 
 If you only want to assign a notification to one schedule, you can alternatively click on the letter
-symbol and then on the plus sign to create a new notification.
+symbol |image_notifications_7| and then on the plus sign to create a new notification.
 
 |image_notifications_2|
 
@@ -206,7 +206,7 @@ recipients who gets a notification. For webhook type you need to provide the web
 |image_notifications_5|
 
 After creating the notification you will see a list of notifications and a search where you can search
-for a notification by name, event or notification type. You can update or delete the corresponding notification,
+for a notification by name, event or notification type. You can *update* or *delete* the corresponding notification,
 if you mouse over on one of them and click on the respective icon.
 
 |image_notifications_6|
@@ -274,19 +274,20 @@ if you mouse over on one of them and click on the respective icon.
    :width: 600
 .. |image_notifications_2| image:: ../img/schedule/OC_notifications_add_notification_2.png
    :align: middle
-   :width: 200
+   :width: 300
 .. |image_notifications_3| image:: ../img/schedule/OC_notifications_add_notification.png
    :align: middle
    :width: 400
 .. |image_notifications_4| image:: ../img/schedule/OC_notifications_btn_notification.png
-   :align: middle
    :height: 30
 .. |image_notifications_5| image:: ../img/schedule/OC_notifications_notifications_type.png
    :align: middle
    :width: 400
 .. |image_notifications_6| image:: ../img/schedule/OC_notifications_edit_delete.png
    :align: middle
-   :width: 200
+   :width: 300
+.. |image_notifications_7| image:: ../img/schedule/OC_notifications_btn_mail.png
+   :height: 21
 
 .. |image1| image:: ../img/schedule/1.png
    :width: 30
