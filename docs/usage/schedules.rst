@@ -27,8 +27,6 @@ here. All displayed schedules can be filtered by the corresponded connection cat
 
 The logs could be enabled/disabled directly here clicking on the toggle button.
 
-|image13|
-
 If the schedule contains webhook, it could be copied clicking on the icon: |image4|.
 The url is stored in the clipboard. Now you can paste it where you need.
 
@@ -299,9 +297,6 @@ if you mouse over on one of them and click on the respective icon.
    :width: 30
 .. |image10| image:: ../img/schedule/10.png
    :width: 30
-.. |image13| image:: ../img/schedule/13.png
-   :align: middle
-   :width: 400
 .. |image14| image:: ../img/schedule/14.png
    :width: 30
 
