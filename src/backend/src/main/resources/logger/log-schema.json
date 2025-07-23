@@ -4,7 +4,7 @@
       "emitOn": "OPERATION_END",
       "properties": ["name", "indexPath", "loopIndex", "loopIterator"],
       "segments": {
-        "REQUEST": ["url", "http_method"],
+        "REQUEST": ["url", "httpMethod"],
         "RESPONSE": ["status", "duration"],
         "EXCEPTION": ["data"]
       }
@@ -30,7 +30,7 @@
       "emitOn": "OPERATION_END",
       "properties": ["name", "indexPath", "loopIndex", "loopIterator"],
       "segments": {
-        "REQUEST": ["url", "http_method"],
+        "REQUEST": ["url", "httpMethod"],
         "REQUEST_HEADER": ["data"],
         "REQUEST_PAYLOAD": ["data"],
         "RESPONSE": ["status", "duration"],
