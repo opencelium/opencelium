@@ -93,6 +93,52 @@ schedule.
 
 |image_schedules_7|
 
+Cron Generator
+"""""""""""""""""
+The Cron Generator supports you in creating the most common cron expressions for triggering
+the schedules. To create a cron expression, select the desired values from the selection
+lists. Below the selection lists, you will see a preview of when the job would run with
+the current settings.
+
+|image_crongenerator_1|
+
+Once you have made the desired settings, confirm the settings by
+clicking on the “**OK**” button.
+
+|image_crongenerator_2|
+
+The finished expression is now displayed in the "*Cron Expression*" field. Alternatively,
+you can also enter an expression directly in the “*Cron Expression*” field.
+
+|image_crongenerator_3|
+
+A cron expression is a string comprised of 6 or 7 fields separated by white space. The
+first 6 fields are mandatory, the last field is optional. The following fields are used
+in a cron expression:
+
+   * Second
+   * Minute
+   * Hour
+   * Day of the month
+   * Month
+   * Day of the week
+   * Year (optional)
+
+Save the schedule by clicking on the “Add” or “Update” button.
+
+|image_crongenerator_4| / |image_crongenerator_5|
+
+OpenCelium uses the Quartz Job Scheduling Library for the cron jobs.
+
+On the following page you will find examples for the correct creation of cron expressions,
+which can be used in OpenCelium.
+
+https://www.quartz-scheduler.org/documentation/quartz-2.2.2/tutorials/crontrigger.html
+
+Examples:
+
+
+
 Webhook
 """""""""""""""""
 A *webhook* allows a connection to be triggered using a URL that is called up. A
@@ -179,7 +225,23 @@ if you mouse over on one of them and click on the icon.
 .. |image17| image:: ../img/schedule/17.png
    :align: middle
    :width: 600
-      
+
+.. |image_crongenerator_1| image:: ../img/schedule/OC_crongenerator_helper.png
+   :align: middle
+   :width: 400
+.. |image_crongenerator_2| image:: ../img/schedule/OC_crongenerator_btn_ok.png
+   :align: middle
+   :height: 30
+.. |image_crongenerator_3| image:: ../img/schedule/OC_crongenerator_cron_expression.png
+   :align: middle
+   :width: 400
+.. |image_crongenerator_4| image:: ../img/schedule/OC_crongenerator_btn_add.png
+   :align: middle
+   :height: 30
+.. |image_crongenerator_5| image:: ../img/schedule/OC_crongenerator_btn_update.png
+   :align: middle
+   :height: 30
+
 .. |image1| image:: ../img/schedule/1.png
    :width: 30
 .. |image2| image:: ../img/schedule/2.png
