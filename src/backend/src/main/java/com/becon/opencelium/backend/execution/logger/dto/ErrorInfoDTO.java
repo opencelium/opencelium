@@ -1,9 +1,19 @@
 package com.becon.opencelium.backend.execution.logger.dto;
 
+import java.util.List;
+
 public class ErrorInfoDTO {
     private String message;
     private String code;
-    private ErrorDetailsDTO details;
+    private List<String> stackTrace;
+
+    public ErrorInfoDTO() {
+    }
+
+    public ErrorInfoDTO(String message, List<String> stackTrace) {
+        this.message = message;
+        this.stackTrace = stackTrace;
+    }
 
     public String getMessage() {
         return message;
@@ -21,11 +31,11 @@ public class ErrorInfoDTO {
         this.code = code;
     }
 
-    public ErrorDetailsDTO getDetails() {
-        return details;
+    public List<String> getStackTrace() {
+        return stackTrace;
     }
 
-    public void setDetails(ErrorDetailsDTO details) {
-        this.details = details;
+    public void setStackTrace(List<String> stack_trace) {
+        this.stackTrace = stack_trace;
     }
 }

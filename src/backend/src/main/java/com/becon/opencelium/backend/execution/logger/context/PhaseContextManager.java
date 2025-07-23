@@ -9,6 +9,7 @@ import java.util.*;
 public class PhaseContextManager {
 
     private String flowId;
+    private String connectorName;
     private final Deque<PhaseContext> stack = new ArrayDeque<>();
 
     public PhaseContextManager() {
@@ -16,6 +17,7 @@ public class PhaseContextManager {
 
     public void startPhase(PhaseContext phaseContext) {
         phaseContext.getParsedLogLine().getProperties().put(LogLineKey.FLOWCHART_ID, flowId);
+        phaseContext.getParsedLogLine().getProperties().put(LogLineKey.CONNECTOR_NAME, connectorName);
         stack.push(phaseContext);
     }
 
@@ -58,6 +60,14 @@ public class PhaseContextManager {
 
     public void setFlowId(String flowId) {
         this.flowId = flowId;
+    }
+
+    public String getConnectorName() {
+        return connectorName;
+    }
+
+    public void setConnectorName(String connectorName) {
+        this.connectorName = connectorName;
     }
 
     /**

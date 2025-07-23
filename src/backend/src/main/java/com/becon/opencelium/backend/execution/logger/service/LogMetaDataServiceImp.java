@@ -107,7 +107,7 @@ public class LogMetaDataServiceImp implements LogMetaDataService {
 
         doc.setExecutionId(executionId);
         doc.setConnectionId(connectionId);
-        doc.setFlowchartId(flowchartId);
+        doc.setFlowId(flowchartId);
 
         doc.setIndexPath(line.getProperties().get(LogLineKey.INDEX_PATH));
         doc.setStartOffset(line.getOffset());
@@ -131,18 +131,18 @@ public class LogMetaDataServiceImp implements LogMetaDataService {
     // --------------------------------------- Private Functions ----------------------------------------------
     private Optional<LogData> findExistingBlock(LogData block) {
         if (block.getProperties().containsKey(LogLineKey.LOOP_INDEX)) {
-            return metaDataLogRepository.findByExecutionConnectionFlowchartIndexPathAndLoopIndex(
+            return metaDataLogRepository.findByExecutionConnectionFlowIdIndexPathAndLoopIndex(
                     block.getConnectionId(),
                     block.getExecutionId(),
-                    block.getFlowchartId(),
+                    block.getFlowId(),
                     block.getIndexPath(),
                     block.getProperties().get(LogLineKey.LOOP_INDEX).toString()
             );
         } else {
-            return metaDataLogRepository.findByConnectionIdAndExecutionIdAndFlowchartIdAndIndexPath(
+            return metaDataLogRepository.findByConnectionIdAndExecutionIdAndFlowIdAndIndexPath(
                     block.getConnectionId(),
                     block.getExecutionId(),
-                    block.getFlowchartId(),
+                    block.getFlowId(),
                     block.getIndexPath()
             );
         }

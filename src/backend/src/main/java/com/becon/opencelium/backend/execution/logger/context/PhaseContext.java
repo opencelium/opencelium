@@ -56,6 +56,10 @@ public class PhaseContext {
         segments.add(seg);
     }
 
+    public String getProperty(LogLineKey key) {
+        return parsedLogLine.getProperties().get(key);
+    }
+
 
 //    public List<PhaseContext> getChildren() {
 //        return children;

@@ -31,7 +31,10 @@ public class FlexiblePatternLogParser implements LogLineParser {
     // Pattern for key-value pairs:
     // Matches key=value with value being quoted, JSON-like object, or simple word
     private static final Pattern KV_PATTERN = Pattern.compile(
-            "(\\w+)=((?:\"[^\"]*\")|(?:\\{[^}]*\\})|(?:\\S+))"
+//            "(\\w+)=((?:\"[^\"]*\")|(?:\\{[^}]*\\})|(?:\\S+))"
+            "(\\w+)=((\"[^\"]*\"|\\{[^}]*\\}|[^\\s]+(?:\\s(?!\\w+=)[^\\s]+)*))" //without stacktrace
+//            "(\\\\w+)=((?:\\\"[^\\\"]*\\\"|\\\\{[^}]*\\\\}|[^\\\\s=]+(?:\\\\s(?!\\\\w+=)[^\\\\s=]+)*)(?:\\\\R.*)*)" // - with stacktrace
+//            "(\\w+)=((?:\"[^\"]*\"|\\{[^}]*\\}|[^\\s=]+(?:\\s(?!\\w+=)[^\\s=]+)*)+)", Pattern.DOTALL
     );
 
     // Pattern to validate log line:

@@ -31,6 +31,7 @@ public class ExecutionTrackerImpl implements ExecutionTracker {
     private final PhaseSchemaRegistry phaseSchemaRegistry;
     private final PhaseBuilderFactory builderFactory;
     private final ParsedLogLineMapper parsedLogLineMapper;
+    private String connectorName;
 
 
     public ExecutionTrackerImpl(String execId, String connId,String flowId, LogDetailLevel level) {
@@ -93,7 +94,9 @@ public class ExecutionTrackerImpl implements ExecutionTracker {
             phaseContext.setStatus(PhaseStatus.PENDING);
             if (phaseType == PhaseType.FLOWCHART_START) {
                 this.flowId = phaseContext.getProperties().get(LogLineKey.FLOWCHART_ID);
+                this.connectorName = phaseContext.getProperties().get(LogLineKey.CONNECTOR_NAME);
                 phaseContextManager.setFlowId(flowId);
+                phaseContextManager.setConnectorName(connectorName);
                 phaseContextManager.startPhase(phaseContext);
             } else {
                 phaseContextManager.startPhase(phaseContext);
@@ -110,6 +113,9 @@ public class ExecutionTrackerImpl implements ExecutionTracker {
         // Handle end events
         if (isEndPhase(phaseType)) {
             PhaseContext closed = phaseContextManager.endPhase(phaseContext);
+            if (closed.getStatus() == PhaseStatus.COMPLETE) {
+                return Optional.empty();
+            }
             closed.setStatus(PhaseStatus.COMPLETE);
             LogData meta = phaseBuilder.build(closed, execId, Long.valueOf(connId));
             meta.setExecutionId(execId);

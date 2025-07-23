@@ -1,85 +1,115 @@
 package com.becon.opencelium.backend.execution.logger.builder.strategies;
 
 import com.becon.opencelium.backend.database.mongodb.entity.LogData;
+import com.becon.opencelium.backend.database.mongodb.entity.LogDataError;
 import com.becon.opencelium.backend.execution.logger.builder.PhaseBuilder;
 import com.becon.opencelium.backend.execution.logger.context.PhaseContext;
 import com.becon.opencelium.backend.execution.logger.context.SegmentContext;
-import com.becon.opencelium.backend.execution.logger.enums.LogDetailLevel;
-import com.becon.opencelium.backend.execution.logger.enums.LogLineType;
-import com.becon.opencelium.backend.execution.logger.enums.PhaseCategory;
-import com.becon.opencelium.backend.execution.logger.enums.PhaseType;
+import com.becon.opencelium.backend.execution.logger.enums.*;
 import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
+import com.becon.opencelium.backend.execution.logger.parser.entity.ParsedLogLine;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class IfLogDataBuilder implements PhaseBuilder {
 
     @Override
-    public LogData build(PhaseContext context, String execId, Long connId) {
+    public LogData build(PhaseContext phaseCtx, String execId, Long connId) {
+        ParsedLogLine parsed = phaseCtx.getParsedLogLine();
+        PhaseCategory category = PhaseCategory.fromValue((PhaseType) parsed.getStage());
+        long offset = parsed.getOffset();
+
+        // 1) Core LogData
         LogData logData = new LogData();
-        PhaseCategory category = PhaseCategory.fromValue((PhaseType)context.getParsedLogLine().getStage());
+        logData.setId(UUID.randomUUID().toString());
         logData.setExecutionId(execId);
         logData.setConnectionId(connId);
-        logData.setFlowchartId(context.getProperties().getOrDefault(LogLineKey.FLOWCHART_ID, null));
-        logData.setStatus(context.getStatus());
+        logData.setFlowId(phaseCtx.getProperty(LogLineKey.FLOWCHART_ID));
+        logData.setIndexPath(phaseCtx.getProperty(LogLineKey.INDEX_PATH));
+        logData.setStatus(phaseCtx.getStatus());
+        logData.setStartOffset(offset);
+        logData.setEndOffset(offset);
         logData.setLogLineType(LogLineType.PHASE);
         logData.setType(category);
-        logData.setIndexPath(context.getProperties().get(LogLineKey.INDEX_PATH));
 
-        if (context.getParsedLogLine() != null) {
-            logData.setStartOffset(context.getParsedLogLine().getOffset());
-            logData.setEndOffset(context.getParsedLogLine().getOffset()); // For IF, usually same line
-        }
+        // 2) Extract flat properties
+        Map<LogLineKey, Object> flatProps = extractFlatProperties(phaseCtx.getProperties());
+        logData.setProperties(flatProps);
 
-        // Copy allowed IF properties
-        Map<LogLineKey, Object> finalProps = new HashMap<>(context.getProperties());
+        // 3) Build segments and errors
+        SegmentAggregate agg = buildSegments(phaseCtx.getSegments());
 
-        // Handle IF segments (IF_RESULT, IF_REF, EXCEPTION)
-        for (SegmentContext segment : context.getSegments()) {
-            switch (segment.getSegmentType()) {
-                case IF_RESULT -> {
-                    // Just one key: data
-                    String result = segment.getAllProperties().get(LogLineKey.DATA);
-                    if (result != null) {
-                        finalProps.put(LogLineKey.RESULT, result);
-                    }
-                }
-                case IF_REF -> {
-                    // Collect multiple refs into one list
-                    String ref = segment.getAllProperties().get(LogLineKey.REF);
-                    String data = segment.getAllProperties().get(LogLineKey.DATA);
-                    if (ref != null && data != null) {
-                        Map<String, String> refEntry = Map.of("name", ref, "value", data);
-                        Object existing = finalProps.get(LogLineKey.REF);
-                        if (existing instanceof List<?> list) {
-                            @SuppressWarnings("unchecked")
-                            List<Map<String, String>> refList = (List<Map<String, String>>) list;
-                            refList.add(refEntry);
-                        } else {
-                            List<Map<String, String>> refList = new ArrayList<>();
-                            refList.add(refEntry);
-                            finalProps.put(LogLineKey.REF, refList);
-                        }
-                    }
-                }
-                case EXCEPTION -> {
-                    String data = segment.getAllProperties().get(LogLineKey.DATA);
-                    if (data != null) {
-                        finalProps.put(LogLineKey.EXCEPTION, data);
-                    }
-                }
-                default -> {
-                    // Skip other segment types
-                }
-            }
-        }
+        // 4) Assemble segment object
+        Map<String, Object> segment = new LinkedHashMap<>();
+        if (!agg.refs.isEmpty())    segment.put("refs", agg.refs);
+        if (agg.ifResult != null)   segment.put("if_result", Map.of("value", agg.ifResult));
+        logData.setSegments(segment);
 
-        logData.setProperties(finalProps);
-//        logData.setCreatedAt(Instant.now());
+        // 5) Attach error if present
+        logData.setError(agg.error);
 
         return logData;
+    }
+
+    private EnumMap<LogLineKey, Object> extractFlatProperties(Map<LogLineKey, String> props) {
+        return props.entrySet().stream()
+                .filter(e -> excludeKey(e.getKey()))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (a, b) -> b,
+                        () -> new EnumMap<>(LogLineKey.class)
+                ));
+    }
+
+    private boolean excludeKey(LogLineKey key) {
+        return !Set.of(
+                LogLineKey.INDEX_PATH,
+                LogLineKey.FLOWCHART_ID
+        ).contains(key);
+    }
+
+    private SegmentAggregate buildSegments(List<SegmentContext> segments) {
+        SegmentAggregate agg = new SegmentAggregate();
+        for (SegmentContext ctx : segments) {
+            Map<LogLineKey, String> p = ctx.getAllProperties();
+            switch (ctx.getSegmentType()) {
+                case IF_REF -> {
+                    String ref = p.get(LogLineKey.REF);
+                    String data = p.get(LogLineKey.DATA);
+                    if (ref != null && data != null) {
+                        agg.refs.add(Map.of("ref", ref, "value", data));
+                    }
+                }
+                case IF_RESULT -> agg.ifResult = p.get(LogLineKey.DATA);
+                case EXCEPTION -> {
+                    String data = p.getOrDefault(LogLineKey.DATA, "");
+                    agg.error = parseErrorInfo(data);
+                }
+                default -> {}
+            }
+        }
+        return agg;
+    }
+
+    private LogDataError parseErrorInfo(String data) {
+        if (data == null || data.isBlank()) {
+            return new LogDataError();
+        }
+        String[] lines = data.split("\\R");
+        String message = lines[0];
+        List<String> stack = new ArrayList<>();
+        for (int i = 1; i < lines.length; i++) {
+            String l = lines[i].strip();
+            if (!l.isEmpty()) stack.add(l);
+        }
+        return new LogDataError(message, stack);
+    }
+
+    private static class SegmentAggregate {
+        final List<Map<String, String>> refs = new ArrayList<>();
+        String ifResult;
+        LogDataError error = new LogDataError();
     }
 }

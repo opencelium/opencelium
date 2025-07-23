@@ -4,48 +4,93 @@ import com.becon.opencelium.backend.database.mongodb.entity.LogData;
 import com.becon.opencelium.backend.execution.logger.builder.PhaseBuilder;
 import com.becon.opencelium.backend.execution.logger.context.PhaseContext;
 import com.becon.opencelium.backend.execution.logger.context.SegmentContext;
-import com.becon.opencelium.backend.execution.logger.enums.*;
+import com.becon.opencelium.backend.execution.logger.enums.PhaseCategory;
+import com.becon.opencelium.backend.execution.logger.enums.PhaseType;
+import com.becon.opencelium.backend.execution.logger.enums.LogLineType;
+import com.becon.opencelium.backend.execution.logger.enums.SegmentType;
 import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class LoopLogDataBuilder implements PhaseBuilder {
+
     @Override
-    public LogData build(PhaseContext context, String execId, Long connId) {
-        PhaseCategory category = PhaseCategory.fromValue((PhaseType)context.getParsedLogLine().getStage());
+    public LogData build(PhaseContext phaseCtx, String execId, Long connId) {
+        var parsed = phaseCtx.getParsedLogLine();
+        PhaseCategory category = PhaseCategory.fromValue((PhaseType) parsed.getStage());
+        long offset = parsed.getOffset();
+
+        // 1) Core LogData setup
         LogData logData = new LogData();
         logData.setId(UUID.randomUUID().toString());
         logData.setExecutionId(execId);
         logData.setConnectionId(connId);
-        logData.setFlowchartId(context.getProperties().get(LogLineKey.FLOWCHART_ID));
-        logData.setStatus(context.getStatus());
-        logData.setIndexPath(context.getProperties().get(LogLineKey.INDEX_PATH));
-        logData.setStartOffset(context.getParsedLogLine().getOffset());
-        logData.setEndOffset(context.getParsedLogLine().getOffset());
+        logData.setFlowId(phaseCtx.getProperty(LogLineKey.FLOWCHART_ID));
+        logData.setIndexPath(phaseCtx.getProperty(LogLineKey.INDEX_PATH));
+        logData.setStatus(phaseCtx.getStatus());
+        logData.setStartOffset(offset);
+        logData.setEndOffset(offset);
         logData.setLogLineType(LogLineType.PHASE);
         logData.setType(category);
 
-        // Copy base phase properties
-        Map<LogLineKey, Object> finalProps = new HashMap<>(context.getProperties());
+        // 2) Extract flat properties
+        var flatProps = extractFlatProperties(phaseCtx.getProperties());
 
-        // 2) Handle LOOP_REF segments with potential duplicates into a unified "ref" list
-        List<Map<String, String>> refList = new ArrayList<>();
-        for (SegmentContext seg : context.getSegments()) {
-            if (seg.getSegmentType() == SegmentType.LOOP_REF) {
-                String refName = seg.getAllProperties().get(LogLineKey.REF);
-                String refValue = seg.getAllProperties().get(LogLineKey.DATA);
-                if (refName != null && refValue != null) {
-                    refList.add(Map.of("name", refName, "value", refValue));
+        // 3) Aggregate segments
+        var agg = buildSegments(phaseCtx.getSegments());
+
+        // 4) Merge segment data into properties
+        if (!agg.refs.isEmpty()) {
+            flatProps.put(LogLineKey.REF, agg.refs);
+        }
+        if (!agg.error.isBlank()) {
+            flatProps.put(LogLineKey.EXCEPTION, agg.error);
+        }
+
+        logData.setProperties(flatProps);
+        return logData;
+    }
+
+    private EnumMap<LogLineKey, Object> extractFlatProperties(Map<LogLineKey, String> props) {
+        return props.entrySet().stream()
+                .filter(e -> excludeKey(e.getKey()))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (a, b) -> b,
+                        () -> new EnumMap<>(LogLineKey.class)
+                ));
+    }
+
+    private boolean excludeKey(LogLineKey key) {
+        return !Set.of(
+                LogLineKey.INDEX_PATH,
+                LogLineKey.FLOWCHART_ID
+        ).contains(key);
+    }
+
+    private SegmentAggregate buildSegments(List<SegmentContext> segments) {
+        var agg = new SegmentAggregate();
+        for (SegmentContext ctx : segments) {
+            var p = ctx.getAllProperties();
+            switch (ctx.getSegmentType()) {
+                case LOOP_REF -> {
+                    var name = p.get(LogLineKey.REF);
+                    var value = p.get(LogLineKey.DATA);
+                    if (name != null && value != null) {
+                        agg.refs.add(Map.of("name", name, "value", value));
+                    }
                 }
-            } else if (seg.getSegmentType() == SegmentType.EXCEPTION) {
-                finalProps.put(LogLineKey.EXCEPTION, seg.getAllProperties().get(LogLineKey.DATA));
+                case EXCEPTION -> agg.error = p.getOrDefault(LogLineKey.DATA, "");
+                default -> {}
             }
         }
-        if (!refList.isEmpty()) {
-            finalProps.put(LogLineKey.REF, refList);
-        }
+        return agg;
+    }
 
-        logData.setProperties(finalProps);
-        return logData;
+    private static class SegmentAggregate {
+        final List<Map<String, String>> refs = new ArrayList<>();
+        String error = "";
     }
 }

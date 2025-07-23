@@ -41,13 +41,14 @@ public class ExecutionController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "Returns child metadata elements of the specified indexPath")
+    @Operation(summary = "Returns children metadata elements of the specified indexPath")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Success",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = MetaDataListDto.class))))
     })
-    @GetMapping("/{executionId}/connector/{connectorId}/element/{indexPath}/child")
+    // change connectorId to a flowId
+    @GetMapping("/{executionId}/connector/{connectorId}/element/{indexPath}/detailed")
     public ResponseEntity<List<MetaDataListDto>> getMetaDataList(
             @PathVariable String executionId,
             @PathVariable String connectorId,
