@@ -79,7 +79,7 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 		}
 	};
 
-	const methodColor = getMethodColor(trace.segment.request.http_method);
+	const methodColor = getMethodColor(trace?.segment?.request?.http_method);
 
 	const requestDetails = trace.segment.request;
 	const responseDetails = trace.segment.response;
@@ -120,13 +120,13 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 						style={{ backgroundColor: methodColor }}
 						className={styles.methodType}
 					>
-						{trace.segment.request.http_method}
+						{trace?.segment?.request?.http_method || ''}
 					</div>
 
 					{ShowIndexPath && (
 						<div style={{ marginLeft: 8 }}>{trace.indexPath}</div>
 					)}
-					<div className={styles.methodUrl}>{trace.segment.request.url}</div>
+					<div className={styles.methodUrl}>{trace?.segment?.request?.url || ''}</div>
 				</div>
 				<div
 					className={styles.methodTraceRightSide}
@@ -135,9 +135,9 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 						e.stopPropagation();
 					}}
 				>
-					<div className={styles.methodStatus}>{trace.segment.response.status}</div>
+					<div className={styles.methodStatus}>{trace.segment?.response?.status || ''}</div>
 					<div>{'|'}</div>
-					<div className={styles.methodTime}>{trace.segment.response.duration}</div>
+					<div className={styles.methodTime}>{trace.segment?.response?.duration || ''}</div>
 				</div>
 			</div>
 
