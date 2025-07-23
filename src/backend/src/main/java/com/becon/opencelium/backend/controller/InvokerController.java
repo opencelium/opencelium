@@ -21,6 +21,7 @@ import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
+import com.becon.opencelium.backend.database.mysql.service.InvokerSyncService;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.parser.InvokerParserImp;
@@ -45,7 +46,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -71,6 +79,7 @@ import java.util.stream.Collectors;
 @RequestMapping(value = "/invoker", produces = MediaType.APPLICATION_JSON_VALUE)
 public class InvokerController {
     private final InvokerService invokerService;
+    private final InvokerSyncService invokerSyncService;
     private final ConnectorService connectorService;
     private final ConnectionService connectionService;
     private final Mapper<Invoker, InvokerDTO> invokerMapper;
@@ -78,12 +87,13 @@ public class InvokerController {
 
     public InvokerController(
             @Qualifier("invokerServiceImp") InvokerService invokerService,
-            @Qualifier("connectorServiceImp") ConnectorService connectorService,
+            InvokerSyncService invokerSyncService, @Qualifier("connectorServiceImp") ConnectorService connectorService,
             @Qualifier("connectionServiceImp") ConnectionService connectionService,
             Mapper<Invoker, InvokerDTO> invokerMapper,
             Mapper<FunctionInvoker, FunctionDTO> functionMapper
     ) {
         this.invokerService = invokerService;
+        this.invokerSyncService = invokerSyncService;
         this.connectorService = connectorService;
         this.connectionService = connectionService;
         this.invokerMapper = invokerMapper;
@@ -105,7 +115,7 @@ public class InvokerController {
     @GetMapping("/{name}")
     public ResponseEntity<?> get(@PathVariable String name) throws Exception {
         InvokerDTO invokerResources = invokerMapper.toDTO(invokerService.findByName(name));
-        return ResponseEntity.ok(invokerResources);
+        return ResponseEntity.ok(setManualChangeValue(invokerResources));
     }
 
     @Operation(summary = "Retrieves all invokers")
@@ -125,6 +135,7 @@ public class InvokerController {
 
         List<InvokerDTO> invokerDTOS = invokerService.findAll()
                 .stream().map(invokerMapper::toDTO)
+                .map(this::setManualChangeValue)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(invokerDTOS);
     }
@@ -374,6 +385,7 @@ public class InvokerController {
     public ResponseEntity<List<InvokerDTO>> synchronise() {
         List<InvokerDTO> invokerDTOS = invokerService.synchronise()
                 .stream().map(invokerMapper::toDTO)
+                .map(this::setManualChangeValue)
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(invokerDTOS);
@@ -396,5 +408,11 @@ public class InvokerController {
             e.printStackTrace();
         }
         return null;
+    }
+    
+    private InvokerDTO setManualChangeValue(InvokerDTO dto) {
+        dto.setHasManualSync(invokerSyncService.hasManualChange(dto.getName()));
+
+        return dto;
     }
 }

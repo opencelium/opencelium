@@ -23,16 +23,6 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
 
     @Override
     @Transactional
-    public void update(int id, InvokerSync sync) {
-        repository.findById(id)
-                .ifPresent(entity -> {
-                    entity.setInvokerContentHmac(sync.getInvokerContentHmac());
-                    entity.setHasManualSync(sync.isHasManualSync());
-                });
-    }
-
-    @Override
-    @Transactional
     public void delete(String invokerName) {
         repository.findByInvokerName(invokerName)
                 .ifPresent(repository::delete);
@@ -41,5 +31,12 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
     @Override
     public Optional<InvokerSync> findByInvokerName(String invokerName) {
         return repository.findByInvokerName(invokerName);
+    }
+
+    @Override
+    public boolean hasManualChange(String invokerName) {
+        return repository.findByInvokerName(invokerName)
+                .map(InvokerSync::isHasManualSync)
+                .orElse(false);
     }
 }
