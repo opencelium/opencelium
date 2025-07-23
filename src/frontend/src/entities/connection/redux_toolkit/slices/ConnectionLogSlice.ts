@@ -50,7 +50,7 @@ export const connectionLogSlice = createSlice({
 					findAndUpdateTrace(connector.traces, parentIndexPath, (trace) => {
 						if (trace.type === 'LOOP') {
 							//@ts-ignore
-							trace.properties.size++;
+							trace.properties.size = trace.properties.size ? trace.properties.size + 1 : 1;
 							return true;
 						}
 						return false;
