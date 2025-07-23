@@ -41,27 +41,40 @@ export const connectionLogSlice = createSlice({
 		clearTextLog: (state) => {
 			state.textLogs = [];
 		},
-		addSocketLog: (state, action: PayloadAction<ConnectionSocketLog<LightSegment>>) => {
-			const {executionId, flowId, connectorName, ...newTrace} = action.payload;
-			if (state.executionId === action.payload.executionId) {
-				let hasConnector = false;
-				state.connectors.forEach((connector) => {
-					if (connector.flowId === action.payload.flowId) {
-						hasConnector = true;
-						connector.traces.push(action.payload);
-						return;
+		addSocketLog: (state, action: PayloadAction<{data: ConnectionSocketLog<LightSegment>, settings: {hasNewLoopIndex: boolean}}>) => {
+			const {executionId, flowId, connectorName, ...newTrace} = action.payload.data;
+			if (state.executionId === executionId) {
+				if (action.payload.settings.hasNewLoopIndex) {
+					const connector = state.connectors.find(c => c.flowId === flowId);
+					const parentIndexPath = action.payload.data.indexPath.split('_').slice(0, -1).join('_');
+					findAndUpdateTrace(connector.traces, parentIndexPath, (trace) => {
+						if (trace.type === 'LOOP') {
+							//@ts-ignore
+							trace.properties.size++;
+							return true;
+						}
+						return false;
+					});
+				} else {
+					let hasConnector = false;
+					state.connectors.forEach((connector) => {
+						if (connector.flowId === flowId) {
+							hasConnector = true;
+							connector.traces.push(action.payload.data);
+							return;
+						}
+					});
+					if (!hasConnector) {
+						state.connectors.push({
+							flowId,
+							name: connectorName,
+							traces: [action.payload.data],
+						})
 					}
-				});
-				if (!hasConnector) {
-					state.connectors.push({
-						flowId,
-						name: connectorName,
-						traces: [action.payload],
-					})
 				}
 			} else {
 				state.executionId = executionId;
-				state.connectors = [{flowId, name: connectorName, traces: [action.payload]}]
+				state.connectors = [{flowId, name: connectorName, traces: [action.payload.data]}]
 			}
 		},
 		cleanMethodTrace: (state, action: PayloadAction<CleanTracePayload>) => {

@@ -33,6 +33,7 @@ const TestConnectionButton = ({validateLogic}: any) => {
     const [channelId, setChannelId] = useState<string>(undefined);
     const {connection} = useAppSelector((state: RootState) => state.connectionReducer);
     const {executionId, schedulerId} = useAppSelector((state: RootState) => state.connectionLogReducer);
+    let previousLogMessage: ConnectionSocketLog<LightSegment> ;
     const subscriptionRef = useRef<() => void>();
 
     useEffect(() => {
@@ -44,13 +45,16 @@ const TestConnectionButton = ({validateLogic}: any) => {
             const subscription = socket.subscribe(`/execution/logs/${channelId}`, (message) => {
                 const data = JSON.parse(message.body) as ConnectionSocketLog<LightSegment>;
                 console.log('Socket.ConnectionLogs', data);
-                dispatch(addSocketLog(data));
-
-                /*
+                let hasNewLoopIndex = false;
+                if (!!previousLogMessage?.properties?.loopIndex && previousLogMessage.properties.loopIndex !== data.properties.loopIndex) {
+                    hasNewLoopIndex = true;
+                }
+                dispatch(addSocketLog({data, settings: {hasNewLoopIndex}}));
+                previousLogMessage = data;
                 if (data.type === 'EXECUTION') {
                     setIsTesting(false);
                     subscriptionRef.current?.();
-                }*/
+                }
             });
             consoleLog("✅ Subscribed to /execution/logs");
             subscriptionRef.current = () => {

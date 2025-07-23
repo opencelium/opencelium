@@ -135,9 +135,9 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 						e.stopPropagation();
 					}}
 				>
-					<div className={styles.methodStatus}>{trace.segment.response.status}</div>
+					<div className={styles.methodStatus}>{trace.segment?.response?.status || ''}</div>
 					<div>{'|'}</div>
-					<div className={styles.methodTime}>{trace.segment.response.duration}</div>
+					<div className={styles.methodTime}>{trace.segment?.response?.duration || ''}</div>
 				</div>
 			</div>
 
