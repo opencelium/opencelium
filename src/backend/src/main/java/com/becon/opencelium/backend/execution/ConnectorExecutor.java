@@ -150,6 +150,7 @@ public class ConnectorExecutor {
                 int length = list.size();
 
                 logger.logAndSend(String.format("phase=LOOP_START indexPath=%s expression=(%s) size=%d iterator=\"%s\" %s", index, loop.getRef(), length, loop.getIterator(), getLoopData()));
+                logger.logAndSend(String.format("segment=LOOP_REF ref=(%s) data=%s", loop.getRef(), list.stream().collect(Collectors.joining(", ", "[", "]"))));
                 executionManager.getLoops().add(loop);
                 for (int i = 0; i < length; i++) {
                     // update currently executing loops' data
