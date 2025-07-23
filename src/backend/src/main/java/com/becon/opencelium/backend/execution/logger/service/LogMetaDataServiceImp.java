@@ -116,10 +116,10 @@ public class LogMetaDataServiceImp implements LogMetaDataService {
         doc.setType(PhaseCategory.fromValue((PhaseType) line.getStage()));
 
         // Include all other unknown fields in the 'properties' map
-        Map<LogLineKey, Object> props = new LinkedHashMap<>();
+        Map<String, Object> props = new LinkedHashMap<>();
         for (Map.Entry<LogLineKey, String> entry : line.getProperties().entrySet()) {
             if (!EXCLUDED_KEYS.contains(entry.getKey())) {
-                props.put(entry.getKey(), entry.getValue());
+                props.put(entry.getKey().name(), entry.getValue());
             }
         }
 

@@ -8,9 +8,8 @@ import com.becon.opencelium.backend.execution.logger.enums.PhaseCategory;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseType;
 import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class DefaultLogDataBuilder implements PhaseBuilder {
     @Override
@@ -34,9 +33,26 @@ public class DefaultLogDataBuilder implements PhaseBuilder {
         }
 
         // Copy basic properties
-        Map<LogLineKey, Object> props = new HashMap<>(context.getProperties());
+        Map<String, Object> props = toStringKeyMap(context.getProperties());
         logData.setProperties(props);
 
         return logData;
+    }
+
+    /**
+     * Converts a Map keyed by LogLineKey into a Map keyed by String (the enum's name),
+     * preserving insertion order.
+     */
+    private Map<String, Object> toStringKeyMap(Map<LogLineKey, String> props) {
+        if (props == null || props.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        return props.entrySet().stream()
+                .collect(Collectors.toMap(
+                        e -> e.getKey().name(),   // enum name as string key
+                        Map.Entry::getValue,      // same value
+                        (a, b) -> b,              // on duplicate (shouldn't happen), keep latter
+                        LinkedHashMap::new        // preserve original order
+                ));
     }
 }

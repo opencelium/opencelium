@@ -44,24 +44,27 @@ public class LoopLogDataBuilder implements PhaseBuilder {
 
         // 4) Merge segment data into properties
         if (!agg.refs.isEmpty()) {
-            flatProps.put(LogLineKey.REF, agg.refs);
+            flatProps.put(LogLineKey.REF.name(), agg.refs);
         }
         if (!agg.error.isBlank()) {
-            flatProps.put(LogLineKey.EXCEPTION, agg.error);
+            flatProps.put(LogLineKey.EXCEPTION.name(), agg.error);
         }
 
         logData.setProperties(flatProps);
         return logData;
     }
 
-    private EnumMap<LogLineKey, Object> extractFlatProperties(Map<LogLineKey, String> props) {
+    private Map<String, Object> extractFlatProperties(Map<LogLineKey, String> props) {
+        if (props == null || props.isEmpty()) {
+            return Collections.emptyMap();
+        }
         return props.entrySet().stream()
                 .filter(e -> excludeKey(e.getKey()))
                 .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue,
-                        (a, b) -> b,
-                        () -> new EnumMap<>(LogLineKey.class)
+                        e -> e.getKey().name(),    // use the enum name as the String key
+                        Map.Entry::getValue,       // the original String value
+                        (a, b) -> b,               // on duplicate key, keep the latter
+                        LinkedHashMap::new         // preserve insertion order
                 ));
     }
 

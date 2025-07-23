@@ -34,7 +34,7 @@ public class IfLogDataBuilder implements PhaseBuilder {
         logData.setType(category);
 
         // 2) Extract flat properties
-        Map<LogLineKey, Object> flatProps = extractFlatProperties(phaseCtx.getProperties());
+        Map<String, Object> flatProps = extractFlatProperties(phaseCtx.getProperties());
         logData.setProperties(flatProps);
 
         // 3) Build segments and errors
@@ -42,8 +42,8 @@ public class IfLogDataBuilder implements PhaseBuilder {
 
         // 4) Assemble segment object
         Map<String, Object> segment = new LinkedHashMap<>();
-        if (!agg.refs.isEmpty())    segment.put("refs", agg.refs);
-        if (agg.ifResult != null)   segment.put("if_result", Map.of("value", agg.ifResult));
+        if (!agg.refs.isEmpty())    segment.put(LogLineKey.REF.name(), agg.refs);
+        if (agg.ifResult != null)   segment.put("value", agg.ifResult);
         logData.setSegments(segment);
 
         // 5) Attach error if present
@@ -52,14 +52,17 @@ public class IfLogDataBuilder implements PhaseBuilder {
         return logData;
     }
 
-    private EnumMap<LogLineKey, Object> extractFlatProperties(Map<LogLineKey, String> props) {
+    private Map<String, Object> extractFlatProperties(Map<LogLineKey, String> props) {
+        if (props == null || props.isEmpty()) {
+            return Collections.emptyMap();
+        }
         return props.entrySet().stream()
                 .filter(e -> excludeKey(e.getKey()))
                 .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue,
-                        (a, b) -> b,
-                        () -> new EnumMap<>(LogLineKey.class)
+                        e -> e.getKey().name(),    // use the enum name as the String key
+                        Map.Entry::getValue,       // the original String value
+                        (a, b) -> b,               // on duplicate key, keep the latter
+                        LinkedHashMap::new         // preserve insertion order
                 ));
     }
 
