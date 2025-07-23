@@ -100,14 +100,14 @@ public class OperationLogDataBuilder implements PhaseBuilder {
             Map<LogLineKey,String> p = ctx.getAllProperties();
             switch (ctx.getSegmentType()) {
                 case REQUEST -> {
-                    agg.request.put("url",    p.get(LogLineKey.URL));
-                    agg.request.put("http_method", p.get(LogLineKey.HTTP_METHOD));
+                    agg.request.put(LogLineKey.URL.name(),    p.get(LogLineKey.URL));
+                    agg.request.put(LogLineKey.HTTP_METHOD.name(), p.get(LogLineKey.HTTP_METHOD));
                 }
                 case REQUEST_HEADER    -> agg.request.put("header",  p.get(LogLineKey.DATA));
                 case REQUEST_PAYLOAD   -> agg.request.put("payload", p.get(LogLineKey.DATA));
                 case RESPONSE          -> {
-                    agg.response.put("status",   p.get(LogLineKey.HTTP_STATUS));
-                    agg.response.put("duration", p.get(LogLineKey.DURATION));
+                    agg.response.put(LogLineKey.HTTP_STATUS.name(),   p.get(LogLineKey.HTTP_STATUS));
+                    agg.response.put(LogLineKey.DURATION.name(), p.get(LogLineKey.DURATION));
                 }
                 case RESPONSE_HEADER   -> agg.response.put("header",  p.get(LogLineKey.DATA));
                 case RESPONSE_PAYLOAD  -> agg.response.put("payload", p.get(LogLineKey.DATA));
