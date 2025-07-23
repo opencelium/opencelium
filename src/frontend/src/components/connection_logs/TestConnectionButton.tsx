@@ -46,12 +46,16 @@ const TestConnectionButton = ({validateLogic}: any) => {
                 const data = JSON.parse(message.body) as ConnectionSocketLog<LightSegment>;
                 console.log('Socket.ConnectionLogs', data);
                 let hasNewLoopIndex = false;
-                if (!!previousLogMessage?.properties?.loopIndex && previousLogMessage.properties.loopIndex !== data.properties.loopIndex) {
+                let isLoopComplete = false;
+                if (!!data.properties.loop_index && previousLogMessage.properties.loop_index !== data.properties.loop_index) {
                     hasNewLoopIndex = true;
+                }
+                if ((data.type === 'LOOP' || data.type === 'FLOWCHART') && data.status === 'COMPLETE') {
+                    return;
                 }
                 dispatch(addSocketLog({data, settings: {hasNewLoopIndex}}));
                 previousLogMessage = data;
-                if (data.type === 'EXECUTION') {
+                if (data.type === 'EXECUTION' && data.status === 'COMPLETE') {
                     setIsTesting(false);
                     subscriptionRef.current?.();
                 }
