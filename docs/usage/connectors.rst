@@ -98,7 +98,6 @@ have set. After confirmation, the credentials are displayed.
    until the browser is closed again.
 
 
-
 .. |image0| image:: ../img/connector/0.png
    :align: middle
 .. |image1| image:: ../img/connector/1.png
@@ -113,10 +112,9 @@ have set. After confirmation, the credentials are displayed.
 .. |image6| image:: ../img/connector/6.png
    :align: middle
    :width: 400
-..|image_master_password_1| image:: ../img/connector/OC_master_password_1.png
+.. |image_master_password_1| image:: ../img/connector/OC_master_password_1.png
    :align: middle
    :width: 400
-..|image_master_password_2| image:: ../img/connector/OC_master_password_2.png
+.. |image_master_password_2| image:: ../img/connector/OC_master_password_2.png
    :align: middle
    :width: 400
-   
