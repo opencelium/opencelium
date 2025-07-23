@@ -124,20 +124,37 @@ in a cron expression:
    * Day of the week
    * Year (optional)
 
-Save the schedule by clicking on the “Add” or “Update” button.
+Save the schedule by clicking on the “**Add**” or “**Update**” button.
 
-|image_crongenerator_4| / |image_crongenerator_5|
+|image_crongenerator_4| or |image_crongenerator_5|
 
 OpenCelium uses the Quartz Job Scheduling Library for the cron jobs.
 
-On the following page you will find examples for the correct creation of cron expressions,
+On the Quartz page you will find `examples`_ for the correct creation of cron expressions,
 which can be used in OpenCelium.
 
-https://www.quartz-scheduler.org/documentation/quartz-2.2.2/tutorials/crontrigger.html
+.. _examples: https://www.quartz-scheduler.org/documentation/quartz-2.2.2/tutorials/crontrigger.html
 
-Examples:
+**Examples:**
 
+.. code-block::
 
+   0 0 12 * * ?
+
+**Meaning:** Run at 12pm (noon) every day
+
+.. code-block::
+
+   0 * 14 * * ? 
+
+**Meaning:** Run at 10:15am every day
+
+.. code-block::
+
+   0 0/5 14,18 * * ? 
+
+**Meaning:** Run every 5 minutes starting at 2pm and ending at 2:55pm, AND fire every 5 minutes starting
+at 6pm and ending at 6:55pm, every day
 
 Webhook
 """""""""""""""""
@@ -156,31 +173,43 @@ Clicking on the icon |image_schedules_16| disables the webhook for the respectiv
 Notifications
 """""""""""""""""
 
-*Notification* is such a feature that allows you to be notified via emails or webhooks when
-pre, post or alert event happens.
+The *notifications* are a feature that allows you to be informed about certain events via e-mail
+or webhook. The available events are pre, post and altert.
+
+**pre** - notification is triggered **before** the schedule
+**post** - notification is triggered **after** the schedule
+**altert** - notification is triggered in the **event of an error**.
 
 .. note::
-	The aggregator applied only for post events.
+   The aggregator only applies for post events.
 
-You can also apply the same notification for multiple schedules. Just select needed schedules and
-press on the notification button |image24|
+You can assign a notification to several schedules. To do this, select the desired schedules in the
+list by clicking on the checkboxes and click on the “**Notification**” button |image_notifications_4|.
 
-|image5|
+|image_notifications_1|
 
-Before you create a notification, you need to create a template that is described  :ref:`here <management-notification_template>`.
-After clicking on add, provide *name*, *event*, *notification type* and after *template*.
+If you only want to assign a notification to one schedule, you can alternatively click on the letter
+symbol and then on the plus sign to create a new notification.
 
-|image6|
+|image_notifications_2|
 
-For E-mail type you need to select the recipients who gets a notification.
+.. note::
+   Before you create a notification, you need to create a template that is described :ref:`here <management-notification_template>`.
 
-|image7|
+After clicking on "**Add**", provide *name*, *event*, *notification type* and *after template*.
 
-For webhook type you need to provide the webhook of the target system.
+|image_notifications_3|
 
-After creating the notification you will see a list of notifications and search to look for them
-by name, event or notification type. Also, you can update or delete the corresponding notification,
-if you mouse over on one of them and click on the icon.
+Select the desired notification type (E-Mail or webhook). For E-mail type you need to select the 
+recipients who gets a notification. For webhook type you need to provide the webhook of the target system.
+
+|image_notifications_5|
+
+After creating the notification you will see a list of notifications and a search where you can search
+for a notification by name, event or notification type. You can update or delete the corresponding notification,
+if you mouse over on one of them and click on the respective icon.
+
+|image_notifications_6|
 
 
 .. |image_schedules_1| image:: ../img/schedule/OC_schedules_list.png
@@ -236,11 +265,28 @@ if you mouse over on one of them and click on the icon.
    :align: middle
    :width: 400
 .. |image_crongenerator_4| image:: ../img/schedule/OC_crongenerator_btn_add.png
-   :align: middle
    :height: 30
 .. |image_crongenerator_5| image:: ../img/schedule/OC_crongenerator_btn_update.png
+   :height: 30
+
+.. |image_notifications_1| image:: ../img/schedule/OC_notifications_list_schedules.png
+   :align: middle
+   :width: 600
+.. |image_notifications_2| image:: ../img/schedule/OC_notifications_add_notification_2.png
+   :align: middle
+   :width: 200
+.. |image_notifications_3| image:: ../img/schedule/OC_notifications_add_notification.png
+   :align: middle
+   :width: 400
+.. |image_notifications_4| image:: ../img/schedule/OC_notifications_btn_notification.png
    :align: middle
    :height: 30
+.. |image_notifications_5| image:: ../img/schedule/OC_notifications_notifications_type.png
+   :align: middle
+   :width: 400
+.. |image_notifications_6| image:: ../img/schedule/OC_notifications_edit_delete.png
+   :align: middle
+   :width: 200
 
 .. |image1| image:: ../img/schedule/1.png
    :width: 30
@@ -250,15 +296,6 @@ if you mouse over on one of them and click on the icon.
    :width: 30
 .. |image4| image:: ../img/schedule/4.png
    :width: 30
-.. |image5| image:: ../img/schedule/5.png
-   :align: middle
-   :width: 400
-.. |image6| image:: ../img/schedule/6.png
-   :align: middle
-   :width: 400
-.. |image7| image:: ../img/schedule/7.png
-   :align: middle
-   :width: 400
 .. |image10| image:: ../img/schedule/10.png
    :width: 30
 .. |image13| image:: ../img/schedule/13.png
@@ -268,5 +305,3 @@ if you mouse over on one of them and click on the icon.
    :width: 30
 
 .. |image20| image:: ../img/schedule/20.png
-.. |image24| image:: ../img/schedule/24.png
-   :width: 120
