@@ -49,7 +49,7 @@ public class LogLineDispatcher {
                     null,
                     mode
             ));
-            return Optional.empty();
+//            return Optional.empty();
         }
 
         // Grab the current tracker once
@@ -61,7 +61,6 @@ public class LogLineDispatcher {
 //                tracker.buildLogData(parsed);
 //            }
             tls.remove();
-            return Optional.empty();
         }
 
         // For any other stage, if no tracker is active we do nothing

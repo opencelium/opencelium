@@ -32,12 +32,12 @@ public class LogDataMapper {
         Map<String, Object> baseSegments = new LinkedHashMap<>();
 
         for (Map.Entry<String, Object> entry : allProps.entrySet()) {
-            String key = entry.getKey().toLowerCase(Locale.ROOT);
+            String key = entry.getKey();
             baseProps.put(key, entry.getValue());
         }
 
         for (Map.Entry<String, Object> entry : allSegments.entrySet()) {
-            String key = entry.getKey().toLowerCase(Locale.ROOT);
+            String key = entry.getKey();
             baseSegments.put(key, entry.getValue());
         }
         dto.setError(buildErrorInfo(src.getError()));
