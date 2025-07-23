@@ -4,7 +4,7 @@ import java.util.List;
 
 import static com.becon.opencelium.backend.polygot_engine.LanguageType.*;
 
-enum ScriptEngineType {
+public enum ScriptEngineType {
     NASHORN("nashorn", "Nashorn", List.of(JS));
 
     private final String code;
