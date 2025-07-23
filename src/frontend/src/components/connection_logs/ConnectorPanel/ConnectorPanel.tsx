@@ -16,7 +16,7 @@ const ConnectorPanel: React.FC<ConnectorPanelProps> = ({
 	theme
 }) => {
 	return (
-		<div className={styles.connectorPanel}>
+		<div className={styles.connectorPanel} style={{width: '100%'}}>
 			<h3 className={styles.connectorPanelTitle}>{connector.name}</h3>
 			{connector.traces.map((trace) => (
 				<div key={trace.indexPath} className={styles.traceItemContainer}>

@@ -91,7 +91,7 @@ const TestConnectionButton = ({validateLogic}: any) => {
         const testResult = validateLogic(connection);
         if(testResult.passed) {
             const channelId = generateUUID();
-            setChannelId(channelId);
+            setChannelId(connection.id || channelId);
         }
     }
     return (
