@@ -13,6 +13,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -57,6 +58,7 @@ public class InvokerSyncScheduler {
         calculateHmacs();
     }
 
+    @Transactional
     @Scheduled(cron = "${opencelium.online_services.invoker_sync.time}")
     public void syncInvokers() {
         if (!active) {
@@ -129,6 +131,30 @@ public class InvokerSyncScheduler {
         }
     }
 
+    @Transactional
+    public void forceSync(String invokerName) {
+        InvokerModule invokerModule = (InvokerModule) remoteApi.getModule(ApiModule.INVOKER);
+
+        try {
+            byte[] xmlBytes = invokerModule.getInvokerFileByName(invokerName + ".xml").getBody();
+            Objects.requireNonNull(xmlBytes);
+
+            String name = extractName(xmlBytes);
+            String hmac = HmacUtility.encode(xmlBytes);
+
+            // update invoker file
+            saveOrUpdateInvokerFile(xmlBytes, name);
+
+            // update sync record to reflect latest changes
+            InvokerSync sync = invokerSyncService.findByInvokerName(name).get();
+            sync.setInvokerContentHmac(hmac);
+            sync.setHasManualSync(false);
+
+            invokerSyncService.save(sync);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     private void calculateHmacs() {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(INVOKER_FILES_PATH, "*.xml")) {

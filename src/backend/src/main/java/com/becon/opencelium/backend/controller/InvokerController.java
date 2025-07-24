@@ -34,6 +34,7 @@ import com.becon.opencelium.backend.resource.connector.FunctionDTO;
 import com.becon.opencelium.backend.resource.connector.InvokerDTO;
 import com.becon.opencelium.backend.resource.connector.InvokerXMLResource;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
+import com.becon.opencelium.backend.subscription.remoteapi.InvokerSyncScheduler;
 import com.becon.opencelium.backend.utility.PathUtility;
 import com.becon.opencelium.backend.utility.Xml;
 import io.swagger.v3.oas.annotations.Operation;
@@ -80,6 +81,7 @@ import java.util.stream.Collectors;
 public class InvokerController {
     private final InvokerService invokerService;
     private final InvokerSyncService invokerSyncService;
+    private final InvokerSyncScheduler invokerSyncScheduler;
     private final ConnectorService connectorService;
     private final ConnectionService connectionService;
     private final Mapper<Invoker, InvokerDTO> invokerMapper;
@@ -87,13 +89,15 @@ public class InvokerController {
 
     public InvokerController(
             @Qualifier("invokerServiceImp") InvokerService invokerService,
-            InvokerSyncService invokerSyncService, @Qualifier("connectorServiceImp") ConnectorService connectorService,
+            InvokerSyncService invokerSyncService, InvokerSyncScheduler invokerSyncScheduler,
+            @Qualifier("connectorServiceImp") ConnectorService connectorService,
             @Qualifier("connectionServiceImp") ConnectionService connectionService,
             Mapper<Invoker, InvokerDTO> invokerMapper,
             Mapper<FunctionInvoker, FunctionDTO> functionMapper
     ) {
         this.invokerService = invokerService;
         this.invokerSyncService = invokerSyncService;
+        this.invokerSyncScheduler = invokerSyncScheduler;
         this.connectorService = connectorService;
         this.connectionService = connectionService;
         this.invokerMapper = invokerMapper;
@@ -390,6 +394,42 @@ public class InvokerController {
 
         return ResponseEntity.ok(invokerDTOS);
     }
+
+    @Operation(summary = "Syncs one invoker file with Service Portal by invoker 'name'")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Invoker has been successfully synced with Service Portal",
+                    content = @Content),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PutMapping("/{invokerName}/sync-force")
+    public ResponseEntity<?> syncForce(@PathVariable String invokerName) {
+        invokerSyncScheduler.forceSync(invokerName);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Syncs invoker files with Service Portal by list of their corresponding 'name's.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204",
+                    description = "List of Invokers have been successfully synced with Service Portal"),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PutMapping(path = "list/sync-force", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> syncForceByNames(@RequestBody IdentifiersDTO<String> invokerNames) {
+        invokerNames.getIdentifiers().forEach(invokerSyncScheduler::forceSync);
+        return ResponseEntity.noContent().build();
+    }
+
 
     private static Document convertStringToXMLDocument(String xmlString) {
         //Parser that produces DOM object trees from XML content

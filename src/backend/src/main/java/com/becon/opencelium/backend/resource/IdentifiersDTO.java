@@ -3,7 +3,7 @@ package com.becon.opencelium.backend.resource;
 import java.util.ArrayList;
 
 public class IdentifiersDTO<T> {
-    ArrayList<T> identifiers;
+    private ArrayList<T> identifiers;
 
     public ArrayList<T> getIdentifiers() {
         return identifiers;
