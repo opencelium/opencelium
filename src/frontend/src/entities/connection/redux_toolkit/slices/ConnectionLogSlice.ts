@@ -51,13 +51,12 @@ export const connectionLogSlice = createSlice({
 			state.executionId = '';
 			state.connectors = [];
 		},
-		addSocketLog: (state, action: PayloadAction<{data: ConnectionSocketLog<LightSegment>, settings: {hasNewLoopIndex: boolean}}>) => {
+		addSocketLog: (state, action: PayloadAction<{data: ConnectionSocketLog<LightSegment>, settings: {hasNewLoopIndex: boolean, parentIndexPath: string}}>) => {
 			const {executionId, flowId, connectorName, ...newTrace} = action.payload.data;
 			if (state.executionId === executionId) {
 				if (action.payload.settings.hasNewLoopIndex) {
 					const connector = state.connectors.find(c => c.flowId === flowId);
-					const parentIndexPath = action.payload.data.indexPath.split('_').slice(0, -1).join('_');
-					findAndUpdateTrace(connector.traces, parentIndexPath, (trace) => {
+					findAndUpdateTrace(connector.traces, action.payload.settings.parentIndexPath, (trace) => {
 						if (trace.type === 'LOOP') {
 							//@ts-ignore
 							trace.properties.size = trace.properties.size ? trace.properties.size + 1 : 1;

@@ -43,7 +43,7 @@ const LogsPanel: React.FC<LogsPanelProps> = ({theme}) => {
               iconSize={TextSize.Size_20}
               position={'right'}
               isDisabled={isDeleting || connectors.length === 0 || isTesting}
-              //isDisabled={isDeleting || textLogs.length === 0}
+              isLoading={isTesting}
               icon={'delete'}
               tooltip={'Clear Logs'}
               target={`clear_log_panel`}

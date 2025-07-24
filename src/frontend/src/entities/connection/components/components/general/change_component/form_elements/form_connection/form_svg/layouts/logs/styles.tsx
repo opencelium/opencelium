@@ -36,10 +36,6 @@ export const LogPanelStyled = styled.div<{isFullScreen: boolean, noLogs: boolean
     bottom: 0;
     padding: 10px;
     ${({noLogs}) => noLogs ? `
-        align-items: start;
-        justify-content: center;
-        display: grid;
-        grid-template-columns: 100%;
     ` : ''}
 `;
 

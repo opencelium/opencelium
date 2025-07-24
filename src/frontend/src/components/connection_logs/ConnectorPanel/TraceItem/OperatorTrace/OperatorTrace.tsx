@@ -38,6 +38,7 @@ export const OperatorTrace: React.FC<Props> = ({
 	const [nextLoading, setNextLoading] = useState(false);
 	const [prevLoading, setPrevLoading] = useState(false);
 	const [iterationIndex, setIterationIndex] = useState(1);
+	const size = (trace.properties as LoopOperatorProperty).size;
 	const handleToggle = async () => {
 		if (!expanded) {
 			setLoading(true);
@@ -63,7 +64,7 @@ export const OperatorTrace: React.FC<Props> = ({
 		dispatch(cleanOperatorTrace({ flowId, indexPath: trace.indexPath }));
 		if (isLoop) {
 			const nextIndex = iterationIndex + 1;
-			if (nextIndex <= (trace.properties as LoopOperatorProperty).size) {
+			if (nextIndex <= size) {
 				setIterationIndex(nextIndex);
 				setNextLoading(true);
 				await dispatch(
@@ -100,12 +101,13 @@ export const OperatorTrace: React.FC<Props> = ({
 			}
 		}
 	};
+	console.log(size === undefined)
 	return (
 		<div>
 			<div className={styles.trace} onClick={handleToggle}>
 				<div className={styles.traceLeftSide}>
 					<ToggleButton
-						loading={loading}
+						loading={loading || size === undefined}
 						expanded={expanded}
 						onClick={handleToggle}
 					/>
@@ -123,13 +125,13 @@ export const OperatorTrace: React.FC<Props> = ({
 				{isLoop && (
 					<div className={styles.loopTraceRightSide} onClick={(e: any) => {e.preventDefault(); e.stopPropagation();}}>
 						<span>
-							{iterationIndex} - {(trace.properties as LoopOperatorProperty).size}
+							{iterationIndex} - {size}
 						</span>
 						<FontIcon
 							isButton={true}
 							iconStyles={{cursor: 'pointer'}}
 							size={16}
-							disabled={iterationIndex === 1}
+							disabled={iterationIndex === 1 || size === undefined}
 							isLoading={prevLoading}
 							value={'arrow_left'}
 							onClick={(e: any) => handlePrevIteration(e)}
@@ -138,7 +140,7 @@ export const OperatorTrace: React.FC<Props> = ({
 							isButton={true}
 							iconStyles={{cursor: 'pointer'}}
 							size={16}
-							disabled={iterationIndex === (trace.properties as LoopOperatorProperty).size}
+							disabled={iterationIndex === size || size === undefined}
 							isLoading={nextLoading}
 							value={'arrow_right'}
 							onClick={(e: any) => handleNextIteration(e)}

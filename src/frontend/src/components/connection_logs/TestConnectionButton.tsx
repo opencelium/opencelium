@@ -36,6 +36,52 @@ const TestConnectionButton = ({validateLogic}: any) => {
     let isFromConnectorCompleted: boolean = false, isToConnectorCompleted: boolean = false;
     const subscriptionRef = useRef<() => void>();
 
+    const isTestFinished = (logMessage: ConnectionSocketLog<LightSegment>): boolean => {
+        if (logMessage.type === 'FLOWCHART' && logMessage.status === 'COMPLETE') {
+            if (!isFromConnectorCompleted) {
+                // if from connector test completed
+                isFromConnectorCompleted = true;
+            } else {
+                // if to connector test completed
+                if (!isToConnectorCompleted) {
+                    isToConnectorCompleted = true;
+                }
+            }
+            // if from and to connectors test completed enable test button and unsubscribe from socket
+            if (isFromConnectorCompleted && isToConnectorCompleted) {
+                dispatch(setIsTesting(false));
+                subscriptionRef.current?.();
+                isFromConnectorCompleted = false;
+                isToConnectorCompleted = false;
+                return true;
+            }
+        }
+        return false;
+    }
+    const shouldSkipTrace = (logMessage: ConnectionSocketLog<LightSegment>): boolean => {
+        // if first log of the loop
+        if (!previousLogMessage?.properties?.loopIndex && !!logMessage.properties.loopIndex) {
+            previousLogMessage = logMessage;
+            return true;
+        }
+        // if rest logs of the loop
+        if (!!previousLogMessage?.properties?.loopIndex && !!logMessage.properties.loopIndex) {
+            if (!(previousLogMessage.properties.loopIndex !== logMessage.properties.loopIndex && logMessage.properties.loopIndex.split(',').length === 1)) {
+                return true;
+            }
+        }
+        // if flowchart completed
+        if (logMessage.type === 'FLOWCHART' && logMessage.status === 'COMPLETE') {
+            return true;
+        }
+    }
+    useEffect(() => {
+        return () => {
+            dispatch(setIsTesting(false));
+            subscriptionRef.current?.();
+        }
+    }, []);
+
     useEffect(() => {
         if (channelId !== '') {
             if (!channelId || !socket || !socket.connected) return;
@@ -44,29 +90,24 @@ const TestConnectionButton = ({validateLogic}: any) => {
             }
             const subscription = socket.subscribe(`/execution/logs/${channelId}`, (message) => {
                 const data = JSON.parse(message.body) as ConnectionSocketLog<LightSegment>;
-                isToConnectorCompleted = false;
                 console.log('Socket.ConnectionLogs', data);
-                if (data.type === 'FLOWCHART' && data.status === 'COMPLETE') {
-                    if (!isFromConnectorCompleted) {
-                        isFromConnectorCompleted = true;
-                    } else {
-                        if (!isToConnectorCompleted) {
-                            isToConnectorCompleted = true;
-                        }
-                    }
-                    if (isFromConnectorCompleted && isToConnectorCompleted) {
-                        dispatch(setIsTesting(false));
-                        subscriptionRef.current?.();
-                    }
-                }
+                if (isTestFinished(data)) return;
+                if (shouldSkipTrace(data)) return;
                 let hasNewLoopIndex = false;
-                if (!!data.properties.loopIndex && previousLogMessage.properties.loopIndex !== data.properties.loopIndex) {
-                    hasNewLoopIndex = true;
+                let parentIndexPath = data.indexPath.split('_').slice(0, -1).join('_')
+                if (!!previousLogMessage?.properties?.loopIndex) {
+                    if (!!data.properties.loopIndex) {
+                        // increase size when loop iteration completed on the first level (except last iteration)
+                        if (previousLogMessage.properties.loopIndex !== data.properties.loopIndex && data.properties.loopIndex.split(',').length === 1) {
+                            hasNewLoopIndex = true;
+                        }
+                    } else {
+                        // increase size when the last loop iteration completed on the first level
+                        hasNewLoopIndex = true;
+                        parentIndexPath = data.indexPath;
+                    }
                 }
-                if ((data.type === 'LOOP' || data.type === 'FLOWCHART') && data.status === 'COMPLETE') {
-                    return;
-                }
-                dispatch(addSocketLog({data, settings: {hasNewLoopIndex}}));
+                dispatch(addSocketLog({data, settings: {hasNewLoopIndex, parentIndexPath}}));
                 previousLogMessage = data;
             });
             consoleLog("✅ Subscribed to /execution/logs");
