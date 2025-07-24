@@ -41,11 +41,14 @@ public class InvokerSync {
     @Column(name = "invoker_name")
     private String invokerName;
 
+    @Column(name = "sp_invoker_file_name")
+    private String spInvokerFileName;
+
     @Column(name = "invoker_content_hmac")
     private String invokerContentHmac;
 
-    @Column(name = "has_manual_sync")
-    private boolean hasManualSync;
+    @Column(name = "manually_modified")
+    private boolean manuallyModified;
 
     @JsonIgnore
     @CreationTimestamp
@@ -68,6 +71,14 @@ public class InvokerSync {
         this.invokerName = invokerName;
     }
 
+    public String getSpInvokerFileName() {
+        return spInvokerFileName;
+    }
+
+    public void setSpInvokerFileName(String spInvokerFileName) {
+        this.spInvokerFileName = spInvokerFileName;
+    }
+
     public String getInvokerContentHmac() {
         return invokerContentHmac;
     }
@@ -76,19 +87,19 @@ public class InvokerSync {
         this.invokerContentHmac = invokerContentHmac;
     }
 
+    public boolean isManuallyModified() {
+        return manuallyModified;
+    }
+
+    public void setManuallyModified(boolean manuallyModified) {
+        this.manuallyModified = manuallyModified;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
-    }
-
-    public boolean isHasManualSync() {
-        return hasManualSync;
-    }
-
-    public void setHasManualSync(boolean hasManualSync) {
-        this.hasManualSync = hasManualSync;
     }
 }

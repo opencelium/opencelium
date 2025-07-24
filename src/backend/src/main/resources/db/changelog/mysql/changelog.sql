@@ -663,7 +663,8 @@ ALTER TABLE `enhancement` MODIFY COLUMN `script` TEXT DEFAULT NULL;
 CREATE TABLE IF NOT EXISTS invoker_sync (
     id INT AUTO_INCREMENT PRIMARY KEY,
     invoker_name TEXT NOT NULL,
+    sp_invoker_file_name TEXT NOT NULL,
     invoker_content_hmac TEXT NOT NULL,
-    has_manual_sync BOOLEAN DEFAULT TRUE,
+    manually_modified BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
