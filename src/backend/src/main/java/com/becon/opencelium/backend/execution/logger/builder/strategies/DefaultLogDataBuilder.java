@@ -48,11 +48,22 @@ public class DefaultLogDataBuilder implements PhaseBuilder {
             return Collections.emptyMap();
         }
         return props.entrySet().stream()
+                .filter(k -> k.getValue() != null && excludeKey(k.getKey()))
                 .collect(Collectors.toMap(
                         e -> e.getKey().name(),   // enum name as string key
                         Map.Entry::getValue,      // same value
                         (a, b) -> b,              // on duplicate (shouldn't happen), keep latter
                         LinkedHashMap::new        // preserve original order
                 ));
+    }
+
+    private boolean excludeKey(LogLineKey key) {
+        return !Set.of(
+                LogLineKey.CONNECTOR_NAME,
+                LogLineKey.INDEX_PATH,
+                LogLineKey.FLOWCHART_ID,
+                LogLineKey.CONNECTION_ID,
+                LogLineKey.EXECUTION_ID
+        ).contains(key);
     }
 }

@@ -70,7 +70,9 @@ public class IfLogDataBuilder implements PhaseBuilder {
         return !Set.of(
                 LogLineKey.CONNECTOR_NAME,
                 LogLineKey.INDEX_PATH,
-                LogLineKey.FLOWCHART_ID
+                LogLineKey.FLOWCHART_ID,
+                LogLineKey.CONNECTION_ID,
+                LogLineKey.EXECUTION_ID
         ).contains(key);
     }
 

@@ -38,18 +38,11 @@ public class LogLineDispatcher {
         return dispatch(logLine, startOffset, LogDetailLevel.LIGHTWEIGHT);
     }
 
-    public Optional<LogDataDTO> dispatch(String logLine, long startOffset, LogDetailLevel mode) {
+    public Optional<LogDataDTO> dispatch(String logLine, long startOffset, LogDetailLevel logLevelMode) {
         ParsedLogLine parsed = parsedLogLineBuilder.build(logLine, startOffset);
         // Handle the start of a new execution
         if (parsed.getStage() == PhaseType.EXECUTION_START) {
-            Map<LogLineKey,String> p = parsed.getProperties();
-            tls.set(new ExecutionTrackerImpl(
-                    p.get(LogLineKey.EXECUTION_ID),
-                    p.get(LogLineKey.CONNECTION_ID),
-                    null,
-                    mode
-            ));
-            return Optional.empty();
+            tls.set(new ExecutionTrackerImpl(logLevelMode));
         }
 
         // Grab the current tracker once
@@ -57,11 +50,7 @@ public class LogLineDispatcher {
 
         // Handle the end of an execution
         if (parsed.getStage() == PhaseType.EXECUTION_END) {
-//            if (tracker != null) {
-//                tracker.buildLogData(parsed);
-//            }
             tls.remove();
-            return Optional.empty();
         }
 
         // For any other stage, if no tracker is active we do nothing

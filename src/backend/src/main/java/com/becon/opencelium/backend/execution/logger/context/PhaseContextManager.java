@@ -8,6 +8,8 @@ import java.util.*;
 
 public class PhaseContextManager {
 
+    private String execId;
+    private String connectionId;
     private String flowId;
     private String connectorName;
     private final Deque<PhaseContext> stack = new ArrayDeque<>();
@@ -16,8 +18,14 @@ public class PhaseContextManager {
     }
 
     public void startPhase(PhaseContext phaseContext) {
-        phaseContext.getParsedLogLine().getProperties().put(LogLineKey.FLOWCHART_ID, flowId);
-        phaseContext.getParsedLogLine().getProperties().put(LogLineKey.CONNECTOR_NAME, connectorName);
+        Map<LogLineKey, String> props = phaseContext.getParsedLogLine().getProperties();
+        props.put(LogLineKey.EXECUTION_ID, execId);
+        props.put(LogLineKey.CONNECTION_ID, connectionId);
+        if (flowId != null) {
+            props.put(LogLineKey.FLOWCHART_ID, flowId);
+            props.put(LogLineKey.CONNECTOR_NAME, connectorName);
+        }
+
         stack.push(phaseContext);
     }
 
@@ -37,6 +45,11 @@ public class PhaseContextManager {
                 startIndex = current.getParsedLogLine().getProperties().get(LogLineKey.FLOWCHART_ID);
                 endIndex = phaseContext.getParsedLogLine().getProperties().get(LogLineKey.FLOWCHART_ID);
                 flowId = "";
+            } else if (phaseContext.getParsedLogLine().getStage() == PhaseType.EXECUTION_END) {
+                startIndex = current.getParsedLogLine().getProperties().get(LogLineKey.EXECUTION_ID);
+                endIndex = phaseContext.getParsedLogLine().getProperties().get(LogLineKey.EXECUTION_ID);
+                execId = "";
+                connectionId = "";
             }
             if (startIndex.equals(endIndex)) {
                 removed = current;
@@ -68,6 +81,14 @@ public class PhaseContextManager {
 
     public void setConnectorName(String connectorName) {
         this.connectorName = connectorName;
+    }
+
+    public void setExecId(String execId) {
+        this.execId = execId;
+    }
+
+    public void setConnectionId(String connectionId) {
+        this.connectionId = connectionId;
     }
 
     /**

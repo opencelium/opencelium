@@ -2,9 +2,6 @@ package com.becon.opencelium.backend.execution.logger.tracker;
 
 import com.becon.opencelium.backend.database.mongodb.entity.LogData;
 import com.becon.opencelium.backend.execution.logger.builder.PhaseBuilderFactory;
-import com.becon.opencelium.backend.execution.logger.builder.strategies.IfLogDataBuilder;
-import com.becon.opencelium.backend.execution.logger.builder.strategies.LoopLogDataBuilder;
-import com.becon.opencelium.backend.execution.logger.builder.strategies.OperationLogDataBuilder;
 import com.becon.opencelium.backend.execution.logger.builder.PhaseBuilder;
 import com.becon.opencelium.backend.execution.logger.context.PhaseContext;
 import com.becon.opencelium.backend.execution.logger.context.PhaseContextManager;
@@ -22,8 +19,8 @@ import java.util.*;
 import static com.becon.opencelium.backend.execution.logger.enums.PhaseType.*;
 
 public class ExecutionTrackerImpl implements ExecutionTracker {
-    private final String execId;
-    private final String connId;
+    private String execId;
+    private String connId;
     private String flowId;
     private final LogDetailLevel level;
 
@@ -38,6 +35,14 @@ public class ExecutionTrackerImpl implements ExecutionTracker {
         this.execId = execId;
         this.connId = connId;
         this.flowId = flowId;
+        this.level = level;
+        this.phaseContextManager = new PhaseContextManager();
+        this.phaseSchemaRegistry = new PhaseSchemaRegistry();
+        this.parsedLogLineMapper = ApplicationContextUtility.getBean(ParsedLogLineMapper.class);
+        this.builderFactory = ApplicationContextUtility.getBean(PhaseBuilderFactory.class);
+    }
+
+    public ExecutionTrackerImpl(LogDetailLevel level) {
         this.level = level;
         this.phaseContextManager = new PhaseContextManager();
         this.phaseSchemaRegistry = new PhaseSchemaRegistry();
@@ -92,7 +97,13 @@ public class ExecutionTrackerImpl implements ExecutionTracker {
         // Handle start events
         if (isStartPhase(phaseType)) {
             phaseContext.setStatus(PhaseStatus.PENDING);
-            if (phaseType == PhaseType.FLOWCHART_START) {
+            if (phaseType == EXECUTION_START) {
+                this.connId = phaseContext.getProperties().get(LogLineKey.CONNECTION_ID);
+                this.execId = phaseContext.getProperties().get(LogLineKey.EXECUTION_ID);
+                phaseContextManager.setExecId(execId);
+                phaseContextManager.setConnectionId(connId);
+                phaseContextManager.startPhase(phaseContext);
+            } else if (phaseType == PhaseType.FLOWCHART_START) {
                 this.flowId = phaseContext.getProperties().get(LogLineKey.FLOWCHART_ID);
                 this.connectorName = phaseContext.getProperties().get(LogLineKey.CONNECTOR_NAME);
                 phaseContextManager.setFlowId(flowId);
@@ -102,7 +113,7 @@ public class ExecutionTrackerImpl implements ExecutionTracker {
                 phaseContextManager.startPhase(phaseContext);
             }
 
-            if (phaseSchema != null && PhaseType.containsFromString(phaseSchema.getEmitOn()) && (PhaseType.fromString(phaseSchema.getEmitOn()) == line.getStage())) {
+            if (shouldEmit(phaseSchema, line)) {
                 LogData logData = phaseBuilder.build(phaseContext, execId, Long.valueOf(connId));
                 return Optional.of(logData);
             }
@@ -147,28 +158,27 @@ public class ExecutionTrackerImpl implements ExecutionTracker {
     }
 
     private boolean shouldEmit(PhaseSchema phaseSchema, ParsedLogLine parsedLine) {
-        SegmentType actual = SegmentType.fromString(parsedLine.getStage().name());
-        if (actual == SegmentType.EXCEPTION) {
+        String actual = parsedLine.getStage().name();
+        if (Objects.equals(actual, SegmentType.EXCEPTION.name())) {
             return true;
         }
-        if (phaseSchema == null || !SegmentType.containsFromString(phaseSchema.getEmitOn())) {
+        if (phaseSchema == null) {
             return false;
         }
-        SegmentType emitOn = SegmentType.fromString(phaseSchema.getEmitOn());
-
-        return emitOn == parsedLine.getStage();
+        List<String> emitOnList = phaseSchema.getEmitOn();
+        return emitOnList.contains(actual);
     }
 
     private boolean isStartPhase(PhaseType type) {
         return switch (type) {
-            case FLOWCHART_START, OPERATION_START, LOOP_START, IF_START -> true;
+            case EXECUTION_START, FLOWCHART_START, OPERATION_START, LOOP_START, IF_START -> true;
             default -> false;
         };
     }
 
     private boolean isEndPhase(PhaseType type) {
         return switch (type) {
-            case FLOWCHART_END, OPERATION_END, LOOP_END, IF_END -> true;
+            case EXECUTION_END, FLOWCHART_END, OPERATION_END, LOOP_END, IF_END -> true;
             default -> false;
         };
     }

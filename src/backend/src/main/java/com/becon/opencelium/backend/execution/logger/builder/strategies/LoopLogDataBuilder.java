@@ -12,7 +12,7 @@ import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.becon.opencelium.backend.execution.logger.keys.LogLineKey.CONNECTOR_NAME;
+import static com.becon.opencelium.backend.execution.logger.keys.LogLineKey.*;
 
 public class LoopLogDataBuilder implements PhaseBuilder {
 
@@ -71,7 +71,9 @@ public class LoopLogDataBuilder implements PhaseBuilder {
         return !Set.of(
                 CONNECTOR_NAME,
                 LogLineKey.INDEX_PATH,
-                LogLineKey.FLOWCHART_ID
+                LogLineKey.FLOWCHART_ID,
+                CONNECTION_ID,
+                EXECUTION_ID
         ).contains(key);
     }
 

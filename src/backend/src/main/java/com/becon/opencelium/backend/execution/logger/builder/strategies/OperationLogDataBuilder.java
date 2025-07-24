@@ -74,6 +74,8 @@ public class OperationLogDataBuilder implements PhaseBuilder {
                 && key != LogLineKey.DURATION
                 && key != LogLineKey.FLOWCHART_ID
                 && key != LogLineKey.CONNECTOR_NAME
+                && key != LogLineKey.EXECUTION_ID
+                && key != LogLineKey.CONNECTION_ID
                 && key != LogLineKey.INDEX_PATH
                 && key != LogLineKey.HTTP_STATUS;
     }
