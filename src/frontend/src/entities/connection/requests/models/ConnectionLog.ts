@@ -53,8 +53,8 @@ interface DetailedLoopOperatorSegment extends LightLoopOperatorSegment {
 }
 export type DetailedOperatorSegment = DetailedIfOperatorSegment | DetailedLoopOperatorSegment;
 interface BaseChildProperty {
-	loop_index?: string,
-	loop_iterator?: string,
+	loopIndex?: string,
+	loopIterator?: string,
 }
 interface BaseOperatorProperty extends BaseChildProperty{
 	expression: string,

@@ -18,6 +18,7 @@ export interface ConnectionLogState {
 	schedulerId: number,
 	connectors: ConnectorLog[],
 	textLogs: ConnectionTextLog[],
+	isTesting: boolean,
 }
 
 export const initialState: ConnectionLogState = {
@@ -25,6 +26,7 @@ export const initialState: ConnectionLogState = {
 	executionId: '',
 	connectors: [],
 	textLogs: [],
+	isTesting: false,
 };
 interface CleanTracePayload {
 	flowId: string;
@@ -35,19 +37,26 @@ export const connectionLogSlice = createSlice({
 	name: 'connectionLog',
 	initialState,
 	reducers: {
+		setIsTesting: (state, action: PayloadAction<boolean>) => {
+			state.isTesting = action.payload;
+		},
 		addTextLog: (state, action: PayloadAction<ConnectionTextLog>) => {
 			state.textLogs.push(action.payload)
 		},
 		clearTextLog: (state) => {
 			state.textLogs = [];
 		},
-		addSocketLog: (state, action: PayloadAction<{data: ConnectionSocketLog<LightSegment>, settings: {hasNewLoopIndex: boolean}}>) => {
+		clearSocketLog: (state) => {
+			state.schedulerId = undefined;
+			state.executionId = '';
+			state.connectors = [];
+		},
+		addSocketLog: (state, action: PayloadAction<{data: ConnectionSocketLog<LightSegment>, settings: {hasNewLoopIndex: boolean, parentIndexPath: string}}>) => {
 			const {executionId, flowId, connectorName, ...newTrace} = action.payload.data;
 			if (state.executionId === executionId) {
 				if (action.payload.settings.hasNewLoopIndex) {
 					const connector = state.connectors.find(c => c.flowId === flowId);
-					const parentIndexPath = action.payload.data.indexPath.split('_').slice(0, -1).join('_');
-					findAndUpdateTrace(connector.traces, parentIndexPath, (trace) => {
+					findAndUpdateTrace(connector.traces, action.payload.settings.parentIndexPath, (trace) => {
 						if (trace.type === 'LOOP') {
 							//@ts-ignore
 							trace.properties.size = trace.properties.size ? trace.properties.size + 1 : 1;
@@ -164,7 +173,8 @@ export const connectionLogSlice = createSlice({
 
 export const {
 	cleanMethodTrace, cleanOperatorTrace, addSocketLog,
-	addTextLog, clearTextLog,
+	addTextLog, clearTextLog, clearSocketLog,
+	setIsTesting,
 } =
 	connectionLogSlice.actions;
 export default connectionLogSlice.reducer;

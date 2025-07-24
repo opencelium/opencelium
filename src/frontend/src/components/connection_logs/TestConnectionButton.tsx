@@ -9,7 +9,7 @@ import {LogPanelHeight, setButtonPanelVisibility, setLogPanelHeight} from "@root
 import {generateUUID} from "@app_component/operator_builder/utils";
 import {useSocketData} from "../../socket/SocketDataContext";
 import {ConnectionSocketLog, LightSegment} from "@root/requests/models/ConnectionLog";
-import {addSocketLog, clearTextLog} from "@root/redux_toolkit/slices/ConnectionLogSlice";
+import {addSocketLog, clearTextLog, setIsTesting} from "@root/redux_toolkit/slices/ConnectionLogSlice";
 import {Button} from "@app_component/base/button/Button";
 import {terminateExecution} from "@entity/schedule/redux_toolkit/action_creators/ScheduleCreators";
 import {consoleLog} from "@application/utils/utils";
@@ -29,12 +29,58 @@ function formatDate(date: Date): string {
 const TestConnectionButton = ({validateLogic}: any) => {
     const dispatch = useAppDispatch();
     const {socket} = useSocketData();
-    const [isTesting, setIsTesting] = useState(false);
     const [channelId, setChannelId] = useState<string>(undefined);
     const {connection} = useAppSelector((state: RootState) => state.connectionReducer);
-    const {executionId, schedulerId} = useAppSelector((state: RootState) => state.connectionLogReducer);
-    let previousLogMessage: ConnectionSocketLog<LightSegment> ;
+    const {executionId, schedulerId, isTesting} = useAppSelector((state: RootState) => state.connectionLogReducer);
+    let previousLogMessage: ConnectionSocketLog<LightSegment>;
+    let isFromConnectorCompleted: boolean = false, isToConnectorCompleted: boolean = false;
     const subscriptionRef = useRef<() => void>();
+
+    const isTestFinished = (logMessage: ConnectionSocketLog<LightSegment>): boolean => {
+        if (logMessage.type === 'FLOWCHART' && logMessage.status === 'COMPLETE') {
+            if (!isFromConnectorCompleted) {
+                // if from connector test completed
+                isFromConnectorCompleted = true;
+            } else {
+                // if to connector test completed
+                if (!isToConnectorCompleted) {
+                    isToConnectorCompleted = true;
+                }
+            }
+            // if from and to connectors test completed enable test button and unsubscribe from socket
+            if (isFromConnectorCompleted && isToConnectorCompleted) {
+                dispatch(setIsTesting(false));
+                subscriptionRef.current?.();
+                isFromConnectorCompleted = false;
+                isToConnectorCompleted = false;
+                return true;
+            }
+        }
+        return false;
+    }
+    const shouldSkipTrace = (logMessage: ConnectionSocketLog<LightSegment>): boolean => {
+        // if first log of the loop
+        if (!previousLogMessage?.properties?.loopIndex && !!logMessage.properties.loopIndex) {
+            previousLogMessage = logMessage;
+            return true;
+        }
+        // if rest logs of the loop
+        if (!!previousLogMessage?.properties?.loopIndex && !!logMessage.properties.loopIndex) {
+            if (!(previousLogMessage.properties.loopIndex !== logMessage.properties.loopIndex && logMessage.properties.loopIndex.split(',').length === 1)) {
+                return true;
+            }
+        }
+        // if flowchart completed
+        if (logMessage.type === 'FLOWCHART' && logMessage.status === 'COMPLETE') {
+            return true;
+        }
+    }
+    useEffect(() => {
+        return () => {
+            dispatch(setIsTesting(false));
+            subscriptionRef.current?.();
+        }
+    }, []);
 
     useEffect(() => {
         if (channelId !== '') {
@@ -45,23 +91,28 @@ const TestConnectionButton = ({validateLogic}: any) => {
             const subscription = socket.subscribe(`/execution/logs/${channelId}`, (message) => {
                 const data = JSON.parse(message.body) as ConnectionSocketLog<LightSegment>;
                 console.log('Socket.ConnectionLogs', data);
+                if (isTestFinished(data)) return;
+                if (shouldSkipTrace(data)) return;
                 let hasNewLoopIndex = false;
-                let isLoopComplete = false;
-                if (!!data.properties.loop_index && previousLogMessage.properties.loop_index !== data.properties.loop_index) {
-                    hasNewLoopIndex = true;
+                let parentIndexPath = data.indexPath.split('_').slice(0, -1).join('_')
+                if (!!previousLogMessage?.properties?.loopIndex) {
+                    if (!!data.properties.loopIndex) {
+                        // increase size when loop iteration completed on the first level (except last iteration)
+                        if (previousLogMessage.properties.loopIndex !== data.properties.loopIndex && data.properties.loopIndex.split(',').length === 1) {
+                            hasNewLoopIndex = true;
+                        }
+                    } else {
+                        // increase size when the last loop iteration completed on the first level
+                        hasNewLoopIndex = true;
+                        parentIndexPath = data.indexPath;
+                    }
                 }
-                if ((data.type === 'LOOP' || data.type === 'FLOWCHART') && data.status === 'COMPLETE') {
-                    return;
-                }
-                dispatch(addSocketLog({data, settings: {hasNewLoopIndex}}));
+                dispatch(addSocketLog({data, settings: {hasNewLoopIndex, parentIndexPath}}));
                 previousLogMessage = data;
-                if (data.type === 'EXECUTION' && data.status === 'COMPLETE') {
-                    setIsTesting(false);
-                    subscriptionRef.current?.();
-                }
             });
             consoleLog("✅ Subscribed to /execution/logs");
             subscriptionRef.current = () => {
+                setChannelId('');
                 subscription.unsubscribe();
                 subscriptionRef.current = undefined;
                 consoleLog("🧹 Unsubscribed from /execution/logs");
@@ -82,7 +133,7 @@ const TestConnectionButton = ({validateLogic}: any) => {
             dispatch(setButtonPanelVisibility(false));
             dispatch(setLogPanelHeight(LogPanelHeight.High));
             dispatch(testConnection({connection, channelId}));
-            setIsTesting(true);
+            dispatch(setIsTesting(true));
         }
     }
 
@@ -92,7 +143,7 @@ const TestConnectionButton = ({validateLogic}: any) => {
         //dispatch(setButtonPanelVisibility(true));
         //dispatch(setLogPanelHeight(0));
         dispatch(terminateExecution(schedulerId));
-        setIsTesting(false);
+        dispatch(setIsTesting(false));
     }
 
     const generateChannelId = () => {
