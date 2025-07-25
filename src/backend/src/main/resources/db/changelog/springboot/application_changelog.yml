@@ -89,11 +89,11 @@ versions:
         operation: add
         value: false
         path: opencelium.online_services.invoker_sync.active
-      - changeset: 5
+      - changeset: 7
         operation: add
         value: '0 0 0 * * *'
         path: opencelium.online_services.template_sync.time
-      - changeset: 6
+      - changeset: 8
         operation: add
         value: false
         path: opencelium.online_services.template_sync.active
