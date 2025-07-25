@@ -1,20 +1,18 @@
 package com.becon.opencelium.backend.polygot_engine;
 
+import java.util.EnumMap;
 import java.util.List;
-
-import static com.becon.opencelium.backend.polygot_engine.LanguageType.*;
+import java.util.Map;
 
 public enum ScriptEngineType {
-    NASHORN("nashorn", "Nashorn", List.of(JS));
+    NASHORN("nashorn", "Nashorn");
 
     private final String code;
     private final String name;
-    private final List<LanguageType> languages;
 
-    ScriptEngineType(String code, String name, List<LanguageType> languages) {
+    ScriptEngineType(String code, String name) {
         this.code = code;
         this.name = name;
-        this.languages = languages;
     }
 
     public String getCode() {
@@ -25,7 +23,14 @@ public enum ScriptEngineType {
         return name;
     }
 
+    private static final Map<ScriptEngineType, List<LanguageType>> languageMap;
+
+    static {
+        languageMap = new EnumMap<>(ScriptEngineType.class);
+        languageMap.put(NASHORN, List.of(LanguageType.JS));
+    }
+
     public List<LanguageType> getLanguages() {
-        return languages;
+        return languageMap.getOrDefault(this, List.of());
     }
 }
