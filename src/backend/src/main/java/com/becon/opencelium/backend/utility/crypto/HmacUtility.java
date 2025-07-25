@@ -1,7 +1,5 @@
 package com.becon.opencelium.backend.utility.crypto;
 
-import com.becon.opencelium.backend.utility.MachineUtility;
-
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
