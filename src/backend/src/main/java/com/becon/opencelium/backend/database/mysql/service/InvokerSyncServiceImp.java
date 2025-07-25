@@ -40,7 +40,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 @Service
-public final class InvokerSyncServiceImp implements InvokerSyncService {
+public class InvokerSyncServiceImp implements InvokerSyncService {
     private final RemoteApi remoteApi;
     private final InvokerService invokerService;
     private final InvokerSyncRepository invokerSyncRepository;
@@ -55,6 +55,42 @@ public final class InvokerSyncServiceImp implements InvokerSyncService {
         this.remoteApi = RemoteApiFactory.createInstance(ApiType.SERVICE_PORTAL);
     }
 
+    @Override
+    public void update(String invokerName) {
+        File invokerFile = invokerService.findFileByInvokerName(invokerName);
+
+        Path filepath = invokerFile.toPath();
+        try {
+            byte[] xmlBytes = Files.readAllBytes(filepath);
+
+            String ocFileName = filepath.getFileName().toString(); // default value until invoker file is not loaded from service portal
+            String contentHmac = HmacUtility.encode(xmlBytes);
+
+            InvokerSync sync = new InvokerSync();
+            Optional<InvokerSync> optionalSync = findByInvokerName(invokerName);
+            if (optionalSync.isPresent()) {
+                sync = optionalSync.get();
+
+                sync.setInvokerContentHmac(contentHmac);
+                sync.setManuallyModified(false);
+            } else {
+                sync.setInvokerName(invokerName);
+                sync.setSpInvokerFileName(ocFileName);
+                sync.setInvokerContentHmac(contentHmac);
+                sync.setManuallyModified(false);
+            }
+
+            save(sync);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void delete(String invokerName) {
+        invokerSyncRepository.findByInvokerName(invokerName)
+                .ifPresent(invokerSyncRepository::delete);
+    }
 
     @Override
     public boolean isManuallyModified(String invokerName) {
@@ -66,7 +102,8 @@ public final class InvokerSyncServiceImp implements InvokerSyncService {
     @Override
     @Transactional
     public void forceSync(String invokerName) {
-        InvokerSync sync = findByInvokerName(invokerName).get();
+        InvokerSync sync = findByInvokerName(invokerName)
+                .orElseThrow(() -> new RuntimeException("Invoker with name = '" + invokerName + "' not found."));
 
         // load invoker file by its 'service portal filename' from service portal
         InvokerModule invokerModule = (InvokerModule) remoteApi.getModule(ApiModule.INVOKER);
@@ -95,14 +132,14 @@ public final class InvokerSyncServiceImp implements InvokerSyncService {
 
     // SYSTEM LEVEL METHODS
     @EventListener(ApplicationReadyEvent.class)
-    protected void init() {
+    void init() {
         // populate invoker_sync table to have date on current invokers in oc
         calculateHmacs();
     }
 
     @Transactional
     @Scheduled(cron = "${opencelium.online_services.invoker_sync.time}")
-    protected void syncInvokers() {
+    void syncInvokers() {
         if (!active) {
             return;
         }
@@ -148,7 +185,6 @@ public final class InvokerSyncServiceImp implements InvokerSyncService {
                                 saveOrUpdateInvokerFile(xmlBytes, invokerName);
 
                                 // update hmac to new files' contents' hmac
-                                sync.setSpInvokerFileName(spFilename);
                                 sync.setInvokerContentHmac(contentHmac);
                             }
                         } else {
@@ -156,7 +192,6 @@ public final class InvokerSyncServiceImp implements InvokerSyncService {
 
                             // invoker file exists, but we do not have a sync record so just store it
                             sync.setInvokerName(invokerName);
-                            sync.setSpInvokerFileName(spFilename);
                             sync.setInvokerContentHmac(contentHmac);
                             sync.setManuallyModified(false);
                         }
@@ -165,10 +200,10 @@ public final class InvokerSyncServiceImp implements InvokerSyncService {
 
                         // invoker file does not exist, save new file and its sync data
                         sync.setInvokerName(invokerName);
-                        sync.setSpInvokerFileName(spFilename);
                         sync.setInvokerContentHmac(contentHmac);
                         sync.setManuallyModified(false);
                     }
+                    sync.setSpInvokerFileName(spFilename); // update default ocFilename to spFileName
 
                     save(sync);
                 }
@@ -185,11 +220,6 @@ public final class InvokerSyncServiceImp implements InvokerSyncService {
     // PRIVATE METHODS
     private void save(InvokerSync sync) {
         invokerSyncRepository.save(sync);
-    }
-
-    private void delete(String invokerName) {
-        invokerSyncRepository.findByInvokerName(invokerName)
-                .ifPresent(invokerSyncRepository::delete);
     }
 
     private Optional<InvokerSync> findByInvokerName(String invokerName) {

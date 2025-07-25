@@ -209,6 +209,9 @@ public class InvokerController {
             DOMSource source = new DOMSource(doc);
             StreamResult result = new StreamResult(new File(PathConstant.INVOKER + "/" + filename + ".xml"));
             transformer.transform(source, result);
+
+            // update sync information for new invoker file
+            invokerSyncService.update(filename);
         } catch (TransformerException ex) {
             throw new RuntimeException(ex);
         }
@@ -347,6 +350,10 @@ public class InvokerController {
             InvokerParserImp invokerParserImp = new InvokerParserImp(invoker);
             FunctionInvoker functionInvoker = invokerParserImp.getFunctions(methodNode).get(0);
             FunctionDTO resource = functionMapper.toDTO(functionInvoker);
+
+            // delete invoker sync record
+            invokerSyncService.update(invokerName);
+
             return ResponseEntity.ok(resource);
         } catch (Exception ex) {
             ex.printStackTrace();

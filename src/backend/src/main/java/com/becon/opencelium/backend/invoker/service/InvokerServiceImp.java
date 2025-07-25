@@ -17,6 +17,7 @@
 package com.becon.opencelium.backend.invoker.service;
 
 import com.becon.opencelium.backend.constant.PathConstant;
+import com.becon.opencelium.backend.database.mysql.service.InvokerSyncService;
 import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.exception.WrongEncode;
 import com.becon.opencelium.backend.invoker.InvokerContainer;
@@ -74,6 +75,9 @@ public class InvokerServiceImp implements InvokerService {
     @Autowired
     private StorageService storageService;
 
+    @Autowired
+    private InvokerSyncService invokerSyncService;
+
     private final Path filePath = Paths.get(PathConstant.INVOKER);
 
     @Override
@@ -125,6 +129,9 @@ public class InvokerServiceImp implements InvokerService {
     public void delete(String name) {
         Objects.requireNonNull(name);
         deleteInvoker(name);
+
+        // delete invoker sync record
+        invokerSyncService.delete(name);
     }
 
     @Override
@@ -134,6 +141,9 @@ public class InvokerServiceImp implements InvokerService {
             if (exists(file)) {
                 invokerContainer.remove(name);
                 Files.delete(file.toAbsolutePath());
+
+                // delete invoker sync record
+                invokerSyncService.delete(name);
             }
         } catch (IOException e) {
             throw new StorageException("Failed to delete stored file", e);
