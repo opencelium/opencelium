@@ -75,6 +75,7 @@ public class InvokerServiceImp implements InvokerService {
     @Autowired
     private StorageService storageService;
 
+    @Lazy
     @Autowired
     private InvokerSyncService invokerSyncService;
 

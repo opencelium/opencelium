@@ -4,7 +4,6 @@ import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.database.mysql.entity.InvokerSync;
 import com.becon.opencelium.backend.database.mysql.repository.InvokerSyncRepository;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
-import com.becon.opencelium.backend.subscription.remoteapi.RemoteApi;
 import com.becon.opencelium.backend.subscription.remoteapi.RemoteApiFactory;
 import com.becon.opencelium.backend.subscription.remoteapi.enums.ApiModule;
 import com.becon.opencelium.backend.subscription.remoteapi.enums.ApiType;
@@ -41,7 +40,7 @@ import java.util.zip.ZipInputStream;
 
 @Service
 public class InvokerSyncServiceImp implements InvokerSyncService {
-    private final RemoteApi remoteApi;
+    private final InvokerModule invokerModule;
     private final InvokerService invokerService;
     private final InvokerSyncRepository invokerSyncRepository;
 
@@ -52,7 +51,7 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
     public InvokerSyncServiceImp(InvokerService invokerService, InvokerSyncRepository invokerSyncRepository) {
         this.invokerService = invokerService;
         this.invokerSyncRepository = invokerSyncRepository;
-        this.remoteApi = RemoteApiFactory.createInstance(ApiType.SERVICE_PORTAL);
+        this.invokerModule = (InvokerModule) RemoteApiFactory.createInstance(ApiType.SERVICE_PORTAL).getModule(ApiModule.INVOKER);
     }
 
     @Override
@@ -106,7 +105,6 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
                 .orElseThrow(() -> new RuntimeException("Invoker with name = '" + invokerName + "' not found."));
 
         // load invoker file by its 'service portal filename' from service portal
-        InvokerModule invokerModule = (InvokerModule) remoteApi.getModule(ApiModule.INVOKER);
         byte[] xmlBytes = invokerModule.getInvokerFileByName(sync.getSpInvokerFileName()).getBody();
         Objects.requireNonNull(xmlBytes);
 
@@ -148,7 +146,6 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
         calculateHmacs();
 
         // load invoker files as zip from service portal
-        InvokerModule invokerModule = (InvokerModule) remoteApi.getModule(ApiModule.INVOKER);
         byte[] zipBytes = invokerModule.getAllInvokerFiles().getBody();
         Objects.requireNonNull(zipBytes);
 

@@ -6,6 +6,7 @@ import com.becon.opencelium.backend.subscription.remoteapi.enums.ApiModule;
 import com.becon.opencelium.backend.subscription.remoteapi.module.InvokerModule;
 import com.becon.opencelium.backend.subscription.remoteapi.module.ReportModule;
 import com.becon.opencelium.backend.subscription.remoteapi.module.SubscriptionModule;
+import com.becon.opencelium.backend.subscription.remoteapi.module.TemplateModule;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpHeaders;
@@ -19,7 +20,7 @@ import org.springframework.web.client.ResourceAccessException;
 
 import java.io.File;
 
-public class ServicePortal implements RemoteApi, SubscriptionModule, ReportModule, InvokerModule {
+public class ServicePortal implements RemoteApi, SubscriptionModule, ReportModule, InvokerModule, TemplateModule {
 
     private final String BASE_URL;
     private final String AUTH_TOKEN;
@@ -136,6 +137,11 @@ public class ServicePortal implements RemoteApi, SubscriptionModule, ReportModul
     @Override
     public ResponseEntity<byte[]> getInvokerFileByName(String invokerName) {
         return httpRequestHelper.makePostRequest("/api/opencelium/invoker/file/" + invokerName, createHeaders(), null, byte[].class);
+    }
+
+    @Override
+    public ResponseEntity<byte[]> getAllTemplateFiles() {
+        return httpRequestHelper.makePostRequest("/api/opencelium/template/files", createHeaders(), null, byte[].class);
     }
 
     // ------------------------------------ PRIVATE ---------------------------------------------------------

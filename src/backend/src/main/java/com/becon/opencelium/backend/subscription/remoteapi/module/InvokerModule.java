@@ -7,7 +7,7 @@ public interface InvokerModule {
     /**
      * Retrieves all invoker files as zip file from a remote API.
      *
-     * @return a list of all subscriptions
+     * @return zip of invoker files
      */
     ResponseEntity<byte[]> getAllInvokerFiles();
 

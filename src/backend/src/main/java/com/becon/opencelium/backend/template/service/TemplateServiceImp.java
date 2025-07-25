@@ -59,16 +59,20 @@ public class TemplateServiceImp implements TemplateService {
     private final ConnectionService connectionService;
     private final Mapper<ConnectionOldDTO, CtionTemplateResource> mapper;
     private final Mapper<ConnectionDTO, ConnectionOldDTO> oldDTOMapper;
-    private final Environment environment;
     private final OpenCeliumProps ocProps;
     private final EntityUpdater<Template> templateEntityUpdater;
     private final ObjectMapper objectMapper;
 
-    public TemplateServiceImp(@Qualifier("connectionServiceImp") ConnectionService connectionService, Mapper<ConnectionOldDTO, CtionTemplateResource> mapper, Mapper<ConnectionDTO, ConnectionOldDTO> oldDTOMapper, Environment environment, EntityVersionManager entityVersionManager, OpenCeliumProps ocProps, @Qualifier("objectMapper") ObjectMapper objectMapper) {
+    public TemplateServiceImp(
+            @Qualifier("connectionServiceImp") ConnectionService connectionService,
+            Mapper<ConnectionOldDTO, CtionTemplateResource> mapper,
+            Mapper<ConnectionDTO, ConnectionOldDTO> oldDTOMapper,
+            EntityVersionManager entityVersionManager,
+            OpenCeliumProps ocProps,
+            @Qualifier("objectMapper") ObjectMapper objectMapper) {
         this.connectionService = connectionService;
         this.mapper = mapper;
         this.oldDTOMapper = oldDTOMapper;
-        this.environment = environment;
         this.ocProps = ocProps;
         this.templateEntityUpdater = entityVersionManager.getUpdater(Template.class);
         this.objectMapper = objectMapper;
@@ -103,7 +107,7 @@ public class TemplateServiceImp implements TemplateService {
         save(template, template.getTemplateId() + ".json");
     }
 
-    public void save(Template template, String fileName) {
+    private void save(Template template, String fileName) {
         try {
             String id = template.getTemplateId();
             ObjectMapper objectMapper = new ObjectMapper();
@@ -160,7 +164,7 @@ public class TemplateServiceImp implements TemplateService {
         templateResource.setName(connectionRes.getTitle());
         templateResource.setDescription(connectionRes.getDescription());
         templateResource.setTemplateId(UUID.randomUUID().toString());
-        templateResource.setVersion(environment.getProperty("opencelium.version", ""));
+        templateResource.setVersion(ocProps.getVersion());
         return templateResource;
     }
 
