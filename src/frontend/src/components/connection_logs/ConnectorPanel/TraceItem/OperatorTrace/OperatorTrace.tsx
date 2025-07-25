@@ -101,7 +101,7 @@ export const OperatorTrace: React.FC<Props> = ({
 			}
 		}
 	};
-	console.log(size === undefined)
+	const hasError = trace?.error?.message;
 	return (
 		<div>
 			<div className={styles.trace} onClick={handleToggle}>
@@ -117,36 +117,42 @@ export const OperatorTrace: React.FC<Props> = ({
 						{(trace.properties as IfOperatorProperty).expression}
 					</span>}
 				</div>
-				{isIf && (
-					<span className={styles.ifTraceRightSide} onClick={(e: any) => {e.preventDefault(); e.stopPropagation();}}>
-						{(trace.segment as DetailedIfOperatorSegment).result ? 'true' : 'false'}
-					</span>
-				)}
-				{isLoop && (
-					<div className={styles.loopTraceRightSide} onClick={(e: any) => {e.preventDefault(); e.stopPropagation();}}>
-						<span>
-							{iterationIndex} - {size || '...'}
-						</span>
-						<FontIcon
-							isButton={true}
-							iconStyles={{cursor: 'pointer'}}
-							size={16}
-							disabled={iterationIndex === 1 || size === undefined}
-							isLoading={prevLoading}
-							value={'arrow_left'}
-							onClick={(e: any) => handlePrevIteration(e)}
-						/>
-						<FontIcon
-							isButton={true}
-							iconStyles={{cursor: 'pointer'}}
-							size={16}
-							disabled={iterationIndex === size || size === undefined}
-							isLoading={nextLoading}
-							value={'arrow_right'}
-							onClick={(e: any) => handleNextIteration(e)}
-						/>
-					</div>
-				)}
+
+				{hasError ? <div className={styles.error}>{trace.error.message}</div>
+					:
+					<React.Fragment>
+						{isIf && (
+							<span className={styles.ifTraceRightSide} onClick={(e: any) => {e.preventDefault(); e.stopPropagation();}}>
+								{(trace.segment as DetailedIfOperatorSegment).result ? 'true' : 'false'}
+							</span>
+						)}
+						{isLoop && (
+							<div className={styles.loopTraceRightSide} onClick={(e: any) => {e.preventDefault(); e.stopPropagation();}}>
+								<span>
+									{iterationIndex} - {size || '...'}
+								</span>
+								<FontIcon
+									isButton={true}
+									iconStyles={{cursor: 'pointer'}}
+									size={16}
+									disabled={iterationIndex === 1 || size === undefined}
+									isLoading={prevLoading}
+									value={'arrow_left'}
+									onClick={(e: any) => handlePrevIteration(e)}
+								/>
+								<FontIcon
+									isButton={true}
+									iconStyles={{cursor: 'pointer'}}
+									size={16}
+									disabled={iterationIndex === size || size === undefined}
+									isLoading={nextLoading}
+									value={'arrow_right'}
+									onClick={(e: any) => handleNextIteration(e)}
+								/>
+							</div>
+						)}
+					</React.Fragment>
+				}
 			</div>
 
 			{expanded && (
