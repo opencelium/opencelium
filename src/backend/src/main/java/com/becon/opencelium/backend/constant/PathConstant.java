@@ -25,7 +25,7 @@ public interface PathConstant {
     String RESOURCES = "src/main/resources";
     String INVOKER = RESOURCES + "/invoker/";
     String LICENSE = RESOURCES + "/license/";
-    String TEMPLATE = "src/main/resources/templates/";
+    String TEMPLATE = RESOURCES + "/templates/";
     String ICONS = "src/main/resources/icon/";
     String APP_DEFAULT_YML = "src/main/resources/application_default.yml";
     String APP_YML = "src/main/resources/application.yml";

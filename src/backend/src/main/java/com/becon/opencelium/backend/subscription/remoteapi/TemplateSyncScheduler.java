@@ -78,17 +78,14 @@ public class TemplateSyncScheduler {
                     String jsonContent = baos.toString(StandardCharsets.UTF_8);
                     Template template = objectMapper.readValue(jsonContent, Template.class);
 
-                    if (Utils.compare(ocProps.getVersion(), template.getVersion()) > 0) {
-                        try {
-                            String oldVersion = template.getVersion();
-                            templateEntityUpdater.updateToCurrentVersion(template)
-                                    .ifUpdated(x -> {
-                                        template.setVersion(ocProps.getVersion());
-                                        templateService.save(template);
-                                    });
-                        } catch (Exception e) {
-                        }
-                    }
+                    try {
+                        templateEntityUpdater.updateToCurrentVersion(template)
+                            .ifUpdated(x -> {
+                                template.setVersion(ocProps.getVersion());
+                            });
+
+                        templateService.save(template);
+                    } catch (Exception e) {}
                 }
             }
         } catch (Exception e) {
