@@ -70,6 +70,9 @@ class ListCollection<EntityProps> implements IListCollection<EntityProps>{
     // action to upload image
     uploadImage: any = false;
 
+    // hide category tabs for connections and schedules
+    hasNotCategoryTabs: boolean = false;
+
     // returns actions that located on the top of collection
     getTopActions?: (viewType?: ViewType, checkedIds?: number[] | string[]) => React.ReactNode = () => {return null;};
 

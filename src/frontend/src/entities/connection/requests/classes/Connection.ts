@@ -21,12 +21,18 @@ import {IConnection} from "../../interfaces/IConnection";
 import {GetConnectionWebhooksResponse, IConnectionRequest} from "../interfaces/IConnection";
 import category from "@entity/category/translations/interpolations/category";
 import {RuleBaseModel} from "@root/requests/models/Rule";
+import {MetaConnectionModel} from "@root/requests/models/Connection";
 
 
 export class ConnectionRequest extends Request implements IConnectionRequest{
 
     constructor(settings?: Partial<IRequestSettings>) {
         super({url: 'connection', ...settings});
+    }
+
+    async getMetaConnectionsByInvokerName(invokerName:string): Promise<AxiosResponse<MetaConnectionModel[]>>{
+        this.endpoint = `/all/meta`;
+        return super.get<MetaConnectionModel[]>();
     }
 
     async generateSupportFile(rule: RuleBaseModel[]): Promise<AxiosResponse<IResponse>> {

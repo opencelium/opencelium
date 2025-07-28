@@ -14,6 +14,7 @@
  */
 
 import ActionCreators from "../../redux_toolkit/action_creators";
+import {syncInvokerWithSP} from "@entity/invoker/redux_toolkit/action_creators/InvokerCreators";
 
 const {
     importInvoker, addInvoker, updateInvoker, uploadInvokerImage, deleteInvokerByName,
@@ -29,7 +30,8 @@ export default {
         [deleteInvokersByName.fulfilled.type]: "The selected invokers were successfully removed",
         [updateInvoker.fulfilled.type]: "The invoker <1><0>{{name}}</0></1> was successfully updated",
         [uploadInvokerImage.fulfilled.type]: "The image of the invoker <1><0>{{name}}</0></1> was successfully uploaded.",
-        [updateOperation.fulfilled.type]: "The response data was successfully updated."
+        [updateOperation.fulfilled.type]: "The response data was successfully updated.",
+        [syncInvokerWithSP.fulfilled.type]: "The invoker was successfully synced.",
     },
     rejected: {
         [updateOperation.rejected.type]: {
@@ -59,6 +61,9 @@ export default {
         },
         [uploadInvokerImage.rejected.type]: {
             "__DEFAULT__": "The image of the invoker was not uploaded."
+        },
+        [syncInvokerWithSP.rejected.type]: {
+            "__DEFAULT__": "The invoker was not synced."
         },
     },
 }

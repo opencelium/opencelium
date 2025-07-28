@@ -110,13 +110,22 @@ class Connections extends ListCollection<ConnectionProps>{
     deletingEntitiesState: API_REQUEST_STATE = API_REQUEST_STATE.INITIAL;
     updatingConnection: API_REQUEST_STATE = API_REQUEST_STATE.INITIAL;
 
-    constructor(connections: any[], dispatch: AppDispatch, deletingEntitiesState?: API_REQUEST_STATE, updatingConnection?: API_REQUEST_STATE) {
+    constructor(connections: any[], dispatch: AppDispatch, deletingEntitiesState?: API_REQUEST_STATE, updatingConnection?: API_REQUEST_STATE, hasNotActions?: boolean, hasNotCategoryTabs?: boolean, hasNotCheckboxes?: boolean) {
         super();
         let connectionInstances = [];
         if(connections) {
             for (let i = 0; i < connections.length; i++) {
                 connectionInstances.push(new Connection({...connections[i], dispatch}));
             }
+        }
+        if (hasNotActions) {
+            this.hasActions = false;
+        }
+        if (hasNotCategoryTabs) {
+            this.hasNotCategoryTabs = true;
+        }
+        if (hasNotCheckboxes) {
+            this.hasCheckboxes = false;
         }
         this.dispatch = dispatch;
         this.deletingEntitiesState = deletingEntitiesState;
