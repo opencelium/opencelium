@@ -1,7 +1,5 @@
 package com.becon.opencelium.backend.utility.crypto;
 
-import com.becon.opencelium.backend.utility.MachineUtility;
-
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
@@ -17,6 +15,19 @@ public class HmacUtility {
             SecretKeySpec secretKeySpec = new SecretKeySpec(SECRET_KEY.getBytes(), HMAC_ALGO);
             mac.init(secretKeySpec);
             byte[] hmacBytes = mac.doFinal(data.getBytes());
+            return Base64.getEncoder().encodeToString(hmacBytes);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static String encode(byte[] data) {
+        try {
+            Mac mac = Mac.getInstance(HMAC_ALGO);
+            SecretKeySpec secretKeySpec = new SecretKeySpec(SECRET_KEY.getBytes(), HMAC_ALGO);
+            mac.init(secretKeySpec);
+
+            byte[] hmacBytes = mac.doFinal(data);
             return Base64.getEncoder().encodeToString(hmacBytes);
         } catch (Exception e) {
             throw new RuntimeException(e);

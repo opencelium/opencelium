@@ -2,27 +2,25 @@ package com.becon.opencelium.backend.subscription.remoteapi;
 
 import com.becon.opencelium.backend.configuration.ApplicationContextProvider;
 import com.becon.opencelium.backend.constant.AppYamlPath;
-import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.subscription.remoteapi.enums.ApiModule;
+import com.becon.opencelium.backend.subscription.remoteapi.module.InvokerModule;
 import com.becon.opencelium.backend.subscription.remoteapi.module.ReportModule;
 import com.becon.opencelium.backend.subscription.remoteapi.module.SubscriptionModule;
-import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
+import com.becon.opencelium.backend.subscription.remoteapi.module.TemplateModule;
 import org.springframework.core.env.Environment;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Objects;
 
-public class ServicePortal implements RemoteApi, SubscriptionModule, ReportModule {
+public class ServicePortal implements RemoteApi, SubscriptionModule, ReportModule, InvokerModule, TemplateModule {
 
     private final String BASE_URL;
     private final String AUTH_TOKEN;
@@ -118,17 +116,32 @@ public class ServicePortal implements RemoteApi, SubscriptionModule, ReportModul
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         body.add("file", new FileSystemResource(activeRequest));
 
-        return httpRequestHelper.makePostRequest("/api/opencelium/license/generate/" + subId, headers, body);
+        return httpRequestHelper.makePostRequest("/api/opencelium/license/generate/" + subId, headers, body, String.class);
     }
 
     @Override
     public void sendReport(Object payload) {
-        httpRequestHelper.makePostRequest("/api/opencelium/history/save", createHeaders(), payload);
+        httpRequestHelper.makePostRequest("/api/opencelium/history/save", createHeaders(), payload, String.class);
     }
 
     @Override
     public ResponseEntity<String> getLastOperationUsageHistory() {
         return httpRequestHelper.makeGetRequest("/api/opencelium/history/last", createHeaders());
+    }
+
+    @Override
+    public ResponseEntity<byte[]> getAllInvokerFiles() {
+        return httpRequestHelper.makePostRequest("/api/opencelium/invoker/files", createHeaders(), null, byte[].class);
+    }
+
+    @Override
+    public ResponseEntity<byte[]> getInvokerFileByName(String invokerName) {
+        return httpRequestHelper.makePostRequest("/api/opencelium/invoker/file/" + invokerName, createHeaders(), null, byte[].class);
+    }
+
+    @Override
+    public ResponseEntity<byte[]> getAllTemplateFiles() {
+        return httpRequestHelper.makePostRequest("/api/opencelium/template/files", createHeaders(), null, byte[].class);
     }
 
     // ------------------------------------ PRIVATE ---------------------------------------------------------

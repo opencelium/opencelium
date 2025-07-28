@@ -23,9 +23,11 @@ import com.becon.opencelium.backend.constant.Constant;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
+import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
+import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.execution.socket.Connection2WebSocketChannelMapping;
@@ -81,7 +83,10 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -92,6 +97,7 @@ public class ConnectionController {
 
     private final Environment environment;
     private final ConnectionService connectionService;
+    private final ConnectorService connectorService;
     private final ConnectionMngService connectionMngService;
     private final SchedulerService schedulerService;
     private final Connection2WebSocketChannelMapping connection2ChannelMapping;
@@ -104,6 +110,7 @@ public class ConnectionController {
     public ConnectionController(
             Environment environment,
             SchedulerService schedulerService,
+            ConnectorService connectorService,
             Connection2WebSocketChannelMapping connection2ChannelMapping,
             Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper,
             Mapper<Connection, ConnectionDTO> connectionMapper,
@@ -117,6 +124,7 @@ public class ConnectionController {
         this.schedulerService = schedulerService;
         this.connection2ChannelMapping = connection2ChannelMapping;
         this.connectionService = connectionService;
+        this.connectorService = connectorService;
         this.connectionMngMapper = connectionMngMapper;
         this.connectionMapper = connectionMapper;
         this.connectionMngService = connectionMngService;
@@ -143,6 +151,40 @@ public class ConnectionController {
         return ResponseEntity.ok(connectionOldDTOMapper.toDTOAll(all));
     }
 
+    @Operation(summary = "Retrieves all connections from database by invokerName")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Connections have been successfully retrieved by invokerName",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConnectionOldDTO.class)))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping(path = "/dependency/{invokerName}")
+    public ResponseEntity<?> getByInvokerName(@PathVariable String invokerName) {
+        List<Integer> connectorIds = connectorService.findAllByInvoker(invokerName).stream().map(Connector::getId).toList();
+
+        List<ConnectionDTO> connections = new ArrayList<>();
+        Set<Long> connectionIds = new HashSet<>();
+
+        for (Integer connectorId : connectorIds) {
+            List<Connection> connectionsByConnectorId = connectionService.findAllByConnectorId(connectorId);
+
+            for (Connection connection : connectionsByConnectorId) {
+                if (connectionIds.add(connection.getId())) {
+                    connections.add(connectionService.getFullConnection(connection.getId()));
+                }
+            }
+        }
+
+        List<ConnectionOldDTO> result = connections.stream()
+                .map(connectionOldDTOMapper::toDTO)
+                .toList();
+        return ResponseEntity.ok(result);
+    }
 
     @Operation(summary = "Retrieves all Metadata of connections from database")
     @ApiResponses(value = {
