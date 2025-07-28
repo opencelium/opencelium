@@ -10,10 +10,12 @@ import styles from './MethodTrace.module.css';
 import LimitedAceEditor from '@app_component/limited_ace_editor/LimitedAceEditor';
 import { useAppDispatch } from '@application/utils/store';
 import { cleanMethodTrace } from '@root/redux_toolkit/slices/ConnectionLogSlice';
-import { ITheme } from '@style/Theme';
+import {ColorTheme, ITheme} from '@style/Theme';
 import Validation from "@application/classes/Validation";
 import {getDetailedMethod} from "@root/redux_toolkit/action_creators/ConnectionLogCreators";
 import {ShowIndexPath} from "@app_component/connection_logs/LogsPanel/LogsPanel";
+import {KeyStyled, MetaBlockStyled, MetaItemStyled, ValueStyled} from "@app_component/base/input/styles";
+import ErrorMessage from "@app_component/connection_logs/ConnectorPanel/ErrorMessage";
 
 interface MethodTraceProps {
 	trace: ConnectionSocketLog<DetailedMethodSegment>;
@@ -58,23 +60,30 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 	const [activeResponseTab, setActiveResponseTab] = useState<'header' | 'body'>(
 		'body'
 	);
+	const hasError = !!trace?.error?.message;
 
 	const handleToggle = async () => {
 		if (!expanded) {
 			setLoading(true);
-			await dispatch(
-				getDetailedMethod({
-					executionId,
-					flowId,
-					indexPath: trace.indexPath,
-				})
-			);
+			if (hasError) {
+
+			} else{
+				await dispatch(
+					getDetailedMethod({
+						executionId,
+						flowId,
+						indexPath: trace.indexPath,
+					})
+				);
+			}
 			setLoading(false);
 			setExpanded(true);
 		} else {
-			dispatch(
-				cleanMethodTrace({flowId, indexPath: trace.indexPath})
-			);
+			if (!hasError) {
+				dispatch(
+					cleanMethodTrace({flowId, indexPath: trace.indexPath})
+				);
+			}
 			setExpanded(false);
 		}
 	};
@@ -106,7 +115,6 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 
 	const requestMode = requestBody ? detectAceMode(requestBody) : 'json';
 	const responseMode = responseBody ? detectAceMode(responseBody) : 'json';
-
 	return (
 		<div>
 			<div className={styles.methodTrace} onClick={handleToggle}>
@@ -126,7 +134,7 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 					{ShowIndexPath && (
 						<div style={{ marginLeft: 8 }}>{trace.indexPath}</div>
 					)}
-					<div className={styles.methodUrl}>{trace?.segment?.request?.url || ''}</div>
+					<div className={styles.methodUrl} style={{color: ColorTheme.Red}}>{trace?.segment?.request?.url || ''}</div>
 				</div>
 				<div
 					className={styles.methodTraceRightSide}
@@ -135,145 +143,153 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 						e.stopPropagation();
 					}}
 				>
-					<div className={styles.methodStatus}>{trace.segment?.response?.status || ''}</div>
-					<div>{'|'}</div>
-					<div className={styles.methodTime}>{trace.segment?.response?.duration || ''}</div>
+					{hasError ? <div className={styles.error} style={{color: ColorTheme.Red}}>{trace.error.message}</div> :
+						<React.Fragment>
+							<div className={styles.methodStatus}>{trace.segment?.response?.status || ''}</div>
+							<div>{'|'}</div>
+							<div className={styles.methodTime}>{trace.segment?.response?.duration || ''}</div>
+						</React.Fragment>
+					}
 				</div>
 			</div>
 
 			{expanded && (
 				<div className={styles.requestResponseContainer}>
-					{/* Request */}
-					<div className={styles.methodRequest}>
-						<Nav tabs className={styles.nav}>
-							<NavItem>
-								<NavLink
-									active={activeRequestTab === 'header'}
-									onClick={(e) => {
-										e.preventDefault();
-										setActiveRequestTab('header');
-									}}
-									className={styles.navLink}
-								>
-									Header
-								</NavLink>
-							</NavItem>
-							<NavItem>
-								<NavLink
-									active={activeRequestTab === 'body'}
-									onClick={(e) => {
-										e.preventDefault();
-										setActiveRequestTab('body');
-									}}
-									className={styles.navLink}
-								>
-									Body
-								</NavLink>
-							</NavItem>
-						</Nav>
-						<TabContent activeTab={activeRequestTab}>
-							<TabPane tabId='header'>
-								<LimitedAceEditor
-									maxLength={Validation.TextLength.Long}
-									mode='json'
-									theme={theme}
-									editorTheme='textmate'
-									value={requestHeaders}
-									fontSize={14}
-									showPrintMargin={false}
-									showGutter={false}
-									highlightActiveLine={false}
-									wrapEnabled={true}
-									setOptions={{ useWorker: false }}
-									className={styles.aceEditor}
-									readOnly={true}
-								/>
-							</TabPane>
-							<TabPane tabId='body'>
-								<LimitedAceEditor
-									maxLength={255}
-									mode={requestMode}
-									theme={theme}
-									editorTheme='textmate'
-									value={requestBody}
-									fontSize={14}
-									showPrintMargin={false}
-									showGutter={true}
-									highlightActiveLine={false}
-									wrapEnabled={true}
-									setOptions={{ useWorker: false, showLineNumbers: false }}
-									className={styles.aceEditor}
-									readOnly={true}
-								/>
-							</TabPane>
-						</TabContent>
-					</div>
-
-					{/* Response */}
-					<div className={styles.methodResponse}>
-						<Nav tabs className={styles.nav}>
-							<NavItem>
-								<NavLink
-									active={activeResponseTab === 'header'}
-									onClick={(e) => {
-										e.preventDefault();
-										setActiveResponseTab('header');
-									}}
-									className={styles.navLink}
-								>
-									Header
-								</NavLink>
-							</NavItem>
-							<NavItem>
-								<NavLink
-									active={activeResponseTab === 'body'}
-									onClick={(e) => {
-										e.preventDefault();
-										setActiveResponseTab('body');
-									}}
-									className={styles.navLink}
-								>
-									Body
-								</NavLink>
-							</NavItem>
-						</Nav>
-						<TabContent activeTab={activeResponseTab}>
-							<TabPane tabId='header'>
-								<LimitedAceEditor
-									maxLength={255}
-									mode='json'
-									theme={theme}
-									editorTheme='textmate'
-									value={responseHeaders}
-									fontSize={14}
-									showPrintMargin={false}
-									showGutter={true}
-									highlightActiveLine={false}
-									wrapEnabled={true}
-									setOptions={{ useWorker: false }}
-									className={styles.aceEditor}
-									readOnly={true}
-								/>
-							</TabPane>
-							<TabPane tabId='body'>
-								<LimitedAceEditor
-									maxLength={255}
-									mode={responseMode}
-									theme={theme}
-									editorTheme='textmate'
-									value={responseBody}
-									fontSize={14}
-									showPrintMargin={false}
-									showGutter={true}
-									highlightActiveLine={false}
-									wrapEnabled={true}
-									setOptions={{ useWorker: false }}
-									className={styles.aceEditor}
-									readOnly={true}
-								/>
-							</TabPane>
-						</TabContent>
-					</div>
+					{hasError ?
+						<ErrorMessage trace={trace}/>
+					:
+					<React.Fragment>
+						{/* Request */}
+						<div className={styles.methodRequest}>
+							<Nav tabs className={styles.nav}>
+								<NavItem>
+									<NavLink
+										active={activeRequestTab === 'header'}
+										onClick={(e) => {
+											e.preventDefault();
+											setActiveRequestTab('header');
+										}}
+										className={styles.navLink}
+									>
+										Header
+									</NavLink>
+								</NavItem>
+								<NavItem>
+									<NavLink
+										active={activeRequestTab === 'body'}
+										onClick={(e) => {
+											e.preventDefault();
+											setActiveRequestTab('body');
+										}}
+										className={styles.navLink}
+									>
+										Body
+									</NavLink>
+								</NavItem>
+							</Nav>
+							<TabContent activeTab={activeRequestTab}>
+								<TabPane tabId='header'>
+									<LimitedAceEditor
+										maxLength={Validation.TextLength.Long}
+										mode='json'
+										theme={theme}
+										editorTheme='textmate'
+										value={requestHeaders}
+										fontSize={14}
+										showPrintMargin={false}
+										showGutter={false}
+										highlightActiveLine={false}
+										wrapEnabled={true}
+										setOptions={{ useWorker: false }}
+										className={styles.aceEditor}
+										readOnly={true}
+									/>
+								</TabPane>
+								<TabPane tabId='body'>
+									<LimitedAceEditor
+										maxLength={255}
+										mode={requestMode}
+										theme={theme}
+										editorTheme='textmate'
+										value={requestBody}
+										fontSize={14}
+										showPrintMargin={false}
+										showGutter={true}
+										highlightActiveLine={false}
+										wrapEnabled={true}
+										setOptions={{ useWorker: false, showLineNumbers: false }}
+										className={styles.aceEditor}
+										readOnly={true}
+									/>
+								</TabPane>
+							</TabContent>
+						</div>
+						{/* Response */}
+						<div className={styles.methodResponse}>
+							<Nav tabs className={styles.nav}>
+								<NavItem>
+									<NavLink
+										active={activeResponseTab === 'header'}
+										onClick={(e) => {
+											e.preventDefault();
+											setActiveResponseTab('header');
+										}}
+										className={styles.navLink}
+									>
+										Header
+									</NavLink>
+								</NavItem>
+								<NavItem>
+									<NavLink
+										active={activeResponseTab === 'body'}
+										onClick={(e) => {
+											e.preventDefault();
+											setActiveResponseTab('body');
+										}}
+										className={styles.navLink}
+									>
+										Body
+									</NavLink>
+								</NavItem>
+							</Nav>
+							<TabContent activeTab={activeResponseTab}>
+								<TabPane tabId='header'>
+									<LimitedAceEditor
+										maxLength={255}
+										mode='json'
+										theme={theme}
+										editorTheme='textmate'
+										value={responseHeaders}
+										fontSize={14}
+										showPrintMargin={false}
+										showGutter={true}
+										highlightActiveLine={false}
+										wrapEnabled={true}
+										setOptions={{ useWorker: false }}
+										className={styles.aceEditor}
+										readOnly={true}
+									/>
+								</TabPane>
+								<TabPane tabId='body'>
+									<LimitedAceEditor
+										maxLength={255}
+										mode={responseMode}
+										theme={theme}
+										editorTheme='textmate'
+										value={responseBody}
+										fontSize={14}
+										showPrintMargin={false}
+										showGutter={true}
+										highlightActiveLine={false}
+										wrapEnabled={true}
+										setOptions={{ useWorker: false }}
+										className={styles.aceEditor}
+										readOnly={true}
+									/>
+								</TabPane>
+							</TabContent>
+						</div>
+					</React.Fragment>}
 				</div>
 			)}
 		</div>
