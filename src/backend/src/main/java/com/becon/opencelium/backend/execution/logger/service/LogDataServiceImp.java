@@ -21,7 +21,7 @@ import java.util.Set;
  * LogMetaDataServiceImp handles persistence and enrichment of parsed execution blocks (e.g. IF, LOOP, METHOD).
  */
 @Service
-public class LogMetaDataServiceImp implements LogMetaDataService {
+public class LogDataServiceImp implements LogDataService {
     // Fields commonly known and excluded from "properties"
     private static final Set<LogLineKey> EXCLUDED_KEYS = Set.of(
             LogLineKey.TIMESTAMP,

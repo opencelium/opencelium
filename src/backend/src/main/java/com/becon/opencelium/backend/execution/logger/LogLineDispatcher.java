@@ -4,16 +4,14 @@ import com.becon.opencelium.backend.database.mongodb.entity.LogData;
 import com.becon.opencelium.backend.execution.logger.dto.LogDataDTO;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseType;
 import com.becon.opencelium.backend.execution.logger.enums.LogDetailLevel;
-import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
 import com.becon.opencelium.backend.execution.logger.parser.ParsedLogLineBuilder;
 import com.becon.opencelium.backend.execution.logger.parser.entity.ParsedLogLine;
-import com.becon.opencelium.backend.execution.logger.service.LogMetaDataService;
-import com.becon.opencelium.backend.execution.logger.service.LogMetaDataServiceImp;
+import com.becon.opencelium.backend.execution.logger.service.LogDataService;
+import com.becon.opencelium.backend.execution.logger.service.LogDataServiceImp;
 import com.becon.opencelium.backend.execution.logger.tracker.ExecutionTracker;
 import com.becon.opencelium.backend.execution.logger.tracker.ExecutionTrackerImpl;
 import com.becon.opencelium.backend.utility.ApplicationContextUtility;
 
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -27,11 +25,11 @@ import java.util.Optional;
 public class LogLineDispatcher {
     private final ThreadLocal<ExecutionTracker> tls = new ThreadLocal<>();
     private final ParsedLogLineBuilder parsedLogLineBuilder;
-    private final LogMetaDataService logMetaDataService;
+    private final LogDataService logMetaDataService;
 
     public LogLineDispatcher() {
         this.parsedLogLineBuilder = ApplicationContextUtility.getBean(ParsedLogLineBuilder.class);
-        this.logMetaDataService = ApplicationContextUtility.getBean(LogMetaDataServiceImp.class);
+        this.logMetaDataService = ApplicationContextUtility.getBean(LogDataServiceImp.class);
     }
 
     public Optional<LogDataDTO> dispatch(String logLine, long startOffset) {
