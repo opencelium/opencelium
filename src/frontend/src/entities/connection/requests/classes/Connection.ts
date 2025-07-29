@@ -31,7 +31,7 @@ export class ConnectionRequest extends Request implements IConnectionRequest{
     }
 
     async getMetaConnectionsByInvokerName(invokerName:string): Promise<AxiosResponse<MetaConnectionModel[]>>{
-        this.endpoint = `/all/meta`;
+        this.endpoint = `/dependency/${invokerName}`;
         return super.get<MetaConnectionModel[]>();
     }
 
