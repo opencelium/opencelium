@@ -68,7 +68,7 @@ This documentation is organized into a couple of sections:
    Changelog <https://github.com/opencelium/opencelium/blob/prod/CHANGELOG.rst>
 
 .. toctree::
-   :caption: REST API Reference
+   :caption: REST API
 
    api/overview
 
