@@ -70,7 +70,7 @@ This documentation is organized into a couple of sections:
 .. toctree::
    :caption: REST API Reference
 
-   Swagger <../swagger.html>
+   api/overview
 
 ##################
 License
