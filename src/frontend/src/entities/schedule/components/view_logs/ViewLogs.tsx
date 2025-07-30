@@ -19,7 +19,6 @@ const ViewLogs = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const firstMatchRef = useRef<any>(null);
     const logTooLarge = useMemo(() => isLogTooLarge(currentExecutionLogs.logs), [currentExecutionLogs.logs]);
-
     const debouncedUpdateSearchTerm = useMemo(() => debounce((val: string) => {
         if (val.length > 2) {
             setSearchTerm(val);
