@@ -21,8 +21,8 @@ public class HttpRequestHelper {
         this.baseUrl = baseUrl;
     }
 
-    public ResponseEntity<String> makeGetRequest(String endpoint, HttpHeaders headers) {
-        return makeRequest(HttpMethod.GET, endpoint, headers, null, String.class);
+    public <T> ResponseEntity<T> makeGetRequest(String endpoint, HttpHeaders headers, Class<T> responseType) {
+        return makeRequest(HttpMethod.GET, endpoint, headers, null, responseType);
     }
 
     public <T> ResponseEntity<T> makePostRequest(String endpoint, HttpHeaders headers, Object body, Class<T> responseType) {
