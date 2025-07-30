@@ -7,6 +7,8 @@ import com.becon.opencelium.backend.subscription.remoteapi.module.InvokerModule;
 import com.becon.opencelium.backend.subscription.remoteapi.module.ReportModule;
 import com.becon.opencelium.backend.subscription.remoteapi.module.SubscriptionModule;
 import com.becon.opencelium.backend.subscription.remoteapi.module.TemplateModule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpHeaders;
@@ -26,6 +28,8 @@ public class ServicePortal implements RemoteApi, SubscriptionModule, ReportModul
     private final String AUTH_TOKEN;
     private final HttpRequestHelper httpRequestHelper;
 
+    private static final Logger logger = LoggerFactory.getLogger(ServicePortal.class);
+
     public ServicePortal() {
         Environment env = ApplicationContextProvider.getApplicationContext().getEnvironment();
         BASE_URL = env.getProperty(AppYamlPath.SP_BASE_URL);
@@ -37,7 +41,7 @@ public class ServicePortal implements RemoteApi, SubscriptionModule, ReportModul
     public ResponseEntity<String> checkConnection() {
         String endpoint = "/api/opencelium/connection/status";
         try {
-            return  httpRequestHelper.makeGetRequest(endpoint, createHeaders());
+            return  httpRequestHelper.makeGetRequest(endpoint, createHeaders(), String.class);
         } catch (ResourceAccessException e) {
             // This handles cases when the URL is not reachable
             e.printStackTrace();
@@ -100,12 +104,12 @@ public class ServicePortal implements RemoteApi, SubscriptionModule, ReportModul
 
     @Override
     public ResponseEntity<String> getAllSubs() {
-        return httpRequestHelper.makeGetRequest("/api/opencelium/license/all", createHeaders());
+        return httpRequestHelper.makeGetRequest("/api/opencelium/license/all", createHeaders(), String.class);
     }
 
     @Override
     public ResponseEntity<String> getSubById(String id) {
-        return httpRequestHelper.makeGetRequest("/api/opencelium/license/" + id, createHeaders());
+        return httpRequestHelper.makeGetRequest("/api/opencelium/license/" + id, createHeaders(), String.class);
     }
 
     @Override
@@ -126,23 +130,57 @@ public class ServicePortal implements RemoteApi, SubscriptionModule, ReportModul
 
     @Override
     public ResponseEntity<String> getLastOperationUsageHistory() {
-        return httpRequestHelper.makeGetRequest("/api/opencelium/history/last", createHeaders());
+        return httpRequestHelper.makeGetRequest("/api/opencelium/history/last", createHeaders(), String.class);
     }
 
     @Override
     public ResponseEntity<byte[]> getAllInvokerFiles() {
-        return httpRequestHelper.makePostRequest("/api/opencelium/invoker/files", createHeaders(), null, byte[].class);
+        String endpoint = "/api/opencelium/invoker/files";
+        try {
+            return httpRequestHelper.makeGetRequest(endpoint, createHeaders(), byte[].class);
+        } catch (ResourceAccessException e) {
+            logger.error("getAllInvokerFiles:: " + BASE_URL + endpoint + " is not reachable. Please check your settings!");
+
+            throw new RuntimeException(BASE_URL + endpoint + " is not reachable. Please check your settings!");
+        } catch (HttpClientErrorException e) {
+            logger.error("getAllInvokerFiles:: " + e.getMessage());
+
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     @Override
     public ResponseEntity<byte[]> getInvokerFileByName(String invokerName) {
-        return httpRequestHelper.makePostRequest("/api/opencelium/invoker/file/" + invokerName, createHeaders(), null, byte[].class);
+        String endpoint = "/api/opencelium/invoker/file/" + invokerName;
+        try {
+            return httpRequestHelper.makeGetRequest(endpoint, createHeaders(), byte[].class);
+        } catch (ResourceAccessException e) {
+            logger.error("getInvokerFileByName:: " + BASE_URL + endpoint + " is not reachable. Please check your settings!");
+
+            throw new RuntimeException(BASE_URL + endpoint + " is not reachable. Please check your settings!");
+        } catch (HttpClientErrorException e) {
+            logger.error("getInvokerFileByName:: " + e.getMessage());
+
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     @Override
     public ResponseEntity<byte[]> getAllTemplateFiles() {
-        return httpRequestHelper.makePostRequest("/api/opencelium/template/files", createHeaders(), null, byte[].class);
+        String endpoint = "/api/opencelium/template/files";
+        try {
+            return httpRequestHelper.makeGetRequest(endpoint, createHeaders(), byte[].class);
+        } catch (ResourceAccessException e) {
+            logger.error("getAllTemplateFiles:: " + BASE_URL + endpoint + " is not reachable. Please check your settings!");
+
+            throw new RuntimeException(BASE_URL + endpoint + " is not reachable. Please check your settings!");
+        } catch (HttpClientErrorException e) {
+            logger.error("getAllTemplateFiles:: " + e.getMessage());
+
+            throw new RuntimeException(e.getMessage());
+        }
     }
+
 
     // ------------------------------------ PRIVATE ---------------------------------------------------------
 
