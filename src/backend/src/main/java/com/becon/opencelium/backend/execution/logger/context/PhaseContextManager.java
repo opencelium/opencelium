@@ -67,7 +67,7 @@ public class PhaseContextManager {
     }
 
     public PhaseContext endCurrentPhase() {
-        return stack.poll();
+        return stack.pop();
     }
 
     public PhaseContext getCurrentPhase() {

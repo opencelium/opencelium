@@ -149,6 +149,9 @@ public class ExecutionTrackerImpl implements ExecutionTracker {
 
         if (shouldEmit(phaseSchema, parsedLine)) {
 //            currentPhaseCtx.setStatus(PhaseStatus.COMPLETE);
+            if(Objects.equals(segmentContext.getSegmentType(), SegmentType.EXCEPTION)) {
+                phaseContextManager.endCurrentPhase();
+            }
             PhaseBuilder builder = builderFactory.getBuilder(phaseCategory);
             LogData logData = builder.build(currentPhaseCtx, execId, Long.parseLong(connId));
             return Optional.of(logData);

@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class PhaseContext {
     private final ParsedLogLine parsedLogLine;
-    private long startOffset;
+    private final long startOffset;
     private long endOffset;
     private PhaseStatus status;
     private final List<SegmentContext> segments = new ArrayList<>();
@@ -47,10 +47,6 @@ public class PhaseContext {
 
     public long getStartOffset() {
         return startOffset;
-    }
-
-    public void setStartOffset(long startOffset) {
-        this.startOffset = startOffset;
     }
 
     public void setEndOffset(long endOffset) {
