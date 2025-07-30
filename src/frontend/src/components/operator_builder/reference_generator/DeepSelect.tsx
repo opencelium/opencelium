@@ -113,9 +113,20 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 		if (selected) {
 			setSearchValue(selected.value);
 			setFilteredOptions(getNestedOptions(selected.value));
+			const responseStructure = connectionEditor.connection.getMethodByColor(color)
+				.response.success.body.fields;
+				// @ts-ignore
+			const requestStructure = connectionEditor.connection.getMethodByColor(connectionEditor.item.color)
+				.request._body._fields;
+			const structure = {
+				request: requestStructure,
+				response: responseStructure
+			}
+			onValueSelect(selected.value, structure);
 		} else {
 			setSearchValue('');
 			setFilteredOptions(allOptions);
+			onValueSelect('', {});
 		}
 	};
 	useEffect(() => {

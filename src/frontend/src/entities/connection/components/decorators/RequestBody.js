@@ -39,6 +39,7 @@ export function RequestBody(CRequestType){
 					constructor(props) {
 						super(props);
 						this.paramGenerator = React.createRef();
+						this.refStructure = null;
 
 						this.state = {
 							showImportJson: false,
@@ -196,7 +197,8 @@ export function RequestBody(CRequestType){
 							connector,
 							method,
 							fieldBindingData,
-							target
+							target,
+							this.refStructure
 						);
 
 						if (target === 'header') {
@@ -456,6 +458,9 @@ export function RequestBody(CRequestType){
 																editCancel={editCancel}
 																bodyReference={target === 'body'}
 																headerReference={target === 'header'}
+																onNamespacesChange={(structure) => {
+																	this.refStructure = structure;
+																}}
 															/>
 														);
 													},
