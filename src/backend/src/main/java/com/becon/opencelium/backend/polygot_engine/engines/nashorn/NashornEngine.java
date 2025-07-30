@@ -40,13 +40,7 @@ public class NashornEngine implements ScriptEngine {
     public NashornEngine() {
 
         // Initialize 'compilator' engine
-        javax.script.ScriptEngine engine = engineManager.getEngineByName("nashorn");
-
-        if (engine instanceof Compilable comp) {
-            this.compilable = comp;
-        } else {
-            this.compilable = null;
-        }
+        this.compilable = initCompilatorEngine();
     }
 
     /**
@@ -189,5 +183,11 @@ public class NashornEngine implements ScriptEngine {
         } catch (JsonProcessingException e) {
             throw new ScriptExecutionException("Cannot read a result of nashorn: " + stringifiedResult, e);
         }
+    }
+
+    private Compilable initCompilatorEngine() {
+        javax.script.ScriptEngine engine = engineManager.getEngineByName("nashorn");
+
+        return engine instanceof Compilable comp ? comp : null;
     }
 }
