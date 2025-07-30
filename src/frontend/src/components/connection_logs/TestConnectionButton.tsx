@@ -9,7 +9,13 @@ import {LogPanelHeight, setButtonPanelVisibility, setLogPanelHeight} from "@root
 import {generateUUID} from "@app_component/operator_builder/utils";
 import {useSocketData} from "../../socket/SocketDataContext";
 import {ConnectionSocketLog, LightSegment} from "@root/requests/models/ConnectionLog";
-import {addSocketLog, clearTextLog, setIsTesting} from "@root/redux_toolkit/slices/ConnectionLogSlice";
+import {
+    addSocketLog,
+    clearSocketLog,
+    clearTextLog,
+    setCurrentLog,
+    setIsTesting
+} from "@root/redux_toolkit/slices/ConnectionLogSlice";
 import {Button} from "@app_component/base/button/Button";
 import {terminateExecution} from "@entity/schedule/redux_toolkit/action_creators/ScheduleCreators";
 import {consoleLog} from "@application/utils/utils";
@@ -58,12 +64,15 @@ const TestConnectionButton = ({validateLogic}: any) => {
             }
         }
         // if flowchart completed
-        if (logMessage.type === 'FLOWCHART' && logMessage.status === 'COMPLETE') {
+        const isFlowchartComplete = logMessage.type === 'FLOWCHART' && logMessage.status === 'COMPLETE';
+        //const isIfComplete = logMessage.type === 'IF' && logMessage.status === 'COMPLETE'
+        if (isFlowchartComplete/* || isIfComplete*/) {
             return true;
         }
     }
     useEffect(() => {
         return () => {
+            dispatch(clearSocketLog());
             dispatch(setIsTesting(false));
             subscriptionRef.current?.();
         }
@@ -77,6 +86,7 @@ const TestConnectionButton = ({validateLogic}: any) => {
             }
             const subscription = socket.subscribe(`/execution/logs/${channelId}`, (message) => {
                 const data = JSON.parse(message.body) as ConnectionSocketLog<LightSegment>;
+                dispatch(setCurrentLog(data));
                 console.log('Socket.ConnectionLogs', data);
                 if (isTestFinished(data)) return;
                 if (shouldSkipTrace(data)) return;

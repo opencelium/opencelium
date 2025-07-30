@@ -41,6 +41,7 @@ import DetailsForProcess
 
 function mapStateToProps(state, props){
     const {currentTechnicalItem, connectionOverview} = mapItemsToClasses(state, props.isModal);
+    const {currentLog} = state.connectionLogReducer;
     return{
         currentTechnicalItem,
         logPanelHeight: connectionOverview.logPanelHeight,
@@ -294,7 +295,7 @@ class Operator extends React.Component{
         const {
             operator, isNotDraggable, isCurrent, currentTechnicalItem,
             isHighlighted, readOnly, isDisabled, logPanelHeight,
-            currentLogs, isTestingConnection, justDeletedItem,
+            currentLogs, isTestingConnection, justDeletedItem, currentLog,
         } = this.props;
         const hasBottomPlaceholder = this.shouldShowBottomPlaceholder();
         const hasRightPlaceholder = this.shouldShowRightPlaceholder();
@@ -341,10 +342,7 @@ class Operator extends React.Component{
         const hasDraggableItem = currentTechnicalItem && currentTechnicalItem.isDragged;
         const hasDraggableOperator = isCurrent && hasDraggableItem;
         const isDraggableItemOperator = hasDraggableItem && currentTechnicalItem instanceof CTechnicalOperator;
-        const currentLog = currentLogs.length > 0 ? currentLogs[currentLogs.length - 1] : null;
-        const hasDashAnimation = logPanelHeight !== 0 && currentLog
-            && (currentLog.message !== ConnectionLogs.BreakMessage || (currentLog.message === ConnectionLogs.BreakMessage && currentLog.operatorData && !currentLog.operatorData.conditionResult) && currentLog.message !== ConnectionLogs.EndOfExecutionMessage)
-            && currentLog.index === operator.entity.index && currentLog.connectorType === operator.connectorType && currentLog.message !== '';
+        const hasDashAnimation = currentLog?.indexPath === operator.entity.index;
         const hasDeleteIcon = isCurrent && !readOnly && !isTestingConnection;
         const logStroke = logPanelHeight !== 0 && currentLogs.findIndex(l => l.index === operator.entity.index && l.connectorType === operator.connectorType) !== -1 ? '#58854d' : '';
         const isJustCreatedItem = this.isJustCreatedItem();

@@ -3,7 +3,7 @@ import {
 	ConnectionSocketLog,
 	DetailedIfOperatorSegment, DetailedOperatorSegment,
 	IfOperatorProperty,
-	LoopOperatorProperty,
+	LoopOperatorProperty, MetaTrace,
 	Trace,
 } from '@root/requests/models/ConnectionLog';
 import ToggleButton from '../ToggleButton/ToggleButton';
@@ -16,7 +16,7 @@ import {getDetailedOperator, getOperatorChildren} from "@root/redux_toolkit/acti
 import {ShowIndexPath} from "@app_component/connection_logs/LogsPanel/LogsPanel";
 
 interface Props {
-	trace: ConnectionSocketLog<DetailedOperatorSegment> & {children?: Trace[]};
+	trace: ConnectionSocketLog<DetailedOperatorSegment> & MetaTrace;
 	flowId: string;
 	executionId: string;
 	iterationIndexes: number[];
@@ -107,7 +107,7 @@ export const OperatorTrace: React.FC<Props> = ({
 			<div className={styles.trace} onClick={handleToggle}>
 				<div className={styles.traceLeftSide}>
 					<ToggleButton
-						loading={loading || size === undefined}
+						loading={loading || !trace.isCompleted}
 						expanded={expanded}
 						onClick={handleToggle}
 					/>
@@ -117,42 +117,38 @@ export const OperatorTrace: React.FC<Props> = ({
 						{(trace.properties as IfOperatorProperty).expression}
 					</span>}
 				</div>
-
-				{hasError ? <div className={styles.error}>{trace.error.message}</div>
-					:
-					<React.Fragment>
-						{isIf && (
-							<span className={styles.ifTraceRightSide} onClick={(e: any) => {e.preventDefault(); e.stopPropagation();}}>
-								{(trace.segment as DetailedIfOperatorSegment).result ? 'true' : 'false'}
+				<React.Fragment>
+					{isIf && (
+						<span className={styles.ifTraceRightSide} onClick={(e: any) => {e.preventDefault(); e.stopPropagation();}}>
+							{(trace.segment as DetailedIfOperatorSegment).result ? 'true' : 'false'}
+						</span>
+					)}
+					{isLoop && (
+						<div className={styles.loopTraceRightSide} onClick={(e: any) => {e.preventDefault(); e.stopPropagation();}}>
+							<span>
+								{iterationIndex} - {size || '...'}
 							</span>
-						)}
-						{isLoop && (
-							<div className={styles.loopTraceRightSide} onClick={(e: any) => {e.preventDefault(); e.stopPropagation();}}>
-								<span>
-									{iterationIndex} - {size || '...'}
-								</span>
-								<FontIcon
-									isButton={true}
-									iconStyles={{cursor: 'pointer'}}
-									size={16}
-									disabled={iterationIndex === 1 || size === undefined}
-									isLoading={prevLoading}
-									value={'arrow_left'}
-									onClick={(e: any) => handlePrevIteration(e)}
-								/>
-								<FontIcon
-									isButton={true}
-									iconStyles={{cursor: 'pointer'}}
-									size={16}
-									disabled={iterationIndex === size || size === undefined}
-									isLoading={nextLoading}
-									value={'arrow_right'}
-									onClick={(e: any) => handleNextIteration(e)}
-								/>
-							</div>
-						)}
-					</React.Fragment>
-				}
+							<FontIcon
+								isButton={true}
+								iconStyles={{cursor: 'pointer'}}
+								size={16}
+								disabled={iterationIndex === 1 || size === undefined}
+								isLoading={prevLoading}
+								value={'arrow_left'}
+								onClick={(e: any) => handlePrevIteration(e)}
+							/>
+							<FontIcon
+								isButton={true}
+								iconStyles={{cursor: 'pointer'}}
+								size={16}
+								disabled={iterationIndex === size || size === undefined}
+								isLoading={nextLoading}
+								value={'arrow_right'}
+								onClick={(e: any) => handleNextIteration(e)}
+							/>
+						</div>
+					)}
+				</React.Fragment>
 			</div>
 
 			{expanded && (

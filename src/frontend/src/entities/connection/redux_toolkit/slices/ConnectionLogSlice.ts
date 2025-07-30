@@ -16,6 +16,7 @@ import {findAndUpdateTrace} from "@root/utils/utils";
 export interface ConnectionLogState {
 	executionId: string,
 	schedulerId: number,
+	currentLog: ConnectionSocketLog<LightSegment>,
 	connectors: ConnectorLog[],
 	textLogs: ConnectionTextLog[],
 	isTesting: boolean,
@@ -24,6 +25,7 @@ export interface ConnectionLogState {
 export const initialState: ConnectionLogState = {
 	schedulerId: undefined,
 	executionId: '',
+	currentLog: undefined,
 	connectors: [],
 	textLogs: [],
 	isTesting: false,
@@ -40,6 +42,9 @@ export const connectionLogSlice = createSlice({
 		setIsTesting: (state, action: PayloadAction<boolean>) => {
 			state.isTesting = action.payload;
 		},
+		setCurrentLog: (state, action: PayloadAction<ConnectionSocketLog<LightSegment>>) => {
+			state.currentLog = action.payload;
+		},
 		addTextLog: (state, action: PayloadAction<ConnectionTextLog>) => {
 			state.textLogs.push(action.payload)
 		},
@@ -54,13 +59,20 @@ export const connectionLogSlice = createSlice({
 		addSocketLog: (state, action: PayloadAction<{data: ConnectionSocketLog<LightSegment>, settings: {hasNewLoopIndex: boolean, parentIndexPath: string}}>) => {
 			const {executionId, flowId, connectorName, ...newTrace} = action.payload.data;
 			if (state.executionId === executionId) {
-				if (action.payload.settings.hasNewLoopIndex) {
+				if (action.payload.settings.parentIndexPath) {
 					const connector = state.connectors.find(c => c.flowId === flowId);
 					findAndUpdateTrace(connector.traces, action.payload.settings.parentIndexPath, (trace) => {
-						if (trace.type === 'LOOP') {
-							//@ts-ignore
-							trace.properties.size = trace.properties.size ? trace.properties.size + 1 : 1;
-							return true;
+						if (action.payload.settings.hasNewLoopIndex) {
+							if (trace.type === 'LOOP') {
+								//@ts-ignore
+								trace.properties.size = trace.properties.size ? trace.properties.size + 1 : 1;
+								trace.isCompleted = true;
+								return true;
+							}
+						} else {
+							if (trace.type === 'IF') {
+								return true;
+							}
 						}
 						return false;
 					});
@@ -69,7 +81,20 @@ export const connectionLogSlice = createSlice({
 					state.connectors.forEach((connector) => {
 						if (connector.flowId === flowId) {
 							hasConnector = true;
-							connector.traces.push(action.payload.data);
+							if (action.payload.data.status === 'COMPLETE') {
+								console.log(connector.traces);
+								findAndUpdateTrace(connector.traces, action.payload.data.indexPath, (trace) => {
+									if (!action.payload.settings.hasNewLoopIndex) {
+										if (trace.type === 'IF') {
+											trace.isCompleted = true;
+											return true;
+										}
+									}
+									return false;
+								});
+							} else {
+								connector.traces.push({...action.payload.data, isCompleted: action.payload.data.type === 'OPERATION'});
+							}
 							return;
 						}
 					});
@@ -174,7 +199,7 @@ export const connectionLogSlice = createSlice({
 export const {
 	cleanMethodTrace, cleanOperatorTrace, addSocketLog,
 	addTextLog, clearTextLog, clearSocketLog,
-	setIsTesting,
+	setIsTesting, setCurrentLog,
 } =
 	connectionLogSlice.actions;
 export default connectionLogSlice.reducer;

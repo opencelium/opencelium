@@ -52,17 +52,6 @@ const LogsPanel: React.FC<LogsPanelProps> = ({theme}) => {
           />}
         </TopStyled>
       <LogPanelStyled id={'connection_current_logs'} isFullScreen={isFullScreen} noLogs={textLogs.length === 0} isDetailsOpened={isDetailsOpened} logPanelHeight={logPanelHeight}>
-        {/*<div style={{display: 'grid', gap: 10}}>
-        {
-          textLogs.map(log => {
-            return (
-                <React.Fragment>
-                  <LogViewer logText={`${log.datetime} ${log.type} ${log.message}`}/>
-                </React.Fragment>
-            )
-          })
-        }
-        </div>*/}
           {connectors.length === 0 && !isTesting ?
               <EmptyLogsStyled>{"There is no any log."}</EmptyLogsStyled>
               :

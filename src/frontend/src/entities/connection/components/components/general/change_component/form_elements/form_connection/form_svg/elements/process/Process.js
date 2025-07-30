@@ -37,6 +37,7 @@ import GetModalProp from '@entity/connection/components/decorators/GetModalProp'
 
 function mapStateToProps(state, props){
     const {currentTechnicalItem, connectionOverview} = mapItemsToClasses(state, props.isModal);
+    const {currentLog} = state.connectionLogReducer;
     return{
         isTestingConnection: connectionOverview.isTestingConnection,
         colorMode: connectionOverview.colorMode,
@@ -46,6 +47,7 @@ function mapStateToProps(state, props){
         justCreatedItem: connectionOverview.justCreatedItem,
         justDeletedItem: connectionOverview.justDeletedItem,
         currentTechnicalItem,
+        currentLog,
     }
 }
 
@@ -232,7 +234,7 @@ class Process extends React.Component{
             process, isNotDraggable, isCurrent, isHighlighted, currentLogs,logPanelHeight,
             isDisabled, colorMode, readOnly, connection, currentTechnicalItem, textSize,
             isTestingConnection, setIsCreateElementPanelOpened, setCoordinatesForCreateElementPanel,
-            setCurrentItem, justDeletedItem,
+            setCurrentItem, justDeletedItem, currentLog,
         } = this.props;
         const isRejectedPlaceholder = currentTechnicalItem && !isAvailableForDragging;
         const method = process.entity;
@@ -273,12 +275,7 @@ class Process extends React.Component{
                 svgSize.width += 90;
             }
         }
-        const currentLog = currentLogs.length > 0 ? currentLogs[currentLogs.length - 1] : null;
-        const prevLog = currentLogs.length > 1 ? currentLogs[currentLogs.length - 2] : null;
-        // || (currentLog.message === ConnectionLogs.BreakMessage && prevLog && !prevLog.hasNextItem)
-        const hasDashAnimation = logPanelHeight !== 0 && currentLog
-            && currentLog.shouldDraw && ((currentLog.message !== ConnectionLogs.BreakMessage && currentLog.message !== ConnectionLogs.EndOfExecutionMessage))
-            && currentLog.index === process.entity.index && currentLog.connectorType === process.connectorType && currentLog.message !== '';
+        const hasDashAnimation = currentLog?.indexPath === process.entity.index;
         const logStroke = logPanelHeight !== 0 && currentLogs.findIndex(l => l.shouldDraw && l.index === process.entity.index && l.connectorType === process.connectorType) !== -1 ? '#58854d' : '';
         const isJustCreatedItem = this.isJustCreatedItem();
         const isJustDeletedItem = this.isJustDeletedItem() || !!justDeletedItem && isHighlighted;

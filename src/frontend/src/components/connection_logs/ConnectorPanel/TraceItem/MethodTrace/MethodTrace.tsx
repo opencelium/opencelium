@@ -123,6 +123,7 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 						loading={loading}
 						expanded={expanded}
 						onClick={handleToggle}
+						hasError={hasError}
 					/>
 					<div
 						style={{ backgroundColor: methodColor }}
@@ -134,7 +135,7 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 					{ShowIndexPath && (
 						<div style={{ marginLeft: 8 }}>{trace.indexPath}</div>
 					)}
-					<div className={styles.methodUrl} style={{color: ColorTheme.Red}}>{trace?.segment?.request?.url || ''}</div>
+					<div className={styles.methodUrl} style={{color: hasError ? ColorTheme.Red : '#000'}}>{trace?.segment?.request?.url || ''}</div>
 				</div>
 				<div
 					className={styles.methodTraceRightSide}

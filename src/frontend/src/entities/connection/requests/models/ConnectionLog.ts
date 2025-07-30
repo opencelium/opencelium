@@ -82,5 +82,10 @@ export interface ConnectorLog {
 }
 
 
-export type Trace = (ConnectionSocketLog<LightSegment> | ConnectionSocketLog<DetailedSegment>) & {children?: Trace[]};
+export type Trace = (ConnectionSocketLog<LightSegment> | ConnectionSocketLog<DetailedSegment>) & MetaTrace;
+
+export interface MetaTrace {
+	children?: Trace[],
+	isCompleted?: boolean
+}
 

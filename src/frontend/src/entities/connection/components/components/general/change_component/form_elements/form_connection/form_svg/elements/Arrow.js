@@ -127,7 +127,6 @@ class Arrow extends React.Component{
             markerStyle = '_rejected_placeholder';
             stroke = '#d24545';
         }
-        const prevItemLog = this.getPrevItemLog();
         const currentLog = currentLogs.length > 0 ? currentLogs[currentLogs.length - 1] : null;
         let hasDashAnimation = currentLog && currentLog.message === ConnectionLogs.BreakMessage
             && `${from.id}_${to.id}` === `${currentLog.connectorType}_${currentLog.index}_${to.id}`;
