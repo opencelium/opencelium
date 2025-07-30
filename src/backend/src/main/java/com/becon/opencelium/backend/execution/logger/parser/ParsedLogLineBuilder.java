@@ -22,9 +22,16 @@ public class ParsedLogLineBuilder {
         return parser.supports(line);
     }
 
-    // Fully builds a ParsedLogLine from a raw log line.
-    public ParsedLogLine build(String line, long offset) {
+    // Fully builds a ParsedLogLine from a raw log line with offset
+    public ParsedLogLine build(String line, long startOffset, long endOffset) {
         Map<LogLineKey, String> parsed = parser.parse(line);
-        return mapper.map(parsed, offset);
+        return mapper.map(parsed, startOffset, endOffset);
+    }
+
+    // Fully builds a ParsedLogLine from a raw log line skipping offset
+    // Required when we need parse part of log and send to client
+    public ParsedLogLine build(String line) {
+        Map<LogLineKey, String> parsed = parser.parse(line);
+        return mapper.map(parsed);
     }
 }

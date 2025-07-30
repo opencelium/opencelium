@@ -122,9 +122,9 @@ public class OcLogger<T extends LogMessage> {
         // evaluate startOffset before writing to a logfile
         long startOffset = getStartOffset();
         t.accept(message);
-
+        long endOffset = getStartOffset();
         if (webSocket) {
-            Optional<LogDataDTO> logData = logLineDispatcher.dispatch(message.toString(), startOffset);
+            Optional<LogDataDTO> logData = logLineDispatcher.dispatch(message.toString(), startOffset, endOffset);
             if (logData.isPresent()) {
                 socketNotificationService.send(connectionId, logData);
             }

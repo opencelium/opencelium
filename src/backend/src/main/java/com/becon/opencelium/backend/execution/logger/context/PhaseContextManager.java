@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.execution.logger.context;
 
 
+import com.becon.opencelium.backend.execution.logger.enums.PhaseStatus;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseType;
 import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
 
@@ -52,6 +53,8 @@ public class PhaseContextManager {
                 connectionId = "";
             }
             if (startIndex.equals(endIndex)) {
+                current.setEndOffset(phaseContext.getEndOffset());
+                current.setStatus(PhaseStatus.COMPLETE);
                 removed = current;
                 break;
             }

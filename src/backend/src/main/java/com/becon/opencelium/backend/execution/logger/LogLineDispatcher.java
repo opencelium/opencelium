@@ -32,12 +32,12 @@ public class LogLineDispatcher {
         this.logMetaDataService = ApplicationContextUtility.getBean(LogDataServiceImp.class);
     }
 
-    public Optional<LogDataDTO> dispatch(String logLine, long startOffset) {
-        return dispatch(logLine, startOffset, LogDetailLevel.LIGHTWEIGHT);
+    public Optional<LogDataDTO> dispatch(String logLine, long startOffset, long endOffset) {
+        return dispatch(logLine, startOffset, endOffset, LogDetailLevel.LIGHTWEIGHT);
     }
 
-    public Optional<LogDataDTO> dispatch(String logLine, long startOffset, LogDetailLevel logLevelMode) {
-        ParsedLogLine parsed = parsedLogLineBuilder.build(logLine, startOffset);
+    public Optional<LogDataDTO> dispatch(String logLine, long startOffset, long endOffset, LogDetailLevel logLevelMode) {
+        ParsedLogLine parsed = parsedLogLineBuilder.build(logLine, startOffset, endOffset);
         // Handle the start of a new execution
         if (parsed.getStage() == PhaseType.EXECUTION_START) {
             tls.set(new ExecutionTrackerImpl(logLevelMode));

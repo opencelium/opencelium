@@ -69,7 +69,7 @@ public class LogDataServiceImp implements LogDataService {
         }
 
         LogData dbBlock = existing.get();
-        dbBlock.setEndOffset(block.getStartOffset());
+        dbBlock.setEndOffset(block.getEndOffset());
         dbBlock.setStatus(block.getStatus());
         metaDataLogRepository.save(dbBlock);
     }
@@ -110,7 +110,8 @@ public class LogDataServiceImp implements LogDataService {
         doc.setFlowId(flowchartId);
 
         doc.setIndexPath(line.getProperties().get(LogLineKey.INDEX_PATH));
-        doc.setStartOffset(line.getOffset());
+        doc.setStartOffset(line.getStartOffset());
+        doc.setEndOffset(line.getEndOffset());
 
         doc.setLogLineType(line.getType());
         doc.setType(PhaseCategory.fromValue((PhaseType) line.getStage()));

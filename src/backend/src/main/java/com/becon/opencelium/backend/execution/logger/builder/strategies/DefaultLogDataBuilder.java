@@ -21,8 +21,8 @@ public class DefaultLogDataBuilder implements PhaseBuilder {
         logData.setFlowId(context.getProperties().get(LogLineKey.FLOWCHART_ID));
         logData.setStatus(context.getStatus());
         logData.setIndexPath(context.getProperties().get(LogLineKey.INDEX_PATH));
-        logData.setStartOffset(context.getParsedLogLine().getOffset());
-        logData.setEndOffset(context.getParsedLogLine().getOffset());
+        logData.setStartOffset(context.getStartOffset());
+        logData.setEndOffset(context.getEndOffset());
         logData.setLogLineType(LogLineType.PHASE);
 
         // Determine and set type from phase
