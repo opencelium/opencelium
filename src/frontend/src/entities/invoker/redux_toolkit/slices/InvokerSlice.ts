@@ -28,7 +28,7 @@ import {
     deleteInvokersByName,
     getAllInvokers,
     getInvokerByName,
-    importInvoker,
+    importInvoker, syncInvokerWithSP,
     updateInvoker,
     updateOperation,
     uploadInvokerImage
@@ -52,6 +52,7 @@ export interface InvokerState extends ICommonState{
     deletingInvokersById: API_REQUEST_STATE,
     uploadingInvokerImage: API_REQUEST_STATE,
     deletingInvokerImage: API_REQUEST_STATE,
+    syncingInvokerWithSP: API_REQUEST_STATE,
     currentInvoker: IInvoker,
     operation: IOperation,
 }
@@ -72,6 +73,7 @@ const initialState: InvokerState = {
     deletingInvokersById: API_REQUEST_STATE.INITIAL,
     uploadingInvokerImage: API_REQUEST_STATE.INITIAL,
     deletingInvokerImage: API_REQUEST_STATE.INITIAL,
+    syncingInvokerWithSP: API_REQUEST_STATE.INITIAL,
     currentInvoker: null,
     operation: null,
     ...CommonState,
@@ -86,6 +88,17 @@ export const invokerSlice = createSlice({
             }
     },
     extraReducers: {
+        [syncInvokerWithSP.pending.type]: (state) => {
+            state.syncingInvokerWithSP = API_REQUEST_STATE.START;
+        },
+        [syncInvokerWithSP.fulfilled.type]: (state, action: PayloadAction<string>) => {
+            state.syncingInvokerWithSP = API_REQUEST_STATE.FINISH;
+            state.invokers = state.invokers.map(invoker => invoker.name === action.payload ? {...invoker, hasManualSync: false} : invoker);
+            state.error = null;
+        },
+        [syncInvokerWithSP.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.syncingInvokerWithSP = API_REQUEST_STATE.ERROR;
+        },
         [importInvoker.pending.type]: (state) => {
             state.importingInvoker = API_REQUEST_STATE.START;
         },

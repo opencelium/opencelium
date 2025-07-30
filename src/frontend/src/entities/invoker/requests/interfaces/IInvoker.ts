@@ -18,6 +18,7 @@ import {IResponse} from "@application/requests/interfaces/IResponse";
 import { IInvoker } from "../../interfaces/IInvoker";
 import {IOperation} from "../../interfaces/IOperation";
 import ModelInvoker from "../models/Invoker";
+import {MetaConnectionModel} from "@root/requests/models/Connection";
 
 interface FieldProps{
     name: string,
@@ -45,7 +46,10 @@ export interface CheckInvokerUniquenessResponse {
 
 export interface IInvokerRequest{
 
-    //to import invoker as an xml file
+    //to import invoker as xml file
+    syncInvokerWithSP(invokerName: string): Promise<AxiosResponse<IResponse>>,
+
+    //to import invoker as xml file
     importInvoker(invoker: FormData): Promise<AxiosResponse<ImportInvokerResponse>>,
 
     //to update a single operation
