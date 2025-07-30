@@ -20,11 +20,17 @@ public class ParsedLogLineMapper {
      * Converts a parsed map into a ParsedLogLine.
      *
      * @param parsedMap the key-value map returned from FlexiblePatternLogParser
-     * @param offset    the character offset in the log file
      * @return a ParsedLogLine with type, value, indexPath, offset, and remaining properties
      * @throws IllegalArgumentException if neither `segment` nor `phase` is found or LogLineValue is unknown
      */
-    public ParsedLogLine map(Map<LogLineKey, String> parsedMap, long offset) {
+    public ParsedLogLine map(Map<LogLineKey, String> parsedMap, long startOffset, long endOffset) {
+        ParsedLogLine parsedLogLine = map(parsedMap);
+        parsedLogLine.setStartOffset(startOffset);
+        parsedLogLine.setEndOffset(endOffset);
+        return parsedLogLine;
+    }
+
+    public ParsedLogLine map(Map<LogLineKey, String> parsedMap) {
         ParsedLogLine parsedLogLine = new ParsedLogLine();
 
         // Determine log line type and stage key
@@ -50,7 +56,7 @@ public class ParsedLogLineMapper {
         parsedLogLine.setStage(stage);
 
         // Set offset
-        parsedLogLine.setOffset(offset);
+        parsedLogLine.setRawLogLine(parsedMap.get(LogLineKey.MESSAGE));
         parsedLogLine.setProperties(parsedMap);
         return parsedLogLine;
     }

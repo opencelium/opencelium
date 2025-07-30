@@ -20,7 +20,6 @@ public class LoopLogDataBuilder implements PhaseBuilder {
     public LogData build(PhaseContext phaseCtx, String execId, Long connId) {
         var parsed = phaseCtx.getParsedLogLine();
         PhaseCategory category = PhaseCategory.fromValue((PhaseType) parsed.getStage());
-        long offset = parsed.getOffset();
 
         // 1) Core LogData setup
         LogData logData = new LogData();
@@ -30,8 +29,8 @@ public class LoopLogDataBuilder implements PhaseBuilder {
         logData.setFlowId(phaseCtx.getProperty(LogLineKey.FLOWCHART_ID));
         logData.setIndexPath(phaseCtx.getProperty(LogLineKey.INDEX_PATH));
         logData.setStatus(phaseCtx.getStatus());
-        logData.setStartOffset(offset);
-        logData.setEndOffset(offset);
+        logData.setStartOffset(phaseCtx.getStartOffset());
+        logData.setEndOffset(phaseCtx.getEndOffset());
         logData.setLogLineType(LogLineType.PHASE);
         logData.setType(category);
 

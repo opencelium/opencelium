@@ -124,10 +124,10 @@ public class ExecutionTrackerImpl implements ExecutionTracker {
         // Handle end events
         if (isEndPhase(phaseType)) {
             PhaseContext closed = phaseContextManager.endPhase(phaseContext);
-            if (closed.getStatus() == PhaseStatus.COMPLETE) {
-                return Optional.empty();
-            }
-            closed.setStatus(PhaseStatus.COMPLETE);
+//            if (closed.getStatus() == PhaseStatus.COMPLETE) {
+//                return Optional.empty();
+//            }
+//            closed.setStatus(PhaseStatus.COMPLETE);
             LogData meta = phaseBuilder.build(closed, execId, Long.valueOf(connId));
             meta.setExecutionId(execId);
             meta.setConnectionId(Long.valueOf(connId));
@@ -148,7 +148,10 @@ public class ExecutionTrackerImpl implements ExecutionTracker {
         PhaseSchema phaseSchema = phaseSchemaRegistry.getSchema(level).get(phaseCategory);
 
         if (shouldEmit(phaseSchema, parsedLine)) {
-            currentPhaseCtx.setStatus(PhaseStatus.COMPLETE);
+//            currentPhaseCtx.setStatus(PhaseStatus.COMPLETE);
+            if(Objects.equals(segmentContext.getSegmentType(), SegmentType.EXCEPTION)) {
+                phaseContextManager.endCurrentPhase();
+            }
             PhaseBuilder builder = builderFactory.getBuilder(phaseCategory);
             LogData logData = builder.build(currentPhaseCtx, execId, Long.parseLong(connId));
             return Optional.of(logData);

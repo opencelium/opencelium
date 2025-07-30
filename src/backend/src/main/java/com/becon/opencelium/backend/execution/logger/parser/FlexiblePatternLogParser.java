@@ -88,7 +88,7 @@ public class FlexiblePatternLogParser implements LogLineParser {
 
         // 3. Remaining content is the raw message
         String msg = line.trim();
-        result.put(LogLineKey.MESSAGE, msg);
+        result.put(LogLineKey.MESSAGE, line);
 
         // 4. Parse all key=value pairs from the message content
         Matcher kvMatcher = KV_PATTERN.matcher(msg);
