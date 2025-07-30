@@ -20,6 +20,7 @@ public enum LogLineKey {
     FLOWCHART_ID("flowId"),
     CONNECTOR_ID("connectorId"),
     CONNECTOR_NAME("connectorName"),
+    DIRECTION("direction"),
     INDEX_PATH("indexPath"), // Path in the log flow hierarchy (e.g., 1_0, 1_1)
 
     /** Optional properties of a log line that do not have a key and are created during the parsing process. */

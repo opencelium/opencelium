@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.execution.logger.context;
 
+import com.becon.opencelium.backend.execution.logger.dto.ErrorDetail;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseCategory;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseStatus;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseType;
@@ -18,6 +19,7 @@ public class PhaseContext {
     private long endOffset;
     private PhaseStatus status;
     private final List<SegmentContext> segments = new ArrayList<>();
+    private ErrorDetail errorDetail;
 //    private final List<Context> children = new ArrayList<>();
 
     public PhaseContext(ParsedLogLine parsedLogLine) {
@@ -78,8 +80,15 @@ public class PhaseContext {
         return parsedLogLine.getProperties().get(key);
     }
 
+    public ErrorDetail getErrorDetail() {
+        return errorDetail;
+    }
 
-//    public List<PhaseContext> getChildren() {
+    public void setErrorDetail(ErrorDetail errorDetail) {
+        this.errorDetail = errorDetail;
+    }
+
+    //    public List<PhaseContext> getChildren() {
 //        return children;
 //    }
 

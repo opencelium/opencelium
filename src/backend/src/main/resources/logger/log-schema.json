@@ -9,7 +9,7 @@
     },
     "FLOWCHART" : {
       "emitOn": ["FLOWCHART_START", "FLOWCHART_END"],
-      "properties": ["flowId", "connectorId", "name", "connectorName"],
+      "properties": ["flowId", "connectorId", "name", "connectorName", "direction"],
       "segments": {
         "EXCEPTION": ["data"]
       }
@@ -40,6 +40,20 @@
     }
   },
   "DETAILED": {
+    "EXECUTION" : {
+      "emitOn": ["EXECUTION_START", "EXECUTION_END"],
+      "properties": ["id", "connectionId"],
+      "segments": {
+        "EXCEPTION": ["data"]
+      }
+    },
+    "FLOWCHART" : {
+      "emitOn": ["FLOWCHART_START", "FLOWCHART_END"],
+      "properties": ["flowId", "connectorId", "name", "connectorName", "direction"],
+      "segments": {
+        "EXCEPTION": ["data"]
+      }
+    },
     "OPERATION" : {
       "emitOn": ["OPERATION_END"],
       "properties": ["name", "indexPath", "loopIndex", "loopIterator"],
