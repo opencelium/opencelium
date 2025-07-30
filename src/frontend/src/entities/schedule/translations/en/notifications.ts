@@ -14,7 +14,7 @@
  */
 
 import ActionCreators from "../../redux_toolkit/action_creators";
-import {actions} from '../../redux_toolkit/slices/ScheduleSlice';
+import {actions, copyLogsToClipboard} from '../../redux_toolkit/slices/ScheduleSlice';
 import {getLogsByExecutionId} from "@entity/schedule/redux_toolkit/action_creators/ScheduleCreators";
 
 const {
@@ -48,6 +48,7 @@ export default {
         [startSchedule.fulfilled.type]: "The job <1><0>{{title}}</0></1> was successfully triggered",
         [startTestSchedule.fulfilled.type]: "Test was successfully triggered",
         [copyWebhookToClipboard.type]: "The webhook was successfully copied",
+        [copyLogsToClipboard.type]: "The logs were successfully copied",
 
     },
     rejected: {
