@@ -1,7 +1,7 @@
 package com.becon.opencelium.backend.polygot_engine;
 
-public class LangViolenceChekerFactory {
-    public LangViolenceCheker get(LanguageType lang) {
+public abstract class LangViolenceChekerFactory {
+    public static LangViolenceCheker get(LanguageType lang) {
         return script -> {
         };
     }
