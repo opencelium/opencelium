@@ -370,7 +370,7 @@ public class FileController {
             FileDTO fileDTO = new FileDTO(name);
 
             // update invoker sync table to store latest files information
-            invokerSyncService.update(name);
+            invokerSyncService.updateSync(name);
 
             return ResponseEntity.ok(fileDTO);
         }
@@ -423,7 +423,7 @@ public class FileController {
                     fileDTOList.add(fileDTO);
 
                     // update invoker sync table to store latest files information
-                    invokerSyncService.update(name);
+                    invokerSyncService.updateSync(name);
                 }
                 zis.close();
             } else {
