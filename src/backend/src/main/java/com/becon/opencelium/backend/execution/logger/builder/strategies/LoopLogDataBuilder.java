@@ -1,12 +1,15 @@
 package com.becon.opencelium.backend.execution.logger.builder.strategies;
 
 import com.becon.opencelium.backend.database.mongodb.entity.LogData;
+import com.becon.opencelium.backend.database.mongodb.entity.LogDataError;
 import com.becon.opencelium.backend.execution.logger.builder.PhaseBuilder;
 import com.becon.opencelium.backend.execution.logger.context.PhaseContext;
 import com.becon.opencelium.backend.execution.logger.context.SegmentContext;
+import com.becon.opencelium.backend.execution.logger.dto.ErrorDetail;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseCategory;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseType;
 import com.becon.opencelium.backend.execution.logger.enums.LogLineType;
+import com.becon.opencelium.backend.execution.logger.enums.SegmentType;
 import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
 
 import java.util.*;
@@ -44,8 +47,10 @@ public class LoopLogDataBuilder implements PhaseBuilder {
         if (!agg.refs.isEmpty()) {
             flatProps.put(LogLineKey.REF.getSrcName(), agg.refs);
         }
-        if (!agg.error.isBlank()) {
-            flatProps.put(LogLineKey.EXCEPTION.getSrcName(), agg.error);
+
+        ErrorDetail errorDetail = phaseCtx.getErrorDetail();
+        if (phaseCtx.getErrorDetail() != null) {
+            logData.setError(mapCtxError(errorDetail));
         }
 
         logData.setProperties(flatProps);
@@ -76,20 +81,24 @@ public class LoopLogDataBuilder implements PhaseBuilder {
         ).contains(key);
     }
 
+    private LogDataError mapCtxError(ErrorDetail errorDetail) {
+        LogDataError error = new LogDataError();
+        error.setMessage(errorDetail.getException().getProperty(DATA));
+        error.setErrorOfOriginPath(errorDetail.getErrorOriginPath());
+        error.setStackTrace(errorDetail.getStackTrace());
+        return error;
+    }
+
     private SegmentAggregate buildSegments(List<SegmentContext> segments) {
         var agg = new SegmentAggregate();
         for (SegmentContext ctx : segments) {
             var p = ctx.getAllProperties();
-            switch (ctx.getSegmentType()) {
-                case LOOP_REF -> {
-                    var name = p.get(LogLineKey.REF);
-                    var value = p.get(LogLineKey.DATA);
-                    if (name != null && value != null) {
-                        agg.refs.add(Map.of("name", name, "value", value));
-                    }
+            if (ctx.getSegmentType() == SegmentType.LOOP_REF) {
+                var name = p.get(REF);
+                var value = p.get(DATA);
+                if (name != null && value != null) {
+                    agg.refs.add(Map.of("name", name, "value", value));
                 }
-                case EXCEPTION -> agg.error = p.getOrDefault(LogLineKey.DATA, "");
-                default -> {}
             }
         }
         return agg;
@@ -97,6 +106,5 @@ public class LoopLogDataBuilder implements PhaseBuilder {
 
     private static class SegmentAggregate {
         final List<Map<String, String>> refs = new ArrayList<>();
-        String error = "";
     }
 }

@@ -5,12 +5,16 @@ import com.becon.opencelium.backend.database.mongodb.entity.LogDataError;
 import com.becon.opencelium.backend.execution.logger.builder.PhaseBuilder;
 import com.becon.opencelium.backend.execution.logger.context.PhaseContext;
 import com.becon.opencelium.backend.execution.logger.context.SegmentContext;
+import com.becon.opencelium.backend.execution.logger.dto.ErrorDetail;
 import com.becon.opencelium.backend.execution.logger.enums.*;
 import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
 import com.becon.opencelium.backend.execution.logger.parser.entity.ParsedLogLine;
+import org.apache.juli.logging.Log;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.becon.opencelium.backend.execution.logger.keys.LogLineKey.DATA;
 
 public class IfLogDataBuilder implements PhaseBuilder {
 
@@ -43,11 +47,14 @@ public class IfLogDataBuilder implements PhaseBuilder {
         // 4) Assemble segment object
         Map<String, Object> segment = new LinkedHashMap<>();
         if (!agg.refs.isEmpty())    segment.put(LogLineKey.REF.getSrcName(), agg.refs);
-        if (agg.ifResult != null)   segment.put("value", agg.ifResult);
+        if (agg.ifResult != null)   segment.put(LogLineKey.RESULT.getSrcName(), agg.ifResult);
         logData.setSegments(segment);
 
         // 5) Attach error if present
-        logData.setError(agg.error);
+        ErrorDetail errorDetail = phaseCtx.getErrorDetail();
+        if (phaseCtx.getErrorDetail() != null) {
+            logData.setError(mapCtxError(errorDetail));
+        }
 
         return logData;
     }
@@ -85,32 +92,22 @@ public class IfLogDataBuilder implements PhaseBuilder {
                     String ref = p.get(LogLineKey.REF);
                     String data = p.get(LogLineKey.DATA);
                     if (ref != null && data != null) {
-                        agg.refs.add(Map.of("ref", ref, "value", data));
+                        agg.refs.add(Map.of(LogLineKey.REF.getSrcName(), ref, "value", data));
                     }
                 }
                 case IF_RESULT -> agg.ifResult = p.get(LogLineKey.DATA);
-                case EXCEPTION -> {
-                    String data = p.getOrDefault(LogLineKey.DATA, "");
-                    agg.error = parseErrorInfo(data);
-                }
                 default -> {}
             }
         }
         return agg;
     }
 
-    private LogDataError parseErrorInfo(String data) {
-        if (data == null || data.isBlank()) {
-            return new LogDataError();
-        }
-        String[] lines = data.split("\\R");
-        String message = lines[0];
-        List<String> stack = new ArrayList<>();
-        for (int i = 1; i < lines.length; i++) {
-            String l = lines[i].strip();
-            if (!l.isEmpty()) stack.add(l);
-        }
-        return new LogDataError(message, stack);
+    private LogDataError mapCtxError(ErrorDetail errorDetail) {
+        LogDataError error = new LogDataError();
+        error.setMessage(errorDetail.getException().getProperty(DATA));
+        error.setErrorOfOriginPath(errorDetail.getErrorOriginPath());
+        error.setStackTrace(errorDetail.getStackTrace());
+        return error;
     }
 
     private static class SegmentAggregate {

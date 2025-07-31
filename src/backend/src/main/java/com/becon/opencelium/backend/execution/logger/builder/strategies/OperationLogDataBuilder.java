@@ -5,12 +5,15 @@ import com.becon.opencelium.backend.database.mongodb.entity.LogDataError;
 import com.becon.opencelium.backend.execution.logger.builder.PhaseBuilder;
 import com.becon.opencelium.backend.execution.logger.context.PhaseContext;
 import com.becon.opencelium.backend.execution.logger.context.SegmentContext;
+import com.becon.opencelium.backend.execution.logger.dto.ErrorDetail;
 import com.becon.opencelium.backend.execution.logger.enums.*;
 import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
 import com.becon.opencelium.backend.execution.logger.parser.entity.ParsedLogLine;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.becon.opencelium.backend.execution.logger.keys.LogLineKey.DATA;
 
 public class OperationLogDataBuilder implements PhaseBuilder {
 
@@ -46,9 +49,19 @@ public class OperationLogDataBuilder implements PhaseBuilder {
         logData.setSegments(segment);
 
         // 5) If we saw an exception, attach error details
-        logData.setError(agg.error);
-
+        ErrorDetail errorDetail = phaseCtx.getErrorDetail();
+        if (phaseCtx.getErrorDetail() != null) {
+            logData.setError(mapCtxError(errorDetail));
+        }
         return logData;
+    }
+
+    private LogDataError mapCtxError(ErrorDetail errorDetail) {
+        LogDataError error = new LogDataError();
+        error.setMessage(errorDetail.getException().getProperty(DATA));
+        error.setErrorOfOriginPath(errorDetail.getErrorOriginPath());
+        error.setStackTrace(errorDetail.getStackTrace());
+        return error;
     }
 
     private Map<String, Object> extractFlatProperties(Map<LogLineKey, String> props) {
@@ -115,12 +128,6 @@ public class OperationLogDataBuilder implements PhaseBuilder {
                 }
                 case RESPONSE_HEADER   -> agg.response.put("header",  p.get(LogLineKey.DATA));
                 case RESPONSE_PAYLOAD  -> agg.response.put("payload", p.get(LogLineKey.DATA));
-                case EXCEPTION         -> {
-                    String ex = p.getOrDefault(LogLineKey.DATA,    "");
-                    LogDataError error = parseErrorInfo(ex);
-                    agg.error.setMessage(error.getMessage());
-                    agg.error.setStackTrace(error.getStackTrace());
-                }
                 default -> {}
             }
         }
@@ -133,6 +140,5 @@ public class OperationLogDataBuilder implements PhaseBuilder {
     private static class SegmentAggregate {
         final Map<String, Object> request  = new LinkedHashMap<>();
         final Map<String, Object> response = new LinkedHashMap<>();
-        final LogDataError error    = new LogDataError();
     }
 }

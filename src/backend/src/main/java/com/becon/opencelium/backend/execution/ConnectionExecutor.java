@@ -61,7 +61,7 @@ public class ConnectionExecutor {
         String flowId = "";
         int connectorId = -1;
         String connectorName = "";
-
+        String direction = "";
         try {
             logger.logAndSend(String.format("phase=EXECUTION_START id=%d connectionId=%d", executionId, connection.getConnectionId()));
 
@@ -70,22 +70,24 @@ public class ConnectionExecutor {
             flowId = source.getFchartId();
             connectorId = source.getId();
             connectorName = source.getName();
+            direction = "source";
             logger.getLogEntity().setConnector(new ConnectorLog(source.getName(), "CONN1"));
-            logger.logAndSend(String.format("phase=FLOWCHART_START flowId=%s connectorId=%d connectorName=%s", flowId, connectorId, connectorName));
+            logger.logAndSend(String.format("phase=FLOWCHART_START flowId=%s connectorId=%d connectorName=%s direction=%s", flowId, connectorId, connectorName, direction));
             sourceEx.start();
-            logger.logAndSend(String.format("phase=FLOWCHART_END flowId=%s connectorId=%d connectorName=%s", flowId, connectorId, connectorName));
+            logger.logAndSend(String.format("phase=FLOWCHART_END flowId=%s connectorId=%d connectorName=%s direction=%s", flowId, connectorId, connectorName, direction));
 
             flowId = target.getFchartId();
             connectorId = target.getId();
             connectorName = target.getName();
+            direction = "target";
             logger.getLogEntity().setConnector(new ConnectorLog(target.getName(), "CONN2"));
-            logger.logAndSend(String.format("phase=FLOWCHART_START flowId=%s connectorId=%d connectorName=%s", flowId, connectorId, connectorName));
+            logger.logAndSend(String.format("phase=FLOWCHART_START flowId=%s connectorId=%d connectorName=%s direction=%s", flowId, connectorId, connectorName, direction));
             targetEx.start();
-            logger.logAndSend(String.format("phase=FLOWCHART_END flowId=%s connectorId=%d connectorName=%s", flowId, connectorId, connectorName));
+            logger.logAndSend(String.format("phase=FLOWCHART_END flowId=%s connectorId=%d connectorName=%s direction=%s", flowId, connectorId, connectorName, direction));
         } catch (Exception e) {
             logger.logAndSend(e);
             // in case of exception 'connectorId' has been initialized with lastly executed Connector.id
-            logger.logAndSend(String.format("phase=FLOWCHART_END flowId=%s connectorId=%d connectorName=%s", flowId, connectorId, connectorName));
+            logger.logAndSend(String.format("phase=FLOWCHART_END flowId=%s connectorId=%d connectorName=%s direction=%s", flowId, connectorId, connectorName, direction));
 
             throw e;
         } finally {

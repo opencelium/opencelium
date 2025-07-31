@@ -5,6 +5,7 @@ import java.util.List;
 public class ErrorInfoDTO {
     private String message;
     private String code;
+    private String originOfErrorPath;
     private List<String> stackTrace;
 
     public ErrorInfoDTO() {
@@ -29,6 +30,14 @@ public class ErrorInfoDTO {
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public String getOriginOfErrorPath() {
+        return originOfErrorPath;
+    }
+
+    public void setOriginOfErrorPath(String originOfErrorPath) {
+        this.originOfErrorPath = originOfErrorPath;
     }
 
     public List<String> getStackTrace() {

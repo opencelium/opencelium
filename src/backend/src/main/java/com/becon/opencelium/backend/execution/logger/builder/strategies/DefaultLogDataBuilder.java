@@ -1,8 +1,10 @@
 package com.becon.opencelium.backend.execution.logger.builder.strategies;
 
 import com.becon.opencelium.backend.database.mongodb.entity.LogData;
+import com.becon.opencelium.backend.database.mongodb.entity.LogDataError;
 import com.becon.opencelium.backend.execution.logger.builder.PhaseBuilder;
 import com.becon.opencelium.backend.execution.logger.context.PhaseContext;
+import com.becon.opencelium.backend.execution.logger.dto.ErrorDetail;
 import com.becon.opencelium.backend.execution.logger.enums.LogLineType;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseCategory;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseType;
@@ -10,6 +12,8 @@ import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.becon.opencelium.backend.execution.logger.keys.LogLineKey.DATA;
 
 public class DefaultLogDataBuilder implements PhaseBuilder {
     @Override
@@ -30,6 +34,11 @@ public class DefaultLogDataBuilder implements PhaseBuilder {
             logData.setType(PhaseCategory.fromValue(phaseType));
         } else {
             logData.setType(PhaseCategory.UNKNOWN);
+        }
+
+        ErrorDetail errorDetail = context.getErrorDetail();
+        if (context.getErrorDetail() != null) {
+            logData.setError(mapCtxError(errorDetail));
         }
 
         // Copy basic properties
@@ -55,6 +64,14 @@ public class DefaultLogDataBuilder implements PhaseBuilder {
                         (a, b) -> b,              // on duplicate (shouldn't happen), keep latter
                         LinkedHashMap::new        // preserve original order
                 ));
+    }
+
+    private LogDataError mapCtxError(ErrorDetail errorDetail) {
+        LogDataError error = new LogDataError();
+        error.setMessage(errorDetail.getException().getProperty(DATA));
+        error.setErrorOfOriginPath(errorDetail.getErrorOriginPath());
+        error.setStackTrace(errorDetail.getStackTrace());
+        return error;
     }
 
     private boolean excludeKey(LogLineKey key) {

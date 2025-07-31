@@ -6,6 +6,7 @@ import com.becon.opencelium.backend.execution.logger.builder.PhaseBuilder;
 import com.becon.opencelium.backend.execution.logger.context.PhaseContext;
 import com.becon.opencelium.backend.execution.logger.context.PhaseContextManager;
 import com.becon.opencelium.backend.execution.logger.context.SegmentContext;
+import com.becon.opencelium.backend.execution.logger.dto.ErrorDetail;
 import com.becon.opencelium.backend.execution.logger.enums.*;
 import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
 import com.becon.opencelium.backend.execution.logger.mapper.ParsedLogLineMapper;
@@ -150,6 +151,9 @@ public class ExecutionTrackerImpl implements ExecutionTracker {
         if (shouldEmit(phaseSchema, parsedLine)) {
 //            currentPhaseCtx.setStatus(PhaseStatus.COMPLETE);
             if(Objects.equals(segmentContext.getSegmentType(), SegmentType.EXCEPTION)) {
+                String index_path = currentPhaseCtx.getParsedLogLine().getProperties().get(LogLineKey.INDEX_PATH);
+                currentPhaseCtx.setErrorDetail(new ErrorDetail(index_path, segmentContext));
+                phaseContextManager.addExceptionSegment(index_path, segmentContext);
                 phaseContextManager.endCurrentPhase();
             }
             PhaseBuilder builder = builderFactory.getBuilder(phaseCategory);
