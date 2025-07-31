@@ -32,7 +32,10 @@ export const ARROW_WIDTH = 2;
 
 function mapStateToProps(state, props){
     const {currentTechnicalItem, connectionOverview} = mapItemsToClasses(state, props.isModal);
+    const {currentLog, currentDirection} = state.connectionLogReducer;
     return{
+        currentLog,
+        currentDirection,
         currentTechnicalItem,
         currentLogs: connectionOverview.currentLogs,
         logPanelHeight: connectionOverview.logPanelHeight,
@@ -100,7 +103,7 @@ class Arrow extends React.Component{
 
     render(){
         const {isMouseOver, isAvailableForDragging} = this.state;
-        const {from, to, isHighlighted, isDisabled, currentTechnicalItem, currentLogs, logPanelHeight, justDeletedItem} = this.props;
+        const {from, to, isHighlighted, isDisabled, currentTechnicalItem, currentLogs, logPanelHeight, justDeletedItem, currentLog, currentDirection} = this.props;
         if(!from || !to){
             return null;
         }
@@ -127,14 +130,12 @@ class Arrow extends React.Component{
             markerStyle = '_rejected_placeholder';
             stroke = '#d24545';
         }
-        const currentLog = currentLogs.length > 0 ? currentLogs[currentLogs.length - 1] : null;
-        let hasDashAnimation = currentLog && currentLog.message === ConnectionLogs.BreakMessage
-            && `${from.id}_${to.id}` === `${currentLog.connectorType}_${currentLog.index}_${to.id}`;
+        let hasDashAnimation = currentLog && !!currentDirection && `${from.id}_${to.id}` === `${currentDirection === 'source' ? 'fromConnector' : 'toConnector'}_${currentLog.indexPath}_${to.id}`;
+
         let hasDashAnimationHorizontal = false;
         let hasDashAnimationVertical = false;
         const isArrowVertical = arrow.x1 === arrow.x2;
         const isArrowHorizontal = arrow.y1 === arrow.y2;
-        let hasArrowAlert = false;
         if (from && from.entity instanceof COperatorItem) {
             if(hasDashAnimation){
                 if(currentLog?.operatorData?.isNextMethodOutside){
@@ -147,6 +148,7 @@ class Arrow extends React.Component{
             hasDashAnimationHorizontal = hasDashAnimation;
         }
         let hasArrowDashAnimation = hasDashAnimationHorizontal && isArrowHorizontal || line1 && hasDashAnimationVertical && isArrowVertical;
+        let hasArrowAlert = hasArrowDashAnimation && !!currentLog?.error?.message;
         if(hasArrowDashAnimation){
             markerStyle = '_dashed';
         }
@@ -161,13 +163,17 @@ class Arrow extends React.Component{
                 for (let i = 0; i < logsWithoutLastItem.length; i++) {
                     if (from.id === `${logsWithoutLastItem[i].connectorType}_${logsWithoutLastItem[i].index}`) {
                         if (!(isArrowVertical && logsWithoutLastItem[i].operatorData && logsWithoutLastItem[i].operatorData.conditionResult === false)) {
-                            logStroke = '#58854d';
+                            logStroke = !!currentLog?.error?.message ? '#d24545' : '#58854d';
                             markerStyle = '_dashed';
                         }
                         break;
                     }
                 }
             }
+        }
+        if (hasDashAnimation && !!currentLog?.error?.message) {
+            stroke = '#d24545';
+            markerStyle = '_rejected_placeholder';
         }
         const isJustDeletedItem = justDeletedItem ? from.id === `${justDeletedItem.connectorType}_${justDeletedItem.index}` || to.id === `${justDeletedItem.connectorType}_${justDeletedItem.index}` || isHighlighted : false;
         return(

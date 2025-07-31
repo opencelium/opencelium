@@ -8,7 +8,7 @@ import {setFullScreen} from "@application/redux_toolkit/slices/ApplicationSlice"
 import {LogPanelHeight, setButtonPanelVisibility, setLogPanelHeight} from "@root/redux_toolkit/slices/ConnectionSlice";
 import {generateUUID} from "@app_component/operator_builder/utils";
 import {useSocketData} from "../../socket/SocketDataContext";
-import {ConnectionSocketLog, LightSegment} from "@root/requests/models/ConnectionLog";
+import {ConnectionSocketLog, LightSegment, LoopOperatorProperty} from "@root/requests/models/ConnectionLog";
 import {
     addSocketLog,
     clearSocketLog,
@@ -43,7 +43,9 @@ const TestConnectionButton = ({validateLogic}: any) => {
     const subscriptionRef = useRef<() => void>();
 
     const isTestFinished = (logMessage: ConnectionSocketLog<LightSegment>): boolean => {
-        if (logMessage.type === 'EXECUTION' && logMessage.status === 'COMPLETE') {dispatch(setIsTesting(false));
+        if (logMessage.type === 'EXECUTION' && logMessage.status === 'COMPLETE') {
+            dispatch(setIsTesting(false));
+            setChannelId('');
             subscriptionRef.current?.();
             isFromConnectorCompleted = false;
             isToConnectorCompleted = false;
@@ -52,14 +54,16 @@ const TestConnectionButton = ({validateLogic}: any) => {
         return false;
     }
     const shouldSkipTrace = (logMessage: ConnectionSocketLog<LightSegment>): boolean => {
+        const isPreviousLogLoop = !!(previousLogMessage?.properties as LoopOperatorProperty)?.loopIndex;
+        const isCurrentLogLoop = !!(logMessage?.properties as LoopOperatorProperty)?.loopIndex;
         // if first log of the loop
-        if (!previousLogMessage?.properties?.loopIndex && !!logMessage.properties.loopIndex) {
+        if (!isPreviousLogLoop && isCurrentLogLoop) {
             previousLogMessage = logMessage;
             return true;
         }
         // if rest logs of the loop
-        if (!!previousLogMessage?.properties?.loopIndex && !!logMessage.properties.loopIndex) {
-            if (!(previousLogMessage.properties.loopIndex !== logMessage.properties.loopIndex && logMessage.properties.loopIndex.split(',').length === 1)) {
+        if (!!isPreviousLogLoop && isCurrentLogLoop) {
+            if (!((previousLogMessage.properties as LoopOperatorProperty).loopIndex !== (logMessage.properties as LoopOperatorProperty).loopIndex && (logMessage.properties as LoopOperatorProperty).loopIndex.split(',').length === 1)) {
                 return true;
             }
         }
@@ -93,10 +97,11 @@ const TestConnectionButton = ({validateLogic}: any) => {
                 let hasNewLoopIndex = false;
                 if (data.indexPath) {
                     let parentIndexPath = data.indexPath.split('_').slice(0, -1).join('_')
-                    if (!!previousLogMessage?.properties?.loopIndex) {
-                        if (!!data.properties.loopIndex) {
+                    const isPreviousLogLoop = !!(previousLogMessage?.properties as LoopOperatorProperty)?.loopIndex;
+                    if (isPreviousLogLoop) {
+                        if (!!(data.properties as LoopOperatorProperty).loopIndex) {
                             // increase size when loop iteration completed on the first level (except last iteration)
-                            if (previousLogMessage.properties.loopIndex !== data.properties.loopIndex && data.properties.loopIndex.split(',').length === 1) {
+                            if ((previousLogMessage.properties as LoopOperatorProperty).loopIndex !== (data.properties as LoopOperatorProperty).loopIndex && (data.properties as LoopOperatorProperty).loopIndex.split(',').length === 1) {
                                 hasNewLoopIndex = true;
                             }
                         } else {
@@ -107,6 +112,11 @@ const TestConnectionButton = ({validateLogic}: any) => {
                     }
                     dispatch(addSocketLog({data, settings: {hasNewLoopIndex, parentIndexPath}}));
                     previousLogMessage = data;
+                }
+                if (!!data?.error?.message) {
+                    if (channelId) {
+                        setChannelId('');
+                    }
                 }
             });
             consoleLog("✅ Subscribed to /execution/logs");
@@ -146,6 +156,7 @@ const TestConnectionButton = ({validateLogic}: any) => {
     }
 
     const generateChannelId = () => {
+        dispatch(clearSocketLog());
         const testResult = validateLogic(connection);
         if(testResult.passed) {
             const channelId = generateUUID();

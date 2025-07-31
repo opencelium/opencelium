@@ -41,8 +41,10 @@ import DetailsForProcess
 
 function mapStateToProps(state, props){
     const {currentTechnicalItem, connectionOverview} = mapItemsToClasses(state, props.isModal);
-    const {currentLog} = state.connectionLogReducer;
+    const {currentLog, currentDirection} = state.connectionLogReducer;
     return{
+        currentLog,
+        currentDirection,
         currentTechnicalItem,
         logPanelHeight: connectionOverview.logPanelHeight,
         isTestingConnection: connectionOverview.isTestingConnection,
@@ -242,7 +244,7 @@ class Operator extends React.Component{
 
     onDoubleClick(){
         this.onClick();
-        this.props.formConnectionSvg.detailsRef.current.descriptionRef.current.conditionRef.current.toggleEdit();
+        this.props.formConnectionSvg.detailsRef.current.descriptionRef.current.conditionRef.current?.toggleEdit();
         //this.props.toggleConditionDialog();
     }
 
@@ -296,6 +298,7 @@ class Operator extends React.Component{
             operator, isNotDraggable, isCurrent, currentTechnicalItem,
             isHighlighted, readOnly, isDisabled, logPanelHeight,
             currentLogs, isTestingConnection, justDeletedItem, currentLog,
+            currentDirection,
         } = this.props;
         const hasBottomPlaceholder = this.shouldShowBottomPlaceholder();
         const hasRightPlaceholder = this.shouldShowRightPlaceholder();
@@ -342,11 +345,16 @@ class Operator extends React.Component{
         const hasDraggableItem = currentTechnicalItem && currentTechnicalItem.isDragged;
         const hasDraggableOperator = isCurrent && hasDraggableItem;
         const isDraggableItemOperator = hasDraggableItem && currentTechnicalItem instanceof CTechnicalOperator;
-        const hasDashAnimation = currentLog?.indexPath === operator.entity.index;
+        const hasDashAnimation = currentDirection && currentLog?.indexPath === operator.entity.index && operator.getHtmlIdName().indexOf(currentDirection === 'source' ? 'fromConnector' : 'toConnector') === 0;
         const hasDeleteIcon = isCurrent && !readOnly && !isTestingConnection;
-        const logStroke = logPanelHeight !== 0 && currentLogs.findIndex(l => l.index === operator.entity.index && l.connectorType === operator.connectorType) !== -1 ? '#58854d' : '';
+        let logStroke = logPanelHeight !== 0 && currentLogs.findIndex(l => l.index === operator.entity.index && l.connectorType === operator.connectorType) !== -1 ? '#58854d' : '';
+        if (hasDashAnimation && !!currentLog?.error?.message) {
+            logStroke = '#d24545';
+            errorStyles.stroke = '#d24545';
+        }
         const isJustCreatedItem = this.isJustCreatedItem();
         const isJustDeletedItem = this.isJustDeletedItem() || !!justDeletedItem && isHighlighted;
+        console.log(currentLog, currentDirection);
         return(
             <svg onMouseOver={(a) => this.onMouseOverSvg(a)} onMouseLeave={(a) => this.onMouseLeaveSvg(a)} id={operator.getHtmlIdName()} x={operator.x} y={operator.y} className={`${styles.operator} ${isDisabledStyle} ${isNotDraggable ? styles.not_draggable : ''} ${isHighlighted ? styles.highlighted_operator : ''} ${isCurrent ? styles.current_operator : ''} confine`} width={svgSize.width} height={svgSize.height}>
                 <rect x={0} y={0} width={svgSize.width} height={svgSize.height} fill={'transparent'} id={`${operator.getHtmlIdName()}_rect`}/>

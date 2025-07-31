@@ -37,7 +37,7 @@ import GetModalProp from '@entity/connection/components/decorators/GetModalProp'
 
 function mapStateToProps(state, props){
     const {currentTechnicalItem, connectionOverview} = mapItemsToClasses(state, props.isModal);
-    const {currentLog} = state.connectionLogReducer;
+    const {currentLog, currentDirection} = state.connectionLogReducer;
     return{
         isTestingConnection: connectionOverview.isTestingConnection,
         colorMode: connectionOverview.colorMode,
@@ -48,6 +48,7 @@ function mapStateToProps(state, props){
         justDeletedItem: connectionOverview.justDeletedItem,
         currentTechnicalItem,
         currentLog,
+        currentDirection,
     }
 }
 
@@ -234,7 +235,7 @@ class Process extends React.Component{
             process, isNotDraggable, isCurrent, isHighlighted, currentLogs,logPanelHeight,
             isDisabled, colorMode, readOnly, connection, currentTechnicalItem, textSize,
             isTestingConnection, setIsCreateElementPanelOpened, setCoordinatesForCreateElementPanel,
-            setCurrentItem, justDeletedItem, currentLog,
+            setCurrentItem, justDeletedItem, currentLog, currentDirection,
         } = this.props;
         const isRejectedPlaceholder = currentTechnicalItem && !isAvailableForDragging;
         const method = process.entity;
@@ -275,8 +276,11 @@ class Process extends React.Component{
                 svgSize.width += 90;
             }
         }
-        const hasDashAnimation = currentLog?.indexPath === process.entity.index;
-        const logStroke = logPanelHeight !== 0 && currentLogs.findIndex(l => l.shouldDraw && l.index === process.entity.index && l.connectorType === process.connectorType) !== -1 ? '#58854d' : '';
+        const hasDashAnimation = currentDirection && currentLog?.indexPath === process.entity.index && process.getHtmlIdName().indexOf(currentDirection === 'source' ? 'fromConnector' : 'toConnector') === 0;
+        let logStroke = logPanelHeight !== 0 && currentLogs.findIndex(l => l.shouldDraw && l.index === process.entity.index && l.connectorType === process.connectorType) !== -1 ? '#58854d' : '';
+        if (hasDashAnimation && !!currentLog?.error?.message) {
+            logStroke = '#d24545';
+        }
         const isJustCreatedItem = this.isJustCreatedItem();
         const isJustDeletedItem = this.isJustDeletedItem() || !!justDeletedItem && isHighlighted;
         return(

@@ -7,7 +7,7 @@ export interface ConnectionSocketLog<SegmentType> extends ConnectionLogIdentifie
 	connectorName: string;
 	status: 'PENDING' | 'COMPLETE' | 'FAIL',
 	type: 'OPERATION' | 'EXECUTION' | 'FLOWCHART' | 'LOOP' | 'IF' | 'UNKNOWN',
-	properties: MethodProperty | OperatorProperty,
+	properties: MethodProperty | OperatorProperty | FlowchartProperty,
 	segment: SegmentType,
 	error?: {
 		message: string,
@@ -58,6 +58,10 @@ interface BaseChildProperty {
 }
 interface BaseOperatorProperty extends BaseChildProperty{
 	expression: string,
+}
+export interface FlowchartProperty {
+	CONNECTOR_ID: string,
+	DIRECTION: 'source' | 'target',
 }
 interface MethodProperty extends BaseChildProperty{
 	name: string,

@@ -3,7 +3,7 @@ import {
 	ConnectionSocketLog,
 	ConnectionTextLog,
 	ConnectorLog,
-	DetailedMethodSegment,
+	DetailedMethodSegment, FlowchartProperty,
 	LightSegment,
 } from '@root/requests/models/ConnectionLog';
 import {
@@ -17,6 +17,7 @@ export interface ConnectionLogState {
 	executionId: string,
 	schedulerId: number,
 	currentLog: ConnectionSocketLog<LightSegment>,
+	currentDirection: 'source' | 'target' | '',
 	connectors: ConnectorLog[],
 	textLogs: ConnectionTextLog[],
 	isTesting: boolean,
@@ -26,6 +27,7 @@ export const initialState: ConnectionLogState = {
 	schedulerId: undefined,
 	executionId: '',
 	currentLog: undefined,
+	currentDirection: '',
 	connectors: [],
 	textLogs: [],
 	isTesting: false,
@@ -43,7 +45,17 @@ export const connectionLogSlice = createSlice({
 			state.isTesting = action.payload;
 		},
 		setCurrentLog: (state, action: PayloadAction<ConnectionSocketLog<LightSegment>>) => {
-			state.currentLog = action.payload;
+			if (!state.currentLog?.error?.message) {
+				state.currentLog = action.payload;
+			} else {
+				state.isTesting = false;
+			}
+			if (action.payload.type === 'FLOWCHART' && action.payload.status === 'PENDING') {
+				state.currentDirection = (action.payload.properties as FlowchartProperty).DIRECTION;
+			}
+			if (action.payload.type === 'EXECUTION' && action.payload.status === 'COMPLETE') {
+				//state.currentDirection = '';
+			}
 		},
 		addTextLog: (state, action: PayloadAction<ConnectionTextLog>) => {
 			state.textLogs.push(action.payload)
@@ -54,6 +66,8 @@ export const connectionLogSlice = createSlice({
 		clearSocketLog: (state) => {
 			state.schedulerId = undefined;
 			state.executionId = '';
+			state.currentDirection = '';
+			state.currentLog = undefined;
 			state.connectors = [];
 		},
 		addSocketLog: (state, action: PayloadAction<{data: ConnectionSocketLog<LightSegment>, settings: {hasNewLoopIndex: boolean, parentIndexPath: string}}>) => {
