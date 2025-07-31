@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -15,6 +16,16 @@ import static org.junit.jupiter.api.Assertions.*;
 public class NashornEngineTest {
 
     private NashornEngine engine;
+    private static final HashMap<String, Object> referenceValues = new HashMap<>();
+    private static final Function<String, Object> referenceExtractor = referenceValues::get;
+
+    static {
+        referenceValues.put("{%#ffffff.(request).url%}", "https://www.google.com");
+        referenceValues.put("{%#ffffff.(request).array_of_objects%}", List.of(new HashMap<String, Object>() {{
+            put("id", 1);
+            put("name", "Bob");
+        }}));
+    }
 
     @BeforeEach
     void setup() {
@@ -179,6 +190,11 @@ public class NashornEngineTest {
     void validate_withNashornNotCompilable_doesNotThrow() {
         // This case should succeed without exception as fallback
         assertDoesNotThrow(() -> engine.validate("1 + 1"));
+    }
+
+    @Test
+    void testWithReference() {
+        assertEquals(engine.execute("a + 'a'", Map.of("a", "{%#ffffff.(request).url%}"), referenceExtractor), referenceValues.get("{%#ffffff.(request).url%}") + "a");
     }
 
 }

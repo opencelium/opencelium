@@ -15,7 +15,9 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of ScriptEngine for executing JavaScript using the Nashorn engine.
@@ -84,6 +86,25 @@ public class NashornEngine implements ScriptEngine {
         }
     }
 
+    @Override
+    public Object execute(String script, Map<String, String> bindings, Function<String, Object> referenceExtractor) throws ScriptExecutionException, InvalidScriptException {
+        try {
+
+            // Creates new engine for each execution
+            javax.script.ScriptEngine engine = engineManager.getEngineByName("nashorn");
+
+            bindArgs(engine, bindings, referenceExtractor);
+
+            Object result = evaluate(engine, script);
+
+            return translateResult(result, engine);
+        } catch (ScriptExecutionException | InvalidScriptException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ScriptExecutionException("Unknown error: " + e.getMessage(), e);
+        }
+    }
+
     /**
      * Validates a script for syntax errors without executing it.
      */
@@ -138,12 +159,32 @@ public class NashornEngine implements ScriptEngine {
         }
     }
 
+    private void bindArgs(javax.script.ScriptEngine engine, Map<String, String> args, Function<String, Object> referenceExtractor) {
+        Map<String, Object> resultMap = args.entrySet().stream()
+                .map(entry -> {
+                    try {
+                        Object value = referenceExtractor.apply(entry.getValue());
+
+                        return Map.entry(entry.getKey(), value);
+                    } catch (Exception e) {
+                        throw new ScriptExecutionException("Reference extracting error: " + e.getMessage(), e);
+                    }
+                })
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        bindArgs(engine, resultMap);
+    }
+
     private void bindArgs(javax.script.ScriptEngine engine, Map<String, Object> bindings) {
         if (bindings != null && !bindings.isEmpty()) {
             bindings.forEach((varName, value) -> {
                 if (value instanceof Map || value instanceof List) {
                     // Serialize complex structures and parse via JSON.parse
                     String stringVal = stringify(value);
+
+                    // replace | remove 'xml' related attributes
+                    stringVal = stringVal.replace("__oc__attributes.", "@").replace(".__oc__value", "");
+
                     engine.put("dataModel", stringVal);
                     JSObject obj = (JSObject) evaluate(engine, "JSON.parse(dataModel)");
                     engine.put(varName, obj);
