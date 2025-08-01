@@ -24,6 +24,19 @@ public class JythonEngine implements ScriptEngine {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
+    /**
+     * The script's output must be assigned to a variable named {@code result}, by convention.
+     * <p>
+     * Example:
+     * <pre>
+     * def run():
+     *     return 42
+     *
+     * result = run()
+     * </pre>
+     */
+    private final String RESULT_VARIABLE = "result";
+
     @Override
     public boolean supports(Language lang) {
         return lang != null
@@ -44,27 +57,29 @@ public class JythonEngine implements ScriptEngine {
             interpreter.exec(script);
 
             // Convention: result is in variable `result`
-            PyObject pyResult = interpreter.get("result");
+            PyObject pyResult = interpreter.get(RESULT_VARIABLE);
 
             return translateResult(pyResult);
+        } catch (ScriptExecutionException | InvalidScriptException e) {
+            throw e;
         } catch (Exception e) {
-            throw new ScriptExecutionException("Jython execution error: " + e.getMessage(), e);
+            throw new ScriptExecutionException("Script execution error: " + e.getMessage(), e);
         }
     }
 
     @Override
     public Object execute(String script, Map<String, String> bindings, Function<String, Object> refExtractor) throws ScriptExecutionException, InvalidScriptException {
         try (PythonInterpreter interpreter = new PythonInterpreter()) {
-            bindArgs(interpreter, bindings,refExtractor);
+            bindArgs(interpreter, bindings, refExtractor);
 
             interpreter.exec(script);
 
             // Convention: result is in variable `result`
-            PyObject pyResult = interpreter.get("result");
+            PyObject pyResult = interpreter.get(RESULT_VARIABLE);
 
             return translateResult(pyResult);
         } catch (Exception e) {
-            throw new ScriptExecutionException("Jython execution error: " + e.getMessage(), e);
+            throw new ScriptExecutionException("Execution failed: " + e.getMessage(), e);
         }
     }
 
@@ -77,7 +92,7 @@ public class JythonEngine implements ScriptEngine {
         try (PythonInterpreter interpreter = new PythonInterpreter()) {
             interpreter.compile(script); // Validate syntax
         } catch (Exception e) {
-            throw new InvalidScriptException("Python script validation failed: " + e.getMessage(), e);
+            throw new InvalidScriptException("Invalid script: " + e.getMessage(), e);
         }
     }
 
@@ -103,7 +118,9 @@ public class JythonEngine implements ScriptEngine {
                                 ? mapper.readValue(json, List.class)
                                 : mapper.readValue(json, Map.class);
                     } catch (JsonProcessingException e) {
-                        throw new ScriptExecutionException("Json processing error: " + e.getMessage(), e);
+                        // This will never happen
+
+                        throw new ScriptExecutionException("Unknown error", e);
                     }
 
                     // 4. Convert to PyObject and inject
@@ -158,7 +175,7 @@ public class JythonEngine implements ScriptEngine {
                 });
             }
         } catch (JsonProcessingException e) {
-            throw new ScriptExecutionException("Failed to parse Jython result", e);
+            throw new ScriptExecutionException("Failed to parse the result", e);
         }
     }
 }
