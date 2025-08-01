@@ -35,8 +35,6 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.zip.ZipEntry;
@@ -47,7 +45,6 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
     private final InvokerModule invokerModule;
     private final InvokerService invokerService;
     private final InvokerSyncRepository invokerSyncRepository;
-    private final Map<String, String> nameFilenamePairs = new HashMap<>();
 
     @Value("${opencelium.online_services.invoker_sync.active:false}")
     private boolean active;
@@ -68,7 +65,7 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
         try {
             byte[] xmlBytes = Files.readAllBytes(filepath);
 
-            String ocFilename = filepath.getFileName().toString();
+            String ocFileName = filepath.getFileName().toString();
             String contentHmac = HmacUtility.encode(xmlBytes);
 
             InvokerSync sync = new InvokerSync();
@@ -76,13 +73,13 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
             if (optionalSync.isPresent()) {
                 sync = optionalSync.get();
 
-                sync.setOcInvokerFileName(ocFilename);
+                sync.setOcInvokerFileName(ocFileName);
                 sync.setInvokerContentHmac(contentHmac);
                 sync.setManuallyModified(false);
             } else {
                 sync.setInvokerName(invokerName);
-                sync.setOcInvokerFileName(ocFilename);
-                sync.setSpInvokerFileName(ocFilename); // replaced when invoker file is loaded from service portal
+                sync.setOcInvokerFileName(ocFileName);
+                sync.setSpInvokerFileName(ocFileName); // replaced when invoker file is loaded from service portal
                 sync.setInvokerContentHmac(contentHmac);
                 sync.setManuallyModified(false);
             }
@@ -113,19 +110,19 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
         InvokerSync sync = invokerSyncRepository.findByInvokerName(invokerName)
                 .orElseThrow(() -> new RuntimeException("Invoker with name = '" + invokerName + "' not found."));
 
-        // load invoker file by its 'service portal filename' from service portal
+        // load invoker file by its 'service portal fileName' from service portal
         byte[] xmlBytes = invokerModule.getInvokerFileByName(sync.getSpInvokerFileName()).getBody();
         Objects.requireNonNull(xmlBytes);
 
         try {
             // extract required fields
-            String ocFilename = sync.getOcInvokerFileName();
+            String ocFileName = sync.getOcInvokerFileName();
             String contentHmac = HmacUtility.encode(xmlBytes);
 
             boolean isContentSame = Objects.equals(contentHmac, sync.getInvokerContentHmac());
             // only replace/copy invoker file if its content is changed
             if (!isContentSame) {
-                saveOrUpdateInvokerFile(xmlBytes, ocFilename);
+                saveOrUpdateInvokerFile(xmlBytes, ocFileName);
 
                 sync.setInvokerContentHmac(contentHmac);
             }
@@ -152,7 +149,6 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
             return;
         }
 
-        // recalculate each files hmac to detect any manual changes
         recalculateSyncData();
 
         // load invoker files as zip from service portal
@@ -175,52 +171,36 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
 
                     // extract required fields
                     String invokerName = extractInvokerName(xmlBytes);
-                    String spFilename = entry.getName();
+                    String spFileName = entry.getName();
                     String contentHmac = HmacUtility.encode(xmlBytes);
 
+                    // after calling recalculateSyncData() we have all existing invoker names in our table,
+                    // so we just need to check this table if we have invoker file for a specific invokerName
                     InvokerSync sync = new InvokerSync();
-                    if (nameFilenamePairs.containsKey(invokerName)) {
-                        // update existing invoker file if not been changed manually
-                        Optional<InvokerSync> optionalSync = invokerSyncRepository.findByInvokerName(invokerName);
-                        if (optionalSync.isPresent()) {
-                            sync = optionalSync.get();
+                    Optional<InvokerSync> optionalSync = invokerSyncRepository.findByInvokerName(invokerName);
+                    if (optionalSync.isPresent()) {
+                        sync = optionalSync.get();
 
-                            boolean isContentSame = Objects.equals(contentHmac, sync.getInvokerContentHmac());
-                            if (!sync.isManuallyModified() && !isContentSame) {
-                                // invoker file is not been modified manually &&
-                                // we have different (file content is different) from ServicePortal
-                                saveOrUpdateInvokerFile(xmlBytes, invokerName);
+                        boolean isContentSame = Objects.equals(contentHmac, sync.getInvokerContentHmac());
+                        // only replace/copy invoker file if:
+                        // 1. It has not been modified manually;
+                        // 2. Its content is different from Service Portal
+                        if (!sync.isManuallyModified() && !isContentSame) {
+                            saveOrUpdateInvokerFile(xmlBytes, sync.getOcInvokerFileName());
 
-                                // update hmac to new files' contents' hmac
-                                sync.setInvokerContentHmac(contentHmac);
-                            }
-                        } else {
-                            // invoker might be added manually or removed via API in the middle of the process
-                            saveOrUpdateInvokerFile(xmlBytes, invokerName);
-
-                            // invoker file exists, but we do not have a sync record so just store it
-                            sync.setInvokerName(invokerName);
                             sync.setInvokerContentHmac(contentHmac);
-                            sync.setManuallyModified(false);
                         }
                     } else {
-                        // we have new invoker file, so store new filename pair:
-                        nameFilenamePairs.put(invokerName, spFilename);
-
-                        // save new file in /invokers folder
-                        saveOrUpdateInvokerFile(xmlBytes, invokerName);
-
-                        // invoker file does not exist, save new file and its sync data
-                        Optional<InvokerSync> optionalSync = invokerSyncRepository.findByInvokerName(invokerName);
-                        if (optionalSync.isPresent()) {
-                            sync = optionalSync.get();
-                        }
+                        // we get new invoker file, so create new file with the same name
+                        saveOrUpdateInvokerFile(xmlBytes, spFileName);
 
                         sync.setInvokerName(invokerName);
+                        sync.setOcInvokerFileName(spFileName);
                         sync.setInvokerContentHmac(contentHmac);
                         sync.setManuallyModified(false);
                     }
-                    sync.setSpInvokerFileName(spFilename); // update default ocFilename to spFileName
+                    // store actual value of invoker file name in Service Portal
+                    sync.setSpInvokerFileName(spFileName);
 
                     saveOrUpdate(sync);
                 }
@@ -245,7 +225,7 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
                 byte[] xmlBytes = Files.readAllBytes(entry);
 
                 String invokerName = extractInvokerName(xmlBytes);
-                String ocFilename = entry.getFileName().toString();
+                String ocFileName = entry.getFileName().toString();
                 String contentHmac = HmacUtility.encode(xmlBytes);
 
                 InvokerSync sync = new InvokerSync();
@@ -258,11 +238,11 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
                     // and we update hmac value to new one when user does force sync this invoker file
                     boolean isContentChanged = !Objects.equals(contentHmac, sync.getInvokerContentHmac());
                     sync.setManuallyModified(isContentChanged);
-                    sync.setOcInvokerFileName(ocFilename);
+                    sync.setOcInvokerFileName(ocFileName);
                 } else {
                     sync.setInvokerName(invokerName);
-                    sync.setOcInvokerFileName(ocFilename);
-                    sync.setSpInvokerFileName(ocFilename); // will be replaced with actual filename in syncInvokers()
+                    sync.setOcInvokerFileName(ocFileName);
+                    sync.setSpInvokerFileName(ocFileName); // will be replaced with actual fileName in syncInvokers()
                     sync.setInvokerContentHmac(contentHmac);
                     sync.setManuallyModified(false);
                 }
@@ -270,7 +250,7 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
                 saveOrUpdate(sync);
             }
         } catch (Exception e) {
-            logger.warn("Failed to calculate sync date", e);
+            logger.warn("Failed to calculate sync data", e);
             throw new RuntimeException(e);
         }
     }
@@ -290,7 +270,7 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
         return xpath.evaluate(expression, doc);
     }
 
-    private void saveOrUpdateInvokerFile(byte[] xmlBytes, String ocFilename) throws Exception {
+    private void saveOrUpdateInvokerFile(byte[] xmlBytes, String ocFileName) throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(false);
         DocumentBuilder builder = factory.newDocumentBuilder();
@@ -301,7 +281,7 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
         Transformer transformer = transformerFactory.newTransformer();
         DOMSource source = new DOMSource(document);
 
-        FileOutputStream output = new FileOutputStream(PathConstant.INVOKER + ocFilename);
+        FileOutputStream output = new FileOutputStream(PathConstant.INVOKER + ocFileName);
         StreamResult result = new StreamResult(output);
         transformer.transform(source, result);
     }
