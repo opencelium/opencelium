@@ -1219,82 +1219,92 @@ export function jsonToString(json, type) {
 }
 
 export function wrapField(path, fieldsObject) {
-    const tokenPattern = /(\['[^']+'\]|\["[^"\]]+"\]|\[[^\]]+\]|[^.\[\]]+)/g;
-    const rawTokens = path.match(tokenPattern) || [];
-    const prefixTokens = rawTokens.slice(0, 2);
-    const pathTokens   = rawTokens.slice(2);
-    const outputParts  = [...prefixTokens];
-    let currentObject  = fieldsObject;
+	const tokenPattern = /(\['[^']+'\]|\["[^"\]]+"\]|\[[^\]]+\]|[^.\[\]]+)/g;
+	const rawTokens = path.match(tokenPattern) || [];
+	const prefixTokens = rawTokens.slice(0, 2);
+	const pathTokens = rawTokens.slice(2);
+	const outputParts = [...prefixTokens];
+	let currentObject = fieldsObject;
+	const prefixLen = prefixTokens.length;
 
-    let i = 0;
-    while (i < pathTokens.length) {
-        const token = pathTokens[i];
+	let i = 0;
+	while (i < pathTokens.length) {
+		const token = pathTokens[i];
 
-        if (token.startsWith('[') && token.endsWith(']')) {
-            if ((token.startsWith("['") && token.endsWith("']")) ||
-                (token.startsWith('["') && token.endsWith('"]'))) {
-                const inner = token.slice(2, -2);
-                outputParts.push(`['${inner}']`);
-                currentObject = (currentObject && typeof currentObject === 'object' && inner in currentObject)
-                    ? currentObject[inner]
-                    : undefined;
-            } else {
-                const inner = token.slice(1, -1);
-                if (outputParts.length > prefixTokens.length) {
-                    outputParts[outputParts.length - 1] += `[${inner}]`;
-                } else {
-                    outputParts.push(`[${inner}]`);
-                }
-                if (currentObject && typeof currentObject === 'object' && inner in currentObject) {
-                    currentObject = currentObject[inner];
-                } else if (Array.isArray(currentObject)) {
-                    const idx = parseInt(inner, 10);
-                    currentObject = (!isNaN(idx) && idx < currentObject.length)
-                        ? currentObject[idx]
-                        : undefined;
-                } else {
-                    currentObject = undefined;
-                }
-            }
-            i++;
-            continue;
-        }
+		const mQuoted = token.match(/^\['([^']+)'\]$|^\["([^"]+)"\]$/);
+		if (mQuoted) {
+			const key = mQuoted[1] !== undefined ? mQuoted[1] : mQuoted[2];
+			outputParts.push(`['${key}']`);
+			currentObject =
+				currentObject &&
+				typeof currentObject === 'object' &&
+				key in currentObject
+					? currentObject[key]
+					: undefined;
+			i++;
+			continue;
+		}
 
-        let matched = false;
-        if (currentObject && typeof currentObject === 'object') {
-            for (let j = pathTokens.length; j > i + 1; j--) {
-                const slice = pathTokens.slice(i, j);
-                const candDot = slice.join('.');
-                if (candDot in currentObject) {
-                    outputParts.push(`['${candDot}']`);
-                    currentObject = currentObject[candDot];
-                    i = j;
-                    matched = true;
-                    break;
-                }
-                const candRaw = slice.join('');
-                if (candRaw in currentObject) {
-                    outputParts.push(`['${candRaw}']`);
-                    currentObject = currentObject[candRaw];
-                    i = j;
-                    matched = true;
-                    break;
-                }
-            }
-        }
-        if (matched) {
-            continue;
-        }
+		const mUnquoted = token.match(/^\[([^\]]+)\]$/);
+		if (mUnquoted) {
+			const inner = mUnquoted[1];
+			if (outputParts.length > prefixLen) {
+				outputParts[outputParts.length - 1] += `[${inner}]`;
+			} else {
+				outputParts.push(`[${inner}]`);
+			}
+			if (Array.isArray(currentObject)) {
+				currentObject = currentObject[0];
+			} else if (
+				currentObject &&
+				typeof currentObject === 'object' &&
+				inner in currentObject
+			) {
+				currentObject = currentObject[inner];
+			} else {
+				currentObject = undefined;
+			}
+			i++;
+			continue;
+		}
 
-        outputParts.push(token);
+		let matched = false;
+		if (currentObject && typeof currentObject === 'object') {
+			for (let j = pathTokens.length; j > i + 1; j--) {
+				const slice = pathTokens.slice(i, j);
+				const candDot = slice.join('.');
+				if (candDot in currentObject) {
+					outputParts.push(`['${candDot}']`);
+					currentObject = currentObject[candDot];
+					i = j;
+					matched = true;
+					break;
+				}
+				const candRaw = slice.join('');
+				if (candRaw in currentObject) {
+					outputParts.push(`['${candRaw}']`);
+					currentObject = currentObject[candRaw];
+					i = j;
+					matched = true;
+					break;
+				}
+			}
+		}
+		if (matched) {
+			continue;
+		}
+
+		outputParts.push(token);
         currentObject = (currentObject && typeof currentObject === 'object' && token in currentObject)
             ? currentObject[token]
             : undefined;
         i++;
-    }
 
-    return outputParts.join('.');
+	}
+
+	return outputParts.join('.');
 }
+
 
 export function unwrapField(field) {
   return field.replace(/\['(.*?)'\]/g, '$1');
