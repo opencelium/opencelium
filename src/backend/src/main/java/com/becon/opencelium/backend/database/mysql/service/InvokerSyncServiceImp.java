@@ -115,17 +115,12 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
         Objects.requireNonNull(xmlBytes);
 
         try {
-            // extract required fields
+            // save invoker file and calculate contents hmac:
             String ocFileName = sync.getOcInvokerFileName();
-            String contentHmac = HmacUtility.encode(xmlBytes);
+            String contentHmac = saveOrUpdateInvokerFile(xmlBytes, ocFileName);
 
-            boolean isContentSame = Objects.equals(contentHmac, sync.getInvokerContentHmac());
-            // only replace/copy invoker file if its content is changed
-            if (!isContentSame) {
-                saveOrUpdateInvokerFile(xmlBytes, ocFileName);
-
-                sync.setInvokerContentHmac(contentHmac);
-            }
+            // update sync date for updated file
+            sync.setInvokerContentHmac(contentHmac);
             sync.setManuallyModified(false);
 
             saveOrUpdate(sync);
@@ -172,7 +167,6 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
                     // extract required fields
                     String invokerName = extractInvokerName(xmlBytes);
                     String spFileName = entry.getName();
-                    String contentHmac = HmacUtility.encode(xmlBytes);
 
                     // after calling recalculateSyncData() we have all existing invoker names in our table,
                     // so we just need to check this table if we have invoker file for a specific invokerName
@@ -181,18 +175,14 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
                     if (optionalSync.isPresent()) {
                         sync = optionalSync.get();
 
-                        boolean isContentSame = Objects.equals(contentHmac, sync.getInvokerContentHmac());
-                        // only replace/copy invoker file if:
-                        // 1. It has not been modified manually;
-                        // 2. Its content is different from Service Portal
-                        if (!sync.isManuallyModified() && !isContentSame) {
-                            saveOrUpdateInvokerFile(xmlBytes, sync.getOcInvokerFileName());
+                        if (!sync.isManuallyModified()) {
+                            String contentHmac = saveOrUpdateInvokerFile(xmlBytes, sync.getOcInvokerFileName());
 
                             sync.setInvokerContentHmac(contentHmac);
                         }
                     } else {
                         // we get new invoker file, so create new file with the same name
-                        saveOrUpdateInvokerFile(xmlBytes, spFileName);
+                        String contentHmac = saveOrUpdateInvokerFile(xmlBytes, spFileName);
 
                         sync.setInvokerName(invokerName);
                         sync.setOcInvokerFileName(spFileName);
@@ -270,7 +260,15 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
         return xpath.evaluate(expression, doc);
     }
 
-    private void saveOrUpdateInvokerFile(byte[] xmlBytes, String ocFileName) throws Exception {
+    /**
+     * his method is used when we get xmlBytes from Service Portal
+     * Saves or Updates invoker file by its name, then calculates content hmac
+     * @param xmlBytes - byte array of invoker file from Service Portal
+     * @param ocFileName - invoker files name in opencelium (might be different from Service Portal)
+     * @return stored file contents' hmac
+     * @throws Exception
+     */
+    private String saveOrUpdateInvokerFile(byte[] xmlBytes, String ocFileName) throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(false);
         DocumentBuilder builder = factory.newDocumentBuilder();
@@ -284,5 +282,11 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
         FileOutputStream output = new FileOutputStream(PathConstant.INVOKER + ocFileName);
         StreamResult result = new StreamResult(output);
         transformer.transform(source, result);
+
+        // calculate updated invoker files content hmac
+        Path updatedInvokerFile = Paths.get(PathConstant.INVOKER + ocFileName);
+        byte[] updatedXmlBytes = Files.readAllBytes(updatedInvokerFile);
+
+        return HmacUtility.encode(updatedXmlBytes);
     }
 }
