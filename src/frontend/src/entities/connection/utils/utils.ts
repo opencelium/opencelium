@@ -1,4 +1,4 @@
-import {OperatorTrace, Trace} from "@root/requests/models/ConnectionLog";
+import {Trace} from "@root/requests/models/ConnectionLog";
 
 type TraceUpdateCallback = (trace: Trace) => boolean;
 
@@ -17,8 +17,8 @@ export function findAndUpdateTrace(
             return updater(trace); // update trace directly
         }
 
-        if (trace.logType === 'operator') {
-            const found = findAndUpdateTrace((trace as OperatorTrace).traces, indexPath, updater);
+        if (trace.type === 'LOOP' || trace.type === 'IF') {
+            const found = findAndUpdateTrace(trace.children, indexPath, updater);
             if (found) return true;
         }
     }

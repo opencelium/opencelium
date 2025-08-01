@@ -40,8 +40,9 @@ import {
   getConnectionById,
   getConnectionWebhooks, generateLogs,
   testConnection,
-  updateConnection,
+  updateConnection, getAllMetaConnectionsByInvokerName,
 } from "../action_creators/ConnectionCreators";
+import {MetaConnectionModel} from "@root/requests/models/Connection";
 
 
 export const LogPanelHeight = {
@@ -63,6 +64,7 @@ export interface ConnectionState extends ICommonState {
   moveTestButton: number;
   connections: IConnection[];
   metaConnections: any[];
+  metaConnectionsByInvokerName: MetaConnectionModel[],
   isCurrentConnectionHasUniqueTitle: TRIPLET_STATE;
   checkingConnectionTitle: API_REQUEST_STATE;
   testingConnection: API_REQUEST_STATE;
@@ -78,6 +80,7 @@ export interface ConnectionState extends ICommonState {
   gettingConnectionWebhooks: API_REQUEST_STATE;
   gettingWebhookTypes: API_REQUEST_STATE;
   generatingLogs: API_REQUEST_STATE,
+  gettingAllMetaConnectionsByInvokerName: API_REQUEST_STATE,
   webhookTypes: string[],
   currentConnection: IConnection;
   /*
@@ -116,6 +119,7 @@ let initialState: ConnectionState = {
   moveTestButton: 0,
   connections: [],
   metaConnections: [],
+  metaConnectionsByInvokerName: [],
   isCurrentConnectionHasUniqueTitle: TRIPLET_STATE.INITIAL,
   checkingConnectionTitle: API_REQUEST_STATE.INITIAL,
   testingConnection: API_REQUEST_STATE.INITIAL,
@@ -131,6 +135,7 @@ let initialState: ConnectionState = {
   gettingConnectionWebhooks: API_REQUEST_STATE.INITIAL,
   gettingWebhookTypes: API_REQUEST_STATE.INITIAL,
   generatingLogs: API_REQUEST_STATE.INITIAL,
+  gettingAllMetaConnectionsByInvokerName: API_REQUEST_STATE.INITIAL,
   webhookTypes: [],
   currentConnection: null,
   currentTechnicalItem: null,
@@ -627,18 +632,36 @@ const connectionReducers = (isModal: boolean = false) => {
         state.gettingMetaConnections = API_REQUEST_STATE.START;
       },
       [getAllMetaConnections.fulfilled.type]: (
-        state,
-        action: PayloadAction<IConnection[]>
+          state,
+          action: PayloadAction<IConnection[]>
       ) => {
         state.gettingMetaConnections = API_REQUEST_STATE.FINISH;
         state.metaConnections = action.payload;
         state.error = null;
       },
       [getAllMetaConnections.rejected.type]: (
-        state,
-        action: PayloadAction<IResponse>
+          state,
+          action: PayloadAction<IResponse>
       ) => {
         state.gettingMetaConnections = API_REQUEST_STATE.ERROR;
+        state.error = action.payload;
+      },
+      [getAllMetaConnectionsByInvokerName.pending.type]: (state) => {
+        state.gettingAllMetaConnectionsByInvokerName = API_REQUEST_STATE.START;
+      },
+      [getAllMetaConnectionsByInvokerName.fulfilled.type]: (
+          state,
+          action: PayloadAction<MetaConnectionModel[]>
+      ) => {
+        state.gettingAllMetaConnectionsByInvokerName = API_REQUEST_STATE.FINISH;
+        state.metaConnectionsByInvokerName = action.payload;
+        state.error = null;
+      },
+      [getAllMetaConnectionsByInvokerName.rejected.type]: (
+          state,
+          action: PayloadAction<IResponse>
+      ) => {
+        state.gettingAllMetaConnectionsByInvokerName = API_REQUEST_STATE.ERROR;
         state.error = action.payload;
       },
       [deleteConnectionById.pending.type]: (state) => {

@@ -276,6 +276,32 @@ export const getAllMetaConnections = createAsyncThunk(
     }
 )
 
+export const getAllMetaConnectionsByInvokerName = createAsyncThunk(
+    'connection/get/all/metadata/by-invoker-name',
+    async(invokerName: string, thunkAPI) => {
+        try {
+            const request = new ConnectionRequest();
+            let response = await request.getMetaConnectionsByInvokerName(invokerName);
+            let result = response.data;
+            // @ts-ignore
+            result = result.filter((connection) => {
+                if(connection.title.indexOf('!*test_connection_') === 0){
+                    if(connection.title.split('_').length >= 3){
+                        return false;
+                    }
+                }
+                if(connection.title.trim() === ''){
+                    return false;
+                }
+                return true;
+            }) || [];
+            return result;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+
 export const deleteConnectionById = createAsyncThunk(
     'connection/delete/byId',
     async(id: number, thunkAPI) => {
@@ -328,6 +354,7 @@ export default {
     getConnectionById,
     getAllConnections,
     getAllMetaConnections,
+    getAllMetaConnectionsByInvokerName,
     deleteConnectionById,
     deleteTestConnectionById,
     deleteConnectionsById,

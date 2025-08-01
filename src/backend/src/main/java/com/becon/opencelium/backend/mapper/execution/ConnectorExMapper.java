@@ -65,7 +65,7 @@ public class ConnectorExMapper {
         connectorEx.setRequiredData(map);
 
         connectorEx.setId(dto.getConnectorId());
-        connectorEx.setFchartId(dto.getFchartId());
+        connectorEx.setFchartId(dto.getFlowId());
         connectorEx.setMethods(operationExMapper.toOperationAll(dto.getMethods(), connectionId, connector.getInvoker()));
         connectorEx.setOperators(operatorExMapper.toEntityAll(dto.getOperators()));
 

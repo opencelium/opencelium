@@ -9,7 +9,7 @@ export default class AllowList extends IfBaseOperator{
     constructor() {
         super({
             name: BinaryOperatorName.AllowList,
-            placeholder: '%[item1, item2]%',
+            placeholder: '%item1,item2%,%item3%',
             defaultRefType: 'constant',
             defaultConstantType: ConstantComponentType.Textarea,
         })

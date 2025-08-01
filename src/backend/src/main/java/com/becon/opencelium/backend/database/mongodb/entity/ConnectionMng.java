@@ -41,7 +41,7 @@ public class ConnectionMng {
     private ConnectorMng toConnector;
 
     @DBRef
-    private List<FieldBindingMng> fieldBindings;
+    private List<FieldBindingMng> fieldBindings; // [null, null, null]
 
     private Map<String, Object> ui;
 

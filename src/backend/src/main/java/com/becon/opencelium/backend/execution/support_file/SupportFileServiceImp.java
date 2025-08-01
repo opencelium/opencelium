@@ -9,10 +9,9 @@ import com.becon.opencelium.backend.enums.SupportFileStatus;
 import com.becon.opencelium.backend.execution.socket.SocketConstant;
 import com.becon.opencelium.backend.execution.socket.WebSocketNotificationService;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
-import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
-import com.becon.opencelium.backend.resource.connection.old.ConnectionOldDTO;
-import com.becon.opencelium.backend.resource.template.CtionTemplateResource;
+import com.becon.opencelium.backend.resource.template.TemplateResource;
+import com.becon.opencelium.backend.template.service.TemplateService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
@@ -45,8 +44,7 @@ import static com.becon.opencelium.backend.utility.LogFileUtility.toPath;
 @Service
 public class SupportFileServiceImp implements SupportFileService {
     private final ConnectionService connectionSqlService;
-    private final Mapper<ConnectionOldDTO, CtionTemplateResource> oldDto2ResourceMapper;
-    private final Mapper<ConnectionDTO, ConnectionOldDTO> dto2OldDtoMapper;
+    private final TemplateService templateService;
     private final ConnectorService connectorSqlService;
     private final InvokerService invokerService;
     private final WebSocketNotificationService notificationService;
@@ -58,15 +56,12 @@ public class SupportFileServiceImp implements SupportFileService {
     private static final Logger logger = LoggerFactory.getLogger(SupportFileService.class);
 
     public SupportFileServiceImp (
-            ConnectionService connectionSqlService,
-            Mapper<ConnectionOldDTO, CtionTemplateResource> oldDto2ResourceMapper,
-            Mapper<ConnectionDTO, ConnectionOldDTO> dto2OldDtoMapper,
+            ConnectionService connectionSqlService, TemplateService templateService,
             ConnectorService connectorSqlService, InvokerService invokerService,
             WebSocketNotificationService notificationService, Environment env
     ) {
         this.connectionSqlService = connectionSqlService;
-        this.oldDto2ResourceMapper = oldDto2ResourceMapper;
-        this.dto2OldDtoMapper = dto2OldDtoMapper;
+        this.templateService = templateService;
         this.connectorSqlService = connectorSqlService;
         this.invokerService = invokerService;
         this.notificationService = notificationService;
@@ -215,9 +210,8 @@ public class SupportFileServiceImp implements SupportFileService {
             ConnectionDTO dto = connectionSqlService.getFullConnection(connectionId);
 
             // Add Connection resource template as a JSON file:
-            ConnectionOldDTO oldDTO = dto2OldDtoMapper.toDTO(dto);
-            CtionTemplateResource template = oldDto2ResourceMapper.toDTO(oldDTO);
-            connectionTitle = template.getTitle();
+            TemplateResource template = templateService.getByConnectionId(connectionId);
+            connectionTitle = template.getName(); // Connection.title == Template.name
             addToZip(zipOutputStream, template, "connection_template.json");
 
             // Add invoker files:

@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.execution.logger.parser;
 
+import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
 import com.becon.opencelium.backend.execution.logger.service.LogStorageService;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +31,10 @@ public class FlexiblePatternLogParser implements LogLineParser {
     // Pattern for key-value pairs:
     // Matches key=value with value being quoted, JSON-like object, or simple word
     private static final Pattern KV_PATTERN = Pattern.compile(
-            "(\\w+)=((?:\"[^\"]*\")|(?:\\{[^}]*\\})|(?:\\S+))"
+//            "(\\w+)=((?:\"[^\"]*\")|(?:\\{[^}]*\\})|(?:\\S+))"
+            "(\\w+)=((\"[^\"]*\"|\\{[^}]*\\}|[^\\s]+(?:\\s(?!\\w+=)[^\\s]+)*))" //without stacktrace
+//            "(\\\\w+)=((?:\\\"[^\\\"]*\\\"|\\\\{[^}]*\\\\}|[^\\\\s=]+(?:\\\\s(?!\\\\w+=)[^\\\\s=]+)*)(?:\\\\R.*)*)" // - with stacktrace
+//            "(\\w+)=((?:\"[^\"]*\"|\\{[^}]*\\}|[^\\s=]+(?:\\s(?!\\w+=)[^\\s=]+)*)+)", Pattern.DOTALL
     );
 
     // Pattern to validate log line:
@@ -65,26 +69,26 @@ public class FlexiblePatternLogParser implements LogLineParser {
      * - All key-value pairs from msg
      */
     @Override
-    public Map<String, String> parse(String line) {
-        Map<String, String> result = new LinkedHashMap<>();
+    public Map<LogLineKey, String> parse(String line) {
+        Map<LogLineKey, String> result = new LinkedHashMap<>();
 
         // 1. Extract timestamp and remove it from line
         Matcher timestampMatcher = TIMESTAMP_PATTERN.matcher(line);
         if (timestampMatcher.find()) {
-            result.put("timestamp", timestampMatcher.group());
+            result.put(LogLineKey.TIMESTAMP, timestampMatcher.group());
             line = removeAt(line, timestampMatcher.start(), timestampMatcher.end());
         }
 
         // 2. Extract log level and remove it from line
         Matcher levelMatcher = LOG_LEVEL_PATTERN.matcher(line);
         if (levelMatcher.find()) {
-            result.put("log_level", levelMatcher.group(1));
+            result.put(LogLineKey.LOG_LEVEL, levelMatcher.group(1));
             line = removeAt(line, levelMatcher.start(), levelMatcher.end());
         }
 
         // 3. Remaining content is the raw message
         String msg = line.trim();
-        result.put("msg", msg);
+        result.put(LogLineKey.MESSAGE, line);
 
         // 4. Parse all key=value pairs from the message content
         Matcher kvMatcher = KV_PATTERN.matcher(msg);
@@ -95,7 +99,10 @@ public class FlexiblePatternLogParser implements LogLineParser {
             if (value.startsWith("\"") && value.endsWith("\"")) {
                 value = value.substring(1, value.length() - 1);
             }
-            result.put(key, value);
+            if (LogLineKey.from(key).isPresent()) {
+                result.put(LogLineKey.from(key).get(), value);
+            }
+
         }
 
         return result;
