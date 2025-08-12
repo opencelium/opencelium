@@ -84,7 +84,17 @@ public class GraalJSEngine implements ScriptEngine {
     @Override
     public boolean isUp() {
         EngineHealthChecker healthChecker = EngineHealthCheckerFactory.getHealthChecker(ScriptEngineType.GRAALVM);
-        return healthChecker != null && healthChecker.check();
+
+        if (healthChecker != null && healthChecker.check()) {
+            // If it is GraalVM then python component must be installed
+
+            try (Context context = Context.create()) {
+                return context.getEngine().getLanguages().keySet().stream().anyMatch("js"::equals);
+            }
+        }
+
+        // If it is not GraalVM then no checks are needed
+        return true;
     }
 
     private Context newContext() {
