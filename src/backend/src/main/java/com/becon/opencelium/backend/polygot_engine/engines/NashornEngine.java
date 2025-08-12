@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.polygot_engine.engines.nashorn;
+package com.becon.opencelium.backend.polygot_engine.engines;
 
 import com.becon.opencelium.backend.polygot_engine.*;
 import com.becon.opencelium.backend.polygot_engine.ex.InvalidScriptException;
