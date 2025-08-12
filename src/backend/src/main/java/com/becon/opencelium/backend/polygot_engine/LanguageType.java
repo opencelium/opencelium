@@ -1,9 +1,13 @@
 package com.becon.opencelium.backend.polygot_engine;
 
+import static com.becon.opencelium.backend.polygot_engine.ScriptEngineType.JYTHON;
 import static com.becon.opencelium.backend.polygot_engine.ScriptEngineType.NASHORN;
 
 public enum LanguageType {
-    JS("js", "JavaScript", NASHORN);
+    JS("js", "JavaScript", NASHORN),
+    PYTHON_2("python2", "Python 2", JYTHON),
+    PYTHON_3("python3", "Python 3", JYTHON),
+    ;
 
     private final String code;
     private final String name;
