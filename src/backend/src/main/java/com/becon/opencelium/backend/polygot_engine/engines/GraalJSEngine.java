@@ -83,7 +83,8 @@ public class GraalJSEngine implements ScriptEngine {
 
     @Override
     public boolean isUp() {
-        return true;
+        EngineHealthChecker healthChecker = EngineHealthCheckerFactory.getHealthChecker(ScriptEngineType.GRAALVM);
+        return healthChecker != null && healthChecker.check();
     }
 
     private Context newContext() {
@@ -123,7 +124,8 @@ public class GraalJSEngine implements ScriptEngine {
             if (result.hasArrayElements()) {
                 return mapper.readValue(json, List.class);
             } else {
-                return mapper.readValue(json, new TypeReference<Map<String, Object>>() {});
+                return mapper.readValue(json, new TypeReference<Map<String, Object>>() {
+                });
             }
         } catch (JsonProcessingException e) {
             throw new ScriptExecutionException("Cannot parse result", e);
