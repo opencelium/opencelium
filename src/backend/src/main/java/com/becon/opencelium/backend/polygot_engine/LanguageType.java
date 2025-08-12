@@ -5,7 +5,7 @@ import static com.becon.opencelium.backend.polygot_engine.ScriptEngineType.NASHO
 
 public enum LanguageType {
     JS("js", "JavaScript", NASHORN),
-    PYTHON("python", "Python", JYTHON)
+    PYTHON_2("python2", "Python 2", JYTHON)
     ;
 
     private final String code;

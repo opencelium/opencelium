@@ -40,7 +40,7 @@ public class JythonEngine implements ScriptEngine {
     @Override
     public boolean supports(Language lang) {
         return lang != null
-                && lang.getLanguage() == LanguageType.PYTHON
+                && lang.getLanguage() == LanguageType.PYTHON_2
                 && lang.getEngine() == ScriptEngineType.JYTHON;
     }
 

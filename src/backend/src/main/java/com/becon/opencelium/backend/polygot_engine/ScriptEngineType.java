@@ -25,7 +25,7 @@ public enum ScriptEngineType {
     public List<LanguageType> getLanguages() {
         return switch (this) {
             case NASHORN -> List.of(LanguageType.JS);
-            case JYTHON -> List.of(LanguageType.PYTHON);
+            case JYTHON -> List.of(LanguageType.PYTHON_2);
         };
     }
 }
