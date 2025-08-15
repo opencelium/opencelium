@@ -73,35 +73,6 @@ public class ServicePortal implements RemoteApi, SubscriptionModule, ReportModul
         }
     }
 
-//    @Override
-//    public ResponseEntity<String> getAllSubs() {
-//        String url = BASE_URL + "/api/opencelium/license/all";
-//        HttpHeaders headers = getHeader();
-//        HttpEntity<String> entity = new HttpEntity<>(headers);
-//        return restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-//    }
-//
-//    @Override
-//    public ResponseEntity<String> getSubById(String id) {
-//        String url = BASE_URL + "/api/opencelium/license/" + id;
-//        HttpHeaders headers = getHeader();
-//        HttpEntity<String> entity = new HttpEntity<>(headers);
-//        return restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-//    }
-//
-//    @Override
-//    public ResponseEntity<String> generateLicenseKey(File activeRequest, String subId) {
-//        String url = BASE_URL + "/api/opencelium/license/generate/" + subId;
-//        HttpHeaders headers = getHeader();
-//        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-//
-//        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-//        body.add("file", new FileSystemResource(activeRequest));
-//
-//        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-//        return restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
-//    }
-
     @Override
     public ResponseEntity<String> getAllSubs() {
         return httpRequestHelper.makeGetRequest("/api/opencelium/license/all", createHeaders(), String.class);
@@ -150,8 +121,8 @@ public class ServicePortal implements RemoteApi, SubscriptionModule, ReportModul
     }
 
     @Override
-    public ResponseEntity<byte[]> getInvokerFileByName(String invokerName) {
-        String endpoint = "/api/opencelium/invoker/file/" + invokerName;
+    public ResponseEntity<byte[]> getInvokerFileByName(String invokerFileName) {
+        String endpoint = "/api/opencelium/invoker/file/" + invokerFileName;
         try {
             return httpRequestHelper.makeGetRequest(endpoint, createHeaders(), byte[].class);
         } catch (ResourceAccessException e) {
