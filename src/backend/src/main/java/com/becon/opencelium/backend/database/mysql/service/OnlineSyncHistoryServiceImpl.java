@@ -2,8 +2,11 @@ package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.database.mysql.entity.OnlineSyncHistory;
 import com.becon.opencelium.backend.database.mysql.repository.OnlineSyncHistoryRepository;
+import com.becon.opencelium.backend.resource.OnlineSyncHistoryDTO;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -13,6 +16,21 @@ public class OnlineSyncHistoryServiceImpl implements OnlineSyncHistoryService {
 
     public OnlineSyncHistoryServiceImpl(OnlineSyncHistoryRepository repository) {
         this.repository = repository;
+    }
+
+    @Override
+    public List<OnlineSyncHistoryDTO> findAll(String user, String service, LocalDateTime startTime, LocalDateTime endTime) {
+        return repository.filterHistory(user, service, startTime, endTime).stream()
+                .map(history -> {
+                    OnlineSyncHistoryDTO dto = new OnlineSyncHistoryDTO();
+
+                    dto.setUser(history.getUsername());
+                    dto.setService(history.getService());
+                    dto.setDetails(history.getDetails());
+                    dto.setTimestamp(history.getCreatedAt().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+
+                    return dto;
+                }).toList();
     }
 
     @Override
