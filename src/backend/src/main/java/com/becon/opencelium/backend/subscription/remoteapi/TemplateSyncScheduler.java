@@ -2,6 +2,7 @@ package com.becon.opencelium.backend.subscription.remoteapi;
 
 import com.becon.opencelium.backend.configuration.OpenCeliumProps;
 import com.becon.opencelium.backend.constant.PathConstant;
+import com.becon.opencelium.backend.database.mysql.service.OnlineSyncHistoryService;
 import com.becon.opencelium.backend.subscription.remoteapi.enums.ApiModule;
 import com.becon.opencelium.backend.subscription.remoteapi.enums.ApiType;
 import com.becon.opencelium.backend.subscription.remoteapi.module.TemplateModule;
@@ -21,6 +22,8 @@ import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -31,21 +34,25 @@ public class TemplateSyncScheduler {
     private final OpenCeliumProps ocProps;
     private final EntityUpdater<Template> templateEntityUpdater;
     private final TemplateService templateService;
+    private final OnlineSyncHistoryService onlineSyncHistoryService;
     private final ObjectMapper objectMapper;
 
     @Value("${opencelium.online_services.template_sync.active:false}")
     private boolean active;
     private static final Path INVOKER_FILES_PATH = Paths.get(PathConstant.INVOKER);
+    private static final String SERVICE = "Template File";
 
     public TemplateSyncScheduler(
             OpenCeliumProps ocProps,
             EntityVersionManager entityVersionManager,
             TemplateService templateService,
+            OnlineSyncHistoryService onlineSyncHistoryService,
             @Qualifier("objectMapper") ObjectMapper objectMapper
     ) {
         this.ocProps = ocProps;
         this.templateEntityUpdater = entityVersionManager.getUpdater(Template.class);
         this.templateService = templateService;
+        this.onlineSyncHistoryService = onlineSyncHistoryService;
         this.templateModule = (TemplateModule) RemoteApiFactory.createInstance(ApiType.SERVICE_PORTAL).getModule(ApiModule.TEMPLATE);
         this.objectMapper = objectMapper;
     }
@@ -60,6 +67,7 @@ public class TemplateSyncScheduler {
         // load template files as zip from service portal
         byte[] zipBytes = templateModule.getAllTemplateFiles().getBody();
         Objects.requireNonNull(zipBytes);
+        List<String> details = new ArrayList<>();
 
         // update invoker files that have not been modified manually
         try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(zipBytes))) {
@@ -84,11 +92,14 @@ public class TemplateSyncScheduler {
                             });
 
                         templateService.save(template);
+                        details.add(template.getTemplateId() + ".json");
                     } catch (Exception e) {}
                 }
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
+        } finally {
+            onlineSyncHistoryService.save(SERVICE, details);
         }
     }
 }

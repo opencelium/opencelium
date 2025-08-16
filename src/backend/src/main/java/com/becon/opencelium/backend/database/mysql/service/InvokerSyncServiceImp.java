@@ -15,6 +15,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
@@ -35,6 +38,9 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.zip.ZipEntry;
@@ -45,19 +51,30 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
     private final InvokerModule invokerModule;
     private final InvokerService invokerService;
     private final InvokerSyncRepository invokerSyncRepository;
+    private final OnlineSyncHistoryService onlineSyncHistoryService;
 
     @Value("${opencelium.online_services.invoker_sync.active:false}")
     private boolean active;
     private static final Path INVOKER_FILES_PATH = Paths.get(PathConstant.INVOKER);
+    private static final String SERVICE = "Invoker File";
     private static final Logger logger = LoggerFactory.getLogger(InvokerSyncServiceImp.class);
 
-    public InvokerSyncServiceImp(InvokerService invokerService, InvokerSyncRepository invokerSyncRepository) {
+    public InvokerSyncServiceImp(
+            InvokerService invokerService, InvokerSyncRepository invokerSyncRepository,
+            OnlineSyncHistoryService onlineSyncHistoryService
+    ) {
         this.invokerService = invokerService;
         this.invokerSyncRepository = invokerSyncRepository;
+        this.onlineSyncHistoryService = onlineSyncHistoryService;
         this.invokerModule = (InvokerModule) RemoteApiFactory.createInstance(ApiType.SERVICE_PORTAL).getModule(ApiModule.INVOKER);
     }
 
+    /**
+     * Updates invoker files' content hmac when user updates invoker file via API
+     * @param invokerName - name of the invoker has been updated via API
+     */
     @Override
+    @Transactional
     public void updateSync(String invokerName) {
         File invokerFile = invokerService.findFileByInvokerName(invokerName);
         Path filepath = invokerFile.toPath();
@@ -87,7 +104,6 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
             saveOrUpdate(sync);
         } catch (Exception e) {
             logger.warn("Failed to update content hmac for invoker = " + invokerName, e);
-            throw new RuntimeException(e);
         }
     }
 
@@ -124,6 +140,7 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
             sync.setManuallyModified(false);
 
             saveOrUpdate(sync);
+            onlineSyncHistoryService.save(getCurrentUsername(), SERVICE, List.of(ocFileName));
         } catch (Exception e) {
             logger.warn("Failed to force sync invoker file", e);
             throw new RuntimeException(e);
@@ -137,7 +154,13 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
         recalculateSyncData();
     }
 
-    @Transactional
+    /**
+     * Synchronizes invoker files with Service Portal.
+     * For each step we update invoker file and hmac of its contents.
+     * In case of an error, process finishes but do not roll back previous successful steps,
+     * instead we restore file that caused the error and will save online syn history.
+     */
+    @Transactional(noRollbackFor = Exception.class)
     @Scheduled(cron = "${opencelium.online_services.invoker_sync.time}")
     void syncInvokers() {
         if (!active) {
@@ -149,6 +172,7 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
         // load invoker files as zip from service portal
         byte[] zipBytes = invokerModule.getAllInvokerFiles().getBody();
         Objects.requireNonNull(zipBytes);
+        List<String> details = new ArrayList<>();
 
         // update invoker files that have not been modified manually
         try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(zipBytes))) {
@@ -177,12 +201,14 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
 
                         if (!sync.isManuallyModified()) {
                             String contentHmac = saveOrUpdateInvokerFile(xmlBytes, sync.getOcInvokerFileName());
+                            details.add(sync.getOcInvokerFileName());
 
                             sync.setInvokerContentHmac(contentHmac);
                         }
                     } else {
                         // we get new invoker file, so create new file with the same name
                         String contentHmac = saveOrUpdateInvokerFile(xmlBytes, spFileName);
+                        details.add(spFileName);
 
                         sync.setInvokerName(invokerName);
                         sync.setOcInvokerFileName(spFileName);
@@ -199,7 +225,10 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
             // update invoker container
             invokerService.refresh();
         } catch (Exception e) {
+            logger.warn("Failed to sync invoker files", e);
             throw new RuntimeException(e);
+        } finally {
+            onlineSyncHistoryService.save(SERVICE, details);
         }
     }
 
@@ -262,7 +291,8 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
 
     /**
      * his method is used when we get xmlBytes from Service Portal
-     * Saves or Updates invoker file by its name, then calculates content hmac
+     * Saves or Updates invoker file by its name, then calculates content hmac,
+     * if error occurs original file will be restored.
      * @param xmlBytes - byte array of invoker file from Service Portal
      * @param ocFileName - invoker files name in opencelium (might be different from Service Portal)
      * @return stored file contents' hmac
@@ -279,14 +309,38 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
         Transformer transformer = transformerFactory.newTransformer();
         DOMSource source = new DOMSource(document);
 
-        FileOutputStream output = new FileOutputStream(PathConstant.INVOKER + ocFileName);
-        StreamResult result = new StreamResult(output);
-        transformer.transform(source, result);
+        Path filePath = Paths.get(PathConstant.INVOKER, ocFileName);
+        // keep backup in-memory as bytes[]
+        byte[] backupBytes = null;
+        if (Files.exists(filePath)) {
+            backupBytes = Files.readAllBytes(filePath);
+        }
+
+        // attempt to update invoker file
+        try (FileOutputStream output = new FileOutputStream(filePath.toFile())) {
+            StreamResult result = new StreamResult(output);
+            transformer.transform(source, result);
+        } catch (Exception e) {
+            if (backupBytes != null) {
+                // restore from in-memory backup, if file existed before
+                Files.write(filePath, backupBytes, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            }
+
+            throw e;
+        }
 
         // calculate updated invoker files content hmac
-        Path updatedInvokerFile = Paths.get(PathConstant.INVOKER + ocFileName);
-        byte[] updatedXmlBytes = Files.readAllBytes(updatedInvokerFile);
+        byte[] updatedXmlBytes = Files.readAllBytes(filePath);
 
         return HmacUtility.encode(updatedXmlBytes);
+    }
+
+    public String getCurrentUsername() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
+            return userDetails.getUsername();
+        }
+
+        return null;
     }
 }

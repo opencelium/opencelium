@@ -110,11 +110,11 @@ public class ServicePortal implements RemoteApi, SubscriptionModule, ReportModul
         try {
             return httpRequestHelper.makeGetRequest(endpoint, createHeaders(), byte[].class);
         } catch (ResourceAccessException e) {
-            logger.error("getAllInvokerFiles:: " + BASE_URL + endpoint + " is not reachable. Please check your settings!");
+            logger.error(BASE_URL + endpoint + " is not reachable. Please check your settings!");
 
             throw new RuntimeException(BASE_URL + endpoint + " is not reachable. Please check your settings!");
         } catch (HttpClientErrorException e) {
-            logger.error("getAllInvokerFiles:: " + e.getMessage());
+            logger.error(e.getMessage());
 
             throw new RuntimeException(e.getMessage());
         }
@@ -126,11 +126,11 @@ public class ServicePortal implements RemoteApi, SubscriptionModule, ReportModul
         try {
             return httpRequestHelper.makeGetRequest(endpoint, createHeaders(), byte[].class);
         } catch (ResourceAccessException e) {
-            logger.error("getInvokerFileByName:: " + BASE_URL + endpoint + " is not reachable. Please check your settings!");
+            logger.error(BASE_URL + endpoint + " is not reachable. Please check your settings!");
 
             throw new RuntimeException(BASE_URL + endpoint + " is not reachable. Please check your settings!");
         } catch (HttpClientErrorException e) {
-            logger.error("getInvokerFileByName:: " + e.getMessage());
+            logger.error(e.getMessage());
 
             throw new RuntimeException(e.getMessage());
         }
@@ -142,11 +142,11 @@ public class ServicePortal implements RemoteApi, SubscriptionModule, ReportModul
         try {
             return httpRequestHelper.makeGetRequest(endpoint, createHeaders(), byte[].class);
         } catch (ResourceAccessException e) {
-            logger.error("getAllTemplateFiles:: " + BASE_URL + endpoint + " is not reachable. Please check your settings!");
+            logger.error(BASE_URL + endpoint + " is not reachable. Please check your settings!");
 
             throw new RuntimeException(BASE_URL + endpoint + " is not reachable. Please check your settings!");
         } catch (HttpClientErrorException e) {
-            logger.error("getAllTemplateFiles:: " + e.getMessage());
+            logger.error(e.getMessage());
 
             throw new RuntimeException(e.getMessage());
         }
