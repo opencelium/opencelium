@@ -1,8 +1,10 @@
 package com.becon.opencelium.backend.execution;
 
+import com.becon.opencelium.backend.enums.LogType;
 import com.becon.opencelium.backend.enums.OpType;
 import com.becon.opencelium.backend.enums.RelationalOperator;
 import com.becon.opencelium.backend.execution.builder.RequestEntityBuilder;
+import com.becon.opencelium.backend.execution.logger.msg.ConnectorLog;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.logger.msg.MethodData;
 import com.becon.opencelium.backend.execution.oc721.Connector;
@@ -34,6 +36,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Stack;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
@@ -49,7 +52,19 @@ public class ConnectorExecutor {
     private final OcLogger<ExecutionLog> logger;
     private final MaskingService masking;
 
-    public ConnectorExecutor(ConnectorEx connectorEx, ExecutionManager executionManager, RestTemplate restTemplate, OcLogger<ExecutionLog> logger, MaskingService masking) {
+    // log related variables:
+    private final String flowId;
+    private final int connectorId;
+    private final String connectorName;
+    private final String direction;
+    private final Stack<String> endPhases = new Stack<>();
+
+
+    public ConnectorExecutor(
+            ConnectorEx connectorEx, ExecutionManager executionManager,
+            RestTemplate restTemplate, OcLogger<ExecutionLog> logger,
+            MaskingService masking, String direction
+    ) {
         this.expressionProcessor = ExpressionProcessorFactory.get(ProcessorType.POSTFIX);
         this.executionManager = executionManager;
         this.restTemplate = restTemplate;
@@ -69,18 +84,38 @@ public class ConnectorExecutor {
         this.executables.sort(getComparator());
 
         this.connector = Connector.fromEx(connectorEx);
+
+        // initialize log related variables:
+        this.flowId = connectorEx.getFchartId();
+        this.connectorId = connectorEx.getId();
+        this.connectorName = connectorEx.getName();
+        this.direction = direction;
     }
 
     public void start() {
-        executionManager.setCurrentCtorId(connector.getId());
+        logger.getLogEntity().setType(LogType.INFO);
+        logger.getLogEntity().setConnector(new ConnectorLog(connectorName, "source".equals(direction) ? "CONN1" : "CONN2"));
+        logger.logAndSend(String.format("phase=FLOWCHART_START flowId=%s connectorId=%d connectorName=%s direction=%s", flowId, connectorId, connectorName, direction));
+        endPhases.push(String.format("phase=FLOWCHART_END flowId=%s connectorId=%d connectorName=%s direction=%s", flowId, connectorId, connectorName, direction));
 
-        int headPointer = 0;
-        while (headPointer < executables.size()) {
-            int tailPointer = getTailPointer(headPointer);
+        try {
+            executionManager.setCurrentCtorId(connector.getId());
 
-            execute(headPointer, tailPointer);
+            int headPointer = 0;
+            while (headPointer < executables.size()) {
+                int tailPointer = getTailPointer(headPointer);
 
-            headPointer = tailPointer + 1;
+                execute(headPointer, tailPointer);
+
+                headPointer = tailPointer + 1;
+            }
+        } catch (RuntimeException e) {
+            logger.logAndSend(e);
+            throw e;
+        } finally {
+            while(!endPhases.isEmpty()) {
+                logger.logAndSend(endPhases.pop());
+            }
         }
     }
 
@@ -96,17 +131,20 @@ public class ConnectorExecutor {
         if (executables.get(headPointer) instanceof OperationDTO operation) {
             logger.getLogEntity().setMethodData(new MethodData(operation.getOperationId()));
             logger.logAndSend(String.format("phase=OPERATION_START indexPath=%s name=\"%s\" %s", index, operation.getName(), getLoopData()));
+            endPhases.push(String.format("phase=OPERATION_END indexPath=%s name=\"%s\" %s", index, operation.getName(), getLoopData()));
+
             if (headPointer != tail) {
                 throw new RuntimeException("Methods cannot have body");
             }
 
             executeOperation(operation);
 
-            logger.logAndSend(String.format("phase=OPERATION_END indexPath=%s name=\"%s\" %s", index, operation.getName(), getLoopData()));
+            logger.logAndSend(endPhases.pop());
             logger.getLogEntity().setMethodData(null);
         } else if (executables.get(headPointer) instanceof OperatorEx operator) {
             if (Objects.equals(operator.getType(), "if")) {
                 logger.logAndSend(String.format("phase=IF_START indexPath=%s expression=(%s) %s", index, operator.getExpression(), getLoopData()));
+                endPhases.push(String.format("phase=IF_END indexPath=%s %s", index, getLoopData()));
 
                 boolean result;
                 try {
@@ -127,7 +165,7 @@ public class ConnectorExecutor {
                     // if result is true, then execute if operators' body
                     execute(headPointer + 1, tail);
                 }
-                logger.logAndSend(String.format("phase=IF_END indexPath=%s %s", index, getLoopData()));
+                logger.logAndSend(endPhases.pop());
             } else {
                 Loop loop = Loop.fromEx(operator);
                 Object referencedList = executionManager.getValue(loop.getRef());
@@ -154,6 +192,8 @@ public class ConnectorExecutor {
 
                 logger.logAndSend(String.format("phase=LOOP_START indexPath=%s expression=(%s) size=%d iterator=\"%s\" %s", index, loop.getRef(), length, loop.getIterator(), getLoopData()));
                 logger.logAndSend(String.format("segment=LOOP_REF ref=(%s) data=%s", loop.getRef(), list.stream().collect(Collectors.joining(", ", "[", "]"))));
+                endPhases.push(String.format("phase=LOOP_END indexPath=%s %s", index, getLoopData()));
+
                 executionManager.getLoops().add(loop);
                 for (int i = 0; i < length; i++) {
                     // update currently executing loops' data
@@ -166,7 +206,7 @@ public class ConnectorExecutor {
 
                 // remove executed loops' data
                 executionManager.getLoops().remove(loop);
-                logger.logAndSend(String.format("phase=LOOP_END indexPath=%s %s", index, getLoopData()));
+                logger.logAndSend(endPhases.pop());
             }
         } else {
             throw new RuntimeException("Wrong type is supplied");
