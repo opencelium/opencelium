@@ -35,11 +35,11 @@ export default class ErrorBoundary extends React.Component {
             return (
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 'calc(100vh - 2rem)'}}>
                     <Card>
-                        <h3 style={{textAlign: 'center', padding: '20px 40px 10px'}}>Oops! An error occurred while processing your request.</h3>
+                        <h3 style={{textAlign: 'center', padding: '20px 40px 10px', fontSize: '20px'}}>Oops! An error occurred while processing your request.</h3>
                         <div style={{borderBottom: '1px solid black', width: '100%'}}/>
                         <div style={{textAlign: 'center', fontSize: '24px', padding: '20px 40px 20px'}}>
-                            <p style={{textAlign: 'center'}}>Please, contact our support team if the problem persists.</p>
-                            <p>We apologize for the inconvenience.</p>
+                            <p style={{textAlign: 'center', fontSize: '16px', marginBottom: '5px'}}>Please, contact our support team if the problem persists.</p>
+                            <p style={{fontSize: '16px'}}>We apologize for the inconvenience.</p>
                         </div>
                     </Card>
                 </div>
