@@ -18,4 +18,5 @@ public interface RegExpression {
     String requestData = "\\{(?!%)(.*?)(?<!%)\\}";
     String pageRef = "@\\{([^}]+)\\}";
     String referencePath = "(body\\.\\$\\..+)|(header\\.\\$\\..+)|(path)";
+    String TEST_CONNECTION_REGEX = "^!\\*test_connection_\\d+_.+";
 }
