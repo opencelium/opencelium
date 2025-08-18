@@ -114,6 +114,8 @@ public class OperationExMapper {
             case "json" -> MediaType.APPLICATION_JSON;
             case "text" -> MediaType.TEXT_PLAIN;
             case "x-www-form-urlencoded" -> MediaType.APPLICATION_FORM_URLENCODED;
+            case "file" -> MediaType.APPLICATION_PDF;
+            case "image" -> MediaType.IMAGE_PNG;
             default -> null;
         };
     }
