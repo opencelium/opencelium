@@ -30,28 +30,22 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "invoker_sync")
+@Table(name = "online_sync_history")
 @EntityListeners(AuditingEntityListener.class)
-public class InvokerSync {
+public class OnlineSyncHistory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "invoker_name")
-    private String invokerName;
+    @Column(name = "username")
+    private String username;
 
-    @Column(name = "sp_invoker_file_name")
-    private String spInvokerFileName;
+    @Column(name = "service")
+    private String service;
 
-    @Column(name = "oc_invoker_file_name")
-    private String ocInvokerFileName;
-
-    @Column(name = "invoker_content_hmac")
-    private String invokerContentHmac;
-
-    @Column(name = "manually_modified")
-    private boolean manuallyModified;
+    @Column(name = "details")
+    private String details;
 
     @JsonIgnore
     @CreationTimestamp
@@ -66,44 +60,28 @@ public class InvokerSync {
         this.id = id;
     }
 
-    public String getInvokerName() {
-        return invokerName;
+    public String getUsername() {
+        return username;
     }
 
-    public void setInvokerName(String invokerName) {
-        this.invokerName = invokerName;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public String getSpInvokerFileName() {
-        return spInvokerFileName;
+    public String getService() {
+        return service;
     }
 
-    public void setSpInvokerFileName(String spInvokerFileName) {
-        this.spInvokerFileName = spInvokerFileName;
+    public void setService(String service) {
+        this.service = service;
     }
 
-    public String getOcInvokerFileName() {
-        return ocInvokerFileName;
+    public String getDetails() {
+        return details;
     }
 
-    public void setOcInvokerFileName(String ocInvokerFileName) {
-        this.ocInvokerFileName = ocInvokerFileName;
-    }
-
-    public String getInvokerContentHmac() {
-        return invokerContentHmac;
-    }
-
-    public void setInvokerContentHmac(String invokerContentHmac) {
-        this.invokerContentHmac = invokerContentHmac;
-    }
-
-    public boolean isManuallyModified() {
-        return manuallyModified;
-    }
-
-    public void setManuallyModified(boolean manuallyModified) {
-        this.manuallyModified = manuallyModified;
+    public void setDetails(String details) {
+        this.details = details;
     }
 
     public LocalDateTime getCreatedAt() {
