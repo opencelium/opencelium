@@ -154,7 +154,6 @@ public class ExecutionTrackerImpl implements ExecutionTracker {
                 String index_path = currentPhaseCtx.getParsedLogLine().getProperties().get(LogLineKey.INDEX_PATH);
                 currentPhaseCtx.setErrorDetail(new ErrorDetail(index_path, segmentContext));
                 phaseContextManager.addExceptionSegment(index_path, segmentContext);
-                phaseContextManager.endCurrentPhase();
             }
             PhaseBuilder builder = builderFactory.getBuilder(phaseCategory);
             LogData logData = builder.build(currentPhaseCtx, execId, Long.parseLong(connId));
