@@ -10,7 +10,7 @@ server:
   address: 127.0.0.1
   port: 9090
 websocket:
-  endpoint: /websocket
+  endpoint: /ws
 #  ssl:
 #    enabled: true
 #    key-store-type: PKCS12
