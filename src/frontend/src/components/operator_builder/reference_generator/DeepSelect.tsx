@@ -114,10 +114,10 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 			setSearchValue(selected.value);
 			setFilteredOptions(getNestedOptions(selected.value));
 			const responseStructure = connectionEditor.connection.getMethodByColor(color)
-				.response.success.body.fields;
+				?.response?.success?.body?.fields ?? {};
 				// @ts-ignore
 			const requestStructure = connectionEditor.connection.getMethodByColor(connectionEditor.item.color)
-				.request._body._fields;
+				?.request?._body?._fields ?? {};
 			const structure = {
 				request: requestStructure,
 				response: responseStructure
