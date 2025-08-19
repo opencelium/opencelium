@@ -46,6 +46,9 @@ public class InvokerRequestBuilder {
     private boolean sslCert;
     private String proxyPort;
     private String proxyHost;
+    private String proxyUser;
+    private String proxyPass;
+    private int timeout;
 
     public InvokerRequestBuilder() {
     }
@@ -72,6 +75,21 @@ public class InvokerRequestBuilder {
 
     public InvokerRequestBuilder setProxyHost(String proxyHost) {
         this.proxyHost = proxyHost;
+        return this;
+    }
+
+    public InvokerRequestBuilder setProxyUser(String proxyUser) {
+        this.proxyUser = proxyUser;
+        return this;
+    }
+
+    public InvokerRequestBuilder setProxyPass(String proxyPass) {
+        this.proxyPass = proxyPass;
+        return this;
+    }
+
+    public InvokerRequestBuilder setTimeout(int timeout) {
+        this.timeout = timeout;
         return this;
     }
 
@@ -135,8 +153,14 @@ public class InvokerRequestBuilder {
     }
 
     private RestTemplate createRestTemplate() {
+        RestCustomizer restCustomizer;
+        if (proxyUser == null || proxyPass == null) {
+            restCustomizer = new RestCustomizer(proxyHost, proxyPort, sslCert);
+        } else {
+            restCustomizer = new RestCustomizer(proxyHost, proxyPort, proxyUser, proxyPass, sslCert, timeout);
+        }
         RestTemplateBuilder restTemplateBuilder =
-                new RestTemplateBuilder(new RestCustomizer(proxyHost, proxyPort, sslCert));
+                new RestTemplateBuilder(restCustomizer);
         return restTemplateBuilder.build();
     }
 
