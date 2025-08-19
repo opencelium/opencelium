@@ -203,7 +203,7 @@ opencelium:
   connector:
     security:
       key: keykeygjhgjh # used for encrypt and decrypt request data
-    master_password: {put your master password}
+    master_password: {insert your master password here}
   token:
     secret: 84bbce3d33de467b47b7e76c2563769!3f9aff968def8ef2674856f67ae8a93f
     activity-time: 18000
