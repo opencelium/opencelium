@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.configuration;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -15,5 +16,22 @@ public class OpenCeliumProps {
 
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    public Integer majorVersion() {
+        if (StringUtils.isBlank(version)) {
+            return null;
+        }
+
+        int firstDotIndex = version.indexOf(".");
+        if (firstDotIndex == -1) {
+            return null;
+        }
+
+        try {
+            return Integer.parseInt(version.substring(0, firstDotIndex));
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 }
