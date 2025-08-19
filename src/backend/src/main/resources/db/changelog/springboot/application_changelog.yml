@@ -105,5 +105,5 @@ versions:
         path: opencelium.version
       - changeset: 2
         operation: add
-        value: {password}
+        value: password
         path: opencelium.connector.master_password
