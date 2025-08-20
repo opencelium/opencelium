@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -78,9 +77,7 @@ public class TemplateSyncScheduler {
             while ((entry = zis.getNextEntry()) != null) {
                 if (entry.getName().endsWith(".json")) {
                     byte[] jsonBytes = zis.readAllBytes();
-
-                    String jsonContent = new String(jsonBytes, StandardCharsets.UTF_8);
-                    Template template = objectMapper.readValue(jsonContent, Template.class);
+                    Template template = objectMapper.readValue(jsonBytes, Template.class);
 
                     try {
                         templateEntityUpdater.updateToCurrentVersion(template)
