@@ -45,7 +45,7 @@ class FinishUpdate extends React.Component{
     componentDidMount() {
         if (!this.containerRef.current) return;
 
-        const buttons = this.containerRef.current.querySelectorAll(".copy-btn");
+        const buttons = this.containerRef.current.querySelectorAll(".instruction-copy-btn");
 
         buttons.forEach((button) => {
             button.addEventListener("click", () => {
