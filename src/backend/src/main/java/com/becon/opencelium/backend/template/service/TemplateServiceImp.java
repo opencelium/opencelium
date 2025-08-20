@@ -37,19 +37,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -105,20 +107,6 @@ public class TemplateServiceImp implements TemplateService {
     @Override
     public void save(Template template) {
         save(template, template.getTemplateId() + ".json");
-    }
-
-    private void save(Template template, String fileName) {
-        try {
-            String id = template.getTemplateId();
-            ObjectMapper objectMapper = new ObjectMapper();
-            template.setTemplateId(id);
-            String json = objectMapper.writeValueAsString(template);
-            FileWriter jsonTemplate = new FileWriter(PathConstant.TEMPLATE + fileName);
-            jsonTemplate.write(json);
-            jsonTemplate.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Override
@@ -232,6 +220,22 @@ public class TemplateServiceImp implements TemplateService {
             return Optional.of(template);
         } catch (Exception e) {
             throw new RuntimeException("ERROR while converting from json to Template object");
+        }
+    }
+
+
+    private void save(Template template, String fileName) {
+        try {
+            String id = template.getTemplateId();
+            ObjectMapper objectMapper = new ObjectMapper();
+            template.setTemplateId(id);
+
+            Path filePath = Paths.get(PathConstant.TEMPLATE, fileName);
+            try (BufferedWriter writer = Files.newBufferedWriter(filePath, StandardCharsets.UTF_8)) {
+                objectMapper.writeValue(writer, template);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

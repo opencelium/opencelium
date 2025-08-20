@@ -31,7 +31,6 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.file.DirectoryStream;
@@ -179,14 +178,7 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
             ZipEntry entry; // = invoker file
             while ((entry = zis.getNextEntry()) != null) {
                 if (entry.getName().endsWith(".xml")) {
-                    // read bytes of invoker file
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    byte[] buffer = new byte[4096];
-                    int len;
-                    while ((len = zis.read(buffer)) > 0) {
-                        baos.write(buffer, 0, len);
-                    }
-                    byte[] xmlBytes = baos.toByteArray();
+                    byte[] xmlBytes = zis.readAllBytes();
 
                     // extract required fields
                     String invokerName = extractInvokerName(xmlBytes);
@@ -220,6 +212,7 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
 
                     saveOrUpdate(sync);
                 }
+                zis.closeEntry();
             }
 
             // update invoker container
