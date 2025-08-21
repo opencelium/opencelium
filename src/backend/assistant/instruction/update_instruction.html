@@ -25,25 +25,8 @@
         white-space: pre;           /* Preserve formatting */
         margin: 0;
     }
-    .copy-btn {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background: #2d2d2d;
-        color: white;
-        border: none;
-        padding: 5px 10px;
-        font-size: 0.85em;
-        border-radius: 3px;
-        cursor: pointer;
-        opacity: 0.8;
-        transition: opacity 0.2s ease;
-    }
     #instruction-code-block {
         margin: 10px 0;
-    }
-    .copy-btn:hover {
-        opacity: 1;
     }
 </style>
 <div style="text-align: left">
@@ -51,7 +34,6 @@
         After clicking <b>"Update OC":</b>, run the following commands on the web server:
     </p>
     <div class="instruction-code-container">
-        <button class="copy-btn">Copy</button>
         <pre><code id="instruction-code-block">chmod +x /usr/bin/oc
 systemctl daemon-reload
 systemctl restart opencelium</code></pre>
