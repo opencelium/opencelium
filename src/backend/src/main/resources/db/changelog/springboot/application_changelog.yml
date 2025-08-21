@@ -83,7 +83,7 @@ versions:
         path: websocket.endpoint
       - changeset: 5
         operation: add
-        value: '0 0 0 * * *'
+        value: '-'
         path: opencelium.online_services.invoker_sync.time
       - changeset: 6
         operation: add
@@ -91,7 +91,7 @@ versions:
         path: opencelium.online_services.invoker_sync.active
       - changeset: 7
         operation: add
-        value: '0 0 0 * * *'
+        value: '-'
         path: opencelium.online_services.template_sync.time
       - changeset: 8
         operation: add
@@ -107,3 +107,7 @@ versions:
         operation: add
         value: password
         path: opencelium.connector.master_passwordNeed urgent fix.
+      - changeset: 3
+        operation: add
+        value: false
+        path: opencelium.online_services.active
