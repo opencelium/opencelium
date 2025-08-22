@@ -44,10 +44,11 @@ public class ZipUtils {
                     String parent = targetPath.getParent().getFileName().toString();
                     String file = targetPath.getFileName().toString();
                     // we have to escape to remove files in conf folder except opencelium.service
-                    if (!parent.equals("conf") || file.equals("opencelium.service")) {
-                        Files.copy(zis, targetPath, StandardCopyOption.REPLACE_EXISTING);
-                        log.info("\"" + targetPath.normalize() + "\" has been replaced or added successfully");
-                    }
+                    // Talked with Bettina, she requested to change all files in conf folder.
+//                    if (!parent.equals("conf") || file.equals("opencelium.service")) {
+                    Files.copy(zis, targetPath, StandardCopyOption.REPLACE_EXISTING);
+                    log.info("\"" + targetPath.normalize() + "\" has been replaced or added successfully");
+//                    }
                 }
             }
         }
