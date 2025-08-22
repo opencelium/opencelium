@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { consoleLog, isNumber, isString } from "@application/utils/utils";
+import { isNumber, isString, wrapField } from "@application/utils/utils";
 import {
     convertFieldNameForBackend,
     markFieldNameAsArray
@@ -25,7 +25,7 @@ import { RESPONSE_FAIL, RESPONSE_SUCCESS } from "@entity/connection/components/c
 
 export class CBodyEditor{
 
-    static updateFieldsBinding(connection, connector, method, bodyData, target = null) {
+    static updateFieldsBinding(connection, connector, method, bodyData, target = null, refStructure) {
         const checkBodyData = CBodyEditor.shouldUpdateFieldBinding(connector, bodyData);
         let invokerBody = method.request.invokerBody;
         
@@ -41,7 +41,7 @@ export class CBodyEditor{
             } else {
                 item.field = `${parents.join('.')}.${bodyData.name}`;
             }
-    
+            console.log(refStructure)
             item.field = convertFieldNameForBackend(invokerBody.fields, item.field, true);
     
             if (target === 'header') {
@@ -49,8 +49,10 @@ export class CBodyEditor{
             } else {
                 item.field = `body.$.${item.field.replace(/^body\.\$\.|header\.\$\./, '')}`;
             }
-    
             item.type = 'request';
+            if(refStructure && refStructure.request){
+                item.field = wrapField(item.field, refStructure.request);
+            }
             let toBindingItems = [CBindingItem.createBindingItem(item)];
     
             let fromBindingItems = [];
@@ -65,6 +67,9 @@ export class CBodyEditor{
                         newItem.field = bindingItemSplitted.slice(2, bindingItemSplitted.length).join('.');
     
                         newItem.field = newItem.field.replace(/^header\.\$/, 'body.$');
+                        if(refStructure && refStructure.response) {
+                            newItem.field = wrapField(newItem.field, refStructure.response);
+                        }
                         fromBindingItems.push(CBindingItem.createBindingItem(newItem));
                     }
                     break;

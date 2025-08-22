@@ -24,7 +24,9 @@ import {
 export default class CBindingItem {
 	constructor(color = '', field = '', type = '') {
 		this._color = color;
-		this._field = putAsterixInEmptyBrackets(transformDataFields(field));
+		this._field = putAsterixInEmptyBrackets(
+			transformDataFields(field)
+		);
 		this._type = type;
 	}
 

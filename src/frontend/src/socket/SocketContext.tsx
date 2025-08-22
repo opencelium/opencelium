@@ -1,6 +1,7 @@
 import React, {createContext, useContext, useRef} from "react";
 import { getSocket } from "./socket";
 import {Client} from "@stomp/stompjs";
+import {consoleLog} from "@application/utils/utils";
 
 const SocketContext = createContext<{socket: Client | null, resetSocket: () => void,}>({socket: null, resetSocket: () => {}});
 
@@ -12,7 +13,7 @@ export const SocketProvider: React.FC<React.PropsWithChildren<{}>> = ({ children
     }
 
     const resetSocket = () => {
-        console.log('reset socket')
+        consoleLog('reset socket')
         if (socketRef.current && socketRef.current.connected) {
             socketRef.current.deactivate().then(() => {
                 socketRef.current = getSocket();

@@ -111,7 +111,7 @@ public class FileController {
         this.invokerServiceImp = invokerServiceImp;
         this.storageService = storageService;
         this.connectorMapper = connectorMapper;
-        templateUpdater = versionManager.getUpdater(Template.class);
+        this.templateUpdater = versionManager.getUpdater(Template.class);
         this.ocProps = ocProps;
     }
 
@@ -564,9 +564,11 @@ public class FileController {
 
     private void updateTemplate(Template template){
         try {
-            Wrapper<Template> updated = templateUpdater.updateToCurrentVersion(template);
-            template.setVersion(updated.getNewVersion());
-            log.info("Template[id={}, name={}] is successfully updated to {} version", template.getTemplateId(), template.getName(), ocProps.getVersion());
+            templateUpdater.updateToCurrentVersion(template)
+                    .ifUpdated(temp -> {
+                        log.info("Template[id={}, name={}] is successfully updated to {} version", template.getTemplateId(), template.getName(), ocProps.getVersion());
+                    });
+            template.setVersion(ocProps.getVersion());
         } catch (Exception e) {
             log.error("Failed to update Template[id={}, name={}]", template.getTemplateId(), template.getName(), e);
             throw new RuntimeException("INVALID_TEMPLATE");

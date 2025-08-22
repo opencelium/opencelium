@@ -161,7 +161,7 @@ const DEBUGGER_LOGS = false;
 export function isNumber(number){
     return !isNaN(number);
 }
-export function consoleLog(value){
+export function consoleLog(...value){
     if(DEBUGGER_LOGS) {
         console.log(value);
     }
@@ -1216,4 +1216,96 @@ export function jsonToString(json, type) {
     }
 
     return { result: '', isNotValid: true };
+}
+
+export function wrapField(path, fieldsObject) {
+	const tokenPattern = /(\['[^']+'\]|\["[^"\]]+"\]|\[[^\]]+\]|[^.\[\]]+)/g;
+	const rawTokens = path.match(tokenPattern) || [];
+	const prefixTokens = rawTokens.slice(0, 2);
+	const pathTokens = rawTokens.slice(2);
+	const outputParts = [...prefixTokens];
+	let currentObject = fieldsObject;
+	const prefixLen = prefixTokens.length;
+
+	let i = 0;
+	while (i < pathTokens.length) {
+		const token = pathTokens[i];
+
+		const mQuoted = token.match(/^\['([^']+)'\]$|^\["([^"]+)"\]$/);
+		if (mQuoted) {
+			const key = mQuoted[1] !== undefined ? mQuoted[1] : mQuoted[2];
+			outputParts.push(`['${key}']`);
+			currentObject =
+				currentObject &&
+				typeof currentObject === 'object' &&
+				key in currentObject
+					? currentObject[key]
+					: undefined;
+			i++;
+			continue;
+		}
+
+		const mUnquoted = token.match(/^\[([^\]]+)\]$/);
+		if (mUnquoted) {
+			const inner = mUnquoted[1];
+			if (outputParts.length > prefixLen) {
+				outputParts[outputParts.length - 1] += `[${inner}]`;
+			} else {
+				outputParts.push(`[${inner}]`);
+			}
+			if (Array.isArray(currentObject)) {
+				currentObject = currentObject[0];
+			} else if (
+				currentObject &&
+				typeof currentObject === 'object' &&
+				inner in currentObject
+			) {
+				currentObject = currentObject[inner];
+			} else {
+				currentObject = undefined;
+			}
+			i++;
+			continue;
+		}
+
+		let matched = false;
+		if (currentObject && typeof currentObject === 'object') {
+			for (let j = pathTokens.length; j > i + 1; j--) {
+				const slice = pathTokens.slice(i, j);
+				const candDot = slice.join('.');
+				if (candDot in currentObject) {
+					outputParts.push(`['${candDot}']`);
+					currentObject = currentObject[candDot];
+					i = j;
+					matched = true;
+					break;
+				}
+				const candRaw = slice.join('');
+				if (candRaw in currentObject) {
+					outputParts.push(`['${candRaw}']`);
+					currentObject = currentObject[candRaw];
+					i = j;
+					matched = true;
+					break;
+				}
+			}
+		}
+		if (matched) {
+			continue;
+		}
+
+		outputParts.push(token);
+        currentObject = (currentObject && typeof currentObject === 'object' && token in currentObject)
+            ? currentObject[token]
+            : undefined;
+        i++;
+
+	}
+
+	return outputParts.join('.');
+}
+
+
+export function unwrapField(field) {
+  return field.replace(/\['(.*?)'\]/g, '$1');
 }

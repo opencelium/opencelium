@@ -1,11 +1,11 @@
-import Button  from '@app_component/base/button/Button';
-import React, {FC, useState} from 'react';
-import {ColorTheme} from "@style/Theme";
-import {TextSize} from "@app_component/base/text/interfaces";
-import Confirmation from "@entity/connection/components/components/general/app/Confirmation";
+import Button from '@app_component/base/button/Button';
+import { TextSize } from "@app_component/base/text/interfaces";
+import { replaceVariables, wrapField } from "@application/utils/utils";
 import CConnection from "@classes/content/connection/CConnection";
 import CEnhancement from "@classes/content/connection/field_binding/CEnhancement";
-import {replaceVariables} from "@application/utils/utils";
+import Confirmation from "@entity/connection/components/components/general/app/Confirmation";
+import { ColorTheme } from "@style/Theme";
+import React, { FC, useState } from 'react';
 
 interface PointerProps{
     pointer: string,
@@ -42,11 +42,13 @@ const Pointer: FC<PointerProps> = ({connection, pointer, pointers, submitEdit, o
         submitEdit(filteredPointers);
         toggleConfirmation(false);
     }
+    const titleString = pointerSplit.slice(2, pointerSplit.length).join('.').replace('[]', '');
+    const titleRefStructure = connection.getMethodByColor(pointerSplit[0]).response.success.body.fields;
     return (
         <div
             onMouseOver={() => {if(!showIcon) toggleIcon(!showIcon)}}
             onMouseLeave={() => {if(showIcon) toggleIcon(!showIcon)}}
-            title={pointerSplit.slice(2, pointerSplit.length).join('.').replace('[]', '')}
+            title={wrapField(titleString, titleRefStructure)}
             style={{position: 'relative', float: 'left', margin: '7px 2px', width: '20px', height: '10px', background: pointerSplit[0]}}
         >
             {showIcon && <div style={{position: "absolute", right: '-5px', top: '-12px'}}>

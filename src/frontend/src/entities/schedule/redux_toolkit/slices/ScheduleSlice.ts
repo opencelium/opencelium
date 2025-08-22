@@ -109,6 +109,8 @@ export const scheduleSlice = createSlice({
     name: 'schedule',
     initialState,
     reducers: {
+        copyLogsToClipboard: (state) => {
+        },
         copyWebhookToClipboard: (state) => {
         },
         setCurrentExecutionLogs: (state, action) => {
@@ -415,7 +417,7 @@ export const scheduleSlice = createSlice({
 
 export const {
     copyWebhookToClipboard, setCurrentSchedule, setInitialTestScheduleState,
-    setCurrentExecutionLogs,
+    setCurrentExecutionLogs, copyLogsToClipboard,
 } = scheduleSlice.actions;
 
 export const actions = {

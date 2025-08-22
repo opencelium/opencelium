@@ -12,6 +12,7 @@ import {TRIPLET_STATE} from "@application/interfaces/IApplication";
 import {disableSocket} from "./socket";
 import IAuthUser from "@entity/user/interfaces/IAuthUser";
 import {LocalStorage} from "@application/classes/LocalStorage";
+import {consoleLog} from "@application/utils/utils";
 
 const SocketDataContext = createContext<SocketDataContextType | undefined>(undefined);
 
@@ -38,7 +39,7 @@ export const SocketDataProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
         sessionChannel.current.onmessage = (event) => {
             if (event.data.type === 'SESSION_UPDATE') {
                 if (event.data.payload.action === 'RELOGIN') {
-                    console.log('📣 Received RELOGIN from another tab');
+                    consoleLog('📣 Received RELOGIN from another tab');
 
                     const storage = LocalStorage.getStorage(true);
                     const authUser: IAuthUser = storage.get('authUser');
@@ -74,8 +75,7 @@ export const SocketDataProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
         }
     }, [authUser?.token]);
     const connect = () => {
-        console.log('connect socket')
-        console.log(socket);
+        consoleLog('connect socket')
         if (!socket) return;
         const alreadyConnected = socket.connected;
 
@@ -83,21 +83,21 @@ export const SocketDataProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
             setIsConnected(true);
             const userSessionSubscription = socket.subscribe(`/user/session`, (message) => {
                 const data = JSON.parse(message.body)
-                console.log('/user/session', data);
+                consoleLog('/user/session', data);
                 if (data.event === 'FORCE_LOGOUT') {
                     socket.deactivate().then(() => {
-                        console.log("🧹 Deactivated");
+                        consoleLog("🧹 Deactivated");
                         dispatch(setIsAboutToLogout(TRIPLET_STATE.TRUE));
                         setCurrentSchedules([]);
                         disableSocket();
                     });
                 }
             });
-            console.log("✅ Subscribed to /user/session");
+            consoleLog("✅ Subscribed to /user/session");
             userSessionSubscriptionRef.current = () => {
                 userSessionSubscription.unsubscribe();
                 userSessionSubscriptionRef.current = undefined;
-                console.log("🧹 Unsubscribed from /user/session");
+                consoleLog("🧹 Unsubscribed from /user/session");
             };
         };
         socket.onDisconnect = () => {
