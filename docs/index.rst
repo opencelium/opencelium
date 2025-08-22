@@ -68,15 +68,15 @@ This documentation is organized into a couple of sections:
    Changelog <https://github.com/opencelium/opencelium/blob/prod/CHANGELOG.rst>
 
 .. toctree::
-   :caption: REST API Reference
+   :caption: REST API
 
-   Swagger <https://opencelium-demo.becon.de:9090/swagger-ui/index.html>
+   api/overview
 
 ##################
 License
 ##################
 
-`becon`_ © 2013-2023 becon GmbH
+`becon`_ © 2013-2025 becon GmbH
 
 .. _becon: LICENSE.html
       
