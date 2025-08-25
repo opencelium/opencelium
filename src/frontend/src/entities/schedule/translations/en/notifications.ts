@@ -14,7 +14,7 @@
  */
 
 import ActionCreators from "../../redux_toolkit/action_creators";
-import {actions} from '../../redux_toolkit/slices/ScheduleSlice';
+import {actions, copyLogsToClipboard} from '../../redux_toolkit/slices/ScheduleSlice';
 import {getLogsByExecutionId} from "@entity/schedule/redux_toolkit/action_creators/ScheduleCreators";
 
 const {
@@ -48,12 +48,14 @@ export default {
         [startSchedule.fulfilled.type]: "The job <1><0>{{title}}</0></1> was successfully triggered",
         [startTestSchedule.fulfilled.type]: "Test was successfully triggered",
         [copyWebhookToClipboard.type]: "The webhook was successfully copied",
+        [copyLogsToClipboard.type]: "The logs were successfully copied",
 
     },
     rejected: {
         [getLogsByExecutionId.rejected.type]: {
             "__DEFAULT__": "The log was not fetched.",
             "LOG_NOT_FOUND": "The log is not found.",
+            "TOO_BIG_LOG": "The log is too big. You can find it in 'src/backend/src/main/resources/logs'."
         },
         [addNotificationToSelectedSchedules.rejected.type]: {
             "__DEFAULT__": "The notification was not added",

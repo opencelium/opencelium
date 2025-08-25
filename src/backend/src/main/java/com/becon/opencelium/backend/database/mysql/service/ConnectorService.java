@@ -45,7 +45,7 @@ public interface ConnectorService {
 
     boolean existByInvoker(String invokerName);
 
-    List<Connector> findAllByInvoker(String title);
+    List<Connector> findAllByInvoker(String invokerName);
 
     List<Connector> findAllByTitleContains(String title);
 

@@ -14,7 +14,7 @@
  */
 
 import {createAsyncThunk} from "@reduxjs/toolkit";
-import {errorHandler} from "@application/utils/utils";
+import {errorHandler, timeout} from "@application/utils/utils";
 import {ResponseMessages} from "@application/requests/interfaces/IResponse";
 import {InvokerRequest} from "../../requests/classes/Invoker";
 import { IInvoker } from "../../interfaces/IInvoker";
@@ -28,6 +28,18 @@ export const checkInvokerFileName = createAsyncThunk(
             const checkFilenameRequest = new InvokerRequest({endpoint: `/file/exists/${filename}`})
             const checkFilenameResponse = await checkFilenameRequest.checkInvokerFilename();
             return checkFilenameResponse.data;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+export const syncInvokerWithSP = createAsyncThunk(
+    'invoker/sync',
+    async(invokerName: string, thunkAPI) => {
+        try {
+            const request = new InvokerRequest()
+            await request.syncInvokerWithSP(invokerName);
+            return invokerName;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
@@ -218,6 +230,7 @@ export const deleteInvokerImage = createAsyncThunk(
 )
 
 export default {
+    syncInvokerWithSP,
     importInvoker,
     updateOperation,
     checkInvokerName,

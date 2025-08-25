@@ -21,6 +21,7 @@ package com.becon.opencelium.backend;
 import com.becon.opencelium.backend.constant.SubscriptionConstant;
 import com.becon.opencelium.backend.database.mysql.entity.ActivationRequest;
 import com.becon.opencelium.backend.enums.ActivReqStatus;
+import com.becon.opencelium.backend.ocel.operator.operators.NotEqualTo;
 import com.becon.opencelium.backend.subscription.dto.LicenseKey;
 import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
 import com.becon.opencelium.backend.utility.crypto.Base64Utility;

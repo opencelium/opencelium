@@ -4,16 +4,14 @@ import com.becon.opencelium.backend.database.mongodb.entity.LogData;
 import com.becon.opencelium.backend.execution.logger.dto.LogDataDTO;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseType;
 import com.becon.opencelium.backend.execution.logger.enums.LogDetailLevel;
-import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
 import com.becon.opencelium.backend.execution.logger.parser.ParsedLogLineBuilder;
 import com.becon.opencelium.backend.execution.logger.parser.entity.ParsedLogLine;
-import com.becon.opencelium.backend.execution.logger.service.LogMetaDataService;
-import com.becon.opencelium.backend.execution.logger.service.LogMetaDataServiceImp;
+import com.becon.opencelium.backend.execution.logger.service.LogDataService;
+import com.becon.opencelium.backend.execution.logger.service.LogDataServiceImp;
 import com.becon.opencelium.backend.execution.logger.tracker.ExecutionTracker;
 import com.becon.opencelium.backend.execution.logger.tracker.ExecutionTrackerImpl;
 import com.becon.opencelium.backend.utility.ApplicationContextUtility;
 
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -27,29 +25,22 @@ import java.util.Optional;
 public class LogLineDispatcher {
     private final ThreadLocal<ExecutionTracker> tls = new ThreadLocal<>();
     private final ParsedLogLineBuilder parsedLogLineBuilder;
-    private final LogMetaDataService logMetaDataService;
+    private final LogDataService logMetaDataService;
 
     public LogLineDispatcher() {
         this.parsedLogLineBuilder = ApplicationContextUtility.getBean(ParsedLogLineBuilder.class);
-        this.logMetaDataService = ApplicationContextUtility.getBean(LogMetaDataServiceImp.class);
+        this.logMetaDataService = ApplicationContextUtility.getBean(LogDataServiceImp.class);
     }
 
-    public Optional<LogDataDTO> dispatch(String logLine, long startOffset) {
-        return dispatch(logLine, startOffset, LogDetailLevel.LIGHTWEIGHT);
+    public Optional<LogDataDTO> dispatch(String logLine, long startOffset, long endOffset) {
+        return dispatch(logLine, startOffset, endOffset, LogDetailLevel.LIGHTWEIGHT);
     }
 
-    public Optional<LogDataDTO> dispatch(String logLine, long startOffset, LogDetailLevel mode) {
-        ParsedLogLine parsed = parsedLogLineBuilder.build(logLine, startOffset);
+    public Optional<LogDataDTO> dispatch(String logLine, long startOffset, long endOffset, LogDetailLevel logLevelMode) {
+        ParsedLogLine parsed = parsedLogLineBuilder.build(logLine, startOffset, endOffset);
         // Handle the start of a new execution
         if (parsed.getStage() == PhaseType.EXECUTION_START) {
-            Map<LogLineKey,String> p = parsed.getProperties();
-            tls.set(new ExecutionTrackerImpl(
-                    p.get(LogLineKey.EXECUTION_ID),
-                    p.get(LogLineKey.CONNECTION_ID),
-                    null,
-                    mode
-            ));
-            return Optional.empty();
+            tls.set(new ExecutionTrackerImpl(logLevelMode));
         }
 
         // Grab the current tracker once
@@ -57,11 +48,7 @@ public class LogLineDispatcher {
 
         // Handle the end of an execution
         if (parsed.getStage() == PhaseType.EXECUTION_END) {
-//            if (tracker != null) {
-//                tracker.buildLogData(parsed);
-//            }
             tls.remove();
-            return Optional.empty();
         }
 
         // For any other stage, if no tracker is active we do nothing

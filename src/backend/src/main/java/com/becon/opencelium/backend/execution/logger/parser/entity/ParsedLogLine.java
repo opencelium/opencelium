@@ -18,7 +18,9 @@ public class ParsedLogLine {
 
     private LogLineType type;        // PHASE or SEGMENT
     private LogLineStage stage;             // e.g., "FLOWCHART_START", "REQUEST"
-    private long offset;
+    private String rawLogLine;
+    private long startOffset; // when started single log line
+    private long endOffset; // when ended single log line
     private Map<LogLineKey, String> properties; // Other key-value fields (e.g., url, data, status)
 
     public ParsedLogLine() {
@@ -44,12 +46,28 @@ public class ParsedLogLine {
         this.stage = typeValue;
     }
 
-    public long getOffset() {
-        return offset;
+    public String getRawLogLine() {
+        return rawLogLine;
     }
 
-    public void setOffset(long offset) {
-        this.offset = offset;
+    public void setRawLogLine(String rawLogLine) {
+        this.rawLogLine = rawLogLine;
+    }
+
+    public long getStartOffset() {
+        return startOffset;
+    }
+
+    public void setStartOffset(long startOffset) {
+        this.startOffset = startOffset;
+    }
+
+    public long getEndOffset() {
+        return endOffset;
+    }
+
+    public void setEndOffset(long endOffset) {
+        this.endOffset = endOffset;
     }
 
     public Map<LogLineKey, String> getProperties() {
@@ -65,14 +83,16 @@ public class ParsedLogLine {
         return "ParsedLogLine{" +
                 "logLineType=" + type +
                 ", stage=" + stage +
-                ", offset=" + offset +
+                ", startOffset=" + startOffset +
+                ", endOffset=" + endOffset +
                 ", properties=" + properties +
                 '}';
     }
 
     public ParsedLogLine clone() {
         ParsedLogLine cloned = new ParsedLogLine(this.type);
-        cloned.setOffset(this.offset);
+        cloned.setStartOffset(this.startOffset);
+        cloned.setEndOffset(this.endOffset);
         cloned.setStage(this.stage); // assuming LogLineStage is an enum or immutable
         cloned.setType(this.type);
 

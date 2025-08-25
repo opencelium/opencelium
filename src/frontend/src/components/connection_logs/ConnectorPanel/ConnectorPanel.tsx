@@ -7,26 +7,23 @@ import TraceItem from './TraceItem/TraceItem';
 interface ConnectorPanelProps {
 	connector: ConnectorLog;
 	executionId: string;
-	connectionId: string;
 	theme?: ITheme;
 }
 
 const ConnectorPanel: React.FC<ConnectorPanelProps> = ({
 	connector,
 	executionId,
-	connectionId,
 	theme
 }) => {
 	return (
-		<div className={styles.connectorPanel}>
+		<div className={styles.connectorPanel} style={{width: '100%'}}>
 			<h3 className={styles.connectorPanelTitle}>{connector.name}</h3>
 			{connector.traces.map((trace) => (
-				<div key={trace.indexPath} className={styles.traceItemContainer}>
+				<div key={`${trace.flowId}_${trace.indexPath}`} className={styles.traceItemContainer}>
 					<TraceItem
 						trace={trace}
-						connectorId={connector.id}
+						flowId={connector.flowId}
 						executionId={executionId}
-						connectionId={connectionId}
 						iterationIndexes={[]}
 						theme={theme}
 					/>

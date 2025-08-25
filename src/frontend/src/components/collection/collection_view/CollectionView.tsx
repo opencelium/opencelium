@@ -328,10 +328,10 @@ const CollectionView: FC<CollectionViewProps> = ({
 						)}
 					</Filter>
 				)}
-				{collection.name === 'schedules' && (
+				{collection.name === 'schedules' && !collection.hasNotCategoryTabs && (
 					<CategoryTabs setCurrentPage={setCurrentPage} readOnly />
 				)}
-				{collection.name === 'connections' && (
+				{collection.name === 'connections' && !collection.hasNotCategoryTabs && (
 					<CategoryTabs setCurrentPage={setCurrentPage} />
 				)}
 				<div

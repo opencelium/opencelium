@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 public class Version43Utils {
 
-    private static final Pattern REFERENCE_REGEX = Pattern.compile("#[a-zA-Z0-9]{6}\\.(\\(response\\)|\\(request\\))\\.[^;]*");
+    private static final Pattern REFERENCE_REGEX = Pattern.compile("#[a-zA-Z0-9]{6}\\.(\\(response\\)|\\(request\\))\\..*?(?=;|%}|$)");
     private static final Pattern REQUEST_PATTERN = Pattern.compile("^(#\\w+)\\.(\\(request\\))\\.(?!body\\.\\$|header\\.\\$)(.+)$");
     private static final Pattern RESPONSE_PATTERN = Pattern.compile("^(#\\w+)\\.(\\(response\\))\\.(success|fail)\\.(.+)$");
 

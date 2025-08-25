@@ -36,10 +36,13 @@ export const LogPanelStyled = styled.div<{isFullScreen: boolean, noLogs: boolean
     bottom: 0;
     padding: 10px;
     ${({noLogs}) => noLogs ? `
-        align-items: center;
-        justify-content: center;
-        display: flex;
     ` : ''}
+`;
+
+export const EmptyLogsStyled = styled.h3`
+    color: #ccc;
+    text-align: center;
+    margin-top: 50px;
 `;
 
 export const HeaderStyled = styled(Text)`

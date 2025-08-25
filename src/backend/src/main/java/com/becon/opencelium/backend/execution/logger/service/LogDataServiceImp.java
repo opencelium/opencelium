@@ -21,7 +21,7 @@ import java.util.Set;
  * LogMetaDataServiceImp handles persistence and enrichment of parsed execution blocks (e.g. IF, LOOP, METHOD).
  */
 @Service
-public class LogMetaDataServiceImp implements LogMetaDataService {
+public class LogDataServiceImp implements LogDataService {
     // Fields commonly known and excluded from "properties"
     private static final Set<LogLineKey> EXCLUDED_KEYS = Set.of(
             LogLineKey.TIMESTAMP,
@@ -69,7 +69,7 @@ public class LogMetaDataServiceImp implements LogMetaDataService {
         }
 
         LogData dbBlock = existing.get();
-        dbBlock.setEndOffset(block.getStartOffset());
+        dbBlock.setEndOffset(block.getEndOffset());
         dbBlock.setStatus(block.getStatus());
         metaDataLogRepository.save(dbBlock);
     }
@@ -107,19 +107,20 @@ public class LogMetaDataServiceImp implements LogMetaDataService {
 
         doc.setExecutionId(executionId);
         doc.setConnectionId(connectionId);
-        doc.setFlowchartId(flowchartId);
+        doc.setFlowId(flowchartId);
 
         doc.setIndexPath(line.getProperties().get(LogLineKey.INDEX_PATH));
-        doc.setStartOffset(line.getOffset());
+        doc.setStartOffset(line.getStartOffset());
+        doc.setEndOffset(line.getEndOffset());
 
         doc.setLogLineType(line.getType());
         doc.setType(PhaseCategory.fromValue((PhaseType) line.getStage()));
 
         // Include all other unknown fields in the 'properties' map
-        Map<LogLineKey, Object> props = new LinkedHashMap<>();
+        Map<String, Object> props = new LinkedHashMap<>();
         for (Map.Entry<LogLineKey, String> entry : line.getProperties().entrySet()) {
             if (!EXCLUDED_KEYS.contains(entry.getKey())) {
-                props.put(entry.getKey(), entry.getValue());
+                props.put(entry.getKey().name(), entry.getValue());
             }
         }
 
@@ -130,19 +131,19 @@ public class LogMetaDataServiceImp implements LogMetaDataService {
 
     // --------------------------------------- Private Functions ----------------------------------------------
     private Optional<LogData> findExistingBlock(LogData block) {
-        if (block.getProperties().containsKey(LogLineKey.LOOP_INDEX)) {
-            return metaDataLogRepository.findByExecutionConnectionFlowchartIndexPathAndLoopIndex(
+        if (block.getProperties().containsKey(LogLineKey.LOOP_INDEX.getSrcName())) {
+            return metaDataLogRepository.findByExecutionConnectionFlowIdIndexPathAndLoopIndex(
                     block.getConnectionId(),
                     block.getExecutionId(),
-                    block.getFlowchartId(),
+                    block.getFlowId(),
                     block.getIndexPath(),
-                    block.getProperties().get(LogLineKey.LOOP_INDEX).toString()
+                    block.getProperties().get(LogLineKey.LOOP_INDEX.getSrcName()).toString()
             );
         } else {
-            return metaDataLogRepository.findByConnectionIdAndExecutionIdAndFlowchartIdAndIndexPath(
+            return metaDataLogRepository.findByConnectionIdAndExecutionIdAndFlowIdAndIndexPath(
                     block.getConnectionId(),
                     block.getExecutionId(),
-                    block.getFlowchartId(),
+                    block.getFlowId(),
                     block.getIndexPath()
             );
         }

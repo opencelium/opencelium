@@ -1,7 +1,21 @@
 {
   "LIGHTWEIGHT": {
+    "EXECUTION" : {
+      "emitOn": ["EXECUTION_START", "EXECUTION_END"],
+      "properties": ["id", "connectionId"],
+      "segments": {
+        "EXCEPTION": ["data"]
+      }
+    },
+    "FLOWCHART" : {
+      "emitOn": ["FLOWCHART_START", "FLOWCHART_END"],
+      "properties": ["flowId", "connectorId", "name", "connectorName", "direction"],
+      "segments": {
+        "EXCEPTION": ["data"]
+      }
+    },
     "OPERATION" : {
-      "emitOn": "OPERATION_END",
+      "emitOn": ["OPERATION_END"],
       "properties": ["name", "indexPath", "loopIndex", "loopIterator"],
       "segments": {
         "REQUEST": ["url", "http_method"],
@@ -10,7 +24,7 @@
       }
     },
     "IF" : {
-      "emitOn": "IF_RESULT",
+      "emitOn": ["IF_RESULT", "IF_END"],
       "properties" : ["indexPath", "expression", "loopIndex", "loopIterator"],
       "segments" : {
         "IF_RESULT": ["data"],
@@ -18,7 +32,7 @@
       }
     },
     "LOOP" : {
-      "emitOn": "LOOP_START",
+      "emitOn": ["LOOP_START", "LOOP_END"],
       "properties" : ["indexPath", "expression", "iterator", "loopIndex", "loopIterator"],
       "segments" : {
         "EXCEPTION": ["data"]
@@ -26,8 +40,22 @@
     }
   },
   "DETAILED": {
+    "EXECUTION" : {
+      "emitOn": ["EXECUTION_START", "EXECUTION_END"],
+      "properties": ["id", "connectionId"],
+      "segments": {
+        "EXCEPTION": ["data"]
+      }
+    },
+    "FLOWCHART" : {
+      "emitOn": ["FLOWCHART_START", "FLOWCHART_END"],
+      "properties": ["flowId", "connectorId", "name", "connectorName", "direction"],
+      "segments": {
+        "EXCEPTION": ["data"]
+      }
+    },
     "OPERATION" : {
-      "emitOn": "OPERATION_END",
+      "emitOn": ["OPERATION_END"],
       "properties": ["name", "indexPath", "loopIndex", "loopIterator"],
       "segments": {
         "REQUEST": ["url", "http_method"],
@@ -40,7 +68,7 @@
       }
     },
     "IF" : {
-      "emitOn": "IF_RESULT",
+      "emitOn": ["IF_RESULT", "IF_END"],
       "properties" : ["indexPath", "expression", "loopIndex", "loopIterator"],
       "segments" : {
         "IF_RESULT": ["data"],
@@ -49,7 +77,7 @@
       }
     },
     "LOOP" : {
-      "emitOn": "LOOP_REF",
+      "emitOn": ["LOOP_REF"],
       "properties" : ["indexPath", "expression", "iterator", "loopIndex", "loopIterator"],
       "segments" : {
         "LOOP_REF": ["data"],

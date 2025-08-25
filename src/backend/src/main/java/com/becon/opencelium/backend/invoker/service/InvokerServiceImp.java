@@ -17,6 +17,7 @@
 package com.becon.opencelium.backend.invoker.service;
 
 import com.becon.opencelium.backend.constant.PathConstant;
+import com.becon.opencelium.backend.database.mysql.service.InvokerSyncService;
 import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.exception.WrongEncode;
 import com.becon.opencelium.backend.invoker.InvokerContainer;
@@ -50,7 +51,15 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -65,6 +74,10 @@ public class InvokerServiceImp implements InvokerService {
 
     @Autowired
     private StorageService storageService;
+
+    @Lazy
+    @Autowired
+    private InvokerSyncService invokerSyncService;
 
     private final Path filePath = Paths.get(PathConstant.INVOKER);
 
@@ -117,6 +130,9 @@ public class InvokerServiceImp implements InvokerService {
     public void delete(String name) {
         Objects.requireNonNull(name);
         deleteInvoker(name);
+
+        // delete invoker sync record
+        invokerSyncService.delete(name);
     }
 
     @Override
@@ -126,6 +142,9 @@ public class InvokerServiceImp implements InvokerService {
             if (exists(file)) {
                 invokerContainer.remove(name);
                 Files.delete(file.toAbsolutePath());
+
+                // delete invoker sync record
+                invokerSyncService.delete(name);
             }
         } catch (IOException e) {
             throw new StorageException("Failed to delete stored file", e);
@@ -450,7 +469,7 @@ public class InvokerServiceImp implements InvokerService {
         }
     }
 
-    public static String getNodeValue(File xmlFile, String xpathExpression) {
+    private static String getNodeValue(File xmlFile, String xpathExpression) {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
