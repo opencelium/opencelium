@@ -1,8 +1,6 @@
 package com.becon.opencelium.backend.polygot_engine;
 
-import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
 
 public enum ScriptEngineType {
     NASHORN("nashorn", "Nashorn");
@@ -23,14 +21,9 @@ public enum ScriptEngineType {
         return name;
     }
 
-    private static final Map<ScriptEngineType, List<LanguageType>> languageMap;
-
-    static {
-        languageMap = new EnumMap<>(ScriptEngineType.class);
-        languageMap.put(NASHORN, List.of(LanguageType.JS));
-    }
-
     public List<LanguageType> getLanguages() {
-        return languageMap.getOrDefault(this, List.of());
+        return switch (this) {
+            case NASHORN -> List.of(LanguageType.JS);
+        };
     }
 }

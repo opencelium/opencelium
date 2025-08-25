@@ -146,8 +146,8 @@ public class ConnectionServiceImp implements ConnectionService {
         connectionMng.getFromConnector().setTitle(from.getTitle());
         connectionMng.getToConnector().setTitle(to.getTitle());
 
-        connectionMng.getFromConnector().setFchartId(UUID.randomUUID().toString());
-        connectionMng.getToConnector().setFchartId(UUID.randomUUID().toString());
+        connectionMng.getFromConnector().setFlowId(UUID.randomUUID().toString());
+        connectionMng.getToConnector().setFlowId(UUID.randomUUID().toString());
 
         //checking existence of category
         if (connection.getCategoryId() != null) {
@@ -199,8 +199,8 @@ public class ConnectionServiceImp implements ConnectionService {
         connectionMng.getFromConnector().setTitle(from.getTitle());
         connectionMng.getToConnector().setTitle(to.getTitle());
 
-        connectionMng.getFromConnector().setFchartId(oldMng.getFromConnector().getFchartId());
-        connectionMng.getToConnector().setFchartId(oldMng.getToConnector().getFchartId());
+        connectionMng.getFromConnector().setFlowId(oldMng.getFromConnector().getFlowId());
+        connectionMng.getToConnector().setFlowId(oldMng.getToConnector().getFlowId());
 
         //checking existence of category
         if (connection.getCategoryId() != null && !connection.getCategoryId().equals(sCon.getCategoryId())) {

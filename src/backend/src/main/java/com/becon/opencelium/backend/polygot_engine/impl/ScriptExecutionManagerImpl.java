@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.polygot_engine.impl;
 
 import com.becon.opencelium.backend.polygot_engine.Language;
+import com.becon.opencelium.backend.polygot_engine.LanguageType;
 import com.becon.opencelium.backend.polygot_engine.ScriptEngine;
 import com.becon.opencelium.backend.polygot_engine.ScriptEngineFactory;
 import com.becon.opencelium.backend.polygot_engine.ScriptExecutionManager;
@@ -21,9 +22,17 @@ public class ScriptExecutionManagerImpl implements ScriptExecutionManager {
         this.scriptEngineFactory = scriptEngineFactory;
     }
 
+    private Optional<ScriptEngine> resolveEngine(Language lang) {
+        return Optional.empty();
+    }
+
     @Override
-    public Optional<ScriptEngine> resolveEngine(Language lang) {
-        return scriptEngineFactory.getEngine(lang);
+    public Optional<ScriptEngine> resolveEngine(LanguageType lang) {
+        return languageConfig.enabledLanguages()
+                .stream()
+                .filter(x -> x.getLanguage() == lang)
+                .findFirst()
+                .flatMap(this::resolveEngine);
     }
 
     @Override

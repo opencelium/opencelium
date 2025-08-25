@@ -4,8 +4,6 @@ import com.becon.opencelium.backend.execution.logger.enums.PhaseCategory;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseStatus;
 import com.becon.opencelium.backend.execution.logger.enums.LogLineType;
 import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
-import com.mongodb.lang.NonNull;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -24,7 +22,8 @@ public class LogData {
 
     private Long connectionId;
     private String executionId;
-    private String flowchartId;
+    private String flowId;
+    private String connectorName;
 
     private PhaseStatus status;
     private String indexPath;
@@ -34,7 +33,9 @@ public class LogData {
     private LogLineType logLineType; // PHASE
     private PhaseCategory type;       // e.g., LOOP, IF
 
-    private Map<LogLineKey, Object> properties = new HashMap<>();
+    private Map<String, Object> properties = new HashMap<>();
+    private Map<String, Object> segments = new HashMap<>();
+    private LogDataError error;
 
     private Instant createdAt;
 
@@ -62,12 +63,20 @@ public class LogData {
         this.executionId = executionId;
     }
 
-    public String getFlowchartId() {
-        return flowchartId;
+    public String getFlowId() {
+        return flowId;
     }
 
-    public void setFlowchartId(String flowchartId) {
-        this.flowchartId = flowchartId;
+    public void setFlowId(String flowId) {
+        this.flowId = flowId;
+    }
+
+    public String getConnectorName() {
+        return connectorName;
+    }
+
+    public void setConnectorName(String connectorName) {
+        this.connectorName = connectorName;
     }
 
     public PhaseStatus getStatus() {
@@ -122,11 +131,11 @@ public class LogData {
         this.type = type;
     }
 
-    public Map<LogLineKey, Object> getProperties() {
+    public Map<String, Object> getProperties() {
         return properties;
     }
 
-    public void setProperties(Map<LogLineKey, Object> properties) {
+    public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
     }
 
@@ -136,5 +145,25 @@ public class LogData {
 
     public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public void addSegments(Map<String, Object> segments) {
+        this.segments = segments;
+    }
+
+    public void setSegments(Map<String, Object> segments) {
+        this.segments = segments;
+    }
+
+    public Map<String, Object> getSegments() {
+        return segments;
+    }
+
+    public void setError(LogDataError error) {
+        this.error = error;
+    }
+
+    public LogDataError getError() {
+        return error;
     }
 }

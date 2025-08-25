@@ -2,6 +2,7 @@ package com.becon.opencelium.backend.execution.logger.dto;
 
 import com.becon.opencelium.backend.execution.logger.enums.PhaseStatus;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseCategory;
+import io.netty.handler.codec.serialization.ObjectEncoder;
 
 import java.util.Map;
 
@@ -12,7 +13,9 @@ public class LogDataDTO {
     private String indexPath;
     private PhaseStatus status;
     private PhaseCategory type;
-    private Map<String, String> properties;
+    private String connectorName;
+    private Map<String, Object> properties;
+    private Map<String, Object> segment;
     private ErrorInfoDTO error;
 
     public String getExecutionId() {
@@ -55,12 +58,28 @@ public class LogDataDTO {
         this.type = type;
     }
 
-    public Map<String, String> getProperties() {
+    public String getConnectorName() {
+        return connectorName;
+    }
+
+    public void setConnectorName(String connectorName) {
+        this.connectorName = connectorName;
+    }
+
+    public Map<String, Object> getProperties() {
         return properties;
     }
 
-    public void setProperties(Map<String, String> properties) {
+    public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
+    }
+
+    public Map<String, Object> getSegment() {
+        return segment;
+    }
+
+    public void setSegment(Map<String, Object> segment) {
+        this.segment = segment;
     }
 
     public ErrorInfoDTO getError() {

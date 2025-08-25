@@ -4,6 +4,7 @@ import {Client} from "@stomp/stompjs";
 import ModelCurrentSchedule from "@entity/schedule/requests/models/CurrentSchedule";
 import {SocketAppPrefix} from "../socket";
 import {Auth} from "@application/classes/Auth";
+import {consoleLog} from "@application/utils/utils";
 
 export const useSupportFilesSocket = (socket: Client | null) => {
     const {isAboutToLogout} = Auth.getReduxState();
@@ -17,14 +18,14 @@ export const useSupportFilesSocket = (socket: Client | null) => {
         }
         const subscription = socket.subscribe(`/execution/support-file`, (message) => {
             const data = JSON.parse(message.body) as ModelCurrentSchedule[];
-            console.log('Socket.SupportFiles', data);
+            consoleLog('Socket.SupportFiles', data);
             setHasNewSupportFile(true);
         });
-        console.log("✅ Subscribed to /execution/support-file");
+        consoleLog("✅ Subscribed to /execution/support-file");
         subscriptionRef.current = () => {
             subscription.unsubscribe();
             subscriptionRef.current = undefined;
-            console.log("🧹 Unsubscribed from /execution/support-file");
+            consoleLog("🧹 Unsubscribed from /execution/support-file");
         };
     }
     useEffect(() => {

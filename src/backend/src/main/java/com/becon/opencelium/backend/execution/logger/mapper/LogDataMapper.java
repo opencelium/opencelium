@@ -1,9 +1,9 @@
 package com.becon.opencelium.backend.execution.logger.mapper;
 
 import com.becon.opencelium.backend.database.mongodb.entity.LogData;
+import com.becon.opencelium.backend.database.mongodb.entity.LogDataError;
 import com.becon.opencelium.backend.execution.logger.dto.ErrorInfoDTO;
 import com.becon.opencelium.backend.execution.logger.dto.LogDataDTO;
-import com.becon.opencelium.backend.execution.logger.enums.PhaseStatus;
 import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
 import org.springframework.stereotype.Component;
 
@@ -17,16 +17,33 @@ public class LogDataMapper {
      */
     public LogDataDTO toDto(LogData src) {
         LogDataDTO dto = new LogDataDTO();
+
         dto.setExecutionId(src.getExecutionId());
-        dto.setFlowId(src.getFlowchartId());
+        dto.setFlowId(src.getFlowId());
         dto.setIndexPath(src.getIndexPath());
         dto.setStatus(src.getStatus());
         dto.setType(src.getType());
-        dto.setProperties(convertProperties(src.getProperties()));
+        dto.setConnectorName(src.getConnectorName());
 
-        if (src.getStatus() == PhaseStatus.FAIL) {
-            dto.setError(buildErrorInfo(src.getProperties()));
+        // Filter only top-level properties (excluding segments and error fields)
+        Map<String, Object> allProps = src.getProperties();
+        Map<String, Object> allSegments = src.getSegments();
+        Map<String, Object> baseProps = new LinkedHashMap<>();
+        Map<String, Object> baseSegments = new LinkedHashMap<>();
+
+        for (Map.Entry<String, Object> entry : allProps.entrySet()) {
+            String key = entry.getKey();
+            baseProps.put(key, entry.getValue());
         }
+
+        for (Map.Entry<String, Object> entry : allSegments.entrySet()) {
+            String key = entry.getKey();
+            baseSegments.put(key, entry.getValue());
+        }
+        dto.setError(buildErrorInfo(src.getError()));
+        dto.setProperties(baseProps);
+        dto.setSegment(baseSegments);
+        // Handle exception segment separately
         return dto;
     }
 
@@ -48,7 +65,7 @@ public class LogDataMapper {
         return props.entrySet().stream()
                 .filter(e -> e.getKey() != null)
                 .collect(Collectors.toMap(
-                        e -> e.getKey().name().toLowerCase(Locale.ROOT),           // Convert LogLineKey to String
+                        e -> e.getKey().getSrcName(),           // Convert LogLineKey to String
                         e -> e.getValue() != null ? e.getValue().toString() : "",
                         (v1, v2) -> v2,
                         LinkedHashMap::new
@@ -59,12 +76,13 @@ public class LogDataMapper {
      * Build an ErrorInfoDTO from the standard properties keys
      * (adjust the keys if your props use different names).
      */
-    private ErrorInfoDTO buildErrorInfo(Map<LogLineKey, Object> props) {
+    private ErrorInfoDTO buildErrorInfo(LogDataError logDataError) {
+        if (logDataError == null) {
+            return null;
+        }
         ErrorInfoDTO err = new ErrorInfoDTO();
-//        Object code = props.get("errorCode");
-        Object message = props.get(LogLineKey.EXCEPTION);
-//        err.setCode(code != null ? code.toString() : null);
-        err.setMessage(message != null ? message.toString() : null);
+        err.setMessage(logDataError.getMessage());
+        err.setStackTrace(logDataError.getStackTrace());
         return err;
     }
 }

@@ -40,6 +40,7 @@ public class InvokerDTO {
     private String authType;
     private LinkedHashMap<String, String> requiredData;
     private List<FunctionDTO> operations;
+    private boolean hasManualSync;
 
     public InvokerDTO() {
     }
@@ -98,5 +99,13 @@ public class InvokerDTO {
 
     public void setOperations(List<FunctionDTO> operations) {
         this.operations = operations;
+    }
+
+    public boolean isHasManualSync() {
+        return hasManualSync;
+    }
+
+    public void setHasManualSync(boolean hasManualSync) {
+        this.hasManualSync = hasManualSync;
     }
 }

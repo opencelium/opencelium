@@ -32,6 +32,11 @@ export class InvokerRequest extends Request implements IInvokerRequest{
         super({url: 'invoker', ...settings});
     }
 
+    async syncInvokerWithSP(invokerName: string): Promise<AxiosResponse<IResponse>>{
+        this.endpoint = `/${invokerName}/sync-force`;
+        return super.put<IResponse>({});
+    }
+
     async importInvoker(data: FormData): Promise<AxiosResponse<ImportInvokerResponse>>{
         this.url = 'storage/invoker';
         return super.post<ImportInvokerResponse>(data);

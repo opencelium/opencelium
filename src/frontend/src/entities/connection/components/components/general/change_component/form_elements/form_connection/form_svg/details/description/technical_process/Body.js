@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isNumber, subArrayToString } from '@application/utils/utils';
+import { isNumber, subArrayToString, unwrapField } from '@application/utils/utils';
 import { markFieldNameAsArray } from '@change_component//form_elements/form_connection/form_methods/help';
 import Enhancement from '@change_component/form_elements/form_connection/form_methods/mapping/enhancement/Enhancement';
 import GraphQLBody from '@change_component/form_elements/form_connection/form_methods/method/GraphQLBody';
@@ -85,10 +85,10 @@ class Body extends React.Component {
 		return connection.fieldBinding.find((item) => {
 			return (
 				item.to.findIndex((elem) => {
-					let name = elem.field
+					let name = unwrapField(elem.field
 						.replace(/^body\.\$\./, '')
 						.replace(/^header\.\$\./, '')
-						.replace(/\.([0-9]+)/g, '[$1]');
+						.replace(/\.([0-9]+)/g, '[$1]'));
 					return elem.color === method.color && name === normalizedFieldName;
 				}) !== -1
 			);
@@ -126,7 +126,7 @@ class Body extends React.Component {
 			} else {
 				fieldName = fieldName.slice(0, -1);
 			}
-			bindingItem = this.getCurrentBindingItem(fieldName);
+			bindingItem = this.getCurrentBindingItem(unwrapField(fieldName));
 		} else {
 			bindingItem = connection.fieldBinding.find((item) => {
 				return (

@@ -21,17 +21,17 @@ public class HttpRequestHelper {
         this.baseUrl = baseUrl;
     }
 
-    public ResponseEntity<String> makeGetRequest(String endpoint, HttpHeaders headers) {
-        return makeRequest(HttpMethod.GET, endpoint, headers, null);
+    public <T> ResponseEntity<T> makeGetRequest(String endpoint, HttpHeaders headers, Class<T> responseType) {
+        return makeRequest(HttpMethod.GET, endpoint, headers, null, responseType);
     }
 
-    public ResponseEntity<String> makePostRequest(String endpoint, HttpHeaders headers, Object body) {
-        return makeRequest(HttpMethod.POST, endpoint, headers, body);
+    public <T> ResponseEntity<T> makePostRequest(String endpoint, HttpHeaders headers, Object body, Class<T> responseType) {
+        return makeRequest(HttpMethod.POST, endpoint, headers, body, responseType);
     }
 
-    private ResponseEntity<String> makeRequest(HttpMethod method, String endpoint, HttpHeaders headers, Object body) {
+    private <T> ResponseEntity<T> makeRequest(HttpMethod method, String endpoint, HttpHeaders headers, Object body, Class<T> responseType ) {
         String url = baseUrl + endpoint;
         HttpEntity<?> entity = (body != null) ? new HttpEntity<>(body, headers) : new HttpEntity<>(headers);
-        return restTemplate.exchange(url, method, entity, String.class);
+        return restTemplate.exchange(url, method, entity, responseType);
     }
 }
