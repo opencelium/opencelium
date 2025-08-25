@@ -66,6 +66,8 @@ export class Invoker extends HookStateClass implements IInvoker{
 
     icon?: string = '';
 
+    hasManualSync?: boolean;
+
     @App.inputType
     operations: Operation[] = [];
 
@@ -85,6 +87,9 @@ export class Invoker extends HookStateClass implements IInvoker{
         this.authTypeSelect = invoker?.authTypeSelect || null;
         this.authType = invoker?.authType || null;
         this.requiredData = invoker?.requiredData || null;
+        if (invoker.hasManualSync) {
+            this.hasManualSync = invoker.hasManualSync;
+        }
         if(!this.authTypeSelect && this.authType){
             this.authTypeSelect = {label: this.authType, value: this.authType};
         }

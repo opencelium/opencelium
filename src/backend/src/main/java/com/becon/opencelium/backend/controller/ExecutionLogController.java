@@ -1,10 +1,8 @@
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.constant.ExceptionConstant;
-import com.becon.opencelium.backend.constant.ExceptionMessages;
-import com.becon.opencelium.backend.exception.GeneralServiceException;
+import com.becon.opencelium.backend.database.mongodb.entity.LogData;
 import com.becon.opencelium.backend.execution.log_managing.resource.MetaDataListDto;
-import com.becon.opencelium.backend.execution.logger.service.LogMetaDataService;
+import com.becon.opencelium.backend.execution.logger.service.LogDataService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -12,7 +10,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,13 +17,12 @@ import java.util.List;
 
 @RestController
 @Tag(name = "Execution", description = "Manages operations related to Execution")
-@RequestMapping(value = "/execution")
-public class ExecutionController {
+@RequestMapping(value = "/execution/log")
+public class ExecutionLogController {
 
-    private static final String LOOP_INDEX_DELIMITER = ",";
-    private final LogMetaDataService logMetaDataService;
+    private final LogDataService logMetaDataService;
 
-    public ExecutionController(LogMetaDataService logMetaDataService) {
+    public ExecutionLogController(LogDataService logMetaDataService) {
         this.logMetaDataService = logMetaDataService;
     }
 
@@ -41,33 +37,32 @@ public class ExecutionController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "Returns child metadata elements of the specified indexPath")
+    @Operation(summary = "Returns children metadata of the specified element")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Success",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = MetaDataListDto.class))))
     })
-    @GetMapping("/{executionId}/connector/{connectorId}/element/{indexPath}/child")
+    // change connectorId to a flowId
+    @GetMapping("/{executionId}/flowchart/{flowId}")
     public ResponseEntity<List<MetaDataListDto>> getMetaDataList(
+            // /{executionId}?flowchart={flowId}?indexPath={indexPath}&loopIndex=1,2
             @PathVariable String executionId,
-            @PathVariable String connectorId,
-            @PathVariable String indexPath,
-            @RequestParam(name = "loopIndex", required = false, defaultValue = "") String loopIndex
+            @PathVariable String flowId,
+            @RequestParam String indexPath,
+            @RequestParam("loopIndex") List<String> loopIndexes // if inside a loop.
     ) {
-        checkLoopIndex(loopIndex);
+//        // 1. Fetch raw metadata entities
+//        List<LogData> rawList = logMetaDataService.findChildren(
+//                executionId, flowId, indexPath, loopIndexes
+//        );
+//
+//        // 2. Map to DTO
+//        List<MetaDataListDto> dtos = rawList.stream()
+//                .map(this::toMetaDataListDto)
+//                .collect(Collectors.toList());
 
+//        return ResponseEntity.ok(dtos);
         return ResponseEntity.ok().build();
-    }
-
-    private void checkLoopIndex(String loopIndex) {
-        if (!StringUtils.isBlank(loopIndex)) {
-            try {
-                for (String index : loopIndex.split(LOOP_INDEX_DELIMITER)) {
-                    Integer.parseInt(index);
-                }
-            } catch (Exception e) {
-                throw new GeneralServiceException(ExceptionConstant.INVALID_DATA, ExceptionMessages.INVALID_LOOP_INDEX.formatted(loopIndex));
-            }
-        }
     }
 }

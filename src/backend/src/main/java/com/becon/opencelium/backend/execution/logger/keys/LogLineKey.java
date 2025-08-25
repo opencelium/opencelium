@@ -17,13 +17,15 @@ public enum LogLineKey {
     SEGMENT("segment"),
     EXECUTION_ID("id"),
     CONNECTION_ID("connectionId"),
-    FLOWCHART_ID("fchartId"),
+    FLOWCHART_ID("flowId"),
     CONNECTOR_ID("connectorId"),
+    CONNECTOR_NAME("connectorName"),
+    DIRECTION("direction"),
     INDEX_PATH("indexPath"), // Path in the log flow hierarchy (e.g., 1_0, 1_1)
 
     /** Optional properties of a log line that do not have a key and are created during the parsing process. */
     TIMESTAMP("timestamp"),
-    LOG_LEVEL("log_level"),
+    LOG_LEVEL("logLevel"),
     MESSAGE("msg"),
 
     /** Shared keys reused across multiple categories */
@@ -54,20 +56,24 @@ public enum LogLineKey {
 
     EXCEPTION("exception");
 
-    private final String key;
+    private final String srcName;
 
-    LogLineKey(String key) {
-        this.key = key;
+    LogLineKey(String srcName) {
+        this.srcName = srcName;
+    }
+
+    public String getSrcName() {
+        return srcName;
     }
 
     public static Optional<LogLineKey> from(String key) {
         return Arrays.stream(values())
-                .filter(k -> k.key.equals(key))
+                .filter(k -> k.srcName.equals(key))
                 .findFirst();
     }
 
     public static boolean contains(String key) {
         return Arrays.stream(values())
-                .anyMatch(k -> k.key.equals(key));
+                .anyMatch(k -> k.srcName.equals(key));
     }
 }

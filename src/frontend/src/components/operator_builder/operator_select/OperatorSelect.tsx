@@ -30,7 +30,6 @@ const OperatorSelect: React.FC<OperatorSelectProps> = ({error, type, operator, u
             setSelectedOption(null);
         }
     }, [operator])
-    console.log('selectedOption', selectedOption)
     return (
         <div style={{minWidth: '200px'}} ref={ref}>
             <Select

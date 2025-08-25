@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class PhaseSchema {
 
-    private String emitOn;
+    private List<String> emitOn;
     private List<String> properties;
     private Map<String, List<String>> segments; // Segment name -> list of keys
 
@@ -18,7 +18,8 @@ public class PhaseSchema {
         return segments;
     }
 
-    public String getEmitOn() {
+    public List<String> getEmitOn() {
         return emitOn;
     }
 }
+

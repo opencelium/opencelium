@@ -402,11 +402,13 @@ export function ConnectionForm(type) {
                             if (jsonToStringResult.isNotValid){
                                 operatorErrors.push('Some data is undefined.');
                             }
+                        } else {
+                            operatorErrors.push('Some data is missing.');
                         }
                         if(operatorErrors.length > 0){
                             errors.operators[connectorType].push({
                                 index: operator.index,
-                                errors: operatorErrors,
+                                errors: [],
                             })
                         }
                     })

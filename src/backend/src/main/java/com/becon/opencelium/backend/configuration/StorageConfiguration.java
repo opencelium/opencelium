@@ -65,6 +65,7 @@ public class StorageConfiguration {
     private final ActivationRequestService activationRequestService;
     private final ConnectionService connectionService;
     private final TemplateService templateService;
+    private final OpenCeliumProps ocProps;
 
     @Autowired
     private ResourceLoader resourceLoader;
@@ -83,7 +84,7 @@ public class StorageConfiguration {
             InvokerContainer invokerContainer,
             DataSource dataSource,
             Environment environment,
-            ConnectionService connectionService, TemplateService templateService
+            ConnectionService connectionService, TemplateService templateService, OpenCeliumProps ocProps
     ) {
         this.userStorageService = userStorageService;
         this.connectorService = connectorService;
@@ -95,6 +96,7 @@ public class StorageConfiguration {
         this.activationRequestService = activationRequestService;
         this.connectionService = connectionService;
         this.templateService = templateService;
+        this.ocProps = ocProps;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -192,8 +194,8 @@ public class StorageConfiguration {
         try {
             ActivationRequest ar = activationRequestService.readFreeAR().orElse(null);
             String initLicense = LicenseKeyUtility.readFreeLicense();
-            Subscription subscription = subscriptionService.convertToSub(initLicense,ar);
-            if(!subscriptionService.exists(subscription.getSubId())) {
+            Subscription subscription = subscriptionService.convertToSub(initLicense, ar);
+            if (!subscriptionService.exists(subscription.getSubId())) {
                 Objects.requireNonNull(ar).setStatus(ActivReqStatus.PROCESSED);
                 ar.setActive(true);
                 activationRequestService.save(ar);
@@ -206,13 +208,19 @@ public class StorageConfiguration {
 
     private void cleanOldFiles(String folder, Predicate<File> filter, String prefix) {
         Path path = Paths.get(folder);
+
+        Integer majorVersion = ocProps.majorVersion();
+        if (majorVersion == null) {
+            // Gracefully ignored cleaning files when the version is not valid
+
+            return;
+        }
+
         if (Files.exists(path) && Files.isDirectory(path)) {
             try (Stream<File> files = Files.list(path).map(Path::toFile).filter(filter)) {
 
-                Double ocVersion = environment.getProperty("opencelium.version", Double.class, 0.0);
-                int intValue = ocVersion.intValue();
 
-                files.filter(f -> !f.getName().startsWith(prefix + intValue + ".")).forEach(f -> {
+                files.filter(f -> !f.getName().startsWith(prefix + majorVersion + ".")).forEach(f -> {
                     if (forceDelete(f)) {
                         log.info("{} - file/folder is deleted", f.getAbsolutePath());
                     } else {

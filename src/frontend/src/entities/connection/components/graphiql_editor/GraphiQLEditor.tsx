@@ -61,7 +61,7 @@ const GraphiQLEditor: FC<GraphiQLEditorProps> =
         }, [gettingConnector])
         useEffect(() => {
             if(shouldRevokeToken && logining !== API_REQUEST_STATE.ERROR){
-                dispatch(graphQLLogin(connector));
+                dispatch(graphQLLogin(currentConnector));
                 setShouldRevokeToken(false);
             }
         }, [shouldRevokeToken]);
@@ -80,8 +80,8 @@ const GraphiQLEditor: FC<GraphiQLEditorProps> =
             }
         }, [logining])
         const graphQLFetcher = async (graphQLParams: FetcherParams) => {
-            const requestProps: GraphQLRequestProps = {url: connector.requestData.url, accessToken, sslOn, ...graphQLParams};
-            let request = new GraphiQLContext(connector);
+            const requestProps: GraphQLRequestProps = {url: currentConnector.requestData.url, accessToken, sslOn, ...graphQLParams};
+            let request = new GraphiQLContext(currentConnector);
             const response = await request.query(requestProps);
             const result: any = response.data;
             if(result && result.errors && result.errors.length > 0 && result.errors[0].extensions && result.errors[0].extensions.causes && result.errors[0].extensions.causes.length > 0 &&  result.errors[0].extensions.causes[0].error){

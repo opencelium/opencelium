@@ -3,6 +3,7 @@ import ModelCurrentSchedule from "@entity/schedule/requests/models/CurrentSchedu
 import {Client} from "@stomp/stompjs";
 import {SocketAppPrefix} from "../socket";
 import {Auth} from "@application/classes/Auth";
+import {consoleLog} from "@application/utils/utils";
 
 export const useCurrentSchedulesSocket = (socket: Client | null) => {
     const {isAboutToLogout} = Auth.getReduxState();
@@ -15,14 +16,14 @@ export const useCurrentSchedulesSocket = (socket: Client | null) => {
         if (!socket || !socket.connected) return;
         const subscription = socket.subscribe(`/scheduler/running/all`, (message) => {
             const data = JSON.parse(message.body) as ModelCurrentSchedule[];
-            console.log('Socket.CurrentSchedules', data);
+            consoleLog('Socket.CurrentSchedules', data);
             setCurrentSchedules(data);
         });
-        console.log("✅ Subscribed to /scheduler/running/all");
+        consoleLog("✅ Subscribed to /scheduler/running/all");
         subscriptionRef.current = () => {
             subscription.unsubscribe();
             subscriptionRef.current = undefined;
-            console.log("🧹 Unsubscribed from /scheduler/running/all");
+            consoleLog("🧹 Unsubscribed from /scheduler/running/all");
         };
     }
     useEffect(() => {

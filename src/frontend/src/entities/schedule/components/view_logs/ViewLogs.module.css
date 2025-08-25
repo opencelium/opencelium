@@ -3,6 +3,5 @@
 }
 .modal-body {
     overflow: hidden;
-    height: 500px;
-    display: grid;
+    height: 80vh;
 }

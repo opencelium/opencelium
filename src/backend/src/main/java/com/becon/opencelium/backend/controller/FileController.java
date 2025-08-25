@@ -18,6 +18,11 @@ package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.configuration.OpenCeliumProps;
 import com.becon.opencelium.backend.constant.PathConstant;
+import com.becon.opencelium.backend.database.mysql.service.ConnectorServiceImp;
+import com.becon.opencelium.backend.database.mysql.service.InvokerSyncService;
+import com.becon.opencelium.backend.database.mysql.service.UserDetailServiceImpl;
+import com.becon.opencelium.backend.database.mysql.service.UserRoleServiceImpl;
+import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
@@ -25,10 +30,6 @@ import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.User;
 import com.becon.opencelium.backend.database.mysql.entity.UserDetail;
 import com.becon.opencelium.backend.database.mysql.entity.UserRole;
-import com.becon.opencelium.backend.database.mysql.service.ConnectorServiceImp;
-import com.becon.opencelium.backend.database.mysql.service.UserDetailServiceImpl;
-import com.becon.opencelium.backend.database.mysql.service.UserRoleServiceImpl;
-import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.FileDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
@@ -40,7 +41,6 @@ import com.becon.opencelium.backend.utility.FileNameUtils;
 import com.becon.opencelium.backend.utility.Xml;
 import com.becon.opencelium.backend.version_manager.EntityUpdater;
 import com.becon.opencelium.backend.version_manager.EntityVersionManager;
-import com.becon.opencelium.backend.version_manager.Wrapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -68,7 +68,13 @@ import org.w3c.dom.Document;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -96,19 +102,33 @@ public class FileController {
     private final TemplateServiceImp templateService;
     private final ConnectorServiceImp connectorService;
     private final InvokerServiceImp invokerServiceImp;
+    private final InvokerSyncService invokerSyncService;
     private final UserStorageService storageService;
     private final Mapper<Connector, ConnectorResource> connectorMapper;
     private final EntityUpdater<Template> templateUpdater;
     private final OpenCeliumProps ocProps;
 
     @Autowired
-    public FileController(UserDetailServiceImpl userDetailService, UserServiceImpl userService, UserRoleServiceImpl userRoleService, TemplateServiceImp templateService, ConnectorServiceImp connectorService, InvokerServiceImp invokerServiceImp, UserStorageService storageService, Mapper<Connector, ConnectorResource> connectorMapper, EntityVersionManager versionManager, OpenCeliumProps ocProps) {
+    public FileController(
+            UserDetailServiceImpl userDetailService,
+            UserServiceImpl userService,
+            UserRoleServiceImpl userRoleService,
+            TemplateServiceImp templateService,
+            ConnectorServiceImp connectorService,
+            InvokerServiceImp invokerServiceImp,
+            InvokerSyncService invokerSyncService,
+            UserStorageService storageService,
+            Mapper<Connector, ConnectorResource> connectorMapper,
+            EntityVersionManager versionManager,
+            OpenCeliumProps ocProps
+    ) {
         this.userDetailService = userDetailService;
         this.userService = userService;
         this.userRoleService = userRoleService;
         this.templateService = templateService;
         this.connectorService = connectorService;
         this.invokerServiceImp = invokerServiceImp;
+        this.invokerSyncService = invokerSyncService;
         this.storageService = storageService;
         this.connectorMapper = connectorMapper;
         this.templateUpdater = versionManager.getUpdater(Template.class);
@@ -348,6 +368,10 @@ public class FileController {
             Xml xml = saveXmlFile(file.getInputStream(), filename);
             String name = xml.getValueByXPath("//invoker/name");
             FileDTO fileDTO = new FileDTO(name);
+
+            // update invoker sync table to store latest files information
+            invokerSyncService.updateSync(name);
+
             return ResponseEntity.ok(fileDTO);
         }
         catch (Exception e) {
@@ -397,6 +421,9 @@ public class FileController {
                     String name = xml.getValueByXPath("//invoker/name");
                     FileDTO fileDTO = new FileDTO(name);
                     fileDTOList.add(fileDTO);
+
+                    // update invoker sync table to store latest files information
+                    invokerSyncService.updateSync(name);
                 }
                 zis.close();
             } else {

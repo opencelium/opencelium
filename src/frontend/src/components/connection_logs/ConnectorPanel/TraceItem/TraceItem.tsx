@@ -1,4 +1,9 @@
-import { Trace } from "@root/requests/models/ConnectionLog";
+import {
+	ConnectionSocketLog,
+	DetailedMethodSegment,
+	DetailedOperatorSegment,
+	Trace
+} from "@root/requests/models/ConnectionLog";
 import { ITheme } from '@style/Theme';
 import React from 'react';
 import MethodTrace from './MethodTrace/MethodTrace';
@@ -6,40 +11,36 @@ import { OperatorTrace } from './OperatorTrace/OperatorTrace';
 
 interface TraceItemProps {
 	trace: Trace;
-	connectorId: string;
+	flowId: string;
 	executionId: string;
-	connectionId: string;
 	iterationIndexes: number[];
 	theme?: ITheme;
 }
 
 export const TraceItem: React.FC<TraceItemProps> = ({
 	trace,
-	connectorId,
+	flowId,
 	executionId,
-	connectionId,
 	iterationIndexes,
 	theme
 }) => {
-	if (trace.logType === 'method') {
+	if (trace.type === 'OPERATION') {
 		return (
 			<MethodTrace
-				trace={trace}
-				connectorId={connectorId}
+				trace={trace as ConnectionSocketLog<DetailedMethodSegment>}
+				flowId={flowId}
 				executionId={executionId}
-				connectionId={connectionId}
 				theme={theme}
 			/>
 		);
 	}
 
-	if (trace.logType === 'operator') {
+	if (trace.type === 'IF' || trace.type === 'LOOP') {
 		return (
 			<OperatorTrace
-				trace={trace}
-				connectorId={connectorId}
+				trace={trace as ConnectionSocketLog<DetailedOperatorSegment>}
+				flowId={flowId}
 				executionId={executionId}
-				connectionId={connectionId}
 				iterationIndexes={iterationIndexes}
 			/>
 		);

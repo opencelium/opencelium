@@ -1,21 +1,35 @@
 package com.becon.opencelium.backend.execution.logger.context;
 
 
+import com.becon.opencelium.backend.execution.logger.dto.ErrorDetail;
+import com.becon.opencelium.backend.execution.logger.enums.PhaseStatus;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseType;
+import com.becon.opencelium.backend.execution.logger.enums.SegmentType;
 import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
 
 import java.util.*;
 
 public class PhaseContextManager {
 
+    private String execId;
+    private String connectionId;
     private String flowId;
+    private String connectorName;
+    private ErrorDetail errorDetail;
     private final Deque<PhaseContext> stack = new ArrayDeque<>();
 
     public PhaseContextManager() {
     }
 
     public void startPhase(PhaseContext phaseContext) {
-        phaseContext.getParsedLogLine().getProperties().put(LogLineKey.FLOWCHART_ID, flowId);
+        Map<LogLineKey, String> props = phaseContext.getParsedLogLine().getProperties();
+        props.put(LogLineKey.EXECUTION_ID, execId);
+        props.put(LogLineKey.CONNECTION_ID, connectionId);
+        if (flowId != null) {
+            props.put(LogLineKey.FLOWCHART_ID, flowId);
+            props.put(LogLineKey.CONNECTOR_NAME, connectorName);
+        }
+
         stack.push(phaseContext);
     }
 
@@ -35,8 +49,18 @@ public class PhaseContextManager {
                 startIndex = current.getParsedLogLine().getProperties().get(LogLineKey.FLOWCHART_ID);
                 endIndex = phaseContext.getParsedLogLine().getProperties().get(LogLineKey.FLOWCHART_ID);
                 flowId = "";
+            } else if (phaseContext.getParsedLogLine().getStage() == PhaseType.EXECUTION_END) {
+                startIndex = current.getParsedLogLine().getProperties().get(LogLineKey.EXECUTION_ID);
+                endIndex = phaseContext.getParsedLogLine().getProperties().get(LogLineKey.EXECUTION_ID);
+                execId = "";
+                connectionId = "";
             }
             if (startIndex.equals(endIndex)) {
+                current.setEndOffset(phaseContext.getEndOffset());
+                current.setStatus(PhaseStatus.COMPLETE);
+                if (errorDetail != null) {
+                    current.setErrorDetail(errorDetail);
+                }
                 removed = current;
                 break;
             }
@@ -49,15 +73,43 @@ public class PhaseContextManager {
     }
 
     public PhaseContext endCurrentPhase() {
-        return stack.poll();
+        if (errorDetail != null) {
+            PhaseContext context = stack.pop();
+            context.setErrorDetail(this.errorDetail);
+            return context;
+        }
+        return stack.pop();
     }
 
     public PhaseContext getCurrentPhase() {
+        if (errorDetail != null) {
+            PhaseContext context = stack.peek();
+            if (context != null) {
+                context.setErrorDetail(this.errorDetail);
+            }
+            return context;
+        }
         return stack.peek();
     }
 
     public void setFlowId(String flowId) {
         this.flowId = flowId;
+    }
+
+    public String getConnectorName() {
+        return connectorName;
+    }
+
+    public void setConnectorName(String connectorName) {
+        this.connectorName = connectorName;
+    }
+
+    public void setExecId(String execId) {
+        this.execId = execId;
+    }
+
+    public void setConnectionId(String connectionId) {
+        this.connectionId = connectionId;
     }
 
     /**
@@ -80,5 +132,12 @@ public class PhaseContextManager {
 
     public void reset() {
         stack.clear();
+    }
+
+    public void addExceptionSegment(String errorOfOriginPath,SegmentContext segmentContext) {
+        if (segmentContext.getSegmentType() != SegmentType.EXCEPTION) {
+            throw new IllegalArgumentException("Requires only EXCEPTION type. Segment type: " + segmentContext.getSegmentType().name() + " is not acceptable.");
+        }
+        this.errorDetail = new ErrorDetail(errorOfOriginPath, segmentContext);
     }
 }

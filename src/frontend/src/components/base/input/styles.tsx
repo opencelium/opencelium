@@ -115,7 +115,30 @@ const EmphasizeInputStyleLines = css`
     }
 `;
 
+const MetaBlockStyled = styled.div`
+  margin-left: 12px;
+`;
+
+const MetaItemStyled = styled.div`
+  margin-top: 4px;
+`;
+
+const KeyStyled = styled.span`
+  font-weight: bold;
+`;
+
+const ValueStyled = styled.pre`
+  color: #222;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+`;
+
 export {
+    MetaItemStyled,
+    MetaBlockStyled,
+    KeyStyled,
+    ValueStyled,
     IconStyled,
     LabelStyled,
     ErrorStyled,

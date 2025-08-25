@@ -6,7 +6,7 @@ import com.becon.opencelium.backend.execution.logger.parser.entity.ParsedLogLine
 
 import java.util.Optional;
 
-public interface LogMetaDataService {
+public interface LogDataService {
     void saveNewBlock(LogData block);
 
     void updateExistingBlock(LogData block);
