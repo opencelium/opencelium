@@ -78,6 +78,9 @@ public class LanguageConfig {
                             throw new IllegalStateException(String.format("%s language has no default engine set. Engine must be specified in config.", languageType));
                         }
                         engine = languageType.getDefaultEngine();
+                    } else if (engine.getLanguages() == null || engine.getLanguages().stream().noneMatch(x -> x == languageType)) {
+
+                        throw new IllegalStateException(String.format("'%s' engine doesn't support '%s' language", engine.getName(), languageType.getName()));
                     }
                     enabledEngines.add(engine);
                 }
