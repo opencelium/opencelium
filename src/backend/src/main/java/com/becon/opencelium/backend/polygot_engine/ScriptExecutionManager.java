@@ -10,26 +10,12 @@ import java.util.Optional;
 public interface ScriptExecutionManager {
 
     /**
-     * Resolves an appropriate {@link ScriptEngine} for the given language configuration.
-     *
-     * @param lang the language and engine configuration
-     * @return an {@link Optional} containing a matching {@code ScriptEngine}, or empty if none is available
-     */
-    Optional<ScriptEngine> resolveEngine(Language lang);
-
-    /**
      * Resolves an appropriate {@link ScriptEngine} for the given language type.
      *
      * @param lang language
      * @return an {@link Optional} containing a matching {@code ScriptEngine}, or empty if none is available
      */
-    default Optional<ScriptEngine> resolveEngine(LanguageType lang) {
-        if (lang == null || lang.getDefaultEngine() == null) {
-            return Optional.empty();
-        }
-
-        return resolveEngine(new Language(lang, lang.getDefaultEngine()));
-    }
+    Optional<ScriptEngine> resolveEngine(LanguageType lang);
 
     /**
      * Returns a list of all languages supported by registered script engines.
