@@ -23,7 +23,7 @@ public class ScriptExecutionManagerImpl implements ScriptExecutionManager {
     }
 
     private Optional<ScriptEngine> resolveEngine(Language lang) {
-        return Optional.empty();
+        return scriptEngineFactory.getEngine(lang);
     }
 
     @Override
