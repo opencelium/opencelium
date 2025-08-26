@@ -2,7 +2,6 @@ package com.becon.opencelium.backend.execution.logger.dto;
 
 import com.becon.opencelium.backend.execution.logger.enums.PhaseStatus;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseCategory;
-import io.netty.handler.codec.serialization.ObjectEncoder;
 
 import java.util.Map;
 

@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.execution.log_managing.resource.LogMetaDataDto;
+import com.becon.opencelium.backend.execution.logger.dto.LogDataDTO;
 import com.becon.opencelium.backend.execution.logger.service.LogDataService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -53,7 +54,7 @@ public class ExecutionLogController {
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = LogMetaDataDto.class))))
     })
     @GetMapping("/{executionId}/child/list")
-    public ResponseEntity<List<LogMetaDataDto>> getMetaDataListHorizontally(
+    public ResponseEntity<List<LogDataDTO>> getMetaDataListHorizontally(
             @PathVariable String executionId,
             @RequestParam(name = "flowId", required = false) String flowchartId,
             @RequestParam(required = false) String indexPath, // &indexPath=1_2_3_0

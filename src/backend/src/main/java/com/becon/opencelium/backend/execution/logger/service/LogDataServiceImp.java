@@ -2,7 +2,6 @@ package com.becon.opencelium.backend.execution.logger.service;
 
 import com.becon.opencelium.backend.database.mongodb.entity.LogData;
 import com.becon.opencelium.backend.database.mongodb.repository.MetaDataLogRepository;
-import com.becon.opencelium.backend.execution.log_managing.resource.LogMetaDataDto;
 import com.becon.opencelium.backend.execution.logger.dto.LogDataDTO;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseCategory;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseType;
@@ -10,6 +9,7 @@ import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
 import com.becon.opencelium.backend.execution.logger.mapper.LogDataMapper;
 import com.becon.opencelium.backend.execution.logger.parser.entity.ParsedLogLine;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -18,6 +18,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
+
+import static com.becon.opencelium.backend.execution.logger.enums.PhaseCategory.FLOWCHART;
 
 /**
  * LogMetaDataServiceImp handles persistence and enrichment of parsed execution blocks (e.g. IF, LOOP, METHOD).
@@ -42,8 +45,61 @@ public class LogDataServiceImp implements LogDataService {
     private LogDataMapper logDataMapper;
 
     @Override
-    public List<LogMetaDataDto> getChildren(String executionId, String flowchartId, String indexPath, String loopIndex) {
-        return null;
+    public List<LogDataDTO> getChildren(String executionId, String flowchartId, String indexPath, String loopIndex) {
+        List<LogData> logData;
+        if (flowchartId == null || flowchartId.isBlank()) {
+            // children of EXECUTION
+            return metaDataLogRepository.findChildren(
+                        executionId,
+                        FLOWCHART.name(),
+                        Sort.by(Sort.Direction.ASC, "createdAt"))
+                    .stream()
+                    .map(logDataMapper::toDto)
+                    .toList();
+        }
+
+        if (indexPath == null || indexPath.isBlank()) {
+            // children of FLOWCHART
+            String regex = "^[0-9]+$";
+
+            return metaDataLogRepository.findChildren(
+                        executionId,
+                        flowchartId,
+                        regex,
+                        Sort.by(Sort.Direction.ASC, "createdAt"))
+                    .stream()
+                    .map(logDataMapper::toDto)
+                    .toList();
+        }
+
+        if (loopIndex == null || loopIndex.isBlank()) {
+            // children of IF
+            String safeParent = Pattern.quote(indexPath);
+            String regex = "^" + safeParent + "_[0-9]+$";
+
+            return metaDataLogRepository.findChildren(
+                            executionId,
+                            flowchartId,
+                            regex,
+                            Sort.by(Sort.Direction.ASC, "createdAt"))
+                    .stream()
+                    .map(logDataMapper::toDto)
+                    .toList();
+        }
+
+        // children of LOOP
+        String safeParent = Pattern.quote(indexPath);
+        String regex = "^" + safeParent + "_[0-9]+$";
+
+        return metaDataLogRepository.findChildren(
+                        executionId,
+                        flowchartId,
+                        regex,
+                        loopIndex,
+                        Sort.by(Sort.Direction.ASC, "createdAt"))
+                .stream()
+                .map(logDataMapper::toDto)
+                .toList();
     }
 
     /**
