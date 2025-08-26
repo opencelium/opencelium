@@ -8,14 +8,12 @@ import com.becon.opencelium.backend.execution.logger.enums.PhaseType;
 import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
 import com.becon.opencelium.backend.execution.logger.mapper.LogDataMapper;
 import com.becon.opencelium.backend.execution.logger.parser.entity.ParsedLogLine;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * LogMetaDataServiceImp handles persistence and enrichment of parsed execution blocks (e.g. IF, LOOP, METHOD).
@@ -47,6 +45,8 @@ public class LogDataServiceImp implements LogDataService {
      */
     @Override
     public void saveNewBlock(LogData block) {
+        String id = new ObjectId().toHexString();
+        block.setId(id);
         block.setCreatedAt(Instant.now());
         metaDataLogRepository.save(block);
     }
@@ -139,13 +139,12 @@ public class LogDataServiceImp implements LogDataService {
                     block.getIndexPath(),
                     block.getProperties().get(LogLineKey.LOOP_INDEX.getSrcName()).toString()
             );
-        } else {
-            return metaDataLogRepository.findByConnectionIdAndExecutionIdAndFlowIdAndIndexPath(
-                    block.getConnectionId(),
-                    block.getExecutionId(),
-                    block.getFlowId(),
-                    block.getIndexPath()
-            );
         }
+        return metaDataLogRepository.findByConnectionIdAndExecutionIdAndFlowIdAndIndexPath(
+                block.getConnectionId(),
+                block.getExecutionId(),
+                block.getFlowId(),
+                block.getIndexPath()
+        );
     }
 }
