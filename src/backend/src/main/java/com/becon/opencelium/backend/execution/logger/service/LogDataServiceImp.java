@@ -2,6 +2,7 @@ package com.becon.opencelium.backend.execution.logger.service;
 
 import com.becon.opencelium.backend.database.mongodb.entity.LogData;
 import com.becon.opencelium.backend.database.mongodb.repository.MetaDataLogRepository;
+import com.becon.opencelium.backend.execution.log_managing.resource.LogMetaDataDto;
 import com.becon.opencelium.backend.execution.logger.dto.LogDataDTO;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseCategory;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseType;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -38,6 +40,11 @@ public class LogDataServiceImp implements LogDataService {
 
     @Autowired
     private LogDataMapper logDataMapper;
+
+    @Override
+    public List<LogMetaDataDto> getChildren(String executionId, String flowchartId, String indexPath, String loopIndex) {
+        return null;
+    }
 
     /**
      * Saves a new block document for a *_START log line.

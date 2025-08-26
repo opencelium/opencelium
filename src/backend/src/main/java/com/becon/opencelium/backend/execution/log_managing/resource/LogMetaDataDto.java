@@ -5,7 +5,7 @@ import com.becon.opencelium.backend.execution.log_managing.commons.LogElementTyp
 
 import java.util.Map;
 
-public class MetaDataListDto {
+public class LogMetaDataDto {
     private String name;
     private LogElementType type;
     private String executionId;
