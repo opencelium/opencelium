@@ -5,4 +5,5 @@ public interface InvokerSyncService {
     void delete(String invokerName);
     boolean isManuallyModified(String invokerName);
     void forceSync(String invokerName);
+    void syncInvokers();
 }

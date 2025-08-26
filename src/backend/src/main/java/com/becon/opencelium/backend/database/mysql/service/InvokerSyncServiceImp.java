@@ -11,10 +11,8 @@ import com.becon.opencelium.backend.subscription.remoteapi.module.InvokerModule;
 import com.becon.opencelium.backend.utility.crypto.HmacUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,7 +29,6 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.file.DirectoryStream;
@@ -53,8 +50,6 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
     private final InvokerSyncRepository invokerSyncRepository;
     private final OnlineSyncHistoryService onlineSyncHistoryService;
 
-    @Value("${opencelium.online_services.invoker_sync.active:false}")
-    private boolean active;
     private static final Path INVOKER_FILES_PATH = Paths.get(PathConstant.INVOKER);
     private static final String SERVICE = "Invoker File";
     private static final Logger logger = LoggerFactory.getLogger(InvokerSyncServiceImp.class);
@@ -147,26 +142,15 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
         }
     }
 
-
-    // SYSTEM LEVEL METHODS
-    @EventListener(ApplicationReadyEvent.class)
-    void init() {
-        recalculateSyncData();
-    }
-
     /**
      * Synchronizes invoker files with Service Portal.
      * For each step we update invoker file and hmac of its contents.
      * In case of an error, process finishes but do not roll back previous successful steps,
      * instead we restore file that caused the error and will save online syn history.
      */
+    @Override
     @Transactional(noRollbackFor = Exception.class)
-    @Scheduled(cron = "${opencelium.online_services.invoker_sync.time}")
-    void syncInvokers() {
-        if (!active) {
-            return;
-        }
-
+    public void syncInvokers() {
         recalculateSyncData();
 
         // load invoker files as zip from service portal
@@ -179,14 +163,7 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
             ZipEntry entry; // = invoker file
             while ((entry = zis.getNextEntry()) != null) {
                 if (entry.getName().endsWith(".xml")) {
-                    // read bytes of invoker file
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    byte[] buffer = new byte[4096];
-                    int len;
-                    while ((len = zis.read(buffer)) > 0) {
-                        baos.write(buffer, 0, len);
-                    }
-                    byte[] xmlBytes = baos.toByteArray();
+                    byte[] xmlBytes = zis.readAllBytes();
 
                     // extract required fields
                     String invokerName = extractInvokerName(xmlBytes);
@@ -220,6 +197,7 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
 
                     saveOrUpdate(sync);
                 }
+                zis.closeEntry();
             }
 
             // update invoker container
@@ -230,6 +208,13 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
         } finally {
             onlineSyncHistoryService.save(SERVICE, details);
         }
+    }
+
+
+    // SYSTEM LEVEL METHODS
+    @EventListener(ApplicationReadyEvent.class)
+    void init() {
+        recalculateSyncData();
     }
 
 
