@@ -7,6 +7,7 @@ import com.becon.opencelium.backend.execution.logger.enums.PhaseCategory;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseType;
 import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
 import com.becon.opencelium.backend.execution.logger.mapper.LogDataMapper;
+import com.becon.opencelium.backend.execution.logger.parser.FlexiblePatternLogParser;
 import com.becon.opencelium.backend.execution.logger.parser.entity.ParsedLogLine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -37,9 +38,13 @@ public class LogDataServiceImp implements LogDataService {
             LogLineKey.INDEX_PATH,
             LogLineKey.FLOWCHART_ID
     );
+    private static final Sort NATURAL_ORDER = Sort.by(Sort.Direction.ASC, "createdAt");
 
     @Autowired
     private MetaDataLogRepository metaDataLogRepository;
+
+    @Autowired
+    private FlexiblePatternLogParser flexiblePatternLogParser;
 
     @Autowired
     private LogDataMapper logDataMapper;
@@ -49,11 +54,7 @@ public class LogDataServiceImp implements LogDataService {
         List<LogData> logData;
         if (flowchartId == null || flowchartId.isBlank()) {
             // children of EXECUTION
-            return metaDataLogRepository.findChildren(
-                        executionId,
-                        FLOWCHART.name(),
-                        Sort.by(Sort.Direction.ASC, "createdAt"))
-                    .stream()
+            return metaDataLogRepository.findChildren(executionId, FLOWCHART.name(), NATURAL_ORDER).stream()
                     .map(logDataMapper::toDto)
                     .toList();
         }
@@ -62,44 +63,40 @@ public class LogDataServiceImp implements LogDataService {
             // children of FLOWCHART
             String regex = "^[0-9]+$";
 
-            return metaDataLogRepository.findChildren(
-                        executionId,
-                        flowchartId,
-                        regex,
-                        Sort.by(Sort.Direction.ASC, "createdAt"))
-                    .stream()
+            return metaDataLogRepository.findChildren(executionId, flowchartId, regex, NATURAL_ORDER).stream()
                     .map(logDataMapper::toDto)
                     .toList();
         }
 
         if (loopIndex == null || loopIndex.isBlank()) {
-            // children of IF
+            // children of IF or LOOP
             String safeParent = Pattern.quote(indexPath);
             String regex = "^" + safeParent + "_[0-9]+$";
 
-            return metaDataLogRepository.findChildren(
-                            executionId,
-                            flowchartId,
-                            regex,
-                            Sort.by(Sort.Direction.ASC, "createdAt"))
-                    .stream()
+            return metaDataLogRepository.findChildren(executionId, flowchartId, regex, NATURAL_ORDER).stream()
                     .map(logDataMapper::toDto)
                     .toList();
         }
 
-        // children of LOOP
+        // children of IF or LOOP
         String safeParent = Pattern.quote(indexPath);
         String regex = "^" + safeParent + "_[0-9]+$";
 
-        return metaDataLogRepository.findChildren(
-                        executionId,
-                        flowchartId,
-                        regex,
-                        loopIndex,
-                        Sort.by(Sort.Direction.ASC, "createdAt"))
-                .stream()
+        return metaDataLogRepository.findChildren(executionId, flowchartId, regex, loopIndex, NATURAL_ORDER).stream()
                 .map(logDataMapper::toDto)
                 .toList();
+    }
+
+    @Override
+    public List<String> getFullDetails(String executionId, String childId) {
+        return metaDataLogRepository.findById(childId)
+                .map(logData -> {
+                    // we can get executionId from logData
+                    long startOffset = logData.getStartOffset();
+                    long endOffset = logData.getEndOffset();
+
+                    return flexiblePatternLogParser.readLines(executionId, startOffset, endOffset);
+                }).orElseGet(List::of);
     }
 
     /**

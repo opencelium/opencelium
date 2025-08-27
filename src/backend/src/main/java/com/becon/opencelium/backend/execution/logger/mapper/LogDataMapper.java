@@ -7,7 +7,10 @@ import com.becon.opencelium.backend.execution.logger.dto.LogDataDTO;
 import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -18,6 +21,7 @@ public class LogDataMapper {
     public LogDataDTO toDto(LogData src) {
         LogDataDTO dto = new LogDataDTO();
 
+        dto.setId(src.getId());
         dto.setExecutionId(src.getExecutionId());
         dto.setFlowId(src.getFlowId());
         dto.setIndexPath(src.getIndexPath());

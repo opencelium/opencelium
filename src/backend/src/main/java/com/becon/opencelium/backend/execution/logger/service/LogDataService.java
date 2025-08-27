@@ -10,6 +10,8 @@ import java.util.Optional;
 public interface LogDataService {
     List<LogDataDTO> getChildren(String executionId, String flowchartId, String indexPath, String loopIndex);
 
+    List<String> getFullDetails(String executionId, String childId);
+
     void saveNewBlock(LogData block);
 
     void updateExistingBlock(LogData block);
