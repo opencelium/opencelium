@@ -56,4 +56,11 @@ public interface MetaDataLogRepository extends MongoRepository<LogData, String> 
         }
     """)
     List<LogData> findChildren(String executionId, String flowId, String regex, String loopIndex, Sort sort);
+
+    Optional<LogData> findFirstByExecutionIdAndFlowIdAndIndexPathRegex(
+            String executionId,
+            String flowId,
+            String regex,
+            Sort sort
+    );
 }

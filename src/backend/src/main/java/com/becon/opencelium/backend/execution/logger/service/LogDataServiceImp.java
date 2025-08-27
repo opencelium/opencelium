@@ -3,18 +3,23 @@ package com.becon.opencelium.backend.execution.logger.service;
 import com.becon.opencelium.backend.database.mongodb.entity.LogData;
 import com.becon.opencelium.backend.database.mongodb.repository.MetaDataLogRepository;
 import com.becon.opencelium.backend.execution.logger.dto.LogDataDTO;
+import com.becon.opencelium.backend.execution.logger.enums.LogDetailLevel;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseCategory;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseType;
 import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
 import com.becon.opencelium.backend.execution.logger.mapper.LogDataMapper;
 import com.becon.opencelium.backend.execution.logger.parser.FlexiblePatternLogParser;
+import com.becon.opencelium.backend.execution.logger.parser.ParsedLogLineBuilder;
 import com.becon.opencelium.backend.execution.logger.parser.entity.ParsedLogLine;
+import com.becon.opencelium.backend.execution.logger.tracker.ExecutionTracker;
+import com.becon.opencelium.backend.execution.logger.tracker.ExecutionTrackerImpl;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +29,7 @@ import java.util.regex.Pattern;
 
 import static com.becon.opencelium.backend.execution.logger.enums.PhaseCategory.EXECUTION;
 import static com.becon.opencelium.backend.execution.logger.enums.PhaseCategory.FLOWCHART;
+import static com.becon.opencelium.backend.execution.logger.enums.PhaseCategory.OPERATION;
 
 /**
  * LogMetaDataServiceImp handles persistence and enrichment of parsed execution blocks (e.g. IF, LOOP, METHOD).
@@ -40,7 +46,8 @@ public class LogDataServiceImp implements LogDataService {
             LogLineKey.INDEX_PATH,
             LogLineKey.FLOWCHART_ID
     );
-    private static final Sort NATURAL_ORDER = Sort.by(Sort.Direction.ASC, "createdAt");
+    private static final Sort SORT_ASCENDING = Sort.by(Sort.Direction.ASC, "createdAt");
+    private static final Sort SORT_DESCENDING = Sort.by(Sort.Direction.DESC, "createdAt");
 
     @Autowired
     private MetaDataLogRepository metaDataLogRepository;
@@ -51,6 +58,9 @@ public class LogDataServiceImp implements LogDataService {
     @Autowired
     private LogDataMapper logDataMapper;
 
+    @Autowired
+    private ParsedLogLineBuilder parsedLogLineBuilder;
+
     @Override
     public List<LogDataDTO> getChildrenById(String elementId, String loopIndex) {
         LogData entity = findByIdElseThrow(elementId);
@@ -59,7 +69,7 @@ public class LogDataServiceImp implements LogDataService {
 
         String executionId = entity.getExecutionId();
         if (type == EXECUTION) {
-            return metaDataLogRepository.findChildren(executionId, FLOWCHART.name(), NATURAL_ORDER).stream()
+            return metaDataLogRepository.findChildren(executionId, FLOWCHART.name(), SORT_ASCENDING).stream()
                     .map(logDataMapper::toDto)
                     .toList();
         }
@@ -68,7 +78,7 @@ public class LogDataServiceImp implements LogDataService {
         if (type == FLOWCHART) {
             String regex = "^[0-9]+$"; // only get if indexPath = number
 
-            return metaDataLogRepository.findChildren(executionId, flowchartId, regex, NATURAL_ORDER).stream()
+            return metaDataLogRepository.findChildren(executionId, flowchartId, regex, SORT_ASCENDING).stream()
                     .map(logDataMapper::toDto)
                     .toList();
         }
@@ -79,7 +89,7 @@ public class LogDataServiceImp implements LogDataService {
 
         if (loopIndex.isBlank()) {
             // IF body, which is located outside any LOOP
-            return metaDataLogRepository.findChildren(executionId, flowchartId, regex, NATURAL_ORDER).stream()
+            return metaDataLogRepository.findChildren(executionId, flowchartId, regex, SORT_ASCENDING).stream()
                     .map(logDataMapper::toDto)
                     .toList();
         }
@@ -88,7 +98,7 @@ public class LogDataServiceImp implements LogDataService {
         Object parentLoopIndex = entity.getProperties().getOrDefault("loopIndex", null);
         String currentLoopIndex = parentLoopIndex instanceof String ? parentLoopIndex + "," + loopIndex : loopIndex;
 
-        return metaDataLogRepository.findChildren(executionId, flowchartId, regex, currentLoopIndex, NATURAL_ORDER).stream()
+        return metaDataLogRepository.findChildren(executionId, flowchartId, regex, currentLoopIndex, SORT_ASCENDING).stream()
                 .map(logDataMapper::toDto)
                 .toList();
     }
@@ -96,16 +106,43 @@ public class LogDataServiceImp implements LogDataService {
     @Override
     public LogDataDTO getDetailsById(String elementId) {
         LogData entity = findByIdElseThrow(elementId);
-//        return metaDataLogRepository.findById(childId)
-//                .map(logData -> {
-//                    // we can get executionId from logData
-//                    long startOffset = logData.getStartOffset();
-//                    long endOffset = logData.getEndOffset();
-//
-//                    return flexiblePatternLogParser.readLines(executionId, startOffset, endOffset);
-//                }).orElseGet(List::of);
 
-        return null;
+        PhaseCategory type = entity.getType();
+
+        String executionId = entity.getExecutionId();
+        Long connectionId = entity.getConnectionId();
+        String flowchartId = entity.getFlowId();
+        long startOffset = entity.getStartOffset();
+        long endOffset = entity.getEndOffset();
+
+        List<String> lines = new ArrayList<>();
+        if (type == OPERATION) {
+            lines.addAll(flexiblePatternLogParser.readLines(executionId, startOffset, endOffset));
+        } else {
+            // for IF and LOOP remove its children before parsing
+            String indexPath = entity.getIndexPath();
+            String safeParent = Pattern.quote(indexPath);
+            String regex = "^" + safeParent + "_[0-9]+(_[0-9]+)*$"; // filters all-level children
+
+            Optional<LogData> firstChild = metaDataLogRepository.findFirstByExecutionIdAndFlowIdAndIndexPathRegex(
+                    executionId, flowchartId, regex, SORT_ASCENDING
+            );
+            Optional<LogData> lastChild = metaDataLogRepository.findFirstByExecutionIdAndFlowIdAndIndexPathRegex(
+                    executionId, flowchartId, regex, SORT_DESCENDING
+            );
+            if (firstChild.isPresent() && lastChild.isPresent()) {
+                long firstChildStartOffset = firstChild.get().getStartOffset();
+                long lastChildEndOffset = lastChild.get().getEndOffset();
+
+                lines.addAll(flexiblePatternLogParser.readLines(executionId, startOffset, firstChildStartOffset));
+                lines.addAll(flexiblePatternLogParser.readLines(executionId, lastChildEndOffset, endOffset));
+            } else {
+                lines = flexiblePatternLogParser.readLines(executionId, startOffset, endOffset);
+            }
+        }
+
+
+        return collect(lines, executionId, connectionId, flowchartId);
     }
 
     /**
@@ -222,5 +259,20 @@ public class LogDataServiceImp implements LogDataService {
     private LogData findByIdElseThrow(String phaseId) {
         return metaDataLogRepository.findById(phaseId)
                 .orElseThrow(() -> new RuntimeException("LogData element not found with specified id = " + phaseId));
+    }
+
+    private LogDataDTO collect(List<String> lines, String executionId, Long connectionId,String flowchartId) {
+        ExecutionTracker tracker = new ExecutionTrackerImpl(executionId, connectionId.toString(), flowchartId, LogDetailLevel.DETAILED);
+
+        ParsedLogLine parsed;
+        Optional<LogData> result = Optional.empty();
+        for (String line : lines) {
+            parsed = parsedLogLineBuilder.build(line);
+            result = tracker.buildLogData(parsed);
+
+            if (result.isPresent()) break;
+        }
+
+        return logDataMapper.toDto(result.get());
     }
 }
