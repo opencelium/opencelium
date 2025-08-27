@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import static com.becon.opencelium.backend.execution.logger.enums.PhaseCategory.EXECUTION;
 import static com.becon.opencelium.backend.execution.logger.enums.PhaseCategory.FLOWCHART;
 
 /**
@@ -51,53 +52,60 @@ public class LogDataServiceImp implements LogDataService {
     private LogDataMapper logDataMapper;
 
     @Override
-    public List<LogDataDTO> getChildren(String executionId, String flowchartId, String indexPath, String loopIndex) {
-        List<LogData> logData;
-        if (flowchartId == null || flowchartId.isBlank()) {
-            // children of EXECUTION
+    public List<LogDataDTO> getChildrenById(String elementId, String loopIndex) {
+        LogData entity = findByIdElseThrow(elementId);
+
+        PhaseCategory type = entity.getType();
+
+        String executionId = entity.getExecutionId();
+        if (type == EXECUTION) {
             return metaDataLogRepository.findChildren(executionId, FLOWCHART.name(), NATURAL_ORDER).stream()
                     .map(logDataMapper::toDto)
                     .toList();
         }
 
-        if (indexPath == null || indexPath.isBlank()) {
-            // children of FLOWCHART
-            String regex = "^[0-9]+$";
+        String flowchartId = entity.getFlowId();
+        if (type == FLOWCHART) {
+            String regex = "^[0-9]+$"; // only get if indexPath = number
 
             return metaDataLogRepository.findChildren(executionId, flowchartId, regex, NATURAL_ORDER).stream()
                     .map(logDataMapper::toDto)
                     .toList();
         }
 
-        if (loopIndex == null || loopIndex.isBlank()) {
-            // children of IF or LOOP
-            String safeParent = Pattern.quote(indexPath);
-            String regex = "^" + safeParent + "_[0-9]+$";
-
-            return metaDataLogRepository.findChildren(executionId, flowchartId, regex, NATURAL_ORDER).stream()
-                    .map(logDataMapper::toDto)
-                    .toList();
-        }
-
-        // children of IF or LOOP
+        String indexPath = entity.getIndexPath();
         String safeParent = Pattern.quote(indexPath);
-        String regex = "^" + safeParent + "_[0-9]+$";
+        String regex = "^" + safeParent + "_[0-9]+$"; // filters only first-level children
 
-        return metaDataLogRepository.findChildren(executionId, flowchartId, regex, loopIndex, NATURAL_ORDER).stream()
+        if (loopIndex.isBlank()) {
+            // IF body, which is located outside any LOOP
+            return metaDataLogRepository.findChildren(executionId, flowchartId, regex, NATURAL_ORDER).stream()
+                    .map(logDataMapper::toDto)
+                    .toList();
+        }
+
+        // IF or LOOP body, which is located inside a LOOP
+        Object parentLoopIndex = entity.getProperties().getOrDefault("loopIndex", null);
+        String currentLoopIndex = parentLoopIndex instanceof String ? parentLoopIndex + "," + loopIndex : loopIndex;
+
+        return metaDataLogRepository.findChildren(executionId, flowchartId, regex, currentLoopIndex, NATURAL_ORDER).stream()
                 .map(logDataMapper::toDto)
                 .toList();
     }
 
     @Override
-    public List<String> getFullDetails(String executionId, String childId) {
-        return metaDataLogRepository.findById(childId)
-                .map(logData -> {
-                    // we can get executionId from logData
-                    long startOffset = logData.getStartOffset();
-                    long endOffset = logData.getEndOffset();
+    public LogDataDTO getDetailsById(String elementId) {
+        LogData entity = findByIdElseThrow(elementId);
+//        return metaDataLogRepository.findById(childId)
+//                .map(logData -> {
+//                    // we can get executionId from logData
+//                    long startOffset = logData.getStartOffset();
+//                    long endOffset = logData.getEndOffset();
+//
+//                    return flexiblePatternLogParser.readLines(executionId, startOffset, endOffset);
+//                }).orElseGet(List::of);
 
-                    return flexiblePatternLogParser.readLines(executionId, startOffset, endOffset);
-                }).orElseGet(List::of);
+        return null;
     }
 
     /**
@@ -209,5 +217,10 @@ public class LogDataServiceImp implements LogDataService {
                 block.getFlowId(),
                 block.getIndexPath()
         );
+    }
+
+    private LogData findByIdElseThrow(String phaseId) {
+        return metaDataLogRepository.findById(phaseId)
+                .orElseThrow(() -> new RuntimeException("LogData element not found with specified id = " + phaseId));
     }
 }

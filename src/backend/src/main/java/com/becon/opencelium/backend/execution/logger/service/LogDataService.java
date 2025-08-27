@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface LogDataService {
-    List<LogDataDTO> getChildren(String executionId, String flowchartId, String indexPath, String loopIndex);
+    List<LogDataDTO> getChildrenById(String elementId, String loopIndex);
 
-    List<String> getFullDetails(String executionId, String childId);
+    LogDataDTO getDetailsById(String elementId);
 
     void saveNewBlock(LogData block);
 

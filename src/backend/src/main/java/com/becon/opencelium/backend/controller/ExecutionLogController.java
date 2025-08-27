@@ -1,6 +1,5 @@
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.execution.log_managing.resource.LogMetaDataDto;
 import com.becon.opencelium.backend.execution.logger.dto.LogDataDTO;
 import com.becon.opencelium.backend.execution.logger.service.LogDataService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,30 +29,28 @@ public class ExecutionLogController {
         this.logMetaDataService = logMetaDataService;
     }
 
-    @Operation(summary = "Returns children metadata of the specified element")
+    @Operation(summary = "Returns children elements' metadata of the specified element by ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Success",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = LogMetaDataDto.class))))
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = LogDataDTO.class))))
     })
-    @GetMapping("/{executionId}/child/list")
-    public ResponseEntity<List<LogDataDTO>> getMetaDataForDirectChildren(
-            @PathVariable String executionId,
-            @RequestParam(name = "flowId", required = false) String flowchartId,
-            @RequestParam(required = false) String indexPath, // &indexPath=1_2_3_0
-            @RequestParam(required = false) String loopIndex // &loopIndex=1,2
+    @GetMapping("/element/{elementId}/children")
+    public ResponseEntity<List<LogDataDTO>> getChildrenById(
+            @PathVariable String elementId,
+            @RequestParam(required = false, defaultValue = "") String loopIndex
     ) {
-        return ResponseEntity.ok(logMetaDataService.getChildren(executionId, flowchartId, indexPath, loopIndex));
+        return ResponseEntity.ok(logMetaDataService.getChildrenById(elementId, loopIndex));
     }
 
-    @Operation(summary = "Returns all log lines of a given Phase")
+    @Operation(summary = "Returns a single element with detailed data like refs, data, request and responses")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Success",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = LogMetaDataDto.class))))
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = LogDataDTO.class))))
     })
-    @GetMapping("/{executionId}/child/{childId}/details")
-    public ResponseEntity<List<String>> getFullDetails(@PathVariable String executionId, @PathVariable String childId) {
-        return ResponseEntity.ok(logMetaDataService.getFullDetails(executionId, childId));
+    @GetMapping("/element/{elementId}/details")
+    public ResponseEntity<LogDataDTO> getDetailsById(@PathVariable String elementId) {
+        return ResponseEntity.ok(logMetaDataService.getDetailsById(elementId));
     }
 }
