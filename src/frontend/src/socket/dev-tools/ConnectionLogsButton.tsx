@@ -1,8 +1,7 @@
 import React, {useState} from "react";
 import {mockSocket} from "../MockOpenceliumSocket";
 import {Button} from "reactstrap";
-import {MockLogs} from "./connection_logs_mock";
-
+const MockLogs: any = [];
 const FakeConnectionLogs = () => {
     const [isDisabled, toggleDisabled] = useState<boolean>(false);
     const getFirstLevelLogs = (index: number) => {

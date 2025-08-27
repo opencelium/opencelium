@@ -131,6 +131,11 @@ export default class COperatorItem{
     }
 
     set expression(expression){
+
+        this._error = {
+            hasError: false,
+            messages: [],
+        };
         this._expression = expression;
     }
 

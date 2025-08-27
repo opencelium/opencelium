@@ -141,7 +141,7 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
                             onChange={selectTheme}
                         />
                     </div>
-                    <InputSwitch
+                    {/*<InputSwitch
                         name={`All online services are ${themeSync ? 'enabled' : 'disabled'} (Gravatar, Online Update, Theme)`}
                         icon={'sync'}
                         label={'Online Service Sync'}
@@ -149,7 +149,7 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
                         onClick={() => dispatch(updateUserDetail({...authUser, userDetail: {...authUser.userDetail, themeSync: !themeSync}}))}
                         hasConfirmation={!themeSync}
                         confirmationText={'Are you agree to share your E-mail with Opencelium Service Portal?'}
-                    />
+                    />*/}
                 </FormSection>
                 <FormSection label={{value: 'Subscriptions'}}>
                     {Permissions}

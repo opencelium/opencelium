@@ -25,8 +25,8 @@ public class ConnectorMng {
     @Field(name = "connector_id")
     private Integer connectorId;
 
-    @Field(name = "fchart_id")
-    private String fchartId;
+    @Field(name = "flodId")
+    private String flowId;
 
     private String title;
 
@@ -47,12 +47,12 @@ public class ConnectorMng {
         this.connectorId = connectorId;
     }
 
-    public String getFchartId() {
-        return fchartId;
+    public String getFlowId() {
+        return flowId;
     }
 
-    public void setFchartId(String fchartId) {
-        this.fchartId = fchartId;
+    public void setFlowId(String flowId) {
+        this.flowId = flowId;
     }
 
     public String getTitle() {

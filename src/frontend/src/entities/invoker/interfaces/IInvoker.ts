@@ -60,6 +60,7 @@ export interface IInvoker extends IInvokerForm{
     id?: number;
     invokerId?: number;
     icon?: string;
+    hasManualSync?: boolean;
     operations: Operation[];
     authType: AuthType,
     requiredData: any;

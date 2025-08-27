@@ -14,7 +14,11 @@
  */
 
 import ActionCreators from "../../redux_toolkit/action_creators";
-import {getAndUpdateConnectionTitle, getAndUpdateConnectionDescription} from "@root/redux_toolkit/action_creators/ConnectionCreators";
+import {
+    getAndUpdateConnectionTitle,
+    getAndUpdateConnectionDescription,
+    getAllMetaConnectionsByInvokerName
+} from "@root/redux_toolkit/action_creators/ConnectionCreators";
 import { syncInvokers } from "@entity/connection/redux_toolkit/slices/EditorSlice";
 import { requestRemoteApi } from "@entity/connection/redux_toolkit/action_creators/EditorCreators";
 import {notifyAboutNewSupportFile} from "@root/redux_toolkit/slices/SupportFileSlice";
@@ -96,5 +100,8 @@ export default {
             "__DEFAULT__": "The selected connections were not removed"
         },
         [graphQLLogin.rejected.type]: "GraphQL was not connected",
+        [getAllMetaConnectionsByInvokerName.rejected.type]: {
+            "__DEFAULT__": "The connections was not fetched."
+        }
     },
 }

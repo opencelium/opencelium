@@ -333,7 +333,11 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     private void setEnhancements(ConnectionMng connection) {
         if (connection.getFieldBindings() == null || connection.getFieldBindings().isEmpty())
             return;
-        connection.getFieldBindings().forEach(f -> f.setEnhancement(enhancementMngMapper.toEntity(enhancementMapper.toDTO(enhancementService.getById(f.getEnhancementId())))));
+        connection.getFieldBindings().forEach(f -> {
+            if (f != null) {
+                f.setEnhancement(enhancementMngMapper.toEntity(enhancementMapper.toDTO(enhancementService.getById(f.getEnhancementId()))));
+            }
+        });
     }
 
     private <T> void doIfNoneMatch(List<T> olds, List<T> news, BiFunction<T, T, Boolean> f, Consumer<T> c) {
