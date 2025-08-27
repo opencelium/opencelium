@@ -9,6 +9,7 @@ import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
 import com.becon.opencelium.backend.execution.logger.mapper.LogDataMapper;
 import com.becon.opencelium.backend.execution.logger.parser.FlexiblePatternLogParser;
 import com.becon.opencelium.backend.execution.logger.parser.entity.ParsedLogLine;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -107,6 +108,8 @@ public class LogDataServiceImp implements LogDataService {
      */
     @Override
     public void saveNewBlock(LogData block) {
+        String id = new ObjectId().toHexString();
+        block.setId(id);
         block.setCreatedAt(Instant.now());
         metaDataLogRepository.save(block);
     }
@@ -199,13 +202,12 @@ public class LogDataServiceImp implements LogDataService {
                     block.getIndexPath(),
                     block.getProperties().get(LogLineKey.LOOP_INDEX.getSrcName()).toString()
             );
-        } else {
-            return metaDataLogRepository.findByConnectionIdAndExecutionIdAndFlowIdAndIndexPath(
-                    block.getConnectionId(),
-                    block.getExecutionId(),
-                    block.getFlowId(),
-                    block.getIndexPath()
-            );
         }
+        return metaDataLogRepository.findByConnectionIdAndExecutionIdAndFlowIdAndIndexPath(
+                block.getConnectionId(),
+                block.getExecutionId(),
+                block.getFlowId(),
+                block.getIndexPath()
+        );
     }
 }
