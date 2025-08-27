@@ -6,15 +6,15 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
-public class ScriptEngineFactory {
+public class ScriptEngineProvider {
 
     private final List<ScriptEngine> engines;
 
-    public ScriptEngineFactory(List<ScriptEngine> engines) {
+    public ScriptEngineProvider(List<ScriptEngine> engines) {
         this.engines = engines;
     }
 
-    public Optional<ScriptEngine> getEngine(Language lang) {
+    public Optional<ScriptEngine> provide(Language lang) {
         return engines.stream()
                 .filter(x -> x.supports(lang))
                 .findFirst();
