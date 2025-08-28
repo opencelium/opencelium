@@ -91,6 +91,14 @@ public class FlexiblePatternLogParser implements LogLineParser {
         result.put(LogLineKey.MESSAGE, line);
 
         // 4. Parse all key=value pairs from the message content
+        Matcher dm = Pattern.compile("(?<!\\S)data=").matcher(msg);
+        if (dm.find()) {
+            int start = dm.start();      // index of 'd'
+            int end   = dm.end();        // index right after '='
+            String dataVal = msg.substring(end).trim();   // starts at '{'
+            result.put(LogLineKey.DATA, dataVal);
+            msg = msg.substring(0, start).trim();         // "... segment=REQUEST_HEADER"
+        }
         Matcher kvMatcher = KV_PATTERN.matcher(msg);
         while (kvMatcher.find()) {
             String key = kvMatcher.group(1);
@@ -102,7 +110,6 @@ public class FlexiblePatternLogParser implements LogLineParser {
             if (LogLineKey.from(key).isPresent()) {
                 result.put(LogLineKey.from(key).get(), value);
             }
-
         }
 
         return result;
