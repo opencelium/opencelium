@@ -4,6 +4,7 @@ export interface ConnectionLogIdentifier {
 	indexPath: string,
 }
 export interface ConnectionSocketLog<SegmentType> extends ConnectionLogIdentifier {
+	id: string,
 	connectorName: string;
 	status: 'PENDING' | 'COMPLETE' | 'FAIL',
 	type: 'OPERATION' | 'EXECUTION' | 'FLOWCHART' | 'LOOP' | 'IF' | 'UNKNOWN',
@@ -34,7 +35,7 @@ export interface DetailedMethodSegment {
 	response: MethodResponse & DetailedMethod
 }
 interface DetailedMethod {
-	header: Record<string, string>,
+	header: string,
 	payload: any,
 }
 interface LightIfOperatorSegment {

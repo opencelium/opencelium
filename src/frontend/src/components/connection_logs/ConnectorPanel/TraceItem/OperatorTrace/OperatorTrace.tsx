@@ -43,11 +43,12 @@ export const OperatorTrace: React.FC<Props> = ({
 		if (!expanded) {
 			setLoading(true);
 			await dispatch(
-				getDetailedOperator({
+				getOperatorChildren({
 					executionId,
 					flowId,
 					indexPath: trace.indexPath,
 					loopIndex: isLoop ? [...iterationIndexes, iterationIndex] : undefined,
+					id: trace.id,
 				})
 			);
 			setLoading(false);
@@ -73,6 +74,7 @@ export const OperatorTrace: React.FC<Props> = ({
 						flowId,
 						indexPath: trace.indexPath,
 						loopIndex: [...iterationIndexes, nextIndex],
+						id: trace.id,
 					})
 				);
 				setNextLoading(false);
@@ -95,6 +97,7 @@ export const OperatorTrace: React.FC<Props> = ({
 						flowId,
 						indexPath: trace.indexPath,
 						loopIndex: [...iterationIndexes, prevIndex],
+						id: trace.id,
 					})
 				);
 				setPrevLoading(false);
