@@ -1,7 +1,6 @@
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.database.mongodb.entity.LogData;
-import com.becon.opencelium.backend.execution.log_managing.resource.MetaDataListDto;
+import com.becon.opencelium.backend.execution.logger.dto.LogDataDTO;
 import com.becon.opencelium.backend.execution.logger.service.LogDataService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -11,7 +10,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -26,43 +29,28 @@ public class ExecutionLogController {
         this.logMetaDataService = logMetaDataService;
     }
 
-    @Operation(summary = "Returns a list of all root-level log metadata entries for a given execution")
+    @Operation(summary = "Returns children elements' metadata of the specified element by ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Success",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = MetaDataListDto.class))))
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = LogDataDTO.class))))
     })
-    @GetMapping("/{executionId}/meta/list")
-    public ResponseEntity<List<MetaDataListDto>> getMetaDataList(@PathVariable String executionId) {
-        return ResponseEntity.ok().build();
+    @GetMapping("/element/{elementId}/children")
+    public ResponseEntity<List<LogDataDTO>> getChildrenById(
+            @PathVariable String elementId,
+            @RequestParam(required = false, defaultValue = "") String loopIndex
+    ) {
+        return ResponseEntity.ok(logMetaDataService.getChildrenById(elementId, loopIndex));
     }
 
-    @Operation(summary = "Returns children metadata of the specified element")
+    @Operation(summary = "Returns a single element with detailed data like refs, data, request and responses")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Success",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = MetaDataListDto.class))))
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = LogDataDTO.class))))
     })
-    // change connectorId to a flowId
-    @GetMapping("/{executionId}/flowchart/{flowId}")
-    public ResponseEntity<List<MetaDataListDto>> getMetaDataList(
-            // /{executionId}?flowchart={flowId}?indexPath={indexPath}&loopIndex=1,2
-            @PathVariable String executionId,
-            @PathVariable String flowId,
-            @RequestParam String indexPath,
-            @RequestParam("loopIndex") List<String> loopIndexes // if inside a loop.
-    ) {
-//        // 1. Fetch raw metadata entities
-//        List<LogData> rawList = logMetaDataService.findChildren(
-//                executionId, flowId, indexPath, loopIndexes
-//        );
-//
-//        // 2. Map to DTO
-//        List<MetaDataListDto> dtos = rawList.stream()
-//                .map(this::toMetaDataListDto)
-//                .collect(Collectors.toList());
-
-//        return ResponseEntity.ok(dtos);
-        return ResponseEntity.ok().build();
+    @GetMapping("/element/{elementId}/details")
+    public ResponseEntity<LogDataDTO> getDetailsById(@PathVariable String elementId) {
+        return ResponseEntity.ok(logMetaDataService.getDetailsById(elementId));
     }
 }

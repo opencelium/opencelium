@@ -2,8 +2,6 @@ package com.becon.opencelium.backend.execution.logger.parser.entity;
 
 import com.becon.opencelium.backend.execution.logger.enums.LogLineStage;
 import com.becon.opencelium.backend.execution.logger.enums.LogLineType;
-import com.becon.opencelium.backend.execution.logger.enums.PhaseType;
-import com.becon.opencelium.backend.execution.logger.enums.SegmentType;
 import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
 
 import java.util.HashMap;
