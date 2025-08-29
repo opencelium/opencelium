@@ -15,11 +15,10 @@
 
 import {
     consoleLog,
-    isArray,
     isId,
     isString,
     sortByIndex,
-    sortByIndexFunction, sortConnectorItemIndexes,
+    sortConnectorItemIndexes,
     subArrayToString
 } from "@application/utils/utils";
 import CMethodItem from "./method/CMethodItem";
@@ -29,14 +28,11 @@ import CConnectorPagination from "./CConnectorPagination";
 import {CTechnicalOperator} from "@entity/connection/components/classes/components/content/connection_overview_2/operator/CTechnicalOperator";
 import {CTechnicalProcess} from "@entity/connection/components/classes/components/content/connection_overview_2/process/CTechnicalProcess";
 import COperator, {OPERATOR_SIZE} from "@entity/connection/components/classes/components/content/connection_overview_2/operator/COperator";
-import React from "react";
 import CProcess, {
     PROCESS_HEIGHT,
     PROCESS_WIDTH
 } from "@entity/connection/components/classes/components/content/connection_overview_2/process/CProcess";
- import CFieldBinding from "@classes/content/connection/field_binding/CFieldBinding";
- import CBindingItem from "@classes/content/connection/field_binding/CBindingItem";
- import {DEFAULT_COLOR} from "@classes/content/connection/operator/CStatement";
+import {DEFAULT_COLOR} from "@classes/content/connection/operator/CStatement";
 
 export const INSIDE_ITEM = 'in';
 export const OUTSIDE_ITEM = 'out';
@@ -220,37 +216,36 @@ export default class CConnectorItem{
         return null;
     }
 
-    getAllMethodReferences(){
-        const references = [];
-        for(let i = 0; i < this._methods.length; i++){
-            const methodReferences = Array.from(this._methods[i].getReferences());
-            let insideReferences = [];
-            let loopOperatorReference = '';
-            for(let j = 0; j < methodReferences.length; j++){
-                const method = this.getMethodByColor(methodReferences[j].substring(0, 7));
-                if(method){
-                    insideReferences.push(method);
-                }
-                const nearestLoopOperator = this.getNearestLoopOperatorFromReference(methodReferences[j]);
-                if (nearestLoopOperator && nearestLoopOperator.index > loopOperatorReference) {
-                    loopOperatorReference = nearestLoopOperator.index;
-                }
+    getAllMethodReferences() {
+        const extractColors = (str) =>
+            typeof str === 'string'
+                ? (str.match(/#([A-Fa-f0-9]{6})\./g) || []).map(m => m.slice(0, -1))
+                : [];
+
+        return this._methods.map(method => {
+            const rawRefs = Array.from(method.getReferences());
+            const colors = new Set();
+            let loopRef = '';
+
+            for (const ref of rawRefs) {
+                extractColors(ref).forEach(c => colors.add(c));
+                const loop = this.getNearestLoopOperatorFromReference(ref);
+                if (loop && loop.index > loopRef) loopRef = loop.index;
             }
-            if(insideReferences.length !== 0){
-                insideReferences = insideReferences.map(m => m.index);
-            }
-            if(loopOperatorReference){
-                insideReferences.push(loopOperatorReference);
-            }
-            if(insideReferences.length !== 0){
-                references.push({
-                    element: this._methods[i].index,
-                    references: insideReferences
-                });
-            }
-        }
-        return references;
+
+            const indexes = [...colors]
+                .map(c => this.getMethodByColor(c))
+                .filter(Boolean)
+                .map(m => m.index);
+
+            if (loopRef) indexes.push(loopRef);
+            if (indexes.length === 0) return null;
+
+            return { element: method.index, references: indexes };
+        }).filter(Boolean);
     }
+
+
 
     getAllOperatorReferences(){
         const references = [];
@@ -332,51 +327,38 @@ export default class CConnectorItem{
         return {inReferences: Array.from(inReferences), outReferences: Array.from(outReferences)};
     }
 
-    getReferencesForOperator(operator, shouldCheckOutReferences = true){
-        let operatorReferences = new Set([]);
-        const allReferences = this.getAllMethodReferences();
-        let inReferences = new Set([]);
-        let outReferences = new Set([]);
-        for(let i = 0; i < allReferences.length; i++){
-            if(allReferences[i].element.indexOf(operator.index) === 0) {
-                inReferences = new Set([...inReferences, ...allReferences[i].references]);
+    getReferencesForOperator(operator, shouldCheckOutReferences = true) {
+        const operatorReferences = new Set();
+        const inReferences = new Set();
+        const outReferences = new Set();
+
+        const extractColors = (exp) =>
+            typeof exp === 'string'
+                ? (exp.match(/#([A-Fa-f0-9]{6})\./g) || []).map(m => m.slice(0, -1))
+                : [];
+        
+        for (const { element, references } of this.getAllMethodReferences()) {
+            if (element.indexOf(operator.index) === 0) {
+                references.forEach(r => inReferences.add(r));
             }
-            if(shouldCheckOutReferences && allReferences[i].references.findIndex(ref => ref.indexOf(operator.index) === 0) !== -1){
-                outReferences.add(allReferences[i].element);
-            }
-        }
-        for(let i = 0; i < this._operators.length; i++){
-            if(this._operators[i].index.indexOf(operator.index) === 0){
-                const leftColor = this._operators[i].condition.leftStatement.color;
-                const rightColor = this._operators[i].condition.rightStatement.color;
-                let loopOperatorReference = '';
-                const nearestLoopOperatorFromLeftStatement = this.getNearestLoopOperatorFromReference(this._operators[i].condition.leftStatement.field);
-                const nearestLoopOperatorFromRightStatement = this.getNearestLoopOperatorFromReference(this._operators[i].condition.rightStatement.field);
-                if (nearestLoopOperatorFromLeftStatement && nearestLoopOperatorFromLeftStatement.index > loopOperatorReference) {
-                    loopOperatorReference = nearestLoopOperatorFromLeftStatement.index;
-                }
-                if (nearestLoopOperatorFromRightStatement && nearestLoopOperatorFromRightStatement.index > loopOperatorReference) {
-                    loopOperatorReference = nearestLoopOperatorFromRightStatement.index;
-                }
-                if(leftColor && leftColor !== DEFAULT_COLOR){
-                    const method = this.getMethodByColor(leftColor);
-                    if(method){
-                        operatorReferences.add(method.index);
-                    }
-                }
-                if(rightColor && rightColor !== DEFAULT_COLOR){
-                    const method = this.getMethodByColor(rightColor);
-                    if(method){
-                        operatorReferences.add(method.index);
-                    }
-                }
-                if(loopOperatorReference){
-                    operatorReferences.add(loopOperatorReference);
-                }
+            if (shouldCheckOutReferences && references.some(r => r.indexOf(operator.index) === 0)) {
+                outReferences.add(element);
             }
         }
+
+        this._operators
+            .filter(op => op.index.indexOf(operator.index) === 0)
+            .forEach(op => {
+                extractColors(op.expression)
+                    .map(c => this.getMethodByColor(c))
+                    .filter(Boolean)
+                    .forEach(method => operatorReferences.add(method.index));
+            });
+
         return Array.from(new Set([...inReferences, ...outReferences, ...operatorReferences]));
     }
+
+
 
     getReferencesForItem(item, isSelectedAll = false, shouldCheckOutReferences = true){
         const isOperator = item instanceof COperatorItem;
