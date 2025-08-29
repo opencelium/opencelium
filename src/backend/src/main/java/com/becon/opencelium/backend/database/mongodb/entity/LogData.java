@@ -3,7 +3,6 @@ package com.becon.opencelium.backend.database.mongodb.entity;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseCategory;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseStatus;
 import com.becon.opencelium.backend.execution.logger.enums.LogLineType;
-import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;

@@ -110,7 +110,9 @@ const TestConnectionButton = ({validateLogic}: any) => {
                             parentIndexPath = data.indexPath;
                         }
                     }
-                    dispatch(addSocketLog({data, settings: {hasNewLoopIndex, parentIndexPath}}));
+                    //@ts-ignore
+                    const {size, ...properties} = data.properties
+                    dispatch(addSocketLog({data: {...data, properties}, settings: {hasNewLoopIndex, parentIndexPath}}));
                     previousLogMessage = data;
                 }
                 if (!!data?.error?.message) {

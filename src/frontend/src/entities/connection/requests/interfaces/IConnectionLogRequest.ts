@@ -8,7 +8,8 @@ import {
 } from "@root/requests/models/ConnectionLog";
 
 export interface ConLogRequestProps extends ConnectionLogIdentifier{
-	loopIndex?: number[]
+	loopIndex?: number[],
+	id: string,
 }
 export interface TestConnectionResponse {
 	schedulerId: number,

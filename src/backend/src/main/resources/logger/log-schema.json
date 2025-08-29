@@ -33,7 +33,7 @@
     },
     "LOOP" : {
       "emitOn": ["LOOP_START", "LOOP_END"],
-      "properties" : ["indexPath", "expression", "iterator", "loopIndex", "loopIterator"],
+      "properties" : ["indexPath", "expression", "iterator", "loopIndex", "loopIterator", "size"],
       "segments" : {
         "EXCEPTION": ["data"]
       }

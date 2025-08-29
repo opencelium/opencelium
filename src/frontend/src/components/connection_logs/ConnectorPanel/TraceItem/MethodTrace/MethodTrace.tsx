@@ -14,8 +14,8 @@ import {ColorTheme, ITheme} from '@style/Theme';
 import Validation from "@application/classes/Validation";
 import {getDetailedMethod} from "@root/redux_toolkit/action_creators/ConnectionLogCreators";
 import {ShowIndexPath} from "@app_component/connection_logs/LogsPanel/LogsPanel";
-import {KeyStyled, MetaBlockStyled, MetaItemStyled, ValueStyled} from "@app_component/base/input/styles";
 import ErrorMessage from "@app_component/connection_logs/ConnectorPanel/ErrorMessage";
+import {isJsonString} from "@application/utils/utils";
 
 interface MethodTraceProps {
 	trace: ConnectionSocketLog<DetailedMethodSegment>;
@@ -73,6 +73,7 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 						executionId,
 						flowId,
 						indexPath: trace.indexPath,
+						id: trace.id,
 					})
 				);
 			}
@@ -93,8 +94,8 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 	const requestDetails = trace.segment.request;
 	const responseDetails = trace.segment.response;
 
-	const requestHeaders = requestDetails
-		? JSON.stringify(requestDetails.header, null, 2)
+	const requestHeaders = !!requestDetails?.header && isJsonString(requestDetails.header)
+		? JSON.stringify(JSON.parse(requestDetails.header), null, 2)
 		: '';
 	const requestBody =
 		requestDetails && requestDetails.payload

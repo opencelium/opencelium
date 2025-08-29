@@ -79,7 +79,9 @@ export const connectionLogSlice = createSlice({
 						if (action.payload.settings.hasNewLoopIndex) {
 							if (trace.type === 'LOOP') {
 								//@ts-ignore
-								trace.properties.size = trace.properties.size ? trace.properties.size + 1 : 1;
+								console.log(+trace.properties.size)
+								//@ts-ignore
+								trace.properties.size = +trace.properties.size ? +trace.properties.size + 1 : 1;
 								trace.isCompleted = true;
 								return true;
 							}
@@ -96,7 +98,6 @@ export const connectionLogSlice = createSlice({
 						if (connector.flowId === flowId) {
 							hasConnector = true;
 							if (action.payload.data.status === 'COMPLETE') {
-								console.log(connector.traces);
 								findAndUpdateTrace(connector.traces, action.payload.data.indexPath, (trace) => {
 									if (!action.payload.settings.hasNewLoopIndex) {
 										if (trace.type === 'IF') {
@@ -107,7 +108,12 @@ export const connectionLogSlice = createSlice({
 									return false;
 								});
 							} else {
-								connector.traces.push({...action.payload.data, isCompleted: action.payload.data.type === 'OPERATION'});
+								const isIndexPathFirstLvl = action.payload.data.indexPath.split('_').length === 1;
+								let isCompleted = action.payload.data.type === 'OPERATION';
+								if (!isIndexPathFirstLvl) {
+									isCompleted = true;
+								}
+								connector.traces.push({...action.payload.data, isCompleted});
 							}
 							return;
 						}
