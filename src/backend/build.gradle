@@ -34,6 +34,13 @@ tasks.named('bootJar') {
 
 test {
 	useJUnitPlatform()
+
+	// For GraalVM
+	jvmArgs = [
+			"-XX:+UnlockExperimentalVMOptions",
+			"-XX:+EnableJVMCI",
+			"-Dpolyglot.engine.WarnInterpreterOnly=false"
+	]
 }
 
 dependencies {
@@ -67,6 +74,8 @@ dependencies {
 	implementation 'com.warrenstrange:googleauth:1.4.0'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.1'
 	implementation("org.python:jython-standalone:2.7.4")
+	implementation("org.graalvm.polyglot:polyglot:24.2.2")
+	implementation("org.graalvm.polyglot:js:24.2.2")
 	compileOnly 'org.mapstruct:mapstruct:1.5.5.Final'
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 	runtimeOnly 'mysql:mysql-connector-java'
