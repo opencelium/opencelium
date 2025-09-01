@@ -1,5 +1,7 @@
 package com.becon.opencelium.backend.scriptengine;
 
+import java.util.Objects;
+
 import static com.becon.opencelium.backend.scriptengine.ScriptEngineType.*;
 
 public enum LanguageType {
@@ -17,6 +19,17 @@ public enum LanguageType {
         this.code = code;
         this.name = name;
         this.defaultEngine = defaultEngine;
+    }
+
+
+    public static LanguageType getByCode(String code) {
+        for (LanguageType type : values()) {
+            if(Objects.equals(code, type.getCode())) {
+                return type;
+            }
+        }
+
+        throw new RuntimeException("%s language is not supported");
     }
 
     public String getCode() {
