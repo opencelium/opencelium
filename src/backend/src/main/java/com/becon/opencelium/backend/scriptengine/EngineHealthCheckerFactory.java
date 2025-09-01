@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.polygot_engine;
+package com.becon.opencelium.backend.scriptengine;
 
 public class EngineHealthCheckerFactory {
     public static EngineHealthChecker getHealthChecker(ScriptEngineType engineType) {

@@ -1,6 +1,6 @@
-package com.becon.opencelium.backend.polygot_engine;
+package com.becon.opencelium.backend.scriptengine;
 
-import static com.becon.opencelium.backend.polygot_engine.ScriptEngineType.*;
+import static com.becon.opencelium.backend.scriptengine.ScriptEngineType.*;
 
 public enum LanguageType {
     JS("js", "JavaScript", NASHORN),

@@ -1,11 +1,11 @@
-package com.becon.opencelium.backend.polygot_engine.impl;
+package com.becon.opencelium.backend.scriptengine.impl;
 
-import com.becon.opencelium.backend.polygot_engine.Language;
-import com.becon.opencelium.backend.polygot_engine.LanguageType;
-import com.becon.opencelium.backend.polygot_engine.ScriptEngine;
-import com.becon.opencelium.backend.polygot_engine.ScriptEngineProvider;
-import com.becon.opencelium.backend.polygot_engine.ScriptExecutionManager;
-import com.becon.opencelium.backend.polygot_engine.config.LanguageConfig;
+import com.becon.opencelium.backend.scriptengine.Language;
+import com.becon.opencelium.backend.scriptengine.LanguageType;
+import com.becon.opencelium.backend.scriptengine.ScriptEngine;
+import com.becon.opencelium.backend.scriptengine.ScriptEngineProvider;
+import com.becon.opencelium.backend.scriptengine.ScriptExecutionManager;
+import com.becon.opencelium.backend.scriptengine.config.LanguageConfig;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
