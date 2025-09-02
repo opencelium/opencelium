@@ -31,8 +31,6 @@ public class ScriptLangProperties {
 
         private ScriptEngineType engine;
 
-        private Boolean enabled = true; // default to true
-
         public LanguageType getLang() {
             return lang;
         }
@@ -49,12 +47,12 @@ public class ScriptLangProperties {
             this.engine = engine;
         }
 
-        public Boolean getEnabled() {
-            return enabled;
-        }
-
-        public void setEnabled(Boolean enabled) {
-            this.enabled = enabled;
+        @Override
+        public String toString() {
+            return "{" +
+                    "lang=" + lang +
+                    ", engine=" + engine +
+                    '}';
         }
     }
 

@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 public class LanguageConfig {
 
     private final ScriptLangProperties scriptLangProperties;
-    private final List<Language> enabledLanguages;
+    private final Map<LanguageType, Language> enabledLanguages;
 
     /**
      * Constructs the LanguageConfig with injected ScriptLangProperties.
@@ -35,67 +35,45 @@ public class LanguageConfig {
 
     /**
      * Initializes enabled languages based on configuration.
-     * Groups entries by language type and applies enable/disable policy.
      *
-     * @return a list of enabled {@link Language} objects
+     * @return a map of enabled {@link Language} objects
      */
-    private List<Language> initLanguages() {
+    private Map<LanguageType, Language> initLanguages() {
         List<ScriptLangProperties.LanguageProperties> languages = scriptLangProperties.getLanguages();
 
         if (languages == null || languages.isEmpty()) {
-            return Collections.emptyList();
+            return Collections.emptyMap();
         }
 
-        List<Language> response = new ArrayList<>();
+        Map<LanguageType, Language> languageMap = new HashMap<>();
 
-        // Group language entries by their type
-        Map<LanguageType, List<ScriptLangProperties.LanguageProperties>> languageMap = languages.stream()
-                .collect(Collectors.groupingBy(ScriptLangProperties.LanguageProperties::getLang));
+        for (ScriptLangProperties.LanguageProperties language : languages) {
+            LanguageType lang = language.getLang();
+            ScriptEngineType engine = language.getEngine();
 
-        HashSet<LanguageType> disabledLanguages = new HashSet<>();
-
-        for (var entry : languageMap.entrySet()) {
-            LanguageType languageType = entry.getKey();
-
-            if (disabledLanguages.contains(languageType)) {
-                continue;
+            if (languageMap.containsKey(lang)) {
+                throw new RuntimeException("Duplicate languages configured %s and %s".formatted(languageMap.get(lang), language));
             }
 
-            HashSet<ScriptEngineType> enabledEngines = new HashSet<>();
+            if (engine == null) {
+                if (lang.getDefaultEngine() == null) {
 
-            for (var lang : entry.getValue()) {
-                ScriptEngineType engine = lang.getEngine();
-                Boolean enabled = lang.getEnabled();
+                    throw new IllegalStateException(String.format("%s language has no default engine set. Engine must be specified in config.", lang));
+                } else if (engine.getLanguages() == null || engine.getLanguages().stream().noneMatch(x -> x == lang)) {
 
-                if (Boolean.FALSE.equals(enabled)) {
-                    // If any entry disables the language, disable the whole language
-                    disabledLanguages.add(languageType);
-                    enabledEngines.clear();
-                    break;
-                } else {
-                    if (Objects.isNull(engine)) {
-                        if (Objects.isNull(languageType.getDefaultEngine())) {
-                            throw new IllegalStateException(String.format("%s language has no default engine set. Engine must be specified in config.", languageType));
-                        }
-                        engine = languageType.getDefaultEngine();
-                    }
-                    enabledEngines.add(engine);
+                    throw new IllegalStateException(String.format("'%s' engine doesn't support '%s' language", engine.getName(), lang.getName()));
                 }
+
+                engine = lang.getDefaultEngine();
             }
 
-            // Add valid language/engine pairs
-            enabledEngines.forEach(engine -> response.add(new Language(languageType, engine)));
+            languageMap.put(lang, new Language(lang, engine));
         }
 
-        return response;
+        return languageMap;
     }
 
-    /**
-     * Returns a list of enabled languages after evaluating configuration.
-     *
-     * @return immutable list of enabled languages
-     */
-    public List<Language> enabledLanguages() {
-        return Collections.unmodifiableList(enabledLanguages);
+    public Optional<Language> findLanguage(LanguageType lang) {
+        return Optional.ofNullable(enabledLanguages.get(lang));
     }
 }
