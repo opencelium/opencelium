@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.utility;
 
-import io.micrometer.common.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -467,7 +467,7 @@ public class PathAndReferenceUtility {
          * but should be normalized to a blank string.
          * </p>
          */
-        SET_EMPTY(x -> org.apache.commons.lang3.StringUtils.EMPTY),
+        SET_EMPTY(x -> StringUtils.EMPTY),
 
         /**
          * Fail immediately by throwing a {@link RuntimeException}
@@ -492,7 +492,7 @@ public class PathAndReferenceUtility {
         WARNING(x -> {
             log.warn("Query value cannot be empty : {}", x);
 
-            return org.apache.commons.lang3.StringUtils.EMPTY;
+            return StringUtils.EMPTY;
         });
 
         /**
