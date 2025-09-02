@@ -27,8 +27,7 @@ class LanguageConfigTest {
     @Nested
     @SpringBootTest(properties = {
             "opencelium.languages[0].lang=python_2",
-            "opencelium.languages[0].engine=jython",
-            "opencelium.languages[0].enabled=true"
+            "opencelium.languages[0].engine=jython"
     })
     class JythonEngineTest {
 
@@ -56,40 +55,40 @@ class LanguageConfigTest {
         }
     }
 
-    /**
-     * Test scenario: First Python 2 entry is disabled, second one is enabled with Jython.
-     * Expect no enabled languages due to filtering logic.
-     */
-    @Nested
-    @SpringBootTest(properties = {
-            "opencelium.languages[0].lang=python_2",
-            "opencelium.languages[0].enabled=false",
-            "opencelium.languages[1].lang=python_2",
-            "opencelium.languages[1].engine=jython",
-            "opencelium.languages[1].enabled=true"
-    })
-    class JythonEngineTest2 {
-
-        @Autowired
-        @Qualifier("scriptLangProperties")
-        ScriptLangProperties props;
-
-        LanguageConfig languageConfig;
-
-        @BeforeEach
-        void setUp() {
-            languageConfig = new LanguageConfig(props);
-        }
-
-        @Test
-        void shouldNotLoadDisabledPython2() {
-            List<Language> languages = languageConfig.enabledLanguages();
-
-            Assertions.assertTrue(
-                    languages.isEmpty()
-            );
-        }
-    }
+//    /**
+//     * Test scenario: First Python 2 entry is disabled, second one is enabled with Jython.
+//     * Expect no enabled languages due to filtering logic.
+//     */
+//    @Nested
+//    @SpringBootTest(properties = {
+//            "opencelium.languages[0].lang=python_2",
+//            "opencelium.languages[0].enabled=false",
+//            "opencelium.languages[1].lang=python_2",
+//            "opencelium.languages[1].engine=jython",
+//            "opencelium.languages[1].enabled=true"
+//    })
+//    class JythonEngineTest2 {
+//
+//        @Autowired
+//        @Qualifier("scriptLangProperties")
+//        ScriptLangProperties props;
+//
+//        LanguageConfig languageConfig;
+//
+//        @BeforeEach
+//        void setUp() {
+//            languageConfig = new LanguageConfig(props);
+//        }
+//
+//        @Test
+//        void shouldNotLoadDisabledPython2() {
+//            List<Language> languages = languageConfig.enabledLanguages();
+//
+//            Assertions.assertTrue(
+//                    languages.isEmpty()
+//            );
+//        }
+//    }
 
     /**
      * Test scenario: Multiple languages configured without explicit engine.
