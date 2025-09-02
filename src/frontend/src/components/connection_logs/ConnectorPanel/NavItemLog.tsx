@@ -1,25 +1,42 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {TextSize} from "@app_component/base/text/interfaces";
 import {ColorTheme} from "@style/Theme";
 import {copyStringToClipboard} from "@application/utils/utils";
-import {copyWebhookToClipboard} from "@entity/schedule/redux_toolkit/slices/ScheduleSlice";
 import Button from "@app_component/base/button/Button";
 import {useAppDispatch} from "@application/utils/store";
+import {NavItem, NavLink} from "reactstrap";
+import styles from "@app_component/connection_logs/ConnectorPanel/TraceItem/MethodTrace/MethodTrace.module.css";
+import {NavLinkProps} from "reactstrap/es/NavLink";
+import {copyLogContentToClipboard} from "@root/redux_toolkit/slices/ConnectionLogSlice";
 
-const CopyLogContent = (props: {content: string}) => {
+const NavItemLog = (props: {navLinkProps: NavLinkProps, title: string, content: string}) => {
     const dispatch = useAppDispatch();
+    const [isMouseOver, toggleMouseOver] = useState(false);
     return (
-        <Button
-            iconSize={TextSize.Size_12}
-            icon={'file_copy'}
-            hasBackground={false}
-            color={ColorTheme.Turquoise}
-            handleClick={() => {
-                copyStringToClipboard(props.content);
-                dispatch(copyWebhookToClipboard())
-            }}
-        />
+        <NavItem onMouseOver={() => toggleMouseOver(true)} onMouseLeave={() => toggleMouseOver(false)}>
+            <NavLink
+                {...props.navLinkProps}
+                className={styles.navLink}
+            >
+                <span>{props.title}</span>
+                {isMouseOver && <Button
+                    iconSize={TextSize.Size_12}
+                    icon={'file_copy'}
+                    hasBackground={false}
+                    color={ColorTheme.Turquoise}
+                    handleClick={() => {
+                        copyStringToClipboard(props.content);
+                        dispatch(copyLogContentToClipboard())
+                    }}
+                    style={{
+                        position: 'absolute',
+                        top: '2px',
+                        right: '2px',
+                    }}
+                />}
+            </NavLink>
+        </NavItem>
     )
 }
 
-export default CopyLogContent;
+export default NavItemLog;

@@ -97,7 +97,6 @@ const TestConnectionButton = ({validateLogic}: any) => {
             const subscription = socket.subscribe(`/execution/logs/${channelId}`, (message) => {
                 const data = JSON.parse(message.body) as ConnectionSocketLog<LightSegment>;
                 dispatch(setCurrentLog(data));
-                console.log('Socket.ConnectionLogs', data);
                 if (isTestFinished(data)) return;
                 if (shouldSkipTrace(data)) return;
                 let hasNewLoopIndex = false;
@@ -156,9 +155,9 @@ const TestConnectionButton = ({validateLogic}: any) => {
 
     const stopTest = () => {
         setChannelId('');
-        //dispatch(setFullScreen(false));
-        //dispatch(setButtonPanelVisibility(true));
-        //dispatch(setLogPanelHeight(0));
+        dispatch(setFullScreen(false));
+        dispatch(setButtonPanelVisibility(true));
+        dispatch(setLogPanelHeight(0));
         dispatch(terminateExecution(schedulerId));
         dispatch(setIsTesting(false));
     }

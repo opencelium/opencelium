@@ -34,7 +34,7 @@ export const LogPanelStyled = styled.div<{isFullScreen: boolean, noLogs: boolean
     overflow-y: auto;
     position: absolute;
     bottom: 0;
-    padding: 10px;
+    display: ${({isDetailsOpened}) => isDetailsOpened ? '10px' : '0'};
     ${({noLogs}) => noLogs ? `
     ` : ''}
 `;

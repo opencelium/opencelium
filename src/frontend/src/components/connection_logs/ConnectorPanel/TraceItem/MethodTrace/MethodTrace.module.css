@@ -61,6 +61,7 @@
 
 .requestResponseContainer {
 	display: flex;
+	gap: 10px;
 }
 
 .methodRequest {
@@ -73,23 +74,19 @@
 
 .nav {
 	border: none;
-	margin: 10px 0 10px;
+	margin: 10px 0 0px;
 }
 
 .navLink {
+	position: relative;
 	cursor: pointer;
-	border: 1px solid #424242 !important;
-	border-radius: 0 !important;
-	width: 150px;
-	padding: 3px 0;
-	text-align: center;
-	background: #fff !important;
-	color: #424242 !important;
-	margin-left: -1px;
 }
 
-.navLink:global(.active) {
-	background: #dae8fc !important;
+.tabContent {
+	border-top: 1px solid #eee;
+	border-bottom: 1px solid #eee;
+	padding-top: 10px;
+	padding-bottom: 10px;
 }
 
 .aceEditor {

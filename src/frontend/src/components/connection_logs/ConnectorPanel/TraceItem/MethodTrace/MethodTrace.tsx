@@ -16,6 +16,7 @@ import {getDetailedMethod} from "@root/redux_toolkit/action_creators/ConnectionL
 import {ShowIndexPath} from "@app_component/connection_logs/LogsPanel/LogsPanel";
 import ErrorMessage from "@app_component/connection_logs/ConnectorPanel/ErrorMessage";
 import {isJsonString} from "@application/utils/utils";
+import NavItemLog from "@app_component/connection_logs/ConnectorPanel/NavItemLog";
 
 interface MethodTraceProps {
 	trace: ConnectionSocketLog<DetailedMethodSegment>;
@@ -164,32 +165,30 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 						{/* Request */}
 						<div className={styles.methodRequest}>
 							<Nav tabs className={styles.nav}>
-								<NavItem>
-									<NavLink
-										active={activeRequestTab === 'header'}
-										onClick={(e) => {
+								<NavItemLog
+									navLinkProps={{
+										active: activeRequestTab === 'header',
+										onClick: (e) => {
 											e.preventDefault();
 											setActiveRequestTab('header');
-										}}
-										className={styles.navLink}
-									>
-										Header
-									</NavLink>
-								</NavItem>
-								<NavItem>
-									<NavLink
-										active={activeRequestTab === 'body'}
-										onClick={(e) => {
+										}
+									}}
+									title={'Header'}
+									content={requestHeaders}
+								/>
+								<NavItemLog
+									navLinkProps={{
+										active: activeRequestTab === 'body',
+										onClick: (e) => {
 											e.preventDefault();
 											setActiveRequestTab('body');
-										}}
-										className={styles.navLink}
-									>
-										Body
-									</NavLink>
-								</NavItem>
+										}
+									}}
+									title={'Body'}
+									content={requestBody}
+								/>
 							</Nav>
-							<TabContent activeTab={activeRequestTab}>
+							<TabContent activeTab={activeRequestTab} className={styles.tabContent}>
 								<TabPane tabId='header'>
 									<LimitedAceEditor
 										mode='json'
@@ -204,6 +203,8 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 										setOptions={{ useWorker: false }}
 										className={styles.aceEditor}
 										readOnly={true}
+										width={'100%'}
+										height={'100px'}
 									/>
 								</TabPane>
 								<TabPane tabId='body'>
@@ -220,6 +221,8 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 										setOptions={{ useWorker: false, showLineNumbers: false }}
 										className={styles.aceEditor}
 										readOnly={true}
+										width={'100%'}
+										height={'100px'}
 									/>
 								</TabPane>
 							</TabContent>
@@ -227,32 +230,30 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 						{/* Response */}
 						<div className={styles.methodResponse}>
 							<Nav tabs className={styles.nav}>
-								<NavItem>
-									<NavLink
-										active={activeResponseTab === 'header'}
-										onClick={(e) => {
+								<NavItemLog
+									navLinkProps={{
+										active: activeResponseTab === 'header',
+										onClick: (e) => {
 											e.preventDefault();
 											setActiveResponseTab('header');
-										}}
-										className={styles.navLink}
-									>
-										Header
-									</NavLink>
-								</NavItem>
-								<NavItem>
-									<NavLink
-										active={activeResponseTab === 'body'}
-										onClick={(e) => {
+										}
+									}}
+									title={'Header'}
+									content={responseHeaders}
+								/>
+								<NavItemLog
+									navLinkProps={{
+										active: activeResponseTab === 'body',
+										onClick: (e) => {
 											e.preventDefault();
 											setActiveResponseTab('body');
-										}}
-										className={styles.navLink}
-									>
-										Body
-									</NavLink>
-								</NavItem>
+										}
+									}}
+									title={'Body'}
+									content={requestBody}
+								/>
 							</Nav>
-							<TabContent activeTab={activeResponseTab}>
+							<TabContent activeTab={activeResponseTab} className={styles.tabContent}>
 								<TabPane tabId='header'>
 									<LimitedAceEditor
 										mode='json'
@@ -267,6 +268,8 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 										setOptions={{ useWorker: false, showLineNumbers: false }}
 										className={styles.aceEditor}
 										readOnly={true}
+										width={'100%'}
+										height={'100px'}
 									/>
 								</TabPane>
 								<TabPane tabId='body'>
@@ -283,6 +286,8 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 										setOptions={{ useWorker: false, showLineNumbers: false }}
 										className={styles.aceEditor}
 										readOnly={true}
+										width={'100%'}
+										height={'100px'}
 									/>
 								</TabPane>
 							</TabContent>

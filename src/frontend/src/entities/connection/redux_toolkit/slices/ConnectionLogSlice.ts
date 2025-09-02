@@ -41,6 +41,8 @@ export const connectionLogSlice = createSlice({
 	name: 'connectionLog',
 	initialState,
 	reducers: {
+		copyLogContentToClipboard: (state) => {
+		},
 		setIsTesting: (state, action: PayloadAction<boolean>) => {
 			state.isTesting = action.payload;
 		},
@@ -78,8 +80,6 @@ export const connectionLogSlice = createSlice({
 					findAndUpdateTrace(connector.traces, action.payload.settings.parentIndexPath, (trace) => {
 						if (action.payload.settings.hasNewLoopIndex) {
 							if (trace.type === 'LOOP') {
-								//@ts-ignore
-								console.log(+trace.properties.size)
 								//@ts-ignore
 								trace.properties.size = +trace.properties.size ? +trace.properties.size + 1 : 1;
 								trace.isCompleted = true;
@@ -157,10 +157,12 @@ export const connectionLogSlice = createSlice({
 			const { flowId, indexPath } = action.payload;
 			state.connectors.forEach((connector) => {
 				if (connector.flowId === flowId) {
-					connector.traces.forEach((trace) => {
-						if ((trace.type === 'IF' || trace.type === 'LOOP') && trace.indexPath === indexPath) {
+					findAndUpdateTrace(connector.traces, indexPath, (trace) => {
+						if (trace.type === 'IF' || trace.type === 'LOOP') {
 							trace.children = [];
+							return true;
 						}
+						 return false;
 					});
 				}
 			});
@@ -226,7 +228,7 @@ export const connectionLogSlice = createSlice({
 export const {
 	cleanMethodTrace, cleanOperatorTrace, addSocketLog,
 	addTextLog, clearTextLog, clearSocketLog,
-	setIsTesting, setCurrentLog,
+	setIsTesting, setCurrentLog, copyLogContentToClipboard,
 } =
 	connectionLogSlice.actions;
 export default connectionLogSlice.reducer;

@@ -38,26 +38,30 @@ export const OperatorTrace: React.FC<Props> = ({
 	const [nextLoading, setNextLoading] = useState(false);
 	const [prevLoading, setPrevLoading] = useState(false);
 	const [iterationIndex, setIterationIndex] = useState(0);
-	const size = (trace.properties as LoopOperatorProperty).size;
+	const loopOperatorProperty = trace.properties as LoopOperatorProperty;
+	const size = loopOperatorProperty.size;
+	const iterator = loopOperatorProperty.iterator;
 	const handleToggle = async () => {
-		if (!expanded) {
-			setLoading(true);
-			await dispatch(
-				getOperatorChildren({
-					executionId,
-					flowId,
-					indexPath: trace.indexPath,
-					loopIndex: isLoop ? [...iterationIndexes, iterationIndex] : undefined,
-					id: trace.id,
-				})
-			);
-			setLoading(false);
-			setExpanded(true);
-		} else {
-			dispatch(cleanOperatorTrace({ flowId, indexPath: trace.indexPath }));
-			setExpanded(false);
+		if (!(loading || !trace.isCompleted)) {
+			if (!expanded) {
+				setLoading(true);
+				await dispatch(
+					getOperatorChildren({
+						executionId,
+						flowId,
+						indexPath: trace.indexPath,
+						loopIndex: [...iterationIndexes, iterationIndex],
+						id: trace.id,
+					})
+				);
+				setLoading(false);
+				setExpanded(true);
+			} else {
+				dispatch(cleanOperatorTrace({flowId, indexPath: trace.indexPath}));
+				setExpanded(false);
+			}
 		}
-	};
+	}
 
 	const handleNextIteration = async (e: any) => {
 		e.preventDefault();
@@ -65,7 +69,7 @@ export const OperatorTrace: React.FC<Props> = ({
 		dispatch(cleanOperatorTrace({ flowId, indexPath: trace.indexPath }));
 		if (isLoop) {
 			const nextIndex = iterationIndex + 1;
-			if (nextIndex <= size) {
+			if (nextIndex <= size - 1) {
 				setIterationIndex(nextIndex);
 				setNextLoading(true);
 				await dispatch(
@@ -88,7 +92,7 @@ export const OperatorTrace: React.FC<Props> = ({
 		dispatch(cleanOperatorTrace({ flowId, indexPath: trace.indexPath }));
 		if (isLoop) {
 			const prevIndex = iterationIndex - 1;
-			if (prevIndex >= 1) {
+			if (prevIndex >= 0) {
 				setIterationIndex(prevIndex);
 				setPrevLoading(true);
 				await dispatch(
@@ -107,7 +111,7 @@ export const OperatorTrace: React.FC<Props> = ({
 	const hasError = trace?.error?.message;
 	return (
 		<div>
-			<div className={styles.trace} onClick={handleToggle}>
+			<div className={styles.trace} style={{cursor: loading || !trace.isCompleted ? 'default' : 'pointer'}} onClick={handleToggle}>
 				<div className={styles.traceLeftSide}>
 					<ToggleButton
 						loading={loading || !trace.isCompleted}
@@ -115,10 +119,8 @@ export const OperatorTrace: React.FC<Props> = ({
 						onClick={handleToggle}
 					/>
 					<span className={styles.type}>{isIf ? 'IF' : 'LOOP'}</span>
+					{isLoop && <span className={styles.iterator}>({iterator})</span>}
 					{ShowIndexPath && <span style={{ marginLeft: 8 }}>{trace.indexPath}</span>}
-					{isIf && <span>
-						{(trace.properties as IfOperatorProperty).expression}
-					</span>}
 				</div>
 				<React.Fragment>
 					{isIf && (
