@@ -37,7 +37,7 @@ export const OperatorTrace: React.FC<Props> = ({
 	const [loading, setLoading] = useState(false);
 	const [nextLoading, setNextLoading] = useState(false);
 	const [prevLoading, setPrevLoading] = useState(false);
-	const [iterationIndex, setIterationIndex] = useState(1);
+	const [iterationIndex, setIterationIndex] = useState(0);
 	const size = (trace.properties as LoopOperatorProperty).size;
 	const handleToggle = async () => {
 		if (!expanded) {
@@ -129,13 +129,13 @@ export const OperatorTrace: React.FC<Props> = ({
 					{isLoop && (
 						<div className={styles.loopTraceRightSide} onClick={(e: any) => {e.preventDefault(); e.stopPropagation();}}>
 							<span>
-								{iterationIndex} - {size || '...'}
+								{(iterationIndex + 1)} - {size || '...'}
 							</span>
 							<FontIcon
 								isButton={true}
 								iconStyles={{cursor: 'pointer'}}
 								size={16}
-								disabled={iterationIndex === 1 || size === undefined}
+								disabled={iterationIndex === 0 || size === undefined}
 								isLoading={prevLoading}
 								value={'arrow_left'}
 								onClick={(e: any) => handlePrevIteration(e)}
@@ -144,7 +144,7 @@ export const OperatorTrace: React.FC<Props> = ({
 								isButton={true}
 								iconStyles={{cursor: 'pointer'}}
 								size={16}
-								disabled={iterationIndex === size || size === undefined}
+								disabled={iterationIndex === size - 1 || size === undefined}
 								isLoading={nextLoading}
 								value={'arrow_right'}
 								onClick={(e: any) => handleNextIteration(e)}

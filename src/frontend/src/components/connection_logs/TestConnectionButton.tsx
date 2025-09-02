@@ -89,6 +89,7 @@ const TestConnectionButton = ({validateLogic}: any) => {
                 if (!!channelId) {
                     setChannelId('');
                 }
+                return;
             }
             if (subscriptionRef.current) {
                 return;
