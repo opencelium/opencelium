@@ -116,7 +116,9 @@ public class LogDataServiceImp implements LogDataService {
         long endOffset = entity.getEndOffset();
 
         List<String> lines = new ArrayList<>();
-        if (type == OPERATION) {
+        if (type == FLOWCHART) {
+            return logDataMapper.toDto(entity);
+        } else if (type == OPERATION) {
             lines.addAll(flexiblePatternLogParser.readLines(executionId, startOffset, endOffset));
         } else {
             // for IF and LOOP remove its children before parsing
@@ -137,12 +139,24 @@ public class LogDataServiceImp implements LogDataService {
                 lines.addAll(flexiblePatternLogParser.readLines(executionId, startOffset, firstChildStartOffset));
                 lines.addAll(flexiblePatternLogParser.readLines(executionId, lastChildEndOffset, endOffset));
             } else {
-                lines = flexiblePatternLogParser.readLines(executionId, startOffset, endOffset);
+                lines.addAll(flexiblePatternLogParser.readLines(executionId, startOffset, endOffset));
             }
         }
 
+        LogData collected = collect(lines, executionId, connectionId, flowchartId);
 
-        return collect(lines, executionId, connectionId, flowchartId);
+        // populate additional fields from 'entity'
+        collected.setId(entity.getId());
+        collected.setConnectionId(entity.getConnectionId());
+        collected.setExecutionId(entity.getExecutionId());
+        collected.setFlowId(entity.getFlowId());
+        collected.setConnectorName(entity.getConnectorName());
+        collected.setStatus(entity.getStatus());
+        collected.setIndexPath(entity.getIndexPath());
+        collected.setLogLineType(entity.getLogLineType());
+        collected.setType(entity.getType());
+
+        return logDataMapper.toDto(collected);
     }
 
     /**
@@ -261,7 +275,7 @@ public class LogDataServiceImp implements LogDataService {
                 .orElseThrow(() -> new RuntimeException("LogData element not found with specified id = " + phaseId));
     }
 
-    private LogDataDTO collect(List<String> lines, String executionId, Long connectionId,String flowchartId) {
+    private LogData collect(List<String> lines, String executionId, Long connectionId,String flowchartId) {
         ExecutionTracker tracker = new ExecutionTrackerImpl(executionId, connectionId.toString(), flowchartId, LogDetailLevel.DETAILED);
 
         ParsedLogLine parsed;
@@ -273,6 +287,6 @@ public class LogDataServiceImp implements LogDataService {
             if (result.isPresent()) break;
         }
 
-        return logDataMapper.toDto(result.get());
+        return result.orElseGet(LogData::new);
     }
 }
