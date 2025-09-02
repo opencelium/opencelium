@@ -2,6 +2,26 @@
 Changelog
 *********
 
+4.5.1
+========
+
+:Date: August 22, 2025
+
+Fixes
+--------
+- OC-1197	Fix delete reference bug
+- OC-1192	Invoker Sync does not work
+- OC-1191	Fix error message
+- OC-1188	Fix reference for param as an object
+- OC-1185	Show full information for reference
+- OC-1184	Integrate Copy to Clipboard button for Logs
+- OC-1173	Error when Comparing string that contains only digits.
+- OC-1171	Fix dependency check during D&D for operators
+- OC-1170	Update headers
+- OC-1166	Error when extracting direct reference
+- OC-1165	Template generated incorrectly in Support File.
+
+
 4.5
 ========
 

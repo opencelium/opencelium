@@ -25,7 +25,7 @@ import { RESPONSE_FAIL, RESPONSE_SUCCESS } from "@entity/connection/components/c
 
 export class CBodyEditor{
 
-    static updateFieldsBinding(connection, connector, method, bodyData, target = null) {
+    static updateFieldsBinding(connection, connector, method, bodyData, target = null, refStructure) {
         const checkBodyData = CBodyEditor.shouldUpdateFieldBinding(connector, bodyData);
         let invokerBody = method.request.invokerBody;
         
@@ -41,7 +41,7 @@ export class CBodyEditor{
             } else {
                 item.field = `${parents.join('.')}.${bodyData.name}`;
             }
-    
+            console.log(refStructure)
             item.field = convertFieldNameForBackend(invokerBody.fields, item.field, true);
     
             if (target === 'header') {
@@ -49,9 +49,10 @@ export class CBodyEditor{
             } else {
                 item.field = `body.$.${item.field.replace(/^body\.\$\.|header\.\$\./, '')}`;
             }
-    
             item.type = 'request';
-            item.field = wrapField(item.field, parents);
+            if(refStructure && refStructure.request){
+                item.field = wrapField(item.field, refStructure.request);
+            }
             let toBindingItems = [CBindingItem.createBindingItem(item)];
     
             let fromBindingItems = [];
@@ -66,7 +67,9 @@ export class CBodyEditor{
                         newItem.field = bindingItemSplitted.slice(2, bindingItemSplitted.length).join('.');
     
                         newItem.field = newItem.field.replace(/^header\.\$/, 'body.$');
-                        newItem.field = wrapField(newItem.field, parents);
+                        if(refStructure && refStructure.response) {
+                            newItem.field = wrapField(newItem.field, refStructure.response);
+                        }
                         fromBindingItems.push(CBindingItem.createBindingItem(newItem));
                     }
                     break;
