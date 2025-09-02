@@ -84,7 +84,12 @@ const TestConnectionButton = ({validateLogic}: any) => {
 
     useEffect(() => {
         if (channelId !== '') {
-            if (!channelId || !socket || !socket.connected) return;
+            if (!channelId) return;
+            if (!socket || !socket.connected) {
+                if (!!channelId) {
+                    setChannelId('');
+                }
+            }
             if (subscriptionRef.current) {
                 return;
             }
