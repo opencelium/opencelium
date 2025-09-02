@@ -9,6 +9,7 @@ import com.becon.opencelium.backend.polygot_engine.config.LanguageConfig;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Component
@@ -28,10 +29,7 @@ public class ScriptExecutionManagerImpl implements ScriptExecutionManager {
 
     @Override
     public Optional<ScriptEngine> resolveEngine(LanguageType lang) {
-        return languageConfig.enabledLanguages()
-                .stream()
-                .filter(x -> x.getLanguage() == lang)
-                .findFirst()
+        return languageConfig.findLanguage(lang)
                 .flatMap(this::resolveEngine);
     }
 
@@ -42,8 +40,8 @@ public class ScriptExecutionManagerImpl implements ScriptExecutionManager {
 
     @Override
     public boolean isEngineAvailable(Language lang) {
-        return languageConfig.enabledLanguages()
-                .stream()
-                .anyMatch(x -> x.equals(lang));
+        Optional<Language> language = languageConfig.findLanguage(lang.getLanguage());
+
+        return language.isPresent() && Objects.equals(lang, language.get());
     }
 }
