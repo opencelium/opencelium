@@ -133,7 +133,7 @@ public class PathAndReferenceUtility {
                 }
 
                 if (StringUtils.isBlank(pair[1])) {
-                    pair[1] = EMPTY_QUERY_VALUE_POLICY.apply(part);
+                    pair[1] = EMPTY_QUERY_VALUE_POLICY.apply(pair[0]);
                 }
 
                 result.add(pair);
