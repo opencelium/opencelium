@@ -1,6 +1,11 @@
 package com.becon.opencelium.backend.utility;
 
+import io.micrometer.common.util.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.*;
+import java.util.function.Function;
 
 import static com.becon.opencelium.backend.constant.RegExpression.referencePath;
 
@@ -11,6 +16,8 @@ public class PathAndReferenceUtility {
     private static final String SUF_WEBHOOK = "}";
     private static final String PRE_BRACKET = "['";
     private static final String SUF_BRACKET = "']";
+    private static final EmptyQueryValuePolicy EMPTY_QUERY_VALUE_POLICY = EmptyQueryValuePolicy.FAIL;
+    private static final Logger log = LogManager.getLogger(PathAndReferenceUtility.class);
 
     public static int indexOf(String path, char ch, boolean hasWebHook, boolean hasDirectRef) {
         return indexOf(path, ch, true, hasWebHook, hasDirectRef);
@@ -78,7 +85,34 @@ public class PathAndReferenceUtility {
         return indexOf(endpoint, '?', false, true, true);
     }
 
-    // response example : {{"name": "Obidjon"},{"role":"admin}}
+    /**
+     * Parses a query string into a list of key-value pairs(guaranteed to be present both key and value), with support for special
+     * placeholders such as:
+     * <ul>
+     *     <li>{@code {%# ... %}} → Direct reference syntax</li>
+     *     <li>{@code ${ ... }} → Webhook reference syntax</li>
+     *     <li>{@code [' ... ']} → Bracket reference syntax (not currently parsed in this method, but constants defined)</li>
+     * </ul>
+     *
+     * <p>Example:</p>
+     * <pre>
+     *
+     * query = "name=Obidjon&role=admin"
+     * result = [["name", "Obidjon"], ["role", "admin"]]
+     *
+     * query = "name={%#username%}&password=${random=&$}"
+     * result = [["name", "{%#username%}"], ["password", "${random=&$}"]]
+     * </pre>
+     *
+     * <p>
+     * The parser ensures that nested values containing special placeholder patterns
+     * are not prematurely split by `=` or `&`. It uses a stack to track when the parser
+     * is inside a placeholder block, preventing incorrect tokenization.
+     * </p>
+     *
+     * @param query the query string to parse (may contain placeholders or plain key-value pairs).
+     * @return a list of string arrays, where each array has exactly two elements: key and value.
+     */
     public static List<String[]> getQueryVariables(String query) {
         if (query == null || query.isEmpty()) {
             return Collections.emptyList();
@@ -86,25 +120,56 @@ public class PathAndReferenceUtility {
 
         int pre1 = query.indexOf(PRE_DIRECT_REF);
         int pre2 = query.indexOf(PRE_WEBHOOK);
+
         if (pre1 == -1 && pre2 == -1) {
-            return Arrays.stream(query.split("&")).map(p -> p.split("=")).toList();
+
+            List<String[]> result = new ArrayList<>();
+
+            for (String part : query.split("&")) {
+                String[] pair = part.split("=");
+
+                if (pair.length == 1 || StringUtils.isBlank(pair[0])) {
+                    throw new RuntimeException("Invalid query parameter: " + part);
+                }
+
+                if (StringUtils.isBlank(pair[1])) {
+                    pair[1] = EMPTY_QUERY_VALUE_POLICY.apply(part);
+                }
+
+                result.add(pair);
+            }
+
+            return result;
         }
 
+        // holder for storing result pairs
         List<String[]> res = new ArrayList<>();
-        int pointer = -1;
+
+        // stack for permanently saving reference prefixes
         Stack<String> stack = new Stack<>();
+
+        int pointer = -1;
         int n = query.length();
         int start = 0;
         for (int i = 0; i < n; i++) {
             if (stack.empty() && query.charAt(i) == '=') {
+                // when '=' appears, it means it separates query param's key and value pair
+                // In this state, we track it's key with certain pointer to bind its value later
+
                 String[] pair = new String[2];
                 pair[0] = query.substring(start, i);
                 res.add(pair);
                 pointer++;
                 start = i + 1;
             } else if (stack.empty() && query.charAt(i) == '&') {
+                // '&' separates query params
+                // In this state, we get prev query's value
+
                 String[] pair = res.get(pointer);
-                pair[1] = query.substring(start, i);
+                String queryValue = query.substring(start, i);
+
+                pair[1] = StringUtils.isBlank(queryValue) ? EMPTY_QUERY_VALUE_POLICY.apply(pair[0]) : queryValue;
+
                 start = i + 1;
             } else if (i + PRE_DIRECT_REF.length() < n && query.startsWith(PRE_DIRECT_REF, i)) {
                 stack.push(SUF_DIRECT_REF);
@@ -124,7 +189,10 @@ public class PathAndReferenceUtility {
                 }
             } else if (i == n - 1) {
                 String[] pair = res.get(pointer);
-                pair[1] = query.substring(start);
+                String queryValue = query.substring(start);
+
+                pair[1] = StringUtils.isBlank(queryValue) ? EMPTY_QUERY_VALUE_POLICY.apply(pair[0]) : queryValue;
+
                 return res;
             }
         }
@@ -375,4 +443,70 @@ public class PathAndReferenceUtility {
                 ? path.substring(PRE_BRACKET.length(), path.length() - SUF_BRACKET.length())
                 : path;
     }
+
+    /**
+     * Defines policies for handling cases where a query value is empty.
+     * <p>
+     * Each policy provides a different strategy through a {@link Function}
+     * that takes the original (possibly empty) value and returns a replacement,
+     * or throws an exception.
+     * </p>
+     *
+     * <ul>
+     *   <li>{@link #SET_EMPTY} – Replaces the value with an empty string.</li>
+     *   <li>{@link #FAIL} – Throws a {@link RuntimeException} when the value is empty.</li>
+     *   <li>{@link #WARNING} – Logs a warning and replaces the value with an empty string.</li>
+     * </ul>
+     */
+    enum EmptyQueryValuePolicy {
+
+        /**
+         * Always replace the query value with an empty string.
+         * <p>
+         * This is a safe option when empty values are allowed
+         * but should be normalized to a blank string.
+         * </p>
+         */
+        SET_EMPTY(x -> org.apache.commons.lang3.StringUtils.EMPTY),
+
+        /**
+         * Fail immediately by throwing a {@link RuntimeException}
+         * if the query value is empty.
+         * <p>
+         * Use this when empty query values are not permitted
+         * and should cause the process to stop.
+         * </p>
+         */
+        FAIL(x -> {
+            throw new RuntimeException("Query value cannot be empty : %s".formatted(x));
+        }),
+
+        /**
+         * Log a warning message when the query value is empty,
+         * and return an empty string instead.
+         * <p>
+         * Useful when you want to allow empty values but still
+         * keep track of them for troubleshooting.
+         * </p>
+         */
+        WARNING(x -> {
+            log.warn("Query value cannot be empty : {}", x);
+
+            return org.apache.commons.lang3.StringUtils.EMPTY;
+        });
+
+        /**
+         * The function that implements the policy behavior.
+         */
+        private final Function<String, String> function;
+
+        EmptyQueryValuePolicy(Function<String, String> function) {
+            this.function = function;
+        }
+
+        public String apply(String key) {
+            return function.apply(key);
+        }
+    }
+
 }
