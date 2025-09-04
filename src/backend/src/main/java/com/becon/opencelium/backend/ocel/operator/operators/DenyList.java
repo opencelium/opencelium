@@ -6,24 +6,34 @@ import com.becon.opencelium.backend.ocel.operator.OperatorEnum;
 import com.becon.opencelium.backend.ocel.operator.SidesType;
 
 import java.util.List;
-import java.util.Objects;
 
 public class DenyList implements BinaryOperator {
     @Override
     public Object apply(Object o1, Object o2) throws ApplyOperatorException {
         if (o2 instanceof String) {
-            String[] split = ((String) o2).split(",");
-            for (String s : split) {
-                if (Objects.equals(s, o1.toString()))
+            String[] split = ((String) o2).replaceAll("\n", ",").split(",");
+            Like like = new Like();
+
+            for (String value : split) {
+                Object result = like.apply(o1.toString(), value);
+                if (Boolean.TRUE.equals(result)) {
                     return false;
+                }
             }
+
             return true;
         }
-        if (o1 instanceof String val && o2 instanceof List<?> list) {
-            for (Object o : list) {
-                if (Objects.equals(o, val))
+
+        if (o1 instanceof String && o2 instanceof List<?> list) {
+            Like like = new Like();
+
+            for (Object value : list) {
+                Object result = like.apply(o1.toString(), value);
+                if (Boolean.TRUE.equals(result)) {
                     return false;
+                }
             }
+
             return true;
         }
         throw ApplyOperatorException.invalidTypePairsException(getOperatorType(), o1, o2);
