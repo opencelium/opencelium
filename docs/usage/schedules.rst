@@ -209,6 +209,71 @@ if you mouse over on one of them and click on the respective icon.
 
 |image_notifications_6|
 
+Logs
+"""""""""""""""""
+The *Logs* feature allows you to create comprehensive log files for support in case your connection 
+is not working and you need help troubleshooting.
+
+Clicking on the |image_support_logs_1| icon opens a view where you can configure the support logs as
+needed by masking certain parts of the logs.
+
+|image_support_logs_2|
+
+In the upper area, you can select a desired preset for the degree of masking. 
+
+|image_support_logs_3|
+
+The following levels are available:
+
+.. list-table::
+  :width: 100 %
+  :widths: 20 20 20 20 20
+  :header-rows: 1
+
+  * - Masking Level
+    - URL
+    - Headers
+    - Request
+    - Response
+
+  * - **Light**
+    - |image_support_logs_4|
+    - |image_support_logs_5|
+    - |image_support_logs_5|
+    - |image_support_logs_5|
+
+  * - **Medium**
+    - |image_support_logs_4|
+    - |image_support_logs_4|
+    - |image_support_logs_5|
+    - |image_support_logs_5|
+
+  * - **Strict**
+    - |image_support_logs_4|
+    - |image_support_logs_4|
+    - |image_support_logs_4|
+    - |image_support_logs_5|
+
+  * - **Custom**
+    - |image_support_logs_4| / |image_support_logs_5|
+    - |image_support_logs_4| / |image_support_logs_5|
+    - |image_support_logs_4| / |image_support_logs_5|
+    - |image_support_logs_4| / |image_support_logs_5|
+
+Alternatively, you can also select individual elements and mask them by clicking on the icon with the
+crossed-out eye |image_support_logs_4|, thus making them unrecognizable for support. Clicking on the icon with the uncrossed
+eye unmasks the element again |image_support_logs_5|.
+
+Once you have made the desired settings, click on the button to generate the support logs.
+
+|image_support_logs_6|
+
+The process of generating the support logs starts the selected connection, generates the logs, and saves
+them together with the invoker files as a ZIP file. Corresponding messages in the notifications indicate
+the start and successful generation of the support logs.
+
+The generated support logs can be accessed either via the link in the notification or under Support Files
+in the admin panel.
 
 .. |image_schedules_1| image:: ../img/schedule/OC_schedules_list.png
    :align: middle
@@ -301,3 +366,23 @@ if you mouse over on one of them and click on the respective icon.
    :width: 30
 
 .. |image20| image:: ../img/schedule/20.png
+
+.. |image_support_logs_1| image:: ../img/schedules/OC_support_logs_icon_logs.png
+   :height: 21
+
+.. |image_support_logs_2| image:: ../img/schedules/OC_support_logs_config.png
+   :align: middle
+   :width: 400
+
+.. |image_support_logs_3| image:: ../img/schedules/OC_support_logs_masking_level.png
+   :align: middle
+   :width: 400
+
+.. |image_support_logs_4| image:: ../img/schedules/OC_support_logs_icon_eye_crossed.png
+   :height: 21
+
+.. |image_support_logs_5| image:: ../img/schedules/OC_support_logs_icon_eye_open.png
+   :height: 21
+
+.. |image_support_logs_6| image:: ../img/schedules/OC_support_logs_btn_create_logs.png
+   :height: 30
