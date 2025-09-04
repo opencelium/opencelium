@@ -167,8 +167,6 @@ public class LogDataServiceImp implements LogDataService {
      */
     @Override
     public void saveNewBlock(LogData block) {
-        String id = new ObjectId().toHexString();
-        block.setId(id);
         block.setCreatedAt(Instant.now());
         metaDataLogRepository.save(block);
     }

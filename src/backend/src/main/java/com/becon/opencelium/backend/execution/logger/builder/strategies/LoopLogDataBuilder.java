@@ -11,6 +11,7 @@ import com.becon.opencelium.backend.execution.logger.enums.PhaseType;
 import com.becon.opencelium.backend.execution.logger.enums.LogLineType;
 import com.becon.opencelium.backend.execution.logger.enums.SegmentType;
 import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
+import com.becon.opencelium.backend.execution.logger.parser.entity.ParsedLogLine;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,8 +21,8 @@ import static com.becon.opencelium.backend.execution.logger.keys.LogLineKey.*;
 public class LoopLogDataBuilder implements PhaseBuilder {
 
     @Override
-    public LogData build(PhaseContext phaseCtx, String execId, Long connId) {
-        var parsed = phaseCtx.getParsedLogLine();
+    public LogData build(PhaseContext phaseCtx, String execId, String flowId, Long connId) {
+        ParsedLogLine parsed = phaseCtx.getParsedLogLine();
         PhaseCategory category = PhaseCategory.fromValue((PhaseType) parsed.getStage());
 
         // 1) Core LogData setup
@@ -29,7 +30,7 @@ public class LoopLogDataBuilder implements PhaseBuilder {
         logData.setId(UUID.randomUUID().toString());
         logData.setExecutionId(execId);
         logData.setConnectionId(connId);
-        logData.setFlowId(phaseCtx.getProperty(LogLineKey.FLOWCHART_ID));
+        logData.setFlowId(flowId);
         logData.setIndexPath(phaseCtx.getProperty(LogLineKey.INDEX_PATH));
         logData.setStatus(phaseCtx.getStatus());
         logData.setStartOffset(phaseCtx.getStartOffset());
@@ -45,7 +46,7 @@ public class LoopLogDataBuilder implements PhaseBuilder {
 
         // 4) Merge segment data into properties
         if (!agg.refs.isEmpty()) {
-            flatProps.put(LogLineKey.REF.getSrcName(), agg.refs);
+            logData.getSegments().put(LogLineKey.REF.getSrcName(), agg.refs);
         }
 
         ErrorDetail errorDetail = phaseCtx.getErrorDetail();
