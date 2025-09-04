@@ -366,23 +366,3 @@ in the admin panel.
    :width: 30
 
 .. |image20| image:: ../img/schedule/20.png
-
-.. |image_support_logs_1| image:: ../img/schedules/OC_support_logs_icon_logs.png
-   :height: 21
-
-.. |image_support_logs_2| image:: ../img/schedules/OC_support_logs_config.png
-   :align: middle
-   :width: 400
-
-.. |image_support_logs_3| image:: ../img/schedules/OC_support_logs_masking_level.png
-   :align: middle
-   :width: 400
-
-.. |image_support_logs_4| image:: ../img/schedules/OC_support_logs_icon_eye_crossed.png
-   :height: 21
-
-.. |image_support_logs_5| image:: ../img/schedules/OC_support_logs_icon_eye_open.png
-   :height: 21
-
-.. |image_support_logs_6| image:: ../img/schedules/OC_support_logs_btn_create_logs.png
-   :height: 30
