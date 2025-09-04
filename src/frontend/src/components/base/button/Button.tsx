@@ -51,7 +51,7 @@ const Button: FC<ButtonProps> =
     const isLabelHidden = !icon && isLoading;
     const hasLabel = !!label && !isLabelHidden;
     let navigate = useNavigate();
-    let onClick = () => {
+    let onClick = (e: any) => {
         if(href){
             if(isExternalHref){
                 window.open(href, '_blank').focus()
@@ -60,7 +60,7 @@ const Button: FC<ButtonProps> =
             }
         } else{
             if(handleClick) {
-                handleClick();
+                handleClick(e);
             }
         }
         hasConfirmation && toggleConfirmation(false);

@@ -17,6 +17,7 @@ import {ShowIndexPath} from "@app_component/connection_logs/LogsPanel/LogsPanel"
 import ErrorMessage from "@app_component/connection_logs/ConnectorPanel/ErrorMessage";
 import {isJsonString} from "@application/utils/utils";
 import NavItemLog from "@app_component/connection_logs/ConnectorPanel/NavItemLog";
+import TabPaneLog from "@app_component/connection_logs/ConnectorPanel/TabPaneLog";
 
 interface MethodTraceProps {
 	trace: ConnectionSocketLog<DetailedMethodSegment>;
@@ -38,10 +39,6 @@ function getMethodColor(httpMethod: HttpMethodType): string {
 		default:
 			return '#000000';
 	}
-}
-
-function detectAceMode(content: string): 'json' | 'xml' {
-	return content.trim().startsWith('<') ? 'xml' : 'json';
 }
 
 const MethodTrace: React.FC<MethodTraceProps> = ({
@@ -115,8 +112,6 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 				: JSON.stringify(responseDetails.payload, null, 2)
 			: '';
 
-	const requestMode = requestBody ? detectAceMode(requestBody) : 'json';
-	const responseMode = responseBody ? detectAceMode(responseBody) : 'json';
 	return (
 		<div>
 			<div className={styles.methodTrace} onClick={handleToggle}>
@@ -189,42 +184,8 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 								/>
 							</Nav>
 							<TabContent activeTab={activeRequestTab} className={styles.tabContent}>
-								<TabPane tabId='header'>
-									<LimitedAceEditor
-										mode='json'
-										theme={theme}
-										editorTheme='textmate'
-										value={requestHeaders}
-										fontSize={14}
-										showPrintMargin={false}
-										showGutter={false}
-										highlightActiveLine={false}
-										wrapEnabled={true}
-										setOptions={{ useWorker: false }}
-										className={styles.aceEditor}
-										readOnly={true}
-										width={'100%'}
-										height={'100px'}
-									/>
-								</TabPane>
-								<TabPane tabId='body'>
-									<LimitedAceEditor
-										mode={requestMode}
-										theme={theme}
-										editorTheme='textmate'
-										value={requestBody}
-										fontSize={14}
-										showPrintMargin={false}
-										showGutter={true}
-										highlightActiveLine={false}
-										wrapEnabled={true}
-										setOptions={{ useWorker: false, showLineNumbers: false }}
-										className={styles.aceEditor}
-										readOnly={true}
-										width={'100%'}
-										height={'100px'}
-									/>
-								</TabPane>
+								<TabPaneLog tabId={'header'} theme={theme} value={requestHeaders}/>
+								<TabPaneLog tabId={'body'} theme={theme} value={requestBody}/>
 							</TabContent>
 						</div>
 						{/* Response */}
@@ -254,42 +215,8 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 								/>
 							</Nav>
 							<TabContent activeTab={activeResponseTab} className={styles.tabContent}>
-								<TabPane tabId='header'>
-									<LimitedAceEditor
-										mode='json'
-										theme={theme}
-										editorTheme='textmate'
-										value={responseHeaders}
-										fontSize={14}
-										showPrintMargin={false}
-										showGutter={true}
-										highlightActiveLine={false}
-										wrapEnabled={true}
-										setOptions={{ useWorker: false, showLineNumbers: false }}
-										className={styles.aceEditor}
-										readOnly={true}
-										width={'100%'}
-										height={'100px'}
-									/>
-								</TabPane>
-								<TabPane tabId='body'>
-									<LimitedAceEditor
-										mode={responseMode}
-										theme={theme}
-										editorTheme='textmate'
-										value={responseBody}
-										fontSize={14}
-										showPrintMargin={false}
-										showGutter={true}
-										highlightActiveLine={false}
-										wrapEnabled={true}
-										setOptions={{ useWorker: false, showLineNumbers: false }}
-										className={styles.aceEditor}
-										readOnly={true}
-										width={'100%'}
-										height={'100px'}
-									/>
-								</TabPane>
+								<TabPaneLog tabId={'header'} theme={theme} value={responseHeaders}/>
+								<TabPaneLog tabId={'body'} theme={theme} value={responseBody}/>
 							</TabContent>
 						</div>
 					</React.Fragment>}

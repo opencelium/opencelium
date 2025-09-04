@@ -2,20 +2,23 @@ import React, {useState} from 'react';
 import {
 	ConnectionSocketLog,
 	DetailedIfOperatorSegment, DetailedOperatorSegment,
-	IfOperatorProperty,
 	LoopOperatorProperty, MetaTrace,
-	Trace,
 } from '@root/requests/models/ConnectionLog';
 import ToggleButton from '../ToggleButton/ToggleButton';
 import TraceItem from '../TraceItem';
 import styles from './OperatorTrace.module.css';
 import {useAppDispatch} from "@application/utils/store";
-import {cleanOperatorTrace} from "@root/redux_toolkit/slices/ConnectionLogSlice";
+import {cleanOperatorTrace, copyLogContentToClipboard} from "@root/redux_toolkit/slices/ConnectionLogSlice";
 import FontIcon from "@basic_components/FontIcon";
-import {getDetailedOperator, getOperatorChildren} from "@root/redux_toolkit/action_creators/ConnectionLogCreators";
+import {getOperatorChildren} from "@root/redux_toolkit/action_creators/ConnectionLogCreators";
 import {ShowIndexPath} from "@app_component/connection_logs/LogsPanel/LogsPanel";
+import {TextSize} from "@app_component/base/text/interfaces";
+import Button from "@app_component/base/button/Button";
+import {copyStringToClipboard} from "@application/utils/utils";
+import {ConnectionLogRequest} from "@root/requests/classes/ConnectionLogRequest";
+import CopyOperatorButton from "@app_component/connection_logs/ConnectorPanel/CopyOperatorButton";
 
-interface Props {
+export interface OperatorTraceProps {
 	trace: ConnectionSocketLog<DetailedOperatorSegment> & MetaTrace;
 	flowId: string;
 	executionId: string;
@@ -24,7 +27,7 @@ interface Props {
 
 const INDENT_SIZE = 40;
 
-export const OperatorTrace: React.FC<Props> = ({
+export const OperatorTrace: React.FC<OperatorTraceProps> = ({
 	trace,
 	flowId,
 	executionId,
@@ -120,6 +123,7 @@ export const OperatorTrace: React.FC<Props> = ({
 					/>
 					<span className={styles.type}>{isIf ? 'IF' : 'LOOP'}</span>
 					{isLoop && <span className={styles.iterator}>({iterator})</span>}
+					{isIf && <CopyOperatorButton trace={trace} flowId={flowId} executionId={executionId} iterationIndexes={iterationIndexes} iterationIndex={iterationIndex}/>}
 					{ShowIndexPath && <span style={{ marginLeft: 8 }}>{trace.indexPath}</span>}
 				</div>
 				<React.Fragment>
