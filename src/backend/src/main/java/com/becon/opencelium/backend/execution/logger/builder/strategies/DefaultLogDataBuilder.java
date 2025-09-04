@@ -17,11 +17,12 @@ import static com.becon.opencelium.backend.execution.logger.keys.LogLineKey.DATA
 
 public class DefaultLogDataBuilder implements PhaseBuilder {
     @Override
-    public LogData build(PhaseContext context, String execId, Long connId) {
+    public LogData build(PhaseContext context, String execId, String flowId, Long connId) {
         LogData logData = new LogData();
         logData.setId(UUID.randomUUID().toString());
         logData.setExecutionId(execId);
         logData.setConnectionId(connId);
+        logData.setFlowId(flowId);
         logData.setFlowId(context.getProperties().get(LogLineKey.FLOWCHART_ID));
         logData.setStatus(context.getStatus());
         logData.setIndexPath(context.getProperties().get(LogLineKey.INDEX_PATH));

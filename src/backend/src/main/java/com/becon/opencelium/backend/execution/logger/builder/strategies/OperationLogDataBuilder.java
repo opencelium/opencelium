@@ -17,7 +17,7 @@ import static com.becon.opencelium.backend.execution.logger.keys.LogLineKey.DATA
 
 public class OperationLogDataBuilder implements PhaseBuilder {
 
-    public LogData build(PhaseContext phaseCtx, String execId, Long connId) {
+    public LogData build(PhaseContext phaseCtx, String execId, String flowId, Long connId) {
         ParsedLogLine parsed = phaseCtx.getParsedLogLine();
         PhaseCategory category = PhaseCategory.fromValue((PhaseType) parsed.getStage());
 
@@ -26,8 +26,8 @@ public class OperationLogDataBuilder implements PhaseBuilder {
         logData.setId(UUID.randomUUID().toString());
         logData.setExecutionId(execId);
         logData.setConnectionId(connId);
+        logData.setFlowId(flowId);
         logData.setConnectorName(phaseCtx.getProperty(LogLineKey.CONNECTOR_NAME));
-        logData.setFlowId(phaseCtx.getProperty(LogLineKey.FLOWCHART_ID));
         logData.setIndexPath(phaseCtx.getProperty(LogLineKey.INDEX_PATH));
         logData.setStatus(phaseCtx.getStatus());
         logData.setStartOffset(parsed.getStartOffset());
