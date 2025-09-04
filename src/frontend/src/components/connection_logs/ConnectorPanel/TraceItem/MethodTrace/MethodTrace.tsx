@@ -104,8 +104,8 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 				: JSON.stringify(requestDetails.payload, null, 2)
 			: '';
 
-	const responseHeaders = responseDetails
-		? JSON.stringify(responseDetails.header, null, 2)
+	const responseHeaders = !!responseDetails?.header && isJsonString(responseDetails.header)
+		? JSON.stringify(JSON.parse(responseDetails.header), null, 2)
 		: '';
 	const responseBody =
 		responseDetails && responseDetails.payload
@@ -192,7 +192,6 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 							<TabContent activeTab={activeRequestTab}>
 								<TabPane tabId='header'>
 									<LimitedAceEditor
-										maxLength={Validation.TextLength.Long}
 										mode='json'
 										theme={theme}
 										editorTheme='textmate'
@@ -209,7 +208,6 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 								</TabPane>
 								<TabPane tabId='body'>
 									<LimitedAceEditor
-										maxLength={255}
 										mode={requestMode}
 										theme={theme}
 										editorTheme='textmate'
@@ -257,7 +255,6 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 							<TabContent activeTab={activeResponseTab}>
 								<TabPane tabId='header'>
 									<LimitedAceEditor
-										maxLength={255}
 										mode='json'
 										theme={theme}
 										editorTheme='textmate'
@@ -267,14 +264,13 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 										showGutter={true}
 										highlightActiveLine={false}
 										wrapEnabled={true}
-										setOptions={{ useWorker: false }}
+										setOptions={{ useWorker: false, showLineNumbers: false }}
 										className={styles.aceEditor}
 										readOnly={true}
 									/>
 								</TabPane>
 								<TabPane tabId='body'>
 									<LimitedAceEditor
-										maxLength={255}
 										mode={responseMode}
 										theme={theme}
 										editorTheme='textmate'
@@ -284,7 +280,7 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 										showGutter={true}
 										highlightActiveLine={false}
 										wrapEnabled={true}
-										setOptions={{ useWorker: false }}
+										setOptions={{ useWorker: false, showLineNumbers: false }}
 										className={styles.aceEditor}
 										readOnly={true}
 									/>

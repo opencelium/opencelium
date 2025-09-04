@@ -94,6 +94,7 @@ export const connectionLogSlice = createSlice({
 					});
 				} else {
 					let hasConnector = false;
+					const isIndexPathFirstLvl = action.payload.data.indexPath.split('_').length === 1;
 					state.connectors.forEach((connector) => {
 						if (connector.flowId === flowId) {
 							hasConnector = true;
@@ -105,10 +106,12 @@ export const connectionLogSlice = createSlice({
 											return true;
 										}
 									}
+									if (!isIndexPathFirstLvl) {
+										trace.isCompleted = true;
+									}
 									return false;
 								});
 							} else {
-								const isIndexPathFirstLvl = action.payload.data.indexPath.split('_').length === 1;
 								let isCompleted = action.payload.data.type === 'OPERATION';
 								if (!isIndexPathFirstLvl) {
 									isCompleted = true;
@@ -119,10 +122,14 @@ export const connectionLogSlice = createSlice({
 						}
 					});
 					if (!hasConnector) {
+						let isCompleted = action.payload.data.type === 'OPERATION';
+						if (!isIndexPathFirstLvl) {
+							isCompleted = true;
+						}
 						state.connectors.push({
 							flowId,
 							name: connectorName,
-							traces: [action.payload.data],
+							traces: [{...action.payload.data, isCompleted}],
 						})
 					}
 				}
@@ -198,7 +205,7 @@ export const connectionLogSlice = createSlice({
 			if (!connector) return;
 			findAndUpdateTrace(connector.traces, indexPath, (trace) => {
 				if (trace.type === 'LOOP' || trace.type === 'IF') {
-					trace.children = action.payload;
+					trace.children = action.payload.map(t => ({...t, isCompleted: true}));
 					return true;
 				}
 				return false;
