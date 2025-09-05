@@ -64,7 +64,7 @@ export interface FlowchartProperty {
 	CONNECTOR_ID: string,
 	DIRECTION: 'source' | 'target',
 }
-interface MethodProperty extends BaseChildProperty{
+export interface MethodProperty extends BaseChildProperty{
 	name: string,
 }
 export interface IfOperatorProperty extends BaseOperatorProperty{

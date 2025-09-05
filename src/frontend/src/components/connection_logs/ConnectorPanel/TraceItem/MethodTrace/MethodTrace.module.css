@@ -5,12 +5,15 @@
 	justify-content: space-between;
 }
 
+.methodTraceLeftSide {
+	flex: 1;
+}
 .methodTraceLeftSide,
 .methodTraceRightSide {
 	display: flex;
 	align-items: center;
-	justify-content: end;
 	position: relative;
+	overflow: hidden;
 }
 .methodTraceRightSide {
 	overflow: hidden;
@@ -29,12 +32,15 @@
 	color: #fff;
 	border-radius: 3px;
 	font-size: 14px;
+	min-width: 60px;
 }
 
 .methodUrl {
-	text-decoration: underline;
+	text-overflow: ellipsis;
 	margin-left: 10px;
 	color: #424242;
+	overflow: hidden;
+	white-space: nowrap;
 }
 
 .error {

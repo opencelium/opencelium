@@ -1,6 +1,6 @@
 import {
 	ConnectionSocketLog,
-	DetailedMethodSegment, HttpMethodType, MethodRequest,
+	DetailedMethodSegment, HttpMethodType, MethodProperty, MethodRequest,
 } from '@root/requests/models/ConnectionLog';
 import React, { useState } from 'react';
 import { Nav, NavItem, NavLink, TabContent, TabPane } from 'reactstrap';
@@ -111,17 +111,19 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 				? responseDetails.payload
 				: JSON.stringify(responseDetails.payload, null, 2)
 			: '';
-
+	const properties = trace?.properties as MethodProperty;
+	const url = trace?.segment?.request?.url || '';
 	return (
 		<div>
 			<div className={styles.methodTrace} onClick={handleToggle}>
 				<div className={styles.methodTraceLeftSide}>
-					<ToggleButton
+					<div style={{minWidth: '40px'}}><ToggleButton
 						loading={loading}
 						expanded={expanded}
 						onClick={handleToggle}
 						hasError={hasError}
 					/>
+					</div>
 					<div
 						style={{ backgroundColor: methodColor }}
 						className={styles.methodType}
@@ -132,7 +134,9 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 					{ShowIndexPath && (
 						<div style={{ marginLeft: 8 }}>{trace.indexPath}</div>
 					)}
-					<div className={styles.methodUrl} style={{color: hasError ? ColorTheme.Red : '#000'}}>{trace?.segment?.request?.url || ''}</div>
+					<div className={styles.methodUrl} style={{color: hasError ? ColorTheme.Red : '#000'}}>
+						<span title={url} style={{textDecoration: 'underline'}}>{`${url}`}</span>
+					</div>
 				</div>
 				<div
 					className={styles.methodTraceRightSide}
@@ -141,7 +145,7 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 						e.stopPropagation();
 					}}
 				>
-					{hasError ? <div className={styles.error} style={{color: ColorTheme.Red}}>{trace.error.message}</div> :
+					{!hasError &&
 						<React.Fragment>
 							<div className={styles.methodStatus}>{trace.segment?.response?.status || ''}</div>
 							<div>{'|'}</div>

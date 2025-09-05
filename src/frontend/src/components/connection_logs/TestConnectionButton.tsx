@@ -5,7 +5,12 @@ import {RootState, useAppDispatch, useAppSelector} from "@application/utils/stor
 import {deleteLogs, testConnection} from "@root/redux_toolkit/action_creators/ConnectionLogCreators";
 import styles from './LogsPanel/LogsPanel.module.css';
 import {setFullScreen} from "@application/redux_toolkit/slices/ApplicationSlice";
-import {LogPanelHeight, setButtonPanelVisibility, setLogPanelHeight} from "@root/redux_toolkit/slices/ConnectionSlice";
+import {
+    LogPanelHeight,
+    setButtonPanelVisibility,
+    setLogPanelHeight,
+    toggleDetails
+} from "@root/redux_toolkit/slices/ConnectionSlice";
 import {generateUUID} from "@app_component/operator_builder/utils";
 import {useSocketData} from "../../socket/SocketDataContext";
 import {ConnectionSocketLog, LightSegment, LoopOperatorProperty} from "@root/requests/models/ConnectionLog";
@@ -44,14 +49,17 @@ const TestConnectionButton = ({validateLogic}: any) => {
 
     const isTestFinished = (logMessage: ConnectionSocketLog<LightSegment>): boolean => {
         if (logMessage.type === 'EXECUTION' && logMessage.status === 'COMPLETE') {
-            dispatch(setIsTesting(false));
-            setChannelId('');
-            subscriptionRef.current?.();
-            isFromConnectorCompleted = false;
-            isToConnectorCompleted = false;
+            stopTestUrgent();
             return true;
         }
         return false;
+    }
+    const stopTestUrgent = () => {
+        dispatch(setIsTesting(false));
+        setChannelId('');
+        subscriptionRef.current?.();
+        isFromConnectorCompleted = false;
+        isToConnectorCompleted = false;
     }
     const shouldSkipTrace = (logMessage: ConnectionSocketLog<LightSegment>): boolean => {
         const isPreviousLogLoop = !!(previousLogMessage?.properties as LoopOperatorProperty)?.loopIndex;
@@ -96,7 +104,7 @@ const TestConnectionButton = ({validateLogic}: any) => {
             }
             const subscription = socket.subscribe(`/execution/logs/${channelId}`, (message) => {
                 const data = JSON.parse(message.body) as ConnectionSocketLog<LightSegment>;
-                dispatch(setCurrentLog(data));
+                console.log(data);
                 if (isTestFinished(data)) return;
                 if (shouldSkipTrace(data)) return;
                 let hasNewLoopIndex = false;
@@ -122,7 +130,7 @@ const TestConnectionButton = ({validateLogic}: any) => {
                 }
                 if (!!data?.error?.message) {
                     if (channelId) {
-                        setChannelId('');
+                        stopTestUrgent();
                     }
                 }
             });
@@ -145,6 +153,7 @@ const TestConnectionButton = ({validateLogic}: any) => {
             if (executionId) {
                 dispatch(deleteLogs({executionId}));
             }
+            dispatch(toggleDetails(false))
             dispatch(setFullScreen(true));
             dispatch(setButtonPanelVisibility(false));
             dispatch(setLogPanelHeight(LogPanelHeight.High));
@@ -155,6 +164,7 @@ const TestConnectionButton = ({validateLogic}: any) => {
 
     const stopTest = () => {
         setChannelId('');
+        dispatch(toggleDetails(true))
         dispatch(setFullScreen(false));
         dispatch(setButtonPanelVisibility(true));
         dispatch(setLogPanelHeight(0));
