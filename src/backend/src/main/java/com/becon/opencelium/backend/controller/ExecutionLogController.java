@@ -38,7 +38,7 @@ public class ExecutionLogController {
     @GetMapping("/element/{elementId}/children")
     public ResponseEntity<List<LogDataDTO>> getChildrenById(
             @PathVariable String elementId,
-            @RequestParam(required = false, defaultValue = "") String loopIndex
+            @RequestParam(required = false, defaultValue = "0") String loopIndex
     ) {
         return ResponseEntity.ok(logMetaDataService.getChildrenById(elementId, loopIndex));
     }
