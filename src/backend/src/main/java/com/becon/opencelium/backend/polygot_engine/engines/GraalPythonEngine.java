@@ -96,6 +96,7 @@ public class GraalPythonEngine implements ScriptEngine {
 
     private Context newContext() {
         return Context.newBuilder("python")
+                .option("engine.WarnInterpreterOnly", "false")
                 .allowAllAccess(false)
                 .build();
     }
