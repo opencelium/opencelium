@@ -18,6 +18,9 @@ export const getSocket = () => {
             connectHeaders: {
                 "client-id": `${Date.now()}-${Math.random()}`,
             },
+            onConnect: () => {
+                consoleLog('Socket connected');
+            },
             debug: (str: string) => {
                 consoleLog('[STOMP DEBUG]', str);
             },

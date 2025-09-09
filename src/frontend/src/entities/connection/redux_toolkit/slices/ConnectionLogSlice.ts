@@ -4,7 +4,7 @@ import {
 	ConnectionTextLog,
 	ConnectorLog,
 	DetailedMethodSegment, FlowchartProperty,
-	LightSegment,
+	LightSegment, LogError,
 } from '@root/requests/models/ConnectionLog';
 import {
 	deleteLogs,
@@ -17,6 +17,7 @@ export interface ConnectionLogState {
 	executionId: string,
 	schedulerId: number,
 	currentLog: ConnectionSocketLog<LightSegment>,
+	currentLogError: {log: ConnectionSocketLog<LightSegment>, parentsPath: string[]},
 	currentDirection: 'source' | 'target' | '',
 	connectors: ConnectorLog[],
 	textLogs: ConnectionTextLog[],
@@ -27,6 +28,7 @@ export const initialState: ConnectionLogState = {
 	schedulerId: undefined,
 	executionId: '',
 	currentLog: undefined,
+	currentLogError: {log: undefined, parentsPath: []},
 	currentDirection: '',
 	connectors: [],
 	textLogs: [],
@@ -46,6 +48,9 @@ export const connectionLogSlice = createSlice({
 		setIsTesting: (state, action: PayloadAction<boolean>) => {
 			state.isTesting = action.payload;
 		},
+		setCurrentLogError: (state, action: PayloadAction<{log: ConnectionSocketLog<LightSegment>, parentsPath: string[]}>) => {
+			state.currentLogError = {log: action.payload.log, parentsPath: Array.from(new Set(action.payload.parentsPath))};
+		},
 		setCurrentLog: (state, action: PayloadAction<ConnectionSocketLog<LightSegment>>) => {
 			if (!state.currentLog?.error?.message) {
 				state.currentLog = action.payload;
@@ -64,6 +69,7 @@ export const connectionLogSlice = createSlice({
 		},
 		clearTextLog: (state) => {
 			state.textLogs = [];
+			state.currentLogError = {log: undefined, parentsPath: []};
 		},
 		clearSocketLog: (state) => {
 			state.schedulerId = undefined;
@@ -71,6 +77,7 @@ export const connectionLogSlice = createSlice({
 			state.currentDirection = '';
 			state.currentLog = undefined;
 			state.connectors = [];
+			state.currentLogError = {log: undefined, parentsPath: []};
 		},
 		addSocketLog: (state, action: PayloadAction<{data: ConnectionSocketLog<LightSegment>, settings: {hasNewLoopIndex: boolean, parentIndexPath: string}}>) => {
 			const {executionId, flowId, connectorName, ...newTrace} = action.payload.data;
@@ -214,7 +221,21 @@ export const connectionLogSlice = createSlice({
 			if (!connector) return;
 			findAndUpdateTrace(connector.traces, indexPath, (trace) => {
 				if (trace.type === 'LOOP' || trace.type === 'IF') {
-					trace.children = action.payload.map(t => ({...t, isCompleted: true}));
+					trace.children = action.payload.map(t => {
+						if (state.currentLogError.log) {
+							if (state.currentLogError.parentsPath.indexOf(t.id) !== -1) {
+								return {...t, hasError: true, isCompleted: true}
+							} else {
+								if (state.currentLogError.log.id === t.id) {
+									return {...t, isCompleted: true, error: state.currentLogError.log.error};
+								} else {
+									return {...t, isCompleted: true}
+								}
+							}
+						} else {
+							return {...t, isCompleted: true}
+						}
+					});
 					return true;
 				}
 				return false;
@@ -236,6 +257,7 @@ export const {
 	cleanMethodTrace, cleanOperatorTrace, addSocketLog,
 	addTextLog, clearTextLog, clearSocketLog,
 	setIsTesting, setCurrentLog, copyLogContentToClipboard,
+	setCurrentLogError,
 } =
 	connectionLogSlice.actions;
 export default connectionLogSlice.reducer;

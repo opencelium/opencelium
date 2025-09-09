@@ -69,7 +69,8 @@ export default {
             "__DEFAULT__": "Could not start generation of the support file."
         },
         [testConnection.rejected.type]: {
-            "__DEFAULT__": "There is an error in during the test of the connection"
+            "__DEFAULT__": "There is an error in during the test of the connection",
+            "Concurrent test executions for the same connection": "The test is already running for this connection."
         },
         [checkConnectionTitle.rejected.type]: {
             "__DEFAULT__": "There is an error in checking uniqueness of the title."
