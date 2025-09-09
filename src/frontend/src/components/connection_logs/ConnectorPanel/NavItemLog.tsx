@@ -11,15 +11,14 @@ import {copyLogContentToClipboard} from "@root/redux_toolkit/slices/ConnectionLo
 
 const NavItemLog = (props: {navLinkProps: NavLinkProps, title: string, content: string}) => {
     const dispatch = useAppDispatch();
-    const [isMouseOver, toggleMouseOver] = useState(false);
     return (
-        <NavItem onMouseOver={() => toggleMouseOver(true)} onMouseLeave={() => toggleMouseOver(false)}>
+        <NavItem>
             <NavLink
                 {...props.navLinkProps}
                 className={styles.navLink}
             >
                 <span>{props.title}</span>
-                {isMouseOver && <Button
+                <Button
                     iconSize={TextSize.Size_12}
                     icon={'file_copy'}
                     hasBackground={false}
@@ -33,7 +32,7 @@ const NavItemLog = (props: {navLinkProps: NavLinkProps, title: string, content: 
                         top: '2px',
                         right: '2px',
                     }}
-                />}
+                />
             </NavLink>
         </NavItem>
     )
