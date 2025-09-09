@@ -29,6 +29,7 @@ import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
+import com.becon.opencelium.backend.exception.ConcurrentTestIsForbidden;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.execution.socket.Connection2WebSocketChannelMapping;
 import com.becon.opencelium.backend.mapper.base.Mapper;
@@ -300,7 +301,7 @@ public class ConnectionController {
         schedulerService.getAllRunningJobs().forEach(job -> {
             String schedulerTitle = job.getTitle();
             if (schedulerTitle.startsWith("!*test_schedule_") && schedulerTitle.endsWith(connectionOldDTO.getTitle())) {
-                throw new RuntimeException("Concurrent test executions for the same connection");
+                throw new ConcurrentTestIsForbidden(0L);
             }
         });
 
@@ -593,7 +594,7 @@ public class ConnectionController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(path = "/remoteapi", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> sendRequestToApi(@RequestBody ApiDataResource apiDataResource) throws Exception {
+    public ResponseEntity<?> sendRequestToApi(@RequestBody ApiDataResource apiDataResource) {
         HttpHeaders headers = new HttpHeaders();
         if (apiDataResource.getHeader() != null) {
             headers.setAll(apiDataResource.getHeader());
@@ -630,7 +631,7 @@ public class ConnectionController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PutMapping(path = "/list/delete")
-    public ResponseEntity<?> deleteCtionByIdIn(@RequestBody IdentifiersDTO<Long> ids) throws Exception {
+    public ResponseEntity<?> deleteCtionByIdIn(@RequestBody IdentifiersDTO<Long> ids) {
         ids.getIdentifiers().forEach(connectionService::deleteById);
         return ResponseEntity.noContent().build();
     }
@@ -714,7 +715,7 @@ public class ConnectionController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(path = "/{connectionId}/rule/list", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<RuleDTO>> saveRuleList(@PathVariable long connectionId, @RequestBody List<RuleDTO> dtos) throws Exception {
+    public ResponseEntity<List<RuleDTO>> saveRuleList(@PathVariable long connectionId, @RequestBody List<RuleDTO> dtos) {
         final URI uri = MvcUriComponentsBuilder
                 .fromController(getClass())
                 .buildAndExpand().toUri();
@@ -735,7 +736,7 @@ public class ConnectionController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(path = "/{connectionId}/rule", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<RuleDTO> saveRule(@PathVariable long connectionId, @RequestBody RuleDTO dto) throws Exception {
+    public ResponseEntity<RuleDTO> saveRule(@PathVariable long connectionId, @RequestBody RuleDTO dto) {
         final URI uri = MvcUriComponentsBuilder
                 .fromController(getClass())
                 .buildAndExpand().toUri();
@@ -756,7 +757,7 @@ public class ConnectionController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PutMapping(path = "/{connectionId}/rule/{ruleId}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> updateRule(@PathVariable long connectionId, @PathVariable long ruleId, @RequestBody RuleDTO dto) throws Exception {
+    public ResponseEntity<?> updateRule(@PathVariable long connectionId, @PathVariable long ruleId, @RequestBody RuleDTO dto) {
         return ResponseEntity.ok(connectionService.updateRule(connectionId, ruleId, dto));
     }
 
