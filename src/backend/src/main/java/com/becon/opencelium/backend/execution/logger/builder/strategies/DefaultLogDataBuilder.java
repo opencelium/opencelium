@@ -9,6 +9,7 @@ import com.becon.opencelium.backend.execution.logger.enums.LogLineType;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseCategory;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseType;
 import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
+import org.bson.types.ObjectId;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -19,7 +20,7 @@ public class DefaultLogDataBuilder implements PhaseBuilder {
     @Override
     public LogData build(PhaseContext context, String execId, String flowId, Long connId) {
         LogData logData = new LogData();
-        logData.setId(UUID.randomUUID().toString());
+        logData.setId(new ObjectId().toHexString());
         logData.setExecutionId(execId);
         logData.setConnectionId(connId);
         logData.setFlowId(flowId);

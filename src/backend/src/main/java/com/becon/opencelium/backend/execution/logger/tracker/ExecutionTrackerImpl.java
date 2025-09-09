@@ -112,7 +112,7 @@ public class ExecutionTrackerImpl implements ExecutionTracker {
             return onPhaseStart(phaseType, category, phaseContext, line);
         }
         if (END_PHASES.contains(phaseType)) {
-            return onPhaseEnd(category, phaseContext, line);
+            return onPhaseEnd(category, phaseContext);
         }
         return Optional.empty();
     }
@@ -148,8 +148,7 @@ public class ExecutionTrackerImpl implements ExecutionTracker {
     }
 
     private Optional<LogData> onPhaseEnd(PhaseCategory category,
-                                         PhaseContext phaseContext,
-                                         ParsedLogLine parsedLine) {
+                                         PhaseContext phaseContext) {
         final PhaseContext closed = phaseContextManager.endPhase(phaseContext);
 
         // Previous behavior kept COMPLETE status handling commented out; preserving semantics.
