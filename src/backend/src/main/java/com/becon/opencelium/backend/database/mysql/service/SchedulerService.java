@@ -36,59 +36,35 @@ public interface SchedulerService {
     Scheduler update(Scheduler scheduler);
 
     List<Scheduler> saveAll(List<Scheduler> schedulers);
-
     void deleteById(int id);
-
     void deleteAllById(List<Integer> schedulers);
-
     List<Scheduler> findAll();
-
     Optional<Scheduler> findById(int id);
-
     boolean existsByTitle(String title);
-
     boolean existsById(int id);
-
     List<Scheduler> findAllById(ArrayList<Integer> ids);
-
     List<Scheduler> findAllByTitleContains(String title);
 
     Scheduler toEntity(SchedulerRequestResource resource);
-
     SchedulerResource toResource(Scheduler entity);
 
     void startNow(Scheduler scheduler);
-
     void startNow(Scheduler scheduler, String channelId);
-
     void startNow(Scheduler scheduler, Map<String, Object> queryMap);
-
     void startNow(Scheduler scheduler, List<MaskingRule> rules);
-
     void throwIfConnectionIsBeingExecuted(long connectionId);
-
     void saveEntity(Scheduler scheduler);
-
     void disable(Scheduler scheduler);
-
     void enable(Scheduler scheduler);
-
     void terminate(Integer schedulerId);
 
     List<RunningJobsResource> getAllRunningJobs() throws Exception;
-
     List<RunningJobsResource> getAllRunningJobsExcludingOne(int schedulerId);
-
     List<EventNotification> getAllNotifications(int schedulerId);
-
     Optional<EventNotification> getNotification(int notificationId);
-
     EventNotification toNotificationEntity(NotificationResource resource);
-
     NotificationResource toNotificationResource(EventNotification eventNotification);
-
     void saveNotification(EventNotification eventNotification);
-
     void deleteNotificationById(int id);
 
     Scheduler getById(int id);
