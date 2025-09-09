@@ -17,13 +17,14 @@
 package com.becon.opencelium.backend.exception;
 
 import com.becon.opencelium.backend.constant.ExceptionConstant;
+import org.springframework.http.HttpStatus;
 
-public class ConcurrentTestIsForbidden extends RuntimeException {
+public class ConcurrentTestIsForbidden extends GeneralServiceException {
 
     private final Long id;
 
     public ConcurrentTestIsForbidden(final Long id) {
-        super(ExceptionConstant.CONCURRENT_TEST_IS_FORBIDDEN + " ; Connection - " + id);
+        super(HttpStatus.INTERNAL_SERVER_ERROR, ExceptionConstant.CONCURRENT_TEST_IS_FORBIDDEN, "Connection is currently being executed, id = " + id);
         this.id = id;
     }
 
