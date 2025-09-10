@@ -2,16 +2,20 @@ import { TextSize } from "@app_component/base/text/interfaces";
 import { Application } from "@application/classes/Application";
 import { RootState, useAppDispatch, useAppSelector } from "@application/utils/store";
 import {
-  ClearButtonStyled, EmptyLogsStyled,
+  ClearButtonStyled, EmptyLogsStyled, FullLogsButtonStyled,
   HeaderStyled, LogPanelStyled, TopStyled
 } from "@change_component/form_elements/form_connection/form_svg/layouts/logs/styles";
 import { Connection } from "@root/classes/Connection";
-import { ITheme } from '@style/Theme';
+import {ColorTheme, ITheme} from '@style/Theme';
 import React, { useState } from 'react';
 import {clearSocketLog, clearTextLog} from "@root/redux_toolkit/slices/ConnectionLogSlice";
 import LogViewer from "@app_component/connection_logs/TextLog";
 import {deleteLogs} from "@root/redux_toolkit/action_creators/ConnectionLogCreators";
 import ConnectorPanel from "@app_component/connection_logs/ConnectorPanel/ConnectorPanel";
+import {PermissionTooltipButton} from "@app_component/base/button/PermissionButton";
+import {TooltipButton} from "@app_component/base/tooltip_button/TooltipButton";
+import {LogPanelHeight, setLogPanelHeight} from "@root/redux_toolkit/slices/ConnectionSlice";
+import {setFullScreen} from "@application/redux_toolkit/slices/ApplicationSlice";
 export const ShowIndexPath = false;
 
 interface LogsPanelProps {
@@ -50,6 +54,23 @@ const LogsPanel: React.FC<LogsPanelProps> = ({theme}) => {
               hasBackground={false}
               handleClick={() => handleDeleteLogs(executionId)}
           />}
+          <FullLogsButtonStyled
+              right={isDetailsOpened ? isFullScreen ? 336 : 324 : isFullScreen ? 36 : 24}
+              tooltip={'Fullscreen'}
+              target={`log_panel_full`}
+              hasBackground={false}
+              handleClick={() => {
+                if (logPanelHeight === LogPanelHeight.Full) {
+                  dispatch(setLogPanelHeight(LogPanelHeight.High))
+                  dispatch(setFullScreen(false));
+                } else {
+                  dispatch(setLogPanelHeight(LogPanelHeight.Full))
+                  dispatch(setFullScreen(true));
+                }
+              }}
+              icon={`arrow_drop_${logPanelHeight === LogPanelHeight.Full ? 'down' : 'up'}`}
+              size={TextSize.Size_20}
+          />
         </TopStyled>
       <LogPanelStyled id={'connection_current_logs'} isFullScreen={isFullScreen} noLogs={textLogs.length === 0} isDetailsOpened={isDetailsOpened} logPanelHeight={logPanelHeight}>
           {connectors.length === 0 && !isTesting ?

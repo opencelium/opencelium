@@ -5,5 +5,5 @@ import com.becon.opencelium.backend.execution.logger.context.PhaseContext;
 import com.becon.opencelium.backend.execution.logger.enums.LogDetailLevel;
 
 public interface PhaseBuilder {
-    LogData build(PhaseContext context, String execId, Long connId);
+    LogData build(PhaseContext context, String execId,String flowId, Long connId);
 }

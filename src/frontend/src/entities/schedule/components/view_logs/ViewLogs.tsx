@@ -7,7 +7,6 @@ import styles from "./ViewLogs.module.css";
 import InputText from "@app_component/base/input/text/InputText";
 import {debounce} from "lodash";
 import {copyStringToClipboard, timeout} from "@application/utils/utils";
-import {setUsers} from "@entity/user/redux-toolkit/slices/UserSlice";
 const isLogTooLarge = (log: string): boolean => {
     const bytes = new TextEncoder().encode(log).length;
     return bytes > 10 * 1024 * 1024; // 10MB in bytes
@@ -20,7 +19,6 @@ const ViewLogs = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const firstMatchRef = useRef<any>(null);
     const logTooLarge = useMemo(() => isLogTooLarge(currentExecutionLogs.logs), [currentExecutionLogs.logs]);
-
     const debouncedUpdateSearchTerm = useMemo(() => debounce((val: string) => {
         if (val.length > 2) {
             setSearchTerm(val);

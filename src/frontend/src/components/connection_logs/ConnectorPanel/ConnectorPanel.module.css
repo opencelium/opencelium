@@ -1,9 +1,9 @@
-.connectorPanel:not(:last-child) {
+.connectorPanel {
 	margin-bottom: 20px;
 }
 
 .connectorPanelTitle {
-	margin: 0 0 10px;
+	margin: 0 0 10px 10px;
 }
 
 .traceItemContainer {

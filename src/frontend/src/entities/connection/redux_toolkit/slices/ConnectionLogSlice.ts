@@ -4,7 +4,7 @@ import {
 	ConnectionTextLog,
 	ConnectorLog,
 	DetailedMethodSegment, FlowchartProperty,
-	LightSegment,
+	LightSegment, LogError,
 } from '@root/requests/models/ConnectionLog';
 import {
 	deleteLogs,
@@ -17,6 +17,7 @@ export interface ConnectionLogState {
 	executionId: string,
 	schedulerId: number,
 	currentLog: ConnectionSocketLog<LightSegment>,
+	currentLogError: {log: ConnectionSocketLog<LightSegment>, parentsPath: string[]},
 	currentDirection: 'source' | 'target' | '',
 	connectors: ConnectorLog[],
 	textLogs: ConnectionTextLog[],
@@ -27,6 +28,7 @@ export const initialState: ConnectionLogState = {
 	schedulerId: undefined,
 	executionId: '',
 	currentLog: undefined,
+	currentLogError: {log: undefined, parentsPath: []},
 	currentDirection: '',
 	connectors: [],
 	textLogs: [],
@@ -41,8 +43,13 @@ export const connectionLogSlice = createSlice({
 	name: 'connectionLog',
 	initialState,
 	reducers: {
+		copyLogContentToClipboard: (state) => {
+		},
 		setIsTesting: (state, action: PayloadAction<boolean>) => {
 			state.isTesting = action.payload;
+		},
+		setCurrentLogError: (state, action: PayloadAction<{log: ConnectionSocketLog<LightSegment>, parentsPath: string[]}>) => {
+			state.currentLogError = {log: action.payload.log, parentsPath: Array.from(new Set(action.payload.parentsPath))};
 		},
 		setCurrentLog: (state, action: PayloadAction<ConnectionSocketLog<LightSegment>>) => {
 			if (!state.currentLog?.error?.message) {
@@ -62,6 +69,7 @@ export const connectionLogSlice = createSlice({
 		},
 		clearTextLog: (state) => {
 			state.textLogs = [];
+			state.currentLogError = {log: undefined, parentsPath: []};
 		},
 		clearSocketLog: (state) => {
 			state.schedulerId = undefined;
@@ -69,6 +77,7 @@ export const connectionLogSlice = createSlice({
 			state.currentDirection = '';
 			state.currentLog = undefined;
 			state.connectors = [];
+			state.currentLogError = {log: undefined, parentsPath: []};
 		},
 		addSocketLog: (state, action: PayloadAction<{data: ConnectionSocketLog<LightSegment>, settings: {hasNewLoopIndex: boolean, parentIndexPath: string}}>) => {
 			const {executionId, flowId, connectorName, ...newTrace} = action.payload.data;
@@ -78,8 +87,6 @@ export const connectionLogSlice = createSlice({
 					findAndUpdateTrace(connector.traces, action.payload.settings.parentIndexPath, (trace) => {
 						if (action.payload.settings.hasNewLoopIndex) {
 							if (trace.type === 'LOOP') {
-								//@ts-ignore
-								console.log(+trace.properties.size)
 								//@ts-ignore
 								trace.properties.size = +trace.properties.size ? +trace.properties.size + 1 : 1;
 								trace.isCompleted = true;
@@ -94,21 +101,31 @@ export const connectionLogSlice = createSlice({
 					});
 				} else {
 					let hasConnector = false;
+					const isIndexPathFirstLvl = action.payload.data.indexPath.split('_').length === 1;
 					state.connectors.forEach((connector) => {
 						if (connector.flowId === flowId) {
 							hasConnector = true;
 							if (action.payload.data.status === 'COMPLETE') {
-								findAndUpdateTrace(connector.traces, action.payload.data.indexPath, (trace) => {
+								const hasUpdatedTrace = findAndUpdateTrace(connector.traces, action.payload.data.indexPath, (trace) => {
 									if (!action.payload.settings.hasNewLoopIndex) {
 										if (trace.type === 'IF') {
 											trace.isCompleted = true;
 											return true;
 										}
 									}
+									if (!isIndexPathFirstLvl) {
+										trace.isCompleted = true;
+									}
 									return false;
 								});
+								if (!hasUpdatedTrace) {
+									let isCompleted = action.payload.data.type === 'OPERATION';
+									if (!isIndexPathFirstLvl) {
+										isCompleted = true;
+									}
+									connector.traces.push({...action.payload.data, isCompleted});
+								}
 							} else {
-								const isIndexPathFirstLvl = action.payload.data.indexPath.split('_').length === 1;
 								let isCompleted = action.payload.data.type === 'OPERATION';
 								if (!isIndexPathFirstLvl) {
 									isCompleted = true;
@@ -119,10 +136,14 @@ export const connectionLogSlice = createSlice({
 						}
 					});
 					if (!hasConnector) {
+						let isCompleted = action.payload.data.type === 'OPERATION';
+						if (!isIndexPathFirstLvl) {
+							isCompleted = true;
+						}
 						state.connectors.push({
 							flowId,
 							name: connectorName,
-							traces: [action.payload.data],
+							traces: [{...action.payload.data, isCompleted}],
 						})
 					}
 				}
@@ -150,10 +171,12 @@ export const connectionLogSlice = createSlice({
 			const { flowId, indexPath } = action.payload;
 			state.connectors.forEach((connector) => {
 				if (connector.flowId === flowId) {
-					connector.traces.forEach((trace) => {
-						if ((trace.type === 'IF' || trace.type === 'LOOP') && trace.indexPath === indexPath) {
+					findAndUpdateTrace(connector.traces, indexPath, (trace) => {
+						if (trace.type === 'IF' || trace.type === 'LOOP') {
 							trace.children = [];
+							return true;
 						}
+						 return false;
 					});
 				}
 			});
@@ -198,7 +221,21 @@ export const connectionLogSlice = createSlice({
 			if (!connector) return;
 			findAndUpdateTrace(connector.traces, indexPath, (trace) => {
 				if (trace.type === 'LOOP' || trace.type === 'IF') {
-					trace.children = action.payload;
+					trace.children = action.payload.map(t => {
+						if (state.currentLogError.log) {
+							if (state.currentLogError.parentsPath.indexOf(t.id) !== -1) {
+								return {...t, hasError: true, isCompleted: true}
+							} else {
+								if (state.currentLogError.log.id === t.id) {
+									return {...t, isCompleted: true, error: state.currentLogError.log.error};
+								} else {
+									return {...t, isCompleted: true}
+								}
+							}
+						} else {
+							return {...t, isCompleted: true}
+						}
+					});
 					return true;
 				}
 				return false;
@@ -219,7 +256,8 @@ export const connectionLogSlice = createSlice({
 export const {
 	cleanMethodTrace, cleanOperatorTrace, addSocketLog,
 	addTextLog, clearTextLog, clearSocketLog,
-	setIsTesting, setCurrentLog,
+	setIsTesting, setCurrentLog, copyLogContentToClipboard,
+	setCurrentLogError,
 } =
 	connectionLogSlice.actions;
 export default connectionLogSlice.reducer;

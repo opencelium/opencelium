@@ -235,6 +235,7 @@ class FormMode extends Component{
         entity.toConnector.setHeadersForMethods();
         //fieldBinding
         entity.fieldBinding = templateContent.fieldBinding;
+        entity.ui = templateContent.ui;
         entity.template.templateId = template.value;
         entity.template.label = template.label;
         updateEntity(entity, 'template');

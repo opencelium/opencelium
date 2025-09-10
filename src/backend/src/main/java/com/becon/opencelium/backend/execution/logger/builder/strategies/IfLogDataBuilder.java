@@ -10,6 +10,7 @@ import com.becon.opencelium.backend.execution.logger.enums.*;
 import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
 import com.becon.opencelium.backend.execution.logger.parser.entity.ParsedLogLine;
 import org.apache.juli.logging.Log;
+import org.bson.types.ObjectId;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -19,16 +20,16 @@ import static com.becon.opencelium.backend.execution.logger.keys.LogLineKey.DATA
 public class IfLogDataBuilder implements PhaseBuilder {
 
     @Override
-    public LogData build(PhaseContext phaseCtx, String execId, Long connId) {
+    public LogData build(PhaseContext phaseCtx, String execId, String flowId, Long connId) {
         ParsedLogLine parsed = phaseCtx.getParsedLogLine();
         PhaseCategory category = PhaseCategory.fromValue((PhaseType) parsed.getStage());
 
         // 1) Core LogData
         LogData logData = new LogData();
-        logData.setId(UUID.randomUUID().toString());
+        logData.setId(new ObjectId().toHexString());
         logData.setExecutionId(execId);
         logData.setConnectionId(connId);
-        logData.setFlowId(phaseCtx.getProperty(LogLineKey.FLOWCHART_ID));
+        logData.setFlowId(flowId);
         logData.setIndexPath(phaseCtx.getProperty(LogLineKey.INDEX_PATH));
         logData.setStatus(phaseCtx.getStatus());
         logData.setStartOffset(phaseCtx.getStartOffset());
@@ -43,7 +44,6 @@ public class IfLogDataBuilder implements PhaseBuilder {
 
         // 3) Build segments and errors
         SegmentAggregate agg = buildSegments(phaseCtx.getSegments());
-
         // 4) Assemble segment object
         Map<String, Object> segment = new LinkedHashMap<>();
         if (!agg.refs.isEmpty())    segment.put(LogLineKey.REF.getSrcName(), agg.refs);

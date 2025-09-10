@@ -9,6 +9,7 @@ import com.becon.opencelium.backend.execution.logger.dto.ErrorDetail;
 import com.becon.opencelium.backend.execution.logger.enums.*;
 import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
 import com.becon.opencelium.backend.execution.logger.parser.entity.ParsedLogLine;
+import org.bson.types.ObjectId;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -17,17 +18,17 @@ import static com.becon.opencelium.backend.execution.logger.keys.LogLineKey.DATA
 
 public class OperationLogDataBuilder implements PhaseBuilder {
 
-    public LogData build(PhaseContext phaseCtx, String execId, Long connId) {
+    public LogData build(PhaseContext phaseCtx, String execId, String flowId, Long connId) {
         ParsedLogLine parsed = phaseCtx.getParsedLogLine();
         PhaseCategory category = PhaseCategory.fromValue((PhaseType) parsed.getStage());
 
         // 1) Instantiate and populate core LogData fields
         LogData logData = new LogData();
-        logData.setId(UUID.randomUUID().toString());
+        logData.setId(new ObjectId().toHexString());
         logData.setExecutionId(execId);
         logData.setConnectionId(connId);
+        logData.setFlowId(flowId);
         logData.setConnectorName(phaseCtx.getProperty(LogLineKey.CONNECTOR_NAME));
-        logData.setFlowId(phaseCtx.getProperty(LogLineKey.FLOWCHART_ID));
         logData.setIndexPath(phaseCtx.getProperty(LogLineKey.INDEX_PATH));
         logData.setStatus(phaseCtx.getStatus());
         logData.setStartOffset(parsed.getStartOffset());

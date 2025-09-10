@@ -2,7 +2,6 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	cursor: pointer;
 }
 
 .type {
@@ -28,4 +27,11 @@
 	margin-top: 4px;
 	border-left: 1px dashed #aaa;
 	padding-left: 8px;
+}
+
+.iterator {
+	margin-left: -5px;
+	margin-top: 0px;
+	font-size: 14px;
+	align-content: flex-end;
 }
