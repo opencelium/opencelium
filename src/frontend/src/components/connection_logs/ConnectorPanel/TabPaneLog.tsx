@@ -3,11 +3,14 @@ import LimitedAceEditor from "@app_component/limited_ace_editor/LimitedAceEditor
 import styles from "@app_component/connection_logs/ConnectorPanel/TraceItem/MethodTrace/MethodTrace.module.css";
 import {TabPane} from "reactstrap";
 import {ITheme} from "@style/Theme";
-function detectAceMode(content: string): 'json' | 'xml' {
-    return content.trim().startsWith('<') ? 'xml' : 'json';
-}
+import {formatXML, isXML} from "@root/utils/utils";
+import {isJsonString} from "@application/utils/utils";
 const TabPaneLog = ({tabId, value, theme}: {tabId: string, value: any, theme: ITheme}) => {
-    const mode = value ? detectAceMode(value) : 'json';
+    const isXmlFormat = isXML(value);
+    const mode = value ? isXmlFormat ? 'xml' : isJsonString(value) ? 'json' : 'text' : 'text';
+    if (isXmlFormat) {
+        value = formatXML(value);
+    }
     return (
         <TabPane tabId={tabId} style={{
             overflow: 'auto',

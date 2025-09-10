@@ -124,18 +124,19 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 						hasError={hasError}
 					/>
 					</div>
-					<div
+					{trace?.segment?.request?.http_method && <div
 						style={{ backgroundColor: methodColor }}
 						className={styles.methodType}
 					>
 						{trace?.segment?.request?.http_method || ''}
 					</div>
+					}
 
 					{ShowIndexPath && (
 						<div style={{ marginLeft: 8 }}>{trace.indexPath}</div>
 					)}
 					<div className={styles.methodUrl} style={{color: hasError ? ColorTheme.Red : '#000'}}>
-						<span title={url} style={{textDecoration: 'underline'}}>{`${url}`}</span>
+						<span title={url} style={{textDecoration: 'underline'}}>{`${url || (properties?.name) || ''}`}</span>
 					</div>
 				</div>
 				<div
