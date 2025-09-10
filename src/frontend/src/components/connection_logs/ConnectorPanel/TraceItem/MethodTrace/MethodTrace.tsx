@@ -129,7 +129,8 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 						className={styles.methodType}
 					>
 						{trace?.segment?.request?.http_method || ''}
-					</div>}
+					</div>
+					}
 
 					{ShowIndexPath && (
 						<div style={{ marginLeft: 8 }}>{trace.indexPath}</div>
