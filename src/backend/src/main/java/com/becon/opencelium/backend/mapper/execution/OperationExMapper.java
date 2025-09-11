@@ -476,11 +476,19 @@ public class OperationExMapper {
     private SchemaDTO getSchemaFromObjectXML(LinkedList<String> hierarchy, Object value, Long connectionId, String methodName) {
         SchemaDTO schemaDTO = new SchemaDTO();
         DataType type = getType(value);
+
         if (value == null || type == null)
             return null;
-        if (type == DataType.OBJECT) {
+
+        if (type.isPrimitive()) {
+            // INTEGER, NUMBER, STRING, BOOLEAN
+
+            String stringVal = String.valueOf(value);
+            schemaDTO.setType(findTypeOfReference(stringVal, connectionId, methodName, hierarchy));
+            schemaDTO.setValue(stringVal);
+        } else if (type == DataType.OBJECT) {
             Map<String, Object> map = (Map<String, Object>) value;
-            if (map.size() == 2 && map.containsKey(OC_VALUE) && map.containsKey(OC_ATTRIBUTES)) {
+            if (map.size() == 2 && map.containsKey(OC_VALUE) && map.containsKey(OC_ATTRIBUTES) || map.size() == 1 && map.containsKey(OC_VALUE)) {
                 String strVal = String.valueOf(map.get(OC_VALUE));
                 schemaDTO.setValue(strVal);
                 if (map.get(OC_VALUE) instanceof Boolean) {
@@ -535,6 +543,10 @@ public class OperationExMapper {
             }
             XmlObjectDTO xod = new XmlObjectDTO();
             schemaDTO.setXml(xod);
+        } else {
+            // fallback to unhandled type, especially UNDEFINED
+
+            schemaDTO.setType(type);
         }
         hierarchy.removeLast();
         return schemaDTO;
