@@ -22,8 +22,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-import static org.apache.naming.SelectorContext.prefix;
-
 @Component
 public class OperationExMapper {
     private final InvokerService invokerService;
