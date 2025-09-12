@@ -22,6 +22,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
+import static org.apache.naming.SelectorContext.prefix;
+
 @Component
 public class OperationExMapper {
     private final InvokerService invokerService;
@@ -29,6 +31,10 @@ public class OperationExMapper {
     private final ConnectorService connectorService;
     private static final String REGEX_DEEP_OBJECT_IN_QUERY = ".+[\\[.+\\]]";
     private static final String REGEX_ARRAY_PARAMETER_IN_PATH = ".+[&|,\\s]+.*";
+    private static final MultipleXmlAttrsStrategy MULTIPLE_XML_ATTRS_STRATEGY = MultipleXmlAttrsStrategy.FAIL;
+    private static final String XMLNS_PREFIX = "xmlns:";
+    private static final String OC_VALUE = "__oc__value";
+    private static final String OC_ATTRIBUTES = "__oc__attributes";
 
     public OperationExMapper(
             @Qualifier("invokerServiceImp") InvokerService invokerService,
@@ -447,30 +453,45 @@ public class OperationExMapper {
         return schemaDTO;
     }
 
-    private static final String OC_VALUE = "__oc__value";
-    private static final String OC_ATTRIBUTES = "__oc__attributes";
-
-    private void setXML(SchemaDTO currSchema, Map<String, String> map) {
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-            if (entry.getKey().contains("xmlns:")) {
-                XmlObjectDTO xmlObjectDTO = new XmlObjectDTO();
-                String name = entry.getKey().split(":")[1];
-                xmlObjectDTO.setPrefix(name);
-                xmlObjectDTO.setNamespace(entry.getValue());
-                currSchema.setXml(xmlObjectDTO);
-            } else {
-                SchemaDTO schemaDTO = new SchemaDTO();
-                currSchema.getProperties().put(entry.getKey(), schemaDTO);
-                XmlObjectDTO xmlObjectDTO = new XmlObjectDTO();
-                xmlObjectDTO.setAttribute(true);
-                schemaDTO.setXml(xmlObjectDTO);
-                schemaDTO.setValue(entry.getValue());
-                xmlObjectDTO.setName(entry.getKey());
-            }
-        }
-        if (currSchema.getXml() == null) {
+    /**
+     * Resolves XML attributes from a map and sets the corresponding
+     * {@link XmlObjectDTO} in the provided {@link SchemaDTO}.
+     *
+     * <p>At most one attribute is supported, so if multiple attributes
+     * are present, resolution is delegated to {@link MultipleXmlAttrsStrategy}.</p>
+     *
+     * <p>If the attribute name starts with the configured {@code XMLNS_PREFIX},
+     * the prefix is stripped before being assigned to the {@link XmlObjectDTO}.</p>
+     *
+     * @param currSchema the schema object to update
+     * @param map        a map of attribute name → namespace value
+     */
+    private void setXmlAttributes(SchemaDTO currSchema, Map<String, String> map) {
+        if (map == null || map.isEmpty()) {
+            // No attributes provided → assign an empty XmlObjectDTO
             currSchema.setXml(new XmlObjectDTO());
+            return;
         }
+
+        // Determine which attribute name to use according to the configured strategy
+        String attrName = MultipleXmlAttrsStrategy.applyStrategy(map, MULTIPLE_XML_ATTRS_STRATEGY);
+
+        // Retrieve corresponding namespace value
+        String value = map.get(attrName);
+
+        // If attribute name starts with XMLNS prefix, strip it
+        int startIndexOfPrefix = attrName.indexOf(XMLNS_PREFIX);
+        if (startIndexOfPrefix != -1) {
+            attrName = attrName.substring(startIndexOfPrefix + XMLNS_PREFIX.length());
+        }
+
+        // Build XmlObjectDTO with resolved prefix + namespace
+        XmlObjectDTO xmlObjectDTO = new XmlObjectDTO();
+        xmlObjectDTO.setPrefix(attrName);
+        xmlObjectDTO.setNamespace(value);
+
+        // Attach it to the schema
+        currSchema.setXml(xmlObjectDTO);
     }
 
     private SchemaDTO getSchemaFromObjectXML(LinkedList<String> hierarchy, Object value, Long connectionId, String methodName) {
@@ -506,7 +527,7 @@ public class OperationExMapper {
                 if (attr != null && !attr.equals("")) {
                     Map<String, String> attrs = (Map<String, String>) attr;
                     schemaDTO.setProperties(new HashMap<>());
-                    setXML(schemaDTO, attrs);
+                    setXmlAttributes(schemaDTO, attrs);
                 } else {
                     schemaDTO.setXml(new XmlObjectDTO());
                 }
@@ -518,7 +539,7 @@ public class OperationExMapper {
                     if (entry.getKey().equals(OC_ATTRIBUTES)) {
                         if (entry.getValue() != null && !entry.getValue().equals("")) {
                             Map<String, String> attrs = (Map<String, String>) entry.getValue();
-                            setXML(schemaDTO, attrs);
+                            setXmlAttributes(schemaDTO, attrs);
                         } else {
                             schemaDTO.setXml(new XmlObjectDTO());
                         }
@@ -837,6 +858,51 @@ public class OperationExMapper {
 
         public void setFields(List<Node> fields) {
             this.fields = fields;
+        }
+    }
+
+    /**
+     * Defines strategies for handling multiple XML attributes
+     * within the special {@code __oc__attributes} element.
+     *
+     * <p>Since {@link SchemaDTO} currently supports only a single
+     * {@link XmlObjectDTO}, this strategy determines how to pick
+     * one attribute when multiple are provided.</p>
+     *
+     * <ul>
+     *   <li>{@link #ACCEPT_FIRST} – Accepts the first attribute encountered</li>
+     *   <li>{@link #ACCEPT_LAST} – Accepts the last attribute encountered</li>
+     *   <li>{@link #FAIL} – Throws an exception if multiple attributes exist</li>
+     * </ul>
+     */
+    private enum MultipleXmlAttrsStrategy {
+        ACCEPT_FIRST,
+        ACCEPT_LAST,
+        FAIL;
+
+        public static String applyStrategy(Map<String, String> attrs, MultipleXmlAttrsStrategy strategy) {
+            // If there is only one attribute, default to ACCEPT_FIRST (shortcut case).
+            if (attrs.size() == 1) {
+                strategy = ACCEPT_FIRST;
+            }
+
+            return switch (strategy) {
+                case ACCEPT_FIRST -> attrs.keySet()
+                        .stream()
+                        .findFirst()
+                        .orElse(null); // pick first available key
+
+                case ACCEPT_LAST -> attrs.keySet()
+                        .stream()
+                        .reduce((first, second) -> second) // reduce keeps last seen key
+                        .orElse(null);
+
+                case FAIL ->
+                    // Fail fast: multiple attributes not allowed in this mode
+                        throw new RuntimeException(
+                                "Multiple attributes are not allowed within %s".formatted(OC_ATTRIBUTES)
+                        );
+            };
         }
     }
 }
