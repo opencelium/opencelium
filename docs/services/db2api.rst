@@ -54,20 +54,15 @@ Testing with POSTMAN
 Get here the POSTMAN Collection for testing
 https://raw.githubusercontent.com/opencelium/db2api/refs/heads/main/conf/DB2API.postman_collection.json
 
-FAQ
-"""""""""""""""""
 
-**SQL Server does not support TLSv1 or TLSv1.0**
-Go to folder java/security and in file java.security find option jdk.tls.disabledAlgorithms and delete TLSv1
-
-.. |image0| image:: ../img/services/db2api/addDb2APIConnector.png
+.. |image0| image:: ../img/services/db2api/AddConnector.png
    :align: middle
 
 .. |image1| image:: ../img/services/db2api/DBQuery.png
    :align: middle
 
-.. |image2| image:: ../img/services/db2api/addTablenameAsEndpoint.png
+.. |image2| image:: ../img/services/db2api/RequestBody.png
    :align: middle
 
-.. |image3| image:: ../img/services/db2api/insomniaOutput.png
+.. |image3| image:: ../img/services/db2api/POSTMAN.png
    :align: middle
