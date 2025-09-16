@@ -49,6 +49,7 @@ import com.github.fge.jsonpatch.JsonPatch;
 import jakarta.persistence.EntityNotFoundException;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -218,6 +219,9 @@ public class ConnectionServiceImp implements ConnectionService {
         }
         List<FieldBindingMng> fieldBindingsToDelete = getEnhancementsToDelete(oldMng, connectionMng);
         fieldBindingsToDelete.forEach(f -> enhancementService.deleteById(f.getEnhancementId()));
+
+        // there is not ocVersion field on ConnectionOldDTO, set connection's version with current system version
+        connection.setOcVersion(ocProps.getVersion());
 
         Connection savedConnection = connectionRepository.save(connection);
         if (enhancements != null && !enhancements.isEmpty()) {
