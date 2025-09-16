@@ -96,6 +96,9 @@ Download and unzip application, and create a link for it.
         ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
         chmod +x /usr/bin/oc
 
+.. note::
+	| If any package is not available on Packagecloud, please contact our support team at support@opencelium.io.
+
 
 Configuration
 ==================
