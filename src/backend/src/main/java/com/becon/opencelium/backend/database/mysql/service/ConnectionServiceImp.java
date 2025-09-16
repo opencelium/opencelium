@@ -39,6 +39,7 @@ import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
 import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
+import com.becon.opencelium.backend.utility.LogFileUtility;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.becon.opencelium.backend.version_manager.EntityUpdater;
 import com.becon.opencelium.backend.version_manager.EntityVersionManager;
@@ -571,6 +572,11 @@ public class ConnectionServiceImp implements ConnectionService {
             }
         }
         connectionRepository.updateVersion(ocProps.getVersion());
+    }
+
+    @Override
+    public List<String> getLogFileNameListById(long connectionId) {
+        return LogFileUtility.getLogFileNameList(connectionId);
     }
 
     // --------------------------------------------------------------------------------------------------------------------------------------------------------

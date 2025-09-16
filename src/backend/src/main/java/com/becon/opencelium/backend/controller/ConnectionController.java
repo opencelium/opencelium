@@ -36,6 +36,7 @@ import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.ApiDataResource;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
+import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;
 import com.becon.opencelium.backend.resource.connection.MethodDTO;
@@ -823,5 +824,23 @@ public class ConnectionController {
         schedulerService.startNow(scheduler, rules);
 
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Retrieves list of log names for connection")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Log names for a connection has been successfully retrieved",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConnectionResource.class)))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping(path = "/{connectionId}/log-files")
+    public ResponseEntity<ResultDTO<List<String>>> getLogFileNameList(@PathVariable long connectionId) {
+        ResultDTO<List<String>> logFileNames = new ResultDTO<>(connectionService.getLogFileNameListById(connectionId));
+        return ResponseEntity.ok(logFileNames);
     }
 }

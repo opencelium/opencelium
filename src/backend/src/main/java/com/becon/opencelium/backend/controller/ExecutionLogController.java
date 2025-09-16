@@ -46,6 +46,19 @@ public class ExecutionLogController {
         return ResponseEntity.ok(logMetaDataService.getChildrenById(elementId, loopIndex));
     }
 
+    @Operation(summary = "Returns children elements metadata of the specified element by log file name")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Success",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = LogDataDTO.class))))
+    })
+    @GetMapping("/logs/children")
+    public ResponseEntity<List<LogDataDTO>> getChildrenByLogFile( @RequestParam String fileName ) {
+        String elementId = LogFileUtility.extractExecutionId(fileName);
+        // service resolves elementId from file, validates, then returns children
+        return ResponseEntity.ok(logMetaDataService.getChildrenById(elementId, ""));
+    }
+
     @Operation(summary = "Returns a single element with detailed data like refs, data, request and responses")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",

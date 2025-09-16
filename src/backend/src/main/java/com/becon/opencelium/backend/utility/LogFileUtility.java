@@ -17,6 +17,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.becon.opencelium.backend.execution.logger.OcLogger.LOG_LOCATION;
@@ -121,6 +122,25 @@ public class LogFileUtility {
         }
     }
 
+    public static List<String> getLogFileNameList(Long connectionId) {
+        Path logFolder = toPath(LOG_LOCATION + "/" + connectionId);
+        String expectedSuffix = ".log";
+
+        try (Stream<Path> stream = Files.list(logFolder)) {
+            return stream
+                    .map(path -> path.getFileName().toString())
+                    .filter(name -> name.matches(LOG_FILE_NAME_RGX) && name.endsWith(expectedSuffix))
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            log.error("Error while reading log files from folder: {}", logFolder, e);
+            throw new GeneralServiceException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    ExceptionConstant.INTERNAL_ERROR,
+                    ExceptionMessages.UNKNOWN_ERROR
+            );
+        }
+    }
+
     private static FileDescriptor readFile(Path path) {
         try (InputStream in = new FileInputStream(path.toFile())) {
             return FileDescriptor.of(
@@ -146,5 +166,16 @@ public class LogFileUtility {
         } catch (Exception e) {
             return LocalDateTime.MIN;
         }
+    }
+
+    public static String extractExecutionId(String fileName) {
+        if (fileName == null || !fileName.endsWith(".log")) {
+            throw new IllegalArgumentException("Invalid log file name: " + fileName);
+        }
+
+        // Remove the ".log" extension
+        String withoutExt = fileName.substring(0, fileName.length() - 4);
+        String[] parts = withoutExt.split("_");
+        return parts[parts.length - 1];
     }
 }
