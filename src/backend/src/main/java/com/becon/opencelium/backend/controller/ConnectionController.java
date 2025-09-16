@@ -335,20 +335,6 @@ public class ConnectionController {
         return ResponseEntity.ok(schedulerResource);
     }
 
-    @Operation(summary = "Retrieves a log file with given executionId")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved", content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE))
-    })
-    @GetMapping("/execution/{executionId}")
-    public ResponseEntity<byte[]> getExecutionLogs(@PathVariable Long executionId) {
-
-        FileDescriptor logFile = LogFileUtility.getLogFile(executionId);
-
-        return ResponseEntity.ok()
-                .headers(logFile.buildHeaders())
-                .body(logFile.getData());
-    }
-
     @Operation(summary = "Deletes a connection by provided connection ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204",

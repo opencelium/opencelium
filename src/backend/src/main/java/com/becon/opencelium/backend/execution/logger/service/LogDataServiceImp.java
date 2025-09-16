@@ -26,8 +26,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import static com.becon.opencelium.backend.execution.logger.enums.PhaseCategory.FLOWCHART;
-import static com.becon.opencelium.backend.execution.logger.enums.PhaseCategory.OPERATION;
+import static com.becon.opencelium.backend.execution.logger.enums.PhaseCategory.*;
 
 /**
  * LogMetaDataServiceImp handles persistence and enrichment of parsed execution blocks (e.g. IF, LOOP, METHOD).
@@ -61,7 +60,8 @@ public class LogDataServiceImp implements LogDataService {
 
     @Override
     public List<LogDataDTO> getChildrenById(String elementId, String loopIndex) {
-        LogDataMng entity = findByIdElseThrow(elementId);
+        String id = findElementId(elementId);
+        LogDataMng entity = findByIdElseThrow(id);
 
         List<LogDataMng> children = switch (entity.getType()) {
             case EXECUTION -> executionChildren(entity);
@@ -74,6 +74,14 @@ public class LogDataServiceImp implements LogDataService {
         return children.stream()
                 .map(logDataMapper::toDto)
                 .toList();
+    }
+
+    // sometime user can send id of execution of flowchart in such cases we have to find elementId.
+    private String findElementId(String elementId) {
+        return metaDataLogRepository.findByExecutionIdAndType(elementId, EXECUTION.name())
+                .or(() -> metaDataLogRepository.findByFlowIdAndType(elementId, FLOWCHART.name()))
+                .map(LogDataMng::getId)
+                .orElse(elementId);
     }
 
     @Override
@@ -243,6 +251,8 @@ public class LogDataServiceImp implements LogDataService {
 
     private LogDataMng findByIdElseThrow(String phaseId) {
         return metaDataLogRepository.findById(phaseId)
+                .or(() -> metaDataLogRepository.findByExecutionIdAndType(phaseId, EXECUTION.name()))
+                .or(() -> metaDataLogRepository.findByFlowIdAndType(phaseId, FLOWCHART.name()))
                 .orElseThrow(() -> new RuntimeException("LogData element not found with specified id = " + phaseId));
     }
 

@@ -63,4 +63,7 @@ public interface MetaDataLogRepository extends MongoRepository<LogDataMng, Strin
             String regex,
             Sort sort
     );
+
+    Optional<LogDataMng> findByExecutionIdAndType(String executionId, String type);
+    Optional<LogDataMng> findByFlowIdAndType(String executionId, String type);
 }
