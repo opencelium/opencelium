@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.execution.logger.mapper;
 
-import com.becon.opencelium.backend.database.mongodb.entity.LogData;
+import com.becon.opencelium.backend.database.mongodb.entity.LogDataMng;
 import com.becon.opencelium.backend.database.mongodb.entity.LogDataError;
 import com.becon.opencelium.backend.execution.logger.dto.ErrorInfoDTO;
 import com.becon.opencelium.backend.execution.logger.dto.LogDataDTO;
@@ -18,7 +18,7 @@ public class LogDataMapper {
     /**
      * Map a LogData entity to its DTO.
      */
-    public LogDataDTO toDto(LogData src) {
+    public LogDataDTO toDto(LogDataMng src) {
         LogDataDTO dto = new LogDataDTO();
 
         dto.setId(src.getId());
@@ -54,7 +54,7 @@ public class LogDataMapper {
     /**
      * Convenience for Optional<LogData> → Optional<LogDataDTO>
      */
-    public Optional<LogDataDTO> toDto(Optional<LogData> logData) {
+    public Optional<LogDataDTO> toDto(Optional<LogDataMng> logData) {
         return logData.map(this::toDto);
     }
 

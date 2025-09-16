@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.database.mongodb.repository;
 
-import com.becon.opencelium.backend.database.mongodb.entity.LogData;
+import com.becon.opencelium.backend.database.mongodb.entity.LogDataMng;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
@@ -8,8 +8,8 @@ import org.springframework.data.mongodb.repository.Query;
 import java.util.List;
 import java.util.Optional;
 
-public interface MetaDataLogRepository extends MongoRepository<LogData, String> {
-    Optional<LogData> findByConnectionIdAndExecutionIdAndFlowIdAndIndexPath(
+public interface MetaDataLogRepository extends MongoRepository<LogDataMng, String> {
+    Optional<LogDataMng> findByConnectionIdAndExecutionIdAndFlowIdAndIndexPath(
             Long connectionId, String executionId, String flowchartId, String indexPath
     );
 
@@ -22,7 +22,7 @@ public interface MetaDataLogRepository extends MongoRepository<LogData, String> 
             'properties.loopIndex': ?4
         }
     """)
-    Optional<LogData> findByExecutionConnectionFlowIdIndexPathAndLoopIndex(
+    Optional<LogDataMng> findByExecutionConnectionFlowIdIndexPathAndLoopIndex(
             Long connectionId,
             String executionId,
             String flowId,
@@ -36,7 +36,7 @@ public interface MetaDataLogRepository extends MongoRepository<LogData, String> 
             'type': ?1
         }
     """)
-    List<LogData> findChildren(String executionId, String type, Sort sort);
+    List<LogDataMng> findChildren(String executionId, String type, Sort sort);
 
     @Query("""
         {
@@ -45,7 +45,7 @@ public interface MetaDataLogRepository extends MongoRepository<LogData, String> 
             'indexPath': { $regex: ?2 }
         }
     """)
-    List<LogData> findChildren(String executionId, String flowId, String regex, Sort sort);
+    List<LogDataMng> findChildren(String executionId, String flowId, String regex, Sort sort);
 
     @Query("""
         {
@@ -55,9 +55,9 @@ public interface MetaDataLogRepository extends MongoRepository<LogData, String> 
             'properties.loopIndex': ?3
         }
     """)
-    List<LogData> findChildren(String executionId, String flowId, String regex, String loopIndex, Sort sort);
+    List<LogDataMng> findChildren(String executionId, String flowId, String regex, String loopIndex, Sort sort);
 
-    Optional<LogData> findFirstByExecutionIdAndFlowIdAndIndexPathRegex(
+    Optional<LogDataMng> findFirstByExecutionIdAndFlowIdAndIndexPathRegex(
             String executionId,
             String flowId,
             String regex,

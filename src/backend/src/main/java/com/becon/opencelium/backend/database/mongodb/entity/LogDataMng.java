@@ -13,9 +13,9 @@ import java.util.Map;
 
 @Document(collection = "log_data")
 @CompoundIndex(name = "exec_connection_flowchart_indexPath_idx",
-        def = "{'executionId': 1, 'connectionId': 1, 'flowchartId': 1, 'indexPath': 1}",
+        def = "{'executionId': 1, 'connectionId': 1, 'flowId': 1, 'indexPath': 1}",
         unique = true)
-public class LogData {
+public class LogDataMng {
     @Id
     private String id;
 

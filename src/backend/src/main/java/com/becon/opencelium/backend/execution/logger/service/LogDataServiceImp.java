@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.execution.logger.service;
 
-import com.becon.opencelium.backend.database.mongodb.entity.LogData;
+import com.becon.opencelium.backend.database.mongodb.entity.LogDataMng;
 import com.becon.opencelium.backend.database.mongodb.repository.MetaDataLogRepository;
 import com.becon.opencelium.backend.execution.logger.dto.LogDataDTO;
 import com.becon.opencelium.backend.execution.logger.enums.LogDetailLevel;
@@ -13,7 +13,6 @@ import com.becon.opencelium.backend.execution.logger.parser.ParsedLogLineBuilder
 import com.becon.opencelium.backend.execution.logger.parser.entity.ParsedLogLine;
 import com.becon.opencelium.backend.execution.logger.tracker.ExecutionTracker;
 import com.becon.opencelium.backend.execution.logger.tracker.ExecutionTrackerImpl;
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -62,9 +61,9 @@ public class LogDataServiceImp implements LogDataService {
 
     @Override
     public List<LogDataDTO> getChildrenById(String elementId, String loopIndex) {
-        LogData entity = findByIdElseThrow(elementId);
+        LogDataMng entity = findByIdElseThrow(elementId);
 
-        List<LogData> children = switch (entity.getType()) {
+        List<LogDataMng> children = switch (entity.getType()) {
             case EXECUTION -> executionChildren(entity);
             case FLOWCHART -> flowchartChildren(entity);
             case IF -> ifChildren(entity);
@@ -79,7 +78,7 @@ public class LogDataServiceImp implements LogDataService {
 
     @Override
     public LogDataDTO getDetailsById(String elementId) {
-        LogData entity = findByIdElseThrow(elementId);
+        LogDataMng entity = findByIdElseThrow(elementId);
 
         PhaseCategory type = entity.getType();
 
@@ -100,10 +99,10 @@ public class LogDataServiceImp implements LogDataService {
             String safeParent = Pattern.quote(indexPath);
             String regex = "^" + safeParent + "_[0-9]+(_[0-9]+)*$"; // filters all-level children
 
-            Optional<LogData> firstChild = metaDataLogRepository.findFirstByExecutionIdAndFlowIdAndIndexPathRegex(
+            Optional<LogDataMng> firstChild = metaDataLogRepository.findFirstByExecutionIdAndFlowIdAndIndexPathRegex(
                     executionId, flowchartId, regex, SORT_ASCENDING
             );
-            Optional<LogData> lastChild = metaDataLogRepository.findFirstByExecutionIdAndFlowIdAndIndexPathRegex(
+            Optional<LogDataMng> lastChild = metaDataLogRepository.findFirstByExecutionIdAndFlowIdAndIndexPathRegex(
                     executionId, flowchartId, regex, SORT_DESCENDING
             );
             if (firstChild.isPresent() && lastChild.isPresent()) {
@@ -117,7 +116,7 @@ public class LogDataServiceImp implements LogDataService {
             }
         }
 
-        LogData collected = collect(lines, executionId, connectionId, flowchartId);
+        LogDataMng collected = collect(lines, executionId, connectionId, flowchartId);
 
         // populate additional fields from 'entity'
         collected.setId(entity.getId());
@@ -140,7 +139,7 @@ public class LogDataServiceImp implements LogDataService {
      * @param block the parsed block metadata to store
      */
     @Override
-    public void saveNewBlock(LogData block) {
+    public void saveNewBlock(LogDataMng block) {
         block.setCreatedAt(Instant.now());
         metaDataLogRepository.save(block);
     }
@@ -153,8 +152,8 @@ public class LogDataServiceImp implements LogDataService {
      * @param block the END block (only startOffset contains the correct ending offset)
      */
     @Override
-    public void updateExistingBlock(LogData block) {
-        Optional<LogData> existing = findExistingBlock(block);
+    public void updateExistingBlock(LogDataMng block) {
+        Optional<LogDataMng> existing = findExistingBlock(block);
         if (existing.isEmpty()) {
             // fallback: either log, throw, or insert as new
             block.setCreatedAt(Instant.now());
@@ -162,14 +161,14 @@ public class LogDataServiceImp implements LogDataService {
             return;
         }
         block.setId(existing.get().getId());
-        LogData dbBlock = existing.get();
+        LogDataMng dbBlock = existing.get();
         dbBlock.setEndOffset(block.getEndOffset());
         dbBlock.setStatus(block.getStatus());
         metaDataLogRepository.save(dbBlock);
     }
 
     @Override
-    public void save(LogData block) {
+    public void save(LogDataMng block) {
         switch (block.getStatus()) {
             case PENDING -> saveNewBlock(block);
             case COMPLETE, FAIL -> updateExistingBlock(block);
@@ -180,8 +179,8 @@ public class LogDataServiceImp implements LogDataService {
     }
 
     @Override
-    public Optional<LogDataDTO> toDto(LogData logData) {
-        return Optional.of(logDataMapper.toDto(logData));
+    public Optional<LogDataDTO> toDto(LogDataMng logDataMng) {
+        return Optional.of(logDataMapper.toDto(logDataMng));
     }
 
     /**
@@ -195,9 +194,9 @@ public class LogDataServiceImp implements LogDataService {
      * @return the enriched document ready to persist
      */
     @Override
-    public LogData fromParsedLogLine(ParsedLogLine line, String executionId,
-                                     Long connectionId, String flowchartId) {
-        LogData doc = new LogData();
+    public LogDataMng fromParsedLogLine(ParsedLogLine line, String executionId,
+                                        Long connectionId, String flowchartId) {
+        LogDataMng doc = new LogDataMng();
 
         doc.setExecutionId(executionId);
         doc.setConnectionId(connectionId);
@@ -224,7 +223,7 @@ public class LogDataServiceImp implements LogDataService {
     }
 
     // --------------------------------------- Private Functions ----------------------------------------------
-    private Optional<LogData> findExistingBlock(LogData block) {
+    private Optional<LogDataMng> findExistingBlock(LogDataMng block) {
         if (block.getProperties().containsKey(LogLineKey.LOOP_INDEX.getSrcName())) {
             return metaDataLogRepository.findByExecutionConnectionFlowIdIndexPathAndLoopIndex(
                     block.getConnectionId(),
@@ -242,16 +241,16 @@ public class LogDataServiceImp implements LogDataService {
         );
     }
 
-    private LogData findByIdElseThrow(String phaseId) {
+    private LogDataMng findByIdElseThrow(String phaseId) {
         return metaDataLogRepository.findById(phaseId)
                 .orElseThrow(() -> new RuntimeException("LogData element not found with specified id = " + phaseId));
     }
 
-    private LogData collect(List<String> lines, String executionId, Long connectionId,String flowchartId) {
+    private LogDataMng collect(List<String> lines, String executionId, Long connectionId, String flowchartId) {
         ExecutionTracker tracker = new ExecutionTrackerImpl(executionId, connectionId.toString(), flowchartId, LogDetailLevel.DETAILED);
 
         ParsedLogLine parsed;
-        Optional<LogData> result = Optional.empty();
+        Optional<LogDataMng> result = Optional.empty();
         for (String line : lines) {
             parsed = parsedLogLineBuilder.build(line);
             result = tracker.buildLogData(parsed);
@@ -259,16 +258,16 @@ public class LogDataServiceImp implements LogDataService {
             if (result.isPresent()) break;
         }
 
-        return result.orElseGet(LogData::new);
+        return result.orElseGet(LogDataMng::new);
     }
 
-    private List<LogData> executionChildren(LogData entity) {
+    private List<LogDataMng> executionChildren(LogDataMng entity) {
         String executionId = entity.getExecutionId();
 
         return metaDataLogRepository.findChildren(executionId, FLOWCHART.name(), SORT_ASCENDING);
     }
 
-    private List<LogData> flowchartChildren(LogData entity) {
+    private List<LogDataMng> flowchartChildren(LogDataMng entity) {
         String executionId = entity.getExecutionId();
         String flowchartId = entity.getFlowId();
         String regex = "^[0-9]+$"; // filters only numbers (first level children)
@@ -276,7 +275,7 @@ public class LogDataServiceImp implements LogDataService {
         return metaDataLogRepository.findChildren(executionId, flowchartId, regex, SORT_ASCENDING);
     }
 
-    private List<LogData> ifChildren(LogData entity) {
+    private List<LogDataMng> ifChildren(LogDataMng entity) {
         String executionId = entity.getExecutionId();
         String flowchartId = entity.getFlowId();
         String indexPath = entity.getIndexPath();
@@ -291,7 +290,7 @@ public class LogDataServiceImp implements LogDataService {
         }
     }
 
-    private List<LogData> loopChildren(LogData entity, String loopIndex) { // default loopIndex = 0
+    private List<LogDataMng> loopChildren(LogDataMng entity, String loopIndex) { // default loopIndex = 0
         String executionId = entity.getExecutionId();
         String flowchartId = entity.getFlowId();
         String indexPath = entity.getIndexPath();

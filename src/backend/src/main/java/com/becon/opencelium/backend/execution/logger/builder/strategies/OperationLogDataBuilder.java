@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.execution.logger.builder.strategies;
 
-import com.becon.opencelium.backend.database.mongodb.entity.LogData;
+import com.becon.opencelium.backend.database.mongodb.entity.LogDataMng;
 import com.becon.opencelium.backend.database.mongodb.entity.LogDataError;
 import com.becon.opencelium.backend.execution.logger.builder.PhaseBuilder;
 import com.becon.opencelium.backend.execution.logger.context.PhaseContext;
@@ -18,26 +18,26 @@ import static com.becon.opencelium.backend.execution.logger.keys.LogLineKey.DATA
 
 public class OperationLogDataBuilder implements PhaseBuilder {
 
-    public LogData build(PhaseContext phaseCtx, String execId, String flowId, Long connId) {
+    public LogDataMng build(PhaseContext phaseCtx, String execId, String flowId, Long connId) {
         ParsedLogLine parsed = phaseCtx.getParsedLogLine();
         PhaseCategory category = PhaseCategory.fromValue((PhaseType) parsed.getStage());
 
         // 1) Instantiate and populate core LogData fields
-        LogData logData = new LogData();
-        logData.setId(new ObjectId().toHexString());
-        logData.setExecutionId(execId);
-        logData.setConnectionId(connId);
-        logData.setFlowId(flowId);
-        logData.setIndexPath(phaseCtx.getProperty(LogLineKey.INDEX_PATH));
-        logData.setStatus(phaseCtx.getStatus());
-        logData.setStartOffset(parsed.getStartOffset());
-        logData.setEndOffset(phaseCtx.getEndOffset());
-        logData.setLogLineType(LogLineType.PHASE);
-        logData.setType(category);
+        LogDataMng logDataMng = new LogDataMng();
+        logDataMng.setId(new ObjectId().toHexString());
+        logDataMng.setExecutionId(execId);
+        logDataMng.setConnectionId(connId);
+        logDataMng.setFlowId(flowId);
+        logDataMng.setIndexPath(phaseCtx.getProperty(LogLineKey.INDEX_PATH));
+        logDataMng.setStatus(phaseCtx.getStatus());
+        logDataMng.setStartOffset(parsed.getStartOffset());
+        logDataMng.setEndOffset(phaseCtx.getEndOffset());
+        logDataMng.setLogLineType(LogLineType.PHASE);
+        logDataMng.setType(category);
 
         // 2) Extract flat properties
         Map<String, Object> flatProps = extractFlatProperties(phaseCtx.getProperties());
-        logData.setProperties(flatProps);
+        logDataMng.setProperties(flatProps);
 
         // 3) Build request/response/error maps
         SegmentAggregate agg = buildSegments(phaseCtx.getSegments());
@@ -46,14 +46,14 @@ public class OperationLogDataBuilder implements PhaseBuilder {
         Map<String, Object> segment = new LinkedHashMap<>();
         if (!agg.request.isEmpty())  segment.put("request",  agg.request);
         if (!agg.response.isEmpty()) segment.put("response", agg.response);
-        logData.setSegments(segment);
+        logDataMng.setSegments(segment);
 
         // 5) If we saw an exception, attach error details
         ErrorDetail errorDetail = phaseCtx.getErrorDetail();
         if (phaseCtx.getErrorDetail() != null) {
-            logData.setError(mapCtxError(errorDetail));
+            logDataMng.setError(mapCtxError(errorDetail));
         }
-        return logData;
+        return logDataMng;
     }
 
     private LogDataError mapCtxError(ErrorDetail errorDetail) {
