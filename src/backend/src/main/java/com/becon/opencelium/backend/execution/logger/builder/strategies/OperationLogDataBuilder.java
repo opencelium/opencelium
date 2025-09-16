@@ -28,7 +28,6 @@ public class OperationLogDataBuilder implements PhaseBuilder {
         logData.setExecutionId(execId);
         logData.setConnectionId(connId);
         logData.setFlowId(flowId);
-        logData.setConnectorName(phaseCtx.getProperty(LogLineKey.CONNECTOR_NAME));
         logData.setIndexPath(phaseCtx.getProperty(LogLineKey.INDEX_PATH));
         logData.setStatus(phaseCtx.getStatus());
         logData.setStartOffset(parsed.getStartOffset());

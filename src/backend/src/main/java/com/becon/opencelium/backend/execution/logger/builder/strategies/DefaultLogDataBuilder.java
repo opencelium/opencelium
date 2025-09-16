@@ -24,6 +24,7 @@ public class DefaultLogDataBuilder implements PhaseBuilder {
         logData.setExecutionId(execId);
         logData.setConnectionId(connId);
         logData.setFlowId(flowId);
+        logData.setConnectorName(context.getProperty(LogLineKey.CONNECTOR_NAME));
         logData.setFlowId(context.getProperties().get(LogLineKey.FLOWCHART_ID));
         logData.setStatus(context.getStatus());
         logData.setIndexPath(context.getProperties().get(LogLineKey.INDEX_PATH));
