@@ -22,6 +22,7 @@ import {
 import { syncInvokers } from "@entity/connection/redux_toolkit/slices/EditorSlice";
 import { requestRemoteApi } from "@entity/connection/redux_toolkit/action_creators/EditorCreators";
 import {notifyAboutNewSupportFile} from "@root/redux_toolkit/slices/SupportFileSlice";
+import {copyLogContentToClipboard} from "@root/redux_toolkit/slices/ConnectionLogSlice";
 
 const {
     testConnection, addConnection,
@@ -35,6 +36,7 @@ const {
 
 export default {
     fulfilled: {
+        [copyLogContentToClipboard.type]: "The log info was copied.",
         [deleteSupportFile.fulfilled.type]: "The support file was successfully deleted.",
         [deleteSupportFiles.fulfilled.type]: "The support files were successfully deleted.",
         [downloadSupportFile.fulfilled.type]: "The support files was successfully downloaded.",
@@ -67,7 +69,8 @@ export default {
             "__DEFAULT__": "Could not start generation of the support file."
         },
         [testConnection.rejected.type]: {
-            "__DEFAULT__": "There is an error in during the test of the connection"
+            "__DEFAULT__": "There is an error in during the test of the connection",
+            "Concurrent test executions for the same connection": "The test is already running for this connection."
         },
         [checkConnectionTitle.rejected.type]: {
             "__DEFAULT__": "There is an error in checking uniqueness of the title."

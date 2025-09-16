@@ -48,6 +48,7 @@ import {MetaConnectionModel} from "@root/requests/models/Connection";
 export const LogPanelHeight = {
   Medium: 270,
   High: 350,
+  Full: 'calc(100% - 28px)',
 };
 
 export interface ConnectionState extends ICommonState {
@@ -99,7 +100,7 @@ export interface ConnectionState extends ICommonState {
   currentLogs: ConnectionLogProps[];
   logMessages: any[],
   isTestingConnection: boolean;
-  logPanelHeight: number;
+  logPanelHeight: number | string;
   isDetailsOpened: boolean;
   justCreatedItem: { index: string; connectorType: string };
   justDeletedItem: { index: string; connectorType: string };

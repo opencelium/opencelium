@@ -51,7 +51,7 @@
       "LOG_MESSAGE": "You can restore (see <0>{{restoreLinkText}}</0>) the old system in any time if an error occurs.",
       "RESTORE_LINK_TEXT": "docs",
       "HINT": "Hint",
-      "CLEAR_CACHE": "Don't forget to clear browser cache (especially the javascript cache)."
+      "CLEAR_CACHE": "Please, note that this update also overwrites the configuration of the web server and don't forget to clear browser cache (especially the javascript cache)."
     },
     "VALIDATION_MESSAGES": {
       "NO_UPDATE_MODE": "Please, select how do you want to update",

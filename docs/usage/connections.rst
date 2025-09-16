@@ -89,6 +89,66 @@ You can create a new aggregator pressing on the button |image31|.
 In the *Details* panel you can see *Endpoint* and *Body* under the **Request** paragraph
 that could be modified clicking on their placeholders.
 
+Operators
+"""""""""""""""""
+Since version 4.5, the use of operators has been significantly simplified. Instead of
+inserting several operators with individual conditions one after the other into the
+connection, it is now sufficient to add one operator. An operator can now contain several
+conditions, which can be linked with AND or OR as desired. In addition, multiple groups
+with different conditions can be mapped to enable complex queries.
+
+Adding an operator
+==================
+
+If you are creating a completely new connection and no methods or operators are included
+yet, you can simply click on the empty area labeled “Click here to create...” in the connection
+editor to display the context menu for adding a method or operator.
+
+|image_operators_1|
+
+|image_operators_2|
+
+If methods or operators are already included, move the mouse over the method or operator to
+which you want to add a new method or operator. Corresponding symbols representing a new method
+or operator will then be displayed. Click on the desired symbol.
+
+|image_operators_3|
+
+|image_operators_4|
+
+In the context menu, select whether it should be a loop or an IF operator. Confirm your
+selection by clicking on the plus sign. A new operator is added to the connection.
+
+|image_operators_5|
+
+Defining the conditions of an If operator
+=========================================
+
+To edit the conditions of an operator, double-click on the operator to open the advanced
+operator view. 
+
+|image_operators_6|
+
+Alternatively, you can select the operator and click on the edit button for
+the conditions in the Details window.
+
+|image_operators_7|
+
+Move the mouse over the yellow area and select “Add Condition” or “Add Group.”
+
+|image_operators_8| or |image_operators_9|
+
+By adding one or more conditions and groups, which can be linked with AND or OR, it is
+possible to create very complex queries.
+
+|image_operators_10|
+
+|image_operators_11|
+
+Once you have defined all conditions, click on the “Save” button to save the operator's
+conditions and return to the connection editor.
+
+|image_operators_12|
 
 Action Panel
 """""""""""""""""
@@ -377,6 +437,7 @@ Response:
 Pagination:
 
 .. code-block:: xml
+
         <pagination>
             <limit>5</limit>
             <result ref="response.body.$.items" action="collect"/>
@@ -413,6 +474,40 @@ Response:
         </body>
 
 
+.. |image_operators_1| image:: ../img/connection/OC_operators_empty_connection.png
+   :align: middle
+   :width: 600
+.. |image_operators_2| image:: ../img/connection/OC_operators_add_if_empty_connection.png
+   :align: middle
+   :width: 600
+.. |image_operators_3| image:: ../img/connection/OC_operators_add_if_hover.png
+   :align: middle
+   :width: 600
+.. |image_operators_4| image:: ../img/connection/OC_operators_add_if_context.png
+   :align: middle
+   :width: 600
+.. |image_operators_5| image:: ../img/connection/OC_operators_if_added.png
+   :align: middle
+   :width: 600
+.. |image_operators_6| image:: ../img/connection/OC_operators_empty_conditions.png
+   :align: middle
+   :width: 600
+.. |image_operators_7| image:: ../img/connection/OC_operators_edit_conditions.png
+   :align: middle
+   :width: 200
+.. |image_operators_8| image:: ../img/connection/OC_operators_btn_add_condition.png
+   :height: 30
+.. |image_operators_9| image:: ../img/connection/OC_operators_btn_add_group.png
+   :height: 30
+.. |image_operators_10| image:: ../img/connection/OC_operators_single_condition.png
+   :align: middle
+   :width: 600
+.. |image_operators_11| image:: ../img/connection/OC_operators_multiple_conditions.png
+   :align: middle
+   :width: 600
+.. |image_operators_12| image:: ../img/connection/OC_operators_btn_save.png
+   :align: middle
+   :height: 30   
 
 .. |image0| image:: ../img/connection/0.png
    :align: middle

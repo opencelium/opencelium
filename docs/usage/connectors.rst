@@ -55,6 +55,48 @@ to the list pressing on the *cancel* button.
 
 |image5|
 
+Master Password
+"""""""""""""""""
+
+The *Master Password* is a function for protecting the credentials of a connector.
+Normally, the information for authentication to an API is stored in the respective
+connection and can be viewed.
+
+To protect this sensitive data, it is possible to activate the master password. This
+means that the credentials are only visible once the corresponding password has been
+entered.
+
+|image_master_password_1|
+
+To activate the function, you must make an entry in the *application.yml* and set
+the desired password. 
+
+Open the *application.yml* that can be found under the following path:
+
+.. code-block::
+
+   /opt/opencelium/src/backend/src/main/resources/application.yml
+
+Add the following entry underneath *opencelium*
+
+.. code-block::
+
+   opencelium:
+      [...]
+      connector:
+         master-password {YOURPASSWORD}
+ 
+Save the file and restart the backend.
+
+After restarting and logging in again, the function is active. Enter the password you
+have set. After confirmation, the credentials are displayed.
+
+|image_master_password_2|
+
+.. note::
+   If the master password has been entered, the credentials of all connectors are displayed
+   until the browser is closed again.
+
 
 .. |image0| image:: ../img/connector/0.png
    :align: middle
@@ -68,5 +110,11 @@ to the list pressing on the *cancel* button.
 .. |image5| image:: ../img/connector/5.png
    :align: middle
 .. |image6| image:: ../img/connector/6.png
+   :align: middle
+   :width: 400
+.. |image_master_password_1| image:: ../img/connector/OC_master_password_1.png
+   :align: middle
+   :width: 400
+.. |image_master_password_2| image:: ../img/connector/OC_master_password_2.png
    :align: middle
    :width: 400
