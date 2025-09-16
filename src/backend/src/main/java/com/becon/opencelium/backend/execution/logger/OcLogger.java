@@ -122,11 +122,9 @@ public class OcLogger<T extends LogMessage> {
         long startOffset = getStartOffset();
         t.accept(message);
         long endOffset = getStartOffset();
-        if (webSocket) {
-            Optional<LogDataDTO> logData = logLineDispatcher.dispatch(message.toString(), startOffset, endOffset);
-            if (logData.isPresent()) {
-                socketNotificationService.send(connectionId, logData);
-            }
+        Optional<LogDataDTO> logData = logLineDispatcher.dispatch(message.toString(), startOffset, endOffset);
+        if (webSocket && logData.isPresent()) {
+            socketNotificationService.send(connectionId, logData);
         }
     }
 

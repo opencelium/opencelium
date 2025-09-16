@@ -39,6 +39,7 @@ import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
 import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
+import com.becon.opencelium.backend.utility.LogFileUtility;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.becon.opencelium.backend.version_manager.EntityUpdater;
 import com.becon.opencelium.backend.version_manager.EntityVersionManager;
@@ -49,6 +50,7 @@ import com.github.fge.jsonpatch.JsonPatch;
 import jakarta.persistence.EntityNotFoundException;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -218,6 +220,9 @@ public class ConnectionServiceImp implements ConnectionService {
         }
         List<FieldBindingMng> fieldBindingsToDelete = getEnhancementsToDelete(oldMng, connectionMng);
         fieldBindingsToDelete.forEach(f -> enhancementService.deleteById(f.getEnhancementId()));
+
+        // there is not ocVersion field on ConnectionOldDTO, set connection's version with current system version
+        connection.setOcVersion(ocProps.getVersion());
 
         Connection savedConnection = connectionRepository.save(connection);
         if (enhancements != null && !enhancements.isEmpty()) {
@@ -571,6 +576,11 @@ public class ConnectionServiceImp implements ConnectionService {
             }
         }
         connectionRepository.updateVersion(ocProps.getVersion());
+    }
+
+    @Override
+    public List<String> getLogFileNameListById(long connectionId) {
+        return LogFileUtility.getLogFileNameList(connectionId);
     }
 
     // --------------------------------------------------------------------------------------------------------------------------------------------------------

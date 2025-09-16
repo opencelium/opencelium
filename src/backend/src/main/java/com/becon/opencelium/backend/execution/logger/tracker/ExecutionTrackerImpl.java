@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.execution.logger.tracker;
 
-import com.becon.opencelium.backend.database.mongodb.entity.LogData;
+import com.becon.opencelium.backend.database.mongodb.entity.LogDataMng;
 import com.becon.opencelium.backend.execution.logger.builder.PhaseBuilderFactory;
 import com.becon.opencelium.backend.execution.logger.builder.PhaseBuilder;
 import com.becon.opencelium.backend.execution.logger.context.PhaseContext;
@@ -83,7 +83,7 @@ public class ExecutionTrackerImpl implements ExecutionTracker {
     // ---- Public API -------------------------------------------------------
 
     @Override
-    public Optional<LogData> buildLogData(ParsedLogLine parsedLine) {
+    public Optional<LogDataMng> buildLogData(ParsedLogLine parsedLine) {
         if (parsedLine == null || parsedLine.getStage() == null) {
             return Optional.empty();
         }
@@ -101,7 +101,7 @@ public class ExecutionTrackerImpl implements ExecutionTracker {
 
     // ---- Internals: Phase handling ---------------------------------------
 
-    private Optional<LogData> handlePhase(ParsedLogLine line) {
+    private Optional<LogDataMng> handlePhase(ParsedLogLine line) {
         final PhaseType phaseType = (PhaseType) line.getStage();
         final PhaseCategory category = PhaseCategory.fromValue(phaseType);
 
@@ -117,10 +117,10 @@ public class ExecutionTrackerImpl implements ExecutionTracker {
         return Optional.empty();
     }
 
-    private Optional<LogData> onPhaseStart(PhaseType phaseType,
-                                           PhaseCategory category,
-                                           PhaseContext phaseContext,
-                                           ParsedLogLine parsedLine) {
+    private Optional<LogDataMng> onPhaseStart(PhaseType phaseType,
+                                              PhaseCategory category,
+                                              PhaseContext phaseContext,
+                                              ParsedLogLine parsedLine) {
         phaseContext.setStatus(PhaseStatus.PENDING);
 
         // Capture identifiers early for downstream builders/emitters
@@ -143,16 +143,16 @@ public class ExecutionTrackerImpl implements ExecutionTracker {
             return Optional.empty();
         }
 
-        LogData out = buildLogDataForContext(category, phaseContext);
+        LogDataMng out = buildLogDataForContext(category, phaseContext);
         return Optional.ofNullable(out);
     }
 
-    private Optional<LogData> onPhaseEnd(PhaseCategory category,
-                                         PhaseContext phaseContext) {
+    private Optional<LogDataMng> onPhaseEnd(PhaseCategory category,
+                                            PhaseContext phaseContext) {
         final PhaseContext closed = phaseContextManager.endPhase(phaseContext);
 
         // Previous behavior kept COMPLETE status handling commented out; preserving semantics.
-        LogData out = buildLogDataForContext(category, closed);
+        LogDataMng out = buildLogDataForContext(category, closed);
 
         // Ensure IDs are set on the payload (defensive in case builders omit them)
         if (out != null) {
@@ -167,7 +167,7 @@ public class ExecutionTrackerImpl implements ExecutionTracker {
 
     // ---- Internals: Segment handling -------------------------------------
 
-    private Optional<LogData> handleSegment(ParsedLogLine parsedLine) {
+    private Optional<LogDataMng> handleSegment(ParsedLogLine parsedLine) {
         final PhaseContext currentPhaseCtx = phaseContextManager.getCurrentPhase();
         if (currentPhaseCtx == null || currentPhaseCtx.getParsedLogLine() == null) {
             // No active phase to attach this segment to
@@ -199,7 +199,7 @@ public class ExecutionTrackerImpl implements ExecutionTracker {
                 currentPhaseCtx.setErrorDetail(new ErrorDetail(indexPath, segmentContext));
                 phaseContextManager.addExceptionSegment(indexPath, segmentContext);
             }
-            LogData out = buildLogDataForContext(category, currentPhaseCtx);
+            LogDataMng out = buildLogDataForContext(category, currentPhaseCtx);
             return Optional.ofNullable(out);
         }
 
@@ -213,7 +213,7 @@ public class ExecutionTrackerImpl implements ExecutionTracker {
         return schemaMap != null ? schemaMap.get(category) : null;
     }
 
-    private LogData buildLogDataForContext(PhaseCategory category, PhaseContext ctx) {
+    private LogDataMng buildLogDataForContext(PhaseCategory category, PhaseContext ctx) {
         final PhaseBuilder builder = builderFactory.getBuilder(category);
         final Long cid = parseLongOrNull(connId);
         return builder.build(ctx, execId, flowId, cid);

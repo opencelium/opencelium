@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.execution.logger.builder.strategies;
 
-import com.becon.opencelium.backend.database.mongodb.entity.LogData;
+import com.becon.opencelium.backend.database.mongodb.entity.LogDataMng;
 import com.becon.opencelium.backend.database.mongodb.entity.LogDataError;
 import com.becon.opencelium.backend.execution.logger.builder.PhaseBuilder;
 import com.becon.opencelium.backend.execution.logger.context.PhaseContext;
@@ -12,7 +12,6 @@ import com.becon.opencelium.backend.execution.logger.enums.LogLineType;
 import com.becon.opencelium.backend.execution.logger.enums.SegmentType;
 import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
 import com.becon.opencelium.backend.execution.logger.parser.entity.ParsedLogLine;
-import org.bson.json.JsonObject;
 import org.bson.types.ObjectId;
 
 import java.util.*;
@@ -23,22 +22,22 @@ import static com.becon.opencelium.backend.execution.logger.keys.LogLineKey.*;
 public class LoopLogDataBuilder implements PhaseBuilder {
 
     @Override
-    public LogData build(PhaseContext phaseCtx, String execId, String flowId, Long connId) {
+    public LogDataMng build(PhaseContext phaseCtx, String execId, String flowId, Long connId) {
         ParsedLogLine parsed = phaseCtx.getParsedLogLine();
         PhaseCategory category = PhaseCategory.fromValue((PhaseType) parsed.getStage());
 
         // 1) Core LogData setup
-        LogData logData = new LogData();
-        logData.setId(new ObjectId().toHexString());
-        logData.setExecutionId(execId);
-        logData.setConnectionId(connId);
-        logData.setFlowId(flowId);
-        logData.setIndexPath(phaseCtx.getProperty(LogLineKey.INDEX_PATH));
-        logData.setStatus(phaseCtx.getStatus());
-        logData.setStartOffset(phaseCtx.getStartOffset());
-        logData.setEndOffset(phaseCtx.getEndOffset());
-        logData.setLogLineType(LogLineType.PHASE);
-        logData.setType(category);
+        LogDataMng logDataMng = new LogDataMng();
+        logDataMng.setId(new ObjectId().toHexString());
+        logDataMng.setExecutionId(execId);
+        logDataMng.setConnectionId(connId);
+        logDataMng.setFlowId(flowId);
+        logDataMng.setIndexPath(phaseCtx.getProperty(LogLineKey.INDEX_PATH));
+        logDataMng.setStatus(phaseCtx.getStatus());
+        logDataMng.setStartOffset(phaseCtx.getStartOffset());
+        logDataMng.setEndOffset(phaseCtx.getEndOffset());
+        logDataMng.setLogLineType(LogLineType.PHASE);
+        logDataMng.setType(category);
 
         // 2) Extract flat properties
         var flatProps = extractFlatProperties(phaseCtx.getProperties());
@@ -48,16 +47,16 @@ public class LoopLogDataBuilder implements PhaseBuilder {
 
         // 4) Merge segment data into properties
         if (!agg.refs.isEmpty()) {
-            logData.getSegments().put(LogLineKey.REF.getSrcName(), agg.refs);
+            logDataMng.getSegments().put(LogLineKey.REF.getSrcName(), agg.refs);
         }
 
         ErrorDetail errorDetail = phaseCtx.getErrorDetail();
         if (phaseCtx.getErrorDetail() != null) {
-            logData.setError(mapCtxError(errorDetail));
+            logDataMng.setError(mapCtxError(errorDetail));
         }
 
-        logData.setProperties(flatProps);
-        return logData;
+        logDataMng.setProperties(flatProps);
+        return logDataMng;
     }
 
     private Map<String, Object> extractFlatProperties(Map<LogLineKey, String> props) {
