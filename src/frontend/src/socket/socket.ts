@@ -10,6 +10,9 @@ export const SocketAppPrefix = '/oc';
 
 export const getSocket = () => {
     const token = store.getState().authReducer.authUser?.token;
+    console.log('getSocket')
+    console.log(socketClient)
+    console.log(token);
     if (!socketClient && token) {
         const webSocket = new SockJS(`${Urls.socketServer}?token=${token}`);
         socketClient = new Client({

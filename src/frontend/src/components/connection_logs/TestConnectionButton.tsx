@@ -18,42 +18,34 @@ import {
     addSocketLog,
     clearSocketLog,
     clearTextLog,
-    setCurrentLog, setCurrentLogError,
+    setCurrentLog, setCurrentLogError, setIsForcedFinished,
     setIsTesting
 } from "@root/redux_toolkit/slices/ConnectionLogSlice";
 import {Button} from "@app_component/base/button/Button";
 import {terminateExecution} from "@entity/schedule/redux_toolkit/action_creators/ScheduleCreators";
 import {consoleLog} from "@application/utils/utils";
-import {INotification, NotificationType} from "@application/interfaces/INotification";
-import {login} from "@application/redux_toolkit/action_creators/AuthCreators";
-import {ResponseMessages} from "@application/requests/interfaces/IResponse";
-function formatDate(date: Date): string {
-    const pad = (n: number, length = 2) => n.toString().padStart(length, '0');
 
-    const year = date.getFullYear();
-    const month = pad(date.getMonth() + 1); // months are zero-based
-    const day = pad(date.getDate());
-    const hours = pad(date.getHours());
-    const minutes = pad(date.getMinutes());
-    const seconds = pad(date.getSeconds());
-    const milliseconds = pad(date.getMilliseconds(), 3);
-
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
-}
 const TestConnectionButton = ({validateLogic}: any) => {
     const dispatch = useAppDispatch();
     const {socket} = useSocketData();
     const [channelId, setChannelId] = useState<string>(undefined);
+    const [startTime, setStartTime] = useState<number>();
     const {connection} = useAppSelector((state: RootState) => state.connectionReducer);
     const {executionId, schedulerId, isTesting, currentLogError} = useAppSelector((state: RootState) => state.connectionLogReducer);
     const currentLogErrorRef = useRef<any>();
     currentLogErrorRef.current = currentLogError;
+    const startTimeRef = useRef<any>();
+    startTimeRef.current = startTime;
     let previousLogMessage: ConnectionSocketLog<LightSegment>;
     let isFromConnectorCompleted: boolean = false, isToConnectorCompleted: boolean = false;
     const subscriptionRef = useRef<() => void>();
 
     const isTestFinished = (logMessage: ConnectionSocketLog<LightSegment>): boolean => {
         if (logMessage.type === 'EXECUTION' && logMessage.status === 'COMPLETE') {
+            const now = Date.now();
+            const executionTime = now - startTimeRef.current;
+            console.log(executionTime, Math.floor(executionTime / 1000) % 60)
+            dispatch(addSocketLog({data: logMessage, settings: {executionTime, hasNewLoopIndex: false, parentIndexPath: ''}}));
             stopTestUrgent();
             return true;
         }
@@ -62,6 +54,7 @@ const TestConnectionButton = ({validateLogic}: any) => {
     const stopTestUrgent = () => {
         dispatch(setIsTesting(false));
         setChannelId('');
+        setStartTime(0);
         subscriptionRef.current?.();
         isFromConnectorCompleted = false;
         isToConnectorCompleted = false;
@@ -117,6 +110,9 @@ const TestConnectionButton = ({validateLogic}: any) => {
             const subscription = socket.subscribe(`/execution/logs/${channelId}`, (message) => {
                 const data = JSON.parse(message.body) as ConnectionSocketLog<LightSegment>;
                 console.log(data);
+                if (data.type === 'EXECUTION' && data.status === 'PENDING') {
+                    setStartTime(Date.now())
+                }
                 if (isTestFinished(data)) return;
                 if (shouldSkipTrace(data)) return;
                 let hasNewLoopIndex = false;
@@ -139,6 +135,10 @@ const TestConnectionButton = ({validateLogic}: any) => {
                     const {size, ...properties} = data.properties
                     dispatch(addSocketLog({data: {...data, properties}, settings: {hasNewLoopIndex, parentIndexPath}}));
                     previousLogMessage = data;
+                } else {
+                    if (data.type === 'FLOWCHART' && data.status === 'PENDING') {
+                        dispatch(addSocketLog({data, settings: {hasNewLoopIndex: false, parentIndexPath: ''}}));
+                    }
                 }
                 if (!!data?.error?.message) {
                     if (!currentLogErrorRef.current.log) {
@@ -162,7 +162,7 @@ const TestConnectionButton = ({validateLogic}: any) => {
         } else {
             subscriptionRef.current?.();
         }
-    }, [channelId]);
+    }, [channelId/*, socket?.connected*/]);
 
     const startTest = async () => {
         if (channelId) {
@@ -175,19 +175,7 @@ const TestConnectionButton = ({validateLogic}: any) => {
             //@ts-ignore
             if (!!response.error) {
                 dispatch(setIsTesting(false));
-                setChannelId('');/*
-                //@ts-ignore
-                const message = response.error.message;
-                let date = new Date();
-                const notification: INotification = {
-                    id: date.getTime(),
-                    type: NotificationType.ERROR,
-                    title: 'OC',
-                    actionType: testConnection.rejected.type,
-                    createdTime: date.getTime().toString(),
-                    params: {message}
-                };
-                dispatch(addNotification(notification));*/
+                setChannelId('');
             } else {
                 dispatch(toggleDetails(false))
                 dispatch(setFullScreen(true));
@@ -205,6 +193,8 @@ const TestConnectionButton = ({validateLogic}: any) => {
         dispatch(setLogPanelHeight(0));
         dispatch(terminateExecution(schedulerId));
         dispatch(setIsTesting(false));
+        dispatch(setIsForcedFinished(true));
+        setStartTime(0);
     }
 
     const generateChannelId = () => {

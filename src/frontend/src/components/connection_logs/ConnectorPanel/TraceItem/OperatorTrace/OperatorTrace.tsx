@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
 	ConnectionSocketLog,
 	DetailedIfOperatorSegment, DetailedOperatorSegment,
@@ -8,7 +8,11 @@ import ToggleButton from '../ToggleButton/ToggleButton';
 import TraceItem from '../TraceItem';
 import styles from './OperatorTrace.module.css';
 import {RootState, useAppDispatch, useAppSelector} from "@application/utils/store";
-import {cleanOperatorTrace, copyLogContentToClipboard} from "@root/redux_toolkit/slices/ConnectionLogSlice";
+import {
+	cleanOperatorTrace,
+	copyLogContentToClipboard,
+	setTraceConfig
+} from "@root/redux_toolkit/slices/ConnectionLogSlice";
 import FontIcon from "@basic_components/FontIcon";
 import {getOperatorChildren} from "@root/redux_toolkit/action_creators/ConnectionLogCreators";
 import {ShowIndexPath} from "@app_component/connection_logs/LogsPanel/LogsPanel";
@@ -37,7 +41,7 @@ export const OperatorTrace: React.FC<OperatorTraceProps> = ({
 	const isLoop = trace.type === 'LOOP';
 	const isIf = trace.type === 'IF';
 	const dispatch = useAppDispatch();
-	const {currentLogError} = useAppSelector((state: RootState) => state.connectionLogReducer);
+	const {currentLogError, traceConfigs} = useAppSelector((state: RootState) => state.connectionLogReducer);
 	const [expanded, setExpanded] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [nextLoading, setNextLoading] = useState(false);
@@ -60,12 +64,31 @@ export const OperatorTrace: React.FC<OperatorTraceProps> = ({
 			);
 			setLoading(false);
 			setExpanded(true);
+			dispatch(setTraceConfig({
+				indexPath: trace.indexPath,
+				config: {
+					isOpened: true,
+				}
+			}));
 		} else {
 			dispatch(cleanOperatorTrace({flowId, indexPath: trace.indexPath}));
 			setExpanded(false);
+			dispatch(setTraceConfig({
+				indexPath: trace.indexPath,
+				config: {
+					isOpened: false,
+				}
+			}));
 		}
 	}
 
+	useEffect(() => {
+		if (traceConfigs[trace.indexPath]) {
+			if (traceConfigs[trace.indexPath].isOpened) {
+				handleToggle();
+			}
+		}
+	}, []);
 	const handleNextIteration = async (e: any) => {
 		e.preventDefault();
 		e.stopPropagation();

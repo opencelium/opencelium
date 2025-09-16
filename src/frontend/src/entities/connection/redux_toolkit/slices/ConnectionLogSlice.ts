@@ -4,7 +4,7 @@ import {
 	ConnectionTextLog,
 	ConnectorLog,
 	DetailedMethodSegment, FlowchartProperty,
-	LightSegment, LogError,
+	LightSegment, LogError, TraceConfig, TraceConfigs,
 } from '@root/requests/models/ConnectionLog';
 import {
 	deleteLogs,
@@ -22,6 +22,10 @@ export interface ConnectionLogState {
 	connectors: ConnectorLog[],
 	textLogs: ConnectionTextLog[],
 	isTesting: boolean,
+	isFinished: boolean,
+	isForcedFinished: boolean,
+	executionTime: number,
+	traceConfigs: TraceConfigs,
 }
 
 export const initialState: ConnectionLogState = {
@@ -33,6 +37,10 @@ export const initialState: ConnectionLogState = {
 	connectors: [],
 	textLogs: [],
 	isTesting: false,
+	isFinished: false,
+	isForcedFinished: false,
+	executionTime: 0,
+	traceConfigs: {},
 };
 interface CleanTracePayload {
 	flowId: string;
@@ -45,8 +53,14 @@ export const connectionLogSlice = createSlice({
 	reducers: {
 		copyLogContentToClipboard: (state) => {
 		},
+		setTraceConfig: (state, action: PayloadAction<{config: TraceConfig, indexPath: string}>) => {
+			state.traceConfigs = {...state.traceConfigs, [action.payload.indexPath]: action.payload.config};
+		},
 		setIsTesting: (state, action: PayloadAction<boolean>) => {
 			state.isTesting = action.payload;
+		},
+		setIsForcedFinished: (state, action: PayloadAction<boolean>) => {
+			state.isForcedFinished = action.payload;
 		},
 		setCurrentLogError: (state, action: PayloadAction<{log: ConnectionSocketLog<LightSegment>, parentsPath: string[]}>) => {
 			state.currentLogError = {log: action.payload.log, parentsPath: Array.from(new Set(action.payload.parentsPath))};
@@ -78,9 +92,17 @@ export const connectionLogSlice = createSlice({
 			state.currentLog = undefined;
 			state.connectors = [];
 			state.currentLogError = {log: undefined, parentsPath: []};
+			state.isFinished = false;
+			state.isForcedFinished = false;
+			state.traceConfigs = {};
 		},
-		addSocketLog: (state, action: PayloadAction<{data: ConnectionSocketLog<LightSegment>, settings: {hasNewLoopIndex: boolean, parentIndexPath: string}}>) => {
+		addSocketLog: (state, action: PayloadAction<{data: ConnectionSocketLog<LightSegment>, settings: {executionTime?: number, hasNewLoopIndex: boolean, parentIndexPath: string}}>) => {
 			const {executionId, flowId, connectorName, ...newTrace} = action.payload.data;
+			if (newTrace.type === 'EXECUTION' && newTrace.status === 'COMPLETE') {
+				state.isFinished = true;
+				state.executionTime = action.payload.settings.executionTime;
+				return;
+			}
 			if (state.executionId === executionId) {
 				if (action.payload.settings.parentIndexPath) {
 					const connector = state.connectors.find(c => c.flowId === flowId);
@@ -100,11 +122,14 @@ export const connectionLogSlice = createSlice({
 						return false;
 					});
 				} else {
-					let hasConnector = false;
-					const isIndexPathFirstLvl = action.payload.data.indexPath.split('_').length === 1;
+					const isIndexPathFirstLvl = action.payload.data?.indexPath ? action.payload.data?.indexPath.split('_').length === 1 : true;
+
+					if (action.payload.data.type === 'FLOWCHART' && !state.connectors.find(c => c.flowId === flowId)) {
+						state.connectors.push({flowId, name: connectorName, traces: []});
+						return;
+					}
 					state.connectors.forEach((connector) => {
 						if (connector.flowId === flowId) {
-							hasConnector = true;
 							if (action.payload.data.status === 'COMPLETE') {
 								const hasUpdatedTrace = findAndUpdateTrace(connector.traces, action.payload.data.indexPath, (trace) => {
 									if (!action.payload.settings.hasNewLoopIndex) {
@@ -135,21 +160,14 @@ export const connectionLogSlice = createSlice({
 							return;
 						}
 					});
-					if (!hasConnector) {
-						let isCompleted = action.payload.data.type === 'OPERATION';
-						if (!isIndexPathFirstLvl) {
-							isCompleted = true;
-						}
-						state.connectors.push({
-							flowId,
-							name: connectorName,
-							traces: [{...action.payload.data, isCompleted}],
-						})
-					}
 				}
 			} else {
 				state.executionId = executionId;
-				state.connectors = [{flowId, name: connectorName, traces: [action.payload.data]}]
+				if (action.payload.data.type === 'FLOWCHART') {
+					state.connectors.push({flowId, name: connectorName, traces: []});
+				} else {
+					state.connectors.push({flowId, name: connectorName, traces: [action.payload.data]});
+				}
 			}
 		},
 		cleanMethodTrace: (state, action: PayloadAction<CleanTracePayload>) => {
@@ -249,6 +267,9 @@ export const connectionLogSlice = createSlice({
 				state.connectors = [];
 				state.textLogs = [];
 			}
+			state.isFinished = false;
+			state.isForcedFinished = false;
+			state.traceConfigs = {};
 		});
 	},
 });
@@ -257,7 +278,7 @@ export const {
 	cleanMethodTrace, cleanOperatorTrace, addSocketLog,
 	addTextLog, clearTextLog, clearSocketLog,
 	setIsTesting, setCurrentLog, copyLogContentToClipboard,
-	setCurrentLogError,
+	setCurrentLogError, setIsForcedFinished, setTraceConfig,
 } =
 	connectionLogSlice.actions;
 export default connectionLogSlice.reducer;

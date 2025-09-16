@@ -70,7 +70,7 @@ export default {
         },
         [testConnection.rejected.type]: {
             "__DEFAULT__": "There is an error in during the test of the connection",
-            "Concurrent test executions for the same connection": "The test is already running for this connection."
+            "CONCURRENT_TEST_IS_FORBIDDEN": "The test is already running for this connection."
         },
         [checkConnectionTitle.rejected.type]: {
             "__DEFAULT__": "There is an error in checking uniqueness of the title."

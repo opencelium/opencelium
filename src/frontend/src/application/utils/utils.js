@@ -157,7 +157,7 @@ export function reactElementToText(node) {
 }
 
 
-const DEBUGGER_LOGS = false;
+const DEBUGGER_LOGS = true;
 export function isNumber(number){
     return !isNaN(number);
 }

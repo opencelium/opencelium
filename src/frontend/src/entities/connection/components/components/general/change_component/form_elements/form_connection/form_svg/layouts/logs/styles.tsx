@@ -18,6 +18,9 @@ import Text from "@app_component/base/text/Text";
 import styled from "styled-components";
 import {isNumber} from "lodash";
 import {LogPanelHeight} from "@root/redux_toolkit/slices/ConnectionSlice";
+import {types} from "sass";
+import Color = types.Color;
+import {ErrorColor} from "@app_component/operator_builder/OperatorBuilder";
 
 export const MessageStyled = styled.div`
     padding: 2px;
@@ -46,6 +49,21 @@ export const EmptyLogsStyled = styled.h3`
     color: #ccc;
     text-align: center;
     margin-top: 50px;
+`;
+
+export const FinishedLogsStyled = styled.div`
+    font-size: 16px;
+    text-align: left;
+    margin: 20px 0 10px 10px;
+    color: #6c9d3f;
+    font-weight: bold;
+`;
+export const ForcedFinishedLogsStyled = styled.div`
+    font-size: 16px;
+    text-align: left;
+    margin: 20px 0 10px 10px;
+    color: ${ErrorColor};
+    font-weight: bold;
 `;
 
 export const HeaderStyled = styled(Text)`

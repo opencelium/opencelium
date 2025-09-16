@@ -95,3 +95,14 @@ export interface MetaTrace {
 	hasError?: boolean,
 }
 
+export interface TraceConfig {
+	isOpened?: boolean,
+	height?: {
+		request: number | undefined,
+		response: number | undefined,
+	},
+}
+
+export type TraceConfigs = {
+	[indexPath: string]: TraceConfig,
+}
