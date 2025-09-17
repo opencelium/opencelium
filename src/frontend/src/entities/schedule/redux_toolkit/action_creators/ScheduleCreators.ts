@@ -356,7 +356,6 @@ export const getLogsByExecutionId = createAsyncThunk(
                 }
             }
         } catch(e){
-            console.log(e);
             return thunkAPI.rejectWithValue({message: e?.response?.data?.error || e.message});
         }
     }

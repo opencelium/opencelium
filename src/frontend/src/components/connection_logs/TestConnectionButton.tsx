@@ -44,7 +44,6 @@ const TestConnectionButton = ({validateLogic}: any) => {
         if (logMessage.type === 'EXECUTION' && logMessage.status === 'COMPLETE') {
             const now = Date.now();
             const executionTime = now - startTimeRef.current;
-            console.log(executionTime, Math.floor(executionTime / 1000) % 60)
             dispatch(addSocketLog({data: logMessage, settings: {executionTime, hasNewLoopIndex: false, parentIndexPath: ''}}));
             stopTestUrgent();
             return true;
@@ -109,7 +108,6 @@ const TestConnectionButton = ({validateLogic}: any) => {
             }
             const subscription = socket.subscribe(`/execution/logs/${channelId}`, (message) => {
                 const data = JSON.parse(message.body) as ConnectionSocketLog<LightSegment>;
-                console.log(data);
                 if (data.type === 'EXECUTION' && data.status === 'PENDING') {
                     setStartTime(Date.now())
                 }

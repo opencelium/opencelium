@@ -8,7 +8,8 @@
 
 .traceItemContainer {
 	padding-right: 5px;
-	border: 1px solid #ECDCE6;
+	border-top: 1px solid #ECDCE6;
+	border-bottom: 1px solid #ECDCE6;
 }
 
 .traceItemContainer:not(:last-child) {

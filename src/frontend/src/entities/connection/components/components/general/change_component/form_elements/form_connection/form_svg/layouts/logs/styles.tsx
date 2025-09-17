@@ -34,7 +34,7 @@ export const LogPanelStyled = styled.div<{isFullScreen: boolean, noLogs: boolean
     max-height: ${({logPanelHeight}) => isNumber(logPanelHeight) ? `${logPanelHeight}px` : logPanelHeight};
     background: white;
     color: black;
-    width: calc(100% - ${({isFullScreen, isDetailsOpened}) => isFullScreen ? isDetailsOpened ? '315px' : '15px' : isDetailsOpened ? '300px' : '0px'});
+    width: calc(100% - ${({isFullScreen, isDetailsOpened}) => isFullScreen ? isDetailsOpened ? '315px' : '15px' : isDetailsOpened ? '300px' : '2px'});
     white-space: initial;
     overflow-y: auto;
     position: absolute;
@@ -80,7 +80,8 @@ export const TopStyled = styled.div<{logPanelHeight: number | string}>`
     min-height: 28px;
     max-height: 28px;
     position: absolute;
-    width: 100%;
+    z-index: 1;
+    width: calc(100% - 2px);
     height: 28px;
     border-top: 2px solid #eee;
     border-bottom: 1px solid #eee;
@@ -141,6 +142,7 @@ export const ClearButtonStyled = styled(TooltipButton)`
     position: absolute;
     width: 24px;
     height: 24px;
+    z-index: 1;
 `;
 export const FullLogsButtonStyled = styled(TooltipButton)`
     background: white;

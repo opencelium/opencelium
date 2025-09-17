@@ -10,9 +10,6 @@ export const SocketAppPrefix = '/oc';
 
 export const getSocket = () => {
     const token = store.getState().authReducer.authUser?.token;
-    console.log('getSocket')
-    console.log(socketClient)
-    console.log(token);
     if (!socketClient && token) {
         const webSocket = new SockJS(`${Urls.socketServer}?token=${token}`);
         socketClient = new Client({
@@ -23,6 +20,9 @@ export const getSocket = () => {
             },
             onConnect: () => {
                 consoleLog('Socket connected');
+            },
+            onDisconnect: () => {
+                consoleLog('Socket disconnected');
             },
             debug: (str: string) => {
                 consoleLog('[STOMP DEBUG]', str);
@@ -42,12 +42,10 @@ export const getSocket = () => {
     return socketClient;
 };
 
-export const disableSocket = () => {
-    if (socketClient.connected) {
-        socketClient.deactivate().then(() => {
-            socketClient = null;
-        })
-    } else {
+export const disableSocket = async () => {
+    if (socketClient) {
+        socketClient.reconnectDelay = 0;
+        await socketClient.deactivate();
         socketClient = null;
     }
 }

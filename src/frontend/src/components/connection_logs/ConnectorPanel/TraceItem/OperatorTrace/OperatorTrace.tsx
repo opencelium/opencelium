@@ -16,11 +16,7 @@ import {
 import FontIcon from "@basic_components/FontIcon";
 import {getOperatorChildren} from "@root/redux_toolkit/action_creators/ConnectionLogCreators";
 import {ShowIndexPath} from "@app_component/connection_logs/LogsPanel/LogsPanel";
-import {TextSize} from "@app_component/base/text/interfaces";
-import Button from "@app_component/base/button/Button";
-import {copyStringToClipboard} from "@application/utils/utils";
-import {ConnectionLogRequest} from "@root/requests/classes/ConnectionLogRequest";
-import CopyOperatorButton from "@app_component/connection_logs/ConnectorPanel/CopyOperatorButton";
+import CopyOperatorButton from "@app_component/connection_logs/ConnectorPanel/TraceItem/OperatorTrace/CopyOperatorButton";
 import {ColorTheme} from "@style/Theme";
 
 export interface OperatorTraceProps {

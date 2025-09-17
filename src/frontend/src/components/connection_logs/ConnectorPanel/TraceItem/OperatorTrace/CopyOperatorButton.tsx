@@ -17,7 +17,6 @@ const CopyOperatorButton = ({flowId, executionId, iterationIndexes, trace, itera
             hasBackground={false}
             isLoading={isLoading}
             handleClick={async (e) => {
-                console.log(e);
                 e?.stopPropagation();
                 setIsLoading(true);
                 const logRequest = new ConnectionLogRequest();
