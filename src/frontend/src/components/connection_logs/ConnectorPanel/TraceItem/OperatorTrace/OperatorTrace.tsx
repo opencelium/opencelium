@@ -18,6 +18,7 @@ import {getOperatorChildren} from "@root/redux_toolkit/action_creators/Connectio
 import {ShowIndexPath} from "@app_component/connection_logs/LogsPanel/LogsPanel";
 import CopyOperatorButton from "@app_component/connection_logs/ConnectorPanel/TraceItem/OperatorTrace/CopyOperatorButton";
 import {ColorTheme} from "@style/Theme";
+import LoopIterator from "@app_component/connection_logs/ConnectorPanel/TraceItem/OperatorTrace/LoopIndex";
 
 export interface OperatorTraceProps {
 	trace: ConnectionSocketLog<DetailedOperatorSegment> & MetaTrace;
@@ -88,10 +89,10 @@ export const OperatorTrace: React.FC<OperatorTraceProps> = ({
 	const handleNextIteration = async (e: any) => {
 		e.preventDefault();
 		e.stopPropagation();
-		dispatch(cleanOperatorTrace({ flowId, indexPath: trace.indexPath }));
 		if (isLoop) {
 			const nextIndex = iterationIndex + 1;
 			if (nextIndex <= size - 1) {
+				dispatch(cleanOperatorTrace({ flowId, indexPath: trace.indexPath }));
 				setIterationIndex(nextIndex);
 				setNextLoading(true);
 				await dispatch(
@@ -104,6 +105,28 @@ export const OperatorTrace: React.FC<OperatorTraceProps> = ({
 					})
 				);
 				setNextLoading(false);
+			}
+		}
+	};
+
+	const loadByIndex = async (newIndex: number) => {
+		if (isLoop) {
+			if (newIndex !== iterationIndex && newIndex >= 0 && newIndex <= size - 1) {
+				dispatch(cleanOperatorTrace({ flowId, indexPath: trace.indexPath }));
+				setIterationIndex(newIndex);
+				setNextLoading(true);
+				setPrevLoading(true);
+				await dispatch(
+					getOperatorChildren({
+						executionId,
+						flowId,
+						indexPath: trace.indexPath,
+						loopIndex: [...iterationIndexes, newIndex],
+						id: trace.id,
+					})
+				);
+				setNextLoading(false);
+				setPrevLoading(false);
 			}
 		}
 	};
@@ -156,9 +179,13 @@ export const OperatorTrace: React.FC<OperatorTraceProps> = ({
 					)}
 					{isLoop && (
 						<div className={styles.loopTraceRightSide} onClick={(e: any) => {e.preventDefault(); e.stopPropagation();}}>
-							<span>
-								<span style={{color: iterationIndex + 1 === size && hasError ? ColorTheme.Red : '#000'}}>{`${(iterationIndex + 1)} / `}</span><span style={{color: hasError && (currentLogError.log.properties as LoopOperatorProperty).loopIndex === `${(+size - 1)}` ? ColorTheme.Red : '#000'}}>{size || '...'}</span>
-							</span>
+							<LoopIterator
+								loadByIndex={loadByIndex}
+								iterationIndex={+iterationIndex + 1}
+								loopIndex={(currentLogError?.log?.properties as LoopOperatorProperty)?.loopIndex}
+								size={size}
+								hasError={hasError}
+							/>
 							<FontIcon
 								isButton={true}
 								iconStyles={{cursor: 'pointer'}}
