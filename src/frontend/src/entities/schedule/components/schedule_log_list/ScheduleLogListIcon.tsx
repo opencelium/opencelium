@@ -22,28 +22,36 @@ import {ColorTheme} from "@style/Theme";
 import {ScheduleNotificationList} from "../pages/schedule_notification/ScheduleNotificationList";
 import {Notification} from "../../classes/Notification";
 import {SchedulePermissions} from "../../constants";
-import {ScheduleNotificationsIconProps} from "./interfaces";
+import {ScheduleLogListIconProps} from "./interfaces";
+import {ScheduleLogList} from "@entity/schedule/components/schedule_log_list/ScheduleLogList";
+import {useAppDispatch} from "@application/utils/store";
+import {getLogList} from "@root/redux_toolkit/action_creators/ConnectionLogCreators";
 
-const ScheduleNotificationsIcon: FC<ScheduleNotificationsIconProps> =
+const ScheduleLogListIcon: FC<ScheduleLogListIconProps> =
     ({
-        schedule,
+        scheduleId,
     }) => {
-    const {
-        gettingNotificationsByScheduleId, currentScheduleId,
-    } = Notification.getReduxState();
+    const dispatch = useAppDispatch();
     const [x, setX] = useState(0);
     const [y, setY] = useState(0);
     const [isToggledList, setIsToggledList] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const getLogs = async () => {
+        setIsLoading(true);
+        dispatch(getLogList({scheduleId}));
+        setIsLoading(false);
+        toggleList();
+    }
     const toggleList = () => {
         setIsToggledList(!isToggledList);
     }
     useEffect(() => {
         setTimeout(() => {
-            let iconElem = document.getElementById(`schedule_notifications_${schedule.id}`);
+            let iconElem = document.getElementById(`schedule_logs_${scheduleId}`);
             if(iconElem) {
-                let position = findTopLeftPosition(`schedule_notifications_${schedule.id}`);
-                let newX = position.left + (iconElem.offsetWidth / 2) - 320;
-                let newY = position.top + (iconElem.offsetHeight / 2) + 20;
+                let position = findTopLeftPosition(`schedule_logs_${scheduleId}`);
+                let newX = position.left + (iconElem.offsetWidth / 2) - 60;
+                let newY = position.top + (iconElem.offsetHeight / 2);
                 if (x !== newX || y !== newY) {
                     setX(newX);
                     setY(newY);
@@ -53,18 +61,27 @@ const ScheduleNotificationsIcon: FC<ScheduleNotificationsIconProps> =
     }, [])
     return (
         <React.Fragment>
-            <PermissionTooltipButton target={`schedule_notifications_${schedule.id}`} tooltip={'Notifications'} position={'top'} color={ColorTheme.Turquoise} permission={SchedulePermissions.READ} icon={'mail'} handleClick={toggleList} hasBackground={false} isLoading={gettingNotificationsByScheduleId === API_REQUEST_STATE.START && schedule.id === currentScheduleId}/>
-            <ScheduleNotificationList x={x} y={y} schedule={schedule} isVisible={isToggledList} close={toggleList}/>
+            <PermissionTooltipButton
+                target={`schedule_logs_${scheduleId}`}
+                tooltip={'Log list'}
+                position={'top'}
+                permission={SchedulePermissions.READ}
+                icon={'more_vert'}
+                handleClick={getLogs}
+                hasBackground={false}
+                isLoading={isLoading}
+            />
+            <ScheduleLogList x={x} y={y} scheduleId={scheduleId} isVisible={isToggledList} close={toggleList}/>
         </React.Fragment>
     )
 }
 
-ScheduleNotificationsIcon.defaultProps = {
+ScheduleLogListIcon.defaultProps = {
 }
 
 
 export {
-    ScheduleNotificationsIcon,
+    ScheduleLogListIcon,
 };
 
-export default withTheme(ScheduleNotificationsIcon);
+export default withTheme(ScheduleLogListIcon);

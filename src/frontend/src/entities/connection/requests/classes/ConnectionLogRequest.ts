@@ -1,6 +1,6 @@
 import {
 	ConLogRequestProps,
-	DeleteLogsRequest,
+	DeleteLogsRequest, GetLogListResponse,
 	IConnectionLogRequest,
 	TestConnectionResponse
 } from '../interfaces/IConnectionLogRequest';
@@ -54,5 +54,11 @@ export class ConnectionLogRequest extends Request implements IConnectionLogReque
 	async testConnection(connection: any): Promise<AxiosResponse<TestConnectionResponse>> {
 		this.url = 'connection';
 		return super.post<TestConnectionResponse>(connection);
+	}
+
+	async getLogList(scheduleId: any): Promise<AxiosResponse<GetLogListResponse>> {
+		this.url = 'connection';
+		this.endpoint = `/${scheduleId}/log-files`;
+		return super.get<GetLogListResponse>();
 	}
 }

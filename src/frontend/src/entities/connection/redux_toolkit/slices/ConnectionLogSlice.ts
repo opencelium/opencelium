@@ -9,7 +9,7 @@ import {
 import {
 	deleteLogs,
 	getDetailedMethod,
-	getDetailedOperator, getFlowChartLogsByExecId, getOperatorChildren, testConnection,
+	getDetailedOperator, getFlowChartLogsByExecId, getLogList, getOperatorChildren, testConnection,
 } from '../action_creators/ConnectionLogCreators';
 import {findAndUpdateTrace} from "@root/utils/utils";
 
@@ -26,6 +26,7 @@ export interface ConnectionLogState {
 	isForcedFinished: boolean,
 	executionTime: number,
 	traceConfigs: TraceConfigs,
+	logList: string[],
 }
 
 export const initialState: ConnectionLogState = {
@@ -41,6 +42,7 @@ export const initialState: ConnectionLogState = {
 	isForcedFinished: false,
 	executionTime: 0,
 	traceConfigs: {},
+	logList: [],
 };
 interface CleanTracePayload {
 	flowId: string;
@@ -201,6 +203,9 @@ export const connectionLogSlice = createSlice({
 		},
 	},
 	extraReducers: (builder) => {
+		builder.addCase(getLogList.fulfilled, (state, action) => {
+			state.logList = action.payload.result;
+		});
 		builder.addCase(testConnection.fulfilled, (state, action) => {
 			state.schedulerId = action.payload.schedulerId;
 		});

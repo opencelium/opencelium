@@ -16,7 +16,6 @@ const ViewLogs = () => {
     const close = () => {
         dispatch(clearSocketLog())
     }
-    console.log(connectors.length);
     return (
         <Dialog
             actions={[

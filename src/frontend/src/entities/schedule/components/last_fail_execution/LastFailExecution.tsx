@@ -27,6 +27,7 @@ import {Schedule} from "@entity/schedule/classes/Schedule";
 import Icon from "@app_component/base/icon/Icon";
 import {LoadingIcon} from "@entity/schedule/components/last_success_execution/styles";
 import {getFlowChartLogsByExecId} from "@root/redux_toolkit/action_creators/ConnectionLogCreators";
+import {ScheduleLogListIcon} from "@entity/schedule/components/schedule_log_list/ScheduleLogListIcon";
 
 const LastFailExecution: FC<LastFailExecutionProps> =
     ({
@@ -63,11 +64,28 @@ const LastFailExecution: FC<LastFailExecutionProps> =
                     taIdComponent = <a id={`last_fail_${schedule.id}`} href={url} target={'_blank'}>#{executionId}</a>;
                 } else{
                     if (schedule.lastExecution.fail.hasLog) {
-                        taIdComponent = startGettingLogs ?
-                            <LoadingIcon loadingSize={'16px'} color={theme?.menu?.background || '#000'} name={' '}
-                                         isLoading={true}/> :
-                            <span id={'clickable'} style={{cursor: 'pointer', textDecoration: 'underline'}}
-                                  onClick={() => getLogs(executionId)}>{`#${executionId}`}</span>;
+                        taIdComponent = startGettingLogs
+                            ?
+                            <LoadingIcon
+                                loadingSize={'16px'}
+                                color={theme?.menu?.background || '#000'}
+                                name={' '}
+                                isLoading={true}
+                            />
+                            :
+                            <span style={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                            }}>
+                                <span
+                                    id={'clickable'}
+                                    style={{cursor: 'pointer', textDecoration: 'underline'}}
+                                    onClick={() => getLogs(executionId)}>
+                                    {`#${executionId}`}
+                                </span>
+                                <ScheduleLogListIcon scheduleId={schedule.connection.connectionId.toString()}/>
+                            </span>;
                     } else {
                         taIdComponent = <span>{`#${executionId}`}</span>
                     }
