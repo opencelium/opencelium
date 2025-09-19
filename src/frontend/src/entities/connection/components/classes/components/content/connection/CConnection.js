@@ -448,7 +448,6 @@ export default class CConnection{
 
     get id(){
         if(!this.hasOwnProperty('_id')){
-            consoleLog(`Connection has undefined 'id'`);
         } else {
             return this._id;
         }

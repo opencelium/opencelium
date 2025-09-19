@@ -2,14 +2,14 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { ConnectionLogRequest } from '@root/requests/classes/ConnectionLogRequest';
 import {errorHandler} from "@application/utils/utils";
 import {
-	ConnectionSocketLog,
+	ConnectionSocketLog, ConnectorLog,
 	DetailedMethodSegment,
 	DetailedOperatorSegment,
 	Trace
 } from "@root/requests/models/ConnectionLog";
 import {
 	ConLogRequestProps,
-	DeleteLogsRequest,
+	DeleteLogsRequest, GetLogListResponse,
 	TestConnectionResponse
 } from "@root/requests/interfaces/IConnectionLogRequest";
 
@@ -53,6 +53,29 @@ export const getOperatorChildren = createAsyncThunk<
 	}
 });
 
+export const getFlowChartLogsByExecId = createAsyncThunk<
+	{connectorLogs: ConnectorLog[], executionId: string},
+	string
+>('connectionLog/getFlowChartLogsByExecId', async (executionId, thunkAPI) => {
+	try {
+		const connectionLogRequest = new ConnectionLogRequest();
+		const flowChartResponse = await connectionLogRequest.getFlowCharts(executionId);
+		const connectorLogs: ConnectorLog[] = [];
+		for (let i = 0; i < flowChartResponse.data.length; i++) {
+			const flowLog = flowChartResponse.data[i];
+			const response = await connectionLogRequest.getFirstLevelLogs(flowLog.id);
+			connectorLogs.push({
+				flowId: flowLog.flowId,
+				name: flowLog.connectorName,
+				traces: response.data.map(t => ({...t, isCompleted: true})),
+			})
+		}
+		return {connectorLogs, executionId};
+	} catch(e){
+		return thunkAPI.rejectWithValue(errorHandler(e));
+	}
+});
+
 export const deleteLogs = createAsyncThunk<void, DeleteLogsRequest>(
 	'connectionLog/deleteLogs',
 	async (data, thunkAPI) => {
@@ -79,9 +102,24 @@ export const testConnection = createAsyncThunk<TestConnectionResponse, {connecti
 	}
 );
 
+export const getLogList = createAsyncThunk<GetLogListResponse, {scheduleId: string}>(
+	'connectionLog/list',
+	async (data, thunkAPI) => {
+		try {
+			const connectionLogRequest = new ConnectionLogRequest();
+			const response = await connectionLogRequest.getLogList(data.scheduleId);
+			return response.data;
+		} catch(e){
+			return thunkAPI.rejectWithValue(errorHandler(e));
+		}
+	}
+);
+
 export default {
 	getDetailedMethod,
 	getDetailedOperator,
 	deleteLogs,
 	testConnection,
+	getFlowChartLogsByExecId,
+	getLogList,
 }

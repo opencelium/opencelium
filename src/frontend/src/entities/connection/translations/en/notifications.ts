@@ -23,6 +23,7 @@ import { syncInvokers } from "@entity/connection/redux_toolkit/slices/EditorSlic
 import { requestRemoteApi } from "@entity/connection/redux_toolkit/action_creators/EditorCreators";
 import {notifyAboutNewSupportFile} from "@root/redux_toolkit/slices/SupportFileSlice";
 import {copyLogContentToClipboard} from "@root/redux_toolkit/slices/ConnectionLogSlice";
+import {getFlowChartLogsByExecId, getLogList} from "@root/redux_toolkit/action_creators/ConnectionLogCreators";
 
 const {
     testConnection, addConnection,
@@ -56,6 +57,12 @@ export default {
         [requestRemoteApi.rejected.type]: {
             "__DEFAULT__": "There is an error during the test of the method"
         },*/
+        [getFlowChartLogsByExecId.rejected.type]: {
+            "__DEFAULT__": "There is an error getting logs."
+        },
+        [getLogList.rejected.type]: {
+            "__DEFAULT__": "There is an error getting a list of logs."
+        },
         [deleteSupportFile.rejected.type]: {
             "__DEFAULT__": "There is an error deleting support file."
         },
@@ -70,7 +77,7 @@ export default {
         },
         [testConnection.rejected.type]: {
             "__DEFAULT__": "There is an error in during the test of the connection",
-            "Concurrent test executions for the same connection": "The test is already running for this connection."
+            "CONCURRENT_TEST_IS_FORBIDDEN": "The test is already running for this connection."
         },
         [checkConnectionTitle.rejected.type]: {
             "__DEFAULT__": "There is an error in checking uniqueness of the title."

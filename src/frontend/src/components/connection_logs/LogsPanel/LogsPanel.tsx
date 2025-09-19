@@ -2,8 +2,8 @@ import { TextSize } from "@app_component/base/text/interfaces";
 import { Application } from "@application/classes/Application";
 import { RootState, useAppDispatch, useAppSelector } from "@application/utils/store";
 import {
-  ClearButtonStyled, EmptyLogsStyled, FullLogsButtonStyled,
-  HeaderStyled, LogPanelStyled, TopStyled
+    ClearButtonStyled, EmptyLogsStyled, FinishedLogsStyled, ForcedFinishedLogsStyled, FullLogsButtonStyled,
+    HeaderStyled, LogPanelStyled, TopStyled
 } from "@change_component/form_elements/form_connection/form_svg/layouts/logs/styles";
 import { Connection } from "@root/classes/Connection";
 import {ColorTheme, ITheme} from '@style/Theme';
@@ -21,10 +21,26 @@ export const ShowIndexPath = false;
 interface LogsPanelProps {
   theme?: ITheme;
 }
+function formatDuration(ms: number): string {
+    const milliseconds = ms % 1000;
+    const seconds = Math.floor(ms / 1000) % 60;
+    const minutes = Math.floor(ms / (1000 * 60)) % 60;
+    const hours = Math.floor(ms / (1000 * 60 * 60)) % 24;
+    const days = Math.floor(ms / (1000 * 60 * 60 * 24));
+
+    const parts: string[] = [];
+    if (days > 0) parts.push(`${days} d`);
+    if (hours > 0) parts.push(`${hours} h`);
+    if (minutes > 0) parts.push(`${minutes} m`);
+    if (seconds > 0) parts.push(`${seconds} s`);
+    if (minutes === 0 && milliseconds > 0) parts.push(`${milliseconds} ms`);
+
+    return parts.join(" ");
+}
 
 const LogsPanel: React.FC<LogsPanelProps> = ({theme}) => {
   const dispatch = useAppDispatch();
-  const {textLogs, executionId, connectors, isTesting} = useAppSelector((state: RootState) => state.connectionLogReducer);
+  const {textLogs, executionId, connectors, isTesting, isFinished, executionTime, isForcedFinished} = useAppSelector((state: RootState) => state.connectionLogReducer);
   const {
     logPanelHeight, isDetailsOpened
   } = Connection.getReduxState();
@@ -84,6 +100,8 @@ const LogsPanel: React.FC<LogsPanelProps> = ({theme}) => {
                   theme={theme}
                 />
             ))}
+          {isFinished && <FinishedLogsStyled>{`TEST FINISHED in ${formatDuration(executionTime)}`}</FinishedLogsStyled>}
+          {isForcedFinished && <ForcedFinishedLogsStyled>{`TEST STOPPED`}</ForcedFinishedLogsStyled>}
       </LogPanelStyled>
     </React.Fragment>
   );

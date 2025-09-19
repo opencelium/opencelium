@@ -24,7 +24,7 @@ public class ConcurrentTestIsForbidden extends GeneralServiceException {
     private final Long id;
 
     public ConcurrentTestIsForbidden(final Long id) {
-        super(HttpStatus.INTERNAL_SERVER_ERROR, ExceptionConstant.CONCURRENT_TEST_IS_FORBIDDEN, "Connection is currently being executed, id = " + id);
+        super(HttpStatus.INTERNAL_SERVER_ERROR, "Connection is currently being executed, id = " + id, ExceptionConstant.CONCURRENT_TEST_IS_FORBIDDEN);
         this.id = id;
     }
 

@@ -89,4 +89,6 @@ public interface ConnectionService {
     void deleteRule(long connectionId, long ruleId);
 
     void updateConnectionsToCurrentVersion();
+
+    List<String> getLogFileNameListById(long connectionId);
 }

@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.execution.logger.builder.strategies;
 
-import com.becon.opencelium.backend.database.mongodb.entity.LogData;
+import com.becon.opencelium.backend.database.mongodb.entity.LogDataMng;
 import com.becon.opencelium.backend.database.mongodb.entity.LogDataError;
 import com.becon.opencelium.backend.execution.logger.builder.PhaseBuilder;
 import com.becon.opencelium.backend.execution.logger.context.PhaseContext;
@@ -18,36 +18,37 @@ import static com.becon.opencelium.backend.execution.logger.keys.LogLineKey.DATA
 
 public class DefaultLogDataBuilder implements PhaseBuilder {
     @Override
-    public LogData build(PhaseContext context, String execId, String flowId, Long connId) {
-        LogData logData = new LogData();
-        logData.setId(new ObjectId().toHexString());
-        logData.setExecutionId(execId);
-        logData.setConnectionId(connId);
-        logData.setFlowId(flowId);
-        logData.setFlowId(context.getProperties().get(LogLineKey.FLOWCHART_ID));
-        logData.setStatus(context.getStatus());
-        logData.setIndexPath(context.getProperties().get(LogLineKey.INDEX_PATH));
-        logData.setStartOffset(context.getStartOffset());
-        logData.setEndOffset(context.getEndOffset());
-        logData.setLogLineType(LogLineType.PHASE);
+    public LogDataMng build(PhaseContext context, String execId, String flowId, Long connId) {
+        LogDataMng logDataMng = new LogDataMng();
+        logDataMng.setId(new ObjectId().toHexString());
+        logDataMng.setExecutionId(execId);
+        logDataMng.setConnectionId(connId);
+        logDataMng.setFlowId(flowId);
+        logDataMng.setConnectorName(context.getProperty(LogLineKey.CONNECTOR_NAME));
+        logDataMng.setFlowId(context.getProperties().get(LogLineKey.FLOWCHART_ID));
+        logDataMng.setStatus(context.getStatus());
+        logDataMng.setIndexPath(context.getProperties().get(LogLineKey.INDEX_PATH));
+        logDataMng.setStartOffset(context.getStartOffset());
+        logDataMng.setEndOffset(context.getEndOffset());
+        logDataMng.setLogLineType(LogLineType.PHASE);
 
         // Determine and set type from phase
         if (context.getParsedLogLine().getStage() instanceof PhaseType phaseType) {
-            logData.setType(PhaseCategory.fromValue(phaseType));
+            logDataMng.setType(PhaseCategory.fromValue(phaseType));
         } else {
-            logData.setType(PhaseCategory.UNKNOWN);
+            logDataMng.setType(PhaseCategory.UNKNOWN);
         }
 
         ErrorDetail errorDetail = context.getErrorDetail();
         if (context.getErrorDetail() != null) {
-            logData.setError(mapCtxError(errorDetail));
+            logDataMng.setError(mapCtxError(errorDetail));
         }
 
         // Copy basic properties
         Map<String, Object> props = toStringKeyMap(context.getProperties());
-        logData.setProperties(props);
+        logDataMng.setProperties(props);
 
-        return logData;
+        return logDataMng;
     }
 
     /**

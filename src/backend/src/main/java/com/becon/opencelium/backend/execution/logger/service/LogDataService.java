@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.execution.logger.service;
 
-import com.becon.opencelium.backend.database.mongodb.entity.LogData;
+import com.becon.opencelium.backend.database.mongodb.entity.LogDataMng;
 import com.becon.opencelium.backend.execution.logger.dto.LogDataDTO;
 import com.becon.opencelium.backend.execution.logger.parser.entity.ParsedLogLine;
 
@@ -12,14 +12,14 @@ public interface LogDataService {
 
     LogDataDTO getDetailsById(String elementId);
 
-    void saveNewBlock(LogData block);
+    void saveNewBlock(LogDataMng block);
 
-    void updateExistingBlock(LogData block);
+    void updateExistingBlock(LogDataMng block);
 
-    LogData fromParsedLogLine(ParsedLogLine line, String executionId,
-                              Long connectionId, String flowchartId);
+    LogDataMng fromParsedLogLine(ParsedLogLine line, String executionId,
+                                 Long connectionId, String flowchartId);
 
-    void save(LogData logData);
+    void save(LogDataMng logDataMng);
 
-    Optional<LogDataDTO> toDto(LogData metaData);
+    Optional<LogDataDTO> toDto(LogDataMng metaData);
 }
