@@ -16,6 +16,7 @@
 .ifTraceRightSide {
 	margin-left: 8px;
 	cursor: text;
+	padding-right: 5px;
 }
 .loopTraceRightSide {
 	display: flex;

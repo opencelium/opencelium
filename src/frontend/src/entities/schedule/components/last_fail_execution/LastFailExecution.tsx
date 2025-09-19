@@ -26,6 +26,7 @@ import {useAppDispatch} from "@application/utils/store";
 import {Schedule} from "@entity/schedule/classes/Schedule";
 import Icon from "@app_component/base/icon/Icon";
 import {LoadingIcon} from "@entity/schedule/components/last_success_execution/styles";
+import {getFlowChartLogsByExecId} from "@root/redux_toolkit/action_creators/ConnectionLogCreators";
 
 const LastFailExecution: FC<LastFailExecutionProps> =
     ({
@@ -34,24 +35,14 @@ const LastFailExecution: FC<LastFailExecutionProps> =
         theme,
     }) => {
         const dispatch = useAppDispatch()
-        const {gettingLogsByExecutionId} = Schedule.getReduxState();
         const [startGettingLogs, setStartGettingLogs] = useState<boolean>(false);
         const prevProps: any = usePrevious({schedule}) || [];
         const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
-        const getLogs = (executionId: string) => {
+        const getLogs = async (executionId: string) => {
             setStartGettingLogs(true);
-            dispatch(getLogsByExecutionId(executionId));
+            await dispatch(getFlowChartLogsByExecId(executionId));
+            setStartGettingLogs(false);
         }
-        useEffect(() => {
-            if (startGettingLogs) {
-                switch (gettingLogsByExecutionId) {
-                    case API_REQUEST_STATE.FINISH:
-                    case API_REQUEST_STATE.ERROR:
-                        setStartGettingLogs(false);
-                        break;
-                }
-            }
-        }, [gettingLogsByExecutionId]);
         useEffect(() => {
             if(prevProps.schedule?.lastExecution?.fail?.taId !== schedule?.lastExecution?.fail?.taId && typeof prevProps.schedule !== 'undefined') {
                 setIsRefreshing(true);

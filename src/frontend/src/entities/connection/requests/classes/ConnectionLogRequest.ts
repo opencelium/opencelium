@@ -36,6 +36,16 @@ export class ConnectionLogRequest extends Request implements IConnectionLogReque
 		return super.get<Trace[]>();
 	}
 
+	async getFlowCharts(executionId: string): Promise<AxiosResponse<Trace[]>> {
+		this.endpoint = `/log/element/${executionId}/children`;
+		return super.get<Trace[]>();
+	}
+
+	async getFirstLevelLogs(flowChartId: string): Promise<AxiosResponse<Trace[]>> {
+		this.endpoint = `/log/element/${flowChartId}/children`;
+		return super.get<Trace[]>();
+	}
+
 	async deleteLogs(data: DeleteLogsRequest): Promise<AxiosResponse<IResponse>> {
 		this.endpoint = `/${data.executionId}`;
 		return super.delete<IResponse>();

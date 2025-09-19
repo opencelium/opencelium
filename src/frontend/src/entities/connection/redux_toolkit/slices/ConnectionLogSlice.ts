@@ -9,7 +9,7 @@ import {
 import {
 	deleteLogs,
 	getDetailedMethod,
-	getDetailedOperator, getOperatorChildren, testConnection,
+	getDetailedOperator, getFlowChartLogsByExecId, getOperatorChildren, testConnection,
 } from '../action_creators/ConnectionLogCreators';
 import {findAndUpdateTrace} from "@root/utils/utils";
 
@@ -231,6 +231,10 @@ export const connectionLogSlice = createSlice({
 				}
 				return false;
 			});
+		});
+		builder.addCase(getFlowChartLogsByExecId.fulfilled, (state, action) => {
+			state.connectors = action.payload.connectorLogs;
+			state.executionId = action.payload.executionId;
 		});
 		builder.addCase(getOperatorChildren.fulfilled, (state, action) => {
 			const { flowId, indexPath, executionId, loopIndex } = action.meta.arg;
