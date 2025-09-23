@@ -28,15 +28,31 @@ const ScheduleLogListStyled = styled.div<{x: number, y: number}>`
     background: white;
     border: 1px solid #eee;
     border-radius: 2px;
+    padding: 2px 5px;
 `;
 
 const ScheduleLogId = styled.span`
+`
+
+const ScheduleLogEntry = styled.tr`
+    white-space: nowrap;
+    text-align: left;
+`;
+const MinusStyled = styled.td`
+    padding-left: 5px;
+    padding-right: 5px;
+`;
+const DatetimeValue = styled.td`
+    cursor: pointer;
     &:hover {
         text-decoration: underline;
     }
-`
+`;
 
 export {
     ScheduleLogListStyled,
     ScheduleLogId,
+    ScheduleLogEntry,
+    MinusStyled,
+    DatetimeValue,
 }
