@@ -19,12 +19,16 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import java.net.URI;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.regex.Pattern;
 
 import static com.becon.opencelium.backend.constant.RegExpression.directRef;
 import static com.becon.opencelium.backend.constant.RegExpression.enhancement;
@@ -92,9 +96,13 @@ public class RequestEntityBuilder {
 
             // replace referenced schema
             replaceRefs(copiedParameter.getSchema());
-
+            String value = ParameterDTOUtil.toString(copiedParameter);
+            if (!ref.contains("url")) {
+                value = replaceWhitespaceWithPercent20(value);
+            }
+            rawUrl = rawUrl.replace(ref,value);
             // convert parameter to string, and replace this path variable with actual value
-            rawUrl = rawUrl.replace(ref, ParameterDTOUtil.toString(copiedParameter));
+//            rawUrl = rawUrl.replace(ref, ParameterDTOUtil.toString(copiedParameter));
         }
 
         // replace query parameters
@@ -109,12 +117,27 @@ public class RequestEntityBuilder {
             // construct correct query parameter
             String query = ParameterDTOUtil.toString(copiedParameter);
 
+            query = replaceWhitespaceWithPercent20(query);
             // replace raw query parameter with correct one
             rawUrl = rawUrl.replace(rawQuery, query);
         }
 
         return URI.create(rawUrl);
     }
+
+    /** Replace every whitespace char with "%20". */
+    public static String replaceWhitespaceWithPercent20(String input) {
+        Pattern WS = Pattern.compile("\\s", Pattern.UNICODE_CHARACTER_CLASS);
+        if (input == null) return null;
+        return WS.matcher(input).replaceAll("%20");
+    }
+
+    // private String encValue(String query) {
+    //     if (query == null || query.isEmpty()) return query;
+
+    //     String encVal = query.replace(" ", "%20");
+    //     return encVal;
+    // }
 
     private HttpHeaders defaultHeadersBuilder() {
         HttpHeaders headers = new HttpHeaders();
