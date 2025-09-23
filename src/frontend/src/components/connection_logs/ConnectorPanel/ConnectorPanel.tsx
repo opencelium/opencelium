@@ -5,6 +5,7 @@ import styles from './ConnectorPanel.module.css';
 import TraceItem from './TraceItem/TraceItem';
 import {RootState, useAppSelector} from "@application/utils/store";
 import {Loading} from "@app_component/base/loading/Loading";
+import {withTheme} from "styled-components";
 
 interface ConnectorPanelProps {
 	connector: ConnectorLog;
@@ -37,4 +38,4 @@ const ConnectorPanel: React.FC<ConnectorPanelProps> = ({
 	);
 };
 
-export default ConnectorPanel;
+export default withTheme(ConnectorPanel);

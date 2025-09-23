@@ -17,6 +17,9 @@ export interface TestConnectionResponse {
 export interface DeleteLogsRequest {
 	executionId: string,
 }
+export interface GetLogListResponse {
+	result: string[],
+}
 
 export interface IConnectionLogRequest {
 	getDetailedMethod(data: ConLogRequestProps): Promise<AxiosResponse<ConnectionSocketLog<DetailedMethodSegment>>>;
@@ -24,4 +27,5 @@ export interface IConnectionLogRequest {
 	getOperatorChildren(data: ConLogRequestProps): Promise<AxiosResponse<Trace[]>>;
 	deleteLogs(data: DeleteLogsRequest): Promise<AxiosResponse<IResponse>>;
 	testConnection(connection: any): Promise<AxiosResponse<TestConnectionResponse>>;
+	getLogList(scheduleId: string): Promise<AxiosResponse<GetLogListResponse>>;
 }
