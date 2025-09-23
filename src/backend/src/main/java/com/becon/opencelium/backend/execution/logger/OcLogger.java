@@ -47,6 +47,9 @@ public class OcLogger<T extends LogMessage> {
         this.connectionId = connectionId;
         this.logEntity = logEntity;
 
+        // delete existing log files with the same 'executionId'
+        LogFileUtility.deleteByExecutionId(executionId);
+
         // set up the logger to create temporary log file in base log directory: type = u (uncategorized), not s (success) or f (fail):
         String loggerId = String.format("%d-%d", executionId, connectionId);
         String filename = LogFileUtility.toFilename(timestamp, connectionId, "u", executionId, "log");
