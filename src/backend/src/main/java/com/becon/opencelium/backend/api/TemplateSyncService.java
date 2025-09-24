@@ -1,8 +1,8 @@
 package com.becon.opencelium.backend.api;
 
+import com.becon.opencelium.backend.api.factory.ApiFactory;
 import com.becon.opencelium.backend.constant.props.OpenceliumProps;
 import com.becon.opencelium.backend.database.mysql.service.OnlineSyncHistoryService;
-import com.becon.opencelium.backend.api.enums.ApiModule;
 import com.becon.opencelium.backend.api.module.TemplateModule;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.template.service.TemplateService;

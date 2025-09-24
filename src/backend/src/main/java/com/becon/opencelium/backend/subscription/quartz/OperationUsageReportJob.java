@@ -2,16 +2,13 @@ package com.becon.opencelium.backend.subscription.quartz;
 
 import com.becon.opencelium.backend.api.serviceportal.ServicePortal;
 import com.becon.opencelium.backend.database.mysql.service.OperationUsageHistoryService;
-import com.becon.opencelium.backend.database.mysql.service.OperationUsageHistoryServiceImpl;
 import com.becon.opencelium.backend.api.ApiClient;
-import com.becon.opencelium.backend.api.ApiFactory;
+import com.becon.opencelium.backend.api.factory.ApiFactory;
 import com.becon.opencelium.backend.subscription.dto.UsageHistoryDto;
-import com.becon.opencelium.backend.api.enums.ApiModule;
 import com.becon.opencelium.backend.api.ApiType;
 import com.becon.opencelium.backend.api.module.ReportModule;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;

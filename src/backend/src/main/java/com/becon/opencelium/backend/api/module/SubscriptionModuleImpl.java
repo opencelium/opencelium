@@ -55,27 +55,4 @@ public class SubscriptionModuleImpl implements SubscriptionModule {
             throw new RemoteApiException("Service is not reachable at " + endpoint, e);
         }
     }
-
-//
-//
-//    @Override
-//    public ResponseEntity<String> getSubById(String id) {
-//        return httpRequestHelper.makeGetRequest("/api/opencelium/license/" + id, createHeaders(), String.class);
-//    }
-
-//    @Override
-//    public ResponseEntity<String> getAllSubs() {
-//        return httpRequestHelper.makeGetRequest("/api/opencelium/license/all", createHeaders(), String.class);
-//    }
-
-//    @Override
-//    public ResponseEntity<String> generateLicenseKey(File activeRequest, String subId) {
-//        HttpHeaders headers = createHeaders();
-//        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-//
-//        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-//        body.add("file", new FileSystemResource(activeRequest));
-//
-//        return httpRequestHelper.makePostRequest("/api/opencelium/license/generate/" + subId, headers, body, String.class);
-//    }
 }

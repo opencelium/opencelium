@@ -1,6 +1,5 @@
 package com.becon.opencelium.backend.api.module;
 
-import com.becon.opencelium.backend.api.serviceportal.ServicePortalApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -33,20 +32,4 @@ public class TemplateModuleImpl implements TemplateModule {
         }
     }
 }
-
-//    @Override
-//    public ResponseEntity<byte[]> getAllTemplateFiles() {
-//        String endpoint = "/api/opencelium/template/files";
-//        try {
-//            return httpRequestHelper.makeGetRequest(endpoint, createHeaders(), byte[].class);
-//        } catch (ResourceAccessException e) {
-//            logger.error(BASE_URL + endpoint + " is not reachable. Please check your settings!");
-//
-//            throw new RuntimeException(BASE_URL + endpoint + " is not reachable. Please check your settings!");
-//        } catch (HttpClientErrorException e) {
-//            logger.error(e.getMessage());
-//
-//            throw new RuntimeException(e.getMessage());
-//        }
-//    }
 

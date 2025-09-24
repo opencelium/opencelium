@@ -1,6 +1,5 @@
 package com.becon.opencelium.backend.api.module;
 
-import com.becon.opencelium.backend.api.serviceportal.ServicePortalApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +9,7 @@ import org.springframework.web.client.RestTemplate;
 
 public class InvokerModuleImpl implements InvokerModule {
 
-    private RestTemplate rt;
+    private final RestTemplate rt;
     private final String BASE_URL;
     private static final Logger logger = LoggerFactory.getLogger(InvokerModuleImpl.class);
 
@@ -38,37 +37,3 @@ public class InvokerModuleImpl implements InvokerModule {
         return null;
     }
 }
-
-
-
-//    @Override
-//    public ResponseEntity<byte[]> getAllInvokerFiles() {
-//        String endpoint = "/api/opencelium/invoker/files";
-//        try {
-//            return httpRequestHelper.makeGetRequest(endpoint, createHeaders(), byte[].class);
-//        } catch (ResourceAccessException e) {
-//            logger.error(BASE_URL + endpoint + " is not reachable. Please check your settings!");
-//
-//            throw new RuntimeException(BASE_URL + endpoint + " is not reachable. Please check your settings!");
-//        } catch (HttpClientErrorException e) {
-//            logger.error(e.getMessage());
-//
-//            throw new RuntimeException(e.getMessage());
-//        }
-//    }
-//
-//    @Override
-//    public ResponseEntity<byte[]> getInvokerFileByName(String invokerFileName) {
-//        String endpoint = "/api/opencelium/invoker/file/" + invokerFileName;
-//        try {
-//            return httpRequestHelper.makeGetRequest(endpoint, createHeaders(), byte[].class);
-//        } catch (ResourceAccessException e) {
-//            logger.error(BASE_URL + endpoint + " is not reachable. Please check your settings!");
-//
-//            throw new RuntimeException(BASE_URL + endpoint + " is not reachable. Please check your settings!");
-//        } catch (HttpClientErrorException e) {
-//            logger.error(e.getMessage());
-//
-//            throw new RuntimeException(e.getMessage());
-//        }
-//    }

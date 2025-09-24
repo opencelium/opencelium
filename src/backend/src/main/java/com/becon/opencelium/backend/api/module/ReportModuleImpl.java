@@ -33,14 +33,4 @@ public class ReportModuleImpl implements ReportModule {
         }
 
     }
-
-//    @Override
-//    public void sendReport(Object payload) {
-//        httpRequestHelper.makePostRequest("/api/opencelium/history/save", createHeaders(), payload, String.class);
-//    }
-//
-//    @Override
-//    public ResponseEntity<String> getLastOperationUsageHistory() {
-//        return httpRequestHelper.makeGetRequest("/api/opencelium/history/last", createHeaders(), String.class);
-//    }
 }
