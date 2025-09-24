@@ -16,7 +16,7 @@ public class PathAndReferenceUtility {
     private static final String SUF_WEBHOOK = "}";
     private static final String PRE_BRACKET = "['";
     private static final String SUF_BRACKET = "']";
-    private static final EmptyQueryValuePolicy EMPTY_QUERY_VALUE_POLICY = EmptyQueryValuePolicy.FAIL;
+    private static final EmptyQueryValuePolicy EMPTY_QUERY_VALUE_POLICY = EmptyQueryValuePolicy.SET_EMPTY;
     private static final Logger log = LogManager.getLogger(PathAndReferenceUtility.class);
 
     public static int indexOf(String path, char ch, boolean hasWebHook, boolean hasDirectRef) {
