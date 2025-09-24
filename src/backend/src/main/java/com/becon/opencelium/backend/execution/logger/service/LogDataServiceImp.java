@@ -76,10 +76,9 @@ public class LogDataServiceImp implements LogDataService {
                 .toList();
     }
 
-    // sometime user can send id of execution of flowchart in such cases we have to find elementId.
+    // sometime user can send id of execution in such cases we have to find elementId.
     private String findElementId(String elementId) {
         return metaDataLogRepository.findByExecutionIdAndType(elementId, EXECUTION.name())
-                .or(() -> metaDataLogRepository.findByFlowIdAndType(elementId, FLOWCHART.name()))
                 .map(LogDataMng::getId)
                 .orElse(elementId);
     }

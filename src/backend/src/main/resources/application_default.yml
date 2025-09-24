@@ -234,9 +234,22 @@ opencelium:
 #      limit:
 #        success: 1
 #        fail: 5
+#  log:
+#    retention:
+#      per-connection:
+#        success: 2
+#        fail: 3
 #  rest_template:
 #    proxy:
 #      host: 127.0.0.1
 #      port: 8082
 #      username: ####
 #      password: ####
+#  online_services:
+#    invoker_sync:
+#      time: 0 0 0 * * *
+#      active: "false"
+#    template_sync:
+#      time: 0 0 0 * * *
+#      active: "false"
+#    active: "false"
