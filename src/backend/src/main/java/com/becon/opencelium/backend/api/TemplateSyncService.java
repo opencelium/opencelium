@@ -1,10 +1,9 @@
-package com.becon.opencelium.backend.subscription.remoteapi;
+package com.becon.opencelium.backend.api;
 
-import com.becon.opencelium.backend.configuration.OpenCeliumProps;
+import com.becon.opencelium.backend.constant.props.OpenceliumProps;
 import com.becon.opencelium.backend.database.mysql.service.OnlineSyncHistoryService;
-import com.becon.opencelium.backend.subscription.remoteapi.enums.ApiModule;
-import com.becon.opencelium.backend.subscription.remoteapi.enums.ApiType;
-import com.becon.opencelium.backend.subscription.remoteapi.module.TemplateModule;
+import com.becon.opencelium.backend.api.enums.ApiModule;
+import com.becon.opencelium.backend.api.module.TemplateModule;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.template.service.TemplateService;
 import com.becon.opencelium.backend.version_manager.EntityUpdater;
@@ -26,7 +25,7 @@ import java.util.zip.ZipInputStream;
 @Service
 public class TemplateSyncService {
     private final TemplateModule templateModule;
-    private final OpenCeliumProps ocProps;
+    private final OpenceliumProps ocProps;
     private final EntityUpdater<Template> templateEntityUpdater;
     private final TemplateService templateService;
     private final OnlineSyncHistoryService onlineSyncHistoryService;
@@ -37,17 +36,18 @@ public class TemplateSyncService {
 
 
     public TemplateSyncService(
-            OpenCeliumProps ocProps,
+            OpenceliumProps ocProps,
             EntityVersionManager entityVersionManager,
             TemplateService templateService,
             OnlineSyncHistoryService onlineSyncHistoryService,
+            ApiFactory apiFactory,
             @Qualifier("objectMapper") ObjectMapper objectMapper
     ) {
         this.ocProps = ocProps;
         this.templateEntityUpdater = entityVersionManager.getUpdater(Template.class);
         this.templateService = templateService;
         this.onlineSyncHistoryService = onlineSyncHistoryService;
-        this.templateModule = (TemplateModule) RemoteApiFactory.createInstance(ApiType.SERVICE_PORTAL).getModule(ApiModule.TEMPLATE);
+        this.templateModule = apiFactory.get(ApiType.SERVICE_PORTAL).features().template();
         this.objectMapper = objectMapper;
     }
 

@@ -16,7 +16,7 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
-import com.becon.opencelium.backend.configuration.OpenCeliumProps;
+import com.becon.opencelium.backend.constant.props.OpenceliumProps;
 import com.becon.opencelium.backend.constant.*;
 import com.becon.opencelium.backend.container.Command;
 import com.becon.opencelium.backend.container.ConnectionUpdateTracker;
@@ -50,7 +50,6 @@ import com.github.fge.jsonpatch.JsonPatch;
 import jakarta.persistence.EntityNotFoundException;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -83,7 +82,7 @@ public class ConnectionServiceImp implements ConnectionService {
     private final MaskingRuleRepository ruleRepository;
     private final PatchHelper patchHelper;
     private final WebhookService webhookService;
-    private final OpenCeliumProps ocProps;
+    private final OpenceliumProps ocProps;
     private final EntityUpdater<ConnectionMng> connectionMngEntityUpdater;
     private final EntityUpdater<Enhancement> enhancementEntityUpdater;
     private final MysqlBackupService mysqlBackupService;
@@ -106,7 +105,7 @@ public class ConnectionServiceImp implements ConnectionService {
             ConnectionUpdateTracker updateTracker,
             MaskingRuleRepository ruleRepository,
             EntityVersionManager entityVersionManager,
-            OpenCeliumProps ocProps, MysqlBackupService mysqlBackupService, MongoDbBackupService mongoDbBackupService
+            OpenceliumProps ocProps, MysqlBackupService mysqlBackupService, MongoDbBackupService mongoDbBackupService
     ) {
         this.connectionRepository = connectionRepository;
         this.connectorService = connectorService;

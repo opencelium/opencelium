@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.subscription.remoteapi.module;
+package com.becon.opencelium.backend.api.module;
 
 import org.springframework.http.ResponseEntity;
 

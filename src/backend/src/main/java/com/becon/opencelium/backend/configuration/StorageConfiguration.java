@@ -17,6 +17,7 @@
 package com.becon.opencelium.backend.configuration;
 
 import com.becon.opencelium.backend.constant.PathConstant;
+import com.becon.opencelium.backend.constant.props.OpenceliumProps;
 import com.becon.opencelium.backend.database.mysql.entity.*;
 import com.becon.opencelium.backend.database.mysql.service.*;
 import com.becon.opencelium.backend.enums.ActivReqStatus;
@@ -65,7 +66,7 @@ public class StorageConfiguration {
     private final ActivationRequestService activationRequestService;
     private final ConnectionService connectionService;
     private final TemplateService templateService;
-    private final OpenCeliumProps ocProps;
+    private final OpenceliumProps ocProps;
 
     @Autowired
     private ResourceLoader resourceLoader;
@@ -84,7 +85,7 @@ public class StorageConfiguration {
             InvokerContainer invokerContainer,
             DataSource dataSource,
             Environment environment,
-            ConnectionService connectionService, TemplateService templateService, OpenCeliumProps ocProps
+            ConnectionService connectionService, TemplateService templateService, OpenceliumProps ocProps
     ) {
         this.userStorageService = userStorageService;
         this.connectorService = connectorService;

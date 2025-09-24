@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.subscription.remoteapi.dto;
+package com.becon.opencelium.backend.subscription.dto;
 
 public class SubscriptionDto {
     private String _id;

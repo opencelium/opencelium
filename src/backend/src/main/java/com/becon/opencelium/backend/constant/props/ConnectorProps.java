@@ -1,9 +1,8 @@
-package com.becon.opencelium.backend.configuration;
+package com.becon.opencelium.backend.constant.props;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-@Component
 @ConfigurationProperties(prefix = "opencelium.connector")
 public class ConnectorProps {
     private String masterPassword;

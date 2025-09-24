@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.version_manager.backup;
 
-import com.becon.opencelium.backend.configuration.OpenCeliumProps;
+import com.becon.opencelium.backend.constant.props.OpenceliumProps;
 import com.becon.opencelium.backend.database.mysql.service.EnhancementService;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.stereotype.Service;
@@ -21,11 +21,11 @@ import java.util.regex.Pattern;
 @Service
 public class MysqlBackupService {
 
-    private final OpenCeliumProps ocProps;
+    private final OpenceliumProps ocProps;
     private final DataSourceProperties dbProperties;
     private final EnhancementService enhancementService;
 
-    public MysqlBackupService(OpenCeliumProps ocProps, DataSourceProperties dbProperties, EnhancementService enhancementService) {
+    public MysqlBackupService(OpenceliumProps ocProps, DataSourceProperties dbProperties, EnhancementService enhancementService) {
         this.ocProps = ocProps;
         this.dbProperties = dbProperties;
         this.enhancementService = enhancementService;

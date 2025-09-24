@@ -1,16 +1,14 @@
 package com.becon.opencelium.backend.subscription.quartz;
 
+import com.becon.opencelium.backend.api.serviceportal.ServicePortal;
 import com.becon.opencelium.backend.database.mysql.service.OperationUsageHistoryService;
 import com.becon.opencelium.backend.database.mysql.service.OperationUsageHistoryServiceImpl;
-import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
-import com.becon.opencelium.backend.subscription.remoteapi.RemoteApi;
-import com.becon.opencelium.backend.subscription.remoteapi.RemoteApiFactory;
-import com.becon.opencelium.backend.subscription.remoteapi.dto.UsageHistoryDto;
-import com.becon.opencelium.backend.subscription.remoteapi.enums.ApiModule;
-import com.becon.opencelium.backend.subscription.remoteapi.enums.ApiType;
-import com.becon.opencelium.backend.subscription.remoteapi.module.ReportModule;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.quartz.Job;
+import com.becon.opencelium.backend.api.ApiClient;
+import com.becon.opencelium.backend.api.ApiFactory;
+import com.becon.opencelium.backend.subscription.dto.UsageHistoryDto;
+import com.becon.opencelium.backend.api.enums.ApiModule;
+import com.becon.opencelium.backend.api.ApiType;
+import com.becon.opencelium.backend.api.module.ReportModule;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,13 +22,19 @@ import java.util.Map;
 @Component
 public class OperationUsageReportJob extends QuartzJobBean {
 
-    @Autowired
-    private OperationUsageHistoryServiceImpl operationUsageHistoryService;
+    private final OperationUsageHistoryService operationUsageHistoryService;
+    private final ApiFactory apiFactory;
+
+    public OperationUsageReportJob(@Qualifier("operationUsageHistoryServiceImpl") OperationUsageHistoryService operationUsageHistoryService,
+                                   ApiFactory apiFactory) {
+        this.operationUsageHistoryService = operationUsageHistoryService;
+        this.apiFactory = apiFactory;
+    }
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
-        RemoteApi remoteApi = RemoteApiFactory.createInstance(ApiType.SERVICE_PORTAL);
-        ReportModule reportModule = (ReportModule) remoteApi.getModule(ApiModule.OPERATION_USAGE);
+        ApiClient<ServicePortal> servicePortal = apiFactory.get(ApiType.SERVICE_PORTAL);
+        ReportModule reportModule = servicePortal.features().operationUsage();
         List<UsageHistoryDto> usageHistoryDtoList = operationUsageHistoryService.findAll()
                 .stream().map(UsageHistoryDto::new).toList();
         if (usageHistoryDtoList.isEmpty()) {

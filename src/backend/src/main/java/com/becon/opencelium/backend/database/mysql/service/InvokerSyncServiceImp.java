@@ -4,10 +4,10 @@ import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.database.mysql.entity.InvokerSync;
 import com.becon.opencelium.backend.database.mysql.repository.InvokerSyncRepository;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
-import com.becon.opencelium.backend.subscription.remoteapi.RemoteApiFactory;
-import com.becon.opencelium.backend.subscription.remoteapi.enums.ApiModule;
-import com.becon.opencelium.backend.subscription.remoteapi.enums.ApiType;
-import com.becon.opencelium.backend.subscription.remoteapi.module.InvokerModule;
+import com.becon.opencelium.backend.api.ApiFactory;
+import com.becon.opencelium.backend.api.enums.ApiModule;
+import com.becon.opencelium.backend.api.ApiType;
+import com.becon.opencelium.backend.api.module.InvokerModule;
 import com.becon.opencelium.backend.utility.crypto.HmacUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,12 +56,13 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
 
     public InvokerSyncServiceImp(
             InvokerService invokerService, InvokerSyncRepository invokerSyncRepository,
-            OnlineSyncHistoryService onlineSyncHistoryService
+            OnlineSyncHistoryService onlineSyncHistoryService,
+            ApiFactory apiFactory
     ) {
         this.invokerService = invokerService;
         this.invokerSyncRepository = invokerSyncRepository;
         this.onlineSyncHistoryService = onlineSyncHistoryService;
-        this.invokerModule = (InvokerModule) RemoteApiFactory.createInstance(ApiType.SERVICE_PORTAL).getModule(ApiModule.INVOKER);
+        this.invokerModule = apiFactory.get(ApiType.SERVICE_PORTAL).features().invoker();
     }
 
     /**

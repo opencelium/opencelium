@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.controller;
 
+import com.becon.opencelium.backend.api.serviceportal.ServicePortal;
 import com.becon.opencelium.backend.database.mysql.entity.ActivationRequest;
 import com.becon.opencelium.backend.database.mysql.entity.OperationUsageHistory;
 import com.becon.opencelium.backend.database.mysql.entity.OperationUsageHistoryDetail;
@@ -11,11 +12,11 @@ import com.becon.opencelium.backend.resource.subs.PaginatedDto;
 import com.becon.opencelium.backend.resource.subs.SubsDTO;
 import com.becon.opencelium.backend.subscription.dto.ActivationRequestDTO;
 import com.becon.opencelium.backend.subscription.dto.LicenseKey;
-import com.becon.opencelium.backend.subscription.remoteapi.RemoteApi;
-import com.becon.opencelium.backend.subscription.remoteapi.RemoteApiFactory;
-import com.becon.opencelium.backend.subscription.remoteapi.enums.ApiModule;
-import com.becon.opencelium.backend.subscription.remoteapi.enums.ApiType;
-import com.becon.opencelium.backend.subscription.remoteapi.module.SubscriptionModule;
+import com.becon.opencelium.backend.api.ApiClient;
+import com.becon.opencelium.backend.api.ApiFactory;
+import com.becon.opencelium.backend.api.enums.ApiModule;
+import com.becon.opencelium.backend.api.ApiType;
+import com.becon.opencelium.backend.api.module.SubscriptionModule;
 import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
 import com.becon.opencelium.backend.utility.crypto.Base64Utility;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -38,15 +39,13 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/subs")
 @Tag(name = "Subscription")
 public class SubscriptionController {
 
-    private final RemoteApi remoteApi;
+    private final ApiClient<ServicePortal> servicePortal;
     private final SubscriptionService subscriptionService;
     private final ActivationRequestService activationRequestService;
     private final ActivationRequestMapper activationRequestMapper;
@@ -58,12 +57,13 @@ public class SubscriptionController {
             @Qualifier("activationRequestServiceImp") ActivationRequestService activationRequestService,
             @Qualifier("operationUsageHistoryServiceImpl") OperationUsageHistoryService operationUsageHistoryService,
             @Qualifier("extraOpsServiceImp") ExtraOpsService extraOpsService,
-            ActivationRequestMapper activationRequestMapper
+            ActivationRequestMapper activationRequestMapper,
+            ApiFactory apiFactory
 
     ) {
         this.subscriptionService = subscriptionService;
         this.activationRequestService = activationRequestService;
-        this.remoteApi = RemoteApiFactory.createInstance(ApiType.SERVICE_PORTAL);
+        this.servicePortal = apiFactory.get(ApiType.SERVICE_PORTAL);
         this.activationRequestMapper = activationRequestMapper;
         this.operationUsageHistoryService = operationUsageHistoryService;
         this.extraOpsService = extraOpsService;
@@ -73,19 +73,19 @@ public class SubscriptionController {
 
     @GetMapping(path = "/all")
     public ResponseEntity<String> getAllSubscriptions() {
-        SubscriptionModule subsModule = (SubscriptionModule) remoteApi.getModule(ApiModule.SUBSCRIPTION);
-        return ResponseEntity.ok(subsModule.getAllSubs().getBody());
+        SubscriptionModule subsModule = servicePortal.features().subscription();
+        return subsModule.getAllSubs();
     }
 
     @GetMapping(path = "/connection/check")
     public ResponseEntity<?> checkConnection() {
-        return ResponseEntity.ok(remoteApi.checkConnection().getBody());
+        return servicePortal.checkConnection();
     }
 
     @GetMapping(path = "/{subId}")
     public ResponseEntity<String> getSubById(@PathVariable String subId) {
-        SubscriptionModule module = (SubscriptionModule) remoteApi.getModule(ApiModule.SUBSCRIPTION);
-        return ResponseEntity.ok(module.getAllSubs().getBody());
+        SubscriptionModule module = servicePortal.features().subscription();
+        return module.getSubById(subId);
     }
 
     @PostMapping(path = "/{subId}")
@@ -95,7 +95,7 @@ public class SubscriptionController {
         String encodedAr = Base64Utility.encode(ar);
 
         // request Service Portal for a license
-        SubscriptionModule sModule = (SubscriptionModule) remoteApi.getModule(ApiModule.SUBSCRIPTION);
+        SubscriptionModule sModule = servicePortal.features().subscription();
         File arFile = activationRequestService.createFile(encodedAr, "activation-request");
         String response  = sModule.generateLicenseKey(arFile, subId).getBody();
         String licenseKey = extractLicenseKey(response);
