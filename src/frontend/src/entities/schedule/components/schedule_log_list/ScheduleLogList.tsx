@@ -18,10 +18,18 @@ import React, {FC, useEffect, useMemo} from 'react';
 import {withTheme} from 'styled-components';
 import {RootState, useAppDispatch, useAppSelector} from "@application/utils/store";
 import {ScheduleLogListProps} from './interfaces';
-import {ScheduleLogId, ScheduleLogListStyled,} from './styles';
+import {DatetimeValue, MinusStyled, ScheduleLogEntry, ScheduleLogId, ScheduleLogListStyled,} from './styles';
 import {useEventListener} from "@application/utils/utils";
 import {getFlowChartLogsByExecId} from "@root/redux_toolkit/action_creators/ConnectionLogCreators";
+function extractDateTime(filename: string): string | null {
+    // Match YYYY-MM-DD_HH-MM at start of string
+    const match = filename.match(/^(\d{4})-(\d{2})-(\d{2})_(\d{2})-(\d{2})/);
+    if (!match) return null;
 
+    const [ , year, month, day, hour, minute ] = match;
+
+    return `${day}.${month}.${year} ${hour}:${minute}`;
+}
 const ScheduleLogList: FC<ScheduleLogListProps> =
     ({
         x,
@@ -35,7 +43,8 @@ const ScheduleLogList: FC<ScheduleLogListProps> =
         return logList.map((logName) => {
             const splitName = logName.substr(0, logName.length - 4).split('_');
             const executionId = splitName[splitName.length - 1];
-            return executionId;
+            const datetime = extractDateTime(logName);
+            return {executionId, datetime};
         }).sort().reverse()
     }, [logList])
     const getLogs = async (executionId: string) => {
@@ -59,13 +68,18 @@ const ScheduleLogList: FC<ScheduleLogListProps> =
     return (
         ReactDOM.createPortal(
             <ScheduleLogListStyled x={x} y={y}>
-                {logExecList.map(((executionId, index) => {
-                    return (
-                        <div onClick={() => getLogs(executionId)} key={executionId} style={{whiteSpace: 'nowrap', textAlign: 'left', paddingLeft: '5px', cursor: 'pointer'}}>
-                            <span>{`${index + 1}. `}<ScheduleLogId>{`#${executionId}`}</ScheduleLogId></span>
-                        </div>
-                    )
-                }))}
+                <table>
+                    {logExecList.map(((entry, index) => {
+                        return (
+                            <ScheduleLogEntry key={entry.executionId}>
+                                <td>{`#${entry.executionId}`}</td>
+                                <MinusStyled>{`-`}</MinusStyled>
+                                <DatetimeValue
+                                    onClick={() => getLogs(entry.executionId)}>{entry.datetime}</DatetimeValue>
+                            </ScheduleLogEntry>
+                        )
+                    }))}
+                </table>
             </ScheduleLogListStyled>,
             document.getElementById('schedule_log_list')
         )
