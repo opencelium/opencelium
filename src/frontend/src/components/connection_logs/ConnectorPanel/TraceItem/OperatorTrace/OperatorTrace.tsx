@@ -1,21 +1,28 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
 	ConnectionSocketLog,
 	DetailedIfOperatorSegment, DetailedOperatorSegment,
-	IfOperatorProperty,
 	LoopOperatorProperty, MetaTrace,
-	Trace,
 } from '@root/requests/models/ConnectionLog';
 import ToggleButton from '../ToggleButton/ToggleButton';
 import TraceItem from '../TraceItem';
 import styles from './OperatorTrace.module.css';
-import {useAppDispatch} from "@application/utils/store";
-import {cleanOperatorTrace} from "@root/redux_toolkit/slices/ConnectionLogSlice";
+import {RootState, useAppDispatch, useAppSelector} from "@application/utils/store";
+import {
+	cleanOperatorTrace,
+	copyLogContentToClipboard,
+	setTraceConfig
+} from "@root/redux_toolkit/slices/ConnectionLogSlice";
 import FontIcon from "@basic_components/FontIcon";
-import {getDetailedOperator, getOperatorChildren} from "@root/redux_toolkit/action_creators/ConnectionLogCreators";
+import {getOperatorChildren} from "@root/redux_toolkit/action_creators/ConnectionLogCreators";
 import {ShowIndexPath} from "@app_component/connection_logs/LogsPanel/LogsPanel";
+import CopyOperatorButton from "@app_component/connection_logs/ConnectorPanel/TraceItem/OperatorTrace/CopyOperatorButton";
+import {ColorTheme} from "@style/Theme";
+import LoopIterator from "@app_component/connection_logs/ConnectorPanel/TraceItem/OperatorTrace/LoopIndex";
+import OperatorTraceExpander
+	from "@app_component/connection_logs/ConnectorPanel/TraceItem/OperatorTrace/OperatorTraceExpander";
 
-interface Props {
+export interface OperatorTraceProps {
 	trace: ConnectionSocketLog<DetailedOperatorSegment> & MetaTrace;
 	flowId: string;
 	executionId: string;
@@ -24,133 +31,71 @@ interface Props {
 
 const INDENT_SIZE = 40;
 
-export const OperatorTrace: React.FC<Props> = ({
+export const OperatorTrace: React.FC<OperatorTraceProps> = ({
 	trace,
 	flowId,
 	executionId,
 	iterationIndexes,
 }) => {
 	const isLoop = trace.type === 'LOOP';
-	const isIf = trace.type === 'IF';
 	const dispatch = useAppDispatch();
+	const {traceConfigs} = useAppSelector((state: RootState) => state.connectionLogReducer);
 	const [expanded, setExpanded] = useState(false);
 	const [loading, setLoading] = useState(false);
-	const [nextLoading, setNextLoading] = useState(false);
-	const [prevLoading, setPrevLoading] = useState(false);
-	const [iterationIndex, setIterationIndex] = useState(1);
-	const size = (trace.properties as LoopOperatorProperty).size;
+	const [iterationIndex, setIterationIndex] = useState(0);
 	const handleToggle = async () => {
 		if (!expanded) {
 			setLoading(true);
 			await dispatch(
-				getDetailedOperator({
+				getOperatorChildren({
 					executionId,
 					flowId,
 					indexPath: trace.indexPath,
-					loopIndex: isLoop ? [...iterationIndexes, iterationIndex] : undefined,
+					loopIndex: [...iterationIndexes, iterationIndex],
+					id: trace.id,
 				})
 			);
 			setLoading(false);
 			setExpanded(true);
+			dispatch(setTraceConfig({
+				indexPath: trace.indexPath,
+				config: {
+					isOpened: true,
+				}
+			}));
 		} else {
-			dispatch(cleanOperatorTrace({ flowId, indexPath: trace.indexPath }));
+			dispatch(cleanOperatorTrace({flowId, indexPath: trace.indexPath}));
 			setExpanded(false);
+			dispatch(setTraceConfig({
+				indexPath: trace.indexPath,
+				config: {
+					isOpened: false,
+				}
+			}));
 		}
-	};
+	}
 
-	const handleNextIteration = async (e: any) => {
-		e.preventDefault();
-		e.stopPropagation();
-		dispatch(cleanOperatorTrace({ flowId, indexPath: trace.indexPath }));
-		if (isLoop) {
-			const nextIndex = iterationIndex + 1;
-			if (nextIndex <= size) {
-				setIterationIndex(nextIndex);
-				setNextLoading(true);
-				await dispatch(
-					getOperatorChildren({
-						executionId,
-						flowId,
-						indexPath: trace.indexPath,
-						loopIndex: [...iterationIndexes, nextIndex],
-					})
-				);
-				setNextLoading(false);
+	useEffect(() => {
+		if (traceConfigs[trace.indexPath]) {
+			if (traceConfigs[trace.indexPath].isOpened) {
+				handleToggle();
 			}
 		}
-	};
+	}, []);
 
-	const handlePrevIteration = async (e: any) => {
-		e.preventDefault();
-		e.stopPropagation();
-		dispatch(cleanOperatorTrace({ flowId, indexPath: trace.indexPath }));
-		if (isLoop) {
-			const prevIndex = iterationIndex - 1;
-			if (prevIndex >= 1) {
-				setIterationIndex(prevIndex);
-				setPrevLoading(true);
-				await dispatch(
-					getOperatorChildren({
-						executionId,
-						flowId,
-						indexPath: trace.indexPath,
-						loopIndex: [...iterationIndexes, prevIndex],
-					})
-				);
-				setPrevLoading(false);
-			}
-		}
-	};
-	const hasError = trace?.error?.message;
 	return (
 		<div>
-			<div className={styles.trace} onClick={handleToggle}>
-				<div className={styles.traceLeftSide}>
-					<ToggleButton
-						loading={loading || !trace.isCompleted}
-						expanded={expanded}
-						onClick={handleToggle}
-					/>
-					<span className={styles.type}>{isIf ? 'IF' : 'LOOP'}</span>
-					{ShowIndexPath && <span style={{ marginLeft: 8 }}>{trace.indexPath}</span>}
-					{isIf && <span>
-						{(trace.properties as IfOperatorProperty).expression}
-					</span>}
-				</div>
-				<React.Fragment>
-					{isIf && (
-						<span className={styles.ifTraceRightSide} onClick={(e: any) => {e.preventDefault(); e.stopPropagation();}}>
-							{(trace.segment as DetailedIfOperatorSegment).result ? 'true' : 'false'}
-						</span>
-					)}
-					{isLoop && (
-						<div className={styles.loopTraceRightSide} onClick={(e: any) => {e.preventDefault(); e.stopPropagation();}}>
-							<span>
-								{iterationIndex} - {size || '...'}
-							</span>
-							<FontIcon
-								isButton={true}
-								iconStyles={{cursor: 'pointer'}}
-								size={16}
-								disabled={iterationIndex === 1 || size === undefined}
-								isLoading={prevLoading}
-								value={'arrow_left'}
-								onClick={(e: any) => handlePrevIteration(e)}
-							/>
-							<FontIcon
-								isButton={true}
-								iconStyles={{cursor: 'pointer'}}
-								size={16}
-								disabled={iterationIndex === size || size === undefined}
-								isLoading={nextLoading}
-								value={'arrow_right'}
-								onClick={(e: any) => handleNextIteration(e)}
-							/>
-						</div>
-					)}
-				</React.Fragment>
-			</div>
-
+			<OperatorTraceExpander
+				expanded={expanded}
+				trace={trace}
+				flowId={flowId}
+				executionId={executionId}
+				iterationIndexes={iterationIndexes}
+				loading={loading}
+				handleToggle={handleToggle}
+				iterationIndex={iterationIndex}
+				setIterationIndex={setIterationIndex}
+			/>
 			{expanded && (
 				<div
 					className={styles.expandedContainer}

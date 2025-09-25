@@ -1218,129 +1218,93 @@ export function jsonToString(json, type) {
     return { result: '', isNotValid: true };
 }
 
-export function wrapField(path, namespaces = []) {
-  const rawParts = [];
-  let currentChunk = '';
-  let inBracket = false;
-  for (const ch of path) {
-    if (ch === '[' && !inBracket) {
-      inBracket = true; currentChunk += ch;
-    } else if (ch === ']' && inBracket) {
-      inBracket = false; currentChunk += ch;
-    } else if (ch === '.' && !inBracket) {
-      rawParts.push(currentChunk); currentChunk = '';
-    } else {
-      currentChunk += ch;
-    }
-  }
-  if (currentChunk) rawParts.push(currentChunk);
+export function wrapField(path, fieldsObject) {
+	const tokenPattern = /(\['[^']+'\]|\["[^"\]]+"\]|\[[^\]]+\]|[^.\[\]]+)/g;
+	const rawTokens = path.match(tokenPattern) || [];
+	const prefixTokens = rawTokens.slice(0, 2);
+	const pathTokens = rawTokens.slice(2);
+	const outputParts = [...prefixTokens];
+	let currentObject = fieldsObject;
+	const prefixLen = prefixTokens.length;
 
-  const prefixParts = [];
-  let idx = 0;
-  if (
-    rawParts[0] && (rawParts[0] === 'body' || rawParts[0] === 'header') &&
-    rawParts[1] === '$'
-  ) {
-    prefixParts.push(rawParts[0], rawParts[1]);
-    idx = 2;
-  }
+	let i = 0;
+	while (i < pathTokens.length) {
+		const token = pathTokens[i];
 
-  const afterPrefix = rawParts.slice(idx);
-  let tokens = afterPrefix;
-  if (afterPrefix.length && (/^\[\d+\]$/.test(afterPrefix[0]) || afterPrefix[0] === '[*]')) {
-    prefixParts.push(afterPrefix[0]);
-    tokens = afterPrefix.slice(1);
-  }
+		const mQuoted = token.match(/^\['([^']+)'\]$|^\["([^"]+)"\]$/);
+		if (mQuoted) {
+			const key = mQuoted[1] !== undefined ? mQuoted[1] : mQuoted[2];
+			outputParts.push(`['${key}']`);
+			currentObject =
+				currentObject &&
+				typeof currentObject === 'object' &&
+				key in currentObject
+					? currentObject[key]
+					: undefined;
+			i++;
+			continue;
+		}
 
-  function isPlain(name) {
-    if (name === 'body' || name === '$') return false;
-    if (/^\[\d+\]$/.test(name) || name === '[*]') return false;
-    if (/^\['.*'\]$/.test(name)) return false;
-    return true;
-  }
+		const mUnquoted = token.match(/^\[([^\]]+)\]$/);
+		if (mUnquoted) {
+			const inner = mUnquoted[1];
+			if (outputParts.length > prefixLen) {
+				outputParts[outputParts.length - 1] += `[${inner}]`;
+			} else {
+				outputParts.push(`[${inner}]`);
+			}
+			if (Array.isArray(currentObject)) {
+				currentObject = currentObject[0];
+			} else if (
+				currentObject &&
+				typeof currentObject === 'object' &&
+				inner in currentObject
+			) {
+				currentObject = currentObject[inner];
+			} else {
+				currentObject = undefined;
+			}
+			i++;
+			continue;
+		}
 
-  if (
-    namespaces.length === 0 &&
-    (
-      (tokens.length > 1 && tokens.every(isPlain)) ||
-      (tokens[0] === '$' && tokens.length > 2 && tokens.slice(1).every(isPlain))
-    )
-  ) {
-    const entire = `['${tokens.join('.') }']`;
-    return [...prefixParts, entire].join('.');
-  }
+		let matched = false;
+		if (currentObject && typeof currentObject === 'object') {
+			for (let j = pathTokens.length; j > i + 1; j--) {
+				const slice = pathTokens.slice(i, j);
+				const candDot = slice.join('.');
+				if (candDot in currentObject) {
+					outputParts.push(`['${candDot}']`);
+					currentObject = currentObject[candDot];
+					i = j;
+					matched = true;
+					break;
+				}
+				const candRaw = slice.join('');
+				if (candRaw in currentObject) {
+					outputParts.push(`['${candRaw}']`);
+					currentObject = currentObject[candRaw];
+					i = j;
+					matched = true;
+					break;
+				}
+			}
+		}
+		if (matched) {
+			continue;
+		}
 
-  const singleNs = new Set(namespaces.filter(ns => !ns.includes('.')));
+		outputParts.push(token);
+        currentObject = (currentObject && typeof currentObject === 'object' && token in currentObject)
+            ? currentObject[token]
+            : undefined;
+        i++;
 
-  const wrapped = [];
-  let i = 0;
-  while (i < tokens.length) {
-    let matchedFull = false;
-    for (const ns of namespaces) {
-      const parts = ns.split('.');
-      if (tokens.slice(i, i + parts.length).join('.') === parts.join('.')) {
-        wrapped.push(parts.length === 1 ? parts[0] : `['${ns}']`);
-        i += parts.length;
-        matchedFull = true;
-        break;
-      }
-    }
-    if (matchedFull) continue;
+	}
 
-    if (
-      wrapped.length === 0 &&
-      prefixParts.length >= 2 &&
-      i + 1 < tokens.length &&
-      isPlain(tokens[i]) &&
-      isPlain(tokens[i+1])
-    ) {
-      wrapped.push(`['${tokens[i]}.${tokens[i+1]}']`);
-      i += 2;
-      continue;
-    }
-
-    const prev = wrapped[wrapped.length - 1];
-    if (
-      prev !== undefined &&
-      singleNs.has(prev) &&
-      i + 1 < tokens.length &&
-      isPlain(tokens[i]) &&
-      isPlain(tokens[i+1])
-    ) {
-      wrapped.push(`['${tokens[i]}.${tokens[i+1]}']`);
-      i += 2;
-      continue;
-    }
-
-    if (
-      namespaces.length === 0 &&
-      prev !== undefined &&
-      (/^\[\d+\]$/.test(prev) || prev === '[*]') &&
-      i + 1 < tokens.length &&
-      isPlain(tokens[i]) &&
-      isPlain(tokens[i+1])
-    ) {
-      wrapped.push(`['${tokens[i]}.${tokens[i+1]}']`);
-      i += 2;
-      continue;
-    }
-
-    const part = tokens[i++];
-    if (
-      part === 'body' || part === '$' ||
-      /^\[\d+\]$/.test(part) || part === '[*]' ||
-      /^\['.*'\]$/.test(part)
-    ) {
-      wrapped.push(part);
-    } else if (part.includes('.') || part.includes('$')) {
-      wrapped.push(`['${part}']`);
-    } else {
-      wrapped.push(part);
-    }
-  }
-
-  return [...prefixParts, ...wrapped].join('.');
+	return outputParts.join('.');
 }
+
 
 export function unwrapField(field) {
   return field.replace(/\['(.*?)'\]/g, '$1');

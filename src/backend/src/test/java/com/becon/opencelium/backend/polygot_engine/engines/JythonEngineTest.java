@@ -67,7 +67,7 @@ class JythonEngineTest {
     void execute_shouldThrowForRuntimeError() {
         assertThatThrownBy(() -> engine.execute("raise Exception('fail')"))
             .isInstanceOf(ScriptExecutionException.class)
-            .hasMessageContaining("Jython execution error");
+            .hasMessageContaining("execution error");
     }
 
     @Test

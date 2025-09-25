@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.version_manager.backup;
 
-import com.becon.opencelium.backend.configuration.OpenCeliumProps;
+import com.becon.opencelium.backend.constant.props.OpenceliumProps;
 import org.bson.Document;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
@@ -16,9 +16,9 @@ public class MongoDbBackupService {
     private static final String OPERATOR_COLLECTION = "operator";
 
     private final MongoTemplate mongoTemplate;
-    private final OpenCeliumProps ocProps;
+    private final OpenceliumProps ocProps;
 
-    public MongoDbBackupService(MongoTemplate mongoTemplate, OpenCeliumProps ocProps) {
+    public MongoDbBackupService(MongoTemplate mongoTemplate, OpenceliumProps ocProps) {
         this.mongoTemplate = mongoTemplate;
         this.ocProps = ocProps;
     }

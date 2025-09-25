@@ -1,6 +1,6 @@
 import {
 	ConLogRequestProps,
-	DeleteLogsRequest,
+	DeleteLogsRequest, GetLogListResponse,
 	IConnectionLogRequest,
 	TestConnectionResponse
 } from '../interfaces/IConnectionLogRequest';
@@ -21,20 +21,28 @@ export class ConnectionLogRequest extends Request implements IConnectionLogReque
 		super({url: 'execution', ...settings});
 	}
 	async getDetailedMethod(data: ConLogRequestProps): Promise<AxiosResponse<ConnectionSocketLog<DetailedMethodSegment>>> {
-		const params = data.loopIndex ? `?loopIndex=${data.loopIndex.join(',')}` : '';
-		this.endpoint = `/${data.executionId}/flow/${data.flowId}/indexPath/${data.indexPath}/detailed/${params}`;
+		this.endpoint = `/log/element/${data.id}/details`;
 		return super.get<ConnectionSocketLog<DetailedMethodSegment>>();
 	}
 
 	async getDetailedOperator(data: ConLogRequestProps): Promise<AxiosResponse<ConnectionSocketLog<DetailedOperatorSegment>>> {
-		const params = data.loopIndex ? `?loopIndex=${data.loopIndex.join(',')}` : '';
-		this.endpoint = `/${data.executionId}/flow/${data.flowId}/indexPath/${data.indexPath}/detailed/${params}`;
+		this.endpoint = `/log/element/${data.id}/details`;
 		return super.get<ConnectionSocketLog<DetailedOperatorSegment>>();
 	}
 
 	async getOperatorChildren(data: ConLogRequestProps): Promise<AxiosResponse<Trace[]>> {
-		const params = data.loopIndex ? `?loopIndex=${data.loopIndex.join(',')}` : '';
-		this.endpoint = `/${data.executionId}/flow/${data.flowId}/indexPath/${data.indexPath}/children/${params}`;
+		const params = data.loopIndex && data.loopIndex.length > 0 ? `?loopIndex=${data.loopIndex[data.loopIndex.length - 1]}` : '';
+		this.endpoint = `/log/element/${data.id}/children${params}`;
+		return super.get<Trace[]>();
+	}
+
+	async getFlowCharts(executionId: string): Promise<AxiosResponse<Trace[]>> {
+		this.endpoint = `/log/element/${executionId}/children`;
+		return super.get<Trace[]>();
+	}
+
+	async getFirstLevelLogs(flowChartId: string): Promise<AxiosResponse<Trace[]>> {
+		this.endpoint = `/log/element/${flowChartId}/children`;
 		return super.get<Trace[]>();
 	}
 
@@ -46,5 +54,11 @@ export class ConnectionLogRequest extends Request implements IConnectionLogReque
 	async testConnection(connection: any): Promise<AxiosResponse<TestConnectionResponse>> {
 		this.url = 'connection';
 		return super.post<TestConnectionResponse>(connection);
+	}
+
+	async getLogList(scheduleId: any): Promise<AxiosResponse<GetLogListResponse>> {
+		this.url = 'connection';
+		this.endpoint = `/${scheduleId}/log-files`;
+		return super.get<GetLogListResponse>();
 	}
 }

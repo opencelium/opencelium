@@ -8,6 +8,7 @@ interface ToggleButtonProps {
 	expanded: boolean;
 	onClick: () => void;
 	hasError?: boolean,
+	disabled?: boolean,
 }
 
 const ToggleButton: React.FC<ToggleButtonProps> = ({
@@ -15,10 +16,11 @@ const ToggleButton: React.FC<ToggleButtonProps> = ({
 	expanded,
 	onClick,
 	hasError,
+	disabled,
 }) => {
 	const icon =
 		<FontIcon
-			iconStyles={{color: hasError ? ColorTheme.Red : '#000'}}
+			iconStyles={{color: disabled ? '#eee' : hasError ? ColorTheme.Red : '#000', cursor: disabled ? 'default' : 'pointer'}}
 			size={16}
 			isLoading={loading}
 			value={expanded ? 'keyboard_arrow_down' : 'keyboard_arrow_right'}
@@ -26,7 +28,7 @@ const ToggleButton: React.FC<ToggleButtonProps> = ({
 		/>
 
 	return (
-		<button onClick={onClick} className={styles.toggleButton}>
+		<button onClick={onClick} className={styles.toggleButton} disabled={disabled} style={{cursor: disabled ? 'default' : 'pointer'}}>
 			{icon}
 		</button>
 	);

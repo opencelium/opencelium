@@ -42,11 +42,13 @@ const Pointer: FC<PointerProps> = ({connection, pointer, pointers, submitEdit, o
         submitEdit(filteredPointers);
         toggleConfirmation(false);
     }
+    const titleString = pointerSplit.slice(2, pointerSplit.length).join('.').replace('[]', '');
+    const titleRefStructure = connection.getMethodByColor(pointerSplit[0]).response.success.body.fields;
     return (
         <div
             onMouseOver={() => {if(!showIcon) toggleIcon(!showIcon)}}
             onMouseLeave={() => {if(showIcon) toggleIcon(!showIcon)}}
-            title={wrapField(pointerSplit.slice(2, pointerSplit.length).join('.').replace('[]', ''))}
+            title={wrapField(titleString, titleRefStructure)}
             style={{position: 'relative', float: 'left', margin: '7px 2px', width: '20px', height: '10px', background: pointerSplit[0]}}
         >
             {showIcon && <div style={{position: "absolute", right: '-5px', top: '-12px'}}>

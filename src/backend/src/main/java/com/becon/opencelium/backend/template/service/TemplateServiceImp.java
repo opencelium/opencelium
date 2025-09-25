@@ -16,7 +16,7 @@
 
 package com.becon.opencelium.backend.template.service;
 
-import com.becon.opencelium.backend.configuration.OpenCeliumProps;
+import com.becon.opencelium.backend.constant.props.OpenceliumProps;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.exception.WrongEncode;
@@ -61,7 +61,7 @@ public class TemplateServiceImp implements TemplateService {
     private final ConnectionService connectionService;
     private final Mapper<ConnectionOldDTO, CtionTemplateResource> mapper;
     private final Mapper<ConnectionDTO, ConnectionOldDTO> oldDTOMapper;
-    private final OpenCeliumProps ocProps;
+    private final OpenceliumProps ocProps;
     private final EntityUpdater<Template> templateEntityUpdater;
     private final ObjectMapper objectMapper;
 
@@ -70,7 +70,7 @@ public class TemplateServiceImp implements TemplateService {
             Mapper<ConnectionOldDTO, CtionTemplateResource> mapper,
             Mapper<ConnectionDTO, ConnectionOldDTO> oldDTOMapper,
             EntityVersionManager entityVersionManager,
-            OpenCeliumProps ocProps,
+            OpenceliumProps ocProps,
             @Qualifier("objectMapper") ObjectMapper objectMapper) {
         this.connectionService = connectionService;
         this.mapper = mapper;

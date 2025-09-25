@@ -5,7 +5,6 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
 import com.becon.opencelium.backend.execution.logger.dto.LogDataDTO;
-import com.becon.opencelium.backend.execution.logger.parser.ParsedLogLineBuilder;
 import com.becon.opencelium.backend.execution.socket.WebSocketNotificationService;
 import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
 import com.becon.opencelium.backend.resource.execution.LoggerConfiguration;
@@ -123,11 +122,9 @@ public class OcLogger<T extends LogMessage> {
         long startOffset = getStartOffset();
         t.accept(message);
         long endOffset = getStartOffset();
-        if (webSocket) {
-            Optional<LogDataDTO> logData = logLineDispatcher.dispatch(message.toString(), startOffset, endOffset);
-            if (logData.isPresent()) {
-                socketNotificationService.send(connectionId, logData);
-            }
+        Optional<LogDataDTO> logData = logLineDispatcher.dispatch(message.toString(), startOffset, endOffset);
+        if (webSocket && logData.isPresent()) {
+            socketNotificationService.send(connectionId, logData);
         }
     }
 
