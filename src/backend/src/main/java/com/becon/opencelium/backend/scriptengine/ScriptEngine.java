@@ -1,7 +1,7 @@
-package com.becon.opencelium.backend.polygot_engine;
+package com.becon.opencelium.backend.scriptengine;
 
-import com.becon.opencelium.backend.polygot_engine.ex.InvalidScriptException;
-import com.becon.opencelium.backend.polygot_engine.ex.ScriptExecutionException;
+import com.becon.opencelium.backend.scriptengine.ex.InvalidScriptException;
+import com.becon.opencelium.backend.scriptengine.ex.ScriptExecutionException;
 
 import java.util.Map;
 import java.util.function.Function;

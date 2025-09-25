@@ -12,6 +12,10 @@ import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.execution.oc721.ReferenceExtractor;
 import com.becon.opencelium.backend.invoker.entity.Pagination;
 import com.becon.opencelium.backend.enums.PageParam;
+import com.becon.opencelium.backend.scriptengine.LanguageType;
+import com.becon.opencelium.backend.scriptengine.ScriptEngine;
+import com.becon.opencelium.backend.scriptengine.ScriptExecutionManager;
+import com.becon.opencelium.backend.scriptengine.ScriptExecutionManagerProvider;
 import com.becon.opencelium.backend.utility.ReferenceUtility;
 
 import java.util.ArrayList;
@@ -32,6 +36,7 @@ public class ExecutionManagerImpl implements ExecutionManager {
     private final Connector connectorTo;
     private final List<FieldBind> fieldBind;
     private final List<Operation> operations = new ArrayList<>();
+    private final ScriptExecutionManager scriptExecutionManager;
     private Integer currentCtorId;
     private Pagination pagination;
 
@@ -43,6 +48,7 @@ public class ExecutionManagerImpl implements ExecutionManager {
 
         this.refExtractor = new ReferenceExtractor(this);
         this.enhancementService = new EnhancementServiceImpl(this);
+        this.scriptExecutionManager = ScriptExecutionManagerProvider.get();
     }
 
     @Override
@@ -103,7 +109,16 @@ public class ExecutionManagerImpl implements ExecutionManager {
                 .map(FieldBind::getEnhance).findFirst()
                 .orElseThrow(() -> new RuntimeException("Non existing fieldBind id 'bindId' = " + bindId));
 
-        return enhancementService.execute(enhancement);
+        ScriptEngine scriptEngine = scriptExecutionManager.resolveEngine(LanguageType.getByCode(enhancement.getLang()))
+                .orElseThrow(() -> new RuntimeException("No engine is available for '%s' language".formatted(enhancement.getLang())));
+
+        if (!scriptEngine.isUp()) {
+            throw new RuntimeException("Currently, an engine is not up for '%s' language".formatted(enhancement.getLang()));
+        }
+
+        scriptEngine.validate(enhancement.getScript());
+
+        return scriptEngine.execute(enhancement.getScript(), enhancement.getArgs(), this::getValue);
     }
 
     @Override

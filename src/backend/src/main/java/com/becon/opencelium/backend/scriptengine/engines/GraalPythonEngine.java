@@ -1,9 +1,9 @@
-package com.becon.opencelium.backend.polygot_engine.engines;
+package com.becon.opencelium.backend.scriptengine.engines;
 
-import com.becon.opencelium.backend.polygot_engine.*;
-import com.becon.opencelium.backend.polygot_engine.Language;
-import com.becon.opencelium.backend.polygot_engine.ex.InvalidScriptException;
-import com.becon.opencelium.backend.polygot_engine.ex.ScriptExecutionException;
+import com.becon.opencelium.backend.scriptengine.*;
+import com.becon.opencelium.backend.scriptengine.Language;
+import com.becon.opencelium.backend.scriptengine.ex.InvalidScriptException;
+import com.becon.opencelium.backend.scriptengine.ex.ScriptExecutionException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,14 +15,14 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
-public class GraalRubyEngine implements ScriptEngine {
+public class GraalPythonEngine implements ScriptEngine {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Override
     public boolean supports(Language lang) {
         return lang != null
-                && lang.getLanguage() == LanguageType.RUBY
+                && lang.getLanguage() == LanguageType.PYTHON_3
                 && lang.getEngine() == ScriptEngineType.GRAALVM;
     }
 
@@ -35,7 +35,7 @@ public class GraalRubyEngine implements ScriptEngine {
     public Object execute(String script, Map<String, Object> bindings) throws ScriptExecutionException, InvalidScriptException {
         try (Context context = newContext()) {
             bindArgs(context, bindings);
-            Value result = context.eval("ruby", script);
+            Value result = context.eval("python", script);
             return translateResult(context, result);
         } catch (PolyglotException e) {
             if (e.isSyntaxError()) {
@@ -54,7 +54,7 @@ public class GraalRubyEngine implements ScriptEngine {
             Map<String, Object> resolved = bindings.entrySet().stream()
                     .collect(Collectors.toMap(Map.Entry::getKey, e -> referenceExtractor.apply(e.getValue())));
             bindArgs(context, resolved);
-            Value result = context.eval("ruby", script);
+            Value result = context.eval("python", script);
             return translateResult(context, result);
         } catch (PolyglotException e) {
             if (e.isSyntaxError()) {
@@ -69,7 +69,7 @@ public class GraalRubyEngine implements ScriptEngine {
     @Override
     public void validate(String script) throws InvalidScriptException {
         try (Context context = newContext()) {
-            context.parse("ruby", script);
+            context.parse("python", script);
         } catch (PolyglotException e) {
             if (e.isSyntaxError()) {
                 throw new InvalidScriptException(e.getMessage(), e);
@@ -83,35 +83,40 @@ public class GraalRubyEngine implements ScriptEngine {
         EngineHealthChecker healthChecker = EngineHealthCheckerFactory.getHealthChecker(ScriptEngineType.GRAALVM);
 
         if (healthChecker != null && healthChecker.check()) {
+            // If it is GraalVM then python component must be installed
+
             try (Context context = Context.create()) {
-                return context.getEngine().getLanguages().keySet().stream().anyMatch("ruby"::equals);
+                return context.getEngine().getLanguages().keySet().stream().anyMatch("python"::equals);
             }
         }
-        return false;
+
+        // If it is not GraalVM then no checks are needed
+        return true;
     }
 
     private Context newContext() {
-        return Context.newBuilder("ruby")
+        return Context.newBuilder("python")
                 .allowAllAccess(false)
                 .build();
     }
 
     private void bindArgs(Context context, Map<String, Object> bindings) {
         if (bindings == null || bindings.isEmpty()) return;
-        Value rubyBindings = context.getBindings("ruby");
+        Value pyBindings = context.getBindings("python");
         bindings.forEach((name, val) -> {
             if (val instanceof Map || val instanceof List) {
                 try {
-                    String json = mapper.writeValueAsString(val);
-                    // Ruby JSON parsing: `require 'json'; JSON.parse('<json>')`
-                    Value rubyObj = context.eval("ruby",
-                        "require 'json'\nJSON.parse('" + escapeRubyString(json) + "')");
-                    rubyBindings.putMember(name, rubyObj);
+                    String json = mapper.writeValueAsString(val)
+                            .replace("__oc__attributes.", "@")
+                            .replace(".__oc__value", "");
+                    // Use python's json.loads to convert string into python object
+                    Value py = context.eval("python", "import json\njson.loads('" + escapePythonString(json) + "')");
+                    pyBindings.putMember(name, py);
                 } catch (JsonProcessingException e) {
                     throw new ScriptExecutionException("Error serializing binding: " + name, e);
                 }
             } else {
-                rubyBindings.putMember(name, val);
+                pyBindings.putMember(name, val);
             }
         });
     }
@@ -122,22 +127,24 @@ public class GraalRubyEngine implements ScriptEngine {
         if (result.isNumber()) return result.as(Number.class);
         if (result.isString()) return result.asString();
 
+        // For sequences and mappings, prefer JSON round-trip via Python json.dumps
         try {
-            // Use Ruby's JSON to dump objects as string, then parse back into Java collections
-            Value json = context.eval("ruby", "require 'json'\nJSON");
-            String dumped = json.invokeMember("generate", result).asString();
-
+            // Use a temporary python context to call json.dumps on the object
+            Value json = context.eval("python", "import json\njson");
+            String dumped = json.invokeMember("dumps", result).asString();
+            // If it's an array/list in JSON -> List, otherwise Map
             if (dumped.trim().startsWith("[")) {
                 return mapper.readValue(dumped, List.class);
             } else {
-                return mapper.readValue(dumped, new TypeReference<Map<String, Object>>() {});
+                return mapper.readValue(dumped, new TypeReference<Map<String, Object>>() {
+                });
             }
         } catch (PolyglotException | JsonProcessingException e) {
-            throw new ScriptExecutionException("Cannot convert Ruby result", e);
+            throw new ScriptExecutionException("Cannot convert Python result", e);
         }
     }
 
-    private String escapeRubyString(String s) {
+    private String escapePythonString(String s) {
         if (s == null) return "";
         return s.replace("\\", "\\\\").replace("'", "\\'").replace("\n", "\\n").replace("\r", "\\r");
     }

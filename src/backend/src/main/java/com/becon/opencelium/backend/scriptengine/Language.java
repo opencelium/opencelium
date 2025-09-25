@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.polygot_engine;
+package com.becon.opencelium.backend.scriptengine;
 
 import java.util.Objects;
 
