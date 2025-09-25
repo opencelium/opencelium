@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 public class LanguageConfig {
 
     private final ScriptLangProperties scriptLangProperties;
-    private final List<Language> enabledLanguages;
+    private final Map<LanguageType, Language> enabledLanguages;
 
     /**
      * Constructs the LanguageConfig with injected ScriptLangProperties.
@@ -35,62 +35,78 @@ public class LanguageConfig {
 
     /**
      * Initializes enabled languages based on configuration.
-     * Groups entries by language type and applies enable/disable policy.
      *
-     * @return a list of enabled {@link Language} objects
+     * <p>This method reads language configurations from {@link ScriptLangProperties},
+     * validates them, and builds a map of {@link LanguageType} to {@link Language}.
+     *
+     * <ul>
+     *   <li>If no languages are configured, it returns an empty map.</li>
+     *   <li>It ensures there are no duplicate language configurations.</li>
+     *   <li>If an engine is not specified, it falls back to the language's default engine
+     *       (if available).</li>
+     *   <li>It validates that the chosen engine supports the given language.</li>
+     * </ul>
+     *
+     * @return a map where the key is {@link LanguageType} and the value is a {@link Language}
+     * @throws RuntimeException if duplicate languages are configured, if no engine is provided and no valid default engine exists,
+     *          or if the engine does not support the language
      */
-    private List<Language> initLanguages() {
+    private Map<LanguageType, Language> initLanguages() {
+        // Retrieve the configured language list
         List<ScriptLangProperties.LanguageProperties> languages = scriptLangProperties.getLanguages();
 
+        // If no languages are configured, return an empty map
         if (languages == null || languages.isEmpty()) {
-            return Collections.emptyList();
+            return Collections.emptyMap();
         }
 
-        List<Language> response = new ArrayList<>();
+        // Holds the final mapping of language type -> language object
+        Map<LanguageType, Language> languageMap = new HashMap<>();
 
-        // Group language entries by their type
-        Map<LanguageType, List<ScriptLangProperties.LanguageProperties>> languageMap = languages.stream()
-                .collect(Collectors.groupingBy(ScriptLangProperties.LanguageProperties::getLang));
+        // Iterate over each configured language
+        for (ScriptLangProperties.LanguageProperties language : languages) {
+            LanguageType lang = language.getLang();
+            ScriptEngineType engine = language.getEngine();
 
-        HashSet<LanguageType> disabledLanguages = new HashSet<>();
-
-        for (var entry : languageMap.entrySet()) {
-            LanguageType languageType = entry.getKey();
-
-            if (disabledLanguages.contains(languageType)) {
-                continue;
+            // Prevent duplicate language entries
+            if (languageMap.containsKey(lang)) {
+                throw new RuntimeException("Duplicate languages configured %s and %s"
+                        .formatted(languageMap.get(lang), language));
             }
 
-            HashSet<ScriptEngineType> enabledEngines = new HashSet<>();
-
-            for (var lang : entry.getValue()) {
-                ScriptEngineType engine = lang.getEngine();
-                Boolean enabled = lang.getEnabled();
-
-                if (Boolean.FALSE.equals(enabled)) {
-                    // If any entry disables the language, disable the whole language
-                    disabledLanguages.add(languageType);
-                    enabledEngines.clear();
-                    break;
-                } else {
-                    if (Objects.isNull(engine)) {
-                        if (Objects.isNull(languageType.getDefaultEngine())) {
-                            throw new IllegalStateException(String.format("%s language has no default engine set. Engine must be specified in config.", languageType));
-                        }
-                        engine = languageType.getDefaultEngine();
-                    } else if (engine.getLanguages() == null || engine.getLanguages().stream().noneMatch(x -> x == languageType)) {
-
-                        throw new IllegalStateException(String.format("'%s' engine doesn't support '%s' language", engine.getName(), languageType.getName()));
-                    }
-                    enabledEngines.add(engine);
+            // Validate and resolve engine
+            if (engine == null) {
+                // If engine is not provided in config and no default exists, fail
+                if (lang.getDefaultEngine() == null) {
+                    throw new RuntimeException(
+                            String.format("%s language has no default engine set. Engine must be specified in config.", lang)
+                    );
                 }
+                // Validate that the default engine supports this language
+                else if (engine.getLanguages() == null ||
+                        engine.getLanguages().stream().noneMatch(x -> x == lang)) {
+                    throw new RuntimeException(
+                            String.format("'%s' engine doesn't support '%s' language",
+                                    engine.getName(), lang.getName())
+                    );
+                }
+
+                // Assign default engine
+                engine = lang.getDefaultEngine();
             }
 
-            // Add valid language/engine pairs
-            enabledEngines.forEach(engine -> response.add(new Language(languageType, engine)));
+            // Add the validated language and its engine to the map
+            languageMap.put(lang, new Language(lang, engine));
         }
 
-        return response;
+        return languageMap;
+    }
+
+    /**
+     * Returns a Language object that configured via given LanguageType
+     */
+    public Optional<Language> findLanguage(LanguageType lang) {
+        return Optional.ofNullable(enabledLanguages.get(lang));
     }
 
     /**
@@ -99,6 +115,6 @@ public class LanguageConfig {
      * @return immutable list of enabled languages
      */
     public List<Language> enabledLanguages() {
-        return Collections.unmodifiableList(enabledLanguages);
+        return enabledLanguages.values().stream().toList();
     }
 }

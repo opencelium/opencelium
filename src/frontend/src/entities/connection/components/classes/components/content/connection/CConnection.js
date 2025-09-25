@@ -188,6 +188,32 @@ export default class CConnection{
         return [...this.fromConnector.operators, ...this.toConnector.operators];
     }
 
+    cloneOperatorWithUI(
+        connection,
+        sourceItem,
+        resultItem
+    ) {
+        if (!(sourceItem instanceof COperatorItem)) return;
+        if (!(resultItem instanceof COperatorItem)) return;
+
+        const sourceUiId = sourceItem.uiId;
+        const sourceExpression = sourceItem.expression;
+
+        if (sourceUiId && sourceExpression && connection.ui?.operators) {
+            const tree = connection.ui.operators.find(op => op.id === sourceUiId);
+            if (tree) {
+                resultItem.uiId = sourceUiId;
+                resultItem.expression = sourceExpression;
+
+                const existing = connection.ui.operators;
+                connection.ui = {
+                    ...connection.ui,
+                    operators: [...existing, tree],
+                };
+            }
+        }
+    }
+
     moveItem(connector, sourceItem, targetLeftItem, mode, shouldDelete = true){
         const result = {
             currentItem: null,
@@ -228,8 +254,10 @@ export default class CConnection{
             connector.setCurrentItem(targetLeftItem);
             if (connector.getConnectorType() === CONNECTOR_FROM) {
                 result.currentItem = this.addFromConnectorOperator(sourceItemData, mode);
+                this.cloneOperatorWithUI(this, sourceItem, result.currentItem);
             } else {
                 result.currentItem = this.addToConnectorOperator(sourceItemData, mode);
+                this.cloneOperatorWithUI(this, sourceItem, result.currentItem);
             }
             const newIndex = connector.generateNextIndex(mode, targetLeftItem);
             connector.updateIndexesForOperator(sourceItem, newIndex, this, shouldDelete);
@@ -420,7 +448,6 @@ export default class CConnection{
 
     get id(){
         if(!this.hasOwnProperty('_id')){
-            consoleLog(`Connection has undefined 'id'`);
         } else {
             return this._id;
         }

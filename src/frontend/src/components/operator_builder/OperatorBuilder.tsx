@@ -162,7 +162,7 @@ const OperatorBuilder = (props: OperatorBuilderProps) => {
                 label={'Save'}
                 handleClick={updateOperator}
             />
-            <Button handleClick={() => toggleDetails(!showDetails)} label={'Show details'} style={{opacity: 0, float: 'right', marginTop: '30px', marginRight: '30px'}}/>
+            <Button handleClick={() => toggleDetails(!showDetails)} label={'Show details'} style={{display: 'none', float: 'right', marginTop: '30px', marginRight: '30px'}}/>
         </div>
     )
 }

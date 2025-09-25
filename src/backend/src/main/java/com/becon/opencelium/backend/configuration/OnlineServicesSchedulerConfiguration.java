@@ -1,7 +1,7 @@
 package com.becon.opencelium.backend.configuration;
 
 import com.becon.opencelium.backend.database.mysql.service.InvokerSyncService;
-import com.becon.opencelium.backend.subscription.remoteapi.TemplateSyncService;
+import com.becon.opencelium.backend.api.TemplateSyncService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;

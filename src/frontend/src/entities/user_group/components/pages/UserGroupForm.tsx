@@ -103,16 +103,16 @@ const UserGroupForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
         title: [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'User Groups', link: '/usergroups'}, {name: formData.formTitle}],
         actions: actions,
         formSections: [
-            <FormSection label={{value: 'user details'}}>
+            <FormSection label={{value: 'group details'}}>
                 {NameInput}
                 {DescriptionInput}
                 {!isView && Avatar}
             </FormSection>,
             <React.Fragment>
-                <FormSection label={{value: 'credentials'}}>
+                <FormSection label={{value: 'components'}}>
                     {Components}
                 </FormSection>
-                <FormSection label={{value: 'user group'}} dependencies={[userGroup.componentsSelect.length === 0]}>
+                <FormSection label={{value: 'permissions'}} dependencies={[userGroup.componentsSelect.length === 0]}>
                     {Permissions}
                 </FormSection>
             </React.Fragment>

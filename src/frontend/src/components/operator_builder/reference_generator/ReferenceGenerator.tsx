@@ -62,6 +62,7 @@ const ReferenceGenerator = React.forwardRef(
 			error = '',
 			style = {},
 			operator,
+			onNamespacesChange
 		}: ReferenceGeneratorProps,
 		ref
 	) => {
@@ -213,9 +214,13 @@ const ReferenceGenerator = React.forwardRef(
 				setReference('');
 			}
 		};
-		const onFieldSelect = (newField: string) => {
+		const onFieldSelect = (newField: string, structure?: object) => {
 			setCurrentField(newField);
+			if (structure && onNamespacesChange) {
+				onNamespacesChange(structure);
+			}
 		};
+
 		const isLikeOperator = (): boolean => {
 			return referenceType !== 'webhook' && Like.isLikeOperator(operator);
 		};

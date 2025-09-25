@@ -43,7 +43,7 @@ class SettingsPanel extends React.Component {
           tooltip={!isDetailsOpened ? 'Show Details' : 'Hide'}
           target={`toggle_connection_button`}
           hasBackground={false}
-          handleClick={this.toggleDetails}
+          handleClick={() => this.toggleDetails()}
         />
       </div>
     );

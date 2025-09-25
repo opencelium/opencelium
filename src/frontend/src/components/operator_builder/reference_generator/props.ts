@@ -21,6 +21,7 @@ export interface ReferenceGeneratorProps {
     bodyReference?: boolean;
     headerReference?: boolean;
     style?: any,
+    onNamespacesChange?: (namespaces: object) => void
 }
 
 export interface MethodSelectProps {
@@ -31,7 +32,7 @@ export interface MethodSelectProps {
 }
 
 export interface DeepSelectProps {
-    onValueSelect: (value: string) => void,
+    onValueSelect: (value: string, structure?: any) => void,
     field: string,
     color: string,
     connectionEditor: ConnectionEditorProps,
