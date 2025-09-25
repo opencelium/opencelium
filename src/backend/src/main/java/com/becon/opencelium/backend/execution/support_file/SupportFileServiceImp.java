@@ -34,7 +34,7 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static com.becon.opencelium.backend.constant.LogConstant.FILE_EXTENSION;
+import static com.becon.opencelium.backend.constant.LogConstant.LOG_FILE_EXTENSION;
 import static com.becon.opencelium.backend.constant.LogConstant.LOG_LOCATION;
 import static com.becon.opencelium.backend.constant.LogConstant.SUCCESS;
 import static com.becon.opencelium.backend.constant.LogConstant.UNCATEGORIZED;
@@ -231,8 +231,8 @@ public class SupportFileServiceImp implements SupportFileService {
             }
 
             // copy temporary uncategorized log file into zip, then delete it:
-            Path filePath = toPath(LOG_LOCATION, toFilename(timestamp, connectionId, UNCATEGORIZED, executionId, FILE_EXTENSION));
-            addToZip(zipOutputStream, filePath.toFile(), toFilename(timestamp, connectionId, type, executionId, FILE_EXTENSION));
+            Path filePath = toPath(LOG_LOCATION, toFilename(timestamp, connectionId, UNCATEGORIZED, executionId, LOG_FILE_EXTENSION));
+            addToZip(zipOutputStream, filePath.toFile(), toFilename(timestamp, connectionId, type, executionId, LOG_FILE_EXTENSION));
             delete(filePath);
 
             // send success notification vie websocket

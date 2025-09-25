@@ -23,7 +23,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import static com.becon.opencelium.backend.constant.LogConstant.FILE_EXTENSION;
+import static com.becon.opencelium.backend.constant.LogConstant.LOG_FILE_EXTENSION;
 import static com.becon.opencelium.backend.constant.LogConstant.LOG_LINE_PATTERN;
 import static com.becon.opencelium.backend.constant.LogConstant.LOG_LOCATION;
 import static com.becon.opencelium.backend.constant.LogConstant.UNCATEGORIZED;
@@ -54,7 +54,7 @@ public class OcLogger<T extends LogMessage> {
 
         // set up the logger to create temporary log file in base log directory: type = u (uncategorized), not s (success) or f (fail):
         String loggerId = String.format("%d-%d", executionId, connectionId);
-        String filename = LogFileUtility.toFilename(timestamp, connectionId, UNCATEGORIZED, executionId, FILE_EXTENSION);
+        String filename = LogFileUtility.toFilename(timestamp, connectionId, UNCATEGORIZED, executionId, LOG_FILE_EXTENSION);
 
         this.filepath = LogFileUtility.toPath(LOG_LOCATION, filename);
 

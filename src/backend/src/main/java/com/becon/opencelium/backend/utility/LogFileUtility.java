@@ -26,14 +26,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.becon.opencelium.backend.constant.LogConstant.DATE_TIME_FORMATTER;
-import static com.becon.opencelium.backend.constant.LogConstant.FILE_EXTENSION;
+import static com.becon.opencelium.backend.constant.LogConstant.LOG_FILE_EXTENSION;
 import static com.becon.opencelium.backend.constant.LogConstant.LOG_FILE_NAME_RGX;
 import static com.becon.opencelium.backend.constant.LogConstant.LOG_LOCATION;
 import static com.becon.opencelium.backend.constant.LogConstant.NAME_PARTS_SEPARATOR;
 import static com.becon.opencelium.backend.constant.LogConstant.UNCATEGORIZED;
 
 public class LogFileUtility {
-    private static final Logger log = LoggerFactory.getLogger(LogFileUtility.class);
+    private static final Logger logger = LoggerFactory.getLogger(LogFileUtility.class);
 
     public static Path toPath(String base, String... sub) {
         Path path = Paths.get(base, sub);
@@ -76,8 +76,8 @@ public class LogFileUtility {
     }
 
     public static void move(Long connectionId, long executionId, String timestamp, String type, int fileLimit) {
-        Path sourcePath = toPath(LOG_LOCATION, toFilename(timestamp, connectionId, UNCATEGORIZED, executionId, FILE_EXTENSION));
-        Path destinationPath = toPath(LOG_LOCATION, connectionId.toString(), toFilename(timestamp, connectionId, type, executionId, FILE_EXTENSION));
+        Path sourcePath = toPath(LOG_LOCATION, toFilename(timestamp, connectionId, UNCATEGORIZED, executionId, LOG_FILE_EXTENSION));
+        Path destinationPath = toPath(LOG_LOCATION, connectionId.toString(), toFilename(timestamp, connectionId, type, executionId, LOG_FILE_EXTENSION));
 
         try {
             Files.createDirectories(destinationPath.getParent());
@@ -119,7 +119,7 @@ public class LogFileUtility {
                     .orElseThrow(() -> new GeneralServiceException(ExceptionConstant.LOG_NOT_FOUND, ExceptionMessages.LOG_NOT_FOUND.formatted(executionId)));
 
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
 
             throw new GeneralServiceException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
@@ -138,7 +138,7 @@ public class LogFileUtility {
                     .filter(name -> name.matches(LOG_FILE_NAME_RGX))
                     .collect(Collectors.toList());
         } catch (IOException e) {
-            log.error("Error while reading log files from folder: {}", logFolder, e);
+            logger.error("Error while reading log files from folder: {}", logFolder, e);
             throw new GeneralServiceException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     ExceptionConstant.INTERNAL_ERROR,
