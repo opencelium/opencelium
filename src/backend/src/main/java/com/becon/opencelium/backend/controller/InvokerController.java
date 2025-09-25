@@ -211,7 +211,7 @@ public class InvokerController {
             transformer.transform(source, result);
 
             // update sync information for new invoker file
-            invokerSyncService.update(filename);
+            invokerSyncService.updateSync(filename);
         } catch (TransformerException ex) {
             throw new RuntimeException(ex);
         }
@@ -352,7 +352,7 @@ public class InvokerController {
             FunctionDTO resource = functionMapper.toDTO(functionInvoker);
 
             // delete invoker sync record
-            invokerSyncService.update(invokerName);
+            invokerSyncService.updateSync(invokerName);
 
             return ResponseEntity.ok(resource);
         } catch (Exception ex) {

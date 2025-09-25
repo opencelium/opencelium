@@ -1,13 +1,16 @@
 package com.becon.opencelium.backend.execution.logger.mapper;
 
-import com.becon.opencelium.backend.database.mongodb.entity.LogData;
+import com.becon.opencelium.backend.database.mongodb.entity.LogDataMng;
 import com.becon.opencelium.backend.database.mongodb.entity.LogDataError;
 import com.becon.opencelium.backend.execution.logger.dto.ErrorInfoDTO;
 import com.becon.opencelium.backend.execution.logger.dto.LogDataDTO;
 import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -15,9 +18,10 @@ public class LogDataMapper {
     /**
      * Map a LogData entity to its DTO.
      */
-    public LogDataDTO toDto(LogData src) {
+    public LogDataDTO toDto(LogDataMng src) {
         LogDataDTO dto = new LogDataDTO();
 
+        dto.setId(src.getId());
         dto.setExecutionId(src.getExecutionId());
         dto.setFlowId(src.getFlowId());
         dto.setIndexPath(src.getIndexPath());
@@ -50,7 +54,7 @@ public class LogDataMapper {
     /**
      * Convenience for Optional<LogData> → Optional<LogDataDTO>
      */
-    public Optional<LogDataDTO> toDto(Optional<LogData> logData) {
+    public Optional<LogDataDTO> toDto(Optional<LogDataMng> logData) {
         return logData.map(this::toDto);
     }
 

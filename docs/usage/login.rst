@@ -2,20 +2,33 @@
 Login
 ##################
 
-After launching the application you will see the login page.
+After launching the application in your browser you will see the login page.
 
-|image0|
+|image_login_0|
 
-As a default admin user it has next credential data:
+The default admin user has the following credential data:
+
+   * **login:** admin@opencelium.io
+   * **password:** 1234
+
+As soon as you login into the system you will see the dashboard and the menu
+on left side. The menu gives you direct acces to the most importants parts
+of the system:
+
+   * Connectors
+   * Connections
+   * Schedules
+   * Admin
+   * Users
+   * Groups
+   * Apps
+   * Invokers
+   * Templates
+
+Please see the next section to get a general overview over the application
+and its usage.
 
 
-- **login:** admin@opencelium.io
-- **password:** 1234
-
-Login into the system! You will see the menu on the left: Connectors, Connections, Schedules, Admin: Users, Groups, Apps, Invokers, Templates.
-
-See next section, explaining the usage of this system.
-
-
-.. |image0| image:: ../img/login/0.png
+.. |image_login_0| image:: ../img/login/OC_login_username_password.png
    :align: middle
+   :width: 200

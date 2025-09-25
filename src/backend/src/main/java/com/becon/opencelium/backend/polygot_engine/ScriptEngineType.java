@@ -4,6 +4,7 @@ import java.util.List;
 
 public enum ScriptEngineType {
     NASHORN("nashorn", "Nashorn"),
+    JYTHON("jython", "Jython"),
     GRAALVM("graalvm", "GraalVM");
 
     private final String code;
@@ -25,6 +26,7 @@ public enum ScriptEngineType {
     public List<LanguageType> getLanguages() {
         return switch (this) {
             case NASHORN -> List.of(LanguageType.JS);
+            case JYTHON -> List.of(LanguageType.PYTHON_2);
             case GRAALVM -> List.of(LanguageType.JS);
         };
     }

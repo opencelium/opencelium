@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.execution.logger;
 
-import com.becon.opencelium.backend.database.mongodb.entity.LogData;
+import com.becon.opencelium.backend.database.mongodb.entity.LogDataMng;
 import com.becon.opencelium.backend.execution.logger.dto.LogDataDTO;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseType;
 import com.becon.opencelium.backend.execution.logger.enums.LogDetailLevel;
@@ -57,11 +57,11 @@ public class LogLineDispatcher {
         }
 
         // Build, save (if present), and map to DTO
-        Optional<LogData> logData = tracker.buildLogData(parsed);
+        Optional<LogDataMng> logData = tracker.buildLogData(parsed);
         if (logData.isEmpty()) {
             return Optional.empty();
         }
-        LogData data = logData.get();
+        LogDataMng data = logData.get();
         logMetaDataService.save(data);
 
         return logMetaDataService.toDto(data);

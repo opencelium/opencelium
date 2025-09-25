@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.database.mongodb.service;
 
-import com.becon.opencelium.backend.configuration.OpenCeliumProps;
+import com.becon.opencelium.backend.constant.props.OpenceliumProps;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.entity.EnhancementMng;
 import com.becon.opencelium.backend.database.mongodb.repository.ConnectionMngRepository;
@@ -29,7 +29,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     private final EnhancementService enhancementService;
     private final MapperUpdatable<Enhancement, EnhancementDTO> enhancementMapper;
     private final Mapper<EnhancementMng, EnhancementDTO> enhancementMngMapper;
-    private final OpenCeliumProps ocProps;
+    private final OpenceliumProps ocProps;
 
     public ConnectionMngServiceImp(
             ConnectionMngRepository connectionMngRepository,
@@ -39,7 +39,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
             @Qualifier("enhancementServiceImp") EnhancementService enhancementService,
             MapperUpdatable<Enhancement, EnhancementDTO> enhancementMapper,
             Mapper<EnhancementMng, EnhancementDTO> enhancementMngMapper,
-            OpenCeliumProps ocProps
+            OpenceliumProps ocProps
     ) {
         this.connectionMngRepository = connectionMngRepository;
         this.fieldBindingMngService = fieldBindingMngService;
@@ -333,7 +333,11 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     private void setEnhancements(ConnectionMng connection) {
         if (connection.getFieldBindings() == null || connection.getFieldBindings().isEmpty())
             return;
-        connection.getFieldBindings().forEach(f -> f.setEnhancement(enhancementMngMapper.toEntity(enhancementMapper.toDTO(enhancementService.getById(f.getEnhancementId())))));
+        connection.getFieldBindings().forEach(f -> {
+            if (f != null) {
+                f.setEnhancement(enhancementMngMapper.toEntity(enhancementMapper.toDTO(enhancementService.getById(f.getEnhancementId()))));
+            }
+        });
     }
 
     private <T> void doIfNoneMatch(List<T> olds, List<T> news, BiFunction<T, T, Boolean> f, Consumer<T> c) {

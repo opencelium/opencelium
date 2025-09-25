@@ -33,7 +33,7 @@ export class InvokerRequest extends Request implements IInvokerRequest{
     }
 
     async syncInvokerWithSP(invokerName: string): Promise<AxiosResponse<IResponse>>{
-        this.endpoint = `${invokerName}/sync-force`;
+        this.endpoint = `/${invokerName}/sync-force`;
         return super.put<IResponse>({});
     }
 

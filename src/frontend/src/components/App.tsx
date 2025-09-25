@@ -31,10 +31,11 @@ import {LocalStorage} from "@application/classes/LocalStorage";
 import {getLogoName} from "@application/redux_toolkit/action_creators/ApplicationCreators";
 import {isArray} from "@application/utils/utils";
 import {SocketProvider} from "../socket/SocketContext";
-import {SocketDataProvider} from "../socket/SocketDataContext";
+import {SocketDataProvider, useSocketData} from "../socket/SocketDataContext";
 
 
 const App = ({}) => {
+    const {deactivateSocket} = useSocketData();
     const dispatch = useAppDispatch();
     const {isAuth, authUser} = Auth.getReduxState();
     const {themes} = Application.getReduxState();
@@ -64,6 +65,10 @@ const App = ({}) => {
             if(authUser.userDetail.sync){
                 dispatch(getLogoName(authUser.email));
             }
+        } else {
+            (async () => {
+                await deactivateSocket()
+            })();
         }
     },[isAuth])
     return (
