@@ -6,6 +6,7 @@ public enum LanguageType {
     JS("js", "JavaScript", NASHORN),
     PYTHON_2("python2", "Python 2", JYTHON),
     PYTHON_3("python3", "Python 3", GRAALVM),
+    RUBY("ruby", "Ruby", GRAALVM),
     ;
 
     private final String code;
