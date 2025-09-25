@@ -9,6 +9,7 @@ public interface LogConstant {
     DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm");
     String NAME_PARTS_SEPARATOR = "_";
     String LOG_FILE_NAME_RGX = ".+_.+_.+_.+_\\d+\\.log";
+    String LOG_LINE_PATTERN = "%d{dd-MM-yyyy HH:mm:ss.SSS} - %msg%n";
 
     // pattern to match log file names and extract executionId:
     // yyyy-MM-dd_HH-mm_<tag>_(u|f|s)_<executionId>.log

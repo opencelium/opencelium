@@ -20,6 +20,8 @@ import com.becon.opencelium.backend.constant.LogConstant;
 import com.becon.opencelium.backend.database.mysql.entity.Subscription;
 import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
 import com.becon.opencelium.backend.execution.ConnectionExecutor;
+import com.becon.opencelium.backend.execution.logger.OcLogger;
+import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.service.ExecutionObjectService;
 import com.becon.opencelium.backend.execution.service.ExecutionObjectServiceImp;
 import com.becon.opencelium.backend.resource.execution.ExecutionObj;
@@ -61,8 +63,6 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
         context.getMergedJobDataMap().put("licenseIsValid", true);
 
         try {
-            String timestamp = LocalDateTime.now().format(LogConstant.DATE_TIME_FORMATTER);
-
             JobDataMap dataMap = context.getMergedJobDataMap();
             QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) dataMap.get("data");
             long execId = dataMap.getLong("execId");
@@ -72,14 +72,30 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
                 context.getMergedJobDataMap().put("data", data);
             }
             ExecutionObj executionObj = executionObjectService.buildObj(data);
-            ConnectionExecutor executor = new ConnectionExecutor(executionObj, execId, timestamp, data.getRules());
 
-            context.put("connectionId", executionObj.getConnection().getConnectionId());
-            context.getMergedJobDataMap().put("Scheduler.debugMode", executionObj.getLoggerConfiguration().isDebugMode());
-            context.put("timestamp", timestamp);
+            String timestamp = LocalDateTime.now().format(LogConstant.DATE_TIME_FORMATTER);
+            long connectionId = executionObj.getConnection().getConnectionId();
+
+            // setup execution logger:
+            OcLogger<ExecutionLog> executionLogger = new OcLogger<>(
+                    executionObj.getLoggerConfiguration(), new ExecutionLog(), connectionId, timestamp, execId
+            );
+
+            ConnectionExecutor executor = new ConnectionExecutor(executionObj, executionLogger, data.getRules());
+
             long startTime = System.currentTimeMillis();
-            executor.start();
-            context.put("operationsEx", executor.getOperations());
+            try {
+                context.put("timestamp", timestamp);
+                context.put("connectionId", connectionId);
+
+                executionLogger.logAndSend(String.format("phase=EXECUTION_START id=%d connectionId=%d", execId, connectionId));
+                executor.start();
+            } finally {
+                executionLogger.logAndSend(String.format("phase=EXECUTION_END id=%d connectionId=%d", execId, connectionId));
+                executionLogger.close(); // release resources
+
+                context.put("operationsEx", executor.getOperations());
+            }
 
             // increments current_usage in subscription and saves entity in current_usage_history.
             String connectionName = executionObj.getConnection().getConnectionName();

@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import static com.becon.opencelium.backend.constant.LogConstant.FILE_EXTENSION;
+import static com.becon.opencelium.backend.constant.LogConstant.LOG_LINE_PATTERN;
 import static com.becon.opencelium.backend.constant.LogConstant.LOG_LOCATION;
 import static com.becon.opencelium.backend.constant.LogConstant.UNCATEGORIZED;
 
@@ -38,8 +39,10 @@ public class OcLogger<T extends LogMessage> {
     private final Path filepath;
     private final Logger logger;
 
-    public OcLogger(LoggerConfiguration loggerConfiguration, T logEntity,
-                    long connectionId, String timestamp, long executionId, Class<?> c) {
+    public OcLogger(
+            LoggerConfiguration loggerConfiguration, T logEntity,
+            long connectionId, String timestamp, long executionId
+    ) {
         this.debugMode = loggerConfiguration.isDebugMode();
         this.webSocket = loggerConfiguration.getTriggerType() == QuartzJobScheduler.TriggerType.EXECUTION_TEST;
         this.supportFile = loggerConfiguration.getTriggerType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE;
@@ -63,7 +66,7 @@ public class OcLogger<T extends LogMessage> {
 
         PatternLayoutEncoder encoder = new PatternLayoutEncoder();
         encoder.setContext(context);
-        encoder.setPattern("%d{dd-MM-yyyy HH:mm:ss.SSS} - %msg%n");
+        encoder.setPattern(LOG_LINE_PATTERN);
         encoder.setCharset(StandardCharsets.UTF_8);
         encoder.start();
 
