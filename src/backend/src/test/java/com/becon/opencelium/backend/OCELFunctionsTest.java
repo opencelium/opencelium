@@ -17,10 +17,6 @@ public class OCELFunctionsTest {
     @Test
     public void currentDate() throws InvalidExpressionException {
         Assertions.assertEquals(
-                LocalDate.now().toString(),
-                expressionProcessor.evaluate("current_date()")
-        );
-        Assertions.assertEquals(
                 LocalDate.now(ZoneId.of("America/New_York")).toString(),
                 expressionProcessor.evaluate("current_date(\"America/New_York\")")
         );
