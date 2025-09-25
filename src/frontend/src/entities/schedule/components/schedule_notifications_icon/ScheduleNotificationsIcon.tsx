@@ -38,16 +38,18 @@ const ScheduleNotificationsIcon: FC<ScheduleNotificationsIconProps> =
         setIsToggledList(!isToggledList);
     }
     useEffect(() => {
-        let iconElem = document.getElementById(`schedule_notifications_${schedule.id}`);
-        if(iconElem) {
-            let position = findTopLeftPosition(`schedule_notifications_${schedule.id}`);
-            let newX = position.left + (iconElem.offsetWidth / 2) - 320;
-            let newY = position.top + (iconElem.offsetHeight / 2) + 20;
-            if (x !== newX || y !== newY) {
-                setX(newX);
-                setY(newY);
+        setTimeout(() => {
+            let iconElem = document.getElementById(`schedule_notifications_${schedule.id}`);
+            if(iconElem) {
+                let position = findTopLeftPosition(`schedule_notifications_${schedule.id}`);
+                let newX = position.left + (iconElem.offsetWidth / 2) - 320;
+                let newY = position.top + (iconElem.offsetHeight / 2) + 20;
+                if (x !== newX || y !== newY) {
+                    setX(newX);
+                    setY(newY);
+                }
             }
-        }
+        }, 1000)
     }, [])
     return (
         <React.Fragment>

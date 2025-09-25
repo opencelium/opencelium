@@ -1,12 +1,10 @@
 package com.becon.opencelium.backend.ocel.operator.operators;
 
-import com.becon.opencelium.backend.execution.operator.Like;
 import com.becon.opencelium.backend.ocel.exception.ApplyOperatorException;
 import com.becon.opencelium.backend.ocel.operator.BinaryOperator;
 import com.becon.opencelium.backend.ocel.operator.OperatorEnum;
 import com.becon.opencelium.backend.ocel.operator.SidesType;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class MatchesInList implements BinaryOperator {
@@ -15,11 +13,27 @@ public class MatchesInList implements BinaryOperator {
         if (o2 instanceof String) {
             String[] values = o2.toString().replace("\n", ",").split(",");
             Like like = new Like();
-            return Arrays.stream(values).anyMatch(v -> like.apply(o1.toString(), v));
+
+            for (String value : values) {
+                Object result = like.apply(o1.toString(), value);
+                if (Boolean.TRUE.equals(result)) {
+                    return true;
+                }
+            }
+
+            return false;
         }
+
         if (o1 instanceof String && o2 instanceof List<?> list) {
             Like like = new Like();
-            return list.stream().anyMatch(v -> like.apply(o1, v));
+            for (Object value : list) {
+                Object result = like.apply(o1.toString(), value);
+                if (Boolean.TRUE.equals(result)) {
+                    return true;
+                }
+            }
+
+            return false;
         }
         throw ApplyOperatorException.invalidTypePairsException(getOperatorType(), o1, o2);
     }

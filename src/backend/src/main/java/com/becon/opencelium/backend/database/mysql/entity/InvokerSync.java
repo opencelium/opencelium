@@ -44,6 +44,9 @@ public class InvokerSync {
     @Column(name = "sp_invoker_file_name")
     private String spInvokerFileName;
 
+    @Column(name = "oc_invoker_file_name")
+    private String ocInvokerFileName;
+
     @Column(name = "invoker_content_hmac")
     private String invokerContentHmac;
 
@@ -77,6 +80,14 @@ public class InvokerSync {
 
     public void setSpInvokerFileName(String spInvokerFileName) {
         this.spInvokerFileName = spInvokerFileName;
+    }
+
+    public String getOcInvokerFileName() {
+        return ocInvokerFileName;
+    }
+
+    public void setOcInvokerFileName(String ocInvokerFileName) {
+        this.ocInvokerFileName = ocInvokerFileName;
     }
 
     public String getInvokerContentHmac() {

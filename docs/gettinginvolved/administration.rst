@@ -130,7 +130,7 @@ Logging
 .. code-block:: sh
 	:linenos:
 	
-	journalctl -xe -u opencelium -f
+	journalctl -xe -u opencelium -o cat -f
 
 
 Backup

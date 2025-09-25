@@ -32,6 +32,7 @@ public enum LogLineKey {
     DATA("data"), // Generic data field, often used for payload or headers
     LOOP_ITERATOR("loopIterator"), // Iterator variable used in loop structures (e.g i; i,j; i,j,k)
     LOOP_INDEX("loopIndex"), // Index of the current iteration in a loop (e.g 1; 1,0; 1,0,3)
+    SIZE("size"), // Size of an array that is used in loop
 
     /**
      * Key definitions for OPERATION phase log lines.

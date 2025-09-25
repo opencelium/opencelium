@@ -14,6 +14,7 @@
  */
 
 import {Application} from "./Application";
+import {consoleLog} from "@application/utils/utils";
 
 // class to print debugging data
 export class Console{
@@ -28,7 +29,7 @@ export class Console{
     static print(info: string | number | object | Array<any>): void{
         if(Application.isDebugging) {
             if (typeof (info) === 'string' || typeof (info) === 'number') {
-                console.log(info);
+                consoleLog(info);
             } else if (Array.isArray(info)) {
                 console.table(info);
             } else if (info && typeof info === 'object' && info.constructor === Object) {

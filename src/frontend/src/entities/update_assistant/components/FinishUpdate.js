@@ -39,12 +39,34 @@ function mapStateToProps(state){
 class FinishUpdate extends React.Component{
     constructor(props) {
         super(props);
+        this.containerRef = React.createRef();
+    }
+
+    componentDidMount() {
+        if (!this.containerRef.current) return;
+
+        const buttons = this.containerRef.current.querySelectorAll(".copy-btn");
+
+        buttons.forEach((button) => {
+            button.addEventListener("click", () => {
+                const codeBlock = button.parentElement?.querySelector("code");
+                if (codeBlock) {
+                    navigator.clipboard.writeText(codeBlock.textContent || "").then(() => {
+                        const original = button.textContent;
+                        button.textContent = "Copied!";
+                        setTimeout(() => {
+                            button.textContent = original || "Copy";
+                        }, 1500);
+                    });
+                }
+            });
+        });
     }
 
     render(){
         const {t, updateSystem, entity, updatingSystem} = this.props;
         return(
-            <div className={styles.finish_update}>
+            <div ref={this.containerRef} className={styles.finish_update}>
                 <div className={styles.header}>{t('FORM.FINISH.HEADER')}</div>
                 <div dangerouslySetInnerHTML={{__html: entity.availableUpdates.selectedVersion?.instruction || ''}} style={{overflow: 'hidden'}}/>
                 <div className={styles.hint}><span>{t('FORM.FINISH.HINT')}</span>: {t('FORM.FINISH.CLEAR_CACHE')}</div>

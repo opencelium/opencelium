@@ -193,13 +193,17 @@ management:
       show-details: always
 
 opencelium:
-  version: 4.5
+  version: 4.6
   ###########################################################################
   #                                                                         #
   #   Is customizable                                                       #
   #                                                                         #
   ###########################################################################
   debug_mode: true
+  connector:
+    security:
+      key: keykeygjhgjh # used for encrypt and decrypt request data
+    master_password: {put your master password}
   token:
     secret: 84bbce3d33de467b47b7e76c2563769!3f9aff968def8ef2674856f67ae8a93f
     activity-time: 18000
@@ -221,8 +225,8 @@ opencelium:
         url: {insert your webhook url here}
   installation:
     type: sources
-  service_portal:
-    base_url: https://service.opencelium.io
+  service-portal:
+    base-url: https://service.opencelium.io
     token: "your-token-here"
 #  support:
 #    file:
@@ -230,9 +234,22 @@ opencelium:
 #      limit:
 #        success: 1
 #        fail: 5
+#  log:
+#    retention:
+#      per-connection:
+#        success: 2
+#        fail: 3
 #  rest_template:
 #    proxy:
 #      host: 127.0.0.1
 #      port: 8082
 #      username: ####
 #      password: ####
+#  online_services:
+#    invoker_sync:
+#      time: 0 0 0 * * *
+#      active: "false"
+#    template_sync:
+#      time: 0 0 0 * * *
+#      active: "false"
+#    active: "false"

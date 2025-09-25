@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.execution.logger.tracker;
 
-import com.becon.opencelium.backend.database.mongodb.entity.LogData;
+import com.becon.opencelium.backend.database.mongodb.entity.LogDataMng;
 import com.becon.opencelium.backend.execution.logger.builder.PhaseBuilderFactory;
 import com.becon.opencelium.backend.execution.logger.builder.PhaseBuilder;
 import com.becon.opencelium.backend.execution.logger.context.PhaseContext;
@@ -19,174 +19,224 @@ import java.util.*;
 
 import static com.becon.opencelium.backend.execution.logger.enums.PhaseType.*;
 
+/**
+ * Refactored ExecutionTrackerImpl
+ * - Removes duplication between phase start/end handling
+ * - Adds null-safety and guards around current phase/IDs
+ * - Uses dependency injection-friendly constructor chaining
+ * - Hardens shouldEmit and segment gating
+ * - Avoids NPE/NumberFormatException on connectionId
+ */
 public class ExecutionTrackerImpl implements ExecutionTracker {
+    private static final EnumSet<PhaseType> START_PHASES = EnumSet.of(
+            EXECUTION_START, FLOWCHART_START, OPERATION_START, LOOP_START, IF_START
+    );
+    private static final EnumSet<PhaseType> END_PHASES = EnumSet.of(
+            EXECUTION_END, FLOWCHART_END, OPERATION_END, LOOP_END, IF_END
+    );
+
     private String execId;
     private String connId;
     private String flowId;
-    private final LogDetailLevel level;
+    private String connectorName;
 
+    private final LogDetailLevel level;
     private final PhaseContextManager phaseContextManager;
     private final PhaseSchemaRegistry phaseSchemaRegistry;
     private final PhaseBuilderFactory builderFactory;
     private final ParsedLogLineMapper parsedLogLineMapper;
-    private String connectorName;
 
+    // ---- Constructors -----------------------------------------------------
 
-    public ExecutionTrackerImpl(String execId, String connId,String flowId, LogDetailLevel level) {
-        this.execId = execId;
-        this.connId = connId;
-        this.flowId = flowId;
-        this.level = level;
-        this.phaseContextManager = new PhaseContextManager();
-        this.phaseSchemaRegistry = new PhaseSchemaRegistry();
-        this.parsedLogLineMapper = ApplicationContextUtility.getBean(ParsedLogLineMapper.class);
-        this.builderFactory = ApplicationContextUtility.getBean(PhaseBuilderFactory.class);
+    public ExecutionTrackerImpl(String execId, String connId, String flowId, LogDetailLevel level) {
+        this(execId, connId, flowId, level,
+                new PhaseContextManager(),
+                new PhaseSchemaRegistry(),
+                ApplicationContextUtility.getBean(PhaseBuilderFactory.class),
+                ApplicationContextUtility.getBean(ParsedLogLineMapper.class));
     }
 
     public ExecutionTrackerImpl(LogDetailLevel level) {
-        this.level = level;
-        this.phaseContextManager = new PhaseContextManager();
-        this.phaseSchemaRegistry = new PhaseSchemaRegistry();
-        this.parsedLogLineMapper = ApplicationContextUtility.getBean(ParsedLogLineMapper.class);
-        this.builderFactory = ApplicationContextUtility.getBean(PhaseBuilderFactory.class);
+        this(null, null, null, level);
     }
+
+    private ExecutionTrackerImpl(
+            String execId,
+            String connId,
+            String flowId,
+            LogDetailLevel level,
+            PhaseContextManager phaseContextManager,
+            PhaseSchemaRegistry phaseSchemaRegistry,
+            PhaseBuilderFactory builderFactory,
+            ParsedLogLineMapper parsedLogLineMapper
+    ) {
+        this.execId = execId;
+        this.connId = connId;
+        this.flowId = flowId;
+        this.level = Objects.requireNonNull(level, "LogDetailLevel must not be null");
+        this.phaseContextManager = Objects.requireNonNull(phaseContextManager);
+        this.phaseSchemaRegistry = Objects.requireNonNull(phaseSchemaRegistry);
+        this.builderFactory = Objects.requireNonNull(builderFactory);
+        this.parsedLogLineMapper = Objects.requireNonNull(parsedLogLineMapper);
+    }
+
+    // ---- Public API -------------------------------------------------------
 
     @Override
-    public Optional<LogData> buildLogData(ParsedLogLine parsedLine) {
-        List<String> keysToExtract;
-
-        if (parsedLine.getType() == LogLineType.PHASE) {
-            PhaseType phaseType = (PhaseType) parsedLine.getStage();
-            PhaseCategory category = PhaseCategory.fromValue(phaseType);
-
-            keysToExtract = phaseSchemaRegistry
-                    .getPhasePropertyList(level, category);
-
-            return handlePhase(parsedLine, keysToExtract);
-
-        } else if (parsedLine.getType() == LogLineType.SEGMENT) {
-            PhaseType currentPhase = (PhaseType) phaseContextManager.getCurrentPhase().getParsedLogLine().getStage();
-            PhaseCategory category = PhaseCategory.fromValue(currentPhase);
-
-            SegmentType segmentType = (SegmentType) parsedLine.getStage();
-            Set<String> allowedSegments = phaseSchemaRegistry.getAllowedSegments(level, category);
-            if (!allowedSegments.contains(parsedLine.getStage().name())) {
-                return Optional.empty();
-            }
-            keysToExtract = phaseSchemaRegistry
-                    .getSegmentPropertyList(level, category, segmentType);
-
-            return handleSegment(parsedLine, keysToExtract);
+    public Optional<LogDataMng> buildLogData(ParsedLogLine parsedLine) {
+        if (parsedLine == null || parsedLine.getStage() == null) {
+            return Optional.empty();
         }
 
+        final LogLineType type = parsedLine.getType();
+        switch (type) {
+            case PHASE:
+                return  handlePhase(parsedLine);
+            case SEGMENT:
+                return handleSegment(parsedLine);
+            default:
+                return Optional.empty();
+        }
+    }
+
+    // ---- Internals: Phase handling ---------------------------------------
+
+    private Optional<LogDataMng> handlePhase(ParsedLogLine line) {
+        final PhaseType phaseType = (PhaseType) line.getStage();
+        final PhaseCategory category = PhaseCategory.fromValue(phaseType);
+
+        final List<String> allowedKeys = phaseSchemaRegistry.getPhasePropertyList(level, category);
+        final PhaseContext phaseContext = parsedLogLineMapper.toPhaseContext(line, allowedKeys);
+
+        if (START_PHASES.contains(phaseType)) {
+            return onPhaseStart(phaseType, category, phaseContext, line);
+        }
+        if (END_PHASES.contains(phaseType)) {
+            return onPhaseEnd(category, phaseContext);
+        }
         return Optional.empty();
     }
 
-    private Optional<LogData> handlePhase(ParsedLogLine line, List<String> allowedPhaseKeys) {
-        PhaseCategory phaseCategory = PhaseCategory.fromValue((PhaseType) line.getStage());
-        PhaseSchema phaseSchema = phaseSchemaRegistry.getSchema(level).get(phaseCategory);
-        LogLineStage stage = line.getStage();
+    private Optional<LogDataMng> onPhaseStart(PhaseType phaseType,
+                                              PhaseCategory category,
+                                              PhaseContext phaseContext,
+                                              ParsedLogLine parsedLine) {
+        phaseContext.setStatus(PhaseStatus.PENDING);
 
-        if (stage.getStageType() != LogLineType.PHASE) {
+        // Capture identifiers early for downstream builders/emitters
+        if (phaseType == EXECUTION_START) {
+            this.connId = phaseContext.getProperties().get(LogLineKey.CONNECTION_ID);
+            this.execId = phaseContext.getProperties().get(LogLineKey.EXECUTION_ID);
+            phaseContextManager.setExecId(execId);
+            phaseContextManager.setConnectionId(connId);
+        } else if (phaseType == FLOWCHART_START) {
+            this.flowId = phaseContext.getProperties().get(LogLineKey.FLOWCHART_ID);
+            this.connectorName = phaseContext.getProperties().get(LogLineKey.CONNECTOR_NAME);
+            phaseContextManager.setFlowId(flowId);
+            phaseContextManager.setConnectorName(connectorName);
+        }
+
+        phaseContextManager.startPhase(phaseContext);
+
+        final PhaseSchema phaseSchema = getPhaseSchema(category);
+        if (!shouldEmit(phaseSchema, parsedLine)) {
             return Optional.empty();
         }
 
-        PhaseType phaseType = (PhaseType) stage;
-        PhaseBuilder phaseBuilder = builderFactory.getBuilder(PhaseCategory.fromValue(phaseType));
-        PhaseContext phaseContext = parsedLogLineMapper.toPhaseContext(line, allowedPhaseKeys);
-
-        // Handle start events
-        if (isStartPhase(phaseType)) {
-            phaseContext.setStatus(PhaseStatus.PENDING);
-            if (phaseType == EXECUTION_START) {
-                this.connId = phaseContext.getProperties().get(LogLineKey.CONNECTION_ID);
-                this.execId = phaseContext.getProperties().get(LogLineKey.EXECUTION_ID);
-                phaseContextManager.setExecId(execId);
-                phaseContextManager.setConnectionId(connId);
-                phaseContextManager.startPhase(phaseContext);
-            } else if (phaseType == PhaseType.FLOWCHART_START) {
-                this.flowId = phaseContext.getProperties().get(LogLineKey.FLOWCHART_ID);
-                this.connectorName = phaseContext.getProperties().get(LogLineKey.CONNECTOR_NAME);
-                phaseContextManager.setFlowId(flowId);
-                phaseContextManager.setConnectorName(connectorName);
-                phaseContextManager.startPhase(phaseContext);
-            } else {
-                phaseContextManager.startPhase(phaseContext);
-            }
-
-            if (shouldEmit(phaseSchema, line)) {
-                LogData logData = phaseBuilder.build(phaseContext, execId, Long.valueOf(connId));
-                return Optional.of(logData);
-            }
-
-            return Optional.empty();
-        }
-
-        // Handle end events
-        if (isEndPhase(phaseType)) {
-            PhaseContext closed = phaseContextManager.endPhase(phaseContext);
-//            if (closed.getStatus() == PhaseStatus.COMPLETE) {
-//                return Optional.empty();
-//            }
-//            closed.setStatus(PhaseStatus.COMPLETE);
-            LogData meta = phaseBuilder.build(closed, execId, Long.valueOf(connId));
-            meta.setExecutionId(execId);
-            meta.setConnectionId(Long.valueOf(connId));
-            return Optional.of(meta);
-        }
-        return Optional.empty(); // unsupported phase type
+        LogDataMng out = buildLogDataForContext(category, phaseContext);
+        return Optional.ofNullable(out);
     }
 
+    private Optional<LogDataMng> onPhaseEnd(PhaseCategory category,
+                                            PhaseContext phaseContext) {
+        final PhaseContext closed = phaseContextManager.endPhase(phaseContext);
 
-    private Optional<LogData> handleSegment(ParsedLogLine parsedLine, List<String> keysToExtract) {
-        PhaseContext currentPhaseCtx = phaseContextManager.getCurrentPhase();
+        // Previous behavior kept COMPLETE status handling commented out; preserving semantics.
+        LogDataMng out = buildLogDataForContext(category, closed);
 
-        SegmentContext segmentContext = parsedLogLineMapper.toSegmentContext(parsedLine, keysToExtract);
+        // Ensure IDs are set on the payload (defensive in case builders omit them)
+        if (out != null) {
+            out.setExecutionId(execId);
+            final Long cid = parseLongOrNull(connId);
+            if (cid != null) {
+                out.setConnectionId(cid);
+            }
+        }
+        return Optional.ofNullable(out);
+    }
+
+    // ---- Internals: Segment handling -------------------------------------
+
+    private Optional<LogDataMng> handleSegment(ParsedLogLine parsedLine) {
+        final PhaseContext currentPhaseCtx = phaseContextManager.getCurrentPhase();
+        if (currentPhaseCtx == null || currentPhaseCtx.getParsedLogLine() == null) {
+            // No active phase to attach this segment to
+            return Optional.empty();
+        }
+
+        final PhaseType phaseType = (PhaseType) currentPhaseCtx.getParsedLogLine().getStage();
+        final PhaseCategory category = PhaseCategory.fromValue(phaseType);
+
+        // Segment gating based on schema
+        final SegmentType segmentType = (SegmentType) parsedLine.getStage();
+        final Set<String> allowedSegments = Optional
+                .ofNullable(phaseSchemaRegistry.getAllowedSegments(level, category))
+                .orElse(Collections.emptySet());
+        if (!allowedSegments.contains(segmentType.name())) {
+            return Optional.empty();
+        }
+
+        final List<String> keysToExtract = phaseSchemaRegistry.getSegmentPropertyList(level, category, segmentType);
+        final SegmentContext segmentContext = parsedLogLineMapper.toSegmentContext(parsedLine, keysToExtract);
+
         currentPhaseCtx.addSegment(segmentContext);
 
-        PhaseType phaseType = (PhaseType) currentPhaseCtx.getParsedLogLine().getStage();
-        PhaseCategory phaseCategory = PhaseCategory.fromValue(phaseType);
-        PhaseSchema phaseSchema = phaseSchemaRegistry.getSchema(level).get(phaseCategory);
-
+        // Shortcut: always emit on EXCEPTION regardless of schema emitOn
+        final PhaseSchema phaseSchema = getPhaseSchema(category);
         if (shouldEmit(phaseSchema, parsedLine)) {
-//            currentPhaseCtx.setStatus(PhaseStatus.COMPLETE);
-            if(Objects.equals(segmentContext.getSegmentType(), SegmentType.EXCEPTION)) {
-                String index_path = currentPhaseCtx.getParsedLogLine().getProperties().get(LogLineKey.INDEX_PATH);
-                currentPhaseCtx.setErrorDetail(new ErrorDetail(index_path, segmentContext));
-                phaseContextManager.addExceptionSegment(index_path, segmentContext);
-                phaseContextManager.endCurrentPhase();
+            if (segmentType == SegmentType.EXCEPTION) {
+                String indexPath = currentPhaseCtx.getParsedLogLine().getProperties().get(LogLineKey.INDEX_PATH);
+                currentPhaseCtx.setErrorDetail(new ErrorDetail(indexPath, segmentContext));
+                phaseContextManager.addExceptionSegment(indexPath, segmentContext);
             }
-            PhaseBuilder builder = builderFactory.getBuilder(phaseCategory);
-            LogData logData = builder.build(currentPhaseCtx, execId, Long.parseLong(connId));
-            return Optional.of(logData);
+            LogDataMng out = buildLogDataForContext(category, currentPhaseCtx);
+            return Optional.ofNullable(out);
         }
 
         return Optional.empty();
+    }
+
+    // ---- Utilities --------------------------------------------------------
+
+    private PhaseSchema getPhaseSchema(PhaseCategory category) {
+        Map<PhaseCategory, PhaseSchema> schemaMap = phaseSchemaRegistry.getSchema(level);
+        return schemaMap != null ? schemaMap.get(category) : null;
+    }
+
+    private LogDataMng buildLogDataForContext(PhaseCategory category, PhaseContext ctx) {
+        final PhaseBuilder builder = builderFactory.getBuilder(category);
+        final Long cid = parseLongOrNull(connId);
+        return builder.build(ctx, execId, flowId, cid);
     }
 
     private boolean shouldEmit(PhaseSchema phaseSchema, ParsedLogLine parsedLine) {
-        String actual = parsedLine.getStage().name();
+        final String actual = parsedLine.getStage().name();
         if (Objects.equals(actual, SegmentType.EXCEPTION.name())) {
             return true;
         }
         if (phaseSchema == null) {
             return false;
         }
-        List<String> emitOnList = phaseSchema.getEmitOn();
-        return emitOnList.contains(actual);
+        final List<String> emitOn = phaseSchema.getEmitOn();
+        return emitOn != null && emitOn.contains(actual);
     }
 
-    private boolean isStartPhase(PhaseType type) {
-        return switch (type) {
-            case EXECUTION_START, FLOWCHART_START, OPERATION_START, LOOP_START, IF_START -> true;
-            default -> false;
-        };
-    }
-
-    private boolean isEndPhase(PhaseType type) {
-        return switch (type) {
-            case EXECUTION_END, FLOWCHART_END, OPERATION_END, LOOP_END, IF_END -> true;
-            default -> false;
-        };
+    private static Long parseLongOrNull(String value) {
+        if (value == null) return null;
+        try {
+            return Long.valueOf(value);
+        } catch (NumberFormatException ignore) {
+            return null;
+        }
     }
 }

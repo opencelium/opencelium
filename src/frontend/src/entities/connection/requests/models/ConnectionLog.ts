@@ -3,16 +3,18 @@ export interface ConnectionLogIdentifier {
 	flowId: string;
 	indexPath: string,
 }
+export type LogError = {
+	message: string,
+	stack_trace: string[],
+} | null;
 export interface ConnectionSocketLog<SegmentType> extends ConnectionLogIdentifier {
+	id: string,
 	connectorName: string;
 	status: 'PENDING' | 'COMPLETE' | 'FAIL',
 	type: 'OPERATION' | 'EXECUTION' | 'FLOWCHART' | 'LOOP' | 'IF' | 'UNKNOWN',
 	properties: MethodProperty | OperatorProperty | FlowchartProperty,
 	segment: SegmentType,
-	error?: {
-		message: string,
-		stack_trace: string[],
-	} | null,
+	error?: LogError,
 }
 export type LightSegment = LightMethodSegment | LightOperatorSegment;
 export type DetailedSegment = DetailedMethodSegment | DetailedOperatorSegment;
@@ -34,18 +36,17 @@ export interface DetailedMethodSegment {
 	response: MethodResponse & DetailedMethod
 }
 interface DetailedMethod {
-	header: Record<string, string>,
+	header: string,
 	payload: any,
 }
 interface LightIfOperatorSegment {
-	result: boolean,
+	result: 'true' | 'false',
 }
 interface LightLoopOperatorSegment {
 
 }
 type LightOperatorSegment = LightIfOperatorSegment | LightLoopOperatorSegment;
 export interface DetailedIfOperatorSegment extends LightIfOperatorSegment{
-	result: boolean,
 	refs: {ref: string, value: any}[],
 }
 interface DetailedLoopOperatorSegment extends LightLoopOperatorSegment {
@@ -63,7 +64,7 @@ export interface FlowchartProperty {
 	CONNECTOR_ID: string,
 	DIRECTION: 'source' | 'target',
 }
-interface MethodProperty extends BaseChildProperty{
+export interface MethodProperty extends BaseChildProperty{
 	name: string,
 }
 export interface IfOperatorProperty extends BaseOperatorProperty{
@@ -90,6 +91,18 @@ export type Trace = (ConnectionSocketLog<LightSegment> | ConnectionSocketLog<Det
 
 export interface MetaTrace {
 	children?: Trace[],
-	isCompleted?: boolean
+	isCompleted?: boolean,
+	hasError?: boolean,
 }
 
+export interface TraceConfig {
+	isOpened?: boolean,
+	height?: {
+		request: number | undefined,
+		response: number | undefined,
+	},
+}
+
+export type TraceConfigs = {
+	[indexPath: string]: TraceConfig,
+}
