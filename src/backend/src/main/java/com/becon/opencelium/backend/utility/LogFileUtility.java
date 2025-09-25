@@ -21,18 +21,19 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.becon.opencelium.backend.execution.logger.OcLogger.LOG_LOCATION;
+import static com.becon.opencelium.backend.constant.LogConstant.DATE_TIME_FORMATTER;
+import static com.becon.opencelium.backend.constant.LogConstant.FILE_EXTENSION;
+import static com.becon.opencelium.backend.constant.LogConstant.LOG_FILE_NAME_RGX;
+import static com.becon.opencelium.backend.constant.LogConstant.LOG_LOCATION;
+import static com.becon.opencelium.backend.constant.LogConstant.NAME_PARTS_SEPARATOR;
+import static com.becon.opencelium.backend.constant.LogConstant.UNCATEGORIZED;
 
 public class LogFileUtility {
-    public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm");
-
     private static final Logger log = LoggerFactory.getLogger(LogFileUtility.class);
-    private static final String LOG_FILE_NAME_RGX = ".+_.+_.+_.+_\\d+\\.log";
 
     public static Path toPath(String base, String... sub) {
         Path path = Paths.get(base, sub);
@@ -41,7 +42,7 @@ public class LogFileUtility {
     }
 
     public static String toFilename(String timestamp, long connectionId, String type, long executionId, String extension) {
-        return timestamp + "_" + connectionId + "_" + type + "_" + executionId + "." + extension;
+        return timestamp + NAME_PARTS_SEPARATOR + connectionId + NAME_PARTS_SEPARATOR + type + NAME_PARTS_SEPARATOR + executionId + "." + extension;
     }
 
     public static void create(String base) throws IOException {
@@ -57,7 +58,7 @@ public class LogFileUtility {
 
         try (Stream<Path> stream = Files.list(connectionFilesFolder)) {
             List<Path> matchingDirs = stream
-                    .filter(path -> Files.isRegularFile(path) && path.getFileName().toString().contains(connectionId + "_" + type))
+                    .filter(path -> Files.isRegularFile(path) && path.getFileName().toString().contains(connectionId + NAME_PARTS_SEPARATOR + type))
                     .sorted((p1, p2) -> {
                         LocalDateTime time1 = extractTime(p1);
                         LocalDateTime time2 = extractTime(p2);
@@ -75,8 +76,8 @@ public class LogFileUtility {
     }
 
     public static void move(Long connectionId, long executionId, String timestamp, String type, int fileLimit) {
-        Path sourcePath = toPath(LOG_LOCATION, toFilename(timestamp, connectionId, "u", executionId, "log"));
-        Path destinationPath = toPath(LOG_LOCATION, connectionId.toString(), toFilename(timestamp, connectionId, type, executionId, "log"));
+        Path sourcePath = toPath(LOG_LOCATION, toFilename(timestamp, connectionId, UNCATEGORIZED, executionId, FILE_EXTENSION));
+        Path destinationPath = toPath(LOG_LOCATION, connectionId.toString(), toFilename(timestamp, connectionId, type, executionId, FILE_EXTENSION));
 
         try {
             Files.createDirectories(destinationPath.getParent());
@@ -130,12 +131,11 @@ public class LogFileUtility {
 
     public static List<String> getLogFileNameList(Long connectionId) {
         Path logFolder = toPath(LOG_LOCATION + "/" + connectionId);
-        String expectedSuffix = ".log";
 
         try (Stream<Path> stream = Files.list(logFolder)) {
             return stream
                     .map(path -> path.getFileName().toString())
-                    .filter(name -> name.matches(LOG_FILE_NAME_RGX) && name.endsWith(expectedSuffix))
+                    .filter(name -> name.matches(LOG_FILE_NAME_RGX))
                     .collect(Collectors.toList());
         } catch (IOException e) {
             log.error("Error while reading log files from folder: {}", logFolder, e);
@@ -168,7 +168,7 @@ public class LogFileUtility {
 
         try {
             String timestamp = filename.substring(0, 16);
-            return LocalDateTime.parse(timestamp, FORMATTER);
+            return LocalDateTime.parse(timestamp, DATE_TIME_FORMATTER);
         } catch (Exception e) {
             return LocalDateTime.MIN;
         }
@@ -181,7 +181,7 @@ public class LogFileUtility {
 
         // Remove the ".log" extension
         String withoutExt = fileName.substring(0, fileName.length() - 4);
-        String[] parts = withoutExt.split("_");
+        String[] parts = withoutExt.split(NAME_PARTS_SEPARATOR);
         return parts[parts.length - 1];
     }
 }

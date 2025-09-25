@@ -16,13 +16,13 @@
 
 package com.becon.opencelium.backend.quartz;
 
+import com.becon.opencelium.backend.constant.LogConstant;
 import com.becon.opencelium.backend.database.mysql.entity.Subscription;
 import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
 import com.becon.opencelium.backend.execution.ConnectionExecutor;
 import com.becon.opencelium.backend.execution.service.ExecutionObjectService;
 import com.becon.opencelium.backend.execution.service.ExecutionObjectServiceImp;
 import com.becon.opencelium.backend.resource.execution.ExecutionObj;
-import com.becon.opencelium.backend.utility.LogFileUtility;
 import org.quartz.InterruptableJob;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -61,7 +61,7 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
         context.getMergedJobDataMap().put("licenseIsValid", true);
 
         try {
-            String timestamp = LocalDateTime.now().format(LogFileUtility.FORMATTER);
+            String timestamp = LocalDateTime.now().format(LogConstant.DATE_TIME_FORMATTER);
 
             JobDataMap dataMap = context.getMergedJobDataMap();
             QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) dataMap.get("data");

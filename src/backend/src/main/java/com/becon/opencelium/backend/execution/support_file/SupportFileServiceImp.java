@@ -34,7 +34,10 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static com.becon.opencelium.backend.execution.logger.OcLogger.LOG_LOCATION;
+import static com.becon.opencelium.backend.constant.LogConstant.FILE_EXTENSION;
+import static com.becon.opencelium.backend.constant.LogConstant.LOG_LOCATION;
+import static com.becon.opencelium.backend.constant.LogConstant.SUCCESS;
+import static com.becon.opencelium.backend.constant.LogConstant.UNCATEGORIZED;
 import static com.becon.opencelium.backend.utility.LogFileUtility.create;
 import static com.becon.opencelium.backend.utility.LogFileUtility.delete;
 import static com.becon.opencelium.backend.utility.LogFileUtility.enforceLimit;
@@ -228,8 +231,8 @@ public class SupportFileServiceImp implements SupportFileService {
             }
 
             // copy temporary uncategorized log file into zip, then delete it:
-            Path filePath = toPath(LOG_LOCATION, toFilename(timestamp, connectionId, "u", executionId, "log"));
-            addToZip(zipOutputStream, filePath.toFile(), toFilename(timestamp, connectionId, type, executionId, "log"));
+            Path filePath = toPath(LOG_LOCATION, toFilename(timestamp, connectionId, UNCATEGORIZED, executionId, FILE_EXTENSION));
+            addToZip(zipOutputStream, filePath.toFile(), toFilename(timestamp, connectionId, type, executionId, FILE_EXTENSION));
             delete(filePath);
 
             // send success notification vie websocket
@@ -246,7 +249,7 @@ public class SupportFileServiceImp implements SupportFileService {
             logger.error("Failed to create support file for connectionId = '" + connectionId + "'");
             throw new RuntimeException(e);
         } finally {
-            int fileLimit = "s".equals(type) ? supportFileSuccessLimit : supportFileFailLimit;
+            int fileLimit = SUCCESS.equals(type) ? supportFileSuccessLimit : supportFileFailLimit;
             enforceLimit(base, connectionId, type, fileLimit);
         }
     }
