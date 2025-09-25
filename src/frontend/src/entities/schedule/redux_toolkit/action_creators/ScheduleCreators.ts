@@ -320,7 +320,7 @@ export const getLogsByExecutionId = createAsyncThunk(
     'schedule/logs/executionId',
     async(executionId: string, thunkAPI) => {
         try {
-            const request = new ScheduleRequest({url: 'connection', endpoint: `/execution/${executionId}`});
+            const request = new ScheduleRequest({url: 'execution', endpoint: `/${executionId}/raw/log`});
             const response = await request.getLogsByExecutionId();
             const blob = new Blob([response.data]);
             const fileSizeInMB = blob.size / (1024 * 1024);
@@ -356,7 +356,6 @@ export const getLogsByExecutionId = createAsyncThunk(
                 }
             }
         } catch(e){
-            console.log(e);
             return thunkAPI.rejectWithValue({message: e?.response?.data?.error || e.message});
         }
     }

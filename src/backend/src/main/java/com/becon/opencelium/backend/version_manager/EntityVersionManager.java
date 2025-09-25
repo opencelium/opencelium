@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.version_manager;
 
-import com.becon.opencelium.backend.configuration.OpenCeliumProps;
+import com.becon.opencelium.backend.constant.props.OpenceliumProps;
 import com.becon.opencelium.backend.version_manager.base.UpdaterType;
 import com.becon.opencelium.backend.version_manager.base.UpdaterVersion;
 import com.becon.opencelium.backend.version_manager.connectionmng.ConnectionMngUpdaterProvider;
@@ -17,7 +17,7 @@ public class EntityVersionManager {
     private final TemplateUpdaterProvider templateUpdaterProvider;
     private final EnhancementUpdaterProvider enhancementUpdaterProvider;
 
-    public EntityVersionManager(ConnectionMngUpdaterProvider connectionMngUpdaterProvider, TemplateUpdaterProvider templateUpdaterProvider, EnhancementUpdaterProvider enhancementUpdaterProvider, OpenCeliumProps ocProps) {
+    public EntityVersionManager(ConnectionMngUpdaterProvider connectionMngUpdaterProvider, TemplateUpdaterProvider templateUpdaterProvider, EnhancementUpdaterProvider enhancementUpdaterProvider, OpenceliumProps ocProps) {
         this.connectionMngUpdaterProvider = connectionMngUpdaterProvider;
         this.templateUpdaterProvider = templateUpdaterProvider;
         this.enhancementUpdaterProvider = enhancementUpdaterProvider;

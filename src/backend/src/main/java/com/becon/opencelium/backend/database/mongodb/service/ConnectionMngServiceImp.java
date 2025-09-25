@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.database.mongodb.service;
 
-import com.becon.opencelium.backend.configuration.OpenCeliumProps;
+import com.becon.opencelium.backend.constant.props.OpenceliumProps;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.entity.EnhancementMng;
 import com.becon.opencelium.backend.database.mongodb.repository.ConnectionMngRepository;
@@ -29,7 +29,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     private final EnhancementService enhancementService;
     private final MapperUpdatable<Enhancement, EnhancementDTO> enhancementMapper;
     private final Mapper<EnhancementMng, EnhancementDTO> enhancementMngMapper;
-    private final OpenCeliumProps ocProps;
+    private final OpenceliumProps ocProps;
 
     public ConnectionMngServiceImp(
             ConnectionMngRepository connectionMngRepository,
@@ -39,7 +39,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
             @Qualifier("enhancementServiceImp") EnhancementService enhancementService,
             MapperUpdatable<Enhancement, EnhancementDTO> enhancementMapper,
             Mapper<EnhancementMng, EnhancementDTO> enhancementMngMapper,
-            OpenCeliumProps ocProps
+            OpenceliumProps ocProps
     ) {
         this.connectionMngRepository = connectionMngRepository;
         this.fieldBindingMngService = fieldBindingMngService;

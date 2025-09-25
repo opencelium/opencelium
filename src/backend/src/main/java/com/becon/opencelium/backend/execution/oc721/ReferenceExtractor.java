@@ -59,64 +59,68 @@ public class ReferenceExtractor implements Extractor {
     public Object extractValue(String ref) {
         Object result = null;
 
-        if (ref.matches(directRef) || ref.matches(wrappedDirectRef)) {
-            // remove wrapper if necessary = {%ref%}
-            // CASE 1: collect all data from Operation:
-            //'#ababab.(response).[*]'
-            //'#ababab.(response).[*].status'
-            //'#ababab.(response).[*].header'
-            //'#ababab.(response).[*].body'
+        try {
+            if (ref.matches(directRef) || ref.matches(wrappedDirectRef)) {
+                // remove wrapper if necessary = {%ref%}
+                // CASE 1: collect all data from Operation:
+                //'#ababab.(response).[*]'
+                //'#ababab.(response).[*].status'
+                //'#ababab.(response).[*].header'
+                //'#ababab.(response).[*].body'
 
-            // CASE 2: return 'status' code of Operation
-            //'#ababab.(response).status',
+                // CASE 2: return 'status' code of Operation
+                //'#ababab.(response).status',
 
-            // CASE 3: return 'header' of Operation
-            //'#ababab.(response).header.$.Content-Type',
-            //'#ababab.(request).header.$.Content-Type',
+                // CASE 3: return 'header' of Operation
+                //'#ababab.(response).header.$.Content-Type',
+                //'#ababab.(request).header.$.Content-Type',
 
-            // CASE 4: return targeted field of 'HttpEntity.body'
-            //'#ababab.(response).body.$.field[*]',
-            //'{%#ababab.(request).body.$.field[*]%}',
-            //'#ababab.(response).body.$.field1.['field2_with_special_symbol'].field3',
-            //'#ababab.(response).body.$.[*]',
-            //'#ababab.(request).body.$.[*]',
+                // CASE 4: return targeted field of 'HttpEntity.body'
+                //'#ababab.(response).body.$.field[*]',
+                //'{%#ababab.(request).body.$.field[*]%}',
+                //'#ababab.(response).body.$.field1.['field2_with_special_symbol'].field3',
+                //'#ababab.(response).body.$.[*]',
+                //'#ababab.(request).body.$.[*]',
 
-            ref = ReferenceUtility.extractDirectRef(ref);
+                ref = ReferenceUtility.extractDirectRef(ref);
 
-            result = extractFromOperation(ref);
-        } else if (ref.matches(enhancement)) {
-            // '#{%bindId%}'
-            String bindId = ref.replace("#{%", "").replace("%}", "");
+                result = extractFromOperation(ref);
+            } else if (ref.matches(enhancement)) {
+                // '#{%bindId%}'
+                String bindId = ref.replace("#{%", "").replace("%}", "");
 
-            result = executionManager.executeScript(bindId);
-        } else if (ref.matches(webhook)) {
-            // '${key}'
-            // '${key:type}'
-            // '${key.field[*]}'
-            // '${key.field[*]:type}'
-            result = extractFromWebhook(ref);
-        } else if (ref.matches(pageRef)) {
-            // '@{limit}'
-            // '@{size}'
-            String param = ref.replace("@{", "").replace("}","");
+                result = executionManager.executeScript(bindId);
+            } else if (ref.matches(webhook)) {
+                // '${key}'
+                // '${key:type}'
+                // '${key.field[*]}'
+                // '${key.field[*]:type}'
+                result = extractFromWebhook(ref);
+            } else if (ref.matches(pageRef)) {
+                // '@{limit}'
+                // '@{size}'
+                String param = ref.replace("@{", "").replace("}", "");
 
-            result = executionManager.getPaginationParamValue(PageParam.fromString(param));
-        } else if (ref.matches(requestData)) {
-            // '{key}'
-            // '{#ctorId.key}'
-            String refValue = ref.replace("{", "").replace("}", "");
+                result = executionManager.getPaginationParamValue(PageParam.fromString(param));
+            } else if (ref.matches(requestData)) {
+                // '{key}'
+                // '{#ctorId.key}'
+                String refValue = ref.replace("{", "").replace("}", "");
 
-            // set id of required connector if exists
-            Integer ctorId = null;
-            if (refValue.startsWith("#")) {
-                ctorId = Integer.valueOf(refValue.substring(1, refValue.indexOf(".")));
-                refValue = refValue.substring(refValue.indexOf(".") + 1);
+                // set id of required connector if exists
+                Integer ctorId = null;
+                if (refValue.startsWith("#")) {
+                    ctorId = Integer.valueOf(refValue.substring(1, refValue.indexOf(".")));
+                    refValue = refValue.substring(refValue.indexOf(".") + 1);
+                }
+
+                result = executionManager.getRequestData(ctorId).getOrDefault(refValue, ref);
             }
+            return result;
 
-            result = executionManager.getRequestData(ctorId).getOrDefault(refValue, ref);
+        } catch (Exception e) {
+            throw new RuntimeException("Reference = " + ref, e);
         }
-
-        return result;
     }
 
     private Object extractFromWebhook(String ref) {
@@ -154,7 +158,7 @@ public class ReferenceExtractor implements Extractor {
         return switch (type) {
             case INTEGER -> Long.parseLong(stringValue);
             case BOOLEAN -> Boolean.parseBoolean(stringValue);
-            case NUMBER  -> Double.parseDouble(stringValue);
+            case NUMBER -> Double.parseDouble(stringValue);
             case STRING -> stringValue.replace("[", "").replace("]", "")
                     .replace("'", "");
             case ARRAY -> {
@@ -264,7 +268,7 @@ public class ReferenceExtractor implements Extractor {
         if (body instanceof String result) {
             return result;
         }
-        
+
         try {
             return new ObjectMapper().writer().withDefaultPrettyPrinter().writeValueAsString(body);
         } catch (Exception e) {
@@ -380,7 +384,7 @@ public class ReferenceExtractor implements Extractor {
                 } else {
                     // case 2.2: field[2]~
                     int index;
-                    try{
+                    try {
                         index = Integer.parseInt(match);
                     } catch (Exception e) {
                         throw new RuntimeException("Wrong index is supplied to a SPLIT STRING operator, 'index' = " + match);

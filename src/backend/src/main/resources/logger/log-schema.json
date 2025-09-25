@@ -33,7 +33,7 @@
     },
     "LOOP" : {
       "emitOn": ["LOOP_START", "LOOP_END"],
-      "properties" : ["indexPath", "expression", "iterator", "loopIndex", "loopIterator"],
+      "properties" : ["indexPath", "expression", "iterator", "loopIndex", "loopIterator", "size"],
       "segments" : {
         "EXCEPTION": ["data"]
       }
@@ -68,7 +68,7 @@
       }
     },
     "IF" : {
-      "emitOn": ["IF_RESULT", "IF_END"],
+      "emitOn": ["IF_RESULT"],
       "properties" : ["indexPath", "expression", "loopIndex", "loopIterator"],
       "segments" : {
         "IF_RESULT": ["data"],
@@ -80,7 +80,7 @@
       "emitOn": ["LOOP_REF"],
       "properties" : ["indexPath", "expression", "iterator", "loopIndex", "loopIterator"],
       "segments" : {
-        "LOOP_REF": ["data"],
+        "LOOP_REF": ["ref","data"],
         "EXCEPTION": ["data"]
       }
     }

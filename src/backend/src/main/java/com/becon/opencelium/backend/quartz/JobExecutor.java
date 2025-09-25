@@ -89,7 +89,7 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
                 subscriptionService.updateUsage(activeSub.getId(), executionObj.getConnection(), operationUsage, startTime);
             }
         } catch (ThreadDeath ignored) {
-        } finally {
+        } finally{
             thread = null;
         }
     }

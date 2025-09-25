@@ -111,3 +111,17 @@ versions:
         operation: add
         value: false
         path: opencelium.online_services.active
+  - version: 4.6
+    changes:
+      - changeset: 1
+        operation: add
+        value: 4.6
+        path: opencelium.version
+      - changeset: 2
+        operation: rename
+        value: opencelium.service_portal.base-url
+        path: opencelium.service_portal.base_url
+      - changeset: 3
+        operation: rename
+        value: opencelium.service-portal
+        path: opencelium.service_portal

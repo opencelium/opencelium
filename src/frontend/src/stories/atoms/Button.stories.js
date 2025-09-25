@@ -17,6 +17,7 @@ import React from 'react';
 import {Button} from "@app_component/base/button/Button";
 import {withTheme} from "styled-components";
 import {ColorTheme} from "@style/Theme";
+import {consoleLog} from "@application/utils/utils";
 
 const TemplateWithTheme = withTheme(Button);
 
@@ -45,7 +46,7 @@ OnlyIcon.args = {
     icon: 'face',
     hasBackground: false,
     color: ColorTheme.Black,
-    handleClick: () => {console.log('Only Icon')},
+    handleClick: () => {consoleLog('Only Icon')},
 }
 
 

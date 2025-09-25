@@ -8,13 +8,17 @@ import {
 } from "@root/requests/models/ConnectionLog";
 
 export interface ConLogRequestProps extends ConnectionLogIdentifier{
-	loopIndex?: number[]
+	loopIndex?: number[],
+	id: string,
 }
 export interface TestConnectionResponse {
 	schedulerId: number,
 }
 export interface DeleteLogsRequest {
 	executionId: string,
+}
+export interface GetLogListResponse {
+	result: string[],
 }
 
 export interface IConnectionLogRequest {
@@ -23,4 +27,5 @@ export interface IConnectionLogRequest {
 	getOperatorChildren(data: ConLogRequestProps): Promise<AxiosResponse<Trace[]>>;
 	deleteLogs(data: DeleteLogsRequest): Promise<AxiosResponse<IResponse>>;
 	testConnection(connection: any): Promise<AxiosResponse<TestConnectionResponse>>;
+	getLogList(scheduleId: string): Promise<AxiosResponse<GetLogListResponse>>;
 }

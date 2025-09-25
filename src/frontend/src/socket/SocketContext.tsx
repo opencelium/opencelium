@@ -1,30 +1,32 @@
-import React, {createContext, useContext, useRef} from "react";
-import { getSocket } from "./socket";
+import React, {createContext, useContext, useEffect, useRef, useState} from "react";
+import {disableSocket, getSocket} from "./socket";
 import {Client} from "@stomp/stompjs";
 import {consoleLog} from "@application/utils/utils";
 
-const SocketContext = createContext<{socket: Client | null, resetSocket: () => void,}>({socket: null, resetSocket: () => {}});
+const SocketContext = createContext<{socket: Client | null, setSocket: () => void, resetSocket: () => void, deactivateSocket: () => Promise<void>}>({socket: null, setSocket: () => {}, resetSocket: () => {}, deactivateSocket: async () => {}});
 
 export const SocketProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
-    const socketRef = useRef<Client | null>(null);
+    const [socket, changeSocket] = useState<Client | null>(null);
+    useEffect(() => {
+        changeSocket(getSocket());
+    }, []);
 
-    if (!socketRef.current) {
-        socketRef.current = getSocket();
+    const setSocket = () => {
+        changeSocket(getSocket());
     }
 
-    const resetSocket = () => {
-        consoleLog('reset socket')
-        if (socketRef.current && socketRef.current.connected) {
-            socketRef.current.deactivate().then(() => {
-                socketRef.current = getSocket();
-            });
-        } else {
-            socketRef.current = getSocket();
-        }
+    const resetSocket = async () => {
+        await deactivateSocket();
+        setSocket();
+    }
+
+    const deactivateSocket = async () => {
+        await disableSocket();
+        changeSocket(null);
     }
 
     return (
-        <SocketContext.Provider value={{socket: socketRef.current, resetSocket}}>
+        <SocketContext.Provider value={{socket, setSocket, resetSocket, deactivateSocket}}>
             {children}
         </SocketContext.Provider>
     );
