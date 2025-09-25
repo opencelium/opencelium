@@ -1,7 +1,7 @@
 package com.becon.opencelium.backend.configuration.interceptors;
 
 import com.becon.opencelium.backend.commons.ThreadLocalSingleton;
-import com.becon.opencelium.backend.configuration.ConnectorProps;
+import com.becon.opencelium.backend.constant.props.ConnectorProps;
 import com.becon.opencelium.backend.constant.HeaderConstants;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

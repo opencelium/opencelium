@@ -16,6 +16,11 @@
 import TooltipButton from "@app_component/base/tooltip_button/TooltipButton";
 import Text from "@app_component/base/text/Text";
 import styled from "styled-components";
+import {isNumber} from "lodash";
+import {LogPanelHeight} from "@root/redux_toolkit/slices/ConnectionSlice";
+import {types} from "sass";
+import Color = types.Color;
+import {ErrorColor} from "@app_component/operator_builder/OperatorBuilder";
 
 export const MessageStyled = styled.div`
     padding: 2px;
@@ -24,17 +29,18 @@ export const MessageStyled = styled.div`
 export const ResponseMessage = styled.div`
 `;
 
-export const LogPanelStyled = styled.div<{isFullScreen: boolean, noLogs: boolean, isDetailsOpened: boolean, logPanelHeight: number}>`
-    min-height: ${({logPanelHeight}) => logPanelHeight}px;
-    max-height: ${({logPanelHeight}) => logPanelHeight}px;
+export const LogPanelStyled = styled.div<{isFullScreen: boolean, noLogs: boolean, isDetailsOpened: boolean, logPanelHeight: number | string}>`
+    min-height: ${({logPanelHeight}) => isNumber(logPanelHeight) ? `${logPanelHeight}px` : logPanelHeight};
+    max-height: ${({logPanelHeight}) => isNumber(logPanelHeight) ? `${logPanelHeight}px` : logPanelHeight};
     background: white;
     color: black;
-    width: calc(100% - ${({isFullScreen, isDetailsOpened}) => isFullScreen ? isDetailsOpened ? '315px' : '15px' : isDetailsOpened ? '300px' : '0px'});
+    width: calc(100% - ${({isFullScreen, isDetailsOpened}) => isFullScreen ? isDetailsOpened ? '315px' : '15px' : isDetailsOpened ? '300px' : '2px'});
     white-space: initial;
     overflow-y: auto;
     position: absolute;
     bottom: 0;
-    padding: 10px;
+    z-index: 1000;
+    display: ${({isDetailsOpened}) => isDetailsOpened ? '10px' : '0'};
     ${({noLogs}) => noLogs ? `
     ` : ''}
 `;
@@ -45,19 +51,37 @@ export const EmptyLogsStyled = styled.h3`
     margin-top: 50px;
 `;
 
+export const FinishedLogsStyled = styled.div`
+    font-size: 16px;
+    text-align: left;
+    margin: 20px 0 10px 10px;
+    color: #6c9d3f;
+    font-weight: bold;
+`;
+export const ForcedFinishedLogsStyled = styled.div`
+    font-size: 16px;
+    text-align: left;
+    margin: 20px 0 10px 10px;
+    color: ${ErrorColor};
+    font-weight: bold;
+`;
+
 export const HeaderStyled = styled(Text)`
+    background-color: white;
     user-select: none;
     text-align: center;
     color: #555;
 `;
 
-export const TopStyled = styled.div<{logPanelHeight: number}>`
+export const TopStyled = styled.div<{logPanelHeight: number | string}>`
     background: white;
-    bottom: ${({logPanelHeight}) => logPanelHeight}px;
+    bottom: ${({logPanelHeight}) => logPanelHeight === LogPanelHeight.Full ? 'unset' : `${logPanelHeight}px`};
+    top: ${({logPanelHeight}) => logPanelHeight === LogPanelHeight.Full ? 0 : 'unset'};
     min-height: 28px;
     max-height: 28px;
     position: absolute;
-    width: 100%;
+    z-index: 1;
+    width: calc(100% - 2px);
     height: 28px;
     border-top: 2px solid #eee;
     border-bottom: 1px solid #eee;
@@ -112,6 +136,15 @@ export const ToggleSmallButtonContainerStyled = styled.div`
 `;
 
 export const ClearButtonStyled = styled(TooltipButton)`
+    background: white;
+    bottom: 0;
+    display: flex;
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    z-index: 1;
+`;
+export const FullLogsButtonStyled = styled(TooltipButton)`
     background: white;
     bottom: 0;
     display: flex;

@@ -16,7 +16,7 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
-import com.becon.opencelium.backend.configuration.ConnectorProps;
+import com.becon.opencelium.backend.constant.props.ConnectorProps;
 import com.becon.opencelium.backend.constant.ExceptionConstant;
 import com.becon.opencelium.backend.constant.ExceptionMessages;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
@@ -35,6 +35,7 @@ import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.utility.crypto.Encoder;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -50,18 +51,21 @@ public class ConnectorServiceImp implements ConnectorService {
     private final InvokerService invokerService;
     private final Encoder encoder;
     private final RequestDataService requestDataService;
+    private final Environment env;
 
     public ConnectorServiceImp(
             ConnectorProps connectorProps, ConnectorRepository connectorRepository,
             @Qualifier("invokerServiceImp") InvokerService invokerService,
             @Qualifier("requestDataServiceImp") RequestDataServiceImp requestDataService,
-            Encoder encoder
+            Encoder encoder,
+            Environment env
     ) {
         this.connectorProps = connectorProps;
         this.connectorRepository = connectorRepository;
         this.invokerService = invokerService;
         this.encoder = encoder;
         this.requestDataService = requestDataService;
+        this.env = env;
     }
 
     @Override
@@ -164,9 +168,19 @@ public class ConnectorServiceImp implements ConnectorService {
         FunctionInvoker function = invokerService.getTestFunction(connector.getInvoker());
         List<RequestData> requestData = buildRequestData(connector);
 
+        String port = env.getProperty("opencelium.rest_template.proxy.port");
+        String host = env.getProperty("opencelium.rest_template.proxy.host");
+        String user = env.getProperty("opencelium.rest_template.proxy.username");
+        String password = env.getProperty("opencelium.rest_template.proxy.password");
+
         return invokerRequestBuilder
                 .setFunction(function)
                 .setRequestData(requestData)
+                .setProxyHost(host)
+                .setProxyPort(port)
+                .setProxyUser(user)
+                .setProxyPass(password)
+                .setTimeout(connector.getTimeout())
                 .setSslCert(connector.isSslValidation())
                 .sendRequest();
     }

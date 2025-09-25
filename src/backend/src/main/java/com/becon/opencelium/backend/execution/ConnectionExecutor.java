@@ -2,8 +2,6 @@ package com.becon.opencelium.backend.execution;
 
 import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
 import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
-import com.becon.opencelium.backend.enums.LogType;
-import com.becon.opencelium.backend.execution.logger.msg.ConnectorLog;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.oc721.Connector;
 import com.becon.opencelium.backend.execution.oc721.FieldBind;
@@ -55,41 +53,14 @@ public class ConnectionExecutor {
 
         executionManager = new ExecutionManagerImpl(webhookVars, source, target, fieldBind);
 
-        ConnectorExecutor sourceEx = new ConnectorExecutor(connection.getSource(), executionManager, getRestTemplate(source), logger, masking);
-        ConnectorExecutor targetEx = new ConnectorExecutor(connection.getTarget(), executionManager, getRestTemplate(target), logger, masking);
+        ConnectorExecutor sourceEx = new ConnectorExecutor(connection.getSource(), executionManager, getRestTemplate(source), logger, masking, "source");
+        ConnectorExecutor targetEx = new ConnectorExecutor(connection.getTarget(), executionManager, getRestTemplate(target), logger, masking, "target");
 
-        String flowId = "";
-        int connectorId = -1;
-        String connectorName = "";
-        String direction = "";
         try {
             logger.logAndSend(String.format("phase=EXECUTION_START id=%d connectionId=%d", executionId, connection.getConnectionId()));
 
-            logger.getLogEntity().setType(LogType.INFO);
-
-            flowId = source.getFchartId();
-            connectorId = source.getId();
-            connectorName = source.getName();
-            direction = "source";
-            logger.getLogEntity().setConnector(new ConnectorLog(source.getName(), "CONN1"));
-            logger.logAndSend(String.format("phase=FLOWCHART_START flowId=%s connectorId=%d connectorName=%s direction=%s", flowId, connectorId, connectorName, direction));
             sourceEx.start();
-            logger.logAndSend(String.format("phase=FLOWCHART_END flowId=%s connectorId=%d connectorName=%s direction=%s", flowId, connectorId, connectorName, direction));
-
-            flowId = target.getFchartId();
-            connectorId = target.getId();
-            connectorName = target.getName();
-            direction = "target";
-            logger.getLogEntity().setConnector(new ConnectorLog(target.getName(), "CONN2"));
-            logger.logAndSend(String.format("phase=FLOWCHART_START flowId=%s connectorId=%d connectorName=%s direction=%s", flowId, connectorId, connectorName, direction));
             targetEx.start();
-            logger.logAndSend(String.format("phase=FLOWCHART_END flowId=%s connectorId=%d connectorName=%s direction=%s", flowId, connectorId, connectorName, direction));
-        } catch (Exception e) {
-            logger.logAndSend(e);
-            // in case of exception 'connectorId' has been initialized with lastly executed Connector.id
-            logger.logAndSend(String.format("phase=FLOWCHART_END flowId=%s connectorId=%d connectorName=%s direction=%s", flowId, connectorId, connectorName, direction));
-
-            throw e;
         } finally {
             logger.logAndSend(String.format("phase=EXECUTION_END id=%d connectionId=%d", executionId, connection.getConnectionId()));
             logger.close(); // release resources

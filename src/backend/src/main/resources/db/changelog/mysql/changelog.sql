@@ -668,3 +668,15 @@ CREATE TABLE IF NOT EXISTS invoker_sync (
     manually_modified BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+--changeset 4.5:23 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE invoker_sync ADD COLUMN IF NOT EXISTS oc_invoker_file_name TEXT;
+
+--changeset 4.5:24 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+CREATE TABLE IF NOT EXISTS online_sync_history (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    service VARCHAR(25) NOT NULL,
+    details TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

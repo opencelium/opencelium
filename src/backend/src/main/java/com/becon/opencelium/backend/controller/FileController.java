@@ -16,7 +16,7 @@
 
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.configuration.OpenCeliumProps;
+import com.becon.opencelium.backend.constant.props.OpenceliumProps;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorServiceImp;
 import com.becon.opencelium.backend.database.mysql.service.InvokerSyncService;
@@ -106,7 +106,7 @@ public class FileController {
     private final UserStorageService storageService;
     private final Mapper<Connector, ConnectorResource> connectorMapper;
     private final EntityUpdater<Template> templateUpdater;
-    private final OpenCeliumProps ocProps;
+    private final OpenceliumProps ocProps;
 
     @Autowired
     public FileController(
@@ -120,7 +120,7 @@ public class FileController {
             UserStorageService storageService,
             Mapper<Connector, ConnectorResource> connectorMapper,
             EntityVersionManager versionManager,
-            OpenCeliumProps ocProps
+            OpenceliumProps ocProps
     ) {
         this.userDetailService = userDetailService;
         this.userService = userService;
@@ -370,7 +370,7 @@ public class FileController {
             FileDTO fileDTO = new FileDTO(name);
 
             // update invoker sync table to store latest files information
-            invokerSyncService.update(name);
+            invokerSyncService.updateSync(name);
 
             return ResponseEntity.ok(fileDTO);
         }
@@ -423,7 +423,7 @@ public class FileController {
                     fileDTOList.add(fileDTO);
 
                     // update invoker sync table to store latest files information
-                    invokerSyncService.update(name);
+                    invokerSyncService.updateSync(name);
                 }
                 zis.close();
             } else {
