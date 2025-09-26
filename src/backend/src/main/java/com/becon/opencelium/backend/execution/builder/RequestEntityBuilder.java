@@ -106,10 +106,10 @@ public class RequestEntityBuilder {
             ParameterDTO copiedParameter = ParameterDTOUtil.copy(parameter);
             replaceRefs(copiedParameter.getSchema());
 
-            // construct correct query parameter
-            String query = ParameterDTOUtil.toString(copiedParameter);
+            // construct query parameter and safely encode it (if necessary)
+            String query = safeEncode(ParameterDTOUtil.toString(copiedParameter));
 
-            // replace raw query parameter with correct one
+            // replace raw query parameter with actual encoded query
             rawUrl = rawUrl.replace(rawQuery, query);
         }
 
@@ -204,6 +204,36 @@ public class RequestEntityBuilder {
         } else {
             throw new RuntimeException("Unsupported DataType for 'application/x-www-form-urlencoded', type = " + schema.getType());
         }
+    }
+
+    private static String safeEncode(String query) {
+        if (query == null) {
+            return null;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < query.length(); i++) {
+            char c = query.charAt(i);
+
+
+            if (c == '%' && i + 2 < query.length() &&
+                    Character.digit(query.charAt(i + 1), 16) != -1 &&
+                    Character.digit(query.charAt(i + 2), 16) != -1) {
+                // keep existing valid %XX sequences
+                sb.append('%').append(query.charAt(i + 1)).append(query.charAt(i + 2));
+                i += 2;
+            } else if (c == ' ') {
+                // encode space
+                sb.append("%20");
+            } else if ("\"<>{}|\\^`".indexOf(c) >= 0) {
+                // encode other illegal chars if needed
+                sb.append('%').append(String.format("%02X", (int) c));
+            } else {
+                sb.append(c);
+            }
+        }
+
+        return sb.toString();
     }
 
     private void replaceRefs(SchemaDTO schema) {
