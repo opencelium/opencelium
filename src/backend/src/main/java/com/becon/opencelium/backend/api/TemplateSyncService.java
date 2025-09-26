@@ -6,8 +6,8 @@ import com.becon.opencelium.backend.database.mysql.service.OnlineSyncHistoryServ
 import com.becon.opencelium.backend.api.module.TemplateModule;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.template.service.TemplateService;
-import com.becon.opencelium.backend.version_manager.EntityUpdater;
-import com.becon.opencelium.backend.version_manager.EntityVersionManager;
+import com.becon.opencelium.backend.versionmanager.EntityUpdater;
+import com.becon.opencelium.backend.versionmanager.EntityVersionManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
