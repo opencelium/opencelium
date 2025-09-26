@@ -1,7 +1,7 @@
-package com.becon.opencelium.backend.polygot_engine.engines;
+package com.becon.opencelium.backend.scriptengine.engines;
 
-import com.becon.opencelium.backend.polygot_engine.ex.InvalidScriptException;
-import com.becon.opencelium.backend.polygot_engine.ex.ScriptExecutionException;
+import com.becon.opencelium.backend.scriptengine.ex.InvalidScriptException;
+import com.becon.opencelium.backend.scriptengine.ex.ScriptExecutionException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

@@ -1,8 +1,8 @@
-package com.becon.opencelium.backend.polygot_engine.engines;
+package com.becon.opencelium.backend.scriptengine.engines;
 
-import com.becon.opencelium.backend.polygot_engine.*;
-import com.becon.opencelium.backend.polygot_engine.ex.InvalidScriptException;
-import com.becon.opencelium.backend.polygot_engine.ex.ScriptExecutionException;
+import com.becon.opencelium.backend.scriptengine.*;
+import com.becon.opencelium.backend.scriptengine.ex.InvalidScriptException;
+import com.becon.opencelium.backend.scriptengine.ex.ScriptExecutionException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

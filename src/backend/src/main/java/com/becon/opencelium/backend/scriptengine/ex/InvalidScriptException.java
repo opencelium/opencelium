@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.polygot_engine.ex;
+package com.becon.opencelium.backend.scriptengine.ex;
 
 /**
  * Thrown to indicate that a script failed validation due to syntax or structural issues.
