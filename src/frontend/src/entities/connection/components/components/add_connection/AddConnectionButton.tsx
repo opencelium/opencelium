@@ -24,6 +24,7 @@ import {getAllConnectors} from "@entity/connector/redux_toolkit/action_creators/
 import {getTemplatesByConnectors} from "@entity/template/redux_toolkit/action_creators/TemplateCreators";
 import {Category} from "@entity/category/classes/Category";
 import {getAllCategories} from "@entity/category/redux_toolkit/action_creators/CategoryCreators";
+import {clearTemplates} from "@entity/template/redux_toolkit/slices/TemplateSlice";
 
 function AddConnectionButton({ theme, direction, ...args }: DropdownMenuProps & {theme?: any}) {
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -72,6 +73,7 @@ function AddConnectionButton({ theme, direction, ...args }: DropdownMenuProps & 
         setValidateMessageTemplate('');
     }
     const toggleForm = () => {
+        dispatch(clearTemplates());
         if(isOpened){
             setTitle('');
             setFromConnector(null);

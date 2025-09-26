@@ -33,7 +33,6 @@ const ScheduleLogListStyled = styled.div<{x: number, y: number}>`
 
 const ScheduleLogId = styled.span`
 `
-
 const ScheduleLogEntry = styled.tr`
     white-space: nowrap;
     text-align: left;

@@ -28,7 +28,7 @@ export enum BinaryOperatorName {
     NotLike= 'NotLike',
     PropertyExists= 'PropertyExists',
     PropertyNotExists= 'PropertyNotExists',
-    RegEx= 'RegEx',
+    RegEx= 'RegExp',
 }
 
 export const AllOperatorNames = {

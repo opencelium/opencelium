@@ -152,7 +152,7 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 											setActiveRequestTab('header');
 										}
 									}}
-									title={'Header'}
+									title={'Request Header'}
 								/>
 								<NavItemLog
 									navLinkProps={{
@@ -162,7 +162,7 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 											setActiveRequestTab('body');
 										}
 									}}
-									title={'Body'}
+									title={'Request Body'}
 								/>
 							</Nav>
 							<TabContent activeTab={activeRequestTab} className={styles.tabContent}>
@@ -181,7 +181,7 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 											setActiveResponseTab('header');
 										}
 									}}
-									title={'Header'}
+									title={'Response Header'}
 								/>
 								<NavItemLog
 									navLinkProps={{
@@ -191,7 +191,7 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 											setActiveResponseTab('body');
 										}
 									}}
-									title={'Body'}
+									title={'Response Body'}
 								/>
 							</Nav>
 							<TabContent activeTab={activeResponseTab} className={styles.tabContent}>
