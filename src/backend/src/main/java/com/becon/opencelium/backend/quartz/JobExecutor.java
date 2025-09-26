@@ -24,7 +24,6 @@ import com.becon.opencelium.backend.execution.logger.OcLogger;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.service.ExecutionObjectService;
 import com.becon.opencelium.backend.execution.service.ExecutionObjectServiceImp;
-import com.becon.opencelium.backend.execution.socket.SocketConstant;
 import com.becon.opencelium.backend.execution.socket.WebSocketNotificationService;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.execution.ExecutionObj;
@@ -71,6 +70,7 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
         }
         context.getMergedJobDataMap().put("licenseIsValid", true);
 
+        long connectionId = -1;
         try {
             JobDataMap dataMap = context.getMergedJobDataMap();
             QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) dataMap.get("data");
@@ -83,7 +83,7 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
             ExecutionObj executionObj = executionObjectService.buildObj(data);
 
             String timestamp = LocalDateTime.now().format(LogConstant.DATE_TIME_FORMATTER);
-            long connectionId = executionObj.getConnection().getConnectionId();
+            connectionId = executionObj.getConnection().getConnectionId();
 
             // setup execution logger:
             OcLogger<ExecutionLog> executionLogger = new OcLogger<>(
@@ -115,9 +115,8 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
             }
         } catch (ThreadDeath ignored) {
         } catch (Exception e) {
-            // TODO: send websocket notification: message format and destination?
             ErrorResource message = new ErrorResource(e, HttpStatus.INTERNAL_SERVER_ERROR);
-            notificationService.send(SocketConstant.LOGS_DESTINATION, message);
+            notificationService.send(connectionId, message);
 
             throw e;
         } finally{
