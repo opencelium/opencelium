@@ -13,7 +13,9 @@ import {TextSize} from "@app_component/base/text/interfaces";
 import {copyStringToClipboard} from "@application/utils/utils";
 import {copyLogContentToClipboard} from "@root/redux_toolkit/slices/ConnectionLogSlice";
 import Button from "@app_component/base/button/Button";
-import {useAppDispatch} from "@application/utils/store";
+import {RootState, useAppDispatch, useAppSelector} from "@application/utils/store";
+import {TooltipButton} from "@app_component/base/tooltip_button/TooltipButton";
+import axios from "axios";
 function getMethodColor(httpMethod: HttpMethodType): string {
     switch (httpMethod) {
         case 'POST':
@@ -29,13 +31,16 @@ function getMethodColor(httpMethod: HttpMethodType): string {
     }
 }
 interface MethodTraceExpanderProps {
+    flowId: string,
     trace: ConnectionSocketLog<DetailedMethodSegment>,
     expanded: boolean,
     loading: boolean,
     handleToggle: () => void,
+    askAI: (e: any, trace: ConnectionSocketLog<DetailedMethodSegment>) => void,
 }
-const MethodTraceExpander = ({trace, expanded, loading, handleToggle}: MethodTraceExpanderProps) => {
+const MethodTraceExpander = ({flowId, trace, expanded, loading, handleToggle, askAI}: MethodTraceExpanderProps) => {
     const dispatch = useAppDispatch();
+    const {connectors} = useAppSelector((state: RootState) => state.connectionLogReducer);
     const [isMouseOver, setIsMouseOver] = useState<boolean>(false);
     const hasError = !!trace?.error?.message;
     const methodColor = getMethodColor(trace?.segment?.request?.http_method);
@@ -59,11 +64,11 @@ const MethodTraceExpander = ({trace, expanded, loading, handleToggle}: MethodTra
                     {trace?.segment?.request?.http_method || ''}
                 </div>
                 }
-
+                {hasError && <TooltipButton target={`ai_${trace.id}`} tooltip={'AI'} hasBackground={false} icon={'star_border_purple500'} handleClick={(e) => askAI(e, trace)}/>}
                 {ShowIndexPath && (
                     <div style={{marginLeft: 8}}>{trace.indexPath}</div>
                 )}
-                <div className={styles.methodUrl} style={{color: hasError ? ColorTheme.Red : '#000'}}>
+                <div className={styles.methodUrl} style={{marginLeft: hasError ? 0 : '10px', color: hasError ? ColorTheme.Red : '#000'}}>
                     <span title={url}
                           style={{textDecoration: 'underline'}}>{`${url || (properties?.name) || ''}`}</span>
                 </div>

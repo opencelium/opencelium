@@ -18,6 +18,9 @@ import NavItemLog from "@app_component/connection_logs/ConnectorPanel/TraceItem/
 import TabPaneLog from "@app_component/connection_logs/ConnectorPanel/TraceItem/MethodTrace/TabPaneLog";
 import MethodTraceExpander
 	from "@app_component/connection_logs/ConnectorPanel/TraceItem/MethodTrace/MethodTraceExpander";
+import axios from "axios";
+import AIResultsContainer from "@app_component/connection_logs/ConnectorPanel/TraceItem/MethodTrace/AIResultsContainer";
+import {Loading} from "@app_component/base/loading/Loading";
 
 interface MethodTraceProps {
 	trace: ConnectionSocketLog<DetailedMethodSegment>;
@@ -35,11 +38,13 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 	theme
 }) => {
 	const dispatch = useAppDispatch();
-	const {traceConfigs} = useAppSelector((state: RootState) => state.connectionLogReducer);
+	const {traceConfigs, connectors} = useAppSelector((state: RootState) => state.connectionLogReducer);
 	const [expanded, setExpanded] = useState<boolean>(false);
 	const [loading, setLoading] = useState<boolean>(false);
 	const [requestHeight, setRequestHeight] = useState<number | undefined>();
 	const [responseHeight, setResponseHeight] = useState<number | undefined>();
+	const [isAILoading, setAILoading] = useState<boolean>(false);
+	const [aiResults, setAIResults] = useState<any>([]);
 	const [activeRequestTab, setActiveRequestTab] = useState<'header' | 'body'>(
 		'body'
 	);
@@ -54,6 +59,8 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 	const hasError = !!trace?.error?.message;
 
 	const handleToggle = async () => {
+		setAIResults([]);
+		setAILoading(false);
 		if (!expanded) {
 			setLoading(true);
 			if (!hasError) {
@@ -111,6 +118,21 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 				? responseDetails.payload
 				: JSON.stringify(responseDetails.payload, null, 2)
 			: '';
+
+	const askAI = async (e: any, trace: ConnectionSocketLog<DetailedMethodSegment>) => {
+		e.stopPropagation();
+		const connectorName = connectors.find(c => c.flowId === flowId)?.name || '';
+		const errorMessageSplit = trace.error?.message.split('\r\n')
+		const q = `System - ${connectorName}: ${(trace.properties as MethodProperty).name} ${trace.segment.request.http_method} - ${errorMessageSplit[0]}`;
+		console.log(q);
+		setAILoading(true);
+		const response = await axios.get(`http://localhost:4000/entry`, {
+			params: { q },
+		});
+		const results = response.data;
+		setAIResults(results);
+		setAILoading(false);
+	}
 	useEffect(() => {
 		if (traceConfigs[trace.indexPath]) {
 			if (traceConfigs[trace.indexPath].isOpened) {
@@ -133,12 +155,12 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 	}, [requestHeight, responseHeight]);
 	return (
 		<div>
-			<MethodTraceExpander trace={trace} expanded={expanded} loading={loading} handleToggle={handleToggle}/>
+			<MethodTraceExpander askAI={askAI} flowId={flowId} trace={trace} expanded={expanded} loading={loading} handleToggle={handleToggle}/>
 
 			{expanded && (
 				<div className={styles.requestResponseContainer}>
 					{hasError ?
-						<ErrorMessage trace={trace}/>
+						isAILoading ? <Loading/> : aiResults.length !== 0 ? <AIResultsContainer aiResults={aiResults}/> : <ErrorMessage trace={trace}/>
 					:
 					<React.Fragment>
 						{/* Request */}

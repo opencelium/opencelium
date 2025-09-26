@@ -37,7 +37,6 @@
 
 .methodUrl {
 	text-overflow: ellipsis;
-	margin-left: 10px;
 	color: #424242;
 	overflow: hidden;
 	white-space: nowrap;
