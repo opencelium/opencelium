@@ -12,7 +12,13 @@ import org.springframework.http.MediaType;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.*;
+import java.nio.file.FileVisitOption;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -98,6 +104,33 @@ public class LogFileUtility {
                     return FileVisitResult.CONTINUE;
                 }
             });
+        }
+    }
+
+    public static void deleteByExecutionId(long executionId) {
+        Path logFolder = toPath(LOG_LOCATION);
+
+        try (Stream<Path> stream = Files.walk(logFolder)) {
+            stream
+                    .filter(Files::isRegularFile)
+                    .filter(p -> {
+                        String filename = p.getFileName().toString();
+
+                        if (!filename.matches(LOG_FILE_NAME_RGX)) return false;
+
+                        int start = filename.lastIndexOf('_');
+                        int end = filename.lastIndexOf('.');
+                        long fileExecutionId = Long.parseLong(filename.substring(start + 1, end));
+
+                        return fileExecutionId == executionId;
+                    })
+                    .forEach(p -> {
+                        try {
+                            Files.deleteIfExists(p);
+                        } catch (IOException ignored) {}
+                    });
+        } catch (IOException e) {
+            log.warn("Failed to delete old log files by executionId", e);
         }
     }
 
