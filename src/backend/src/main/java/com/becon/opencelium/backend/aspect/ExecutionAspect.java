@@ -79,6 +79,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static com.becon.opencelium.backend.constant.LogConstant.FAIL;
+import static com.becon.opencelium.backend.constant.LogConstant.SUCCESS;
+
 @Aspect
 @Component
 public class ExecutionAspect {
@@ -172,15 +175,15 @@ public class ExecutionAspect {
             connection2ChannelMapping.remove(connectionId);
 
             // move temporarily log file under /connectionId folder if debug is enabled
-            move(connectionId, execId, timestamp, "s", debugMode);
+            move(connectionId, execId, timestamp, SUCCESS, debugMode);
         } else if (data.getExecType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE) {
-            supportFileService.collectFiles(connectionId, execId, timestamp, "s");
+            supportFileService.collectFiles(connectionId, execId, timestamp, SUCCESS);
 
             // delete temporarily created scheduler
             schedulerService.deleteById(schedulerId);
         } else {
             // move temporarily log file under /connectionId folder if debug is enabled
-            move(connectionId, execId, timestamp, "s", debugMode);
+            move(connectionId, execId, timestamp, SUCCESS, debugMode);
         }
 
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
@@ -218,15 +221,15 @@ public class ExecutionAspect {
             connection2ChannelMapping.remove(connectionId);
 
             // move temporarily log file under /connectionId folder if debug is enabled
-            move(connectionId, execId, timestamp, "f", debugMode);
+            move(connectionId, execId, timestamp, FAIL, debugMode);
         } else if (data.getExecType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE) {
-            supportFileService.collectFiles(connectionId, execId, timestamp, "f");
+            supportFileService.collectFiles(connectionId, execId, timestamp, FAIL);
 
             // delete temporarily created scheduler
             schedulerService.deleteById(schedulerId);
         } else {
             // move temporarily log file under /connectionId folder if debug is enabled
-            move(connectionId, execId, timestamp, "f", debugMode);
+            move(connectionId, execId, timestamp, FAIL, debugMode);
         }
 
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
@@ -531,7 +534,7 @@ public class ExecutionAspect {
     private void move(Long connectionId, long execId, String timestamp, String type, boolean debugMode) {
         if (debugMode) {
             int fileLimit;
-            if ("s".equals(type)) {
+            if (SUCCESS.equals(type)) {
                 fileLimit = env.getProperty(AppYamlPath.LOG_FILE_SUCCESS_LIMIT, Integer.class, 2);
             } else {
                 fileLimit = env.getProperty(AppYamlPath.LOG_FILE_FAIL_LIMIT, Integer.class, 3);

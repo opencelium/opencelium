@@ -109,17 +109,21 @@ const ReferenceGenerator = React.forwardRef(
 		};
 
 		const applyReference = () => {
-			if (currentField !== '') {
-				let newReference = '';
-				newReference = ReferenceFactory.getReference(
-					referenceType,
-					currentField,
-					color,
-					'response'
-				);
-				if (newReference !== reference) {
-					setReference(newReference);
+			if (!currentField) return;
+
+			let newReference = ReferenceFactory.getReference(referenceType, currentField, color, 'response');
+
+			if (isLikeOperator()) {
+				if (hasOpenPerc && !newReference.startsWith('%')) {
+					newReference = `%${newReference}`;
 				}
+				if (hasClosedPerc && !newReference.endsWith('%')) {
+					newReference = `${newReference}%`;
+				}
+			}
+
+			if (newReference !== reference) {
+				setReference(newReference);
 			}
 		};
 		const getComputedReference = () => {
@@ -232,11 +236,13 @@ const ReferenceGenerator = React.forwardRef(
 				case 'constant':
 					if (hasOpenPerc) {
 						if (currentField && currentField[0] !== '%') {
-							//setCurrentField(currentField === EmptyString ? '%' : `%${currentField}`)
+							const newVal = currentField === EmptyString ? '%' : `%${currentField}`;
+							if (newVal !== currentField) setCurrentField(newVal);
 						}
 					} else {
 						if (currentField && currentField[0] === '%') {
-							//setCurrentField(currentField.substring(1));
+							const newVal = currentField.substring(1);
+							if (newVal !== currentField) setCurrentField(newVal);
 						}
 					}
 					break;
@@ -258,11 +264,13 @@ const ReferenceGenerator = React.forwardRef(
 				case 'constant':
 					if (hasClosedPerc) {
 						if (currentField && currentField[currentField.length - 1] !== '%') {
-							//setCurrentField(currentField === EmptyString ? '%' : `${currentField}%`)
+							const newVal = currentField === EmptyString ? '%' : `${currentField}%`;
+							if (newVal !== currentField) setCurrentField(newVal);
 						}
 					} else {
 						if (currentField && currentField[currentField.length - 1] === '%') {
-							//setCurrentField(currentField.substring(0, currentField.length - 1));
+							const newVal = currentField.slice(0, -1);
+							if (newVal !== currentField) setCurrentField(newVal);
 						}
 					}
 					break;
