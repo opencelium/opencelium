@@ -3,7 +3,7 @@ package com.becon.opencelium.backend.utility.migrate;
 public class ChangeSet {
     private Integer id;
     private String version;
-    private String operation;
+    private OperationType operation;
     private Object value;
     private String path;
     private long timestamp;
@@ -25,11 +25,11 @@ public class ChangeSet {
         this.version = version;
     }
 
-    public String getOperation() {
+    public OperationType getOperation() {
         return operation;
     }
 
-    public void setOperation(String operation) {
+    public void setOperation(OperationType operation) {
         this.operation = operation;
     }
 

@@ -2,6 +2,7 @@ package com.becon.opencelium.backend.utility;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,6 +16,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
+@SpringBootTest
 class LogFileUtilityTest {
 
     @Test

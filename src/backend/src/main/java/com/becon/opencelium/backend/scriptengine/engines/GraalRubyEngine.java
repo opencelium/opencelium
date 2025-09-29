@@ -92,6 +92,7 @@ public class GraalRubyEngine implements ScriptEngine {
 
     private Context newContext() {
         return Context.newBuilder("ruby")
+                .option("engine.WarnInterpreterOnly", "false")
                 .allowAllAccess(false)
                 .build();
     }

@@ -132,7 +132,11 @@ const List: FC<ListViewProps> =
                             collection.listProps.map((listProp: ListProp<any>) => {
                                 let propertyKey = listProp.propertyKey;
                                 let columnWidth = listProp.width || 'auto';
-                                const columnStyle = listProp.style || {};
+                                const columnStyle: any = !!listProp.style ? {...listProp.style} : {};
+                                const headerStyle: any = {};
+                                if (listProp?.header?.left) {
+                                    columnStyle.justifyContent = 'flex-start';
+                                }
                                 if (propertyKey !== '') {
                                     let translationProp = propertyKey;
                                     let splitColumnName = propertyKey.split('.');
@@ -142,9 +146,9 @@ const List: FC<ListViewProps> =
                                     let hasSortIcon = collection.sortingProps.findIndex((prop: string) => prop === propertyKey) !== -1;
                                     let sortIcon = hasSortIcon ? sortTypes[propertyKey] === SortType.asc ? 'keyboard_arrow_up' : 'keyboard_arrow_down' : '';
                                     return (
-                                        <ThStyled key={propertyKey} width={columnWidth}>
+                                        <ThStyled key={propertyKey} width={columnWidth} style={headerStyle}>
                                             <div style={{display: 'flex', justifyContent: 'center', ...columnStyle}}>
-                                                {collection.translations[translationProp] && <span style={{marginLeft: hasSortIcon ? '24px' : 0}}><Text value={collection.translations[translationProp]}/></span>}
+                                                {collection.translations[translationProp] && <span style={{marginLeft: hasSortIcon ? listProp?.header?.left ? 0 : '24px' : 0}}><Text value={collection.translations[translationProp]}/></span>}
                                                 {hasSortIcon &&
                                                     <TooltipButton target={'sort_button'} tooltip={sortTypes[propertyKey] === SortType.asc ? 'Asc' : 'Desc'} position={'top'} hasBackground={false} color={ColorTheme.Blue}
                                                             handleClick={() => sort(propertyKey, sortTypes[propertyKey] === SortType.asc ? SortType.desc : SortType.asc)}

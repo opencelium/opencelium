@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.regex.Pattern;
 
 import static com.becon.opencelium.backend.constant.RegExpression.directRef;
 import static com.becon.opencelium.backend.constant.RegExpression.enhancement;
@@ -94,7 +95,12 @@ public class RequestEntityBuilder {
             replaceRefs(copiedParameter.getSchema());
 
             // convert parameter to string, and replace this path variable with actual value
-            rawUrl = rawUrl.replace(ref, ParameterDTOUtil.toString(copiedParameter));
+            String value = ParameterDTOUtil.toString(copiedParameter);
+            if (!ref.contains("url")) {
+                value = safeEncode(value);
+            }
+
+            rawUrl = rawUrl.replace(ref, value);
         }
 
         // replace query parameters
@@ -115,6 +121,20 @@ public class RequestEntityBuilder {
 
         return URI.create(rawUrl);
     }
+
+//    /** Replace every whitespace char with "%20". */
+//    public static String replaceWhitespaceWithPercent20(String input) {
+//        Pattern WS = Pattern.compile("\\s", Pattern.UNICODE_CHARACTER_CLASS);
+//        if (input == null) return null;
+//        return WS.matcher(input).replaceAll("%20");
+//    }
+
+//    private String encValue(String query) {
+//        if (query == null || query.isEmpty()) return query;
+//
+//        String encVal = query.replace(" ", "%20");
+//        return encVal;
+//    }
 
     private HttpHeaders defaultHeadersBuilder() {
         HttpHeaders headers = new HttpHeaders();
@@ -162,15 +182,16 @@ public class RequestEntityBuilder {
             requestBody = SchemaDTOUtil.toText(copiedSchema);
         } else if (MediaTypeUtility.isXmlCompatible(bodyContent)) {
             requestBody = SchemaDTOUtil.toXML(copiedSchema);
-        }  else {
+        } else {
             requestBody = SchemaDTOUtil.toJSON(copiedSchema);
         }
 
         // TODO: works only for CheckMk. Should be deleted in future releases.
         if ("CheckMK".equals(operation.getInvoker()) && requestBody != null && !requestBody.isEmpty() && MediaTypeUtility.isFormUrlencodedCompatible(contentType)) {
-            return new LinkedMultiValueMap<>(){{
-                add("request", requestBody);
-            }};
+            LinkedMultiValueMap<Object, Object> request = new LinkedMultiValueMap<>();
+            request.add("request", requestBody);
+
+            return request;
         }
 
         return requestBody;
@@ -269,7 +290,7 @@ public class RequestEntityBuilder {
                     schema.setItems(List.of(referencedSchema));
                 } else if (requiredType == DataType.OBJECT) {
                     schema.setProperties(Map.of(referencedSchema.getValue(), referencedSchema));
-                } else if (availableType.isPrimitive()){
+                } else if (availableType.isPrimitive()) {
                     schema.setValue(referencedSchema.getValue());
                 } else {
                     throw new RuntimeException(String.format("SchemaDTO cannot be converted from %s type to %s type", availableType, requiredType));
