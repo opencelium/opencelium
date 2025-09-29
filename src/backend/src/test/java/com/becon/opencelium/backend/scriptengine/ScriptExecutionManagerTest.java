@@ -1,9 +1,9 @@
-package com.becon.opencelium.backend.polygot_engine;
+package com.becon.opencelium.backend.scriptengine;
 
-import com.becon.opencelium.backend.polygot_engine.engines.GraalJSEngine;
-import com.becon.opencelium.backend.polygot_engine.engines.GraalPythonEngine;
-import com.becon.opencelium.backend.polygot_engine.engines.GraalRubyEngine;
-import com.becon.opencelium.backend.polygot_engine.engines.JythonEngine;
+import com.becon.opencelium.backend.scriptengine.engines.GraalJSEngine;
+import com.becon.opencelium.backend.scriptengine.engines.GraalPythonEngine;
+import com.becon.opencelium.backend.scriptengine.engines.GraalRubyEngine;
+import com.becon.opencelium.backend.scriptengine.engines.JythonEngine;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
