@@ -222,8 +222,8 @@ public class RequestEntityBuilder {
                 // keep existing valid %XX sequences
                 sb.append('%').append(query.charAt(i + 1)).append(query.charAt(i + 2));
                 i += 2;
-            } else if (c == ' ') {
-                // encode space
+            } else if (Character.isWhitespace(c)) {
+                // encode all types of whitespace (space, tab, newline, Unicode space, ...)
                 sb.append("%20");
             } else if ("\"<>{}|\\^`".indexOf(c) >= 0) {
                 // encode other illegal chars if needed
