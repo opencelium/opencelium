@@ -25,17 +25,17 @@ public class JythonEngine implements ScriptEngine {
     private final ObjectMapper mapper = new ObjectMapper();
 
     /**
-     * The script's output must be assigned to a variable named {@code result}, by convention.
+     * The script's output must be assigned to a variable named {@code RESULT_VAR}, by convention.
      * <p>
      * Example:
      * <pre>
      * def run():
      *     return 42
      *
-     * result = run()
+     * RESULT_VAR = run()
      * </pre>
      */
-    private final String RESULT_VARIABLE = "result";
+    private final String RESULT_VARIABLE = "RESULT_VAR";
 
     @Override
     public boolean supports(Language lang) {
@@ -56,7 +56,7 @@ public class JythonEngine implements ScriptEngine {
 
             interpreter.exec(script);
 
-            // Convention: result is in variable `result`
+            // Convention: result is in variable `RESULT_VAR`
             PyObject pyResult = interpreter.get(RESULT_VARIABLE);
 
             return translateResult(pyResult);
