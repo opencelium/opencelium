@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/languages")
+@RequestMapping("/lang-code")
 @Tag(name = "Languages", description = "Operations related to Languages")
 public class LanguageController {
 
@@ -28,7 +28,7 @@ public class LanguageController {
         this.scriptLanguageService = scriptLanguageService;
     }
 
-    @Operation(summary = "Returns All Available Languages")
+    @Operation(summary = "Returns All Supported Programming Languages")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Languages have been successfully retrieved",
@@ -45,7 +45,7 @@ public class LanguageController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<ScriptLanguageDTO>> getLanguages() {
         return ResponseEntity.ok(scriptLanguageService.getAllLanguages());
     }
