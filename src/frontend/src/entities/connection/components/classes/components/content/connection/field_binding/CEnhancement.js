@@ -151,6 +151,7 @@ export default class CEnhancement {
 
 	set language(language) {
 		this._language = language;
+		this.updateExpertVar();
 	}
 
 	get simpleCode() {

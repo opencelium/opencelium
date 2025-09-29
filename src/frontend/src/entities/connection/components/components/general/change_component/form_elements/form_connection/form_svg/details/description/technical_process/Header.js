@@ -67,7 +67,7 @@ class Header extends React.Component {
 			.replace(/^body\.\$\./, '')
 			.replace(/^header\.\$\./, '')
 			.replace(/\.([0-9]+)/g, '[$1]');
-		
+
 		return connection.fieldBinding.find((item) => {
 			return (
 				item.to.findIndex((elem) => {
@@ -292,8 +292,16 @@ class Header extends React.Component {
 	renderEnhancement() {
 		const { currentEnhancement, isOpenedEnhancement } = this.state;
 		const { readOnly, connection, method } = this.props;
+		let bindingItem = connection.fieldBinding.find(
+			(item) =>
+				item.to.findIndex((elem) => elem.color === method.color) !== -1
+		);
+		if (bindingItem) {
+			bindingItem = bindingItem.getObject();
+		}
 		const enhancementElement = (
 			<Enhancement
+				binding={bindingItem}
 				method={method}
 				connection={connection}
 				ref={this.enhancementRef}

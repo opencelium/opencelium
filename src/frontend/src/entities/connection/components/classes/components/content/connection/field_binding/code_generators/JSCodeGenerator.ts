@@ -12,6 +12,10 @@ export class JSCodeGenerator extends CodeGenerator implements ICodeGenerator {
         return `RESULT_VAR = VAR_0;`;
     }
 
+    getExpertVarRegExp(): RegExp {
+        return /var\s+(\w+)\s*=\s*#(\w+)\.\(\w+\)\.([\w\d.\[\*\]\~]+)/g;
+    }
+
     getExpertVar(): string {
         let result = '';
         if (this._fieldBinding) {

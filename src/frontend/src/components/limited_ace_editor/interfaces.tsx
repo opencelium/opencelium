@@ -44,6 +44,7 @@ export interface LimitedAceEditorProps {
 		top?: string;
 		right?: string;
 	};
+	hasDiffLang?: boolean,
 }
 
 export interface LimitedAceEditorCounterProps {

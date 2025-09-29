@@ -25,6 +25,7 @@ import React, { useEffect, useImperativeHandle, useRef, useState } from 'react';
 import AceEditor from 'react-ace';
 import { LimitedAceEditorProps } from './interfaces';
 import { LimitedAceEditorContainer, LimitedAceEditorCounter } from './styles';
+import InputSelect from "@app_component/base/input/select/InputSelect";
 
 const LimitedAceEditor = React.forwardRef<any, LimitedAceEditorProps>(
 	(props, ref) => {
@@ -99,47 +100,49 @@ const LimitedAceEditor = React.forwardRef<any, LimitedAceEditorProps>(
 		}, [maxLength, readOnly, onChange]);
 
 		return (
-			<LimitedAceEditorContainer>
-				{isFocused && maxLength && typeof maxLength === 'number' && (
-					<LimitedAceEditorCounter
-						top={counterStyles?.top}
-						right={counterStyles?.right}
-						theme={theme}
-					>
-						{currentValue?.length || 0}/{maxLength}
-					</LimitedAceEditorCounter>
-				)}
-				<AceEditor
-					onFocus={() => toggleFocus(true)}
-					ref={editorRef}
-					mode={mode}
-					theme={editorTheme}
-					value={currentValue}
-					fontSize={fontSize}
-					showPrintMargin={showPrintMargin}
-					showGutter={showGutter}
-					highlightActiveLine={highlightActiveLine}
-					wrapEnabled={wrapEnabled}
-					setOptions={setOptions}
-					className={className}
-					readOnly={readOnly}
-					style={style}
-					markers={markers}
-					name={name}
-					editorProps={editorProps}
-					height={height}
-					width={width}
-					placeholder={placeholder}
-					cursorStart={cursorStart}
-					focus={focus}
-					onBlur={(e: any) => {
-						toggleFocus(false);
-						if (typeof onBlur === 'function') {
-							onBlur();
-						}
-					}}
-				/>
-			</LimitedAceEditorContainer>
+			<React.Fragment>
+				<LimitedAceEditorContainer>
+					{isFocused && maxLength && typeof maxLength === 'number' && (
+						<LimitedAceEditorCounter
+							top={counterStyles?.top}
+							right={counterStyles?.right}
+							theme={theme}
+						>
+							{currentValue?.length || 0}/{maxLength}
+						</LimitedAceEditorCounter>
+					)}
+					<AceEditor
+						onFocus={() => toggleFocus(true)}
+						ref={editorRef}
+						mode={mode}
+						theme={editorTheme}
+						value={currentValue}
+						fontSize={fontSize}
+						showPrintMargin={showPrintMargin}
+						showGutter={showGutter}
+						highlightActiveLine={highlightActiveLine}
+						wrapEnabled={wrapEnabled}
+						setOptions={setOptions}
+						className={className}
+						readOnly={readOnly}
+						style={style}
+						markers={markers}
+						name={name}
+						editorProps={editorProps}
+						height={height}
+						width={width}
+						placeholder={placeholder}
+						cursorStart={cursorStart}
+						focus={focus}
+						onBlur={(e: any) => {
+							toggleFocus(false);
+							if (typeof onBlur === 'function') {
+								onBlur();
+							}
+						}}
+					/>
+				</LimitedAceEditorContainer>
+			</React.Fragment>
 		);
 	}
 );

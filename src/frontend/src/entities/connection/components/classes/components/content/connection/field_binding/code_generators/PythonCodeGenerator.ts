@@ -11,6 +11,10 @@ export class PythonCodeGenerator extends CodeGenerator implements ICodeGenerator
         return `RESULT_VAR = VAR_0`;
     }
 
+    getExpertVarRegExp(): RegExp {
+        return /(\w+)\s*=\s*#(\w+)\.\(\w+\)\.([\w\d.\[\*\]\~]+)/g;
+    }
+
     getExpertVar(): string {
         let result = '';
         if (this._fieldBinding) {

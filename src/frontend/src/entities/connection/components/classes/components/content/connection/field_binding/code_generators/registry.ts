@@ -6,5 +6,6 @@ import {PythonCodeGenerator} from "@classes/content/connection/field_binding/cod
 export const codeGeneratorRegistry: Record<string, (fieldBinding: any) => ICodeGenerator> = {
     js: (fieldBinding: any) => new JSCodeGenerator(fieldBinding),
     ruby: (fieldBinding: any) => new RubyCodeGenerator(fieldBinding),
-    python: (fieldBinding: any) => new PythonCodeGenerator(fieldBinding),
+    python2: (fieldBinding: any) => new PythonCodeGenerator(fieldBinding),
+    python3: (fieldBinding: any) => new PythonCodeGenerator(fieldBinding),
 };
