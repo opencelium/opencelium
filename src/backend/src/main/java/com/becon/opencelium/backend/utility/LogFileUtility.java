@@ -131,7 +131,7 @@ public class LogFileUtility {
                         } catch (IOException ignored) {}
                     });
         } catch (IOException e) {
-            log.warn("Failed to delete old log files by executionId", e);
+            logger.warn("Failed to delete old log files by executionId", e);
         }
     }
 
