@@ -2,7 +2,6 @@ package com.becon.opencelium.backend.scriptengine.client;
 
 import com.becon.opencelium.backend.scriptengine.Language;
 import com.becon.opencelium.backend.scriptengine.LanguageType;
-import com.becon.opencelium.backend.scriptengine.ScriptEngineType;
 import com.becon.opencelium.backend.scriptengine.ScriptExecutionManager;
 import com.becon.opencelium.backend.resource.languages.ScriptLanguageDTO;
 import org.springframework.stereotype.Component;
@@ -39,12 +38,6 @@ public class ScriptLanguageServiceImpl implements ScriptLanguageService {
         if (langType != null) {
             languageDTO.setLanguage(langType.getCode());
             languageDTO.setLanguageName(langType.getName());
-        }
-
-        ScriptEngineType engine = language.getEngine();
-        if (engine != null) {
-            languageDTO.setEngine(engine.getCode());
-            languageDTO.setEngineName(engine.getName());
         }
 
         return languageDTO;
