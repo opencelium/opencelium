@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.controller;
 
+import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.scriptengine.client.ScriptLanguageService;
 import com.becon.opencelium.backend.resource.languages.ScriptLanguageDTO;
@@ -46,7 +47,9 @@ public class LanguageController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/all")
-    public ResponseEntity<List<ScriptLanguageDTO>> getLanguages() {
-        return ResponseEntity.ok(scriptLanguageService.getAllLanguages());
+    public ResponseEntity<ResultDTO<List<ScriptLanguageDTO>>> getLanguages() {
+        return ResponseEntity.ok(
+                ResultDTO.of(scriptLanguageService.getAllLanguages())
+        );
     }
 }

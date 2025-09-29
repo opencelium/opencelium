@@ -6,6 +6,10 @@ public class ResultDTO<T> {
     public ResultDTO() {
     }
 
+    public static <T> ResultDTO<T> of(T result) {
+        return new ResultDTO<>(result);
+    }
+
     public ResultDTO(T result) {
         this.result = result;
     }
