@@ -57,11 +57,7 @@ public class FieldBindExMapper {
                 }
             });
 
-            String script = "(function() {\n" +
-                    enhancement.getScript() +
-                    "\nreturn RESULT_VAR;\n})()";
-
-            enhancementEx.setScript(script);
+            enhancementEx.setScript(enhancement.getScript());
             enhancementEx.setArgs(args);
         }
 
