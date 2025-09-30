@@ -18,6 +18,7 @@ package com.becon.opencelium.backend.quartz;
 
 import com.becon.opencelium.backend.constant.LogConstant;
 import com.becon.opencelium.backend.database.mysql.entity.Subscription;
+import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
 import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
 import com.becon.opencelium.backend.execution.ConnectionExecutor;
 import com.becon.opencelium.backend.execution.logger.OcLogger;
@@ -45,6 +46,7 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
     private final ExecutionObjectService executionObjectService;
     private final SubscriptionService subscriptionService;
     private final WebSocketNotificationService notificationService;
+    private final SchedulerService schedulerService;
     private final Logger logger = LoggerFactory.getLogger(JobExecutor.class);
 
     private volatile Thread thread;
@@ -52,15 +54,18 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
     public JobExecutor(
             @Qualifier("executionObjectServiceImp") ExecutionObjectServiceImp executionObjectService,
             @Qualifier("subscriptionServiceImpl") SubscriptionService subscriptionService,
-            WebSocketNotificationService notificationService
-    ) {
+            WebSocketNotificationService notificationService,
+            SchedulerService schedulerService) {
         this.executionObjectService = executionObjectService;
         this.subscriptionService = subscriptionService;
         this.notificationService = notificationService;
+        this.schedulerService = schedulerService;
     }
 
     @Override
     public void executeInternal(JobExecutionContext context) {
+        String timestamp = LocalDateTime.now().format(LogConstant.DATE_TIME_FORMATTER);
+
         thread = Thread.currentThread();
         Subscription activeSub = subscriptionService.getActiveSubs();
         if (!subscriptionService.isValid(activeSub)) {
@@ -80,10 +85,9 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
                 data = getData(dataMap);
                 context.getMergedJobDataMap().put("data", data);
             }
-            ExecutionObj executionObj = executionObjectService.buildObj(data);
+            connectionId = schedulerService.getById(data.getScheduleId()).getConnection().getId();
 
-            String timestamp = LocalDateTime.now().format(LogConstant.DATE_TIME_FORMATTER);
-            connectionId = executionObj.getConnection().getConnectionId();
+            ExecutionObj executionObj = executionObjectService.buildObj(data);
 
             // setup execution logger:
             OcLogger<ExecutionLog> executionLogger = new OcLogger<>(
