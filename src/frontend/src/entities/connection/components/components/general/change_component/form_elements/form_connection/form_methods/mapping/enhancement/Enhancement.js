@@ -35,7 +35,7 @@ import {codeGeneratorRegistry} from "@classes/content/connection/field_binding/c
 
 const languageOptions = [
 	{label: 'JavaScript', value: 'js'},
-	{label: 'Python2', value: 'python2'},
+	//{label: 'Python2', value: 'python2'},
 	{label: 'Python3', value: 'python3'},
 	//{label: 'Ruby', value: 'ruby'},
 ];
