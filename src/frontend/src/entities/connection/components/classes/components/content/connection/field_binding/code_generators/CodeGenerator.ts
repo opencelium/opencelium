@@ -1,4 +1,4 @@
-import {transformDataFields} from "@change_component/form_elements/form_connection/form_svg/utils";
+import {transformDataFields, transformExpertVar} from "@change_component/form_elements/form_connection/form_svg/utils";
 
 export default class CodeGenerator {
     _fieldBinding: any;
@@ -46,6 +46,36 @@ export default class CodeGenerator {
             }
         }
 
+        return result;
+    }
+
+    protected getExpertVarRegExp(): RegExp {
+        return /var\s+(\w+)\s*=\s*#(\w+)\.\(\w+\)\.([\w\d.\[\*\]\~]+)/g;
+    }
+
+    protected getExpertVar(): string {
+        let result = '';
+        if (this._fieldBinding) {
+            let resultVariable = this.getResultVariable();
+            let variables = this.getVariables();
+
+            let resultFrom = this._fieldBinding.to.some((item: any) =>
+                item.field.startsWith('header.$')
+            )
+                ? 'header'
+                : 'body';
+
+            result += `//var RESULT_VAR = ${resultVariable.color}.(${
+                resultVariable.type
+            }).${transformExpertVar(resultVariable.name, resultFrom)};\n`;
+
+            for (let i = 0; i < variables.length; i++) {
+                result += `//var VAR_${i} = ${variables[i].color}.(${
+                    variables[i].type
+                }).${transformExpertVar(variables[i].name, 'body')};`;
+                if (i < variables.length - 1) result += '\n';
+            }
+        }
         return result;
     }
 
