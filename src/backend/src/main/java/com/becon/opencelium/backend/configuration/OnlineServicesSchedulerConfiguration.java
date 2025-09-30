@@ -9,19 +9,19 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 @Configuration
 public class OnlineServicesSchedulerConfiguration implements SchedulingConfigurer {
-    @Value("${opencelium.online_services.active:false}")
+    @Value("${opencelium.online-services.active:false}")
     private boolean active;
 
-    @Value("${opencelium.online_services.invoker_sync.active:false}")
+    @Value("${opencelium.online-services.invoker-sync.active:false}")
     private boolean invokerSyncActive;
 
-    @Value("${opencelium.online_services.invoker_sync.time:-}")
+    @Value("${opencelium.online-services.invoker-sync.time:-}")
     private String invokerSyncTime;
 
-    @Value("${opencelium.online_services.template_sync.active:false}")
+    @Value("${opencelium.online-services.template-sync.active:false}")
     private boolean templateSyncActive;
 
-    @Value("${opencelium.online_services.template_sync.time:-}")
+    @Value("${opencelium.online-services.template-sync.time:-}")
     private String templateSyncTime;
 
     private final InvokerSyncService invokerSyncService;

@@ -3,8 +3,8 @@ package com.becon.opencelium.backend.application.assistant;
 import com.becon.opencelium.backend.application.entity.SystemOverview;
 import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
-import com.becon.opencelium.backend.resource.update_assistant.InstallationDTO;
-import com.becon.opencelium.backend.resource.update_assistant.Neo4jConfigResource;
+import com.becon.opencelium.backend.resource.updateassistant.InstallationDTO;
+import com.becon.opencelium.backend.resource.updateassistant.Neo4jConfigResource;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Path;

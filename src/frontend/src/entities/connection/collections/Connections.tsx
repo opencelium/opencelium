@@ -44,9 +44,9 @@ class Connections extends ListCollection<ConnectionProps>{
     getListRawUrl = (entity: IConnection) => `${entity.id}/update`;
     listStyles = {borderTopLeftRadius: '0px'};
     ListRawComponent = DefaultListRaw;
-    sortingProps: ConnectionProps[] = ['title'];
+    sortingProps: ConnectionProps[] = ['title', 'description', 'fromConnector.title', 'toConnector.title'];
     listProps: ListProp<ConnectionProps>[] = [
-        {propertyKey: 'title', width: '20%',
+        {propertyKey: 'title', width: '20%', header: {left: true},
             getValue: (entity: IConnection) => {
                 return(
                     <InlineEditInput
@@ -61,7 +61,7 @@ class Connections extends ListCollection<ConnectionProps>{
                     />
                 )
         }},
-        {propertyKey: 'description', width: '30%',
+        {propertyKey: 'description', width: '30%', header: {left: true},
             getValue: (entity: IConnection) => {
                 return(
                     <InlineEditInput
@@ -74,8 +74,8 @@ class Connections extends ListCollection<ConnectionProps>{
                     />
                 )
             }},
-        {propertyKey: 'fromConnector.title'},
-        {propertyKey: 'toConnector.title'},
+        {propertyKey: 'fromConnector.title', header: {left: true},},
+        {propertyKey: 'toConnector.title', header: {left: true},},
     ];
     gridProps = {title: 'title'};
     translations = {
@@ -152,6 +152,33 @@ class Connections extends ListCollection<ConnectionProps>{
                         return this.asc(a.title, b.title);
                     } else{
                         return this.desc(a.title, b.title);
+                    }
+                })
+                break;
+            case 'description':
+                this.entities = this.entities.sort((a: IConnection, b: IConnection) => {
+                    if(sortingType === SortType.asc){
+                        return this.asc(a.description, b.description);
+                    } else{
+                        return this.desc(a.description, b.description);
+                    }
+                })
+                break;
+            case 'fromConnector.title':
+                this.entities = this.entities.sort((a: IConnection, b: IConnection) => {
+                    if(sortingType === SortType.asc){
+                        return this.asc(a.fromConnector.title, b.fromConnector.title);
+                    } else{
+                        return this.desc(a.fromConnector.title, b.fromConnector.title);
+                    }
+                })
+                break;
+            case 'toConnector.title':
+                this.entities = this.entities.sort((a: IConnection, b: IConnection) => {
+                    if(sortingType === SortType.asc){
+                        return this.asc(a.toConnector.title, b.toConnector.title);
+                    } else{
+                        return this.desc(a.toConnector.title, b.toConnector.title);
                     }
                 })
                 break;

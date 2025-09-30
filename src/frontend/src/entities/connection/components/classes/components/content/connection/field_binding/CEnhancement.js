@@ -19,6 +19,7 @@ import {
     transformDataFields,
     transformExpertVar,
 } from '@change_component/form_elements/form_connection/form_svg/utils';
+import {codeGeneratorRegistry} from "@classes/content/connection/field_binding/code_generators/registry";
 
 /**
  * Enhancement class for Field Binding class
@@ -102,77 +103,16 @@ export default class CEnhancement {
 		return putAsterixInEmptyBrackets(this._expertVar);
 	}
 
-	getVariables() {
-		const binding = this._fieldBinding;
-		let variables = [];
-		for (let i = 0; i < binding.from.length; i++) {
-			const fromFieldName = transformDataFields(binding.from[i].field);
-			variables.push({
-				name: fromFieldName,
-				value: null,
-				type: binding.from[i].type,
-				color: binding.from[i].color,
-			});
-		}
-		return variables;
-	}
-
-	getResultVariable() {
-		const binding = this._fieldBinding;
-		let variables = this.getVariables();
-		let result = { name: '', value: null, type: 'variable' };
-
-		if (binding.to.length > 0) {
-			let toFieldName = transformDataFields(binding.to[0].field);
-			let toFieldType = binding.to[0].type;
-			let toFieldColor = binding.to[0].color;
-
-			if (toFieldName !== '') {
-				result = {
-					name: toFieldName,
-					value: null,
-					type: toFieldType,
-					color: toFieldColor,
-				};
-			}
-			if (variables.findIndex((v) => v.name === result.name) !== -1) {
-				result.name = `_to_connector_${result.name}`;
-			}
-		}
-
-		return result;
-	}
-
 	getExpertVar() {
-		let result = '';
-		if (this._fieldBinding) {
-			let resultVariable = this.getResultVariable();
-			let variables = this.getVariables();
-
-			let resultFrom = this._fieldBinding.to.some((item) =>
-				item.field.startsWith('header.$')
-			)
-				? 'header'
-				: 'body';
-
-			result += `//var RESULT_VAR = ${resultVariable.color}.(${
-				resultVariable.type
-			}).${transformExpertVar(resultVariable.name, resultFrom)};\n`;
-
-			for (let i = 0; i < variables.length; i++) {
-				result += `//var VAR_${i} = ${variables[i].color}.(${
-					variables[i].type
-				}).${transformExpertVar(variables[i].name, 'body')};`;
-				if (i < variables.length - 1) result += '\n';
-			}
-		}
-		return result;
+		const generator = codeGeneratorRegistry[this.language](this._fieldBinding);
+		return generator.getExpertVar();
 	}
 
 	setExpertCode(expertCode) {
 		let result = expertCode !== '' ? expertCode : '';
 		if (result === '') {
-			result = 'RESULT_VAR = VAR_0;';
+			const generator = codeGeneratorRegistry[this.language](this._fieldBinding);
+			result = generator.getDefaultExpertCode();
 		}
 		return result;
 	}
@@ -211,6 +151,7 @@ export default class CEnhancement {
 
 	set language(language) {
 		this._language = language;
+		this.updateExpertVar();
 	}
 
 	get simpleCode() {

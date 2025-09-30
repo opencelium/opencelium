@@ -17,7 +17,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice
 public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @Value("${opencelium.debug_mode}")
+    @Value("${opencelium.debug-mode}")
     private boolean debugMode;
 
     @ExceptionHandler(value = { Exception.class })

@@ -22,7 +22,7 @@ import { getMarker, setFocusById } from '@application/utils/utils';
 import CEnhancement from '@classes/content/connection/field_binding/CEnhancement';
 import TooltipFontIcon from '@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon';
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React, {Component, useState} from 'react';
 import { Col, Row } from 'react-grid-system';
 import {
 	FieldBindingsBlockStyled,
@@ -30,7 +30,22 @@ import {
 	SourceFieldStyled,
 	SourceMethodNameStyled,
 } from '../../../form_svg/details/description/technical_process/reference_information/styles';
+import InputSelect from "@app_component/base/input/select/InputSelect";
+import {codeGeneratorRegistry} from "@classes/content/connection/field_binding/code_generators/registry";
 
+const languageOptions = [
+	{label: 'JavaScript', value: 'js'},
+	{label: 'Python2', value: 'python2'},
+	{label: 'Python3', value: 'python3'},
+	//{label: 'Ruby', value: 'ruby'},
+];
+
+const modeMap = {
+	'js': 'javascript',
+	'python2': 'python',
+	'python3': 'python',
+	'ruby': 'ruby',
+}
 /**
  * Enhancement Component
  */
@@ -43,6 +58,7 @@ class Enhancement extends Component {
 		this.state = {
 			expertVar,
 			expertCode,
+			currentLanguage: enhancement?.language || 'javascript',
 			name: enhancement ? enhancement.name : '',
 			description: enhancement ? enhancement.description : '',
 			markers: [],
@@ -82,6 +98,16 @@ class Enhancement extends Component {
 		}
 	}
 
+	updateCurrentLanguage(newLanguage) {
+		let { enhancement, setEnhancement, binding } = this.props;
+		const enhancementInstance = CEnhancement.createEnhancement({...enhancement, fieldBinding: binding});
+		enhancementInstance.language = newLanguage;
+		setEnhancement(enhancementInstance.getObject());
+		this.setState({
+			currentLanguage: newLanguage,
+		})
+	}
+
 	/**
 	 * to update description of enhancement
 	 */
@@ -107,7 +133,9 @@ class Enhancement extends Component {
 
 	renderExpertVar(input) {
 		const { connection } = this.props;
-		const regex = /var\s+(\w+)\s*=\s*#(\w+)\.\(\w+\)\.([\w\d.\[\*\]\~]+)/g;
+		const {currentLanguage} = this.state;
+		const LanguageGenerator = codeGeneratorRegistry[currentLanguage]();
+		const regex = LanguageGenerator.getExpertVarRegExp();
 		let match;
 		const result = [];
 
@@ -144,7 +172,7 @@ class Enhancement extends Component {
 	renderEnhancement() {
 		const { expertVar, markers } = this.state;
 		let { readOnly, theme } = this.props;
-		let { expertCode } = this.state;
+		let { expertCode, currentLanguage } = this.state;
 
 		const styleProps = {
 			display: 'inline-block',
@@ -166,17 +194,25 @@ class Enhancement extends Component {
 				>
 					{this.renderExpertVar(expertVar)}
 				</FieldBindingsBlockStyled>
+				<InputSelect
+					id={`input_language`}
+					icon={'code'}
+					marginBottom={'20px'}
+					label={'Language'}
+					options={languageOptions}
+					onChange={(option) => this.updateCurrentLanguage(option.value)}
+					value={languageOptions.find(o => o.value === currentLanguage)}
+				/>
 				<Input
 					readOnly={readOnly}
 					value={expertCode}
-					label={'Script'}
-					icon={'javascript'}
 					display={'grid'}
 					hasUnderline={false}
 					labelMargin='-25px 0 0 0'
 					height={`calc(100% - 100px)`}
 				>
 					<LimitedAceEditor
+						hasDiffLang
 						maxLength={Validation.TextLength.Long}
 						ref={this.props.enhancementRef}
 						style={{
@@ -187,7 +223,7 @@ class Enhancement extends Component {
 							height: '100%',
 						}}
 						markers={markers}
-						mode='javascript'
+						mode={modeMap[currentLanguage]}
 						editorTheme='tomorrow'
 						theme={theme}
 						onChange={(newCode, e) => this.updateExpertCode(newCode, e)}

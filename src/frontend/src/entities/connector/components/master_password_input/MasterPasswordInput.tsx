@@ -8,6 +8,7 @@ import {checkMasterPassword} from "@entity/connector/redux_toolkit/action_creato
 import {MasterPasswordContainer, PromptContainer} from "@entity/connector/components/master_password_input/styles";
 import {MasterPasswordProps} from "@entity/connector/components/master_password_input/interfaces";
 import {onEnter, setFocusById} from "@application/utils/utils";
+import {InputTextType} from "@app_component/base/input/text/interfaces";
 
 const MasterPasswordInput = ({onSuccess}: MasterPasswordProps) => {
     const dispatch = useAppDispatch();
@@ -72,6 +73,7 @@ const MasterPasswordInput = ({onSuccess}: MasterPasswordProps) => {
                     id={`master_password`}
                     autoFocus={true}
                     icon={'key'}
+                    type={InputTextType.Password}
                     placeholder={'Enter your Master Password'}
                     required={true}
                     onKeyDown={(e) => onEnter(e, send)}

@@ -73,6 +73,9 @@ export const templateSlice = createSlice({
     name: 'template',
     initialState,
     reducers: {
+        clearTemplates: (state) => {
+            state.templates = [];
+        },
     },
     extraReducers: {
         [checkTemplateId.pending.type]: (state) => {
@@ -249,5 +252,7 @@ export const templateSlice = createSlice({
         },
     }
 })
+
+export const {clearTemplates} = templateSlice.actions;
 
 export default templateSlice.reducer;

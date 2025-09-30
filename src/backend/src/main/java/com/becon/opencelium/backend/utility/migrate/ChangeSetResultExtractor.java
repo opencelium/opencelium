@@ -11,7 +11,7 @@ public class ChangeSetResultExtractor implements ResultSetExtractor<ChangeSet> {
     public ChangeSet extractData(ResultSet rs) throws SQLException {
         ChangeSet cs = new ChangeSet();
         cs.setId(rs.getInt("id"));
-        cs.setOperation(rs.getString("op"));
+        cs.setOperation(OperationType.getFromNameOrElseThrow(rs.getString("op")));
         cs.setPath(rs.getString("path"));
         cs.setValue(rs.getString("value"));
         cs.setVersion(rs.getString("version"));

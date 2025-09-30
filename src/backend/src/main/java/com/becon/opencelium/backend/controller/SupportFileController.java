@@ -1,7 +1,7 @@
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.execution.support_file.SupportFile;
-import com.becon.opencelium.backend.execution.support_file.SupportFileService;
+import com.becon.opencelium.backend.execution.supportfile.SupportFile;
+import com.becon.opencelium.backend.execution.supportfile.SupportFileService;
 import com.becon.opencelium.backend.resource.connection.SupportFileNamesDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.user.ComponentResource;
