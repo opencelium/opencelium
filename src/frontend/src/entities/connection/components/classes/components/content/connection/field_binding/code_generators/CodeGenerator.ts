@@ -42,7 +42,7 @@ export default class CodeGenerator {
                 };
             }
             if (variables.findIndex((v) => v.name === result.name) !== -1) {
-                result.name = `_to_connector_${result.name}`;
+                //result.name = `_to_connector_${result.name}`;
             }
         }
 
