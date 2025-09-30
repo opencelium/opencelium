@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 public class GraalPythonEngine implements ScriptEngine {
 
     private final ObjectMapper mapper = new ObjectMapper();
+    private static final String RESULT_VAR = "RESULT_VAR";
 
     @Override
     public boolean supports(Language lang) {
@@ -36,7 +37,7 @@ public class GraalPythonEngine implements ScriptEngine {
         try (Context context = newContext()) {
             bindArgs(context, bindings);
             Value result = context.eval("python", script);
-            return translateResult(context, result);
+            return translateResult(context, result.getMember(RESULT_VAR));
         } catch (PolyglotException e) {
             if (e.isSyntaxError()) {
                 throw new InvalidScriptException(e.getMessage(), e);
@@ -55,7 +56,7 @@ public class GraalPythonEngine implements ScriptEngine {
                     .collect(Collectors.toMap(Map.Entry::getKey, e -> referenceExtractor.apply(e.getValue())));
             bindArgs(context, resolved);
             Value result = context.eval("python", script);
-            return translateResult(context, result);
+            return translateResult(context, result.getMember(RESULT_VAR));
         } catch (PolyglotException e) {
             if (e.isSyntaxError()) {
                 throw new InvalidScriptException(e.getMessage(), e);
