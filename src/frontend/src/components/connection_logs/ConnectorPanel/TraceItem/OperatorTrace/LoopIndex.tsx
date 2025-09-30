@@ -56,7 +56,7 @@ const LoopIndex = ({iterationIndex, loopIndex, hasError, size, loadByIndex}: Loo
         setNewLoopIndex(newLoopIndex);
     };
     return (
-        <span style={{display: 'flex', gap: '2px'}} onMouseOver={() => setMouseOver(true)} onMouseLeave={() => setMouseOver(false)}>
+        <span title={'Press Enter'} style={{display: 'flex', gap: '2px'}} onMouseOver={() => setMouseOver(true)} onMouseLeave={() => setMouseOver(false)}>
             <InputText
                 onFocus={() => setFocus(true)}
                 onBlur={() => setFocus(false)}

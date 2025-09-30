@@ -51,7 +51,11 @@ const ListRow: FC<ListRowProps> =
                         const propertyKey = listProp.propertyKey;
                         const getValue = listProp.getValue;
                         const shouldReplace = listProp.replace || false;
-                        const cellStyle = listProp.style || {};
+                        const cellStyle = !!listProp.style ? {...listProp.style} : {};
+                        if (listProp?.header?.left) {
+                            cellStyle.textAlign = 'left';
+                            cellStyle.padding = '10px';
+                        }
                         if (propertyKey !== '') {
                             let entityValue: any = '';
                             if(getValue){

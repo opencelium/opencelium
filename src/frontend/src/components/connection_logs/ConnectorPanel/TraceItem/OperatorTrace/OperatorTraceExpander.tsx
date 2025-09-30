@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import styles from "@app_component/connection_logs/ConnectorPanel/TraceItem/OperatorTrace/OperatorTrace.module.css";
 import ToggleButton from "@app_component/connection_logs/ConnectorPanel/TraceItem/ToggleButton/ToggleButton";
-import {ColorTheme} from "@style/Theme";
+import {ColorTheme, ITheme} from "@style/Theme";
 import CopyOperatorButton
     from "@app_component/connection_logs/ConnectorPanel/TraceItem/OperatorTrace/CopyOperatorButton";
 import {ShowIndexPath} from "@app_component/connection_logs/LogsPanel/LogsPanel";
@@ -16,6 +16,7 @@ import {RootState, useAppDispatch, useAppSelector} from "@application/utils/stor
 import {OperatorTraceProps} from "@app_component/connection_logs/ConnectorPanel/TraceItem/OperatorTrace/OperatorTrace";
 import {cleanOperatorTrace} from "@root/redux_toolkit/slices/ConnectionLogSlice";
 import {getOperatorChildren} from "@root/redux_toolkit/action_creators/ConnectionLogCreators";
+import {withTheme} from "styled-components";
 
 interface OperatorTraceExpanderProps extends OperatorTraceProps{
     handleToggle: () => void,
@@ -23,9 +24,10 @@ interface OperatorTraceExpanderProps extends OperatorTraceProps{
     expanded: boolean,
     iterationIndex: number,
     setIterationIndex: (newIndex: number) => void,
+    theme?: ITheme,
 }
 
-const OperatorTraceExpander = ({trace, loading, handleToggle, expanded, flowId, executionId, iterationIndexes, setIterationIndex, iterationIndex}: OperatorTraceExpanderProps) => {
+const OperatorTraceExpander = ({theme, trace, loading, handleToggle, expanded, flowId, executionId, iterationIndexes, setIterationIndex, iterationIndex}: OperatorTraceExpanderProps) => {
     const dispatch = useAppDispatch();
     const {currentLogError} = useAppSelector((state: RootState) => state.connectionLogReducer);
     const [isMouseOver, setIsMouseOver] = useState<boolean>(false);
@@ -148,8 +150,9 @@ const OperatorTraceExpander = ({trace, loading, handleToggle, expanded, flowId, 
                         />
                         <FontIcon
                             isButton={true}
-                            iconStyles={{cursor: 'pointer'}}
+                            darkTheme={false}
                             size={16}
+                            iconStyles={{cursor: 'pointer', color: iterationIndex === 0 || size === undefined ? theme.button.background.disable : theme.button.background.quite}}
                             disabled={iterationIndex === 0 || size === undefined}
                             isLoading={prevLoading}
                             value={'arrow_left'}
@@ -157,8 +160,9 @@ const OperatorTraceExpander = ({trace, loading, handleToggle, expanded, flowId, 
                         />
                         <FontIcon
                             isButton={true}
-                            iconStyles={{cursor: 'pointer'}}
+                            darkTheme={false}
                             size={16}
+                            iconStyles={{cursor: 'pointer', color: iterationIndex === size - 1 || size === undefined ? theme.button.background.disable : theme.button.background.quite}}
                             disabled={iterationIndex === size - 1 || size === undefined}
                             isLoading={nextLoading}
                             value={'arrow_right'}
@@ -170,4 +174,4 @@ const OperatorTraceExpander = ({trace, loading, handleToggle, expanded, flowId, 
         </div>
     )
 }
-export default OperatorTraceExpander;
+export default withTheme(OperatorTraceExpander);

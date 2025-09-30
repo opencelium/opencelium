@@ -24,6 +24,17 @@ const TabPaneLog = ({tabId, value, theme, height, setHeight, content}: {content:
     useEffect(() => {
         setIsMouseOver(false);
     }, []);
+    const updateMouseOver = (newValue: boolean) => {
+        if (newValue !== isMouseOver) {
+            if (newValue) {
+                if (!!content) {
+                    setIsMouseOver(newValue);
+                }
+            } else {
+                setIsMouseOver(newValue);
+            }
+        }
+    }
     useEffect(() => {
         const el = ref.current;
         if (!el) return;
@@ -57,7 +68,7 @@ const TabPaneLog = ({tabId, value, theme, height, setHeight, content}: {content:
         return () => { ro.disconnect(); commit.cancel(); };
     }, []);
     return (
-        <TabPane tabId={tabId} onMouseOver={() => setIsMouseOver(true)} onMouseLeave={() => {setIsMouseOver(false)}}>
+        <TabPane tabId={tabId} onMouseOver={() => updateMouseOver(true)} onMouseLeave={() => {updateMouseOver(false)}}>
             <div ref={ref} style={{
                 position: 'relative',
                 overflow: 'auto',
@@ -85,7 +96,7 @@ const TabPaneLog = ({tabId, value, theme, height, setHeight, content}: {content:
                 /> :
                     <div className={localStyles.emptyBodyContent}>{"No data"}</div>
                 }
-                {isMouseOver && <Button
+                {(isMouseOver && !!content) && <Button
                     iconSize={TextSize.Size_16}
                     icon={'file_copy'}
                     hasBackground={false}

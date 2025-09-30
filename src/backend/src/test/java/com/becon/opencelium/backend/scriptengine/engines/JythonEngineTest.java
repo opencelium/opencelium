@@ -21,7 +21,7 @@ class JythonEngineTest {
 
     @Test
     void execute_shouldReturnPrimitiveResult() throws Exception {
-        Object result = engine.execute("result = 2 + 3");
+        Object result = engine.execute("RESULT_VAR = 2 + 3");
         assertThat(result).isEqualTo(5);
     }
 
@@ -31,7 +31,7 @@ class JythonEngineTest {
         bindings.put("x", 10);
         bindings.put("y", 5);
 
-        Object result = engine.execute("result = {'sum': x + y, 'diff': x - y}", bindings);
+        Object result = engine.execute("RESULT_VAR = {'sum': x + y, 'diff': x - y}", bindings);
 
         assertThat(result)
             .isInstanceOf(Map.class)
@@ -44,7 +44,7 @@ class JythonEngineTest {
         Map<String, String> bindings = Map.of("x", "100", "y", "50");
 
         Object result = engine.execute(
-                "result = int(x) * int(y)",
+                "RESULT_VAR = int(x) * int(y)",
                 bindings,
                 Integer::parseInt
         );
@@ -88,7 +88,7 @@ class JythonEngineTest {
 
         // Python script that uses the bound map and calculates a sum
         String script = "" +
-                "result = input['x'] + input['y']";
+                "RESULT_VAR = input['x'] + input['y']";
 
         Object result = engine.execute(script, bindings);
 
