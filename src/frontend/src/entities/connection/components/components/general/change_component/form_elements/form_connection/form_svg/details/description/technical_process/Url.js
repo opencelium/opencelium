@@ -85,7 +85,7 @@ class Url extends React.Component{
     render(){
         const {isUrlVisible} = this.state;
         const {isExtended, isCurrentInfo, readOnly} = this.props;
-        const label = readOnly ? 'Ok' : 'Apply';
+        const label = 'Close';
         return(
             <React.Fragment>
                 <Col id="url_label" xs={4} className={`${styles.col} ${styles.entry_padding}`}>{`Endpoint`}</Col>
