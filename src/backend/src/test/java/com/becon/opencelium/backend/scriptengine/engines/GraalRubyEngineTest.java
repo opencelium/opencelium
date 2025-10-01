@@ -52,7 +52,7 @@
 //        bindings.put("x", 10);
 //        bindings.put("y", 5);
 //
-//        String script = "result = {'sum' => x + y, 'diff' => x - y}\nresult";
+//        String script = "RESULT_VAR = {'sum' => x + y, 'diff' => x - y}\nRESULT_VAR";
 //
 //        Object result = engine.execute(script, bindings);
 //
@@ -68,7 +68,7 @@
 //    void execute_withRefExtractor_shouldWork() throws Exception {
 //        Map<String, String> bindings = Map.of("x", "100", "y", "50");
 //
-//        String script = "result = x.to_i * y.to_i\nresult";
+//        String script = "RESULT_VAR = x.to_i * y.to_i\nRESULT_VAR";
 //
 //        Object result = engine.execute(script, bindings, Integer::parseInt);
 //
@@ -77,7 +77,7 @@
 //
 //    @Test
 //    void validate_shouldNotThrowForValidScript() {
-//        assertThatCode(() -> engine.validate("x = 1 + 2")).doesNotThrowAnyException();
+//        assertThatCode(() -> engine.validate("RESULT_VAR = 1 + 2")).doesNotThrowAnyException();
 //    }
 //
 //    @Test
@@ -108,7 +108,7 @@
 //        Map<String, Object> bindings = new HashMap<>();
 //        bindings.put("input", nestedMap);
 //
-//        String script = "result = input['a'] + input['b']\nresult";
+//        String script = "RESULT_VAR = input['a'] + input['b']\nresult";
 //
 //        Object result = engine.execute(script, bindings);
 //
