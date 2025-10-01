@@ -37,7 +37,7 @@ public class GraalPythonEngine implements ScriptEngine {
         try (Context context = newContext()) {
             bindArgs(context, bindings);
             Value result = context.eval("python", script);
-            return translateResult(context, result.getMember(RESULT_VAR));
+            return translateResult(context, result);
         } catch (PolyglotException e) {
             if (e.isSyntaxError()) {
                 throw new InvalidScriptException(e.getMessage(), e);
@@ -56,7 +56,7 @@ public class GraalPythonEngine implements ScriptEngine {
                     .collect(Collectors.toMap(Map.Entry::getKey, e -> referenceExtractor.apply(e.getValue())));
             bindArgs(context, resolved);
             Value result = context.eval("python", script);
-            return translateResult(context, result.getMember(RESULT_VAR));
+            return translateResult(context, result);
         } catch (PolyglotException e) {
             if (e.isSyntaxError()) {
                 throw new InvalidScriptException(e.getMessage(), e);
@@ -124,7 +124,13 @@ public class GraalPythonEngine implements ScriptEngine {
     }
 
     private Object translateResult(Context context, Value result) {
-        if (result == null || result.isNull()) return null;
+        if (result == null) return null;
+
+        if (result.hasMember(RESULT_VAR)) {
+            result = result.getMember(RESULT_VAR);
+        }
+
+        if (result.isNull()) return null;
         if (result.isBoolean()) return result.asBoolean();
         if (result.isNumber()) return result.as(Number.class);
         if (result.isString()) return result.asString();
