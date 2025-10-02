@@ -2,7 +2,6 @@ package com.becon.opencelium.backend.scriptengine;
 
 import com.becon.opencelium.backend.scriptengine.engines.GraalJSEngine;
 import com.becon.opencelium.backend.scriptengine.engines.GraalPythonEngine;
-import com.becon.opencelium.backend.scriptengine.engines.GraalRubyEngine;
 import com.becon.opencelium.backend.scriptengine.engines.JythonEngine;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
@@ -23,8 +22,6 @@ public class ScriptExecutionManagerTest {
             "opencelium.languages[1].engine=graalvm",
             "opencelium.languages[2].lang=js",
             "opencelium.languages[2].engine=graalvm",
-            "opencelium.languages[3].lang=ruby",
-            "opencelium.languages[3].engine=graalvm",
     })
     class JythonEngineTest {
 
@@ -62,17 +59,6 @@ public class ScriptExecutionManagerTest {
             ScriptEngine scriptEngine = scriptEngineOptional.get();
 
             Assertions.assertEquals(GraalPythonEngine.class, scriptEngine.getClass());
-        }
-
-        @Test
-        void testGraalRubyEngine() {
-            Optional<ScriptEngine> scriptEngineOptional = scriptExecutionManager.resolveEngine(LanguageType.RUBY);
-
-            Assertions.assertTrue(scriptEngineOptional.isPresent());
-
-            ScriptEngine scriptEngine = scriptEngineOptional.get();
-
-            Assertions.assertEquals(GraalRubyEngine.class, scriptEngine.getClass());
         }
     }
 }
