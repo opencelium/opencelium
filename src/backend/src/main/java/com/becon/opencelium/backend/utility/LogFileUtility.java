@@ -174,6 +174,26 @@ public class LogFileUtility {
         }
     }
 
+    public static List<String> getLogFileNameList(Long connectionId, int schedulerId, String status) {
+        Path logFolder = toPath(LOG_LOCATION + "/" + connectionId);
+
+        // TODO: filter by schedulerId
+        try (Stream<Path> stream = Files.list(logFolder)) {
+            return stream
+                    .map(path -> path.getFileName().toString())
+                    .filter(name -> name.matches(LOG_FILE_NAME_RGX))
+                    .filter(name -> status == null || name.contains(status))
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            logger.error("Error while reading log files from folder: {}", logFolder, e);
+            throw new GeneralServiceException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    ExceptionConstant.INTERNAL_ERROR,
+                    ExceptionMessages.UNKNOWN_ERROR
+            );
+        }
+    }
+
     private static FileDescriptor readFile(Path path) {
         try (InputStream in = new FileInputStream(path.toFile())) {
             return FileDescriptor.of(

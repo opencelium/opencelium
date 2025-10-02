@@ -85,7 +85,7 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
                 data = getData(dataMap);
                 context.getMergedJobDataMap().put("data", data);
             }
-            connectionId = schedulerService.getById(data.getScheduleId()).getConnection().getId();
+            connectionId = schedulerService.getConnectionIdById(data.getScheduleId());
 
             ExecutionObj executionObj = executionObjectService.buildObj(data);
 
