@@ -71,7 +71,6 @@ dependencies {
 	implementation("org.graalvm.polyglot:polyglot:24.2.2")
 	implementation("org.graalvm.polyglot:js:24.2.2")
 	implementation("org.graalvm.polyglot:python:24.2.2")
-	implementation("org.graalvm.polyglot:ruby:24.2.2")
 	compileOnly 'org.mapstruct:mapstruct:1.5.5.Final'
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 	runtimeOnly 'mysql:mysql-connector-java'
