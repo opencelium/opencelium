@@ -114,6 +114,9 @@ export function isString(str){
 }
 
 export function capitalize(string){
+    if (!string) {
+        return string;
+    }
     return string.toString().charAt(0).toUpperCase() + string.toString().slice(1);
 }
 

@@ -37,7 +37,7 @@ const languageOptions = [
 	{label: 'JavaScript', value: 'js'},
 	//{label: 'Python2', value: 'python2'},
 	{label: 'Python3', value: 'python3'},
-	//{label: 'Ruby', value: 'ruby'},
+	{label: 'Ruby', value: 'ruby'},
 ];
 
 const modeMap = {
