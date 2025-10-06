@@ -85,7 +85,8 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
                 data = getData(dataMap);
                 context.getMergedJobDataMap().put("data", data);
             }
-            connectionId = schedulerService.getConnectionIdById(data.getScheduleId());
+            int schedulerId = data.getScheduleId();
+            connectionId = schedulerService.getConnectionIdById(schedulerId);
 
             ExecutionObj executionObj = executionObjectService.buildObj(data);
 
@@ -101,10 +102,10 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
                 context.put("timestamp", timestamp);
                 context.put("connectionId", connectionId);
 
-                executionLogger.logAndSend(String.format("phase=EXECUTION_START id=%d connectionId=%d", execId, connectionId));
+                executionLogger.logAndSend(String.format("phase=EXECUTION_START id=%d connectionId=%d schedulerId=%d", execId, connectionId, schedulerId));
                 executor.start();
             } finally {
-                executionLogger.logAndSend(String.format("phase=EXECUTION_END id=%d connectionId=%d", execId, connectionId));
+                executionLogger.logAndSend(String.format("phase=EXECUTION_END id=%d connectionId=%d schedulerId=%d", execId, connectionId, schedulerId));
                 executionLogger.close(); // release resources
 
                 context.put("operationsEx", executor.getOperations());
