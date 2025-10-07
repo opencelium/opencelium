@@ -16,6 +16,8 @@
 
 package com.becon.opencelium.backend.database.mysql.entity;
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedBy;
@@ -36,9 +38,13 @@ public class Connector {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @NotNull
+    @NotEmpty
     @Column(name = "title")
     private String title;
 
+    @NotEmpty
+    @NotNull
     @Column(name = "invoker")
     private String invoker;
 
