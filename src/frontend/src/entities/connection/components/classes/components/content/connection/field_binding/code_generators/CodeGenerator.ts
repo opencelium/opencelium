@@ -50,7 +50,7 @@ export default class CodeGenerator {
     }
 
     protected getExpertVarRegExp(): RegExp {
-        return /var\s+(\w+)\s*=\s*#(\w+)\.\(\w+\)\.([\w\d.\[\*\]\~]+)/g;
+        return /var\s+(\w+)\s*=\s*#(\w+)\.\(\w+\)\.([^;]+)\s*;/g;
     }
 
     protected getExpertVar(): string {
