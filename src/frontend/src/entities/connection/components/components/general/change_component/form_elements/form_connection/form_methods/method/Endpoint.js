@@ -28,7 +28,10 @@ import QueryString from '@change_component/form_elements/form_connection/form_me
 import CMethodItem from '@entity/connection/components/classes/components/content/connection/method/CMethodItem';
 import CEndpoint from '@entity/connection/components/classes/components/general/change_component/form_elements/CEndpoint';
 import styles from '@entity/connection/components/themes/default/general/form_methods.scss';
-import { BACKSPACE_KEY_CODE } from '@entity/connection/components/utils/constants/inputs';
+import {
+	BACKSPACE_KEY_CODE,
+	DEL_KEY_CODE,
+} from '@entity/connection/components/utils/constants/inputs';
 import ToolboxThemeInput from '../../../../../../../hocs/ToolboxThemeInput';
 
 const PROHIBITED_ENDPOINT_CHARACTERS = ['<', '>', 'Enter'];
@@ -107,15 +110,16 @@ class Endpoint extends Component {
 		const refsAfter = (result.match(REF_RE) || []).length;
 
 		let newPos = caretBefore;
-		const DELETE_KEY_CODE = 46;
 
 		if (
 			(currentKeyCode === BACKSPACE_KEY_CODE ||
-				currentKeyCode === DELETE_KEY_CODE) &&
+				currentKeyCode === DEL_KEY_CODE) &&
 			refsBefore > refsAfter
 		) {
 			newPos = caretBefore;
 		} else if (delta === -1 && currentKeyCode === BACKSPACE_KEY_CODE) {
+			newPos = caretBefore;
+		} else if (delta === -1 && currentKeyCode === DEL_KEY_CODE) {
 			newPos = caretBefore;
 		} else if (delta !== 1) {
 			newPos = caretBefore + delta;
