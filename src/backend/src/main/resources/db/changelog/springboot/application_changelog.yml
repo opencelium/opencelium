@@ -145,3 +145,7 @@ versions:
         operation: rename
         value: debug-mode
         path: opencelium.debug_mode
+      - changeset: 9
+        operation: modify
+        value: ./support-files
+        path: opencelium.support.file.directory

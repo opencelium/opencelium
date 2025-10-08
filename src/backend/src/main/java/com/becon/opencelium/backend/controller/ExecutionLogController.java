@@ -1,8 +1,12 @@
 package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.commons.FileDescriptor;
+import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
 import com.becon.opencelium.backend.execution.logger.dto.LogDataDTO;
 import com.becon.opencelium.backend.execution.logger.service.LogDataService;
+import com.becon.opencelium.backend.resource.application.ResultDTO;
+import com.becon.opencelium.backend.resource.connection.ConnectionResource;
+import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.utility.LogFileUtility;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -27,9 +31,11 @@ import java.util.List;
 public class ExecutionLogController {
 
     private final LogDataService logMetaDataService;
+    private final SchedulerService schedulerService;
 
-    public ExecutionLogController(LogDataService logMetaDataService) {
+    public ExecutionLogController(LogDataService logMetaDataService, SchedulerService schedulerService) {
         this.logMetaDataService = logMetaDataService;
+        this.schedulerService = schedulerService;
     }
 
     @Operation(summary = "Returns children elements' metadata of the specified element by ID")
@@ -82,6 +88,32 @@ public class ExecutionLogController {
         return ResponseEntity.ok()
                 .headers(logFile.buildHeaders())
                 .body(logFile.getData());
+    }
+
+    @Operation(summary = "Retrieves list of log names for connection by connectionId OR schedulerId AND/OR status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Log names for a connection has been successfully retrieved",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConnectionResource.class)))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping(path = "/log-files")
+    public ResponseEntity<ResultDTO<List<String>>> getLogFileNameList(
+            @RequestParam(required = false, defaultValue = "-1") long connectionId,
+            @RequestParam(required = false, defaultValue = "-1") int schedulerId,
+            @RequestParam(required = false) String status
+    ) {
+        if (connectionId == -1) {
+            connectionId = schedulerService.getConnectionIdById(schedulerId);
+        }
+
+        ResultDTO<List<String>> logFileNames = new ResultDTO<>(LogFileUtility.getLogFileNameList(connectionId, schedulerId, status));
+        return ResponseEntity.ok(logFileNames);
     }
 
 }
