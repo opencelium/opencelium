@@ -17,10 +17,11 @@ import styled from "styled-components";
 import {Text} from "@app_component/base/text/Text";
 import {NotificationListAppearance} from "@style/animations";
 import {ScheduleLogListProps} from "@entity/schedule/components/schedule_log_list/interfaces";
+import {Card} from "@app_component/base/card/Card";
 
-const ScheduleLogListStyled = styled.div<{x: number, y: number}>`
+const ScheduleLogListStyled = styled(Card)<{x: number, y: number}>`
     ${NotificationListAppearance};
-    min-width: 60px;
+    min-width: 184px;
     height: auto;
     position: absolute;
     left: ${({x}) => x || 0}px;
@@ -28,7 +29,7 @@ const ScheduleLogListStyled = styled.div<{x: number, y: number}>`
     background: white;
     border: 1px solid #eee;
     border-radius: 2px;
-    padding: 2px 5px;
+    padding: 8px 10px;
 `;
 
 const ScheduleLogId = styled.span`
@@ -36,6 +37,9 @@ const ScheduleLogId = styled.span`
 const ScheduleLogEntry = styled.tr`
     white-space: nowrap;
     text-align: left;
+    &:hover {
+        text-decoration: underline;
+    }
 `;
 const MinusStyled = styled.td`
     padding-left: 5px;
@@ -43,9 +47,6 @@ const MinusStyled = styled.td`
 `;
 const DatetimeValue = styled.td`
     cursor: pointer;
-    &:hover {
-        text-decoration: underline;
-    }
 `;
 
 export {

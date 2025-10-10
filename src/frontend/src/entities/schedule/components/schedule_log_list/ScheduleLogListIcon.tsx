@@ -26,16 +26,19 @@ import {ScheduleLogListIconProps} from "./interfaces";
 import {ScheduleLogList} from "@entity/schedule/components/schedule_log_list/ScheduleLogList";
 import {useAppDispatch} from "@application/utils/store";
 import {getLogList} from "@root/redux_toolkit/action_creators/ConnectionLogCreators";
+import {clearLogList} from "@root/redux_toolkit/slices/ConnectionLogSlice";
 
 const ScheduleLogListIcon: FC<ScheduleLogListIconProps> =
     ({
         scheduleId,
+        type,
     }) => {
     const dispatch = useAppDispatch();
     const [x, setX] = useState(0);
     const [y, setY] = useState(0);
     const [isToggledList, setIsToggledList] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const id = `schedule_logs_${type}_${scheduleId}`;
     const getLogs = async () => {
         setIsLoading(true);
         dispatch(getLogList({scheduleId}));
@@ -43,26 +46,27 @@ const ScheduleLogListIcon: FC<ScheduleLogListIconProps> =
         toggleList();
     }
     const toggleList = () => {
+        if (isToggledList) {
+            dispatch(clearLogList());
+        }
         setIsToggledList(!isToggledList);
     }
     useEffect(() => {
-        setTimeout(() => {
-            let iconElem = document.getElementById(`schedule_logs_${scheduleId}`);
-            if(iconElem) {
-                let position = findTopLeftPosition(`schedule_logs_${scheduleId}`);
-                let newX = position.left + (iconElem.offsetWidth / 2) - 170;
-                let newY = position.top + (iconElem.offsetHeight / 2) - 10;
-                if (x !== newX || y !== newY) {
-                    setX(newX);
-                    setY(newY);
-                }
+        let iconElem = document.getElementById(id);
+        if(iconElem) {
+            let position = findTopLeftPosition(id);
+            let newX = position.left + (iconElem.offsetWidth / 2) - 190;
+            let newY = position.top + (iconElem.offsetHeight / 2) - 10;
+            if (x !== newX || y !== newY) {
+                setX(newX);
+                setY(newY);
             }
-        }, 1000)
-    }, [])
+        }
+    }, [isToggledList])
     return (
         <React.Fragment>
             <PermissionTooltipButton
-                target={`schedule_logs_${scheduleId}`}
+                target={id}
                 tooltip={'Log list'}
                 position={'top'}
                 permission={SchedulePermissions.READ}
