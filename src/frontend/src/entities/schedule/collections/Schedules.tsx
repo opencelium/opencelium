@@ -78,6 +78,7 @@ class Schedules extends ListCollection<ScheduleProps>{
     }, {
         propertyKey: 'connection.title',
         width: '15%',
+        style: {textAlign: 'left', padding: '10px'},
         getValue: (schedule: ISchedule) => {
             const shortTitle = schedule.connection.title.length > 64 ? `${schedule.connection.title.substr(0, 64)}...` : schedule.connection.title;
             return(

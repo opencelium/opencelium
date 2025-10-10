@@ -5,7 +5,7 @@ import java.util.Objects;
 import static com.becon.opencelium.backend.scriptengine.ScriptEngineType.*;
 
 public enum LanguageType {
-    JS("js", "JavaScript", NASHORN),
+    JS("js", "JavaScript", GRAALVM),
     PYTHON_2("python2", "Python 2", JYTHON),
     PYTHON_3("python3", "Python 3", GRAALVM),
     RUBY("ruby", "Ruby", GRAALVM),

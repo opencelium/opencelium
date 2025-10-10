@@ -252,8 +252,17 @@ class Body extends React.Component {
 	renderEnhancement() {
 		const { currentEnhancement, isOpenedEnhancement } = this.state;
 		const { readOnly, connection, method, theme } = this.props;
+
+		let bindingItem = connection.fieldBinding.find(
+			(item) =>
+				item.to.findIndex((elem) => elem.color === method.color) !== -1
+		);
+		if (bindingItem) {
+			bindingItem = bindingItem.getObject();
+		}
 		const enhancementElement = (
 			<Enhancement
+				binding={bindingItem}
 				method={method}
 				connection={connection}
 				ref={this.enhancementRef}

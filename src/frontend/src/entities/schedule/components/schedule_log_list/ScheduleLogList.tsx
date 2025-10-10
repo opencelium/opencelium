@@ -68,17 +68,22 @@ const ScheduleLogList: FC<ScheduleLogListProps> =
     return (
         ReactDOM.createPortal(
             <ScheduleLogListStyled x={x} y={y}>
-                <table>
-                    {logExecList.map(((entry, index) => {
+                {logExecList.length === 0 ?
+                    <div style={{textAlign: 'center', width: '100%'}}>
+                        {`The list is empty.`}
+                    </div>
+                    :
+                    <table>
+                        {logExecList.map(((entry, index) => {
                         return (
-                            <ScheduleLogEntry key={entry.executionId}>
+                            <ScheduleLogEntry key={entry.executionId} onClick={() => getLogs(entry.executionId)}>
                                 <td>{`#${entry.executionId}`}</td>
                                 <MinusStyled>{`-`}</MinusStyled>
-                                <DatetimeValue onClick={() => getLogs(entry.executionId)}>{entry.datetime}</DatetimeValue>
+                                <DatetimeValue>{entry.datetime}</DatetimeValue>
                             </ScheduleLogEntry>
-                        )
-                    }))}
-                </table>
+                        )}))}
+                    </table>
+                }
             </ScheduleLogListStyled>,
             document.getElementById('schedule_log_list')
         )

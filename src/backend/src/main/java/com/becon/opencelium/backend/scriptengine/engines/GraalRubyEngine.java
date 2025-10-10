@@ -19,6 +19,8 @@ public class GraalRubyEngine implements ScriptEngine {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
+    private static final String RESULT_VAR = "RESULT_VAR";
+
     @Override
     public boolean supports(Language lang) {
         return lang != null
@@ -92,6 +94,7 @@ public class GraalRubyEngine implements ScriptEngine {
 
     private Context newContext() {
         return Context.newBuilder("ruby")
+                .option("engine.WarnInterpreterOnly", "false")
                 .allowAllAccess(false)
                 .build();
     }
@@ -117,7 +120,13 @@ public class GraalRubyEngine implements ScriptEngine {
     }
 
     private Object translateResult(Context context, Value result) {
-        if (result == null || result.isNull()) return null;
+        if (result == null) return null;
+
+        if (result.hasMember(RESULT_VAR)) {
+            result = result.getMember(RESULT_VAR);
+        }
+
+        if (result.isNull()) return null;
         if (result.isBoolean()) return result.asBoolean();
         if (result.isNumber()) return result.as(Number.class);
         if (result.isString()) return result.asString();

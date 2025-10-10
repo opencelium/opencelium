@@ -99,6 +99,7 @@ public class GraalJSEngine implements ScriptEngine {
 
     private Context newContext() {
         return Context.newBuilder("js")
+                .option("engine.WarnInterpreterOnly", "false")
                 .allowAllAccess(false)
                 .build();
     }

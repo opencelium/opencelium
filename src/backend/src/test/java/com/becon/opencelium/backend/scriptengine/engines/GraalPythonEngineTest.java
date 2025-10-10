@@ -1,10 +1,10 @@
-package com.becon.opencelium.backend.polygot_engine.engines;
+package com.becon.opencelium.backend.scriptengine.engines;
 
-import com.becon.opencelium.backend.polygot_engine.Language;
-import com.becon.opencelium.backend.polygot_engine.LanguageType;
-import com.becon.opencelium.backend.polygot_engine.ScriptEngineType;
-import com.becon.opencelium.backend.polygot_engine.ex.InvalidScriptException;
-import com.becon.opencelium.backend.polygot_engine.ex.ScriptExecutionException;
+import com.becon.opencelium.backend.scriptengine.Language;
+import com.becon.opencelium.backend.scriptengine.LanguageType;
+import com.becon.opencelium.backend.scriptengine.ScriptEngineType;
+import com.becon.opencelium.backend.scriptengine.ex.InvalidScriptException;
+import com.becon.opencelium.backend.scriptengine.ex.ScriptExecutionException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -46,8 +46,14 @@ class GraalPythonEngineTest {
     }
 
     @Test
-    void testExecute_simpleScript_returnsValue() throws Exception {
+    void testExecute_simpleScript_returnsValue() {
         Object result = engine.execute("1 + 1");
+        assertEquals(2, ((Number) result).intValue());
+    }
+
+    @Test
+    void testExecute_simpleScript_returnsValueWithResultVar() {
+        Object result = engine.execute("RESULT_VAR = 1 + 1");
         assertEquals(2, ((Number) result).intValue());
     }
 
@@ -62,8 +68,21 @@ class GraalPythonEngineTest {
     }
 
     @Test
-    void testExecute_withBindingsAndReferenceExtractor() throws Exception {
+    void testExecute_withBindingsAndReferenceExtractor() {
         String script = "value * 2";
+        Map<String, String> bindings = Map.of("value", "ref1");
+        // Mock reference extractor to resolve "ref1" -> 5
+        var referenceExtractor = mock(java.util.function.Function.class);
+        when(referenceExtractor.apply("ref1")).thenReturn(5);
+
+        Object result = engine.execute(script, bindings, referenceExtractor);
+        assertEquals(10, ((Number) result).intValue());
+        verify(referenceExtractor).apply("ref1");
+    }
+
+    @Test
+    void testExecute_withBindingsAndReferenceExtractorWithResultVar() {
+        String script = "RESULT_VAR = value * 2";
         Map<String, String> bindings = Map.of("value", "ref1");
         // Mock reference extractor to resolve "ref1" -> 5
         var referenceExtractor = mock(java.util.function.Function.class);

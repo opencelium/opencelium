@@ -28,7 +28,7 @@ const Option: FC<OptionProps> =
         return (
             <React.Fragment>
                 <OptionContainerStyled {...props}>
-                    <OptionStyled readOnly={true} {...props} value={capitalize(props.value)}/>
+                    <OptionStyled readOnly={true} {...props} value={capitalize(props?.value)}/>
                     {OptionRightComponent}
                 </OptionContainerStyled>
             </React.Fragment>

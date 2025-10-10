@@ -46,7 +46,7 @@ class Connections extends ListCollection<ConnectionProps>{
     ListRawComponent = DefaultListRaw;
     sortingProps: ConnectionProps[] = ['title', 'description', 'fromConnector.title', 'toConnector.title'];
     listProps: ListProp<ConnectionProps>[] = [
-        {propertyKey: 'title', width: '20%',
+        {propertyKey: 'title', width: '20%', header: {left: true},
             getValue: (entity: IConnection) => {
                 return(
                     <InlineEditInput
@@ -61,7 +61,7 @@ class Connections extends ListCollection<ConnectionProps>{
                     />
                 )
         }},
-        {propertyKey: 'description', width: '30%',
+        {propertyKey: 'description', width: '30%', header: {left: true},
             getValue: (entity: IConnection) => {
                 return(
                     <InlineEditInput
@@ -74,8 +74,8 @@ class Connections extends ListCollection<ConnectionProps>{
                     />
                 )
             }},
-        {propertyKey: 'fromConnector.title'},
-        {propertyKey: 'toConnector.title'},
+        {propertyKey: 'fromConnector.title', header: {left: true},},
+        {propertyKey: 'toConnector.title', header: {left: true},},
     ];
     gridProps = {title: 'title'};
     translations = {

@@ -15,7 +15,8 @@ const DEFAULT_HEIGHT = 100;
 const TabPaneLog = ({tabId, value, theme, height, setHeight, content}: {content: string, tabId: string, value: any, theme: ITheme, height: number | undefined, setHeight: (newHeight: number) => void,}) => {
     const dispatch = useAppDispatch();
     const isXmlFormat = isXML(value);
-    const mode = value ? isXmlFormat ? 'xml' : isJsonString(value) ? 'json' : 'text' : 'text';
+    const isJson = isJsonString(value);
+    const mode = value ? isXmlFormat ? 'xml' : isJson ? 'json' : 'text' : 'text';
     if (isXmlFormat) {
         value = formatXML(value);
     }
@@ -24,6 +25,17 @@ const TabPaneLog = ({tabId, value, theme, height, setHeight, content}: {content:
     useEffect(() => {
         setIsMouseOver(false);
     }, []);
+    const updateMouseOver = (newValue: boolean) => {
+        if (newValue !== isMouseOver) {
+            if (newValue) {
+                if (!!content) {
+                    setIsMouseOver(newValue);
+                }
+            } else {
+                setIsMouseOver(newValue);
+            }
+        }
+    }
     useEffect(() => {
         const el = ref.current;
         if (!el) return;
@@ -57,7 +69,7 @@ const TabPaneLog = ({tabId, value, theme, height, setHeight, content}: {content:
         return () => { ro.disconnect(); commit.cancel(); };
     }, []);
     return (
-        <TabPane tabId={tabId} onMouseOver={() => setIsMouseOver(true)} onMouseLeave={() => {setIsMouseOver(false)}}>
+        <TabPane tabId={tabId} onMouseOver={() => updateMouseOver(true)} onMouseLeave={() => {updateMouseOver(false)}}>
             <div ref={ref} style={{
                 position: 'relative',
                 overflow: 'auto',
@@ -71,13 +83,13 @@ const TabPaneLog = ({tabId, value, theme, height, setHeight, content}: {content:
                     mode={mode}
                     theme={theme}
                     editorTheme='textmate'
-                    value={value}
+                    value={isJson ? JSON.stringify(JSON.parse(value), null, 2) : value}
                     fontSize={14}
                     showPrintMargin={false}
                     showGutter={true}
                     highlightActiveLine={false}
                     wrapEnabled={true}
-                    setOptions={{ useWorker: false, showLineNumbers: false }}
+                    setOptions={{ useWorker: false, showLineNumbers: false,  }}
                     className={styles.aceEditor}
                     readOnly={true}
                     width={'100%'}
@@ -85,7 +97,7 @@ const TabPaneLog = ({tabId, value, theme, height, setHeight, content}: {content:
                 /> :
                     <div className={localStyles.emptyBodyContent}>{"No data"}</div>
                 }
-                {isMouseOver && <Button
+                {(isMouseOver && !!content) && <Button
                     iconSize={TextSize.Size_16}
                     icon={'file_copy'}
                     hasBackground={false}

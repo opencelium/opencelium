@@ -38,6 +38,9 @@ export interface ListProp<EntityProps>{
     getValue?: (entity: any) => any,
     replace?: boolean,
     style?: any;
+    header?: {
+        left?: boolean,
+    },
 }
 
 export interface IListCollection<EntityProps>{

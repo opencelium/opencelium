@@ -23,27 +23,18 @@ import java.util.stream.Collectors;
 public class ConnectionExecutor {
     private final Map<String, Object> webhookVars;
     private final ConnectionEx connection;
-    private final OcLogger<ExecutionLog> logger;
+    private final OcLogger<ExecutionLog> executionLogger;
     private final MaskingService masking;
     private final ProxyEx proxy;
-    private final long executionId;
     private ExecutionManager executionManager;
 
-    public ConnectionExecutor(
-            ExecutionObj executionObj, long executionId,
-            String timestamp, List<MaskingRule> rules
-    ) {
+    public ConnectionExecutor(ExecutionObj executionObj, OcLogger<ExecutionLog> executionLogger, List<MaskingRule> rules) {
         this.webhookVars = executionObj.getWebhookVars();
         this.connection = executionObj.getConnection();
         this.proxy = executionObj.getProxy();
-        this.executionId = executionId;
-        this.masking = new MaskingServiceImp(rules);
 
-        // logging files related setup
-        this.logger = new OcLogger<>(
-                executionObj.getLoggerConfiguration(), new ExecutionLog(),
-                connection.getConnectionId(), timestamp, executionId, ConnectionExecutor.class
-        );
+        this.executionLogger = executionLogger;
+        this.masking = new MaskingServiceImp(rules);
     }
 
     public void start() {
@@ -53,18 +44,11 @@ public class ConnectionExecutor {
 
         executionManager = new ExecutionManagerImpl(webhookVars, source, target, fieldBind);
 
-        ConnectorExecutor sourceEx = new ConnectorExecutor(connection.getSource(), executionManager, getRestTemplate(source), logger, masking, "source");
-        ConnectorExecutor targetEx = new ConnectorExecutor(connection.getTarget(), executionManager, getRestTemplate(target), logger, masking, "target");
+        ConnectorExecutor sourceEx = new ConnectorExecutor(connection.getSource(), executionManager, getRestTemplate(source), executionLogger, masking, "source");
+        ConnectorExecutor targetEx = new ConnectorExecutor(connection.getTarget(), executionManager, getRestTemplate(target), executionLogger, masking, "target");
 
-        try {
-            logger.logAndSend(String.format("phase=EXECUTION_START id=%d connectionId=%d", executionId, connection.getConnectionId()));
-
-            sourceEx.start();
-            targetEx.start();
-        } finally {
-            logger.logAndSend(String.format("phase=EXECUTION_END id=%d connectionId=%d", executionId, connection.getConnectionId()));
-            logger.close(); // release resources
-        }
+        sourceEx.start();
+        targetEx.start();
     }
 
     public List<Operation> getOperations() {
