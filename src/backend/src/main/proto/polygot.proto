@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+import "google/protobuf/struct.proto";
+
+option java_multiple_files = true;
+option java_package = "com.becon.opencelium.backend.proto";
+option java_outer_classname = "PolygotEngineProto";
+
+service ExternalConsumer {
+  rpc execute(ScriptRequest) returns (ScriptResult);
+}
+
+message ScriptRequest{
+  string uuid = 1;
+  string language = 2;
+  string engine = 3;
+  string script = 4;
+  google.protobuf.Struct args = 5;
+}
+
+message ScriptResult{
+  string uuid = 1;
+  google.protobuf.Value result = 2;
+  string errorMessage = 3;
+  string errorCode = 4;
+  bool success = 5;
+}
