@@ -28,6 +28,7 @@ import com.becon.opencelium.backend.invoker.parser.InvokerParserImp;
 import com.becon.opencelium.backend.invoker.resource.OperationResource;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.mapper.base.Mapper;
+import com.becon.opencelium.backend.mapper.mysql.invoker.InvokerMapper;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.connector.FunctionDTO;
@@ -37,6 +38,7 @@ import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.utility.PathUtility;
 import com.becon.opencelium.backend.utility.Xml;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -46,14 +48,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -119,7 +114,17 @@ public class InvokerController {
         return ResponseEntity.ok(setManualChangeValue(invokerResources));
     }
 
-    @Operation(summary = "Retrieves all invokers")
+    @Operation(
+        summary = "Retrieves all invokers",
+        parameters = {
+            @Parameter(
+                    name = "opsIncluded",
+                    description = "Whether to include operations for each invoker",
+                    example = "false",
+                    schema = @Schema(defaultValue = "true")
+            )
+        }
+    )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "List of Invokers have been successfully retrieved",
@@ -132,10 +137,13 @@ public class InvokerController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/all")
-    public ResponseEntity<List<InvokerDTO>> getAll() throws Exception {
-
-        List<InvokerDTO> invokerDTOS = invokerService.findAll()
-                .stream().map(invokerMapper::toDTO)
+    public ResponseEntity<List<InvokerDTO>> getAll(@RequestParam(name = "opsIncluded", defaultValue = "true") boolean opsIncluded) throws Exception {
+        List<Invoker> invokers = invokerService.findAll();
+        InvokerMapper invokerMappers = (InvokerMapper) invokerMapper;
+        List<InvokerDTO> invokerDTOS = invokers.stream()
+                .map(invoker -> opsIncluded
+                        ? invokerMappers.toDTO(invoker)
+                        : invokerMappers.toDTONoOps(invoker))
                 .map(this::setManualChangeValue)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(invokerDTOS);

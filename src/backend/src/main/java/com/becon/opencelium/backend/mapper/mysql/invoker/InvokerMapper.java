@@ -35,4 +35,13 @@ public interface InvokerMapper extends Mapper<Invoker, InvokerDTO> {
             @Mapping(target = "requiredData", qualifiedByName = {"requiredDataMapper", "toDTO"})
     })
     InvokerDTO toDTO(Invoker entity);
+
+    // Lite mapping (NO operations)
+    @Named("toDTONoOps")
+    @Mappings({
+            @Mapping(target = "icon", expression = "java(StringUtility.resolveImagePath(entity.getIcon()))"),
+            @Mapping(target = "operations", ignore = true), // <— prevents loading/mapping ops
+            @Mapping(target = "requiredData", qualifiedByName = {"requiredDataMapper", "toDTO"})
+    })
+    InvokerDTO toDTONoOps(Invoker entity);
 }
