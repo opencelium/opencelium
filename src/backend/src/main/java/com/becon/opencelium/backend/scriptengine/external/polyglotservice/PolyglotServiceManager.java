@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 
 import jakarta.annotation.PreDestroy;
+import org.springframework.stereotype.Component;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -32,8 +34,9 @@ import java.util.concurrent.TimeUnit;
  * to ensure visibility across threads.
  *
  * @see PolyglotProps
- * @see PolyglotAutoConfiguration
+ * @see PolyglotServiceConfiguration
  */
+@Component
 public class PolyglotServiceManager implements DisposableBean {
 
     private static final Logger logger = LoggerFactory.getLogger(PolyglotServiceManager.class);
@@ -128,7 +131,9 @@ public class PolyglotServiceManager implements DisposableBean {
         Process process = processBuilder.start();
 
         // Start a thread to log output
-        startOutputLogger(process);
+        if (props.isExternalLogEnabled()) {
+            startOutputLogger(process);
+        }
 
         return process;
     }

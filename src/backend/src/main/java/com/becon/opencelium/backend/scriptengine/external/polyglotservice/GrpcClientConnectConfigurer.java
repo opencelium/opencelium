@@ -38,7 +38,7 @@ public class GrpcClientConnectConfigurer {
      */
     public ExternalConsumerGrpc.ExternalConsumerBlockingStub externalConsumerBlockingStub() {
 
-        if (polyglotProps.isEnabled() && Objects.equals(polyglotProps.getProtocol(), "grpc")) {
+        if (!polyglotProps.isEnabled() || !Objects.equals(polyglotProps.getProtocol(), "grpc")) {
             managedChannel = null;
             return null;
         }
