@@ -30,7 +30,8 @@ import {clearLogList} from "@root/redux_toolkit/slices/ConnectionLogSlice";
 
 const ScheduleLogListIcon: FC<ScheduleLogListIconProps> =
     ({
-        scheduleId,
+        schedulerId,
+        connectionId,
         type,
     }) => {
     const dispatch = useAppDispatch();
@@ -38,10 +39,10 @@ const ScheduleLogListIcon: FC<ScheduleLogListIconProps> =
     const [y, setY] = useState(0);
     const [isToggledList, setIsToggledList] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const id = `schedule_logs_${type}_${scheduleId}`;
+    const id = `schedule_logs_${type}_${schedulerId}`;
     const getLogs = async () => {
         setIsLoading(true);
-        dispatch(getLogList({scheduleId}));
+        dispatch(getLogList({schedulerId, connectionId, status: type === 'success' ? 's' : 'f'}));
         setIsLoading(false);
         toggleList();
     }
@@ -75,7 +76,7 @@ const ScheduleLogListIcon: FC<ScheduleLogListIconProps> =
                 hasBackground={false}
                 isLoading={isLoading}
             />
-            <ScheduleLogList x={x} y={y} scheduleId={scheduleId} isVisible={isToggledList} close={toggleList}/>
+            <ScheduleLogList x={x} y={y} scheduleId={schedulerId} isVisible={isToggledList} close={toggleList}/>
         </React.Fragment>
     )
 }

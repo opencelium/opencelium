@@ -9,7 +9,7 @@ import {
 } from "@root/requests/models/ConnectionLog";
 import {
 	ConLogRequestProps,
-	DeleteLogsRequest, GetLogListResponse,
+	DeleteLogsRequest, GetLogListProps, GetLogListResponse,
 	TestConnectionResponse
 } from "@root/requests/interfaces/IConnectionLogRequest";
 
@@ -102,12 +102,12 @@ export const testConnection = createAsyncThunk<TestConnectionResponse, {connecti
 	}
 );
 
-export const getLogList = createAsyncThunk<GetLogListResponse, {scheduleId: string}>(
+export const getLogList = createAsyncThunk<GetLogListResponse, GetLogListProps>(
 	'connectionLog/list',
 	async (data, thunkAPI) => {
 		try {
 			const connectionLogRequest = new ConnectionLogRequest();
-			const response = await connectionLogRequest.getLogList(data.scheduleId);
+			const response = await connectionLogRequest.getLogList(data);
 			return response.data;
 		} catch(e){
 			return thunkAPI.rejectWithValue(errorHandler(e));

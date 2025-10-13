@@ -84,7 +84,7 @@ const LastFailExecution: FC<LastFailExecutionProps> =
                                     onClick={() => getLogs(executionId)}>
                                     {`#${executionId}`}
                                 </span>
-                                <ScheduleLogListIcon scheduleId={schedule.connection.connectionId.toString()} type={'fail'}/>
+                                <ScheduleLogListIcon schedulerId={schedule.id.toString()} connectionId={schedule.connection.connectionId.toString()} type={'fail'}/>
                             </span>;
                     } else {
                         taIdComponent = <span>{`#${executionId}`}</span>

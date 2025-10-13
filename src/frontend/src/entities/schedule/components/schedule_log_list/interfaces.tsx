@@ -24,6 +24,7 @@ export interface ScheduleLogListProps {
 }
 export interface ScheduleLogListIconProps {
     theme?: ITheme,
-    scheduleId: string,
+    schedulerId: string,
+    connectionId: string,
     type: 'success' | 'fail'
 }
