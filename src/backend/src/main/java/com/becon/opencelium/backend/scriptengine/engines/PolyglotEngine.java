@@ -9,9 +9,11 @@ import com.becon.opencelium.backend.scriptengine.ex.InvalidScriptException;
 import com.becon.opencelium.backend.scriptengine.ex.ScriptExecutionException;
 import com.becon.opencelium.backend.scriptengine.external.ExternalScriptExecutor;
 import com.becon.opencelium.backend.scriptengine.external.polyglotservice.StructConverter;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
@@ -23,6 +25,7 @@ public class PolyglotEngine implements ScriptEngine {
 
     private final ExternalScriptExecutor<ScriptRequest> polyglotExecutor;
     private LanguageType languageType;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public PolyglotEngine(ExternalScriptExecutor<ScriptRequest> polyglotExecutor) {
         this.polyglotExecutor = polyglotExecutor;
@@ -68,6 +71,22 @@ public class PolyglotEngine implements ScriptEngine {
                 .map(entry -> {
                     try {
                         Object value = referenceExtractor.apply(entry.getValue());
+
+                        if (value instanceof Map || value instanceof List) {
+                            try {
+                                String stringVal = objectMapper.writeValueAsString(value)
+                                        .replace("__oc__attributes.", "@")
+                                        .replace(".__oc__value", "");
+
+                                if (value instanceof List) {
+                                    value = objectMapper.readValue(stringVal, List.class);
+                                } else {
+                                    value = objectMapper.readValue(stringVal, Map.class);
+                                }
+                            } catch (Exception e) {
+                                throw new ScriptExecutionException("Serialization/Deserialization error: " + e.getMessage(), e);
+                            }
+                        }
 
                         return Map.entry(entry.getKey(), value);
                     } catch (Exception e) {
