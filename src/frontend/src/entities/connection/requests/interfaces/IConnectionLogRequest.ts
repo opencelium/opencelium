@@ -21,11 +21,17 @@ export interface GetLogListResponse {
 	result: string[],
 }
 
+export interface GetLogListProps{
+	connectionId: string,
+	schedulerId: string,
+	status: 's' | 'f',
+}
+
 export interface IConnectionLogRequest {
 	getDetailedMethod(data: ConLogRequestProps): Promise<AxiosResponse<ConnectionSocketLog<DetailedMethodSegment>>>;
 	getDetailedOperator(data: ConLogRequestProps): Promise<AxiosResponse<ConnectionSocketLog<DetailedOperatorSegment>>>;
 	getOperatorChildren(data: ConLogRequestProps): Promise<AxiosResponse<Trace[]>>;
 	deleteLogs(data: DeleteLogsRequest): Promise<AxiosResponse<IResponse>>;
 	testConnection(connection: any): Promise<AxiosResponse<TestConnectionResponse>>;
-	getLogList(scheduleId: string): Promise<AxiosResponse<GetLogListResponse>>;
+	getLogList(data: GetLogListProps): Promise<AxiosResponse<GetLogListResponse>>;
 }

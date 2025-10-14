@@ -87,6 +87,9 @@ export const connectionLogSlice = createSlice({
 			state.textLogs = [];
 			state.currentLogError = {log: undefined, parentsPath: []};
 		},
+		clearLogList: (state) => {
+			state.logList = [];
+		},
 		clearSocketLog: (state) => {
 			state.schedulerId = undefined;
 			state.executionId = '';
@@ -288,6 +291,7 @@ export const {
 	addTextLog, clearTextLog, clearSocketLog,
 	setIsTesting, setCurrentLog, copyLogContentToClipboard,
 	setCurrentLogError, setIsForcedFinished, setTraceConfig,
+	clearLogList,
 } =
 	connectionLogSlice.actions;
 export default connectionLogSlice.reducer;
