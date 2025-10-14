@@ -4,7 +4,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.regex.Pattern;
 
 public interface LogConstant {
-    String LOG_LOCATION = "src/main/resources/logs";
+    String LOG_LOCATION = "./logs";
     String LOG_FILE_EXTENSION = "log";
     DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm");
     String NAME_PARTS_SEPARATOR = "_";

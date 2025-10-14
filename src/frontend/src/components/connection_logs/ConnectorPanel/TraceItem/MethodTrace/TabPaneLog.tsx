@@ -15,7 +15,8 @@ const DEFAULT_HEIGHT = 100;
 const TabPaneLog = ({tabId, value, theme, height, setHeight, content}: {content: string, tabId: string, value: any, theme: ITheme, height: number | undefined, setHeight: (newHeight: number) => void,}) => {
     const dispatch = useAppDispatch();
     const isXmlFormat = isXML(value);
-    const mode = value ? isXmlFormat ? 'xml' : isJsonString(value) ? 'json' : 'text' : 'text';
+    const isJson = isJsonString(value);
+    const mode = value ? isXmlFormat ? 'xml' : isJson ? 'json' : 'text' : 'text';
     if (isXmlFormat) {
         value = formatXML(value);
     }
@@ -82,13 +83,13 @@ const TabPaneLog = ({tabId, value, theme, height, setHeight, content}: {content:
                     mode={mode}
                     theme={theme}
                     editorTheme='textmate'
-                    value={value}
+                    value={isJson ? JSON.stringify(JSON.parse(value), null, 2) : value}
                     fontSize={14}
                     showPrintMargin={false}
                     showGutter={true}
                     highlightActiveLine={false}
                     wrapEnabled={true}
-                    setOptions={{ useWorker: false, showLineNumbers: false }}
+                    setOptions={{ useWorker: false, showLineNumbers: false,  }}
                     className={styles.aceEditor}
                     readOnly={true}
                     width={'100%'}

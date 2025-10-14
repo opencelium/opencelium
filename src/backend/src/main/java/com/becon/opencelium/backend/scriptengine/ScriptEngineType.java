@@ -4,8 +4,7 @@ import java.util.List;
 
 public enum ScriptEngineType {
     NASHORN("nashorn", "Nashorn"),
-    JYTHON("jython", "Jython"),
-    GRAALVM("graalvm", "GraalVM");
+    POLYGOT_ENGINE("polygot-engine", "Polygot Engine");
 
     private final String code;
     private final String name;
@@ -26,8 +25,8 @@ public enum ScriptEngineType {
     public List<LanguageType> getLanguages() {
         return switch (this) {
             case NASHORN -> List.of(LanguageType.JS);
-            case JYTHON -> List.of(LanguageType.PYTHON_2);
-            case GRAALVM -> List.of(LanguageType.JS, LanguageType.PYTHON_3, LanguageType.RUBY);
+            case POLYGOT_ENGINE ->
+                    List.of(LanguageType.JS, LanguageType.PYTHON_2, LanguageType.PYTHON_3, LanguageType.RUBY);
         };
     }
 }

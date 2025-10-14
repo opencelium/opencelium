@@ -1,11 +1,8 @@
 package com.becon.opencelium.backend.scriptengine.impl;
 
-import com.becon.opencelium.backend.scriptengine.Language;
-import com.becon.opencelium.backend.scriptengine.LanguageType;
-import com.becon.opencelium.backend.scriptengine.ScriptEngine;
-import com.becon.opencelium.backend.scriptengine.ScriptEngineProvider;
-import com.becon.opencelium.backend.scriptengine.ScriptExecutionManager;
+import com.becon.opencelium.backend.scriptengine.*;
 import com.becon.opencelium.backend.scriptengine.config.LanguageConfig;
+import com.becon.opencelium.backend.scriptengine.engines.PolyglotEngine;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -24,7 +21,16 @@ public class ScriptExecutionManagerImpl implements ScriptExecutionManager {
     }
 
     private Optional<ScriptEngine> resolveEngine(Language lang) {
-        return scriptEngineProvider.provide(lang);
+        Optional<ScriptEngine> engineOpt = scriptEngineProvider.provide(lang);
+
+        if (engineOpt.isPresent() && lang.getEngine() == ScriptEngineType.POLYGOT_ENGINE) {
+            PolyglotEngine polyglotEngine = (PolyglotEngine) engineOpt.get();
+
+            polyglotEngine.setLanguageType(lang.getLanguage());
+            return Optional.of(polyglotEngine);
+        }
+
+        return engineOpt;
     }
 
     @Override

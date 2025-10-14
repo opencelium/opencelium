@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
+import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -174,6 +175,26 @@ public class LogFileUtility {
         }
     }
 
+    public static List<String> getLogFileNameList(Long connectionId, int schedulerId, String status) {
+        Path logFolder = toPath(LOG_LOCATION + "/" + connectionId);
+
+        try (Stream<Path> stream = Files.list(logFolder)) {
+            return stream
+                    .filter(path -> path.getFileName().toString().matches(LOG_FILE_NAME_RGX))
+                    .filter(path -> status == null || path.getFileName().toString().contains(status))
+                    .filter(path -> executedByScheduler(path, schedulerId))
+                    .map(path -> path.getFileName().toString())
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            logger.error("Error while reading log files from folder: {}", logFolder, e);
+            throw new GeneralServiceException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    ExceptionConstant.INTERNAL_ERROR,
+                    ExceptionMessages.UNKNOWN_ERROR
+            );
+        }
+    }
+
     private static FileDescriptor readFile(Path path) {
         try (InputStream in = new FileInputStream(path.toFile())) {
             return FileDescriptor.of(
@@ -210,5 +231,20 @@ public class LogFileUtility {
         String withoutExt = fileName.substring(0, fileName.length() - 4);
         String[] parts = withoutExt.split(NAME_PARTS_SEPARATOR);
         return parts[parts.length - 1];
+    }
+
+    private static boolean executedByScheduler(Path path, int schedulerId) {
+        if (schedulerId == -1) {
+            // if 'schedulerId' has default value then skip this filter
+            return true;
+        }
+
+        String token = "schedulerId=" + schedulerId;
+        try (BufferedReader reader = Files.newBufferedReader(path)) {
+            String firstLine = reader.readLine();
+            return firstLine != null && firstLine.contains(token);
+        } catch (IOException e) {
+            return false;
+        }
     }
 }

@@ -68,6 +68,10 @@ public class LanguageConfig {
             LanguageType lang = language.getLang();
             ScriptEngineType engine = language.getEngine();
 
+            if(lang == null){
+                throw new IllegalArgumentException("Language is null");
+            }
+
             // Prevent duplicate language entries
             if (languageMap.containsKey(lang)) {
                 throw new RuntimeException("Duplicate languages configured %s and %s"
@@ -82,12 +86,12 @@ public class LanguageConfig {
                             String.format("%s language has no default engine set. Engine must be specified in config.", lang)
                     );
                 }
+
                 // Validate that the default engine supports this language
-                else if (engine.getLanguages() == null ||
-                        engine.getLanguages().stream().noneMatch(x -> x == lang)) {
+                if (lang.getDefaultEngine().getLanguages() == null || lang.getDefaultEngine().getLanguages().stream().noneMatch(x -> x == lang)) {
                     throw new RuntimeException(
                             String.format("'%s' engine doesn't support '%s' language",
-                                    engine.getName(), lang.getName())
+                                    lang.getDefaultEngine().getName(), lang.getName())
                     );
                 }
 
