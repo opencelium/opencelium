@@ -228,11 +228,6 @@ opencelium:
   service-portal:
     base-url: https://service.opencelium.io
     token: "your-token-here"
-  languages:
-    - lang: js
-#    - lang: python2
-#    - lang: python3
-#    - lang: ruby
   polyglot:
     # Enables or disables the polyglot service integration.
     # Default: false
