@@ -25,6 +25,7 @@ import com.becon.opencelium.backend.database.mysql.repository.ConnectorRepositor
 import com.becon.opencelium.backend.exception.ConnectorAlreadyExistsException;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
+import com.becon.opencelium.backend.execution.logger.mapper.ParsedLogLineMapper;
 import com.becon.opencelium.backend.execution.rdata.RequiredDataService;
 import com.becon.opencelium.backend.execution.rdata.RequiredDataServiceImp;
 import com.becon.opencelium.backend.invoker.InvokerRequestBuilder;
@@ -160,6 +161,11 @@ public class ConnectorServiceImp implements ConnectorService {
             list.forEach(this::decrypt);
         }
         return list;
+    }
+
+    @Override
+    public Optional<Connector> findAllByTitle(String title) {
+        return connectorRepository.findByTitle(title);
     }
 
     @Override
