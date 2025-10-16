@@ -157,6 +157,7 @@ public class ExecutionAspect {
 
         QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
         int schedulerId = data.getScheduleId();
+        long connectionId = schedulerService.getConnectionIdById(schedulerId);
         boolean debugMode = schedulerService.getById(schedulerId).getDebugMode();
 
         long execId = jobDataMap.getLong("execId");
@@ -165,7 +166,6 @@ public class ExecutionAspect {
         executeAggregator(operations, execId);
 
         String timestamp = (String) context.get("timestamp");
-        Long connectionId = (Long) context.get("connectionId");
         if (data.getExecType() == QuartzJobScheduler.TriggerType.EXECUTION_TEST) {
             // delete temporarily created scheduler
             schedulerService.deleteById(schedulerId);
@@ -203,6 +203,7 @@ public class ExecutionAspect {
 
         QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
         int schedulerId = data.getScheduleId();
+        long connectionId = schedulerService.getConnectionIdById(schedulerId);
         boolean debugMode = schedulerService.getById(schedulerId).getDebugMode();
 
         long execId = jobDataMap.getLong("execId");
@@ -211,7 +212,6 @@ public class ExecutionAspect {
         executeAggregator(operations, execId);
 
         String timestamp = (String) context.get("timestamp");
-        Long connectionId = (Long) context.get("connectionId");
         if (data.getExecType() == QuartzJobScheduler.TriggerType.EXECUTION_TEST) {
             // delete temporarily created scheduler
             schedulerService.deleteById(schedulerId);

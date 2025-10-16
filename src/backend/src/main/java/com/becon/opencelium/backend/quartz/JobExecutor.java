@@ -65,6 +65,7 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
     @Override
     public void executeInternal(JobExecutionContext context) {
         String timestamp = LocalDateTime.now().format(LogConstant.DATE_TIME_FORMATTER);
+        context.put("timestamp", timestamp);
 
         thread = Thread.currentThread();
         Subscription activeSub = subscriptionService.getActiveSubs();
@@ -87,21 +88,19 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
             }
             int schedulerId = data.getScheduleId();
             connectionId = schedulerService.getConnectionIdById(schedulerId);
+            boolean debugMode = schedulerService.getById(schedulerId).getDebugMode();
 
             ExecutionObj executionObj = executionObjectService.buildObj(data);
 
             // setup execution logger:
             OcLogger<ExecutionLog> executionLogger = new OcLogger<>(
-                    executionObj.getLoggerConfiguration(), new ExecutionLog(), connectionId, timestamp, execId
+                    data.getExecType(), debugMode, new ExecutionLog(), connectionId, timestamp, execId
             );
 
             ConnectionExecutor executor = new ConnectionExecutor(executionObj, executionLogger, data.getRules());
 
             long startTime = System.currentTimeMillis();
             try {
-                context.put("timestamp", timestamp);
-                context.put("connectionId", connectionId);
-
                 executionLogger.logAndSend(String.format("phase=EXECUTION_START id=%d connectionId=%d schedulerId=%d", execId, connectionId, schedulerId));
                 executor.start();
             } finally {
