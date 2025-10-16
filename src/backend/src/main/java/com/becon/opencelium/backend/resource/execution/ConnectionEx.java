@@ -5,27 +5,27 @@ import java.util.List;
 public class ConnectionEx {
     private long connectionId;
     private String connectionName;
-    private ConnectorEx source;
-    private ConnectorEx target;
+    private List<FlowchartEx> flowcharts;
+    private ExecutionPlanEx executionPlan;
     private List<FieldBindEx> fieldBind;
 
     public ConnectionEx() {
     }
 
-    public ConnectorEx getSource() {
-        return source;
+    public List<FlowchartEx> getFlowcharts() {
+        return flowcharts;
     }
 
-    public void setSource(ConnectorEx source) {
-        this.source = source;
+    public void setFlowcharts(List<FlowchartEx> flowcharts) {
+        this.flowcharts = flowcharts;
     }
 
-    public ConnectorEx getTarget() {
-        return target;
+    public ExecutionPlanEx getExecutionPlan() {
+        return executionPlan;
     }
 
-    public void setTarget(ConnectorEx target) {
-        this.target = target;
+    public void setExecutionPlan(ExecutionPlanEx executionPlan) {
+        this.executionPlan = executionPlan;
     }
 
     public List<FieldBindEx> getFieldBind() {
