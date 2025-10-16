@@ -144,6 +144,15 @@ export const ClearButtonStyled = styled(TooltipButton)`
     height: 24px;
     z-index: 1;
 `;
+export const MinimizeLogsButtonStyled = styled(TooltipButton)`
+    background: white;
+    bottom: 0;
+    display: flex;
+    position: absolute;
+    width: 24px;
+    height: 24px;
+`;
+
 export const FullLogsButtonStyled = styled(TooltipButton)`
     background: white;
     bottom: 0;
