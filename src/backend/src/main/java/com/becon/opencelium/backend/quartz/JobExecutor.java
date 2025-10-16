@@ -61,29 +61,28 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
     public void executeInternal(JobExecutionContext context) {
         thread = Thread.currentThread();
 
+        JobDataMap jobDataMap = context.getMergedJobDataMap();
         Subscription activeSub = subscriptionService.getActiveSubs();
         if (!subscriptionService.isValid(activeSub)) {
             logger.warn("Subscription is not valid");
-            context.getMergedJobDataMap().put("licenseIsValid", false);
+            jobDataMap.put("licenseIsValid", false);
             return;
         }
-        context.getMergedJobDataMap().put("licenseIsValid", true);
+        jobDataMap.put("licenseIsValid", true);
 
-        long connectionId = -1;
+        long execId = jobDataMap.getLong("execId");
+        long connectionId = jobDataMap.getLong("connectionId");
+        boolean debugMode = jobDataMap.getBoolean("debugMode");
+        String timestamp = jobDataMap.getString("timestamp");
+        QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
+        if (data == null) {
+            // old schedulers do not have 'data' object.
+            data = getData(jobDataMap);
+            jobDataMap.put("data", data);
+        }
+        int schedulerId = data.getScheduleId();
+
         try {
-            JobDataMap jobDataMap = context.getMergedJobDataMap();
-            long execId = jobDataMap.getLong("execId");
-            connectionId = jobDataMap.getLong("connectionId");
-            boolean debugMode = jobDataMap.getBoolean("debugMode");
-            String timestamp = jobDataMap.getString("timestamp");
-            QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
-            if (data == null) {
-                // old schedulers do not have 'data' object.
-                data = getData(jobDataMap);
-                context.getMergedJobDataMap().put("data", data);
-            }
-            int schedulerId = data.getScheduleId();
-
             ExecutionObj executionObj = executionObjectService.buildObj(data);
 
             // setup execution logger:

@@ -296,6 +296,10 @@ public class SupportFileServiceImp implements SupportFileService {
     }
 
     private void addToZip(ZipOutputStream zipOutputStream, File file, String zipEntryName) throws IOException {
+        if (file == null || !file.exists()) {
+            return;
+        }
+
         try (FileInputStream fis = new FileInputStream(file)) {
             ZipEntry zipEntry = new ZipEntry(zipEntryName);
             zipOutputStream.putNextEntry(zipEntry);
