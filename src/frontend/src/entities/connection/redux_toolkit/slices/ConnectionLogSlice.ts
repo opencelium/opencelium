@@ -27,6 +27,7 @@ export interface ConnectionLogState {
 	executionTime: number,
 	traceConfigs: TraceConfigs,
 	logList: string[],
+	collectionDataError: string,
 }
 
 export const initialState: ConnectionLogState = {
@@ -43,6 +44,7 @@ export const initialState: ConnectionLogState = {
 	executionTime: 0,
 	traceConfigs: {},
 	logList: [],
+	collectionDataError: '',
 };
 interface CleanTracePayload {
 	flowId: string;
@@ -66,6 +68,9 @@ export const connectionLogSlice = createSlice({
 		},
 		setCurrentLogError: (state, action: PayloadAction<{log: ConnectionSocketLog<LightSegment>, parentsPath: string[]}>) => {
 			state.currentLogError = {log: action.payload.log, parentsPath: Array.from(new Set(action.payload.parentsPath))};
+		},
+		setCollectionDataError: (state, action: PayloadAction<string>) => {
+			state.collectionDataError = action.payload;
 		},
 		setCurrentLog: (state, action: PayloadAction<ConnectionSocketLog<LightSegment>>) => {
 			if (!state.currentLog?.error?.message) {
@@ -291,7 +296,7 @@ export const {
 	addTextLog, clearTextLog, clearSocketLog,
 	setIsTesting, setCurrentLog, copyLogContentToClipboard,
 	setCurrentLogError, setIsForcedFinished, setTraceConfig,
-	clearLogList,
+	clearLogList, setCollectionDataError,
 } =
 	connectionLogSlice.actions;
 export default connectionLogSlice.reducer;
