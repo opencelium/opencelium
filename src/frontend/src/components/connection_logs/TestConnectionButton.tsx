@@ -17,7 +17,7 @@ import {ConnectionSocketLog, LightSegment, LoopOperatorProperty} from "@root/req
 import {
     addSocketLog,
     clearSocketLog,
-    clearTextLog,
+    clearTextLog, setCollectionDataError,
     setCurrentLog, setCurrentLogError, setIsForcedFinished,
     setIsTesting
 } from "@root/redux_toolkit/slices/ConnectionLogSlice";
@@ -108,9 +108,13 @@ const TestConnectionButton = ({validateLogic}: any) => {
             }
             const subscription = socket.subscribe(`/execution/logs/${channelId}`, (message) => {
                 const data = JSON.parse(message.body) as ConnectionSocketLog<LightSegment>;
-                console.log(data);
+                //console.log(data);
                 if (data.type === 'EXECUTION' && data.status === 'PENDING') {
                     setStartTime(Date.now())
+                }
+                if (!!data.error && !!data.message) {
+                    dispatch(setCollectionDataError(data.message));
+                    stopTestUrgent();
                 }
                 if (isTestFinished(data)) return;
                 if (shouldSkipTrace(data)) return;

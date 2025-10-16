@@ -2,8 +2,16 @@ import { TextSize } from "@app_component/base/text/interfaces";
 import { Application } from "@application/classes/Application";
 import { RootState, useAppDispatch, useAppSelector } from "@application/utils/store";
 import {
-    ClearButtonStyled, EmptyLogsStyled, FinishedLogsStyled, ForcedFinishedLogsStyled, FullLogsButtonStyled,
-    HeaderStyled, LogPanelStyled, MinimizeLogsButtonStyled, TopStyled
+    ClearButtonStyled,
+    CollectionDataErrorStyled,
+    EmptyLogsStyled,
+    FinishedLogsStyled,
+    ForcedFinishedLogsStyled,
+    FullLogsButtonStyled,
+    HeaderStyled,
+    LogPanelStyled,
+    MinimizeLogsButtonStyled,
+    TopStyled
 } from "@change_component/form_elements/form_connection/form_svg/layouts/logs/styles";
 import { Connection } from "@root/classes/Connection";
 import {ColorTheme, ITheme} from '@style/Theme';
@@ -40,7 +48,7 @@ function formatDuration(ms: number): string {
 
 const LogsPanel: React.FC<LogsPanelProps> = ({theme}) => {
   const dispatch = useAppDispatch();
-  const {textLogs, executionId, connectors, isTesting, isFinished, executionTime, isForcedFinished} = useAppSelector((state: RootState) => state.connectionLogReducer);
+  const {collectionDataError, textLogs, executionId, connectors, isTesting, isFinished, executionTime, isForcedFinished} = useAppSelector((state: RootState) => state.connectionLogReducer);
   const {
     logPanelHeight, isDetailsOpened
   } = Connection.getReduxState();
@@ -103,9 +111,10 @@ const LogsPanel: React.FC<LogsPanelProps> = ({theme}) => {
         </TopStyled>
     }
       <LogPanelStyled id={'connection_current_logs'} isFullScreen={isFullScreen} noLogs={textLogs.length === 0} isDetailsOpened={isDetailsOpened} logPanelHeight={logPanelHeight}>
-          {connectors.length === 0 && !isTesting ?
-              <EmptyLogsStyled>{"There is no any log."}</EmptyLogsStyled>
-              :
+          {!!collectionDataError ? <CollectionDataErrorStyled>{`There is an error: `}<strong>{collectionDataError}</strong></CollectionDataErrorStyled> :
+              connectors.length === 0 && !isTesting ?
+                  <EmptyLogsStyled>{"There is no any log."}</EmptyLogsStyled>
+                  :
               connectors.map((connector) => (
                 <ConnectorPanel
                   key={connector.flowId}
