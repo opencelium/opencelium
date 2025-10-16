@@ -18,6 +18,7 @@ package com.becon.opencelium.backend.aspect;
 
 import com.becon.opencelium.backend.constant.AggrConst;
 import com.becon.opencelium.backend.constant.AppYamlPath;
+import com.becon.opencelium.backend.constant.LogConstant;
 import com.becon.opencelium.backend.database.mysql.entity.Argument;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.DataAggregator;
@@ -68,6 +69,7 @@ import org.springframework.stereotype.Component;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -141,10 +143,17 @@ public class ExecutionAspect {
         long execId = initExecutionObj(schedulerId);
         jobDataMap.put("execId", execId);
 
+        Scheduler scheduler = schedulerService.getById(schedulerId);
+        jobDataMap.put("connectionId", scheduler.getConnection().getId());
+        jobDataMap.put("debugMode", scheduler.getDebugMode());
+
         List<EventNotification> eventNotifications = schedulerService.getAllNotifications(schedulerId);
         triggerNotifications(eventNotifications, "pre", null);
 
         sendRunningJobsNotification();
+
+        String timestamp = LocalDateTime.now().format(LogConstant.DATE_TIME_FORMATTER);
+        jobDataMap.put("timestamp", timestamp);
     }
 
     @AfterReturning("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
@@ -155,17 +164,17 @@ public class ExecutionAspect {
             return;
         }
 
+        long execId = jobDataMap.getLong("execId");
+        long connectionId = jobDataMap.getLong("connectionId");
+        boolean debugMode = jobDataMap.getBoolean("debugMode");
+        String timestamp = jobDataMap.getString("timestamp");
         QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
         int schedulerId = data.getScheduleId();
-        long connectionId = schedulerService.getConnectionIdById(schedulerId);
-        boolean debugMode = schedulerService.getById(schedulerId).getDebugMode();
 
-        long execId = jobDataMap.getLong("execId");
         updateExecutionObj(execId, true, debugMode);
         List<Operation> operations = (List<Operation>) context.get("operationsEx");
         executeAggregator(operations, execId);
 
-        String timestamp = (String) context.get("timestamp");
         if (data.getExecType() == QuartzJobScheduler.TriggerType.EXECUTION_TEST) {
             // delete temporarily created scheduler
             schedulerService.deleteById(schedulerId);
@@ -201,17 +210,17 @@ public class ExecutionAspect {
             return;
         }
 
+        long execId = jobDataMap.getLong("execId");
+        long connectionId = jobDataMap.getLong("connectionId");
+        boolean debugMode = jobDataMap.getBoolean("debugMode");
+        String timestamp = jobDataMap.getString("timestamp");
         QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
         int schedulerId = data.getScheduleId();
-        long connectionId = schedulerService.getConnectionIdById(schedulerId);
-        boolean debugMode = schedulerService.getById(schedulerId).getDebugMode();
 
-        long execId = jobDataMap.getLong("execId");
         updateExecutionObj(execId, false, debugMode);
         List<Operation> operations = (List<Operation>) context.get("operationsEx");
         executeAggregator(operations, execId);
 
-        String timestamp = (String) context.get("timestamp");
         if (data.getExecType() == QuartzJobScheduler.TriggerType.EXECUTION_TEST) {
             // delete temporarily created scheduler
             schedulerService.deleteById(schedulerId);
