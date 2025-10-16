@@ -3,7 +3,7 @@ package com.becon.opencelium.backend.resource.execution;
 public class RetryEx {
     private Integer maxAttempts;
 
-    private Integer backOffMs;
+    private Long backOffMs;
 
     public Integer getMaxAttempts() {
         return maxAttempts;
@@ -13,11 +13,11 @@ public class RetryEx {
         this.maxAttempts = maxAttempts;
     }
 
-    public Integer getBackOffMs() {
+    public Long getBackOffMs() {
         return backOffMs;
     }
 
-    public void setBackOffMs(Integer backOffMs) {
+    public void setBackOffMs(Long backOffMs) {
         this.backOffMs = backOffMs;
     }
 }
