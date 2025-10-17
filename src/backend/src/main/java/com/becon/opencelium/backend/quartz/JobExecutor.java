@@ -16,9 +16,7 @@
 
 package com.becon.opencelium.backend.quartz;
 
-import com.becon.opencelium.backend.constant.LogConstant;
 import com.becon.opencelium.backend.database.mysql.entity.Subscription;
-import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
 import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
 import com.becon.opencelium.backend.execution.ConnectionExecutor;
 import com.becon.opencelium.backend.execution.logger.OcLogger;
@@ -38,7 +36,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.Map;
 
 @Component
@@ -46,7 +43,6 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
     private final ExecutionObjectService executionObjectService;
     private final SubscriptionService subscriptionService;
     private final WebSocketNotificationService notificationService;
-    private final SchedulerService schedulerService;
     private final Logger logger = LoggerFactory.getLogger(JobExecutor.class);
 
     private volatile Thread thread;
@@ -54,54 +50,50 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
     public JobExecutor(
             @Qualifier("executionObjectServiceImp") ExecutionObjectServiceImp executionObjectService,
             @Qualifier("subscriptionServiceImpl") SubscriptionService subscriptionService,
-            WebSocketNotificationService notificationService,
-            SchedulerService schedulerService) {
+            WebSocketNotificationService notificationService
+    ) {
         this.executionObjectService = executionObjectService;
         this.subscriptionService = subscriptionService;
         this.notificationService = notificationService;
-        this.schedulerService = schedulerService;
     }
 
     @Override
     public void executeInternal(JobExecutionContext context) {
-        String timestamp = LocalDateTime.now().format(LogConstant.DATE_TIME_FORMATTER);
-
         thread = Thread.currentThread();
+
+        JobDataMap jobDataMap = context.getMergedJobDataMap();
         Subscription activeSub = subscriptionService.getActiveSubs();
         if (!subscriptionService.isValid(activeSub)) {
             logger.warn("Subscription is not valid");
-            context.getMergedJobDataMap().put("licenseIsValid", false);
+            jobDataMap.put("licenseIsValid", false);
             return;
         }
-        context.getMergedJobDataMap().put("licenseIsValid", true);
+        jobDataMap.put("licenseIsValid", true);
 
-        long connectionId = -1;
-        try {
-            JobDataMap dataMap = context.getMergedJobDataMap();
-            QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) dataMap.get("data");
-            long execId = dataMap.getLong("execId");
+        long execId = jobDataMap.getLong("execId");
+        long connectionId = jobDataMap.getLong("connectionId");
+        boolean debugMode = jobDataMap.getBoolean("debugMode");
+        String timestamp = jobDataMap.getString("timestamp");
+        QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
+        if (data == null) {
             // old schedulers do not have 'data' object.
-            if (data == null) {
-                data = getData(dataMap);
-                context.getMergedJobDataMap().put("data", data);
-            }
-            int schedulerId = data.getScheduleId();
-            connectionId = schedulerService.getConnectionIdById(schedulerId);
+            data = getData(jobDataMap);
+            jobDataMap.put("data", data);
+        }
+        int schedulerId = data.getScheduleId();
 
+        try {
             ExecutionObj executionObj = executionObjectService.buildObj(data);
 
             // setup execution logger:
             OcLogger<ExecutionLog> executionLogger = new OcLogger<>(
-                    executionObj.getLoggerConfiguration(), new ExecutionLog(), connectionId, timestamp, execId
+                    data.getExecType(), debugMode, new ExecutionLog(), connectionId, timestamp, execId
             );
 
             ConnectionExecutor executor = new ConnectionExecutor(executionObj, executionLogger, data.getRules());
 
             long startTime = System.currentTimeMillis();
             try {
-                context.put("timestamp", timestamp);
-                context.put("connectionId", connectionId);
-
                 executionLogger.logAndSend(String.format("phase=EXECUTION_START id=%d connectionId=%d schedulerId=%d", execId, connectionId, schedulerId));
                 executor.start();
             } finally {

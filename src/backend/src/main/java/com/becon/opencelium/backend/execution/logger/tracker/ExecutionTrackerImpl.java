@@ -89,14 +89,11 @@ public class ExecutionTrackerImpl implements ExecutionTracker {
         }
 
         final LogLineType type = parsedLine.getType();
-        switch (type) {
-            case PHASE:
-                return  handlePhase(parsedLine);
-            case SEGMENT:
-                return handleSegment(parsedLine);
-            default:
-                return Optional.empty();
-        }
+        return switch (type) {
+            case PHASE -> handlePhase(parsedLine);
+            case SEGMENT -> handleSegment(parsedLine);
+            default -> Optional.empty();
+        };
     }
 
     // ---- Internals: Phase handling ---------------------------------------

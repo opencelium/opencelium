@@ -11,7 +11,6 @@ import com.becon.opencelium.backend.mapper.execution.ConnectionExMapper;
 import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
 import com.becon.opencelium.backend.resource.execution.ConnectionEx;
 import com.becon.opencelium.backend.resource.execution.ExecutionObj;
-import com.becon.opencelium.backend.resource.execution.LoggerConfiguration;
 import com.becon.opencelium.backend.resource.execution.ProxyEx;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
@@ -58,11 +57,6 @@ public class ExecutionObjectServiceImp implements ExecutionObjectService {
         String password = env.getProperty(AppYamlPath.PROXY_PASS, "");
         ProxyEx proxy = new ProxyEx(host, port, user, password);
         executionObj.setProxy(proxy);
-
-        LoggerConfiguration loggerConfiguration = new LoggerConfiguration();
-        loggerConfiguration.setDebugMode(scheduler.getDebugMode());
-        loggerConfiguration.setTriggerType(data.getExecType());
-        executionObj.setLoggerConfiguration(loggerConfiguration);
 
         return executionObj;
     }
