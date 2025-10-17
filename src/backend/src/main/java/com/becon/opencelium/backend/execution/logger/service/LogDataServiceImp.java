@@ -18,12 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static com.becon.opencelium.backend.execution.logger.enums.PhaseCategory.*;
@@ -66,14 +61,45 @@ public class LogDataServiceImp implements LogDataService {
         List<LogDataMng> children = switch (entity.getType()) {
             case EXECUTION -> executionChildren(entity);
             case FLOWCHART -> flowchartChildren(entity);
-            case IF -> ifChildren(entity);
-            case LOOP -> loopChildren(entity, loopIndex);
-            default -> List.of();
+            case IF        -> ifChildren(entity);
+            case LOOP      -> loopChildren(entity, loopIndex);
+            default        -> List.of();
         };
 
+        Comparator<LogDataMng> byIndexPathNumeric = (a, b) -> compareIndexPath(a.getIndexPath(), b.getIndexPath());
+        Comparator<LogDataMng> byStartOffset     = Comparator.comparing(
+                LogDataMng::getStartOffset,
+                Comparator.nullsLast(Long::compareTo)
+        );
+
         return children.stream()
+                .sorted(byIndexPathNumeric.thenComparing(byStartOffset))
                 .map(logDataMapper::toDto)
                 .toList();
+    }
+
+    /** Compares indexPath strings like "0_10_2" numerically as [0,10,2]. */
+    private static int compareIndexPath(String a, String b) {
+        List<Integer> la = parseIndexPath(a);
+        List<Integer> lb = parseIndexPath(b);
+        int n = Math.min(la.size(), lb.size());
+        for (int i = 0; i < n; i++) {
+            int c = Integer.compare(la.get(i), lb.get(i));
+            if (c != 0) return c;
+        }
+        // If all compared parts equal, shorter path comes first
+        return Integer.compare(la.size(), lb.size());
+    }
+
+    /** Splits on non-digits and parses integers; null/blank -> empty list. */
+    private static List<Integer> parseIndexPath(String s) {
+        if (s == null || s.isBlank()) return List.of();
+        String[] parts = s.split("\\D+"); // split on non-digits (e.g., underscore)
+        List<Integer> out = new ArrayList<>(parts.length);
+        for (String p : parts) {
+            if (!p.isEmpty()) out.add(Integer.parseInt(p));
+        }
+        return out;
     }
 
     // sometime user can send id of execution in such cases we have to find elementId.
@@ -135,6 +161,7 @@ public class LogDataServiceImp implements LogDataService {
         collected.setIndexPath(entity.getIndexPath());
         collected.setLogLineType(entity.getLogLineType());
         collected.setType(entity.getType());
+        collected.setError(entity.getError());
 
         return logDataMapper.toDto(collected);
     }
@@ -168,10 +195,10 @@ public class LogDataServiceImp implements LogDataService {
             return;
         }
         block.setId(existing.get().getId());
-        LogDataMng dbBlock = existing.get();
-        dbBlock.setEndOffset(block.getEndOffset());
-        dbBlock.setStatus(block.getStatus());
-        metaDataLogRepository.save(dbBlock);
+//        LogDataMng dbBlock = existing.get();
+//        dbBlock.setEndOffset(block.getEndOffset());
+//        dbBlock.setStatus(block.getStatus());
+        metaDataLogRepository.save(block);
     }
 
     @Override
