@@ -169,11 +169,16 @@ public class InvokerServiceImp implements InvokerService {
     public void moveInvokersToNewLocation(String oldPath, String newPath) {
         List<Path> oldInvokers = getAllPaths(oldPath);
 
+        Path targetPath = Paths.get(newPath);
+        if (Files.exists(targetPath)) {
+            targetPath.toFile().mkdirs();
+        }
+
         oldInvokers.forEach(x -> {
             try {
                 Files.move(
                         x,
-                        Paths.get(newPath).resolve(x.getFileName()),
+                        targetPath.resolve(x.getFileName()),
                         StandardCopyOption.REPLACE_EXISTING
                 );
             } catch (IOException e) {
@@ -210,17 +215,17 @@ public class InvokerServiceImp implements InvokerService {
 //    public void forceDelete(String name) {
 //        Objects.requireNonNull(name);
 //        Consumer<String> refDeletion = invokerName -> {
-////            if (connectorService.existByInvoker(invokerName)) {
-////                Connector connector = connectorService.
-////                Connection connection = connectionServiceImp.findAllByConnectorId()
-////                connectionServiceImp.deleteById();
-////                connectorService.deleteByInvoker(invokerName);
-////            }
+
+    ////            if (connectorService.existByInvoker(invokerName)) {
+    ////                Connector connector = connectorService.
+    ////                Connection connection = connectionServiceImp.findAllByConnectorId()
+    ////                connectionServiceImp.deleteById();
+    ////                connectorService.deleteByInvoker(invokerName);
+    ////            }
 //
 //        };
 //        deleteInvoker(name, refDeletion);
 //    }
-
     private void deleteInvoker(String name) {
         Objects.requireNonNull(name);
         Invoker backup = invokerContainer.getByName(name);
