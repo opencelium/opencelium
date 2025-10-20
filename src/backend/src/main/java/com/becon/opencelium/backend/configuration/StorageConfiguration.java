@@ -30,6 +30,7 @@ import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
 import com.becon.opencelium.backend.template.service.TemplateService;
 import com.becon.opencelium.backend.utility.migrate.ChangeSetDao;
 import com.becon.opencelium.backend.utility.migrate.YAMLMigrator;
+import com.becon.opencelium.backend.versionmanager.backup.FileBackupManager;
 import org.quartz.*;
 import org.quartz.Scheduler;
 import org.slf4j.Logger;
@@ -41,6 +42,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.util.FileSystemUtils;
 
 import javax.sql.DataSource;
 import java.io.*;
@@ -106,7 +108,9 @@ public class StorageConfiguration {
         setInitialLicense();
         // updates report schedule
         updateReportSchedule();
-        // creating 'src/main/resources/templates/' directory
+        // creating '/runtime' directory
+        createDirectory(PathConstant.RUNTIME);
+        // creating '/runtime/templates' directory
         createDirectory(PathConstant.TEMPLATE);
         // creating 'src/main/resources/assistant/' directory
         createDirectory(PathConstant.ASSISTANT);
@@ -124,6 +128,8 @@ public class StorageConfiguration {
 
         // creates storage for files
         userStorageService.init();
+
+        FileBackupManager.moveToNewLocation(PathConstant.RESOURCES + "/backup", PathConstant.BACKUP);
 
         // updates connections and enhancements to current version
         connectionService.updateConnectionsToCurrentVersion();
@@ -145,7 +151,8 @@ public class StorageConfiguration {
         String cron = "0 0 23 * * ?";
         schedulerReport(cron);
     }
-    private void schedulerReport(String cron){
+
+    private void schedulerReport(String cron) {
         String triggerName = "operationUsageReportJobTrigger";
         String triggerGroup = "USAGE_REPORT";
         JobKey jobKey = JobKey.jobKey("operationUsageReportJob", triggerGroup);
