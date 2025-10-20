@@ -194,6 +194,7 @@ public class ExecutionTrackerImpl implements ExecutionTracker {
             if (segmentType == SegmentType.EXCEPTION) {
                 String indexPath = currentPhaseCtx.getParsedLogLine().getProperties().get(LogLineKey.INDEX_PATH);
                 currentPhaseCtx.setErrorDetail(new ErrorDetail(indexPath, segmentContext));
+                currentPhaseCtx.setStatus(PhaseStatus.FAIL);
                 phaseContextManager.addExceptionSegment(indexPath, segmentContext);
             }
             LogDataMng out = buildLogDataForContext(category, currentPhaseCtx);

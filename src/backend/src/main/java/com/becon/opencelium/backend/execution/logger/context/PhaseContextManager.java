@@ -15,7 +15,6 @@ public class PhaseContextManager {
     private String connectionId;
     private String flowId;
     private String connectorName;
-    private ErrorDetail errorDetail;
     private final Deque<PhaseContext> stack = new ArrayDeque<>();
 
     public PhaseContextManager() {
@@ -58,9 +57,6 @@ public class PhaseContextManager {
             if (startIndex.equals(endIndex)) {
                 current.setEndOffset(phaseContext.getEndOffset());
                 current.setStatus(PhaseStatus.COMPLETE);
-                if (errorDetail != null) {
-                    current.setErrorDetail(errorDetail);
-                }
                 removed = current;
                 break;
             }
@@ -73,22 +69,22 @@ public class PhaseContextManager {
     }
 
     public PhaseContext endCurrentPhase() {
-        if (errorDetail != null) {
-            PhaseContext context = stack.pop();
-            context.setErrorDetail(this.errorDetail);
-            return context;
-        }
+//        if (errorDetail != null) {
+//            PhaseContext context = stack.pop();
+//            context.setErrorDetail(this.errorDetail);
+//            return context;
+//        }
         return stack.pop();
     }
 
     public PhaseContext getCurrentPhase() {
-        if (errorDetail != null) {
-            PhaseContext context = stack.peek();
-            if (context != null) {
-                context.setErrorDetail(this.errorDetail);
-            }
-            return context;
-        }
+//        if (errorDetail != null) {
+//            PhaseContext context = stack.peek();
+//            if (context != null) {
+//                context.setErrorDetail(this.errorDetail);
+//            }
+//            return context;
+//        }
         return stack.peek();
     }
 
@@ -138,6 +134,8 @@ public class PhaseContextManager {
         if (segmentContext.getSegmentType() != SegmentType.EXCEPTION) {
             throw new IllegalArgumentException("Requires only EXCEPTION type. Segment type: " + segmentContext.getSegmentType().name() + " is not acceptable.");
         }
-        this.errorDetail = new ErrorDetail(errorOfOriginPath, segmentContext);
+        PhaseContext currentPhase = getCurrentPhase();
+        ErrorDetail errorDetail = new ErrorDetail(errorOfOriginPath, segmentContext);
+        currentPhase.setErrorDetail(errorDetail);
     }
 }
