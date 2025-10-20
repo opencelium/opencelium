@@ -47,12 +47,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -317,6 +312,10 @@ public class TemplateServiceImp implements TemplateService {
     }
 
     private List<Path> getAllPaths(String folder) {
+        if (Files.notExists(Paths.get(folder))) {
+            return Collections.emptyList();
+        }
+
         try (Stream<Path> walk = Files.walk(Paths.get(folder))) {
             return walk.filter(Files::isRegularFile)
                     .filter(path -> FileNameUtils.getExtension(path.toString()).equals("json"))

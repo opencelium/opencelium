@@ -24,7 +24,8 @@ public interface PathConstant {
 
     String RUNTIME = "runtime/";
     String RESOURCES = "src/main/resources";
-    String INVOKER = RESOURCES + "/invoker/";
+    String INVOKER = RUNTIME + "invoker/";
+    String INVOKER_ON_RESOURCES = RESOURCES + "/invoker/";
     String LICENSE = RESOURCES + "/license/";
     String TEMPLATE = RUNTIME + "templates/";
     String TEMPLATE_ON_RESOURCES = RESOURCES + "/templates";
