@@ -20,7 +20,7 @@ import com.becon.opencelium.backend.constant.LogConstant;
 import com.becon.opencelium.backend.database.mysql.entity.Subscription;
 import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
 import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
-import com.becon.opencelium.backend.execution.ConnectionExecutor;
+import com.becon.opencelium.backend.execution.executor.ConnectionExecutor;
 import com.becon.opencelium.backend.execution.logger.OcLogger;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.service.ExecutionObjectService;

@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.execution;
+package com.becon.opencelium.backend.execution.executor;
 
 import com.becon.opencelium.backend.enums.LogType;
 import com.becon.opencelium.backend.enums.OpType;
@@ -7,9 +7,8 @@ import com.becon.opencelium.backend.execution.builder.RequestEntityBuilder;
 import com.becon.opencelium.backend.execution.logger.msg.ConnectorLog;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.logger.msg.MethodData;
-import com.becon.opencelium.backend.execution.oc721.Connector;
-import com.becon.opencelium.backend.execution.oc721.Loop;
-import com.becon.opencelium.backend.execution.oc721.Operation;
+import com.becon.opencelium.backend.execution.executor.model.Loop;
+import com.becon.opencelium.backend.execution.executor.model.Operation;
 import com.becon.opencelium.backend.invoker.entity.Pagination;
 import com.becon.opencelium.backend.enums.PageParam;
 import com.becon.opencelium.backend.execution.masking.MaskingService;
@@ -17,7 +16,7 @@ import com.becon.opencelium.backend.execution.logger.OcLogger;
 import com.becon.opencelium.backend.ocel.ExpressionProcessor;
 import com.becon.opencelium.backend.ocel.ExpressionProcessorFactory;
 import com.becon.opencelium.backend.ocel.ProcessorType;
-import com.becon.opencelium.backend.resource.execution.ConnectorEx;
+import com.becon.opencelium.backend.resource.execution.FlowchartEx;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.resource.execution.OperatorEx;
 import com.becon.opencelium.backend.resource.execution.ResponseDTO;
@@ -43,27 +42,25 @@ import java.util.stream.Collectors;
 import static com.becon.opencelium.backend.utility.MediaTypeUtility.isBinaryCompatible;
 import static com.becon.opencelium.backend.utility.MediaTypeUtility.isJsonCompatible;
 
-public class ConnectorExecutor {
+public class FlowchartExecutor {
     private final ExpressionProcessor expressionProcessor;
-    private final Connector connector;
     private final ExecutionManager executionManager;
     private final RestTemplate restTemplate;
     private final List<Object> executables;
     private final OcLogger<ExecutionLog> logger;
     private final MaskingService masking;
+    private final Pagination pagination;
 
     // log related variables:
     private final String flowId;
     private final int connectorId;
     private final String connectorName;
-    private final String direction;
     private final Stack<String> endPhases = new Stack<>();
 
 
-    public ConnectorExecutor(
-            ConnectorEx connectorEx, ExecutionManager executionManager,
-            RestTemplate restTemplate, OcLogger<ExecutionLog> logger,
-            MaskingService masking, String direction
+    public FlowchartExecutor(
+            FlowchartEx connectorEx, ExecutionManager executionManager,
+            RestTemplate restTemplate, OcLogger<ExecutionLog> logger, MaskingService masking
     ) {
         this.expressionProcessor = ExpressionProcessorFactory.get(ProcessorType.POSTFIX);
         this.executionManager = executionManager;
@@ -74,7 +71,7 @@ public class ConnectorExecutor {
         this.executables = new ArrayList<>();
         if (Objects.nonNull(connectorEx.getMethods())) {
             connectorEx.getMethods().forEach(o -> {
-                o.setInvoker(connectorEx.getInvoker());
+                o.setInvoker(connectorEx.getInvoker().getName());
                 executables.add(o);
             });
         }
@@ -83,23 +80,22 @@ public class ConnectorExecutor {
         }
         this.executables.sort(getComparator());
 
-        this.connector = Connector.fromEx(connectorEx);
+        this.pagination = connectorEx.getPagination();
 
         // initialize log related variables:
-        this.flowId = connectorEx.getFchartId();
-        this.connectorId = connectorEx.getId();
+        this.flowId = connectorEx.getFlowId();
+        this.connectorId = connectorEx.getCtorId();
         this.connectorName = connectorEx.getName();
-        this.direction = direction;
     }
 
     public void start() {
         logger.getLogEntity().setType(LogType.INFO);
-        logger.getLogEntity().setConnector(new ConnectorLog(connectorName, "source".equals(direction) ? "CONN1" : "CONN2"));
-        logger.logAndSend(String.format("phase=FLOWCHART_START flowId=%s connectorId=%d connectorName=%s direction=%s", flowId, connectorId, connectorName, direction));
-        endPhases.push(String.format("phase=FLOWCHART_END flowId=%s connectorId=%d connectorName=%s direction=%s", flowId, connectorId, connectorName, direction));
+        logger.getLogEntity().setConnector(new ConnectorLog(connectorName, flowId));
+        logger.logAndSend(String.format("phase=FLOWCHART_START flowId=%s connectorId=%d connectorName=%s direction=%s", flowId, connectorId, connectorName, flowId));
+        endPhases.push(String.format("phase=FLOWCHART_END flowId=%s connectorId=%d connectorName=%s direction=%s", flowId, connectorId, connectorName, flowId));
 
         try {
-            executionManager.setCurrentCtorId(connector.getId());
+            executionManager.setCurrentCtorId(connectorId);
 
             int headPointer = 0;
             while (headPointer < executables.size()) {
@@ -209,7 +205,7 @@ public class ConnectorExecutor {
                 logger.logAndSend(endPhases.pop());
             }
         } else {
-            throw new RuntimeException("Wrong type is supplied");
+            throw new IllegalArgumentException("Unsupported type: " + executables.get(headPointer).getClass());
         }
 
         // we already executed operations'/operators' body, now start executing next body
@@ -221,7 +217,7 @@ public class ConnectorExecutor {
 
         Pagination pagination = null;
         if (dto.getOperationType() == OpType.PAGINATION) {
-            pagination = dto.getPagination() != null ? dto.getPagination() : connector.getPagination();
+            pagination = dto.getPagination() != null ? dto.getPagination() : this.pagination;
 
             if (pagination != null) {
                 pagination = pagination.clone();

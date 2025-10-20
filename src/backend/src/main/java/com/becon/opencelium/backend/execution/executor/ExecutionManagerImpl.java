@@ -1,17 +1,15 @@
-package com.becon.opencelium.backend.execution;
+package com.becon.opencelium.backend.execution.executor;
 
 import com.becon.opencelium.backend.enums.RelationalOperator;
-import com.becon.opencelium.backend.execution.oc721.Connector;
-import com.becon.opencelium.backend.execution.oc721.Enhancement;
-import com.becon.opencelium.backend.execution.oc721.EnhancementService;
-import com.becon.opencelium.backend.execution.oc721.EnhancementServiceImpl;
-import com.becon.opencelium.backend.execution.oc721.Extractor;
-import com.becon.opencelium.backend.execution.oc721.FieldBind;
-import com.becon.opencelium.backend.execution.oc721.Loop;
-import com.becon.opencelium.backend.execution.oc721.Operation;
-import com.becon.opencelium.backend.execution.oc721.ReferenceExtractor;
+import com.becon.opencelium.backend.execution.executor.extractor.Extractor;
+import com.becon.opencelium.backend.execution.executor.extractor.ReferenceExtractor;
+import com.becon.opencelium.backend.execution.executor.model.Enhancement;
+import com.becon.opencelium.backend.execution.executor.model.FieldBind;
+import com.becon.opencelium.backend.execution.executor.model.Loop;
+import com.becon.opencelium.backend.execution.executor.model.Operation;
 import com.becon.opencelium.backend.invoker.entity.Pagination;
 import com.becon.opencelium.backend.enums.PageParam;
+import com.becon.opencelium.backend.resource.execution.FlowchartEx;
 import com.becon.opencelium.backend.scriptengine.LanguageType;
 import com.becon.opencelium.backend.scriptengine.ScriptEngine;
 import com.becon.opencelium.backend.scriptengine.ScriptExecutionManager;
@@ -19,35 +17,30 @@ import com.becon.opencelium.backend.scriptengine.ScriptExecutionManagerProvider;
 import com.becon.opencelium.backend.utility.ReferenceUtility;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.becon.opencelium.backend.constant.RegExpression.pageRef;
-
 public class ExecutionManagerImpl implements ExecutionManager {
     private final Map<String, Object> webhookVars;
     private final Extractor refExtractor;
-    private final EnhancementService enhancementService;
     private final List<Loop> loops = new ArrayList<>();
-    private final Connector connectorFrom;
-    private final Connector connectorTo;
+    private final Map<Integer, Map<String, String>> requestDataMap = new HashMap<>();
     private final List<FieldBind> fieldBind;
     private final List<Operation> operations = new ArrayList<>();
     private final ScriptExecutionManager scriptExecutionManager;
     private Integer currentCtorId;
     private Pagination pagination;
 
-    public ExecutionManagerImpl(Map<String, Object> webhookVars, Connector connectorFrom, Connector connectorTo, List<FieldBind> fieldBind) {
+    public ExecutionManagerImpl(Map<String, Object> webhookVars, List<FlowchartEx> flowcharts, List<FieldBind> fieldBind) {
         this.webhookVars = webhookVars;
-        this.connectorFrom = connectorFrom;
-        this.connectorTo = connectorTo;
         this.fieldBind = fieldBind;
+        flowcharts.forEach(flowchart -> requestDataMap.put(flowchart.getCtorId(), flowchart.getRequiredData()));
 
         this.refExtractor = new ReferenceExtractor(this);
-        this.enhancementService = new EnhancementServiceImpl(this);
         this.scriptExecutionManager = ScriptExecutionManagerProvider.get();
     }
 
@@ -84,15 +77,7 @@ public class ExecutionManagerImpl implements ExecutionManager {
         // if 'connectorId' is null then use current connectors' id:
         ctorId = ctorId == null ? this.currentCtorId : ctorId;
 
-        if (Objects.equals(ctorId, connectorFrom.getId())) {
-            return connectorFrom.getRequiredData();
-        }
-
-        if (Objects.equals(ctorId, connectorTo.getId())) {
-            return connectorTo.getRequiredData();
-        }
-
-        throw new RuntimeException("Non existing connector id 'ctorId' = " + ctorId);
+        return requestDataMap.get(ctorId);
     }
 
     @Override

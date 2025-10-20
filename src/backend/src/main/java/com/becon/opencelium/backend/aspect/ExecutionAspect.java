@@ -41,7 +41,7 @@ import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.execution.JSHttpObject;
 import com.becon.opencelium.backend.execution.notification.EmailServiceImpl;
 import com.becon.opencelium.backend.execution.notification.IncomingWebhookService;
-import com.becon.opencelium.backend.execution.oc721.Operation;
+import com.becon.opencelium.backend.execution.executor.model.Operation;
 import com.becon.opencelium.backend.execution.socket.Connection2WebSocketChannelMapping;
 import com.becon.opencelium.backend.execution.socket.SocketConstant;
 import com.becon.opencelium.backend.execution.socket.WebSocketNotificationService;
