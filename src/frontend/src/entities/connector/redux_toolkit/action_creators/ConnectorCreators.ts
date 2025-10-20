@@ -62,7 +62,7 @@ export const addConnector = createAsyncThunk(
             title = encodeURIComponent(title);
             const checkTitleRequest = new ConnectorRequest({endpoint: `/exists/${title}`});
             const responseTitleRequest = await checkTitleRequest.checkConnectorTitle();
-            if (responseTitleRequest.data.message === ResponseMessages.EXISTS) {
+            if (responseTitleRequest.data.result) {
                 return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.CONNECTOR_EXISTS}));
             }
             const testDataRequest = new ConnectorRequest({endpoint: '/check'});
@@ -100,7 +100,7 @@ export const updateConnector = createAsyncThunk(
                 title = encodeURIComponent(title);
                 const checkTitleRequest = new ConnectorRequest({endpoint: `/exists/${title}`});
                 const responseTitleRequest = await checkTitleRequest.checkConnectorTitle();
-                if (responseTitleRequest.data.message === ResponseMessages.EXISTS) {
+                if (responseTitleRequest.data.result) {
                     return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.CONNECTOR_EXISTS}));
                 }
             }
