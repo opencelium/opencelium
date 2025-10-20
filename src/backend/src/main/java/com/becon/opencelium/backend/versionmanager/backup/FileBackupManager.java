@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.versionmanager.backup;
 
+import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -17,7 +18,7 @@ import java.time.format.DateTimeFormatter;
 public class FileBackupManager {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private static final Path backupDir = Paths.get(new File("").toURI()).resolve("src/main/resources/backup");
+    private static final Path backupDir = Paths.get(PathConstant.BACKUP);
 
     public static void doBackup(Template template, String fromVersion, String toVersion) {
         doBackup(template, fromVersion, toVersion, "template", template.getTemplateId());

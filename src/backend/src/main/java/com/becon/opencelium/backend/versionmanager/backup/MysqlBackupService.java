@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.versionmanager.backup;
 
+import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.constant.props.OpenceliumProps;
 import com.becon.opencelium.backend.database.mysql.service.EnhancementService;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
@@ -44,7 +45,7 @@ public class MysqlBackupService {
 
         ProcessBuilder processBuilder = new ProcessBuilder(command);
 
-        Path rootPath = Paths.get("src", "main", "resources", "backup", entity).toAbsolutePath();
+        Path rootPath = Paths.get(PathConstant.BACKUP).resolve(entity);
         File rootFolder = rootPath.toFile();
         rootFolder.mkdirs();
 
@@ -97,7 +98,7 @@ public class MysqlBackupService {
         );
         ProcessBuilder processBuilder = new ProcessBuilder(command);
 
-        Path rootPath = Paths.get("src", "main", "resources", "backup", entity).toAbsolutePath();
+        Path rootPath = Paths.get(PathConstant.BACKUP).resolve(entity);
         File backupFile = getBackupWithCurrentVersionIfPresent(entity, rootPath.toFile());
 
         if (Objects.isNull(backupFile)) {
