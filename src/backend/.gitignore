@@ -11,6 +11,7 @@ assistant/temporary
 assistant/versions
 src/main/resources/application.yml
 src/main/resources/upload-dir
+runtime/
 
 # invoker folder
 ## ignore everything in the invoker folder
