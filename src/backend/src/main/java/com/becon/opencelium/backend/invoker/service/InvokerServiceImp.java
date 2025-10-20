@@ -594,7 +594,6 @@ public class InvokerServiceImp implements InvokerService {
 
         try (Stream<Path> walk = Files.walk(Paths.get(folder))) {
             return walk.filter(Files::isRegularFile)
-                    .filter(path -> FileNameUtils.getExtension(path.toString()).equals("xml"))
                     .map(Path::toAbsolutePath)
                     .toList();
         } catch (Exception e) {
