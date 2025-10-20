@@ -40,7 +40,7 @@ public class InvokerConfiguration {
     public Map<String, Invoker> containerBean(@Qualifier("invokerServiceImp") InvokerService invokerService){
         if (Files.notExists(filePath)){
             File directory = filePath.toFile();
-            directory.mkdir();
+            directory.mkdirs();
             System.out.println("Directory has been created: " + PathConstant.INVOKER);
         }
 
