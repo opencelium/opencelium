@@ -3,14 +3,13 @@ package com.becon.opencelium.backend.versionmanager.backup;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.util.FileSystemUtils;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -33,7 +32,7 @@ public class FileBackupManager {
 
     private static boolean isThisVersion(String name, String entity, String fromVersion, String id) {
         return name.startsWith(entity + "_v" + fromVersion + "_")
-               && name.endsWith(id + ".json");
+                && name.endsWith(id + ".json");
     }
 
     private static <T> void doBackup(T entity, String fromVersion, String toVersion, String entityType, String id) {
@@ -68,6 +67,27 @@ public class FileBackupManager {
             }
         } catch (IOException ignored) {
         }
+    }
+
+    public static void moveToNewLocation(String oldPath, String newPath) {
+        Path sourceDir = Paths.get(oldPath);
+        Path targetDir = Paths.get(newPath);
+
+        if (!Files.exists(sourceDir)) {
+            return;
+        }
+
+        if (!Files.exists(targetDir)) {
+            targetDir.toFile().mkdirs();
+        }
+
+        try {
+            FileSystemUtils.copyRecursively(sourceDir, targetDir);
+            FileSystemUtils.deleteRecursively(sourceDir);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
 }
