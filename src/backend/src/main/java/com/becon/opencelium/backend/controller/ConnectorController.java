@@ -364,7 +364,7 @@ public class ConnectorController {
     @Operation(summary = "Verifies uniqueness of connector title")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
-                    description = "Returns EXISTS or NOT_EXISTS",
+                    description = "Returns true or false in the result object",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
             @ApiResponse(responseCode = "401",
                     description = "Unauthorized",
@@ -375,11 +375,14 @@ public class ConnectorController {
     })
     @GetMapping("/exists/{title}")
     public ResponseEntity<?> titleExists(@PathVariable("title") String title) throws IOException {
+        ResultDTO<Boolean> resultDTO = new ResultDTO<>();
         if (connectorService.existByTitle(title)) {
-            throw new ResponseStatusException(HttpStatus.OK, "EXISTS");
+            resultDTO.setResult(true);
         } else {
-            throw new ResponseStatusException(HttpStatus.OK, "NOT_EXISTS");
+            resultDTO.setResult(false);
         }
+
+        return ResponseEntity.ok(resultDTO);
     }
 
 

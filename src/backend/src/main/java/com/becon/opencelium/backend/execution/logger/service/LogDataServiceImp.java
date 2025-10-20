@@ -198,6 +198,7 @@ public class LogDataServiceImp implements LogDataService {
 //        LogDataMng dbBlock = existing.get();
 //        dbBlock.setEndOffset(block.getEndOffset());
 //        dbBlock.setStatus(block.getStatus());
+        block.setCreatedAt(existing.get().getCreatedAt());
         metaDataLogRepository.save(block);
     }
 
