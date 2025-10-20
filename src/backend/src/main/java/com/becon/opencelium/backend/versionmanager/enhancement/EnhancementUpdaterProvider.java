@@ -21,7 +21,7 @@ public class EnhancementUpdaterProvider {
 
     public EntityUpdater<Enhancement> getUpdater(final UpdaterVersion version) {
         return switch (version) {
-            case VERSION_4_4, VERSION_4_5 -> enhancementUpdaters.get(lowerFirstChar(Enhancement44Updater.class.getSimpleName()));
+            case VERSION_4_4, VERSION_4_5, VERSION_4_6 -> enhancementUpdaters.get(lowerFirstChar(Enhancement44Updater.class.getSimpleName()));
             default -> new DefaultUpdater<>();
         };
     }
