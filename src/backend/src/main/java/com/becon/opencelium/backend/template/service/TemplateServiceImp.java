@@ -159,7 +159,7 @@ public class TemplateServiceImp implements TemplateService {
 
     @Override
     public void updateTemplatesToCurrentVersion() {
-        // move from /src/main/resources/templates to /templates
+        // move from /src/main/resources/templates to /runtime/templates
         moveTemplatesToNewLocation();
 
         Map<String, Template> templateMap = getAllAsMap();
@@ -192,7 +192,6 @@ public class TemplateServiceImp implements TemplateService {
 
     private void moveTemplatesToNewLocation() {
         List<Path> templatesInResources = getAllPaths(PathConstant.TEMPLATE_ON_RESOURCES);
-        System.out.println(templatesInResources);
 
         templatesInResources.forEach(x -> {
             try {
