@@ -205,7 +205,6 @@ public class TemplateServiceImp implements TemplateService {
             Files.deleteIfExists(Path.of(PathConstant.TEMPLATE_ON_RESOURCES));
         } catch (IOException e) {
             log.error("Failed to remove folder {}", PathConstant.TEMPLATE_ON_RESOURCES);
-            throw new RuntimeException(e);
         }
     }
 
