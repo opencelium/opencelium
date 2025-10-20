@@ -26,7 +26,7 @@ public class FlexiblePatternLogParser implements LogLineParser {
     private static final Pattern TIMESTAMP_PATTERN = Pattern.compile("\\b\\d{2}-\\d{2}-\\d{4} \\d{2}:\\d{2}:\\d{2}\\.\\d{3}\\b");
 
     // Pattern for log levels with optional ANSI coloring: INFO, DEBUG, WARN, etc.
-    private static final Pattern LOG_LEVEL_PATTERN = Pattern.compile("(?:(?:\\x1B\\[[\\d;]+m)?(INFO|DEBUG|ERROR|WARN|TRACE)(?:\\x1B\\[[\\d;]+m)?)");
+    private static final Pattern LOG_LEVEL_PATTERN = Pattern.compile("^\\s*(?:\\x1B\\[[\\d;]+m)?(INFO|DEBUG|ERROR|WARN|TRACE)\\b(?:\\x1B\\[[\\d;]+m)?");;
 
     // Pattern for key-value pairs:
     // Matches key=value with value being quoted, JSON-like object, or simple word

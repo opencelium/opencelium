@@ -314,7 +314,6 @@ class Body extends React.Component {
 			method,
 			connector,
 			connection,
-			hasEnhancement,
 		} = this.props;
 		let gridStyles = {};
 		if (isToggledReferenceIcon && !isToggledIcon) {
@@ -332,6 +331,8 @@ class Body extends React.Component {
 		if (!hasEnhancement) {
 			gridStyles.gridTemplateRows = 'unset';
 		}
+		const isGraphQLData = method.isGraphQLData();
+		const hasEnhancement = this.props.hasEnhancement && !isGraphQLData;
 		return (
 			<React.Fragment>
 				<div
