@@ -46,6 +46,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -158,6 +159,9 @@ public class TemplateServiceImp implements TemplateService {
 
     @Override
     public void updateTemplatesToCurrentVersion() {
+        // move from /src/main/resources/templates to /templates
+        moveTemplatesToNewLocation();
+
         Map<String, Template> templateMap = getAllAsMap();
         for (Map.Entry<String, Template> entry : templateMap.entrySet()) {
             String fileName = entry.getKey();
@@ -186,6 +190,31 @@ public class TemplateServiceImp implements TemplateService {
         }
     }
 
+    private void moveTemplatesToNewLocation() {
+        List<Path> templatesInResources = getAllPaths(PathConstant.TEMPLATE_ON_RESOURCES);
+        System.out.println(templatesInResources);
+
+        templatesInResources.forEach(x -> {
+            try {
+                Files.move(
+                        x,
+                        Paths.get(PathConstant.TEMPLATE).resolve(x.getFileName()),
+                        StandardCopyOption.REPLACE_EXISTING
+                );
+            } catch (IOException e) {
+                log.error("Failed to move {} file from {} to {}", x, PathConstant.TEMPLATE_ON_RESOURCES, PathConstant.TEMPLATE);
+                throw new RuntimeException(e);
+            }
+        });
+
+        try {
+            Files.deleteIfExists(Path.of(PathConstant.TEMPLATE_ON_RESOURCES));
+        } catch (IOException e) {
+            log.error("Failed to remove folder {}", PathConstant.TEMPLATE_ON_RESOURCES);
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public void deleteById(String templateId) {
         Map<String, Template> templates = getAllAsMap();
@@ -195,8 +224,7 @@ public class TemplateServiceImp implements TemplateService {
         if (fileName == null) {
             throw new RuntimeException("FILE_NOT_FOUND");
         }
-        String path = PathConstant.TEMPLATE + fileName;
-        File file = new File(path);
+        File file = Paths.get(PathConstant.TEMPLATE).resolve(fileName).toFile();
         if (!file.delete()) {
             throw new RuntimeException("FILE_NOT_DELETED");
         }
@@ -206,7 +234,7 @@ public class TemplateServiceImp implements TemplateService {
     public Optional<Template> findById(String id) {
         StringBuilder contentBuilder = new StringBuilder();
         try (Stream<String> stream = Files
-                .lines(Paths.get(PathConstant.TEMPLATE + id.concat(".json")), StandardCharsets.UTF_8)) {
+                .lines(Paths.get(PathConstant.TEMPLATE).resolve(id.concat(".json")), StandardCharsets.UTF_8)) {
 
             stream.forEach(s -> contentBuilder.append(s).append("\n"));
         } catch (IOException e) {
@@ -230,7 +258,7 @@ public class TemplateServiceImp implements TemplateService {
             ObjectMapper objectMapper = new ObjectMapper();
             template.setTemplateId(id);
 
-            Path filePath = Paths.get(PathConstant.TEMPLATE, fileName);
+            Path filePath = Paths.get(PathConstant.TEMPLATE).resolve(fileName);
             try (BufferedWriter writer = Files.newBufferedWriter(filePath, StandardCharsets.UTF_8)) {
                 objectMapper.writeValue(writer, template);
             }
@@ -284,6 +312,17 @@ public class TemplateServiceImp implements TemplateService {
             });
 
             return files;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private List<Path> getAllPaths(String folder) {
+        try (Stream<Path> walk = Files.walk(Paths.get(folder))) {
+            return walk.filter(Files::isRegularFile)
+                    .filter(path -> FileNameUtils.getExtension(path.toString()).equals("json"))
+                    .map(Path::toAbsolutePath)
+                    .toList();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -106,7 +106,7 @@ public class StorageConfiguration {
         setInitialLicense();
         // updates report schedule
         updateReportSchedule();
-        // creating 'src/main/resources/templates/' directory
+        // creating '/templates' directory
         createDirectory(PathConstant.TEMPLATE);
         // creating 'src/main/resources/assistant/' directory
         createDirectory(PathConstant.ASSISTANT);
