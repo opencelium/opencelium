@@ -70,7 +70,7 @@ const LogsPanel: React.FC<LogsPanelProps> = ({theme}) => {
               right={isDetailsOpened ? isFullScreen ? 312 : 300 : isFullScreen ? 12 : 2}
               iconSize={TextSize.Size_20}
               position={'right'}
-              isDisabled={isDeleting || connectors.length === 0 || isTesting}
+              isDisabled={(isDeleting || connectors.length === 0 || isTesting) && !collectionDataError}
               isLoading={isTesting}
               icon={'delete'}
               tooltip={'Clear Logs'}
