@@ -184,13 +184,14 @@ management:
   health:
     defaults:
       enabled: false
-    status:
-      http-mapping:
-        DOWN: 200
-        UP: 200
   endpoint:
     health:
       show-details: always
+      status:
+        http-mapping:
+          OUT_OF_SERVICE: 200
+          DOWN: 200
+          UP: 200
 
 opencelium:
   version: 4.6
