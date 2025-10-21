@@ -105,7 +105,7 @@ export const connectorSlice = createSlice({
         },
         [checkConnectorTitle.fulfilled.type]: (state, action: PayloadAction<IResponse>) => {
             state.checkingConnectorTitle = API_REQUEST_STATE.FINISH;
-            state.isCurrentConnectorHasUniqueTitle = action.payload.message === ResponseMessages.NOT_EXISTS ? TRIPLET_STATE.TRUE : TRIPLET_STATE.FALSE;
+            state.isCurrentConnectorHasUniqueTitle = action.payload.result ? TRIPLET_STATE.TRUE : TRIPLET_STATE.FALSE;
             state.error = null;
         },
         [checkConnectorTitle.rejected.type]: (state, action: PayloadAction<IResponse>) => {

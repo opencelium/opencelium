@@ -15,6 +15,7 @@ export interface ConnectionSocketLog<SegmentType> extends ConnectionLogIdentifie
 	properties: MethodProperty | OperatorProperty | FlowchartProperty,
 	segment: SegmentType,
 	error?: LogError,
+	message?: string,
 }
 export type LightSegment = LightMethodSegment | LightOperatorSegment;
 export type DetailedSegment = DetailedMethodSegment | DetailedOperatorSegment;

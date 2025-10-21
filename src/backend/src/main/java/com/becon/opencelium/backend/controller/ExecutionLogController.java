@@ -109,7 +109,7 @@ public class ExecutionLogController {
             @RequestParam(required = false) String status
     ) {
         if (connectionId == -1) {
-            connectionId = schedulerService.getConnectionIdById(schedulerId);
+            connectionId = schedulerService.getById(schedulerId).getConnection().getId();
         }
 
         ResultDTO<List<String>> logFileNames = new ResultDTO<>(LogFileUtility.getLogFileNameList(connectionId, schedulerId, status));

@@ -1,6 +1,5 @@
 package com.becon.opencelium.backend.scriptengine;
 
-import com.becon.opencelium.backend.scriptengine.config.LanguageConfig;
 import com.becon.opencelium.backend.scriptengine.impl.ScriptExecutionManagerImpl;
 import org.springframework.stereotype.Component;
 
@@ -9,10 +8,9 @@ public class ScriptExecutionManagerProvider {
 
     private static ScriptExecutionManager instance;
 
-    public ScriptExecutionManagerProvider(LanguageConfig languageConfig,
-                                          ScriptEngineProvider scriptEngineProvider) {
+    public ScriptExecutionManagerProvider(ScriptEngineProvider scriptEngineProvider) {
         // initialize only once
-        instance = new ScriptExecutionManagerImpl(languageConfig, scriptEngineProvider);
+        instance = new ScriptExecutionManagerImpl(scriptEngineProvider);
     }
 
     public static ScriptExecutionManager get() {

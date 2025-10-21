@@ -106,7 +106,7 @@ versions:
       - changeset: 2
         operation: add
         value: password
-        path: opencelium.connector.master_passwordNeed urgent fix.
+        path: opencelium.connector.master_password
       - changeset: 3
         operation: add
         value: false

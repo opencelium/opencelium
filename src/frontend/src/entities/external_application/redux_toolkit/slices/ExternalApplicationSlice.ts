@@ -21,29 +21,33 @@ import {IResponse} from "@application/requests/interfaces/IResponse";
 import {
     checkAllExternalApplications,
     checkElasticsearch,
-    checkMongoDB
+    checkMongoDB, checkPolyglot
 } from "../action_creators/ExternalApplicationCreators";
 import {
     ActuatorHealthResponseProps,
-    ElasticSearchResponseProps, DBResponseProps,
+    ElasticSearchResponseProps, DBResponseProps, CheckPolyglotResponse,
 } from "../../requests/interfaces/IExternalApplication";
 
 export interface ExternalApplicationSlice extends ICommonState{
     checkingElasticSearch: API_REQUEST_STATE,
+    checkingPolyglot: API_REQUEST_STATE,
     checkingMongoDB: API_REQUEST_STATE,
     checkingAll: API_REQUEST_STATE,
     elasticSearchCheckResults: ElasticSearchResponseProps,
     mongoDBCheckResults: DBResponseProps,
     actuatorHealth: ActuatorHealthResponseProps,
+    polyglotStatus: CheckPolyglotResponse
 }
 
 const initialState: ExternalApplicationSlice = {
     checkingElasticSearch: API_REQUEST_STATE.INITIAL,
+    checkingPolyglot: API_REQUEST_STATE.INITIAL,
     checkingMongoDB: API_REQUEST_STATE.INITIAL,
     checkingAll: API_REQUEST_STATE.INITIAL,
     elasticSearchCheckResults: null,
     mongoDBCheckResults: null,
     actuatorHealth: null,
+    polyglotStatus: null,
     ...CommonState,
 }
 
@@ -63,6 +67,18 @@ export const externalApplicationSlice = createSlice({
         },
         [checkElasticsearch.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.checkingElasticSearch = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [checkPolyglot.pending.type]: (state) => {
+            state.checkingPolyglot = API_REQUEST_STATE.START;
+        },
+        [checkPolyglot.fulfilled.type]: (state, action: PayloadAction<CheckPolyglotResponse>) => {
+            state.checkingPolyglot = API_REQUEST_STATE.FINISH;
+            state.polyglotStatus = action.payload;
+            state.error = null;
+        },
+        [checkPolyglot.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.checkingPolyglot = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
         [checkMongoDB.pending.type]: (state) => {
