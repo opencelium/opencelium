@@ -48,7 +48,7 @@ function formatDuration(ms: number): string {
 
 const LogsPanel: React.FC<LogsPanelProps> = ({theme}) => {
   const dispatch = useAppDispatch();
-  const {collectionDataError, textLogs, executionId, connectors, isTesting, isFinished, executionTime, isForcedFinished} = useAppSelector((state: RootState) => state.connectionLogReducer);
+  const {collectionDataError, textLogs, executionId, connectors, isTesting, isFinished, executionTime, isForcedFinished, currentLogError} = useAppSelector((state: RootState) => state.connectionLogReducer);
   const {
     logPanelHeight, isDetailsOpened
   } = Connection.getReduxState();
@@ -124,7 +124,7 @@ const LogsPanel: React.FC<LogsPanelProps> = ({theme}) => {
                 />
             ))}
           {isFinished && <FinishedLogsStyled>{`TEST FINISHED in ${formatDuration(executionTime)}`}</FinishedLogsStyled>}
-          {isForcedFinished && <ForcedFinishedLogsStyled>{`TEST STOPPED`}</ForcedFinishedLogsStyled>}
+          {(isForcedFinished || !!currentLogError?.log) && <ForcedFinishedLogsStyled>{`TEST STOPPED`}</ForcedFinishedLogsStyled>}
       </LogPanelStyled>
     </React.Fragment>
   );
