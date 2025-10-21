@@ -51,7 +51,7 @@ export const EmptyLogsStyled = styled.h3`
     margin-top: 50px;
 `;
 
-export const CollectionDataErrorStyled = styled.span`
+export const CollectionDataErrorStyled = styled.div`
     font-size: 16px;
     margin: 20px;
 `;
