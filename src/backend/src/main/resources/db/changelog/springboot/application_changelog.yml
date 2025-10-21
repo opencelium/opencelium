@@ -1,4 +1,4 @@
-# operations: add, modify, delete, rename.
+# operations: add, modify, delete, rename, move.
 versions:
   - version: 4.0
     changes:
@@ -149,3 +149,7 @@ versions:
         operation: modify
         value: ./support-files
         path: opencelium.support.file.directory
+      - changeset: 10
+        operation: move
+        value: management.endpoint.health.status
+        path: management.health.status

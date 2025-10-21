@@ -85,6 +85,7 @@ public class LogDataMapper {
             return null;
         }
         ErrorInfoDTO err = new ErrorInfoDTO();
+        err.setOriginOfErrorPath(logDataError.getErrorOfOriginPath());
         err.setMessage(logDataError.getMessage());
         err.setStackTrace(logDataError.getStackTrace());
         return err;
