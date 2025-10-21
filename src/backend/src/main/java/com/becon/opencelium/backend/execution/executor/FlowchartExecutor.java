@@ -1,55 +1,39 @@
 package com.becon.opencelium.backend.execution.executor;
 
 import com.becon.opencelium.backend.enums.LogType;
-import com.becon.opencelium.backend.enums.OpType;
 import com.becon.opencelium.backend.enums.RelationalOperator;
-import com.becon.opencelium.backend.execution.builder.RequestEntityBuilder;
 import com.becon.opencelium.backend.execution.logger.msg.ConnectorLog;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.logger.msg.MethodData;
 import com.becon.opencelium.backend.execution.executor.model.Loop;
-import com.becon.opencelium.backend.execution.executor.model.Operation;
-import com.becon.opencelium.backend.invoker.entity.Pagination;
-import com.becon.opencelium.backend.enums.PageParam;
 import com.becon.opencelium.backend.execution.masking.MaskingService;
 import com.becon.opencelium.backend.execution.logger.OcLogger;
 import com.becon.opencelium.backend.ocel.ExpressionProcessor;
 import com.becon.opencelium.backend.ocel.ExpressionProcessorFactory;
 import com.becon.opencelium.backend.ocel.ProcessorType;
 import com.becon.opencelium.backend.resource.execution.FlowchartEx;
+import com.becon.opencelium.backend.resource.execution.OnErrorEx;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.resource.execution.OperatorEx;
-import com.becon.opencelium.backend.resource.execution.ResponseDTO;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.MediaType;
-import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
+import com.becon.opencelium.backend.resource.execution.ProxyEx;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.client.RestTemplate;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Stack;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-import static com.becon.opencelium.backend.utility.MediaTypeUtility.isBinaryCompatible;
-import static com.becon.opencelium.backend.utility.MediaTypeUtility.isJsonCompatible;
-
 public class FlowchartExecutor {
-    private final ExpressionProcessor expressionProcessor;
     private final ExecutionManager executionManager;
-    private final RestTemplate restTemplate;
+    private final OperationExecutor operationExecutor;
     private final List<Object> executables;
+    private final ExpressionProcessor expressionProcessor;
     private final OcLogger<ExecutionLog> logger;
     private final MaskingService masking;
-    private final Pagination pagination;
 
     // log related variables:
     private final String flowId;
@@ -59,33 +43,30 @@ public class FlowchartExecutor {
 
 
     public FlowchartExecutor(
-            FlowchartEx connectorEx, ExecutionManager executionManager,
-            RestTemplate restTemplate, OcLogger<ExecutionLog> logger, MaskingService masking
+            FlowchartEx flowchart, ExecutionManager executionManager,
+            OcLogger<ExecutionLog> logger, MaskingService masking, ProxyEx proxy, OnErrorEx onError
     ) {
-        this.expressionProcessor = ExpressionProcessorFactory.get(ProcessorType.POSTFIX);
         this.executionManager = executionManager;
-        this.restTemplate = restTemplate;
+        this.expressionProcessor = ExpressionProcessorFactory.get(ProcessorType.POSTFIX);
         this.logger = logger;
         this.masking = masking;
 
+        this.operationExecutor = new OperationExecutor(flowchart, executionManager, logger, masking, onError, proxy);
+
         this.executables = new ArrayList<>();
-        if (Objects.nonNull(connectorEx.getMethods())) {
-            connectorEx.getMethods().forEach(o -> {
-                o.setInvoker(connectorEx.getInvoker().getName());
+        if (Objects.nonNull(flowchart.getMethods())) {
+            flowchart.getMethods().forEach(o -> {
+                o.setInvoker(flowchart.getInvoker().getName());
                 executables.add(o);
             });
         }
-        if (Objects.nonNull(connectorEx.getOperators())) {
-            this.executables.addAll(connectorEx.getOperators());
-        }
+        this.executables.addAll(Optional.ofNullable(flowchart.getOperators()).orElse(Collections.emptyList()));
         this.executables.sort(getComparator());
 
-        this.pagination = connectorEx.getPagination();
-
         // initialize log related variables:
-        this.flowId = connectorEx.getFlowId();
-        this.connectorId = connectorEx.getCtorId();
-        this.connectorName = connectorEx.getName();
+        this.flowId = flowchart.getFlowId();
+        this.connectorId = flowchart.getCtorId();
+        this.connectorName = flowchart.getName();
     }
 
     public void start() {
@@ -109,7 +90,7 @@ public class FlowchartExecutor {
             logger.logAndSend(e);
             throw e;
         } finally {
-            while(!endPhases.isEmpty()) {
+            while (!endPhases.isEmpty()) {
                 logger.logAndSend(endPhases.pop());
             }
         }
@@ -129,11 +110,7 @@ public class FlowchartExecutor {
             logger.logAndSend(String.format("phase=OPERATION_START indexPath=%s name=\"%s\" %s", index, operation.getName(), getLoopData()));
             endPhases.push(String.format("phase=OPERATION_END indexPath=%s name=\"%s\" %s", index, operation.getName(), getLoopData()));
 
-            if (headPointer != tail) {
-                throw new RuntimeException("Methods cannot have body");
-            }
-
-            executeOperation(operation);
+            operationExecutor.execute(operation);
 
             logger.logAndSend(endPhases.pop());
             logger.getLogEntity().setMethodData(null);
@@ -149,7 +126,7 @@ public class FlowchartExecutor {
                             executionManager::getValue,
                             logger,
                             masking
-                        );
+                    );
 
                     logger.logAndSend("segment=IF_RESULT data=" + result);
                 } catch (RuntimeException e) {
@@ -210,115 +187,6 @@ public class FlowchartExecutor {
 
         // we already executed operations'/operators' body, now start executing next body
         execute(tail + 1, tailPointer);
-    }
-
-    private void executeOperation(OperationDTO dto) {
-        BiFunction<String, String, String> toRef = (type, part) -> dto.getOperationId() + ".(" + type + ")." + part;
-
-        Pagination pagination = null;
-        if (dto.getOperationType() == OpType.PAGINATION) {
-            pagination = dto.getPagination() != null ? dto.getPagination() : this.pagination;
-
-            if (pagination != null) {
-                pagination = pagination.clone();
-            }
-        }
-        executionManager.setPagination(pagination);
-
-        boolean hasMore = false;
-        long duration = 0;
-        RequestEntity<?> requestEntity;
-        Class<?> responseType;
-        ResponseEntity<?> responseEntity;
-        do {
-            requestEntity = RequestEntityBuilder.start()
-                    .forOperation(dto)
-                    .usingReferences(executionManager::getValue)
-                    .createRequest();
-
-            URI uri = requestEntity.getUrl();
-            if (pagination != null && pagination.existsParam(PageParam.LINK)) {
-                String nextElemLink = pagination.findParam(PageParam.LINK).getValue();
-                if (nextElemLink != null && !nextElemLink.isEmpty()) {
-                    try {
-                        uri = new URI(nextElemLink);
-                    } catch (URISyntaxException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            }
-
-            logger.logAndSend(String.format("segment=REQUEST url=%s http_method=%s", masking.applyMask(uri, toRef.apply("request", "url")), requestEntity.getMethod()));
-            logger.logAndSend(String.format("segment=REQUEST_HEADER data=%s", masking.applyMask(requestEntity.getHeaders(), toRef.apply("request", "header"))));
-            logger.logAndSend(String.format("segment=REQUEST_PAYLOAD data=%s", masking.applyMask(requestEntity.getBody(), toRef.apply("request", "body"))));
-
-            HttpEntity<Object> httpEntity = new HttpEntity<>(requestEntity.getBody(), requestEntity.getHeaders());
-            responseType = getResponseType(dto);
-
-            long startTime = System.currentTimeMillis();
-            responseEntity = this.restTemplate.exchange(uri, requestEntity.getMethod(), httpEntity, responseType);
-            duration += (System.currentTimeMillis() - startTime);
-
-            if (pagination != null) {
-                pagination.updateParamValues(responseEntity, responseType);
-                hasMore = pagination.hasMore();
-            }
-        } while (hasMore);
-
-        if (responseType.equals(byte[].class)) {
-            byte[] fileBytes = (byte[]) responseEntity.getBody();
-            String base64Encoded = Base64.getEncoder().encodeToString(fileBytes);
-
-            responseEntity = new ResponseEntity<>(base64Encoded,
-                    responseEntity.getHeaders(),
-                    responseEntity.getStatusCode());
-        }
-
-        if (pagination != null) {
-            String paginatedBody = pagination.findParam(PageParam.RESULT).getValue();
-            responseEntity = new ResponseEntity<>(paginatedBody,
-                    responseEntity.getHeaders(),
-                    responseEntity.getStatusCode());
-
-            // remove reference for used pagination
-            pagination = null;
-            executionManager.setPagination(pagination);
-        }
-        logger.logAndSend(String.format("segment=RESPONSE status=%d duration=%dms", responseEntity.getStatusCode().value(), duration));
-        logger.logAndSend(String.format("segment=RESPONSE_HEADER data=%s", masking.applyMask(responseEntity.getHeaders(), toRef.apply("response", "header"))));
-        logger.logAndSend(String.format("segment=RESPONSE_PAYLOAD data=%s", masking.applyMask(responseEntity.getBody(), toRef.apply("response", "body"))));
-
-        Operation operation = executionManager.findOperationByColor(dto.getOperationId())
-                .orElseGet(() -> {
-                    int loopDepth = executionManager.getLoops().size(); // in which depth the operation is executed
-
-                    Operation newOperation = Operation.fromDTO(dto, loopDepth);
-                    executionManager.addOperation(newOperation);
-
-                    return newOperation;
-                });
-
-        String key = executionManager.generateKey(operation.getLoopDepth());
-
-        operation.addRequest(key, requestEntity);
-        operation.addResponse(key, responseEntity);
-    }
-
-    private Class<?> getResponseType(OperationDTO dto) {
-        MediaType mediaType = MediaType.APPLICATION_JSON;
-        for (ResponseDTO response : dto.getResponses()) {
-            if ("success".equals(response.getStatus())) {
-                mediaType = response.getContent();
-            }
-        }
-
-        if (isJsonCompatible(mediaType)) {
-            return Object.class;
-        } else if (isBinaryCompatible(mediaType)) {
-            return byte[].class;
-        } else {
-            return String.class;
-        }
     }
 
     private int getTailPointer(int headPointer) {
