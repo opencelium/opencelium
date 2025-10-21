@@ -30,6 +30,18 @@ export const checkElasticsearch = createAsyncThunk(
         }
     }
 )
+export const checkPolyglot = createAsyncThunk(
+    'external_application/check/polyglot',
+    async(data: never, thunkAPI) => {
+        try {
+            const request = new ExternalApplicationRequest({isApi: false});
+            const response = await request.checkPolyglot();
+            return response.data;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
 export const checkMongoDB = createAsyncThunk(
     'external_application/check/mongodb',
     async(data: never, thunkAPI) => {
@@ -62,6 +74,7 @@ export const checkAllExternalApplications = createAsyncThunk(
 
 export default {
     checkElasticsearch,
+    checkPolyglot,
     checkMongoDB,
     checkAllExternalApplications,
 }

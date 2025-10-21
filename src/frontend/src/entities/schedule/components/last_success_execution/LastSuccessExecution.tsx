@@ -83,7 +83,7 @@ const LastSuccessExecution: FC<LastSuccessExecutionProps> =
                                     onClick={() => getLogs(executionId)}>
                                     {`#${executionId}`}
                                 </span>
-                                <ScheduleLogListIcon scheduleId={schedule.connection.connectionId.toString()} type={'success'}/>
+                                <ScheduleLogListIcon schedulerId={schedule.id.toString()} connectionId={schedule.connection.connectionId.toString()} type={'success'}/>
                             </span>;
                     } else {
                         taIdComponent = <span>{`#${executionId}`}</span>

@@ -1,8 +1,8 @@
 import React from 'react';
 import {KeyStyled, MetaBlockStyled, MetaItemStyled, ValueStyled} from "@app_component/base/input/styles";
-import {ConnectionSocketLog, DetailedMethodSegment} from "@root/requests/models/ConnectionLog";
+import {ConnectionSocketLog, DetailedMethodSegment, DetailedOperatorSegment} from "@root/requests/models/ConnectionLog";
 interface ErrorMessageProps {
-    trace: ConnectionSocketLog<DetailedMethodSegment>;
+    trace: ConnectionSocketLog<DetailedMethodSegment | DetailedOperatorSegment>;
 }
 const ErrorMessage = ({trace}: ErrorMessageProps) => {
     return (

@@ -7,8 +7,8 @@
 #                                                                         #
 ###########################################################################
 server:
-  address: 127.0.0.1
   port: 9090
+  address: 127.0.0.1
 websocket:
   endpoint: /websocket
 #  ssl:
@@ -184,13 +184,14 @@ management:
   health:
     defaults:
       enabled: false
-    status:
-      http-mapping:
-        DOWN: 200
-        UP: 200
   endpoint:
     health:
       show-details: always
+      status:
+        http-mapping:
+          OUT_OF_SERVICE: 200
+          DOWN: 200
+          UP: 200
 
 opencelium:
   version: 4.6
@@ -228,6 +229,52 @@ opencelium:
   service-portal:
     base-url: https://service.opencelium.io
     token: "your-token-here"
+  polyglot:
+    # Enables or disables the polyglot service integration.
+    # Default: false
+    enabled: false
+
+    # Communication protocol used to connect to the polyglot service.
+    # Supported: grpc (default), http (future)
+    # Default: grpc
+    protocol: grpc
+
+    # Host address of the polyglot service.
+    # Default: 127.0.0.1
+    host: '127.0.0.1'
+
+    # Port number of the polyglot service.
+    # Default: 6566
+    port: 6566
+
+    # Automatically starts the polyglot service JAR if not running.
+    # If false, assumes the service is already running externally.
+    # Default: false
+    auto-start: false
+
+    launch:
+      # Path to the polyglot service JAR file.
+      # Required only if auto-start is true.
+      # Example: /opt/polyglot/polyglot-service.jar
+      jarPath:
+
+      # Command-line arguments passed to the polyglot service.
+      args:
+
+      # Maximum time (in seconds) to wait for the service to start and respond.
+      # Default: 30
+      waitTimeoutSec: 30
+
+      # JVM arguments used when launching the polyglot service.
+      # Adjust for performance or memory tuning.
+      # Default: "-Xms64m -Xmx256m"
+      jvmArgs: '-Xms64m -Xmx256m'
+
+      # Enables forwarding of logs produced by the external polyglot JAR
+      # to this application’s logging system.
+      # Default: false
+      external-log-enabled: false
+
 #  support:
 #    file:
 #      directory: src/main/resources/support-files

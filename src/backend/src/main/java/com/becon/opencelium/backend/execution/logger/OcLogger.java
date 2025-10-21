@@ -7,7 +7,6 @@ import ch.qos.logback.core.FileAppender;
 import com.becon.opencelium.backend.execution.logger.dto.LogDataDTO;
 import com.becon.opencelium.backend.execution.socket.WebSocketNotificationService;
 import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
-import com.becon.opencelium.backend.resource.execution.LoggerConfiguration;
 import com.becon.opencelium.backend.utility.ApplicationContextUtility;
 import com.becon.opencelium.backend.utility.LogFileUtility;
 import org.slf4j.Logger;
@@ -40,12 +39,12 @@ public class OcLogger<T extends LogMessage> {
     private final Logger logger;
 
     public OcLogger(
-            LoggerConfiguration loggerConfiguration, T logEntity,
+            QuartzJobScheduler.TriggerType triggerType, boolean debugMode, T logEntity,
             long connectionId, String timestamp, long executionId
     ) {
-        this.debugMode = loggerConfiguration.isDebugMode();
-        this.webSocket = loggerConfiguration.getTriggerType() == QuartzJobScheduler.TriggerType.EXECUTION_TEST;
-        this.supportFile = loggerConfiguration.getTriggerType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE;
+        this.debugMode = debugMode;
+        this.webSocket = (QuartzJobScheduler.TriggerType.EXECUTION_TEST == triggerType);
+        this.supportFile = (QuartzJobScheduler.TriggerType.SUPPORT_FILE == triggerType);
 
         this.socketNotificationService = ApplicationContextUtility.getBean(WebSocketNotificationService.class);
         this.logLineDispatcher = new LogLineDispatcher();
