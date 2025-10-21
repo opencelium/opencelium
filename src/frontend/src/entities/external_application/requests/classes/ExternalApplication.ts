@@ -18,7 +18,7 @@ import Request from "@entity/application/requests/classes/Request";
 import {IRequestSettings} from "@application/requests/interfaces/IRequest";
 import {
     ElasticSearchResponseProps,
-    IExternalApplicationRequest, DBResponseProps
+    IExternalApplicationRequest, DBResponseProps, CheckPolyglotResponse
 } from "../interfaces/IExternalApplication";
 import {
     ActuatorHealthResponseProps,
@@ -34,6 +34,11 @@ export class ExternalApplicationRequest extends Request implements IExternalAppl
     async checkElasticsearch(): Promise<AxiosResponse<ElasticSearchResponseProps>>{
         this.endpoint = '/elasticsearch';
         return super.get<ElasticSearchResponseProps>();
+    }
+
+    async checkPolyglot(): Promise<AxiosResponse<CheckPolyglotResponse>>{
+        this.endpoint = '/polyglot';
+        return super.get<CheckPolyglotResponse>();
     }
 
     async checkMongoDB(): Promise<AxiosResponse<DBResponseProps>>{
