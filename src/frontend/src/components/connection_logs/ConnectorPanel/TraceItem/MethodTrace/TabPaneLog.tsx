@@ -11,8 +11,9 @@ import {TextSize} from "@app_component/base/text/interfaces";
 import {copyLogContentToClipboard} from "@root/redux_toolkit/slices/ConnectionLogSlice";
 import Button from "@app_component/base/button/Button";
 import {useAppDispatch} from "@application/utils/store";
+import AIResultsContainer from "@app_component/connection_logs/ConnectorPanel/TraceItem/MethodTrace/AIResultsContainer";
 const DEFAULT_HEIGHT = 100;
-const TabPaneLog = ({tabId, value, theme, height, setHeight, content}: {content: string, tabId: string, value: any, theme: ITheme, height: number | undefined, setHeight: (newHeight: number) => void,}) => {
+const TabPaneLog = ({tabId, value, theme, height, setHeight, content, aiResults}: {content: string, tabId: string, value: any, theme: ITheme, height: number | undefined, setHeight: (newHeight: number) => void, aiResults?: any}) => {
     const dispatch = useAppDispatch();
     const isXmlFormat = isXML(value);
     const isJson = isJsonString(value);
@@ -78,7 +79,8 @@ const TabPaneLog = ({tabId, value, theme, height, setHeight, content}: {content:
                 height: (height ?? DEFAULT_HEIGHT) + 'px',
                 paddingBottom: '5px',
             }}>
-                {!!content ? <LimitedAceEditor
+                {(aiResults && aiResults.length>0) ? <AIResultsContainer aiResults={aiResults}/> :
+                !!content ? <LimitedAceEditor
                     style={{maxHeight: '100%'}}
                     mode={mode}
                     theme={theme}

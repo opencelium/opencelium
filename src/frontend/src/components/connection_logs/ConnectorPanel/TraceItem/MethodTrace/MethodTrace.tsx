@@ -21,6 +21,7 @@ import MethodTraceExpander
 import axios from "axios";
 import AIResultsContainer from "@app_component/connection_logs/ConnectorPanel/TraceItem/MethodTrace/AIResultsContainer";
 import {Loading} from "@app_component/base/loading/Loading";
+import {TooltipButton} from "@app_component/base/tooltip_button/TooltipButton";
 
 interface MethodTraceProps {
 	trace: ConnectionSocketLog<DetailedMethodSegment>;
@@ -29,9 +30,15 @@ interface MethodTraceProps {
 	theme: ITheme;
 }
 
-export
+function findOperationByName(connectors: any, name: string) {
+	for (const connector of connectors) {
+		const operation = connector.invoker.operations.find((op: any) => op.name === name);
+		if (operation) return operation;
+	}
+	return null; // or undefined if not found
+}
 
-const MethodTrace: React.FC<MethodTraceProps> = ({
+export const MethodTrace: React.FC<MethodTraceProps> = ({
 	trace,
 	flowId,
 	executionId,
@@ -39,6 +46,7 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 }) => {
 	const dispatch = useAppDispatch();
 	const {traceConfigs, connectors} = useAppSelector((state: RootState) => state.connectionLogReducer);
+	const {connectors: connectorConfigs} = useAppSelector((state: RootState) => state.connectorReducer);
 	const [expanded, setExpanded] = useState<boolean>(false);
 	const [loading, setLoading] = useState<boolean>(false);
 	const [requestHeight, setRequestHeight] = useState<number | undefined>();
@@ -121,9 +129,12 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 
 	const askAI = async (e: any, trace: ConnectionSocketLog<DetailedMethodSegment>) => {
 		e.stopPropagation();
+		const methodName = (trace.properties as MethodProperty).name;
 		const connectorName = connectors.find(c => c.flowId === flowId)?.name || '';
 		const errorMessageSplit = trace.error?.message.split('\r\n')
-		const q = `System - ${connectorName}: ${(trace.properties as MethodProperty).name} ${trace.segment.request.http_method} - ${errorMessageSplit[0]}`;
+		const connectorConfig = findOperationByName(connectorConfigs, methodName);
+		const params = connectorConfig ? (connectorConfig.request.endpoint.match(/\*:[^:*]+:\*/g) || []).map((s: any) => s.slice(2, -2)) : [];
+		const q = `System - ${connectorName}: pathVariable: ${params.join(', ')};${methodName} ${trace.segment.request.http_method} - ${errorMessageSplit ? errorMessageSplit[0] : ''}; url: ${trace.segment.request.url}`;
 		console.log(q);
 		setAILoading(true);
 		const response = await axios.get(`http://localhost:4000/entry`, {
@@ -213,12 +224,16 @@ const MethodTrace: React.FC<MethodTraceProps> = ({
 											setActiveResponseTab('body');
 										}
 									}}
-									title={'Response Body'}
+									title={
+									<span>
+										{'Response Body'}
+										<TooltipButton target={`ai_${trace.id}`} tooltip={'AI'} hasBackground={false} icon={'star_border_purple500'} handleClick={(e) => askAI(e, trace)}/>
+									</span>}
 								/>
 							</Nav>
 							<TabContent activeTab={activeResponseTab} className={styles.tabContent}>
 								<TabPaneLog height={responseHeight} setHeight={setResponseHeight} tabId={'header'} theme={theme} value={responseHeaders} content={responseHeaders}/>
-								<TabPaneLog height={responseHeight} setHeight={setResponseHeight} tabId={'body'} theme={theme} value={responseBody} content={responseBody}/>
+								<TabPaneLog height={responseHeight} setHeight={setResponseHeight} tabId={'body'} theme={theme} value={responseBody} content={responseBody} aiResults={aiResults}/>
 							</TabContent>
 						</div>
 					</React.Fragment>}
