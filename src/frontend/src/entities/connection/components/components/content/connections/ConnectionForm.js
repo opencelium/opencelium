@@ -403,7 +403,7 @@ export function ConnectionForm(type) {
                                 operatorErrors.push('Some data is undefined.');
                             }
                         } else {
-                            operatorErrors.push('Some data is missing.');
+                            //operatorErrors.push('Some data is missing.');
                         }
                         if(operatorErrors.length > 0){
                             errors.operators[connectorType].push({
