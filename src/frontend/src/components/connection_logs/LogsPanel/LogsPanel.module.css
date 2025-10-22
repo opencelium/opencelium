@@ -46,9 +46,6 @@
 		}
 	}
 
-	&:disabled span:first-child {
-		transform: scale(1);
-	}
 	&:disabled span:last-child {
 		color: #fff;
 	}
