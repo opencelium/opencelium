@@ -165,7 +165,9 @@ public class ConnectorServiceImp implements ConnectorService {
 
     @Override
     public Optional<Connector> findAllByTitle(String title) {
-        return connectorRepository.findByTitle(title);
+        Optional<Connector> connector = connectorRepository.findByTitle(title);
+        connector.ifPresent(this::decrypt);
+        return connector;
     }
 
     @Override
