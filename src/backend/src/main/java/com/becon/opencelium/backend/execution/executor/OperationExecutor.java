@@ -25,7 +25,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
 import java.util.Base64;
-import java.util.function.BiFunction;
 
 import static com.becon.opencelium.backend.utility.MediaTypeUtility.isBinaryCompatible;
 import static com.becon.opencelium.backend.utility.MediaTypeUtility.isJsonCompatible;
@@ -39,7 +38,7 @@ public class OperationExecutor {
 
     public OperationExecutor(
             FlowchartEx flowchart, ExecutionManager executionManager,
-            OcLogger<ExecutionLog> logger, MaskingService masking, OnErrorEx onErros, ProxyEx proxy
+            OcLogger<ExecutionLog> logger, MaskingService masking, OnErrorEx onError, ProxyEx proxy
     ) {
         this.executionManager = executionManager;
         this.restTemplate = buildRestTemplate(flowchart, proxy);
@@ -50,44 +49,25 @@ public class OperationExecutor {
 
 
     public void execute(OperationDTO dto) {
-        BiFunction<String, String, String> toRef = (type, part) -> dto.getOperationId() + ".(" + type + ")." + part;
-
-        Pagination pagination = null;
-        if (dto.getOperationType() == OpType.PAGINATION) {
-            pagination = dto.getPagination() != null ? dto.getPagination() : this.pagination;
-
-            if (pagination != null) {
-                pagination = pagination.clone();
-            }
-        }
+        Pagination pagination = resolvePagination(dto);
         executionManager.setPagination(pagination);
 
         boolean hasMore = false;
         long duration = 0;
         RequestEntity<?> requestEntity;
-        Class<?> responseType;
         ResponseEntity<?> responseEntity;
+        Class<?> responseType;
         do {
             requestEntity = RequestEntityBuilder.start()
                     .forOperation(dto)
                     .usingReferences(executionManager::getValue)
                     .createRequest();
 
-            URI uri = requestEntity.getUrl();
-            if (pagination != null && pagination.existsParam(PageParam.LINK)) {
-                String nextElemLink = pagination.findParam(PageParam.LINK).getValue();
-                if (nextElemLink != null && !nextElemLink.isEmpty()) {
-                    try {
-                        uri = new URI(nextElemLink);
-                    } catch (URISyntaxException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            }
+            URI uri = resolveURI(requestEntity.getUrl(), pagination);
 
-            logger.logAndSend(String.format("segment=REQUEST url=%s http_method=%s", masking.applyMask(uri, toRef.apply("request", "url")), requestEntity.getMethod()));
-            logger.logAndSend(String.format("segment=REQUEST_HEADER data=%s", masking.applyMask(requestEntity.getHeaders(), toRef.apply("request", "header"))));
-            logger.logAndSend(String.format("segment=REQUEST_PAYLOAD data=%s", masking.applyMask(requestEntity.getBody(), toRef.apply("request", "body"))));
+            logger.logAndSend(String.format("segment=REQUEST url=%s http_method=%s", masking.applyMask(uri, buildRef(dto.getOperationId(), "request", "url")), requestEntity.getMethod()));
+            logger.logAndSend(String.format("segment=REQUEST_HEADER data=%s", masking.applyMask(requestEntity.getHeaders(), buildRef(dto.getOperationId(), "request", "header"))));
+            logger.logAndSend(String.format("segment=REQUEST_PAYLOAD data=%s", masking.applyMask(requestEntity.getBody(), buildRef(dto.getOperationId(), "request", "body"))));
 
             HttpEntity<Object> httpEntity = new HttpEntity<>(requestEntity.getBody(), requestEntity.getHeaders());
             responseType = getResponseType(dto);
@@ -106,39 +86,61 @@ public class OperationExecutor {
             byte[] fileBytes = (byte[]) responseEntity.getBody();
             String base64Encoded = Base64.getEncoder().encodeToString(fileBytes);
 
-            responseEntity = new ResponseEntity<>(base64Encoded,
-                    responseEntity.getHeaders(),
-                    responseEntity.getStatusCode());
+            responseEntity = new ResponseEntity<>(base64Encoded, responseEntity.getHeaders(), responseEntity.getStatusCode());
         }
 
         if (pagination != null) {
             String paginatedBody = pagination.findParam(PageParam.RESULT).getValue();
-            responseEntity = new ResponseEntity<>(paginatedBody,
-                    responseEntity.getHeaders(),
-                    responseEntity.getStatusCode());
+            responseEntity = new ResponseEntity<>(paginatedBody, responseEntity.getHeaders(), responseEntity.getStatusCode());
 
             // remove reference for used pagination
             pagination = null;
             executionManager.setPagination(pagination);
         }
         logger.logAndSend(String.format("segment=RESPONSE status=%d duration=%dms", responseEntity.getStatusCode().value(), duration));
-        logger.logAndSend(String.format("segment=RESPONSE_HEADER data=%s", masking.applyMask(responseEntity.getHeaders(), toRef.apply("response", "header"))));
-        logger.logAndSend(String.format("segment=RESPONSE_PAYLOAD data=%s", masking.applyMask(responseEntity.getBody(), toRef.apply("response", "body"))));
+        logger.logAndSend(String.format("segment=RESPONSE_HEADER data=%s", masking.applyMask(responseEntity.getHeaders(), buildRef(dto.getOperationId(), "response", "header"))));
+        logger.logAndSend(String.format("segment=RESPONSE_PAYLOAD data=%s", masking.applyMask(responseEntity.getBody(), buildRef(dto.getOperationId(), "response", "body"))));
 
-        Operation operation = executionManager.findOperationByColor(dto.getOperationId())
-                .orElseGet(() -> {
-                    int loopDepth = executionManager.getLoops().size(); // in which depth the operation is executed
+        Operation operation = executionManager.findOperationByColor(dto.getOperationId()).orElseGet(() -> {
+            Operation newOperation = Operation.fromDTO(dto, executionManager.getLoops().size());
+            executionManager.addOperation(newOperation);
 
-                    Operation newOperation = Operation.fromDTO(dto, loopDepth);
-                    executionManager.addOperation(newOperation);
-
-                    return newOperation;
-                });
+            return newOperation;
+        });
 
         String key = executionManager.generateKey(operation.getLoopDepth());
 
         operation.addRequest(key, requestEntity);
         operation.addResponse(key, responseEntity);
+    }
+
+
+    private Pagination resolvePagination(OperationDTO dto) {
+        if (dto.getOperationType() == OpType.PAGINATION) {
+            Pagination pagination = dto.getPagination() != null ? dto.getPagination() : this.pagination;
+            if (pagination != null) {
+                return pagination.clone();
+            }
+        }
+
+        return null;
+    }
+
+    private URI resolveURI(URI uri, Pagination pagination) {
+        if (pagination == null || !pagination.existsParam(PageParam.LINK)) {
+            return uri;
+        }
+
+        String nextLink = pagination.findParam(PageParam.LINK).getValue();
+        if (nextLink == null || nextLink.isBlank()) {
+            return uri;
+        }
+
+        try {
+            return new URI(nextLink);
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("Invalid pagination link URI: " + nextLink, e);
+        }
     }
 
     private Class<?> getResponseType(OperationDTO dto) {
@@ -156,6 +158,10 @@ public class OperationExecutor {
         } else {
             return String.class;
         }
+    }
+
+    private String buildRef(String operationId, String type, String part) {
+        return operationId + ".(" + type + ")." + part;
     }
 
     private RestTemplate buildRestTemplate(FlowchartEx flowchart, ProxyEx proxy) {
