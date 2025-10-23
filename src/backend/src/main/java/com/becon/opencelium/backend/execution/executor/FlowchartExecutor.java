@@ -1,7 +1,6 @@
 package com.becon.opencelium.backend.execution.executor;
 
 import com.becon.opencelium.backend.enums.LogType;
-import com.becon.opencelium.backend.enums.RelationalOperator;
 import com.becon.opencelium.backend.execution.logger.msg.ConnectorLog;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.logger.msg.MethodData;
@@ -26,6 +25,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Stack;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class FlowchartExecutor {
     private final ExecutionManager executionManager;
@@ -115,66 +115,39 @@ public class FlowchartExecutor {
         } else if (executable instanceof OperatorEx operator && "if".equals(operator.getType())) {
             logger.logAndSend(String.format("phase=IF_START indexPath=%s expression=(%s) %s", index, operator.getExpression(), getLoopData()));
             endPhases.push(String.format("phase=IF_END indexPath=%s %s", index, getLoopData()));
+            endPhases.push("segment=IF_RESULT data=unknown"); // if exception occurs this will be logged, otherwise will just be skipped
 
-            boolean result;
-            try {
-                result = (Boolean) expressionProcessor.evaluate(
-                        operator.getExpression(),
-                        executionManager::getValue,
-                        logger,
-                        masking
-                );
+            boolean result = (Boolean) expressionProcessor.evaluate(
+                    operator.getExpression(),
+                    executionManager::getValue,
+                    logger,
+                    masking
+            );
 
-                logger.logAndSend("segment=IF_RESULT data=" + result);
-            } catch (RuntimeException e) {
-                logger.logAndSend("segment=IF_RESULT data=unknown");
-                throw e;
-            }
-
+            endPhases.pop(); // potential exception case message is skipped
+            logger.logAndSend("segment=IF_RESULT data=" + result);
             if (result) {
-                // if result is true, then execute if operators' body
                 execute(headPointer + 1, tail);
             }
             logger.logAndSend(endPhases.pop());
         } else if (executable instanceof OperatorEx operator && "loop".equals(operator.getType())) {
             Loop loop = Loop.fromEx(operator);
-            Object referencedList = executionManager.getValue(loop.getRef());
-            List<String> list = new ArrayList<>();
+            List<String> values = buildLoopValues(loop);
 
-            if (ObjectUtils.isEmpty(referencedList)) {
-                // if list empty just do nothing
-            } else if (loop.getOperator() == RelationalOperator.FOR) {
-                int length = ((List<Object>) referencedList).size();
-
-                for (int i = 0; i < length; i++) {
-                    list.add(String.valueOf(i));
-                }
-            } else if (loop.getOperator() == RelationalOperator.FOR_IN) {
-                list = (List<String>) referencedList;
-            } else {
-                String[] strs = ((String) referencedList).split(loop.getDelimiter());
-
-                Collections.addAll(list, strs);
-            }
-
-            int length = list.size();
-
-            logger.logAndSend(String.format("phase=LOOP_START indexPath=%s expression=(%s) size=%d iterator=\"%s\" %s", index, loop.getRef(), length, loop.getIterator(), getLoopData()));
-            logger.logAndSend(String.format("segment=LOOP_REF ref=(%s) data=%s", loop.getRef(), list.stream().collect(Collectors.joining(", ", "[", "]"))));
+            logger.logAndSend(String.format("phase=LOOP_START indexPath=%s expression=(%s) size=%d iterator=\"%s\" %s", index, loop.getRef(), values.size(), loop.getIterator(), getLoopData()));
+            logger.logAndSend(String.format("segment=LOOP_REF ref=(%s) data=%s", loop.getRef(), values.stream().collect(Collectors.joining(", ", "[", "]"))));
             endPhases.push(String.format("phase=LOOP_END indexPath=%s %s", index, getLoopData()));
 
             executionManager.getLoops().add(loop);
-            for (int i = 0; i < length; i++) {
+            for (int i = 0; i < values.size(); i++) {
                 // update currently executing loops' data
                 loop.setIndex(i);
-                loop.setValue(list.get(i));
+                loop.setValue(values.get(i));
 
-                // if length !=0, then execute loop operators' body
                 execute(headPointer + 1, tail);
             }
-
-            // remove executed loops' data
             executionManager.getLoops().remove(loop);
+
             logger.logAndSend(endPhases.pop());
         } else {
             throw new IllegalArgumentException("Unsupported type: " + executable.getClass());
@@ -212,6 +185,25 @@ public class FlowchartExecutor {
                 .collect(Collectors.joining(","));
 
         return String.format("loopIterator=\"%s\" loopIndex=\"%s\"", loopIterator, loopIndex);
+    }
+
+    private List<String> buildLoopValues(Loop loop) {
+        Object referencedList = executionManager.getValue(loop.getRef());
+        if (ObjectUtils.isEmpty(referencedList)) {
+            return Collections.emptyList();
+        }
+
+        return switch (loop.getOperator()) {
+            case FOR -> IntStream.range(0, ((List<Object>) referencedList).size())
+                    .mapToObj(String::valueOf)
+                    .toList();
+
+            case FOR_IN -> (List<String>) referencedList;
+
+            case SPLIT_STRING -> List.of(((String) referencedList).split(loop.getDelimiter()));
+
+            default -> Collections.emptyList();
+        };
     }
 
     private static Comparator<Object> getComparator() {
