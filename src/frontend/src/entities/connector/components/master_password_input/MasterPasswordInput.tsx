@@ -30,7 +30,7 @@ const MasterPasswordInput = ({onSuccess}: MasterPasswordProps) => {
     useEffect(() => {
         switch(existingMasterPassword) {
             case API_REQUEST_STATE.FINISH:
-                if (!existMasterPasswordResponse.result) {
+                if (!existMasterPasswordResponse) {
                     togglePrompt(true);
                 }
                 break;

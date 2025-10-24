@@ -83,8 +83,8 @@ export class ConnectorRequest extends Request implements IConnectorRequest{
         return super.get<IResponse>(settings);
     }
 
-    async existMasterPassword(): Promise<AxiosResponse<CheckResponse>>{
+    async existMasterPassword(): Promise<AxiosResponse<boolean>>{
         this.endpoint = '/master-password/status/exist'
-        return super.get<CheckResponse>();
+        return super.get<boolean>();
     }
 }
