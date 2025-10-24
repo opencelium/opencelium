@@ -82,4 +82,9 @@ export class ConnectorRequest extends Request implements IConnectorRequest{
         this.endpoint = '/master-password/status'
         return super.get<IResponse>(settings);
     }
+
+    async existMasterPassword(): Promise<AxiosResponse<IResponse>>{
+        this.endpoint = '/master-password/status/exist'
+        return super.get<IResponse>();
+    }
 }
