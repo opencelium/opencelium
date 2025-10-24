@@ -65,4 +65,6 @@ public interface ConnectorService {
     void verifyMasterPassword(String masterPassword);
 
     Optional<Connector> findAllByTitle(String title);
+
+    Boolean existsMasterPassword();
 }
