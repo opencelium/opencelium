@@ -62,5 +62,5 @@ export interface IConnectorRequest{
     checkMasterPassword(settings: AxiosRequestConfig): Promise<AxiosResponse<IResponse>>,
 
     //to check if master password exist
-    existMasterPassword(): Promise<AxiosResponse<CheckResponse>>,
+    existMasterPassword(): Promise<AxiosResponse<boolean>>,
 }

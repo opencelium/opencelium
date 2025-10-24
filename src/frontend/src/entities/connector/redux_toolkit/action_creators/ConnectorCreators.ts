@@ -242,7 +242,7 @@ export const existMasterPassword = createAsyncThunk(
             const response = await request.existMasterPassword();
             return response.data;
         } catch(e){
-            return thunkAPI.rejectWithValue({message: e.response?.data?.error});
+            return thunkAPI.rejectWithValue(errorHandler(e));
         }
     }
 )
