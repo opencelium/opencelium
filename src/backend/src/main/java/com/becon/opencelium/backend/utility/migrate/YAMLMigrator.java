@@ -189,8 +189,8 @@ public class YAMLMigrator {
                     changeSet.setSuccess(false);
                 } else {
                     log.warn("An error occurred while applying {} - changeset : {}", changeSet.getVersion(), e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
-                    finish(patched, newChangeSets.subList(0, i));
-                    return;
+
+                    changeSet.setSuccess(false);
                 }
             }
         }
