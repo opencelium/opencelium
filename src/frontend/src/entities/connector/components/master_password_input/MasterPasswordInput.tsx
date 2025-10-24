@@ -4,7 +4,10 @@ import {useAppDispatch} from "@application/utils/store";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import Button from "@app_component/base/button/Button";
 import {Connector} from "@entity/connector/classes/Connector";
-import {checkMasterPassword} from "@entity/connector/redux_toolkit/action_creators/ConnectorCreators";
+import {
+    checkMasterPassword,
+    existMasterPassword
+} from "@entity/connector/redux_toolkit/action_creators/ConnectorCreators";
 import {MasterPasswordContainer, PromptContainer} from "@entity/connector/components/master_password_input/styles";
 import {MasterPasswordProps} from "@entity/connector/components/master_password_input/interfaces";
 import {onEnter, setFocusById} from "@application/utils/utils";
@@ -12,7 +15,7 @@ import {InputTextType} from "@app_component/base/input/text/interfaces";
 
 const MasterPasswordInput = ({onSuccess}: MasterPasswordProps) => {
     const dispatch = useAppDispatch();
-    const {checkingMasterPassword, error: reduxError} = Connector.getReduxState();
+    const {checkingMasterPassword, error: reduxError, existingMasterPassword, existMasterPasswordResponse} = Connector.getReduxState();
     const [startSending, setStartSending] = useState<boolean>(false);
     const [password, setPassword] = useState<string>('');
     const [error, setError] = useState<string>('');
@@ -22,9 +25,20 @@ const MasterPasswordInput = ({onSuccess}: MasterPasswordProps) => {
         setStartSending(true);
     }
     useEffect(() => {
-        setStartSending(true);
-        dispatch(checkMasterPassword(password));
+        dispatch(existMasterPassword());
     }, []);
+    useEffect(() => {
+        switch(existingMasterPassword) {
+            case API_REQUEST_STATE.FINISH:
+                if (!existMasterPasswordResponse.result) {
+                    togglePrompt(true);
+                }
+                break;
+            case API_REQUEST_STATE.ERROR:
+                togglePrompt(true);
+                break;
+        }
+    }, [existingMasterPassword]);
     useEffect(() => {
         if (startSending) {
             switch(checkingMasterPassword)  {
