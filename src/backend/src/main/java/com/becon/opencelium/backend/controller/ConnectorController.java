@@ -207,6 +207,19 @@ public class ConnectorController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Checks existence of Master Password")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Exists or Not Exists",
+                    content = @Content(schema = @Schema(implementation = Boolean.class))
+            )
+    })
+    @GetMapping(path = "/master-password/status/exist")
+    public ResponseEntity<Boolean> checkMasterPasswordExist() {
+        return ResponseEntity.ok(connectorService.existsMasterPassword());
+    }
+
     @Operation(summary = "Deletes a connector in the system by providing connector ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204",
