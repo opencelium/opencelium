@@ -169,7 +169,7 @@ public class FlowchartExecutor {
         return headPointer - 1;
     }
 
-    public String getLoopData() {
+    private String getLoopData() {
         List<Loop> loops = executionManager.getLoops();
         if (loops.isEmpty()) {
             return "";
