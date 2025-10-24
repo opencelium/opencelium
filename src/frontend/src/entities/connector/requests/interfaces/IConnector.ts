@@ -14,7 +14,7 @@
  */
 
 import {AxiosRequestConfig, AxiosResponse} from "axios";
-import {IResponse} from "@application/requests/interfaces/IResponse";
+import {CheckResponse, IResponse} from "@application/requests/interfaces/IResponse";
 import ModelConnectorPoust from "../models/ConnectorPoust";
 import ModelConnector from "../models/Connector";
 
@@ -60,4 +60,7 @@ export interface IConnectorRequest{
 
     //to check master password
     checkMasterPassword(settings: AxiosRequestConfig): Promise<AxiosResponse<IResponse>>,
+
+    //to check if master password exist
+    existMasterPassword(): Promise<AxiosResponse<CheckResponse>>,
 }

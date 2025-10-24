@@ -234,6 +234,19 @@ export const deleteConnectorImage = createAsyncThunk(
     }
 )
 
+export const existMasterPassword = createAsyncThunk(
+    'connector/check/master-password/exist',
+    async(data: never, thunkAPI) => {
+        try {
+            const request = new ConnectorRequest();
+            const response = await request.existMasterPassword();
+            return response.data;
+        } catch(e){
+            return thunkAPI.rejectWithValue({message: e.response?.data?.error});
+        }
+    }
+)
+
 export const checkMasterPassword = createAsyncThunk(
     'connector/check/master-password',
     async(password: string, thunkAPI) => {
@@ -259,5 +272,6 @@ export default {
     uploadConnectorImage,
     deleteConnectorImage,
     checkMasterPassword,
+    existMasterPassword,
     getConnectorCredentials,
 }
