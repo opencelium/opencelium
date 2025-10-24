@@ -22,6 +22,10 @@ const MasterPasswordInput = ({onSuccess}: MasterPasswordProps) => {
         setStartSending(true);
     }
     useEffect(() => {
+        setStartSending(true);
+        dispatch(checkMasterPassword(password));
+    }, []);
+    useEffect(() => {
         if (startSending) {
             switch(checkingMasterPassword)  {
                 case API_REQUEST_STATE.FINISH:
@@ -32,7 +36,9 @@ const MasterPasswordInput = ({onSuccess}: MasterPasswordProps) => {
                     setStartSending(false);
                     switch(reduxError?.message) {
                         case 'MASTER_PASSWORD_WRONG':
-                            setError('The master password is wrong.');
+                            if (password !== '') {
+                                setError('The master password is wrong.');
+                            }
                             break;
                         case 'MASTER_PASSWORD_NOT_EXIST':
                             togglePrompt(true);
