@@ -22,6 +22,7 @@ import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.resource.webhook.WebhookResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookTokenResource;
 
+import java.util.Map;
 import java.util.Optional;
 
 public interface WebhookService {
@@ -51,4 +52,6 @@ public interface WebhookService {
     boolean existsBySchedulerId(int id);
 
     WebhookParamDTO toParamResource(String param);
+
+    Map<String, Object> mergeParams(Map<String, Object> primaryParams, Map<String, Object> additionalParams);
 }

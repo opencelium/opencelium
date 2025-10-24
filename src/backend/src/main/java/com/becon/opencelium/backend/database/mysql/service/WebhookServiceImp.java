@@ -16,9 +16,11 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
+import com.becon.opencelium.backend.constant.ExceptionConstant;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.entity.Webhook;
 import com.becon.opencelium.backend.database.mysql.repository.WebhookRepository;
+import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.resource.webhook.WebhookResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookTokenResource;
@@ -27,9 +29,8 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.util.CollectionUtils;
 
-import java.net.URI;
 import java.util.*;
 
 @Service
@@ -55,21 +56,21 @@ public class WebhookServiceImp implements WebhookService {
 
         String uuid = claims.getClaim("uuid").toString();
         String tmp = claims.getClaim("userId").toString();
-        int schedulerId = ((Long)claims.getClaim("schedulerId")).intValue();
+        int schedulerId = ((Long) claims.getClaim("schedulerId")).intValue();
         int userId = Integer.parseInt(tmp);
 
         boolean userExists = userService.existsById(userId);
         boolean schedulerExists = schedulerService.existsById(schedulerId);
 
-        if(!schedulerExists){
+        if (!schedulerExists) {
             throw new RuntimeException("SCHEDULER_NOT_FOUND");
         }
 
-        if (!userExists){
+        if (!userExists) {
             throw new RuntimeException("USER_NOT_FOUND");
         }
 
-        WebhookTokenResource webhookToken = new WebhookTokenResource(userId ,uuid, schedulerId);
+        WebhookTokenResource webhookToken = new WebhookTokenResource(userId, uuid, schedulerId);
 
         return Optional.of(webhookToken);
     }
@@ -165,6 +166,37 @@ public class WebhookServiceImp implements WebhookService {
             webhookParamDTO.setType(var[1]);
         }
         return webhookParamDTO;
+    }
+
+    @Override
+    public Map<String, Object> mergeParams(Map<String, Object> primaryParams, Map<String, Object> additionalParams) {
+        if (CollectionUtils.isEmpty(additionalParams)) {
+            return primaryParams;
+        }
+
+        if (CollectionUtils.isEmpty(primaryParams)) {
+            return additionalParams;
+        }
+
+        boolean conflicted = false;
+        List<String> conflictedParams = new ArrayList<>();
+
+        for (Map.Entry<String, Object> entry : primaryParams.entrySet()) {
+            if (additionalParams.containsKey(entry.getKey())) {
+                conflicted = true;
+                conflictedParams.add(entry.getKey());
+            }
+        }
+
+        if (conflicted) {
+            throw new GeneralServiceException(
+                    ExceptionConstant.INVALID_DATA,
+                    "[%s] parameters are present on both query and body parameters".formatted(String.join(",", conflictedParams))
+            );
+        }
+
+        primaryParams.putAll(additionalParams);
+        return primaryParams;
     }
 
     public Map<String, Object> convertToArrayList(Map<String, Object> inputMap) {

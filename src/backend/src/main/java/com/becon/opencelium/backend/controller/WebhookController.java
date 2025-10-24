@@ -135,15 +135,12 @@ public class WebhookController {
         if (scheduler == null){
             throw new RuntimeException("SCHEDULER_NOT_FOUND");
         }
-        if (queryParam != null && !queryParam.isEmpty() ) {
-            payload.putAll(webhookService.convertToArrayList(queryParam));
-        }
 
         try {
             if (payload.isEmpty()) {
                 schedulerService.startNow(scheduler);
             } else {
-                schedulerService.startNow(scheduler, payload);
+                schedulerService.startNow(scheduler, webhookService.mergeParams(payload, queryParam));
             }
         }
         catch (Exception e){
