@@ -16,9 +16,13 @@ import com.becon.opencelium.backend.resource.execution.ProxyEx;
 import com.becon.opencelium.backend.resource.execution.ResponseDTO;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
@@ -34,6 +38,7 @@ public class OperationExecutor {
     private final RestTemplate restTemplate;
     private final OcLogger<ExecutionLog> logger;
     private final MaskingService masking;
+    private final OnErrorEx onError;
     private final Pagination pagination;
 
     public OperationExecutor(
@@ -44,6 +49,7 @@ public class OperationExecutor {
         this.restTemplate = buildRestTemplate(flowchart, proxy);
         this.logger = logger;
         this.masking = masking;
+        this.onError = onError;
         this.pagination = flowchart.getPagination();
     }
 
@@ -56,7 +62,7 @@ public class OperationExecutor {
         long duration = 0;
         RequestEntity<?> requestEntity;
         ResponseEntity<?> responseEntity;
-        Class<?> responseType;
+        Class<?> responseType = getResponseType(dto);
         do {
             requestEntity = RequestEntityBuilder.start()
                     .forOperation(dto)
@@ -69,11 +75,8 @@ public class OperationExecutor {
             logger.logAndSend(String.format("segment=REQUEST_HEADER data=%s", masking.applyMask(requestEntity.getHeaders(), buildRef(dto.getOperationId(), "request", "header"))));
             logger.logAndSend(String.format("segment=REQUEST_PAYLOAD data=%s", masking.applyMask(requestEntity.getBody(), buildRef(dto.getOperationId(), "request", "body"))));
 
-            HttpEntity<Object> httpEntity = new HttpEntity<>(requestEntity.getBody(), requestEntity.getHeaders());
-            responseType = getResponseType(dto);
-
             long startTime = System.currentTimeMillis();
-            responseEntity = this.restTemplate.exchange(uri, requestEntity.getMethod(), httpEntity, responseType);
+            responseEntity = sendRequest(uri, requestEntity, responseType);
             duration += (System.currentTimeMillis() - startTime);
 
             if (pagination != null) {
@@ -114,6 +117,36 @@ public class OperationExecutor {
         operation.addResponse(key, responseEntity);
     }
 
+
+    private ResponseEntity<?> sendRequest(URI uri, RequestEntity<?> requestEntity, Class<?> responseType) {
+        HttpEntity<Object> httpEntity = new HttpEntity<>(requestEntity.getBody(), requestEntity.getHeaders());
+
+        try {
+            return this.restTemplate.exchange(uri, requestEntity.getMethod(), httpEntity, responseType);
+        } catch (Exception e) {
+            return switch (onError.getStrategy()) {
+                case STOP, RETRY -> throw e;
+                case CONTINUE -> convertException(e);
+            };
+        }
+    }
+
+    private ResponseEntity<?> convertException(Exception e) {
+        if (e instanceof HttpStatusCodeException sce) {
+            return ResponseEntity.status(sce.getStatusCode())
+                    .headers(sce.getResponseHeaders())
+                    .body(sce.getResponseBodyAsString());
+        } else if (e instanceof ResourceAccessException rae) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body("Connection/Resource access error: " + rae.getMessage());
+        } else if (e instanceof RestClientException rce) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("General client error: " + rce.getMessage());
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Unexpected error: " + e.getMessage());
+        }
+    }
 
     private Pagination resolvePagination(OperationDTO dto) {
         if (dto.getOperationType() == OpType.PAGINATION) {

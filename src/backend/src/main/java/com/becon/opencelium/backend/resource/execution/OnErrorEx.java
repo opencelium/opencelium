@@ -1,15 +1,16 @@
 package com.becon.opencelium.backend.resource.execution;
 
-public class OnErrorEx {
-    private String strategy;
+import com.becon.opencelium.backend.enums.execution.HttpErrorHandlingStrategy;
 
+public class OnErrorEx {
+    private HttpErrorHandlingStrategy strategy;
     private RetryEx retry;
 
-    public String getStrategy() {
+    public HttpErrorHandlingStrategy getStrategy() {
         return strategy;
     }
 
-    public void setStrategy(String strategy) {
+    public void setStrategy(HttpErrorHandlingStrategy strategy) {
         this.strategy = strategy;
     }
 
