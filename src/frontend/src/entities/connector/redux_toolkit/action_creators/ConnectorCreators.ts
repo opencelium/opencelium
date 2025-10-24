@@ -242,7 +242,7 @@ export const checkMasterPassword = createAsyncThunk(
             await request.checkMasterPassword({headers: {'X-Master-Password': password}});
             return password;
         } catch(e){
-            return thunkAPI.rejectWithValue({message: e.response.data.error});
+            return thunkAPI.rejectWithValue({message: e.response?.data?.error});
         }
     }
 )
