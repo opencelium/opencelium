@@ -15,7 +15,7 @@ import {InputTextType} from "@app_component/base/input/text/interfaces";
 
 const MasterPasswordInput = ({onSuccess}: MasterPasswordProps) => {
     const dispatch = useAppDispatch();
-    const {checkingMasterPassword, error: reduxError, existingMasterPassword} = Connector.getReduxState();
+    const {checkingMasterPassword, error: reduxError, existingMasterPassword, existMasterPasswordResponse} = Connector.getReduxState();
     const [startSending, setStartSending] = useState<boolean>(false);
     const [password, setPassword] = useState<string>('');
     const [error, setError] = useState<string>('');
@@ -30,6 +30,9 @@ const MasterPasswordInput = ({onSuccess}: MasterPasswordProps) => {
     useEffect(() => {
         switch(existingMasterPassword) {
             case API_REQUEST_STATE.FINISH:
+                if (!existMasterPasswordResponse.result) {
+                    togglePrompt(true);
+                }
                 break;
             case API_REQUEST_STATE.ERROR:
                 togglePrompt(true);

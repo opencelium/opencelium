@@ -239,7 +239,8 @@ export const existMasterPassword = createAsyncThunk(
     async(data: never, thunkAPI) => {
         try {
             const request = new ConnectorRequest();
-            await request.existMasterPassword();
+            const response = await request.existMasterPassword();
+            return response.data;
         } catch(e){
             return thunkAPI.rejectWithValue({message: e.response?.data?.error});
         }

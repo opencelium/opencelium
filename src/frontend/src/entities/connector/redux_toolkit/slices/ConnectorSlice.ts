@@ -14,7 +14,7 @@
  */
 
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {IResponse, ResponseMessages} from "@application/requests/interfaces/IResponse";
+import {CheckResponse, IResponse, ResponseMessages} from "@application/requests/interfaces/IResponse";
 import {ICommonState} from "@application/interfaces/core";
 import {CommonState} from "@application/utils/store";
 import {API_REQUEST_STATE, TRIPLET_STATE} from "@application/interfaces/IApplication";
@@ -52,6 +52,7 @@ export interface ConnectorState extends ICommonState{
     deletingConnectorImage: API_REQUEST_STATE,
     checkingMasterPassword: API_REQUEST_STATE,
     existingMasterPassword: API_REQUEST_STATE,
+    existMasterPasswordResponse: CheckResponse,
     masterPassword: string,
     currentConnector: ModelConnector,
 }
@@ -72,6 +73,7 @@ const initialState: ConnectorState = {
     deletingConnectorImage: API_REQUEST_STATE.INITIAL,
     checkingMasterPassword: API_REQUEST_STATE.INITIAL,
     existingMasterPassword: API_REQUEST_STATE.INITIAL,
+    existMasterPasswordResponse: {result: false},
     masterPassword: '',
     currentConnector: null,
     ...CommonState,
@@ -259,8 +261,9 @@ export const connectorSlice = createSlice({
         [existMasterPassword.pending.type]: (state) => {
             state.existingMasterPassword = API_REQUEST_STATE.START;
         },
-        [existMasterPassword.fulfilled.type]: (state, action: PayloadAction<string>) => {
+        [existMasterPassword.fulfilled.type]: (state, action: PayloadAction<CheckResponse>) => {
             state.existingMasterPassword = API_REQUEST_STATE.FINISH;
+            state.existMasterPasswordResponse = action.payload;
             state.error = null;
         },
         [existMasterPassword.rejected.type]: (state, action: PayloadAction<IResponse>) => {
