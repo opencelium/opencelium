@@ -281,7 +281,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 .orElseGet(() -> {
                     // If no history exists, create a new one
                     return operationUsageHistoryService.createNewEntity(sub, connectionEx.getConnectionName(),
-                            opsUsage, startTime, null, null);
+                            opsUsage, startTime, connectionEx.getSource().getInvoker(), connectionEx.getTarget().getInvoker());
                 });
         operationUsageHistoryService.save(operationUsageHistory);
         if (!isCurrentUsageIsValid(sub)) {
