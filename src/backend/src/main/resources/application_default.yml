@@ -228,7 +228,7 @@ opencelium:
     type: sources
   service-portal:
     base-url: https://service.opencelium.io
-    token: # your-token-here
+    token: your-token-here
   ###########################################################################
   #                                                                         #
   #   Polyglot Engine Configuration                                         #
