@@ -3,6 +3,10 @@ package com.becon.opencelium.backend.resource.execution;
 public class InvokerEx {
     private String name;
 
+    public InvokerEx(String invoker) {
+        this.name = invoker;
+    }
+
     public String getName() {
         return name;
     }

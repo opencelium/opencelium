@@ -34,11 +34,23 @@ public class ConnectionMng {
     @Field(name = "connection_id")
     private Long connectionId; // id generated in mariadb.
 
+    /**
+     * In old connections
+     */
     @Field(name = "from_connector")
     private ConnectorMng fromConnector;
 
+    /**
+     * In old connections
+     */
     @Field(name = "to_connector")
     private ConnectorMng toConnector;
+
+    @Field(name = "flowcharts")
+    private List<FlowchartMng> flowcharts;
+
+    @Field(name = "execution_plan")
+    private ExecutionPlanMng executionPlan;
 
     @DBRef
     private List<FieldBindingMng> fieldBindings; // [null, null, null]
@@ -72,6 +84,22 @@ public class ConnectionMng {
         this.connectionId = connectionId;
     }
 
+    public List<FieldBindingMng> getFieldBindings() {
+        return fieldBindings;
+    }
+
+    public void setFieldBindings(List<FieldBindingMng> fieldBindings) {
+        this.fieldBindings = fieldBindings;
+    }
+
+    public Map<String, Object> getUi() {
+        return ui;
+    }
+
+    public void setUi(Map<String, Object> ui) {
+        this.ui = ui;
+    }
+
     public ConnectorMng getFromConnector() {
         return fromConnector;
     }
@@ -88,19 +116,19 @@ public class ConnectionMng {
         this.toConnector = toConnector;
     }
 
-    public List<FieldBindingMng> getFieldBindings() {
-        return fieldBindings;
+    public List<FlowchartMng> getFlowcharts() {
+        return flowcharts;
     }
 
-    public void setFieldBindings(List<FieldBindingMng> fieldBindings) {
-        this.fieldBindings = fieldBindings;
+    public void setFlowcharts(List<FlowchartMng> flowcharts) {
+        this.flowcharts = flowcharts;
     }
 
-    public Map<String, Object> getUi() {
-        return ui;
+    public ExecutionPlanMng getExecutionPlan() {
+        return executionPlan;
     }
 
-    public void setUi(Map<String, Object> ui) {
-        this.ui = ui;
+    public void setExecutionPlan(ExecutionPlanMng executionPlan) {
+        this.executionPlan = executionPlan;
     }
 }

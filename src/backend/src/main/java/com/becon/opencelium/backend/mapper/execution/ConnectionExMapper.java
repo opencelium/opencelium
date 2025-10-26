@@ -6,18 +6,21 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ConnectionExMapper {
-    private final ConnectorExMapper connectorExMapper;
+    private final FlowchartMapperEx flowchartMapperEx;
     private final FieldBindExMapper fieldBindExMapper;
-    public ConnectionExMapper(ConnectorExMapper connectorExMapper, FieldBindExMapper fieldBindExMapper) {
-        this.connectorExMapper = connectorExMapper;
+    private final ExecutionPlanExMapper executionPlanExMapper;
+
+    public ConnectionExMapper(FlowchartMapperEx flowchartMapperEx, FieldBindExMapper fieldBindExMapper, ExecutionPlanExMapper executionPlanExMapper) {
+        this.flowchartMapperEx = flowchartMapperEx;
         this.fieldBindExMapper = fieldBindExMapper;
+        this.executionPlanExMapper = executionPlanExMapper;
     }
 
     public ConnectionEx toEntity(ConnectionMng dto){
         ConnectionEx connectionEx = new ConnectionEx();
         connectionEx.setConnectionId(dto.getConnectionId());
-        connectionEx.setSource(connectorExMapper.toEntity(dto.getFromConnector(), dto.getConnectionId()));
-        connectionEx.setTarget(connectorExMapper.toEntity(dto.getToConnector(), dto.getConnectionId()));
+        connectionEx.setFlowcharts(flowchartMapperEx.toFlowchartExAll(dto.getFlowcharts(), dto.getConnectionId()));
+        connectionEx.setExecutionPlan(executionPlanExMapper.toExecutionPlanEx(dto.getExecutionPlan()));
         connectionEx.setFieldBind(fieldBindExMapper.toEntityAll(dto.getFieldBindings()));
         return connectionEx;
     }
