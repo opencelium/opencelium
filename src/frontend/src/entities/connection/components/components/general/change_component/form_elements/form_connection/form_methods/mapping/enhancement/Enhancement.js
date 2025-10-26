@@ -32,13 +32,7 @@ import {
 } from '../../../form_svg/details/description/technical_process/reference_information/styles';
 import InputSelect from "@app_component/base/input/select/InputSelect";
 import {codeGeneratorRegistry} from "@classes/content/connection/field_binding/code_generators/registry";
-
-const languageOptions = [
-	{label: 'JavaScript', value: 'js'},
-	//{label: 'Python2', value: 'python2'},
-	{label: 'Python3', value: 'python3'},
-	{label: 'Ruby', value: 'ruby'},
-];
+import Languages from "@change_component/form_elements/form_connection/form_methods/mapping/enhancement/Languages";
 
 const modeMap = {
 	'js': 'javascript',
@@ -194,15 +188,7 @@ class Enhancement extends Component {
 				>
 					{this.renderExpertVar(expertVar)}
 				</FieldBindingsBlockStyled>
-				<InputSelect
-					id={`input_language`}
-					icon={'code'}
-					marginBottom={'20px'}
-					label={'Language'}
-					options={languageOptions}
-					onChange={(option) => this.updateCurrentLanguage(option.value)}
-					value={languageOptions.find(o => o.value === currentLanguage)}
-				/>
+				<Languages onChange={(option) => this.updateCurrentLanguage(option.value)} currentLanguage={currentLanguage}/>
 				<Input
 					readOnly={readOnly}
 					value={expertCode}

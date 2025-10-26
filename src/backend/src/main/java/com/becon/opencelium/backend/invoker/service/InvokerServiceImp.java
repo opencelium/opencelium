@@ -51,6 +51,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -165,6 +166,35 @@ public class InvokerServiceImp implements InvokerService {
     }
 
     @Override
+    public void moveInvokersToNewLocation(String oldPath, String newPath) {
+        List<Path> oldInvokers = getAllPaths(oldPath);
+
+        Path targetPath = Paths.get(newPath);
+        if (Files.exists(targetPath)) {
+            targetPath.toFile().mkdirs();
+        }
+
+        oldInvokers.forEach(x -> {
+            try {
+                Files.move(
+                        x,
+                        targetPath.resolve(x.getFileName()),
+                        StandardCopyOption.REPLACE_EXISTING
+                );
+            } catch (IOException e) {
+                log.error("Failed to move {} file from {} to {}", x, oldPath, newPath);
+                throw new RuntimeException(e);
+            }
+        });
+
+        try {
+            Files.deleteIfExists(Path.of(oldPath));
+        } catch (IOException e) {
+            log.error("Failed to remove folder {}", oldPath);
+        }
+    }
+
+    @Override
     public Map<String, Invoker> containerize(List<Document> invokers) {
         Map<String, Invoker> container = new HashMap<>();
         invokers.forEach(document -> {
@@ -185,17 +215,17 @@ public class InvokerServiceImp implements InvokerService {
 //    public void forceDelete(String name) {
 //        Objects.requireNonNull(name);
 //        Consumer<String> refDeletion = invokerName -> {
-////            if (connectorService.existByInvoker(invokerName)) {
-////                Connector connector = connectorService.
-////                Connection connection = connectionServiceImp.findAllByConnectorId()
-////                connectionServiceImp.deleteById();
-////                connectorService.deleteByInvoker(invokerName);
-////            }
+
+    ////            if (connectorService.existByInvoker(invokerName)) {
+    ////                Connector connector = connectorService.
+    ////                Connection connection = connectionServiceImp.findAllByConnectorId()
+    ////                connectionServiceImp.deleteById();
+    ////                connectorService.deleteByInvoker(invokerName);
+    ////            }
 //
 //        };
 //        deleteInvoker(name, refDeletion);
 //    }
-
     private void deleteInvoker(String name) {
         Objects.requireNonNull(name);
         Invoker backup = invokerContainer.getByName(name);
@@ -552,6 +582,20 @@ public class InvokerServiceImp implements InvokerService {
                             throw new WrongEncode("UTF8");
                         }
                     }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private List<Path> getAllPaths(String folder) {
+        if (Files.notExists(Paths.get(folder))) {
+            return Collections.emptyList();
+        }
+
+        try (Stream<Path> walk = Files.walk(Paths.get(folder))) {
+            return walk.filter(Files::isRegularFile)
+                    .map(Path::toAbsolutePath)
+                    .toList();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

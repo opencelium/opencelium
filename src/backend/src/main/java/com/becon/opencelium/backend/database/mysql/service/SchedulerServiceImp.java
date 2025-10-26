@@ -373,9 +373,4 @@ public class SchedulerServiceImp implements SchedulerService {
     public void deleteNotificationById(int id) {
         notificationRepository.deleteById(id);
     }
-
-    @Override
-    public long getConnectionIdById(int schedulerId) {
-        return getById(schedulerId).getConnection().getId();
-    }
 }

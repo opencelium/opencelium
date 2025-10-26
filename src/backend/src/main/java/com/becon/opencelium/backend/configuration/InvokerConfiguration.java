@@ -39,10 +39,13 @@ public class InvokerConfiguration {
     @Bean
     public Map<String, Invoker> containerBean(@Qualifier("invokerServiceImp") InvokerService invokerService){
         if (Files.notExists(filePath)){
-            File directory = new File(PathConstant.INVOKER);
-            directory.mkdir();
+            File directory = filePath.toFile();
+            directory.mkdirs();
             System.out.println("Directory has been created: " + PathConstant.INVOKER);
         }
+
+        invokerService.moveInvokersToNewLocation(PathConstant.INVOKER_ON_RESOURCES, PathConstant.INVOKER);
+
         List<Document> invokers = invokerService.getAllInvokerDocuments();
         return invokerService.containerize(invokers);
     }

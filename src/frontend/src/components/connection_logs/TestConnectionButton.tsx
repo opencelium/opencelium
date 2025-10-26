@@ -17,7 +17,7 @@ import {ConnectionSocketLog, LightSegment, LoopOperatorProperty} from "@root/req
 import {
     addSocketLog,
     clearSocketLog,
-    clearTextLog,
+    clearTextLog, setCollectionDataError,
     setCurrentLog, setCurrentLogError, setIsForcedFinished,
     setIsTesting
 } from "@root/redux_toolkit/slices/ConnectionLogSlice";
@@ -108,9 +108,13 @@ const TestConnectionButton = ({validateLogic}: any) => {
             }
             const subscription = socket.subscribe(`/execution/logs/${channelId}`, (message) => {
                 const data = JSON.parse(message.body) as ConnectionSocketLog<LightSegment>;
-                console.log(data);
+                //console.log(data);
                 if (data.type === 'EXECUTION' && data.status === 'PENDING') {
                     setStartTime(Date.now())
+                }
+                if (!!data.error && !!data.message) {
+                    dispatch(setCollectionDataError(data.message));
+                    stopTestUrgent();
                 }
                 if (isTestFinished(data)) return;
                 if (shouldSkipTrace(data)) return;
@@ -204,20 +208,30 @@ const TestConnectionButton = ({validateLogic}: any) => {
             setChannelId(connection.id || channelId);
         }
     }
+    const isDisabled = !socket.connected;
     return (
-        <Button
-            id={'test_connection_button'}
-            className={styles.testConnectionTitle}
-            hasBackground={true}
-            background={isTesting ? ColorTheme.Blue : ColorTheme.White}
-            color={isTesting ? ColorTheme.White : ColorTheme.Gray}
-            padding="2px 10px"
-            handleClick={isTesting ? stopTest : generateChannelId}
-            icon={isTesting ? "stop" : "play_arrow"}
-            loadingSize={TextSize.Size_14}
-            label={isTesting ? "Stop" : "Test run"}
-            size={TextSize.Size_12}
-        />
+        <div style={{position: 'relative'}}>
+            <Button
+                id={'test_connection_button'}
+                className={styles.testConnectionTitle}
+                hasBackground={true}
+                isDisabled={isDisabled}
+                background={isTesting ? ColorTheme.Blue : ColorTheme.White}
+                color={isDisabled ? '#ccc !important' : isTesting ? ColorTheme.White : ColorTheme.Gray}
+                padding="2px 10px"
+                handleClick={isTesting ? stopTest : generateChannelId}
+                icon={isTesting ? "stop" : "play_arrow"}
+                loadingSize={TextSize.Size_14}
+                label={isTesting ? "Stop" : "Test run"}
+            />
+            {isDisabled && <span style={{
+                position: 'absolute',
+                bottom: '1px',
+                left: '26px',
+                fontSize: '10px',
+                color: '#ccc'
+            }}>{"Websocket is inactive"}</span>}
+        </div>
     )
 }
 export default TestConnectionButton;

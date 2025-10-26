@@ -79,6 +79,9 @@ public class LogFileUtility {
     public static void move(Long connectionId, long executionId, String timestamp, String type, int fileLimit) {
         Path sourcePath = toPath(LOG_LOCATION, toFilename(timestamp, connectionId, UNCATEGORIZED, executionId, LOG_FILE_EXTENSION));
         Path destinationPath = toPath(LOG_LOCATION, connectionId.toString(), toFilename(timestamp, connectionId, type, executionId, LOG_FILE_EXTENSION));
+        if (!Files.exists(sourcePath)) {
+            return;
+        }
 
         try {
             Files.createDirectories(destinationPath.getParent());

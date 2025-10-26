@@ -24,6 +24,11 @@ export interface ElasticSearchResponseProps {
     details: {version: string, error: string},
     status: ExternalApplicationStatus,
 }
+
+export interface CheckPolyglotResponse {
+    details: {version: string, error: string},
+    status: ExternalApplicationStatus,
+}
 export interface DBResponseProps {
     details: {version: string, name: string, error?: string},
     status: ExternalApplicationStatus,
@@ -42,6 +47,9 @@ export interface IExternalApplicationRequest {
 
     //to check elastic search status
     checkElasticsearch(): Promise<AxiosResponse<ElasticSearchResponseProps>>,
+
+    //to check polyglot status
+    checkPolyglot(): Promise<AxiosResponse<CheckPolyglotResponse>>,
 
     //to check mongodb status
     checkMongoDB(): Promise<AxiosResponse<DBResponseProps>>,

@@ -20,26 +20,28 @@ public class ScriptLanguageServiceImpl implements ScriptLanguageService {
 
     @Override
     public List<ScriptLanguageDTO> getAllLanguages() {
-        List<Language> languages = scriptExecutionManager.availableLanguages();
+//        List<Language> languages = scriptExecutionManager.availableLanguages();
+//
+//        if (languages == null || languages.isEmpty()) {
+//            return Collections.emptyList();
+//        }
+//
+//        return languages.stream()
+//                .map(this::buildLanguage)
+//                .toList();
 
-        if (languages == null || languages.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return languages.stream()
-                .map(this::buildLanguage)
-                .toList();
+        return Collections.emptyList();
     }
 
-    private ScriptLanguageDTO buildLanguage(Language language) {
-        ScriptLanguageDTO languageDTO = new ScriptLanguageDTO();
-
-        LanguageType langType = language.getLanguage();
-        if (langType != null) {
-            languageDTO.setLanguage(langType.getCode());
-            languageDTO.setLanguageName(langType.getName());
-        }
-
-        return languageDTO;
-    }
+//    private ScriptLanguageDTO buildLanguage(Language language) {
+//        ScriptLanguageDTO languageDTO = new ScriptLanguageDTO();
+//
+//        LanguageType langType = language.getLanguage();
+//        if (langType != null) {
+//            languageDTO.setLanguage(langType.getCode());
+//            languageDTO.setLanguageName(langType.getName());
+//        }
+//
+//        return languageDTO;
+//    }
 }

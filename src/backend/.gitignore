@@ -3,6 +3,7 @@ HELP.md
 build/
 logs/
 support-files/
+runtime/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**
 !**/src/test/**
@@ -11,6 +12,7 @@ assistant/temporary
 assistant/versions
 src/main/resources/application.yml
 src/main/resources/upload-dir
+runtime/
 
 # invoker folder
 ## ignore everything in the invoker folder
