@@ -16,7 +16,7 @@
 import {AxiosRequestConfig, AxiosResponse} from "axios";
 import Request from "@entity/application/requests/classes/Request";
 import {IRequestSettings} from "@application/requests/interfaces/IRequest";
-import {IResponse} from "@application/requests/interfaces/IResponse";
+import {CheckResponse, IResponse} from "@application/requests/interfaces/IResponse";
 import {IConnectorRequest} from "../interfaces/IConnector";
 import ModelConnectorPoust from "../models/ConnectorPoust";
 import ModelConnector from "../models/Connector";
@@ -81,5 +81,10 @@ export class ConnectorRequest extends Request implements IConnectorRequest{
     async checkMasterPassword(settings: AxiosRequestConfig): Promise<AxiosResponse<IResponse>>{
         this.endpoint = '/master-password/status'
         return super.get<IResponse>(settings);
+    }
+
+    async existMasterPassword(): Promise<AxiosResponse<boolean>>{
+        this.endpoint = '/master-password/status/exist'
+        return super.get<boolean>();
     }
 }

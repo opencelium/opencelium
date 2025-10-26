@@ -2,6 +2,7 @@ package com.becon.opencelium.backend.execution.logger.context;
 
 
 import com.becon.opencelium.backend.execution.logger.dto.ErrorDetail;
+import com.becon.opencelium.backend.execution.logger.dto.ErrorInfoDTO;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseStatus;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseType;
 import com.becon.opencelium.backend.execution.logger.enums.SegmentType;
@@ -15,6 +16,9 @@ public class PhaseContextManager {
     private String connectionId;
     private String flowId;
     private String connectorName;
+    // currently, execution could have only one exception
+    // if it occurs then we save it here to cast to parent elements.
+    private ErrorDetail exception; // TODO: should be removed after UI optimisation
     private final Deque<PhaseContext> stack = new ArrayDeque<>();
 
     public PhaseContextManager() {
@@ -65,6 +69,9 @@ public class PhaseContextManager {
         if (removed == null) {
             throw new IllegalStateException("Phase context to end was not found in stack.");
         }
+
+        // Adds exception to parent elements
+        removed.setErrorDetail(exception); // TODO: should be removed after UI optimisation
         return removed;
     }
 
@@ -108,6 +115,8 @@ public class PhaseContextManager {
         this.connectionId = connectionId;
     }
 
+
+
     /**
      * Called when an EXCEPTION segment occurs.
      * Clears all nested phases except FLOWCHART and EXECUTION, which are managed by the dispatcher.
@@ -137,5 +146,11 @@ public class PhaseContextManager {
         PhaseContext currentPhase = getCurrentPhase();
         ErrorDetail errorDetail = new ErrorDetail(errorOfOriginPath, segmentContext);
         currentPhase.setErrorDetail(errorDetail);
+        currentPhase.setStatus(PhaseStatus.FAIL);
+        exception = errorDetail; // TODO: should be removed after UI optimisation
+    }
+
+    public ErrorDetail getException() {
+        return exception;
     }
 }

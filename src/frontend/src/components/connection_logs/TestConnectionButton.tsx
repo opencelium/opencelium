@@ -208,20 +208,30 @@ const TestConnectionButton = ({validateLogic}: any) => {
             setChannelId(connection.id || channelId);
         }
     }
+    const isDisabled = !socket.connected;
     return (
-        <Button
-            id={'test_connection_button'}
-            className={styles.testConnectionTitle}
-            hasBackground={true}
-            background={isTesting ? ColorTheme.Blue : ColorTheme.White}
-            color={isTesting ? ColorTheme.White : ColorTheme.Gray}
-            padding="2px 10px"
-            handleClick={isTesting ? stopTest : generateChannelId}
-            icon={isTesting ? "stop" : "play_arrow"}
-            loadingSize={TextSize.Size_14}
-            label={isTesting ? "Stop" : "Test run"}
-            size={TextSize.Size_12}
-        />
+        <div style={{position: 'relative'}}>
+            <Button
+                id={'test_connection_button'}
+                className={styles.testConnectionTitle}
+                hasBackground={true}
+                isDisabled={isDisabled}
+                background={isTesting ? ColorTheme.Blue : ColorTheme.White}
+                color={isDisabled ? '#ccc !important' : isTesting ? ColorTheme.White : ColorTheme.Gray}
+                padding="2px 10px"
+                handleClick={isTesting ? stopTest : generateChannelId}
+                icon={isTesting ? "stop" : "play_arrow"}
+                loadingSize={TextSize.Size_14}
+                label={isTesting ? "Stop" : "Test run"}
+            />
+            {isDisabled && <span style={{
+                position: 'absolute',
+                bottom: '1px',
+                left: '26px',
+                fontSize: '10px',
+                color: '#ccc'
+            }}>{"Websocket is inactive"}</span>}
+        </div>
     )
 }
 export default TestConnectionButton;

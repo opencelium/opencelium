@@ -105,6 +105,7 @@ export const connectionLogSlice = createSlice({
 			state.isFinished = false;
 			state.isForcedFinished = false;
 			state.traceConfigs = {};
+			state.collectionDataError = '';
 		},
 		addSocketLog: (state, action: PayloadAction<{data: ConnectionSocketLog<LightSegment>, settings: {executionTime?: number, hasNewLoopIndex: boolean, parentIndexPath: string}}>) => {
 			const {executionId, flowId, connectorName, ...newTrace} = action.payload.data;
@@ -287,6 +288,7 @@ export const connectionLogSlice = createSlice({
 			state.isFinished = false;
 			state.isForcedFinished = false;
 			state.traceConfigs = {};
+			state.collectionDataError = '';
 		});
 	},
 });

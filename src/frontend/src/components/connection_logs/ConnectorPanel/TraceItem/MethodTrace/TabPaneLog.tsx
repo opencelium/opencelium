@@ -102,7 +102,7 @@ const TabPaneLog = ({tabId, value, theme, height, setHeight, content}: {content:
                     icon={'file_copy'}
                     hasBackground={false}
                     handleClick={() => {
-                        copyStringToClipboard(content);
+                        copyStringToClipboard(isJsonString(content) ? JSON.stringify(JSON.parse(content), null, 2) : content);
                         dispatch(copyLogContentToClipboard())
                     }}
                     style={{

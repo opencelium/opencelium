@@ -48,7 +48,7 @@ function formatDuration(ms: number): string {
 
 const LogsPanel: React.FC<LogsPanelProps> = ({theme}) => {
   const dispatch = useAppDispatch();
-  const {collectionDataError, textLogs, executionId, connectors, isTesting, isFinished, executionTime, isForcedFinished} = useAppSelector((state: RootState) => state.connectionLogReducer);
+  const {collectionDataError, textLogs, executionId, connectors, isTesting, isFinished, executionTime, isForcedFinished, currentLogError} = useAppSelector((state: RootState) => state.connectionLogReducer);
   const {
     logPanelHeight, isDetailsOpened
   } = Connection.getReduxState();
@@ -70,7 +70,7 @@ const LogsPanel: React.FC<LogsPanelProps> = ({theme}) => {
               right={isDetailsOpened ? isFullScreen ? 312 : 300 : isFullScreen ? 12 : 2}
               iconSize={TextSize.Size_20}
               position={'right'}
-              isDisabled={isDeleting || connectors.length === 0 || isTesting}
+              isDisabled={(isDeleting || connectors.length === 0 || isTesting) && !collectionDataError}
               isLoading={isTesting}
               icon={'delete'}
               tooltip={'Clear Logs'}
@@ -79,18 +79,6 @@ const LogsPanel: React.FC<LogsPanelProps> = ({theme}) => {
               handleClick={() => handleDeleteLogs(executionId)}
           />}
 
-            <MinimizeLogsButtonStyled
-                right={isDetailsOpened ? isFullScreen ? 366 : 354 : isFullScreen ? 66 : 54}
-                tooltip={'Hide'}
-                target={`log_panel_hide`}
-                hasBackground={false}
-                handleClick={() => {
-                    dispatch(setLogPanelHeight(0))
-                    dispatch(setFullScreen(false));
-                }}
-                icon={'minimize'}
-                size={TextSize.Size_20}
-            />
           <FullLogsButtonStyled
               right={isDetailsOpened ? isFullScreen ? 336 : 324 : isFullScreen ? 36 : 24}
               tooltip={`${logPanelHeight === LogPanelHeight.Full ? 'Minimize' : 'Fullscreen'}`}
@@ -108,6 +96,18 @@ const LogsPanel: React.FC<LogsPanelProps> = ({theme}) => {
               icon={`${logPanelHeight === LogPanelHeight.Full ? 'arrow_drop_down' : 'fullscreen'}`}
               size={TextSize.Size_20}
           />
+            <MinimizeLogsButtonStyled
+                right={isDetailsOpened ? isFullScreen ? 359 : 347 : isFullScreen ? 59 : 47}
+                tooltip={'Hide'}
+                target={`log_panel_hide`}
+                hasBackground={false}
+                handleClick={() => {
+                    dispatch(setLogPanelHeight(0))
+                    dispatch(setFullScreen(false));
+                }}
+                icon={'minimize'}
+                size={TextSize.Size_20}
+            />
         </TopStyled>
     }
       <LogPanelStyled id={'connection_current_logs'} isFullScreen={isFullScreen} noLogs={textLogs.length === 0} isDetailsOpened={isDetailsOpened} logPanelHeight={logPanelHeight}>
@@ -124,7 +124,7 @@ const LogsPanel: React.FC<LogsPanelProps> = ({theme}) => {
                 />
             ))}
           {isFinished && <FinishedLogsStyled>{`TEST FINISHED in ${formatDuration(executionTime)}`}</FinishedLogsStyled>}
-          {isForcedFinished && <ForcedFinishedLogsStyled>{`TEST STOPPED`}</ForcedFinishedLogsStyled>}
+          {(isForcedFinished || !!currentLogError?.log) && <ForcedFinishedLogsStyled>{`TEST STOPPED`}</ForcedFinishedLogsStyled>}
       </LogPanelStyled>
     </React.Fragment>
   );

@@ -16,5 +16,5 @@ export const PromptContainer = styled.div`
     border-radius: 5px;
     background-color: #fff;
     position: absolute;
-    top: 150px;
+    top: 0px;
 `;

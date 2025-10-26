@@ -35,6 +35,10 @@ export interface IResponse{
     result?: boolean | any,
 }
 
+export interface CheckResponse {
+    result: boolean,
+}
+
 export interface PageResponse<Entry> {
     content: Entry[],
     currentPage: number,

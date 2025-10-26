@@ -3,6 +3,7 @@ HELP.md
 build/
 logs/
 support-files/
+runtime/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**
 !**/src/test/**
