@@ -209,6 +209,41 @@ if you mouse over on one of them and click on the respective icon.
 
 |image_notifications_6|
 
+
+Execution Logs
+"""""""""""""""""
+
+Each job in the Scheduler includes a detailed **Execution Log** view.  
+The log viewer uses the same interactive **UI-Log interface** as the *Test-Run* feature in the Connection Editor,  
+allowing users to inspect requests, loops, and responses in a structured, tree-based layout.
+
+For each scheduled job, the system automatically maintains historical logs for both **successful** and **failed** executions:
+
+- **Success Logs:** retain the two most recent successful runs  
+- **Fail Logs:** retain the three most recent failed runs  
+
+This retention behavior can be adjusted in the backend configuration file (`application.yml`):
+
+.. code-block:: yaml
+
+   log:
+     retention:
+       per-connection:
+         success: 2
+         fail: 3
+
+Adjusting these values changes how many historical logs are stored per connection or scheduled job.  
+Older logs exceeding the defined retention limits are automatically removed.
+
+|image_execution_logs_1|
+
+This is an overview of all logs that can be viewed.
+
+|image_execution_logs_2|
+
+...and this is the UI log view, which we also use for the test run
+
+
 Support Logs
 """""""""""""""""
 The *Logs* feature allows you to create comprehensive log files for support in case your connection 
@@ -409,5 +444,10 @@ logs of past runs.
 .. |image_support_logs_5| image:: ../img/schedule/OC_support_logs_icon_eye_open.png
    :height: 21
 .. |image_support_logs_6| image:: ../img/schedule/OC_support_logs_btn_create_logs.png
+   :align: middle
+   :height: 30
+.. |image_execution_logs_1| image:: ../img/schedule/OC_execution_logs_overview.png
+   :height: 30
+.. |image_execution_logs_2| image:: ../img/schedule/OC_execution_logs_uilog.png
    :align: middle
    :height: 30
