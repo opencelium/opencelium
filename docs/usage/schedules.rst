@@ -447,7 +447,7 @@ logs of past runs.
    :align: middle
    :height: 30
 .. |image_execution_logs_1| image:: ../img/schedule/OC_execution_logs_overview.png
-   :height: 30
+   :height: 300
 .. |image_execution_logs_2| image:: ../img/schedule/OC_execution_logs_uilog.png
    :align: middle
-   :height: 30
+   :height: 400
