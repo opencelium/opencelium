@@ -209,6 +209,7 @@ if you mouse over on one of them and click on the respective icon.
 
 |image_notifications_6|
 
+.. _scheduler_execution_log:
 
 Execution Logs
 """""""""""""""""
