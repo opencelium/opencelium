@@ -85,7 +85,10 @@ export const connectorSlice = createSlice({
     reducers: {
         setCurrentConnector: (state, action) => {
             state.currentConnector = action.payload;
-        }
+        },
+        clearMasterPassword: (state) => {
+            state.masterPassword = '';
+        },
     },
     extraReducers: {
         [testRequestData.pending.type]: (state, action: PayloadAction<ModelConnectorPoust>) => {
@@ -282,6 +285,6 @@ export const connectorSlice = createSlice({
     }
 })
 
-export const {setCurrentConnector} = connectorSlice.actions;
+export const {setCurrentConnector, clearMasterPassword} = connectorSlice.actions;
 
 export default connectorSlice.reducer;
