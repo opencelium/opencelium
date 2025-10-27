@@ -488,6 +488,8 @@ During execution, all API requests, loops, and responses are logged and displaye
 
 The UI log component provides structured, interactive access to runtime data, enabling developers to inspect requests, monitor performance, and identify issues directly in the editor.
 
+.. _connection_ui_logger:
+
 UI Log Structure
 ==================
 
