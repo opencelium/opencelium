@@ -474,6 +474,117 @@ Response:
         </body>
 
 
+Test-Run
+"""""""""""""""""
+
+The **Test-Run** feature allows developers to execute a configured connection directly from the Connection Editor and view runtime logs in the user interface.  
+It is designed to support debugging, inspection, and optimization of interface workflows without relying on external log files or additional tools.
+
+Functional Overview
+==================
+
+A Test-Run executes the configured connection workflow using the current editor state.  
+During execution, all API requests, loops, and responses are logged and displayed in real time within the UI.
+
+The UI log component provides structured, interactive access to runtime data, enabling developers to inspect requests, monitor performance, and identify issues directly in the editor.
+
+UI Log Structure
+==================
+
+The log viewer is inspired by browser developer tools and presents log data in a hierarchical tree format:
+
+- **API Requests**  
+  Each API request is represented as a collapsible log entry containing:
+  
+  - HTTP method and endpoint  
+  - Request headers and body  
+  - Response status, headers, and body  
+  - Execution time in milliseconds  
+
+- **Loops**  
+  When a step is executed in a loop, all iterations are displayed as a compressed group.  
+  Each iteration can be expanded or accessed directly via an index-based paginator.
+
+- **Error and Warning Handling**  
+  Log entries are categorized by severity (`ERROR`, `WARNING`, `INFO`).  
+  Errors are highlighted visually and can be expanded to inspect detailed request and response data.
+
+|image37|
+
+|image37|
+
+Real-Time Streaming (WebSocket)
+==================
+
+Log data is streamed to the frontend via a **WebSocket** connection.  
+This enables real-time feedback while a Test-Run is executing.
+
+Technical details:
+
+- Bidirectional WebSocket channel between client and backend  
+- JSON-based message format for all log events  
+- Incremental streaming in chunks to reduce network load  
+- Automatic reconnection logic on connection loss  
+
+
+Scalability and Performance
+==================
+
+The log system is designed to handle large data volumes efficiently.  
+Several mechanisms are implemented to maintain responsiveness:
+
+- Lazy-loading of log entries  
+- Collapsed view for repeated or looped steps  
+- Pagination when exceeding 500 log entries  
+- Asynchronous rendering pipeline in the frontend  
+
+
+Scheduler Integration
+==================
+
+The same logging system is also used for the **Scheduler**.  
+This ensures a unified log format and viewing experience for both manual (Test-Run) and scheduled executions.
+
+- Consistent UI for live and historical executions  
+- Logs accessible from the Scheduler job detail view  
+- Full execution history with filtering by date, status, or job ID  
+
+
+Log Format
+==================
+
+Each log event follows a defined JSON schema:
+
+.. code-block:: json
+
+   {
+     "timestamp": "2025-10-27T10:45:32.521Z",
+     "level": "INFO",
+     "context": "connection.step.3",
+     "message": "Request executed successfully",
+     "duration_ms": 245,
+     "request": {
+       "method": "POST",
+       "url": "https://api.example.com/items",
+       "body": { ... }
+     },
+     "response": {
+       "status": 200,
+       "body": { ... }
+     }
+   }
+
+
+
+
+Error Handling
+==================
+
+When errors occur (e.g., failed requests, timeouts, or invalid responses), the log entry is marked with `level: ERROR`.  
+The UI highlights the affected request in red and allows developers to inspect the full request and response payloads.
+
+
+
 .. |image_operators_1| image:: ../img/connection/OC_operators_empty_connection.png
    :align: middle
    :width: 600
@@ -600,5 +711,11 @@ Response:
    :align: middle
    :width: 300
 .. |image49| image:: ../img/connection/49.png
+   :width: 300
+   :align: middle
+.. |image50| image:: ../img/connection/50.png
+   :align: middle
+   :width: 300
+.. |image51| image:: ../img/connection/51.png
    :width: 300
    :align: middle
