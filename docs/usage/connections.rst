@@ -511,9 +511,11 @@ The log viewer is inspired by browser developer tools and presents log data in a
 
 
 |image50|
+
 Presentation of the Connection Editor interface in the UI log
 
 |image51|
+
 ... and the unfolding of the API request
 
 
