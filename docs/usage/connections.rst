@@ -509,9 +509,9 @@ The log viewer is inspired by browser developer tools and presents log data in a
   Log entries are categorized by severity (`ERROR`, `WARNING`, `INFO`).  
   Errors are highlighted visually and can be expanded to inspect detailed request and response data.
 
-|image37|
+|image49|
 
-|image37|
+|image50|
 
 Real-Time Streaming (WebSocket)
 ==================
