@@ -590,6 +590,152 @@ When errors occur (e.g., failed requests, timeouts, or invalid responses), the l
 The UI highlights the affected request in red and allows developers to inspect the full request and response payloads.
 
 
+Multi-Language Support for Enhancements
+"""""""""""""""""
+
+OpenCelium 4.6 introduces **multi-language support for Enhancements**, extending the enhancement execution engine beyond JavaScript.  
+Developers can now write enhancement logic in **Python 2**, **Python 3**, and **Ruby** – with additional language support (e.g. Go, TypeScript) planned for future releases.
+
+
+Overview
+==================
+
+Enhancements in OpenCelium are used to manipulate or format data retrieved from API responses before passing it to subsequent requests.  
+Previously, these logic transformations could only be implemented using JavaScript executed directly within the Core.  
+
+With the new multi-language feature, developers can define and execute enhancement scripts in different programming languages.  
+This provides more flexibility for integrating existing code snippets or reusing domain-specific logic.
+
+
+Architecture
+==================
+
+- **JavaScript Enhancements**  
+  Still executed directly in the OpenCelium Core runtime for minimal latency.
+
+- **External Language Execution (Python / Ruby)**  
+  Handled by a dedicated microservice — the `polyglot-engine`.  
+  This service runs code in a **sandboxed environment** to ensure security and isolation from the Core system.
+
+- **Communication**  
+  Enhancement scripts written in Python or Ruby are transmitted to the `polyglot-engine`,  
+  executed remotely, and their result is returned to the Core for further processing.
+
+Repository:  
+`https://github.com/opencelium/polyglot-engine <https://github.com/opencelium/polyglot-engine>`_
+
+
+Supported Languages
+==================
+
+- JavaScript *(default; executed within Core)*  
+- Python 2  
+- Python 3  
+- Ruby  
+
+
+Example
+==================
+
+**JavaScript**
+
+.. code-block:: javascript
+
+   let result = VAR_0.toUpperCase();
+   RESULT_VAR = result;
+
+**Python**
+
+.. code-block:: python
+
+   result = VAR_0.upper()
+   RESULT_VAR = result
+
+**Ruby**
+
+.. code-block:: ruby
+
+   result = VAR_0.upcase
+   RESULT_VAR = result
+
+
+Configuration
+==================
+
+The Polyglot Engine service must be reachable by the OpenCelium Core.  
+Configuration is typically defined in the backend settings file (`application.yml`).
+
+Example section (default setup):
+
+.. code-block:: yaml
+
+   ###########################################################################
+   #                                                                         #
+   #   Polyglot Engine Configuration                                         #
+   #   You can enable Python 3, Ruby, or GraalVM JS                          #
+   #   using this configuration.                                             #
+   #                                                                         #
+   #   By default OC uses Nashorn JS                                         #
+   #                                                                         #
+   ###########################################################################
+   polyglot:
+     # Enables or disables the polyglot service integration.
+     # Default: false
+     enabled: false
+
+     # Communication protocol used to connect to the polyglot service.
+     # Supported: grpc (default), http (future)
+     # Default: grpc
+     protocol: grpc
+
+     # Host address of the polyglot service.
+     # Default: 127.0.0.1
+     host: '127.0.0.1'
+
+     # Port number of the polyglot service.
+     # Default: 6566
+     port: 6566
+
+     # Automatically starts the polyglot service JAR if not running.
+     # If false, assumes the service is already running externally.
+     # Default: false
+     auto-start: false
+
+     launch:
+       # Path to the polyglot service JAR file.
+       # Required only if auto-start is true.
+       # Example: /opt/polyglot/polyglot-service.jar
+       jarPath:
+
+       # Command-line arguments passed to the polyglot service.
+       args:
+
+       # Maximum time (in seconds) to wait for the service to start and respond.
+       # Default: 30
+       waitTimeoutSec: 30
+
+       # JVM arguments used when launching the polyglot service.
+       # Adjust for performance or memory tuning.
+       # Default: "-Xms64m -Xmx256m"
+       jvmArgs: '-Xms64m -Xmx256m'
+
+       # Enables forwarding of logs produced by the external polyglot JAR
+       # to this application’s logging system.
+       # Default: false
+       external-log-enabled: false
+
+
+Runtime Behavior
+==================
+
+- When **`polyglot.enabled`** is `false`, enhancements are executed internally using the JavaScript engine.  
+- When **enabled**, the Core routes enhancement scripts to the external Polyglot Engine.  
+- Startup automation can be controlled via **`auto-start`** and `launch.jarPath` configuration values.  
+- Logs and execution errors from the Polyglot Engine can optionally be forwarded to the main application log.
+
+
+If the service is disabled or unreachable, enhancement execution will fall back to **JavaScript-only** mode.
+
 
 .. |image_operators_1| image:: ../img/connection/OC_operators_empty_connection.png
    :align: middle
