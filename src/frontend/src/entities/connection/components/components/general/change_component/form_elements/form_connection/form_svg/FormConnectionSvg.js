@@ -28,6 +28,7 @@ import ButtonPanel from './layouts/button_panel/ButtonPanel';
 import TechnicalLayout from './layouts/TechnicalLayout';
 
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
+import {checkPolyglot} from "@entity/external_application/redux_toolkit/action_creators/ExternalApplicationCreators";
 
 export const HAS_LAYOUTS_SCALING = true;
 
@@ -56,7 +57,8 @@ function mapStateToProps(state, props) {
     setConnectionData,
     setModalConnectionData,
     setModalCurrentTechnicalItem,
-    clearCurrentLogs
+    clearCurrentLogs,
+    checkPolyglot
   },
   null,
   { forwardRef: true }
@@ -103,6 +105,7 @@ class FormConnectionSvg extends Component {
         ? entity.getObjectForConnectionOverview()
         : entity;
     this.setData({ connection: connectionData });
+    //this.props.checkPolyglot();
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
