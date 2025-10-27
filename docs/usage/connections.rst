@@ -510,11 +510,11 @@ The log viewer is inspired by browser developer tools and presents log data in a
   Errors are highlighted visually and can be expanded to inspect detailed request and response data.
 
 
-|image49|
-.. centered:: Presentation of the Connection Editor interface in the UI log
-
 |image50|
-.. centered:: ... and the unfolding of the API request
+Presentation of the Connection Editor interface in the UI log
+
+|image51|
+... and the unfolding of the API request
 
 
 Real-Time Streaming (WebSocket)
@@ -713,7 +713,7 @@ The UI highlights the affected request in red and allows developers to inspect t
    :align: middle
    :width: 300
 .. |image49| image:: ../img/connection/49.png
-   :width: 300
+   :width: 100
    :align: middle
 .. |image50| image:: ../img/connection/50.png
    :align: middle
