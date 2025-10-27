@@ -550,7 +550,7 @@ Several mechanisms are implemented to maintain responsiveness:
 Scheduler Integration
 ==================
 
-The same logging system is also used for the **Scheduler**.  
+The same logging system is also used for the :ref:`Scheduler <scheduler_execution_log>`.  
 This ensures a unified log format and viewing experience for both manual (Test-Run) and scheduled executions.
 
 - Consistent UI for live and historical executions  
