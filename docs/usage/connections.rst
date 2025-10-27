@@ -509,9 +509,13 @@ The log viewer is inspired by browser developer tools and presents log data in a
   Log entries are categorized by severity (`ERROR`, `WARNING`, `INFO`).  
   Errors are highlighted visually and can be expanded to inspect detailed request and response data.
 
+
 |image49|
+.. centered:: Presentation of the Connection Editor interface in the UI log
 
 |image50|
+.. centered:: ... and the unfolding of the API request
+
 
 Real-Time Streaming (WebSocket)
 ==================
@@ -573,8 +577,6 @@ Each log event follows a defined JSON schema:
        "body": { ... }
      }
    }
-
-
 
 
 Error Handling
@@ -715,7 +717,7 @@ The UI highlights the affected request in red and allows developers to inspect t
    :align: middle
 .. |image50| image:: ../img/connection/50.png
    :align: middle
-   :width: 300
+   :width: 1000
 .. |image51| image:: ../img/connection/51.png
-   :width: 300
+   :width: 1000
    :align: middle
