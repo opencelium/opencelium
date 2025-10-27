@@ -241,7 +241,7 @@ This is an overview of all logs that can be viewed.
 
 |image_execution_logs_2|
 
-...and this is the :ref:`UI log viewer <connection_ui_log>`, which we also use for the test run.
+...and this is the :ref:`UI log viewer <connection_ui_logger>`, which we also use for the test run.
 
 
 Support Logs
