@@ -310,35 +310,6 @@ Corresponding messages in the notifications indicate the start and successful ge
 The generated support logs can be accessed either via the link in the notification or under Support Files
 in the admin panel.
 
-Logs
-"""""""""""""""""
-The entries in the columns *Last Success* and *Last Fail* give you direct access to the corresponding logs.
-Click directly on the number of the run to open the log in the log viewer. The three dots also give you access to further
-logs of past runs.
-
-.. note::
-   You can configure the number of logs provided via *application.yml*.
-
-   Open the *application.yml* that can be found under the following path:
-
-   .. code-block::
-
-      /opt/opencelium/src/backend/src/main/resources/application.yml
-
-   Add the following entry underneath *opencelium*
-
-   .. code-block::
-
-      opencelium:
-         [...]
-         log:
-            retention:
-               per-connection:
-               success: 2
-               fail: 3
-
-   Save the file and restart the backend.
-
 .. |image_schedules_1| image:: ../img/schedule/OC_schedules_list.png
    :align: middle
    :width: 600
