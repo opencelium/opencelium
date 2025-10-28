@@ -35,6 +35,7 @@ This documentation is organized into a couple of sections:
    management/notification_template
    management/aggregator
    management/invoker
+   management/smart_sync
 
 .. toctree::
    :caption: Services
