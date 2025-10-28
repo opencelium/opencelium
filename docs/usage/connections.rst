@@ -474,6 +474,269 @@ Response:
         </body>
 
 
+Test-Run
+"""""""""""""""""
+
+The **Test-Run** feature allows developers to execute a configured connection directly from the Connection Editor and view runtime logs in the user interface.  
+It is designed to support debugging, inspection, and optimization of interface workflows without relying on external log files or additional tools.
+
+Functional Overview
+==================
+
+A Test-Run executes the configured connection workflow using the current editor state.  
+During execution, all API requests, loops, and responses are logged and displayed in real time within the UI.
+
+The UI log component provides structured, interactive access to runtime data, enabling developers to inspect requests, monitor performance, and identify issues directly in the editor.
+
+.. _connection_ui_logger:
+
+UI Log Structure
+==================
+
+The log viewer is inspired by browser developer tools and presents log data in a hierarchical tree format:
+
+- **API Requests**  
+  Each API request is represented as a collapsible log entry containing:
+  
+  - HTTP method and endpoint  
+  - Request headers and body  
+  - Response status, headers, and body  
+  - Execution time in milliseconds  
+
+- **Loops**  
+  When a step is executed in a loop, all iterations are displayed as a compressed group.  
+  Each iteration can be expanded or accessed directly via an index-based paginator.
+
+- **Error and Warning Handling**  
+  Log entries are categorized by severity (`ERROR`, `WARNING`, `INFO`).  
+  Errors are highlighted visually and can be expanded to inspect detailed request and response data.
+
+
+|image50|
+
+Presentation of the Connection Editor interface in the UI log
+
+|image51|
+
+... and the unfolding of the API request
+
+
+Real-Time Streaming (WebSocket)
+==================
+
+Log data is streamed to the frontend via a **WebSocket** connection.  
+This enables real-time feedback while a Test-Run is executing.
+
+Technical details:
+
+- Bidirectional WebSocket channel between client and backend  
+- JSON-based message format for all log events  
+- Incremental streaming in chunks to reduce network load  
+- Automatic reconnection logic on connection loss  
+
+
+Scalability and Performance
+==================
+
+The log system is designed to handle large data volumes efficiently.  
+Several mechanisms are implemented to maintain responsiveness:
+
+- Lazy-loading of log entries  
+- Collapsed view for repeated or looped steps  
+- Pagination when exceeding 500 log entries  
+- Asynchronous rendering pipeline in the frontend  
+
+
+Scheduler Integration
+==================
+
+The same logging system is also used for the :ref:`Scheduler <scheduler_execution_log>`.  
+This ensures a unified log format and viewing experience for both manual (Test-Run) and scheduled executions.
+
+- Consistent UI for live and historical executions  
+- Logs accessible from the Scheduler job detail view  
+- Full execution history with filtering by date, status, or job ID  
+
+
+Log Format
+==================
+
+Each log event follows a defined JSON schema:
+
+.. code-block:: json
+
+   {
+     "timestamp": "2025-10-27T10:45:32.521Z",
+     "level": "INFO",
+     "context": "connection.step.3",
+     "message": "Request executed successfully",
+     "duration_ms": 245,
+     "request": {
+       "method": "POST",
+       "url": "https://api.example.com/items",
+       "body": { ... }
+     },
+     "response": {
+       "status": 200,
+       "body": { ... }
+     }
+   }
+
+
+Error Handling
+==================
+
+When errors occur (e.g., failed requests, timeouts, or invalid responses), the log entry is marked with `level: ERROR`.  
+The UI highlights the affected request in red and allows developers to inspect the full request and response payloads.
+
+
+Multi-Language Support for Enhancements
+"""""""""""""""""
+
+OpenCelium 4.6 introduces **multi-language support for Enhancements**, extending the enhancement execution engine beyond JavaScript.  
+Developers can now write enhancement logic in **Python 2**, **Python 3**, and **Ruby** – with additional language support (e.g. Go, TypeScript) planned for future releases.
+
+
+Overview
+==================
+
+Enhancements in OpenCelium are used to manipulate or format data retrieved from API responses before passing it to subsequent requests.  
+Previously, these logic transformations could only be implemented using JavaScript executed directly within the Core.  
+
+With the new multi-language feature, developers can define and execute enhancement scripts in different programming languages.  
+This provides more flexibility for integrating existing code snippets or reusing domain-specific logic.
+
+
+Architecture
+==================
+
+- **JavaScript Enhancements**  
+  Still executed directly in the OpenCelium Core runtime for minimal latency.
+
+- **External Language Execution (Python / Ruby)**  
+  Handled by a dedicated microservice — the `polyglot-engine`.  
+  This service runs code in a **sandboxed environment** to ensure security and isolation from the Core system.
+
+- **Communication**  
+  Enhancement scripts written in Python or Ruby are transmitted to the `polyglot-engine`,  
+  executed remotely, and their result is returned to the Core for further processing.
+
+Repository:  
+`https://github.com/opencelium/polyglot-engine <https://github.com/opencelium/polyglot-engine>`_
+
+
+Supported Languages
+==================
+
+- JavaScript *(default; executed within Core)*  
+- Python 2  
+- Python 3  
+- Ruby  
+
+
+Example
+==================
+
+**JavaScript**
+
+.. code-block:: javascript
+
+   let result = VAR_0.toUpperCase();
+   RESULT_VAR = result;
+
+**Python**
+
+.. code-block:: python
+
+   result = VAR_0.upper()
+   RESULT_VAR = result
+
+**Ruby**
+
+.. code-block:: ruby
+
+   result = VAR_0.upcase
+   RESULT_VAR = result
+
+
+Configuration
+==================
+
+The Polyglot Engine service must be reachable by the OpenCelium Core.  
+Configuration is typically defined in the backend settings file (`application.yml`).
+
+Example section (default setup):
+
+.. code-block:: yaml
+
+   ###########################################################################
+   #                                                                         #
+   #   Polyglot Engine Configuration                                         #
+   #   You can enable Python 3, Ruby, or GraalVM JS                          #
+   #   using this configuration.                                             #
+   #                                                                         #
+   #   By default OC uses Nashorn JS                                         #
+   #                                                                         #
+   ###########################################################################
+   polyglot:
+     # Enables or disables the polyglot service integration.
+     # Default: false
+     enabled: false
+
+     # Communication protocol used to connect to the polyglot service.
+     # Supported: grpc (default), http (future)
+     # Default: grpc
+     protocol: grpc
+
+     # Host address of the polyglot service.
+     # Default: 127.0.0.1
+     host: '127.0.0.1'
+
+     # Port number of the polyglot service.
+     # Default: 6566
+     port: 6566
+
+     # Automatically starts the polyglot service JAR if not running.
+     # If false, assumes the service is already running externally.
+     # Default: false
+     auto-start: false
+
+     launch:
+       # Path to the polyglot service JAR file.
+       # Required only if auto-start is true.
+       # Example: /opt/polyglot/polyglot-service.jar
+       jarPath:
+
+       # Command-line arguments passed to the polyglot service.
+       args:
+
+       # Maximum time (in seconds) to wait for the service to start and respond.
+       # Default: 30
+       waitTimeoutSec: 30
+
+       # JVM arguments used when launching the polyglot service.
+       # Adjust for performance or memory tuning.
+       # Default: "-Xms64m -Xmx256m"
+       jvmArgs: '-Xms64m -Xmx256m'
+
+       # Enables forwarding of logs produced by the external polyglot JAR
+       # to this application’s logging system.
+       # Default: false
+       external-log-enabled: false
+
+
+Runtime Behavior
+==================
+
+- When **`polyglot.enabled`** is `false`, enhancements are executed internally using the JavaScript engine.  
+- When **enabled**, the Core routes enhancement scripts to the external Polyglot Engine.  
+- Startup automation can be controlled via **`auto-start`** and `launch.jarPath` configuration values.  
+- Logs and execution errors from the Polyglot Engine can optionally be forwarded to the main application log.
+
+
+If the service is disabled or unreachable, enhancement execution will fall back to **JavaScript-only** mode.
+
+
 .. |image_operators_1| image:: ../img/connection/OC_operators_empty_connection.png
    :align: middle
    :width: 600
@@ -600,5 +863,11 @@ Response:
    :align: middle
    :width: 300
 .. |image49| image:: ../img/connection/49.png
-   :width: 300
+   :width: 100
+   :align: middle
+.. |image50| image:: ../img/connection/50.png
+   :align: middle
+   :width: 1000
+.. |image51| image:: ../img/connection/51.png
+   :width: 1000
    :align: middle
