@@ -18,6 +18,12 @@ export const getSocket = () => {
             connectHeaders: {
                 "client-id": `${Date.now()}-${Math.random()}`,
             },
+            onConnect: () => {
+                consoleLog('Socket connected');
+            },
+            onDisconnect: () => {
+                consoleLog('Socket disconnected');
+            },
             debug: (str: string) => {
                 consoleLog('[STOMP DEBUG]', str);
             },
@@ -36,12 +42,10 @@ export const getSocket = () => {
     return socketClient;
 };
 
-export const disableSocket = () => {
-    if (socketClient.connected) {
-        socketClient.deactivate().then(() => {
-            socketClient = null;
-        })
-    } else {
+export const disableSocket = async () => {
+    if (socketClient) {
+        socketClient.reconnectDelay = 0;
+        await socketClient.deactivate();
         socketClient = null;
     }
 }

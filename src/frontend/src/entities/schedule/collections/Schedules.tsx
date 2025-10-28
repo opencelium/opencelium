@@ -59,7 +59,7 @@ class Schedules extends ListCollection<ScheduleProps>{
     listStyles = {borderTopLeftRadius: '0px'};
     getListRawUrl = (entity: ISchedule) => `/schedules/${entity.id}/update`;
     ListRawComponent = DefaultListRaw;
-    sortingProps: ScheduleProps[] = ['title'];
+    sortingProps: ScheduleProps[] = ['title', 'connection.title', 'lastSuccessExecution', 'lastFailExecution', 'lastDuration'];
     listProps: ListProp<ScheduleProps>[] = [
     {
         propertyKey: 'status',
@@ -78,9 +78,11 @@ class Schedules extends ListCollection<ScheduleProps>{
     }, {
         propertyKey: 'connection.title',
         width: '15%',
+        style: {textAlign: 'left', padding: '10px'},
         getValue: (schedule: ISchedule) => {
+            const shortTitle = schedule.connection.title.length > 64 ? `${schedule.connection.title.substr(0, 64)}...` : schedule.connection.title;
             return(
-                <Link to={`/connections/${schedule.connection.connectionId}/update`} title={schedule.connection.title} style={{color: 'black'}}>{schedule.connection.title}</Link>
+                <Link to={`/connections/${schedule.connection.connectionId}/update`} title={schedule.connection.title} style={{color: 'black'}}>{shortTitle}</Link>
             );
         },
     }, {
@@ -220,6 +222,42 @@ class Schedules extends ListCollection<ScheduleProps>{
                         return this.asc(a.title, b.title);
                     } else{
                         return this.desc(a.title, b.title);
+                    }
+                })
+                break;
+            case 'connection.title':
+                this.entities = this.entities.sort((a: ISchedule, b: ISchedule) => {
+                    if(sortingType === SortType.asc){
+                        return this.asc(a.connection.title, b.connection.title);
+                    } else{
+                        return this.desc(a.connection.title, b.connection.title);
+                    }
+                })
+                break;
+            case 'lastSuccessExecution':
+                this.entities = this.entities.sort((a: ISchedule, b: ISchedule) => {
+                    if(sortingType === SortType.asc){
+                        return this.asc(a.lastExecution?.success?.startTime, b.lastExecution?.success?.startTime);
+                    } else{
+                        return this.desc(a.lastExecution?.success?.startTime, b.lastExecution?.success?.startTime);
+                    }
+                })
+                break;
+            case 'lastFailExecution':
+                this.entities = this.entities.sort((a: ISchedule, b: ISchedule) => {
+                    if(sortingType === SortType.asc){
+                        return this.asc(a.lastExecution?.fail?.startTime, b.lastExecution?.fail?.startTime);
+                    } else{
+                        return this.desc(a.lastExecution?.fail?.startTime, b.lastExecution?.fail?.startTime);
+                    }
+                })
+                break;
+            case 'lastDuration':
+                this.entities = this.entities.sort((a: ISchedule, b: ISchedule) => {
+                    if(sortingType === SortType.asc){
+                        return this.asc(a.lastExecution?.success?.duration, b.lastExecution?.success?.duration);
+                    } else{
+                        return this.desc(a.lastExecution?.success?.duration, b.lastExecution?.success?.duration);
                     }
                 })
                 break;

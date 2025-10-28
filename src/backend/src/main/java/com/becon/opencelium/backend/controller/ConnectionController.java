@@ -23,16 +23,20 @@ import com.becon.opencelium.backend.constant.Constant;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
+import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
+import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
+import com.becon.opencelium.backend.exception.ConcurrentTestIsForbidden;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.execution.socket.Connection2WebSocketChannelMapping;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.ApiDataResource;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
+import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectionResource;
 import com.becon.opencelium.backend.resource.connection.MethodDTO;
@@ -81,7 +85,10 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -92,6 +99,7 @@ public class ConnectionController {
 
     private final Environment environment;
     private final ConnectionService connectionService;
+    private final ConnectorService connectorService;
     private final ConnectionMngService connectionMngService;
     private final SchedulerService schedulerService;
     private final Connection2WebSocketChannelMapping connection2ChannelMapping;
@@ -104,6 +112,7 @@ public class ConnectionController {
     public ConnectionController(
             Environment environment,
             SchedulerService schedulerService,
+            ConnectorService connectorService,
             Connection2WebSocketChannelMapping connection2ChannelMapping,
             Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper,
             Mapper<Connection, ConnectionDTO> connectionMapper,
@@ -117,6 +126,7 @@ public class ConnectionController {
         this.schedulerService = schedulerService;
         this.connection2ChannelMapping = connection2ChannelMapping;
         this.connectionService = connectionService;
+        this.connectorService = connectorService;
         this.connectionMngMapper = connectionMngMapper;
         this.connectionMapper = connectionMapper;
         this.connectionMngService = connectionMngService;
@@ -143,6 +153,40 @@ public class ConnectionController {
         return ResponseEntity.ok(connectionOldDTOMapper.toDTOAll(all));
     }
 
+    @Operation(summary = "Retrieves all connections from database by invokerName")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Connections have been successfully retrieved by invokerName",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConnectionOldDTO.class)))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping(path = "/dependency/{invokerName}")
+    public ResponseEntity<?> getByInvokerName(@PathVariable String invokerName) {
+        List<Integer> connectorIds = connectorService.findAllByInvoker(invokerName).stream().map(Connector::getId).toList();
+
+        List<ConnectionDTO> connections = new ArrayList<>();
+        Set<Long> connectionIds = new HashSet<>();
+
+        for (Integer connectorId : connectorIds) {
+            List<Connection> connectionsByConnectorId = connectionService.findAllByConnectorId(connectorId);
+
+            for (Connection connection : connectionsByConnectorId) {
+                if (connectionIds.add(connection.getId())) {
+                    connections.add(connectionService.getFullConnection(connection.getId()));
+                }
+            }
+        }
+
+        List<ConnectionOldDTO> result = connections.stream()
+                .map(connectionOldDTOMapper::toDTO)
+                .toList();
+        return ResponseEntity.ok(result);
+    }
 
     @Operation(summary = "Retrieves all Metadata of connections from database")
     @ApiResponses(value = {
@@ -258,7 +302,7 @@ public class ConnectionController {
         schedulerService.getAllRunningJobs().forEach(job -> {
             String schedulerTitle = job.getTitle();
             if (schedulerTitle.startsWith("!*test_schedule_") && schedulerTitle.endsWith(connectionOldDTO.getTitle())) {
-                throw new RuntimeException("Concurrent test executions for the same connection");
+                throw new ConcurrentTestIsForbidden(0L);
             }
         });
 
@@ -290,20 +334,6 @@ public class ConnectionController {
         SchedulerResource schedulerResource = new SchedulerResource();
         schedulerResource.setSchedulerId(scheduler.getId());
         return ResponseEntity.ok(schedulerResource);
-    }
-
-    @Operation(summary = "Retrieves a log file with given executionId")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved", content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE))
-    })
-    @GetMapping("/execution/{executionId}")
-    public ResponseEntity<byte[]> getExecutionLogs(@PathVariable Long executionId) {
-
-        FileDescriptor logFile = LogFileUtility.getLogFile(executionId);
-
-        return ResponseEntity.ok()
-                .headers(logFile.buildHeaders())
-                .body(logFile.getData());
     }
 
     @Operation(summary = "Deletes a connection by provided connection ID")
@@ -551,7 +581,7 @@ public class ConnectionController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(path = "/remoteapi", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> sendRequestToApi(@RequestBody ApiDataResource apiDataResource) throws Exception {
+    public ResponseEntity<?> sendRequestToApi(@RequestBody ApiDataResource apiDataResource) {
         HttpHeaders headers = new HttpHeaders();
         if (apiDataResource.getHeader() != null) {
             headers.setAll(apiDataResource.getHeader());
@@ -588,7 +618,7 @@ public class ConnectionController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PutMapping(path = "/list/delete")
-    public ResponseEntity<?> deleteCtionByIdIn(@RequestBody IdentifiersDTO<Long> ids) throws Exception {
+    public ResponseEntity<?> deleteCtionByIdIn(@RequestBody IdentifiersDTO<Long> ids) {
         ids.getIdentifiers().forEach(connectionService::deleteById);
         return ResponseEntity.noContent().build();
     }
@@ -672,7 +702,7 @@ public class ConnectionController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(path = "/{connectionId}/rule/list", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<RuleDTO>> saveRuleList(@PathVariable long connectionId, @RequestBody List<RuleDTO> dtos) throws Exception {
+    public ResponseEntity<List<RuleDTO>> saveRuleList(@PathVariable long connectionId, @RequestBody List<RuleDTO> dtos) {
         final URI uri = MvcUriComponentsBuilder
                 .fromController(getClass())
                 .buildAndExpand().toUri();
@@ -693,7 +723,7 @@ public class ConnectionController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(path = "/{connectionId}/rule", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<RuleDTO> saveRule(@PathVariable long connectionId, @RequestBody RuleDTO dto) throws Exception {
+    public ResponseEntity<RuleDTO> saveRule(@PathVariable long connectionId, @RequestBody RuleDTO dto) {
         final URI uri = MvcUriComponentsBuilder
                 .fromController(getClass())
                 .buildAndExpand().toUri();
@@ -714,7 +744,7 @@ public class ConnectionController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PutMapping(path = "/{connectionId}/rule/{ruleId}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> updateRule(@PathVariable long connectionId, @PathVariable long ruleId, @RequestBody RuleDTO dto) throws Exception {
+    public ResponseEntity<?> updateRule(@PathVariable long connectionId, @PathVariable long ruleId, @RequestBody RuleDTO dto) {
         return ResponseEntity.ok(connectionService.updateRule(connectionId, ruleId, dto));
     }
 
@@ -794,5 +824,23 @@ public class ConnectionController {
         schedulerService.startNow(scheduler, rules);
 
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Retrieves list of log names for connection")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Log names for a connection has been successfully retrieved",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConnectionResource.class)))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping(path = "/{connectionId}/log-files")
+    public ResponseEntity<ResultDTO<List<String>>> getLogFileNameList(@PathVariable long connectionId) {
+        ResultDTO<List<String>> logFileNames = new ResultDTO<>(connectionService.getLogFileNameListById(connectionId));
+        return ResponseEntity.ok(logFileNames);
     }
 }

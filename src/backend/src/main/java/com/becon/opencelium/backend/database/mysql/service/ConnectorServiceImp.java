@@ -16,7 +16,8 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
-import com.becon.opencelium.backend.configuration.ConnectorProps;
+import com.becon.opencelium.backend.constant.AppYamlPath;
+import com.becon.opencelium.backend.constant.props.ConnectorProps;
 import com.becon.opencelium.backend.constant.ExceptionConstant;
 import com.becon.opencelium.backend.constant.ExceptionMessages;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
@@ -25,6 +26,7 @@ import com.becon.opencelium.backend.database.mysql.repository.ConnectorRepositor
 import com.becon.opencelium.backend.exception.ConnectorAlreadyExistsException;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
+import com.becon.opencelium.backend.execution.logger.mapper.ParsedLogLineMapper;
 import com.becon.opencelium.backend.execution.rdata.RequiredDataService;
 import com.becon.opencelium.backend.execution.rdata.RequiredDataServiceImp;
 import com.becon.opencelium.backend.invoker.InvokerRequestBuilder;
@@ -34,6 +36,7 @@ import com.becon.opencelium.backend.invoker.entity.RequiredData;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.utility.crypto.Encoder;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
@@ -163,6 +166,18 @@ public class ConnectorServiceImp implements ConnectorService {
     }
 
     @Override
+    public Optional<Connector> findAllByTitle(String title) {
+        Optional<Connector> connector = connectorRepository.findByTitle(title);
+        connector.ifPresent(this::decrypt);
+        return connector;
+    }
+
+    @Override
+    public Boolean existsMasterPassword() {
+        return StringUtils.isNotBlank(connectorProps.getMasterPassword());
+    }
+
+    @Override
     public ResponseEntity<?> checkCommunication(Connector connector) {
         InvokerRequestBuilder invokerRequestBuilder = new InvokerRequestBuilder();
         FunctionInvoker function = invokerService.getTestFunction(connector.getInvoker());
@@ -268,11 +283,11 @@ public class ConnectorServiceImp implements ConnectorService {
                     ExceptionMessages.MASTER_PASSWORD_IS_MISSING_IN_HEADER
             );
         }
-        if (Objects.isNull(connectorProps.getMasterPassword())) {
+        if (StringUtils.isBlank(connectorProps.getMasterPassword())) {
             throw new GeneralServiceException(
                     HttpStatus.BAD_REQUEST,
                     ExceptionConstant.MASTER_PASSWORD_NOT_EXIST,
-                    ExceptionMessages.MASTER_PASSWORD_NOT_EXIST
+                    "%s is not set in the application.yml file".formatted(AppYamlPath.MASTER_PASSWORD)
             );
         }
         if (!Objects.equals(connectorProps.getMasterPassword(), masterPassword)) {

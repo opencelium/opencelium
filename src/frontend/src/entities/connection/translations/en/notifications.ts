@@ -14,10 +14,16 @@
  */
 
 import ActionCreators from "../../redux_toolkit/action_creators";
-import {getAndUpdateConnectionTitle, getAndUpdateConnectionDescription} from "@root/redux_toolkit/action_creators/ConnectionCreators";
+import {
+    getAndUpdateConnectionTitle,
+    getAndUpdateConnectionDescription,
+    getAllMetaConnectionsByInvokerName
+} from "@root/redux_toolkit/action_creators/ConnectionCreators";
 import { syncInvokers } from "@entity/connection/redux_toolkit/slices/EditorSlice";
 import { requestRemoteApi } from "@entity/connection/redux_toolkit/action_creators/EditorCreators";
 import {notifyAboutNewSupportFile} from "@root/redux_toolkit/slices/SupportFileSlice";
+import {copyLogContentToClipboard} from "@root/redux_toolkit/slices/ConnectionLogSlice";
+import {getFlowChartLogsByExecId, getLogList} from "@root/redux_toolkit/action_creators/ConnectionLogCreators";
 
 const {
     testConnection, addConnection,
@@ -31,6 +37,7 @@ const {
 
 export default {
     fulfilled: {
+        [copyLogContentToClipboard.type]: "The log info was copied.",
         [deleteSupportFile.fulfilled.type]: "The support file was successfully deleted.",
         [deleteSupportFiles.fulfilled.type]: "The support files were successfully deleted.",
         [downloadSupportFile.fulfilled.type]: "The support files was successfully downloaded.",
@@ -50,6 +57,12 @@ export default {
         [requestRemoteApi.rejected.type]: {
             "__DEFAULT__": "There is an error during the test of the method"
         },*/
+        [getFlowChartLogsByExecId.rejected.type]: {
+            "__DEFAULT__": "There is an error getting logs."
+        },
+        [getLogList.rejected.type]: {
+            "__DEFAULT__": "There is an error getting a list of logs."
+        },
         [deleteSupportFile.rejected.type]: {
             "__DEFAULT__": "There is an error deleting support file."
         },
@@ -63,7 +76,8 @@ export default {
             "__DEFAULT__": "Could not start generation of the support file."
         },
         [testConnection.rejected.type]: {
-            "__DEFAULT__": "There is an error in during the test of the connection"
+            "__DEFAULT__": "There is an error in during the test of the connection",
+            "CONCURRENT_TEST_IS_FORBIDDEN": "The test is already running for this connection."
         },
         [checkConnectionTitle.rejected.type]: {
             "__DEFAULT__": "There is an error in checking uniqueness of the title."
@@ -96,5 +110,8 @@ export default {
             "__DEFAULT__": "The selected connections were not removed"
         },
         [graphQLLogin.rejected.type]: "GraphQL was not connected",
+        [getAllMetaConnectionsByInvokerName.rejected.type]: {
+            "__DEFAULT__": "The connections was not fetched."
+        }
     },
 }

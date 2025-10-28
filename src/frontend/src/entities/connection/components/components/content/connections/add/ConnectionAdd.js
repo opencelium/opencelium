@@ -90,7 +90,6 @@ export default function(props) {
         return () => {
             dispatch(setTemplatePanelVisibility(false))
             dispatch(setSavePanelVisibility(false))
-            dispatch(getAllCategories());
             dispatch(setWebhooks([]));
         }
     }, []);

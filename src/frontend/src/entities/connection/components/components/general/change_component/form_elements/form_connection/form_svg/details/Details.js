@@ -73,7 +73,7 @@ class Details extends React.Component {
             tooltip={'Show Details'}
             target={`show_connection_button`}
             hasBackground={false}
-            handleClick={this.toggleDetails}
+            handleClick={() => this.toggleDetails()}
         />}
         <div
           className={`${styles.details_maximized} ${styles.details_right}`}

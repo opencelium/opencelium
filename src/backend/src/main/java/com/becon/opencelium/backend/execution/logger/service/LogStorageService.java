@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.execution.logger.service;
 
-import com.becon.opencelium.backend.execution.logger.OcLogger;
+import com.becon.opencelium.backend.constant.LogConstant;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -14,8 +14,8 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+import static com.becon.opencelium.backend.constant.LogConstant.FILE_NAME_PATTERN;
 import static com.becon.opencelium.backend.utility.LogFileUtility.toPath;
 
 /**
@@ -25,11 +25,6 @@ import static com.becon.opencelium.backend.utility.LogFileUtility.toPath;
  */
 @Service
 public class LogStorageService {
-    // Pattern to match log file names and extract executionId
-    private static final Pattern FILE_NAME_PATTERN = Pattern.compile(
-            "\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}_.+_(u|f|s)_(.+)\\.log"
-    );
-
     /**
      * Reads a specific block of log lines for a given executionId.
      *
@@ -63,7 +58,7 @@ public class LogStorageService {
      */
     private Path getLogFileByExecutionId(String executionId) {
         Path[] logfiles = {null, null}; // {'fail' or 'success', 'unknown'}
-        Path root = toPath(OcLogger.LOG_LOCATION);
+        Path root = toPath(LogConstant.LOG_LOCATION);
 
         try {
             Files.walkFileTree(root, new SimpleFileVisitor<>() {

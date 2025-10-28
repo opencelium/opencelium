@@ -24,6 +24,7 @@ import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.repository.NotificationRepository;
 import com.becon.opencelium.backend.database.mysql.repository.SchedulerRepository;
+import com.becon.opencelium.backend.exception.ConcurrentTestIsForbidden;
 import com.becon.opencelium.backend.exception.SchedulerNotFoundException;
 import com.becon.opencelium.backend.factory.SchedulerFactory;
 import com.becon.opencelium.backend.mapper.base.Mapper;
@@ -236,7 +237,7 @@ public class SchedulerServiceImp implements SchedulerService {
     }
 
     @Override
-    public void startNow(Scheduler scheduler, Map<String, Object> webhook) throws Exception {
+    public void startNow(Scheduler scheduler, Map<String, Object> webhook) {
         throwIfConnectionIsBeingExecuted(scheduler.getConnection().getId());
         schedulingStrategy.runJob(scheduler, webhook);
     }
@@ -250,7 +251,7 @@ public class SchedulerServiceImp implements SchedulerService {
     @Override
     public void throwIfConnectionIsBeingExecuted(long connectionId) {
         if (schedulingStrategy.getRunningJobs().containsKey(connectionId)) {
-            throw new RuntimeException("Connection with id = " + connectionId + " is currently being executed");
+            throw new ConcurrentTestIsForbidden(connectionId);
         }
     }
 
@@ -276,7 +277,7 @@ public class SchedulerServiceImp implements SchedulerService {
     }
 
     @Override
-    public List<RunningJobsResource> getAllRunningJobs() throws Exception {
+    public List<RunningJobsResource> getAllRunningJobs() {
         Map<Long, Integer> runningJobs = schedulingStrategy.getRunningJobs();
         List<RunningJobsResource> runningJobsResources = new ArrayList<>();
         runningJobs.forEach((connId, schedId) -> {

@@ -14,7 +14,6 @@
  */
 import { LocalStorage } from '@application/classes/LocalStorage';
 import CreateElementPanel from '@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/CreateElementPanel';
-import LogPanel from '@change_component/form_elements/form_connection/form_svg/layouts/logs/LogPanel';
 import { mapItemsToClasses } from '@change_component/form_elements/form_connection/form_svg/utils';
 import CConnection from '@entity/connection/components/classes/components/content/connection/CConnection';
 import styles from '@entity/connection/components/themes/default/content/connections/connection_overview_2.scss';
@@ -23,12 +22,13 @@ import { setModalConnectionData, setModalCurrentTechnicalItem } from '@entity/co
 import React, { Component } from 'react';
 import { withTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
-import LogsPanel from '../../../../../../../../../components/connection_logs/LogsPanel';
+import LogsPanel from '../../../../../../../../../components/connection_logs/LogsPanel/LogsPanel';
 import Details from './details/Details';
 import ButtonPanel from './layouts/button_panel/ButtonPanel';
 import TechnicalLayout from './layouts/TechnicalLayout';
 
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
+import {checkPolyglot} from "@entity/external_application/redux_toolkit/action_creators/ExternalApplicationCreators";
 
 export const HAS_LAYOUTS_SCALING = true;
 
@@ -57,7 +57,8 @@ function mapStateToProps(state, props) {
     setConnectionData,
     setModalConnectionData,
     setModalCurrentTechnicalItem,
-    clearCurrentLogs
+    clearCurrentLogs,
+    checkPolyglot
   },
   null,
   { forwardRef: true }
@@ -104,6 +105,7 @@ class FormConnectionSvg extends Component {
         ? entity.getObjectForConnectionOverview()
         : entity;
     this.setData({ connection: connectionData });
+    //this.props.checkPolyglot();
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {

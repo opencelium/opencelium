@@ -37,7 +37,6 @@ const ScheduleNotificationList: FC<ScheduleNotificationListProps> =
         isVisible,
         close,
     }) => {
-    if(!isVisible) return null;
     const dispatch = useAppDispatch();
     const {
         notifications,
@@ -89,6 +88,7 @@ const ScheduleNotificationList: FC<ScheduleNotificationListProps> =
         }
     }
     useEventListener('mousedown', checkIfClickedOutside, window, isVisible);
+    if(!isVisible || x === 0 || y === 0) return null;
     return (
         ReactDOM.createPortal(
             <ScheduleNotificationListStyled x={x} y={y}>

@@ -3,30 +3,32 @@ import { ITheme } from '@style/Theme';
 import React from 'react';
 import styles from './ConnectorPanel.module.css';
 import TraceItem from './TraceItem/TraceItem';
+import {RootState, useAppSelector} from "@application/utils/store";
+import {Loading} from "@app_component/base/loading/Loading";
+import {withTheme} from "styled-components";
 
 interface ConnectorPanelProps {
 	connector: ConnectorLog;
 	executionId: string;
-	connectionId: string;
 	theme?: ITheme;
 }
 
 const ConnectorPanel: React.FC<ConnectorPanelProps> = ({
 	connector,
 	executionId,
-	connectionId,
 	theme
 }) => {
+	const {isTesting, isFinished, isForcedFinished} = useAppSelector((state: RootState) => state.connectionLogReducer);
 	return (
-		<div className={styles.connectorPanel}>
+		<div className={styles.connectorPanel} style={{width: '100%'}}>
 			<h3 className={styles.connectorPanelTitle}>{connector.name}</h3>
+			{connector.traces.length === 0 && isTesting && !isFinished && !isForcedFinished && <Loading/>}
 			{connector.traces.map((trace) => (
-				<div key={trace.indexPath} className={styles.traceItemContainer}>
+				<div key={`${trace.flowId}_${trace.indexPath}`} className={styles.traceItemContainer}>
 					<TraceItem
 						trace={trace}
-						connectorId={connector.id}
+						flowId={connector.flowId}
 						executionId={executionId}
-						connectionId={connectionId}
 						iterationIndexes={[]}
 						theme={theme}
 					/>
@@ -36,4 +38,4 @@ const ConnectorPanel: React.FC<ConnectorPanelProps> = ({
 	);
 };
 
-export default ConnectorPanel;
+export default withTheme(ConnectorPanel);

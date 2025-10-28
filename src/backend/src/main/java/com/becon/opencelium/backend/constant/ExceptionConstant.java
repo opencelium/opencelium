@@ -46,6 +46,7 @@ public interface ExceptionConstant {
 
     // ----------------------------------------- Connection ----------------------------------------------- //
     String CONNECTION_NOT_FOUND = "CONNECTION_NOT_FOUND";
+    String CONCURRENT_TEST_IS_FORBIDDEN = "CONCURRENT_TEST_IS_FORBIDDEN";
 
     // ----------------------------------------- Enhancement ----------------------------------------------- //
     String ENHANCEMENT_NOT_FOUND = "ENHANCEMENT_NOT_FOUND";

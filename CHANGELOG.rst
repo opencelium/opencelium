@@ -2,6 +2,32 @@
 Changelog
 *********
 
+4.6
+========
+
+:Date: October 25, 2025
+
+Features
+--------
+* UI-Logs
+* Multi-Language support
+* Smart Sync
+
+Fixes
+--------
+*  Delete old log files by executionId (in case of dropping DB) (OC-1212)
+*  Template generated incorrectly in Support File (OC-1165)
+*  Fix link in Update Assistant (OC-1142)
+*  Fix delete reference bug (OC-1070)
+*  Fix hmac bug (OC-1097)
+*  Fix enhancement for xml responses (OC-1104)
+*  Test duplicate connection feature (OC-1107)
+*  Saving an aggregator adds duplicate comments (OC-1119)
+*  Fix InputSelect options bug (OC-1126)
+*  Test duplicate connection feature (OC-1107)
+*  Add wildcard property for reference generator (OC-1158)
+
+
 4.5.1
 ========
 
@@ -9,17 +35,17 @@ Changelog
 
 Fixes
 --------
-- OC-1197	Fix delete reference bug
-- OC-1192	Invoker Sync does not work
-- OC-1191	Fix error message
-- OC-1188	Fix reference for param as an object
-- OC-1185	Show full information for reference
-- OC-1184	Integrate Copy to Clipboard button for Logs
-- OC-1173	Error when Comparing string that contains only digits.
-- OC-1171	Fix dependency check during D&D for operators
-- OC-1170	Update headers
-- OC-1166	Error when extracting direct reference
-- OC-1165	Template generated incorrectly in Support File.
+*  Fix delete reference bug (OC-1197)
+*  Invoker Sync does not work (OC-1192)
+*  Fix error message (OC-1191)
+*  Fix reference for param as an object (OC-1188)
+*  Show full information for reference (OC-1185)
+*  Integrate Copy to Clipboard button for Logs (OC-1184)
+*  Error when Comparing string that contains only digits (OC-1173)
+*  Fix dependency check during D&D for operators (OC-1171)
+*  Update headers (OC-1170)
+*  Error when extracting direct reference (OC-1166)
+*  Template generated incorrectly in Support File (OC-1165)
 
 
 4.5

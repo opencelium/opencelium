@@ -1,42 +1,76 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { ConnectionLogRequest } from '@root/requests/classes/ConnectionLogRequest';
+import {errorHandler} from "@application/utils/utils";
 import {
-	DeleteLogsRequest,
-	GetMethodTraceRequest,
-	GetMethodTraceResponse,
-	GetOperatorTraceResponse,
-	GetOperatorTraceRequest, TestConnectionResponse,
-} from '@root/requests/interfaces/IConnectionLog';
-import {errorHandler, timeout} from "@application/utils/utils";
-import {Methods, Operators} from "../../../../socket/dev-tools/connection_logs_mock";
+	ConnectionSocketLog, ConnectorLog,
+	DetailedMethodSegment,
+	DetailedOperatorSegment,
+	Trace
+} from "@root/requests/models/ConnectionLog";
+import {
+	ConLogRequestProps,
+	DeleteLogsRequest, GetLogListProps, GetLogListResponse,
+	TestConnectionResponse
+} from "@root/requests/interfaces/IConnectionLogRequest";
 
 
-export const getMethodTrace = createAsyncThunk<
-	GetMethodTraceResponse,
-	GetMethodTraceRequest
->('connectionLog/getMethodTrace', async (request, thunkAPI) => {
+export const getDetailedMethod = createAsyncThunk<
+	ConnectionSocketLog<DetailedMethodSegment>,
+	ConLogRequestProps
+>('connectionLog/getMethodTrace', async (data, thunkAPI) => {
 	try {
-		await timeout(1000);
-		return Methods[request.connectorId][request.indexPath];
-		const connectionLogRequest = new ConnectionLogRequest({endpoint: `/${request.executionId}/meta`});
-		//const response = await connectionLogRequest.getMethodTrace();
-		//return response.data;
+		const connectionLogRequest = new ConnectionLogRequest();
+		const response = await connectionLogRequest.getDetailedMethod(data);
+		return response.data;
 	} catch(e){
 		return thunkAPI.rejectWithValue(errorHandler(e));
 	}
 });
 
-export const getOperatorTrace = createAsyncThunk<
-	GetOperatorTraceResponse,
-	GetOperatorTraceRequest
->('connectionLog/getOperatorTrace', async (request, thunkAPI) => {
+export const getDetailedOperator = createAsyncThunk<
+	ConnectionSocketLog<DetailedOperatorSegment>,
+	ConLogRequestProps
+>('connectionLog/getOperatorTrace', async (data, thunkAPI) => {
 	try {
-		await timeout(1000);
-		return Operators[request.connectorId][request.indexPath];
-		/*const endpointParams = request.iterationIndexes && request.iterationIndexes.length > 0 ? `?loopIndex=${request.iterationIndexes.join(',')}` : '';
-		const connectionLogRequest = new ConnectionLogRequest({endpoint: `/${request.executionId}/connector/${request.connectorId}/element/${request.indexPath}/child${endpointParams}`});
-		const response = await connectionLogRequest.getOperatorTrace();
-		return response.data;*/
+		const connectionLogRequest = new ConnectionLogRequest();
+		const response = await connectionLogRequest.getDetailedOperator(data);
+		return response.data;
+	} catch(e){
+		return thunkAPI.rejectWithValue(errorHandler(e));
+	}
+});
+
+export const getOperatorChildren = createAsyncThunk<
+	Trace[],
+	ConLogRequestProps
+>('connectionLog/getOperatorChildren', async (data, thunkAPI) => {
+	try {
+		const connectionLogRequest = new ConnectionLogRequest();
+		const response = await connectionLogRequest.getOperatorChildren(data);
+		return response.data;
+	} catch(e){
+		return thunkAPI.rejectWithValue(errorHandler(e));
+	}
+});
+
+export const getFlowChartLogsByExecId = createAsyncThunk<
+	{connectorLogs: ConnectorLog[], executionId: string},
+	string
+>('connectionLog/getFlowChartLogsByExecId', async (executionId, thunkAPI) => {
+	try {
+		const connectionLogRequest = new ConnectionLogRequest();
+		const flowChartResponse = await connectionLogRequest.getFlowCharts(executionId);
+		const connectorLogs: ConnectorLog[] = [];
+		for (let i = 0; i < flowChartResponse.data.length; i++) {
+			const flowLog = flowChartResponse.data[i];
+			const response = await connectionLogRequest.getFirstLevelLogs(flowLog.id);
+			connectorLogs.push({
+				flowId: flowLog.flowId,
+				name: flowLog.connectorName,
+				traces: response.data.map(t => ({...t, isCompleted: true})),
+			})
+		}
+		return {connectorLogs, executionId};
 	} catch(e){
 		return thunkAPI.rejectWithValue(errorHandler(e));
 	}
@@ -44,12 +78,10 @@ export const getOperatorTrace = createAsyncThunk<
 
 export const deleteLogs = createAsyncThunk<void, DeleteLogsRequest>(
 	'connectionLog/deleteLogs',
-	async (request, thunkAPI) => {
+	async (data, thunkAPI) => {
 		try {
-			await timeout(1000);
-			//const connectionLogRequest = new ConnectionLogRequest({endpoint: `/${request.executionId}`});
-			//await connectionLogRequest.deleteLogs();
-			return;
+			const connectionLogRequest = new ConnectionLogRequest();
+			await connectionLogRequest.deleteLogs(data);
 		} catch(e){
 			return thunkAPI.rejectWithValue(errorHandler(e));
 		}
@@ -70,9 +102,24 @@ export const testConnection = createAsyncThunk<TestConnectionResponse, {connecti
 	}
 );
 
+export const getLogList = createAsyncThunk<GetLogListResponse, GetLogListProps>(
+	'connectionLog/list',
+	async (data, thunkAPI) => {
+		try {
+			const connectionLogRequest = new ConnectionLogRequest();
+			const response = await connectionLogRequest.getLogList(data);
+			return response.data;
+		} catch(e){
+			return thunkAPI.rejectWithValue(errorHandler(e));
+		}
+	}
+);
+
 export default {
-	getMethodTrace,
-	getOperatorTrace,
+	getDetailedMethod,
+	getDetailedOperator,
 	deleteLogs,
 	testConnection,
+	getFlowChartLogsByExecId,
+	getLogList,
 }

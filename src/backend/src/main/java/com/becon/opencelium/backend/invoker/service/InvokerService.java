@@ -51,5 +51,7 @@ public interface InvokerService {
     void deleteInvokerFile(String name);
     void refresh();
     List<Invoker> synchronise();
+
+    void moveInvokersToNewLocation(String invokerOnResources, String invoker);
 //    Object findField(String field, Map<String, Object> body);
 }

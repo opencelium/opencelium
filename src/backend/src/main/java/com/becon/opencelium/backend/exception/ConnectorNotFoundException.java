@@ -20,14 +20,23 @@ import com.becon.opencelium.backend.constant.ExceptionConstant;
 
 public class ConnectorNotFoundException extends RuntimeException{
 
-    private final int id;
+    private int id;
+    private String title;
 
-    public ConnectorNotFoundException(final int id) {
+    public ConnectorNotFoundException(int id) {
         super(ExceptionConstant.CONNECTOR_NOT_FOUND);
         this.id = id;
+    }
+    public ConnectorNotFoundException(String title) {
+        super(ExceptionConstant.CONNECTOR_NOT_FOUND);
+        this.title = title;
     }
 
     public int getId() {
         return id;
+    }
+
+    public String getTitle() {
+        return title;
     }
 }

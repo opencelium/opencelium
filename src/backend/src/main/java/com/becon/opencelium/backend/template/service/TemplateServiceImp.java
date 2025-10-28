@@ -16,7 +16,7 @@
 
 package com.becon.opencelium.backend.template.service;
 
-import com.becon.opencelium.backend.configuration.OpenCeliumProps;
+import com.becon.opencelium.backend.constant.props.OpenceliumProps;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.exception.WrongEncode;
@@ -27,28 +27,26 @@ import com.becon.opencelium.backend.resource.template.CtionTemplateResource;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.utility.FileNameUtils;
-import com.becon.opencelium.backend.version_manager.EntityUpdater;
-import com.becon.opencelium.backend.version_manager.EntityVersionManager;
-import com.becon.opencelium.backend.version_manager.backup.FileBackupManager;
-import com.becon.opencelium.backend.version_manager.base.Utils;
+import com.becon.opencelium.backend.versionmanager.EntityUpdater;
+import com.becon.opencelium.backend.versionmanager.EntityVersionManager;
+import com.becon.opencelium.backend.versionmanager.backup.FileBackupManager;
+import com.becon.opencelium.backend.versionmanager.base.Utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -59,16 +57,20 @@ public class TemplateServiceImp implements TemplateService {
     private final ConnectionService connectionService;
     private final Mapper<ConnectionOldDTO, CtionTemplateResource> mapper;
     private final Mapper<ConnectionDTO, ConnectionOldDTO> oldDTOMapper;
-    private final Environment environment;
-    private final OpenCeliumProps ocProps;
+    private final OpenceliumProps ocProps;
     private final EntityUpdater<Template> templateEntityUpdater;
     private final ObjectMapper objectMapper;
 
-    public TemplateServiceImp(@Qualifier("connectionServiceImp") ConnectionService connectionService, Mapper<ConnectionOldDTO, CtionTemplateResource> mapper, Mapper<ConnectionDTO, ConnectionOldDTO> oldDTOMapper, Environment environment, EntityVersionManager entityVersionManager, OpenCeliumProps ocProps, @Qualifier("objectMapper") ObjectMapper objectMapper) {
+    public TemplateServiceImp(
+            @Qualifier("connectionServiceImp") ConnectionService connectionService,
+            Mapper<ConnectionOldDTO, CtionTemplateResource> mapper,
+            Mapper<ConnectionDTO, ConnectionOldDTO> oldDTOMapper,
+            EntityVersionManager entityVersionManager,
+            OpenceliumProps ocProps,
+            @Qualifier("objectMapper") ObjectMapper objectMapper) {
         this.connectionService = connectionService;
         this.mapper = mapper;
         this.oldDTOMapper = oldDTOMapper;
-        this.environment = environment;
         this.ocProps = ocProps;
         this.templateEntityUpdater = entityVersionManager.getUpdater(Template.class);
         this.objectMapper = objectMapper;
@@ -101,20 +103,6 @@ public class TemplateServiceImp implements TemplateService {
     @Override
     public void save(Template template) {
         save(template, template.getTemplateId() + ".json");
-    }
-
-    public void save(Template template, String fileName) {
-        try {
-            String id = template.getTemplateId();
-            ObjectMapper objectMapper = new ObjectMapper();
-            template.setTemplateId(id);
-            String json = objectMapper.writeValueAsString(template);
-            FileWriter jsonTemplate = new FileWriter(PathConstant.TEMPLATE + fileName);
-            jsonTemplate.write(json);
-            jsonTemplate.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Override
@@ -160,12 +148,15 @@ public class TemplateServiceImp implements TemplateService {
         templateResource.setName(connectionRes.getTitle());
         templateResource.setDescription(connectionRes.getDescription());
         templateResource.setTemplateId(UUID.randomUUID().toString());
-        templateResource.setVersion(environment.getProperty("opencelium.version", ""));
+        templateResource.setVersion(ocProps.getVersion());
         return templateResource;
     }
 
     @Override
     public void updateTemplatesToCurrentVersion() {
+        // move from /src/main/resources/templates to /runtime/templates
+        moveTemplatesToNewLocation();
+
         Map<String, Template> templateMap = getAllAsMap();
         for (Map.Entry<String, Template> entry : templateMap.entrySet()) {
             String fileName = entry.getKey();
@@ -194,6 +185,29 @@ public class TemplateServiceImp implements TemplateService {
         }
     }
 
+    private void moveTemplatesToNewLocation() {
+        List<Path> templatesInResources = getAllPaths(PathConstant.TEMPLATE_ON_RESOURCES);
+
+        templatesInResources.forEach(x -> {
+            try {
+                Files.move(
+                        x,
+                        Paths.get(PathConstant.TEMPLATE).resolve(x.getFileName()),
+                        StandardCopyOption.REPLACE_EXISTING
+                );
+            } catch (IOException e) {
+                log.error("Failed to move {} file from {} to {}", x, PathConstant.TEMPLATE_ON_RESOURCES, PathConstant.TEMPLATE);
+                throw new RuntimeException(e);
+            }
+        });
+
+        try {
+            Files.deleteIfExists(Path.of(PathConstant.TEMPLATE_ON_RESOURCES));
+        } catch (IOException e) {
+            log.error("Failed to remove folder {}", PathConstant.TEMPLATE_ON_RESOURCES);
+        }
+    }
+
     @Override
     public void deleteById(String templateId) {
         Map<String, Template> templates = getAllAsMap();
@@ -203,8 +217,7 @@ public class TemplateServiceImp implements TemplateService {
         if (fileName == null) {
             throw new RuntimeException("FILE_NOT_FOUND");
         }
-        String path = PathConstant.TEMPLATE + fileName;
-        File file = new File(path);
+        File file = Paths.get(PathConstant.TEMPLATE).resolve(fileName).toFile();
         if (!file.delete()) {
             throw new RuntimeException("FILE_NOT_DELETED");
         }
@@ -214,7 +227,7 @@ public class TemplateServiceImp implements TemplateService {
     public Optional<Template> findById(String id) {
         StringBuilder contentBuilder = new StringBuilder();
         try (Stream<String> stream = Files
-                .lines(Paths.get(PathConstant.TEMPLATE + id.concat(".json")), StandardCharsets.UTF_8)) {
+                .lines(Paths.get(PathConstant.TEMPLATE).resolve(id.concat(".json")), StandardCharsets.UTF_8)) {
 
             stream.forEach(s -> contentBuilder.append(s).append("\n"));
         } catch (IOException e) {
@@ -228,6 +241,22 @@ public class TemplateServiceImp implements TemplateService {
             return Optional.of(template);
         } catch (Exception e) {
             throw new RuntimeException("ERROR while converting from json to Template object");
+        }
+    }
+
+
+    private void save(Template template, String fileName) {
+        try {
+            String id = template.getTemplateId();
+            ObjectMapper objectMapper = new ObjectMapper();
+            template.setTemplateId(id);
+
+            Path filePath = Paths.get(PathConstant.TEMPLATE).resolve(fileName);
+            try (BufferedWriter writer = Files.newBufferedWriter(filePath, StandardCharsets.UTF_8)) {
+                objectMapper.writeValue(writer, template);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -276,6 +305,21 @@ public class TemplateServiceImp implements TemplateService {
             });
 
             return files;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private List<Path> getAllPaths(String folder) {
+        if (Files.notExists(Paths.get(folder))) {
+            return Collections.emptyList();
+        }
+
+        try (Stream<Path> walk = Files.walk(Paths.get(folder))) {
+            return walk.filter(Files::isRegularFile)
+                    .filter(path -> FileNameUtils.getExtension(path.toString()).equals("json"))
+                    .map(Path::toAbsolutePath)
+                    .toList();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

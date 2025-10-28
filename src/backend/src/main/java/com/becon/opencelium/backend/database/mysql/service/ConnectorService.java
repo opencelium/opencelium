@@ -18,6 +18,7 @@ package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.RequestData;
+import com.becon.opencelium.backend.execution.logger.mapper.ParsedLogLineMapper;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.http.ResponseEntity;
@@ -45,7 +46,7 @@ public interface ConnectorService {
 
     boolean existByInvoker(String invokerName);
 
-    List<Connector> findAllByInvoker(String title);
+    List<Connector> findAllByInvoker(String invokerName);
 
     List<Connector> findAllByTitleContains(String title);
 
@@ -62,4 +63,8 @@ public interface ConnectorService {
     void updateRequestData(Integer connectorId, Map<String, String> requestData);
 
     void verifyMasterPassword(String masterPassword);
+
+    Optional<Connector> findAllByTitle(String title);
+
+    Boolean existsMasterPassword();
 }

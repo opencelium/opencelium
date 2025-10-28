@@ -50,7 +50,7 @@ public interface SchedulerService {
 
     void startNow(Scheduler scheduler);
     void startNow(Scheduler scheduler, String channelId);
-    void startNow(Scheduler scheduler, Map<String, Object> queryMap) throws Exception;
+    void startNow(Scheduler scheduler, Map<String, Object> queryMap);
     void startNow(Scheduler scheduler, List<MaskingRule> rules);
     void throwIfConnectionIsBeingExecuted(long connectionId);
     void saveEntity(Scheduler scheduler);
@@ -66,6 +66,5 @@ public interface SchedulerService {
     NotificationResource toNotificationResource(EventNotification eventNotification);
     void saveNotification(EventNotification eventNotification);
     void deleteNotificationById(int id);
-
     Scheduler getById(int id);
 }

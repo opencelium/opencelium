@@ -103,7 +103,14 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 				return;
 			}
 
-			setFilteredOptions(getNestedOptions(input));
+			const newOptions = getNestedOptions(input);
+			setFilteredOptions(newOptions);
+
+			const exactMatch = newOptions.find((opt) => opt.value === input);
+			if (!exactMatch) {
+				setSelectedOption(null);
+				onValueSelect(input, {});
+			}
 		}
 	};
 
@@ -113,20 +120,22 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 		if (selected) {
 			setSearchValue(selected.value);
 			setFilteredOptions(getNestedOptions(selected.value));
-			const responseStructure = connectionEditor.connection.getMethodByColor(color)
-				?.response?.success?.body?.fields ?? {};
-				// @ts-ignore
-			const requestStructure = connectionEditor.connection.getMethodByColor(connectionEditor.item.color)
-				?.request?._body?._fields ?? {};
+			const responseStructure = connectionEditor.connection.getMethodByColor(color)?.response?.success?.body?.fields ?? {};
+			// @ts-ignore
+			const requestStructure = connectionEditor.connection.getMethodByColor(connectionEditor.item.color)?.request?._body?._fields ?? {};
 			const structure = {
 				request: requestStructure,
-				response: responseStructure
-			}
+				response: responseStructure,
+			};
 			onValueSelect(selected.value, structure);
 		} else {
-			setSearchValue('');
-			setFilteredOptions(allOptions);
-			onValueSelect('', {});
+			if (searchValue) {
+				onValueSelect(searchValue, {});
+			} else {
+				setSearchValue('');
+				setFilteredOptions(allOptions);
+				onValueSelect('', {});
+			}
 		}
 	};
 	useEffect(() => {

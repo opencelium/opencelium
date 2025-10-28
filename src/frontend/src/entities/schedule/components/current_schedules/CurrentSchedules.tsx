@@ -28,6 +28,7 @@ const CurrentSchedules: FC<CurrentSchedulesProps> =
 
     }) => {
     const dispatch = useAppDispatch();
+    const {socket} = useSocketData();
     const {currentSchedules} = useSocketData();
     const preProps: any[] = usePrevious({currentSchedules}) || [];
     useEffect(() => {
@@ -53,6 +54,11 @@ const CurrentSchedules: FC<CurrentSchedulesProps> =
                 )
             });
         } else{
+            if (!socket.connected) {
+                return (
+                    <EmptyListStyled value={"Please, enable websocket to see the current schedules."} color={'#ccc'}/>
+                )
+            }
             return (
                 <EmptyListStyled value={"There are no triggering schedules"}/>
             )
@@ -61,7 +67,7 @@ const CurrentSchedules: FC<CurrentSchedulesProps> =
     return (
         <CurrentSchedulesStyled >
             <div>
-                <HeaderStyled style={{marginBottom: '20px'}}>{'Current Jobs'}</HeaderStyled>
+                <HeaderStyled style={{marginBottom: '20px', color: !socket.connected ? '#ccc' : '#000'}}>{'Current Jobs'}</HeaderStyled>
                 <div>
                     {getProgressBars()}
                 </div>

@@ -28,22 +28,21 @@ export class CBodyEditor{
     static updateFieldsBinding(connection, connector, method, bodyData, target = null, refStructure) {
         const checkBodyData = CBodyEditor.shouldUpdateFieldBinding(connector, bodyData);
         let invokerBody = method.request.invokerBody;
-        
+
         if (checkBodyData !== 0) {
             let parents = bodyData.namespaces;
             let newValue = bodyData.newValue;
             let currentItem = connector.getCurrentItem();
             let item = {};
             item.color = currentItem.color;
-    
+
             if (parents.length === 0) {
                 item.field = bodyData.name;
             } else {
                 item.field = `${parents.join('.')}.${bodyData.name}`;
             }
-            console.log(refStructure)
             item.field = convertFieldNameForBackend(invokerBody.fields, item.field, true);
-    
+
             if (target === 'header') {
                 item.field = `header.$.${item.field.replace(/^body\.\$\.|header\.\$\./, '')}`;
             } else {
@@ -54,7 +53,7 @@ export class CBodyEditor{
                 item.field = wrapField(item.field, refStructure.request);
             }
             let toBindingItems = [CBindingItem.createBindingItem(item)];
-    
+
             let fromBindingItems = [];
             switch (checkBodyData) {
                 case 1:
@@ -65,7 +64,7 @@ export class CBodyEditor{
                         newItem.color = bindingItemSplitted[0];
                         newItem.type = bindingItemSplitted[1].substr(1, bindingItemSplitted[1].length - 2);
                         newItem.field = bindingItemSplitted.slice(2, bindingItemSplitted.length).join('.');
-    
+
                         newItem.field = newItem.field.replace(/^header\.\$/, 'body.$');
                         if(refStructure && refStructure.response) {
                             newItem.field = wrapField(newItem.field, refStructure.response);
@@ -81,10 +80,10 @@ export class CBodyEditor{
 
 
         }
-    
+
         CBodyEditor.cleanFieldBinding(connection, bodyData);
     }
-    
+
 
     static cleanFieldBinding(connection, bodyData){
         if(bodyData.newValue === '' || typeof bodyData.newValue === 'undefined') {
@@ -148,7 +147,7 @@ export class CBodyEditor{
             }
             if(isString(bodyData.newValue)) {
                 let newValueSplitted = bodyData.newValue.split('.');
-                
+
                 if (newValueSplitted.length > 3) {
                     if (newValueSplitted[1] === `(${STATEMENT_REQUEST})`
                         || newValueSplitted[1] === `(${STATEMENT_RESPONSE})`) {

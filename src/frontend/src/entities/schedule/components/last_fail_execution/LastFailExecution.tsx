@@ -26,6 +26,8 @@ import {useAppDispatch} from "@application/utils/store";
 import {Schedule} from "@entity/schedule/classes/Schedule";
 import Icon from "@app_component/base/icon/Icon";
 import {LoadingIcon} from "@entity/schedule/components/last_success_execution/styles";
+import {getFlowChartLogsByExecId} from "@root/redux_toolkit/action_creators/ConnectionLogCreators";
+import {ScheduleLogListIcon} from "@entity/schedule/components/schedule_log_list/ScheduleLogListIcon";
 
 const LastFailExecution: FC<LastFailExecutionProps> =
     ({
@@ -34,24 +36,14 @@ const LastFailExecution: FC<LastFailExecutionProps> =
         theme,
     }) => {
         const dispatch = useAppDispatch()
-        const {gettingLogsByExecutionId} = Schedule.getReduxState();
         const [startGettingLogs, setStartGettingLogs] = useState<boolean>(false);
         const prevProps: any = usePrevious({schedule}) || [];
         const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
-        const getLogs = (executionId: string) => {
+        const getLogs = async (executionId: string) => {
             setStartGettingLogs(true);
-            dispatch(getLogsByExecutionId(executionId));
+            await dispatch(getFlowChartLogsByExecId(executionId));
+            setStartGettingLogs(false);
         }
-        useEffect(() => {
-            if (startGettingLogs) {
-                switch (gettingLogsByExecutionId) {
-                    case API_REQUEST_STATE.FINISH:
-                    case API_REQUEST_STATE.ERROR:
-                        setStartGettingLogs(false);
-                        break;
-                }
-            }
-        }, [gettingLogsByExecutionId]);
         useEffect(() => {
             if(prevProps.schedule?.lastExecution?.fail?.taId !== schedule?.lastExecution?.fail?.taId && typeof prevProps.schedule !== 'undefined') {
                 setIsRefreshing(true);
@@ -72,11 +64,28 @@ const LastFailExecution: FC<LastFailExecutionProps> =
                     taIdComponent = <a id={`last_fail_${schedule.id}`} href={url} target={'_blank'}>#{executionId}</a>;
                 } else{
                     if (schedule.lastExecution.fail.hasLog) {
-                        taIdComponent = startGettingLogs ?
-                            <LoadingIcon loadingSize={'16px'} color={theme?.menu?.background || '#000'} name={' '}
-                                         isLoading={true}/> :
-                            <span id={'clickable'} style={{cursor: 'pointer', textDecoration: 'underline'}}
-                                  onClick={() => getLogs(executionId)}>{`#${executionId}`}</span>;
+                        taIdComponent = startGettingLogs
+                            ?
+                            <LoadingIcon
+                                loadingSize={'16px'}
+                                color={theme?.menu?.background || '#000'}
+                                name={' '}
+                                isLoading={true}
+                            />
+                            :
+                            <span style={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                            }}>
+                                <span
+                                    id={'clickable'}
+                                    style={{cursor: 'pointer', textDecoration: 'underline'}}
+                                    onClick={() => getLogs(executionId)}>
+                                    {`#${executionId}`}
+                                </span>
+                                <ScheduleLogListIcon schedulerId={schedule.id.toString()} connectionId={schedule.connection.connectionId.toString()} type={'fail'}/>
+                            </span>;
                     } else {
                         taIdComponent = <span>{`#${executionId}`}</span>
                     }

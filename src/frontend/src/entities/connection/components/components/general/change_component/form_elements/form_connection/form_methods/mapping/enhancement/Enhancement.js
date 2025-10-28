@@ -22,7 +22,7 @@ import { getMarker, setFocusById } from '@application/utils/utils';
 import CEnhancement from '@classes/content/connection/field_binding/CEnhancement';
 import TooltipFontIcon from '@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon';
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React, {Component, useState} from 'react';
 import { Col, Row } from 'react-grid-system';
 import {
 	FieldBindingsBlockStyled,
@@ -30,10 +30,33 @@ import {
 	SourceFieldStyled,
 	SourceMethodNameStyled,
 } from '../../../form_svg/details/description/technical_process/reference_information/styles';
+import InputSelect from "@app_component/base/input/select/InputSelect";
+import {codeGeneratorRegistry} from "@classes/content/connection/field_binding/code_generators/registry";
+import Languages from "@change_component/form_elements/form_connection/form_methods/mapping/enhancement/Languages";
+import {connect} from "react-redux";
+import {checkPolyglot} from "@entity/external_application/redux_toolkit/action_creators/ExternalApplicationCreators";
+import {ExternalApplicationStatus} from "@entity/external_application/requests/interfaces/IExternalApplication";
+
+const languageOptions = [
+	{label: 'JavaScript', value: 'js'},
+	//{label: 'Python2', value: 'python2'},
+	{label: 'Python3', value: 'python3'},
+	{label: 'Ruby', value: 'ruby'},
+];
+const modeMap = {
+	'js': 'javascript',
+	'python2': 'python',
+	'python3': 'python',
+	'ruby': 'ruby',
+}
+const mapStateToProps = (state) => ({
+	polyglotStatus: state.externalApplicationReducer.polyglotStatus,
+});
 
 /**
  * Enhancement Component
  */
+@connect(mapStateToProps, {checkPolyglot})
 class Enhancement extends Component {
 	constructor(props) {
 		super(props);
@@ -43,6 +66,7 @@ class Enhancement extends Component {
 		this.state = {
 			expertVar,
 			expertCode,
+			currentLanguage: enhancement?.language || 'javascript',
 			name: enhancement ? enhancement.name : '',
 			description: enhancement ? enhancement.description : '',
 			markers: [],
@@ -82,6 +106,28 @@ class Enhancement extends Component {
 		}
 	}
 
+	getOptions() {
+		const { polyglotStatus } = this.props;
+
+		if (polyglotStatus?.status === ExternalApplicationStatus.DOWN) {
+			return languageOptions.map(l => ({
+				value: l.value,
+				label: l.value === 'js' ? l.label : `${l.label} (not configured)`,
+			}));
+		} else {
+			return languageOptions;
+		}
+	}
+	updateCurrentLanguage(newLanguage) {
+		let { enhancement, setEnhancement, binding } = this.props;
+		const enhancementInstance = CEnhancement.createEnhancement({...enhancement, fieldBinding: binding});
+		enhancementInstance.language = newLanguage;
+		setEnhancement(enhancementInstance.getObject());
+		this.setState({
+			currentLanguage: newLanguage,
+		})
+	}
+
 	/**
 	 * to update description of enhancement
 	 */
@@ -107,7 +153,9 @@ class Enhancement extends Component {
 
 	renderExpertVar(input) {
 		const { connection } = this.props;
-		const regex = /var\s+(\w+)\s*=\s*#(\w+)\.\(\w+\)\.([\w\d.\[\*\]\~]+)/g;
+		const {currentLanguage} = this.state;
+		const LanguageGenerator = codeGeneratorRegistry[currentLanguage]();
+		const regex = LanguageGenerator.getExpertVarRegExp();
 		let match;
 		const result = [];
 
@@ -144,7 +192,8 @@ class Enhancement extends Component {
 	renderEnhancement() {
 		const { expertVar, markers } = this.state;
 		let { readOnly, theme } = this.props;
-		let { expertCode } = this.state;
+		let { expertCode, currentLanguage } = this.state;
+		const options = this.getOptions();
 
 		const styleProps = {
 			display: 'inline-block',
@@ -154,6 +203,7 @@ class Enhancement extends Component {
 			height: 'calc(100% - 37px)',
 			borderBottom: '1px solid #e9e9e9',
 		};
+		const lOptions = this.getOptions();
 		return (
 			<>
 				<FieldBindingsBlockStyled
@@ -166,17 +216,25 @@ class Enhancement extends Component {
 				>
 					{this.renderExpertVar(expertVar)}
 				</FieldBindingsBlockStyled>
+				<InputSelect
+					id={`input_language`}
+					icon={'code'}
+					marginBottom={'20px'}
+					label={'Language'}
+					options={lOptions}
+					onChange={(option) => this.updateCurrentLanguage(option.value)}
+					value={lOptions.find(o => o.value === currentLanguage)}
+				/>
 				<Input
 					readOnly={readOnly}
 					value={expertCode}
-					label={'Script'}
-					icon={'javascript'}
 					display={'grid'}
 					hasUnderline={false}
 					labelMargin='-25px 0 0 0'
 					height={`calc(100% - 100px)`}
 				>
 					<LimitedAceEditor
+						hasDiffLang
 						maxLength={Validation.TextLength.Long}
 						ref={this.props.enhancementRef}
 						style={{
@@ -187,7 +245,7 @@ class Enhancement extends Component {
 							height: '100%',
 						}}
 						markers={markers}
-						mode='javascript'
+						mode={modeMap[currentLanguage]}
 						editorTheme='tomorrow'
 						theme={theme}
 						onChange={(newCode, e) => this.updateExpertCode(newCode, e)}

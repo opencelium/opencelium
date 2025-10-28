@@ -62,7 +62,7 @@ export const addConnector = createAsyncThunk(
             title = encodeURIComponent(title);
             const checkTitleRequest = new ConnectorRequest({endpoint: `/exists/${title}`});
             const responseTitleRequest = await checkTitleRequest.checkConnectorTitle();
-            if (responseTitleRequest.data.message === ResponseMessages.EXISTS) {
+            if (responseTitleRequest.data.result) {
                 return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.CONNECTOR_EXISTS}));
             }
             const testDataRequest = new ConnectorRequest({endpoint: '/check'});
@@ -100,7 +100,7 @@ export const updateConnector = createAsyncThunk(
                 title = encodeURIComponent(title);
                 const checkTitleRequest = new ConnectorRequest({endpoint: `/exists/${title}`});
                 const responseTitleRequest = await checkTitleRequest.checkConnectorTitle();
-                if (responseTitleRequest.data.message === ResponseMessages.EXISTS) {
+                if (responseTitleRequest.data.result) {
                     return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.CONNECTOR_EXISTS}));
                 }
             }
@@ -234,6 +234,19 @@ export const deleteConnectorImage = createAsyncThunk(
     }
 )
 
+export const existMasterPassword = createAsyncThunk(
+    'connector/check/master-password/exist',
+    async(data: never, thunkAPI) => {
+        try {
+            const request = new ConnectorRequest();
+            const response = await request.existMasterPassword();
+            return response.data;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+
 export const checkMasterPassword = createAsyncThunk(
     'connector/check/master-password',
     async(password: string, thunkAPI) => {
@@ -242,7 +255,7 @@ export const checkMasterPassword = createAsyncThunk(
             await request.checkMasterPassword({headers: {'X-Master-Password': password}});
             return password;
         } catch(e){
-            return thunkAPI.rejectWithValue({message: e.response.data.error});
+            return thunkAPI.rejectWithValue({message: e.response?.data?.error});
         }
     }
 )
@@ -259,5 +272,6 @@ export default {
     uploadConnectorImage,
     deleteConnectorImage,
     checkMasterPassword,
+    existMasterPassword,
     getConnectorCredentials,
 }

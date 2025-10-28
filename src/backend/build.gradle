@@ -18,14 +18,20 @@ plugins {
 	id 'org.springframework.boot' version '3.0.0'
 	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
 	id 'java'
+	id 'com.google.protobuf' version '0.9.4'
 }
 
 group = 'com.becon'
-version = '4.5.1'
+version = '4.6'
 sourceCompatibility = '17'
 
 repositories {
 	mavenCentral()
+}
+
+ext {
+	grpcVersion = '1.66.0'
+	protobufVersion = '3.25.1'
 }
 
 tasks.named('bootJar') {
@@ -66,10 +72,44 @@ dependencies {
 	implementation 'com.google.zxing:core:3.4.1'
 	implementation 'com.warrenstrange:googleauth:1.4.0'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.1'
+	implementation "io.grpc:grpc-protobuf:1.66.0"
+	implementation "io.grpc:grpc-stub:1.66.0"
+	implementation "io.grpc:grpc-netty-shaded:1.66.0"
+	implementation "com.google.protobuf:protobuf-java-util:3.25.1"
+	compileOnly 'org.apache.tomcat:annotations-api:6.0.53'
 	compileOnly 'org.mapstruct:mapstruct:1.5.5.Final'
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 	runtimeOnly 'mysql:mysql-connector-java'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testImplementation 'org.mockito:mockito-inline:5.2.0'
+}
+
+def generatedFilesBaseDir = "${buildDir}/generated/source/proto"
+protobuf {
+	protoc {
+		artifact = "com.google.protobuf:protoc:${protobufVersion}"
+	}
+	clean {
+		delete generatedFilesBaseDir
+	}
+	plugins {
+		grpc {
+			artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}"
+		}
+	}
+	generateProtoTasks {
+		all()*.plugins {
+			grpc {}
+		}
+	}
+}
+
+sourceSets {
+	main {
+		java {
+			srcDir "${generatedFilesBaseDir}/main/java"
+			srcDir "${generatedFilesBaseDir}/main/grpc"
+		}
+	}
 }

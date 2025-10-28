@@ -19,67 +19,89 @@ package com.becon.opencelium.backend.quartz;
 import com.becon.opencelium.backend.database.mysql.entity.Subscription;
 import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
 import com.becon.opencelium.backend.execution.ConnectionExecutor;
+import com.becon.opencelium.backend.execution.logger.OcLogger;
+import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.service.ExecutionObjectService;
 import com.becon.opencelium.backend.execution.service.ExecutionObjectServiceImp;
+import com.becon.opencelium.backend.execution.socket.WebSocketNotificationService;
+import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.execution.ExecutionObj;
-import com.becon.opencelium.backend.utility.LogFileUtility;
 import org.quartz.InterruptableJob;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.Map;
 
 @Component
 public class JobExecutor extends QuartzJobBean implements InterruptableJob {
     private final ExecutionObjectService executionObjectService;
     private final SubscriptionService subscriptionService;
+    private final WebSocketNotificationService notificationService;
     private final Logger logger = LoggerFactory.getLogger(JobExecutor.class);
 
     private volatile Thread thread;
 
-    public JobExecutor(@Qualifier("executionObjectServiceImp") ExecutionObjectServiceImp executionObjectService,
-                       @Qualifier("subscriptionServiceImpl") SubscriptionService subscriptionService) {
+    public JobExecutor(
+            @Qualifier("executionObjectServiceImp") ExecutionObjectServiceImp executionObjectService,
+            @Qualifier("subscriptionServiceImpl") SubscriptionService subscriptionService,
+            WebSocketNotificationService notificationService
+    ) {
         this.executionObjectService = executionObjectService;
         this.subscriptionService = subscriptionService;
+        this.notificationService = notificationService;
     }
 
     @Override
     public void executeInternal(JobExecutionContext context) {
         thread = Thread.currentThread();
+
+        JobDataMap jobDataMap = context.getMergedJobDataMap();
         Subscription activeSub = subscriptionService.getActiveSubs();
         if (!subscriptionService.isValid(activeSub)) {
             logger.warn("Subscription is not valid");
-            context.getMergedJobDataMap().put("licenseIsValid", false);
+            jobDataMap.put("licenseIsValid", false);
             return;
         }
-        context.getMergedJobDataMap().put("licenseIsValid", true);
+        jobDataMap.put("licenseIsValid", true);
+
+        long execId = jobDataMap.getLong("execId");
+        long connectionId = jobDataMap.getLong("connectionId");
+        boolean debugMode = jobDataMap.getBoolean("debugMode");
+        String timestamp = jobDataMap.getString("timestamp");
+        QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
+        if (data == null) {
+            // old schedulers do not have 'data' object.
+            data = getData(jobDataMap);
+            jobDataMap.put("data", data);
+        }
+        int schedulerId = data.getScheduleId();
 
         try {
-            String timestamp = LocalDateTime.now().format(LogFileUtility.FORMATTER);
-
-            JobDataMap dataMap = context.getMergedJobDataMap();
-            QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) dataMap.get("data");
-            long execId = dataMap.getLong("execId");
-            // old schedulers do not have 'data' object.
-            if (data == null) {
-                data = getData(dataMap);
-                context.getMergedJobDataMap().put("data", data);
-            }
             ExecutionObj executionObj = executionObjectService.buildObj(data);
-            ConnectionExecutor executor = new ConnectionExecutor(executionObj, execId, timestamp, data.getRules());
 
-            context.put("connectionId", executionObj.getConnection().getConnectionId());
-            context.getMergedJobDataMap().put("Scheduler.debugMode", executionObj.getLoggerConfiguration().isDebugMode());
-            context.put("timestamp", timestamp);
+            // setup execution logger:
+            OcLogger<ExecutionLog> executionLogger = new OcLogger<>(
+                    data.getExecType(), debugMode, new ExecutionLog(), connectionId, timestamp, execId
+            );
+
+            ConnectionExecutor executor = new ConnectionExecutor(executionObj, executionLogger, data.getRules());
+
             long startTime = System.currentTimeMillis();
-            executor.start();
-            context.put("operationsEx", executor.getOperations());
+            try {
+                executionLogger.logAndSend(String.format("phase=EXECUTION_START id=%d connectionId=%d schedulerId=%d", execId, connectionId, schedulerId));
+                executor.start();
+            } finally {
+                executionLogger.logAndSend(String.format("phase=EXECUTION_END id=%d connectionId=%d schedulerId=%d", execId, connectionId, schedulerId));
+                executionLogger.close(); // release resources
+
+                context.put("operationsEx", executor.getOperations());
+            }
 
             // increments current_usage in subscription and saves entity in current_usage_history.
             String connectionName = executionObj.getConnection().getConnectionName();
@@ -89,7 +111,12 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
                 subscriptionService.updateUsage(activeSub.getId(), executionObj.getConnection(), operationUsage, startTime);
             }
         } catch (ThreadDeath ignored) {
-        } finally {
+        } catch (Exception e) {
+            ErrorResource message = new ErrorResource(e, HttpStatus.INTERNAL_SERVER_ERROR);
+            notificationService.send(connectionId, message);
+
+            throw e;
+        } finally{
             thread = null;
         }
     }

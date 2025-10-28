@@ -1,71 +1,109 @@
-interface BaseSocketLog {
+export interface ConnectionLogIdentifier {
 	executionId: string;
-	connectionId: string;
-	connectorId: string;
-	connectorName: string;
+	flowId: string;
+	indexPath: string,
 }
-export type ConnectionSocketLog =
-| (MethodTrace & BaseSocketLog)
-| (OperatorTrace & BaseSocketLog);
+export type LogError = {
+	message: string,
+	stack_trace: string[],
+} | null;
+export interface ConnectionSocketLog<SegmentType> extends ConnectionLogIdentifier {
+	id: string,
+	connectorName: string;
+	status: 'PENDING' | 'COMPLETE' | 'FAIL',
+	type: 'OPERATION' | 'EXECUTION' | 'FLOWCHART' | 'LOOP' | 'IF' | 'UNKNOWN',
+	properties: MethodProperty | OperatorProperty | FlowchartProperty,
+	segment: SegmentType,
+	error?: LogError,
+	message?: string,
+}
+export type LightSegment = LightMethodSegment | LightOperatorSegment;
+export type DetailedSegment = DetailedMethodSegment | DetailedOperatorSegment;
+interface LightMethodSegment {
+	request: MethodRequest,
+	response: MethodResponse
+}
+export type HttpMethodType = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+export interface MethodRequest {
+	url: string,
+	http_method: HttpMethodType,
+}
+interface MethodResponse {
+	status: string,
+	duration: string,
+}
+export interface DetailedMethodSegment {
+	request: MethodRequest & DetailedMethod,
+	response: MethodResponse & DetailedMethod
+}
+interface DetailedMethod {
+	header: string,
+	payload: any,
+}
+interface LightIfOperatorSegment {
+	result: 'true' | 'false',
+}
+interface LightLoopOperatorSegment {
+
+}
+type LightOperatorSegment = LightIfOperatorSegment | LightLoopOperatorSegment;
+export interface DetailedIfOperatorSegment extends LightIfOperatorSegment{
+	refs: {ref: string, value: any}[],
+}
+interface DetailedLoopOperatorSegment extends LightLoopOperatorSegment {
+	refs: {ref: string, value: any}[],
+}
+export type DetailedOperatorSegment = DetailedIfOperatorSegment | DetailedLoopOperatorSegment;
+interface BaseChildProperty {
+	loopIndex?: string,
+	loopIterator?: string,
+}
+interface BaseOperatorProperty extends BaseChildProperty{
+	expression: string,
+}
+export interface FlowchartProperty {
+	CONNECTOR_ID: string,
+	DIRECTION: 'source' | 'target',
+}
+export interface MethodProperty extends BaseChildProperty{
+	name: string,
+}
+export interface IfOperatorProperty extends BaseOperatorProperty{
+}
+export interface LoopOperatorProperty extends BaseOperatorProperty {
+	size: number,
+	iterator: string,
+}
+type OperatorProperty = IfOperatorProperty | LoopOperatorProperty;
 export interface ConnectionTextLog {
 	message: string,
 	type: 'INFO',
 	datetime: string,
 }
-export interface ConnectionLog {
-	executionId: string;
-	connectionId: string;
-	connectors: ConnectorLog[];
-}
 
 export interface ConnectorLog {
-	id: string;
 	name: string;
+	flowId: string,
 	traces: Trace[];
 }
 
-export type Trace = MethodTrace | OperatorTrace;
 
-export interface MethodTrace {
-	logType: 'method';
-	indexPath: string;
-	httpMethod: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-	statusCode: number;
-	url: string;
-	executionTime: number;
-	requestDetails?: HttpRequestLog;
-	responseDetails?: HttpResponseLog;
+export type Trace = (ConnectionSocketLog<LightSegment> | ConnectionSocketLog<DetailedSegment>) & MetaTrace;
+
+export interface MetaTrace {
+	children?: Trace[],
+	isCompleted?: boolean,
+	hasError?: boolean,
 }
 
-export interface HttpRequestLog {
-	headers: Record<string, string>;
-	body?: any;
+export interface TraceConfig {
+	isOpened?: boolean,
+	height?: {
+		request: number | undefined,
+		response: number | undefined,
+	},
 }
 
-export interface HttpResponseLog {
-	headers: Record<string, string>;
-	body?: any;
-}
-
-export interface OperatorTrace {
-	logType: 'operator';
-	indexPath: string;
-	conditionStatement: string;
-	info: OperatorInfo;
-	traces: Trace[];
-}
-
-export type OperatorInfo = OperatorLoopInfo | OperatorIfInfo;
-
-export interface OperatorLoopInfo {
-	type: 'loop';
-	iteration: {
-		current: number;
-		total: number;
-	};
-}
-
-export interface OperatorIfInfo {
-	type: 'if';
-	conditionResult: boolean;
+export type TraceConfigs = {
+	[indexPath: string]: TraceConfig,
 }

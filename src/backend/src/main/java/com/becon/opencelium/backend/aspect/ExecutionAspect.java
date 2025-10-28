@@ -18,6 +18,7 @@ package com.becon.opencelium.backend.aspect;
 
 import com.becon.opencelium.backend.constant.AggrConst;
 import com.becon.opencelium.backend.constant.AppYamlPath;
+import com.becon.opencelium.backend.constant.LogConstant;
 import com.becon.opencelium.backend.database.mysql.entity.Argument;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.DataAggregator;
@@ -45,7 +46,7 @@ import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.execution.socket.Connection2WebSocketChannelMapping;
 import com.becon.opencelium.backend.execution.socket.SocketConstant;
 import com.becon.opencelium.backend.execution.socket.WebSocketNotificationService;
-import com.becon.opencelium.backend.execution.support_file.SupportFileService;
+import com.becon.opencelium.backend.execution.supportfile.SupportFileService;
 import com.becon.opencelium.backend.quartz.JobExecutor;
 import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
 import com.becon.opencelium.backend.resource.schedule.RunningJobsResource;
@@ -68,6 +69,7 @@ import org.springframework.stereotype.Component;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -78,6 +80,9 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static com.becon.opencelium.backend.constant.LogConstant.FAIL;
+import static com.becon.opencelium.backend.constant.LogConstant.SUCCESS;
 
 @Aspect
 @Component
@@ -138,10 +143,17 @@ public class ExecutionAspect {
         long execId = initExecutionObj(schedulerId);
         jobDataMap.put("execId", execId);
 
+        Scheduler scheduler = schedulerService.getById(schedulerId);
+        jobDataMap.put("connectionId", scheduler.getConnection().getId());
+        jobDataMap.put("debugMode", scheduler.getDebugMode());
+
         List<EventNotification> eventNotifications = schedulerService.getAllNotifications(schedulerId);
         triggerNotifications(eventNotifications, "pre", null);
 
         sendRunningJobsNotification();
+
+        String timestamp = LocalDateTime.now().format(LogConstant.DATE_TIME_FORMATTER);
+        jobDataMap.put("timestamp", timestamp);
     }
 
     @AfterReturning("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
@@ -152,17 +164,16 @@ public class ExecutionAspect {
             return;
         }
 
+        long execId = jobDataMap.getLong("execId");
+        long connectionId = jobDataMap.getLong("connectionId");
+        boolean debugMode = jobDataMap.getBoolean("debugMode");
+        String timestamp = jobDataMap.getString("timestamp");
         QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
         int schedulerId = data.getScheduleId();
 
-        long execId = jobDataMap.getLong("execId");
-        boolean debugMode = schedulerService.getById(schedulerId).getDebugMode();
         updateExecutionObj(execId, true, debugMode);
         List<Operation> operations = (List<Operation>) context.get("operationsEx");
         executeAggregator(operations, execId);
-
-        String timestamp = (String) context.get("timestamp");
-        Long connectionId = (Long) context.get("connectionId");
 
         if (data.getExecType() == QuartzJobScheduler.TriggerType.EXECUTION_TEST) {
             // delete temporarily created scheduler
@@ -173,15 +184,15 @@ public class ExecutionAspect {
             connection2ChannelMapping.remove(connectionId);
 
             // move temporarily log file under /connectionId folder if debug is enabled
-            move(connectionId, execId, timestamp, "s", debugMode);
+            move(connectionId, execId, timestamp, SUCCESS, debugMode);
         } else if (data.getExecType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE) {
-            supportFileService.collectFiles(connectionId, execId, timestamp, "s");
+            supportFileService.collectFiles(connectionId, execId, timestamp, SUCCESS);
 
             // delete temporarily created scheduler
             schedulerService.deleteById(schedulerId);
         } else {
             // move temporarily log file under /connectionId folder if debug is enabled
-            move(connectionId, execId, timestamp, "s", debugMode);
+            move(connectionId, execId, timestamp, SUCCESS, debugMode);
         }
 
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
@@ -199,17 +210,17 @@ public class ExecutionAspect {
             return;
         }
 
+        long execId = jobDataMap.getLong("execId");
+        long connectionId = jobDataMap.getLong("connectionId");
+        boolean debugMode = jobDataMap.getBoolean("debugMode");
+        String timestamp = jobDataMap.getString("timestamp");
         QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
         int schedulerId = data.getScheduleId();
 
-        long execId = jobDataMap.getLong("execId");
-        boolean debugMode = schedulerService.getById(schedulerId).getDebugMode();
         updateExecutionObj(execId, false, debugMode);
         List<Operation> operations = (List<Operation>) context.get("operationsEx");
         executeAggregator(operations, execId);
 
-        String timestamp = (String) context.get("timestamp");
-        Long connectionId = (Long) context.get("connectionId");
         if (data.getExecType() == QuartzJobScheduler.TriggerType.EXECUTION_TEST) {
             // delete temporarily created scheduler
             schedulerService.deleteById(schedulerId);
@@ -219,15 +230,15 @@ public class ExecutionAspect {
             connection2ChannelMapping.remove(connectionId);
 
             // move temporarily log file under /connectionId folder if debug is enabled
-            move(connectionId, execId, timestamp, "f", debugMode);
+            move(connectionId, execId, timestamp, FAIL, debugMode);
         } else if (data.getExecType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE) {
-            supportFileService.collectFiles(connectionId, execId, timestamp, "f");
+            supportFileService.collectFiles(connectionId, execId, timestamp, FAIL);
 
             // delete temporarily created scheduler
             schedulerService.deleteById(schedulerId);
         } else {
             // move temporarily log file under /connectionId folder if debug is enabled
-            move(connectionId, execId, timestamp, "f", debugMode);
+            move(connectionId, execId, timestamp, FAIL, debugMode);
         }
 
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
@@ -246,7 +257,7 @@ public class ExecutionAspect {
                 .getId();
     }
 
-    private void updateExecutionObj(long execId, boolean success, boolean debugMode) {
+    private void updateExecutionObj(long execId, boolean success, boolean hasLog) {
         Execution execution = executionService.getById(execId);
         execution.setEndTime(new Date());
         execution.setStatus(success ? "S" : "F");
@@ -262,14 +273,14 @@ public class ExecutionAspect {
             le.setSuccessDuration(execution.getEndTime().getTime() - execution.getStartTime().getTime());
             le.setSuccessStartTime(execution.getStartTime());
             le.setSuccessEndTime(execution.getEndTime());
+            le.setSuccessHasLog(hasLog);
             le.setSuccessExecutionId(execution.getId());
-            le.setSuccessHasLog(debugMode);
         } else {
             le.setFailDuration(execution.getEndTime().getTime() - execution.getStartTime().getTime());
             le.setFailStartTime(execution.getStartTime());
             le.setFailEndTime(execution.getEndTime());
+            le.setFailHasLog(hasLog);
             le.setFailExecutionId(execution.getId());
-            le.setFailHasLog(debugMode);
         }
         if (le.getScheduler() == null) {
             le.setScheduler(execution.getScheduler());
@@ -532,7 +543,7 @@ public class ExecutionAspect {
     private void move(Long connectionId, long execId, String timestamp, String type, boolean debugMode) {
         if (debugMode) {
             int fileLimit;
-            if ("s".equals(type)) {
+            if (SUCCESS.equals(type)) {
                 fileLimit = env.getProperty(AppYamlPath.LOG_FILE_SUCCESS_LIMIT, Integer.class, 2);
             } else {
                 fileLimit = env.getProperty(AppYamlPath.LOG_FILE_FAIL_LIMIT, Integer.class, 3);

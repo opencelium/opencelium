@@ -4,21 +4,28 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
-import com.becon.opencelium.backend.execution.logger.parser.ParsedLogLineBuilder;
+import com.becon.opencelium.backend.execution.logger.dto.LogDataDTO;
 import com.becon.opencelium.backend.execution.socket.WebSocketNotificationService;
 import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
-import com.becon.opencelium.backend.resource.execution.LoggerConfiguration;
 import com.becon.opencelium.backend.utility.ApplicationContextUtility;
 import com.becon.opencelium.backend.utility.LogFileUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.RandomAccessFile;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.function.Consumer;
+
+import static com.becon.opencelium.backend.constant.LogConstant.LOG_FILE_EXTENSION;
+import static com.becon.opencelium.backend.constant.LogConstant.LOG_LINE_PATTERN;
+import static com.becon.opencelium.backend.constant.LogConstant.LOG_LOCATION;
+import static com.becon.opencelium.backend.constant.LogConstant.UNCATEGORIZED;
 
 public class OcLogger<T extends LogMessage> {
     private final boolean debugMode;
@@ -30,25 +37,26 @@ public class OcLogger<T extends LogMessage> {
     private final long connectionId;
     private final Path filepath;
     private final Logger logger;
-    ParsedLogLineBuilder parsedLogLineBuilder;
 
-    public static final String LOG_LOCATION = "src/main/resources/logs";
-
-    public OcLogger(LoggerConfiguration loggerConfiguration, T logEntity,
-                    long connectionId, String timestamp, long executionId, Class<?> c) {
-        this.debugMode = loggerConfiguration.isDebugMode();
-        this.webSocket = loggerConfiguration.getTriggerType() == QuartzJobScheduler.TriggerType.EXECUTION_TEST;
-        this.supportFile = loggerConfiguration.getTriggerType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE;
+    public OcLogger(
+            QuartzJobScheduler.TriggerType triggerType, boolean debugMode, T logEntity,
+            long connectionId, String timestamp, long executionId
+    ) {
+        this.debugMode = debugMode;
+        this.webSocket = (QuartzJobScheduler.TriggerType.EXECUTION_TEST == triggerType);
+        this.supportFile = (QuartzJobScheduler.TriggerType.SUPPORT_FILE == triggerType);
 
         this.socketNotificationService = ApplicationContextUtility.getBean(WebSocketNotificationService.class);
-        this.parsedLogLineBuilder = ApplicationContextUtility.getBean(ParsedLogLineBuilder.class);
         this.logLineDispatcher = new LogLineDispatcher();
         this.connectionId = connectionId;
         this.logEntity = logEntity;
 
+        // delete existing log files with the same 'executionId'
+        LogFileUtility.deleteByExecutionId(executionId);
+
         // set up the logger to create temporary log file in base log directory: type = u (uncategorized), not s (success) or f (fail):
         String loggerId = String.format("%d-%d", executionId, connectionId);
-        String filename = LogFileUtility.toFilename(timestamp, connectionId, "u", executionId, "log");
+        String filename = LogFileUtility.toFilename(timestamp, connectionId, UNCATEGORIZED, executionId, LOG_FILE_EXTENSION);
 
         this.filepath = LogFileUtility.toPath(LOG_LOCATION, filename);
 
@@ -60,7 +68,7 @@ public class OcLogger<T extends LogMessage> {
 
         PatternLayoutEncoder encoder = new PatternLayoutEncoder();
         encoder.setContext(context);
-        encoder.setPattern("%d{dd-MM-yyyy HH:mm:ss.SSS} - %msg%n");
+        encoder.setPattern(LOG_LINE_PATTERN);
         encoder.setCharset(StandardCharsets.UTF_8);
         encoder.start();
 
@@ -105,11 +113,10 @@ public class OcLogger<T extends LogMessage> {
     }
 
     public void logAndSend(Exception e){
-        Consumer<Exception> printStrategy = x -> {
-            logger.error(e.getMessage(), e);
-        };
-
-        logAndSend(printStrategy, e);
+        String stackTrace = getStackTraceAsString(e);
+        String logMessage = "segment=EXCEPTION data=" + stackTrace;
+        Consumer<String> printStrategy = logger::info;
+        logAndSend(printStrategy, logMessage);
     }
 
 
@@ -121,10 +128,10 @@ public class OcLogger<T extends LogMessage> {
         // evaluate startOffset before writing to a logfile
         long startOffset = getStartOffset();
         t.accept(message);
-
-        if (webSocket) {
-            logEntity.setMessage(message);
-            socketNotificationService.send(connectionId, logEntity);
+        long endOffset = getStartOffset();
+        Optional<LogDataDTO> logData = logLineDispatcher.dispatch(message.toString(), startOffset, endOffset);
+        if (webSocket && logData.isPresent()) {
+            socketNotificationService.send(connectionId, logData);
         }
     }
 
@@ -146,5 +153,11 @@ public class OcLogger<T extends LogMessage> {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String getStackTraceAsString(Throwable e) {
+        StringWriter sw = new StringWriter();
+        e.printStackTrace(new PrintWriter(sw));
+        return sw.toString();
     }
 }

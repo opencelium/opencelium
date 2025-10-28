@@ -16,7 +16,7 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
-import com.becon.opencelium.backend.configuration.OpenCeliumProps;
+import com.becon.opencelium.backend.constant.props.OpenceliumProps;
 import com.becon.opencelium.backend.constant.*;
 import com.becon.opencelium.backend.container.Command;
 import com.becon.opencelium.backend.container.ConnectionUpdateTracker;
@@ -39,12 +39,13 @@ import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
 import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
+import com.becon.opencelium.backend.utility.LogFileUtility;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
-import com.becon.opencelium.backend.version_manager.EntityUpdater;
-import com.becon.opencelium.backend.version_manager.EntityVersionManager;
-import com.becon.opencelium.backend.version_manager.backup.MongoDbBackupService;
-import com.becon.opencelium.backend.version_manager.backup.MysqlBackupService;
-import com.becon.opencelium.backend.version_manager.base.Utils;
+import com.becon.opencelium.backend.versionmanager.EntityUpdater;
+import com.becon.opencelium.backend.versionmanager.EntityVersionManager;
+import com.becon.opencelium.backend.versionmanager.backup.MongoDbBackupService;
+import com.becon.opencelium.backend.versionmanager.backup.MysqlBackupService;
+import com.becon.opencelium.backend.versionmanager.base.Utils;
 import com.github.fge.jsonpatch.JsonPatch;
 import jakarta.persistence.EntityNotFoundException;
 import net.minidev.json.JSONArray;
@@ -81,7 +82,7 @@ public class ConnectionServiceImp implements ConnectionService {
     private final MaskingRuleRepository ruleRepository;
     private final PatchHelper patchHelper;
     private final WebhookService webhookService;
-    private final OpenCeliumProps ocProps;
+    private final OpenceliumProps ocProps;
     private final EntityUpdater<ConnectionMng> connectionMngEntityUpdater;
     private final EntityUpdater<Enhancement> enhancementEntityUpdater;
     private final MysqlBackupService mysqlBackupService;
@@ -104,7 +105,7 @@ public class ConnectionServiceImp implements ConnectionService {
             ConnectionUpdateTracker updateTracker,
             MaskingRuleRepository ruleRepository,
             EntityVersionManager entityVersionManager,
-            OpenCeliumProps ocProps, MysqlBackupService mysqlBackupService, MongoDbBackupService mongoDbBackupService
+            OpenceliumProps ocProps, MysqlBackupService mysqlBackupService, MongoDbBackupService mongoDbBackupService
     ) {
         this.connectionRepository = connectionRepository;
         this.connectorService = connectorService;
@@ -146,8 +147,8 @@ public class ConnectionServiceImp implements ConnectionService {
         connectionMng.getFromConnector().setTitle(from.getTitle());
         connectionMng.getToConnector().setTitle(to.getTitle());
 
-        connectionMng.getFromConnector().setFchartId(UUID.randomUUID().toString());
-        connectionMng.getToConnector().setFchartId(UUID.randomUUID().toString());
+        connectionMng.getFromConnector().setFlowId(UUID.randomUUID().toString());
+        connectionMng.getToConnector().setFlowId(UUID.randomUUID().toString());
 
         //checking existence of category
         if (connection.getCategoryId() != null) {
@@ -199,8 +200,8 @@ public class ConnectionServiceImp implements ConnectionService {
         connectionMng.getFromConnector().setTitle(from.getTitle());
         connectionMng.getToConnector().setTitle(to.getTitle());
 
-        connectionMng.getFromConnector().setFchartId(oldMng.getFromConnector().getFchartId());
-        connectionMng.getToConnector().setFchartId(oldMng.getToConnector().getFchartId());
+        connectionMng.getFromConnector().setFlowId(oldMng.getFromConnector().getFlowId());
+        connectionMng.getToConnector().setFlowId(oldMng.getToConnector().getFlowId());
 
         //checking existence of category
         if (connection.getCategoryId() != null && !connection.getCategoryId().equals(sCon.getCategoryId())) {
@@ -218,6 +219,9 @@ public class ConnectionServiceImp implements ConnectionService {
         }
         List<FieldBindingMng> fieldBindingsToDelete = getEnhancementsToDelete(oldMng, connectionMng);
         fieldBindingsToDelete.forEach(f -> enhancementService.deleteById(f.getEnhancementId()));
+
+        // there is not ocVersion field on ConnectionOldDTO, set connection's version with current system version
+        connection.setOcVersion(ocProps.getVersion());
 
         Connection savedConnection = connectionRepository.save(connection);
         if (enhancements != null && !enhancements.isEmpty()) {
@@ -571,6 +575,11 @@ public class ConnectionServiceImp implements ConnectionService {
             }
         }
         connectionRepository.updateVersion(ocProps.getVersion());
+    }
+
+    @Override
+    public List<String> getLogFileNameListById(long connectionId) {
+        return LogFileUtility.getLogFileNameList(connectionId);
     }
 
     // --------------------------------------------------------------------------------------------------------------------------------------------------------

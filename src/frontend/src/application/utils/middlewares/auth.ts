@@ -27,6 +27,7 @@ import { checkConnection } from '@application/redux_toolkit/action_creators/Chec
 import {checkMongoDB} from "@entity/external_application/redux_toolkit/action_creators/ExternalApplicationCreators";
 import {validateTotp} from "@entity/totp/redux_toolkit/action_creators/TotpCreators";
 import {setQrCode, setSecretKey} from "@entity/totp/redux_toolkit/slices/TotpSlice";
+import {clearMasterPassword} from "@entity/connector/redux_toolkit/slices/ConnectorSlice";
 
 export const checkAccess = (storeApi: any, action: any) => {
     const response: IResponse = action.payload;
@@ -67,6 +68,7 @@ export const authMiddleware: Middleware<{}, RootState> = storeApi => next => act
         dispatch(clearSearchFields({}));
         dispatch(clearCurrentPages({}));
         dispatch(clearWidgetSettings());
+        dispatch(clearMasterPassword());
     }
     return next(action);
 }

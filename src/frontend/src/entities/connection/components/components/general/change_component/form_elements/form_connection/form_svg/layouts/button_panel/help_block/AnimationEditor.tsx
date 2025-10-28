@@ -41,6 +41,7 @@ import AnimationFunctionSteps from "./classes/AnimationFunctionSteps";
 import { Invoker } from "@entity/invoker/classes/Invoker";
 import RefFunctions from "./classes/RefFunctions";
 import Loading from "@app_component/base/loading/Loading";
+import {consoleLog} from "@application/utils/utils";
 
 
 const prepareConnection = (connection: any, connectors: any, invokers: any) => {
@@ -181,7 +182,7 @@ const AnimationEditor: FC<{setPopoverProps: any, isVisible: boolean, theme?: any
                 })()
             }
         }catch (e){
-            console.log(e);
+            consoleLog(e);
         }
     }, [videoAnimationName, index, animationProps.update])
 
@@ -211,7 +212,7 @@ const AnimationEditor: FC<{setPopoverProps: any, isVisible: boolean, theme?: any
                 }
             })();
         } catch (e){
-            console.log(e);
+            consoleLog(e);
         }
     }, [connectorType])
 
@@ -254,7 +255,7 @@ const AnimationEditor: FC<{setPopoverProps: any, isVisible: boolean, theme?: any
                 }
             }
         } catch(e) {
-            console.log(e);
+            consoleLog(e);
         }
     }
 
@@ -289,7 +290,7 @@ const AnimationEditor: FC<{setPopoverProps: any, isVisible: boolean, theme?: any
                 }
             }
         } catch(e){
-            console.log(e);
+            consoleLog(e);
         }
     }
 
@@ -419,7 +420,7 @@ const AnimationEditor: FC<{setPopoverProps: any, isVisible: boolean, theme?: any
                 }
             }
         } catch(e) {
-            console.log(e);
+            consoleLog(e);
         }
     }
 
@@ -525,7 +526,7 @@ const AnimationEditor: FC<{setPopoverProps: any, isVisible: boolean, theme?: any
             }
             setIndex(index + 1)
         } catch (e){
-            console.log(e);
+            consoleLog(e);
         }
     }
 

@@ -22,10 +22,13 @@ public interface PathConstant {
     String MYSQl = "com.becon.opencelium.backend.database.mysql";
     String ELASTICSEARCH = "com.becon.opencelium.backend.elasticsearch";
 
+    String RUNTIME = "runtime/";
     String RESOURCES = "src/main/resources";
-    String INVOKER = RESOURCES + "/invoker/";
+    String INVOKER = RUNTIME + "invoker/";
+    String INVOKER_ON_RESOURCES = RESOURCES + "/invoker/";
     String LICENSE = RESOURCES + "/license/";
-    String TEMPLATE = "src/main/resources/templates/";
+    String TEMPLATE = RUNTIME + "templates/";
+    String TEMPLATE_ON_RESOURCES = RESOURCES + "/templates";
     String ICONS = "src/main/resources/icon/";
     String APP_DEFAULT_YML = "src/main/resources/application_default.yml";
     String APP_YML = "src/main/resources/application.yml";
@@ -36,4 +39,5 @@ public interface PathConstant {
     String ASSISTANT = "assistant/";
     String LIBS = "build/libs/";
     String CHANGELOG = "./assistant/changelog/file/";
+    String BACKUP = RUNTIME + "backup/";
 }

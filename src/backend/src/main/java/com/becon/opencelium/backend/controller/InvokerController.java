@@ -21,12 +21,14 @@ import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
+import com.becon.opencelium.backend.database.mysql.service.InvokerSyncService;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.parser.InvokerParserImp;
 import com.becon.opencelium.backend.invoker.resource.OperationResource;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.mapper.base.Mapper;
+import com.becon.opencelium.backend.mapper.mysql.invoker.InvokerMapper;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.connector.FunctionDTO;
@@ -36,6 +38,7 @@ import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.utility.PathUtility;
 import com.becon.opencelium.backend.utility.Xml;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -71,6 +74,7 @@ import java.util.stream.Collectors;
 @RequestMapping(value = "/invoker", produces = MediaType.APPLICATION_JSON_VALUE)
 public class InvokerController {
     private final InvokerService invokerService;
+    private final InvokerSyncService invokerSyncService;
     private final ConnectorService connectorService;
     private final ConnectionService connectionService;
     private final Mapper<Invoker, InvokerDTO> invokerMapper;
@@ -80,10 +84,12 @@ public class InvokerController {
             @Qualifier("invokerServiceImp") InvokerService invokerService,
             @Qualifier("connectorServiceImp") ConnectorService connectorService,
             @Qualifier("connectionServiceImp") ConnectionService connectionService,
+            InvokerSyncService invokerSyncService,
             Mapper<Invoker, InvokerDTO> invokerMapper,
             Mapper<FunctionInvoker, FunctionDTO> functionMapper
     ) {
         this.invokerService = invokerService;
+        this.invokerSyncService = invokerSyncService;
         this.connectorService = connectorService;
         this.connectionService = connectionService;
         this.invokerMapper = invokerMapper;
@@ -105,10 +111,20 @@ public class InvokerController {
     @GetMapping("/{name}")
     public ResponseEntity<?> get(@PathVariable String name) throws Exception {
         InvokerDTO invokerResources = invokerMapper.toDTO(invokerService.findByName(name));
-        return ResponseEntity.ok(invokerResources);
+        return ResponseEntity.ok(setManualChangeValue(invokerResources));
     }
 
-    @Operation(summary = "Retrieves all invokers")
+    @Operation(
+        summary = "Retrieves all invokers",
+        parameters = {
+            @Parameter(
+                    name = "opsIncluded",
+                    description = "Whether to include operations for each invoker",
+                    example = "false",
+                    schema = @Schema(defaultValue = "true")
+            )
+        }
+    )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "List of Invokers have been successfully retrieved",
@@ -121,10 +137,14 @@ public class InvokerController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/all")
-    public ResponseEntity<List<InvokerDTO>> getAll() throws Exception {
-
-        List<InvokerDTO> invokerDTOS = invokerService.findAll()
-                .stream().map(invokerMapper::toDTO)
+    public ResponseEntity<List<InvokerDTO>> getAll(@RequestParam(name = "opsIncluded", defaultValue = "true") boolean opsIncluded) throws Exception {
+        List<Invoker> invokers = invokerService.findAll();
+        InvokerMapper invokerMappers = (InvokerMapper) invokerMapper;
+        List<InvokerDTO> invokerDTOS = invokers.stream()
+                .map(invoker -> opsIncluded
+                        ? invokerMappers.toDTO(invoker)
+                        : invokerMappers.toDTONoOps(invoker))
+                .map(this::setManualChangeValue)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(invokerDTOS);
     }
@@ -197,6 +217,9 @@ public class InvokerController {
             DOMSource source = new DOMSource(doc);
             StreamResult result = new StreamResult(new File(PathConstant.INVOKER + "/" + filename + ".xml"));
             transformer.transform(source, result);
+
+            // update sync information for new invoker file
+            invokerSyncService.updateSync(filename);
         } catch (TransformerException ex) {
             throw new RuntimeException(ex);
         }
@@ -335,6 +358,10 @@ public class InvokerController {
             InvokerParserImp invokerParserImp = new InvokerParserImp(invoker);
             FunctionInvoker functionInvoker = invokerParserImp.getFunctions(methodNode).get(0);
             FunctionDTO resource = functionMapper.toDTO(functionInvoker);
+
+            // delete invoker sync record
+            invokerSyncService.updateSync(invokerName);
+
             return ResponseEntity.ok(resource);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -374,10 +401,47 @@ public class InvokerController {
     public ResponseEntity<List<InvokerDTO>> synchronise() {
         List<InvokerDTO> invokerDTOS = invokerService.synchronise()
                 .stream().map(invokerMapper::toDTO)
+                .map(this::setManualChangeValue)
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(invokerDTOS);
     }
+
+    @Operation(summary = "Syncs one invoker file with Service Portal by invoker 'name'")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Invoker has been successfully synced with Service Portal",
+                    content = @Content),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PutMapping("/{invokerName}/sync-force")
+    public ResponseEntity<?> syncForce(@PathVariable String invokerName) {
+        invokerSyncService.forceSync(invokerName);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Syncs invoker files with Service Portal by list of their corresponding 'name's.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204",
+                    description = "List of Invokers have been successfully synced with Service Portal"),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PutMapping(path = "list/sync-force", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> syncForceByNames(@RequestBody IdentifiersDTO<String> invokerNames) {
+        invokerNames.getIdentifiers().forEach(invokerSyncService::forceSync);
+        return ResponseEntity.noContent().build();
+    }
+
 
     private static Document convertStringToXMLDocument(String xmlString) {
         //Parser that produces DOM object trees from XML content
@@ -396,5 +460,11 @@ public class InvokerController {
             e.printStackTrace();
         }
         return null;
+    }
+    
+    private InvokerDTO setManualChangeValue(InvokerDTO dto) {
+        dto.setHasManualSync(invokerSyncService.isManuallyModified(dto.getName()));
+
+        return dto;
     }
 }

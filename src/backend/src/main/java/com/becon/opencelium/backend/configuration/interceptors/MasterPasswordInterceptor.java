@@ -1,7 +1,7 @@
 package com.becon.opencelium.backend.configuration.interceptors;
 
 import com.becon.opencelium.backend.commons.ThreadLocalSingleton;
-import com.becon.opencelium.backend.configuration.ConnectorProps;
+import com.becon.opencelium.backend.constant.props.ConnectorProps;
 import com.becon.opencelium.backend.constant.HeaderConstants;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,7 +23,7 @@ public class MasterPasswordInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         String masterPassword = requireNonNullElse(request.getHeader(HeaderConstants.MASTER_PASSWORD), StringUtils.EMPTY);
-        ThreadLocalSingleton.setHasMasterPassword(connectorProps.getMasterPassword() != null && connectorProps.getMasterPassword().equals(masterPassword));
+        ThreadLocalSingleton.setHasMasterPassword(StringUtils.isNotBlank(connectorProps.getMasterPassword()) && connectorProps.getMasterPassword().equals(masterPassword));
         return true;
     }
 

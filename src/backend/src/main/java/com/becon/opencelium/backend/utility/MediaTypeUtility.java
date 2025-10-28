@@ -27,4 +27,22 @@ public class MediaTypeUtility {
     public static boolean isFormUrlencodedCompatible(MediaType mediaType) {
         return MediaType.APPLICATION_FORM_URLENCODED.isCompatibleWith(mediaType);
     }
+
+    public static boolean isBinaryCompatible(MediaType mediaType) {
+        if (mediaType == null) {
+            return false;
+        }
+
+        String type = mediaType.getType();
+        String subtype = mediaType.getSubtype();
+
+        return MediaType.APPLICATION_OCTET_STREAM.includes(mediaType) ||
+                "image".equalsIgnoreCase(type) ||
+                "video".equalsIgnoreCase(type) ||
+                "audio".equalsIgnoreCase(type) ||
+                subtype.contains("pdf") ||
+                subtype.contains("zip") ||
+                subtype.contains("msword") ||
+                subtype.contains("officedocument");
+    }
 }

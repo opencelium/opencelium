@@ -79,7 +79,7 @@ const InlineEditInput: FC<InlineEditInputProps> =
     const shortInitialValue = initialValue.length > 64 ? `${initialValue.substr(0, 64)}...` : initialValue;
     return (
         <div style={{position: showEditor ? 'relative' : 'unset'}}>
-            <span ref={inlineValueRef} style={{color: showEditor ? 'white' : 'black'}} onDoubleClick={() => {
+            <span ref={inlineValueRef} title={initialValue} style={{color: showEditor ? 'white' : 'black'}} onDoubleClick={() => {
                 toggleEditor(true);
             }}>{shortInitialValue === '' ? '-' : shortInitialValue}</span>
             {showEditor &&

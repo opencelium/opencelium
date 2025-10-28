@@ -185,12 +185,14 @@ public class YAMLMigrator {
                     }
                     i--;
                 } else if (e.getCause() != null && e.getCause().getMessage().equals("value cannot be null")
-                           || changeSet.getOperation().equals("delete") && e.getCause() != null && e.getCause().getMessage().equals("no such path in target JSON document")) {
+                        || changeSet.getOperation() == OperationType.DELETE && e.getCause() != null && e.getCause().getMessage().equals("no such path in target JSON document")) {
+                    log.warn("An error occurred while applying {} - changeset : {}", changeSet.getVersion(), e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
+
                     changeSet.setSuccess(false);
                 } else {
-                    log.warn("An error occurred while applying {} - changeset : {}", changeSet.getVersion(), e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
-                    finish(patched, newChangeSets.subList(0, i));
-                    return;
+                    log.warn("Unexpected error occurred while applying {} - changeset : {}", changeSet.getVersion(), e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
+
+                    changeSet.setSuccess(false);
                 }
             }
         }
@@ -237,7 +239,7 @@ public class YAMLMigrator {
 
     private static void changeRenamedPaths(List<Comment> commentLines, List<ChangeSet> changeSets) {
         for (ChangeSet changeSet : changeSets) {
-            if (changeSet.getOperation().equals("rename")) {
+            if (changeSet.getOperation() == OperationType.RENAME) {
                 for (Comment cl : commentLines) {
                     if (!cl.prev.isEmpty() && cl.prev.equals(changeSet.getPath())) {
                         cl.prev = (String) changeSet.getValue();
@@ -268,25 +270,25 @@ public class YAMLMigrator {
         ArrayList<Map<?, ?>> opList = new ArrayList<>();
         Map<String, Object> map = new HashMap<>();
         switch (changeSet.getOperation()) {
-            case "add" -> {
-                map.put("op", changeSet.getOperation());
+            case ADD -> {
+                map.put("op", "add");
                 map.put("path", "/" + changeSet.getPath().replaceAll("\\.", "/"));
                 map.put("value", changeSet.getValue());
                 opList.add(map);
             }
-            case "modify" -> {
+            case MODIFY -> {
                 map.put("op", "replace");
                 map.put("path", "/" + changeSet.getPath().replaceAll("\\.", "/"));
                 map.put("value", changeSet.getValue());
                 opList.add(map);
             }
-            case "delete" -> {
+            case DELETE -> {
                 map.put("op", "remove");
                 map.put("path", "/" + changeSet.getPath().replaceAll("\\.", "/"));
                 changeSet.setValue(null);
                 opList.add(map);
             }
-            case "rename" -> {
+            case MOVE -> {
                 Map<String, Object> prev = new HashMap<>();
                 String toPath = "/" + ((String) (changeSet.getValue())).replaceAll("\\.", "/");
                 prev.put("op", "add");
@@ -300,8 +302,24 @@ public class YAMLMigrator {
                 map.put("path", toPath);
                 opList.add(map);
             }
+            case RENAME -> {
+                String fromPath = "/" + changeSet.getPath().replaceAll("\\.", "/");
+                String newName = ((String) (changeSet.getValue()));
+                String newPath = fromPath.substring(0, fromPath.lastIndexOf("/") + 1) + newName;
+
+                Map<String, Object> prev = new HashMap<>();
+                prev.put("op", "add");
+                prev.put("path", newPath);
+                prev.put("value", "");
+                opList.add(prev);
+
+                map.put("op", "move");
+                map.put("from", fromPath);
+                map.put("path", newPath);
+                opList.add(map);
+            }
             default -> {
-                log.warn("Unsupported operation: {}", changeSet.getOperation());
+                log.warn("Unsupported operation: {}", changeSet.getOperation().getValue());
                 return null;
             }
         }
@@ -339,13 +357,16 @@ public class YAMLMigrator {
                 changeSet.setPath(getAsString(change, "path", "Syntax error: 'path' property is required. Location: versions[%s] -> changeset[%s]".formatted(versionVal, changeSetVersion)));
 
                 String operation = getAsString(change, "operation", "Syntax error: 'operation' property is required. Location: versions[%s] -> changeset[%s]".formatted(versionVal, changeSetVersion));
-                if (!Set.of("add", "modify", "delete", "rename").contains(operation)) {
+                OperationType op = OperationType.getFromNameOrElseNull(operation);
+
+                if (op == null) {
                     throw new RuntimeException("Syntax error: Invalid operation '%s'. Location: versions[%s] -> changeset[%s]".formatted(operation, versionVal, changeSetVersion));
                 }
-                changeSet.setOperation(operation);
 
-                if (!operation.equals("delete")) {
-                    changeSet.setValue(getAsString(change, "value", "Syntax error: 'value' property is required for operations other than 'delete'. Location: versions[%s] -> changeset[%s]".formatted(versionVal, changeSetVersion)));
+                changeSet.setOperation(op);
+
+                if (op != OperationType.DELETE) {
+                    changeSet.setValue(getAsString(change, "value", "Syntax error: 'value' property is required for '%s' operations. Location: versions[%s] -> changeset[%s]".formatted(versionVal, op.getValue(), changeSetVersion)));
                 }
 
                 result.add(changeSet);

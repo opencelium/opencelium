@@ -10,14 +10,14 @@ export default class SupportFileResponseClass {
 
     supportFileObject: SupportFileObject;
 
-    constructor(data: SupportFileResponse, type: SupportFileType) {
+    constructor(data: Omit<SupportFileResponse, "status" | "connectionId" | "connectionTitle">, type: SupportFileType) {
         this.supportFile = data.supportFile;
         this.type = type;
         this.supportFileObject = this.convertFilenameIntoObject(this.supportFile)
     }
     convertFilenameIntoObject(filename: string): SupportFileObject | undefined {
         try {
-            const regex = /\/(\d+)\/(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}_\d+)_([sf])_(\d+)\.zip$/;
+            const regex = /\/(\d+)\/(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}_\d+)_([sf])_(\d+)\.(zip|log)$/;
             const match = filename.match(regex);
             if (!match) {
                 throw new Error("Path does not match expected format");

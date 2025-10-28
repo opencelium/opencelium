@@ -8,7 +8,7 @@ public enum PhaseCategory {
     IF,
     UNKNOWN;
 
-    public static PhaseCategory fromValue(LogLineStage value) {
+    public static PhaseCategory fromValue(PhaseType value) {
         return switch (value) {
             case EXECUTION_START, EXECUTION_END -> EXECUTION;
             case FLOWCHART_START, FLOWCHART_END -> FLOWCHART;

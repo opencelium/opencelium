@@ -41,7 +41,10 @@ import DetailsForProcess
 
 function mapStateToProps(state, props){
     const {currentTechnicalItem, connectionOverview} = mapItemsToClasses(state, props.isModal);
+    const {currentLog, currentDirection} = state.connectionLogReducer;
     return{
+        currentLog,
+        currentDirection,
         currentTechnicalItem,
         logPanelHeight: connectionOverview.logPanelHeight,
         isTestingConnection: connectionOverview.isTestingConnection,
@@ -241,7 +244,7 @@ class Operator extends React.Component{
 
     onDoubleClick(){
         this.onClick();
-        this.props.formConnectionSvg.detailsRef.current.descriptionRef.current.conditionRef.current.toggleEdit();
+        this.props.formConnectionSvg.detailsRef.current.descriptionRef.current.conditionRef.current?.toggleEdit();
         //this.props.toggleConditionDialog();
     }
 
@@ -294,7 +297,8 @@ class Operator extends React.Component{
         const {
             operator, isNotDraggable, isCurrent, currentTechnicalItem,
             isHighlighted, readOnly, isDisabled, logPanelHeight,
-            currentLogs, isTestingConnection, justDeletedItem,
+            currentLogs, isTestingConnection, justDeletedItem, currentLog,
+            currentDirection,
         } = this.props;
         const hasBottomPlaceholder = this.shouldShowBottomPlaceholder();
         const hasRightPlaceholder = this.shouldShowRightPlaceholder();
@@ -341,12 +345,13 @@ class Operator extends React.Component{
         const hasDraggableItem = currentTechnicalItem && currentTechnicalItem.isDragged;
         const hasDraggableOperator = isCurrent && hasDraggableItem;
         const isDraggableItemOperator = hasDraggableItem && currentTechnicalItem instanceof CTechnicalOperator;
-        const currentLog = currentLogs.length > 0 ? currentLogs[currentLogs.length - 1] : null;
-        const hasDashAnimation = logPanelHeight !== 0 && currentLog
-            && (currentLog.message !== ConnectionLogs.BreakMessage || (currentLog.message === ConnectionLogs.BreakMessage && currentLog.operatorData && !currentLog.operatorData.conditionResult) && currentLog.message !== ConnectionLogs.EndOfExecutionMessage)
-            && currentLog.index === operator.entity.index && currentLog.connectorType === operator.connectorType && currentLog.message !== '';
+        const hasDashAnimation = currentDirection && currentLog?.indexPath === operator.entity.index && operator.getHtmlIdName().indexOf(currentDirection === 'source' ? 'fromConnector' : 'toConnector') === 0;
         const hasDeleteIcon = isCurrent && !readOnly && !isTestingConnection;
-        const logStroke = logPanelHeight !== 0 && currentLogs.findIndex(l => l.index === operator.entity.index && l.connectorType === operator.connectorType) !== -1 ? '#58854d' : '';
+        let logStroke = logPanelHeight !== 0 && currentLogs.findIndex(l => l.index === operator.entity.index && l.connectorType === operator.connectorType) !== -1 ? '#58854d' : '';
+        if (hasDashAnimation && !!currentLog?.error?.message) {
+            logStroke = '#d24545';
+            errorStyles.stroke = '#d24545';
+        }
         const isJustCreatedItem = this.isJustCreatedItem();
         const isJustDeletedItem = this.isJustDeletedItem() || !!justDeletedItem && isHighlighted;
         return(

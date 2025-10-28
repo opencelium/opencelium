@@ -58,7 +58,6 @@ export function putAsterixInEmptyBrackets(data) {
 			data = data.split(':[*]').join(':[]');
 			return JSON.parse(data);
 		} catch (e) {
-			console.log(data);
 		}
 	}
 	return data;

@@ -17,6 +17,7 @@
 package com.becon.opencelium.backend.invoker.service;
 
 import com.becon.opencelium.backend.constant.PathConstant;
+import com.becon.opencelium.backend.database.mysql.service.InvokerSyncService;
 import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.exception.WrongEncode;
 import com.becon.opencelium.backend.invoker.InvokerContainer;
@@ -50,7 +51,16 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -65,6 +75,10 @@ public class InvokerServiceImp implements InvokerService {
 
     @Autowired
     private StorageService storageService;
+
+    @Lazy
+    @Autowired
+    private InvokerSyncService invokerSyncService;
 
     private final Path filePath = Paths.get(PathConstant.INVOKER);
 
@@ -117,6 +131,9 @@ public class InvokerServiceImp implements InvokerService {
     public void delete(String name) {
         Objects.requireNonNull(name);
         deleteInvoker(name);
+
+        // delete invoker sync record
+        invokerSyncService.delete(name);
     }
 
     @Override
@@ -126,6 +143,9 @@ public class InvokerServiceImp implements InvokerService {
             if (exists(file)) {
                 invokerContainer.remove(name);
                 Files.delete(file.toAbsolutePath());
+
+                // delete invoker sync record
+                invokerSyncService.delete(name);
             }
         } catch (IOException e) {
             throw new StorageException("Failed to delete stored file", e);
@@ -143,6 +163,35 @@ public class InvokerServiceImp implements InvokerService {
     public List<Invoker> synchronise() {
         refresh();
         return findAll();
+    }
+
+    @Override
+    public void moveInvokersToNewLocation(String oldPath, String newPath) {
+        List<Path> oldInvokers = getAllPaths(oldPath);
+
+        Path targetPath = Paths.get(newPath);
+        if (Files.exists(targetPath)) {
+            targetPath.toFile().mkdirs();
+        }
+
+        oldInvokers.forEach(x -> {
+            try {
+                Files.move(
+                        x,
+                        targetPath.resolve(x.getFileName()),
+                        StandardCopyOption.REPLACE_EXISTING
+                );
+            } catch (IOException e) {
+                log.error("Failed to move {} file from {} to {}", x, oldPath, newPath);
+                throw new RuntimeException(e);
+            }
+        });
+
+        try {
+            Files.deleteIfExists(Path.of(oldPath));
+        } catch (IOException e) {
+            log.error("Failed to remove folder {}", oldPath);
+        }
     }
 
     @Override
@@ -166,17 +215,17 @@ public class InvokerServiceImp implements InvokerService {
 //    public void forceDelete(String name) {
 //        Objects.requireNonNull(name);
 //        Consumer<String> refDeletion = invokerName -> {
-////            if (connectorService.existByInvoker(invokerName)) {
-////                Connector connector = connectorService.
-////                Connection connection = connectionServiceImp.findAllByConnectorId()
-////                connectionServiceImp.deleteById();
-////                connectorService.deleteByInvoker(invokerName);
-////            }
+
+    ////            if (connectorService.existByInvoker(invokerName)) {
+    ////                Connector connector = connectorService.
+    ////                Connection connection = connectionServiceImp.findAllByConnectorId()
+    ////                connectionServiceImp.deleteById();
+    ////                connectorService.deleteByInvoker(invokerName);
+    ////            }
 //
 //        };
 //        deleteInvoker(name, refDeletion);
 //    }
-
     private void deleteInvoker(String name) {
         Objects.requireNonNull(name);
         Invoker backup = invokerContainer.getByName(name);
@@ -450,7 +499,7 @@ public class InvokerServiceImp implements InvokerService {
         }
     }
 
-    public static String getNodeValue(File xmlFile, String xpathExpression) {
+    private static String getNodeValue(File xmlFile, String xpathExpression) {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
@@ -533,6 +582,20 @@ public class InvokerServiceImp implements InvokerService {
                             throw new WrongEncode("UTF8");
                         }
                     }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private List<Path> getAllPaths(String folder) {
+        if (Files.notExists(Paths.get(folder))) {
+            return Collections.emptyList();
+        }
+
+        try (Stream<Path> walk = Files.walk(Paths.get(folder))) {
+            return walk.filter(Files::isRegularFile)
+                    .map(Path::toAbsolutePath)
+                    .toList();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
