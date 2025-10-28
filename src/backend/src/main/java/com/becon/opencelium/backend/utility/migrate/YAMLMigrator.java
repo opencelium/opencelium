@@ -186,13 +186,11 @@ public class YAMLMigrator {
                     i--;
                 } else if (e.getCause() != null && e.getCause().getMessage().equals("value cannot be null")
                         || changeSet.getOperation() == OperationType.DELETE && e.getCause() != null && e.getCause().getMessage().equals("no such path in target JSON document")) {
-                    log.warn("An error occurred while applying {} - changeset : {}", changeSet.getVersion(), e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
-
                     changeSet.setSuccess(false);
                 } else {
-                    log.warn("Unexpected error occurred while applying {} - changeset : {}", changeSet.getVersion(), e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
-
-                    changeSet.setSuccess(false);
+                    log.warn("An error occurred while applying {} - changeset : {}", changeSet.getVersion(), e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
+                    finish(patched, newChangeSets.subList(0, i));
+                    return;
                 }
             }
         }
