@@ -477,40 +477,57 @@ Response:
 Test-Run
 """""""""""""""""
 
-The **Test-Run** feature allows developers to execute a configured connection directly from the Connection Editor and view runtime logs in the user interface.  
-It is designed to support debugging, inspection, and optimization of interface workflows without relying on external log files or additional tools.
+The **Test Run** feature executes the configured connection, using the current editor state, directly from the Connection Editor and displays the corresponding runtime logs in real time.
+During execution, all API requests, loops, and responses are captured and displayed hierarchically in the UI. It is designed to support debugging, 
+inspection, and optimization of interface workflows without relying on external log files or additional tools.
 
 Functional Overview
 ==================
 
-A Test-Run executes the configured connection workflow using the current editor state.  
-During execution, all API requests, loops, and responses are logged and displayed in real time within the UI.
-
-The UI log component provides structured, interactive access to runtime data, enabling developers to inspect requests, monitor performance, and identify issues directly in the editor.
+The **UI Logs** provide a graphical representation of all runtime activities of a connection that can be accessed directly through the user interface. 
+The UI log component provides structured, interactive access to runtime data, enabling developers to inspect requests, monitor performance, and 
+identify issues directly in the editor.
 
 .. _connection_ui_logger:
 
 UI Log Structure
 ==================
 
-The log viewer is inspired by browser developer tools and presents log data in a hierarchical tree format:
+The layout of the log viewer is inspired by browser developer tools and presents data in a structured, expandable tree view:
 
-- **API Requests**  
-  Each API request is represented as a collapsible log entry containing:
-  
-  - HTTP method and endpoint  
-  - Request headers and body  
-  - Response status, headers, and body  
-  - Execution time in milliseconds  
+**1. Connector and Process Hierarchy**
 
-- **Loops**  
-  When a step is executed in a loop, all iterations are displayed as a compressed group.  
-  Each iteration can be expanded or accessed directly via an index-based paginator.
+Each connection is displayed as a hierarchical structure, representing the sequence of processes and operators. You can expand or collapse each level using the arrow icons.
 
-- **Error and Warning Handling**  
-  Log entries are categorized by severity (`ERROR`, `WARNING`, `INFO`).  
-  Errors are highlighted visually and can be expanded to inspect detailed request and response data.
+**2. HTTP Requests and Responses**
 
+Each API call is shown with:
+	•	HTTP Method (e.g., POST, GET, DELETE, PUT)
+	•	Endpoint URL
+	•	HTTP Status Code (e.g., 200 OK, 201 Created, 204 Updated, 404 Not Found, 401 Unauthorized, 500 Internal Server Error)
+	•	Execution Time (in milliseconds)
+	•	Request / Response Headers — metadata such as Content-Type or Authorization
+	•	Request / Response Body (Payload) — the actual data sent and received
+
+Header and body data can be copied to the clipboard using the copy icon.
+
+**3. Loop Handling and Pagination**
+
+If a connection step contains a loop, its iterations are grouped together.
+The pagination control allows you to navigate between individual iterations (e.g., 2 / 12). You can also jump directly to a specific 
+iteration by entering its index.
+
+**4. Error and Warning Indicators**
+
+Log entries are visually categorized by severity levels such as `ERROR`, `WARNING`, `INFO`.
+Click on an entry to expand it and inspect detailed request and response information.
+
+**5. Panel Controls**
+
+	•	Arrow icon: Maximize or minimize the log panel
+	•	Trash icon: Clear all log entries
+	•	Copy icon: Copy headers or bodies
+	•	Pagination control: Navigate between loop iterations
 
 |image50|
 

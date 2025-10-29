@@ -236,9 +236,15 @@ This retention behavior can be adjusted in the backend configuration file (`appl
 Adjusting these values changes how many historical logs are stored per connection or scheduled job.  
 Older logs exceeding the defined retention limits are automatically removed.
 
+.. note::
+   To ensure that the logs are created according to the configuration, they must be activated for the 
+   respective job (the switch in the column **Logs** must be active).
+
 |image_execution_logs_1|
 
-This is an overview of all logs that can be viewed.
+The entries in the columns **Last Success** and **Last Fail** give you direct access to the corresponding logs. 
+Click directly on the job number to open the log in the log viewer. The three dots also give you access to the 
+logs of past jobs (if configured).
 
 |image_execution_logs_2|
 
