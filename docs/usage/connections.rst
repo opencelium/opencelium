@@ -526,11 +526,11 @@ Click on an entry to expand it and inspect detailed request and response informa
 
 **5. Panel Controls**
 
-   •  |image_ui_logs_1| Open log viewer in fullscreen mode
-	•	|image_ui_logs_2| Clear all log entries
-	•	|image_ui_logs_3| Copy headers, bodies or URLs to you clipboard
-   •  |image_ui_logs_4| Leave fullscreen mode
-   •  |image_ui_logs_5| Hide log viewer
+- |image_ui_logs_1| Open log viewer in fullscreen mode
+- |image_ui_logs_2| Clear all log entries
+- |image_ui_logs_3| Copy headers, bodies or URLs to you clipboard
+- |image_ui_logs_4| Leave fullscreen mode
+- |image_ui_logs_5| Hide log viewer
 
 |image50|
 
