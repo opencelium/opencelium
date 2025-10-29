@@ -238,7 +238,7 @@ Older logs exceeding the defined retention limits are automatically removed.
 
 .. note::
    To ensure that the logs are created according to the configuration, they must be activated for the 
-   respective job (the switch in the column **Logs** must be active).
+   respective job (the switch |image_schedules_logs_6| in the column **Logs** must be active).
 
 |image_execution_logs_1|
 
@@ -429,3 +429,6 @@ in the admin panel.
 .. |image_execution_logs_2| image:: ../img/schedule/OC_execution_logs_uilog.png
    :align: middle
    :height: 400
+
+.. |image_schedules_logs_6| image:: ../img/connection/OC_schedules_btn_logs.png
+:height: 43

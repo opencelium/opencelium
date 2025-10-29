@@ -524,10 +524,13 @@ Click on an entry to expand it and inspect detailed request and response informa
 
 **5. Panel Controls**
 
-	•	Arrow icon: Maximize or minimize the log panel
-	•	Trash icon: Clear all log entries
-	•	Copy icon: Copy headers or bodies
-	•	Pagination control: Navigate between loop iterations
+	•	|image_ui_logs_2| Clear all log entries
+	•	|image_ui_logs_3| Copy headers, bodies or URLs to you clipboard
+   •  |image_ui_logs_1| Open log viewer in fullscreen mode
+   •  |image_ui_logs_4| Leave fullscreen mode
+   •  |image_ui_logs_5| Hide log viewer
+	•	|image_ui_logs_6| Navigate between loop iterations (pagination)
+
 
 |image50|
 
@@ -787,7 +790,20 @@ If the service is disabled or unreachable, enhancement execution will fall back 
    :width: 600
 .. |image_operators_12| image:: ../img/connection/OC_operators_btn_save.png
    :align: middle
-   :height: 30   
+   :height: 30
+
+.. |image_ui_logs_1| image:: ../img/connection/OC_ui_logs_btn_open_fullscreen.png
+:height: 43
+.. |image_ui_logs_2| image:: ../img/connection/OC_ui_logs_btn_clear_logs.png
+:height: 43
+.. |image_ui_logs_3| image:: ../img/connection/OC_ui_logs_btn_copy.png
+:height: 43
+.. |image_ui_logs_4| image:: ../img/connection/OC_ui_logs_btn_close_fullscreen.png
+:height: 43
+.. |image_ui_logs_5| image:: ../img/connection/OC_ui_logs_btn_minimize.png
+:height: 43
+.. |image_ui_logs_6| image:: ../img/connection/OC_ui_logs_btn_pagination.png
+:height: 43
 
 .. |image0| image:: ../img/connection/0.png
    :align: middle
