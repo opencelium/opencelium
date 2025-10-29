@@ -532,6 +532,7 @@ Click on an entry to expand it and inspect detailed request and response informa
 	•	|image_ui_logs_6| Navigate between loop iterations (pagination)
 
 
+
 |image50|
 
 Presentation of the Connection Editor interface in the UI log
@@ -793,17 +794,17 @@ If the service is disabled or unreachable, enhancement execution will fall back 
    :height: 30
 
 .. |image_ui_logs_1| image:: ../img/connection/OC_ui_logs_btn_open_fullscreen.png
-:height: 43
+:height: 30
 .. |image_ui_logs_2| image:: ../img/connection/OC_ui_logs_btn_clear_logs.png
-:height: 43
+:height: 30
 .. |image_ui_logs_3| image:: ../img/connection/OC_ui_logs_btn_copy.png
-:height: 43
+:height: 30
 .. |image_ui_logs_4| image:: ../img/connection/OC_ui_logs_btn_close_fullscreen.png
-:height: 43
+:height: 30
 .. |image_ui_logs_5| image:: ../img/connection/OC_ui_logs_btn_minimize.png
-:height: 43
+:height: 30
 .. |image_ui_logs_6| image:: ../img/connection/OC_ui_logs_btn_pagination.png
-:height: 43
+:height: 30
 
 .. |image0| image:: ../img/connection/0.png
    :align: middle
