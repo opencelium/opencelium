@@ -431,4 +431,4 @@ in the admin panel.
    :height: 400
 
 .. |image_schedules_logs_6| image:: ../img/schedule/OC_schedules_btn_logs.png
-   :height: 30
+   :height: 20
