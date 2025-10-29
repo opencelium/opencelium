@@ -509,13 +509,15 @@ Each API call is shown with:
 	•	Request / Response Headers — metadata such as Content-Type or Authorization
 	•	Request / Response Body (Payload) — the actual data sent and received
 
-Header and body data can be copied to the clipboard using the copy icon.
+Header and body data can be copied to the clipboard using the copy icon (|image_ui_logs_3|).
 
 **3. Loop Handling and Pagination**
 
 If a connection step contains a loop, its iterations are grouped together.
 The pagination control allows you to navigate between individual iterations (e.g., 2 / 12). You can also jump directly to a specific 
 iteration by entering its index.
+
+	•	|image_ui_logs_6| Navigate between loop iterations (pagination)
 
 **4. Error and Warning Indicators**
 
@@ -529,7 +531,7 @@ Click on an entry to expand it and inspect detailed request and response informa
    •  |image_ui_logs_1| Open log viewer in fullscreen mode
    •  |image_ui_logs_4| Leave fullscreen mode
    •  |image_ui_logs_5| Hide log viewer
-	•	|image_ui_logs_6| Navigate between loop iterations (pagination)
+
 
 
 
@@ -794,17 +796,17 @@ If the service is disabled or unreachable, enhancement execution will fall back 
    :height: 30
 
 .. |image_ui_logs_1| image:: ../img/connection/OC_ui_logs_btn_open_fullscreen.png
-:height: 30
+   :height: 30
 .. |image_ui_logs_2| image:: ../img/connection/OC_ui_logs_btn_clear_logs.png
-:height: 30
+   :height: 30
 .. |image_ui_logs_3| image:: ../img/connection/OC_ui_logs_btn_copy.png
-:height: 30
+   :height: 30
 .. |image_ui_logs_4| image:: ../img/connection/OC_ui_logs_btn_close_fullscreen.png
-:height: 30
+   :height: 30
 .. |image_ui_logs_5| image:: ../img/connection/OC_ui_logs_btn_minimize.png
-:height: 30
+   :height: 30
 .. |image_ui_logs_6| image:: ../img/connection/OC_ui_logs_btn_pagination.png
-:height: 30
+   :height: 30
 
 .. |image0| image:: ../img/connection/0.png
    :align: middle
