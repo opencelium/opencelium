@@ -430,5 +430,5 @@ in the admin panel.
    :align: middle
    :height: 400
 
-.. |image_schedules_logs_6| image:: ../img/connection/OC_schedules_btn_logs.png
-:height: 43
+.. |image_schedules_logs_6| image:: ../img/schedule/OC_schedules_btn_logs.png
+   :height: 30
