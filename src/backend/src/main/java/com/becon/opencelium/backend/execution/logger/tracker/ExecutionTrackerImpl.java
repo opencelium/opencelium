@@ -127,10 +127,13 @@ public class ExecutionTrackerImpl implements ExecutionTracker {
             phaseContextManager.setExecId(execId);
             phaseContextManager.setConnectionId(connId);
         } else if (phaseType == FLOWCHART_START) {
-            this.flowId = phaseContext.getProperties().get(LogLineKey.FLOWCHART_ID);
+            this.flowId = Objects.requireNonNull(
+                    phaseContext.getProperties().get(LogLineKey.FLOWCHART_ID),
+                    "Flow ID cannot be null"
+            );
             this.connectorName = phaseContext.getProperties().get(LogLineKey.CONNECTOR_NAME);
-            phaseContextManager.setFlowId(flowId);
-            phaseContextManager.setConnectorName(connectorName);
+            phaseContextManager.setFlowId(this.flowId);
+            phaseContextManager.setConnectorName(this.connectorName);
         }
 
         phaseContextManager.startPhase(phaseContext);
