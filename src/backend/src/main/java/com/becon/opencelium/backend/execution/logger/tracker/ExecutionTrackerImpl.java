@@ -127,10 +127,17 @@ public class ExecutionTrackerImpl implements ExecutionTracker {
             phaseContextManager.setExecId(execId);
             phaseContextManager.setConnectionId(connId);
         } else if (phaseType == FLOWCHART_START) {
+<<<<<<< HEAD
             this.flowId = phaseContext.getProperties().get(LogLineKey.FLOWCHART_ID);
             if (this.flowId == null || this.flowId.equals("null")) {
                 throw new RuntimeException("Flow ID cannot be null");
             }
+=======
+            this.flowId = Objects.requireNonNull(
+                    phaseContext.getProperties().get(LogLineKey.FLOWCHART_ID),
+                    "Flow ID cannot be null"
+            );
+>>>>>>> db81d6a7c ([Added] OC-1129 Added null value checker for flowId #time 15m)
             this.connectorName = phaseContext.getProperties().get(LogLineKey.CONNECTOR_NAME);
             phaseContextManager.setFlowId(this.flowId);
             phaseContextManager.setConnectorName(this.connectorName);
