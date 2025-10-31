@@ -119,7 +119,7 @@ public class ReferenceExtractor implements Extractor {
             return result;
 
         } catch (Exception e) {
-            throw new RuntimeException("Reference = " + ref, e);
+            throw new RuntimeException("Error while extracting value from Reference = %s. %s".formatted(ref, e.getMessage()), e);
         }
     }
 
