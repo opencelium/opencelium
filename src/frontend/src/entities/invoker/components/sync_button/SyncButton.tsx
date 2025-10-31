@@ -53,23 +53,25 @@ const SyncButton = ({invoker}: any) => {
         {label: 'Sync', onClick: sync, id: 'sync', isLoading: startSyncing},
         {label: 'Cancel', onClick: toggle, id: 'cancel'}
     ];
-    if (!(onlineServiceStatus?.invoker_sync.active && onlineServiceStatus?.active) || !invoker.hasManualSync) {
+    if (!invoker.hasManualSync) {
         return null;
     }
+    const isDisabled = !(onlineServiceStatus?.invoker_sync.active && onlineServiceStatus?.active);
     const CConnections = new Connections(metaConnectionsByInvokerName, dispatch, API_REQUEST_STATE.INITIAL, API_REQUEST_STATE.INITIAL, true, true, true);
     return (
         <React.Fragment>
             <TooltipButton
                 target={`sync_entity_${invoker.id}`}
                 position={'top'}
-                tooltip={'Sync with Service Portal'}
+                tooltip={isDisabled ? 'Please, activate online service in application.yml file' : 'Sync with Service Portal'}
                 handleClick={() => {
                     dispatch(getAllMetaConnectionsByInvokerName(invoker.name));
                     setStartGetting(true);
                 }}
+                isDisabled={isDisabled}
                 hasBackground={false}
                 icon={'cloud_sync'}
-                background={'#ed6868'}
+                background={isDisabled ? '#999' : '#ed6868'}
                 isLoading={startGetting}
                 size={TextSize.Size_20}
             />

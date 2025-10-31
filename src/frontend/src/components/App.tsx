@@ -43,10 +43,8 @@ const App = ({}) => {
     const appTheme = updateThemeWithColors(Themes.default, selectedTheme);
     useEffect(() => {
         if(authUser) {
-            if (onlineServiceStatus?.active) {
+            if (!onlineServiceStatus?.active) {
                 dispatch(getLogoName(authUser.email));
-            }
-            if (navigator.onLine) {
                 bindWithServicePortalThemes(onlineServiceOpenCeliumUrl);
             } else {
                 bindWithServicePortalThemes(offlineServiceOpenCeliumUrls);
