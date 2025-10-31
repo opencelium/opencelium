@@ -476,7 +476,7 @@ class AvailableUpdates extends React.Component{
                         disabled={!onlineServiceStatus?.active}
                         isActive={activeMode === ONLINE_UPDATE}
                         authUser={authUser}
-                        title={!onlineServiceStatus?.active ? 'Please, activate sync in profile settings' : 'Online'}
+                        title={!onlineServiceStatus?.active ? 'Please, activate online service in application.yml file' : 'Online'}
                         label={'Online'}
                         onClick={(e) => this.selectMode(e, ONLINE_UPDATE)}
                         size={TextSize.Size_16}
