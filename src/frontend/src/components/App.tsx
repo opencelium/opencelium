@@ -55,7 +55,7 @@ const App = ({}) => {
     }, [onlineServiceStatus?.active || authUser])
     useEffect(() => {
         if(isAuth) {
-            //dispatch(getOnlineServiceStatus());
+            dispatch(getOnlineServiceStatus());
         } else {
             (async () => {
                 await deactivateSocket()
