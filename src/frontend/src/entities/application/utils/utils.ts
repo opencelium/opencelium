@@ -40,7 +40,7 @@ export const saveThemesHandler = (e: any) => {
 
 export const getThemesFromServicePortal = () => {
     const iframe = document.getElementById('iframe_messenger');
-    const hasSync = store.getState().authReducer.authUser?.userDetail?.themeSync || false;
+    const hasSync = store.getState().applicationReducer.onlineServiceStatus?.active || false;
     //todo: uncomment when backend update user group will be ready
     if(iframe/* && hasSync*/){
         // @ts-ignore
@@ -53,7 +53,7 @@ export const getThemesFromServicePortal = () => {
 
 export const saveThemesInServicePortal = (themes: string) => {
     const iframe = document.getElementById('iframe_messenger');
-    const hasSync = store.getState().authReducer.authUser?.userDetail?.themeSync || false;
+    const hasSync = store.getState().applicationReducer.onlineServiceStatus?.active || false;
     //todo: uncomment when backend update user group will be ready
     if(iframe/* && hasSync*/){
         // @ts-ignore

@@ -13,9 +13,11 @@ import {CollectionView} from "@app_component/collection/collection_view/Collecti
 import Hint from "@app_component/base/hint/Hint";
 import {Invoker} from "@entity/invoker/classes/Invoker";
 import {syncInvokerWithSP} from "@entity/invoker/redux_toolkit/action_creators/InvokerCreators";
+import {Application} from "@application/classes/Application";
 
 const SyncButton = ({invoker}: any) => {
     const dispatch = useAppDispatch();
+    const {onlineServiceStatus} = Application.getReduxState();
     const {syncingInvokerWithSP} = Invoker.getReduxState();
     const {gettingAllMetaConnectionsByInvokerName, metaConnectionsByInvokerName} = Connection.getReduxState();
     const [startGetting, setStartGetting] = useState<boolean>(false);
@@ -51,7 +53,7 @@ const SyncButton = ({invoker}: any) => {
         {label: 'Sync', onClick: sync, id: 'sync', isLoading: startSyncing},
         {label: 'Cancel', onClick: toggle, id: 'cancel'}
     ];
-    if (!authUser.userDetail.themeSync || !invoker.hasManualSync) {
+    if (!(onlineServiceStatus?.invoker_sync.active && onlineServiceStatus?.active) || !invoker.hasManualSync) {
         return null;
     }
     const CConnections = new Connections(metaConnectionsByInvokerName, dispatch, API_REQUEST_STATE.INITIAL, API_REQUEST_STATE.INITIAL, true, true, true);

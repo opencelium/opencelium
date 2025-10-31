@@ -21,7 +21,7 @@ import {
     ResourcesProps,
     ApplicationVersionResponseProps,
     GlobalSearchResponseProps,
-    IApplicationRequest, RemoteApiRequestProps, RemoteApiResponseProps
+    IApplicationRequest, RemoteApiRequestProps, RemoteApiResponseProps, OnlineServiceStatus
 } from "../interfaces/IApplication";
 import {ITicket} from "../../interfaces/ITicket";
 import {IResponse} from "../interfaces/IResponse";
@@ -77,5 +77,11 @@ export class ApplicationRequest extends Request implements IApplicationRequest{
         this.isFullUrl = true;
         this.hasAuthToken = false;
         return super.get<string>();
+    }
+
+    async getOnlineServiceStatus(): Promise<AxiosResponse<OnlineServiceStatus>>{
+        this.hasAuthToken = false;
+        this.url = '';
+        return super.get<OnlineServiceStatus>();
     }
 }

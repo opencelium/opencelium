@@ -81,6 +81,16 @@ export interface StatusResponse {
     status: string,
 }
 
+export interface OnlineServiceStatus {
+    active: boolean,
+    invoker_sync: {
+        active: boolean,
+    },
+    template_sync: {
+        active: boolean,
+    }
+}
+
 export interface IApplicationRequest{
 
     //to make an external request
@@ -109,4 +119,7 @@ export interface IApplicationRequest{
 
     //to get name of logo
     getLogoName(): Promise<AxiosResponse<string>>,
+
+    //to get online service status
+    getOnlineServiceStatus(): Promise<AxiosResponse<OnlineServiceStatus>>
 }
