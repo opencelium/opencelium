@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.resource;
+package com.becon.opencelium.backend.resource.onlinesync;
 
 import jakarta.annotation.Resource;
 
