@@ -22,6 +22,7 @@ import com.becon.opencelium.backend.container.Command;
 import com.becon.opencelium.backend.container.ConnectionUpdateTracker;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
+import com.becon.opencelium.backend.database.mongodb.repository.MetaDataLogRepository;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngServiceImp;
 import com.becon.opencelium.backend.database.mongodb.service.FieldBindingMngService;
@@ -33,10 +34,14 @@ import com.becon.opencelium.backend.database.mysql.repository.ConnectionReposito
 import com.becon.opencelium.backend.database.mysql.repository.MaskingRuleRepository;
 import com.becon.opencelium.backend.enums.Action;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
+import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.mapper.base.Mapper;
+import com.becon.opencelium.backend.mapper.mysql.ConnectionMapper;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
+import com.becon.opencelium.backend.resource.connection.DraftConnectionCreateRequest;
+import com.becon.opencelium.backend.resource.connection.FlowchartCreateRequest;
 import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.utility.LogFileUtility;
@@ -48,6 +53,7 @@ import com.becon.opencelium.backend.versionmanager.backup.MysqlBackupService;
 import com.becon.opencelium.backend.versionmanager.base.Utils;
 import com.github.fge.jsonpatch.JsonPatch;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import org.slf4j.Logger;
@@ -87,6 +93,7 @@ public class ConnectionServiceImp implements ConnectionService {
     private final EntityUpdater<Enhancement> enhancementEntityUpdater;
     private final MysqlBackupService mysqlBackupService;
     private final MongoDbBackupService mongoDbBackupService;
+    private final MetaDataLogRepository metaDataLogRepository;
 
     public ConnectionServiceImp(
             ConnectionRepository connectionRepository,
@@ -105,7 +112,10 @@ public class ConnectionServiceImp implements ConnectionService {
             ConnectionUpdateTracker updateTracker,
             MaskingRuleRepository ruleRepository,
             EntityVersionManager entityVersionManager,
-            OpenceliumProps ocProps, MysqlBackupService mysqlBackupService, MongoDbBackupService mongoDbBackupService
+            OpenceliumProps ocProps,
+            MysqlBackupService mysqlBackupService,
+            MongoDbBackupService mongoDbBackupService,
+            MetaDataLogRepository metaDataLogRepository
     ) {
         this.connectionRepository = connectionRepository;
         this.connectorService = connectorService;
@@ -127,6 +137,7 @@ public class ConnectionServiceImp implements ConnectionService {
         this.enhancementEntityUpdater = entityVersionManager.getUpdater(Enhancement.class);
         this.mysqlBackupService = mysqlBackupService;
         this.mongoDbBackupService = mongoDbBackupService;
+        this.metaDataLogRepository = metaDataLogRepository;
     }
 
 
@@ -524,7 +535,8 @@ public class ConnectionServiceImp implements ConnectionService {
         boolean gotBackup = false;
         for (Long id : ids) {
             Connection connection = getById(id);
-            if (Utils.compare(ocProps.getVersion(), connection.getOcVersion()) > 0 && !isTestConnection(connection.getTitle())) {
+            if (Utils.compare(ocProps.getVersion(), connection.getOcVersion()) >= 0 && !isTestConnection(connection.getTitle())) {
+                // FIXME: 'Utils.compare(ocProps.getVersion(), connection.getOcVersion()) >= 0' condition should be with '>'. It has changed for 4.6 version only. Fix it on next versions
 
                 if (!gotBackup) {
                     try {
@@ -540,6 +552,9 @@ public class ConnectionServiceImp implements ConnectionService {
                 // UPDATE CONNECTION_MNG
                 ConnectionMng connectionMng = connectionMngService.getByConnectionId(connection.getId());
                 try {
+
+                    clearLogsWithNullFlowId(connectionMng);
+
                     connectionMngEntityUpdater.updateToCurrentVersion(connectionMng)
                             .ifChangedOrElseIfUpdated(
                                     x -> {
@@ -575,6 +590,21 @@ public class ConnectionServiceImp implements ConnectionService {
             }
         }
         connectionRepository.updateVersion(ocProps.getVersion());
+    }
+
+    private void clearLogsWithNullFlowId(ConnectionMng connectionMng) {
+        if (connectionMng.getFromConnector() != null && connectionMng.getFromConnector().getFlowId() == null
+                || connectionMng.getToConnector() != null && connectionMng.getToConnector().getFlowId() == null) {
+
+            try {
+                long deletedItems = metaDataLogRepository.deleteAllByConnectionId(connectionMng.getConnectionId());
+                if (deletedItems > 0) {
+                    log.info("Deleted {} logData items of Connection[id={}] due to null flowId field", deletedItems, connectionMng.getConnectionId());
+                }
+            } catch (Exception e) {
+                log.error("Failed to clear logs of Connection[id={}] with null flowId field ", connectionMng.getConnectionId(), e);
+            }
+        }
     }
 
     @Override
