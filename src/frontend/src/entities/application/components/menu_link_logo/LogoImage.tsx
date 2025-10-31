@@ -26,12 +26,12 @@ import {LogoImageStyled, LoadingStyled} from "./styles";
 const LogoImage = (props: any) => {
     const imageRef = useRef(null);
     const {authUser} = Auth.getReduxState();
-    const {logoDataStatus} = Application.getReduxState();
+    const {logoDataStatus, onlineServiceStatus} = Application.getReduxState();
     const {updatingUserDetail} = useAppSelector((state: RootState) => state.userDetailReducer);
     const [isLogoExist, setIsLogoExist] = useState<boolean>(null);
     const [src, setSrc] = useState<string>('');
     const logoName = authUser.logoName || OC_NAME;
-    const isThemeSynced = authUser.userDetail.themeSync;
+    const isThemeSynced = !!onlineServiceStatus?.active;
     let logoPath = isThemeSynced ? `${onlineApiServerOpenCeliumUrl}fsdlfshdfksldfdfsd-sdfjslkdfhsdlkfhfs-sdfjskdfhjsbdasdalksdhah/logo/${authUser.email}?${new Date().getTime()}` : LogoOcWhiteImagePath;
     useEffect(() => {
         if(isThemeSynced) {

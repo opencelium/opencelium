@@ -34,11 +34,13 @@ import ActivateLicenseComponent from "@entity/license_management/components/acti
 import Button from "@app_component/base/button/Button";
 import {DetailView} from "@entity/license_management/components/detail_view/DetailView";
 import ImportCreditsComponent from "@entity/license_management/components/import_credits/ImportCreditsComponent";
+import {Application} from "@application/classes/Application";
 
 
 const LicenseManagement: FC<IForm> = ({}) => {
     const dispatch = useAppDispatch();
     const {authUser} = Auth.getReduxState();
+    const {onlineServiceStatus} = Application.getReduxState();
     const {
         currentSubscription, gettingCurrentSubscription, importingCredits,
     } = Subscription.getReduxState();
@@ -48,10 +50,10 @@ const LicenseManagement: FC<IForm> = ({}) => {
         generatingActivateRequest,
     } = License.getReduxState();
     useEffect(() => {
-        if (authUser.userDetail.themeSync) {
+        if (onlineServiceStatus?.active) {
             dispatch(getLicenseStatus());
         }
-    }, [authUser?.userDetail?.themeSync])
+    }, [onlineServiceStatus?.active])
     useEffect(() => {
         if (importingCredits === API_REQUEST_STATE.FINISH) {
             dispatch(getCurrentSubscription());
@@ -73,7 +75,7 @@ const LicenseManagement: FC<IForm> = ({}) => {
         }
     }, [activatingFreeLicense]);
     const actions = []
-    if (!authUser.userDetail.themeSync){
+    if (!onlineServiceStatus?.active){
         actions.push(
             <Button
                 key={'download'}
@@ -85,7 +87,7 @@ const LicenseManagement: FC<IForm> = ({}) => {
         );
         actions.push(<ImportLicenseComponent key={'upload_license'}/>);
     } else {
-        if (authUser.userDetail.themeSync && (!currentSubscription || Subscription.isFree(currentSubscription))) {
+        if (onlineServiceStatus?.active && (!currentSubscription || Subscription.isFree(currentSubscription))) {
             actions.push(<ActivateLicenseComponent key={'activate'}/>);
         }
     }

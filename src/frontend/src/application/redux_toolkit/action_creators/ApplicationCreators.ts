@@ -35,6 +35,19 @@ export const getLogoName = createAsyncThunk(
     }
 )
 
+export const getOnlineServiceStatus = createAsyncThunk(
+    'application/get/online/service/status',
+    async(data: never, thunkAPI) => {
+        try{
+            const request = new ApplicationRequest();
+            const response = await request.getOnlineServiceStatus();
+            return response.data;
+        }catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+
 export const addTicket = createAsyncThunk(
     'application/add/ticket',
     async(ticket: ITicket, thunkAPI) => {
@@ -154,4 +167,5 @@ export default {
     updateResources,
     openExternalUrl,
     requestRemoteApi,
+    getOnlineServiceStatus,
 }

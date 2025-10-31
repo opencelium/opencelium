@@ -43,7 +43,6 @@ export default class UserDetailRequest extends Request implements IUserDetailReq
             surname: userDetail.surname,
             theme: userDetail.theme,
             userTitle: userDetail.userTitle,
-            themeSync: userDetail.themeSync,
         };
     }
 }
