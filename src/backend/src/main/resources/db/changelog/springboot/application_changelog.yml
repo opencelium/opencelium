@@ -153,3 +153,9 @@ versions:
         operation: move
         value: management.endpoint.health.status
         path: management.health.status
+  - version: 4.6.1
+    changes:
+      - changeset: 1
+        operation: add
+        value: 4.6.1
+        path: opencelium.version
