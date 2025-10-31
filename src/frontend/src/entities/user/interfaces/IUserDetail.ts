@@ -18,7 +18,6 @@ import { UserTitle } from "../requests/models/UserDetail";
 
 export interface IUserDetailSwitch{
     appTour: boolean,
-    themeSync?: boolean,
 }
 
 export interface IUserDetailFile{

@@ -28,7 +28,7 @@ import {Global} from "@style/global";
 import {Auth} from "@application/classes/Auth";
 import {useAppDispatch} from "@application/utils/store";
 import {LocalStorage} from "@application/classes/LocalStorage";
-import {getLogoName} from "@application/redux_toolkit/action_creators/ApplicationCreators";
+import {getLogoName, getOnlineServiceStatus} from "@application/redux_toolkit/action_creators/ApplicationCreators";
 import {isArray} from "@application/utils/utils";
 import {SocketProvider} from "../socket/SocketContext";
 import {SocketDataProvider, useSocketData} from "../socket/SocketDataContext";
@@ -38,33 +38,22 @@ const App = ({}) => {
     const {deactivateSocket} = useSocketData();
     const dispatch = useAppDispatch();
     const {isAuth, authUser} = Auth.getReduxState();
-    const {themes} = Application.getReduxState();
+    const {themes, onlineServiceStatus} = Application.getReduxState();
     let selectedTheme: any = themes && isArray(themes) ? themes.find(theme => theme.isCurrent) || DefaultTheme : DefaultTheme;
     const appTheme = updateThemeWithColors(Themes.default, selectedTheme);
     useEffect(() => {
         if(authUser) {
-            //if (authUser.userDetail.themeSync) {
-                if (navigator.onLine) {
-                    bindWithServicePortalThemes(onlineServiceOpenCeliumUrl);
-                } else {
-                    bindWithServicePortalThemes(offlineServiceOpenCeliumUrls);
-                }
-            //} else {
-                //unbindWithServicePortalThemes();
-            //}
+            if (!onlineServiceStatus?.active) {
+                dispatch(getLogoName(authUser.email));
+                bindWithServicePortalThemes(onlineServiceOpenCeliumUrl);
+            } else {
+                bindWithServicePortalThemes(offlineServiceOpenCeliumUrls);
+            }
         }
-    }, [authUser?.userDetail?.themeSync || authUser])
+    }, [onlineServiceStatus?.active || authUser])
     useEffect(() => {
         if(isAuth) {
-            if(authUser.themes) {
-                const storage = LocalStorage.getStorage();
-                if (storage.get('themes') !== authUser.themes) {
-                    //dispatch(updateAuthUser({...authUser, themes: storage.get('themes')}));
-                }
-            }
-            if(authUser.userDetail.sync){
-                dispatch(getLogoName(authUser.email));
-            }
+            dispatch(getOnlineServiceStatus());
         } else {
             (async () => {
                 await deactivateSocket()

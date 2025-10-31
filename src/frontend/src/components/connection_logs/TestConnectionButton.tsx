@@ -108,7 +108,6 @@ const TestConnectionButton = ({validateLogic}: any) => {
             }
             const subscription = socket.subscribe(`/execution/logs/${channelId}`, (message) => {
                 const data = JSON.parse(message.body) as ConnectionSocketLog<LightSegment>;
-                //console.log(data);
                 if (data.type === 'EXECUTION' && data.status === 'PENDING') {
                     setStartTime(Date.now())
                 }
