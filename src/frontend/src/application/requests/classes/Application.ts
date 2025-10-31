@@ -80,8 +80,7 @@ export class ApplicationRequest extends Request implements IApplicationRequest{
     }
 
     async getOnlineServiceStatus(): Promise<AxiosResponse<OnlineServiceStatus>>{
-        this.hasAuthToken = false;
-        this.url = '';
+        this.url = 'sync-history/status';
         return super.get<OnlineServiceStatus>();
     }
 }
