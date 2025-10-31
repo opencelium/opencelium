@@ -167,7 +167,7 @@ public class NashornEngine implements ScriptEngine {
 
                         return Map.entry(entry.getKey(), value);
                     } catch (Exception e) {
-                        throw new ScriptExecutionException("Reference extracting error: " + e.getMessage(), e);
+                        throw new ScriptExecutionException(e.getMessage(), e);
                     }
                 })
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
