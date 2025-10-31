@@ -40,6 +40,8 @@ import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
 import com.becon.opencelium.backend.database.mysql.service.UserService;
 import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.execution.JSHttpObject;
+import com.becon.opencelium.backend.execution.logger.service.LogDataService;
+import com.becon.opencelium.backend.execution.logger.service.LogDataServiceImp;
 import com.becon.opencelium.backend.execution.notification.EmailServiceImpl;
 import com.becon.opencelium.backend.execution.notification.IncomingWebhookService;
 import com.becon.opencelium.backend.execution.oc721.Operation;
@@ -101,6 +103,7 @@ public class ExecutionAspect {
     private final Connection2WebSocketChannelMapping connection2ChannelMapping;
     private final SubscriptionService subscriptionService;
     private final WebSocketNotificationService notificationService;
+    private final LogDataService logDataService;
 
     public ExecutionAspect(
             @Qualifier("schedulerServiceImp") SchedulerService schedulerService,
@@ -109,6 +112,7 @@ public class ExecutionAspect {
             @Qualifier("lastExecutionServiceImp") LastExecutionService lastExecutionService,
             @Qualifier("subscriptionServiceImpl") SubscriptionService subscriptionService,
             @Qualifier("dataAggregatorServiceImp") DataAggregatorService dataAggregatorService,
+            @Qualifier("logDataServiceImp") LogDataService logDataService,
             IncomingWebhookService incomingWebhookService,
             EmailServiceImpl emailService,
             Environment env,
@@ -127,6 +131,7 @@ public class ExecutionAspect {
         this.subscriptionService = subscriptionService;
         this.connection2ChannelMapping = connection2ChannelMapping;
         this.notificationService = notificationService;
+        this.logDataService = logDataService;
     }
 
     @Before("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
@@ -262,7 +267,7 @@ public class ExecutionAspect {
         execution.setEndTime(new Date());
         execution.setStatus(success ? "S" : "F");
         executionService.save(execution);
-
+        hasLog = LogFileUtility.logFileExistForExecId(execId) && logDataService.findRootByExecutionId(execId).isPresent();
         LastExecution le;
         if (lastExecutionService.existsBySchedulerId(execution.getScheduler().getId())) {
             le = lastExecutionService.findBySchedulerId(execution.getScheduler().getId());
