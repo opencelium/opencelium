@@ -23,6 +23,7 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -149,6 +150,23 @@ public class LogFileUtility {
                     .map(LogFileUtility::readFile)
                     .orElseThrow(() -> new GeneralServiceException(ExceptionConstant.LOG_NOT_FOUND, ExceptionMessages.LOG_NOT_FOUND.formatted(executionId)));
 
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
+
+            throw new GeneralServiceException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    ExceptionConstant.INTERNAL_ERROR,
+                    ExceptionMessages.UNKNOWN_ERROR
+            );
+        }
+    }
+
+    public static boolean logFileExistForExecId(Long executionId) {
+        Path logFolder = toPath(LOG_LOCATION);
+        try (Stream<Path> stream = Files.walk(logFolder, FileVisitOption.FOLLOW_LINKS)) {
+
+            return stream
+                    .anyMatch(x -> x.getFileName().toString().matches(LOG_FILE_NAME_RGX) && x.getFileName().toString().endsWith("%d.log".formatted(executionId)));
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
 

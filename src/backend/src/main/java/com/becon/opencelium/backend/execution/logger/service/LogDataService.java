@@ -21,5 +21,7 @@ public interface LogDataService {
 
     void save(LogDataMng logDataMng);
 
+    Optional<LogDataMng> findRootByExecutionId(Long execId);
+
     Optional<LogDataDTO> toDto(LogDataMng metaData);
 }
