@@ -31,11 +31,7 @@ public class Connection46MngUpdater implements ConnectionMngUpdater {
     }
 
     private Wrapper<ConnectionMng> updateFromInternal(ConnectionMng connection, String oldVersion) {
-<<<<<<< HEAD
         if (Objects.isNull(connection) || Utils.compare(currentVersion.getVersion(), oldVersion) < 0)
-=======
-        if (Objects.isNull(connection) || Utils.compare(currentVersion.getVersion(), oldVersion) <= 0)
->>>>>>> 1e1a42740 ([Fixed] #comment Added 4.6 version connection updater for setting flowId #time 1h)
             return Wrapper.notUpdated(connection);
 
         if (Utils.compare(oldVersion, UpdaterVersion.VERSION_4_4.getVersion()) < 0) {
