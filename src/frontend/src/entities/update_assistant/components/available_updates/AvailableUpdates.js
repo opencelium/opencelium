@@ -46,6 +46,7 @@ export const OFFLINE_UPDATE = 'OFFLINE_UPDATE';
 function mapStateToProps(state){
     const authUser = state.authReducer.authUser;
     const updateAssistant = state.updateAssistantReducer;
+    const onlineServiceStatus = state.applicationReducer.onlineServiceStatus;
     return{
         authUser,
         uploadingOnlineVersion: updateAssistant.uploadingOnlineVersion,
@@ -57,6 +58,7 @@ function mapStateToProps(state){
         offlineUpdates: updateAssistant.offlineUpdates,
         changelog: updateAssistant.changelog,
         error: updateAssistant.error,
+        onlineServiceStatus,
     };
 }
 /*
@@ -466,15 +468,15 @@ class AvailableUpdates extends React.Component{
 
     render(){
         const {activeMode, startFetchingOnlineUpdates, startFetchingOfflineUpdates, showChangelog} = this.state;
-        const {t, authUser, fetchingOnlineUpdates, fetchingOfflineUpdates, changelog, gettingChangelog, error} = this.props;
+        const {t, authUser, fetchingOnlineUpdates, fetchingOfflineUpdates, changelog, gettingChangelog, error, onlineServiceStatus} = this.props;
         return(
             <div style={{margin: '20px 0 0 0'}}>
                 <div style={{textAlign: 'center'}}>
                     <ImportButtonStyled
-                        disabled={!authUser.userDetail.themeSync}
+                        disabled={!onlineServiceStatus?.active}
                         isActive={activeMode === ONLINE_UPDATE}
                         authUser={authUser}
-                        title={!authUser.userDetail.themeSync ? 'Please, activate sync in profile settings' : 'Online'}
+                        title={!onlineServiceStatus?.active ? 'Please, activate online service in application.yml file' : 'Online'}
                         label={'Online'}
                         onClick={(e) => this.selectMode(e, ONLINE_UPDATE)}
                         size={TextSize.Size_16}

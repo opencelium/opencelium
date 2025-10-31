@@ -214,6 +214,11 @@ public class LogDataServiceImp implements LogDataService {
     }
 
     @Override
+    public Optional<LogDataMng> findRootByExecutionId(Long execId) {
+        return metaDataLogRepository.findByExecutionIdAndType(Long.toString(execId), EXECUTION.name());
+    }
+
+    @Override
     public Optional<LogDataDTO> toDto(LogDataMng logDataMng) {
         return Optional.of(logDataMapper.toDto(logDataMng));
     }

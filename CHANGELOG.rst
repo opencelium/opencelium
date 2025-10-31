@@ -2,6 +2,22 @@
 Changelog
 *********
 
+4.6.1
+========
+
+:Date: October 31, 2025
+
+Features
+--------
+* Implement endpoint for online services
+
+Fixes
+--------
+*  Request Data not Updating (OC-1251)
+*  Error during execution, wrong reference (OC-1245)
+*  Replace themeSync value to onlince service status (OC-1250)
+
+
 4.6
 ========
 

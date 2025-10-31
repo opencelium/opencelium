@@ -21,7 +21,8 @@ public class ConnectionMngUpdaterProvider {
 
     public EntityUpdater<ConnectionMng> getUpdater(final UpdaterVersion version) {
         return switch (version) {
-            case VERSION_4_4, VERSION_4_5, VERSION_4_6 -> connectionMngUpdaters.get(lowerFirstChar(Connection44MngUpdater.class.getSimpleName()));
+            case VERSION_4_4, VERSION_4_5 -> connectionMngUpdaters.get(lowerFirstChar(Connection44MngUpdater.class.getSimpleName()));
+            case VERSION_4_6 -> connectionMngUpdaters.get(lowerFirstChar(Connection46MngUpdater.class.getSimpleName()));
             default -> new DefaultUpdater<>();
         };
     }

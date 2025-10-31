@@ -176,6 +176,7 @@ public class YAMLMigrator {
                 patched = PATCH_HELPER.patch(singleJsonPatch, patched, Object.class);
                 changeSet.setSuccess(true);
             } catch (RuntimeException e) {
+
                 if (e.getCause() != null && (e.getCause().getMessage().equals("parent of node to add does not exist") || e.getCause().getMessage().equals("parent of path to add to is not a container"))) {
                     if (PATCH_HELPER.size(singleJsonPatch) == 2) {
                         JsonPatch firstOp = PATCH_HELPER.delete(singleJsonPatch, 1, 2);
@@ -192,6 +193,11 @@ public class YAMLMigrator {
                     finish(patched, newChangeSets.subList(0, i));
                     return;
                 }
+
+                log.warn("An error occurred while applying {} - changeset : {}", changeSet.getVersion(), e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
+
+                changeSet.setSuccess(false);
+
             }
         }
         finish(patched, newChangeSets);

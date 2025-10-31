@@ -24,14 +24,16 @@ import {useNavigate} from "react-router";
 import Tooltip from "@app_component/base/tooltip/Tooltip";
 import {Auth} from "@application/classes/Auth";
 import AvatarDefault from "@image/application/avatar_default.png";
+import {Application} from "@application/classes/Application";
 
 const TopBar: FC<TopBarProps> =
     ({
          theme,
      }) => {
         const {authUser} = Auth.getReduxState();
+        const {onlineServiceStatus} = Application.getReduxState();
         const navigate = useNavigate();
-        const isOnline = authUser?.userDetail?.themeSync || false;
+        const isOnline = onlineServiceStatus?.active || false;
         const MyProfile = isOnline ?
             <Gravatar
                 id={'my_profile'}

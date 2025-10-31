@@ -16,16 +16,20 @@
 
 package com.becon.opencelium.backend.database.mongodb.entity;
 
+import jakarta.validation.constraints.NotNull;
+import org.checkerframework.checker.units.qual.N;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.List;
 
 public class ConnectorMng {
+    @NotNull
     @Field(name = "connector_id")
     private Integer connectorId;
 
-    @Field(name = "flodId")
+    @NotNull
+    @Field(name = "flowId")
     private String flowId;
 
     private String title;

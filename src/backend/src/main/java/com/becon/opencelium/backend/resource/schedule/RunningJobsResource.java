@@ -67,4 +67,15 @@ public class RunningJobsResource {
     public void setToConnector(String toConnector) {
         this.toConnector = toConnector;
     }
+
+    @Override
+    public String toString() {
+        return "RunningJobsResource{" +
+                "schedulerId=" + schedulerId +
+                ", title='" + title + '\'' +
+                ", avgDuration=" + avgDuration +
+                ", fromConnector='" + fromConnector + '\'' +
+                ", toConnector='" + toConnector + '\'' +
+                '}';
+    }
 }

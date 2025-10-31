@@ -22,12 +22,12 @@ import {CommonState} from "../../utils/store";
 import {ICommonState} from "../../interfaces/core";
 import {
     ApplicationVersionResponseProps,
-    GlobalSearchResponseProps, RemoteApiResponseProps,
+    GlobalSearchResponseProps, OnlineServiceStatus, RemoteApiResponseProps,
     ResourcesProps
 } from "../../requests/interfaces/IApplication";
 import {
     addTicket, getAllComponents, getGlobalSearchData,
-    getLogoName, getResources, getVersion,
+    getLogoName, getOnlineServiceStatus, getResources, getVersion,
     openExternalUrl, requestRemoteApi, updateResources,
 } from "../../redux_toolkit/action_creators/ApplicationCreators";
 import {IApplicationResponse, IResponse} from "../../requests/interfaces/IResponse";
@@ -47,6 +47,7 @@ export interface AuthState extends ICommonState{
     updatingResources: API_REQUEST_STATE,
     openingExternalUrl: API_REQUEST_STATE,
     requestingRemoteApi: API_REQUEST_STATE,
+    gettingOnlineServiceStatus: API_REQUEST_STATE,
     remoteApiData: RemoteApiResponseProps,
     isNotificationPanelOpened: boolean,
     version: string,
@@ -65,6 +66,7 @@ export interface AuthState extends ICommonState{
     logoDataStatus: string,
     searchFields: any,
     currentPages: any,
+    onlineServiceStatus: OnlineServiceStatus,
 }
 
 
@@ -94,6 +96,7 @@ const initialState: AuthState = {
     updatingResources: API_REQUEST_STATE.INITIAL,
     openingExternalUrl: API_REQUEST_STATE.INITIAL,
     requestingRemoteApi: API_REQUEST_STATE.INITIAL,
+    gettingOnlineServiceStatus: API_REQUEST_STATE.INITIAL,
     remoteApiData: null,
     isNotificationPanelOpened: false,
     version: version || '',
@@ -112,6 +115,7 @@ const initialState: AuthState = {
     logoDataStatus: storage.get('logoDataStatus') || '',
     searchFields,
     currentPages,
+    onlineServiceStatus: null,
     ...CommonState,
 }
 
@@ -274,6 +278,19 @@ export const applicationSlice = createSlice({
         },
         [requestRemoteApi.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.requestingRemoteApi = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [getOnlineServiceStatus.pending.type]: (state) => {
+            state.gettingOnlineServiceStatus = API_REQUEST_STATE.START;
+            state.remoteApiData = null;
+        },
+        [getOnlineServiceStatus.fulfilled.type]: (state, action: PayloadAction<OnlineServiceStatus>) => {
+            state.gettingOnlineServiceStatus = API_REQUEST_STATE.FINISH;
+            state.onlineServiceStatus = action.payload;
+            state.error = null;
+        },
+        [getOnlineServiceStatus.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.gettingOnlineServiceStatus = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
     }

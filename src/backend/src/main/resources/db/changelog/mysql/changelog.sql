@@ -638,13 +638,13 @@ ALTER TABLE `connector` MODIFY COLUMN `invoker` VARCHAR(255) DEFAULT NULL;
 ALTER TABLE `data_aggregator` MODIFY COLUMN `script` TEXT;
 
 --changeset 4.5:15 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
-ALTER TABLE `enhancement` MODIFY COLUMN `script` VARCHAR(5000) DEFAULT NULL;
+ALTER TABLE `enhancement` MODIFY COLUMN `script` TEXT DEFAULT NULL;
 
 --changeset 4.5:16 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 ALTER TABLE `event_content` MODIFY COLUMN `subject` VARCHAR(255) NOT NULL;
 
 --changeset 4.5:17 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
-ALTER TABLE `event_content` MODIFY COLUMN `body` VARCHAR(5000) DEFAULT NULL;
+ALTER TABLE `event_content` MODIFY COLUMN `body` TEXT DEFAULT NULL;
 
 --changeset 4.5:18 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 ALTER TABLE `event_message` MODIFY COLUMN `name` VARCHAR(255) NOT NULL;
