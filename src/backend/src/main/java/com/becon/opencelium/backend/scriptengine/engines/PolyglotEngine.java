@@ -69,29 +69,30 @@ public class PolyglotEngine implements ScriptEngine {
     private Map<String, Object> extractArgs(Map<String, String> args, Function<String, Object> referenceExtractor) {
         return args.entrySet().stream()
                 .map(entry -> {
+                    Object value;
                     try {
-                        Object value = referenceExtractor.apply(entry.getValue());
-
-                        if (value instanceof Map || value instanceof List) {
-                            try {
-                                String stringVal = objectMapper.writeValueAsString(value)
-                                        .replace("__oc__attributes.", "@")
-                                        .replace(".__oc__value", "");
-
-                                if (value instanceof List) {
-                                    value = objectMapper.readValue(stringVal, List.class);
-                                } else {
-                                    value = objectMapper.readValue(stringVal, Map.class);
-                                }
-                            } catch (Exception e) {
-                                throw new ScriptExecutionException("Serialization/Deserialization error: " + e.getMessage(), e);
-                            }
-                        }
-
-                        return Map.entry(entry.getKey(), value);
+                        value = referenceExtractor.apply(entry.getValue());
                     } catch (Exception e) {
-                        throw new ScriptExecutionException("Reference extracting error: " + e.getMessage(), e);
+                        throw new ScriptExecutionException(e.getMessage(), e);
                     }
+
+                    if (value instanceof Map || value instanceof List) {
+                        try {
+                            String stringVal = objectMapper.writeValueAsString(value)
+                                    .replace("__oc__attributes.", "@")
+                                    .replace(".__oc__value", "");
+
+                            if (value instanceof List) {
+                                value = objectMapper.readValue(stringVal, List.class);
+                            } else {
+                                value = objectMapper.readValue(stringVal, Map.class);
+                            }
+                        } catch (Exception e) {
+                            throw new ScriptExecutionException("Serialization/Deserialization error: " + e.getMessage(), e);
+                        }
+                    }
+
+                    return Map.entry(entry.getKey(), value);
                 })
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
