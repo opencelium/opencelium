@@ -1,8 +1,9 @@
 package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.database.mysql.service.OnlineSyncHistoryService;
-import com.becon.opencelium.backend.resource.OnlineSyncHistoryDTO;
+import com.becon.opencelium.backend.resource.onlinesync.OnlineSyncHistoryDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
+import com.becon.opencelium.backend.resource.onlinesync.OnlineSyncStatusDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -96,6 +97,22 @@ public class OnlineSyncHistoryController {
                 .body(csvBytes);
     }
 
+    @Operation(summary = "Retrieves Online Services Status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Online Services Status",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = OnlineSyncStatusDTO.class)))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/status")
+    public ResponseEntity<OnlineSyncStatusDTO> getStatus(){
+        return ResponseEntity.ok(onlineSyncHistoryService.getStatus());
+    }
 
     private String escapeCsv(String value) {
         if (value == null) {
