@@ -26,15 +26,15 @@ import LogoImage from "./LogoImage";
 export const MenuLinkLogo = ({isReadonly, $onHoverColor, to}: MenuLinkLogoProps) => {
     const dispatch = useAppDispatch();
     const {authUser} = Auth.getReduxState();
-    const {logoDataStatus, version} = Application.getReduxState();
-    const logoName = authUser?.userDetail?.themeSync ? authUser.logoName || OC_NAME : OC_NAME;
+    const {logoDataStatus, version, onlineServiceStatus} = Application.getReduxState();
+    const logoName = onlineServiceStatus?.active ? authUser.logoName || OC_NAME : OC_NAME;
     const time = new Date();
     const logoImageProps = isReadonly ? {} : {update: time};
     useEffect(() => {
-        if(authUser.userDetail.themeSync){
+        if(onlineServiceStatus?.active){
             dispatch(getLogoName(authUser.email));
         }
-    }, [logoDataStatus, authUser.userDetail.themeSync])
+    }, [logoDataStatus, onlineServiceStatus?.active])
     useEffect(() => {
         dispatch(getVersion());
     }, []);

@@ -16,7 +16,11 @@
 import { Middleware } from 'redux'
 import {AppDispatch, RootState} from "@application/utils/store";
 import {LocalStorage} from "@application/classes/LocalStorage";
-import {getLogoName, getVersion} from "@application/redux_toolkit/action_creators/ApplicationCreators";
+import {
+    getLogoName,
+    getOnlineServiceStatus,
+    getVersion
+} from "@application/redux_toolkit/action_creators/ApplicationCreators";
 import {ApplicationVersionResponseProps} from "@application/requests/interfaces/IApplication";
 import {
     setCurrentPages,
@@ -30,12 +34,12 @@ import {updateAuthUser} from "@application/redux_toolkit/slices/AuthSlice";
 import {saveThemesInServicePortal} from "@entity/application/utils/utils";
 
 export const applicationMiddleware: Middleware<{}, RootState> = storeApi => next => action => {
+    const dispatch: AppDispatch = storeApi.dispatch;
     if (getLogoName.fulfilled.type === action.type) {
         const storage = LocalStorage.getStorage(true);
         let authUser: IAuthUser = {...storage.get('authUser')};
         authUser.logoName = action.payload;
         storage.set('authUser', authUser);
-        const dispatch: AppDispatch = storeApi.dispatch;
         dispatch(updateAuthUser(authUser));
     }
     if(setThemes.type === action.type){

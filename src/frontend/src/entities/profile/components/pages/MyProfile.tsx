@@ -40,15 +40,11 @@ import {isArray} from "@application/utils/utils";
 
 const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(({theme}) => {
     const dispatch = useAppDispatch();
-    let {themes} = Application.getReduxState();
+    let {themes, onlineServiceStatus} = Application.getReduxState();
     if(!themes || !isArray(themes) || themes.length === 0){
         themes = DefaultThemes;
     }
     const {authUser} = Auth.getReduxState();
-    const [themeSync, setThemeSync] = useState<boolean>(authUser?.userDetail?.themeSync || false);
-    useEffect(() => {
-        setThemeSync(authUser.userDetail.themeSync);
-    }, [authUser.userDetail])
     const userGroup = UserGroup.createState<IUserGroup>({
         _readOnly: true,
         ...authUser.userGroup,
@@ -101,7 +97,7 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
         // @ts-ignore
         dispatch(setThemes(JSON.stringify(newThemes)));
     }
-    const isOnline = authUser?.userDetail?.themeSync || false;
+    const isOnline = !!onlineServiceStatus?.active;
     //TODO - Move Gravatar to external component
     const Avatar = isOnline ?
         <ProfileImageStyled
@@ -141,15 +137,6 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
                             onChange={selectTheme}
                         />
                     </div>
-                    {/*<InputSwitch
-                        name={`All online services are ${themeSync ? 'enabled' : 'disabled'} (Gravatar, Online Update, Theme)`}
-                        icon={'sync'}
-                        label={'Online Service Sync'}
-                        isChecked={themeSync}
-                        onClick={() => dispatch(updateUserDetail({...authUser, userDetail: {...authUser.userDetail, themeSync: !themeSync}}))}
-                        hasConfirmation={!themeSync}
-                        confirmationText={'Are you agree to share your E-mail with Opencelium Service Portal?'}
-                    />*/}
                 </FormSection>
                 <FormSection label={{value: 'Subscriptions'}}>
                     {Permissions}
