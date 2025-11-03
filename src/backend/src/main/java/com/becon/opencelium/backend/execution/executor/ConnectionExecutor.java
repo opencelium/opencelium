@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.execution.executor;
 
+import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
 import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.executor.model.FieldBind;
@@ -11,7 +12,10 @@ import com.becon.opencelium.backend.resource.execution.ConnectionEx;
 import com.becon.opencelium.backend.resource.execution.ExecutionObj;
 import com.becon.opencelium.backend.resource.execution.FlowchartEx;
 import com.becon.opencelium.backend.resource.execution.ProxyEx;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.web.client.RestTemplate;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -43,7 +47,7 @@ public class ConnectionExecutor {
                     executionManager,
                     executionLogger,
                     masking,
-                    proxy,
+                    buildRestTemplate(flowchart),
                     connection.getExecutionPlan().getOnError()
             ));
         }
@@ -56,5 +60,16 @@ public class ConnectionExecutor {
             return List.of();
         }
         return executionManager.getAllOperations();
+    }
+
+    private RestTemplate buildRestTemplate(FlowchartEx flowchart) {
+        int timeout = flowchart.getTimeout();
+        RestTemplateBuilder restTemplateBuilder =
+                new RestTemplateBuilder(new RestCustomizer(proxy.getHost(), proxy.getPort(), proxy.getUser(), proxy.getPassword(), flowchart.isSslCert(), timeout));
+        if (timeout > 0) {
+            restTemplateBuilder.setReadTimeout(Duration.ofMillis(timeout));
+        }
+
+        return restTemplateBuilder.build();
     }
 }

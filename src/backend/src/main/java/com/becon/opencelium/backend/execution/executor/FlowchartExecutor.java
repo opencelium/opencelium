@@ -14,8 +14,8 @@ import com.becon.opencelium.backend.resource.execution.FlowchartEx;
 import com.becon.opencelium.backend.resource.execution.OnErrorEx;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.resource.execution.OperatorEx;
-import com.becon.opencelium.backend.resource.execution.ProxyEx;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,10 +44,10 @@ public class FlowchartExecutor {
 
     public FlowchartExecutor(
             FlowchartEx flowchart, ExecutionManager executionManager,
-            OcLogger<ExecutionLog> logger, MaskingService masking, ProxyEx proxy, OnErrorEx onError
+            OcLogger<ExecutionLog> logger, MaskingService masking, RestTemplate restTemplate, OnErrorEx onError
     ) {
         this.executionManager = executionManager;
-        this.operationExecutor = new OperationExecutor(flowchart, executionManager, logger, masking, onError, proxy);
+        this.operationExecutor = new OperationExecutor(executionManager, restTemplate, flowchart.getPagination(), logger, masking, onError);
         this.expressionProcessor = ExpressionProcessorFactory.get(ProcessorType.POSTFIX);
         this.logger = logger;
         this.masking = masking;

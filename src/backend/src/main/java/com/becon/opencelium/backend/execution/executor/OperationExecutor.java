@@ -1,6 +1,5 @@
 package com.becon.opencelium.backend.execution.executor;
 
-import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
 import com.becon.opencelium.backend.enums.OpType;
 import com.becon.opencelium.backend.enums.PageParam;
 import com.becon.opencelium.backend.execution.builder.RequestEntityBuilder;
@@ -9,12 +8,9 @@ import com.becon.opencelium.backend.execution.logger.OcLogger;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.masking.MaskingService;
 import com.becon.opencelium.backend.invoker.entity.Pagination;
-import com.becon.opencelium.backend.resource.execution.FlowchartEx;
 import com.becon.opencelium.backend.resource.execution.OnErrorEx;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
-import com.becon.opencelium.backend.resource.execution.ProxyEx;
 import com.becon.opencelium.backend.resource.execution.ResponseDTO;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -27,7 +23,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.Duration;
 import java.util.Base64;
 
 import static com.becon.opencelium.backend.utility.MediaTypeUtility.isBinaryCompatible;
@@ -42,15 +37,15 @@ public class OperationExecutor {
     private final Pagination pagination;
 
     public OperationExecutor(
-            FlowchartEx flowchart, ExecutionManager executionManager,
-            OcLogger<ExecutionLog> logger, MaskingService masking, OnErrorEx onError, ProxyEx proxy
+            ExecutionManager executionManager, RestTemplate restTemplate, Pagination pagination,
+            OcLogger<ExecutionLog> logger, MaskingService masking, OnErrorEx onError
     ) {
         this.executionManager = executionManager;
-        this.restTemplate = buildRestTemplate(flowchart, proxy);
+        this.restTemplate = restTemplate;
         this.logger = logger;
         this.masking = masking;
         this.onError = onError;
-        this.pagination = flowchart.getPagination();
+        this.pagination = pagination;
     }
 
 
@@ -195,16 +190,5 @@ public class OperationExecutor {
 
     private String buildRef(String operationId, String type, String part) {
         return operationId + ".(" + type + ")." + part;
-    }
-
-    private RestTemplate buildRestTemplate(FlowchartEx flowchart, ProxyEx proxy) {
-        int timeout = flowchart.getTimeout();
-        RestTemplateBuilder restTemplateBuilder =
-                new RestTemplateBuilder(new RestCustomizer(proxy.getHost(), proxy.getPort(), proxy.getUser(), proxy.getPassword(), flowchart.isSslCert(), timeout));
-        if (timeout > 0) {
-            restTemplateBuilder.setReadTimeout(Duration.ofMillis(timeout));
-        }
-
-        return restTemplateBuilder.build();
     }
 }
