@@ -45,7 +45,9 @@ import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.becon.opencelium.backend.versionmanager.EntityUpdater;
 import com.becon.opencelium.backend.versionmanager.EntityVersionManager;
 import com.becon.opencelium.backend.versionmanager.backup.MongoDbBackupService;
-import com.becon.opencelium.backend.versionmanager.backup.MysqlBackupService;
+import com.becon.opencelium.backend.versionmanager.backup.mysql.MysqlBackupService;
+import com.becon.opencelium.backend.versionmanager.backup.mysql.MysqlBackupServiceFactory;
+import com.becon.opencelium.backend.versionmanager.backup.mysql.MysqlBackupType;
 import com.becon.opencelium.backend.versionmanager.base.Utils;
 import com.github.fge.jsonpatch.JsonPatch;
 import jakarta.persistence.EntityNotFoundException;
@@ -108,7 +110,7 @@ public class ConnectionServiceImp implements ConnectionService {
             MaskingRuleRepository ruleRepository,
             EntityVersionManager entityVersionManager,
             OpenceliumProps ocProps,
-            MysqlBackupService mysqlBackupService,
+            MysqlBackupServiceFactory mysqlBackupServiceFactory,
             MongoDbBackupService mongoDbBackupService,
             MetaDataLogRepository metaDataLogRepository
     ) {
@@ -130,7 +132,7 @@ public class ConnectionServiceImp implements ConnectionService {
         this.ocProps = ocProps;
         this.connectionMngEntityUpdater = entityVersionManager.getUpdater(ConnectionMng.class);
         this.enhancementEntityUpdater = entityVersionManager.getUpdater(Enhancement.class);
-        this.mysqlBackupService = mysqlBackupService;
+        this.mysqlBackupService = mysqlBackupServiceFactory.resolve(MysqlBackupType.CSV);
         this.mongoDbBackupService = mongoDbBackupService;
         this.metaDataLogRepository = metaDataLogRepository;
     }
@@ -560,9 +562,8 @@ public class ConnectionServiceImp implements ConnectionService {
                             );
                 } catch (Exception e) {
                     log.error("Failed to update Connection[id={}, name={}]", connection.getId(), connection.getTitle(), e);
-                    mysqlBackupService.restore(EntityNames.ENHANCEMENT);
-                    mongoDbBackupService.restore();
-                    log.warn("Rolled back all changes");
+//                    mongoDbBackupService.restore();
+//                    log.warn("Rolled back all changes");
                     throw new RuntimeException(e);
                 }
 
@@ -576,9 +577,8 @@ public class ConnectionServiceImp implements ConnectionService {
                             }));
                 } catch (Exception e) {
                     log.error("Failed to update Connection[id={}, name={}]", connection.getId(), connection.getTitle(), e);
-                    mysqlBackupService.restore(EntityNames.ENHANCEMENT);
-                    mongoDbBackupService.restore();
-                    log.warn("Rolled back all changes");
+//                    mongoDbBackupService.restore();
+//                    log.warn("Rolled back all changes");
                     throw new RuntimeException(e);
                 }
                 log.info("Connection[id={}, name={}] is successfully updated to {} version", connection.getId(), connection.getTitle(), ocProps.getVersion());

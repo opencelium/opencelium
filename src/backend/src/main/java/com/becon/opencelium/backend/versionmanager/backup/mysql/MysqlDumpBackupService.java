@@ -1,14 +1,14 @@
-package com.becon.opencelium.backend.versionmanager.backup;
+package com.becon.opencelium.backend.versionmanager.backup.mysql;
 
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.constant.props.OpenceliumProps;
-import com.becon.opencelium.backend.database.mysql.service.EnhancementService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
@@ -20,19 +20,29 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
-public class MysqlBackupService {
+public class MysqlDumpBackupService implements MysqlBackupService {
 
+    private static final Logger log = LoggerFactory.getLogger(MysqlDumpBackupService.class);
     private final OpenceliumProps ocProps;
     private final DataSourceProperties dbProperties;
-    private final EnhancementService enhancementService;
 
-    public MysqlBackupService(OpenceliumProps ocProps, DataSourceProperties dbProperties, EnhancementService enhancementService) {
+    public MysqlDumpBackupService(OpenceliumProps ocProps, DataSourceProperties dbProperties) {
         this.ocProps = ocProps;
         this.dbProperties = dbProperties;
-        this.enhancementService = enhancementService;
     }
 
     public void backup(String entity) {
+        Path rootPath = Paths.get(PathConstant.BACKUP).resolve(entity);
+        File rootFolder = rootPath.toFile();
+        rootFolder.mkdirs();
+
+        File existingMatchedFile = getBackupWithCurrentVersionIfPresent(entity, rootFolder);
+        if (Objects.nonNull(existingMatchedFile)) {
+            log.info("Skipped taking backup. Because backup file already exists for table {}", entity);
+
+            return;
+        }
+
         List<String> command = Arrays.asList(
                 "mysqldump",
                 "-h", extractHost(dbProperties.determineUrl()),
@@ -44,18 +54,6 @@ public class MysqlBackupService {
         );
 
         ProcessBuilder processBuilder = new ProcessBuilder(command);
-
-        Path rootPath = Paths.get(PathConstant.BACKUP).resolve(entity);
-        File rootFolder = rootPath.toFile();
-        rootFolder.mkdirs();
-
-        File existingMatchedFile = getBackupWithCurrentVersionIfPresent(entity, rootFolder);
-        if (Objects.nonNull(existingMatchedFile)) {
-            try {
-                Files.deleteIfExists(Path.of(existingMatchedFile.getAbsolutePath()));
-            } catch (IOException ignored) {
-            }
-        }
 
         File backupFile = rootPath.resolve(buildFilePath(entity)).toFile();
         if (!backupFile.exists()) {
@@ -80,46 +78,16 @@ public class MysqlBackupService {
         }
     }
 
+    @Override
+    public MysqlBackupType getType() {
+        return MysqlBackupType.DUMP;
+    }
+
     private File getBackupWithCurrentVersionIfPresent(String entity, File rootFolder) {
         File[] matchingFiles = rootFolder.listFiles((dir, name) ->
                 isThisVersion(name, entity)
         );
         return (matchingFiles != null && matchingFiles.length > 0) ? matchingFiles[0] : null;
-    }
-
-    public void restore(String entity) {
-        List<String> command = Arrays.asList(
-                "mysql",
-                "-h", extractHost(dbProperties.determineUrl()),
-                "-P", extractPort(dbProperties.determineUrl()),
-                "-u", dbProperties.determineUsername(),
-                "--password=" + dbProperties.determinePassword(),
-                extractSchemaName(dbProperties.determineUrl())
-        );
-        ProcessBuilder processBuilder = new ProcessBuilder(command);
-
-        Path rootPath = Paths.get(PathConstant.BACKUP).resolve(entity);
-        File backupFile = getBackupWithCurrentVersionIfPresent(entity, rootPath.toFile());
-
-        if (Objects.isNull(backupFile)) {
-            throw new RuntimeException("Backup file not found");
-        }
-
-        processBuilder.redirectInput(backupFile);
-
-        enhancementService.deleteAll();
-        try {
-            Process process = processBuilder.start();
-            int exitCode = process.waitFor();
-            if (exitCode == 0 || exitCode == 2) {
-                System.out.println("Restore succeed");
-                Files.deleteIfExists(Path.of(backupFile.getAbsolutePath()));
-            } else {
-                throw new RuntimeException("Could not restore backup file");
-            }
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException("Error executing restore", e);
-        }
     }
 
     private String buildFilePath(String entityName) {

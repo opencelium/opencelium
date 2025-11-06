@@ -39,4 +39,6 @@ public interface EnhancementService {
     void deleteById(Integer id);
 
     void deleteAll();
+
+    List<Enhancement> getAll();
 }
