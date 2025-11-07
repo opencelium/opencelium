@@ -19,6 +19,7 @@ package com.becon.opencelium.backend.database.mysql.service;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.RequestData;
 import com.becon.opencelium.backend.execution.logger.mapper.ParsedLogLineMapper;
+import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.http.ResponseEntity;
@@ -67,4 +68,6 @@ public interface ConnectorService {
     Optional<Connector> findAllByTitle(String title);
 
     Boolean existsMasterPassword();
+
+    List<Connector> findByIds(IdentifiersDTO<Integer> ids);
 }

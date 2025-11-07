@@ -133,6 +133,24 @@ public class ConnectorController {
         return ResponseEntity.ok(connectorResources);
     }
 
+    @Operation(summary = "Retrieves all connectors with IDs")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Connectors have been successfully retrieved",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConnectorResource.class)))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/list/by-ids")
+    public ResponseEntity<List<ConnectorResource>> getAllByIds(@RequestBody IdentifiersDTO<Integer> ids) {
+        List<ConnectorResource> connectorResources = connectorResourceMapper.toDTOAll(connectorService.findByIds(ids));
+        return ResponseEntity.ok(connectorResources);
+    }
+
     @Operation(summary = "Creates new connector in the system by accepting Connector data in the request body")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",

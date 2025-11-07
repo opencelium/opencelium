@@ -34,6 +34,7 @@ import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
+import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.utility.crypto.Encoder;
 import org.apache.commons.lang3.StringUtils;
@@ -175,6 +176,15 @@ public class ConnectorServiceImp implements ConnectorService {
     @Override
     public Boolean existsMasterPassword() {
         return StringUtils.isNotBlank(connectorProps.getMasterPassword());
+    }
+
+    @Override
+    public List<Connector> findByIds(IdentifiersDTO<Integer> ids) {
+        List<Connector> connectors = connectorRepository.findAllById(ids.getIdentifiers());
+
+        connectors.forEach(c -> c.setRequestData(null));
+
+        return connectors;
     }
 
     @Override
