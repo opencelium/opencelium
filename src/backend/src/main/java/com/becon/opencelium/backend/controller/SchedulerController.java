@@ -86,6 +86,31 @@ public class SchedulerController {
         return ResponseEntity.ok(scheduleList);
     }
 
+    @Operation(summary = "Retrieves a list of schedulers by IDs")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Success",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = SchedulerResource.class)))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/all/by-ids")
+    public ResponseEntity<List<SchedulerResource>> getAllByIds(IdentifiersDTO<Integer> ids) {
+        List<Scheduler> schedulers = schedulerService.findAllById(ids.getIdentifiers());
+        List<SchedulerResource> scheduleList = schedulers.stream()
+                .map(s -> schedulerService.toResource(s)).collect(Collectors.toList());
+
+        // send notification about all running jobs
+        List<RunningJobsResource> allRunningJobs = schedulerService.getAllRunningJobs();
+        notificationService.send(SocketConstant.SCHEDULER_DESTINATION, allRunningJobs);
+
+        return ResponseEntity.ok(scheduleList);
+    }
+
     @Operation(summary = "Retrieves a scheduler from database by provided id")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",

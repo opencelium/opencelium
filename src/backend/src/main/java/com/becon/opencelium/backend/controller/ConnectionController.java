@@ -217,6 +217,35 @@ public class ConnectionController {
         return ResponseEntity.ok(connectionResources);
     }
 
+    @Operation(summary = "Retrieves all connections by IDs")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Connections have been successfully retrieved",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConnectionResource.class)))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping(path = "/all/by-ids")
+    public ResponseEntity<?> getAllMeta(@RequestBody IdentifiersDTO<Long> ids) {
+        List<Connection> connections = connectionService.findAllByIds(ids);
+        List<ConnectionResource> connectionResources = connectionResourceMapper.toDTOAll(connections);
+        //unnecessary fields
+        connectionResources.forEach(c -> {
+            c.getFromConnector().setRequestData(null);
+            c.getFromConnector().getInvoker().setOperations(null);
+            c.getFromConnector().getInvoker().setRequiredData(null);
+
+            c.getToConnector().setRequestData(null);
+            c.getToConnector().getInvoker().setOperations(null);
+            c.getToConnector().getInvoker().setRequiredData(null);
+        });
+        return ResponseEntity.ok(connectionResources);
+    }
+
     @Operation(summary = "Retrieves a connection from database by provided connection ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",

@@ -43,6 +43,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -180,11 +181,11 @@ public class ConnectorServiceImp implements ConnectorService {
 
     @Override
     public List<Connector> findByIds(IdentifiersDTO<Integer> ids) {
-        List<Connector> connectors = connectorRepository.findAllById(ids.getIdentifiers());
+        if (ids == null || CollectionUtils.isEmpty(ids.getIdentifiers())) {
+            return Collections.emptyList();
+        }
 
-        connectors.forEach(c -> c.setRequestData(null));
-
-        return connectors;
+        return connectorRepository.findAllById(ids.getIdentifiers());
     }
 
     @Override

@@ -148,6 +148,13 @@ public class ConnectorController {
     @GetMapping("/list/by-ids")
     public ResponseEntity<List<ConnectorResource>> getAllByIds(@RequestBody IdentifiersDTO<Integer> ids) {
         List<ConnectorResource> connectorResources = connectorResourceMapper.toDTOAll(connectorService.findByIds(ids));
+
+        connectorResources.forEach(x -> {
+            x.setRequestData(null);
+            x.getInvoker().setOperations(null);
+            x.getInvoker().setRequiredData(null);
+        });
+
         return ResponseEntity.ok(connectorResources);
     }
 
