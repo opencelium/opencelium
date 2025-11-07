@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.database.mongodb.entity;
 
+import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.*;
 
@@ -56,6 +57,9 @@ public class ConnectionMng {
     private List<FieldBindingMng> fieldBindings; // [null, null, null]
 
     private Map<String, Object> ui;
+
+    @Version
+    private Integer revision;
 
     public ConnectionMng() {
     }
@@ -130,5 +134,13 @@ public class ConnectionMng {
 
     public void setExecutionPlan(ExecutionPlanMng executionPlan) {
         this.executionPlan = executionPlan;
+    }
+
+    public Integer getRevision() {
+        return revision;
+    }
+
+    public void setRevision(Integer revision) {
+        this.revision = revision;
     }
 }

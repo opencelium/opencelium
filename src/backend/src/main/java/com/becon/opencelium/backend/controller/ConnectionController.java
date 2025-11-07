@@ -45,6 +45,8 @@ import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
 import com.becon.opencelium.backend.resource.connection.old.ConnectionOldDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
+import com.becon.opencelium.backend.resource.partialconnection.FlowchartCreateRequest;
+import com.becon.opencelium.backend.resource.partialconnection.NewConnectionCreateRequest;
 import com.becon.opencelium.backend.resource.request.SchedulerRequestResource;
 import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
@@ -59,6 +61,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -354,156 +357,18 @@ public class ConnectionController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Creates an empty connection and returns it's id")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Connection has been successfully created",
-                    content = @Content(schema = @Schema(implementation = ConnectionDTO.class))),
-            @ApiResponse(responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-            @ApiResponse(responseCode = "500",
-                    description = "Internal Error",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-    })
-    @GetMapping("/id")
-    public ResponseEntity<?> getNewConnectionId() {
-        Long id = connectionService.createEmptyConnection();
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("id", id);
+    @PostMapping("/new")
+    public ResponseEntity<ResultDTO<Long>> createNewConnection(@Valid @RequestBody NewConnectionCreateRequest request){
+        Long id = connectionService.createNewConnection(request);
 
-        final URI uri = MvcUriComponentsBuilder
-                .fromController(getClass())
-                .buildAndExpand().toUri();
-        return ResponseEntity.created(uri).body(jsonObject);
+        return ResponseEntity.ok(ResultDTO.of(id));
     }
 
-    @Operation(summary = "Updates connection with a patch request")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Connection has been successfully updated"),
-            @ApiResponse(responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-            @ApiResponse(responseCode = "500",
-                    description = "Internal Error",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-    })
-    @PatchMapping(path = "/{connectionId}", consumes = "application/json-patch+json")
-    public ResponseEntity<?> patchUpdate(@PathVariable Long connectionId, @RequestBody JsonPatch patch) {
-        PatchConnectionDetails details = patchHelper.describe(patch);
-        connectionService.patchUpdate(connectionId, patch, details);
-        ConnectionDTO connectionDTO = connectionService.getFullConnection(connectionId);
-        JSONObject jsonObject = new JSONObject();
+    @PostMapping("/fchart")
+    public ResponseEntity<ResultDTO<String>> addFlowchart(@Valid @RequestBody FlowchartCreateRequest request){
+        String id = connectionService.addFlowchart(request);
 
-        for (PatchConnectionDetails.PatchOperationDetail opDetail : details.getOpDetails()) {
-            if (opDetail.isMethodAdded()) {
-                List<MethodDTO> methods;
-                if (opDetail.isFrom()) {
-                    methods = connectionDTO.getFromConnector().getMethods();
-                } else {
-                    methods = connectionDTO.getToConnector().getMethods();
-                }
-                String id = methods.get(patchHelper.getIndexOfList(opDetail.getIndexOfMethod(), methods.size())).getId();
-                jsonObject.put("id", id);
-                return ResponseEntity.ok(jsonObject);
-            } else if (opDetail.isOperatorAdded()) {
-                List<OperatorDTO> operators;
-                if (opDetail.isFrom()) {
-                    operators = connectionDTO.getFromConnector().getOperators();
-                } else {
-                    operators = connectionDTO.getToConnector().getOperators();
-                }
-                String id = operators.get(patchHelper.getIndexOfList(opDetail.getIndexOfOperator(), operators.size())).getId();
-                jsonObject.put("id", id);
-                return ResponseEntity.ok(jsonObject);
-            } else if (opDetail.isEnhancementAdded()) {
-                List<FieldBindingDTO> fieldBindings = connectionDTO.getFieldBinding();
-                String id = fieldBindings.get(patchHelper.getIndexOfList(opDetail.getIndexOfEnhancement(), fieldBindings.size())).getId();
-                jsonObject.put("id", id);
-                return ResponseEntity.ok(jsonObject);
-            }
-        }
-        return ResponseEntity.ok().build();
-    }
-
-
-    @Operation(summary = "Add|delete|updates a method and|or an operator of connection with a patch request and returns current its id")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Method and|or Operator has been successfully updated"),
-            @ApiResponse(responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-            @ApiResponse(responseCode = "500",
-                    description = "Internal Error",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-    })
-    @PatchMapping(
-            path = {"/{connectionId}/connector/{connectorId}"},
-            consumes = "application/json-patch+json"
-    )
-    public ResponseEntity<?> patchMethodOrOperator(
-            @PathVariable Long connectionId,
-            @PathVariable Integer connectorId,
-            @RequestBody JsonPatch patch
-    ) {
-        if (connectorId == null || connectorId == 0) {
-            throw new ConnectorNotFoundException(0);
-        }
-
-        Connection connection = connectionService.getById(connectionId);
-
-        JsonPatch changed;
-        if (connection.getFromConnector() == connectorId) {
-            changed = patchHelper.changeEachPath(patch, p -> "/fromConnector" + p);
-        } else {
-            changed = patchHelper.changeEachPath(patch, p -> "/toConnector" + p);
-        }
-        return patchUpdate(connectionId, changed);
-    }
-
-    @Operation(summary = "Updates a fieldBinding of connection with a patch request")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "FieldBinding has been successfully updated"),
-            @ApiResponse(responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-            @ApiResponse(responseCode = "500",
-                    description = "Internal Error",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-    })
-    @PatchMapping(
-            path = {"/{connectionId}/fieldBinding/{id}"},
-            consumes = "application/json-patch+json"
-    )
-    public ResponseEntity<?> patchEnhancement(
-            @PathVariable Long connectionId,
-            @PathVariable String id,
-            @RequestBody JsonPatch patch
-    ) {
-        if (id == null) {
-            throw new RuntimeException("ENHANCEMENT_NOT_FOUND");
-        }
-        ConnectionMng connectionMng = connectionMngService.getByConnectionId(connectionId);
-        if (connectionMng.getFieldBindings() == null) {
-            throw new RuntimeException("ENHANCEMENT_NOT_FOUND");
-        }
-        int index = -1;
-        for (int i = 0; i < connectionMng.getFieldBindings().size(); i++) {
-            if (connectionMng.getFieldBindings().get(i).getId().equals(id)) {
-                index = i;
-                break;
-            }
-        }
-        if (index == -1) {
-            throw new RuntimeException("ENHANCEMENT_NOT_FOUND");
-        } else {
-            String pre = "/fieldBinding/" + index;
-            JsonPatch changed = patchHelper.changeEachPath(patch, p -> pre + p);
-            return patchUpdate(connectionId, changed);
-        }
+        return ResponseEntity.ok(ResultDTO.of(id));
     }
 
     @Operation(summary = "Undoes the last update and returns undid connection")

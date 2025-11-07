@@ -3,7 +3,10 @@ package com.becon.opencelium.backend.database.mongodb.service;
 import com.becon.opencelium.backend.constant.props.OpenceliumProps;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.entity.EnhancementMng;
+import com.becon.opencelium.backend.database.mongodb.entity.FlowchartMng;
 import com.becon.opencelium.backend.database.mongodb.repository.ConnectionMngRepository;
+import com.becon.opencelium.backend.database.mysql.entity.Connection;
+import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.database.mysql.service.EnhancementService;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
@@ -12,11 +15,15 @@ import com.becon.opencelium.backend.mapper.base.MapperUpdatable;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
+import org.hibernate.dialect.lock.OptimisticEntityLockException;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
@@ -197,23 +204,33 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     }
 
     @Override
-    public void doWithPatchedConnection(ConnectionDTO connectionDTO, ConnectionDTO patched, PatchConnectionDetails details) {
-        for (PatchConnectionDetails.PatchOperationDetail opDetail : details.getOpDetails()) {
-            if (opDetail.isItEnh()) {
-                fieldBindingMngService.doWithPatchedEnhancement(connectionDTO, patched, opDetail);
-            } else if (opDetail.isItMethod()) {
-                if (opDetail.isFrom()) {
-                    methodMngService.doWithPatchedMethod(connectionDTO.getFromConnector(), patched.getFromConnector(), opDetail);
-                } else {
-                    methodMngService.doWithPatchedMethod(connectionDTO.getToConnector(), patched.getToConnector(), opDetail);
-                }
-            } else if (opDetail.isItOperator()) {
-                if (opDetail.isFrom()) {
-                    operatorMngService.doWithPatchedOperator(connectionDTO.getFromConnector(), patched.getFromConnector(), opDetail);
-                } else {
-                    operatorMngService.doWithPatchedOperator(connectionDTO.getToConnector(), patched.getToConnector(), opDetail);
-                }
-            }
+    public void createNewConnection(Long connectionId) {
+        ConnectionMng connectionMng = new ConnectionMng();
+        connectionMng.setConnectionId(connectionId);
+        connectionMng.setVersion(ocProps.getVersion());
+
+        connectionMngRepository.save(connectionMng);
+    }
+
+    @Override
+    public String addFlowchart(Long id, Connector connector) {
+        ConnectionMng connectionMng = getByConnectionId(id);
+
+        FlowchartMng flowchartMng = new FlowchartMng();
+        flowchartMng.setConnectorId(connector.getId());
+        flowchartMng.setTitle(connector.getTitle());
+        flowchartMng.setFlowId(UUID.randomUUID().toString());
+
+        if (connectionMng.getFlowcharts() == null) {
+            connectionMng.setFlowcharts(new ArrayList<>());
+        }
+
+        connectionMng.getFlowcharts().add(flowchartMng);
+
+        try {
+            connectionMngRepository.save(connectionMng);
+        } catch (OptimisticLockingFailureException e) {
+            throw new RuntimeException(e);
         }
     }
 

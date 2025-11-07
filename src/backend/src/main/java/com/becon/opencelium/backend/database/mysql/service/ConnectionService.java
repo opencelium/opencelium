@@ -22,8 +22,11 @@ import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
+import com.becon.opencelium.backend.resource.partialconnection.FlowchartCreateRequest;
+import com.becon.opencelium.backend.resource.partialconnection.NewConnectionCreateRequest;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.github.fge.jsonpatch.JsonPatch;
+import jakarta.validation.Valid;
 
 import java.io.IOException;
 import java.util.List;
@@ -56,11 +59,7 @@ public interface ConnectionService {
 
     Long createEmptyConnection();
 
-    void undo(Long connectionId);
-
     List<Connection> getAllConnectionsNotContains(List<Long> ids);
-
-    void patchUpdate(Long connectionId, JsonPatch patch, PatchConnectionDetails details);
 
     ConnectionDTO getFullConnection(Long connectionId);
 
@@ -91,4 +90,8 @@ public interface ConnectionService {
     void updateConnectionsToCurrentVersion();
 
     List<String> getLogFileNameListById(long connectionId);
+
+    Long createNewConnection(NewConnectionCreateRequest request);
+
+    String addFlowchart(FlowchartCreateRequest request);
 }

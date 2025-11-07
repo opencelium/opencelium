@@ -3,6 +3,8 @@ package com.becon.opencelium.backend.database.mongodb.service;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
 import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
+import com.becon.opencelium.backend.database.mysql.entity.Connection;
+import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 
@@ -21,5 +23,8 @@ public interface ConnectionMngService {
 
     List<ConnectionMng> getAllById(List<Long> ids);
     long count();
-    void doWithPatchedConnection(ConnectionDTO connectionDTO, ConnectionDTO patched, PatchConnectionDetails details);
+
+    void createNewConnection(Long connectionId);
+
+    String addFlowchart(Long id, Connector connector);
 }

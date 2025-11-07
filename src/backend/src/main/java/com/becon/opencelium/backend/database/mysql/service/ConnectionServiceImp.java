@@ -18,7 +18,6 @@ package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.constant.props.OpenceliumProps;
 import com.becon.opencelium.backend.constant.*;
-import com.becon.opencelium.backend.container.Command;
 import com.becon.opencelium.backend.container.ConnectionUpdateTracker;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
@@ -33,11 +32,13 @@ import com.becon.opencelium.backend.database.mysql.repository.ConnectionReposito
 import com.becon.opencelium.backend.database.mysql.repository.MaskingRuleRepository;
 import com.becon.opencelium.backend.enums.Action;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
+import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.mapper.base.Mapper;
-import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
 import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
+import com.becon.opencelium.backend.resource.partialconnection.FlowchartCreateRequest;
+import com.becon.opencelium.backend.resource.partialconnection.NewConnectionCreateRequest;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.utility.LogFileUtility;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
@@ -46,7 +47,6 @@ import com.becon.opencelium.backend.versionmanager.EntityVersionManager;
 import com.becon.opencelium.backend.versionmanager.backup.MongoDbBackupService;
 import com.becon.opencelium.backend.versionmanager.backup.MysqlBackupService;
 import com.becon.opencelium.backend.versionmanager.base.Utils;
-import com.github.fge.jsonpatch.JsonPatch;
 import jakarta.persistence.EntityNotFoundException;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -247,31 +247,6 @@ public class ConnectionServiceImp implements ConnectionService {
         connectionMngService.saveDirectly(connectionMng);
         connectionHistoryService.makeHistoryAndSave(saved, null, Action.CREATE);
         return saved.getId();
-    }
-
-    @Override
-    @Transactional
-    public void patchUpdate(Long connectionId, JsonPatch patch, PatchConnectionDetails details) {
-        ConnectionDTO connectionDTO = getFullConnection(connectionId);
-        ConnectionDTO patched = patchUpdateInternal(connectionDTO, patch, details);
-        updateTracker.pushAndMakeHistory(connectionDTO, patched, patch);
-    }
-
-    @Override
-    public void undo(Long connectionId) {
-        synchronized (ConnectionUpdateTracker.class) {
-            Command command = updateTracker.undo(connectionId);
-            if (command != null) {
-                try {
-                    PatchConnectionDetails details = patchHelper.describe(command.getJsonPatch());
-                    ConnectionDTO connectionDTO = getFullConnection(connectionId);
-                    patchUpdateInternal(connectionDTO, command.getJsonPatch(), details);
-                    connectionHistoryService.makeHistoryAndSave(new Connection(connectionId), command.getJsonPatch(), Action.UNDO);
-                } catch (Exception e) {
-                    updateTracker.push(command);
-                }
-            }
-        }
     }
 
     @Override
@@ -582,6 +557,33 @@ public class ConnectionServiceImp implements ConnectionService {
         return LogFileUtility.getLogFileNameList(connectionId);
     }
 
+    @Override
+    @Transactional
+    public Long createNewConnection(NewConnectionCreateRequest request) {
+        if (existsByName(request.getTitle())) {
+            throw new GeneralServiceException(ExceptionConstant.INVALID_DATA, ExceptionMessages.CONNECTION_EXIST_WITH_TITLE.formatted(request.getTitle()));
+        }
+
+        Connection connection = new Connection();
+        connection.setTitle(request.getTitle());
+        connection.setDescription(request.getDescription());
+
+        connection = connectionRepository.save(connection);
+
+        connectionMngService.createNewConnection(connection.getId());
+
+        return connection.getId();
+    }
+
+    @Override
+    public String addFlowchart(FlowchartCreateRequest request) {
+        Connection connection = getById(request.getConnectionId());
+
+        Connector connector = connectorService.getById(request.getConnectorId());
+
+        return connectionMngService.addFlowchart(connection.getId(), connector);
+    }
+
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
     // private methods
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -607,52 +609,6 @@ public class ConnectionServiceImp implements ConnectionService {
             }
         }
     }
-
-    private ConnectionDTO patchUpdateInternal(ConnectionDTO connectionDTO, JsonPatch patch, PatchConnectionDetails details) {
-        ConnectionDTO patched = patchHelper.patch(patch, connectionDTO, ConnectionDTO.class);
-
-        doWithConnectorsAfterPatch(connectionDTO);
-        doWithConnectorsAfterPatch(patched);
-
-        connectionMngService.doWithPatchedConnection(connectionDTO, patched, details);
-
-        Connection connection = connectionMapper.toEntity(patched);
-        connection.setEnhancements(null);
-        connectionRepository.save(connection);
-
-        ConnectionMng connectionMng = connectionMngMapper.toEntity(patched);
-        connectionMngService.saveDirectly(connectionMng);
-        return patched;
-    }
-
-    private void doWithConnectorsAfterPatch(ConnectionDTO connectionDTO) {
-        if (connectionDTO.getFromConnector() != null) {
-            ConnectorDTO fromConnector = connectionDTO.getFromConnector();
-            if (fromConnector.getConnectorId() == null || !connectorService.existsById(fromConnector.getConnectorId())) {
-                connectionDTO.setFromConnector(null);
-            } else {
-                setDefaultValues(fromConnector);
-            }
-        }
-        if (connectionDTO.getToConnector() != null) {
-            ConnectorDTO toConnector = connectionDTO.getToConnector();
-            if (toConnector.getConnectorId() == null || !connectorService.existsById(toConnector.getConnectorId())) {
-                connectionDTO.setFromConnector(null);
-            } else {
-                setDefaultValues(toConnector);
-            }
-        }
-    }
-
-    private void setDefaultValues(ConnectorDTO connectorDTO) {
-        connectorDTO.setTitle(null);
-        connectorDTO.setSslCert(false);
-        connectorDTO.setIcon(null);
-        connectorDTO.setInvoker(null);
-        connectorDTO.setTimeout(0);
-        connectorDTO.setBusinessLayout(null);
-    }
-
 
     private List<FieldBindingMng> getNewEnhancements(ConnectionMng old, ConnectionMng connectionMng) {
         List<FieldBindingMng> list = new ArrayList<>();
