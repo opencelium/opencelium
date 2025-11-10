@@ -38,17 +38,17 @@ public class ConnectionExecutor {
     }
 
     public void start() {
-//        Connector source = Connector.fromEx(connection.getSource());
-//        Connector target = Connector.fromEx(connection.getTarget());
-//        List<FieldBind> fieldBind = connection.getFieldBind().stream().map(FieldBind::fromEx).collect(Collectors.toList());
-//
-//        executionManager = new ExecutionManagerImpl(webhookVars, source, target, fieldBind);
-//
-//        ConnectorExecutor sourceEx = new ConnectorExecutor(connection.getSource(), executionManager, getRestTemplate(source), executionLogger, masking, "source");
-//        ConnectorExecutor targetEx = new ConnectorExecutor(connection.getTarget(), executionManager, getRestTemplate(target), executionLogger, masking, "target");
-//
-//        sourceEx.start();
-//        targetEx.start();
+        Connector source = Connector.fromEx(connection.getSource());
+        Connector target = Connector.fromEx(connection.getTarget());
+        List<FieldBind> fieldBind = connection.getFieldBind().stream().map(FieldBind::fromEx).collect(Collectors.toList());
+
+        executionManager = new ExecutionManagerImpl(webhookVars, source, target, fieldBind);
+
+        ConnectorExecutor sourceEx = new ConnectorExecutor(connection.getSource(), executionManager, getRestTemplate(source), executionLogger, masking, "source");
+        ConnectorExecutor targetEx = new ConnectorExecutor(connection.getTarget(), executionManager, getRestTemplate(target), executionLogger, masking, "target");
+
+        sourceEx.start();
+        targetEx.start();
     }
 
     public List<Operation> getOperations() {
