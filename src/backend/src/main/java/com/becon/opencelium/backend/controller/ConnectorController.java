@@ -150,7 +150,6 @@ public class ConnectorController {
         List<ConnectorResource> connectorResources = connectorResourceMapper.toDTOAll(connectorService.findByIds(ids));
 
         connectorResources.forEach(x -> {
-            x.setRequestData(null);
             x.getInvoker().setOperations(null);
             x.getInvoker().setRequiredData(null);
         });

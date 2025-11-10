@@ -185,7 +185,9 @@ public class ConnectorServiceImp implements ConnectorService {
             return Collections.emptyList();
         }
 
-        return connectorRepository.findAllById(ids.getIdentifiers());
+        List<Connector> connectors = connectorRepository.findAllById(ids.getIdentifiers());
+        connectors.forEach(this::decrypt);
+        return connectors;
     }
 
     @Override
