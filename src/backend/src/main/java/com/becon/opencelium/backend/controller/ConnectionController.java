@@ -16,7 +16,6 @@
 
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.commons.FileDescriptor;
 import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
 import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.constant.Constant;
@@ -30,15 +29,12 @@ import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
 import com.becon.opencelium.backend.exception.ConcurrentTestIsForbidden;
-import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.execution.socket.Connection2WebSocketChannelMapping;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.ApiDataResource;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
-import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.connection.*;
-import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
 import com.becon.opencelium.backend.resource.connection.old.ConnectionOldDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
@@ -47,10 +43,8 @@ import com.becon.opencelium.backend.resource.partialconnection.NewConnectionCrea
 import com.becon.opencelium.backend.resource.request.SchedulerRequestResource;
 import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
-import com.becon.opencelium.backend.utility.LogFileUtility;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.fge.jsonpatch.JsonPatch;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -59,7 +53,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.env.Environment;
@@ -71,7 +64,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -382,17 +374,17 @@ public class ConnectionController {
     }
 
     @PostMapping("/{connectionId}/field-binding")
-    public ResponseEntity<FieldBinding5DTO> addFieldBinding(
+    public ResponseEntity<ReferenceDTO> addFieldBinding(
             @PathVariable Long connectionId,
-            @Valid @RequestBody FieldBinding5DTO fieldBinding
+            @Valid @RequestBody ReferenceDTO fieldBinding
     ){
         return ResponseEntity.ok(connectionMngService.addFieldBinding(connectionId, fieldBinding));
     }
 
     @PutMapping("/{connectionId}/field-binding")
-    public ResponseEntity<FieldBinding5DTO> updateFieldBinding(
+    public ResponseEntity<ReferenceDTO> updateFieldBinding(
             @PathVariable Long connectionId,
-            @Valid @RequestBody FieldBinding5DTO fieldBinding
+            @Valid @RequestBody ReferenceDTO fieldBinding
     ){
         return ResponseEntity.ok(connectionMngService.updateFieldBinding(connectionId, fieldBinding));
     }

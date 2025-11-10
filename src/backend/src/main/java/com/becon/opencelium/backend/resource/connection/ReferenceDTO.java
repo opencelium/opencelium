@@ -2,7 +2,7 @@ package com.becon.opencelium.backend.resource.connection;
 
 import java.util.Map;
 
-public class FieldBinding5DTO {
+public class ReferenceDTO {
 
     private String id;
     private String title;

@@ -2,10 +2,9 @@ package com.becon.opencelium.backend.database.mongodb.service;
 
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
-import com.becon.opencelium.backend.resource.connection.FieldBinding5DTO;
+import com.becon.opencelium.backend.resource.connection.ReferenceDTO;
 import com.becon.opencelium.backend.resource.connection.MethodDTO;
 import com.becon.opencelium.backend.resource.connection.OperatorDTO;
-import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -13,8 +12,6 @@ public interface ConnectionMngService {
     boolean existsByConnectionId(Long id);
 
     ConnectionMng save(ConnectionMng connectionMng);
-
-    void updateAndBind(ConnectionMng old, ConnectionMng connectionMng);
 
     ConnectionMng saveDirectly(ConnectionMng connectionMng);
 
@@ -42,7 +39,7 @@ public interface ConnectionMngService {
 
     OperatorDTO updateOperator(Long connectionId, String flowId, OperatorDTO operator);
 
-    FieldBinding5DTO addFieldBinding(Long connectionId, FieldBinding5DTO fieldBinding);
+    ReferenceDTO addFieldBinding(Long connectionId, ReferenceDTO fieldBinding);
 
-    FieldBinding5DTO updateFieldBinding(Long connectionId, FieldBinding5DTO fieldBinding);
+    ReferenceDTO updateFieldBinding(Long connectionId, ReferenceDTO fieldBinding);
 }

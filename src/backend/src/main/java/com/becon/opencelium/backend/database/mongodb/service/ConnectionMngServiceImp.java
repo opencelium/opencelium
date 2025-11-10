@@ -5,22 +5,13 @@ import com.becon.opencelium.backend.constant.props.OpenceliumProps;
 import com.becon.opencelium.backend.database.mongodb.dao.ConnectionMngDAO;
 import com.becon.opencelium.backend.database.mongodb.entity.*;
 import com.becon.opencelium.backend.database.mongodb.repository.ConnectionMngRepository;
-import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
-import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
-import com.becon.opencelium.backend.database.mysql.service.EnhancementService;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.mapper.base.Mapper;
-import com.becon.opencelium.backend.mapper.base.MapperUpdatable;
-import com.becon.opencelium.backend.resource.PatchConnectionDetails;
-import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
-import com.becon.opencelium.backend.resource.connection.FieldBinding5DTO;
+import com.becon.opencelium.backend.resource.connection.ReferenceDTO;
 import com.becon.opencelium.backend.resource.connection.MethodDTO;
 import com.becon.opencelium.backend.resource.connection.OperatorDTO;
-import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
-import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
-import org.hibernate.dialect.lock.OptimisticEntityLockException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
@@ -29,8 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
 
 @Service
 public class ConnectionMngServiceImp implements ConnectionMngService {
@@ -38,37 +27,34 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     private final FieldBindingMngService fieldBindingMngService;
     private final MethodMngService methodMngService;
     private final OperatorMngService operatorMngService;
-    private final EnhancementService enhancementService;
-    private final MapperUpdatable<Enhancement, EnhancementDTO> enhancementMapper;
-    private final Mapper<EnhancementMng, EnhancementDTO> enhancementMngMapper;
     private final OpenceliumProps ocProps;
     private final ConnectionMngDAO connectionMngDAO;
     private final Mapper<MethodMng, MethodDTO> methodMngMapper;
     private final Mapper<OperatorMng, OperatorDTO> operatorMngMapper;
-    private final Mapper<FieldBindingMng, FieldBinding5DTO> fieldBindingMngMapper;
+    private final Mapper<ReferenceMng, ReferenceDTO> referenceMapper;
+    private final ReferenceMngService referenceMngService;
 
     public ConnectionMngServiceImp(
             ConnectionMngRepository connectionMngRepository,
             @Qualifier("fieldBindingMngServiceImp") FieldBindingMngService fieldBindingMngService,
             @Qualifier("methodMngServiceImp") MethodMngService methodMngService,
             @Qualifier("operatorMngServiceImp") OperatorMngService operatorMngService,
-            @Qualifier("enhancementServiceImp") EnhancementService enhancementService,
-            MapperUpdatable<Enhancement, EnhancementDTO> enhancementMapper,
-            Mapper<EnhancementMng, EnhancementDTO> enhancementMngMapper,
-            OpenceliumProps ocProps, ConnectionMngDAO connectionMngDAO, Mapper<MethodMng, MethodDTO> methodMngMapper, Mapper<OperatorMng, OperatorDTO> operatorMngMapper, Mapper<FieldBindingMng, FieldBinding5DTO> fieldBindingMngMapper
+            OpenceliumProps ocProps,
+            ConnectionMngDAO connectionMngDAO,
+            Mapper<MethodMng, MethodDTO> methodMngMapper,
+            Mapper<OperatorMng, OperatorDTO> operatorMngMapper,
+            Mapper<ReferenceMng, ReferenceDTO> referenceMapper, ReferenceMngService referenceMngService
     ) {
         this.connectionMngRepository = connectionMngRepository;
         this.fieldBindingMngService = fieldBindingMngService;
         this.methodMngService = methodMngService;
         this.operatorMngService = operatorMngService;
-        this.enhancementService = enhancementService;
-        this.enhancementMapper = enhancementMapper;
-        this.enhancementMngMapper = enhancementMngMapper;
         this.ocProps = ocProps;
         this.connectionMngDAO = connectionMngDAO;
         this.methodMngMapper = methodMngMapper;
         this.operatorMngMapper = operatorMngMapper;
-        this.fieldBindingMngMapper = fieldBindingMngMapper;
+        this.referenceMapper = referenceMapper;
+        this.referenceMngService = referenceMngService;
     }
 
     @Override
@@ -136,7 +122,6 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         ConnectionMng connectionMng = connectionMngRepository.findByConnectionId(connectionId)
                 .orElseThrow(() -> new ConnectionNotFoundException(connectionId));
 
-        setEnhancements(connectionMng);
         return connectionMng;
     }
 
@@ -288,26 +273,30 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     }
 
     @Override
-    public FieldBinding5DTO addFieldBinding(Long connectionId, FieldBinding5DTO fieldBinding) {
-        FieldBindingMng fb = fieldBindingMngMapper.toEntity(fieldBinding);
+    public ReferenceDTO addFieldBinding(Long connectionId, ReferenceDTO fieldBinding) {
+        ReferenceMng reference = referenceMapper.toEntity(fieldBinding);
 
-        FieldBindingMng savedFb = connectionMngDAO.pushNewFieldBinding(connectionId, fb);
+        ReferenceMng savedReference = connectionMngDAO.pushNewFieldBinding(connectionId, reference);
 
-        return fieldBindingMngMapper.toDTO(savedFb);
+        return referenceMapper.toDTO(savedReference);
     }
 
     @Override
-    public FieldBinding5DTO updateFieldBinding(Long connectionId, FieldBinding5DTO fieldBinding) {
-        if (fieldBinding.getId() == null) {
+    public ReferenceDTO updateFieldBinding(Long connectionId, ReferenceDTO referenceDTO) {
+        if (referenceDTO.getId() == null) {
             throw new GeneralServiceException(ExceptionConstant.INVALID_DATA, "FIELD_BINDING_ID_NULL");
         }
 
         connectionMngDAO.checkConnection(connectionId);
 
-        FieldBindingMng fbToSave = fieldBindingMngMapper.toEntity(fieldBinding);
-        fieldBindingMngService.save();
-    }
+        ReferenceMng referenceToUpdate = referenceMapper.toEntity(referenceDTO);
+        ReferenceMng reference = referenceMngService.getById(referenceToUpdate.getId());
+        referenceToUpdate.setRevision(reference.getRevision());
 
+        referenceMngService.save(referenceToUpdate);
+
+        return referenceMapper.toDTO(referenceToUpdate);
+    }
 
     private void deleteChildren(ConnectionMng connectionMng) {
         if (connectionMng.getFromConnector() != null) {
@@ -340,19 +329,5 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
                     .stream()
                     .filter(f -> f.getId() != null)
                     .toList());
-    }
-
-    private void setEnhancements(ConnectionMng connection) {
-        if (connection.getFieldBindings() == null || connection.getFieldBindings().isEmpty())
-            return;
-        connection.getFieldBindings().forEach(f -> {
-            if (f != null) {
-                f.setEnhancement(enhancementMngMapper.toEntity(enhancementMapper.toDTO(enhancementService.getById(f.getEnhancementId()))));
-            }
-        });
-    }
-
-    private <T> void doIfNoneMatch(List<T> olds, List<T> news, BiFunction<T, T, Boolean> f, Consumer<T> c) {
-        if (olds != null) for (T t : olds) if (news.stream().noneMatch(x -> f.apply(x, t))) c.accept(t);
     }
 }

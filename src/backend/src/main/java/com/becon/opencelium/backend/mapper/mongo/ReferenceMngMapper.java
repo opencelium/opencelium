@@ -1,8 +1,8 @@
 package com.becon.opencelium.backend.mapper.mongo;
 
-import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
+import com.becon.opencelium.backend.database.mongodb.entity.ReferenceMng;
 import com.becon.opencelium.backend.mapper.base.Mapper;
-import com.becon.opencelium.backend.resource.connection.FieldBinding5DTO;
+import com.becon.opencelium.backend.resource.connection.ReferenceDTO;
 import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
@@ -13,19 +13,19 @@ import java.util.List;
         unmappedTargetPolicy = ReportingPolicy.IGNORE
 )
 @Named("fieldBindingMngMapper")
-public interface FieldBinding5MngMapper extends Mapper<FieldBindingMng, FieldBinding5DTO>{
+public interface ReferenceMngMapper extends Mapper<ReferenceMng, ReferenceDTO>{
 
-    FieldBindingMng toEntity(FieldBinding5DTO dto);
+    ReferenceMng toEntity(ReferenceDTO dto);
 
-    FieldBinding5DTO toDTO(FieldBindingMng entity);
+    ReferenceDTO toDTO(ReferenceMng entity);
 
     @Named("toEntityAll")
-    default List<FieldBindingMng> toEntityAll(List<FieldBinding5DTO> dtos) {
+    default List<ReferenceMng> toEntityAll(List<ReferenceDTO> dtos) {
         return Mapper.super.toEntityAll(dtos);
     }
 
     @Named("toDTOAll")
-    default List<FieldBinding5DTO> toDTOAll(List<FieldBindingMng> entities) {
+    default List<ReferenceDTO> toDTOAll(List<ReferenceMng> entities) {
         return Mapper.super.toDTOAll(entities);
     }
 }

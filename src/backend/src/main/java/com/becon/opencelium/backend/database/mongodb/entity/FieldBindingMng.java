@@ -1,20 +1,23 @@
 package com.becon.opencelium.backend.database.mongodb.entity;
 
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.FieldType;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
-import java.util.Map;
+import java.util.List;
 
 @Document(collection = "field_binding")
 public class FieldBindingMng {
     @MongoId(targetType = FieldType.OBJECT_ID)
     private String id;
-    private String title;
-    private String description;
-    private String script;
-    private Map<String, String> args;
-    private String language;
+    @Indexed
+    @Field(name = "enhancement_id")
+    private Integer enhancementId;
+    private List<LinkedFieldMng> from;
+    private EnhancementMng enhancement;
+    private List<LinkedFieldMng> to;
 
     public String getId() {
         return id;
@@ -24,43 +27,35 @@ public class FieldBindingMng {
         this.id = id;
     }
 
-    public String getTitle() {
-        return title;
+    public Integer getEnhancementId() {
+        return enhancementId;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setEnhancementId(Integer enhancementId) {
+        this.enhancementId = enhancementId;
     }
 
-    public String getDescription() {
-        return description;
+    public List<LinkedFieldMng> getFrom() {
+        return from;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setFrom(List<LinkedFieldMng> from) {
+        this.from = from;
     }
 
-    public String getScript() {
-        return script;
+    public EnhancementMng getEnhancement() {
+        return enhancement;
     }
 
-    public void setScript(String script) {
-        this.script = script;
+    public void setEnhancement(EnhancementMng enhancement) {
+        this.enhancement = enhancement;
     }
 
-    public Map<String, String> getArgs() {
-        return args;
+    public List<LinkedFieldMng> getTo() {
+        return to;
     }
 
-    public void setArgs(Map<String, String> args) {
-        this.args = args;
-    }
-
-    public String getLanguage() {
-        return language;
-    }
-
-    public void setLanguage(String language) {
-        this.language = language;
+    public void setTo(List<LinkedFieldMng> to) {
+        this.to = to;
     }
 }

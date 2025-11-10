@@ -1,13 +1,10 @@
 package com.becon.opencelium.backend.database.mongodb.dao;
 
 import com.becon.opencelium.backend.constant.ExceptionConstant;
-import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
-import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
-import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
-import com.becon.opencelium.backend.database.mongodb.entity.OperatorMng;
-import com.becon.opencelium.backend.database.mongodb.service.FieldBindingMngService;
+import com.becon.opencelium.backend.database.mongodb.entity.*;
 import com.becon.opencelium.backend.database.mongodb.service.MethodMngService;
 import com.becon.opencelium.backend.database.mongodb.service.OperatorMngService;
+import com.becon.opencelium.backend.database.mongodb.service.ReferenceMngService;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -21,13 +18,13 @@ public class ConnectionMngDAOImpl implements ConnectionMngDAO {
     private final MongoTemplate mongoTemplate;
     private final MethodMngService methodMngService;
     private final OperatorMngService operatorMngService;
-    private final FieldBindingMngService fieldBindingMngService;
+    private final ReferenceMngService referenceMngService;
 
-    public ConnectionMngDAOImpl(MongoTemplate mongoTemplate, MethodMngService methodMngService, OperatorMngService operatorMngService, FieldBindingMngService fieldBindingMngService) {
+    public ConnectionMngDAOImpl(MongoTemplate mongoTemplate, MethodMngService methodMngService, OperatorMngService operatorMngService, ReferenceMngService referenceMngService) {
         this.mongoTemplate = mongoTemplate;
         this.methodMngService = methodMngService;
         this.operatorMngService = operatorMngService;
-        this.fieldBindingMngService = fieldBindingMngService;
+        this.referenceMngService = referenceMngService;
     }
 
     @Override
@@ -75,18 +72,18 @@ public class ConnectionMngDAOImpl implements ConnectionMngDAO {
     }
 
     @Override
-    public FieldBindingMng pushNewFieldBinding(Long connectionId, FieldBindingMng fb) {
+    public ReferenceMng pushNewFieldBinding(Long connectionId, ReferenceMng reference) {
         checkConnection(connectionId);
 
-        fb.setId(null);
-        FieldBindingMng saved = fieldBindingMngService.save(fb);
+        reference.setId(null);
+        ReferenceMng saved = referenceMngService.save(reference);
 
         Query flowchartQuery = new Query(Criteria
                 .where("connection_id").is(connectionId));
 
         mongoTemplate.updateFirst(
                 flowchartQuery,
-                new Update().push("fieldBindings", saved),
+                new Update().push("references", saved),
                 ConnectionMng.class
         );
 

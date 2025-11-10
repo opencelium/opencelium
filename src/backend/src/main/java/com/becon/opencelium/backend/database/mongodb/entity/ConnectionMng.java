@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.database.mongodb.entity;
 
+import jakarta.persistence.Column;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.*;
@@ -38,11 +39,29 @@ public class ConnectionMng {
     @Field(name = "flowcharts")
     private List<FlowchartMng> flowcharts;
 
+    /**
+     * on old connections
+     */
+    @Column(name = "from_connector")
+    private ConnectorMng fromConnector;
+
+    /**
+     * on old connections
+     */
+    @Column(name = "to_connector")
+    private ConnectorMng toConnector;
+
     @Field(name = "execution_plan")
     private ExecutionPlanMng executionPlan;
 
+    /**
+     * on old connections
+     */
     @DBRef
     private List<FieldBindingMng> fieldBindings; // [null, null, null]
+
+    @DBRef
+    private List<ReferenceMng> references;
 
     private Map<String, Object> ui;
 
@@ -114,5 +133,29 @@ public class ConnectionMng {
 
     public void setRevision(Integer revision) {
         this.revision = revision;
+    }
+
+    public ConnectorMng getFromConnector() {
+        return fromConnector;
+    }
+
+    public void setFromConnector(ConnectorMng fromConnector) {
+        this.fromConnector = fromConnector;
+    }
+
+    public ConnectorMng getToConnector() {
+        return toConnector;
+    }
+
+    public void setToConnector(ConnectorMng toConnector) {
+        this.toConnector = toConnector;
+    }
+
+    public List<ReferenceMng> getReferences() {
+        return references;
+    }
+
+    public void setReferences(List<ReferenceMng> references) {
+        this.references = references;
     }
 }
