@@ -16,7 +16,7 @@
 
 package com.becon.opencelium.backend.database.mongodb.entity;
 
-import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.FieldType;
@@ -35,6 +35,8 @@ public class MethodMng {
     private RequestMng request;
     private ResponseMng response;
 
+    @Version
+    private Integer revision;
 
     public MethodMng() {
     }
@@ -101,6 +103,14 @@ public class MethodMng {
 
     public void setDataAggregator(Integer dataAggregator) {
         this.dataAggregator = dataAggregator;
+    }
+
+    public Integer getRevision() {
+        return revision;
+    }
+
+    public void setRevision(Integer revision) {
+        this.revision = revision;
     }
 
     @Override

@@ -37,10 +37,7 @@ import com.becon.opencelium.backend.resource.ApiDataResource;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.application.ResultDTO;
-import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
-import com.becon.opencelium.backend.resource.connection.ConnectionResource;
-import com.becon.opencelium.backend.resource.connection.MethodDTO;
-import com.becon.opencelium.backend.resource.connection.OperatorDTO;
+import com.becon.opencelium.backend.resource.connection.*;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
 import com.becon.opencelium.backend.resource.connection.old.ConnectionOldDTO;
@@ -264,29 +261,6 @@ public class ConnectionController {
         return ResponseEntity.created(uri).body(connectionOldDTOMapper.toDTO(dto));
     }
 
-    @Operation(summary = "Modifies a connection by provided connection ID and accepting connection data in request body.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Connection has been successfully modified",
-                    content = @Content(schema = @Schema(implementation = ConnectionOldDTO.class))),
-            @ApiResponse(responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-            @ApiResponse(responseCode = "500",
-                    description = "Internal Error",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-    })
-    @PutMapping(path = "/{connectionId}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> update(@PathVariable Long connectionId, @RequestBody ConnectionOldDTO connectionOldDTO) throws Exception {
-        ConnectionDTO connectionDTO = connectionOldDTOMapper.toEntity(connectionOldDTO);
-        Connection connection = connectionMapper.toEntity(connectionDTO);
-        ConnectionMng connectionMng = connectionMngMapper.toEntity(connectionDTO);
-        connection.setId(connectionId);
-
-        connectionService.update(connection, connectionMng);
-        return ResponseEntity.ok(connectionOldDTOMapper.toDTO(connectionService.getFullConnection(connectionId)));
-    }
-
     @Operation(summary = "Tests connection execution by temporarily creating new connection and scheduler.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
@@ -371,23 +345,56 @@ public class ConnectionController {
         return ResponseEntity.ok(ResultDTO.of(id));
     }
 
-    @Operation(summary = "Undoes the last update and returns undid connection")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Connection has been successfully undid",
-                    content = @Content(schema = @Schema(implementation = ConnectionDTO.class))),
-            @ApiResponse(responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-            @ApiResponse(responseCode = "500",
-                    description = "Internal Error",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
-    })
-    @GetMapping(path = "/{connectionId}/undo")
-    public ResponseEntity<?> undo(@PathVariable Long connectionId) {
-        connectionService.undo(connectionId);
-        ConnectionDTO connectionDTO = connectionService.getFullConnection(connectionId);
-        return ResponseEntity.ok(connectionDTO);
+    @PostMapping("/{connectionId}/flowchart/{flowId}/method")
+    public ResponseEntity<MethodDTO> addMethod(
+            @PathVariable Long connectionId,
+            @PathVariable String flowId,
+            @Valid @RequestBody MethodDTO method
+    ){
+        return ResponseEntity.ok(connectionMngService.addMethod(connectionId, flowId, method));
+    }
+
+    @PutMapping("/{connectionId}/flowchart/{flowId}/method")
+    public ResponseEntity<MethodDTO> updateMethod(
+            @PathVariable Long connectionId,
+            @PathVariable String flowId,
+            @Valid @RequestBody MethodDTO method
+    ){
+        return ResponseEntity.ok(connectionMngService.updateMethod(connectionId, flowId, method));
+    }
+
+    @PostMapping("/{connectionId}/flowchart/{flowId}/operator")
+    public ResponseEntity<OperatorDTO> addOperator(
+            @PathVariable Long connectionId,
+            @PathVariable String flowId,
+            @Valid @RequestBody OperatorDTO operator
+    ){
+        return ResponseEntity.ok(connectionMngService.addOperator(connectionId, flowId, operator));
+    }
+
+    @PutMapping("/{connectionId}/flowchart/{flowId}/operator")
+    public ResponseEntity<OperatorDTO> updateOperator(
+            @PathVariable Long connectionId,
+            @PathVariable String flowId,
+            @Valid @RequestBody OperatorDTO operator
+    ){
+        return ResponseEntity.ok(connectionMngService.updateOperator(connectionId, flowId, operator));
+    }
+
+    @PostMapping("/{connectionId}/field-binding")
+    public ResponseEntity<FieldBinding5DTO> addFieldBinding(
+            @PathVariable Long connectionId,
+            @Valid @RequestBody FieldBinding5DTO fieldBinding
+    ){
+        return ResponseEntity.ok(connectionMngService.addFieldBinding(connectionId, fieldBinding));
+    }
+
+    @PutMapping("/{connectionId}/field-binding")
+    public ResponseEntity<FieldBinding5DTO> updateFieldBinding(
+            @PathVariable Long connectionId,
+            @Valid @RequestBody FieldBinding5DTO fieldBinding
+    ){
+        return ResponseEntity.ok(connectionMngService.updateFieldBinding(connectionId, fieldBinding));
     }
 
     @Operation(summary = "Validates a connection for correctly constructed structure")

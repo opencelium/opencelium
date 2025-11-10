@@ -19,14 +19,11 @@ package com.becon.opencelium.backend.database.mysql.service;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
-import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
 import com.becon.opencelium.backend.resource.partialconnection.FlowchartCreateRequest;
 import com.becon.opencelium.backend.resource.partialconnection.NewConnectionCreateRequest;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
-import com.github.fge.jsonpatch.JsonPatch;
-import jakarta.validation.Valid;
 
 import java.io.IOException;
 import java.util.List;
@@ -53,11 +50,7 @@ public interface ConnectionService {
 
     List<Connection> findAllByNameContains(String name);
 
-    void update(Connection connection, ConnectionMng connectionMng);
-
     Connection getById(Long connectionId);
-
-    Long createEmptyConnection();
 
     List<Connection> getAllConnectionsNotContains(List<Long> ids);
 

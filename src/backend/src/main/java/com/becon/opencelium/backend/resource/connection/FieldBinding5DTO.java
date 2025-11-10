@@ -1,14 +1,9 @@
-package com.becon.opencelium.backend.database.mongodb.entity;
-
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.FieldType;
-import org.springframework.data.mongodb.core.mapping.MongoId;
+package com.becon.opencelium.backend.resource.connection;
 
 import java.util.Map;
 
-@Document(collection = "field_binding")
-public class FieldBindingMng {
-    @MongoId(targetType = FieldType.OBJECT_ID)
+public class FieldBinding5DTO {
+
     private String id;
     private String title;
     private String description;

@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.database.mongodb.entity;
 
+import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.FieldType;
 import org.springframework.data.mongodb.core.mapping.MongoId;
@@ -31,6 +32,9 @@ public class OperatorMng {
     private ConditionMng condition;
     private String uiId;
     private String expression;
+
+    @Version
+    private Integer revision;
 
     public OperatorMng() {
     }
@@ -88,5 +92,13 @@ public class OperatorMng {
 
     public void setExpression(String expression) {
         this.expression = expression;
+    }
+
+    public Integer getRevision() {
+        return revision;
+    }
+
+    public void setRevision(Integer revision) {
+        this.revision = revision;
     }
 }

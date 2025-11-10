@@ -35,18 +35,6 @@ public class ConnectionMng {
     @Field(name = "connection_id")
     private Long connectionId; // id generated in mariadb.
 
-    /**
-     * In old connections
-     */
-    @Field(name = "from_connector")
-    private ConnectorMng fromConnector;
-
-    /**
-     * In old connections
-     */
-    @Field(name = "to_connector")
-    private ConnectorMng toConnector;
-
     @Field(name = "flowcharts")
     private List<FlowchartMng> flowcharts;
 
@@ -102,22 +90,6 @@ public class ConnectionMng {
 
     public void setUi(Map<String, Object> ui) {
         this.ui = ui;
-    }
-
-    public ConnectorMng getFromConnector() {
-        return fromConnector;
-    }
-
-    public void setFromConnector(ConnectorMng fromConnector) {
-        this.fromConnector = fromConnector;
-    }
-
-    public ConnectorMng getToConnector() {
-        return toConnector;
-    }
-
-    public void setToConnector(ConnectorMng toConnector) {
-        this.toConnector = toConnector;
     }
 
     public List<FlowchartMng> getFlowcharts() {

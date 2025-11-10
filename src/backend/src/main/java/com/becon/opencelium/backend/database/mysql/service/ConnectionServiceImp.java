@@ -78,9 +78,7 @@ public class ConnectionServiceImp implements ConnectionService {
     private final Mapper<Connector, ConnectorDTO> connectorMapper;
     private final Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper;
     private final Mapper<Connection, ConnectionDTO> connectionMapper;
-    private final ConnectionUpdateTracker updateTracker;
     private final MaskingRuleRepository ruleRepository;
-    private final PatchHelper patchHelper;
     private final WebhookService webhookService;
     private final OpenceliumProps ocProps;
     private final EntityUpdater<ConnectionMng> connectionMngEntityUpdater;
@@ -98,11 +96,9 @@ public class ConnectionServiceImp implements ConnectionService {
             @Qualifier("connectionHistoryServiceImp") ConnectionHistoryService connectionHistoryService,
             @Qualifier("schedulerServiceImp") SchedulerService schedulerService,
             @Qualifier("webhookServiceImp") WebhookService webhookService,
-            PatchHelper patchHelper,
             Mapper<Connector, ConnectorDTO> connectorMapper,
             Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper,
             Mapper<Connection, ConnectionDTO> connectionMapper,
-            ConnectionUpdateTracker updateTracker,
             MaskingRuleRepository ruleRepository,
             EntityVersionManager entityVersionManager,
             OpenceliumProps ocProps, MysqlBackupService mysqlBackupService, MongoDbBackupService mongoDbBackupService
@@ -113,11 +109,9 @@ public class ConnectionServiceImp implements ConnectionService {
         this.connectionMngService = connectionMngService;
         this.enhancementService = enhancementService;
         this.categoryService = categoryService;
-        this.patchHelper = patchHelper;
         this.connectorMapper = connectorMapper;
         this.connectionMngMapper = connectionMngMapper;
         this.connectionMapper = connectionMapper;
-        this.updateTracker = updateTracker;
         this.connectionHistoryService = connectionHistoryService;
         this.schedulerService = schedulerService;
         this.webhookService = webhookService;
@@ -175,78 +169,6 @@ public class ConnectionServiceImp implements ConnectionService {
         ConnectionMng savedMng = connectionMngService.save(connectionMng);
         connectionHistoryService.makeHistoryAndSave(savedConnection, null, Action.CREATE);
         return savedMng;
-    }
-
-    @Override
-    @Transactional
-    public void update(Connection connection, ConnectionMng connectionMng) {
-        Connection sCon = getById(connection.getId());
-
-        if (!Objects.equals(sCon.getTitle(), connection.getTitle())) {
-            if (existsByName(connection.getTitle())) {
-                throw new RuntimeException("TITLE_HAS_ALREADY_TAKEN");
-            }
-        }
-
-        ConnectionMng oldMng = connectionMngService.getByConnectionId(connection.getId());
-        if (connectionMng.getId() == null || !oldMng.getId().equals(connectionMng.getId())) {
-            connectionMng.setId(oldMng.getId());
-        }
-
-        //checking existence of connectors
-        Connector from = connectorService.getById(connection.getToConnector());
-        Connector to = connectorService.getById(connection.getFromConnector());
-
-        connectionMng.getFromConnector().setTitle(from.getTitle());
-        connectionMng.getToConnector().setTitle(to.getTitle());
-
-        connectionMng.getFromConnector().setFlowId(oldMng.getFromConnector().getFlowId());
-        connectionMng.getToConnector().setFlowId(oldMng.getToConnector().getFlowId());
-
-        //checking existence of category
-        if (connection.getCategoryId() != null && !connection.getCategoryId().equals(sCon.getCategoryId())) {
-            categoryService.get(connection.getCategoryId());
-        }
-
-        List<Enhancement> enhancements = connection.getEnhancements();
-        connection.setEnhancements(null);
-
-        List<FieldBindingMng> newFieldBindings = getNewEnhancements(oldMng, connectionMng);
-        for (FieldBindingMng fb : newFieldBindings) {
-            if (fb.getEnhancementId() != null) {
-                enhancements.stream().filter(e -> fb.getEnhancementId().equals(e.getId())).forEach(en -> en.setId(null));
-            }
-        }
-        List<FieldBindingMng> fieldBindingsToDelete = getEnhancementsToDelete(oldMng, connectionMng);
-        fieldBindingsToDelete.forEach(f -> enhancementService.deleteById(f.getEnhancementId()));
-
-        // there is not ocVersion field on ConnectionOldDTO, set connection's version with current system version
-        connection.setOcVersion(ocProps.getVersion());
-
-        Connection savedConnection = connectionRepository.save(connection);
-        if (enhancements != null && !enhancements.isEmpty()) {
-            enhancements.forEach(enhancement -> enhancement.setConnection(savedConnection));
-            enhancementService.saveAll(enhancements);
-            for (int i = 0; i < connectionMng.getFieldBindings().size(); i++) {
-                connectionMng.getFieldBindings().get(i).setEnhancementId(enhancements.get(i).getId());
-            }
-        }
-
-        connectionMng.setConnectionId(savedConnection.getId());
-        connectionMngService.updateAndBind(oldMng, connectionMng);
-    }
-
-    @Override
-    public Long createEmptyConnection() {
-        Connection connection = new Connection();
-        connection.setOcVersion(ocProps.getVersion());
-        Connection saved = connectionRepository.save(connection);
-        ConnectionMng connectionMng = new ConnectionMng();
-        connectionMng.setConnectionId(saved.getId());
-        connectionMng.setVersion(ocProps.getVersion());
-        connectionMngService.saveDirectly(connectionMng);
-        connectionHistoryService.makeHistoryAndSave(saved, null, Action.CREATE);
-        return saved.getId();
     }
 
     @Override

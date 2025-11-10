@@ -1,20 +1,25 @@
 package com.becon.opencelium.backend.database.mongodb.service;
 
+import com.becon.opencelium.backend.constant.ExceptionConstant;
 import com.becon.opencelium.backend.constant.props.OpenceliumProps;
-import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
-import com.becon.opencelium.backend.database.mongodb.entity.EnhancementMng;
-import com.becon.opencelium.backend.database.mongodb.entity.FlowchartMng;
+import com.becon.opencelium.backend.database.mongodb.dao.ConnectionMngDAO;
+import com.becon.opencelium.backend.database.mongodb.entity.*;
 import com.becon.opencelium.backend.database.mongodb.repository.ConnectionMngRepository;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.database.mysql.service.EnhancementService;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
+import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.mapper.base.MapperUpdatable;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
+import com.becon.opencelium.backend.resource.connection.FieldBinding5DTO;
+import com.becon.opencelium.backend.resource.connection.MethodDTO;
+import com.becon.opencelium.backend.resource.connection.OperatorDTO;
 import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
+import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import org.hibernate.dialect.lock.OptimisticEntityLockException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -37,6 +42,10 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     private final MapperUpdatable<Enhancement, EnhancementDTO> enhancementMapper;
     private final Mapper<EnhancementMng, EnhancementDTO> enhancementMngMapper;
     private final OpenceliumProps ocProps;
+    private final ConnectionMngDAO connectionMngDAO;
+    private final Mapper<MethodMng, MethodDTO> methodMngMapper;
+    private final Mapper<OperatorMng, OperatorDTO> operatorMngMapper;
+    private final Mapper<FieldBindingMng, FieldBinding5DTO> fieldBindingMngMapper;
 
     public ConnectionMngServiceImp(
             ConnectionMngRepository connectionMngRepository,
@@ -46,7 +55,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
             @Qualifier("enhancementServiceImp") EnhancementService enhancementService,
             MapperUpdatable<Enhancement, EnhancementDTO> enhancementMapper,
             Mapper<EnhancementMng, EnhancementDTO> enhancementMngMapper,
-            OpenceliumProps ocProps
+            OpenceliumProps ocProps, ConnectionMngDAO connectionMngDAO, Mapper<MethodMng, MethodDTO> methodMngMapper, Mapper<OperatorMng, OperatorDTO> operatorMngMapper, Mapper<FieldBindingMng, FieldBinding5DTO> fieldBindingMngMapper
     ) {
         this.connectionMngRepository = connectionMngRepository;
         this.fieldBindingMngService = fieldBindingMngService;
@@ -56,6 +65,10 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         this.enhancementMapper = enhancementMapper;
         this.enhancementMngMapper = enhancementMngMapper;
         this.ocProps = ocProps;
+        this.connectionMngDAO = connectionMngDAO;
+        this.methodMngMapper = methodMngMapper;
+        this.operatorMngMapper = operatorMngMapper;
+        this.fieldBindingMngMapper = fieldBindingMngMapper;
     }
 
     @Override
@@ -117,26 +130,6 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
 
         return connectionMngRepository.save(connectionMng);
     }
-
-    @Override
-    public void updateAndBind(ConnectionMng old, ConnectionMng connectionMng) {
-        if (Objects.isNull(connectionMng)) return;
-
-        try {
-            updateWithoutRollback(old, connectionMng);
-        } catch (Exception e) {
-            updateWithoutRollback(connectionMng, old);
-            throw e;
-        }
-        try {
-            fieldBindingMngService.bindAfterUpdate(connectionMng);
-        } catch (Exception e) {
-            fieldBindingMngService.bindAfterUpdate(old);
-            updateWithoutRollback(connectionMng, old);
-            throw e;
-        }
-    }
-
 
     @Override
     public ConnectionMng getByConnectionId(Long connectionId) {
@@ -232,87 +225,89 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         } catch (OptimisticLockingFailureException e) {
             throw new RuntimeException(e);
         }
+
+        return flowchartMng.getFlowId();
     }
 
-    private void updateWithoutRollback(ConnectionMng old, ConnectionMng connectionMng) {
-        if (connectionMng.getFromConnector() != null) {
-            if (connectionMng.getFromConnector().getMethods() != null) {
-                methodMngService.saveAll(connectionMng.getFromConnector().getMethods());
-                doIfNoneMatch(
-                        old.getFromConnector().getMethods(),
-                        connectionMng.getFromConnector().getMethods(),
-                        (m1, m2) -> m1.getId().equals(m2.getId()),
-                        methodMngService::delete
-                );
-            } else if (old.getFromConnector() != null && old.getFromConnector().getMethods() != null) {
-                methodMngService.deleteAll(old.getFromConnector().getMethods());
-            }
+    @Override
+    public MethodDTO addMethod(Long connectionId, String flowId, MethodDTO method) {
+        MethodMng methodToSave = methodMngMapper.toEntity(method);
 
-            if (connectionMng.getFromConnector().getOperators() != null) {
-                operatorMngService.saveAll(connectionMng.getFromConnector().getOperators());
-                doIfNoneMatch(
-                        old.getFromConnector().getOperators(),
-                        connectionMng.getFromConnector().getOperators(),
-                        (o1, o2) -> o1.getId().equals(o2.getId()),
-                        operatorMngService::delete
-                );
-            } else if (old.getFromConnector() != null && old.getFromConnector().getOperators() != null) {
-                operatorMngService.deleteAll(old.getFromConnector().getOperators());
-            }
-        } else if (old.getFromConnector() != null) {
-            if (old.getFromConnector().getMethods() != null) {
-                methodMngService.deleteAll(old.getFromConnector().getMethods());
-            }
-            if (old.getFromConnector().getOperators() != null) {
-                operatorMngService.deleteAll(old.getFromConnector().getOperators());
-            }
-        }
+        MethodMng savedMethod = connectionMngDAO.pushNewMethod(connectionId, flowId, methodToSave);
 
-        if (connectionMng.getToConnector() != null) {
-            if (connectionMng.getToConnector().getMethods() != null) {
-                methodMngService.saveAll(connectionMng.getToConnector().getMethods());
-                doIfNoneMatch(
-                        old.getToConnector().getMethods(),
-                        connectionMng.getToConnector().getMethods(),
-                        (m1, m2) -> m1.getId().equals(m2.getId()),
-                        methodMngService::delete
-                );
-            } else if (old.getToConnector() != null && old.getToConnector().getMethods() != null) {
-                methodMngService.deleteAll(old.getToConnector().getMethods());
-            }
-            if (connectionMng.getToConnector().getOperators() != null) {
-                operatorMngService.saveAll(connectionMng.getToConnector().getOperators());
-                doIfNoneMatch(
-                        old.getToConnector().getOperators(),
-                        connectionMng.getToConnector().getOperators(),
-                        (o1, o2) -> o1.getId().equals(o2.getId()),
-                        operatorMngService::delete
-                );
-            } else if (old.getToConnector() != null && old.getToConnector().getOperators() != null) {
-                operatorMngService.deleteAll(old.getToConnector().getOperators());
-            }
-        } else if (old.getToConnector() != null) {
-            if (old.getToConnector().getMethods() != null) {
-                methodMngService.deleteAll(old.getToConnector().getMethods());
-            }
-            if (old.getToConnector().getOperators() != null) {
-                operatorMngService.deleteAll(old.getToConnector().getOperators());
-            }
-        }
-
-        if (connectionMng.getFieldBindings() != null && !connectionMng.getFieldBindings().isEmpty()) {
-            fieldBindingMngService.saveAll(connectionMng.getFieldBindings());
-            doIfNoneMatch(
-                    old.getFieldBindings(),
-                    connectionMng.getFieldBindings(),
-                    (f1, f2) -> f1.getId().equals(f2.getId()),
-                    fieldBindingMngService::delete
-            );
-        } else if (old.getFieldBindings() != null) {
-            fieldBindingMngService.deleteAll(old.getFieldBindings());
-        }
-        connectionMngRepository.save(connectionMng);
+        return methodMngMapper.toDTO(savedMethod);
     }
+
+    @Override
+    public MethodDTO updateMethod(Long connectionId, String flowId, MethodDTO method) {
+        if (method.getId() == null) {
+            throw new GeneralServiceException(ExceptionConstant.INVALID_DATA, "METHOD_ID_NULL");
+        }
+
+        connectionMngDAO.checkConnection(connectionId);
+
+        connectionMngDAO.checkFlowchart(connectionId, flowId);
+
+        MethodMng methodToUpdate = methodMngMapper.toEntity(method);
+
+        MethodMng oldMethod = methodMngService.getById(method.getId());
+        methodToUpdate.setRevision(oldMethod.getRevision());
+
+        methodMngService.save(methodToUpdate);
+
+        return methodMngMapper.toDTO(methodToUpdate);
+    }
+
+    @Override
+    public OperatorDTO addOperator(Long connectionId, String flowId, OperatorDTO operator) {
+        OperatorMng operatorToSave = operatorMngMapper.toEntity(operator);
+
+        OperatorMng saved = connectionMngDAO.pushNewOperator(connectionId, flowId, operatorToSave);
+
+        return operatorMngMapper.toDTO(saved);
+    }
+
+    @Override
+    public OperatorDTO updateOperator(Long connectionId, String flowId, OperatorDTO operator) {
+        if (operator.getId() == null) {
+            throw new GeneralServiceException(ExceptionConstant.INVALID_DATA, "OPERATOR_ID_NULL");
+        }
+
+        connectionMngDAO.checkConnection(connectionId);
+
+        connectionMngDAO.checkFlowchart(connectionId, flowId);
+
+        OperatorMng operatorToUpdate = operatorMngMapper.toEntity(operator);
+
+        OperatorMng oldOperator = operatorMngService.getById(operator.getId());
+        operatorToUpdate.setRevision(oldOperator.getRevision());
+
+        operatorMngService.save(operatorToUpdate);
+
+        return operatorMngMapper.toDTO(operatorToUpdate);
+    }
+
+    @Override
+    public FieldBinding5DTO addFieldBinding(Long connectionId, FieldBinding5DTO fieldBinding) {
+        FieldBindingMng fb = fieldBindingMngMapper.toEntity(fieldBinding);
+
+        FieldBindingMng savedFb = connectionMngDAO.pushNewFieldBinding(connectionId, fb);
+
+        return fieldBindingMngMapper.toDTO(savedFb);
+    }
+
+    @Override
+    public FieldBinding5DTO updateFieldBinding(Long connectionId, FieldBinding5DTO fieldBinding) {
+        if (fieldBinding.getId() == null) {
+            throw new GeneralServiceException(ExceptionConstant.INVALID_DATA, "FIELD_BINDING_ID_NULL");
+        }
+
+        connectionMngDAO.checkConnection(connectionId);
+
+        FieldBindingMng fbToSave = fieldBindingMngMapper.toEntity(fieldBinding);
+        fieldBindingMngService.save();
+    }
+
 
     private void deleteChildren(ConnectionMng connectionMng) {
         if (connectionMng.getFromConnector() != null) {
