@@ -34,6 +34,7 @@ import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
+import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.utility.crypto.Encoder;
 import org.apache.commons.lang3.StringUtils;
@@ -42,6 +43,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -175,6 +177,17 @@ public class ConnectorServiceImp implements ConnectorService {
     @Override
     public Boolean existsMasterPassword() {
         return StringUtils.isNotBlank(connectorProps.getMasterPassword());
+    }
+
+    @Override
+    public List<Connector> findByIds(IdentifiersDTO<Integer> ids) {
+        if (ids == null || CollectionUtils.isEmpty(ids.getIdentifiers())) {
+            return Collections.emptyList();
+        }
+
+        List<Connector> connectors = connectorRepository.findAllById(ids.getIdentifiers());
+        connectors.forEach(this::decrypt);
+        return connectors;
     }
 
     @Override
