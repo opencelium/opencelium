@@ -6,13 +6,16 @@ import com.becon.opencelium.backend.resource.connection.OperatorDTO;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.Named;
+import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
 
 
 @org.mapstruct.Mapper(
         componentModel = "spring",
-        uses = ConditionMngMapper.class
+        uses = ConditionMngMapper.class,
+        unmappedSourcePolicy = ReportingPolicy.IGNORE,
+        unmappedTargetPolicy = ReportingPolicy.IGNORE
 )
 @Named("operatorMngMapper")
 public interface OperatorMngMapper extends Mapper<OperatorMng, OperatorDTO> {

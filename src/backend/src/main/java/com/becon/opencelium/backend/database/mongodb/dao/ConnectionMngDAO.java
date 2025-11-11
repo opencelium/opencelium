@@ -17,5 +17,11 @@ public interface ConnectionMngDAO {
 
     OperatorMng pushNewOperator(Long connectionId, String flowId, OperatorMng operatorMng);
 
-    ReferenceMng pushNewFieldBinding(Long connectionId, ReferenceMng fb);
+    ReferenceMng pushNewReference(Long connectionId, ReferenceMng fb);
+
+    void removeReference(Long connectionId, String fbId);
+
+    void removeOperator(Long connectionId, String flowId, String operatorId);
+
+    void removeMethod(Long connectionId, String flowId, String methodId);
 }

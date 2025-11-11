@@ -22,4 +22,9 @@ public class ReferenceMngServiceImpl implements ReferenceMngService {
         return referenceMngRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("REFERENCE_NOT_FOUND"));
     }
+
+    @Override
+    public void delete(String id) {
+        referenceMngRepository.deleteById(id);
+    }
 }

@@ -12,6 +12,8 @@ import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.connection.ReferenceDTO;
 import com.becon.opencelium.backend.resource.connection.MethodDTO;
 import com.becon.opencelium.backend.resource.connection.OperatorDTO;
+import com.becon.opencelium.backend.utility.patch.PatchHelper;
+import com.github.fge.jsonpatch.JsonPatch;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     private final Mapper<OperatorMng, OperatorDTO> operatorMngMapper;
     private final Mapper<ReferenceMng, ReferenceDTO> referenceMapper;
     private final ReferenceMngService referenceMngService;
+    private final PatchHelper patchHelper;
 
     public ConnectionMngServiceImp(
             ConnectionMngRepository connectionMngRepository,
@@ -43,7 +46,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
             ConnectionMngDAO connectionMngDAO,
             Mapper<MethodMng, MethodDTO> methodMngMapper,
             Mapper<OperatorMng, OperatorDTO> operatorMngMapper,
-            Mapper<ReferenceMng, ReferenceDTO> referenceMapper, ReferenceMngService referenceMngService
+            Mapper<ReferenceMng, ReferenceDTO> referenceMapper, ReferenceMngService referenceMngService, PatchHelper patchHelper
     ) {
         this.connectionMngRepository = connectionMngRepository;
         this.fieldBindingMngService = fieldBindingMngService;
@@ -55,6 +58,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         this.operatorMngMapper = operatorMngMapper;
         this.referenceMapper = referenceMapper;
         this.referenceMngService = referenceMngService;
+        this.patchHelper = patchHelper;
     }
 
     @Override
@@ -244,6 +248,25 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     }
 
     @Override
+    public MethodDTO updateMethod(Long connectionId, String flowId, String methodId, JsonPatch patch) {
+        connectionMngDAO.checkConnection(connectionId);
+
+        connectionMngDAO.checkFlowchart(connectionId, flowId);
+
+        MethodMng method = methodMngService.getById(methodId);
+        MethodMng patched = patchHelper.patch(patch, method, MethodMng.class);
+
+        methodMngService.save(patched);
+
+        return methodMngMapper.toDTO(patched);
+    }
+
+    @Override
+    public void deleteMethod(Long connectionId, String flowId, String methodId) {
+        connectionMngDAO.removeMethod(connectionId, flowId, methodId);
+    }
+
+    @Override
     public OperatorDTO addOperator(Long connectionId, String flowId, OperatorDTO operator) {
         OperatorMng operatorToSave = operatorMngMapper.toEntity(operator);
 
@@ -273,10 +296,29 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     }
 
     @Override
+    public OperatorDTO updateOperator(Long connectionId, String flowId, String operatorId, JsonPatch patch) {
+        connectionMngDAO.checkConnection(connectionId);
+
+        connectionMngDAO.checkFlowchart(connectionId, flowId);
+
+        OperatorMng operator = operatorMngService.getById(operatorId);
+        OperatorMng patched = patchHelper.patch(patch, operator, OperatorMng.class);
+
+        operatorMngService.save(patched);
+
+        return operatorMngMapper.toDTO(patched);
+    }
+
+    @Override
+    public void deleteOperator(Long connectionId, String flowId, String operatorId) {
+        connectionMngDAO.removeOperator(connectionId, flowId, operatorId);
+    }
+
+    @Override
     public ReferenceDTO addFieldBinding(Long connectionId, ReferenceDTO fieldBinding) {
         ReferenceMng reference = referenceMapper.toEntity(fieldBinding);
 
-        ReferenceMng savedReference = connectionMngDAO.pushNewFieldBinding(connectionId, reference);
+        ReferenceMng savedReference = connectionMngDAO.pushNewReference(connectionId, reference);
 
         return referenceMapper.toDTO(savedReference);
     }
@@ -296,6 +338,23 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         referenceMngService.save(referenceToUpdate);
 
         return referenceMapper.toDTO(referenceToUpdate);
+    }
+
+    @Override
+    public ReferenceDTO updateFieldBinding(Long connectionId, String fbId, JsonPatch patch) {
+        connectionMngDAO.checkConnection(connectionId);
+
+        ReferenceMng referenceMng = referenceMngService.getById(fbId);
+        ReferenceMng patched = patchHelper.patch(patch, referenceMng, ReferenceMng.class);
+
+        referenceMngService.save(patched);
+
+        return referenceMapper.toDTO(patched);
+    }
+
+    @Override
+    public void deleteFieldBinding(Long connectionId, String fbId) {
+        connectionMngDAO.removeReference(connectionId, fbId);
     }
 
     private void deleteChildren(ConnectionMng connectionMng) {

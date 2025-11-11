@@ -6,6 +6,7 @@ import com.becon.opencelium.backend.database.mongodb.service.MethodMngService;
 import com.becon.opencelium.backend.database.mongodb.service.OperatorMngService;
 import com.becon.opencelium.backend.database.mongodb.service.ReferenceMngService;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
+import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -72,7 +73,7 @@ public class ConnectionMngDAOImpl implements ConnectionMngDAO {
     }
 
     @Override
-    public ReferenceMng pushNewFieldBinding(Long connectionId, ReferenceMng reference) {
+    public ReferenceMng pushNewReference(Long connectionId, ReferenceMng reference) {
         checkConnection(connectionId);
 
         reference.setId(null);
@@ -88,6 +89,54 @@ public class ConnectionMngDAOImpl implements ConnectionMngDAO {
         );
 
         return saved;
+    }
+
+    @Override
+    public void removeReference(Long connectionId, String fbId) {
+
+        Query query = new Query(Criteria
+                .where("connection_id").is(connectionId));
+
+        Update update = new Update()
+                .pull("references", Query.query(Criteria.where("$id").is(new ObjectId(fbId))));
+
+        mongoTemplate.updateFirst(query, update, ConnectionMng.class);
+
+        referenceMngService.delete(fbId);
+    }
+
+    @Override
+    public void removeOperator(Long connectionId, String flowId, String operatorId) {
+        checkConnection(connectionId);
+
+        Query query = new Query(Criteria
+                .where("connection_id").is(connectionId)
+                .and("flowcharts.flowId").is(flowId));
+
+        Update update = new Update()
+                .pull("flowcharts.$.operators",
+                        Query.query(Criteria.where("$id").is(new ObjectId(operatorId))));
+
+        mongoTemplate.updateFirst(query, update, ConnectionMng.class);
+
+        operatorMngService.delete(operatorId);
+    }
+
+    @Override
+    public void removeMethod(Long connectionId, String flowId, String methodId) {
+        checkConnection(connectionId);
+
+        Query query = new Query(Criteria
+                .where("connection_id").is(connectionId)
+                .and("flowcharts.flowId").is(flowId));
+
+        Update update = new Update()
+                .pull("flowcharts.$.methods",
+                        Query.query(Criteria.where("$id").is(new ObjectId(methodId))));
+
+        mongoTemplate.updateFirst(query, update, ConnectionMng.class);
+
+        operatorMngService.delete(methodId);
     }
 
     @Override

@@ -110,6 +110,11 @@ public class OperatorMngServiceImp implements OperatorMngService {
         }
     }
 
+    @Override
+    public void delete(String operatorId) {
+        operatorMngRepository.deleteById(operatorId);
+    }
+
     private void validateExpression(OperatorMng operator) {
         validateExpression(operator.getExpression(), operator.getType());
     }

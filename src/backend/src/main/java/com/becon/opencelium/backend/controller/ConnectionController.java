@@ -45,6 +45,7 @@ import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.fge.jsonpatch.JsonPatch;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -62,15 +63,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -355,6 +348,26 @@ public class ConnectionController {
         return ResponseEntity.ok(connectionMngService.updateMethod(connectionId, flowId, method));
     }
 
+    @PatchMapping("/{connectionId}/flowchart/{flowId}/method/{methodId}")
+    public ResponseEntity<MethodDTO> updateMethodPatch(
+            @PathVariable Long connectionId,
+            @PathVariable String flowId,
+            @PathVariable String methodId,
+            @RequestBody JsonPatch patch
+    ){
+        return ResponseEntity.ok(connectionMngService.updateMethod(connectionId, flowId, methodId, patch));
+    }
+
+    @DeleteMapping("/{connectionId}/flowchart/{flowId}/method/{methodId}")
+    public ResponseEntity<?> deleteMethod(
+            @PathVariable Long connectionId,
+            @PathVariable String flowId,
+            @PathVariable String methodId
+    ){
+        connectionMngService.deleteMethod(connectionId, flowId, methodId);
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/{connectionId}/flowchart/{flowId}/operator")
     public ResponseEntity<OperatorDTO> addOperator(
             @PathVariable Long connectionId,
@@ -373,6 +386,26 @@ public class ConnectionController {
         return ResponseEntity.ok(connectionMngService.updateOperator(connectionId, flowId, operator));
     }
 
+    @PatchMapping("/{connectionId}/flowchart/{flowId}/operator/{operatorId}")
+    public ResponseEntity<OperatorDTO> updateOperatorPatch(
+            @PathVariable Long connectionId,
+            @PathVariable String flowId,
+            @PathVariable String operatorId,
+            @RequestBody JsonPatch patch
+    ){
+        return ResponseEntity.ok(connectionMngService.updateOperator(connectionId, flowId, operatorId, patch));
+    }
+
+    @DeleteMapping("/{connectionId}/flowchart/{flowId}/operator/{operatorId}")
+    public ResponseEntity<?> deleteOperator(
+            @PathVariable Long connectionId,
+            @PathVariable String flowId,
+            @PathVariable String operatorId
+    ){
+        connectionMngService.deleteOperator(connectionId, flowId, operatorId);
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/{connectionId}/field-binding")
     public ResponseEntity<ReferenceDTO> addFieldBinding(
             @PathVariable Long connectionId,
@@ -387,6 +420,24 @@ public class ConnectionController {
             @Valid @RequestBody ReferenceDTO fieldBinding
     ){
         return ResponseEntity.ok(connectionMngService.updateFieldBinding(connectionId, fieldBinding));
+    }
+
+    @PatchMapping("/{connectionId}/field-binding/{fbId}")
+    public ResponseEntity<ReferenceDTO> updateFieldBindingPatch(
+            @PathVariable Long connectionId,
+            @PathVariable String fbId,
+            @RequestBody JsonPatch patch
+    ){
+        return ResponseEntity.ok(connectionMngService.updateFieldBinding(connectionId, fbId, patch));
+    }
+
+    @DeleteMapping("/{connectionId}/field-binding/{fbId}")
+    public ResponseEntity<?> deleteFieldBinding(
+            @PathVariable Long connectionId,
+            @PathVariable String fbId
+    ){
+        connectionMngService.deleteFieldBinding(connectionId, fbId);
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Validates a connection for correctly constructed structure")

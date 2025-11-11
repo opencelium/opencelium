@@ -6,4 +6,6 @@ public interface ReferenceMngService {
     ReferenceMng save(ReferenceMng reference);
 
     ReferenceMng getById(String id);
+
+    void delete(String id);
 }

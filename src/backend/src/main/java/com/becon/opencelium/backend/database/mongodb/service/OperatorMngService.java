@@ -20,4 +20,6 @@ public interface OperatorMngService {
     void deleteAll(List<OperatorMng> operators);
 
     void doWithPatchedOperator(ConnectorDTO connectorDTO, ConnectorDTO patched, PatchConnectionDetails.PatchOperationDetail opDetail);
+
+    void delete(String operatorId);
 }
