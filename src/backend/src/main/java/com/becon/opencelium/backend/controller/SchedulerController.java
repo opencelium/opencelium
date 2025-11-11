@@ -98,7 +98,7 @@ public class SchedulerController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @GetMapping("/all/by-ids")
+    @PostMapping("/all/by-ids")
     public ResponseEntity<List<SchedulerResource>> getAllByIds(IdentifiersDTO<Integer> ids) {
         List<Scheduler> schedulers = schedulerService.findAllById(ids.getIdentifiers());
         List<SchedulerResource> scheduleList = schedulers.stream()
