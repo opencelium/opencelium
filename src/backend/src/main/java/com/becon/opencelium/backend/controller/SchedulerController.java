@@ -99,7 +99,7 @@ public class SchedulerController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping("/all/by-ids")
-    public ResponseEntity<List<SchedulerResource>> getAllByIds(IdentifiersDTO<Integer> ids) {
+    public ResponseEntity<List<SchedulerResource>> getAllByIds(@RequestBody IdentifiersDTO<Integer> ids) {
         List<Scheduler> schedulers = schedulerService.findAllById(ids.getIdentifiers());
         List<SchedulerResource> scheduleList = schedulers.stream()
                 .map(s -> schedulerService.toResource(s)).collect(Collectors.toList());
