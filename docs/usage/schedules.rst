@@ -209,6 +209,107 @@ if you mouse over on one of them and click on the respective icon.
 
 |image_notifications_6|
 
+.. _scheduler_execution_log:
+
+Execution Logs
+"""""""""""""""""
+
+Each job in the Scheduler includes a detailed **Execution Log** view.  
+The log viewer uses the same interactive **UI-Log interface** as the *Test-Run* feature in the Connection Editor,  
+allowing users to inspect requests, loops, and responses in a structured, tree-based layout.
+
+For each scheduled job, the system automatically maintains historical logs for both **successful** and **failed** executions:
+
+- **Success Logs:** retain the two most recent successful runs  
+- **Fail Logs:** retain the three most recent failed runs  
+
+This retention behavior can be adjusted in the backend configuration file (`application.yml`):
+
+.. code-block:: yaml
+
+   log:
+     retention:
+       per-connection:
+         success: 2
+         fail: 3
+
+Adjusting these values changes how many historical logs are stored per connection or scheduled job.  
+Older logs exceeding the defined retention limits are automatically removed.
+
+|image_execution_logs_1|
+
+This is an overview of all logs that can be viewed.
+
+|image_execution_logs_2|
+
+...and this is the :ref:`UI log viewer <connection_ui_logger>`, which we also use for the test run.
+
+
+Support Logs
+"""""""""""""""""
+The *Logs* feature allows you to create comprehensive log files for support in case your connection 
+is not working and you need help troubleshooting.
+
+Clicking on the |image_support_logs_1| icon opens a view where you can configure the support logs as
+needed by masking certain parts of the logs.
+
+|image_support_logs_2|
+
+In the upper area, you can select a desired preset for the degree of masking. 
+
+|image_support_logs_3|
+
+The following levels are available:
+
+.. list-table::
+  :width: 100 %
+  :widths: 20 20 20 20 20
+  :header-rows: 1
+
+  * - Masking Level
+    - URL
+    - Headers
+    - Request
+    - Response
+
+  * - **Light**
+    - |image_support_logs_4|
+    - |image_support_logs_5|
+    - |image_support_logs_5|
+    - |image_support_logs_5|
+
+  * - **Medium**
+    - |image_support_logs_4|
+    - |image_support_logs_4|
+    - |image_support_logs_5|
+    - |image_support_logs_5|
+
+  * - **Strict**
+    - |image_support_logs_4|
+    - |image_support_logs_4|
+    - |image_support_logs_4|
+    - |image_support_logs_5|
+
+  * - **Custom**
+    - |image_support_logs_4| / |image_support_logs_5|
+    - |image_support_logs_4| / |image_support_logs_5|
+    - |image_support_logs_4| / |image_support_logs_5|
+    - |image_support_logs_4| / |image_support_logs_5|
+
+Alternatively, you can also select individual elements and mask them by clicking on the icon with the
+crossed-out eye |image_support_logs_4|, thus making them unrecognizable for support. Clicking on the icon with the uncrossed
+eye unmasks the element again |image_support_logs_5|.
+
+Once you have made the desired settings, click on the button to generate the support logs.
+
+|image_support_logs_6|
+
+The process of generating the support logs starts the selected connection,
+generates the logs, and saves them together with the invoker files as a ZIP file. 
+Corresponding messages in the notifications indicate the start and successful generation of the support logs.
+
+The generated support logs can be accessed either via the link in the notification or under Support Files
+in the admin panel.
 
 .. |image_schedules_1| image:: ../img/schedule/OC_schedules_list.png
    :align: middle
@@ -301,3 +402,24 @@ if you mouse over on one of them and click on the respective icon.
    :width: 30
 
 .. |image20| image:: ../img/schedule/20.png
+
+.. |image_support_logs_1| image:: ../img/schedule/OC_support_logs_icon_logs.png
+   :height: 21
+.. |image_support_logs_2| image:: ../img/schedule/OC_support_logs_config.png
+   :align: middle
+   :width: 400
+.. |image_support_logs_3| image:: ../img/schedule/OC_support_logs_masking_level.png
+   :align: middle
+   :width: 400
+.. |image_support_logs_4| image:: ../img/schedule/OC_support_logs_icon_eye_crossed.png
+   :height: 21
+.. |image_support_logs_5| image:: ../img/schedule/OC_support_logs_icon_eye_open.png
+   :height: 21
+.. |image_support_logs_6| image:: ../img/schedule/OC_support_logs_btn_create_logs.png
+   :align: middle
+   :height: 30
+.. |image_execution_logs_1| image:: ../img/schedule/OC_execution_logs_overview.png
+   :height: 300
+.. |image_execution_logs_2| image:: ../img/schedule/OC_execution_logs_uilog.png
+   :align: middle
+   :height: 400
