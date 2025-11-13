@@ -119,29 +119,37 @@ versions:
         path: opencelium.version
       - changeset: 2
         operation: rename
+        value: base-url
+        path: opencelium.service_portal.base_url
+      - changeset: 3
+        operation: rename
+        value: service-portal
+        path: opencelium.service_portal
+      - changeset: 4
+        operation: rename
         value: master-password
         path: opencelium.connector.master_password
-      - changeset: 3
+      - changeset: 5
         operation: rename
         value: template-sync
         path: opencelium.online_services.template_sync
-      - changeset: 4
+      - changeset: 6
         operation: rename
         value: online-services
         path: opencelium.online_services
-      - changeset: 5
+      - changeset: 7
         operation: rename
         value: incoming-webhook
         path: opencelium.notification.tools.incoming_webhook
-      - changeset: 6
+      - changeset: 8
         operation: rename
         value: debug-mode
         path: opencelium.debug_mode
-      - changeset: 7
+      - changeset: 9
         operation: modify
         value: ./support-files
         path: opencelium.support.file.directory
-      - changeset: 8
+      - changeset: 10
         operation: move
         value: management.endpoint.health.status
         path: management.health.status

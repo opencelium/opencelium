@@ -35,6 +35,7 @@ import com.becon.opencelium.backend.database.mysql.repository.MaskingRuleReposit
 import com.becon.opencelium.backend.enums.Action;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
 import com.becon.opencelium.backend.mapper.base.Mapper;
+import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
@@ -56,6 +57,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.util.*;
@@ -605,6 +607,15 @@ public class ConnectionServiceImp implements ConnectionService {
     @Override
     public List<String> getLogFileNameListById(long connectionId) {
         return LogFileUtility.getLogFileNameList(connectionId);
+    }
+
+    @Override
+    public List<Connection> findAllByIds(IdentifiersDTO<Long> ids) {
+        if (ids == null || CollectionUtils.isEmpty(ids.getIdentifiers())) {
+            return Collections.emptyList();
+        }
+
+        return connectionRepository.findAllById(ids.getIdentifiers());
     }
 
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
