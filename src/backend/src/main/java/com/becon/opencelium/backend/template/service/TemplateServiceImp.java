@@ -284,28 +284,24 @@ public class TemplateServiceImp implements TemplateService {
         }
     }
 
-    private Map<String, Template> getAllAsMap() throws WrongEncode {
+    private Map<String, Template> getAllAsMap() {
         try (Stream<Path> walk = Files.walk(Paths.get(PathConstant.TEMPLATE))) {
             ObjectMapper objectMapper = new ObjectMapper();
-            Map<String, Template> files = new HashMap<>();
-            walk.filter(Files::isRegularFile).forEach(path -> {
-                if (!FileNameUtils.getExtension(path.toString()).equals("json")) {
-                    return;
-                }
-                StringBuilder contentBuilder = new StringBuilder();
-                Path filePath = Paths.get(path.toString());
-                try (Stream<String> stream = Files.lines(filePath, StandardCharsets.UTF_8)) {
-                    stream.forEach(s -> contentBuilder.append(s).append("\n"));
-                    Template template = objectMapper.readValue(contentBuilder.toString(), Template.class);
-                    files.put(filePath.getFileName().toString(), template);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    throw new WrongEncode("UTF8");
-                }
-            });
-
-            return files;
-        } catch (Exception e) {
+            return walk
+                    .filter(Files::isRegularFile)
+                    .filter(path -> path.toString().endsWith(".json"))
+                    .collect(Collectors.toMap(
+                            path -> path.getFileName().toString(),
+                            path -> {
+                                try {
+                                    String json = Files.readString(path, StandardCharsets.UTF_8);
+                                    return objectMapper.readValue(json, Template.class);
+                                } catch (IOException e) {
+                                    throw new RuntimeException("Failed to read template: " + path, e);
+                                }
+                            }
+                    ));
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
