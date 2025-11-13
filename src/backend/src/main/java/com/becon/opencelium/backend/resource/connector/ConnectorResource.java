@@ -16,11 +16,13 @@
 
 package com.becon.opencelium.backend.resource.connector;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.annotation.Resource;
 
 import java.util.Map;
 
 @Resource
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ConnectorResource {
 
     private int connectorId;
