@@ -165,6 +165,29 @@ Once all details are complete, the group can be added by clicking the “Add” 
 
 |image_group_10|
 
+Support Files
+"""""""""""""""""
+
+Every connection execution can archive its request/response payloads as a support
+file.  The Admin → **Support Files** card exposes these bundles so operators can
+download them or clean up disk space.
+
+- The grid lists the **connection title**, the stored **file path**, the
+  detected **timestamp**, and a **status** cell.  A green cell indicates that a
+  success archive (``*_s_*.zip``) exists; a red cell highlights that only a
+  failure archive (``*_f_*.zip``) was created for that run.
+- Click the download icon to fetch the ZIP.  Each archive contains the
+  serialized request/response bodies that were captured during execution, so it
+  can be shared with support without re-running the workflow.
+- Use the trash icon on a row to delete a single archive.  Selecting multiple
+  entries in list view enables the **Delete Selected** action so bulk cleanups
+  can be performed before rotating disks or backing up.
+
+All files follow the same directory layout
+(``/upload-dir/support-files/<connection>/<timestamp>_<status>_<execution>.zip``),
+so the screen is also a quick way to correlate a support ticket with the
+matching execution ID before handing the archive over to engineering.
+
 External Applications
 """""""""""""""""""""
 
@@ -273,12 +296,10 @@ filters shown in :doc:`connections`, :doc:`schedules`, and the
 dashboard widgets, so this card is the preferred place to curate your
 taxonomy.
 
-
 .. |image_admin_0| image:: ../img/admin/0.png
    :align: middle
 .. |image_admin_2| image:: ../img/admin/2.png
    :align: middle
-
 
 .. |image_user_0| image:: ../img/user/OC_menu_admin.png
    :align: middle
@@ -337,7 +358,6 @@ taxonomy.
    :height: 30
 
 
-
 .. |image_update_assistant_0| image:: ../img/update_assistant/0.png
    :align: middle
 .. |image_update_assistant_1| image:: ../img/update_assistant/1.png
@@ -345,4 +365,3 @@ taxonomy.
    
 .. |image_migration_0| image:: ../img/admin/4.png
    :align: middle
-   

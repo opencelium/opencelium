@@ -18,76 +18,46 @@ and are summarized here for quick reference:
 
 Installation on Debian/Ubuntu
 =============================
-The full walk-through stays in ``docs_new/getting_started/installation.rst``.  The
-main steps are condensed below so they can be cross-referenced with automation.
+Treat this section as a deployment checklist.  Every shell command and full
+walk-through remains in ``docs_new/getting_started/installation.rst`` (see the
+*Debian/Ubuntu* chapter), so operations teams only have to keep the detailed
+guide up to date once.
 
-#. Update the host and pull dependencies::
-
-      apt update
-      apt dist-upgrade
-      apt install unzip mariadb-server mariadb-client openjdk-17-jdk nginx
-
-#. Install MongoDB by following the vendor instructions and ensure ``mongod`` is
-   enabled.
-#. Download and unpack OpenCelium::
-
-      wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_latest.zip/download?distro_version_id=230" -P /opt/opencelium/
-      unzip -o -d /opt/opencelium/ /opt/opencelium/oc_latest.zip
-      rm /opt/opencelium/oc_latest.zip
-      ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
-      chmod +x /usr/bin/oc
-
-#. Configure MariaDB::
-
-      systemctl restart mariadb
-      systemctl enable mariadb
-      mysql -u root -e "source /opt/opencelium/src/backend/database/oc_data.sql; GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost' IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
-      mysql_secure_installation
-
-   Replace the example password and align with the ``spring.datasource`` block.
-#. Configure MongoDB::
-
-      systemctl restart mongod
-      systemctl enable mongod
-      mongosh --eval "db.getSiblingDB('opencelium').createUser({user: 'oc_admin', pwd: passwordPrompt(), roles: ['readWrite','dbAdmin' ]})"
-
-#. Configure nginx (HTTP or HTTPS)::
-
-      rm /etc/nginx/sites-enabled/default
-      ln -s /opt/opencelium/conf/nginx.conf /etc/nginx/sites-enabled/oc.conf
-      # or link nginx-ssl.conf and update certificate paths
-      systemctl restart nginx
-      systemctl enable nginx
-
-#. Prepare ``application.yml`` by copying the default file and adapting database
-   passwords, SSL properties, proxy settings, and optional LDAP/service portal
-   sections::
-
-      cp /opt/opencelium/src/backend/src/main/resources/application_default.yml \
-         /opt/opencelium/src/backend/src/main/resources/application.yml
-
-#. Wire the systemd service::
-
-      ln -s /opt/opencelium/conf/opencelium.service /etc/systemd/system/opencelium.service
-      systemctl daemon-reload
-      systemctl enable opencelium
-      systemctl start opencelium
+- **Prepare the host** – update the OS, install ``unzip``, MariaDB, Java 17, and
+  nginx, then follow the MongoDB vendor instructions.  Enable ``mariadb`` and
+  ``mongod`` services once the packages are installed.
+- **Deploy the release artifact** – download the latest ``oc_latest.zip`` from
+  PackageCloud, unpack it below ``/opt/opencelium``, and link the ``oc`` helper
+  script into ``/usr/bin`` for easier service control.
+- **Provision databases** – import ``database/oc_data.sql``, create the
+  ``opencelium`` MariaDB user, and create the ``oc_admin`` MongoDB user.  Make
+  sure the credentials match the ``spring.datasource`` and
+  ``spring.data.mongodb.uri`` entries you will place into ``application.yml``.
+- **Expose HTTP/S** – link ``conf/nginx.conf`` (or ``nginx-ssl.conf``) into
+  ``/etc/nginx/sites-enabled/oc.conf`` and reload nginx so the frontend can serve
+  ``/settings.json`` and proxy API calls.
+- **Finalize configuration** – copy
+  ``src/backend/src/main/resources/application_default.yml`` to
+  ``application.yml`` and adapt secrets, SSL details, LDAP/service-portal
+  settings, and proxy configuration for the target environment.
+- **Register the service** – link ``conf/opencelium.service`` into
+  ``/etc/systemd/system``, run ``systemctl daemon-reload``, enable the unit, and
+  start OpenCelium.  At this point ``journalctl -u opencelium -f`` should show a
+  clean startup log.
 
 Installation on SLES 15 SP5
 ===========================
-The SLES instructions mirror the Debian steps with ``zypper`` commands (see the
-end of ``docs_new/getting_started/installation.rst``):
+Follow the same workflow as Debian, substituting the SLES command set from
+``docs_new/getting_started/installation.rst`` (``zypper`` for packages,
+``insserv``/systemd for services).  The only platform-specific notes are:
 
-#. Install prerequisites::
-
-      zypper install unzip insserv mariadb mariadb-client java-17-openjdk nginx
-
-#. Install MongoDB per vendor documentation.
-#. Download and unpack the ``oc_latest.zip`` archive, link ``/usr/bin/oc``.
-#. Configure MariaDB and MongoDB users exactly as shown for Debian.
-#. Link the nginx configuration, choose HTTP or HTTPS, and reload the service.
-#. Copy ``application_default.yml`` to ``application.yml`` and adjust secrets.
-#. Register ``opencelium.service`` with ``insserv``/systemd and start it.
+- Install prerequisites with ``zypper install unzip insserv mariadb ...`` and
+  use the SLES MongoDB repository when following the vendor install guide.
+- When registering the service, ensure ``insserv`` creates the correct symlinks
+  before calling ``systemctl enable opencelium``.
+- Package names and file locations match the Debian instructions, so the
+  database preparation, nginx linkage, and ``application.yml`` customization are
+  identical once the packages are in place.
 
 Post-install Checks
 ===================
