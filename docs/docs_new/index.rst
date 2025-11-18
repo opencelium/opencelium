@@ -20,13 +20,13 @@ into the remaining chapters as needed.
    :caption: Platform Guide
    :maxdepth: 2
 
-   overview
-   architecture
-   deployment
-   configuration
-   frontend
-   extensibility
-   operations
+   platform/overview
+   platform/architecture
+   platform/deployment
+   platform/configuration
+   platform/frontend
+   platform/extensibility
+   platform/operations
 
 .. toctree::
    :caption: Usage
@@ -46,7 +46,6 @@ into the remaining chapters as needed.
 
    services/index
    tools/index
-   api_docs/index
 
 .. toctree::
    :caption: Media & Sources
@@ -54,3 +53,4 @@ into the remaining chapters as needed.
 
    media
    sources
+   api_docs/index
