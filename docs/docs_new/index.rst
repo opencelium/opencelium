@@ -1,8 +1,8 @@
 :orphan:
 
-############################
+##########################
 OpenCelium Technical Guide
-############################
+##########################
 
 This guide brings together installation instructions, operational
 runbooks, and implementation details so operators, developers, and
