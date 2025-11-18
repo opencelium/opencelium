@@ -1,8 +1,8 @@
 .. _usage-connection:
 
-##################
+###########
 Connections
-##################
+###########
 
 .. contents::
    :local:
@@ -92,6 +92,66 @@ You can create a new aggregator pressing on the button |image31|.
 In the *Details* panel you can see *Endpoint* and *Body* under the **Request** paragraph
 that could be modified clicking on their placeholders.
 
+Operators
+"""""""""""""""""
+Since version 4.5, the use of operators has been significantly simplified. Instead of
+inserting several operators with individual conditions one after the other into the
+connection, it is now sufficient to add one operator. An operator can now contain several
+conditions, which can be linked with AND or OR as desired. In addition, multiple groups
+with different conditions can be mapped to enable complex queries.
+
+Adding an operator
+==================
+
+If you are creating a completely new connection and no methods or operators are included
+yet, you can simply click on the empty area labeled “Click here to create...” in the connection
+editor to display the context menu for adding a method or operator.
+
+|image_operators_1|
+
+|image_operators_2|
+
+If methods or operators are already included, move the mouse over the method or operator to
+which you want to add a new method or operator. Corresponding symbols representing a new method
+or operator will then be displayed. Click on the desired symbol.
+
+|image_operators_3|
+
+|image_operators_4|
+
+In the context menu, select whether it should be a loop or an IF operator. Confirm your
+selection by clicking on the plus sign. A new operator is added to the connection.
+
+|image_operators_5|
+
+Defining the conditions of an If operator
+=========================================
+
+To edit the conditions of an operator, double-click on the operator to open the advanced
+operator view. 
+
+|image_operators_6|
+
+Alternatively, you can select the operator and click on the edit button for
+the conditions in the Details window.
+
+|image_operators_7|
+
+Move the mouse over the yellow area and select “Add Condition” or “Add Group.”
+
+|image_operators_8| or |image_operators_9|
+
+By adding one or more conditions and groups, which can be linked with AND or OR, it is
+possible to create very complex queries.
+
+|image_operators_10|
+
+|image_operators_11|
+
+Once you have defined all conditions, click on the “Save” button to save the operator's
+conditions and return to the connection editor.
+
+|image_operators_12|
 
 Action Panel
 """""""""""""""""
@@ -417,6 +477,336 @@ Response:
         </body>
 
 
+Test-Run
+"""""""""""""""""
+
+The **Test Run** feature executes the configured connection, using the current editor state, directly from the Connection Editor and displays the corresponding runtime logs in real time.
+During execution, all API requests, loops, and responses are captured and displayed hierarchically in the UI. It is designed to support debugging, 
+inspection, and optimization of interface workflows without relying on external log files or additional tools.
+
+Functional Overview
+===================
+
+The **UI Logs** provide a graphical representation of all runtime activities of a connection that can be accessed directly through the user interface. 
+The UI log component provides structured, interactive access to runtime data, enabling developers to inspect requests, monitor performance, and 
+identify issues directly in the editor.
+
+.. _connection_ui_logger:
+
+UI Log Structure
+=================
+
+The layout of the log viewer is inspired by browser developer tools and presents data in a structured, expandable tree view:
+
+**1. Connector and Process Hierarchy**
+
+Each connection is displayed as a hierarchical structure, representing the sequence of processes and operators. You can expand or collapse each level using the arrow icons.
+
+**2. HTTP Requests and Responses**
+
+Each API call is shown with:
+	•	HTTP Method (e.g., POST, GET, DELETE, PUT)
+	•	Endpoint URL
+	•	HTTP Status Code (e.g., 200 OK, 201 Created, 204 Updated, 404 Not Found, 401 Unauthorized, 500 Internal Server Error)
+	•	Execution Time (in milliseconds)
+	•	Request / Response Headers — metadata such as Content-Type or Authorization
+	•	Request / Response Body (Payload) — the actual data sent and received
+
+Header and body data can be copied to the clipboard using the copy icon (|image_ui_logs_3|).
+
+**3. Loop Handling and Pagination**
+
+If a connection step contains a loop, its iterations are grouped together.
+The pagination control allows you to navigate between individual iterations (e.g., 2 / 12). You can also jump directly to a specific 
+iteration by entering its index.
+
+	•	|image_ui_logs_6| Navigate between loop iterations (pagination)
+
+**4. Error and Warning Indicators**
+
+Log entries are visually categorized by severity levels such as `ERROR`, `WARNING`, `INFO`.
+Click on an entry to expand it and inspect detailed request and response information.
+
+**5. Panel Controls**
+
+- |image_ui_logs_1| Open log viewer in fullscreen mode
+- |image_ui_logs_2| Clear all log entries
+- |image_ui_logs_3| Copy headers, bodies or URLs to you clipboard
+- |image_ui_logs_4| Leave fullscreen mode
+- |image_ui_logs_5| Hide log viewer
+
+|image50|
+
+Presentation of the Connection Editor interface in the UI log
+
+|image51|
+
+... and the unfolding of the API request
+
+
+Real-Time Streaming (WebSocket)
+===============================
+
+Log data is streamed to the frontend via a **WebSocket** connection.  
+This enables real-time feedback while a Test-Run is executing.
+
+Technical details:
+
+- Bidirectional WebSocket channel between client and backend  
+- JSON-based message format for all log events  
+- Incremental streaming in chunks to reduce network load  
+- Automatic reconnection logic on connection loss  
+
+
+Scalability and Performance
+===========================
+
+The log system is designed to handle large data volumes efficiently.  
+Several mechanisms are implemented to maintain responsiveness:
+
+- Lazy-loading of log entries  
+- Collapsed view for repeated or looped steps  
+- Pagination when exceeding 500 log entries  
+- Asynchronous rendering pipeline in the frontend  
+
+
+Scheduler Integration
+=====================
+
+The same logging system is also used for the :ref:`Scheduler <scheduler_execution_log>`.  
+This ensures a unified log format and viewing experience for both manual (Test-Run) and scheduled executions.
+
+- Consistent UI for live and historical executions  
+- Logs accessible from the Scheduler job detail view  
+- Full execution history with filtering by date, status, or job ID  
+
+
+Log Format
+==================
+
+Each log event follows a defined JSON schema:
+
+.. code-block:: json
+
+   {
+     "timestamp": "2025-10-27T10:45:32.521Z",
+     "level": "INFO",
+     "context": "connection.step.3",
+     "message": "Request executed successfully",
+     "duration_ms": 245,
+     "request": {
+       "method": "POST",
+       "url": "https://api.example.com/items",
+       "body": { ... }
+     },
+     "response": {
+       "status": 200,
+       "body": { ... }
+     }
+   }
+
+
+Error Handling
+==================
+
+When errors occur (e.g., failed requests, timeouts, or invalid responses), the log entry is marked with `level: ERROR`.  
+The UI highlights the affected request in red and allows developers to inspect the full request and response payloads.
+
+
+Multi-Language Support for Enhancements
+"""""""""""""""""""""""""""""""""""""""
+
+OpenCelium 4.6 introduces **multi-language support for Enhancements**, extending the enhancement execution engine beyond JavaScript.  
+Developers can now write enhancement logic in **Python 2**, **Python 3**, and **Ruby** – with additional language support (e.g. Go, TypeScript) planned for future releases.
+
+
+Overview
+==================
+
+Enhancements in OpenCelium are used to manipulate or format data retrieved from API responses before passing it to subsequent requests.  
+Previously, these logic transformations could only be implemented using JavaScript executed directly within the Core.  
+
+With the new multi-language feature, developers can define and execute enhancement scripts in different programming languages.  
+This provides more flexibility for integrating existing code snippets or reusing domain-specific logic.
+
+
+Architecture
+==================
+
+- **JavaScript Enhancements**  
+  Still executed directly in the OpenCelium Core runtime for minimal latency.
+
+- **External Language Execution (Python / Ruby)**  
+  Handled by a dedicated microservice — the `polyglot-engine`.  
+  This service runs code in a **sandboxed environment** to ensure security and isolation from the Core system.
+
+- **Communication**  
+  Enhancement scripts written in Python or Ruby are transmitted to the `polyglot-engine`,  
+  executed remotely, and their result is returned to the Core for further processing.
+
+Repository:  
+`https://github.com/opencelium/polyglot-engine <https://github.com/opencelium/polyglot-engine>`_
+
+
+Supported Languages
+===================
+
+- JavaScript *(default; executed within Core)*  
+- Python 2  
+- Python 3  
+- Ruby  
+
+
+Example
+==================
+
+**JavaScript**
+
+.. code-block:: javascript
+
+   let result = VAR_0.toUpperCase();
+   RESULT_VAR = result;
+
+**Python**
+
+.. code-block:: python
+
+   result = VAR_0.upper()
+   RESULT_VAR = result
+
+**Ruby**
+
+.. code-block:: ruby
+
+   result = VAR_0.upcase
+   RESULT_VAR = result
+
+
+Configuration
+==================
+
+The Polyglot Engine service must be reachable by the OpenCelium Core.  
+Configuration is typically defined in the backend settings file (`application.yml`).
+
+Example section (default setup):
+
+.. code-block:: yaml
+
+   ###########################################################################
+   #                                                                         #
+   #   Polyglot Engine Configuration                                         #
+   #   You can enable Python 3, Ruby, or GraalVM JS                          #
+   #   using this configuration.                                             #
+   #                                                                         #
+   #   By default OC uses Nashorn JS                                         #
+   #                                                                         #
+   ###########################################################################
+   polyglot:
+     # Enables or disables the polyglot service integration.
+     # Default: false
+     enabled: false
+
+     # Communication protocol used to connect to the polyglot service.
+     # Supported: grpc (default), http (future)
+     # Default: grpc
+     protocol: grpc
+
+     # Host address of the polyglot service.
+     # Default: 127.0.0.1
+     host: '127.0.0.1'
+
+     # Port number of the polyglot service.
+     # Default: 6566
+     port: 6566
+
+     # Automatically starts the polyglot service JAR if not running.
+     # If false, assumes the service is already running externally.
+     # Default: false
+     auto-start: false
+
+     launch:
+       # Path to the polyglot service JAR file.
+       # Required only if auto-start is true.
+       # Example: /opt/polyglot/polyglot-service.jar
+       jarPath:
+
+       # Command-line arguments passed to the polyglot service.
+       args:
+
+       # Maximum time (in seconds) to wait for the service to start and respond.
+       # Default: 30
+       waitTimeoutSec: 30
+
+       # JVM arguments used when launching the polyglot service.
+       # Adjust for performance or memory tuning.
+       # Default: "-Xms64m -Xmx256m"
+       jvmArgs: '-Xms64m -Xmx256m'
+
+       # Enables forwarding of logs produced by the external polyglot JAR
+       # to this application’s logging system.
+       # Default: false
+       external-log-enabled: false
+
+
+Runtime Behavior
+==================
+
+- When **`polyglot.enabled`** is `false`, enhancements are executed internally using the JavaScript engine.  
+- When **enabled**, the Core routes enhancement scripts to the external Polyglot Engine.  
+- Startup automation can be controlled via **`auto-start`** and `launch.jarPath` configuration values.  
+- Logs and execution errors from the Polyglot Engine can optionally be forwarded to the main application log.
+
+
+If the service is disabled or unreachable, enhancement execution will fall back to **JavaScript-only** mode.
+
+
+.. |image_operators_1| image:: ../img/connection/OC_operators_empty_connection.png
+   :align: middle
+   :width: 600
+.. |image_operators_2| image:: ../img/connection/OC_operators_add_if_empty_connection.png
+   :align: middle
+   :width: 600
+.. |image_operators_3| image:: ../img/connection/OC_operators_add_if_hover.png
+   :align: middle
+   :width: 600
+.. |image_operators_4| image:: ../img/connection/OC_operators_add_if_context.png
+   :align: middle
+   :width: 600
+.. |image_operators_5| image:: ../img/connection/OC_operators_if_added.png
+   :align: middle
+   :width: 600
+.. |image_operators_6| image:: ../img/connection/OC_operators_empty_conditions.png
+   :align: middle
+   :width: 600
+.. |image_operators_7| image:: ../img/connection/OC_operators_edit_conditions.png
+   :align: middle
+   :width: 200
+.. |image_operators_8| image:: ../img/connection/OC_operators_btn_add_condition.png
+   :height: 30
+.. |image_operators_9| image:: ../img/connection/OC_operators_btn_add_group.png
+   :height: 30
+.. |image_operators_10| image:: ../img/connection/OC_operators_single_condition.png
+   :align: middle
+   :width: 600
+.. |image_operators_11| image:: ../img/connection/OC_operators_multiple_conditions.png
+   :align: middle
+   :width: 600
+.. |image_operators_12| image:: ../img/connection/OC_operators_btn_save.png
+   :align: middle
+   :height: 30
+
+.. |image_ui_logs_1| image:: ../img/connection/OC_ui_logs_btn_open_fullscreen.png
+   :height: 30
+.. |image_ui_logs_2| image:: ../img/connection/OC_ui_logs_btn_clear_logs.png
+   :height: 30
+.. |image_ui_logs_3| image:: ../img/connection/OC_ui_logs_btn_copy.png
+   :height: 30
+.. |image_ui_logs_4| image:: ../img/connection/OC_ui_logs_btn_close_fullscreen.png
+   :height: 30
+.. |image_ui_logs_5| image:: ../img/connection/OC_ui_logs_btn_minimize.png
+   :height: 30
+.. |image_ui_logs_6| image:: ../img/connection/OC_ui_logs_btn_pagination.png
+   :height: 30
 
 .. |image0| image:: ../img/connection/0.png
    :align: middle
@@ -509,5 +899,11 @@ Response:
    :align: middle
    :width: 300
 .. |image49| image:: ../img/connection/49.png
-   :width: 300
+   :width: 100
+   :align: middle
+.. |image50| image:: ../img/connection/50.png
+   :align: middle
+   :width: 100
+.. |image51| image:: ../img/connection/51.png
+   :width: 100
    :align: middle

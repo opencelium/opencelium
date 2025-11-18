@@ -46,6 +46,7 @@ into the remaining chapters as needed.
 
    services/index
    tools/index
+   api_docs/index
 
 .. toctree::
    :caption: Media & Sources

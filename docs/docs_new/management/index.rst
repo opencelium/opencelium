@@ -16,3 +16,4 @@ rest of the documentation.
    aggregator
    invoker
    create_connection
+   smart_sync

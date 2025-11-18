@@ -2,6 +2,9 @@
 Installation
 ##################
 
+.. contents::
+   :local:
+
 .. note::
 	| Please check the software requirements, before installing OC.
 	| 
@@ -523,7 +526,7 @@ Use default Docker installation guide.
 
 (opt. Docker Engine installation usually already includes Docker Compose Plugin)
 
-1. Getting started with opencelium-docker-compose:
+2. Getting started with opencelium-docker-compose:
 
 .. code-block:: sh
 	:linenos:
