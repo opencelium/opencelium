@@ -13,10 +13,10 @@ Installation
 	| Otherwise nginx is not able to access the files. 
 
 Debian/Ubuntu (example for 24.04 LTS)
-"""""""""""""""""
+"""""""""""""""""""""""""""""""""""""
 
 Prepare environment
-==================
+===================
 
 **1. Update:**
 
@@ -36,7 +36,7 @@ Update your system, download and install required packages.
 	
 	
 Install Application
-==================
+===================
 
 Download and unzip application, and create a link for it.
 

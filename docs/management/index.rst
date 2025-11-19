@@ -1,10 +1,8 @@
-####################
+#####################
 Management Reference
-####################
+#####################
 
-Administrative articles (authentication, license management, templates, etc.)
-live under ``docs/docs_new/management`` so they can evolve in sync with the
-rest of the documentation.
+Administrative articles for topics like authentication, license management, templates, etc.
 
 .. toctree::
    :maxdepth: 2

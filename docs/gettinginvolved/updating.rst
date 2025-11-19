@@ -6,17 +6,17 @@ Updating
    :local:
 
 From OC 4.x to latest
-"""""""""""""""""
+"""""""""""""""""""""
 
 Update zip file installations
-==================
+=============================
 
 | Log in to OpenCelium, open the *AdminPanel* and click on *Update Assistant*.
 | Click here to see, how to use :ref:`Update Assistant <admin_panel-update_assistant>`.
 
 
 Update DEB package for Ubuntu 24.04 LTS
-==================
+=======================================
 
 .. code-block:: sh
 	:linenos:
@@ -26,7 +26,7 @@ Update DEB package for Ubuntu 24.04 LTS
 	
 
 Update RPM package for SUSE Linux Enterprise Server 15 SP5
-==================
+==========================================================
 
 .. code-block:: sh
 	:linenos:
@@ -36,7 +36,7 @@ Update RPM package for SUSE Linux Enterprise Server 15 SP5
 
 
 Update RPM package for RedHat 9.2
-==================
+=================================
 
 .. code-block:: sh
 	:linenos:
@@ -48,7 +48,7 @@ Update RPM package for RedHat 9.2
 | 
 
 From OC 3.x to 4.1 
-"""""""""""""""""
+"""""""""""""""""""
 
 .. note::
         | This update guide is intended for existing zip file 3.x installations. 
@@ -84,7 +84,7 @@ Prepare Update
 
 
 Install Application
-==================
+===================
 
 Download and unzip application, and create a link for it.
 

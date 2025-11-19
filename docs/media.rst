@@ -1,6 +1,6 @@
-##################
+#################
 Media & Community
-##################
+#################
 
 - `Website <https://opencelium.io>`_
 - `Service Portal (subscribers) <https://service.opencelium.io>`_

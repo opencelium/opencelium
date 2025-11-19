@@ -1,6 +1,6 @@
-##################
+#########
 Schedules
-##################
+#########
 
 .. contents::
    :local:
@@ -56,7 +56,7 @@ on the "**x**" on the right side.
 |image17|
 
 Adding a new schedule
-"""""""""""""""""
+"""""""""""""""""""""
 
 To add a new job for the scheduler click on the button "Add Schedule". 
 

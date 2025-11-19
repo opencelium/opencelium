@@ -223,7 +223,7 @@ often use. :ref:`Here <management-business_template>`, you can read how to manag
 .. _admin_panel-data_aggregator:
 
 Data Aggregator
-"""""""""""""""""
+"""""""""""""""
 
 Data Aggregator is a feature that provides a possibility to notify a user after the
 triggered connection (this happens in *Schedules*). :ref:`Here <management-data_aggregator>`, you can read how to manage with them.

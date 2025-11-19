@@ -1,6 +1,6 @@
-##################
+###########
 Usage Guide
-##################
+###########
 
 Here you can find compehensive walkthroughs for the most imprtant topics (login,
 connectors, connections, schedules, etc.)
