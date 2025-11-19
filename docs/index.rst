@@ -1,8 +1,8 @@
 ﻿:orphan:
 
-##########################
-OpenCelium Technical Guide
-##########################
+#########################
+OpenCelium Documentation
+#########################
 
 This guide brings together installation instructions, operational
 runbooks, and implementation details so operators, developers, and
@@ -41,6 +41,7 @@ into the remaining chapters as needed.
 
    media
    sources
+   api/overview
 
 .. toctree::
    :caption: Licence
