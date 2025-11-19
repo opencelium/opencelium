@@ -41,7 +41,7 @@ into the remaining chapters as needed.
 
    media
    sources
-   api/overview
+   api_docs/index
 
 .. toctree::
    :caption: Licence
