@@ -2,9 +2,8 @@
 Usage Guide
 ##################
 
-These walkthroughs mirror the original ``docs/usage`` topics (login,
-connectors, connections, schedules, etc.) and are now part of the new
-``docs/docs_new`` tree.
+Here you can find compehensive walkthroughs for the most imprtant topics (login,
+connectors, connections, schedules, etc.)
 
 .. toctree::
    :maxdepth: 2

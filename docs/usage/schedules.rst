@@ -2,6 +2,9 @@
 Schedules
 ##################
 
+.. contents::
+   :local:
+
 The *Schedules* panel shows an overview of all schedules that have been set up. In
 general, a schedule defines which connection should be performed when. All CRUD 
 actions are one one page. The list view shows the following information for each

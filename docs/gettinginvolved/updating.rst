@@ -2,6 +2,8 @@
 Updating
 ##################
 
+.. contents::
+   :local:
 
 From OC 4.x to latest
 """""""""""""""""

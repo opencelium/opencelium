@@ -2,6 +2,9 @@
 Installation
 ##################
 
+.. contents::
+   :local:
+
 .. note::
 	| Please check the software requirements, before installing OC.
 	| 
@@ -162,10 +165,10 @@ Finally start OpenCelium backend.
 		
 
 SUSE Linux Enterprise Server (example for SLES 15 SP5)
-"""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Prepare environment
-==================
+===================
 
 **1. Update:**
 
@@ -183,7 +186,7 @@ Update your system, download and install required packages.
 
 	
 Install Application
-==================
+===================
 
 Download and unzip application, and create a link for it.
 
@@ -323,10 +326,10 @@ Finally start OpenCelium backend.
 		
 
 Red Hat Enterprise Linux (example for Red Hat 9.2)
-"""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Prepare environment
-==================
+===================
 
 **1. Update:**
 
@@ -345,7 +348,7 @@ Update your system, download and install required packages.
 
 	
 Install Application
-==================
+===================
 
 Download and unzip application, and create a link for it.
 
@@ -520,9 +523,10 @@ Use default Docker installation guide.
 
    * `Docker Engine <https://docs.docker.com/engine/installation/>`_
    * `Docker Compose <https://docs.docker.com/compose/install/>`_
+  
 (opt. Docker Engine installation usually already includes Docker Compose Plugin)
 
-2. Getting started with opencelium-docker-compose:
+1. Getting started with opencelium-docker-compose:
 
 .. code-block:: sh
 	:linenos:
@@ -542,10 +546,10 @@ Use default Docker installation guide.
 
 
 DEB package for Ubuntu 24.04 LTS
-"""""""""""""""""
+"""""""""""""""""""""""""""""""""
 
 Prepare environment:
-==================
+====================
 
 **1. Update Ubuntu system:**
 
@@ -576,7 +580,7 @@ Prepare environment:
 
 
 Install Application:
-==================
+====================
 
 **1. Install deb package for OpenCelium:**
 
@@ -604,7 +608,7 @@ Install Application:
 		
 
 Configure environment (optional):
-==================
+=================================
 
 **1. Secure MySql and set root password (only for new MySql installations):**
 
@@ -645,10 +649,10 @@ Configure environment (optional):
 
 
 RPM package for SUSE Linux Enterprise Server 15 SP5
-"""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Prepare environment:
-==================
+====================
 
 **1. Update SLES system:**
 
@@ -665,7 +669,7 @@ Prepare environment:
 	
 
 Install Application:
-==================
+====================
 
 **1. Install rpm package for OpenCelium:**
 
@@ -692,7 +696,7 @@ Install Application:
 		
 
 Configure environment (optional):
-==================
+=================================
 
 **1. Secure MySql and set root password (only for new MySql installations):**
 
@@ -732,10 +736,10 @@ Configure environment (optional):
 
 
 RPM package for RedHat 9.2
-"""""""""""""""""
+"""""""""""""""""""""""""""
 
 Prepare environment:
-==================
+====================
 
 **1. Update RedHat system:**
 
@@ -757,7 +761,7 @@ Prepare environment:
 	
 
 Install Application:
-==================
+====================
 
 **1. Install rpm package for OpenCelium:**
 
@@ -805,7 +809,7 @@ Install Application:
 		
 
 Configure environment (optional):
-==================
+=================================
 
 **1. Secure MySql and set root password (only for new MySql installations):**
 

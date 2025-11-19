@@ -110,10 +110,11 @@ For login using LDAP credentials, please have a look into OpenCelium Logs for tr
 .. |image2| image:: ../img/management/authentication/2.png
    :align: middle
    :width: 200
-.. |image3| image:: ../img/management/authentication/3.png
-   :align: middle
 .. |image4| image:: ../img/management/authentication/4.png
    :align: middle
    :width: 400
+
+
+
 
 

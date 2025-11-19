@@ -2,6 +2,9 @@
 Administration
 ##################
 
+.. contents::
+   :local:
+
 Services
 """""""""""""""""
 
@@ -40,7 +43,7 @@ Backend:
 
 
 Routing of the backend through an endpoint
-"""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""
 
 To change this routing you need to follow the next steps.
 
@@ -123,7 +126,7 @@ Start opencelium services automatically on system start
 .. _getting_started-administration-logging:
 
 Logging
-"""""""""""""""""
+"""""""
 
 | If you want to have a look into OpenCelium Logs please use:
 
