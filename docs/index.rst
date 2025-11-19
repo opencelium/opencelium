@@ -37,11 +37,16 @@ into the remaining chapters as needed.
 
 .. toctree::
    :caption: Media & Sources
-   :maxdepth: 1
+   :maxdepth: 2
 
    media
    sources
-   api_docs/index
+
+.. toctree::
+   :caption: REST API
+   :maxdepth: 1
+
+   api/index
 
 .. toctree::
    :caption: Licence
@@ -52,4 +57,6 @@ into the remaining chapters as needed.
 `becon`_ © 2013-2025 becon GmbH
 
 .. _becon: LICENSE.html
+
+api_docs/index
       

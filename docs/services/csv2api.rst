@@ -1,13 +1,13 @@
-##################
+#######
 csv2api
-##################
+#######
 
 .. note::
 	csv2api is a subscription connector. Make sure that you have already got your subscription. If in doubt, contact our support support@opencelium.io.
 
 
 Installation
-"""""""""""""""""
+""""""""""""
 
 .. code-block:: sh
         :linenos:
@@ -25,7 +25,7 @@ Additional Information are available at github (https://github.com/opencelium/cs
 Afterwords please download the CSV2api Invoker file from the service portal (https://service.opencelium.io) an import it into you OpenCelium instance.
 
 Serv file through HTTP
-"""""""""""""""""
+"""""""""""""""""""""""
 
 To load the csv file its has to be available through http / https.
 
@@ -82,7 +82,7 @@ After that you can use it in a connection. Add a GetDataSources process to make 
 
 
 Additional Service
-"""""""""""""""""
+"""""""""""""""""""
 
 User **with subscription** has an access to Service Portal. There is a tool for easy conversion
 a csv file into an invoker file.

@@ -1,13 +1,13 @@
-##################
+######
 db2api
-##################
+######
 
 .. note::
 	db2api is a subscription connector. Make sure that you have already got your subscription. If in doubt, contact our support support@opencelium.io. 
 
 
 Installation
-"""""""""""""""""
+""""""""""""
 
 .. code-block:: sh
         :linenos:
@@ -18,7 +18,7 @@ Installation
 Please read default documentation here https://github.com/opencelium/db2api#user-content-installation
 
 Usage
-"""""""""""""""""
+"""""
 
 First of all add a connector to your target csv file.
 
@@ -40,7 +40,7 @@ Add an endpoint to get the right table.
 Please read more about the search options here https://github.com/opencelium/db2api#user-content-usage
 
 Supported Databases
-"""""""""""""""""
+"""""""""""""""""""
 - MICROSOFT
 - MYSQL
 - POSTGRESQL

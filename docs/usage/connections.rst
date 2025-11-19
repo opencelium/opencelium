@@ -597,13 +597,13 @@ Each log event follows a defined JSON schema:
      "request": {
        "method": "POST",
        "url": "https://api.example.com/items",
-       "body": { ... }
+       "body": {}
      },
      "response": {
        "status": 200,
-       "body": { ... }
+       "body": {}
      }
-   }
+   },
 
 
 Error Handling
