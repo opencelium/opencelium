@@ -2,6 +2,9 @@
 Updating
 ##################
 
+.. warning::
+        | Before updating, always do a full backup of your system! 
+
 .. contents::
    :local:
 
@@ -43,8 +46,20 @@ Update RPM package for RedHat 9.2
 
 	yum update
 	yum update -y OpenCelium
+
+
+| Update Docker Compose
+=================================
+
+.. code-block:: sh
+	:linenos:
+
+        cd opencelium-docker
+	docker compose down -v
+	git fetch --tags
+        git checkout tags/latest
+        docker compose up -d
 	
-| 
 | 
 
 From OC 3.x to 4.1 
