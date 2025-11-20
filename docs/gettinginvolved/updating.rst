@@ -48,7 +48,7 @@ Update RPM package for RedHat 9.2
 	yum update -y OpenCelium
 
 
-| Update Docker Compose
+Update Docker Compose
 =================================
 
 .. code-block:: sh
@@ -61,6 +61,7 @@ Update RPM package for RedHat 9.2
         docker compose up -d
 	
 | 
+|
 
 From OC 3.x to 4.1 
 """""""""""""""""""

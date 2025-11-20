@@ -527,7 +527,7 @@ Use default Docker installation guide.
 	:linenos:
 
 	git clone https://github.com/opencelium/opencelium-docker.git 
-	cp /opt/opencelium/src/backend/src/main/resources/application_default.yml /opt/opencelium/src/backend/src/main/resources/application.yml
+	cp /opt/opencelium-docker/conf/application_default.yml /opt/opencelium-docker/conf/application.yml
 	cd opencelium-docker
 
 .. note::
