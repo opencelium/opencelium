@@ -1,10 +1,10 @@
 package com.becon.opencelium.backend.database.mongodb.service;
 
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
-import com.becon.opencelium.backend.database.mysql.entity.Connector;
-import com.becon.opencelium.backend.resource.connection.ReferenceDTO;
+import com.becon.opencelium.backend.resource.connection.v5.MapperDTO;
 import com.becon.opencelium.backend.resource.connection.MethodDTO;
 import com.becon.opencelium.backend.resource.connection.OperatorDTO;
+import com.becon.opencelium.backend.resource.partialconnection.FlowchartCreateRequest;
 import com.github.fge.jsonpatch.JsonPatch;
 
 import java.util.List;
@@ -30,7 +30,7 @@ public interface ConnectionMngService {
 
     void createNewConnection(Long connectionId);
 
-    String addFlowchart(Long id, Connector connector);
+    String addFlowchart(FlowchartCreateRequest request);
 
     MethodDTO addMethod(Long connectionId, String flowId, MethodDTO method);
 
@@ -48,11 +48,11 @@ public interface ConnectionMngService {
 
     void deleteOperator(Long connectionId, String flowId, String operatorId);
 
-    ReferenceDTO addFieldBinding(Long connectionId, ReferenceDTO fieldBinding);
+    MapperDTO addMapper(Long connectionId, MapperDTO fieldBinding);
 
-    ReferenceDTO updateFieldBinding(Long connectionId, ReferenceDTO fieldBinding);
+    MapperDTO updateMapper(Long connectionId, MapperDTO fieldBinding);
 
-    ReferenceDTO updateFieldBinding(Long connectionId, String fbId, JsonPatch patch);
+    MapperDTO updateMapper(Long connectionId, String fbId, JsonPatch patch);
 
-    void deleteFieldBinding(Long connectionId, String fbId);
+    void deleteMapper(Long connectionId, String fbId);
 }

@@ -83,6 +83,7 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testImplementation 'org.mockito:mockito-inline:5.2.0'
+    testImplementation("de.flapdoodle.embed:de.flapdoodle.embed.mongo:3.5.4")
 }
 
 def generatedFilesBaseDir = "${buildDir}/generated/source/proto"

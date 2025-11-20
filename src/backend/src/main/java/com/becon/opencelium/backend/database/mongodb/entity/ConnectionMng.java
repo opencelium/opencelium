@@ -61,7 +61,7 @@ public class ConnectionMng {
     private List<FieldBindingMng> fieldBindings; // [null, null, null]
 
     @DBRef
-    private List<ReferenceMng> references;
+    private List<MapperMng> mappers;
 
     private Map<String, Object> ui;
 
@@ -151,11 +151,11 @@ public class ConnectionMng {
         this.toConnector = toConnector;
     }
 
-    public List<ReferenceMng> getReferences() {
-        return references;
+    public List<MapperMng> getMappers() {
+        return mappers;
     }
 
-    public void setReferences(List<ReferenceMng> references) {
-        this.references = references;
+    public void setMappers(List<MapperMng> mappers) {
+        this.mappers = mappers;
     }
 }

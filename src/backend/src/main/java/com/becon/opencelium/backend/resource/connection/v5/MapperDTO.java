@@ -1,30 +1,15 @@
-package com.becon.opencelium.backend.database.mongodb.entity;
-
-import org.springframework.data.annotation.Version;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.FieldType;
-import org.springframework.data.mongodb.core.mapping.MongoId;
+package com.becon.opencelium.backend.resource.connection.v5;
 
 import java.util.Map;
 
-@Document("reference")
-public class ReferenceMng {
+public class MapperDTO {
 
-    @MongoId(targetType = FieldType.OBJECT_ID)
     private String id;
-
     private String title;
-
     private String description;
-
     private String script;
-
     private Map<String, String> args;
-
     private String language;
-
-    @Version
-    private Integer revision;
 
     public String getId() {
         return id;
@@ -72,13 +57,5 @@ public class ReferenceMng {
 
     public void setLanguage(String language) {
         this.language = language;
-    }
-
-    public Integer getRevision() {
-        return revision;
-    }
-
-    public void setRevision(Integer revision) {
-        this.revision = revision;
     }
 }

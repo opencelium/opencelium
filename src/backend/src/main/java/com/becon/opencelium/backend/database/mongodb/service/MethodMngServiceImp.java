@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
+@Service("methodMngServiceImp")
 public class MethodMngServiceImp implements MethodMngService {
     private final MethodMngRepository methodMngRepository;
     private final PatchHelper patchHelper;

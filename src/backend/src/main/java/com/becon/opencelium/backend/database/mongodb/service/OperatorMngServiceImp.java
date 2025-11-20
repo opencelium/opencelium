@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
+@Service("operatorMngServiceImp")
 public class OperatorMngServiceImp implements OperatorMngService {
     private final OperatorMngRepository operatorMngRepository;
     private final PatchHelper patchHelper;

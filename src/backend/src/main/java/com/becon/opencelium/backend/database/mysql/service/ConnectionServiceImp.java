@@ -461,11 +461,15 @@ public class ConnectionServiceImp implements ConnectionService {
 
     @Override
     public String addFlowchart(FlowchartCreateRequest request) {
-        Connection connection = getById(request.getConnectionId());
+        if (!existsById(request.getConnectionId())) {
+            throw new GeneralServiceException(ExceptionConstant.INVALID_DATA, "CONNECTION_NOT_FOUND");
+        }
 
-        Connector connector = connectorService.getById(request.getConnectorId());
+        if (!connectorService.existsById(request.getConnectorId())) {
+            throw new GeneralServiceException(ExceptionConstant.INVALID_DATA, "CONNECTOR_NOT_FOUND");
+        }
 
-        return connectionMngService.addFlowchart(connection.getId(), connector);
+        return connectionMngService.addFlowchart(request);
     }
 
     // --------------------------------------------------------------------------------------------------------------------------------------------------------

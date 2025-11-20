@@ -34,6 +34,7 @@ public interface ExceptionConstant {
     String LOG_NOT_FOUND = "LOG_NOT_FOUND";
     String INTERNAL_ERROR = "INTERNAL_ERROR";
     String INVALID_DATA = "INVALID_DATA";
+    String CYCLE_DETECTED = "CYCLE_DETECTED";
 
     // ----------------------------------------- Storage Controller --------------------------------------- //
 

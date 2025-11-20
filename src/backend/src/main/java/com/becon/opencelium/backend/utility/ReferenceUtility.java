@@ -209,4 +209,8 @@ public class ReferenceUtility {
             holder.setLength(0);
         }
     }
+
+    public static String extractColor(String value) {
+        return value.substring(0, 7);
+    }
 }

@@ -21,6 +21,7 @@ import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.constant.Constant;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
+import com.becon.opencelium.backend.database.mongodb.service.ExecutionPlanService;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
@@ -31,19 +32,22 @@ import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
 import com.becon.opencelium.backend.exception.ConcurrentTestIsForbidden;
 import com.becon.opencelium.backend.execution.socket.Connection2WebSocketChannelMapping;
 import com.becon.opencelium.backend.mapper.base.Mapper;
+import com.becon.opencelium.backend.mapper.v5.ConnectionV5Mapper;
 import com.becon.opencelium.backend.resource.ApiDataResource;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.connection.*;
 import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
 import com.becon.opencelium.backend.resource.connection.old.ConnectionOldDTO;
+import com.becon.opencelium.backend.resource.connection.v5.ConnectionV5DTO;
+import com.becon.opencelium.backend.resource.connection.v5.ExecutionPlanDTO;
+import com.becon.opencelium.backend.resource.connection.v5.MapperDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.partialconnection.FlowchartCreateRequest;
 import com.becon.opencelium.backend.resource.partialconnection.NewConnectionCreateRequest;
 import com.becon.opencelium.backend.resource.request.SchedulerRequestResource;
 import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
-import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatch;
 import io.swagger.v3.oas.annotations.Operation;
@@ -92,7 +96,8 @@ public class ConnectionController {
     private final Mapper<Connection, ConnectionDTO> connectionMapper;
     private final Mapper<Connection, ConnectionResource> connectionResourceMapper;
     private final Mapper<ConnectionDTO, ConnectionOldDTO> connectionOldDTOMapper;
-    private final PatchHelper patchHelper;
+    private final ConnectionV5Mapper connectionV5Mapper;
+    private final ExecutionPlanService executionPlanService;
 
     public ConnectionController(
             Environment environment,
@@ -104,8 +109,7 @@ public class ConnectionController {
             Mapper<Connection, ConnectionResource> connectionResourceMapper,
             Mapper<ConnectionDTO, ConnectionOldDTO> connectionOldDTOMapper,
             @Qualifier("connectionServiceImp") ConnectionService connectionService,
-            @Qualifier("connectionMngServiceImp") ConnectionMngService connectionMngService,
-            PatchHelper patchHelper
+            @Qualifier("connectionMngServiceImp") ConnectionMngService connectionMngService, ConnectionV5Mapper connectionV5Mapper, ExecutionPlanService executionPlanService
     ) {
         this.environment = environment;
         this.schedulerService = schedulerService;
@@ -117,7 +121,145 @@ public class ConnectionController {
         this.connectionMngService = connectionMngService;
         this.connectionResourceMapper = connectionResourceMapper;
         this.connectionOldDTOMapper = connectionOldDTOMapper;
-        this.patchHelper = patchHelper;
+        this.connectionV5Mapper = connectionV5Mapper;
+        this.executionPlanService = executionPlanService;
+    }
+
+    @GetMapping("/v5/{connectionId}")
+    public ResponseEntity<ConnectionV5DTO> getById(@PathVariable Long connectionId){
+        ConnectionMng connectionMng = connectionMngService.getByConnectionId(connectionId);
+        Connection connection = connectionService.getById(connectionId);
+
+        return ResponseEntity.ok(connectionV5Mapper.toDTO(connectionMng, connection));
+    }
+
+    @GetMapping("/{connectionId}/execution-plan")
+    public ResponseEntity<ExecutionPlanDTO> getExecutionPlan(@PathVariable Long connectionId){
+        return ResponseEntity.ok(executionPlanService.getByConnectionId(connectionId));
+    }
+
+    @PostMapping("/new")
+    public ResponseEntity<ResultDTO<Long>> createNewConnection(@Valid @RequestBody NewConnectionCreateRequest request){
+        Long id = connectionService.createNewConnection(request);
+
+        return ResponseEntity.ok(ResultDTO.of(id));
+    }
+
+    @PostMapping("/fchart")
+    public ResponseEntity<ResultDTO<String>> addFlowchart(@Valid @RequestBody FlowchartCreateRequest request){
+        String id = connectionService.addFlowchart(request);
+
+        return ResponseEntity.ok(ResultDTO.of(id));
+    }
+
+    @PostMapping("/{connectionId}/flowchart/{flowId}/method")
+    public ResponseEntity<MethodDTO> addMethod(
+            @PathVariable Long connectionId,
+            @PathVariable String flowId,
+            @Valid @RequestBody MethodDTO method
+    ){
+        return ResponseEntity.ok(connectionMngService.addMethod(connectionId, flowId, method));
+    }
+
+    @PutMapping("/{connectionId}/flowchart/{flowId}/method")
+    public ResponseEntity<MethodDTO> updateMethod(
+            @PathVariable Long connectionId,
+            @PathVariable String flowId,
+            @Valid @RequestBody MethodDTO method
+    ){
+        return ResponseEntity.ok(connectionMngService.updateMethod(connectionId, flowId, method));
+    }
+
+    @PatchMapping("/{connectionId}/flowchart/{flowId}/method/{methodId}")
+    public ResponseEntity<MethodDTO> updateMethodPatch(
+            @PathVariable Long connectionId,
+            @PathVariable String flowId,
+            @PathVariable String methodId,
+            @RequestBody JsonPatch patch
+    ){
+        return ResponseEntity.ok(connectionMngService.updateMethod(connectionId, flowId, methodId, patch));
+    }
+
+    @DeleteMapping("/{connectionId}/flowchart/{flowId}/method/{methodId}")
+    public ResponseEntity<?> deleteMethod(
+            @PathVariable Long connectionId,
+            @PathVariable String flowId,
+            @PathVariable String methodId
+    ){
+        connectionMngService.deleteMethod(connectionId, flowId, methodId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{connectionId}/flowchart/{flowId}/operator")
+    public ResponseEntity<OperatorDTO> addOperator(
+            @PathVariable Long connectionId,
+            @PathVariable String flowId,
+            @Valid @RequestBody OperatorDTO operator
+    ){
+        return ResponseEntity.ok(connectionMngService.addOperator(connectionId, flowId, operator));
+    }
+
+    @PutMapping("/{connectionId}/flowchart/{flowId}/operator")
+    public ResponseEntity<OperatorDTO> updateOperator(
+            @PathVariable Long connectionId,
+            @PathVariable String flowId,
+            @Valid @RequestBody OperatorDTO operator
+    ){
+        return ResponseEntity.ok(connectionMngService.updateOperator(connectionId, flowId, operator));
+    }
+
+    @PatchMapping("/{connectionId}/flowchart/{flowId}/operator/{operatorId}")
+    public ResponseEntity<OperatorDTO> updateOperatorPatch(
+            @PathVariable Long connectionId,
+            @PathVariable String flowId,
+            @PathVariable String operatorId,
+            @RequestBody JsonPatch patch
+    ){
+        return ResponseEntity.ok(connectionMngService.updateOperator(connectionId, flowId, operatorId, patch));
+    }
+
+    @DeleteMapping("/{connectionId}/flowchart/{flowId}/operator/{operatorId}")
+    public ResponseEntity<?> deleteOperator(
+            @PathVariable Long connectionId,
+            @PathVariable String flowId,
+            @PathVariable String operatorId
+    ){
+        connectionMngService.deleteOperator(connectionId, flowId, operatorId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{connectionId}/field-binding")
+    public ResponseEntity<MapperDTO> addFieldBinding(
+            @PathVariable Long connectionId,
+            @Valid @RequestBody MapperDTO fieldBinding
+    ){
+        return ResponseEntity.ok(connectionMngService.addMapper(connectionId, fieldBinding));
+    }
+
+    @PutMapping("/{connectionId}/field-binding")
+    public ResponseEntity<MapperDTO> updateFieldBinding(
+            @PathVariable Long connectionId,
+            @Valid @RequestBody MapperDTO fieldBinding
+    ){
+        return ResponseEntity.ok(connectionMngService.updateMapper(connectionId, fieldBinding));
+    }
+
+    @PatchMapping("/{connectionId}/field-binding/{fbId}")
+    public ResponseEntity<MapperDTO> updateFieldBindingPatch(
+            @PathVariable Long connectionId,
+            @PathVariable String fbId,
+            @RequestBody JsonPatch patch
+    ){
+        return ResponseEntity.ok(connectionMngService.updateMapper(connectionId, fbId, patch));
+    }
+
+    @DeleteMapping("/{connectionId}/field-binding/{fbId}")
+    public ResponseEntity<?> deleteFieldBinding(
+            @PathVariable Long connectionId,
+            @PathVariable String fbId
+    ){
+        connectionMngService.deleteMapper(connectionId, fbId);
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Retrieves all connections from database")
@@ -314,130 +456,6 @@ public class ConnectionController {
     public ResponseEntity<?> delete(@PathVariable("id") Long id) {
         connectionService.deleteById(id);
         return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/new")
-    public ResponseEntity<ResultDTO<Long>> createNewConnection(@Valid @RequestBody NewConnectionCreateRequest request){
-        Long id = connectionService.createNewConnection(request);
-
-        return ResponseEntity.ok(ResultDTO.of(id));
-    }
-
-    @PostMapping("/fchart")
-    public ResponseEntity<ResultDTO<String>> addFlowchart(@Valid @RequestBody FlowchartCreateRequest request){
-        String id = connectionService.addFlowchart(request);
-
-        return ResponseEntity.ok(ResultDTO.of(id));
-    }
-
-    @PostMapping("/{connectionId}/flowchart/{flowId}/method")
-    public ResponseEntity<MethodDTO> addMethod(
-            @PathVariable Long connectionId,
-            @PathVariable String flowId,
-            @Valid @RequestBody MethodDTO method
-    ){
-        return ResponseEntity.ok(connectionMngService.addMethod(connectionId, flowId, method));
-    }
-
-    @PutMapping("/{connectionId}/flowchart/{flowId}/method")
-    public ResponseEntity<MethodDTO> updateMethod(
-            @PathVariable Long connectionId,
-            @PathVariable String flowId,
-            @Valid @RequestBody MethodDTO method
-    ){
-        return ResponseEntity.ok(connectionMngService.updateMethod(connectionId, flowId, method));
-    }
-
-    @PatchMapping("/{connectionId}/flowchart/{flowId}/method/{methodId}")
-    public ResponseEntity<MethodDTO> updateMethodPatch(
-            @PathVariable Long connectionId,
-            @PathVariable String flowId,
-            @PathVariable String methodId,
-            @RequestBody JsonPatch patch
-    ){
-        return ResponseEntity.ok(connectionMngService.updateMethod(connectionId, flowId, methodId, patch));
-    }
-
-    @DeleteMapping("/{connectionId}/flowchart/{flowId}/method/{methodId}")
-    public ResponseEntity<?> deleteMethod(
-            @PathVariable Long connectionId,
-            @PathVariable String flowId,
-            @PathVariable String methodId
-    ){
-        connectionMngService.deleteMethod(connectionId, flowId, methodId);
-        return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("/{connectionId}/flowchart/{flowId}/operator")
-    public ResponseEntity<OperatorDTO> addOperator(
-            @PathVariable Long connectionId,
-            @PathVariable String flowId,
-            @Valid @RequestBody OperatorDTO operator
-    ){
-        return ResponseEntity.ok(connectionMngService.addOperator(connectionId, flowId, operator));
-    }
-
-    @PutMapping("/{connectionId}/flowchart/{flowId}/operator")
-    public ResponseEntity<OperatorDTO> updateOperator(
-            @PathVariable Long connectionId,
-            @PathVariable String flowId,
-            @Valid @RequestBody OperatorDTO operator
-    ){
-        return ResponseEntity.ok(connectionMngService.updateOperator(connectionId, flowId, operator));
-    }
-
-    @PatchMapping("/{connectionId}/flowchart/{flowId}/operator/{operatorId}")
-    public ResponseEntity<OperatorDTO> updateOperatorPatch(
-            @PathVariable Long connectionId,
-            @PathVariable String flowId,
-            @PathVariable String operatorId,
-            @RequestBody JsonPatch patch
-    ){
-        return ResponseEntity.ok(connectionMngService.updateOperator(connectionId, flowId, operatorId, patch));
-    }
-
-    @DeleteMapping("/{connectionId}/flowchart/{flowId}/operator/{operatorId}")
-    public ResponseEntity<?> deleteOperator(
-            @PathVariable Long connectionId,
-            @PathVariable String flowId,
-            @PathVariable String operatorId
-    ){
-        connectionMngService.deleteOperator(connectionId, flowId, operatorId);
-        return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("/{connectionId}/field-binding")
-    public ResponseEntity<ReferenceDTO> addFieldBinding(
-            @PathVariable Long connectionId,
-            @Valid @RequestBody ReferenceDTO fieldBinding
-    ){
-        return ResponseEntity.ok(connectionMngService.addFieldBinding(connectionId, fieldBinding));
-    }
-
-    @PutMapping("/{connectionId}/field-binding")
-    public ResponseEntity<ReferenceDTO> updateFieldBinding(
-            @PathVariable Long connectionId,
-            @Valid @RequestBody ReferenceDTO fieldBinding
-    ){
-        return ResponseEntity.ok(connectionMngService.updateFieldBinding(connectionId, fieldBinding));
-    }
-
-    @PatchMapping("/{connectionId}/field-binding/{fbId}")
-    public ResponseEntity<ReferenceDTO> updateFieldBindingPatch(
-            @PathVariable Long connectionId,
-            @PathVariable String fbId,
-            @RequestBody JsonPatch patch
-    ){
-        return ResponseEntity.ok(connectionMngService.updateFieldBinding(connectionId, fbId, patch));
-    }
-
-    @DeleteMapping("/{connectionId}/field-binding/{fbId}")
-    public ResponseEntity<?> deleteFieldBinding(
-            @PathVariable Long connectionId,
-            @PathVariable String fbId
-    ){
-        connectionMngService.deleteFieldBinding(connectionId, fbId);
-        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Validates a connection for correctly constructed structure")

@@ -5,23 +5,20 @@ import com.becon.opencelium.backend.constant.props.OpenceliumProps;
 import com.becon.opencelium.backend.database.mongodb.dao.ConnectionMngDAO;
 import com.becon.opencelium.backend.database.mongodb.entity.*;
 import com.becon.opencelium.backend.database.mongodb.repository.ConnectionMngRepository;
-import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.mapper.base.Mapper;
-import com.becon.opencelium.backend.resource.connection.ReferenceDTO;
+import com.becon.opencelium.backend.resource.connection.v5.MapperDTO;
 import com.becon.opencelium.backend.resource.connection.MethodDTO;
 import com.becon.opencelium.backend.resource.connection.OperatorDTO;
+import com.becon.opencelium.backend.resource.partialconnection.FlowchartCreateRequest;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.github.fge.jsonpatch.JsonPatch;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 @Service
 public class ConnectionMngServiceImp implements ConnectionMngService {
@@ -33,9 +30,10 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     private final ConnectionMngDAO connectionMngDAO;
     private final Mapper<MethodMng, MethodDTO> methodMngMapper;
     private final Mapper<OperatorMng, OperatorDTO> operatorMngMapper;
-    private final Mapper<ReferenceMng, ReferenceDTO> referenceMapper;
-    private final ReferenceMngService referenceMngService;
+    private final Mapper<MapperMng, MapperDTO> mapperMapper;
+    private final MapperMngService mapperMngService;
     private final PatchHelper patchHelper;
+    private final ExecutionPlanService executionPlanService;
 
     public ConnectionMngServiceImp(
             ConnectionMngRepository connectionMngRepository,
@@ -46,7 +44,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
             ConnectionMngDAO connectionMngDAO,
             Mapper<MethodMng, MethodDTO> methodMngMapper,
             Mapper<OperatorMng, OperatorDTO> operatorMngMapper,
-            Mapper<ReferenceMng, ReferenceDTO> referenceMapper, ReferenceMngService referenceMngService, PatchHelper patchHelper
+            Mapper<MapperMng, MapperDTO> mapperMapper, MapperMngService mapperMngService, PatchHelper patchHelper, ExecutionPlanService executionPlanService
     ) {
         this.connectionMngRepository = connectionMngRepository;
         this.fieldBindingMngService = fieldBindingMngService;
@@ -56,9 +54,10 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         this.connectionMngDAO = connectionMngDAO;
         this.methodMngMapper = methodMngMapper;
         this.operatorMngMapper = operatorMngMapper;
-        this.referenceMapper = referenceMapper;
-        this.referenceMngService = referenceMngService;
+        this.mapperMapper = mapperMapper;
+        this.mapperMngService = mapperMngService;
         this.patchHelper = patchHelper;
+        this.executionPlanService = executionPlanService;
     }
 
     @Override
@@ -190,30 +189,14 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         ConnectionMng connectionMng = new ConnectionMng();
         connectionMng.setConnectionId(connectionId);
         connectionMng.setVersion(ocProps.getVersion());
+        connectionMng.setExecutionPlan(executionPlanService.initNew());
 
         connectionMngRepository.save(connectionMng);
     }
 
     @Override
-    public String addFlowchart(Long id, Connector connector) {
-        ConnectionMng connectionMng = getByConnectionId(id);
-
-        FlowchartMng flowchartMng = new FlowchartMng();
-        flowchartMng.setConnectorId(connector.getId());
-        flowchartMng.setTitle(connector.getTitle());
-        flowchartMng.setFlowId(UUID.randomUUID().toString());
-
-        if (connectionMng.getFlowcharts() == null) {
-            connectionMng.setFlowcharts(new ArrayList<>());
-        }
-
-        connectionMng.getFlowcharts().add(flowchartMng);
-
-        try {
-            connectionMngRepository.save(connectionMng);
-        } catch (OptimisticLockingFailureException e) {
-            throw new RuntimeException(e);
-        }
+    public String addFlowchart(FlowchartCreateRequest request) {
+        FlowchartMng flowchartMng = connectionMngDAO.addFlowchart(request);
 
         return flowchartMng.getFlowId();
     }
@@ -315,46 +298,52 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     }
 
     @Override
-    public ReferenceDTO addFieldBinding(Long connectionId, ReferenceDTO fieldBinding) {
-        ReferenceMng reference = referenceMapper.toEntity(fieldBinding);
+    public MapperDTO addMapper(Long connectionId, MapperDTO fieldBinding) {
+        MapperMng mapper = mapperMapper.toEntity(fieldBinding);
 
-        ReferenceMng savedReference = connectionMngDAO.pushNewReference(connectionId, reference);
+        ExecutionPlanMng executionPlan = executionPlanService.reorderSteps(connectionId, mapper, false);
 
-        return referenceMapper.toDTO(savedReference);
+        MapperMng savedMapper = connectionMngDAO.pushNewMapperAndUpdatePlan(connectionId, mapper, executionPlan);
+
+        return mapperMapper.toDTO(savedMapper);
     }
 
     @Override
-    public ReferenceDTO updateFieldBinding(Long connectionId, ReferenceDTO referenceDTO) {
-        if (referenceDTO.getId() == null) {
-            throw new GeneralServiceException(ExceptionConstant.INVALID_DATA, "FIELD_BINDING_ID_NULL");
+    public MapperDTO updateMapper(Long connectionId, MapperDTO mapperDTO) {
+        if (mapperDTO.getId() == null) {
+            throw new GeneralServiceException(ExceptionConstant.INVALID_DATA, "MAPPER_ID_NULL");
         }
 
         connectionMngDAO.checkConnection(connectionId);
 
-        ReferenceMng referenceToUpdate = referenceMapper.toEntity(referenceDTO);
-        ReferenceMng reference = referenceMngService.getById(referenceToUpdate.getId());
-        referenceToUpdate.setRevision(reference.getRevision());
+        MapperMng mapperToUpdate = mapperMapper.toEntity(mapperDTO);
+        MapperMng mapper = mapperMngService.getById(mapperToUpdate.getId());
+        mapperToUpdate.setRevision(mapper.getRevision());
 
-        referenceMngService.save(referenceToUpdate);
+        executionPlanService.reorderSteps(connectionId, mapper, true);
 
-        return referenceMapper.toDTO(referenceToUpdate);
+        mapperMngService.save(mapperToUpdate);
+
+        return mapperMapper.toDTO(mapperToUpdate);
     }
 
     @Override
-    public ReferenceDTO updateFieldBinding(Long connectionId, String fbId, JsonPatch patch) {
+    public MapperDTO updateMapper(Long connectionId, String fbId, JsonPatch patch) {
         connectionMngDAO.checkConnection(connectionId);
 
-        ReferenceMng referenceMng = referenceMngService.getById(fbId);
-        ReferenceMng patched = patchHelper.patch(patch, referenceMng, ReferenceMng.class);
+        MapperMng mapperMng = mapperMngService.getById(fbId);
+        MapperMng patched = patchHelper.patch(patch, mapperMng, MapperMng.class);
 
-        referenceMngService.save(patched);
+        executionPlanService.reorderSteps(connectionId, patched, true);
 
-        return referenceMapper.toDTO(patched);
+        mapperMngService.save(patched);
+
+        return mapperMapper.toDTO(patched);
     }
 
     @Override
-    public void deleteFieldBinding(Long connectionId, String fbId) {
-        connectionMngDAO.removeReference(connectionId, fbId);
+    public void deleteMapper(Long connectionId, String fbId) {
+        connectionMngDAO.removeMapper(connectionId, fbId);
     }
 
     private void deleteChildren(ConnectionMng connectionMng) {
