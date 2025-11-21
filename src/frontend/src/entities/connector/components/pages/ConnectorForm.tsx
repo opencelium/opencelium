@@ -37,6 +37,10 @@ import { setCurrentConnector } from "../../redux_toolkit/slices/ConnectorSlice";
 import MasterPasswordInput from "@entity/connector/components/master_password_input/MasterPasswordInput";
 import Validation from "@application/classes/Validation";
 import {setFocusById} from "@application/utils/utils";
+import {TooltipButton} from "@app_component/base/tooltip_button/TooltipButton";
+import {ConnectionSocketLog, DetailedMethodSegment, MethodProperty} from "@root/requests/models/ConnectionLog";
+import axios from "axios";
+import AIResultsContainer from "@app_component/connection_logs/ConnectorPanel/TraceItem/MethodTrace/AIResultsContainer";
 
 
 const ConnectorForm: FC<IForm> = ({isAdd, isUpdate}) => {
@@ -44,6 +48,8 @@ const ConnectorForm: FC<IForm> = ({isAdd, isUpdate}) => {
         gettingConnector, currentConnector, addingConnector, checkingConnectorTitle, isCurrentConnectorHasUniqueTitle,
         isCurrentConnectorHasInvalidRequestData, testingRequestData, updatingConnector, error, masterPassword,
     } = Connector.getReduxState();
+    const [isAILoading, setAILoading] = useState<boolean>(false);
+    const [aiResults, setAIResults] = useState<any>([]);
     const dispatch = useAppDispatch();
     const {gettingInvokers, invokers} = Invoker.getReduxState();
     const [shouldNavigateToConnection, setShouldNavigateToConnection] = useState<boolean>(false);
@@ -91,6 +97,25 @@ const ConnectorForm: FC<IForm> = ({isAdd, isUpdate}) => {
     },[addingConnector, updatingConnector]);
     const test = () => {
         dispatch(testRequestData(connector.getPoustModel(true)));
+    }
+    const askAI = async (e: any) => {
+        e.stopPropagation();
+        const invokerName = connector.invoker.name;
+        let invoker = invokers.find(i => i.name === invokerName);
+        if (!invoker) return;
+        console.log(invoker.operations);
+        const operation = invoker.operations.find((op: any) => op.type === 'test');
+        if (!operation) return;
+        const methodName = operation.name;
+        const params = (operation.request.endpoint.match(/\*:[^:*]+:\*/g) || []).map((s: any) => s.slice(2, -2));
+        const q = `System - ${invokerName}: pathVariable: ${params.join(', ')};${methodName} ${operation.request.method} - ${error.message}; url: ${operation.request.endpoint}`;
+        setAILoading(true);
+        const response = await axios.get(`http://localhost:4000/entry`, {
+            params: { q },
+        });
+        const results = response.data;
+        setAIResults(results);
+        setAILoading(false);
     }
     const onSuccessMasterPassword = () => {
         setHasMasking(false);
@@ -193,6 +218,10 @@ const ConnectorForm: FC<IForm> = ({isAdd, isUpdate}) => {
                     handleClick={test}
                     isLoading={testingRequestData === API_REQUEST_STATE.START}
                 />}
+                {!!error && <Button
+                    margin={"0 20px 0 0"}
+                    float={'right'} label={'AI Service'} icon={'star_border_purple500'} handleClick={(e) => askAI(e)}/>}
+                {aiResults && aiResults.length > 0 && <div style={{marginTop: '100px'}}><AIResultsContainer aiResults={aiResults}/></div>}
             </FormSection>
         ]
     }
