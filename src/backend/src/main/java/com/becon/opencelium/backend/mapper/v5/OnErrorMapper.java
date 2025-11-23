@@ -7,7 +7,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
 @Named("onErrorMapper")
-@Mapper(componentModel = "spring", uses = {RetryMapper.class})
+@Mapper(componentModel = "spring", uses = {RetryOnErrorMapper.class})
 public interface OnErrorMapper {
 
     @Named("toDTO")

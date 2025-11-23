@@ -1,6 +1,5 @@
 package com.becon.opencelium.backend.resource.connection.v5;
 
-import com.becon.opencelium.backend.database.mysql.entity.BusinessLayout;
 import com.becon.opencelium.backend.resource.connection.MethodDTO;
 import com.becon.opencelium.backend.resource.connection.OperatorDTO;
 import com.becon.opencelium.backend.resource.connector.InvokerDTO;
@@ -13,10 +12,9 @@ public class FlowchartDTO {
     private Integer connectorId;
     private String title;
     private String icon;
-    private boolean sslCert;
-    private int timeout;
+    private Boolean sslCert;
+    private Integer timeout;
     private InvokerDTO invoker;
-    private BusinessLayout businessLayout;
     private List<MethodDTO> methods;
     private List<OperatorDTO> operators;
 
@@ -44,19 +42,19 @@ public class FlowchartDTO {
         this.icon = icon;
     }
 
-    public boolean isSslCert() {
+    public Boolean isSslCert() {
         return sslCert;
     }
 
-    public void setSslCert(boolean sslCert) {
+    public void setSslCert(Boolean sslCert) {
         this.sslCert = sslCert;
     }
 
-    public int getTimeout() {
+    public Integer getTimeout() {
         return timeout;
     }
 
-    public void setTimeout(int timeout) {
+    public void setTimeout(Integer timeout) {
         this.timeout = timeout;
     }
 
@@ -66,14 +64,6 @@ public class FlowchartDTO {
 
     public void setInvoker(InvokerDTO invoker) {
         this.invoker = invoker;
-    }
-
-    public BusinessLayout getBusinessLayout() {
-        return businessLayout;
-    }
-
-    public void setBusinessLayout(BusinessLayout businessLayout) {
-        this.businessLayout = businessLayout;
     }
 
     public List<MethodDTO> getMethods() {

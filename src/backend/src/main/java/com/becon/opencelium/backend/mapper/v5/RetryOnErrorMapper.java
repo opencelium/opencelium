@@ -7,7 +7,7 @@ import org.mapstruct.Named;
 
 @Named("retryMapper")
 @Mapper(componentModel = "spring")
-public interface RetryMapper {
+public interface RetryOnErrorMapper {
 
     @Named("toDTO")
     RetryOnErrorDTO toDTO(RetryOnErrorMng retry);
