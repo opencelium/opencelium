@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.execution.executor;
 
 import com.becon.opencelium.backend.enums.RelationalOperator;
+import com.becon.opencelium.backend.execution.ExecutionMemory;
 import com.becon.opencelium.backend.execution.executor.extractor.Extractor;
 import com.becon.opencelium.backend.execution.executor.extractor.ReferenceExtractor;
 import com.becon.opencelium.backend.execution.executor.model.Enhancement;
@@ -16,8 +17,6 @@ import com.becon.opencelium.backend.scriptengine.ScriptExecutionManager;
 import com.becon.opencelium.backend.scriptengine.ScriptExecutionManagerProvider;
 import com.becon.opencelium.backend.utility.ReferenceUtility;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -25,74 +24,34 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ExecutionManagerImpl implements ExecutionManager {
-    private final Map<String, Object> webhookVars;
     private final Extractor refExtractor;
-    private final List<Loop> loops = new ArrayList<>();
-    private final Map<Integer, Map<String, String>> requestDataMap = new HashMap<>();
-    private final List<FieldBind> fieldBind;
-    private final List<Operation> operations = new ArrayList<>();
     private final ScriptExecutionManager scriptExecutionManager;
-    private Integer currentCtorId;
-    private Pagination pagination;
+    private final ExecutionMemory executionMemory;
 
     public ExecutionManagerImpl(Map<String, Object> webhookVars, List<FlowchartEx> flowcharts, List<FieldBind> fieldBind) {
-        this.webhookVars = webhookVars;
-        this.fieldBind = fieldBind;
-        flowcharts.forEach(flowchart -> requestDataMap.put(flowchart.getCtorId(), flowchart.getRequiredData()));
-
+        this.executionMemory = new ExecutionMemory(webhookVars, fieldBind, flowcharts);
         this.refExtractor = new ReferenceExtractor(this);
         this.scriptExecutionManager = ScriptExecutionManagerProvider.get();
     }
 
     @Override
     public Map<String, Object> getWebhookVars() {
-        return webhookVars;
-    }
-
-    @Override
-    public List<Loop> getLoops() {
-        return loops;
-    }
-
-    @Override
-    public String generateKey(int loopDepth) {
-        if (loopDepth == 0 || loops.isEmpty()) {
-            return "#";
-        }
-
-        return loops.stream()
-                .limit(loopDepth)
-                .map(loop -> {
-                    if (loop.getOperator() == RelationalOperator.FOR) {
-                        return String.valueOf(loop.getIndex());
-                    } else {
-                        return loop.getValue();
-                    }
-                })
-                .collect(Collectors.joining(", "));
+        return executionMemory.getWebhookVars();
     }
 
     @Override
     public Map<String, String> getRequestData(Integer ctorId) {
-        // if 'connectorId' is null then use current connectors' id:
-        ctorId = ctorId == null ? this.currentCtorId : ctorId;
-
-        return requestDataMap.get(ctorId);
+        return executionMemory.getRequestData(ctorId);
     }
 
     @Override
-    public Optional<Operation> findOperationByColor(String color) {
-        return operations.stream()
-                .filter(operation -> operation.getColor().equals(color))
-                .findFirst();
+    public String getPaginationParamValue(PageParam pageParam) {
+        return executionMemory.getPaginationParamValue(pageParam);
     }
 
     @Override
     public Object executeScript(String bindId) {
-        Enhancement enhancement = fieldBind.stream()
-                .filter(fb -> Objects.equals(bindId, fb.getBindId()))
-                .map(FieldBind::getEnhance).findFirst()
-                .orElseThrow(() -> new RuntimeException("Non existing fieldBind id 'bindId' = " + bindId));
+        Enhancement enhancement = executionMemory.getEnhancementByBindId(bindId);
 
         ScriptEngine scriptEngine = scriptExecutionManager.resolveEngine(LanguageType.getByCode(enhancement.getLang()))
                 .orElseThrow(() -> new RuntimeException("No engine is available for '%s' language".formatted(enhancement.getLang())));
@@ -137,27 +96,53 @@ public class ExecutionManagerImpl implements ExecutionManager {
     }
 
     @Override
-    public void addOperation(Operation operation) {
-        this.operations.add(operation);
-    }
-
-    @Override
-    public List<Operation> getAllOperations() {
-        return operations;
-    }
-
-    @Override
     public void setCurrentCtorId(Integer ctorId) {
-        this.currentCtorId = ctorId;
+        executionMemory.setCurrentCtorId(ctorId);
     }
 
     @Override
     public void setPagination(Pagination pagination) {
-        this.pagination = pagination;
+        executionMemory.setPagination(pagination);
     }
 
     @Override
-    public String getPaginationParamValue(PageParam pageParam) {
-        return pagination.getParamValue(pageParam);
+    public List<Loop> getLoops() {
+        return executionMemory.getLoops();
+    }
+
+
+    @Override
+    public String generateKey(int loopDepth) {
+        List<Loop> loops = executionMemory.getLoops();
+
+        if (loopDepth == 0 || loops.isEmpty()) {
+            return "#";
+        }
+
+        return loops.stream()
+                .limit(loopDepth)
+                .map(loop -> {
+                    if (loop.getOperator() == RelationalOperator.FOR) {
+                        return String.valueOf(loop.getIndex());
+                    } else {
+                        return loop.getValue();
+                    }
+                })
+                .collect(Collectors.joining(", "));
+    }
+
+    @Override
+    public Optional<Operation> findOperationByColor(String color) {
+        return executionMemory.findOperationByColor(color);
+    }
+
+    @Override
+    public void addOperation(Operation operation) {
+        executionMemory.getAllOperations().add(operation);
+    }
+
+    @Override
+    public List<Operation> getAllOperations() {
+        return executionMemory.getAllOperations();
     }
 }
