@@ -2,6 +2,7 @@ package com.becon.opencelium.backend.database.mongodb.service;
 
 import com.becon.opencelium.backend.constant.ExceptionConstant;
 import com.becon.opencelium.backend.constant.props.OpenceliumProps;
+import com.becon.opencelium.backend.database.mongodb.criteria.ConnectionCriteria;
 import com.becon.opencelium.backend.database.mongodb.dao.ConnectionMngDAO;
 import com.becon.opencelium.backend.database.mongodb.entity.*;
 import com.becon.opencelium.backend.database.mongodb.repository.ConnectionMngRepository;
@@ -122,10 +123,8 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
 
     @Override
     public ConnectionMng getByConnectionId(Long connectionId) {
-        ConnectionMng connectionMng = connectionMngRepository.findByConnectionId(connectionId)
+        return connectionMngRepository.findByConnectionId(connectionId)
                 .orElseThrow(() -> new ConnectionNotFoundException(connectionId));
-
-        return connectionMng;
     }
 
     @Override
@@ -344,6 +343,22 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     @Override
     public void deleteMapper(Long connectionId, String fbId) {
         connectionMngDAO.removeMapper(connectionId, fbId);
+    }
+
+    @Override
+    public void update(Long id, JsonPatch patch) {
+        ConnectionMng connectionMng = connectionMngDAO.getConnection(
+                id,
+                ConnectionCriteria.builder()
+                        .ui(true)
+                        .build()
+        );
+
+        JsonPatch connectionMngPatch = patchHelper.filterBy(patch, List.of("/ui"));
+
+        ConnectionMng patchedConnectionMng = patchHelper.patch(connectionMngPatch, connectionMng, ConnectionMng.class);
+
+        connectionMngDAO.update(patchedConnectionMng);
     }
 
     private void deleteChildren(ConnectionMng connectionMng) {

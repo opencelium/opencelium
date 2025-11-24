@@ -25,7 +25,6 @@ import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngServic
 import com.becon.opencelium.backend.database.mongodb.service.FieldBindingMngService;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
-import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.database.mysql.repository.ConnectionRepository;
 import com.becon.opencelium.backend.database.mysql.repository.MaskingRuleRepository;
@@ -33,6 +32,7 @@ import com.becon.opencelium.backend.enums.Action;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.mapper.base.Mapper;
+import com.becon.opencelium.backend.mapper.v5.ConnectionV5Mapper;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
 import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
@@ -40,11 +40,12 @@ import com.becon.opencelium.backend.resource.partialconnection.FlowchartCreateRe
 import com.becon.opencelium.backend.resource.partialconnection.NewConnectionCreateRequest;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.utility.LogFileUtility;
+import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.becon.opencelium.backend.versionmanager.EntityUpdater;
 import com.becon.opencelium.backend.versionmanager.EntityVersionManager;
 import com.becon.opencelium.backend.versionmanager.backup.MongoDbBackupService;
-import com.becon.opencelium.backend.versionmanager.backup.MysqlBackupService;
 import com.becon.opencelium.backend.versionmanager.base.Utils;
+import com.github.fge.jsonpatch.JsonPatch;
 import jakarta.persistence.EntityNotFoundException;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -80,6 +81,7 @@ public class ConnectionServiceImp implements ConnectionService {
     private final OpenceliumProps ocProps;
     private final EntityUpdater<ConnectionMng> connectionMngEntityUpdater;
     private final MongoDbBackupService mongoDbBackupService;
+    private final PatchHelper patchHelper;
 
     public ConnectionServiceImp(
             ConnectionRepository connectionRepository,
@@ -96,7 +98,8 @@ public class ConnectionServiceImp implements ConnectionService {
             MaskingRuleRepository ruleRepository,
             EntityVersionManager entityVersionManager,
             OpenceliumProps ocProps,
-            MongoDbBackupService mongoDbBackupService
+            MongoDbBackupService mongoDbBackupService,
+            PatchHelper patchHelper
     ) {
         this.connectionRepository = connectionRepository;
         this.connectorService = connectorService;
@@ -113,6 +116,7 @@ public class ConnectionServiceImp implements ConnectionService {
         this.ocProps = ocProps;
         this.connectionMngEntityUpdater = entityVersionManager.getUpdater(ConnectionMng.class);
         this.mongoDbBackupService = mongoDbBackupService;
+        this.patchHelper = patchHelper;
     }
 
 
@@ -448,9 +452,15 @@ public class ConnectionServiceImp implements ConnectionService {
             throw new GeneralServiceException(ExceptionConstant.INVALID_DATA, ExceptionMessages.CONNECTION_EXIST_WITH_TITLE.formatted(request.getTitle()));
         }
 
+        if (request.getCategoryId() != null && !categoryService.exists(request.getCategoryId())) {
+            throw new GeneralServiceException(ExceptionConstant.INVALID_DATA, ExceptionMessages.CATEGORY_NOT_FOUND);
+        }
+
         Connection connection = new Connection();
         connection.setTitle(request.getTitle());
         connection.setDescription(request.getDescription());
+        connection.setCategoryId(request.getCategoryId());
+        connection.setOcVersion(ocProps.getVersion());
 
         connection = connectionRepository.save(connection);
 
@@ -470,6 +480,31 @@ public class ConnectionServiceImp implements ConnectionService {
         }
 
         return connectionMngService.addFlowchart(request);
+    }
+
+    @Override
+    @Transactional
+    public void update(Long id, JsonPatch patch) {
+        Connection connection = getById(id);
+
+        JsonPatch connectionPatch = patchHelper.filterBy(patch, List.of("/title", "/description", "/categoryId", "/icon"));
+
+        Connection patchedConnection = patchHelper.patch(connectionPatch, connection, Connection.class);
+
+        if (!Objects.equals(patchedConnection.getTitle(), connection.getTitle())) {
+            if (existsByName(patchedConnection.getTitle())) {
+                throw new GeneralServiceException(ExceptionConstant.INVALID_DATA, ExceptionMessages.CONNECTION_EXIST_WITH_TITLE.formatted(patchedConnection.getTitle()));
+            }
+        }
+
+        if (!Objects.equals(patchedConnection.getCategoryId(), connection.getCategoryId())) {
+            if (!categoryService.exists(patchedConnection.getCategoryId())) {
+                throw new GeneralServiceException(ExceptionConstant.INVALID_DATA, ExceptionMessages.CATEGORY_NOT_FOUND);
+            }
+        }
+
+        connectionRepository.save(patchedConnection);
+        connectionMngService.update(id, patch);
     }
 
     // --------------------------------------------------------------------------------------------------------------------------------------------------------

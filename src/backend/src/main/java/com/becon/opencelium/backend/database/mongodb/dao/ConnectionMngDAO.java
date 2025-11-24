@@ -31,4 +31,6 @@ public interface ConnectionMngDAO {
     MapperMng pushNewMapperAndUpdatePlan(Long connectionId, MapperMng mapper, ExecutionPlanMng executionPlan);
 
     void updateExecutionPlan(Long connectionId, ExecutionPlanMng executionPlan);
+
+    void update(ConnectionMng connectionMng);
 }

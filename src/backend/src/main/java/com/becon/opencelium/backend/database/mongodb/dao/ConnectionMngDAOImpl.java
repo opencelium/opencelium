@@ -181,6 +181,18 @@ public class ConnectionMngDAOImpl implements ConnectionMngDAO {
     }
 
     @Override
+    public void update(ConnectionMng connectionMng) {
+        Query flowchartQuery = new Query(Criteria
+                .where("connection_id").is(connectionMng.getConnectionId()));
+
+        mongoTemplate.updateFirst(
+                flowchartQuery,
+                new Update().set("ui", connectionMng.getUi()),
+                ConnectionMng.class
+        );
+    }
+
+    @Override
     public ConnectionMng getConnection(Long connectionId, ConnectionCriteria criteria) {
         Query query = new Query(Criteria.where("connection_id").is(connectionId));
         includeFields(query, criteria);

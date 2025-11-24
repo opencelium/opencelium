@@ -13,4 +13,5 @@ public interface ExceptionMessages {
     String LOG_ELEMENT_NOT_FOUND_WITH_INDEX_PATH = "Log element not found with indexPath: %s";
     String LOOP_INDEX_IS_REQUIRED = "loopIndex is required";
     String CONNECTION_EXIST_WITH_TITLE = "Connection exist with title: '%s'";
+    String CATEGORY_NOT_FOUND = "Category not found";
 }

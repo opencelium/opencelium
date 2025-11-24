@@ -187,6 +187,26 @@ public class PatchHelper {
         return mapper.convertValue(nodeList, JsonPatch.class);
     }
 
+    public JsonPatch filterBy(JsonPatch patch, List<String> allowedPaths) {
+        JsonNode jsonNode = mapper.convertValue(patch, JsonNode.class);
+        Iterator<JsonNode> nodes = jsonNode.elements();
+
+        List<JsonNode> filtered = new ArrayList<>();
+
+        while (nodes.hasNext()) {
+            JsonNode op = nodes.next();
+            String path = op.get("path").asText();
+
+            // keep only if the path is EXACTLY in the allowed list
+            if (allowedPaths.contains(path)) {
+                filtered.add(op);
+            }
+        }
+
+        return mapper.convertValue(filtered, JsonPatch.class);
+    }
+
+
     public int size(JsonPatch jsonPatch) {
         JsonNode jsonNode = mapper.convertValue(jsonPatch, JsonNode.class);
         Iterator<JsonNode> nodes = jsonNode.elements();

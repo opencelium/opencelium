@@ -24,6 +24,7 @@ import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
 import com.becon.opencelium.backend.resource.partialconnection.FlowchartCreateRequest;
 import com.becon.opencelium.backend.resource.partialconnection.NewConnectionCreateRequest;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
+import com.github.fge.jsonpatch.JsonPatch;
 
 import java.io.IOException;
 import java.util.List;
@@ -87,4 +88,6 @@ public interface ConnectionService {
     Long createNewConnection(NewConnectionCreateRequest request);
 
     String addFlowchart(FlowchartCreateRequest request);
+
+    void update(Long id, JsonPatch patch);
 }

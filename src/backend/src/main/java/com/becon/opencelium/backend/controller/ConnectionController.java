@@ -125,6 +125,16 @@ public class ConnectionController {
         this.executionPlanService = executionPlanService;
     }
 
+    @Operation(
+            summary = "Retrieve a connection by ID",
+            description = "Returns detailed connection information including flowcharts, methods, operators, and bindings."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Connection retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = ConnectionV5DTO.class))),
+            @ApiResponse(responseCode = "400", description = "Connection not found",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class)))
+    })
     @GetMapping("/v5/{connectionId}")
     public ResponseEntity<ConnectionV5DTO> getById(@PathVariable Long connectionId){
         ConnectionMng connectionMng = connectionMngService.getByConnectionId(connectionId);
@@ -133,11 +143,30 @@ public class ConnectionController {
         return ResponseEntity.ok(connectionV5Mapper.toDTO(connectionMng, connection));
     }
 
+    @Operation(
+            summary = "Retrieve execution plan for a connection"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Execution plan retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = ExecutionPlanDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Connection not found",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class)))
+    })
     @GetMapping("/{connectionId}/execution-plan")
     public ResponseEntity<ExecutionPlanDTO> getExecutionPlan(@PathVariable Long connectionId){
         return ResponseEntity.ok(executionPlanService.getByConnectionId(connectionId));
     }
 
+    @Operation(
+            summary = "Create a new empty connection",
+            description = "Creates a new connection entity with basic metadata and returns its ID."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Connection created successfully",
+                    content = @Content(schema = @Schema(implementation = ResultDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Validation error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class)))
+    })
     @PostMapping("/new")
     public ResponseEntity<ResultDTO<Long>> createNewConnection(@Valid @RequestBody NewConnectionCreateRequest request){
         Long id = connectionService.createNewConnection(request);
@@ -145,6 +174,31 @@ public class ConnectionController {
         return ResponseEntity.ok(ResultDTO.of(id));
     }
 
+    @Operation(
+            summary = "Patch update connection",
+            description = "Updates selected fields of the connection using RFC-6902 JSON Patch."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Connection updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Validation Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class)))
+    })
+    @PatchMapping("/{id}")
+    public ResponseEntity<?> patchUpdateConnection(@PathVariable Long id, @RequestBody JsonPatch patch){
+        connectionService.update(id, patch);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(
+            summary = "Add a new flowchart to the connection",
+            description = "Creates a new flowchart inside the specified connection and returns its generated ID."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Flowchart created successfully",
+                    content = @Content(schema = @Schema(implementation = ResultDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Validation Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class)))
+    })
     @PostMapping("/fchart")
     public ResponseEntity<ResultDTO<String>> addFlowchart(@Valid @RequestBody FlowchartCreateRequest request){
         String id = connectionService.addFlowchart(request);
@@ -152,6 +206,16 @@ public class ConnectionController {
         return ResponseEntity.ok(ResultDTO.of(id));
     }
 
+    @Operation(
+            summary = "Add a method to a flowchart",
+            description = "Adds a new method to the specified flowchart."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Method added successfully",
+                    content = @Content(schema = @Schema(implementation = MethodDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Validation Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class)))
+    })
     @PostMapping("/{connectionId}/flowchart/{flowId}/method")
     public ResponseEntity<MethodDTO> addMethod(
             @PathVariable Long connectionId,
@@ -161,6 +225,16 @@ public class ConnectionController {
         return ResponseEntity.ok(connectionMngService.addMethod(connectionId, flowId, method));
     }
 
+    @Operation(
+            summary = "Update method",
+            description = "Replaces an existing method with new data."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Method updated successfully",
+                    content = @Content(schema = @Schema(implementation = MethodDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Validation Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class)))
+    })
     @PutMapping("/{connectionId}/flowchart/{flowId}/method")
     public ResponseEntity<MethodDTO> updateMethod(
             @PathVariable Long connectionId,
@@ -170,6 +244,16 @@ public class ConnectionController {
         return ResponseEntity.ok(connectionMngService.updateMethod(connectionId, flowId, method));
     }
 
+    @Operation(
+            summary = "Patch update a method",
+            description = "Applies JSON Patch operations to a single method."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Method updated successfully",
+                    content = @Content(schema = @Schema(implementation = MethodDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Validation Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class)))
+    })
     @PatchMapping("/{connectionId}/flowchart/{flowId}/method/{methodId}")
     public ResponseEntity<MethodDTO> updateMethodPatch(
             @PathVariable Long connectionId,
@@ -180,6 +264,15 @@ public class ConnectionController {
         return ResponseEntity.ok(connectionMngService.updateMethod(connectionId, flowId, methodId, patch));
     }
 
+    @Operation(
+            summary = "Delete method",
+            description = "Removes a method from the flowchart."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Method deleted successfully"),
+            @ApiResponse(responseCode = "400", description = "Validation Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class)))
+    })
     @DeleteMapping("/{connectionId}/flowchart/{flowId}/method/{methodId}")
     public ResponseEntity<?> deleteMethod(
             @PathVariable Long connectionId,
@@ -190,6 +283,13 @@ public class ConnectionController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Add operator to flowchart")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Operator added successfully",
+                    content = @Content(schema = @Schema(implementation = OperatorDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Validation Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class)))
+    })
     @PostMapping("/{connectionId}/flowchart/{flowId}/operator")
     public ResponseEntity<OperatorDTO> addOperator(
             @PathVariable Long connectionId,
@@ -199,6 +299,13 @@ public class ConnectionController {
         return ResponseEntity.ok(connectionMngService.addOperator(connectionId, flowId, operator));
     }
 
+    @Operation(summary = "Update operator")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Operator updated successfully",
+                    content = @Content(schema = @Schema(implementation = OperatorDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Validation Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class)))
+    })
     @PutMapping("/{connectionId}/flowchart/{flowId}/operator")
     public ResponseEntity<OperatorDTO> updateOperator(
             @PathVariable Long connectionId,
@@ -208,6 +315,13 @@ public class ConnectionController {
         return ResponseEntity.ok(connectionMngService.updateOperator(connectionId, flowId, operator));
     }
 
+    @Operation(summary = "Patch operator")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Operator patched successfully",
+                    content = @Content(schema = @Schema(implementation = OperatorDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Validation Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class)))
+    })
     @PatchMapping("/{connectionId}/flowchart/{flowId}/operator/{operatorId}")
     public ResponseEntity<OperatorDTO> updateOperatorPatch(
             @PathVariable Long connectionId,
@@ -218,6 +332,12 @@ public class ConnectionController {
         return ResponseEntity.ok(connectionMngService.updateOperator(connectionId, flowId, operatorId, patch));
     }
 
+    @Operation(summary = "Delete operator")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Operator deleted successfully"),
+            @ApiResponse(responseCode = "400", description = "Validation Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class)))
+    })
     @DeleteMapping("/{connectionId}/flowchart/{flowId}/operator/{operatorId}")
     public ResponseEntity<?> deleteOperator(
             @PathVariable Long connectionId,
@@ -228,6 +348,13 @@ public class ConnectionController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Add field binding")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Field binding added successfully",
+                    content = @Content(schema = @Schema(implementation = MapperDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Validation Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class)))
+    })
     @PostMapping("/{connectionId}/field-binding")
     public ResponseEntity<MapperDTO> addFieldBinding(
             @PathVariable Long connectionId,
@@ -236,6 +363,13 @@ public class ConnectionController {
         return ResponseEntity.ok(connectionMngService.addMapper(connectionId, fieldBinding));
     }
 
+    @Operation(summary = "Update field binding")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Field binding updated successfully",
+                    content = @Content(schema = @Schema(implementation = MapperDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Validation Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class)))
+    })
     @PutMapping("/{connectionId}/field-binding")
     public ResponseEntity<MapperDTO> updateFieldBinding(
             @PathVariable Long connectionId,
@@ -244,6 +378,13 @@ public class ConnectionController {
         return ResponseEntity.ok(connectionMngService.updateMapper(connectionId, fieldBinding));
     }
 
+    @Operation(summary = "Patch field binding")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Field binding updated successfully",
+                    content = @Content(schema = @Schema(implementation = MapperDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Validation Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class)))
+    })
     @PatchMapping("/{connectionId}/field-binding/{fbId}")
     public ResponseEntity<MapperDTO> updateFieldBindingPatch(
             @PathVariable Long connectionId,
@@ -253,6 +394,12 @@ public class ConnectionController {
         return ResponseEntity.ok(connectionMngService.updateMapper(connectionId, fbId, patch));
     }
 
+    @Operation(summary = "Delete field binding")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Field binding deleted successfully"),
+            @ApiResponse(responseCode = "400", description = "Validation Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class)))
+    })
     @DeleteMapping("/{connectionId}/field-binding/{fbId}")
     public ResponseEntity<?> deleteFieldBinding(
             @PathVariable Long connectionId,

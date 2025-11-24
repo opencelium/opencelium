@@ -9,6 +9,8 @@ public class NewConnectionCreateRequest {
 
     private String description;
 
+    private Integer categoryId;
+
     public String getTitle() {
         return title;
     }
@@ -23,5 +25,13 @@ public class NewConnectionCreateRequest {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Integer getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Integer categoryId) {
+        this.categoryId = categoryId;
     }
 }

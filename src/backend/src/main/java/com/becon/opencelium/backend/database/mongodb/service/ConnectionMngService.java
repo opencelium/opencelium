@@ -55,4 +55,6 @@ public interface ConnectionMngService {
     MapperDTO updateMapper(Long connectionId, String fbId, JsonPatch patch);
 
     void deleteMapper(Long connectionId, String fbId);
+
+    void update(Long id, JsonPatch patch);
 }
