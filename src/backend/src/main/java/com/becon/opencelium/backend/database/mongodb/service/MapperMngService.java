@@ -8,4 +8,6 @@ public interface MapperMngService {
     MapperMng getById(String id);
 
     void delete(String id);
+
+    void validate(MapperMng mapper);
 }

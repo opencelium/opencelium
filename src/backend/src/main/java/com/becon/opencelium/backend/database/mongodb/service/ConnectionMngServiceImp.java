@@ -204,6 +204,10 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     public MethodDTO addMethod(Long connectionId, String flowId, MethodDTO method) {
         MethodMng methodToSave = methodMngMapper.toEntity(method);
 
+        if (connectionMngDAO.existsMethodColor(connectionId, method.getColor())) {
+            throw new GeneralServiceException(ExceptionConstant.INVALID_DATA, "METHOD_COLOR_ALREADY_EXIST");
+        }
+
         MethodMng savedMethod = connectionMngDAO.pushNewMethod(connectionId, flowId, methodToSave);
 
         return methodMngMapper.toDTO(savedMethod);
@@ -224,6 +228,10 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         MethodMng oldMethod = methodMngService.getById(method.getId());
         methodToUpdate.setRevision(oldMethod.getRevision());
 
+        if (!Objects.equals(oldMethod.getColor(), method.getColor()) && connectionMngDAO.existsMethodColor(connectionId, method.getColor())) {
+            throw new GeneralServiceException(ExceptionConstant.INVALID_DATA, "METHOD_COLOR_ALREADY_EXIST");
+        }
+
         methodMngService.save(methodToUpdate);
 
         return methodMngMapper.toDTO(methodToUpdate);
@@ -237,6 +245,10 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
 
         MethodMng method = methodMngService.getById(methodId);
         MethodMng patched = patchHelper.patch(patch, method, MethodMng.class);
+
+        if (!Objects.equals(patched.getColor(), method.getColor()) && connectionMngDAO.existsMethodColor(connectionId, patched.getColor())) {
+            throw new GeneralServiceException(ExceptionConstant.INVALID_DATA, "METHOD_COLOR_ALREADY_EXIST");
+        }
 
         methodMngService.save(patched);
 
@@ -300,6 +312,8 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     public MapperDTO addMapper(Long connectionId, MapperDTO fieldBinding) {
         MapperMng mapper = mapperMapper.toEntity(fieldBinding);
 
+        mapperMngService.validate(mapper);
+
         ExecutionPlanMng executionPlan = executionPlanService.reorderSteps(connectionId, mapper, false);
 
         MapperMng savedMapper = connectionMngDAO.pushNewMapperAndUpdatePlan(connectionId, mapper, executionPlan);
@@ -319,6 +333,8 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         MapperMng mapper = mapperMngService.getById(mapperToUpdate.getId());
         mapperToUpdate.setRevision(mapper.getRevision());
 
+        mapperMngService.validate(mapperToUpdate);
+
         executionPlanService.reorderSteps(connectionId, mapper, true);
 
         mapperMngService.save(mapperToUpdate);
@@ -332,6 +348,8 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
 
         MapperMng mapperMng = mapperMngService.getById(fbId);
         MapperMng patched = patchHelper.patch(patch, mapperMng, MapperMng.class);
+
+        mapperMngService.validate(patched);
 
         executionPlanService.reorderSteps(connectionId, patched, true);
 

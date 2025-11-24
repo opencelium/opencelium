@@ -20,6 +20,7 @@ public class ReferenceUtility {
     public static final String IS_FOR_IN_VALUE_TYPE = "\\['(.*?)\\']";
     public static final String IS_SPLIT_STRING_TYPE = "\\[([a-z0-9*]+)\\]~";
     public static final String ARRAY_LETTER_INDEX = "\\[([a-z])\\]";
+    private static final Pattern DIRECT_REF_PATTERN = Pattern.compile(directRef);
 
     public static boolean containsRef(String value) {
         if (value == null) {
@@ -212,5 +213,9 @@ public class ReferenceUtility {
 
     public static String extractColor(String value) {
         return value.substring(0, 7);
+    }
+
+    public static boolean isDirectReference(String value) {
+        return DIRECT_REF_PATTERN.matcher(value).matches();
     }
 }

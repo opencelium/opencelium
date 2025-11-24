@@ -33,4 +33,6 @@ public interface ConnectionMngDAO {
     void updateExecutionPlan(Long connectionId, ExecutionPlanMng executionPlan);
 
     void update(ConnectionMng connectionMng);
+
+    boolean existsMethodColor(Long connectionId, String color);
 }

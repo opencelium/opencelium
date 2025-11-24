@@ -193,6 +193,16 @@ public class ConnectionMngDAOImpl implements ConnectionMngDAO {
     }
 
     @Override
+    public boolean existsMethodColor(Long connectionId, String color) {
+        Query query = new Query(Criteria
+                .where("connection_id").is(connectionId)
+                .and("flowcharts.methods.color").is(color));
+
+        return mongoTemplate.exists(query, ConnectionMng.class);
+    }
+
+
+    @Override
     public ConnectionMng getConnection(Long connectionId, ConnectionCriteria criteria) {
         Query query = new Query(Criteria.where("connection_id").is(connectionId));
         includeFields(query, criteria);
