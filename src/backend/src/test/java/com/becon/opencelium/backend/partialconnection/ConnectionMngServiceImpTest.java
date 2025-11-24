@@ -656,6 +656,59 @@ public class ConnectionMngServiceImpTest {
         assertTrue(steps.contains(f2));
     }
 
+    /**
+     * Test Case 16 - Mapper's method color is not present
+     */
+    @Test
+    void test_MethodColorIsNotPresent() {
+        Long connId = 115L;
+        createConnection(connId);
+
+        String f1 = addFlowchart(connId, 1, "F1");
+
+        addMethod(connId, f1, "#111111");
+        addMethod(connId, f1, "#333333");
+
+        Long secondConnId = 116L;
+        createConnection(secondConnId);
+
+        String f2 = addFlowchart(secondConnId, 1, "F2");
+        addMethod(secondConnId, f2, "#222222");
+
+        Assertions.assertThrowsExactly(GeneralServiceException.class, () -> addMapper(connId, "#222222", List.of("#111111")));
+        Assertions.assertThrowsExactly(GeneralServiceException.class, () -> addMapper(connId, "#333333", List.of("#222222")));
+
+        Assertions.assertDoesNotThrow(() -> addMapper(connId, "#111111", List.of("#333333")));
+    }
+
+    /**
+     * Test Case 17 - Duplicate method colors
+     */
+    @Test
+    void test_duplicateMethodColors() {
+        Long connId = 117L;
+        createConnection(connId);
+
+        String f1 = addFlowchart(connId, 1, "F1");
+
+        addMethod(connId, f1, "#111111");
+        addMethod(connId, f1, "#222222");
+
+        Long secondConnId = 118L;
+        createConnection(secondConnId);
+
+        String f2 = addFlowchart(secondConnId, 1, "F2");
+
+        addMethod(secondConnId, f2, "#333333");
+        addMethod(secondConnId, f2, "#444444");
+
+        Assertions.assertThrowsExactly(GeneralServiceException.class, () -> addMethod(connId, f1, "#111111"));
+        Assertions.assertThrowsExactly(GeneralServiceException.class, () -> addMethod(connId, f1, "#222222"));
+
+        Assertions.assertThrowsExactly(GeneralServiceException.class, () -> addMethod(secondConnId, f2, "#333333"));
+        Assertions.assertThrowsExactly(GeneralServiceException.class, () -> addMethod(secondConnId, f2, "#444444"));
+    }
+
     private MapperDTO addMapper(Long connectionId, String resultVar, List<String> args) {
         MapperDTO mapper = new MapperDTO();
         mapper.setLanguage("js");
@@ -854,7 +907,7 @@ public class ConnectionMngServiceImpTest {
 
         @Bean
         public ExecutionPlanMapper executionPlanMapper() {
-            return new ExecutionPlanMapper(){
+            return new ExecutionPlanMapper() {
                 @Override
                 public ExecutionPlanDTO toDTO(ExecutionPlanMng executionPlan) {
                     ExecutionPlanDTO exPlan = new ExecutionPlanDTO();

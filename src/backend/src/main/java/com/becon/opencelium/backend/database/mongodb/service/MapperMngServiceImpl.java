@@ -39,7 +39,7 @@ public class MapperMngServiceImpl implements MapperMngService {
     }
 
     private void validateArgs(Map<String, String> args) {
-        if (args.containsKey("RESULT_VAR")) {
+        if (!args.containsKey("RESULT_VAR")) {
             throw new GeneralServiceException(ExceptionConstant.INVALID_DATA, "MISSING_RESULT_VAR");
         }
 

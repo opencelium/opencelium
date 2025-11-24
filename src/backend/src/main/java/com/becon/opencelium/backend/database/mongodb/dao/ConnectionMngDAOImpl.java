@@ -16,6 +16,8 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Component
@@ -194,11 +196,11 @@ public class ConnectionMngDAOImpl implements ConnectionMngDAO {
 
     @Override
     public boolean existsMethodColor(Long connectionId, String color) {
-        Query query = new Query(Criteria
-                .where("connection_id").is(connectionId)
-                .and("flowcharts.methods.color").is(color));
 
-        return mongoTemplate.exists(query, ConnectionMng.class);
+        List<MethodMng> methods = getMethodsByConnection(connectionId);
+
+        return methods.stream()
+                .anyMatch(m -> Objects.equals(color, m.getColor()));
     }
 
 
@@ -277,5 +279,20 @@ public class ConnectionMngDAOImpl implements ConnectionMngDAO {
                     "Flowchart not found - " + flowId
             );
         }
+    }
+
+    public List<MethodMng> getMethodsByConnection(Long connectionId) {
+        Query query = new Query(Criteria.where("connection_id").is(connectionId));
+        query.fields().include("flowcharts.methods");
+
+        ConnectionMng result = mongoTemplate.findOne(query, ConnectionMng.class);
+
+        if (result == null || result.getFlowcharts() == null)
+            return List.of();
+
+        return result.getFlowcharts().stream()
+                .filter(fc -> fc.getMethods() != null)
+                .flatMap(fc -> fc.getMethods().stream())
+                .toList();
     }
 }
