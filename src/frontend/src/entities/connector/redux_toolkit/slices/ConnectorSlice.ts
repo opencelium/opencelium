@@ -25,8 +25,10 @@ import {
     deleteConnectorById,
     deleteConnectorImage,
     deleteConnectorsById,
+    existMasterPassword,
     getAllConnectors,
-    getConnectorById, getConnectorCredentials,
+    getConnectorById,
+    getConnectorCredentials,
     testRequestData,
     updateConnector,
     uploadConnectorImage
@@ -49,6 +51,8 @@ export interface ConnectorState extends ICommonState{
     uploadingConnectorImage: API_REQUEST_STATE,
     deletingConnectorImage: API_REQUEST_STATE,
     checkingMasterPassword: API_REQUEST_STATE,
+    existingMasterPassword: API_REQUEST_STATE,
+    existMasterPasswordResponse: boolean,
     masterPassword: string,
     currentConnector: ModelConnector,
 }
@@ -68,6 +72,8 @@ const initialState: ConnectorState = {
     uploadingConnectorImage: API_REQUEST_STATE.INITIAL,
     deletingConnectorImage: API_REQUEST_STATE.INITIAL,
     checkingMasterPassword: API_REQUEST_STATE.INITIAL,
+    existingMasterPassword: API_REQUEST_STATE.INITIAL,
+    existMasterPasswordResponse: false,
     masterPassword: '',
     currentConnector: null,
     ...CommonState,
@@ -105,7 +111,7 @@ export const connectorSlice = createSlice({
         },
         [checkConnectorTitle.fulfilled.type]: (state, action: PayloadAction<IResponse>) => {
             state.checkingConnectorTitle = API_REQUEST_STATE.FINISH;
-            state.isCurrentConnectorHasUniqueTitle = action.payload.message === ResponseMessages.NOT_EXISTS ? TRIPLET_STATE.TRUE : TRIPLET_STATE.FALSE;
+            state.isCurrentConnectorHasUniqueTitle = action.payload.result ? TRIPLET_STATE.TRUE : TRIPLET_STATE.FALSE;
             state.error = null;
         },
         [checkConnectorTitle.rejected.type]: (state, action: PayloadAction<IResponse>) => {
@@ -250,6 +256,18 @@ export const connectorSlice = createSlice({
         },
         [checkMasterPassword.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.checkingMasterPassword = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [existMasterPassword.pending.type]: (state) => {
+            state.existingMasterPassword = API_REQUEST_STATE.START;
+        },
+        [existMasterPassword.fulfilled.type]: (state, action: PayloadAction<boolean>) => {
+            state.existingMasterPassword = API_REQUEST_STATE.FINISH;
+            state.existMasterPasswordResponse = action.payload;
+            state.error = null;
+        },
+        [existMasterPassword.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.existingMasterPassword = API_REQUEST_STATE.ERROR;
             state.error = action.payload;
         },
         [getConnectorCredentials.pending.type]: (state) => {

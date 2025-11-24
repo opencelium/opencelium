@@ -2,6 +2,7 @@ package com.becon.opencelium.backend.execution.logger.context;
 
 
 import com.becon.opencelium.backend.execution.logger.dto.ErrorDetail;
+import com.becon.opencelium.backend.execution.logger.dto.ErrorInfoDTO;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseStatus;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseType;
 import com.becon.opencelium.backend.execution.logger.enums.SegmentType;
@@ -15,7 +16,9 @@ public class PhaseContextManager {
     private String connectionId;
     private String flowId;
     private String connectorName;
-    private ErrorDetail errorDetail;
+    // currently, execution could have only one exception
+    // if it occurs then we save it here to cast to parent elements.
+    private ErrorDetail exception; // TODO: should be removed after UI optimisation
     private final Deque<PhaseContext> stack = new ArrayDeque<>();
 
     public PhaseContextManager() {
@@ -58,9 +61,6 @@ public class PhaseContextManager {
             if (startIndex.equals(endIndex)) {
                 current.setEndOffset(phaseContext.getEndOffset());
                 current.setStatus(PhaseStatus.COMPLETE);
-                if (errorDetail != null) {
-                    current.setErrorDetail(errorDetail);
-                }
                 removed = current;
                 break;
             }
@@ -69,26 +69,29 @@ public class PhaseContextManager {
         if (removed == null) {
             throw new IllegalStateException("Phase context to end was not found in stack.");
         }
+
+        // Adds exception to parent elements
+        removed.setErrorDetail(exception); // TODO: should be removed after UI optimisation
         return removed;
     }
 
     public PhaseContext endCurrentPhase() {
-        if (errorDetail != null) {
-            PhaseContext context = stack.pop();
-            context.setErrorDetail(this.errorDetail);
-            return context;
-        }
+//        if (errorDetail != null) {
+//            PhaseContext context = stack.pop();
+//            context.setErrorDetail(this.errorDetail);
+//            return context;
+//        }
         return stack.pop();
     }
 
     public PhaseContext getCurrentPhase() {
-        if (errorDetail != null) {
-            PhaseContext context = stack.peek();
-            if (context != null) {
-                context.setErrorDetail(this.errorDetail);
-            }
-            return context;
-        }
+//        if (errorDetail != null) {
+//            PhaseContext context = stack.peek();
+//            if (context != null) {
+//                context.setErrorDetail(this.errorDetail);
+//            }
+//            return context;
+//        }
         return stack.peek();
     }
 
@@ -111,6 +114,8 @@ public class PhaseContextManager {
     public void setConnectionId(String connectionId) {
         this.connectionId = connectionId;
     }
+
+
 
     /**
      * Called when an EXCEPTION segment occurs.
@@ -138,6 +143,14 @@ public class PhaseContextManager {
         if (segmentContext.getSegmentType() != SegmentType.EXCEPTION) {
             throw new IllegalArgumentException("Requires only EXCEPTION type. Segment type: " + segmentContext.getSegmentType().name() + " is not acceptable.");
         }
-        this.errorDetail = new ErrorDetail(errorOfOriginPath, segmentContext);
+        PhaseContext currentPhase = getCurrentPhase();
+        ErrorDetail errorDetail = new ErrorDetail(errorOfOriginPath, segmentContext);
+        currentPhase.setErrorDetail(errorDetail);
+        currentPhase.setStatus(PhaseStatus.FAIL);
+        exception = errorDetail; // TODO: should be removed after UI optimisation
+    }
+
+    public ErrorDetail getException() {
+        return exception;
     }
 }

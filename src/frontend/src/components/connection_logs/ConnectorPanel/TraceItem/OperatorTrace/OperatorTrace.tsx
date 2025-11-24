@@ -1,26 +1,18 @@
 import React, {useEffect, useState} from 'react';
 import {
-	ConnectionSocketLog,
-	DetailedIfOperatorSegment, DetailedOperatorSegment,
-	LoopOperatorProperty, MetaTrace,
+	ConnectionSocketLog, DetailedOperatorSegment,MetaTrace,
 } from '@root/requests/models/ConnectionLog';
-import ToggleButton from '../ToggleButton/ToggleButton';
 import TraceItem from '../TraceItem';
 import styles from './OperatorTrace.module.css';
 import {RootState, useAppDispatch, useAppSelector} from "@application/utils/store";
 import {
 	cleanOperatorTrace,
-	copyLogContentToClipboard,
 	setTraceConfig
 } from "@root/redux_toolkit/slices/ConnectionLogSlice";
-import FontIcon from "@basic_components/FontIcon";
 import {getOperatorChildren} from "@root/redux_toolkit/action_creators/ConnectionLogCreators";
-import {ShowIndexPath} from "@app_component/connection_logs/LogsPanel/LogsPanel";
-import CopyOperatorButton from "@app_component/connection_logs/ConnectorPanel/TraceItem/OperatorTrace/CopyOperatorButton";
-import {ColorTheme} from "@style/Theme";
-import LoopIterator from "@app_component/connection_logs/ConnectorPanel/TraceItem/OperatorTrace/LoopIndex";
 import OperatorTraceExpander
 	from "@app_component/connection_logs/ConnectorPanel/TraceItem/OperatorTrace/OperatorTraceExpander";
+import ErrorMessage from "@app_component/connection_logs/ConnectorPanel/TraceItem/MethodTrace/ErrorMessage";
 
 export interface OperatorTraceProps {
 	trace: ConnectionSocketLog<DetailedOperatorSegment> & MetaTrace;
@@ -83,6 +75,7 @@ export const OperatorTrace: React.FC<OperatorTraceProps> = ({
 		}
 	}, []);
 
+	const hasError = !!trace?.error?.message;
 	return (
 		<div>
 			<OperatorTraceExpander
@@ -96,24 +89,30 @@ export const OperatorTrace: React.FC<OperatorTraceProps> = ({
 				iterationIndex={iterationIndex}
 				setIterationIndex={setIterationIndex}
 			/>
-			{expanded && (
-				<div
-					className={styles.expandedContainer}
-					style={{
-						marginLeft: INDENT_SIZE,
-					}}
-				>
-					{trace.children ? trace.children.map((innerTrace) => (
-						<TraceItem
-							key={innerTrace.indexPath}
-							trace={innerTrace}
-							flowId={flowId}
-							executionId={executionId}
-							iterationIndexes={isLoop ? [...iterationIndexes, iterationIndex] : iterationIndexes}
-						/>
-					)) : `There are no traces for ${trace.indexPath}`}
-				</div>
-			)}
+			{
+				expanded && (
+					<div
+						className={styles.expandedContainer}
+						style={{
+							marginLeft: INDENT_SIZE,
+						}}
+					>
+						{hasError ?
+							<ErrorMessage trace={trace}/>
+							:
+							trace.children ? trace.children.map((innerTrace) => (
+								<TraceItem
+									key={innerTrace.indexPath}
+									trace={innerTrace}
+									flowId={flowId}
+									executionId={executionId}
+									iterationIndexes={isLoop ? [...iterationIndexes, iterationIndex] : iterationIndexes}
+								/>
+							)) : `There are no traces for ${trace.indexPath}`
+						}
+					</div>
+				)
+			}
 		</div>
 	);
 };
