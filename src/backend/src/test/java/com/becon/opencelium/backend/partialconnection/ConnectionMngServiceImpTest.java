@@ -7,6 +7,8 @@ import com.becon.opencelium.backend.database.mongodb.repository.ConnectionMngRep
 import com.becon.opencelium.backend.database.mongodb.service.*;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.mapper.base.Mapper;
+import com.becon.opencelium.backend.mapper.v5.ExecutionPlanMapper;
+import com.becon.opencelium.backend.resource.connection.v5.ExecutionPlanDTO;
 import com.becon.opencelium.backend.resource.connection.v5.MapperDTO;
 import com.becon.opencelium.backend.resource.connection.MethodDTO;
 import com.becon.opencelium.backend.resource.connection.OperatorDTO;
@@ -846,6 +848,19 @@ public class ConnectionMngServiceImpTest {
                     dto.setArgs(entity.getArgs());
                     dto.setLanguage(entity.getLanguage());
                     return dto;
+                }
+            };
+        }
+
+        @Bean
+        public ExecutionPlanMapper executionPlanMapper() {
+            return new ExecutionPlanMapper(){
+                @Override
+                public ExecutionPlanDTO toDTO(ExecutionPlanMng executionPlan) {
+                    ExecutionPlanDTO exPlan = new ExecutionPlanDTO();
+                    exPlan.setMode(executionPlan.getMode());
+                    exPlan.setSteps(executionPlan.getSteps());
+                    return exPlan;
                 }
             };
         }
