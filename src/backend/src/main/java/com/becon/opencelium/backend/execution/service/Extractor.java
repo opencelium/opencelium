@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.execution.oc721;
+package com.becon.opencelium.backend.execution.service;
 
 public interface Extractor {
     Object extractValue(String ref);

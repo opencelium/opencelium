@@ -1,15 +1,15 @@
-package com.becon.opencelium.backend.execution;
+package com.becon.opencelium.backend.execution.executor;
 
 import com.becon.opencelium.backend.enums.RelationalOperator;
-import com.becon.opencelium.backend.execution.oc721.Connector;
-import com.becon.opencelium.backend.execution.oc721.Enhancement;
-import com.becon.opencelium.backend.execution.oc721.EnhancementService;
-import com.becon.opencelium.backend.execution.oc721.EnhancementServiceImpl;
-import com.becon.opencelium.backend.execution.oc721.Extractor;
-import com.becon.opencelium.backend.execution.oc721.FieldBind;
-import com.becon.opencelium.backend.execution.oc721.Loop;
-import com.becon.opencelium.backend.execution.oc721.Operation;
-import com.becon.opencelium.backend.execution.oc721.ReferenceExtractor;
+import com.becon.opencelium.backend.execution.model.Connector;
+import com.becon.opencelium.backend.execution.model.Enhancement;
+import com.becon.opencelium.backend.execution.service.EnhancementService;
+import com.becon.opencelium.backend.execution.service.EnhancementServiceImpl;
+import com.becon.opencelium.backend.execution.service.Extractor;
+import com.becon.opencelium.backend.execution.model.FieldBind;
+import com.becon.opencelium.backend.execution.model.Loop;
+import com.becon.opencelium.backend.execution.model.Operation;
+import com.becon.opencelium.backend.execution.service.ReferenceExtractor;
 import com.becon.opencelium.backend.invoker.entity.Pagination;
 import com.becon.opencelium.backend.enums.PageParam;
 import com.becon.opencelium.backend.scriptengine.LanguageType;
@@ -24,8 +24,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static com.becon.opencelium.backend.constant.RegExpression.pageRef;
 
 public class ExecutionManagerImpl implements ExecutionManager {
     private final Map<String, Object> webhookVars;

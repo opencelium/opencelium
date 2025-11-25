@@ -18,7 +18,7 @@ package com.becon.opencelium.backend.quartz;
 
 import com.becon.opencelium.backend.database.mysql.entity.Subscription;
 import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
-import com.becon.opencelium.backend.execution.ConnectionExecutor;
+import com.becon.opencelium.backend.execution.executor.ConnectionExecutor;
 import com.becon.opencelium.backend.execution.logger.OcLogger;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.service.ExecutionObjectService;

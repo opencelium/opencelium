@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.execution;
+package com.becon.opencelium.backend.execution.executor;
 
 import com.becon.opencelium.backend.enums.LogType;
 import com.becon.opencelium.backend.enums.OpType;
@@ -7,9 +7,9 @@ import com.becon.opencelium.backend.execution.builder.RequestEntityBuilder;
 import com.becon.opencelium.backend.execution.logger.msg.ConnectorLog;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.logger.msg.MethodData;
-import com.becon.opencelium.backend.execution.oc721.Connector;
-import com.becon.opencelium.backend.execution.oc721.Loop;
-import com.becon.opencelium.backend.execution.oc721.Operation;
+import com.becon.opencelium.backend.execution.model.Connector;
+import com.becon.opencelium.backend.execution.model.Loop;
+import com.becon.opencelium.backend.execution.model.Operation;
 import com.becon.opencelium.backend.invoker.entity.Pagination;
 import com.becon.opencelium.backend.enums.PageParam;
 import com.becon.opencelium.backend.execution.masking.MaskingService;
@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 import static com.becon.opencelium.backend.utility.MediaTypeUtility.isBinaryCompatible;
 import static com.becon.opencelium.backend.utility.MediaTypeUtility.isJsonCompatible;
 
-public class ConnectorExecutor {
+public class FlowchartExecutor {
     private final ExpressionProcessor expressionProcessor;
     private final Connector connector;
     private final ExecutionManager executionManager;
@@ -60,7 +60,7 @@ public class ConnectorExecutor {
     private final Stack<String> endPhases = new Stack<>();
 
 
-    public ConnectorExecutor(
+    public FlowchartExecutor(
             ConnectorEx connectorEx, ExecutionManager executionManager,
             RestTemplate restTemplate, OcLogger<ExecutionLog> logger,
             MaskingService masking, String direction

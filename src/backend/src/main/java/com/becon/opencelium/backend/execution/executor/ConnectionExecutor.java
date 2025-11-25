@@ -1,11 +1,11 @@
-package com.becon.opencelium.backend.execution;
+package com.becon.opencelium.backend.execution.executor;
 
 import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
 import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
-import com.becon.opencelium.backend.execution.oc721.Connector;
-import com.becon.opencelium.backend.execution.oc721.FieldBind;
-import com.becon.opencelium.backend.execution.oc721.Operation;
+import com.becon.opencelium.backend.execution.model.Connector;
+import com.becon.opencelium.backend.execution.model.FieldBind;
+import com.becon.opencelium.backend.execution.model.Operation;
 import com.becon.opencelium.backend.execution.masking.MaskingService;
 import com.becon.opencelium.backend.execution.masking.MaskingServiceImp;
 import com.becon.opencelium.backend.execution.logger.OcLogger;
@@ -44,8 +44,8 @@ public class ConnectionExecutor {
 
         executionManager = new ExecutionManagerImpl(webhookVars, source, target, fieldBind);
 
-        ConnectorExecutor sourceEx = new ConnectorExecutor(connection.getSource(), executionManager, getRestTemplate(source), executionLogger, masking, "source");
-        ConnectorExecutor targetEx = new ConnectorExecutor(connection.getTarget(), executionManager, getRestTemplate(target), executionLogger, masking, "target");
+        FlowchartExecutor sourceEx = new FlowchartExecutor(connection.getSource(), executionManager, getRestTemplate(source), executionLogger, masking, "source");
+        FlowchartExecutor targetEx = new FlowchartExecutor(connection.getTarget(), executionManager, getRestTemplate(target), executionLogger, masking, "target");
 
         sourceEx.start();
         targetEx.start();
