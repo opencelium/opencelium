@@ -2,7 +2,6 @@ package com.becon.opencelium.backend.execution.executor;
 
 import com.becon.opencelium.backend.enums.LogType;
 import com.becon.opencelium.backend.enums.OpType;
-import com.becon.opencelium.backend.enums.RelationalOperator;
 import com.becon.opencelium.backend.execution.builder.RequestEntityBuilder;
 import com.becon.opencelium.backend.execution.logger.msg.ConnectorLog;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
@@ -39,6 +38,7 @@ import java.util.Objects;
 import java.util.Stack;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.becon.opencelium.backend.utility.MediaTypeUtility.isBinaryCompatible;
 import static com.becon.opencelium.backend.utility.MediaTypeUtility.isJsonCompatible;
@@ -113,9 +113,7 @@ public class FlowchartExecutor {
             logger.logAndSend(e);
             throw e;
         } finally {
-            while(!endPhases.isEmpty()) {
-                logger.logAndSend(endPhases.pop());
-            }
+            flushEndPhases();
         }
     }
 
@@ -124,90 +122,58 @@ public class FlowchartExecutor {
             return;
         }
 
-        // points to the end of the operator body
+        Object executable = executables.get(headPointer);
         int tail = getTailPointer(headPointer);
-        String index = getIndex(executables.get(headPointer));
+        String index = getIndex(executable);
 
-        if (executables.get(headPointer) instanceof OperationDTO operation) {
+        if (executable instanceof OperationDTO operation) {
             logger.getLogEntity().setMethodData(new MethodData(operation.getOperationId()));
             logger.logAndSend(String.format("phase=OPERATION_START indexPath=%s name=\"%s\" %s", index, operation.getName(), getLoopData()));
             endPhases.push(String.format("phase=OPERATION_END indexPath=%s name=\"%s\" %s", index, operation.getName(), getLoopData()));
-
-            if (headPointer != tail) {
-                throw new RuntimeException("Methods cannot have body");
-            }
 
             executeOperation(operation);
 
             logger.logAndSend(endPhases.pop());
             logger.getLogEntity().setMethodData(null);
-        } else if (executables.get(headPointer) instanceof OperatorEx operator) {
-            if (Objects.equals(operator.getType(), "if")) {
-                logger.logAndSend(String.format("phase=IF_START indexPath=%s expression=(%s) %s", index, operator.getExpression(), getLoopData()));
-                endPhases.push(String.format("phase=IF_END indexPath=%s %s", index, getLoopData()));
+        } else if (executable instanceof OperatorEx operator && "if".equals(operator.getType())) {
+            logger.logAndSend(String.format("phase=IF_START indexPath=%s expression=(%s) %s", index, operator.getExpression(), getLoopData()));
+            endPhases.push(String.format("phase=IF_END indexPath=%s %s", index, getLoopData()));
+            endPhases.push("segment=IF_RESULT data=unknown"); // if exception occurs this will be logged, otherwise will just be skipped
 
-                boolean result;
-                try {
-                    result = (Boolean) expressionProcessor.evaluate(
-                            operator.getExpression(),
-                            executionManager::getValue,
-                            logger,
-                            masking
-                        );
+            boolean result = (Boolean) expressionProcessor.evaluate(
+                    operator.getExpression(),
+                    executionManager::getValue,
+                    logger,
+                    masking
+            );
 
-                    logger.logAndSend("segment=IF_RESULT data=" + result);
-                } catch (RuntimeException e) {
-                    logger.logAndSend("segment=IF_RESULT data=unknown");
-                    throw e;
-                }
+            endPhases.pop(); // potential exception case message is skipped
+            logger.logAndSend("segment=IF_RESULT data=" + result);
 
-                if (result) {
-                    // if result is true, then execute if operators' body
-                    execute(headPointer + 1, tail);
-                }
-                logger.logAndSend(endPhases.pop());
-            } else {
-                Loop loop = Loop.fromEx(operator);
-                Object referencedList = executionManager.getValue(loop.getRef());
-                List<String> list = new ArrayList<>();
-
-                if (ObjectUtils.isEmpty(referencedList)) {
-                    // if list empty just do nothing
-                } else if (loop.getOperator() == RelationalOperator.FOR) {
-                    int length = ((List<Object>) referencedList).size();
-
-                    for (int i = 0; i < length; i++) {
-                        list.add(String.valueOf(i));
-                    }
-
-                } else if (loop.getOperator() == RelationalOperator.FOR_IN) {
-                    list = (List<String>) referencedList;
-                } else {
-                    String[] strs = ((String) referencedList).split(loop.getDelimiter());
-
-                    Collections.addAll(list, strs);
-                }
-
-                int length = list.size();
-
-                logger.logAndSend(String.format("phase=LOOP_START indexPath=%s expression=(%s) size=%d iterator=\"%s\" %s", index, loop.getRef(), length, loop.getIterator(), getLoopData()));
-                logger.logAndSend(String.format("segment=LOOP_REF ref=(%s) data=%s", loop.getRef(), list.stream().collect(Collectors.joining(", ", "[", "]"))));
-                endPhases.push(String.format("phase=LOOP_END indexPath=%s %s", index, getLoopData()));
-
-                executionManager.getLoops().add(loop);
-                for (int i = 0; i < length; i++) {
-                    // update currently executing loops' data
-                    loop.setIndex(i);
-                    loop.setValue(list.get(i));
-
-                    // if length !=0, then execute loop operators' body
-                    execute(headPointer + 1, tail);
-                }
-
-                // remove executed loops' data
-                executionManager.getLoops().remove(loop);
-                logger.logAndSend(endPhases.pop());
+            if (result) {
+                execute(headPointer + 1, tail);
             }
+            logger.logAndSend(endPhases.pop());
+
+        } else if (executable instanceof OperatorEx operator && "loop".equals(operator.getType())) {
+            Loop loop = Loop.fromEx(operator);
+            List<String> values = buildLoopValues(loop);
+
+            logger.logAndSend(String.format("phase=LOOP_START indexPath=%s expression=(%s) size=%d iterator=\"%s\" %s", index, loop.getRef(), values.size(), loop.getIterator(), getLoopData()));
+            logger.logAndSend(String.format("segment=LOOP_REF ref=(%s) data=%s", loop.getRef(), values.stream().collect(Collectors.joining(", ", "[", "]"))));
+            endPhases.push(String.format("phase=LOOP_END indexPath=%s %s", index, getLoopData()));
+
+            executionManager.getLoops().add(loop);
+            for (int i = 0; i < values.size(); i++) {
+                // update currently executing loops' data
+                loop.setIndex(i);
+                loop.setValue(values.get(i));
+
+                execute(headPointer + 1, tail);
+            }
+            executionManager.getLoops().remove(loop);
+
+            logger.logAndSend(endPhases.pop());
         } else {
             throw new RuntimeException("Wrong type is supplied");
         }
@@ -355,6 +321,25 @@ public class FlowchartExecutor {
         return String.format("loopIterator=\"%s\" loopIndex=\"%s\"", loopIterator, loopIndex);
     }
 
+    private List<String> buildLoopValues(Loop loop) {
+        Object referencedList = executionManager.getValue(loop.getRef());
+        if (ObjectUtils.isEmpty(referencedList)) {
+            return Collections.emptyList();
+        }
+
+        return switch (loop.getOperator()) {
+            case FOR -> IntStream.range(0, ((List<Object>) referencedList).size())
+                    .mapToObj(String::valueOf)
+                    .toList();
+
+            case FOR_IN -> (List<String>) referencedList;
+
+            case SPLIT_STRING -> List.of(((String) referencedList).split(loop.getDelimiter()));
+
+            default -> Collections.emptyList();
+        };
+    }
+
     private static Comparator<Object> getComparator() {
         return (o1, o2) -> {
             String[] arr1 = getIndex(o1).split("_");
@@ -381,6 +366,12 @@ public class FlowchartExecutor {
             return ((OperatorEx) o).getIndex();
         } else {
             throw new RuntimeException("getIndex() is only applicable to OperationDTO and OperatorEX");
+        }
+    }
+
+    private void flushEndPhases() {
+        while (!endPhases.isEmpty()) {
+            logger.logAndSend(endPhases.pop());
         }
     }
 }
