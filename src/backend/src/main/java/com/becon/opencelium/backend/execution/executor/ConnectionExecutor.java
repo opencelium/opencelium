@@ -44,8 +44,8 @@ public class ConnectionExecutor {
 
         executionManager = new ExecutionManagerImpl(webhookVars, source, target, fieldBind);
 
-        FlowchartExecutor sourceEx = new FlowchartExecutor(connection.getSource(), executionManager, getRestTemplate(source), executionLogger, masking, "source");
-        FlowchartExecutor targetEx = new FlowchartExecutor(connection.getTarget(), executionManager, getRestTemplate(target), executionLogger, masking, "target");
+        ConnectorExecutor sourceEx = new ConnectorExecutor(connection.getSource(), executionManager, getRestTemplate(source), executionLogger, masking, "source");
+        ConnectorExecutor targetEx = new ConnectorExecutor(connection.getTarget(), executionManager, getRestTemplate(target), executionLogger, masking, "target");
 
         sourceEx.start();
         targetEx.start();

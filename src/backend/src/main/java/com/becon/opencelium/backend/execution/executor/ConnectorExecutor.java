@@ -25,7 +25,7 @@ import java.util.Stack;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class FlowchartExecutor {
+public class ConnectorExecutor {
     private final ExpressionProcessor expressionProcessor;
     private final ExecutionManager executionManager;
     private final OperationExecutor operationExecutor;
@@ -41,7 +41,7 @@ public class FlowchartExecutor {
     private final Stack<String> endPhases = new Stack<>();
 
 
-    public FlowchartExecutor(
+    public ConnectorExecutor(
             ConnectorEx connectorEx, ExecutionManager executionManager,
             RestTemplate restTemplate, OcLogger<ExecutionLog> logger,
             MaskingService masking, String direction
