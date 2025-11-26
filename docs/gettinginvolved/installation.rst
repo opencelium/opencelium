@@ -531,8 +531,8 @@ Use default Docker installation guide.
 	cd opencelium-docker
 
 .. note::
-	|We recommend to use always the latest tag version.
-	|
+	| We recommend to use always the latest tag version.
+	
 	| Modify application.yml
 	| Within section "Database configuration section of MariaDB and MongoDB":
 	| - change password of opencelium user for MariaDB (default "secret1234")

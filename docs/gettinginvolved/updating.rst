@@ -56,8 +56,9 @@ Update Docker Compose
 
         cd opencelium-docker
 	docker compose down -v
-	git fetch --tags
-        git checkout tags/latest
+	mv conf/application.yml /conf/application.yml.old
+        git pull
+        mv conf/application.yml.old /conf/application.yml
         docker compose up -d
 	
 | 
