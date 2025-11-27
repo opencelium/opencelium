@@ -6,7 +6,7 @@ Installation
    :local:
 
 .. note::
-	| Please check the hard- and software :doc:`requirements`, before installing OpenCelium.
+	| Please check the :doc:`requirements`, before installing OpenCelium.
 	|
 	| The installation commands must be executed by a user with sudo rights. 
 	| Ensure you have administrative privileges to properly perform the installation.
@@ -94,7 +94,7 @@ Start and enable mongod service and create a user for Opencelium.
 
 .. note::
     | If you encounter an "ECONNREFUSED" error, it indicates that 
-	| mongod was not yet ready to accept connections.
+    | mongod was not yet ready to accept connections.
     | In this case, please run the mongosh command again.
 
 **3. Nginx:**
@@ -169,18 +169,18 @@ Finally start OpenCelium backend.
 	systemctl start opencelium
 
 .. note::
-	| Now you can connect to the application, by navigating to http://localhost in your web browser.
+    | Now you can connect to the application, by navigating to http://localhost in your web browser.
 
     | The default login credentials are:
     | **Username: admin@opencelium.io**
     | **Password: 1234**
 
-	| If you want to have a look into OpenCelium Logs please use:
+    | If you want to have a look into OpenCelium Logs please use:
 	
 	.. code-block:: sh
-		:linenos:
-		
-		journalctl -xe -u opencelium -f
+        :linenos:
+
+        journalctl -xe -u opencelium -f
 		
 
 SUSE Linux Enterprise Server (example for SLES 15 SP5)
