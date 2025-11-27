@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -67,34 +68,36 @@ public class PolyglotEngine implements ScriptEngine {
     }
 
     private Map<String, Object> extractArgs(Map<String, String> args, Function<String, Object> referenceExtractor) {
-        return args.entrySet().stream()
-                .map(entry -> {
-                    Object value;
-                    try {
-                        value = referenceExtractor.apply(entry.getValue());
-                    } catch (Exception e) {
-                        throw new ScriptExecutionException(e.getMessage(), e);
+        Map<String, Object> resultMap = new HashMap<>(args.size());
+
+        for (Map.Entry<String, String> entry : args.entrySet()) {
+            Object value;
+            try {
+                value = referenceExtractor.apply(entry.getValue());
+            } catch (Exception e) {
+                throw new ScriptExecutionException(e.getMessage(), e);
+            }
+
+            if (value instanceof Map || value instanceof List) {
+                try {
+                    String stringVal = objectMapper.writeValueAsString(value)
+                            .replace("__oc__attributes.", "@")
+                            .replace(".__oc__value", "");
+
+                    if (value instanceof List) {
+                        value = objectMapper.readValue(stringVal, List.class);
+                    } else {
+                        value = objectMapper.readValue(stringVal, Map.class);
                     }
+                } catch (Exception e) {
+                    throw new ScriptExecutionException("Serialization/Deserialization error: " + e.getMessage(), e);
+                }
+            }
 
-                    if (value instanceof Map || value instanceof List) {
-                        try {
-                            String stringVal = objectMapper.writeValueAsString(value)
-                                    .replace("__oc__attributes.", "@")
-                                    .replace(".__oc__value", "");
+            resultMap.put(entry.getKey(), value);
+        }
 
-                            if (value instanceof List) {
-                                value = objectMapper.readValue(stringVal, List.class);
-                            } else {
-                                value = objectMapper.readValue(stringVal, Map.class);
-                            }
-                        } catch (Exception e) {
-                            throw new ScriptExecutionException("Serialization/Deserialization error: " + e.getMessage(), e);
-                        }
-                    }
-
-                    return Map.entry(entry.getKey(), value);
-                })
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return resultMap;
     }
 
     private ScriptRequest buildScriptRequest(String script, Map<String, Object> args) {
