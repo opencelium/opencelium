@@ -6,7 +6,7 @@ Installation
    :local:
 
 .. note::
-	| Please check the software requirements, before installing OC.
+	| Please check the hard- and software :doc:`requirements', before installing OpenCelium.
 	|
 	| The installation commands must be executed by a user with sudo rights. 
 	| Ensure you have administrative privileges to properly perform the installation.
@@ -72,8 +72,10 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 	mysql_secure_installation
 
 .. note::
-	| "mysql_secure_installation" is a command-line-tool to enhance the security of your MariaDB instance and protects it from unauthorized access.
-	| You can use default values for all prompts, unless specific changes are required.
+	| "mysql_secure_installation" is a command-line-tool to enhance the security 
+	| of your MariaDB instance and protects it from unauthorized access.
+	| You can use default values for all prompts, 
+	| unless specific changes are required for your company.
 	| Set a strong root password for the root user (there is no default password!)
 
 **2. MongoDB:**
@@ -168,17 +170,11 @@ Finally start OpenCelium backend.
 .. note::
 	Now you can connect to the application, by navigating to http://localhost in your web browser.
 
-    The default login credentials are as follows:
+    The default login credentials are:
 
-    Username: admin
-    Password: 1234
+    | **Username: admin@opencelium.io**
+    | **Password: 1234**
 
-	| Afterwards you can connect to `http://localhost`	
-	| Default User and Password is:
-	
-	| *admin@opencelium.io*
-	| *1234*
-	
 	| If you want to have a look into OpenCelium Logs please use:
 	
 	.. code-block:: sh
