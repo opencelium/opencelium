@@ -169,7 +169,7 @@ Finally start OpenCelium backend.
 	systemctl start opencelium
 
 .. note::
-    | Now you can connect to the application, by navigating to http://localhost in your web browser.
+    | Now you can connect to OpenCelium, by navigating to http://localhost in your web browser.
 
     | The default login credentials are:
     | **Username: admin@opencelium.io**
@@ -178,9 +178,9 @@ Finally start OpenCelium backend.
     | If you want to have a look into OpenCelium Logs please use:
 	
 	.. code-block:: sh
-        :linenos:
-
-        journalctl -xe -u opencelium -f
+		:linenos:
+		
+		journalctl -xe -u opencelium -f
 		
 
 SUSE Linux Enterprise Server (example for SLES 15 SP5)
