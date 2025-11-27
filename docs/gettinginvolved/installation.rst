@@ -6,7 +6,7 @@ Installation
    :local:
 
 .. note::
-	| Please check the hard- and software :doc:`requirements', before installing OpenCelium.
+	| Please check the hard- and software :doc:`requirements`, before installing OpenCelium.
 	|
 	| The installation commands must be executed by a user with sudo rights. 
 	| Ensure you have administrative privileges to properly perform the installation.
@@ -72,10 +72,10 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 	mysql_secure_installation
 
 .. note::
-	| "mysql_secure_installation" is a command-line-tool to enhance the security 
-	| of your MariaDB instance and protects it from unauthorized access.
-	| You can use default values for all prompts, 
-	| unless specific changes are required for your company.
+	| "mysql_secure_installation" is a command-line-tool to enhance the security of your 
+	| MariaDB instance and protects it from unauthorized access.
+	| You can use default values for all prompts, unless specific changes are required
+	| for your company.
 	| Set a strong root password for the root user (there is no default password!)
 
 **2. MongoDB:**
@@ -93,7 +93,8 @@ Start and enable mongod service and create a user for Opencelium.
 	mongosh --eval "db.getSiblingDB('opencelium').createUser({user: 'oc_admin', pwd: 'secretsecret', roles: ['readWrite','dbAdmin' ]})"
 
 .. note::
-    | If you encounter an "ECONNREFUSED" error, it indicates that mongod was not yet ready to accept connections.
+    | If you encounter an "ECONNREFUSED" error, it indicates that 
+	| mongod was not yet ready to accept connections.
     | In this case, please run the mongosh command again.
 
 **3. Nginx:**
@@ -168,10 +169,9 @@ Finally start OpenCelium backend.
 	systemctl start opencelium
 
 .. note::
-	Now you can connect to the application, by navigating to http://localhost in your web browser.
+	| Now you can connect to the application, by navigating to http://localhost in your web browser.
 
-    The default login credentials are:
-
+    | The default login credentials are:
     | **Username: admin@opencelium.io**
     | **Password: 1234**
 
