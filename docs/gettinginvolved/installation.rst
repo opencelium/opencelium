@@ -7,6 +7,9 @@ Installation
 
 .. note::
 	| Please check the software requirements, before installing OC.
+	|
+	| The installation commands must be executed by a user with sudo rights. 
+	| Ensure you have administrative privileges to properly perform the installation.
 	| 
 	| If you have changed the original umask on you linux server, 
 	| please set additional permissions to /opt/opencelium. 
@@ -31,8 +34,9 @@ Update your system, download and install required packages.
 
 **2. Install MongoDB:**
 
-| Use default MongoDB installation guide.
-| You can find documentation here: `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux/>`_
+| Additonally an installation of MongoDB is required. 
+| Please refer to the default MongoDB documentation for detailed installation instructions. 
+| You can find this documentation here: `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux/>`_
 	
 	
 Install Application
@@ -66,17 +70,29 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 	systemctl enable mariadb
 	mysql -u root -e "source /opt/opencelium/src/backend/database/oc_data.sql; GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost' IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
 	mysql_secure_installation
-	
+
+.. note::
+	| "mysql_secure_installation" is a command-line-tool to enhance the security of your MariaDB instance and protects it from unauthorized access.
+	| You can use default values for all prompts, unless specific changes are required.
+	| Set a strong root password for the root user (there is no default password!)
+
 **2. MongoDB:**
 
 Start and enable mongod service and create a user for Opencelium.
 
+.. note::
+	Please change the password (secretsecret) in the following command line!
+
 .. code-block:: sh
 	:linenos:
-	
+
 	systemctl restart mongod
 	systemctl enable mongod
-	mongosh --eval "db.getSiblingDB('opencelium').createUser({user: 'oc_admin', pwd: passwordPrompt(), roles: ['readWrite','dbAdmin' ]})"
+	mongosh --eval "db.getSiblingDB('opencelium').createUser({user: 'oc_admin', pwd: 'secretsecret', roles: ['readWrite','dbAdmin' ]})"
+
+.. note::
+    | If you encounter an "ECONNREFUSED" error, it indicates that mongod was not yet ready to accept connections.
+    | In this case, please run the mongosh command again.
 
 **3. Nginx:**
 
@@ -150,11 +166,18 @@ Finally start OpenCelium backend.
 	systemctl start opencelium
 
 .. note::
+	Now you can connect to the application, by navigating to http://localhost in your web browser.
+
+    The default login credentials are as follows:
+
+    Username: admin
+    Password: 1234
+
 	| Afterwards you can connect to `http://localhost`	
 	| Default User and Password is:
 	
-	| admin@opencelium.io
-	| 1234
+	| *admin@opencelium.io*
+	| *1234*
 	
 	| If you want to have a look into OpenCelium Logs please use:
 	
