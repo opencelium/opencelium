@@ -322,15 +322,11 @@ public class InvokerServiceImp implements InvokerService {
                                 String.join(".", seen),
                                 idx));
             }
+
             if (index >= list.size()) {
-                throw new RuntimeException(
-                        String.format(
-                                "No such element in list. You tried to reference the %s element of the '%s' array, but the array's size is %d in the invoker file. Please ensure the array has at least %s elements or modify the reference path.",
-                                idx,
-                                String.join(".", seen),
-                                list.size(),
-                                idx));
+                index = 0;
             }
+
             Object obj = list.get(index);
             seen.set(seen.size() - 1, seen.get(seen.size() - 1) + hierarchy.pollFirst());
             return findFieldType(obj, hierarchy, seen);
