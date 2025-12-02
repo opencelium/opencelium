@@ -329,7 +329,7 @@ class Body extends React.Component {
 				>
 					{hasEnhancement && (
 						<ReferenceInformation
-							style={{maxHeight: !isToggledIcon ? !isToggledReferenceIcon ? '40px' : 'calc(100% - 40px)' : '50%',}}
+							style={{maxHeight: !isToggledReferenceIcon ? '40px' : isToggledIcon ? '50%' : 'calc(100% - 40px)',}}
 							body={source}
 							method={method}
 							connection={connection}
@@ -350,7 +350,7 @@ class Body extends React.Component {
 						flex: 1,
 						display: 'flex',
 						flexDirection: 'column',
-						maxHeight: !isToggledReferenceIcon ? !isToggledIcon ? '40px' : 'calc(100% - 40px)' : '50%',
+						maxHeight: !isToggledIcon ? '40px' : isToggledReferenceIcon ? '50%' : 'calc(100% - 40px)',
 					}}>
 						<div>
 							<b>{bodyTitle}</b>
