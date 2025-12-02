@@ -1087,14 +1087,13 @@
   box-shadow: none;
   position: unset;
   padding: 0;
-  max-height: calc(100% - 170px);
   overflow-y: auto;
   transition: unset;
   animation: unset;
 }
 .method_body_full_height {
   @extend .method_body_no_placeholder;
-  max-height: calc(100% - 95px);
+  max-height: 100%;
 }
 
 .method_body_draft{

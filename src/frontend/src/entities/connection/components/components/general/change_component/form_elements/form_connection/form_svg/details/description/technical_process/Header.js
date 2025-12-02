@@ -16,7 +16,6 @@
 import CEnhancement from '@entity/connection/components/classes/components/content/connection/field_binding/CEnhancement';
 import Button from '@entity/connection/components/components/general/basic_components/buttons/Button';
 import Dialog from '@entity/connection/components/components/general/basic_components/Dialog';
-import Table from '@entity/connection/components/components/general/basic_components/table/Table';
 import TooltipFontIcon from '@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon';
 import styles from '@entity/connection/components/themes/default/content/connections/connection_overview_2';
 import React from 'react';
@@ -154,7 +153,7 @@ class Header extends React.Component {
 		}
 	}
 
-	renderHeader() {
+	renderHeader(style = {}) {
 		const { isToggledReferenceIcon } = this.state;
 		const {
 			isDraft,
@@ -181,6 +180,7 @@ class Header extends React.Component {
 				openEnhancement={(a, b) =>
 					this.setCurrentEnhancementClickingOnPointer(a, b)
 				}
+				style={style}
 			/>
 		);
 	}
@@ -200,22 +200,6 @@ class Header extends React.Component {
 			connection,
 			hasEnhancement,
 		} = this.props;
-		let gridStyles = {};
-		if (isToggledReferenceIcon && !isToggledIcon) {
-			gridStyles.gridTemplateRows = 'calc(100% - 40px) 40px';
-		}
-		if (!isToggledReferenceIcon && isToggledIcon) {
-			gridStyles.gridTemplateRows = '40px calc(100% - 40px)';
-		}
-		if (!isToggledReferenceIcon && !isToggledIcon) {
-			gridStyles.gridTemplateRows = '40px 40px';
-		}
-		if (isToggledReferenceIcon && isToggledIcon) {
-			gridStyles.gridTemplateRows = '25% calc(100%)';
-		}
-		if (!hasEnhancement) {
-			gridStyles.gridTemplateRows = 'unset';
-		}
 		return (
 			<React.Fragment>
 				<div
@@ -224,10 +208,10 @@ class Header extends React.Component {
 							? styles.body_data_with_enhancement
 							: styles.body_data_without_enhancement
 					}
-					style={gridStyles}
 				>
 					{hasEnhancement && (
 						<ReferenceInformation
+							style={{maxHeight: !isToggledReferenceIcon ? '40px' : isToggledIcon ? '50%' : 'calc(100% - 40px)',}}
 							body={source}
 							method={method}
 							connection={connection}
@@ -243,18 +227,27 @@ class Header extends React.Component {
 							location='header'
 						/>
 					)}
-					<div>
+					<div style={{
+						position: 'relative',
+						flex: 1,
+						display: 'flex',
+						flexDirection: 'column',
+						maxHeight: !isToggledIcon ? '40px' : isToggledReferenceIcon ? '50%' : 'calc(100% - 40px)',
+					}}>
 						<div>
 							<b>{'Request Data'}</b>
 							<TooltipFontIcon
 								tooltipPosition={'right'}
-								style={{ verticalAlign: 'middle', cursor: 'pointer' }}
-								onClick={() => this.setState({ isToggledIcon: !isToggledIcon })}
+								style={{verticalAlign: 'middle', cursor: 'pointer'}}
+								onClick={() => this.setState({isToggledIcon: !isToggledIcon})}
 								tooltip={isToggledIcon ? 'Hide' : 'Show'}
 								value={isToggledIcon ? 'expand_less' : 'chevron_right'}
 							/>
 						</div>
-						{isToggledIcon && this.renderHeader()}
+						{isToggledIcon && this.renderHeader({
+							flex: 1,
+							overflowY: 'auto',
+						})}
 					</div>
 				</div>
 				{hasEnhancement && (
