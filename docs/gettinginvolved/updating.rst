@@ -51,14 +51,15 @@ Update RPM package for RedHat 9.2
 Update Docker Compose
 =================================
 
+.. warning::
+        | Before updating from versions prior 4.6.1, do a backup of your application.yml file! 
+
 .. code-block:: sh
 	:linenos:
 
         cd opencelium-docker
 	docker compose down -v
-	mv conf/application.yml /conf/application.yml.old
-        git pull
-        mv conf/application.yml.old /conf/application.yml
+	git pull
         docker compose up -d
 	
 | 

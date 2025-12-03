@@ -516,6 +516,9 @@ Ansible
 Docker Compose
 """""""""""""""""
 
+.. warning::
+	We currently do not support Docker environments in productive use. We recommend using it for use in a test phase!
+	
 .. note::
 	You need at least 4 GB of RAM to run the containers. We recommend 8GB for a better performance.
 
