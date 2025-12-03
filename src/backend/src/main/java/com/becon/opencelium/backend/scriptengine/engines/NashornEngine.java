@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 import javax.script.Compilable;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import java.util.AbstractMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -160,17 +162,17 @@ public class NashornEngine implements ScriptEngine {
     }
 
     private void bindArgs(javax.script.ScriptEngine engine, Map<String, String> args, Function<String, Object> referenceExtractor) {
-        Map<String, Object> resultMap = args.entrySet().stream()
-                .map(entry -> {
-                    try {
-                        Object value = referenceExtractor.apply(entry.getValue());
 
-                        return Map.entry(entry.getKey(), value);
-                    } catch (Exception e) {
-                        throw new ScriptExecutionException(e.getMessage(), e);
-                    }
-                })
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Map<String, Object> resultMap = new HashMap<>(args.size());
+
+        for (Map.Entry<String, String> entry : args.entrySet()) {
+            try {
+                Object value = referenceExtractor.apply(entry.getValue());
+                resultMap.put(entry.getKey(), value);
+            } catch (Exception e) {
+                throw new ScriptExecutionException(e.getMessage(), e);
+            }
+        }
 
         bindArgs(engine, resultMap);
     }

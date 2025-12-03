@@ -62,7 +62,7 @@ public class LogLineDispatcher {
             return Optional.empty();
         }
         LogDataMng data = logData.get();
-        logMetaDataService.save(data);
+        logMetaDataService.bufferAndFlush(data);
 
         return logMetaDataService.toDto(data);
     }

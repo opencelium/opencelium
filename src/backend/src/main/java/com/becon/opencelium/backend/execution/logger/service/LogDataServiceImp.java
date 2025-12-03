@@ -2,9 +2,12 @@ package com.becon.opencelium.backend.execution.logger.service;
 
 import com.becon.opencelium.backend.database.mongodb.entity.LogDataMng;
 import com.becon.opencelium.backend.database.mongodb.repository.MetaDataLogRepository;
+import com.becon.opencelium.backend.execution.logger.buffer.InMemoryLogBlockBuffer;
+import com.becon.opencelium.backend.execution.logger.buffer.LogBlockBuffer;
 import com.becon.opencelium.backend.execution.logger.dto.LogDataDTO;
 import com.becon.opencelium.backend.execution.logger.enums.LogDetailLevel;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseCategory;
+import com.becon.opencelium.backend.execution.logger.enums.PhaseStatus;
 import com.becon.opencelium.backend.execution.logger.enums.PhaseType;
 import com.becon.opencelium.backend.execution.logger.keys.LogLineKey;
 import com.becon.opencelium.backend.execution.logger.mapper.LogDataMapper;
@@ -41,6 +44,12 @@ public class LogDataServiceImp implements LogDataService {
     private static final Sort SORT_ASCENDING = Sort.by(Sort.Direction.ASC, "createdAt");
     private static final Sort SORT_DESCENDING = Sort.by(Sort.Direction.DESC, "createdAt");
 
+    private static final int BATCH_SIZE = 10000;
+    // buffer of blocks waiting to be flushed
+    // in-memory index so findExistingBlock can see buffered items
+    // key = connectionId|executionId|flowId|indexPath|loopIndex?
+    private final Map<String, LogDataMng> bufferIndex = new HashMap<>();
+
     @Autowired
     private MetaDataLogRepository metaDataLogRepository;
 
@@ -52,6 +61,11 @@ public class LogDataServiceImp implements LogDataService {
 
     @Autowired
     private ParsedLogLineBuilder parsedLogLineBuilder;
+
+    private final LogBlockBuffer buffer = new InMemoryLogBlockBuffer(
+            BATCH_SIZE,
+            this::buildKey // use method reference as key extractor
+    );
 
     @Override
     public List<LogDataDTO> getChildrenById(String elementId, String loopIndex) {
@@ -203,15 +217,52 @@ public class LogDataServiceImp implements LogDataService {
     }
 
     @Override
-    public void save(LogDataMng block) {
-        switch (block.getStatus()) {
-            case PENDING -> saveNewBlock(block);
-            case COMPLETE, FAIL -> updateExistingBlock(block);
-            default -> throw new IllegalStateException(
-                    "Unexpected status: " + block.getStatus()
-            );
+    public synchronized void save(LogDataMng block) {
+        LogDataMng toPersist = prepareForPersist(block);
+        // single synchronous save, without buffering
+        metaDataLogRepository.save(toPersist);
+    }
+
+    /**
+     * Buffer a single block; when buffer reaches BATCH_SIZE,
+     * flush all to DB in one go.
+     */
+    @Override
+    public synchronized void bufferAndFlush(LogDataMng block) {
+        LogDataMng toPersist = prepareForPersist(block);
+        List<LogDataMng> batchToFlush = buffer.buffer(toPersist);
+        boolean executionComplete = isExecutionComplete(toPersist);
+        if (executionComplete) {
+            // 1) put this block into the buffer first
+            List<LogDataMng> fromThreshold = buffer.buffer(toPersist);
+
+            // 2) flush everything that is still in memory (including this block)
+            List<LogDataMng> allRemaining = buffer.flushAll();
+
+            // merge both (fromThreshold is usually empty, but keep it correct)
+            if (!fromThreshold.isEmpty() || !allRemaining.isEmpty()) {
+                batchToFlush = new ArrayList<>(fromThreshold.size() + allRemaining.size());
+                batchToFlush.addAll(fromThreshold);
+                batchToFlush.addAll(allRemaining);
+            }
+        } else {
+            // normal path: only flush when threshold is reached
+            batchToFlush = buffer.buffer(toPersist);
+        }
+        if (!batchToFlush.isEmpty() ) {
+            metaDataLogRepository.saveAll(batchToFlush);
         }
     }
+
+    public void flushBufferNow() {
+        List<LogDataMng> batch = buffer.flushAll();
+        if (!batch.isEmpty()) {
+            long start = System.currentTimeMillis();
+            metaDataLogRepository.saveAll(batch);
+            System.out.println("flushBufferNow: " + (start - System.currentTimeMillis()) + "ms");
+        }
+    }
+
 
     @Override
     public Optional<LogDataMng> findRootByExecutionId(Long execId) {
@@ -263,23 +314,23 @@ public class LogDataServiceImp implements LogDataService {
     }
 
     // --------------------------------------- Private Functions ----------------------------------------------
-    private Optional<LogDataMng> findExistingBlock(LogDataMng block) {
-        if (block.getProperties().containsKey(LogLineKey.LOOP_INDEX.getSrcName())) {
-            return metaDataLogRepository.findByExecutionConnectionFlowIdIndexPathAndLoopIndex(
-                    block.getConnectionId(),
-                    block.getExecutionId(),
-                    block.getFlowId(),
-                    block.getIndexPath(),
-                    block.getProperties().get(LogLineKey.LOOP_INDEX.getSrcName()).toString()
-            );
-        }
-        return metaDataLogRepository.findByConnectionIdAndExecutionIdAndFlowIdAndIndexPath(
-                block.getConnectionId(),
-                block.getExecutionId(),
-                block.getFlowId(),
-                block.getIndexPath()
-        );
-    }
+//    private Optional<LogDataMng> findExistingBlock(LogDataMng block) {
+//        if (block.getProperties().containsKey(LogLineKey.LOOP_INDEX.getSrcName())) {
+//            return metaDataLogRepository.findByExecutionConnectionFlowIdIndexPathAndLoopIndex(
+//                    block.getConnectionId(),
+//                    block.getExecutionId(),
+//                    block.getFlowId(),
+//                    block.getIndexPath(),
+//                    block.getProperties().get(LogLineKey.LOOP_INDEX.getSrcName()).toString()
+//            );
+//        }
+//        return metaDataLogRepository.findByConnectionIdAndExecutionIdAndFlowIdAndIndexPath(
+//                block.getConnectionId(),
+//                block.getExecutionId(),
+//                block.getFlowId(),
+//                block.getIndexPath()
+//        );
+//    }
 
     private LogDataMng findByIdElseThrow(String phaseId) {
         return metaDataLogRepository.findById(phaseId)
@@ -342,5 +393,113 @@ public class LogDataServiceImp implements LogDataService {
         String currentLoopIndex = nearestLoopIndex.isBlank() ? loopIndex : nearestLoopIndex + "," + loopIndex;
 
         return metaDataLogRepository.findChildren(executionId, flowchartId, regex, currentLoopIndex, SORT_ASCENDING);
+    }
+
+    // ------------------------------------------------------------------------------------
+    // Core logic reused by save() and bufferAndFlush()
+    // ------------------------------------------------------------------------------------
+
+    private LogDataMng prepareForPersist(LogDataMng block) {
+        return switch (block.getStatus()) {
+            case PENDING -> prepareNewBlock(block);
+            case COMPLETE, FAIL -> prepareExistingBlock(block);
+            default -> throw new IllegalStateException("Unexpected status: " + block.getStatus());
+        };
+    }
+
+    private LogDataMng prepareNewBlock(LogDataMng block) {
+        if (block.getCreatedAt() == null) {
+            block.setCreatedAt(Instant.now());
+        }
+        return block;
+    }
+
+    private LogDataMng prepareExistingBlock(LogDataMng incoming) {
+        long start = System.currentTimeMillis();
+        Optional<LogDataMng> existingOpt = findExistingBlock(incoming);
+        System.out.println("findExistingBlock: " + (start - System.currentTimeMillis()) + "ms");
+        if (existingOpt.isEmpty()) {
+            if (incoming.getCreatedAt() == null) {
+                incoming.setCreatedAt(Instant.now());
+            }
+            return incoming;
+        }
+
+        LogDataMng existing = existingOpt.get();
+
+        // merge fields you actually want to update
+        existing.setEndOffset(incoming.getEndOffset());
+        existing.setStatus(incoming.getStatus());
+        existing.setProperties(incoming.getProperties());
+        existing.setCreatedAt(Instant.now());
+
+        return existing;
+    }
+
+    // ---------------- Lookup logic ----------------
+
+    /**
+     * First check in-memory buffer, then DB.
+     */
+    private Optional<LogDataMng> findExistingBlock(LogDataMng block) {
+        Optional<LogDataMng> inBuffer = buffer.findInBuffer(block);
+        if (inBuffer.isPresent()) {
+            System.out.println("buffer");
+            return inBuffer;
+        }
+
+        if (block.getType() == OPERATION) {
+            return Optional.empty();
+        }
+
+        if (hasLoopIndex(block) ) {
+            return metaDataLogRepository.findByExecutionConnectionFlowIdIndexPathAndLoopIndex(
+                    block.getConnectionId(),
+                    block.getExecutionId(),
+                    block.getFlowId(),
+                    block.getIndexPath(),
+                    getLoopIndex(block)
+            );
+        }
+
+        return metaDataLogRepository.findByConnectionIdAndExecutionIdAndFlowIdAndIndexPath(
+                block.getConnectionId(),
+                block.getExecutionId(),
+                block.getFlowId(),
+                block.getIndexPath()
+        );
+    }
+
+    private boolean hasLoopIndex(LogDataMng block) {
+        return block.getProperties() != null &&
+                block.getProperties().containsKey(LogLineKey.LOOP_INDEX.getSrcName());
+    }
+
+    private String getLoopIndex(LogDataMng block) {
+        return block.getProperties()
+                .get(LogLineKey.LOOP_INDEX.getSrcName())
+                .toString();
+    }
+
+    /**
+     * Composite key identical to your DB uniqueness criteria.
+     */
+    private String buildKey(LogDataMng block) {
+        StringBuilder sb = new StringBuilder()
+                .append(block.getConnectionId()).append('|')
+                .append(block.getExecutionId()).append('|')
+                .append(block.getFlowId()).append('|')
+                .append(block.getIndexPath());
+
+        if (hasLoopIndex(block)) {
+            sb.append('|').append(getLoopIndex(block));
+        }
+        return sb.toString();
+    }
+
+    private boolean isExecutionComplete(LogDataMng block) {
+        // adjust enum names to your real ones
+        return block.getType() == PhaseCategory.EXECUTION
+                && block.getStatus() == PhaseStatus.COMPLETE;
     }
 }
