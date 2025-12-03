@@ -7,7 +7,7 @@ import com.becon.opencelium.backend.database.mongodb.entity.*;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.flowchart.*;
 import com.becon.opencelium.backend.mapper.v5.ExecutionPlanMapper;
-import com.becon.opencelium.backend.resource.connection.v5.ExecutionPlanDTO;
+import com.becon.opencelium.backend.resource.v5.connection.ExecutionPlanDTO;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 

@@ -1,8 +1,6 @@
 package com.becon.opencelium.backend.utility;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,6 +19,7 @@ public class ReferenceUtility {
     public static final String IS_SPLIT_STRING_TYPE = "\\[([a-z0-9*]+)\\]~";
     public static final String ARRAY_LETTER_INDEX = "\\[([a-z])\\]";
     private static final Pattern DIRECT_REF_PATTERN = Pattern.compile(directRef);
+    private static final String RESULT_VAR = "RESULT_VAR";
 
     public static boolean containsRef(String value) {
         if (value == null) {
@@ -79,7 +78,7 @@ public class ReferenceUtility {
         String exchange = extractExchangeType(ref);
         String res = "";
 
-        if (exchange.equals("response")){
+        if (exchange.equals("response")) {
             res = ref.split("\\.")[2];
         }
 
@@ -129,7 +128,7 @@ public class ReferenceUtility {
         String[] refParts = splitPaths(ref);
 
         String result = "";
-        for (int i = 0; i < partCount - 1 ; i++) {
+        for (int i = 0; i < partCount - 1; i++) {
             result += refParts[i] + ".";
         }
 
@@ -217,5 +216,75 @@ public class ReferenceUtility {
 
     public static boolean isDirectReference(String value) {
         return DIRECT_REF_PATTERN.matcher(value).matches();
+    }
+
+    public static Map<String, String> convertEnhancementArgs(String vars) {
+        List<String> varList = PathAndReferenceUtility.splitByDelimiter(
+                vars.endsWith(";")
+                        ? vars.substring(0, vars.length() - 1)
+                        : vars,
+                ';'
+        );
+
+        for (int i = 0; i < varList.size(); i++) {
+            varList.set(i, varList.get(i).trim());
+            if (varList.get(i).startsWith("//")) {
+                varList.set(i, varList.get(i).substring(2));
+            }
+        }
+
+        Map<String, String> args = new HashMap<>();
+        varList.forEach(v -> {
+            List<String> split = PathAndReferenceUtility.splitByDelimiter(v, '=');
+            String key = split.get(0).trim().split("\\s")[1];
+            String value = split.get(1).trim();
+            args.put(key, value);
+        });
+
+        return args;
+    }
+
+    public static String extractResultVar(Map<String, String> args) {
+        if (!args.containsKey(RESULT_VAR)) {
+            throw new IllegalArgumentException(RESULT_VAR + " not found");
+        }
+
+        return args.get(RESULT_VAR);
+    }
+
+    public static String extractLocationType(String reference) {
+        //#ffffff.(request).body.$.a.b
+        //#ffffff.(request).header.$.a
+        //#ffffff.(request).path
+        //#ffffff.(response).body.$.a.b
+        //#ffffff.(response).header.$.a
+
+        int startPath;
+        if (reference.substring(8).startsWith("request")) {
+            startPath = 19;
+        } else {
+            startPath = 20;
+        }
+
+        String path = reference.substring(startPath);
+        String res = path.startsWith("body") ? "body" :
+                path.startsWith("header") ? "header" :
+                        path.equals("path") ? "path" : null;
+
+        if (res == null) {
+            throw new IllegalArgumentException("unknown reference location type");
+        }
+
+        return res;
+    }
+
+    public static String extractPath(String reference) {
+        int index = reference.indexOf("$");
+
+        if (index == -1) {
+            return "";
+        }
+
+        return reference.substring(index + 2);
     }
 }

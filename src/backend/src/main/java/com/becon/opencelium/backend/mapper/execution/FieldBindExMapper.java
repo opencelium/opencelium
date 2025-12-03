@@ -5,7 +5,7 @@ import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.database.mysql.service.EnhancementService;
 import com.becon.opencelium.backend.resource.execution.EnhancementEx;
 import com.becon.opencelium.backend.resource.execution.FieldBindEx;
-import com.becon.opencelium.backend.utility.PathAndReferenceUtility;
+import com.becon.opencelium.backend.utility.ReferenceUtility;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -33,29 +33,8 @@ public class FieldBindExMapper {
         if (enhancement.getArgs() == null) {
             enhancementEx.setArgs(new HashMap<>());
         } else {
-            List<String> vars = PathAndReferenceUtility.splitByDelimiter(
-                    enhancement.getArgs().endsWith(";")
-                            ? enhancement.getArgs().substring(0, enhancement.getArgs().length() - 1)
-                            : enhancement.getArgs(),
-                    ';'
-            );
-
-            for (int i = 0; i < vars.size(); i++) {
-                vars.set(i, vars.get(i).trim());
-                if (vars.get(i).startsWith("//")) {
-                    vars.set(i, vars.get(i).substring(2));
-                }
-            }
-
-            Map<String, String> args = new HashMap<>();
-            vars.forEach(v -> {
-                List<String> split = PathAndReferenceUtility.splitByDelimiter(v, '=');
-                String key = split.get(0).trim().split("\\s")[1];
-                String value = split.get(1).trim();
-                if (!key.equals("RESULT_VAR")) {
-                    args.put(key, value);
-                }
-            });
+            Map<String, String> args = ReferenceUtility.convertEnhancementArgs(enhancement.getArgs());
+            args.remove("RESULT_VAR");
 
             enhancementEx.setScript(enhancement.getScript());
             enhancementEx.setArgs(args);

@@ -1,7 +1,7 @@
 package com.becon.opencelium.backend.mapper.v5;
 
 import com.becon.opencelium.backend.database.mongodb.entity.ExecutionPlanMng;
-import com.becon.opencelium.backend.resource.connection.v5.ExecutionPlanDTO;
+import com.becon.opencelium.backend.resource.v5.connection.ExecutionPlanDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;

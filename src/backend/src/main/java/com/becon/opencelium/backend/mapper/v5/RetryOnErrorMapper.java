@@ -1,7 +1,7 @@
 package com.becon.opencelium.backend.mapper.v5;
 
 import com.becon.opencelium.backend.database.mongodb.entity.RetryOnErrorMng;
-import com.becon.opencelium.backend.resource.connection.v5.RetryOnErrorDTO;
+import com.becon.opencelium.backend.resource.v5.connection.RetryOnErrorDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Named;
 

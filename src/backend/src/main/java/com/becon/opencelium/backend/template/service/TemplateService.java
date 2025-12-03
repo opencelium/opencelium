@@ -17,6 +17,7 @@
 package com.becon.opencelium.backend.template.service;
 
 import com.becon.opencelium.backend.resource.template.TemplateResource;
+import com.becon.opencelium.backend.resource.v5.template.TemplateV5;
 import com.becon.opencelium.backend.template.entity.Template;
 
 import java.util.List;
@@ -28,6 +29,8 @@ public interface TemplateService {
     Template toEntity(TemplateResource templateResource);
 
     void save(Template template);
+
+    void save(TemplateV5 template);
 
     List<Template> findByFromInvokerAndToInvoker(String invoker, String invoker1);
 
@@ -43,6 +46,5 @@ public interface TemplateService {
 
     TemplateResource getByConnectionId(Long connectionId);
 
-    void updateTemplatesToCurrentVersion();
-
+    List<Template> findAllLessThanV5();
 }

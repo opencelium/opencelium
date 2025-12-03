@@ -2,7 +2,7 @@ package com.becon.opencelium.backend.mapper.mongo;
 
 import com.becon.opencelium.backend.database.mongodb.entity.MapperMng;
 import com.becon.opencelium.backend.mapper.base.Mapper;
-import com.becon.opencelium.backend.resource.connection.v5.MapperDTO;
+import com.becon.opencelium.backend.resource.v5.connection.MapperDTO;
 import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 

@@ -81,8 +81,6 @@ public interface ConnectionService {
 
     void deleteRule(long connectionId, long ruleId);
 
-    void updateConnectionsToCurrentVersion();
-
     List<String> getLogFileNameListById(long connectionId);
 
     Long createNewConnection(NewConnectionCreateRequest request);
@@ -90,4 +88,6 @@ public interface ConnectionService {
     String addFlowchart(FlowchartCreateRequest request);
 
     void update(Long id, JsonPatch patch);
+
+    void save(Connection connection);
 }

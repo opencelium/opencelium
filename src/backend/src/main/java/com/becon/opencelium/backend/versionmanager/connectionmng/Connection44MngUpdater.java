@@ -3,7 +3,7 @@ package com.becon.opencelium.backend.versionmanager.connectionmng;
 import com.becon.opencelium.backend.database.mongodb.entity.*;
 import com.becon.opencelium.backend.ocel.OCExpressionHelper;
 import com.becon.opencelium.backend.ocel.operator.OperatorEnum;
-import com.becon.opencelium.backend.versionmanager.Wrapper;
+import com.becon.opencelium.backend.versionmanager.EntityUpdater;
 import com.becon.opencelium.backend.versionmanager.base.*;
 import io.micrometer.common.util.StringUtils;
 import org.springframework.stereotype.Component;
@@ -12,27 +12,27 @@ import java.util.Map;
 import java.util.Objects;
 
 @Component
-public class Connection44MngUpdater implements ConnectionMngUpdater {
+public class Connection44MngUpdater implements EntityUpdater<ConnectionMng> {
 
-    private static final UpdaterVersion currentVersion = UpdaterVersion.VERSION_4_4;
+    private static final String currentVersion = "4.4";
 
     @Override
-    public Wrapper<ConnectionMng> updateToCurrentVersion(ConnectionMng connection) {
+    public ConnectionMng updateToCurrentVersion(ConnectionMng connection) {
         return Objects.isNull(connection)
-                ? Wrapper.notUpdated(null)
+                ? null
                 : updateFromInternal(connection, connection.getVersion());
     }
 
     @Override
-    public Wrapper<ConnectionMng> updateFrom(ConnectionMng connection, String oldVersion) {
+    public ConnectionMng updateFrom(ConnectionMng connection, String oldVersion) {
         return updateFromInternal(connection, oldVersion);
     }
 
-    private Wrapper<ConnectionMng> updateFromInternal(ConnectionMng connection, String oldVersion) {
-        if (Objects.isNull(connection) || Utils.compare(currentVersion.getVersion(), oldVersion) <= 0)
-            return Wrapper.notUpdated(connection);
+    private ConnectionMng updateFromInternal(ConnectionMng connection, String oldVersion) {
+        if (Objects.isNull(connection) || Utils.compare(currentVersion, oldVersion) <= 0)
+            return connection;
 
-        connection.setVersion(currentVersion.getVersion());
+        connection.setVersion(currentVersion);
 
         Reference<Boolean> changed = new Reference<>(false);
 
@@ -52,10 +52,7 @@ public class Connection44MngUpdater implements ConnectionMngUpdater {
             connection.getFieldBindings().forEach(x -> update(x, changed));
         }
 
-        return Wrapper.updated(connection)
-                .changed(changed.getValue())
-                .withOldVersion(oldVersion)
-                .withNewVersion(currentVersion.getVersion());
+        return connection;
     }
 
     private void update(OperatorMng operator, Reference<Boolean> changed) {

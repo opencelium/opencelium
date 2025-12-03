@@ -9,7 +9,7 @@ import com.becon.opencelium.backend.database.mongodb.repository.ConnectionMngRep
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.mapper.base.Mapper;
-import com.becon.opencelium.backend.resource.connection.v5.MapperDTO;
+import com.becon.opencelium.backend.resource.v5.connection.MapperDTO;
 import com.becon.opencelium.backend.resource.connection.MethodDTO;
 import com.becon.opencelium.backend.resource.connection.OperatorDTO;
 import com.becon.opencelium.backend.resource.partialconnection.FlowchartCreateRequest;

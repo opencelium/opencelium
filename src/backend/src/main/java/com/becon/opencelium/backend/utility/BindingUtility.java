@@ -361,6 +361,32 @@ public class BindingUtility {
         }
     }
 
+
+    //-----------------------------------------------Replace Id-----------------------------------------------------//
+    public static void findAndReplaceId(MethodMng method, String reference, String id, String newId) {
+        String location = ReferenceUtility.extractLocationType(reference);
+        String path = ReferenceUtility.extractPath(reference);
+
+        if ("path".equals(location)) {
+            String replaced = method.getRequest().getEndpoint().replace("{%" + id + "%}", "{%" + newId + "%}");
+            method.getRequest().setEndpoint(replaced);
+        } else if ("header".equals(location)) {
+            Map<String, String> header = method.getRequest().getHeader();
+            if (header != null) {
+                for (Map.Entry<String, String> entry : header.entrySet()) {
+                    entry.setValue(entry.getValue().replace("{%" + id + "%}", "{%" + newId + "%}"));
+                }
+            }
+        } else if ("body".equals(location)) {
+            BodyMng body = method.getRequest().getBody();
+            if (body != null) {
+                List<String> subPaths = PathAndReferenceUtility.splitByDelimiter(path, '.');
+
+                doWithBody(body, subPaths, newId, method.getRequest().getBody().getFormat());
+            }
+        }
+    }
+
 //--------------------------------------------------------------------------------------------------------//
 //-----------------------------------------------Others-----------------------------------------------------//
 

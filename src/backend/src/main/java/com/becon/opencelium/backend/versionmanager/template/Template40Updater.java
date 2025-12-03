@@ -10,8 +10,6 @@ import com.becon.opencelium.backend.resource.connector.ResultDTO;
 import com.becon.opencelium.backend.resource.template.CtionTemplateResource;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.versionmanager.EntityUpdater;
-import com.becon.opencelium.backend.versionmanager.Wrapper;
-import com.becon.opencelium.backend.versionmanager.base.UpdaterVersion;
 import com.becon.opencelium.backend.versionmanager.base.Utils;
 import com.becon.opencelium.backend.versionmanager.template.domains.MethodWithDirectBody;
 import com.becon.opencelium.backend.versionmanager.template.domains.RequestWithDirectBody;
@@ -31,7 +29,7 @@ public class Template40Updater implements EntityUpdater<Template> {
     private final ObjectMapper objectMapper;
     private final OperatorOldDTOMapper operatorOldDTOMapper;
 
-    private final UpdaterVersion updaterVersion = UpdaterVersion.VERSION_4_0;
+    private static final String updaterVersion = "4.0";
 
     public Template40Updater(ObjectMapper objectMapper, OperatorOldDTOMapper operatorOldDTOMapper) {
         this.objectMapper = objectMapper;
@@ -39,16 +37,16 @@ public class Template40Updater implements EntityUpdater<Template> {
     }
 
     @Override
-    public Wrapper<Template> updateToCurrentVersion(Template template) {
+    public Template updateToCurrentVersion(Template template) {
         return updateFrom(template, template.getVersion());
     }
 
     @Override
-    public Wrapper<Template> updateFrom(Template template, String oldVersion) {
-        if (Objects.isNull(template) || Utils.compare(updaterVersion.getVersion(), oldVersion) <= 0)
-            return Wrapper.notUpdated(template);
+    public Template updateFrom(Template template, String oldVersion) {
+        if (Objects.isNull(template) || Utils.compare(updaterVersion, oldVersion) <= 0)
+            return template;
 
-        template.setVersion(updaterVersion.getVersion());
+        template.setVersion(updaterVersion);
         CtionTemplateResource connection = template.getConnection();
 
         if (Objects.nonNull(connection.getFromConnector().getMethods())) {
@@ -74,10 +72,7 @@ public class Template40Updater implements EntityUpdater<Template> {
             connection.getToConnector().setOperators(operatorOldDTOMapper.toEntityAll(toOperators));
         }
 
-        return Wrapper.updated(template)
-                .changed(true)
-                .withOldVersion(oldVersion)
-                .withNewVersion(updaterVersion.getVersion());
+        return template;
     }
 
     private Object resolveMethods(List<MethodWithDirectBody> methods) {

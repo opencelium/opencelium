@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.resource.connection.v5;
+package com.becon.opencelium.backend.resource.v5.connection;
 
 import com.becon.opencelium.backend.resource.connection.MethodDTO;
 import com.becon.opencelium.backend.resource.connection.OperatorDTO;

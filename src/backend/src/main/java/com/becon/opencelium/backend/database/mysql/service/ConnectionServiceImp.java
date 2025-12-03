@@ -32,7 +32,6 @@ import com.becon.opencelium.backend.enums.Action;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.mapper.base.Mapper;
-import com.becon.opencelium.backend.mapper.v5.ConnectionV5Mapper;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
 import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
@@ -41,8 +40,6 @@ import com.becon.opencelium.backend.resource.partialconnection.NewConnectionCrea
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.utility.LogFileUtility;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
-import com.becon.opencelium.backend.versionmanager.EntityUpdater;
-import com.becon.opencelium.backend.versionmanager.EntityVersionManager;
 import com.becon.opencelium.backend.versionmanager.backup.MongoDbBackupService;
 import com.becon.opencelium.backend.versionmanager.base.Utils;
 import com.github.fge.jsonpatch.JsonPatch;
@@ -79,7 +76,6 @@ public class ConnectionServiceImp implements ConnectionService {
     private final MaskingRuleRepository ruleRepository;
     private final WebhookService webhookService;
     private final OpenceliumProps ocProps;
-    private final EntityUpdater<ConnectionMng> connectionMngEntityUpdater;
     private final MongoDbBackupService mongoDbBackupService;
     private final PatchHelper patchHelper;
 
@@ -96,7 +92,6 @@ public class ConnectionServiceImp implements ConnectionService {
             Mapper<ConnectionMng, ConnectionDTO> connectionMngMapper,
             Mapper<Connection, ConnectionDTO> connectionMapper,
             MaskingRuleRepository ruleRepository,
-            EntityVersionManager entityVersionManager,
             OpenceliumProps ocProps,
             MongoDbBackupService mongoDbBackupService,
             PatchHelper patchHelper
@@ -114,7 +109,6 @@ public class ConnectionServiceImp implements ConnectionService {
         this.webhookService = webhookService;
         this.ruleRepository = ruleRepository;
         this.ocProps = ocProps;
-        this.connectionMngEntityUpdater = entityVersionManager.getUpdater(ConnectionMng.class);
         this.mongoDbBackupService = mongoDbBackupService;
         this.patchHelper = patchHelper;
     }
@@ -401,46 +395,6 @@ public class ConnectionServiceImp implements ConnectionService {
     }
 
     @Override
-    public void updateConnectionsToCurrentVersion() {
-        List<Long> ids = connectionRepository.findIds();
-        boolean gotBackup = false;
-        for (Long id : ids) {
-            Connection connection = getById(id);
-            if (Utils.compare(ocProps.getVersion(), connection.getOcVersion()) > 0 && !isTestConnection(connection.getTitle())) {
-
-                if (!gotBackup) {
-                    try {
-                        mongoDbBackupService.backup();
-                        gotBackup = true;
-                    } catch (Exception e) {
-                        log.error("Failed to backup. Skipped updating connections");
-                        throw new RuntimeException(e);
-                    }
-                }
-                AtomicBoolean connectionChanged = new AtomicBoolean(false);
-                // UPDATE CONNECTION_MNG
-                ConnectionMng connectionMng = connectionMngService.getByConnectionId(connection.getId());
-                try {
-                    connectionMngEntityUpdater.updateToCurrentVersion(connectionMng)
-                            .ifChangedOrElseIfUpdated(
-                                    x -> {
-                                        connectionMngService.updateWithoutBinding(x);
-                                        connectionChanged.set(true);
-                                    }, // if any field is updated
-                                    connectionMngService::saveDirectly // only version is set to the current version
-                            );
-                } catch (Exception e) {
-                    log.error("Failed to update Connection[id={}, name={}]", connection.getId(), connection.getTitle(), e);
-                    mongoDbBackupService.restore();
-                    log.warn("Rolled back all changes");
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-        connectionRepository.updateVersion(ocProps.getVersion());
-    }
-
-    @Override
     public List<String> getLogFileNameListById(long connectionId) {
         return LogFileUtility.getLogFileNameList(connectionId);
     }
@@ -505,6 +459,11 @@ public class ConnectionServiceImp implements ConnectionService {
 
         connectionRepository.save(patchedConnection);
         connectionMngService.update(id, patch);
+    }
+
+    @Override
+    public void save(Connection connection) {
+        connectionRepository.save(connection);
     }
 
     // --------------------------------------------------------------------------------------------------------------------------------------------------------

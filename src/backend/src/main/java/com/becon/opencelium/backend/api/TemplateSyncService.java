@@ -1,17 +1,13 @@
 package com.becon.opencelium.backend.api;
 
 import com.becon.opencelium.backend.api.factory.ApiFactory;
-import com.becon.opencelium.backend.constant.props.OpenceliumProps;
 import com.becon.opencelium.backend.database.mysql.service.OnlineSyncHistoryService;
 import com.becon.opencelium.backend.api.module.TemplateModule;
-import com.becon.opencelium.backend.template.entity.Template;
+import com.becon.opencelium.backend.resource.v5.template.TemplateV5;
 import com.becon.opencelium.backend.template.service.TemplateService;
-import com.becon.opencelium.backend.versionmanager.EntityUpdater;
-import com.becon.opencelium.backend.versionmanager.EntityVersionManager;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.becon.opencelium.backend.versionmanager.updaters.TemplateComplexUpdater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,30 +21,23 @@ import java.util.zip.ZipInputStream;
 @Service
 public class TemplateSyncService {
     private final TemplateModule templateModule;
-    private final OpenceliumProps ocProps;
-    private final EntityUpdater<Template> templateEntityUpdater;
+    private final TemplateComplexUpdater templateUpdater;
     private final TemplateService templateService;
     private final OnlineSyncHistoryService onlineSyncHistoryService;
-    private final ObjectMapper objectMapper;
 
     private static final String SERVICE = "Template File";
     private static final Logger logger = LoggerFactory.getLogger(TemplateSyncService.class);
 
-
     public TemplateSyncService(
-            OpenceliumProps ocProps,
-            EntityVersionManager entityVersionManager,
+            TemplateComplexUpdater templateUpdater,
             TemplateService templateService,
             OnlineSyncHistoryService onlineSyncHistoryService,
-            ApiFactory apiFactory,
-            @Qualifier("objectMapper") ObjectMapper objectMapper
+            ApiFactory apiFactory
     ) {
-        this.ocProps = ocProps;
-        this.templateEntityUpdater = entityVersionManager.getUpdater(Template.class);
+        this.templateUpdater = templateUpdater;
         this.templateService = templateService;
         this.onlineSyncHistoryService = onlineSyncHistoryService;
         this.templateModule = apiFactory.get(ApiType.SERVICE_PORTAL).features().template();
-        this.objectMapper = objectMapper;
     }
 
     @Transactional
@@ -64,14 +53,8 @@ public class TemplateSyncService {
             while ((entry = zis.getNextEntry()) != null) {
                 if (entry.getName().endsWith(".json")) {
                     byte[] jsonBytes = zis.readAllBytes();
-                    Template template = objectMapper.readValue(jsonBytes, Template.class);
-
                     try {
-                        templateEntityUpdater.updateToCurrentVersion(template)
-                            .ifUpdated(x -> {
-                                template.setVersion(ocProps.getVersion());
-                            });
-
+                        TemplateV5 template = templateUpdater.update(jsonBytes);
                         templateService.save(template);
                         details.add(template.getTemplateId() + ".json");
                     } catch (Exception e) {

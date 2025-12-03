@@ -27,10 +27,11 @@ import com.becon.opencelium.backend.storage.UserStorageService;
 import com.becon.opencelium.backend.subscription.quartz.OperationUsageReportJob;
 import com.becon.opencelium.backend.subscription.quartz.QuartzCronUpdater;
 import com.becon.opencelium.backend.subscription.utility.LicenseKeyUtility;
-import com.becon.opencelium.backend.template.service.TemplateService;
 import com.becon.opencelium.backend.utility.migrate.ChangeSetDao;
 import com.becon.opencelium.backend.utility.migrate.YAMLMigrator;
 import com.becon.opencelium.backend.versionmanager.backup.FileBackupManager;
+import com.becon.opencelium.backend.versionmanager.updaters.ConnectionComplexUpdater;
+import com.becon.opencelium.backend.versionmanager.updaters.TemplateComplexUpdater;
 import org.quartz.*;
 import org.quartz.Scheduler;
 import org.slf4j.Logger;
@@ -40,9 +41,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
-import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.util.FileSystemUtils;
 
 import javax.sql.DataSource;
 import java.io.*;
@@ -63,11 +62,10 @@ public class StorageConfiguration {
     private final InvokerContainer invokerContainer;
     private final RequestDataService requestDataService;
     private final ChangeSetDao changeSetDao;
-    private final Environment environment;
     private final SubscriptionService subscriptionService;
     private final ActivationRequestService activationRequestService;
-    private final ConnectionService connectionService;
-    private final TemplateService templateService;
+    private final TemplateComplexUpdater templateComplexUpdater;
+    private final ConnectionComplexUpdater connectionComplexUpdater;
     private final OpenceliumProps ocProps;
 
     @Autowired
@@ -86,19 +84,18 @@ public class StorageConfiguration {
             @Qualifier("activationRequestServiceImp") ActivationRequestService activationRequestService,
             InvokerContainer invokerContainer,
             DataSource dataSource,
-            Environment environment,
-            ConnectionService connectionService, TemplateService templateService, OpenceliumProps ocProps
+            TemplateComplexUpdater templateComplexUpdater, ConnectionComplexUpdater connectionComplexUpdater,
+            OpenceliumProps ocProps
     ) {
         this.userStorageService = userStorageService;
         this.connectorService = connectorService;
         this.invokerContainer = invokerContainer;
         this.requestDataService = requestDataService;
         this.changeSetDao = new ChangeSetDao(dataSource);
-        this.environment = environment;
         this.subscriptionService = subscriptionService;
         this.activationRequestService = activationRequestService;
-        this.connectionService = connectionService;
-        this.templateService = templateService;
+        this.templateComplexUpdater = templateComplexUpdater;
+        this.connectionComplexUpdater = connectionComplexUpdater;
         this.ocProps = ocProps;
     }
 
@@ -131,11 +128,10 @@ public class StorageConfiguration {
 
         FileBackupManager.moveToNewLocation(PathConstant.RESOURCES + "/backup", PathConstant.BACKUP);
 
-        // updates connections and enhancements to current version
-        connectionService.updateConnectionsToCurrentVersion();
-
         // updates templates to the current version
-        templateService.updateTemplatesToCurrentVersion();
+        templateComplexUpdater.update();
+
+        connectionComplexUpdater.update();
 
         // saves new changesets
         if (YAMLMigrator.getChangeSetsToSave() != null) {

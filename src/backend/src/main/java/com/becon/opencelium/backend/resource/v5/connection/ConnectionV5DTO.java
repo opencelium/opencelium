@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.resource.connection.v5;
+package com.becon.opencelium.backend.resource.v5.connection;
 
 import java.util.List;
 import java.util.Map;

@@ -21,16 +21,14 @@ import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.exception.WrongEncode;
 import com.becon.opencelium.backend.mapper.base.Mapper;
+import com.becon.opencelium.backend.mapper.v5.TemplateV5Mapper;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.old.ConnectionOldDTO;
 import com.becon.opencelium.backend.resource.template.CtionTemplateResource;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
+import com.becon.opencelium.backend.resource.v5.template.TemplateV5;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.utility.FileNameUtils;
-import com.becon.opencelium.backend.versionmanager.EntityUpdater;
-import com.becon.opencelium.backend.versionmanager.EntityVersionManager;
-import com.becon.opencelium.backend.versionmanager.backup.FileBackupManager;
-import com.becon.opencelium.backend.versionmanager.base.Utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -58,22 +56,20 @@ public class TemplateServiceImp implements TemplateService {
     private final Mapper<ConnectionOldDTO, CtionTemplateResource> mapper;
     private final Mapper<ConnectionDTO, ConnectionOldDTO> oldDTOMapper;
     private final OpenceliumProps ocProps;
-    private final EntityUpdater<Template> templateEntityUpdater;
-    private final ObjectMapper objectMapper;
+    private final TemplateV5Mapper templateV5Mapper;
 
     public TemplateServiceImp(
             @Qualifier("connectionServiceImp") ConnectionService connectionService,
             Mapper<ConnectionOldDTO, CtionTemplateResource> mapper,
             Mapper<ConnectionDTO, ConnectionOldDTO> oldDTOMapper,
-            EntityVersionManager entityVersionManager,
             OpenceliumProps ocProps,
-            @Qualifier("objectMapper") ObjectMapper objectMapper) {
+            TemplateV5Mapper templateV5Mapper
+    ) {
         this.connectionService = connectionService;
         this.mapper = mapper;
         this.oldDTOMapper = oldDTOMapper;
         this.ocProps = ocProps;
-        this.templateEntityUpdater = entityVersionManager.getUpdater(Template.class);
-        this.objectMapper = objectMapper;
+        this.templateV5Mapper = templateV5Mapper;
     }
 
     @Override
@@ -102,6 +98,11 @@ public class TemplateServiceImp implements TemplateService {
 
     @Override
     public void save(Template template) {
+        save(templateV5Mapper.toTemplateV5(template), template.getTemplateId() + ".json");
+    }
+
+    @Override
+    public void save(TemplateV5 template) {
         save(template, template.getTemplateId() + ".json");
     }
 
@@ -153,35 +154,27 @@ public class TemplateServiceImp implements TemplateService {
     }
 
     @Override
-    public void updateTemplatesToCurrentVersion() {
-        // move from /src/main/resources/templates to /runtime/templates
-        moveTemplatesToNewLocation();
-
-        Map<String, Template> templateMap = getAllAsMap();
-        for (Map.Entry<String, Template> entry : templateMap.entrySet()) {
-            String fileName = entry.getKey();
-            Template template = entry.getValue();
-            Template backup;
-            try {
-                backup = objectMapper.readValue(objectMapper.writeValueAsString(template), Template.class);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
-
-            if (Utils.compare(ocProps.getVersion(), template.getVersion()) > 0) {
-                try {
-                    String oldVersion = template.getVersion();
-                    templateEntityUpdater.updateToCurrentVersion(template)
-                            .ifUpdated(x -> {
-                                template.setVersion(ocProps.getVersion());
-                                FileBackupManager.doBackup(backup, oldVersion, ocProps.getVersion());
-                                save(template, fileName);
-                                log.info("Template[id={}, name={}] is successfully updated to {} version", template.getTemplateId(), template.getName(), ocProps.getVersion());
-                            });
-                } catch (Exception e) {
-                    log.error("Failed to update Template[id={}, name={}]", template.getTemplateId(), template.getName(), e);
-                }
-            }
+    public List<Template> findAllLessThanV5() {
+        try (Stream<Path> walk = Files.walk(Paths.get(PathConstant.TEMPLATE))) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return walk.filter(Files::isRegularFile)
+                    .filter(path -> FileNameUtils.getExtension(path.toString()).equals("json"))
+                    .map(path -> {
+                        StringBuilder contentBuilder = new StringBuilder();
+                        try (Stream<String> stream = Files.lines(Paths.get(path.toString()), StandardCharsets.UTF_8)) {
+                            stream.forEach(s -> contentBuilder.append(s).append("\n"));
+                            return objectMapper.readValue(contentBuilder.toString(), Template.class);
+                        } catch (JsonProcessingException ignored) {
+                            return null;
+                        }catch (Exception e) {
+                            e.printStackTrace();
+                            throw new WrongEncode("UTF-8");
+                        }
+                    })
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -245,7 +238,7 @@ public class TemplateServiceImp implements TemplateService {
     }
 
 
-    private void save(Template template, String fileName) {
+    private void save(TemplateV5 template, String fileName) {
         try {
             String id = template.getTemplateId();
             ObjectMapper objectMapper = new ObjectMapper();

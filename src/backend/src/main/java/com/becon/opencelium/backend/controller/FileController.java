@@ -16,7 +16,6 @@
 
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.constant.props.OpenceliumProps;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorServiceImp;
 import com.becon.opencelium.backend.database.mysql.service.InvokerSyncService;
@@ -34,13 +33,13 @@ import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.FileDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
+import com.becon.opencelium.backend.resource.v5.template.TemplateV5;
 import com.becon.opencelium.backend.storage.UserStorageService;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.template.service.TemplateServiceImp;
 import com.becon.opencelium.backend.utility.FileNameUtils;
 import com.becon.opencelium.backend.utility.Xml;
-import com.becon.opencelium.backend.versionmanager.EntityUpdater;
-import com.becon.opencelium.backend.versionmanager.EntityVersionManager;
+import com.becon.opencelium.backend.versionmanager.updaters.TemplateComplexUpdater;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -105,8 +104,7 @@ public class FileController {
     private final InvokerSyncService invokerSyncService;
     private final UserStorageService storageService;
     private final Mapper<Connector, ConnectorResource> connectorMapper;
-    private final EntityUpdater<Template> templateUpdater;
-    private final OpenceliumProps ocProps;
+    private final TemplateComplexUpdater templateComplexUpdater;
 
     @Autowired
     public FileController(
@@ -119,8 +117,7 @@ public class FileController {
             InvokerSyncService invokerSyncService,
             UserStorageService storageService,
             Mapper<Connector, ConnectorResource> connectorMapper,
-            EntityVersionManager versionManager,
-            OpenceliumProps ocProps
+            TemplateComplexUpdater templateComplexUpdater
     ) {
         this.userDetailService = userDetailService;
         this.userService = userService;
@@ -131,8 +128,7 @@ public class FileController {
         this.invokerSyncService = invokerSyncService;
         this.storageService = storageService;
         this.connectorMapper = connectorMapper;
-        this.templateUpdater = versionManager.getUpdater(Template.class);
-        this.ocProps = ocProps;
+        this.templateComplexUpdater = templateComplexUpdater;
     }
 
     @Operation(summary = "Uploads profile picture of a user by provided user email")
@@ -260,17 +256,17 @@ public class FileController {
             ObjectMapper objectMapper = new ObjectMapper();
             Template template = objectMapper.readValue(file.getBytes(), Template.class);
 
-            updateTemplate(template);
+            TemplateV5 templateV5 = updateTemplate(template);
 
             if (template.getTemplateId() != null && templateService.existsById(template.getTemplateId())) {
                 templateService.deleteById(template.getTemplateId());
                 id = template.getTemplateId();
             } else {
                 id = UUID.randomUUID().toString();
-                template.setTemplateId(id);
+                templateV5.setTemplateId(id);
             }
             // Save file in storage
-            templateService.save(template);
+            templateService.save(templateV5);
 
             URI uri = getUri(id + ".json");
             FileDTO fileDTO = new FileDTO(id, uri.toString());
@@ -307,7 +303,7 @@ public class FileController {
                 ZipInputStream zis = new ZipInputStream(inputStream);
                 ObjectMapper objectMapper = new ObjectMapper();
                 ZipEntry zipEntry;
-                List<Template> templates = new ArrayList<>();
+                List<TemplateV5> templates = new ArrayList<>();
                 while ((zipEntry = zis.getNextEntry()) != null) {
                     if (zipEntry.isDirectory() || !zipEntry.getName().endsWith(".json")) {
                         continue;
@@ -317,8 +313,8 @@ public class FileController {
                     String jsonContent = new String(zis.readAllBytes(), StandardCharsets.UTF_8);
                     Template template = objectMapper.readValue(jsonContent, Template.class);
                     template.setTemplateId(id);
-                    updateTemplate(template);
-                    templates.add(template);
+                    TemplateV5 templateV5 = updateTemplate(template);
+                    templates.add(templateV5);
                 }
                 zis.close();
 
@@ -589,15 +585,12 @@ public class FileController {
         }
     }
 
-    private void updateTemplate(Template template){
+    private TemplateV5 updateTemplate(Template template){
         try {
-            templateUpdater.updateToCurrentVersion(template)
-                    .ifUpdated(temp -> {
-                        log.info("Template[id={}, name={}] is successfully updated to {} version", template.getTemplateId(), template.getName(), ocProps.getVersion());
-                    });
-            template.setVersion(ocProps.getVersion());
+            TemplateV5 templateV5 = templateComplexUpdater.updateAndConvert(template);
+            templateService.save(templateV5);
+            return templateV5;
         } catch (Exception e) {
-            log.error("Failed to update Template[id={}, name={}]", template.getTemplateId(), template.getName(), e);
             throw new RuntimeException("INVALID_TEMPLATE");
         }
     }

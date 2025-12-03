@@ -11,7 +11,7 @@ import com.becon.opencelium.backend.resource.connection.old.FieldBindingOldDTO;
 import com.becon.opencelium.backend.resource.connector.BodyDTO;
 import com.becon.opencelium.backend.resource.template.CtionTemplateResource;
 import com.becon.opencelium.backend.template.entity.Template;
-import com.becon.opencelium.backend.versionmanager.Wrapper;
+import com.becon.opencelium.backend.versionmanager.EntityUpdater;
 import com.becon.opencelium.backend.versionmanager.base.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,51 +23,36 @@ import java.util.Map;
 import java.util.Objects;
 
 @Component
-public class Template44Updater implements TemplateUpdater {
+public class Template44Updater implements EntityUpdater<Template> {
 
-    private static final UpdaterVersion currentVersion = UpdaterVersion.VERSION_4_4;
-    private final Template40Updater template40Updater;
+    private static final String currentVersion = "4.4";
     private final ObjectMapper objectMapper;
     private final Mapper<ConditionMng, ConditionDTO> conditionMapper;
 
-    public Template44Updater(Template40Updater template40Updater, ObjectMapper objectMapper, Mapper<ConditionMng, ConditionDTO> conditionMapper) {
-        this.template40Updater = template40Updater;
+    public Template44Updater(ObjectMapper objectMapper, Mapper<ConditionMng, ConditionDTO> conditionMapper) {
         this.objectMapper = objectMapper;
         this.conditionMapper = conditionMapper;
     }
 
     @Override
-    public Wrapper<Template> updateToCurrentVersion(Template template) {
+    public Template updateToCurrentVersion(Template template) {
         return updateFromInternal(template, template.getVersion());
     }
 
     @Override
-    public Wrapper<Template> updateFrom(Template template, String oldVersion) {
+    public Template updateFrom(Template template, String oldVersion) {
         return updateFromInternal(template, oldVersion);
     }
 
-    private Wrapper<Template> updateFromInternal(Template template, String oldVersion) {
-        if (Objects.isNull(template) || Utils.compare(currentVersion.getVersion(), oldVersion) <= 0)
-            return Wrapper.notUpdated(template);
+    private Template updateFromInternal(Template template, String oldVersion) {
+        if (Objects.isNull(template) || Utils.compare(currentVersion, oldVersion) <= 0)
+            return template;
 
         if (Utils.compare(oldVersion, "4.0") < 0) {
-            Wrapper<Template> updatedTo4_0 = template40Updater.updateFrom(template, oldVersion);
-            if (!updatedTo4_0.isUpdated()) {
-                return updatedTo4_0;
-            }
-            Wrapper<Template> result = updateFromGreaterThan4_0(updatedTo4_0.getData(), updatedTo4_0.getNewVersion());
-            return Wrapper.updated(result.getData())
-                    .changed(true)
-                    .withOldVersion(oldVersion)
-                    .withNewVersion(currentVersion.getVersion());
-        } else if (Utils.compare(oldVersion, "4.0") >= 0) {
-            return updateFromGreaterThan4_0(template, oldVersion);
+            throw new RuntimeException("Update to 4.0 version first");
         }
-        return Wrapper.notUpdated(template);
-    }
 
-    private Wrapper<Template> updateFromGreaterThan4_0(Template template, String oldVersion) {
-        template.setVersion(currentVersion.getVersion());
+        template.setVersion(currentVersion);
         CtionTemplateResource connection = template.getConnection();
 
         Reference<Boolean> changed = new Reference<>(false);
@@ -104,10 +89,7 @@ public class Template44Updater implements TemplateUpdater {
             connection.setFieldBinding(fieldBindings);
         }
 
-        return Wrapper.updated(template)
-                .changed(changed.getValue())
-                .withOldVersion(oldVersion)
-                .withNewVersion(currentVersion.getVersion());
+        return template;
     }
 
     private void update(FieldBindingOldDTO fieldBinding, Reference<Boolean> changed) {
