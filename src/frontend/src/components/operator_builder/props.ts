@@ -68,6 +68,7 @@ export interface GroupUIProps extends UpdateGroupProps, GroupStyleProps{
 }
 export interface GroupHeaderUIProps extends UpdateGroupProps{
     group: GroupProps,
+    isInitial?: boolean,
 }
 export interface GroupStyleProps {
     isInitial?: boolean,
