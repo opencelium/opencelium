@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.concurrent.BlockingQueue;
 import java.util.function.Consumer;
 
 import static com.becon.opencelium.backend.constant.LogConstant.LOG_FILE_EXTENSION;
@@ -37,6 +38,9 @@ public class OcLogger<T extends LogMessage> {
     private final long connectionId;
     private final Path filepath;
     private final Logger logger;
+
+    // --- async logging state ---
+//    private final AsyncLogDispatcher asyncDispatcher;
 
     public OcLogger(
             QuartzJobScheduler.TriggerType triggerType, boolean debugMode, T logEntity,
@@ -80,23 +84,34 @@ public class OcLogger<T extends LogMessage> {
         logger.setAdditive(false); // do not pass message to parent, just write to the file
 
         this.logger = logger;
+
+//        // create async dispatcher ONLY if we are actually logging to file
+//        if (debugMode || supportFile) {
+//            String threadName = "OcLogger-" + connectionId + "-" + executionId;
+//            this.asyncDispatcher = new AsyncLogDispatcher(threadName);
+//        } else {
+//            this.asyncDispatcher = null;
+//        }
     }
 
     public void close() {
+        // Stop async worker so no more writes happen
+//        if (asyncDispatcher != null) {
+//            asyncDispatcher.close();   // waits for queue to drain and thread to finish
+//        }
+
         if (logger instanceof ch.qos.logback.classic.Logger classicLogger) {
             classicLogger.iteratorForAppenders().forEachRemaining(appender -> {
                 if (appender instanceof FileAppender) {
                     appender.stop();
                 }
             });
-
             classicLogger.detachAndStopAllAppenders();
         }
 
         if (!debugMode && !supportFile) {
             // debugMode = false && supportFile = false then there is nothing in logfile
             // so just delete it
-
             try {
                 LogFileUtility.delete(filepath);
             } catch (IOException e) {}
@@ -108,19 +123,25 @@ public class OcLogger<T extends LogMessage> {
     }
 
     public void logAndSend(String message){
-        Consumer<String> printStrategy = logger::info;
-        logAndSend(printStrategy, message);
+//        if (asyncDispatcher != null) {
+//            asyncDispatcher.submit(() -> logAndSendSync(logger::info, message));
+//        } else {
+            logAndSendSync(logger::info, message);
+//        }
     }
 
     public void logAndSend(Exception e){
         String stackTrace = getStackTraceAsString(e);
         String logMessage = "segment=EXCEPTION data=" + stackTrace;
-        Consumer<String> printStrategy = logger::info;
-        logAndSend(printStrategy, logMessage);
+//        if (asyncDispatcher != null) {
+//            asyncDispatcher.submit(() -> logAndSendSync(logger::info, logMessage));
+//        } else {
+            logAndSendSync(logger::info, logMessage);
+//        }
     }
 
 
-    private <E> void logAndSend(Consumer<E> t, E message) {
+    private <E> void logAndSendSync(Consumer<E> t, E message) {
         if (!debugMode && !supportFile) {
             return;
         }
