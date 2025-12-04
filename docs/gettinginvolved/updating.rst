@@ -52,7 +52,8 @@ Update Docker Compose
 =================================
 
 .. warning::
-        | To preserve your own settings, do a backup of your configuraton files (conf folder and .env file) before updating! 
+        | Before updating, do a backup of your configuraton files (conf folder and .env file) 
+        | to preserve your own settings! 
 
 
 .. code-block:: sh

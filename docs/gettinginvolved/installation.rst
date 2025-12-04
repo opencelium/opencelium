@@ -539,9 +539,8 @@ The Docker images are hosted on `Dockerhub <https://hub.docker.com/u/becongmbh>`
 Use default Docker installation guide.
 
    * `Docker Engine <https://docs.docker.com/engine/installation/>`_
-   * `Docker Compose <https://docs.docker.com/compose/install/>`_
-  
-(opt. Docker Engine installation usually already includes Docker Compose Plugin)
+   * `Docker Compose <https://docs.docker.com/compose/install/>`_ 
+  (opt. Docker Engine installation usually already includes Docker Compose Plugin)
 
 1. Getting started with opencelium-docker-compose:
 
@@ -568,7 +567,7 @@ Use default Docker installation guide.
 
 .. code-block:: sh
 	:linenos:
-	
+
 	cd /opt/opencelium-docker
 	docker-compose up -d
 
