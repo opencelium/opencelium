@@ -8,7 +8,7 @@ const Group = ({updateGroup, deleteGroup, group, isInitial, hasNext, connectionE
     const GroupComponent = type === OperatorType.Loop ? LoopGroupContainer : IfGroupContainer;
     return (
         <GroupComponent isInitial={isInitial} hasNext={hasNext}>
-            {type === OperatorType.If && <GroupHeader group={group} updateGroup={updateGroup} deleteGroup={deleteGroup}/>}
+            {type === OperatorType.If && <GroupHeader isInitial={isInitial} group={group} updateGroup={updateGroup} deleteGroup={deleteGroup}/>}
             {group?.items?.length > 0 && <GroupItemsContainer isLoop={type === OperatorType.Loop}>
                 {
                     group?.items.map((item, index) => {
