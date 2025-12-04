@@ -52,7 +52,9 @@ Update Docker Compose
 =================================
 
 .. warning::
-        | Before updating from versions prior 4.6.1, do a backup of your application.yml file! 
+        | To preserve your own settings, do a backup of your configuraton files before updating! 
+        | - .env
+        | - conf/* 
 
 .. code-block:: sh
 	:linenos:

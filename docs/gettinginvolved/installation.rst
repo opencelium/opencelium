@@ -518,7 +518,7 @@ Docker Compose
 
 .. warning::
 	We currently do not support Docker environments in productive use. We recommend using it for use in a test phase!
-	
+
 .. note::
 	You need at least 4 GB of RAM to run the containers. We recommend 8GB for a better performance.
 
@@ -548,24 +548,28 @@ Use default Docker installation guide.
 .. code-block:: sh
 	:linenos:
 
-	git clone https://github.com/opencelium/opencelium-docker.git 
+	git clone https://github.com/opencelium/opencelium-docker.git /opt/opencelium-docker
 	cp /opt/opencelium-docker/conf/application_default.yml /opt/opencelium-docker/conf/application.yml
-	cd opencelium-docker
+	cp /opt/opencelium-docker/conf/settings_default.json /opt/opencelium-docker/conf/settings.json
+	cp /opt/opencelium-docker/.env_default /opt/opencelium-docker/.env
 
 .. note::
-	| We recommend to use always the latest tag version.
+	| We recommend to use always the latest tag version from github.
 	
+	| To set your own passwords, modify the .env file 
+	| and adjust the passwords in application.yml accordingly.
+
 	| Modify application.yml
 	| Within section "Database configuration section of MariaDB and MongoDB":
 	| - change password of opencelium user for MariaDB (default "secret1234")
 	| - change password of oc_admin user for MongoDB in uri line (default "secretsecret")
 
 
-3. Start OpenCelium using DockerHub images
+1. Start OpenCelium using DockerHub images
 
 .. code-block:: sh
 	:linenos:
-
+	cd /opt/opencelium-docker
 	docker-compose up -d
 
 
