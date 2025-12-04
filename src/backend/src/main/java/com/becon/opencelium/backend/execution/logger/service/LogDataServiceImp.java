@@ -259,7 +259,6 @@ public class LogDataServiceImp implements LogDataService {
         if (!batch.isEmpty()) {
             long start = System.currentTimeMillis();
             metaDataLogRepository.saveAll(batch);
-            System.out.println("flushBufferNow: " + (start - System.currentTimeMillis()) + "ms");
         }
     }
 
@@ -415,9 +414,7 @@ public class LogDataServiceImp implements LogDataService {
     }
 
     private LogDataMng prepareExistingBlock(LogDataMng incoming) {
-        long start = System.currentTimeMillis();
         Optional<LogDataMng> existingOpt = findExistingBlock(incoming);
-        System.out.println("findExistingBlock: " + (start - System.currentTimeMillis()) + "ms");
         if (existingOpt.isEmpty()) {
             if (incoming.getCreatedAt() == null) {
                 incoming.setCreatedAt(Instant.now());
@@ -444,7 +441,6 @@ public class LogDataServiceImp implements LogDataService {
     private Optional<LogDataMng> findExistingBlock(LogDataMng block) {
         Optional<LogDataMng> inBuffer = buffer.findInBuffer(block);
         if (inBuffer.isPresent()) {
-            System.out.println("buffer");
             return inBuffer;
         }
 
