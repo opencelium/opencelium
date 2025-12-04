@@ -140,8 +140,10 @@ public class InvokerServiceImp implements InvokerService {
     public void deleteInvokerFile(String name) {
         try {
             Path file = findFileByInvokerName(name).toPath();
-            if (exists(file)) {
+            if (invokerContainer.existsByName(name)) {
                 invokerContainer.remove(name);
+            }
+            if (exists(file)) {
                 Files.delete(file.toAbsolutePath());
 
                 // delete invoker sync record
@@ -202,10 +204,12 @@ public class InvokerServiceImp implements InvokerService {
                 return;
             }
             InvokerParserImp parser = new InvokerParserImp(document);
-            File f = new File(document.getDocumentURI());
-            String invoker = FileNameUtils.removeExtension(f.getName());
-            invoker = invoker.replace("%20", " ");
-            container.put(invoker, parser.parse());
+//            File f = new File(document.getDocumentURI());
+//            String invoker = FileNameUtils.removeExtension(f.getName());
+//            invoker = invoker.replace("%20", " ");
+            Invoker invoker =  parser.parse();
+            String invokerName = invoker.getName();
+            container.put(invokerName, invoker);
         });
         return container;
     }
