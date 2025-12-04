@@ -19,7 +19,8 @@ const ReferenceInformation: FC<ReferenceInformationProps> = ({
 	onReferenceClick,
 	isToggledIcon,
 	toggleIcon,
-	location
+	location,
+	style,
 }) => {
 	const [fieldBindings, setFieldBindings] = useState<CFieldBinding[]>([]);
 	const extractReferences = () => {
@@ -41,7 +42,7 @@ const ReferenceInformation: FC<ReferenceInformationProps> = ({
 	}, [fieldBindings]);
 	const hasFieldBindings = fieldBindings.length > 0;
 	return (
-		<ReferenceInformationStyled>
+		<ReferenceInformationStyled style={style}>
 			<div>
 				<b>{`Reference information`}</b>
 				<span>{hasFieldBindings ? '' : ' (is empty now)'}</span>

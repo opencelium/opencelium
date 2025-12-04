@@ -52,6 +52,7 @@ const ProgressBarFromStyled = styled.div`
 `;
 
 const ProgressBarTitleStyled = styled.div`
+    top: 0;
     line-height: 33px;
     position: absolute;
     z-index: 1;

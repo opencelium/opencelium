@@ -745,7 +745,8 @@ $DASHED_COLOR: #58854d;
 	width: 50%;
 	border-right: 1px solid #eee;
 	padding-right: 10px;
-	display: grid;
+	display: flex;
+	flex-direction: column;
 }
 .body_data_without_enhancement {
 	@extend .body_data;
