@@ -556,8 +556,7 @@ Use default Docker installation guide.
 .. note::
 	| We recommend to use always the latest tag version from github.
 	
-	| To set your own passwords, modify the .env file 
-	| and adjust the passwords in application.yml accordingly.
+	| To set your own passwords, modify the .env file and adjust the passwords in application.yml accordingly.
 
 	| Modify application.yml
 	| Within section "Database configuration section of MariaDB and MongoDB":
@@ -565,10 +564,11 @@ Use default Docker installation guide.
 	| - change password of oc_admin user for MongoDB in uri line (default "secretsecret")
 
 
-1. Start OpenCelium using DockerHub images
+2. Start OpenCelium using DockerHub images
 
 .. code-block:: sh
 	:linenos:
+	
 	cd /opt/opencelium-docker
 	docker-compose up -d
 
