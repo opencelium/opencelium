@@ -75,9 +75,6 @@ public class StorageConfiguration {
     @Autowired
     private Scheduler quartzScheduler;
 
-    private static final String JAR_PREFIX = "opencelium.backend-";
-    private static final String JAR_EXTENSION = ".jar";
-
     public StorageConfiguration(
             UserStorageService userStorageService,
             @Qualifier("connectorServiceImp") ConnectorService connectorService,
@@ -142,8 +139,7 @@ public class StorageConfiguration {
             changeSetDao.createAll(YAMLMigrator.getChangeSetsToSave());
         }
 
-        // deleting old version zip and jar files
-        cleanOldFiles(PathConstant.LIBS, f -> f.isFile() && f.getName().endsWith(JAR_EXTENSION), JAR_PREFIX);
+        // deleting old version zip files
         cleanOldFiles(PathConstant.ASSISTANT + PathConstant.VERSIONS, File::isDirectory, "");
     }
 

@@ -4,10 +4,12 @@ import com.becon.opencelium.backend.application.entity.SystemOverview;
 import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.updateassistant.InstallationDTO;
+import com.becon.opencelium.backend.resource.updateassistant.JarFileDescriptor;
 import com.becon.opencelium.backend.resource.updateassistant.Neo4jConfigResource;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Path;
+import java.util.List;
 
 public interface ApplicationService {
 
@@ -25,4 +27,8 @@ public interface ApplicationService {
     void restore();
 
     void doMigrate(Neo4jConfigResource neo4jConfig);
+
+    List<JarFileDescriptor> getOldJarFiles();
+
+    List<JarFileDescriptor> deleteOldJarFiles();
 }
