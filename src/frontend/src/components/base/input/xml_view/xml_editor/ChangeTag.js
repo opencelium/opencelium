@@ -28,7 +28,7 @@ import {
     setFocusById
 } from "@application/utils/utils";
 import Button from "@basic_components/buttons/Button";
-import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import FontIcon from "@basic_components/FontIcon";
 import CXmlEditor from "./classes/CXmlEditor";
 import TagType from "@app_component/base/input/xml_view/xml_editor/TagType";
 import Value from "@app_component/base/input/xml_view/xml_editor/Value";
@@ -194,7 +194,7 @@ class ChangeTag extends Component{
         const {translate, tag, mode, close, ReferenceComponent} = this.props;
         return ReactDOM.createPortal(
             <div className={styles.change_tag_popup} style={{left: this.left, top: this.top}}>
-                <TooltipFontIcon size={14} isButton={true} tooltip={translate('XML_EDITOR.CLOSE')} value={'close'} className={styles.close_icon} onClick={close}/>
+                <FontIcon size={14} isButton={true} tooltip={translate('XML_EDITOR.CLOSE')} value={'close'} className={styles.close_icon} onClick={close}/>
                 <TagType translate={translate} valueType={valueType} changeValueType={(a) => this.changeValueType(a)}/>
                 {valueType === TAG_VALUE_TYPES.CLIPBOARD && <Input id={`${tag.uniqueIndex}_clipboard_text`} rows={2} multiline={true} value={clipboardText} onChange={(a) => this.changeClipboardText(a)} onKeyDown={(a) => this.pressKey(a)} label={translate('XML_EDITOR.TAG.TEXT')} theme={{input: styles.change_tag_name}}/>}
                 {valueType !== TAG_VALUE_TYPES.CLIPBOARD && <Input id={`${tag.uniqueIndex}_name`} value={name} onChange={(a) => this.changeName(a)} onKeyDown={(a) => this.pressKey(a)} label={translate('XML_EDITOR.TAG.NAME')} theme={{input: styles.change_tag_name}}/>}

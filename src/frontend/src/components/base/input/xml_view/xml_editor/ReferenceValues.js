@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import FontIcon from "@basic_components/FontIcon";
 import { ATTRIBUTES_MARK } from "@classes/content/invoker/CBody";
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
@@ -71,14 +71,14 @@ class ReferenceValues extends Component{
                             }
                             return (
                                 <React.Fragment key={key}>
-                                    <TooltipFontIcon
+                                    <FontIcon
                                         onClick={(a) => this.onReferenceClick(a)}
                                         className={appStyles.reference_value}
                                         tooltip={pointer.slice(2, pointer.length).join('.').replace('[]', '')}
                                         value={<span/>}
                                         style={{background: pointer[0], ...styles, ...extraStyles}}
                                     />
-                                    {hasDelete && <TooltipFontIcon size={14} tooltip={translate('XML_EDITOR.DELETE_ICON')} onClick={() => this.deleteReference(key)} value={'delete'} className={appStyles.reference_value_delete}/>}
+                                    {hasDelete && <FontIcon size={14} tooltip={translate('XML_EDITOR.DELETE_ICON')} onClick={() => this.deleteReference(key)} value={'delete'} className={appStyles.reference_value_delete}/>}
                                 </React.Fragment>
                             );
                         } else{
