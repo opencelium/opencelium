@@ -36,7 +36,7 @@ const OperatorTraceExpander = ({theme, trace, loading, handleToggle, expanded, f
     const isIf = trace.type === 'IF';
     const isLoop = trace.type === 'LOOP';
     const hasError = !!trace.error || trace.hasError || currentLogError.parentsPath.indexOf(trace.id) !== -1 || currentLogError.log?.id === trace.id;
-    const isDisabledToggle = loading || !trace.isCompleted || isIf && (trace.segment as DetailedIfOperatorSegment).result === 'false';
+    const isDisabledToggle = loading || !trace.isCompleted || isLoop && (trace.properties as LoopOperatorProperty).size === 0 || isIf && (trace.segment as DetailedIfOperatorSegment).result !== 'true';
     const loopOperatorProperty = trace.properties as LoopOperatorProperty;
     const size = loopOperatorProperty.size;
     const iterator = loopOperatorProperty.iterator;
@@ -141,33 +141,36 @@ const OperatorTraceExpander = ({theme, trace, loading, handleToggle, expanded, f
                         e.preventDefault();
                         e.stopPropagation();
                     }}>
-                        <LoopIterator
-                            loadByIndex={loadByIndex}
-                            iterationIndex={+iterationIndex + 1}
-                            loopIndex={(currentLogError?.log?.properties as LoopOperatorProperty)?.loopIndex}
-                            size={size}
-                            hasError={hasError}
-                        />
-                        <FontIcon
-                            isButton={true}
-                            darkTheme={false}
-                            size={16}
-                            iconStyles={{cursor: 'pointer', color: iterationIndex === 0 || size === undefined ? theme.button.background.disable : theme.button.background.quite}}
-                            disabled={iterationIndex === 0 || size === undefined}
-                            isLoading={prevLoading}
-                            value={'arrow_left'}
-                            onClick={(e: any) => handlePrevIteration(e)}
-                        />
-                        <FontIcon
-                            isButton={true}
-                            darkTheme={false}
-                            size={16}
-                            iconStyles={{cursor: 'pointer', color: iterationIndex === size - 1 || size === undefined ? theme.button.background.disable : theme.button.background.quite}}
-                            disabled={iterationIndex === size - 1 || size === undefined}
-                            isLoading={nextLoading}
-                            value={'arrow_right'}
-                            onClick={(e: any) => handleNextIteration(e)}
-                        />
+                        {(trace.properties as LoopOperatorProperty).size === 0 ? <div style={{paddingRight: '5px'}}>empty</div> : <React.Fragment>
+                            <LoopIterator
+                                loadByIndex={loadByIndex}
+                                iterationIndex={+iterationIndex + 1}
+                                loopIndex={(currentLogError?.log?.properties as LoopOperatorProperty)?.loopIndex}
+                                size={size}
+                                hasError={hasError}
+                            />
+                            <FontIcon
+                                isButton={true}
+                                darkTheme={false}
+                                size={16}
+                                iconStyles={{cursor: 'pointer', color: iterationIndex === 0 || size === undefined ? theme.button.background.disable : theme.button.background.quite}}
+                                disabled={iterationIndex === 0 || size === undefined}
+                                isLoading={prevLoading}
+                                value={'arrow_left'}
+                                onClick={(e: any) => handlePrevIteration(e)}
+                            />
+                            <FontIcon
+                                isButton={true}
+                                darkTheme={false}
+                                size={16}
+                                iconStyles={{cursor: 'pointer', color: iterationIndex === size - 1 || size === undefined ? theme.button.background.disable : theme.button.background.quite}}
+                                disabled={iterationIndex === size - 1 || size === undefined}
+                                isLoading={nextLoading}
+                                value={'arrow_right'}
+                                onClick={(e: any) => handleNextIteration(e)}
+                            />
+                        </React.Fragment>
+                        }
                     </div>
                 )}
             </React.Fragment>
