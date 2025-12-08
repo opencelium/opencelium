@@ -2,7 +2,6 @@ package com.becon.opencelium.backend.database.mongodb.service;
 
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
-import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 
@@ -31,7 +30,6 @@ public interface FieldBindingMngService {
     void delete(FieldBindingMng fb);
 
     void deleteAll(List<FieldBindingMng> fieldBindings);
-    List<FieldBindingMng> getAllByConnectionId(Long connectionId);
 
     void doWithPatchedEnhancement(ConnectionDTO connectionDTO, ConnectionDTO patched, PatchConnectionDetails.PatchOperationDetail details);
 }

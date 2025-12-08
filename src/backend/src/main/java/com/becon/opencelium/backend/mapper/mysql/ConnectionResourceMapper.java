@@ -27,7 +27,6 @@ public interface ConnectionResourceMapper extends Mapper<Connection, ConnectionR
             @Mapping(target = "fromConnector", source = "fromConnector.connectorId"),
             @Mapping(target = "toConnector", source = "toConnector.connectorId"),
             @Mapping(target = "icon", expression = "java(StringUtility.findImageFromUrl(dto.getIcon()))"),
-            @Mapping(target = "enhancements", ignore = true)
     })
     Connection toEntity(ConnectionResource dto);
 

@@ -23,6 +23,7 @@ public class ConnectionMngUpdaterProvider {
         return switch (version) {
             case VERSION_4_4, VERSION_4_5 -> connectionMngUpdaters.get(lowerFirstChar(Connection44MngUpdater.class.getSimpleName()));
             case VERSION_4_6 -> connectionMngUpdaters.get(lowerFirstChar(Connection46MngUpdater.class.getSimpleName()));
+            case VERSION_4_7 ->  connectionMngUpdaters.get(lowerFirstChar(Connection47MngUpdater.class.getSimpleName()));
             default -> new DefaultUpdater<>();
         };
     }
