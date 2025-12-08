@@ -19,7 +19,7 @@ import Property from "@app_component/base/input/xml_view/xml_editor/Property";
 import ReferenceValues from "@app_component/base/input/xml_view/xml_editor/ReferenceValues";
 import { OnReferenceClickContext } from "@app_component/base/input/xml_view/xml_editor/XmlEditor";
 import { checkReferenceFormat, isString } from "@application/utils/utils";
-import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import FontIcon from "@basic_components/FontIcon";
 import { update } from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
@@ -65,6 +65,7 @@ class Tag extends Component{
      * to hide add tag popup window
      */
     hideAddTagPopup(){
+        console.log('hideAddTagPopup')
         this.setState({
             hasAddTagPopup: false,
             hasDeleteTagIcon: false,
@@ -87,6 +88,7 @@ class Tag extends Component{
      * to hide add tag popup window
      */
     hideUpdateTagPopup(){
+        console.log('hideUpdateTagPopup')
         this.setState({
             hasUpdateTagPopup: false,
             hasDeleteTagIcon: false,
@@ -109,6 +111,7 @@ class Tag extends Component{
      * to hide add property popup window
      */
     hideAddPropertyPopup(){
+        console.log('hideAddPropertyPopup')
         this.setState({
             hasAddPropertyPopup: false,
             property: CProperty.createProperty('', '', this.props.tag),
@@ -141,24 +144,30 @@ class Tag extends Component{
      * to show next icons: add property, add tag, copy to clipboard, delete tag
      */
     showTagIcons(){
-        this.setState({
-            hasDeleteTagIcon: true,
-            hasAddPropertyIcon: true,
-            hasAddTagIcon: true,
-            hasCopyToClipboardIcon: true,
-        });
+        const {hasDeleteTagIcon, hasAddPropertyIcon, hasAddTagIcon, hasCopyToClipboardIcon} = this.state;
+        if (!hasDeleteTagIcon && !hasAddPropertyIcon && !hasAddTagIcon && !hasCopyToClipboardIcon) {
+            this.setState({
+                hasDeleteTagIcon: true,
+                hasAddPropertyIcon: true,
+                hasAddTagIcon: true,
+                hasCopyToClipboardIcon: true,
+            });
+        }
     }
 
     /**
      * to hide next icons: add property, add tag, copy to clipboard, delete tag
      */
     hideTagIcons(){
-        this.setState({
-            hasDeleteTagIcon: false,
-            hasAddPropertyIcon: false,
-            hasAddTagIcon: false,
-            hasCopyToClipboardIcon: false,
-        });
+        const {hasDeleteTagIcon, hasAddPropertyIcon, hasAddTagIcon, hasCopyToClipboardIcon} = this.state;
+        if (hasDeleteTagIcon && hasAddPropertyIcon && hasAddTagIcon && hasCopyToClipboardIcon) {
+            this.setState({
+                hasDeleteTagIcon: false,
+                hasAddPropertyIcon: false,
+                hasAddTagIcon: false,
+                hasCopyToClipboardIcon: false,
+            });
+        }
     }
 
     /**
@@ -255,7 +264,7 @@ class Tag extends Component{
     renderSubTags(){
         const {translate, tag, update, readOnly, ReferenceComponent, xml} = this.props;
         if(tag.minimized){
-            return <TooltipFontIcon
+            return <FontIcon
                 size={14}
                 className={styles.expand_tag}
                 tooltip={translate('XML_EDITOR.MORE')}
@@ -269,7 +278,7 @@ class Tag extends Component{
         if(tag.tags.length === 0 && !readOnly){
             return (
                 <div>
-                    <TooltipFontIcon
+                    <FontIcon
                         id={`${tag.uniqueIndex}_add_tag`}
                         size={14}
                         className={styles.add_tag_icon_outside}
@@ -295,36 +304,108 @@ class Tag extends Component{
     }
 
     render() {
-        const {hasAddPropertyIcon, hasDeleteTagIcon, hasMinimizerIcon, hasAddPropertyPopup, property, hasUpdateTagPopup, hasAddTagPopup, addTag, hasAddTagIcon, hasCopyToClipboardIcon} = this.state;
+        const {
+            hasAddPropertyIcon,
+            hasDeleteTagIcon,
+            hasMinimizerIcon,
+            hasAddPropertyPopup,
+            property,
+            hasUpdateTagPopup,
+            hasAddTagPopup,
+            addTag,
+            hasAddTagIcon,
+            hasCopyToClipboardIcon
+        } = this.state;
         const {xml, translate, tag, isDeclaration, deleteTag, update, readOnly, ReferenceComponent} = this.props;
         const hasMinimizer = !isString(tag.tags) && tag.tags !== null && hasMinimizerIcon;
         const isMinimized = tag.minimized;
-        return(
+        const showAddTagIcon = hasAddTagIcon && !readOnly && tag.valueType !== TAG_VALUE_TYPES.TEXT && !isDeclaration;
+        const showCopyIcon = hasCopyToClipboardIcon;
+        const showDeleteIcon = hasDeleteTagIcon && !readOnly;
+        const showIcons = showAddTagIcon || showCopyIcon || showDeleteIcon;
+        const hasTags = !!tag.tags;
+        const Icons = <div style={{display: 'inline-block'}}>
+            {showIcons && <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '5px',
+                marginLeft: '5px',
+            }}>
+                {showAddTagIcon && <FontIcon
+                    size={14}
+                    id={`${tag.uniqueIndex}_add_tag`}
+                    tooltip={translate('XML_EDITOR.ADD_ITEM')}
+                    value={'add_circle_outline'}
+                    className={`${styles.add_tag_icon_inside} ${showAddTagIcon ? '' : styles.hidden}`}
+                    onClick={() => this.showAddTagPopup()}
+                />}
+                { showCopyIcon && <FontIcon
+                    size={14}
+                    id={`${tag.uniqueIndex}_copy_to_clipboard`}
+                    tooltip={translate('XML_EDITOR.COPY_TO_CLIPBOARD')}
+                    value={'keyboard'}
+                    className={`${styles.copy_to_clipboard_icon} ${showCopyIcon ? '' : styles.hidden}`}
+                    onClick={() => this.copyToClipboard()}
+                />}
+                { showDeleteIcon && <FontIcon
+                    size={14}
+                    tooltip={translate('XML_EDITOR.DELETE_TAG')}
+                    value={'delete'}
+                    className={`${styles.delete_icon} ${showDeleteIcon ? '' : styles.hidden}`}
+                    onClick={deleteTag ? deleteTag : null}
+                /> }
+            </div>
+            }
+        </div>;
+        return (
             <span onMouseOver={() => this.showMinimizerIcon()} onMouseLeave={() => this.hideMinimizerIcon()}>
-                {hasMinimizer && <div className={styles.minimized_icon} style={{marginLeft: `${XML_TAG_INDENT - 10}px`}}><TooltipFontIcon size={14} tooltip={isMinimized ? translate('XML_EDITOR.MAXIMIZE') : translate('XML_EDITOR.MINIMIZE')} value={isMinimized ? 'add' : 'remove'} onClick={() => this.toggleTag()}/></div>}
+                {hasMinimizer &&
+                    <div className={styles.minimized_icon} style={{marginLeft: `${XML_TAG_INDENT - 10}px`}}><FontIcon
+                        size={14}
+                        tooltip={isMinimized ? translate('XML_EDITOR.MAXIMIZE') : translate('XML_EDITOR.MINIMIZE')}
+                        value={isMinimized ? 'add' : 'remove'} onClick={() => this.toggleTag()}/></div>}
                 <div className={styles.tag} style={{paddingLeft: `${XML_TAG_INDENT}px`}}>
-                    <span onMouseOver={() => this.showTagIcons()} onMouseLeave={() => this.hideTagIcons()} className={styles.tag_open}>
+                    <span onMouseOver={() => this.showTagIcons()} onMouseLeave={() => this.hideTagIcons()}
+                          className={styles.tag_open} style={{paddingRight: hasTags ? '' : '80px'}}>
                         <span className={styles.bracket}>{`<${isDeclaration ? '?' : ''}`}</span>
-                        <span className={`${styles.name_open} ${!readOnly ? styles.name_open_hovered : ''}`} onClick={!readOnly ? () => this.showUpdateTagPopup() : null} id={`${tag.uniqueIndex}_tag_name`}>{tag.name}</span>
-                        {hasUpdateTagPopup && !readOnly && <ChangeTag xml={xml} translate={translate} correspondedId={`${tag.uniqueIndex}_tag_name`} tag={tag} change={update} close={() => this.hideUpdateTagPopup()} mode={'update'} ReferenceComponent={ReferenceComponent}/>}
-                        {hasAddTagPopup && !readOnly && <ChangeTag xml={xml} translate={translate} correspondedId={`${tag.uniqueIndex}_add_tag`} parent={tag} tag={addTag} change={update} close={() => this.hideAddTagPopup()} mode={'add'} ReferenceComponent={ReferenceComponent}/>}
+                        <span className={`${styles.name_open} ${!readOnly ? styles.name_open_hovered : ''}`}
+                              onClick={!readOnly ? () => this.showUpdateTagPopup() : null}
+                              id={`${tag.uniqueIndex}_tag_name`}>{tag.name}</span>
+                        {hasUpdateTagPopup && !readOnly &&
+                            <ChangeTag xml={xml} translate={translate} correspondedId={`${tag.uniqueIndex}_tag_name`}
+                                       tag={tag} change={update} close={() => this.hideUpdateTagPopup()} mode={'update'}
+                                       ReferenceComponent={ReferenceComponent}/>}
+                        {hasAddTagPopup && !readOnly &&
+                            <ChangeTag xml={xml} translate={translate} correspondedId={`${tag.uniqueIndex}_add_tag`}
+                                       parent={tag} tag={addTag} change={update} close={() => this.hideAddTagPopup()}
+                                       mode={'add'} ReferenceComponent={ReferenceComponent}/>}
                         {this.renderProperties()}
-                        {hasAddPropertyIcon && !readOnly && <TooltipFontIcon size={14} id={`${tag.uniqueIndex}_add_property`} tooltip={translate('XML_EDITOR.ADD_PROPERTY')} value={'add_circle_outline'} className={styles.add_property_icon} onClick={() => this.showAddPropertyPopup()}/>}
-                        {hasAddPropertyPopup && !readOnly && <ChangeProperty xml={xml} tag={tag} translate={translate} correspondedId={`${tag.uniqueIndex}_add_property`} property={property} change={(a) => this.addProperty(a)} close={() => this.hideAddPropertyPopup()} mode={'add'} ReferenceComponent={ReferenceComponent}/>}
+                        {hasAddPropertyIcon && !readOnly && <FontIcon size={14} id={`${tag.uniqueIndex}_add_property`}
+                                                                      tooltip={translate('XML_EDITOR.ADD_PROPERTY')}
+                                                                      value={'add_circle_outline'}
+                                                                      className={styles.add_property_icon}
+                                                                      onClick={() => this.showAddPropertyPopup()}/>}
+                        {hasAddPropertyPopup && !readOnly && <ChangeProperty xml={xml} tag={tag} translate={translate}
+                                                                             correspondedId={`${tag.uniqueIndex}_add_property`}
+                                                                             property={property}
+                                                                             change={(a) => this.addProperty(a)}
+                                                                             close={() => this.hideAddPropertyPopup()}
+                                                                             mode={'add'}
+                                                                             ReferenceComponent={ReferenceComponent}/>}
                         {!tag.tags && <span className={styles.bracket}>{isDeclaration ? '?' : '/'}</span>}
                         <span className={styles.bracket}>{'>'}</span>
-                        {hasDeleteTagIcon && !readOnly && <TooltipFontIcon size={14} tooltip={translate('XML_EDITOR.DELETE_TAG')} value={'delete'} className={styles.delete_icon} onClick={deleteTag ? deleteTag : null} style={{paddingLeft: hasAddTagIcon && tag.valueType !== TAG_VALUE_TYPES.TEXT && !isDeclaration ? '32px' : '16px'}}/>}
-                        {hasCopyToClipboardIcon && <TooltipFontIcon size={14} id={`${tag.uniqueIndex}_copy_to_clipboard`} tooltip={translate('XML_EDITOR.COPY_TO_CLIPBOARD')} value={'keyboard'} style={{paddingLeft: hasAddTagIcon && tag.valueType !== TAG_VALUE_TYPES.TEXT && !readOnly && !isDeclaration  ? '16px': '0'}} className={styles.add_tag_icon_inside} onClick={() => this.copyToClipboard()}/>}
-                        {hasAddTagIcon && !readOnly && tag.valueType !== TAG_VALUE_TYPES.TEXT && !isDeclaration && <TooltipFontIcon size={14} id={`${tag.uniqueIndex}_add_tag`} tooltip={translate('XML_EDITOR.ADD_ITEM')} value={'add_circle_outline'} className={styles.add_tag_icon_inside} onClick={() => this.showAddTagPopup()}/>}
+                        {!hasTags ? Icons : null}
                     </span>
                     {
-                        tag.tags &&
+                        hasTags &&
                         <React.Fragment>
                             {this.renderSubTags()}
-                            <span>
+                            <span  onMouseOver={() => this.showTagIcons()} onMouseLeave={() => this.hideTagIcons()} style={{paddingRight: '80px'}}>
                                 <span className={styles.bracket}>{'</'}</span>
                                 <span className={styles.name_close}>{tag.name}</span>
                                 <span className={styles.bracket}>{'>'}</span>
+                                {Icons}
                             </span>
                         </React.Fragment>
                     }
@@ -334,18 +415,18 @@ class Tag extends Component{
     }
 }
 
-Tag.propTypes = {
-    xml: PropTypes.instanceOf(CXmlEditor).isRequired,
-    tag: PropTypes.instanceOf(CTag).isRequired,
-    isDeclaration: PropTypes.bool,
-    update: PropTypes.func.isRequired,
-    deleteTag: PropTypes.func.isRequired,
-    readOnly: PropTypes.bool,
-};
+ Tag.propTypes = {
+     xml: PropTypes.instanceOf(CXmlEditor).isRequired,
+     tag: PropTypes.instanceOf(CTag).isRequired,
+     isDeclaration: PropTypes.bool,
+     update: PropTypes.func.isRequired,
+     deleteTag: PropTypes.func.isRequired,
+     readOnly: PropTypes.bool,
+ };
 
-Tag.defaultProps = {
-    isDeclaration: false,
-    readOnly: false,
-};
+ Tag.defaultProps = {
+     isDeclaration: false,
+     readOnly: false,
+ };
 
-export default Tag;
+ export default Tag;

@@ -19,7 +19,7 @@ import Input from "@basic_components/inputs/Input";
 import Button from "@basic_components/buttons/Button";
 import CProperty from "./classes/CProperty";
 import {findTopLeft, isNumber, setFocusById} from "@application/utils/utils";
-import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import FontIcon from "@basic_components/FontIcon";
 import ReactDOM from "react-dom";
 import basicStyles from "@entity/connection/components/themes/default/general/basic_components";
 import Value from "@app_component/base/input/xml_view/xml_editor/Value";
@@ -122,7 +122,7 @@ class ChangeProperty extends Component{
         const {translate, property, mode, close, ReferenceComponent, tag} = this.props;
         return ReactDOM.createPortal(
             <div className={basicStyles.change_popup} style={{top: this.top, left: this.left}}>
-                <TooltipFontIcon size={14} isButton={true} tooltip={translate('XML_EDITOR.CLOSE')} value={'close'} className={basicStyles.close_icon} onClick={close}/>
+                <FontIcon size={14} isButton={true} tooltip={translate('XML_EDITOR.CLOSE')} value={'close'} className={basicStyles.close_icon} onClick={close}/>
                 <Input id={`${property.uniqueIndex}_name`} value={name} onChange={(a) => this.changeName(a)} onKeyDown={(a) => this.pressKey(a)} label={translate('XML_EDITOR.PROPERTY.NAME')} theme={{input: basicStyles.change_tag_name}}/>
                 <Value tag={tag} property={property} translate={translate} value={value} changeValue={(a, b) => this.changeValue(a, b)} uniqueIndex={property.uniqueIndex} ReferenceComponent={ReferenceComponent} pressKey={(a) => this.pressKey(a)}/>
                 <Button onClick={(a) => this.change(a)} title={mode === 'add' ? translate('XML_EDITOR.PROPERTY.ADD') : translate('XML_EDITOR.PROPERTY.UPDATE')}/>
