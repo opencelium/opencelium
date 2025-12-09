@@ -2,16 +2,10 @@ package com.becon.opencelium.backend.database.mongodb.service;
 
 import com.becon.opencelium.backend.constant.props.OpenceliumProps;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
-import com.becon.opencelium.backend.database.mongodb.entity.EnhancementMng;
 import com.becon.opencelium.backend.database.mongodb.repository.ConnectionMngRepository;
-import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
-import com.becon.opencelium.backend.database.mysql.service.EnhancementService;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
-import com.becon.opencelium.backend.mapper.base.Mapper;
-import com.becon.opencelium.backend.mapper.base.MapperUpdatable;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
-import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -26,9 +20,6 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     private final FieldBindingMngService fieldBindingMngService;
     private final MethodMngService methodMngService;
     private final OperatorMngService operatorMngService;
-    private final EnhancementService enhancementService;
-    private final MapperUpdatable<Enhancement, EnhancementDTO> enhancementMapper;
-    private final Mapper<EnhancementMng, EnhancementDTO> enhancementMngMapper;
     private final OpenceliumProps ocProps;
 
     public ConnectionMngServiceImp(
@@ -36,18 +27,12 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
             @Qualifier("fieldBindingMngServiceImp") FieldBindingMngService fieldBindingMngService,
             @Qualifier("methodMngServiceImp") MethodMngService methodMngService,
             @Qualifier("operatorMngServiceImp") OperatorMngService operatorMngService,
-            @Qualifier("enhancementServiceImp") EnhancementService enhancementService,
-            MapperUpdatable<Enhancement, EnhancementDTO> enhancementMapper,
-            Mapper<EnhancementMng, EnhancementDTO> enhancementMngMapper,
             OpenceliumProps ocProps
     ) {
         this.connectionMngRepository = connectionMngRepository;
         this.fieldBindingMngService = fieldBindingMngService;
         this.methodMngService = methodMngService;
         this.operatorMngService = operatorMngService;
-        this.enhancementService = enhancementService;
-        this.enhancementMapper = enhancementMapper;
-        this.enhancementMngMapper = enhancementMngMapper;
         this.ocProps = ocProps;
     }
 
@@ -133,11 +118,8 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
 
     @Override
     public ConnectionMng getByConnectionId(Long connectionId) {
-        ConnectionMng connectionMng = connectionMngRepository.findByConnectionId(connectionId)
+        return connectionMngRepository.findByConnectionId(connectionId)
                 .orElseThrow(() -> new ConnectionNotFoundException(connectionId));
-
-        setEnhancements(connectionMng);
-        return connectionMng;
     }
 
     @Override
@@ -328,16 +310,6 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
                     .stream()
                     .filter(f -> f.getId() != null)
                     .toList());
-    }
-
-    private void setEnhancements(ConnectionMng connection) {
-        if (connection.getFieldBindings() == null || connection.getFieldBindings().isEmpty())
-            return;
-        connection.getFieldBindings().forEach(f -> {
-            if (f != null) {
-                f.setEnhancement(enhancementMngMapper.toEntity(enhancementMapper.toDTO(enhancementService.getById(f.getEnhancementId()))));
-            }
-        });
     }
 
     private <T> void doIfNoneMatch(List<T> olds, List<T> news, BiFunction<T, T, Boolean> f, Consumer<T> c) {

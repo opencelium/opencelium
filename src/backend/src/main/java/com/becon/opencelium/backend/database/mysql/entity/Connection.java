@@ -69,9 +69,6 @@ public class Connection {
     @Column(name = "icon")
     private String icon;
 
-    @OneToMany(mappedBy = "connection", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private List<Enhancement> enhancements;
-
     @OneToMany(mappedBy = "connection", fetch = FetchType.LAZY)
     private List<Scheduler> schedulers;
 
@@ -172,14 +169,6 @@ public class Connection {
         this.icon = icon;
     }
 
-    public List<Enhancement> getEnhancements() {
-        return enhancements;
-    }
-
-    public void setEnhancements(List<Enhancement> enhancements) {
-        this.enhancements = enhancements;
-    }
-
     public List<Scheduler> getSchedulers() {
         return schedulers;
     }
@@ -224,7 +213,6 @@ public class Connection {
                 ", createdOn=" + createdOn +
                 ", modifiedBy=" + modifiedBy +
                 ", modifiedOn=" + modifiedOn +
-                ", enhancements=" + enhancements +
                 ", schedulers=" + schedulers +
                 ", businessLayout=" + businessLayout +
                 ", icon=" + icon +

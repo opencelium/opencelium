@@ -503,7 +503,8 @@ public class AssistantServiceImp implements ApplicationService {
                     addHeaderFromInvoker(connectionMng, from.getInvoker(), to.getInvoker());
 
                     //setting fieldBindings
-                    connectionMng.setFieldBindings(fieldBindingMngServiceImp.getAllByConnectionId(connection.getId()));
+                    // IT IS NOT SUPPORTED FROM 4.7 version
+//                    connectionMng.setFieldBindings(fieldBindingMngServiceImp.getAllByConnectionId(connection.getId()));
 
                     //saving to mongodb
                     connectionMngServiceImp.save(connectionMng);
