@@ -504,6 +504,8 @@ public class ConnectionServiceImp implements ConnectionService {
 
                 ConnectionMng connectionMng = connectionMngService.getByConnectionId(connection.getId());
                 try {
+                    clearLogsWithNullFlowId(connectionMng);
+
                     connectionMngEntityUpdater.updateToCurrentVersion(connectionMng)
                             .ifChangedOrElseIfUpdated(
                                     connectionMngService::updateWithoutBinding, // if any field is updated
