@@ -469,10 +469,10 @@ public class InvokerServiceImp implements InvokerService {
     @Override
     public void save(Document document) {
         InvokerParserImp parser = new InvokerParserImp(document);
-        File f = new File(document.getDocumentURI());
-        String invoker = FileNameUtils.removeExtension(f.getName());
-        invoker = invoker.replace("%20", " ");
-        invokerContainer.add(invoker, parser.parse());
+        Invoker invoker = parser.parse();
+        String invokerName = invoker.getName();
+        invokerName = invokerName.replace("%20", " ");
+        invokerContainer.add(invokerName, invoker);
     }
 
     @Override
