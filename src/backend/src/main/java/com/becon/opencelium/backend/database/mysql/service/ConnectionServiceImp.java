@@ -532,9 +532,7 @@ public class ConnectionServiceImp implements ConnectionService {
         boolean gotBackup = false;
         for (Long id : ids) {
             Connection connection = getById(id);
-            if (Utils.compare(ocProps.getVersion(), connection.getOcVersion()) >= 0 && !isTestConnection(connection.getTitle())) {
-                // FIXME: 'Utils.compare(ocProps.getVersion(), connection.getOcVersion()) >= 0' condition should be with '>'. It has changed for 4.6 version only. Fix it on next versions
-
+            if (Utils.compare(ocProps.getVersion(), connection.getOcVersion()) > 0 && !isTestConnection(connection.getTitle())) {
                 if (!gotBackup) {
                     try {
                         mysqlBackupService.backup(EntityNames.ENHANCEMENT);
