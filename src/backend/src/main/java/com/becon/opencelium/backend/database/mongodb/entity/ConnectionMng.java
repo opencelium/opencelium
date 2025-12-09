@@ -41,7 +41,11 @@ public class ConnectionMng {
     private ConnectorMng toConnector;
 
     @DBRef
-    private List<FieldBindingMng> fieldBindings; // [null, null, null]
+    @Field(name = "fieldBindings")
+    private List<FieldBindingMng> oldFieldBindings; // [null, null, null]
+
+    @Field(name = "field_bindings")
+    private List<FieldBindingMng> fieldBindings;
 
     private Map<String, Object> ui;
 
@@ -102,5 +106,13 @@ public class ConnectionMng {
 
     public void setUi(Map<String, Object> ui) {
         this.ui = ui;
+    }
+
+    public List<FieldBindingMng> getOldFieldBindings() {
+        return oldFieldBindings;
+    }
+
+    public void setOldFieldBindings(List<FieldBindingMng> oldFieldBindings) {
+        this.oldFieldBindings = oldFieldBindings;
     }
 }

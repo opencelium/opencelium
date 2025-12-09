@@ -22,9 +22,7 @@ import com.becon.opencelium.backend.container.Command;
 import com.becon.opencelium.backend.container.ConnectionUpdateTracker;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.repository.MetaDataLogRepository;
-import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
-import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngServiceImp;
-import com.becon.opencelium.backend.database.mongodb.service.FieldBindingMngService;
+import com.becon.opencelium.backend.database.mongodb.service.*;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
@@ -85,6 +83,8 @@ public class ConnectionServiceImp implements ConnectionService {
     private final MongoDbBackupService mongoDbBackupService;
     private final MetaDataLogRepository metaDataLogRepository;
     private final EnhancementService enhancementService;
+    private final MethodMngService methodMngService;
+    private final OperatorMngService operatorMngService;
 
     public ConnectionServiceImp(
             ConnectionRepository connectionRepository,
@@ -105,7 +105,7 @@ public class ConnectionServiceImp implements ConnectionService {
             EntityVersionManager entityVersionManager,
             OpenceliumProps ocProps,
             MongoDbBackupService mongoDbBackupService,
-            MetaDataLogRepository metaDataLogRepository
+            MetaDataLogRepository metaDataLogRepository, MethodMngService methodMngService, OperatorMngService operatorMngService
     ) {
         this.connectionRepository = connectionRepository;
         this.connectorService = connectorService;
@@ -126,6 +126,8 @@ public class ConnectionServiceImp implements ConnectionService {
         this.mongoDbBackupService = mongoDbBackupService;
         this.metaDataLogRepository = metaDataLogRepository;
         this.enhancementService = enhancementService;
+        this.methodMngService = methodMngService;
+        this.operatorMngService = operatorMngService;
     }
 
 
@@ -160,7 +162,7 @@ public class ConnectionServiceImp implements ConnectionService {
 
         //saving connectionMng
         connectionMng.setConnectionId(savedConnection.getId());
-        ConnectionMng savedMng = connectionMngService.save(connectionMng);
+        ConnectionMng savedMng = connectionMngService.create(connectionMng);
         connectionHistoryService.makeHistoryAndSave(savedConnection, null, Action.CREATE);
         return savedMng;
     }
@@ -517,8 +519,26 @@ public class ConnectionServiceImp implements ConnectionService {
             }
         }
 
-        enhancementService.deleteAll();
-        connectionRepository.updateVersion(ocProps.getVersion());
+        // When all connections updated successfully
+        // Following operations only for 4.7 version. May|Must be deleted new versions
+        try {
+            // truncate enhancements on mysql
+            enhancementService.deleteAll();
+
+            // clear fieldBindings document on mongodb
+            fieldBindingMngService.deleteAll();
+
+            // clear methods document on mongodb
+            methodMngService.deleteAll();
+
+            // clear operators document on mongodb
+            operatorMngService.deleteAll();
+
+            // update all connections' version to the current version
+            connectionRepository.updateVersion(ocProps.getVersion());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void clearLogsWithNullFlowId(ConnectionMng connectionMng) {
@@ -581,8 +601,6 @@ public class ConnectionServiceImp implements ConnectionService {
 
         doWithConnectorsAfterPatch(connectionDTO);
         doWithConnectorsAfterPatch(patched);
-
-        connectionMngService.doWithPatchedConnection(connectionDTO, patched, details);
 
         Connection connection = connectionMapper.toEntity(patched);
         connectionRepository.save(connection);

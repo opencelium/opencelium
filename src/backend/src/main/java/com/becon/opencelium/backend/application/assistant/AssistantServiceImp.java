@@ -507,7 +507,7 @@ public class AssistantServiceImp implements ApplicationService {
 //                    connectionMng.setFieldBindings(fieldBindingMngServiceImp.getAllByConnectionId(connection.getId()));
 
                     //saving to mongodb
-                    connectionMngServiceImp.save(connectionMng);
+                    connectionMngServiceImp.create(connectionMng);
                     log.info("Connection[name: {}, id: {}] successfully migrated", connection.getTitle(), connection.getId());
                 } catch (Exception e) {
                     log.error("Some error occurred during migration of Connection[name: {}, id: {}]", connection.getTitle(), connection.getId());

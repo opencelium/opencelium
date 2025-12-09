@@ -8,6 +8,7 @@ import com.becon.opencelium.backend.database.mysql.service.EnhancementService;
 import com.becon.opencelium.backend.versionmanager.Wrapper;
 import com.becon.opencelium.backend.versionmanager.base.UpdaterVersion;
 import com.becon.opencelium.backend.versionmanager.base.Utils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -52,12 +53,57 @@ public class Connection47MngUpdater implements ConnectionMngUpdater {
     private Wrapper<ConnectionMng> updateFromGreaterThan4_6(ConnectionMng connection, String oldVersion) {
         connection.setVersion(currentVersion.getVersion());
 
+        moveMethods(connection);
+
+        moveOperators(connection);
+
+        moveFieldBindings(connection);
+
         fillEnhancements(connection);
 
         return Wrapper.updated(connection)
                 .changed(true)
                 .withOldVersion(oldVersion)
                 .withNewVersion(currentVersion.getVersion());
+    }
+
+    private void moveFieldBindings(ConnectionMng connection) {
+        if (CollectionUtils.isNotEmpty(connection.getOldFieldBindings())) {
+            connection.setFieldBindings(connection.getOldFieldBindings());
+            connection.setOldFieldBindings(null);
+        }
+    }
+
+    private void moveOperators(ConnectionMng connection) {
+        if (connection.getFromConnector() != null) {
+            if (CollectionUtils.isNotEmpty(connection.getFromConnector().getOldOperators())) {
+                connection.getFromConnector().setOperators(connection.getFromConnector().getOldOperators());
+                connection.getFromConnector().setOldOperators(null);
+            }
+        }
+
+        if (connection.getToConnector() != null) {
+            if (CollectionUtils.isNotEmpty(connection.getToConnector().getOldOperators())) {
+                connection.getToConnector().setOperators(connection.getToConnector().getOldOperators());
+                connection.getToConnector().setOldOperators(null);
+            }
+        }
+    }
+
+    private void moveMethods(ConnectionMng connection) {
+        if (connection.getFromConnector() != null) {
+            if (CollectionUtils.isNotEmpty(connection.getFromConnector().getOldMethods())) {
+                connection.getFromConnector().setMethods(connection.getFromConnector().getOldMethods());
+                connection.getFromConnector().setOldMethods(null);
+            }
+        }
+
+        if (connection.getToConnector() != null) {
+            if (CollectionUtils.isNotEmpty(connection.getToConnector().getOldMethods())) {
+                connection.getToConnector().setMethods(connection.getToConnector().getOldMethods());
+                connection.getToConnector().setOldMethods(null);
+            }
+        }
     }
 
     private void fillEnhancements(ConnectionMng connection) {
