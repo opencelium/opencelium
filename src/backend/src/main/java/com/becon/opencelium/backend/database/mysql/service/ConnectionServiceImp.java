@@ -539,11 +539,10 @@ public class ConnectionServiceImp implements ConnectionService {
                         mongoDbBackupService.backup();
                         gotBackup = true;
                     } catch (Exception e) {
-                        log.error("Failed to backup. Skipped updating connections");
-                        throw new RuntimeException(e);
+                        log.error("Failed to backup");
                     }
                 }
-                AtomicBoolean connectionChanged = new AtomicBoolean(false);
+
                 // UPDATE CONNECTION_MNG
                 ConnectionMng connectionMng = connectionMngService.getByConnectionId(connection.getId());
                 try {
@@ -552,39 +551,29 @@ public class ConnectionServiceImp implements ConnectionService {
 
                     connectionMngEntityUpdater.updateToCurrentVersion(connectionMng)
                             .ifChangedOrElseIfUpdated(
-                                    x -> {
-                                        connectionMngService.updateWithoutBinding(x);
-                                        connectionChanged.set(true);
-                                    }, // if any field is updated
+                                    connectionMngService::updateWithoutBinding, // if any field is updated
                                     connectionMngService::saveDirectly // only version is set to the current version
                             );
                 } catch (Exception e) {
                     log.error("Failed to update Connection[id={}, name={}]", connection.getId(), connection.getTitle(), e);
-                    mysqlBackupService.restore(EntityNames.ENHANCEMENT);
-                    mongoDbBackupService.restore();
-                    log.warn("Rolled back all changes");
-                    throw new RuntimeException(e);
+                    continue;
                 }
 
-                AtomicBoolean anyEnhancementChanged = new AtomicBoolean(false);
                 // UPDATE ENHANCEMENTS
                 try {
                     connection.getEnhancements().forEach(enhancement -> enhancementEntityUpdater.updateFrom(enhancement, connection.getOcVersion())
-                            .ifChanged(x -> {
-                                anyEnhancementChanged.set(true);
-                                enhancementService.save(enhancement);
-                            }));
+                            .ifChanged(x -> enhancementService.save(enhancement)));
                 } catch (Exception e) {
                     log.error("Failed to update Connection[id={}, name={}]", connection.getId(), connection.getTitle(), e);
-                    mysqlBackupService.restore(EntityNames.ENHANCEMENT);
-                    mongoDbBackupService.restore();
-                    log.warn("Rolled back all changes");
-                    throw new RuntimeException(e);
+                    continue;
                 }
+
+                connection.setOcVersion(ocProps.getVersion());
+                connectionRepository.save(connection);
+
                 log.info("Connection[id={}, name={}] is successfully updated to {} version", connection.getId(), connection.getTitle(), ocProps.getVersion());
             }
         }
-        connectionRepository.updateVersion(ocProps.getVersion());
     }
 
     private void clearLogsWithNullFlowId(ConnectionMng connectionMng) {
