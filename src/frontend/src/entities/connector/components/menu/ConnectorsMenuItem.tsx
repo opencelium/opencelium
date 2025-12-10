@@ -22,7 +22,7 @@ const ConnectorsMenuItem_0: FC<MenuItemProps> = ({isReadonly, onHoverColor}) => 
     return (
         <MenuLink
             permission={ConnectorPermissions.READ}
-            size={30}
+            size={26}
             to={'/connectors'}
             name={'settings_input_hdmi'}
             label={'Connectors'}

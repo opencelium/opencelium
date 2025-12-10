@@ -44,7 +44,7 @@ export const MenuLinkLogo = ({isReadonly, $onHoverColor, to}: MenuLinkLogoProps)
             to={isReadonly ? '#' : to}
             $onHoverColor={$onHoverColor}
         >
-            <LogoImage style={{marginLeft: '4px'}} {...logoImageProps}/>
+            <LogoImage style={{marginLeft: '8px'}} {...logoImageProps}/>
             <span>
                 <span>{logoName}</span>
             </span>

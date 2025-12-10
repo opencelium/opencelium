@@ -31,7 +31,7 @@ import {useAppDispatch} from "@application/utils/store";
 
 const Global = createGlobalStyle`
     body{
-        padding: 2rem 1rem 0 calc(64px + 1rem);
+        padding: 2rem 1rem 0 calc(48px + 1rem);
     }
 `;
 
@@ -64,7 +64,7 @@ const Menu: FC<MenuProps> =
             if(isFullScreen){
                 bodyElement.style['padding'] = '0 1rem 2rem';
             } else{
-                bodyElement.style['padding'] = '0 1rem 0 calc(64px + 1rem)';
+                bodyElement.style['padding'] = '0 1rem 0 calc(48px + 1rem)';
             }
         }
     }, [isFullScreen])
@@ -72,7 +72,7 @@ const Menu: FC<MenuProps> =
         return () => {
             const bodyElement = document.querySelector('body');
             if (bodyElement) {
-                bodyElement.style['padding'] = '0 1rem 0 calc(64px + 1rem)';
+                bodyElement.style['padding'] = '0 1rem 0 calc(48px + 1rem)';
             }
         }
     }, [])
@@ -84,7 +84,7 @@ const Menu: FC<MenuProps> =
                 if (!isMenuExpanded) {
                     bodyElement.style['padding'] = '0 1rem 0 calc(244px + 1rem)';
                 } else {
-                    bodyElement.style['padding'] = '0 1rem 0 calc(64px + 1rem)';
+                    bodyElement.style['padding'] = '0 1rem 0 calc(48px + 1rem)';
                 }
             }
         }

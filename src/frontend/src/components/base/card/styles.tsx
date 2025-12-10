@@ -34,7 +34,7 @@ const CardStyled = styled.div<CardProps>`
     border-top-right-radius: 5px;
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
-    box-shadow: 0 1px 3px rgb(0 0 0 / 12%), 0 1px 2px rgb(0 0 0 / 24%);
+    box-shadow: 0 5px 3px rgb(0 0 0 / 12%),0 2px 2px rgb(0 0 0 / 24%),0 5px 2px rgb(0 0 0 / 24%);
     position: relative;
     ${({isRefreshing}) => isRefreshing ? 'opacity: 0;' : 'opacity: 1;'}
     ${({isListCard, gridViewType}) => isListCard ? `

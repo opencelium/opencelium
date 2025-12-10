@@ -20,7 +20,7 @@ import ContentLoading from "@app_component/base/loading/ContentLoading";
 
 const TextStyled = styled.span<TextStyledProps>`
     color: ${({color, theme}:{color:string, theme: ITheme}) => color || 'inherit'};
-    font-size: ${({size, theme}:{size:string, theme: ITheme}) => size || theme.text.size || '16px'};
+    font-size: ${({size, theme}:{size:string, theme: ITheme}) => size || theme.text.size || '12px'};
     font-family: ${({theme}: {theme: ITheme}) => theme.text.fontFamily || '"Arial"'};
     padding-left: ${({paddingLeft}) => paddingLeft || '0'};
     width: ${({width}) => width || 'unset'};

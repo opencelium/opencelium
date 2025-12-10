@@ -20,8 +20,8 @@ const MenuStyled = styled.div<MenuStyledProps>`
     position: fixed;
     top: 0;
     left: 0;
-    width: ${({isFullScreen, isExpanded}) => isFullScreen ? '0' : isExpanded ? '244px !important' : '64px'};
-    padding: ${({isFullScreen}) => isFullScreen ? '0' : '0 0.5rem 2rem'};
+    width: ${({isFullScreen, isExpanded}) => isFullScreen ? '0' : isExpanded ? '244px !important' : '48px'};
+    padding: ${({isFullScreen}) => isFullScreen ? '0' : '0 0 2rem'};
     padding-top: 1rem;
     height: 100vh;
     background: ${({theme, background}) => background || theme.menu.background || '#012E55'};
