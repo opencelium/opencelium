@@ -23,10 +23,10 @@ import {FormSectionProps} from "../form_section/interfaces";
 import {FormProps} from './interfaces';
 import {ActionsStyled, FormSectionStyled, FormStyled, SectionStyled} from './styles';
 import {isArray} from "@application/utils/utils";
-import {getCurrentSubscription} from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
 import {useAppDispatch} from "@application/utils/store";
-import Subscription from "@entity/license_management/classes/Subscription";
 import LicenseAlertMessage from "@entity/dashboard/components/license_alert_message/LicenseAlertMessage";
+import {setEntityHeader} from "@application/redux_toolkit/slices/ApplicationSlice";
+import {Application} from "@application/classes/Application";
 
 const Form: FC<FormProps> =
     ({
@@ -38,6 +38,15 @@ const Form: FC<FormProps> =
         gridTemplateColumns,
         hasNotAlert,
     }) => {
+        const dispatch = useAppDispatch();
+        const {
+            entityHeader,
+        } = Application.getReduxState();
+    useEffect(() => {
+        if (entityHeader !== title) {
+            dispatch(setEntityHeader(title.toString()));
+        }
+    }, [title]);
     if(isLoading){
         return(
             <ContentLoading/>
@@ -72,9 +81,8 @@ const Form: FC<FormProps> =
     return (
         <ErrorBoundary>
             <FormStyled>
-                <Title title={title}/>
                 {!hasNotAlert ? <LicenseAlertMessage/> : null}
-                <ActionsStyled>{actions}</ActionsStyled>
+                {actions?.length > 0 && <ActionsStyled>{actions}</ActionsStyled> }
                 <SectionStyled gridTemplateColumns={gridTemplateColumns}>
                     {sectionComponents}
                 </SectionStyled>

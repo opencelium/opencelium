@@ -89,7 +89,7 @@ const DeleteButtonStyled = styled.div`
 
 const CollectionViewStyled = styled.div`
     ${Appearance}
-    margin: 20px 0;
+    margin: 0 0 20px;
 `;
 const GridStyled = styled.div`
     margin: 20px 0;
@@ -101,12 +101,8 @@ const TopSectionStyled = styled.div`
     gap: 10px 0;
     flex-wrap: wrap;
     display: flex;
-    margin: 20px 0;
+    margin: 0px 0 20px;
     width: 100%;
-    ${({hasViewSection}: {hasViewSection: boolean}) => hasViewSection ?
-    `& > :last-child{
-        margin-left: auto;
-    }` : ``}
 `;
 
 const ViewSectionStyled = styled.div`

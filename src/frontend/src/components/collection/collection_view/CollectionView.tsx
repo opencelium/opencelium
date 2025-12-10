@@ -17,27 +17,24 @@ import Button from '@app_component/base/button/Button';
 import ErrorBoundary from '@app_component/base/error_boundary/ErrorBoundary';
 import InputText from '@app_component/base/input/text/InputText';
 import CollectionLoading from '@app_component/base/loading/CollectionLoading';
-import { TooltipButton } from '@app_component/base/tooltip_button/TooltipButton';
 import Filter from '@app_component/collection/filter/Filter';
 import { BadRequest } from '@app_component/default_pages/bad_request/BadRequest';
 import { Application } from '@application/classes/Application';
 import { API_REQUEST_STATE } from '@application/interfaces/IApplication';
 import {
-    setCurrentPages,
-    setGridViewType as setGridViewTypeGlobally,
-    setSearchFields,
-    setViewType as setViewTypeGlobally,
+	setCurrentPages, setEntityHeader,
+	setGridViewType as setGridViewTypeGlobally,
+	setSearchFields, setSearchValue,
+	setViewType as setViewTypeGlobally, toggleSearch,
 } from '@application/redux_toolkit/slices/ApplicationSlice';
 import { useAppDispatch } from '@application/utils/store';
 import { debounce } from '@application/utils/utils';
 import CategoryTabs from '@entity/category/components/category_tabs/CategoryTabs';
 import LicenseAlertMessage from '@entity/dashboard/components/license_alert_message/LicenseAlertMessage';
-import { ColorTheme } from '@style/Theme';
 import React, { FC, useEffect, useRef, useState } from 'react';
 import { withTheme } from 'styled-components';
-import { GridViewMenu, GridViewType } from '../GridViewMenu';
+import { GridViewType } from '../GridViewMenu';
 import { Pagination } from '../Pagination';
-import Title from '../collection_title/Title';
 import { Grid } from './Grid';
 import { List } from './List';
 import { CollectionViewProps } from './interfaces';
@@ -77,11 +74,11 @@ const CollectionView: FC<CollectionViewProps> = ({
 		currentPages,
 		viewType,
 		gridViewType,
+		entityHeader,
+		searchValue,
+		hasSearch,
 	} = Application.getReduxState();
 	const searchValuePropertyName = collection?.name || '';
-	const [searchValue, setSearchValue] = useState<string>(
-		searchValuePropertyName ? searchFields[searchValuePropertyName] || '' : ''
-	);
 	const [isRefreshing, setIsRefreshing] = useState(false);
 	const [isFilterVisible, toggleFilter] = useState<boolean>(false);
 	const [filterData, setFilterData] = useState(defaultFilterData);
@@ -118,6 +115,24 @@ const CollectionView: FC<CollectionViewProps> = ({
 	if (defaultViewType !== '') {
 		applicationViewType = defaultViewType;
 	}
+	useEffect(() => {
+		dispatch(setSearchValue(searchValuePropertyName ? searchFields[searchValuePropertyName] || '' : ''));
+		return () => {
+			dispatch(toggleSearch(false));
+		}
+	}, []);
+
+	useEffect(() => {
+		const hasSearchValue = collection.hasSearch && collection.entities.length > 0;
+		if (hasSearch !== hasSearchValue) {
+			dispatch(toggleSearch(hasSearchValue));
+		}
+	}, [collection.hasSearch, collection.entities]);
+	useEffect(() => {
+		if (entityHeader !== collection.title) {
+			dispatch(setEntityHeader(collection.title.toString()));
+		}
+	}, [collection?.title]);
 	useEffect(() => {
 		if (searchValuePropertyName) {
 			localStorage.setItem(
@@ -261,7 +276,6 @@ const CollectionView: FC<CollectionViewProps> = ({
 			checkedIds.push(id);
 		}
 	}
-	const hasSearch = collection.hasSearch && collection.entities.length > 0;
 	if (hasError) {
 		return <BadRequest />;
 	}
@@ -271,10 +285,9 @@ const CollectionView: FC<CollectionViewProps> = ({
 	return (
 		<ErrorBoundary>
 			<CollectionViewStyled>
-				{hasTitle && <Title title={collection.title} />}
 				{!hasNotAlert ? <LicenseAlertMessage /> : null}
 				{hasTopBar && (
-					<TopSectionStyled hasViewSection={hasViewSection}>
+					<TopSectionStyled>
 						<ActionsStyled>
 							{collection.getTopActions(applicationViewType, checkedIds)}
 							{collection.hasFilter && (
@@ -286,39 +299,7 @@ const CollectionView: FC<CollectionViewProps> = ({
 								/>
 							)}
 						</ActionsStyled>
-						{hasSearch && (
-							<InputText
-								marginLeft={'0'}
-								autoFocus
-								inputHeight={'35px'}
-								value={searchValue}
-								onChange={(e) => search(e.target.value)}
-								minHeight={'1'}
-								width={'200px'}
-								placeholder={'Search field'}
-							/>
-						)}
 						{collection.AfterSearchComponents}
-						{hasViewSection && (
-							<ViewSectionStyled>
-								<TooltipButton
-									target={'view_list'}
-									tooltip={'List'}
-									position={'top'}
-									icon={'view_list'}
-									size={24}
-									hasBackground={false}
-									color={ColorTheme.Turquoise}
-									handleClick={() => onChangeViewType(ViewType.LIST)}
-								/>
-								<GridViewMenu
-									setGridViewType={onChangeViewGridType}
-									viewType={applicationViewType}
-									setViewType={onChangeViewType}
-									setIsRefreshing={setIsRefreshing}
-								/>
-							</ViewSectionStyled>
-						)}
 					</TopSectionStyled>
 				)}
 				{isFilterVisible && (

@@ -67,6 +67,9 @@ export interface AuthState extends ICommonState{
     searchFields: any,
     currentPages: any,
     onlineServiceStatus: OnlineServiceStatus,
+    entityHeader: string,
+    isMenuExpanded: boolean,
+    hasSearch: boolean,
 }
 
 
@@ -116,6 +119,9 @@ const initialState: AuthState = {
     searchFields,
     currentPages,
     onlineServiceStatus: null,
+    entityHeader: '',
+    isMenuExpanded: false,
+    hasSearch: false,
     ...CommonState,
 }
 
@@ -123,6 +129,18 @@ export const applicationSlice = createSlice({
     name: 'application',
     initialState,
     reducers: {
+        toggleSearch: (state, action: PayloadAction<boolean>) => {
+            state.hasSearch = action.payload;
+        },
+        setSearchValue: (state, action: PayloadAction<string>) => {
+            state.searchValue = action.payload;
+        },
+        setEntityHeader: (state, action: PayloadAction<string>) => {
+            state.entityHeader = action.payload;
+        },
+        toggleMenu: (state, action: PayloadAction<boolean>) => {
+            state.isMenuExpanded = action.payload;
+        },
         toggleNotificationPanel: (state) => {
             state.isNotificationPanelOpened = !state.isNotificationPanelOpened;
         },
@@ -171,7 +189,7 @@ export const applicationSlice = createSlice({
         },
         setLogoDataStatus: (state, action: PayloadAction<string>) => {
             state.logoDataStatus = action.payload;
-        }
+        },
     },
     extraReducers: {
         [getLogoName.pending.type]: (state) => {
@@ -301,6 +319,7 @@ export const {
     setComponentInChangeContent, setConnectionDraftToOpenOnce,setGridViewType,
     setViewType, setFullScreen, setThemes, setLogoDataStatus,
     setSearchFields, clearSearchFields, clearCurrentPages, setCurrentPages,
+    setEntityHeader, toggleMenu, setSearchValue, toggleSearch,
 } = applicationSlice.actions;
 
 export const actions = {

@@ -35,12 +35,12 @@ const ActionsStyled = styled.div<ActionsStyledProps>`
     &>:not(:last-child) {
         margin-right: 10px;
     }
-    margin: 20px 0;
+    margin: 0 0 20px;
 `;
 
 const FormStyled = styled.div<FormStyledProps>`
     ${Appearance}
-    margin: ${({margin}) => margin || '20px 0'};
+    margin: ${({margin}) => margin || '0 0 20px'};
     padding: ${({padding}) => padding || 0};
     padding-bottom: 30px;
 `;

@@ -63,18 +63,13 @@ const CalloutMessageStyled = styled.div<CalloutMessageStyledProps>`
 
 const TopBarStyled = styled.div`
   z-index: 1000;
-  height: 38px;
-  position: absolute;
-  right: 30px;
-  top: 20px;
+  height: 80px;
+  background-color: #fff;
+    position: absolute;
+    left: 0;
+    right: 0;
   display: flex;
   align-items: center;
-  >:nth-child(n){
-    margin-right: 10px;
-  }
-  >:first-child,>:last-child{
-    margin-right: 0;
-  }
   .search_input{
     width: 200px;
     float: left;

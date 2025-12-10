@@ -628,7 +628,7 @@ export function ConnectionForm(type) {
                 }
                 let contentTranslations = {};
 
-                contentTranslations.header = t(`${this.translationKey}.HEADER`);
+                contentTranslations.header = `${capitalize(this.translationKey.toLowerCase())} Connection`;
                 if(this.isView){
                     contentTranslations.list_button = {title: t(`connections:VIEW.LIST_BUTTON`), link: this.redirectUrl};
                 } else{

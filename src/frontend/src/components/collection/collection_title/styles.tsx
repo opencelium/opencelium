@@ -18,7 +18,6 @@ import styled from "styled-components";
 import {ITheme} from "@style/Theme";
 
 const TitleStyled = styled.div`
-    margin-top: 40px;
     font-family: ${({theme}: {theme: ITheme}) => theme.text.fontFamily};
     color: ${({theme}: {theme: ITheme}) => theme.collectionView.title.color.quite};
     & >span{
