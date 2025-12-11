@@ -534,17 +534,30 @@ public class ConnectionServiceImp implements ConnectionService {
             Connection connection = getById(id);
             if (Utils.compare(ocProps.getVersion(), connection.getOcVersion()) > 0 && !isTestConnection(connection.getTitle())) {
                 if (!gotBackup) {
+                    gotBackup = true;
+
                     try {
                         mysqlBackupService.backup(EntityNames.ENHANCEMENT);
-                        mongoDbBackupService.backup();
-                        gotBackup = true;
                     } catch (Exception e) {
-                        log.error("Failed to backup");
+                        log.error("Failed to take backup {} table from mysql. Continuing updating connections without backup", EntityNames.ENHANCEMENT);
+                    }
+
+                    try {
+                        mongoDbBackupService.backup();
+                    } catch (Exception e) {
+                        log.error("Failed to take backup from MongoDB. Continuing updating connections without backup");
                     }
                 }
 
                 // UPDATE CONNECTION_MNG
-                ConnectionMng connectionMng = connectionMngService.getByConnectionId(connection.getId());
+                ConnectionMng connectionMng;
+                try {
+                    connectionMng = connectionMngService.getByConnectionId(connection.getId());
+                } catch (Exception e) {
+                    log.error("Failed to find Connection[id={}, name={}] on MongoDB with id {}. Skipped updating", connection.getId(), connection.getTitle(), connection.getId());
+                    continue;
+                }
+
                 try {
 
                     clearLogsWithNullFlowId(connectionMng);
