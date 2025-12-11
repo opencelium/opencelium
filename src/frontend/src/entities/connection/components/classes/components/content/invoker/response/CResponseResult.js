@@ -74,6 +74,13 @@ export default class CResponseResult{
     get header(){
         return this._header;
     }
+    getHeaderFields(){
+        const result = this._header.reduce((acc, item) => {
+            acc[item.name] = item.value;
+            return acc;
+        }, {});
+        return result;
+    }
 
     setHeader(headerItems){
         this._header = [];
