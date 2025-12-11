@@ -258,7 +258,7 @@ class ConfigurationsIcon extends React.Component {
           actions={[
             { label: "Save", onClick: (a) => this.save(a) },
             {
-              label: "Cancel",
+              label: "Close",
               onClick: (a) => this.toggleIsVisibleSettingsWindow(a),
             },
           ]}
