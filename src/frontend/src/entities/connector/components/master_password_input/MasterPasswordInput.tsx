@@ -12,7 +12,9 @@ import {MasterPasswordContainer, PromptContainer} from "@entity/connector/compon
 import {MasterPasswordProps} from "@entity/connector/components/master_password_input/interfaces";
 import {onEnter, setFocusById} from "@application/utils/utils";
 import {InputTextType} from "@app_component/base/input/text/interfaces";
-
+function isAscii(str: string) {
+    return /^[\x20-\x7E]*$/.test(str);
+}
 const MasterPasswordInput = ({onSuccess}: MasterPasswordProps) => {
     const dispatch = useAppDispatch();
     const {checkingMasterPassword, error: reduxError, existingMasterPassword, existMasterPasswordResponse} = Connector.getReduxState();
@@ -21,6 +23,10 @@ const MasterPasswordInput = ({onSuccess}: MasterPasswordProps) => {
     const [error, setError] = useState<string>('');
     const [showPrompt, togglePrompt] = useState<boolean>(false);
     const send = () => {
+        if (!isAscii(password)) {
+            setError("Password contains non-ASCII characters!");
+            return;
+        }
         dispatch(checkMasterPassword(password));
         setStartSending(true);
     }
