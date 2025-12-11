@@ -148,6 +148,12 @@ export const connectionLogSlice = createSlice({
 											trace.isCompleted = true;
 											return true;
 										}
+										if (trace.type === 'LOOP') {
+											trace.isCompleted = true;
+											//@ts-ignore
+											trace.properties.size = 0;
+											return true;
+										}
 									}
 									if (!isIndexPathFirstLvl) {
 										trace.isCompleted = true;

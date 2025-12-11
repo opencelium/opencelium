@@ -31,20 +31,20 @@ const LogoImage = (props: any) => {
     const [isLogoExist, setIsLogoExist] = useState<boolean>(null);
     const [src, setSrc] = useState<string>('');
     const logoName = authUser.logoName || OC_NAME;
-    const isThemeSynced = !!onlineServiceStatus?.active;
-    let logoPath = isThemeSynced ? `${onlineApiServerOpenCeliumUrl}fsdlfshdfksldfdfsd-sdfjslkdfhsdlkfhfs-sdfjskdfhjsbdasdalksdhah/logo/${authUser.email}?${new Date().getTime()}` : LogoOcWhiteImagePath;
+    let logoPath = !!onlineServiceStatus?.active ? `${onlineApiServerOpenCeliumUrl}fsdlfshdfksldfdfsd-sdfjslkdfhsdlkfhfs-sdfjskdfhjsbdasdalksdhah/logo/${authUser.email}?${new Date().getTime()}` : LogoOcWhiteImagePath;
     useEffect(() => {
-        if(isThemeSynced) {
+        if(!!onlineServiceStatus?.active) {
             checkImage(logoPath, () => {
                 setIsLogoExist(true);
+                setSrc(logoPath);
             }, () => {
                 setIsLogoExist(false);
                 setSrc(LogoOcWhiteImagePath);
             });
         }
-    }, [])
+    }, [onlineServiceStatus?.active])
     useEffect(() => {
-        if(isLogoExist && isThemeSynced){
+        if(isLogoExist && !!onlineServiceStatus?.active){
             const check = convertPngUrlToBase64(logoPath).then((data) => {
                 if(data) setSrc(data);
             });
@@ -61,7 +61,7 @@ const LogoImage = (props: any) => {
         if (updatingUserDetail === API_REQUEST_STATE.ERROR) {
             setIsLogoExist(false);
         }
-    }, [updatingUserDetail, authUser.userDetail.themeSync])
+    }, [updatingUserDetail, onlineServiceStatus?.active])
     useEffect(() => {
         setIsLogoExist(null);
         checkImage(logoPath, () => setIsLogoExist(true), () => setIsLogoExist(false));
@@ -72,7 +72,7 @@ const LogoImage = (props: any) => {
     return(
         <LogoImageStyled
             ref={imageRef}
-            src={isThemeSynced ? src || LogoOcWhiteImagePath : LogoOcWhiteImagePath}
+            src={!!onlineServiceStatus?.active ? src || LogoOcWhiteImagePath : LogoOcWhiteImagePath}
             alt={logoName}
             {...props}
         />
