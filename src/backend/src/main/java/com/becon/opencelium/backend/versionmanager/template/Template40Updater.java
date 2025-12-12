@@ -19,6 +19,8 @@ import com.becon.opencelium.backend.versionmanager.template.domains.ResponseWith
 import com.becon.opencelium.backend.versionmanager.template.domains.ResultWithDirectBody;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -28,6 +30,7 @@ import java.util.Objects;
 @Component
 public class Template40Updater implements EntityUpdater<Template> {
 
+    private static final Logger log = LoggerFactory.getLogger(Template40Updater.class);
     private final ObjectMapper objectMapper;
     private final OperatorOldDTOMapper operatorOldDTOMapper;
 
@@ -52,25 +55,49 @@ public class Template40Updater implements EntityUpdater<Template> {
         CtionTemplateResource connection = template.getConnection();
 
         if (Objects.nonNull(connection.getFromConnector().getMethods())) {
-            List<MethodWithDirectBody> fromMethods = objectMapper.convertValue(connection.getFromConnector().getMethods(), new TypeReference<>() {
-            });
+            List<MethodWithDirectBody> fromMethods = null;
+            try {
+                fromMethods = objectMapper.convertValue(connection.getFromConnector().getMethods(), new TypeReference<>() {
+                });
+            } catch (IllegalArgumentException e) {
+                log.error("Failed to read methods on template");
+                throw e;
+            }
 
             connection.getFromConnector().setMethods(resolveMethods(fromMethods));
         }
         if (Objects.nonNull(connection.getFromConnector().getOperators())) {
-            List<OperatorOldDTO> fromOperators = objectMapper.convertValue(connection.getFromConnector().getOperators(), new TypeReference<>() {
-            });
+            List<OperatorOldDTO> fromOperators = null;
+            try {
+                fromOperators = objectMapper.convertValue(connection.getFromConnector().getOperators(), new TypeReference<>() {
+                });
+            } catch (IllegalArgumentException e) {
+                log.error("Failed to read operators on template");
+                throw e;
+            }
             connection.getFromConnector().setOperators(operatorOldDTOMapper.toEntityAll(fromOperators));
         }
         if (Objects.nonNull(connection.getToConnector().getMethods())) {
-            List<MethodWithDirectBody> toMethods = objectMapper.convertValue(connection.getToConnector().getMethods(), new TypeReference<>() {
-            });
+            List<MethodWithDirectBody> toMethods = null;
+            try {
+                toMethods = objectMapper.convertValue(connection.getToConnector().getMethods(), new TypeReference<>() {
+                });
+            } catch (IllegalArgumentException e) {
+                log.error("Failed to read methods on template");
+                throw e;
+            }
 
             connection.getToConnector().setMethods(resolveMethods(toMethods));
         }
         if (Objects.nonNull(connection.getToConnector().getOperators())) {
-            List<OperatorOldDTO> toOperators = objectMapper.convertValue(connection.getToConnector().getOperators(), new TypeReference<>() {
-            });
+            List<OperatorOldDTO> toOperators = null;
+            try {
+                toOperators = objectMapper.convertValue(connection.getToConnector().getOperators(), new TypeReference<>() {
+                });
+            } catch (IllegalArgumentException e) {
+                log.error("Failed to read operators on template");
+                throw e;
+            }
             connection.getToConnector().setOperators(operatorOldDTOMapper.toEntityAll(toOperators));
         }
 
