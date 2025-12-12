@@ -165,7 +165,8 @@ public class TemplateServiceImp implements TemplateService {
             try {
                 backup = objectMapper.readValue(objectMapper.writeValueAsString(template), Template.class);
             } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
+                log.error("Error while reading template Template[id={}, name={}]", template.getTemplateId(), template.getName());
+                continue;
             }
 
             if (Utils.compare(ocProps.getVersion(), template.getVersion()) > 0) {
