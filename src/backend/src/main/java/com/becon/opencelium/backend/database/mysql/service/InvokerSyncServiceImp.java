@@ -165,8 +165,13 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
                 if (entry.getName().endsWith(".xml")) {
                     byte[] xmlBytes = zis.readAllBytes();
 
+                    Optional<String> optionalInvokerName = safeExtractInvokerName(xmlBytes, entry.getName());
+                    if (optionalInvokerName.isEmpty()) {
+                        continue;
+                    }
+
                     // extract required fields
-                    String invokerName = extractInvokerName(xmlBytes);
+                    String invokerName = optionalInvokerName.get();
                     String spFileName = entry.getName();
 
                     // after calling recalculateSyncData() we have all existing invoker names in our table,
@@ -228,7 +233,12 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
             for (Path entry : stream) {
                 byte[] xmlBytes = Files.readAllBytes(entry);
 
-                String invokerName = extractInvokerName(xmlBytes);
+                Optional<String> optionalInvokerName = safeExtractInvokerName(xmlBytes, entry.toAbsolutePath().toString());
+                if (optionalInvokerName.isEmpty()) {
+                    continue;
+                }
+
+                String invokerName = optionalInvokerName.get();
                 String ocFileName = entry.getFileName().toString();
                 String contentHmac = HmacUtility.encode(xmlBytes);
 
@@ -256,6 +266,27 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
         } catch (Exception e) {
             logger.warn("Failed to calculate sync data", e);
             throw new RuntimeException(e);
+        }
+    }
+
+    private Optional<String> safeExtractInvokerName(byte[] xmlBytes, String location) {
+        try {
+            return Optional.of(extractInvokerName(xmlBytes));
+        } catch (Exception e) {
+            Path filename = Paths.get(location).getFileName();
+
+            logger.warn("""
+                            Failed to parse XML:
+                              filename: {}
+                              location: {}
+                              error message: {}
+                            """,
+                    filename,
+                    location,
+                    e.getMessage()
+            );
+
+            return Optional.empty();
         }
     }
 
