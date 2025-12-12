@@ -141,11 +141,14 @@ export const connectionLogSlice = createSlice({
 					}
 					state.connectors.forEach((connector) => {
 						if (connector.flowId === flowId) {
-							if (action.payload.data.status === 'COMPLETE') {
+							if (action.payload.data.status === 'COMPLETE' || action.payload.data.status === 'FAIL') {
 								const hasUpdatedTrace = findAndUpdateTrace(connector.traces, action.payload.data.indexPath, (trace) => {
 									if (!action.payload.settings.hasNewLoopIndex) {
 										if (trace.type === 'IF') {
 											trace.isCompleted = true;
+											if (newTrace.error) {
+												trace.error = newTrace.error;
+											}
 											return true;
 										}
 										if (trace.type === 'LOOP') {
