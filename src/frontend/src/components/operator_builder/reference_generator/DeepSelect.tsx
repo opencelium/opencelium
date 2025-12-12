@@ -187,10 +187,12 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 	useEffect(() => {
 		// ✅ Root should pass through untouched
 		if (field === '$.' || field === '') {
-			if (searchValue !== '$.') {
-				handleInputChange('$.', { action: 'input-change' });
+			if (searchValue !== '') {
+				if (searchValue !== '$.') {
+					handleInputChange('$.', {action: 'input-change'});
+				}
+				return;
 			}
-			return;
 		}
 
 		const unwrapped =
