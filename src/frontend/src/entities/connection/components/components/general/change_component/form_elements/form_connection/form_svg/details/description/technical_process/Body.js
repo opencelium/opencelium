@@ -436,7 +436,7 @@ class Body extends React.Component {
 				<Dialog
 					actions={[
 						{
-							label: 'Ok',
+							label: 'Close',
 							onClick: (a) => this.toggleBodyVisible(a),
 							id: 'header_ok',
 						},

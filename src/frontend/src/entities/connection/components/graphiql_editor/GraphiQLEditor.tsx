@@ -80,17 +80,23 @@ const GraphiQLEditor: FC<GraphiQLEditorProps> =
             }
         }, [logining])
         const graphQLFetcher = async (graphQLParams: FetcherParams) => {
-            const requestProps: GraphQLRequestProps = {url: currentConnector.requestData.url, accessToken, sslOn, ...graphQLParams};
-            let request = new GraphiQLContext(currentConnector);
-            const response = await request.query(requestProps);
-            const result: any = response.data;
-            if(result && result.errors && result.errors.length > 0 && result.errors[0].extensions && result.errors[0].extensions.causes && result.errors[0].extensions.causes.length > 0 &&  result.errors[0].extensions.causes[0].error){
-                if(result.errors[0].extensions.causes[0].error === 'AccessDeniedException'){
-                    setShouldRevokeToken(true);
-                    return {};
+            if (currentConnector) {
+                const requestProps: GraphQLRequestProps = {
+                    url: currentConnector.requestData.url,
+                    accessToken,
+                    sslOn, ...graphQLParams
+                };
+                let request = new GraphiQLContext(currentConnector);
+                const response = await request.query(requestProps);
+                const result: any = response.data;
+                if (result && result.errors && result.errors.length > 0 && result.errors[0].extensions && result.errors[0].extensions.causes && result.errors[0].extensions.causes.length > 0 && result.errors[0].extensions.causes[0].error) {
+                    if (result.errors[0].extensions.causes[0].error === 'AccessDeniedException') {
+                        setShouldRevokeToken(true);
+                        return {};
+                    }
                 }
+                return result;
             }
-            return result;
         }
         const generateQuery = (query: string) => {
             let result = {query: query};
@@ -102,7 +108,7 @@ const GraphiQLEditor: FC<GraphiQLEditorProps> =
         if(startLogining){
             return <div style={{height: '100%', display: 'grid', placeItems: 'center'}}><Loading/></div>;
         }
-        if (!startLogining && accessToken === '') {
+        if (!startLogining && accessToken === '' && !masterPassword) {
             return <MasterPasswordContainer><MasterPasswordInput onSuccess={() => {}}/></MasterPasswordContainer>;
         }
         return (
