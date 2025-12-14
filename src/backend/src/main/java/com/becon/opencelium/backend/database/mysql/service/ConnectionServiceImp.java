@@ -485,11 +485,10 @@ public class ConnectionServiceImp implements ConnectionService {
                         log.error("Failed to take backup from MongoDB. Continuing updating connections without backup");
                     }
                 }
-
                 // UPDATE CONNECTION_MNG
                 ConnectionMng connectionMng;
                 try {
-                    connectionMng = connectionMngService.getById(connection.getSnapshotId());
+                    connectionMng = connectionMngService.getConnectionId(connection.getId());
                 } catch (Exception e) {
                     log.error("Failed to find Connection[id={}, name={}] on MongoDB with id {}. Skipped updating", connection.getId(), connection.getTitle(), connection.getId());
                     continue;
@@ -505,25 +504,27 @@ public class ConnectionServiceImp implements ConnectionService {
                     log.error("Failed to update Connection[id={}, name={}]", connection.getId(), connection.getTitle(), e);
                     continue;
                 }
-                try {
-                    // truncate enhancements on mysql
-                    enhancementService.deleteAll();
 
-                    // clear fieldBindings document on mongodb
-                    fieldBindingMngService.deleteAll();
-
-                    // clear methods document on mongodb
-                    methodMngService.deleteAll();
-
-                    // clear operators document on mongodb
-                    operatorMngService.deleteAll();
-
-                    // update all connections' version to the current version
-                    connectionRepository.updateVersion(ocProps.getVersion());
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                connection.setSnapshotId(connectionMng.getId());
+                connection.setOcVersion(ocProps.getVersion());
+                connectionRepository.save(connection);
             }
+        }
+
+        try {
+            // truncate enhancements on mysql
+            enhancementService.deleteAll();
+
+            // clear fieldBindings document on mongodb
+            fieldBindingMngService.deleteAll();
+
+            // clear methods document on mongodb
+            methodMngService.deleteAll();
+
+            // clear operators document on mongodb
+            operatorMngService.deleteAll();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

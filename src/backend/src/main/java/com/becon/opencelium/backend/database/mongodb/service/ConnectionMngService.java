@@ -15,4 +15,6 @@ public interface ConnectionMngService {
 
     long count();
     ConnectionMng getById(String id);
+
+    ConnectionMng getConnectionId(Long id);
 }

@@ -92,6 +92,12 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
                 .orElseThrow(() -> new RuntimeException("CONNECTION_NOT_FOUND"));
     }
 
+    @Override
+    public ConnectionMng getConnectionId(Long id) {
+        return connectionMngRepository.findByConnectionId(id)
+                .orElseThrow(() -> new RuntimeException("CONNECTION_NOT_FOUND"));
+    }
+
     private void populateWithIds(ConnectionMng connectionMng) {
         populateWithIds(connectionMng, false);
     }
