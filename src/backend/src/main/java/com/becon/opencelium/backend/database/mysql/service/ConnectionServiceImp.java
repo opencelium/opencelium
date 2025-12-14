@@ -80,9 +80,7 @@ public class ConnectionServiceImp implements ConnectionService {
     private final OpenceliumProps ocProps;
     private final EntityUpdater<ConnectionMng> connectionMngEntityUpdater;
     private final MongoDbBackupService mongoDbBackupService;
-    private final EnhancementService enhancementService;
-    private final MethodMngService methodMngService;
-    private final OperatorMngService operatorMngService;
+    private final MetaDataLogRepository metaDataLogRepository;
 
     public ConnectionServiceImp(
             ConnectionRepository connectionRepository,
@@ -476,13 +474,31 @@ public class ConnectionServiceImp implements ConnectionService {
         for (Long id : ids) {
             Connection connection = getById(id);
             if (Utils.compare(ocProps.getVersion(), connection.getOcVersion()) > 0 && !isTestConnection(connection.getTitle())) {
-
                 if (!gotBackup) {
-                    mongoDbBackupService.backup();
                     gotBackup = true;
+
+                    try {
+                        mysqlBackupService.backup(EntityNames.ENHANCEMENT);
+                    } catch (Exception e) {
+                        log.error("Failed to take backup {} table from mysql. Continuing updating connections without backup", EntityNames.ENHANCEMENT);
+                    }
+
+                    try {
+                        mongoDbBackupService.backup();
+                    } catch (Exception e) {
+                        log.error("Failed to take backup from MongoDB. Continuing updating connections without backup");
+                    }
                 }
 
-                ConnectionMng connectionMng = connectionMngService.getById(connection.getSnapshotId());
+                // UPDATE CONNECTION_MNG
+                ConnectionMng connectionMng;
+                try {
+                    connectionMng = connectionMngService.getByConnectionId(connection.getId());
+                } catch (Exception e) {
+                    log.error("Failed to find Connection[id={}, name={}] on MongoDB with id {}. Skipped updating", connection.getId(), connection.getTitle(), connection.getId());
+                    continue;
+                }
+
                 try {
                     connectionMngEntityUpdater.updateToCurrentVersion(connectionMng)
                             .ifChangedOrElseIfUpdated(
@@ -491,14 +507,23 @@ public class ConnectionServiceImp implements ConnectionService {
                             );
                 } catch (Exception e) {
                     log.error("Failed to update Connection[id={}, name={}]", connection.getId(), connection.getTitle(), e);
-                    mongoDbBackupService.restore();
-                    log.warn("Rolled back all changes");
-                    throw new RuntimeException(e);
+                    continue;
                 }
+
+                // UPDATE ENHANCEMENTS
+                try {
+                    connection.getEnhancements().forEach(enhancement -> enhancementEntityUpdater.updateFrom(enhancement, connection.getOcVersion())
+                            .ifChanged(x -> enhancementService.save(enhancement)));
+                } catch (Exception e) {
+                    log.error("Failed to update Connection[id={}, name={}]", connection.getId(), connection.getTitle(), e);
+                    continue;
+                }
+
+                connection.setOcVersion(ocProps.getVersion());
+                connectionRepository.save(connection);
+
                 log.info("Connection[id={}, name={}] is successfully updated to {} version", connection.getId(), connection.getTitle(), ocProps.getVersion());
             }
-        }
-
         // When all connections updated successfully
         // Following operations only for 4.7 version. May|Must be deleted new versions
         try {
