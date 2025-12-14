@@ -36,6 +36,9 @@ public class Connection {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "snapshot_id")
+    private String snapshotId;
+
     @Column(name = "title")
     private String title;
 
@@ -217,5 +220,13 @@ public class Connection {
                 ", businessLayout=" + businessLayout +
                 ", icon=" + icon +
                 '}';
+    }
+
+    public String getSnapshotId() {
+        return snapshotId;
+    }
+
+    public void setSnapshotId(String snapshotId) {
+        this.snapshotId = snapshotId;
     }
 }

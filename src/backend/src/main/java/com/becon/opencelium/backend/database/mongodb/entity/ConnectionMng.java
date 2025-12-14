@@ -16,9 +16,13 @@
 
 package com.becon.opencelium.backend.database.mongodb.entity;
 
+import jakarta.persistence.PrePersist;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.*;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -48,6 +52,9 @@ public class ConnectionMng {
     private List<FieldBindingMng> fieldBindings;
 
     private Map<String, Object> ui;
+
+    @CreatedDate
+    private LocalDateTime createdAt;
 
     public ConnectionMng() {
     }
@@ -114,5 +121,18 @@ public class ConnectionMng {
 
     public void setOldFieldBindings(List<FieldBindingMng> oldFieldBindings) {
         this.oldFieldBindings = oldFieldBindings;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
     }
 }

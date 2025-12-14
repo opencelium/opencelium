@@ -31,7 +31,7 @@ import java.util.List;
 
 public interface ConnectionService {
 
-    ConnectionMng save(Connection connection, ConnectionMng connectionMng);
+    Long save(Connection connection, ConnectionMng connectionMng);
 
     void deleteById(Long id);
 
@@ -68,8 +68,6 @@ public interface ConnectionService {
     List<Connection> getAllByCategoryId(Integer categoryId);
 
     List<ConnectionDTO> getAllFullConnection();
-
-    List<Connection> findAllNotCompleted();
 
     void updateCategory(Connection connection, Integer newCategory);
 

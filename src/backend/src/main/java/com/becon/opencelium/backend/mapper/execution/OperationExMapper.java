@@ -44,7 +44,7 @@ public class OperationExMapper {
         this.connectorService = connectorService;
     }
 
-    public List<OperationDTO> toOperationAll(List<MethodMng> methods, Long connectionId, String invoker) {
+    public List<OperationDTO> toOperationAll(List<MethodMng> methods, String connectionId, String invoker) {
         if (methods == null || methods.isEmpty()) {
             return Collections.emptyList();
         }
@@ -55,7 +55,7 @@ public class OperationExMapper {
         return operations;
     }
 
-    public OperationDTO toOperation(@NonNull MethodMng method, Long connectionId, String invokerStr) {
+    public OperationDTO toOperation(@NonNull MethodMng method, String connectionId, String invokerStr) {
         Invoker invoker = invokerService.findByName(invokerStr);
         List<FunctionInvoker> operations = invoker.getOperations();
         FunctionInvoker fiv = operations.stream()
@@ -382,7 +382,7 @@ public class OperationExMapper {
         return parameters;
     }
 
-    private RequestBodyDTO getRequestBody(BodyMng body, Long connectionId, String methodName, MediaType mediaType) {
+    private RequestBodyDTO getRequestBody(BodyMng body, String connectionId, String methodName, MediaType mediaType) {
         if (body == null || body.getFormat() == null || body.getFields() == null) {
             return null;
         }
@@ -403,7 +403,7 @@ public class OperationExMapper {
         };
     }
 
-    private SchemaDTO getSchema(BodyMng body, Long connectionId, String methodName) {
+    private SchemaDTO getSchema(BodyMng body, String connectionId, String methodName) {
         Map<String, Object> fields = body.getFields();
         if (fields == null) {
             return null;
@@ -492,7 +492,7 @@ public class OperationExMapper {
         currSchema.setXml(xmlObjectDTO);
     }
 
-    private SchemaDTO getSchemaFromObjectXML(LinkedList<String> hierarchy, Object value, Long connectionId, String methodName) {
+    private SchemaDTO getSchemaFromObjectXML(LinkedList<String> hierarchy, Object value, String connectionId, String methodName) {
         SchemaDTO schemaDTO = new SchemaDTO();
         DataType type = getType(value);
 
@@ -572,7 +572,7 @@ public class OperationExMapper {
     }
 
     @SuppressWarnings("unchecked")
-    private SchemaDTO getSchemaFromObjectJSON(LinkedList<String> hierarchy, Object obj, Long connectionId, String methodName) {
+    private SchemaDTO getSchemaFromObjectJSON(LinkedList<String> hierarchy, Object obj, String connectionId, String methodName) {
         SchemaDTO schemaDTO = new SchemaDTO();
         DataType type = getType(obj);
         if (obj == null || type == null)
@@ -606,13 +606,13 @@ public class OperationExMapper {
         return schemaDTO;
     }
 
-    private DataType findTypeOfReference(String value, Long connectionId, String methodName, LinkedList<String> hierarchy) {
+    private DataType findTypeOfReference(String value, String connectionId, String methodName, LinkedList<String> hierarchy) {
         if (value.matches(RegExpression.requiredData)
                 || value.matches(RegExpression.enhancement)
                 || value.matches(RegExpression.directRef)
                 || value.matches(RegExpression.webhook)) {
 
-            ConnectionMng connectionMng = connectionMngService.getByConnectionId(connectionId);
+            ConnectionMng connectionMng = connectionMngService.getById(connectionId);
             Connector fromConnector = connectorService.getById(connectionMng.getFromConnector().getConnectorId());
             Connector toConnector = connectorService.getById(connectionMng.getToConnector().getConnectorId());
 

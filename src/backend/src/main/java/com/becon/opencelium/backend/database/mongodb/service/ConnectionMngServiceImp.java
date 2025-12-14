@@ -31,17 +31,8 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     }
 
     @Override
-    public boolean existsByConnectionId(Long id) {
-        return connectionMngRepository.existsByConnectionId(id);
-    }
-
-    @Override
     public ConnectionMng save(ConnectionMng connectionMng) {
         if (Objects.isNull(connectionMng)) return null;
-
-        if (connectionMng.getConnectionId() != null && existsByConnectionId(connectionMng.getConnectionId())) {
-            throw new RuntimeException("CONNECTION_ALREADY_EXISTS");
-        }
 
         return connectionMngRepository.save(connectionMng);
     }
@@ -50,10 +41,8 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     public ConnectionMng create(ConnectionMng connectionMng) {
         if (Objects.isNull(connectionMng)) return null;
 
-        if (connectionMng.getConnectionId() != null && existsByConnectionId(connectionMng.getConnectionId())) {
-            throw new RuntimeException("CONNECTION_ALREADY_EXISTS");
-        }
         connectionMng.setVersion(ocProps.getVersion());
+        connectionMng.setId(null);
 
         populateWithIds(connectionMng, true);
 
@@ -67,23 +56,6 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         if (Objects.isNull(connectionMng)) return null;
 
         return connectionMngRepository.save(connectionMng);
-    }
-
-    @Override
-    public void updateAndBind(ConnectionMng old, ConnectionMng connectionMng) {
-        if (Objects.isNull(connectionMng)) return;
-
-        populateWithIds(connectionMng);
-
-        fieldBindingMngService.bind(connectionMng);
-
-        connectionMngRepository.save(connectionMng);
-    }
-
-    @Override
-    public ConnectionMng getByConnectionId(Long connectionId) {
-        return connectionMngRepository.findByConnectionId(connectionId)
-                .orElseThrow(() -> new ConnectionNotFoundException(connectionId));
     }
 
     @Override
@@ -103,13 +75,8 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     }
 
     @Override
-    public List<ConnectionMng> getAllById(List<Long> ids) {
-        return connectionMngRepository.findAllByConnectionIdIn(ids);
-    }
-
-    @Override
-    public ConnectionMng delete(Long id) {
-        ConnectionMng connectionMng = getByConnectionId(id);
+    public ConnectionMng delete(String id) {
+        ConnectionMng connectionMng = getById(id);
         connectionMngRepository.delete(connectionMng);
         return connectionMng;
     }
@@ -117,6 +84,12 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     @Override
     public long count() {
         return connectionMngRepository.count();
+    }
+
+    @Override
+    public ConnectionMng getById(String id) {
+        return connectionMngRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("CONNECTION_NOT_FOUND"));
     }
 
     private void populateWithIds(ConnectionMng connectionMng) {

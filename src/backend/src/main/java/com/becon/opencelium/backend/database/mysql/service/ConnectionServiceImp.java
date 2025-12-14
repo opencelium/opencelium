@@ -21,7 +21,6 @@ import com.becon.opencelium.backend.constant.*;
 import com.becon.opencelium.backend.container.Command;
 import com.becon.opencelium.backend.container.ConnectionUpdateTracker;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
-import com.becon.opencelium.backend.database.mongodb.repository.MetaDataLogRepository;
 import com.becon.opencelium.backend.database.mongodb.service.*;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
@@ -81,7 +80,6 @@ public class ConnectionServiceImp implements ConnectionService {
     private final OpenceliumProps ocProps;
     private final EntityUpdater<ConnectionMng> connectionMngEntityUpdater;
     private final MongoDbBackupService mongoDbBackupService;
-    private final MetaDataLogRepository metaDataLogRepository;
     private final EnhancementService enhancementService;
     private final MethodMngService methodMngService;
     private final OperatorMngService operatorMngService;
@@ -105,7 +103,7 @@ public class ConnectionServiceImp implements ConnectionService {
             EntityVersionManager entityVersionManager,
             OpenceliumProps ocProps,
             MongoDbBackupService mongoDbBackupService,
-            MetaDataLogRepository metaDataLogRepository, MethodMngService methodMngService, OperatorMngService operatorMngService
+            MethodMngService methodMngService, OperatorMngService operatorMngService
     ) {
         this.connectionRepository = connectionRepository;
         this.connectorService = connectorService;
@@ -124,7 +122,6 @@ public class ConnectionServiceImp implements ConnectionService {
         this.ocProps = ocProps;
         this.connectionMngEntityUpdater = entityVersionManager.getUpdater(ConnectionMng.class);
         this.mongoDbBackupService = mongoDbBackupService;
-        this.metaDataLogRepository = metaDataLogRepository;
         this.enhancementService = enhancementService;
         this.methodMngService = methodMngService;
         this.operatorMngService = operatorMngService;
@@ -136,7 +133,7 @@ public class ConnectionServiceImp implements ConnectionService {
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
     @Override
     @Transactional
-    public ConnectionMng save(Connection connection, ConnectionMng connectionMng) {
+    public Long save(Connection connection, ConnectionMng connectionMng) {
         if (existsByName(connection.getTitle())) {
             throw new RuntimeException("TITLE_HAS_ALREADY_TAKEN");
         }
@@ -156,15 +153,14 @@ public class ConnectionServiceImp implements ConnectionService {
             categoryService.get(connection.getCategoryId());
         }
 
-        connection.setOcVersion(ocProps.getVersion());
+        ConnectionMng savedMng = connectionMngService.create(connectionMng);
 
+        connection.setOcVersion(ocProps.getVersion());
+        connection.setSnapshotId(savedMng.getId());
         Connection savedConnection = connectionRepository.save(connection);
 
-        //saving connectionMng
-        connectionMng.setConnectionId(savedConnection.getId());
-        ConnectionMng savedMng = connectionMngService.create(connectionMng);
         connectionHistoryService.makeHistoryAndSave(savedConnection, null, Action.CREATE);
-        return savedMng;
+        return savedConnection.getId();
     }
 
     @Override
@@ -178,10 +174,7 @@ public class ConnectionServiceImp implements ConnectionService {
             }
         }
 
-        ConnectionMng oldMng = connectionMngService.getByConnectionId(connection.getId());
-        if (connectionMng.getId() == null || !oldMng.getId().equals(connectionMng.getId())) {
-            connectionMng.setId(oldMng.getId());
-        }
+        ConnectionMng oldMng = connectionMngService.getById(sCon.getSnapshotId());
 
         //checking existence of connectors
         Connector from = connectorService.getById(connection.getToConnector());
@@ -198,13 +191,12 @@ public class ConnectionServiceImp implements ConnectionService {
             categoryService.get(connection.getCategoryId());
         }
 
-        // there is not ocVersion field on ConnectionOldDTO, set connection's version with current system version
+        connectionMng.setId(null);
+        ConnectionMng savedMng = connectionMngService.create(connectionMng);
+
         connection.setOcVersion(ocProps.getVersion());
-
-        Connection savedConnection = connectionRepository.save(connection);
-
-        connectionMng.setConnectionId(savedConnection.getId());
-        connectionMngService.updateAndBind(oldMng, connectionMng);
+        connection.setSnapshotId(savedMng.getId());
+        connectionRepository.save(connection);
     }
 
     @Override
@@ -213,7 +205,6 @@ public class ConnectionServiceImp implements ConnectionService {
         connection.setOcVersion(ocProps.getVersion());
         Connection saved = connectionRepository.save(connection);
         ConnectionMng connectionMng = new ConnectionMng();
-        connectionMng.setConnectionId(saved.getId());
         connectionMng.setVersion(ocProps.getVersion());
         connectionMngService.saveDirectly(connectionMng);
         connectionHistoryService.makeHistoryAndSave(saved, null, Action.CREATE);
@@ -252,7 +243,7 @@ public class ConnectionServiceImp implements ConnectionService {
         deleteSchedules(connection);
         ConnectionMng deleted;
         try {
-            deleted = connectionMngService.delete(id);
+            deleted = connectionMngService.delete(connection.getSnapshotId());
         } catch (Exception e) {
             connectionRepository.deleteById(id);
             return;
@@ -281,7 +272,7 @@ public class ConnectionServiceImp implements ConnectionService {
         deleteSchedules(connection);
         ConnectionMng deleted;
         try {
-            deleted = connectionMngService.delete(id);
+            deleted = connectionMngService.delete(connection.getSnapshotId());
         } catch (Exception e) {
             connectionRepository.deleteById(id);
             return;
@@ -342,11 +333,12 @@ public class ConnectionServiceImp implements ConnectionService {
     @Override
     public ConnectionDTO getFullConnection(Long connectionId) {
         Connection connection = getById(connectionId);
-        ConnectionMng connectionMng = connectionMngService.getByConnectionId(connectionId);
+        ConnectionMng connectionMng = connectionMngService.getById(connection.getSnapshotId());
 
         ConnectionDTO connectionDTOMng = connectionMngMapper.toDTO(connectionMng);
         ConnectionDTO connectionDTO = connectionMapper.toDTO(connection);
 
+        connectionDTOMng.setConnectionId(connectionDTO.getConnectionId());
         connectionDTOMng.setTitle(connectionDTO.getTitle());
         connectionDTOMng.setDescription(connectionDTO.getDescription());
         connectionDTOMng.setIcon(connectionDTO.getIcon());
@@ -385,18 +377,6 @@ public class ConnectionServiceImp implements ConnectionService {
         List<ConnectionDTO> res = new ArrayList<>();
         for (Connection connection : all) {
             res.add(getFullConnection(connection.getId()));
-        }
-        return res;
-    }
-
-    @Override
-    public List<Connection> findAllNotCompleted() {
-        List<Connection> all = findAll();
-        List<Connection> res = new ArrayList<>();
-        for (Connection connection : all) {
-            if (!connectionMngService.existsByConnectionId(connection.getId())) {
-                res.add(connection);
-            }
         }
         return res;
     }
@@ -502,10 +482,8 @@ public class ConnectionServiceImp implements ConnectionService {
                     gotBackup = true;
                 }
 
-                ConnectionMng connectionMng = connectionMngService.getByConnectionId(connection.getId());
+                ConnectionMng connectionMng = connectionMngService.getById(connection.getSnapshotId());
                 try {
-                    clearLogsWithNullFlowId(connectionMng);
-
                     connectionMngEntityUpdater.updateToCurrentVersion(connectionMng)
                             .ifChangedOrElseIfUpdated(
                                     connectionMngService::updateWithoutBinding, // if any field is updated
@@ -540,21 +518,6 @@ public class ConnectionServiceImp implements ConnectionService {
             connectionRepository.updateVersion(ocProps.getVersion());
         } catch (Exception e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    private void clearLogsWithNullFlowId(ConnectionMng connectionMng) {
-        if (connectionMng.getFromConnector() != null && connectionMng.getFromConnector().getFlowId() == null
-                || connectionMng.getToConnector() != null && connectionMng.getToConnector().getFlowId() == null) {
-
-            try {
-                long deletedItems = metaDataLogRepository.deleteAllByConnectionId(connectionMng.getConnectionId());
-                if (deletedItems > 0) {
-                    log.info("Deleted {} logData items of Connection[id={}] due to null flowId field", deletedItems, connectionMng.getConnectionId());
-                }
-            } catch (Exception e) {
-                log.error("Failed to clear logs of Connection[id={}] with null flowId field ", connectionMng.getConnectionId(), e);
-            }
         }
     }
 

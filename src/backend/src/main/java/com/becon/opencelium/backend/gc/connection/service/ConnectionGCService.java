@@ -36,11 +36,11 @@ public class ConnectionGCService {
             List<ConnectionMng> connectionMngs = connectionMngService.getAll();
             for (ConnectionMng connectionMng : connectionMngs) {
                 list.stream()
-                        .filter(c -> Objects.equals(c.getConnection().getId(), connectionMng.getConnectionId()))
+//                        .filter(c -> Objects.equals(c.getConnection().getId(), connectionMng.getConnectionId())) //TODO:
                         .findAny()
                         .ifPresentOrElse(c -> {
                         }, () -> {
-                            connectionMngService.delete(connectionMng.getConnectionId());
+                            connectionMngService.delete(connectionMng.getId());
                         });
             }
         }
@@ -58,9 +58,10 @@ public class ConnectionGCService {
         if (connections.isEmpty()) {
             if (connectionMngService.count() != 0) {
                 connectionMngService.getAll().forEach(c -> {
-                    if (!allConnectionIds.contains(c.getConnectionId())) {
-                        connectionMngService.delete(c.getConnectionId());
-                    }
+//                    if (!allConnectionIds.contains(c.getConnectionId())) {
+//                        connectionMngService.delete(c.getId());
+//                    }
+                    //TODO:
                 });
             }
             return null;
@@ -78,7 +79,7 @@ public class ConnectionGCService {
 
     public ConnectionForGC getById(Long id) {
         Connection connection = connectionService.getById(id);
-        ConnectionMng connectionMng = connectionMngService.getByConnectionId(id);
+        ConnectionMng connectionMng = connectionMngService.getById(connection.getSnapshotId());
         return new ConnectionForGC(connection, connectionMng);
     }
 
@@ -89,7 +90,7 @@ public class ConnectionGCService {
         }
         connections.forEach(c -> {
             try {
-                ConnectionMng connectionMng = connectionMngService.getByConnectionId(c.getId());
+                ConnectionMng connectionMng = connectionMngService.getById(c.getSnapshotId());
                 list.add(new ConnectionForGC(c, connectionMng));
             } catch (ConnectionNotFoundException e) {
                 connectionService.deleteOnlyConnection(c.getId());
