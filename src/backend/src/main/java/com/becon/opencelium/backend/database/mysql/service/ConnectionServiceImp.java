@@ -80,7 +80,9 @@ public class ConnectionServiceImp implements ConnectionService {
     private final OpenceliumProps ocProps;
     private final EntityUpdater<ConnectionMng> connectionMngEntityUpdater;
     private final MongoDbBackupService mongoDbBackupService;
-    private final MetaDataLogRepository metaDataLogRepository;
+    private final EnhancementService enhancementService;
+    private final MethodMngService methodMngService;
+    private final OperatorMngService operatorMngService;
 
     public ConnectionServiceImp(
             ConnectionRepository connectionRepository,
@@ -478,12 +480,6 @@ public class ConnectionServiceImp implements ConnectionService {
                     gotBackup = true;
 
                     try {
-                        mysqlBackupService.backup(EntityNames.ENHANCEMENT);
-                    } catch (Exception e) {
-                        log.error("Failed to take backup {} table from mysql. Continuing updating connections without backup", EntityNames.ENHANCEMENT);
-                    }
-
-                    try {
                         mongoDbBackupService.backup();
                     } catch (Exception e) {
                         log.error("Failed to take backup from MongoDB. Continuing updating connections without backup");
@@ -493,7 +489,7 @@ public class ConnectionServiceImp implements ConnectionService {
                 // UPDATE CONNECTION_MNG
                 ConnectionMng connectionMng;
                 try {
-                    connectionMng = connectionMngService.getByConnectionId(connection.getId());
+                    connectionMng = connectionMngService.getById(connection.getSnapshotId());
                 } catch (Exception e) {
                     log.error("Failed to find Connection[id={}, name={}] on MongoDB with id {}. Skipped updating", connection.getId(), connection.getTitle(), connection.getId());
                     continue;
@@ -509,40 +505,25 @@ public class ConnectionServiceImp implements ConnectionService {
                     log.error("Failed to update Connection[id={}, name={}]", connection.getId(), connection.getTitle(), e);
                     continue;
                 }
-
-                // UPDATE ENHANCEMENTS
                 try {
-                    connection.getEnhancements().forEach(enhancement -> enhancementEntityUpdater.updateFrom(enhancement, connection.getOcVersion())
-                            .ifChanged(x -> enhancementService.save(enhancement)));
+                    // truncate enhancements on mysql
+                    enhancementService.deleteAll();
+
+                    // clear fieldBindings document on mongodb
+                    fieldBindingMngService.deleteAll();
+
+                    // clear methods document on mongodb
+                    methodMngService.deleteAll();
+
+                    // clear operators document on mongodb
+                    operatorMngService.deleteAll();
+
+                    // update all connections' version to the current version
+                    connectionRepository.updateVersion(ocProps.getVersion());
                 } catch (Exception e) {
-                    log.error("Failed to update Connection[id={}, name={}]", connection.getId(), connection.getTitle(), e);
-                    continue;
+                    throw new RuntimeException(e);
                 }
-
-                connection.setOcVersion(ocProps.getVersion());
-                connectionRepository.save(connection);
-
-                log.info("Connection[id={}, name={}] is successfully updated to {} version", connection.getId(), connection.getTitle(), ocProps.getVersion());
             }
-        // When all connections updated successfully
-        // Following operations only for 4.7 version. May|Must be deleted new versions
-        try {
-            // truncate enhancements on mysql
-            enhancementService.deleteAll();
-
-            // clear fieldBindings document on mongodb
-            fieldBindingMngService.deleteAll();
-
-            // clear methods document on mongodb
-            methodMngService.deleteAll();
-
-            // clear operators document on mongodb
-            operatorMngService.deleteAll();
-
-            // update all connections' version to the current version
-            connectionRepository.updateVersion(ocProps.getVersion());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 
