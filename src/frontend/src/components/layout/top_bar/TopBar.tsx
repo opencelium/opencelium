@@ -27,8 +27,6 @@ import AvatarDefault from "@image/application/avatar_default.png";
 import {Application} from "@application/classes/Application";
 import Text from "@app_component/base/text/Text";
 import {TextSize} from "@app_component/base/text/interfaces";
-import InputText from "@app_component/base/input/text/InputText";
-import {setSearchValue} from "@application/redux_toolkit/slices/ApplicationSlice";
 import {useAppDispatch} from "@application/utils/store";
 
 const TopBar: FC<TopBarProps> =
@@ -38,8 +36,9 @@ const TopBar: FC<TopBarProps> =
         const dispatch = useAppDispatch();
         const {authUser} = Auth.getReduxState();
         const {
-            onlineServiceStatus, entityHeader, isMenuExpanded,
-            searchValue, hasSearch} = Application.getReduxState();
+            onlineServiceStatus, entityHeader,
+            isMenuExpanded,
+        } = Application.getReduxState();
         const navigate = useNavigate();
         const isOnline = onlineServiceStatus?.active || false;
         const MyProfile = isOnline ?
@@ -63,7 +62,7 @@ const TopBar: FC<TopBarProps> =
                 onClick={() => navigate('/profile', {replace: false})}
             />;
         return (
-            <TopBarStyled style={{transition: '0.5s', display: 'flex', justifyContent: 'space-between', paddingLeft: `calc(${isMenuExpanded ? '244px' : '80px'} + 1rem)`, paddingRight: '1rem'}}>
+            <TopBarStyled style={{transition: '0.5s', display: 'flex', justifyContent: 'space-between', paddingLeft: `calc(${isMenuExpanded ? '212px' : '48px'} + 1rem)`, paddingRight: '1rem'}}>
                 <div style={{
                     fontFamily: `${theme.text.fontFamily}`,
                     color: `${theme.collectionView.title.color.quite}`,
@@ -72,17 +71,7 @@ const TopBar: FC<TopBarProps> =
                     {entityHeader ? <Text value={entityHeader}  size={TextSize.Size_24}/> : null }
                 </div>
                 <div style={{display: 'flex', gap: '10px', alignItems: 'center', justifyContent: 'center'}}>
-                    {hasSearch ? <InputText
-                        marginLeft={'0'}
-                        autoFocus
-                        inputHeight={'35px'}
-                        value={searchValue}
-                        onChange={(e) => dispatch(setSearchValue(e.target.value))}
-                        minHeight={'1'}
-                        width={'200px'}
-                        placeholder={'Search field'}
-                    /> : <GlobalSearch/>
-                    }
+                    <GlobalSearch/>
                     <NotificationItem/>
                     <Tooltip target={'my_profile'} tooltip={'My Profile'} position={'bottom'} component={MyProfile}/>
                 </div>

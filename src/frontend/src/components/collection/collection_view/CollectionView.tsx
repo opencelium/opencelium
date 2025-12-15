@@ -24,8 +24,8 @@ import { API_REQUEST_STATE } from '@application/interfaces/IApplication';
 import {
 	setCurrentPages, setEntityHeader,
 	setGridViewType as setGridViewTypeGlobally,
-	setSearchFields, setSearchValue,
-	setViewType as setViewTypeGlobally, toggleSearch,
+	setSearchFields,
+	setViewType as setViewTypeGlobally,
 } from '@application/redux_toolkit/slices/ApplicationSlice';
 import { useAppDispatch } from '@application/utils/store';
 import { debounce } from '@application/utils/utils';
@@ -75,8 +75,6 @@ const CollectionView: FC<CollectionViewProps> = ({
 		viewType,
 		gridViewType,
 		entityHeader,
-		searchValue,
-		hasSearch,
 	} = Application.getReduxState();
 	const searchValuePropertyName = collection?.name || '';
 	const [isRefreshing, setIsRefreshing] = useState(false);
@@ -85,6 +83,9 @@ const CollectionView: FC<CollectionViewProps> = ({
 	const [checks, setChecks] = useState<any>({});
 	const [entitiesPerPage, setEntitiesPerPage] = useState(
 		LIST_VIEW_ENTITIES_NUMBER
+	);
+	const [searchValue, setSearchValue] = useState<string>(
+		searchValuePropertyName ? searchFields[searchValuePropertyName] || '' : ''
 	);
 	const getInitialPage = () => {
 		if (paginationProps?.page != null) {
@@ -115,19 +116,6 @@ const CollectionView: FC<CollectionViewProps> = ({
 	if (defaultViewType !== '') {
 		applicationViewType = defaultViewType;
 	}
-	useEffect(() => {
-		dispatch(setSearchValue(searchValuePropertyName ? searchFields[searchValuePropertyName] || '' : ''));
-		return () => {
-			dispatch(toggleSearch(false));
-		}
-	}, []);
-
-	useEffect(() => {
-		const hasSearchValue = collection.hasSearch && collection.entities.length > 0;
-		if (hasSearch !== hasSearchValue) {
-			dispatch(toggleSearch(hasSearchValue));
-		}
-	}, [collection.hasSearch, collection.entities]);
 	useEffect(() => {
 		if (entityHeader !== collection.title) {
 			dispatch(setEntityHeader(collection.title.toString()));
@@ -276,6 +264,7 @@ const CollectionView: FC<CollectionViewProps> = ({
 			checkedIds.push(id);
 		}
 	}
+	const hasSearch = collection.hasSearch && collection.entities.length > 0;
 	if (hasError) {
 		return <BadRequest />;
 	}
@@ -299,6 +288,18 @@ const CollectionView: FC<CollectionViewProps> = ({
 								/>
 							)}
 						</ActionsStyled>
+						{hasSearch && (
+							<InputText
+								marginLeft={'0'}
+								autoFocus
+								inputHeight={'35px'}
+								value={searchValue}
+								onChange={(e) => search(e.target.value)}
+								minHeight={'1'}
+								width={'200px'}
+								placeholder={'Search field'}
+							/>
+						)}
 						{collection.AfterSearchComponents}
 					</TopSectionStyled>
 				)}

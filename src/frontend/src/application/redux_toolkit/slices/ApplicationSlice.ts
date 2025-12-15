@@ -69,7 +69,6 @@ export interface AuthState extends ICommonState{
     onlineServiceStatus: OnlineServiceStatus,
     entityHeader: string,
     isMenuExpanded: boolean,
-    hasSearch: boolean,
 }
 
 
@@ -121,7 +120,6 @@ const initialState: AuthState = {
     onlineServiceStatus: null,
     entityHeader: '',
     isMenuExpanded: false,
-    hasSearch: false,
     ...CommonState,
 }
 
@@ -129,12 +127,6 @@ export const applicationSlice = createSlice({
     name: 'application',
     initialState,
     reducers: {
-        toggleSearch: (state, action: PayloadAction<boolean>) => {
-            state.hasSearch = action.payload;
-        },
-        setSearchValue: (state, action: PayloadAction<string>) => {
-            state.searchValue = action.payload;
-        },
         setEntityHeader: (state, action: PayloadAction<string>) => {
             state.entityHeader = action.payload;
         },
@@ -319,7 +311,7 @@ export const {
     setComponentInChangeContent, setConnectionDraftToOpenOnce,setGridViewType,
     setViewType, setFullScreen, setThemes, setLogoDataStatus,
     setSearchFields, clearSearchFields, clearCurrentPages, setCurrentPages,
-    setEntityHeader, toggleMenu, setSearchValue, toggleSearch,
+    setEntityHeader, toggleMenu, 
 } = applicationSlice.actions;
 
 export const actions = {
