@@ -41,6 +41,10 @@ public class Loop {
         } else if (expression.startsWith(FOR.getName())) {
             result.setOperator(FOR);
         } else {
+            if (ref == null) {
+                throw new RuntimeException("Current expression=(%s) is not supported for SPLIT_STRING".formatted(expression));
+            }
+
             result.setOperator(SPLIT_STRING);
 
             String delimiter = expression.replace(ref, "")
