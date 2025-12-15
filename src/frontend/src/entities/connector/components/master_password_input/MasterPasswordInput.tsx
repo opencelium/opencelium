@@ -20,11 +20,11 @@ const MasterPasswordInput = ({onSuccess}: MasterPasswordProps) => {
     const {checkingMasterPassword, error: reduxError, existingMasterPassword, existMasterPasswordResponse} = Connector.getReduxState();
     const [startSending, setStartSending] = useState<boolean>(false);
     const [password, setPassword] = useState<string>('');
-    const [error, setError] = useState<string>('');
+    const [error, setError] = useState<string | any>('');
     const [showPrompt, togglePrompt] = useState<boolean>(false);
     const send = () => {
         if (!isAscii(password)) {
-            setError("Password contains non-ASCII characters!");
+            setError(<span>{`Password contains `}<a href={'https://terpconnect.umd.edu/~zben/Web/CharSet/htmlchars.html'} target={'_blank'}>non-ASCII</a> {` characters!`}</span>);
             return;
         }
         dispatch(checkMasterPassword(password));
