@@ -217,6 +217,11 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         }
     }
 
+    @Override
+    public long deleteByConnectionIdIn(List<Long> chunk) {
+        return connectionMngRepository.deleteByConnectionIdIn(chunk);
+    }
+
     private void updateWithoutRollback(ConnectionMng old, ConnectionMng connectionMng) {
         if (connectionMng.getFromConnector() != null) {
             if (connectionMng.getFromConnector().getMethods() != null) {
