@@ -36,7 +36,7 @@ const OperatorTraceExpander = ({theme, trace, loading, handleToggle, expanded, f
     const isIf = trace.type === 'IF';
     const isLoop = trace.type === 'LOOP';
     const hasError = !!trace.error || trace.hasError || currentLogError.parentsPath.indexOf(trace.id) !== -1 || currentLogError.log?.id === trace.id;
-    const isDisabledToggle = loading || !trace.isCompleted || isLoop && (trace.properties as LoopOperatorProperty).size === 0 || isIf && (trace.segment as DetailedIfOperatorSegment).result !== 'true';
+    const isDisabledToggle = loading || !trace.isCompleted || isLoop && (trace.properties as LoopOperatorProperty).size === 0 || isIf && (trace.segment as DetailedIfOperatorSegment).result !== 'true' && !hasError;
     const loopOperatorProperty = trace.properties as LoopOperatorProperty;
     const size = loopOperatorProperty.size;
     const iterator = loopOperatorProperty.iterator;
