@@ -85,6 +85,9 @@ public class Connection {
     @Column(name = "oc_version")
     private String ocVersion;
 
+    @Version
+    private Integer revision;
+
     public Connection() {
     }
 
@@ -228,5 +231,13 @@ public class Connection {
 
     public void setSnapshotId(String snapshotId) {
         this.snapshotId = snapshotId;
+    }
+
+    public Integer getRevision() {
+        return revision;
+    }
+
+    public void setRevision(Integer revision) {
+        this.revision = revision;
     }
 }

@@ -201,6 +201,7 @@ public class ConnectionServiceImp implements ConnectionService {
 
         connection.setOcVersion(ocProps.getVersion());
         connection.setSnapshotId(savedMng.getId());
+        connection.setRevision(sCon.getRevision());
         connectionRepository.save(connection);
     }
 
