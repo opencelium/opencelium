@@ -52,7 +52,6 @@ public class Connection47MngUpdater implements ConnectionMngUpdater {
 
     private Wrapper<ConnectionMng> updateFromGreaterThan4_6(ConnectionMng connection, String oldVersion) {
         connection.setVersion(currentVersion.getVersion());
-        connection.setConnectionId(null);
 
         moveMethods(connection);
 

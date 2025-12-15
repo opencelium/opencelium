@@ -7,7 +7,6 @@ import java.util.List;
 public interface ConnectionMngService {
     ConnectionMng save(ConnectionMng connectionMng);
     ConnectionMng create(ConnectionMng connectionMng);
-    ConnectionMng saveDirectly(ConnectionMng connectionMng);
     List<ConnectionMng> getAll();
     ConnectionMng delete(String id);
 
@@ -16,5 +15,5 @@ public interface ConnectionMngService {
     long count();
     ConnectionMng getById(String id);
 
-    ConnectionMng getConnectionId(Long id);
+    List<ConnectionMng> getAllByConnectionId(Long id);
 }

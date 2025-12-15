@@ -33,6 +33,7 @@ import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
+import com.becon.opencelium.backend.resource.connection.ConnectionVersionedDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
 import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
@@ -159,6 +160,9 @@ public class ConnectionServiceImp implements ConnectionService {
         connection.setSnapshotId(savedMng.getId());
         Connection savedConnection = connectionRepository.save(connection);
 
+        savedMng.setConnectionId(savedConnection.getId());
+        connectionMngService.save(savedMng);
+
         connectionHistoryService.makeHistoryAndSave(savedConnection, null, Action.CREATE);
         return savedConnection.getId();
     }
@@ -192,6 +196,7 @@ public class ConnectionServiceImp implements ConnectionService {
         }
 
         connectionMng.setId(null);
+        connectionMng.setConnectionId(connection.getId());
         ConnectionMng savedMng = connectionMngService.create(connectionMng);
 
         connection.setOcVersion(ocProps.getVersion());
@@ -206,7 +211,7 @@ public class ConnectionServiceImp implements ConnectionService {
         Connection saved = connectionRepository.save(connection);
         ConnectionMng connectionMng = new ConnectionMng();
         connectionMng.setVersion(ocProps.getVersion());
-        connectionMngService.saveDirectly(connectionMng);
+        connectionMngService.save(connectionMng);
         connectionHistoryService.makeHistoryAndSave(saved, null, Action.CREATE);
         return saved.getId();
     }
@@ -333,7 +338,15 @@ public class ConnectionServiceImp implements ConnectionService {
     @Override
     public ConnectionDTO getFullConnection(Long connectionId) {
         Connection connection = getById(connectionId);
-        ConnectionMng connectionMng = connectionMngService.getById(connection.getSnapshotId());
+        return getFullConnection(connection, connection.getSnapshotId());
+    }
+
+    private ConnectionDTO getFullConnection(Connection connection, String snapshotId) {
+        ConnectionMng connectionMng = connectionMngService.getById(snapshotId);
+
+        if (!Objects.equals(connectionMng.getConnectionId(), connection.getId())) {
+            throw new RuntimeException("CONNECTION_NOT_FOUND");
+        }
 
         ConnectionDTO connectionDTOMng = connectionMngMapper.toDTO(connectionMng);
         ConnectionDTO connectionDTO = connectionMapper.toDTO(connection);
@@ -364,6 +377,12 @@ public class ConnectionServiceImp implements ConnectionService {
         }
         fieldBindingMngService.detach(connectionDTOMng);
         return connectionDTOMng;
+    }
+
+    @Override
+    public ConnectionDTO getFullConnection(Long connectionId, String snapshotId) {
+        Connection connection = getById(connectionId);
+        return getFullConnection(connection, snapshotId);
     }
 
     @Override
@@ -487,18 +506,19 @@ public class ConnectionServiceImp implements ConnectionService {
                 }
                 // UPDATE CONNECTION_MNG
                 ConnectionMng connectionMng;
-                try {
-                    connectionMng = connectionMngService.getConnectionId(connection.getId());
-                } catch (Exception e) {
+                List<ConnectionMng> connections = connectionMngService.getAllByConnectionId(connection.getId());
+                if (connections.size() != 1) {
                     log.error("Failed to find Connection[id={}, name={}] on MongoDB with id {}. Skipped updating", connection.getId(), connection.getTitle(), connection.getId());
                     continue;
+                } else {
+                    connectionMng = connections.get(0);
                 }
 
                 try {
                     connectionMngEntityUpdater.updateToCurrentVersion(connectionMng)
                             .ifChangedOrElseIfUpdated(
                                     connectionMngService::updateWithoutBinding, // if any field is updated
-                                    connectionMngService::saveDirectly // only version is set to the current version
+                                    connectionMngService::save // only version is set to the current version
                             );
                 } catch (Exception e) {
                     log.error("Failed to update Connection[id={}, name={}]", connection.getId(), connection.getTitle(), e);
@@ -542,6 +562,22 @@ public class ConnectionServiceImp implements ConnectionService {
         return connectionRepository.findAllById(ids.getIdentifiers());
     }
 
+    @Override
+    public List<ConnectionVersionedDTO> getConnectionVersions(Long connectionId) {
+        Connection connection = getById(connectionId);
+        List<ConnectionMng> connections = connectionMngService.getAllByConnectionId(connectionId);
+
+        return connections.stream()
+                .map(x -> {
+                    ConnectionVersionedDTO versionedDTO = new ConnectionVersionedDTO();
+                    versionedDTO.setConnectionId(connection.getId());
+                    versionedDTO.setTitle(connection.getTitle());
+                    versionedDTO.setSnapshotId(x.getId());
+                    versionedDTO.setCreatedAt(x.getCreatedAt().toString());
+                    return versionedDTO;
+                }).toList();
+    }
+
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
     // private methods
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -578,7 +614,7 @@ public class ConnectionServiceImp implements ConnectionService {
         connectionRepository.save(connection);
 
         ConnectionMng connectionMng = connectionMngMapper.toEntity(patched);
-        connectionMngService.saveDirectly(connectionMng);
+        connectionMngService.save(connectionMng);
         return patched;
     }
 

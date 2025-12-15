@@ -37,10 +37,7 @@ import com.becon.opencelium.backend.resource.ApiDataResource;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.application.ResultDTO;
-import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
-import com.becon.opencelium.backend.resource.connection.ConnectionResource;
-import com.becon.opencelium.backend.resource.connection.MethodDTO;
-import com.becon.opencelium.backend.resource.connection.OperatorDTO;
+import com.becon.opencelium.backend.resource.connection.*;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
 import com.becon.opencelium.backend.resource.connection.old.ConnectionOldDTO;
@@ -51,6 +48,8 @@ import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.utility.LogFileUtility;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.fge.jsonpatch.JsonPatch;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -261,6 +260,41 @@ public class ConnectionController {
     @GetMapping(path = "/{connectionId}")
     public ResponseEntity<?> get(@PathVariable Long connectionId) {
         ConnectionDTO connectionDTO = connectionService.getFullConnection(connectionId);
+        return ResponseEntity.ok(connectionOldDTOMapper.toDTO(connectionDTO));
+    }
+
+    @Operation(summary = "Retrieves all connections versions by provided connection ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Connection versions has been successfully retrieved",
+                    content = @Content(schema = @Schema(implementation = ConnectionOldDTO.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/{connectionId}/versions")
+    public ResponseEntity<List<ConnectionVersionedDTO>> getConnectionVersions(@PathVariable Long connectionId){
+        return ResponseEntity.ok(connectionService.getConnectionVersions(connectionId));
+    }
+
+    @Operation(summary = "Retrieves a connection by provided connection ID and snapshotId")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Connection has been successfully retrieved",
+                    content = @Content(schema = @Schema(implementation = ConnectionOldDTO.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/{connectionId}/version/{snapshotId}")
+    public ResponseEntity<ConnectionOldDTO> getConnectionByVersion(@PathVariable Long connectionId, @PathVariable String snapshotId){
+        ConnectionDTO connectionDTO = connectionService.getFullConnection(connectionId, snapshotId);
         return ResponseEntity.ok(connectionOldDTOMapper.toDTO(connectionDTO));
     }
 
@@ -670,6 +704,8 @@ public class ConnectionController {
         Connection connection = connectionService.getById(connectionId);
         ConnectionMng connectionMng = connectionMngService.getById(connection.getSnapshotId());
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         try {
             // Convert the Java object to a JSON string
             String json = objectMapper.writeValueAsString(connectionMng);

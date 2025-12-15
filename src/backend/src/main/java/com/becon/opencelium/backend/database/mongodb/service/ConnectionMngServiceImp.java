@@ -6,7 +6,6 @@ import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
 import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
 import com.becon.opencelium.backend.database.mongodb.entity.OperatorMng;
 import com.becon.opencelium.backend.database.mongodb.repository.ConnectionMngRepository;
-import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -52,13 +51,6 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     }
 
     @Override
-    public ConnectionMng saveDirectly(ConnectionMng connectionMng) {
-        if (Objects.isNull(connectionMng)) return null;
-
-        return connectionMngRepository.save(connectionMng);
-    }
-
-    @Override
     public List<ConnectionMng> getAll() {
         return connectionMngRepository.findAll();
     }
@@ -93,9 +85,8 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     }
 
     @Override
-    public ConnectionMng getConnectionId(Long id) {
-        return connectionMngRepository.findByConnectionId(id)
-                .orElseThrow(() -> new RuntimeException("CONNECTION_NOT_FOUND"));
+    public List<ConnectionMng> getAllByConnectionId(Long id) {
+        return connectionMngRepository.findAllByConnectionIdOrderByConnectionIdDesc(id);
     }
 
     private void populateWithIds(ConnectionMng connectionMng) {
