@@ -43,7 +43,7 @@ public class Loop {
         } else {
             result.setOperator(SPLIT_STRING);
 
-            String delimiter = expression.replace(ref, "")
+            String delimiter = expression.replace(ref, " ")
                     .replace(SPLIT_STRING.getName(), "")
                     .replace("'", "")
                     .trim();
