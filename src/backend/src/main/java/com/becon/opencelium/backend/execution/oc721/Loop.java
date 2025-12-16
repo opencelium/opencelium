@@ -47,7 +47,7 @@ public class Loop {
 
             result.setOperator(SPLIT_STRING);
 
-            String delimiter = expression.replace(ref, " ")
+            String delimiter = expression.replace(ref, "s")
                     .replace(SPLIT_STRING.getName(), "")
                     .replace("'", "")
                     .trim();
