@@ -21,7 +21,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.*;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -53,7 +53,7 @@ public class ConnectionMng {
     private Map<String, Object> ui;
 
     @CreatedDate
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     public ConnectionMng() {
     }
@@ -122,16 +122,16 @@ public class ConnectionMng {
         this.oldFieldBindings = oldFieldBindings;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public Instant getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
     }
 
     @PrePersist
     protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = Instant.now();
     }
 }

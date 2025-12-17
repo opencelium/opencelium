@@ -7,13 +7,13 @@ public class ConnectionVersionedDTO {
 
     private String snapshotId;
 
-    private String createdAt;
+    private Long createdAt;
 
-    public String getCreatedAt() {
+    public Long getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(String createdAt) {
+    public void setCreatedAt(Long createdAt) {
         this.createdAt = createdAt;
     }
 

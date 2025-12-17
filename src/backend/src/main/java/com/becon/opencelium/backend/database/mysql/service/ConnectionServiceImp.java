@@ -574,7 +574,7 @@ public class ConnectionServiceImp implements ConnectionService {
                     versionedDTO.setConnectionId(connection.getId());
                     versionedDTO.setTitle(connection.getTitle());
                     versionedDTO.setSnapshotId(x.getId());
-                    versionedDTO.setCreatedAt(x.getCreatedAt().toString());
+                    versionedDTO.setCreatedAt(x.getCreatedAt().toEpochMilli());
                     return versionedDTO;
                 }).toList();
     }
