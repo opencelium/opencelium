@@ -21,6 +21,7 @@ import com.becon.opencelium.backend.resource.execution.ConnectorEx;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.resource.execution.OperatorEx;
 import com.becon.opencelium.backend.resource.execution.ResponseDTO;
+import com.becon.opencelium.backend.utility.Comparators;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
@@ -81,7 +82,12 @@ public class ConnectorExecutor {
         if (Objects.nonNull(connectorEx.getOperators())) {
             this.executables.addAll(connectorEx.getOperators());
         }
-        this.executables.sort(getComparator());
+        this.executables.sort(
+                Comparator.comparing(
+                        ConnectorExecutor::extractIndex,
+                        Comparators.INDEX_PATH
+                )
+        );
 
         this.connector = Connector.fromEx(connectorEx);
 
@@ -113,7 +119,7 @@ public class ConnectorExecutor {
             logger.logAndSend(e);
             throw e;
         } finally {
-            while(!endPhases.isEmpty()) {
+            while (!endPhases.isEmpty()) {
                 logger.logAndSend(endPhases.pop());
             }
         }
@@ -126,7 +132,7 @@ public class ConnectorExecutor {
 
         // points to the end of the operator body
         int tail = getTailPointer(headPointer);
-        String index = getIndex(executables.get(headPointer));
+        String index = extractIndex(executables.get(headPointer));
 
         if (executables.get(headPointer) instanceof OperationDTO operation) {
             logger.getLogEntity().setMethodData(new MethodData(operation.getOperationId()));
@@ -153,7 +159,7 @@ public class ConnectorExecutor {
                             executionManager::getValue,
                             logger,
                             masking
-                        );
+                    );
 
                     logger.logAndSend("segment=IF_RESULT data=" + result);
                 } catch (RuntimeException e) {
@@ -326,10 +332,10 @@ public class ConnectorExecutor {
     }
 
     private int getTailPointer(int headPointer) {
-        String index = getIndex(executables.get(headPointer)) + "_";
+        String index = extractIndex(executables.get(headPointer)) + "_";
 
         for (headPointer++; headPointer < executables.size(); headPointer++) {
-            if (!getIndex(executables.get(headPointer)).startsWith(index)) {
+            if (!extractIndex(executables.get(headPointer)).startsWith(index)) {
                 break;
             }
         }
@@ -355,32 +361,13 @@ public class ConnectorExecutor {
         return String.format("loopIterator=\"%s\" loopIndex=\"%s\"", loopIterator, loopIndex);
     }
 
-    private static Comparator<Object> getComparator() {
-        return (o1, o2) -> {
-            String[] arr1 = getIndex(o1).split("_");
-            String[] arr2 = getIndex(o2).split("_");
-
-            for (int i = 0; i < arr1.length && i < arr2.length; i++) {
-                // skip equal elements until there is a difference found
-                if (Objects.equals(arr1[i], arr2[i])) continue;
-
-                // if there is an unequal elements then return their difference
-                return Integer.parseInt(arr1[i]) - Integer.parseInt(arr2[i]);
-            }
-
-            // at this point one array contains the other one
-            // so array with greater length is greater
-            return arr1.length - arr2.length;
-        };
-    }
-
-    private static String getIndex(Object o) {
-        if (o instanceof OperationDTO) {
-            return ((OperationDTO) o).getExecOrder();
-        } else if (o instanceof OperatorEx) {
-            return ((OperatorEx) o).getIndex();
-        } else {
-            throw new RuntimeException("getIndex() is only applicable to OperationDTO and OperatorEX");
+    private static String extractIndex(Object o) {
+        if (o instanceof OperationDTO operation) {
+            return operation.getExecOrder();
+        } else if (o instanceof OperatorEx operator) {
+            return operator.getIndex();
         }
+
+        throw new IllegalArgumentException("Unsupported executable type: " + o.getClass());
     }
 }
