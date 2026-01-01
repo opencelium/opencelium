@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.reference;
+package com.becon.opencelium.backend.reference.model;
 
 public enum ReferenceType {
     DIRECT,
