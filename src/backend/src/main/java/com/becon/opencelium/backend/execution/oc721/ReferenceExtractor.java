@@ -1,12 +1,16 @@
 package com.becon.opencelium.backend.execution.oc721;
 
 import com.becon.opencelium.backend.constant.RegExpression;
-import com.becon.opencelium.backend.enums.PageParam;
 import com.becon.opencelium.backend.enums.execution.DataType;
 import com.becon.opencelium.backend.execution.ExecutionManager;
+import com.becon.opencelium.backend.reference.ReferenceParser;
+import com.becon.opencelium.backend.reference.model.EnhancementReference;
+import com.becon.opencelium.backend.reference.model.PageReference;
+import com.becon.opencelium.backend.reference.model.Reference;
+import com.becon.opencelium.backend.reference.model.RequestDataReference;
 import com.becon.opencelium.backend.resource.execution.ResponseEx;
-import com.becon.opencelium.backend.utility.ReferenceUtility;
 import com.becon.opencelium.backend.utility.MediaTypeUtility;
+import com.becon.opencelium.backend.utility.ReferenceUtility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
@@ -35,13 +39,7 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
-import static com.becon.opencelium.backend.constant.RegExpression.directRef;
-import static com.becon.opencelium.backend.constant.RegExpression.enhancement;
-import static com.becon.opencelium.backend.constant.RegExpression.pageRef;
-import static com.becon.opencelium.backend.constant.RegExpression.requestData;
 import static com.becon.opencelium.backend.constant.RegExpression.webhook;
-import static com.becon.opencelium.backend.constant.RegExpression.wrappedDirectRef;
 import static com.becon.opencelium.backend.enums.execution.DataType.UNDEFINED;
 import static com.becon.opencelium.backend.utility.ReferenceUtility.ARRAY_LETTER_INDEX;
 import static com.becon.opencelium.backend.utility.ReferenceUtility.IS_FOR_IN_KEY_TYPE;
@@ -57,70 +55,48 @@ public class ReferenceExtractor implements Extractor {
 
     @Override
     public Object extractValue(String ref) {
-        Object result = null;
+        if (ref == null) {
+            return null;
+        }
 
         try {
-            if (ref.matches(directRef) || ref.matches(wrappedDirectRef)) {
-                // remove wrapper if necessary = {%ref%}
-                // CASE 1: collect all data from Operation:
-                //'#ababab.(response).[*]'
-                //'#ababab.(response).[*].status'
-                //'#ababab.(response).[*].header'
-                //'#ababab.(response).[*].body'
-
-                // CASE 2: return 'status' code of Operation
-                //'#ababab.(response).status',
-
-                // CASE 3: return 'header' of Operation
-                //'#ababab.(response).header.$.Content-Type',
-                //'#ababab.(request).header.$.Content-Type',
-
-                // CASE 4: return targeted field of 'HttpEntity.body'
-                //'#ababab.(response).body.$.field[*]',
-                //'{%#ababab.(request).body.$.field[*]%}',
-                //'#ababab.(response).body.$.field1.['field2_with_special_symbol'].field3',
-                //'#ababab.(response).body.$.[*]',
-                //'#ababab.(request).body.$.[*]',
-
-                ref = ReferenceUtility.extractDirectRef(ref);
-
-                result = extractFromOperation(ref);
-            } else if (ref.matches(enhancement)) {
-                // '#{%bindId%}'
-                String bindId = ref.replace("#{%", "").replace("%}", "");
-
-                result = executionManager.executeScript(bindId);
-            } else if (ref.matches(webhook)) {
-                // '${key}'
-                // '${key:type}'
-                // '${key.field[*]}'
-                // '${key.field[*]:type}'
-                result = extractFromWebhook(ref);
-            } else if (ref.matches(pageRef)) {
-                // '@{limit}'
-                // '@{size}'
-                String param = ref.replace("@{", "").replace("}", "");
-
-                result = executionManager.getPaginationParamValue(PageParam.fromString(param));
-            } else if (ref.matches(requestData)) {
-                // '{key}'
-                // '{#ctorId.key}'
-                String refValue = ref.replace("{", "").replace("}", "");
-
-                // set id of required connector if exists
-                Integer ctorId = null;
-                if (refValue.startsWith("#")) {
-                    ctorId = Integer.valueOf(refValue.substring(1, refValue.indexOf(".")));
-                    refValue = refValue.substring(refValue.indexOf(".") + 1);
-                }
-
-                result = executionManager.getRequestData(ctorId).getOrDefault(refValue, ref);
-            }
-            return result;
-
+            return doExtract(ref);
         } catch (Exception e) {
-            throw new RuntimeException("Error while extracting value from Reference = %s. %s".formatted(ref, e.getMessage()), e);
+            throw new RuntimeException("Failed to resolve reference = %s. Reason = %s".formatted(ref, e.getMessage()), e);
         }
+    }
+
+    /**
+     * Parser 'ref' to a Reference object and resolves its value.
+     * At this point 'ref' is guaranteed to be a reference.
+     */
+    private Object doExtract(String ref) {
+        Reference reference = ReferenceParser.parse(ref);
+
+        return switch (reference.getType()) {
+            case DIRECT -> {
+                yield extractFromOperation(ref);
+            }
+            case WRAPPED_DIRECT -> {
+                ref = ReferenceUtility.extractDirectRef(ref);
+                yield extractFromOperation(ref);
+            }
+            case ENHANCEMENT -> {
+                EnhancementReference er = (EnhancementReference) reference;
+                yield executionManager.executeScript(er.getBindId());
+            }
+            case WEBHOOK -> {
+                yield extractFromWebhook(ref);
+            }
+            case PAGE -> {
+                PageReference pr = (PageReference) reference;
+                yield executionManager.getPaginationParamValue(pr.getParam());
+            }
+            case REQUEST_DATA -> {
+                RequestDataReference rdr = (RequestDataReference) reference;
+                yield executionManager.getRequestData(rdr.getCtorId()).getOrDefault(rdr.getKey(), rdr.getRaw());
+            }
+        };
     }
 
     private Object extractFromWebhook(String ref) {
