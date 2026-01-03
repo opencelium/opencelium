@@ -53,42 +53,36 @@ public class ReferenceExtractor implements Extractor {
     }
 
     @Override
-    public Object extractValue(String ref) {
-        if (ref == null) {
+    public Object extractValue(String rawReference) {
+        if (rawReference == null) {
             return null;
         }
 
         try {
-            return doExtract(ref);
+            return doExtract(rawReference);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to resolve reference = %s. Reason = %s".formatted(ref, e.getMessage()), e);
+            throw new RuntimeException("Failed to resolve reference = %s. Reason = %s".formatted(rawReference, e.getMessage()), e);
         }
     }
 
     /**
-     * Parser 'ref' to a Reference object and resolves its value.
-     * At this point 'ref' is guaranteed to be a reference.
+     * Parser 'rawReference' to a Reference object and resolves its value.
+     * At this point 'rawReference' is guaranteed to be a reference.
      */
-    private Object doExtract(String ref) {
-        Reference reference = ReferenceParser.parse(ref);
+    private Object doExtract(String rawReference) {
+        Reference reference = ReferenceParser.parse(rawReference);
 
         return switch (reference.getType()) {
             case DIRECT -> {
-                yield extractFromOperation(ref);
+                yield extractFromOperation(rawReference);
             }
             case WRAPPED_DIRECT -> {
-                ref = ReferenceUtility.extractDirectRef(ref);
-                yield extractFromOperation(ref);
+                rawReference = ReferenceUtility.extractDirectRef(rawReference);
+                yield extractFromOperation(rawReference);
             }
-            case ENHANCEMENT -> {
-                EnhancementReference er = (EnhancementReference) reference;
-                yield executionManager.executeScript(er.getBindId());
-            }
+            case ENHANCEMENT -> executionManager.executeScript(((EnhancementReference) reference).getBindId());
             case WEBHOOK -> extractFromWebhook((WebhookReference) reference);
-            case PAGE -> {
-                PageReference pr = (PageReference) reference;
-                yield executionManager.getPaginationParamValue(pr.getPageParam());
-            }
+            case PAGE -> executionManager.getPaginationParamValue(((PageReference) reference).getPageParam());
             case REQUEST_DATA -> {
                 RequestDataReference rdr = (RequestDataReference) reference;
                 yield executionManager.getRequestData(rdr.getCtorId()).getOrDefault(rdr.getKey(), rdr.getRaw());

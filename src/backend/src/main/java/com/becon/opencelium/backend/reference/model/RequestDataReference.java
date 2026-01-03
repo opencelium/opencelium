@@ -7,11 +7,12 @@ import java.util.Objects;
  *
  * <p>Syntax:
  * <pre>{@code
- * {<key>}
- * {#<ctorId>.<key>}
+ * {key}
+ * {#ctorId.key}
  * }</pre>
  *
- * <p>The {@code <ctorId>} is optional and refers to a specific connector, if it is not specified then we take current connector id.
+ * <p>The {@code ctorId} is optional and refers to a specific connector.
+ * If it is not specified, the current connector id is used.
  *
  * <p>Examples:
  * <pre>{@code
@@ -48,54 +49,64 @@ public final class RequestDataReference implements Reference {
         return key;
     }
 
-    public static RequestDataReference parse(String s) {
-        Objects.requireNonNull(s, "Request data reference is null");
-        validate(s);
+    /**
+     * Parses a raw request data reference string into a {@link RequestDataReference}.
+     *
+     * <p>Expected syntax:
+     * <pre>{@code
+     * {key}
+     * {#ctorId.key}
+     * }</pre>
+     *
+     * @param rawReference raw request data reference
+     * @return parsed {@link RequestDataReference}
+     * @throws NullPointerException     if {@code rawReference} is {@code null}
+     * @throws IllegalArgumentException if syntax is invalid, ctorId is malformed,
+     *                                  or the key is empty
+     */
+    public static RequestDataReference parse(String rawReference) {
+        Objects.requireNonNull(rawReference, "Request data reference is null");
+        validate(rawReference);
 
-        // remove wrapper: {}
-        String content = s.substring(1, s.length() - 1);
+        String content = rawReference.substring(1, rawReference.length() - 1);
 
         Integer ctorId = null;
         String key;
 
         if (content.startsWith("#")) {
-            int dot = content.indexOf('.');
-            String idPart = content.substring(1, dot);
+            int dotIndex = content.indexOf('.');
+
+            String idPart = content.substring(1, dotIndex);
             ctorId = Integer.valueOf(idPart);
-            key = content.substring(dot + 1);
+
+            key = content.substring(dotIndex + 1);
         } else {
             key = content;
         }
 
-        return new RequestDataReference(s, ctorId, key);
+        return new RequestDataReference(rawReference, ctorId, key);
     }
 
-    private static void validate(String s) {
-        if (!s.startsWith("{") || !s.endsWith("}")) {
-            throw new IllegalArgumentException("Invalid request data reference: " + s);
+    private static void validate(String rawReference) {
+        if (!rawReference.startsWith("{") || !rawReference.endsWith("}")) {
+            throw new IllegalArgumentException("Invalid request data reference: " + rawReference);
         }
 
-        // exclude {%...%}
-        if (s.startsWith("{%") && s.endsWith("%}")) {
-            throw new IllegalArgumentException("Invalid request data reference: " + s);
+        if (rawReference.length() <= 2) {
+            throw new IllegalArgumentException("Empty request data reference: " + rawReference);
         }
 
-        if (s.length() <= 2) {
-            throw new IllegalArgumentException("Empty request data reference: " + s);
-        }
-
-        String content = s.substring(1, s.length() - 1);
+        String content = rawReference.substring(1, rawReference.length() - 1);
 
         if (content.startsWith("#")) {
             int dot = content.indexOf('.');
             if (dot <= 1 || dot == content.length() - 1) {
-                throw new IllegalArgumentException("Invalid request data reference: " + s);
+                throw new IllegalArgumentException("Invalid request data reference: " + rawReference);
             }
 
-            // validate ctorId
             for (int i = 1; i < dot; i++) {
                 if (!Character.isDigit(content.charAt(i))) {
-                    throw new IllegalArgumentException("Invalid ctorId in request data reference: " + s);
+                    throw new IllegalArgumentException("Invalid ctorId in request data reference: " + rawReference);
                 }
             }
         }
