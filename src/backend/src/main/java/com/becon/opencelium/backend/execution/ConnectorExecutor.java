@@ -85,7 +85,7 @@ public class ConnectorExecutor {
         this.executables.sort(
                 Comparator.comparing(
                         ConnectorExecutor::extractIndex,
-                        Comparators.INDEX_PATH
+                        Comparators.NUMERIC_PARTS
                 )
         );
 

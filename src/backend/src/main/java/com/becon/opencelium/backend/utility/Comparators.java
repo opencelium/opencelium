@@ -7,40 +7,49 @@ public final class Comparators {
     private Comparators() {
     }
 
-    /**
-     * Compares hierarchical numeric index paths: i_j_k_... (i, j, k are non-negative integers)
-     * Example: 1_2_10 > 1_2_3
-     */
-    public static final Comparator<String> INDEX_PATH = Comparators::compareIndexPath;
+    public static final Comparator<String> NUMERIC_PARTS = Comparators::compareNumericParts;
 
-    public static int compareIndexPath(String idx1, String idx2) {
-        int len1 = idx1.length();
-        int len2 = idx2.length();
+
+    /**
+     * Compares two strings by interpreting them as hierarchical sequences of
+     * non-negative integers. Integer components are parsed in order and compared
+     * lexicographically. Any non-digit characters are treated as separators.
+     *
+     * <p>Examples:
+     * <pre>
+     * 1_2_10   > 1_2_3
+     * 1, 2, 10 > 1, 2, 3
+     * 1->2->3  > 1->2->1
+     * </pre>
+     */
+    private static int compareNumericParts(String s1, String s2) {
+        int len1 = s1.length(), len2 = s2.length();
         int pointer1 = 0, pointer2 = 0;
 
-        // move pointers to convert each levels index to a number
         while (pointer1 < len1 && pointer2 < len2) {
-            int v1 = 0;
-            int v2 = 0;
+            // skip level separator characters (non-digits):
+            // '_' (underscore for indexPath),
+            // ", " (comma and space for loopIndex)
+            while (pointer1 < len1 && !Character.isDigit(s1.charAt(pointer1))) pointer1++;
+            while (pointer2 < len2 && !Character.isDigit(s2.charAt(pointer2))) pointer2++;
 
-            while (pointer1 < len1 && idx1.charAt(pointer1) != '_') {
-                v1 = v1 * 10 + (idx1.charAt(pointer1++) - '0');
+            if (pointer1 >= len1 || pointer2 >= len2) break;
+
+            int v1 = 0, v2 = 0;
+
+            while (pointer1 < len1 && Character.isDigit(s1.charAt(pointer1))) {
+                v1 = v1 * 10 + (s1.charAt(pointer1++) - '0');
             }
 
-            while (pointer2 < len2 && idx2.charAt(pointer2) != '_') {
-                v2 = v2 * 10 + (idx2.charAt(pointer2++) - '0');
+            while (pointer2 < len2 && Character.isDigit(s2.charAt(pointer2))) {
+                v2 = v2 * 10 + (s2.charAt(pointer2++) - '0');
             }
 
             if (v1 != v2) {
                 return Integer.compare(v1, v2);
             }
-
-            // skip level separator character '_'
-            pointer1++;
-            pointer2++;
         }
 
-        // if both are the same chart then longer one should be larger
         return Integer.compare(len1, len2);
     }
 }
