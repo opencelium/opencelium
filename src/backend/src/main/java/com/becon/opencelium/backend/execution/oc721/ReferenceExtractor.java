@@ -41,6 +41,7 @@ import java.util.regex.Pattern;
 
 import static com.becon.opencelium.backend.constant.RegExpression.webhook;
 import static com.becon.opencelium.backend.enums.execution.DataType.UNDEFINED;
+import static com.becon.opencelium.backend.utility.Comparators.NUMERIC_PARTS;
 import static com.becon.opencelium.backend.utility.ReferenceUtility.ARRAY_LETTER_INDEX;
 import static com.becon.opencelium.backend.utility.ReferenceUtility.IS_FOR_IN_KEY_TYPE;
 import static com.becon.opencelium.backend.utility.ReferenceUtility.IS_FOR_IN_VALUE_TYPE;
@@ -163,7 +164,7 @@ public class ReferenceExtractor implements Extractor {
         // so we can directly target '[*]' to check if 'ref' is in CASE 1:
         if ("[*]".equals(ref.substring(19, 22))) {
             if (ref.length() == 22) {
-                TreeMap<String, ResponseEx> responses = new TreeMap<>(getComparator());
+                TreeMap<String, ResponseEx> responses = new TreeMap<>(NUMERIC_PARTS);
                 operation.getResponses().forEach((K, V) -> responses.put(K, ResponseEx.of(V)));
 
                 return responses;
@@ -172,7 +173,7 @@ public class ReferenceExtractor implements Extractor {
             // collect only specified response part
             String part = ref.substring(23); // can be in ['header', 'status', 'body']
             if (part.equals("status")) {
-                TreeMap<String, Integer> statuses = new TreeMap<>(getComparator());
+                TreeMap<String, Integer> statuses = new TreeMap<>(NUMERIC_PARTS);
 
                 operation.getResponses().forEach((K, V) -> statuses.put(K, V.getStatusCode().value()));
 
@@ -180,7 +181,7 @@ public class ReferenceExtractor implements Extractor {
             }
 
             if (part.equals("header")) {
-                TreeMap<String, Map<String, List<String>>> headers = new TreeMap<>(getComparator());
+                TreeMap<String, Map<String, List<String>>> headers = new TreeMap<>(NUMERIC_PARTS);
 
                 operation.getResponses().forEach((K, V) -> headers.put(K, V.getHeaders()));
 
@@ -188,7 +189,7 @@ public class ReferenceExtractor implements Extractor {
             }
 
             if (part.equals("body")) {
-                TreeMap<String, Object> bodies = new TreeMap<>(getComparator());
+                TreeMap<String, Object> bodies = new TreeMap<>(NUMERIC_PARTS);
 
                 operation.getResponses().forEach((K, V) -> bodies.put(K, V.getBody()));
 
@@ -503,24 +504,5 @@ public class ReferenceExtractor implements Extractor {
         }
 
         return result;
-    }
-
-    private static Comparator<String> getComparator() {
-        return (String idx1, String idx2) -> {
-            String[] arr1 = idx1.split(", ");
-            String[] arr2 = idx2.split(", ");
-
-            for (int i = 0; i < arr1.length && i < arr2.length; i++) {
-                // skip equal elements until there is a difference found
-                if (Objects.equals(arr1[i], arr2[i])) continue;
-
-                // if there is an unequal elements then return their difference
-                return Integer.parseInt(arr1[i]) - Integer.parseInt(arr2[i]);
-            }
-
-            // at this point one array contains the other one
-            // so array with greater length is greater
-            return arr1.length - arr2.length;
-        };
     }
 }
