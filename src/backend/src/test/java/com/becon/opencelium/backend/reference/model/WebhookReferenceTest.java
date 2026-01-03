@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.reference.model;
 
 import com.becon.opencelium.backend.enums.execution.DataType;
+import com.becon.opencelium.backend.reference.enums.ReferenceType;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

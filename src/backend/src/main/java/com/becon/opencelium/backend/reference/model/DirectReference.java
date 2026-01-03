@@ -1,5 +1,8 @@
 package com.becon.opencelium.backend.reference.model;
 
+import com.becon.opencelium.backend.reference.enums.ExchangeType;
+import com.becon.opencelium.backend.reference.enums.ReferenceType;
+
 import java.util.Objects;
 
 /**
