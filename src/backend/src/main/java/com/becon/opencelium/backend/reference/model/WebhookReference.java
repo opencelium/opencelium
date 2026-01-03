@@ -12,7 +12,7 @@ import java.util.Objects;
  * ${path:dataType}
  * }</pre>
  *
- * <p>The inner expression contains json path, and optional data type of targeted element by this path.
+ * <p>The inner expression contains json {@code path}, and optional {@code dataType} - type of targeted element by this {@code path}.
  *
  * <p>Examples:
  * <pre>{@code
@@ -64,10 +64,9 @@ public final class WebhookReference implements Reference {
      *
      * @param rawReference the raw webhook reference (must start with "${" and end with "}")
      * @return parsed {@link WebhookReference} containing path and optional data type
-     *
-     * @throws NullPointerException if {@code rawReference} is {@code null}
+     * @throws NullPointerException     if {@code rawReference} is {@code null}
      * @throws IllegalArgumentException if the reference syntax is invalid,
-     *         the path is empty, or the data type is unknown
+     *                                  the path is empty, or the data type is unknown
      */
     public static WebhookReference parse(String rawReference) {
         Objects.requireNonNull(rawReference, "Webhook reference is null");

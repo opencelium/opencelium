@@ -7,7 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class WebhookReferenceTest {
-    // POSITIVE cases
+
+    // -------  POSITIVE cases  -------
+
     @Test
     void simplePathWithoutDataType() {
         WebhookReference ref = WebhookReference.parse("${key}");
@@ -36,7 +38,7 @@ class WebhookReferenceTest {
     }
 
 
-    // NEGATIVE cases
+    // -------  NEGATIVE cases  -------
     @Test
     void nullReferenceThrowsNullPointerException() {
         assertThrows(

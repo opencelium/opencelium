@@ -9,10 +9,10 @@ import java.util.Objects;
  *
  * <p>Syntax:
  * <pre>{@code
- * @{<param>}
+ * @{pageParam}
  * }</pre>
  *
- * <p>Where {@code <param>} is one of the supported pagination parameters
+ * <p>Where {@code pageParam} is one of the supported pagination parameters
  * defined in {@link PageParam}.
  *
  * <p>Examples:
@@ -21,13 +21,13 @@ import java.util.Objects;
  * @{size}
  * }</pre>
  */
-public class PageReference implements Reference {
+public final class PageReference implements Reference {
     private final String raw;
-    private final PageParam param;
+    private final PageParam pageParam;
 
-    private PageReference(String raw, PageParam param) {
+    private PageReference(String raw, PageParam pageParam) {
         this.raw = raw;
-        this.param = param;
+        this.pageParam = pageParam;
     }
 
     @Override
@@ -40,19 +40,32 @@ public class PageReference implements Reference {
         return raw;
     }
 
-    public PageParam getParam() {
-        return param;
+    public PageParam getPageParam() {
+        return pageParam;
     }
 
-    public static PageReference parse(String ref) {
-        Objects.requireNonNull(ref, "Page reference is null");
-        validate(ref);
+    /**
+     * Parses a raw pagination reference.
+     *
+     * <p>Expected syntax:
+     * <pre>{@code
+     * @{pageParam}
+     * }</pre>
+     *
+     * @param rawReference raw page reference (must start with "@{" and end with "}")
+     * @return parsed {@link PageReference}
+     * @throws NullPointerException     if {@code rawReference} is null
+     * @throws IllegalArgumentException if syntax is invalid or param is unknown
+     */
 
-        // remove wrapper: @{}
-        String paramString = ref.substring(2, ref.length() - 1);
-        PageParam param = PageParam.fromString(paramString);
+    public static PageReference parse(String rawReference) {
+        Objects.requireNonNull(rawReference, "Page reference is null");
+        validate(rawReference);
 
-        return new PageReference(ref, param);
+        String paramString = rawReference.substring(2, rawReference.length() - 1);
+        PageParam pageParam = PageParam.fromString(paramString);
+
+        return new PageReference(rawReference, pageParam);
     }
 
     private static void validate(String ref) {

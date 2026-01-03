@@ -87,7 +87,7 @@ public class ReferenceExtractor implements Extractor {
             case WEBHOOK -> extractFromWebhook((WebhookReference) reference);
             case PAGE -> {
                 PageReference pr = (PageReference) reference;
-                yield executionManager.getPaginationParamValue(pr.getParam());
+                yield executionManager.getPaginationParamValue(pr.getPageParam());
             }
             case REQUEST_DATA -> {
                 RequestDataReference rdr = (RequestDataReference) reference;
