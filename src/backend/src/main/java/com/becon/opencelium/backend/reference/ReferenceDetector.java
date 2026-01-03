@@ -1,6 +1,5 @@
 package com.becon.opencelium.backend.reference;
 
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.becon.opencelium.backend.constant.RegExpression.directRef;
@@ -11,14 +10,16 @@ import static com.becon.opencelium.backend.constant.RegExpression.webhook;
 import static com.becon.opencelium.backend.constant.RegExpression.wrappedDirectRef;
 
 public class ReferenceDetector {
+    private static final Pattern CONTAINS_PATTERN =
+            Pattern.compile(directRef + "|" + wrappedDirectRef + "|" +
+                    enhancement + "|" + webhook + "|" +
+                    pageRef + "|" + requestData);
+
     public static boolean containsReference(String expression) {
         if (expression == null) {
             return false;
         }
 
-        Pattern pattern = Pattern.compile(directRef + "|" + wrappedDirectRef + "|" + enhancement + "|" + webhook + "|" + pageRef + "|" + requestData);
-        Matcher matcher = pattern.matcher(expression);
-
-        return matcher.find();
+        return CONTAINS_PATTERN.matcher(expression).find();
     }
 }
