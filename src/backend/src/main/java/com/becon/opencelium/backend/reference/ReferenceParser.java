@@ -1,36 +1,29 @@
 package com.becon.opencelium.backend.reference;
 
-import com.becon.opencelium.backend.reference.model.DirectReference;
-import com.becon.opencelium.backend.reference.model.EnhancementReference;
-import com.becon.opencelium.backend.reference.model.PageReference;
-import com.becon.opencelium.backend.reference.model.Reference;
-import com.becon.opencelium.backend.reference.model.RequestDataReference;
-import com.becon.opencelium.backend.reference.model.WebhookReference;
-import com.becon.opencelium.backend.reference.model.WrappedDirectReference;
-
-import static com.becon.opencelium.backend.constant.RegExpression.directRef;
-import static com.becon.opencelium.backend.constant.RegExpression.enhancement;
-import static com.becon.opencelium.backend.constant.RegExpression.pageRef;
-import static com.becon.opencelium.backend.constant.RegExpression.requestData;
-import static com.becon.opencelium.backend.constant.RegExpression.webhook;
-import static com.becon.opencelium.backend.constant.RegExpression.wrappedDirectRef;
+import com.becon.opencelium.backend.reference.model.*;
 
 public class ReferenceParser {
+
     public static Reference parse(String ref) {
-        if (ref.matches(directRef)) {
+        if (ReferenceMatchers.isDirect(ref)) {
             return DirectReference.parse(ref);
-        } else if (ref.matches(wrappedDirectRef)) {
+        }
+        if (ReferenceMatchers.isWrappedDirect(ref)) {
             return WrappedDirectReference.parse(ref);
-        } else if (ref.matches(enhancement)) {
+        }
+        if (ReferenceMatchers.isEnhancement(ref)) {
             return EnhancementReference.parse(ref);
-        } else if (ref.matches(webhook)) {
+        }
+        if (ReferenceMatchers.isWebhook(ref)) {
             return WebhookReference.parse(ref);
-        } else if (ref.matches(pageRef)) {
+        }
+        if (ReferenceMatchers.isPage(ref)) {
             return PageReference.parse(ref);
-        } else if (ref.matches(requestData)) {
+        }
+        if (ReferenceMatchers.isRequestData(ref)) {
             return RequestDataReference.parse(ref);
         }
 
-        throw new RuntimeException();
+        throw new IllegalArgumentException("Unknown reference: " + ref);
     }
 }
