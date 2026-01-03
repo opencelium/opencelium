@@ -24,7 +24,7 @@ class ComparatorsTest {
     }
 
     @Test
-    void comparingNumerically_notLexicographically() {
+    void comparingNumericallyNotLexicographically() {
         // indexPath
         assertTrue(COMPARATOR.compare("1_2_10", "1_2_3") > 0);
         assertTrue(COMPARATOR.compare("1_2_3", "1_2_10") < 0);

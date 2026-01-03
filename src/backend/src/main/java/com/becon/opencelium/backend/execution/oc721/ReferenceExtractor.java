@@ -8,6 +8,7 @@ import com.becon.opencelium.backend.reference.model.EnhancementReference;
 import com.becon.opencelium.backend.reference.model.PageReference;
 import com.becon.opencelium.backend.reference.model.Reference;
 import com.becon.opencelium.backend.reference.model.RequestDataReference;
+import com.becon.opencelium.backend.reference.model.WebhookReference;
 import com.becon.opencelium.backend.resource.execution.ResponseEx;
 import com.becon.opencelium.backend.utility.MediaTypeUtility;
 import com.becon.opencelium.backend.utility.ReferenceUtility;
@@ -30,7 +31,6 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -39,8 +39,6 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.becon.opencelium.backend.constant.RegExpression.webhook;
-import static com.becon.opencelium.backend.enums.execution.DataType.UNDEFINED;
 import static com.becon.opencelium.backend.utility.Comparators.NUMERIC_PARTS;
 import static com.becon.opencelium.backend.utility.ReferenceUtility.ARRAY_LETTER_INDEX;
 import static com.becon.opencelium.backend.utility.ReferenceUtility.IS_FOR_IN_KEY_TYPE;
@@ -86,9 +84,7 @@ public class ReferenceExtractor implements Extractor {
                 EnhancementReference er = (EnhancementReference) reference;
                 yield executionManager.executeScript(er.getBindId());
             }
-            case WEBHOOK -> {
-                yield extractFromWebhook(ref);
-            }
+            case WEBHOOK -> extractFromWebhook((WebhookReference) reference);
             case PAGE -> {
                 PageReference pr = (PageReference) reference;
                 yield executionManager.getPaginationParamValue(pr.getParam());
@@ -100,30 +96,14 @@ public class ReferenceExtractor implements Extractor {
         };
     }
 
-    private Object extractFromWebhook(String ref) {
+    private Object extractFromWebhook(WebhookReference ref) {
         Map<String, Object> webhookVars = executionManager.getWebhookVars();
         if (webhookVars == null || webhookVars.isEmpty()) {
             return null;
         }
 
-        // get requiredType if specified, then update reference
-        DataType type = UNDEFINED;
-        if (ref.contains(":")) {
-            type = DataType.fromString(ref.split(":")[1].replace("}", ""));
-
-            ref = ref.split(":")[0].concat("}");
-        }
-
-        Object value = null;
-        Pattern pattern = Pattern.compile(webhook);
-        Matcher matcher = pattern.matcher(ref);
-
-        if (matcher.find()) {
-            String paths = matcher.group().replace("${", "").replace("}", "");
-            value = getFromJSON(webhookVars, paths);
-        }
-
-        return mapToType(value, type);
+        Object value = getFromJSON(webhookVars, ref.getPath());
+        return mapToType(value, ref.getDataType());
     }
 
     private Object mapToType(Object value, DataType type) {
