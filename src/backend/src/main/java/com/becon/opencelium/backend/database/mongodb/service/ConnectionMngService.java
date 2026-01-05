@@ -22,4 +22,6 @@ public interface ConnectionMngService {
     List<ConnectionMng> getAllById(List<Long> ids);
     long count();
     void doWithPatchedConnection(ConnectionDTO connectionDTO, ConnectionDTO patched, PatchConnectionDetails details);
+
+    long deleteByConnectionIdIn(List<Long> chunk);
 }

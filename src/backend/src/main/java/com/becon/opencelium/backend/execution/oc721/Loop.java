@@ -41,9 +41,13 @@ public class Loop {
         } else if (expression.startsWith(FOR.getName())) {
             result.setOperator(FOR);
         } else {
+            if (ref == null) {
+                throw new RuntimeException(ReferenceUtility.getContainedReferenceAndType(expression) + " is not supported for SPLIT_STRING");
+            }
+
             result.setOperator(SPLIT_STRING);
 
-            String delimiter = expression.replace(ref, "")
+            String delimiter = expression.replace(ref, "s")
                     .replace(SPLIT_STRING.getName(), "")
                     .replace("'", "")
                     .trim();

@@ -142,6 +142,9 @@ public class StorageConfiguration {
             changeSetDao.createAll(YAMLMigrator.getChangeSetsToSave());
         }
 
+        // removes connections that contain prefix in their names !*test_connection_
+        connectionService.cleanupAllTestConnections();
+
         // deleting old version zip and jar files
         cleanOldFiles(PathConstant.LIBS, f -> f.isFile() && f.getName().endsWith(JAR_EXTENSION), JAR_PREFIX);
         cleanOldFiles(PathConstant.ASSISTANT + PathConstant.VERSIONS, File::isDirectory, "");
