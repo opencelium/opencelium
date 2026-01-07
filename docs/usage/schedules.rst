@@ -146,7 +146,7 @@ which can be used in OpenCelium.
 
 .. code-block::
 
-   0 * 14 * * ? 
+   0 15 10 * * ? *
 
 **Meaning:** Run at 10:15am every day
 
