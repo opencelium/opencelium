@@ -101,10 +101,9 @@ Start and enable mongod service and create a user for Opencelium.
 	mongosh --eval "db.getSiblingDB('opencelium').createUser({user: 'oc_admin', pwd: 'secretsecret', roles: ['readWrite','dbAdmin' ]})"
 
 .. note::
-	| If you encounter an "ECONNREFUSED" error, it indicates that 
-	| mongod was not yet ready to accept connections.
-	| In this case, please verify that the MongoDB server is running without errors 
-	| by executing the command "systemctl status mongod" and run the mongosh command again.
+	If you encounter an "ECONNREFUSED" error, it indicates that mongod was not yet ready to accept connections.
+	In this case, please verify that the MongoDB server is running without errors 
+	by executing the command "systemctl status mongod" and run the mongosh command again.
 
 **3. Nginx:**
 
