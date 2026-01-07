@@ -178,15 +178,15 @@ Finally start OpenCelium backend.
 	systemctl start opencelium
 
 .. note::
-    | Now you can connect to OpenCelium, by navigating to http://localhost in your web browser.
+	| Now you can connect to OpenCelium, by navigating to http://localhost in your web browser.
 
-    | The default login credentials are:
+	| The default login credentials are:
 	|
-    | **Username: admin@opencelium.io**
-    | **Password: 1234**
+	| **Username: admin@opencelium.io**
+	| **Password: 1234**
 	|
 
-    | If you want to have a look into OpenCelium Logs please use:
+	| If you want to have a look into OpenCelium Logs please use:
 	
 	.. code-block:: sh
 		:linenos:
