@@ -21,7 +21,6 @@ import java.util.Objects;
  * }</pre>
  */
 public final class WrappedDirectReference implements Reference {
-
     private final String raw;
     private final DirectReference directReference;
 

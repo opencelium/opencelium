@@ -16,7 +16,6 @@ import java.util.Objects;
  * <p>The {@code <operationId>} consists of exactly 6 alphanumeric characters.
  */
 public final class DirectReference implements Reference {
-
     private final String raw;
     private final String operationId;
     private final ExchangeType exchangeType;

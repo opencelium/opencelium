@@ -1,8 +1,17 @@
 package com.becon.opencelium.backend.reference;
 
-import com.becon.opencelium.backend.reference.model.*;
+import com.becon.opencelium.backend.reference.model.DirectReference;
+import com.becon.opencelium.backend.reference.model.EnhancementReference;
+import com.becon.opencelium.backend.reference.model.PageReference;
+import com.becon.opencelium.backend.reference.model.Reference;
+import com.becon.opencelium.backend.reference.model.RequestDataReference;
+import com.becon.opencelium.backend.reference.model.WebhookReference;
+import com.becon.opencelium.backend.reference.model.WrappedDirectReference;
 
 public class ReferenceParser {
+
+    private ReferenceParser() {
+    }
 
     public static Reference parse(String ref) {
         if (ReferenceMatchers.isDirect(ref)) {
