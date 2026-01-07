@@ -84,12 +84,11 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 
 **2. MongoDB:**
 
-.. note::
-	Please ensure MongoDB is already installed on your system!
-
 Start and enable mongod service and create a user for Opencelium.
 
 .. note::
+	Ensure MongoDB is already installed on your system!
+
 	Please change the password (secretsecret) in the following command line!
 
 .. code-block:: sh
