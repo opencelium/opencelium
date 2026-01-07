@@ -80,8 +80,7 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 	| for your company.
 	| Set a strong password for the root user (there is no default password!)
 	| 
-	| Please refer to the default MariaDB documentation for detailed instructions 
-	| `mariadb-secure-installation <https://mariadb.com/docs/server/clients-and-utilities/deployment-tools/mariadb-secure-installation/>`_
+	| Please refer to MariaDB documentation <https://mariadb.com/docs/server/clients-and-utilities/deployment-tools/mariadb-secure-installation/>`_ for detailed instructions.
 
 **2. MongoDB:**
 
@@ -102,8 +101,8 @@ Start and enable mongod service and create a user for Opencelium.
 
 .. note::
 	If you encounter an "ECONNREFUSED" error, it indicates that mongod was not yet ready to accept connections.
-	In this case, please verify that the MongoDB server is running without errors 
-	by executing the command "systemctl status mongod" and run the mongosh command again.
+	In this case, please verify that the MongoDB server is running without errors by executing 
+	the command "systemctl status mongod" and run the mongosh command again.
 
 **3. Nginx:**
 
