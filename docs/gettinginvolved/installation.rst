@@ -80,7 +80,7 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 	| for your company.
 	| Set a strong password for the root user (there is no default password!)
 	| 
-	| Please refer to MariaDB documentation <https://mariadb.com/docs/server/clients-and-utilities/deployment-tools/mariadb-secure-installation/>`_ for detailed instructions.
+	| Please refer to `MariaDB documentation <https://mariadb.com/docs/server/clients-and-utilities/deployment-tools/mariadb-secure-installation/>`_ for detailed instructions.
 
 **2. MongoDB:**
 
