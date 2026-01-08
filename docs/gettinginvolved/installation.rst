@@ -71,11 +71,11 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 	systemctl restart mariadb
 	systemctl enable mariadb
 	mysql -u root -e "source /opt/opencelium/src/backend/database/oc_data.sql; GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost' IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
-	mariadb-secure-insstallation
+	mariadb-secure-installation
 
 .. note::
 	| "mariadb_secure_installation" is a command-line-tool to enhance the security of your 
-	| MariaDB instance and protect it from unauthorized access.
+	| MariaDB instance and protect it from unauthorized access. (same as mysql_secure_installation)
 	| You can use default values for all prompts, unless specific changes are required
 	| for your company.
 	| Set a strong password for the root user (there is no default password!)
@@ -155,14 +155,6 @@ Create and adjust configuration.
 	| - change password of oc_admin user for MongoDB in uri line (default "secretsecret")
 
 	| Just in case you are using SSL, add certs to the ssl section. 
-	| It has to be a p12 keystore file with password! 
-	| If you just have key and pem you can create a p12 as follows:
-
-	
-	.. code-block:: sh
-		:linenos:
-		
-		openssl pkcs12 -export -out /opt/opencelium/src/backend/src/main/resources/opencelium.p12 -in /etc/ssl/certs/opencelium.pem -inkey /etc/ssl/private/opencelium.key
 	
 Finally start OpenCelium backend.	
 	
@@ -318,15 +310,7 @@ Create and adjust configuration.
 	| - change password of oc_admin user for MongoDB in uri line (default "secretsecret")
 
 	| Just in case you are using SSL, add certs to the ssl section. 
-	| It has to be a p12 keystore file with password! 
-	| If you just have key and pem you can create a p12 as follows:
 
-	
-	.. code-block:: sh
-		:linenos:
-		
-		openssl pkcs12 -export -out /opt/opencelium/src/backend/src/main/resources/opencelium.p12 -in /etc/pki/tls/certs/opencelium.pem -inkey /etc/pki/tls//private/opencelium.key
-	
 Finally start OpenCelium backend.	
 	
 .. code-block:: sh
@@ -481,14 +465,6 @@ Create and adjust configuration.
 
 
 	| Just in case you are using SSL, add certs to the ssl section. 
-	| It has to be a p12 keystore file with password! 
-	| If you just have key and pem you can create a p12 as follows:
-
-	
-	.. code-block:: sh
-		:linenos:
-		
-		openssl pkcs12 -export -out /opt/opencelium/src/backend/src/main/resources/opencelium.p12 -in /etc/pki/tls/certs/opencelium.pem -inkey /etc/pki/tls//private/opencelium.key
 	
 Finally start OpenCelium backend.	
 	
@@ -558,6 +534,7 @@ Use default Docker installation guide.
 	git clone https://github.com/opencelium/opencelium-docker.git /opt/opencelium-docker
 	cp /opt/opencelium-docker/conf/application_default.yml /opt/opencelium-docker/conf/application.yml
 	cp /opt/opencelium-docker/conf/settings_default.json /opt/opencelium-docker/conf/settings.json
+	cp /opt/opencelium-docker/conf/nginx_default.conf /opt/opencelium-docker/conf/nginx.conf
 	cp /opt/opencelium-docker/.env_default /opt/opencelium-docker/.env
 
 .. note::
@@ -569,6 +546,35 @@ Use default Docker installation guide.
 	| Within section "Database configuration section of MariaDB and MongoDB":
 	| - change password of opencelium user for MariaDB (default "secret1234")
 	| - change password of oc_admin user for MongoDB in uri line (default "secretsecret")
+
+.. note::
+	If you like to use SSL, do the following steps:
+	
+	Create config folders for SSL: 
+	
+	.. code-block:: sh
+		:linenos:
+	
+		mkdir /opt/opencelium-docker/conf/ssl/certs
+		mkdir /opt/opencelium-docker/conf/ssl/private
+
+	and copy your own certificates to these folders!
+		
+	Copy the SSL-configuration file for OpenCelium:
+
+	.. code-block:: sh
+		:linenos:
+	
+		cp /opt/opencelium-docker/conf/nginx-ssl_default.conf /opt/opencelium-docker/conf/nginx-ssl.conf
+
+	and change the certificates within the config (/opt/opencelium/conf/nginx-ssl.conf), with your own:	
+			
+	.. code-block:: sh
+		:linenos:	
+	
+		ssl_certificate /opencelium-docker/conf/ssl/certs/opencelium.pem;
+		ssl_certificate_key /opencelium-docker/conf/ssl/private/opencelium.key;
+		
 
 
 2. Start OpenCelium using DockerHub images
