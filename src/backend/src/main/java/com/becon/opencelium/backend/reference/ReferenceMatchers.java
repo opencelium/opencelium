@@ -9,6 +9,13 @@ import static com.becon.opencelium.backend.constant.RegExpression.requestData;
 import static com.becon.opencelium.backend.constant.RegExpression.webhook;
 import static com.becon.opencelium.backend.constant.RegExpression.wrappedDirectRef;
 
+/**
+ * Low-level reference classifiers.
+ *
+ * <p>These methods perform fast, positional checks (charAt-based)
+ * before applying regex validation. They are intentionally
+ * low-level and performance-oriented.
+ */
 public final class ReferenceMatchers {
 
     private ReferenceMatchers() {
@@ -79,8 +86,8 @@ public final class ReferenceMatchers {
     }
 
     public static boolean isPage(String ref) {
-        // @{} - shortest possible case
-        if (ref == null || ref.length() < 3) {
+        // @{x} - shortest possible case
+        if (ref == null || ref.length() < 4) {
             return false;
         }
 
