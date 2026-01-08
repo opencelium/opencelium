@@ -74,8 +74,8 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 	mysql-secure-installation
 
 .. note::
-	| "mysql_secure_installation" is a command-line-tool to enhance the security of your 
-	| MariaDB instance and protect it from unauthorized access. (same as "mariadb_secure_installation")
+	| "mysql_secure_installation" is a command-line-tool to enhance the security of your MariaDB
+	| instance and protect it from unauthorized access. (same as "mariadb_secure_installation")
 	| You can use default values for all prompts, unless specific changes are required
 	| for your company.
 	| Set a strong password for the root user (there is no default password!)
@@ -234,6 +234,15 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 	mysql -u root -e "source /opt/opencelium/src/backend/database/oc_data.sql; GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost' IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
 	mysql_secure_installation
 	
+	.. note::
+	| "mysql_secure_installation" is a command-line-tool to enhance the security of your MariaDB
+	| instance and protect it from unauthorized access. (same as "mariadb_secure_installation")
+	| You can use default values for all prompts, unless specific changes are required
+	| for your company.
+	| Set a strong password for the root user (there is no default password!)
+	| 
+	| Please refer to `MariaDB documentation <https://mariadb.com/docs/server/clients-and-utilities/deployment-tools/mariadb-secure-installation/>`_ for detailed instructions.
+
 **2. MongoDB:**
 
 Start and enable mongod service and create a user for Opencelium.
@@ -319,12 +328,14 @@ Finally start OpenCelium backend.
 	systemctl start opencelium
 
 .. note::
-	| Afterwards you can connect to `http://localhost`	
-	| Default User and Password is:
-	
-	| admin@opencelium.io
-	| 1234
-	
+	| Now you can connect to OpenCelium, by navigating to http://localhost in your web browser.
+
+	| The default login credentials are:
+	|
+	| **Username: admin@opencelium.io**
+	| **Password: 1234**
+	|
+
 	| If you want to have a look into OpenCelium Logs please use:
 	
 	.. code-block:: sh
@@ -386,6 +397,15 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 	systemctl enable mariadb
 	mysql -u root -e "source /opt/opencelium/src/backend/database/oc_data.sql; GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost' IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
 	mysql_secure_installation
+
+	.. note::
+	| "mysql_secure_installation" is a command-line-tool to enhance the security of your MariaDB
+	| instance and protect it from unauthorized access. (same as "mariadb_secure_installation")
+	| You can use default values for all prompts, unless specific changes are required
+	| for your company.
+	| Set a strong password for the root user (there is no default password!)
+	| 
+	| Please refer to `MariaDB documentation <https://mariadb.com/docs/server/clients-and-utilities/deployment-tools/mariadb-secure-installation/>`_ for detailed instructions.
 	
 **2. MongoDB:**
 
@@ -472,18 +492,21 @@ Finally start OpenCelium backend.
 	systemctl start opencelium
 
 .. note::
-	| Afterwards you can connect to `http://localhost`	
-	| Default User and Password is:
-	
-	| admin@opencelium.io
-	| 1234
-	
+	| Now you can connect to OpenCelium, by navigating to http://localhost in your web browser.
+
+	| The default login credentials are:
+	|
+	| **Username: admin@opencelium.io**
+	| **Password: 1234**
+	|
+
 	| If you want to have a look into OpenCelium Logs please use:
 	
 	.. code-block:: sh
 		:linenos:
 		
 		journalctl -xe -u opencelium -f
+
 		
 Ansible
 """""""""""""""""
@@ -591,6 +614,15 @@ Use default Docker installation guide.
 	cd /opt/opencelium-docker
 	docker-compose up -d
 
+.. note::
+	| Now you can connect to OpenCelium, by navigating to http://localhost in your web browser.
+
+	| The default login credentials are:
+	|
+	| **Username: admin@opencelium.io**
+	| **Password: 1234**
+	|
+
 
 DEB package for Ubuntu 24.04 LTS
 """""""""""""""""""""""""""""""""
@@ -640,12 +672,14 @@ Install Application:
 	apt install -y opencelium
 	
 .. note::
-	| Afterwards you can connect to `http://localhost`	
-	| Default User and Password is:
-	
-	| admin@opencelium.io
-	| 1234
-	
+	| Now you can connect to OpenCelium, by navigating to http://localhost in your web browser.
+
+	| The default login credentials are:
+	|
+	| **Username: admin@opencelium.io**
+	| **Password: 1234**
+	|
+
 	| If you want to have a look into OpenCelium Logs please use:
 	
 	.. code-block:: sh
@@ -694,7 +728,6 @@ Configure environment (optional):
 	systemctl restart opencelium
 
 
-
 RPM package for SUSE Linux Enterprise Server 15 SP5
 """""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -728,19 +761,21 @@ Install Application:
 	zypper install -y OpenCelium
 	
 .. note::
-	| Afterwards you can connect to `http://localhost`	
-	| Default User and Password is:
-	
-	| admin@opencelium.io
-	| 1234
-	
+	| Now you can connect to OpenCelium, by navigating to http://localhost in your web browser.
+
+	| The default login credentials are:
+	|
+	| **Username: admin@opencelium.io**
+	| **Password: 1234**
+	|
+
 	| If you want to have a look into OpenCelium Logs please use:
 	
 	.. code-block:: sh
 		:linenos:
 		
 		journalctl -xe -u opencelium -f
-		
+
 
 Configure environment (optional):
 =================================
@@ -841,19 +876,20 @@ Install Application:
 		yum install -y OpenCelium
 	
 .. note::
-	| Afterwards you can connect to `http://localhost`	
-	| Default User and Password is:
-	
-	| admin@opencelium.io
-	| 1234
-	
+	| Now you can connect to OpenCelium, by navigating to http://localhost in your web browser.
+
+	| The default login credentials are:
+	|
+	| **Username: admin@opencelium.io**
+	| **Password: 1234**
+	|
+
 	| If you want to have a look into OpenCelium Logs please use:
 	
 	.. code-block:: sh
 		:linenos:
 		
 		journalctl -xe -u opencelium -f
-		
 
 Configure environment (optional):
 =================================
