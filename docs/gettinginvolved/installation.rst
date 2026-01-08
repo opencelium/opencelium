@@ -76,9 +76,9 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 .. note::
 	| "mysql_secure_installation" is a command-line-tool to enhance the security of your MariaDB
 	| instance and protect it from unauthorized access. (same as "mariadb_secure_installation")
+	|
 	| You can use default values for all prompts, unless specific changes are required
-	| for your company.
-	| Set a strong password for the root user (there is no default password!)
+	| for your company. Set a strong password for the root user (there is no default password!)
 	| 
 	| Please refer to `MariaDB documentation <https://mariadb.com/docs/server/clients-and-utilities/deployment-tools/mariadb-secure-installation/>`_ for detailed instructions.
 
@@ -237,9 +237,9 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 	.. note::
 	| "mysql_secure_installation" is a command-line-tool to enhance the security of your MariaDB
 	| instance and protect it from unauthorized access. (same as "mariadb_secure_installation")
+	|
 	| You can use default values for all prompts, unless specific changes are required
-	| for your company.
-	| Set a strong password for the root user (there is no default password!)
+	| for your company. Set a strong password for the root user (there is no default password!)
 	| 
 	| Please refer to `MariaDB documentation <https://mariadb.com/docs/server/clients-and-utilities/deployment-tools/mariadb-secure-installation/>`_ for detailed instructions.
 
@@ -401,9 +401,9 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 	.. note::
 	| "mysql_secure_installation" is a command-line-tool to enhance the security of your MariaDB
 	| instance and protect it from unauthorized access. (same as "mariadb_secure_installation")
+	|
 	| You can use default values for all prompts, unless specific changes are required
-	| for your company.
-	| Set a strong password for the root user (there is no default password!)
+	| for your company. Set a strong password for the root user (there is no default password!)
 	| 
 	| Please refer to `MariaDB documentation <https://mariadb.com/docs/server/clients-and-utilities/deployment-tools/mariadb-secure-installation/>`_ for detailed instructions.
 	
@@ -541,8 +541,7 @@ The Docker images are hosted on `Dockerhub <https://hub.docker.com/u/becongmbh>`
 Use default Docker installation guide.
 
    * `Docker Engine <https://docs.docker.com/engine/installation/>`_
-   * `Docker Compose <https://docs.docker.com/compose/install/>`_ 
-  (opt. Docker Engine installation usually already includes Docker Compose Plugin)
+   * `Docker Compose <https://docs.docker.com/compose/install/>`_ (opt. Docker Engine installation already includes Docker Compose Plugin)
 
 1. Getting started with opencelium-docker-compose:
 
@@ -593,11 +592,11 @@ Use default Docker installation guide.
 		ssl_certificate /opencelium-docker/conf/ssl/certs/opencelium.pem;
 		ssl_certificate_key /opencelium-docker/conf/ssl/private/opencelium.key;
 
-	Activate SSL in docker compose file (/opt/opencelium-docker/docker-compose.yml):abbr:
+	Activate SSL in docker compose file (/opt/opencelium-docker/docker-compose.yml):
 
-		.. code-block:: sh
+	.. code-block:: sh
 		:linenos:	
-		
+
 		# comment for ssl
 		# - ./conf/nginx.conf:/etc/nginx/conf.d/default.conf
 		uncomment for ssl
