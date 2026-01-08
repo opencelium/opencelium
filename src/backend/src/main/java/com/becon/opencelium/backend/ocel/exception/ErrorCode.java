@@ -28,7 +28,8 @@ public enum ErrorCode {
     FUNC_INVALID_PARAMETER("invalid.function.parameter"),
     EMPTY_EXPRESSION("empty.expression"),
     INVALID_LOOP_EXPRESSION("invalid.loop.expression"),
-    INVALID_LOOP_TYPE("invalid.loop.expression");
+    INVALID_LOOP_TYPE("invalid.loop.expression"),
+    INVALID_OPERAND_PART("invalid.operand.part");
 
     private final String code;
 

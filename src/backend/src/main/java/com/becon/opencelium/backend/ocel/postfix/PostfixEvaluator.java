@@ -3,20 +3,18 @@ package com.becon.opencelium.backend.ocel.postfix;
 import com.becon.opencelium.backend.execution.logger.OcLogger;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.masking.MaskingService;
+import com.becon.opencelium.backend.ocel.exception.*;
 import com.becon.opencelium.backend.ocel.utils.ReferenceUtils;
-import com.becon.opencelium.backend.ocel.exception.ApplyFunctionException;
 import com.becon.opencelium.backend.ocel.function.FunctionFactory;
 import com.becon.opencelium.backend.ocel.operand.Operand;
 import com.becon.opencelium.backend.ocel.operator.Arity;
 import com.becon.opencelium.backend.ocel.Evaluator;
-import com.becon.opencelium.backend.ocel.exception.InvalidExpressionException;
 import com.becon.opencelium.backend.ocel.operator.Operator;
-import com.becon.opencelium.backend.ocel.exception.ApplyOperatorException;
-import com.becon.opencelium.backend.ocel.exception.ValueParseException;
 import com.becon.opencelium.backend.ocel.common.RawValueParser;
 import com.becon.opencelium.backend.ocel.operator.OperatorUtils;
 import com.becon.opencelium.backend.ocel.token.Token;
 import com.becon.opencelium.backend.ocel.token.TokenType;
+import com.becon.opencelium.backend.utility.PathAndReferenceUtility;
 
 import java.util.*;
 import java.util.function.Function;
@@ -149,7 +147,47 @@ public class PostfixEvaluator implements Evaluator {
 
             return result;
         }
-        return rawValueParser.parse(rawValue);
+
+        List<int[]> locs = PathAndReferenceUtility.extractReferenceIndexes(rawValue);
+
+        if (locs.isEmpty()){
+            return rawValueParser.parse(rawValue);
+        }
+
+        if (referenceExtractor == null) {
+            throw InvalidExpressionException.referenceExtractorNotFound(rawValue);
+        }
+
+        StringBuilder out = new StringBuilder(rawValue.length());
+        int pos = 0;
+
+        for (int[] loc : locs) {
+            int start = loc[0], end = loc[1];
+
+            out.append(rawValue, pos, start);
+
+            String ref = rawValue.substring(start, end);
+            Object result = referenceExtractor.apply(ref);
+
+            if (result instanceof Collection<?>) {
+                throw new InvalidExpressionException(
+                        ErrorCode.INVALID_OPERAND_PART,
+                        "REFERENCE[%s] returned a non-string value inside OPERAND[%s]".formatted(ref, rawValue)
+                );
+            }
+
+            if (logger != null && masking != null) {
+                String maskedResult = masking.applyMask(result, ref);
+                logger.logAndSend("segment=IF_REF ref=(%s) data=%s".formatted(ref, maskedResult));
+            }
+
+            out.append(result);
+            pos = end;
+        }
+
+        out.append(rawValue, pos, rawValue.length());
+        return out.toString();
+
     }
 
     public static PostfixEvaluator getInstance() {
