@@ -23,26 +23,84 @@ public final class ReferenceMatchers {
 
 
     public static boolean isDirect(String ref) {
-        return ref != null && DIRECT_REF.matcher(ref).matches();
+        // #ababab.(request).x - shortest possible case
+        if (ref == null || ref.length() < 19) {
+            return false;
+        }
+
+        if (ref.charAt(0) != '#' || ref.charAt(7) != '.') {
+            return false;
+        }
+
+        return DIRECT_REF.matcher(ref).matches();
     }
 
     public static boolean isWrappedDirect(String ref) {
-        return ref != null && WRAPPED_DIRECT_REF.matcher(ref).matches();
+        // {%#ababab.(request).x%} - shortest possible case
+        if (ref == null || ref.length() < 23) {
+            return false;
+        }
+
+        if (ref.charAt(0) != '{' || ref.charAt(1) != '%' || ref.charAt(2) != '#'
+                || ref.charAt(ref.length() - 2) != '%' || ref.charAt(ref.length() - 1) != '}'
+        ) {
+            return false;
+        }
+
+        return WRAPPED_DIRECT_REF.matcher(ref).matches();
     }
 
     public static boolean isEnhancement(String ref) {
-        return ref != null && ENHANCEMENT_REF.matcher(ref).matches();
+        // "#{%<24-hex>%}" - fixed length
+        if (ref == null || ref.length() != 29) {
+            return false;
+        }
+
+        if (ref.charAt(0) != '#' || ref.charAt(1) != '{' || ref.charAt(2) != '%'
+                || ref.charAt(27) != '%' || ref.charAt(28) != '}'
+        ) {
+            return false;
+        }
+
+        return ENHANCEMENT_REF.matcher(ref).matches();
     }
 
     public static boolean isWebhook(String ref) {
-        return ref != null && WEBHOOK_REF.matcher(ref).matches();
+        // ${} - shortest possible case
+        if (ref == null || ref.length() < 3) {
+            return false;
+        }
+
+        if (ref.charAt(0) != '$' || ref.charAt(1) != '{' || ref.charAt(ref.length() - 1) != '}') {
+            return false;
+        }
+
+        return WEBHOOK_REF.matcher(ref).matches();
     }
 
     public static boolean isPage(String ref) {
-        return ref != null && PAGE_REF.matcher(ref).matches();
+        // @{} - shortest possible case
+        if (ref == null || ref.length() < 3) {
+            return false;
+        }
+
+        if (ref.charAt(0) != '@' || ref.charAt(1) != '{' || ref.charAt(ref.length() - 1) != '}') {
+            return false;
+        }
+
+        return PAGE_REF.matcher(ref).matches();
     }
 
     public static boolean isRequestData(String ref) {
-        return ref != null && REQUEST_DATA_REF.matcher(ref).matches();
+        // {} - shortest possible case
+        if (ref == null || ref.length() < 2) {
+            return false;
+        }
+
+        if (ref.charAt(0) != '{' || ref.charAt(ref.length() - 1) != '}') {
+            return false;
+        }
+
+        return REQUEST_DATA_REF.matcher(ref).matches();
     }
 }
