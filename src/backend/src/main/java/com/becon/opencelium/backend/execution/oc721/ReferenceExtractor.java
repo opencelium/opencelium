@@ -15,6 +15,7 @@ import com.becon.opencelium.backend.utility.ReferenceUtility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
+import jakarta.annotation.Nullable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 import org.w3c.dom.Document;
@@ -52,8 +53,20 @@ public class ReferenceExtractor implements Extractor {
         this.executionManager = executionManager;
     }
 
+    /**
+     * Resolves a single reference expression.
+     *
+     * <ul>
+     *   <li>{@code null} input → {@code null}</li>
+     *   <li>Valid reference → resolved value</li>
+     *   <li>Non-reference input → {@code null} (backward compatibility)</li>
+     * </ul>
+     *
+     * <p>This method is on a hot path. Parsing and dispatch are optimized
+     * to avoid unnecessary allocations and exceptions.
+     */
     @Override
-    public Object extractValue(String rawReference) {
+    public Object extractValue(@Nullable String rawReference) {
         if (rawReference == null) {
             return null;
         }
@@ -65,27 +78,44 @@ public class ReferenceExtractor implements Extractor {
         }
     }
 
+
     /**
-     * Parser 'rawReference' to a Reference object and resolves its value.
-     * At this point 'rawReference' is guaranteed to be a reference.
+     * Parses and resolves a reference.
+     *
+     * <p>Returns {@code null} if the input is not a reference
+     * to preserve historical behavior.
      */
     private Object doExtract(String rawReference) {
         Reference reference = ReferenceParser.parse(rawReference);
 
+        if (reference == null) {
+            // backward compatibility: non-reference → null
+            return null;
+        }
+
         return switch (reference.getType()) {
-            case DIRECT -> {
-                yield extractFromOperation(rawReference);
-            }
+            case DIRECT -> extractFromOperation(rawReference);
+
             case WRAPPED_DIRECT -> {
                 rawReference = ReferenceUtility.extractDirectRef(rawReference);
                 yield extractFromOperation(rawReference);
             }
-            case ENHANCEMENT -> executionManager.executeScript(((EnhancementReference) reference).getBindId());
+
+            case ENHANCEMENT -> executionManager.executeScript(
+                    ((EnhancementReference) reference).getBindId()
+            );
+
             case WEBHOOK -> extractFromWebhook((WebhookReference) reference);
-            case PAGE -> executionManager.getPaginationParamValue(((PageReference) reference).getPageParam());
+
+            case PAGE -> executionManager.getPaginationParamValue(
+                    ((PageReference) reference).getPageParam()
+            );
+
             case REQUEST_DATA -> {
                 RequestDataReference rdr = (RequestDataReference) reference;
-                yield executionManager.getRequestData(rdr.getCtorId()).getOrDefault(rdr.getKey(), rdr.getRaw());
+                yield executionManager
+                        .getRequestData(rdr.getCtorId())
+                        .getOrDefault(rdr.getKey(), rdr.getRaw());
             }
         };
     }
