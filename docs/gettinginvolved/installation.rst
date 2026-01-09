@@ -198,10 +198,13 @@ Update your system, download and install required packages.
 
 **2. Install MongoDB:**
 
-| Use default MongoDB installation guide.
-| You can find documentation here: `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux/>`_
+| Additonally an installation of MongoDB is required!
+| 
+| Please refer to the default MongoDB documentation for detailed installation instructions. 
+| You can find this documentation here: `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux/>`_
+|
 
-	
+
 Install Application
 ===================
 
@@ -234,7 +237,7 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 	mysql -u root -e "source /opt/opencelium/src/backend/database/oc_data.sql; GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost' IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
 	mysql_secure_installation
 	
-	.. note::
+.. note::
 	| "mysql_secure_installation" is a command-line-tool to enhance the security of your MariaDB
 	| instance and protect it from unauthorized access. (same as "mariadb_secure_installation")
 	|
@@ -247,6 +250,11 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 
 Start and enable mongod service and create a user for Opencelium.
 
+.. note::
+	Ensure MongoDB is already installed on your system!
+
+	Please change the password (secretsecret) in the following command line!
+
 .. code-block:: sh
 	:linenos:
 	
@@ -254,6 +262,11 @@ Start and enable mongod service and create a user for Opencelium.
 	systemctl enable mongod
 	mongosh --eval "db.getSiblingDB('opencelium').createUser({user: 'oc_admin', pwd: passwordPrompt(), roles: ['readWrite','dbAdmin' ]})"
 	
+.. note::
+	If you encounter an "ECONNREFUSED" error, it indicates that mongod was not yet ready to accept connections.
+	In this case, please verify that the MongoDB server is running without errors by executing 
+	the command "systemctl status mongod" and run the mongosh command again.
+
 **3. Nginx:**
 
 Copy the configuration file for OpenCelium.
@@ -362,8 +375,11 @@ Update your system, download and install required packages.
 
 **2. Install MongoDB:**
 
-| Use default MongoDB installation guide.
-| You can find documentation here: `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux/>`_
+| Additonally an installation of MongoDB is required!
+| 
+| Please refer to the default MongoDB documentation for detailed installation instructions. 
+| You can find this documentation here: `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux/>`_
+|
 
 	
 Install Application
@@ -398,7 +414,7 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 	mysql -u root -e "source /opt/opencelium/src/backend/database/oc_data.sql; GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost' IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
 	mysql_secure_installation
 
-	.. note::
+.. note::
 	| "mysql_secure_installation" is a command-line-tool to enhance the security of your MariaDB
 	| instance and protect it from unauthorized access. (same as "mariadb_secure_installation")
 	|
@@ -411,13 +427,23 @@ Create database and mysql user for OpenCelium, enable mysql service and secure m
 
 Start and enable mongod service and create a user for Opencelium.
 
+.. note::
+	Ensure MongoDB is already installed on your system!
+
+	Please change the password (secretsecret) in the following command line!
+
 .. code-block:: sh
 	:linenos:
 	
 	systemctl restart mongod
 	systemctl enable mongod
 	mongosh --eval "db.getSiblingDB('opencelium').createUser({user: 'oc_admin', pwd: passwordPrompt(), roles: ['readWrite','dbAdmin' ]})"
-	
+
+.. note::
+	If you encounter an "ECONNREFUSED" error, it indicates that mongod was not yet ready to accept connections.
+	In this case, please verify that the MongoDB server is running without errors by executing 
+	the command "systemctl status mongod" and run the mongosh command again.
+
 **3. Nginx:**
 
 Copy the configuration file for OpenCelium.
@@ -599,7 +625,7 @@ Use default Docker installation guide.
 
 		# comment for ssl
 		# - ./conf/nginx.conf:/etc/nginx/conf.d/default.conf
-		uncomment for ssl
+		# uncomment for ssl
 		- ./conf/nginx-ssl.conf:/etc/nginx/conf.d/default.conf
 		- ./conf/ssl/certs/:/etc/ssl/certs/
 		- ./conf/ssl/private/:/etc/ssl/private/
@@ -640,8 +666,11 @@ Prepare environment:
 
 **2. Install MongoDB:**
 
-| Use default MongoDB installation guide.
-| You can find documentation here: `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux/>`_
+| Additonally an installation of MongoDB is required!
+| 
+| Please refer to the default MongoDB documentation for detailed installation instructions. 
+| You can find this documentation here: `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux/>`_
+|
 	
 
 **3. Install Webserver: (optional)**
@@ -696,6 +725,16 @@ Configure environment (optional):
 	:linenos:
 
 	mysql_secure_installation
+
+.. note::
+	| "mysql_secure_installation" is a command-line-tool to enhance the security of your MariaDB
+	| instance and protect it from unauthorized access. (same as "mariadb_secure_installation")
+	|
+	| You can use default values for all prompts, unless specific changes are required
+	| for your company. Set a strong password for the root user (there is no default password!)
+	| 
+	| Please refer to `MariaDB documentation <https://mariadb.com/docs/server/clients-and-utilities/deployment-tools/mariadb-secure-installation/>`_ for detailed instructions.
+	
 	
 **2. Change user passwords for MySQL and MongoDB:**
 
@@ -743,9 +782,11 @@ Prepare environment:
 	
 **2. Install MongoDB:**
 
-| Use default MongoDB installation guide.
-| You can find documentation here: `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux/>`_
-	
+| Additonally an installation of MongoDB is required!
+| 
+| Please refer to the default MongoDB documentation for detailed installation instructions. 
+| You can find this documentation here: `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux/>`_
+|
 
 Install Application:
 ====================
@@ -785,6 +826,16 @@ Configure environment (optional):
 	:linenos:
 
 	mysql_secure_installation
+
+.. note::
+	| "mysql_secure_installation" is a command-line-tool to enhance the security of your MariaDB
+	| instance and protect it from unauthorized access. (same as "mariadb_secure_installation")
+	|
+	| You can use default values for all prompts, unless specific changes are required
+	| for your company. Set a strong password for the root user (there is no default password!)
+	| 
+	| Please refer to `MariaDB documentation <https://mariadb.com/docs/server/clients-and-utilities/deployment-tools/mariadb-secure-installation/>`_ for detailed instructions.
+	
 	
 **2. Change user passwords for MySQL and MongoDB:**
 
@@ -837,9 +888,11 @@ Prepare environment:
 
 **2. Install MongoDB:**
 
-| Use default MongoDB installation guide.
-| You can find documentation here: `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux/>`_
-	
+| Additonally an installation of MongoDB is required!
+| 
+| Please refer to the default MongoDB documentation for detailed installation instructions. 
+| You can find this documentation here: `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux/>`_
+|
 
 Install Application:
 ====================
@@ -899,6 +952,16 @@ Configure environment (optional):
 	:linenos:
 
 	mysql_secure_installation
+
+.. note::
+	| "mysql_secure_installation" is a command-line-tool to enhance the security of your MariaDB
+	| instance and protect it from unauthorized access. (same as "mariadb_secure_installation")
+	|
+	| You can use default values for all prompts, unless specific changes are required
+	| for your company. Set a strong password for the root user (there is no default password!)
+	| 
+	| Please refer to `MariaDB documentation <https://mariadb.com/docs/server/clients-and-utilities/deployment-tools/mariadb-secure-installation/>`_ for detailed instructions.
+	
 	
 **2. Change user passwords for MySQL and MongoDB:**
 
