@@ -334,4 +334,11 @@ public class EvaluationTest {
         Assertions.assertEquals(Boolean.FALSE, expressionProcessor.evaluate("{url} NotLike \"%google%\"", referenceExtractor));
 
     }
+
+    @Test
+    public void testInnerReferences() throws InvalidExpressionException {
+        Assertions.assertEquals(Boolean.TRUE, expressionProcessor.evaluate("\"AAA{%#ffffff.(request).name%}AAA\" Like \"%{%#ffffff.(request).name%}%\"", referenceExtractor));
+        Assertions.assertEquals(Boolean.TRUE, expressionProcessor.evaluate("\"{%#ffffff.(request).name%}{%#ffffff.(request).name%}\" = \"Bob{%#ffffff.(request).name%}\"", referenceExtractor));
+        Assertions.assertThrows(InvalidExpressionException.class, () -> expressionProcessor.evaluate("\"AAA{%#ffffff.(response).array_of_numbers%}AAA\" Like \"%{%#ffffff.(request).name%}%\"", referenceExtractor));
+    }
 }
