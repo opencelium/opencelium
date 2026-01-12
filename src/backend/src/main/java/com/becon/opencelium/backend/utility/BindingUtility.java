@@ -367,7 +367,7 @@ public class BindingUtility {
         String location = ReferenceUtility.extractLocationType(reference);
         String path = ReferenceUtility.extractPath(reference);
 
-        if ("path".equals(location)) {
+        if ("endpoint".equals(location)) {
             String replaced = method.getRequest().getEndpoint().replace("{%" + id + "%}", "{%" + newId + "%}");
             method.getRequest().setEndpoint(replaced);
         } else if ("header".equals(location)) {

@@ -410,7 +410,7 @@ public class PathAndReferenceUtility {
     public static String getPlaceTypeOfRef(String field) {
         return field == null ? null
                 : !field.matches(referencePath) ? null
-                : field.equals("path") ? field
+                : field.equals("endpoint") ? field
                 : isBody(field) ? "body"
                 : isHeader(field) ? "header"
                 : null;

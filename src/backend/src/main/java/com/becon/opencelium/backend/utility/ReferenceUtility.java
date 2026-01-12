@@ -255,7 +255,7 @@ public class ReferenceUtility {
     public static String extractLocationType(String reference) {
         //#ffffff.(request).body.$.a.b
         //#ffffff.(request).header.$.a
-        //#ffffff.(request).path
+        //#ffffff.(request).endpoint
         //#ffffff.(response).body.$.a.b
         //#ffffff.(response).header.$.a
 
@@ -269,7 +269,7 @@ public class ReferenceUtility {
         String path = reference.substring(startPath);
         String res = path.startsWith("body") ? "body" :
                 path.startsWith("header") ? "header" :
-                        path.equals("path") ? "path" : null;
+                        path.equals("endpoint") ? "endpoint" : null;
 
         if (res == null) {
             throw new IllegalArgumentException("unknown reference location type");

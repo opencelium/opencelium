@@ -252,7 +252,7 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
                 if (toField.getColor().equals(method.getColor())) {
                     String type = PathAndReferenceUtility.getPlaceTypeOfRef(toField.getField());
                     switch (type) {
-                        case "path" -> {
+                        case "endpoint" -> {
                             String endpoint = method.getRequest().getEndpoint();
                             endpoint = BindingUtility.doWithPath(endpoint, fb.getId(), fb.getFrom());
                             method.getRequest().setEndpoint(endpoint);
