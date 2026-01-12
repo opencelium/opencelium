@@ -38,6 +38,6 @@ public class ReferenceParser {
             return RequestDataReference.parse(ref);
         }
 
-        return null; // if no match found - do not throw
+        throw new IllegalArgumentException("Unknown reference: " + ref);
     }
 }

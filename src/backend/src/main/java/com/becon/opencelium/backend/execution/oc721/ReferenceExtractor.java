@@ -59,7 +59,7 @@ public class ReferenceExtractor implements Extractor {
      * <ul>
      *   <li>{@code null} input → {@code null}</li>
      *   <li>Valid reference → resolved value</li>
-     *   <li>Non-reference input → {@code null} (backward compatibility)</li>
+     *   <li>Non-reference input → {@link IllegalArgumentException}</li>
      * </ul>
      *
      * <p>This method is on a hot path. Parsing and dispatch are optimized
@@ -79,19 +79,8 @@ public class ReferenceExtractor implements Extractor {
     }
 
 
-    /**
-     * Parses and resolves a reference.
-     *
-     * <p>Returns {@code null} if the input is not a reference
-     * to preserve historical behavior.
-     */
     private Object doExtract(String rawReference) {
         Reference reference = ReferenceParser.parse(rawReference);
-
-        if (reference == null) {
-            // backward compatibility: non-reference → null
-            return null;
-        }
 
         return switch (reference.getType()) {
             case DIRECT -> extractFromOperation(rawReference);
