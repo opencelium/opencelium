@@ -14,6 +14,7 @@ import com.becon.opencelium.backend.ocel.common.RawValueParser;
 import com.becon.opencelium.backend.ocel.operator.OperatorUtils;
 import com.becon.opencelium.backend.ocel.token.Token;
 import com.becon.opencelium.backend.ocel.token.TokenType;
+import com.becon.opencelium.backend.ocel.utils.ValueUtils;
 import com.becon.opencelium.backend.utility.PathAndReferenceUtility;
 
 import java.util.*;
@@ -140,17 +141,14 @@ public class PostfixEvaluator implements Evaluator {
                 throw InvalidExpressionException.referenceExtractorNotFound(rawValue);
 
             Object result = referenceExtractor.apply(rawValue);
-            if (Objects.nonNull(logger) && Objects.nonNull(masking)) {
-                String maskedResult = masking.applyMask(result, rawValue);
-                logger.logAndSend(String.format("segment=IF_REF ref=(%s) data=%s", rawValue, maskedResult));
-            }
+            logResult(result, rawValue, logger, masking);
 
             return result;
         }
 
         List<int[]> locs = PathAndReferenceUtility.extractReferenceIndexes(rawValue);
 
-        if (locs.isEmpty()){
+        if (locs.isEmpty()) {
             return rawValueParser.parse(rawValue);
         }
 
@@ -168,26 +166,27 @@ public class PostfixEvaluator implements Evaluator {
 
             String ref = rawValue.substring(start, end);
             Object result = referenceExtractor.apply(ref);
+            logResult(result, ref, logger, masking);
 
-            if (result instanceof Collection<?>) {
-                throw new InvalidExpressionException(
-                        ErrorCode.INVALID_OPERAND_PART,
-                        "REFERENCE[%s] returned a non-string value inside OPERAND[%s]".formatted(ref, rawValue)
-                );
-            }
-
-            if (logger != null && masking != null) {
-                String maskedResult = masking.applyMask(result, ref);
-                logger.logAndSend("segment=IF_REF ref=(%s) data=%s".formatted(ref, maskedResult));
-            }
-
-            out.append(result);
+            String stringResult = ValueUtils.serializeValue(result);
+            out.append(stringResult);
             pos = end;
         }
 
         out.append(rawValue, pos, rawValue.length());
-        return out.toString();
 
+        if(out.charAt(0) == '"' && out.charAt(out.length() - 1) == '"') {
+            out.deleteCharAt(0);
+            out.deleteCharAt(out.length() - 1);
+        }
+        return out.toString();
+    }
+
+    private void logResult(Object result,String ref, OcLogger<ExecutionLog> logger, MaskingService masking){
+        if (logger != null && masking != null) {
+            String maskedResult = masking.applyMask(result, ref);
+            logger.logAndSend("segment=IF_REF ref=(%s) data=%s".formatted(ref, maskedResult));
+        }
     }
 
     public static PostfixEvaluator getInstance() {
