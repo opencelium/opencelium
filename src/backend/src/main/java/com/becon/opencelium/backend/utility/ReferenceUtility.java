@@ -53,20 +53,6 @@ public class ReferenceUtility {
         return "No reference found(" + res + ")";
     }
 
-    public static List<String> extractRefs(String value) {
-        List<String> result = new ArrayList<>();
-
-        // 'directRef' cannot be in complex reference
-        Pattern pattern = Pattern.compile(wrappedDirectRef + "|" + enhancement + "|" + webhook + "|" + pageRef + "|" + requestData);
-        Matcher matcher = pattern.matcher(value);
-
-        while (matcher.find()) {
-            result.add(matcher.group());
-        }
-
-        return result;
-    }
-
     public static String extractRef(String value, String type) {
         Pattern pattern = Pattern.compile(type);
         Matcher matcher = pattern.matcher(value);

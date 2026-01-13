@@ -3,6 +3,7 @@ package com.becon.opencelium.backend.execution.builder;
 import com.becon.opencelium.backend.enums.execution.DataType;
 import com.becon.opencelium.backend.enums.execution.ParamLocation;
 import com.becon.opencelium.backend.reference.ReferenceDetector;
+import com.becon.opencelium.backend.reference.ReferenceMatchers;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.resource.execution.ParameterDTO;
 import com.becon.opencelium.backend.resource.execution.ParameterDTOUtil;
@@ -25,10 +26,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static com.becon.opencelium.backend.constant.RegExpression.directRef;
-import static com.becon.opencelium.backend.constant.RegExpression.enhancement;
-import static com.becon.opencelium.backend.constant.RegExpression.webhook;
 
 public class RequestEntityBuilder {
     private final OperationDTO operation;
@@ -306,18 +303,13 @@ public class RequestEntityBuilder {
         }
 
         // if 'ref' is a direct reference or enhancement type then 'referenced' should be primary
-        if (ref.matches(directRef) || ref.matches(enhancement)) {
+        if (ReferenceMatchers.isDirect(ref) || ReferenceMatchers.isEnhancement(ref)) {
             return true;
         }
 
-        // if 'ref' type webhook and variable type is defined explicitly then 'referenced' should be primary
-        if (ref.matches(webhook) && ref.contains(":")) {
-            // validation of DataType is done when resolving this 'ref'
-            // in ReferenceExtractor.class (line 117) so just check if 'ref' contains :
-            return true;
-        }
-
-        return false;
+        // if 'ref' is a webhook and variable type is defined explicitly then 'referenced' should be primary
+        // validation of DataType is done when parsing this 'ref' in WebhookReference.parse(...)
+        return ReferenceMatchers.isWebhook(ref) && ref.contains(":");
     }
 
     private List<ParameterDTO> getParamsByLocation(ParamLocation location) {

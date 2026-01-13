@@ -15,9 +15,14 @@ public class ReferenceDetector {
     }
 
     private static final Pattern CONTAINS_PATTERN =
-            Pattern.compile(directRef + "|" + wrappedDirectRef + "|" +
-                    enhancement + "|" + webhook + "|" +
-                    pageRef + "|" + requestData);
+            Pattern.compile(
+                    directRef + "|" +
+                            wrappedDirectRef + "|" +
+                            enhancement + "|" +
+                            webhook + "|" +
+                            pageRef + "|" +
+                            requestData
+            );
 
     public static boolean containsReference(String expression) {
         if (expression == null) {
