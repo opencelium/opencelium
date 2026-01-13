@@ -1,13 +1,12 @@
 package com.becon.opencelium.backend.ocel.operator.operators;
 
-import com.becon.opencelium.backend.ocel.operator.OperatorEnum;
-import com.becon.opencelium.backend.ocel.operator.SidesType;
+import com.becon.opencelium.backend.ocel.operator.*;
 import com.becon.opencelium.backend.ocel.exception.ApplyOperatorException;
-import com.becon.opencelium.backend.ocel.operator.Arity;
-import com.becon.opencelium.backend.ocel.operator.BinaryOperator;
 import com.becon.opencelium.backend.ocel.utils.ValueUtils;
 
-public class And implements BinaryOperator {
+import java.util.function.Supplier;
+
+public class And implements BinaryOperator, BoolOperator {
 
     @Override
     public Boolean apply(Object o1, Object o2) throws ApplyOperatorException {
@@ -15,6 +14,11 @@ public class And implements BinaryOperator {
             return ValueUtils.parseBoolean(o1) && ValueUtils.parseBoolean(o2);
         }
         throw ApplyOperatorException.invalidTypePairsException(getOperatorType(), o1, o2);
+    }
+
+    @Override
+    public Boolean apply(Supplier<Boolean> x, Supplier<Boolean> y) {
+        return !x.get() ? Boolean.FALSE : y.get();
     }
 
     @Override
