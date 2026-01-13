@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class DirectReferenceTest {
     /*
@@ -131,5 +132,47 @@ class DirectReferenceTest {
 
         assertEquals(DirectReference.Part.BODY, body.getPart());
         assertEquals("field1.['field2_with_special_symbol'].field3", body.getPath());
+    }
+
+
+    // -------  NEGATIVE cases  -------
+
+    @Test
+    void nullReferenceThrowsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> parse(null));
+    }
+
+    @Test
+    void shortReferenceThrowsException() {
+        assertThrows(IllegalArgumentException.class, () -> parse("#a1b2c3.(request)."));
+    }
+
+    @Test
+    void missingHashThrowsException() {
+        assertThrows(IllegalArgumentException.class, () -> parse("ababab.(response).status"));
+    }
+
+    @Test
+    void invalidColorThrowsException() {
+        assertThrows(IllegalArgumentException.class, () -> parse("#abc.(response).status"));
+        assertThrows(IllegalArgumentException.class, () -> parse("#ab@12!. (response).status"));
+    }
+
+    @Test
+    void invalidExchangeTypeThrowsException() {
+        assertThrows(IllegalArgumentException.class, () -> parse("#ababab.(responses).status"));
+        assertThrows(IllegalArgumentException.class, () -> parse("#ababab.response.status"));
+    }
+
+    @Test
+    void invalidPartThrowsException() {
+        assertThrows(IllegalArgumentException.class, () -> parse("#ababab.(response).invalidPart"));
+        assertThrows(IllegalArgumentException.class, () -> parse("#ababab.(response).[**]"));
+    }
+
+    @Test
+    void statusWithPathThrowsException() {
+        assertThrows(IllegalArgumentException.class, () -> parse("#ababab.(response).status.$.code"));
+        assertThrows(IllegalArgumentException.class, () -> parse("#ababab.(request).status."));
     }
 }

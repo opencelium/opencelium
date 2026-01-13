@@ -9,14 +9,15 @@ import static com.becon.opencelium.backend.reference.enums.ReferenceType.WRAPPED
 /**
  * Represents a wrapped direct reference.
  *
- * <p>Syntax:
+ * <p><b>Syntax</b>:
  * <pre>{@code
- * {%#<direct-reference>%}
+ * {%direct-reference%}
  * }</pre>
  *
  * <p>The wrapped value must be a valid {@link DirectReference}.
+ * Wrapping does not change the semantics of the underlying reference.
  *
- * <p>Examples:
+ * <p><b>Examples</b>:
  * <pre>{@code
  * {%#ababab.(response).body.$.field[*]%}
  * {%#A1b2C3.(request).status%}
@@ -53,14 +54,13 @@ public final class WrappedDirectReference implements Reference {
      *
      * @param rawReference wrapped reference string
      * @return parsed {@link WrappedDirectReference}
-     * @throws NullPointerException if {@code s} is null
-     * @throws IllegalArgumentException if the reference is invalid
+     * @throws NullPointerException     if {@code s} is null
+     * @throws IllegalArgumentException if syntax is invalid, or direct reference is malformed
      */
     public static WrappedDirectReference parse(String rawReference) {
         Objects.requireNonNull(rawReference, "null is not a reference");
         validate(rawReference);
 
-        // unwrap "{%" and "%}"
         String inner = rawReference.substring(2, rawReference.length() - 2);
 
         // delegate full validation to DirectReference
@@ -70,11 +70,11 @@ public final class WrappedDirectReference implements Reference {
     }
 
     private static void validate(String rawReference) {
-        if (!rawReference.startsWith("{%#") || !rawReference.endsWith("%}")) {
+        if (!rawReference.startsWith("{%") || !rawReference.endsWith("%}")) {
             throw new IllegalArgumentException("Invalid syntax for " + WRAPPED_DIRECT + " reference: " + rawReference);
         }
 
-        if (rawReference.length() <= 6) {
+        if (rawReference.length() <= 4) {
             throw new IllegalArgumentException("Empty direct reference in " + WRAPPED_DIRECT + " reference: " + rawReference);
         }
     }
