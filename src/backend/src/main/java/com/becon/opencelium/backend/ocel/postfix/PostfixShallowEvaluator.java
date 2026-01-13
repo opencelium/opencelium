@@ -15,6 +15,7 @@ import com.becon.opencelium.backend.ocel.operator.Operator;
 import com.becon.opencelium.backend.ocel.common.RawValueParser;
 import com.becon.opencelium.backend.ocel.token.Token;
 import com.becon.opencelium.backend.ocel.token.TokenType;
+import com.becon.opencelium.backend.utility.PathAndReferenceUtility;
 
 import java.util.*;
 
@@ -127,6 +128,10 @@ public class PostfixShallowEvaluator implements ShallowEvaluator {
                     if (ReferenceUtils.isReference(rawValue)) {
                         operandStack.push(dummy);
                     } else {
+                        List<int[]> ints = PathAndReferenceUtility.extractReferenceIndexes(rawValue);
+                        if (!ints.isEmpty()) {
+                            operandStack.push(dummy);
+                        }
                         operandStack.push(Operand.withRawValue(rawValue));
                     }
                 } else if (Objects.equals(token.getType(), TokenType.FUNCTION)) {
