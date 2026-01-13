@@ -1,8 +1,6 @@
 package com.becon.opencelium.backend;
 
-import com.becon.opencelium.backend.ocel.ExpressionProcessor;
-import com.becon.opencelium.backend.ocel.ExpressionProcessorFactory;
-import com.becon.opencelium.backend.ocel.ProcessorType;
+import com.becon.opencelium.backend.ocel.*;
 import com.becon.opencelium.backend.ocel.exception.InvalidExpressionException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -17,11 +15,13 @@ public class EvaluationTest {
     private static final HashMap<String, Object> referenceValues = new HashMap<>();
     private static final Function<String, Object> referenceExtractor = referenceValues::get;
     private static final ExpressionProcessor expressionProcessor = ExpressionProcessorFactory.get(ProcessorType.POSTFIX);
+    private static final Validator validator = Validator.withCustomShallowEvaluator(ShallowEvaluatorType.POSTFIX);
 
     static {
         // request data
         referenceValues.put("{null}", null);
         referenceValues.put("{bool_true}", true);
+        referenceValues.put("{bool_false}", false);
         referenceValues.put("{url}", "https://www.google.com");
         referenceValues.put("{number1}", 1);
         referenceValues.put("{number2}", 2);
@@ -41,6 +41,11 @@ public class EvaluationTest {
             put("id", 1);
             put("name", "Bob");
         }}));
+        referenceValues.put("{person_object}", new LinkedHashMap<String, Object>() {{
+            put("id", 1);
+            put("name", "Obid");
+            put("address", "Tashkent");
+        }});
 
         // webhook
         referenceValues.put("${null}", null);
@@ -91,6 +96,17 @@ public class EvaluationTest {
             put("id", 1);
             put("name", "A");
         }});
+        referenceValues.put("{%#ffffff.(request).body.$.person%}", new LinkedHashMap<String, Object>() {{
+            put("id", 1);
+            put("name", "Obid");
+            put("address", "Tashkent");
+        }});
+        referenceValues.put("{%#ffffff.(request).body.$.person.address%}", new LinkedHashMap<String, Object>() {{
+            put("id", 1);
+            put("name", "Obid");
+            put("address", "Tashkent");
+        }});
+
 
         // enhancement
         referenceValues.put("#{%600d5b5f4f3e2c1d8a7b6c00%}", null);
@@ -391,4 +407,31 @@ public class EvaluationTest {
         );
     }
 
+
+    @Test
+    public void testShortCircuit() throws InvalidExpressionException {
+        // {%#ffffff.(request).body.$.person.email%} Like '%@%' will be skipped and doesn't throw exception
+        Assertions.assertThrows(InvalidExpressionException.class, () -> expressionProcessor.evaluate("{%#ffffff.(request).body.$.person.email%} Like '%@%'", referenceExtractor));
+        Assertions.assertDoesNotThrow(() -> expressionProcessor.evaluate("{%#ffffff.(request).body.$.person%} PropertyExists 'email' && {%#ffffff.(request).body.$.person.email%} Like '%@%'", referenceExtractor));
+        Assertions.assertEquals(Boolean.FALSE, expressionProcessor.evaluate("{%#ffffff.(request).body.$.person%} PropertyExists 'email' && {%#ffffff.(request).body.$.person.email%} Like '%@%'", referenceExtractor));
+
+        // {%#ffffff.(request).body.$.person.email%} Like '%@%' will be skipped and doesn't throw exception
+        Assertions.assertDoesNotThrow(() -> expressionProcessor.evaluate("{%#ffffff.(request).body.$.person%} PropertyExists 'address' && {%#ffffff.(request).body.$.person%} PropertyNotExists 'email' || {%#ffffff.(request).body.$.person.email%} Like '%@%'", referenceExtractor));
+        Assertions.assertEquals(Boolean.TRUE, expressionProcessor.evaluate(("{%#ffffff.(request).body.$.person%} PropertyExists 'address' && {%#ffffff.(request).body.$.person%} PropertyNotExists 'email' || {%#ffffff.(request).body.$.person.email%} Like '%@%'"), referenceExtractor));
+
+        // {null} > 0 will be skipped and doesn't throw exception
+        Assertions.assertThrows(InvalidExpressionException.class, () -> expressionProcessor.evaluate("{null} > 0", referenceExtractor));
+        Assertions.assertDoesNotThrow(() -> expressionProcessor.evaluate("{bool_false} && {null} > 0", referenceExtractor));
+        Assertions.assertEquals(Boolean.FALSE, expressionProcessor.evaluate("{bool_false} && {null} > 0", referenceExtractor));
+
+        // 'a' > 0 will be skipped and doesn't throw exception
+        Assertions.assertEquals(Boolean.FALSE, validator.isValid("{bool_false} && 'a' > 0"));
+        Assertions.assertEquals(Boolean.FALSE, expressionProcessor.evaluate("{bool_false} && 'a' > 0", referenceExtractor));
+
+        // 'a' > 0 will be skipped and doesn't throw exception
+        Assertions.assertEquals(Boolean.TRUE, expressionProcessor.evaluate("{bool_true} || 'a' > 0", referenceExtractor));
+
+        // {null} > 0 will be skipped and doesn't throw exception
+        Assertions.assertEquals(Boolean.FALSE, expressionProcessor.evaluate("({bool_true} || {null} > 0) && {bool_false}", referenceExtractor));
+    }
 }
