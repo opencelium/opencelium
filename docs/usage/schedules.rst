@@ -1,6 +1,9 @@
-##################
+#########
 Schedules
-##################
+#########
+
+.. contents::
+   :local:
 
 The *Schedules* panel shows an overview of all schedules that have been set up. In
 general, a schedule defines which connection should be performed when. All CRUD 
@@ -53,7 +56,7 @@ on the "**x**" on the right side.
 |image17|
 
 Adding a new schedule
-"""""""""""""""""
+"""""""""""""""""""""
 
 To add a new job for the scheduler click on the button "Add Schedule". 
 
@@ -143,7 +146,7 @@ which can be used in OpenCelium.
 
 .. code-block::
 
-   0 * 14 * * ? 
+   0 15 10 * * ? *
 
 **Meaning:** Run at 10:15am every day
 

@@ -1,10 +1,10 @@
-##################
+######
 db2api
-##################
+######
 
 
 Installation
-"""""""""""""""""
+""""""""""""
 
 .. code-block:: sh
         :linenos:
@@ -15,7 +15,7 @@ Installation
 Please refer to the official documentation: https://github.com/opencelium/db2api?tab=readme-ov-file#installation-tested-on-ubuntu-server-24043-lts
 
 Usage
-"""""""""""""""""
+"""""
 
 First of all add a connector to your target database.
 
@@ -37,7 +37,7 @@ Add your database query into the request body.
 Please read more about the search options here https://github.com/opencelium/db2api?tab=readme-ov-file#api-endpoints
 
 Supported Databases
-"""""""""""""""""
+"""""""""""""""""""
 - MICROSOFT
 - MYSQL
 - POSTGRESQL

@@ -1,83 +1,62 @@
-﻿##################
-Welcome to OpenCelium documentation
-##################
+﻿:orphan:
 
-This documentation is organized into a couple of sections:
+#########################
+OpenCelium Documentation
+#########################
+
+This guide brings together installation instructions, operational
+runbooks, and implementation details so operators, developers, and
+solution architects can understand the platform end-to-end. Begin with
+*Getting Started* for prerequisites and installation steps, then dive
+into the remaining chapters as needed.
 
 .. toctree::
    :caption: Getting Started
    :maxdepth: 2
 
-   gettinginvolved/introduction
-   gettinginvolved/requirements
-   gettinginvolved/installation
-   gettinginvolved/updating
-   gettinginvolved/administration
+   gettinginvolved/index
 
 .. toctree::
    :caption: Usage
    :maxdepth: 2
 
-   usage/login
-   usage/application_management
-   usage/connectors
-   usage/connections
-   usage/schedules
-   usage/admin
+   usage/index
 
 .. toctree::
    :caption: Management
    :maxdepth: 2
 
-   management/authentication
-   management/license_management
-   management/template
-   management/notification_template
-   management/aggregator
-   management/invoker
-   management/smart_sync
+   management/index
 
 .. toctree::
-   :caption: Services
+   :caption: Services & Tools
    :maxdepth: 2
 
-   services/db2api
-   services/csv2api
+   services/index
+   tools/index
 
 .. toctree::
-   :caption: Media
+   :caption: Media & Sources
    :maxdepth: 2
 
-    Website <https://opencelium.io>
-    Service Portal (only for subscribers) <https://service.opencelium.io>
-    Video Tutorials <https://www.youtube.com/playlist?list=PLh_5t7kd2fySIqh6XxCB94lGXvU5lXbQ4>
-    Webinars <https://www.youtube.com/playlist?list=PLh_5t7kd2fyScueyWSRhOn16acRFEBmgO>
-
-.. toctree::
-   :caption: Tools
-   :maxdepth: 2
-
-   tools/idoit
-   tools/otrs
-
-.. toctree::
-   :caption: Sources
-   :maxdepth: 2
-
-   Download <https://packagecloud.io/becon/opencelium/>
-   Repository <https://github.com/opencelium/opencelium/>
-   Changelog <https://github.com/opencelium/opencelium/blob/prod/CHANGELOG.rst>
+   media
+   sources
 
 .. toctree::
    :caption: REST API
+   :maxdepth: 1
 
-   api/overview
+   api/index
 
-##################
-License
-##################
+.. toctree::
+   :caption: Licence
+   :maxdepth: 1
+
+   LICENSE 
 
 `becon`_ © 2013-2025 becon GmbH
 
 .. _becon: LICENSE.html
+
+api_docs/index
       

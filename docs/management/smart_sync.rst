@@ -1,8 +1,8 @@
 .. _management-smart_sync:
 
-##################
+##########
 Smart Sync
-##################
+##########
 
 
 The **Smart Sync** feature provides a direct connection between the OpenCelium Service Portal and a local OpenCelium instance.  

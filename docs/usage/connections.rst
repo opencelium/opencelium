@@ -1,8 +1,11 @@
 .. _usage-connection:
 
-##################
+###########
 Connections
-##################
+###########
+
+.. contents::
+   :local:
 
 Connection List
 """""""""""""""""
@@ -482,7 +485,7 @@ During execution, all API requests, loops, and responses are captured and displa
 inspection, and optimization of interface workflows without relying on external log files or additional tools.
 
 Functional Overview
-==================
+===================
 
 The **UI Logs** provide a graphical representation of all runtime activities of a connection that can be accessed directly through the user interface. 
 The UI log component provides structured, interactive access to runtime data, enabling developers to inspect requests, monitor performance, and 
@@ -491,7 +494,7 @@ identify issues directly in the editor.
 .. _connection_ui_logger:
 
 UI Log Structure
-==================
+=================
 
 The layout of the log viewer is inspired by browser developer tools and presents data in a structured, expandable tree view:
 
@@ -542,7 +545,7 @@ Presentation of the Connection Editor interface in the UI log
 
 
 Real-Time Streaming (WebSocket)
-==================
+===============================
 
 Log data is streamed to the frontend via a **WebSocket** connection.  
 This enables real-time feedback while a Test-Run is executing.
@@ -556,7 +559,7 @@ Technical details:
 
 
 Scalability and Performance
-==================
+===========================
 
 The log system is designed to handle large data volumes efficiently.  
 Several mechanisms are implemented to maintain responsiveness:
@@ -568,7 +571,7 @@ Several mechanisms are implemented to maintain responsiveness:
 
 
 Scheduler Integration
-==================
+=====================
 
 The same logging system is also used for the :ref:`Scheduler <scheduler_execution_log>`.  
 This ensures a unified log format and viewing experience for both manual (Test-Run) and scheduled executions.
@@ -594,13 +597,13 @@ Each log event follows a defined JSON schema:
      "request": {
        "method": "POST",
        "url": "https://api.example.com/items",
-       "body": { ... }
+       "body": {}
      },
      "response": {
        "status": 200,
-       "body": { ... }
+       "body": {}
      }
-   }
+   },
 
 
 Error Handling
@@ -611,7 +614,7 @@ The UI highlights the affected request in red and allows developers to inspect t
 
 
 Multi-Language Support for Enhancements
-"""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""
 
 OpenCelium 4.6 introduces **multi-language support for Enhancements**, extending the enhancement execution engine beyond JavaScript.  
 Developers can now write enhancement logic in **Python 2**, **Python 3**, and **Ruby** – with additional language support (e.g. Go, TypeScript) planned for future releases.
@@ -646,7 +649,7 @@ Repository:
 
 
 Supported Languages
-==================
+===================
 
 - JavaScript *(default; executed within Core)*  
 - Python 2  

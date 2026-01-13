@@ -2,6 +2,9 @@
 Admin Panel
 ##################
 
+.. contents::
+   :local:
+
 The admin panel can be accessed via the gear symbol or the “Admin”
 menu item in the left-hand navigation. If the menu is expanded, you
 also have direct access to the most important tools. Clicking on the
@@ -162,8 +165,31 @@ Once all details are complete, the group can be added by clicking the “Add” 
 
 |image_group_10|
 
-External Applications
+Support Files
 """""""""""""""""
+
+Every connection execution can archive its request/response payloads as a support
+file.  The Admin → **Support Files** card exposes these bundles so operators can
+download them or clean up disk space.
+
+- The grid lists the **connection title**, the stored **file path**, the
+  detected **timestamp**, and a **status** cell.  A green cell indicates that a
+  success archive (``*_s_*.zip``) exists; a red cell highlights that only a
+  failure archive (``*_f_*.zip``) was created for that run.
+- Click the download icon to fetch the ZIP.  Each archive contains the
+  serialized request/response bodies that were captured during execution, so it
+  can be shared with support without re-running the workflow.
+- Use the trash icon on a row to delete a single archive.  Selecting multiple
+  entries in list view enables the **Delete Selected** action so bulk cleanups
+  can be performed before rotating disks or backing up.
+
+All files follow the same directory layout
+(``/upload-dir/support-files/<connection>/<timestamp>_<status>_<execution>.zip``),
+so the screen is also a quick way to correlate a support ticket with the
+matching execution ID before handing the archive over to engineering.
+
+External Applications
+"""""""""""""""""""""
 
 The applications menu displays a list of software that OpenCelium connected with.
 If they are installed and configured on your machine,
@@ -197,16 +223,29 @@ often use. :ref:`Here <management-business_template>`, you can read how to manag
 .. _admin_panel-data_aggregator:
 
 Data Aggregator
-"""""""""""""""""
+"""""""""""""""
 
 Data Aggregator is a feature that provides a possibility to notify a user after the
 triggered connection (this happens in *Schedules*). :ref:`Here <management-data_aggregator>`, you can read how to manage with them.
 
 Notification Templates
-"""""""""""""""""
+"""""""""""""""""""""""
 
 Notification Templates are templates that are used in scheduler jobs to notify users for three event
 types: *pre*, *post*, and *alert*.  :ref:`Here <management-notification_template>`, you can read how to manage with them.
+
+License Management
+"""""""""""""""""""
+
+The License Management card mirrors the full workflow described in
+:doc:`../management/license_management`. It surfaces the current
+subscription, warns if the API-call quota is exhausted, and exposes
+“Request Activation Request”, “Import License”, and “Activate Online” actions.
+Online activation only appears when the user has enabled **Online
+Service Sync** in their profile (:ref:`usage-my_profile`), because that
+permission allows the frontend to contact the Service Portal. The
+embedded *Detail View* lets you trace API usage back to specific
+connections when debugging overages.
 
 .. _admin_panel-update_assistant:
 
@@ -234,7 +273,7 @@ read the  :ref:`Logging <getting_started-administration-logging>` paragraph.
 .. _admin_panel-migration:
 
 Migration from 3.x to 4.x
-"""""""""""""""""
+"""""""""""""""""""""""""
 Since version 4.0, OpenCelium uses MongoDB to store your connection data.
 The *Migration* tool helps you to migrate your data from Neo4j to MongoDB,
 in case of updating from an old OpenCelium version to 4.x.
@@ -246,12 +285,21 @@ Click on *Migrate* to start data migration.
 
 |image_migration_0|
 
+Categories
+"""""""""""""""""
+
+The *Categories* card centralizes the hierarchy that was previously only
+available from the Connections page. It lets you create, rename, or
+delete categories (including recursive deletes that remove subfolders and
+dependent connections). Changes propagate immediately to the category
+filters shown in :doc:`connections`, :doc:`schedules`, and the
+dashboard widgets, so this card is the preferred place to curate your
+taxonomy.
 
 .. |image_admin_0| image:: ../img/admin/0.png
    :align: middle
 .. |image_admin_2| image:: ../img/admin/2.png
    :align: middle
-
 
 .. |image_user_0| image:: ../img/user/OC_menu_admin.png
    :align: middle
@@ -310,7 +358,6 @@ Click on *Migrate* to start data migration.
    :height: 30
 
 
-
 .. |image_update_assistant_0| image:: ../img/update_assistant/0.png
    :align: middle
 .. |image_update_assistant_1| image:: ../img/update_assistant/1.png
@@ -318,4 +365,3 @@ Click on *Migrate* to start data migration.
    
 .. |image_migration_0| image:: ../img/admin/4.png
    :align: middle
-   

@@ -1,91 +1,105 @@
-﻿##################
+﻿######################
 Application Management
-##################
+######################
 
+.. contents::
+   :local:
 
-The OC Application tries to keep consistency in all her parts. It means
-to save persistence in the User Interface, so user does not need to get
-used again and again.
+OpenCelium presents a unified interface across every module, so once you
+learn the navigation, the patterns repeat everywhere.
 
 Navigation
-=========
+==========
 
-On the left side you can see the menu for navigation. It displays only icons
-until you mouseover it. After it expands and shows the labels. The admin item
-has sub items, that can be (un)folded clicking on the arrow.
+The left-hand menu shows icon-only shortcuts by default. Hover over the
+rail (or click the burger icon |burger_icon|) to expand it and reveal
+labels. Administrative items expose sub-menus that can be expanded or
+collapsed individually.
 
 |menu|
 
-To persist the expanding of the menu click on the menu icon |burger_icon|.
+Top Bar & Global Search
+=======================
 
+Every page shares the same top bar:
 
-Notification System
-=========
+- **Global search** – typing part of a connector, connection, or schedule
+  title sends a query to ``/search/{title}`` and displays grouped
+  results. Selecting one navigates directly to that module and pre-fills
+  the search filter.
+- **Notification bell** – opens the notification drawer regardless of
+  where you are in the app.
+- **Profile avatar** – opens the profile page so you can adjust personal
+  settings (see :ref:`usage-my_profile`).
 
-With each entity you can do CRUD operations: Create, Read, Update and Delete.
-After a successful or a rejected operation, you will be alerted with a message:
+Notification Panel
+==================
 
-|notification_alert|
-
-This message goes to the stack in the Notification Panel. You can see
-it clicking on the bell icon |bell|.
+Actions such as create, update, and delete always produce a toast. Each
+toast is also added to the notification panel, which records the type
+(info, warning, error), timestamp, and message. Use the chevron icon to
+expand long messages, click entity links to jump to the affected record,
+or clear individual/all entries with the trash buttons.
 
 |notification_panel|
 
-Each notification contains the type icon (info, error, warning), the timestamp
-and the message itself. In case, the content is too long, you can unfold it
-clicking on the arrows icon.
+List & Grid Views
+=================
 
-|notification|
+Data-heavy modules offer both table and card layouts. In table view you
+can:
 
-Moreover, sometimes the message has a concrete name of the entity that was
-in a process and clicking on it you will be redirected to its replacement.
-A notification or all notifications can be easily cleared using a bin icon or
-*Clear all* responsively.
-
-List of Elements
-=========
-
-The list of data represents as a table where columns display corresponding data,
-optional checkboxes for multiple actions and a column with single actions.
+- Sort by clicking the title column |title_sort_icon|.
+- Inline-edit names and descriptions (Connections, Connectors, Schedules)
+  by double-clicking the value |connector_inline_name_update|.
+- Select multiple rows for bulk actions.
 
 |list_view|
 
-There is a possibility also to sort data (asc/desc) by name or by title |title_sort_icon|.
-In Connector / Connection / Schedule List you can update a name / a title and a description (if exists)
-directly there just double clicking on the text.
-
-|connector_inline_name_update|
-
-User has a possibility to see data in a grid view clicking on the icon |grid_icon| and setting
-a number of elements pro row:
+Switch to the grid view |grid_icon| to see cards with icons. You can
+upload a new icon directly from the grid |upload_image_icon|. Both
+layout modes honor pagination |paginator| and the universal search box.
 
 |grid_view|
 
-If the amount of data does not fit to the page, here comes a pagination for navigating |paginator|.
-The grid view displays an icon of the element that can be replaced, if you mouseover the icon and
-click on it |upload_image_icon|. Checking items in the list view you can apply an operation to all of them,
-for instance *Delete Selected*. The action columns provides such manipulations like: *view*, *update*, and *delete*.
-Also, you can search by all possible parameters that has the corresponded entity typing in the search input.
+Add/Update Forms
+================
 
-Add/Update Element
-=========
-
-You are on the page with list of elements. To add a new one, you need to
-click on the *Add <Element>* button. The application
-shows the same forms for adding and updating of the concrete element.
-
-Add/Update element has several form sections. The validation process is fulfilled
-after pressing the action buttons.
+Entry creation flows all follow the same pattern: click **Add
+<Element>**, complete each form section, and submit. Validation only runs
+when the section is submitted, so required fields stay highlighted until
+they are filled.
 
 |form_section|
 
-Sometimes, the section form appears only after selecting data in the section before it.
-The reason is a dependency of your selection.
+Some sections are conditional—for example, a subsection might only
+appear after you choose a connector. This ensures dependencies are met
+before additional options are shown.
 
+.. _usage-my_profile:
 
+Profile & Theme Sync
+====================
 
+The profile page stores personal details and two platform-wide toggles:
 
+- **Theme** – select a theme to apply it immediately; the choice is saved
+  with your account.
+- **Online Service Sync** – when enabled, OpenCelium loads a Service
+  Portal iframe to synchronize avatars (Gravatar), custom themes, and
+  online license activation (see :doc:`../management/license_management`).
+
+Both settings update the backend via the user-detail API, so your
+account must have permission to edit itself.
+
+Dashboard Overview
+==================
+
+The :doc:`dashboard` follows the same layout conventions described here
+but adds draggable widgets. Use the pencil icon to enter edit mode,
+drag/drop or remove widgets, and save. Widget preferences are stored per
+user through the ``/widget`` and ``/widget_setting`` endpoints, so your
+layout persists across browsers.
 
 
 .. |bell| image:: ../img/management/bell.png
