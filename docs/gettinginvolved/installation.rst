@@ -647,6 +647,16 @@ Use default Docker installation guide.
 	| **Password: 1234**
 	|
 
+	| If you want to have a look into OpenCelium Logs please use:
+	
+	.. code-block:: sh
+		:linenos:
+		
+		docker logs oc-backend
+		docker logs oc-frontend
+		docker logs oc-mariadb
+		docker logs oc-mongodb
+
 
 DEB package for Ubuntu 24.04 LTS
 """""""""""""""""""""""""""""""""
