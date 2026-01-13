@@ -5,32 +5,23 @@ import com.becon.opencelium.backend.reference.enums.ReferenceType;
 
 import java.util.Objects;
 
-/**
- * Represents a direct reference.
- *
- * <p>Syntax:
- * <pre>{@code
- * #<operationId>.(response|request).(body|status|header)[.<path>]
- * }</pre>
- *
- * <p>The {@code <operationId>} consists of exactly 6 alphanumeric characters.
- */
 public final class DirectReference implements Reference {
+
     private final String raw;
-    private final String operationId;
+    private final String color;
     private final ExchangeType exchangeType;
     private final Part part;
-    private final String path; // nullable (only for body/header)
+    private final String path; // nullable, without "$."
 
     private DirectReference(
             String raw,
-            String operationId,
+            String color,
             ExchangeType exchangeType,
             Part part,
             String path
     ) {
         this.raw = raw;
-        this.operationId = operationId;
+        this.color = color;
         this.exchangeType = exchangeType;
         this.part = part;
         this.path = path;
@@ -46,8 +37,8 @@ public final class DirectReference implements Reference {
         return raw;
     }
 
-    public String getOperationId() {
-        return operationId;
+    public String getColor() {
+        return color;
     }
 
     public ExchangeType getExchangeType() {
@@ -58,138 +49,116 @@ public final class DirectReference implements Reference {
         return part;
     }
 
-    /**
-     * Optional path (only for BODY and HEADER).
-     * Returns {@code null} for STATUS.
-     */
     public String getPath() {
         return path;
     }
 
-    /**
-     * Parses a direct reference.
-     */
-    public static DirectReference parse(String s) {
-        Objects.requireNonNull(s, "Direct reference is null");
-        validate(s);
 
-        // operationId
-        String operationId = s.substring(1, 7);
+    public static DirectReference parse(String rawReference) {
+        Objects.requireNonNull(rawReference, "Direct reference is null");
+        validate(rawReference);
 
-        int p = 7; // after operationId
+        // '#ababab.(response).body.$.field[*]'
+        // '#ababab.(request).body.$.field[*]'
 
-        // skip ".("
-        p += 2;
 
-        // exchange
-        ExchangeType exchangeType;
-        if (s.startsWith("response)", p)) {
+        int p = 0;
+        // color
+        final String color = rawReference.substring(0, 7);
+        p += 7; // skip "#abc123"
+
+        // exchange type
+        final ExchangeType exchangeType;
+        if (rawReference.charAt(11) == 's') {
             exchangeType = ExchangeType.RESPONSE;
-            p += "response)".length();
+            p += 12; // skip ".(response)."
         } else {
             exchangeType = ExchangeType.REQUEST;
-            p += "request)".length();
+            p += 11; // skip ".(request)."
         }
 
-        // skip '.'
-        p++;
-
-        // extract part
-        Part part;
-        if (s.startsWith("body", p)) {
+        // exchange part
+        final Part part;
+        if (rawReference.charAt(p) == 'b') {
             part = Part.BODY;
-            p += 4;
-        } else if (s.startsWith("status", p)) {
+            p += 4; // skip "body"
+        } else if (rawReference.charAt(p) == 's') {
             part = Part.STATUS;
-            p += 6;
-        } else if (s.startsWith("header", p)) {
+            p += 6; // skip "status"
+        } else if (rawReference.charAt(p) == 'h') {
             part = Part.HEADER;
-            p += 6;
+            p += 6; // skip "header"
         } else {
-            throw new IllegalArgumentException("Invalid part in direct reference: " + s);
+            part = Part.ALL;
+            p += 3; // skip "[*]"
         }
 
-        String path = null;
-
-        // optional ".<path>"
-        if (p < s.length()) {
-            if (s.charAt(p) != '.') {
-                throw new IllegalArgumentException("Invalid direct reference: " + s);
-            }
-            p++;
-            path = s.substring(p);
+        // path
+        final String path;
+        p += part == Part.ALL ? 1 : 3; // skip "." for Part.ALL or skip ".$." for other values of Part
+        if (p < rawReference.length()) {
+            path = rawReference.substring(p); // remove ".$."
+        } else {
+            path = null;
         }
 
-        return new DirectReference(s, operationId, exchangeType, part, path);
+        return new DirectReference(
+                rawReference,
+                color,
+                exchangeType,
+                part,
+                path
+        );
     }
 
-    /**
-     * Validates the grammar of a direct reference.
-     */
-    private static void validate(String s) {
-        // minimal length: "#xxxxxx.(r).status"
-        if (s.length() < 18) {
-            throw new IllegalArgumentException("Invalid direct reference: " + s);
+
+    private static void validate(String rawReference) {
+        // #ababab.(request).x - shortest possible case
+        if (rawReference.length() < 19) {
+            throw new IllegalArgumentException("Invalid direct reference: " + rawReference);
         }
 
-        if (s.charAt(0) != '#') {
-            throw new IllegalArgumentException("Invalid direct reference: " + s);
+        int p = 0;
+        // color
+        if (rawReference.charAt(p) != '#') {
+            throw new IllegalArgumentException("Invalid color in direct reference: " + rawReference);
         }
 
-        // operationId
-        for (int i = 1; i <= 6; i++) {
-            char c = s.charAt(i);
+        while (++p < 7) {
+            char c = rawReference.charAt(p);
             if (!Character.isLetterOrDigit(c)) {
-                throw new IllegalArgumentException("Invalid operationId in direct reference: " + s);
+                throw new IllegalArgumentException("Invalid color in direct reference: " + rawReference);
             }
         }
 
-        int p = 7;
-
-        if (s.charAt(p++) != '.' || s.charAt(p++) != '(') {
-            throw new IllegalArgumentException("Invalid direct reference: " + s);
-        }
-
-        if (s.startsWith("response)", p)) {
-            p += "response)".length();
-        } else if (s.startsWith("request)", p)) {
-            p += "request)".length();
+        // exchange type
+        if (rawReference.startsWith(".(response).", p)) {
+            p += 12;
+        } else if (rawReference.startsWith(".(request).", p)) {
+            p += 11;
         } else {
-            throw new IllegalArgumentException("Invalid exchange type in direct reference: " + s);
+            throw new IllegalArgumentException("Invalid exchange type in direct reference: " + rawReference);
         }
 
-        if (p >= s.length() || s.charAt(p++) != '.') {
-            throw new IllegalArgumentException("Invalid direct reference: " + s);
+        // part
+        if (rawReference.startsWith("status", p)) {
+            if (rawReference.length() != p + 6) {
+                throw new IllegalArgumentException("Status reference must not have a path: " + rawReference);
+            }
+            return;
         }
 
-        // validate part keyword
-        if (s.startsWith("body", p)) {
-            p += 4;
-        } else if (s.startsWith("status", p)) {
-            p += 6;
-        } else if (s.startsWith("header", p)) {
-            p += 6;
-        } else {
-            throw new IllegalArgumentException("Invalid part in direct reference: " + s);
+        if (rawReference.startsWith("body", p) || rawReference.startsWith("header", p) || rawReference.startsWith("[*]", p)) {
+            return;
         }
 
-        // status must not have a path
-        if (s.startsWith("status", p - 6) && p < s.length()) {
-            throw new IllegalArgumentException("Status reference must not have a path: " + s);
-        }
-
-        // body/header may optionally have ".<path>"
-        if (p < s.length() && s.charAt(p) != '.') {
-            throw new IllegalArgumentException("Invalid direct reference: " + s);
-        }
+        throw new IllegalArgumentException("Invalid part in direct reference: " + rawReference);
     }
 
-    /**
-     * Top-level part of a direct reference.
-     */
     public enum Part {
         BODY,
         STATUS,
-        HEADER
+        HEADER,
+        ALL // [*]
     }
 }
