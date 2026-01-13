@@ -4,6 +4,8 @@ import com.becon.opencelium.backend.reference.enums.ReferenceType;
 
 import java.util.Objects;
 
+import static com.becon.opencelium.backend.reference.enums.ReferenceType.REQUEST_DATA;
+
 /**
  * Represents a request data reference.
  *
@@ -35,7 +37,7 @@ public final class RequestDataReference implements Reference {
 
     @Override
     public ReferenceType getType() {
-        return ReferenceType.REQUEST_DATA;
+        return REQUEST_DATA;
     }
 
     @Override
@@ -67,7 +69,7 @@ public final class RequestDataReference implements Reference {
      *                                  or the key is empty
      */
     public static RequestDataReference parse(String rawReference) {
-        Objects.requireNonNull(rawReference, "Request data reference is null");
+        Objects.requireNonNull(rawReference, "null is not a reference");
         validate(rawReference);
 
         String content = rawReference.substring(1, rawReference.length() - 1);
@@ -91,11 +93,11 @@ public final class RequestDataReference implements Reference {
 
     private static void validate(String rawReference) {
         if (!rawReference.startsWith("{") || !rawReference.endsWith("}")) {
-            throw new IllegalArgumentException("Invalid request data reference: " + rawReference);
+            throw new IllegalArgumentException("Invalid syntax for " + REQUEST_DATA + " reference: " + rawReference);
         }
 
         if (rawReference.length() <= 2) {
-            throw new IllegalArgumentException("Empty request data reference: " + rawReference);
+            throw new IllegalArgumentException("Empty key in " + REQUEST_DATA + " reference: " + rawReference);
         }
 
         String content = rawReference.substring(1, rawReference.length() - 1);
@@ -103,12 +105,12 @@ public final class RequestDataReference implements Reference {
         if (content.startsWith("#")) {
             int dot = content.indexOf('.');
             if (dot <= 1 || dot == content.length() - 1) {
-                throw new IllegalArgumentException("Invalid request data reference: " + rawReference);
+                throw new IllegalArgumentException("Empty key in " + REQUEST_DATA + " reference: " + rawReference);
             }
 
             for (int i = 1; i < dot; i++) {
                 if (!Character.isDigit(content.charAt(i))) {
-                    throw new IllegalArgumentException("Invalid ctorId in request data reference: " + rawReference);
+                    throw new IllegalArgumentException("Invalid ctorId in " + REQUEST_DATA + " reference: " + rawReference);
                 }
             }
         }

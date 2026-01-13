@@ -5,6 +5,8 @@ import com.becon.opencelium.backend.reference.enums.ReferenceType;
 
 import java.util.Objects;
 
+import static com.becon.opencelium.backend.reference.enums.ReferenceType.PAGE;
+
 /**
  * Represents a pagination reference.
  *
@@ -33,7 +35,7 @@ public final class PageReference implements Reference {
 
     @Override
     public ReferenceType getType() {
-        return ReferenceType.PAGE;
+        return PAGE;
     }
 
     @Override
@@ -60,7 +62,7 @@ public final class PageReference implements Reference {
      */
 
     public static PageReference parse(String rawReference) {
-        Objects.requireNonNull(rawReference, "Page reference is null");
+        Objects.requireNonNull(rawReference, "null is not a reference");
         validate(rawReference);
 
         String paramString = rawReference.substring(2, rawReference.length() - 1);
@@ -69,13 +71,13 @@ public final class PageReference implements Reference {
         return new PageReference(rawReference, pageParam);
     }
 
-    private static void validate(String ref) {
-        if (!ref.startsWith("@{") || !ref.endsWith("}")) {
-            throw new IllegalArgumentException("Invalid page reference: " + ref);
+    private static void validate(String rawReference) {
+        if (!rawReference.startsWith("@{") || !rawReference.endsWith("}")) {
+            throw new IllegalArgumentException("Invalid syntax for " + PAGE + " reference: " + rawReference);
         }
 
-        if (ref.length() <= 3) {
-            throw new IllegalArgumentException("Empty page parameter: " + ref);
+        if (rawReference.length() <= 3) {
+            throw new IllegalArgumentException("Empty parameter in " + PAGE + " reference: " + rawReference);
         }
     }
 }

@@ -4,6 +4,8 @@ import com.becon.opencelium.backend.reference.enums.ReferenceType;
 
 import java.util.Objects;
 
+import static com.becon.opencelium.backend.reference.enums.ReferenceType.ENHANCEMENT;
+
 /**
  * Represents an enhancement reference.
  *
@@ -32,7 +34,7 @@ public final class EnhancementReference implements Reference {
 
     @Override
     public ReferenceType getType() {
-        return ReferenceType.ENHANCEMENT;
+        return ENHANCEMENT;
     }
 
     @Override
@@ -62,7 +64,7 @@ public final class EnhancementReference implements Reference {
      *                                  the binding id is malformed
      */
     public static EnhancementReference parse(String rawReference) {
-        Objects.requireNonNull(rawReference, "Enhancement reference is null");
+        Objects.requireNonNull(rawReference, "null is not a reference");
         validate(rawReference);
 
         String bindId = rawReference.substring(3, rawReference.length() - 2);
@@ -72,19 +74,19 @@ public final class EnhancementReference implements Reference {
 
     private static void validate(String rawReference) {
         if (!rawReference.startsWith("#{%") || !rawReference.endsWith("%}")) {
-            throw new IllegalArgumentException("Invalid enhancement reference: " + rawReference);
+            throw new IllegalArgumentException("Invalid syntax for " + ENHANCEMENT + " reference: " + rawReference);
         }
 
         // total length must be exactly 29
         if (rawReference.length() != 29) {
-            throw new IllegalArgumentException("Enhancement binding id must be exactly 24 hexadecimal characters: " + rawReference);
+            throw new IllegalArgumentException("Binding id must be 24 hex chars in " + ENHANCEMENT + " reference: " + rawReference);
         }
 
         // validate hexadecimal characters
         for (int i = 3; i < 27; i++) {
             char c = rawReference.charAt(i);
             if (Character.digit(c, 16) < 0) {
-                throw new IllegalArgumentException("Invalid hex character '" + c + "' in enhancement reference: " + rawReference);
+                throw new IllegalArgumentException("Invalid hex character '" + c + "' in " + ENHANCEMENT + " reference: " + rawReference);
             }
         }
     }

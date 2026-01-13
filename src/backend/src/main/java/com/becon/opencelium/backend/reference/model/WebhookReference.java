@@ -5,6 +5,8 @@ import com.becon.opencelium.backend.reference.enums.ReferenceType;
 
 import java.util.Objects;
 
+import static com.becon.opencelium.backend.reference.enums.ReferenceType.WEBHOOK;
+
 /**
  * Represents a webhook reference.
  *
@@ -35,7 +37,7 @@ public final class WebhookReference implements Reference {
 
     @Override
     public ReferenceType getType() {
-        return ReferenceType.WEBHOOK;
+        return WEBHOOK;
     }
 
     @Override
@@ -70,7 +72,7 @@ public final class WebhookReference implements Reference {
      *                                  the path is empty, or the data type is unknown
      */
     public static WebhookReference parse(String rawReference) {
-        Objects.requireNonNull(rawReference, "Webhook reference is null");
+        Objects.requireNonNull(rawReference, "null is not a reference");
         validate(rawReference);
 
         final DataType dataType;
@@ -94,11 +96,11 @@ public final class WebhookReference implements Reference {
 
     private static void validate(String rawReference) {
         if (!rawReference.startsWith("${") || !rawReference.endsWith("}")) {
-            throw new IllegalArgumentException("Invalid webhook reference: " + rawReference);
+            throw new IllegalArgumentException("Invalid syntax for " + WEBHOOK + " reference: " + rawReference);
         }
 
         if (rawReference.length() <= 3) {
-            throw new IllegalArgumentException("Empty webhook expression: " + rawReference);
+            throw new IllegalArgumentException("Empty key in " + WEBHOOK + " reference: " + rawReference);
         }
     }
 }

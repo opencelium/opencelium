@@ -4,6 +4,8 @@ import com.becon.opencelium.backend.reference.enums.ReferenceType;
 
 import java.util.Objects;
 
+import static com.becon.opencelium.backend.reference.enums.ReferenceType.WRAPPED_DIRECT;
+
 /**
  * Represents a wrapped direct reference.
  *
@@ -31,7 +33,7 @@ public final class WrappedDirectReference implements Reference {
 
     @Override
     public ReferenceType getType() {
-        return ReferenceType.WRAPPED_DIRECT;
+        return WRAPPED_DIRECT;
     }
 
     @Override
@@ -49,36 +51,31 @@ public final class WrappedDirectReference implements Reference {
     /**
      * Parses a wrapped direct reference.
      *
-     * @param s wrapped reference string
+     * @param rawReference wrapped reference string
      * @return parsed {@link WrappedDirectReference}
      * @throws NullPointerException if {@code s} is null
      * @throws IllegalArgumentException if the reference is invalid
      */
-    public static WrappedDirectReference parse(String s) {
-        Objects.requireNonNull(s, "Wrapped direct reference is null");
-        validate(s);
+    public static WrappedDirectReference parse(String rawReference) {
+        Objects.requireNonNull(rawReference, "null is not a reference");
+        validate(rawReference);
 
         // unwrap "{%" and "%}"
-        String inner = s.substring(2, s.length() - 2);
+        String inner = rawReference.substring(2, rawReference.length() - 2);
 
         // delegate full validation to DirectReference
         DirectReference direct = DirectReference.parse(inner);
 
-        return new WrappedDirectReference(s, direct);
+        return new WrappedDirectReference(rawReference, direct);
     }
 
-    /**
-     * Validates the wrapped-direct structure only.
-     * <p>Does NOT validate the inner direct reference.
-     */
-    private static void validate(String s) {
-        if (!s.startsWith("{%#") || !s.endsWith("%}")) {
-            throw new IllegalArgumentException("Invalid wrapped direct reference: " + s);
+    private static void validate(String rawReference) {
+        if (!rawReference.startsWith("{%#") || !rawReference.endsWith("%}")) {
+            throw new IllegalArgumentException("Invalid syntax for " + WRAPPED_DIRECT + " reference: " + rawReference);
         }
 
-        // minimal sanity check (must contain something meaningful inside)
-        if (s.length() <= 6) { // "{%#x%}"
-            throw new IllegalArgumentException("Invalid wrapped direct reference: " + s);
+        if (rawReference.length() <= 6) {
+            throw new IllegalArgumentException("Empty direct reference in " + WRAPPED_DIRECT + " reference: " + rawReference);
         }
     }
 }

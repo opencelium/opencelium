@@ -7,8 +7,64 @@ import java.util.Objects;
 
 import static com.becon.opencelium.backend.reference.enums.ReferenceType.DIRECT;
 
+/**
+ * Represents a direct reference to an operation request or response.
+ *
+ * <p><b>Syntax</b>:
+ * <pre>{@code
+ * #color.(response|request).(status|header|body|[*])[.<path>]
+ * }</pre>
+ *
+ * <ul>
+ *   <li>{@code color} – 6-character alphanumeric operation identifier</li>
+ *   <li>{@code response|request} – exchange type</li>
+ *   <li>{@code status|header|body|[*]} – part (exactly one)</li>
+ *   <li>{@code path} – optional, JSONPath-like expression</li>
+ * </ul>
+ *
+ * <p>The {@code path} part is <b>opaque</b> and is not validated syntactically.
+ * It is interpreted later during extraction.
+ *
+ * <p><b>Selector rules</b>:
+ * <ul>
+ *   <li>{@code status} – returns HTTP status code (must NOT have a path)</li>
+ *   <li>{@code header} – returns headers (path required)</li>
+ *   <li>{@code body} – returns body (path required)</li>
+ *   <li>{@code [*]} – selects all responses; any following segments are treated as path</li>
+ * </ul>
+ *
+ * <p><b>Examples</b>:
+ *
+ * <pre>{@code
+ * // CASE 1: collect all data
+ * #ababab.(response).[*]
+ * #ababab.(response).[*].status
+ * #ababab.(response).[*].header
+ * #ababab.(response).[*].body
+ *
+ * // CASE 2: status
+ * #ababab.(response).status
+ *
+ * // CASE 3: header
+ * #ababab.(response).header.$.Content-Type
+ * #ababab.(request).header.$.Content-Type
+ *
+ * // CASE 4: body
+ * #ababab.(response).body.$.field[*]
+ * #ababab.(response).body.$.field1.['field2_with_special_symbol'].field3
+ * #ababab.(response).body.$.[*]
+ * #ababab.(request).body.$.[*]
+ * }</pre>
+ *
+ * <p><b>Notes</b>:
+ * <ul>
+ *   <li>Only the first token after {@code (response|request).} is treated as a selector.</li>
+ *   <li>Any subsequent segments are part of the {@code path}, even if they equal
+ *       {@code status}, {@code header}, or {@code body}.</li>
+ *   <li>All positional offsets and parsing rules are encapsulated in this class.</li>
+ * </ul>
+ */
 public final class DirectReference implements Reference {
-
     private final String raw;
     private final String color;
     private final ExchangeType exchangeType;
@@ -55,7 +111,20 @@ public final class DirectReference implements Reference {
         return path;
     }
 
-
+    /**
+     * Parses a raw direct reference string into a {@link DirectReference}.
+     *
+     * <p>Expected syntax:
+     * <pre>{@code
+     * #color.(response|request).(status|header|body|[*])[.<path>]
+     * }</pre>
+     *
+     * @param rawReference raw direct reference
+     * @return parsed {@link DirectReference}
+     * @throws NullPointerException     if {@code rawReference} is {@code null}
+     * @throws IllegalArgumentException if syntax is invalid, exchange type or part is invalid,
+     *                                  or an illegal path is present
+     */
     public static DirectReference parse(String rawReference) {
         Objects.requireNonNull(rawReference, "null is not a reference");
         validate(rawReference);
