@@ -40,6 +40,7 @@ class DirectReferenceTest {
         DirectReference all = parse("#ababab.(response).[*]");
 
         assertEquals(DirectReference.Part.ALL, all.getPart());
+        assertNull(all.getPath());
 
         // status
         DirectReference status = parse("#ababab.(response).status");
@@ -63,6 +64,7 @@ class DirectReferenceTest {
         DirectReference all = parse("#ababab.(request).[*]");
 
         assertEquals(DirectReference.Part.ALL, all.getPart());
+        assertNull(all.getPath());
 
         // status
         DirectReference status = parse("#ababab.(request).status");

@@ -95,6 +95,7 @@ public class ReferenceUtility {
         return ref.charAt(11) == 's' ? "response" : "request";
     }
 
+    @Deprecated
     public static String getResult(String ref) {
         String exchange = extractExchangeType(ref);
         String res = "";

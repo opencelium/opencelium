@@ -4,11 +4,14 @@ import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.enums.execution.DataType;
 import com.becon.opencelium.backend.execution.ExecutionManager;
 import com.becon.opencelium.backend.reference.ReferenceParser;
+import com.becon.opencelium.backend.reference.enums.ExchangeType;
+import com.becon.opencelium.backend.reference.model.DirectReference;
 import com.becon.opencelium.backend.reference.model.EnhancementReference;
 import com.becon.opencelium.backend.reference.model.PageReference;
 import com.becon.opencelium.backend.reference.model.Reference;
 import com.becon.opencelium.backend.reference.model.RequestDataReference;
 import com.becon.opencelium.backend.reference.model.WebhookReference;
+import com.becon.opencelium.backend.reference.model.WrappedDirectReference;
 import com.becon.opencelium.backend.resource.execution.ResponseEx;
 import com.becon.opencelium.backend.utility.MediaTypeUtility;
 import com.becon.opencelium.backend.utility.ReferenceUtility;
@@ -83,11 +86,11 @@ public class ReferenceExtractor implements Extractor {
         Reference reference = ReferenceParser.parse(rawReference);
 
         return switch (reference.getType()) {
-            case DIRECT -> extractFromOperation(rawReference);
+            case DIRECT -> extractFromOperation((DirectReference) reference);
 
             case WRAPPED_DIRECT -> {
-                rawReference = ReferenceUtility.extractDirectRef(rawReference);
-                yield extractFromOperation(rawReference);
+                WrappedDirectReference wdr = (WrappedDirectReference) reference;
+                yield extractFromOperation(wdr.getDirectReference());
             }
 
             case ENHANCEMENT -> executionManager.executeScript(
@@ -144,28 +147,23 @@ public class ReferenceExtractor implements Extractor {
         };
     }
 
-    private Object extractFromOperation(String ref) {
+    private Object extractFromOperation(DirectReference ref) {
         // find operation by color
-        String color = ref.substring(0, 7);
+        Operation operation = executionManager.findOperationByColor(ref.getColor())
+                .orElseThrow(() -> new RuntimeException("There is no Operation with '" + ref.getColor() + "'"));
 
-        Operation operation = executionManager.findOperationByColor(color)
-                .orElseThrow(() -> new RuntimeException("There is no Operation with '" + color + "'"));
-
+        final String path = ref.getPath();
         // CASE 1:
-        // 'ref' always starts with '#colour.(response).[*]',
-        // and '#colour' and '(response)' are used in this order in all cases,
-        // so we can directly target '[*]' to check if 'ref' is in CASE 1:
-        if ("[*]".equals(ref.substring(19, 22))) {
-            if (ref.length() == 22) {
+        if (ref.getPart() == DirectReference.Part.ALL) {
+            if (path == null) {
                 TreeMap<String, ResponseEx> responses = new TreeMap<>(NUMERIC_PARTS);
                 operation.getResponses().forEach((K, V) -> responses.put(K, ResponseEx.of(V)));
 
                 return responses;
             }
 
-            // collect only specified response part
-            String part = ref.substring(23); // can be in ['header', 'status', 'body']
-            if (part.equals("status")) {
+            // collect only specified response part, can be in ['header', 'status', 'body']
+            if ("status".equals(path)) {
                 TreeMap<String, Integer> statuses = new TreeMap<>(NUMERIC_PARTS);
 
                 operation.getResponses().forEach((K, V) -> statuses.put(K, V.getStatusCode().value()));
@@ -173,7 +171,7 @@ public class ReferenceExtractor implements Extractor {
                 return statuses;
             }
 
-            if (part.equals("header")) {
+            if ("header".equals(path)) {
                 TreeMap<String, Map<String, List<String>>> headers = new TreeMap<>(NUMERIC_PARTS);
 
                 operation.getResponses().forEach((K, V) -> headers.put(K, V.getHeaders()));
@@ -181,7 +179,7 @@ public class ReferenceExtractor implements Extractor {
                 return headers;
             }
 
-            if (part.equals("body")) {
+            if ("body".equals(path)) {
                 TreeMap<String, Object> bodies = new TreeMap<>(NUMERIC_PARTS);
 
                 operation.getResponses().forEach((K, V) -> bodies.put(K, V.getBody()));
@@ -194,30 +192,22 @@ public class ReferenceExtractor implements Extractor {
         String key = executionManager.generateKey(operation.getLoopDepth());
 
         // CASE 2:
-        // only ResponseEntity can have status
-        // so 'ref' is always in form '#colour.(response).status',
-        // so we can directly target 'status' to check if 'ref' is in CASE 2:
-        if ("status".equals(ref.substring(19, 25))) {
+        // only ResponseEntity can have status, so 'ref' is always in form '#color.(response).status',
+        if (ref.getPart() == DirectReference.Part.STATUS) {
             return operation.getResponses().get(key).getStatusCode().value();
         }
 
-        String exchangeType = ReferenceUtility.extractExchangeType(ref);
-        String path = ref.substring(ref.indexOf('$') + 2); // remove operation info
-        HttpEntity<?> entity;
-        String part;
-
-        if (exchangeType.equals("response")) {
+        final HttpEntity<?> entity;
+        if (ref.getExchangeType() == ExchangeType.RESPONSE) {
             entity = operation.getResponses().get(key);
-            part = ref.substring(19, ref.indexOf('$') - 1);
         } else {
             entity = operation.getRequests().get(key);
-            part = ref.substring(18, ref.indexOf('$') - 1);
         }
 
         // CASE 3:
         //'#ababab.(response).header.$.Content-Type',
         //'#ababab.(request).header.$.Content-Type',
-        if ("header".equals(part)) {
+        if (ref.getPart() == DirectReference.Part.HEADER) {
             return entity.getHeaders().get(path);
         }
 
