@@ -40,6 +40,7 @@ class JsonBody extends Component {
 			onReferenceClick,
 			source,
 			target,
+			style,
 		} = this.props;
 		const src =
 			source === null
@@ -62,6 +63,7 @@ class JsonBody extends Component {
 					width: '80%',
 					display: 'inline-block',
 					position: 'relative',
+					...style,
 				}}
 				ReferenceComponent={ReferenceComponent}
 				PointerComponent={PointerComponent}
@@ -78,6 +80,7 @@ JsonBody.propTypes = {
 	connection: PropTypes.instanceOf(CConnection),
 	connector: PropTypes.instanceOf(CConnectorItem),
 	updateBody: PropTypes.func,
+	style: PropTypes.any,
 };
 
 JsonBody.defaultProps = {
@@ -86,6 +89,7 @@ JsonBody.defaultProps = {
 	isDraft: false,
 	source: null,
 	noPlaceholder: false,
+	style: {},
 };
 
 export default React.forwardRef((props, ref) => (

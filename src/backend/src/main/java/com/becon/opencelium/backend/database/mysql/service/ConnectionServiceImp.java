@@ -35,6 +35,7 @@ import com.becon.opencelium.backend.database.mysql.repository.MaskingRuleReposit
 import com.becon.opencelium.backend.enums.Action;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
 import com.becon.opencelium.backend.mapper.base.Mapper;
+import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
@@ -56,10 +57,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -67,6 +68,8 @@ import java.util.stream.Collectors;
 @Service
 public class ConnectionServiceImp implements ConnectionService {
     private static final Logger log = LoggerFactory.getLogger(ConnectionServiceImp.class);
+    private static final String TEST_PREFIX_LIKE = "!*test_connection_%";
+    private static final int CHUNK_SIZE = 1000;
 
     private final ConnectionRepository connectionRepository;
     private final ConnectorService connectorService;
@@ -530,61 +533,61 @@ public class ConnectionServiceImp implements ConnectionService {
         boolean gotBackup = false;
         for (Long id : ids) {
             Connection connection = getById(id);
-            if (Utils.compare(ocProps.getVersion(), connection.getOcVersion()) >= 0 && !isTestConnection(connection.getTitle())) {
-                // FIXME: 'Utils.compare(ocProps.getVersion(), connection.getOcVersion()) >= 0' condition should be with '>'. It has changed for 4.6 version only. Fix it on next versions
-
+            if (Utils.compare(ocProps.getVersion(), connection.getOcVersion()) > 0 && !isTestConnection(connection.getTitle())) {
                 if (!gotBackup) {
+                    gotBackup = true;
+
                     try {
                         mysqlBackupService.backup(EntityNames.ENHANCEMENT);
-                        mongoDbBackupService.backup();
-                        gotBackup = true;
                     } catch (Exception e) {
-                        log.error("Failed to backup. Skipped updating connections");
-                        throw new RuntimeException(e);
+                        log.error("Failed to take backup {} table from mysql. Continuing updating connections without backup", EntityNames.ENHANCEMENT);
+                    }
+
+                    try {
+                        mongoDbBackupService.backup();
+                    } catch (Exception e) {
+                        log.error("Failed to take backup from MongoDB. Continuing updating connections without backup");
                     }
                 }
-                AtomicBoolean connectionChanged = new AtomicBoolean(false);
+
                 // UPDATE CONNECTION_MNG
-                ConnectionMng connectionMng = connectionMngService.getByConnectionId(connection.getId());
+                ConnectionMng connectionMng;
+                try {
+                    connectionMng = connectionMngService.getByConnectionId(connection.getId());
+                } catch (Exception e) {
+                    log.error("Failed to find Connection[id={}, name={}] on MongoDB with id {}. Skipped updating", connection.getId(), connection.getTitle(), connection.getId());
+                    continue;
+                }
+
                 try {
 
                     clearLogsWithNullFlowId(connectionMng);
 
                     connectionMngEntityUpdater.updateToCurrentVersion(connectionMng)
                             .ifChangedOrElseIfUpdated(
-                                    x -> {
-                                        connectionMngService.updateWithoutBinding(x);
-                                        connectionChanged.set(true);
-                                    }, // if any field is updated
+                                    connectionMngService::updateWithoutBinding, // if any field is updated
                                     connectionMngService::saveDirectly // only version is set to the current version
                             );
                 } catch (Exception e) {
                     log.error("Failed to update Connection[id={}, name={}]", connection.getId(), connection.getTitle(), e);
-                    mysqlBackupService.restore(EntityNames.ENHANCEMENT);
-                    mongoDbBackupService.restore();
-                    log.warn("Rolled back all changes");
-                    throw new RuntimeException(e);
+                    continue;
                 }
 
-                AtomicBoolean anyEnhancementChanged = new AtomicBoolean(false);
                 // UPDATE ENHANCEMENTS
                 try {
                     connection.getEnhancements().forEach(enhancement -> enhancementEntityUpdater.updateFrom(enhancement, connection.getOcVersion())
-                            .ifChanged(x -> {
-                                anyEnhancementChanged.set(true);
-                                enhancementService.save(enhancement);
-                            }));
+                            .ifChanged(x -> enhancementService.save(enhancement)));
                 } catch (Exception e) {
                     log.error("Failed to update Connection[id={}, name={}]", connection.getId(), connection.getTitle(), e);
-                    mysqlBackupService.restore(EntityNames.ENHANCEMENT);
-                    mongoDbBackupService.restore();
-                    log.warn("Rolled back all changes");
-                    throw new RuntimeException(e);
+                    continue;
                 }
+
+                connection.setOcVersion(ocProps.getVersion());
+                connectionRepository.save(connection);
+
                 log.info("Connection[id={}, name={}] is successfully updated to {} version", connection.getId(), connection.getTitle(), ocProps.getVersion());
             }
         }
-        connectionRepository.updateVersion(ocProps.getVersion());
     }
 
     private void clearLogsWithNullFlowId(ConnectionMng connectionMng) {
@@ -606,6 +609,66 @@ public class ConnectionServiceImp implements ConnectionService {
     public List<String> getLogFileNameListById(long connectionId) {
         return LogFileUtility.getLogFileNameList(connectionId);
     }
+
+    @Override
+    public List<Connection> findAllByIds(IdentifiersDTO<Long> ids) {
+        if (ids == null || CollectionUtils.isEmpty(ids.getIdentifiers())) {
+            return Collections.emptyList();
+        }
+
+        return connectionRepository.findAllById(ids.getIdentifiers());
+    }
+
+    /**
+     * Full cleanup:
+     * 1) find test connection ids in MariaDB
+     * 2) delete Mongo docs referencing those ids
+     * 3) delete MariaDB rows by ids
+     *
+     * Idempotent: can be run multiple times safely.
+     */
+    @Override
+    @Transactional
+    public CleanupResult cleanupAllTestConnections() {
+        log.info("Test connection cleanup completed started");
+        List<Long> ids = connectionRepository.findIdsByTitleLike(TEST_PREFIX_LIKE);
+        if (ids.isEmpty()) return new CleanupResult(0, 0, 0);
+
+        long totalMongoDeleted = 0;
+        int totalSqlDeleted = 0;
+
+        for (List<Long> chunk : chunks(ids, CHUNK_SIZE)) {
+            // delete mongo first (so we don’t keep dangling refs if SQL delete succeeds)
+            totalMongoDeleted += connectionMngService.deleteByConnectionIdIn(chunk);
+
+            // then delete SQL rows
+            totalSqlDeleted += deleteSqlChunk(chunk);
+        }
+        CleanupResult cleanupResult = new CleanupResult(ids.size(), totalMongoDeleted, totalSqlDeleted);
+        log.info(
+                "Test connection cleanup completed: candidates={}, mongoDeleted={}, sqlDeleted={}",
+                cleanupResult.candidateSqlIds(),
+                cleanupResult.mongoDeleted(),
+                cleanupResult.sqlDeleted()
+        );
+        return cleanupResult;
+    }
+
+    @Transactional
+    protected int deleteSqlChunk(List<Long> chunk) {
+        chunk.forEach(this::deleteById);
+        return chunk.size();
+    }
+
+    private static <T> List<List<T>> chunks(List<T> list, int size) {
+        List<List<T>> out = new ArrayList<>();
+        for (int i = 0; i < list.size(); i += size) {
+            out.add(list.subList(i, Math.min(i + size, list.size())));
+        }
+        return out;
+    }
+
+    public record CleanupResult(int candidateSqlIds, long mongoDeleted, int sqlDeleted) {}
 
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
     // private methods

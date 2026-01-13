@@ -23,6 +23,7 @@ import {useAppDispatch} from "@application/utils/store";
 import {useSocketData} from "../../../socket/SocketDataContext";
 import {Auth} from "@application/classes/Auth";
 import {TRIPLET_STATE} from "@application/interfaces/IApplication";
+import {getCurrentSubscription} from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
 
 const CheckConnectionComponent: FC =
     ({
@@ -34,6 +35,9 @@ const CheckConnectionComponent: FC =
             const logoutProps: LogoutProps = {wasAccessDenied: true, message: ResponseMessages.UNSUPPORTED_HEADER_AUTH_TYPE};
             dispatch(logout(logoutProps));
         }
+        useEffect(() => {
+            dispatch(getCurrentSubscription());
+        }, []);
         useEffect(() => {
             if (authUser?.id !== -1) {
                 if (isAboutToLogout === TRIPLET_STATE.TRUE) {

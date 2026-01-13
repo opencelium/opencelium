@@ -10,7 +10,8 @@ public enum UpdaterVersion {
     VERSION_4_0("4.0"),
     VERSION_4_4("4.4"),
     VERSION_4_5("4.5"),
-    VERSION_4_6("4.6");
+    VERSION_4_6("4.6"),
+    VERSION_4_7("4.7");
 
     private final String version;
 

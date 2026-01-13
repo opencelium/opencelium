@@ -32,6 +32,39 @@ public class ReferenceUtility {
         return matcher.find();
     }
 
+    public static String getContainedReferenceAndType(String expression) {
+        if (expression == null) {
+            return "No reference found";
+        }
+
+        String res = extractRef(expression, wrappedDirectRef);
+        if (res != null) {
+            return "direct ref(" + res + ")";
+        }
+
+        res = extractRef(expression, enhancement);
+        if (res != null) {
+            return "enhancement(" + res + ")";
+        }
+
+        res = extractRef(expression, webhook);
+        if (res != null) {
+            return "webhook(" + res + ")";
+        }
+
+        res = extractRef(expression, pageRef);
+        if (res != null) {
+            return "page(" + res + ")";
+        }
+
+        res = extractRef(expression, requestData);
+        if (res != null) {
+            return "request data(" + res + ")";
+        }
+
+        return "No reference found(" + res + ")";
+    }
+
     public static List<String> extractRefs(String value) {
         List<String> result = new ArrayList<>();
 
@@ -78,7 +111,7 @@ public class ReferenceUtility {
         String exchange = extractExchangeType(ref);
         String res = "";
 
-        if (exchange.equals("response")){
+        if (exchange.equals("response")) {
             res = ref.split("\\.")[2];
         }
 
@@ -128,7 +161,7 @@ public class ReferenceUtility {
         String[] refParts = splitPaths(ref);
 
         String result = "";
-        for (int i = 0; i < partCount - 1 ; i++) {
+        for (int i = 0; i < partCount - 1; i++) {
             result += refParts[i] + ".";
         }
 

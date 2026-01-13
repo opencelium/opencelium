@@ -24,9 +24,12 @@ import {
 import {Button} from "@app_component/base/button/Button";
 import {terminateExecution} from "@entity/schedule/redux_toolkit/action_creators/ScheduleCreators";
 import {consoleLog} from "@application/utils/utils";
+import Subscription from "@entity/license_management/classes/Subscription";
 
 const TestConnectionButton = ({validateLogic}: any) => {
     const dispatch = useAppDispatch();
+    const {currentSubscription} = Subscription.getReduxState();
+    const isLicenseExpired = Subscription.hasReachedLimit(currentSubscription);
     const {socket} = useSocketData();
     const [channelId, setChannelId] = useState<string>(undefined);
     const [startTime, setStartTime] = useState<number>();
@@ -207,7 +210,7 @@ const TestConnectionButton = ({validateLogic}: any) => {
             setChannelId(connection.id || channelId);
         }
     }
-    const isDisabled = !socket.connected;
+    const isDisabled = !socket.connected || isLicenseExpired;
     return (
         <div style={{position: 'relative'}}>
             <Button
@@ -229,7 +232,7 @@ const TestConnectionButton = ({validateLogic}: any) => {
                 left: '26px',
                 fontSize: '10px',
                 color: '#ccc'
-            }}>{"Websocket is inactive"}</span>}
+            }}>{isLicenseExpired ? "Your license is expired" : "Websocket is inactive"}</span>}
         </div>
     )
 }

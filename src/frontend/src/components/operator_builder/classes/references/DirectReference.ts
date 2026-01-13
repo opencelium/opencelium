@@ -9,7 +9,7 @@ export default class DirectReference extends BaseReference {
     }
 
     static getRegex(): RegExp {
-        return /"?%?\{%(#[0-9A-Fa-f]{6})\.\((request|response)\)\.body\.\$\.(.*?)%\}%?"?/;
+        return /"?%?\{%(#[0-9A-Fa-f]{6})\.\((request|response)\)\.body\.\$(?:\.([^%]*))?%\}%?"?/;
     }
 
     extractData(): DirectReferenceData | null {
@@ -19,7 +19,7 @@ export default class DirectReference extends BaseReference {
     }
 
     static generateReference(field: string, color: string, type: SourceType): string {
-        return `{%${color}.(${type}).body.$.${field}%}`;
+        return `{%${color}.(${type}).body.${!field ? field : field.startsWith('$.') ? field : field === '$' ? '$' : `$.${field}`}%}`;
     }
 }
 

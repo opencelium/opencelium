@@ -174,7 +174,7 @@ class Body extends React.Component {
 		}
 	}
 
-	renderBody() {
+	renderBody(style = {}) {
 		const { isToggledReferenceIcon } = this.state;
 		const {
 			readOnly,
@@ -222,6 +222,7 @@ class Body extends React.Component {
 						openEnhancement={(a, b) =>
 							this.setCurrentEnhancementClickingOnPointer(a, b)
 						}
+						style={style}
 					/>
 				);
 			case BODY_FORMAT.XML:
@@ -315,22 +316,6 @@ class Body extends React.Component {
 			connector,
 			connection,
 		} = this.props;
-		let gridStyles = {};
-		if (isToggledReferenceIcon && !isToggledIcon) {
-			gridStyles.gridTemplateRows = 'calc(100% - 40px) 40px';
-		}
-		if (!isToggledReferenceIcon && isToggledIcon) {
-			gridStyles.gridTemplateRows = '40px calc(100% - 40px)';
-		}
-		if (!isToggledReferenceIcon && !isToggledIcon) {
-			gridStyles.gridTemplateRows = '40px 40px';
-		}
-		if (isToggledReferenceIcon && isToggledIcon) {
-			gridStyles.gridTemplateRows = '25% calc(100%)';
-		}
-		if (!hasEnhancement) {
-			gridStyles.gridTemplateRows = 'unset';
-		}
 		const isGraphQLData = method.isGraphQLData();
 		const hasEnhancement = this.props.hasEnhancement && !isGraphQLData;
 		return (
@@ -341,10 +326,10 @@ class Body extends React.Component {
 							? styles.body_data_with_enhancement
 							: styles.body_data_without_enhancement
 					}
-					style={gridStyles}
 				>
 					{hasEnhancement && (
 						<ReferenceInformation
+							style={{maxHeight: !isToggledReferenceIcon ? '40px' : isToggledIcon ? '50%' : 'calc(100% - 40px)',}}
 							body={source}
 							method={method}
 							connection={connection}
@@ -360,7 +345,13 @@ class Body extends React.Component {
 							location='body'
 						/>
 					)}
-					<div style={{position: 'relative'}}>
+					<div style={{
+						position: 'relative',
+						flex: 1,
+						display: 'flex',
+						flexDirection: 'column',
+						maxHeight: !isToggledIcon ? '40px' : isToggledReferenceIcon ? '50%' : 'calc(100% - 40px)',
+					}}>
 						<div>
 							<b>{bodyTitle}</b>
 							<TooltipFontIcon
@@ -371,7 +362,10 @@ class Body extends React.Component {
 								value={isToggledIcon ? 'expand_less' : 'chevron_right'}
 							/>
 						</div>
-						{isToggledIcon && this.renderBody()}
+						{isToggledIcon && this.renderBody({
+							flex: 1,
+							overflowY: 'auto',
+						})}
 					</div>
 				</div>
 				{hasEnhancement && (
@@ -442,7 +436,7 @@ class Body extends React.Component {
 				<Dialog
 					actions={[
 						{
-							label: 'Ok',
+							label: 'Close',
 							onClick: (a) => this.toggleBodyVisible(a),
 							id: 'header_ok',
 						},
