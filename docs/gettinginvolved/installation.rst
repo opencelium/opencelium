@@ -636,7 +636,7 @@ Use default Docker installation guide.
 	:linenos:
 
 	cd /opt/opencelium-docker
-	docker-compose up -d
+	docker compose up -d
 
 .. note::
 	| Now you can connect to OpenCelium, by navigating to http://localhost in your web browser.
