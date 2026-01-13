@@ -37,7 +37,7 @@ public class EvaluationTest {
         referenceValues.put("{array_of_numbers}", List.of(1, 2, 3, 4, 5));
         referenceValues.put("{array_of_strings}", List.of("hello", "world"));
         referenceValues.put("{array_of_bool}", List.of(true, false));
-        referenceValues.put("{array_of_objects}", List.of(new HashMap<String, Object>() {{
+        referenceValues.put("{array_of_objects}", List.of(new LinkedHashMap<String, Object>() {{
             put("id", 1);
             put("name", "Bob");
         }}));
@@ -65,7 +65,7 @@ public class EvaluationTest {
         referenceValues.put("${array_of_numbers}", List.of(1, 2, 3, 4, 5));
         referenceValues.put("${array_of_strings}", List.of("hello", "world"));
         referenceValues.put("${array_of_bool}", List.of(true, false));
-        referenceValues.put("${array_of_objects}", List.of(new HashMap<String, Object>() {{
+        referenceValues.put("${array_of_objects}", List.of(new LinkedHashMap<String, Object>() {{
             put("id", 1);
             put("name", "Bob");
         }}));
@@ -88,10 +88,14 @@ public class EvaluationTest {
         referenceValues.put("{%#ffffff.(response).array_of_numbers%}", List.of(1, 2, 3, 4, 5));
         referenceValues.put("{%#ffffff.(request).array_of_strings%}", List.of("hello", "world"));
         referenceValues.put("{%#ffffff.(response).array_of_bool%}", List.of(true, false));
-        referenceValues.put("{%#ffffff.(request).array_of_objects%}", List.of(new HashMap<String, Object>() {{
+        referenceValues.put("{%#ffffff.(request).array_of_objects%}", List.of(new LinkedHashMap<String, Object>() {{
             put("id", 1);
             put("name", "Bob");
         }}));
+        referenceValues.put("{%#ffffff.(request).object%}", new LinkedHashMap<String, Object>() {{
+            put("id", 1);
+            put("name", "A");
+        }});
         referenceValues.put("{%#ffffff.(request).body.$.person%}", new LinkedHashMap<String, Object>() {{
             put("id", 1);
             put("name", "Obid");
@@ -122,7 +126,7 @@ public class EvaluationTest {
         referenceValues.put("#{%600d5b5f4f3e2c1d8a7b6c20%}", List.of(1, 2, 3, 4, 5));
         referenceValues.put("#{%600d5b5f4f3e2c1d8a7b6c21%}", List.of("hello", "world"));
         referenceValues.put("#{%600d5b5f4f3e2c1d8a7b6c22%}", List.of(true, false));
-        referenceValues.put("#{%600d5b5f4f3e2c1d8a7b6c23%}", List.of(new HashMap<String, Object>() {{
+        referenceValues.put("#{%600d5b5f4f3e2c1d8a7b6c23%}", List.of(new LinkedHashMap<String, Object>() {{
             put("id", 1);
             put("name", "Bob");
         }}));
@@ -356,8 +360,53 @@ public class EvaluationTest {
     public void testInnerReferences() throws InvalidExpressionException {
         Assertions.assertEquals(Boolean.TRUE, expressionProcessor.evaluate("\"AAA{%#ffffff.(request).name%}AAA\" Like \"%{%#ffffff.(request).name%}%\"", referenceExtractor));
         Assertions.assertEquals(Boolean.TRUE, expressionProcessor.evaluate("\"{%#ffffff.(request).name%}{%#ffffff.(request).name%}\" = \"Bob{%#ffffff.(request).name%}\"", referenceExtractor));
-        Assertions.assertThrows(InvalidExpressionException.class, () -> expressionProcessor.evaluate("\"AAA{%#ffffff.(response).array_of_numbers%}AAA\" Like \"%{%#ffffff.(request).name%}%\"", referenceExtractor));
+        Assertions.assertEquals(Boolean.TRUE, expressionProcessor.evaluate("\"{%#ffffff.(request).name%}{%#ffffff.(request).name%}\" = \"BobBob\"", referenceExtractor));
+        Assertions.assertEquals(Boolean.TRUE, expressionProcessor.evaluate("\"AAA{%#ffffff.(response).array_of_numbers%}AAA\" Like \"%1, 2, 3, 4, 5%\"", referenceExtractor));
+        Assertions.assertEquals(Boolean.TRUE, expressionProcessor.evaluate("\"AAA{%#ffffff.(request).object%}AAA\" Like \"%\"id\": 1, \"name\": \"A\"%\"", referenceExtractor));
     }
+
+
+    @Test
+    public void testSerializeObjects() throws InvalidExpressionException {
+        Assertions.assertEquals(Boolean.TRUE,
+                expressionProcessor.evaluate(
+                        "\"SS{%#ffffff.(request).object%}\" = \"SS{\"id\": 1, \"name\": \"A\"}\"",
+                        referenceExtractor
+                )
+        );
+
+        Assertions.assertEquals(Boolean.TRUE,
+                expressionProcessor.evaluate(
+                        "\"PREFIX-{%#ffffff.(request).object%}-SUFFIX\" Like \"%\"id\": 1, \"name\": \"A\"%\"",
+                        referenceExtractor
+                )
+        );
+
+        Assertions.assertEquals(Boolean.TRUE,
+                expressionProcessor.evaluate(
+                        "\"A{%#ffffff.(request).array_of_objects%}\" = \"A[{\"id\": 1, \"name\": \"Bob\"}]\"",
+                        referenceExtractor
+                )
+        );
+
+        var nested = new LinkedHashMap<String, Object>();
+        nested.put("id", 10);
+        nested.put("meta", new LinkedHashMap<String, Object>() {{
+            put("name", "X");
+            put("active", true);
+        }});
+        nested.put("tags", List.of("a", "b"));
+
+        referenceValues.put("{%#ffffff.(request).nested_object%}", nested);
+
+        Assertions.assertEquals(Boolean.TRUE,
+                expressionProcessor.evaluate(
+                        "\"A{%#ffffff.(request).nested_object%}\" = \"A{\"id\": 10, \"meta\": {\"name\": \"X\", \"active\": true}, \"tags\": [\"a\", \"b\"]}\"",
+                        referenceExtractor
+                )
+        );
+    }
+
 
     @Test
     public void testShortCircuit() throws InvalidExpressionException {
