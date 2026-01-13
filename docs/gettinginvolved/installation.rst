@@ -60,7 +60,7 @@ Configuration
 
 **1. MariaDB:**
 
-Create database and mysql user for OpenCelium, enable mysql service and secure mysql installation.
+Create database and mariadb user for OpenCelium, enable mariadb service and secure mariadb installation.
 
 .. note::
 	Please change the password (secret1234) in the following command line!
@@ -224,7 +224,7 @@ Configuration
 
 **1. MariaDB:**
 
-Create database and mysql user for OpenCelium, enable mysql service and secure mysql installation.
+Create database and mariadb user for OpenCelium, enable mariadb service and secure mariadb installation.
 
 .. note::
 	Please change the password (secret1234) in the following command line!
@@ -401,7 +401,7 @@ Configuration
 
 **1. MariaDB:**
 
-Create database and mysql user for OpenCelium, enable mysql service and secure mysql installation.
+Create database and mariadb user for OpenCelium, enable mariadb service and secure mariadb installation.
 
 .. note::
 	Please change the password (secret1234) in the following command line!
@@ -554,9 +554,7 @@ Docker is a container-based software framework for automating deployment of
 applications. Compose is a tool for defining and running multi-container Docker 
 applications.
 
-This repo is meant to be the starting point for somebody who likes to use 
-dockerized multi-container OpenCelium in production. The OpenCelium Docker image uses 
-the stable branch of OpenCelium's Git repo.
+The OpenCelium Docker image uses the stable branch of OpenCelium's Git repo.
 
 The Docker images are hosted on `Dockerhub <https://hub.docker.com/u/becongmbh>`_.
 
@@ -598,6 +596,7 @@ Use default Docker installation guide.
 	.. code-block:: sh
 		:linenos:
 	
+		mkdir /opt/opencelium-docker/conf/ssl
 		mkdir /opt/opencelium-docker/conf/ssl/certs
 		mkdir /opt/opencelium-docker/conf/ssl/private
 
@@ -671,7 +670,6 @@ Prepare environment:
 | Please refer to the default MongoDB documentation for detailed installation instructions. 
 | You can find this documentation here: `MongoDB Installation <https://www.mongodb.com/docs/manual/administration/install-on-linux/>`_
 |
-	
 
 **3. Install Webserver: (optional)**
 
@@ -746,6 +744,17 @@ Configure environment (optional):
 
 	mysql -u root -p -e "ALTER USER 'opencelium'@'localhost' IDENTIFIED BY 'secret1234';"
 	mongosh --eval "db.getSiblingDB('opencelium').changeUserPassword('oc_admin', 'secretsecret')"
+
+.. note::
+	As the MongoDB user "oc_admin" doesn't exist, you probably encountered an "ECONNREFUSED" error during installation.  
+	This indicates that mongod was not yet ready to accept connections.
+	In this case, please verify that the MongoDB server is running without errors by executing 
+	the command "systemctl status mongod" and run the this command to create the user:
+
+	.. code-block:: sh
+		:linenos:
+
+		mongosh --eval "db.getSiblingDB('opencelium').createUser({user: 'oc_admin', pwd: passwordPrompt(), roles: ['readWrite','dbAdmin' ]})"
 
 **3. Modify application.yml file for backend:**
 
@@ -847,6 +856,18 @@ Configure environment (optional):
 
 	mysql -u root -p -e "ALTER USER 'opencelium'@'localhost' IDENTIFIED BY 'secret1234';"
 	mongosh --eval "db.getSiblingDB('opencelium').changeUserPassword('oc_admin', 'secretsecret')"
+
+.. note::
+	As the MongoDB user "oc_admin" doesn't exist, you probably encountered an "ECONNREFUSED" error during installation.  
+	This indicates that mongod was not yet ready to accept connections.
+	In this case, please verify that the MongoDB server is running without errors by executing 
+	the command "systemctl status mongod" and run the this command to create the user:
+
+	.. code-block:: sh
+		:linenos:
+
+		mongosh --eval "db.getSiblingDB('opencelium').createUser({user: 'oc_admin', pwd: passwordPrompt(), roles: ['readWrite','dbAdmin' ]})"
+
 
 **3. Modify application.yml file for backend:**
 
@@ -973,6 +994,17 @@ Configure environment (optional):
 
 	mysql -u root -p -e "ALTER USER 'opencelium'@'localhost' IDENTIFIED BY 'secret1234';"
 	mongosh --eval "db.getSiblingDB('opencelium').changeUserPassword('oc_admin', 'secretsecret')"
+
+.. note::
+	As the MongoDB user "oc_admin" doesn't exist, you probably encountered an "ECONNREFUSED" error during installation.  
+	This indicates that mongod was not yet ready to accept connections.
+	In this case, please verify that the MongoDB server is running without errors by executing 
+	the command "systemctl status mongod" and run the this command to create the user:
+
+	.. code-block:: sh
+		:linenos:
+
+		mongosh --eval "db.getSiblingDB('opencelium').createUser({user: 'oc_admin', pwd: passwordPrompt(), roles: ['readWrite','dbAdmin' ]})"
 
 **3. Modify application.yml file for backend:**
 
