@@ -12,8 +12,6 @@ import com.becon.opencelium.backend.ocel.operator.Operator;
 import com.becon.opencelium.backend.ocel.operator.OperatorUtils;
 import com.becon.opencelium.backend.ocel.token.Token;
 import com.becon.opencelium.backend.ocel.token.TokenType;
-import com.becon.opencelium.backend.ocel.utils.ValueUtils;
-import com.becon.opencelium.backend.utility.PathAndReferenceUtility;
 
 import java.util.*;
 import java.util.function.Function;
@@ -104,60 +102,6 @@ public class PostfixEvaluator implements Evaluator {
 
         } catch (Exception e) {
             throw InvalidExpressionException.unexpectedException(e);
-        }
-    }
-
-    private Object getValueOfRaw(String rawValue, Function<String, Object> referenceExtractor, OcLogger<ExecutionLog> logger, MaskingService masking) throws ValueParseException, InvalidExpressionException {
-        if (ReferenceUtils.isReference(rawValue)) {
-            if (referenceExtractor == null)
-                throw InvalidExpressionException.referenceExtractorNotFound(rawValue);
-
-            Object result = referenceExtractor.apply(rawValue);
-            logResult(result, rawValue, logger, masking);
-
-            return result;
-        }
-
-        List<int[]> locs = PathAndReferenceUtility.extractReferenceIndexes(rawValue);
-
-        if (locs.isEmpty()) {
-            return rawValueParser.parse(rawValue);
-        }
-
-        if (referenceExtractor == null) {
-            throw InvalidExpressionException.referenceExtractorNotFound(rawValue);
-        }
-
-        StringBuilder out = new StringBuilder(rawValue.length());
-        int pos = 0;
-
-        for (int[] loc : locs) {
-            int start = loc[0], end = loc[1];
-
-            out.append(rawValue, pos, start);
-
-            String ref = rawValue.substring(start, end);
-            Object result = referenceExtractor.apply(ref);
-            logResult(result, ref, logger, masking);
-
-            String stringResult = ValueUtils.serializeValue(result);
-            out.append(stringResult);
-            pos = end;
-        }
-
-        out.append(rawValue, pos, rawValue.length());
-
-        if(out.charAt(0) == '"' && out.charAt(out.length() - 1) == '"') {
-            out.deleteCharAt(0);
-            out.deleteCharAt(out.length() - 1);
-        }
-        return out.toString();
-    }
-
-    private void logResult(Object result,String ref, OcLogger<ExecutionLog> logger, MaskingService masking){
-        if (logger != null && masking != null) {
-            String maskedResult = masking.applyMask(result, ref);
-            logger.logAndSend("segment=IF_REF ref=(%s) data=%s".formatted(ref, maskedResult));
         }
     }
 

@@ -361,8 +361,8 @@ public class EvaluationTest {
         Assertions.assertEquals(Boolean.TRUE, expressionProcessor.evaluate("\"AAA{%#ffffff.(request).name%}AAA\" Like \"%{%#ffffff.(request).name%}%\"", referenceExtractor));
         Assertions.assertEquals(Boolean.TRUE, expressionProcessor.evaluate("\"{%#ffffff.(request).name%}{%#ffffff.(request).name%}\" = \"Bob{%#ffffff.(request).name%}\"", referenceExtractor));
         Assertions.assertEquals(Boolean.TRUE, expressionProcessor.evaluate("\"{%#ffffff.(request).name%}{%#ffffff.(request).name%}\" = \"BobBob\"", referenceExtractor));
-        Assertions.assertEquals(Boolean.TRUE, expressionProcessor.evaluate("\"AAA{%#ffffff.(response).array_of_numbers%}AAA\" Like \"%\\[1, 2, 3, 4, 5\\]%\"", referenceExtractor));
-        Assertions.assertEquals(Boolean.TRUE, expressionProcessor.evaluate("\"AAA{%#ffffff.(request).object%}AAA\" Like \"%\\{\"id\": 1, \"name\": \"A\"\\}%\"", referenceExtractor));
+        Assertions.assertEquals(Boolean.TRUE, expressionProcessor.evaluate("\"AAA{%#ffffff.(response).array_of_numbers%}AAA\" Like \"%1, 2, 3, 4, 5%\"", referenceExtractor));
+        Assertions.assertEquals(Boolean.TRUE, expressionProcessor.evaluate("\"AAA{%#ffffff.(request).object%}AAA\" Like \"%\"id\": 1, \"name\": \"A\"%\"", referenceExtractor));
     }
 
 
@@ -377,7 +377,7 @@ public class EvaluationTest {
 
         Assertions.assertEquals(Boolean.TRUE,
                 expressionProcessor.evaluate(
-                        "\"PREFIX-{%#ffffff.(request).object%}-SUFFIX\" Like \"%\\{\"id\": 1, \"name\": \"A\"\\}%\"",
+                        "\"PREFIX-{%#ffffff.(request).object%}-SUFFIX\" Like \"%\"id\": 1, \"name\": \"A\"%\"",
                         referenceExtractor
                 )
         );

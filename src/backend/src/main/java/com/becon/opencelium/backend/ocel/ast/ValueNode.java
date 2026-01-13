@@ -8,6 +8,7 @@ import com.becon.opencelium.backend.ocel.exception.ErrorCode;
 import com.becon.opencelium.backend.ocel.exception.InvalidExpressionException;
 import com.becon.opencelium.backend.ocel.exception.ValueParseException;
 import com.becon.opencelium.backend.ocel.utils.ReferenceUtils;
+import com.becon.opencelium.backend.ocel.utils.ValueUtils;
 import com.becon.opencelium.backend.utility.PathAndReferenceUtility;
 
 import java.util.Collection;
@@ -41,57 +42,60 @@ public class ValueNode implements ASTNode {
             return readyValue;
         }
 
-        if (ReferenceUtils.isReference(value)) {
-            if (refExtractor == null)
-                throw InvalidExpressionException.referenceExtractorNotFound(value);
+        return getValueOfRaw(value, refExtractor, logger, masking);
+    }
 
-            Object result = refExtractor.apply(value);
-            if (Objects.nonNull(logger) && Objects.nonNull(masking)) {
-                String maskedResult = masking.applyMask(result, value);
-                logger.logAndSend(String.format("segment=IF_REF ref=(%s) data=%s", value, maskedResult));
-            }
+    private Object getValueOfRaw(String rawValue, Function<String, Object> referenceExtractor, OcLogger<ExecutionLog> logger, MaskingService masking) throws ValueParseException, InvalidExpressionException {
+        if (ReferenceUtils.isReference(rawValue)) {
+            if (referenceExtractor == null)
+                throw InvalidExpressionException.referenceExtractorNotFound(rawValue);
+
+            Object result = referenceExtractor.apply(rawValue);
+            logResult(result, rawValue, logger, masking);
 
             return result;
         }
 
-        List<int[]> locs = PathAndReferenceUtility.extractReferenceIndexes(value);
+        List<int[]> locs = PathAndReferenceUtility.extractReferenceIndexes(rawValue);
 
         if (locs.isEmpty()) {
-            return valueParser.parse(value);
+            return valueParser.parse(rawValue);
         }
 
-        if (refExtractor == null) {
-            throw InvalidExpressionException.referenceExtractorNotFound(value);
+        if (referenceExtractor == null) {
+            throw InvalidExpressionException.referenceExtractorNotFound(rawValue);
         }
 
-        StringBuilder out = new StringBuilder(value.length());
+        StringBuilder out = new StringBuilder(rawValue.length());
         int pos = 0;
 
         for (int[] loc : locs) {
             int start = loc[0], end = loc[1];
 
-            out.append(value, pos, start);
+            out.append(rawValue, pos, start);
 
-            String ref = value.substring(start, end);
-            Object result = refExtractor.apply(ref);
+            String ref = rawValue.substring(start, end);
+            Object result = referenceExtractor.apply(ref);
+            logResult(result, ref, logger, masking);
 
-            if (result instanceof Collection<?>) {
-                throw new InvalidExpressionException(
-                        ErrorCode.INVALID_OPERAND_PART,
-                        "REFERENCE[%s] returned a non-string value inside OPERAND[%s]".formatted(ref, value)
-                );
-            }
-
-            if (logger != null && masking != null) {
-                String maskedResult = masking.applyMask(result, ref);
-                logger.logAndSend("segment=IF_REF ref=(%s) data=%s".formatted(ref, maskedResult));
-            }
-
-            out.append(result);
+            String stringResult = ValueUtils.serializeValue(result);
+            out.append(stringResult);
             pos = end;
         }
 
-        out.append(value, pos, value.length());
+        out.append(rawValue, pos, rawValue.length());
+
+        if(out.charAt(0) == '\"' && out.charAt(out.length() - 1) == '\"') {
+            out.deleteCharAt(0);
+            out.deleteCharAt(out.length() - 1);
+        }
         return out.toString();
+    }
+
+    private void logResult(Object result,String ref, OcLogger<ExecutionLog> logger, MaskingService masking){
+        if (logger != null && masking != null) {
+            String maskedResult = masking.applyMask(result, ref);
+            logger.logAndSend("segment=IF_REF ref=(%s) data=%s".formatted(ref, maskedResult));
+        }
     }
 }
