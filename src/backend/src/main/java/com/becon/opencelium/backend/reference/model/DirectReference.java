@@ -5,13 +5,15 @@ import com.becon.opencelium.backend.reference.enums.ReferenceType;
 
 import java.util.Objects;
 
+import static com.becon.opencelium.backend.reference.enums.ReferenceType.DIRECT;
+
 public final class DirectReference implements Reference {
 
     private final String raw;
     private final String color;
     private final ExchangeType exchangeType;
     private final Part part;
-    private final String path; // nullable, without "$."
+    private final String path; // nullable
 
     private DirectReference(
             String raw,
@@ -29,7 +31,7 @@ public final class DirectReference implements Reference {
 
     @Override
     public ReferenceType getType() {
-        return ReferenceType.DIRECT;
+        return DIRECT;
     }
 
     @Override
@@ -55,12 +57,8 @@ public final class DirectReference implements Reference {
 
 
     public static DirectReference parse(String rawReference) {
-        Objects.requireNonNull(rawReference, "Direct reference is null");
+        Objects.requireNonNull(rawReference, "null is not a reference");
         validate(rawReference);
-
-        // '#ababab.(response).body.$.field[*]'
-        // '#ababab.(request).body.$.field[*]'
-
 
         int p = 0;
         // color
@@ -115,19 +113,19 @@ public final class DirectReference implements Reference {
     private static void validate(String rawReference) {
         // #ababab.(request).x - shortest possible case
         if (rawReference.length() < 19) {
-            throw new IllegalArgumentException("Invalid direct reference: " + rawReference);
+            throw new IllegalArgumentException(DIRECT + " reference must contain least 19 chars: " + rawReference);
         }
 
         int p = 0;
         // color
         if (rawReference.charAt(p) != '#') {
-            throw new IllegalArgumentException("Invalid color in direct reference: " + rawReference);
+            throw new IllegalArgumentException("Invalid color for " + DIRECT + " reference: " + rawReference);
         }
 
         while (++p < 7) {
             char c = rawReference.charAt(p);
             if (!Character.isLetterOrDigit(c)) {
-                throw new IllegalArgumentException("Invalid color in direct reference: " + rawReference);
+                throw new IllegalArgumentException("Invalid color for " + DIRECT + " reference: " + rawReference);
             }
         }
 
@@ -137,13 +135,13 @@ public final class DirectReference implements Reference {
         } else if (rawReference.startsWith(".(request).", p)) {
             p += 11;
         } else {
-            throw new IllegalArgumentException("Invalid exchange type in direct reference: " + rawReference);
+            throw new IllegalArgumentException("Invalid exchange type for " + DIRECT + " reference: " + rawReference);
         }
 
         // part
         if (rawReference.startsWith("status", p)) {
             if (rawReference.length() != p + 6) {
-                throw new IllegalArgumentException("Status reference must not have a path: " + rawReference);
+                throw new IllegalArgumentException(DIRECT + " reference with part = 'status' must not have a path: " + rawReference);
             }
             return;
         }
@@ -152,7 +150,7 @@ public final class DirectReference implements Reference {
             return;
         }
 
-        throw new IllegalArgumentException("Invalid part in direct reference: " + rawReference);
+        throw new IllegalArgumentException(DIRECT + " reference contains invalid part: " + rawReference);
     }
 
     public enum Part {

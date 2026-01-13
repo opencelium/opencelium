@@ -8,12 +8,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class PageReferenceTest {
+    /*
+     * Test-only delegate for PageReference.parse(..).
+     * Used to reduce noise in "find usages" results from test code.
+     */
+    private static PageReference parse(String rawReference) {
+        return PageReference.parse(rawReference);
+    }
+
 
     // -------  POSITIVE cases  -------
 
     @Test
     void limitParam() {
-        PageReference ref = PageReference.parse("@{limit}");
+        PageReference ref = parse("@{limit}");
 
         assertEquals("@{limit}", ref.getRaw());
         assertEquals(PageParam.LIMIT, ref.getPageParam());
@@ -22,14 +30,14 @@ class PageReferenceTest {
 
     @Test
     void sizeParam() {
-        PageReference ref = PageReference.parse("@{size}");
+        PageReference ref = parse("@{size}");
 
         assertEquals(PageParam.SIZE, ref.getPageParam());
     }
 
     @Test
     void paramIsCaseInsensitive() {
-        PageReference ref = PageReference.parse("@{LiMiT}");
+        PageReference ref = parse("@{LiMiT}");
 
         assertEquals(PageParam.LIMIT, ref.getPageParam());
     }
@@ -39,41 +47,26 @@ class PageReferenceTest {
 
     @Test
     void nullReferenceThrowsException() {
-        assertThrows(
-                NullPointerException.class,
-                () -> PageReference.parse(null)
-        );
+        assertThrows(NullPointerException.class, () -> parse(null));
     }
 
     @Test
     void missingOpeningSyntaxThrowsException() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> PageReference.parse("limit}")
-        );
+        assertThrows(IllegalArgumentException.class, () -> parse("limit}"));
     }
 
     @Test
     void missingClosingBraceThrowsException() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> PageReference.parse("@{limit")
-        );
+        assertThrows(IllegalArgumentException.class, () -> parse("@{limit"));
     }
 
     @Test
     void emptyExpressionThrowsException() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> PageReference.parse("@{}")
-        );
+        assertThrows(IllegalArgumentException.class, () -> parse("@{}"));
     }
 
     @Test
     void unknownParamThrowsException() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> PageReference.parse("@{unknown}")
-        );
+        assertThrows(IllegalArgumentException.class, () -> parse("@{unknown}"));
     }
 }
