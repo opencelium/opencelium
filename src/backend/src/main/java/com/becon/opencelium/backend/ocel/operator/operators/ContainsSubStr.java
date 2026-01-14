@@ -46,7 +46,7 @@ public class ContainsSubStr implements BinaryOperator {
     }
 
     private boolean isArrayRight(Object o1, Object o2) {
-        return o2 instanceof String && o1 instanceof List<?> list && isStringArray(list);
+        return o2 instanceof List<?> list && o1 instanceof String && isStringArray(list);
     }
 
     private boolean isStringArray(List<?> list) {
