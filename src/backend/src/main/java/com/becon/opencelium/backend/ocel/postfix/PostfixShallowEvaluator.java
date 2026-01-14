@@ -131,8 +131,9 @@ public class PostfixShallowEvaluator implements ShallowEvaluator {
                         List<int[]> ints = PathAndReferenceUtility.extractReferenceIndexes(rawValue);
                         if (!ints.isEmpty()) {
                             operandStack.push(dummy);
+                        } else {
+                            operandStack.push(Operand.withRawValue(rawValue));
                         }
-                        operandStack.push(Operand.withRawValue(rawValue));
                     }
                 } else if (Objects.equals(token.getType(), TokenType.FUNCTION)) {
                     List<List<Token>> parameters = token.getFunctionParameters();
