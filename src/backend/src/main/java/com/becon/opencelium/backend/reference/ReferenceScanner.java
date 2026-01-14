@@ -12,10 +12,6 @@ import static com.becon.opencelium.backend.constant.RegExpression.webhook;
 import static com.becon.opencelium.backend.constant.RegExpression.wrappedDirectRef;
 
 public final class ReferenceScanner {
-
-    private ReferenceScanner() {
-    }
-
     private static final Pattern EXTRACTION_PATTERN =
             Pattern.compile(
                     wrappedDirectRef + "|" +
@@ -24,6 +20,9 @@ public final class ReferenceScanner {
                             pageRef + "|" +
                             requestData
             );
+
+    private ReferenceScanner() {
+    }
 
     public static List<String> extract(String expression) {
         if (expression == null || expression.isEmpty()) {

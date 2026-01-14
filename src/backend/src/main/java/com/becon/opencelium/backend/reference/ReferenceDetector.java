@@ -10,10 +10,6 @@ import static com.becon.opencelium.backend.constant.RegExpression.webhook;
 import static com.becon.opencelium.backend.constant.RegExpression.wrappedDirectRef;
 
 public class ReferenceDetector {
-
-    private ReferenceDetector() {
-    }
-
     private static final Pattern CONTAINS_PATTERN =
             Pattern.compile(
                     directRef + "|" +
@@ -23,6 +19,9 @@ public class ReferenceDetector {
                             pageRef + "|" +
                             requestData
             );
+
+    private ReferenceDetector() {
+    }
 
     public static boolean containsReference(String expression) {
         if (expression == null) {

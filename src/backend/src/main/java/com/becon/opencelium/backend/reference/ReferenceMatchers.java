@@ -17,10 +17,6 @@ import static com.becon.opencelium.backend.constant.RegExpression.wrappedDirectR
  * low-level and performance-oriented.
  */
 public final class ReferenceMatchers {
-
-    private ReferenceMatchers() {
-    }
-
     private static final Pattern DIRECT_REF = Pattern.compile(directRef);
     private static final Pattern WRAPPED_DIRECT_REF = Pattern.compile(wrappedDirectRef);
     private static final Pattern ENHANCEMENT_REF = Pattern.compile(enhancement);
@@ -28,6 +24,8 @@ public final class ReferenceMatchers {
     private static final Pattern PAGE_REF = Pattern.compile(pageRef);
     private static final Pattern REQUEST_DATA_REF = Pattern.compile(requestData);
 
+    private ReferenceMatchers() {
+    }
 
     public static boolean isDirect(String ref) {
         // #ababab.(request).x - shortest possible case
