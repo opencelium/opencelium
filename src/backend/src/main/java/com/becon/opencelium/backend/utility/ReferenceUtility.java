@@ -25,27 +25,27 @@ public class ReferenceUtility {
             return "No reference found";
         }
 
-        String res = extractRef(expression, wrappedDirectRef);
+        String res = extractReference(expression, wrappedDirectRef);
         if (res != null) {
             return "direct ref(" + res + ")";
         }
 
-        res = extractRef(expression, enhancement);
+        res = extractReference(expression, enhancement);
         if (res != null) {
             return "enhancement(" + res + ")";
         }
 
-        res = extractRef(expression, webhook);
+        res = extractReference(expression, webhook);
         if (res != null) {
             return "webhook(" + res + ")";
         }
 
-        res = extractRef(expression, pageRef);
+        res = extractReference(expression, pageRef);
         if (res != null) {
             return "page(" + res + ")";
         }
 
-        res = extractRef(expression, requestData);
+        res = extractReference(expression, requestData);
         if (res != null) {
             return "request data(" + res + ")";
         }
@@ -53,7 +53,7 @@ public class ReferenceUtility {
         return "No reference found(" + res + ")";
     }
 
-    public static String extractRef(String value, String type) {
+    public static String extractReference(String value, String type) {
         Pattern pattern = Pattern.compile(type);
         Matcher matcher = pattern.matcher(value);
 
@@ -62,17 +62,6 @@ public class ReferenceUtility {
         }
 
         return null;
-    }
-
-    public static String extractDirectRef(String ref) {
-        // '{%#ababab.(response).body.$.field[*]%}'
-        if (ref.startsWith("{%") && ref.endsWith("%}")) {
-            ref = ref.substring(2, ref.length() - 2);
-        }
-
-        // '#ababab.(response).body.$.field[*]'
-        // '#ababab.(request).body.$.field[*]'
-        return ref;
     }
 
     public static String extractExchangeType(String ref) {

@@ -9,7 +9,6 @@ import static com.becon.opencelium.backend.enums.RelationalOperator.FOR;
 import static com.becon.opencelium.backend.enums.RelationalOperator.FOR_IN;
 import static com.becon.opencelium.backend.enums.RelationalOperator.SPLIT_STRING;
 
-
 public class Loop {
     private String ref;
     private String delimiter;
@@ -18,45 +17,26 @@ public class Loop {
     private String value;
     private RelationalOperator operator;
 
-    public static Loop fromEx(OperatorEx operatorEx) {
-        Loop result = new Loop();
-
-        result.setIterator(operatorEx.getIterator());
+    public static Loop fromOperator(OperatorEx operatorEx) {
+        Loop loop = new Loop();
+        loop.setIterator(operatorEx.getIterator());
 
         String expression = operatorEx.getExpression();
+        String wrappedDirectRef = ReferenceUtility.extractReference(expression, RegExpression.wrappedDirectRef);
 
-        String ref = ReferenceUtility.extractRef(expression, RegExpression.wrappedDirectRef);
         if (expression.startsWith(FOR_IN.getName())) {
-            result.setOperator(FOR_IN);
-
-            if (ref == null) {
-                // then 'ref' is a 'webhook'
-                ref = ReferenceUtility.extractRef(expression, RegExpression.webhook);
-
-                int index = ref.contains(":") ? ref.indexOf(":") : ref.length() - 1;
-                ref = ref.substring(0, index) + "['*']~" + ref.substring(index);
-            } else {
-                ref = ReferenceUtility.extractDirectRef(ref) + "['*']~";
-            }
-        } else if (expression.startsWith(FOR.getName())) {
-            result.setOperator(FOR);
-        } else {
-            if (ref == null) {
-                throw new RuntimeException(ReferenceUtility.getContainedReferenceAndType(expression) + " is not supported for SPLIT_STRING");
-            }
-
-            result.setOperator(SPLIT_STRING);
-
-            String delimiter = expression.replace(ref, " ")
-                    .replace(SPLIT_STRING.getName(), "")
-                    .replace("'", "")
-                    .trim();
-
-            result.setDelimiter(delimiter);
+            configureForInLoop(loop, expression, wrappedDirectRef);
+            return loop;
         }
-        result.setRef(ref);
 
-        return result;
+        if (expression.startsWith(FOR.getName())) {
+            loop.setOperator(FOR);
+            loop.setRef(wrappedDirectRef);
+            return loop;
+        }
+
+        configureSplitStringLoop(loop, expression, wrappedDirectRef);
+        return loop;
     }
 
     public static boolean isIterator(String str) {
@@ -109,5 +89,47 @@ public class Loop {
 
     private void setOperator(RelationalOperator operator) {
         this.operator = operator;
+    }
+
+    private static void configureForInLoop(Loop loop, String expression, String wrappedDirectRef) {
+        loop.setOperator(FOR_IN);
+
+        String ref = wrappedDirectRef != null
+                ? buildIterableDirectRef(wrappedDirectRef)
+                : buildIterableWebhookRef(expression);
+
+        loop.setRef(ref);
+    }
+
+    private static String buildIterableDirectRef(String wrappedDirectRef) {
+        return wrappedDirectRef.substring(2, wrappedDirectRef.length() - 2) + "['*']~";
+    }
+
+    private static String buildIterableWebhookRef(String expression) {
+        String webhookRef = ReferenceUtility.extractReference(expression, RegExpression.webhook);
+
+        int colonIndex = webhookRef.contains(":")
+                ? webhookRef.indexOf(":")
+                : webhookRef.length() - 1;
+
+        return webhookRef.substring(0, colonIndex) + "['*']~" + webhookRef.substring(colonIndex);
+    }
+
+    private static void configureSplitStringLoop(Loop loop, String expression, String wrappedDirectRef) {
+        if (wrappedDirectRef == null) {
+            throw new IllegalArgumentException(
+                    ReferenceUtility.getContainedReferenceAndType(expression) + " is not supported for SPLIT_STRING"
+            );
+        }
+
+        loop.setOperator(SPLIT_STRING);
+        loop.setRef(wrappedDirectRef);
+
+        String delimiter = expression.replace(wrappedDirectRef, "")
+                .replace(SPLIT_STRING.getName(), "")
+                .replace("'", "")
+                .trim();
+
+        loop.setDelimiter(delimiter);
     }
 }

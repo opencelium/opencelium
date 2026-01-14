@@ -173,7 +173,7 @@ public class ConnectorExecutor {
                 }
                 logger.logAndSend(endPhases.pop());
             } else {
-                Loop loop = Loop.fromEx(operator);
+                Loop loop = Loop.fromOperator(operator);
                 Object referencedList = executionManager.getValue(loop.getRef());
                 List<String> list = new ArrayList<>();
 
