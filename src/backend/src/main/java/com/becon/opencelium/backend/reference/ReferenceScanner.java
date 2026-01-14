@@ -14,12 +14,13 @@ import static com.becon.opencelium.backend.constant.RegExpression.wrappedDirectR
 public final class ReferenceScanner {
     private static final Pattern EXTRACTION_PATTERN =
             Pattern.compile(
-                    wrappedDirectRef + "|" +
-                            enhancement + "|" +
+                    enhancement + "|" +
                             webhook + "|" +
                             pageRef + "|" +
                             requestData
             );
+
+    private static final Pattern WRAPPED_DIRECT_REF = Pattern.compile(wrappedDirectRef);
 
     private ReferenceScanner() {
     }
@@ -30,7 +31,18 @@ public final class ReferenceScanner {
         }
 
         List<String> result = new ArrayList<>();
+        char[] copy = expression.toCharArray();
+
         Matcher matcher = EXTRACTION_PATTERN.matcher(expression);
+        while (matcher.find()) {
+            result.add(matcher.group());
+
+            for (int i = matcher.start(); i < matcher.end(); i++) {
+                copy[i] = ' ';
+            }
+        }
+
+        matcher = WRAPPED_DIRECT_REF.matcher(new String(copy));
 
         while (matcher.find()) {
             result.add(matcher.group());

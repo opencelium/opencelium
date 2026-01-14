@@ -2,6 +2,8 @@ package com.becon.opencelium.backend.reference;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -116,22 +118,42 @@ class ReferenceScannerTest {
     }
 
     @Test
-    void extractMultipleDifferentReferencesInOrder() {
-        String expr =
-                "{%#ababab.(request).body.$.field[*]%} " +
-                        "#{%abcdef0123456789abcdef01%} " +
-                        "${key:type} " +
-                        "@{size} " +
-                        "{#3.value}";
+    void extractMultipleDifferentReferences() {
+        int t = 1000;
 
-        List<String> refs = extract(expr);
+        String enhancement = "#{%abcdef0123456789abcdef01%}";
+        String webhook = "${key:type}";
+        String pageRef = "@{size}";
+        String requestData = "{#3.value}";
+        String wrappedDirectRef = "{%#ababab.(request).body.$.field[*]%}";
 
-        assertEquals(5, refs.size());
-        assertEquals("{%#ababab.(request).body.$.field[*]%}", refs.get(0));
-        assertEquals("#{%abcdef0123456789abcdef01%}", refs.get(1));
-        assertEquals("${key:type}", refs.get(2));
-        assertEquals("@{size}", refs.get(3));
-        assertEquals("{#3.value}", refs.get(4));
+        List<String> base = new ArrayList<>();
+        base.add(enhancement);
+        base.add(webhook);
+        base.add(pageRef);
+        base.add(requestData);
+        base.add(wrappedDirectRef);
+
+        // add spacing noise
+        for (int i = 0; i < 8; i++) {
+            base.add(" ");
+        }
+
+        while (t-- > 0) {
+            Collections.shuffle(base);
+
+            String expr = String.join("", base);
+
+            List<String> refs = extract(expr);
+
+            assertEquals(5, refs.size());
+
+            assertTrue(refs.contains(enhancement));
+            assertTrue(refs.contains(webhook));
+            assertTrue(refs.contains(pageRef));
+            assertTrue(refs.contains(requestData));
+            assertTrue(refs.contains(wrappedDirectRef));
+        }
     }
 
     @Test
