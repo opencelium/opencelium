@@ -9,7 +9,7 @@ import com.becon.opencelium.backend.ocel.utils.Utils;
 import java.util.List;
 import java.util.Objects;
 
-public class Contains implements BinaryOperator {
+class Contains implements BinaryOperator {
     @Override
     public Object apply(Object o1, Object o2) throws ApplyOperatorException {
         List<?> values;

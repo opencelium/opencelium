@@ -7,7 +7,7 @@ import com.becon.opencelium.backend.ocel.operator.SidesType;
 
 import java.util.List;
 
-public class DenyList implements BinaryOperator {
+class DenyList implements BinaryOperator {
     @Override
     public Object apply(Object o1, Object o2) throws ApplyOperatorException {
         if (o2 instanceof String) {

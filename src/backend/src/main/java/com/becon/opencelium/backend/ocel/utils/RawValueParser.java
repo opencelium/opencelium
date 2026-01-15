@@ -1,11 +1,7 @@
-package com.becon.opencelium.backend.ocel.common;
+package com.becon.opencelium.backend.ocel.utils;
 
 import com.becon.opencelium.backend.ocel.exception.*;
 import com.becon.opencelium.backend.ocel.operand.OperandUtils;
-import com.becon.opencelium.backend.ocel.utils.ReferenceUtils;
-import com.becon.opencelium.backend.ocel.utils.Utils;
-import com.becon.opencelium.backend.ocel.utils.ValueUtils;
-import com.becon.opencelium.backend.utility.PathAndReferenceUtility;
 
 import java.util.ArrayList;
 import java.util.List;

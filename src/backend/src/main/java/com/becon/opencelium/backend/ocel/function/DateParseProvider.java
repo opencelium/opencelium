@@ -1,16 +1,15 @@
-package com.becon.opencelium.backend.ocel.function.providers;
+package com.becon.opencelium.backend.ocel.function;
 
-import com.becon.opencelium.backend.ocel.common.Constants;
 import com.becon.opencelium.backend.ocel.exception.ApplyFunctionException;
-import com.becon.opencelium.backend.ocel.function.Function;
-import com.becon.opencelium.backend.ocel.function.FunctionProvider;
-import com.becon.opencelium.backend.ocel.function.functions.DateParse;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
-public class DateParseProvider implements FunctionProvider {
+class DateParseProvider implements FunctionProvider {
+
+    private static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
+
     @Override
     public Function tryFind(Object[] args) {
         if (DATE_PARSE_FUNC.parameterListMatches(args)) {
@@ -38,7 +37,7 @@ public class DateParseProvider implements FunctionProvider {
             String var2 = (String) args[1]; // date's format
             try {
                 LocalDate date = LocalDate.parse(var1, DateTimeFormatter.ofPattern(var2));
-                return date.format(DateTimeFormatter.ofPattern(Constants.DEFAULT_DATE_FORMAT));
+                return date.format(DateTimeFormatter.ofPattern(DEFAULT_DATE_FORMAT));
             } catch (DateTimeParseException e) {
                 throw ApplyFunctionException.invalidParameterValue(getFunctionEnum(), var1, 0, "Date MUST be in '%s' format".formatted(var2));
             } catch (IllegalArgumentException e) {

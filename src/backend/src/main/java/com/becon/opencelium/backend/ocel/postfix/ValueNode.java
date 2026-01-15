@@ -1,22 +1,19 @@
-package com.becon.opencelium.backend.ocel.ast;
+package com.becon.opencelium.backend.ocel.postfix;
 
 import com.becon.opencelium.backend.execution.logger.OcLogger;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.masking.MaskingService;
-import com.becon.opencelium.backend.ocel.common.RawValueParser;
-import com.becon.opencelium.backend.ocel.exception.ErrorCode;
 import com.becon.opencelium.backend.ocel.exception.InvalidExpressionException;
 import com.becon.opencelium.backend.ocel.exception.ValueParseException;
+import com.becon.opencelium.backend.ocel.utils.RawValueParser;
 import com.becon.opencelium.backend.ocel.utils.ReferenceUtils;
 import com.becon.opencelium.backend.ocel.utils.ValueUtils;
 import com.becon.opencelium.backend.utility.PathAndReferenceUtility;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Function;
 
-public class ValueNode implements ASTNode {
+class ValueNode implements ASTNode {
 
     private final String value;
     private final Object readyValue;

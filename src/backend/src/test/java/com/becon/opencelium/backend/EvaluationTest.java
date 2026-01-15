@@ -434,4 +434,14 @@ public class EvaluationTest {
         // {null} > 0 will be skipped and doesn't throw exception
         Assertions.assertEquals(Boolean.FALSE, expressionProcessor.evaluate("({bool_true} || {null} > 0) && {bool_false}", referenceExtractor));
     }
+
+
+    @Test
+    public void test(){
+        referenceValues.put("{%#E41298.(response).body.$.data[k].name%}", "i-doit");
+        referenceValues.put("{%#E41298.(response).body.$.data[k].value%}", "Ja");
+        referenceValues.put("{%#FFCFB5.(response).body.$.[i].InstalledSoftware[j].Name%}", "ownername");
+        referenceValues.put("{%#E41298.(response).body.$.data[k].ownerName%}", "name");
+        Assertions.assertEquals(Boolean.TRUE,expressionProcessor.evaluate("(({%#E41298.(response).body.$.data[k].name%} = 'i-doit' && {%#E41298.(response).body.$.data[k].value%} = 'Ja' && {%#FFCFB5.(response).body.$.[i].InstalledSoftware[j].Name%} Like \"%{%#E41298.(response).body.$.data[k].ownerName%}%\"))", referenceExtractor));
+    }
 }
