@@ -2,9 +2,11 @@ package com.becon.opencelium.backend.database.mongodb.service;
 
 import com.becon.opencelium.backend.database.mongodb.entity.OperatorMng;
 import com.becon.opencelium.backend.database.mongodb.repository.OperatorMngRepository;
+import com.becon.opencelium.backend.exception.ConnectionValidationException;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.ocel.OCExpressionHelper;
 import com.becon.opencelium.backend.ocel.Validator;
+import com.becon.opencelium.backend.ocel.exception.InvalidExpressionException;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
 import com.becon.opencelium.backend.resource.connection.OperatorDTO;
@@ -52,7 +54,7 @@ public class OperatorMngServiceImp implements OperatorMngService {
     @Override
     public OperatorMng getById(String id) {
         return operatorMngRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("OPERATOR_NOT_FOUND"));
+                .orElseThrow(() -> ConnectionValidationException.operatorNotFound(id));
     }
 
     @Override
@@ -115,10 +117,14 @@ public class OperatorMngServiceImp implements OperatorMngService {
     }
 
     private void validateExpression(String exp, String type) {
-        if ("if".equals(type)) {
-            ocelValidator.validate(exp);
-        } else {
-            OCExpressionHelper.validateLoopExp(exp);
+        try {
+            if ("if".equals(type)) {
+                ocelValidator.validate(exp);
+            } else {
+                OCExpressionHelper.validateLoopExp(exp);
+            }
+        } catch (InvalidExpressionException e) {
+            throw ConnectionValidationException.invalidExpression(exp, e);
         }
     }
 }

@@ -4,7 +4,7 @@ import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
-import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
+import com.becon.opencelium.backend.exception.ConnectionValidationException;
 import com.becon.opencelium.backend.gc.connection.ConnectionForGC;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -91,7 +91,7 @@ public class ConnectionGCService {
             try {
                 ConnectionMng connectionMng = connectionMngService.getByConnectionId(c.getId());
                 list.add(new ConnectionForGC(c, connectionMng));
-            } catch (ConnectionNotFoundException e) {
+            } catch (ConnectionValidationException e) {
                 connectionService.deleteOnlyConnection(c.getId());
             }
         });

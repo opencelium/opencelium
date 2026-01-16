@@ -3,6 +3,7 @@ package com.becon.opencelium.backend.database.mysql.service;
 import com.becon.opencelium.backend.database.mysql.entity.Category;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.repository.CategoryRepository;
+import com.becon.opencelium.backend.exception.CategoryValidationException;
 import com.becon.opencelium.backend.resource.CategoryDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,9 +30,6 @@ public class CategoryServiceImp implements CategoryService {
     @Override
     @Transactional
     public Integer add(CategoryDTO categoryDTO) {
-        if (categoryDTO == null) {
-            throw new RuntimeException("CATEGORY_IS_NULL");
-        }
 
         checkName(categoryDTO.getName());
 
@@ -40,7 +38,7 @@ public class CategoryServiceImp implements CategoryService {
 
         if (categoryDTO.getParentCategory() != null) {
             if (!repository.existsById(categoryDTO.getParentCategory())) {
-                throw new RuntimeException("PARENT_CATEGORY_NOT_FOUND");
+                throw CategoryValidationException.notFound(categoryDTO.getParentCategory());
             }
             curr.setParentCategory(get(categoryDTO.getParentCategory()));
         }
@@ -50,7 +48,7 @@ public class CategoryServiceImp implements CategoryService {
         if (categoryDTO.getSubCategories() != null) {
             categoryDTO.getSubCategories().forEach(id -> {
                 if (!repository.existsById(id)) {
-                    throw new RuntimeException("SUB_CATEGORY_NOT_FOUND(" + id + ")");
+                    throw CategoryValidationException.notFound(id);
                 } else {
                     Category child = get(id);
                     child.setParentCategory(saved);
@@ -66,12 +64,8 @@ public class CategoryServiceImp implements CategoryService {
     @Override
     @Transactional
     public void update(CategoryDTO categoryDTO) {
-        if (categoryDTO == null) {
-            throw new RuntimeException("CATEGORY_IS_NULL");
-        }
-
         if (categoryDTO.getId() == null || !repository.existsById(categoryDTO.getId())) {
-            throw new RuntimeException("CATEGORY_NOT_FOUND");
+            throw CategoryValidationException.notFound(categoryDTO.getId());
         }
         Category old = get(categoryDTO.getId());
 
@@ -86,7 +80,7 @@ public class CategoryServiceImp implements CategoryService {
         if (categoryDTO.getParentCategory() != null) {
             if (old.getParentCategory() == null || !categoryDTO.getParentCategory().equals(old.getParentCategory().getId())) {
                 if (!repository.existsById(categoryDTO.getId())) {
-                    throw new RuntimeException("PARENT_CATEGORY_NOT_FOUND");
+                    throw CategoryValidationException.notFound(categoryDTO.getParentCategory());
                 } else {
                     category.setParentCategory(new Category(categoryDTO.getParentCategory()));
                 }
@@ -99,7 +93,7 @@ public class CategoryServiceImp implements CategoryService {
         if (categoryDTO.getSubCategories() != null && old.getSubCategories() != null) {
             categoryDTO.getSubCategories().forEach(id -> {
                 if (!repository.existsById(id)) {
-                    throw new RuntimeException("SUB_CATEGORY_NOT_FOUND(" + id + ")");
+                    throw CategoryValidationException.notFound(id);
                 } else {
                     if (old.getSubCategories().stream().noneMatch(s -> s.getId().equals(id))) {
                         Category child = get(id);
@@ -130,7 +124,7 @@ public class CategoryServiceImp implements CategoryService {
     @Override
     public Category get(Integer id) {
         return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("CATEGORY_NOT_FOUND"));
+                .orElseThrow(() ->  CategoryValidationException.notFound(id));
     }
 
     @Override
@@ -167,7 +161,7 @@ public class CategoryServiceImp implements CategoryService {
         }
         ids.forEach(c -> {
             if (!exists(c)) {
-                throw new RuntimeException("CATEGORY_NOT_FOUND");
+                throw CategoryValidationException.notFound(c);
             }
         });
 
@@ -200,7 +194,7 @@ public class CategoryServiceImp implements CategoryService {
         }
         ids.forEach(c -> {
             if (!exists(c)) {
-                throw new RuntimeException("CATEGORY_NOT_FOUND(" + c + ")");
+                throw CategoryValidationException.notFound(c);
             }
         });
         for (Integer id : ids) {
@@ -241,11 +235,11 @@ public class CategoryServiceImp implements CategoryService {
 
     private void checkName(String name) {
         if (name == null || name.isBlank()) {
-            throw new RuntimeException("INVALID_CATEGORY_NAME");
+            throw CategoryValidationException.invalidCategoryName(name);
         }
 
         if (repository.existsByNameEqualsIgnoreCase(name)) {
-            throw new RuntimeException("TITLE_HAS_ALREADY_TAKEN");
+            throw CategoryValidationException.titleAlreadyTaken(name);
         }
     }
 
@@ -275,7 +269,7 @@ public class CategoryServiceImp implements CategoryService {
                     break;
                 }
             }
-            throw new RuntimeException("CYCLE_HAS_FOUND : " + sb);
+            throw CategoryValidationException.cycleFound(sb.toString());
         }
     }
 }

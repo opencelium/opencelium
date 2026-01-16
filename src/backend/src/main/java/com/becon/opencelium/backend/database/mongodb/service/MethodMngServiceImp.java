@@ -2,6 +2,7 @@ package com.becon.opencelium.backend.database.mongodb.service;
 
 import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
 import com.becon.opencelium.backend.database.mongodb.repository.MethodMngRepository;
+import com.becon.opencelium.backend.exception.ConnectionValidationException;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
@@ -46,20 +47,12 @@ public class MethodMngServiceImp implements MethodMngService {
     @Override
     public MethodMng getById(String id) {
         return methodMngRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("METHOD_NOT_FOUND"));
+                .orElseThrow(() -> ConnectionValidationException.methodNotFound(id));
     }
-
 
     @Override
     public void deleteAll(List<MethodMng> methods) {
         methodMngRepository.deleteAllById(methods.stream().map(MethodMng::getId).toList());
-    }
-
-    @Override
-    public String getNameByCode(String methodKey) {
-        MethodMng methodMng = methodMngRepository.findByColor(methodKey)
-                .orElseThrow(() -> new RuntimeException("METHOD_NOT_FOUND"));
-        return methodMng.getName();
     }
 
     @Override

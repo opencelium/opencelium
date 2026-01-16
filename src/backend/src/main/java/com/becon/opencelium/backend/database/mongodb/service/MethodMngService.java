@@ -18,7 +18,6 @@ public interface MethodMngService {
     MethodMng getById(String id);
 
     void deleteAll(List<MethodMng> methods);
-    String getNameByCode(String methodKey);
 
     void doWithPatchedMethod(ConnectorDTO connectorDTO, ConnectorDTO patched, PatchConnectionDetails.PatchOperationDetail opDetail);
 }

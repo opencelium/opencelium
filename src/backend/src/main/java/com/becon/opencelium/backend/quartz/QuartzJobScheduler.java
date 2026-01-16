@@ -4,7 +4,7 @@ import com.becon.opencelium.backend.constant.Constant;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
-import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
+import com.becon.opencelium.backend.exception.ConnectionValidationException;
 import com.becon.opencelium.backend.exception.SchedulerNotFoundException;
 import org.quartz.CronExpression;
 import org.quartz.CronScheduleBuilder;
@@ -314,7 +314,7 @@ public class QuartzJobScheduler implements SchedulingStrategy {
         }
 
         if (scheduler.getConnection() == null || scheduler.getConnection().getId() == null) {
-            throw new ConnectionNotFoundException(0L);
+            throw ConnectionValidationException.connectionNotFound(null);
         }
 
         return scheduler.getConnection().getId() + "-" + scheduler.getId();

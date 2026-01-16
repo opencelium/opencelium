@@ -5,6 +5,7 @@ import com.becon.opencelium.backend.database.mongodb.repository.FieldBindingRepo
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.database.mysql.service.EnhancementService;
+import com.becon.opencelium.backend.exception.ConnectionValidationException;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.mapper.base.MapperUpdatable;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
@@ -67,7 +68,7 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
     @Override
     public FieldBindingMng getById(String id) {
         return fieldBindingRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("ENHANCEMENT_NOT_FOUND"));
+                .orElseThrow(() -> ConnectionValidationException.enhancementNotFound(id));
     }
 
     @Override
@@ -251,6 +252,10 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
             for (MethodMng method : methods) {
                 if (toField.getColor().equals(method.getColor())) {
                     String type = PathAndReferenceUtility.getPlaceTypeOfRef(toField.getField());
+                    if (type == null) {
+                        throw ConnectionValidationException.invalidReference(PathAndReferenceUtility.rebuildReference(toField.getColor(), toField.getType(), toField.getField()));
+                    }
+
                     switch (type) {
                         case "path" -> {
                             String endpoint = method.getRequest().getEndpoint();
@@ -267,7 +272,7 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
                             Map<String, Object> boundFields = BindingUtility.doWithBody(method.getRequest().getBody(), fieldPaths, fb.getId(), method.getRequest().getBody().getFormat());
                             method.getRequest().getBody().setFields(boundFields);
                         }
-                        default -> throw new RuntimeException("UNSUPPORTED_TYPE: " + type);
+                        default -> throw new ConnectionValidationException("Unsupported reference type: " + type);
                     }
                     break;
                 }

@@ -53,4 +53,7 @@ public interface ExceptionConstant {
 
     // ----------------------------------------- Scheduler ----------------------------------------------- //
     String SCHEDULER_NOT_FOUND = "SCHEDULER_NOT_FOUND";
+    String INVALID_CONNECTION = "INVALID_CONNECTION";
+    String INVALID_CATEGORY = "INVALID_CATEGORY";
+    String CATEGORY_NOT_FOUND = "CATEGORY_NOT_FOUND";
 }

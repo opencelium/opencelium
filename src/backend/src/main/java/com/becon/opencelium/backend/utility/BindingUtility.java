@@ -5,6 +5,7 @@ import com.becon.opencelium.backend.database.mongodb.entity.BodyMng;
 import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
 import com.becon.opencelium.backend.database.mongodb.entity.LinkedFieldMng;
 import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
+import com.becon.opencelium.backend.exception.ConnectionValidationException;
 
 import java.util.*;
 
@@ -96,7 +97,7 @@ public class BindingUtility {
                 return sb.toString();
             }
         }
-        throw new RuntimeException("ENHANCEMENT_NOT_FOUND");
+        throw ConnectionValidationException.enhancementNotFound(id);
     }
 
     private static String getRefOfFBForPath(List<LinkedFieldMng> froms) {

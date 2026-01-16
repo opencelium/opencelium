@@ -6,7 +6,7 @@ import com.becon.opencelium.backend.database.mongodb.entity.EnhancementMng;
 import com.becon.opencelium.backend.database.mongodb.repository.ConnectionMngRepository;
 import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.database.mysql.service.EnhancementService;
-import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
+import com.becon.opencelium.backend.exception.ConnectionValidationException;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.mapper.base.MapperUpdatable;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
@@ -58,10 +58,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
 
     @Override
     public ConnectionMng save(ConnectionMng connectionMng) {
-        if (Objects.isNull(connectionMng)) return null;
-        if (connectionMng.getConnectionId() != null && existsByConnectionId(connectionMng.getConnectionId())) {
-            throw new RuntimeException("CONNECTION_ALREADY_EXISTS");
-        }
+
         connectionMng.setVersion(ocProps.getVersion());
         try {
             fieldBindingMngService.bind(connectionMng); // also saves to db
@@ -134,7 +131,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     @Override
     public ConnectionMng getByConnectionId(Long connectionId) {
         ConnectionMng connectionMng = connectionMngRepository.findByConnectionId(connectionId)
-                .orElseThrow(() -> new ConnectionNotFoundException(connectionId));
+                .orElseThrow(() -> ConnectionValidationException.connectionNotFound(connectionId));
 
         setEnhancements(connectionMng);
         return connectionMng;
