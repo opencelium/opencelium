@@ -18,7 +18,6 @@ import {withTheme} from 'styled-components';
 import {BadRequest} from "@app_component/default_pages/bad_request/BadRequest";
 import ContentLoading from "@app_component/base/loading/ContentLoading";
 import ErrorBoundary from "@app_component/base/error_boundary/ErrorBoundary";
-import {Title} from "@app_component/collection/collection_title/Title";
 import {FormSectionProps} from "../form_section/interfaces";
 import {FormProps} from './interfaces';
 import {ActionsStyled, FormSectionStyled, FormStyled, SectionStyled} from './styles';
@@ -44,7 +43,7 @@ const Form: FC<FormProps> =
         } = Application.getReduxState();
     useEffect(() => {
         if (entityHeader !== title) {
-            dispatch(setEntityHeader(title.toString()));
+            dispatch(setEntityHeader(title));
         }
     }, [title]);
     if(isLoading){

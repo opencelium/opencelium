@@ -25,9 +25,8 @@ import Tooltip from "@app_component/base/tooltip/Tooltip";
 import {Auth} from "@application/classes/Auth";
 import AvatarDefault from "@image/application/avatar_default.png";
 import {Application} from "@application/classes/Application";
-import Text from "@app_component/base/text/Text";
-import {TextSize} from "@app_component/base/text/interfaces";
 import {useAppDispatch} from "@application/utils/store";
+import Title from "@app_component/layout/top_bar/collection_title/Title";
 
 const TopBar: FC<TopBarProps> =
     ({
@@ -68,7 +67,7 @@ const TopBar: FC<TopBarProps> =
                     color: `${theme.collectionView.title.color.quite}`,
                     fontSize: '24px'
                 }}>
-                    {entityHeader ? <Text value={entityHeader}  size={TextSize.Size_24}/> : null }
+                    {entityHeader ? <Title title={entityHeader}/> : null }
                 </div>
                 <div style={{display: 'flex', gap: '10px', alignItems: 'center', justifyContent: 'center'}}>
                     <GlobalSearch/>

@@ -27,7 +27,6 @@ import CancelButton from "@entity/connection/components/components/general/view_
 import {setConnectionData, setCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import { setModalConnectionData, setModalCurrentTechnicalItem } from '@entity/connection/redux_toolkit/slices/ModalConnectionSlice';
 import CConnection from "@entity/connection/components/classes/components/content/connection/CConnection";
-import Title from "@app_component/collection/collection_title/Title";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import CSvg from "@classes/content/connection_overview_2/CSvg";
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';

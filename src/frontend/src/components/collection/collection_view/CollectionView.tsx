@@ -118,7 +118,7 @@ const CollectionView: FC<CollectionViewProps> = ({
 	}
 	useEffect(() => {
 		if (entityHeader !== collection.title) {
-			dispatch(setEntityHeader(collection.title.toString()));
+			dispatch(setEntityHeader(collection.title));
 		}
 	}, [collection?.title]);
 	useEffect(() => {

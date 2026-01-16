@@ -20,13 +20,25 @@ import Text from "@app_component/base/text/Text";
 import {TextSize} from "@app_component/base/text/interfaces";
 import {TitleProps} from './interfaces';
 import {IconStyled, LinkStyled, TitleStyled} from "./styles";
+import {ColorTheme} from "@style/Theme";
+import {Application} from "@application/classes/Application";
+import DashboardIcon from "@app_component/layout/top_bar/collection_title/icons/DashboardIcon";
+import {withTranslation} from "react-i18next";
 
 const Title: FC<TitleProps> =
     ({
         title,
         className,
-        icon,
     }) => {
+    const {
+        entityIconKey,
+    } = Application.getReduxState();
+    let icon = null;
+    switch (entityIconKey) {
+        case 'dashboard':
+            icon = <DashboardIcon/>
+            break;
+    }
     if(isArray(title)){
         return(
             <TitleStyled className={className}>
@@ -65,7 +77,6 @@ const Title: FC<TitleProps> =
 
 Title.defaultProps = {
     className: '',
-    icon: null,
 }
 
 
