@@ -194,7 +194,7 @@ public class ConnectionServiceImp implements ConnectionService {
         } catch (ConnectionValidationException e) {
             throw e;
         } catch (Exception e) {
-            throw new ConnectionValidationException(e.getMessage());
+            throw ConnectionValidationException.unknownError(e.getMessage());
         }
     }
 
