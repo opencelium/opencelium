@@ -60,6 +60,10 @@ public class ConnectionValidationException extends RuntimeException {
         return new ConnectionValidationException(ExceptionMessages.ENHANCEMENT_NOT_FOUND.formatted(id));
     }
 
+    public static ConnectionValidationException unknownError(String message) {
+        return new ConnectionValidationException(ExceptionConstant.UNKNOWN_ERROR, message);
+    }
+
     public HttpStatus getStatus() {
         return status;
     }

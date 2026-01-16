@@ -32,8 +32,6 @@ public class ConnectionValidatorImpl implements ConnectionValidator {
         if (connectionMng.getConnectionId() != null && connectionMngService.existsByConnectionId(connectionMng.getConnectionId())) {
             throw ConnectionValidationException.connectionAlreadyExists(connectionMng.getConnectionId());
         }
-
-
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.becon.opencelium.backend.exception.handler;
 
+import com.becon.opencelium.backend.exception.CategoryValidationException;
+import com.becon.opencelium.backend.exception.ConnectionValidationException;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.ocel.exception.InvalidExpressionException;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
@@ -29,6 +31,26 @@ public class GlobalExceptionHandler {
         errorResource.setError(ex.getErrorCode().getCode());
         errorResource.setTimestamp(Date.from(Instant.now()));
         errorResource.setStatus(HttpStatus.BAD_REQUEST);
+        return ResponseEntity.badRequest().body(errorResource);
+    }
+
+    @ExceptionHandler(ConnectionValidationException.class)
+    public ResponseEntity<ErrorResource> handleConnectionValidationException(ConnectionValidationException ex) {
+        ErrorResource errorResource = new ErrorResource();
+        errorResource.setMessage(ex.getMessage());
+        errorResource.setError(ex.getError());
+        errorResource.setTimestamp(Date.from(Instant.now()));
+        errorResource.setStatus(ex.getStatus());
+        return ResponseEntity.badRequest().body(errorResource);
+    }
+
+    @ExceptionHandler(CategoryValidationException.class)
+    public ResponseEntity<ErrorResource> handleCategoryValidationException(CategoryValidationException ex) {
+        ErrorResource errorResource = new ErrorResource();
+        errorResource.setMessage(ex.getMessage());
+        errorResource.setError(ex.getError());
+        errorResource.setTimestamp(Date.from(Instant.now()));
+        errorResource.setStatus(ex.getStatus());
         return ResponseEntity.badRequest().body(errorResource);
     }
 
