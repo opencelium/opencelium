@@ -26,6 +26,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidExpressionException.class)
     public ResponseEntity<ErrorResource> handleInvalidExpressionException(InvalidExpressionException ex) {
+        ex.printStackTrace();
         ErrorResource errorResource = new ErrorResource();
         errorResource.setMessage(ex.getMessage());
         errorResource.setError(ex.getErrorCode().getCode());
@@ -36,6 +37,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ConnectionValidationException.class)
     public ResponseEntity<ErrorResource> handleConnectionValidationException(ConnectionValidationException ex) {
+        ex.printStackTrace();
         ErrorResource errorResource = new ErrorResource();
         errorResource.setMessage(ex.getMessage());
         errorResource.setError(ex.getError());
@@ -46,6 +48,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(CategoryValidationException.class)
     public ResponseEntity<ErrorResource> handleCategoryValidationException(CategoryValidationException ex) {
+        ex.printStackTrace();
         ErrorResource errorResource = new ErrorResource();
         errorResource.setMessage(ex.getMessage());
         errorResource.setError(ex.getError());
@@ -56,6 +59,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(GeneralServiceException.class)
     public ResponseEntity<ErrorResource> handleGeneralException(GeneralServiceException ex) {
+        ex.printStackTrace();
         ErrorResource errorResource = new ErrorResource();
         errorResource.setMessage(ex.getMessage());
         errorResource.setError(ex.getError());
