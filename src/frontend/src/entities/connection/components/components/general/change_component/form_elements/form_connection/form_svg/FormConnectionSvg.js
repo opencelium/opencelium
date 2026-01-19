@@ -163,7 +163,10 @@ class FormConnectionSvg extends Component {
     return (
       <div
         className={`${styles.connection_editor}`}
-        style={{ padding: isFullScreen ? "0 0 0 15px" : "0" }}
+        style={{
+          padding: isFullScreen ? "0 0 0 15px" : "0",
+          boxShadow: "0 5px 3px rgb(0 0 0 / 12%),0 2px 2px rgb(0 0 0 / 24%),0 5px 2px rgb(0 0 0 / 24%)",
+      }}
       >
         <Details
           ref={this.detailsRef}

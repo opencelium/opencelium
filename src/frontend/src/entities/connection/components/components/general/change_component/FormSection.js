@@ -54,6 +54,7 @@ import TooltipFontIcon from "@entity/connection/components/components/general/ba
 import styles from "@entity/connection/components/themes/default/general/form_component.scss";
 import { withTheme } from "styled-components";
 import { FormSectionIconsStyled } from "./styles";
+import {Card} from "@app_component/base/card/Card";
 
 export const ModalContext = React.createContext({
   isModal: false,
@@ -390,13 +391,15 @@ class FormSection extends Component {
         }*/
         const hasIcons = content.hasFullScreenFunction || !!content.AdditionalIcon;
         return (
-            <div
+            <Card
                 className={`${!isSubFormSection ? styles.form : ''} ${
                   content.visible ? content.formClassName : ''
                 } ${isFormSectionMinimized ? styles.minimized_form : ''} ${
                   isOneFormSectionFullScreen ? styles.full_screen : ''
                 }`}
                 style={style}
+                padding={"50px 30px 10px 10px"}
+                margin={"21px 0 0"}
             >
                 {hasHeader &&
                     <Label id={`form_section_label_${content.header}`} value={content.header} position={'absolute'}/>
@@ -421,7 +424,7 @@ class FormSection extends Component {
                     </span>
                     {content.hint.text}
                 </div>}
-            </div>
+            </Card>
         );
     }
 }

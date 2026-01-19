@@ -28,7 +28,7 @@ const SettingsLoader = ({ children }: { children: React.ReactNode }) => {
             .catch((error) => console.error("Error loading settings:", error));
     }, []);
 
-    if (!hasSettings) return <Loading/>;
+    if (!hasSettings) return <Loading top={"20%"}/>;
 
     return <>{children}</>;
 };
