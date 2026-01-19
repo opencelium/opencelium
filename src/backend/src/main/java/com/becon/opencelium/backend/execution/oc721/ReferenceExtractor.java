@@ -256,8 +256,8 @@ public class ReferenceExtractor implements Extractor {
             // CASE 1: FOR_IN operator
             // CASE 1.1: index types for KEY(s), there are 3 types:
             // 1) obj['i']~            - field name on ith index (indexing starts from 0)
-            // 3) obj['*']~            - all field names
-            // 4) obj['field_name']~   - field_name by this fields' name
+            // 2) obj['*']~            - all field names
+            // 3) obj['field_name']~   - field_name by this fields' name
 
             pattern = Pattern.compile(IS_FOR_IN_KEY_TYPE);
             matcher = pattern.matcher(path);
@@ -359,9 +359,9 @@ public class ReferenceExtractor implements Extractor {
             }
 
             // CASE 3: FOR operator, there are 3 cases (2 of them is dealt automatically)
-            // 1) array[i]~            - value on the ith index (indexing starts from 0)
-            // 2) array[3]~            - value on the 3rd index (indexing starts from 0) (DONE by library)
-            // 3) array[*]~            - all values (DONE by library)
+            // 1) array[i]             - value on the ith index (indexing starts from 0)
+            // 2) array[3]             - value on the 3rd index (indexing starts from 0) (DONE by library)
+            // 3) array[*]             - all values (DONE by library)
 
             pattern = Pattern.compile(ARRAY_LETTER_INDEX);
             matcher = pattern.matcher(path);
