@@ -6,6 +6,7 @@ import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,4 +16,5 @@ public interface ConnectionMngRepository extends MongoRepository<ConnectionMng,S
     void deleteById(String id);
 
     List<ConnectionMng> findAllByConnectionIdOrderByConnectionIdDesc(Long id);
+    long deleteByConnectionIdIn(Collection<Long> connectionIds);
 }

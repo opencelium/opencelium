@@ -46,4 +46,12 @@ public interface ConnectionRepository extends JpaRepository<Connection, Long> {
     @Modifying
     @Query("update Connection c set c.ocVersion = :version")
     void updateVersion(@Param("version")String version);
+
+    @Query("select c.id from Connection c where c.title like :pattern")
+    List<Long> findIdsByTitleLike(@Param("pattern") String pattern);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Transactional
+    @Query("delete from Connection c where c.id in :ids")
+    int deleteByIds(@Param("ids") List<Long> ids);
 }

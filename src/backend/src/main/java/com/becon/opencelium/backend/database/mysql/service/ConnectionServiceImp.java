@@ -63,6 +63,8 @@ import java.util.stream.Collectors;
 @Service
 public class ConnectionServiceImp implements ConnectionService {
     private static final Logger log = LoggerFactory.getLogger(ConnectionServiceImp.class);
+    private static final String TEST_PREFIX_LIKE = "!*test_connection_%";
+    private static final int CHUNK_SIZE = 1000;
 
     private final ConnectionRepository connectionRepository;
     private final ConnectorService connectorService;
@@ -578,6 +580,57 @@ public class ConnectionServiceImp implements ConnectionService {
                     return versionedDTO;
                 }).toList();
     }
+
+    /**
+     * Full cleanup:
+     * 1) find test connection ids in MariaDB
+     * 2) delete Mongo docs referencing those ids
+     * 3) delete MariaDB rows by ids
+     *
+     * Idempotent: can be run multiple times safely.
+     */
+    @Override
+    @Transactional
+    public CleanupResult cleanupAllTestConnections() {
+        log.info("Test connection cleanup completed started");
+        List<Long> ids = connectionRepository.findIdsByTitleLike(TEST_PREFIX_LIKE);
+        if (ids.isEmpty()) return new CleanupResult(0, 0, 0);
+
+        long totalMongoDeleted = 0;
+        int totalSqlDeleted = 0;
+
+        for (List<Long> chunk : chunks(ids, CHUNK_SIZE)) {
+            // delete mongo first (so we don’t keep dangling refs if SQL delete succeeds)
+            totalMongoDeleted += connectionMngService.deleteByConnectionIdIn(chunk);
+
+            // then delete SQL rows
+            totalSqlDeleted += deleteSqlChunk(chunk);
+        }
+        CleanupResult cleanupResult = new CleanupResult(ids.size(), totalMongoDeleted, totalSqlDeleted);
+        log.info(
+                "Test connection cleanup completed: candidates={}, mongoDeleted={}, sqlDeleted={}",
+                cleanupResult.candidateSqlIds(),
+                cleanupResult.mongoDeleted(),
+                cleanupResult.sqlDeleted()
+        );
+        return cleanupResult;
+    }
+
+    @Transactional
+    protected int deleteSqlChunk(List<Long> chunk) {
+        chunk.forEach(this::deleteById);
+        return chunk.size();
+    }
+
+    private static <T> List<List<T>> chunks(List<T> list, int size) {
+        List<List<T>> out = new ArrayList<>();
+        for (int i = 0; i < list.size(); i += size) {
+            out.add(list.subList(i, Math.min(i + size, list.size())));
+        }
+        return out;
+    }
+
+    public record CleanupResult(int candidateSqlIds, long mongoDeleted, int sqlDeleted) {}
 
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
     // private methods

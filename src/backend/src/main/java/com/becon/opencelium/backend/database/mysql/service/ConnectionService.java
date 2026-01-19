@@ -96,5 +96,8 @@ public interface ConnectionService {
 
     List<Connection> findAllByIds(IdentifiersDTO<Long> ids);
 
+
+    ConnectionServiceImp.CleanupResult cleanupAllTestConnections();
+
     List<ConnectionVersionedDTO> getConnectionVersions(Long connectionId);
 }

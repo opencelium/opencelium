@@ -1,6 +1,8 @@
 package com.becon.opencelium.backend.ocel.utils;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
 
 public class ValueUtils {
 
@@ -88,5 +90,97 @@ public class ValueUtils {
 
     public static boolean isArray(String x) {
         return x.startsWith("[") && x.endsWith("]");
+    }
+
+    public static String serializeValue(Object value) {
+        if (value == null) return "null";
+
+        if (value instanceof Number || value instanceof Boolean || value instanceof String) {
+            return value.toString();
+        }
+
+        if (value instanceof List<?> list) return serializeList(list);
+        if (value instanceof Map<?, ?> map) return serializeMap(map);
+
+        return value.toString();
+    }
+
+    private static String serializeValueInList(Object value) {
+        if (value == null) return "null";
+
+        if (value instanceof String s) {
+            return "\"" + escape(s) + "\"";
+        }
+
+        if (value instanceof Number || value instanceof Boolean) {
+            return value.toString();
+        }
+
+        if (value instanceof List<?> list) return serializeList(list);
+        if (value instanceof Map<?, ?> map) return serializeMap(map);
+
+        return "\"" + escape(value.toString()) + "\"";
+    }
+
+    private static String serializeValueInMap(Object value) {
+        if (value == null) return "null";
+
+        if (value instanceof String s) {
+            return "\"" + escape(s) + "\"";
+        }
+
+        if (value instanceof Number || value instanceof Boolean) {
+            return value.toString();
+        }
+
+        if (value instanceof List<?> list) return serializeList(list);
+        if (value instanceof Map<?, ?> map) return serializeMap(map);
+
+        return "\"" + escape(value.toString()) + "\"";
+    }
+
+    private static String serializeList(List<?> list) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+
+        boolean first = true;
+        for (Object element : list) {
+            if (!first) sb.append(", ");
+            first = false;
+
+            sb.append(serializeValueInList(element));
+        }
+
+        sb.append("]");
+        return sb.toString();
+    }
+
+    private static String serializeMap(Map<?, ?> map) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+
+        boolean first = true;
+        for (Map.Entry<?, ?> entry : map.entrySet()) {
+            if (!first) sb.append(", ");
+            first = false;
+
+            sb.append("\"")
+                    .append(escape(String.valueOf(entry.getKey())))
+                    .append("\": ");
+
+            sb.append(serializeValueInMap(entry.getValue()));
+        }
+
+        sb.append("}");
+        return sb.toString();
+    }
+
+    private static String escape(String s) {
+        return s
+                .replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t");
     }
 }

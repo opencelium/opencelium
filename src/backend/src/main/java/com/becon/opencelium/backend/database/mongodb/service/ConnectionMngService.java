@@ -16,4 +16,6 @@ public interface ConnectionMngService {
     ConnectionMng getById(String id);
 
     List<ConnectionMng> getAllByConnectionId(Long id);
+
+    long deleteByConnectionIdIn(List<Long> chunk);
 }
