@@ -228,7 +228,7 @@ class FormConnectors extends Component{
                     <InputSelect
                         id={'input_fromConnector'}
                         icon={'share'}
-                        label={'Connectors'}
+                        label={'Connectors *'}
                         error={error.fromConnector}
                         value={fromConnectorValue}
                         onChange={(e, connector) => this.handleChange(e, 'fromConnector')}
