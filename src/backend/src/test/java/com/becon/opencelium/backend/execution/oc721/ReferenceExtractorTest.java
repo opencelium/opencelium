@@ -46,40 +46,64 @@ class ReferenceExtractorTest {
     // =======================================================
     //                    DIRECT_REFERENCE
     // =======================================================
-
+    //
     // CASE 1: collect all data from Operation, there are 4 sub-cases
-    // CASE 1.1: '#ababab.(response).[*]'
-    // CASE 1.2: '#ababab.(response).[*].status'
-    // CASE 1.3: '#ababab.(response).[*].header'
-    // CASE 1.4: '#ababab.(response).[*].body'
+    //   CASE 1.1: '#ababab.(response).[*]'
+    //   CASE 1.2: '#ababab.(response).[*].status'
+    //   CASE 1.3: '#ababab.(response).[*].header'
+    //   CASE 1.4: '#ababab.(response).[*].body'
+    //
+    // CASE 2: return 'status' code of ResponseEntity, there is one sub-case
+    //   CASE 2.1: '#ababab.(response).status'
+    //
+    // CASE 3: return 'header' value of HttpEntity, there is one sub-case
+    //   CASE 3.1: '#ababab.(response).header.$.Content-Type',
+    //
+    // CASE 4: extract data from HttpEntity, there are 4 sub-cases
+    //   CASE 4.1: FOR_IN operator, there are 2 sub-cases
+    //      CASE 4.1.1: index types for KEY(s), there are 3 sub-cases:
+    //          CASE 4.1.1.1: obj['i']~            - field name on ith index (indexing starts from 0)
+    //          CASE 4.1.1.2: obj['*']~            - all field names
+    //          CASE 4.1.1.3: obj['field_name']~   - field_name by this fields' name
+    //      CASE 4.1.2: index types for VALUE(s), there are 2 sub-cases:
+    //          CASE 4.1.2.1: obj['i']             - value of the field on ith index (indexing starts from 0)
+    //          CASE 4.1.2.2: obj['field_name']    - value of the field by its name
+    //
+    //   CASE 4.2: SPLIT STRING operator, there are 3 sub-cases
+    //      CASE 4.2.1: field[i]~                  - string on the ith index (indexing starts from 0)
+    //      CASE 4.2.2: field[*]~                  - all strings (after splitting)
+    //      CASE 4.2.3: field[2]~                  - string on the 2nd index (indexing starts from 0)
+    //
+    //   CASE 4.3: FOR operator, there are 3 cases (2 of them is handled in CASE 4.4)
+    //      CASE 4.3.1: array[i]                   - value on the ith index (indexing starts from 0)
+    //      CASE 4.3.2: array[3]                   - value on the 3rd index (indexing starts from 0) (handled in CASE 4.4)
+    //      CASE 4.3.3: array[*]                   - all values (handled in CASE 4.4)
+    //
+    //   CASE 4.4: regular json path
+
 
     @Test
     void extractAllResponses_case1_1() {
         // GIVEN
-        ResponseEntity<?> res00 = response(200, "index_path: 0_0");
-        ResponseEntity<?> res01 = response(200, "index_path: 0_1");
-        ResponseEntity<?> res02 = response(200, "index_path: 0_2");
-        ResponseEntity<?> res10 = response(200, "index_path: 1_0");
-        ResponseEntity<?> res11 = response(200, "index_path: 1_1");
-        ResponseEntity<?> res12 = response(200, "index_path: 1_2");
-
-        Operation operation = new Operation();
-        operation.setColor("#ababab");
-        operation.setLoopDepth(2);
+        ResponseEntity<?> res00 = response(200, "{}");
+        ResponseEntity<?> res01 = response(200, "{}");
+        ResponseEntity<?> res02 = response(200, "{}");
+        ResponseEntity<?> res10 = response(200, "{}");
+        ResponseEntity<?> res11 = response(200, "{}1");
+        ResponseEntity<?> res12 = response(200, "{}");
 
         Map<String, ResponseEntity<?>> responses = Map.of(
                 "0, 0", res00, "1, 1", res11, "1, 0", res10,
                 "0, 2", res02, "0, 1", res01, "1, 2", res12
         );
-        operation.getResponses().putAll(responses);
+
+        Operation operation = operation("#ababab", 2, responses);
 
         when(executionManager.findOperationByColor("#ababab"))
                 .thenReturn(Optional.of(operation));
 
-
         // WHEN
         Object result = extractValue("#ababab.(response).[*]");
-
 
         // THEN
         assertTrue(result instanceof TreeMap);
@@ -94,30 +118,25 @@ class ReferenceExtractorTest {
     @Test
     void extractAllResponseStatuses_case1_2() {
         // GIVEN
-        ResponseEntity<?> res00 = response(200, "index_path: 0_0");
-        ResponseEntity<?> res01 = response(201, "index_path: 0_1");
-        ResponseEntity<?> res02 = response(202, "index_path: 0_2");
-        ResponseEntity<?> res10 = response(301, "index_path: 1_0");
-        ResponseEntity<?> res11 = response(302, "index_path: 1_1");
-        ResponseEntity<?> res12 = response(303, "index_path: 1_2");
-
-        Operation operation = new Operation();
-        operation.setColor("#ababab");
-        operation.setLoopDepth(2);
+        ResponseEntity<?> res00 = response(200, "{}");
+        ResponseEntity<?> res01 = response(201, "{}1");
+        ResponseEntity<?> res02 = response(202, "{}");
+        ResponseEntity<?> res10 = response(301, "{}");
+        ResponseEntity<?> res11 = response(302, "{}");
+        ResponseEntity<?> res12 = response(303, "{}");
 
         Map<String, ResponseEntity<?>> responses = Map.of(
                 "0, 0", res00, "1, 1", res11, "1, 0", res10,
                 "0, 2", res02, "0, 1", res01, "1, 2", res12
         );
-        operation.getResponses().putAll(responses);
+
+        Operation operation = operation("#ababab", 2, responses);
 
         when(executionManager.findOperationByColor("#ababab"))
                 .thenReturn(Optional.of(operation));
 
-
         // WHEN
         Object result = extractValue("#ababab.(response).[*].status");
-
 
         // THEN
         assertTrue(result instanceof TreeMap);
@@ -137,30 +156,25 @@ class ReferenceExtractorTest {
     @Test
     void extractAllResponseHeaders_case1_3() {
         // GIVEN
-        ResponseEntity<?> res00 = response(200, "index_path: 0_0", "index", "0_0");
-        ResponseEntity<?> res01 = response(200, "index_path: 0_1", "index", "0_1");
-        ResponseEntity<?> res02 = response(200, "index_path: 0_2", "index", "0_2");
-        ResponseEntity<?> res10 = response(200, "index_path: 1_0", "index", "1_0");
-        ResponseEntity<?> res11 = response(200, "index_path: 1_1", "index", "1_1");
-        ResponseEntity<?> res12 = response(200, "index_path: 1_2", "index", "1_2");
-
-        Operation operation = new Operation();
-        operation.setColor("#ababab");
-        operation.setLoopDepth(2);
+        ResponseEntity<?> res00 = response(200, "{}", "index", "0_0");
+        ResponseEntity<?> res01 = response(200, "{}", "index", "0_1");
+        ResponseEntity<?> res02 = response(200, "{}", "index", "0_2");
+        ResponseEntity<?> res10 = response(200, "{}", "index", "1_0");
+        ResponseEntity<?> res11 = response(200, "{}", "index", "1_1");
+        ResponseEntity<?> res12 = response(200, "{}2", "index", "1_2");
 
         Map<String, ResponseEntity<?>> responses = Map.of(
                 "0, 0", res00, "1, 1", res11, "1, 0", res10,
                 "0, 2", res02, "0, 1", res01, "1, 2", res12
         );
-        operation.getResponses().putAll(responses);
+
+        Operation operation = operation("#ababab", 2, responses);
 
         when(executionManager.findOperationByColor("#ababab"))
                 .thenReturn(Optional.of(operation));
 
-
         // WHEN
         Object result = extractValue("#ababab.(response).[*].header");
-
 
         // THEN
         assertTrue(result instanceof TreeMap);
@@ -182,30 +196,24 @@ class ReferenceExtractorTest {
     @Test
     void extractAllResponseBodies_case1_4() {
         // GIVEN
-        ResponseEntity<?> res00 = response(200, "index_path: 0_0");
-        ResponseEntity<?> res01 = response(200, "index_path: 0_1");
-        ResponseEntity<?> res02 = response(200, "index_path: 0_2");
-        ResponseEntity<?> res10 = response(200, "index_path: 1_0");
-        ResponseEntity<?> res11 = response(200, "index_path: 1_1");
-        ResponseEntity<?> res12 = response(200, "index_path: 1_2");
-
-        Operation operation = new Operation();
-        operation.setColor("#ababab");
-        operation.setLoopDepth(2);
+        ResponseEntity<?> res00 = response(200, "{\"index\": \"0_0\"}");
+        ResponseEntity<?> res01 = response(200, "{\"index\": \"0_1\"}");
+        ResponseEntity<?> res02 = response(200, "{\"index\": \"0_2\"}");
+        ResponseEntity<?> res10 = response(200, "{\"index\": \"1_0\"}");
+        ResponseEntity<?> res11 = response(200, "{\"index\": \"1_1\"}");
+        ResponseEntity<?> res12 = response(200, "{\"index\": \"1_2\"}");
 
         Map<String, ResponseEntity<?>> responses = Map.of(
                 "0, 0", res00, "1, 1", res11, "1, 0", res10,
                 "0, 2", res02, "0, 1", res01, "1, 2", res12
         );
-        operation.getResponses().putAll(responses);
+        Operation operation = operation("#ababab", 2, responses);
 
         when(executionManager.findOperationByColor("#ababab"))
                 .thenReturn(Optional.of(operation));
 
-
         // WHEN
         Object result = extractValue("#ababab.(response).[*].body");
-
 
         // THEN
         assertTrue(result instanceof TreeMap);
@@ -216,64 +224,46 @@ class ReferenceExtractorTest {
                 new ArrayList<>(responseBodies.keySet())
         );
 
-        assertEquals(
-                List.of("index_path: 0_0", "index_path: 0_1", "index_path: 0_2", "index_path: 1_0", "index_path: 1_1", "index_path: 1_2"),
-                new ArrayList<>(responseBodies.values())
+        List<String> expected = List.of(
+                "{\"index\": \"0_0\"}", "{\"index\": \"0_1\"}", "{\"index\": \"0_2\"}",
+                "{\"index\": \"1_0\"}", "{\"index\": \"1_1\"}", "{\"index\": \"1_2\"}"
         );
+        assertEquals(expected, new ArrayList<>(responseBodies.values()));
     }
-
-
-    // CASE 2: return 'status' code of ResponseEntity, there is one sub-case
-    // CASE 2.1: '#ababab.(response).status',
 
     @Test
     void extractResponseStatus_case2_1() {
         // GIVEN
-        ResponseEntity<?> res00 = response(200, "index_path: 0_0");
-        ResponseEntity<?> res01 = response(201, "index_path: 0_1");
-        ResponseEntity<?> res10 = response(300, "index_path: 1_0");
-        ResponseEntity<?> res11 = response(301, "index_path: 1_1"); // should verufy this for key = "1, 1"
-
-        Operation operation = new Operation();
-        operation.setColor("#ababab");
-        operation.setLoopDepth(2);
+        ResponseEntity<?> res00 = response(200, "{}");
+        ResponseEntity<?> res01 = response(201, "{}");
+        ResponseEntity<?> res10 = response(300, "{}");
+        ResponseEntity<?> res11 = response(301, "{}"); // should verify this for key = "1, 1"
 
         Map<String, ResponseEntity<?>> responses = Map.of(
                 "0, 0", res00, "1, 1", res11,
                 "1, 0", res10, "0, 1", res01
         );
-        operation.getResponses().putAll(responses);
+        Operation operation = operation("#ababab", 2, responses);
 
         when(executionManager.findOperationByColor("#ababab"))
                 .thenReturn(Optional.of(operation));
 
-        when(executionManager.generateKey(2))
+        when(executionManager.generateKey(operation.getLoopDepth()))
                 .thenReturn("1, 1");
-
 
         // WHEN
         Object status = extractValue("#ababab.(response).status");
-
 
         // THEN
         assertEquals(301, status);
     }
 
-
-    // CASE 3: return 'header' value of HttpEntity, there are 2 sub-cases
-    // CASE 3.1: '#ababab.(response).header.$.Content-Type',
-    // CASE 3.2: '#ababab.(request).header.$.Content-Type',
-
     @Test
     void extractResponseHeaderValue_case3_1() {
         // GIVEN
-        ResponseEntity<?> response = response(200, "{body: \"value\"}", "headerKey", "headerValue");
+        ResponseEntity<?> response = response(200, "{}", "headerKey", "headerValue");
 
-        Operation operation = new Operation();
-        operation.setColor("#ababab");
-        operation.setLoopDepth(0);
-
-        operation.getResponses().put("#", response);
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
 
         when(executionManager.findOperationByColor("#ababab"))
                 .thenReturn(Optional.of(operation));
@@ -281,17 +271,15 @@ class ReferenceExtractorTest {
         when(executionManager.generateKey(operation.getLoopDepth()))
                 .thenReturn("#");
 
-
         // WHEN
         Object result = extractValue("#ababab.(response).header.$.headerKey");
-
 
         // THEN
         assertEquals(List.of("headerValue"), result);
     }
 
     @Test
-    void extractRequestHeaderValue_case3_2() {
+    void extractRequestHeaderValue_case3_1() {
         // GIVEN
         HttpHeaders headers = new HttpHeaders();
         headers.add("X-Req", "123");
@@ -311,36 +299,12 @@ class ReferenceExtractorTest {
         when(executionManager.generateKey(operation.getLoopDepth()))
                 .thenReturn("#");
 
-
         // WHEN
         Object result = extractValue("#ababab.(request).header.$.X-Req");
-
 
         // THEN
         assertEquals(List.of("123"), result);
     }
-
-    // CASE 4: extract data from HttpEntity, there are 4 sub-cases
-    // CASE 4.1: FOR_IN operator, there are 2 sub-cases
-    //   CASE 4.1.1: index types for KEY(s), there are 3 sub-cases:
-    //      CASE 4.1.1.1: obj['i']~            - field name on ith index (indexing starts from 0)
-    //      CASE 4.1.1.2: obj['*']~            - all field names
-    //      CASE 4.1.1.3: obj['field_name']~   - field_name by this fields' name
-    //   CASE 4.1.2: index types for VALUE(s), there are 2 sub-cases:
-    //      CASE 4.1.2.1: obj['i']             - value of the field on ith index (indexing starts from 0)
-    //      CASE 4.1.2.2: obj['field_name']    - value of the field by its name
-    //
-    // CASE 4.2: SPLIT STRING operator, there are 3 sub-cases
-    //   CASE 4.2.1: field[i]~            - string on the ith index (indexing starts from 0)
-    //   CASE 4.2.2: field[*]~            - all strings (after splitting)
-    //   CASE 4.2.3: field[2]~            - string on the 2nd index (indexing starts from 0)
-    //
-    // CASE 4.3: FOR operator, there are 3 cases (2 of them is handled in CASE 4.4)
-    //   CASE 4.3.1: array[i]             - value on the ith index (indexing starts from 0)
-    //   CASE 4.3.2: array[3]             - value on the 3rd index (indexing starts from 0) (handled in CASE 4.4)
-    //   CASE 4.3.3: array[*]             - all values (handled in CASE 4.4)
-    //
-    // CASE 4.4: regular json path
 
     private static final String jsonResponseBody = """
             {
@@ -394,18 +358,10 @@ class ReferenceExtractorTest {
                 HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
         );
 
-        Operation operation = new Operation();
-        operation.setColor("#ababab");
-        operation.setLoopDepth(0);
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
 
-        operation.getResponses().put("#", response);
+        Loop loop = loop("forin", "i", "forin {%#ababab.(response).body.$.meta['*']~%}");
 
-        OperatorEx operator = new OperatorEx();
-        operator.setIndex("0");
-        operator.setType("forin");
-        operator.setIterator("i");
-        operator.setExpression("forin {%#ababab.(response).body.$.meta['*']~%}");
-        Loop loop = Loop.fromOperator(operator);
         loop.setValue("version");
         loop.setIndex(1);
 
@@ -436,11 +392,7 @@ class ReferenceExtractorTest {
                 HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
         );
 
-        Operation operation = new Operation();
-        operation.setColor("#ababab");
-        operation.setLoopDepth(0);
-
-        operation.getResponses().put("#", response);
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
 
         when(executionManager.findOperationByColor("#ababab"))
                 .thenReturn(Optional.of(operation));
@@ -448,10 +400,8 @@ class ReferenceExtractorTest {
         when(executionManager.generateKey(operation.getLoopDepth()))
                 .thenReturn("#");
 
-
         // WHEN
         Object val = extractValue("#ababab.(response).body.$.meta['*']~");
-
 
         // THEN
         assertEquals(List.of("response-id", "version"), val);
@@ -466,11 +416,7 @@ class ReferenceExtractorTest {
                 HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
         );
 
-        Operation operation = new Operation();
-        operation.setColor("#ababab");
-        operation.setLoopDepth(0);
-
-        operation.getResponses().put("#", response);
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
 
         when(executionManager.findOperationByColor("#ababab"))
                 .thenReturn(Optional.of(operation));
@@ -478,10 +424,8 @@ class ReferenceExtractorTest {
         when(executionManager.generateKey(operation.getLoopDepth()))
                 .thenReturn("#");
 
-
         // WHEN
         Object val1 = extractValue("#ababab.(response).body.$.meta['response-id']~");
-
 
         // THEN
         assertEquals("response-id", val1);
@@ -496,18 +440,9 @@ class ReferenceExtractorTest {
                 HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
         );
 
-        Operation operation = new Operation();
-        operation.setColor("#ababab");
-        operation.setLoopDepth(0);
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
 
-        operation.getResponses().put("#", response);
-
-        OperatorEx operator = new OperatorEx();
-        operator.setIndex("0");
-        operator.setType("forin");
-        operator.setIterator("i");
-        operator.setExpression("forin {%#ababab.(response).body.$.data.items[0]['*']~%}");
-        Loop loop = Loop.fromOperator(operator);
+        Loop loop =  loop("forin", "i", "forin {%#ababab.(response).body.$.data.items[0]['*']~%}");
 
         when(executionManager.findOperationByColor("#ababab"))
                 .thenReturn(Optional.of(operation));
@@ -517,7 +452,6 @@ class ReferenceExtractorTest {
 
         when(executionManager.getLoops())
                 .thenReturn(List.of(loop));
-
 
         // WHEN-THEN
         loop.setValue("name");
@@ -545,11 +479,7 @@ class ReferenceExtractorTest {
                 HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
         );
 
-        Operation operation = new Operation();
-        operation.setColor("#ababab");
-        operation.setLoopDepth(0);
-
-        operation.getResponses().put("#", response);
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
 
         when(executionManager.findOperationByColor("#ababab"))
                 .thenReturn(Optional.of(operation));
@@ -557,10 +487,8 @@ class ReferenceExtractorTest {
         when(executionManager.generateKey(operation.getLoopDepth()))
                 .thenReturn("#");
 
-
         // WHEN
         Object val = extractValue("#ababab.(response).body.$.data['map_with_special_keys']");
-
 
         // THEN
         assertTrue(val instanceof Map);
@@ -583,18 +511,9 @@ class ReferenceExtractorTest {
                 HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
         );
 
-        Operation operation = new Operation();
-        operation.setColor("#ababab");
-        operation.setLoopDepth(0);
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
 
-        operation.getResponses().put("#", response);
-
-        OperatorEx operator = new OperatorEx();
-        operator.setIndex("0");
-        operator.setType("SplitString");
-        operator.setIterator("i");
-        operator.setExpression("{%#ababab.(response).body.$.string_with_delimiter[*]~%} SplitString ';'");
-        Loop loop = Loop.fromOperator(operator);
+        Loop loop = loop("SplitString", "i", "{%#ababab.(response).body.$.string_with_delimiter[*]~%} SplitString ';'");
 
         when(executionManager.findOperationByColor("#ababab"))
                 .thenReturn(Optional.of(operation));
@@ -604,7 +523,6 @@ class ReferenceExtractorTest {
 
         when(executionManager.getLoops())
                 .thenReturn(List.of(loop));
-
 
         // WHEN-THEN
         loop.setValue("a");
@@ -712,18 +630,9 @@ class ReferenceExtractorTest {
                 HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
         );
 
-        Operation operation = new Operation();
-        operation.setColor("#ababab");
-        operation.setLoopDepth(0);
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
 
-        operation.getResponses().put("#", response);
-
-        OperatorEx operator = new OperatorEx();
-        operator.setIndex("0");
-        operator.setType("for");
-        operator.setIterator("i");
-        operator.setExpression("for {%#ababab.(response).body.$.list[*]%}");
-        Loop loop = Loop.fromOperator(operator);
+        Loop loop = loop("for", "i", "for {%#ababab.(response).body.$.list[*]%}");
 
         when(executionManager.findOperationByColor("#ababab"))
                 .thenReturn(Optional.of(operation));
@@ -733,7 +642,6 @@ class ReferenceExtractorTest {
 
         when(executionManager.getLoops())
                 .thenReturn(List.of(loop));
-
 
         // WHEN-THEN
         loop.setIndex(0);
@@ -756,18 +664,9 @@ class ReferenceExtractorTest {
                 HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
         );
 
-        Operation operation = new Operation();
-        operation.setColor("#ababab");
-        operation.setLoopDepth(0);
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
 
-        operation.getResponses().put("#", response);
-
-        OperatorEx operator = new OperatorEx();
-        operator.setIndex("0");
-        operator.setType("for");
-        operator.setIterator("i");
-        operator.setExpression("for {%#ababab.(response).body.$.data.items[*]%}");
-        Loop loop = Loop.fromOperator(operator);
+        Loop loop = loop("for", "i", "for {%#ababab.(response).body.$.data.items[*]%}");
         loop.setValue("1");
 
         when(executionManager.findOperationByColor("#ababab"))
@@ -778,7 +677,6 @@ class ReferenceExtractorTest {
 
         when(executionManager.getLoops())
                 .thenReturn(List.of(loop));
-
 
         // WHEN-THEN
         Object val1 = extractValue("#ababab.(response).body.$.data.items[i].id");
@@ -801,12 +699,7 @@ class ReferenceExtractorTest {
                 HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
         );
 
-        Operation operation = new Operation();
-        operation.setColor("#ababab");
-        operation.setLoopDepth(0);
-
-        operation.getResponses().put("#", response);
-
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
 
         when(executionManager.findOperationByColor("#ababab"))
                 .thenReturn(Optional.of(operation));
@@ -814,10 +707,8 @@ class ReferenceExtractorTest {
         when(executionManager.generateKey(operation.getLoopDepth()))
                 .thenReturn("#");
 
-
         // WHEN
         Object val = extractValue("#ababab.(response).body.$.list[1]");
-
 
         // THEN
         assertEquals("L2", val);
@@ -832,12 +723,7 @@ class ReferenceExtractorTest {
                 HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
         );
 
-        Operation operation = new Operation();
-        operation.setColor("#ababab");
-        operation.setLoopDepth(0);
-
-        operation.getResponses().put("#", response);
-
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
 
         when(executionManager.findOperationByColor("#ababab"))
                 .thenReturn(Optional.of(operation));
@@ -845,10 +731,8 @@ class ReferenceExtractorTest {
         when(executionManager.generateKey(operation.getLoopDepth()))
                 .thenReturn("#");
 
-
         // WHEN
         Object val = extractValue("#ababab.(response).body.$.list[*]");
-
 
         // THEN
         assertTrue(val instanceof List);
@@ -864,18 +748,13 @@ class ReferenceExtractorTest {
                 HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
         );
 
-        Operation operation = new Operation();
-        operation.setColor("#ababab");
-        operation.setLoopDepth(0);
-
-        operation.getResponses().put("#", response);
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
 
         when(executionManager.findOperationByColor("#ababab"))
                 .thenReturn(Optional.of(operation));
 
         when(executionManager.generateKey(operation.getLoopDepth()))
                 .thenReturn("#");
-
 
         // WHEN - THEN
         Object val1 = extractValue("#ababab.(response).body.$.status");
@@ -898,18 +777,13 @@ class ReferenceExtractorTest {
                 HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
         );
 
-        Operation operation = new Operation();
-        operation.setColor("#ababab");
-        operation.setLoopDepth(0);
-
-        operation.getResponses().put("#", response);
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
 
         when(executionManager.findOperationByColor("#ababab"))
                 .thenReturn(Optional.of(operation));
 
         when(executionManager.generateKey(operation.getLoopDepth()))
                 .thenReturn("#");
-
 
         // WHEN - THEN
         Object val1 = extractValue("#ababab.(response).body.$.data.map_with_special_keys");
@@ -924,6 +798,15 @@ class ReferenceExtractorTest {
         assertEquals(42, val3);
     }
 
+    private Operation operation(String color, int loopDepth, Map<String, ResponseEntity<?>> responses) {
+        Operation operation = new Operation();
+        operation.setColor(color);
+        operation.setLoopDepth(loopDepth);
+
+        operation.getResponses().putAll(responses);
+
+        return operation;
+    }
 
     private ResponseEntity<?> response(int status, Object body, String headerName, String headerValue) {
         HttpHeaders headers = new HttpHeaders();
@@ -931,10 +814,20 @@ class ReferenceExtractorTest {
         return new ResponseEntity<>(body, headers, HttpStatus.valueOf(status));
     }
 
-
     private ResponseEntity<?> response(int status, Object body) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         return new ResponseEntity<>(body, headers, HttpStatus.valueOf(status));
+    }
+
+    private Loop loop(String type, String iterator, String expression) {
+        OperatorEx operator = new OperatorEx();
+        operator.setId("23123");
+        operator.setIndex("1");
+        operator.setType(type);
+        operator.setIterator(iterator);
+        operator.setExpression(expression);
+
+        return Loop.fromOperator(operator);
     }
 }
