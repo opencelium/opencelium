@@ -66,12 +66,12 @@ class ReferenceExtractorTest {
     //      CASE 4.1.1: index types for KEY(s), there are 3 sub-cases:
     //          CASE 4.1.1.1: obj['i']~            - field name on ith index (indexing starts from 0)
     //          CASE 4.1.1.2: obj['*']~            - all field names
-    //          CASE 4.1.1.3: obj['field_name']~   - field_name by this fields' name
+    //          CASE 4.1.1.3: obj['field_name']~   - field_name itself
     //      CASE 4.1.2: index types for VALUE(s), there are 2 sub-cases:
     //          CASE 4.1.2.1: obj['i']             - value of the field on ith index (indexing starts from 0)
     //          CASE 4.1.2.2: obj['field_name']    - value of the field by its name
     //
-    //   CASE 4.2: SPLIT STRING operator, there are 3 sub-cases
+    //   CASE 4.2: SPLIT_STRING operator, there are 3 sub-cases
     //      CASE 4.2.1: field[i]~                  - string on the ith index (indexing starts from 0)
     //      CASE 4.2.2: field[*]~                  - all strings (after splitting)
     //      CASE 4.2.3: field[2]~                  - string on the 2nd index (indexing starts from 0)
@@ -315,6 +315,12 @@ class ReferenceExtractorTest {
                 "response-id": "142",
                 "version": 3
               },
+              "items": [
+                {
+                  "name": "complex Split String",
+                  "string": "x-y-z"
+                }
+              ],
               "data": {
                 "items": [
                   {
@@ -538,69 +544,69 @@ class ReferenceExtractorTest {
         assertEquals("d", val2);
     }
 
-//    @Test
-//    void extractFromJsonResponseBody_SPLIT_STRING_case4_2_2() {
-//        // GIVEN
-//        ResponseEntity<?> response = response(
-//                200,
-//                jsonResponseBody,
-//                HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
-//        );
-//
-//        Operation operation = operation("#ababab", 0, Map.of("#", response));
-//
-//        Loop loop = loop("SplitString", "i", "{%#ababab.(response).body.$.string_with_delimiter[*]~%} SplitString ';'");
-//
-//        when(executionManager.findOperationByColor("#ababab"))
-//                .thenReturn(Optional.of(operation));
-//
-//        when(executionManager.generateKey(operation.getLoopDepth()))
-//                .thenReturn("#");
-//
-//        when(executionManager.getLoops())
-//                .thenReturn(List.of(loop));
-//
-//        // WHEN
-//        Object val = extractValue("#ababab.(response).body.$.string_with_delimiter[*]~");
-//
-//        // THEN
-//        assertTrue(val instanceof List);
-//        assertEquals(List.of("a", "b", "c", "d"), val);
-//    }
-//
-//    @Test
-//    void extractFromJsonResponseBody_SPLIT_STRING_case4_2_3() {
-//        // GIVEN
-//        ResponseEntity<?> response = response(
-//                200,
-//                jsonResponseBody,
-//                HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
-//        );
-//
-//        Operation operation = operation("#ababab", 0, Map.of("#", response));
-//
-//        Loop loop = loop("SplitString", "i", "{%#ababab.(response).body.$.string_with_delimiter[*]~%} SplitString ';'");
-//
-//        when(executionManager.findOperationByColor("#ababab"))
-//                .thenReturn(Optional.of(operation));
-//
-//        when(executionManager.generateKey(operation.getLoopDepth()))
-//                .thenReturn("#");
-//
-//        when(executionManager.getLoops())
-//                .thenReturn(List.of(loop));
-//
-//        // WHEN-THEN
-//        loop.setIndex(0);
-//        loop.setValue("a");
-//        Object val1 = extractValue("#ababab.(response).body.$.string_with_delimiter[0]~");
-//        assertEquals("a", val1);
-//
-//        loop.setIndex(2);
-//        loop.setValue("c");
-//        Object val2 = extractValue("#ababab.(response).body.$.string_with_delimiter[2]~");
-//        assertEquals("c", val2);
-//    }
+    @Test
+    void extractFromJsonResponseBody_SPLIT_STRING_case4_2_2() {
+        // GIVEN
+        ResponseEntity<?> response = response(
+                200,
+                jsonContent,
+                HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
+        );
+
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
+
+        Loop loop = loop("SplitString", "i", "{%#ababab.(response).body.$.string_with_delimiter[*]~%} SplitString ';'");
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        when(executionManager.getLoops())
+                .thenReturn(List.of(loop));
+
+        // WHEN
+        Object val = extractValue("#ababab.(response).body.$.string_with_delimiter[*]~");
+
+        // THEN
+        assertTrue(val instanceof List);
+        assertEquals(List.of("a", "b", "c", "d"), val);
+    }
+
+    @Test
+    void extractFromJsonResponseBody_SPLIT_STRING_case4_2_3() {
+        // GIVEN
+        ResponseEntity<?> response = response(
+                200,
+                jsonContent,
+                HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
+        );
+
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
+
+        Loop loop = loop("SplitString", "i", "{%#ababab.(response).body.$.string_with_delimiter[*]~%} SplitString ';'");
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        when(executionManager.getLoops())
+                .thenReturn(List.of(loop));
+
+        // WHEN-THEN
+        loop.setIndex(0);
+        loop.setValue("a");
+        Object val1 = extractValue("#ababab.(response).body.$.string_with_delimiter[0]~");
+        assertEquals("a", val1);
+
+        loop.setIndex(2);
+        loop.setValue("c");
+        Object val2 = extractValue("#ababab.(response).body.$.string_with_delimiter[2]~");
+        assertEquals("c", val2);
+    }
 
     @Test
     void extractFromJsonResponseBodyAsPrimitive_FOR_case4_3_1() {
@@ -782,7 +788,7 @@ class ReferenceExtractorTest {
     }
 
     @Test
-        // FOR -> FOR_IN (value) -> FOR_IN (key)
+        // FOR <-> FOR_IN (value) <-> FOR_IN (key)
     void extractFromJsonResponseBody_case4_3_1_case4_1_2_1_case4_1_1_1() {
         // GIVEN
         ResponseEntity<?> response = response(
@@ -821,14 +827,60 @@ class ReferenceExtractorTest {
         assertEquals(List.of("id", "name", "tags", "metrics"), val2);
 
         // verify FOR_IN keys loop creation (3rd loop)
-        // it will be created in 1st loop adn 2nd loop, so we need to initialize their control values
-        loop1.setIndex(1);
-        loop1.setValue("1");
+        // it will be created in 1st loop adn 2nd loop, so we need to initialize second loops control values
         loop2.setIndex(3);
         loop2.setValue("metrics");
         Object val3 = extractValue("#ababab.(response).body.$.data.items[i]['j']['*']~");
         assertTrue(val3 instanceof List);
         assertEquals(List.of("count", "ratio"), val3);
+    }
+
+    @Test
+        // FOR <-> FOR_IN (value) <-> SPLIT_STRING
+    void extractFromJsonResponseBody_case4_3_1_case4_1_2_1_case4_2_1() {
+        // GIVEN
+        ResponseEntity<?> response = response(
+                200,
+                jsonContent,
+                HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
+        );
+
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
+
+        Loop loop1 = loop("for", "i", "for {%#ababab.(response).body.$.items[*]%}");
+        Loop loop2 = loop("forin", "j", "forin {%#ababab.(response).body.$.items[i]['*']~%}");
+        Loop loop3 = loop("SplitString", "k", "{%#ababab.(response).body.$.items[i]['j'][*]~%} SplitString '-'");
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        when(executionManager.getLoops())
+                .thenReturn(List.of(loop1, loop2, loop3));
+
+        // WHEN - THEN
+        // verify FOR loop creation (1st loop)
+        Object val1 = extractValue("#ababab.(response).body.$.items[*]");
+        assertTrue(val1 instanceof List);
+        assertEquals(1, ((List) val1).size());
+
+        // verify FOR_IN keys loop creation (2nd loop)
+        // it will be created in 1st loop, so we need to initialize its control values
+        loop1.setIndex(0);
+        loop1.setValue("0");
+        Object val2 = extractValue("#ababab.(response).body.$.items[i]['*']~");
+        assertTrue(val2 instanceof List);
+        assertEquals(List.of("name", "string"), val2);
+
+        // verify FOR_IN keys loop creation (3rd loop)
+        // it will be created in 1st loop adn 2nd loop, so we need to initialize second loops control values
+        loop2.setIndex(1);
+        loop2.setValue("string");
+        Object val3 = extractValue("#ababab.(response).body.$.items[i]['j'][*]~");
+        assertTrue(val3 instanceof List);
+        assertEquals(List.of("x", "y", "z"), val3);
     }
 
 

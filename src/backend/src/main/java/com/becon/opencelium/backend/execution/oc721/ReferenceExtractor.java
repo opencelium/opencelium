@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.execution.oc721;
 
 import com.becon.opencelium.backend.constant.RegExpression;
+import com.becon.opencelium.backend.enums.RelationalOperator;
 import com.becon.opencelium.backend.enums.execution.DataType;
 import com.becon.opencelium.backend.execution.ExecutionManager;
 import com.becon.opencelium.backend.reference.ReferenceParser;
@@ -240,7 +241,7 @@ public class ReferenceExtractor implements Extractor {
         Object result = body;
         int partCount = 0;
 
-        // creating json path query
+        // recursively read json
         for (String path : ReferenceUtility.splitPaths(paths)) {
             partCount++;
             if (path.isEmpty()) {
@@ -253,43 +254,38 @@ public class ReferenceExtractor implements Extractor {
             Pattern pattern;
             Matcher matcher;
 
-            // CASE 1: FOR_IN operator
-            // CASE 1.1: index types for KEY(s), there are 3 types:
-            // 1) obj['i']~            - field name on ith index (indexing starts from 0)
-            // 2) obj['*']~            - all field names
-            // 3) obj['field_name']~   - field_name by this fields' name
+            // CASE 4.1: FOR_IN operator, there are 2 sub-cases
+            //   CASE 4.1.1: index types for KEY(s), there are 3 sub-cases:
+            //     CASE 4.1.1.1: obj['i']~            - field name on ith index (indexing starts from 0)
+            //     CASE 4.1.1.2: obj['*']~            - all field names
+            //     CASE 4.1.1.3: obj['field_name']~   - field_name itself
 
             pattern = Pattern.compile(IS_FOR_IN_KEY_TYPE);
             matcher = pattern.matcher(path);
 
-            if (matcher.find()) {
-                // 'field name' is a primitive type value so path will not continue further
-                // thus just return required value(s)
-
+            if (matcher.find()) { // FOR_IN for KEY(s) always comes last in path so after finding result just return
                 String match = matcher.group(1);
 
-                if (Loop.isIterator(match)) {
-                    // case 1.1.1: obj['i']~
-                    // find loop by its iterator
+                if (Loop.isIterator(match)) { // CASE 4.1.1.1
+                    // find loop by iterator, loop stores current value of the iterator
                     Loop loop = getLoopByIterator(match);
 
-                    // return iterators' current value from loop
                     return loop.getValue();
-                } else if ("*".equals(match)) {
-                    // case 1.1.2: obj['*']~
-                    // return all field names of the current object
-                    Object currentBody = getFromJSON(body, ReferenceUtility.getPointerToBody(paths, partCount, matcher.group(0)));
-                    return getFieldNames(currentBody);
-                } else {
-                    // case 1.1.3: obj['field_name']~
-                    // return just match itself
-                    return match;
                 }
+
+                if ("*".equals(match)) { // CASE 4.1.1.2
+                    String pathToCurrentObject = path.replace(matcher.group(0), ""); // just remove FOR_IN operators (comes always last)
+                    Object currentObject = getFromJSON(result, pathToCurrentObject); // path might contain other operators, so continue calling method on result
+
+                    return getFieldNames(currentObject);
+                }
+
+                return match; // CASE 4.1.1.3
             }
 
-            // CASE 1.2: index types for VALUE(s), there are 2 types:
-            // 1) obj['i']             - value of the field on ith index (indexing starts from 0)
-            // 2) obj['field_name']    - value of the field by its name
+            // CASE 4.1.2: index types for VALUE(s), there are 2 sub-cases:
+            //   CASE 4.1.2.1: obj['i']             - value of the field on ith index (indexing starts from 0)
+            //   CASE 4.1.2.2: obj['field_name']    - value of the field by its name
 
             pattern = Pattern.compile(IS_FOR_IN_VALUE_TYPE);
             matcher = pattern.matcher(path);
@@ -298,81 +294,75 @@ public class ReferenceExtractor implements Extractor {
                 String match = matcher.group(1);
                 String fieldName;
 
-                if (Loop.isIterator(match)) {
-                    // case 1.2.1: obj['i']
-                    // find loop by its iterator
+                if (Loop.isIterator(match)) { // CASE 4.1.2.1
+                    // find loop by iterator, loop stores current value of the iterator
                     Loop loop = getLoopByIterator(match);
 
-                    // get current fields' name from loop
                     fieldName = loop.getValue();
-                } else {
-                    // case 1.2.2: obj['field_name']
+                } else { // CASE 4.1.2.2
                     fieldName = match;
                 }
 
+                // FOR_IN type for VALUE(s) is supported by library so just build the correct path
+                // it will be resolved in CASE 4.4
                 path = path.replace("['" + match + "']", "['" + fieldName + "']");
             }
 
-            // CASE 2: SPLIT STRING operator, there are 3 cases
-            // 1) field[i]~            - string on the ith index (indexing starts from 0)
-            // 2) field[*]~            - all strings (after splitting)
-            // 3) field[2]~            - string on the 2nd index (indexing starts from 0)
+            // CASE 4.2: SPLIT_STRING operator, there are 3 sub-cases
+            //   CASE 4.2.1: field[i]~                  - string on the ith index (indexing starts from 0)
+            //   CASE 4.2.2: field[*]~                  - all strings (after splitting)
+            //   CASE 4.2.3: field[2]~                  - string on the 2nd index (indexing starts from 0)
 
             pattern = Pattern.compile(IS_SPLIT_STRING_TYPE);
             matcher = pattern.matcher(path);
 
-            while (matcher.find()) {
+            if (matcher.find()) { // SPLIT_STRING always comes last in path so after finding result just return
                 String match = matcher.group(1);
 
-                if (Loop.isIterator(match)) {
-                    // case 2.1: field[i]~
-                    // find loop by its iterator
+                if (Loop.isIterator(match)) { // CASE 4.2.1
+                    // find loop by iterator, loop stores current value of the iterator
                     Loop loop = getLoopByIterator(match);
 
-                    // it is a primitive value so just return iterators' current value from loop
                     return loop.getValue();
-                } else if ("*".equals(match)) {
-                    // case 2.3: field[*]~
-                    // find loop by reference
-                    Loop loop = getLoopByReference(paths);
-
-                    // recreate list of strings split by delimiter
-                    List<String> strs = new ArrayList<>();
-                    Collections.addAll(strs, ((String) result).split(loop.getDelimiter()));
-
-                    result = strs;
-                } else {
-                    // case 2.2: field[2]~
-                    int index;
-                    try {
-                        index = Integer.parseInt(match);
-                    } catch (Exception e) {
-                        throw new RuntimeException("Wrong index is supplied to a SPLIT STRING operator, 'index' = " + match);
-                    }
-
-                    // find loop by reference
-                    Loop loop = getLoopByReference(paths);
-
-                    // it is a primitive value just return string on the specified index
-                    return ((String) result).split(loop.getDelimiter())[index];
                 }
+
+                // find loop to get delimiter
+                // NOTE. There will not be more than one loop for SPLIT_STRING
+                Loop loop = getSplitStringLoop();
+
+                String pathToCurrentString = path.replace(matcher.group(0), ""); // just remove SPLIT_STRING operators (comes always last)
+                Object currentString = getFromJSON(result, pathToCurrentString); // path might contain other operators, so continue calling method on result
+
+                if ("*".equals(match)) { // CASE 4.2.2
+                    return Arrays.asList(((String) currentString).split(loop.getDelimiter()));
+                }
+
+                // CASE 4.2.3
+                int index;
+                try {
+                    index = Integer.parseInt(match);
+                } catch (Exception e) {
+                    throw new RuntimeException("Non-integer index in SPLIT STRING, operator = " + matcher.group(0));
+                }
+
+                return ((String) currentString).split(loop.getDelimiter())[index];
             }
 
-            // CASE 3: FOR operator, there are 3 cases (2 of them is dealt automatically)
-            // 1) array[i]             - value on the ith index (indexing starts from 0)
-            // 2) array[3]             - value on the 3rd index (indexing starts from 0) (DONE by library)
-            // 3) array[*]             - all values (DONE by library)
+            // CASE 4.3: FOR operator, there are 3 cases (2 of them is handled in CASE 4.4)
+            //   CASE 4.3.1: array[i]                   - value on the ith index (indexing starts from 0)
+            //   CASE 4.3.2: array[3]                   - value on the 3rd index (indexing starts from 0) (handled in CASE 4.4)
+            //   CASE 4.3.3: array[*]                   - all values (handled in CASE 4.4)
 
             pattern = Pattern.compile(ARRAY_LETTER_INDEX);
             matcher = pattern.matcher(path);
 
-            while (matcher.find()) {
+            while (matcher.find()) { // CASE 4.3.1
                 String iterator = matcher.group(1);
 
-                // find loop by its iterator
+                // find loop by iterator, loop stores current value of the iterator
                 Loop loop = getLoopByIterator(iterator);
 
-                // replace iterator with its current number value
+                // just build the correct path it will be resolved by library
                 path = path.replace("[" + iterator + "]", "[" + loop.getValue() + "]");
             }
 
@@ -465,9 +455,9 @@ public class ReferenceExtractor implements Extractor {
                 .findFirst().orElseThrow(() -> new RuntimeException("Wrong 'iterator' value is supplied"));
     }
 
-    private Loop getLoopByReference(String reference) {
+    private Loop getSplitStringLoop() {
         return executionManager.getLoops().stream()
-                .filter(loop -> ReferenceUtility.equals(loop.getRef(), reference))
+                .filter(loop -> loop.getOperator() == RelationalOperator.SPLIT_STRING)
                 .findFirst().orElseThrow(() -> new RuntimeException("Wrong 'reference' value is supplied"));
     }
 

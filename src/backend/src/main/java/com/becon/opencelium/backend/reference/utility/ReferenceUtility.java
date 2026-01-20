@@ -120,46 +120,6 @@ public class ReferenceUtility {
         return result;
     }
 
-    public static String getPointerToBody(String ref, int partCount, String remove) {
-        String[] refParts = splitPaths(ref);
-
-        String result = "";
-        for (int i = 0; i < partCount - 1; i++) {
-            result += refParts[i] + ".";
-        }
-
-        result += refParts[partCount - 1].replace(remove, "");
-
-        return result;
-    }
-
-    public static boolean equals(String ref1, String ref2) {
-        String[] actualRefParts = ref1.split("\\.");
-        String[] potentialRefParts = ref2.split("\\.");
-
-        // 'reference' should contain 'ref' as it is a specific part of it:
-        if (actualRefParts.length > potentialRefParts.length) {
-            return false;
-        }
-
-        String part;
-        for (int i = 0; i < actualRefParts.length; i++) {
-            // if 'part' contains index then remove it, otherwise take whole part
-            if (actualRefParts[i].contains("[")) {
-                part = actualRefParts[i].substring(0, actualRefParts[i].indexOf('['));
-            } else {
-                part = actualRefParts[i];
-            }
-
-            // 'potentialRefParts[i]' should contain part
-            if (!potentialRefParts[i].contains(part)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     private static String wrapSpacesIfNecessary(String part) {
         if (!part.contains(" ")) {
             return part;
