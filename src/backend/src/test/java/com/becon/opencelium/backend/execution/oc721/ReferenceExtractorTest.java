@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -20,6 +21,7 @@ import java.util.TreeMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -306,7 +308,7 @@ class ReferenceExtractorTest {
         assertEquals(List.of("123"), result);
     }
 
-    private static final String jsonResponseBody = """
+    private static final String jsonContent = """
             {
               "status": "ok",
               "meta": {
@@ -345,7 +347,9 @@ class ReferenceExtractorTest {
                 "L2",
                 "L3"
               ],
-              "string_with_delimiter": "a;b;c;d"
+              "string_with_delimiter": "a;b;c;d",
+              "string_array": "[\\"a\\", \\"b\\", \\"c\\"]",
+              "last": true
             }""";
 
 
@@ -354,7 +358,7 @@ class ReferenceExtractorTest {
         // GIVEN
         ResponseEntity<?> response = response(
                 200,
-                jsonResponseBody,
+                jsonContent,
                 HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
         );
 
@@ -386,7 +390,7 @@ class ReferenceExtractorTest {
         // GIVEN
         ResponseEntity<?> response = response(
                 200,
-                jsonResponseBody,
+                jsonContent,
                 HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
         );
 
@@ -410,7 +414,7 @@ class ReferenceExtractorTest {
         // GIVEN
         ResponseEntity<?> response = response(
                 200,
-                jsonResponseBody,
+                jsonContent,
                 HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
         );
 
@@ -434,14 +438,14 @@ class ReferenceExtractorTest {
         // GIVEN
         ResponseEntity<?> response = response(
                 200,
-                jsonResponseBody,
+                jsonContent,
                 HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
         );
 
         Operation operation = operation("#ababab", 0, Map.of("#", response));
 
         // loop extracts targeted objects field names
-        Loop loop =  loop("forin", "i", "forin {%#ababab.(response).body.$.data.items[0]['*']~%}");
+        Loop loop = loop("forin", "i", "forin {%#ababab.(response).body.$.data.items[0]['*']~%}");
 
         when(executionManager.findOperationByColor("#ababab"))
                 .thenReturn(Optional.of(operation));
@@ -473,7 +477,7 @@ class ReferenceExtractorTest {
         // GIVEN
         ResponseEntity<?> response = response(
                 200,
-                jsonResponseBody,
+                jsonContent,
                 HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
         );
 
@@ -505,7 +509,7 @@ class ReferenceExtractorTest {
         // GIVEN
         ResponseEntity<?> response = response(
                 200,
-                jsonResponseBody,
+                jsonContent,
                 HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
         );
 
@@ -603,7 +607,7 @@ class ReferenceExtractorTest {
         // GIVEN
         ResponseEntity<?> response = response(
                 200,
-                jsonResponseBody,
+                jsonContent,
                 HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
         );
 
@@ -637,7 +641,7 @@ class ReferenceExtractorTest {
         // GIVEN
         ResponseEntity<?> response = response(
                 200,
-                jsonResponseBody,
+                jsonContent,
                 HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
         );
 
@@ -674,7 +678,7 @@ class ReferenceExtractorTest {
         // GIVEN
         ResponseEntity<?> response = response(
                 200,
-                jsonResponseBody,
+                jsonContent,
                 HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
         );
 
@@ -698,7 +702,7 @@ class ReferenceExtractorTest {
         // GIVEN
         ResponseEntity<?> response = response(
                 200,
-                jsonResponseBody,
+                jsonContent,
                 HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
         );
 
@@ -723,7 +727,7 @@ class ReferenceExtractorTest {
         // GIVEN
         ResponseEntity<?> response = response(
                 200,
-                jsonResponseBody,
+                jsonContent,
                 HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
         );
 
@@ -752,7 +756,7 @@ class ReferenceExtractorTest {
         // GIVEN
         ResponseEntity<?> response = response(
                 200,
-                jsonResponseBody,
+                jsonContent,
                 HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
         );
 
@@ -778,19 +782,19 @@ class ReferenceExtractorTest {
     }
 
     @Test
-    // FOR -> FOR_IN (value) -> FOR_IN (key)
+        // FOR -> FOR_IN (value) -> FOR_IN (key)
     void extractFromJsonResponseBody_case4_3_1_case4_1_2_1_case4_1_1_1() {
         // GIVEN
         ResponseEntity<?> response = response(
                 200,
-                jsonResponseBody,
+                jsonContent,
                 HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
         );
 
         Operation operation = operation("#ababab", 0, Map.of("#", response));
 
         Loop loop1 = loop("for", "i", "for {%#ababab.(response).body.$.data.items[*]%}");
-        Loop loop2 =  loop("forin", "j", "forin {%#ababab.(response).body.$.data.items[i]['*']~%}");
+        Loop loop2 = loop("forin", "j", "forin {%#ababab.(response).body.$.data.items[i]['*']~%}");
         Loop loop3 = loop("forin", "k", "forin {%#ababab.(response).body.$.data.items[i]['j']['*']~%}");
 
         when(executionManager.findOperationByColor("#ababab"))
@@ -827,6 +831,106 @@ class ReferenceExtractorTest {
         assertEquals(List.of("count", "ratio"), val3);
     }
 
+
+    // =======================================================
+    //                         WEBHOOK
+    // =======================================================
+    //
+    // CASE 1: ${key.field[*]}                - just extract value as it is
+    // CASE 2: ${key.field[0].id:integer}     - extract value as specified type
+
+    @Test
+    void extractFromWebhook_case1() {
+        // GIVEN
+        Map<String, Object> webhookVars = new HashMap<>();
+        webhookVars.put("json", jsonContent);
+        webhookVars.put("id", 1);
+        webhookVars.put("version", "4.7.1");
+
+        when(executionManager.getWebhookVars())
+                .thenReturn(webhookVars);
+
+        // WHEN - THEN
+        Object val1 = extractValue("${id}");
+        assertEquals(1, val1);
+
+        Object val2 = extractValue("${version}");
+        assertEquals("4.7.1", val2);
+
+        Object val3 = extractValue("${json.meta.response-id}");
+        assertEquals("142", val3);
+
+        Object val4 = extractValue("${json.data.items[1]['tags'][0]}");
+        assertEquals("x", val4);
+    }
+
+    @Test
+    void extractFromWebhook_case2() {
+        // GIVEN
+        Map<String, Object> webhookVars = new HashMap<>();
+        webhookVars.put("json", jsonContent);
+        webhookVars.put("id", 1);
+        webhookVars.put("version", "4.7.1");
+
+        when(executionManager.getWebhookVars())
+                .thenReturn(webhookVars);
+
+        // WHEN - THEN
+        Object val1 = extractValue("${json.meta.response-id:integer}");
+        assertEquals(142L, val1);
+
+        Object val2 = extractValue("${json.last:boolean}");
+        assertEquals(true, val2);
+
+        Object val3 = extractValue("${json.data.items[0].metrics.ratio:number}");
+        assertEquals(0.5, val3);
+
+        // array converted to string
+        Object val41 = extractValue("${json.data.items[0].tags}");
+        assertTrue(val41 instanceof List);
+        Object val42 = extractValue("${json.data.items[0].tags:string}");
+        assertTrue(val42 instanceof String);
+
+        // string converted to array
+        Object val51 = extractValue("${json.string_array}");
+        assertTrue(val51 instanceof String);
+        Object val52 = extractValue("${json.string_array:array}");
+        assertTrue(val52 instanceof List);
+        assertEquals(List.of("a", "b", "c"), val52);
+    }
+
+
+    // =======================================================
+    //                      REQUEST_DATA
+    // =======================================================
+    //
+    // CASE 1: {username}
+    // CASE 2: {#12.username}
+
+    @Test
+    void extractFromRequestData_case1_case2() {
+        // GIVEN
+        Map<String, String> requestData = new HashMap<>();
+        requestData.put("username", "Kevin");
+        requestData.put("id", "153");
+
+        when(executionManager.getRequestData(any()))
+                .thenReturn(requestData);
+
+        // WHEN - THEN
+        Object val1 = extractValue("{id}");
+        assertEquals("153", val1);
+
+        Object val2 = extractValue("{#12.username}");
+        assertEquals("Kevin", val2);
+
+        // if no data found then return ref itself
+        Object val3 = extractValue("{#12.user-id}");
+        assertEquals("{#12.user-id}", val3);
+    }
+
+
+    // helper methods
     private Operation operation(String color, int loopDepth, Map<String, ResponseEntity<?>> responses) {
         Operation operation = new Operation();
         operation.setColor(color);
