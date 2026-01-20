@@ -98,7 +98,7 @@ public class Loop {
                 ? buildIterableDirectRef(wrappedDirectRef)
                 : buildIterableWebhookRef(expression);
 
-        loop.setRef(ref);
+        loop.setRef(ref); // ['*']~ - is appended automatically
     }
 
     private static String buildIterableDirectRef(String wrappedDirectRef) {

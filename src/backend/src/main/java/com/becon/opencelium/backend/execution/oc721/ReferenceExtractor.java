@@ -154,9 +154,15 @@ public class ReferenceExtractor implements Extractor {
                 .orElseThrow(() -> new RuntimeException("There is no Operation with '" + ref.getColor() + "'"));
 
         final String path = ref.getPath();
-        // CASE 1:
+
+        // CASE 1: collect all data from Operation, there are 4 sub-cases
+        //   CASE 1.1: '#ababab.(response).[*]'
+        //   CASE 1.2: '#ababab.(response).[*].status'
+        //   CASE 1.3: '#ababab.(response).[*].header'
+        //   CASE 1.4: '#ababab.(response).[*].body'
+
         if (ref.getPart() == DirectReference.Part.ALL) {
-            if (path == null) {
+            if (path == null) { // CASE 1.1
                 TreeMap<String, ResponseEx> responses = new TreeMap<>(NUMERIC_PARTS);
                 operation.getResponses().forEach((K, V) -> responses.put(K, ResponseEx.of(V)));
 
@@ -164,7 +170,7 @@ public class ReferenceExtractor implements Extractor {
             }
 
             // collect only specified response part, can be in ['header', 'status', 'body']
-            if ("status".equals(path)) {
+            if ("status".equals(path)) { // CASE 1.2
                 TreeMap<String, Integer> statuses = new TreeMap<>(NUMERIC_PARTS);
 
                 operation.getResponses().forEach((K, V) -> statuses.put(K, V.getStatusCode().value()));
@@ -172,7 +178,7 @@ public class ReferenceExtractor implements Extractor {
                 return statuses;
             }
 
-            if ("header".equals(path)) {
+            if ("header".equals(path)) { // CASE 1.3
                 TreeMap<String, Map<String, List<String>>> headers = new TreeMap<>(NUMERIC_PARTS);
 
                 operation.getResponses().forEach((K, V) -> headers.put(K, V.getHeaders()));
@@ -180,7 +186,7 @@ public class ReferenceExtractor implements Extractor {
                 return headers;
             }
 
-            if ("body".equals(path)) {
+            if ("body".equals(path)) { // CASE 1.4
                 TreeMap<String, Object> bodies = new TreeMap<>(NUMERIC_PARTS);
 
                 operation.getResponses().forEach((K, V) -> bodies.put(K, V.getBody()));
@@ -192,8 +198,7 @@ public class ReferenceExtractor implements Extractor {
         // at this point we work on a specific HttpEntity (Response or Request)
         String key = executionManager.generateKey(operation.getLoopDepth());
 
-        // CASE 2:
-        // only ResponseEntity can have status, so 'ref' is always in form '#color.(response).status',
+        // CASE 2: '#ababab.(response).status'         - return 'status' code of ResponseEntity
         if (ref.getPart() == DirectReference.Part.STATUS) {
             return operation.getResponses().get(key).getStatusCode().value();
         }
@@ -205,14 +210,19 @@ public class ReferenceExtractor implements Extractor {
             entity = operation.getRequests().get(key);
         }
 
-        // CASE 3:
-        //'#ababab.(response).header.$.Content-Type',
-        //'#ababab.(request).header.$.Content-Type',
+        // CASE 3: return 'header' value of HttpEntity
+        // ex.1) '#ababab.(response).header.$.Content-Type',
+        // ex.2) '#ababab.(request).header.$.Content-Type',
         if (ref.getPart() == DirectReference.Part.HEADER) {
             return entity.getHeaders().get(path);
         }
 
-        // CASE 4:
+        // CASE 4: has 4 sub-cases
+        //   CASE 4.1: FOR_IN operator
+        //   CASE 4.2: SPLIT_STRING operator
+        //   CASE 4.3: FOR operator
+        //   CASE 4.4: regular json path
+        // We can also mix several of these cases
         Object body = entity.getBody();
         MediaType mediaType = entity.getHeaders().getContentType();
 
@@ -239,11 +249,9 @@ public class ReferenceExtractor implements Extractor {
 
     private Object getFromJSON(Object body, String paths) {
         Object result = body;
-        int partCount = 0;
 
         // recursively read json
         for (String path : ReferenceUtility.splitPaths(paths)) {
-            partCount++;
             if (path.isEmpty()) {
                 continue;
             }

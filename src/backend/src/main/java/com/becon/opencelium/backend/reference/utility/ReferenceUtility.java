@@ -1,55 +1,33 @@
 package com.becon.opencelium.backend.reference.utility;
 
+import com.becon.opencelium.backend.reference.ReferenceDetector;
+import com.becon.opencelium.backend.reference.ReferenceParser;
+import com.becon.opencelium.backend.reference.ReferenceScanner;
+import com.becon.opencelium.backend.reference.model.Reference;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.becon.opencelium.backend.constant.RegExpression.enhancement;
-import static com.becon.opencelium.backend.constant.RegExpression.pageRef;
-import static com.becon.opencelium.backend.constant.RegExpression.requestData;
-import static com.becon.opencelium.backend.constant.RegExpression.webhook;
-import static com.becon.opencelium.backend.constant.RegExpression.wrappedDirectRef;
-
-
 public class ReferenceUtility {
-    public static final String IS_FOR_IN_KEY_TYPE   = "\\['([^\\[\\]'']*)'\\]~";
+    public static final String IS_FOR_IN_KEY_TYPE = "\\['([^\\[\\]'']*)'\\]~";
     public static final String IS_FOR_IN_VALUE_TYPE = "\\['([^\\[\\]'']*)'\\]";
     public static final String IS_SPLIT_STRING_TYPE = "\\[([a-z0-9*]+)\\]~";
     public static final String ARRAY_LETTER_INDEX = "\\[([a-z])\\]";
 
     public static String getContainedReferenceAndType(String expression) {
-        if (expression == null) {
-            return "No reference found";
+        if (ReferenceDetector.containsReference(expression)) {
+            List<String> references = ReferenceScanner.extract(expression);
+
+            String res = references.get(0);
+            Reference reference = ReferenceParser.parse(res);
+
+            return reference.getType() + " ref(" + res + ")";
         }
 
-        String res = extractReference(expression, wrappedDirectRef);
-        if (res != null) {
-            return "direct ref(" + res + ")";
-        }
-
-        res = extractReference(expression, enhancement);
-        if (res != null) {
-            return "enhancement(" + res + ")";
-        }
-
-        res = extractReference(expression, webhook);
-        if (res != null) {
-            return "webhook(" + res + ")";
-        }
-
-        res = extractReference(expression, pageRef);
-        if (res != null) {
-            return "page(" + res + ")";
-        }
-
-        res = extractReference(expression, requestData);
-        if (res != null) {
-            return "request data(" + res + ")";
-        }
-
-        return "No reference found(" + res + ")";
+        return "NO ref(" + expression + ")";
     }
 
     public static String extractReference(String value, String type) {

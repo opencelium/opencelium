@@ -55,11 +55,11 @@ class ReferenceExtractorTest {
     //   CASE 1.3: '#ababab.(response).[*].header'
     //   CASE 1.4: '#ababab.(response).[*].body'
     //
-    // CASE 2: return 'status' code of ResponseEntity, there is one sub-case
-    //   CASE 2.1: '#ababab.(response).status'
+    // CASE 2: '#ababab.(response).status'         - return 'status' code of ResponseEntity
     //
-    // CASE 3: return 'header' value of HttpEntity, there is one sub-case
-    //   CASE 3.1: '#ababab.(response).header.$.Content-Type',
+    // CASE 3: return 'header' value of HttpEntity
+    // ex.1) '#ababab.(response).header.$.Content-Type',
+    // ex.2) '#ababab.(request).header.$.Content-Type',
     //
     // CASE 4: extract data from HttpEntity, there are 4 sub-cases
     //   CASE 4.1: FOR_IN operator, there are 2 sub-cases
@@ -234,7 +234,7 @@ class ReferenceExtractorTest {
     }
 
     @Test
-    void extractResponseStatus_case2_1() {
+    void extractResponseStatus_case2() {
         // GIVEN
         ResponseEntity<?> res00 = response(200, "{}");
         ResponseEntity<?> res01 = response(201, "{}");
@@ -261,7 +261,7 @@ class ReferenceExtractorTest {
     }
 
     @Test
-    void extractResponseHeaderValue_case3_1() {
+    void extractResponseHeaderValue_case3() {
         // GIVEN
         ResponseEntity<?> response = response(200, "{}", "headerKey", "headerValue");
 
@@ -281,7 +281,7 @@ class ReferenceExtractorTest {
     }
 
     @Test
-    void extractRequestHeaderValue_case3_1() {
+    void extractRequestHeaderValue_case3() {
         // GIVEN
         HttpHeaders headers = new HttpHeaders();
         headers.add("X-Req", "123");
@@ -370,7 +370,7 @@ class ReferenceExtractorTest {
 
         Operation operation = operation("#ababab", 0, Map.of("#", response));
 
-        Loop loop = loop("forin", "i", "forin {%#ababab.(response).body.$.meta['*']~%}");
+        Loop loop = loop("forin", "i", "forin {%#ababab.(response).body.$.meta%}");
 
         when(executionManager.findOperationByColor("#ababab"))
                 .thenReturn(Optional.of(operation));
@@ -451,7 +451,7 @@ class ReferenceExtractorTest {
         Operation operation = operation("#ababab", 0, Map.of("#", response));
 
         // loop extracts targeted objects field names
-        Loop loop = loop("forin", "i", "forin {%#ababab.(response).body.$.data.items[0]['*']~%}");
+        Loop loop = loop("forin", "i", "forin {%#ababab.(response).body.$.data.items[0]%}");
 
         when(executionManager.findOperationByColor("#ababab"))
                 .thenReturn(Optional.of(operation));
@@ -800,8 +800,8 @@ class ReferenceExtractorTest {
         Operation operation = operation("#ababab", 0, Map.of("#", response));
 
         Loop loop1 = loop("for", "i", "for {%#ababab.(response).body.$.data.items[*]%}");
-        Loop loop2 = loop("forin", "j", "forin {%#ababab.(response).body.$.data.items[i]['*']~%}");
-        Loop loop3 = loop("forin", "k", "forin {%#ababab.(response).body.$.data.items[i]['j']['*']~%}");
+        Loop loop2 = loop("forin", "j", "forin {%#ababab.(response).body.$.data.items[i]%}");
+        Loop loop3 = loop("forin", "k", "forin {%#ababab.(response).body.$.data.items[i]['j']%}");
 
         when(executionManager.findOperationByColor("#ababab"))
                 .thenReturn(Optional.of(operation));
@@ -814,7 +814,7 @@ class ReferenceExtractorTest {
 
         // WHEN - THEN
         // verify FOR loop creation (1st loop)
-        Object val1 = extractValue("#ababab.(response).body.$.data.items[*]");
+        Object val1 = extractValue("#ababab.(response).body.$.data.items[*]"); // loop1.getRef()
         assertTrue(val1 instanceof List);
         assertEquals(2, ((List) val1).size());
 
@@ -822,7 +822,7 @@ class ReferenceExtractorTest {
         // it will be created in 1st loop, so we need to initialize its control values
         loop1.setIndex(1);
         loop1.setValue("1");
-        Object val2 = extractValue("#ababab.(response).body.$.data.items[i]['*']~");
+        Object val2 = extractValue("#ababab.(response).body.$.data.items[i]['*']~"); // loop2.getRef()
         assertTrue(val2 instanceof List);
         assertEquals(List.of("id", "name", "tags", "metrics"), val2);
 
@@ -830,7 +830,7 @@ class ReferenceExtractorTest {
         // it will be created in 1st loop adn 2nd loop, so we need to initialize second loops control values
         loop2.setIndex(3);
         loop2.setValue("metrics");
-        Object val3 = extractValue("#ababab.(response).body.$.data.items[i]['j']['*']~");
+        Object val3 = extractValue("#ababab.(response).body.$.data.items[i]['j']['*']~"); // loop3.getRef()
         assertTrue(val3 instanceof List);
         assertEquals(List.of("count", "ratio"), val3);
     }
@@ -848,7 +848,7 @@ class ReferenceExtractorTest {
         Operation operation = operation("#ababab", 0, Map.of("#", response));
 
         Loop loop1 = loop("for", "i", "for {%#ababab.(response).body.$.items[*]%}");
-        Loop loop2 = loop("forin", "j", "forin {%#ababab.(response).body.$.items[i]['*']~%}");
+        Loop loop2 = loop("forin", "j", "forin {%#ababab.(response).body.$.items[i]%}");
         Loop loop3 = loop("SplitString", "k", "{%#ababab.(response).body.$.items[i]['j'][*]~%} SplitString '-'");
 
         when(executionManager.findOperationByColor("#ababab"))
@@ -862,7 +862,7 @@ class ReferenceExtractorTest {
 
         // WHEN - THEN
         // verify FOR loop creation (1st loop)
-        Object val1 = extractValue("#ababab.(response).body.$.items[*]");
+        Object val1 = extractValue("#ababab.(response).body.$.items[*]"); // loop1.getRef()
         assertTrue(val1 instanceof List);
         assertEquals(1, ((List) val1).size());
 
@@ -870,7 +870,7 @@ class ReferenceExtractorTest {
         // it will be created in 1st loop, so we need to initialize its control values
         loop1.setIndex(0);
         loop1.setValue("0");
-        Object val2 = extractValue("#ababab.(response).body.$.items[i]['*']~");
+        Object val2 = extractValue("#ababab.(response).body.$.items[i]['*']~"); // loop2.getRef()
         assertTrue(val2 instanceof List);
         assertEquals(List.of("name", "string"), val2);
 
@@ -878,7 +878,7 @@ class ReferenceExtractorTest {
         // it will be created in 1st loop adn 2nd loop, so we need to initialize second loops control values
         loop2.setIndex(1);
         loop2.setValue("string");
-        Object val3 = extractValue("#ababab.(response).body.$.items[i]['j'][*]~");
+        Object val3 = extractValue("#ababab.(response).body.$.items[i]['j'][*]~"); // loop3.getRef()
         assertTrue(val3 instanceof List);
         assertEquals(List.of("x", "y", "z"), val3);
     }
