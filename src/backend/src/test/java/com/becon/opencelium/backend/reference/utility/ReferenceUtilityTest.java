@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.utility;
+package com.becon.opencelium.backend.reference.utility;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;

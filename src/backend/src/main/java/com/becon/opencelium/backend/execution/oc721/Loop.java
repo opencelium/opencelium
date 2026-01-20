@@ -3,7 +3,7 @@ package com.becon.opencelium.backend.execution.oc721;
 import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.enums.RelationalOperator;
 import com.becon.opencelium.backend.resource.execution.OperatorEx;
-import com.becon.opencelium.backend.utility.ReferenceUtility;
+import com.becon.opencelium.backend.reference.utility.ReferenceUtility;
 
 import static com.becon.opencelium.backend.enums.RelationalOperator.FOR;
 import static com.becon.opencelium.backend.enums.RelationalOperator.FOR_IN;

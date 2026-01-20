@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.utility;
+package com.becon.opencelium.backend.reference.utility;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,9 +14,8 @@ import static com.becon.opencelium.backend.constant.RegExpression.wrappedDirectR
 
 
 public class ReferenceUtility {
-
-    public static final String IS_FOR_IN_KEY_TYPE = "\\['(.*?)\\']~";
-    public static final String IS_FOR_IN_VALUE_TYPE = "\\['(.*?)\\']";
+    public static final String IS_FOR_IN_KEY_TYPE   = "\\['([^\\[\\]'']*)'\\]~";
+    public static final String IS_FOR_IN_VALUE_TYPE = "\\['([^\\[\\]'']*)'\\]";
     public static final String IS_SPLIT_STRING_TYPE = "\\[([a-z0-9*]+)\\]~";
     public static final String ARRAY_LETTER_INDEX = "\\[([a-z])\\]";
 

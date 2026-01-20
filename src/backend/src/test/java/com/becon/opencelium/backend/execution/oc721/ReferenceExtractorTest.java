@@ -334,7 +334,7 @@ class ReferenceExtractorTest {
                     }
                   }
                 ],
-                "map_with_special_keys": {
+                "key_with_underscore": {
                   "key.with.dot": {
                     "inner-value": 42
                   }
@@ -362,9 +362,6 @@ class ReferenceExtractorTest {
 
         Loop loop = loop("forin", "i", "forin {%#ababab.(response).body.$.meta['*']~%}");
 
-        loop.setValue("version");
-        loop.setIndex(1);
-
         when(executionManager.findOperationByColor("#ababab"))
                 .thenReturn(Optional.of(operation));
 
@@ -374,10 +371,11 @@ class ReferenceExtractorTest {
         when(executionManager.getLoops())
                 .thenReturn(List.of(loop));
 
-
         // WHEN
-        Object val1 = extractValue("#ababab.(response).body.$.meta['i']~");
+        loop.setIndex(1);
+        loop.setValue("version");
 
+        Object val1 = extractValue("#ababab.(response).body.$.meta['i']~");
 
         // THEN
         assertEquals("version", val1);
@@ -442,6 +440,7 @@ class ReferenceExtractorTest {
 
         Operation operation = operation("#ababab", 0, Map.of("#", response));
 
+        // loop extracts targeted objects field names
         Loop loop =  loop("forin", "i", "forin {%#ababab.(response).body.$.data.items[0]['*']~%}");
 
         when(executionManager.findOperationByColor("#ababab"))
@@ -454,16 +453,15 @@ class ReferenceExtractorTest {
                 .thenReturn(List.of(loop));
 
         // WHEN-THEN
-        loop.setValue("name");
         loop.setIndex(1);
+        loop.setValue("name");
 
-        Object val1 = extractValue("#ababab.(response).body.$.data.items[0]['i']");
+        Object val1 = extractValue("#ababab.(response).body.$.data.items[0]['i']"); // primitive
         assertEquals("first", val1);
 
-
-        loop.setValue("metrics");
         loop.setIndex(3);
-        Object val2 = extractValue("#ababab.(response).body.$.data.items[0]['i']");
+        loop.setValue("metrics");
+        Object val2 = extractValue("#ababab.(response).body.$.data.items[0]['i']"); // object
         assertTrue(val2 instanceof Map);
         Map metrics = (Map) val2;
         assertEquals(metrics.get("count"), 10);
@@ -488,15 +486,15 @@ class ReferenceExtractorTest {
                 .thenReturn("#");
 
         // WHEN
-        Object val = extractValue("#ababab.(response).body.$.data['map_with_special_keys']");
+        Object val = extractValue("#ababab.(response).body.$.data['key_with_underscore']");
 
         // THEN
         assertTrue(val instanceof Map);
-        Map mapWithSpecialKeys = (Map) val;
-        assertTrue(mapWithSpecialKeys.containsKey("key.with.dot"));
+        Map keyWithUnderscore = (Map) val;
+        assertTrue(keyWithUnderscore.containsKey("key.with.dot"));
 
-        assertTrue(mapWithSpecialKeys.get("key.with.dot") instanceof Map);
-        Map keyWithDot = (Map) mapWithSpecialKeys.get("key.with.dot");
+        assertTrue(keyWithUnderscore.get("key.with.dot") instanceof Map);
+        Map keyWithDot = (Map) keyWithUnderscore.get("key.with.dot");
         assertTrue(keyWithDot.containsKey("inner-value"));
         assertEquals(1, keyWithDot.size());
         assertEquals(42, keyWithDot.get("inner-value"));
@@ -545,18 +543,9 @@ class ReferenceExtractorTest {
 //                HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
 //        );
 //
-//        Operation operation = new Operation();
-//        operation.setColor("#ababab");
-//        operation.setLoopDepth(0);
+//        Operation operation = operation("#ababab", 0, Map.of("#", response));
 //
-//        operation.getResponses().put("#", response);
-//
-//        OperatorEx operator = new OperatorEx();
-//        operator.setIndex("0");
-//        operator.setType("SplitString");
-//        operator.setIterator("i");
-//        operator.setExpression("{%#ababab.(response).body.$.string_with_delimiter[*]~%} SplitString ';'");
-//        Loop loop = Loop.fromOperator(operator);
+//        Loop loop = loop("SplitString", "i", "{%#ababab.(response).body.$.string_with_delimiter[*]~%} SplitString ';'");
 //
 //        when(executionManager.findOperationByColor("#ababab"))
 //                .thenReturn(Optional.of(operation));
@@ -567,10 +556,8 @@ class ReferenceExtractorTest {
 //        when(executionManager.getLoops())
 //                .thenReturn(List.of(loop));
 //
-//
 //        // WHEN
 //        Object val = extractValue("#ababab.(response).body.$.string_with_delimiter[*]~");
-//
 //
 //        // THEN
 //        assertTrue(val instanceof List);
@@ -586,18 +573,9 @@ class ReferenceExtractorTest {
 //                HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
 //        );
 //
-//        Operation operation = new Operation();
-//        operation.setColor("#ababab");
-//        operation.setLoopDepth(0);
+//        Operation operation = operation("#ababab", 0, Map.of("#", response));
 //
-//        operation.getResponses().put("#", response);
-//
-//        OperatorEx operator = new OperatorEx();
-//        operator.setIndex("0");
-//        operator.setType("SplitString");
-//        operator.setIterator("i");
-//        operator.setExpression("{%#ababab.(response).body.$.string_with_delimiter[*]~%} SplitString ';'");
-//        Loop loop = Loop.fromOperator(operator);
+//        Loop loop = loop("SplitString", "i", "{%#ababab.(response).body.$.string_with_delimiter[*]~%} SplitString ';'");
 //
 //        when(executionManager.findOperationByColor("#ababab"))
 //                .thenReturn(Optional.of(operation));
@@ -607,7 +585,6 @@ class ReferenceExtractorTest {
 //
 //        when(executionManager.getLoops())
 //                .thenReturn(List.of(loop));
-//
 //
 //        // WHEN-THEN
 //        loop.setIndex(0);
@@ -667,7 +644,6 @@ class ReferenceExtractorTest {
         Operation operation = operation("#ababab", 0, Map.of("#", response));
 
         Loop loop = loop("for", "i", "for {%#ababab.(response).body.$.data.items[*]%}");
-        loop.setValue("1");
 
         when(executionManager.findOperationByColor("#ababab"))
                 .thenReturn(Optional.of(operation));
@@ -679,6 +655,9 @@ class ReferenceExtractorTest {
                 .thenReturn(List.of(loop));
 
         // WHEN-THEN
+        loop.setIndex(1);
+        loop.setValue("1");
+
         Object val1 = extractValue("#ababab.(response).body.$.data.items[i].id");
         assertEquals(2, val1);
 
@@ -765,7 +744,7 @@ class ReferenceExtractorTest {
 
         Object val3 = extractValue("#ababab.(response).body.$.list[*]");
         assertTrue(val3 instanceof List);
-        assertEquals(3, ((List) val3).size());
+        assertEquals(List.of("L1", "L2", "L3"), val3);
     }
 
     @Test
@@ -786,16 +765,66 @@ class ReferenceExtractorTest {
                 .thenReturn("#");
 
         // WHEN - THEN
-        Object val1 = extractValue("#ababab.(response).body.$.data.map_with_special_keys");
+        Object val1 = extractValue("#ababab.(response).body.$.data.key_with_underscore");
         assertTrue(val1 instanceof Map);
         assertTrue(((Map) val1).containsKey("key.with.dot"));
 
-        Object val2 = extractValue("#ababab.(response).body.$.data.map_with_special_keys.['key.with.dot']");
+        Object val2 = extractValue("#ababab.(response).body.$.data.key_with_underscore.['key.with.dot']");
         assertTrue(val2 instanceof Map);
         assertTrue(((Map) val2).containsKey("inner-value"));
 
-        Object val3 = extractValue("#ababab.(response).body.$.data.map_with_special_keys.['key.with.dot'].inner-value");
+        Object val3 = extractValue("#ababab.(response).body.$.data.key_with_underscore.['key.with.dot'].inner-value");
         assertEquals(42, val3);
+    }
+
+    @Test
+    // FOR -> FOR_IN (value) -> FOR_IN (key)
+    void extractFromJsonResponseBody_case4_3_1_case4_1_2_1_case4_1_1_1() {
+        // GIVEN
+        ResponseEntity<?> response = response(
+                200,
+                jsonResponseBody,
+                HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
+        );
+
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
+
+        Loop loop1 = loop("for", "i", "for {%#ababab.(response).body.$.data.items[*]%}");
+        Loop loop2 =  loop("forin", "j", "forin {%#ababab.(response).body.$.data.items[i]['*']~%}");
+        Loop loop3 = loop("forin", "k", "forin {%#ababab.(response).body.$.data.items[i]['j']['*']~%}");
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        when(executionManager.getLoops())
+                .thenReturn(List.of(loop1, loop2, loop3));
+
+        // WHEN - THEN
+        // verify FOR loop creation (1st loop)
+        Object val1 = extractValue("#ababab.(response).body.$.data.items[*]");
+        assertTrue(val1 instanceof List);
+        assertEquals(2, ((List) val1).size());
+
+        // verify FOR_IN keys loop creation (2nd loop)
+        // it will be created in 1st loop, so we need to initialize its control values
+        loop1.setIndex(1);
+        loop1.setValue("1");
+        Object val2 = extractValue("#ababab.(response).body.$.data.items[i]['*']~");
+        assertTrue(val2 instanceof List);
+        assertEquals(List.of("id", "name", "tags", "metrics"), val2);
+
+        // verify FOR_IN keys loop creation (3rd loop)
+        // it will be created in 1st loop adn 2nd loop, so we need to initialize their control values
+        loop1.setIndex(1);
+        loop1.setValue("1");
+        loop2.setIndex(3);
+        loop2.setValue("metrics");
+        Object val3 = extractValue("#ababab.(response).body.$.data.items[i]['j']['*']~");
+        assertTrue(val3 instanceof List);
+        assertEquals(List.of("count", "ratio"), val3);
     }
 
     private Operation operation(String color, int loopDepth, Map<String, ResponseEntity<?>> responses) {

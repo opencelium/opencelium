@@ -27,7 +27,7 @@ import com.becon.opencelium.backend.invoker.parser.InvokerParserImp;
 import com.becon.opencelium.backend.resource.application.UpdateInvokerResource;
 import com.becon.opencelium.backend.enums.execution.DataType;
 import com.becon.opencelium.backend.storage.StorageService;
-import com.becon.opencelium.backend.utility.ReferenceUtility;
+import com.becon.opencelium.backend.reference.utility.ReferenceUtility;
 import com.becon.opencelium.backend.utility.FileNameUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

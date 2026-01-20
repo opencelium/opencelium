@@ -14,7 +14,7 @@ import com.becon.opencelium.backend.reference.model.WebhookReference;
 import com.becon.opencelium.backend.reference.model.WrappedDirectReference;
 import com.becon.opencelium.backend.resource.execution.ResponseEx;
 import com.becon.opencelium.backend.utility.MediaTypeUtility;
-import com.becon.opencelium.backend.utility.ReferenceUtility;
+import com.becon.opencelium.backend.reference.utility.ReferenceUtility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
@@ -44,10 +44,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.becon.opencelium.backend.utility.Comparators.NUMERIC_PARTS;
-import static com.becon.opencelium.backend.utility.ReferenceUtility.ARRAY_LETTER_INDEX;
-import static com.becon.opencelium.backend.utility.ReferenceUtility.IS_FOR_IN_KEY_TYPE;
-import static com.becon.opencelium.backend.utility.ReferenceUtility.IS_FOR_IN_VALUE_TYPE;
-import static com.becon.opencelium.backend.utility.ReferenceUtility.IS_SPLIT_STRING_TYPE;
+import static com.becon.opencelium.backend.reference.utility.ReferenceUtility.ARRAY_LETTER_INDEX;
+import static com.becon.opencelium.backend.reference.utility.ReferenceUtility.IS_FOR_IN_KEY_TYPE;
+import static com.becon.opencelium.backend.reference.utility.ReferenceUtility.IS_FOR_IN_VALUE_TYPE;
+import static com.becon.opencelium.backend.reference.utility.ReferenceUtility.IS_SPLIT_STRING_TYPE;
 
 public class ReferenceExtractor implements Extractor {
     private final ExecutionManager executionManager;
