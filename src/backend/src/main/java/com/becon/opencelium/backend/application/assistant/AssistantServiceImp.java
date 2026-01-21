@@ -2,8 +2,11 @@ package com.becon.opencelium.backend.application.assistant;
 
 import com.becon.opencelium.backend.application.entity.SystemOverview;
 import com.becon.opencelium.backend.application.repository.SystemOverviewRepository;
+import com.becon.opencelium.backend.constant.ExceptionConstant;
+import com.becon.opencelium.backend.constant.ExceptionMessages;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.constant.AppYamlPath;
+import com.becon.opencelium.backend.constant.props.OpenceliumProps;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectorMng;
 import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
@@ -12,6 +15,7 @@ import com.becon.opencelium.backend.database.mongodb.service.FieldBindingMngServ
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorServiceImp;
+import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionServiceImp;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
@@ -20,9 +24,12 @@ import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.updateassistant.InstallationDTO;
+import com.becon.opencelium.backend.resource.updateassistant.JarFileDescriptor;
 import com.becon.opencelium.backend.resource.updateassistant.Neo4jConfigResource;
 import com.becon.opencelium.backend.utility.Neo4jDriverUtility;
+import com.becon.opencelium.backend.utility.PackageVersionManager;
 import com.becon.opencelium.backend.utility.ZipUtils;
+import com.becon.opencelium.backend.versionmanager.base.Utils;
 import com.jayway.jsonpath.JsonPath;
 import com.mongodb.client.MongoClient;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
@@ -57,6 +64,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -87,6 +95,9 @@ public class AssistantServiceImp implements ApplicationService {
     private FieldBindingMngServiceImp fieldBindingMngServiceImp;
     @Autowired
     private InvokerServiceImp invokerServiceImp;
+
+    @Autowired
+    private OpenceliumProps ocProps;
 
     @Override
     public SystemOverview getSystemOverview() {
@@ -517,6 +528,44 @@ public class AssistantServiceImp implements ApplicationService {
             e.printStackTrace();
             throw new RuntimeException(e.getMessage());
         }
+    }
+
+    @Override
+    public List<JarFileDescriptor> getOldJarFiles() {
+        Path libsPath = Paths.get(PathConstant.LIBS);
+
+        try (Stream<Path> fileStream = Files.walk(libsPath)) {
+            return fileStream.filter(Files::isRegularFile)
+                    .filter(file -> file.getFileName().toString().startsWith(PathConstant.JAR_PREFIX) && file.getFileName().toString().endsWith(".jar"))
+                    .filter(file -> {
+                        String fileVersion = PackageVersionManager.extractVersionOfJarFile(file.getFileName().toString());
+                        return Utils.compare(fileVersion, ocProps.getVersion()) < 0;
+                    })
+                    .map(file -> new JarFileDescriptor(libsPath.toAbsolutePath().toString(), file.getFileName().toString()))
+                    .toList();
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            throw new GeneralServiceException(ExceptionConstant.INTERNAL_ERROR, ExceptionMessages.UNKNOWN_ERROR);
+        }
+    }
+
+    @Override
+    public List<JarFileDescriptor> deleteOldJarFiles() {
+        List<JarFileDescriptor> oldJarFiles = getOldJarFiles();
+        if (oldJarFiles == null) {
+            return Collections.emptyList();
+        }
+
+        oldJarFiles.forEach(oldJarFile -> {
+            try {
+                Files.deleteIfExists(Paths.get(PathConstant.LIBS).resolve(oldJarFile.getFileName()));
+            } catch (IOException e) {
+                log.error(e.getMessage());
+                throw new GeneralServiceException(ExceptionConstant.INTERNAL_ERROR, ExceptionMessages.UNKNOWN_ERROR);
+            }
+        });
+
+        return oldJarFiles;
     }
 
     private void addHeaderFromInvoker(ConnectionMng connectionMng, String fromInvokerStr, String toInvokerStr) {
