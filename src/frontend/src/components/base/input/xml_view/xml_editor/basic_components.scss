@@ -742,12 +742,13 @@
 .expand_tag{
   cursor: pointer;
   font-size: 14px;
-  margin: 0 5px;
+  margin-left: 15px;
   vertical-align: sub;
 }
 .minimized_icon{
   position: absolute;
   z-index: 10;
+  margin-top: 4px;
   span{
     font-size: 13px;
     line-height: 21px;
@@ -759,6 +760,8 @@
   .tag_open{
     position: relative;
     overflow-wrap: break-word;
+    padding-top: 5px;
+    padding-bottom: 5px;
   }
   .name_open{
     color: #ff5a71;
@@ -766,14 +769,32 @@
   }
   .name_open_hovered:hover{
     cursor: pointer;
-    box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 12%),0 1px 2px rgb(0 0 0 / 24%);
     border-radius: 2px;
+    padding: 2px;
   }
   .name_close {
     color: #ff5a71;
   }
   .bracket{
     color: black;
+  }
+
+  .tag_icons {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 6px;
+    width: 80px;   // фиксированная ширина, чтобы layout не дергался
+    justify-content: flex-end;
+    pointer-events: auto;
+  }
+
+  .hidden {
+    opacity: 0;
+    pointer-events: none;
   }
   .add_property_icon{
     font-size: 14px;
@@ -782,24 +803,33 @@
     vertical-align: text-bottom;
     line-height: 16px;
     background: white;
+    display: inline-block !important;
   }
   .delete_icon{
     background: white;
     cursor: pointer;
     font-size: 16px !important;
-    position: absolute;
     z-index: 10000;
   }
+}
+.copy_to_clipboard_icon{
+  background: white;
+  cursor: pointer;
+  font-size: 16px !important;
+  z-index: 10000;
 }
 .add_tag_icon_inside{
   background: white;
   cursor: pointer;
   font-size: 16px !important;
-  position: absolute;
   z-index: 10000;
 }
 .add_declaration_icon{
-  @extend .add_tag_icon_inside;
+  background: white;
+  cursor: pointer;
+  font-size: 16px !important;
+  position: absolute !important;
+  z-index: 10000;
   padding-left: 15px;
   color: #c0c0c5;
 }
@@ -814,7 +844,6 @@
   cursor: text;
   margin-left: 5px;
   position: relative;
-  padding: 2px;
   .name{
     color: #5e805e;
   }
@@ -824,9 +853,9 @@
   .remove_icon{
     cursor: pointer;
     font-size: 16px !important;
-    right: -10px;
-    top: -5px;
-    position: absolute;
+    right: -1px;
+    top: -1px;
+    position: absolute !important;
   }
 }
 .change_popup{
@@ -891,9 +920,11 @@
   right: 0;
 }
 .property_hovered:hover{
-  box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 12%),0 1px 2px rgb(0 0 0 / 24%);
   border-radius: 2px;
   cursor: pointer;
+  position: relative;
+  padding: 5px 15px 2px 2px;
 }
 .reference_value{
   margin: 7px 0 7px 4px;
@@ -910,7 +941,7 @@
   padding: 3px;
 }
 .tag_reference_values:hover{
-  box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 12%),0 1px 2px rgb(0 0 0 / 24%);
   border-radius: 2px;
   cursor: pointer;
 }

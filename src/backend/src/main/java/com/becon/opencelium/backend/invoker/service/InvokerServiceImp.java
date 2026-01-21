@@ -326,6 +326,7 @@ public class InvokerServiceImp implements InvokerService {
                                 String.join(".", seen),
                                 idx));
             }
+
             if (index >= list.size()) {
 //                throw new RuntimeException(
 //                        String.format(
@@ -336,6 +337,7 @@ public class InvokerServiceImp implements InvokerService {
 //                                idx));
                 index = 0; // We have to get first element from invoker array to identify object's structure.
             }
+
             Object obj = list.get(index);
             seen.set(seen.size() - 1, seen.get(seen.size() - 1) + hierarchy.pollFirst());
             return findFieldType(obj, hierarchy, seen);
@@ -469,10 +471,10 @@ public class InvokerServiceImp implements InvokerService {
     @Override
     public void save(Document document) {
         InvokerParserImp parser = new InvokerParserImp(document);
-        File f = new File(document.getDocumentURI());
-        String invoker = FileNameUtils.removeExtension(f.getName());
-        invoker = invoker.replace("%20", " ");
-        invokerContainer.add(invoker, parser.parse());
+        Invoker invoker = parser.parse();
+        String invokerName = invoker.getName();
+        invokerName = invokerName.replace("%20", " ");
+        invokerContainer.add(invokerName, invoker);
     }
 
     @Override

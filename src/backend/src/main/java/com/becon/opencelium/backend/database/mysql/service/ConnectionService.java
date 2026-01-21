@@ -94,4 +94,7 @@ public interface ConnectionService {
     List<String> getLogFileNameListById(long connectionId);
 
     List<Connection> findAllByIds(IdentifiersDTO<Long> ids);
+
+
+    ConnectionServiceImp.CleanupResult cleanupAllTestConnections();
 }

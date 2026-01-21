@@ -159,3 +159,15 @@ versions:
         operation: add
         value: 4.6.1
         path: opencelium.version
+  - version: 4.7
+    changes:
+      - changeset: 1
+        operation: add
+        value: 4.7
+        path: opencelium.version
+  - version: 4.7.1
+    changes:
+      - changeset: 1
+        operation: add
+        value: 4.7.1
+        path: opencelium.version

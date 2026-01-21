@@ -351,6 +351,46 @@ public class PathAndReferenceUtility {
                 : res;
     }
 
+    /**
+     * Extracts the start and end indexes of all direct references found in the given text.
+     *
+     * <p>Example:</p>
+     * <pre>
+     * text = "Hello {%#ffffff.(request).name%}"
+     * result = [[6, 19]]
+     * </pre>
+     */
+    public static List<int[]> extractReferenceIndexes(String text) {
+        if (text == null || text.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        if (!text.contains(PRE_DIRECT_REF)) {
+            return Collections.emptyList();
+        }
+
+        List<int[]> result = new ArrayList<>();
+        Stack<Integer> stack = new Stack<>();
+        int n = text.length();
+
+        for (int i = 0; i < n; i++) {
+            if (i + PRE_DIRECT_REF.length() <= n && text.startsWith(PRE_DIRECT_REF, i)) {
+                stack.push(i);
+                i += PRE_DIRECT_REF.length() - 1;
+            }else if (i + SUF_DIRECT_REF.length() <= n && text.startsWith(SUF_DIRECT_REF, i)) {
+                if (!stack.isEmpty()) {
+                    int startIdx = stack.pop();
+                    if (text.startsWith(PRE_DIRECT_REF, startIdx)) {
+                        result.add(new int[]{startIdx, i + SUF_DIRECT_REF.length()});
+                    }
+                }
+                i += SUF_DIRECT_REF.length() - 1;
+            }
+        }
+
+        return result;
+    }
+
     public static List<String> parseBracketNotationPath(String path) {
         if (path == null || path.isEmpty()) {
             return Collections.emptyList();

@@ -28,7 +28,7 @@ interface InputElementProps{
     paddingTop?: string | number,
     marginTop?: string | number,
     marginBottom?: string | number,
-    error?: string,
+    error?: string | any,
     icon?: string,
     label?: string,
     isLoading?: boolean,
