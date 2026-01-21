@@ -199,6 +199,7 @@ class Header extends React.Component {
 			connector,
 			connection,
 			hasEnhancement,
+			headerTitle,
 		} = this.props;
 		let gridStyles = {};
 		if (isToggledReferenceIcon && !isToggledIcon) {
@@ -245,7 +246,7 @@ class Header extends React.Component {
 					)}
 					<div>
 						<div>
-							<b>{'Request Data'}</b>
+							<b>{headerTitle || 'Request Data'}</b>
 							<TooltipFontIcon
 								tooltipPosition={'right'}
 								style={{ verticalAlign: 'middle', cursor: 'pointer' }}
@@ -340,7 +341,7 @@ class Header extends React.Component {
 
 	render() {
 		const { isHeaderVisible } = this.state;
-		const { isExtended, isCurrentInfo } = this.props;
+		const { isExtended, hasEnhancement } = this.props;
 		return (
 			<React.Fragment>
 				<Col
@@ -357,17 +358,10 @@ class Header extends React.Component {
 						tooltip={'Show'}
 					/>
 				</Col>
-				{isExtended &&
-					isCurrentInfo &&
-					ReactDOM.createPortal(
-						this.renderItems(),
-						document.getElementById('extended_details_information')
-					)}
-
 				<Dialog
 					actions={[
 						{
-							label: 'Ok',
+							label: 'Close',
 							onClick: () => this.toggleHeaderVisible(),
 							id: 'header_ok',
 						},
@@ -376,7 +370,9 @@ class Header extends React.Component {
 					toggle={() => this.toggleHeaderVisible()}
 					title={'Header'}
 					theme={{
-						dialog: styles.body_dialog_with_enhancement,
+						dialog: hasEnhancement
+								? styles.body_dialog_with_enhancement
+								: styles.body_dialog,
 						body: styles.enhancement_dialog_body,
 						content: styles.body_content,
 					}}

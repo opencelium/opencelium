@@ -11,8 +11,8 @@ import {
 } from "@app_component/operator_builder/styles";
 import {ErrorColor} from "@app_component/operator_builder/OperatorBuilder";
 
-const GroupHeader = ({updateGroup, deleteGroup, group}: GroupHeaderUIProps) => {
-    const [showActions, toggleActions] = useState<boolean>(false);
+const GroupHeader = ({updateGroup, deleteGroup, group, isInitial}: GroupHeaderUIProps) => {
+    const [showActions, toggleActions] = useState<boolean>(true);
     const unselectedStyles = {
         backgroundColor: '#aaa',
         color: 'black',
@@ -76,12 +76,12 @@ const GroupHeader = ({updateGroup, deleteGroup, group}: GroupHeaderUIProps) => {
     }
     const onMouseOver = () => {
         if (!showActions){
-            toggleActions(true);
+            //toggleActions(true);
         }
     }
     const onMouseLeave = () => {
         if (showActions){
-            toggleActions(false);
+            //toggleActions(false);
         }
     }
     const hasItems = group?.items?.length > 0;

@@ -345,6 +345,7 @@ class Body extends React.Component {
 				>
 					{hasEnhancement && (
 						<ReferenceInformation
+							style={{maxHeight: !isToggledReferenceIcon ? '40px' : isToggledIcon ? '50%' : 'calc(100% - 40px)',}}
 							body={source}
 							method={method}
 							connection={connection}
@@ -360,7 +361,13 @@ class Body extends React.Component {
 							location='body'
 						/>
 					)}
-					<div style={{position: 'relative'}}>
+					<div style={{
+						position: 'relative',
+						flex: 1,
+						display: 'flex',
+						flexDirection: 'column',
+						maxHeight: !isToggledIcon ? '40px' : isToggledReferenceIcon ? '50%' : 'calc(100% - 40px)',
+					}}>
 						<div>
 							<b>{bodyTitle}</b>
 							<TooltipFontIcon
@@ -442,7 +449,7 @@ class Body extends React.Component {
 				<Dialog
 					actions={[
 						{
-							label: 'Ok',
+							label: 'Close',
 							onClick: (a) => this.toggleBodyVisible(a),
 							id: 'header_ok',
 						},

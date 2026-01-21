@@ -16,6 +16,8 @@ import com.becon.opencelium.backend.versionmanager.base.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -26,6 +28,7 @@ import java.util.Objects;
 public class Template44Updater implements TemplateUpdater {
 
     private static final UpdaterVersion currentVersion = UpdaterVersion.VERSION_4_4;
+    private static final Logger log = LoggerFactory.getLogger(Template44Updater.class);
     private final Template40Updater template40Updater;
     private final ObjectMapper objectMapper;
     private final Mapper<ConditionMng, ConditionDTO> conditionMapper;
@@ -73,32 +76,62 @@ public class Template44Updater implements TemplateUpdater {
         Reference<Boolean> changed = new Reference<>(false);
 
         if (Objects.nonNull(connection.getFromConnector().getMethods())) {
-            List<MethodDTO> fromMethods = objectMapper.convertValue(connection.getFromConnector().getMethods(), new TypeReference<>() {
-            });
+            List<MethodDTO> fromMethods;
+            try {
+                fromMethods = objectMapper.convertValue(connection.getFromConnector().getMethods(), new TypeReference<>() {
+                });
+            } catch (IllegalArgumentException e) {
+                log.error("Failed to read methods on template");
+                throw e;
+            }
             fromMethods.forEach(x -> update(x, changed));
             connection.getFromConnector().setMethods(fromMethods);
         }
         if (Objects.nonNull(connection.getFromConnector().getOperators())) {
-            List<OperatorDTO> fromOperators = objectMapper.convertValue(connection.getFromConnector().getOperators(), new TypeReference<>() {
-            });
+            List<OperatorDTO> fromOperators;
+            try {
+                fromOperators = objectMapper.convertValue(connection.getFromConnector().getOperators(), new TypeReference<>() {
+                });
+            } catch (IllegalArgumentException e) {
+                log.error("Failed to read operators on template");
+                throw e;
+            }
             fromOperators.forEach(x -> update(x, changed));
             connection.getFromConnector().setOperators(fromOperators);
         }
         if (Objects.nonNull(connection.getToConnector().getMethods())) {
-            List<MethodDTO> toMethods = objectMapper.convertValue(connection.getToConnector().getMethods(), new TypeReference<>() {
-            });
+            List<MethodDTO> toMethods;
+            try {
+                toMethods = objectMapper.convertValue(connection.getToConnector().getMethods(), new TypeReference<>() {
+                });
+            } catch (IllegalArgumentException e) {
+                log.error("Failed to read methods on template");
+                throw e;
+            }
             toMethods.forEach(x -> update(x, changed));
             connection.getToConnector().setMethods(toMethods);
         }
         if (Objects.nonNull(connection.getToConnector().getOperators())) {
-            List<OperatorDTO> toOperators = objectMapper.convertValue(connection.getToConnector().getOperators(), new TypeReference<>() {
-            });
+            List<OperatorDTO> toOperators;
+            try {
+                toOperators = objectMapper.convertValue(connection.getToConnector().getOperators(), new TypeReference<>() {
+                });
+            } catch (IllegalArgumentException e) {
+                log.error("Failed to read operators on template");
+                throw e;
+            }
             toOperators.forEach(x -> update(x, changed));
             connection.getToConnector().setOperators(toOperators);
         }
         if (Objects.nonNull(connection.getFieldBinding())) {
-            List<FieldBindingOldDTO> fieldBindings = objectMapper.convertValue(connection.getFieldBinding(), new TypeReference<>() {
-            });
+            List<FieldBindingOldDTO> fieldBindings;
+            try {
+                fieldBindings = objectMapper.convertValue(connection.getFieldBinding(), new TypeReference<>() {
+                });
+            } catch (IllegalArgumentException e) {
+                log.error("Failed to read fieldBindings on template");
+                throw e;
+            }
 
             fieldBindings.forEach(x -> update(x, changed));
             connection.setFieldBinding(fieldBindings);

@@ -37,18 +37,24 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 		setAllOptions(getNestedOptions(''));
 	}, []);
 	const getNestedOptions = (path: string): OptionType[] => {
-		const keys = path.match(/[^.[\]]+|\[\*]|\[\d+]|\[\w+]/g) || [];
+		const isRoot = path === '$.';
+		const normalizedPath = isRoot ? '' : path.replace(/^\$\./, '');
+
+		const keys =
+			normalizedPath.match(/[^.[\]]+|\[\*]|\[\d+]|\[\w+]/g) || [];
 
 		let currentData: DataStructure | null = !color
 			? {}
-			: connectionEditor.connection.getMethodByColor(color).response.success
-					.body.fields;
+			: connectionEditor.connection
+				.getMethodByColor(color)
+				.response.success.body.fields;
 
-		let lastValidPath = '';
+		// IMPORTANT: root starts as '$'
+		let lastValidPath = isRoot ? '$' : '';
 
 		for (let i = 0; i < keys.length; i++) {
 			const key = keys[i];
-			if (key === '') break;
+			if (!key) break;
 
 			const isArrayAccess = key.startsWith('[') && key.endsWith(']');
 			const isIterator = isArrayAccess && iterators.includes(key.slice(1, -1));
@@ -68,43 +74,76 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 				break;
 			}
 
-			lastValidPath = lastValidPath
-				? lastValidPath + (key.startsWith('[') ? key : `.${key}`)
-				: key;
+			// Build correct JSONPath
+			lastValidPath =
+				lastValidPath === '$'
+					? `$${key.startsWith('[') ? key : `.${key}`}`
+					: lastValidPath
+						? lastValidPath + (key.startsWith('[') ? key : `.${key}`)
+						: key;
+		}
+
+		const options: OptionType[] = [];
+
+		// Root option only at top level
+		if (normalizedPath === '') {
+			options.push({
+				label: 'The root object',
+				value: '$.',
+			});
 		}
 
 		if (Array.isArray(currentData)) {
-			return [
-				{ label: 'First element of the array', value: `${lastValidPath}[0]` },
-				{ label: 'The whole array', value: `${lastValidPath}[*]` },
+			options.push(
+				{
+					label: 'First element of the array',
+					value: lastValidPath === '$' ? `$[0]` : `${lastValidPath}[0]`,
+				},
+				{
+					label: 'The whole array',
+					value: lastValidPath === '$' ? `$[*]` : `${lastValidPath}[*]`,
+				},
 				...iterators.map((it) => ({
 					label: `(${it} loop)`,
-					value: `${lastValidPath}[${it}]`,
-				})),
-			];
+					value:
+						lastValidPath === '$'
+							? `$[${it}]`
+							: `${lastValidPath}[${it}]`,
+				}))
+			);
+
+			return options;
 		}
 
 		if (currentData && typeof currentData === 'object') {
-			return Object.keys(currentData).map((key) => ({
-				label: key,
-				value: lastValidPath === '' ? key : `${lastValidPath}.${key}`,
-			}));
+			options.push(
+				...Object.keys(currentData).map((key) => ({
+					label: key,
+					value:
+						lastValidPath === '$'
+							? `$.${key}`
+							: lastValidPath
+								? `${lastValidPath}.${key}`
+								: key,
+				}))
+			);
 		}
 
-		return [];
+		return options;
 	};
+
 
 	const handleInputChange = (input: string, actionMeta: { action: string }) => {
 		if (actionMeta.action === 'input-change') {
 			setSearchValue(input);
 
+			const newOptions = getNestedOptions(input);
+			setFilteredOptions(newOptions);
 			if (input === '') {
 				setSelectedOption(null);
 				return;
 			}
 
-			const newOptions = getNestedOptions(input);
-			setFilteredOptions(newOptions);
 
 			const exactMatch = newOptions.find((opt) => opt.value === input);
 			if (!exactMatch) {
@@ -146,8 +185,19 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 		}
 	}, [selectedOption]);
 	useEffect(() => {
+		// ✅ Root should pass through untouched
+		if (field === '$.' || field === '') {
+			if (searchValue !== '') {
+				if (searchValue !== '$.') {
+					handleInputChange('$.', {action: 'input-change'});
+				}
+				return;
+			}
+		}
+
 		const unwrapped =
 			field
+				?.replace(/^\$\./, '')
 				?.replace(/\['(.*?)'\]/g, (match, val, offset, str) => {
 					const prevChar = str[offset - 1];
 
@@ -168,6 +218,7 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 		}
 	}, [field]);
 
+
 	useEffect(() => {
 		setFilteredOptions(allOptions);
 	}, [allOptions]);
@@ -182,7 +233,7 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 			<Select
 				placeholder={'Select Field...'}
 				options={filteredOptions}
-				inputValue={searchValue}
+				inputValue={menuIsOpen ? searchValue : !!searchValue ? filteredOptions.find(o => o.value === searchValue)?.label || searchValue : searchValue}
 				onInputChange={handleInputChange}
 				onChange={handleChange}
 				value={selectedOption}

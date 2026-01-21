@@ -140,8 +140,10 @@ public class InvokerServiceImp implements InvokerService {
     public void deleteInvokerFile(String name) {
         try {
             Path file = findFileByInvokerName(name).toPath();
-            if (exists(file)) {
+            if (invokerContainer.existsByName(name)) {
                 invokerContainer.remove(name);
+            }
+            if (exists(file)) {
                 Files.delete(file.toAbsolutePath());
 
                 // delete invoker sync record
@@ -202,10 +204,12 @@ public class InvokerServiceImp implements InvokerService {
                 return;
             }
             InvokerParserImp parser = new InvokerParserImp(document);
-            File f = new File(document.getDocumentURI());
-            String invoker = FileNameUtils.removeExtension(f.getName());
-            invoker = invoker.replace("%20", " ");
-            container.put(invoker, parser.parse());
+//            File f = new File(document.getDocumentURI());
+//            String invoker = FileNameUtils.removeExtension(f.getName());
+//            invoker = invoker.replace("%20", " ");
+            Invoker invoker =  parser.parse();
+            String invokerName = invoker.getName();
+            container.put(invokerName, invoker);
         });
         return container;
     }
@@ -324,7 +328,14 @@ public class InvokerServiceImp implements InvokerService {
             }
 
             if (index >= list.size()) {
-                index = 0;
+//                throw new RuntimeException(
+//                        String.format(
+//                                "No such element in list. You tried to reference the %s element of the '%s' array, but the array's size is %d in the invoker file. Please ensure the array has at least %s elements or modify the reference path.",
+//                                idx,
+//                                String.join(".", seen),
+//                                list.size(),
+//                                idx));
+                index = 0; // We have to get first element from invoker array to identify object's structure.
             }
 
             Object obj = list.get(index);
@@ -460,10 +471,10 @@ public class InvokerServiceImp implements InvokerService {
     @Override
     public void save(Document document) {
         InvokerParserImp parser = new InvokerParserImp(document);
-        File f = new File(document.getDocumentURI());
-        String invoker = FileNameUtils.removeExtension(f.getName());
-        invoker = invoker.replace("%20", " ");
-        invokerContainer.add(invoker, parser.parse());
+        Invoker invoker = parser.parse();
+        String invokerName = invoker.getName();
+        invokerName = invokerName.replace("%20", " ");
+        invokerContainer.add(invokerName, invoker);
     }
 
     @Override
