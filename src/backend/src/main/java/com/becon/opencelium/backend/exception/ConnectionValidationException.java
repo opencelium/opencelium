@@ -10,14 +10,29 @@ public class ConnectionValidationException extends RuntimeException {
     private final String error;
     private final String message;
 
+    public ConnectionValidationException(HttpStatus status, String error, String message, Throwable cause) {
+        super(cause);
+        this.status = status;
+        this.error = error;
+        this.message = message;
+    }
+
     public ConnectionValidationException(HttpStatus status, String error, String message) {
         this.status = status;
         this.error = error;
         this.message = message;
     }
 
+    public ConnectionValidationException(String error, String message, Throwable e) {
+        this(HttpStatus.BAD_REQUEST, error, message, e);
+    }
+
     public ConnectionValidationException(String error, String message) {
         this(HttpStatus.BAD_REQUEST, error, message);
+    }
+
+    public ConnectionValidationException(String message, Throwable e) {
+        this(HttpStatus.BAD_REQUEST, ExceptionConstant.INVALID_CONNECTION, message, e);
     }
 
     public ConnectionValidationException(String message) {
@@ -49,7 +64,7 @@ public class ConnectionValidationException extends RuntimeException {
     }
 
     public static ConnectionValidationException invalidExpression(String exp, InvalidExpressionException e) {
-        return new ConnectionValidationException("Invalid Expression - %s. code - %s, error - %s".formatted(exp, e.getErrorCode().getCode(), e.getMessage()));
+        return new ConnectionValidationException("Invalid Expression - %s. code - %s, error - %s".formatted(exp, e.getErrorCode().getCode(), e.getMessage()), e);
     }
 
     public static ConnectionValidationException operatorNotFound(String id) {
@@ -60,8 +75,8 @@ public class ConnectionValidationException extends RuntimeException {
         return new ConnectionValidationException(ExceptionMessages.ENHANCEMENT_NOT_FOUND.formatted(id));
     }
 
-    public static ConnectionValidationException unknownError(String message) {
-        return new ConnectionValidationException(ExceptionConstant.UNKNOWN_ERROR, message);
+    public static ConnectionValidationException unknownError(String message, Throwable cause) {
+        return new ConnectionValidationException(ExceptionConstant.UNKNOWN_ERROR, message, cause);
     }
 
     public HttpStatus getStatus() {

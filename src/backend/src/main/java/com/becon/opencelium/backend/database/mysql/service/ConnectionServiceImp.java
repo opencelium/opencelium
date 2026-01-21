@@ -194,7 +194,7 @@ public class ConnectionServiceImp implements ConnectionService {
         } catch (ConnectionValidationException e) {
             throw e;
         } catch (Exception e) {
-            throw ConnectionValidationException.unknownError(e.getMessage());
+            throw ConnectionValidationException.unknownError(e.getMessage(), e);
         }
     }
 
@@ -260,7 +260,7 @@ public class ConnectionServiceImp implements ConnectionService {
         } catch (ConnectionValidationException e) {
             throw e;
         } catch (Exception e) {
-            throw ConnectionValidationException.unknownError(e.getMessage());
+            throw ConnectionValidationException.unknownError(e.getMessage(), e);
         }
     }
 

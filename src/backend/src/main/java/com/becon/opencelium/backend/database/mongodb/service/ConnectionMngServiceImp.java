@@ -1,8 +1,7 @@
 package com.becon.opencelium.backend.database.mongodb.service;
 
 import com.becon.opencelium.backend.constant.props.OpenceliumProps;
-import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
-import com.becon.opencelium.backend.database.mongodb.entity.EnhancementMng;
+import com.becon.opencelium.backend.database.mongodb.entity.*;
 import com.becon.opencelium.backend.database.mongodb.repository.ConnectionMngRepository;
 import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.database.mysql.service.EnhancementService;
@@ -113,16 +112,16 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         if (Objects.isNull(connectionMng)) return;
 
         try {
-            updateWithoutRollback(old, connectionMng);
+            updateWithoutRollback(old, connectionMng, false);
         } catch (Exception e) {
-            updateWithoutRollback(connectionMng, old);
+            updateWithoutRollback(connectionMng, old, true);
             throw e;
         }
         try {
             fieldBindingMngService.bindAfterUpdate(connectionMng);
         } catch (Exception e) {
             fieldBindingMngService.bindAfterUpdate(old);
-            updateWithoutRollback(connectionMng, old);
+            updateWithoutRollback(connectionMng, old, true);
             throw e;
         }
     }
@@ -219,18 +218,30 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         return connectionMngRepository.deleteByConnectionIdIn(chunk);
     }
 
-    private void updateWithoutRollback(ConnectionMng old, ConnectionMng connectionMng) {
+    private void updateWithoutRollback(ConnectionMng old, ConnectionMng connectionMng, boolean ignoreNullId) {
         if (connectionMng.getFromConnector() != null) {
             if (connectionMng.getFromConnector().getMethods() != null) {
                 methodMngService.saveAll(connectionMng.getFromConnector().getMethods());
                 doIfNoneMatch(
                         old.getFromConnector().getMethods(),
                         connectionMng.getFromConnector().getMethods(),
-                        (m1, m2) -> m1.getId().equals(m2.getId()),
-                        methodMngService::delete
+                        (m1, m2) -> Objects.equals(m1.getId(), m2.getId()),
+                        x -> {
+                            if (ignoreNullId && x.getId() == null) {
+                                return;
+                            }
+                            methodMngService.delete(x);
+                        }
                 );
             } else if (old.getFromConnector() != null && old.getFromConnector().getMethods() != null) {
-                methodMngService.deleteAll(old.getFromConnector().getMethods());
+                List<MethodMng> methodsForDelete = old.getFromConnector().getMethods();
+                if (ignoreNullId) {
+                    methodsForDelete = methodsForDelete
+                            .stream()
+                            .filter(x -> Objects.nonNull(x.getId()))
+                            .toList();
+                }
+                methodMngService.deleteAll(methodsForDelete);
             }
 
             if (connectionMng.getFromConnector().getOperators() != null) {
@@ -239,17 +250,43 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
                         old.getFromConnector().getOperators(),
                         connectionMng.getFromConnector().getOperators(),
                         (o1, o2) -> o1.getId().equals(o2.getId()),
-                        operatorMngService::delete
+                        x -> {
+                            if (ignoreNullId && x.getId() == null) {
+                                return;
+                            }
+                            operatorMngService.delete(x);
+                        }
                 );
             } else if (old.getFromConnector() != null && old.getFromConnector().getOperators() != null) {
-                operatorMngService.deleteAll(old.getFromConnector().getOperators());
+                List<OperatorMng> operatorsForDelete = old.getFromConnector().getOperators();
+                if (ignoreNullId) {
+                    operatorsForDelete = operatorsForDelete
+                            .stream()
+                            .filter(x -> Objects.nonNull(x.getId()))
+                            .toList();
+                }
+                operatorMngService.deleteAll(operatorsForDelete);
             }
         } else if (old.getFromConnector() != null) {
             if (old.getFromConnector().getMethods() != null) {
-                methodMngService.deleteAll(old.getFromConnector().getMethods());
+                List<MethodMng> methodsForDelete = old.getFromConnector().getMethods();
+                if (ignoreNullId) {
+                    methodsForDelete = methodsForDelete
+                            .stream()
+                            .filter(x -> Objects.nonNull(x.getId()))
+                            .toList();
+                }
+                methodMngService.deleteAll(methodsForDelete);
             }
             if (old.getFromConnector().getOperators() != null) {
-                operatorMngService.deleteAll(old.getFromConnector().getOperators());
+                List<OperatorMng> operatorsForDelete = old.getFromConnector().getOperators();
+                if (ignoreNullId) {
+                    operatorsForDelete = operatorsForDelete
+                            .stream()
+                            .filter(x -> Objects.nonNull(x.getId()))
+                            .toList();
+                }
+                operatorMngService.deleteAll(operatorsForDelete);
             }
         }
 
@@ -260,10 +297,22 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
                         old.getToConnector().getMethods(),
                         connectionMng.getToConnector().getMethods(),
                         (m1, m2) -> m1.getId().equals(m2.getId()),
-                        methodMngService::delete
+                        x -> {
+                            if (ignoreNullId && x.getId() == null) {
+                                return;
+                            }
+                            methodMngService.delete(x);
+                        }
                 );
             } else if (old.getToConnector() != null && old.getToConnector().getMethods() != null) {
-                methodMngService.deleteAll(old.getToConnector().getMethods());
+                List<MethodMng> methodsForDelete = old.getToConnector().getMethods();
+                if (ignoreNullId) {
+                    methodsForDelete = methodsForDelete
+                            .stream()
+                            .filter(x -> Objects.nonNull(x.getId()))
+                            .toList();
+                }
+                methodMngService.deleteAll(methodsForDelete);
             }
             if (connectionMng.getToConnector().getOperators() != null) {
                 operatorMngService.saveAll(connectionMng.getToConnector().getOperators());
@@ -271,17 +320,43 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
                         old.getToConnector().getOperators(),
                         connectionMng.getToConnector().getOperators(),
                         (o1, o2) -> o1.getId().equals(o2.getId()),
-                        operatorMngService::delete
+                        x -> {
+                            if (ignoreNullId && x.getId() == null) {
+                                return;
+                            }
+                            operatorMngService.delete(x);
+                        }
                 );
             } else if (old.getToConnector() != null && old.getToConnector().getOperators() != null) {
-                operatorMngService.deleteAll(old.getToConnector().getOperators());
+                List<OperatorMng> operatorsForDelete = old.getToConnector().getOperators();
+                if (ignoreNullId) {
+                    operatorsForDelete = operatorsForDelete
+                            .stream()
+                            .filter(x -> Objects.nonNull(x.getId()))
+                            .toList();
+                }
+                operatorMngService.deleteAll(operatorsForDelete);
             }
         } else if (old.getToConnector() != null) {
             if (old.getToConnector().getMethods() != null) {
-                methodMngService.deleteAll(old.getToConnector().getMethods());
+                List<MethodMng> methodsForDelete = old.getToConnector().getMethods();
+                if (ignoreNullId) {
+                    methodsForDelete = methodsForDelete
+                            .stream()
+                            .filter(x -> Objects.nonNull(x.getId()))
+                            .toList();
+                }
+                methodMngService.deleteAll(methodsForDelete);
             }
             if (old.getToConnector().getOperators() != null) {
-                operatorMngService.deleteAll(old.getToConnector().getOperators());
+                List<OperatorMng> operatorsForDelete = old.getToConnector().getOperators();
+                if (ignoreNullId) {
+                    operatorsForDelete = operatorsForDelete
+                            .stream()
+                            .filter(x -> Objects.nonNull(x.getId()))
+                            .toList();
+                }
+                operatorMngService.deleteAll(operatorsForDelete);
             }
         }
 
@@ -291,10 +366,23 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
                     old.getFieldBindings(),
                     connectionMng.getFieldBindings(),
                     (f1, f2) -> f1.getId().equals(f2.getId()),
-                    fieldBindingMngService::delete
+                    x -> {
+                        if (ignoreNullId && x.getId() == null) {
+                            return;
+                        }
+                        fieldBindingMngService.delete(x);
+                    }
             );
         } else if (old.getFieldBindings() != null) {
             fieldBindingMngService.deleteAll(old.getFieldBindings());
+            List<FieldBindingMng> fbForDelete = old.getFieldBindings();
+            if (ignoreNullId) {
+                fbForDelete = fbForDelete
+                        .stream()
+                        .filter(x -> Objects.nonNull(x.getId()))
+                        .toList();
+            }
+            fieldBindingMngService.deleteAll(fbForDelete);
         }
         connectionMngRepository.save(connectionMng);
     }

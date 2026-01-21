@@ -6,6 +6,11 @@ import org.apache.commons.lang3.StringUtils;
 public class InvalidExpressionException extends RuntimeException {
     private final ErrorCode errorCode;
 
+    public InvalidExpressionException(ErrorCode errorCode, String message, Throwable cause) {
+        super(message, cause);
+        this.errorCode = errorCode;
+    }
+
     public InvalidExpressionException(ErrorCode errorCode, String message) {
         super(message);
         this.errorCode = errorCode;
@@ -36,11 +41,11 @@ public class InvalidExpressionException extends RuntimeException {
     }
 
     public static InvalidExpressionException valueParseException(ValueParseException e) {
-        return new InvalidExpressionException(e.getCode(), e.getMessage());
+        return new InvalidExpressionException(e.getCode(), e.getMessage(), e);
     }
 
     public static InvalidExpressionException applyOperatorException(ApplyOperatorException e) {
-        return new InvalidExpressionException(e.getCode(), e.getMessage());
+        return new InvalidExpressionException(e.getCode(), e.getMessage(), e);
     }
 
     public static InvalidExpressionException unexpectedEndOfExpression(String exp) {
@@ -48,7 +53,7 @@ public class InvalidExpressionException extends RuntimeException {
     }
 
     public static InvalidExpressionException unexpectedException(Exception e) {
-        return new InvalidExpressionException(ErrorCode.UNEXPECTED_EXCEPTION, e.getMessage());
+        return new InvalidExpressionException(ErrorCode.UNEXPECTED_EXCEPTION, e.getMessage(), e);
     }
 
     public static InvalidExpressionException referenceExtractorNotFound(String reference) {
@@ -56,7 +61,7 @@ public class InvalidExpressionException extends RuntimeException {
     }
 
     public static InvalidExpressionException cannotExtractReferenceValue(String reference, RuntimeException e) {
-        return new InvalidExpressionException(ErrorCode.CANNOT_EXTRACT_REFERENCE, "Exception occurred while getting a value of '%s'. Cause: '%s'".formatted(reference, e.getMessage()));
+        return new InvalidExpressionException(ErrorCode.CANNOT_EXTRACT_REFERENCE, "Exception occurred while getting a value of '%s'. Cause: '%s'".formatted(reference, e.getMessage()), e);
     }
 
     public static InvalidExpressionException functionNotFound(String functionName, Object[] args) {
@@ -64,7 +69,7 @@ public class InvalidExpressionException extends RuntimeException {
     }
 
     public static InvalidExpressionException applyFunctionException(ApplyFunctionException e) {
-        return new InvalidExpressionException(e.getCode(), e.getMessage());
+        return new InvalidExpressionException(e.getCode(), e.getMessage(), e);
     }
 
     public static InvalidExpressionException emptyExpression() {
