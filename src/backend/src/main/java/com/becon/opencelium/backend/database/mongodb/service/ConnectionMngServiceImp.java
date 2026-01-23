@@ -221,7 +221,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     private void updateWithoutRollback(ConnectionMng old, ConnectionMng connectionMng, boolean ignoreNullId) {
         if (connectionMng.getFromConnector() != null) {
             if (connectionMng.getFromConnector().getMethods() != null) {
-                methodMngService.saveAll(connectionMng.getFromConnector().getMethods());
+                connectionMng.getFromConnector().setMethods(methodMngService.saveAll(connectionMng.getFromConnector().getMethods()));
                 doIfNoneMatch(
                         old.getFromConnector().getMethods(),
                         connectionMng.getFromConnector().getMethods(),
@@ -245,7 +245,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
             }
 
             if (connectionMng.getFromConnector().getOperators() != null) {
-                operatorMngService.saveAll(connectionMng.getFromConnector().getOperators());
+                connectionMng.getFromConnector().setOperators(operatorMngService.saveAll(connectionMng.getFromConnector().getOperators()));
                 doIfNoneMatch(
                         old.getFromConnector().getOperators(),
                         connectionMng.getFromConnector().getOperators(),
@@ -292,7 +292,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
 
         if (connectionMng.getToConnector() != null) {
             if (connectionMng.getToConnector().getMethods() != null) {
-                methodMngService.saveAll(connectionMng.getToConnector().getMethods());
+                connectionMng.getToConnector().setMethods(methodMngService.saveAll(connectionMng.getToConnector().getMethods()));
                 doIfNoneMatch(
                         old.getToConnector().getMethods(),
                         connectionMng.getToConnector().getMethods(),
@@ -315,7 +315,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
                 methodMngService.deleteAll(methodsForDelete);
             }
             if (connectionMng.getToConnector().getOperators() != null) {
-                operatorMngService.saveAll(connectionMng.getToConnector().getOperators());
+                connectionMng.getToConnector().setOperators(operatorMngService.saveAll(connectionMng.getToConnector().getOperators()));
                 doIfNoneMatch(
                         old.getToConnector().getOperators(),
                         connectionMng.getToConnector().getOperators(),
@@ -361,7 +361,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         }
 
         if (connectionMng.getFieldBindings() != null && !connectionMng.getFieldBindings().isEmpty()) {
-            fieldBindingMngService.saveAll(connectionMng.getFieldBindings());
+            connectionMng.setFieldBindings(fieldBindingMngService.saveAll(connectionMng.getFieldBindings()));
             doIfNoneMatch(
                     old.getFieldBindings(),
                     connectionMng.getFieldBindings(),
