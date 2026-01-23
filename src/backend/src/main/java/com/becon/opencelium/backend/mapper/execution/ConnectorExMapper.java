@@ -37,7 +37,7 @@ public class ConnectorExMapper {
         this.invokerService = invokerService;
     }
 
-    ConnectorEx toEntity(ConnectorMng dto, Long connectionId) {
+    ConnectorEx toEntity(ConnectorMng dto, String connectionId) {
         Connector connector = connectorService.getById(dto.getConnectorId());
         ConnectorEx connectorEx = new ConnectorEx();
 

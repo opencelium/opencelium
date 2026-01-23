@@ -16,9 +16,12 @@
 
 package com.becon.opencelium.backend.database.mongodb.entity;
 
+import jakarta.persistence.PrePersist;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.*;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -41,9 +44,16 @@ public class ConnectionMng {
     private ConnectorMng toConnector;
 
     @DBRef
-    private List<FieldBindingMng> fieldBindings; // [null, null, null]
+    @Field(name = "fieldBindings")
+    private List<FieldBindingMng> oldFieldBindings; // [null, null, null]
+
+    @Field(name = "field_bindings")
+    private List<FieldBindingMng> fieldBindings;
 
     private Map<String, Object> ui;
+
+    @CreatedDate
+    private Instant createdAt;
 
     public ConnectionMng() {
     }
@@ -102,5 +112,26 @@ public class ConnectionMng {
 
     public void setUi(Map<String, Object> ui) {
         this.ui = ui;
+    }
+
+    public List<FieldBindingMng> getOldFieldBindings() {
+        return oldFieldBindings;
+    }
+
+    public void setOldFieldBindings(List<FieldBindingMng> oldFieldBindings) {
+        this.oldFieldBindings = oldFieldBindings;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = Instant.now();
     }
 }

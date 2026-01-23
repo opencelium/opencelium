@@ -25,7 +25,6 @@ import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
 import com.becon.opencelium.backend.resource.application.AvailableUpdateResource;
 import com.becon.opencelium.backend.resource.application.MigrateDataResource;
 import com.becon.opencelium.backend.resource.updateassistant.InstallationDTO;
-import com.becon.opencelium.backend.resource.updateassistant.Neo4jConfigResource;
 import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
@@ -448,11 +447,5 @@ public class UpdateAssistantController {
         } catch (IOException e) {
             throw new StorageFileNotFoundException("Error accessing files: " + e.getMessage(), e);
         }
-    }
-
-    @PostMapping("/db/migrate")
-    public ResponseEntity<?> dbMigrate(@RequestBody Neo4jConfigResource neo4jConfig) {
-        assistantServiceImp.doMigrate(neo4jConfig);
-        return ResponseEntity.ok().build();
     }
 }
