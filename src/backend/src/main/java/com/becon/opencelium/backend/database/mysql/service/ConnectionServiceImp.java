@@ -250,20 +250,12 @@ public class ConnectionServiceImp implements ConnectionService {
     @Transactional
     public void deleteById(Long id) {
         Connection connection = getById(id);
+
         deleteSchedules(connection);
-        ConnectionMng deleted;
-        try {
-            deleted = connectionMngService.delete(connection.getSnapshotId());
-        } catch (Exception e) {
-            connectionRepository.deleteById(id);
-            return;
-        }
-        try {
-            connectionRepository.deleteById(id);
-        } catch (Exception e) {
-            connectionMngService.save(deleted);
-            throw e;
-        }
+
+        connectionRepository.deleteById(id);
+
+        connectionMngService.deleteAllByConnectionId(connection.getId());
     }
 
     @Override
@@ -279,21 +271,14 @@ public class ConnectionServiceImp implements ConnectionService {
     @Transactional
     public void deleteAndTrackIt(Long id) {
         Connection connection = getById(id);
+
         deleteSchedules(connection);
-        ConnectionMng deleted;
-        try {
-            deleted = connectionMngService.delete(connection.getSnapshotId());
-        } catch (Exception e) {
-            connectionRepository.deleteById(id);
-            return;
-        }
-        try {
-            connectionRepository.deleteById(id);
-            connectionHistoryService.makeHistoryAndSave(connection, null, Action.DELETE);
-        } catch (Exception e) {
-            connectionMngService.save(deleted);
-            throw e;
-        }
+
+        connectionRepository.deleteById(id);
+
+        connectionMngService.deleteAllByConnectionId(connection.getId());
+
+        connectionHistoryService.makeHistoryAndSave(connection, null, Action.DELETE);
     }
 
     @Override
