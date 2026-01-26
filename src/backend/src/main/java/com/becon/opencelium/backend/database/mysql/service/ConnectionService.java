@@ -100,4 +100,6 @@ public interface ConnectionService {
     ConnectionServiceImp.CleanupResult cleanupAllTestConnections();
 
     List<ConnectionVersionedDTO> getConnectionVersions(Long connectionId);
+
+    void deleteSnapshot(Long connectionId, String snapshotId);
 }
