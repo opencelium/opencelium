@@ -17,4 +17,6 @@ public interface ConnectionMngRepository extends MongoRepository<ConnectionMng,S
 
     List<ConnectionMng> findAllByConnectionIdOrderByConnectionIdDesc(Long id);
     long deleteByConnectionIdIn(Collection<Long> connectionIds);
+
+    void deleteAllByConnectionId(Long id);
 }

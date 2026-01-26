@@ -18,4 +18,6 @@ public interface ConnectionMngService {
     List<ConnectionMng> getAllByConnectionId(Long id);
 
     long deleteByConnectionIdIn(List<Long> chunk);
+
+    void deleteAllByConnectionId(Long id);
 }
