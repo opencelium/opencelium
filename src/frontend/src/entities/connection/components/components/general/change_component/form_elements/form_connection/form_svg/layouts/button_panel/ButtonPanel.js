@@ -62,7 +62,7 @@ class ButtonPanel extends React.Component {
       );
     }
     const buttonPanel = document.querySelector("#button_panel");
-    buttonPanel.style.bottom = `${this.props.logPanelHeight + 48}px`;
+    buttonPanel.style.bottom = `${this.props.logPanelHeight + 128}px`;
 
     const testConnectionButton = document.querySelector(
       "#test_connection_button"
