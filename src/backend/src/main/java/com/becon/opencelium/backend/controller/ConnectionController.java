@@ -298,6 +298,23 @@ public class ConnectionController {
         return ResponseEntity.ok(connectionOldDTOMapper.toDTO(connectionDTO));
     }
 
+    @Operation(summary = "Deletes a connection by provided connection ID and snapshotId")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Connection has been successfully deleted"),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @DeleteMapping("/{connectionId}/version/{snapshotId}")
+    public ResponseEntity<?> deleteConnectionByVersion(@PathVariable Long connectionId, @PathVariable String snapshotId){
+        connectionService.deleteSnapshot(connectionId, snapshotId);
+        return ResponseEntity.ok().build();
+    }
+
     @Operation(summary = "Creates a connection from database by accepting connection data in request body.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
