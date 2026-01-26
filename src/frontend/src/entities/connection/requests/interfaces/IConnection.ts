@@ -59,3 +59,10 @@ export interface IConnectionRequest {
     //to delete connections by id
     deleteConnectionsById(connection: number[]): Promise<AxiosResponse<number[]>>,
 }
+
+export interface ConnectionVersionItem {
+    connectionId: number;
+    title: string;
+    snapshotId: string;
+    createdAt: number;
+}

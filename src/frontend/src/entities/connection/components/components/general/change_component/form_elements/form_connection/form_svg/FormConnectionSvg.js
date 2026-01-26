@@ -17,7 +17,7 @@ import CreateElementPanel from '@change_component/form_elements/form_connection/
 import { mapItemsToClasses } from '@change_component/form_elements/form_connection/form_svg/utils';
 import CConnection from '@entity/connection/components/classes/components/content/connection/CConnection';
 import styles from '@entity/connection/components/themes/default/content/connections/connection_overview_2.scss';
-import { clearCurrentLogs, setConnectionData, setCurrentTechnicalItem } from '@entity/connection/redux_toolkit/slices/ConnectionSlice';
+import { clearCurrentLogs, setConnectionData, setCurrentTechnicalItem, setIsDirty } from '@entity/connection/redux_toolkit/slices/ConnectionSlice';
 import { setModalConnectionData, setModalCurrentTechnicalItem } from '@entity/connection/redux_toolkit/slices/ModalConnectionSlice';
 import React, { Component } from 'react';
 import { withTranslation } from 'react-i18next';
@@ -58,7 +58,8 @@ function mapStateToProps(state, props) {
     setModalConnectionData,
     setModalCurrentTechnicalItem,
     clearCurrentLogs,
-    checkPolyglot
+    checkPolyglot,
+    setIsDirty
   },
   null,
   { forwardRef: true }
@@ -134,6 +135,7 @@ class FormConnectionSvg extends Component {
         JSON.stringify(connection.getObject())
       );
       if (entity !== null) {
+        this.props.setIsDirty(true);
         let connectionData =
           entity instanceof CConnection
             ? entity.getObjectForConnectionOverview()

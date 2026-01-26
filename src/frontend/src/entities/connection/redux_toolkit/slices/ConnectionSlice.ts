@@ -41,8 +41,11 @@ import {
   getConnectionWebhooks, generateLogs,
   testConnection,
   updateConnection, getAllMetaConnectionsByInvokerName,
+  getConnectionVersions,
+  getConnectionVersionBySnapshot,
 } from "../action_creators/ConnectionCreators";
 import {MetaConnectionModel} from "@root/requests/models/Connection";
+import { ConnectionVersionItem } from '@entity/connection/requests/interfaces/IConnection';
 
 
 export const LogPanelHeight = {
@@ -104,6 +107,13 @@ export interface ConnectionState extends ICommonState {
   isDetailsOpened: boolean;
   justCreatedItem: { index: string; connectorType: string };
   justDeletedItem: { index: string; connectorType: string };
+
+  connectionVersions: ConnectionVersionItem[];
+  gettingConnectionVersions: API_REQUEST_STATE;
+  openingConnectionVersion: API_REQUEST_STATE;
+  openedSnapshotId: string | null;
+  isDirty: boolean;
+  gettingConnectionVersionBySnapshot: API_REQUEST_STATE;
 }
 
 let initialState: ConnectionState = {
@@ -156,6 +166,14 @@ let initialState: ConnectionState = {
   isDetailsOpened: true,
   justCreatedItem: null,
   justDeletedItem: null,
+
+  connectionVersions: [],
+  gettingConnectionVersions: API_REQUEST_STATE.INITIAL,
+  openingConnectionVersion: API_REQUEST_STATE.INITIAL,
+  openedSnapshotId: null,
+  isDirty: false,
+  gettingConnectionVersionBySnapshot: API_REQUEST_STATE.INITIAL,
+
   ...CommonState,
 };
 
@@ -241,7 +259,7 @@ const connectionReducers = (isModal: boolean = false) => {
 
       state.isTestingConnection = action.payload;
     },
-  addCurrentLog: (state, action: PayloadAction<ConnectionLogProps>) => {
+    addCurrentLog: (state, action: PayloadAction<ConnectionLogProps>) => {
       if(action.payload){
           const currentState = current(state);
           let newCurrentLogs = currentState.currentLogs;
@@ -300,18 +318,18 @@ const connectionReducers = (isModal: boolean = false) => {
           state.currentLogs = newCurrentLogs;
           state.logMessages = [...state.logMessages, action.payload];
       }
-  },
-  shouldNotDrawLogMessage: (state, action: PayloadAction<{index: string, connectorType: string}>) => {
+    },
+    shouldNotDrawLogMessage: (state, action: PayloadAction<{index: string, connectorType: string}>) => {
       state.currentLogs = state.currentLogs.map(log => {
           if(log.index === action.payload.index && log.connectorType === action.payload.connectorType){
               return {...log, shouldDraw: false};
           }
           return log;
       })
-  },
-  addLogMessage: (state, action: PayloadAction<any>) => {
+    },
+    addLogMessage: (state, action: PayloadAction<any>) => {
       state.logMessages = [...state.logMessages, action.payload];
-  },
+    },
     clearCurrentLogs: (state, action: PayloadAction<any>) => {
       state.currentLogs = [];
     },
@@ -336,7 +354,6 @@ const connectionReducers = (isModal: boolean = false) => {
       state.currentTechnicalItem = action.payload;
       state.isCreateElementPanelOpened = action.payload !== null;
     },
-
     setDetailsLocation: (state, action: PayloadAction<any>) => {
       state.detailsLocation = action.payload.location;
     },
@@ -348,10 +365,50 @@ const connectionReducers = (isModal: boolean = false) => {
       state.testConnection = null;
       state.addingTestConnection = API_REQUEST_STATE.INITIAL;
       state.deletingTestConnectionById = API_REQUEST_STATE.INITIAL;
-    }
+    },
+    setIsDirty: (state, action: PayloadAction<boolean>) => {
+      state.isDirty = action.payload;
+    },
   }
   if(!isModal){
     const extraReducers: CaseReducers<NoInfer<ConnectionState>, any>  = {
+      [getConnectionVersions.pending.type]: (state) => {
+        state.gettingConnectionVersions = API_REQUEST_STATE.START;
+      },
+      [getConnectionVersions.fulfilled.type]: (state, action: PayloadAction<any[]>) => {
+        state.gettingConnectionVersions = API_REQUEST_STATE.FINISH;
+        state.connectionVersions = action.payload || [];
+        state.error = null;
+      },
+      [getConnectionVersions.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+        state.gettingConnectionVersions = API_REQUEST_STATE.ERROR;
+        state.error = action.payload;
+      },
+
+      [getConnectionVersionBySnapshot.pending.type]: (state) => {
+        state.openingConnectionVersion = API_REQUEST_STATE.START;
+      },
+      [getConnectionVersionBySnapshot.fulfilled.type]: (state, action: PayloadAction<IConnection>) => {
+        state.openingConnectionVersion = API_REQUEST_STATE.FINISH;
+
+        const payload: any = action.payload || null;
+
+        const normalized = payload
+          ? {
+              ...payload,
+              id: payload.id ?? payload.connectionId,
+            }
+          : payload;
+
+        state.currentConnection = normalized;
+        state.connection = normalized;
+        state.isDirty = false;
+        state.error = null;
+      },
+      [getConnectionVersionBySnapshot.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+        state.openingConnectionVersion = API_REQUEST_STATE.ERROR;
+        state.error = action.payload;
+      },
       [testConnection.pending.type]: (state) => {
         state.testingConnection = API_REQUEST_STATE.START;
       },
@@ -537,6 +594,7 @@ const connectionReducers = (isModal: boolean = false) => {
         ) {
           state.currentConnection = action.payload;
         }
+        state.isDirty = false;
         state.error = null;
       },
       [updateConnection.rejected.type]: (
@@ -796,7 +854,8 @@ export const {
   setSavePanelVisibility,
   setTemplatePanelVisibility,
   setAnimationSpeed,
-  setIsAnimationNotFound
+  setIsAnimationNotFound,
+  setIsDirty
 } = connectionSlice.actions;
 
 

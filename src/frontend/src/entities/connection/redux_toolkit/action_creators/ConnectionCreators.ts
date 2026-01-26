@@ -341,6 +341,34 @@ export const deleteConnectionsById = createAsyncThunk(
     }
 )
 
+export const getConnectionVersions = createAsyncThunk(
+    'connection/versioning/getVersions',
+    async (connectionId: number, thunkAPI) => {
+        try {
+            const request = new ConnectionRequest();
+            const response = await request.getConnectionVersions(connectionId);
+            return response.data;
+        } catch (e) {
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+);
+
+export const getConnectionVersionBySnapshot = createAsyncThunk(
+    'connection/versioning/getVersionBySnapshot',
+    async ({ connectionId, snapshotId }: { connectionId: number; snapshotId: string }, thunkAPI) => {
+        try {
+            const request = new ConnectionRequest();
+            const response = await request.getConnectionBySnapshot(connectionId, snapshotId);
+
+            const transformed = transformDataFields(response.data);
+            return transformed;
+        } catch (e) {
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+);
+
 export default {
     generateLogs,
     getConnectionWebhooks,
@@ -358,4 +386,6 @@ export default {
     deleteConnectionById,
     deleteTestConnectionById,
     deleteConnectionsById,
+    getConnectionVersions,
+    getConnectionVersionBySnapshot
 }

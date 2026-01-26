@@ -27,6 +27,7 @@ import AvatarDefault from "@image/application/avatar_default.png";
 import {Application} from "@application/classes/Application";
 import {useAppDispatch} from "@application/utils/store";
 import Title from "@app_component/layout/top_bar/collection_title/Title";
+import ConnectionVersioning from './connection_versioning/ConnectionVersioning';
 
 const TopBar: FC<TopBarProps> =
     ({
@@ -70,6 +71,7 @@ const TopBar: FC<TopBarProps> =
                     {entityHeader ? <Title title={entityHeader}/> : null }
                 </div>
                 <div style={{display: 'flex', gap: '10px', alignItems: 'center', justifyContent: 'center'}}>
+                    <ConnectionVersioning theme={theme} />
                     <GlobalSearch/>
                     <NotificationItem/>
                     <Tooltip target={'my_profile'} tooltip={'My Profile'} position={'bottom'} component={MyProfile}/>
