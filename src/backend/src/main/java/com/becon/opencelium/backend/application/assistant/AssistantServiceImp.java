@@ -2,8 +2,20 @@ package com.becon.opencelium.backend.application.assistant;
 
 import com.becon.opencelium.backend.application.entity.SystemOverview;
 import com.becon.opencelium.backend.application.repository.SystemOverviewRepository;
+import com.becon.opencelium.backend.constant.ExceptionConstant;
+import com.becon.opencelium.backend.constant.ExceptionMessages;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.constant.AppYamlPath;
+import com.becon.opencelium.backend.constant.props.OpenceliumProps;
+import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
+import com.becon.opencelium.backend.database.mongodb.entity.ConnectorMng;
+import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
+import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngServiceImp;
+import com.becon.opencelium.backend.database.mongodb.service.FieldBindingMngServiceImp;
+import com.becon.opencelium.backend.database.mysql.entity.Connection;
+import com.becon.opencelium.backend.database.mysql.entity.Connector;
+import com.becon.opencelium.backend.database.mysql.service.ConnectorServiceImp;
+import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
@@ -38,6 +50,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -54,6 +67,21 @@ public class AssistantServiceImp implements ApplicationService {
 
     @Autowired
     private RestTemplate restTemplate;
+
+    @Autowired
+    private ConnectionServiceImp connectionService;
+
+    @Autowired
+    private ConnectorServiceImp connectorServiceImp;
+    @Autowired
+    private ConnectionMngServiceImp connectionMngServiceImp;
+    @Autowired
+    private FieldBindingMngServiceImp fieldBindingMngServiceImp;
+    @Autowired
+    private InvokerServiceImp invokerServiceImp;
+
+    @Autowired
+    private OpenceliumProps ocProps;
 
     @Override
     public SystemOverview getSystemOverview() {
@@ -408,5 +436,79 @@ public class AssistantServiceImp implements ApplicationService {
         }
 
         return normalizePath;
+    }
+
+    @Override
+    public List<JarFileDescriptor> getOldJarFiles() {
+        Path libsPath = Paths.get(PathConstant.LIBS);
+
+        try (Stream<Path> fileStream = Files.walk(libsPath)) {
+            return fileStream.filter(Files::isRegularFile)
+                    .filter(file -> file.getFileName().toString().startsWith(PathConstant.JAR_PREFIX) && file.getFileName().toString().endsWith(".jar"))
+                    .filter(file -> {
+                        String fileVersion = PackageVersionManager.extractVersionOfJarFile(file.getFileName().toString());
+                        return Utils.compare(fileVersion, ocProps.getVersion()) < 0;
+                    })
+                    .map(file -> new JarFileDescriptor(libsPath.toAbsolutePath().toString(), file.getFileName().toString()))
+                    .toList();
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            throw new GeneralServiceException(ExceptionConstant.INTERNAL_ERROR, ExceptionMessages.UNKNOWN_ERROR);
+        }
+    }
+
+    @Override
+    public List<JarFileDescriptor> deleteOldJarFiles() {
+        List<JarFileDescriptor> oldJarFiles = getOldJarFiles();
+        if (oldJarFiles == null) {
+            return Collections.emptyList();
+        }
+
+        oldJarFiles.forEach(oldJarFile -> {
+            try {
+                Files.deleteIfExists(Paths.get(PathConstant.LIBS).resolve(oldJarFile.getFileName()));
+            } catch (IOException e) {
+                log.error(e.getMessage());
+                throw new GeneralServiceException(ExceptionConstant.INTERNAL_ERROR, ExceptionMessages.UNKNOWN_ERROR);
+            }
+        });
+
+        return oldJarFiles;
+    }
+
+    private void addHeaderFromInvoker(ConnectionMng connectionMng, String fromInvokerStr, String toInvokerStr) {
+        Invoker fromInvoker = invokerServiceImp.findByName(fromInvokerStr);
+        Invoker toInvoker = invokerServiceImp.findByName(toInvokerStr);
+
+        addHeaderFromInvokerHelper(connectionMng.getFromConnector().getMethods(), fromInvoker);
+        addHeaderFromInvokerHelper(connectionMng.getToConnector().getMethods(), toInvoker);
+    }
+
+    private void addHeaderFromInvokerHelper(List<MethodMng> methods, Invoker invoker) {
+        for (MethodMng method : methods) {
+            if (method.getRequest() != null) {
+                Map<String, String> header = method.getRequest().getHeader();
+
+                FunctionInvoker fv = invoker.getOperations()
+                        .stream()
+                        .filter(o -> o.getName().equals(method.getName()))
+                        .findFirst()
+                        .orElse(null);
+
+                if (fv != null && fv.getRequest() != null && fv.getRequest().getHeader() != null) {
+                    Map<String, String> header1 = fv.getRequest().getHeader();
+                    if (header == null) {
+                        header = new HashMap<>();
+                    }
+
+                    for (Map.Entry<String, String> entry : header1.entrySet()) {
+                        if (!header.containsKey(entry.getKey())) {
+                            header.put(entry.getKey(), entry.getValue());
+                        }
+                    }
+                    method.getRequest().setHeader(header);
+                }
+            }
+        }
     }
 }
