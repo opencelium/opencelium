@@ -88,6 +88,11 @@ export class ConnectionRequest extends Request implements IConnectionRequest{
         return super.get<IConnection>();
     }
 
+    async deleteConnectionBySnapshot(connectionId: number, snapshotId: string): Promise<AxiosResponse<void>> {
+        this.endpoint = `/${connectionId}/version/${snapshotId}`;
+        return super.delete<void>();
+    }
+
     backendMap(connection: IConnection){
         let mappedConnection: any = {
             title: connection.title,

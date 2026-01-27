@@ -28,9 +28,9 @@ import {
 import ConnectionVersionHistoryPanel, {
 	ConnectionVersionItem,
 } from './ConnectionVersionHistoryPanel';
-import UnsavedChangesDialog from './UnsavedChangesDialog';
 
 import { ITheme } from '@style/Theme';
+import ConnectionVersioningConfirmDialog from './ConnectionVersioningConfirmDialog';
 
 export interface ConnectionVersioningProps {
 	theme: ITheme;
@@ -48,7 +48,7 @@ const ConnectionVersioning: FC<ConnectionVersioningProps> = ({ theme }) => {
 
 	const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
-	const [isUnsavedDialogOpen, setIsUnsavedDialogOpen] = useState(false);
+	const [confirmOpenVersion, setConfirmOpenVersion] = useState<null | ConnectionVersionItem>(null);
 	const [
 		pendingVersion,
 		setPendingVersion,
@@ -127,7 +127,7 @@ const ConnectionVersioning: FC<ConnectionVersioningProps> = ({ theme }) => {
 
 			if (isDirty) {
 				setPendingVersion(v);
-				setIsUnsavedDialogOpen(true);
+				setConfirmOpenVersion(v);
 				return;
 			}
 
@@ -135,19 +135,6 @@ const ConnectionVersioning: FC<ConnectionVersioningProps> = ({ theme }) => {
 		},
 		[connectionId, doOpenVersion, isDirty],
 	);
-
-	const onUnsavedYes = useCallback(() => {
-		if (pendingVersion) {
-			doOpenVersion(pendingVersion);
-		}
-		setPendingVersion(null);
-		setIsUnsavedDialogOpen(false);
-	}, [doOpenVersion, pendingVersion]);
-
-	const onUnsavedNo = useCallback(() => {
-		setPendingVersion(null);
-		setIsUnsavedDialogOpen(false);
-	}, []);
 
 	useEffect(() => {
 		if (!connectionId) return;
@@ -242,14 +229,21 @@ const ConnectionVersioning: FC<ConnectionVersioningProps> = ({ theme }) => {
 				theme={theme}
 			/>
 
-			<UnsavedChangesDialog
-				open={isUnsavedDialogOpen}
-				title='Unsaved changes'
-				message='You did not save the current connection and it will be lost after opening the version. (Yes/no)'
-				yesLabel='Yes'
-				noLabel='No'
-				onYes={onUnsavedYes}
-				onNo={onUnsavedNo}
+			<ConnectionVersioningConfirmDialog
+				open={!!confirmOpenVersion}
+				title="Unsaved changes"
+				message="You did not save the current connection and it will be lost after opening the version. (Yes/no)"
+				yesLabel="Yes"
+				noLabel="No"
+				onNo={() => setConfirmOpenVersion(null)}
+				onYes={() => {
+					const v = confirmOpenVersion;
+					setConfirmOpenVersion(null);
+					if (!v) return;
+
+					dispatch(getConnectionVersionBySnapshot({ connectionId: connectionId!, snapshotId: v.snapshotId }) as any);
+					setIsHistoryOpen(false);
+				}}
 			/>
 		</div>
 	);

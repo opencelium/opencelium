@@ -16,12 +16,15 @@
 import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
 
-export interface UnsavedChangesDialogProps {
+export type ConnectionVersioningConfirmDialogVariant = 'primary' | 'danger';
+
+export interface ConnectionVersioningConfirmDialogProps {
   open: boolean;
   title?: string;
   message?: string;
   yesLabel?: string;
   noLabel?: string;
+  variant?: ConnectionVersioningConfirmDialogVariant;
   onYes: () => void;
   onNo: () => void;
 }
@@ -91,16 +94,26 @@ const btnPrimary: React.CSSProperties = {
   color: '#fff',
 };
 
-const UnsavedChangesDialog: FC<UnsavedChangesDialogProps> = ({
+const btnDanger: React.CSSProperties = {
+  ...btnBase,
+  border: '1px solid rgba(0,0,0,0.10)',
+  background: '#d9534f',
+  color: '#fff',
+};
+
+const ConnectionVersioningConfirmDialog: FC<ConnectionVersioningConfirmDialogProps> = ({
   open,
-  title = 'Unsaved changes',
-  message = 'You did not save the current connection and it will be lost after opening the version. (Yes/no)',
+  title = 'Confirm',
+  message = '',
   yesLabel = 'Yes',
   noLabel = 'No',
+  variant = 'primary',
   onYes,
   onNo,
 }) => {
   if (!open) return null;
+
+  const yesStyle = variant === 'danger' ? btnDanger : btnPrimary;
 
   const node = (
     <div
@@ -116,12 +129,7 @@ const UnsavedChangesDialog: FC<UnsavedChangesDialogProps> = ({
           <button type="button" style={btnSecondary} onClick={onNo}>
             {noLabel}
           </button>
-          <button
-            type="button"
-            style={btnPrimary}
-            onClick={onYes}
-            autoFocus
-          >
+          <button type="button" style={yesStyle} onClick={onYes} autoFocus>
             {yesLabel}
           </button>
         </div>
@@ -132,4 +140,4 @@ const UnsavedChangesDialog: FC<UnsavedChangesDialogProps> = ({
   return ReactDOM.createPortal(node, document.body);
 };
 
-export default UnsavedChangesDialog;
+export default ConnectionVersioningConfirmDialog;

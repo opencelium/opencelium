@@ -43,6 +43,7 @@ import {
   updateConnection, getAllMetaConnectionsByInvokerName,
   getConnectionVersions,
   getConnectionVersionBySnapshot,
+  deleteConnectionVersion,
 } from "../action_creators/ConnectionCreators";
 import {MetaConnectionModel} from "@root/requests/models/Connection";
 import { ConnectionVersionItem } from '@entity/connection/requests/interfaces/IConnection';
@@ -114,6 +115,7 @@ export interface ConnectionState extends ICommonState {
   openedSnapshotId: string | null;
   isDirty: boolean;
   gettingConnectionVersionBySnapshot: API_REQUEST_STATE;
+  deletingConnectionVersion: API_REQUEST_STATE;
 }
 
 let initialState: ConnectionState = {
@@ -173,6 +175,7 @@ let initialState: ConnectionState = {
   openedSnapshotId: null,
   isDirty: false,
   gettingConnectionVersionBySnapshot: API_REQUEST_STATE.INITIAL,
+  deletingConnectionVersion: API_REQUEST_STATE.INITIAL,
 
   ...CommonState,
 };
@@ -407,6 +410,28 @@ const connectionReducers = (isModal: boolean = false) => {
       },
       [getConnectionVersionBySnapshot.rejected.type]: (state, action: PayloadAction<IResponse>) => {
         state.openingConnectionVersion = API_REQUEST_STATE.ERROR;
+        state.error = action.payload;
+      },
+      [deleteConnectionVersion.pending.type]: (state) => {
+        state.deletingConnectionVersion = API_REQUEST_STATE.START;
+      },
+
+      [deleteConnectionVersion.fulfilled.type]: (
+        state,
+        action: PayloadAction<{ connectionId: number; snapshotId: string }>
+      ) => {
+        state.deletingConnectionVersion = API_REQUEST_STATE.FINISH;
+
+        const snapshotId = action.payload?.snapshotId;
+        if (snapshotId) {
+          state.connectionVersions = (state.connectionVersions || []).filter((v: any) => v?.snapshotId !== snapshotId);
+        }
+
+        state.error = null;
+      },
+
+      [deleteConnectionVersion.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+        state.deletingConnectionVersion = API_REQUEST_STATE.ERROR;
         state.error = action.payload;
       },
       [testConnection.pending.type]: (state) => {
