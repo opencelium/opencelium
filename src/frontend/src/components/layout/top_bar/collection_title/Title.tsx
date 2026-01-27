@@ -24,6 +24,7 @@ import {ColorTheme} from "@style/Theme";
 import {Application} from "@application/classes/Application";
 import DashboardIcon from "@app_component/layout/top_bar/collection_title/icons/DashboardIcon";
 import {withTranslation} from "react-i18next";
+import HeaderText from "@app_component/base/text/HeaderText";
 
 const Title: FC<TitleProps> =
     ({
@@ -68,7 +69,7 @@ const Title: FC<TitleProps> =
     return (
         <TitleStyled className={className}>
             <span>
-                <Text value={title} size={TextSize.Size_24}/>
+                <HeaderText value={title} size={TextSize.Size_24}/>
                 <IconStyled>{icon}</IconStyled>
             </span>
         </TitleStyled>

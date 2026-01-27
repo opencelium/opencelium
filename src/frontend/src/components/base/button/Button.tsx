@@ -91,8 +91,8 @@ const Button: FC<ButtonProps> =
 }
 
 Button.defaultProps = {
-    iconSize: '24px',
-    size: 16,
+    iconSize: '16px',
+    size: 14,
     href: '',
     hasBackground: true,
     permission: NO_RESTRICTION,
