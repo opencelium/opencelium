@@ -8,19 +8,19 @@ import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.constant.props.OpenceliumProps;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
-import com.becon.opencelium.backend.database.mongodb.entity.ConnectorMng;
 import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
-import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngServiceImp;
-import com.becon.opencelium.backend.database.mongodb.service.FieldBindingMngServiceImp;
-import com.becon.opencelium.backend.database.mysql.entity.Connection;
-import com.becon.opencelium.backend.database.mysql.entity.Connector;
-import com.becon.opencelium.backend.database.mysql.service.ConnectorServiceImp;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.exception.StorageException;
+import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
+import com.becon.opencelium.backend.invoker.entity.Invoker;
+import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.updateassistant.InstallationDTO;
+import com.becon.opencelium.backend.resource.updateassistant.JarFileDescriptor;
+import com.becon.opencelium.backend.utility.PackageVersionManager;
 import com.becon.opencelium.backend.utility.ZipUtils;
+import com.becon.opencelium.backend.versionmanager.base.Utils;
 import com.jayway.jsonpath.JsonPath;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.slf4j.Logger;
@@ -54,7 +54,6 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-
 @Service
 public class AssistantServiceImp implements ApplicationService {
 
@@ -69,19 +68,10 @@ public class AssistantServiceImp implements ApplicationService {
     private RestTemplate restTemplate;
 
     @Autowired
-    private ConnectionServiceImp connectionService;
-
-    @Autowired
-    private ConnectorServiceImp connectorServiceImp;
-    @Autowired
-    private ConnectionMngServiceImp connectionMngServiceImp;
-    @Autowired
-    private FieldBindingMngServiceImp fieldBindingMngServiceImp;
-    @Autowired
-    private InvokerServiceImp invokerServiceImp;
-
-    @Autowired
     private OpenceliumProps ocProps;
+
+    @Autowired
+    private InvokerService invokerService;
 
     @Override
     public SystemOverview getSystemOverview() {
@@ -477,8 +467,8 @@ public class AssistantServiceImp implements ApplicationService {
     }
 
     private void addHeaderFromInvoker(ConnectionMng connectionMng, String fromInvokerStr, String toInvokerStr) {
-        Invoker fromInvoker = invokerServiceImp.findByName(fromInvokerStr);
-        Invoker toInvoker = invokerServiceImp.findByName(toInvokerStr);
+        Invoker fromInvoker = invokerService.findByName(fromInvokerStr);
+        Invoker toInvoker = invokerService.findByName(toInvokerStr);
 
         addHeaderFromInvokerHelper(connectionMng.getFromConnector().getMethods(), fromInvoker);
         addHeaderFromInvokerHelper(connectionMng.getToConnector().getMethods(), toInvoker);
