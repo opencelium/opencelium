@@ -29,7 +29,7 @@ import {Application} from "@application/classes/Application";
 import {MultipleTitleProps} from "@application/interfaces/IApplication";
 const areEqualHeaders = (h1: string | MultipleTitleProps[], h2: string | MultipleTitleProps[]) => {
     if (isString(h1)) {
-        return h1 !== h2;
+        return h1 === h2;
     }
     if (typeof h1 !== 'string' && typeof h2 !== 'string' && h1.length === h2.length) {
         for (let i = 0; i < h1.length; i++) {
