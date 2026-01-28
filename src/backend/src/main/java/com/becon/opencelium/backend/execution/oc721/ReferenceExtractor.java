@@ -1,15 +1,25 @@
 package com.becon.opencelium.backend.execution.oc721;
 
 import com.becon.opencelium.backend.constant.RegExpression;
-import com.becon.opencelium.backend.enums.PageParam;
+import com.becon.opencelium.backend.enums.RelationalOperator;
 import com.becon.opencelium.backend.enums.execution.DataType;
 import com.becon.opencelium.backend.execution.ExecutionManager;
+import com.becon.opencelium.backend.reference.ReferenceParser;
+import com.becon.opencelium.backend.reference.enums.ExchangeType;
+import com.becon.opencelium.backend.reference.model.DirectReference;
+import com.becon.opencelium.backend.reference.model.EnhancementReference;
+import com.becon.opencelium.backend.reference.model.PageReference;
+import com.becon.opencelium.backend.reference.model.Reference;
+import com.becon.opencelium.backend.reference.model.RequestDataReference;
+import com.becon.opencelium.backend.reference.model.WebhookReference;
+import com.becon.opencelium.backend.reference.model.WrappedDirectReference;
 import com.becon.opencelium.backend.resource.execution.ResponseEx;
-import com.becon.opencelium.backend.utility.ReferenceUtility;
 import com.becon.opencelium.backend.utility.MediaTypeUtility;
+import com.becon.opencelium.backend.reference.utility.ReferenceUtility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
+import jakarta.annotation.Nullable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 import org.w3c.dom.Document;
@@ -26,7 +36,6 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -35,18 +44,11 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
-import static com.becon.opencelium.backend.constant.RegExpression.directRef;
-import static com.becon.opencelium.backend.constant.RegExpression.enhancement;
-import static com.becon.opencelium.backend.constant.RegExpression.pageRef;
-import static com.becon.opencelium.backend.constant.RegExpression.requestData;
-import static com.becon.opencelium.backend.constant.RegExpression.webhook;
-import static com.becon.opencelium.backend.constant.RegExpression.wrappedDirectRef;
-import static com.becon.opencelium.backend.enums.execution.DataType.UNDEFINED;
-import static com.becon.opencelium.backend.utility.ReferenceUtility.ARRAY_LETTER_INDEX;
-import static com.becon.opencelium.backend.utility.ReferenceUtility.IS_FOR_IN_KEY_TYPE;
-import static com.becon.opencelium.backend.utility.ReferenceUtility.IS_FOR_IN_VALUE_TYPE;
-import static com.becon.opencelium.backend.utility.ReferenceUtility.IS_SPLIT_STRING_TYPE;
+import static com.becon.opencelium.backend.utility.Comparators.NUMERIC_PARTS;
+import static com.becon.opencelium.backend.reference.utility.ReferenceUtility.ARRAY_LETTER_INDEX;
+import static com.becon.opencelium.backend.reference.utility.ReferenceUtility.IS_FOR_IN_KEY_TYPE;
+import static com.becon.opencelium.backend.reference.utility.ReferenceUtility.IS_FOR_IN_VALUE_TYPE;
+import static com.becon.opencelium.backend.reference.utility.ReferenceUtility.IS_SPLIT_STRING_TYPE;
 
 public class ReferenceExtractor implements Extractor {
     private final ExecutionManager executionManager;
@@ -55,98 +57,70 @@ public class ReferenceExtractor implements Extractor {
         this.executionManager = executionManager;
     }
 
+    /**
+     * Resolves a single reference expression.
+     *
+     * <ul>
+     *   <li>{@code null} input → {@code null}</li>
+     *   <li>Valid reference → resolved value</li>
+     *   <li>Non-reference input → {@link IllegalArgumentException}</li>
+     * </ul>
+     *
+     * <p>This method is on a hot path. Parsing and dispatch are optimized
+     * to avoid unnecessary allocations and exceptions.
+     */
     @Override
-    public Object extractValue(String ref) {
-        Object result = null;
+    public Object extractValue(@Nullable String rawReference) {
+        if (rawReference == null) {
+            return null;
+        }
 
         try {
-            if (ref.matches(directRef) || ref.matches(wrappedDirectRef)) {
-                // remove wrapper if necessary = {%ref%}
-                // CASE 1: collect all data from Operation:
-                //'#ababab.(response).[*]'
-                //'#ababab.(response).[*].status'
-                //'#ababab.(response).[*].header'
-                //'#ababab.(response).[*].body'
-
-                // CASE 2: return 'status' code of Operation
-                //'#ababab.(response).status',
-
-                // CASE 3: return 'header' of Operation
-                //'#ababab.(response).header.$.Content-Type',
-                //'#ababab.(request).header.$.Content-Type',
-
-                // CASE 4: return targeted field of 'HttpEntity.body'
-                //'#ababab.(response).body.$.field[*]',
-                //'{%#ababab.(request).body.$.field[*]%}',
-                //'#ababab.(response).body.$.field1.['field2_with_special_symbol'].field3',
-                //'#ababab.(response).body.$.[*]',
-                //'#ababab.(request).body.$.[*]',
-
-                ref = ReferenceUtility.extractDirectRef(ref);
-
-                result = extractFromOperation(ref);
-            } else if (ref.matches(enhancement)) {
-                // '#{%bindId%}'
-                String bindId = ref.replace("#{%", "").replace("%}", "");
-
-                result = executionManager.executeScript(bindId);
-            } else if (ref.matches(webhook)) {
-                // '${key}'
-                // '${key:type}'
-                // '${key.field[*]}'
-                // '${key.field[*]:type}'
-                result = extractFromWebhook(ref);
-            } else if (ref.matches(pageRef)) {
-                // '@{limit}'
-                // '@{size}'
-                String param = ref.replace("@{", "").replace("}", "");
-
-                result = executionManager.getPaginationParamValue(PageParam.fromString(param));
-            } else if (ref.matches(requestData)) {
-                // '{key}'
-                // '{#ctorId.key}'
-                String refValue = ref.replace("{", "").replace("}", "");
-
-                // set id of required connector if exists
-                Integer ctorId = null;
-                if (refValue.startsWith("#")) {
-                    ctorId = Integer.valueOf(refValue.substring(1, refValue.indexOf(".")));
-                    refValue = refValue.substring(refValue.indexOf(".") + 1);
-                }
-
-                result = executionManager.getRequestData(ctorId).getOrDefault(refValue, ref);
-            }
-            return result;
-
+            return doExtract(rawReference);
         } catch (Exception e) {
-            throw new RuntimeException("Error while extracting value from Reference = %s. %s".formatted(ref, e.getMessage()), e);
+            throw new RuntimeException("Failed to resolve reference = %s. Reason = %s".formatted(rawReference, e.getMessage()), e);
         }
     }
 
-    private Object extractFromWebhook(String ref) {
+
+    private Object doExtract(String rawReference) {
+        Reference reference = ReferenceParser.parse(rawReference);
+
+        return switch (reference.getType()) {
+            case DIRECT -> extractFromOperation((DirectReference) reference);
+
+            case WRAPPED_DIRECT -> {
+                WrappedDirectReference wdr = (WrappedDirectReference) reference;
+                yield extractFromOperation(wdr.getDirectReference());
+            }
+
+            case ENHANCEMENT -> executionManager.executeScript(
+                    ((EnhancementReference) reference).getBindId()
+            );
+
+            case WEBHOOK -> extractFromWebhook((WebhookReference) reference);
+
+            case PAGE -> executionManager.getPaginationParamValue(
+                    ((PageReference) reference).getPageParam()
+            );
+
+            case REQUEST_DATA -> {
+                RequestDataReference rdr = (RequestDataReference) reference;
+                yield executionManager
+                        .getRequestData(rdr.getCtorId())
+                        .getOrDefault(rdr.getKey(), rdr.getRaw());
+            }
+        };
+    }
+
+    private Object extractFromWebhook(WebhookReference ref) {
         Map<String, Object> webhookVars = executionManager.getWebhookVars();
         if (webhookVars == null || webhookVars.isEmpty()) {
             return null;
         }
 
-        // get requiredType if specified, then update reference
-        DataType type = UNDEFINED;
-        if (ref.contains(":")) {
-            type = DataType.fromString(ref.split(":")[1].replace("}", ""));
-
-            ref = ref.split(":")[0].concat("}");
-        }
-
-        Object value = null;
-        Pattern pattern = Pattern.compile(webhook);
-        Matcher matcher = pattern.matcher(ref);
-
-        if (matcher.find()) {
-            String paths = matcher.group().replace("${", "").replace("}", "");
-            value = getFromJSON(webhookVars, paths);
-        }
-
-        return mapToType(value, type);
+        Object value = getFromJSON(webhookVars, ref.getPath());
+        return mapToType(value, ref.getDataType());
     }
 
     private Object mapToType(Object value, DataType type) {
@@ -174,45 +148,46 @@ public class ReferenceExtractor implements Extractor {
         };
     }
 
-    private Object extractFromOperation(String ref) {
+    private Object extractFromOperation(DirectReference ref) {
         // find operation by color
-        String color = ref.substring(0, 7);
+        Operation operation = executionManager.findOperationByColor(ref.getColor())
+                .orElseThrow(() -> new RuntimeException("There is no Operation with '" + ref.getColor() + "'"));
 
-        Operation operation = executionManager.findOperationByColor(color)
-                .orElseThrow(() -> new RuntimeException("There is no Operation with '" + color + "'"));
+        final String path = ref.getPath();
 
-        // CASE 1:
-        // 'ref' always starts with '#colour.(response).[*]',
-        // and '#colour' and '(response)' are used in this order in all cases,
-        // so we can directly target '[*]' to check if 'ref' is in CASE 1:
-        if ("[*]".equals(ref.substring(19, 22))) {
-            if (ref.length() == 22) {
-                TreeMap<String, ResponseEx> responses = new TreeMap<>(getComparator());
+        // CASE 1: collect all data from Operation, there are 4 sub-cases
+        //   CASE 1.1: '#ababab.(response).[*]'
+        //   CASE 1.2: '#ababab.(response).[*].status'
+        //   CASE 1.3: '#ababab.(response).[*].header'
+        //   CASE 1.4: '#ababab.(response).[*].body'
+
+        if (ref.getPart() == DirectReference.Part.ALL) {
+            if (path == null) { // CASE 1.1
+                TreeMap<String, ResponseEx> responses = new TreeMap<>(NUMERIC_PARTS);
                 operation.getResponses().forEach((K, V) -> responses.put(K, ResponseEx.of(V)));
 
                 return responses;
             }
 
-            // collect only specified response part
-            String part = ref.substring(23); // can be in ['header', 'status', 'body']
-            if (part.equals("status")) {
-                TreeMap<String, Integer> statuses = new TreeMap<>(getComparator());
+            // collect only specified response part, can be in ['header', 'status', 'body']
+            if ("status".equals(path)) { // CASE 1.2
+                TreeMap<String, Integer> statuses = new TreeMap<>(NUMERIC_PARTS);
 
                 operation.getResponses().forEach((K, V) -> statuses.put(K, V.getStatusCode().value()));
 
                 return statuses;
             }
 
-            if (part.equals("header")) {
-                TreeMap<String, Map<String, List<String>>> headers = new TreeMap<>(getComparator());
+            if ("header".equals(path)) { // CASE 1.3
+                TreeMap<String, Map<String, List<String>>> headers = new TreeMap<>(NUMERIC_PARTS);
 
                 operation.getResponses().forEach((K, V) -> headers.put(K, V.getHeaders()));
 
                 return headers;
             }
 
-            if (part.equals("body")) {
-                TreeMap<String, Object> bodies = new TreeMap<>(getComparator());
+            if ("body".equals(path)) { // CASE 1.4
+                TreeMap<String, Object> bodies = new TreeMap<>(NUMERIC_PARTS);
 
                 operation.getResponses().forEach((K, V) -> bodies.put(K, V.getBody()));
 
@@ -223,35 +198,31 @@ public class ReferenceExtractor implements Extractor {
         // at this point we work on a specific HttpEntity (Response or Request)
         String key = executionManager.generateKey(operation.getLoopDepth());
 
-        // CASE 2:
-        // only ResponseEntity can have status
-        // so 'ref' is always in form '#colour.(response).status',
-        // so we can directly target 'status' to check if 'ref' is in CASE 2:
-        if ("status".equals(ref.substring(19, 25))) {
+        // CASE 2: '#ababab.(response).status'         - return 'status' code of ResponseEntity
+        if (ref.getPart() == DirectReference.Part.STATUS) {
             return operation.getResponses().get(key).getStatusCode().value();
         }
 
-        String exchangeType = ReferenceUtility.extractExchangeType(ref);
-        String path = ref.substring(ref.indexOf('$') + 2); // remove operation info
-        HttpEntity<?> entity;
-        String part;
-
-        if (exchangeType.equals("response")) {
+        final HttpEntity<?> entity;
+        if (ref.getExchangeType() == ExchangeType.RESPONSE) {
             entity = operation.getResponses().get(key);
-            part = ref.substring(19, ref.indexOf('$') - 1);
         } else {
             entity = operation.getRequests().get(key);
-            part = ref.substring(18, ref.indexOf('$') - 1);
         }
 
-        // CASE 3:
-        //'#ababab.(response).header.$.Content-Type',
-        //'#ababab.(request).header.$.Content-Type',
-        if ("header".equals(part)) {
+        // CASE 3: return 'header' value of HttpEntity
+        // ex.1) '#ababab.(response).header.$.Content-Type',
+        // ex.2) '#ababab.(request).header.$.Content-Type',
+        if (ref.getPart() == DirectReference.Part.HEADER) {
             return entity.getHeaders().get(path);
         }
 
-        // CASE 4:
+        // CASE 4: has 4 sub-cases
+        //   CASE 4.1: FOR_IN operator
+        //   CASE 4.2: SPLIT_STRING operator
+        //   CASE 4.3: FOR operator
+        //   CASE 4.4: regular json path
+        // We can also mix several of these cases
         Object body = entity.getBody();
         MediaType mediaType = entity.getHeaders().getContentType();
 
@@ -278,11 +249,9 @@ public class ReferenceExtractor implements Extractor {
 
     private Object getFromJSON(Object body, String paths) {
         Object result = body;
-        int partCount = 0;
 
-        // creating json path query
+        // recursively read json
         for (String path : ReferenceUtility.splitPaths(paths)) {
-            partCount++;
             if (path.isEmpty()) {
                 continue;
             }
@@ -293,43 +262,38 @@ public class ReferenceExtractor implements Extractor {
             Pattern pattern;
             Matcher matcher;
 
-            // CASE 1: FOR_IN operator
-            // CASE 1.1: index types for KEY(s), there are 3 types:
-            // 1) obj['i']~            - field name on ith index (indexing starts from 0)
-            // 3) obj['*']~            - all field names
-            // 4) obj['field_name']~   - field_name by this fields' name
+            // CASE 4.1: FOR_IN operator, there are 2 sub-cases
+            //   CASE 4.1.1: index types for KEY(s), there are 3 sub-cases:
+            //     CASE 4.1.1.1: obj['i']~            - field name on ith index (indexing starts from 0)
+            //     CASE 4.1.1.2: obj['*']~            - all field names
+            //     CASE 4.1.1.3: obj['field_name']~   - field_name itself
 
             pattern = Pattern.compile(IS_FOR_IN_KEY_TYPE);
             matcher = pattern.matcher(path);
 
-            if (matcher.find()) {
-                // 'field name' is a primitive type value so path will not continue further
-                // thus just return required value(s)
-
+            if (matcher.find()) { // FOR_IN for KEY(s) always comes last in path so after finding result just return
                 String match = matcher.group(1);
 
-                if (Loop.isIterator(match)) {
-                    // case 1.1.1: obj['i']~
-                    // find loop by its iterator
+                if (Loop.isIterator(match)) { // CASE 4.1.1.1
+                    // find loop by iterator, loop stores current value of the iterator
                     Loop loop = getLoopByIterator(match);
 
-                    // return iterators' current value from loop
                     return loop.getValue();
-                } else if ("*".equals(match)) {
-                    // case 1.1.2: obj['*']~
-                    // return all field names of the current object
-                    Object currentBody = getFromJSON(body, ReferenceUtility.getPointerToBody(paths, partCount, matcher.group(0)));
-                    return getFieldNames(currentBody);
-                } else {
-                    // case 1.1.3: obj['field_name']~
-                    // return just match itself
-                    return match;
                 }
+
+                if ("*".equals(match)) { // CASE 4.1.1.2
+                    String pathToCurrentObject = path.replace(matcher.group(0), ""); // just remove FOR_IN operators (comes always last)
+                    Object currentObject = getFromJSON(result, pathToCurrentObject); // path might contain other operators, so continue calling method on result
+
+                    return getFieldNames(currentObject);
+                }
+
+                return match; // CASE 4.1.1.3
             }
 
-            // CASE 1.2: index types for VALUE(s), there are 2 types:
-            // 1) obj['i']             - value of the field on ith index (indexing starts from 0)
-            // 2) obj['field_name']    - value of the field by its name
+            // CASE 4.1.2: index types for VALUE(s), there are 2 sub-cases:
+            //   CASE 4.1.2.1: obj['i']             - value of the field on ith index (indexing starts from 0)
+            //   CASE 4.1.2.2: obj['field_name']    - value of the field by its name
 
             pattern = Pattern.compile(IS_FOR_IN_VALUE_TYPE);
             matcher = pattern.matcher(path);
@@ -338,81 +302,75 @@ public class ReferenceExtractor implements Extractor {
                 String match = matcher.group(1);
                 String fieldName;
 
-                if (Loop.isIterator(match)) {
-                    // case 1.2.1: obj['i']
-                    // find loop by its iterator
+                if (Loop.isIterator(match)) { // CASE 4.1.2.1
+                    // find loop by iterator, loop stores current value of the iterator
                     Loop loop = getLoopByIterator(match);
 
-                    // get current fields' name from loop
                     fieldName = loop.getValue();
-                } else {
-                    // case 1.2.2: obj['field_name']
+                } else { // CASE 4.1.2.2
                     fieldName = match;
                 }
 
+                // FOR_IN type for VALUE(s) is supported by library so just build the correct path
+                // it will be resolved in CASE 4.4
                 path = path.replace("['" + match + "']", "['" + fieldName + "']");
             }
 
-            // CASE 2: SPLIT STRING operator, there are 3 cases
-            // 1) field[i]~            - string on the ith index (indexing starts from 0)
-            // 2) field[*]~            - all strings (after splitting)
-            // 3) field[2]~            - string on the 2nd index (indexing starts from 0)
+            // CASE 4.2: SPLIT_STRING operator, there are 3 sub-cases
+            //   CASE 4.2.1: field[i]~                  - string on the ith index (indexing starts from 0)
+            //   CASE 4.2.2: field[*]~                  - all strings (after splitting)
+            //   CASE 4.2.3: field[2]~                  - string on the 2nd index (indexing starts from 0)
 
             pattern = Pattern.compile(IS_SPLIT_STRING_TYPE);
             matcher = pattern.matcher(path);
 
-            while (matcher.find()) {
+            if (matcher.find()) { // SPLIT_STRING always comes last in path so after finding result just return
                 String match = matcher.group(1);
 
-                if (Loop.isIterator(match)) {
-                    // case 2.1: field[i]~
-                    // find loop by its iterator
+                if (Loop.isIterator(match)) { // CASE 4.2.1
+                    // find loop by iterator, loop stores current value of the iterator
                     Loop loop = getLoopByIterator(match);
 
-                    // it is a primitive value so just return iterators' current value from loop
                     return loop.getValue();
-                } else if ("*".equals(match)) {
-                    // case 2.3: field[*]~
-                    // find loop by reference
-                    Loop loop = getLoopByReference(paths);
-
-                    // recreate list of strings split by delimiter
-                    List<String> strs = new ArrayList<>();
-                    Collections.addAll(strs, ((String) result).split(loop.getDelimiter()));
-
-                    result = strs;
-                } else {
-                    // case 2.2: field[2]~
-                    int index;
-                    try {
-                        index = Integer.parseInt(match);
-                    } catch (Exception e) {
-                        throw new RuntimeException("Wrong index is supplied to a SPLIT STRING operator, 'index' = " + match);
-                    }
-
-                    // find loop by reference
-                    Loop loop = getLoopByReference(paths);
-
-                    // it is a primitive value just return string on the specified index
-                    return ((String) result).split(loop.getDelimiter())[index];
                 }
+
+                // find loop to get delimiter
+                // NOTE. There will not be more than one loop for SPLIT_STRING
+                Loop loop = getSplitStringLoop();
+
+                String pathToCurrentString = path.replace(matcher.group(0), ""); // just remove SPLIT_STRING operators (comes always last)
+                Object currentString = getFromJSON(result, pathToCurrentString); // path might contain other operators, so continue calling method on result
+
+                if ("*".equals(match)) { // CASE 4.2.2
+                    return Arrays.asList(((String) currentString).split(loop.getDelimiter()));
+                }
+
+                // CASE 4.2.3
+                int index;
+                try {
+                    index = Integer.parseInt(match);
+                } catch (Exception e) {
+                    throw new RuntimeException("Non-integer index in SPLIT STRING, operator = " + matcher.group(0));
+                }
+
+                return ((String) currentString).split(loop.getDelimiter())[index];
             }
 
-            // CASE 3: FOR operator, there are 3 cases (2 of them is dealt automatically)
-            // 1) array[i]~            - value on the ith index (indexing starts from 0)
-            // 2) array[3]~            - value on the 3rd index (indexing starts from 0) (DONE by library)
-            // 3) array[*]~            - all values (DONE by library)
+            // CASE 4.3: FOR operator, there are 3 cases (2 of them is handled in CASE 4.4)
+            //   CASE 4.3.1: array[i]                   - value on the ith index (indexing starts from 0)
+            //   CASE 4.3.2: array[3]                   - value on the 3rd index (indexing starts from 0) (handled in CASE 4.4)
+            //   CASE 4.3.3: array[*]                   - all values (handled in CASE 4.4)
 
             pattern = Pattern.compile(ARRAY_LETTER_INDEX);
             matcher = pattern.matcher(path);
 
-            while (matcher.find()) {
+            while (matcher.find()) { // CASE 4.3.1
                 String iterator = matcher.group(1);
 
-                // find loop by its iterator
+                // find loop by iterator, loop stores current value of the iterator
                 Loop loop = getLoopByIterator(iterator);
 
-                // replace iterator with its current number value
+                // just build the correct path it will be resolved by library
                 path = path.replace("[" + iterator + "]", "[" + loop.getValue() + "]");
             }
 
@@ -505,9 +463,9 @@ public class ReferenceExtractor implements Extractor {
                 .findFirst().orElseThrow(() -> new RuntimeException("Wrong 'iterator' value is supplied"));
     }
 
-    private Loop getLoopByReference(String reference) {
+    private Loop getSplitStringLoop() {
         return executionManager.getLoops().stream()
-                .filter(loop -> ReferenceUtility.equals(loop.getRef(), reference))
+                .filter(loop -> loop.getOperator() == RelationalOperator.SPLIT_STRING)
                 .findFirst().orElseThrow(() -> new RuntimeException("Wrong 'reference' value is supplied"));
     }
 
@@ -527,24 +485,5 @@ public class ReferenceExtractor implements Extractor {
         }
 
         return result;
-    }
-
-    private static Comparator<String> getComparator() {
-        return (String idx1, String idx2) -> {
-            String[] arr1 = idx1.split(", ");
-            String[] arr2 = idx2.split(", ");
-
-            for (int i = 0; i < arr1.length && i < arr2.length; i++) {
-                // skip equal elements until there is a difference found
-                if (Objects.equals(arr1[i], arr2[i])) continue;
-
-                // if there is an unequal elements then return their difference
-                return Integer.parseInt(arr1[i]) - Integer.parseInt(arr2[i]);
-            }
-
-            // at this point one array contains the other one
-            // so array with greater length is greater
-            return arr1.length - arr2.length;
-        };
     }
 }
