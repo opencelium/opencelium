@@ -94,6 +94,11 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
         return connectionMngRepository.deleteByConnectionIdIn(chunk);
     }
 
+    @Override
+    public void deleteAllByConnectionId(Long id) {
+        connectionMngRepository.deleteAllByConnectionId(id);
+    }
+
     private void populateWithIds(ConnectionMng connectionMng) {
         populateWithIds(connectionMng, false);
     }

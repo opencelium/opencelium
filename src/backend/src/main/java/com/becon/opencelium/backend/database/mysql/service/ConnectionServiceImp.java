@@ -29,6 +29,7 @@ import com.becon.opencelium.backend.database.mysql.repository.ConnectionReposito
 import com.becon.opencelium.backend.database.mysql.repository.MaskingRuleRepository;
 import com.becon.opencelium.backend.enums.Action;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
+import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
@@ -50,6 +51,7 @@ import net.minidev.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -248,20 +250,12 @@ public class ConnectionServiceImp implements ConnectionService {
     @Transactional
     public void deleteById(Long id) {
         Connection connection = getById(id);
+
         deleteSchedules(connection);
-        ConnectionMng deleted;
-        try {
-            deleted = connectionMngService.delete(connection.getSnapshotId());
-        } catch (Exception e) {
-            connectionRepository.deleteById(id);
-            return;
-        }
-        try {
-            connectionRepository.deleteById(id);
-        } catch (Exception e) {
-            connectionMngService.save(deleted);
-            throw e;
-        }
+
+        connectionRepository.deleteById(id);
+
+        connectionMngService.deleteAllByConnectionId(connection.getId());
     }
 
     @Override
@@ -277,21 +271,14 @@ public class ConnectionServiceImp implements ConnectionService {
     @Transactional
     public void deleteAndTrackIt(Long id) {
         Connection connection = getById(id);
+
         deleteSchedules(connection);
-        ConnectionMng deleted;
-        try {
-            deleted = connectionMngService.delete(connection.getSnapshotId());
-        } catch (Exception e) {
-            connectionRepository.deleteById(id);
-            return;
-        }
-        try {
-            connectionRepository.deleteById(id);
-            connectionHistoryService.makeHistoryAndSave(connection, null, Action.DELETE);
-        } catch (Exception e) {
-            connectionMngService.save(deleted);
-            throw e;
-        }
+
+        connectionRepository.deleteById(id);
+
+        connectionMngService.deleteAllByConnectionId(connection.getId());
+
+        connectionHistoryService.makeHistoryAndSave(connection, null, Action.DELETE);
     }
 
     @Override
@@ -518,6 +505,8 @@ public class ConnectionServiceImp implements ConnectionService {
                 }
 
                 try {
+                    connectionMng.setCreatedBy(connection.getCreatedBy());
+
                     connectionMngEntityUpdater.updateToCurrentVersion(connectionMng)
                             .ifChangedOrElseIfUpdated(
                                     connectionMngService::updateWithoutBinding, // if any field is updated
@@ -576,9 +565,22 @@ public class ConnectionServiceImp implements ConnectionService {
                     versionedDTO.setConnectionId(connection.getId());
                     versionedDTO.setTitle(connection.getTitle());
                     versionedDTO.setSnapshotId(x.getId());
-                    versionedDTO.setCreatedAt(x.getCreatedAt().toEpochMilli());
+                    versionedDTO.setCreatedAt(x.getCreatedAt() != null ? x.getCreatedAt().toEpochMilli() : null);
+                    versionedDTO.setCurrent(Objects.equals(connection.getSnapshotId(), x.getId()));
+                    versionedDTO.setAuthor(x.getCreatedBy());
                     return versionedDTO;
                 }).toList();
+    }
+
+    @Override
+    public void deleteSnapshot(Long connectionId, String snapshotId) {
+        Connection connection = getById(connectionId);
+
+        if (Objects.equals(connection.getSnapshotId(), snapshotId)) {
+            throw new GeneralServiceException(ExceptionConstant.INVALID_DATA, ExceptionMessages.CANT_REMOVE_LAST_VERSION_CONNECTION);
+        }
+
+        connectionMngService.delete(snapshotId);
     }
 
     /**

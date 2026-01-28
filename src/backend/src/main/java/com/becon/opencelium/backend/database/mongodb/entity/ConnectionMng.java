@@ -16,8 +16,10 @@
 
 package com.becon.opencelium.backend.database.mongodb.entity;
 
-import jakarta.persistence.PrePersist;
+import jakarta.persistence.EntityListeners;
+import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.*;
 
@@ -26,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 @Document(collection = "connection")
+@EntityListeners(AuditingEntityListener.class)
 public class ConnectionMng {
 
     private String version;
@@ -54,6 +57,9 @@ public class ConnectionMng {
 
     @CreatedDate
     private Instant createdAt;
+
+    @CreatedBy
+    private Integer createdBy;
 
     public ConnectionMng() {
     }
@@ -130,8 +136,11 @@ public class ConnectionMng {
         this.createdAt = createdAt;
     }
 
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = Instant.now();
+    public Integer getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(Integer createdBy) {
+        this.createdBy = createdBy;
     }
 }
