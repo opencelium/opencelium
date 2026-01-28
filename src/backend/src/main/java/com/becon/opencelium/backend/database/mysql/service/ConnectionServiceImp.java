@@ -548,7 +548,9 @@ public class ConnectionServiceImp implements ConnectionService {
         List<ConnectionMng> connections = connectionMngService.getAllByConnectionId(connection.getId());
 
         for (ConnectionMng connectionMng : connections) {
-            connectionMng.setCreatedBy(connection.getCreatedBy());
+            if (connectionMng.getCreatedBy() == null) {
+                connectionMng.setCreatedBy(connection.getCreatedBy());
+            }
             try {
                 connectionMngEntityUpdater.updateToCurrentVersion(connectionMng);
                 connectionMngService.save(connectionMng);
@@ -606,7 +608,7 @@ public class ConnectionServiceImp implements ConnectionService {
      * 1) find test connection ids in MariaDB
      * 2) delete Mongo docs referencing those ids
      * 3) delete MariaDB rows by ids
-     *
+     * <p>
      * Idempotent: can be run multiple times safely.
      */
     @Override
@@ -650,7 +652,8 @@ public class ConnectionServiceImp implements ConnectionService {
         return out;
     }
 
-    public record CleanupResult(int candidateSqlIds, long mongoDeleted, int sqlDeleted) {}
+    public record CleanupResult(int candidateSqlIds, long mongoDeleted, int sqlDeleted) {
+    }
 
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
     // private methods
