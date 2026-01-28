@@ -3,20 +3,19 @@ package com.becon.opencelium.backend.ocel.postfix;
 import com.becon.opencelium.backend.execution.logger.OcLogger;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.masking.MaskingService;
-import com.becon.opencelium.backend.ocel.ast.*;
 import com.becon.opencelium.backend.ocel.exception.*;
 import com.becon.opencelium.backend.ocel.function.FunctionFactory;
 import com.becon.opencelium.backend.ocel.operator.Arity;
 import com.becon.opencelium.backend.ocel.Evaluator;
 import com.becon.opencelium.backend.ocel.operator.Operator;
-import com.becon.opencelium.backend.ocel.operator.OperatorUtils;
 import com.becon.opencelium.backend.ocel.token.Token;
 import com.becon.opencelium.backend.ocel.token.TokenType;
+import com.becon.opencelium.backend.ocel.utils.OperatorUtils;
 
 import java.util.*;
 import java.util.function.Function;
 
-public class PostfixEvaluator implements Evaluator {
+class PostfixEvaluator implements Evaluator {
 
     private static final PostfixEvaluator INSTANCE = new PostfixEvaluator();
 

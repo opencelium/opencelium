@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.ocel.operator;
 
-import com.becon.opencelium.backend.ocel.common.Component;
+import com.becon.opencelium.backend.ocel.Component;
 import com.becon.opencelium.backend.ocel.exception.ApplyOperatorException;
 
 public interface Operator extends Component {

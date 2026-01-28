@@ -1,6 +1,6 @@
-package com.becon.opencelium.backend.ocel.common;
+package com.becon.opencelium.backend.ocel.operator;
 
-public class Dummy {
+class Dummy {
     private static final Dummy DUMMY = new Dummy();
 
     private Dummy() {

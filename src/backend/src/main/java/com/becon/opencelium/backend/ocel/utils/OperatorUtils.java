@@ -1,6 +1,9 @@
-package com.becon.opencelium.backend.ocel.operator;
+package com.becon.opencelium.backend.ocel.utils;
 
-import com.becon.opencelium.backend.ocel.utils.Utils;
+import com.becon.opencelium.backend.ocel.operator.Arity;
+import com.becon.opencelium.backend.ocel.operator.Operator;
+import com.becon.opencelium.backend.ocel.operator.OperatorEnum;
+import com.becon.opencelium.backend.ocel.operator.operators.OperatorFactory;
 
 import java.util.Arrays;
 

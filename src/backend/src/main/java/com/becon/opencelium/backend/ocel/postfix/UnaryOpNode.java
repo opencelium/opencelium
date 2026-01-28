@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.ocel.ast;
+package com.becon.opencelium.backend.ocel.postfix;
 
 import com.becon.opencelium.backend.execution.logger.OcLogger;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
@@ -10,7 +10,7 @@ import com.becon.opencelium.backend.ocel.operator.Operator;
 
 import java.util.function.Function;
 
-public class UnaryOpNode implements ASTNode {
+class UnaryOpNode implements ASTNode {
     private final Operator operator;
     private final ASTNode operand;
 

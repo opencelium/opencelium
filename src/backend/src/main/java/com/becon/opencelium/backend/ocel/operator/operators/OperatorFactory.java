@@ -1,6 +1,7 @@
-package com.becon.opencelium.backend.ocel.operator;
+package com.becon.opencelium.backend.ocel.operator.operators;
 
-import com.becon.opencelium.backend.ocel.operator.operators.*;
+import com.becon.opencelium.backend.ocel.operator.Operator;
+import com.becon.opencelium.backend.ocel.operator.OperatorEnum;
 
 public class OperatorFactory {
 

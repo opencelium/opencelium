@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class PropertyExists implements BinaryOperator {
+class PropertyExists implements BinaryOperator {
     @Override
     public Object apply(Object o1, Object o2) throws ApplyOperatorException {
         if (o1 instanceof Set<?> set) {
