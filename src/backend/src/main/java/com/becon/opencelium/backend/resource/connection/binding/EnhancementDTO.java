@@ -16,7 +16,6 @@
 
 package com.becon.opencelium.backend.resource.connection.binding;
 
-import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
 import jakarta.annotation.Resource;
 
 
@@ -32,14 +31,6 @@ public class EnhancementDTO {
     public EnhancementDTO() {
     }
 
-    public EnhancementDTO(Enhancement enhancement) {
-        this.title = enhancement.getTitle();
-        this.description = enhancement.getDescription();
-        this.script = enhancement.getScript();
-        this.args = enhancement.getArgs();
-        this.simpleCode = null;
-        this.language = enhancement.getLanguage();
-    }
     public String getTitle() {
         return title;
     }

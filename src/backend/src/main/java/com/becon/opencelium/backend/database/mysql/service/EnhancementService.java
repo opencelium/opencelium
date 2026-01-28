@@ -16,27 +16,12 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
-import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
 import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
-import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
-import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface EnhancementService {
-    Enhancement save(Enhancement enhancement);
-    List<Enhancement> saveAll(List<Enhancement> enhancement);
-    List<Enhancement> findAllByConnectionId(Long connectionId);
-    void deleteAllByConnectionId(Long connectionId);
-    Enhancement getById(Integer id);
     Optional<Enhancement> findById(Integer enhId);
-    void deleteAll(List<Integer> ids);
-    FieldBindingMng toFieldBinding(Enhancement enhancement);
-
-    boolean existById(Integer id);
-
-    void deleteById(Integer id);
 
     void deleteAll();
 }

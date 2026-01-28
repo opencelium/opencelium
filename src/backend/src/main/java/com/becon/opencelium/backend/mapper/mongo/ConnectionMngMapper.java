@@ -23,8 +23,8 @@ public interface ConnectionMngMapper extends Mapper<ConnectionMng, ConnectionDTO
     @Mappings({
             @Mapping(target = "toConnector", qualifiedByName = {"connectorMngMapper", "toEntity"}),
             @Mapping(target = "fromConnector", qualifiedByName = {"connectorMngMapper", "toEntity"}),
-            @Mapping(target = "fieldBindings", source = "fieldBinding", qualifiedByName = {"fieldBindingMngMapper", "toEntityAll"})
-
+            @Mapping(target = "fieldBindings", source = "fieldBinding", qualifiedByName = {"fieldBindingMngMapper", "toEntityAll"}),
+            @Mapping(target = "connectionId", ignore = true)
     })
     ConnectionMng toEntity(ConnectionDTO connectorDTO);
 
