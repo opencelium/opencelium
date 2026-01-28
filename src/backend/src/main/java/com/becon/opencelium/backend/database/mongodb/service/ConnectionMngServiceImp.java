@@ -7,20 +7,13 @@ import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
 import com.becon.opencelium.backend.database.mongodb.entity.OperatorMng;
 import com.becon.opencelium.backend.database.mongodb.entity.*;
 import com.becon.opencelium.backend.database.mongodb.repository.ConnectionMngRepository;
-import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
-import com.becon.opencelium.backend.database.mysql.service.EnhancementService;
-import com.becon.opencelium.backend.exception.ConnectionValidationException;
-import com.becon.opencelium.backend.mapper.base.Mapper;
-import com.becon.opencelium.backend.mapper.base.MapperUpdatable;
-import com.becon.opencelium.backend.resource.PatchConnectionDetails;
-import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
-import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class ConnectionMngServiceImp implements ConnectionMngService {
@@ -65,17 +58,6 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     }
 
     @Override
-    public void updateWithoutBinding(ConnectionMng connectionMng) {
-        if (Objects.isNull(connectionMng)) return;
-
-        if (Objects.isNull(connectionMng.getId()) || !connectionMngRepository.existsById(connectionMng.getId())) {
-            throw new RuntimeException("CONNECTION_NOT_FOUND");
-        }
-
-        connectionMngRepository.save(connectionMng);
-    }
-
-    @Override
     public ConnectionMng delete(String id) {
         ConnectionMng connectionMng = getById(id);
         connectionMngRepository.delete(connectionMng);
@@ -106,6 +88,11 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     @Override
     public void deleteAllByConnectionId(Long id) {
         connectionMngRepository.deleteAllByConnectionId(id);
+    }
+
+    @Override
+    public Optional<ConnectionMng> getLastVersion(Long id) {
+        return connectionMngRepository.findFirstByConnectionIdOrderByCreatedAtDesc(id);
     }
 
     private void populateWithIds(ConnectionMng connectionMng) {

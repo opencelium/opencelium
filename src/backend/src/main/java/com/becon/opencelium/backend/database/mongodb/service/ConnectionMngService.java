@@ -3,14 +3,13 @@ package com.becon.opencelium.backend.database.mongodb.service;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ConnectionMngService {
     ConnectionMng save(ConnectionMng connectionMng);
     ConnectionMng create(ConnectionMng connectionMng);
     List<ConnectionMng> getAll();
     ConnectionMng delete(String id);
-
-    void updateWithoutBinding(ConnectionMng connectionMng);
 
     long count();
     ConnectionMng getById(String id);
@@ -20,4 +19,6 @@ public interface ConnectionMngService {
     long deleteByConnectionIdIn(List<Long> chunk);
 
     void deleteAllByConnectionId(Long id);
+
+    Optional<ConnectionMng> getLastVersion(Long id);
 }
