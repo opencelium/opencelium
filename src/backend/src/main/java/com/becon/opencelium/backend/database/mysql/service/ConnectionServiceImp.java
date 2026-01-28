@@ -553,9 +553,11 @@ public class ConnectionServiceImp implements ConnectionService {
             }
             try {
                 connectionMngEntityUpdater.updateToCurrentVersion(connectionMng);
+                connectionMng.setVersion(ocProps.getVersion());
                 connectionMngService.save(connectionMng);
+                log.info("Connection[id={}, snapshotId={}, name={}] successfully updated to {} version", connection.getId(), connectionMng.getId(), connection.getTitle(), connectionMng.getVersion());
             } catch (Exception e) {
-                log.error("Failed to update Connection[id={}, name={}]", connection.getId(), connection.getTitle(), e);
+                log.error("Failed to update Connection[id={}, snapshotId={}, name={}]", connection.getId(), connectionMng.getId(), connection.getTitle(), e);
             }
         }
     }
