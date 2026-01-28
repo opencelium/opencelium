@@ -36,6 +36,7 @@ const ActionsStyled = styled.div<ActionsStyledProps>`
         margin-right: 10px;
     }
     margin: 0 0 20px;
+    display: flex;
 `;
 
 const FormStyled = styled.div<FormStyledProps>`

@@ -45,6 +45,7 @@ import Webhook from "@root/classes/Webhook";
 import {jsonToString} from "@app_component/operator_builder/utils";
 import {OperatorType} from "@app_component/operator_builder/props";
 import Validation from "@application/classes/Validation";
+import DropdownActionButton from '@app_component/dropdown_action_button/DropdownActionButton';
 
 /**
  * common component to add and update Connection
@@ -634,7 +635,7 @@ export function ConnectionForm(type) {
                 } else{
                     contentTranslations.cancel_button = {title: t(`app:FORM.CANCEL`), link: this.redirectUrl};
                 }
-                contentTranslations.action_button = this.isView ? null : {title: t(`${this.translationKey}.${this.translationKey}_BUTTON`), link: this.redirectUrl};
+                // contentTranslations.action_button = this.isView ? null : {title: t(`${this.translationKey}.${this.translationKey}_BUTTON`), link: this.redirectUrl};
                 let categoryMenuItems;
                 let categorySelect;
                 if(this.isAdd){
@@ -684,58 +685,96 @@ export function ConnectionForm(type) {
                     if(this.isView || contents.length < 2){
                         return null;
                     }
-                    let button = null;
-                    if(this.isAdd){
-                        button = <Button icon={'add'} isLoading={this.isNavigatingToScheduler && (this.props[this.actionName] === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START)} title={t('ADD.ADD_BUTTON_AND_GO_TO_ADD_SCHEDULER')} onClick={() => this.doActionAndGoToAddScheduler(entity)} size={TextSize.Size_16}/>;
+
+                    const isBusy =
+                        (this.props[this.actionName] === API_REQUEST_STATE.START ||
+                        checkingConnectionTitle === API_REQUEST_STATE.START);
+
+                    const items = [];
+
+                    if (this.isAdd) {
+                        items.push(
+                        {
+                            id: 'add_close',
+                            label: 'Add & Close',
+                            onClick: () => this.doAction(entity),
+                            isLoading: !this.isNavigatingToScheduler && isBusy,
+                        },
+                        {
+                            id: 'add_go_add_scheduler',
+                            label: t('ADD.ADD_BUTTON_AND_GO_TO_ADD_SCHEDULER'),
+                            onClick: () => this.doActionAndGoToAddScheduler(entity),
+                            isLoading: this.isNavigatingToScheduler && isBusy,
+                        }
+                        );
                     }
-                    if(this.isUpdate){
-                        button = <Button icon={'autorenew'} isLoading={this.isNavigatingToScheduler && (this.props[this.actionName] === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START)} title={t('UPDATE.UPDATE_BUTTON_AND_GO_TO_SCHEDULER')} onClick={() => this.doActionAndGoToScheduler(entity)} size={TextSize.Size_16}/>;
+
+                    if (this.isUpdate) {
+                        items.push(
+                        {
+                            id: 'update_close',
+                            label: 'Update & Close',
+                            onClick: () => this.doAction(entity),
+                            isLoading: !this.isNavigatingToScheduler && isBusy,
+                        },
+                        {
+                            id: 'update_go_scheduler',
+                            label: t('UPDATE.UPDATE_BUTTON_AND_GO_TO_SCHEDULER'),
+                            onClick: () => this.doActionAndGoToScheduler(entity),
+                            isLoading: this.isNavigatingToScheduler && isBusy,
+                        }
+                        );
                     }
-                    const isDisabled = entity.fromConnector.methods.length === 0 && entity.fromConnector.operators.length === 0 && entity.toConnector.methods.length === 0 && entity.toConnector.operators.length === 0;
-                    return(
+
+                    const isDisabled =
+                        entity.fromConnector.methods.length === 0 &&
+                        entity.fromConnector.operators.length === 0 &&
+                        entity.toConnector.methods.length === 0 &&
+                        entity.toConnector.operators.length === 0;
+
+                    return (
                         <React.Fragment>
-                            {!this.isUpdate && <React.Fragment>
-                                {button}
-                            <div style={{float: 'left'}}>
+                        <div style={{ float: 'left', marginRight: 10 }}>
+                            <DropdownActionButton
+                                label={this.isAdd ? 'Add Connection' : 'Update Connection'}
+                                direction={'down'}
+                                isLoading={false}
+                                disabled={false}
+                                items={items}
+                            />
+                        </div>
+
+                        {!this.isUpdate && (
+                            <React.Fragment>
+                            <div style={{ float: 'left' }}>
                                 <AddTemplate
-                                    data={contents[2].inputs[1]}
-                                    entity={entity}
-                                    disabled={isDisabled}
-                                    buttonProps={{
-                                        size: TextSize.Size_16,
-                                        icon: 'add',
-                                        title: t(`${this.translationKey}.FORM.ADD_TEMPLATE`)
-                                    }}
+                                data={contents[2].inputs[1]}
+                                entity={entity}
+                                disabled={isDisabled}
+                                buttonProps={{
+                                    size: TextSize.Size_16,
+                                    icon: 'add',
+                                    title: t(`${this.translationKey}.FORM.ADD_TEMPLATE`)
+                                }}
                                 />
                             </div>
-                            <div style={{float: 'left'}}>
+
+                            <div style={{ float: 'left' }}>
                                 <DataAggregatorButton
-                                    readOnly={this.isView}
-                                    connection={entity}
-                                    updateConnection={(e) => {
-                                        updateEntity(e);
-                                        if(currentTechnicalItem){
-                                            const connector = currentTechnicalItem.connectorType === CONNECTOR_FROM ? e.fromConnector : e.toConnector;
-                                            const currentItem = connector.getSvgElementByIndex(currentTechnicalItem.entity.index);
-                                            setCurrentTechnicalItem(currentItem.getObject());
-                                        }
-                                    }}
+                                readOnly={this.isView}
+                                connection={entity}
+                                updateConnection={(e) => {
+                                    updateEntity(e);
+                                    if (currentTechnicalItem) {
+                                    const connector =
+                                        currentTechnicalItem.connectorType === CONNECTOR_FROM ? e.fromConnector : e.toConnector;
+                                    const currentItem = connector.getSvgElementByIndex(currentTechnicalItem.entity.index);
+                                    setCurrentTechnicalItem(currentItem.getObject());
+                                    }
+                                }}
                                 />
                             </div>
-                            {this.isUpdate &&
-                                <React.Fragment>
-                                    <div style={{float: 'left'}}>
-                                        <LoadTemplate
-                                            data={contents[1].inputs[1]}
-                                            entity={entity}
-                                            updateEntity={updateEntity}
-                                        />
-                                    </div>
-                                    <div style={{float: 'left'}}>
-                                        <SyncInvokers connection={entity} updateConnection={updateEntity} connectors={connectors}/>
-                                    </div>
-                                </React.Fragment>
-                            }
+
                             <Button
                                 key={'list_button'}
                                 label={'Cancel'}
@@ -743,10 +782,11 @@ export function ConnectionForm(type) {
                                 href={'/connections'}
                                 size={TextSize.Size_16}
                             />
-                            </React.Fragment>}
+                            </React.Fragment>
+                        )}
                         </React.Fragment>
                     );
-                }
+                };
                 return (
                     <Form
                         shouldScroll={this.isUpdate ? 'methods' : ''}
