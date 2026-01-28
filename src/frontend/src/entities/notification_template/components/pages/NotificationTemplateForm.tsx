@@ -37,6 +37,8 @@ import CAggregator from "@classes/content/connection/data_aggregator/CAggregator
 import { getAllTools } from "@entity/schedule/redux_toolkit/action_creators/ToolCreators";
 import Tool from "@entity/schedule/classes/Tool";
 import Validation from "@application/classes/Validation";
+import DropdownActionButton from '@app_component/dropdown_action_button/DropdownActionButton';
+
 
 
 const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
@@ -54,6 +56,7 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
     const dispatch = useAppDispatch();
     const didMount = useRef(false);
     let navigate = useNavigate();
+    const [shouldNavigateToSchedule, setShouldNavigateToSchedule] = useState(false);
     let urlParams = useParams();
     const bodyRef = React.useRef();
     const [markers, setMarkers] = useState([]);
@@ -109,13 +112,23 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
     }, [content.body, markers])
     useEffect(() => {
         if (didMount.current) {
-            if(error === null && (addingNotificationTemplate === API_REQUEST_STATE.FINISH || updatingNotificationTemplate === API_REQUEST_STATE.FINISH)){
-                navigate('/notification_templates', { replace: false });
+            const isFinish =
+                (isAdd && addingNotificationTemplate === API_REQUEST_STATE.FINISH) ||
+                (isUpdate &&
+                    updatingNotificationTemplate === API_REQUEST_STATE.FINISH);
+
+            if (error === null && isFinish) {
+                if (isAdd && shouldNavigateToSchedule) {
+                    navigate('/schedules/add', { replace: false });
+                } else {
+                    navigate('/notification_templates', { replace: false });
+                }
+                setShouldNavigateToSchedule(false);
             }
         } else {
             didMount.current = true;
         }
-    },[addingNotificationTemplate, updatingNotificationTemplate]);
+	}, [ addingNotificationTemplate, updatingNotificationTemplate, error, isAdd, isUpdate, shouldNavigateToSchedule ]);
     const NameInput = notificationTemplate.getText({
         propertyName: "name", props: {maxLength: Validation.TextLength.Short, autoFocus: !isView, icon: 'title', label: 'Name', required: true, isLoading: checkingNotificationTemplateName === API_REQUEST_STATE.START, error: isCurrentNotificationTemplateHasUniqueName === TRIPLET_STATE.FALSE ? 'Must be unique' : ''}
     })
@@ -161,23 +174,79 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
             }</DataAggregatorItemsStyled>
         </Input>
     ) : null;
-    let actions = [<Button
-        key={'list_button'}
-        label={formData.listButton.label}
-        icon={formData.listButton.icon}
-        href={'/notification_templates'}
-        autoFocus={isView}
-    />];
-    if(isAdd || isUpdate){
-        let handleClick = isAdd ? () => notificationTemplate.add(unarchivedAggregators) : () => notificationTemplate.update(unarchivedAggregators);
-        actions.unshift(<Button
-            key={'action_button'}
-            label={formData.actionButton.label}
-            icon={formData.actionButton.icon}
-            handleClick={handleClick}
-            isLoading={addingNotificationTemplate === API_REQUEST_STATE.START || updatingNotificationTemplate === API_REQUEST_STATE.START}
-        />);
+    let actions = [
+        <Button
+            key={'list_button'}
+            label={formData.listButton.label}
+            icon={formData.listButton.icon}
+            href={'/notification_templates'}
+            autoFocus={isView}
+        />,
+    ];
+
+    if (isAdd) {
+        const handleAddAndClose = () => {
+            setShouldNavigateToSchedule(false);
+            notificationTemplate.add(unarchivedAggregators);
+        };
+
+        const handleAddAndGoToAddSchedule = () => {
+            setShouldNavigateToSchedule(true);
+            notificationTemplate.add(unarchivedAggregators);
+        };
+
+        const isAnyLoading =
+            checkingNotificationTemplateName === API_REQUEST_STATE.START ||
+            addingNotificationTemplate === API_REQUEST_STATE.START;
+
+        actions.unshift(
+            <DropdownActionButton
+                key={'add_notification_template_dropdown'}
+                label={formData.actionButton.label}
+                direction={'down'}
+                disabled={false}
+                isLoading={isAnyLoading}
+                items={[
+                    {
+                        id: 'add_close',
+                        label: 'Add & Close',
+                        onClick: handleAddAndClose,
+                        isLoading:
+                            addingNotificationTemplate === API_REQUEST_STATE.START &&
+                            !shouldNavigateToSchedule,
+                    },
+                    {
+                        id: 'add_go_to_add_schedule',
+                        label: 'Add & Go to Add Schedule',
+                        onClick: handleAddAndGoToAddSchedule,
+                        isLoading:
+                            addingNotificationTemplate === API_REQUEST_STATE.START &&
+                            shouldNavigateToSchedule,
+                    },
+                ]}
+            />,
+        );
     }
+
+    if (isUpdate) {
+        const handleUpdateAndClose = () => {
+            notificationTemplate.update(unarchivedAggregators);
+        };
+
+        actions.unshift(
+            <Button
+                key={'action_button'}
+                label={`${formData.actionButton.label} & Close`}
+                icon={formData.actionButton.icon}
+                handleClick={handleUpdateAndClose}
+                isLoading={
+                    checkingNotificationTemplateName === API_REQUEST_STATE.START ||
+                    updatingNotificationTemplate === API_REQUEST_STATE.START
+                }
+            />,
+        );
+    }
+
     const data = {
         title: [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Notification Templates', link: '/notification_templates'}, {name: formData.formTitle}],
         actions,
