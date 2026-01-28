@@ -24,7 +24,7 @@ class LoopTest {
         operator.setExpression(expression);
 
         // create loop
-        Loop loop = Loop.fromEx(operator);
+        Loop loop = Loop.fromOperator(operator);
 
         // assert creation
         assertEquals(iterator, loop.getIterator());
