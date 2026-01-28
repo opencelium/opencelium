@@ -6,15 +6,16 @@ import com.becon.opencelium.backend.ocel.exception.ApplyFunctionException;
 import com.becon.opencelium.backend.ocel.function.FunctionFactory;
 import com.becon.opencelium.backend.ocel.operand.Operand;
 import com.becon.opencelium.backend.ocel.operator.Arity;
-import com.becon.opencelium.backend.ocel.operator.OperatorUtils;
+import com.becon.opencelium.backend.ocel.utils.OperatorUtils;
 import com.becon.opencelium.backend.ocel.operator.SidesType;
 import com.becon.opencelium.backend.ocel.exception.ApplyOperatorException;
 import com.becon.opencelium.backend.ocel.exception.InvalidExpressionException;
 import com.becon.opencelium.backend.ocel.exception.ValueParseException;
 import com.becon.opencelium.backend.ocel.operator.Operator;
-import com.becon.opencelium.backend.ocel.common.RawValueParser;
+import com.becon.opencelium.backend.ocel.utils.RawValueParser;
 import com.becon.opencelium.backend.ocel.token.Token;
 import com.becon.opencelium.backend.ocel.token.TokenType;
+import com.becon.opencelium.backend.utility.PathAndReferenceUtility;
 
 import java.util.*;
 
@@ -127,7 +128,12 @@ public class PostfixShallowEvaluator implements ShallowEvaluator {
                     if (ReferenceUtils.isReference(rawValue)) {
                         operandStack.push(dummy);
                     } else {
-                        operandStack.push(Operand.withRawValue(rawValue));
+                        List<int[]> ints = PathAndReferenceUtility.extractReferenceIndexes(rawValue);
+                        if (!ints.isEmpty()) {
+                            operandStack.push(dummy);
+                        } else {
+                            operandStack.push(Operand.withRawValue(rawValue));
+                        }
                     }
                 } else if (Objects.equals(token.getType(), TokenType.FUNCTION)) {
                     List<List<Token>> parameters = token.getFunctionParameters();

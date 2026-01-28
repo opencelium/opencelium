@@ -23,4 +23,6 @@ public interface ExceptionMessages {
     String METHOD_NOT_FOUND = "Method[id=%s] is not found";
     String OPERATOR_NOT_FOUND = "Operator[id=%s] is not found";
     String ENHANCEMENT_NOT_FOUND = "Enhancement[id=%s] is not found";
+    String CANT_REMOVE_LAST_VERSION_CONNECTION = "Can't remove last version connection";
+
 }

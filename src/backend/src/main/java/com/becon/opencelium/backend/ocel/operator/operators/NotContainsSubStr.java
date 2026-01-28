@@ -5,7 +5,7 @@ import com.becon.opencelium.backend.ocel.operator.BinaryOperator;
 import com.becon.opencelium.backend.ocel.operator.OperatorEnum;
 import com.becon.opencelium.backend.ocel.operator.SidesType;
 
-public class NotContainsSubStr implements BinaryOperator {
+class NotContainsSubStr implements BinaryOperator {
     @Override
     public Object apply(Object o1, Object o2) throws ApplyOperatorException {
         return !(Boolean) (new ContainsSubStr().apply(o1, o2));

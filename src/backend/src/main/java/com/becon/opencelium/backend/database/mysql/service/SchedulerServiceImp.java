@@ -197,13 +197,21 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Override
     public SchedulerResource toResource(Scheduler entity) {
+        return toResource(entity, true);
+    }
+
+    @Override
+    public SchedulerResource toResource(Scheduler entity, Boolean includeConnection) {
         SchedulerResource schedulerResource = new SchedulerResource();
         schedulerResource.setSchedulerId(entity.getId());
         schedulerResource.setTitle(entity.getTitle());
         schedulerResource.setStatus(entity.getStatus());
         schedulerResource.setCronExp(entity.getCronExp());
         schedulerResource.setDebugMode(entity.getDebugMode());
-        schedulerResource.setConnection(connectionMapper.toDTO(entity.getConnection()));
+
+        if (Boolean.TRUE.equals(includeConnection)) {
+            schedulerResource.setConnection(connectionMapper.toDTO(entity.getConnection()));
+        }
 
         if (entity.getLastExecution() != null) {
             schedulerResource.setLastExecution(lastExecutionService.toResource(entity.getLastExecution()));

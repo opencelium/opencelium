@@ -1,11 +1,8 @@
-package com.becon.opencelium.backend.ocel.function.providers;
+package com.becon.opencelium.backend.ocel.function;
 
 import com.becon.opencelium.backend.ocel.exception.ApplyFunctionException;
-import com.becon.opencelium.backend.ocel.function.Function;
-import com.becon.opencelium.backend.ocel.function.FunctionProvider;
-import com.becon.opencelium.backend.ocel.function.functions.CurrentTimeMills;
 
-public class CurrentTimeMillsProvider implements FunctionProvider {
+class CurrentTimeMillsProvider implements FunctionProvider {
     private static final CurrentTimeMillsProvider INSTANCE = new CurrentTimeMillsProvider();
 
     private CurrentTimeMillsProvider() {}

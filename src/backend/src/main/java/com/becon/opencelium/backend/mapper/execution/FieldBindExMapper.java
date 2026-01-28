@@ -1,34 +1,26 @@
 package com.becon.opencelium.backend.mapper.execution;
 
+import com.becon.opencelium.backend.database.mongodb.entity.EnhancementMng;
 import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
-import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
-import com.becon.opencelium.backend.database.mysql.service.EnhancementService;
 import com.becon.opencelium.backend.resource.execution.EnhancementEx;
 import com.becon.opencelium.backend.resource.execution.FieldBindEx;
 import com.becon.opencelium.backend.utility.PathAndReferenceUtility;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
 
 @Component
 public class FieldBindExMapper {
-    private final EnhancementService enhancementService;
-
-    public FieldBindExMapper(@Qualifier("enhancementServiceImp") EnhancementService enhancementService) {
-        this.enhancementService = enhancementService;
-    }
-
 
     public FieldBindEx toEntity(FieldBindingMng dto) {
         FieldBindEx fieldBindEx = new FieldBindEx();
         fieldBindEx.setBindId(dto.getId());
+        EnhancementMng enhancement = dto.getEnhancement();
 
-        Enhancement enhancement = enhancementService.getById(dto.getEnhancementId());
         EnhancementEx enhancementEx = new EnhancementEx();
 
         enhancementEx.setEnhanceId(dto.getEnhancementId());
-        enhancementEx.setLang(enhancement.getLanguage());
+        enhancementEx.setLang(dto.getEnhancement().getLanguage());
 
         if (enhancement.getArgs() == null) {
             enhancementEx.setArgs(new HashMap<>());

@@ -35,9 +35,17 @@ public class ConnectorMng {
     private String title;
 
     @DBRef
+    @Field("methods")
+    private List<MethodMng> oldMethods;
+
+    @Field("method")
     private List<MethodMng> methods;
 
     @DBRef
+    @Field("operators")
+    private List<OperatorMng> oldOperators;
+
+    @Field("operator")
     private List<OperatorMng> operators;
 
     public ConnectorMng() {
@@ -81,5 +89,21 @@ public class ConnectorMng {
 
     public void setOperators(List<OperatorMng> operators) {
         this.operators = operators;
+    }
+
+    public List<MethodMng> getOldMethods() {
+        return oldMethods;
+    }
+
+    public List<OperatorMng> getOldOperators() {
+        return oldOperators;
+    }
+
+    public void setOldOperators(List<OperatorMng> oldOperators) {
+        this.oldOperators = oldOperators;
+    }
+
+    public void setOldMethods(List<MethodMng> oldMethods) {
+        this.oldMethods = oldMethods;
     }
 }

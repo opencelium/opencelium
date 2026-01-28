@@ -36,6 +36,9 @@ public class Connection {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "snapshot_id")
+    private String snapshotId;
+
     @Column(name = "title")
     private String title;
 
@@ -69,9 +72,6 @@ public class Connection {
     @Column(name = "icon")
     private String icon;
 
-    @OneToMany(mappedBy = "connection", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private List<Enhancement> enhancements;
-
     @OneToMany(mappedBy = "connection", fetch = FetchType.LAZY)
     private List<Scheduler> schedulers;
 
@@ -84,6 +84,9 @@ public class Connection {
 
     @Column(name = "oc_version")
     private String ocVersion;
+
+    @Version
+    private Integer revision;
 
     public Connection() {
     }
@@ -172,14 +175,6 @@ public class Connection {
         this.icon = icon;
     }
 
-    public List<Enhancement> getEnhancements() {
-        return enhancements;
-    }
-
-    public void setEnhancements(List<Enhancement> enhancements) {
-        this.enhancements = enhancements;
-    }
-
     public List<Scheduler> getSchedulers() {
         return schedulers;
     }
@@ -224,10 +219,25 @@ public class Connection {
                 ", createdOn=" + createdOn +
                 ", modifiedBy=" + modifiedBy +
                 ", modifiedOn=" + modifiedOn +
-                ", enhancements=" + enhancements +
                 ", schedulers=" + schedulers +
                 ", businessLayout=" + businessLayout +
                 ", icon=" + icon +
                 '}';
+    }
+
+    public String getSnapshotId() {
+        return snapshotId;
+    }
+
+    public void setSnapshotId(String snapshotId) {
+        this.snapshotId = snapshotId;
+    }
+
+    public Integer getRevision() {
+        return revision;
+    }
+
+    public void setRevision(Integer revision) {
+        this.revision = revision;
     }
 }

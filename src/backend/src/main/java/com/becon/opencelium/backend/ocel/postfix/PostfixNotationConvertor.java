@@ -1,16 +1,13 @@
 package com.becon.opencelium.backend.ocel.postfix;
 
-import com.becon.opencelium.backend.ocel.common.Component;
-import com.becon.opencelium.backend.ocel.function.FunctionFactory;
-import com.becon.opencelium.backend.ocel.operand.Operand;
 import com.becon.opencelium.backend.ocel.operator.Operator;
-import com.becon.opencelium.backend.ocel.operator.OperatorUtils;
+import com.becon.opencelium.backend.ocel.utils.OperatorUtils;
 import com.becon.opencelium.backend.ocel.token.Token;
 import com.becon.opencelium.backend.ocel.token.TokenType;
 
 import java.util.*;
 
-public class PostfixNotationConvertor {
+class PostfixNotationConvertor {
 
     private static final PostfixNotationConvertor INSTANCE = new PostfixNotationConvertor();
 

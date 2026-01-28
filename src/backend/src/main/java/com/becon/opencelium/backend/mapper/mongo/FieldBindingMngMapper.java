@@ -32,7 +32,6 @@ public interface FieldBindingMngMapper extends Mapper<FieldBindingMng, FieldBind
     @Mappings({
             @Mapping(target = "to", qualifiedByName = {"linkedFieldMngMapper", "toDTOAll"}),
             @Mapping(target = "from", qualifiedByName = {"linkedFieldMngMapper", "toDTOAll"}),
-            @Mapping(target = "enhancement", source = "enhancementId", qualifiedByName = {"helperMapper", "getEnhancementDTOById"})
     })
     FieldBindingDTO toDTO(FieldBindingMng entity);
 

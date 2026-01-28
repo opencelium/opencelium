@@ -48,6 +48,8 @@ public interface SchedulerService {
     Scheduler toEntity(SchedulerRequestResource resource);
     SchedulerResource toResource(Scheduler entity);
 
+    SchedulerResource toResource(Scheduler entity, Boolean includeConnection);
+
     void startNow(Scheduler scheduler);
     void startNow(Scheduler scheduler, String channelId);
     void startNow(Scheduler scheduler, Map<String, Object> queryMap);

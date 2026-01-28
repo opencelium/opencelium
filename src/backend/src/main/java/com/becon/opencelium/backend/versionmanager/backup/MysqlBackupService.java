@@ -24,12 +24,10 @@ public class MysqlBackupService {
 
     private final OpenceliumProps ocProps;
     private final DataSourceProperties dbProperties;
-    private final EnhancementService enhancementService;
 
     public MysqlBackupService(OpenceliumProps ocProps, DataSourceProperties dbProperties, EnhancementService enhancementService) {
         this.ocProps = ocProps;
         this.dbProperties = dbProperties;
-        this.enhancementService = enhancementService;
     }
 
     public void backup(String entity) {
@@ -107,7 +105,6 @@ public class MysqlBackupService {
 
         processBuilder.redirectInput(backupFile);
 
-        enhancementService.deleteAll();
         try {
             Process process = processBuilder.start();
             int exitCode = process.waitFor();

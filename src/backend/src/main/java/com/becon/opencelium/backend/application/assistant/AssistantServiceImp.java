@@ -2,34 +2,27 @@ package com.becon.opencelium.backend.application.assistant;
 
 import com.becon.opencelium.backend.application.entity.SystemOverview;
 import com.becon.opencelium.backend.application.repository.SystemOverviewRepository;
+import com.becon.opencelium.backend.constant.ExceptionConstant;
+import com.becon.opencelium.backend.constant.ExceptionMessages;
 import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.constant.AppYamlPath;
+import com.becon.opencelium.backend.constant.props.OpenceliumProps;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
-import com.becon.opencelium.backend.database.mongodb.entity.ConnectorMng;
 import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
-import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngServiceImp;
-import com.becon.opencelium.backend.database.mongodb.service.FieldBindingMngServiceImp;
-import com.becon.opencelium.backend.database.mysql.entity.Connection;
-import com.becon.opencelium.backend.database.mysql.entity.Connector;
-import com.becon.opencelium.backend.database.mysql.service.ConnectorServiceImp;
+import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.exception.StorageException;
-import com.becon.opencelium.backend.database.mysql.service.ConnectionServiceImp;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
-import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
+import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.updateassistant.InstallationDTO;
-import com.becon.opencelium.backend.resource.updateassistant.Neo4jConfigResource;
-import com.becon.opencelium.backend.utility.Neo4jDriverUtility;
+import com.becon.opencelium.backend.resource.updateassistant.JarFileDescriptor;
+import com.becon.opencelium.backend.utility.PackageVersionManager;
 import com.becon.opencelium.backend.utility.ZipUtils;
+import com.becon.opencelium.backend.versionmanager.base.Utils;
 import com.jayway.jsonpath.JsonPath;
-import com.mongodb.client.MongoClient;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
-import org.neo4j.driver.AuthTokens;
-import org.neo4j.driver.GraphDatabase;
-import org.neo4j.driver.Result;
-import org.neo4j.driver.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,9 +50,9 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
 
 @Service
 public class AssistantServiceImp implements ApplicationService {
@@ -70,23 +63,15 @@ public class AssistantServiceImp implements ApplicationService {
 
     @Autowired
     private Environment env;
-    @Autowired
-    private MongoClient mongoClient;
 
     @Autowired
     private RestTemplate restTemplate;
 
     @Autowired
-    private ConnectionServiceImp connectionService;
+    private OpenceliumProps ocProps;
 
     @Autowired
-    private ConnectorServiceImp connectorServiceImp;
-    @Autowired
-    private ConnectionMngServiceImp connectionMngServiceImp;
-    @Autowired
-    private FieldBindingMngServiceImp fieldBindingMngServiceImp;
-    @Autowired
-    private InvokerServiceImp invokerServiceImp;
+    private InvokerService invokerService;
 
     @Override
     public SystemOverview getSystemOverview() {
@@ -444,84 +429,46 @@ public class AssistantServiceImp implements ApplicationService {
     }
 
     @Override
-    public void doMigrate(Neo4jConfigResource neo4jConfig) {
-        try (var driver = GraphDatabase.driver(neo4jConfig.getUrl(), AuthTokens.basic(neo4jConfig.getUsername(), neo4jConfig.getPassword()));
-             Session session = driver.session()) {
-            driver.verifyConnectivity(); //checking connectivity to neo4j
-            log.info("Connection successfully established to neo4j server with this credentials : [url: {}, username: {}, password: {}]", neo4jConfig.getUrl(), neo4jConfig.getUsername(), neo4jConfig.getPassword().replaceAll(".", "*"));
+    public List<JarFileDescriptor> getOldJarFiles() {
+        Path libsPath = Paths.get(PathConstant.LIBS);
 
-            try {
-                mongoClient.listDatabaseNames(); //checking connectivity to mongodb
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new RuntimeException("Failed to connect to mongodb");
-            }
-
-            List<Connection> connections = null;
-            try {
-                connections = connectionService.findAllNotCompleted();
-            } catch (Exception e) {
-                log.error("Failed to retrieve connections from neo4j", e);
-            }
-
-            if (connections.isEmpty()) {
-                log.info("No connections to migrate");
-                return;
-            }
-            for (Connection connection : connections) {
-                try {
-                    //building connection's data from mysql
-                    ConnectionMng connectionMng = new ConnectionMng();
-                    connectionMng.setConnectionId(connection.getId());
-                    Connector from = connectorServiceImp.getById(connection.getFromConnector());
-                    Connector to = connectorServiceImp.getById(connection.getToConnector());
-                    ConnectorMng fromMng = new ConnectorMng();
-                    fromMng.setTitle(from.getTitle());
-                    fromMng.setConnectorId(from.getId());
-                    ConnectorMng toMng = new ConnectorMng();
-                    toMng.setTitle(to.getTitle());
-                    toMng.setConnectorId(to.getId());
-                    connectionMng.setFromConnector(fromMng);
-                    connectionMng.setToConnector(toMng);
-
-                    String cypherQuery = "MATCH p=((:Connection{connectionId:%d})-[*]->()) return p".formatted(connection.getId());
-                    Result result = session.run(cypherQuery);
-
-                    if (!result.hasNext()) {
-                        log.warn("Connection[name: {}, id: {}] is not found in neo4j", connection.getTitle(), connection.getId());
-                        continue;
-                    }
-
-                    try {
-                        Neo4jDriverUtility.convertResultToConnection(result, connectionMng);
-                    } catch (Exception e) {
-                        log.error("Cannot convert Connection[name: {}, id: {}] from neo4j. {}", connection.getTitle(), connection.getId(), e.getMessage());
-                        e.printStackTrace();
-                        continue;
-                    }
-
-                    addHeaderFromInvoker(connectionMng, from.getInvoker(), to.getInvoker());
-
-                    //setting fieldBindings
-                    connectionMng.setFieldBindings(fieldBindingMngServiceImp.getAllByConnectionId(connection.getId()));
-
-                    //saving to mongodb
-                    connectionMngServiceImp.save(connectionMng);
-                    log.info("Connection[name: {}, id: {}] successfully migrated", connection.getTitle(), connection.getId());
-                } catch (Exception e) {
-                    log.error("Some error occurred during migration of Connection[name: {}, id: {}]", connection.getTitle(), connection.getId());
-                    e.printStackTrace();
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
+        try (Stream<Path> fileStream = Files.walk(libsPath)) {
+            return fileStream.filter(Files::isRegularFile)
+                    .filter(file -> file.getFileName().toString().startsWith(PathConstant.JAR_PREFIX) && file.getFileName().toString().endsWith(".jar"))
+                    .filter(file -> {
+                        String fileVersion = PackageVersionManager.extractVersionOfJarFile(file.getFileName().toString());
+                        return Utils.compare(fileVersion, ocProps.getVersion()) < 0;
+                    })
+                    .map(file -> new JarFileDescriptor(libsPath.toAbsolutePath().toString(), file.getFileName().toString()))
+                    .toList();
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            throw new GeneralServiceException(ExceptionConstant.INTERNAL_ERROR, ExceptionMessages.UNKNOWN_ERROR);
         }
     }
 
+    @Override
+    public List<JarFileDescriptor> deleteOldJarFiles() {
+        List<JarFileDescriptor> oldJarFiles = getOldJarFiles();
+        if (oldJarFiles == null) {
+            return Collections.emptyList();
+        }
+
+        oldJarFiles.forEach(oldJarFile -> {
+            try {
+                Files.deleteIfExists(Paths.get(PathConstant.LIBS).resolve(oldJarFile.getFileName()));
+            } catch (IOException e) {
+                log.error(e.getMessage());
+                throw new GeneralServiceException(ExceptionConstant.INTERNAL_ERROR, ExceptionMessages.UNKNOWN_ERROR);
+            }
+        });
+
+        return oldJarFiles;
+    }
+
     private void addHeaderFromInvoker(ConnectionMng connectionMng, String fromInvokerStr, String toInvokerStr) {
-        Invoker fromInvoker = invokerServiceImp.findByName(fromInvokerStr);
-        Invoker toInvoker = invokerServiceImp.findByName(toInvokerStr);
+        Invoker fromInvoker = invokerService.findByName(fromInvokerStr);
+        Invoker toInvoker = invokerService.findByName(toInvokerStr);
 
         addHeaderFromInvokerHelper(connectionMng.getFromConnector().getMethods(), fromInvoker);
         addHeaderFromInvokerHelper(connectionMng.getToConnector().getMethods(), toInvoker);

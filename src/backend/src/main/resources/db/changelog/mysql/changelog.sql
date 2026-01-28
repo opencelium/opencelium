@@ -680,3 +680,9 @@ CREATE TABLE IF NOT EXISTS online_sync_history (
     details TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+--changeset 4.8:1 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE connection ADD COLUMN IF NOT EXISTS snapshot_id VARCHAR(30);
+
+--changeset 4.8:2 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE connection ADD COLUMN IF NOT EXISTS revision INT;
