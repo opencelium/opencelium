@@ -161,14 +161,14 @@ const ConnectorForm: FC<IForm> = ({isAdd, isUpdate}) => {
 				actions.unshift(
 					<DropdownActionButton
 						key={'add_connector_dropdown'}
-						label={'Add Connector'}
+						label={'Add'}
 						direction={'down'}
 						disabled={false}
 						isLoading={isAnyLoading}
 						items={[
 							{
 								id: 'add_close',
-								label: `${formData.actionButton.label} & Close`,
+								label: `& Close`,
 								onClick: handleAddOrUpdateAndClose,
 								isLoading:
 									addingConnector === API_REQUEST_STATE.START &&
@@ -176,7 +176,7 @@ const ConnectorForm: FC<IForm> = ({isAdd, isUpdate}) => {
 							},
 							{
 								id: 'add_go_to_connection',
-								label: 'Add & Go to Add Connection',
+								label: '& Go to Add Connection',
 								onClick: handleAddAndGoToConnection,
 								isLoading:
 									addingConnector === API_REQUEST_STATE.START &&

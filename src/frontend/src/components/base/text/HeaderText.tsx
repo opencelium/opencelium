@@ -4,7 +4,7 @@ import Text from './Text';
 
 const HeaderText = (props: TextProps) => {
     return (
-        <Text {...props} size={TextSize.Size_16}/>
+        <Text {...props} size={TextSize.Size_24}/>
     )
 }
 

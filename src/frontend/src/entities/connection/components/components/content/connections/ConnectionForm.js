@@ -696,13 +696,13 @@ export function ConnectionForm(type) {
                         items.push(
                         {
                             id: 'add_close',
-                            label: 'Add & Close',
+                            label: '& Close',
                             onClick: () => this.doAction(entity),
                             isLoading: !this.isNavigatingToScheduler && isBusy,
                         },
                         {
                             id: 'add_go_add_scheduler',
-                            label: t('ADD.ADD_BUTTON_AND_GO_TO_ADD_SCHEDULER'),
+                            label: '& Go to Add Schedule',
                             onClick: () => this.doActionAndGoToAddScheduler(entity),
                             isLoading: this.isNavigatingToScheduler && isBusy,
                         }
@@ -713,7 +713,7 @@ export function ConnectionForm(type) {
                         items.push(
                         {
                             id: 'update_close',
-                            label: 'Update & Close',
+                            label: '& Close',
                             onClick: () => this.doAction(entity),
                             isLoading: !this.isNavigatingToScheduler && isBusy,
                         },
@@ -736,7 +736,7 @@ export function ConnectionForm(type) {
                         <React.Fragment>
                         <div style={{ float: 'left', marginRight: 10 }}>
                             <DropdownActionButton
-                                label={this.isAdd ? 'Add Connection' : 'Update Connection'}
+                                label={this.isAdd ? 'Add' : 'Update'}
                                 direction={'down'}
                                 isLoading={false}
                                 disabled={false}

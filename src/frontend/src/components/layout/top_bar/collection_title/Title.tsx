@@ -69,7 +69,7 @@ const Title: FC<TitleProps> =
     return (
         <TitleStyled className={className}>
             <span>
-                <HeaderText value={title} size={TextSize.Size_24}/>
+                <HeaderText value={title}/>
                 <IconStyled>{icon}</IconStyled>
             </span>
         </TitleStyled>

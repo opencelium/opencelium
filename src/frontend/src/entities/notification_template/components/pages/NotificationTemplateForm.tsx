@@ -128,7 +128,7 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
         } else {
             didMount.current = true;
         }
-	}, [ addingNotificationTemplate, updatingNotificationTemplate, error, isAdd, isUpdate, shouldNavigateToSchedule ]);
+    }, [ addingNotificationTemplate, updatingNotificationTemplate, error, isAdd, isUpdate, shouldNavigateToSchedule ]);
     const NameInput = notificationTemplate.getText({
         propertyName: "name", props: {maxLength: Validation.TextLength.Short, autoFocus: !isView, icon: 'title', label: 'Name', required: true, isLoading: checkingNotificationTemplateName === API_REQUEST_STATE.START, error: isCurrentNotificationTemplateHasUniqueName === TRIPLET_STATE.FALSE ? 'Must be unique' : ''}
     })
@@ -264,9 +264,7 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
             </FormSection>
         ]
     }
-    return(
-        <FormComponent {...data} isLoading={shouldFetchNotificationTemplate && gettingNotificationTemplate === API_REQUEST_STATE.START}/>
-    )
+    return <FormComponent {...data} isLoading={shouldFetchNotificationTemplate && gettingNotificationTemplate === API_REQUEST_STATE.START}/>;
 }
 
 export default NotificationTemplateForm

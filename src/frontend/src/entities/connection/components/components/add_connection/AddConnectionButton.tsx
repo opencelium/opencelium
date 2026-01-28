@@ -171,7 +171,7 @@ function AddConnectionButton({ theme, direction, ...args }: DropdownMenuProps & 
     return (
         <>
             <DropdownActionButton
-                label="Add Connection"
+                label="Add"
                 items={[
                     { id: 'via_template', label: 'via template', onClick: toggleForm },
                     { id: 'via_editor', label: 'via editor', onClick: openEditor },

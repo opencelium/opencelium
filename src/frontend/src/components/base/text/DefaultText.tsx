@@ -4,7 +4,7 @@ import Text from './Text';
 
 const DefaultText = (props: TextProps) => {
     return (
-        <Text {...props} size={TextSize.Size_12}/>
+        <Text {...props}/>
     )
 }
 

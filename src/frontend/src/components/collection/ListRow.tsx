@@ -55,6 +55,7 @@ const ListRow: FC<ListRowProps> =
                         const cellStyle = !!listProp.style ? {...listProp.style} : {};
                         if (listProp?.header?.left) {
                             cellStyle.textAlign = 'left';
+                            cellStyle.padding = '10px';
                         }
                         if (propertyKey !== '') {
                             let entityValue: any = '';

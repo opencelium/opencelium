@@ -4,7 +4,7 @@ import Text from './Text';
 
 const ColumnHeaderText = (props: TextProps) => {
     return (
-        <Text {...props} size={TextSize.Size_14}/>
+        <Text {...props}/>
     )
 }
 
