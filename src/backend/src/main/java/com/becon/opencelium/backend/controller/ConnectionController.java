@@ -229,7 +229,7 @@ public class ConnectionController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @GetMapping(path = "/all/by-ids")
+    @PostMapping(path = "/all/by-ids")
     public ResponseEntity<?> getAllMeta(@RequestBody IdentifiersDTO<Long> ids) {
         List<Connection> connections = connectionService.findAllByIds(ids);
         List<ConnectionResource> connectionResources = connectionResourceMapper.toDTOAll(connections);

@@ -98,11 +98,13 @@ public class SchedulerController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @GetMapping("/all/by-ids")
-    public ResponseEntity<List<SchedulerResource>> getAllByIds(IdentifiersDTO<Integer> ids) {
+    @PostMapping("/all/by-ids")
+    public ResponseEntity<List<SchedulerResource>> getAllByIds(@RequestBody IdentifiersDTO<Integer> ids) {
         List<Scheduler> schedulers = schedulerService.findAllById(ids.getIdentifiers());
+
         List<SchedulerResource> scheduleList = schedulers.stream()
-                .map(s -> schedulerService.toResource(s)).collect(Collectors.toList());
+                .map(s -> schedulerService.toResource(s, Boolean.FALSE))
+                .toList();
 
         // send notification about all running jobs
         List<RunningJobsResource> allRunningJobs = schedulerService.getAllRunningJobs();

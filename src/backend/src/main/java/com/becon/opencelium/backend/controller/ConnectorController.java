@@ -145,7 +145,7 @@ public class ConnectorController {
                     description = "Internal Error",
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
-    @GetMapping("/list/by-ids")
+    @PostMapping("/list/by-ids")
     public ResponseEntity<List<ConnectorResource>> getAllByIds(@RequestBody IdentifiersDTO<Integer> ids) {
         List<ConnectorResource> connectorResources = connectorResourceMapper.toDTOAll(connectorService.findByIds(ids));
 

@@ -2,6 +2,22 @@
 Changelog
 *********
 
+4.7.1
+========
+ 
+:Date: January 27, 2026
+ 
+Fixes
+--------
+ 
+* Execution code optimization and Refactoring (OC-1303)
+* Webhook is not supported in SplitString (OC-1305)
+* Bug with LIKE operator (OC-1307)
+* Check sequential executing of the conditions in the operator (OC-1311)
+* Bug with Reference On Arrays (OC-1283)
+* List Of Connectors (OC-1258)
+* Bug with ContainsSubStr (OC-1314)
+
 4.7
 ========
 
@@ -37,7 +53,7 @@ Fixes
 * masster-password space is not handled (OC-1243)
 * Bug with slack response in Logs (OC-1232)
 * RegEx or Like doesn't work with single quote (OC-1231)
-*  Polyglot as external service JAR (OC-1223)
+* Polyglot as external service JAR (OC-1223)
 * log-files endpoint refactoring (OC-1222)
 * Fix Like and NotLike in IF operator (OC-1220)
 * Fix RegExp in IF operator (OC-1219)
@@ -61,9 +77,9 @@ Fixes
 * Create endpoint for Logs (OC-1116)
 * Connector Partial Update (OC-1109)
 * Master Password for Connector  (OC-1108)
-*  Meta Information Requests (OC-1098)
+* Meta Information Requests (OC-1098)
 * Unit Tests for Parsers & Trackers (OC-1092)
-*  Implement Trackers for Scope Blocks (OC-1088)
+* Implement Trackers for Scope Blocks (OC-1088)
 * Track Execution Context (OC-1087)
 * Implement Log Parsers (OC-1086)
 * Implement Dispatcher (Router) (OC-1085)
