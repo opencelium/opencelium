@@ -128,11 +128,11 @@ public class StorageConfiguration {
 
         FileBackupManager.moveToNewLocation(PathConstant.RESOURCES + "/backup", PathConstant.BACKUP);
 
-        // updates connections and enhancements to current version
-        connectionService.updateConnectionsToCurrentVersion();
-
         // sets revision of connection
         connectionService.setInitialRevisionToConnections();
+
+        // updates connections and enhancements to current version
+        connectionService.updateConnectionsToCurrentVersion();
 
         // updates templates to the current version
         templateService.updateTemplatesToCurrentVersion();
