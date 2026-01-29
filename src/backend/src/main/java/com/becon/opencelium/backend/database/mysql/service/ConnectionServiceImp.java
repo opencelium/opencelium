@@ -519,9 +519,6 @@ public class ConnectionServiceImp implements ConnectionService {
 
                 connection.setSnapshotId(connectionMng.getId());
                 connection.setOcVersion(ocProps.getVersion());
-                if (connection.getRevision() == null) {
-                    connection.setRevision(1);
-                }
                 connectionRepository.save(connection);
             }
         }
@@ -584,6 +581,11 @@ public class ConnectionServiceImp implements ConnectionService {
         }
 
         connectionMngService.delete(snapshotId);
+    }
+
+    @Override
+    public void setInitialRevisionToConnections() {
+        connectionRepository.updateInitialRevision();
     }
 
     /**
