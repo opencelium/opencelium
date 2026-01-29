@@ -1,7 +1,5 @@
 package com.becon.opencelium.backend.ocel.operator;
 
-import com.becon.opencelium.backend.ocel.common.Dummy;
-
 public interface UnaryOperator extends Operator {
     @Override
     default Object apply(Object o1, Object o2) {

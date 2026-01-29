@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.ocel.function;
 
-import com.becon.opencelium.backend.ocel.common.Component;
+import com.becon.opencelium.backend.ocel.Component;
 import com.becon.opencelium.backend.ocel.exception.ApplyFunctionException;
 
 public interface Function extends Component {

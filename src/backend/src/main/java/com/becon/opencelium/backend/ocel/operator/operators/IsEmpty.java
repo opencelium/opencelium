@@ -1,13 +1,12 @@
 package com.becon.opencelium.backend.ocel.operator.operators;
 
-import com.becon.opencelium.backend.ocel.operator.Arity;
 import com.becon.opencelium.backend.ocel.operator.OperatorEnum;
 import com.becon.opencelium.backend.ocel.exception.ApplyOperatorException;
 import com.becon.opencelium.backend.ocel.operator.UnaryOperator;
 
 import java.util.List;
 
-public class IsEmpty implements UnaryOperator {
+class IsEmpty implements UnaryOperator {
 
     @Override
     public Object apply(Object o) throws ApplyOperatorException {

@@ -7,10 +7,9 @@ import com.becon.opencelium.backend.ocel.operand.OperandUtils;
 import com.becon.opencelium.backend.ocel.operator.Arity;
 import com.becon.opencelium.backend.ocel.exception.InvalidExpressionException;
 import com.becon.opencelium.backend.ocel.operator.Operator;
-import com.becon.opencelium.backend.ocel.operator.OperatorUtils;
+import com.becon.opencelium.backend.ocel.utils.OperatorUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Collections;
 import java.util.List;
 
 public class Validator {

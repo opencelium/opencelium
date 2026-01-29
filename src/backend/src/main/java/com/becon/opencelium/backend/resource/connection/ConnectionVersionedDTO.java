@@ -9,6 +9,10 @@ public class ConnectionVersionedDTO {
 
     private Long createdAt;
 
+    private Boolean isCurrent;
+
+    private Integer author;
+
     public Long getCreatedAt() {
         return createdAt;
     }
@@ -39,5 +43,21 @@ public class ConnectionVersionedDTO {
 
     public void setConnectionId(Long connectionId) {
         this.connectionId = connectionId;
+    }
+
+    public Boolean getCurrent() {
+        return isCurrent;
+    }
+
+    public void setCurrent(Boolean current) {
+        isCurrent = current;
+    }
+
+    public Integer getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(Integer author) {
+        this.author = author;
     }
 }
