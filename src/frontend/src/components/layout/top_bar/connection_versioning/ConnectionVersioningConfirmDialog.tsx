@@ -15,18 +15,16 @@
 
 import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
-
-export type ConnectionVersioningConfirmDialogVariant = 'primary' | 'danger';
+import Button from '@app_component/base/button/Button';
 
 export interface ConnectionVersioningConfirmDialogProps {
   open: boolean;
   title?: string;
   message?: string;
-  yesLabel?: string;
-  noLabel?: string;
-  variant?: ConnectionVersioningConfirmDialogVariant;
-  onYes: () => void;
-  onNo: () => void;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  onConfirm: () => void;
+  onCancel: () => void;
 }
 
 const overlayStyle: React.CSSProperties = {
@@ -71,67 +69,30 @@ const footerStyle: React.CSSProperties = {
   gap: '10px',
 };
 
-const btnBase: React.CSSProperties = {
-  height: '34px',
-  padding: '0 14px',
-  borderRadius: '6px',
-  fontSize: '14px',
-  fontWeight: 600,
-  cursor: 'pointer',
-};
-
-const btnSecondary: React.CSSProperties = {
-  ...btnBase,
-  border: '1px solid rgba(0,0,0,0.18)',
-  background: '#fff',
-  color: 'rgba(0,0,0,0.8)',
-};
-
-const btnPrimary: React.CSSProperties = {
-  ...btnBase,
-  border: '1px solid rgba(0,0,0,0.10)',
-  background: '#7da0d6',
-  color: '#fff',
-};
-
-const btnDanger: React.CSSProperties = {
-  ...btnBase,
-  border: '1px solid rgba(0,0,0,0.10)',
-  background: '#d9534f',
-  color: '#fff',
-};
-
 const ConnectionVersioningConfirmDialog: FC<ConnectionVersioningConfirmDialogProps> = ({
   open,
-  title = 'Confirm',
-  message = '',
-  yesLabel = 'Yes',
-  noLabel = 'No',
-  variant = 'primary',
-  onYes,
-  onNo,
+  title,
+  message,
+  confirmLabel = 'Yes',
+  cancelLabel = 'No',
+  onConfirm,
+  onCancel,
 }) => {
   if (!open) return null;
-
-  const yesStyle = variant === 'danger' ? btnDanger : btnPrimary;
 
   const node = (
     <div
       style={overlayStyle}
       onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onNo();
+        if (e.target === e.currentTarget) onCancel();
       }}
     >
       <div style={dialogStyle} role="dialog" aria-modal="true">
         <div style={headerStyle}>{title}</div>
         <div style={bodyStyle}>{message}</div>
         <div style={footerStyle}>
-          <button type="button" style={btnSecondary} onClick={onNo}>
-            {noLabel}
-          </button>
-          <button type="button" style={yesStyle} onClick={onYes} autoFocus>
-            {yesLabel}
-          </button>
+          <Button handleClick={onCancel} label={cancelLabel}/>
+          <Button handleClick={onConfirm} label={confirmLabel}/>
         </div>
       </div>
     </div>

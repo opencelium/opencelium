@@ -105,6 +105,7 @@ class FormConnectionSvg extends Component {
       entity instanceof CConnection
         ? entity.getObjectForConnectionOverview()
         : entity;
+		this.props.setIsDirty(false);
     this.setData({ connection: connectionData });
     //this.props.checkPolyglot();
   }
@@ -116,6 +117,7 @@ class FormConnectionSvg extends Component {
               entity instanceof CConnection
                   ? entity.getObjectForConnectionOverview()
                   : entity;
+					this.props.setIsDirty(false);				
           this.setData({connection: connectionData});
       }
   }
@@ -126,25 +128,28 @@ class FormConnectionSvg extends Component {
     clearCurrentLogs();
   }
 
-  updateEntity(entity = null, settings = { hasPostMessage: true }) {
+  updateEntity(entity = null, settings = { hasPostMessage: true, markDirty: true }) {
     const { authUser, connection, updateEntity } = this.props;
-    if (connection) {
-      const storage = LocalStorage.getStorage();
-      storage.set(
-        `${connection.fromConnector.invoker.name}&${connection.toConnector.invoker.name}`,
-        JSON.stringify(connection.getObject())
-      );
-      if (entity !== null) {
-        this.props.setIsDirty(true);
-        let connectionData =
-          entity instanceof CConnection
-            ? entity.getObjectForConnectionOverview()
-            : entity;
-        updateEntity(entity);
-        this.setData({ connection: connectionData });
-      }
+    if (!connection) return;
+    const storage = LocalStorage.getStorage();
+    storage.set(
+      `${connection.fromConnector.invoker.name}&${connection.toConnector.invoker.name}`,
+      JSON.stringify(connection.getObject())
+    );
+    if (entity === null) return;
+    const markDirty = settings?.markDirty !== false;
+
+    if (markDirty) {
+      this.props.setIsDirty(true);
     }
+    const connectionData =
+      entity instanceof CConnection
+			 	? entity.getObjectForConnectionOverview()
+				: entity;
+    updateEntity(entity);
+    this.setData({ connection: connectionData });
   }
+
 
   render() {
     const {

@@ -29,8 +29,10 @@ import ConnectionVersionHistoryPanel, {
 	ConnectionVersionItem,
 } from './ConnectionVersionHistoryPanel';
 
-import { ITheme } from '@style/Theme';
+import { ColorTheme, ITheme } from '@style/Theme';
 import ConnectionVersioningConfirmDialog from './ConnectionVersioningConfirmDialog';
+import TooltipButton from '@app_component/base/tooltip_button/TooltipButton';
+import Button from '@app_component/base/button/Button';
 
 export interface ConnectionVersioningProps {
 	theme: ITheme;
@@ -162,65 +164,23 @@ const ConnectionVersioning: FC<ConnectionVersioningProps> = ({ theme }) => {
 				marginRight: '10px',
 			}}
 		>
-			<button
-				type='button'
-				onClick={onSave}
-				disabled={isSaving}
-				style={{
-					height: '34px',
-					padding: '0 14px',
-					borderRadius: '6px',
-					border: '1px solid rgba(0,0,0,0.1)',
-					background: '#7da0d6',
-					color: '#fff',
-					cursor: 'pointer',
-					fontSize: '14px',
-					fontWeight: 600,
-				}}
-				title={isSaved ? 'Saved' : 'Save'}
-			>
-				{saveLabel}
-			</button>
+			<Button
+				handleClick={onSave}
+				isDisabled={!isDirty || isSaving}
+				label={isSaving ? 'Saving...' : (isDirty ? 'Save' : 'Saved')}
+			/>
 
-			<button
-				type='button'
-				onClick={onOpenHistory}
-				style={{
-					width: '34px',
-					height: '34px',
-					borderRadius: '6px',
-					border: '1px solid rgba(0,0,0,0.12)',
-					background: '#fff',
-					cursor: 'pointer',
-					display: 'flex',
-					alignItems: 'center',
-					justifyContent: 'center',
-				}}
-				title='Version history'
-			>
-				<svg width='18' height='18' viewBox='0 0 24 24' fill='none'>
-					<path
-						d='M12 8v5l3 2'
-						stroke='currentColor'
-						strokeWidth='2'
-						strokeLinecap='round'
-						strokeLinejoin='round'
-					/>
-					<path
-						d='M3 12a9 9 0 1 0 3-6.7'
-						stroke='currentColor'
-						strokeWidth='2'
-						strokeLinecap='round'
-					/>
-					<path
-						d='M3 4v5h5'
-						stroke='currentColor'
-						strokeWidth='2'
-						strokeLinecap='round'
-						strokeLinejoin='round'
-					/>
-				</svg>
-			</button>
+
+			<TooltipButton
+				target={`version_history`}
+				tooltip="Open Version History"
+				handleClick={onOpenHistory}
+				icon={'history'}
+				hasBackground={true}
+				background={ColorTheme.White}
+				color={ColorTheme.Gray}
+				padding="5px"
+			/>
 
 			<ConnectionVersionHistoryPanel
 				open={isHistoryOpen}
@@ -233,10 +193,8 @@ const ConnectionVersioning: FC<ConnectionVersioningProps> = ({ theme }) => {
 				open={!!confirmOpenVersion}
 				title="Unsaved changes"
 				message="You did not save the current connection and it will be lost after opening the version. (Yes/no)"
-				yesLabel="Yes"
-				noLabel="No"
-				onNo={() => setConfirmOpenVersion(null)}
-				onYes={() => {
+				onCancel={() => setConfirmOpenVersion(null)}
+				onConfirm={() => {
 					const v = confirmOpenVersion;
 					setConfirmOpenVersion(null);
 					if (!v) return;

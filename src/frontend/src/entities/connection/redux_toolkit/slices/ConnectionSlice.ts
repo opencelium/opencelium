@@ -391,7 +391,11 @@ const connectionReducers = (isModal: boolean = false) => {
       [getConnectionVersionBySnapshot.pending.type]: (state) => {
         state.openingConnectionVersion = API_REQUEST_STATE.START;
       },
-      [getConnectionVersionBySnapshot.fulfilled.type]: (state, action: PayloadAction<IConnection>) => {
+
+      [getConnectionVersionBySnapshot.fulfilled.type]: (
+        state,
+        action: PayloadAction<IConnection>
+      ) => {
         state.openingConnectionVersion = API_REQUEST_STATE.FINISH;
 
         const payload: any = action.payload || null;
@@ -405,10 +409,17 @@ const connectionReducers = (isModal: boolean = false) => {
 
         state.currentConnection = normalized;
         state.connection = normalized;
-        state.isDirty = false;
+
+        const snapshotId = (action as any)?.meta?.arg?.snapshotId ?? null;
+        state.openedSnapshotId = snapshotId;
+        state.isDirty = true;
         state.error = null;
       },
-      [getConnectionVersionBySnapshot.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+
+      [getConnectionVersionBySnapshot.rejected.type]: (
+        state,
+        action: PayloadAction<IResponse>
+      ) => {
         state.openingConnectionVersion = API_REQUEST_STATE.ERROR;
         state.error = action.payload;
       },
@@ -620,6 +631,7 @@ const connectionReducers = (isModal: boolean = false) => {
           state.currentConnection = action.payload;
         }
         state.isDirty = false;
+        state.openedSnapshotId = null;
         state.error = null;
       },
       [updateConnection.rejected.type]: (
