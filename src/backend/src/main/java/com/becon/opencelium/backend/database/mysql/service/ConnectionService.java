@@ -102,4 +102,6 @@ public interface ConnectionService {
     List<ConnectionVersionedDTO> getConnectionVersions(Long connectionId);
 
     void deleteSnapshot(Long connectionId, String snapshotId);
+
+    void setInitialRevisionToConnections();
 }

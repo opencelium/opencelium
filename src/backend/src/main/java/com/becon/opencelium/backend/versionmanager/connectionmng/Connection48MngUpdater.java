@@ -16,13 +16,13 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Component
-public class Connection47MngUpdater implements ConnectionMngUpdater {
+public class Connection48MngUpdater implements ConnectionMngUpdater {
 
-    private static final UpdaterVersion currentVersion = UpdaterVersion.VERSION_4_7;
+    private static final UpdaterVersion currentVersion = UpdaterVersion.VERSION_4_8;
     private final EnhancementService enhancementService;
     private final Connection46MngUpdater connection46MngUpdater;
 
-    public Connection47MngUpdater(EnhancementService enhancementService, Connection46MngUpdater connection46MngUpdater) {
+    public Connection48MngUpdater(EnhancementService enhancementService, Connection46MngUpdater connection46MngUpdater) {
         this.enhancementService = enhancementService;
         this.connection46MngUpdater = connection46MngUpdater;
     }
