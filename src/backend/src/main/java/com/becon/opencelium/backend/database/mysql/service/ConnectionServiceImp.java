@@ -583,6 +583,11 @@ public class ConnectionServiceImp implements ConnectionService {
         connectionMngService.delete(snapshotId);
     }
 
+    @Override
+    public void setInitialRevisionToConnections() {
+        connectionRepository.updateInitialRevision();
+    }
+
     /**
      * Full cleanup:
      * 1) find test connection ids in MariaDB
