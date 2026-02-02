@@ -164,7 +164,7 @@ const List: FC<ListViewProps> =
                         }
                         {collection.hasActions &&
                         <th>
-                            <span>Actions</span>
+                            <ColumnHeaderText value={'Actions'}/>
                         </th>
                         }
                     </tr>

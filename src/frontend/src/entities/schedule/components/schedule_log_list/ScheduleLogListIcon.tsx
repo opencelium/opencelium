@@ -56,7 +56,7 @@ const ScheduleLogListIcon: FC<ScheduleLogListIconProps> =
         let iconElem = document.getElementById(id);
         if(iconElem) {
             let position = findTopLeftPosition(id);
-            let newX = position.left + (iconElem.offsetWidth / 2) - 190;
+            let newX = position.left + (iconElem.offsetWidth / 2) - 146;
             let newY = position.top + (iconElem.offsetHeight / 2) - 10;
             if (x !== newX || y !== newY) {
                 setX(newX);

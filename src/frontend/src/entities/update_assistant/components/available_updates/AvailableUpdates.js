@@ -38,6 +38,8 @@ import Loading from "@app_component/base/loading/Loading";
      from "@entity/update_assistant/components/available_updates/DownloadOnlineVersionIcon";
  import {Dialog} from "@app_component/base/dialog/Dialog";
  import {Urls} from "@entity/application/requests/classes/url";
+ import DetailsCollection from "@entity/license_management/components/detail_view/DetailsCollection";
+ import {ColumnHeaderTextSize, DefaultTextSize} from "@entity/application/utils/constants";
 
 export const ONLINE_UPDATE = 'ONLINE_UPDATE';
 export const OFFLINE_UPDATE = 'OFFLINE_UPDATE';
@@ -314,12 +316,12 @@ class AvailableUpdates extends React.Component{
         }
         return(
             <React.Fragment>
-                <Table className={styles.table} authUser={authUser}>
+                <Table className={styles.table} authUser={authUser} style={{fontSize: `${DefaultTextSize}px`}}>
                     <thead>
                     <tr>
-                        <th>{t('FORM.VERSION_HEADER')}</th>
-                        <th>{t('FORM.CHANGELOG_HEADER')}</th>
-                        <th style={{paddingRight: numberOfVisibleEntries > 6 ? '35px' : ''}}>{t('FORM.SELECT_HEADER')}</th>
+                        <th style={{fontSize: `${ColumnHeaderTextSize}px`}}>{t('FORM.VERSION_HEADER')}</th>
+                        <th style={{fontSize: `${ColumnHeaderTextSize}px`}}>{t('FORM.CHANGELOG_HEADER')}</th>
+                        <th style={{fontSize: `${ColumnHeaderTextSize}px`, paddingRight: numberOfVisibleEntries > 6 ? '35px' : ''}}>{t('FORM.SELECT_HEADER')}</th>
                     </tr>
                     </thead>
                 </Table>
@@ -331,8 +333,8 @@ class AvailableUpdates extends React.Component{
                                 const isAlreadyDownloaded = activeMode === ONLINE_UPDATE && offlineUpdates.findIndex(u => u.name === version.name) !== -1;
                                 return (
                                     <tr key={version.name}>
-                                        <td>{`v${version.name}`}</td>
-                                        <td>
+                                        <td style={{fontSize: `${DefaultTextSize}px`}}>{`v${version.name}`}</td>
+                                        <td style={{fontSize: `${DefaultTextSize}px`}}>
                                             {version?.changelogLink ? <div style={{color: '#000', textDecoration: 'underline', cursor: 'pointer'}} title={'Show changelog'} onClick={() => this.getChangelog(version.changelogLink)}>
                                                 {t('FORM.CHANGELOG')}
                                             </div>
@@ -340,7 +342,7 @@ class AvailableUpdates extends React.Component{
                                                 <div style={{}}>{t('FORM.CHANGELOG')}</div>
                                             }
                                         </td>
-                                        <td>
+                                        <td style={{fontSize: `${DefaultTextSize}px`}}>
                                             {version.status !== VERSION_STATUS.CURRENT
                                                 ?
                                                 !isAlreadyDownloaded
@@ -411,9 +413,9 @@ class AvailableUpdates extends React.Component{
                     }
                     return (
                         <tr key={version.name}>
-                            <td>{`v${version.name}`}</td>
-                            <td><a href={version.changelogLink} target={'_blank'}>{t('FORM.CHANGELOG')}</a></td>
-                            <td>
+                            <td style={{fontSize: `${DefaultTextSize}px`}}>{`v${version.name}`}</td>
+                            <td style={{fontSize: `${DefaultTextSize}px`}}><a href={version.changelogLink} target={'_blank'}>{t('FORM.CHANGELOG')}</a></td>
+                            <td style={{fontSize: `${DefaultTextSize}px`}}>
                                 <RadioButtons
                                     label={''}
                                     value={selectedVersionName}

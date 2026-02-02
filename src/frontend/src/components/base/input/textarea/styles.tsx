@@ -17,9 +17,11 @@ import styled from "styled-components";
 import {ITheme} from "@style/Theme";
 import { EmphasizeInputStyleLines } from "../styles";
 import {ElementProps} from "../interfaces";
+import {DefaultTextSize} from "@entity/application/utils/constants";
 
 
 const TextareaStyled = styled.textarea<ElementProps>`
+    font-size: ${DefaultTextSize}px;
     font-family: ${({theme}: {theme: ITheme}) => theme.text.fontFamily || '"Arial"'};
     padding-top: ${({theme}) => theme.input.inputElement.paddingTop || 0};
     padding-bottom: ${({theme}) => theme.input.inputElement.paddingBottom || 0};

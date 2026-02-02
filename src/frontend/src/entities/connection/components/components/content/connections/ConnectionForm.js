@@ -24,7 +24,7 @@ import {
     CONNECTOR_TO
 } from "@entity/connection/components/classes/components/content/connection/CConnectorItem";
 import AddTemplate from "@change_component/form_elements/form_connection/form_methods/AddTemplate";
-import Button from "@entity/connection/components/components/general/basic_components/buttons/Button";
+import Button from "@app_component/base/button/Button";
 import {LocalStorage} from "@application/classes/LocalStorage";
 import {capitalize, findTopLeft, setFocusById} from "@application/utils/utils";
 import {TextSize} from "@app_component/base/text/interfaces";
@@ -46,6 +46,7 @@ import {jsonToString} from "@app_component/operator_builder/utils";
 import {OperatorType} from "@app_component/operator_builder/props";
 import Validation from "@application/classes/Validation";
 import DropdownActionButton from '@app_component/dropdown_action_button/DropdownActionButton';
+import {setIsForm} from "@entity/data_aggregator/redux_toolkit/slices/DataAggregatorSlice";
 
 /**
  * common component to add and update Connection
@@ -746,44 +747,44 @@ export function ConnectionForm(type) {
 
                         {!this.isUpdate && (
                             <React.Fragment>
-                            <div style={{ float: 'left' }}>
-                                <AddTemplate
-                                data={contents[2].inputs[1]}
-                                entity={entity}
-                                disabled={isDisabled}
-                                buttonProps={{
-                                    size: TextSize.Size_16,
-                                    icon: 'add',
-                                    title: t(`${this.translationKey}.FORM.ADD_TEMPLATE`)
-                                }}
-                                />
-                            </div>
+                                <div style={{float: 'left'}}>
+                                    <AddTemplate
+                                        data={contents[2].inputs[1]}
+                                        entity={entity}
+                                        disabled={isDisabled}
+                                        buttonProps={{
+                                            icon: 'add',
+                                            title: t(`${this.translationKey}.FORM.ADD_TEMPLATE`)
+                                        }}
+                                    />
+                                </div>
 
-                            <div style={{ float: 'left' }}>
-                                <DataAggregatorButton
-                                readOnly={this.isView}
-                                connection={entity}
-                                updateConnection={(e) => {
-                                    updateEntity(e);
-                                    if (currentTechnicalItem) {
-                                    const connector =
-                                        currentTechnicalItem.connectorType === CONNECTOR_FROM ? e.fromConnector : e.toConnector;
-                                    const currentItem = connector.getSvgElementByIndex(currentTechnicalItem.entity.index);
-                                    setCurrentTechnicalItem(currentItem.getObject());
-                                    }
-                                }}
-                                />
-                            </div>
+                                <div style={{float: 'left'}}>
+                                    <DataAggregatorButton
+                                        readOnly={this.isView}
+                                        connection={entity}
+                                        updateConnection={(e) => {
+                                            updateEntity(e);
+                                            if (currentTechnicalItem) {
+                                                const connector =
+                                                    currentTechnicalItem.connectorType === CONNECTOR_FROM ? e.fromConnector : e.toConnector;
+                                                const currentItem = connector.getSvgElementByIndex(currentTechnicalItem.entity.index);
+                                                setCurrentTechnicalItem(currentItem.getObject());
+                                            }
+                                        }}
+                                    />
+                                </div>
 
-                            <Button
-                                key={'list_button'}
-                                label={'Cancel'}
-                                icon={'cancel'}
-                                href={'/connections'}
-                                size={TextSize.Size_16}
-                            />
+                                <div style={{float: 'left'}}>
+                                    <Button
+                                        key={'cancel_button'}
+                                        label={'Cancel'}
+                                        icon={'cancel'}
+                                        href={'/connections'}
+                                    />
+                                </div>
                             </React.Fragment>
-                        )}
+                            )}
                         </React.Fragment>
                     );
                 };

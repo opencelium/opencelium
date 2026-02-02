@@ -23,6 +23,8 @@ import styles from '@entity/connection/components/themes/default/general/basic_c
 import {getFocusableElements} from "@application/utils/utils";
 import CVoiceControl from "@entity/connection/components/classes/voice_control/CVoiceControl";
 import CDialogControl from "@entity/connection/components/classes/voice_control/CDialogControl";
+import {HeaderTextSize} from "@entity/application/utils/constants";
+import HeaderText from "@app_component/base/text/HeaderText";
 
 
 /**
@@ -105,7 +107,7 @@ class Dialog extends Component{
         let dialogClassname = `${styles.dialog} ${theme.dialog}`;
         return(
             <Modal id={id || `modal_${title}`} autoFocus={true} isOpen={isOpen} toggle={toggle} className={dialogClassname} modalClassName={theme.modal} contentClassName={theme.content} wrapClassName={theme.wrapper}>
-                <ModalHeader toggle={toggle} className={theme.title}>{title}</ModalHeader>
+                <ModalHeader toggle={toggle} className={theme.title}><HeaderText value={title} /></ModalHeader>
                 <ModalBody className={theme.body}>
                     {children}
                 </ModalBody>

@@ -28,6 +28,7 @@ import {BottomActionsStyled, EmptyListStyled, ScheduleNotificationListStyled, Li
 import ScheduleNotificationForm from "./ScheduleNotificationForm";
 import {useConstructor} from "@application/utils/hooks/useConstructor";
 import {useEventListener} from "@application/utils/utils";
+import {DefaultTextSize} from "@entity/application/utils/constants";
 
 const ScheduleNotificationList: FC<ScheduleNotificationListProps> =
     ({
@@ -93,7 +94,7 @@ const ScheduleNotificationList: FC<ScheduleNotificationListProps> =
         ReactDOM.createPortal(
             <ScheduleNotificationListStyled x={x} y={y}>
                 <div>
-                    <InputText autoFocus value={searchValue} onChange={(e:ChangeEvent<HTMLInputElement>) => search(e.target.value)} minHeight={'30px'}/>
+                    <InputText placeholder={'Search'} autoFocus value={searchValue} onChange={(e:ChangeEvent<HTMLInputElement>) => search(e.target.value)} minHeight={'30px'}/>
                 </div>
                 <ListStyled>
                     {notificationEntities.length === 0 && <EmptyListStyled value={'There are no notifications'}/>}
@@ -101,18 +102,18 @@ const ScheduleNotificationList: FC<ScheduleNotificationListProps> =
                         const name = notification.name.length > 20 ? `${notification.name.substring(0, 20)}...` : notification.name;
                         return (
                             <div key={notification.id} style={{display: 'flex', justifyContent: 'space-between'}}>
-                                <span title={notification.name}>{`${name} (${notification.eventType}/${notification.type})`}</span>
+                                <span title={notification.name} style={{fontSize: `${DefaultTextSize}px`}}>{`${name} (${notification.eventType}/${notification.type})`}</span>
                                 <div style={{display: 'flex'}}>
-                                    <TooltipButton target={`update_schedule_notification_${notification.id}`} tooltip={'Update'} float={'right'} iconSize={TextSize.Size_20} hasBackground={false} icon={'edit'} color={ColorTheme.Turquoise} handleClick={() => onUpdate(notification)}/>
-                                    <TooltipButton target={`delete_schedule_notification_${notification.id}`} tooltip={'Delete'} float={'right'} iconSize={TextSize.Size_20} hasConfirmation={true} confirmationText={'Do you really want to delete?'} hasBackground={false} icon={'delete'} color={ColorTheme.Turquoise} handleClick={() => notification.deleteById()}/>
+                                    <TooltipButton target={`update_schedule_notification_${notification.id}`} tooltip={'Update'} float={'right'} hasBackground={false} icon={'edit'} color={ColorTheme.Turquoise} handleClick={() => onUpdate(notification)}/>
+                                    <TooltipButton target={`delete_schedule_notification_${notification.id}`} tooltip={'Delete'} float={'right'} hasConfirmation={true} confirmationText={'Do you really want to delete?'} hasBackground={false} icon={'delete'} color={ColorTheme.Turquoise} handleClick={() => notification.deleteById()}/>
                                 </div>
                             </div>
                         );
                     })}
                 </ListStyled>
                 <BottomActionsStyled>
-                    <TooltipButton target={`add_schedule_notification`} tooltip={'Add'} position={'top'} iconSize={TextSize.Size_20} hasBackground={false} icon={'add'} color={ColorTheme.Turquoise} handleClick={onAdd}/>
-                    <TooltipButton target={'close_schedule_notification'} tooltip={'Close'} position={'top'} float={'right'} iconSize={TextSize.Size_20} hasBackground={false} icon={'close'} color={ColorTheme.Turquoise} handleClick={close}/>
+                    <TooltipButton target={`add_schedule_notification`} tooltip={'Add'} position={'top'} hasBackground={false} icon={'add'} color={ColorTheme.Turquoise} handleClick={onAdd}/>
+                    <TooltipButton target={'close_schedule_notification'} tooltip={'Close'} position={'top'} float={'right'} hasBackground={false} icon={'close'} color={ColorTheme.Turquoise} handleClick={close}/>
                 </BottomActionsStyled>
                 {isToggled && <ScheduleNotificationForm schedule={schedule} notificationId={currentNotificationId} isAdd={isAdd} isUpdate={isUpdate} isToggled={isToggled} toggle={toggle}/>}
             </ScheduleNotificationListStyled>,

@@ -18,11 +18,12 @@ import {connect} from 'react-redux';
 import PropTypes from 'prop-types';
 import {withTranslation} from "react-i18next";
 import styles from "@entity/connection/components/themes/default/content/update_assistant/main";
-import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import Confirmation from "@entity/connection/components/components/general/app/Confirmation";
 import {OFFLINE_UPDATE} from "@entity/update_assistant/components/available_updates/AvailableUpdates";
 import {deleteApplicationFile as deleteVersion} from "@entity/update_assistant/redux_toolkit/action_creators/UpdateAssistantCreators";
+import {DefaultTextSize} from "@entity/application/utils/constants";
+import Button from "@app_component/base/button/Button";
 
 function mapStateToProps(state){
     const application = state.applicationReducer;
@@ -93,8 +94,8 @@ class OldVersionEntry extends React.Component{
         }
         return(
             <tr className={styles.disable_version_entry} onMouseOver={(a) => this.onMouseOver(a)} onMouseLeave={(a) => this.onMouseLeave(a)}>
-                <td onMouseOver={(a) => this.onMouseOver(a)} onMouseLeave={(a) => this.onMouseLeave(a)}>{`v${version.name}`}</td>
-                <td onMouseOver={(a) => this.onMouseOver(a)} onMouseLeave={(a) => this.onMouseLeave(a)}>
+                <td style={{fontSize: `${DefaultTextSize}px`}} onMouseOver={(a) => this.onMouseOver(a)} onMouseLeave={(a) => this.onMouseLeave(a)}>{`v${version.name}`}</td>
+                <td style={{fontSize: `${DefaultTextSize}px`}} onMouseOver={(a) => this.onMouseOver(a)} onMouseLeave={(a) => this.onMouseLeave(a)}>
                     {version.changelogLink ?
                         <span onClick={onChangelogClick} style={{
                             cursor: 'pointer',
@@ -106,16 +107,14 @@ class OldVersionEntry extends React.Component{
                     }
                 </td>
                 <td onMouseOver={(a) => this.onMouseOver(a)} onMouseLeave={(a) => this.onMouseLeave(a)}
-                    style={{position: 'relative'}}>
+                    style={{position: 'relative', fontSize: `${DefaultTextSize}px`}}>
                     <span>{t('FORM.OLD_VERSION')}</span>
                     {isVisibleDeleteIcon &&
-                        <TooltipFontIcon
+                        <Button
                             className={styles.delete_icon}
-                            isButton={true}
-                            value={icon}
-                            tooltip={t('FORM.DELETE_TOOLTIP')}
-                            onClick={(a) => this.toggleConfirmDelete(a)}
-                            size={20}
+                            handleClick={(a) => this.toggleConfirmDelete(a)}
+                            hasBackground={false}
+                            icon={icon}
                         />
                     }
                     {this.renderConfirmation()}

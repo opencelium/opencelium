@@ -21,12 +21,14 @@ import Icon from "../../icon/Icon";
 import Text from "../../text/Text";
 import Button from "../../button/Button";
 import {ToggleStyledProps, InputContainerStyledProps, OptionsStyledProps, OptionStyledProps} from "./interfaces";
+import {DefaultTextSize} from "@entity/application/utils/constants";
 
 
 const EmptyOptionsStyled = styled.div`
     background: #ffffff;
     min-height: 34px;
-    padding: 5px
+    padding: 5px;
+    font-size: ${DefaultTextSize}px;
 `;
 
 const LineStyled = styled.div<ElementProps>``
@@ -77,6 +79,7 @@ const TextStyled = styled(Text)<ElementProps>`
     cursor: default;
 `;
 const SearchInputStyled = styled.input<ElementProps | HTMLInputElement>`
+    font-size: ${DefaultTextSize}px;
     font-family: ${({theme}: {theme: ITheme}) => theme.text.fontFamily || '"Arial"'};
     flex: 1;
     padding-right: 20px;
@@ -107,6 +110,7 @@ const ToggleStyled = styled(Button)<ToggleStyledProps>`
 `;
 
 const SelectStyled = styled.input<ElementProps>`
+    font-size: ${DefaultTextSize}px;
     font-family: ${({theme}: {theme: ITheme}) => theme.text.fontFamily || '"Arial"'};
     cursor: default;
     position: absolute;
@@ -125,6 +129,7 @@ const SelectStyled = styled.input<ElementProps>`
 `;
 
 const OptionStyled = styled.input<OptionStyledProps>`
+    font-size: ${DefaultTextSize}px;
     font-family: ${({theme}: {theme: ITheme}) => theme.text.fontFamily || '"Arial"'};
     width: 100%;
     border: none;

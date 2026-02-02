@@ -297,7 +297,7 @@ const CollectionView: FC<CollectionViewProps> = ({
 								onChange={(e) => search(e.target.value)}
 								minHeight={'1'}
 								width={'200px'}
-								placeholder={'Search field'}
+								placeholder={'Search'}
 							/>
 						)}
 						{collection.AfterSearchComponents}

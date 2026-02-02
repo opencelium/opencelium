@@ -145,7 +145,7 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
     const BodyInput = notificationTemplate.content.getTextarea({
         propertyName: "body", props: {icon: 'feed', label: 'Body', required: true, height: `calc(100% - 67px)`, style: {height: 'calc(100% - 37px)'}}
     })
-    const ConnectionForm =
+    const DataAggregatorSelect =
         <InputSelect
             id={`input_connections`}
             onChange={(option: any) => setSelectedAggregator(option)}
@@ -255,7 +255,7 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
                 {NameInput}
                 {Type}
                 <HelpDivider/>
-                {ConnectionForm}
+                {DataAggregatorSelect}
                 {DataAggregatorItems}
             </FormSection>,
             <FormSection label={{value: 'Template Content'}} inputsStyle={{height: '100%'}}>

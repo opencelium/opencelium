@@ -3,6 +3,7 @@ import { Dropdown, DropdownMenu, DropdownProps } from 'reactstrap';
 import { DropdownMenuProps } from 'reactstrap/es/DropdownMenu';
 
 import { DropdownItemStyled, DropdownToggleStyled } from './style';
+import {ButtonLabelSize} from "@entity/application/utils/constants";
 
 export type DropdownDirection = NonNullable<DropdownProps['direction']>;
 
@@ -78,7 +79,7 @@ export default function DropdownActionButton({
 						disabled={disabled || isLoading || item.disabled || item.isLoading}
 						onClick={() => handleItemClick(item)}
 					>
-						{item.label}
+						<span style={{fontSize: `${ButtonLabelSize}px`}}>{item.label}</span>
 					</DropdownItemStyled>
 				))}
 			</DropdownMenu>

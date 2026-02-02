@@ -27,7 +27,7 @@ import {DeleteSupportFiles} from "@entity/support_files/components/delete_suppor
 class SupportFiles extends ListCollection<SupportFileResponseProps>{
     name: string = 'support_files';
     entities: SupportFileResponse[];
-    title = 'Support Files';
+    title = [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Support Files'}];
     keyPropName: SupportFileResponseProps ='supportFile';
     listProps: ListProp<SupportFileResponseProps>[] = [
         {

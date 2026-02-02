@@ -23,6 +23,8 @@ import Text from "../text/Text";
 import {ButtonProps} from './interfaces';
 import Icon from '../icon/Icon';
 import {ButtonStyled, LabelStyled} from './styles';
+import {ButtonIconSize, ButtonLabelSize} from "@entity/application/utils/constants";
+import DefaultText from "@app_component/base/text/DefaultText";
 
 const Button: FC<ButtonProps> =
     ({
@@ -81,9 +83,7 @@ const Button: FC<ButtonProps> =
                     toggle={() => toggleConfirmation(!isConfirmationOpened)}
                     title={'Confirmation'}
                 >
-                    <span>
-                        {confirmationText}
-                    </span>
+                    <DefaultText value={confirmationText}/>
                 </Dialog>
             }
         </ButtonStyled>
@@ -91,8 +91,8 @@ const Button: FC<ButtonProps> =
 }
 
 Button.defaultProps = {
-    iconSize: '24px',
-    size: 16,
+    iconSize: `${ButtonIconSize}px`,
+    size: `${ButtonLabelSize}px`,
     href: '',
     hasBackground: true,
     permission: NO_RESTRICTION,

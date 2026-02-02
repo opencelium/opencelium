@@ -30,7 +30,7 @@ const ButtonStyled = styled.button<ButtonStyledProps>`
     bottom: ${({bottom}) => bottom ? `${bottom}px` : 'unset'};
     top: ${({top}) => top || 0};
     border: 1px solid transparent;
-    padding: ${({padding}) => padding || '0.375rem .75rem'};
+    padding: ${({padding}) => padding || '0.175rem .55rem'};
     margin: ${({margin}) => margin || '0'};
     line-height: 1.5;
     border-radius: .25rem;

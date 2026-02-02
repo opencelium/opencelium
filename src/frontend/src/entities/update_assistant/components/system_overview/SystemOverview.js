@@ -26,6 +26,7 @@ import {checkAllExternalApplications as fetchSystemRequirements} from "@entity/e
 import {checkApplicationBeforeUpdate as checkResetFiles} from "@entity/update_assistant/redux_toolkit/action_creators/UpdateAssistantCreators";
 import {API_REQUEST_STATE, OC_NAME} from "@application/interfaces/IApplication";
 import {APP_STATUS_DOWN} from "@entity/application/requests/classes/url";
+import {DefaultTextSize} from "@entity/application/utils/constants";
 
 
 function mapStateToProps(state){
@@ -102,7 +103,7 @@ class SystemOverview extends React.Component{
             <Container style={{position: 'unset'}}>
                 {
                     !!(systemRequirements && systemRequirements.components) &&
-                    <div style={{marginTop: '25px'}}>
+                    <div style={{marginTop: '25px', fontSize: `${DefaultTextSize}px`}}>
                         {
                             Object.entries(systemRequirements.components).map(line => {
                                 if (VISIBLE_SERVICES.indexOf(line[0]) !== -1) {
@@ -121,7 +122,7 @@ class SystemOverview extends React.Component{
                         }
                     </div>
                 }
-                <div className={styles.system_overview}>
+                <div className={styles.system_overview} style={{fontSize: `${DefaultTextSize}px`}}>
                     <span className={styles.hint}>
                         {`Hint: `}
                     </span>

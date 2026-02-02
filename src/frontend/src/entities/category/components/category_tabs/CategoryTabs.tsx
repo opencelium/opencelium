@@ -34,6 +34,8 @@ import { CategoryTabsProps } from "./interfaces";
 import Checkbox from "@entity/connection/components/components/general/basic_components/inputs/Checkbox";
 import {getAllMetaConnections} from "@root/redux_toolkit/action_creators/ConnectionCreators";
 import Validation from "@application/classes/Validation";
+import {CategoryTextSize, HeaderTextSize} from "@entity/application/utils/constants";
+import DefaultText from "@app_component/base/text/DefaultText";
 
 const AllCategoriesTab: any = {name: 'All', parentCategory: null, subCategories: []};
 
@@ -222,7 +224,7 @@ const CategoryTabs: FC<CategoryTabsProps> = ({setCurrentPage, readOnly = false})
 
   return (
     <div>
-      <div className={styles.breadcrumbs}>
+      <div className={styles.breadcrumbs} style={{fontSize: `${HeaderTextSize}px`}}>
       {breadcrumbs.map((breadcrumb, index) => (
         breadcrumbs.length === index + 1 ?
         <div className={`${styles.breadcrumb} ${styles.breadcrumb_disabled}`} key={index}>
@@ -234,7 +236,7 @@ const CategoryTabs: FC<CategoryTabsProps> = ({setCurrentPage, readOnly = false})
       </div>
       ))}
       </div>
-      <div className={styles.tab_panel}>
+      <div style={{fontSize: `${CategoryTextSize}px`}} className={styles.tab_panel}>
         {tabs.map((tab, index) => (
           <div className={`${styles.tab} ${activeTab === tab.name ? `${styles.active_tab}` : ''}`} key={index} onClick={() => {
             setCurrentPage(1);
@@ -283,7 +285,7 @@ const CategoryTabs: FC<CategoryTabsProps> = ({setCurrentPage, readOnly = false})
           title={'Confirmation'}
         >
           <div>
-            <p>Do you really want to remove?</p>
+            <p><DefaultText value={'Do you really want to remove?'} /></p>
               <Checkbox
                 className={styles.category_remove_checkbox}
                 labelClassName={styles.category_remove_label}

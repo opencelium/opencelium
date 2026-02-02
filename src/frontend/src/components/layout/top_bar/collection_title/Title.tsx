@@ -52,12 +52,12 @@ const Title: FC<TitleProps> =
                             if(t.link){
                                 return (
                                     <span key={t.name}>
-                                        <LinkStyled to={t.link} title={t.name}><Text value={`${t.name}`} size={TextSize.Size_24}/></LinkStyled>
-                                        <Text value={`${!isLastTitle ? ` / ` : ''}`} size={TextSize.Size_24}/>
+                                        <LinkStyled to={t.link} title={t.name}><HeaderText value={`${t.name}`}/></LinkStyled>
+                                        <HeaderText value={`${!isLastTitle ? ` / ` : ''}`}/>
                                     </span>
                                 );
                             } else{
-                                return <span key={t.name}><Text value={`${t.name}${!isLastTitle ? ` / ` : ''}`} size={TextSize.Size_24}/></span>;
+                                return <span key={t.name}><HeaderText value={`${t.name}${!isLastTitle ? ` / ` : ''}`}/></span>;
                             }
                         })
                     }

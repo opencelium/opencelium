@@ -36,7 +36,7 @@ FormUser.args = {
     actions: [
         <Button label={'Add User'} icon={'add'} size={'1rem'}/>,
         <Button label={'Delete Selected'} icon={'delete'} size={'1rem'}/>,
-        <InputText display={'inline-block'} placeholder={'Search field'}/>
+        <InputText display={'inline-block'} placeholder={'Search'}/>
         ],
     formSections: [
         <FormSection label={{value: 'user details'}}>
