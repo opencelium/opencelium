@@ -16,6 +16,8 @@
 
 package com.becon.opencelium.backend.database.mongodb.entity;
 
+import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
+
 public class EnhancementMng {
     private String title;
     private String description;
@@ -24,6 +26,14 @@ public class EnhancementMng {
     private String language;
 
     public EnhancementMng() {
+    }
+
+    public EnhancementMng(Enhancement enhancement) {
+        this.title = enhancement.getTitle();
+        this.description = enhancement.getDescription();
+        this.script = enhancement.getScript();
+        this.args = enhancement.getArgs();
+        this.language = enhancement.getLanguage();
     }
 
     public String getTitle() {

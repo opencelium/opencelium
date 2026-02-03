@@ -21,9 +21,12 @@ import com.becon.opencelium.backend.constant.*;
 import com.becon.opencelium.backend.container.Command;
 import com.becon.opencelium.backend.container.ConnectionUpdateTracker;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
+import com.becon.opencelium.backend.database.mongodb.entity.EnhancementMng;
+import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
 import com.becon.opencelium.backend.database.mongodb.service.*;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
+import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.database.mysql.repository.ConnectionRepository;
 import com.becon.opencelium.backend.database.mysql.repository.MaskingRuleRepository;
@@ -37,12 +40,14 @@ import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectionVersionedDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
 import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
+import com.becon.opencelium.backend.resource.template.TemplateResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
+import com.becon.opencelium.backend.template.service.TemplateService;
 import com.becon.opencelium.backend.utility.LogFileUtility;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.becon.opencelium.backend.versionmanager.EntityUpdater;
 import com.becon.opencelium.backend.versionmanager.EntityVersionManager;
-import com.becon.opencelium.backend.versionmanager.backup.MongoDbBackupService;
+import com.becon.opencelium.backend.versionmanager.backup.FileBackupManager;
 import com.becon.opencelium.backend.versionmanager.base.Utils;
 import com.github.fge.jsonpatch.JsonPatch;
 import jakarta.persistence.EntityNotFoundException;
@@ -51,7 +56,7 @@ import net.minidev.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatus;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -84,10 +89,10 @@ public class ConnectionServiceImp implements ConnectionService {
     private final WebhookService webhookService;
     private final OpenceliumProps ocProps;
     private final EntityUpdater<ConnectionMng> connectionMngEntityUpdater;
-    private final MongoDbBackupService mongoDbBackupService;
     private final EnhancementService enhancementService;
     private final MethodMngService methodMngService;
     private final OperatorMngService operatorMngService;
+    private final TemplateService templateService;
 
     public ConnectionServiceImp(
             ConnectionRepository connectionRepository,
@@ -107,8 +112,9 @@ public class ConnectionServiceImp implements ConnectionService {
             MaskingRuleRepository ruleRepository,
             EntityVersionManager entityVersionManager,
             OpenceliumProps ocProps,
-            MongoDbBackupService mongoDbBackupService,
-            MethodMngService methodMngService, OperatorMngService operatorMngService
+            MethodMngService methodMngService,
+            OperatorMngService operatorMngService,
+            @Lazy TemplateService templateService
     ) {
         this.connectionRepository = connectionRepository;
         this.connectorService = connectorService;
@@ -126,10 +132,10 @@ public class ConnectionServiceImp implements ConnectionService {
         this.ruleRepository = ruleRepository;
         this.ocProps = ocProps;
         this.connectionMngEntityUpdater = entityVersionManager.getUpdater(ConnectionMng.class);
-        this.mongoDbBackupService = mongoDbBackupService;
         this.enhancementService = enhancementService;
         this.methodMngService = methodMngService;
         this.operatorMngService = operatorMngService;
+        this.templateService = templateService;
     }
 
 
@@ -328,11 +334,30 @@ public class ConnectionServiceImp implements ConnectionService {
     @Override
     public ConnectionDTO getFullConnection(Long connectionId) {
         Connection connection = getById(connectionId);
-        return getFullConnection(connection, connection.getSnapshotId());
+        return getFullConnection(connection, connection.getSnapshotId(), false);
     }
 
-    private ConnectionDTO getFullConnection(Connection connection, String snapshotId) {
+    private ConnectionDTO getFullConnection(Connection connection, String snapshotId, boolean withOldElements) {
         ConnectionMng connectionMng = connectionMngService.getById(snapshotId);
+        if (withOldElements) {
+            connectionMng.setFieldBindings(connectionMng.getOldFieldBindings());
+            for (FieldBindingMng fb : connectionMng.getFieldBindings()) {
+                if (fb.getEnhancementId() != null) {
+                    Optional<Enhancement> existingEnhancement = enhancementService.findById(fb.getEnhancementId());
+                    existingEnhancement.ifPresent(enhancement -> fb.setEnhancement(new EnhancementMng(enhancement)));
+                }
+            }
+
+            if (connectionMng.getFromConnector() != null) {
+                connectionMng.getFromConnector().setOperators(connectionMng.getFromConnector().getOldOperators());
+                connectionMng.getFromConnector().setMethods(connectionMng.getFromConnector().getOldMethods());
+            }
+
+            if (connectionMng.getToConnector() != null) {
+                connectionMng.getToConnector().setOperators(connectionMng.getToConnector().getOldOperators());
+                connectionMng.getToConnector().setMethods(connectionMng.getToConnector().getOldMethods());
+            }
+        }
 
         if (!Objects.equals(connectionMng.getConnectionId(), connection.getId())) {
             throw new RuntimeException("CONNECTION_NOT_FOUND");
@@ -371,8 +396,13 @@ public class ConnectionServiceImp implements ConnectionService {
 
     @Override
     public ConnectionDTO getFullConnection(Long connectionId, String snapshotId) {
+        return getFullConnection(connectionId, snapshotId, false);
+    }
+
+    @Override
+    public ConnectionDTO getFullConnection(Long connectionId, String snapshotId, boolean withOldElements) {
         Connection connection = getById(connectionId);
-        return getFullConnection(connection, snapshotId);
+        return getFullConnection(connection, snapshotId, withOldElements);
     }
 
     @Override
@@ -481,20 +511,11 @@ public class ConnectionServiceImp implements ConnectionService {
     @Override
     public void updateConnectionsToCurrentVersion() {
         List<Long> ids = connectionRepository.findIds();
-        boolean gotBackup = false;
+
         for (Long id : ids) {
             Connection connection = getById(id);
-            if (Utils.compare(ocProps.getVersion(), connection.getOcVersion()) > 0 && !isTestConnection(connection.getTitle())) {
-                if (!gotBackup) {
-                    gotBackup = true;
 
-                    try {
-                        mongoDbBackupService.backup();
-                    } catch (Exception e) {
-                        log.error("Failed to take backup from MongoDB. Continuing updating connections without backup");
-                    }
-                }
-                // UPDATE CONNECTION_MNG
+            if (Utils.compare(ocProps.getVersion(), connection.getOcVersion()) > 0 && !isTestConnection(connection.getTitle())) {
                 ConnectionMng connectionMng;
                 List<ConnectionMng> connections = connectionMngService.getAllByConnectionId(connection.getId());
                 if (connections.size() != 1) {
@@ -503,6 +524,11 @@ public class ConnectionServiceImp implements ConnectionService {
                 } else {
                     connectionMng = connections.get(0);
                 }
+
+                // Taking backup
+                TemplateResource template = templateService.getByConnectionId(connection.getId(), connectionMng.getId(), true);
+                template.setVersion(connectionMng.getVersion());
+                FileBackupManager.doBackup(template, connectionMng.getVersion(), ocProps.getVersion(), "connection", String.valueOf(connection.getId()));
 
                 try {
                     connectionMng.setCreatedBy(connection.getCreatedBy());
@@ -593,7 +619,7 @@ public class ConnectionServiceImp implements ConnectionService {
      * 1) find test connection ids in MariaDB
      * 2) delete Mongo docs referencing those ids
      * 3) delete MariaDB rows by ids
-     *
+     * <p>
      * Idempotent: can be run multiple times safely.
      */
     @Override
@@ -637,7 +663,8 @@ public class ConnectionServiceImp implements ConnectionService {
         return out;
     }
 
-    public record CleanupResult(int candidateSqlIds, long mongoDeleted, int sqlDeleted) {}
+    public record CleanupResult(int candidateSqlIds, long mongoDeleted, int sqlDeleted) {
+    }
 
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
     // private methods

@@ -111,18 +111,7 @@ public class Connection48MngUpdater implements ConnectionMngUpdater {
             for (FieldBindingMng fb : connection.getFieldBindings()) {
                 if (isEnhancementEmpty(fb) && fb.getEnhancementId() != null) {
                     Optional<Enhancement> existingEnhancement = enhancementService.findById(fb.getEnhancementId());
-                    if (existingEnhancement.isPresent()) {
-                        Enhancement enhancement = existingEnhancement.get();
-
-                        EnhancementMng enhancementMng = new EnhancementMng();
-                        enhancementMng.setTitle(enhancement.getTitle() == null ? org.apache.commons.lang3.StringUtils.EMPTY : enhancement.getTitle());
-                        enhancementMng.setDescription(enhancement.getDescription() == null ? org.apache.commons.lang3.StringUtils.EMPTY : enhancement.getDescription());
-                        enhancementMng.setScript(enhancement.getScript());
-                        enhancementMng.setArgs(enhancement.getArgs());
-                        enhancementMng.setLanguage(enhancement.getLanguage());
-
-                        fb.setEnhancement(enhancementMng);
-                    }
+                    existingEnhancement.ifPresent(enhancement -> fb.setEnhancement(new EnhancementMng(enhancement)));
                 }
 
                 fb.setEnhancementId(null);

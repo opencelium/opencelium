@@ -35,7 +35,7 @@ public class FileBackupManager {
                 && name.endsWith(id + ".json");
     }
 
-    private static <T> void doBackup(T entity, String fromVersion, String toVersion, String entityType, String id) {
+    public static <T> void doBackup(T entity, String fromVersion, String toVersion, String entityType, String id) {
         try {
             fromVersion = fromVersion.replaceAll("[^\\d.]", "");
 

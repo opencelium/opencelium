@@ -43,6 +43,10 @@ public interface TemplateService {
 
     TemplateResource getByConnectionId(Long connectionId);
 
+    TemplateResource getByConnectionId(Long connectionId, String snapshotId);
+
+    TemplateResource getByConnectionId(Long connectionId, String snapshotId, boolean withOldElements);
+
     void updateTemplatesToCurrentVersion();
 
 }

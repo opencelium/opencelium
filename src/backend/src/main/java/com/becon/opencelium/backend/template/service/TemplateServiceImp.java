@@ -139,7 +139,22 @@ public class TemplateServiceImp implements TemplateService {
 
     @Override
     public TemplateResource getByConnectionId(Long connectionId) {
-        ConnectionDTO connectionDTO = connectionService.getFullConnection(connectionId);
+        return getByConnectionId(connectionId, null);
+    }
+
+    @Override
+    public TemplateResource getByConnectionId(Long connectionId, String snapshotId) {
+        return getByConnectionId(connectionId, snapshotId, false);
+    }
+
+    @Override
+    public TemplateResource getByConnectionId(Long connectionId, String snapshotId, boolean withOldElements) {
+        ConnectionDTO connectionDTO;
+        if (snapshotId == null) {
+            connectionDTO = connectionService.getFullConnection(connectionId);
+        } else {
+            connectionDTO = connectionService.getFullConnection(connectionId, snapshotId, withOldElements);
+        }
         ConnectionOldDTO oldDTO = oldDTOMapper.toDTO(connectionDTO);
         CtionTemplateResource connectionRes = mapper.toDTO(oldDTO);
 

@@ -68,6 +68,8 @@ public interface ConnectionService {
 
     ConnectionDTO getFullConnection(Long connectionId, String snapshotId);
 
+    ConnectionDTO getFullConnection(Long connectionId, String snapshotId, boolean withOldElements);
+
     List<Connection> getAllByCategoryId(Integer categoryId);
 
     List<ConnectionDTO> getAllFullConnection();
