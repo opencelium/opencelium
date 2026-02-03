@@ -27,6 +27,8 @@ import {
 } from "@change_component/form_elements/form_connection/form_svg/details/description/Icons";
 import Confirmation from "@entity/connection/components/components/general/app/Confirmation";
 import TooltipFontIcon from "@basic_components/tooltips/TooltipFontIcon";
+import DefaultText from "@app_component/base/text/DefaultText";
+import {DefaultTextSize} from "@entity/application/utils/constants";
 
 const IndicatorsContainer = props => {
     return (
@@ -161,8 +163,8 @@ class SelectableInput extends React.Component{
         const hasOnTextValueClick = !!onTextValueClick;
         return(
             <React.Fragment>
-                <Col id={label} xs={4} className={styles.col}>{label}</Col>
-                <Col id={`${label}_option`} style={{display: 'flex'}} xs={8} className={isEditOn ? styles.col_select : styles.col} onMouseOver={(a) => this.mouseOver(a)} onMouseLeave={(a) => this.mouseLeave(a)}>
+                <Col id={label} xs={4} className={styles.col}><DefaultText value={label} /></Col>
+                <Col id={`${label}_option`} style={{display: 'flex', fontSize: `${DefaultTextSize}px`}} xs={8} className={isEditOn ? styles.col_select : styles.col} onMouseOver={(a) => this.mouseOver(a)} onMouseLeave={(a) => this.mouseLeave(a)}>
                     {isEditOn
                         ?
                         this.renderOptions()
