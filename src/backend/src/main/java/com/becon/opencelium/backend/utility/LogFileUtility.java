@@ -22,6 +22,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -208,12 +209,13 @@ public class LogFileUtility {
                     .collect(Collectors.toList());
         } catch (IOException e) {
             logger.error("Error while reading log files from folder: {}", logFolder, e);
-            throw new GeneralServiceException(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    ExceptionConstant.INTERNAL_ERROR,
-                    ExceptionMessages.UNKNOWN_ERROR
-            );
+//            throw new GeneralServiceException(
+//                    HttpStatus.INTERNAL_SERVER_ERROR,
+//                    ExceptionConstant.INTERNAL_ERROR,
+//                    ExceptionMessages.UNKNOWN_ERROR
+//            );
         }
+        return Collections.emptyList();
     }
 
     private static FileDescriptor readFile(Path path) {
