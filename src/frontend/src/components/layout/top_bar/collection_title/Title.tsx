@@ -17,14 +17,11 @@ import React, {FC} from 'react';
 import {withTheme} from 'styled-components';
 import {isArray} from "@application/utils/utils";
 import Text from "@app_component/base/text/Text";
-import {TextSize} from "@app_component/base/text/interfaces";
 import {TitleProps} from './interfaces';
 import {IconStyled, LinkStyled, TitleStyled} from "./styles";
-import {ColorTheme} from "@style/Theme";
 import {Application} from "@application/classes/Application";
 import DashboardIcon from "@app_component/layout/top_bar/collection_title/icons/DashboardIcon";
-import {withTranslation} from "react-i18next";
-import HeaderText from "@app_component/base/text/HeaderText";
+import {EntityHeaderTextSize} from "@entity/application/utils/constants";
 
 const Title: FC<TitleProps> =
     ({
@@ -52,12 +49,12 @@ const Title: FC<TitleProps> =
                             if(t.link){
                                 return (
                                     <span key={t.name}>
-                                        <LinkStyled to={t.link} title={t.name}><HeaderText value={`${t.name}`}/></LinkStyled>
-                                        <HeaderText value={`${!isLastTitle ? ` / ` : ''}`}/>
+                                        <LinkStyled to={t.link} title={t.name}><Text value={`${t.name}`} size={`${EntityHeaderTextSize}px`}/></LinkStyled>
+                                        <Text value={`${!isLastTitle ? ` / ` : ''}`} size={`${EntityHeaderTextSize}px`}/>
                                     </span>
                                 );
                             } else{
-                                return <span key={t.name}><HeaderText value={`${t.name}${!isLastTitle ? ` / ` : ''}`}/></span>;
+                                return <span key={t.name}><Text value={`${t.name}${!isLastTitle ? ` / ` : ''}`} size={`${EntityHeaderTextSize}px`}/></span>;
                             }
                         })
                     }
@@ -69,7 +66,7 @@ const Title: FC<TitleProps> =
     return (
         <TitleStyled className={className}>
             <span>
-                <HeaderText value={title}/>
+                <Text value={title} size={`${EntityHeaderTextSize}px`}/>
                 <IconStyled>{icon}</IconStyled>
             </span>
         </TitleStyled>

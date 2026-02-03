@@ -112,6 +112,8 @@ const ViewSectionStyled = styled.div`
 `;
 
 const ActionsStyled = styled.div`
+    align-items: center;
+    display: flex;
     & > *{
         margin-right: 10px;
     }
