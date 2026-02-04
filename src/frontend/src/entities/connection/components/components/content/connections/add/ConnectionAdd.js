@@ -41,6 +41,7 @@ import {getAllCategories} from "@entity/category/redux_toolkit/action_creators/C
 
 
 function mapStateToProps(state){
+    const isFullScreen = state.applicationReducer.isFullScreen;
     const authUser = state.authReducer.authUser;
     const template = state.templateReducer
     const connector = state.connectorReducer;
@@ -48,6 +49,7 @@ function mapStateToProps(state){
     const category = state.categoryReducer;
     const {currentTechnicalItem} = mapItemsToClasses(state);
     return{
+        isFullScreen,
         authUser,
         connection: connection.currentConnection,
         currentTechnicalItem,

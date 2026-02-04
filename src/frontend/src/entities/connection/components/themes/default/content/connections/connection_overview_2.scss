@@ -54,7 +54,7 @@ $DASHED_COLOR: #58854d;
 
 .connection_editor {
 	border-radius: 5px;
-	height: 100vh;
+	height: 100%;
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -302,7 +302,7 @@ $DASHED_COLOR: #58854d;
 	height: 20px;
 }
 .details_maximized {
-	height: calc(100vh - 2px);
+	height: 100%;
 }
 .details_data {
 	padding: 0 10px 10px;

@@ -15,7 +15,7 @@
 
 import styled from "styled-components";
 import {HeaderStyledProps, LoginFormStyledProps} from "./interfaces";
-import {DefaultCardShadowStyles} from "@entity/application/utils/constants";
+import {DefaultCardShadowStyles, DefaultShadowHoverStyles} from "@entity/application/utils/constants";
 
 const LoginFormStyled = styled.div<LoginFormStyledProps>`
     background: ${({theme}) => theme.menu.background || '#012E55'};
@@ -25,6 +25,7 @@ const LoginFormStyled = styled.div<LoginFormStyledProps>`
     position: absolute;
     left: calc(50% - 150px);
     ${DefaultCardShadowStyles}
+    ${DefaultShadowHoverStyles}
     ${({isAuth}) => isAuth ? `
         height: 100vh;
         left: 0;

@@ -158,6 +158,7 @@ const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
         <div className="button_wrap">
           <TooltipButton
             position={"bottom"}
+            isDisabled={data.isUpdate}
             icon={isFullScreen ? "close_fullscreen" : "open_in_full"}
             tooltip={isFullScreen ? "Minimize" : "Maximize"}
             target={`fullscreen_connection_button`}

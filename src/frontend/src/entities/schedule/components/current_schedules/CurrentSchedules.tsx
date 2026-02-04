@@ -26,7 +26,7 @@ import HeaderText from "@app_component/base/text/HeaderText";
 
 const CurrentSchedules: FC<CurrentSchedulesProps> =
     ({
-
+         hasNoHoverEffect
     }) => {
     const dispatch = useAppDispatch();
     const {socket} = useSocketData();
@@ -66,7 +66,7 @@ const CurrentSchedules: FC<CurrentSchedulesProps> =
         }
     }
     return (
-        <CurrentSchedulesStyled >
+        <CurrentSchedulesStyled hasNoHofevEffect={hasNoHoverEffect}>
             <div>
                 <div style={{marginBottom: '10px', color: !socket.connected ? '#ccc' : '#000'}}><HeaderText value={'Current Jobs'}/></div>
                 <div>

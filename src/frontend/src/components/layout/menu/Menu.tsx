@@ -58,7 +58,7 @@ const Menu: FC<MenuProps> =
     useEffect(() => {
         setTimeout(() => resizeWindow(), 500);
     },[isMenuExpanded]);
-    useEffect(() => {
+/*    useEffect(() => {
         const bodyElement = document.querySelector('body');
         if (bodyElement) {
             if(isFullScreen){
@@ -67,10 +67,13 @@ const Menu: FC<MenuProps> =
                 bodyElement.style['padding'] = '0 1rem 0 calc(48px + 1rem)';
             }
         }
-    }, [isFullScreen])
+    }, [isFullScreen])*/
     useEffect(() => {
+        const bodyElement = document.querySelector('body');
+        if (bodyElement) {
+            bodyElement.style['padding'] = '0 1rem 0 calc(48px + 1rem)';
+        }
         return () => {
-            const bodyElement = document.querySelector('body');
             if (bodyElement) {
                 bodyElement.style['padding'] = '0 1rem 0 calc(48px + 1rem)';
             }

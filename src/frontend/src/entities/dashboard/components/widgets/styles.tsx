@@ -15,7 +15,7 @@
 
 import styled from "styled-components";
 import WidgetTitle from "../widget_title/WidgetTitle";
-import {DefaultCardShadowStyles} from "@entity/application/utils/constants";
+import {DefaultCardShadowStyles, DefaultShadowHoverStyles} from "@entity/application/utils/constants";
 
 const CurrentSchedulesWidgetStyled = styled.div`
     position: relative;
@@ -25,6 +25,7 @@ const CurrentSchedulesWidgetStyled = styled.div`
     padding: 1vw 1vw 0.5vw;
     background-color: #fff;
     ${DefaultCardShadowStyles}
+    ${DefaultShadowHoverStyles}
 `;
 
 const ConnectionOverviewWidgetStyled = styled.div`
@@ -34,6 +35,7 @@ const ConnectionOverviewWidgetStyled = styled.div`
         outline: none !important;
     }
     ${DefaultCardShadowStyles}
+    ${DefaultShadowHoverStyles}
 `;
 
 const ConnectionOverviewTitle = styled(WidgetTitle)`
@@ -45,6 +47,7 @@ const MonitoringBoardsWidgetStyled = styled.div`
     padding: 1vw 1vw 0.5vw;
     background-color: #fff;
     ${DefaultCardShadowStyles}
+    ${DefaultShadowHoverStyles}
     height: calc(100% - 55px);
     max-width: 100%;
     &>iframe{
@@ -63,6 +66,7 @@ const SubscriptionOverviewWidgetStyled = styled.div`
     padding: 1vw 1.5vw 0.5vw 1vw;
     background-color: #fff;
     ${DefaultCardShadowStyles}
+    ${DefaultShadowHoverStyles}
 `;
 
 export {

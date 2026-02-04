@@ -31,6 +31,7 @@ const CardStyled = styled.div<CardProps>`
     padding: ${({padding, isVisible}) => isVisible ? padding || 0 : 0};
     margin: ${({margin, isVisible}) => isVisible ? margin || 0 : 0};
     ${DefaultCardShadowStyles}
+    ${({hasNoHofevEffect}) => hasNoHofevEffect ? '' : DefaultCardShadowStyles}
     position: relative;
     ${({isRefreshing}) => isRefreshing ? 'opacity: 0;' : 'opacity: 1;'}
     ${({isListCard, gridViewType}) => isListCard ? `

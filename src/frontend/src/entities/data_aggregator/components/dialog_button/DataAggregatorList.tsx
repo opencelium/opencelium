@@ -16,6 +16,7 @@ import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 const DataAggregatorList:FC<AggregatorListProps> =
     ({
         setFormType,
+         shouldNoSetEntityHeader,
     }) => {
     const dispatch = useAppDispatch();
     const {
@@ -35,7 +36,7 @@ const DataAggregatorList:FC<AggregatorListProps> =
     }, [])
     const CollectionAggregator = new DataAggregatorCollection(unarchivedAggregators, getListActions);
     return (
-        <CollectionView hasTopBar={false} hasError={!!error} isLoading={gettingAllUnarchivedAggregators === API_REQUEST_STATE.START} collection={CollectionAggregator} hasViewSection={false} hasTitle={false} isListViewCard={false}/>
+        <CollectionView shouldNoSetEntityHeader={shouldNoSetEntityHeader} hasTopBar={false} hasError={!!error} isLoading={gettingAllUnarchivedAggregators === API_REQUEST_STATE.START} collection={CollectionAggregator} hasViewSection={false} hasTitle={false} isListViewCard={false}/>
     )
 }
 

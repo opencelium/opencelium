@@ -129,7 +129,7 @@ const defaultTheme: ITheme = {
         }
     },
     text: {
-        fontFamily: `"Open Sans", "Arial", sans-serif`,
+        fontFamily: `Open Sans, "Arial", sans-serif`,
         color: {
             quite: ColorTheme.Black,
         },

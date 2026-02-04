@@ -117,7 +117,7 @@ class TechnicalLayout extends React.Component{
         const items = connection ? [...connection.fromConnector.svgItems, ...connection.toConnector.svgItems] : [];
 
         const {fromConnectorPanelParams, toConnectorPanelParams} = this.getPanelParams(items);
-        let startingSvgY = -54;
+        let startingSvgY = -104;
         let svgStyle = {};
         return(
             <div id={this.layoutId} className={`${styles.technical_layout}`}>

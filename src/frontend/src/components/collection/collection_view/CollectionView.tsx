@@ -45,7 +45,7 @@ import {
     ViewSectionStyled,
 } from './styles';
 
-const LIST_VIEW_ENTITIES_NUMBER = 1;
+const LIST_VIEW_ENTITIES_NUMBER = 15;
 
 export enum ViewType {
 	LIST = 'LIST',
@@ -67,6 +67,8 @@ const CollectionView: FC<CollectionViewProps> = ({
 	onListRowClick,
 	paginationProps,
 	hasNotAlert,
+	hasNoHoverEffect,
+	shouldNoSetEntityHeader,
 }) => {
 	const dispatch = useAppDispatch();
 	const {
@@ -117,8 +119,10 @@ const CollectionView: FC<CollectionViewProps> = ({
 		applicationViewType = defaultViewType;
 	}
 	useEffect(() => {
-		if (entityHeader !== collection.title) {
-			dispatch(setEntityHeader(collection.title));
+		if (!shouldNoSetEntityHeader) {
+			if (entityHeader !== collection.title) {
+				dispatch(setEntityHeader(collection.title));
+			}
 		}
 	}, [collection?.title]);
 	useEffect(() => {
@@ -340,6 +344,7 @@ const CollectionView: FC<CollectionViewProps> = ({
 							filterData={filterData}
 							onListRowClick={onListRowClick}
 							hasPaginationProps={!!paginationProps}
+							hasNoHoverEffect={hasNoHoverEffect}
 						/>
 					)}
 					{applicationViewType === ViewType.GRID && (
@@ -384,6 +389,7 @@ CollectionView.defaultProps = {
 	loadingStyles: {},
 	onListRowClick: null,
 	paginationProps: null,
+	hasNoHoverEffect: false,
 };
 
 export { CollectionView };

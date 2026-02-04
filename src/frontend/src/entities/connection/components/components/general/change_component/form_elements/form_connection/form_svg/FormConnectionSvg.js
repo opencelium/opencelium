@@ -118,7 +118,7 @@ class FormConnectionSvg extends Component {
               entity instanceof CConnection
                   ? entity.getObjectForConnectionOverview()
                   : entity;
-					this.props.setIsDirty(false);				
+					this.props.setIsDirty(false);
           this.setData({connection: connectionData});
       }
   }
@@ -172,7 +172,7 @@ class FormConnectionSvg extends Component {
       <FormConnectionSvgStyled
         className={`${styles.connection_editor}`}
         style={{
-          padding: isFullScreen ? "0 0 0 15px" : "0",
+          padding: "0",
       }}
       >
         <Details

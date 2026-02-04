@@ -96,7 +96,31 @@ const GlobalSearch: FC<SearchProps> =
                         float: 'left',
                         border: 'none',
                         fontSize: DefaultInputTextSize,
-                    })
+                    }),
+                    noOptionsMessage: (provided: any, {isFocused, isDisabled}: {isFocused: boolean, isDisabled: boolean}) => ({
+                        ...provided,
+                        fontSize: DefaultInputTextSize,
+                    }),
+                    singleValue: (provided: any, {isFocused, isDisabled}: {isFocused: boolean, isDisabled: boolean}) => ({
+                        ...provided,
+                        fontSize: DefaultInputTextSize,
+                    }),
+                    multiValueLabel: (provided: any, {isFocused, isDisabled}: {isFocused: boolean, isDisabled: boolean}) => ({
+                        ...provided,
+                        fontSize: DefaultInputTextSize,
+                    }),
+                    multiValue: (provided: any, {isFocused, isDisabled}: {isFocused: boolean, isDisabled: boolean}) => ({
+                        ...provided,
+                        fontSize: DefaultInputTextSize,
+                    }),
+                    option: (provided: any, {isFocused, isDisabled}: {isFocused: boolean, isDisabled: boolean}) => ({
+                        ...provided,
+                        fontSize: DefaultInputTextSize,
+                    }),
+                    placeholder: (provided: any, {isFocused, isDisabled}: {isFocused: boolean, isDisabled: boolean}) => ({
+                        ...provided,
+                        fontSize: DefaultInputTextSize,
+                    }),
                 }}
                 selectMenuControlStyles={{
                     borderRadius: '2px',

@@ -27,26 +27,19 @@ import AddTemplate from "@change_component/form_elements/form_connection/form_me
 import Button from "@app_component/base/button/Button";
 import {LocalStorage} from "@application/classes/LocalStorage";
 import {capitalize, findTopLeft, setFocusById} from "@application/utils/utils";
-import {TextSize} from "@app_component/base/text/interfaces";
 import {API_REQUEST_STATE, TRIPLET_STATE} from "@application/interfaces/IApplication";
 
 import "@style/css/react_resizable.css";
 import "@style/css/graphiql.css";
 import ContentLoading from "@app_component/base/loading/ContentLoading";
 import {ConnectionPermissions} from "@root/constants";
-import {IF_OPERATOR, LOOP_OPERATOR} from "@classes/content/connection/operator/COperatorItem";
-import LoadTemplate from "@change_component/form_elements/form_connection/form_methods/LoadTemplate";
 import CEnhancement from "@classes/content/connection/field_binding/CEnhancement";
 import DataAggregatorButton
     from "@entity/data_aggregator/components/dialog_button/DataAggregatorButton";
-import SyncInvokers from "@change_component/form_elements/form_connection/form_methods/SyncInvokers";
 import { Category } from "@entity/category/classes/Category";
-import Webhook from "@root/classes/Webhook";
 import {jsonToString} from "@app_component/operator_builder/utils";
-import {OperatorType} from "@app_component/operator_builder/props";
 import Validation from "@application/classes/Validation";
 import DropdownActionButton from '@app_component/dropdown_action_button/DropdownActionButton';
-import {setIsForm} from "@entity/data_aggregator/redux_toolkit/slices/DataAggregatorSlice";
 
 /**
  * common component to add and update Connection
@@ -288,6 +281,7 @@ export function ConnectionForm(type) {
                     testConnection: (entity) => this.testConnection(entity),
                     validateLogic: (entity) => this.validateLogic(entity),
                     additionalButtonsProps,
+                    isUpdate: this.isUpdate,
                 };
             }
 
@@ -511,13 +505,12 @@ export function ConnectionForm(type) {
                             readOnly: true,
                             hasAddMethod: true,
                             style: {margin: '0 65px'},
-
                         },
                         this.getMethodsFormSection(),
                     ],
-                    formClassName: styles.methods_form,
+                    formClassName: this.props.isFullScreen ? styles.fullscreen_methods_form : styles.methods_form,
                     hint: {text: t(`${this.translationKey}.FORM.HINT_3`)},
-                    header: t(`${this.translationKey}.FORM.PAGE_3`),
+                    header: this.isUpdate ? '' : t(`${this.translationKey}.FORM.PAGE_3`),
                     visible: hasMethodsInputsSection || this.isView,
                 }
             }

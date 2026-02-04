@@ -31,5 +31,4 @@ export const DefaultCardShadowStyles = `
     border-radius: 6px;
     transition: all 0.5s ease-in;
     ${DefaultShadowStyles}
-    ${DefaultShadowHoverStyles}
 `;
