@@ -21,6 +21,7 @@ import {ScheduleLogListProps} from './interfaces';
 import {DatetimeValue, MinusStyled, ScheduleLogEntry, ScheduleLogId, ScheduleLogListStyled,} from './styles';
 import {useEventListener} from "@application/utils/utils";
 import {getFlowChartLogsByExecId} from "@root/redux_toolkit/action_creators/ConnectionLogCreators";
+import {DefaultTextSize} from "@entity/application/utils/constants";
 function extractDateTime(filename: string): string | null {
     // Match YYYY-MM-DD_HH-MM at start of string
     const match = filename.match(/^(\d{4})-(\d{2})-(\d{2})_(\d{2})-(\d{2})/);
@@ -76,7 +77,7 @@ const ScheduleLogList: FC<ScheduleLogListProps> =
                     <table>
                         {logExecList.map(((entry, index) => {
                         return (
-                            <ScheduleLogEntry key={entry.executionId} onClick={() => getLogs(entry.executionId)}>
+                            <ScheduleLogEntry style={{fontSize: `${DefaultTextSize}px`}} key={entry.executionId} onClick={() => getLogs(entry.executionId)}>
                                 <td>{`#${entry.executionId}`}</td>
                                 <MinusStyled>{`-`}</MinusStyled>
                                 <DatetimeValue>{entry.datetime}</DatetimeValue>

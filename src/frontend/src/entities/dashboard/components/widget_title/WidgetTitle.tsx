@@ -20,6 +20,7 @@ import {TextSize} from "@app_component/base/text/interfaces";
 import {ColorTheme} from "@style/Theme";
 import { WidgetTitleProps } from './interfaces';
 import {WidgetTitleStyled} from './styles';
+import HeaderText from "@app_component/base/text/HeaderText";
 
 const WidgetTitle: FC<WidgetTitleProps> =
     ({
@@ -29,9 +30,8 @@ const WidgetTitle: FC<WidgetTitleProps> =
     return (
         <WidgetTitleStyled className={className}>
             <span>
-                <Text
+                <HeaderText
                     value={title}
-                    size={TextSize.Size_20}
                     color={ColorTheme.Black}
                     isBold={true}
                 />

@@ -32,6 +32,7 @@ import { withTheme } from "styled-components";
 import TestMethodButton from "@change_component/form_elements/form_connection/form_svg/details/test_method/TestMethodButton";
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 import { setModalCurrentTechnicalItem } from '@entity/connection/redux_toolkit/slices/ModalConnectionSlice';
+import {DefaultTextSize} from "@entity/application/utils/constants";
 function mapStateToProps(state){
     const editor = state.connectionEditorReducer;
     return{
@@ -113,7 +114,7 @@ class TechnicalProcessDescription extends React.Component {
         const isErrorLocationBody = hasErrors ? errors?.location.indexOf('body') !== -1 : false;
         const errorColor = theme?.input?.error?.color || '#9b2e2e';
         return(
-            <Row className={styles.row}>
+            <Row className={styles.row} style={{fontSize: `${DefaultTextSize}px`}}>
                 <Name {...this.props} ref={this.nameRef}/>
                 <Label
                     {...this.props}

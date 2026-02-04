@@ -22,6 +22,7 @@ import {CurrentSchedulesStyled, EmptyListStyled, HeaderStyled} from './styles';
 import {getSchedulesById} from "../../redux_toolkit/action_creators/ScheduleCreators";
 import {ProgressBarElement} from "../../components/progress_bar_element/ProgressBarElement";
 import {useSocketData} from "../../../../socket/SocketDataContext";
+import HeaderText from "@app_component/base/text/HeaderText";
 
 const CurrentSchedules: FC<CurrentSchedulesProps> =
     ({
@@ -67,7 +68,7 @@ const CurrentSchedules: FC<CurrentSchedulesProps> =
     return (
         <CurrentSchedulesStyled >
             <div>
-                <HeaderStyled style={{marginBottom: '20px', color: !socket.connected ? '#ccc' : '#000'}}>{'Current Jobs'}</HeaderStyled>
+                <div style={{marginBottom: '10px', color: !socket.connected ? '#ccc' : '#000'}}><HeaderText value={'Current Jobs'}/></div>
                 <div>
                     {getProgressBars()}
                 </div>

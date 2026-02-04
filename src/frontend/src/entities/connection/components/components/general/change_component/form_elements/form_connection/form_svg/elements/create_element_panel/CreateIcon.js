@@ -29,6 +29,7 @@ export const CreateIcon = (props) => {
             isButton={true}
             disabled={isDisabled}
             iconStyles={{background: 'white', borderRadius: '50%'}}
+            size={'22px'}
         />
     )
 }

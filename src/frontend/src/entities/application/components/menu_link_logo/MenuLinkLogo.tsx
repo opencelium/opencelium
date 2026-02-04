@@ -22,6 +22,7 @@ import {getLogoName, getVersion} from "@application/redux_toolkit/action_creator
 import {useAppDispatch} from "@application/utils/store";
 import {MenuLinkLogoProps} from "@app_component/layout/menu/base/interfaces";
 import LogoImage from "./LogoImage";
+import {EntityHeaderTextSize} from "@entity/application/utils/constants";
 
 export const MenuLinkLogo = ({isReadonly, $onHoverColor, to}: MenuLinkLogoProps) => {
     const dispatch = useAppDispatch();
@@ -45,7 +46,7 @@ export const MenuLinkLogo = ({isReadonly, $onHoverColor, to}: MenuLinkLogoProps)
             $onHoverColor={$onHoverColor}
         >
             <LogoImage style={{marginLeft: '8px'}} {...logoImageProps}/>
-            <span style={{marginRight: '5px'}}>
+            <span style={{marginRight: '8px', fontSize: `${EntityHeaderTextSize}px`}}>
                 <span>{logoName}</span>
             </span>
         </MenuLinkLogoStyled>

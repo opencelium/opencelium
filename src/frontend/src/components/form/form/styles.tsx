@@ -35,7 +35,8 @@ const ActionsStyled = styled.div<ActionsStyledProps>`
     &>:not(:last-child) {
         margin-right: 10px;
     }
-    margin: 0 0 20px;
+    margin: 0 0 10px;
+    display: flex;
 `;
 
 const FormStyled = styled.div<FormStyledProps>`

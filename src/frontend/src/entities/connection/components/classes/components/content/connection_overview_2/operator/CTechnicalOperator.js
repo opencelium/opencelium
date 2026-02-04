@@ -61,11 +61,11 @@ export class CTechnicalOperator extends COperator{
         result.beforeItemLineStyles = {top: `${y + 27}px`, left: `${x + 230}px`};
         result.panelItemStyles = {top: `${y - 3 - panelItemYIntend}px`, left: `${x + 250}px`};
         result.afterItemLineStyles = {top: `${y + 27}px`, left: `${x + 450}px`};
-        result.createIconStyles = {top: `${y + 17}px`, left: `${x + 468}px`};
+        result.createIconStyles = {top: `${y + 20}px`, left: `${x + 468}px`};
         if(data.isOnlyOneCreateElement){
             result.panelItemStyles = {top: `${y - 3 - panelItemYIntend}px`, left: `${x - 5}px`};
             result.afterItemLineStyles = {top: `${y + 27}px`, left: `${x + 195}px`};
-            result.createIconStyles = {top: `${y + 14}px`, left: `${x + 213}px`};
+            result.createIconStyles = {top: `${y + 17}px`, left: `${x + 213}px`};
         }
         if(data && data.noOperatorType){
             result.panelItemTypeStyles.top = `${y + 17}px`;

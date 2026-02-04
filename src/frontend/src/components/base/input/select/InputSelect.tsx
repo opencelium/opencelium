@@ -239,7 +239,7 @@ const InputSelect: FC<InputSelectProps> = ({
         return flattenedCategories
     };
     const hasIcon = !!icon;
-    let height = isToggled ? (localOptions.length > 0 ? categoryList ? CategoryList(localOptions).length : localOptions.length : 1) * 34 + 1 : 0;
+    let height = isToggled ? (localOptions.length > 0 ? categoryList ? CategoryList(localOptions).length : localOptions.length : 1) * 28 + 1 : 0;
     let multipleLabels = [];
     let hasValue = !!value;
     if(isMultiple){
@@ -303,7 +303,7 @@ const InputSelect: FC<InputSelectProps> = ({
                 {
                     localOptions.length > 0 ? sortAlphabeticallyByKey(localOptions, 'label').map((option:any, key:any) => {
                         return (
-                            <Option 
+                            <Option
                                 key={`${option.value}_${option.label}_${key}`}
                                 onKeyDown={(e: any) => focusNextOption(e, option)}
                                 isCurrent={

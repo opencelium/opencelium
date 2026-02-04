@@ -45,7 +45,7 @@ import {
     ViewSectionStyled,
 } from './styles';
 
-const LIST_VIEW_ENTITIES_NUMBER = 10;
+const LIST_VIEW_ENTITIES_NUMBER = 1;
 
 export enum ViewType {
 	LIST = 'LIST',
@@ -297,7 +297,7 @@ const CollectionView: FC<CollectionViewProps> = ({
 								onChange={(e) => search(e.target.value)}
 								minHeight={'1'}
 								width={'200px'}
-								placeholder={'Search field'}
+								placeholder={'Search'}
 							/>
 						)}
 						{collection.AfterSearchComponents}

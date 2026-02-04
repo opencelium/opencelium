@@ -21,7 +21,6 @@ import {Card} from "@app_component/base/card/Card";
 
 const ScheduleLogListStyled = styled(Card)<{x: number, y: number}>`
     ${NotificationListAppearance};
-    min-width: 184px;
     height: auto;
     position: absolute;
     left: ${({x}) => x || 0}px;

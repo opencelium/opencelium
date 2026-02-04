@@ -17,6 +17,7 @@ const LoadingStyled = styled(Loading)`
 const MenuLinkLogoStyled = styled(Link)<MenuLinkLogoStyledProps>`
     margin-bottom: 35px !important;
     padding-bottom: 10px;
+    justify-content: flex-start !important;
     &:hover{
         border-bottom: 2px solid ${({theme, $onHoverColor}) => $onHoverColor || theme.menu.menuItem.hover || '#00ACC2'};
         padding-bottom: 8px;

@@ -18,6 +18,7 @@ import {withTheme} from 'styled-components';
 import {RadioStyled} from './styles';
 import {InputRadioProps, RadiosAlign} from "./interfaces";
 import Text from "../../text/Text";
+import DefaultText from "@app_component/base/text/DefaultText";
 
 const InputRadio: FC<InputRadioProps> =
     ({
@@ -39,7 +40,7 @@ const InputRadio: FC<InputRadioProps> =
     return (
         <RadioStyled align={align} emphasizeColor={color} marginLeft={marginLeft}>
             {inputBeforeLabel}
-            <Text value={label}/>
+            <DefaultText value={label}/>
             {inputAfterLabel}
         </RadioStyled>
     )

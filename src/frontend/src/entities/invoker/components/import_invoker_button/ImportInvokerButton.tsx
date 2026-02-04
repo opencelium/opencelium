@@ -72,7 +72,7 @@ const ImportInvokerButton: FC<ImportInvokerButtonProps> =
     }
     return (
         <ImportInvokerButtonStyled >
-            <PermissionButton size={TextSize.Size_16} key={'add_button'} icon={'add'} handleClick={toggleDialog} label={'Import Invoker'} permission={InvokerPermissions.CREATE}/>
+            <PermissionButton key={'add_button'} icon={'add'} handleClick={toggleDialog} label={'Import Invoker'} permission={InvokerPermissions.CREATE}/>
             <Dialog
                 actions={[
                     {id: 'import_ok', label: 'Ok', onClick: checkFilename},

@@ -16,6 +16,7 @@
 import styled from "styled-components";
 import {Text} from "@app_component/base/text/Text";
 import {Card} from "@app_component/base/card/Card";
+import DefaultText from "@app_component/base/text/DefaultText";
 
 const CurrentSchedulesStyled = styled(Card)`
     padding: 1vw 1vw 0.5vw;
@@ -34,7 +35,7 @@ const HeaderStyled = styled.div`
     margin-bottom: 30px;
 `;
 
-const EmptyListStyled = styled(Text)`
+const EmptyListStyled = styled(DefaultText)`
 `;
 
 export {

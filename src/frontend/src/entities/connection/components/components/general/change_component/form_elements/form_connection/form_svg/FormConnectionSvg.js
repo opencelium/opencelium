@@ -29,6 +29,7 @@ import TechnicalLayout from './layouts/TechnicalLayout';
 
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 import {checkPolyglot} from "@entity/external_application/redux_toolkit/action_creators/ExternalApplicationCreators";
+import {FormConnectionSvgStyled} from "@change_component/form_elements/form_connection/form_svg/styles";
 
 export const HAS_LAYOUTS_SCALING = true;
 
@@ -168,11 +169,10 @@ class FormConnectionSvg extends Component {
       createElementPanelPosition,
     } = this.state;
     return (
-      <div
+      <FormConnectionSvgStyled
         className={`${styles.connection_editor}`}
         style={{
           padding: isFullScreen ? "0 0 0 15px" : "0",
-          boxShadow: "0 5px 3px rgb(0 0 0 / 12%),0 2px 2px rgb(0 0 0 / 24%),0 5px 2px rgb(0 0 0 / 24%)",
       }}
       >
         <Details
@@ -219,7 +219,7 @@ class FormConnectionSvg extends Component {
         <ButtonPanel readOnly={data.readOnly} data={data} entity={entity} updateEntity={updateEntity} currentTechnicalItem={currentTechnicalItem} setCurrentTechnicalItem={setCurrentTechnicalItem} />
 {/*        <LogPanel />*/}
         <LogsPanel theme={theme}/>
-      </div>
+      </FormConnectionSvgStyled>
     );
   }
 }

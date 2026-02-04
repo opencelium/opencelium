@@ -21,6 +21,7 @@ import {InputSwitcherStyled, InputSwitchStyled} from "./styles";
 import Text from "../../text/Text";
 import {TextSize} from "../../text/interfaces";
 import Dialog from "@app_component/base/dialog/Dialog";
+import DefaultText from "@app_component/base/text/DefaultText";
 
 
 const InputSwitch: FC<InputSwitchProps> = ({
@@ -49,7 +50,7 @@ const InputSwitch: FC<InputSwitchProps> = ({
         <Input readOnly={readOnly} placeholder={placeholder} required={required} label={label} icon={icon} error={error} isLoading={isLoading} isIconInside={isIconInside}>
             <InputSwitchStyled {...props}>
                 <InputSwitcherStyled isChecked={isChecked} onClick={ readOnly ? () => {} : hasConfirmation ? () => toggleConfirmation(true) : handleClick}/>
-                <Text value={name} size={TextSize.Size_14}/>
+                <DefaultText value={name}/>
             </InputSwitchStyled>{
                 hasConfirmation &&
                 <Dialog

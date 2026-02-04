@@ -17,6 +17,7 @@ import React, {FC} from 'react';
 import {Text} from "@app_component/base/text/Text";
 import {TextSize} from "@app_component/base/text/interfaces";
 import {EmptyListStyled} from './styles';
+import DefaultText from "@app_component/base/text/DefaultText";
 
 const EmptyList: FC =
     ({
@@ -24,7 +25,7 @@ const EmptyList: FC =
     }) => {
     return (
         <EmptyListStyled >
-            <Text value={'There are no results.'} size={TextSize.Size_14}/>
+            <DefaultText value={'There are no results.'}/>
         </EmptyListStyled>
     )
 }

@@ -21,12 +21,28 @@ import ErrorBoundary from "@app_component/base/error_boundary/ErrorBoundary";
 import {FormSectionProps} from "../form_section/interfaces";
 import {FormProps} from './interfaces';
 import {ActionsStyled, FormSectionStyled, FormStyled, SectionStyled} from './styles';
-import {isArray} from "@application/utils/utils";
+import {isArray, isString} from "@application/utils/utils";
 import {useAppDispatch} from "@application/utils/store";
 import LicenseAlertMessage from "@entity/dashboard/components/license_alert_message/LicenseAlertMessage";
 import {setEntityHeader} from "@application/redux_toolkit/slices/ApplicationSlice";
 import {Application} from "@application/classes/Application";
-
+import {MultipleTitleProps} from "@application/interfaces/IApplication";
+const areEqualHeaders = (h1: string | MultipleTitleProps[], h2: string | MultipleTitleProps[]) => {
+    if (isString(h1)) {
+        return h1 === h2;
+    }
+    if (typeof h1 !== 'string' && typeof h2 !== 'string' && h1.length === h2.length) {
+        for (let i = 0; i < h1.length; i++) {
+            if (h1[i].name === h2[i].name) {
+                continue;
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+    return false;
+}
 const Form: FC<FormProps> =
     ({
         title,
@@ -42,7 +58,7 @@ const Form: FC<FormProps> =
             entityHeader,
         } = Application.getReduxState();
     useEffect(() => {
-        if (entityHeader !== title) {
+        if (!entityHeader || !areEqualHeaders(entityHeader, title)) {
             dispatch(setEntityHeader(title));
         }
     }, [title]);

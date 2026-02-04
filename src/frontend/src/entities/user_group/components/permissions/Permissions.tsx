@@ -22,6 +22,7 @@ import {OptionProps} from "@app_component/base/input/select/interfaces";
 import {PermissionTypes} from "@application/requests/models/Component";
 import {PermissionProps, PermissionsProps} from './interfaces';
 import { PermissionsStyled } from './styles';
+import DefaultText from "@app_component/base/text/DefaultText";
 
 export function getAllPermissions() : PermissionTypes[]{
     let permissions : PermissionTypes[] = [];
@@ -143,7 +144,7 @@ const Permissions: FC<PermissionsProps> =
                                 return (
                                     <th key={permissionType}>
                                         <span>
-                                            <Text transKey={`permissions.${permissionType}`}/>
+                                            <DefaultText transKey={`permissions.${permissionType}`}/>
                                             {!readOnly && <input id={key === 0 ? id : ''} type={'checkbox'} checked={isAllCheckedByPermissionType(permissionType)} onChange={() => toggleAllByPermissionType(permissionType)}/>}
                                         </span>
                                     </th>
@@ -152,7 +153,7 @@ const Permissions: FC<PermissionsProps> =
                             {!readOnly &&
                                 <th>
                                     <span>
-                                        <Text transKey={`permissions.ADMIN`}/>
+                                        <DefaultText transKey={`permissions.ADMIN`}/>
                                         <input type={'checkbox'} checked={isAllChecked()} onChange={toggleAll}/>
                                     </span>
                                 </th>
@@ -164,7 +165,7 @@ const Permissions: FC<PermissionsProps> =
                             const componentPermissions = permissions[component.label] || [];
                             return(
                                 <tr key={component.value}>
-                                    <td><Text value={capitalize(component.label.toLowerCase())}/></td>
+                                    <td><DefaultText value={capitalize(component.label.toLowerCase())}/></td>
                                     {allPermissionTypes.map((permissionType: PermissionTypes) => {
                                         return (
                                             <td key={`${component.value}_${permissionType}`}>
@@ -172,9 +173,9 @@ const Permissions: FC<PermissionsProps> =
                                                     ?
                                                         componentPermissions.findIndex(elem => elem === permissionType) !== -1
                                                         ?
-                                                            <Text value={'+'}/>
+                                                            <DefaultText value={'+'}/>
                                                         :
-                                                            <Text value={'-'}/>
+                                                            <DefaultText value={'-'}/>
                                                     :
                                                         <input
                                                             type={'checkbox'}

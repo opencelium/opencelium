@@ -42,7 +42,7 @@ const Layout: FC =
                         </React.Fragment>
                 }
                 <Suspense fallback={(<ContentLoading/>)}>
-                    <div style={{paddingTop: '100px'}}>
+                    <div style={{paddingTop: '80px'}}>
                         <Outlet/>
                     </div>
                 </Suspense>

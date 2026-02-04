@@ -19,6 +19,7 @@ import OCButton from '@app_component/base/button/Button';
 import styles from '@entity/connection/components/themes/default/general/basic_components.scss';
 import {getThemeClass, formatHtmlId} from "@application/utils/utils";
 import FontIcon from "../FontIcon";
+import {ButtonIconSize, ButtonLabelSize} from "@entity/application/utils/constants";
 
 
 /**
@@ -38,12 +39,6 @@ class Button extends Component{
         if(title === '' && this.props.children === null){
             return null;
         }
-        let classNames = [
-            'button_icon',
-            'button_title',
-            'ripple',
-        ];
-        classNames = getThemeClass({classNames, authUser, styles});
         id = id !== '' ? id : formatHtmlId(`button_${title}`);
         return (
             <OCButton
@@ -51,7 +46,7 @@ class Button extends Component{
                 href={href}
                 label={title || this.props.children}
                 icon={icon}
-                size={size || 14}
+                size={size}
                 iconSize={iconSize}
                 isDisabled={disabled}
                 handleClick={disabled ? null : onClick}
@@ -93,7 +88,8 @@ Button.defaultProps = {
     title: '',
     isActive: false,
     id: '',
-    iconSize: 24,
+    iconSize: `${ButtonIconSize}px`,
+    size: `${ButtonLabelSize}px`,
     iconClassName: '',
 };
 

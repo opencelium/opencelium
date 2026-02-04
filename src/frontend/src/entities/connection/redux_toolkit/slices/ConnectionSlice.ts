@@ -158,7 +158,7 @@ let initialState: ConnectionState = {
   notificationData: {},
   detailsLocation: PANEL_LOCATION.SAME_WINDOW,
   colorMode: COLOR_MODE.RECTANGLE_TOP,
-  processTextSize: 20,
+  processTextSize: 14,
   isCreateElementPanelOpened: false,
   isDraftOpenedOnce: false,
   currentLogs: [],

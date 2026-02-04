@@ -1,16 +1,10 @@
 import React, {useEffect, useState} from 'react';
-import {
-    Dropdown,
-    DropdownMenu,
-    DropdownItem,
-} from 'reactstrap';
 import PropTypes from 'prop-types';
 import {DropdownMenuProps} from "reactstrap/es/DropdownMenu";
 import {useNavigate} from "react-router";
 import Dialog from "@app_component/base/dialog/Dialog";
 import Loading from "@app_component/base/loading/Loading";
 import {withTheme} from "styled-components";
-import {DropdownItemStyled, DropdownToggleStyled} from "./style";
 import {API_REQUEST_STATE, TRIPLET_STATE} from "@application/interfaces/IApplication";
 import {ColorTheme} from "@style/Theme";
 import InputText from "@app_component/base/input/text/InputText";
@@ -25,6 +19,7 @@ import {getTemplatesByConnectors} from "@entity/template/redux_toolkit/action_cr
 import {Category} from "@entity/category/classes/Category";
 import {getAllCategories} from "@entity/category/redux_toolkit/action_creators/CategoryCreators";
 import {clearTemplates} from "@entity/template/redux_toolkit/slices/TemplateSlice";
+import DropdownActionButton from '@app_component/dropdown_action_button/DropdownActionButton';
 
 function AddConnectionButton({ theme, direction, ...args }: DropdownMenuProps & {theme?: any}) {
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -175,13 +170,13 @@ function AddConnectionButton({ theme, direction, ...args }: DropdownMenuProps & 
 
     return (
         <>
-            <Dropdown isOpen={dropdownOpen} toggle={toggle} direction={direction}>
-                <DropdownToggleStyled caret>{"Add Connection"}</DropdownToggleStyled>
-                <DropdownMenu {...args}>
-                    <DropdownItemStyled onClick={toggleForm}>{"via template"}</DropdownItemStyled>
-                    <DropdownItemStyled onClick={openEditor}>{"via editor"}</DropdownItemStyled>
-                </DropdownMenu>
-            </Dropdown>
+            <DropdownActionButton
+                label="Add"
+                items={[
+                    { id: 'via_template', label: 'via template', onClick: toggleForm },
+                    { id: 'via_editor', label: 'via editor', onClick: openEditor },
+                ]}
+            />
             <Dialog
                 actions={[
                     {id: 'quick_add_ok', label: 'Ok', onClick: validateFields, isLoading: addingConnection === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START},
