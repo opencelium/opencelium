@@ -45,7 +45,7 @@ import {
     ViewSectionStyled,
 } from './styles';
 
-const LIST_VIEW_ENTITIES_NUMBER = 10;
+const LIST_VIEW_ENTITIES_NUMBER = 1;
 
 export enum ViewType {
 	LIST = 'LIST',

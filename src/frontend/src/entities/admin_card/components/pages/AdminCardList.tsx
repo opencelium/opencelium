@@ -38,6 +38,9 @@ const cards = [
     {id: 11, name: 'External Applications', link: '/apps'},
     {id: 12, name: 'Migration from Neo4j to MongoDB (deprecated)', link: `/migration`},
     {id: 13, name: 'Categories', link: `/categories`},
+    {id: 14, name: 'External Applications', link: '/apps'},
+    {id: 15, name: 'Migration from Neo4j to MongoDB (deprecated)', link: `/migration`},
+    {id: 16, name: 'Categories', link: `/categories`},
 ]
 const AdminCardList: FC<AdminCardListProps> = permission(AdminCardPermissions.READ)(({}) => {
     const dispatch = useAppDispatch();

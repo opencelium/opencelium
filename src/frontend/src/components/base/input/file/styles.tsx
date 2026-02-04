@@ -19,7 +19,7 @@ import {ButtonStyledProps, InputProps, TextStyledProps} from "./interfaces";
 import Button from "../../button/Button";
 import {ElementProps} from "../interfaces";
 import {EmphasizeInputStyleLines} from "../styles";
-import {DefaultTextSize} from "@entity/application/utils/constants";
+import {DefaultInputTextSize} from "@entity/application/utils/constants";
 
 const CheckboxStyled = styled.input`
     margin-top: ${({theme}) => theme.input.inputElement.paddingTop || 0};
@@ -30,7 +30,7 @@ const CheckboxStyled = styled.input`
 `;
 
 const TextStyled = styled(Text)<TextStyledProps>`
-    font-size: ${DefaultTextSize}px;
+    font-size: ${DefaultInputTextSize}px;
     padding-top: ${({theme}) => theme.input.inputElement.paddingTop || 0};
     padding-bottom: ${({theme}) => theme.input.inputElement.paddingBottom || 0};
     margin-top: ${({marginTop}) => marginTop || 0};

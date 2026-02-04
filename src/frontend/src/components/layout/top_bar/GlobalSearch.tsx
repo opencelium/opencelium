@@ -24,6 +24,7 @@ import {setSearchFields as setGlobalSearchValue} from "@application/redux_toolki
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import ReactSelect from "@app_component/base/input/select/ReactSelect";
 import { SearchProps } from './interfaces';
+import {DefaultInputTextSize} from "@entity/application/utils/constants";
 
 
 const GlobalSearch: FC<SearchProps> =
@@ -94,6 +95,7 @@ const GlobalSearch: FC<SearchProps> =
                         width: '200px',
                         float: 'left',
                         border: 'none',
+                        fontSize: DefaultInputTextSize,
                     })
                 }}
                 selectMenuControlStyles={{

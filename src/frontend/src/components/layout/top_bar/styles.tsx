@@ -17,6 +17,7 @@ import styled from "styled-components";
 import {SlideToTop} from "@style/animations";
 import {ITheme} from "@style/Theme";
 import {CalloutStyledProps, CalloutMessageStyledProps} from "./interfaces";
+import {DefaultShadowStyles} from "@entity/application/utils/constants";
 
 const CalloutStyled = styled.div<CalloutStyledProps>`
     ${SlideToTop}
@@ -70,6 +71,7 @@ const TopBarStyled = styled.div`
     right: 0;
   display: flex;
   align-items: center;
+    ${DefaultShadowStyles}
   .search_input{
     width: 200px;
     float: left;

@@ -33,7 +33,7 @@
 
 .testConnectionTitle {
 	opacity: 1 !important;
-	padding: 15px 14.3px !important;
+	padding: 5px 10px !important;
 	right: 0;
 	border-right: none;
 	span {
@@ -42,7 +42,7 @@
 		}
 		&:last-child {
 			font-weight: unset;
-			font-size: 20px;
+			font-size: 16px;
 		}
 	}
 

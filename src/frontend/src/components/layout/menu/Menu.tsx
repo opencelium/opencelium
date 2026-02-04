@@ -82,7 +82,7 @@ const Menu: FC<MenuProps> =
             let bodyElement = document.querySelector('body');
             if (bodyElement) {
                 if (!isMenuExpanded) {
-                    bodyElement.style['padding'] = '0 1rem 0 calc(212px + 1rem)';
+                    bodyElement.style['padding'] = '0 1rem 0 calc(180px + 1rem)';
                 } else {
                     bodyElement.style['padding'] = '0 1rem 0 calc(48px + 1rem)';
                 }
