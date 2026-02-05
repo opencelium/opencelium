@@ -493,10 +493,14 @@ public class ConnectionServiceImp implements ConnectionService {
                     continue;
                 }
 
-                connectionMng.setCreatedBy(connection.getCreatedBy());
+                if (connectionMng.getCreatedBy() == null) {
+                    connectionMng.setCreatedBy(connection.getCreatedBy());
+                }
                 connectionMngService.save(connectionMng);
 
-                connection.setSnapshotId(connectionMng.getId());
+                if (connection.getSnapshotId() == null) {
+                    connection.setSnapshotId(connectionMng.getId());
+                }
                 connection.setOcVersion(ocProps.getVersion());
                 connectionRepository.save(connection);
             }
@@ -556,7 +560,7 @@ public class ConnectionServiceImp implements ConnectionService {
      * 1) find test connection ids in MariaDB
      * 2) delete Mongo docs referencing those ids
      * 3) delete MariaDB rows by ids
-     *
+     * <p>
      * Idempotent: can be run multiple times safely.
      */
     @Override
@@ -600,7 +604,8 @@ public class ConnectionServiceImp implements ConnectionService {
         return out;
     }
 
-    public record CleanupResult(int candidateSqlIds, long mongoDeleted, int sqlDeleted) {}
+    public record CleanupResult(int candidateSqlIds, long mongoDeleted, int sqlDeleted) {
+    }
 
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
     // private methods
