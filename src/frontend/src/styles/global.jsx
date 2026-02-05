@@ -21,6 +21,35 @@ import {SlickCarousel} from "./slick_carousel";
 
 
 export const Global = createGlobalStyle`
+    @font-face {
+        font-family: "Open Sans";
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src:
+                url("/styles/fonts/open_sans/open-sans-v29-latin-regular.woff2") format("woff2"),
+                url("/styles/fonts/open_sans/open-sans-v29-latin-regular.woff") format("woff");
+    }
+
+    @font-face {
+        font-family: "Open Sans";
+        font-style: normal;
+        font-weight: 600;
+        font-display: swap;
+        src:
+                url("/styles/fonts/open_sans/open-sans-v29-latin-600.woff2") format("woff2"),
+                url("/styles/fonts/open_sans/open-sans-v29-latin-600.woff") format("woff");
+    }
+
+    @font-face {
+        font-family: "Open Sans";
+        font-style: italic;
+        font-weight: 400;
+        font-display: swap;
+        src:
+                url("/styles/fonts/open_sans/open-sans-v29-latin-italic.woff2") format("woff2"),
+                url("/styles/fonts/open_sans/open-sans-v29-latin-italic.woff") format("woff");
+    }
     body{
         background: #eee;
         position: relative;
