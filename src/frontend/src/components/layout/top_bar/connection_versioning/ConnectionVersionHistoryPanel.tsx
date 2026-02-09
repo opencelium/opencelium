@@ -13,7 +13,15 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+	FC,
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from 'react';
+import ReactDOM from 'react-dom';
 import { useAppDispatch, useAppSelector } from '@application/utils/store';
 import { API_REQUEST_STATE } from '@application/interfaces/IApplication';
 
@@ -22,10 +30,43 @@ import { deleteConnectionVersion } from '@entity/connection/redux_toolkit/action
 
 import ConnectionVersioningConfirmDialog from './ConnectionVersioningConfirmDialog';
 
-import TooltipButton from '@app_component/base/tooltip_button/TooltipButton';
-import { ColorTheme } from '@style/Theme';
+import Button from '@app_component/base/button/Button';
 import { useEventListener } from '@application/utils/utils';
 
+import {
+	PanelRoot,
+	PanelHeader,
+	PanelTitle,
+	CloseBtn,
+	PanelContent,
+	LoadingRow,
+	EmptyRow,
+	TimelineRoot,
+	TimelineLine,
+	DateRow,
+	DateSpacer,
+	DateInnerRow,
+	DateHr,
+	DateLabel,
+	ItemRow,
+	TimeCol,
+	TimeLabel,
+	Dot,
+	Card,
+	CardHeader,
+	AuthorText,
+	DotsButton,
+	DotsIcon,
+	DotSmall,
+	CommentArea,
+	ExpandButton,
+	ExpandIcon,
+	CommentTextarea,
+	SaveRow,
+	MenuRoot,
+	MenuItem,
+	MenuDivider,
+} from './ConnectionVersionHistoryPanel.styles';
 
 export type ConnectionVersionItem = {
 	connectionId?: number;
@@ -33,6 +74,7 @@ export type ConnectionVersionItem = {
 	snapshotId: string;
 	createdAt: number;
 	author?: number;
+	comment?: string;
 };
 
 export interface ConnectionVersionHistoryPanelProps {
@@ -42,263 +84,671 @@ export interface ConnectionVersionHistoryPanelProps {
 	theme: any;
 }
 
-function formatVersionDate(ts: number): string {
-  try {
-    const d = new Date(ts);
-    const yyyy = d.getFullYear();
-    const mon = d.toLocaleString('en-US', { month: 'short' });
-    const dd = String(d.getDate()).padStart(2, '0');
-    const hh = String(d.getHours()).padStart(2, '0');
-    const mm = String(d.getMinutes()).padStart(2, '0');
-    const ss = String(d.getSeconds()).padStart(2, '0');
-    return `${yyyy} ${mon} ${dd} at ${hh}:${mm}:${ss}`;
-  } catch {
-    return `${ts}`;
-  }
-}
-
 function normalizeVersions(raw: any): ConnectionVersionItem[] {
-  if (!Array.isArray(raw)) return [];
+	if (!Array.isArray(raw)) return [];
+	return raw
+		.map((it: any) => {
+			const snapshotId = it?.snapshotId;
+			const createdAt = it?.createdAt;
+			if (!snapshotId || typeof createdAt !== 'number') return null;
 
-  const mapped = raw
-    .map((it: any) => {
-      const snapshotId = it?.snapshotId;
-      const createdAt = it?.createdAt;
-      const author = it?.author;
-
-      if (!snapshotId || typeof createdAt !== 'number') return null;
-
-      return {
-        connectionId: it?.connectionId,
-        title: it?.title,
-        snapshotId: String(snapshotId),
-        createdAt: createdAt,
-        author: author,
-      } as ConnectionVersionItem;
-    })
-    .filter(Boolean) as ConnectionVersionItem[];
-
-  return mapped;
+			return {
+				connectionId: it?.connectionId,
+				title: it?.title,
+				snapshotId: String(snapshotId),
+				createdAt,
+				author: it?.author,
+				comment: it?.comment,
+			} as ConnectionVersionItem;
+		})
+		.filter(Boolean) as ConnectionVersionItem[];
 }
 
-const panelBaseStyle: React.CSSProperties = {
-  overflowY: 'auto',
-  position: 'fixed',
-  top: 0,
-  height: '100vh',
-  width: '360px',
-  background: '#fff',
-  borderLeft: '1px solid rgba(0,0,0,0.12)',
-  zIndex: 9999,
-  boxShadow: '0 0 20px rgba(0,0,0,0.08)',
-  display: 'flex',
-  flexDirection: 'column',
-  transition: 'all 0.3s',
-};
+function pad2(n: number): string {
+	return String(n).padStart(2, '0');
+}
+
+function formatTimeHHMM(ts: number): string {
+	try {
+		const d = new Date(ts);
+		return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+	} catch {
+		return '';
+	}
+}
+
+function formatDateDDMMYYYY(ts: number): string {
+	try {
+		const d = new Date(ts);
+		const dd = pad2(d.getDate());
+		const mm = pad2(d.getMonth() + 1);
+		const yyyy = d.getFullYear();
+		return `${dd}.${mm}.${yyyy}`;
+	} catch {
+		return '';
+	}
+}
+
+type TimelineRow =
+	| { kind: 'date'; key: string; dateLabel: string }
+	| { kind: 'item'; key: string; item: ConnectionVersionItem };
+
+function buildTimelineRows(
+	versionsDesc: ConnectionVersionItem[],
+): TimelineRow[] {
+	const rows: TimelineRow[] = [];
+	let lastDate = '';
+
+	for (const v of versionsDesc) {
+		const d = formatDateDDMMYYYY(v.createdAt);
+		if (d && d !== lastDate) {
+			rows.push({ kind: 'date', key: `date_${d}`, dateLabel: d });
+			lastDate = d;
+		}
+		rows.push({ kind: 'item', key: `item_${v.snapshotId}`, item: v });
+	}
+
+	return rows;
+}
+
+function stopPropagationOnly(e: any) {
+	e.stopPropagation();
+}
+
+function stopBoth(e: any) {
+	e.preventDefault();
+	e.stopPropagation();
+}
+
+function clamp(n: number, min: number, max: number): number {
+	return Math.max(min, Math.min(max, n));
+}
 
 const ConnectionVersionHistoryPanel: FC<ConnectionVersionHistoryPanelProps> = ({
-  open,
-  onClose,
-  onSelect,
+	open,
+	onClose,
+	onSelect,
 }) => {
-  const dispatch = useAppDispatch();
+	const dispatch = useAppDispatch();
 
-  const connectionState = useAppSelector((s: any) => s.connectionReducer);
-  const userState = useAppSelector((s: any) => s.userReducer);
+	const connectionState = useAppSelector((s: any) => s.connectionReducer);
+	const userState = useAppSelector((s: any) => s.userReducer);
 
-  const loading = connectionState?.gettingConnectionVersions === API_REQUEST_STATE.START;
-  const rawVersions = connectionState?.connectionVersions;
+	const loading =
+		connectionState?.gettingConnectionVersions === API_REQUEST_STATE.START;
+	const rawVersions = connectionState?.connectionVersions;
 
-  const users = userState?.users || [];
-  const usersLoading = userState?.gettingUsers === API_REQUEST_STATE.START;
+	const users = userState?.users || [];
+	const usersLoading = userState?.gettingUsers === API_REQUEST_STATE.START;
 
-  const [deletingSnapshotId, setDeletingSnapshotId] = useState<string | null>(null);
-  const [confirmDelete, setConfirmDelete] = useState<{ open: boolean; v: ConnectionVersionItem | null }>({
-    open: false,
-    v: null,
-  });
+	const [deletingSnapshotId, setDeletingSnapshotId] = useState<string | null>(
+		null,
+	);
+	const [confirmDelete, setConfirmDelete] = useState<{
+		open: boolean;
+		v: ConnectionVersionItem | null;
+	}>({
+		open: false,
+		v: null,
+	});
 
-  const panelRef = useRef() as React.MutableRefObject<HTMLDivElement | null>;
+	const [activeSnapshotId, setActiveSnapshotId] = useState<string | null>(null);
+	const [expandedSnapshotId, setExpandedSnapshotId] = useState<string | null>(
+		null,
+	);
+	const [comments, setComments] = useState<Record<string, string>>({});
 
-  const checkIfClickedOutside = useCallback(
-    (e: any) => {
-      if (panelRef.current !== null) {
-        if (open && panelRef.current && !panelRef.current.contains(e.target)) {
-          const dialogElement = document.querySelector('[role=dialog]');
-          const isPartOfDialog = dialogElement ? dialogElement.contains(e.target) : false;
-          if (!isPartOfDialog) {
-            onClose();
-          }
-        }
-      }
-    },
-    [open, onClose],
-  );
+	const [expandedWidths, setExpandedWidths] = useState<Record<string, number>>(
+		{},
+	);
 
-  useEventListener('mousedown', checkIfClickedOutside, window, open);
+	const [hoveredSnapshotId, setHoveredSnapshotId] = useState<string | null>(
+		null,
+	);
 
-  useEffect(() => {
-    if (!open) return;
+	const [menu, setMenu] = useState<{
+		open: boolean;
+		snapshotId: string | null;
+		x: number;
+		y: number;
+	}>({ open: false, snapshotId: null, x: 0, y: 0 });
 
-    if (!usersLoading && (!Array.isArray(users) || users.length === 0)) {
-      dispatch(getAllUsers() as any);
-    }
-  }, [open, usersLoading, users?.length, dispatch]);
+	const panelRef = useRef<HTMLDivElement | null>(null);
+	const menuRef = useRef<HTMLDivElement | null>(null);
 
-  const getAuthorLabel = useCallback(
-    (authorId?: number): string => {
-      if (!authorId || !Array.isArray(users) || users.length === 0) return 'Unknown';
+	const dotsRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
-      const u = users.find((x: any) => x?.userId === authorId);
-      const name = u?.userDetail?.name || '';
-      const surname = u?.userDetail?.surname || '';
-      const full = `${name} ${surname}`.trim();
+	const commentAreaRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-      return full || 'Unknown';
-    },
-    [users],
-  );
+	const closeMenu = useCallback(() => {
+		setMenu({ open: false, snapshotId: null, x: 0, y: 0 });
+	}, []);
 
-  const versions = useMemo(() => {
-    const normalized = normalizeVersions(rawVersions);
-    return [...normalized].sort((a, b) => b.createdAt - a.createdAt);
-  }, [rawVersions]);
+	useEffect(() => {
+		if (open) return;
 
-  const onAskDelete = useCallback((e: React.MouseEvent, v: ConnectionVersionItem) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setConfirmDelete({ open: true, v });
-  }, []);
+		setExpandedSnapshotId(null);
+		setActiveSnapshotId(null);
+		setHoveredSnapshotId(null);
+		closeMenu();
+	}, [open]);
 
-  const onConfirmDelete = useCallback(async () => {
-    const v = confirmDelete.v;
-    if (!v?.connectionId || !v?.snapshotId) {
-      setConfirmDelete({ open: false, v: null });
-      return;
-    }
+	useEffect(() => {
+		if (!open) return;
 
-    const connectionId = v.connectionId;
-    const snapshotId = v.snapshotId;
+		const handler = (e: PointerEvent) => {
+			if (!menu.open || !menu.snapshotId) return;
 
-    try {
-      setDeletingSnapshotId(snapshotId);
+			const target = e.target as Node | null;
+			if (!target) return;
 
-      await dispatch(deleteConnectionVersion({ connectionId, snapshotId }) as any).unwrap();
-    } catch (err) {
-    } finally {
-      setDeletingSnapshotId(null);
-      setConfirmDelete({ open: false, v: null });
-    }
-  }, [confirmDelete.v, dispatch]);
+			const m = menuRef.current;
+			if (m && m.contains(target)) return;
 
-  const onCancelDelete = useCallback(() => {
-    setConfirmDelete({ open: false, v: null });
-  }, []);
+			const btn = dotsRefs.current[menu.snapshotId];
+			if (btn && btn.contains(target)) return;
 
-  return (
-    <>
-      <ConnectionVersioningConfirmDialog
-        open={confirmDelete.open}
-        title="Delete version"
-        message="Are you sure you want to delete this version?"
-        confirmLabel="Delete"
-        cancelLabel="Cancel"
-        onConfirm={onConfirmDelete}
-        onCancel={onCancelDelete}
-      />
+			closeMenu();
+		};
 
-      <div
-        ref={panelRef}
-        style={{
-          ...panelBaseStyle,
-          right: open ? '0' : '-360px',
-          pointerEvents: open ? 'auto' : 'none',
-        }}
-      >
-        <div
-          style={{
-            padding: '16px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <div style={{ fontSize: '18px', fontWeight: 700 }}>Version History</div>
+		window.addEventListener('pointerdown', handler, true);
+		return () => window.removeEventListener('pointerdown', handler, true);
+	}, [open, menu.open, menu.snapshotId, closeMenu]);
 
-          <button
-            type="button"
-            onClick={onClose}
-            style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '6px',
-              border: '1px solid rgba(0,0,0,0.12)',
-              background: '#fff',
-              cursor: 'pointer',
-              fontSize: '18px',
-              lineHeight: '28px',
-            }}
-            title="Close"
-            tabIndex={open ? 0 : -1}
-          >
-            ×
-          </button>
-        </div>
+	useEffect(() => {
+		if (!open) return;
 
-        <div style={{ padding: '0 16px 16px 16px', overflow: 'auto' }}>
-          {loading && <div style={{ padding: '8px 0' }}>Loading...</div>}
+		const handler = (e: PointerEvent) => {
+			if (!expandedSnapshotId) return;
 
-          {!loading && versions.length === 0 && (
-            <div style={{ padding: '8px 0', color: 'rgba(0,0,0,0.6)' }}>No versions yet.</div>
-          )}
+			const targetEl = e.target as HTMLElement | null;
+			if (!targetEl) return;
 
-          {versions.map((v) => {
-            const isDeleting = deletingSnapshotId === v.snapshotId;
+			if (targetEl.closest('[data-oc-comment-area="true"]')) return;
 
-            return (
-              <div
-                key={v.snapshotId}
-                onClick={() => onSelect(v)}
-                style={{
-                  padding: '12px',
-                  border: '1px solid rgba(0,0,0,0.12)',
-                  borderRadius: '8px',
-                  marginBottom: '10px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  justifyContent: 'space-between',
-                  gap: '10px',
-                }}
-              >
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontWeight: 700, marginBottom: '6px' }}>{formatVersionDate(v.createdAt)}</div>
+			setExpandedSnapshotId(null);
+		};
 
-                  <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.7)', marginBottom: '4px' }}>
-                    Author: {getAuthorLabel(v.author)}
-                  </div>
+		window.addEventListener('pointerdown', handler, true);
+		return () => window.removeEventListener('pointerdown', handler, true);
+	}, [open, expandedSnapshotId]);
 
-                  <div style={{ fontSize: '13px', color: 'rgba(0,0,0,0.7)' }}>SnapshotID: {v.snapshotId}</div>
-                </div>
+	const checkIfClickedOutsidePanel = useCallback(
+		(e: any) => {
+			if (!open) return;
 
-                <TooltipButton
-                  target={`delete_version_${v.snapshotId}`}
-                  tooltip="Delete version"
-                  handleClick={(e: any) => onAskDelete(e, v)}
-                  icon={'delete'}
-                  isDisabled={isDeleting}
-                  hasBackground={true}
-                  background={ColorTheme.White}
-                  color={ColorTheme.Gray}
-                  padding="5px"
-                />
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </>
-  );
+			const panelEl = panelRef.current;
+			if (!panelEl) return;
+
+			if (!panelEl.contains(e.target)) {
+				const dialogElement = document.querySelector('[role=dialog]');
+				const isPartOfDialog = dialogElement
+					? dialogElement.contains(e.target)
+					: false;
+				const isPartOfMenu = menuRef.current
+					? menuRef.current.contains(e.target)
+					: false;
+				if (!isPartOfDialog && !isPartOfMenu) onClose();
+			}
+		},
+		[open, onClose],
+	);
+
+	useEventListener('mousedown', checkIfClickedOutsidePanel, window, open);
+
+	useEffect(() => {
+		if (!open) return;
+
+		const onKey = (e: KeyboardEvent) => {
+			if (e.key === 'Escape') {
+				if (menu.open) closeMenu();
+				else onClose();
+			}
+		};
+
+		window.addEventListener('keydown', onKey);
+		return () => window.removeEventListener('keydown', onKey);
+	}, [open, menu.open, closeMenu, onClose]);
+
+	useEffect(() => {
+		if (!open) return;
+
+		if (!usersLoading && (!Array.isArray(users) || users.length === 0)) {
+			dispatch(getAllUsers() as any);
+		}
+	}, [open, usersLoading, users?.length, dispatch]);
+
+	const getAuthorLabel = useCallback(
+		(authorId?: number): string => {
+			if (!authorId || !Array.isArray(users) || users.length === 0)
+				return 'Unknown';
+
+			const u = users.find((x: any) => x?.userId === authorId);
+			const name = u?.userDetail?.name || '';
+			const surname = u?.userDetail?.surname || '';
+			const full = `${name} ${surname}`.trim();
+			return full || 'Unknown';
+		},
+		[users],
+	);
+
+	const versions = useMemo(() => {
+		const normalized = normalizeVersions(rawVersions);
+		const sorted = [...normalized].sort((a, b) => b.createdAt - a.createdAt);
+
+		setComments((prev) => {
+			const next = { ...prev };
+			for (const v of sorted) {
+				if (next[v.snapshotId] === undefined)
+					next[v.snapshotId] = v.comment ?? '';
+			}
+			return next;
+		});
+
+		return sorted;
+	}, [rawVersions]);
+
+	const rows = useMemo(() => buildTimelineRows(versions), [versions]);
+
+	const onAskDelete = useCallback((v: ConnectionVersionItem) => {
+		setConfirmDelete({ open: true, v });
+	}, []);
+
+	const onConfirmDelete = useCallback(async () => {
+		const v = confirmDelete.v;
+		if (!v?.connectionId || !v?.snapshotId) {
+			setConfirmDelete({ open: false, v: null });
+			return;
+		}
+
+		try {
+			setDeletingSnapshotId(v.snapshotId);
+			await dispatch(
+				deleteConnectionVersion({
+					connectionId: v.connectionId,
+					snapshotId: v.snapshotId,
+				}) as any,
+			).unwrap();
+		} catch {
+		} finally {
+			setDeletingSnapshotId(null);
+			setConfirmDelete({ open: false, v: null });
+		}
+	}, [confirmDelete.v, dispatch]);
+
+	const onCancelDelete = useCallback(() => {
+		setConfirmDelete({ open: false, v: null });
+	}, []);
+
+	const onToggleMenu = useCallback((e: any, v: ConnectionVersionItem) => {
+		stopBoth(e);
+
+		const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+		const desiredX = rect.right + 8;
+		const desiredY = rect.top;
+
+		setMenu((prev) => {
+			if (prev.open && prev.snapshotId === v.snapshotId)
+				return { open: false, snapshotId: null, x: 0, y: 0 };
+			return { open: true, snapshotId: v.snapshotId, x: desiredX, y: desiredY };
+		});
+	}, []);
+
+	const onMenuCopySnapshot = useCallback(
+		async (v: ConnectionVersionItem) => {
+			try {
+				await navigator.clipboard.writeText(v.snapshotId);
+			} catch {}
+			closeMenu();
+		},
+		[closeMenu],
+	);
+
+	const onMenuDelete = useCallback(
+		(v: ConnectionVersionItem) => {
+			closeMenu();
+			onAskDelete(v);
+		},
+		[closeMenu, onAskDelete],
+	);
+
+	const onMenuCreateTemplate = useCallback(
+		(v: ConnectionVersionItem) => {
+			// TODO
+			console.log('Create template', v.snapshotId);
+			closeMenu();
+		},
+		[closeMenu],
+	);
+
+	const onMenuDownloadTemplate = useCallback(
+		(v: ConnectionVersionItem) => {
+			// TODO
+			console.log('Download template', v.snapshotId);
+			closeMenu();
+		},
+		[closeMenu],
+	);
+
+	const onSaveComment = useCallback(
+		async (e: any, v: ConnectionVersionItem) => {
+			stopBoth(e);
+			// TODO: dispatch save comment
+			setActiveSnapshotId(null);
+		},
+		[],
+	);
+
+	const computeExpandedWidthFor = useCallback(
+		(snapshotId: string, textareaEl: HTMLTextAreaElement | null) => {
+			if (!textareaEl) return;
+			const panelEl = panelRef.current;
+			if (!panelEl) return;
+
+			const panelRect = panelEl.getBoundingClientRect();
+			const taRect = textareaEl.getBoundingClientRect();
+
+			const padding = 16;
+			const maxAllowed = Math.floor(taRect.right - panelRect.left - padding);
+
+			const desired = 460;
+			const minW = 320;
+			const w = clamp(desired, minW, Math.max(minW, maxAllowed));
+
+			setExpandedWidths((prev) =>
+				prev[snapshotId] === w ? prev : { ...prev, [snapshotId]: w },
+			);
+		},
+		[],
+	);
+
+	const focusComment = useCallback((snapshotId: string) => {
+		const el = document.getElementById(
+			`comment_ta_${snapshotId}`,
+		) as HTMLTextAreaElement | null;
+		if (!el) return;
+		try {
+			el.focus();
+			const len = el.value?.length ?? 0;
+			el.setSelectionRange(len, len);
+		} catch {}
+		setActiveSnapshotId(snapshotId);
+	}, []);
+
+	const renderMenu = useCallback(() => {
+		if (!menu.open || !menu.snapshotId) return null;
+
+		const v = versions.find((x) => x.snapshotId === menu.snapshotId);
+		if (!v) return null;
+
+		const vw = window.innerWidth;
+		const vh = window.innerHeight;
+		const width = 210;
+		const height = 4 * 40 + 26;
+
+		let x = menu.x;
+		let y = menu.y;
+		if (x + width > vw - 8) x = vw - width - 8;
+		if (y + height > vh - 8) y = vh - height - 8;
+		if (x < 8) x = 8;
+		if (y < 8) y = 8;
+
+		const isDeleting = deletingSnapshotId === v.snapshotId;
+
+		return (
+			<MenuRoot ref={menuRef} style={{ left: x, top: y }}>
+				<MenuItem
+					onMouseDown={stopBoth}
+					onClick={(e) => {
+						stopBoth(e);
+						onMenuCreateTemplate(v);
+					}}
+				>
+					Create template
+				</MenuItem>
+
+				<MenuItem
+					onMouseDown={stopBoth}
+					onClick={(e) => {
+						stopBoth(e);
+						onMenuCopySnapshot(v);
+					}}
+				>
+					Copy snapshotId
+				</MenuItem>
+
+				<MenuItem
+					onMouseDown={stopBoth}
+					onClick={(e) => {
+						stopBoth(e);
+						onMenuDownloadTemplate(v);
+					}}
+				>
+					Download template
+				</MenuItem>
+
+				<MenuDivider />
+
+				<MenuItem
+					$isDisabled={isDeleting}
+					style={{
+						color: isDeleting ? 'rgba(0,0,0,0.35)' : 'rgba(0,0,0,0.88)',
+					}}
+					onMouseDown={stopBoth}
+					onClick={(e) => {
+						stopBoth(e);
+						onMenuDelete(v);
+					}}
+				>
+					Delete
+				</MenuItem>
+			</MenuRoot>
+		);
+	}, [
+		menu.open,
+		menu.snapshotId,
+		menu.x,
+		menu.y,
+		versions,
+		deletingSnapshotId,
+		onMenuCreateTemplate,
+		onMenuCopySnapshot,
+		onMenuDownloadTemplate,
+		onMenuDelete,
+		closeMenu,
+	]);
+
+	const node = (
+		<>
+			<ConnectionVersioningConfirmDialog
+				open={confirmDelete.open}
+				title='Delete version'
+				message='Are you sure you want to delete this version?'
+				confirmLabel='Delete'
+				cancelLabel='Cancel'
+				onConfirm={onConfirmDelete}
+				onCancel={onCancelDelete}
+			/>
+
+			{renderMenu()}
+
+			<PanelRoot ref={panelRef} $open={open}>
+				<PanelHeader>
+					<PanelTitle>Version History</PanelTitle>
+
+					<CloseBtn
+						type='button'
+						onClick={onClose}
+						title='Close'
+						tabIndex={open ? 0 : -1}
+					>
+						×
+					</CloseBtn>
+				</PanelHeader>
+
+				<PanelContent>
+					{loading && <LoadingRow>Loading...</LoadingRow>}
+
+					{!loading && versions.length === 0 && (
+						<EmptyRow>No versions yet.</EmptyRow>
+					)}
+
+					<TimelineRoot>
+						<TimelineLine />
+
+						{rows.map((row) => {
+							if (row.kind === 'date') {
+								return (
+									<DateRow key={row.key}>
+										<DateSpacer />
+										<DateInnerRow>
+											<DateHr />
+											<DateLabel>{row.dateLabel}</DateLabel>
+											<DateHr />
+										</DateInnerRow>
+									</DateRow>
+								);
+							}
+
+							const v = row.item;
+							const timeLabel = formatTimeHHMM(v.createdAt);
+
+							const isActive = activeSnapshotId === v.snapshotId;
+							const isExpanded = expandedSnapshotId === v.snapshotId;
+							const isHovered = hoveredSnapshotId === v.snapshotId;
+							const showExpand = isActive || isHovered;
+
+							const commentValue = comments[v.snapshotId] ?? '';
+
+							const normalWidth = 320;
+							const expandedWidth = expandedWidths[v.snapshotId] ?? 420;
+							const shiftLeft = isExpanded
+								? Math.max(0, expandedWidth - normalWidth)
+								: 0;
+
+							return (
+								<ItemRow key={row.key}>
+									<TimeCol>
+										<TimeLabel>{timeLabel}</TimeLabel>
+										<Dot />
+									</TimeCol>
+
+									<Card onClick={() => onSelect(v)} $width={normalWidth}>
+										<CardHeader>
+											<AuthorText>
+												Author: {getAuthorLabel(v.author)}
+											</AuthorText>
+
+											<DotsButton
+												ref={(el) => {
+													dotsRefs.current[v.snapshotId] = el;
+												}}
+												type='button'
+												title='Menu'
+												onMouseDown={stopBoth}
+												onClick={(e) => onToggleMenu(e, v)}
+											>
+												<DotsIcon>
+													<DotSmall />
+													<DotSmall />
+													<DotSmall />
+												</DotsIcon>
+											</DotsButton>
+										</CardHeader>
+
+										<CommentArea
+											ref={(el) => {
+												commentAreaRefs.current[v.snapshotId] = el;
+											}}
+											data-oc-comment-area='true'
+											onMouseEnter={() => setHoveredSnapshotId(v.snapshotId)}
+											onMouseLeave={() =>
+												setHoveredSnapshotId((prev) =>
+													prev === v.snapshotId ? null : prev,
+												)
+											}
+										>
+											{showExpand && (
+												<ExpandButton
+													type='button'
+													title={isExpanded ? 'Collapse' : 'Expand'}
+													onMouseDown={stopBoth}
+													onClick={(e) => {
+														stopBoth(e);
+
+														if (!isExpanded) {
+															const ta = document.getElementById(
+																`comment_ta_${v.snapshotId}`,
+															) as HTMLTextAreaElement | null;
+															computeExpandedWidthFor(v.snapshotId, ta);
+															setExpandedSnapshotId(v.snapshotId);
+														} else {
+															setExpandedSnapshotId(null);
+														}
+
+														Promise.resolve().then(() =>
+															focusComment(v.snapshotId),
+														);
+													}}
+												>
+													<ExpandIcon $expanded={isExpanded}>⤢</ExpandIcon>
+												</ExpandButton>
+											)}
+
+											<CommentTextarea
+												id={`comment_ta_${v.snapshotId}`}
+												value={commentValue}
+												placeholder='Comment'
+												onMouseDown={stopPropagationOnly}
+												onClick={stopPropagationOnly}
+												onFocus={(e) => {
+													e.stopPropagation();
+													setActiveSnapshotId(v.snapshotId);
+												}}
+												onBlur={(e) => {
+													e.stopPropagation();
+													setActiveSnapshotId((prev) =>
+														prev === v.snapshotId ? null : prev,
+													);
+												}}
+												onChange={(e) => {
+													const val = e.target.value;
+													setComments((prev) => ({
+														...prev,
+														[v.snapshotId]: val,
+													}));
+												}}
+												$expanded={isExpanded}
+												$expandedWidth={expandedWidth}
+												$shiftLeft={shiftLeft}
+											/>
+
+											{isActive && (
+												<SaveRow
+													onMouseDown={(e) => {
+														e.preventDefault();
+														e.stopPropagation();
+													}}
+													onClick={stopPropagationOnly}
+												>
+													<Button
+														handleClick={(e: any) => onSaveComment(e, v)}
+														label='Save'
+													/>
+												</SaveRow>
+											)}
+										</CommentArea>
+									</Card>
+								</ItemRow>
+							);
+						})}
+					</TimelineRoot>
+				</PanelContent>
+			</PanelRoot>
+		</>
+	);
+
+	return ReactDOM.createPortal(node, document.body);
 };
 
 export default ConnectionVersionHistoryPanel;
