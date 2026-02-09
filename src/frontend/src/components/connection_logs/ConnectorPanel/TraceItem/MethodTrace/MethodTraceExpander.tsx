@@ -14,6 +14,7 @@ import {copyStringToClipboard} from "@application/utils/utils";
 import {copyLogContentToClipboard} from "@root/redux_toolkit/slices/ConnectionLogSlice";
 import Button from "@app_component/base/button/Button";
 import {useAppDispatch} from "@application/utils/store";
+import DefaultText from "@app_component/base/text/DefaultText";
 function getMethodColor(httpMethod: HttpMethodType): string {
     switch (httpMethod) {
         case 'POST':
@@ -44,7 +45,7 @@ const MethodTraceExpander = ({trace, expanded, loading, handleToggle}: MethodTra
     return (
         <div className={styles.methodTrace} onClick={handleToggle} onMouseOver={() => setIsMouseOver(true)} onMouseLeave={() => {setIsMouseOver(false)}}>
             <div className={styles.methodTraceLeftSide}>
-                <div style={{minWidth: '40px'}}>
+                <div style={{minWidth: '30px'}}>
                     <ToggleButton
                         loading={loading}
                         expanded={expanded}
@@ -56,16 +57,17 @@ const MethodTraceExpander = ({trace, expanded, loading, handleToggle}: MethodTra
                     style={{backgroundColor: methodColor}}
                     className={styles.methodType}
                 >
-                    {trace?.segment?.request?.http_method || ''}
+                    <DefaultText value={trace?.segment?.request?.http_method || ''} />
                 </div>
                 }
 
                 {ShowIndexPath && (
-                    <div style={{marginLeft: 8}}>{trace.indexPath}</div>
+                    <div style={{marginLeft: 8}}><DefaultText value={trace.indexPath}/></div>
                 )}
                 <div className={styles.methodUrl} style={{color: hasError ? ColorTheme.Red : '#000'}}>
                     <span title={url}
-                          style={{textDecoration: 'underline'}}>{`${url || (properties?.name) || ''}`}</span>
+                          style={{textDecoration: 'underline'}}><DefaultText value={`${url || (properties?.name) || ''}`}/>
+                    </span>
                 </div>
 
                 {isMouseOver && <Button
@@ -92,9 +94,9 @@ const MethodTraceExpander = ({trace, expanded, loading, handleToggle}: MethodTra
             >
                 {!hasError &&
                     <React.Fragment>
-                        <div className={styles.methodStatus}>{trace.segment?.response?.status || ''}</div>
-                        <div>{'|'}</div>
-                        <div className={styles.methodTime}>{trace.segment?.response?.duration || ''}</div>
+                        <div className={styles.methodStatus}><DefaultText value={trace.segment?.response?.status || ''}/></div>
+                        <div><DefaultText value={'|'}/></div>
+                        <div className={styles.methodTime}><DefaultText value={trace.segment?.response?.duration || ''}/></div>
                     </React.Fragment>
                 }
             </div>

@@ -183,7 +183,7 @@ const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
             color={!logPanelHeight ? ColorTheme.Gray : ColorTheme.White}
             padding="2px"
             handleClick={() =>
-              dispatch(setLogPanelHeight(!logPanelHeight ? LogPanelHeight.High : 0))
+              dispatch(setLogPanelHeight(!logPanelHeight ? LogPanelHeight.High : LogPanelHeight.Low))
             }
           />
         </div>

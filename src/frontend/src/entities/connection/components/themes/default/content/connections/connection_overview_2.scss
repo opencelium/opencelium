@@ -277,7 +277,7 @@ $DASHED_COLOR: #58854d;
 }
 
 .details {
-	z-index: 1;
+	z-index: 2;
 	background: white;
 	width: 300px;
 	position: absolute;
@@ -297,6 +297,7 @@ $DASHED_COLOR: #58854d;
 .details_right {
 	@extend .details;
 	right: 0;
+	transition: all 0.5s;
 }
 .details_minimized {
 	height: 20px;

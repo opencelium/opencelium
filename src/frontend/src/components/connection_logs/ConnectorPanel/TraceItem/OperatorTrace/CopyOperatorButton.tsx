@@ -12,7 +12,6 @@ const CopyOperatorButton = ({flowId, executionId, iterationIndexes, trace, itera
     const [isLoading, setIsLoading] = useState<boolean>(false);
     return (
         <Button
-            iconSize={TextSize.Size_16}
             icon={'file_copy'}
             hasBackground={false}
             isLoading={isLoading}

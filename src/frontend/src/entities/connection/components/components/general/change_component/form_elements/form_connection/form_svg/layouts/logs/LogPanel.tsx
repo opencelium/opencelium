@@ -22,7 +22,7 @@ import {
 } from "./styles";
 import {TextSize} from "@app_component/base/text/interfaces";
 import {useAppDispatch} from "@application/utils/store";
-import {clearCurrentLogs} from "@root/redux_toolkit/slices/ConnectionSlice";
+import {clearCurrentLogs, LogPanelHeight} from "@root/redux_toolkit/slices/ConnectionSlice";
 import {clearModalCurrentLogs} from "@root/redux_toolkit/slices/ModalConnectionSlice";
 import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
 import LogMessage from "@change_component/form_elements/form_connection/form_svg/layouts/logs/LogMessage";
@@ -31,7 +31,7 @@ import GetModalProp from '@entity/connection/components/decorators/GetModalProp'
 const LogPanel: FC<{isModal?: boolean}> = ({isModal}) => {
     const dispatch = useAppDispatch();
     const clearLogs = isModal ? clearModalCurrentLogs : clearCurrentLogs;
-    const {isFullScreen} = Application.getReduxState();
+    const {isFullScreen, isMenuExpanded} = Application.getReduxState();
     const {
         currentLogs, logPanelHeight, currentTechnicalItem,
         isTestingConnection, isDetailsOpened,
@@ -55,10 +55,15 @@ const LogPanel: FC<{isModal?: boolean}> = ({isModal}) => {
     }, [currentTechnicalItem])
     return (
         <React.Fragment>
-            <TopStyled logPanelHeight={logPanelHeight}>
-                {logPanelHeight !== 0 && <HeaderStyled id={'test_execution_process'} value={'Logs'} width={isDetailsOpened ? 'calc(100% - 300px)' : '100%'}/>}
+            <TopStyled
+                logPanelHeight={logPanelHeight}
+                isFullScreen={isFullScreen}
+                isDetailsOpened={isDetailsOpened}
+                isMenuExpanded={isMenuExpanded}
+            >
+                {logPanelHeight !== LogPanelHeight.Low && <HeaderStyled id={'test_execution_process'} value={'Logs'} width={isDetailsOpened ? 'calc(100% - 300px)' : '100%'}/>}
 
-                {logPanelHeight !== 0 && <ClearButtonStyled
+                {logPanelHeight !== LogPanelHeight.Low && <ClearButtonStyled
                     right={isDetailsOpened ? isFullScreen ? 312 : 300 : isFullScreen ? 12 : 2}
                     iconSize={TextSize.Size_20}
                     position={'right'}
@@ -70,8 +75,15 @@ const LogPanel: FC<{isModal?: boolean}> = ({isModal}) => {
                     handleClick={() => dispatch(clearLogs([]))}
                 />}
             </TopStyled>
-            {logPanelHeight !== 0 &&
-                <LogPanelStyled id={'connection_current_logs'} isFullScreen={isFullScreen} noLogs={currentLogs.length === 0} isDetailsOpened={isDetailsOpened} logPanelHeight={logPanelHeight}>
+            {logPanelHeight !== LogPanelHeight.Low &&
+                <LogPanelStyled
+                    id={'connection_current_logs'}
+                    isFullScreen={isFullScreen}
+                    noLogs={currentLogs.length === 0}
+                    isDetailsOpened={isDetailsOpened}
+                    logPanelHeight={logPanelHeight}
+                    isMenuExpanded={isMenuExpanded}
+                >
                     {currentLogs.length > 0 ?
                         currentLogs.map((log, key) => {
                             const messageProps: React.HTMLAttributes<HTMLDivElement> = {};

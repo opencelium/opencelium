@@ -3,6 +3,7 @@ import { DeepSelectProps } from '@app_component/operator_builder/reference_gener
 import { ErrorMessage } from '@app_component/operator_builder/styles';
 import React, { useEffect, useRef, useState } from 'react';
 import Select from 'react-select';
+import {DefaultInputTextSize} from "@entity/application/utils/constants";
 
 type DataStructure = {
 	[key: string]: DataStructure | null | DataStructure[] | any;
@@ -257,16 +258,38 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 							? '#666'
 							: '#ccc',
 						opacity: 1,
+						fontSize: DefaultInputTextSize,
 					}),
 					singleValue: (base) => ({
 						...base,
 						opacity: 1,
+						fontSize: DefaultInputTextSize,
 					}),
 					input: (base) => ({
 						...base,
 						input: {
 							opacity: '1 !important',
 						},
+					}),
+					noOptionsMessage: (provided) => ({
+						...provided,
+						fontSize: DefaultInputTextSize,
+					}),
+					multiValueLabel: (provided) => ({
+						...provided,
+						fontSize: DefaultInputTextSize,
+					}),
+					multiValue: (provided) => ({
+						...provided,
+						fontSize: DefaultInputTextSize,
+					}),
+					option: (provided) => ({
+						...provided,
+						fontSize: DefaultInputTextSize,
+					}),
+					placeholder: (provided) => ({
+						...provided,
+						fontSize: DefaultInputTextSize,
 					}),
 					menuPortal: (base) => ({ ...base, zIndex: 10000 }),
 				}}
