@@ -2,6 +2,7 @@ import React from 'react';
 import {NavItem, NavLink} from "reactstrap";
 import styles from "@app_component/connection_logs/ConnectorPanel/TraceItem/MethodTrace/MethodTrace.module.css";
 import {NavLinkProps} from "reactstrap/es/NavLink";
+import DefaultText from "@app_component/base/text/DefaultText";
 
 const NavItemLog = (props: {navLinkProps: NavLinkProps, title: string}) => {
     return (
@@ -10,7 +11,7 @@ const NavItemLog = (props: {navLinkProps: NavLinkProps, title: string}) => {
                 {...props.navLinkProps}
                 className={styles.navLink}
             >
-                <span>{props.title}</span>
+                <DefaultText value={props.title}/>
             </NavLink>
         </NavItem>
     )

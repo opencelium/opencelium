@@ -84,40 +84,40 @@ const GlobalSearch: FC<SearchProps> =
                 maxMenuHeight={200}
                 minMenuHeight={50}
                 styles={{
-                    container: (provided: any, {isFocused, isDisabled}: {isFocused: boolean, isDisabled: boolean}) => ({
+                    container: (provided: any) => ({
                         ...provided,
                         width: '200px',
                         border: 'none',
                         marginRight: '5px !important',
                     }),
-                    control: (provided: any, {isFocused, isDisabled}: {isFocused: boolean, isDisabled: boolean}) => ({
+                    control: (provided: any) => ({
                         ...provided,
                         width: '200px',
                         float: 'left',
                         border: 'none',
                         fontSize: DefaultInputTextSize,
                     }),
-                    noOptionsMessage: (provided: any, {isFocused, isDisabled}: {isFocused: boolean, isDisabled: boolean}) => ({
+                    noOptionsMessage: (provided: any) => ({
                         ...provided,
                         fontSize: DefaultInputTextSize,
                     }),
-                    singleValue: (provided: any, {isFocused, isDisabled}: {isFocused: boolean, isDisabled: boolean}) => ({
+                    singleValue: (provided: any) => ({
                         ...provided,
                         fontSize: DefaultInputTextSize,
                     }),
-                    multiValueLabel: (provided: any, {isFocused, isDisabled}: {isFocused: boolean, isDisabled: boolean}) => ({
+                    multiValueLabel: (provided: any) => ({
                         ...provided,
                         fontSize: DefaultInputTextSize,
                     }),
-                    multiValue: (provided: any, {isFocused, isDisabled}: {isFocused: boolean, isDisabled: boolean}) => ({
+                    multiValue: (provided: any) => ({
                         ...provided,
                         fontSize: DefaultInputTextSize,
                     }),
-                    option: (provided: any, {isFocused, isDisabled}: {isFocused: boolean, isDisabled: boolean}) => ({
+                    option: (provided: any) => ({
                         ...provided,
                         fontSize: DefaultInputTextSize,
                     }),
-                    placeholder: (provided: any, {isFocused, isDisabled}: {isFocused: boolean, isDisabled: boolean}) => ({
+                    placeholder: (provided: any) => ({
                         ...provided,
                         fontSize: DefaultInputTextSize,
                     }),

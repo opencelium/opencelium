@@ -11,7 +11,8 @@ import {TextSize} from "@app_component/base/text/interfaces";
 import {copyLogContentToClipboard} from "@root/redux_toolkit/slices/ConnectionLogSlice";
 import Button from "@app_component/base/button/Button";
 import {useAppDispatch} from "@application/utils/store";
-const DEFAULT_HEIGHT = 100;
+import {DefaultInputTextSize} from "@entity/application/utils/constants";
+const DEFAULT_HEIGHT = 150;
 const TabPaneLog = ({tabId, value, theme, height, setHeight, content}: {content: string, tabId: string, value: any, theme: ITheme, height: number | undefined, setHeight: (newHeight: number) => void,}) => {
     const dispatch = useAppDispatch();
     const isXmlFormat = isXML(value);
@@ -84,7 +85,7 @@ const TabPaneLog = ({tabId, value, theme, height, setHeight, content}: {content:
                     theme={theme}
                     editorTheme='textmate'
                     value={isJson ? JSON.stringify(JSON.parse(value), null, 2) : value}
-                    fontSize={14}
+                    fontSize={12}
                     showPrintMargin={false}
                     showGutter={true}
                     highlightActiveLine={false}
@@ -95,10 +96,9 @@ const TabPaneLog = ({tabId, value, theme, height, setHeight, content}: {content:
                     width={'100%'}
                     height={'100%'}
                 /> :
-                    <div className={localStyles.emptyBodyContent}>{"No data"}</div>
+                    <div className={localStyles.emptyBodyContent} style={{fontSize: `${DefaultInputTextSize}px`}}>{"No data"}</div>
                 }
                 {(isMouseOver && !!content) && <Button
-                    iconSize={TextSize.Size_16}
                     icon={'file_copy'}
                     hasBackground={false}
                     handleClick={() => {

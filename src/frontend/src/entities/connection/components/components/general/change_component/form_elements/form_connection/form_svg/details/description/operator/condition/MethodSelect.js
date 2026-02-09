@@ -17,6 +17,7 @@ import Select from "@entity/connection/components/components/general/basic_compo
 import PropTypes from 'prop-types';
 import React from 'react';
 import { components } from "react-select";
+import {DefaultInputTextSize} from "@entity/application/utils/constants";
 
 const CustomSingleValue = (props) => {
     const Component = components.SingleValue;
@@ -104,8 +105,25 @@ class MethodSelect extends React.Component{
                                 ...styles,
                                 textAlign: 'center',
                                 width: '70%',
+                                fontSize: DefaultInputTextSize,
                             };
-                        }
+                        },
+                        noOptionsMessage: (provided) => ({
+                            ...provided,
+                            fontSize: DefaultInputTextSize,
+                        }),
+                        multiValueLabel: (provided) => ({
+                            ...provided,
+                            fontSize: DefaultInputTextSize,
+                        }),
+                        multiValue: (provided) => ({
+                            ...provided,
+                            fontSize: DefaultInputTextSize,
+                        }),
+                        option: (provided) => ({
+                            ...provided,
+                            fontSize: DefaultInputTextSize,
+                        }),
                     }}
                     components={{
                         SingleValue: (props) => {

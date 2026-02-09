@@ -4,6 +4,7 @@ import {MethodSelectProps} from "@app_component/operator_builder/reference_gener
 import {flattenOptions} from "@app_component/operator_builder/utils";
 import {ErrorColor} from "@app_component/operator_builder/OperatorBuilder";
 import {ErrorMessage} from "@app_component/operator_builder/styles";
+import {DefaultInputTextSize} from "@entity/application/utils/constants";
 
 interface OptionType {
     label: string;
@@ -30,16 +31,35 @@ const MethodSelect: React.FC<MethodSelectProps> = ({onMethodSelect, methodColor,
             "&:hover": {
                 borderColor: "#666",
             },
+            fontSize: DefaultInputTextSize,
         }),
         singleValue: (provided) => ({
             ...provided,
             color: "black",
+            fontSize: DefaultInputTextSize,
         }),
         option: (provided, { data, isFocused, isSelected }) => ({
             ...provided,
             color: "black",
             display: "flex",
             alignItems: "center",
+            fontSize: DefaultInputTextSize,
+        }),
+        noOptionsMessage: (provided: any) => ({
+            ...provided,
+            fontSize: DefaultInputTextSize,
+        }),
+        multiValueLabel: (provided: any) => ({
+            ...provided,
+            fontSize: DefaultInputTextSize,
+        }),
+        multiValue: (provided: any) => ({
+            ...provided,
+            fontSize: DefaultInputTextSize,
+        }),
+        placeholder: (provided: any) => ({
+            ...provided,
+            fontSize: DefaultInputTextSize,
         }),
         menuPortal: (base) => ({ ...base, zIndex: 10000 }),
     };

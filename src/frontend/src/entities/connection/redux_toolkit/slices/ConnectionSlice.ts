@@ -50,9 +50,10 @@ import { ConnectionVersionItem } from '@entity/connection/requests/interfaces/IC
 
 
 export const LogPanelHeight = {
+  Low: 28,
   Medium: 270,
   High: 350,
-  Full: 'calc(100% - 28px)',
+  Full: 'calc(100%)',
 };
 
 export interface ConnectionState extends ICommonState {
@@ -164,7 +165,7 @@ let initialState: ConnectionState = {
   currentLogs: [],
   logMessages: [],
   isTestingConnection: false,
-  logPanelHeight: 0,
+  logPanelHeight: LogPanelHeight.Low,
   isDetailsOpened: true,
   justCreatedItem: null,
   justDeletedItem: null,
@@ -251,7 +252,7 @@ const connectionReducers = (isModal: boolean = false) => {
     setTestingConnection: (state, action: PayloadAction<boolean>) => {
       if (action.payload) {
         state.currentLogs = [];
-        if (state.logPanelHeight === 0) {
+        if (state.logPanelHeight === LogPanelHeight.Low) {
           state.logPanelHeight = LogPanelHeight.Medium;
         }
       }

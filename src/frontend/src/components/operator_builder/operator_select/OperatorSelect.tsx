@@ -6,6 +6,7 @@ import {OperatorName} from "@app_component/operator_builder/interfaces/OperatorN
 import OperatorTypeFactory from "@app_component/operator_builder/classes/OperatorTypeFactory";
 import {ErrorColor} from "@app_component/operator_builder/OperatorBuilder";
 import {ErrorMessage} from "@app_component/operator_builder/styles";
+import {DefaultInputTextSize} from "@entity/application/utils/constants";
 
 
 const OperatorSelect: React.FC<OperatorSelectProps> = ({error, type, operator, updateOperator}) => {
@@ -43,6 +44,37 @@ const OperatorSelect: React.FC<OperatorSelectProps> = ({error, type, operator, u
                     control: (base, state) => ({
                         ...base,
                         borderColor: !!error && !operator ? ErrorColor : state.isFocused ? "#666" : "#ccc",
+                    }),
+                    singleValue: (base) => ({
+                        ...base,
+                        fontSize: DefaultInputTextSize,
+                    }),
+                    input: (base) => ({
+                        ...base,
+                        input: {
+                            opacity: '1 !important',
+                            fontSize: DefaultInputTextSize,
+                        },
+                    }),
+                    noOptionsMessage: (provided) => ({
+                        ...provided,
+                        fontSize: DefaultInputTextSize,
+                    }),
+                    multiValueLabel: (provided) => ({
+                        ...provided,
+                        fontSize: DefaultInputTextSize,
+                    }),
+                    multiValue: (provided) => ({
+                        ...provided,
+                        fontSize: DefaultInputTextSize,
+                    }),
+                    option: (provided) => ({
+                        ...provided,
+                        fontSize: DefaultInputTextSize,
+                    }),
+                    placeholder: (provided) => ({
+                        ...provided,
+                        fontSize: DefaultInputTextSize,
                     }),
                     menuPortal: (base) => ({ ...base, zIndex: 10000 }),
                 }}
