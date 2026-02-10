@@ -18,7 +18,12 @@ import Request from "@entity/application/requests/classes/Request";
 import {IRequestSettings} from "@application/requests/interfaces/IRequest";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 import {IConnection} from "../../interfaces/IConnection";
-import {ConnectionVersionItem, GetConnectionWebhooksResponse, IConnectionRequest} from "../interfaces/IConnection";
+import {
+    ConnectionVersionItem,
+    GetConnectionWebhooksResponse,
+    IConnectionRequest,
+    SaveEditorConfig
+} from "../interfaces/IConnection";
 import {RuleBaseModel} from "@root/requests/models/Rule";
 import {MetaConnectionModel} from "@root/requests/models/Connection";
 
@@ -91,6 +96,11 @@ export class ConnectionRequest extends Request implements IConnectionRequest{
     async deleteConnectionBySnapshot(connectionId: number, snapshotId: string): Promise<AxiosResponse<void>> {
         this.endpoint = `/${connectionId}/version/${snapshotId}`;
         return super.delete<void>();
+    }
+
+    async saveEditorConfig(data: SaveEditorConfig): Promise<AxiosResponse<void>> {
+        this.endpoint = `/editor`;
+        return super.post<void>(data);
     }
 
     backendMap(connection: IConnection){

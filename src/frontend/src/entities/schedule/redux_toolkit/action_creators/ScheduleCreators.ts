@@ -324,39 +324,34 @@ export const getLogsByExecutionId = createAsyncThunk(
             const response = await request.getLogsByExecutionId();
             const blob = new Blob([response.data]);
             const fileSizeInMB = blob.size / (1024 * 1024);
+
+            // Optional: set filename if content-disposition header is available
+            const contentDisposition = response.headers['content-disposition'];
+            let filename = 'downloaded-file';
+
+            if (contentDisposition && contentDisposition.includes('filename=')) {
+                filename = contentDisposition
+                    .split('filename=')[1]
+                    .replace(/['"]/g, '');
+            }
             if (fileSizeInMB < 500) {
-                if (fileSizeInMB > 100) {
-                    const url = window.URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-
-                    // Optional: set filename if content-disposition header is available
-                    const contentDisposition = response.headers['content-disposition'];
-                    let filename = 'downloaded-file';
-
-                    if (contentDisposition && contentDisposition.includes('filename=')) {
-                        filename = contentDisposition
-                            .split('filename=')[1]
-                            .replace(/['"]/g, '');
-                    }
-
-                    link.href = url;
-                    link.setAttribute('download', filename);
-                    document.body.appendChild(link);
-                    link.click();
-                    link.remove();
-                    window.URL.revokeObjectURL(url);
-                    return {executionId: '', logs: ''};
-                } else {
-                    const logs = await blob.text();
-                    return {executionId, logs};
-                }
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', filename);
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                window.URL.revokeObjectURL(url);
+                return {executionId: '', logs: ''};
             } else {
                 throw {
-                    message: 'TOO_BIG_LOG'
+                    message: 'TOO_BIG_LOG',
+                    data: {logPath: `${executionId}${filename !== 'downloaded-file' ? `/${filename}` : ''}`},
                 }
             }
         } catch(e){
-            return thunkAPI.rejectWithValue({message: e?.response?.data?.error || e.message});
+            return thunkAPI.rejectWithValue({message: e?.response?.data?.error || e.message, data: e.data});
         }
     }
 )

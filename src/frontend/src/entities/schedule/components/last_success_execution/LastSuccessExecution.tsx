@@ -66,9 +66,9 @@ const LastSuccessExecution: FC<LastSuccessExecutionProps> =
                         taIdComponent = startGettingLogs
                             ?
                             <LoadingIcon
-                                loadingSize={'16px'}
+                                loadingSize={'18px'}
                                 color={theme?.menu?.background || '#000'}
-                                name={' '}
+                                name={'close'}
                                 isLoading={true}
                             />
                             :

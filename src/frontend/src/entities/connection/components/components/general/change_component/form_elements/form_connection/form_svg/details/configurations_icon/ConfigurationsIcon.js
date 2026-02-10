@@ -40,6 +40,7 @@ import {Category} from "@entity/category/classes/Category";
 import {getAllCategories} from "@entity/category/redux_toolkit/action_creators/CategoryCreators";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import Validation from "@application/classes/Validation";
+import {saveEditorConfig} from "@root/redux_toolkit/action_creators/EditorCreators";
 
 function mapStateToProps(state, props) {
   const { connectionOverview, connection } = mapItemsToClasses(state, props.isModal);
@@ -56,7 +57,7 @@ function mapStateToProps(state, props) {
 @GetModalProp()
 @connect(mapStateToProps, {
   setPanelConfigurations, setModalPanelConfigurations, getAndUpdateConnectionDescription,
-  getAndUpdateConnectionTitle, getAllCategories,
+  getAndUpdateConnectionTitle, getAllCategories, saveEditorConfig,
 })
 class ConfigurationsIcon extends React.Component {
   constructor(props) {
@@ -161,7 +162,7 @@ class ConfigurationsIcon extends React.Component {
     const {
       connection, setPanelConfigurations, setModalPanelConfigurations,
       isModal, getAndUpdateConnectionDescription, getAndUpdateConnectionTitle,
-      updateConnection,
+      updateConnection, saveEditorConfig,
     } = this.props;
     if(isModal){
       setModalPanelConfigurations({
@@ -173,6 +174,10 @@ class ConfigurationsIcon extends React.Component {
         colorMode,
         processTextSize,
       });
+      saveEditorConfig({
+        colorMode,
+        processTextSize,
+      })
     }
     const specialCharacters = /[\/\\]/;
     if(connection.id) {
@@ -193,7 +198,7 @@ class ConfigurationsIcon extends React.Component {
         if (category) {
           connection.categoryId = category.value;
         }
-        getAndUpdateConnectionTitle({...connectionObj, title, description, categoryId: category ? category.value : null}).then((data) => {
+        getAndUpdateConnectionTitle({...connectionObj, title, description, categoryId: category ? category?.value : null}).then((data) => {
           if(data.payload.message === ResponseMessages.CONNECTOR_EXISTS){
             this.setState({validationMessageTitle: 'Connection with such title already exist'});
             return
@@ -209,7 +214,7 @@ class ConfigurationsIcon extends React.Component {
           updateConnection(connection);
         });
 
-      } else if (description !== connection.description || category.value !== connection.categoryId) {
+      } else if (description !== connection.description || category?.value !== connection.categoryId) {
         connection.description = description;
         if (category) {
           connection.categoryId = category.value;

@@ -29,7 +29,7 @@ const Tooltip: FC<TooltipProps> =
         return(
             <React.Fragment>
                 {component}
-                <ReactstrapTooltip autohide={false} placement={position} target={target} isOpen={tooltipOpen} toggle={toggle}>
+                <ReactstrapTooltip autohide={false} defaultChecked={false} placement={position} target={target} isOpen={tooltipOpen} toggle={toggle}>
                     {tooltip}
                 </ReactstrapTooltip>
             </React.Fragment>

@@ -24,6 +24,11 @@ export interface GetConnectionWebhooksResponse {
     type: string,
 }
 
+export interface SaveEditorConfig {
+    colorMode: string,
+    processTextSize: string,
+}
+
 export interface IConnectionRequest {
 
     //to get connections by invoker name
@@ -58,6 +63,9 @@ export interface IConnectionRequest {
 
     //to delete connections by id
     deleteConnectionsById(connection: number[]): Promise<AxiosResponse<number[]>>,
+
+    //to save editor config
+    saveEditorConfig(data: SaveEditorConfig): Promise<AxiosResponse<void>>,
 }
 
 export interface ConnectionVersionItem {
