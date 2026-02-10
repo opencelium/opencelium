@@ -28,9 +28,9 @@ import { API_REQUEST_STATE } from '@application/interfaces/IApplication';
 import { getAllUsers } from '@entity/user/redux-toolkit/action_creators/UserCreators';
 import { deleteConnectionVersion } from '@entity/connection/redux_toolkit/action_creators/ConnectionCreators';
 
-import ConnectionVersioningConfirmDialog from './ConnectionVersioningConfirmDialog';
-
 import Button from '@app_component/base/button/Button';
+import TooltipButton from '@app_component/base/tooltip_button/TooltipButton';
+import { ColorTheme } from '@style/Theme';
 import { useEventListener } from '@application/utils/utils';
 
 import {
@@ -59,14 +59,14 @@ import {
 	DotsIcon,
 	DotSmall,
 	CommentArea,
-	ExpandButton,
-	ExpandIcon,
+	ExpandButtonContainer,
 	CommentTextarea,
 	SaveRow,
 	MenuRoot,
 	MenuItem,
 	MenuDivider,
 } from './ConnectionVersionHistoryPanel.styles';
+import Confirmation from '@entity/connection/components/components/general/app/Confirmation';
 
 export type ConnectionVersionItem = {
 	connectionId?: number;
@@ -560,14 +560,12 @@ const ConnectionVersionHistoryPanel: FC<ConnectionVersionHistoryPanelProps> = ({
 
 	const node = (
 		<>
-			<ConnectionVersioningConfirmDialog
-				open={confirmDelete.open}
-				title='Delete version'
-				message='Are you sure you want to delete this version?'
-				confirmLabel='Delete'
-				cancelLabel='Cancel'
-				onConfirm={onConfirmDelete}
-				onCancel={onCancelDelete}
+			<Confirmation
+				active={confirmDelete.open}
+				title={'Confirmation'}
+				message={'Are you sure you want to delete this version?'}
+				okClick={onConfirmDelete}
+				cancelClick={onCancelDelete}
 			/>
 
 			{renderMenu()}
@@ -669,30 +667,46 @@ const ConnectionVersionHistoryPanel: FC<ConnectionVersionHistoryPanelProps> = ({
 											}
 										>
 											{showExpand && (
-												<ExpandButton
-													type='button'
-													title={isExpanded ? 'Collapse' : 'Expand'}
+												<ExpandButtonContainer
 													onMouseDown={stopBoth}
 													onClick={(e) => {
 														stopBoth(e);
-
-														if (!isExpanded) {
-															const ta = document.getElementById(
-																`comment_ta_${v.snapshotId}`,
-															) as HTMLTextAreaElement | null;
-															computeExpandedWidthFor(v.snapshotId, ta);
-															setExpandedSnapshotId(v.snapshotId);
-														} else {
-															setExpandedSnapshotId(null);
-														}
-
-														Promise.resolve().then(() =>
-															focusComment(v.snapshotId),
-														);
 													}}
 												>
-													<ExpandIcon $expanded={isExpanded}>⤢</ExpandIcon>
-												</ExpandButton>
+													<TooltipButton
+														position={'bottom'}
+														icon={
+															isExpanded ? 'close_fullscreen' : 'open_in_full'
+														}
+														tooltip={isExpanded ? 'Minimize' : 'Maximize'}
+														target={`version_comment_expand_${v.snapshotId}`}
+														hasBackground={true}
+														background={
+															isExpanded ? ColorTheme.Blue : ColorTheme.White
+														}
+														color={
+															isExpanded ? ColorTheme.White : ColorTheme.Gray
+														}
+														padding='2px'
+														handleClick={(e: any) => {
+															stopBoth(e);
+
+															if (!isExpanded) {
+																const ta = document.getElementById(
+																	`comment_ta_${v.snapshotId}`,
+																) as HTMLTextAreaElement | null;
+																computeExpandedWidthFor(v.snapshotId, ta);
+																setExpandedSnapshotId(v.snapshotId);
+															} else {
+																setExpandedSnapshotId(null);
+															}
+
+															Promise.resolve().then(() =>
+																focusComment(v.snapshotId),
+															);
+														}}
+													/>
+												</ExpandButtonContainer>
 											)}
 
 											<CommentTextarea

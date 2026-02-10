@@ -30,9 +30,9 @@ import ConnectionVersionHistoryPanel, {
 } from './ConnectionVersionHistoryPanel';
 
 import { ColorTheme, ITheme } from '@style/Theme';
-import ConnectionVersioningConfirmDialog from './ConnectionVersioningConfirmDialog';
 import TooltipButton from '@app_component/base/tooltip_button/TooltipButton';
 import Button from '@app_component/base/button/Button';
+import Confirmation from '@entity/connection/components/components/general/app/Confirmation';
 
 export interface ConnectionVersioningProps {
 	theme: ITheme;
@@ -189,19 +189,24 @@ const ConnectionVersioning: FC<ConnectionVersioningProps> = ({ theme }) => {
 				theme={theme}
 			/>
 
-			<ConnectionVersioningConfirmDialog
-				open={!!confirmOpenVersion}
-				title="Unsaved changes"
-				message="You did not save the current connection and it will be lost after opening the version. (Yes/no)"
-				onCancel={() => setConfirmOpenVersion(null)}
-				onConfirm={() => {
+			<Confirmation
+				active={!!confirmOpenVersion}
+				title={'Confirmation'}
+				message={'You did not save the current connection and it will be lost after opening the version. Do you want to continue?'}
+				okClick={() => {
 					const v = confirmOpenVersion;
 					setConfirmOpenVersion(null);
 					if (!v) return;
 
-					dispatch(getConnectionVersionBySnapshot({ connectionId: connectionId!, snapshotId: v.snapshotId }) as any);
+					dispatch(
+						getConnectionVersionBySnapshot({
+							connectionId: connectionId!,
+							snapshotId: v.snapshotId,
+						}) as any,
+					);
 					setIsHistoryOpen(false);
 				}}
+				cancelClick={() => setConfirmOpenVersion(null)}
 			/>
 		</div>
 	);

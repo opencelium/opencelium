@@ -201,7 +201,7 @@ export const CommentArea = styled.div`
 	position: relative;
 `;
 
-export const ExpandButton = styled.button`
+export const ExpandButtonContainer = styled.div`
 	position: absolute;
 	right: 16px;
 	top: 6px;
@@ -228,9 +228,9 @@ export const CommentTextarea = styled.textarea<{
 	$expandedWidth: number;
 	$shiftLeft: number;
 }>`
-	width: ${({ $expanded, $expandedWidth }) => ($expanded ? `${$expandedWidth}px` : '100%')};
-	margin-left: ${({ $expanded, $shiftLeft }) => ($expanded ? `-${$shiftLeft}px` : '0px')};
-
+	width: ${({ $expanded, $expandedWidth }) => $expanded ? `${$expandedWidth}px` : '100%'};
+	float: ${({ $expanded }) => ($expanded ? 'right' : 'none')};
+	
 	min-height: ${({ $expanded }) => ($expanded ? '200px' : '84px')};
 	max-height: ${({ $expanded }) => ($expanded ? '240px' : '140px')};
 	overflow-y: hidden;
@@ -246,17 +246,19 @@ export const CommentTextarea = styled.textarea<{
 	border: 2px solid rgba(0,0,0,0.12);
 	border-radius: 0px;
 	padding: 10px;
+	padding-right: 45px;
 	font-size: 14px;
 	outline: none;
 	box-sizing: border-box;
 	background: #fff;
 	color: rgba(0, 0, 0, 0.85);
+	margin-bottom: 10px;
 `;
 
 export const SaveRow = styled.div`
-	margin-top: 10px;
 	display: flex;
 	justify-content: flex-end;
+	clear: both;
 `;
 
 export const MenuRoot = styled.div`
