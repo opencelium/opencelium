@@ -53,6 +53,9 @@ public class ConnectionMng {
     @Field(name = "field_bindings")
     private List<FieldBindingMng> fieldBindings;
 
+    @Field(name = "comment")
+    private String comment;
+
     private Map<String, Object> ui;
 
     @CreatedDate
@@ -142,5 +145,13 @@ public class ConnectionMng {
 
     public void setCreatedBy(Integer createdBy) {
         this.createdBy = createdBy;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 }

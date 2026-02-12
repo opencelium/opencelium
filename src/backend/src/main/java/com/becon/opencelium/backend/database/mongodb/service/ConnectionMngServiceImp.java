@@ -6,6 +6,8 @@ import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
 import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
 import com.becon.opencelium.backend.database.mongodb.entity.OperatorMng;
 import com.becon.opencelium.backend.database.mongodb.repository.ConnectionMngRepository;
+import com.becon.opencelium.backend.mapper.mongo.ConnectionMngMapper;
+import com.becon.opencelium.backend.resource.connection.ConnectionVersionUpdateRequest;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -18,15 +20,17 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     private final ConnectionMngRepository connectionMngRepository;
     private final FieldBindingMngService fieldBindingMngService;
     private final OpenceliumProps ocProps;
+    private final ConnectionMngMapper connectionMngMapper;
 
     public ConnectionMngServiceImp(
             ConnectionMngRepository connectionMngRepository,
             @Qualifier("fieldBindingMngServiceImp") FieldBindingMngService fieldBindingMngService,
-            OpenceliumProps ocProps
+            OpenceliumProps ocProps, ConnectionMngMapper connectionMngMapper
     ) {
         this.connectionMngRepository = connectionMngRepository;
         this.fieldBindingMngService = fieldBindingMngService;
         this.ocProps = ocProps;
+        this.connectionMngMapper = connectionMngMapper;
     }
 
     @Override
@@ -97,6 +101,15 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     @Override
     public void deleteAllByConnectionId(Long id) {
         connectionMngRepository.deleteAllByConnectionId(id);
+    }
+
+    @Override
+    public void updateSnapshot(String snapshotId, ConnectionVersionUpdateRequest request) {
+        ConnectionMng connection = getById(snapshotId);
+
+        connectionMngMapper.updateFrom(connection, request);
+
+        connectionMngRepository.save(connection);
     }
 
     private void populateWithIds(ConnectionMng connectionMng) {

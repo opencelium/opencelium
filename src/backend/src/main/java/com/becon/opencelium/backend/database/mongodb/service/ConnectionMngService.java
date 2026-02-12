@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.database.mongodb.service;
 
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
+import com.becon.opencelium.backend.resource.connection.ConnectionVersionUpdateRequest;
 
 import java.util.List;
 
@@ -20,4 +21,6 @@ public interface ConnectionMngService {
     long deleteByConnectionIdIn(List<Long> chunk);
 
     void deleteAllByConnectionId(Long id);
+
+    void updateSnapshot(String snapshotId, ConnectionVersionUpdateRequest request);
 }
