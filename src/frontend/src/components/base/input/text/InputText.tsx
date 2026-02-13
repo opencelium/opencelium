@@ -53,6 +53,8 @@ const InputText: FC<InputTextProps> = ({
     checkBackground,
     errorBottom,
     isVisibilityTrue,
+    rightIcon,
+    onRightIconClick,
     ...props
 }) => {
     if(!isVisible){
@@ -67,9 +69,43 @@ const InputText: FC<InputTextProps> = ({
     const hasCheck = type === InputTextType.Password && !(!icon && isLoading);
     const showPassword = type === InputTextType.Password && checked;
     const hasLabel = label !== '';
+
+    const hasRightIcon = !!rightIcon;
+    const needsRightSpace = hasCheck || hasRightIcon;
+
+    const afterInputComponent = hasCheck ? (
+        <CheckStyled
+            tabIndex={readOnly || props.tabIndex === -1 ? -1 : 0}
+            background={checkBackground}
+            hasBackground={false}
+            icon={checked ? 'visibility_off' : 'visibility'}
+            paddingRight={paddingRight}
+            paddingTop={paddingTop ? paddingTop : '0'}
+            color={ColorTheme.Blue}
+            marginTop={hasLabel ? '20px' : 0}
+            handleClick={changeHandler}
+        />
+    ) : hasRightIcon ? (
+        <CheckStyled
+            tabIndex={readOnly || props.tabIndex === -1 ? -1 : 0}
+            background={''}
+            hasBackground={false}
+            icon={rightIcon as string}
+            paddingRight={paddingRight}
+            paddingTop={paddingTop ? paddingTop : '0'}
+            color={ColorTheme.Blue}
+            marginTop={hasLabel ? '20px' : 0}
+            handleClick={() => {
+                if (!readOnly && onRightIconClick) {
+                    onRightIconClick();
+                }
+            }}
+        />
+    ) : null;
+
     return(
         <Input errorBottom={errorBottom} overflow={overflow} height={height} paddingTop={paddingTop} marginTop={marginTop} background={background} minHeight={minHeight} marginLeft={marginLeft} width={width} paddingLeft={paddingLeft} paddingRight={paddingRight}
-               afterInputComponent={hasCheck ? <CheckStyled tabIndex={readOnly || props.tabIndex === -1 ? -1 : 0} background={checkBackground} hasBackground={false} icon={checked ? 'visibility_off' : 'visibility'} paddingRight={paddingRight} paddingTop={paddingTop ? paddingTop : '0'} color={ColorTheme.Blue} marginTop={hasLabel ? '20px' : 0} handleClick={changeHandler}/> : null}
+               afterInputComponent={afterInputComponent}
                display={display} hasUnderline={hasUnderline} readOnly={readOnly} value={value} maxLength={maxLength} placeholder={placeholder} required={required} label={label} icon={icon} error={error} isLoading={isLoading} isIconInside={isIconInside}>
             <InputStyled
                 emphasizeColor={color}
