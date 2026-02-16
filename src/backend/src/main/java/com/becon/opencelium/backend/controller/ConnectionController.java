@@ -58,6 +58,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -312,6 +313,30 @@ public class ConnectionController {
     @DeleteMapping("/{connectionId}/version/{snapshotId}")
     public ResponseEntity<?> deleteConnectionByVersion(@PathVariable Long connectionId, @PathVariable String snapshotId){
         connectionService.deleteSnapshot(connectionId, snapshotId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Updates certain snapshot's metadata by provided connection ID and snapshotId")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Snapshot has been successfully updated"),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "403",
+                    description = "Only owner of the Snapshot can update it",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PutMapping("/{connectionId}/version/{snapshotId}")
+    public ResponseEntity<?> updateConnectionSnapshot(
+            @PathVariable Long connectionId,
+            @PathVariable String snapshotId,
+            @RequestBody @Valid ConnectionVersionUpdateRequest request
+    ){
+        connectionService.updateSnapshot(connectionId, snapshotId, request);
         return ResponseEntity.ok().build();
     }
 

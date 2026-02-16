@@ -34,6 +34,7 @@ import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
+import com.becon.opencelium.backend.resource.connection.ConnectionVersionUpdateRequest;
 import com.becon.opencelium.backend.resource.connection.ConnectionVersionedDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
 import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
@@ -553,6 +554,15 @@ public class ConnectionServiceImp implements ConnectionService {
     @Override
     public void setInitialRevisionToConnections() {
         connectionRepository.updateInitialRevision();
+    }
+
+    @Override
+    public void updateSnapshot(Long connectionId, String snapshotId, ConnectionVersionUpdateRequest request) {
+        if (!existsById(connectionId)) {
+            throw new ConnectionNotFoundException(connectionId);
+        }
+
+        connectionMngService.updateSnapshot(snapshotId, request);
     }
 
     /**
