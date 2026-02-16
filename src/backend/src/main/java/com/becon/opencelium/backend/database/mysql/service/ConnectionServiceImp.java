@@ -84,10 +84,6 @@ public class ConnectionServiceImp implements ConnectionService {
     private final WebhookService webhookService;
     private final OpenceliumProps ocProps;
     private final EntityUpdater<ConnectionMng> connectionMngEntityUpdater;
-    private final MongoDbBackupService mongoDbBackupService;
-    private final EnhancementService enhancementService;
-    private final MethodMngService methodMngService;
-    private final OperatorMngService operatorMngService;
     private final OwnershipSecurity ownershipSecurity;
 
     public ConnectionServiceImp(
@@ -107,8 +103,7 @@ public class ConnectionServiceImp implements ConnectionService {
             MaskingRuleRepository ruleRepository,
             EntityVersionManager entityVersionManager,
             OpenceliumProps ocProps,
-            MongoDbBackupService mongoDbBackupService,
-            MethodMngService methodMngService, OperatorMngService operatorMngService, OwnershipSecurity ownershipSecurity
+            OwnershipSecurity ownershipSecurity
     ) {
         this.connectionRepository = connectionRepository;
         this.connectorService = connectorService;
@@ -126,10 +121,6 @@ public class ConnectionServiceImp implements ConnectionService {
         this.ruleRepository = ruleRepository;
         this.ocProps = ocProps;
         this.connectionMngEntityUpdater = entityVersionManager.getUpdater(ConnectionMng.class);
-        this.mongoDbBackupService = mongoDbBackupService;
-        this.enhancementService = enhancementService;
-        this.methodMngService = methodMngService;
-        this.operatorMngService = operatorMngService;
         this.ownershipSecurity = ownershipSecurity;
     }
 
