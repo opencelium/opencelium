@@ -44,7 +44,6 @@ import com.becon.opencelium.backend.utility.LogFileUtility;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.becon.opencelium.backend.versionmanager.EntityUpdater;
 import com.becon.opencelium.backend.versionmanager.EntityVersionManager;
-import com.becon.opencelium.backend.versionmanager.backup.MongoDbBackupService;
 import com.becon.opencelium.backend.versionmanager.base.Utils;
 import com.github.fge.jsonpatch.JsonPatch;
 import jakarta.persistence.EntityNotFoundException;
@@ -53,7 +52,6 @@ import net.minidev.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -97,7 +95,6 @@ public class ConnectionServiceImp implements ConnectionService {
             @Qualifier("connectorServiceImp") ConnectorService connectorService,
             @Qualifier("connectionMngServiceImp") ConnectionMngServiceImp connectionMngService,
             @Qualifier("fieldBindingMngServiceImp") FieldBindingMngService fieldBindingMngService,
-            @Qualifier("enhancementServiceImp") EnhancementService enhancementService,
             @Qualifier("categoryServiceImp") CategoryService categoryService,
             @Qualifier("connectionHistoryServiceImp") ConnectionHistoryService connectionHistoryService,
             @Qualifier("schedulerServiceImp") SchedulerService schedulerService,
@@ -135,7 +132,6 @@ public class ConnectionServiceImp implements ConnectionService {
         this.operatorMngService = operatorMngService;
         this.ownershipSecurity = ownershipSecurity;
     }
-
 
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
     // public methods
@@ -485,62 +481,43 @@ public class ConnectionServiceImp implements ConnectionService {
     @Override
     public void updateConnectionsToCurrentVersion() {
         List<Long> ids = connectionRepository.findIds();
-        boolean gotBackup = false;
+
         for (Long id : ids) {
             Connection connection = getById(id);
             if (Utils.compare(ocProps.getVersion(), connection.getOcVersion()) > 0 && !isTestConnection(connection.getTitle())) {
-                if (!gotBackup) {
-                    gotBackup = true;
 
-                    try {
-                        mongoDbBackupService.backup();
-                    } catch (Exception e) {
-                        log.error("Failed to take backup from MongoDB. Continuing updating connections without backup");
-                    }
-                }
-                // UPDATE CONNECTION_MNG
-                ConnectionMng connectionMng;
                 List<ConnectionMng> connections = connectionMngService.getAllByConnectionId(connection.getId());
-                if (connections.size() != 1) {
-                    log.error("Failed to find Connection[id={}, name={}] on MongoDB with id {}. Skipped updating", connection.getId(), connection.getTitle(), connection.getId());
+                ConnectionMng connectionMng;
+                if (connections.isEmpty()) {
+                    log.error("Failed to find Connection[id={}, name={}] on MongoDB. Skipped updating", connection.getId(), connection.getTitle());
+                    continue;
+                } else if (connections.size() > 1) {
+                    log.error("{} instances found for Connection[id={}, name={}] on MongoDB. Skipped updating", connections.size(), connection.getId(), connection.getTitle());
                     continue;
                 } else {
                     connectionMng = connections.get(0);
                 }
 
                 try {
-                    connectionMng.setCreatedBy(connection.getCreatedBy());
+                    connectionMngEntityUpdater.updateToCurrentVersion(connectionMng);
 
-                    connectionMngEntityUpdater.updateToCurrentVersion(connectionMng)
-                            .ifChangedOrElseIfUpdated(
-                                    connectionMngService::updateWithoutBinding, // if any field is updated
-                                    connectionMngService::save // only version is set to the current version
-                            );
+                    log.info("Connection[id={}, name={}, version={}] successfully updated to {} version", connection.getId(), connection.getTitle(), connection.getOcVersion(), connectionMng.getVersion());
                 } catch (Exception e) {
-                    log.error("Failed to update Connection[id={}, name={}]", connection.getId(), connection.getTitle(), e);
+                    log.error("Failed to update Connection[id={}, name={}, version={}]", connection.getId(), connection.getTitle(), connection.getOcVersion(), e);
                     continue;
                 }
 
-                connection.setSnapshotId(connectionMng.getId());
+                if (connectionMng.getCreatedBy() == null) {
+                    connectionMng.setCreatedBy(connection.getCreatedBy());
+                }
+                connectionMngService.save(connectionMng);
+
+                if (connection.getSnapshotId() == null) {
+                    connection.setSnapshotId(connectionMng.getId());
+                }
                 connection.setOcVersion(ocProps.getVersion());
                 connectionRepository.save(connection);
             }
-        }
-
-        try {
-            // truncate enhancements on mysql
-            enhancementService.deleteAll();
-
-            // clear fieldBindings document on mongodb
-            fieldBindingMngService.deleteAll();
-
-            // clear methods document on mongodb
-            methodMngService.deleteAll();
-
-            // clear operators document on mongodb
-            operatorMngService.deleteAll();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -612,7 +589,7 @@ public class ConnectionServiceImp implements ConnectionService {
      * 1) find test connection ids in MariaDB
      * 2) delete Mongo docs referencing those ids
      * 3) delete MariaDB rows by ids
-     *
+     * <p>
      * Idempotent: can be run multiple times safely.
      */
     @Override
@@ -656,7 +633,8 @@ public class ConnectionServiceImp implements ConnectionService {
         return out;
     }
 
-    public record CleanupResult(int candidateSqlIds, long mongoDeleted, int sqlDeleted) {}
+    public record CleanupResult(int candidateSqlIds, long mongoDeleted, int sqlDeleted) {
+    }
 
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
     // private methods

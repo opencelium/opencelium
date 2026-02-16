@@ -60,17 +60,6 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     }
 
     @Override
-    public void updateWithoutBinding(ConnectionMng connectionMng) {
-        if (Objects.isNull(connectionMng)) return;
-
-        if (Objects.isNull(connectionMng.getId()) || !connectionMngRepository.existsById(connectionMng.getId())) {
-            throw new RuntimeException("CONNECTION_NOT_FOUND");
-        }
-
-        connectionMngRepository.save(connectionMng);
-    }
-
-    @Override
     public ConnectionMng delete(String id) {
         ConnectionMng connectionMng = getById(id);
         connectionMngRepository.delete(connectionMng);
