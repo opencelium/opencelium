@@ -1,6 +1,5 @@
 package com.becon.opencelium.backend.database.mongodb.service;
 
-import com.becon.opencelium.backend.commons.filter.OwnershipSecurity;
 import com.becon.opencelium.backend.constant.props.OpenceliumProps;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
@@ -22,18 +21,16 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     private final FieldBindingMngService fieldBindingMngService;
     private final OpenceliumProps ocProps;
     private final ConnectionMngMapper connectionMngMapper;
-    private final OwnershipSecurity ownershipSecurity;
 
     public ConnectionMngServiceImp(
             ConnectionMngRepository connectionMngRepository,
             @Qualifier("fieldBindingMngServiceImp") FieldBindingMngService fieldBindingMngService,
-            OpenceliumProps ocProps, ConnectionMngMapper connectionMngMapper, OwnershipSecurity ownershipSecurity
+            OpenceliumProps ocProps, ConnectionMngMapper connectionMngMapper
     ) {
         this.connectionMngRepository = connectionMngRepository;
         this.fieldBindingMngService = fieldBindingMngService;
         this.ocProps = ocProps;
         this.connectionMngMapper = connectionMngMapper;
-        this.ownershipSecurity = ownershipSecurity;
     }
 
     @Override
@@ -81,6 +78,11 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     }
 
     @Override
+    public void delete(ConnectionMng connectionMng) {
+        connectionMngRepository.delete(connectionMng);
+    }
+
+    @Override
     public long count() {
         return connectionMngRepository.count();
     }
@@ -107,11 +109,7 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     }
 
     @Override
-    public void updateSnapshot(String snapshotId, ConnectionVersionUpdateRequest request) {
-        ConnectionMng connection = getById(snapshotId);
-
-        ownershipSecurity.checkOwnership(connection);
-
+    public void updateSnapshot(ConnectionMng connection, ConnectionVersionUpdateRequest request) {
         connectionMngMapper.updateFrom(connection, request);
 
         connectionMngRepository.save(connection);

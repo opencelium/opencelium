@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
+import com.becon.opencelium.backend.commons.filter.OwnershipSecurity;
 import com.becon.opencelium.backend.constant.props.OpenceliumProps;
 import com.becon.opencelium.backend.constant.*;
 import com.becon.opencelium.backend.container.Command;
@@ -89,6 +90,7 @@ public class ConnectionServiceImp implements ConnectionService {
     private final EnhancementService enhancementService;
     private final MethodMngService methodMngService;
     private final OperatorMngService operatorMngService;
+    private final OwnershipSecurity ownershipSecurity;
 
     public ConnectionServiceImp(
             ConnectionRepository connectionRepository,
@@ -109,7 +111,7 @@ public class ConnectionServiceImp implements ConnectionService {
             EntityVersionManager entityVersionManager,
             OpenceliumProps ocProps,
             MongoDbBackupService mongoDbBackupService,
-            MethodMngService methodMngService, OperatorMngService operatorMngService
+            MethodMngService methodMngService, OperatorMngService operatorMngService, OwnershipSecurity ownershipSecurity
     ) {
         this.connectionRepository = connectionRepository;
         this.connectorService = connectorService;
@@ -131,6 +133,7 @@ public class ConnectionServiceImp implements ConnectionService {
         this.enhancementService = enhancementService;
         this.methodMngService = methodMngService;
         this.operatorMngService = operatorMngService;
+        this.ownershipSecurity = ownershipSecurity;
     }
 
 
@@ -581,7 +584,10 @@ public class ConnectionServiceImp implements ConnectionService {
             throw new GeneralServiceException(ExceptionConstant.INVALID_DATA, ExceptionMessages.CANT_REMOVE_LAST_VERSION_CONNECTION);
         }
 
-        connectionMngService.delete(snapshotId);
+        ConnectionMng connectionMng = connectionMngService.getById(snapshotId);
+        ownershipSecurity.checkOwnerOrAdmin(connectionMng);
+
+        connectionMngService.delete(connectionMng);
     }
 
     @Override
@@ -595,7 +601,10 @@ public class ConnectionServiceImp implements ConnectionService {
             throw new ConnectionNotFoundException(connectionId);
         }
 
-        connectionMngService.updateSnapshot(snapshotId, request);
+        ConnectionMng connectionMng = connectionMngService.getById(snapshotId);
+        ownershipSecurity.checkOwnerOrAdmin(connectionMng);
+
+        connectionMngService.updateSnapshot(connectionMng, request);
     }
 
     /**
