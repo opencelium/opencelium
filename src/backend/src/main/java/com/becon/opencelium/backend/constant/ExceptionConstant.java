@@ -53,4 +53,5 @@ public interface ExceptionConstant {
 
     // ----------------------------------------- Scheduler ----------------------------------------------- //
     String SCHEDULER_NOT_FOUND = "SCHEDULER_NOT_FOUND";
+    String FORBIDDEN = "FORBIDDEN";
 }
