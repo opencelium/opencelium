@@ -4,9 +4,11 @@ import com.becon.opencelium.backend.application.entity.SystemOverview;
 import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.updateassistant.InstallationDTO;
+import com.becon.opencelium.backend.resource.updateassistant.JarFileDescriptor;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Path;
+import java.util.List;
 
 public interface ApplicationService {
 
@@ -22,4 +24,8 @@ public interface ApplicationService {
     String getCurrentVersion();
     InstallationDTO getInstallation();
     void restore();
+
+    List<JarFileDescriptor> getOldJarFiles();
+
+    List<JarFileDescriptor> deleteOldJarFiles();
 }

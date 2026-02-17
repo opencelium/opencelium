@@ -75,9 +75,6 @@ public class StorageConfiguration {
     @Autowired
     private Scheduler quartzScheduler;
 
-    private static final String JAR_PREFIX = "opencelium.backend-";
-    private static final String JAR_EXTENSION = ".jar";
-
     public StorageConfiguration(
             UserStorageService userStorageService,
             @Qualifier("connectorServiceImp") ConnectorService connectorService,
@@ -131,6 +128,9 @@ public class StorageConfiguration {
 
         FileBackupManager.moveToNewLocation(PathConstant.RESOURCES + "/backup", PathConstant.BACKUP);
 
+        // sets revision of connection
+        connectionService.setInitialRevisionToConnections();
+
         // updates connections and enhancements to current version
         connectionService.updateConnectionsToCurrentVersion();
 
@@ -145,8 +145,7 @@ public class StorageConfiguration {
         // removes connections that contain prefix in their names !*test_connection_
         connectionService.cleanupAllTestConnections();
 
-        // deleting old version zip and jar files
-        cleanOldFiles(PathConstant.LIBS, f -> f.isFile() && f.getName().endsWith(JAR_EXTENSION), JAR_PREFIX);
+        // deleting old version zip files
         cleanOldFiles(PathConstant.ASSISTANT + PathConstant.VERSIONS, File::isDirectory, "");
     }
 

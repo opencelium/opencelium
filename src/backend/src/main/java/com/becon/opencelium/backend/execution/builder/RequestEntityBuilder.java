@@ -1,15 +1,16 @@
 package com.becon.opencelium.backend.execution.builder;
 
 import com.becon.opencelium.backend.enums.execution.DataType;
-import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.enums.execution.ParamLocation;
+import com.becon.opencelium.backend.reference.ReferenceDetector;
+import com.becon.opencelium.backend.reference.ReferenceMatchers;
+import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.resource.execution.ParameterDTO;
 import com.becon.opencelium.backend.resource.execution.ParameterDTOUtil;
 import com.becon.opencelium.backend.resource.execution.RequestBodyDTO;
 import com.becon.opencelium.backend.resource.execution.SchemaDTO;
 import com.becon.opencelium.backend.resource.execution.SchemaDTOUtil;
 import com.becon.opencelium.backend.utility.MediaTypeUtility;
-import com.becon.opencelium.backend.utility.ReferenceUtility;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -25,11 +26,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.regex.Pattern;
-
-import static com.becon.opencelium.backend.constant.RegExpression.directRef;
-import static com.becon.opencelium.backend.constant.RegExpression.enhancement;
-import static com.becon.opencelium.backend.constant.RegExpression.webhook;
 
 public class RequestEntityBuilder {
     private final OperationDTO operation;
@@ -122,20 +118,6 @@ public class RequestEntityBuilder {
         return URI.create(rawUrl);
     }
 
-//    /** Replace every whitespace char with "%20". */
-//    public static String replaceWhitespaceWithPercent20(String input) {
-//        Pattern WS = Pattern.compile("\\s", Pattern.UNICODE_CHARACTER_CLASS);
-//        if (input == null) return null;
-//        return WS.matcher(input).replaceAll("%20");
-//    }
-
-//    private String encValue(String query) {
-//        if (query == null || query.isEmpty()) return query;
-//
-//        String encVal = query.replace(" ", "%20");
-//        return encVal;
-//    }
-
     private HttpHeaders defaultHeadersBuilder() {
         HttpHeaders headers = new HttpHeaders();
 
@@ -214,7 +196,7 @@ public class RequestEntityBuilder {
             for (Map.Entry<String, SchemaDTO> property : properties.entrySet()) {
                 value = property.getValue() == null ? null : property.getValue().getValue();
 
-                if (value != null && ReferenceUtility.containsRef((String) value)) {
+                if (ReferenceDetector.containsReference((String) value)) {
                     value = references.apply((String) value);
                 }
 
@@ -264,7 +246,7 @@ public class RequestEntityBuilder {
 
         String value = schema.getValue();
 
-        if (ReferenceUtility.containsRef(value)) {
+        if (ReferenceDetector.containsReference(value)) {
             SchemaDTO referencedSchema = SchemaDTOUtil.fromObject(references.apply(value));
 
             if (referencedSchema == null) {
@@ -321,18 +303,13 @@ public class RequestEntityBuilder {
         }
 
         // if 'ref' is a direct reference or enhancement type then 'referenced' should be primary
-        if (ref.matches(directRef) || ref.matches(enhancement)) {
+        if (ReferenceMatchers.isDirect(ref) || ReferenceMatchers.isEnhancement(ref)) {
             return true;
         }
 
-        // if 'ref' type webhook and variable type is defined explicitly then 'referenced' should be primary
-        if (ref.matches(webhook) && ref.contains(":")) {
-            // validation of DataType is done when resolving this 'ref'
-            // in ReferenceExtractor.class (line 117) so just check if 'ref' contains :
-            return true;
-        }
-
-        return false;
+        // if 'ref' is a webhook and variable type is defined explicitly then 'referenced' should be primary
+        // validation of DataType is done when parsing this 'ref' in WebhookReference.parse(...)
+        return ReferenceMatchers.isWebhook(ref) && ref.contains(":");
     }
 
     private List<ParameterDTO> getParamsByLocation(ParamLocation location) {

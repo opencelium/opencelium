@@ -25,6 +25,7 @@ import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
 import com.becon.opencelium.backend.resource.application.AvailableUpdateResource;
 import com.becon.opencelium.backend.resource.application.MigrateDataResource;
 import com.becon.opencelium.backend.resource.updateassistant.InstallationDTO;
+import com.becon.opencelium.backend.resource.updateassistant.JarFileDescriptor;
 import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
@@ -447,5 +448,15 @@ public class UpdateAssistantController {
         } catch (IOException e) {
             throw new StorageFileNotFoundException("Error accessing files: " + e.getMessage(), e);
         }
+    }
+
+    @GetMapping("/migration/libs/old-jar")
+    public ResponseEntity<List<JarFileDescriptor>> getOldJarFiles(){
+        return ResponseEntity.ok(assistantServiceImp.getOldJarFiles());
+    }
+
+    @DeleteMapping("/migration/libs/old-jar")
+    public ResponseEntity<List<JarFileDescriptor>> deleteOldJarFiles(){
+        return ResponseEntity.ok(assistantServiceImp.deleteOldJarFiles());
     }
 }

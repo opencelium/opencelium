@@ -10,6 +10,7 @@ import com.github.fge.jsonpatch.JsonPatch;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.env.*;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -382,10 +383,13 @@ public class YAMLMigrator {
     private static boolean setDataSource(Map<String, Object> yaml) {
         Map<String, Object> spring = (Map<String, Object>) yaml.getOrDefault("spring", new HashMap<>());
         Map<String, Object> datasource = (Map<String, Object>) spring.getOrDefault("datasource", new HashMap<>());
-        String url = datasource.getOrDefault("url", "").toString();
-        String username = datasource.getOrDefault("username", "").toString();
-        String password = datasource.getOrDefault("password", "").toString();
-        String driver = datasource.getOrDefault("driver-class-name", "").toString();
+
+        PropertySourcesPropertyResolver propertyResolver = PropertyResolver.buildPropertyResolver(yaml);
+
+        String url = PropertyResolver.resolveProperty(propertyResolver, datasource.getOrDefault("url", "").toString());
+        String username = PropertyResolver.resolveProperty(propertyResolver, datasource.getOrDefault("username", "").toString());
+        String password = PropertyResolver.resolveProperty(propertyResolver, datasource.getOrDefault("password", "").toString());
+        String driver = PropertyResolver.resolveProperty(propertyResolver, datasource.getOrDefault("driver-class-name", "").toString());
 
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setUrl(url);
@@ -395,7 +399,7 @@ public class YAMLMigrator {
 
         //checking connectivity
         try {
-            dataSource.getConnection();
+            dataSource.getConnection().close();
         } catch (SQLException e) {
             log.warn("An error is occurred while connecting to the database");
             return false;
@@ -720,5 +724,42 @@ public class YAMLMigrator {
     private static class Comment {
         private final List<String> lines = new ArrayList<>();
         private String prev;
+    }
+
+    private static class PropertyResolver {
+
+        public static PropertySourcesPropertyResolver buildPropertyResolver(Map<String, Object> yaml) {
+            MutablePropertySources sources = new MutablePropertySources();
+
+            sources.addFirst(new MapPropertySource("yaml", flatten(yaml)));
+            sources.addLast(new PropertiesPropertySource("systemProps", System.getProperties()));
+            sources.addLast(new SystemEnvironmentPropertySource("env", (Map) System.getenv()));
+
+            PropertySourcesPropertyResolver resolver = new PropertySourcesPropertyResolver(sources);
+            resolver.setIgnoreUnresolvableNestedPlaceholders(false);
+            return resolver;
+        }
+
+        public static String resolveProperty(PropertySourcesPropertyResolver resolver, String value) {
+            return resolver.resolveRequiredPlaceholders(value);
+        }
+
+        private static Map<String, Object> flatten(Map<String, Object> yaml) {
+            Map<String, Object> out = new LinkedHashMap<>();
+            flatten("", yaml, out);
+            return out;
+        }
+
+        private static void flatten(String prefix, Object node, Map<String, Object> out) {
+            if (node instanceof Map<?, ?> m) {
+                for (var e : m.entrySet()) {
+                    String k = prefix.isEmpty() ? e.getKey().toString()
+                            : prefix + "." + e.getKey();
+                    flatten(k, e.getValue(), out);
+                }
+            } else if (node != null) {
+                out.put(prefix, node);
+            }
+        }
     }
 }

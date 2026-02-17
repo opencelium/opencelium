@@ -39,4 +39,6 @@ public interface PathConstant {
     String LIBS = "build/libs/";
     String CHANGELOG = "./assistant/changelog/file/";
     String BACKUP = RUNTIME + "backup/";
+
+    String JAR_PREFIX = "opencelium.backend-";
 }

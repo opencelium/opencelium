@@ -1,22 +1,20 @@
 package com.becon.opencelium.backend.execution;
 
+import com.becon.opencelium.backend.enums.PageParam;
 import com.becon.opencelium.backend.enums.RelationalOperator;
 import com.becon.opencelium.backend.execution.oc721.Connector;
 import com.becon.opencelium.backend.execution.oc721.Enhancement;
-import com.becon.opencelium.backend.execution.oc721.EnhancementService;
-import com.becon.opencelium.backend.execution.oc721.EnhancementServiceImpl;
 import com.becon.opencelium.backend.execution.oc721.Extractor;
 import com.becon.opencelium.backend.execution.oc721.FieldBind;
 import com.becon.opencelium.backend.execution.oc721.Loop;
 import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.execution.oc721.ReferenceExtractor;
 import com.becon.opencelium.backend.invoker.entity.Pagination;
-import com.becon.opencelium.backend.enums.PageParam;
+import com.becon.opencelium.backend.reference.ReferenceScanner;
 import com.becon.opencelium.backend.scriptengine.LanguageType;
 import com.becon.opencelium.backend.scriptengine.ScriptEngine;
 import com.becon.opencelium.backend.scriptengine.ScriptExecutionManager;
 import com.becon.opencelium.backend.scriptengine.ScriptExecutionManagerProvider;
-import com.becon.opencelium.backend.utility.ReferenceUtility;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,12 +23,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.becon.opencelium.backend.constant.RegExpression.pageRef;
-
 public class ExecutionManagerImpl implements ExecutionManager {
     private final Map<String, Object> webhookVars;
     private final Extractor refExtractor;
-    private final EnhancementService enhancementService;
     private final List<Loop> loops = new ArrayList<>();
     private final Connector connectorFrom;
     private final Connector connectorTo;
@@ -47,7 +42,6 @@ public class ExecutionManagerImpl implements ExecutionManager {
         this.fieldBind = fieldBind;
 
         this.refExtractor = new ReferenceExtractor(this);
-        this.enhancementService = new EnhancementServiceImpl(this);
         this.scriptExecutionManager = ScriptExecutionManagerProvider.get();
     }
 
@@ -131,7 +125,7 @@ public class ExecutionManagerImpl implements ExecutionManager {
 
         // This method extracts 5 reference types:
         // ['wrappedDirectRef', 'enhancement', 'webhook', 'pageRef', 'requestData'
-        List<String> references = ReferenceUtility.extractRefs(value);
+        List<String> references = ReferenceScanner.extract(value);
 
         // There are 3 cases to skip following if:
         // 1) value == 'directRef': references.isEmpty() == true - we directly call refExtractor.extractValue(value)

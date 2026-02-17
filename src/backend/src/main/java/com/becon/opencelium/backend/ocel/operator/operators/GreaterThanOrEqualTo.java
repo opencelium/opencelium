@@ -1,14 +1,13 @@
 package com.becon.opencelium.backend.ocel.operator.operators;
 
-import com.becon.opencelium.backend.ocel.operator.Arity;
+import com.becon.opencelium.backend.ocel.operator.BinaryOperator;
 import com.becon.opencelium.backend.ocel.operator.OperatorEnum;
 import com.becon.opencelium.backend.ocel.operator.SidesType;
 import com.becon.opencelium.backend.ocel.exception.ApplyOperatorException;
-import com.becon.opencelium.backend.ocel.operator.BinaryOperator;
 import com.becon.opencelium.backend.ocel.utils.DateUtils;
 import com.becon.opencelium.backend.ocel.utils.ValueUtils;
 
-public class GreaterThanOrEqualTo implements BinaryOperator {
+class GreaterThanOrEqualTo implements BinaryOperator {
     @Override
     public Object apply(Object o1, Object o2) throws ApplyOperatorException {
         if (ValueUtils.isNumber(o1) && ValueUtils.isNumber(o2)) {

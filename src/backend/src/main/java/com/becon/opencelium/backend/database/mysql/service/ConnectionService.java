@@ -22,6 +22,7 @@ import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
+import com.becon.opencelium.backend.resource.connection.ConnectionVersionUpdateRequest;
 import com.becon.opencelium.backend.resource.connection.ConnectionVersionedDTO;
 import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
@@ -102,4 +103,8 @@ public interface ConnectionService {
     List<ConnectionVersionedDTO> getConnectionVersions(Long connectionId);
 
     void deleteSnapshot(Long connectionId, String snapshotId);
+
+    void setInitialRevisionToConnections();
+
+    void updateSnapshot(Long connectionId, String snapshotId, ConnectionVersionUpdateRequest request);
 }

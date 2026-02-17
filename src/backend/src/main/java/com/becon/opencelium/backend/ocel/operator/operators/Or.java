@@ -6,7 +6,7 @@ import com.becon.opencelium.backend.ocel.utils.ValueUtils;
 
 import java.util.function.Supplier;
 
-public class Or implements BinaryOperator, BoolOperator {
+class Or implements BinaryOperator, BoolOperator {
 
     @Override
     public Boolean apply(Object o1, Object o2) throws ApplyOperatorException {

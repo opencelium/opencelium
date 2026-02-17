@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.database.mongodb.entity;
 
+import com.becon.opencelium.backend.commons.filter.OwnableEntity;
 import jakarta.persistence.EntityListeners;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -29,7 +30,7 @@ import java.util.Map;
 
 @Document(collection = "connection")
 @EntityListeners(AuditingEntityListener.class)
-public class ConnectionMng {
+public class ConnectionMng implements OwnableEntity {
 
     private String version;
 
@@ -52,6 +53,9 @@ public class ConnectionMng {
 
     @Field(name = "field_bindings")
     private List<FieldBindingMng> fieldBindings;
+
+    @Field(name = "comment")
+    private String comment;
 
     private Map<String, Object> ui;
 
@@ -136,11 +140,20 @@ public class ConnectionMng {
         this.createdAt = createdAt;
     }
 
+    @Override
     public Integer getCreatedBy() {
         return createdBy;
     }
 
     public void setCreatedBy(Integer createdBy) {
         this.createdBy = createdBy;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 }

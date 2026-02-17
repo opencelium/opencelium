@@ -7,7 +7,7 @@ import com.becon.opencelium.backend.ocel.function.FunctionEnum;
 import com.becon.opencelium.backend.ocel.function.FunctionUtils;
 import com.becon.opencelium.backend.ocel.operand.OperandUtils;
 import com.becon.opencelium.backend.ocel.operator.OperatorEnum;
-import com.becon.opencelium.backend.ocel.operator.OperatorUtils;
+import com.becon.opencelium.backend.ocel.utils.OperatorUtils;
 
 import java.util.*;
 

@@ -54,4 +54,9 @@ public interface ConnectionRepository extends JpaRepository<Connection, Long> {
     @Transactional
     @Query("delete from Connection c where c.id in :ids")
     int deleteByIds(@Param("ids") List<Long> ids);
+
+    @Transactional
+    @Modifying
+    @Query("update Connection c set c.revision = 1 where c.revision is null")
+    void updateInitialRevision();
 }

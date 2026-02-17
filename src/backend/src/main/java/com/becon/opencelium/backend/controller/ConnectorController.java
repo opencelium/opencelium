@@ -39,6 +39,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -77,7 +79,16 @@ public class ConnectorController {
         this.connectorResourceMapper = connectorResourceMapper;
     }
 
-    @Operation(summary = "Retrieves a connector from database by provided connector Title")
+    @Operation(summary = "Retrieves a connector from database by provided connector Title",
+        parameters = {
+            @Parameter(
+                name = "X-Master-Password",
+                in = ParameterIn.HEADER,
+                description = "Enables secure resolution of protected connection credentials (such as remote API URL," +
+                        " authentication tokens, usernames, or passwords) required to execute the request.\n" +
+                        "If omitted, sensitive connection properties remain masked and are not used."
+            )
+    })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Connector has been successfully retrieved",
@@ -96,7 +107,17 @@ public class ConnectorController {
                 .orElseThrow(() -> new ConnectorNotFoundException(title));
     }
 
-    @Operation(summary = "Retrieves a connector from database by provided connector ID")
+    @Operation(
+        summary = "Retrieves a connector from database by provided connector ID",
+        parameters = {
+            @Parameter(
+                    name = "X-Master-Password",
+                    in = ParameterIn.HEADER,
+                    description = "Enables secure resolution of protected connection credentials (such as remote API URL," +
+                            " authentication tokens, usernames, or passwords) required to execute the request.\n" +
+                            "If omitted, sensitive connection properties remain masked and are not used."
+            )
+    })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Connector has been successfully retrieved",
@@ -115,7 +136,16 @@ public class ConnectorController {
                 .orElseThrow(() -> new ConnectorNotFoundException(id));
     }
 
-    @Operation(summary = "Retrieves all connectors from database")
+    @Operation(summary = "Retrieves all connectors from database",
+        parameters = {
+            @Parameter(
+                name = "X-Master-Password",
+                in = ParameterIn.HEADER,
+                description = "Enables secure resolution of protected connection credentials (such as remote API URL," +
+                        " authentication tokens, usernames, or passwords) required to execute the request.\n" +
+                        "If omitted, sensitive connection properties remain masked and are not used."
+            )
+    })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Connectors have been successfully retrieved",

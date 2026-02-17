@@ -32,15 +32,15 @@ public class ConnectionPool extends Pool<Long> {
 
             if (all == null || all.isEmpty()) {
                 toDeletePool.add(elem);
-                log.info("Connection[id = {}] is marked as WILL_BE_DELETED with status RED. Because it hasn't any history while last {} seconds.", elem, maxDuration);
+                log.info("Connection[id = {}] is marked as WILL_BE_DELETED with status RED. Because it hasn't any history while last {} milliseconds.", elem, maxDuration);
                 changed = true;
             } else if (all.size() == 1 && all.get(0).getAction().equals(Action.CREATE)) {
                 if (all.get(0).getCreated().isAfter(LocalDateTime.now().minus(NEW_POOL_LIFE_TIME, ChronoUnit.MILLIS))) {
-                    log.info("Connection[id = {}] is marked as WILL_BE_DELETED with status NEW. Because it is created less than {} seconds ago. ", elem, NEW_POOL_LIFE_TIME / 1000);
+                    log.info("Connection[id = {}] is marked as WILL_BE_DELETED with status NEW. Because it is created less than {} milliseconds ago. ", elem, NEW_POOL_LIFE_TIME / 1000);
                     changed = true;
                     newPool.put(elem, poolObj);
                 } else {
-                    log.info("Connection[id = {}] is marked as WILL_BE_DELETED with status RED. Because it is created more than {} seconds ago.", elem, NEW_POOL_LIFE_TIME / 1000);
+                    log.info("Connection[id = {}] is marked as WILL_BE_DELETED with status RED. Because it is created more than {} milliseconds ago.", elem, NEW_POOL_LIFE_TIME / 1000);
                     changed = true;
                     toDeletePool.add(elem);
                 }
@@ -54,16 +54,16 @@ public class ConnectionPool extends Pool<Long> {
                                         .ifPresentOrElse(
                                                 chhh -> {
                                                     youngPool.put(elem, poolObj);
-                                                    log.info("Connection[id = {}] is marked as WILL_BE_DELETED with status YOUNG. Because it is modified less than {} seconds ago.", elem, YOUNG_POOL_LIFE_TIME / 1000);
+                                                    log.info("Connection[id = {}] is marked as WILL_BE_DELETED with status YOUNG. Because it is modified less than {} millisecond ago.", elem, YOUNG_POOL_LIFE_TIME / 1000);
                                                 },
                                                 () -> {
                                                     poolObj.setFairness(YOUNG_POOL_MAX_FAIRNESS + 1);
                                                     oldPool.put(elem, poolObj);
-                                                    log.info("Connection[id = {}] is marked as WILL_BE_DELETED with status OLD. Because it is modified less than {} seconds ago.", elem, OLD_POOL_LIFE_TIME / 1000);
+                                                    log.info("Connection[id = {}] is marked as WILL_BE_DELETED with status OLD. Because it is modified less than {} millisecond ago.", elem, OLD_POOL_LIFE_TIME / 1000);
                                                 }),
                                 () -> {
                                     toDeletePool.add(elem);
-                                    log.info("Connection[id = {}] is marked as WILL_BE_DELETED with status RED. Because it is modified more than {} seconds ago.", elem, OLD_POOL_LIFE_TIME / 1000);
+                                    log.info("Connection[id = {}] is marked as WILL_BE_DELETED with status RED. Because it is modified more than {} millisecond ago.", elem, OLD_POOL_LIFE_TIME / 1000);
                                 }
                         );
                 changed = true;
@@ -161,10 +161,10 @@ public class ConnectionPool extends Pool<Long> {
 
         if (all.size() == 1 && all.get(0).getAction() == Action.CREATE) {
             if (all.get(0).getCreated().isAfter(LocalDateTime.now().minus(NEW_POOL_LIFE_TIME, ChronoUnit.MILLIS))) {
-                log.info("Connection[id = {}] is marked as WILL_BE_DELETED with status NEW. Because it is created less than {} seconds ago. ", poolObj.getElement(), NEW_POOL_LIFE_TIME / 1000);
+                log.info("Connection[id = {}] is marked as WILL_BE_DELETED with status NEW. Because it is created less than {} milliseconds ago. ", poolObj.getElement(), NEW_POOL_LIFE_TIME / 1000);
                 newPool.put(poolObj.getElement(), poolObj);
             } else {
-                log.info("Connection[id = {}] is marked as WILL_BE_DELETED with status RED. Because it is created more than {} seconds ago. ", poolObj.getElement(), NEW_POOL_LIFE_TIME / 1000);
+                log.info("Connection[id = {}] is marked as WILL_BE_DELETED with status RED. Because it is created more than {} milliseconds ago. ", poolObj.getElement(), NEW_POOL_LIFE_TIME / 1000);
                 toDeletePool.add(poolObj.getElement());
             }
         } else {
