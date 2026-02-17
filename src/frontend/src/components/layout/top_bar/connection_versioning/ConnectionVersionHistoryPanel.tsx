@@ -19,7 +19,7 @@ import React, {
 	useEffect,
 	useMemo,
 	useRef,
-	useState,
+	useState
 } from 'react';
 import ReactDOM from 'react-dom';
 import { useAppDispatch, useAppSelector } from '@application/utils/store';
@@ -31,7 +31,7 @@ import { deleteConnectionVersion } from '@entity/connection/redux_toolkit/action
 import Button from '@app_component/base/button/Button';
 import TooltipButton from '@app_component/base/tooltip_button/TooltipButton';
 import { ColorTheme } from '@style/Theme';
-import { useEventListener } from '@application/utils/utils';
+import { useEventListener, setFocusById } from '@application/utils/utils';
 
 import {
 	PanelRoot,
@@ -39,7 +39,6 @@ import {
 	PanelTitle,
 	CloseBtn,
 	PanelContent,
-	LoadingRow,
 	EmptyRow,
 	TimelineRoot,
 	TimelineLine,
@@ -64,9 +63,15 @@ import {
 	SaveRow,
 	MenuRoot,
 	MenuItem,
-	MenuDivider,
 } from './ConnectionVersionHistoryPanel.styles';
 import Confirmation from '@entity/connection/components/components/general/app/Confirmation';
+import Dialog from '@app_component/base/dialog/Dialog';
+import InputText from '@app_component/base/input/text/InputText';
+import InputTextarea from '@app_component/base/input/textarea/InputTextarea';
+import Validation from '@application/classes/Validation';
+import { addTemplate, exportTemplate } from '@entity/template/redux_toolkit/action_creators/TemplateCreators';
+import { Template } from '@entity/connection/classes/Template';
+import { ConnectionRequest } from '@entity/connection/requests/classes/Connection';
 
 export type ConnectionVersionItem = {
 	connectionId?: number;
@@ -164,6 +169,33 @@ function clamp(n: number, min: number, max: number): number {
 	return Math.max(min, Math.min(max, n));
 }
 
+function sanitizeConnectionForTemplate(connection: any): any {
+	if (!connection || typeof connection !== 'object') return connection;
+
+	const c = JSON.parse(JSON.stringify(connection));
+	c.nodeId = null;
+
+	const sanitizeSide = (side: 'fromConnector' | 'toConnector') => {
+		const co = c?.[side];
+		if (!co || typeof co !== 'object') return;
+
+		co.nodeId = null;
+
+		if (co.invoker && typeof co.invoker === 'object') {
+			const name = co.invoker?.name ?? '';
+			co.invoker = { name };
+		}
+
+		if (!Array.isArray(co.methods)) co.methods = [];
+		if (!Array.isArray(co.operators)) co.operators = [];
+	};
+
+	sanitizeSide('fromConnector');
+	sanitizeSide('toConnector');
+
+	return c;
+}
+
 const ConnectionVersionHistoryPanel: FC<ConnectionVersionHistoryPanelProps> = ({
 	open,
 	onClose,
@@ -173,6 +205,7 @@ const ConnectionVersionHistoryPanel: FC<ConnectionVersionHistoryPanelProps> = ({
 
 	const connectionState = useAppSelector((s: any) => s.connectionReducer);
 	const userState = useAppSelector((s: any) => s.userReducer);
+	const appVersion = useAppSelector((s: any) => s.applicationReducer?.version);
 
 	const loading =
 		connectionState?.gettingConnectionVersions === API_REQUEST_STATE.START;
@@ -213,15 +246,100 @@ const ConnectionVersionHistoryPanel: FC<ConnectionVersionHistoryPanelProps> = ({
 		y: number;
 	}>({ open: false, snapshotId: null, x: 0, y: 0 });
 
+	const [copiedSnapshotId, setCopiedSnapshotId] = useState<string | null>(null);
+	const copiedTimerRef = useRef<number | null>(null);
+
 	const panelRef = useRef<HTMLDivElement | null>(null);
 	const menuRef = useRef<HTMLDivElement | null>(null);
 
 	const dotsRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
-	const commentAreaRefs = useRef<Record<string, HTMLDivElement | null>>({});
+	const [downloadTplDialog, setDownloadTplDialog] = useState<{
+		open: boolean;
+		v: ConnectionVersionItem | null;
+	}>({ open: false, v: null });
+
+	const [templateName, setTemplateName] = useState<string>('');
+	const [templateDescription, setTemplateDescription] = useState<string>('');
+	const [templateNameError, setTemplateNameError] = useState<string>('');
+	const [isDownloadingTemplate, setIsDownloadingTemplate] = useState<boolean>(false);
+
+	const validateTemplateFields = useCallback(() => {
+		let err = '';
+		if (templateName.trim() === '') {
+			err = 'Name is a required field';
+			setFocusById('download_template_name');
+		}
+		setTemplateNameError(err);
+		return err === '';
+	}, [templateName]);
+
+	const onOpenDownloadTemplateDialog = useCallback((v: ConnectionVersionItem) => {
+		setTemplateName('');
+		setTemplateDescription('');
+		setTemplateNameError('');
+		setDownloadTplDialog({ open: true, v });
+	}, []);
+
+	const onCloseDownloadTemplateDialog = useCallback(() => {
+		if (isDownloadingTemplate) return;
+		setDownloadTplDialog({ open: false, v: null });
+	}, [isDownloadingTemplate]);
+
+	const onDownloadAsTemplate = useCallback(async () => {
+		const v = downloadTplDialog.v;
+
+		if (!v?.connectionId || !v?.snapshotId) {
+			setDownloadTplDialog({ open: false, v: null });
+			return;
+		}
+
+		if (!validateTemplateFields()) return;
+
+		setIsDownloadingTemplate(true);
+
+		try {
+			const req = new ConnectionRequest();
+			const resp = await req.getConnectionBySnapshot(v.connectionId, v.snapshotId);
+			const snapshotConnectionRaw = resp?.data;
+
+			const snapshotConnection = sanitizeConnectionForTemplate(snapshotConnectionRaw);
+
+			const createdTemplate = await dispatch(
+				addTemplate(
+					new Template({
+						name: templateName,
+						description: templateDescription,
+						version: appVersion || '',
+						connection: snapshotConnection,
+						dispatch,
+					}) as any,
+				) as any,
+			).unwrap();
+
+			await dispatch(exportTemplate(createdTemplate) as any).unwrap();
+
+			setDownloadTplDialog({ open: false, v: null });
+		} catch (e) {
+		} finally {
+			setIsDownloadingTemplate(false);
+		}
+	}, [
+		downloadTplDialog.v,
+		validateTemplateFields,
+		dispatch,
+		appVersion,
+		templateName,
+		templateDescription,
+	]);
 
 	const closeMenu = useCallback(() => {
 		setMenu({ open: false, snapshotId: null, x: 0, y: 0 });
+		setCopiedSnapshotId(null);
+		if (copiedTimerRef.current) {
+			window.clearTimeout(copiedTimerRef.current);
+			copiedTimerRef.current = null;
+		}
 	}, []);
 
 	useEffect(() => {
@@ -231,7 +349,16 @@ const ConnectionVersionHistoryPanel: FC<ConnectionVersionHistoryPanelProps> = ({
 		setActiveSnapshotId(null);
 		setHoveredSnapshotId(null);
 		closeMenu();
-	}, [open]);
+	}, [open, closeMenu]);
+
+	useEffect(() => {
+		return () => {
+			if (copiedTimerRef.current) {
+				window.clearTimeout(copiedTimerRef.current);
+				copiedTimerRef.current = null;
+			}
+		};
+	}, []);
 
 	useEffect(() => {
 		if (!open) return;
@@ -334,19 +461,18 @@ const ConnectionVersionHistoryPanel: FC<ConnectionVersionHistoryPanelProps> = ({
 
 	const versions = useMemo(() => {
 		const normalized = normalizeVersions(rawVersions);
-		const sorted = [...normalized].sort((a, b) => b.createdAt - a.createdAt);
+		return [...normalized].sort((a, b) => b.createdAt - a.createdAt);
+	}, [rawVersions]);
 
+	useEffect(() => {
 		setComments((prev) => {
 			const next = { ...prev };
-			for (const v of sorted) {
-				if (next[v.snapshotId] === undefined)
-					next[v.snapshotId] = v.comment ?? '';
+			for (const v of versions) {
+				if (next[v.snapshotId] === undefined) next[v.snapshotId] = v.comment ?? '';
 			}
 			return next;
 		});
-
-		return sorted;
-	}, [rawVersions]);
+	}, [versions]);
 
 	const rows = useMemo(() => buildTimelineRows(versions), [versions]);
 
@@ -369,7 +495,6 @@ const ConnectionVersionHistoryPanel: FC<ConnectionVersionHistoryPanelProps> = ({
 					snapshotId: v.snapshotId,
 				}) as any,
 			).unwrap();
-		} catch {
 		} finally {
 			setDeletingSnapshotId(null);
 			setConfirmDelete({ open: false, v: null });
@@ -387,6 +512,12 @@ const ConnectionVersionHistoryPanel: FC<ConnectionVersionHistoryPanelProps> = ({
 		const desiredX = rect.right + 8;
 		const desiredY = rect.top;
 
+		setCopiedSnapshotId(null);
+		if (copiedTimerRef.current) {
+			window.clearTimeout(copiedTimerRef.current);
+			copiedTimerRef.current = null;
+		}
+
 		setMenu((prev) => {
 			if (prev.open && prev.snapshotId === v.snapshotId)
 				return { open: false, snapshotId: null, x: 0, y: 0 };
@@ -398,8 +529,29 @@ const ConnectionVersionHistoryPanel: FC<ConnectionVersionHistoryPanelProps> = ({
 		async (v: ConnectionVersionItem) => {
 			try {
 				await navigator.clipboard.writeText(v.snapshotId);
-			} catch {}
-			closeMenu();
+			} catch (e) {
+				try {
+					const ta = document.createElement('textarea');
+					ta.value = v.snapshotId;
+					ta.style.position = 'fixed';
+					ta.style.left = '-9999px';
+					ta.style.top = '0';
+					document.body.appendChild(ta);
+					ta.focus();
+					ta.select();
+					document.execCommand('copy');
+					document.body.removeChild(ta);
+				} catch (e2) {
+				}
+			}
+
+			setCopiedSnapshotId(v.snapshotId);
+
+			if (copiedTimerRef.current) window.clearTimeout(copiedTimerRef.current);
+			copiedTimerRef.current = window.setTimeout(() => {
+				setCopiedSnapshotId(null);
+				closeMenu();
+			}, 1200);
 		},
 		[closeMenu],
 	);
@@ -410,24 +562,6 @@ const ConnectionVersionHistoryPanel: FC<ConnectionVersionHistoryPanelProps> = ({
 			onAskDelete(v);
 		},
 		[closeMenu, onAskDelete],
-	);
-
-	const onMenuCreateTemplate = useCallback(
-		(v: ConnectionVersionItem) => {
-			// TODO
-			console.log('Create template', v.snapshotId);
-			closeMenu();
-		},
-		[closeMenu],
-	);
-
-	const onMenuDownloadTemplate = useCallback(
-		(v: ConnectionVersionItem) => {
-			// TODO
-			console.log('Download template', v.snapshotId);
-			closeMenu();
-		},
-		[closeMenu],
 	);
 
 	const onSaveComment = useCallback(
@@ -475,6 +609,160 @@ const ConnectionVersionHistoryPanel: FC<ConnectionVersionHistoryPanelProps> = ({
 		setActiveSnapshotId(snapshotId);
 	}, []);
 
+	const timelineMemo = useMemo(() => {
+		return (
+			<TimelineRoot>
+				<TimelineLine />
+
+				{rows.map((row) => {
+					if (row.kind === 'date') {
+						return (
+							<DateRow key={row.key}>
+								<DateSpacer />
+								<DateInnerRow>
+									<DateHr />
+									<DateLabel>{row.dateLabel}</DateLabel>
+									<DateHr />
+								</DateInnerRow>
+							</DateRow>
+						);
+					}
+
+					const v = row.item;
+					const timeLabel = formatTimeHHMM(v.createdAt);
+
+					const isActive = activeSnapshotId === v.snapshotId;
+					const isExpanded = expandedSnapshotId === v.snapshotId;
+					const isHovered = hoveredSnapshotId === v.snapshotId;
+					const showExpand = isActive || isHovered;
+
+					const commentValue = comments[v.snapshotId] ?? '';
+
+					const normalWidth = 320;
+					const expandedWidth = expandedWidths[v.snapshotId] ?? 420;
+					const shiftLeft = isExpanded ? Math.max(0, expandedWidth - normalWidth) : 0;
+
+					return (
+						<ItemRow key={row.key}>
+							<TimeCol>
+								<TimeLabel>{timeLabel}</TimeLabel>
+								<Dot />
+							</TimeCol>
+
+							<Card onClick={() => onSelect(v)} $width={normalWidth}>
+								<CardHeader>
+									<AuthorText>Author: {getAuthorLabel(v.author)}</AuthorText>
+
+									<DotsButton
+										ref={(el) => {
+											dotsRefs.current[v.snapshotId] = el;
+										}}
+										type='button'
+										title='Menu'
+										onMouseDown={stopBoth}
+										onClick={(e) => onToggleMenu(e, v)}
+									>
+										<DotsIcon>
+											<DotSmall />
+											<DotSmall />
+											<DotSmall />
+										</DotsIcon>
+									</DotsButton>
+								</CardHeader>
+
+								<CommentArea
+									data-oc-comment-area='true'
+									onMouseEnter={() => setHoveredSnapshotId(v.snapshotId)}
+									onMouseLeave={() =>
+										setHoveredSnapshotId((prev) => (prev === v.snapshotId ? null : prev))
+									}
+								>
+									{showExpand && (
+										<ExpandButtonContainer onMouseDown={stopBoth} onClick={stopBoth}>
+											<TooltipButton
+												position={'bottom'}
+												icon={isExpanded ? 'close_fullscreen' : 'open_in_full'}
+												tooltip={isExpanded ? 'Minimize' : 'Maximize'}
+												target={`version_comment_expand_${v.snapshotId}`}
+												hasBackground={true}
+												background={isExpanded ? ColorTheme.Blue : ColorTheme.White}
+												color={isExpanded ? ColorTheme.White : ColorTheme.Gray}
+												padding='2px'
+												handleClick={(e: any) => {
+													stopBoth(e);
+
+													if (!isExpanded) {
+														const ta = document.getElementById(
+															`comment_ta_${v.snapshotId}`,
+														) as HTMLTextAreaElement | null;
+														computeExpandedWidthFor(v.snapshotId, ta);
+														setExpandedSnapshotId(v.snapshotId);
+													} else {
+														setExpandedSnapshotId(null);
+													}
+
+													Promise.resolve().then(() => focusComment(v.snapshotId));
+												}}
+											/>
+										</ExpandButtonContainer>
+									)}
+
+									<CommentTextarea
+										id={`comment_ta_${v.snapshotId}`}
+										value={commentValue}
+										placeholder='Comment'
+										onMouseDown={stopPropagationOnly}
+										onClick={stopPropagationOnly}
+										onFocus={(e) => {
+											e.stopPropagation();
+											setActiveSnapshotId(v.snapshotId);
+										}}
+										onBlur={(e) => {
+											e.stopPropagation();
+											setActiveSnapshotId((prev) => (prev === v.snapshotId ? null : prev));
+										}}
+										onChange={(e) => {
+											const val = e.target.value;
+											setComments((prev) => ({ ...prev, [v.snapshotId]: val }));
+										}}
+										$expanded={isExpanded}
+										$expandedWidth={expandedWidth}
+										$shiftLeft={shiftLeft}
+									/>
+
+									{isActive && (
+										<SaveRow
+											onMouseDown={(e) => {
+												e.preventDefault();
+												e.stopPropagation();
+											}}
+											onClick={stopPropagationOnly}
+										>
+											<Button handleClick={onSaveComment as any} label='Save' />
+										</SaveRow>
+									)}
+								</CommentArea>
+							</Card>
+						</ItemRow>
+					);
+				})}
+			</TimelineRoot>
+		);
+	}, [
+		rows,
+		activeSnapshotId,
+		expandedSnapshotId,
+		hoveredSnapshotId,
+		comments,
+		expandedWidths,
+		onSelect,
+		getAuthorLabel,
+		onToggleMenu,
+		computeExpandedWidthFor,
+		focusComment,
+		onSaveComment,
+	]);
+
 	const renderMenu = useCallback(() => {
 		if (!menu.open || !menu.snapshotId) return null;
 
@@ -484,7 +772,7 @@ const ConnectionVersionHistoryPanel: FC<ConnectionVersionHistoryPanelProps> = ({
 		const vw = window.innerWidth;
 		const vh = window.innerHeight;
 		const width = 210;
-		const height = 4 * 40 + 26;
+		const height = 3 * 40;
 
 		let x = menu.x;
 		let y = menu.y;
@@ -494,51 +782,47 @@ const ConnectionVersionHistoryPanel: FC<ConnectionVersionHistoryPanelProps> = ({
 		if (y < 8) y = 8;
 
 		const isDeleting = deletingSnapshotId === v.snapshotId;
+		const isCopied = copiedSnapshotId === v.snapshotId;
 
 		return (
 			<MenuRoot ref={menuRef} style={{ left: x, top: y }}>
 				<MenuItem
-					onMouseDown={stopBoth}
-					onClick={(e) => {
-						stopBoth(e);
-						onMenuCreateTemplate(v);
+					$isDisabled={isCopied}
+					style={{
+						color: isCopied ? ColorTheme.Blue : undefined,
+						fontWeight: isCopied ? 600 : undefined,
 					}}
-				>
-					Create template
-				</MenuItem>
-
-				<MenuItem
-					onMouseDown={stopBoth}
-					onClick={(e) => {
+					onMouseDown={(e) => {
 						stopBoth(e);
+						if (isCopied) return;
 						onMenuCopySnapshot(v);
 					}}
+					onClick={stopBoth}
 				>
-					Copy snapshotId
+					{isCopied ? 'Copied' : 'Copy snapshotId'}
 				</MenuItem>
 
 				<MenuItem
-					onMouseDown={stopBoth}
-					onClick={(e) => {
+					onMouseDown={(e) => {
 						stopBoth(e);
-						onMenuDownloadTemplate(v);
+						closeMenu();
+						onOpenDownloadTemplateDialog(v);
 					}}
+					onClick={stopBoth}
 				>
-					Download template
+					Download as Template
 				</MenuItem>
-
-				<MenuDivider />
 
 				<MenuItem
 					$isDisabled={isDeleting}
 					style={{
 						color: isDeleting ? 'rgba(0,0,0,0.35)' : 'rgba(0,0,0,0.88)',
 					}}
-					onMouseDown={stopBoth}
-					onClick={(e) => {
+					onMouseDown={(e) => {
 						stopBoth(e);
 						onMenuDelete(v);
 					}}
+					onClick={stopBoth}
 				>
 					Delete
 				</MenuItem>
@@ -551,11 +835,11 @@ const ConnectionVersionHistoryPanel: FC<ConnectionVersionHistoryPanelProps> = ({
 		menu.y,
 		versions,
 		deletingSnapshotId,
-		onMenuCreateTemplate,
+		copiedSnapshotId,
 		onMenuCopySnapshot,
-		onMenuDownloadTemplate,
 		onMenuDelete,
 		closeMenu,
+		onOpenDownloadTemplateDialog,
 	]);
 
 	const node = (
@@ -568,195 +852,65 @@ const ConnectionVersionHistoryPanel: FC<ConnectionVersionHistoryPanelProps> = ({
 				cancelClick={onCancelDelete}
 			/>
 
+			<Dialog
+				active={downloadTplDialog.open}
+				toggle={onCloseDownloadTemplateDialog}
+				title={'Download as Template'}
+				actions={[
+					{
+						id: 'download_as_template_ok',
+						label: isDownloadingTemplate ? 'Downloading...' : 'Download',
+						onClick: onDownloadAsTemplate,
+						isLoading: isDownloadingTemplate,
+					},
+					{
+						id: 'download_as_template_cancel',
+						label: 'Cancel',
+						onClick: onCloseDownloadTemplateDialog,
+					},
+				]}
+			>
+				<InputText
+					id={'download_template_name'}
+					maxLength={Validation.TextLength.Short}
+					error={templateNameError}
+					onChange={(e) => {
+						setTemplateName(e.target.value);
+						setTemplateNameError('');
+					}}
+					value={templateName}
+					label={'Name'}
+					name={'download_template_name'}
+					icon={'title'}
+					autoFocus
+					required
+				/>
+
+				<InputTextarea
+					id={'download_template_description'}
+					maxLength={Validation.TextLength.Medium}
+					onChange={(e) => setTemplateDescription(e.target.value)}
+					value={templateDescription}
+					label={'Description'}
+					name={'download_template_description'}
+					icon={'notes'}
+				/>
+			</Dialog>
+
 			{renderMenu()}
 
 			<PanelRoot ref={panelRef} $open={open}>
 				<PanelHeader>
 					<PanelTitle>Version History</PanelTitle>
 
-					<CloseBtn
-						type='button'
-						onClick={onClose}
-						title='Close'
-						tabIndex={open ? 0 : -1}
-					>
+					<CloseBtn type='button' onClick={onClose} title='Close' tabIndex={open ? 0 : -1}>
 						×
 					</CloseBtn>
 				</PanelHeader>
 
 				<PanelContent>
-					{loading && <LoadingRow>Loading...</LoadingRow>}
-
-					{!loading && versions.length === 0 && (
-						<EmptyRow>No versions yet.</EmptyRow>
-					)}
-
-					<TimelineRoot>
-						<TimelineLine />
-
-						{rows.map((row) => {
-							if (row.kind === 'date') {
-								return (
-									<DateRow key={row.key}>
-										<DateSpacer />
-										<DateInnerRow>
-											<DateHr />
-											<DateLabel>{row.dateLabel}</DateLabel>
-											<DateHr />
-										</DateInnerRow>
-									</DateRow>
-								);
-							}
-
-							const v = row.item;
-							const timeLabel = formatTimeHHMM(v.createdAt);
-
-							const isActive = activeSnapshotId === v.snapshotId;
-							const isExpanded = expandedSnapshotId === v.snapshotId;
-							const isHovered = hoveredSnapshotId === v.snapshotId;
-							const showExpand = isActive || isHovered;
-
-							const commentValue = comments[v.snapshotId] ?? '';
-
-							const normalWidth = 320;
-							const expandedWidth = expandedWidths[v.snapshotId] ?? 420;
-							const shiftLeft = isExpanded
-								? Math.max(0, expandedWidth - normalWidth)
-								: 0;
-
-							return (
-								<ItemRow key={row.key}>
-									<TimeCol>
-										<TimeLabel>{timeLabel}</TimeLabel>
-										<Dot />
-									</TimeCol>
-
-									<Card onClick={() => onSelect(v)} $width={normalWidth}>
-										<CardHeader>
-											<AuthorText>
-												Author: {getAuthorLabel(v.author)}
-											</AuthorText>
-
-											<DotsButton
-												ref={(el) => {
-													dotsRefs.current[v.snapshotId] = el;
-												}}
-												type='button'
-												title='Menu'
-												onMouseDown={stopBoth}
-												onClick={(e) => onToggleMenu(e, v)}
-											>
-												<DotsIcon>
-													<DotSmall />
-													<DotSmall />
-													<DotSmall />
-												</DotsIcon>
-											</DotsButton>
-										</CardHeader>
-
-										<CommentArea
-											ref={(el) => {
-												commentAreaRefs.current[v.snapshotId] = el;
-											}}
-											data-oc-comment-area='true'
-											onMouseEnter={() => setHoveredSnapshotId(v.snapshotId)}
-											onMouseLeave={() =>
-												setHoveredSnapshotId((prev) =>
-													prev === v.snapshotId ? null : prev,
-												)
-											}
-										>
-											{showExpand && (
-												<ExpandButtonContainer
-													onMouseDown={stopBoth}
-													onClick={(e) => {
-														stopBoth(e);
-													}}
-												>
-													<TooltipButton
-														position={'bottom'}
-														icon={
-															isExpanded ? 'close_fullscreen' : 'open_in_full'
-														}
-														tooltip={isExpanded ? 'Minimize' : 'Maximize'}
-														target={`version_comment_expand_${v.snapshotId}`}
-														hasBackground={true}
-														background={
-															isExpanded ? ColorTheme.Blue : ColorTheme.White
-														}
-														color={
-															isExpanded ? ColorTheme.White : ColorTheme.Gray
-														}
-														padding='2px'
-														handleClick={(e: any) => {
-															stopBoth(e);
-
-															if (!isExpanded) {
-																const ta = document.getElementById(
-																	`comment_ta_${v.snapshotId}`,
-																) as HTMLTextAreaElement | null;
-																computeExpandedWidthFor(v.snapshotId, ta);
-																setExpandedSnapshotId(v.snapshotId);
-															} else {
-																setExpandedSnapshotId(null);
-															}
-
-															Promise.resolve().then(() =>
-																focusComment(v.snapshotId),
-															);
-														}}
-													/>
-												</ExpandButtonContainer>
-											)}
-
-											<CommentTextarea
-												id={`comment_ta_${v.snapshotId}`}
-												value={commentValue}
-												placeholder='Comment'
-												onMouseDown={stopPropagationOnly}
-												onClick={stopPropagationOnly}
-												onFocus={(e) => {
-													e.stopPropagation();
-													setActiveSnapshotId(v.snapshotId);
-												}}
-												onBlur={(e) => {
-													e.stopPropagation();
-													setActiveSnapshotId((prev) =>
-														prev === v.snapshotId ? null : prev,
-													);
-												}}
-												onChange={(e) => {
-													const val = e.target.value;
-													setComments((prev) => ({
-														...prev,
-														[v.snapshotId]: val,
-													}));
-												}}
-												$expanded={isExpanded}
-												$expandedWidth={expandedWidth}
-												$shiftLeft={shiftLeft}
-											/>
-
-											{isActive && (
-												<SaveRow
-													onMouseDown={(e) => {
-														e.preventDefault();
-														e.stopPropagation();
-													}}
-													onClick={stopPropagationOnly}
-												>
-													<Button
-														handleClick={(e: any) => onSaveComment(e, v)}
-														label='Save'
-													/>
-												</SaveRow>
-											)}
-										</CommentArea>
-									</Card>
-								</ItemRow>
-							);
-						})}
-					</TimelineRoot>
+					{!loading && versions.length === 0 && <EmptyRow>No versions yet.</EmptyRow>}
+					{timelineMemo}
 				</PanelContent>
 			</PanelRoot>
 		</>

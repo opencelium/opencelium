@@ -49,6 +49,7 @@ const ConnectionVersioning: FC<ConnectionVersioningProps> = ({ theme }) => {
 	const location = useLocation();
 
 	const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+	const [pendingOpenHistory, setPendingOpenHistory] = useState(false);
 
 	const [confirmOpenVersion, setConfirmOpenVersion] = useState<null | ConnectionVersionItem>(null);
 	const [
@@ -77,15 +78,6 @@ const ConnectionVersioning: FC<ConnectionVersioningProps> = ({ theme }) => {
 
 	const isSaving =
 		connectionState?.updatingConnection === API_REQUEST_STATE.START;
-	const isSaved =
-		connectionState?.updatingConnection === API_REQUEST_STATE.FINISH &&
-		!connectionState?.isDirty;
-
-	const saveLabel = useMemo(() => {
-		if (!canShow) return '';
-		if (isSaving) return 'Saving...';
-		return isSaved ? 'Saved' : 'Save';
-	}, [canShow, isSaving, isSaved]);
 
 	const onSave = useCallback(() => {
 		if (!connectionId) return;
@@ -98,7 +90,7 @@ const ConnectionVersioning: FC<ConnectionVersioningProps> = ({ theme }) => {
 	const onOpenHistory = useCallback(() => {
 		if (!connectionId) return;
 
-		setIsHistoryOpen(true);
+		setPendingOpenHistory(true);
 
 		dispatch(getConnectionVersions(connectionId) as any);
 	}, [connectionId, dispatch]);
@@ -138,6 +130,20 @@ const ConnectionVersioning: FC<ConnectionVersioningProps> = ({ theme }) => {
 		[connectionId, doOpenVersion, isDirty],
 	);
 
+	const versionsLoading =
+	connectionState?.gettingConnectionVersions === API_REQUEST_STATE.START;
+	const versionsLoaded =
+		connectionState?.gettingConnectionVersions === API_REQUEST_STATE.FINISH;
+
+	useEffect(() => {
+		if (!pendingOpenHistory) return;
+
+		if (!versionsLoaded) return;
+
+		setPendingOpenHistory(false);
+		setIsHistoryOpen(true);
+	}, [pendingOpenHistory, versionsLoaded]);
+
 	useEffect(() => {
 		if (!connectionId) return;
 
@@ -176,6 +182,8 @@ const ConnectionVersioning: FC<ConnectionVersioningProps> = ({ theme }) => {
 				tooltip="Open Version History"
 				handleClick={onOpenHistory}
 				icon={'history'}
+				isLoading={versionsLoading || pendingOpenHistory}
+				isDisabled={versionsLoading || pendingOpenHistory}
 				hasBackground={true}
 				background={ColorTheme.White}
 				color={ColorTheme.Gray}
