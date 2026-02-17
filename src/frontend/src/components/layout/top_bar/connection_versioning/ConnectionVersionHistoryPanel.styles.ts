@@ -20,7 +20,7 @@ export const PanelRoot = styled.div<{ $open: boolean }>`
 	position: fixed;
 	top: 0;
 	height: 100vh;
-	width: 460px;
+	width: 440px;
 	background: #fff;
 	border-left: 1px solid rgba(0, 0, 0, 0.12);
 	z-index: 20000;
@@ -57,7 +57,7 @@ export const CloseBtn = styled.button`
 `;
 
 export const PanelContent = styled.div`
-	padding: 0 16px 16px 16px;
+	padding: 0 16px 16px 0;
 	overflow: auto;
 `;
 
@@ -76,7 +76,7 @@ export const TimelineRoot = styled.div`
 
 export const TimelineLine = styled.div`
 	position: absolute;
-	left: 40px;
+	left: 55px;
 	top: 0;
 	bottom: 0;
 	width: 2px;
@@ -127,7 +127,7 @@ export const TimeCol = styled.div`
 
 export const TimeLabel = styled.div`
 	position: absolute;
-	left: 0px;
+	left: 15px;
 	top: 7px;
 	width: 32px;
 	text-align: right;
@@ -137,7 +137,7 @@ export const TimeLabel = styled.div`
 
 export const Dot = styled.div`
 	position: absolute;
-	left: 35px;
+	left: 50px;
 	top: 12px;
 	width: 12px;
 	height: 12px;
