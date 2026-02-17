@@ -16,7 +16,9 @@
 import styled from 'styled-components';
 import DefaultText from "@app_component/base/text/DefaultText";
 import HeaderText from "@app_component/base/text/HeaderText";
-import {DefaultInputTextSize, DefaultTextSize} from "@entity/application/utils/constants";
+import {DefaultInputTextSize, DefaultShadowHoverStyles, DefaultTextSize} from "@entity/application/utils/constants";
+import {ColorTheme, ITheme} from "@style/Theme";
+import chroma from "chroma-js";
 
 export const PanelRoot = styled.div<{ $open: boolean }>`
 	overflow-y: auto;
@@ -136,27 +138,31 @@ export const TimeLabel = styled.div`
 	color: rgba(0, 0, 0, 0.65);
 `;
 
-export const Dot = styled.div`
+export const Dot = styled.div<{isCurrent: boolean}>`
 	position: absolute;
 	left: 50px;
 	top: 12px;
 	width: 12px;
 	height: 12px;
 	border-radius: 50%;
-	background: #e0e0e0;
+	background: ${({isCurrent}) => isCurrent ? ColorTheme.Blue : '#e0e0e0'};
 	border: 1px solid rgba(0,0,0,0.12);
 	box-sizing: border-box;
 	z-index: 1;
 `;
 
-export const Card = styled.div<{ $width: number }>`
+export const Card = styled.div<{ $width: number, isCurrent: boolean, theme: ITheme }>`
 	width: ${({ $width }) => `${$width}px`};
 	border: 1px solid rgba(0, 0, 0, 0.12);
+	border-color: ${({theme, isCurrent}) => isCurrent ? `${chroma(ColorTheme.Blue).alpha(0.9)}` : 'rgba(0, 0, 0, 0.12)'};
 	border-radius: 14px;
 	background: #fff;
 	padding: 12px;
-	cursor: pointer;
 	position: relative;
+	${({isCurrent}) => isCurrent ? '' : `
+		${DefaultShadowHoverStyles}	
+		cursor: pointer;
+	`}
 `;
 
 export const CardHeader = styled.div`

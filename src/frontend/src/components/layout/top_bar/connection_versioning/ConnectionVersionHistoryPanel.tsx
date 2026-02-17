@@ -73,6 +73,7 @@ import { addTemplate, exportTemplate } from '@entity/template/redux_toolkit/acti
 import { Template } from '@entity/connection/classes/Template';
 import { ConnectionRequest } from '@entity/connection/requests/classes/Connection';
 import DefaultText from "@app_component/base/text/DefaultText";
+import {withTheme} from "styled-components";
 
 export type ConnectionVersionItem = {
 	connectionId?: number;
@@ -81,6 +82,7 @@ export type ConnectionVersionItem = {
 	createdAt: number;
 	author?: number;
 	comment?: string;
+	current: boolean;
 };
 
 export interface ConnectionVersionHistoryPanelProps {
@@ -105,6 +107,7 @@ function normalizeVersions(raw: any): ConnectionVersionItem[] {
 				createdAt,
 				author: it?.author,
 				comment: it?.comment,
+				current: !!it?.current,
 			} as ConnectionVersionItem;
 		})
 		.filter(Boolean) as ConnectionVersionItem[];
@@ -201,6 +204,7 @@ const ConnectionVersionHistoryPanel: FC<ConnectionVersionHistoryPanelProps> = ({
 	open,
 	onClose,
 	onSelect,
+	theme,
 }) => {
 	const dispatch = useAppDispatch();
 
@@ -658,15 +662,15 @@ const ConnectionVersionHistoryPanel: FC<ConnectionVersionHistoryPanelProps> = ({
 					const normalWidth = 320;
 					const expandedWidth = expandedWidths[v.snapshotId] ?? 420;
 					const shiftLeft = isExpanded ? Math.max(0, expandedWidth - normalWidth) : 0;
-
+					console.log(v.current)
 					return (
 						<ItemRow key={row.key}>
 							<TimeCol>
 								<TimeLabel>{timeLabel}</TimeLabel>
-								<Dot />
+								<Dot isCurrent={v.current} />
 							</TimeCol>
 
-							<Card onClick={() => onSelect(v)} $width={normalWidth}>
+							<Card onClick={v.current ? () => {} : () => onSelect(v)} $width={normalWidth} isCurrent={v.current} theme={theme}>
 								<CardHeader>
 									<AuthorText isBold value={`Author: ${getAuthorLabel(v.author)}`}/>
 
@@ -830,7 +834,7 @@ const ConnectionVersionHistoryPanel: FC<ConnectionVersionHistoryPanelProps> = ({
 					Download as Template
 				</MenuItem>
 
-				<MenuItem
+				{!v.current && <MenuItem
 					$isDisabled={isDeleting}
 					style={{
 						color: isDeleting ? 'rgba(0,0,0,0.35)' : 'rgba(0,0,0,0.88)',
@@ -843,6 +847,7 @@ const ConnectionVersionHistoryPanel: FC<ConnectionVersionHistoryPanelProps> = ({
 				>
 					Delete
 				</MenuItem>
+				}
 			</MenuRoot>
 		);
 	}, [
@@ -936,4 +941,4 @@ const ConnectionVersionHistoryPanel: FC<ConnectionVersionHistoryPanelProps> = ({
 	return ReactDOM.createPortal(node, document.body);
 };
 
-export default ConnectionVersionHistoryPanel;
+export default withTheme(ConnectionVersionHistoryPanel);
