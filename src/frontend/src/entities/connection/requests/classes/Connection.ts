@@ -93,6 +93,11 @@ export class ConnectionRequest extends Request implements IConnectionRequest{
         return super.delete<void>();
     }
 
+    async updateConnectionVersionComment(connectionId: number, snapshotId: string, comment: string): Promise<AxiosResponse<IResponse>> {
+        this.endpoint = `/${connectionId}/version/${snapshotId}`;
+        return super.put<IResponse>({ comment });
+    }
+
     backendMap(connection: IConnection){
         let mappedConnection: any = {
             title: connection.title,

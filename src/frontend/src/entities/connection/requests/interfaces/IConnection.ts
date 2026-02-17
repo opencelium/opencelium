@@ -65,4 +65,5 @@ export interface ConnectionVersionItem {
     title: string;
     snapshotId: string;
     createdAt: number;
+    comment?: string;
 }
