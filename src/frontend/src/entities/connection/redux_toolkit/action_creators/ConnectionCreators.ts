@@ -382,6 +382,22 @@ export const deleteConnectionVersion = createAsyncThunk(
 	},
 );
 
+export const updateConnectionVersionComment = createAsyncThunk(
+    'connection/versioning/updateVersion',
+    async (
+        { connectionId, snapshotId, comment }: { connectionId: number; snapshotId: string; comment: string },
+        thunkAPI
+    ) => {
+        try {
+            const request = new ConnectionRequest();
+            await request.updateConnectionVersionComment(connectionId, snapshotId, comment);
+            return { connectionId, snapshotId, comment };
+        } catch (e) {
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    },
+);
+
 export default {
     generateLogs,
     getConnectionWebhooks,
@@ -401,5 +417,6 @@ export default {
     deleteConnectionsById,
     getConnectionVersions,
     getConnectionVersionBySnapshot,
-    deleteConnectionVersion
+    deleteConnectionVersion,
+    updateConnectionVersionComment
 }

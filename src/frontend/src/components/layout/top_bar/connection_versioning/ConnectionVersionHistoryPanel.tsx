@@ -26,7 +26,7 @@ import { useAppDispatch, useAppSelector } from '@application/utils/store';
 import { API_REQUEST_STATE } from '@application/interfaces/IApplication';
 
 import { getAllUsers } from '@entity/user/redux-toolkit/action_creators/UserCreators';
-import { deleteConnectionVersion } from '@entity/connection/redux_toolkit/action_creators/ConnectionCreators';
+import { deleteConnectionVersion, updateConnectionVersionComment  } from '@entity/connection/redux_toolkit/action_creators/ConnectionCreators';
 
 import Button from '@app_component/base/button/Button';
 import TooltipButton from '@app_component/base/tooltip_button/TooltipButton';
@@ -565,12 +565,28 @@ const ConnectionVersionHistoryPanel: FC<ConnectionVersionHistoryPanelProps> = ({
 	);
 
 	const onSaveComment = useCallback(
-		async (e: any, v: ConnectionVersionItem) => {
+    async (e: any, v: ConnectionVersionItem) => {
 			stopBoth(e);
-			// TODO: dispatch save comment
-			setActiveSnapshotId(null);
+
+			const connectionId = v?.connectionId;
+			const snapshotId = v?.snapshotId;
+			const comment = (comments?.[snapshotId] ?? '').toString();
+
+			if (!connectionId || !snapshotId) {
+				setActiveSnapshotId(null);
+				return;
+			}
+
+			try {
+				await dispatch(
+					updateConnectionVersionComment({ connectionId, snapshotId, comment }) as any
+				).unwrap();
+			} catch (err) {
+			} finally {
+					setActiveSnapshotId(null);
+			}
 		},
-		[],
+		[comments, dispatch],
 	);
 
 	const computeExpandedWidthFor = useCallback(
@@ -738,7 +754,7 @@ const ConnectionVersionHistoryPanel: FC<ConnectionVersionHistoryPanelProps> = ({
 											}}
 											onClick={stopPropagationOnly}
 										>
-											<Button handleClick={onSaveComment as any} label='Save' />
+											<Button handleClick={(e: any) => onSaveComment(e, v)} label='Save' />
 										</SaveRow>
 									)}
 								</CommentArea>

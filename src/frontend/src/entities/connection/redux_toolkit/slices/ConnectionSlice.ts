@@ -44,6 +44,7 @@ import {
   getConnectionVersions,
   getConnectionVersionBySnapshot,
   deleteConnectionVersion,
+  updateConnectionVersionComment
 } from "../action_creators/ConnectionCreators";
 import {MetaConnectionModel} from "@root/requests/models/Connection";
 import { ConnectionVersionItem } from '@entity/connection/requests/interfaces/IConnection';
@@ -117,6 +118,7 @@ export interface ConnectionState extends ICommonState {
   isDirty: boolean;
   gettingConnectionVersionBySnapshot: API_REQUEST_STATE;
   deletingConnectionVersion: API_REQUEST_STATE;
+  updatingConnectionVersionComment: API_REQUEST_STATE;
 }
 
 let initialState: ConnectionState = {
@@ -177,6 +179,7 @@ let initialState: ConnectionState = {
   isDirty: false,
   gettingConnectionVersionBySnapshot: API_REQUEST_STATE.INITIAL,
   deletingConnectionVersion: API_REQUEST_STATE.INITIAL,
+  updatingConnectionVersionComment: API_REQUEST_STATE.INITIAL,
 
   ...CommonState,
 };
@@ -444,6 +447,29 @@ const connectionReducers = (isModal: boolean = false) => {
 
       [deleteConnectionVersion.rejected.type]: (state, action: PayloadAction<IResponse>) => {
         state.deletingConnectionVersion = API_REQUEST_STATE.ERROR;
+        state.error = action.payload;
+      },
+      [updateConnectionVersionComment.pending.type]: (state) => {
+        state.updatingConnectionVersionComment = API_REQUEST_STATE.START;
+      },
+      [updateConnectionVersionComment.fulfilled.type]: (
+        state,
+        action: PayloadAction<{ connectionId: number; snapshotId: string; comment: string }>
+      ) => {
+        state.updatingConnectionVersionComment = API_REQUEST_STATE.FINISH;
+
+        const { snapshotId, comment } = action.payload || ({} as any);
+
+        if (snapshotId) {
+            state.connectionVersions = (state.connectionVersions || []).map((v: any) =>
+                v?.snapshotId === snapshotId ? { ...v, comment } : v
+            );
+        }
+
+        state.error = null;
+      },
+      [updateConnectionVersionComment.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+        state.updatingConnectionVersionComment = API_REQUEST_STATE.ERROR;
         state.error = action.payload;
       },
       [testConnection.pending.type]: (state) => {
