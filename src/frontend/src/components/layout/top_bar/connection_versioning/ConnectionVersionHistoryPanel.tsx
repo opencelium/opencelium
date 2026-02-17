@@ -72,6 +72,7 @@ import Validation from '@application/classes/Validation';
 import { addTemplate, exportTemplate } from '@entity/template/redux_toolkit/action_creators/TemplateCreators';
 import { Template } from '@entity/connection/classes/Template';
 import { ConnectionRequest } from '@entity/connection/requests/classes/Connection';
+import DefaultText from "@app_component/base/text/DefaultText";
 
 export type ConnectionVersionItem = {
 	connectionId?: number;
@@ -651,7 +652,7 @@ const ConnectionVersionHistoryPanel: FC<ConnectionVersionHistoryPanelProps> = ({
 
 							<Card onClick={() => onSelect(v)} $width={normalWidth}>
 								<CardHeader>
-									<AuthorText>Author: {getAuthorLabel(v.author)}</AuthorText>
+									<AuthorText isBold value={`Author: ${getAuthorLabel(v.author)}`}/>
 
 									<DotsButton
 										ref={(el) => {
@@ -901,7 +902,7 @@ const ConnectionVersionHistoryPanel: FC<ConnectionVersionHistoryPanelProps> = ({
 
 			<PanelRoot ref={panelRef} $open={open}>
 				<PanelHeader>
-					<PanelTitle>Version History</PanelTitle>
+					<PanelTitle value={'Version History'} isBold/>
 
 					<CloseBtn type='button' onClick={onClose} title='Close' tabIndex={open ? 0 : -1}>
 						×

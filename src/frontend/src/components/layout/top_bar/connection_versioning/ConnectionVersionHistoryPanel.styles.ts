@@ -14,6 +14,9 @@
  */
 
 import styled from 'styled-components';
+import DefaultText from "@app_component/base/text/DefaultText";
+import HeaderText from "@app_component/base/text/HeaderText";
+import {DefaultInputTextSize, DefaultTextSize} from "@entity/application/utils/constants";
 
 export const PanelRoot = styled.div<{ $open: boolean }>`
 	overflow-y: auto;
@@ -40,9 +43,7 @@ export const PanelHeader = styled.div`
 	align-items: center;
 `;
 
-export const PanelTitle = styled.div`
-	font-size: 18px;
-	font-weight: 700;
+export const PanelTitle = styled(HeaderText)`
 `;
 
 export const CloseBtn = styled.button`
@@ -108,7 +109,7 @@ export const DateHr = styled.div`
 `;
 
 export const DateLabel = styled.div`
-	font-size: 14px;
+	font-size: ${DefaultTextSize}px;
 	color: rgba(0, 0, 0, 0.65);
 `;
 
@@ -128,10 +129,10 @@ export const TimeCol = styled.div`
 export const TimeLabel = styled.div`
 	position: absolute;
 	left: 0px;
-	top: 7px;
+	top: 8px;
 	width: 32px;
 	text-align: right;
-	font-size: 14px;
+	font-size: ${DefaultTextSize}px;
 	color: rgba(0, 0, 0, 0.65);
 `;
 
@@ -166,9 +167,7 @@ export const CardHeader = styled.div`
 	margin-bottom: 10px;
 `;
 
-export const AuthorText = styled.div`
-	font-weight: 600;
-	color: rgba(0, 0, 0, 0.82);
+export const AuthorText = styled(DefaultText)`
 `;
 
 export const DotsButton = styled.button`
@@ -247,7 +246,7 @@ export const CommentTextarea = styled.textarea<{
 	border-radius: 0px;
 	padding: 10px;
 	padding-right: 45px;
-	font-size: 14px;
+	font-size: ${DefaultInputTextSize}px;
 	outline: none;
 	box-sizing: border-box;
 	background: #fff;
