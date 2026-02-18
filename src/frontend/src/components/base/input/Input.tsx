@@ -87,7 +87,7 @@ const Input: FC<InputProps> =
             return child;
         });
         if(!minHeight && minHeight !== 0){
-            minHeight = 36;
+            minHeight = 40;
             if(hasLabel){
                 minHeight += 20;
             }
