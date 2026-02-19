@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.controller;
 
+import com.becon.opencelium.backend.database.mysql.service.PasswordResetService;
 import com.becon.opencelium.backend.database.mysql.service.TotpService;
 import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.exception.EmailAlreadyExistException;
@@ -26,7 +27,9 @@ import com.becon.opencelium.backend.database.mysql.entity.User;
 import com.becon.opencelium.backend.database.mysql.service.SessionServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.UserRoleServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
+import com.becon.opencelium.backend.resource.ForgetPasswordDTO;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
+import com.becon.opencelium.backend.resource.ResetPasswordDTO;
 import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.request.UserRequestResource;
@@ -41,6 +44,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -62,6 +66,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -83,6 +88,9 @@ public class UserController {
 
     @Autowired
     private TotpService totpService;
+
+    @Autowired
+    private PasswordResetService passwordResetService;
 
 
     @Operation(summary = "Retrieves user data from the database based on the provided user 'id'")
@@ -117,13 +125,13 @@ public class UserController {
     })
     @GetMapping("/check/{email}")
     public ResponseEntity<?> emailExists(@PathVariable("email") String email) {
-        if (userService.existsByEmail(email)){
+        if (userService.existsByEmail(email)) {
             throw new ResponseStatusException(HttpStatus.OK, "EXISTS");
         } else {
             throw new ResponseStatusException(HttpStatus.OK, "NOT_EXISTS");
         }
     }
-//
+
     @Operation(summary = "Retrieves a list of all users in the application")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",
@@ -137,13 +145,13 @@ public class UserController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/all")
-    public ResponseEntity<List<UserResource>> all(){
+    public ResponseEntity<List<UserResource>> all() {
         final List<UserResource> userResources =
                 userService.findAll().stream().map(UserResource::new).collect(Collectors.toList());
         final URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
         return ResponseEntity.created(uri).body(userResources);
     }
-//
+
     @Operation(summary = "Creates a new user in the system by accepting user data in the request body")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",
@@ -159,16 +167,16 @@ public class UserController {
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> post(@RequestBody UserRequestResource userRequestResource) throws IOException {
 
-        if (userService.existsByEmail(userRequestResource.getEmail())){
+        if (userService.existsByEmail(userRequestResource.getEmail())) {
             throw new EmailAlreadyExistException(userRequestResource.getEmail());
         }
 
-        if (!userRoleService.existsById(userRequestResource.getUserGroup())){
+        if (!userRoleService.existsById(userRequestResource.getUserGroup())) {
             throw new RoleNotFoundException(userRequestResource.getUserGroup());
         }
 
         UserDetailResource userDetailResource = userRequestResource.getUserDetail();
-        if(userDetailResource.getLang() == null || userDetailResource.getLang().isEmpty()){
+        if (userDetailResource.getLang() == null || userDetailResource.getLang().isEmpty()) {
             userDetailResource.setLang(LangEnum.EN.getCode());
             userRequestResource.setUserDetail(userDetailResource);
         } else {
@@ -202,15 +210,15 @@ public class UserController {
     // due to frontend requirements, for all changes need to send all user data. if something will be missed it will
     // save empty values
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> update( @PathVariable("id") int id,
-                                     @RequestBody UserRequestResource userRequestResource) throws IOException {
+    public ResponseEntity<?> update(@PathVariable("id") int id,
+                                    @RequestBody UserRequestResource userRequestResource) throws IOException {
 
-        if (!userService.existsById(id)){
+        if (!userService.existsById(id)) {
             throw new UserNotFoundException(id);
         }
         userRequestResource.setUserId(id);
         UserDetailResource userDetailResource = userRequestResource.getUserDetail();
-        if(userDetailResource.getLang() == null || userDetailResource.getLang().isEmpty()){
+        if (userDetailResource.getLang() == null || userDetailResource.getLang().isEmpty()) {
             userDetailResource.setLang("en");
             userRequestResource.setUserDetail(userDetailResource);
         }
@@ -240,7 +248,7 @@ public class UserController {
                 .map(
                         p -> {
                             // if user has an image delete the image from storage
-                            if (p.getUserDetail().getProfilePicture() != null){
+                            if (p.getUserDetail().getProfilePicture() != null) {
                                 storageService.delete(p.getUserDetail().getProfilePicture());
                             }
                             // delete user
@@ -266,7 +274,7 @@ public class UserController {
     public ResponseEntity<?> deleteUsersById(@RequestBody IdentifiersDTO<Integer> payload) {
         payload.getIdentifiers().forEach(id -> {
             User p = userService.findById(id).orElseThrow(() -> new UserNotFoundException(id));
-            if (p.getUserDetail().getProfilePicture() != null){
+            if (p.getUserDetail().getProfilePicture() != null) {
                 storageService.delete(p.getUserDetail().getProfilePicture());
             }
             userService.deleteById(id);
@@ -274,7 +282,7 @@ public class UserController {
 
         return ResponseEntity.noContent().build();
     }
-//
+
     @Operation(summary = "Logs out the currently authenticated user.")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",
@@ -360,6 +368,24 @@ public class UserController {
             resultDTO.setResult(true);
         }
         return ResponseEntity.ok(resultDTO);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgetPassword(@Valid @RequestBody ForgetPasswordDTO dto) {
+        passwordResetService.requestReset(dto.email());
+
+        return ResponseEntity.ok(
+                Map.of("message", "If an account with that email exists, you will receive a password reset link shortly.")
+        );
+    }
+
+    @PutMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordDTO dto) {
+        passwordResetService.resetPassword(dto.token(), dto.newPassword());
+
+        return ResponseEntity.ok(
+                Map.of("message", "Password has been successfully reset.")
+        );
     }
 
     /*
