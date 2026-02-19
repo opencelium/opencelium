@@ -540,6 +540,7 @@ public class ConnectionServiceImp implements ConnectionService {
                     versionedDTO.setCreatedAt(x.getCreatedAt() != null ? x.getCreatedAt().toEpochMilli() : null);
                     versionedDTO.setCurrent(Objects.equals(connection.getSnapshotId(), x.getId()));
                     versionedDTO.setAuthor(x.getCreatedBy());
+                    versionedDTO.setComment(x.getComment());
                     return versionedDTO;
                 }).toList();
     }
