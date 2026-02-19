@@ -340,6 +340,23 @@ public class ConnectionController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Switches connection's current version(snapshot) by provided connection ID and snapshotId")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Connection has been successfully updated"),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PutMapping("/{connectionId}/switch-version/{snapshotId}")
+    public ResponseEntity<?> switchVersion(@PathVariable Long connectionId, @PathVariable String snapshotId){
+        connectionService.switchVersion(connectionId, snapshotId);
+        return ResponseEntity.ok().build();
+    }
+
     @Operation(summary = "Creates a connection from database by accepting connection data in request body.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",

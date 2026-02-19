@@ -11,9 +11,6 @@ public interface ConnectionMngService {
     List<ConnectionMng> getAll();
     ConnectionMng delete(String id);
     void delete(ConnectionMng connectionMng);
-
-    void updateWithoutBinding(ConnectionMng connectionMng);
-
     long count();
     ConnectionMng getById(String id);
 

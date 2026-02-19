@@ -576,6 +576,16 @@ public class ConnectionServiceImp implements ConnectionService {
         connectionMngService.updateSnapshot(connectionMng, request);
     }
 
+    @Override
+    public void switchVersion(Long connectionId, String snapshotId) {
+        Connection connection = getById(connectionId);
+        ConnectionMng connectionMng = connectionMngService.getById(snapshotId);
+
+        connection.setSnapshotId(connectionMng.getId());
+
+        connectionRepository.save(connection);
+    }
+
     /**
      * Full cleanup:
      * 1) find test connection ids in MariaDB
