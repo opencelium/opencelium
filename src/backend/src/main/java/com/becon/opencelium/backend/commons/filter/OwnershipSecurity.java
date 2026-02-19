@@ -6,6 +6,7 @@ import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.security.SecurityAuditorAware;
 import com.becon.opencelium.backend.security.UserPrincipals;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -26,8 +27,11 @@ public class OwnershipSecurity {
     }
 
     public boolean isAdmin() {
-        UserPrincipals principals = (UserPrincipals) SecurityContextHolder.getContext()
-                .getAuthentication().getPrincipal();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !(auth.getPrincipal() instanceof UserPrincipals principals)) {
+            return false;
+        }
+
         return ADMIN_ROLE.equals(principals.getUser().getUserRole().getName());
     }
 
