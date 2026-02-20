@@ -1,9 +1,11 @@
 package com.becon.opencelium.backend.database.mongodb.entity;
 
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.List;
 
+@Document(collection ="field_binding")
 public class FieldBindingMng {
     private String id;
     @Field(name = "enhancement_id")

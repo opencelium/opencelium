@@ -16,6 +16,9 @@
 
 package com.becon.opencelium.backend.database.mongodb.entity;
 
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document(collection ="operator")
 public class OperatorMng {
 
     private String id;

@@ -16,8 +16,10 @@
 
 package com.becon.opencelium.backend.database.mongodb.entity;
 
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+@Document(collection ="method")
 public class MethodMng {
     private String id;
     private String index;

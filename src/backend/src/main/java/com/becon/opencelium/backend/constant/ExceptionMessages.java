@@ -13,4 +13,5 @@ public interface ExceptionMessages {
     String LOG_ELEMENT_NOT_FOUND_WITH_INDEX_PATH = "Log element not found with indexPath: %s";
     String LOOP_INDEX_IS_REQUIRED = "loopIndex is required";
     String CANT_REMOVE_LAST_VERSION_CONNECTION = "Can't remove last version connection";
+    String ONLY_OWNER_CAN_PERFORM_ACTION = "Only owner can perform this action";
 }
