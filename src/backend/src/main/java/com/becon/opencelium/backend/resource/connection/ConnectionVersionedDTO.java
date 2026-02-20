@@ -13,6 +13,8 @@ public class ConnectionVersionedDTO {
 
     private Integer author;
 
+    private String comment;
+
     public Long getCreatedAt() {
         return createdAt;
     }
@@ -59,5 +61,13 @@ public class ConnectionVersionedDTO {
 
     public void setAuthor(Integer author) {
         this.author = author;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 }

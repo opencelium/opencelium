@@ -107,4 +107,6 @@ public interface ConnectionService {
     void setInitialRevisionToConnections();
 
     void updateSnapshot(Long connectionId, String snapshotId, ConnectionVersionUpdateRequest request);
+
+    void switchVersion(Long connectionId, String snapshotId);
 }
