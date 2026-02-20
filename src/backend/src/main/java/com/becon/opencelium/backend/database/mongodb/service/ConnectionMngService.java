@@ -10,6 +10,7 @@ public interface ConnectionMngService {
     ConnectionMng create(ConnectionMng connectionMng);
     List<ConnectionMng> getAll();
     ConnectionMng delete(String id);
+    void delete(ConnectionMng connectionMng);
     long count();
     ConnectionMng getById(String id);
 
@@ -19,5 +20,5 @@ public interface ConnectionMngService {
 
     void deleteAllByConnectionId(Long id);
 
-    void updateSnapshot(String snapshotId, ConnectionVersionUpdateRequest request);
+    void updateSnapshot(ConnectionMng connectionMng, ConnectionVersionUpdateRequest request);
 }
