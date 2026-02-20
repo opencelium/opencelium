@@ -17,27 +17,24 @@ import Button from '@app_component/base/button/Button';
 import ErrorBoundary from '@app_component/base/error_boundary/ErrorBoundary';
 import InputText from '@app_component/base/input/text/InputText';
 import CollectionLoading from '@app_component/base/loading/CollectionLoading';
-import { TooltipButton } from '@app_component/base/tooltip_button/TooltipButton';
 import Filter from '@app_component/collection/filter/Filter';
 import { BadRequest } from '@app_component/default_pages/bad_request/BadRequest';
 import { Application } from '@application/classes/Application';
 import { API_REQUEST_STATE } from '@application/interfaces/IApplication';
 import {
-    setCurrentPages,
-    setGridViewType as setGridViewTypeGlobally,
-    setSearchFields,
-    setViewType as setViewTypeGlobally,
+	setCurrentPages, setEntityHeader,
+	setGridViewType as setGridViewTypeGlobally,
+	setSearchFields,
+	setViewType as setViewTypeGlobally,
 } from '@application/redux_toolkit/slices/ApplicationSlice';
 import { useAppDispatch } from '@application/utils/store';
 import { debounce } from '@application/utils/utils';
 import CategoryTabs from '@entity/category/components/category_tabs/CategoryTabs';
 import LicenseAlertMessage from '@entity/dashboard/components/license_alert_message/LicenseAlertMessage';
-import { ColorTheme } from '@style/Theme';
 import React, { FC, useEffect, useRef, useState } from 'react';
 import { withTheme } from 'styled-components';
-import { GridViewMenu, GridViewType } from '../GridViewMenu';
+import { GridViewType } from '../GridViewMenu';
 import { Pagination } from '../Pagination';
-import Title from '../collection_title/Title';
 import { Grid } from './Grid';
 import { List } from './List';
 import { CollectionViewProps } from './interfaces';
@@ -48,7 +45,7 @@ import {
     ViewSectionStyled,
 } from './styles';
 
-const LIST_VIEW_ENTITIES_NUMBER = 10;
+const LIST_VIEW_ENTITIES_NUMBER = 15;
 
 export enum ViewType {
 	LIST = 'LIST',
@@ -70,6 +67,8 @@ const CollectionView: FC<CollectionViewProps> = ({
 	onListRowClick,
 	paginationProps,
 	hasNotAlert,
+	hasNoHoverEffect,
+	shouldNoSetEntityHeader,
 }) => {
 	const dispatch = useAppDispatch();
 	const {
@@ -77,17 +76,18 @@ const CollectionView: FC<CollectionViewProps> = ({
 		currentPages,
 		viewType,
 		gridViewType,
+		entityHeader,
 	} = Application.getReduxState();
 	const searchValuePropertyName = collection?.name || '';
-	const [searchValue, setSearchValue] = useState<string>(
-		searchValuePropertyName ? searchFields[searchValuePropertyName] || '' : ''
-	);
 	const [isRefreshing, setIsRefreshing] = useState(false);
 	const [isFilterVisible, toggleFilter] = useState<boolean>(false);
 	const [filterData, setFilterData] = useState(defaultFilterData);
 	const [checks, setChecks] = useState<any>({});
 	const [entitiesPerPage, setEntitiesPerPage] = useState(
 		LIST_VIEW_ENTITIES_NUMBER
+	);
+	const [searchValue, setSearchValue] = useState<string>(
+		searchValuePropertyName ? searchFields[searchValuePropertyName] || '' : ''
 	);
 	const getInitialPage = () => {
 		if (paginationProps?.page != null) {
@@ -118,6 +118,13 @@ const CollectionView: FC<CollectionViewProps> = ({
 	if (defaultViewType !== '') {
 		applicationViewType = defaultViewType;
 	}
+	useEffect(() => {
+		if (!shouldNoSetEntityHeader) {
+			if (entityHeader !== collection.title) {
+				dispatch(setEntityHeader(collection.title));
+			}
+		}
+	}, [collection?.title]);
 	useEffect(() => {
 		if (searchValuePropertyName) {
 			localStorage.setItem(
@@ -271,10 +278,9 @@ const CollectionView: FC<CollectionViewProps> = ({
 	return (
 		<ErrorBoundary>
 			<CollectionViewStyled>
-				{hasTitle && <Title title={collection.title} />}
 				{!hasNotAlert ? <LicenseAlertMessage /> : null}
 				{hasTopBar && (
-					<TopSectionStyled hasViewSection={hasViewSection}>
+					<TopSectionStyled>
 						<ActionsStyled>
 							{collection.getTopActions(applicationViewType, checkedIds)}
 							{collection.hasFilter && (
@@ -295,30 +301,10 @@ const CollectionView: FC<CollectionViewProps> = ({
 								onChange={(e) => search(e.target.value)}
 								minHeight={'1'}
 								width={'200px'}
-								placeholder={'Search field'}
+								placeholder={'Search'}
 							/>
 						)}
 						{collection.AfterSearchComponents}
-						{hasViewSection && (
-							<ViewSectionStyled>
-								<TooltipButton
-									target={'view_list'}
-									tooltip={'List'}
-									position={'top'}
-									icon={'view_list'}
-									size={24}
-									hasBackground={false}
-									color={ColorTheme.Turquoise}
-									handleClick={() => onChangeViewType(ViewType.LIST)}
-								/>
-								<GridViewMenu
-									setGridViewType={onChangeViewGridType}
-									viewType={applicationViewType}
-									setViewType={onChangeViewType}
-									setIsRefreshing={setIsRefreshing}
-								/>
-							</ViewSectionStyled>
-						)}
 					</TopSectionStyled>
 				)}
 				{isFilterVisible && (
@@ -358,6 +344,7 @@ const CollectionView: FC<CollectionViewProps> = ({
 							filterData={filterData}
 							onListRowClick={onListRowClick}
 							hasPaginationProps={!!paginationProps}
+							hasNoHoverEffect={hasNoHoverEffect}
 						/>
 					)}
 					{applicationViewType === ViewType.GRID && (
@@ -402,6 +389,7 @@ CollectionView.defaultProps = {
 	loadingStyles: {},
 	onListRowClick: null,
 	paginationProps: null,
+	hasNoHoverEffect: false,
 };
 
 export { CollectionView };

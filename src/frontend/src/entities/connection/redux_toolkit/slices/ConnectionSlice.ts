@@ -41,14 +41,20 @@ import {
   getConnectionWebhooks, generateLogs,
   testConnection,
   updateConnection, getAllMetaConnectionsByInvokerName,
+  getConnectionVersions,
+  getConnectionVersionBySnapshot,
+  deleteConnectionVersion,
+  updateConnectionVersionComment, setCurrentConnectionVersion
 } from "../action_creators/ConnectionCreators";
 import {MetaConnectionModel} from "@root/requests/models/Connection";
+import { ConnectionVersionItem } from '@entity/connection/requests/interfaces/IConnection';
 
 
 export const LogPanelHeight = {
+  Low: 28,
   Medium: 270,
   High: 350,
-  Full: 'calc(100% - 28px)',
+  Full: 'calc(100%)',
 };
 
 export interface ConnectionState extends ICommonState {
@@ -104,6 +110,15 @@ export interface ConnectionState extends ICommonState {
   isDetailsOpened: boolean;
   justCreatedItem: { index: string; connectorType: string };
   justDeletedItem: { index: string; connectorType: string };
+
+  connectionVersions: ConnectionVersionItem[];
+  gettingConnectionVersions: API_REQUEST_STATE;
+  openingConnectionVersion: API_REQUEST_STATE;
+  openedSnapshotId: string | null;
+  isDirty: boolean;
+  gettingConnectionVersionBySnapshot: API_REQUEST_STATE;
+  deletingConnectionVersion: API_REQUEST_STATE;
+  updatingConnectionVersionComment: API_REQUEST_STATE;
 }
 
 let initialState: ConnectionState = {
@@ -146,16 +161,26 @@ let initialState: ConnectionState = {
   notificationData: {},
   detailsLocation: PANEL_LOCATION.SAME_WINDOW,
   colorMode: COLOR_MODE.RECTANGLE_TOP,
-  processTextSize: 20,
+  processTextSize: 14,
   isCreateElementPanelOpened: false,
   isDraftOpenedOnce: false,
   currentLogs: [],
   logMessages: [],
   isTestingConnection: false,
-  logPanelHeight: 0,
+  logPanelHeight: LogPanelHeight.Low,
   isDetailsOpened: true,
   justCreatedItem: null,
   justDeletedItem: null,
+
+  connectionVersions: [],
+  gettingConnectionVersions: API_REQUEST_STATE.INITIAL,
+  openingConnectionVersion: API_REQUEST_STATE.INITIAL,
+  openedSnapshotId: null,
+  isDirty: false,
+  gettingConnectionVersionBySnapshot: API_REQUEST_STATE.INITIAL,
+  deletingConnectionVersion: API_REQUEST_STATE.INITIAL,
+  updatingConnectionVersionComment: API_REQUEST_STATE.INITIAL,
+
   ...CommonState,
 };
 
@@ -230,7 +255,7 @@ const connectionReducers = (isModal: boolean = false) => {
     setTestingConnection: (state, action: PayloadAction<boolean>) => {
       if (action.payload) {
         state.currentLogs = [];
-        if (state.logPanelHeight === 0) {
+        if (state.logPanelHeight === LogPanelHeight.Low) {
           state.logPanelHeight = LogPanelHeight.Medium;
         }
       }
@@ -241,7 +266,7 @@ const connectionReducers = (isModal: boolean = false) => {
 
       state.isTestingConnection = action.payload;
     },
-  addCurrentLog: (state, action: PayloadAction<ConnectionLogProps>) => {
+    addCurrentLog: (state, action: PayloadAction<ConnectionLogProps>) => {
       if(action.payload){
           const currentState = current(state);
           let newCurrentLogs = currentState.currentLogs;
@@ -300,18 +325,18 @@ const connectionReducers = (isModal: boolean = false) => {
           state.currentLogs = newCurrentLogs;
           state.logMessages = [...state.logMessages, action.payload];
       }
-  },
-  shouldNotDrawLogMessage: (state, action: PayloadAction<{index: string, connectorType: string}>) => {
+    },
+    shouldNotDrawLogMessage: (state, action: PayloadAction<{index: string, connectorType: string}>) => {
       state.currentLogs = state.currentLogs.map(log => {
           if(log.index === action.payload.index && log.connectorType === action.payload.connectorType){
               return {...log, shouldDraw: false};
           }
           return log;
       })
-  },
-  addLogMessage: (state, action: PayloadAction<any>) => {
+    },
+    addLogMessage: (state, action: PayloadAction<any>) => {
       state.logMessages = [...state.logMessages, action.payload];
-  },
+    },
     clearCurrentLogs: (state, action: PayloadAction<any>) => {
       state.currentLogs = [];
     },
@@ -336,7 +361,6 @@ const connectionReducers = (isModal: boolean = false) => {
       state.currentTechnicalItem = action.payload;
       state.isCreateElementPanelOpened = action.payload !== null;
     },
-
     setDetailsLocation: (state, action: PayloadAction<any>) => {
       state.detailsLocation = action.payload.location;
     },
@@ -348,10 +372,124 @@ const connectionReducers = (isModal: boolean = false) => {
       state.testConnection = null;
       state.addingTestConnection = API_REQUEST_STATE.INITIAL;
       state.deletingTestConnectionById = API_REQUEST_STATE.INITIAL;
-    }
+    },
+    setIsDirty: (state, action: PayloadAction<boolean>) => {
+      state.isDirty = action.payload;
+    },
   }
   if(!isModal){
     const extraReducers: CaseReducers<NoInfer<ConnectionState>, any>  = {
+      [getConnectionVersions.pending.type]: (state) => {
+        state.gettingConnectionVersions = API_REQUEST_STATE.START;
+      },
+      [getConnectionVersions.fulfilled.type]: (state, action: PayloadAction<any[]>) => {
+        state.gettingConnectionVersions = API_REQUEST_STATE.FINISH;
+        state.connectionVersions = action.payload || [];
+        state.error = null;
+      },
+      [getConnectionVersions.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+        state.gettingConnectionVersions = API_REQUEST_STATE.ERROR;
+        state.error = action.payload;
+      },
+      [setCurrentConnectionVersion.pending.type]: (state) => {
+        state.gettingConnectionVersions = API_REQUEST_STATE.START;
+      },
+      [setCurrentConnectionVersion.fulfilled.type]: (state, action: PayloadAction<string>) => {
+        state.gettingConnectionVersions = API_REQUEST_STATE.FINISH;
+        state.connectionVersions = state.connectionVersions.map(v => {
+          if (v.snapshotId === action.payload) {
+            return {...v, current: true}
+          } else {
+            return {...v, current: false}
+          }});
+        state.isDirty = false;
+        state.error = null;
+      },
+      [setCurrentConnectionVersion.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+        state.gettingConnectionVersions = API_REQUEST_STATE.ERROR;
+        state.error = action.payload;
+      },
+
+      [getConnectionVersionBySnapshot.pending.type]: (state) => {
+        state.openingConnectionVersion = API_REQUEST_STATE.START;
+      },
+
+      [getConnectionVersionBySnapshot.fulfilled.type]: (
+        state,
+        action: PayloadAction<IConnection>
+      ) => {
+        state.openingConnectionVersion = API_REQUEST_STATE.FINISH;
+
+        const payload: any = action.payload || null;
+
+        const normalized = payload
+          ? {
+              ...payload,
+              id: payload.id ?? payload.connectionId,
+            }
+          : payload;
+
+        state.currentConnection = normalized;
+        state.connection = normalized;
+
+        const snapshotId = (action as any)?.meta?.arg?.snapshotId ?? null;
+        state.openedSnapshotId = snapshotId;
+        state.isDirty = true;
+        state.error = null;
+      },
+
+      [getConnectionVersionBySnapshot.rejected.type]: (
+        state,
+        action: PayloadAction<IResponse>
+      ) => {
+        state.openingConnectionVersion = API_REQUEST_STATE.ERROR;
+        state.error = action.payload;
+      },
+      [deleteConnectionVersion.pending.type]: (state) => {
+        state.deletingConnectionVersion = API_REQUEST_STATE.START;
+      },
+
+      [deleteConnectionVersion.fulfilled.type]: (
+        state,
+        action: PayloadAction<{ connectionId: number; snapshotId: string }>
+      ) => {
+        state.deletingConnectionVersion = API_REQUEST_STATE.FINISH;
+
+        const snapshotId = action.payload?.snapshotId;
+        if (snapshotId) {
+          state.connectionVersions = (state.connectionVersions || []).filter((v: any) => v?.snapshotId !== snapshotId);
+        }
+
+        state.error = null;
+      },
+
+      [deleteConnectionVersion.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+        state.deletingConnectionVersion = API_REQUEST_STATE.ERROR;
+        state.error = action.payload;
+      },
+      [updateConnectionVersionComment.pending.type]: (state) => {
+        state.updatingConnectionVersionComment = API_REQUEST_STATE.START;
+      },
+      [updateConnectionVersionComment.fulfilled.type]: (
+        state,
+        action: PayloadAction<{ connectionId: number; snapshotId: string; comment: string }>
+      ) => {
+        state.updatingConnectionVersionComment = API_REQUEST_STATE.FINISH;
+
+        const { snapshotId, comment } = action.payload || ({} as any);
+
+        if (snapshotId) {
+            state.connectionVersions = (state.connectionVersions || []).map((v: any) =>
+                v?.snapshotId === snapshotId ? { ...v, comment } : v
+            );
+        }
+
+        state.error = null;
+      },
+      [updateConnectionVersionComment.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+        state.updatingConnectionVersionComment = API_REQUEST_STATE.ERROR;
+        state.error = action.payload;
+      },
       [testConnection.pending.type]: (state) => {
         state.testingConnection = API_REQUEST_STATE.START;
       },
@@ -537,6 +675,8 @@ const connectionReducers = (isModal: boolean = false) => {
         ) {
           state.currentConnection = action.payload;
         }
+        state.isDirty = false;
+        state.openedSnapshotId = null;
         state.error = null;
       },
       [updateConnection.rejected.type]: (
@@ -796,7 +936,8 @@ export const {
   setSavePanelVisibility,
   setTemplatePanelVisibility,
   setAnimationSpeed,
-  setIsAnimationNotFound
+  setIsAnimationNotFound,
+  setIsDirty
 } = connectionSlice.actions;
 
 

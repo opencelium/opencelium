@@ -1,0 +1,1018 @@
+package com.becon.opencelium.backend.execution.oc721;
+
+import com.becon.opencelium.backend.execution.ExecutionManager;
+import com.becon.opencelium.backend.resource.execution.OperatorEx;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.RequestEntity;
+import org.springframework.http.ResponseEntity;
+
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.TreeMap;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+class ReferenceExtractorTest {
+
+    private ExecutionManager executionManager;
+    private ReferenceExtractor extractor;
+
+    /*
+     * Test-only delegate for ReferenceExtractor.extractValue(..).
+     * Used to reduce noise in "find usages" results from test code.
+     */
+    private Object extractValue(String rawReference) {
+        return extractor.extractValue(rawReference);
+    }
+
+
+    @BeforeEach
+    void setUp() {
+        executionManager = mock(ExecutionManager.class);
+        extractor = new ReferenceExtractor(executionManager);
+    }
+
+    // =======================================================
+    //                    DIRECT_REFERENCE
+    // =======================================================
+    //
+    // CASE 1: collect all data from Operation, there are 4 sub-cases
+    //   CASE 1.1: '#ababab.(response).[*]'
+    //   CASE 1.2: '#ababab.(response).[*].status'
+    //   CASE 1.3: '#ababab.(response).[*].header'
+    //   CASE 1.4: '#ababab.(response).[*].body'
+    //
+    // CASE 2: '#ababab.(response).status'         - return 'status' code of ResponseEntity
+    //
+    // CASE 3: return 'header' value of HttpEntity
+    // ex.1) '#ababab.(response).header.$.Content-Type',
+    // ex.2) '#ababab.(request).header.$.Content-Type',
+    //
+    // CASE 4: extract data from HttpEntity, there are 4 sub-cases
+    //   CASE 4.1: FOR_IN operator, there are 2 sub-cases
+    //      CASE 4.1.1: index types for KEY(s), there are 3 sub-cases:
+    //          CASE 4.1.1.1: obj['i']~            - field name on ith index (indexing starts from 0)
+    //          CASE 4.1.1.2: obj['*']~            - all field names
+    //          CASE 4.1.1.3: obj['field_name']~   - field_name itself
+    //      CASE 4.1.2: index types for VALUE(s), there are 2 sub-cases:
+    //          CASE 4.1.2.1: obj['i']             - value of the field on ith index (indexing starts from 0)
+    //          CASE 4.1.2.2: obj['field_name']    - value of the field by its name
+    //
+    //   CASE 4.2: SPLIT_STRING operator, there are 3 sub-cases
+    //      CASE 4.2.1: field[i]~                  - string on the ith index (indexing starts from 0)
+    //      CASE 4.2.2: field[*]~                  - all strings (after splitting)
+    //      CASE 4.2.3: field[2]~                  - string on the 2nd index (indexing starts from 0)
+    //
+    //   CASE 4.3: FOR operator, there are 3 cases (2 of them is handled in CASE 4.4)
+    //      CASE 4.3.1: array[i]                   - value on the ith index (indexing starts from 0)
+    //      CASE 4.3.2: array[3]                   - value on the 3rd index (indexing starts from 0) (handled in CASE 4.4)
+    //      CASE 4.3.3: array[*]                   - all values (handled in CASE 4.4)
+    //
+    //   CASE 4.4: regular json path
+
+
+    @Test
+    void extractAllResponses_case1_1() {
+        // GIVEN
+        ResponseEntity<?> res00 = response(200, "{}");
+        ResponseEntity<?> res01 = response(200, "{}");
+        ResponseEntity<?> res02 = response(200, "{}");
+        ResponseEntity<?> res10 = response(200, "{}");
+        ResponseEntity<?> res11 = response(200, "{}1");
+        ResponseEntity<?> res12 = response(200, "{}");
+
+        Map<String, ResponseEntity<?>> responses = Map.of(
+                "0, 0", res00, "1, 1", res11, "1, 0", res10,
+                "0, 2", res02, "0, 1", res01, "1, 2", res12
+        );
+
+        Operation operation = operation("#ababab", 2, responses);
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        // WHEN
+        Object result = extractValue("#ababab.(response).[*]");
+
+        // THEN
+        assertTrue(result instanceof TreeMap);
+        TreeMap<String, ?> responseAll = (TreeMap<String, ?>) result;
+
+        assertEquals(
+                List.of("0, 0", "0, 1", "0, 2", "1, 0", "1, 1", "1, 2"),
+                new ArrayList<>(responseAll.keySet())
+        );
+    }
+
+    @Test
+    void extractAllResponseStatuses_case1_2() {
+        // GIVEN
+        ResponseEntity<?> res00 = response(200, "{}");
+        ResponseEntity<?> res01 = response(201, "{}1");
+        ResponseEntity<?> res02 = response(202, "{}");
+        ResponseEntity<?> res10 = response(301, "{}");
+        ResponseEntity<?> res11 = response(302, "{}");
+        ResponseEntity<?> res12 = response(303, "{}");
+
+        Map<String, ResponseEntity<?>> responses = Map.of(
+                "0, 0", res00, "1, 1", res11, "1, 0", res10,
+                "0, 2", res02, "0, 1", res01, "1, 2", res12
+        );
+
+        Operation operation = operation("#ababab", 2, responses);
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        // WHEN
+        Object result = extractValue("#ababab.(response).[*].status");
+
+        // THEN
+        assertTrue(result instanceof TreeMap);
+        TreeMap<String, Integer> responseStatuses = (TreeMap<String, Integer>) result;
+
+        assertEquals(
+                List.of("0, 0", "0, 1", "0, 2", "1, 0", "1, 1", "1, 2"),
+                new ArrayList<>(responseStatuses.keySet())
+        );
+
+        assertEquals(
+                List.of(200, 201, 202, 301, 302, 303),
+                new ArrayList<>(responseStatuses.values())
+        );
+    }
+
+    @Test
+    void extractAllResponseHeaders_case1_3() {
+        // GIVEN
+        ResponseEntity<?> res00 = response(200, "{}", "index", "0_0");
+        ResponseEntity<?> res01 = response(200, "{}", "index", "0_1");
+        ResponseEntity<?> res02 = response(200, "{}", "index", "0_2");
+        ResponseEntity<?> res10 = response(200, "{}", "index", "1_0");
+        ResponseEntity<?> res11 = response(200, "{}", "index", "1_1");
+        ResponseEntity<?> res12 = response(200, "{}2", "index", "1_2");
+
+        Map<String, ResponseEntity<?>> responses = Map.of(
+                "0, 0", res00, "1, 1", res11, "1, 0", res10,
+                "0, 2", res02, "0, 1", res01, "1, 2", res12
+        );
+
+        Operation operation = operation("#ababab", 2, responses);
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        // WHEN
+        Object result = extractValue("#ababab.(response).[*].header");
+
+        // THEN
+        assertTrue(result instanceof TreeMap);
+        TreeMap<String, Map<String, List<String>>> responseHeaders = (TreeMap<String, Map<String, List<String>>>) result;
+
+        assertEquals(
+                List.of("0, 0", "0, 1", "0, 2", "1, 0", "1, 1", "1, 2"),
+                new ArrayList<>(responseHeaders.keySet())
+        );
+
+        responseHeaders.forEach((key, headers) ->
+                assertEquals(
+                        List.of(key.replace(", ", "_")),
+                        headers.get("index")
+                )
+        );
+    }
+
+    @Test
+    void extractAllResponseBodies_case1_4() {
+        // GIVEN
+        ResponseEntity<?> res00 = response(200, "{\"index\": \"0_0\"}");
+        ResponseEntity<?> res01 = response(200, "{\"index\": \"0_1\"}");
+        ResponseEntity<?> res02 = response(200, "{\"index\": \"0_2\"}");
+        ResponseEntity<?> res10 = response(200, "{\"index\": \"1_0\"}");
+        ResponseEntity<?> res11 = response(200, "{\"index\": \"1_1\"}");
+        ResponseEntity<?> res12 = response(200, "{\"index\": \"1_2\"}");
+
+        Map<String, ResponseEntity<?>> responses = Map.of(
+                "0, 0", res00, "1, 1", res11, "1, 0", res10,
+                "0, 2", res02, "0, 1", res01, "1, 2", res12
+        );
+        Operation operation = operation("#ababab", 2, responses);
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        // WHEN
+        Object result = extractValue("#ababab.(response).[*].body");
+
+        // THEN
+        assertTrue(result instanceof TreeMap);
+        TreeMap<String, Object> responseBodies = (TreeMap<String, Object>) result;
+
+        assertEquals(
+                List.of("0, 0", "0, 1", "0, 2", "1, 0", "1, 1", "1, 2"),
+                new ArrayList<>(responseBodies.keySet())
+        );
+
+        List<String> expected = List.of(
+                "{\"index\": \"0_0\"}", "{\"index\": \"0_1\"}", "{\"index\": \"0_2\"}",
+                "{\"index\": \"1_0\"}", "{\"index\": \"1_1\"}", "{\"index\": \"1_2\"}"
+        );
+        assertEquals(expected, new ArrayList<>(responseBodies.values()));
+    }
+
+    @Test
+    void extractResponseStatus_case2() {
+        // GIVEN
+        ResponseEntity<?> res00 = response(200, "{}");
+        ResponseEntity<?> res01 = response(201, "{}");
+        ResponseEntity<?> res10 = response(300, "{}");
+        ResponseEntity<?> res11 = response(301, "{}"); // should verify this for key = "1, 1"
+
+        Map<String, ResponseEntity<?>> responses = Map.of(
+                "0, 0", res00, "1, 1", res11,
+                "1, 0", res10, "0, 1", res01
+        );
+        Operation operation = operation("#ababab", 2, responses);
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("1, 1");
+
+        // WHEN
+        Object status = extractValue("#ababab.(response).status");
+
+        // THEN
+        assertEquals(301, status);
+    }
+
+    @Test
+    void extractResponseHeaderValue_case3() {
+        // GIVEN
+        ResponseEntity<?> response = response(200, "{}", "headerKey", "headerValue");
+
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        // WHEN
+        Object result = extractValue("#ababab.(response).header.$.headerKey");
+
+        // THEN
+        assertEquals(List.of("headerValue"), result);
+    }
+
+    @Test
+    void extractRequestHeaderValue_case3() {
+        // GIVEN
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("X-Req", "123");
+
+        RequestEntity<String> request =
+                new RequestEntity<>("{}", headers, HttpMethod.POST, URI.create("http://example.com"));
+
+        Operation operation = new Operation();
+        operation.setColor("#ababab");
+        operation.setLoopDepth(0);
+
+        operation.addRequest("#", request);
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        // WHEN
+        Object result = extractValue("#ababab.(request).header.$.X-Req");
+
+        // THEN
+        assertEquals(List.of("123"), result);
+    }
+
+    private static final String jsonContent = """
+            {
+              "status": "ok",
+              "meta": {
+                "response-id": "142",
+                "version": 3
+              },
+              "items": [
+                {
+                  "name": "complex Split String",
+                  "string": "x-y-z"
+                }
+              ],
+              "data": {
+                "items": [
+                  {
+                    "id": 1,
+                    "name": "first",
+                    "tags": ["a", "b", "c"],
+                    "metrics": {
+                      "count": 10,
+                      "ratio": 0.5
+                    }
+                  },
+                  {
+                    "id": 2,
+                    "name": "second",
+                    "tags": ["x", "y"],
+                    "metrics": {
+                      "count": 20,
+                      "ratio": 1.5
+                    }
+                  }
+                ],
+                "key_with_underscore": {
+                  "key.with.dot": {
+                    "inner-value": 42
+                  }
+                }
+              },
+              "list": [
+                "L1",
+                "L2",
+                "L3"
+              ],
+              "string_with_delimiter": "a;b;c;d",
+              "string_array": "[\\"a\\", \\"b\\", \\"c\\"]",
+              "last": true
+            }""";
+
+
+    @Test
+    void extractFromJsonResponseBody_FOIR_IN_case4_1_1_1() {
+        // GIVEN
+        ResponseEntity<?> response = response(
+                200,
+                jsonContent,
+                HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
+        );
+
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
+
+        Loop loop = loop("forin", "i", "forin {%#ababab.(response).body.$.meta%}");
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        when(executionManager.getLoops())
+                .thenReturn(List.of(loop));
+
+        // WHEN
+        loop.setIndex(1);
+        loop.setValue("version");
+
+        Object val1 = extractValue("#ababab.(response).body.$.meta['i']~");
+
+        // THEN
+        assertEquals("version", val1);
+    }
+
+    @Test
+    void extractFromJsonResponseBody_FOIR_IN_case4_1_1_2() {
+        // GIVEN
+        ResponseEntity<?> response = response(
+                200,
+                jsonContent,
+                HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
+        );
+
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        // WHEN
+        Object val = extractValue("#ababab.(response).body.$.meta['*']~");
+
+        // THEN
+        assertEquals(List.of("response-id", "version"), val);
+    }
+
+    @Test
+    void extractFromJsonResponseBody_FOIR_IN_case4_1_1_3() {
+        // GIVEN
+        ResponseEntity<?> response = response(
+                200,
+                jsonContent,
+                HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
+        );
+
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        // WHEN
+        Object val1 = extractValue("#ababab.(response).body.$.meta['response-id']~");
+
+        // THEN
+        assertEquals("response-id", val1);
+    }
+
+    @Test
+    void extractFromJsonResponseBody_FOIR_IN_case4_1_2_1() {
+        // GIVEN
+        ResponseEntity<?> response = response(
+                200,
+                jsonContent,
+                HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
+        );
+
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
+
+        // loop extracts targeted objects field names
+        Loop loop = loop("forin", "i", "forin {%#ababab.(response).body.$.data.items[0]%}");
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        when(executionManager.getLoops())
+                .thenReturn(List.of(loop));
+
+        // WHEN-THEN
+        loop.setIndex(1);
+        loop.setValue("name");
+
+        Object val1 = extractValue("#ababab.(response).body.$.data.items[0]['i']"); // primitive
+        assertEquals("first", val1);
+
+        loop.setIndex(3);
+        loop.setValue("metrics");
+        Object val2 = extractValue("#ababab.(response).body.$.data.items[0]['i']"); // object
+        assertTrue(val2 instanceof Map);
+        Map metrics = (Map) val2;
+        assertEquals(metrics.get("count"), 10);
+        assertEquals(metrics.get("ratio"), 0.5);
+    }
+
+    @Test
+    void extractFromJsonResponseBody_FOIR_IN_case4_1_2_2() {
+        // GIVEN
+        ResponseEntity<?> response = response(
+                200,
+                jsonContent,
+                HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
+        );
+
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        // WHEN
+        Object val = extractValue("#ababab.(response).body.$.data['key_with_underscore']");
+
+        // THEN
+        assertTrue(val instanceof Map);
+        Map keyWithUnderscore = (Map) val;
+        assertTrue(keyWithUnderscore.containsKey("key.with.dot"));
+
+        assertTrue(keyWithUnderscore.get("key.with.dot") instanceof Map);
+        Map keyWithDot = (Map) keyWithUnderscore.get("key.with.dot");
+        assertTrue(keyWithDot.containsKey("inner-value"));
+        assertEquals(1, keyWithDot.size());
+        assertEquals(42, keyWithDot.get("inner-value"));
+    }
+
+    @Test
+    void extractFromJsonResponseBody_SPLIT_STRING_case4_2_1() {
+        // GIVEN
+        ResponseEntity<?> response = response(
+                200,
+                jsonContent,
+                HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
+        );
+
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
+
+        Loop loop = loop("SplitString", "i", "{%#ababab.(response).body.$.string_with_delimiter[*]~%} SplitString ';'");
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        when(executionManager.getLoops())
+                .thenReturn(List.of(loop));
+
+        // WHEN-THEN
+        loop.setValue("a");
+        loop.setIndex(0);
+        Object val1 = extractValue("#ababab.(response).body.$.string_with_delimiter[i]~");
+        assertEquals("a", val1);
+
+        loop.setValue("d");
+        loop.setIndex(3);
+        Object val2 = extractValue("#ababab.(response).body.$.string_with_delimiter[i]~");
+        assertEquals("d", val2);
+    }
+
+    @Test
+    void extractFromJsonResponseBody_SPLIT_STRING_case4_2_2() {
+        // GIVEN
+        ResponseEntity<?> response = response(
+                200,
+                jsonContent,
+                HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
+        );
+
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
+
+        Loop loop = loop("SplitString", "i", "{%#ababab.(response).body.$.string_with_delimiter[*]~%} SplitString ';'");
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        when(executionManager.getLoops())
+                .thenReturn(List.of(loop));
+
+        // WHEN
+        Object val = extractValue("#ababab.(response).body.$.string_with_delimiter[*]~");
+
+        // THEN
+        assertTrue(val instanceof List);
+        assertEquals(List.of("a", "b", "c", "d"), val);
+    }
+
+    @Test
+    void extractFromJsonResponseBody_SPLIT_STRING_case4_2_3() {
+        // GIVEN
+        ResponseEntity<?> response = response(
+                200,
+                jsonContent,
+                HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
+        );
+
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
+
+        Loop loop = loop("SplitString", "i", "{%#ababab.(response).body.$.string_with_delimiter[*]~%} SplitString ';'");
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        when(executionManager.getLoops())
+                .thenReturn(List.of(loop));
+
+        // WHEN-THEN
+        loop.setIndex(0);
+        loop.setValue("a");
+        Object val1 = extractValue("#ababab.(response).body.$.string_with_delimiter[0]~");
+        assertEquals("a", val1);
+
+        loop.setIndex(2);
+        loop.setValue("c");
+        Object val2 = extractValue("#ababab.(response).body.$.string_with_delimiter[2]~");
+        assertEquals("c", val2);
+    }
+
+    @Test
+    void extractFromJsonResponseBodyAsPrimitive_FOR_case4_3_1() {
+        // GIVEN
+        ResponseEntity<?> response = response(
+                200,
+                jsonContent,
+                HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
+        );
+
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
+
+        Loop loop = loop("for", "i", "for {%#ababab.(response).body.$.list[*]%}");
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        when(executionManager.getLoops())
+                .thenReturn(List.of(loop));
+
+        // WHEN-THEN
+        loop.setIndex(0);
+        loop.setValue("0");
+        Object val1 = extractValue("#ababab.(response).body.$.list[i]");
+        assertEquals("L1", val1);
+
+        loop.setIndex(2);
+        loop.setValue("2");
+        Object val2 = extractValue("#ababab.(response).body.$.list[i]");
+        assertEquals("L3", val2);
+    }
+
+    @Test
+    void extractFromJsonResponseBodyAsObject_FOR_case4_3_1() {
+        // GIVEN
+        ResponseEntity<?> response = response(
+                200,
+                jsonContent,
+                HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
+        );
+
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
+
+        Loop loop = loop("for", "i", "for {%#ababab.(response).body.$.data.items[*]%}");
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        when(executionManager.getLoops())
+                .thenReturn(List.of(loop));
+
+        // WHEN-THEN
+        loop.setIndex(1);
+        loop.setValue("1");
+
+        Object val1 = extractValue("#ababab.(response).body.$.data.items[i].id");
+        assertEquals(2, val1);
+
+        Object val2 = extractValue("#ababab.(response).body.$.data.items[i].name");
+        assertEquals("second", val2);
+
+        Object val3 = extractValue("#ababab.(response).body.$.data.items[i].tags");
+        assertTrue(val3 instanceof List);
+        assertEquals(List.of("x", "y"), val3);
+    }
+
+    @Test
+    void extractFromJsonResponseBody_FOR_case4_3_2() {
+        // GIVEN
+        ResponseEntity<?> response = response(
+                200,
+                jsonContent,
+                HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
+        );
+
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        // WHEN
+        Object val = extractValue("#ababab.(response).body.$.list[1]");
+
+        // THEN
+        assertEquals("L2", val);
+    }
+
+    @Test
+    void extractFromJsonResponseBody_FOR_case4_3_3() {
+        // GIVEN
+        ResponseEntity<?> response = response(
+                200,
+                jsonContent,
+                HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
+        );
+
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        // WHEN
+        Object val = extractValue("#ababab.(response).body.$.list[*]");
+
+        // THEN
+        assertTrue(val instanceof List);
+        assertEquals(List.of("L1", "L2", "L3"), val);
+    }
+
+    @Test
+    void extractFromJsonResponseBodyBySimplePath_case4_4() {
+        // GIVEN
+        ResponseEntity<?> response = response(
+                200,
+                jsonContent,
+                HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
+        );
+
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        // WHEN - THEN
+        Object val1 = extractValue("#ababab.(response).body.$.status");
+        assertEquals("ok", val1);
+
+        Object val2 = extractValue("#ababab.(response).body.$.meta.version");
+        assertEquals(3, val2);
+
+        Object val3 = extractValue("#ababab.(response).body.$.list[*]");
+        assertTrue(val3 instanceof List);
+        assertEquals(List.of("L1", "L2", "L3"), val3);
+    }
+
+    @Test
+    void extractFromJsonResponseBodyByPathWithSpecialSymbol_case4_4() {
+        // GIVEN
+        ResponseEntity<?> response = response(
+                200,
+                jsonContent,
+                HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
+        );
+
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        // WHEN - THEN
+        Object val1 = extractValue("#ababab.(response).body.$.data.key_with_underscore");
+        assertTrue(val1 instanceof Map);
+        assertTrue(((Map) val1).containsKey("key.with.dot"));
+
+        Object val2 = extractValue("#ababab.(response).body.$.data.key_with_underscore.['key.with.dot']");
+        assertTrue(val2 instanceof Map);
+        assertTrue(((Map) val2).containsKey("inner-value"));
+
+        Object val3 = extractValue("#ababab.(response).body.$.data.key_with_underscore.['key.with.dot'].inner-value");
+        assertEquals(42, val3);
+    }
+
+    @Test
+        // FOR <-> FOR_IN (value) <-> FOR_IN (key)
+    void extractFromJsonResponseBody_case4_3_1_case4_1_2_1_case4_1_1_1() {
+        // GIVEN
+        ResponseEntity<?> response = response(
+                200,
+                jsonContent,
+                HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
+        );
+
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
+
+        Loop loop1 = loop("for", "i", "for {%#ababab.(response).body.$.data.items[*]%}");
+        Loop loop2 = loop("forin", "j", "forin {%#ababab.(response).body.$.data.items[i]%}");
+        Loop loop3 = loop("forin", "k", "forin {%#ababab.(response).body.$.data.items[i]['j']%}");
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        when(executionManager.getLoops())
+                .thenReturn(List.of(loop1, loop2, loop3));
+
+        // WHEN - THEN
+        // verify FOR loop creation (1st loop)
+        Object val1 = extractValue("#ababab.(response).body.$.data.items[*]"); // loop1.getRef()
+        assertTrue(val1 instanceof List);
+        assertEquals(2, ((List) val1).size());
+
+        // verify FOR_IN keys loop creation (2nd loop)
+        // it will be created in 1st loop, so we need to initialize its control values
+        loop1.setIndex(1);
+        loop1.setValue("1");
+        Object val2 = extractValue("#ababab.(response).body.$.data.items[i]['*']~"); // loop2.getRef()
+        assertTrue(val2 instanceof List);
+        assertEquals(List.of("id", "name", "tags", "metrics"), val2);
+
+        // verify FOR_IN keys loop creation (3rd loop)
+        // it will be created in 1st loop adn 2nd loop, so we need to initialize second loops control values
+        loop2.setIndex(3);
+        loop2.setValue("metrics");
+        Object val3 = extractValue("#ababab.(response).body.$.data.items[i]['j']['*']~"); // loop3.getRef()
+        assertTrue(val3 instanceof List);
+        assertEquals(List.of("count", "ratio"), val3);
+    }
+
+    @Test
+        // FOR <-> FOR_IN (value) <-> SPLIT_STRING
+    void extractFromJsonResponseBody_case4_3_1_case4_1_2_1_case4_2_1() {
+        // GIVEN
+        ResponseEntity<?> response = response(
+                200,
+                jsonContent,
+                HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE
+        );
+
+        Operation operation = operation("#ababab", 0, Map.of("#", response));
+
+        Loop loop1 = loop("for", "i", "for {%#ababab.(response).body.$.items[*]%}");
+        Loop loop2 = loop("forin", "j", "forin {%#ababab.(response).body.$.items[i]%}");
+        Loop loop3 = loop("SplitString", "k", "{%#ababab.(response).body.$.items[i]['j'][*]~%} SplitString '-'");
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        when(executionManager.getLoops())
+                .thenReturn(List.of(loop1, loop2, loop3));
+
+        // WHEN - THEN
+        // verify FOR loop creation (1st loop)
+        Object val1 = extractValue("#ababab.(response).body.$.items[*]"); // loop1.getRef()
+        assertTrue(val1 instanceof List);
+        assertEquals(1, ((List) val1).size());
+
+        // verify FOR_IN keys loop creation (2nd loop)
+        // it will be created in 1st loop, so we need to initialize its control values
+        loop1.setIndex(0);
+        loop1.setValue("0");
+        Object val2 = extractValue("#ababab.(response).body.$.items[i]['*']~"); // loop2.getRef()
+        assertTrue(val2 instanceof List);
+        assertEquals(List.of("name", "string"), val2);
+
+        // verify FOR_IN keys loop creation (3rd loop)
+        // it will be created in 1st loop adn 2nd loop, so we need to initialize second loops control values
+        loop2.setIndex(1);
+        loop2.setValue("string");
+        Object val3 = extractValue("#ababab.(response).body.$.items[i]['j'][*]~"); // loop3.getRef()
+        assertTrue(val3 instanceof List);
+        assertEquals(List.of("x", "y", "z"), val3);
+    }
+
+
+    // =======================================================
+    //                         WEBHOOK
+    // =======================================================
+    //
+    // CASE 1: ${key.field[*]}                - just extract value as it is
+    // CASE 2: ${key.field[0].id:integer}     - extract value as specified type
+
+    @Test
+    void extractFromWebhook_case1() {
+        // GIVEN
+        Map<String, Object> webhookVars = new HashMap<>();
+        webhookVars.put("json", jsonContent);
+        webhookVars.put("id", 1);
+        webhookVars.put("version", "4.7.1");
+
+        when(executionManager.getWebhookVars())
+                .thenReturn(webhookVars);
+
+        // WHEN - THEN
+        Object val1 = extractValue("${id}");
+        assertEquals(1, val1);
+
+        Object val2 = extractValue("${version}");
+        assertEquals("4.7.1", val2);
+
+        Object val3 = extractValue("${json.meta.response-id}");
+        assertEquals("142", val3);
+
+        Object val4 = extractValue("${json.data.items[1]['tags'][0]}");
+        assertEquals("x", val4);
+    }
+
+    @Test
+    void extractFromWebhook_case2() {
+        // GIVEN
+        Map<String, Object> webhookVars = new HashMap<>();
+        webhookVars.put("json", jsonContent);
+        webhookVars.put("id", 1);
+        webhookVars.put("version", "4.7.1");
+
+        when(executionManager.getWebhookVars())
+                .thenReturn(webhookVars);
+
+        // WHEN - THEN
+        Object val1 = extractValue("${json.meta.response-id:integer}");
+        assertEquals(142L, val1);
+
+        Object val2 = extractValue("${json.last:boolean}");
+        assertEquals(true, val2);
+
+        Object val3 = extractValue("${json.data.items[0].metrics.ratio:number}");
+        assertEquals(0.5, val3);
+
+        // array converted to string
+        Object val41 = extractValue("${json.data.items[0].tags}");
+        assertTrue(val41 instanceof List);
+        Object val42 = extractValue("${json.data.items[0].tags:string}");
+        assertTrue(val42 instanceof String);
+
+        // string converted to array
+        Object val51 = extractValue("${json.string_array}");
+        assertTrue(val51 instanceof String);
+        Object val52 = extractValue("${json.string_array:array}");
+        assertTrue(val52 instanceof List);
+        assertEquals(List.of("a", "b", "c"), val52);
+    }
+
+
+    // =======================================================
+    //                      REQUEST_DATA
+    // =======================================================
+    //
+    // CASE 1: {username}
+    // CASE 2: {#12.username}
+
+    @Test
+    void extractFromRequestData_case1_case2() {
+        // GIVEN
+        Map<String, String> requestData = new HashMap<>();
+        requestData.put("username", "Kevin");
+        requestData.put("id", "153");
+
+        when(executionManager.getRequestData(any()))
+                .thenReturn(requestData);
+
+        // WHEN - THEN
+        Object val1 = extractValue("{id}");
+        assertEquals("153", val1);
+
+        Object val2 = extractValue("{#12.username}");
+        assertEquals("Kevin", val2);
+
+        // if no data found then return ref itself
+        Object val3 = extractValue("{#12.user-id}");
+        assertEquals("{#12.user-id}", val3);
+    }
+
+
+    // helper methods
+    private Operation operation(String color, int loopDepth, Map<String, ResponseEntity<?>> responses) {
+        Operation operation = new Operation();
+        operation.setColor(color);
+        operation.setLoopDepth(loopDepth);
+
+        operation.getResponses().putAll(responses);
+
+        return operation;
+    }
+
+    private ResponseEntity<?> response(int status, Object body, String headerName, String headerValue) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(headerName, headerValue);
+        return new ResponseEntity<>(body, headers, HttpStatus.valueOf(status));
+    }
+
+    private ResponseEntity<?> response(int status, Object body) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return new ResponseEntity<>(body, headers, HttpStatus.valueOf(status));
+    }
+
+    private Loop loop(String type, String iterator, String expression) {
+        OperatorEx operator = new OperatorEx();
+        operator.setId("23123");
+        operator.setIndex("1");
+        operator.setType(type);
+        operator.setIterator(iterator);
+        operator.setExpression(expression);
+
+        return Loop.fromOperator(operator);
+    }
+}

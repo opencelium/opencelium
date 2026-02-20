@@ -1,27 +1,24 @@
 package com.becon.opencelium.backend.database.mongodb.service;
 
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
-import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
-import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
-import com.becon.opencelium.backend.resource.PatchConnectionDetails;
-import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
+import com.becon.opencelium.backend.resource.connection.ConnectionVersionUpdateRequest;
 
 import java.util.List;
 
 public interface ConnectionMngService {
-    boolean existsByConnectionId(Long id);
     ConnectionMng save(ConnectionMng connectionMng);
-    void updateAndBind(ConnectionMng old, ConnectionMng connectionMng);
-    ConnectionMng saveDirectly(ConnectionMng connectionMng);
-    ConnectionMng getByConnectionId(Long connectionId);
+    ConnectionMng create(ConnectionMng connectionMng);
     List<ConnectionMng> getAll();
-    ConnectionMng delete(Long id);
-
-    void updateWithoutBinding(ConnectionMng connectionMng);
-
-    List<ConnectionMng> getAllById(List<Long> ids);
+    ConnectionMng delete(String id);
+    void delete(ConnectionMng connectionMng);
     long count();
-    void doWithPatchedConnection(ConnectionDTO connectionDTO, ConnectionDTO patched, PatchConnectionDetails details);
+    ConnectionMng getById(String id);
+
+    List<ConnectionMng> getAllByConnectionId(Long id);
 
     long deleteByConnectionIdIn(List<Long> chunk);
+
+    void deleteAllByConnectionId(Long id);
+
+    void updateSnapshot(ConnectionMng connectionMng, ConnectionVersionUpdateRequest request);
 }

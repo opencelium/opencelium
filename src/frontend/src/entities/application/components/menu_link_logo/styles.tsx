@@ -4,7 +4,7 @@ import Loading from "@app_component/base/loading/Loading";
 import {MenuLinkLogoStyledProps} from "./interfaces";
 
 const LogoImageStyled = styled.img`
-    width: 2.5rem;
+    width: 2rem;
     height: auto;
     border-radius: 5px;
 `;
@@ -17,6 +17,7 @@ const LoadingStyled = styled(Loading)`
 const MenuLinkLogoStyled = styled(Link)<MenuLinkLogoStyledProps>`
     margin-bottom: 35px !important;
     padding-bottom: 10px;
+    justify-content: flex-start !important;
     &:hover{
         border-bottom: 2px solid ${({theme, $onHoverColor}) => $onHoverColor || theme.menu.menuItem.hover || '#00ACC2'};
         padding-bottom: 8px;

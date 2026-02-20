@@ -1,18 +1,13 @@
 package com.becon.opencelium.backend.database.mongodb.entity;
 
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-import org.springframework.data.mongodb.core.mapping.FieldType;
-import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import java.util.List;
 
-@Document(collection = "field_binding")
+@Document(collection ="field_binding")
 public class FieldBindingMng {
-    @MongoId(targetType = FieldType.OBJECT_ID)
     private String id;
-    @Indexed
     @Field(name = "enhancement_id")
     private Integer enhancementId;
     private List<LinkedFieldMng> from;

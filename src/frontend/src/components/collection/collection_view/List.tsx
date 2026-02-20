@@ -26,6 +26,7 @@ import {CheckProps, ListViewProps, SortType} from './interfaces';
 import {EmptyList} from "../EmptyList";
 import {ThStyled} from "./styles";
 import {ListRow} from "../ListRow";
+import ColumnHeaderText from "@app_component/base/text/ColumnHeaderText";
 
 
 const MAX_COLUMN_VALUE_LENGTH = 150;
@@ -45,6 +46,7 @@ const List: FC<ListViewProps> =
         isCard,
         onListRowClick,
         hasPaginationProps,
+         hasNoHoverEffect,
     }) => {
     const [sortTypes, setSortTypes] = useState<any>({});
     const [visibleEntities, setVisibleEntities] = useState([]);
@@ -112,7 +114,7 @@ const List: FC<ListViewProps> =
         setSortTypes({...sortTypes, [sortingProp]: sortType})
     }
     const CardComponent = isCard ? Card : React.Fragment;
-    let cardProps = isCard ? {padding: '10px', margin: '0 0 20px 0', isRefreshing, overflow: 'auto', style: collection.listStyles} : {};
+    let cardProps = isCard ? {padding: '10px', margin: '0 0 20px 0', isRefreshing, overflow: 'auto', style: collection.listStyles, hasNoHoverEffect} : {};
     return (
         <CardComponent {...cardProps}>
             {visibleEntities.length === 0
@@ -148,7 +150,7 @@ const List: FC<ListViewProps> =
                                     return (
                                         <ThStyled key={propertyKey} width={columnWidth} style={headerStyle}>
                                             <div style={{display: 'flex', justifyContent: 'center', ...columnStyle}}>
-                                                {collection.translations[translationProp] && <span style={{marginLeft: hasSortIcon ? listProp?.header?.left ? 0 : '24px' : 0}}><Text value={collection.translations[translationProp]}/></span>}
+                                                {collection.translations[translationProp] && <span style={{marginLeft: hasSortIcon ? listProp?.header?.left ? 0 : '24px' : 0}}><ColumnHeaderText value={collection.translations[translationProp]}/></span>}
                                                 {hasSortIcon &&
                                                     <TooltipButton target={'sort_button'} tooltip={sortTypes[propertyKey] === SortType.asc ? 'Asc' : 'Desc'} position={'top'} hasBackground={false} color={ColorTheme.Blue}
                                                             handleClick={() => sort(propertyKey, sortTypes[propertyKey] === SortType.asc ? SortType.desc : SortType.asc)}
@@ -163,7 +165,7 @@ const List: FC<ListViewProps> =
                         }
                         {collection.hasActions &&
                         <th>
-                            <span>Actions</span>
+                            <ColumnHeaderText value={'Actions'}/>
                         </th>
                         }
                     </tr>

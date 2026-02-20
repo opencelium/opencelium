@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.utility;
 
 import com.becon.opencelium.backend.application.entity.AvailableUpdate;
+import com.becon.opencelium.backend.constant.PathConstant;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -58,5 +59,9 @@ public class PackageVersionManager {
         return Arrays.stream(version.split("\\."))
                 .map(Integer::parseInt)
                 .collect(Collectors.toList());
+    }
+
+    public static String extractVersionOfJarFile(String fileName){
+        return fileName.substring(PathConstant.JAR_PREFIX.length(), fileName.lastIndexOf("."));
     }
 }

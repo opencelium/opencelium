@@ -39,18 +39,73 @@ class Header extends React.Component {
 		};
 		this.JsonBodyRef = React.createRef();
 		this.enhancementRef = React.createRef();
+		this._isDirty = false;
+		this._openSnapshot = null;
+		this._isEnhancementInitializing = false;
+		this._hasUserTouchedEnhancement = false;
+	}
+
+	_markDirty() {
+		this._isDirty = true;
+	}
+
+	_takeSnapshot(connection) {
+		try {
+			const obj =
+				typeof connection.getObject === 'function'
+					? connection.getObject()
+					: connection;
+			return JSON.stringify(obj);
+		} catch (e) {
+			return null;
+		}
 	}
 
 	toggleHeaderVisible() {
-		const { setCurrentInfo, nameOfCurrentInfo, updateConnection, connection } = this.props;
-		if (setCurrentInfo) setCurrentInfo(nameOfCurrentInfo);
-		updateConnection(connection);
+		const {
+			setCurrentInfo,
+			nameOfCurrentInfo,
+			updateConnection,
+			connection,
+		} = this.props;
+		const willOpen = !this.state.isHeaderVisible;
+
+		if (willOpen) {
+			if (setCurrentInfo) setCurrentInfo(nameOfCurrentInfo);
+
+			this._isDirty = false;
+			this._openSnapshot = this._takeSnapshot(connection);
+
+			this.setState({
+				currentEnhancement: null,
+				currentFieldName: '',
+				isToggledIcon: true,
+				isToggledReferenceIcon: false,
+				isHeaderVisible: true,
+			});
+
+			return;
+		}
+
+		let hasChanges = this._isDirty;
+
+		if (!hasChanges && this._openSnapshot) {
+			const now = this._takeSnapshot(connection);
+			hasChanges = now !== this._openSnapshot;
+		}
+
+		if (hasChanges) {
+			updateConnection(connection);
+		}
+
+		this._openSnapshot = null;
+
 		this.setState({
 			currentEnhancement: null,
 			currentFieldName: '',
 			isToggledIcon: true,
 			isToggledReferenceIcon: false,
-			isHeaderVisible: !this.state.isHeaderVisible,
+			isHeaderVisible: false,
 		});
 	}
 
@@ -119,29 +174,54 @@ class Header extends React.Component {
 			bindingItem = bindingItem.to[0];
 			connection.setCurrentFieldBindingTo(bindingItem);
 		}
-		this.setCurrentEnhancement(connection.getEnhancementByTo());
+		this.setCurrentEnhancement(connection.getEnhancementByTo(), {
+			silent: true,
+		});
 		this.setState({
 			currentFieldName: fieldName,
 		});
 	}
 
-	setCurrentEnhancement(currentEnhancement) {
+	setCurrentEnhancement(currentEnhancement, options = {}) {
 		const { connection } = this.props;
-		if (currentEnhancement !== null) {
-			connection.updateEnhancement(currentEnhancement);
+
+		const next =
+			currentEnhancement instanceof CEnhancement
+				? currentEnhancement.getObject()
+				: currentEnhancement;
+
+		if (!next) return;
+
+		const stable = (v) => {
+			try { return JSON.stringify(v ?? null); }
+			catch { return String(v); }
+		};
+
+		const prev = this.state.currentEnhancement;
+
+		if (stable(prev) === stable(next)) {
+			return;
 		}
-		this.setState({
-			currentEnhancement:
-				currentEnhancement instanceof CEnhancement
-					? currentEnhancement.getObject()
-					: currentEnhancement,
-		});
+
+		if (options && options.silent) {
+			this.setState({ currentEnhancement: next });
+			return;
+		}
+
+		connection.updateEnhancement(next);
+		this._isDirty = true;
+
+		this.setState({ currentEnhancement: next });
 	}
+
+
+
 
 	updateEntity(entity = null) {
 		const { currentFieldName } = this.state;
 		const { connection, updateConnection } = this.props;
 		let currentEntity = entity === null ? connection : entity;
+		this._markDirty('updateEntity');
 		updateConnection(currentEntity);
 		if (currentFieldName !== '') {
 			let bindingItem = this.getCurrentBindingItem(currentFieldName);
@@ -280,8 +360,17 @@ class Header extends React.Component {
 	}
 
 	toggleEnhancement() {
-		this.setState({ isOpenedEnhancement: !this.state.isOpenedEnhancement });
+		const willOpen = !this.state.isOpenedEnhancement;
+
+		if (willOpen) {
+			this._isEnhancementInitializing = true;
+			this._hasUserTouchedEnhancement = false;
+		}
+
+		this.setState({ isOpenedEnhancement: willOpen });
 	}
+
+
 
 	renderEnhancement() {
 		const { currentEnhancement, isOpenedEnhancement } = this.state;

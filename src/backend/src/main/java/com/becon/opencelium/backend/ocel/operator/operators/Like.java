@@ -1,14 +1,13 @@
 package com.becon.opencelium.backend.ocel.operator.operators;
 
-import com.becon.opencelium.backend.ocel.operator.Arity;
+import com.becon.opencelium.backend.ocel.operator.BinaryOperator;
 import com.becon.opencelium.backend.ocel.operator.OperatorEnum;
 import com.becon.opencelium.backend.ocel.operator.SidesType;
 import com.becon.opencelium.backend.ocel.exception.ApplyOperatorException;
-import com.becon.opencelium.backend.ocel.operator.BinaryOperator;
 
 import java.util.regex.Pattern;
 
-public class Like implements BinaryOperator {
+class Like implements BinaryOperator {
     @Override
     public Object apply(Object o1, Object o2) throws ApplyOperatorException {
 //        if (!(o1 instanceof String s1) || !(o2 instanceof String s2))

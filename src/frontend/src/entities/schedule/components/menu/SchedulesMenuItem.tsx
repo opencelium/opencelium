@@ -22,7 +22,7 @@ const SchedulesMenuItem_2: FC<MenuItemProps> = ({isReadonly, onHoverColor}) => {
         return (
             <MenuLink
                 permission={SchedulePermissions.READ}
-                size={30}
+                size={26}
                 to={'/schedules'}
                 name={'update'}
                 label={'Schedules'}

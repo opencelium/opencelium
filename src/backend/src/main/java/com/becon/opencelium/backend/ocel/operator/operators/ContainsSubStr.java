@@ -8,7 +8,7 @@ import com.becon.opencelium.backend.ocel.operator.SidesType;
 import java.util.List;
 import java.util.Objects;
 
-public class ContainsSubStr implements BinaryOperator {
+class ContainsSubStr implements BinaryOperator {
     @Override
     public Object apply(Object o1, Object o2) throws ApplyOperatorException {
         List<?> values;

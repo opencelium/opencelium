@@ -42,11 +42,12 @@ public class ExecutionObjectServiceImp implements ExecutionObjectService {
     public ExecutionObj buildObj(QuartzJobScheduler.ScheduleData data) {
         int scheduleId = data.getScheduleId();
         Scheduler scheduler = schedulerService.getById(scheduleId);
-        ConnectionMng connectionMng = connectionMngService.getByConnectionId(scheduler.getConnection().getId());
+        ConnectionMng connectionMng = connectionMngService.getById(scheduler.getConnection().getSnapshotId());
 
         ExecutionObj executionObj = new ExecutionObj();
         ConnectionEx connectionEx = connectionMapper.toEntity(connectionMng);
-        connectionEx.setConnectionName(getConnectionName(connectionMng.getConnectionId()));
+        connectionEx.setConnectionId(scheduler.getConnection().getId());
+        connectionEx.setConnectionName(getConnectionName(scheduler.getConnection().getId()));
         executionObj.setConnection(connectionEx);
 
         executionObj.setWebhookVars(data.getQueryParams());

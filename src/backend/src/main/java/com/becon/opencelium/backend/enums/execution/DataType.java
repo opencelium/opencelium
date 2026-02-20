@@ -27,7 +27,7 @@ public enum DataType {
     }
 
     public boolean isPrimitive() {
-        return this.type.equals("string") || this.type.equals("number") || this.type.equals("integer") || this.type.equals("boolean");
+        return this == STRING || this == NUMBER || this == INTEGER || this == BOOLEAN;
     }
 
     public static List<String> getTypes() {

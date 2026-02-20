@@ -16,6 +16,7 @@ import Button from "@basic_components/buttons/Button";
 import Rule from "@root/classes/Rule";
 import FormSelect from "@change_component/form_elements/FormSelect";
 import InputSelect from "@app_component/base/input/select/InputSelect";
+import {DefaultTextSize} from "@entity/application/utils/constants";
 
 const LogsButton = ({schedule}: {schedule: ISchedule}) => {
     const dispatch = useAppDispatch();
@@ -104,7 +105,6 @@ const LogsButton = ({schedule}: {schedule: ISchedule}) => {
                 hasBackground={false}
                 handleClick={() => toggle(true)}
                 icon={'ballot'}
-                size={TextSize.Size_20}
             />
             <Dialog
                 actions={[{label: 'Create Support-Logs', isLoading: startAction && generatingLogs === API_REQUEST_STATE.START, onClick: startCollectingLogs, id: 'get_logs_button'}, {label: 'Cancel', onClick: () => toggle(false), id: 'cancel_button'}]}
@@ -122,7 +122,7 @@ const LogsButton = ({schedule}: {schedule: ISchedule}) => {
                         options={levelOptions}/>
                     <Label>
                         {"URL"}
-                        <Button iconSize={20} handleClick={() => toggleUrl(!maskedUrl)} hasBackground={false} icon={maskedUrl ? 'visibility_off' : 'visibility'} />
+                        <Button handleClick={() => toggleUrl(!maskedUrl)} hasBackground={false} icon={maskedUrl ? 'visibility_off' : 'visibility'} />
                     </Label>
                     <UrlStyled
                         onClick={() => toggleUrl(!maskedUrl)}>
@@ -132,7 +132,7 @@ const LogsButton = ({schedule}: {schedule: ISchedule}) => {
                     </UrlStyled>
                     <Label>
                         {"Headers"}
-                        <Button iconSize={20} handleClick={() => toggleHeader(!maskedHeader)} hasBackground={false} icon={maskedHeader ? 'visibility_off' : 'visibility'} />
+                        <Button handleClick={() => toggleHeader(!maskedHeader)} hasBackground={false} icon={maskedHeader ? 'visibility_off' : 'visibility'} />
                     </Label>
                     <HeaderStyled
                         className={maskedHeader ? 'masked' : ''}
@@ -175,7 +175,7 @@ const LogsButton = ({schedule}: {schedule: ISchedule}) => {
                             className={maskedRequest ? 'masked' : ''}>
                             <Label>
                                 {"Request"}
-                                <Button iconSize={20} handleClick={() => toggleRequest(!maskedRequest)} hasBackground={false} icon={maskedRequest ? 'visibility_off' : 'visibility'} />
+                                <Button handleClick={() => toggleRequest(!maskedRequest)} hasBackground={false} icon={maskedRequest ? 'visibility_off' : 'visibility'} />
                             </Label>
                             <Clicker onClick={() => toggleRequest(!maskedRequest)}/>
                             <RequestContent>
@@ -184,7 +184,7 @@ const LogsButton = ({schedule}: {schedule: ISchedule}) => {
                                         {"*******************"}
                                     </MaskedText>
                                     :
-                                    <ReactJsonView enableClipboard={false} iconStyle={'circle'} collapsed={false} src={{body: {_id: '31'}}}/>
+                                    <ReactJsonView enableClipboard={false} style={{fontSize: `${DefaultTextSize}px`}} iconStyle={'circle'} collapsed={false} src={{body: {_id: '31'}}}/>
                                 }
                             </RequestContent>
                         </RequestStyled>
@@ -192,7 +192,7 @@ const LogsButton = ({schedule}: {schedule: ISchedule}) => {
                             className={maskedResponse ? 'masked' : ''}>
                             <Label>
                                 {"Response"}
-                                <Button iconSize={20} handleClick={() => toggleResponse(!maskedResponse)} hasBackground={false} icon={maskedResponse ? 'visibility_off' : 'visibility'} />
+                                <Button handleClick={() => toggleResponse(!maskedResponse)} hasBackground={false} icon={maskedResponse ? 'visibility_off' : 'visibility'} />
                             </Label>
                             <Clicker onClick={() => toggleResponse(!maskedResponse)}/>
                             <ResponseContent>
@@ -205,6 +205,7 @@ const LogsButton = ({schedule}: {schedule: ISchedule}) => {
                                         enableClipboard={false}
                                         iconStyle={'circle'}
                                         collapsed={false}
+                                        style={{fontSize: `${DefaultTextSize}px`}}
                                         src={{body: {transactionId: '31', type: 3}}}
                                     />
                                 }

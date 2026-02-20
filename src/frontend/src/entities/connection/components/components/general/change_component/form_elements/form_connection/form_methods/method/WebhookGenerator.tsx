@@ -17,6 +17,7 @@ import {
 import {getWebhookTypes} from "@entity/schedule/redux_toolkit/action_creators/WebhookCreators";
 import {ErrorMessage} from "@app_component/operator_builder/styles";
 import {ErrorColor} from "@app_component/operator_builder/OperatorBuilder";
+import {DefaultInputTextSize} from "@entity/application/utils/constants";
 
 
 const WebhookGenerator =
@@ -166,6 +167,37 @@ const WebhookGenerator =
                         ...base,
                         borderColor: hasError ? ErrorColor : state.isFocused ? "#666" : "#ccc",
                         opacity: 1,
+                    }),
+
+                    singleValue: (base: any) => ({
+                        ...base,
+                        fontSize: DefaultInputTextSize,
+                    }),
+                    input: (base: any) => ({
+                        ...base,
+                        input: {
+                            fontSize: DefaultInputTextSize,
+                        },
+                    }),
+                    noOptionsMessage: (provided: any) => ({
+                        ...provided,
+                        fontSize: DefaultInputTextSize,
+                    }),
+                    multiValueLabel: (provided: any) => ({
+                        ...provided,
+                        fontSize: DefaultInputTextSize,
+                    }),
+                    multiValue: (provided: any) => ({
+                        ...provided,
+                        fontSize: DefaultInputTextSize,
+                    }),
+                    option: (provided: any) => ({
+                        ...provided,
+                        fontSize: DefaultInputTextSize,
+                    }),
+                    placeholder: (provided: any) => ({
+                        ...provided,
+                        fontSize: DefaultInputTextSize,
                     }),
                     menuPortal: (base: any) => ({ ...base, zIndex: 10000 }),
                 }}

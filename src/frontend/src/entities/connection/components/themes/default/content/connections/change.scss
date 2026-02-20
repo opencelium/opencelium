@@ -25,6 +25,17 @@
   box-shadow: none !important;
   margin-bottom: 100px;
   padding-right: 10px !important;
+  transition: none !important;
+}
+.fullscreen_methods_form{
+  @extend .methods_form;
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  width: 100%;
+  margin: 56px 0 0 0 !important;
+  min-height: calc(100vh - 56px) !important;
+  padding: 0 !important;
 }
 
 .mode_form{

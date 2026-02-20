@@ -27,11 +27,11 @@ import CancelButton from "@entity/connection/components/components/general/view_
 import {setConnectionData, setCurrentTechnicalItem} from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import { setModalConnectionData, setModalCurrentTechnicalItem } from '@entity/connection/redux_toolkit/slices/ModalConnectionSlice';
 import CConnection from "@entity/connection/components/classes/components/content/connection/CConnection";
-import Title from "@app_component/collection/collection_title/Title";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import CSvg from "@classes/content/connection_overview_2/CSvg";
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 import LicenseAlertMessage from "@entity/dashboard/components/license_alert_message/LicenseAlertMessage";
+import {setEntityHeader} from "@application/redux_toolkit/slices/ApplicationSlice";
 
 function mapStateToProps(state, props){
     const authUser = state.authReducer.authUser;
@@ -43,7 +43,7 @@ function mapStateToProps(state, props){
 }
 
 @GetModalProp()
-@connect(mapStateToProps, {setConnectionData, setCurrentTechnicalItem, setModalConnectionData, setModalCurrentTechnicalItem})
+@connect(mapStateToProps, {setConnectionData, setCurrentTechnicalItem, setModalConnectionData, setModalCurrentTechnicalItem, setEntityHeader})
 class Form extends React.Component{
     constructor(props) {
         super(props);
@@ -83,6 +83,10 @@ class Form extends React.Component{
         };
         this.setData = props.isModal ? props.setModalConnectionData : props.setConnectionData;
         this.setCurrentTechnicalItem = props.isModal ? props.setModalCurrentTechnicalItem : props.setCurrentTechnicalItem;
+    }
+
+    componentDidMount() {
+        this.props.setEntityHeader(this.props.translations.header)
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -207,8 +211,7 @@ class Form extends React.Component{
         const hasListButton = translations && translations.list_button;
         const hasCancelButton = translations && translations.cancel_button;
         return(
-            <div style={{margin: '20px 0', padding: 0, paddingBottom: '30px'}}>
-                <Title title={translations.header}/>
+            <div style={{margin: '0 0 20px', padding: 0, paddingBottom: '30px'}}>
                 <LicenseAlertMessage/>
                 <div className={styles.buttons_panel}>
                     {type !== 'update' &&

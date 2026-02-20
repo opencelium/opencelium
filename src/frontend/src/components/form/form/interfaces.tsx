@@ -15,7 +15,7 @@
 
 import React from "react";
 import {ITheme} from "@style/Theme";
-import {MultipleTitleProps} from "@application/interfaces/IListCollection";
+import {MultipleTitleProps} from "@application/interfaces/IApplication";
 
 interface TitleStyledProps{
 
@@ -40,7 +40,7 @@ interface FormSectionStyledProps{
 
 interface FormProps{
     theme?: ITheme,
-    title?: string | MultipleTitleProps[] | React.ReactNode,
+    title?: string | MultipleTitleProps[],
     formSections?: any,
     actions?: any[],
     isLoading?: boolean,

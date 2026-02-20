@@ -17,7 +17,7 @@ import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {ViewType} from "@app_component/collection/collection_view/CollectionView";
 import {GridViewType} from "@app_component/collection/GridViewMenu";
 import {DefaultThemes} from "@style/Theme";
-import {API_REQUEST_STATE, LocalStorageTheme} from "../../interfaces/IApplication";
+import {API_REQUEST_STATE, LocalStorageTheme, MultipleTitleProps} from "../../interfaces/IApplication";
 import {CommonState} from "../../utils/store";
 import {ICommonState} from "../../interfaces/core";
 import {
@@ -37,7 +37,7 @@ import { IComponent } from "../../interfaces/IApplication";
 import {isJsonString} from "@application/utils/utils";
 
 
-export interface AuthState extends ICommonState{
+export interface ApplicationState extends ICommonState{
     gettingLogoName: API_REQUEST_STATE,
     addingTicket: API_REQUEST_STATE,
     gettingVersion: API_REQUEST_STATE,
@@ -67,6 +67,9 @@ export interface AuthState extends ICommonState{
     searchFields: any,
     currentPages: any,
     onlineServiceStatus: OnlineServiceStatus,
+    entityHeader: string | MultipleTitleProps[],
+    entityIconKey: string,
+    isMenuExpanded: boolean,
 }
 
 
@@ -86,7 +89,7 @@ const viewType: ViewType = storage.get('viewType');
 const gridViewType: GridViewType = storage.get('gridViewType');
 const searchFields = storage.get('searchFields') || {};
 const currentPages = storage.get('currentPages') || {};
-const initialState: AuthState = {
+const initialState: ApplicationState = {
     gettingLogoName: API_REQUEST_STATE.INITIAL,
     addingTicket: API_REQUEST_STATE.INITIAL,
     gettingVersion: API_REQUEST_STATE.INITIAL,
@@ -116,6 +119,9 @@ const initialState: AuthState = {
     searchFields,
     currentPages,
     onlineServiceStatus: null,
+    entityHeader: '',
+    entityIconKey: '',
+    isMenuExpanded: false,
     ...CommonState,
 }
 
@@ -123,6 +129,15 @@ export const applicationSlice = createSlice({
     name: 'application',
     initialState,
     reducers: {
+        setEntityHeader: (state, action: PayloadAction<string | MultipleTitleProps[]>) => {
+            state.entityHeader = action.payload;
+        },
+        setEntityIconKey: (state, action: PayloadAction<string>) => {
+            state.entityIconKey = action.payload;
+        },
+        toggleMenu: (state, action: PayloadAction<boolean>) => {
+            state.isMenuExpanded = action.payload;
+        },
         toggleNotificationPanel: (state) => {
             state.isNotificationPanelOpened = !state.isNotificationPanelOpened;
         },
@@ -171,7 +186,7 @@ export const applicationSlice = createSlice({
         },
         setLogoDataStatus: (state, action: PayloadAction<string>) => {
             state.logoDataStatus = action.payload;
-        }
+        },
     },
     extraReducers: {
         [getLogoName.pending.type]: (state) => {
@@ -301,6 +316,7 @@ export const {
     setComponentInChangeContent, setConnectionDraftToOpenOnce,setGridViewType,
     setViewType, setFullScreen, setThemes, setLogoDataStatus,
     setSearchFields, clearSearchFields, clearCurrentPages, setCurrentPages,
+    setEntityHeader, toggleMenu, setEntityIconKey,
 } = applicationSlice.actions;
 
 export const actions = {

@@ -19,6 +19,7 @@ import {OperationUsageEntryModel} from "@entity/license_management/requests/mode
 import EntriesCollection from "@entity/license_management/components/detail_view/EntriesCollection";
 import DetailsCollection from "@entity/license_management/components/detail_view/DetailsCollection";
 import Subscription from "@entity/license_management/classes/Subscription";
+import HeaderText from "@app_component/base/text/HeaderText";
 const DetailView = () => {
     const [collection, setCollection] = useState<'entries' | 'details'>('entries');
     const [currentEntry, setCurrentEntry] = useState<null | OperationUsageEntryModel>(null);
@@ -35,8 +36,8 @@ const DetailView = () => {
             {collection === 'details' &&
                 <div style={{width: '100%'}}>
                     <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                        <div style={{fontSize: '20px'}}>
-                            {currentEntry?.connectionTitle || ''}
+                        <div>
+                            <HeaderText value={currentEntry?.connectionTitle || ''}/>
                         </div>
                         <Button
                             key={'back_button'}

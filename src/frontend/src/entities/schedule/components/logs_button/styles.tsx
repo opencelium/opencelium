@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import {DefaultTextSize} from "@entity/application/utils/constants";
 
 export const LogsButtonStyled = styled.div`
     height: 100%;
@@ -7,14 +8,15 @@ export const LogsButtonStyled = styled.div`
 `;
 export const MaskedText = styled.span<{masked: boolean}>`
     opacity: ${({masked}) => masked ? 0.4 : 1};
+    font-size: ${DefaultTextSize}px;
 `;
 export const Label = styled.div`
-    font-size: 18px;
     color: #000;
     margin-bottom: 10px;
     display: flex;
     gap: 5px;
     justify-content: space-between;
+    font-size: ${DefaultTextSize}px;
 `;
 export const UrlStyled = styled.button`
     user-select: none;
@@ -24,7 +26,7 @@ export const UrlStyled = styled.button`
     padding-left: 10px;
     justify-content: start;
     align-items: center;
-    height: 40px;
+    height: 34px;
     border: 1px solid #aaa;
     border-radius: 5px;
     margin-bottom: 10px;
@@ -33,11 +35,10 @@ export const HeaderStyled = styled.div`
     user-select: none;
     cursor: pointer;
     width: 100%;
-    height: 100px;
+    height: 80px;
     border: 1px solid #aaa;
     border-radius: 5px;
     margin-bottom: 10px;
-    padding: 10px 0 0;
     &>table{
         padding: 10px 10px 5px;
         width: 100%;
@@ -64,11 +65,11 @@ export const PayloadStyled = styled.div`
 export const RequestStyled = styled.div`
     position: relative;
     width: 100%;
-    height: 200px;
+    height: 145px;
 `;
 export const RequestContent = styled.div`
     width: 100%;
-    height: 200px;
+    height: 145px;
     border: 1px solid #aaa;
     border-radius: 5px;
     padding-left: 10px;
@@ -78,12 +79,12 @@ export const RequestContent = styled.div`
 `;
 export const ResponseStyled = styled.div`
     width: 100%;
-    height: 200px;
+    height: 145px;
     position: relative;
 `;
 export const ResponseContent = styled.div`
     width: 100%;
-    height: 200px;
+    height: 145px;
     border: 1px solid #aaa;
     border-radius: 5px;
     padding-left: 10px;

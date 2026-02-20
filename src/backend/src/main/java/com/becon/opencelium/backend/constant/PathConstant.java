@@ -17,7 +17,6 @@
 package com.becon.opencelium.backend.constant;
 
 public interface PathConstant {
-    String NEO4J = "com.becon.opencelium.backend.neo4j";
     String MONGODB = "com.becon.opencelium.backend.database.mongodb";
     String MYSQl = "com.becon.opencelium.backend.database.mysql";
     String ELASTICSEARCH = "com.becon.opencelium.backend.elasticsearch";
@@ -40,4 +39,6 @@ public interface PathConstant {
     String LIBS = "build/libs/";
     String CHANGELOG = "./assistant/changelog/file/";
     String BACKUP = RUNTIME + "backup/";
+
+    String JAR_PREFIX = "opencelium.backend-";
 }

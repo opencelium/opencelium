@@ -28,7 +28,6 @@ const getNavLinkStyles = (theme: ITheme, onHoverColor?: string) => { return `
     column-gap: .75rem;
     padding: 10px 7px;
     color: #eee;
-    border-radius: .5rem;
     margin-bottom: 1rem;
     transition: .3s;
     cursor: pointer;

@@ -26,11 +26,12 @@ import { MenuProps } from './interfaces';
 import {MenuStyled, MenuTop, NavStyled} from './styles';
 import {LogoutMenuItem} from "./LogoutMenuItem";
 import {getMenuItems} from "@entity/index";
-
+import {toggleMenu} from "@application/redux_toolkit/slices/ApplicationSlice";
+import {useAppDispatch} from "@application/utils/store";
 
 const Global = createGlobalStyle`
     body{
-        padding: 2rem 2rem 0 calc(95px + 2rem);
+        padding: 2rem 1rem 0 calc(48px + 1rem);
     }
 `;
 
@@ -41,8 +42,8 @@ const Menu: FC<MenuProps> =
          background,
          hoverMenuItemBackground,
     }) => {
-    const {isFullScreen} = Application.getReduxState();
-    const [isExpanded, toggleExpanded] = useState(false);
+    const dispatch = useAppDispatch();
+    const {isFullScreen, isMenuExpanded} = Application.getReduxState();
     const [isMouseOver, toggleMouseOver] = useState(false);
     const onMouseOver = () => {
         if(!isReadonly) {
@@ -56,40 +57,43 @@ const Menu: FC<MenuProps> =
     }
     useEffect(() => {
         setTimeout(() => resizeWindow(), 500);
-    },[isExpanded]);
-    useEffect(() => {
+    },[isMenuExpanded]);
+/*    useEffect(() => {
         const bodyElement = document.querySelector('body');
         if (bodyElement) {
             if(isFullScreen){
-                bodyElement.style['padding'] = '2rem';
+                bodyElement.style['padding'] = '0 1rem 2rem';
             } else{
-                bodyElement.style['padding'] = '2rem 2rem 0 calc(95px + 2rem)';
+                bodyElement.style['padding'] = '0 1rem 0 calc(48px + 1rem)';
             }
         }
-    }, [isFullScreen])
+    }, [isFullScreen])*/
     useEffect(() => {
+        const bodyElement = document.querySelector('body');
+        if (bodyElement) {
+            bodyElement.style['padding'] = '0 1rem 0 calc(48px + 1rem)';
+        }
         return () => {
-            const bodyElement = document.querySelector('body');
             if (bodyElement) {
-                bodyElement.style['padding'] = '2rem 2rem 0 calc(95px + 2rem)';
+                bodyElement.style['padding'] = '0 1rem 0 calc(48px + 1rem)';
             }
         }
     }, [])
     const toggle = () => {
         if(!isReadonly) {
-            toggleExpanded(!isExpanded);
+            dispatch(toggleMenu(!isMenuExpanded));
             let bodyElement = document.querySelector('body');
             if (bodyElement) {
-                if (!isExpanded) {
-                    bodyElement.style['padding'] = '2rem 2rem 0 17rem';
+                if (!isMenuExpanded) {
+                    bodyElement.style['padding'] = '0 1rem 0 calc(180px + 1rem)';
                 } else {
-                    bodyElement.style['padding'] = '2rem 2rem 0 calc(95px + 2rem)';
+                    bodyElement.style['padding'] = '0 1rem 0 calc(48px + 1rem)';
                 }
             }
         }
     }
 
-    let showMenu = isMouseOver ? true : isExpanded;
+    let showMenu = isMouseOver ? true : isMenuExpanded;
     return (
         <React.Fragment>
             <Global/>
@@ -98,8 +102,8 @@ const Menu: FC<MenuProps> =
                     <div>
                         <MenuTop>
                             <MenuLinkLogo to={'/'} isReadonly={isReadonly} $onHoverColor={hoverMenuItemBackground}/>
-                            <Tooltip target={'menu_burger_icon'} tooltip={isExpanded ? 'Constrict' : 'Expand'} component={
-                                <Button margin={'12px 8.5px'} id={'menu_burger_icon'} iconSize={'30px'} handleClick={toggle} hasBackground={false} icon={isExpanded ? 'menu_open' : 'menu'} background={ColorTheme.White}/>}
+                            <Tooltip target={'menu_burger_icon'} tooltip={isMenuExpanded ? 'Constrict' : 'Expand'} component={
+                                <Button margin={'12px 8.5px'} id={'menu_burger_icon'} iconSize={'30px'} handleClick={toggle} hasBackground={false} icon={isMenuExpanded ? 'menu_open' : 'menu'} background={ColorTheme.White}/>}
                             />
                         </MenuTop>
                         <div>

@@ -54,7 +54,7 @@ export class Request implements IRequest{
     getHeaders(settings?: AxiosRequestConfig):any{
         let headers: any = {
             'crossDomain': true,
-            'timeout': 10000,
+            'timeout': 40000,
             'content-type': 'application/json',
         };
         if(this.isFormData){

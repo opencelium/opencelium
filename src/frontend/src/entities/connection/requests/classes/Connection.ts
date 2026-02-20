@@ -18,8 +18,7 @@ import Request from "@entity/application/requests/classes/Request";
 import {IRequestSettings} from "@application/requests/interfaces/IRequest";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 import {IConnection} from "../../interfaces/IConnection";
-import {GetConnectionWebhooksResponse, IConnectionRequest} from "../interfaces/IConnection";
-import category from "@entity/category/translations/interpolations/category";
+import {ConnectionVersionItem, GetConnectionWebhooksResponse, IConnectionRequest} from "../interfaces/IConnection";
 import {RuleBaseModel} from "@root/requests/models/Rule";
 import {MetaConnectionModel} from "@root/requests/models/Connection";
 
@@ -65,6 +64,8 @@ export class ConnectionRequest extends Request implements IConnectionRequest{
     }
 
     async updateConnection(connection: IConnection): Promise<AxiosResponse<IConnection>>{
+        const id: any = (connection as any)?.id ?? (connection as any)?.connectionId;
+        this.endpoint = `/${id}`;
         return super.put<IConnection>(this.backendMap(connection));
     }
 
@@ -75,6 +76,31 @@ export class ConnectionRequest extends Request implements IConnectionRequest{
     async deleteConnectionsById(connectionIds: number[]): Promise<AxiosResponse<number[]>>{
         this.endpoint = '/list/delete';
         return super.put<number[]>({identifiers: connectionIds});
+    }
+
+    async getConnectionVersions(connectionId: number): Promise<AxiosResponse<ConnectionVersionItem[]>> {
+        this.endpoint = `/${connectionId}/versions`;
+        return super.get<ConnectionVersionItem[]>();
+    }
+
+    async getConnectionBySnapshot(connectionId: number, snapshotId: string): Promise<AxiosResponse<IConnection>> {
+        this.endpoint = `/${connectionId}/version/${snapshotId}`;
+        return super.get<IConnection>();
+    }
+
+    async setCurrentVersion(connectionId: number, snapshotId: string): Promise<AxiosResponse<IConnection>> {
+        this.endpoint = `/${connectionId}/switch-version/${snapshotId}`;
+        return super.put<IConnection>({});
+    }
+
+    async deleteConnectionBySnapshot(connectionId: number, snapshotId: string): Promise<AxiosResponse<void>> {
+        this.endpoint = `/${connectionId}/version/${snapshotId}`;
+        return super.delete<void>();
+    }
+
+    async updateConnectionVersionComment(connectionId: number, snapshotId: string, comment: string): Promise<AxiosResponse<IResponse>> {
+        this.endpoint = `/${connectionId}/version/${snapshotId}`;
+        return super.put<IResponse>({ comment });
     }
 
     backendMap(connection: IConnection){

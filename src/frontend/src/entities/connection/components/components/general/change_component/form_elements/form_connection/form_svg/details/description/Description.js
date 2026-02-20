@@ -29,6 +29,7 @@ import {connect} from "react-redux";
 import DataAggregator
     from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/DataAggregator";
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
+import DefaultText from "@app_component/base/text/DefaultText";
 
 function mapStateToProps(state, props){
     const {connection} = mapItemsToClasses(state, props.isModal);
@@ -58,8 +59,8 @@ class Description extends React.Component{
                 {
                     operatorItem.iterator &&
                     <React.Fragment>
-                        <Col xs={4} className={`${styles.col}`}>{`Iterator`}</Col>
-                        <Col xs={8} className={`${styles.col} ${styles.value}`}>{operatorItem.iterator}</Col>
+                        <Col xs={4} className={`${styles.col}`}><DefaultText value={`Iterator`} /></Col>
+                        <Col xs={8} className={`${styles.col} ${styles.value}`}><DefaultText value={operatorItem.iterator} /></Col>
                     </React.Fragment>
                 }
                 <Condition ref={this.conditionRef} readOnly={readOnly} nameOfCurrentInfo={'operator_condition'} isCurrentInfo={currentInfo === 'operator_condition'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} updateConnection={updateConnection} connection={connection} details={details}/>

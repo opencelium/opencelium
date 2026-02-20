@@ -18,8 +18,10 @@ import {ITheme} from "@style/Theme";
 import {EmphasizeInputStyleLines} from "../styles";
 import {CheckStyledProps, ElementProps} from "../interfaces";
 import Button from "../../button/Button";
+import {DefaultInputTextSize} from "@entity/application/utils/constants";
 
 const InputStyled = styled.input<ElementProps>`
+    font-size: ${DefaultInputTextSize}px;
     font-family: ${({theme}: {theme: ITheme}) => theme.text.fontFamily || '"Arial"'};
     background: ${({background}) => background ? background : 'unset'};
     outline: none;

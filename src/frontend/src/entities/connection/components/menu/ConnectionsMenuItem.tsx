@@ -22,7 +22,7 @@ const ConnectionsMenuItem_1: FC<MenuItemProps> = ({isReadonly, onHoverColor}) =>
         return (
             <MenuLink
                 permission={ConnectionPermissions.READ}
-                size={30}
+                size={26}
                 to={'/connections'}
                 name={'sync_alt'}
                 label={'Connections'}

@@ -29,6 +29,7 @@ const ViewLogs = () => {
             toggle={close}
             theme={{dialog: styles.modalDialog, body: styles.modalBody}}
             title={`Log of the execution #${executionId}`}
+            hasFullScreenOption
         >
             {
                 connectors.map((connector) => (

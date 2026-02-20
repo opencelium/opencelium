@@ -58,6 +58,7 @@ class CreateElementPanel extends React.Component{
         document.body.appendChild(this.createElementPanel);
         this.createProcessRef = React.createRef();
         this.createOperatorRef = React.createRef();
+        this.panelContentRef = React.createRef();
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -80,11 +81,24 @@ class CreateElementPanel extends React.Component{
         }
     }
 
+    componentDidMount() {
+        document.addEventListener('mousedown', this.handleDocumentClick);
+    }
+
     componentWillUnmount(){
+        document.removeEventListener('mousedown', this.handleDocumentClick);
         if(this.createElementPanel) {
             document.body.removeChild(this.createElementPanel);
         }
     }
+
+    handleDocumentClick = (event) => {
+        if (!this.panelContentRef.current) return;
+
+        if (!this.panelContentRef.current.contains(event.target)) {
+            this.props.setIsCreateElementPanelOpened(false);
+        }
+    };
 
     changeType(localType){
         if(localType === CREATE_PROCESS){
@@ -133,7 +147,7 @@ class CreateElementPanel extends React.Component{
         const hasLineBeforeCreateProcess = hasItemTypePanel || hasItemPositionPanel;
         return(
             ReactDOM.createPortal(
-                <div>
+                <div ref={this.panelContentRef}>
                     {hasItemPositionPanel &&
                         <ItemPositionPanel
                             {...this.props}

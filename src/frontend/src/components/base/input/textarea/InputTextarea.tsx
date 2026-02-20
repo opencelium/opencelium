@@ -39,7 +39,7 @@ const InputTextarea: FC<InputTextareaProps> =
         ...props
      }) => {
         const hasLabel = label !== '';
-        let minHeight = 24 * rows + 40;
+        let minHeight = 16 * rows + 30;
         if(hasLabel){
             minHeight += 20;
         }

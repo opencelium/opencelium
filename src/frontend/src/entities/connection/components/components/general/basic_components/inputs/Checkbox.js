@@ -18,6 +18,8 @@ import PropTypes from 'prop-types';
 import {Label, Input} from 'reactstrap';
 
 import styles from '@entity/connection/components/themes/default/general/basic_components.scss';
+ import DefaultButtonIcon from "@app_component/base/button/DefaultButtonIcon";
+ import DefaultText from "@app_component/base/text/DefaultText";
 
 
 /**
@@ -37,13 +39,17 @@ class Checkbox extends Component{
                     {inputPosition === 'right'
                         ?
                             <React.Fragment>
-                                <span className={`${styles.checkbox_label} ${labelClassName}`}>{label}</span>
+                                <span className={`${styles.checkbox_label} ${labelClassName}`}>
+                                    <DefaultText value={label} />
+                                </span>
                                 <Input type = "checkbox" {...props} checked={checked} className={`${inputClassName} ${styles.checkbox}`}/>
                             </React.Fragment>
                         :
                             <React.Fragment>
                                 <Input type = "checkbox" {...props} checked={checked} className={`${inputClassName} ${styles.checkbox}`}/>
-                                <span className={`${styles.checkbox_label} ${labelClassName}`}>{label}</span>
+                                <span className={`${styles.checkbox_label} ${labelClassName}`}>
+                                    <DefaultText value={label} />
+                                </span>
                             </React.Fragment>
                     }
                 </Label>

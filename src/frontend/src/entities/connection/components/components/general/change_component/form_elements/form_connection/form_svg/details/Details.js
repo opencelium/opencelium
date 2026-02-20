@@ -25,6 +25,8 @@ import { toggleDetails } from '@root/redux_toolkit/slices/ConnectionSlice';
 import { toggleModalDetails } from '@root/redux_toolkit/slices/ModalConnectionSlice';
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 import TestMethodButton from './test_method/TestMethodButton';
+import DefaultText from "@app_component/base/text/DefaultText";
+import HeaderText from "@app_component/base/text/HeaderText";
 
 function mapStateToProps(state, props) {
   const { currentTechnicalItem, connection, connectionOverview } = mapItemsToClasses(state, props.isModal);
@@ -81,7 +83,7 @@ class Details extends React.Component {
         >
           <SettingsPanel {...this.props} />
           <div className={styles.details_data}>
-            <div className={styles.title}>Details</div>
+            <div className={styles.title}><HeaderText value={'Details'} isBold/></div>
             {details ? (
               <React.Fragment>
                 <div className={styles.label}>
@@ -94,7 +96,7 @@ class Details extends React.Component {
                 </div>
               </React.Fragment>
             ) : (
-              <div>{'There is no selected item'}</div>
+              <div><DefaultText value={'There is no selected item'}/></div>
             )}
           </div>
         </div>

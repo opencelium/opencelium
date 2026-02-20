@@ -17,6 +17,7 @@ import {OperatorTraceProps} from "@app_component/connection_logs/ConnectorPanel/
 import {cleanOperatorTrace} from "@root/redux_toolkit/slices/ConnectionLogSlice";
 import {getOperatorChildren} from "@root/redux_toolkit/action_creators/ConnectionLogCreators";
 import {withTheme} from "styled-components";
+import DefaultText from "@app_component/base/text/DefaultText";
 
 interface OperatorTraceExpanderProps extends OperatorTraceProps{
     handleToggle: () => void,
@@ -120,12 +121,16 @@ const OperatorTraceExpander = ({theme, trace, loading, handleToggle, expanded, f
                     hasError={hasError}
                 />
                 <span className={styles.type}
-                      style={{color: hasError ? ColorTheme.Red : '#000'}}>{isIf ? 'IF' : 'LOOP'}</span>
+                      style={{color: hasError ? ColorTheme.Red : '#000'}}>
+                    <DefaultText value={isIf ? 'IF' : 'LOOP'}/>
+                </span>
                 {isLoop && <span className={styles.iterator}
-                                 style={{color: hasError ? ColorTheme.Red : '#000'}}>({iterator})</span>}
+                                 style={{color: hasError ? ColorTheme.Red : '#000'}}>
+                    <DefaultText value={`(${iterator})`}/>
+                </span>}
                 {isIf && isMouseOver && <CopyOperatorButton trace={trace} flowId={flowId} executionId={executionId}
                                              iterationIndexes={iterationIndexes} iterationIndex={iterationIndex}/>}
-                {ShowIndexPath && <span style={{marginLeft: 8}}>{trace.indexPath}</span>}
+                {ShowIndexPath && <span style={{marginLeft: 8}}><DefaultText value={trace.indexPath}/></span>}
             </div>
             <React.Fragment>
                 {isIf && (
@@ -133,8 +138,8 @@ const OperatorTraceExpander = ({theme, trace, loading, handleToggle, expanded, f
                         e.preventDefault();
                         e.stopPropagation();
                     }} style={{color: hasError ? ColorTheme.Red : '#000'}}>
-							{(trace.segment as DetailedIfOperatorSegment).result}
-						</span>
+                        <DefaultText value={(trace.segment as DetailedIfOperatorSegment).result} />
+                    </span>
                 )}
                 {isLoop && (
                     <div className={styles.loopTraceRightSide} onClick={(e: any) => {
@@ -152,7 +157,6 @@ const OperatorTraceExpander = ({theme, trace, loading, handleToggle, expanded, f
                             <FontIcon
                                 isButton={true}
                                 darkTheme={false}
-                                size={16}
                                 iconStyles={{cursor: 'pointer', color: iterationIndex === 0 || size === undefined ? theme.button.background.disable : theme.button.background.quite}}
                                 disabled={iterationIndex === 0 || size === undefined}
                                 isLoading={prevLoading}
@@ -162,7 +166,6 @@ const OperatorTraceExpander = ({theme, trace, loading, handleToggle, expanded, f
                             <FontIcon
                                 isButton={true}
                                 darkTheme={false}
-                                size={16}
                                 iconStyles={{cursor: 'pointer', color: iterationIndex === size - 1 || size === undefined ? theme.button.background.disable : theme.button.background.quite}}
                                 disabled={iterationIndex === size - 1 || size === undefined}
                                 isLoading={nextLoading}

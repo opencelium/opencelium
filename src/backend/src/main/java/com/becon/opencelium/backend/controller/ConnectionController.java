@@ -37,10 +37,7 @@ import com.becon.opencelium.backend.resource.ApiDataResource;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.application.ResultDTO;
-import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
-import com.becon.opencelium.backend.resource.connection.ConnectionResource;
-import com.becon.opencelium.backend.resource.connection.MethodDTO;
-import com.becon.opencelium.backend.resource.connection.OperatorDTO;
+import com.becon.opencelium.backend.resource.connection.*;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
 import com.becon.opencelium.backend.resource.connection.old.ConnectionOldDTO;
@@ -51,6 +48,8 @@ import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.utility.LogFileUtility;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.fge.jsonpatch.JsonPatch;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -59,6 +58,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -264,6 +264,99 @@ public class ConnectionController {
         return ResponseEntity.ok(connectionOldDTOMapper.toDTO(connectionDTO));
     }
 
+    @Operation(summary = "Retrieves all connections versions by provided connection ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Connection versions has been successfully retrieved",
+                    content = @Content(schema = @Schema(implementation = ConnectionOldDTO.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/{connectionId}/versions")
+    public ResponseEntity<List<ConnectionVersionedDTO>> getConnectionVersions(@PathVariable Long connectionId){
+        return ResponseEntity.ok(connectionService.getConnectionVersions(connectionId));
+    }
+
+    @Operation(summary = "Retrieves a connection by provided connection ID and snapshotId")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Connection has been successfully retrieved",
+                    content = @Content(schema = @Schema(implementation = ConnectionOldDTO.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/{connectionId}/version/{snapshotId}")
+    public ResponseEntity<ConnectionOldDTO> getConnectionByVersion(@PathVariable Long connectionId, @PathVariable String snapshotId){
+        ConnectionDTO connectionDTO = connectionService.getFullConnection(connectionId, snapshotId);
+        return ResponseEntity.ok(connectionOldDTOMapper.toDTO(connectionDTO));
+    }
+
+    @Operation(summary = "Deletes a connection by provided connection ID and snapshotId")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Connection has been successfully deleted"),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @DeleteMapping("/{connectionId}/version/{snapshotId}")
+    public ResponseEntity<?> deleteConnectionByVersion(@PathVariable Long connectionId, @PathVariable String snapshotId){
+        connectionService.deleteSnapshot(connectionId, snapshotId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Updates certain snapshot's metadata by provided connection ID and snapshotId")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Snapshot has been successfully updated"),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "403",
+                    description = "Only owner of the Snapshot can update it",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PutMapping("/{connectionId}/version/{snapshotId}")
+    public ResponseEntity<?> updateConnectionSnapshot(
+            @PathVariable Long connectionId,
+            @PathVariable String snapshotId,
+            @RequestBody @Valid ConnectionVersionUpdateRequest request
+    ){
+        connectionService.updateSnapshot(connectionId, snapshotId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Switches connection's current version(snapshot) by provided connection ID and snapshotId")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Connection has been successfully updated"),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PutMapping("/{connectionId}/switch-version/{snapshotId}")
+    public ResponseEntity<?> switchVersion(@PathVariable Long connectionId, @PathVariable String snapshotId){
+        connectionService.switchVersion(connectionId, snapshotId);
+        return ResponseEntity.ok().build();
+    }
+
     @Operation(summary = "Creates a connection from database by accepting connection data in request body.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
@@ -281,8 +374,8 @@ public class ConnectionController {
         ConnectionDTO connectionDTO = connectionOldDTOMapper.toEntity(connectionOldDTO);
         Connection connection = connectionMapper.toEntity(connectionDTO);
         ConnectionMng connectionMng = connectionMngMapper.toEntity(connectionDTO);
-        ConnectionMng savedConnection = connectionService.save(connection, connectionMng);
-        ConnectionDTO dto = connectionService.getFullConnection(savedConnection.getConnectionId());
+        Long connectionId = connectionService.save(connection, connectionMng);
+        ConnectionDTO dto = connectionService.getFullConnection(connectionId);
 
         final URI uri = MvcUriComponentsBuilder
                 .fromController(getClass())
@@ -341,8 +434,7 @@ public class ConnectionController {
         ConnectionDTO connectionDTO = connectionOldDTOMapper.toEntity(connectionOldDTO);
         Connection connection = connectionMapper.toEntity(connectionDTO);
         ConnectionMng connectionMng = connectionMngMapper.toEntity(connectionDTO);
-        ConnectionMng savedConnection = connectionService.save(connection, connectionMng);
-        Long connectionId = savedConnection.getConnectionId();
+        Long connectionId = connectionService.save(connection, connectionMng);
 
         // create temporary scheduler for above connection, will be deleted after execution finished
         SchedulerRequestResource resource = new SchedulerRequestResource();
@@ -515,7 +607,8 @@ public class ConnectionController {
         if (id == null) {
             throw new RuntimeException("ENHANCEMENT_NOT_FOUND");
         }
-        ConnectionMng connectionMng = connectionMngService.getByConnectionId(connectionId);
+        Connection connection = connectionService.getById(connectionId);
+        ConnectionMng connectionMng = connectionMngService.getById(connection.getSnapshotId());
         if (connectionMng.getFieldBindings() == null) {
             throw new RuntimeException("ENHANCEMENT_NOT_FOUND");
         }
@@ -667,8 +760,11 @@ public class ConnectionController {
     })
     @GetMapping("/{connectionId}/webhook/vars")
     public ResponseEntity<?> getVariablesFromConnection(@PathVariable long connectionId) {
-        ConnectionMng connectionMng = connectionMngService.getByConnectionId(connectionId);
+        Connection connection = connectionService.getById(connectionId);
+        ConnectionMng connectionMng = connectionMngService.getById(connection.getSnapshotId());
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         try {
             // Convert the Java object to a JSON string
             String json = objectMapper.writeValueAsString(connectionMng);

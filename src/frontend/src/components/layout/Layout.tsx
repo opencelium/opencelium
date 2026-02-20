@@ -42,7 +42,9 @@ const Layout: FC =
                         </React.Fragment>
                 }
                 <Suspense fallback={(<ContentLoading/>)}>
-                    <Outlet/>
+                    <div style={{paddingTop: '80px'}}>
+                        <Outlet/>
+                    </div>
                 </Suspense>
             </Suspense>
             <CheckConnectionComponent/>

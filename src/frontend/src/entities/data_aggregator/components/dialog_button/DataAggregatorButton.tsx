@@ -174,6 +174,7 @@ const DataAggregatorButton:FC<DataAggregatorProps> = ({connection, updateConnect
                     />
                     :
                     <DataAggregatorList
+                        shouldNoSetEntityHeader={true}
                         setFormType={(type: FormType, aggregator: ModelDataAggregator) => {
                             dispatch(setFormType(type));
                             dispatch(setCurrentAggregator(aggregator));

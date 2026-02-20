@@ -54,6 +54,7 @@ interface ListViewProps extends ViewProps{
     isCard?: boolean,
     onListRowClick?: (entity: any) => void,
     hasPaginationProps: boolean,
+    hasNoHoverEffect?: boolean,
 }
 
 interface CollectionViewProps{
@@ -77,6 +78,8 @@ interface CollectionViewProps{
         setPage: (page: number) => void,
         page: number,
     } | undefined | null,
+    hasNoHoverEffect?: boolean,
+    shouldNoSetEntityHeader?: boolean,
 }
 
 interface CheckProps{

@@ -21,7 +21,6 @@ const ToggleButton: React.FC<ToggleButtonProps> = ({
 	const icon =
 		<FontIcon
 			iconStyles={{color: disabled ? '#eee' : hasError ? ColorTheme.Red : '#000', cursor: disabled ? 'default' : 'pointer'}}
-			size={16}
 			isLoading={loading}
 			value={expanded ? 'keyboard_arrow_down' : 'keyboard_arrow_right'}
 			onClick={() => {}}

@@ -91,6 +91,10 @@ interface LocalStorageTheme{
     colors: {action: string, menu: string, header: string},
     isCurrent?: boolean,
 }
+export interface MultipleTitleProps{
+    name: string,
+    link?: string,
+}
 
 export {
     API_REQUEST_STATE,

@@ -1,6 +1,6 @@
 package com.becon.opencelium.backend.ocel.operand;
 
-import com.becon.opencelium.backend.ocel.common.Component;
+import com.becon.opencelium.backend.ocel.Component;
 
 public class Operand implements Component {
     private Object value;

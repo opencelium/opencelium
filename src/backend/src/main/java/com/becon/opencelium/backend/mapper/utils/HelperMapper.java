@@ -1,26 +1,20 @@
 package com.becon.opencelium.backend.mapper.utils;
 
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectorMng;
-import com.becon.opencelium.backend.database.mongodb.service.FieldBindingMngService;
 import com.becon.opencelium.backend.database.mysql.entity.Category;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
-import com.becon.opencelium.backend.database.mysql.entity.Enhancement;
 import com.becon.opencelium.backend.database.mysql.entity.RequestData;
 import com.becon.opencelium.backend.database.mysql.service.*;
 import com.becon.opencelium.backend.invoker.entity.RequiredData;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
-import com.becon.opencelium.backend.mapper.mongo.FieldBindingMngMapper;
 import com.becon.opencelium.backend.mapper.mongo.MethodMngMapper;
 import com.becon.opencelium.backend.mapper.mongo.OperatorMngMapper;
 import com.becon.opencelium.backend.mapper.mysql.ConnectorMapper;
 import com.becon.opencelium.backend.mapper.mysql.ConnectorResourceMapper;
-import com.becon.opencelium.backend.mapper.mysql.EnhancementMapper;
 import com.becon.opencelium.backend.mapper.mysql.RequestDataMapper;
 import com.becon.opencelium.backend.mapper.mysql.invoker.InvokerMapper;
 import com.becon.opencelium.backend.resource.CategoryResponseDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
-import com.becon.opencelium.backend.resource.connection.binding.EnhancementDTO;
-import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.connector.InvokerDTO;
 import org.mapstruct.*;
@@ -48,21 +42,12 @@ public abstract class HelperMapper {
     private ConnectorService connectorService;
 
     @Autowired
-    @Qualifier("enhancementServiceImp")
-    private EnhancementService enhancementService;
-
-    @Autowired
     @Qualifier("invokerServiceImp")
     private InvokerService invokerService;
 
     @Autowired
     @Qualifier("requestDataServiceImp")
     private RequestDataService requestDataService;
-
-    @Autowired
-    @Qualifier("fieldBindingMngServiceImp")
-    @Lazy
-    private FieldBindingMngService fieldBindingMngService;
 
     @Autowired
     private InvokerMapper invokerMapper;
@@ -73,24 +58,11 @@ public abstract class HelperMapper {
 
     @Autowired
     @Lazy
-    private EnhancementMapper enhancementMapper;
-
-    @Autowired
-    @Lazy
-    private FieldBindingMngMapper fieldBindingMngMapper;
-
-    @Autowired
-    @Lazy
     private RequestDataMapper requestDataMapper;
 
     @Autowired
     @Lazy
     private ConnectorResourceMapper connectorResourceMapper;
-
-    @Autowired
-    @Qualifier("categoryServiceImp")
-    @Lazy
-    private CategoryService categoryService;
 
 
     @Named("toConnectorDTO")
@@ -117,26 +89,6 @@ public abstract class HelperMapper {
     @Named("getConnectorResourceById")
     public ConnectorResource getConnectorResourceById(int id) {
         return connectorResourceMapper.toDTO(connectorService.findById(id).orElse(null));
-    }
-
-    @Named("getFieldBindings")
-    public List<FieldBindingDTO> getFieldBindings(List<Enhancement> enhancements) {
-        if (enhancements == null) {
-            return Collections.emptyList();
-        }
-        List<FieldBindingDTO> list = new ArrayList<>(enhancements.size());
-        ArrayList<Integer> ids = new ArrayList<>();
-        for (Enhancement enhancement : enhancements) {
-            if (enhancement.getId() != null) {
-                ids.add(enhancement.getId());
-            } else {
-                FieldBindingDTO fieldBindingDTO = new FieldBindingDTO();
-                fieldBindingDTO.setEnhancement(enhancementMapper.toDTO(enhancement));
-                list.add(fieldBindingDTO);
-            }
-        }
-        list.addAll(fieldBindingMngMapper.toDTOAll(fieldBindingMngService.findAllByEnhancementId(ids)));
-        return list;
     }
 
     @Mappings({
@@ -180,12 +132,6 @@ public abstract class HelperMapper {
             data.setVisibility(visibility);
         });
         return requestData;
-    }
-
-    @Named("getEnhancementDTOById")
-    public EnhancementDTO getEnhancementDTOById(Integer id) {
-        Enhancement enhancement = enhancementService.getById(id);
-        return enhancementMapper.toDTO(enhancement);
     }
 
     @Named("mapCategoriesToIds")

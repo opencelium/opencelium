@@ -46,11 +46,13 @@ import {useParams} from "react-router";
 */
 function mapStateToProps(state){
     const authUser = state.authReducer.authUser;
+    const isFullScreen = state.applicationReducer.isFullScreen;
     const connection = state.connectionReducer;
     const {currentTechnicalItem} = mapItemsToClasses(state);
     const template = state.templateReducer;
     const connector = state.connectorReducer;
     return{
+        isFullScreen,
         authUser,
         connection: connection.currentConnection,
         currentTechnicalItem,
@@ -88,10 +90,12 @@ export default function(props) {
     let urlParams = useParams();
     const dispatch = useAppDispatch();
     useEffect(() => {
+        dispatch(setFullScreen(true));
         return () => {
             dispatch(setTemplatePanelVisibility(false))
             dispatch(setSavePanelVisibility(false))
             dispatch(setWebhooks([]));
+            dispatch(setFullScreen(false));
         }
     }, []);
     return <ConnectionUpdate {...props} navigate={navigate} params={urlParams}/>;

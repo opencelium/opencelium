@@ -29,6 +29,7 @@ interface CardProps{
     position?: string,
     overflow?: string;
     style?: any;
+    hasNoHofevEffect?: boolean,
 }
 
 export{

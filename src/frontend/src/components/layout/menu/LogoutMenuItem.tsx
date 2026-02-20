@@ -35,7 +35,7 @@ const LogoutMenuItem: FC<MenuItemProps> = ({isReadonly, onHoverColor}) => {
                 }}
                 name={'logout'}
                 label={'Log Out'}
-                size={30}
+                size={26}
                 hasConfirmation={!isReadonly}
                 confirmationText={'Do you want to logout?'}
                 isReadonly={isReadonly}

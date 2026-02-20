@@ -16,14 +16,21 @@
 
 package com.becon.opencelium.backend.database.mongodb.entity;
 
+import com.becon.opencelium.backend.commons.filter.OwnableEntity;
+import jakarta.persistence.EntityListeners;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.*;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
 @Document(collection = "connection")
-public class ConnectionMng {
+@EntityListeners(AuditingEntityListener.class)
+public class ConnectionMng implements OwnableEntity {
 
     private String version;
 
@@ -41,9 +48,22 @@ public class ConnectionMng {
     private ConnectorMng toConnector;
 
     @DBRef
-    private List<FieldBindingMng> fieldBindings; // [null, null, null]
+    @Field(name = "fieldBindings")
+    private List<FieldBindingMng> oldFieldBindings; // [null, null, null]
+
+    @Field(name = "field_bindings")
+    private List<FieldBindingMng> fieldBindings;
+
+    @Field(name = "comment")
+    private String comment;
 
     private Map<String, Object> ui;
+
+    @CreatedDate
+    private Instant createdAt;
+
+    @CreatedBy
+    private Integer createdBy;
 
     public ConnectionMng() {
     }
@@ -102,5 +122,38 @@ public class ConnectionMng {
 
     public void setUi(Map<String, Object> ui) {
         this.ui = ui;
+    }
+
+    public List<FieldBindingMng> getOldFieldBindings() {
+        return oldFieldBindings;
+    }
+
+    public void setOldFieldBindings(List<FieldBindingMng> oldFieldBindings) {
+        this.oldFieldBindings = oldFieldBindings;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    @Override
+    public Integer getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(Integer createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 }

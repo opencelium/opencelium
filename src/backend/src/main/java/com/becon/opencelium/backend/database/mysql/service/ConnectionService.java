@@ -22,6 +22,8 @@ import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
+import com.becon.opencelium.backend.resource.connection.ConnectionVersionUpdateRequest;
+import com.becon.opencelium.backend.resource.connection.ConnectionVersionedDTO;
 import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.github.fge.jsonpatch.JsonPatch;
@@ -31,7 +33,7 @@ import java.util.List;
 
 public interface ConnectionService {
 
-    ConnectionMng save(Connection connection, ConnectionMng connectionMng);
+    Long save(Connection connection, ConnectionMng connectionMng);
 
     void deleteById(Long id);
 
@@ -65,11 +67,11 @@ public interface ConnectionService {
 
     ConnectionDTO getFullConnection(Long connectionId);
 
+    ConnectionDTO getFullConnection(Long connectionId, String snapshotId);
+
     List<Connection> getAllByCategoryId(Integer categoryId);
 
     List<ConnectionDTO> getAllFullConnection();
-
-    List<Connection> findAllNotCompleted();
 
     void updateCategory(Connection connection, Integer newCategory);
 
@@ -97,4 +99,14 @@ public interface ConnectionService {
 
 
     ConnectionServiceImp.CleanupResult cleanupAllTestConnections();
+
+    List<ConnectionVersionedDTO> getConnectionVersions(Long connectionId);
+
+    void deleteSnapshot(Long connectionId, String snapshotId);
+
+    void setInitialRevisionToConnections();
+
+    void updateSnapshot(Long connectionId, String snapshotId, ConnectionVersionUpdateRequest request);
+
+    void switchVersion(Long connectionId, String snapshotId);
 }

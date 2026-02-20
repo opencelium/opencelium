@@ -17,7 +17,7 @@ import CreateElementPanel from '@change_component/form_elements/form_connection/
 import { mapItemsToClasses } from '@change_component/form_elements/form_connection/form_svg/utils';
 import CConnection from '@entity/connection/components/classes/components/content/connection/CConnection';
 import styles from '@entity/connection/components/themes/default/content/connections/connection_overview_2.scss';
-import { clearCurrentLogs, setConnectionData, setCurrentTechnicalItem } from '@entity/connection/redux_toolkit/slices/ConnectionSlice';
+import { clearCurrentLogs, setConnectionData, setCurrentTechnicalItem, setIsDirty } from '@entity/connection/redux_toolkit/slices/ConnectionSlice';
 import { setModalConnectionData, setModalCurrentTechnicalItem } from '@entity/connection/redux_toolkit/slices/ModalConnectionSlice';
 import React, { Component } from 'react';
 import { withTranslation } from 'react-i18next';
@@ -29,6 +29,7 @@ import TechnicalLayout from './layouts/TechnicalLayout';
 
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 import {checkPolyglot} from "@entity/external_application/redux_toolkit/action_creators/ExternalApplicationCreators";
+import {FormConnectionSvgStyled} from "@change_component/form_elements/form_connection/form_svg/styles";
 
 export const HAS_LAYOUTS_SCALING = true;
 
@@ -58,7 +59,8 @@ function mapStateToProps(state, props) {
     setModalConnectionData,
     setModalCurrentTechnicalItem,
     clearCurrentLogs,
-    checkPolyglot
+    checkPolyglot,
+    setIsDirty
   },
   null,
   { forwardRef: true }
@@ -104,6 +106,7 @@ class FormConnectionSvg extends Component {
       entity instanceof CConnection
         ? entity.getObjectForConnectionOverview()
         : entity;
+		this.props.setIsDirty(false);
     this.setData({ connection: connectionData });
     //this.props.checkPolyglot();
   }
@@ -115,6 +118,7 @@ class FormConnectionSvg extends Component {
               entity instanceof CConnection
                   ? entity.getObjectForConnectionOverview()
                   : entity;
+					this.props.setIsDirty(false);
           this.setData({connection: connectionData});
       }
   }
@@ -125,24 +129,28 @@ class FormConnectionSvg extends Component {
     clearCurrentLogs();
   }
 
-  updateEntity(entity = null, settings = { hasPostMessage: true }) {
+  updateEntity(entity = null, settings = { hasPostMessage: true, markDirty: true }) {
     const { authUser, connection, updateEntity } = this.props;
-    if (connection) {
-      const storage = LocalStorage.getStorage();
-      storage.set(
-        `${connection.fromConnector.invoker.name}&${connection.toConnector.invoker.name}`,
-        JSON.stringify(connection.getObject())
-      );
-      if (entity !== null) {
-        let connectionData =
-          entity instanceof CConnection
-            ? entity.getObjectForConnectionOverview()
-            : entity;
-        updateEntity(entity);
-        this.setData({ connection: connectionData });
-      }
+    if (!connection) return;
+    const storage = LocalStorage.getStorage();
+    storage.set(
+      `${connection.fromConnector.invoker.name}&${connection.toConnector.invoker.name}`,
+      JSON.stringify(connection.getObject())
+    );
+    if (entity === null) return;
+    const markDirty = settings?.markDirty !== false;
+
+    if (markDirty) {
+      this.props.setIsDirty(true);
     }
+    const connectionData =
+      entity instanceof CConnection
+			 	? entity.getObjectForConnectionOverview()
+				: entity;
+    updateEntity(entity);
+    this.setData({ connection: connectionData });
   }
+
 
   render() {
     const {
@@ -161,9 +169,11 @@ class FormConnectionSvg extends Component {
       createElementPanelPosition,
     } = this.state;
     return (
-      <div
+      <FormConnectionSvgStyled
         className={`${styles.connection_editor}`}
-        style={{ padding: isFullScreen ? "0 0 0 15px" : "0" }}
+        style={{
+          padding: "0",
+      }}
       >
         <Details
           ref={this.detailsRef}
@@ -209,7 +219,7 @@ class FormConnectionSvg extends Component {
         <ButtonPanel readOnly={data.readOnly} data={data} entity={entity} updateEntity={updateEntity} currentTechnicalItem={currentTechnicalItem} setCurrentTechnicalItem={setCurrentTechnicalItem} />
 {/*        <LogPanel />*/}
         <LogsPanel theme={theme}/>
-      </div>
+      </FormConnectionSvgStyled>
     );
   }
 }

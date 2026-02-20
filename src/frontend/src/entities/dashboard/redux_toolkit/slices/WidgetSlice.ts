@@ -24,11 +24,13 @@ import {IWidget} from "../../interfaces/IWidget";
 export interface WidgetSlice extends ICommonState{
     gettingAllWidgets: API_REQUEST_STATE,
     widgets: IWidget[],
+    isWidgetEditOn: boolean,
 }
 
 const initialState: WidgetSlice = {
     gettingAllWidgets: API_REQUEST_STATE.INITIAL,
     widgets: [],
+    isWidgetEditOn: false,
     ...CommonState,
 }
 
@@ -36,6 +38,9 @@ export const widgetSlice = createSlice({
     name: 'widget',
     initialState,
     reducers: {
+        toggleWidgetEdit: (state, action: PayloadAction<boolean>) => {
+            state.isWidgetEditOn = action.payload;
+        },
     },
     extraReducers: {
         [getAllWidgets.pending.type]: (state) => {
@@ -58,5 +63,9 @@ export const widgetSlice = createSlice({
         },
     }
 })
+
+export const {
+    toggleWidgetEdit,
+} = widgetSlice.actions;
 
 export default widgetSlice.reducer;
