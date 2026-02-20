@@ -22,7 +22,7 @@ import { API_REQUEST_STATE } from '@application/interfaces/IApplication';
 import {
 	updateConnection,
 	getConnectionVersions,
-	getConnectionVersionBySnapshot,
+	getConnectionVersionBySnapshot, setCurrentConnectionVersion,
 } from '@entity/connection/redux_toolkit/action_creators/ConnectionCreators';
 
 import ConnectionVersionHistoryPanel, {
@@ -99,18 +99,24 @@ const ConnectionVersioning: FC<ConnectionVersioningProps> = ({ theme }) => {
 		setIsHistoryOpen(false);
 	}, []);
 
+	const dispatchCurrentVersion = (v: ConnectionVersionItem) => {
+		dispatch(
+			getConnectionVersionBySnapshot({
+				connectionId,
+				snapshotId: v.snapshotId,
+			}) as any,
+		);
+		dispatch(setCurrentConnectionVersion({
+			connectionId,
+			snapshotId: v.snapshotId,
+		}))
+	}
+
 	const doOpenVersion = useCallback(
-		(v: ConnectionVersionItem) => {
+		async (v: ConnectionVersionItem) => {
 			if (!connectionId) return;
 
-			dispatch(
-				getConnectionVersionBySnapshot({
-					connectionId,
-					snapshotId: v.snapshotId,
-				}) as any,
-			);
-
-			setIsHistoryOpen(false);
+			dispatchCurrentVersion(v);
 		},
 		[connectionId, dispatch],
 	);
@@ -206,13 +212,7 @@ const ConnectionVersioning: FC<ConnectionVersioningProps> = ({ theme }) => {
 					setConfirmOpenVersion(null);
 					if (!v) return;
 
-					dispatch(
-						getConnectionVersionBySnapshot({
-							connectionId: connectionId!,
-							snapshotId: v.snapshotId,
-						}) as any,
-					);
-					setIsHistoryOpen(false);
+					dispatchCurrentVersion(v);
 				}}
 				cancelClick={() => setConfirmOpenVersion(null)}
 			/>

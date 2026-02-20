@@ -369,6 +369,19 @@ export const getConnectionVersionBySnapshot = createAsyncThunk(
     }
 );
 
+export const setCurrentConnectionVersion = createAsyncThunk(
+    'connection/versioning/setCurrent',
+    async ({ connectionId, snapshotId }: { connectionId: number; snapshotId: string }, thunkAPI) => {
+        try {
+            const request = new ConnectionRequest();
+            await request.setCurrentVersion(connectionId, snapshotId);
+            return snapshotId;
+        } catch (e) {
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+);
+
 export const deleteConnectionVersion = createAsyncThunk(
 	'connection/versioning/deleteVersion',
 	async ({ connectionId, snapshotId }: { connectionId: number; snapshotId: string }, thunkAPI) => {

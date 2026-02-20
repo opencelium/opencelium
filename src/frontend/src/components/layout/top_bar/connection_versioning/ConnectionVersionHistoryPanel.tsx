@@ -72,8 +72,8 @@ import Validation from '@application/classes/Validation';
 import { addTemplate, exportTemplate } from '@entity/template/redux_toolkit/action_creators/TemplateCreators';
 import { Template } from '@entity/connection/classes/Template';
 import { ConnectionRequest } from '@entity/connection/requests/classes/Connection';
-import DefaultText from "@app_component/base/text/DefaultText";
 import {withTheme} from "styled-components";
+import Role from "@entity/user/classes/Role";
 
 export type ConnectionVersionItem = {
 	connectionId?: number;
@@ -211,6 +211,7 @@ const ConnectionVersionHistoryPanel: FC<ConnectionVersionHistoryPanelProps> = ({
 	const connectionState = useAppSelector((s: any) => s.connectionReducer);
 	const userState = useAppSelector((s: any) => s.userReducer);
 	const appVersion = useAppSelector((s: any) => s.applicationReducer?.version);
+	const authUser = useAppSelector((s: any) => s.authReducer?.authUser);
 
 	const loading =
 		connectionState?.gettingConnectionVersions === API_REQUEST_STATE.START;
@@ -463,6 +464,16 @@ const ConnectionVersionHistoryPanel: FC<ConnectionVersionHistoryPanelProps> = ({
 		},
 		[users],
 	);
+	const hasEditPermission = useCallback(
+		(authorId?: number): boolean => {
+			if (!authorId || !Array.isArray(users) || users.length === 0)
+				return false;
+
+			const u = users.find((x: any) => x?.userId === authorId);
+			return Role.isAdmin(u) || authUser?.id === authorId;
+		},
+		[users],
+	);
 
 	const versions = useMemo(() => {
 		const normalized = normalizeVersions(rawVersions);
@@ -662,7 +673,6 @@ const ConnectionVersionHistoryPanel: FC<ConnectionVersionHistoryPanelProps> = ({
 					const normalWidth = 320;
 					const expandedWidth = expandedWidths[v.snapshotId] ?? 420;
 					const shiftLeft = isExpanded ? Math.max(0, expandedWidth - normalWidth) : 0;
-					console.log(v.current)
 					return (
 						<ItemRow key={row.key}>
 							<TimeCol>
@@ -749,6 +759,7 @@ const ConnectionVersionHistoryPanel: FC<ConnectionVersionHistoryPanelProps> = ({
 										$expanded={isExpanded}
 										$expandedWidth={expandedWidth}
 										$shiftLeft={shiftLeft}
+										disabled={!hasEditPermission(v.author)}
 									/>
 
 									{isActive && (
@@ -834,7 +845,7 @@ const ConnectionVersionHistoryPanel: FC<ConnectionVersionHistoryPanelProps> = ({
 					Download as Template
 				</MenuItem>
 
-				{!v.current && <MenuItem
+				{!v.current && hasEditPermission(v.author) && <MenuItem
 					$isDisabled={isDeleting}
 					style={{
 						color: isDeleting ? 'rgba(0,0,0,0.35)' : 'rgba(0,0,0,0.88)',

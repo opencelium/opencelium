@@ -80,7 +80,8 @@ export const ForcedFinishedLogsStyled = styled(DefaultText)`
 export const HeaderStyled = styled(Text)`
     background-color: white;
     user-select: none;
-    text-align: center;
+    text-align: left;
+    margin-left: 20px;
     color: #555;
     flex: 1;
 `;

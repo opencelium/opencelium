@@ -25,7 +25,7 @@ export const PanelRoot = styled.div<{ $open: boolean }>`
 	position: fixed;
 	top: 0;
 	height: 100vh;
-	width: 440px;
+	width: 414px;
 	background: #fff;
 	border-left: 1px solid rgba(0, 0, 0, 0.12);
 	z-index: 20000;
@@ -79,7 +79,7 @@ export const TimelineRoot = styled.div`
 
 export const TimelineLine = styled.div`
 	position: absolute;
-	left: 55px;
+	left: 45px;
 	top: 0;
 	bottom: 0;
 	width: 2px;
@@ -90,11 +90,11 @@ export const DateRow = styled.div`
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	margin: 14px 0;
+	margin: 8px 0;
 `;
 
 export const DateSpacer = styled.div`
-	width: 72px;
+	width: 50px;
 `;
 
 export const DateInnerRow = styled.div`
@@ -119,18 +119,18 @@ export const ItemRow = styled.div`
 	display: flex;
 	align-items: flex-start;
 	gap: 12px;
-	margin-bottom: 14px;
+	margin-bottom: 8px;
 `;
 
 export const TimeCol = styled.div`
-	width: 72px;
+	width: 50px;
 	position: relative;
 	flex-shrink: 0;
 `;
 
 export const TimeLabel = styled.div`
 	position: absolute;
-	left: 15px;
+	left: 5px;
 	top: 8px;
 	width: 32px;
 	text-align: right;
@@ -140,7 +140,7 @@ export const TimeLabel = styled.div`
 
 export const Dot = styled.div<{isCurrent: boolean}>`
 	position: absolute;
-	left: 50px;
+	left: 40px;
 	top: 12px;
 	width: 12px;
 	height: 12px;
@@ -154,10 +154,10 @@ export const Dot = styled.div<{isCurrent: boolean}>`
 export const Card = styled.div<{ $width: number, isCurrent: boolean, theme: ITheme }>`
 	width: ${({ $width }) => `${$width}px`};
 	border: 1px solid rgba(0, 0, 0, 0.12);
-	border-color: ${({theme, isCurrent}) => isCurrent ? `${chroma(ColorTheme.Blue).alpha(0.9)}` : 'rgba(0, 0, 0, 0.12)'};
-	border-radius: 14px;
+	border-color: ${({theme, isCurrent}) => 'rgba(0, 0, 0, 0.12)'};
+	border-radius: 6px;
 	background: #fff;
-	padding: 12px;
+	padding: 5px;
 	position: relative;
 	${({isCurrent}) => isCurrent ? '' : `
 		${DefaultShadowHoverStyles}	
@@ -170,7 +170,7 @@ export const CardHeader = styled.div`
 	align-items: center;
 	justify-content: space-between;
 	gap: 10px;
-	margin-bottom: 10px;
+	margin-bottom: 5px;
 `;
 
 export const AuthorText = styled(DefaultText)`
@@ -257,7 +257,7 @@ export const CommentTextarea = styled.textarea<{
 	box-sizing: border-box;
 	background: #fff;
 	color: rgba(0, 0, 0, 0.85);
-	margin-bottom: 10px;
+	margin-bottom: 0px;
 `;
 
 export const SaveRow = styled.div`

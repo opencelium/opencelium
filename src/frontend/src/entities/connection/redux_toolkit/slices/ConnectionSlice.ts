@@ -44,7 +44,7 @@ import {
   getConnectionVersions,
   getConnectionVersionBySnapshot,
   deleteConnectionVersion,
-  updateConnectionVersionComment
+  updateConnectionVersionComment, setCurrentConnectionVersion
 } from "../action_creators/ConnectionCreators";
 import {MetaConnectionModel} from "@root/requests/models/Connection";
 import { ConnectionVersionItem } from '@entity/connection/requests/interfaces/IConnection';
@@ -388,6 +388,24 @@ const connectionReducers = (isModal: boolean = false) => {
         state.error = null;
       },
       [getConnectionVersions.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+        state.gettingConnectionVersions = API_REQUEST_STATE.ERROR;
+        state.error = action.payload;
+      },
+      [setCurrentConnectionVersion.pending.type]: (state) => {
+        state.gettingConnectionVersions = API_REQUEST_STATE.START;
+      },
+      [setCurrentConnectionVersion.fulfilled.type]: (state, action: PayloadAction<string>) => {
+        state.gettingConnectionVersions = API_REQUEST_STATE.FINISH;
+        state.connectionVersions = state.connectionVersions.map(v => {
+          if (v.snapshotId === action.payload) {
+            return {...v, current: true}
+          } else {
+            return {...v, current: false}
+          }});
+        state.isDirty = false;
+        state.error = null;
+      },
+      [setCurrentConnectionVersion.rejected.type]: (state, action: PayloadAction<IResponse>) => {
         state.gettingConnectionVersions = API_REQUEST_STATE.ERROR;
         state.error = action.payload;
       },
