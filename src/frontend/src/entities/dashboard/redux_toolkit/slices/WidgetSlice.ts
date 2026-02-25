@@ -55,32 +55,9 @@ export const widgetSlice = createSlice({
                 'METRICS_OVERVIEW': {x: 0, y: 0, w: 12, h: 2, minW: 12, minH: 2},
             };
 
-            const STATIC_WIDGETS: IWidget[] = [
-                {
-                    widgetId: -2001,
-                    i: 'METRICS_OVERVIEW' as any,
-                    icon: 'dashboard',
-                    tooltipTranslationKey: 'Dashboard Overview',
-                },
-            ];
-
-            const backendWidgets = action.payload || [];
-            const merged: IWidget[] = [...backendWidgets];
-
-            for (const sw of STATIC_WIDGETS) {
-                const exists = merged.some(w => w.i === sw.i);
-                if (!exists) merged.push(sw);
-            }
-
             state.gettingAllWidgets = API_REQUEST_STATE.FINISH;
 
-            state.widgets = merged
-                .map(widget => {
-                    const coords = WIDGET_COORDINATES[widget.i] || {};
-                    return {...widget, ...coords};
-                })
-                .filter(widget => widget.i !== 'MONITORING_BOARDS');
-
+            state.widgets = action.payload.map(widget => {return {...widget, ...WIDGET_COORDINATES[widget.i]};}).filter(widget => widget.i !== 'MONITORING_BOARDS');
             state.error = null;
         },
         [getAllWidgets.rejected.type]: (state, action: PayloadAction<IResponse>) => {
