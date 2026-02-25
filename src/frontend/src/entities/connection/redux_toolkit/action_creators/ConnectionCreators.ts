@@ -383,16 +383,16 @@ export const setCurrentConnectionVersion = createAsyncThunk(
 );
 
 export const deleteConnectionVersion = createAsyncThunk(
-	'connection/versioning/deleteVersion',
-	async ({ connectionId, snapshotId }: { connectionId: number; snapshotId: string }, thunkAPI) => {
-		try {
-			const request = new ConnectionRequest();
-			await request.deleteConnectionBySnapshot(connectionId, snapshotId);
-			return { connectionId, snapshotId };
-		} catch (e) {
-			return thunkAPI.rejectWithValue(errorHandler(e));
-		}
-	},
+    'connection/versioning/deleteVersion',
+    async ({ connectionId, snapshotId }: { connectionId: number; snapshotId: string }, thunkAPI) => {
+        try {
+            const request = new ConnectionRequest();
+            await request.deleteConnectionBySnapshot(connectionId, snapshotId);
+            return { connectionId, snapshotId };
+        } catch (e) {
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    },
 );
 
 export const updateConnectionVersionComment = createAsyncThunk(

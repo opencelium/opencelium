@@ -18,7 +18,12 @@ import Request from "@entity/application/requests/classes/Request";
 import {IRequestSettings} from "@application/requests/interfaces/IRequest";
 import {IResponse} from "@application/requests/interfaces/IResponse";
 import {IConnection} from "../../interfaces/IConnection";
-import {ConnectionVersionItem, GetConnectionWebhooksResponse, IConnectionRequest} from "../interfaces/IConnection";
+import {
+    ConnectionVersionItem,
+    GetConnectionWebhooksResponse,
+    IConnectionRequest,
+    SaveEditorConfig
+} from "../interfaces/IConnection";
 import {RuleBaseModel} from "@root/requests/models/Rule";
 import {MetaConnectionModel} from "@root/requests/models/Connection";
 
@@ -100,7 +105,11 @@ export class ConnectionRequest extends Request implements IConnectionRequest{
 
     async updateConnectionVersionComment(connectionId: number, snapshotId: string, comment: string): Promise<AxiosResponse<IResponse>> {
         this.endpoint = `/${connectionId}/version/${snapshotId}`;
-        return super.put<IResponse>({ comment });
+        return super.put<IResponse>({comment});
+    }
+    async saveEditorConfig(data: SaveEditorConfig): Promise<AxiosResponse<void>> {
+        this.endpoint = `/editor`;
+        return super.post<void>(data);
     }
 
     backendMap(connection: IConnection){

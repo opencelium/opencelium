@@ -45,6 +45,7 @@ const Button: FC<ButtonProps> =
         className,
         iconSize,
         loadingSize,
+         autoFocus,
         isExternalHref,
         ...styles
     }) => {
@@ -72,7 +73,7 @@ const Button: FC<ButtonProps> =
         return null;
     }
     return (
-        <ButtonStyled id={id} className={className} isDisabled={isDisabled} hasLabel={hasLabel} size={instanceSize.size} onClick={hasConfirmation ? () => toggleConfirmation(true) : onClick} color={color} background={background} disabled={isDisabled} hasBackground={hasBackground} isContentCentralized={isLabelHidden} {...styles}>
+        <ButtonStyled autoFocus={autoFocus} id={id} className={className} isDisabled={isDisabled} hasLabel={hasLabel} size={instanceSize.size} onClick={hasConfirmation ? () => toggleConfirmation(true) : onClick} color={color} background={background} disabled={isDisabled} hasBackground={hasBackground} isContentCentralized={isLabelHidden} {...styles}>
             <Icon isLoading={isLoading} name={icon} size={iconSize || instanceSize.size} loadingSize={loadingSize} color={ hasBackground ? color || theme.button.color.quite : background || theme.button.background.quite}/>
             {hasLabel && <Text value={<LabelStyled hasIcon={hasIcon} opacity={isLabelHidden ? 0 : 1} color={color} size={instanceSize.size} hasBackground={hasBackground}>{label}</LabelStyled>}/>}
             {
@@ -102,6 +103,7 @@ Button.defaultProps = {
     isLoading: false,
     loadingSize: '',
     isExternalHref: false,
+    autoFocus: false,
 }
 
 export {

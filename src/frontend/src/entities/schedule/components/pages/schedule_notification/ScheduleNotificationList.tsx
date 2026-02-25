@@ -43,8 +43,9 @@ const ScheduleNotificationList: FC<ScheduleNotificationListProps> =
         notifications,
     } = Notification.getReduxState();
     useEffect(() => {
+        if (!schedule?.id) return;
         dispatch(getNotificationsByScheduleId(schedule.id));
-    }, [])
+    }, [dispatch, schedule.id]);
     const [isToggled, changeIsToggled] = useState<boolean>(false);
     const toggle = () =>{
         changeIsToggled(!isToggled);
@@ -88,11 +89,12 @@ const ScheduleNotificationList: FC<ScheduleNotificationListProps> =
             }
         }
     }
-    useEventListener('mousedown', checkIfClickedOutside, window, isVisible);
-    if(!isVisible || x === 0 || y === 0) return null;
+    useEventListener('mousedown',
+        isVisible ? checkIfClickedOutside : undefined,
+        window);
     return (
         ReactDOM.createPortal(
-            <ScheduleNotificationListStyled x={x} y={y}>
+            !isVisible || x === 0 || y === 0 ? null : <ScheduleNotificationListStyled x={x} y={y}>
                 <div>
                     <InputText placeholder={'Search'} autoFocus value={searchValue} onChange={(e:ChangeEvent<HTMLInputElement>) => search(e.target.value)} minHeight={'30px'}/>
                 </div>

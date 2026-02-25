@@ -54,7 +54,7 @@ class Dialog extends Component{
     }
 
     componentDidUpdate(prevProps){
-        const {active} = this.props;
+        const {active, actions} = this.props;
         if(prevProps.active !== active){
             if(active){
                 CVoiceControl.removeCommands({component:this}, CDialogControl);
@@ -65,7 +65,9 @@ class Dialog extends Component{
             this.setState({
                 isOpen: active,
             }, () => {
-                this.setFocus();
+                if (actions.findIndex(a => a.autoFocus) === -1) {
+                    this.setFocus();
+                }
             });
         }
     }
@@ -96,6 +98,7 @@ class Dialog extends Component{
             let isLoading = action.hasOwnProperty('isLoading') ? action.isLoading : false;
             return <Button
                 key={action.label}
+                autoFocus={action.autoFocus || false}
                 isLoading={isLoading}
                 disabled={isLoading}
                 title={isLoading ? ' ' : action.label}
@@ -107,19 +110,19 @@ class Dialog extends Component{
 
     render(){
         const {isOpen, isFullScreen} = this.state;
-        const {title, toggle, children, theme, id, hasFullScreenOption} = this.props;
+        const {title, toggle, children, theme, id, hasFullScreenOption, additionalActions} = this.props;
         const dialogClassName = `${styles.dialog} ${theme.dialog}${isFullScreen ? ` ${styles.fullscreen_dialog}` : ''}`;
         const contentClassName = `${theme.content}${isFullScreen ? ` ${styles.fullscreen_content}` : ''}`;
         const bodyClassName = `${theme.body}${isFullScreen ? ` ${styles.fullscreen_body}` : ''}`;
         return(
-            <Modal id={id || `modal_${title}`} autoFocus={true} isOpen={isOpen} toggle={toggle} className={dialogClassName} modalClassName={theme.modal} contentClassName={contentClassName} wrapClassName={theme.wrapper}>
+            <Modal id={id || `modal_${title}`} isOpen={isOpen} toggle={toggle} className={dialogClassName} modalClassName={theme.modal} contentClassName={contentClassName} wrapClassName={theme.wrapper}>
                 <ModalHeader close={
                     <div style={{
                         display: 'flex',
                         gap: '10px',
                     }}>
+                        {additionalActions}
                         {hasFullScreenOption && <TooltipButton
-                            position={"bottom"}
                             icon={isFullScreen ? "close_fullscreen" : "open_in_full"}
                             tooltip={isFullScreen ? "Minimize" : "Maximize"}
                             target={`fullscreen_dialog`}
@@ -174,6 +177,7 @@ Dialog.defaultProps = {
     isConfirmation: false,
     hasAutoFocus: true,
     hasFullScreenOption: false,
+    additionalActions: null,
 };
 
 export default Dialog;
