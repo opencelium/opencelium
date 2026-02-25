@@ -52,13 +52,13 @@ export const widgetSlice = createSlice({
                 'CURRENT_SCHEDULER': {x: 10, y: 0, w: 6, h: 4, minW: 6, minH: 4},
                 'MONITORING_BOARDS': {x: 0, y: 0, w: 6, h: 4, minW: 6, minH: 4},
                 'SUBSCRIPTION_OVERVIEW': {x: 0, y: 0, w: 6, h: 4, minW: 6, minH: 4},
-                'DASHBOARD_METRICS_OVERVIEW': {x: 0, y: 0, w: 12, h: 2, minW: 12, minH: 2},
+                'METRICS_OVERVIEW': {x: 0, y: 0, w: 12, h: 2, minW: 12, minH: 2},
             };
 
             const STATIC_WIDGETS: IWidget[] = [
                 {
                     widgetId: -2001,
-                    i: 'DASHBOARD_METRICS_OVERVIEW' as any,
+                    i: 'METRICS_OVERVIEW' as any,
                     icon: 'dashboard',
                     tooltipTranslationKey: 'Dashboard Overview',
                 },

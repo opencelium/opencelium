@@ -15,7 +15,13 @@
 
 import styled from "styled-components";
 import WidgetTitle from "../widget_title/WidgetTitle";
-import {DefaultCardShadowStyles, DefaultShadowHoverStyles} from "@entity/application/utils/constants";
+import {
+    CategoryTextSize,
+    DefaultCardShadowStyles,
+    DefaultShadowHoverStyles,
+    DefaultTextSize
+} from "@entity/application/utils/constants";
+import {ColorTheme} from "@style/Theme";
 
 const CurrentSchedulesWidgetStyled = styled.div`
     position: relative;
@@ -83,9 +89,9 @@ const DashboardMetricsOverviewWidgetStyled = styled.div`
 `;
 
 const MetricsCardHeaderStyled = styled.div`
-	font-size: 13px;
+	font-size: ${CategoryTextSize}px;
 	font-weight: 600;
-	color: #666;
+	color: ${ColorTheme.Gray};
     margin-top: 15px;
 `;
 
@@ -137,8 +143,8 @@ const MetricCellStyled = styled.div`
 `;
 
 const MetricLabelStyled = styled.div`
-	font-size: 12px;
-	color: #666;
+	font-size: ${DefaultTextSize}px;
+	color: ${ColorTheme.Gray};
 	text-align: center;
 	line-height: 1.2;
 	white-space: nowrap;
@@ -147,7 +153,7 @@ const MetricLabelStyled = styled.div`
 `;
 
 const MetricValueStyled = styled.div`
-	font-size: 22px;
+	font-size: 20px;
 	font-weight: 700;
 	color: #111;
 	text-align: center;

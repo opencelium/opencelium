@@ -51,7 +51,7 @@ export const WIDGET_LIST = {
     'SUBSCRIPTION_OVERVIEW': <SubscriptionOverviewWidget/>,
     'CURRENT_SCHEDULER': <CurrentSchedulesWidget/>,
     'CONNECTION_OVERVIEW': <ConnectionOverviewWidget/>,
-    'DASHBOARD_METRICS_OVERVIEW': <DashboardMetricsOverviewWidget/>,
+    'METRICS_OVERVIEW': <DashboardMetricsOverviewWidget/>,
 }
 
 const DashboardForm: FC<DashboardFormProps> =
