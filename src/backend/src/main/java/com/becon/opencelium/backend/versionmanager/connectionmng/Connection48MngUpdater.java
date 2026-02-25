@@ -70,7 +70,6 @@ public class Connection48MngUpdater implements ConnectionMngUpdater {
     private void moveFieldBindings(ConnectionMng connection) {
         if (CollectionUtils.isNotEmpty(connection.getOldFieldBindings())) {
             connection.setFieldBindings(connection.getOldFieldBindings());
-            connection.setOldFieldBindings(null);
         }
     }
 
@@ -78,14 +77,12 @@ public class Connection48MngUpdater implements ConnectionMngUpdater {
         if (connection.getFromConnector() != null) {
             if (CollectionUtils.isNotEmpty(connection.getFromConnector().getOldOperators())) {
                 connection.getFromConnector().setOperators(connection.getFromConnector().getOldOperators());
-                connection.getFromConnector().setOldOperators(null);
             }
         }
 
         if (connection.getToConnector() != null) {
             if (CollectionUtils.isNotEmpty(connection.getToConnector().getOldOperators())) {
                 connection.getToConnector().setOperators(connection.getToConnector().getOldOperators());
-                connection.getToConnector().setOldOperators(null);
             }
         }
     }
@@ -94,14 +91,12 @@ public class Connection48MngUpdater implements ConnectionMngUpdater {
         if (connection.getFromConnector() != null) {
             if (CollectionUtils.isNotEmpty(connection.getFromConnector().getOldMethods())) {
                 connection.getFromConnector().setMethods(connection.getFromConnector().getOldMethods());
-                connection.getFromConnector().setOldMethods(null);
             }
         }
 
         if (connection.getToConnector() != null) {
             if (CollectionUtils.isNotEmpty(connection.getToConnector().getOldMethods())) {
                 connection.getToConnector().setMethods(connection.getToConnector().getOldMethods());
-                connection.getToConnector().setOldMethods(null);
             }
         }
     }
@@ -124,8 +119,6 @@ public class Connection48MngUpdater implements ConnectionMngUpdater {
                         fb.setEnhancement(enhancementMng);
                     }
                 }
-
-                fb.setEnhancementId(null);
             }
         }
     }

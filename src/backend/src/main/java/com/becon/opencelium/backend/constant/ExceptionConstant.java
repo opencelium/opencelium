@@ -57,4 +57,5 @@ public interface ExceptionConstant {
     String INVALID_CATEGORY = "INVALID_CATEGORY";
     String CATEGORY_NOT_FOUND = "CATEGORY_NOT_FOUND";
     String UNKNOWN_ERROR = "UNKNOWN_ERROR";
+    String FORBIDDEN = "FORBIDDEN";
 }

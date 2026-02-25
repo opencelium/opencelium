@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
+import com.becon.opencelium.backend.commons.filter.OwnershipSecurity;
 import com.becon.opencelium.backend.constant.props.OpenceliumProps;
 import com.becon.opencelium.backend.constant.*;
 import com.becon.opencelium.backend.container.Command;
@@ -36,6 +37,7 @@ import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
+import com.becon.opencelium.backend.resource.connection.ConnectionVersionUpdateRequest;
 import com.becon.opencelium.backend.resource.connection.ConnectionVersionedDTO;
 import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
 import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
@@ -44,7 +46,6 @@ import com.becon.opencelium.backend.utility.LogFileUtility;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.becon.opencelium.backend.versionmanager.EntityUpdater;
 import com.becon.opencelium.backend.versionmanager.EntityVersionManager;
-import com.becon.opencelium.backend.versionmanager.backup.MongoDbBackupService;
 import com.becon.opencelium.backend.versionmanager.base.Utils;
 import com.github.fge.jsonpatch.JsonPatch;
 import jakarta.persistence.EntityNotFoundException;
@@ -85,18 +86,14 @@ public class ConnectionServiceImp implements ConnectionService {
     private final WebhookService webhookService;
     private final OpenceliumProps ocProps;
     private final EntityUpdater<ConnectionMng> connectionMngEntityUpdater;
-    private final MongoDbBackupService mongoDbBackupService;
-    private final EnhancementService enhancementService;
-    private final MethodMngService methodMngService;
-    private final OperatorMngService operatorMngService;
     private final ConnectionValidator connectionValidator;
+    private final OwnershipSecurity ownershipSecurity;
 
     public ConnectionServiceImp(
             ConnectionRepository connectionRepository,
             @Qualifier("connectorServiceImp") ConnectorService connectorService,
             @Qualifier("connectionMngServiceImp") ConnectionMngServiceImp connectionMngService,
             @Qualifier("fieldBindingMngServiceImp") FieldBindingMngService fieldBindingMngService,
-            @Qualifier("enhancementServiceImp") EnhancementService enhancementService,
             @Qualifier("categoryServiceImp") CategoryService categoryService,
             @Qualifier("connectionHistoryServiceImp") ConnectionHistoryService connectionHistoryService,
             @Qualifier("schedulerServiceImp") SchedulerService schedulerService,
@@ -111,6 +108,7 @@ public class ConnectionServiceImp implements ConnectionService {
             OpenceliumProps ocProps,
             MongoDbBackupService mongoDbBackupService,
             MethodMngService methodMngService, OperatorMngService operatorMngService, ConnectionValidator connectionValidator
+            OwnershipSecurity ownershipSecurity
     ) {
         this.connectionRepository = connectionRepository;
         this.connectorService = connectorService;
@@ -133,8 +131,8 @@ public class ConnectionServiceImp implements ConnectionService {
         this.methodMngService = methodMngService;
         this.operatorMngService = operatorMngService;
         this.connectionValidator = connectionValidator;
+        this.ownershipSecurity = ownershipSecurity;
     }
-
 
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
     // public methods
@@ -499,65 +497,42 @@ public class ConnectionServiceImp implements ConnectionService {
     @Override
     public void updateConnectionsToCurrentVersion() {
         List<Long> ids = connectionRepository.findIds();
-        boolean gotBackup = false;
+
         for (Long id : ids) {
             Connection connection = getById(id);
             if (Utils.compare(ocProps.getVersion(), connection.getOcVersion()) > 0 && !isTestConnection(connection.getTitle())) {
-                if (!gotBackup) {
-                    gotBackup = true;
 
-                    try {
-                        mongoDbBackupService.backup();
-                    } catch (Exception e) {
-                        log.error("Failed to take backup from MongoDB. Continuing updating connections without backup");
-                    }
-                }
-
-                updateAllVersions(connection); // exception-free
-
-                Optional<ConnectionMng> connectionMng = connectionMngService.getLastVersion(connection.getId());
-                if (connectionMng.isPresent()) {
-                    connection.setSnapshotId(connectionMng.get().getId());
+                List<ConnectionMng> connections = connectionMngService.getAllByConnectionId(connection.getId());
+                ConnectionMng connectionMng;
+                if (connections.isEmpty()) {
+                    log.error("Failed to find Connection[id={}, name={}] on MongoDB. Skipped updating", connection.getId(), connection.getTitle());
+                    continue;
+                } else if (connections.size() > 1) {
+                    log.error("{} instances found for Connection[id={}, name={}] on MongoDB. Skipped updating", connections.size(), connection.getId(), connection.getTitle());
+                    continue;
                 } else {
-                    log.error("Failed to find connection with id = {}", connection.getId());
+                    connectionMng = connections.get(0);
                 }
 
+                try {
+                    connectionMngEntityUpdater.updateToCurrentVersion(connectionMng);
+
+                    log.info("Connection[id={}, name={}, version={}] successfully updated to {} version", connection.getId(), connection.getTitle(), connection.getOcVersion(), connectionMng.getVersion());
+                } catch (Exception e) {
+                    log.error("Failed to update Connection[id={}, name={}, version={}]", connection.getId(), connection.getTitle(), connection.getOcVersion(), e);
+                    continue;
+                }
+
+                if (connectionMng.getCreatedBy() == null) {
+                    connectionMng.setCreatedBy(connection.getCreatedBy());
+                }
+                connectionMngService.save(connectionMng);
+
+                if (connection.getSnapshotId() == null) {
+                    connection.setSnapshotId(connectionMng.getId());
+                }
                 connection.setOcVersion(ocProps.getVersion());
                 connectionRepository.save(connection);
-            }
-        }
-
-        try {
-            // truncate enhancements on mysql
-            enhancementService.deleteAll();
-
-            // clear fieldBindings document on mongodb
-            fieldBindingMngService.deleteAll();
-
-            // clear methods document on mongodb
-            methodMngService.deleteAll();
-
-            // clear operators document on mongodb
-            operatorMngService.deleteAll();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void updateAllVersions(Connection connection) {
-        List<ConnectionMng> connections = connectionMngService.getAllByConnectionId(connection.getId());
-
-        for (ConnectionMng connectionMng : connections) {
-            if (connectionMng.getCreatedBy() == null) {
-                connectionMng.setCreatedBy(connection.getCreatedBy());
-            }
-            try {
-                connectionMngEntityUpdater.updateToCurrentVersion(connectionMng);
-                connectionMng.setVersion(ocProps.getVersion());
-                connectionMngService.save(connectionMng);
-                log.info("Connection[id={}, snapshotId={}, name={}] successfully updated to {} version", connection.getId(), connectionMng.getId(), connection.getTitle(), connectionMng.getVersion());
-            } catch (Exception e) {
-                log.error("Failed to update Connection[id={}, snapshotId={}, name={}]", connection.getId(), connectionMng.getId(), connection.getTitle(), e);
             }
         }
     }
@@ -590,6 +565,7 @@ public class ConnectionServiceImp implements ConnectionService {
                     versionedDTO.setCreatedAt(x.getCreatedAt() != null ? x.getCreatedAt().toEpochMilli() : null);
                     versionedDTO.setCurrent(Objects.equals(connection.getSnapshotId(), x.getId()));
                     versionedDTO.setAuthor(x.getCreatedBy());
+                    versionedDTO.setComment(x.getComment());
                     return versionedDTO;
                 }).toList();
     }
@@ -602,12 +578,37 @@ public class ConnectionServiceImp implements ConnectionService {
             throw new GeneralServiceException(ExceptionConstant.INVALID_DATA, ExceptionMessages.CANT_REMOVE_LAST_VERSION_CONNECTION);
         }
 
-        connectionMngService.delete(snapshotId);
+        ConnectionMng connectionMng = connectionMngService.getById(snapshotId);
+        ownershipSecurity.checkOwnerOrAdmin(connectionMng);
+
+        connectionMngService.delete(connectionMng);
     }
 
     @Override
     public void setInitialRevisionToConnections() {
         connectionRepository.updateInitialRevision();
+    }
+
+    @Override
+    public void updateSnapshot(Long connectionId, String snapshotId, ConnectionVersionUpdateRequest request) {
+        if (!existsById(connectionId)) {
+            throw new ConnectionNotFoundException(connectionId);
+        }
+
+        ConnectionMng connectionMng = connectionMngService.getById(snapshotId);
+        ownershipSecurity.checkOwnerOrAdmin(connectionMng);
+
+        connectionMngService.updateSnapshot(connectionMng, request);
+    }
+
+    @Override
+    public void switchVersion(Long connectionId, String snapshotId) {
+        Connection connection = getById(connectionId);
+        ConnectionMng connectionMng = connectionMngService.getById(snapshotId);
+
+        connection.setSnapshotId(connectionMng.getId());
+
+        connectionRepository.save(connection);
     }
 
     /**

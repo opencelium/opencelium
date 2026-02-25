@@ -24,5 +24,6 @@ public interface ExceptionMessages {
     String OPERATOR_NOT_FOUND = "Operator[id=%s] is not found";
     String ENHANCEMENT_NOT_FOUND = "Enhancement[id=%s] is not found";
     String CANT_REMOVE_LAST_VERSION_CONNECTION = "Can't remove last version connection";
-
+    String ONLY_OWNER_CAN_PERFORM_ACTION = "Only owner can perform this action";
+    String ONLY_OWNER_OR_ADMIN_CAN_PERFORM_ACTION = "Only owner or admin can perform this action";
 }
