@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
+import com.becon.opencelium.backend.commons.filter.OwnershipSecurity;
 import com.becon.opencelium.backend.constant.props.OpenceliumProps;
 import com.becon.opencelium.backend.constant.*;
 import com.becon.opencelium.backend.container.Command;
@@ -83,6 +84,7 @@ public class ConnectionServiceImp implements ConnectionService {
     private final WebhookService webhookService;
     private final OpenceliumProps ocProps;
     private final EntityUpdater<ConnectionMng> connectionMngEntityUpdater;
+    private final OwnershipSecurity ownershipSecurity;
 
     public ConnectionServiceImp(
             ConnectionRepository connectionRepository,
@@ -100,7 +102,8 @@ public class ConnectionServiceImp implements ConnectionService {
             ConnectionUpdateTracker updateTracker,
             MaskingRuleRepository ruleRepository,
             EntityVersionManager entityVersionManager,
-            OpenceliumProps ocProps
+            OpenceliumProps ocProps,
+            OwnershipSecurity ownershipSecurity
     ) {
         this.connectionRepository = connectionRepository;
         this.connectorService = connectorService;
@@ -118,6 +121,7 @@ public class ConnectionServiceImp implements ConnectionService {
         this.ruleRepository = ruleRepository;
         this.ocProps = ocProps;
         this.connectionMngEntityUpdater = entityVersionManager.getUpdater(ConnectionMng.class);
+        this.ownershipSecurity = ownershipSecurity;
     }
 
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -536,6 +540,7 @@ public class ConnectionServiceImp implements ConnectionService {
                     versionedDTO.setCreatedAt(x.getCreatedAt() != null ? x.getCreatedAt().toEpochMilli() : null);
                     versionedDTO.setCurrent(Objects.equals(connection.getSnapshotId(), x.getId()));
                     versionedDTO.setAuthor(x.getCreatedBy());
+                    versionedDTO.setComment(x.getComment());
                     return versionedDTO;
                 }).toList();
     }
@@ -548,7 +553,10 @@ public class ConnectionServiceImp implements ConnectionService {
             throw new GeneralServiceException(ExceptionConstant.INVALID_DATA, ExceptionMessages.CANT_REMOVE_LAST_VERSION_CONNECTION);
         }
 
-        connectionMngService.delete(snapshotId);
+        ConnectionMng connectionMng = connectionMngService.getById(snapshotId);
+        ownershipSecurity.checkOwnerOrAdmin(connectionMng);
+
+        connectionMngService.delete(connectionMng);
     }
 
     @Override
@@ -562,7 +570,20 @@ public class ConnectionServiceImp implements ConnectionService {
             throw new ConnectionNotFoundException(connectionId);
         }
 
-        connectionMngService.updateSnapshot(snapshotId, request);
+        ConnectionMng connectionMng = connectionMngService.getById(snapshotId);
+        ownershipSecurity.checkOwnerOrAdmin(connectionMng);
+
+        connectionMngService.updateSnapshot(connectionMng, request);
+    }
+
+    @Override
+    public void switchVersion(Long connectionId, String snapshotId) {
+        Connection connection = getById(connectionId);
+        ConnectionMng connectionMng = connectionMngService.getById(snapshotId);
+
+        connection.setSnapshotId(connectionMng.getId());
+
+        connectionRepository.save(connection);
     }
 
     /**
