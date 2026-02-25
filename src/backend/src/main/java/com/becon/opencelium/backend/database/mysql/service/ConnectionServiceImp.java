@@ -106,8 +106,7 @@ public class ConnectionServiceImp implements ConnectionService {
             MaskingRuleRepository ruleRepository,
             EntityVersionManager entityVersionManager,
             OpenceliumProps ocProps,
-            MongoDbBackupService mongoDbBackupService,
-            MethodMngService methodMngService, OperatorMngService operatorMngService, ConnectionValidator connectionValidator
+            ConnectionValidator connectionValidator,
             OwnershipSecurity ownershipSecurity
     ) {
         this.connectionRepository = connectionRepository;
@@ -126,10 +125,6 @@ public class ConnectionServiceImp implements ConnectionService {
         this.ruleRepository = ruleRepository;
         this.ocProps = ocProps;
         this.connectionMngEntityUpdater = entityVersionManager.getUpdater(ConnectionMng.class);
-        this.mongoDbBackupService = mongoDbBackupService;
-        this.enhancementService = enhancementService;
-        this.methodMngService = methodMngService;
-        this.operatorMngService = operatorMngService;
         this.connectionValidator = connectionValidator;
         this.ownershipSecurity = ownershipSecurity;
     }
@@ -592,7 +587,7 @@ public class ConnectionServiceImp implements ConnectionService {
     @Override
     public void updateSnapshot(Long connectionId, String snapshotId, ConnectionVersionUpdateRequest request) {
         if (!existsById(connectionId)) {
-            throw new ConnectionNotFoundException(connectionId);
+            throw ConnectionValidationException.connectionNotFound(connectionId);
         }
 
         ConnectionMng connectionMng = connectionMngService.getById(snapshotId);
