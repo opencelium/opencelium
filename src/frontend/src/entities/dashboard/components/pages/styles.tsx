@@ -37,7 +37,7 @@ const WidgetItemStyled = styled.div<WidgetItemStyledProps>`
     border: 1px solid #eee;
     border-radius: 4px;
     padding: 10px;
-    min-height: 430px;
+    min-height: ${({ widgetKey }) => widgetKey === 'DASHBOARD_METRICS_OVERVIEW' ? '210px' : '430px'};
     ${({isWidgetEditOn}) => isWidgetEditOn ? `
     cursor: move !important;
     &:hover{

@@ -44,13 +44,14 @@ import {SubscriptionOverviewWidget} from "@entity/dashboard/components/widgets/S
 import {getCurrentSubscription} from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
 import LicenseAlertMessage from "@entity/dashboard/components/license_alert_message/LicenseAlertMessage";
 import {setEntityHeader, setEntityIconKey} from "@application/redux_toolkit/slices/ApplicationSlice";
-
+import {DashboardMetricsOverviewWidget} from "../widgets/DashboardMetricsOverviewWidget";
 
 export const WIDGET_LIST = {
     'MONITORING_BOARDS': <MonitoringBoardsWidget/>,
     'SUBSCRIPTION_OVERVIEW': <SubscriptionOverviewWidget/>,
     'CURRENT_SCHEDULER': <CurrentSchedulesWidget/>,
     'CONNECTION_OVERVIEW': <ConnectionOverviewWidget/>,
+    'DASHBOARD_METRICS_OVERVIEW': <DashboardMetricsOverviewWidget/>,
 }
 
 const DashboardForm: FC<DashboardFormProps> =
@@ -136,7 +137,7 @@ const DashboardForm: FC<DashboardFormProps> =
         const getWidgets = () => {
             return layout.map(layout => {
                 return (
-                    <WidgetItemStyled key={layout.i} isWidgetEditOn={isWidgetEditOn}>
+                    <WidgetItemStyled key={layout.i} isWidgetEditOn={isWidgetEditOn} widgetKey={layout.i}>
                         {isWidgetEditOn &&
                             <RemoveButtonStyled
                                 size={20}

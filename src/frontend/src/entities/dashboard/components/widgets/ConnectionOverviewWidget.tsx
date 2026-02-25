@@ -14,7 +14,7 @@
  */
 
 import ReactDOM from "react-dom";
-import React, {FC, useEffect, useState} from 'react';
+import React, {FC, useEffect, useMemo, useRef, useState} from 'react';
 import Graph from "react-graph-vis";
 import {isValidIconUrl} from "@application/utils/utils";
 import {OC_NAME, OC_DESCRIPTION, API_REQUEST_STATE} from "@application/interfaces/IApplication";
@@ -32,15 +32,31 @@ import {
 import {ConnectionOverviewTitle, ConnectionOverviewWidgetStyled} from './styles';
 import {Urls} from "@entity/application/requests/classes/url";
 
+const TOAST_PORTAL_ID = 'connection_overview_description';
+
 const ConnectionOverviewWidget: FC =
     ({
 
     }) => {
     const dispatch = useAppDispatch();
     const {metaConnections, gettingMetaConnections} = Connection.getReduxState();
+
     const [nodes, setNodes] = useState([]);
     const [graph, setGraph] = useState({nodes: [], edges: []});
     const [hasConnections, setHasConnections] = useState<boolean>(false);
+
+    const networkRef = useRef<any>(null);
+    const containerRef = useRef<HTMLDivElement | null>(null);
+
+    const resizeTimerRef = useRef<number | null>(null);
+
+    const hideToast = useMemo(() => {
+        return () => {
+            const portal = document.getElementById(TOAST_PORTAL_ID);
+            ReactDOM.render(null, portal);
+        };
+    }, []);
+
     useEffect(() => {
         dispatch(getAllMetaConnections());
     }, [])
@@ -85,9 +101,69 @@ const ConnectionOverviewWidget: FC =
             setGraph(newGrapth);
             setHasConnections(true);
         }
-    }, [metaConnections]);
+    }, [metaConnections, gettingMetaConnections]);
 
-    const options = {
+    useEffect(() => {
+        const onDocMouseDown = (e: MouseEvent) => {
+            const container = containerRef.current;
+            if (!container) return;
+            const target = e.target as Node;
+
+            if (!container.contains(target)) {
+                hideToast();
+            }
+        };
+
+        document.addEventListener('mousedown', onDocMouseDown, true);
+        return () => {
+            document.removeEventListener('mousedown', onDocMouseDown, true);
+        };
+    }, [hideToast]);
+
+    useEffect(() => {
+        if (!containerRef.current) return;
+
+        const doResize = () => {
+            const network = networkRef.current;
+            if (!network) return;
+
+            try {
+                if (typeof network.setSize === 'function') {
+                    network.setSize('100%', '100%');
+                }
+                if (typeof network.redraw === 'function') {
+                    network.redraw();
+                }
+                if (typeof network.fit === 'function') {
+                    network.fit({animation: false});
+                }
+            } catch (e) {}
+        };
+
+        const debounced = () => {
+            if (resizeTimerRef.current) window.clearTimeout(resizeTimerRef.current);
+            resizeTimerRef.current = window.setTimeout(doResize, 80);
+        };
+
+        let ro: ResizeObserver | null = null;
+        if (typeof ResizeObserver !== 'undefined') {
+            ro = new ResizeObserver(() => debounced());
+            ro.observe(containerRef.current);
+        } else {
+            window.addEventListener('resize', debounced);
+        }
+
+        return () => {
+            if (resizeTimerRef.current) {
+                window.clearTimeout(resizeTimerRef.current);
+                resizeTimerRef.current = null;
+            }
+            if (ro) ro.disconnect();
+            else window.removeEventListener('resize', debounced);
+        };
+    }, []);
+
+    const options = useMemo(() => ({
         physics: {
             stabilization: true
         },
@@ -109,56 +185,113 @@ const ConnectionOverviewWidget: FC =
                 }
             },
         }
+    }), []);
+
+    const renderToastAtDomPoint = (domLeft: number, domTop: number, selectedNode: any) => {
+        const container = containerRef.current;
+        if (!container) return;
+
+        const rect = container.getBoundingClientRect();
+
+        let left = rect.left + domLeft + window.scrollX + 10;
+        let top = rect.top + domTop + window.scrollY - 10;
+
+        const padding = 8;
+        const maxLeft = window.scrollX + window.innerWidth - padding;
+        const maxTop = window.scrollY + window.innerHeight - padding;
+        if (left > maxLeft) left = maxLeft;
+        if (top > maxTop) top = maxTop;
+        if (left < window.scrollX + padding) left = window.scrollX + padding;
+        if (top < window.scrollY + padding) top = window.scrollY + padding;
+
+        const portal = document.getElementById(TOAST_PORTAL_ID);
+
+        ReactDOM.render(
+            <Toast
+                header={selectedNode.title}
+                body={selectedNode.description}
+                left={left}
+                top={top}
+            />,
+            portal
+        );
     };
+
     if(!hasConnections){
         return (
             <ContentLoading/>
         )
     }
+
     return (
         <ConnectionOverviewWidgetStyled >
             <ConnectionOverviewTitle title={'Connection Overview'}/>
-            <Graph
+            <div
+                ref={containerRef}
                 style={{
-                    backgroundImage: `url("${OpenCeliumBackgroundImagePath}")`,
-                    backgroundPosition: 'center center',
+                    position: 'relative',
                     width: '100%',
                     height: '100%',
-                    backgroundRepeat: 'no-repeat',
-                    backgroundSize: 'contain',
-                    backgroundColor: '#fff',
-                    borderRadius: '5px',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
                 }}
-                graph={graph}
-                options={options}
-                events={{
-                    select: function(event: any) {
-                        const { nodes, edges } = event;
-                    }
-                }}
-                getNetwork={(network:any) => {
-                    network.on("click", function(params: any) {
-                        const selectedNodeId = params.nodes.length === 1 ? params.nodes[0] : null;
-                        let domElement = null;
-                        if(selectedNodeId){
-                            const {x, y} = params.pointer.DOM;
-                            const selectedNode = nodes.find(node => node.id === selectedNodeId);
-                            if(selectedNode) {
-                                const header = selectedNode.title;
-                                const body = selectedNode.description;
-                                domElement = <Toast header={header} body={body} left={x} top={y}/>;
+            >
+                <Graph
+                    style={{
+                        backgroundImage: `url("${OpenCeliumBackgroundImagePath}")`,
+                        backgroundPosition: 'center center',
+                        width: '100%',
+                        height: '100%',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundSize: 'contain',
+                        backgroundColor: '#fff',
+                        borderRadius: '5px',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
+                    }}
+                    graph={graph}
+                    options={options}
+                    getNetwork={(network:any) => {
+                        networkRef.current = network;
+                        try {
+                            if (typeof network.off === 'function') {
+                                network.off('click');
+                                network.off('initRedraw');
                             }
-                        }
-                        ReactDOM.render(domElement, document.getElementById('connection_overview_description'));
-                    });
-                    network.on("initRedrew", function(params: any) {
-                        // Get the node ID
-                    });
-                }}
-            />
+                        } catch (e) {}
+
+                        network.on("initRedraw", function() {
+                            try {
+                                if (typeof network.setSize === 'function') {
+                                    network.setSize('100%', '100%');
+                                }
+                                if (typeof network.redraw === 'function') {
+                                    network.redraw();
+                                }
+                            } catch (e) {}
+                        });
+
+                        network.on("click", function(params: any) {
+                            const selectedNodeId = params.nodes.length === 1 ? params.nodes[0] : null;
+
+                            if(!selectedNodeId){
+                                hideToast();
+                                return;
+                            }
+
+                            const selectedNode = nodes.find(node => node.id === selectedNodeId);
+                            if(!selectedNode){
+                                hideToast();
+                                return;
+                            }
+
+                            const domX = params.pointer?.DOM?.x ?? 0;
+                            const domY = params.pointer?.DOM?.y ?? 0;
+
+                            renderToastAtDomPoint(domX, domY, selectedNode);
+                        });
+                    }}
+                />
+            </div>
         </ConnectionOverviewWidgetStyled>
-    )
+    );
 }
 
 ConnectionOverviewWidget.defaultProps = {

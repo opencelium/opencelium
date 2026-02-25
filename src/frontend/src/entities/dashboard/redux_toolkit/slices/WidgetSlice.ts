@@ -52,9 +52,35 @@ export const widgetSlice = createSlice({
                 'CURRENT_SCHEDULER': {x: 10, y: 0, w: 6, h: 4, minW: 6, minH: 4},
                 'MONITORING_BOARDS': {x: 0, y: 0, w: 6, h: 4, minW: 6, minH: 4},
                 'SUBSCRIPTION_OVERVIEW': {x: 0, y: 0, w: 6, h: 4, minW: 6, minH: 4},
+                'DASHBOARD_METRICS_OVERVIEW': {x: 0, y: 0, w: 12, h: 2, minW: 12, minH: 2},
             };
+
+            const STATIC_WIDGETS: IWidget[] = [
+                {
+                    widgetId: -2001,
+                    i: 'DASHBOARD_METRICS_OVERVIEW' as any,
+                    icon: 'dashboard',
+                    tooltipTranslationKey: 'Dashboard Overview',
+                },
+            ];
+
+            const backendWidgets = action.payload || [];
+            const merged: IWidget[] = [...backendWidgets];
+
+            for (const sw of STATIC_WIDGETS) {
+                const exists = merged.some(w => w.i === sw.i);
+                if (!exists) merged.push(sw);
+            }
+
             state.gettingAllWidgets = API_REQUEST_STATE.FINISH;
-            state.widgets = action.payload.map(widget => {return {...widget, ...WIDGET_COORDINATES[widget.i]};}).filter(widget => widget.i !== 'MONITORING_BOARDS');
+
+            state.widgets = merged
+                .map(widget => {
+                    const coords = WIDGET_COORDINATES[widget.i] || {};
+                    return {...widget, ...coords};
+                })
+                .filter(widget => widget.i !== 'MONITORING_BOARDS');
+
             state.error = null;
         },
         [getAllWidgets.rejected.type]: (state, action: PayloadAction<IResponse>) => {
