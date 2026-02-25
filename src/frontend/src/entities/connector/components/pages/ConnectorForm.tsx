@@ -98,13 +98,73 @@ const ConnectorForm: FC<IForm> = ({isAdd, isUpdate}) => {
         dispatch(getConnectorCredentials(connector.getPoustModel(true)));
     }
     const TitleInput = connector.getText({
-        propertyName: "title", props: {maxLength: Validation.TextLength.Short, autoFocus: true, icon: 'title', label: 'Title', required: true, isLoading: checkingConnectorTitle === API_REQUEST_STATE.START, error: isCurrentConnectorHasUniqueTitle === TRIPLET_STATE.FALSE ? 'The title is already in use' : ''}
+        propertyName: "title", props: {
+            maxLength: Validation.TextLength.Short,
+            autoFocus: true,
+            icon: 'title',
+            label: 'Title',
+            required: true,
+            isLoading: checkingConnectorTitle === API_REQUEST_STATE.START,
+            error: isCurrentConnectorHasUniqueTitle === TRIPLET_STATE.FALSE ? 'The title is already in use' : '',
+        }
     })
     const DescriptionInput = connector.getTextarea({
-        propertyName: "description", props: {maxLength: Validation.TextLength.Medium, label: "Description"}
+        propertyName: "description", props: {
+            maxLength: Validation.TextLength.Medium,
+            label: "Description",
+            helpMessage: [
+                {
+                    content: (
+                        <div>
+                            This is the invoker file that contains the API description of the system.
+                            <br />
+                            Select the invoker and set the credentials.
+                        </div>
+                    ),
+                    disableBeacon: true,
+                    disableOverlayClose: true,
+                    hideCloseButton: true,
+                    hideFooter: true,
+                    placement: 'bottom',
+                    spotlightClicks: true,
+                    styles: {
+                        options: {
+                            zIndex: 10000,
+                        },
+                    },
+                    target: '',
+                    title: 'Invoker',
+                }
+            ],
+        }
     })
     const InvokerComponent = connector.getSelect({propertyName: 'invokerSelect', props: {
         icon: 'description',
+
+            helpMessage: [
+                {
+                    content: (
+                        <div>
+                            This is the invoker file that contains the API description of the system.
+                            <br />
+                            Select the invoker and set the credentials.
+                        </div>
+                    ),
+                    disableBeacon: true,
+                    disableOverlayClose: true,
+                    hideCloseButton: true,
+                    hideFooter: true,
+                    placement: 'bottom',
+                    spotlightClicks: true,
+                    styles: {
+                        options: {
+                            zIndex: 10000,
+                        },
+                    },
+                    target: '',
+                    title: 'Invoker',
+                }
+            ],
         label: 'Invoker',
         options: invokerOptions,
         isLoading: gettingInvokers === API_REQUEST_STATE.START,

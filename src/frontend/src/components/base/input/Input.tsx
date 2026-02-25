@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {FC} from 'react';
+import React, {FC, useRef} from 'react';
 import {ColorTheme} from "@style/Theme";
 import {InputProps} from './interfaces';
 import {ErrorStyled, IconStyled, InputElementStyled, LabelStyled, NumberCounterStyled} from './styles';
@@ -22,10 +22,12 @@ import {Text} from "../text/Text";
 import {CheckboxStyled} from "@app_component/base/input/file/styles";
 import {isNumber} from "@application/utils/utils";
 import {ButtonIconSize, SmallTextSize} from "@entity/application/utils/constants";
+import HelpIcon from "@app_component/base/input/HelpIcon";
 
 
 const Input: FC<InputProps> =
     ({
+        isSelect,
         errorBottom,
         background,
         width,
@@ -57,8 +59,10 @@ const Input: FC<InputProps> =
         labelMargin,
         paddingRight,
         marginBottom,
-        checkboxProps
+        checkboxProps,
+        helpMessage,
     }) => {
+        const inputRef = useRef(null);
         const hasMaxLength = maxLength !== Infinity && !readOnly;
         const hasLabel = label !== '';
         const hasError = error !== '';
@@ -103,7 +107,7 @@ const Input: FC<InputProps> =
                 height={height}
                 marginTop={marginTop}
                 background={background}
-                ref={componentRef}
+                ref={componentRef || inputRef}
                 display={display}
                 minHeight={isNumber(minHeight) ? `${minHeight}px` : minHeight}
                 paddingTop={paddingTop}
@@ -123,6 +127,7 @@ const Input: FC<InputProps> =
                 {hasError && <ErrorStyled errorBottom={errorBottom} paddingLeft={paddingLeft} hasIcon={hasIcon} isIconInside={isIconInside}><Text value={error} size={`${SmallTextSize}px`} color={ColorTheme.Red}/></ErrorStyled>}
                 {hasMaxLength && <NumberCounterStyled>{`${value ? value.toString().length : 0}/${maxLength}`}</NumberCounterStyled>}
                 {afterInputComponent}
+                {!!helpMessage && <HelpIcon paddingRight={isSelect ? '20px' : !!afterInputComponent ? '25px' : 0} steps={helpMessage} inputRef={componentRef || inputRef}/>}
             </InputElementStyled>
         );
 }

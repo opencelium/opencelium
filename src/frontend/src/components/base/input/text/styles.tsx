@@ -48,7 +48,16 @@ const CheckStyled = styled(Button)<CheckStyledProps>`
     opacity: 1 !important;
 `;
 
+const HelpIconStyled = styled(Button)<CheckStyledProps>`
+    position: absolute;
+    right: ${({paddingRight}) => `calc(${paddingRight || '0px'} + 2px)` || '2px'};
+    top: 25px;
+    margin-top: ${({marginTop, paddingTop}) => marginTop || paddingTop || 0};
+    opacity: 1 !important;
+`;
+
 export {
     InputStyled,
     CheckStyled,
+    HelpIconStyled,
 }

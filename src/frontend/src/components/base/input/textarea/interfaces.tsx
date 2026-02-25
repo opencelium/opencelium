@@ -15,11 +15,13 @@
 
 import React, {InputHTMLAttributes} from "react";
 import {InputElementProps} from "../interfaces";
+import {Step} from "react-joyride";
 
 
 interface InputTextareaProps extends InputHTMLAttributes<HTMLTextAreaElement>, InputElementProps{
     rows?: number,
     ref?: any,
+    helpMessage?: Step[],
 }
 
 

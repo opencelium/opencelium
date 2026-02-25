@@ -14,8 +14,6 @@
  */
 
 import styled from "styled-components";
-import chroma from "chroma-js";
-import { ITheme } from '@style/Theme';
 import {Progress} from "reactstrap";
 
 const ProgressBarElementStyled = styled.div`

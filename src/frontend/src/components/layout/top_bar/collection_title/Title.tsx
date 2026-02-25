@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {FC} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import {withTheme} from 'styled-components';
 import {isArray} from "@application/utils/utils";
 import Text from "@app_component/base/text/Text";
@@ -22,6 +22,11 @@ import {IconStyled, LinkStyled, TitleStyled} from "./styles";
 import {Application} from "@application/classes/Application";
 import DashboardIcon from "@app_component/layout/top_bar/collection_title/icons/DashboardIcon";
 import {EntityHeaderTextSize} from "@entity/application/utils/constants";
+import Tour from "@app_component/base/tour/Tour";
+import {HelpIconStyled} from "@app_component/base/input/text/styles";
+import {ColorTheme} from "@style/Theme";
+import Button from "@app_component/base/button/Button";
+import {Step} from "react-joyride";
 
 const Title: FC<TitleProps> =
     ({
@@ -31,12 +36,53 @@ const Title: FC<TitleProps> =
     const {
         entityIconKey,
     } = Application.getReduxState();
+    const [startTour, toggleTour] = useState<boolean>(false);
+    const [steps, setSteps] = useState<Step[]>([]);
     let icon = null;
     switch (entityIconKey) {
         case 'dashboard':
             icon = <DashboardIcon/>
             break;
     }
+    useEffect(() => {
+        switch (entityIconKey) {
+            case 'dashboard':
+                setSteps([
+                    {
+                        content: 'Connector description',
+                        disableBeacon: true,
+                        spotlightPadding: 0,
+                        target: '#connector_menu_item',
+                        title: 'Connector',
+                        placement: 'right',
+                    },
+                    {
+                        spotlightPadding: 0,
+                        content: 'Connection description',
+                        target: '#connection_menu_item',
+                        title: 'Connection',
+                        placement: 'right',
+                    },
+                    {
+                        spotlightPadding: 0,
+                        content: 'Schedule description',
+                        target: '#schedule_menu_item',
+                        title: 'Schedule',
+                        placement: 'right',
+                    },
+                    {
+                        spotlightPadding: 0,
+                        content: 'Admin description',
+                        target: '#admin_menu_item',
+                        title: 'Admin',
+                        placement: 'right',
+                    },
+                ])
+                break;
+            default:
+                setSteps([]);
+        }
+    }, [entityIconKey])
     if(isArray(title)){
         return(
             <TitleStyled className={className}>
@@ -64,11 +110,25 @@ const Title: FC<TitleProps> =
         )
     }
     return (
-        <TitleStyled className={className}>
+        <TitleStyled className={className} style={{position: 'relative'}}>
             <span>
                 <Text value={title} size={`${EntityHeaderTextSize}px`}/>
                 <IconStyled>{icon}</IconStyled>
             </span>
+            {steps.length > 0 ? <React.Fragment>
+                <Tour steps={steps} toggle={toggleTour} show={startTour}/>
+                <Button
+                    position={'absolute'}
+                    right={-35}
+                    hasBackground={false}
+                    icon={'info'}
+                    color={ColorTheme.Blue}
+                    handleClick={() => toggleTour(true)}
+                />
+            </React.Fragment>
+                :
+                null
+            }
         </TitleStyled>
     );
 }

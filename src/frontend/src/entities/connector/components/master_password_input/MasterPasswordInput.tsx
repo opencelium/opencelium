@@ -99,6 +99,7 @@ const MasterPasswordInput = ({onSuccess}: MasterPasswordProps) => {
                     id={`master_password`}
                     autoFocus={true}
                     icon={'key'}
+                    label={'Master Password'}
                     type={InputTextType.Password}
                     placeholder={'Enter your Master Password'}
                     required={true}

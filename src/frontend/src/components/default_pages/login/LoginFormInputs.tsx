@@ -52,6 +52,31 @@ const LoginFormInputs = ({isAuth, hasAnimation}: {isAuth: boolean, hasAnimation?
             background: ColorTheme.White,
             minHeight: isAuth ? 0 : 73,
             height: isAuth ? 0 : 'unset',
+
+            helpMessage: [
+                {
+                    content: (
+                        <div>
+                            This is the invoker file that contains the API description of the system.
+                            <br />
+                            Select the invoker and set the credentials.
+                        </div>
+                    ),
+                    disableBeacon: true,
+                    disableOverlayClose: true,
+                    hideCloseButton: true,
+                    hideFooter: true,
+                    placement: 'bottom',
+                    spotlightClicks: true,
+                    styles: {
+                        options: {
+                            zIndex: 10000,
+                        },
+                    },
+                    target: '',
+                    title: 'Invoker',
+                }
+            ],
             paddingTop: isAuth ? '0' : '20px',
             paddingLeft: '5px',
             paddingRight: '5px',
