@@ -688,4 +688,4 @@ ALTER TABLE connection ADD COLUMN IF NOT EXISTS snapshot_id VARCHAR(30);
 ALTER TABLE connection ADD COLUMN IF NOT EXISTS revision INT;
 
 --changeset 4.8:3 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
-VALUES (5, 'METRICS_OVERVIEW', 'dashboard', 'Metrics Overview')
+INSERT INTO widget (id, name, icon, tooltipTranslationKey) VALUES (5, 'METRICS_OVERVIEW', 'dashboard', 'Metrics Overview')
