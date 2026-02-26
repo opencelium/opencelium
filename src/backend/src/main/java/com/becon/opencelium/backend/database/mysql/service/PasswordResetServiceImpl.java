@@ -21,6 +21,7 @@ import java.util.Optional;
 public class PasswordResetServiceImpl implements PasswordResetService {
     private final UserService userService;
     private final PasswordResetTokenRepository tokenRepository;
+    private final PasswordResetRateLimiter rateLimiter;
     private final EmailServiceImpl emailService;
 
     @Value("${spring.security.base-url}")
@@ -35,18 +36,23 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     public PasswordResetServiceImpl(
             UserService userService,
             PasswordResetTokenRepository tokenRepository,
+            PasswordResetRateLimiter rateLimiter,
             EmailServiceImpl emailService
     ) {
         this.userService = userService;
         this.tokenRepository = tokenRepository;
+        this.rateLimiter = rateLimiter;
         this.emailService = emailService;
     }
 
     @Override
     @Transactional
-    public void requestReset(String email) {
-        //  TODO: 1) allow only 3 failed attempts
+    public void requestReset(String email, String clientIp) {
+        // check rate limits
+        rateLimiter.enforceLimit("IP:" + clientIp);
+        rateLimiter.enforceLimit("EMAIL:" + email.toLowerCase());
 
+        // check if we have user by email
         User user = userService.findByEmail(email)
                 .orElseThrow(() -> new GeneralServiceException(HttpStatus.BAD_REQUEST, ExceptionConstant.EMAIL_NOT_EXISTS, "email does not exists"));
 
@@ -62,13 +68,18 @@ public class PasswordResetServiceImpl implements PasswordResetService {
                 // user has token: valid AND not used BUT expired
                 // 1) invalidate found token
                 token.setValid(false);
+                tokenRepository.save(token);
 
                 // 2) check if limit is reached
                 var tokens = tokenRepository.findLatestTokensByUserId(user.getId(), maxEmailValidationAttempts);
                 if (tokens.size() == maxEmailValidationAttempts) {
-                    var tokenFirst = tokens.get(maxEmailValidationAttempts - 1);
+                    var oldest = tokens.get(maxEmailValidationAttempts - 1);
 
-                    if (isInLockoutRange(tokenFirst)) {
+                    Instant lockoutEnds = oldest.getCreatedAt()
+                            .toInstant()
+                            .plusMillis(tokenActivityTime * maxEmailValidationAttempts + lockoutTime);
+
+                    if (Instant.now().isBefore(lockoutEnds)) {
                         throw new GeneralServiceException(HttpStatus.TOO_MANY_REQUESTS, ExceptionConstant.TOO_MANY_ATTEMPTS, "too many attempts, try later");
                     }
                 }
@@ -110,13 +121,8 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     }
 
     public boolean isExpired(PasswordResetToken token) {
-        Instant expirationLeft = Instant.now().minusMillis(tokenActivityTime);
-        return token.getCreatedAt().toInstant().isAfter(expirationLeft);
-    }
-
-    public boolean isInLockoutRange(PasswordResetToken token) {
-        Instant limitLeft = Instant.now().minusMillis(tokenActivityTime * maxEmailValidationAttempts + lockoutTime);
-        return token.getCreatedAt().toInstant().isAfter(limitLeft);
+        Instant expiresAt = token.getCreatedAt().toInstant().plusMillis(tokenActivityTime);
+        return Instant.now().isAfter(expiresAt);
     }
 
     private String generateToken() {
