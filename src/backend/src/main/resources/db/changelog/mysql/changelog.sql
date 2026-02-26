@@ -686,3 +686,14 @@ ALTER TABLE connection ADD COLUMN IF NOT EXISTS snapshot_id VARCHAR(30);
 
 --changeset 4.8:2 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 ALTER TABLE connection ADD COLUMN IF NOT EXISTS revision INT;
+
+--changeset 4.8:3 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+CREATE TABLE IF NOT EXISTS password_reset_token (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT(11) NOT NULL,
+    token VARCHAR(64) NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_used BOOLEAN DEFAULT FALSE,
+    is_valid BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

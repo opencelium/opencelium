@@ -177,3 +177,19 @@ versions:
         operation: add
         value: 4.8
         path: opencelium.version
+      - changeset: 2
+        operation: add
+        value: https://frontend.example.com/reset-password
+        path: spring.security.base-url
+      - changeset: 3
+        operation: add
+        value: 30
+        path: spring.security.token-activity-time
+      - changeset: 4
+        operation: add
+        value: 3
+        path: spring.security.max-email-validation-attempts
+      - changeset: 5
+        operation: add
+        value: 15
+        path: spring.security.lockout-time

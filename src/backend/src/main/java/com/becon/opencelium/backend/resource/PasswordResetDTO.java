@@ -1,9 +1,11 @@
 package com.becon.opencelium.backend.resource;
 
+import com.becon.opencelium.backend.validation.password.PasswordMatches;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public record ResetPasswordDTO(
+@PasswordMatches
+public record PasswordResetDTO(
         @NotBlank
         String token,
         @NotBlank

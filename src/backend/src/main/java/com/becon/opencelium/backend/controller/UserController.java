@@ -16,7 +16,6 @@
 
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.database.mysql.service.PasswordResetService;
 import com.becon.opencelium.backend.database.mysql.service.TotpService;
 import com.becon.opencelium.backend.enums.LangEnum;
 import com.becon.opencelium.backend.exception.EmailAlreadyExistException;
@@ -27,9 +26,7 @@ import com.becon.opencelium.backend.database.mysql.entity.User;
 import com.becon.opencelium.backend.database.mysql.service.SessionServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.UserRoleServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
-import com.becon.opencelium.backend.resource.ForgetPasswordDTO;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
-import com.becon.opencelium.backend.resource.ResetPasswordDTO;
 import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.request.UserRequestResource;
@@ -44,7 +41,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -66,7 +62,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -88,9 +83,6 @@ public class UserController {
 
     @Autowired
     private TotpService totpService;
-
-    @Autowired
-    private PasswordResetService passwordResetService;
 
 
     @Operation(summary = "Retrieves user data from the database based on the provided user 'id'")
@@ -368,24 +360,6 @@ public class UserController {
             resultDTO.setResult(true);
         }
         return ResponseEntity.ok(resultDTO);
-    }
-
-    @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgetPassword(@Valid @RequestBody ForgetPasswordDTO dto) {
-        passwordResetService.requestReset(dto.email());
-
-        return ResponseEntity.ok(
-                Map.of("message", "If an account with that email exists, you will receive a password reset link shortly.")
-        );
-    }
-
-    @PutMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordDTO dto) {
-        passwordResetService.resetPassword(dto.token(), dto.newPassword());
-
-        return ResponseEntity.ok(
-                Map.of("message", "Password has been successfully reset.")
-        );
     }
 
     /*
