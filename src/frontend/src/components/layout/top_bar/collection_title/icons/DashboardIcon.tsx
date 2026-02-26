@@ -10,6 +10,7 @@ const DashboardIcon = () => {
     const {isWidgetEditOn} = Widget.getReduxState();
     return (
         <Button
+            id={'dashboard-edit-icon'}
             hasBackground={false}
             iconSize={'16px'}
             color={ColorTheme.Gray}

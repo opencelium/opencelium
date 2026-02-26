@@ -73,6 +73,7 @@ const GlobalSearch: FC<SearchProps> =
         const isLoading = gettingGlobalSearchData === API_REQUEST_STATE.START;
         return (
             <ReactSelect
+                id={'global-search'}
                 placeholder={'Search...'}
                 inputValue={searchValue}
                 value={null}

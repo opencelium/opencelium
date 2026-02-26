@@ -63,7 +63,7 @@ const ScheduleList: FC<ScheduleListProps & {hasNoHoverEffect?: boolean, shouldNo
     const CSchedules = new Schedules(filteredSchedules, dispatch, deletingSchedulesById, isReadonly, hasElasticSearch, updatingSchedule);
     return (
         <React.Fragment>
-            <CollectionView shouldNoSetEntityHeader={shouldNoSetEntityHeader} hasNoHoverEffect={hasNoHoverEffect} defaultViewType={ViewType.LIST} hasNotAlert={hasNotAlert} hasViewSection={false} hasTopBar={hasTopBar} hasTitle={hasTitle} shouldBeUpdated={shouldBeUpdated} collection={CSchedules} isLoading={gettingAllSchedules === API_REQUEST_STATE.START} componentPermission={SchedulePermissions}/>
+            <CollectionView entityKey={'schedule-list'} shouldNoSetEntityHeader={shouldNoSetEntityHeader} hasNoHoverEffect={hasNoHoverEffect} defaultViewType={ViewType.LIST} hasNotAlert={hasNotAlert} hasViewSection={false} hasTopBar={hasTopBar} hasTitle={hasTitle} shouldBeUpdated={shouldBeUpdated} collection={CSchedules} isLoading={gettingAllSchedules === API_REQUEST_STATE.START} componentPermission={SchedulePermissions}/>
             {gettingAllSchedules === API_REQUEST_STATE.FINISH && <CurrentSchedules hasNoHoverEffect={hasNoHoverEffect}/>}
             <ViewLogs/>
         </React.Fragment>

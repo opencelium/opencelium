@@ -1,6 +1,8 @@
 import React, {FC, useEffect, useState} from "react";
 import Joyride, {ACTIONS, CallBackProps, EVENTS, STATUS, Step} from "react-joyride";
 import DefaultText from "@app_component/base/text/DefaultText";
+import BeaconComponent from "@app_component/base/tour/BeaconComponent";
+import TourTooltip from "@app_component/base/tour/TourTooltip";
 
 interface TourProps{
     steps: Step[],
@@ -74,6 +76,7 @@ const Tour:FC<TourProps> =  ({
             stepIndex={stepIndex}
             callback={handleJoyrideCallback}
             continuous
+            tooltipComponent={TourTooltip}
             hideCloseButton
             disableOverlayClose={false}
             run={show}

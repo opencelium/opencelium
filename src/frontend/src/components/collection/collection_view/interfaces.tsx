@@ -15,7 +15,7 @@
 
 import {ITheme} from "@style/Theme";
 import ListCollection from "@application/classes/ListCollection";
-import { ComponentPermissionProps } from "@application/interfaces/IApplication";
+import {CollectionEntityKey, ComponentPermissionProps, EntityIconKeyType} from "@application/interfaces/IApplication";
 import {ViewType} from "@app_component/collection/collection_view/CollectionView";
 
 interface InlineEditInputProps{
@@ -52,6 +52,7 @@ interface ListViewProps extends ViewProps{
     setChecks: (checks: any[]) => void,
     filterData?: any,
     isCard?: boolean,
+    entityKey?: CollectionEntityKey,
     onListRowClick?: (entity: any) => void,
     hasPaginationProps: boolean,
     hasNoHoverEffect?: boolean,
@@ -80,6 +81,7 @@ interface CollectionViewProps{
     } | undefined | null,
     hasNoHoverEffect?: boolean,
     shouldNoSetEntityHeader?: boolean,
+    entityKey?: CollectionEntityKey,
 }
 
 interface CheckProps{

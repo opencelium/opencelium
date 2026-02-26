@@ -27,6 +27,8 @@ import {HelpIconStyled} from "@app_component/base/input/text/styles";
 import {ColorTheme} from "@style/Theme";
 import Button from "@app_component/base/button/Button";
 import {Step} from "react-joyride";
+import {DashboardTourSteps} from "@entity/dashboard/utils/tourSteps";
+import {switchSteps} from "@app_component/layout/top_bar/collection_title/switchSteps";
 
 const Title: FC<TitleProps> =
     ({
@@ -45,43 +47,7 @@ const Title: FC<TitleProps> =
             break;
     }
     useEffect(() => {
-        switch (entityIconKey) {
-            case 'dashboard':
-                setSteps([
-                    {
-                        content: 'Connector description',
-                        disableBeacon: true,
-                        spotlightPadding: 0,
-                        target: '#connector_menu_item',
-                        title: 'Connector',
-                        placement: 'right',
-                    },
-                    {
-                        spotlightPadding: 0,
-                        content: 'Connection description',
-                        target: '#connection_menu_item',
-                        title: 'Connection',
-                        placement: 'right',
-                    },
-                    {
-                        spotlightPadding: 0,
-                        content: 'Schedule description',
-                        target: '#schedule_menu_item',
-                        title: 'Schedule',
-                        placement: 'right',
-                    },
-                    {
-                        spotlightPadding: 0,
-                        content: 'Admin description',
-                        target: '#admin_menu_item',
-                        title: 'Admin',
-                        placement: 'right',
-                    },
-                ])
-                break;
-            default:
-                setSteps([]);
-        }
+        setSteps(switchSteps(entityIconKey));
     }, [entityIconKey])
     if(isArray(title)){
         return(
@@ -110,7 +76,7 @@ const Title: FC<TitleProps> =
         )
     }
     return (
-        <TitleStyled className={className} style={{position: 'relative'}}>
+        <TitleStyled className={className} style={{position: 'relative'}} id={`${entityIconKey}-header`}>
             <span>
                 <Text value={title} size={`${EntityHeaderTextSize}px`}/>
                 <IconStyled>{icon}</IconStyled>
@@ -119,7 +85,7 @@ const Title: FC<TitleProps> =
                 <Tour steps={steps} toggle={toggleTour} show={startTour}/>
                 <Button
                     position={'absolute'}
-                    right={-35}
+                    right={!!icon ? -35 : -18}
                     hasBackground={false}
                     icon={'info'}
                     color={ColorTheme.Blue}

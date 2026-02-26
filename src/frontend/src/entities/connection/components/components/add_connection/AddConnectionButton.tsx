@@ -176,6 +176,7 @@ function AddConnectionButton({ theme, direction, ...args }: DropdownMenuProps & 
                     { id: 'via_template', label: 'via template', onClick: toggleForm },
                     { id: 'via_editor', label: 'via editor', onClick: openEditor },
                 ]}
+                id={'connection-list-add'}
             />
             <Dialog
                 actions={[

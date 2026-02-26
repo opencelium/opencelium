@@ -23,7 +23,7 @@ const SelectedNotificationButton: FC<SelectedNotificationButtonProps> =
     }, [addingNotificationToSelectedSchedules])
     return(
         <Fragment>
-            <Button isDisabled={scheduleIds.length === 0 || addingNotificationToSelectedSchedules === API_REQUEST_STATE.START} isLoading={addingNotificationToSelectedSchedules === API_REQUEST_STATE.START} key={'start_button'} handleClick={toggle} icon={'mail'} label={'Notification'}/>
+            <Button id={'schedule-list-notification'} isDisabled={scheduleIds.length === 0 || addingNotificationToSelectedSchedules === API_REQUEST_STATE.START} isLoading={addingNotificationToSelectedSchedules === API_REQUEST_STATE.START} key={'start_button'} handleClick={toggle} icon={'mail'} label={'Notification'}/>
             {showForm && <ScheduleNotificationForm selectedScheduleIds={scheduleIds} isPlural={true} isToggled={showForm} toggle={toggle}/>}
         </Fragment>
     )

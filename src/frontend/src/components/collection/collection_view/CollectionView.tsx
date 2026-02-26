@@ -22,7 +22,7 @@ import { BadRequest } from '@app_component/default_pages/bad_request/BadRequest'
 import { Application } from '@application/classes/Application';
 import { API_REQUEST_STATE } from '@application/interfaces/IApplication';
 import {
-	setCurrentPages, setEntityHeader,
+	setCurrentPages, setEntityHeader, setEntityIconKey,
 	setGridViewType as setGridViewTypeGlobally,
 	setSearchFields,
 	setViewType as setViewTypeGlobally,
@@ -69,6 +69,7 @@ const CollectionView: FC<CollectionViewProps> = ({
 	hasNotAlert,
 	hasNoHoverEffect,
 	shouldNoSetEntityHeader,
+ 	entityKey,
 }) => {
 	const dispatch = useAppDispatch();
 	const {
@@ -294,6 +295,7 @@ const CollectionView: FC<CollectionViewProps> = ({
 						</ActionsStyled>
 						{hasSearch && (
 							<InputText
+								id={'collection-search-input'}
 								marginLeft={'0'}
 								autoFocus
 								inputHeight={'35px'}
@@ -331,6 +333,7 @@ const CollectionView: FC<CollectionViewProps> = ({
 				>
 					{applicationViewType === ViewType.LIST && (
 						<List
+							entityKey={entityKey}
 							isCard={isListViewCard}
 							collection={collection}
 							searchValue={searchValue}
