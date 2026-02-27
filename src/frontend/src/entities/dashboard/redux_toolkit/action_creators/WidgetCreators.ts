@@ -29,7 +29,20 @@ export const getAllWidgets = createAsyncThunk(
         }
     }
 )
+export const getMetrics = createAsyncThunk(
+    'widget/get/metrics',
+    async(data: never, thunkAPI) => {
+        try {
+            const request = new WidgetRequest();
+            const response = await request.getMetrics();
+            return response.data;
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
 
 export default {
     getAllWidgets,
+    getMetrics,
 }
