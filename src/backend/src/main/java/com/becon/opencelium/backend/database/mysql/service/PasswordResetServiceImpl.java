@@ -52,11 +52,9 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     @Override
     @Transactional
     public void requestReset(String email, String clientIp) {
-        // check rate limits
         rateLimiter.enforceLimit("IP:" + clientIp);
         rateLimiter.enforceLimit("EMAIL:" + email.toLowerCase());
 
-        // check if we have user by email
         User user = userService.findByEmail(email)
                 .orElseThrow(() -> new GeneralServiceException(HttpStatus.BAD_REQUEST, ExceptionConstant.EMAIL_NOT_EXISTS, "email does not exists"));
 
@@ -64,9 +62,9 @@ public class PasswordResetServiceImpl implements PasswordResetService {
             throw new GeneralServiceException(HttpStatus.TOO_MANY_REQUESTS, ExceptionConstant.EMAIL_RECOVERY_FAILED, "email recovery failed");
         }
 
-        // check if user has unused & valid token:
         Optional<PasswordResetToken> optionalToken = tokenRepository.findByUserIdAndValidTrue(user.getId());
         if (optionalToken.isPresent()) {
+            // check if user has unused & valid token:
             var token = optionalToken.get();
 
             if (!isExpired(token)) {
