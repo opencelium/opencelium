@@ -688,6 +688,9 @@ ALTER TABLE connection ADD COLUMN IF NOT EXISTS snapshot_id VARCHAR(30);
 ALTER TABLE connection ADD COLUMN IF NOT EXISTS revision INT;
 
 --changeset 4.8:3 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+INSERT INTO widget (id, name, icon, tooltipTranslationKey) VALUES (5, 'METRICS_OVERVIEW', 'dashboard', 'Metrics Overview');
+
+--changeset 4.8:4 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 CREATE TABLE IF NOT EXISTS password_reset_token (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id INT(11) NOT NULL,
