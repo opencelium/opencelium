@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.database.mysql.entity.Widget;
+import com.becon.opencelium.backend.resource.application.SystemMetricsDTO;
 import com.becon.opencelium.backend.resource.user.WidgetResource;
 
 import java.util.List;
@@ -14,4 +15,6 @@ public interface WidgetService {
     WidgetResource toResource(Widget widget);
 
     List<Widget> findAll();
+
+    SystemMetricsDTO getSystemMetrics();
 }
