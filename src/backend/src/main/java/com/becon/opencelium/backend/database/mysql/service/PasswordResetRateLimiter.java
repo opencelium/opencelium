@@ -1,9 +1,7 @@
 package com.becon.opencelium.backend.database.mysql.service;
 
-import com.becon.opencelium.backend.constant.ExceptionConstant;
-import com.becon.opencelium.backend.exception.GeneralServiceException;
+import com.becon.opencelium.backend.exception.TooManyRequestsException;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -35,7 +33,7 @@ public class PasswordResetRateLimiter {
             }
 
             if (deque.size() >= maxEmailValidationAttempts) {
-                throw new GeneralServiceException(HttpStatus.TOO_MANY_REQUESTS, ExceptionConstant.TOO_MANY_ATTEMPTS, "Too many attempts, try later");
+                throw new TooManyRequestsException("Too many attempts, try later");
             }
 
             deque.addLast(now);

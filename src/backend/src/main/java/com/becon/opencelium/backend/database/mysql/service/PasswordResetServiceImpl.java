@@ -6,6 +6,8 @@ import com.becon.opencelium.backend.database.mysql.entity.User;
 import com.becon.opencelium.backend.database.mysql.repository.PasswordResetTokenRepository;
 import com.becon.opencelium.backend.enums.AuthMethod;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
+import com.becon.opencelium.backend.exception.ServiceUnavailableException;
+import com.becon.opencelium.backend.exception.TooManyRequestsException;
 import com.becon.opencelium.backend.execution.notification.EmailServiceImpl;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -59,7 +61,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
                 .orElseThrow(() -> new GeneralServiceException(HttpStatus.BAD_REQUEST, ExceptionConstant.EMAIL_NOT_EXISTS, "email does not exists"));
 
         if (user.getAuthMethod() == AuthMethod.LDAP) {
-            throw new GeneralServiceException(HttpStatus.TOO_MANY_REQUESTS, ExceptionConstant.EMAIL_RECOVERY_FAILED, "email recovery failed");
+            throw new ServiceUnavailableException(ExceptionConstant.EMAIL_RECOVERY_FAILED, "There is an issue with your email configuration. For security reasons, the detailed error message has been written to your Opencelium logs. Please review the logs for more information.");
         }
 
         Optional<PasswordResetToken> optionalToken = tokenRepository.findByUserIdAndValidTrue(user.getId());
@@ -69,7 +71,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
 
             if (!isExpired(token)) {
                 // user has token: valid AND not used AND not expired
-                throw new GeneralServiceException(HttpStatus.TOO_MANY_REQUESTS, ExceptionConstant.TOO_MANY_ATTEMPTS, "too many attempts, try later");
+                throw new TooManyRequestsException("too many attempts, try later");
             } else {
                 // user has token: valid AND not used BUT expired
                 // 1) invalidate found token
@@ -86,7 +88,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
                             .plusMillis(tokenActivityTime * maxEmailValidationAttempts + lockoutTime);
 
                     if (Instant.now().isBefore(lockoutEnds)) {
-                        throw new GeneralServiceException(HttpStatus.TOO_MANY_REQUESTS, ExceptionConstant.TOO_MANY_ATTEMPTS, "too many attempts, try later");
+                        throw new TooManyRequestsException("too many attempts, try later");
                     }
                 }
             }
@@ -103,7 +105,10 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         tokenRepository.save(token);
 
         String message = "%s?token=%s".formatted(baseUrl, rawToken);
-        emailService.sendMessage(user.getEmail(), "Reset Password", message);
+        boolean sent = emailService.sendMessage(user.getEmail(), "Reset Password", message);
+        if (!sent) {
+            throw new ServiceUnavailableException(ExceptionConstant.EMAIL_RECOVERY_FAILED, "There is an issue with your email configuration. For security reasons, the detailed error message has been written to your Opencelium logs. Please review the logs for more information.");
+        }
     }
 
     @Override
