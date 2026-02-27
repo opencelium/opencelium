@@ -333,6 +333,7 @@ const CollectionView: FC<CollectionViewProps> = ({
 				>
 					{applicationViewType === ViewType.LIST && (
 						<List
+							shouldNoSetEntityHeader={shouldNoSetEntityHeader}
 							entityKey={entityKey}
 							isCard={isListViewCard}
 							collection={collection}

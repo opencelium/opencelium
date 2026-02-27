@@ -56,6 +56,7 @@ interface ListViewProps extends ViewProps{
     onListRowClick?: (entity: any) => void,
     hasPaginationProps: boolean,
     hasNoHoverEffect?: boolean,
+    shouldNoSetEntityHeader?: boolean,
 }
 
 interface CollectionViewProps{

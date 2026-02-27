@@ -36,6 +36,7 @@ import ViewLogs from "@entity/schedule/components/view_logs/ViewLogs";
 const ScheduleList: FC<ScheduleListProps & {hasNoHoverEffect?: boolean, shouldNoSetEntityHeader?: boolean,}> = permission(SchedulePermissions.READ)
 (({hasTopBar, isReadonly, hasTitle, hasNotAlert, hasNoHoverEffect, shouldNoSetEntityHeader}) => {
     const dispatch = useAppDispatch();
+    const [isLoading, setIsLoading] = useState<boolean>(true);
     const [shouldBeUpdated, setShouldBeUpdated] = useState(false);
     const {metaConnections} = Connection.getReduxState();
     const {elasticSearchCheckResults} = ExternalApplication.getReduxState();
@@ -53,9 +54,17 @@ const ScheduleList: FC<ScheduleListProps & {hasNoHoverEffect?: boolean, shouldNo
     }, [metaConnections, categories, schedules, activeCategory]);
     useEffect(() => {
         dispatch(getAllMetaConnections());
-        dispatch(getAllSchedules());
         dispatch(checkMongoDB());
         dispatch(getCurrentSubscription());
+        (async () => {
+            try {
+                await dispatch(getAllSchedules());
+            } catch(e) {
+
+            } finally {
+                setIsLoading(false);
+            }
+        })()
     }, [])
     useEffect(() => {
         setShouldBeUpdated(!shouldBeUpdated);
@@ -63,8 +72,21 @@ const ScheduleList: FC<ScheduleListProps & {hasNoHoverEffect?: boolean, shouldNo
     const CSchedules = new Schedules(filteredSchedules, dispatch, deletingSchedulesById, isReadonly, hasElasticSearch, updatingSchedule);
     return (
         <React.Fragment>
-            <CollectionView entityKey={'schedule-list'} shouldNoSetEntityHeader={shouldNoSetEntityHeader} hasNoHoverEffect={hasNoHoverEffect} defaultViewType={ViewType.LIST} hasNotAlert={hasNotAlert} hasViewSection={false} hasTopBar={hasTopBar} hasTitle={hasTitle} shouldBeUpdated={shouldBeUpdated} collection={CSchedules} isLoading={gettingAllSchedules === API_REQUEST_STATE.START} componentPermission={SchedulePermissions}/>
-            {gettingAllSchedules === API_REQUEST_STATE.FINISH && <CurrentSchedules hasNoHoverEffect={hasNoHoverEffect}/>}
+            <CollectionView
+                entityKey={'schedule-list'}
+                shouldNoSetEntityHeader={shouldNoSetEntityHeader}
+                hasNoHoverEffect={hasNoHoverEffect}
+                defaultViewType={ViewType.LIST}
+                hasNotAlert={hasNotAlert}
+                hasViewSection={false}
+                hasTopBar={hasTopBar}
+                hasTitle={hasTitle}
+                shouldBeUpdated={shouldBeUpdated}
+                collection={CSchedules}
+                isLoading={isLoading}
+                componentPermission={SchedulePermissions}
+            />
+            {!isLoading && <CurrentSchedules hasNoHoverEffect={hasNoHoverEffect}/>}
             <ViewLogs/>
         </React.Fragment>
     )
@@ -76,6 +98,7 @@ ScheduleList.defaultProps = {
     hasTitle: true,
     hasNotAlert: false,
     hasNoHoverEffect: false,
+    shouldNoSetEntityHeader: false,
 }
 
 export {

@@ -51,6 +51,7 @@ const List: FC<ListViewProps> =
         hasPaginationProps,
          hasNoHoverEffect,
         entityKey,
+         shouldNoSetEntityHeader,
     }) => {
     const dispatch = useAppDispatch();
     const {entityIconKey} = Application.getReduxState();
@@ -67,22 +68,26 @@ const List: FC<ListViewProps> =
     }, []);
 
     useEffect(() => {
-        if (entityKey !== entityIconKey) {
-            if (entityKey) {
-                if (visibleEntities.length === 0) {
-                    dispatch(setEntityIconKey(`${entityKey}-empty`));
-                } else {
-                    dispatch(setEntityIconKey(entityKey));
+        if (!shouldNoSetEntityHeader) {
+            if (entityKey !== entityIconKey) {
+                if (entityKey) {
+                    if (visibleEntities.length === 0) {
+                        dispatch(setEntityIconKey(`${entityKey}-empty`));
+                    } else {
+                        dispatch(setEntityIconKey(entityKey));
+                    }
                 }
             }
+            if (visibleEntities.length === 0 && `${entityKey}-empty` !== entityIconKey) {
+                dispatch(setEntityIconKey(`${entityKey}-empty`));
+            }
         }
-        if (visibleEntities.length === 0 && `${entityKey}-empty` !== entityIconKey) {
-            dispatch(setEntityIconKey(`${entityKey}-empty`));
-        }
-    }, [entityKey, visibleEntities.length]);
+    }, [entityKey, visibleEntities.length, shouldNoSetEntityHeader]);
     useEffect(() => {
         return () => {
-            dispatch(setEntityIconKey(''));
+            if (!shouldNoSetEntityHeader) {
+                dispatch(setEntityIconKey(''));
+            }
         }
     }, []);
     useEffect(() => {
