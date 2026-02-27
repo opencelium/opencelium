@@ -9,6 +9,7 @@
 server:
   port: 9090
   address: 127.0.0.1
+  forward-headers-strategy: native
 websocket:
   endpoint: /ws
 #  ssl:
@@ -122,6 +123,11 @@ spring:
   #                                                                    #
   ######################################################################
   security:
+    base-url: "https://frontend.example.com/reset-password"
+    token-activity-time: 30 // milliseconds
+    max-email-validation-attempts: 3
+    lockout-time: 15 // milliseconds
+
 #    ldap:
 #      # LDAP server URL
 #      urls: ldap://localhost:7389

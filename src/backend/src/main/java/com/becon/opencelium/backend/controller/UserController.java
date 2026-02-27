@@ -117,13 +117,13 @@ public class UserController {
     })
     @GetMapping("/check/{email}")
     public ResponseEntity<?> emailExists(@PathVariable("email") String email) {
-        if (userService.existsByEmail(email)){
+        if (userService.existsByEmail(email)) {
             throw new ResponseStatusException(HttpStatus.OK, "EXISTS");
         } else {
             throw new ResponseStatusException(HttpStatus.OK, "NOT_EXISTS");
         }
     }
-//
+
     @Operation(summary = "Retrieves a list of all users in the application")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",
@@ -137,13 +137,13 @@ public class UserController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/all")
-    public ResponseEntity<List<UserResource>> all(){
+    public ResponseEntity<List<UserResource>> all() {
         final List<UserResource> userResources =
                 userService.findAll().stream().map(UserResource::new).collect(Collectors.toList());
         final URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
         return ResponseEntity.created(uri).body(userResources);
     }
-//
+
     @Operation(summary = "Creates a new user in the system by accepting user data in the request body")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",
@@ -159,16 +159,16 @@ public class UserController {
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> post(@RequestBody UserRequestResource userRequestResource) throws IOException {
 
-        if (userService.existsByEmail(userRequestResource.getEmail())){
+        if (userService.existsByEmail(userRequestResource.getEmail())) {
             throw new EmailAlreadyExistException(userRequestResource.getEmail());
         }
 
-        if (!userRoleService.existsById(userRequestResource.getUserGroup())){
+        if (!userRoleService.existsById(userRequestResource.getUserGroup())) {
             throw new RoleNotFoundException(userRequestResource.getUserGroup());
         }
 
         UserDetailResource userDetailResource = userRequestResource.getUserDetail();
-        if(userDetailResource.getLang() == null || userDetailResource.getLang().isEmpty()){
+        if (userDetailResource.getLang() == null || userDetailResource.getLang().isEmpty()) {
             userDetailResource.setLang(LangEnum.EN.getCode());
             userRequestResource.setUserDetail(userDetailResource);
         } else {
@@ -202,15 +202,15 @@ public class UserController {
     // due to frontend requirements, for all changes need to send all user data. if something will be missed it will
     // save empty values
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> update( @PathVariable("id") int id,
-                                     @RequestBody UserRequestResource userRequestResource) throws IOException {
+    public ResponseEntity<?> update(@PathVariable("id") int id,
+                                    @RequestBody UserRequestResource userRequestResource) throws IOException {
 
-        if (!userService.existsById(id)){
+        if (!userService.existsById(id)) {
             throw new UserNotFoundException(id);
         }
         userRequestResource.setUserId(id);
         UserDetailResource userDetailResource = userRequestResource.getUserDetail();
-        if(userDetailResource.getLang() == null || userDetailResource.getLang().isEmpty()){
+        if (userDetailResource.getLang() == null || userDetailResource.getLang().isEmpty()) {
             userDetailResource.setLang("en");
             userRequestResource.setUserDetail(userDetailResource);
         }
@@ -240,7 +240,7 @@ public class UserController {
                 .map(
                         p -> {
                             // if user has an image delete the image from storage
-                            if (p.getUserDetail().getProfilePicture() != null){
+                            if (p.getUserDetail().getProfilePicture() != null) {
                                 storageService.delete(p.getUserDetail().getProfilePicture());
                             }
                             // delete user
@@ -266,7 +266,7 @@ public class UserController {
     public ResponseEntity<?> deleteUsersById(@RequestBody IdentifiersDTO<Integer> payload) {
         payload.getIdentifiers().forEach(id -> {
             User p = userService.findById(id).orElseThrow(() -> new UserNotFoundException(id));
-            if (p.getUserDetail().getProfilePicture() != null){
+            if (p.getUserDetail().getProfilePicture() != null) {
                 storageService.delete(p.getUserDetail().getProfilePicture());
             }
             userService.deleteById(id);
@@ -274,7 +274,7 @@ public class UserController {
 
         return ResponseEntity.noContent().build();
     }
-//
+
     @Operation(summary = "Logs out the currently authenticated user.")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",
