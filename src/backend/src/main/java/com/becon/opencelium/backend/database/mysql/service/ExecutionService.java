@@ -29,6 +29,8 @@ public interface ExecutionService {
 
     List<Execution> getExecutionsBySchedulerId(int schedulerId);
 
+    List<Execution> findAll();
+
     Optional<Execution> findById(long id);
 
     Execution getById(long id);

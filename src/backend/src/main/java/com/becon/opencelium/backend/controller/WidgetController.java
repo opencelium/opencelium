@@ -2,7 +2,8 @@ package com.becon.opencelium.backend.controller;
 
 
 import com.becon.opencelium.backend.database.mysql.entity.Widget;
-import com.becon.opencelium.backend.database.mysql.service.WidgetServiceImp;
+import com.becon.opencelium.backend.database.mysql.service.WidgetService;
+import com.becon.opencelium.backend.resource.application.SystemMetricsDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.user.WidgetResource;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,7 +13,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,8 +27,11 @@ import java.util.stream.Collectors;
 @RequestMapping(value = "/widget", produces = MediaType.APPLICATION_JSON_VALUE)
 public class WidgetController {
 
-    @Autowired
-    private WidgetServiceImp widgetServiceImp;
+    private final WidgetService widgetService;
+
+    public WidgetController(WidgetService widgetService) {
+        this.widgetService = widgetService;
+    }
 
     @Operation(summary = "Creates a new widget in the system by accepting widget data in the request body")
     @ApiResponses(value = {
@@ -44,10 +47,10 @@ public class WidgetController {
     })
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> save(@RequestBody WidgetResource widgetResource){
-        Widget widget = widgetServiceImp.toEntity(widgetResource);
-        widgetServiceImp.save(widget);
+        Widget widget = widgetService.toEntity(widgetResource);
+        widgetService.save(widget);
 
-        WidgetResource resource = widgetServiceImp.toResource(widget);
+        WidgetResource resource = widgetService.toResource(widget);
         final URI uri = MvcUriComponentsBuilder
                 .fromController(getClass())
                 .path("/{id}")
@@ -69,7 +72,7 @@ public class WidgetController {
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") int id){
-        widgetServiceImp.deleteById(id);
+        widgetService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -87,9 +90,9 @@ public class WidgetController {
     })
     @GetMapping("/all")
     public ResponseEntity<?> viewAll() {
-        List<Widget> widgets = widgetServiceImp.findAll();
+        List<Widget> widgets = widgetService.findAll();
         List<WidgetResource> resources = widgets.stream()
-                .map(ws -> widgetServiceImp.toResource(ws))
+                .map(ws -> widgetService.toResource(ws))
                 .collect(Collectors.toList());
         return ResponseEntity.ok().body(resources);
     }
@@ -108,7 +111,33 @@ public class WidgetController {
     })
     @GetMapping("/{id}")
     public ResponseEntity<?> view(@PathVariable("id") int id){
-        Widget widget = widgetServiceImp.findById(id).orElseThrow(() -> new RuntimeException("Widget not found"));
+        Widget widget = widgetService.findById(id).orElseThrow(() -> new RuntimeException("Widget not found"));
         return ResponseEntity.ok().body(widget);
+    }
+
+    @Operation(
+            summary = "Get system overview metrics",
+            description = "Returns aggregated execution statistics and current runtime metrics (CPU, memory, log size) for the system dashboard."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Metrics successfully retrieved. Individual fields may be null if a metric could not be collected.",
+                    content = @Content(schema = @Schema(implementation = SystemMetricsDTO.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))
+            )
+    })
+    @GetMapping("/system/overview")
+    public ResponseEntity<SystemMetricsDTO> systemOverview(){
+        return ResponseEntity.ok(widgetService.getSystemMetrics());
     }
 }

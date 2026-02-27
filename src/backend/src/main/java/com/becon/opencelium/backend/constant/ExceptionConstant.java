@@ -21,6 +21,8 @@ public interface ExceptionConstant {
     String USER_NOT_EXIST = "USER_NOT_EXIST";
     String EMAIL_ALREADY_EXIST = "EMAIL_ALREADY_EXIST";
     String EMAIL_NOT_FOUND = "EMAIL_NOT_FOUND";
+    String EMAIL_NOT_EXISTS = "EMAIL_NOT_EXISTS";
+    String EMAIL_RECOVERY_FAILED = "EMAIL_RECOVERY_FAILED";
     String PASSWORD_IS_NULL = "PASSWORD_IS_NULL";
     String SESSION_NOT_EXIST = "SESSION_NOT_EXIST";
     String GROUP_NOT_FOUND = "GROUP_NOT_FOUND";
@@ -34,6 +36,8 @@ public interface ExceptionConstant {
     String LOG_NOT_FOUND = "LOG_NOT_FOUND";
     String INTERNAL_ERROR = "INTERNAL_ERROR";
     String INVALID_DATA = "INVALID_DATA";
+    String INVALID_TOKEN = "INVALID_TOKEN";
+    String TOO_MANY_ATTEMPTS = "TOO_MANY_ATTEMPTS";
 
     // ----------------------------------------- Storage Controller --------------------------------------- //
 
