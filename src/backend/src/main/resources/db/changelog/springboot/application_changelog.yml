@@ -183,15 +183,15 @@ versions:
         path: spring.security.base-url
       - changeset: 3
         operation: add
-        value: 30
+        value: 60000
         path: spring.security.token-activity-time
       - changeset: 4
         operation: add
-        value: 3
+        value: 2
         path: spring.security.max-email-validation-attempts
       - changeset: 5
         operation: add
-        value: 15
+        value: 180000
         path: spring.security.lockout-time
       - changeset: 6
         operation: add

@@ -38,8 +38,6 @@ public class PasswordResetToken {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
-    private int userId;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -64,14 +62,6 @@ public class PasswordResetToken {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
     }
 
     public User getUser() {

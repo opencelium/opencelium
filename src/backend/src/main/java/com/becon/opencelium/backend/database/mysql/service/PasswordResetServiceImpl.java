@@ -4,6 +4,7 @@ import com.becon.opencelium.backend.constant.ExceptionConstant;
 import com.becon.opencelium.backend.database.mysql.entity.PasswordResetToken;
 import com.becon.opencelium.backend.database.mysql.entity.User;
 import com.becon.opencelium.backend.database.mysql.repository.PasswordResetTokenRepository;
+import com.becon.opencelium.backend.enums.AuthMethod;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.execution.notification.EmailServiceImpl;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -20,6 +21,7 @@ import java.util.Optional;
 @Service
 public class PasswordResetServiceImpl implements PasswordResetService {
     private final UserService userService;
+    private final SessionService sessionService;
     private final PasswordResetTokenRepository tokenRepository;
     private final PasswordResetRateLimiter rateLimiter;
     private final EmailServiceImpl emailService;
@@ -35,11 +37,13 @@ public class PasswordResetServiceImpl implements PasswordResetService {
 
     public PasswordResetServiceImpl(
             UserService userService,
+            SessionService sessionService,
             PasswordResetTokenRepository tokenRepository,
             PasswordResetRateLimiter rateLimiter,
             EmailServiceImpl emailService
     ) {
         this.userService = userService;
+        this.sessionService = sessionService;
         this.tokenRepository = tokenRepository;
         this.rateLimiter = rateLimiter;
         this.emailService = emailService;
@@ -55,6 +59,10 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         // check if we have user by email
         User user = userService.findByEmail(email)
                 .orElseThrow(() -> new GeneralServiceException(HttpStatus.BAD_REQUEST, ExceptionConstant.EMAIL_NOT_EXISTS, "email does not exists"));
+
+        if (user.getAuthMethod() == AuthMethod.LDAP) {
+            throw new GeneralServiceException(HttpStatus.TOO_MANY_REQUESTS, ExceptionConstant.EMAIL_RECOVERY_FAILED, "email recovery failed");
+        }
 
         // check if user has unused & valid token:
         Optional<PasswordResetToken> optionalToken = tokenRepository.findByUserIdAndValidTrue(user.getId());
@@ -91,7 +99,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         String hashedToken = hashToken(rawToken);
 
         PasswordResetToken token = new PasswordResetToken();
-        token.setUserId(user.getId());
+        token.setUser(user);
         token.setToken(hashedToken);
 
         tokenRepository.save(token);
@@ -113,11 +121,15 @@ public class PasswordResetServiceImpl implements PasswordResetService {
             throw new GeneralServiceException(HttpStatus.BAD_REQUEST, ExceptionConstant.INVALID_TOKEN, "invalid or expired token");
         }
 
-        User user = userService.getById(token.getUserId());
+        int userId = token.getUser().getId();
+        User user = userService.getById(userId);
         user.setPassword(userService.encodePassword(newPassword));
 
         token.setUsed(true);
         token.setValid(false);
+
+        // remove session if exists
+        sessionService.deleteByUserId(userId);
     }
 
     public boolean isExpired(PasswordResetToken token) {
