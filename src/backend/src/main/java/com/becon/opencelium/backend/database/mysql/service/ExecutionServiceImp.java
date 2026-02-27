@@ -46,6 +46,11 @@ public class ExecutionServiceImp implements ExecutionService {
     }
 
     @Override
+    public List<Execution> findAll() {
+        return executionRepository.findAll();
+    }
+
+    @Override
     public Optional<Execution> findById(long id) {
         return executionRepository.findById(id);
     }
