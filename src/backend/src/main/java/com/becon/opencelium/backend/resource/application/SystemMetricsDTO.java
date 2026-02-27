@@ -2,31 +2,22 @@ package com.becon.opencelium.backend.resource.application;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(name = "SystemMetrics", description = "Aggregated system and execution statistics for the dashboard")
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class SystemMetricsDTO {
 
-    @Schema(description = "Total number of executions (all time)", example = "503")
     private Integer totalExecs;
 
-    @Schema(description = "Total number of failed executions (all time)", example = "103")
     private Integer totalFailedExecs;
 
-    @Schema(description = "Sum of all execution durations in milliseconds", example = "4046400000")
     private Long totalRuntime;
 
-    @Schema(description = "Average duration of successful executions in milliseconds", example = "1980000")
     private Long averageRuntimeS;
 
-    @Schema(description = "Current JVM process CPU usage as a percentage (0.00 – 100.00)", example = "15.0")
     private Double cpuUsage;
 
-    @Schema(description = "Current JVM process committed virtual memory in MB", example = "480.5")
     private Double memoryUsage;
 
-    @Schema(description = "Total size of execution log files on disk in MB", example = "4330.21")
     private Double execLogSize;
 
     public Integer getTotalExecs() {

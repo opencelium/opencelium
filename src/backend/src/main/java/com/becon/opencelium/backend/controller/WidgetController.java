@@ -137,7 +137,7 @@ public class WidgetController {
             )
     })
     @GetMapping("/system/overview")
-    public ResponseEntity<?> systemOverview(){
+    public ResponseEntity<SystemMetricsDTO> systemOverview(){
         return ResponseEntity.ok(widgetService.getSystemMetrics());
     }
 }
