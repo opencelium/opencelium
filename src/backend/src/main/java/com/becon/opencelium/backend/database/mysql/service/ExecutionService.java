@@ -17,15 +17,16 @@
 package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.database.mysql.entity.Execution;
+import com.becon.opencelium.backend.resource.application.ExecutionStatsDTO;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface ExecutionService {
 
-    Execution save(Execution execution);
+    ExecutionStatsDTO getStats();
 
-    void deleteAllBySchedulerId(int schedulerId);
+    Execution save(Execution execution);
 
     List<Execution> getExecutionsBySchedulerId(int schedulerId);
 

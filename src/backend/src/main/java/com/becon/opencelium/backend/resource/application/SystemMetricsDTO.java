@@ -18,6 +18,8 @@ public class SystemMetricsDTO {
 
     private Double memoryUsage;
 
+    private Double maxMemorySize;
+
     private Double execLogSize;
 
     public Integer getTotalExecs() {
@@ -74,5 +76,13 @@ public class SystemMetricsDTO {
 
     public void setExecLogSize(Double execLogSize) {
         this.execLogSize = execLogSize;
+    }
+
+    public Double getMaxMemorySize() {
+        return maxMemorySize;
+    }
+
+    public void setMaxMemorySize(Double maxMemorySize) {
+        this.maxMemorySize = maxMemorySize;
     }
 }
