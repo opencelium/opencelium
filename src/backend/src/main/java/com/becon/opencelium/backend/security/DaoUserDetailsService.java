@@ -23,6 +23,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class DaoUserDetailsService implements UserDetailsService {
@@ -31,6 +32,7 @@ public class DaoUserDetailsService implements UserDetailsService {
     private UserServiceImpl userService;
 
     @Override
+    @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userService.findByEmail(email).orElse(null);
         if (user == null || user.getPassword() == null) {

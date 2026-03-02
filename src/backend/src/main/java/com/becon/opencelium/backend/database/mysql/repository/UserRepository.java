@@ -29,11 +29,15 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<User> findByEmail(String email);
+
     Optional<User> findByUsernameAndAuthMethod(String username, AuthMethod authMethod);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<User> findOneById(int id);
+
     @Transactional
     void deleteOneById(int id);
+
     boolean existsByEmail(String email);
 }
