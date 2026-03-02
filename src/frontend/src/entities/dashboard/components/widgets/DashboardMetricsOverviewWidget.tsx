@@ -26,6 +26,7 @@ import {useAppDispatch} from "@application/utils/store";
 import {getMetrics} from "@entity/dashboard/redux_toolkit/action_creators/WidgetCreators";
 import {Widget} from "@entity/dashboard/classes/Widget";
 import {Loading} from "@app_component/base/loading/Loading";
+import {useSocketData} from "../../../../socket/SocketDataContext";
 function formatDuration(seconds: number): string {
 	if (seconds >= 3600) {
 		return `${(seconds / 3600).toFixed(3)} h`;
@@ -91,24 +92,24 @@ interface IStats {
 
 const DashboardMetricsOverviewWidget: FC = () => {
 	const dispatch = useAppDispatch();
-	const {metrics} = Widget.getReduxState();
+	const {systemMetrics: metrics} = useSocketData();
 	const [isLoading, setIsLoading] = useState<boolean>(true);
 	const stats = useMemo<IStats>(
 		() => {
-			const failedExecPerc = metrics ? calculateClampedPercentage(metrics.total_failed_execs, metrics.total_execs) : '-';
-			const runtime = metrics ? formatDuration(metrics.total_runtime) : '-';
-			const avgRuntime = metrics ? formatDuration(metrics.avg_runtime_s) : '-';
+			const failedExecPerc = metrics?.total_failed_execs && metrics?.total_execs ? calculateClampedPercentage(metrics.total_failed_execs, metrics.total_execs) : '-';
+			const runtime = metrics?.total_runtime ? formatDuration(metrics.total_runtime) : '-';
+			const avgRuntime = metrics?.avg_runtime_s ? formatDuration(metrics.avg_runtime_s) : '-';
 			return {
 				periodDays: 7,
 				metrics: [
 					{ key: 'executions', label: 'Executions', value: `${metrics?.total_execs || '-'}` },
 					{ key: 'failed_executions', label: 'Failed executions', value: `${metrics?.total_failed_execs || '-'}` },
-					{ key: 'failed_execution_percent', label: 'Failed execution %', value: `${failedExecPerc}${metrics ? '%' : ''}`},
+					{ key: 'failed_execution_percent', label: 'Failed execution %', value: `${failedExecPerc}${failedExecPerc !== '-' ? '%' : ''}`},
 					{ key: 'run_time', label: 'Run time', value: runtime},
 					{ key: 'avg_run_time', label: 'Run time Ø', value: avgRuntime },
 					{ key: 'cpu_usage', label: 'CPU usage %', value: `${metrics?.cpu_usage || '-'}${metrics ? '%' : ''}` },
-					{ key: 'memory_usage', label: 'Memory usage', value: `${metrics ? formatKilobytes(metrics.memory_usage) : '-'}` },
-					{ key: 'generated_logs', label: 'Generated Logs', value: `${metrics ? formatKilobytes(metrics.exec_log_size) : '-'}` },
+					{ key: 'memory_usage', label: 'Memory usage', value: `${metrics?.memory_usage ? formatKilobytes(metrics.memory_usage) : '-'}` },
+					{ key: 'generated_logs', label: 'Generated Logs', value: `${metrics?.exec_log_size ? formatKilobytes(metrics.exec_log_size) : '-'}` },
 				],
 			}
 		},
