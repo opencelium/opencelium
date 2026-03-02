@@ -12,6 +12,7 @@ import {TRIPLET_STATE} from "@application/interfaces/IApplication";
 import IAuthUser from "@entity/user/interfaces/IAuthUser";
 import {LocalStorage} from "@application/classes/LocalStorage";
 import {consoleLog} from "@application/utils/utils";
+import {useSystemMetricsSocket} from "./modules/useSystemMetricsSocket";
 
 const SocketDataContext = createContext<SocketDataContextType | undefined>(undefined);
 
@@ -25,6 +26,7 @@ export const SocketDataProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
     const { currentSchedules, setCurrentSchedules,  } = useCurrentSchedulesSocket(socket);
     const { hasNewSupportFile, setHasNewSupportFile } = useSupportFilesSocket(socket);
     const { currentSubscription } = useCurrentSubscriptionSocket(socket);
+    const { systemMetrics, setSystemMetrics,  } = useSystemMetricsSocket(socket);
     const userSessionSubscriptionRef = useRef<() => void>();
 
     const isConnectedReference: any = useRef();
@@ -84,6 +86,7 @@ export const SocketDataProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
                     consoleLog("🧹 Deactivated");
                     dispatch(setIsAboutToLogout(TRIPLET_STATE.TRUE));
                     setCurrentSchedules([]);
+                    setSystemMetrics(undefined)
                 }
             });
             consoleLog("✅ Subscribed to /user/session");
@@ -135,6 +138,7 @@ export const SocketDataProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
                 isConnected,
                 authValid,
                 currentSchedules,
+                systemMetrics,
                 hasNewSupportFile,
                 currentSubscription,
                 socket,

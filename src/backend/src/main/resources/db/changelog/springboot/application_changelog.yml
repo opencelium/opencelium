@@ -177,3 +177,23 @@ versions:
         operation: add
         value: 4.8
         path: opencelium.version
+      - changeset: 2
+        operation: add
+        value: https://frontend.example.com/reset-password
+        path: spring.restor-psw.base-url
+      - changeset: 3
+        operation: add
+        value: 60000
+        path: spring.restor-psw.token-activity-time
+      - changeset: 4
+        operation: add
+        value: 2
+        path: spring.restor-psw.max-email-validation-attempts
+      - changeset: 5
+        operation: add
+        value: 180000
+        path: spring.restor-psw.lockout-time
+      - changeset: 6
+        operation: add
+        value: native
+        path: server.forward-headers-strategy

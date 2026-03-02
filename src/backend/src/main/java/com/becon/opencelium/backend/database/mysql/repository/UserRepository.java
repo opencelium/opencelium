@@ -18,7 +18,9 @@ package com.becon.opencelium.backend.database.mysql.repository;
 
 import com.becon.opencelium.backend.database.mysql.entity.User;
 import com.becon.opencelium.backend.enums.AuthMethod;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,14 +29,15 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
-
-
-//    @Query(value = "SELECT * FROM user WHERE email=?1", nativeQuery = true)
     Optional<User> findByEmail(String email);
+
     Optional<User> findByUsernameAndAuthMethod(String username, AuthMethod authMethod);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<User> findOneById(int id);
+
     @Transactional
     void deleteOneById(int id);
-    boolean existsByEmail(String email);
 
+    boolean existsByEmail(String email);
 }

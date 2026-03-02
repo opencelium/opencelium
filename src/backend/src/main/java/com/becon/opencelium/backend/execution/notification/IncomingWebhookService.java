@@ -19,7 +19,7 @@ public class IncomingWebhookService implements CommunicationTool {
     private RestTemplate restTemplate;
 
     @Override
-    public void sendMessage(String destination, String subject, String text) {
+    public boolean sendMessage(String destination, String subject, String text) {
         HttpMethod method = HttpMethod.POST;
         String body = "{" +
                             "\"text\": \"" + subject +
@@ -31,6 +31,8 @@ public class IncomingWebhookService implements CommunicationTool {
         HttpEntity<Object> httpEntity = new HttpEntity <Object> (body, httpHeaders);
 
         restTemplate.exchange(destination, method, httpEntity, String.class);
+
+        return true;
     }
 
     @Override

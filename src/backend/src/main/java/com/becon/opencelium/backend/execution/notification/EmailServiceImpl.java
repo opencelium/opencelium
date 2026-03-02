@@ -17,9 +17,9 @@ public class EmailServiceImpl implements CommunicationTool {
     private Environment env;
 
     @Override
-    public void sendMessage(String destination, String subject, String text) {
+    public boolean sendMessage(String destination, String subject, String text) {
         if (emailSender == null) {
-            return;
+            return false;
         }
 
         String senderName = env.getProperty("spring.mail.opencelium.from");
@@ -34,9 +34,12 @@ public class EmailServiceImpl implements CommunicationTool {
             }
 
             emailSender.send(message);
+            return true;
         } catch (MailException exception) {
             exception.printStackTrace();
         }
+
+        return false;
     }
 
     @Override

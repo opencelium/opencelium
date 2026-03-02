@@ -16,7 +16,7 @@
 import {AxiosResponse} from "axios";
 import Request from "@entity/application/requests/classes/Request";
 import {IRequestSettings} from "@application/requests/interfaces/IRequest";
-import {IWidgetRequest} from "../interfaces/IWidget";
+import {IWidgetRequest, Metrics} from "../interfaces/IWidget";
 import {IWidget} from "../../interfaces/IWidget";
 
 
@@ -29,5 +29,10 @@ export class WidgetRequest extends Request implements IWidgetRequest{
     async getAllWidgets(): Promise<AxiosResponse<IWidget[]>>{
         this.endpoint = '/all';
         return super.get<IWidget[]>();
+    }
+
+    async getMetrics(): Promise<AxiosResponse<Metrics>>{
+        this.endpoint = '/system/overview';
+        return super.get<Metrics>();
     }
 }

@@ -34,6 +34,8 @@ interface InputTextProps extends InputHTMLAttributes<HTMLInputElement>, InputEle
     checkBackground?: string,
     errorBottom?: string | number,
     isVisibilityTrue?: boolean,
+    rightIcon?: string,
+    onRightIconClick?: () => void,
 }
 
 

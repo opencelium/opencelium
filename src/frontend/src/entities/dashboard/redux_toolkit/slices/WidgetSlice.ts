@@ -18,18 +18,21 @@ import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {CommonState} from "@application/utils/store";
 import {ICommonState} from "@application/interfaces/core";
 import {IResponse} from "@application/requests/interfaces/IResponse";
-import {getAllWidgets} from "../action_creators/WidgetCreators";
+import {getAllWidgets, getMetrics} from "../action_creators/WidgetCreators";
 import {IWidget} from "../../interfaces/IWidget";
+import {Metrics} from "@entity/dashboard/requests/interfaces/IWidget";
 
 export interface WidgetSlice extends ICommonState{
     gettingAllWidgets: API_REQUEST_STATE,
     widgets: IWidget[],
+    metrics: Metrics,
     isWidgetEditOn: boolean,
 }
 
 const initialState: WidgetSlice = {
     gettingAllWidgets: API_REQUEST_STATE.INITIAL,
     widgets: [],
+    metrics: undefined,
     isWidgetEditOn: false,
     ...CommonState,
 }
@@ -52,13 +55,25 @@ export const widgetSlice = createSlice({
                 'CURRENT_SCHEDULER': {x: 10, y: 0, w: 6, h: 4, minW: 6, minH: 4},
                 'MONITORING_BOARDS': {x: 0, y: 0, w: 6, h: 4, minW: 6, minH: 4},
                 'SUBSCRIPTION_OVERVIEW': {x: 0, y: 0, w: 6, h: 4, minW: 6, minH: 4},
+                'METRICS_OVERVIEW': {x: 0, y: 0, w: 12, h: 2, minW: 12, minH: 2},
             };
+
             state.gettingAllWidgets = API_REQUEST_STATE.FINISH;
+
             state.widgets = action.payload.map(widget => {return {...widget, ...WIDGET_COORDINATES[widget.i]};}).filter(widget => widget.i !== 'MONITORING_BOARDS');
             state.error = null;
         },
         [getAllWidgets.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.gettingAllWidgets = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [getMetrics.pending.type]: (state) => {
+        },
+        [getMetrics.fulfilled.type]: (state, action: PayloadAction<Metrics>) => {
+            state.metrics = action.payload;
+            state.error = null;
+        },
+        [getMetrics.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.error = action.payload;
         },
     }
