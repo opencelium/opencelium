@@ -20,7 +20,7 @@ import {DefaultCardShadowStyles, DefaultShadowHoverStyles} from "@entity/applica
 const LoginFormStyled = styled.div<LoginFormStyledProps>`
     background: ${({theme}) => theme.menu.background || '#012E55'};
     width: 300px;
-    height: 275px;
+    height: auto;
     top: 30px;
     position: absolute;
     left: calc(50% - 150px);
