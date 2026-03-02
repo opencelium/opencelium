@@ -36,6 +36,7 @@ import {ProfileImageStyled, DefaultImageStyled} from "./styles";
 import {withTheme} from "styled-components";
 import AvatarDefault from "@image/application/avatar_default.png";
 import {isArray} from "@application/utils/utils";
+import {FormProps} from "@app_component/form/form/interfaces";
 
 
 const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(({theme}) => {
@@ -115,11 +116,12 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
             src={AvatarDefault}
             style={{width: '100px', height: '100px', cursor: 'pointer', borderRadius: '50%', border: `1px solid ${theme.menu.background}`}}
         />;
-    const data = {
+    const data: FormProps = {
+        entityKey: 'profile-form',
         title: 'My Profile',
         formSections: [
             <React.Fragment>
-                <FormSection label={{value: 'user details'}}>
+                <FormSection label={{value: 'user details'}} id={'profile-form-user-details'}>
                     {Avatar}
                     {Title}
                     {UserDetailsInputs}
@@ -127,7 +129,7 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
                 </FormSection>
             </React.Fragment>,
             <React.Fragment>
-                <FormSection label={{value: 'settings'}}>
+                <FormSection label={{value: 'settings'}} id={'profile-form-settings'}>
                     <div style={{position: 'relative'}}>
                         <InputSelect
                             icon={'palette'}
@@ -138,7 +140,7 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
                         />
                     </div>
                 </FormSection>
-                <FormSection label={{value: 'Subscriptions'}}>
+                <FormSection label={{value: 'Permissions'}} id={'profile-form-permissions'}>
                     {Permissions}
                 </FormSection>
             </React.Fragment>

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import { Dropdown, DropdownMenu, DropdownProps } from 'reactstrap';
 import { DropdownMenuProps } from 'reactstrap/es/DropdownMenu';
 
@@ -34,6 +34,7 @@ export default function DropdownActionButton({
 	isLoading = false,
 	closeOnItemClick = true,
 	onOpenChange,
+	id,
 	...menuProps
 }: DropdownActionButtonProps) {
 	const [open, setOpen] = useState(false);
@@ -65,9 +66,8 @@ export default function DropdownActionButton({
 		},
 		[disabled, isLoading, closeOnItemClick, onOpenChange],
 	);
-
 	return (
-		<Dropdown isOpen={open} toggle={toggle} direction={direction}>
+		<Dropdown isOpen={open} toggle={toggle} direction={direction} id={id}>
 			<DropdownToggleStyled caret disabled={disabled || isLoading}>
 				{label}
 			</DropdownToggleStyled>

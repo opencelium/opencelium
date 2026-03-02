@@ -76,8 +76,8 @@ class Connectors extends ListCollection<ConnectorProps>{
         const hasSearch = this.hasSearch && this.entities.length > 0;
         return(
             <React.Fragment>
-                <PermissionButton autoFocus={!hasSearch} key={'add_button'} icon={'add'} href={'add'} label={'Add Connector'} permission={ConnectorPermissions.CREATE}/>
-                {viewType === ViewType.LIST && this.entities.length !== 0 && <PermissionButton isDisabled={checkedIds.length === 0} hasConfirmation confirmationText={'Do you really want to delete?'}  key={'delete_button'} icon={'delete'} label={'Delete Selected'} handleClick={() => this.dispatch(deleteConnectorsById(checkedIds))} permission={ConnectorPermissions.DELETE}/>}
+                <PermissionButton id={'connector-list-add'} autoFocus={!hasSearch} key={'add_button'} icon={'add'} href={'add'} label={'Add Connector'} permission={ConnectorPermissions.CREATE}/>
+                {viewType === ViewType.LIST && this.entities.length !== 0 && <PermissionButton id={'connector-list-delete-selected'} isDisabled={checkedIds.length === 0} hasConfirmation confirmationText={'Do you really want to delete?'}  key={'delete_button'} icon={'delete'} label={'Delete Selected'} handleClick={() => this.dispatch(deleteConnectorsById(checkedIds))} permission={ConnectorPermissions.DELETE}/>}
             </React.Fragment>
         );
     };

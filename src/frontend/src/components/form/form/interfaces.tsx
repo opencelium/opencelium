@@ -15,7 +15,7 @@
 
 import React from "react";
 import {ITheme} from "@style/Theme";
-import {MultipleTitleProps} from "@application/interfaces/IApplication";
+import {EntityIconKeyType, MultipleTitleProps} from "@application/interfaces/IApplication";
 
 interface TitleStyledProps{
 
@@ -47,6 +47,7 @@ interface FormProps{
     error?: any,
     gridTemplateColumns?: string,
     hasNotAlert?: boolean,
+    entityKey?: EntityIconKeyType,
 }
 
 export {

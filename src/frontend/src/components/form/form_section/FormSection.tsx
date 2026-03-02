@@ -32,6 +32,7 @@ const FormSection: FC<FormSectionProps> =
         padding,
         OverlayComponent,
         inputsStyle,
+        id,
     }) => {
     let isVisible = true;
     for(let i = 0; i < dependencies.length; i++){
@@ -41,7 +42,7 @@ const FormSection: FC<FormSectionProps> =
     }
     const hasLabel = label !== null;
     return (
-        <FormSectionStyled position={position} overflow={overflow} isVisible={isVisible} padding={padding ? padding : `${hasLabel ? '50px' : '20px'} 30px 20px 10px`} margin={`${hasLabel ? '31px' : '0'} 0 0`}>
+        <FormSectionStyled id={id} position={position} overflow={overflow} isVisible={isVisible} padding={padding ? padding : `${hasLabel ? '50px' : '20px'} 30px 20px 10px`} margin={`${hasLabel ? '31px' : '0'} 0 0`}>
             {hasLabel && <Label {...label} position={'absolute'}/>}
             <Inputs style={inputsStyle}>{children}</Inputs>
             {OverlayComponent && <OverlayFormSection component={OverlayComponent}/>}

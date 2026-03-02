@@ -17,7 +17,12 @@ import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {ViewType} from "@app_component/collection/collection_view/CollectionView";
 import {GridViewType} from "@app_component/collection/GridViewMenu";
 import {DefaultThemes} from "@style/Theme";
-import {API_REQUEST_STATE, LocalStorageTheme, MultipleTitleProps} from "../../interfaces/IApplication";
+import {
+    API_REQUEST_STATE,
+    EntityIconKeyType,
+    LocalStorageTheme,
+    MultipleTitleProps
+} from "../../interfaces/IApplication";
 import {CommonState} from "../../utils/store";
 import {ICommonState} from "../../interfaces/core";
 import {
@@ -68,7 +73,7 @@ export interface ApplicationState extends ICommonState{
     currentPages: any,
     onlineServiceStatus: OnlineServiceStatus,
     entityHeader: string | MultipleTitleProps[],
-    entityIconKey: string,
+    entityIconKey: EntityIconKeyType,
     isMenuExpanded: boolean,
 }
 
@@ -132,7 +137,8 @@ export const applicationSlice = createSlice({
         setEntityHeader: (state, action: PayloadAction<string | MultipleTitleProps[]>) => {
             state.entityHeader = action.payload;
         },
-        setEntityIconKey: (state, action: PayloadAction<string>) => {
+        setEntityIconKey: (state, action: PayloadAction<EntityIconKeyType>) => {
+            console.log(action.payload)
             state.entityIconKey = action.payload;
         },
         toggleMenu: (state, action: PayloadAction<boolean>) => {

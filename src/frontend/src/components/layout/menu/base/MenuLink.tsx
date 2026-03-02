@@ -30,6 +30,7 @@ import {MenuLabelSize} from "@entity/application/utils/constants";
 
 const MenuLink: FC<MenuLinkProps & LinkProps & IconProps> = permission<MenuLinkProps & LinkProps & IconProps>(null, false)(
     ({
+        id,
         to,
         onClick,
         name,
@@ -44,6 +45,7 @@ const MenuLink: FC<MenuLinkProps & LinkProps & IconProps> = permission<MenuLinkP
     const [isConfirmationOpened, toggleConfirmation] = useState<boolean>(false);
     return (
         <MenuLinkStyled
+            id={id}
             to={isReadonly ? '#' : to}
             onClick={hasConfirmation ? () => toggleConfirmation(!isConfirmationOpened) : onClick ? onClick : () => {}}
             $onHoverColor={onHoverColor}

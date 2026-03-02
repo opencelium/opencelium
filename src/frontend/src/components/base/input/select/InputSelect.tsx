@@ -57,6 +57,7 @@ const InputSelect: FC<InputSelectProps> = ({
     categoryList,
     currentCategory,
     emptyListText,
+    helpMessage,
     ...props
 }) => {
     let source: OptionProps[];
@@ -260,7 +261,7 @@ const InputSelect: FC<InputSelectProps> = ({
     const hasSearchInput = isSearchable && (!readOnly || !isMultiple);
 
     return(
-        <Input checkboxProps={checkboxProps} className={className} paddingLeft={hasIcon && isIconInside ? '30px' : '0'} componentRef={inputRef} noIcon={!hasIcon} hasUnderline={false} readOnly={readOnly} maxLength={maxLength} placeholder={placeholder} required={required} label={label} icon={icon} error={error} isLoading={isLoading} isIconInside={isIconInside}>
+        <Input isSelect={true} helpMessage={helpMessage} checkboxProps={checkboxProps} className={className} paddingLeft={hasIcon && isIconInside ? '30px' : '0'} componentRef={inputRef} noIcon={!hasIcon} hasUnderline={false} readOnly={readOnly} maxLength={maxLength} placeholder={placeholder} required={required} label={label} icon={icon} error={error} isLoading={isLoading} isIconInside={isIconInside}>
             <InputContainerStyled hasBorder={!hasValue && !isToggled} ref={containerRef} color={currentOption ? ColorTheme.Black : ColorTheme.Gray}>
                 <MultipleValuesStyled ref={multipleRef}>
                     {

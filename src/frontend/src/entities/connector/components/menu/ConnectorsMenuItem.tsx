@@ -21,6 +21,7 @@ import {MenuItemProps} from "@app_component/layout/menu/interfaces";
 const ConnectorsMenuItem_0: FC<MenuItemProps> = ({isReadonly, onHoverColor}) => {
     return (
         <MenuLink
+            id={'connector_menu_item'}
             permission={ConnectorPermissions.READ}
             size={26}
             to={'/connectors'}

@@ -165,9 +165,9 @@ class Schedules extends ListCollection<ScheduleProps>{
         const hasSearch = this.hasSearch && this.entities.length > 0;
         return(
             <React.Fragment>
-                <PermissionButton autoFocus={!hasSearch} key={'add_button'} icon={'add'} href={'add'} label={'Add Schedule'} permission={SchedulePermissions.CREATE}/>
+                <PermissionButton id={'schedule-list-add'} autoFocus={!hasSearch} key={'add_button'} icon={'add'} href={'add'} label={'Add Schedule'} permission={SchedulePermissions.CREATE}/>
                 {viewType === ViewType.LIST && this.entities.length !== 0 && <SelectedNotificationButton key={'start_button'} scheduleIds={checkedIds}/>}
-                {viewType === ViewType.LIST && this.entities.length !== 0 && <PermissionButton isDisabled={checkedIds.length === 0} hasConfirmation confirmationText={'Do you really want to delete?'}  key={'delete_button'} icon={'delete'} label={'Delete'} handleClick={() => this.dispatch(deleteSchedulesById(checkedIds))} permission={SchedulePermissions.DELETE}/>}
+                {viewType === ViewType.LIST && this.entities.length !== 0 && <PermissionButton id={'schedule-list-delete-selected'} isDisabled={checkedIds.length === 0} hasConfirmation confirmationText={'Do you really want to delete?'}  key={'delete_button'} icon={'delete'} label={'Delete'} handleClick={() => this.dispatch(deleteSchedulesById(checkedIds))} permission={SchedulePermissions.DELETE}/>}
             </React.Fragment>
         );
     };

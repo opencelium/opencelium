@@ -17,6 +17,7 @@ import React, {Ref} from "react";
 import {ColorTheme, ITheme} from "@style/Theme";
 import {ElementProps, InputElementProps} from "../interfaces";
 import {CategoryModel} from "@entity/category/requests/models/CategoryModel";
+import {Step} from "react-joyride";
 
 interface OptionsProps{
     currentOption?: OptionProps,
@@ -77,6 +78,7 @@ interface InputSelectProps extends InputElementProps{
     categoryList?: boolean,
     currentCategory?: CategoryModel | null,
     emptyListText?: string,
+    helpMessage?: Step[],
 }
 
 interface OptionsStyledProps extends ElementProps{

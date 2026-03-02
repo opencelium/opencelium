@@ -65,6 +65,11 @@ const ScheduleNotificationList: FC<ScheduleNotificationListProps> =
         setCurrentNotificationId(notification.id)
         toggle();
     }
+    useEffect(() => {
+        return () => {
+            changeIsToggled(false);
+        }
+    }, []);
     const search = (value: string) => {
         setSearchValue(value);
     }

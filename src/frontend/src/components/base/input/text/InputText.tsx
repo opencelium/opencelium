@@ -55,6 +55,7 @@ const InputText: FC<InputTextProps> = ({
     isVisibilityTrue,
     rightIcon,
     onRightIconClick,
+    helpMessage,
     ...props
 }) => {
     if(!isVisible){
@@ -104,7 +105,7 @@ const InputText: FC<InputTextProps> = ({
     ) : null;
 
     return(
-        <Input errorBottom={errorBottom} overflow={overflow} height={height} paddingTop={paddingTop} marginTop={marginTop} background={background} minHeight={minHeight} marginLeft={marginLeft} width={width} paddingLeft={paddingLeft} paddingRight={paddingRight}
+        <Input helpMessage={helpMessage} errorBottom={errorBottom} overflow={overflow} height={height} paddingTop={paddingTop} marginTop={marginTop} background={background} minHeight={minHeight} marginLeft={marginLeft} width={width} paddingLeft={paddingLeft} paddingRight={paddingRight}
                afterInputComponent={afterInputComponent}
                display={display} hasUnderline={hasUnderline} readOnly={readOnly} value={value} maxLength={maxLength} placeholder={placeholder} required={required} label={label} icon={icon} error={error} isLoading={isLoading} isIconInside={isIconInside}>
             <InputStyled

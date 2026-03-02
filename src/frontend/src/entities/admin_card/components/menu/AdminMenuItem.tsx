@@ -31,6 +31,7 @@ const AdminMenuItem_3: FC<AdminMenuItemProps> =
     }) => {
         return (
             <MenuLinkWithSubLinks
+                id={'admin_menu_item'}
                 to={'/admin_cards'}
                 name={'settings'}
                 label={'Admin'}

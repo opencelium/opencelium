@@ -27,6 +27,9 @@ import {EmptyList} from "../EmptyList";
 import {ThStyled} from "./styles";
 import {ListRow} from "../ListRow";
 import ColumnHeaderText from "@app_component/base/text/ColumnHeaderText";
+import {setEntityIconKey} from "@application/redux_toolkit/slices/ApplicationSlice";
+import {Application} from "@application/classes/Application";
+import {useAppDispatch} from "@application/utils/store";
 
 
 const MAX_COLUMN_VALUE_LENGTH = 150;
@@ -47,7 +50,11 @@ const List: FC<ListViewProps> =
         onListRowClick,
         hasPaginationProps,
          hasNoHoverEffect,
+        entityKey,
+         shouldNoSetEntityHeader,
     }) => {
+    const dispatch = useAppDispatch();
+    const {entityIconKey} = Application.getReduxState();
     const [sortTypes, setSortTypes] = useState<any>({});
     const [visibleEntities, setVisibleEntities] = useState([]);
     const [isAllChecked, setAllChecked] = useState(false);
@@ -58,6 +65,30 @@ const List: FC<ListViewProps> =
             newSortTypes[collection.sortingProps[i]] = SortType.asc;
         }
         setSortTypes(newSortTypes)
+    }, []);
+
+    useEffect(() => {
+        if (!shouldNoSetEntityHeader) {
+            if (entityKey !== entityIconKey) {
+                if (entityKey) {
+                    if (visibleEntities.length === 0) {
+                        dispatch(setEntityIconKey(`${entityKey}-empty`));
+                    } else {
+                        dispatch(setEntityIconKey(entityKey));
+                    }
+                }
+            }
+            if (visibleEntities.length === 0 && `${entityKey}-empty` !== entityIconKey) {
+                dispatch(setEntityIconKey(`${entityKey}-empty`));
+            }
+        }
+    }, [entityKey, visibleEntities.length, shouldNoSetEntityHeader]);
+    useEffect(() => {
+        return () => {
+            if (!shouldNoSetEntityHeader) {
+                dispatch(setEntityIconKey(''));
+            }
+        }
     }, []);
     useEffect(() => {
         if (!hasPaginationProps) {
@@ -147,12 +178,13 @@ const List: FC<ListViewProps> =
                                     }
                                     let hasSortIcon = collection.sortingProps.findIndex((prop: string) => prop === propertyKey) !== -1;
                                     let sortIcon = hasSortIcon ? sortTypes[propertyKey] === SortType.asc ? 'keyboard_arrow_up' : 'keyboard_arrow_down' : '';
+                                    let idPostFix = propertyKey.split('.').join('-');
                                     return (
-                                        <ThStyled key={propertyKey} width={columnWidth} style={headerStyle}>
+                                        <ThStyled id={`collection-column-header-${idPostFix}`} key={propertyKey} width={columnWidth} style={headerStyle}>
                                             <div style={{display: 'flex', justifyContent: 'center', ...columnStyle}}>
                                                 {collection.translations[translationProp] && <span style={{marginLeft: hasSortIcon ? listProp?.header?.left ? 0 : '24px' : 0}}><ColumnHeaderText value={collection.translations[translationProp]}/></span>}
                                                 {hasSortIcon &&
-                                                    <TooltipButton target={'sort_button'} tooltip={sortTypes[propertyKey] === SortType.asc ? 'Asc' : 'Desc'} position={'top'} hasBackground={false} color={ColorTheme.Blue}
+                                                    <TooltipButton target={`sort_button_${propertyKey}`} tooltip={sortTypes[propertyKey] === SortType.asc ? 'Asc' : 'Desc'} position={'top'} hasBackground={false} color={ColorTheme.Blue}
                                                             handleClick={() => sort(propertyKey, sortTypes[propertyKey] === SortType.asc ? SortType.desc : SortType.asc)}
                                                             icon={sortIcon} size={24}
                                                     />

@@ -100,6 +100,7 @@ const MenuLinkLabelStyled = styled(Text)`
 
 const MenuLinkStyled = styled(Link)<MenuLinkStyledProps>`
     ${({theme, $onHoverColor}) => getNavLinkStyles(theme, $onHoverColor)}
+    margin: 0 5px;
 `;
 
 const MenuIconStyled = styled.span`

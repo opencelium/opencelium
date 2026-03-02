@@ -16,6 +16,7 @@
 import {ITheme} from "@style/Theme";
 
 interface CardProps{
+    id?: string,
     isButton?: boolean,
     isVisible?: boolean,
     padding?: string | number,

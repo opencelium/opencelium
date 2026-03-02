@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {FC} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import {withTheme} from 'styled-components';
 import {isArray} from "@application/utils/utils";
 import Text from "@app_component/base/text/Text";
@@ -22,6 +22,13 @@ import {IconStyled, LinkStyled, TitleStyled} from "./styles";
 import {Application} from "@application/classes/Application";
 import DashboardIcon from "@app_component/layout/top_bar/collection_title/icons/DashboardIcon";
 import {EntityHeaderTextSize} from "@entity/application/utils/constants";
+import Tour from "@app_component/base/tour/Tour";
+import {HelpIconStyled} from "@app_component/base/input/text/styles";
+import {ColorTheme} from "@style/Theme";
+import Button from "@app_component/base/button/Button";
+import {Step} from "react-joyride";
+import {DashboardTourSteps} from "@entity/dashboard/utils/tourSteps";
+import {switchSteps} from "@app_component/layout/top_bar/collection_title/switchSteps";
 
 const Title: FC<TitleProps> =
     ({
@@ -31,12 +38,17 @@ const Title: FC<TitleProps> =
     const {
         entityIconKey,
     } = Application.getReduxState();
+    const [startTour, toggleTour] = useState<boolean>(false);
+    const [steps, setSteps] = useState<Step[]>([]);
     let icon = null;
     switch (entityIconKey) {
         case 'dashboard':
             icon = <DashboardIcon/>
             break;
     }
+    useEffect(() => {
+        setSteps(switchSteps(entityIconKey));
+    }, [entityIconKey])
     if(isArray(title)){
         return(
             <TitleStyled className={className}>
@@ -64,11 +76,25 @@ const Title: FC<TitleProps> =
         )
     }
     return (
-        <TitleStyled className={className}>
+        <TitleStyled className={className} style={{position: 'relative'}} id={`${entityIconKey}-header`}>
             <span>
                 <Text value={title} size={`${EntityHeaderTextSize}px`}/>
                 <IconStyled>{icon}</IconStyled>
             </span>
+            {steps.length > 0 ? <React.Fragment>
+                <Tour steps={steps} toggle={toggleTour} show={startTour}/>
+                <Button
+                    position={'absolute'}
+                    right={!!icon ? -35 : -18}
+                    hasBackground={false}
+                    icon={'info'}
+                    color={ColorTheme.Blue}
+                    handleClick={() => toggleTour(true)}
+                />
+            </React.Fragment>
+                :
+                null
+            }
         </TitleStyled>
     );
 }

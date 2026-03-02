@@ -25,6 +25,7 @@ const LogoutMenuItem: FC<MenuItemProps> = ({isReadonly, onHoverColor}) => {
         let navigate = useNavigate();
         return (
             <MenuLink
+                id={'logout_menu_item'}
                 key={'log_out'}
                 to={'#'}
                 onClick={() => {

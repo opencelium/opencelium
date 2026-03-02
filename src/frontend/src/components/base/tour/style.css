@@ -1,0 +1,103 @@
+
+@keyframes tooltipFade {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.tooltip__body {
+    position: relative;
+    max-width: 360px;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 16px 16px 14px;
+    box-shadow:
+            0 10px 25px rgba(0, 0, 0, 0.12),
+            0 4px 10px rgba(0, 0, 0, 0.08);
+    color: #1f2937;
+    animation: tooltipFade 0.2s ease-out;
+}
+
+/* Close button (X) */
+.tooltip__close {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    background: transparent;
+    border: none;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    color: #9ca3af;
+    transition: color 0.15s ease;
+}
+
+.tooltip__close:hover {
+    color: #111827;
+}
+
+/* Title */
+.tooltip__title {
+    margin: 0 24px 8px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #111827;
+}
+
+/* Content */
+.tooltip__content {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #374151;
+}
+
+/* Footer */
+.tooltip__footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-top: 14px;
+    gap: 8px;
+}
+
+/* Buttons */
+.tooltip__button {
+    appearance: none;
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #4b5563;
+    transition:
+            background 0.15s ease,
+            color 0.15s ease;
+}
+
+.tooltip__button:hover {
+    background: #f3f4f6;
+    color: #111827;
+}
+
+/* Primary button (Next / Finish) */
+.tooltip__button--primary {
+    background: #2563eb;
+    color: #ffffff;
+    font-weight: 500;
+}
+
+.tooltip__button--primary:hover {
+    background: #1d4ed8;
+}
+
+/* Spacer for Back + Next */
+.tooltip__spacer {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}

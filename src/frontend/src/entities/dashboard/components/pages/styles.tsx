@@ -20,7 +20,7 @@ import {ReactGridLayoutStyledProps, WidgetItemStyledProps} from "../pages/interf
 
 const ReactGridLayout = WidthProvider(RGL);
 const DashboardFormStyled = styled.div`
-    width: calc(100% + 40px);
+    width: calc(100% - 48px);
     margin-left: -20px;
 `;
 

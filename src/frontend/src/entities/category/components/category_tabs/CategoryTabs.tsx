@@ -259,7 +259,7 @@ const CategoryTabs: FC<CategoryTabsProps> = ({setCurrentPage, readOnly = false})
             {capitalize(tab.name)}
           </div>
         ))}
-        {!readOnly && <div className={`${styles.tab} ${styles.add_tab}`} onClick={() => setVisibleAddCategoryDialog(!visibleAddCategoryDialog)}>
+        {!readOnly && <div id={'tab-create-category'} className={`${styles.tab} ${styles.add_tab}`} onClick={() => setVisibleAddCategoryDialog(!visibleAddCategoryDialog)}>
           +
         </div>
         }

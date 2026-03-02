@@ -24,7 +24,7 @@ import {ActionsStyled, FormSectionStyled, FormStyled, SectionStyled} from './sty
 import {isArray, isString} from "@application/utils/utils";
 import {useAppDispatch} from "@application/utils/store";
 import LicenseAlertMessage from "@entity/dashboard/components/license_alert_message/LicenseAlertMessage";
-import {setEntityHeader} from "@application/redux_toolkit/slices/ApplicationSlice";
+import {setEntityHeader, setEntityIconKey} from "@application/redux_toolkit/slices/ApplicationSlice";
 import {Application} from "@application/classes/Application";
 import {MultipleTitleProps} from "@application/interfaces/IApplication";
 const areEqualHeaders = (h1: string | MultipleTitleProps[], h2: string | MultipleTitleProps[]) => {
@@ -52,16 +52,29 @@ const Form: FC<FormProps> =
         error,
         gridTemplateColumns,
         hasNotAlert,
+         entityKey,
     }) => {
-        const dispatch = useAppDispatch();
-        const {
-            entityHeader,
-        } = Application.getReduxState();
+    const dispatch = useAppDispatch();
+    const {
+        entityHeader,
+         entityIconKey,
+    } = Application.getReduxState();
     useEffect(() => {
         if (!entityHeader || !areEqualHeaders(entityHeader, title)) {
             dispatch(setEntityHeader(title));
         }
     }, [title]);
+    useEffect(() => {
+        if (entityIconKey !== entityKey) {
+            dispatch(setEntityIconKey(entityKey));
+        }
+    }, [entityKey]);
+    useEffect(() => {
+        return () => {
+            dispatch(setEntityHeader(''))
+            dispatch(setEntityIconKey(''))
+        }
+    }, [])
     if(isLoading){
         return(
             <ContentLoading/>
@@ -107,6 +120,7 @@ const Form: FC<FormProps> =
 }
 
 Form.defaultProps = {
+    entityKey: '',
     title: '',
     error: null,
     gridTemplateColumns: '',

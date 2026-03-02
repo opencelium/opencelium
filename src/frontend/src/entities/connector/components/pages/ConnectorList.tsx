@@ -36,7 +36,7 @@ const ConnectorList: FC<ConnectorListProps> = permission(ConnectorPermissions.RE
     }, [connectors])
     const CConnectors = new Connectors(connectors, dispatch, deletingConnectorsById, uploadingConnectorImage, updatingConnector);
     return (
-        <CollectionView collection={CConnectors} shouldBeUpdated={shouldBeUpdated} isLoading={gettingConnectors === API_REQUEST_STATE.START} componentPermission={ConnectorPermissions}/>
+        <CollectionView entityKey={'connector-list'} collection={CConnectors} shouldBeUpdated={shouldBeUpdated} isLoading={gettingConnectors === API_REQUEST_STATE.START} componentPermission={ConnectorPermissions}/>
     )
 })
 

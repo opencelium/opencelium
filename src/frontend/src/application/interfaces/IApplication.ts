@@ -24,6 +24,18 @@ export interface IObservation{
     functionName: string,
 }
 
+export type EntityIconKeyType =
+    '' | 'dashboard' | 'profile-form' |
+    'add-connector-form-without-credentials' | 'add-connector-form-with-credentials' |
+    'update-connector-form-without-mask' | 'update-connector-form-with-mask' |
+    'view-connector-form' |
+    CollectionEntityKey | EmptyCollectionEntityKey
+    ;
+
+export type CollectionEntityKey = 'connector-list' | 'connection-list' | 'schedule-list';
+
+export type EmptyCollectionEntityKey = 'connector-list-empty' | 'connection-list-empty' | 'schedule-list-empty';
+
 export interface DispatchParamsProps<T>{
 
     // on/off validation before dispatching

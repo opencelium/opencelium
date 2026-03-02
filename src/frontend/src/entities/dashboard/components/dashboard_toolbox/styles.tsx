@@ -42,6 +42,7 @@ const DashboardToolboxStyled = styled.div`
 `;
 
 const TitleStyled = styled.div`
+    margin-right: 10px;
     display: inline-block;
     text-align: center;
     line-height: 65px;

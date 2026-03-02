@@ -137,7 +137,7 @@ const DashboardForm: FC<DashboardFormProps> =
         const getWidgets = () => {
             return layout.map(layout => {
                 return (
-                    <WidgetItemStyled key={layout.i} isWidgetEditOn={isWidgetEditOn} widgetKey={layout.i}>
+                    <WidgetItemStyled key={layout.i} id={`widget-${layout.i}`} isWidgetEditOn={isWidgetEditOn} widgetKey={layout.i}>
                         {isWidgetEditOn &&
                             <RemoveButtonStyled
                                 size={20}
