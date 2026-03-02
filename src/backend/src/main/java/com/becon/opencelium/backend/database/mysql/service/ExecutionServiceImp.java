@@ -18,26 +18,35 @@ package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.database.mysql.entity.Execution;
 import com.becon.opencelium.backend.database.mysql.repository.ExecutionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.becon.opencelium.backend.database.mysql.repository.projection.ExecutionStatsProjection;
+import com.becon.opencelium.backend.resource.application.ExecutionStatsDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class ExecutionServiceImp implements ExecutionService {
-    @Autowired
-    private ExecutionRepository executionRepository;
 
-    @Override
-    public Execution save(Execution execution) {
-        return executionRepository.save(execution);
+    private static final Logger log = LoggerFactory.getLogger(ExecutionServiceImp.class);
+    private static final String STATS_KEY = "executionStats";
+
+    private final ExecutionRepository executionRepository;
+    private final ConcurrentHashMap<String, ExecutionStatsDTO> cache = new ConcurrentHashMap<>(1);
+
+    public ExecutionServiceImp(ExecutionRepository executionRepository) {
+        this.executionRepository = executionRepository;
     }
 
     @Override
-    public void deleteAllBySchedulerId(int schedulerId) {
-        executionRepository.deleteBySchedulerId(schedulerId);
+    public Execution save(Execution execution) {
+        cache.remove(STATS_KEY);
+        log.debug("[Cache] '{}' evicted", STATS_KEY);
+        return executionRepository.save(execution);
     }
 
     @Override
@@ -48,6 +57,20 @@ public class ExecutionServiceImp implements ExecutionService {
     @Override
     public List<Execution> findAll() {
         return executionRepository.findAll();
+    }
+
+    @Override
+    public ExecutionStatsDTO getStats() {
+        return cache.computeIfAbsent(STATS_KEY, k -> {
+            log.debug("[Cache] '{}' miss — querying DB", STATS_KEY);
+            ExecutionStatsProjection p = executionRepository.getAggregatedStats();
+            return new ExecutionStatsDTO(
+                    p.getTotalExecs().intValue(),
+                    p.getTotalFailed().intValue(),
+                    p.getTotalRuntime().longValue(),
+                    Math.round(p.getAvgRuntime())
+            );
+        });
     }
 
     @Override

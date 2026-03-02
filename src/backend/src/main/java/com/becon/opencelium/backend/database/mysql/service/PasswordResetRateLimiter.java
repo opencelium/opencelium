@@ -1,7 +1,7 @@
 package com.becon.opencelium.backend.database.mysql.service;
 
+import com.becon.opencelium.backend.constant.props.PasswordResetProperties;
 import com.becon.opencelium.backend.exception.TooManyRequestsException;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -13,10 +13,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class PasswordResetRateLimiter {
-    @Value("${spring.security.max-email-validation-attempts}")
-    private int maxEmailValidationAttempts;
-    @Value("${spring.security.lockout-time}")
-    private long lockoutTime;
+    private final int maxEmailValidationAttempts;
+    private final long lockoutTime;
+
+    public PasswordResetRateLimiter(PasswordResetProperties props) {
+        this.maxEmailValidationAttempts = props.getMaxEmailValidationAttempts();
+        this.lockoutTime = props.getLockoutTime();
+    }
 
     private final Map<String, Deque<Instant>> attempts = new ConcurrentHashMap<>();
 

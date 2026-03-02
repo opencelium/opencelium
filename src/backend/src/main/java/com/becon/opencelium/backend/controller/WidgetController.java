@@ -3,7 +3,6 @@ package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.database.mysql.entity.Widget;
 import com.becon.opencelium.backend.database.mysql.service.WidgetService;
-import com.becon.opencelium.backend.resource.application.SystemMetricsDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.user.WidgetResource;
 import io.swagger.v3.oas.annotations.Operation;
@@ -113,31 +112,5 @@ public class WidgetController {
     public ResponseEntity<?> view(@PathVariable("id") int id){
         Widget widget = widgetService.findById(id).orElseThrow(() -> new RuntimeException("Widget not found"));
         return ResponseEntity.ok().body(widget);
-    }
-
-    @Operation(
-            summary = "Get system overview metrics",
-            description = "Returns aggregated execution statistics and current runtime metrics (CPU, memory, log size) for the system dashboard."
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Metrics successfully retrieved. Individual fields may be null if a metric could not be collected.",
-                    content = @Content(schema = @Schema(implementation = SystemMetricsDTO.class))
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))
-            ),
-            @ApiResponse(
-                    responseCode = "500",
-                    description = "Internal server error",
-                    content = @Content(schema = @Schema(implementation = ErrorResource.class))
-            )
-    })
-    @GetMapping("/system/overview")
-    public ResponseEntity<SystemMetricsDTO> systemOverview(){
-        return ResponseEntity.ok(widgetService.getSystemMetrics());
     }
 }
