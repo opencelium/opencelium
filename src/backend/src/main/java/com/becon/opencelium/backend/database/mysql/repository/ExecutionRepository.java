@@ -17,7 +17,9 @@
 package com.becon.opencelium.backend.database.mysql.repository;
 
 import com.becon.opencelium.backend.database.mysql.entity.Execution;
+import com.becon.opencelium.backend.database.mysql.repository.projection.ExecutionStatsProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +27,17 @@ import java.util.List;
 
 @Repository
 public interface ExecutionRepository extends JpaRepository<Execution, Long> {
+
+    @Query(nativeQuery = true, value = """
+            SELECT COUNT(*) AS totalExecs,
+                SUM(CASE WHEN status = 'F' THEN 1 ELSE 0 END) AS totalFailed,
+                COALESCE(SUM(CASE WHEN start_time IS NOT NULL AND end_time IS NOT NULL
+                    THEN TIMESTAMPDIFF(MICROSECOND, start_time, end_time) / 1000.0 ELSE 0 END), 0) AS totalRuntime,
+                COALESCE(AVG(CASE WHEN status = 'S' AND start_time IS NOT NULL AND end_time IS NOT NULL
+                    THEN TIMESTAMPDIFF(MICROSECOND, start_time, end_time) / 1000.0 ELSE NULL END), 0) AS avgRuntime
+            FROM execution
+            """)
+    ExecutionStatsProjection getAggregatedStats();
 
     List<Execution> findByEndTimeIsNull();
 
