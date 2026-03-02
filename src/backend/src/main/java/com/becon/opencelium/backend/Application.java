@@ -20,7 +20,6 @@ import com.becon.opencelium.backend.utility.migrate.YAMLMigrator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -29,7 +28,6 @@ import java.util.Properties;
 
 @EnableAsync
 @EnableScheduling
-@EnableCaching
 @ConfigurationPropertiesScan("com.becon.opencelium.backend.constant.props")
 @SpringBootApplication(scanBasePackages = "com.becon.opencelium.backend")
 public class Application {

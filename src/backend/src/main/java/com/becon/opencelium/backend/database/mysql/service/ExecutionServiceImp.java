@@ -16,36 +16,36 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
-import com.becon.opencelium.backend.configuration.CacheConfiguration;
 import com.becon.opencelium.backend.database.mysql.entity.Execution;
 import com.becon.opencelium.backend.database.mysql.repository.ExecutionRepository;
 import com.becon.opencelium.backend.database.mysql.repository.projection.ExecutionStatsProjection;
 import com.becon.opencelium.backend.resource.application.ExecutionStatsDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class ExecutionServiceImp implements ExecutionService {
 
     private static final Logger log = LoggerFactory.getLogger(ExecutionServiceImp.class);
+    private static final String STATS_KEY = "executionStats";
 
     private final ExecutionRepository executionRepository;
+    private final ConcurrentHashMap<String, ExecutionStatsDTO> cache = new ConcurrentHashMap<>(1);
 
     public ExecutionServiceImp(ExecutionRepository executionRepository) {
         this.executionRepository = executionRepository;
     }
 
     @Override
-    @CacheEvict(CacheConfiguration.EXECUTION_STATS)
     public Execution save(Execution execution) {
-        log.debug("[Cache] '{}' evicted", CacheConfiguration.EXECUTION_STATS);
+        cache.remove(STATS_KEY);
+        log.debug("[Cache] '{}' evicted", STATS_KEY);
         return executionRepository.save(execution);
     }
 
@@ -60,16 +60,17 @@ public class ExecutionServiceImp implements ExecutionService {
     }
 
     @Override
-    @Cacheable(CacheConfiguration.EXECUTION_STATS)
     public ExecutionStatsDTO getStats() {
-        log.debug("[Cache] '{}' miss — querying DB", CacheConfiguration.EXECUTION_STATS);
-        ExecutionStatsProjection p = executionRepository.getAggregatedStats();
-        return new ExecutionStatsDTO(
-                p.getTotalExecs().intValue(),
-                p.getTotalFailed().intValue(),
-                p.getTotalRuntime().longValue(),
-                Math.round(p.getAvgRuntime())
-        );
+        return cache.computeIfAbsent(STATS_KEY, k -> {
+            log.debug("[Cache] '{}' miss — querying DB", STATS_KEY);
+            ExecutionStatsProjection p = executionRepository.getAggregatedStats();
+            return new ExecutionStatsDTO(
+                    p.getTotalExecs().intValue(),
+                    p.getTotalFailed().intValue(),
+                    p.getTotalRuntime().longValue(),
+                    Math.round(p.getAvgRuntime())
+            );
+        });
     }
 
     @Override
