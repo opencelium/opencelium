@@ -9,6 +9,7 @@ public interface SocketConstant {
 
     String NOTIFICATION_DESTINATION_PREFIX = "/subscription"; // Message broker prefix for user notifications
     String NOTIFICATION_DESTINATION = "/subscription"; // WebSocket topic for user subscription notifications
+    String SYSTEM_METRICS_DESTINATION = "/subscription/system/metrics"; // WebSocket topic for live system metrics
 
     String SCHEDULER_DESTINATION_PREFIX = "/scheduler/running/all";
     String SCHEDULER_DESTINATION = "/scheduler/running/all";
