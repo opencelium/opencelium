@@ -33,6 +33,7 @@ import IncomingWebhook from "@entity/schedule/classes/IncomingWebhook";
 import {getIncomingWebhook} from "@entity/schedule/redux_toolkit/action_creators/IncomingWebhookCreators";
 import { clearWebhook } from "@entity/schedule/redux_toolkit/slices/IncomingWebhookSlice";
 import Validation from "@application/classes/Validation";
+import {NotificationTemplateEventTypeSteps, NotificationTemplateInputSteps} from "@entity/schedule/utils/tourSteps";
 
 
 const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
@@ -126,6 +127,7 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
             {autoFocus: true, label: 'Post', value: EVENT_TYPE.POST, key: EVENT_TYPE.POST},
             {label: 'Alert', value: EVENT_TYPE.ALERT, key: EVENT_TYPE.ALERT}
         ],
+        helpMessage: NotificationTemplateEventTypeSteps,
         required: true,
     }})
     const NotificationTypeComponent = notification.getSelect({
@@ -144,6 +146,7 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
             options: notificationTemplatesOptions,
             required: true,
             isLoading: gettingNotificationTemplates === API_REQUEST_STATE.START,
+            helpMessage: NotificationTemplateInputSteps,
         }
     });
     const RecipientsComponent = notification.getSelect({

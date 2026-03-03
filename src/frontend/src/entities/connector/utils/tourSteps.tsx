@@ -81,9 +81,8 @@ export const MasterPasswordStep: Step[] = [
     {
         title: 'Master Password',
         content: <span>
-            <span>This is required to securely store and encrypt sensitive configuration data.</span>
-            <br/>
-            <span>You can find master password in application.yml file or ask admin for help.</span>
+            <span>The Request Data section defines the payload that will be sent to the target system.
+You can specify static values or dynamically reference data from previous request results and webhooks.</span>
             </span>,
         target: '',
         placement: 'right',

@@ -17,9 +17,13 @@ import Rule from "@root/classes/Rule";
 import FormSelect from "@change_component/form_elements/FormSelect";
 import InputSelect from "@app_component/base/input/select/InputSelect";
 import {DefaultTextSize} from "@entity/application/utils/constants";
+import Tour from "@app_component/base/tour/Tour";
+import {ColorTheme} from "@style/Theme";
+import {ScheduleSupportLogsSteps} from "@entity/schedule/utils/tourSteps";
 
 const LogsButton = ({schedule}: {schedule: ISchedule}) => {
     const dispatch = useAppDispatch();
+    const [startTour, toggleTour] = useState<boolean>(false);
     const {generatingLogs} = useAppSelector((state: RootState) => state.connectionReducer);
     const [startAction, toggleAction] = useState<boolean>(false);
     const [isToggled, toggle] = useState<boolean>(false);
@@ -106,11 +110,23 @@ const LogsButton = ({schedule}: {schedule: ISchedule}) => {
                 handleClick={() => toggle(true)}
                 icon={'ballot'}
             />
-            <Dialog
+            <Dialog id={'schedule-support-log-header'}
                 actions={[{label: 'Create Support-Logs', isLoading: startAction && generatingLogs === API_REQUEST_STATE.START, onClick: startCollectingLogs, id: 'get_logs_button'}, {label: 'Cancel', onClick: () => toggle(false), id: 'cancel_button'}]}
                 active={isToggled}
                 toggle={() => toggle(!isToggled)}
-                title={"Support-Logs"}
+                title={<div style={{display: 'inline', position: 'relative'}}>
+                    <span>Support Logs</span>
+                    <Tour steps={ScheduleSupportLogsSteps} toggle={toggleTour} show={startTour}/>
+                    <Button
+                        position={'absolute'}
+                        right={-20}
+                        top={'-5px'}
+                        hasBackground={false}
+                        icon={'info'}
+                        color={ColorTheme.Blue}
+                        handleClick={() => toggleTour(true)}
+                    />
+                </div>}
                 styles={{modal: {minWidth: '650px'}, body: {minHeight: '400px'}}}
             >
                 <LogsButtonStyled>

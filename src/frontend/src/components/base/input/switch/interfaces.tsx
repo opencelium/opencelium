@@ -16,6 +16,7 @@
 import React, {InputHTMLAttributes, Key} from "react";
 import {ITheme} from "@style/Theme";
 import {ElementProps, InputElementProps} from "../interfaces";
+import {Step} from "react-joyride";
 
 interface InputSwitchProps extends InputHTMLAttributes<HTMLInputElement>, InputElementProps{
     label?: string,
@@ -27,6 +28,7 @@ interface InputSwitchProps extends InputHTMLAttributes<HTMLInputElement>, InputE
     position?: string,
     hasConfirmation?: boolean,
     confirmationText?: any,
+    helpMessage?: Step[],
 }
 
 interface InputSwitchStyledProps extends ElementProps{

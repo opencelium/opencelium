@@ -31,6 +31,8 @@ import { setCurrentSchedule } from "../../redux_toolkit/slices/ScheduleSlice";
 import {Schedule} from "../../classes/Schedule";
 import {ISchedule} from "../../interfaces/ISchedule";
 import Validation from "@application/classes/Validation";
+import {FormProps} from "@app_component/form/form/interfaces";
+import {ScheduleInputLogs} from "@entity/schedule/utils/tourSteps";
 
 
 const ScheduleForm: FC<IForm> = ({isAdd, isView, isUpdate}) => {
@@ -97,7 +99,12 @@ const ScheduleForm: FC<IForm> = ({isAdd, isView, isUpdate}) => {
         }
     })
     const DebugModeInput = schedule.getSwitch({
-        propertyName: "debugMode", props: {icon: 'summarize', label: 'Logs', name: schedule.debugMode ? 'Logs are activated' : 'Logs are deactivated'}
+        propertyName: "debugMode", props: {
+            icon: 'summarize',
+            label: 'Logs',
+            name: schedule.debugMode ? 'Logs are activated' : 'Logs are deactivated',
+            helpMessage: ScheduleInputLogs,
+        }
     })
     const CronExpInput = schedule.getCronExp();
     let actions = [<Button
@@ -117,11 +124,12 @@ const ScheduleForm: FC<IForm> = ({isAdd, isView, isUpdate}) => {
             isLoading={addingSchedule === API_REQUEST_STATE.START || updatingSchedule === API_REQUEST_STATE.START}
         />);
     }
-    const data = {
+    const data: FormProps = {
+        entityKey: 'schedule-form',
         title: formData.formTitle,
         actions,
         formSections: [
-            <FormSection label={{value: 'General Data'}}>
+            <FormSection label={{value: 'General Data'}} id={'schedule-form-general-data'}>
                 {TitleInput}
                 {DebugModeInput}
                 {ConnectionForm}

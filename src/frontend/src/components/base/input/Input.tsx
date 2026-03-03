@@ -22,7 +22,7 @@ import {Text} from "../text/Text";
 import {CheckboxStyled} from "@app_component/base/input/file/styles";
 import {isNumber} from "@application/utils/utils";
 import {ButtonIconSize, SmallTextSize} from "@entity/application/utils/constants";
-import HelpIcon from "@app_component/base/input/HelpIcon";
+import InputHelpIcon from "@app_component/base/input/InputHelpIcon";
 
 
 const Input: FC<InputProps> =
@@ -91,7 +91,7 @@ const Input: FC<InputProps> =
             return child;
         });
         if(!minHeight && minHeight !== 0){
-            minHeight = 40;
+            minHeight = 45;
             if(hasLabel){
                 minHeight += 20;
             }
@@ -127,7 +127,7 @@ const Input: FC<InputProps> =
                 {hasError && <ErrorStyled errorBottom={errorBottom} paddingLeft={paddingLeft} hasIcon={hasIcon} isIconInside={isIconInside}><Text value={error} size={`${SmallTextSize}px`} color={ColorTheme.Red}/></ErrorStyled>}
                 {hasMaxLength && <NumberCounterStyled>{`${value ? value.toString().length : 0}/${maxLength}`}</NumberCounterStyled>}
                 {afterInputComponent}
-                {!!helpMessage && <HelpIcon paddingRight={isSelect ? '20px' : !!afterInputComponent ? '25px' : 0} steps={helpMessage} inputRef={componentRef || inputRef}/>}
+                {!!helpMessage && <InputHelpIcon paddingRight={isSelect ? '20px' : !!afterInputComponent ? '25px' : 0} steps={helpMessage} inputRef={componentRef || inputRef}/>}
             </InputElementStyled>
         );
 }

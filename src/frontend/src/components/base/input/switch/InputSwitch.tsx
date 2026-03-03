@@ -39,6 +39,7 @@ const InputSwitch: FC<InputSwitchProps> = ({
        readOnly,
        hasConfirmation,
        confirmationText,
+       helpMessage,
        ...props
     }) => {
     const [isConfirmationOpened, toggleConfirmation] = useState<boolean>(false);
@@ -47,7 +48,7 @@ const InputSwitch: FC<InputSwitchProps> = ({
         hasConfirmation && toggleConfirmation(false);
     };
     return (
-        <Input readOnly={readOnly} placeholder={placeholder} required={required} label={label} icon={icon} error={error} isLoading={isLoading} isIconInside={isIconInside}>
+        <Input helpMessage={helpMessage} readOnly={readOnly} placeholder={placeholder} required={required} label={label} icon={icon} error={error} isLoading={isLoading} isIconInside={isIconInside}>
             <InputSwitchStyled {...props}>
                 <InputSwitcherStyled isChecked={isChecked} onClick={ readOnly ? () => {} : hasConfirmation ? () => toggleConfirmation(true) : handleClick}/>
                 <DefaultText value={name}/>

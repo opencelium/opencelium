@@ -18,7 +18,6 @@ import {connect} from 'react-redux';
 
 import styles from '@entity/connection/components/themes/default/general/content.scss';
 import {getThemeClass} from "@application/utils/utils";
-import HelpIcon from "../app/HelpIcon";
 
 
 
@@ -74,13 +73,6 @@ class ContentHeader extends Component{
             <div className={`${styles[classNames.header]} ${className}`}>
                 {this.renderBreadcrumbs()}
                 {title}
-                {
-                    hasHelp
-                        ?
-                            <HelpIcon onClick={header.onHelpClick} id={title}/>
-                        :
-                            null
-                }
                 <sup>
                     {
                         icons.map((Icon, key) => <React.Fragment key={key}>{Icon}</React.Fragment>)

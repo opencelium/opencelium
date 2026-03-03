@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isNumber, subArrayToString, unwrapField } from '@application/utils/utils';
+import { isNumber, unwrapField } from '@application/utils/utils';
 import { markFieldNameAsArray } from '@change_component//form_elements/form_connection/form_methods/help';
 import Enhancement from '@change_component/form_elements/form_connection/form_methods/mapping/enhancement/Enhancement';
 import GraphQLBody from '@change_component/form_elements/form_connection/form_methods/method/GraphQLBody';
@@ -30,6 +30,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Col, Row } from 'react-grid-system';
 import { withTheme } from 'styled-components';
+import HelpIcon from "@app_component/base/tour/HelpIcon";
+import {EnhancementSteps} from "@root/utils/tourSteps";
 
 class Body extends React.Component {
 	constructor(props) {
@@ -43,6 +45,8 @@ class Body extends React.Component {
 			isOpenedEnhancement: false,
 		};
 		this.JsonBodyRef = React.createRef();
+		this.EnhancementRef = React.createRef();
+		this.BodyRef = React.createRef();
 		this.enhancementRef = React.createRef();
 		this._isDirty = false;
 		this._openSnapshot = null;
@@ -400,6 +404,7 @@ class Body extends React.Component {
 			method,
 			connector,
 			connection,
+			tourSteps,
 		} = this.props;
 		const isGraphQLData = method.isGraphQLData();
 		const hasEnhancement = this.props.hasEnhancement && !isGraphQLData;
@@ -430,7 +435,7 @@ class Body extends React.Component {
 							location='body'
 						/>
 					)}
-					<div style={{
+					<div ref={this.BodyRef} style={{
 						position: 'relative',
 						flex: 1,
 						display: 'flex',
@@ -438,14 +443,17 @@ class Body extends React.Component {
 						maxHeight: !isToggledIcon ? '40px' : isToggledReferenceIcon ? '50%' : 'calc(100% - 40px)',
 					}}>
 						<div>
-							<b>{bodyTitle}</b>
+							<b ref={this.BodyRef}>{bodyTitle}</b>
 							<TooltipFontIcon
 								tooltipPosition={'right'}
-								style={{ verticalAlign: 'middle', cursor: 'pointer' }}
+								style={{ verticalAlign: 'middle', cursor: 'pointer', marginLeft: '15px' }}
 								onClick={() => this.setState({ isToggledIcon: !isToggledIcon })}
 								tooltip={isToggledIcon ? 'Hide' : 'Show'}
 								value={isToggledIcon ? 'expand_less' : 'chevron_right'}
 							/>
+							<div style={{position: 'absolute', left: '100px', top: 0}}>
+								<HelpIcon steps={tourSteps} inputRef={this.BodyRef}/>
+							</div>
 						</div>
 						{isToggledIcon && this.renderBody({
 							flex: 1,
@@ -454,16 +462,19 @@ class Body extends React.Component {
 					</div>
 				</div>
 				{hasEnhancement && (
-					<div className={styles.body_enhancement}>
+					<div className={styles.body_enhancement} ref={this.EnhancementRef}>
 						<div className={styles.body_enhancement_title}>
 							<b>{'Enhancement'}</b>
+							<div style={{position: 'absolute', left: '115px', top: '-10px'}}>
+								<HelpIcon steps={EnhancementSteps} inputRef={this.EnhancementRef}/>
+							</div>
 							{currentEnhancement && (
 								<Button
 									icon={'open_in_new'}
 									onClick={() => this.toggleEnhancement()}
 									iconSize={'13px'}
 									label={'Open script in new window'}
-									style={{ marginBottom: '10px' }}
+									style={{marginBottom: '10px'}}
 								/>
 							)}
 						</div>
@@ -550,6 +561,7 @@ Body.defaultProps = {
 	isDraft: false,
 	hasEnhancement: true,
 	hasError: false,
+	tourSteps: [],
 };
 
 export default withTheme(Body);
