@@ -23,7 +23,6 @@ export const saveEditorConfig = createAsyncThunk(
     async(data: SaveEditorConfig, thunkAPI) => {
         try{
             const request = new ConnectionRequest();
-            console.log('save', data)
             //await request.saveEditorConfig(data);
         }catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));

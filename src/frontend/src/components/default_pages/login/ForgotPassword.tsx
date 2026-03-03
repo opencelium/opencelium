@@ -16,13 +16,14 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Toast, ToastBody, ToastHeader } from 'reactstrap';
 
-import Card from '@entity/connection/components/components/general/basic_components/card/Card';
 import InputText from '@app_component/base/input/text/InputText';
 import { ColorTheme } from '@style/Theme';
 import Button from '@app_component/base/button/Button';
 
 import Request from '@entity/application/requests/classes/Request';
 import { SimpleMessageResponse, ErrorResponse } from '@application/requests/classes/Auth';
+import {Card} from "@app_component/base/card/Card";
+import DefaultText from "@app_component/base/text/DefaultText";
 
 const SERVER_UNREACHABLE_MESSAGE = 'Server is not reachable, check status of the server.';
 
@@ -135,29 +136,31 @@ const ForgotPassword: FC = () => {
 		<>
 			{ToastNode}
 
-			<div style={{ display: 'flex', justifyContent: 'center', marginTop: 60 }}>
+			<div style={{
+				display: 'flex',
+				justifyContent: 'center',
+				marginTop: 60,
+			}}>
 				<Card
 					style={{
-						minHeight: 360,
+						width: 500,
+						height: 300,
 						padding: '0 30px',
 						display: 'flex',
 						alignItems: 'center',
 						justifyContent: 'center',
-						background: '#fff',
-						borderRadius: '5px',
 					}}
 				>
 					{!isSent ? (
 						<div
 							style={{
-								width: 420,
 								display: 'flex',
 								flexDirection: 'column',
 								alignItems: 'center',
 							}}
 						>
-							<div style={{ textAlign: 'center', fontSize: 18, marginBottom: 28 }}>
-								Please, enter your email:
+							<div style={{ textAlign: 'center', marginBottom: 28 }}>
+								<DefaultText value={"Please, enter your email:"}/>
 							</div>
 
 							<InputText
@@ -169,7 +172,7 @@ const ForgotPassword: FC = () => {
 								placeholder='Email'
 								background={ColorTheme.White}
 								readOnly={isLoading}
-								width='240px'
+								width='260px'
 								error={emailError}
 								onBlur={() => {
 									const err = validateEmail(email);
@@ -180,8 +183,6 @@ const ForgotPassword: FC = () => {
 							<div
 								style={{
 									alignSelf: 'flex-end',
-									marginTop: 30,
-									marginRight: 85,
 								}}
 							>
 								<Button

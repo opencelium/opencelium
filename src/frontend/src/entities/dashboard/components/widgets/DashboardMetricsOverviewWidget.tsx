@@ -41,7 +41,6 @@ function formatDuration(milliseconds: number): string {
 	return `${Math.floor(seconds)} sec`;
 }
 function calculateClampedPercentage(total: number, value: number): number {
-	console.log(total, value)
 	if (total <= 0) return 0;
 
 	if (value <= 0) return 0;

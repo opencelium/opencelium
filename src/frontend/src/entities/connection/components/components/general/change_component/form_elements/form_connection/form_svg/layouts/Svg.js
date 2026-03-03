@@ -403,7 +403,6 @@ class Svg extends React.Component {
                         viewBox.width = svgElement.viewBox.baseVal.width * scaleDelta;
                         viewBox.height = svgElement.viewBox.baseVal.height * scaleDelta;
                         CSvg.setViewBox(svgId, viewBox);
-                        console.log(viewBox)
                     }
                 }
             }

@@ -17,7 +17,7 @@ import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Toast, ToastBody, ToastHeader } from 'reactstrap';
 
-import Card from '@entity/connection/components/components/general/basic_components/card/Card';
+import {Card} from "@app_component/base/card/Card";
 import InputText from '@app_component/base/input/text/InputText';
 import { InputTextType } from '@app_component/base/input/text/interfaces';
 import { ColorTheme } from '@style/Theme';
@@ -25,6 +25,7 @@ import Button from '@app_component/base/button/Button';
 
 import Request from '@entity/application/requests/classes/Request';
 import { SimpleMessageResponse, ErrorResponse } from '@application/requests/classes/Auth';
+import DefaultText from "@app_component/base/text/DefaultText";
 
 const SERVER_UNREACHABLE_MESSAGE = 'Server is not reachable, check status of the server.';
 const PASSWORD_LENGTH_MESSAGE = 'Password must contain at least 8 symbols.';
@@ -200,16 +201,19 @@ const SetPassword: FC = () => {
 		<>
 			{ToastNode}
 
-			<div style={{ display: 'flex', justifyContent: 'center', marginTop: 60 }}>
+			<div style={{
+				display: 'flex',
+				justifyContent: 'center',
+				marginTop: 60,
+			}}>
 				<Card
 					style={{
-						minHeight: 360,
+						width: 500,
+						height: 300,
 						padding: '0 30px',
 						display: 'flex',
 						alignItems: 'center',
 						justifyContent: 'center',
-						background: '#fff',
-						borderRadius: '5px',
 					}}
 				>
 					{expired ? (
@@ -217,16 +221,15 @@ const SetPassword: FC = () => {
 					) : !isSuccess ? (
 						<div
 							style={{
-								width: 420,
 								display: 'flex',
 								flexDirection: 'column',
 								alignItems: 'center',
 							}}
 						>
 							<p
-								style={{ textAlign: 'center', fontSize: 16, marginBottom: 28 }}
+								style={{ textAlign: 'center', marginBottom: 28 }}
 							>
-								Please, enter your new password here:
+								<DefaultText value={"Please, enter your new password here:"}/>
 							</p>
 
 							<InputText
@@ -245,7 +248,7 @@ const SetPassword: FC = () => {
 								}}
 								placeholder='Password'
 								background={ColorTheme.White}
-								width='240px'
+								width='260px'
 								readOnly={isLoading}
 								error={passwordError}
 							/>
@@ -268,7 +271,7 @@ const SetPassword: FC = () => {
 								}}
 								placeholder='Repeat Password'
 								background={ColorTheme.White}
-								width='240px'
+								width='260px'
 								readOnly={isLoading}
 								error={repeatPasswordError}
 							/>
@@ -276,8 +279,6 @@ const SetPassword: FC = () => {
 							<div
 								style={{
 									alignSelf: 'flex-end',
-									marginTop: 30,
-									marginRight: 85,
 								}}
 							>
 								<Button

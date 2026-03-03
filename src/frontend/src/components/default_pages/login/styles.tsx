@@ -60,6 +60,9 @@ const ForgotPasswordLink = styled.div`
     top: 310px;
     left: 50%;
     transform: translateX(-50%);
+    &:hover {
+        text-decoration-line: underline;
+    }
 `
 
 export {
