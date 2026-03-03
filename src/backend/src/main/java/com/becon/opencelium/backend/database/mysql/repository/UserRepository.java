@@ -32,7 +32,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 //    @Query(value = "SELECT * FROM user WHERE email=?1", nativeQuery = true)
     Optional<User> findByEmail(String email);
     Optional<User> findByUsernameAndAuthMethod(String username, AuthMethod authMethod);
-    Optional<User> findOneById(int id);
     @Transactional
     void deleteOneById(int id);
     boolean existsByEmail(String email);
