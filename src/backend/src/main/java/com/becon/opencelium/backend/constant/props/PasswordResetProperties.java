@@ -2,7 +2,7 @@ package com.becon.opencelium.backend.constant.props;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix = "spring.restor-psw")
+@ConfigurationProperties(prefix = "opencelium.forgot-psw")
 public class PasswordResetProperties {
     private String baseUrl;
     private long tokenActivityTime = 60_000; // 1 minute
