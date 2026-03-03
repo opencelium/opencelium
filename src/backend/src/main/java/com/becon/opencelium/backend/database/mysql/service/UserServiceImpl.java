@@ -34,7 +34,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -74,12 +73,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
+    @Transactional(readOnly = true)
     public Optional<User> findById(int id) {
         return userRepository.findOneById(id);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public User getById(Integer userId) {
         return findById(userId)
                 .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
