@@ -5,6 +5,8 @@ import {
     ConstantSelectOptions,
     ReferenceType
 } from "@app_component/operator_builder/reference_generator/props";
+import {Step} from "react-joyride";
+import {getLoopOperatorTours} from "@app_component/operator_builder/tourSteps";
 
 export default class LoopBaseOperator implements IBaseOperator, BaseOperatorProps<LoopOperatorName>{
     name: LoopOperatorName;
@@ -29,5 +31,9 @@ export default class LoopBaseOperator implements IBaseOperator, BaseOperatorProp
             value: this.name,
             label: LoopOperatorLabel[this.name],
         }
+    }
+
+    getTourSteps(): Step[] {
+        return getLoopOperatorTours(this.name);
     }
 }
