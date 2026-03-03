@@ -262,6 +262,7 @@ class Form extends React.Component{
                             } else {
                                 return (
                                     <FormSection
+                                        id={form?.id}
                                         shouldScroll={shouldScroll}
                                         key={key1}
                                         isSubFormSection={false}

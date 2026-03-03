@@ -29,7 +29,8 @@ export type EntityIconKeyType =
     'add-connector-form-without-credentials' | 'add-connector-form-with-credentials' |
     'update-connector-form-without-mask' | 'update-connector-form-with-mask' |
     'view-connector-form' |
-    CollectionEntityKey | EmptyCollectionEntityKey
+    CollectionEntityKey | EmptyCollectionEntityKey |
+    'schedule-form' | 'add-connection-form-without-connectors' | 'add-connection-form-with-connectors' | 'update-connection-form'
     ;
 
 export type CollectionEntityKey = 'connector-list' | 'connection-list' | 'schedule-list';

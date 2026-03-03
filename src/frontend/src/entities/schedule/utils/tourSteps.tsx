@@ -1,5 +1,6 @@
 import React from 'react';
 import {Step} from "react-joyride";
+import {Link} from "react-router-dom";
 
 export const EmptyScheduleListSteps: Step[] = [
     {
@@ -174,3 +175,73 @@ export const ScheduleListSteps: Step[] = [
     },
 ]
 
+
+export const ScheduleFormSteps: Step[] = [
+    {
+        title: 'General Data',
+        content:
+            'This form is used to create a schedule that automatically executes a selected connection based on a defined time configuration in cron expression field.',
+        target: '#schedule-form-general-data',
+        placement: 'right',
+        disableBeacon: true,
+    },
+]
+
+export const ScheduleInputLogs: Step[] = [{
+    title: 'Enable or disable logging for this schedule',
+    content: `When enabled, execution details will be stored and available for review.`,
+    target: '',
+    placement: 'right',
+    disableBeacon: true,
+    hideCloseButton: true,
+    hideFooter: true,
+}]
+
+export const ScheduleSupportLogsSteps: Step[] = [
+    {
+        title: 'Create Support-Logs',
+        content:
+            <span>
+                <span>
+                    This form allows you to create a support log file while controlling how sensitive data is masked.
+                    Masking ensures that confidential information is hidden in logs for security and compliance purposes.
+                </span>
+                <span>Once the creation is complete, the support file will be available for download in <Link to={'/support_files'} target={'_blank'}>{"Support Files"}</Link>.</span>
+            </span>,
+        target: '#schedule-support-log-header',
+        placement: 'right',
+        disableBeacon: true,
+    },
+]
+
+
+export const NotificationTemplateInputSteps: Step[] = [{
+    title: 'Template',
+    content: <span>
+            <span>
+                Select a notification template that defines the message content.
+                Templates can be created and managed in <Link to={'/notification_templates'} target={'_blank'}>{"Notification Templates"}</Link>.
+            </span>
+        </span>,
+    target: '',
+    placement: 'right',
+    disableBeacon: true,
+    hideCloseButton: true,
+    hideFooter: true,
+}]
+export const NotificationTemplateEventTypeSteps: Step[] = [{
+    title: 'Event Type',
+    content: <span>
+            Defines when the notification is triggered:
+            <ul style={{marginLeft: '20px'}}>
+                <li>Pre — before the schedule execution starts</li>
+                <li>Post — after the schedule execution completes</li>
+                <li>Alert — when an error or exceptional event occurs</li>
+            </ul>
+        </span>,
+    target: '',
+    placement: 'right',
+    disableBeacon: true,
+    hideCloseButton: true,
+    hideFooter: true,
+}]

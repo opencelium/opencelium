@@ -52,6 +52,7 @@ export const SubFormSections = (props) => {
                 form.map((subform, key2) => {
                     return (
                         <FormSection
+                            id={subform?.id}
                             shouldScroll={shouldScroll}
                             key={`${key1}_${key2}`}
                             isSubFormSection={true}

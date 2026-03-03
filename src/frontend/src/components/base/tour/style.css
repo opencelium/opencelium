@@ -1,14 +1,4 @@
 
-@keyframes tooltipFade {
-    from {
-        opacity: 0;
-        transform: translateY(4px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
 .tooltip__body {
     position: relative;
     max-width: 360px;
@@ -19,7 +9,6 @@
             0 10px 25px rgba(0, 0, 0, 0.12),
             0 4px 10px rgba(0, 0, 0, 0.08);
     color: #1f2937;
-    animation: tooltipFade 0.2s ease-out;
 }
 
 /* Close button (X) */
@@ -99,5 +88,5 @@
 .tooltip__spacer {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 15px;
 }

@@ -17,7 +17,7 @@ import React, {Component, useEffect} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 
-import {setFullScreen} from "@application/redux_toolkit/slices/ApplicationSlice";
+import {setEntityHeader, setEntityIconKey, setFullScreen} from "@application/redux_toolkit/slices/ApplicationSlice";
 import {
     updateConnection,
     checkConnectionTitle,
@@ -40,6 +40,7 @@ import {useParams} from "react-router";
 } from "@root/redux_toolkit/slices/ConnectionSlice";
  import {useAppDispatch} from "@application/utils/store";
  import {getAllCategories} from "@entity/category/redux_toolkit/action_creators/CategoryCreators";
+ import {Application} from "@application/classes/Application";
 
 /*
 * TODO: implement connection update
@@ -89,13 +90,22 @@ export default function(props) {
     const navigate = useNavigate();
     let urlParams = useParams();
     const dispatch = useAppDispatch();
+    const {
+        entityIconKey,
+    } = Application.getReduxState();
+    const entityKey = 'update-connection-form';
     useEffect(() => {
         dispatch(setFullScreen(true));
+        if (entityIconKey !== entityKey) {
+            dispatch(setEntityIconKey(entityKey));
+        }
         return () => {
             dispatch(setTemplatePanelVisibility(false))
             dispatch(setSavePanelVisibility(false))
             dispatch(setWebhooks([]));
             dispatch(setFullScreen(false));
+            dispatch(setEntityHeader(''))
+            dispatch(setEntityIconKey(''))
         }
     }, []);
     return <ConnectionUpdate {...props} navigate={navigate} params={urlParams}/>;

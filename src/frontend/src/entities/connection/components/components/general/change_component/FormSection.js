@@ -369,7 +369,7 @@ class FormSection extends Component {
 
     render(){
         const {isFormSectionMinimized} = this.state;
-        const {isSubFormSection, isOneFormSectionFullScreen, } = this.props;
+        const {isSubFormSection, isOneFormSectionFullScreen, id } = this.props;
         let style = {};
         const content = {
             visible: true,
@@ -392,6 +392,7 @@ class FormSection extends Component {
         const hasIcons = content.hasFullScreenFunction || !!content.AdditionalIcon;
         return (
             <Card
+                id={id}
                 className={`${!isSubFormSection ? styles.form : ''} ${
                   content.visible ? content.formClassName : ''
                 } ${isFormSectionMinimized ? styles.minimized_form : ''} ${

@@ -40,6 +40,7 @@ import { Category } from "@entity/category/classes/Category";
 import {jsonToString} from "@app_component/operator_builder/utils";
 import Validation from "@application/classes/Validation";
 import DropdownActionButton from '@app_component/dropdown_action_button/DropdownActionButton';
+import {setEntityIconKey} from "@application/redux_toolkit/slices/ApplicationSlice";
 
 /**
  * common component to add and update Connection
@@ -301,6 +302,11 @@ export function ConnectionForm(type) {
                     let toConnectorId = connection.toConnector.id;
                     if(connection.template.mode === TEMPLATE_MODE){
                         this.props.fetchTemplates({from: fromConnectorId, to: toConnectorId});
+                    }
+                    if (fromConnectorId !== 0 && toConnectorId !== 0) {
+                        if (this.isAdd && this.props.entityIconKey !== 'add-connection-form-with-connectors') {
+                            this.props?.setEntityIconKey('add-connection-form-with-connectors')
+                        }
                     }
                     this.setState({
                         hasModeInputsSection: fromConnectorId !== 0 && toConnectorId !== 0,
@@ -662,6 +668,7 @@ export function ConnectionForm(type) {
                             },
                             this.getFirstConnectorFormSection(),
                         ],
+                        id: 'connection-form-direction',
                         formClassName: this.isView ? styles.direction_form : '',
                         hint: {text: t(`${this.translationKey}.FORM.HINT_1`)},
                         header: t(`${this.translationKey}.FORM.PAGE_1`),
@@ -730,6 +737,7 @@ export function ConnectionForm(type) {
                         <React.Fragment>
                         <div style={{ float: 'left', marginRight: 10 }}>
                             <DropdownActionButton
+                                id={'connection-form-add-options'}
                                 label={this.isAdd ? 'Add' : 'Update'}
                                 direction={'down'}
                                 isLoading={false}
@@ -746,6 +754,7 @@ export function ConnectionForm(type) {
                                         entity={entity}
                                         disabled={isDisabled}
                                         buttonProps={{
+                                            id: 'connection-form-create-template',
                                             icon: 'add',
                                             title: t(`${this.translationKey}.FORM.ADD_TEMPLATE`)
                                         }}
@@ -770,6 +779,7 @@ export function ConnectionForm(type) {
 
                                 <div style={{float: 'left'}}>
                                     <Button
+                                        id={'connection-form-cancel'}
                                         key={'cancel_button'}
                                         label={'Cancel'}
                                         icon={'cancel'}

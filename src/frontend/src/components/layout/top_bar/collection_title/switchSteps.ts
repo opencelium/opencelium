@@ -3,11 +3,14 @@ import {ProfileTourSteps} from "@entity/profile/utils/tourSteps";
 import {EntityIconKeyType} from "@application/interfaces/IApplication";
 import {
     AddConnectorTourSteps, ConnectorListSteps, EmptyConnectorListSteps,
-    UpdateConnectorTourSteps,
     UpdateConnectorWithMaskTourSteps, UpdateConnectorWithoutMaskTourSteps
 } from "@entity/connector/utils/tourSteps";
-import {ConnectionListSteps, EmptyConnectionListSteps} from "@root/utils/tourSteps";
-import {EmptyScheduleListSteps, ScheduleListSteps} from "@entity/schedule/utils/tourSteps";
+import {
+    AddConnectionStepsWithConnectors, AddConnectionStepsWithoutConnectors,
+    ConnectionListSteps,
+    EmptyConnectionListSteps, UpdateConnectionStepsWithConnectors
+} from "@root/utils/tourSteps";
+import {EmptyScheduleListSteps, ScheduleFormSteps, ScheduleListSteps} from "@entity/schedule/utils/tourSteps";
 
 export function switchSteps(entityIconKey: EntityIconKeyType) {
 
@@ -36,6 +39,14 @@ export function switchSteps(entityIconKey: EntityIconKeyType) {
             return EmptyScheduleListSteps;
         case 'schedule-list':
             return ScheduleListSteps;
+        case 'schedule-form':
+            return ScheduleFormSteps;
+        case 'add-connection-form-without-connectors':
+            return AddConnectionStepsWithoutConnectors;
+        case 'add-connection-form-with-connectors':
+            return AddConnectionStepsWithConnectors;
+        case 'update-connection-form':
+            return UpdateConnectionStepsWithConnectors;
         default:
             return [];
     }

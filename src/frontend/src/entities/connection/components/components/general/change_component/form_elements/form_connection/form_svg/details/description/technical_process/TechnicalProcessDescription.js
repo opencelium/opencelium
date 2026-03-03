@@ -33,6 +33,7 @@ import TestMethodButton from "@change_component/form_elements/form_connection/fo
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 import { setModalCurrentTechnicalItem } from '@entity/connection/redux_toolkit/slices/ModalConnectionSlice';
 import {DefaultTextSize} from "@entity/application/utils/constants";
+import {RequestDataSteps} from "@root/utils/tourSteps";
 function mapStateToProps(state){
     const editor = state.connectionEditorReducer;
     return{
@@ -174,6 +175,7 @@ class TechnicalProcessDescription extends React.Component {
                             readOnly={readOnly}
                             theme={theme}
                             source={request.getHeaderFields()}
+                            tourSteps={RequestDataSteps}
                         />
                         <Body
                             toggleBodyDialog={toggleRequestBodyDialog}
@@ -191,6 +193,7 @@ class TechnicalProcessDescription extends React.Component {
                             bodyTitle={"Request data"}
                             hasError={isErrorLocationRequest && isErrorLocationBody}
                             ref={this.bodyRef}
+                            tourSteps={RequestDataSteps}
                         />
                     </Row>
                 </Col>

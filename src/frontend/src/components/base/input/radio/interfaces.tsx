@@ -16,6 +16,7 @@
 import React, {InputHTMLAttributes, Key} from "react";
 import {ITheme} from "@style/Theme";
 import {ElementProps, InputElementProps} from "../interfaces";
+import {Step} from "react-joyride";
 
 enum RadiosAlign{
     Horizontal= 'horizontal',
@@ -36,6 +37,7 @@ interface InputRadiosProps extends InputHTMLAttributes<HTMLInputElement>, InputE
     options: InputRadioProps[],
     theme?: ITheme,
     align?: RadiosAlign,
+    helpMessage?: Step[],
 }
 
 interface InputRadiosStyledProps extends ElementProps{

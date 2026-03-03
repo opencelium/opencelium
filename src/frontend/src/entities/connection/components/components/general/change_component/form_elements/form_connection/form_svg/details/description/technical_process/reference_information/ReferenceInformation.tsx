@@ -9,8 +9,10 @@ import {
 	TargetFieldStyled,
 } from '@change_component/form_elements/form_connection/form_svg/details/description/technical_process/reference_information/styles';
 import CFieldBinding from '@classes/content/connection/field_binding/CFieldBinding';
-import React, { FC, useEffect, useState } from 'react';
+import React, {FC, useEffect, useRef, useState} from 'react';
 import { Reference, ReferenceInformationProps } from './interfaces';
+import HelpIcon from "@app_component/base/tour/HelpIcon";
+import {ReferenceInfoSteps} from "@root/utils/tourSteps";
 
 const ReferenceInformation: FC<ReferenceInformationProps> = ({
 	method,
@@ -22,6 +24,7 @@ const ReferenceInformation: FC<ReferenceInformationProps> = ({
 	location,
 	style,
 }) => {
+	const ContainerRef = useRef();
 	const [fieldBindings, setFieldBindings] = useState<CFieldBinding[]>([]);
 	const extractReferences = () => {
 		const allBindings = connection.getFieldBindingsByMethod(method);
@@ -42,19 +45,23 @@ const ReferenceInformation: FC<ReferenceInformationProps> = ({
 	}, [fieldBindings]);
 	const hasFieldBindings = fieldBindings.length > 0;
 	return (
-		<ReferenceInformationStyled style={style}>
+		<ReferenceInformationStyled style={style} ref={ContainerRef}>
 			<div>
 				<b>{`Reference information`}</b>
 				<span>{hasFieldBindings ? '' : ' (is empty now)'}</span>
 				{hasFieldBindings && (
 					<TooltipFontIcon
 						tooltipPosition={'right'}
-						style={{ verticalAlign: 'middle', cursor: 'pointer' }}
+						style={{verticalAlign: 'middle', cursor: 'pointer', marginLeft: '15px'}}
 						onClick={() => toggleIcon(!isToggledIcon)}
 						tooltip={isToggledIcon ? 'Hide' : 'Show'}
 						value={isToggledIcon ? 'expand_less' : 'chevron_right'}
 					/>
 				)}
+
+				<div style={{position: 'absolute', left: '170px', top: 0}}>
+					<HelpIcon steps={ReferenceInfoSteps} inputRef={ContainerRef}/>
+				</div>
 			</div>
 			{isToggledIcon && hasFieldBindings && (
 				<FieldBindingsBlockStyled>

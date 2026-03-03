@@ -28,7 +28,7 @@ import {
     setCurrentConnection, setConnection,
     setTemplatePanelVisibility, setSavePanelVisibility, setWebhooks
 } from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
-import {setFullScreen} from "@application/redux_toolkit/slices/ApplicationSlice";
+import {setEntityHeader, setEntityIconKey, setFullScreen} from "@application/redux_toolkit/slices/ApplicationSlice";
 import {addTemplate, getTemplatesByConnectors as fetchTemplates} from "@entity/template/redux_toolkit/action_creators/TemplateCreators";
 import {getAllConnectors as fetchConnectors} from "@entity/connector/redux_toolkit/action_creators/ConnectorCreators";
 import {permission} from "@entity/application/utils/permission";
@@ -38,6 +38,7 @@ import {ConnectionPermissions} from "@entity/connection/constants";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import {useAppDispatch} from "@application/utils/store";
 import {getAllCategories} from "@entity/category/redux_toolkit/action_creators/CategoryCreators";
+import {Application} from "@application/classes/Application";
 
 
 function mapStateToProps(state){
@@ -77,7 +78,7 @@ function mapStateToProps(state){
 @connect(mapStateToProps, {
     updateConnection, addConnection, addTemplate, fetchConnectors, checkConnectionTitle,
     fetchTemplates, testConnection, setCurrentTechnicalItem, setCurrentConnection,
-    setFullScreen, setConnection,
+    setFullScreen, setConnection, setEntityIconKey,
 })
 @permission(ConnectionPermissions.CREATE, true)
 @withTranslation(['connections', 'app', 'basic_components'])
@@ -88,12 +89,21 @@ class ConnectionAdd extends Component{}
 export default function(props) {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
+    const {
+        entityIconKey,
+    } = Application.getReduxState();
+    const entityKey = 'add-connection-form-without-connectors';
     useEffect(() => {
+        if (entityIconKey !== entityKey) {
+            dispatch(setEntityIconKey(entityKey));
+        }
         return () => {
             dispatch(setTemplatePanelVisibility(false))
             dispatch(setSavePanelVisibility(false))
             dispatch(setWebhooks([]));
+            dispatch(setEntityHeader(''))
+            dispatch(setEntityIconKey(''))
         }
     }, []);
-    return <ConnectionAdd {...props} navigate={navigate} />;
+    return <ConnectionAdd {...props} entityIconKey={entityIconKey} navigate={navigate} />;
 }

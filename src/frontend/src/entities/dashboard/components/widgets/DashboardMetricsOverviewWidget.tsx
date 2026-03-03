@@ -27,7 +27,9 @@ import {getMetrics} from "@entity/dashboard/redux_toolkit/action_creators/Widget
 import {Widget} from "@entity/dashboard/classes/Widget";
 import {Loading} from "@app_component/base/loading/Loading";
 import {useSocketData} from "../../../../socket/SocketDataContext";
-function formatDuration(seconds: number): string {
+function formatDuration(milliseconds: number): string {
+	const seconds = milliseconds / 1000;
+
 	if (seconds >= 3600) {
 		return `${(seconds / 3600).toFixed(3)} h`;
 	}
@@ -39,6 +41,7 @@ function formatDuration(seconds: number): string {
 	return `${Math.floor(seconds)} sec`;
 }
 function calculateClampedPercentage(total: number, value: number): number {
+	console.log(total, value)
 	if (total <= 0) return 0;
 
 	if (value <= 0) return 0;
@@ -96,9 +99,9 @@ const DashboardMetricsOverviewWidget: FC = () => {
 	const [isLoading, setIsLoading] = useState<boolean>(true);
 	const stats = useMemo<IStats>(
 		() => {
-			const failedExecPerc = metrics?.total_failed_execs && metrics?.total_execs ? calculateClampedPercentage(metrics.total_failed_execs, metrics.total_execs) : '-';
+			const failedExecPerc = metrics?.total_failed_execs && metrics?.total_execs ? calculateClampedPercentage(metrics.total_execs, metrics.total_failed_execs) : '-';
 			const runtime = metrics?.total_runtime ? formatDuration(metrics.total_runtime) : '-';
-			const avgRuntime = metrics?.avg_runtime_s ? formatDuration(metrics.avg_runtime_s) : '-';
+			const avgRuntime = metrics?.average_runtime_s ? formatDuration(metrics.average_runtime_s) : '-';
 			return {
 				periodDays: 7,
 				metrics: [

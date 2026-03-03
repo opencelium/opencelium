@@ -24,6 +24,8 @@ import { Col, Row } from 'react-grid-system';
 import Enhancement from '../../../../form_methods/mapping/enhancement/Enhancement';
 import JsonBody from '../../../../form_methods/method/JsonBody';
 import ReferenceInformation from './reference_information/ReferenceInformation';
+import HelpIcon from "@app_component/base/tour/HelpIcon";
+import {EnhancementSteps} from "@root/utils/tourSteps";
 
 class Header extends React.Component {
 	constructor(props) {
@@ -37,6 +39,8 @@ class Header extends React.Component {
 			isOpenedEnhancement: false,
 			isToggledIcon: true,
 		};
+		this.EnhancementRef = React.createRef();
+		this.HeaderRef = React.createRef();
 		this.JsonBodyRef = React.createRef();
 		this.enhancementRef = React.createRef();
 		this._isDirty = false;
@@ -280,6 +284,7 @@ class Header extends React.Component {
 			connection,
 			hasEnhancement,
 			headerTitle,
+			tourSteps,
 		} = this.props;
 		return (
 			<React.Fragment>
@@ -316,7 +321,7 @@ class Header extends React.Component {
 						maxHeight: !isToggledIcon ? '40px' : isToggledReferenceIcon ? '50%' : 'calc(100% - 40px)',
 					}}>
 						<div>
-							<b>{headerTitle || 'Request Data'}</b>
+							<b ref={this.HeaderRef}>{headerTitle || 'Request Data'}</b>
 							<TooltipFontIcon
 								tooltipPosition={'right'}
 								style={{verticalAlign: 'middle', cursor: 'pointer'}}
@@ -324,6 +329,9 @@ class Header extends React.Component {
 								tooltip={isToggledIcon ? 'Hide' : 'Show'}
 								value={isToggledIcon ? 'expand_less' : 'chevron_right'}
 							/>
+							<div style={{position: 'absolute', left: '100px', top: 0}}>
+								<HelpIcon steps={tourSteps} inputRef={this.HeaderRef}/>
+							</div>
 						</div>
 						{isToggledIcon && this.renderHeader({
 							flex: 1,
@@ -332,16 +340,19 @@ class Header extends React.Component {
 					</div>
 				</div>
 				{hasEnhancement && (
-					<div className={styles.body_enhancement}>
+					<div className={styles.body_enhancement} ref={this.EnhancementRef}>
 						<div className={styles.body_enhancement_title}>
 							<b>{'Enhancement'}</b>
+							<div style={{position: 'absolute', left: '115px', top: '-10px'}}>
+								<HelpIcon steps={EnhancementSteps} inputRef={this.EnhancementRef}/>
+							</div>
 							{currentEnhancement && (
 								<Button
 									icon={'open_in_new'}
 									onClick={() => this.toggleEnhancement()}
 									iconSize={'13px'}
 									label={'Open script in new window'}
-									style={{ marginBottom: '10px' }}
+									style={{marginBottom: '10px'}}
 								/>
 							)}
 						</div>
@@ -470,6 +481,7 @@ Header.defaultProps = {
 	hasEnhancement: true,
 	isDraft: false,
 	hasError: false,
+	tourSteps: [],
 };
 
 export default Header;
