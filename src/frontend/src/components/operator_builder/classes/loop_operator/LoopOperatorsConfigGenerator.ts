@@ -9,6 +9,7 @@ import DirectReference from "@app_component/operator_builder/classes/references/
 import WebhookReference from "@app_component/operator_builder/classes/references/WebhookReference";
 import {generateUUID} from "@app_component/operator_builder/utils";
 import LoopBaseOperator from "@app_component/operator_builder/classes/loop_operator/LoopBaseOperator";
+import {Step} from "react-joyride";
 
 export default class LoopOperatorsConfigGenerator extends OperatorsConfigGenerator {
 
@@ -65,6 +66,11 @@ export default class LoopOperatorsConfigGenerator extends OperatorsConfigGenerat
                 return new SplitString();
         }
     }
+
+    getTourSteps(operatorName: LoopOperatorName): Step[] {
+        return (this.getOperatorClass(operatorName)).getTourSteps();
+    }
+
     getOption(operatorName: LoopOperatorName): OptionType {
         return this.getOperatorClass(operatorName).getOption();
     }

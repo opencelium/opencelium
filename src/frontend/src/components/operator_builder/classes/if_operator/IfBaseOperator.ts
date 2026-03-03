@@ -5,6 +5,8 @@ import {
     ConstantSelectOptions,
     ReferenceType
 } from "@app_component/operator_builder/reference_generator/props";
+import {Step} from "react-joyride";
+import {getIfOperatorTours} from "@app_component/operator_builder/tourSteps";
 
 
 export default class IfBaseOperator implements IBaseOperator, BaseOperatorProps<OperatorName>{
@@ -30,5 +32,9 @@ export default class IfBaseOperator implements IBaseOperator, BaseOperatorProps<
             value: this.name,
             label: OperatorLabel[this.name],
         }
+    }
+
+    getTourSteps(): Step[] {
+        return getIfOperatorTours(this.name);
     }
 }

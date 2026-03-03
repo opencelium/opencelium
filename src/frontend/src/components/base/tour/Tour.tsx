@@ -83,12 +83,18 @@ const Tour:FC<TourProps> =  ({
             scrollToFirstStep
             showProgress
             steps={steps}
+            floaterProps={{
+                disableAnimation: true,
+            }}
             styles={{
                 beacon: {
                     zIndex: 20000,
                 },
                 options: {
                     zIndex: 20000,
+                },
+                spotlight: {
+                    transition: 'none', // Remove the 0.2s default sliding transition
                 }
             }}
         />
