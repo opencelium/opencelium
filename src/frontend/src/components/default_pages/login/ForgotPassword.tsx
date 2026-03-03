@@ -37,6 +37,8 @@ const ForgotPassword: FC = () => {
 		message: '',
 	});
 
+	const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 	const closeToast = useCallback(() => {
 		setToast({ open: false, message: '' });
 	}, []);
@@ -66,6 +68,11 @@ const ForgotPassword: FC = () => {
 
 	const onSend = useCallback(async () => {
 		setEmailError('');
+		const validationError = validateEmail(email);
+		if (validationError) {
+			setEmailError(validationError);
+			return;
+		}
 		setIsLoading(true);
 
 		try {
@@ -116,6 +123,14 @@ const ForgotPassword: FC = () => {
 		}
 	}, [email, showToast]);
 
+	const validateEmail = useCallback((value: string) => {
+		const v = value.trim();
+
+		if (!v) return 'Email is required.';
+		if (!EMAIL_REGEX.test(v)) return 'Please enter a valid email address.';
+		return '';
+	}, []);
+
 	return (
 		<>
 			{ToastNode}
@@ -156,6 +171,10 @@ const ForgotPassword: FC = () => {
 								readOnly={isLoading}
 								width='240px'
 								error={emailError}
+								onBlur={() => {
+									const err = validateEmail(email);
+									setEmailError(err);
+								}}
 							/>
 
 							<div
