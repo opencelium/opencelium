@@ -15,7 +15,6 @@ export const useSystemMetricsSocket = (socket: Client | null) => {
         if (!socket || !socket.connected) return;
         const subscription = socket.subscribe(`/subscription/system/metrics`, (message) => {
             const data = JSON.parse(message.body) as Metrics;
-            console.log(data);
             consoleLog('Socket.SystemMetrics', data);
             setSystemMetrics(data);
         });

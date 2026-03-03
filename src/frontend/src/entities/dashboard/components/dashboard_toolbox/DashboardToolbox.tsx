@@ -20,15 +20,12 @@ import {ColorTheme} from "@style/Theme";
 import {DashboardToolboxProps, ToolboxItemsProps} from './interfaces';
 import {DashboardToolboxStyled, TitleStyled, ToolboxItemsStyled, ToolboxItemStyled} from './styles';
 import Tour from "@app_component/base/tour/Tour";
-import {Step} from "react-joyride";
 import {WidgetTourSteps} from "@entity/dashboard/utils/tourSteps";
 import DefaultText from "@app_component/base/text/DefaultText";
-import {EmptyListStyled} from "@app_component/collection/styles";
 
 
 const ToolboxItem = (props: ToolboxItemsProps) => {
     const {onTakeItem, item} = props;
-    console.log(item)
     return (
         <ToolboxItemStyled
             id={`widget-${item.i}`}

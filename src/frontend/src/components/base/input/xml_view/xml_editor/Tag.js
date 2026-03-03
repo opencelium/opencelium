@@ -65,7 +65,6 @@ class Tag extends Component{
      * to hide add tag popup window
      */
     hideAddTagPopup(){
-        console.log('hideAddTagPopup')
         this.setState({
             hasAddTagPopup: false,
             hasDeleteTagIcon: false,
@@ -88,7 +87,6 @@ class Tag extends Component{
      * to hide add tag popup window
      */
     hideUpdateTagPopup(){
-        console.log('hideUpdateTagPopup')
         this.setState({
             hasUpdateTagPopup: false,
             hasDeleteTagIcon: false,
@@ -111,7 +109,6 @@ class Tag extends Component{
      * to hide add property popup window
      */
     hideAddPropertyPopup(){
-        console.log('hideAddPropertyPopup')
         this.setState({
             hasAddPropertyPopup: false,
             property: CProperty.createProperty('', '', this.props.tag),
