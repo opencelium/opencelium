@@ -28,6 +28,7 @@ import {
     updateUser, uploadUserImage
 } from "../action_creators/UserCreators";
 import ModelUser from "../../requests/models/User";
+import { updatePassword } from '../action_creators/UserCreators';
 
 export interface UserState extends ICommonState{
     users: ModelUser[],
@@ -42,6 +43,8 @@ export interface UserState extends ICommonState{
     uploadingUserImage: API_REQUEST_STATE,
     deletingUserImage: API_REQUEST_STATE,
     currentUser: ModelUser,
+    updatingPassword: API_REQUEST_STATE,
+    updatePasswordResponse: IResponse | null,
 }
 
 const initialState: UserState = {
@@ -57,6 +60,8 @@ const initialState: UserState = {
     uploadingUserImage: API_REQUEST_STATE.INITIAL,
     deletingUserImage: API_REQUEST_STATE.INITIAL,
     currentUser: null,
+    updatingPassword: API_REQUEST_STATE.INITIAL,
+    updatePasswordResponse: null,
     ...CommonState,
 }
 
@@ -185,6 +190,21 @@ export const userSlice = createSlice({
         },
         [uploadUserImage.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.uploadingUserImage = API_REQUEST_STATE.ERROR;
+            state.error = action.payload;
+        },
+        [updatePassword.pending.type]: (state) => {
+            state.updatingPassword = API_REQUEST_STATE.START;
+            state.updatePasswordResponse = null;
+            state.error = null;
+        },
+        [updatePassword.fulfilled.type]: (state, action: PayloadAction<IResponse>) => {
+            state.updatingPassword = API_REQUEST_STATE.FINISH;
+            state.updatePasswordResponse = action.payload;
+            state.error = null;
+        },
+        [updatePassword.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.updatingPassword = API_REQUEST_STATE.ERROR;
+            state.updatePasswordResponse = null;
             state.error = action.payload;
         },
     }

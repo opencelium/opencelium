@@ -21,17 +21,10 @@ import InputText from '@app_component/base/input/text/InputText';
 import { ColorTheme } from '@style/Theme';
 import Button from '@app_component/base/button/Button';
 
-const EMAIL_CONFIG_MESSAGE = 'Please, configure your email settings to use Forgot Password feature.';
-const SERVER_UNREACHABLE_MESSAGE = 'Server is not reachable, check status of the server.';
-const USER_NOT_EXIST_MESSAGE = 'User with such E-mail does not exist.';
+import Request from '@entity/application/requests/classes/Request';
+import { SimpleMessageResponse, ErrorResponse } from '@application/requests/classes/Auth';
 
-/**
- * 0 - success
- * 1 - email config not set
- * 2 - server not reachable
- * 3 - user not exist
- */
-const TEST_MODE: number = 0;
+const SERVER_UNREACHABLE_MESSAGE = 'Server is not reachable, check status of the server.';
 
 const ForgotPassword: FC = () => {
 	const [email, setEmail] = useState('');
@@ -58,33 +51,6 @@ const ForgotPassword: FC = () => {
 		return () => clearTimeout(t);
 	}, [toast.open, closeToast]);
 
-	const onSend = useCallback(async () => {
-		setIsLoading(true);
-
-		try {
-			setEmailError('');
-
-			if (TEST_MODE === 1) {
-				showToast(EMAIL_CONFIG_MESSAGE);
-				return;
-			}
-
-			if (TEST_MODE === 2) {
-				showToast(SERVER_UNREACHABLE_MESSAGE);
-				return;
-			}
-
-			if (TEST_MODE === 3) {
-				setEmailError(USER_NOT_EXIST_MESSAGE);
-				return;
-			}
-
-			setIsSent(true);
-		} finally {
-			setIsLoading(false);
-		}
-	}, [showToast]);
-
 	const ToastNode = useMemo(() => {
 		if (!toast.open) return null;
 
@@ -97,6 +63,58 @@ const ForgotPassword: FC = () => {
 			</div>
 		);
 	}, [toast.open, toast.message, closeToast]);
+
+	const onSend = useCallback(async () => {
+		setEmailError('');
+		setIsLoading(true);
+
+		try {
+			const request = new Request({
+				url: 'auth/forgot-password',
+				hasAuthToken: false,
+				isApi: false,
+			});
+
+			await request.post<SimpleMessageResponse>({
+				email: email.trim(),
+			});
+
+			setIsSent(true);
+		} catch (e: any) {
+			const resp = e?.response;
+
+			if (!resp) {
+				showToast(SERVER_UNREACHABLE_MESSAGE);
+				return;
+			}
+
+			const status: number = resp.status;
+			const data: ErrorResponse = resp.data || {};
+			const code = String(data.error || '');
+
+			if (status === 400 && code === 'EMAIL_NOT_EXISTS') {
+				setEmailError('User with such E-mail does not exist.');
+				return;
+			}
+
+			if (status === 429 && code === 'TOO_MANY_ATTEMPTS') {
+				setEmailError('Too many attempts, try later.');
+				return;
+			}
+
+			if (status === 503 && code === 'EMAIL_RECOVERY_FAILED') {
+				showToast(
+					data.message ||
+						'There is an issue with your email configuration. For security reasons, the detailed error message has been written to your Opencelium logs. Please review the logs for more information.',
+				);
+				return;
+			}
+
+			showToast(data.message || SERVER_UNREACHABLE_MESSAGE);
+		} finally {
+			setIsLoading(false);
+		}
+	}, [email, showToast]);
 
 	return (
 		<>
@@ -140,14 +158,32 @@ const ForgotPassword: FC = () => {
 								error={emailError}
 							/>
 
-							<div style={{ alignSelf: 'flex-end', marginTop: 30, marginRight: 85 }}>
-								<Button label='Send' handleClick={onSend} isDisabled={!email || isLoading} />
+							<div
+								style={{
+									alignSelf: 'flex-end',
+									marginTop: 30,
+									marginRight: 85,
+								}}
+							>
+								<Button
+									label='Send'
+									handleClick={onSend}
+									isDisabled={isLoading}
+								/>
 							</div>
 						</div>
 					) : (
-						<div style={{ textAlign: 'center', fontSize: 18, width: 420, lineHeight: 1.6 }}>
+						<div
+							style={{
+								textAlign: 'center',
+								fontSize: 18,
+								width: 420,
+								lineHeight: 1.6,
+							}}
+						>
 							<p style={{ width: 320, margin: '0 auto' }}>
-								Thank you. We have sent you an Email with a link to reset your password.
+								Thank you. We have sent you an Email with a link to reset your
+								password.
 							</p>
 						</div>
 					)}

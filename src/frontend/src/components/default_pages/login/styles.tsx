@@ -15,7 +15,8 @@
 
 import styled from "styled-components";
 import {HeaderStyledProps, LoginFormStyledProps} from "./interfaces";
-import {DefaultCardShadowStyles, DefaultShadowHoverStyles} from "@entity/application/utils/constants";
+import {DefaultCardShadowStyles, DefaultInputTextSize, DefaultShadowHoverStyles} from "@entity/application/utils/constants";
+import { ColorTheme } from '@style/Theme';
 
 const LoginFormStyled = styled.div<LoginFormStyledProps>`
     background: ${({theme}) => theme.menu.background || '#012E55'};
@@ -50,7 +51,19 @@ const HeaderStyled = styled.div<HeaderStyledProps>`
     ` : ''}
 `;
 
+const ForgotPasswordLink = styled.div`
+    overflow: unset;
+    font-size: ${DefaultInputTextSize}px;
+    color: ${ColorTheme.Blue};
+    cursor: pointer;
+    position: absolute;
+    top: 310px;
+    left: 50%;
+    transform: translateX(-50%);
+`
+
 export {
     LoginFormStyled,
     HeaderStyled,
+    ForgotPasswordLink
 }
