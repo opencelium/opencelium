@@ -20,7 +20,6 @@ import crypto from "crypto";
 import _ from "lodash";
 import React, { ReactElement, useEffect, useRef } from "react";
 import ReactDOM from 'react-dom';
-import ReactDOMServer from "react-dom/server";
 import { Application } from "../classes/Application";
 import { ResponseMessages } from "../requests/interfaces/IResponse";
 
@@ -154,9 +153,22 @@ export function getFocusableElements(elem){
     }
     return [];
 }
+function reactNodeToText(node) {
+    if (typeof node === "string") return node;
+    if (typeof node === "number") return String(node);
 
+    if (Array.isArray(node)) {
+        return node.map(reactNodeToText).join("");
+    }
+
+    if (React.isValidElement(node)) {
+        return reactNodeToText(node.props.children);
+    }
+
+    return "";
+}
 export function reactElementToText(node) {
-    return ReactDOMServer.renderToString(node);
+    return reactNodeToText(node);
 }
 
 
