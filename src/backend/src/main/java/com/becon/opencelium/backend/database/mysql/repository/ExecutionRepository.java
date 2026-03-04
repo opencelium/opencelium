@@ -30,7 +30,7 @@ public interface ExecutionRepository extends JpaRepository<Execution, Long> {
 
     @Query(nativeQuery = true, value = """
             SELECT COUNT(*) AS totalExecs,
-                SUM(CASE WHEN status = 'F' THEN 1 ELSE 0 END) AS totalFailed,
+                COALESCE(SUM(CASE WHEN status = 'F' THEN 1 ELSE 0 END), 0) AS totalFailed,
                 COALESCE(SUM(CASE WHEN start_time IS NOT NULL AND end_time IS NOT NULL
                     THEN TIMESTAMPDIFF(MICROSECOND, start_time, end_time) / 1000.0 ELSE 0 END), 0) AS totalRuntime,
                 COALESCE(AVG(CASE WHEN status = 'S' AND start_time IS NOT NULL AND end_time IS NOT NULL
