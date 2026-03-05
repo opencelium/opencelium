@@ -26,6 +26,7 @@ import com.becon.opencelium.backend.database.mysql.repository.UserRepository;
 import com.becon.opencelium.backend.database.mysql.repository.UserRoleRepository;
 import com.becon.opencelium.backend.enums.AuthMethod;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
+import com.becon.opencelium.backend.exception.ServiceUnavailableException;
 import com.becon.opencelium.backend.resource.ChangePasswordDTO;
 import com.becon.opencelium.backend.resource.request.UserRequestResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
@@ -202,6 +203,10 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void changePassword(ChangePasswordDTO dto) {
         User user = getCurrentUser();
+
+        if (user.getAuthMethod() == AuthMethod.LDAP) {
+            throw new ServiceUnavailableException(ExceptionConstant.PASSWORD_MANAGED_EXTERNALLY, "Password is managed externally.");
+        }
 
         if (!bCryptPasswordEncoder.matches(dto.currentPassword(), user.getPassword())) {
             throw new GeneralServiceException(HttpStatus.BAD_REQUEST, ExceptionConstant.WRONG_PASSWORD, "wrong password");
