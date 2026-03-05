@@ -39,9 +39,13 @@ export interface ConnectionVersioningProps {
 }
 
 function isConnectionEditorLikeRoute(pathname: string): boolean {
-	const p = (pathname || '').toLowerCase();
-	const isConnections = p.includes('/connections');
-	return isConnections;
+  const p = (pathname || '').toLowerCase();
+
+  const isUpdate = /\/connections\/\d+\/update\b/.test(p);
+  const isView = /\/connections\/\d+\/view\b/.test(p);
+  const isAdd = /\/connections\/add\b/.test(p);
+
+  return isUpdate || isView || isAdd;
 }
 
 const ConnectionVersioning: FC<ConnectionVersioningProps> = ({ theme }) => {

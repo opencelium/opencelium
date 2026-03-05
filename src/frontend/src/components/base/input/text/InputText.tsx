@@ -53,9 +53,9 @@ const InputText: FC<InputTextProps> = ({
     checkBackground,
     errorBottom,
     isVisibilityTrue,
-    helpMessage,
     rightIcon,
     onRightIconClick,
+    helpMessage,
     ...props
 }) => {
     if(!isVisible){

@@ -20,6 +20,7 @@ import {IResponse} from "@application/requests/interfaces/IResponse";
 import IUserRequest, {DeleteUsersByIdRequestProps} from "../interfaces/IUserRequest";
 import ModelUser from "../models/User";
 import ModelUserPoust from "../models/UserPoust";
+import { UpdatePasswordRequestBody } from '@entity/user/redux-toolkit/action_creators/UserCreators';
 
 
 export default class UserRequest extends Request implements IUserRequest{
@@ -60,6 +61,10 @@ export default class UserRequest extends Request implements IUserRequest{
     async uploadUserImage(data: FormData): Promise<AxiosResponse<ModelUser>>{
         this.url = 'storage/profilePicture';
         return super.post<ModelUser>(data);
+    }
+
+    async updatePassword(data: UpdatePasswordRequestBody): Promise<AxiosResponse<IResponse>> {
+        return super.post<IResponse>(data);
     }
 
 }

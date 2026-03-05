@@ -22,21 +22,12 @@ import {IAuth} from "@application/interfaces/IAuth";
 import {onEnter} from "@application/utils/utils";
 import {InputTextType} from "@app_component/base/input/text/interfaces";
 import {ColorTheme} from "@style/Theme";
-import {HeaderStyled, LoginFormStyled} from "./styles";
+import {ForgotPasswordLink, HeaderStyled, LoginFormStyled} from "./styles";
 import {LoginIcon} from "./login_icon/LoginIcon";
 import AuthCode from "@app_component/default_pages/login/AuthCode";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 
-const EMAIL_CONFIG_MESSAGE = "Please, configure your email settings to use Forgot Password feature.";
-const SERVER_ERROR_MESSAGE = "Server is not reachable, check status of the server.";
 const WRONG_LOGIN_MESSAGE = "Username or password is wrong.";
-
-/**
-* 0 - email config set
-* 1 - email config not set
-* 2 - server not reachable
-*/
-const TEST_MODE: number = 0;
 
 const LoginFormInputs = ({isAuth, hasAnimation}: {isAuth: boolean, hasAnimation?: boolean}) => {
     const navigate = useNavigate();
@@ -46,39 +37,9 @@ const LoginFormInputs = ({isAuth, hasAnimation}: {isAuth: boolean, hasAnimation?
 
     const LoginForm = Auth.createState<IAuth>();
 
-    const [toastOpen, setToastOpen] = React.useState(false);
-    const [toastMessage, setToastMessage] = React.useState("");
-
-    const closeToast = () => setToastOpen(false);
-
-    const openToast = (message: string) => {
-        setToastMessage(message);
-        setToastOpen(true);
-    };
-
-    React.useEffect(() => {
-        if (!toastOpen) return;
-        const t = setTimeout(() => setToastOpen(false), 4000);
-        return () => clearTimeout(t);
-    }, [toastOpen]);
-
-    const onForgotPasswordClick = React.useCallback(async () => {
-        try {
-            if (TEST_MODE === 1) {
-                openToast(EMAIL_CONFIG_MESSAGE);
-                return;
-            }
-
-            if (TEST_MODE === 2) {
-                openToast(SERVER_ERROR_MESSAGE);
-                return;
-            }
-
-            navigate("/forgot-password");
-        } catch (e) {
-            openToast(SERVER_ERROR_MESSAGE);
-        }
-    }, [navigate]);
+  const onForgotPasswordClick = React.useCallback(() => {
+    navigate("/forgot-password");
+  }, [navigate]);
 
     const passwordError = React.useMemo(() => {
         if (logining !== API_REQUEST_STATE.ERROR) return "";
@@ -159,48 +120,21 @@ const LoginFormInputs = ({isAuth, hasAnimation}: {isAuth: boolean, hasAnimation?
 
     return(
         <>
-            {toastOpen && (
-                <div style={{position: "fixed", right: 20, top: 20, zIndex: 9999}}>
-                    <Toast isOpen={toastOpen}>
-                        <ToastHeader toggle={closeToast}>Notice</ToastHeader>
-                        <ToastBody>{toastMessage}</ToastBody>
-                    </Toast>
-                </div>
-            )}
-
             <LoginFormStyled isAuth={isAuth}>
                 <HeaderStyled isAuth={isAuth}>Log In</HeaderStyled>
 
                 {UsernameInput}
                 {PasswordInput}
 
-                {!isAuth && (
-                    <div
-                        onClick={onForgotPasswordClick}
-                        style={{
-                            overflow: 'unset',
-                            textAlign: "right",
-                            position: 'relative',
-                            marginTop: 0,
-                            marginBottom: 0,
-                            height: 'unset',
-                            marginLeft: 0,
-                            paddingRight: '5px',
-                            paddingBottom: 25,
-                            fontSize: 14,
-                            color: ColorTheme.Blue,
-                            cursor: "pointer",
-                            userSelect: "none",
-                            background: '#fff'
-                        }}
-                    >
-                        Forgot password?
-                    </div>
-                )}
-
                 <LoginIcon hasAnimation={hasAnimation} login={() => LoginForm.login()}/>
                 {!!sessionId && <AuthCode/>}
             </LoginFormStyled>
+
+            {!isAuth && (
+                <ForgotPasswordLink onClick={onForgotPasswordClick}>
+                Forgot password?
+                </ForgotPasswordLink>
+            )}
         </>
     )
 }

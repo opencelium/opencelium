@@ -20,6 +20,11 @@ import {IEntityWithImage} from "@application/requests/interfaces/IRequest";
 import UserRequest from "../../requests/classes/UserRequest";
 import ModelUserPoust from "../../requests/models/UserPoust";
 
+export interface UpdatePasswordRequestBody {
+    currentPassword: string;
+    newPassword: string;
+}
+
 export const checkUserEmail = createAsyncThunk(
     'user/exist/email',
     async(email: string, thunkAPI) => {
@@ -150,6 +155,19 @@ export const uploadUserImage = createAsyncThunk(
             const response = await request.uploadUserImage(formData);
             return response.data;
         } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+
+export const updatePassword = createAsyncThunk(
+    'user/password/update',
+    async (data: UpdatePasswordRequestBody, thunkAPI) => {
+        try {
+            const request = new UserRequest({ endpoint: `/password` }); // TODO: replace endpoint when backend ready
+            const response = await request.updatePassword(data);
+            return response.data;
+        } catch (e) {
             return thunkAPI.rejectWithValue(errorHandler(e));
         }
     }

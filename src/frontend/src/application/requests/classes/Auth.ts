@@ -23,6 +23,15 @@ import {LocalStorage} from "../../classes/LocalStorage";
 import {LoginTOTPResponse} from "@entity/totp/requests/interfaces/ITotp";
 
 
+export interface SimpleMessageResponse {
+    message: string;
+}
+
+export interface ErrorResponse {
+    message?: string;
+    error?: string;
+}
+
 export class AuthRequest extends Request implements IAuth{
 
     constructor(settings?: Partial<IRequestSettings>) {
@@ -32,6 +41,31 @@ export class AuthRequest extends Request implements IAuth{
     async login(credentials: ICredentials): Promise<AxiosResponse<IUser & LoginTOTPResponse>>{
         this.url = 'login';
         return super.post<IUser & LoginTOTPResponse>(credentials);
+    }
+
+    async forgotPassword(email: string): Promise<AxiosResponse<SimpleMessageResponse>>{
+        this.url = 'auth/forgot-password';
+        this.hasAuthToken = false;
+
+        return super.post<SimpleMessageResponse>({
+            email,
+        });
+    }
+
+    async resetPassword(
+        token: string,
+        newPassword: string,
+        confirmPassword: string
+    ): Promise<AxiosResponse<SimpleMessageResponse>>{
+
+        this.url = 'auth/reset-password';
+        this.hasAuthToken = false;
+
+        return super.post<SimpleMessageResponse>({
+            token,
+            newPassword,
+            confirmPassword,
+        });
     }
 
     logout():void{

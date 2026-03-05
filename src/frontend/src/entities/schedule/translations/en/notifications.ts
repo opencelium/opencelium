@@ -55,7 +55,7 @@ export default {
         [getLogsByExecutionId.rejected.type]: {
             "__DEFAULT__": "The log was not fetched.",
             "LOG_NOT_FOUND": "The log is not found.",
-            "TOO_BIG_LOG": "The log is too big. You can find it in 'src/backend/src/main/resources/logs'."
+            "TOO_BIG_LOG": "The log is too big. You can find it in <1><0>{{logPath}}</0></1>."
         },
         [addNotificationToSelectedSchedules.rejected.type]: {
             "__DEFAULT__": "The notification was not added",

@@ -20,7 +20,7 @@ export type Metrics = {
     total_execs : number
     total_failed_execs: number
     total_runtime: number
-    avg_runtime_s: number
+    average_runtime_s: number
     cpu_usage : number
     memory_usage : number
     exec_log_size : number
@@ -29,6 +29,4 @@ export interface IWidgetRequest{
 
     //to get all widgets of authorized user
     getAllWidgets(): Promise<AxiosResponse<IWidget[]>>,
-    //to get metrics overview data
-    getMetrics(): Promise<AxiosResponse<Metrics>>
 }
