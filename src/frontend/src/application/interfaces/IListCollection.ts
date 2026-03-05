@@ -27,10 +27,6 @@ export interface ListCollectionCardProps{
     getImageComponent?: (entity: any) => any,
 }
 
-export interface MultipleTitleProps{
-    name: string,
-    link?: string,
-}
 
 export interface ListProp<EntityProps>{
     propertyKey: EntityProps,

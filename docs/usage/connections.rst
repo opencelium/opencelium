@@ -1,8 +1,11 @@
 .. _usage-connection:
 
-##################
+###########
 Connections
-##################
+###########
+
+.. contents::
+   :local:
 
 Connection List
 """""""""""""""""
@@ -477,40 +480,60 @@ Response:
 Test-Run
 """""""""""""""""
 
-The **Test-Run** feature allows developers to execute a configured connection directly from the Connection Editor and view runtime logs in the user interface.  
-It is designed to support debugging, inspection, and optimization of interface workflows without relying on external log files or additional tools.
+The **Test Run** feature executes the configured connection, using the current editor state, directly from the Connection Editor and displays the corresponding runtime logs in real time.
+During execution, all API requests, loops, and responses are captured and displayed hierarchically in the UI. It is designed to support debugging, 
+inspection, and optimization of interface workflows without relying on external log files or additional tools.
 
 Functional Overview
-==================
+===================
 
-A Test-Run executes the configured connection workflow using the current editor state.  
-During execution, all API requests, loops, and responses are logged and displayed in real time within the UI.
-
-The UI log component provides structured, interactive access to runtime data, enabling developers to inspect requests, monitor performance, and identify issues directly in the editor.
+The **UI Logs** provide a graphical representation of all runtime activities of a connection that can be accessed directly through the user interface. 
+The UI log component provides structured, interactive access to runtime data, enabling developers to inspect requests, monitor performance, and 
+identify issues directly in the editor.
 
 .. _connection_ui_logger:
 
 UI Log Structure
-==================
+=================
 
-The log viewer is inspired by browser developer tools and presents log data in a hierarchical tree format:
+The layout of the log viewer is inspired by browser developer tools and presents data in a structured, expandable tree view:
 
-- **API Requests**  
-  Each API request is represented as a collapsible log entry containing:
-  
-  - HTTP method and endpoint  
-  - Request headers and body  
-  - Response status, headers, and body  
-  - Execution time in milliseconds  
+**1. Connector and Process Hierarchy**
 
-- **Loops**  
-  When a step is executed in a loop, all iterations are displayed as a compressed group.  
-  Each iteration can be expanded or accessed directly via an index-based paginator.
+Each connection is displayed as a hierarchical structure, representing the sequence of processes and operators. You can expand or collapse each level using the arrow icons.
 
-- **Error and Warning Handling**  
-  Log entries are categorized by severity (`ERROR`, `WARNING`, `INFO`).  
-  Errors are highlighted visually and can be expanded to inspect detailed request and response data.
+**2. HTTP Requests and Responses**
 
+Each API call is shown with:
+	•	HTTP Method (e.g., POST, GET, DELETE, PUT)
+	•	Endpoint URL
+	•	HTTP Status Code (e.g., 200 OK, 201 Created, 204 Updated, 404 Not Found, 401 Unauthorized, 500 Internal Server Error)
+	•	Execution Time (in milliseconds)
+	•	Request / Response Headers — metadata such as Content-Type or Authorization
+	•	Request / Response Body (Payload) — the actual data sent and received
+
+Header and body data can be copied to the clipboard using the copy icon (|image_ui_logs_3|).
+
+**3. Loop Handling and Pagination**
+
+If a connection step contains a loop, its iterations are grouped together.
+The pagination control allows you to navigate between individual iterations (e.g., 2 / 12). You can also jump directly to a specific 
+iteration by entering its index.
+
+	•	|image_ui_logs_6| Navigate between loop iterations (pagination)
+
+**4. Error and Warning Indicators**
+
+Log entries are visually categorized by severity levels such as `ERROR`, `WARNING`, `INFO`.
+Click on an entry to expand it and inspect detailed request and response information.
+
+**5. Panel Controls**
+
+- |image_ui_logs_1| Open log viewer in fullscreen mode
+- |image_ui_logs_2| Clear all log entries
+- |image_ui_logs_3| Copy headers, bodies or URLs to you clipboard
+- |image_ui_logs_4| Leave fullscreen mode
+- |image_ui_logs_5| Hide log viewer
 
 |image50|
 
@@ -522,7 +545,7 @@ Presentation of the Connection Editor interface in the UI log
 
 
 Real-Time Streaming (WebSocket)
-==================
+===============================
 
 Log data is streamed to the frontend via a **WebSocket** connection.  
 This enables real-time feedback while a Test-Run is executing.
@@ -536,7 +559,7 @@ Technical details:
 
 
 Scalability and Performance
-==================
+===========================
 
 The log system is designed to handle large data volumes efficiently.  
 Several mechanisms are implemented to maintain responsiveness:
@@ -548,7 +571,7 @@ Several mechanisms are implemented to maintain responsiveness:
 
 
 Scheduler Integration
-==================
+=====================
 
 The same logging system is also used for the :ref:`Scheduler <scheduler_execution_log>`.  
 This ensures a unified log format and viewing experience for both manual (Test-Run) and scheduled executions.
@@ -574,13 +597,13 @@ Each log event follows a defined JSON schema:
      "request": {
        "method": "POST",
        "url": "https://api.example.com/items",
-       "body": { ... }
+       "body": {}
      },
      "response": {
        "status": 200,
-       "body": { ... }
+       "body": {}
      }
-   }
+   },
 
 
 Error Handling
@@ -591,7 +614,7 @@ The UI highlights the affected request in red and allows developers to inspect t
 
 
 Multi-Language Support for Enhancements
-"""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""
 
 OpenCelium 4.6 introduces **multi-language support for Enhancements**, extending the enhancement execution engine beyond JavaScript.  
 Developers can now write enhancement logic in **Python 2**, **Python 3**, and **Ruby** – with additional language support (e.g. Go, TypeScript) planned for future releases.
@@ -626,7 +649,7 @@ Repository:
 
 
 Supported Languages
-==================
+===================
 
 - JavaScript *(default; executed within Core)*  
 - Python 2  
@@ -770,7 +793,20 @@ If the service is disabled or unreachable, enhancement execution will fall back 
    :width: 600
 .. |image_operators_12| image:: ../img/connection/OC_operators_btn_save.png
    :align: middle
-   :height: 30   
+   :height: 30
+
+.. |image_ui_logs_1| image:: ../img/connection/OC_ui_logs_btn_open_fullscreen.png
+   :height: 30
+.. |image_ui_logs_2| image:: ../img/connection/OC_ui_logs_btn_clear_logs.png
+   :height: 30
+.. |image_ui_logs_3| image:: ../img/connection/OC_ui_logs_btn_copy.png
+   :height: 30
+.. |image_ui_logs_4| image:: ../img/connection/OC_ui_logs_btn_close_fullscreen.png
+   :height: 30
+.. |image_ui_logs_5| image:: ../img/connection/OC_ui_logs_btn_minimize.png
+   :height: 30
+.. |image_ui_logs_6| image:: ../img/connection/OC_ui_logs_btn_pagination.png
+   :height: 30
 
 .. |image0| image:: ../img/connection/0.png
    :align: middle

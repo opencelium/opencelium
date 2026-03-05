@@ -14,10 +14,10 @@
  */
 
 import React from "react";
-import {IListCollection, ListCollectionCardProps, ListProp, MultipleTitleProps} from "../interfaces/IListCollection";
+import {IListCollection, ListCollectionCardProps, ListProp} from "../interfaces/IListCollection";
 import {ColorTheme} from "@style/Theme";
 import {AppDispatch} from "../utils/store";
-import {API_REQUEST_STATE, ComponentPermissionProps} from "../interfaces/IApplication";
+import {API_REQUEST_STATE, ComponentPermissionProps, MultipleTitleProps} from "../interfaces/IApplication";
 import {ViewType} from "@app_component/collection/collection_view/CollectionView";
 import {PermissionButton, PermissionTooltipButton} from "@app_component/base/button/PermissionButton";
 import {TextSize} from "@app_component/base/text/interfaces";
@@ -40,7 +40,7 @@ class ListCollection<EntityProps> implements IListCollection<EntityProps>{
     uploadingImage?: API_REQUEST_STATE = API_REQUEST_STATE.INITIAL;
 
     // title of collection
-    title?: string | MultipleTitleProps[] | React.ReactNode;
+    title?: string | MultipleTitleProps[];
 
     // name of the property that represents key during collection rendering
     keyPropName: EntityProps;

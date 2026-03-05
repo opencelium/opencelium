@@ -15,6 +15,7 @@
 
 import React, {InputHTMLAttributes} from "react";
 import {InputElementProps} from "../interfaces";
+import {Step} from "react-joyride";
 
 export enum InputTextType {
     Text = "text",
@@ -34,6 +35,9 @@ interface InputTextProps extends InputHTMLAttributes<HTMLInputElement>, InputEle
     checkBackground?: string,
     errorBottom?: string | number,
     isVisibilityTrue?: boolean,
+    rightIcon?: string,
+    onRightIconClick?: () => void,
+    helpMessage?: Step[],
 }
 
 

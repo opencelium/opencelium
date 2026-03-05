@@ -22,6 +22,7 @@ interface DashboardFormProps{
 
 interface WidgetItemStyledProps{
     isWidgetEditOn?: boolean,
+    widgetKey?: string;
 }
 
 interface ReactGridLayoutStyledProps extends ReactGridLayoutProps{

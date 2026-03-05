@@ -26,9 +26,11 @@ import {ColorTheme} from "@style/Theme";
 import MenuIcon from "./MenuIcon";
 import { MenuLinkProps } from './interfaces';
 import {MenuLinkLabelStyled, MenuLinkStyled} from './styles';
+import {MenuLabelSize} from "@entity/application/utils/constants";
 
 const MenuLink: FC<MenuLinkProps & LinkProps & IconProps> = permission<MenuLinkProps & LinkProps & IconProps>(null, false)(
     ({
+        id,
         to,
         onClick,
         name,
@@ -43,12 +45,13 @@ const MenuLink: FC<MenuLinkProps & LinkProps & IconProps> = permission<MenuLinkP
     const [isConfirmationOpened, toggleConfirmation] = useState<boolean>(false);
     return (
         <MenuLinkStyled
+            id={id}
             to={isReadonly ? '#' : to}
             onClick={hasConfirmation ? () => toggleConfirmation(!isConfirmationOpened) : onClick ? onClick : () => {}}
             $onHoverColor={onHoverColor}
         >
             {name !== '' ? <MenuIcon color={ColorTheme.White} name={name} size={size}/> : component}
-            <MenuLinkLabelStyled value={label} size={TextSize.Size_16}/>
+            <MenuLinkLabelStyled value={label} size={`${MenuLabelSize}px`}/>
             {
                 hasConfirmation &&
                 <Dialog

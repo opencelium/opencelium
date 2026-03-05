@@ -26,6 +26,7 @@ import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
 import COperatorItem from "@classes/content/connection/operator/COperatorItem";
 import {ConnectionLogType} from "@root/interfaces/IConnection";
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
+import {LogPanelHeight} from "@root/redux_toolkit/slices/ConnectionSlice";
 
 export const ARROW_WIDTH = 2;
 
@@ -153,7 +154,7 @@ class Arrow extends React.Component{
             markerStyle = '_dashed';
         }
         let logStroke = '';
-        if(logPanelHeight !== 0){
+        if(logPanelHeight !== LogPanelHeight.Low){
             if(currentLog && currentLog.type === ConnectionLogType.ERROR && `${from.id}_${to.id}` === `${from.id}_${currentLog.connectorType}_${currentLog.index}`){
                 stroke = '#d24545';
                 hasArrowAlert = true;

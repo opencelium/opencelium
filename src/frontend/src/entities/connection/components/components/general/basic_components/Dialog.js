@@ -23,6 +23,11 @@ import styles from '@entity/connection/components/themes/default/general/basic_c
 import {getFocusableElements} from "@application/utils/utils";
 import CVoiceControl from "@entity/connection/components/classes/voice_control/CVoiceControl";
 import CDialogControl from "@entity/connection/components/classes/voice_control/CDialogControl";
+import {HeaderTextSize} from "@entity/application/utils/constants";
+import HeaderText from "@app_component/base/text/HeaderText";
+import {ColorTheme} from "@style/Theme";
+import {setFullScreen as setFullScreenFormSection} from "@application/redux_toolkit/slices/ApplicationSlice";
+import {TooltipButton} from "@app_component/base/tooltip_button/TooltipButton";
 
 
 /**
@@ -35,6 +40,7 @@ class Dialog extends Component{
 
         this.state = {
             isOpen: props.active,
+            isFullScreen: false,
         };
     }
 
@@ -48,7 +54,7 @@ class Dialog extends Component{
     }
 
     componentDidUpdate(prevProps){
-        const {active} = this.props;
+        const {active, actions} = this.props;
         if(prevProps.active !== active){
             if(active){
                 CVoiceControl.removeCommands({component:this}, CDialogControl);
@@ -59,7 +65,9 @@ class Dialog extends Component{
             this.setState({
                 isOpen: active,
             }, () => {
-                this.setFocus();
+                if (actions.findIndex(a => a.autoFocus) === -1) {
+                    this.setFocus();
+                }
             });
         }
     }
@@ -90,6 +98,7 @@ class Dialog extends Component{
             let isLoading = action.hasOwnProperty('isLoading') ? action.isLoading : false;
             return <Button
                 key={action.label}
+                autoFocus={action.autoFocus || false}
                 isLoading={isLoading}
                 disabled={isLoading}
                 title={isLoading ? ' ' : action.label}
@@ -100,13 +109,39 @@ class Dialog extends Component{
     }
 
     render(){
-        const {isOpen} = this.state;
-        const {title, toggle, children, theme, id} = this.props;
-        let dialogClassname = `${styles.dialog} ${theme.dialog}`;
+        const {isOpen, isFullScreen} = this.state;
+        const {title, toggle, children, theme, id, hasFullScreenOption, additionalActions} = this.props;
+        const dialogClassName = `${styles.dialog} ${theme.dialog}${isFullScreen ? ` ${styles.fullscreen_dialog}` : ''}`;
+        const contentClassName = `${theme.content}${isFullScreen ? ` ${styles.fullscreen_content}` : ''}`;
+        const bodyClassName = `${theme.body}${isFullScreen ? ` ${styles.fullscreen_body}` : ''}`;
         return(
-            <Modal id={id || `modal_${title}`} autoFocus={true} isOpen={isOpen} toggle={toggle} className={dialogClassname} modalClassName={theme.modal} contentClassName={theme.content} wrapClassName={theme.wrapper}>
-                <ModalHeader toggle={toggle} className={theme.title}>{title}</ModalHeader>
-                <ModalBody className={theme.body}>
+            <Modal id={id || `modal_${title}`} isOpen={isOpen} toggle={toggle} className={dialogClassName} modalClassName={theme.modal} contentClassName={contentClassName} wrapClassName={theme.wrapper}>
+                <ModalHeader close={
+                    <div style={{
+                        display: 'flex',
+                        gap: '10px',
+                    }}>
+                        {additionalActions}
+                        {hasFullScreenOption && <TooltipButton
+                            icon={isFullScreen ? "close_fullscreen" : "open_in_full"}
+                            tooltip={isFullScreen ? "Minimize" : "Maximize"}
+                            target={`fullscreen_dialog`}
+                            hasBackground={false}
+                            handleClick={() => this.setState({isFullScreen: !isFullScreen})}
+                        />}
+                        <TooltipButton
+                            position={"bottom"}
+                            icon={"close"}
+                            tooltip={"Close"}
+                            target={`close_dialog`}
+                            hasBackground={false}
+                            handleClick={toggle}
+                        />
+                    </div>
+                } toggle={toggle} className={theme.title}>
+                    <HeaderText value={title}/>
+                </ModalHeader>
+                <ModalBody className={bodyClassName}>
                     {children}
                 </ModalBody>
                 <ModalFooter style={{borderTop: 'none'}} className={styles.buttons}>
@@ -133,6 +168,7 @@ Dialog.propTypes = {
         body: PropTypes.string,
     }),
     hasAutoFocus: PropTypes.bool,
+    hasFullScreenOption: PropTypes.bool,
 };
 
 Dialog.defaultProps = {
@@ -140,6 +176,8 @@ Dialog.defaultProps = {
     active: false,
     isConfirmation: false,
     hasAutoFocus: true,
+    hasFullScreenOption: false,
+    additionalActions: null,
 };
 
 export default Dialog;

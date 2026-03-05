@@ -121,7 +121,6 @@ class AddTemplate extends Component{
         return (
             <React.Fragment>
                 {iconProps && <TooltipFontIcon {...iconProps} turquoiseTheme isButton onClick={(a) => this.toggleAddTemplateDialog(a)} disabled={disabled}/>}
-                {}
                 {buttonProps && !tooltipButtonProps && <Button {...buttonProps} onClick={(a) => this.toggleAddTemplateDialog(a)} disabled={disabled}/>}
                 {tooltipButtonProps &&
                 <TooltipButton

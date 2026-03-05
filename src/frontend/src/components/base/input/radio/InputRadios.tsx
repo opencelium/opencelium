@@ -36,6 +36,7 @@ const InputRadios: FC<InputRadiosProps> = ({
         isIconInside,
         readOnly,
         align,
+        helpMessage,
         ...props
     }) => {
     const hasOptions = options && options.length > 0;
@@ -43,7 +44,7 @@ const InputRadios: FC<InputRadiosProps> = ({
         return null;
     }
     return (
-        <Input readOnly={readOnly} value={value} placeholder={placeholder} required={required} label={label} icon={icon} error={error} isLoading={isLoading} isIconInside={isIconInside}>
+        <Input helpMessage={helpMessage} readOnly={readOnly} value={value} placeholder={placeholder} required={required} label={label} icon={icon} error={error} isLoading={isLoading} isIconInside={isIconInside}>
             <InputRadiosStyled readOnly={readOnly} {...props}>
                 {
                     options.map((option, key) =>

@@ -1,6 +1,9 @@
-##################
+#########
 Schedules
-##################
+#########
+
+.. contents::
+   :local:
 
 The *Schedules* panel shows an overview of all schedules that have been set up. In
 general, a schedule defines which connection should be performed when. All CRUD 
@@ -53,7 +56,7 @@ on the "**x**" on the right side.
 |image17|
 
 Adding a new schedule
-"""""""""""""""""
+"""""""""""""""""""""
 
 To add a new job for the scheduler click on the button "Add Schedule". 
 
@@ -143,7 +146,7 @@ which can be used in OpenCelium.
 
 .. code-block::
 
-   0 * 14 * * ? 
+   0 15 10 * * ? *
 
 **Meaning:** Run at 10:15am every day
 
@@ -236,9 +239,15 @@ This retention behavior can be adjusted in the backend configuration file (`appl
 Adjusting these values changes how many historical logs are stored per connection or scheduled job.  
 Older logs exceeding the defined retention limits are automatically removed.
 
+.. note::
+   To ensure that the logs are created according to the configuration, they must be activated for the 
+   respective job (the switch |image_schedules_logs_6| in the column **Logs** must be active).
+
 |image_execution_logs_1|
 
-This is an overview of all logs that can be viewed.
+The entries in the columns **Last Success** and **Last Fail** give you direct access to the corresponding logs. 
+Click directly on the job number to open the log in the log viewer. The three dots also give you access to the 
+logs of past jobs (if configured).
 
 |image_execution_logs_2|
 
@@ -423,3 +432,6 @@ in the admin panel.
 .. |image_execution_logs_2| image:: ../img/schedule/OC_execution_logs_uilog.png
    :align: middle
    :height: 400
+
+.. |image_schedules_logs_6| image:: ../img/schedule/OC_schedules_btn_logs.png
+   :height: 20

@@ -3,7 +3,7 @@ OTRS
 ##################
 
 ApiExtension package
-"""""""""""""""""
+"""""""""""""""""""""
 
 The ApiExtension is an otrs package. It extends the system's API functions.
 
@@ -26,7 +26,7 @@ See below the new operations
 
 
 OC-Connector configuration file
-"""""""""""""""""
+"""""""""""""""""""""""""""""""
 
 The configuration file (yml) is a predefined webservice in otrs. Its possible to add this via the otrs frontend.
 

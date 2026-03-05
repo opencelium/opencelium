@@ -28,6 +28,7 @@ import GreaterThan from "@app_component/operator_builder/classes/if_operator/typ
 import GreaterThanOrEqualTo from "@app_component/operator_builder/classes/if_operator/types/GreaterThanOrEqual";
 import OperatorsConfigGenerator from "@app_component/operator_builder/classes/OperatorsConfigGenerator";
 import IfBaseOperator from "@app_component/operator_builder/classes/if_operator/IfBaseOperator";
+import {Step} from "react-joyride";
 
 export default class IfOperatorsConfigGenerator extends OperatorsConfigGenerator {
 
@@ -82,6 +83,11 @@ export default class IfOperatorsConfigGenerator extends OperatorsConfigGenerator
                 return new RegEx();
         }
     }
+
+    getTourSteps(operatorName: OperatorName): Step[] {
+        return (this.getOperatorClass(operatorName)).getTourSteps();
+    }
+
     getOption(operatorName: OperatorName): OptionType {
         return (this.getOperatorClass(operatorName)).getOption();
     }

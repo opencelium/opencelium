@@ -1,8 +1,8 @@
 .. _management-invoker:
 
-##################
+#######
 Invoker
-##################
+#######
 
 
 Invoker can be managed both from UI and from server directly. Let us consider the Add Invoker use case.

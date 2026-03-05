@@ -19,6 +19,13 @@ package com.becon.opencelium.backend.controller;
 import com.becon.opencelium.backend.database.mysql.service.PasswordResetService;
 import com.becon.opencelium.backend.resource.ForgotPasswordDTO;
 import com.becon.opencelium.backend.resource.ResetPasswordDTO;
+import com.becon.opencelium.backend.resource.error.ErrorResource;
+import com.becon.opencelium.backend.resource.user.UserResource;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
@@ -39,6 +46,21 @@ public class PasswordResetController {
         this.passwordResetService = passwordResetService;
     }
 
+    @Operation(summary = "Creates reset password token for user and sends it via email")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Token created and sent successfully",
+                    content = @Content(schema = @Schema(implementation = UserResource.class))),
+            @ApiResponse(responseCode = "400",
+                    description = "Bad Request",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "429",
+                    description = "Too Many Request",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @PostMapping("/forgot-password")
     public ResponseEntity<?> requestPasswordReset(@Valid @RequestBody ForgotPasswordDTO dto, HttpServletRequest request) {
         String clientIp = request.getRemoteAddr();
@@ -48,6 +70,18 @@ public class PasswordResetController {
         return ResponseEntity.ok(Map.of("message", "reset link sent"));
     }
 
+    @Operation(summary = "Resets new password for user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Password reset successfully",
+                    content = @Content(schema = @Schema(implementation = UserResource.class))),
+            @ApiResponse(responseCode = "400",
+                    description = "Bad Request",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordDTO dto) {
         passwordResetService.resetPassword(dto.token(), dto.newPassword());

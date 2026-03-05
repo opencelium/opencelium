@@ -36,15 +36,16 @@ const InputTextarea: FC<InputTextareaProps> =
         rows,
         readOnly,
         height,
+        helpMessage,
         ...props
      }) => {
         const hasLabel = label !== '';
-        let minHeight = 24 * rows + 40;
+        let minHeight = 16 * rows + 30;
         if(hasLabel){
             minHeight += 20;
         }
         return (
-            <Input isTextarea readOnly={readOnly} value={value} maxLength={maxLength} placeholder={placeholder} required={required}
+            <Input helpMessage={helpMessage} isTextarea readOnly={readOnly} value={value} maxLength={maxLength} placeholder={placeholder} required={required}
                    label={label} icon={icon} error={error} isLoading={isLoading} isIconInside={isIconInside} minHeight={props.minHeight || minHeight} height={height}>
                 <TextareaStyled
                     isTextarea

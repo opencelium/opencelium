@@ -26,7 +26,7 @@ const TableStyled = styled.table<TableStyledProps>`
     }
     & th{
         text-transform: capitalize;
-        padding: 10px 0;
+        padding: 5px 0;
     }
     & thead{
         & > span{
@@ -34,11 +34,11 @@ const TableStyled = styled.table<TableStyledProps>`
         }
         & tr{
             & th:first-child{
-                padding-left: 15px;
-                padding-right: 15px;
+                padding-left: 5px;
+                padding-right: 5px;
             }
             & th:last-child{
-                padding: 0 15px;
+                padding: 0 5px;
             }
         }
     }
@@ -46,14 +46,14 @@ const TableStyled = styled.table<TableStyledProps>`
         & tr{
             border-top: 1px solid #aaa;
             & td{
-                padding: 10px 0;
+                padding: 5px 0;
             }
             & td:first-child{
-                padding-left: 15px;
-                padding-right: 15px;
+                padding-left: 5px;
+                padding-right: 5px;
             }
             & td:last-child{
-                padding: 0 15px;
+                padding: 0 5px;
             }
         }
     }

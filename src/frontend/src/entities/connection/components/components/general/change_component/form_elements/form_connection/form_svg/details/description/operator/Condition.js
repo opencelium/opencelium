@@ -45,6 +45,7 @@ import Webhook from "@root/classes/Webhook";
 import {CTechnicalOperator} from "@classes/content/connection_overview_2/operator/CTechnicalOperator";
 import OperatorBuilder from "@app_component/operator_builder/OperatorBuilder";
 import {OperatorType} from "@app_component/operator_builder/props";
+import {DefaultTextSize} from "@entity/application/utils/constants";
 
 export const TransitionEffect = 'width 0.3s ease 0s';
 
@@ -524,9 +525,9 @@ class Condition extends React.Component{
         const expression = connector.getOperatorByIndex(operator.index)?.expression ? 'The operator is set' : 'The operator is not set';
         return(
             <React.Fragment>
-                <Col id='condition_name' xs={4} className={styles.col} style={{color: hasError ? errorColor : '#000'}}>{`Condition`}</Col>
+                <Col id='condition_name' xs={4} className={styles.col} style={{color: hasError ? errorColor : '#000', fontSize: `${DefaultTextSize}px`}}>{`Condition`}</Col>
                 <Col id="condition_label" style={{display: 'flex'}} xs={8} className={styles.col} onMouseOver={(a) => this.mouseOver(a)} onMouseLeave={(a) => this.mouseLeave(a)}>
-                    <span className={styles.value} title={conditionTextTitle} style={{color: hasError ? errorColor : '#000'}}>{expression}</span>
+                    <span className={styles.value} title={conditionTextTitle} style={{color: hasError ? errorColor : '#000', fontSize: `${DefaultTextSize}px`}}>{expression}</span>
                     {isMouseOver && !isConditionDialogOpened && !readOnly && <EditIcon onClick={(a) => this.toggleEdit(a)}/>}
                     {isMouseOver && !isConditionDialogOpened && readOnly && <ViewIcon onClick={(a) => this.toggleEdit(a)}/>}
                     {isExtended && isCurrentInfo &&

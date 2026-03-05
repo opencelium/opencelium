@@ -33,7 +33,7 @@ public class UserRequestResource {
         this.userId = userId;
     }
 
-    public String getEmail() {
+    public String getEmail(){
         return email;
     }
 

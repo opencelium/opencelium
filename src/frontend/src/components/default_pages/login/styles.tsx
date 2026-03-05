@@ -15,21 +15,18 @@
 
 import styled from "styled-components";
 import {HeaderStyledProps, LoginFormStyledProps} from "./interfaces";
+import {DefaultCardShadowStyles, DefaultInputTextSize, DefaultShadowHoverStyles} from "@entity/application/utils/constants";
+import { ColorTheme } from '@style/Theme';
 
 const LoginFormStyled = styled.div<LoginFormStyledProps>`
-    position: relative;    
     background: ${({theme}) => theme.menu.background || '#012E55'};
-    border-radius: 6px;
     width: 300px;
-    height: 275px;
+    height: auto;
     top: 30px;
     position: absolute;
     left: calc(50% - 150px);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-    transition: all 0.5s ease-in;
-    &:hover{
-        box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
-    }
+    ${DefaultCardShadowStyles}
+    ${DefaultShadowHoverStyles}
     ${({isAuth}) => isAuth ? `
         height: 100vh;
         left: 0;
@@ -54,7 +51,22 @@ const HeaderStyled = styled.div<HeaderStyledProps>`
     ` : ''}
 `;
 
+const ForgotPasswordLink = styled.div`
+    overflow: unset;
+    font-size: ${DefaultInputTextSize}px;
+    color: ${ColorTheme.Blue};
+    cursor: pointer;
+    position: absolute;
+    top: 310px;
+    left: 50%;
+    transform: translateX(-50%);
+    &:hover {
+        text-decoration-line: underline;
+    }
+`
+
 export {
     LoginFormStyled,
     HeaderStyled,
+    ForgotPasswordLink
 }

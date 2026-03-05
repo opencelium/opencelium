@@ -24,6 +24,7 @@ import {setSearchFields as setGlobalSearchValue} from "@application/redux_toolki
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import ReactSelect from "@app_component/base/input/select/ReactSelect";
 import { SearchProps } from './interfaces';
+import {DefaultInputTextSize} from "@entity/application/utils/constants";
 
 
 const GlobalSearch: FC<SearchProps> =
@@ -72,6 +73,7 @@ const GlobalSearch: FC<SearchProps> =
         const isLoading = gettingGlobalSearchData === API_REQUEST_STATE.START;
         return (
             <ReactSelect
+                id={'global-search'}
                 placeholder={'Search...'}
                 inputValue={searchValue}
                 value={null}
@@ -83,18 +85,43 @@ const GlobalSearch: FC<SearchProps> =
                 maxMenuHeight={200}
                 minMenuHeight={50}
                 styles={{
-                    container: (provided: any, {isFocused, isDisabled}: {isFocused: boolean, isDisabled: boolean}) => ({
+                    container: (provided: any) => ({
                         ...provided,
                         width: '200px',
                         border: 'none',
                         marginRight: '5px !important',
                     }),
-                    control: (provided: any, {isFocused, isDisabled}: {isFocused: boolean, isDisabled: boolean}) => ({
+                    control: (provided: any) => ({
                         ...provided,
                         width: '200px',
                         float: 'left',
                         border: 'none',
-                    })
+                        fontSize: DefaultInputTextSize,
+                    }),
+                    noOptionsMessage: (provided: any) => ({
+                        ...provided,
+                        fontSize: DefaultInputTextSize,
+                    }),
+                    singleValue: (provided: any) => ({
+                        ...provided,
+                        fontSize: DefaultInputTextSize,
+                    }),
+                    multiValueLabel: (provided: any) => ({
+                        ...provided,
+                        fontSize: DefaultInputTextSize,
+                    }),
+                    multiValue: (provided: any) => ({
+                        ...provided,
+                        fontSize: DefaultInputTextSize,
+                    }),
+                    option: (provided: any) => ({
+                        ...provided,
+                        fontSize: DefaultInputTextSize,
+                    }),
+                    placeholder: (provided: any) => ({
+                        ...provided,
+                        fontSize: DefaultInputTextSize,
+                    }),
                 }}
                 selectMenuControlStyles={{
                     borderRadius: '2px',

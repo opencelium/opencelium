@@ -18,8 +18,10 @@ import {ITheme} from "@style/Theme";
 import {EmphasizeInputStyleLines} from "../styles";
 import {CheckStyledProps, ElementProps} from "../interfaces";
 import Button from "../../button/Button";
+import {DefaultInputTextSize} from "@entity/application/utils/constants";
 
 const InputStyled = styled.input<ElementProps>`
+    font-size: ${DefaultInputTextSize}px;
     font-family: ${({theme}: {theme: ITheme}) => theme.text.fontFamily || '"Arial"'};
     background: ${({background}) => background ? background : 'unset'};
     outline: none;
@@ -46,7 +48,16 @@ const CheckStyled = styled(Button)<CheckStyledProps>`
     opacity: 1 !important;
 `;
 
+const HelpIconStyled = styled(Button)<CheckStyledProps>`
+    position: absolute;
+    right: ${({paddingRight}) => `calc(${paddingRight || '0px'} + 2px)` || '2px'};
+    top: 25px;
+    margin-top: ${({marginTop, paddingTop}) => marginTop || paddingTop || 0};
+    opacity: 1 !important;
+`;
+
 export {
     InputStyled,
     CheckStyled,
+    HelpIconStyled,
 }

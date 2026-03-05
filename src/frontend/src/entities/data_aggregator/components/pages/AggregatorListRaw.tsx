@@ -16,6 +16,7 @@
 
 import React, {FC} from 'react';
 import ModelDataAggregator from "@entity/data_aggregator/requests/models/DataAggregator";
+import {DefaultTextSize} from "@entity/application/utils/constants";
 
 const AggregatorListRaw: FC<{entity: ModelDataAggregator}> =
     ({
@@ -23,7 +24,7 @@ const AggregatorListRaw: FC<{entity: ModelDataAggregator}> =
         entity,
     }) => {
         return (
-            <tr style={{background: entity.active === false ? '#eee' : 'unset'}}>
+            <tr style={{background: entity.active === false ? '#eee' : 'unset', fontSize: `${DefaultTextSize}px`}}>
                 {children}
             </tr>
         )

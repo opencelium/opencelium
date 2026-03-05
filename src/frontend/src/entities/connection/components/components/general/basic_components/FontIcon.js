@@ -20,6 +20,7 @@ import styles from "@entity/connection/components/themes/default/general/basic_c
 import Loading from "@loading";
 import {isNumber, isString} from "@application/utils/utils";
 import Icons from "@entity/connection/components/utils/constants/icons";
+ import {ButtonIconSize} from "@entity/application/utils/constants";
 
 
 /**
@@ -120,7 +121,7 @@ FontIcon.propTypes = {
 };
 
 FontIcon.defaultProps = {
-    size: 24,
+    size: ButtonIconSize,
     className: '',
     iconClassName: '',
     isButton: false,

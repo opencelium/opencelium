@@ -13,19 +13,21 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {FC} from 'react';
+import React, {FC, useRef} from 'react';
 import {ColorTheme} from "@style/Theme";
 import {InputProps} from './interfaces';
 import {ErrorStyled, IconStyled, InputElementStyled, LabelStyled, NumberCounterStyled} from './styles';
 import Icon from '../icon/Icon';
 import {Text} from "../text/Text";
-import {TextSize} from "../text/interfaces";
 import {CheckboxStyled} from "@app_component/base/input/file/styles";
 import {isNumber} from "@application/utils/utils";
+import {ButtonIconSize, SmallTextSize} from "@entity/application/utils/constants";
+import InputHelpIcon from "@app_component/base/input/InputHelpIcon";
 
 
 const Input: FC<InputProps> =
     ({
+        isSelect,
         errorBottom,
         background,
         width,
@@ -57,8 +59,10 @@ const Input: FC<InputProps> =
         labelMargin,
         paddingRight,
         marginBottom,
-        checkboxProps
+        checkboxProps,
+        helpMessage,
     }) => {
+        const inputRef = useRef(null);
         const hasMaxLength = maxLength !== Infinity && !readOnly;
         const hasLabel = label !== '';
         const hasError = error !== '';
@@ -87,7 +91,7 @@ const Input: FC<InputProps> =
             return child;
         });
         if(!minHeight && minHeight !== 0){
-            minHeight = 47;
+            minHeight = 45;
             if(hasLabel){
                 minHeight += 20;
             }
@@ -103,7 +107,7 @@ const Input: FC<InputProps> =
                 height={height}
                 marginTop={marginTop}
                 background={background}
-                ref={componentRef}
+                ref={componentRef || inputRef}
                 display={display}
                 minHeight={isNumber(minHeight) ? `${minHeight}px` : minHeight}
                 paddingTop={paddingTop}
@@ -118,11 +122,12 @@ const Input: FC<InputProps> =
                 }
                 {!!checkboxProps ? <span style={{paddingLeft: '20px'}}>{childrenWithProps}</span> : childrenWithProps}
                 {hasUnderline && <div/>}
-                {showIcon && <IconStyled paddingTop={paddingTop ? paddingTop : '0'} top={hasLabel ? '24px' : '2px'} left={!isLoadingWithoutIcon && isIconInside ? '3px' : '10px'} right={isLoadingWithoutIcon ? isTextarea ? '15px' : '3px' : 'unset'}><Icon color={ColorTheme.LightGray} isLoading={isLoading} name={icon} size={TextSize.Size_24}/></IconStyled>}
-                {hasLabel && <LabelStyled labelMargin={labelMargin} paddingTop={paddingTop ? paddingTop : '0'} hasIcon={hasIcon} isIconInside={isIconInside}><Text value={label} size={TextSize.Size_12}/></LabelStyled>}
-                {hasError && <ErrorStyled errorBottom={errorBottom} paddingLeft={paddingLeft} hasIcon={hasIcon} isIconInside={isIconInside}><Text value={error} size={TextSize.Size_12} color={ColorTheme.Red}/></ErrorStyled>}
+                {showIcon && <IconStyled paddingTop={paddingTop ? paddingTop : '0'} top={hasLabel ? '24px' : '2px'} left={!isLoadingWithoutIcon && isIconInside ? '3px' : '10px'} right={isLoadingWithoutIcon ? isTextarea ? '15px' : '3px' : 'unset'}><Icon color={ColorTheme.LightGray} isLoading={isLoading} name={icon} size={`${ButtonIconSize}px`}/></IconStyled>}
+                {hasLabel && <LabelStyled labelMargin={labelMargin} paddingTop={paddingTop ? paddingTop : '0'} hasIcon={hasIcon} isIconInside={isIconInside}><Text value={label} size={`${SmallTextSize}px`}/></LabelStyled>}
+                {hasError && <ErrorStyled errorBottom={errorBottom} paddingLeft={paddingLeft} hasIcon={hasIcon} isIconInside={isIconInside}><Text value={error} size={`${SmallTextSize}px`} color={ColorTheme.Red}/></ErrorStyled>}
                 {hasMaxLength && <NumberCounterStyled>{`${value ? value.toString().length : 0}/${maxLength}`}</NumberCounterStyled>}
                 {afterInputComponent}
+                {!!helpMessage && <InputHelpIcon paddingRight={isSelect ? '20px' : !!afterInputComponent ? '25px' : 0} steps={helpMessage} inputRef={componentRef || inputRef}/>}
             </InputElementStyled>
         );
 }

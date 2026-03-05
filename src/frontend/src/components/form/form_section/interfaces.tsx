@@ -27,6 +27,7 @@ interface FormSectionProps{
     position?: string,
     styles?: any,
     inputsStyle?: any,
+    id?: string,
 }
 
 export {

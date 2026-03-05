@@ -5,8 +5,11 @@ import {
     DropdownToggle,
     DropdownItem,
 } from 'reactstrap';
+import {ButtonLabelSize} from "@entity/application/utils/constants";
 
 export const DropdownToggleStyled = styled(DropdownToggle)<any>`
+    font-size: ${ButtonLabelSize}px;
+    padding: 0.275rem .55rem;
     color: ${({color, theme}: {color?: string, theme: ITheme}) => color || theme.button.color.quite};
     background: ${({background, theme}: {background?: string, theme: ITheme}) => theme.button.background.quite};
     border-color: ${({background, theme}: {background?: string, theme: ITheme}) => theme.button.background.quite};

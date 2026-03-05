@@ -37,7 +37,7 @@
 
 .methodUrl {
 	text-overflow: ellipsis;
-	margin-left: 10px;
+	margin-left: 5px;
 	color: #424242;
 	overflow: hidden;
 	white-space: nowrap;
@@ -84,6 +84,10 @@
 }
 
 .navLink {
+	padding: 8px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 	position: relative;
 	cursor: pointer;
 }

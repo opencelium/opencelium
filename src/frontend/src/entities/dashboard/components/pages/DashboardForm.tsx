@@ -20,7 +20,6 @@ import {useAppDispatch} from "@application/utils/store";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {resizeWindow} from "@application/utils/utils";
 import {ColorTheme} from "@style/Theme";
-import Button from "@app_component/base/button/Button";
 import {
     getAllWidgetSettings,
     updateAllWidgetSettings
@@ -39,20 +38,20 @@ import {
     DashboardViewStyled,
     ReactGridLayoutStyled,
     RemoveButtonStyled,
-    TitleStyled,
     WidgetItemStyled
 } from './styles';
 import {SubscriptionOverviewWidget} from "@entity/dashboard/components/widgets/SubscriptionOverview";
 import {getCurrentSubscription} from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
 import LicenseAlertMessage from "@entity/dashboard/components/license_alert_message/LicenseAlertMessage";
-
-export const HAS_DASHBOARD_WIDGET_ENGINE = true;
+import {setEntityHeader, setEntityIconKey} from "@application/redux_toolkit/slices/ApplicationSlice";
+import {DashboardMetricsOverviewWidget} from "../widgets/DashboardMetricsOverviewWidget";
 
 export const WIDGET_LIST = {
     'MONITORING_BOARDS': <MonitoringBoardsWidget/>,
     'SUBSCRIPTION_OVERVIEW': <SubscriptionOverviewWidget/>,
     'CURRENT_SCHEDULER': <CurrentSchedulesWidget/>,
     'CONNECTION_OVERVIEW': <ConnectionOverviewWidget/>,
+    'METRICS_OVERVIEW': <DashboardMetricsOverviewWidget/>,
 }
 
 const DashboardForm: FC<DashboardFormProps> =
@@ -63,8 +62,8 @@ const DashboardForm: FC<DashboardFormProps> =
         */
         const dispatch = useAppDispatch();
         const {widgets} = Widget.getReduxState();
+        const {isWidgetEditOn} = Widget.getReduxState();
         const {updatingAllWidgetSettings, widgetSettings} = WidgetSetting.getReduxState();
-        const [isWidgetEditOn, setIsWidgetEditOn] = useState<boolean>(false);
         const [currentWidget, setCurrentWidget] = useState(null);
         const [layout, setLayout] = useState<IWidgetSetting[]>([]);
         const [toolbox, setToolbox] = useState([]);
@@ -73,6 +72,12 @@ const DashboardForm: FC<DashboardFormProps> =
             dispatch(getAllWidgets());
             dispatch(getAllWidgetSettings());
             dispatch(getCurrentSubscription());
+            dispatch(setEntityHeader('Dashboard'))
+            dispatch(setEntityIconKey('dashboard'));
+            return () => {
+                dispatch(setEntityHeader(''))
+                dispatch(setEntityIconKey(''))
+            }
         }, [])
         useEffect(() => {
             let newLayout = widgetSettings.map(item => {
@@ -94,9 +99,6 @@ const DashboardForm: FC<DashboardFormProps> =
             setToolbox(newToolbox);
             resizeWindow();
         }, [widgets, widgetSettings])
-        const toggleWidgetEdit = () => {
-            setIsWidgetEditOn(!isWidgetEditOn);
-        }
         const onTakeItem = (item: any) => {
             const newToolbox = [
                 ...toolbox.filter(({ i }) => i !== item.i),
@@ -135,7 +137,7 @@ const DashboardForm: FC<DashboardFormProps> =
         const getWidgets = () => {
             return layout.map(layout => {
                 return (
-                    <WidgetItemStyled key={layout.i} isWidgetEditOn={isWidgetEditOn}>
+                    <WidgetItemStyled key={layout.i} id={`widget-${layout.i}`} isWidgetEditOn={isWidgetEditOn} widgetKey={layout.i}>
                         {isWidgetEditOn &&
                             <RemoveButtonStyled
                                 size={20}
@@ -164,10 +166,8 @@ const DashboardForm: FC<DashboardFormProps> =
             gridSettings.isDraggable = true;
             gridSettings.isResizable = true;
         }
-        const EditDashboardIcon = HAS_DASHBOARD_WIDGET_ENGINE && <Button hasBackground={false} iconSize={'16px'} color={ColorTheme.Gray} icon={isWidgetEditOn ? 'check_circle_outline' : 'edit'} handleClick={toggleWidgetEdit}/>;
         return (
             <DashboardFormStyled>
-                <TitleStyled title={'Dashboard'} icon={EditDashboardIcon}/>
                 <LicenseAlertMessage/>
                 <DashboardViewStyled>
                     <div>

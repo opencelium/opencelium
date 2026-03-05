@@ -195,7 +195,7 @@ const TestConnectionButton = ({validateLogic}: any) => {
         dispatch(toggleDetails(true))
         dispatch(setFullScreen(false));
         dispatch(setButtonPanelVisibility(true));
-        dispatch(setLogPanelHeight(0));
+        dispatch(setLogPanelHeight(LogPanelHeight.Low));
         dispatch(terminateExecution(schedulerId));
         dispatch(setIsTesting(false));
         dispatch(setIsForcedFinished(true));

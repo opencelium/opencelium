@@ -15,6 +15,7 @@
 
 import React, {Ref} from "react";
 import {ITheme} from "@style/Theme";
+import {Step} from "react-joyride";
 
 
 interface CheckStyledProps{
@@ -63,6 +64,8 @@ interface InputProps extends InputElementProps{
     height?: string | number,
     className?: string,
     errorBottom?: string | number,
+    helpMessage?: Step[],
+    isSelect?: boolean,
 }
 
 /*

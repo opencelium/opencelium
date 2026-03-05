@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { isNumber, subArrayToString, unwrapField } from '@application/utils/utils';
+import { isNumber, unwrapField } from '@application/utils/utils';
 import { markFieldNameAsArray } from '@change_component//form_elements/form_connection/form_methods/help';
 import Enhancement from '@change_component/form_elements/form_connection/form_methods/mapping/enhancement/Enhancement';
 import GraphQLBody from '@change_component/form_elements/form_connection/form_methods/method/GraphQLBody';
@@ -30,6 +30,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Col, Row } from 'react-grid-system';
 import { withTheme } from 'styled-components';
+import HelpIcon from "@app_component/base/tour/HelpIcon";
+import {EnhancementSteps} from "@root/utils/tourSteps";
 
 class Body extends React.Component {
 	constructor(props) {
@@ -43,7 +45,29 @@ class Body extends React.Component {
 			isOpenedEnhancement: false,
 		};
 		this.JsonBodyRef = React.createRef();
+		this.EnhancementRef = React.createRef();
+		this.BodyRef = React.createRef();
 		this.enhancementRef = React.createRef();
+		this._isDirty = false;
+		this._openSnapshot = null;
+		this._isEnhancementInitializing = false;
+		this._hasUserTouchedEnhancement = false;
+	}
+
+	_markDirty() {
+		this._isDirty = true;
+	}
+
+	_takeSnapshot(connection) {
+		try {
+			const obj =
+				typeof connection.getObject === 'function'
+					? connection.getObject()
+					: connection;
+			return JSON.stringify(obj);
+		} catch (e) {
+			return null;
+		}
 	}
 
 	getBodyDialogState() {}
@@ -61,12 +85,46 @@ class Body extends React.Component {
 			isBodyDialogOpened,
 			toggleBodyDialog,
 		} = this.props;
-		if (!isBodyDialogOpened) {
-			connection.currentEnhancemnet = null;
+
+		const willOpen = !isBodyDialogOpened;
+
+		if (willOpen) {
+			if (setCurrentInfo) setCurrentInfo(nameOfCurrentInfo);
+
+			if (connection) {
+				connection.currentEnhancemnet = null;
+			}
+
+			this._isDirty = false;
+			this._openSnapshot = this._takeSnapshot(connection);
+
+			toggleBodyDialog();
+
+			this.setState({
+				currentEnhancement: null,
+				currentFieldName: '',
+				isToggledIcon: true,
+				isToggledReferenceIcon: false,
+			});
+
+			return;
 		}
-		if (setCurrentInfo) setCurrentInfo(nameOfCurrentInfo);
-		updateConnection(connection);
+
+		let hasChanges = this._isDirty;
+
+		if (!hasChanges && this._openSnapshot) {
+			const now = this._takeSnapshot(connection);
+			hasChanges = now !== this._openSnapshot;
+		}
+
+		if (hasChanges) {
+			updateConnection(connection);
+		}
+
+		this._openSnapshot = null;
+
 		toggleBodyDialog();
+
 		this.setState({
 			currentEnhancement: null,
 			currentFieldName: '',
@@ -140,29 +198,52 @@ class Body extends React.Component {
 			bindingItem = bindingItem.to[0];
 			connection.setCurrentFieldBindingTo(bindingItem);
 		}
-		this.setCurrentEnhancement(connection.getEnhancementByTo());
+		this.setCurrentEnhancement(connection.getEnhancementByTo(), {
+			silent: true,
+		});
 		this.setState({
 			currentFieldName: fieldName,
 		});
 	}
 
-	setCurrentEnhancement(currentEnhancement) {
+	setCurrentEnhancement(currentEnhancement, options = {}) {
 		const { connection } = this.props;
-		if (currentEnhancement !== null) {
-			connection.updateEnhancement(currentEnhancement);
+
+		const next =
+			currentEnhancement instanceof CEnhancement
+				? currentEnhancement.getObject()
+				: currentEnhancement;
+
+		if (!next) return;
+
+		const stable = (v) => {
+			try { return JSON.stringify(v ?? null); }
+			catch { return String(v); }
+		};
+
+		const prev = this.state.currentEnhancement;
+
+		if (stable(prev) === stable(next)) {
+			return;
 		}
-		this.setState({
-			currentEnhancement:
-				currentEnhancement instanceof CEnhancement
-					? currentEnhancement.getObject()
-					: currentEnhancement,
-		});
+
+		if (options && options.silent) {
+			this.setState({ currentEnhancement: next });
+			return;
+		}
+
+		connection.updateEnhancement(next);
+		this._isDirty = true;
+
+		this.setState({ currentEnhancement: next });
 	}
+
 
 	updateEntity(entity = null) {
 		const { currentFieldName } = this.state;
 		const { connection, updateConnection } = this.props;
 		let currentEntity = entity === null ? connection : entity;
+		this._markDirty('updateEntity');
 		updateConnection(currentEntity);
 		if (currentFieldName !== '') {
 			let bindingItem = this.getCurrentBindingItem(currentFieldName);
@@ -174,7 +255,7 @@ class Body extends React.Component {
 		}
 	}
 
-	renderBody() {
+	renderBody(style = {}) {
 		const { isToggledReferenceIcon } = this.state;
 		const {
 			readOnly,
@@ -222,6 +303,7 @@ class Body extends React.Component {
 						openEnhancement={(a, b) =>
 							this.setCurrentEnhancementClickingOnPointer(a, b)
 						}
+						style={style}
 					/>
 				);
 			case BODY_FORMAT.XML:
@@ -246,8 +328,16 @@ class Body extends React.Component {
 	}
 
 	toggleEnhancement() {
-		this.setState({ isOpenedEnhancement: !this.state.isOpenedEnhancement });
+		const willOpen = !this.state.isOpenedEnhancement;
+
+		if (willOpen) {
+			this._isEnhancementInitializing = true;
+			this._hasUserTouchedEnhancement = false;
+		}
+
+		this.setState({ isOpenedEnhancement: willOpen });
 	}
+
 
 	renderEnhancement() {
 		const { currentEnhancement, isOpenedEnhancement } = this.state;
@@ -314,23 +404,8 @@ class Body extends React.Component {
 			method,
 			connector,
 			connection,
+			tourSteps,
 		} = this.props;
-		let gridStyles = {};
-		if (isToggledReferenceIcon && !isToggledIcon) {
-			gridStyles.gridTemplateRows = 'calc(100% - 40px) 40px';
-		}
-		if (!isToggledReferenceIcon && isToggledIcon) {
-			gridStyles.gridTemplateRows = '40px calc(100% - 40px)';
-		}
-		if (!isToggledReferenceIcon && !isToggledIcon) {
-			gridStyles.gridTemplateRows = '40px 40px';
-		}
-		if (isToggledReferenceIcon && isToggledIcon) {
-			gridStyles.gridTemplateRows = '25% calc(100%)';
-		}
-		if (!hasEnhancement) {
-			gridStyles.gridTemplateRows = 'unset';
-		}
 		const isGraphQLData = method.isGraphQLData();
 		const hasEnhancement = this.props.hasEnhancement && !isGraphQLData;
 		return (
@@ -341,7 +416,6 @@ class Body extends React.Component {
 							? styles.body_data_with_enhancement
 							: styles.body_data_without_enhancement
 					}
-					style={gridStyles}
 				>
 					{hasEnhancement && (
 						<ReferenceInformation
@@ -361,7 +435,7 @@ class Body extends React.Component {
 							location='body'
 						/>
 					)}
-					<div style={{
+					<div ref={this.BodyRef} style={{
 						position: 'relative',
 						flex: 1,
 						display: 'flex',
@@ -369,29 +443,38 @@ class Body extends React.Component {
 						maxHeight: !isToggledIcon ? '40px' : isToggledReferenceIcon ? '50%' : 'calc(100% - 40px)',
 					}}>
 						<div>
-							<b>{bodyTitle}</b>
+							<b ref={this.BodyRef}>{bodyTitle}</b>
 							<TooltipFontIcon
 								tooltipPosition={'right'}
-								style={{ verticalAlign: 'middle', cursor: 'pointer' }}
+								style={{ verticalAlign: 'middle', cursor: 'pointer', marginLeft: '15px' }}
 								onClick={() => this.setState({ isToggledIcon: !isToggledIcon })}
 								tooltip={isToggledIcon ? 'Hide' : 'Show'}
 								value={isToggledIcon ? 'expand_less' : 'chevron_right'}
 							/>
+							<div style={{position: 'absolute', left: '100px', top: 0}}>
+								<HelpIcon steps={tourSteps} inputRef={this.BodyRef}/>
+							</div>
 						</div>
-						{isToggledIcon && this.renderBody()}
+						{isToggledIcon && this.renderBody({
+							flex: 1,
+							overflowY: 'auto',
+						})}
 					</div>
 				</div>
 				{hasEnhancement && (
-					<div className={styles.body_enhancement}>
+					<div className={styles.body_enhancement} ref={this.EnhancementRef}>
 						<div className={styles.body_enhancement_title}>
 							<b>{'Enhancement'}</b>
+							<div style={{position: 'absolute', left: '115px', top: '-10px'}}>
+								<HelpIcon steps={EnhancementSteps} inputRef={this.EnhancementRef}/>
+							</div>
 							{currentEnhancement && (
 								<Button
 									icon={'open_in_new'}
 									onClick={() => this.toggleEnhancement()}
 									iconSize={'13px'}
 									label={'Open script in new window'}
-									style={{ marginBottom: '10px' }}
+									style={{marginBottom: '10px'}}
 								/>
 							)}
 						</div>
@@ -478,6 +561,7 @@ Body.defaultProps = {
 	isDraft: false,
 	hasEnhancement: true,
 	hasError: false,
+	tourSteps: [],
 };
 
 export default withTheme(Body);

@@ -19,6 +19,7 @@ import Text from "@app_component/base/text/Text";
 import TooltipButton from "@app_component/base/tooltip_button/TooltipButton";
 import {ITheme} from "@style/Theme";
 import {MenuLinkStyledProps} from './interfaces';
+import {MenuLabelSize} from "@entity/application/utils/constants";
 
 const getNavLinkStyles = (theme: ITheme, onHoverColor?: string) => { return `
     margin: 2px;
@@ -28,7 +29,6 @@ const getNavLinkStyles = (theme: ITheme, onHoverColor?: string) => { return `
     column-gap: .75rem;
     padding: 10px 7px;
     color: #eee;
-    border-radius: .5rem;
     margin-bottom: 1rem;
     transition: .3s;
     cursor: pointer;
@@ -47,7 +47,7 @@ const getNavLinkStyles = (theme: ITheme, onHoverColor?: string) => { return `
 const SUB_LINK = `
     display: block;
     color: #eee;
-    font-size: 16px;
+    font-size: ${MenuLabelSize}px;
     & :hover{
         color: #eee;
     }
@@ -81,6 +81,7 @@ const LinksStyled = styled.ul`
 
 const MenuLinkWithSubLinksStyled = styled.div<MenuLinkStyledProps>`
     ${({theme, $onHoverColor}) => getNavLinkStyles(theme, $onHoverColor)}
+    font-size: ${MenuLabelSize}px;
     a{
         padding: 0;
         margin: 0 0 0 5px;
@@ -99,6 +100,7 @@ const MenuLinkLabelStyled = styled(Text)`
 
 const MenuLinkStyled = styled(Link)<MenuLinkStyledProps>`
     ${({theme, $onHoverColor}) => getNavLinkStyles(theme, $onHoverColor)}
+    margin: 0 5px;
 `;
 
 const MenuIconStyled = styled.span`

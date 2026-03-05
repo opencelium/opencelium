@@ -25,10 +25,7 @@ export const CONNECTION_VIEW_TYPE = {
 export const isProd = process.env.NODE_ENV === 'production';
 export const isDev = process.env.NODE_ENV === 'development';
 export const isBuild = process.env.NODE_BUILD;
-export const Roles = {
-    USER: 'ROLE_USER',
-    ADMIN: 'ROLE_ADMIN'
-};
+
 
 export const Request = {
     REJECTED: 'Server problems. The request was rejected.',

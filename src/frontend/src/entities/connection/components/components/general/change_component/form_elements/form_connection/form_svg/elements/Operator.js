@@ -31,7 +31,7 @@ import {ARROW_WIDTH} from "@change_component/form_elements/form_connection/form_
 import DashedElement from "@change_component/form_elements/form_connection/form_svg/elements/process/DashedElement";
 import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
 import CreatePanel from "@change_component/form_elements/form_connection/form_svg/elements/process/CreatePanel";
-import {setJustDeletedItem} from "@root/redux_toolkit/slices/ConnectionSlice";
+import {LogPanelHeight, setJustDeletedItem} from "@root/redux_toolkit/slices/ConnectionSlice";
 import {toggleConditionDialog} from "@root/redux_toolkit/slices/EditorSlice";
 import {setModalJustDeletedItem} from "@root/redux_toolkit/slices/ModalConnectionSlice";
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
@@ -347,7 +347,7 @@ class Operator extends React.Component{
         const isDraggableItemOperator = hasDraggableItem && currentTechnicalItem instanceof CTechnicalOperator;
         const hasDashAnimation = currentDirection && currentLog?.indexPath === operator.entity.index && operator.getHtmlIdName().indexOf(currentDirection === 'source' ? 'fromConnector' : 'toConnector') === 0;
         const hasDeleteIcon = isCurrent && !readOnly && !isTestingConnection;
-        let logStroke = logPanelHeight !== 0 && currentLogs.findIndex(l => l.index === operator.entity.index && l.connectorType === operator.connectorType) !== -1 ? '#58854d' : '';
+        let logStroke = logPanelHeight !== LogPanelHeight.Low && currentLogs.findIndex(l => l.index === operator.entity.index && l.connectorType === operator.connectorType) !== -1 ? '#58854d' : '';
         if (hasDashAnimation && !!currentLog?.error?.message) {
             logStroke = '#d24545';
             errorStyles.stroke = '#d24545';

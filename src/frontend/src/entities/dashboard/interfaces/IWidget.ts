@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-export type WidgetKey = 'CONNECTION_OVERVIEW' | 'CURRENT_SCHEDULER' | 'MONITORING_BOARDS';
+export type WidgetKey = 'CONNECTION_OVERVIEW' | 'CURRENT_SCHEDULER' | 'MONITORING_BOARDS' | 'METRICS_OVERVIEW';
 
 
 export interface IWidget{

@@ -22,7 +22,7 @@ import {
     Line,
 } from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/Lines";
 import {CreateIcon} from "@change_component/form_elements/form_connection/form_svg/elements/create_element_panel/CreateIcon";
-import {setFocusById} from "@application/utils/utils";
+import {onEnter, setFocusById} from "@application/utils/utils";
 import {CTechnicalProcess} from "@entity/connection/components/classes/components/content/connection_overview_2/process/CTechnicalProcess";
 import CCreateElementPanel from "@entity/connection/components/classes/components/content/connection_overview_2/CCreateElementPanel";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
@@ -30,6 +30,8 @@ import {connect} from "react-redux";
 import {setJustCreatedItem} from "@root/redux_toolkit/slices/ConnectionSlice";
 import {setModalJustCreatedItem} from "@root/redux_toolkit/slices/ModalConnectionSlice";
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
+import InputText from "@app_component/base/input/text/InputText";
+import InputSelect from "@app_component/base/input/select/InputSelect";
 
 
 function mapStateToProps(state, props){
@@ -53,7 +55,6 @@ class CreateProcess extends React.Component{
     }
 
     componentDidMount() {
-        setFocusById('new_request_name');
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -138,22 +139,23 @@ class CreateProcess extends React.Component{
             <React.Fragment>
                 {hasBeforeLine && !isModal ? <Line style={beforeItemLineStyles}/> : null}
                 <div id="create_process_container" className={styles.create_element_panel_for_item} style={panelItemStyles}>
-                    <Select
-                        id={'new_request_name'}
+                    <InputSelect
+                        id={`new_request_name`}
                         name={'new_request_name'}
                         value={name}
                         onChange={(a) => this.changeName(a)}
                         onKeyDown={(a) => this.onKeyDown(a)}
                         options={nameSource}
-                        closeOnSelect={false}
-                        placeholder={'Name'}
-                        maxMenuHeight={200}
-                        minMenuHeight={50}
+                        required
                         label={'Name'}
-                        className={styles.input_label}
-                        required={true}
                     />
-                    <Input id={'new_request_label'} theme={{input: styles.input_label}} onKeyDown={(a) => this.onKeyDown(a)} onChange={(a) => this.changeLabel(a)} value={label} label={'Label'}/>
+                    <InputText
+                        id={'new_request_label'}
+                        value={label}
+                        onChange={(e) => this.changeLabel(e.target.value)}
+                        label={'Label'}
+                        onKeyDown={(a) => this.onKeyDown(a)}
+                    />
                 </div>
                 <Line style={afterItemLineStyles}/>
                 <CreateIcon create={(a) => this.create(a)} style={createIconStyles} isDisabled={isAddDisabled}/>

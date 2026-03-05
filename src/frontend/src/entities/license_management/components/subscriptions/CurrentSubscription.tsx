@@ -12,6 +12,8 @@ import Dialog from "@app_component/base/dialog/Dialog";
 import {convertTimeForSubscription, formatOperationUsage} from "@application/utils/utils";
 import SubscriptionModel from "@entity/license_management/requests/models/SubscriptionModel";
 import Subscription from "@entity/license_management/classes/Subscription";
+import HeaderText from "@app_component/base/text/HeaderText";
+import {DefaultTextSize} from "@entity/application/utils/constants";
 
 export const RoleNames: any = {
     admin: 'OC Admin',
@@ -44,8 +46,8 @@ const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionM
     return (
         <div>
             <div>
-                <div style={{fontSize: '24px', marginBottom: '10px'}}>{"License Information"}</div>
-                <div style={{width: '100%'}}>
+                <div style={{marginBottom: '10px'}}><HeaderText value={"License Information"}/></div>
+                <div style={{width: '100%', fontSize: `${DefaultTextSize}px`}}>
                     <InfoStyled>
                         <div><b>Status:</b></div>
                         <div>

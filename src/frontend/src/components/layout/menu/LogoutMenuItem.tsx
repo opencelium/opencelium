@@ -25,6 +25,7 @@ const LogoutMenuItem: FC<MenuItemProps> = ({isReadonly, onHoverColor}) => {
         let navigate = useNavigate();
         return (
             <MenuLink
+                id={'logout_menu_item'}
                 key={'log_out'}
                 to={'#'}
                 onClick={() => {
@@ -35,7 +36,7 @@ const LogoutMenuItem: FC<MenuItemProps> = ({isReadonly, onHoverColor}) => {
                 }}
                 name={'logout'}
                 label={'Log Out'}
-                size={30}
+                size={26}
                 hasConfirmation={!isReadonly}
                 confirmationText={'Do you want to logout?'}
                 isReadonly={isReadonly}

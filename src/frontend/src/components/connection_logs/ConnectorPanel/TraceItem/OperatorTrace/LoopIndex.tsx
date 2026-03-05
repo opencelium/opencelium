@@ -2,6 +2,9 @@ import React, {useEffect, useState} from 'react';
 import {ColorTheme} from "@style/Theme";
 import InputText from "@app_component/base/input/text/InputText";
 import {onEnter} from "@application/utils/utils";
+import DefaultText from "@app_component/base/text/DefaultText";
+import {Text} from "@app_component/base/text/Text";
+import {DefaultInputTextSize, DefaultTextSize} from "@entity/application/utils/constants";
 
 interface LoopIteratorProps {
     iterationIndex: number,
@@ -64,7 +67,11 @@ const LoopIndex = ({iterationIndex, loopIndex, hasError, size, loadByIndex}: Loo
                 inputHeight={'18px'}
                 value={`${newLoopIndex}`}
                 min={1}
-                style={{color: iterationIndex + 1 === size && hasError ? ColorTheme.Red : '#000', textAlign: 'center'}}
+                style={{
+                    color: iterationIndex + 1 === size && hasError ? ColorTheme.Red : '#000',
+                    textAlign: 'center',
+                    fontSize: `${DefaultTextSize}px`,
+                }}
                 max={size}
                 onChange={(e) => handleChange(e.target.value)}
                 minHeight={'1'}
@@ -74,7 +81,7 @@ const LoopIndex = ({iterationIndex, loopIndex, hasError, size, loadByIndex}: Loo
             />
             <span>{`/`}</span>
             <span style={{color: hasError && loopIndex === `${(+size - 1)}` ? ColorTheme.Red : '#000'}}>
-                {size || '...'}
+                <DefaultText value={size || '...'} size={`${DefaultInputTextSize}px`} />
             </span>
         </span>
     )

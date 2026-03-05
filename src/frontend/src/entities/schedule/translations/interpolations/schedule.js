@@ -24,7 +24,7 @@ import {
     startSchedule,
     switchScheduleStatus,
     updateSchedule,
-    switchScheduleLogsStatus
+    switchScheduleLogsStatus, getLogsByExecutionId
 } from "../../redux_toolkit/action_creators/ScheduleCreators";
 import Schedules from "@entity/schedule/collections/Schedules";
 
@@ -110,6 +110,18 @@ const DELETE_SCHEDULE_NOTIFICATION = (responseType, dispatch, navigate, params) 
     );
 }
 
+const DOWNLOAD_LOG = (responseType, dispatch, navigate, params) => {
+    const {data, message} = params;
+    if (message !== 'TOO_BIG_LOG' || !data) {
+        return null;
+    }
+    return (
+        <InterpolateTranslation i18nKey={`notifications.${responseType}.${getLogsByExecutionId[responseType].type}.TOO_BIG_LOG`}>
+            The log is too big. You can find it in <strong>{`src/backend/${data.logPath}`}</strong>.
+        </InterpolateTranslation>
+    );
+}
+
 export default {
     [getActionWithoutType(addSchedule.fulfilled.type)]: ADD_SCHEDULE,
     [getActionWithoutType(updateSchedule.fulfilled.type)]: UPDATE_SCHEDULE,
@@ -120,4 +132,5 @@ export default {
     [getActionWithoutType(addNotification.fulfilled.type)]: ADD_SCHEDULE_NOTIFICATION,
     [getActionWithoutType(updateNotification.fulfilled.type)]: UPDATE_SCHEDULE_NOTIFICATION,
     [getActionWithoutType(deleteNotificationById.fulfilled.type)]: DELETE_SCHEDULE_NOTIFICATION,
+    [getActionWithoutType(getLogsByExecutionId.rejected.type)]: DOWNLOAD_LOG,
 }

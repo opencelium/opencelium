@@ -121,6 +121,7 @@ const DataAggregatorButton:FC<DataAggregatorProps> = ({connection, updateConnect
         <React.Fragment>
             {!tooltipButtonProps &&
                 <Button
+                    id={'connection-form-assign-aggregator'}
                     isDisabled={allMethodOptions.length === 0 || readOnly}
                     label={'Aggregator'}
                     icon={'subtitles'}
@@ -174,6 +175,7 @@ const DataAggregatorButton:FC<DataAggregatorProps> = ({connection, updateConnect
                     />
                     :
                     <DataAggregatorList
+                        shouldNoSetEntityHeader={true}
                         setFormType={(type: FormType, aggregator: ModelDataAggregator) => {
                             dispatch(setFormType(type));
                             dispatch(setCurrentAggregator(aggregator));

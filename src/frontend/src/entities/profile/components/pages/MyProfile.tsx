@@ -13,10 +13,10 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {ChangeEvent, FC, useEffect, useState} from "react";
+import React, {ChangeEvent, FC, useEffect, useMemo, useState} from "react";
 import {permission} from "@entity/application/utils/permission";
 import {Auth} from "@application/classes/Auth";
-import {useAppDispatch} from "@application/utils/store";
+import {useAppDispatch, useAppSelector} from "@application/utils/store";
 import {Application} from "@application/classes/Application";
 import { setThemes } from "@application/redux_toolkit/slices/ApplicationSlice";
 import FormSection from "@app_component/form/form_section/FormSection";
@@ -36,6 +36,12 @@ import {ProfileImageStyled, DefaultImageStyled} from "./styles";
 import {withTheme} from "styled-components";
 import AvatarDefault from "@image/application/avatar_default.png";
 import {isArray} from "@application/utils/utils";
+import {FormProps} from "@app_component/form/form/interfaces";
+import { API_REQUEST_STATE } from '@application/interfaces/IApplication';
+import { updatePassword } from '@entity/user/redux-toolkit/action_creators/UserCreators';
+import Button from '@app_component/base/button/Button';
+import InputText from '@app_component/base/input/text/InputText';
+import { InputTextType } from '@app_component/base/input/text/interfaces';
 
 
 const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(({theme}) => {
@@ -115,19 +121,135 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
             src={AvatarDefault}
             style={{width: '100px', height: '100px', cursor: 'pointer', borderRadius: '50%', border: `1px solid ${theme.menu.background}`}}
         />;
-    const data = {
+
+    const { updatingPassword } = useAppSelector((s) => s.userReducer);
+    const isUpdatingPassword = updatingPassword === API_REQUEST_STATE.START;
+
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [passwordTouched, setPasswordTouched] = useState(false);
+
+    const passwordValidationError = useMemo(() => {
+        if (!currentPassword && !newPassword && !confirmPassword) return '';
+        if (!currentPassword || !newPassword || !confirmPassword) return 'Please fill all password fields.';
+        if (newPassword.length < 8) return 'New password must be at least 8 characters.';
+        if (newPassword !== confirmPassword) return 'Passwords do not match.';
+        if (currentPassword === newPassword) return 'New password must be different from current password.';
+        return '';
+    }, [currentPassword, newPassword, confirmPassword]);
+
+    const currentPasswordError = useMemo(() => {
+        if (!passwordTouched) return '';
+        if (passwordValidationError === 'Please fill all password fields.' && !currentPassword) {
+            return 'Please fill current password.';
+        }
+        return '';
+    }, [passwordTouched, passwordValidationError, currentPassword]);
+
+    const newPasswordError = useMemo(() => {
+        if (!passwordTouched) return '';
+        if (passwordValidationError === 'Please fill all password fields.' && !newPassword) {
+            return 'Please fill new password.';
+        }
+        if (passwordValidationError === 'New password must be at least 8 characters.') {
+            return passwordValidationError;
+        }
+        if (passwordValidationError === 'New password must be different from current password.') {
+            return passwordValidationError;
+        }
+        return '';
+    }, [passwordTouched, passwordValidationError, newPassword]);
+
+    const confirmPasswordError = useMemo(() => {
+        if (!passwordTouched) return '';
+        if (passwordValidationError === 'Please fill all password fields.' && !confirmPassword) {
+            return 'Please confirm new password.';
+        }
+        if (passwordValidationError === 'Passwords do not match.') {
+            return passwordValidationError;
+        }
+        return '';
+    }, [passwordTouched, passwordValidationError, confirmPassword]);
+
+    const onUpdatePassword = () => {
+        setPasswordTouched(true);
+        if (passwordValidationError) return;
+
+        dispatch(updatePassword({
+            currentPassword,
+            newPassword,
+        }) as any).then((res: any) => {
+            if (res && res.type && String(res.type).includes('fulfilled')) {
+                setCurrentPassword('');
+                setNewPassword('');
+                setConfirmPassword('');
+                setPasswordTouched(false);
+            }
+        });
+    };
+
+    const data: FormProps = {
+        entityKey: 'profile-form',
         title: 'My Profile',
         formSections: [
             <React.Fragment>
-                <FormSection label={{value: 'user details'}}>
+                <FormSection label={{value: 'user details'}} id={'profile-form-user-details'}>
                     {Avatar}
                     {Title}
                     {UserDetailsInputs}
                     {Email}
                 </FormSection>
+                <FormSection label={{ value: 'update password' }} id={'profile-form-update-password'}>
+                    <InputText
+                        icon={'lock'}
+                        label={'Current password'}
+                        type={InputTextType.Password}
+                        value={currentPassword}
+                        onChange={(e: any) => setCurrentPassword(e.target.value)}
+                        maxLength={255}
+                        required={true}
+                        error={currentPasswordError}
+                    />
+                    <InputText
+                        icon={'lock'}
+                        label={'New password'}
+                        type={InputTextType.Password}
+                        value={newPassword}
+                        onChange={(e: any) => setNewPassword(e.target.value)}
+                        maxLength={255}
+                        required={true}
+                        error={newPasswordError}
+                    />
+                    <InputText
+                        icon={'lock'}
+                        label={'Confirm new password'}
+                        type={InputTextType.Password}
+                        value={confirmPassword}
+                        onChange={(e: any) => setConfirmPassword(e.target.value)}
+                        maxLength={255}
+                        required={true}
+                        error={confirmPasswordError}
+                    />
+
+                    <div style={{ position: 'absolute', right: 0, bottom: '-40px' }}>
+                        <Button
+                            label={isUpdatingPassword ? 'Updating...' : 'Update'}
+                            isDisabled={
+                                isUpdatingPassword ||
+                                !currentPassword ||
+                                !newPassword ||
+                                !confirmPassword ||
+                                !!passwordValidationError
+                            }
+                            isLoading={isUpdatingPassword}
+                            handleClick={onUpdatePassword}
+                        />
+                    </div>
+                </FormSection>
             </React.Fragment>,
             <React.Fragment>
-                <FormSection label={{value: 'settings'}}>
+                <FormSection label={{value: 'settings'}} id={'profile-form-settings'}>
                     <div style={{position: 'relative'}}>
                         <InputSelect
                             icon={'palette'}
@@ -138,7 +260,7 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
                         />
                     </div>
                 </FormSection>
-                <FormSection label={{value: 'Subscriptions'}}>
+                <FormSection label={{value: 'Permissions'}} id={'profile-form-permissions'}>
                     {Permissions}
                 </FormSection>
             </React.Fragment>

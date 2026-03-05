@@ -24,6 +24,8 @@ import {
     checkApplicationBeforeUpdate as checkResetFiles
 } from "@entity/update_assistant/redux_toolkit/action_creators/UpdateAssistantCreators";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
+import {DefaultTextSize, HeaderTextSize} from "@entity/application/utils/constants";
+import HeaderText from "@app_component/base/text/HeaderText";
 
 
 function mapStateToProps(state){
@@ -67,9 +69,9 @@ class FinishUpdate extends React.Component{
         const {t, updateSystem, entity, updatingSystem} = this.props;
         return(
             <div ref={this.containerRef} className={styles.finish_update}>
-                <div className={styles.header}>{t('FORM.FINISH.HEADER')}</div>
+                <div className={styles.header} style={{fontSize: `${HeaderTextSize}px`}}>{t('FORM.FINISH.HEADER')}</div>
                 <div dangerouslySetInnerHTML={{__html: entity.availableUpdates.selectedVersion?.instruction || ''}} style={{overflow: 'hidden'}}/>
-                <div className={styles.hint}><span>{t('FORM.FINISH.HINT')}</span>: {t('FORM.FINISH.CLEAR_CACHE')}</div>
+                <div className={styles.hint} style={{fontSize: `${DefaultTextSize}px`}}><span>{t('FORM.FINISH.HINT')}</span>: {t('FORM.FINISH.CLEAR_CACHE')}</div>
                 <div style={{display: 'flex', justifyContent: 'center'}}>
                     <Button
                         isLoading={updatingSystem === API_REQUEST_STATE.START}

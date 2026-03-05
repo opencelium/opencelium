@@ -36,7 +36,7 @@ interface TextProps extends TextStyledProps{
     namespace?: string,
     transKey?: string,
     color?: string,
-    size?: TextSize,
+    size?: TextSize | string,
     hasTitle?: boolean,
     theme?: ITheme,
     isLoading?: boolean,

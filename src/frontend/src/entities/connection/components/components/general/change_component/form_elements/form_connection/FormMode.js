@@ -312,7 +312,7 @@ class FormMode extends Component{
             if(options.length === 0){
                 return(
                     <div className={styles.no_templates}>
-                        <span>There is no templates</span>
+                        <span>There are no templates</span>
                         {error && <div className={styles.no_templates_error}>{error}</div>}
                     </div>
                 );
@@ -390,6 +390,7 @@ class FormMode extends Component{
                         <div
                             style={{display: 'flex', justifyContent: 'space-around', gap: '10px', textAlign: 'center'}}>
                             <ExpertButtonStyled
+                                id={'connection-form-mode-expert'}
                                 size={TextSize.Size_16}
                                 isActive={mode === EXPERT_MODE}
                                 authUser={authUser}
@@ -397,6 +398,7 @@ class FormMode extends Component{
                                 onClick={(e) => this.toggleConfirm(e, EXPERT_MODE)}
                             />
                             <TemplateButtonStyled
+                                id={'connection-form-mode-template'}
                                 size={TextSize.Size_16}
                                 isActive={mode === TEMPLATE_MODE}
                                 authUser={authUser}

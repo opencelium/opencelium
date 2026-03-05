@@ -75,9 +75,10 @@ export class CNotification implements INotification{
         let messageData: MessageDataProps = {message: '', length: 0};
         const translationKey = `notifications.${this.type}.${this.actionType}`;
         let interpolationName = getActionWithoutType(this.actionType);
-        if(interpolations.hasOwnProperty(interpolationName) && this.type !== NotificationType.ERROR && !this.params.hasOwnProperty('message')){
+        if(interpolations.hasOwnProperty(interpolationName)){
             messageData.message = interpolations[interpolationName](this.type, dispatch, navigate, this.params);
-        } else{
+        }
+        if (!messageData.message) {
             if(this.params?.message){
                 if (this.actionType === '') {
                     messageData.message = this.params.message;

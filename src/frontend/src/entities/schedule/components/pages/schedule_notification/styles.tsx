@@ -17,6 +17,7 @@ import styled from "styled-components";
 import {Text} from "@app_component/base/text/Text";
 import {NotificationListAppearance} from "@style/animations";
 import {ScheduleNotificationListStyledProps} from "./interfaces";
+import DefaultText from "@app_component/base/text/DefaultText";
 
 const ScheduleNotificationListStyled = styled.div<ScheduleNotificationListStyledProps>`
     ${NotificationListAppearance}
@@ -42,7 +43,7 @@ const BottomActionsStyled = styled.div`
     margin: 0 3px;
 `;
 
-const EmptyListStyled = styled(Text)`
+const EmptyListStyled = styled(DefaultText)`
 `;
 
 export {

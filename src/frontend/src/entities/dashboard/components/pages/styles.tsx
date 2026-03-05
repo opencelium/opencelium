@@ -16,20 +16,14 @@
 import styled from "styled-components";
 import RGL, {WidthProvider} from "react-grid-layout";
 import Button from "@app_component/base/button/Button";
-import {Title} from "@app_component/collection/collection_title/Title";
 import {ReactGridLayoutStyledProps, WidgetItemStyledProps} from "../pages/interfaces";
 
 const ReactGridLayout = WidthProvider(RGL);
 const DashboardFormStyled = styled.div`
-    width: calc(100% + 40px);
+    width: calc(100% - 48px);
     margin-left: -20px;
-}
 `;
 
-const TitleStyled = styled(Title)`
-    margin-left: 20px;
-    margin-bottom: 20px;
-`;
 
 const RemoveButtonStyled = styled(Button)`
     position: absolute;
@@ -43,7 +37,7 @@ const WidgetItemStyled = styled.div<WidgetItemStyledProps>`
     border: 1px solid #eee;
     border-radius: 4px;
     padding: 10px;
-    min-height: 430px;
+    min-height: ${({ widgetKey }) => widgetKey === 'METRICS_OVERVIEW' ? '210px' : '430px'};
     ${({isWidgetEditOn}) => isWidgetEditOn ? `
     cursor: move !important;
     &:hover{
@@ -80,7 +74,6 @@ const ReactGridLayoutStyled = styled(ReactGridLayout)<ReactGridLayoutStyledProps
 
 export {
     DashboardFormStyled,
-    TitleStyled,
     WidgetItemStyled,
     DashboardViewStyled,
     ReactGridLayoutStyled,
