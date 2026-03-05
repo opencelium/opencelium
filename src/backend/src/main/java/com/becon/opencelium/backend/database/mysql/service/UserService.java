@@ -17,6 +17,7 @@
 package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.database.mysql.entity.User;
+import com.becon.opencelium.backend.resource.ChangePasswordDTO;
 import com.becon.opencelium.backend.resource.request.UserRequestResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
 
@@ -54,4 +55,6 @@ public interface UserService {
     String encodePassword(String password);
 
     User getCurrentUser();
+
+    void changePassword(ChangePasswordDTO dto);
 }

@@ -18,7 +18,7 @@ package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.database.mysql.service.PasswordResetService;
 import com.becon.opencelium.backend.resource.ForgotPasswordDTO;
-import com.becon.opencelium.backend.resource.PasswordResetDTO;
+import com.becon.opencelium.backend.resource.ResetPasswordDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
 import io.swagger.v3.oas.annotations.Operation;
@@ -83,7 +83,7 @@ public class PasswordResetController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@Valid @RequestBody PasswordResetDTO dto) {
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordDTO dto) {
         passwordResetService.resetPassword(dto.token(), dto.newPassword());
 
         return ResponseEntity.ok(Map.of("message", "password updated"));

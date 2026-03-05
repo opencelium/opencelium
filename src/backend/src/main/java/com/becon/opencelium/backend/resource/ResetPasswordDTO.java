@@ -1,15 +1,17 @@
 package com.becon.opencelium.backend.resource;
 
+import com.becon.opencelium.backend.validation.password.PasswordConfirmation;
 import com.becon.opencelium.backend.validation.password.PasswordMatches;
+import com.becon.opencelium.backend.validation.password.ValidPassword;
 import jakarta.validation.constraints.NotBlank;
 
 @PasswordMatches
-public record PasswordResetDTO(
+public record ResetPasswordDTO(
         @NotBlank
         String token,
-        @NotBlank
+        @ValidPassword
         String newPassword,
-        @NotBlank
+        @ValidPassword
         String confirmPassword
-) {
+) implements PasswordConfirmation {
 }
