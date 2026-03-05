@@ -29,7 +29,7 @@ import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 
 const WRONG_LOGIN_MESSAGE = "Username or password is wrong.";
 
-const LoginFormInputs = ({isAuth, hasAnimation}: {isAuth: boolean, hasAnimation?: boolean}) => {
+const LoginFormInputs = ({isAuth, hasAnimation, hasForgotPassword}: {isAuth: boolean, hasAnimation?: boolean, hasForgotPassword: boolean}) => {
     const navigate = useNavigate();
 
     const authRedux = Auth.getReduxState();
@@ -105,7 +105,7 @@ const LoginFormInputs = ({isAuth, hasAnimation}: {isAuth: boolean, hasAnimation?
                 {!!sessionId && <AuthCode/>}
             </LoginFormStyled>
 
-            {!isAuth && (
+            {!isAuth && hasForgotPassword && (
                 <ForgotPasswordLink onClick={onForgotPasswordClick}>
                 Forgot password?
                 </ForgotPasswordLink>

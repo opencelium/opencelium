@@ -30,12 +30,20 @@ export type EntityIconKeyType =
     'update-connector-form-without-mask' | 'update-connector-form-with-mask' |
     'view-connector-form' |
     CollectionEntityKey | EmptyCollectionEntityKey |
-    'schedule-form' | 'add-connection-form-without-connectors' | 'add-connection-form-with-connectors' | 'update-connection-form'
+    'schedule-form' | 'add-connection-form-without-connectors' | 'add-connection-form-with-connectors' | 'update-connection-form' |
+    'user-form' | 'group-form-with-permission' | 'group-form-without-permission' | 'ldap-form-with-debug' | 'ldap-form-without-debug' |
+    'category-form' | 'notification-template-form'
     ;
 
-export type CollectionEntityKey = 'connector-list' | 'connection-list' | 'schedule-list';
+export type CollectionEntityKey = 'connector-list' | 'connection-list' | 'schedule-list' |
+    'admin-card-list'
+    | 'user-list' | 'group-list' | 'support-file-list' | 'invoker-list' | 'template-list' | 'aggregator-list'
+    | 'notification-template-list' | 'external-application-list' | 'category-list';
 
-export type EmptyCollectionEntityKey = 'connector-list-empty' | 'connection-list-empty' | 'schedule-list-empty';
+export type EmptyCollectionEntityKey = 'connector-list-empty' | 'connection-list-empty' | 'schedule-list-empty' |
+    'admin-card-list-empty'
+    | 'user-list-empty' | 'group-list-empty' | 'support-file-list-empty' | 'invoker-list-empty' | 'template-list-empty' | 'aggregator-list-empty'
+    | 'notification-template-list-empty' | 'external-application-list-empty' | 'category-list-empty';
 
 export interface DispatchParamsProps<T>{
 

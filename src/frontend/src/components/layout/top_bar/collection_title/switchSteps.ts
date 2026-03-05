@@ -11,6 +11,21 @@ import {
     EmptyConnectionListSteps, UpdateConnectionStepsWithConnectors
 } from "@root/utils/tourSteps";
 import {EmptyScheduleListSteps, ScheduleFormSteps, ScheduleListSteps} from "@entity/schedule/utils/tourSteps";
+import {AdminCardListSteps} from "@entity/admin_card/utils/tourSteps";
+import {UserEmptyListSteps, UserFormTourSteps, UserListSteps} from "@entity/user/utils/tourSteps";
+import {
+    UserGroupEmptyListSteps,
+    UserGroupFormWithoutPermissionTourSteps, UserGroupFormWithPermissionTourSteps,
+    UserGroupListSteps
+} from "@entity/user_group/utils/tourSteps";
+import {LDAPWithDebugTourSteps, LDAPWithoutDebugTourSteps} from "@entity/ldap/utils/tourSteps";
+import {SupportFileEmptyListSteps, SupportFileListSteps} from "@entity/support_files/utils/tourSteps";
+import {CategoryEmptyListSteps, CategoryFormSteps, CategoryListSteps} from "@entity/category/utils/tourSteps";
+import {ExternalApplicationListSteps} from "@entity/external_application/utils/tourSteps";
+import {
+    NotificationTemplateEmptyListSteps, NotificationTemplateFormSteps,
+    NotificationTemplateListSteps
+} from "@entity/notification_template/utils/tourSteps";
 
 export function switchSteps(entityIconKey: EntityIconKeyType) {
 
@@ -47,6 +62,45 @@ export function switchSteps(entityIconKey: EntityIconKeyType) {
             return AddConnectionStepsWithConnectors;
         case 'update-connection-form':
             return UpdateConnectionStepsWithConnectors;
+        case 'admin-card-list':
+        case 'admin-card-list-empty':
+            return AdminCardListSteps;
+        case 'user-list':
+            return UserListSteps;
+        case 'user-list-empty':
+            return UserEmptyListSteps;
+        case 'user-form':
+            return UserFormTourSteps;
+        case 'group-list':
+            return UserGroupListSteps;
+        case 'group-list-empty':
+            return UserGroupEmptyListSteps;
+        case 'group-form-without-permission':
+            return UserGroupFormWithoutPermissionTourSteps;
+        case 'group-form-with-permission':
+            return UserGroupFormWithPermissionTourSteps;
+        case 'ldap-form-with-debug':
+            return LDAPWithDebugTourSteps;
+        case 'ldap-form-without-debug':
+            return LDAPWithoutDebugTourSteps;
+        case 'support-file-list':
+            return SupportFileListSteps;
+        case 'support-file-list-empty':
+            return SupportFileEmptyListSteps;
+        case 'category-list':
+            return CategoryListSteps;
+        case 'category-list-empty':
+            return CategoryEmptyListSteps;
+        case 'category-form':
+            return CategoryFormSteps;
+        case 'external-application-list':
+            return ExternalApplicationListSteps;
+        case 'notification-template-list':
+            return NotificationTemplateListSteps;
+        case 'notification-template-list-empty':
+            return NotificationTemplateEmptyListSteps;
+        case 'notification-template-form':
+            return NotificationTemplateFormSteps;
         default:
             return [];
     }

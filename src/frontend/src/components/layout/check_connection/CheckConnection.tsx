@@ -55,7 +55,7 @@ const CheckConnectionComponent: FC =
                 hasNoActions={true}
                 dialogTheme={{content: 'hide_dialog_content'}}
             >
-                <LoginFormInputs isAuth={false} hasAnimation={false}/>
+                <LoginFormInputs isAuth={false} hasAnimation={false} hasForgotPassword={false}/>
             </Dialog>
         )
     }

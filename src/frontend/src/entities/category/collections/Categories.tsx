@@ -42,8 +42,8 @@ class Categories extends ListCollection<CategoryProps>{
         const hasSearch = this.hasSearch && this.entities.length > 0;
         return(
             <React.Fragment>
-                <PermissionButton autoFocus={!hasSearch} key={'add_button'} icon={'add'} href={'add'} label={'Add Category'} permission={CategoryPermissions.CREATE}/>
-                {viewType === ViewType.LIST && this.entities.length !== 0 && <PermissionButton isDisabled={checkedIds.length === 0} hasConfirmation confirmationText={'Do you really want to delete?'}  key={'delete_button'} icon={'delete'} label={'Delete Selected'} handleClick={() => this.dispatch(deleteCategoriesById(checkedIds))} permission={CategoryPermissions.DELETE}/>}
+                <PermissionButton id={'category-list-add'} autoFocus={!hasSearch} key={'add_button'} icon={'add'} href={'add'} label={'Add Category'} permission={CategoryPermissions.CREATE}/>
+                {viewType === ViewType.LIST && this.entities.length !== 0 && <PermissionButton id={'category-list-delete-selected'} isDisabled={checkedIds.length === 0} hasConfirmation confirmationText={'Do you really want to delete?'}  key={'delete_button'} icon={'delete'} label={'Delete Selected'} handleClick={() => this.dispatch(deleteCategoriesById(checkedIds))} permission={CategoryPermissions.DELETE}/>}
             </React.Fragment>
         );
     };

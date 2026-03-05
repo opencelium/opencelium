@@ -15,7 +15,6 @@
 
 import React, {FC, useEffect, useState} from 'react';
 import {RootState, useAppDispatch, useAppSelector} from "@application/utils/store";
-import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {permission} from "@entity/application/utils/permission";
 import CollectionView from "@app_component/collection/collection_view/CollectionView";
 import {getSupportFiles} from "@root/redux_toolkit/action_creators/SupportFileCreators";
@@ -25,10 +24,19 @@ import SupportFiles from "@entity/support_files/collections/SupportFiles";
 
 const SupportFilesList: FC<SupportFilesListProps> = permission(ConnectionPermissions.READ)(({}) => {
     const dispatch = useAppDispatch();
-    const {gettingSupportFiles, supportFileResponses, error} = useAppSelector((state: RootState) => state.supportFileReducer);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const {supportFileResponses, error} = useAppSelector((state: RootState) => state.supportFileReducer);
     const [shouldBeUpdated, setShouldBeUpdated] = useState(false);
     useEffect(() => {
-        dispatch(getSupportFiles());
+        (async () => {
+            try {
+                await dispatch(getSupportFiles());
+            } catch(e) {
+
+            } finally {
+                setIsLoading(false);
+            }
+        })()
     }, []);
     useEffect(() => {
         setShouldBeUpdated(!shouldBeUpdated);
@@ -36,11 +44,12 @@ const SupportFilesList: FC<SupportFilesListProps> = permission(ConnectionPermiss
     const CSupportFiles = new SupportFiles(supportFileResponses);
     return (
         <CollectionView
+            entityKey={'support-file-list'}
             hasViewSection={false}
             collection={CSupportFiles}
             shouldBeUpdated={shouldBeUpdated}
             hasError={!!error}
-            isLoading={gettingSupportFiles === API_REQUEST_STATE.START}
+            isLoading={isLoading}
             componentPermission={ConnectionPermissions}
         />
     )

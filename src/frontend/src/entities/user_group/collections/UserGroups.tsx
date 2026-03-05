@@ -52,8 +52,8 @@ class UserGroups extends ListCollection<UserGroupProps>{
         const hasSearch = this.hasSearch && this.entities.length > 0;
         return(
             <React.Fragment>
-                <PermissionButton autoFocus={!hasSearch} key={'add_button'} icon={'add'} href={'add'} label={'Add Group'} permission={UserGroupPermissions.CREATE}/>
-                {viewType === ViewType.LIST && this.entities.length !== 0 && <PermissionButton isDisabled={checkedIds.length === 0} hasConfirmation confirmationText={'Do you really want to delete?'}  key={'delete_button'} icon={'delete'} label={'Delete Selected'} handleClick={() => this.dispatch(deleteUserGroupsById(checkedIds))} permission={UserGroupPermissions.DELETE}/>}
+                <PermissionButton id={'group-list-add'} autoFocus={!hasSearch} key={'add_button'} icon={'add'} href={'add'} label={'Add Group'} permission={UserGroupPermissions.CREATE}/>
+                {viewType === ViewType.LIST && this.entities.length !== 0 && <PermissionButton id={'group-list-delete-selected'} isDisabled={checkedIds.length === 0} hasConfirmation confirmationText={'Do you really want to delete?'}  key={'delete_button'} icon={'delete'} label={'Delete Selected'} handleClick={() => this.dispatch(deleteUserGroupsById(checkedIds))} permission={UserGroupPermissions.DELETE}/>}
             </React.Fragment>
         );
     };

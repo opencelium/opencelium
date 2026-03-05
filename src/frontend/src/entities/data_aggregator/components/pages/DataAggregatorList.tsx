@@ -66,7 +66,7 @@ const DataAggregatorList:FC =
     ]
     const CollectionAggregator = new DataAggregatorCollection(aggregators, getListActions, listProps, AfterSearchComponents, isChecked);
     return (
-        <CollectionView defaultViewType={ViewType.LIST} hasViewSection={false} hasError={!!error} shouldBeUpdated={shouldBeUpdated} collection={CollectionAggregator} isLoading={gettingAllAggregators === API_REQUEST_STATE.START}/>
+        <CollectionView entityKey={'aggregator-list'} defaultViewType={ViewType.LIST} hasViewSection={false} hasError={!!error} shouldBeUpdated={shouldBeUpdated} collection={CollectionAggregator} isLoading={gettingAllAggregators === API_REQUEST_STATE.START}/>
     )
 }
 

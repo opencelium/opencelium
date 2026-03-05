@@ -55,6 +55,7 @@ const List: FC<ListViewProps> =
     }) => {
     const dispatch = useAppDispatch();
     const {entityIconKey} = Application.getReduxState();
+        console.log(entityIconKey)
     const [sortTypes, setSortTypes] = useState<any>({});
     const [visibleEntities, setVisibleEntities] = useState([]);
     const [isAllChecked, setAllChecked] = useState(false);

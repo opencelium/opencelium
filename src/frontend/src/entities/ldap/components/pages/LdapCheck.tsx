@@ -25,6 +25,9 @@ import {useAppDispatch} from "@application/utils/store";
 import {getDefaultConfig} from "@entity/ldap/redux_toolkit/action_creators/LdapCreators";
 import {clearDebugLogs} from "@entity/ldap/redux_toolkit/slices/LdapSlice";
 import Hint from "@app_component/base/hint/Hint";
+import {FormProps} from "@app_component/form/form/interfaces";
+import {setEntityIconKey} from "@application/redux_toolkit/slices/ApplicationSlice";
+import {DefaultTextSize, HeaderTextSize} from "@entity/application/utils/constants";
 
 
 const LdapCheck: FC<IForm> = ({}) => {
@@ -39,7 +42,13 @@ const LdapCheck: FC<IForm> = ({}) => {
             dispatch(clearDebugLogs());
         }
     }, []);
-
+    useEffect(() => {
+        if (debugLogs.length === 0) {
+            dispatch(setEntityIconKey('ldap-form-without-debug'))
+        } else {
+            dispatch(setEntityIconKey('ldap-form-with-debug'))
+        }
+    }, [debugLogs.length])
     const ldapForm = LdapCheckForm.createState<ILdapCheckForm>({_readOnly: true}, defaultConfig);
     const TextInputs = ldapForm.getTexts([
         {propertyName: "urls", props: {icon: 'perm_identity', label: "Url", required: true}},
@@ -60,16 +69,19 @@ const LdapCheck: FC<IForm> = ({}) => {
         }}
         isLoading={testingConfig === API_REQUEST_STATE.START}
     />]
-    const data = {
+    const data: FormProps = {
+        entityKey: debugLogs.length === 0 ? 'ldap-form-without-debug' : 'ldap-form-with-debug',
         title: [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'LDAP check'}],
         actions,
         formSections: [
-            <FormSection label={{value: 'Configurations'}}>
+            <FormSection label={{value: 'Configurations'}} id={'ldap-form-config'}>
                 {TextInputs}
-                {!defaultConfig && <div style={{marginLeft: 10, marginTop: 20, marginBottom: 20}}><Hint message={'You can set configurations in application.yml file'}/></div>}
+                {!defaultConfig && <div style={{marginLeft: 10, marginTop: 20, marginBottom: 20}}>
+                    <Hint message={'You can set configurations in application.yml file'}/>
+                </div>}
             </FormSection>,
-            <FormSection dependencies={[debugLogs.length === 0]} label={{value: 'Debug'}}>
-                <h3 style={{marginLeft: 20}}>{"LDAP tests:"}</h3>
+            <FormSection dependencies={[debugLogs.length === 0]} label={{value: 'Debug'}} id={'ldap-form-debug'}>
+                <p style={{marginLeft: 20, fontSize: HeaderTextSize}}>{"LDAP tests:"}</p>
                 {debugLogs.map((log, index) => {
                     return (
                         <div style={{margin: '20px 0 5px 20px'}}>

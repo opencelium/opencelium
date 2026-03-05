@@ -38,6 +38,8 @@ import { getAllTools } from "@entity/schedule/redux_toolkit/action_creators/Tool
 import Tool from "@entity/schedule/classes/Tool";
 import Validation from "@application/classes/Validation";
 import DropdownActionButton from '@app_component/dropdown_action_button/DropdownActionButton';
+import {FormProps} from "@app_component/form/form/interfaces";
+import {NTAggregatorInputStep} from "@entity/notification_template/utils/tourSteps";
 
 
 
@@ -143,11 +145,13 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
         propertyName: "subject", props: {maxLength: Validation.TextLength.Short, icon: 'subject', label: 'Subject', required: true}
     })
     const BodyInput = notificationTemplate.content.getTextarea({
-        propertyName: "body", props: {icon: 'feed', label: 'Body', required: true, height: `calc(100% - 67px)`, style: {height: 'calc(100% - 37px)'}}
+        propertyName: "body", props: {
+            icon: 'feed', label: 'Body', required: true, height: `calc(100% - 67px)`, style: {height: 'calc(100% - 37px)'}}
     })
     const DataAggregatorSelect =
         <InputSelect
             id={`input_connections`}
+            helpMessage={NTAggregatorInputStep}
             onChange={(option: any) => setSelectedAggregator(option)}
             value={selectedAggregator}
             icon={'subtitles'}
@@ -247,18 +251,19 @@ const NotificationTemplateForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
         );
     }
 
-    const data = {
+    const data: FormProps = {
+        entityKey: 'notification-template-form',
         title: [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Notification Templates', link: '/notification_templates'}, {name: formData.formTitle}],
         actions,
         formSections: [
-            <FormSection label={{value: 'General Data'}}>
+            <FormSection label={{value: 'General Data'}} id={'notification-template-form-general-data'}>
                 {NameInput}
                 {Type}
                 <HelpDivider/>
                 {DataAggregatorSelect}
                 {DataAggregatorItems}
             </FormSection>,
-            <FormSection label={{value: 'Template Content'}} inputsStyle={{height: '100%'}}>
+            <FormSection label={{value: 'Template Content'}} id={'notification-template-form-template-content'} inputsStyle={{height: '100%'}}>
                 {SubjectInput}
                 {notificationTemplate.content.getBoby({ref: bodyRef, markers})}
             </FormSection>

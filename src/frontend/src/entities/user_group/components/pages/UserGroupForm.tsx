@@ -29,6 +29,8 @@ import FormSection from "@app_component/form/form_section/FormSection";
 import {UserGroup} from "../../classes/UserGroup";
 import {IUserGroup} from "../../interfaces/IUserGroup";
 import Validation from "@application/classes/Validation";
+import {FormProps} from "@app_component/form/form/interfaces";
+import {setEntityIconKey} from "@application/redux_toolkit/slices/ApplicationSlice";
 
 const UserGroupForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
     const dispatch = useAppDispatch();
@@ -66,6 +68,13 @@ const UserGroupForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
             didMount.current = true;
         }
     },[addingUserGroup, updatingUserGroup]);
+    useEffect(() => {
+        if (userGroup.componentsSelect.length === 0) {
+            dispatch(setEntityIconKey('group-form-without-permission'))
+        } else {
+            dispatch(setEntityIconKey('group-form-with-permission'))
+        }
+    }, [userGroup.componentsSelect.length]);
     const NameInput = userGroup.getText({
         propertyName: "name", props: {maxLength: Validation.TextLength.Short, autoFocus: !isView, required: true, icon: 'person', label: 'Name', isLoading: checkingUserGroupName === API_REQUEST_STATE.START, error: isCurrentUserGroupHasUniqueName === TRIPLET_STATE.FALSE ? 'The name is already in use' : ''}
     })
@@ -99,20 +108,21 @@ const UserGroupForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
             isLoading={isAdd && addingUserGroup === API_REQUEST_STATE.START || isUpdate && updatingUserGroup === API_REQUEST_STATE.START}
         />);
     }
-    const data = {
+    const data: FormProps = {
+        entityKey: isView ? 'group-form-with-permission' : 'group-form-without-permission',
         title: [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'User Groups', link: '/usergroups'}, {name: formData.formTitle}],
         actions: actions,
         formSections: [
-            <FormSection label={{value: 'group details'}}>
+            <FormSection label={{value: 'group details'}} id={'group-form-details'}>
                 {NameInput}
                 {DescriptionInput}
                 {!isView && Avatar}
             </FormSection>,
             <React.Fragment>
-                <FormSection label={{value: 'components'}}>
+                <FormSection label={{value: 'components'}} id={'group-form-components'}>
                     {Components}
                 </FormSection>
-                <FormSection label={{value: 'permissions'}} dependencies={[userGroup.componentsSelect.length === 0]}>
+                <FormSection label={{value: 'permissions'}} id={'group-form-permissions'} dependencies={[userGroup.componentsSelect.length === 0]}>
                     {Permissions}
                 </FormSection>
             </React.Fragment>

@@ -27,18 +27,33 @@ import { UserPermissions } from '../../constants';
 
 const UserList: FC<UserListProps> = permission(UserPermissions.READ)(({}) => {
     const dispatch = useAppDispatch();
+    const [isLoading, setIsLoading] = useState<boolean>(true);
     const {authUser} = Auth.getReduxState();
     const [shouldBeUpdated, setShouldBeUpdated] = useState(false);
     const {gettingUsers, users, deletingUsersById, uploadingUserImage} = User.getReduxState();
     useEffect(() => {
-        dispatch(getAllUsers());
+        (async () => {
+            try {
+                dispatch(getAllUsers());
+            } catch(e) {
+
+            } finally {
+                setIsLoading(false);
+            }
+        })()
     }, [])
     useEffect(() => {
         setShouldBeUpdated(!shouldBeUpdated);
     }, [users])
     const CUsers = new Users(users, dispatch, authUser || null, deletingUsersById, uploadingUserImage);
     return (
-        <CollectionView collection={CUsers} shouldBeUpdated={shouldBeUpdated} isLoading={gettingUsers === API_REQUEST_STATE.START} componentPermission={UserPermissions}/>
+        <CollectionView
+            entityKey={'user-list'}
+            collection={CUsers}
+            shouldBeUpdated={shouldBeUpdated}
+            isLoading={isLoading}
+            componentPermission={UserPermissions}
+        />
     )
 })
 

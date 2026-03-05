@@ -37,6 +37,7 @@ const MigrationForm: FC<IForm> = ({}) => {
     const actions = [<Button
         key={'action_button'}
         label={'Migrate'}
+        isDisabled={true}
         icon={'swap_horiz'}
         handleClick={() => migrationForm.migrate()}
         isLoading={migrating === API_REQUEST_STATE.START}

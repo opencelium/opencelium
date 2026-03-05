@@ -13,9 +13,8 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {FC, useEffect} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import {useAppDispatch} from "@application/utils/store";
-import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {permission} from "@entity/application/utils/permission";
 import {Auth} from "@application/classes/Auth";
 import CollectionView from "@app_component/collection/collection_view/CollectionView";
@@ -28,13 +27,27 @@ import {UserGroupListProps} from "./interfaces";
 const UserGroupList: FC<UserGroupListProps> = permission(UserGroupPermissions.READ)(({}) => {
     const dispatch = useAppDispatch();
     const {authUser} = Auth.getReduxState();
+    const [isLoading, setIsLoading] = useState<boolean>(true);
     const {gettingUserGroups, userGroups, deletingUserGroupsById} = UserGroup.getReduxState();
     useEffect(() => {
-        dispatch(getAllUserGroups());
+        (async () => {
+            try {
+                await dispatch(getAllUserGroups());
+            } catch(e) {
+
+            } finally {
+                setIsLoading(false);
+            }
+        })()
     }, [])
     const CUserGroups = new UserGroups(userGroups, dispatch, authUser?.userGroup || null, deletingUserGroupsById);
     return (
-        <CollectionView collection={CUserGroups} isLoading={gettingUserGroups === API_REQUEST_STATE.START} componentPermission={UserGroupPermissions}/>
+        <CollectionView
+            entityKey={'group-list'}
+            collection={CUserGroups}
+            isLoading={isLoading}
+            componentPermission={UserGroupPermissions}
+        />
     )
 })
 

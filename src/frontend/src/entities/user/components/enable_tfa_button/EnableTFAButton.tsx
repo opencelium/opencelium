@@ -10,6 +10,7 @@ const EnableTfaButton = ({checkedIds, permission}: {checkedIds: number[], permis
     const {enablingUsersTotp} = Totp.getReduxState();
     return (
         <PermissionButton
+            id={'user-list-enable-2fa-selected'}
             key={'enable_tfa_button'}
             isDisabled={checkedIds.length === 0}
             icon={'smartphone'}

@@ -51,6 +51,7 @@ const DeleteSupportFiles: FC<DeleteSupportFilesProps> =
         }, [deletingSupportFiles]);
         return (
             <PermissionButton
+                id={'support-file-list-delete-selected'}
                 isDisabled={isDisabled}
                 hasConfirmation
                 confirmationText={'Do you really want to delete?'}

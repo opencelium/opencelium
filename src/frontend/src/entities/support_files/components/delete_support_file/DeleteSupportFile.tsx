@@ -58,7 +58,7 @@ const DeleteSupportFile: FC<DeleteSupportFileProps> =
                 hasConfirmation
                 confirmationText={'Do you really want to delete?'}
                 isLoading={isDeleting}
-                target={`delete_${supportFileTimeStamp.toString()}`}
+                target={`delete_entity_${supportFileTimeStamp.toString()}`}
                 position={'top'}
                 tooltip={'Delete'}
                 hasBackground={false}

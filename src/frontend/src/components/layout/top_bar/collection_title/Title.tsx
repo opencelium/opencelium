@@ -51,7 +51,7 @@ const Title: FC<TitleProps> =
     }, [entityIconKey])
     if(isArray(title)){
         return(
-            <TitleStyled className={className}>
+            <TitleStyled className={className} style={{position: 'relative'}} id={`${entityIconKey}-header`}>
                 <span>
                     {
                         // @ts-ignore
@@ -72,6 +72,20 @@ const Title: FC<TitleProps> =
                     }
                     <IconStyled>{icon}</IconStyled>
                 </span>
+                {steps.length > 0 ? <React.Fragment>
+                        <Tour steps={steps} toggle={toggleTour} show={startTour}/>
+                        <Button
+                            position={'absolute'}
+                            right={!!icon ? -35 : -18}
+                            hasBackground={false}
+                            icon={'info'}
+                            color={ColorTheme.Blue}
+                            handleClick={() => toggleTour(true)}
+                        />
+                    </React.Fragment>
+                    :
+                    null
+                }
             </TitleStyled>
         )
     }

@@ -42,8 +42,8 @@ class NotificationTemplates extends ListCollection<NotificationTemplateProps>{
         const hasSearch = this.hasSearch && this.entities.length > 0;
         return(
             <React.Fragment>
-                <PermissionButton autoFocus={!hasSearch} key={'add_button'} icon={'add'} href={'add'} label={'Add Notification Template'} permission={NotificationTemplatePermissions.CREATE}/>
-                {viewType === ViewType.LIST && this.entities.length !== 0 && <PermissionButton isDisabled={checkedIds.length === 0} hasConfirmation confirmationText={'Do you really want to delete?'}  key={'delete_button'} icon={'delete'} label={'Delete Selected'} handleClick={() => this.dispatch(deleteNotificationTemplatesById(checkedIds))} permission={NotificationTemplatePermissions.DELETE}/>}
+                <PermissionButton id={'notification-template-list-add'} autoFocus={!hasSearch} key={'add_button'} icon={'add'} href={'add'} label={'Add Notification Template'} permission={NotificationTemplatePermissions.CREATE}/>
+                {viewType === ViewType.LIST && this.entities.length !== 0 && <PermissionButton id={'notification-template-list-delete-selected'} isDisabled={checkedIds.length === 0} hasConfirmation confirmationText={'Do you really want to delete?'}  key={'delete_button'} icon={'delete'} label={'Delete Selected'} handleClick={() => this.dispatch(deleteNotificationTemplatesById(checkedIds))} permission={NotificationTemplatePermissions.DELETE}/>}
             </React.Fragment>
         );
     };

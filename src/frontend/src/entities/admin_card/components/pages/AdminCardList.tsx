@@ -38,7 +38,6 @@ const cards = [
     {id: 11, name: 'External Applications', link: '/apps'},
     {id: 12, name: 'Categories', link: `/categories`},
     {id: 14, name: 'Migration from Neo4j to MongoDB (deprecated)', link: `/migration`},
-    {id: 15, name: 'Categories', link: `/categories`},
 ]
 const AdminCardList: FC<AdminCardListProps> = permission(AdminCardPermissions.READ)(({}) => {
     const dispatch = useAppDispatch();
@@ -87,7 +86,7 @@ const AdminCardList: FC<AdminCardListProps> = permission(AdminCardPermissions.RE
     }, [gettingInstallationInfo])
     const CAdminCards = new AdminCards(adminCards);
     return (
-        <CollectionView collection={CAdminCards} shouldBeUpdated={shouldBeUpdated} componentPermission={AdminCardPermissions}/>
+        <CollectionView entityKey={'admin-card-list'} collection={CAdminCards} shouldBeUpdated={shouldBeUpdated} componentPermission={AdminCardPermissions}/>
     )
 })
 

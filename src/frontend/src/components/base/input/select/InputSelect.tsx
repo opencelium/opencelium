@@ -257,7 +257,7 @@ const InputSelect: FC<InputSelectProps> = ({
             }
         }
     }
-    const searchPlaceholder = !!placeholder ? placeholder : "Please type to search...";
+    const searchPlaceholder = !!placeholder ? placeholder : readOnly ? '-' : "Please type to search...";
     const hasSearchInput = isSearchable && (!readOnly || !isMultiple);
 
     return(

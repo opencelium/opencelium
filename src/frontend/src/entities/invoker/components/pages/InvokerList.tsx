@@ -46,7 +46,7 @@ const InvokerList: FC<InvokerListProps> = permission(InvokerPermissions.READ)(({
     }, [invokers])
     const CInvokers = new Invokers(invokers, dispatch, deletingInvokersById, uploadingInvokerImage);
     return (
-        <CollectionView collection={CInvokers} shouldBeUpdated={shouldBeUpdated} isLoading={gettingInvokers === API_REQUEST_STATE.START} componentPermission={InvokerPermissions}/>
+        <CollectionView entityKey={'invoker-list'} collection={CInvokers} shouldBeUpdated={shouldBeUpdated} isLoading={gettingInvokers === API_REQUEST_STATE.START} componentPermission={InvokerPermissions}/>
     )
 })
 

@@ -46,7 +46,7 @@ const LoginForm: FC<LoginFormProps> = ({}) => {
         <Suspense fallback={(<LayoutLoading/>)}>
             <Global/>
             {!isAuth && <NotificationItem/>}
-            <LoginFormInputs isAuth={isAuth}/>
+            <LoginFormInputs isAuth={isAuth} hasForgotPassword={true}/>
         </Suspense>
     )
 }

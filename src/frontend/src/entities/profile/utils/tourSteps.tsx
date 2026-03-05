@@ -1,3 +1,4 @@
+import React from 'react';
 import {Step} from "react-joyride";
 
 export const ProfileTourSteps: Step[] = [
@@ -6,6 +7,18 @@ export const ProfileTourSteps: Step[] = [
         content:
             'The User Details section contains personal and organizational information associated with the account, including contact details and role-related metadata.',
         target: '#profile-form-user-details',
+        placement: 'right',
+        disableBeacon: true,
+    },
+    {
+        title: 'Update Password',
+        content:
+            <span>
+                Allows the user to securely change their account password.
+                <br/>
+                Your session will be immediately expired after update.
+            </span>,
+        target: '#profile-form-update-password',
         placement: 'right',
         disableBeacon: true,
     },

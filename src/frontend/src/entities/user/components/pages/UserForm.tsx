@@ -35,6 +35,7 @@ import IUserDetail from "../../interfaces/IUserDetail";
 import {UserImageStyled} from "../../components/pages/UserImage";
 import {UserPermissions} from "../../constants";
 import Validation from "@application/classes/Validation";
+import {FormProps} from "@app_component/form/form/interfaces";
 
 
 
@@ -123,11 +124,12 @@ const UserForm: FC<IForm> = permission<IForm>(UserPermissions.CREATE)(({isAdd, i
         />);
     }
 
-    const data = {
+    const data: FormProps = {
+        entityKey: 'user-form',
         title: [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Users', link: '/users'}, {name: formData.formTitle}],
         actions,
         formSections: [
-            <FormSection label={{value: 'user details'}}>
+            <FormSection label={{value: 'user details'}} id={'user-form-details'}>
                 {Title}
                 {UserDetailsInputs}
                 {isView ?
@@ -145,10 +147,10 @@ const UserForm: FC<IForm> = permission<IForm>(UserPermissions.CREATE)(({isAdd, i
                 }
             </FormSection>,
             <React.Fragment>
-                <FormSection label={{value: 'credentials'}}>
+                <FormSection label={{value: 'credentials'}} id={'user-form-credentials'}>
                     {Credentials}
                 </FormSection>
-                <FormSection label={{value: 'user group'}}>
+                <FormSection label={{value: 'user group'}} id={'user-form-group'}>
                     {UserGroupComponent}
                     {UserGroupTextarea}
                 </FormSection>

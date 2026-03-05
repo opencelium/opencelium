@@ -20,7 +20,6 @@ import {Connection} from "@entity/connection/classes/Connection";
 import CollectionView from "@app_component/collection/collection_view/CollectionView";
 import {useAppDispatch} from "@application/utils/store";
 import {getAllMetaConnections} from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
-import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {permission} from "@entity/application/utils/permission";
 import { ConnectionPermissions } from '@entity/connection/constants';
 import {checkMongoDB} from "@entity/external_application/redux_toolkit/action_creators/ExternalApplicationCreators";
@@ -28,12 +27,20 @@ import { Category } from '@entity/category/classes/Category';
 
 const ConnectionList: FC<ConnectionListProps> = permission(ConnectionPermissions.READ)(({}) => {
     const dispatch = useAppDispatch();
+    const [isLoading, setIsLoading] = useState<boolean>(true);
     const {gettingMetaConnections, metaConnections, deletingConnectionsById, updatingConnection} = Connection.getReduxState();
     const [shouldBeUpdated, setShouldBeUpdated] = useState(false);
     const { activeCategory, categories } = Category.getReduxState();
     useEffect(() => {
-        dispatch(getAllMetaConnections());
         dispatch(checkMongoDB());
+        (async () => {
+            try {
+                await dispatch(getAllMetaConnections());
+            } catch(e) {
+            } finally {
+                setIsLoading(false);
+            }
+        })()
     }, [])
     useEffect(() => {
         setShouldBeUpdated(!shouldBeUpdated);
@@ -47,7 +54,13 @@ const ConnectionList: FC<ConnectionListProps> = permission(ConnectionPermissions
     }
     const CConnections = new Connections(filteredConnections, dispatch, deletingConnectionsById, updatingConnection);
     return (
-        <CollectionView entityKey={'connection-list'} collection={CConnections} shouldBeUpdated={shouldBeUpdated} isLoading={gettingMetaConnections === API_REQUEST_STATE.START} componentPermission={ConnectionPermissions}/>
+        <CollectionView
+            entityKey={'connection-list'}
+            collection={CConnections}
+            shouldBeUpdated={shouldBeUpdated}
+            isLoading={isLoading}
+            componentPermission={ConnectionPermissions}
+        />
     )
 })
 

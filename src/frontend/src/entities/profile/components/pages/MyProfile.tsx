@@ -42,6 +42,7 @@ import { updatePassword } from '@entity/user/redux-toolkit/action_creators/UserC
 import Button from '@app_component/base/button/Button';
 import InputText from '@app_component/base/input/text/InputText';
 import { InputTextType } from '@app_component/base/input/text/interfaces';
+import Hint from "@app_component/base/hint/Hint";
 
 
 const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(({theme}) => {
@@ -231,17 +232,11 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
                         required={true}
                         error={confirmPasswordError}
                     />
+                    <Hint message={'Your session will be immediately expired after update.'} style={{marginLeft: 40}}/>
 
                     <div style={{ float: 'right' }}>
                         <Button
                             label={isUpdatingPassword ? 'Updating...' : 'Update'}
-                            isDisabled={
-                                isUpdatingPassword ||
-                                !currentPassword ||
-                                !newPassword ||
-                                !confirmPassword ||
-                                !!passwordValidationError
-                            }
                             isLoading={isUpdatingPassword}
                             handleClick={onUpdatePassword}
                         />

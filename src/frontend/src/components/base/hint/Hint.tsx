@@ -1,10 +1,11 @@
 import React from 'react';
+import DefaultText from "@app_component/base/text/DefaultText";
 
 const Hint = ({message, style}: {message: any, style?: any}) => {
     return (
         <div style={style || {}}>
-            <b>{`Hint: `}</b>
-            <span>{message}</span>
+            <DefaultText value={`Hint: `} isBold/>
+            <DefaultText value={message}/>
         </div>
     )
 }

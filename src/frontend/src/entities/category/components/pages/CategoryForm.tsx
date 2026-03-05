@@ -29,6 +29,8 @@ import {getAllCategories} from "@entity/category/redux_toolkit/action_creators/C
 import {useAppDispatch} from "@application/utils/store";
 import {setCurrentCategory} from "@entity/category/redux_toolkit/slices/CategorySlice";
 import Validation from "@application/classes/Validation";
+import {FormProps} from "@app_component/form/form/interfaces";
+import {CategoryParentInputStep} from "@entity/category/utils/tourSteps";
 
 const CategoryForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
     const {
@@ -91,6 +93,7 @@ const CategoryForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
     const ParentCategory = category.getSelect({propertyName: 'parentSelect', props: {
         icon: 'category',
         label: 'Parent Category',
+        helpMessage: CategoryParentInputStep,
         options: Category.getOptionsForCategorySelect(categories, true, currentCategory),
         required: false,
         isLoading: gettingAllTools === API_REQUEST_STATE.START,
@@ -100,7 +103,7 @@ const CategoryForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
 
     let actions = [<Button
         key={'list_button'}
-        label={formData.listButton.label}
+        label={isView ? 'Categories' : formData.listButton.label}
         icon={formData.listButton.icon}
         href={'/categories'}
         autoFocus={isView}
@@ -117,11 +120,12 @@ const CategoryForm: FC<IForm> = ({isAdd, isUpdate, isView}) => {
         />);
     }
 
-    const data = {
+    const data: FormProps = {
+        entityKey: 'category-form',
         title: [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Categories', link: '/categories'}, {name: formData.formTitle}],
         actions,
         formSections: [
-            <FormSection label={{value: 'General Data'}}>
+            <FormSection label={{value: 'General Data'}} id={'category-form-general-data'}>
                 {NameInput}
                 {ParentCategory}
             </FormSection>

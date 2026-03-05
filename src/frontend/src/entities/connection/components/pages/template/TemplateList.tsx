@@ -40,7 +40,7 @@ const TemplateList: FC<TemplateListProps> = permission(TemplatePermissions.READ)
     }, [templates])
     const CTemplates = new Templates(templates, dispatch, deletingTemplatesById);
     return (
-        <CollectionView collection={CTemplates} shouldBeUpdated={shouldBeUpdated} isLoading={gettingTemplates === API_REQUEST_STATE.START || gettingConnectors === API_REQUEST_STATE.START} componentPermission={TemplatePermissions}/>
+        <CollectionView entityKey={'template-list'} collection={CTemplates} shouldBeUpdated={shouldBeUpdated} isLoading={gettingTemplates === API_REQUEST_STATE.START || gettingConnectors === API_REQUEST_STATE.START} componentPermission={TemplatePermissions}/>
     )
 })
 

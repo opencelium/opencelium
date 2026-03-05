@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {FC, useEffect} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import {useAppDispatch} from "@application/utils/store";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {permission} from "@entity/application/utils/permission";
@@ -29,10 +29,18 @@ import {ExternalApplicationStatus} from "@entity/external_application/requests/i
 
 const ExternalApplicationList: FC<ExternalApplicationListProps> = permission(ExternalApplicationPermissions.READ)(({}) => {
     const dispatch = useAppDispatch();
+    const [isLoading, setIsLoading] = useState<boolean>(true);
     const {checkingAll, actuatorHealth} = ExternalApplication.getReduxState();
     let externalApplications: ExternalApplication[] = [];
     useEffect(() => {
-        dispatch(checkAllExternalApplications())
+        (async () => {
+            try {
+                await dispatch(checkAllExternalApplications());
+            } catch(e) {
+            } finally {
+                setIsLoading(false);
+            }
+        })()
     }, []);
     if((checkingAll === API_REQUEST_STATE.FINISH || checkingAll === API_REQUEST_STATE.ERROR) && actuatorHealth){
         externalApplications.push({
@@ -65,7 +73,12 @@ const ExternalApplicationList: FC<ExternalApplicationListProps> = permission(Ext
     }
     const CExternalApplications = new ExternalApplications(externalApplications);
     return (
-        <CollectionView collection={CExternalApplications} isLoading={checkingAll === API_REQUEST_STATE.START} componentPermission={ExternalApplicationPermissions}/>
+        <CollectionView
+            entityKey={'external-application-list'}
+            collection={CExternalApplications}
+            isLoading={isLoading}
+            componentPermission={ExternalApplicationPermissions}
+        />
     )
 })
 

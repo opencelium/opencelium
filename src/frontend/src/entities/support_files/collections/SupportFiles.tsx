@@ -23,6 +23,7 @@ import SupportFileResponseClass from "@entity/support_files/classes/SupportFileR
 import {DeleteSupportFile} from "@entity/support_files/components/delete_support_file/DeleteSupportFile";
 import {ViewType} from "@app_component/collection/collection_view/CollectionView";
 import {DeleteSupportFiles} from "@entity/support_files/components/delete_support_files/DeleteSupportFiles";
+import IUser from "@entity/user/interfaces/IUser";
 
 class SupportFiles extends ListCollection<SupportFileResponseProps>{
     name: string = 'support_files';
@@ -104,6 +105,12 @@ class SupportFiles extends ListCollection<SupportFileResponseProps>{
         super();
         this.entities = [...supportFiles];
     }
+    search(supportFile: SupportFileResponse, searchValue: string){
+        searchValue = searchValue.toLowerCase();
+        let checkConnectionTitle = supportFile.connectionTitle ? supportFile.connectionTitle.toLowerCase().indexOf(searchValue) !== -1 : false;
+        return checkConnectionTitle;
+    }
+
 }
 
 export default SupportFiles;

@@ -57,7 +57,7 @@ const DownloadSupportFile: FC<DownloadSupportFileProps> =
         return (
             <PermissionTooltipButton
                 isLoading={isDownloading}
-                target={`download_${supportFileTimeStamp.toString()}`}
+                target={`download_entity_${supportFileTimeStamp.toString()}`}
                 position={'top'}
                 tooltip={'Download'}
                 hasBackground={false}

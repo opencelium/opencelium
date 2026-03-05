@@ -30,6 +30,7 @@ import {
 import { NotificationTemplateState } from '../redux_toolkit/slices/NotificationTemplateSlice';
 import Validation from "@application/classes/Validation";
 import {DefaultTextSize} from "@entity/application/utils/constants";
+import {NTAggregatorInputStep} from "@entity/notification_template/utils/tourSteps";
 
 export class Content extends HookStateClass implements IContent {
 	static reduxState?: NotificationTemplateState;
@@ -98,6 +99,7 @@ export class Content extends HookStateClass implements IContent {
 				label={'Body'}
 				icon={'feed'}
 				marginBottom={'20px'}
+				helpMessage={NTAggregatorInputStep}
 			>
 				<LimitedAceEditor
 					{...props}
