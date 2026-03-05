@@ -36,11 +36,10 @@ const cards = [
     {id: 9, name: 'Notification Templates', link: '/notification_templates'},
     {id: 10, name: 'Update Assistant', link: '/update_assistant', isLoading: true, isDisabled: true},
     {id: 11, name: 'External Applications', link: '/apps'},
-    {id: 12, name: 'Migration from Neo4j to MongoDB (deprecated)', link: `/migration`},
-    {id: 13, name: 'Categories', link: `/categories`},
-    {id: 14, name: 'External Applications', link: '/apps'},
-    {id: 15, name: 'Migration from Neo4j to MongoDB (deprecated)', link: `/migration`},
-    {id: 16, name: 'Categories', link: `/categories`},
+    {id: 12, name: 'Categories', link: `/categories`},
+    {id: 13, name: 'External Applications', link: '/apps'},
+    {id: 14, name: 'Migration from Neo4j to MongoDB (deprecated)', link: `/migration`},
+    {id: 15, name: 'Categories', link: `/categories`},
 ]
 const AdminCardList: FC<AdminCardListProps> = permission(AdminCardPermissions.READ)(({}) => {
     const dispatch = useAppDispatch();

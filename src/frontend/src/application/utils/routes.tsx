@@ -26,6 +26,8 @@ import {Routes as EntityRoutes, LoginRoute} from "@entity/index"
 import {Auth} from "../classes/Auth";
 import ErrorBoundary from "../../components/base/error_boundary/ErrorBoundary";
 import Sandbox from "@app_component/sandbox/Sandbox";
+import ForgotPassword from '@app_component/default_pages/login/ForgotPassword';
+import SetPassword from '@app_component/default_pages/login/SetPassword';
 
 function RequireAuth({ children }: { children: JSX.Element }) {
     let location = useLocation();
@@ -47,6 +49,8 @@ export const getRoutes = () => {
             {LoginRoute !== null ? LoginRoute : <Route path="/login" element={<ErrorBoundary><LoginForm/></ErrorBoundary>}/>}
             <Route path="/sandbox" element={<ErrorBoundary><Sandbox/></ErrorBoundary>}/>
             <Route path="/*" element={<ErrorBoundary><PageNotFound/></ErrorBoundary>}/>
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/set-password" element={<SetPassword />} />
         </Routes>
     )
 }
