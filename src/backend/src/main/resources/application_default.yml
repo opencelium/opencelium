@@ -122,12 +122,6 @@ spring:
   #   logging.level.org.springframework.data.ldap: DEBUG settings      #
   #                                                                    #
   ######################################################################
-  restor-psw:
-    base-url: "https://frontend.example.com/reset-password"
-    token-activity-time: 30 // milliseconds
-    max-email-validation-attempts: 3
-    lockout-time: 15 // milliseconds
-
 #    ldap:
 #      # LDAP server URL
 #      urls: ldap://localhost:7389
@@ -207,6 +201,11 @@ opencelium:
   #                                                                         #
   ###########################################################################
   debug-mode: true
+  forgot-psw:
+    base-url: https://frontend.example.com/reset-password
+    token-activity-time: 240000
+    max-email-validation-attempts: 3
+    lockout-time: 480000
   connector:
     security:
       key: keykeygjhgjh # used for encrypt and decrypt request data
