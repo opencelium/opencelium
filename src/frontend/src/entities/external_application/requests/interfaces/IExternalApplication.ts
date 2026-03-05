@@ -34,10 +34,28 @@ export interface DBResponseProps {
     status: ExternalApplicationStatus,
 }
 
+export interface EmailResponseProps {
+    details: {
+        location: string,
+        error?: string,
+    },
+    status: ExternalApplicationStatus,
+}
+
+export interface PolyglotResponseProps {
+    details: {
+        name: string,
+        error?: string,
+    },
+    status: ExternalApplicationStatus,
+}
+
 export interface ActuatorHealthResponseProps {
     components: {
         mariaDB: DBResponseProps,
         mongoDB: DBResponseProps,
+        email?: EmailResponseProps,
+        polyglot?: PolyglotResponseProps,
     },
     status: ExternalApplicationStatus
 }

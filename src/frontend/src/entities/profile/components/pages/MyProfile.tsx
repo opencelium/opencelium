@@ -232,7 +232,7 @@ const MyProfile: FC<MyProfileListProps> = permission(MyProfilePermissions.READ)(
                         error={confirmPasswordError}
                     />
 
-                    <div style={{ position: 'absolute', right: 0, bottom: '-40px' }}>
+                    <div style={{ float: 'right' }}>
                         <Button
                             label={isUpdatingPassword ? 'Updating...' : 'Update'}
                             isDisabled={
