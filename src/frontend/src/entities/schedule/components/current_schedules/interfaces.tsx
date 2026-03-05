@@ -17,6 +17,7 @@ import {ITheme} from "@style/Theme";
 
 interface CurrentSchedulesProps{
     theme?: ITheme,
+    hasNoHoverEffect?: boolean,
 }
 
 export {

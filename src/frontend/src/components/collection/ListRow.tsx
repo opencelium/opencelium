@@ -20,6 +20,7 @@ import {isArray, isString} from "@application/utils/utils";
 import Text from "@app_component/base/text/Text";
 import { ListRowProps } from './interfaces';
 import {ListRowStyled} from "@app_component/collection/styles";
+import DefaultText from "@app_component/base/text/DefaultText";
 
 const MAX_COLUMN_VALUE_LENGTH = 150;
 
@@ -54,7 +55,6 @@ const ListRow: FC<ListRowProps> =
                         const cellStyle = !!listProp.style ? {...listProp.style} : {};
                         if (listProp?.header?.left) {
                             cellStyle.textAlign = 'left';
-                            cellStyle.padding = '10px';
                         }
                         if (propertyKey !== '') {
                             let entityValue: any = '';
@@ -97,7 +97,7 @@ const ListRow: FC<ListRowProps> =
                             }
                             return (
                                 <td key={propertyKey} title={completeValue} style={cellStyle}>
-                                    <Text value={entityValue}/>
+                                    <DefaultText value={entityValue}/>
                                 </td>
                             )
                         }

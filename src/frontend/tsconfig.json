@@ -4,7 +4,7 @@
     "baseUrl": "./",
     "outDir": "./dist/",
     "noImplicitAny": true,
-    "module": "es6",
+    "module": "esnext",
     "target": "es5",
     "jsx": "react",
     "allowJs": true,
@@ -12,6 +12,7 @@
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
+    "skipLibCheck": true,
     "paths": {
       "@entity/*": ["./src/entities/*"],
       "@application/*": ["./src/application/*"],

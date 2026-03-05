@@ -17,6 +17,7 @@ import styled, {css} from "styled-components";
 import chroma from "chroma-js";
 import {ITheme} from "@style/Theme";
 import {InputStyledProps, LabelStyledProps, IconStyledProps, ErrorStyledProps, ElementProps} from "./interfaces";
+import {ButtonIconSize, SmallTextSize} from "@entity/application/utils/constants";
 
 const IconStyled = styled.div<IconStyledProps>`
     position: absolute;
@@ -24,8 +25,8 @@ const IconStyled = styled.div<IconStyledProps>`
     left: ${({left}) => left || 0};
     right: ${({right}) => right || 'unset'};
     top: ${({top}) => top || '2px'};
-    width: 20px;
-    height: 20px;
+    width: ${ButtonIconSize}px;
+    height: ${ButtonIconSize}px;
     place-items: center;
     display: grid;
     color: #eee;
@@ -39,7 +40,7 @@ const LabelStyled = styled.span<LabelStyledProps>`
     left: ${({hasIcon, isIconInside, theme}) => !hasIcon || isIconInside ? 0 : theme.input.iconInputDistance};
     padding-top: ${({paddingTop}) => paddingTop || 0};
     top: 0;
-    font-size: 12px;
+    font-size: ${SmallTextSize}px;
     transition: color 0.5s;
     margin: ${({labelMargin}) => labelMargin || 0};
 `;
@@ -48,8 +49,8 @@ const ErrorStyled = styled.span<ErrorStyledProps>`
     opacity: 1 !important;
     position: absolute;
     left: ${({hasIcon, isIconInside, theme}) => !hasIcon || isIconInside ? 0 : theme.input.iconInputDistance};
-    bottom: ${({theme, errorBottom}) => typeof errorBottom !== 'undefined' ? errorBottom : `calc(-${theme.input.inputElement.paddingTop})` || 0};
-    font-size: 12px;
+    bottom: ${({theme, errorBottom}) => typeof errorBottom !== 'undefined' ? errorBottom : '-1px'};
+    font-size: ${SmallTextSize}px;
     color: ${({color, theme}: {color?: string, theme: ITheme}) => color || theme.input.error.color};
     transition: color 0.5s;
     padding-left: ${({paddingLeft}) => paddingLeft || 0}; 
@@ -78,7 +79,7 @@ const NumberCounterStyled = styled.span`
     position: absolute;
     right: 0;
     bottom: ${({theme}) => `-calc(${theme.input.inputElement.paddingTop} / 2)` || 0};
-    font-size: 12px;
+    font-size: ${SmallTextSize}px;
     color: #888888;
 `;
 

@@ -57,6 +57,7 @@ const InputSelect: FC<InputSelectProps> = ({
     categoryList,
     currentCategory,
     emptyListText,
+    helpMessage,
     ...props
 }) => {
     let source: OptionProps[];
@@ -239,7 +240,7 @@ const InputSelect: FC<InputSelectProps> = ({
         return flattenedCategories
     };
     const hasIcon = !!icon;
-    let height = isToggled ? (localOptions.length > 0 ? categoryList ? CategoryList(localOptions).length : localOptions.length : 1) * 34 + 1 : 0;
+    let height = isToggled ? (localOptions.length > 0 ? categoryList ? CategoryList(localOptions).length : localOptions.length : 1) * 28 + 1 : 0;
     let multipleLabels = [];
     let hasValue = !!value;
     if(isMultiple){
@@ -260,7 +261,7 @@ const InputSelect: FC<InputSelectProps> = ({
     const hasSearchInput = isSearchable && (!readOnly || !isMultiple);
 
     return(
-        <Input checkboxProps={checkboxProps} className={className} paddingLeft={hasIcon && isIconInside ? '30px' : '0'} componentRef={inputRef} noIcon={!hasIcon} hasUnderline={false} readOnly={readOnly} maxLength={maxLength} placeholder={placeholder} required={required} label={label} icon={icon} error={error} isLoading={isLoading} isIconInside={isIconInside}>
+        <Input isSelect={true} helpMessage={helpMessage} checkboxProps={checkboxProps} className={className} paddingLeft={hasIcon && isIconInside ? '30px' : '0'} componentRef={inputRef} noIcon={!hasIcon} hasUnderline={false} readOnly={readOnly} maxLength={maxLength} placeholder={placeholder} required={required} label={label} icon={icon} error={error} isLoading={isLoading} isIconInside={isIconInside}>
             <InputContainerStyled hasBorder={!hasValue && !isToggled} ref={containerRef} color={currentOption ? ColorTheme.Black : ColorTheme.Gray}>
                 <MultipleValuesStyled ref={multipleRef}>
                     {
@@ -303,7 +304,7 @@ const InputSelect: FC<InputSelectProps> = ({
                 {
                     localOptions.length > 0 ? sortAlphabeticallyByKey(localOptions, 'label').map((option:any, key:any) => {
                         return (
-                            <Option 
+                            <Option
                                 key={`${option.value}_${option.label}_${key}`}
                                 onKeyDown={(e: any) => focusNextOption(e, option)}
                                 isCurrent={

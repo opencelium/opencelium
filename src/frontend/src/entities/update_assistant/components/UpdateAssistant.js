@@ -198,7 +198,7 @@ class UpdateAssistant extends Component{
         const {updateData, hasAvailableUpdates, hasTemplateFileUpdate, hasInvokerFileUpdate, hasConnectionMigration, hasFinishUpdate} = this.state;
         const {t, updatingSystem, gettingInstallationInfo, installationInfo} = this.props;
         let contentTranslations = {};
-        contentTranslations.header = [{name: 'Admin Panel', link: '/admin_cards'}, {name: t('FORM.HEADER')}];
+        contentTranslations.header = [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Update Assistant'}];
         const isActionDisabled = !this.validateAvailableUpdates() || !this.validateTemplateFileUpdate() || !this.validateInvokerFileUpdate() || !this.validateConnectionMigration();
         let contents = [{
             inputs: [

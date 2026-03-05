@@ -18,6 +18,7 @@ import React, {FC} from 'react';
 import {useNavigate} from "react-router";
 import {DefaultListRawStyled} from './styles';
 import {DefaultListRawProps} from './interfaces';
+import {DefaultTextSize} from "@entity/application/utils/constants";
 
 let timer: any;
 
@@ -33,7 +34,7 @@ const DefaultListRaw: FC<DefaultListRawProps> =
         const hasDisabledStyle = entity.isDisabled || entity.isLoading;
         const hasOnClickEvent = !!onClick;
         return (
-            <DefaultListRawStyled id={id} title={entity.title || ''} style={{cursor: hasDisabledStyle ? "default" : "pointer", color: hasDisabledStyle ? '#777' : '#000', background: hasDisabledStyle ? '#eee' : 'unset'}} onClick={entity.isDisabled ? () => {} : hasOnClickEvent ? (e) => onClick(entity) : (e: any) => {
+            <DefaultListRawStyled id={id} title={entity.title || ''} style={{fontSize: `${DefaultTextSize}px`, cursor: hasDisabledStyle ? "default" : "pointer", color: hasDisabledStyle ? '#777' : '#000', background: hasDisabledStyle ? '#eee' : 'unset'}} onClick={entity.isDisabled ? () => {} : hasOnClickEvent ? (e) => onClick(entity) : (e: any) => {
                 if (timer) clearTimeout(timer);
                 timer = setTimeout(function() {
                     let element = e.target;

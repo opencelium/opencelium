@@ -15,12 +15,13 @@
 
 import styled from "styled-components";
 import {Text} from "@app_component/base/text/Text";
+import {Card} from "@app_component/base/card/Card";
+import DefaultText from "@app_component/base/text/DefaultText";
 
-const CurrentSchedulesStyled = styled.div`
+const CurrentSchedulesStyled = styled(Card)`
     padding: 1vw 1vw 0.5vw;
     background-color: #fff;
     border-radius: 5px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
     transition: all 0.3s cubic-bezier(.25,.8,.25,1);
     &> div{
         margin: 20px 0;
@@ -34,7 +35,7 @@ const HeaderStyled = styled.div`
     margin-bottom: 30px;
 `;
 
-const EmptyListStyled = styled(Text)`
+const EmptyListStyled = styled(DefaultText)`
 `;
 
 export {

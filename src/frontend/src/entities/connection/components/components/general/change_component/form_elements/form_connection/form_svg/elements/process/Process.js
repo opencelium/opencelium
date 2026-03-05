@@ -30,7 +30,7 @@ import {OUTSIDE_ITEM} from "@classes/content/connection/CConnectorItem";
 import DashedElement from "./DashedElement";
 import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
 import CreatePanel from "@change_component/form_elements/form_connection/form_svg/elements/process/CreatePanel";
-import {setJustDeletedItem} from "@root/redux_toolkit/slices/ConnectionSlice";
+import {LogPanelHeight, setJustDeletedItem} from "@root/redux_toolkit/slices/ConnectionSlice";
 import {toggleRequestBodyDialog} from "@root/redux_toolkit/slices/EditorSlice";
 import {setModalJustDeletedItem} from "@root/redux_toolkit/slices/ModalConnectionSlice";
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
@@ -277,7 +277,7 @@ class Process extends React.Component{
             }
         }
         const hasDashAnimation = currentDirection && currentLog?.indexPath === process.entity.index && process.getHtmlIdName().indexOf(currentDirection === 'source' ? 'fromConnector' : 'toConnector') === 0;
-        let logStroke = logPanelHeight !== 0 && currentLogs.findIndex(l => l.shouldDraw && l.index === process.entity.index && l.connectorType === process.connectorType) !== -1 ? '#58854d' : '';
+        let logStroke = logPanelHeight !== LogPanelHeight.Low && currentLogs.findIndex(l => l.shouldDraw && l.index === process.entity.index && l.connectorType === process.connectorType) !== -1 ? '#58854d' : '';
         if (hasDashAnimation && !!currentLog?.error?.message) {
             logStroke = '#d24545';
         }

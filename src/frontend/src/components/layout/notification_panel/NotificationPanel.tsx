@@ -33,6 +33,7 @@ import {
     NotificationsStyled,
     PanelTitleStyled
 } from './styles';
+import DefaultText from "@app_component/base/text/DefaultText";
 
 const NotificationPanel: FC<NotificationPanelProps> = ({theme}) => {
     const dispatch = useAppDispatch();
@@ -60,7 +61,7 @@ const NotificationPanel: FC<NotificationPanelProps> = ({theme}) => {
             <CloseButtonStyled tabIndex={isNotificationPanelOpened ? 0 : -1} color={ColorTheme.Black} target={'notification_panel_close'} tooltip={'Close'} size={20} hasBackground={false} icon={'close'} onClick={() => dispatch(toggleNotificationPanel())}/>
             <Text value={<PanelTitleStyled>{"Notifications"}</PanelTitleStyled>}/>
             {!hasNotifications ?
-                <div>There are no notifications</div>
+                <DefaultText value={'There are no notifications'} />
                 :
                 <React.Fragment>
                     <ActionsStyled>

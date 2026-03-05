@@ -67,7 +67,7 @@ class TechnicalLayout extends React.Component{
             } else{
                 connection.removeToConnectorMethod(method);
             }
-            updateConnection(connection);
+            updateConnection(connection, { markDirty: true });
             const currentItem = connector.getCurrentItem();
             if(currentItem){
                 const currentSvgElement = connector.getSvgElementByIndex(currentItem.index);
@@ -80,16 +80,16 @@ class TechnicalLayout extends React.Component{
         if(currentItem) {
             const {connection, updateConnection} = this.props;
             this.setCurrentTechnicalItem(currentItem.getObject());
-            if (connection) {
+            if (!connection) return;
+
                 const connector = connection.getConnectorByType(currentItem.connectorType);
                 const currentItemInConnector = connector.getCurrentItem();
                 if (currentItemInConnector) {
                     connector.setCurrentItem(currentItem.entity);
-                    updateConnection(connection);
+                    updateConnection(connection, {markDirty: false});
                 }
             }
-        }
-    }
+      }
 
     getPanelParams(allItems){
         const {connection} = this.props;
@@ -115,8 +115,9 @@ class TechnicalLayout extends React.Component{
             setRef, connection, currentTechnicalItem, ...svgProps
         } = this.props;
         const items = connection ? [...connection.fromConnector.svgItems, ...connection.toConnector.svgItems] : [];
+
         const {fromConnectorPanelParams, toConnectorPanelParams} = this.getPanelParams(items);
-        let startingSvgY = -50;
+        let startingSvgY = -104;
         let svgStyle = {};
         return(
             <div id={this.layoutId} className={`${styles.technical_layout}`}>
@@ -139,7 +140,7 @@ class TechnicalLayout extends React.Component{
                     fromConnectorPanelParams={fromConnectorPanelParams}
                     toConnectorPanelParams={toConnectorPanelParams}
                     setCreateElementPanelPosition={setCreateElementPanelPosition}
-                    startingSvgX={-250}
+                    startingSvgX={-450}
                     startingSvgY={startingSvgY}
                 />
             </div>

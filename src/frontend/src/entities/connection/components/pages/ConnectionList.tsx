@@ -47,7 +47,7 @@ const ConnectionList: FC<ConnectionListProps> = permission(ConnectionPermissions
     }
     const CConnections = new Connections(filteredConnections, dispatch, deletingConnectionsById, updatingConnection);
     return (
-        <CollectionView collection={CConnections} shouldBeUpdated={shouldBeUpdated} isLoading={gettingMetaConnections === API_REQUEST_STATE.START} componentPermission={ConnectionPermissions}/>
+        <CollectionView entityKey={'connection-list'} collection={CConnections} shouldBeUpdated={shouldBeUpdated} isLoading={gettingMetaConnections === API_REQUEST_STATE.START} componentPermission={ConnectionPermissions}/>
     )
 })
 

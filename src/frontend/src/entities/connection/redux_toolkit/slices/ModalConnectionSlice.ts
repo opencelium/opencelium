@@ -53,7 +53,7 @@ let initialState: ConnectionState = {
   isCreateElementPanelOpened: false,
   currentLogs: [],
   isTestingConnection: false,
-  logPanelHeight: 0,
+  logPanelHeight: LogPanelHeight.Low,
   isDetailsOpened: true,
   justCreatedItem: null,
   justDeletedItem: null,
@@ -88,7 +88,7 @@ export const modalConnectionSlice = createSlice({
     setModalTestingConnection: (state, action: PayloadAction<boolean>) => {
       if (action.payload) {
         state.currentLogs = [];
-        if (state.logPanelHeight === 0) {
+        if (state.logPanelHeight === LogPanelHeight.Low) {
           state.logPanelHeight = LogPanelHeight.Medium;
         }
       }

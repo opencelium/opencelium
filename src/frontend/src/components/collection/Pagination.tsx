@@ -14,8 +14,9 @@
  */
 
 import React, { FC, useEffect } from 'react';
-import { PaginationItem, PaginationLink, Pagination as ReactPagination } from "reactstrap";
+import { Pagination as ReactPagination } from "reactstrap";
 import { PaginationProps } from "./interfaces";
+import {PaginationItemStyled, PaginationLinkStyled} from "@app_component/collection/styles";
 
 //must be odd
 const MAX_PAGES = 5;
@@ -45,40 +46,40 @@ const Pagination: FC<PaginationProps> =
     }, [total, currentPage])
     for(let i = startIndex; i <= endIndex; i++){
         paginationItems.push(
-            <PaginationItem key={i} active={currentPage === i}>
-                <PaginationLink onClick={() => setCurrentPage(i)}>
+            <PaginationItemStyled key={i} active={currentPage === i}>
+                <PaginationLinkStyled onClick={() => setCurrentPage(i)}>
                     {i}
-                </PaginationLink>
-            </PaginationItem>
+                </PaginationLinkStyled>
+            </PaginationItemStyled>
         );
     }
     return (
         <ReactPagination aria-label="Page navigation example" style={{paddingBottom: '30px'}}>
-            <PaginationItem disabled={currentPage === 1}>
-                <PaginationLink
+            <PaginationItemStyled disabled={currentPage === 1}>
+                <PaginationLinkStyled
                     first
                     onClick={() => setCurrentPage(1)}
                 />
-            </PaginationItem>
-            <PaginationItem disabled={currentPage === 1}>
-                <PaginationLink
+            </PaginationItemStyled>
+            <PaginationItemStyled disabled={currentPage === 1}>
+                <PaginationLinkStyled
                     previous
                     onClick={() => setCurrentPage(currentPage - 1)}
                 />
-            </PaginationItem>
+            </PaginationItemStyled>
             {paginationItems}
-            <PaginationItem disabled={currentPage === total}>
-                <PaginationLink
+            <PaginationItemStyled disabled={currentPage === total}>
+                <PaginationLinkStyled
                     next
                     onClick={() => setCurrentPage(currentPage + 1)}
                 />
-            </PaginationItem>
-            <PaginationItem disabled={currentPage === total}>
-                <PaginationLink
+            </PaginationItemStyled>
+            <PaginationItemStyled disabled={currentPage === total}>
+                <PaginationLinkStyled
                     last
                     onClick={() => setCurrentPage(total)}
                 />
-            </PaginationItem>
+            </PaginationItemStyled>
         </ReactPagination>
     )
 }

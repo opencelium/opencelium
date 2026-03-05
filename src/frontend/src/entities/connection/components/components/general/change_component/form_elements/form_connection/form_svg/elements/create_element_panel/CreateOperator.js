@@ -29,6 +29,7 @@ import {connect} from "react-redux";
 import {setJustCreatedItem} from "@root/redux_toolkit/slices/ConnectionSlice";
 import {setModalJustCreatedItem} from "@root/redux_toolkit/slices/ModalConnectionSlice";
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
+import InputSelect from "@app_component/base/input/select/InputSelect";
 
 
 @GetModalProp()
@@ -110,20 +111,16 @@ class CreateOperator extends React.Component{
             <React.Fragment>
                 {!itemPosition && !itemType && !isModal ? <Line style={beforeItemLineStyles}/> : null}
                 <div id="create_operator_container" className={styles.create_element_panel_for_item} style={panelItemStyles}>
-                    <Select
-                        id={'new_operator_type'}
+                    <InputSelect
+                        id={`new_operator_type`}
                         name={'new_operator_type'}
                         value={type}
                         onChange={(a) => this.changeType(a)}
                         onKeyDown={(a) => this.onKeyDown(a)}
                         options={typeSource}
-                        closeOnSelect={false}
-                        placeholder={'Type'}
-                        maxMenuHeight={200}
-                        minMenuHeight={50}
+                        required
                         label={'Type'}
-                        className={styles.input_label}
-                        required={true}
+                        minHeight={'56px'}
                     />
                 </div>
                 <Line style={afterItemLineStyles}/>

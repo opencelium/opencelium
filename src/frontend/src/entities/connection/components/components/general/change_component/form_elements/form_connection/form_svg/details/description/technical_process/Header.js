@@ -16,7 +16,6 @@
 import CEnhancement from '@entity/connection/components/classes/components/content/connection/field_binding/CEnhancement';
 import Button from '@entity/connection/components/components/general/basic_components/buttons/Button';
 import Dialog from '@entity/connection/components/components/general/basic_components/Dialog';
-import Table from '@entity/connection/components/components/general/basic_components/table/Table';
 import TooltipFontIcon from '@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon';
 import styles from '@entity/connection/components/themes/default/content/connections/connection_overview_2';
 import React from 'react';
@@ -25,6 +24,8 @@ import { Col, Row } from 'react-grid-system';
 import Enhancement from '../../../../form_methods/mapping/enhancement/Enhancement';
 import JsonBody from '../../../../form_methods/method/JsonBody';
 import ReferenceInformation from './reference_information/ReferenceInformation';
+import HelpIcon from "@app_component/base/tour/HelpIcon";
+import {EnhancementSteps} from "@root/utils/tourSteps";
 
 class Header extends React.Component {
 	constructor(props) {
@@ -38,20 +39,77 @@ class Header extends React.Component {
 			isOpenedEnhancement: false,
 			isToggledIcon: true,
 		};
+		this.EnhancementRef = React.createRef();
+		this.HeaderRef = React.createRef();
 		this.JsonBodyRef = React.createRef();
 		this.enhancementRef = React.createRef();
+		this._isDirty = false;
+		this._openSnapshot = null;
+		this._isEnhancementInitializing = false;
+		this._hasUserTouchedEnhancement = false;
+	}
+
+	_markDirty() {
+		this._isDirty = true;
+	}
+
+	_takeSnapshot(connection) {
+		try {
+			const obj =
+				typeof connection.getObject === 'function'
+					? connection.getObject()
+					: connection;
+			return JSON.stringify(obj);
+		} catch (e) {
+			return null;
+		}
 	}
 
 	toggleHeaderVisible() {
-		const { setCurrentInfo, nameOfCurrentInfo, updateConnection, connection } = this.props;
-		if (setCurrentInfo) setCurrentInfo(nameOfCurrentInfo);
-		updateConnection(connection);
+		const {
+			setCurrentInfo,
+			nameOfCurrentInfo,
+			updateConnection,
+			connection,
+		} = this.props;
+		const willOpen = !this.state.isHeaderVisible;
+
+		if (willOpen) {
+			if (setCurrentInfo) setCurrentInfo(nameOfCurrentInfo);
+
+			this._isDirty = false;
+			this._openSnapshot = this._takeSnapshot(connection);
+
+			this.setState({
+				currentEnhancement: null,
+				currentFieldName: '',
+				isToggledIcon: true,
+				isToggledReferenceIcon: false,
+				isHeaderVisible: true,
+			});
+
+			return;
+		}
+
+		let hasChanges = this._isDirty;
+
+		if (!hasChanges && this._openSnapshot) {
+			const now = this._takeSnapshot(connection);
+			hasChanges = now !== this._openSnapshot;
+		}
+
+		if (hasChanges) {
+			updateConnection(connection);
+		}
+
+		this._openSnapshot = null;
+
 		this.setState({
 			currentEnhancement: null,
 			currentFieldName: '',
 			isToggledIcon: true,
 			isToggledReferenceIcon: false,
-			isHeaderVisible: !this.state.isHeaderVisible,
+			isHeaderVisible: false,
 		});
 	}
 
@@ -120,29 +178,54 @@ class Header extends React.Component {
 			bindingItem = bindingItem.to[0];
 			connection.setCurrentFieldBindingTo(bindingItem);
 		}
-		this.setCurrentEnhancement(connection.getEnhancementByTo());
+		this.setCurrentEnhancement(connection.getEnhancementByTo(), {
+			silent: true,
+		});
 		this.setState({
 			currentFieldName: fieldName,
 		});
 	}
 
-	setCurrentEnhancement(currentEnhancement) {
+	setCurrentEnhancement(currentEnhancement, options = {}) {
 		const { connection } = this.props;
-		if (currentEnhancement !== null) {
-			connection.updateEnhancement(currentEnhancement);
+
+		const next =
+			currentEnhancement instanceof CEnhancement
+				? currentEnhancement.getObject()
+				: currentEnhancement;
+
+		if (!next) return;
+
+		const stable = (v) => {
+			try { return JSON.stringify(v ?? null); }
+			catch { return String(v); }
+		};
+
+		const prev = this.state.currentEnhancement;
+
+		if (stable(prev) === stable(next)) {
+			return;
 		}
-		this.setState({
-			currentEnhancement:
-				currentEnhancement instanceof CEnhancement
-					? currentEnhancement.getObject()
-					: currentEnhancement,
-		});
+
+		if (options && options.silent) {
+			this.setState({ currentEnhancement: next });
+			return;
+		}
+
+		connection.updateEnhancement(next);
+		this._isDirty = true;
+
+		this.setState({ currentEnhancement: next });
 	}
+
+
+
 
 	updateEntity(entity = null) {
 		const { currentFieldName } = this.state;
 		const { connection, updateConnection } = this.props;
 		let currentEntity = entity === null ? connection : entity;
+		this._markDirty('updateEntity');
 		updateConnection(currentEntity);
 		if (currentFieldName !== '') {
 			let bindingItem = this.getCurrentBindingItem(currentFieldName);
@@ -154,7 +237,7 @@ class Header extends React.Component {
 		}
 	}
 
-	renderHeader() {
+	renderHeader(style = {}) {
 		const { isToggledReferenceIcon } = this.state;
 		const {
 			isDraft,
@@ -181,6 +264,7 @@ class Header extends React.Component {
 				openEnhancement={(a, b) =>
 					this.setCurrentEnhancementClickingOnPointer(a, b)
 				}
+				style={style}
 			/>
 		);
 	}
@@ -200,23 +284,8 @@ class Header extends React.Component {
 			connection,
 			hasEnhancement,
 			headerTitle,
+			tourSteps,
 		} = this.props;
-		let gridStyles = {};
-		if (isToggledReferenceIcon && !isToggledIcon) {
-			gridStyles.gridTemplateRows = 'calc(100% - 40px) 40px';
-		}
-		if (!isToggledReferenceIcon && isToggledIcon) {
-			gridStyles.gridTemplateRows = '40px calc(100% - 40px)';
-		}
-		if (!isToggledReferenceIcon && !isToggledIcon) {
-			gridStyles.gridTemplateRows = '40px 40px';
-		}
-		if (isToggledReferenceIcon && isToggledIcon) {
-			gridStyles.gridTemplateRows = '25% calc(100%)';
-		}
-		if (!hasEnhancement) {
-			gridStyles.gridTemplateRows = 'unset';
-		}
 		return (
 			<React.Fragment>
 				<div
@@ -225,10 +294,10 @@ class Header extends React.Component {
 							? styles.body_data_with_enhancement
 							: styles.body_data_without_enhancement
 					}
-					style={gridStyles}
 				>
 					{hasEnhancement && (
 						<ReferenceInformation
+							style={{maxHeight: !isToggledReferenceIcon ? '40px' : isToggledIcon ? '50%' : 'calc(100% - 40px)',}}
 							body={source}
 							method={method}
 							connection={connection}
@@ -244,31 +313,46 @@ class Header extends React.Component {
 							location='header'
 						/>
 					)}
-					<div>
+					<div style={{
+						position: 'relative',
+						flex: 1,
+						display: 'flex',
+						flexDirection: 'column',
+						maxHeight: !isToggledIcon ? '40px' : isToggledReferenceIcon ? '50%' : 'calc(100% - 40px)',
+					}}>
 						<div>
-							<b>{headerTitle || 'Request Data'}</b>
+							<b ref={this.HeaderRef}>{headerTitle || 'Request Data'}</b>
 							<TooltipFontIcon
 								tooltipPosition={'right'}
-								style={{ verticalAlign: 'middle', cursor: 'pointer' }}
-								onClick={() => this.setState({ isToggledIcon: !isToggledIcon })}
+								style={{verticalAlign: 'middle', cursor: 'pointer'}}
+								onClick={() => this.setState({isToggledIcon: !isToggledIcon})}
 								tooltip={isToggledIcon ? 'Hide' : 'Show'}
 								value={isToggledIcon ? 'expand_less' : 'chevron_right'}
 							/>
+							<div style={{position: 'absolute', left: '100px', top: 0}}>
+								<HelpIcon steps={tourSteps} inputRef={this.HeaderRef}/>
+							</div>
 						</div>
-						{isToggledIcon && this.renderHeader()}
+						{isToggledIcon && this.renderHeader({
+							flex: 1,
+							overflowY: 'auto',
+						})}
 					</div>
 				</div>
 				{hasEnhancement && (
-					<div className={styles.body_enhancement}>
+					<div className={styles.body_enhancement} ref={this.EnhancementRef}>
 						<div className={styles.body_enhancement_title}>
 							<b>{'Enhancement'}</b>
+							<div style={{position: 'absolute', left: '115px', top: '-10px'}}>
+								<HelpIcon steps={EnhancementSteps} inputRef={this.EnhancementRef}/>
+							</div>
 							{currentEnhancement && (
 								<Button
 									icon={'open_in_new'}
 									onClick={() => this.toggleEnhancement()}
 									iconSize={'13px'}
 									label={'Open script in new window'}
-									style={{ marginBottom: '10px' }}
+									style={{marginBottom: '10px'}}
 								/>
 							)}
 						</div>
@@ -287,8 +371,17 @@ class Header extends React.Component {
 	}
 
 	toggleEnhancement() {
-		this.setState({ isOpenedEnhancement: !this.state.isOpenedEnhancement });
+		const willOpen = !this.state.isOpenedEnhancement;
+
+		if (willOpen) {
+			this._isEnhancementInitializing = true;
+			this._hasUserTouchedEnhancement = false;
+		}
+
+		this.setState({ isOpenedEnhancement: willOpen });
 	}
+
+
 
 	renderEnhancement() {
 		const { currentEnhancement, isOpenedEnhancement } = this.state;
@@ -388,6 +481,7 @@ Header.defaultProps = {
 	hasEnhancement: true,
 	isDraft: false,
 	hasError: false,
+	tourSteps: [],
 };
 
 export default Header;

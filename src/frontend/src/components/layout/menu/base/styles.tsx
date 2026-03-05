@@ -28,7 +28,6 @@ const getNavLinkStyles = (theme: ITheme, onHoverColor?: string) => { return `
     column-gap: .75rem;
     padding: 10px 7px;
     color: #eee;
-    border-radius: .5rem;
     margin-bottom: 1rem;
     transition: .3s;
     cursor: pointer;
@@ -99,6 +98,7 @@ const MenuLinkLabelStyled = styled(Text)`
 
 const MenuLinkStyled = styled(Link)<MenuLinkStyledProps>`
     ${({theme, $onHoverColor}) => getNavLinkStyles(theme, $onHoverColor)}
+    margin: 0 5px;
 `;
 
 const MenuIconStyled = styled.span`

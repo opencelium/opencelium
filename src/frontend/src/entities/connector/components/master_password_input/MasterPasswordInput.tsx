@@ -12,6 +12,7 @@ import {MasterPasswordContainer, PromptContainer} from "@entity/connector/compon
 import {MasterPasswordProps} from "@entity/connector/components/master_password_input/interfaces";
 import {onEnter, setFocusById} from "@application/utils/utils";
 import {InputTextType} from "@app_component/base/input/text/interfaces";
+import {MasterPasswordStep} from "@entity/connector/utils/tourSteps";
 function isAscii(str: string) {
     return /^[\x20-\x7E]*$/.test(str);
 }
@@ -93,12 +94,13 @@ const MasterPasswordInput = ({onSuccess}: MasterPasswordProps) => {
         )
     }
     return (
-        <MasterPasswordContainer>
+        <MasterPasswordContainer id={'master-password-container'}>
             <div style={{width: '300px'}}>
                 <InputText
                     id={`master_password`}
                     autoFocus={true}
                     icon={'key'}
+                    label={'Master Password'}
                     type={InputTextType.Password}
                     placeholder={'Enter your Master Password'}
                     required={true}
@@ -108,6 +110,7 @@ const MasterPasswordInput = ({onSuccess}: MasterPasswordProps) => {
                         setError('');
                     }}
                     error={error}
+                    helpMessage={MasterPasswordStep}
                 />
             </div>
             <Button

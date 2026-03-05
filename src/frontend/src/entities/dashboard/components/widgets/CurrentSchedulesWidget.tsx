@@ -24,8 +24,8 @@ const CurrentSchedulesWidget: FC =
     }) => {
     return (
         <CurrentSchedulesWidgetStyled >
-            <WidgetTitle title={'Current Scheduler'}/>
-            <ScheduleList hasTopBar={false} isReadonly={true} hasTitle={false} hasNotAlert={true}/>
+            <WidgetTitle title={'Current Schedules'}/>
+            <ScheduleList shouldNoSetEntityHeader={true} hasTopBar={false} isReadonly={true} hasTitle={false} hasNotAlert={true} hasNoHoverEffect={true}/>
         </CurrentSchedulesWidgetStyled>
     )
 }

@@ -20,6 +20,7 @@ import {TextSize} from "@app_component/base/text/interfaces";
 import {ColorTheme} from "@style/Theme";
 import {LabelProps} from './interfaces';
 import {LabelStyled} from './styles';
+import DefaultText from "@app_component/base/text/DefaultText";
 /*
 * TODO: check everywhere the text (should be lang key)
 */
@@ -39,7 +40,7 @@ const Label: FC<LabelProps> =
     }
     return (
         <LabelStyled background={background} onClick={onClick} top={top} left={left} position={position} {...labelProps}>
-            <Text value={value} size={TextSize.Size_14} color={ColorTheme.White}/>
+            <DefaultText value={value} color={ColorTheme.White}/>
         </LabelStyled>
     )
 }

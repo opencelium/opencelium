@@ -1,8 +1,8 @@
 .. _management-data_aggregator:
 
-##################
+###############
 Data Aggregator
-##################
+###############
 
 
 *Aggregator* is a feature that provides a possibility to notify a user after the

@@ -9,6 +9,7 @@ export const MasterPasswordContainer = styled.div`
     background-color: #fff;
     position: absolute;
     top: 0;
+    align-items: center;
 `;
 
 export const PromptContainer = styled.div`

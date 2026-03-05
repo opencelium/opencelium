@@ -16,9 +16,14 @@ import Button from "@basic_components/buttons/Button";
 import Rule from "@root/classes/Rule";
 import FormSelect from "@change_component/form_elements/FormSelect";
 import InputSelect from "@app_component/base/input/select/InputSelect";
+import {DefaultTextSize} from "@entity/application/utils/constants";
+import Tour from "@app_component/base/tour/Tour";
+import {ColorTheme} from "@style/Theme";
+import {ScheduleSupportLogsSteps} from "@entity/schedule/utils/tourSteps";
 
 const LogsButton = ({schedule}: {schedule: ISchedule}) => {
     const dispatch = useAppDispatch();
+    const [startTour, toggleTour] = useState<boolean>(false);
     const {generatingLogs} = useAppSelector((state: RootState) => state.connectionReducer);
     const [startAction, toggleAction] = useState<boolean>(false);
     const [isToggled, toggle] = useState<boolean>(false);
@@ -104,13 +109,24 @@ const LogsButton = ({schedule}: {schedule: ISchedule}) => {
                 hasBackground={false}
                 handleClick={() => toggle(true)}
                 icon={'ballot'}
-                size={TextSize.Size_20}
             />
-            <Dialog
+            <Dialog id={'schedule-support-log-header'}
                 actions={[{label: 'Create Support-Logs', isLoading: startAction && generatingLogs === API_REQUEST_STATE.START, onClick: startCollectingLogs, id: 'get_logs_button'}, {label: 'Cancel', onClick: () => toggle(false), id: 'cancel_button'}]}
                 active={isToggled}
                 toggle={() => toggle(!isToggled)}
-                title={"Support-Logs"}
+                title={<div style={{display: 'inline', position: 'relative'}}>
+                    <span>Support Logs</span>
+                    <Tour steps={ScheduleSupportLogsSteps} toggle={toggleTour} show={startTour}/>
+                    <Button
+                        position={'absolute'}
+                        right={-20}
+                        top={'-5px'}
+                        hasBackground={false}
+                        icon={'info'}
+                        color={ColorTheme.Blue}
+                        handleClick={() => toggleTour(true)}
+                    />
+                </div>}
                 styles={{modal: {minWidth: '650px'}, body: {minHeight: '400px'}}}
             >
                 <LogsButtonStyled>
@@ -122,7 +138,7 @@ const LogsButton = ({schedule}: {schedule: ISchedule}) => {
                         options={levelOptions}/>
                     <Label>
                         {"URL"}
-                        <Button iconSize={20} handleClick={() => toggleUrl(!maskedUrl)} hasBackground={false} icon={maskedUrl ? 'visibility_off' : 'visibility'} />
+                        <Button handleClick={() => toggleUrl(!maskedUrl)} hasBackground={false} icon={maskedUrl ? 'visibility_off' : 'visibility'} />
                     </Label>
                     <UrlStyled
                         onClick={() => toggleUrl(!maskedUrl)}>
@@ -132,7 +148,7 @@ const LogsButton = ({schedule}: {schedule: ISchedule}) => {
                     </UrlStyled>
                     <Label>
                         {"Headers"}
-                        <Button iconSize={20} handleClick={() => toggleHeader(!maskedHeader)} hasBackground={false} icon={maskedHeader ? 'visibility_off' : 'visibility'} />
+                        <Button handleClick={() => toggleHeader(!maskedHeader)} hasBackground={false} icon={maskedHeader ? 'visibility_off' : 'visibility'} />
                     </Label>
                     <HeaderStyled
                         className={maskedHeader ? 'masked' : ''}
@@ -175,7 +191,7 @@ const LogsButton = ({schedule}: {schedule: ISchedule}) => {
                             className={maskedRequest ? 'masked' : ''}>
                             <Label>
                                 {"Request"}
-                                <Button iconSize={20} handleClick={() => toggleRequest(!maskedRequest)} hasBackground={false} icon={maskedRequest ? 'visibility_off' : 'visibility'} />
+                                <Button handleClick={() => toggleRequest(!maskedRequest)} hasBackground={false} icon={maskedRequest ? 'visibility_off' : 'visibility'} />
                             </Label>
                             <Clicker onClick={() => toggleRequest(!maskedRequest)}/>
                             <RequestContent>
@@ -184,7 +200,7 @@ const LogsButton = ({schedule}: {schedule: ISchedule}) => {
                                         {"*******************"}
                                     </MaskedText>
                                     :
-                                    <ReactJsonView enableClipboard={false} iconStyle={'circle'} collapsed={false} src={{body: {_id: '31'}}}/>
+                                    <ReactJsonView enableClipboard={false} style={{fontSize: `${DefaultTextSize}px`}} iconStyle={'circle'} collapsed={false} src={{body: {_id: '31'}}}/>
                                 }
                             </RequestContent>
                         </RequestStyled>
@@ -192,7 +208,7 @@ const LogsButton = ({schedule}: {schedule: ISchedule}) => {
                             className={maskedResponse ? 'masked' : ''}>
                             <Label>
                                 {"Response"}
-                                <Button iconSize={20} handleClick={() => toggleResponse(!maskedResponse)} hasBackground={false} icon={maskedResponse ? 'visibility_off' : 'visibility'} />
+                                <Button handleClick={() => toggleResponse(!maskedResponse)} hasBackground={false} icon={maskedResponse ? 'visibility_off' : 'visibility'} />
                             </Label>
                             <Clicker onClick={() => toggleResponse(!maskedResponse)}/>
                             <ResponseContent>
@@ -205,6 +221,7 @@ const LogsButton = ({schedule}: {schedule: ISchedule}) => {
                                         enableClipboard={false}
                                         iconStyle={'circle'}
                                         collapsed={false}
+                                        style={{fontSize: `${DefaultTextSize}px`}}
                                         src={{body: {transactionId: '31', type: 3}}}
                                     />
                                 }

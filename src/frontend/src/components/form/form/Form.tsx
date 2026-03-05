@@ -18,16 +18,31 @@ import {withTheme} from 'styled-components';
 import {BadRequest} from "@app_component/default_pages/bad_request/BadRequest";
 import ContentLoading from "@app_component/base/loading/ContentLoading";
 import ErrorBoundary from "@app_component/base/error_boundary/ErrorBoundary";
-import {Title} from "@app_component/collection/collection_title/Title";
 import {FormSectionProps} from "../form_section/interfaces";
 import {FormProps} from './interfaces';
 import {ActionsStyled, FormSectionStyled, FormStyled, SectionStyled} from './styles';
-import {isArray} from "@application/utils/utils";
-import {getCurrentSubscription} from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
+import {isArray, isString} from "@application/utils/utils";
 import {useAppDispatch} from "@application/utils/store";
-import Subscription from "@entity/license_management/classes/Subscription";
 import LicenseAlertMessage from "@entity/dashboard/components/license_alert_message/LicenseAlertMessage";
-
+import {setEntityHeader, setEntityIconKey} from "@application/redux_toolkit/slices/ApplicationSlice";
+import {Application} from "@application/classes/Application";
+import {MultipleTitleProps} from "@application/interfaces/IApplication";
+const areEqualHeaders = (h1: string | MultipleTitleProps[], h2: string | MultipleTitleProps[]) => {
+    if (isString(h1)) {
+        return h1 === h2;
+    }
+    if (typeof h1 !== 'string' && typeof h2 !== 'string' && h1.length === h2.length) {
+        for (let i = 0; i < h1.length; i++) {
+            if (h1[i].name === h2[i].name) {
+                continue;
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+    return false;
+}
 const Form: FC<FormProps> =
     ({
         title,
@@ -37,7 +52,29 @@ const Form: FC<FormProps> =
         error,
         gridTemplateColumns,
         hasNotAlert,
+         entityKey,
     }) => {
+    const dispatch = useAppDispatch();
+    const {
+        entityHeader,
+         entityIconKey,
+    } = Application.getReduxState();
+    useEffect(() => {
+        if (!entityHeader || !areEqualHeaders(entityHeader, title)) {
+            dispatch(setEntityHeader(title));
+        }
+    }, [title]);
+    useEffect(() => {
+        if (entityIconKey !== entityKey) {
+            dispatch(setEntityIconKey(entityKey));
+        }
+    }, [entityKey]);
+    useEffect(() => {
+        return () => {
+            dispatch(setEntityHeader(''))
+            dispatch(setEntityIconKey(''))
+        }
+    }, [])
     if(isLoading){
         return(
             <ContentLoading/>
@@ -72,9 +109,8 @@ const Form: FC<FormProps> =
     return (
         <ErrorBoundary>
             <FormStyled>
-                <Title title={title}/>
                 {!hasNotAlert ? <LicenseAlertMessage/> : null}
-                <ActionsStyled>{actions}</ActionsStyled>
+                {actions?.length > 0 && <ActionsStyled>{actions}</ActionsStyled> }
                 <SectionStyled gridTemplateColumns={gridTemplateColumns}>
                     {sectionComponents}
                 </SectionStyled>
@@ -84,6 +120,7 @@ const Form: FC<FormProps> =
 }
 
 Form.defaultProps = {
+    entityKey: '',
     title: '',
     error: null,
     gridTemplateColumns: '',

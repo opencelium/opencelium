@@ -19,8 +19,8 @@ import {InputSwitchStyledProps} from "./interfaces";
 const InputSwitcherStyled = styled.div<InputSwitchStyledProps>`
     display: inline-block;
     position: relative;
-    width: 40px;
-    height: 20px;
+    width: 26px;
+    height: 14px;
     border-radius: 15px;
     border: 1px solid #aaa;
     transition: background 0.3s;
@@ -30,10 +30,10 @@ const InputSwitcherStyled = styled.div<InputSwitchStyledProps>`
         position: absolute;
         border-radius: 50%;
         background: ${({isChecked, theme}) => isChecked ? '#fff' : theme.input.text.color.disable};
-        width: 15px;
-        height: 15px;
+        width: 10px;
+        height: 10px;
         top: 1px;
-        left: ${({isChecked}) => isChecked ? '20px' : '3px'};
+        left: ${({isChecked}) => isChecked ? '12px' : '3px'};
         transition: left 0.3s;
     }
 `;

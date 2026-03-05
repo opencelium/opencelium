@@ -14,7 +14,8 @@
  */
 
 import styled from "styled-components";
-import {DropdownMenu} from "reactstrap";
+import {DropdownMenu, PaginationItem, PaginationLink} from "reactstrap";
+import {DefaultTextSize} from "@entity/application/utils/constants";
 
 const EmptyListStyled = styled.div`
     
@@ -46,9 +47,24 @@ const ListRowStyled = styled.tr`
     }
 `;
 
+const PaginationItemStyled = styled(PaginationItem)`
+    height: 30px;
+    font-size: ${DefaultTextSize}px;
+`;
+
+const PaginationLinkStyled = styled(PaginationLink)`
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: ${DefaultTextSize}px;
+`
+
 export {
     EmptyListStyled,
     TypesStyled,
     DropdownMenuStyled,
     ListRowStyled,
+    PaginationItemStyled,
+    PaginationLinkStyled,
 }

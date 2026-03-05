@@ -23,9 +23,11 @@ import Button from "../button/Button";
 import {TextSize} from "../text/interfaces";
 import Text from "../text/Text";
 import {ActionsStyled} from "./styles";
+import HeaderText from "@app_component/base/text/HeaderText";
 
 const Dialog: FC<DialogProps> =
     ({
+        id,
         active,
         title,
         isConfirmation,
@@ -59,8 +61,8 @@ const Dialog: FC<DialogProps> =
             }}, 500);
     }
     return (
-        <Modal id={`modal_${title}`} autoFocus={true} isOpen={isOpen} toggle={toggle} style={styles.modal} className={dialogClassname} modalClassName={dialogTheme.modal} contentClassName={dialogTheme.content} wrapClassName={dialogTheme.wrapper} backdropClassName={dialogTheme.backdrop}>
-            {title && <ModalHeader toggle={toggle} className={dialogTheme.title} style={styles.header}><Text value={title} size={TextSize.Size_20} isBold={true}/></ModalHeader>}
+        <Modal id={id || `modal_${title}`} autoFocus={true} isOpen={isOpen} toggle={toggle} style={styles.modal} className={dialogClassname} modalClassName={dialogTheme.modal} contentClassName={dialogTheme.content} wrapClassName={dialogTheme.wrapper} backdropClassName={dialogTheme.backdrop}>
+            {title && <ModalHeader toggle={toggle} className={dialogTheme.title} style={styles.header}><HeaderText value={title} isBold={true}/></ModalHeader>}
             {hasNoBody ? children :
                 <ModalBody style={styles.body} className={dialogTheme.body}>
                     {children}
@@ -80,8 +82,6 @@ const Dialog: FC<DialogProps> =
                                             label={action.label}
                                             handleClick={action.onClick}
                                             id={action.id ? action.id : `button_${action.label}`}
-                                            size={TextSize.Size_16}
-                                            iconSize={TextSize.Size_14}
                                         />
                             })
                         }

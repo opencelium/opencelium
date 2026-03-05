@@ -19,6 +19,7 @@ import styles from "@entity/connection/components/themes/default/content/connect
 import {connect} from "react-redux";
 import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
+import {HeaderTextSize} from "@entity/application/utils/constants";
 
 function mapStateToProps(state, props){
     const {connectionOverview} = mapItemsToClasses(state, props.isModal);
@@ -52,7 +53,7 @@ class Panel extends React.Component{
             <React.Fragment>
                 <svg id={`${connectorType}_panel${this.props.isModal ? '_modal' : ''}`} x={panelPosition.x} y={panelPosition.y} width={panelPosition.width} height={panelPosition.height}>
                     <rect onClick={hasAction ? () => this.onClick() : () => {}} x={rectPosition.x} y={rectPosition.y} width={rectPosition.width} height={rectPosition.height} className={styles.connector_item_panel} style={{cursor: isEmpty && hasAction ? 'pointer' : 'move'}}/>
-                    <text textAnchor={namePosition === 'right' ? "end" : "start"} x={textX} y={rectPosition.y - 6} className={styles.connector_item_text}>
+                    <text textAnchor={namePosition === 'right' ? "end" : "start"} x={textX} y={rectPosition.y - 6} className={styles.connector_item_text} style={{fontSize: `${HeaderTextSize}px`}}>
                         {invokerName}
                     </text>
                     {hasAction && <text id={`${connectorType}_panel_text`} style={{opacity: hasPanelText ? 1 : 0}} onClick={() => this.onClick()} dominantBaseline={"middle"} textAnchor={"middle"} x={'50%'} y={'50%'} className={styles.connector_empty_text}>

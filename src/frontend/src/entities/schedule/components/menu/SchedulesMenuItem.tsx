@@ -21,8 +21,9 @@ import {MenuItemProps} from "@app_component/layout/menu/interfaces";
 const SchedulesMenuItem_2: FC<MenuItemProps> = ({isReadonly, onHoverColor}) => {
         return (
             <MenuLink
+                id={'schedule_menu_item'}
                 permission={SchedulePermissions.READ}
-                size={30}
+                size={26}
                 to={'/schedules'}
                 name={'update'}
                 label={'Schedules'}

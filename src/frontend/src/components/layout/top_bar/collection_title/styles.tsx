@@ -18,8 +18,7 @@ import styled from "styled-components";
 import {ITheme} from "@style/Theme";
 
 const TitleStyled = styled.div`
-    margin-top: 40px;
-    font-family: ${({theme}: {theme: ITheme}) => theme.text.fontFamily};
+    font-family: ${({theme}: {theme: ITheme}) => `Open Sans, "Arial", sans-serif`};
     color: ${({theme}: {theme: ITheme}) => theme.collectionView.title.color.quite};
     & >span{
         position: relative;

@@ -1,10 +1,10 @@
 API Docs
 ======================
 
-`Zur Swagger API-Dokumentation <../swagger.html>`_
+`Swagger API documentation <../swagger.html>`_
 
-`Zur ReDoc API-Dokumentation <../redoc.html>`_
+`ReDoc API documentation <../redoc.html>`_
 
-`Zur Spotlight Elements API-Dokumentation <../spotlight.html>`_
+`Spotlight Elements API documentation <../spotlight.html>`_
 
-`Zur RapiDocs API-Dokumentation <../rapidoc.html>`_
+`RapiDocs API documentation <../rapidoc.html>`_

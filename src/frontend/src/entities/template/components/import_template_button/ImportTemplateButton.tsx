@@ -75,7 +75,7 @@ const ImportTemplateButton: FC<ImportTemplateButtonProps> =
     }, [startImporting]);
     return (
         <ImportTemplateButtonStyled >
-            <PermissionButton autoFocus={autoFocus} size={TextSize.Size_16} key={'add_button'} icon={'add'} handleClick={toggleDialog} label={'Import Template'} permission={TemplatePermissions.CREATE}/>
+            <PermissionButton autoFocus={autoFocus} key={'add_button'} icon={'add'} handleClick={toggleDialog} label={'Import Template'} permission={TemplatePermissions.CREATE}/>
             <Dialog
                 actions={[
                     {id: 'import_ok', label: 'Ok', onClick: () => setStartImporting(true)},

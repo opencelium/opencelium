@@ -2,6 +2,9 @@
 Connectors
 ##################
 
+.. contents::
+   :local:
+   
 Connector is a core component in OpenCelium. It is a system to which we
 will send requests and get responses. They can be different throw
 different protocols: HTTP, JSON-RPC, SOAP, and so on. Currently, HTTP

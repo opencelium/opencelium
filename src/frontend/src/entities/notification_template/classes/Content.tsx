@@ -29,6 +29,7 @@ import {
 } from '../interfaces/INotificationTemplate';
 import { NotificationTemplateState } from '../redux_toolkit/slices/NotificationTemplateSlice';
 import Validation from "@application/classes/Validation";
+import {DefaultTextSize} from "@entity/application/utils/constants";
 
 export class Content extends HookStateClass implements IContent {
 	static reduxState?: NotificationTemplateState;
@@ -105,7 +106,7 @@ export class Content extends HookStateClass implements IContent {
 					mode={'text'}
 					theme='textmate'
 					name='notificationTemplateContent'
-					fontSize={16}
+					fontSize={DefaultTextSize}
 					showPrintMargin={false}
 					showGutter={false}
 					highlightActiveLine={false}

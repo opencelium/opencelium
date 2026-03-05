@@ -30,10 +30,12 @@ export const FieldBindingBlockStyled = styled.div`
 `;
 
 export const FieldBindingsBlockStyled = styled.div`
+    flex: 1;
     overflow-y: auto;
-    max-height: calc(100% - 36px);
 `;
 
 export const ReferenceInformationStyled = styled.div`
-    overflow: hidden;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 `;

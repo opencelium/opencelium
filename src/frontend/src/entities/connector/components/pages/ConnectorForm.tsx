@@ -15,7 +15,7 @@
 
 import React, {FC, useEffect, useRef, useState} from "react";
 import {useNavigate, useParams} from "react-router";
-import {API_REQUEST_STATE, TRIPLET_STATE} from "@application/interfaces/IApplication";
+import {API_REQUEST_STATE, EntityIconKeyType, TRIPLET_STATE} from "@application/interfaces/IApplication";
 import {useAppDispatch} from "@application/utils/store";
 import {IForm} from "@application/interfaces/IForm";
 import {Form} from "@application/classes/Form";
@@ -37,6 +37,9 @@ import { setCurrentConnector } from "../../redux_toolkit/slices/ConnectorSlice";
 import MasterPasswordInput from "@entity/connector/components/master_password_input/MasterPasswordInput";
 import Validation from "@application/classes/Validation";
 import {setFocusById} from "@application/utils/utils";
+import DropdownActionButton from '@app_component/dropdown_action_button/DropdownActionButton';
+import {FormProps} from "@app_component/form/form/interfaces";
+import {InvokerInputStep} from "@entity/connector/utils/tourSteps";
 
 
 const ConnectorForm: FC<IForm> = ({isAdd, isUpdate}) => {
@@ -97,13 +100,25 @@ const ConnectorForm: FC<IForm> = ({isAdd, isUpdate}) => {
         dispatch(getConnectorCredentials(connector.getPoustModel(true)));
     }
     const TitleInput = connector.getText({
-        propertyName: "title", props: {maxLength: Validation.TextLength.Short, autoFocus: true, icon: 'title', label: 'Title', required: true, isLoading: checkingConnectorTitle === API_REQUEST_STATE.START, error: isCurrentConnectorHasUniqueTitle === TRIPLET_STATE.FALSE ? 'The title is already in use' : ''}
+        propertyName: "title", props: {
+            maxLength: Validation.TextLength.Short,
+            autoFocus: true,
+            icon: 'title',
+            label: 'Title',
+            required: true,
+            isLoading: checkingConnectorTitle === API_REQUEST_STATE.START,
+            error: isCurrentConnectorHasUniqueTitle === TRIPLET_STATE.FALSE ? 'The title is already in use' : '',
+        }
     })
     const DescriptionInput = connector.getTextarea({
-        propertyName: "description", props: {maxLength: Validation.TextLength.Medium, label: "Description"}
+        propertyName: "description", props: {
+            maxLength: Validation.TextLength.Medium,
+            label: "Description",
+        }
     })
     const InvokerComponent = connector.getSelect({propertyName: 'invokerSelect', props: {
         icon: 'description',
+        helpMessage: InvokerInputStep,
         label: 'Invoker',
         options: invokerOptions,
         isLoading: gettingInvokers === API_REQUEST_STATE.START,
@@ -127,37 +142,84 @@ const ConnectorForm: FC<IForm> = ({isAdd, isUpdate}) => {
         propertyName: "sslCert", props: {icon: 'verified', label: 'Disable SSL Validation', name: connector.sslCert ? 'SSL Validation is deactivated' : 'SSL Validation is activated'}
     })
     const Icon = connector.getFile({propertyName: "iconFile", props: {label: "Icon",}});
-    let actions = [<Button
-        key={'list_button'}
-        label={formData.listButton.label}
-        icon={formData.listButton.icon}
-        href={'/connectors'}
-    />];
-    if(isAdd || isUpdate){
-        let handleAddClick = isAdd ? () => {setShouldNavigateToConnection(false); connector.add()} : hasMasking ? () => connector.update() : () => connector.updateWithCredentials();
-        let handleAddAndGoToConnection = () => {setShouldNavigateToConnection(true); connector.add()};
-        if(isAdd) {
-            actions.unshift(<Button
-                key={'add_and_go_to_connection_button'}
-                label={'Add & Go to Add Connection'}
-                icon={'add'}
-                handleClick={handleAddAndGoToConnection}
-                isLoading={addingConnector === API_REQUEST_STATE.START && shouldNavigateToConnection}
-            />);
-        }
-        actions.unshift(<Button
-            key={'action_button'}
-            label={`${formData.actionButton.label} & Close`}
-            icon={formData.actionButton.icon}
-            handleClick={handleAddClick}
-            isLoading={isAdd && addingConnector === API_REQUEST_STATE.START && !shouldNavigateToConnection || isUpdate && updatingConnector === API_REQUEST_STATE.START}
-        />);
-    }
-    const data = {
+    let actions = [
+			<Button
+				key={'list_button'}
+				label={formData.listButton.label}
+				icon={formData.listButton.icon}
+				href={'/connectors'}
+			/>,
+	];
+
+    if (isAdd || isUpdate) {
+			const handleAddOrUpdateAndClose = isAdd
+				? () => {
+						setShouldNavigateToConnection(false);
+						connector.add();
+				  }
+				: hasMasking
+				? () => connector.update()
+				: () => connector.updateWithCredentials();
+
+			const handleAddAndGoToConnection = () => {
+				setShouldNavigateToConnection(true);
+				connector.add();
+			};
+
+			const isAnyLoading =
+				checkingConnectorTitle === API_REQUEST_STATE.START ||
+				(isAdd && addingConnector === API_REQUEST_STATE.START) ||
+				(isUpdate && updatingConnector === API_REQUEST_STATE.START);
+
+			if (isAdd) {
+				actions.unshift(
+					<DropdownActionButton
+						key={'add_connector_dropdown'}
+						label={'Add'}
+						direction={'down'}
+						disabled={false}
+						isLoading={isAnyLoading}
+						items={[
+							{
+								id: 'add_close',
+								label: `& Close`,
+								onClick: handleAddOrUpdateAndClose,
+								isLoading:
+									addingConnector === API_REQUEST_STATE.START &&
+									!shouldNavigateToConnection,
+							},
+							{
+								id: 'add_go_to_connection',
+								label: '& Go to Add Connection',
+								onClick: handleAddAndGoToConnection,
+								isLoading:
+									addingConnector === API_REQUEST_STATE.START &&
+									shouldNavigateToConnection,
+							},
+						]}
+					/>,
+				);
+			} else {
+				actions.unshift(
+					<Button
+						key={'update_close_button'}
+						label={`${formData.actionButton.label} & Close`}
+						icon={formData.actionButton.icon}
+						handleClick={handleAddOrUpdateAndClose}
+						isLoading={
+							updatingConnector === API_REQUEST_STATE.START || isAnyLoading
+						}
+					/>,
+				);
+			}
+	}
+    const entityKey: EntityIconKeyType = isAdd ? `add-connector-form-with${!!connector.invokerSelect ? '' : 'out'}-credentials` : isUpdate ? `update-connector-form-with${hasMasking ? '' : 'out'}-mask` : 'view-connector-form';
+    const data: FormProps = {
+        entityKey,
         title: formData.formTitle,
         actions,
         formSections: [
-            <FormSection label={{value: 'General Data'}}>
+            <FormSection label={{value: 'General Data'}} id={'connector-form-general-data'}>
                 {TitleInput}
                 {DescriptionInput}
                 {InvokerComponent}
@@ -167,6 +229,7 @@ const ConnectorForm: FC<IForm> = ({isAdd, isUpdate}) => {
                 {Icon}
             </FormSection>,
             <FormSection
+                id={'connector-form-credentials'}
                 label={{value: 'Credentials'}}
                 dependencies={[!connector.invokerSelect]}
                  OverlayComponent={

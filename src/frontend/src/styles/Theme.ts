@@ -113,7 +113,7 @@ const defaultTheme: ITheme = {
         },
     },
     input: {
-        iconInputDistance: '50px',
+        iconInputDistance: '40px',
         inputElement: {
             paddingTop: '5px',
             paddingBottom: '3px',
@@ -129,7 +129,7 @@ const defaultTheme: ITheme = {
         }
     },
     text: {
-        fontFamily: `"Open Sans", "Arial", sans-serif`,
+        fontFamily: `Open Sans, "Arial", sans-serif`,
         color: {
             quite: ColorTheme.Black,
         },

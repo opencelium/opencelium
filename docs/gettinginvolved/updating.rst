@@ -2,19 +2,24 @@
 Updating
 ##################
 
+.. warning::
+        | Before updating, always do a full backup of your system! 
+
+.. contents::
+   :local:
 
 From OC 4.x to latest
-"""""""""""""""""
+"""""""""""""""""""""
 
 Update zip file installations
-==================
+=============================
 
 | Log in to OpenCelium, open the *AdminPanel* and click on *Update Assistant*.
 | Click here to see, how to use :ref:`Update Assistant <admin_panel-update_assistant>`.
 
 
 Update DEB package for Ubuntu 24.04 LTS
-==================
+=======================================
 
 .. code-block:: sh
 	:linenos:
@@ -24,7 +29,7 @@ Update DEB package for Ubuntu 24.04 LTS
 	
 
 Update RPM package for SUSE Linux Enterprise Server 15 SP5
-==================
+==========================================================
 
 .. code-block:: sh
 	:linenos:
@@ -34,19 +39,36 @@ Update RPM package for SUSE Linux Enterprise Server 15 SP5
 
 
 Update RPM package for RedHat 9.2
-==================
+=================================
 
 .. code-block:: sh
 	:linenos:
 
 	yum update
 	yum update -y OpenCelium
+
+
+Update Docker Compose
+=================================
+
+.. warning::
+        | Before updating, do a backup of your configuraton files (conf folder and .env file) 
+        | to preserve your own settings! 
+
+
+.. code-block:: sh
+	:linenos:
+
+        cd opencelium-docker
+	docker compose down -v
+	git pull
+        docker compose up -d
 	
 | 
-| 
+|
 
 From OC 3.x to 4.1 
-"""""""""""""""""
+"""""""""""""""""""
 
 .. note::
         | This update guide is intended for existing zip file 3.x installations. 
@@ -82,7 +104,7 @@ Prepare Update
 
 
 Install Application
-==================
+===================
 
 Download and unzip application, and create a link for it.
 
@@ -95,6 +117,9 @@ Download and unzip application, and create a link for it.
         rm /usr/bin/oc
         ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
         chmod +x /usr/bin/oc
+
+.. note::
+	| If any package is not available on Packagecloud, please contact our support team at support@opencelium.io.
 
 
 Configuration

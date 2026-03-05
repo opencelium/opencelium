@@ -25,8 +25,8 @@ number of calls.
 |image6|
 
 There are two ways of activating the licenses: online and offline. If the switcher on the
-*Profile* page is on, the license management works automatically, otherwise you need to
-upload the license manually.
+*Profile* page is on (:ref:`usage-my_profile`), the license management works automatically, 
+otherwise you need to upload the license manually.
 
 |image3|
 
@@ -44,7 +44,7 @@ the license file and upload it in OpenCelium.
 After that you will see updated information about your subscription.
 
 Online (only for subscribers)
-=========
+=============================
 
 The online process required the valid configuration inside of the *application.yml* file,
 otherwise *Activate License* button will be disabled.

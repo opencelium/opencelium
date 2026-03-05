@@ -54,7 +54,7 @@ $DASHED_COLOR: #58854d;
 
 .connection_editor {
 	border-radius: 5px;
-	height: 100vh;
+	height: 100%;
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -277,7 +277,7 @@ $DASHED_COLOR: #58854d;
 }
 
 .details {
-	z-index: 1;
+	z-index: 2;
 	background: white;
 	width: 300px;
 	position: absolute;
@@ -297,12 +297,13 @@ $DASHED_COLOR: #58854d;
 .details_right {
 	@extend .details;
 	right: 0;
+	transition: all 0.5s;
 }
 .details_minimized {
 	height: 20px;
 }
 .details_maximized {
-	height: calc(100vh - 2px);
+	height: 100%;
 }
 .details_data {
 	padding: 0 10px 10px;
@@ -745,7 +746,8 @@ $DASHED_COLOR: #58854d;
 	width: 50%;
 	border-right: 1px solid #eee;
 	padding-right: 10px;
-	display: grid;
+	display: flex;
+	flex-direction: column;
 }
 .body_data_without_enhancement {
 	@extend .body_data;

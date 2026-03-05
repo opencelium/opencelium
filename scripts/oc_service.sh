@@ -96,7 +96,7 @@ backup(){
            helpBackup
         fi
 
-	backupdir=$backupdir/$(date +%Y%m%d)
+	backupdir=$backupdir/$name
 
 	# Deleting already exists backups
 	if [ -d "$backupdir" ];then
@@ -187,7 +187,7 @@ restore(){
 	fi
 
 	echo "Restoring MongoDB..."
-	mongorestore --drop "$restore_dir"/opencelium
+	mongorestore --drop -d opencelium $restore_dir/opencelium
 
 	echo "Restoring MySQL..."
 	mysql -u "$username" -p"$password" opencelium < "$restore_dir/oc_data.sql"

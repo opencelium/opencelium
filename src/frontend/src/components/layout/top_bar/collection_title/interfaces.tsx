@@ -14,14 +14,12 @@
  */
 
 import {ITheme} from "@style/Theme";
-import React from "react";
-import {MultipleTitleProps} from "@application/interfaces/IListCollection";
+import {MultipleTitleProps} from "@application/interfaces/IApplication";
 
 interface TitleProps{
     theme?: ITheme,
-    title: string | MultipleTitleProps[] | React.ReactNode,
+    title: string | MultipleTitleProps[],
     className?: string,
-    icon?: any,
 }
 
 export {

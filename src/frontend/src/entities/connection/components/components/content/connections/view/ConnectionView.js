@@ -37,9 +37,11 @@ import {useAppDispatch} from "@application/utils/store";
 const connectionPrefixURL = '/connections';
 
 function mapStateToProps(state){
+    const isFullScreen = state.applicationReducer.isFullScreen;
     const authUser = state.authReducer.authUser;
     const connection = state.connectionReducer;
     return{
+        isFullScreen,
         authUser,
         error: connection.error,
         connection: connection.currentConnection,
