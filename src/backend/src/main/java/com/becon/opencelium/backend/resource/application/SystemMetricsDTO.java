@@ -16,11 +16,11 @@ public class SystemMetricsDTO {
 
     private Double cpuUsage;
 
-    private Double memoryUsage;
+    private Long memoryUsage;
 
-    private Double maxMemorySize;
+    private Long maxMemorySize;
 
-    private Double execLogSize;
+    private Long execLogSize;
 
     public Integer getTotalExecs() {
         return totalExecs;
@@ -62,27 +62,27 @@ public class SystemMetricsDTO {
         this.cpuUsage = cpuUsage;
     }
 
-    public Double getMemoryUsage() {
+    public Long getMemoryUsage() {
         return memoryUsage;
     }
 
-    public void setMemoryUsage(Double memoryUsage) {
+    public void setMemoryUsage(Long memoryUsage) {
         this.memoryUsage = memoryUsage;
     }
 
-    public Double getExecLogSize() {
+    public Long getExecLogSize() {
         return execLogSize;
     }
 
-    public void setExecLogSize(Double execLogSize) {
+    public void setExecLogSize(Long execLogSize) {
         this.execLogSize = execLogSize;
     }
 
-    public Double getMaxMemorySize() {
+    public Long getMaxMemorySize() {
         return maxMemorySize;
     }
 
-    public void setMaxMemorySize(Double maxMemorySize) {
+    public void setMaxMemorySize(Long maxMemorySize) {
         this.maxMemorySize = maxMemorySize;
     }
 }
