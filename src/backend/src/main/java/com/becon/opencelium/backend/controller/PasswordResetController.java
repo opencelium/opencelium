@@ -18,7 +18,7 @@ package com.becon.opencelium.backend.controller;
 
 import com.becon.opencelium.backend.database.mysql.service.PasswordResetService;
 import com.becon.opencelium.backend.resource.ForgotPasswordDTO;
-import com.becon.opencelium.backend.resource.PasswordResetDTO;
+import com.becon.opencelium.backend.resource.ResetPasswordDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
@@ -49,7 +49,7 @@ public class PasswordResetController {
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@Valid @RequestBody PasswordResetDTO dto) {
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordDTO dto) {
         passwordResetService.resetPassword(dto.token(), dto.newPassword());
 
         return ResponseEntity.ok(Map.of("message", "password updated"));

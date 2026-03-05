@@ -1,17 +1,15 @@
 package com.becon.opencelium.backend.validation.password;
 
-import com.becon.opencelium.backend.resource.PasswordResetDTO;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 public class PasswordMatchesValidator
-        implements ConstraintValidator<PasswordMatches, PasswordResetDTO> {
+        implements ConstraintValidator<PasswordMatches, PasswordConfirmation> {
 
     @Override
-    public boolean isValid(PasswordResetDTO dto, ConstraintValidatorContext context) {
+    public boolean isValid(PasswordConfirmation dto, ConstraintValidatorContext context) {
         if (dto.newPassword() == null) {
-            // @NotBlank handles this case
-            return true;
+            return false;
         }
 
         boolean matches = dto.newPassword().equals(dto.confirmPassword());

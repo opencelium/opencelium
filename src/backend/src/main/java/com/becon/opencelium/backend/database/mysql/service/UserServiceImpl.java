@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
+import com.becon.opencelium.backend.constant.ExceptionConstant;
 import com.becon.opencelium.backend.database.mysql.entity.Session;
 import com.becon.opencelium.backend.database.mysql.entity.User;
 import com.becon.opencelium.backend.database.mysql.entity.UserDetail;
@@ -24,11 +25,14 @@ import com.becon.opencelium.backend.database.mysql.entity.WidgetSetting;
 import com.becon.opencelium.backend.database.mysql.repository.UserRepository;
 import com.becon.opencelium.backend.database.mysql.repository.UserRoleRepository;
 import com.becon.opencelium.backend.enums.AuthMethod;
+import com.becon.opencelium.backend.exception.GeneralServiceException;
+import com.becon.opencelium.backend.resource.ChangePasswordDTO;
 import com.becon.opencelium.backend.resource.request.UserRequestResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
 import com.becon.opencelium.backend.utility.EmailUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -190,5 +194,17 @@ public class UserServiceImpl implements UserService {
             return findByEmail(userDetails.getUsername()).get();
         }
         return null;
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(ChangePasswordDTO dto) {
+        User user = getCurrentUser();
+
+        if (!bCryptPasswordEncoder.matches(dto.currentPassword(), user.getPassword())) {
+            throw new GeneralServiceException(HttpStatus.BAD_REQUEST, ExceptionConstant.WRONG_PASSWORD, "wrong password");
+        }
+
+        user.setPassword(encodePassword(dto.newPassword()));
     }
 }
