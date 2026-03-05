@@ -155,12 +155,13 @@ const DashboardForm: FC<DashboardFormProps> =
         let gridSettings: ReactGridLayoutProps = {
             className: `layout`,
             rowHeight: 100,
-            width: 1200,
             isBounded: true,
             isDraggable: false,
             isResizable: false,
             layout,
             onLayoutChange,
+            margin: [10, 10],
+            containerPadding: [0, 0],
         };
         if(isWidgetEditOn){
             gridSettings.isDraggable = true;

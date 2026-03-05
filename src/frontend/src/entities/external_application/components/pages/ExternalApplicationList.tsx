@@ -38,12 +38,30 @@ const ExternalApplicationList: FC<ExternalApplicationListProps> = permission(Ext
         externalApplications.push({
             id: 1, name: actuatorHealth.components?.mariaDB?.details.name || 'MariaDB', icon: MariaDBImagePath, link: '', value: actuatorHealth.components?.mariaDB?.details.name || 'db',
             status: actuatorHealth.components?.mariaDB?.status || ExternalApplicationStatus.DOWN,
-            version: actuatorHealth.components?.mariaDB?.details.version || '',
+            version: `v. ${actuatorHealth.components?.mariaDB?.details.version}` || '',
+            error: actuatorHealth.components?.mariaDB?.details?.error || '-',
         },{
             id: 2, name: actuatorHealth.components?.mongoDB?.details.name || 'MongoDB', icon: MongoDBImagePath, link: '', value: actuatorHealth.components?.mongoDB?.details.name || 'db',
             status: actuatorHealth.components?.mongoDB?.status || ExternalApplicationStatus.DOWN,
-            version: actuatorHealth.components?.mongoDB?.details.version || '',
+            version: `v. ${actuatorHealth.components?.mongoDB?.details.version}` || '',
+            error: actuatorHealth.components?.mongoDB?.details?.error || '-',
         })
+        if (actuatorHealth.components?.email) {
+            externalApplications.push({
+                id: 3, name: 'Email', icon: MongoDBImagePath, link: '', value: 'email',
+                status: actuatorHealth.components?.email?.status || ExternalApplicationStatus.DOWN,
+                version: actuatorHealth.components?.email?.details.location || '',
+                error: actuatorHealth.components?.email?.details?.error || '-',
+            })
+        }
+        if (actuatorHealth.components?.polyglot) {
+            externalApplications.push({
+                id: 4, name: actuatorHealth.components?.polyglot?.details.name || 'Polyglot', icon: MongoDBImagePath, link: '', value: 'polyglot',
+                status: actuatorHealth.components?.polyglot?.status || ExternalApplicationStatus.DOWN,
+                version: '',
+                error: actuatorHealth.components?.polyglot?.details?.error || '-',
+            })
+        }
     }
     const CExternalApplications = new ExternalApplications(externalApplications);
     return (

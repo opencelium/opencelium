@@ -33,8 +33,7 @@ const ToolboxItemStyled = styled.div`
 
 const DashboardToolboxStyled = styled.div`
     background-color: #f8f8f8;    
-    width: calc(100% - 40px);
-    margin-left: 20px;
+    width: 100%;
     height: 75px;
     min-height: 75px;
     margin-bottom: 30px;

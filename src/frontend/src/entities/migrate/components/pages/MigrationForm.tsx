@@ -42,7 +42,7 @@ const MigrationForm: FC<IForm> = ({}) => {
         isLoading={migrating === API_REQUEST_STATE.START}
     />]
     const data = {
-        title: [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Migration from Neo4j to MongoDB'}],
+        title: [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Migration from Neo4j to MongoDB (deprecated)'}],
         actions,
         formSections: [
             <FormSection label={{value: 'General Data'}}>

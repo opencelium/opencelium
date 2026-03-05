@@ -37,7 +37,6 @@ const cards = [
     {id: 10, name: 'Update Assistant', link: '/update_assistant', isLoading: true, isDisabled: true},
     {id: 11, name: 'External Applications', link: '/apps'},
     {id: 12, name: 'Categories', link: `/categories`},
-    {id: 13, name: 'External Applications', link: '/apps'},
     {id: 14, name: 'Migration from Neo4j to MongoDB (deprecated)', link: `/migration`},
     {id: 15, name: 'Categories', link: `/categories`},
 ]
