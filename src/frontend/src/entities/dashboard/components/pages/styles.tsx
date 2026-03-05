@@ -20,8 +20,7 @@ import {ReactGridLayoutStyledProps, WidgetItemStyledProps} from "../pages/interf
 
 const ReactGridLayout = WidthProvider(RGL);
 const DashboardFormStyled = styled.div`
-    width: calc(100% - 48px);
-    margin-left: -20px;
+    width: 100%;
 `;
 
 
@@ -36,7 +35,6 @@ const WidgetItemStyled = styled.div<WidgetItemStyledProps>`
     background-clip: border-box;
     border: 1px solid #eee;
     border-radius: 4px;
-    padding: 10px;
     min-height: ${({ widgetKey }) => widgetKey === 'METRICS_OVERVIEW' ? '210px' : '430px'};
     ${({isWidgetEditOn}) => isWidgetEditOn ? `
     cursor: move !important;
@@ -48,6 +46,9 @@ const WidgetItemStyled = styled.div<WidgetItemStyledProps>`
 
 const DashboardViewStyled = styled.div`
     margin-top: -10px;
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
 `;
 
 const ReactGridLayoutStyled = styled(ReactGridLayout)<ReactGridLayoutStyledProps>`
