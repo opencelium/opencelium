@@ -104,20 +104,17 @@ public class WidgetServiceImp implements WidgetService {
         try {
             java.lang.management.OperatingSystemMXBean base = ManagementFactory.getOperatingSystemMXBean();
             if (base instanceof OperatingSystemMXBean os) {
-                double memoryMB = os.getCommittedVirtualMemorySize() / 1024.0;
-                dto.setMemoryUsage(Math.round(memoryMB * 100.0) / 100.0);
-
-                double maxMemoryMB = os.getTotalMemorySize() / 1024.0;
-                dto.setMaxMemorySize(Math.round(maxMemoryMB * 100.0) / 100.0);
+                dto.setMemoryUsage(os.getCommittedVirtualMemorySize() / 1024);
+                dto.setMaxMemorySize(os.getTotalMemorySize() / 1024);
             } else {
                 // fallback: JVM heap + non-heap committed / max
                 long heapCommitted    = (long) meterRegistry.get("jvm.memory.committed").tag("area", "heap").gauge().value();
                 long nonHeapCommitted = (long) meterRegistry.get("jvm.memory.committed").tag("area", "nonheap").gauge().value();
-                dto.setMemoryUsage((heapCommitted + nonHeapCommitted) / 1024.0);
+                dto.setMemoryUsage((heapCommitted + nonHeapCommitted) / 1024);
 
                 long heapMax    = (long) meterRegistry.get("jvm.memory.max").tag("area", "heap").gauge().value();
                 long nonHeapMax = (long) meterRegistry.get("jvm.memory.max").tag("area", "nonheap").gauge().value();
-                dto.setMaxMemorySize((heapMax + nonHeapMax) / 1024.0);
+                dto.setMaxMemorySize((heapMax + nonHeapMax) / 1024);
             }
         } catch (Exception e) {
             log.error("Failed to retrieve memory usage", e);
@@ -132,17 +129,17 @@ public class WidgetServiceImp implements WidgetService {
         }
     }
 
-    private double calcLogSizeMB() {
+    private long calcLogSizeMB() {
         Path logDir = LogFileUtility.toPath(LogConstant.LOG_LOCATION);
         if (!Files.exists(logDir)) {
-            return 0.0;
+            return 0L;
         }
         try (Stream<Path> stream = Files.walk(logDir)) {
             long bytes = stream
                     .filter(Files::isRegularFile)
                     .mapToLong(p -> p.toFile().length())
                     .sum();
-            return Math.round(bytes / 1024.0 * 100.0) / 100.0;
+            return bytes / 1024;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
