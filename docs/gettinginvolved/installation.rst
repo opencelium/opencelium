@@ -52,6 +52,8 @@ Download and unzip application, and create a link for it.
 	wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_latest.zip/download?distro_version_id=230" -P /opt/opencelium/
 	unzip -o -d /opt/opencelium/ /opt/opencelium/oc_latest.zip
 	rm /opt/opencelium/oc_latest.zip
+	cp /opt/opencelium/src/frontend/settings_default.json /opt/opencelium/src/frontend/settings.json
+	cp /opt/opencelium/conf/nginx_default.conf /opt/opencelium/conf/nginx.conf
 	ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
 	chmod +x /usr/bin/oc
 		
@@ -71,7 +73,7 @@ Create database and mariadb user for OpenCelium, enable mariadb service and secu
 	systemctl restart mariadb
 	systemctl enable mariadb
 	mysql -u root -e "source /opt/opencelium/src/backend/database/oc_data.sql; GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost' IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
-	mysql-secure-installation
+	mysql_secure_installation
 
 .. note::
 	| "mysql_secure_installation" is a command-line-tool to enhance the security of your MariaDB
@@ -119,6 +121,7 @@ Remove default config and link configuration file for OpenCelium.
 	.. code-block:: sh
 		:linenos:
 	
+		cp /opt/opencelium/conf/nginx-ssl_default.conf /opt/opencelium/conf/nginx-ssl.conf
 		rm /etc/nginx/sites-enabled/default
 		ln -s /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/sites-enabled/oc.conf
 		
@@ -216,6 +219,8 @@ Download and unzip application, and create a link for it.
 	wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_latest.zip/download?distro_version_id=230" -P /opt/opencelium/
 	unzip -o -d /opt/opencelium/ /opt/opencelium/oc_latest.zip
 	rm /opt/opencelium/oc_latest.zip
+	cp /opt/opencelium/src/frontend/settings_default.json /opt/opencelium/src/frontend/settings.json
+	cp /opt/opencelium/conf/nginx_default.conf /opt/opencelium/conf/nginx.conf
 	ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
 	chmod +x /usr/bin/oc
 		
@@ -282,6 +287,7 @@ Copy the configuration file for OpenCelium.
 	.. code-block:: sh
 		:linenos:
 	
+		cp /opt/opencelium/conf/nginx-ssl_default.conf /opt/opencelium/conf/nginx-ssl.conf
 		ln -s /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
 		
 	and change the certificates within the config (/opt/opencelium/conf/nginx-ssl.conf), with your own:	
@@ -393,6 +399,8 @@ Download and unzip application, and create a link for it.
 	wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_latest.zip/download?distro_version_id=230" -P /opt/opencelium/
 	unzip -o -d /opt/opencelium/ /opt/opencelium/oc_latest.zip
 	rm /opt/opencelium/oc_latest.zip
+	cp /opt/opencelium/src/frontend/settings_default.json /opt/opencelium/src/frontend/settings.json
+	cp /opt/opencelium/conf/nginx_default.conf /opt/opencelium/conf/nginx.conf
 	ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
 	chmod +x /usr/bin/oc
 		
@@ -459,6 +467,7 @@ Copy the configuration file for OpenCelium.
 	.. code-block:: sh
 		:linenos:
 		
+		cp /opt/opencelium/conf/nginx-ssl_default.conf /opt/opencelium/conf/nginx-ssl.conf
 		ln -s /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
 		ln -s /etc/pki/tls/private/ /etc/ssl/private
 		
