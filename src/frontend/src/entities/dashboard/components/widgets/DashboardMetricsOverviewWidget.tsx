@@ -109,7 +109,7 @@ const DashboardMetricsOverviewWidget: FC = () => {
 					{ key: 'failed_execution_percent', label: 'Failed execution %', value: `${failedExecPerc}${failedExecPerc !== '-' ? '%' : ''}`},
 					{ key: 'run_time', label: 'Run time', value: runtime},
 					{ key: 'avg_run_time', label: 'Run time Ø', value: avgRuntime },
-					{ key: 'cpu_usage', label: 'CPU usage %', value: `${metrics?.cpu_usage || '-'}${metrics ? '%' : ''}` },
+					{ key: 'cpu_usage', label: 'CPU usage %', value: `${metrics?.cpu_usage ? `${metrics.cpu_usage}%` : '-'}` },
 					{ key: 'memory_usage', label: 'Memory usage', value: `${metrics?.memory_usage ? formatKilobytes(metrics.memory_usage) : '-'}` },
 					{ key: 'generated_logs', label: 'Generated Logs', value: `${metrics?.exec_log_size ? formatKilobytes(metrics.exec_log_size) : '-'}` },
 				],
