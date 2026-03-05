@@ -26,6 +26,7 @@ export class ExternalApplication implements IExternalApplication{
     value: string = '';
     status?: ExternalApplicationStatus = ExternalApplicationStatus.DOWN;
     version?: string = '';
+    error?: string = '';
 
     constructor(externalApplication?: Partial<IExternalApplication>) {
         this.id = externalApplication?.id || 0;
@@ -35,6 +36,7 @@ export class ExternalApplication implements IExternalApplication{
         this.value = externalApplication?.value || '';
         this.status = externalApplication?.status || ExternalApplicationStatus.DOWN;
         this.version = externalApplication?.version || '';
+        this.error = externalApplication?.error || '';
     }
 
     static getReduxState(){
