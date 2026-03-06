@@ -39,6 +39,9 @@ import {mapItemsToClasses} from "@change_component/form_elements/form_connection
 import {useAppDispatch} from "@application/utils/store";
 import {getAllCategories} from "@entity/category/redux_toolkit/action_creators/CategoryCreators";
 import {Application} from "@application/classes/Application";
+import {Connection} from "@root/classes/Connection";
+import {useConfirmLeave} from "@application/utils/hooks/useConfirmLeave";
+import {useBlockNavigation} from "@application/utils/hooks/useBlockNavigation";
 
 
 function mapStateToProps(state){
@@ -92,7 +95,10 @@ export default function(props) {
     const {
         entityIconKey,
     } = Application.getReduxState();
+    const {isDirty} = Connection.getReduxState();
     const entityKey = 'add-connection-form-without-connectors';
+    useConfirmLeave(isDirty);
+    useBlockNavigation(isDirty);
     useEffect(() => {
         if (entityIconKey !== entityKey) {
             dispatch(setEntityIconKey(entityKey));

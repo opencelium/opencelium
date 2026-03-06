@@ -30,7 +30,7 @@ const TestConnectionButton = ({validateLogic}: any) => {
     const dispatch = useAppDispatch();
     const {currentSubscription} = Subscription.getReduxState();
     const isLicenseExpired = Subscription.hasReachedLimit(currentSubscription);
-    const {socket} = useSocketData();
+    const {socket, isConnected, socketError} = useSocketData();
     const [channelId, setChannelId] = useState<string>(undefined);
     const [startTime, setStartTime] = useState<number>();
     const {connection} = useAppSelector((state: RootState) => state.connectionReducer);
@@ -210,12 +210,15 @@ const TestConnectionButton = ({validateLogic}: any) => {
             setChannelId(connection.id || channelId);
         }
     }
-    const isDisabled = !socket.connected || isLicenseExpired;
+    const isDisabled = !socket.connected || isLicenseExpired || !!socketError;
+    const isLoading = !socket.connected && !socketError;
+    const isLabelDisabled = isDisabled && !isLoading;
     return (
         <div style={{position: 'relative'}}>
             <Button
                 id={'test_connection_button'}
-                className={styles.testConnectionTitle}
+                className={isLoading ? styles.testConnectionTitleLoading :  styles.testConnectionTitle}
+                isLoading={isLoading}
                 hasBackground={true}
                 isDisabled={isDisabled}
                 background={isTesting ? ColorTheme.Blue : ColorTheme.White}
@@ -224,15 +227,9 @@ const TestConnectionButton = ({validateLogic}: any) => {
                 handleClick={isTesting ? stopTest : generateChannelId}
                 icon={isTesting ? "stop" : "play_arrow"}
                 loadingSize={TextSize.Size_14}
-                label={isTesting ? "Stop" : "Test run"}
+                size={!isLabelDisabled && !isLicenseExpired ? '16px' : '12px'}
+                label={isTesting ? "Stop" : isLabelDisabled ? isLicenseExpired ? <span>Your license<br/>is expired</span> : <span>Websocket<br/>is inactive</span> : "Test run"}
             />
-            {isDisabled && <span style={{
-                position: 'absolute',
-                bottom: '1px',
-                left: '26px',
-                fontSize: '10px',
-                color: '#ccc'
-            }}>{isLicenseExpired ? "Your license is expired" : "Websocket is inactive"}</span>}
         </div>
     )
 }

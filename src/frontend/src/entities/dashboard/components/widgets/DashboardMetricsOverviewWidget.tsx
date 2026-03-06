@@ -20,13 +20,15 @@ import {
 	MetricsGridStyled,
 	MetricCellStyled,
 	MetricLabelStyled,
-	MetricValueStyled,
+	MetricValueStyled, ErrorStyled, LoadingStyled,
 } from './styles';
 import {useAppDispatch} from "@application/utils/store";
 import {getMetrics} from "@entity/dashboard/redux_toolkit/action_creators/WidgetCreators";
 import {Widget} from "@entity/dashboard/classes/Widget";
 import {Loading} from "@app_component/base/loading/Loading";
 import {useSocketData} from "../../../../socket/SocketDataContext";
+import DefaultText from "@app_component/base/text/DefaultText";
+import HeaderText from "@app_component/base/text/HeaderText";
 function formatDuration(milliseconds: number): string {
 	const seconds = milliseconds / 1000;
 
@@ -94,7 +96,7 @@ interface IStats {
 
 const DashboardMetricsOverviewWidget: FC = () => {
 	const dispatch = useAppDispatch();
-	const {systemMetrics: metrics} = useSocketData();
+	const {systemMetrics: metrics, socketError, isConnected} = useSocketData();
 	const [isLoading, setIsLoading] = useState<boolean>(true);
 	const stats = useMemo<IStats>(
 		() => {
@@ -134,7 +136,8 @@ const DashboardMetricsOverviewWidget: FC = () => {
 			<MetricsCardHeaderStyled>
 				Overview last {stats.periodDays} days
 			</MetricsCardHeaderStyled>
-
+			{socketError ? <ErrorStyled><HeaderText value={'Websocket is inactive'}/></ErrorStyled>
+				: (isLoading || !metrics) ? <LoadingStyled><Loading/></LoadingStyled> :
 			<MetricsGridStyled>
 				{stats.metrics.map((m) => (
 					<MetricCellStyled key={m.key}>
@@ -143,6 +146,7 @@ const DashboardMetricsOverviewWidget: FC = () => {
 					</MetricCellStyled>
 				))}
 			</MetricsGridStyled>
+			}
 		</DashboardMetricsOverviewWidgetStyled>
 	);
 };

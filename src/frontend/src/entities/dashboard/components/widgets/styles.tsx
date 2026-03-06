@@ -95,6 +95,20 @@ const MetricsCardHeaderStyled = styled.div`
     margin-top: 15px;
 `;
 
+const ErrorStyled = styled.div`
+    display: flex;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+`;
+
+const LoadingStyled = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+`;
+
 const MetricsGridStyled = styled.div`
 	width: 100%;
 	display: grid;
@@ -170,5 +184,7 @@ export {
     MetricValueStyled,
     DashboardMetricsOverviewWidgetStyled,
     MetricsGridStyled,
-    MetricsCardHeaderStyled
+    MetricsCardHeaderStyled,
+    ErrorStyled,
+    LoadingStyled,
 }

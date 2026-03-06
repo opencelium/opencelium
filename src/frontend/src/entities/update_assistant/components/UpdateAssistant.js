@@ -227,7 +227,7 @@ class UpdateAssistant extends Component{
             ],
             hint: {text: t('FORM.HINT_2')},
             header: t(`FORM.PAGE_2`),
-            visible: hasAvailableUpdates,
+            visible: true,
         },{
             inputs:[
                 {
@@ -239,7 +239,7 @@ class UpdateAssistant extends Component{
                 },
             ],
             header: t(`FORM.PAGE_6`),
-            visible: hasFinishUpdate,
+            visible: true,
         },
         ];
         if(!installationInfo || gettingInstallationInfo === API_REQUEST_STATE.START) {
