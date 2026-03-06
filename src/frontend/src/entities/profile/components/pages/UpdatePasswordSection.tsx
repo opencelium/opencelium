@@ -35,50 +35,42 @@ const UpdatePasswordSection: FC = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [passwordTouched, setPasswordTouched] = useState(false);
 
-    const passwordValidationError = useMemo(() => {
-        if (!currentPassword && !newPassword && !confirmPassword) return '';
-        if (!currentPassword || !newPassword || !confirmPassword) return 'Please fill all password fields.';
-        if (newPassword.length < 8) return 'New password must be at least 8 characters.';
-        if (newPassword !== confirmPassword) return 'Passwords do not match.';
-        if (currentPassword === newPassword) return 'New password must be different from current password.';
-        return '';
-    }, [currentPassword, newPassword, confirmPassword]);
-
     const currentPasswordError = useMemo(() => {
         if (!passwordTouched) return '';
-        if (passwordValidationError === 'Please fill all password fields.' && !currentPassword) {
-            return 'Please fill current password.';
-        }
+        if (!currentPassword) return 'Please fill current password.';
         return '';
-    }, [passwordTouched, passwordValidationError, currentPassword]);
+    }, [passwordTouched, currentPassword]);
 
     const newPasswordError = useMemo(() => {
         if (!passwordTouched) return '';
-        if (passwordValidationError === 'Please fill all password fields.' && !newPassword) {
-            return 'Please fill new password.';
-        }
-        if (passwordValidationError === 'New password must be at least 8 characters.') {
-            return passwordValidationError;
-        }
-        if (passwordValidationError === 'New password must be different from current password.') {
-            return passwordValidationError;
+        if (!newPassword) return 'Please fill new password.';
+        if (newPassword.length < 8) return 'New password must be at least 8 characters.';
+        if (currentPassword && currentPassword === newPassword) {
+            return 'New password must be different from current password.';
         }
         return '';
-    }, [passwordTouched, passwordValidationError, newPassword]);
+    }, [passwordTouched, newPassword, currentPassword]);
 
     const confirmPasswordError = useMemo(() => {
         if (!passwordTouched) return '';
-        if (passwordValidationError === 'Please fill all password fields.' && !confirmPassword) {
-            return 'Please confirm new password.';
-        }
-        if (passwordValidationError === 'Passwords do not match.') {
-            return passwordValidationError;
-        }
+        if (!confirmPassword) return 'Please confirm new password.';
+        if (newPassword && confirmPassword !== newPassword) return 'Passwords do not match.';
         return '';
-    }, [passwordTouched, passwordValidationError, confirmPassword]);
+    }, [passwordTouched, confirmPassword, newPassword]);
 
     const onUpdatePassword = () => {
 			setPasswordTouched(true);
+
+            if (
+                !currentPassword ||
+                !newPassword ||
+                !confirmPassword ||
+                newPassword.length < 8 ||
+                newPassword !== confirmPassword ||
+                currentPassword === newPassword
+            ) {
+                return;
+            }
 
 			dispatch(updatePassword({
 					currentPassword,
