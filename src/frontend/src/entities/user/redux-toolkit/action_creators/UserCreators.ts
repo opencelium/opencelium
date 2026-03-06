@@ -23,6 +23,7 @@ import ModelUserPoust from "../../requests/models/UserPoust";
 export interface UpdatePasswordRequestBody {
     currentPassword: string;
     newPassword: string;
+    confirmPassword: string;
 }
 
 export const checkUserEmail = createAsyncThunk(
@@ -164,7 +165,7 @@ export const updatePassword = createAsyncThunk(
     'user/password/update',
     async (data: UpdatePasswordRequestBody, thunkAPI) => {
         try {
-            const request = new UserRequest({ endpoint: `/password` }); // TODO: replace endpoint when backend ready
+            const request = new UserRequest({ endpoint: `/change-password` });
             const response = await request.updatePassword(data);
             return response.data;
         } catch (e) {
