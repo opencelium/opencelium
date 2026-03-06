@@ -60,7 +60,7 @@ interface ButtonProps {
     color?: string,
     background?: string,
     icon?: string,
-    label?: string,
+    label?: string | any,
     size?: string | number,
     iconSize?: string,
     isDisabled?: boolean,

@@ -42,7 +42,24 @@
 		}
 		&:last-child {
 			font-weight: unset;
-			font-size: 16px;
+		}
+	}
+
+	&:disabled span:last-child {
+		color: #fff;
+	}
+}
+
+.testConnectionTitleLoading {
+	opacity: 1 !important;
+	padding: 5px 10px !important;
+	right: 0;
+	border-right: none;
+	span {
+		&:first-child {
+		}
+		&:last-child {
+			font-weight: unset;
 		}
 	}
 

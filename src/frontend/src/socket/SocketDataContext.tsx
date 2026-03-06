@@ -21,6 +21,7 @@ export const SocketDataProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
     const dispatch = useAppDispatch();
     const {authUser, isAboutToLogout} = Auth.getReduxState();
     const [isConnected, setIsConnected] = useState(false);
+    const [socketError, setSocketError] = useState<string | null>(null);
     const [authValid, setAuthValid] = useState(true);
 
     const { currentSchedules, setCurrentSchedules,  } = useCurrentSchedulesSocket(socket);
@@ -78,6 +79,7 @@ export const SocketDataProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
 
         socket.onConnect = () => {
             setIsConnected(true);
+            setSocketError(null);
             const userSessionSubscription = socket.subscribe(`/user/session`, async (message) => {
                 const data = JSON.parse(message.body)
                 consoleLog('/user/session', data);
@@ -101,7 +103,21 @@ export const SocketDataProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
             setIsConnected(false);
         };
 
+        socket.onStompError = (frame) => {
+            console.error('[STOMP ERROR]', frame.headers['message'], frame.body);
+
+            setSocketError(frame.headers['message'] || 'STOMP error');
+            setIsConnected(false);
+        };
+
+        socket.onWebSocketError = (event) => {
+            console.error('[WS ERROR]', event);
+
+            setSocketError('WebSocket connection error');
+            setIsConnected(false);
+        };
         if (!alreadyConnected) {
+            setSocketError(null);
             socket.activate();
         }
     }
@@ -142,7 +158,8 @@ export const SocketDataProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
                 hasNewSupportFile,
                 currentSubscription,
                 socket,
-                deactivateSocket
+                deactivateSocket,
+                socketError,
             }}
         >
             {children}

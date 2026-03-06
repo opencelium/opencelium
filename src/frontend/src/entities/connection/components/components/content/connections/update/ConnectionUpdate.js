@@ -41,6 +41,9 @@ import {useParams} from "react-router";
  import {useAppDispatch} from "@application/utils/store";
  import {getAllCategories} from "@entity/category/redux_toolkit/action_creators/CategoryCreators";
  import {Application} from "@application/classes/Application";
+ import {Connection} from "@root/classes/Connection";
+ import {useConfirmLeave} from "@application/utils/hooks/useConfirmLeave";
+ import {useBlockNavigation} from "@application/utils/hooks/useBlockNavigation";
 
 /*
 * TODO: implement connection update
@@ -93,7 +96,10 @@ export default function(props) {
     const {
         entityIconKey,
     } = Application.getReduxState();
+    const {isDirty} = Connection.getReduxState();
     const entityKey = 'update-connection-form';
+    useConfirmLeave(isDirty);
+    useBlockNavigation(isDirty);
     useEffect(() => {
         dispatch(setFullScreen(true));
         if (entityIconKey !== entityKey) {

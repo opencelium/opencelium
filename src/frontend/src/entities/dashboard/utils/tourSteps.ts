@@ -28,7 +28,7 @@ export const WidgetTourSteps: Step[] = [
     {
         title: 'Metrics Overview',
         content:
-            'The Metrics Overview widget presents system performance metrics and operational statistics for OpenCelium.',
+            'The Metrics Overview widget presents system performance metrics and operational statistics of OpenCelium.',
         target: '#widget-METRICS_OVERVIEW',
         placement: 'bottom',
         disableBeacon: true,

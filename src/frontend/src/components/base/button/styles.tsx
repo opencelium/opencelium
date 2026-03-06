@@ -76,8 +76,8 @@ const SpinnerStyled = styled.span<SpinnerStyledProps>`
     left: ${({left}) => left || 0};
     top: ${({top}) => top || 0};
     position: ${({position}: {position: string}) => position || 'unset'};
-    width: ${({size}) => size ? isNumber(size) ? `${size}px` : size : 'auto'};
-    height: ${({size}) => size ? isNumber(size) ? `${size}px` : size : 'auto'};
+    width: ${({size, loadingSize}) => {let localSize = loadingSize || size; return localSize ? isNumber(localSize) ? `${localSize}px` : localSize : 'auto'}};
+    height: ${({size, loadingSize}) =>  {let localSize = loadingSize || size; return localSize ? isNumber(localSize) ? `${localSize}px` : localSize : 'auto'}};
     color: ${({color, theme}: {color?: string, theme: ITheme}) => color || theme.button.color.quite};
     transition: color 0.5s;
     display: grid;
