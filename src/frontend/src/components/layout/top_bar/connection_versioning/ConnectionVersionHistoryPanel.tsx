@@ -483,12 +483,21 @@ const ConnectionVersionHistoryPanel: FC<ConnectionVersionHistoryPanelProps> = ({
 	useEffect(() => {
 		setComments((prev) => {
 			const next = { ...prev };
+
 			for (const v of versions) {
-				if (next[v.snapshotId] === undefined) next[v.snapshotId] = v.comment ?? '';
+				const snapshotId = v.snapshotId;
+				const backendComment = v.comment ?? '';
+
+				if (activeSnapshotId !== snapshotId) {
+					next[snapshotId] = backendComment;
+				} else if (next[snapshotId] === undefined) {
+					next[snapshotId] = backendComment;
+				}
 			}
+
 			return next;
 		});
-	}, [versions]);
+	}, [versions, activeSnapshotId]);
 
 	const rows = useMemo(() => buildTimelineRows(versions), [versions]);
 
