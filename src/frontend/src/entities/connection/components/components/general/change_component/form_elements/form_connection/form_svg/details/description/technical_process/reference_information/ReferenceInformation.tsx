@@ -48,7 +48,7 @@ const ReferenceInformation: FC<ReferenceInformationProps> = ({
 		<ReferenceInformationStyled style={style} ref={ContainerRef}>
 			<div>
 				<b>{`Reference information`}</b>
-				<span>{hasFieldBindings ? '' : ' (is empty now)'}</span>
+				<span style={{marginLeft: hasFieldBindings ? '0' : 15}}>{hasFieldBindings ? '' : ' (is empty now)'}</span>
 				{hasFieldBindings && (
 					<TooltipFontIcon
 						tooltipPosition={'right'}
@@ -59,7 +59,7 @@ const ReferenceInformation: FC<ReferenceInformationProps> = ({
 					/>
 				)}
 
-				<div style={{position: 'absolute', left: '170px', top: 0}}>
+				<div style={{position: 'absolute', left: '170px', top: -10}}>
 					<HelpIcon steps={ReferenceInfoSteps} inputRef={ContainerRef}/>
 				</div>
 			</div>

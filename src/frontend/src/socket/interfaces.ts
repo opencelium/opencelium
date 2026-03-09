@@ -12,4 +12,5 @@ export interface SocketDataContextType {
     currentSubscription: SubscriptionModel,
     socket: Client,
     deactivateSocket: () => Promise<void>,
+    socketError: string | null
 }

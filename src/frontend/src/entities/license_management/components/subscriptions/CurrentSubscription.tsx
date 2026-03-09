@@ -121,7 +121,7 @@ const CurrentSubscription = ({subscription, theme}: {subscription: SubscriptionM
                     }
                 </div>
             </div>
-            {!isUnlimited && <div style={{position: 'relative', height: progressbarHeight + 50, marginTop: 60}}>
+            {!isUnlimited && <div id={'license-management-progress-bar'} style={{position: 'relative', height: progressbarHeight + 50, marginTop: 60}}>
                 <ProgressBar
                     style={{
                         borderRadius: '0.25rem',
