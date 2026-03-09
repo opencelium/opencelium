@@ -26,7 +26,7 @@ import {checkForUpdates} from "../../redux_toolkit/action_creators/UpdateAssista
 const GET_LAST_AVAILABLE_VERSION = (responseType: NotificationType, dispatch: AppDispatch, navigate: NavigateFunction, params: IApplicationResponse<CheckForUpdateProps>) => {
     // @ts-ignore
     return (<InterpolateTranslation i18nKey={`notifications.${responseType}.${checkForUpdates[responseType].type}`}>
-            OC Update v{params.data.version} is available.
+            OC Update v{params?.data?.version} is available.
         </InterpolateTranslation>
     );
 }

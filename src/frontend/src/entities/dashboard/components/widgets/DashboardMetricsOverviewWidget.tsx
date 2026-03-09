@@ -23,11 +23,8 @@ import {
 	MetricValueStyled, ErrorStyled, LoadingStyled,
 } from './styles';
 import {useAppDispatch} from "@application/utils/store";
-import {getMetrics} from "@entity/dashboard/redux_toolkit/action_creators/WidgetCreators";
-import {Widget} from "@entity/dashboard/classes/Widget";
 import {Loading} from "@app_component/base/loading/Loading";
 import {useSocketData} from "../../../../socket/SocketDataContext";
-import DefaultText from "@app_component/base/text/DefaultText";
 import HeaderText from "@app_component/base/text/HeaderText";
 function formatDuration(milliseconds: number): string {
 	const seconds = milliseconds / 1000;
@@ -95,9 +92,7 @@ interface IStats {
 }
 
 const DashboardMetricsOverviewWidget: FC = () => {
-	const dispatch = useAppDispatch();
 	const {systemMetrics: metrics, socketError, isConnected} = useSocketData();
-	const [isLoading, setIsLoading] = useState<boolean>(true);
 	const stats = useMemo<IStats>(
 		() => {
 			const failedExecPerc = metrics?.total_failed_execs && metrics?.total_execs ? calculateClampedPercentage(metrics.total_execs, metrics.total_failed_execs) : '-';
@@ -119,18 +114,7 @@ const DashboardMetricsOverviewWidget: FC = () => {
 		},
 		[metrics],
 	);
-	useEffect(() => {
-		(async () => {
-			try {
-				dispatch(getMetrics());
-			} catch (e) {
-
-			} finally {
-				setIsLoading(false);
-			}
-		})()
-	}, []);
-
+	const isLoading = !metrics && !socketError;
 	return (
 		<DashboardMetricsOverviewWidgetStyled>
 			<MetricsCardHeaderStyled>
