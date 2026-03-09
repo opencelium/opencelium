@@ -52,7 +52,6 @@ Download and unzip application, and create a link for it.
 	wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_latest.zip/download?distro_version_id=230" -P /opt/opencelium/
 	unzip -o -d /opt/opencelium/ /opt/opencelium/oc_latest.zip
 	rm /opt/opencelium/oc_latest.zip
-	cp /opt/opencelium/src/frontend/settings_default.json /opt/opencelium/src/frontend/settings.json
 	cp /opt/opencelium/conf/nginx_default.conf /opt/opencelium/conf/nginx.conf
 	ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
 	chmod +x /usr/bin/oc
@@ -219,7 +218,6 @@ Download and unzip application, and create a link for it.
 	wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_latest.zip/download?distro_version_id=230" -P /opt/opencelium/
 	unzip -o -d /opt/opencelium/ /opt/opencelium/oc_latest.zip
 	rm /opt/opencelium/oc_latest.zip
-	cp /opt/opencelium/src/frontend/settings_default.json /opt/opencelium/src/frontend/settings.json
 	cp /opt/opencelium/conf/nginx_default.conf /opt/opencelium/conf/nginx.conf
 	ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
 	chmod +x /usr/bin/oc
@@ -399,7 +397,6 @@ Download and unzip application, and create a link for it.
 	wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_latest.zip/download?distro_version_id=230" -P /opt/opencelium/
 	unzip -o -d /opt/opencelium/ /opt/opencelium/oc_latest.zip
 	rm /opt/opencelium/oc_latest.zip
-	cp /opt/opencelium/src/frontend/settings_default.json /opt/opencelium/src/frontend/settings.json
 	cp /opt/opencelium/conf/nginx_default.conf /opt/opencelium/conf/nginx.conf
 	ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
 	chmod +x /usr/bin/oc
