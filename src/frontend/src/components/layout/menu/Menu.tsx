@@ -102,9 +102,11 @@ const Menu: FC<MenuProps> =
                     <div>
                         <MenuTop>
                             <MenuLinkLogo to={'/'} isReadonly={isReadonly} $onHoverColor={hoverMenuItemBackground}/>
-                            <Tooltip target={'menu_burger_icon'} tooltip={isMenuExpanded ? 'Constrict' : 'Expand'} component={
-                                <Button margin={'12px 8.5px'} id={'menu_burger_icon'} iconSize={'30px'} handleClick={toggle} hasBackground={false} icon={isMenuExpanded ? 'menu_open' : 'menu'} background={ColorTheme.White}/>}
-                            />
+                            <div style={{display: 'flex', alignItems: 'center', justifyContent: 'flex-start', marginLeft: '4px'}}>
+                                <Tooltip target={'menu_burger_icon'} tooltip={isMenuExpanded ? 'Constrict' : 'Expand'} component={
+                                    <Button margin={'12px 8.5px'} id={'menu_burger_icon'} iconSize={'25px'} handleClick={toggle} hasBackground={false} icon={isMenuExpanded ? 'menu_open' : 'menu'} background={ColorTheme.White}/>}
+                                />
+                            </div>
                         </MenuTop>
                         <div>
                             {getMenuItems({showMenu, isReadonly, onHoverColor: hoverMenuItemBackground})}

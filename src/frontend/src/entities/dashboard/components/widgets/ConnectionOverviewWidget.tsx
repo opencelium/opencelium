@@ -175,6 +175,9 @@ const ConnectionOverviewWidget: FC =
             },
             length: 100
         },
+        interaction: {
+            zoomView: false
+        },
         nodes:{
             color: {
                 border: "#ffffff00",
