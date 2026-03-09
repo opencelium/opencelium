@@ -22,6 +22,7 @@ interface LoadingProps{
     color?: string,
     className?: string,
     top?: string,
+    style?: any,
 }
 
 export {

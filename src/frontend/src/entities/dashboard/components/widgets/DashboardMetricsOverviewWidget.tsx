@@ -16,16 +16,16 @@
 import React, {FC, useEffect, useMemo, useState} from 'react';
 import {
 	DashboardMetricsOverviewWidgetStyled,
-	MetricsCardHeaderStyled,
 	MetricsGridStyled,
 	MetricCellStyled,
 	MetricLabelStyled,
-	MetricValueStyled, ErrorStyled, LoadingStyled,
+	MetricValueStyled, ErrorStyled, LoadingStyled, WidgetCardHeaderStyled,
 } from './styles';
 import {useAppDispatch} from "@application/utils/store";
 import {Loading} from "@app_component/base/loading/Loading";
 import {useSocketData} from "../../../../socket/SocketDataContext";
 import HeaderText from "@app_component/base/text/HeaderText";
+import {ContentLoading} from "@app_component/base/loading/ContentLoading";
 function formatDuration(milliseconds: number): string {
 	const seconds = milliseconds / 1000;
 
@@ -114,14 +114,20 @@ const DashboardMetricsOverviewWidget: FC = () => {
 		},
 		[metrics],
 	);
+<<<<<<< HEAD
 	const isLoading = !metrics && !socketError;
+=======
+
+>>>>>>> version4.8
 	return (
 		<DashboardMetricsOverviewWidgetStyled>
-			<MetricsCardHeaderStyled>
-				Overview last {stats.periodDays} days
-			</MetricsCardHeaderStyled>
+			<div style={{marginTop: '15px'}}>
+				<WidgetCardHeaderStyled>
+					Overview last {stats.periodDays} days
+				</WidgetCardHeaderStyled>
+			</div>
 			{socketError ? <ErrorStyled><HeaderText value={'Websocket is inactive'}/></ErrorStyled>
-				: (isLoading || !metrics) ? <LoadingStyled><Loading/></LoadingStyled> :
+				: (isLoading || !metrics) ? <LoadingStyled><ContentLoading/></LoadingStyled> :
 			<MetricsGridStyled>
 				{stats.metrics.map((m) => (
 					<MetricCellStyled key={m.key}>

@@ -88,11 +88,10 @@ const DashboardMetricsOverviewWidgetStyled = styled.div`
 	gap: 10px;
 `;
 
-const MetricsCardHeaderStyled = styled.div`
+const WidgetCardHeaderStyled = styled.span`
 	font-size: ${CategoryTextSize}px;
 	font-weight: 600;
 	color: ${ColorTheme.Gray};
-    margin-top: 15px;
 `;
 
 const ErrorStyled = styled.div`
@@ -184,7 +183,7 @@ export {
     MetricValueStyled,
     DashboardMetricsOverviewWidgetStyled,
     MetricsGridStyled,
-    MetricsCardHeaderStyled,
+    WidgetCardHeaderStyled,
     ErrorStyled,
     LoadingStyled,
 }

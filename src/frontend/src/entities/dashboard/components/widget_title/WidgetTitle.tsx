@@ -21,6 +21,7 @@ import {ColorTheme} from "@style/Theme";
 import { WidgetTitleProps } from './interfaces';
 import {WidgetTitleStyled} from './styles';
 import HeaderText from "@app_component/base/text/HeaderText";
+import {WidgetCardHeaderStyled} from "@entity/dashboard/components/widgets/styles";
 
 const WidgetTitle: FC<WidgetTitleProps> =
     ({
@@ -30,11 +31,7 @@ const WidgetTitle: FC<WidgetTitleProps> =
     return (
         <WidgetTitleStyled className={className}>
             <span>
-                <HeaderText
-                    value={title}
-                    color={ColorTheme.Black}
-                    isBold={true}
-                />
+                <WidgetCardHeaderStyled>{title}</WidgetCardHeaderStyled>
             </span>
         </WidgetTitleStyled>
     )

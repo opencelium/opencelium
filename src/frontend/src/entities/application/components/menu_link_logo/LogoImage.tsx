@@ -22,6 +22,7 @@ import {Application} from "@application/classes/Application";
 import LogoOcWhiteImagePath from "@image/application/logo_oc_white.png";
 import {onlineApiServerOpenCeliumUrl} from "@entity/application/requests/classes/url";
 import {LogoImageStyled, LoadingStyled} from "./styles";
+import {TextSize} from "@app_component/base/text/interfaces";
 
 const LogoImage = (props: any) => {
     const imageRef = useRef(null);
@@ -67,7 +68,7 @@ const LogoImage = (props: any) => {
         checkImage(logoPath, () => setIsLogoExist(true), () => setIsLogoExist(false));
     }, [logoDataStatus])
     if(isLogoExist === null){
-        return <LoadingStyled className={props?.className || ''}/>;
+        return <LoadingStyled className={props?.className || ''} size={TextSize.Size_18}/>;
     }
     return(
         <LogoImageStyled
