@@ -26,6 +26,7 @@ import {
     NotificationTemplateEmptyListSteps, NotificationTemplateFormSteps,
     NotificationTemplateListSteps
 } from "@entity/notification_template/utils/tourSteps";
+import {LicenseManagementOfflineSteps} from "@entity/license_management/utils/tourSteps";
 
 export function switchSteps(entityIconKey: EntityIconKeyType) {
 
@@ -101,6 +102,8 @@ export function switchSteps(entityIconKey: EntityIconKeyType) {
             return NotificationTemplateEmptyListSteps;
         case 'notification-template-form':
             return NotificationTemplateFormSteps;
+        case 'license-management-offline':
+            return LicenseManagementOfflineSteps;
         default:
             return [];
     }

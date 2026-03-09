@@ -45,6 +45,7 @@ const ImportCreditsComponent = () => {
                 />
             </Dialog>
             <Button
+                id={'license-management-extra-ops'}
                 label={'Extra Ops'}
                 icon={'library_add'}
                 handleClick={() => toggleDialog(true)}

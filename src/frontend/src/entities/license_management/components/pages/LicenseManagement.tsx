@@ -35,6 +35,7 @@ import Button from "@app_component/base/button/Button";
 import {DetailView} from "@entity/license_management/components/detail_view/DetailView";
 import ImportCreditsComponent from "@entity/license_management/components/import_credits/ImportCreditsComponent";
 import {Application} from "@application/classes/Application";
+import {FormProps} from "@app_component/form/form/interfaces";
 
 
 const LicenseManagement: FC<IForm> = ({}) => {
@@ -79,6 +80,7 @@ const LicenseManagement: FC<IForm> = ({}) => {
         actions.push(
             <Button
                 key={'download'}
+                id={'license-management-generate-act-req'}
                 icon={'file_download'}
                 label={'Generate Activation Request'}
                 isLoading={generatingActivateRequest === API_REQUEST_STATE.START}
@@ -114,16 +116,17 @@ const LicenseManagement: FC<IForm> = ({}) => {
                 handleClick={() => dispatch(activateFreeLicense())}
             />);
     }
-    const data = {
+    const data: FormProps = {
+        entityKey: 'license-management-offline',
         title: [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Subscription Overview'}],
         actions,
         formSections: [
-            <FormSection label={{value: 'subscription'}}>
+            <FormSection label={{value: 'subscription'}} id={'license-management-subscription'}>
                 <div style={{marginLeft: 20}}>
                     <CurrentSubscription subscription={currentSubscription || Subscription.getEmptySubscription()}/>
                 </div>
             </FormSection>,
-            <FormSection label={{value: 'Detail View'}} dependencies={[!currentSubscription]}>
+            <FormSection label={{value: 'Detail View'}} id={'license-management-detail-view'} dependencies={[!currentSubscription]}>
                 <DetailView/>
             </FormSection>
         ]

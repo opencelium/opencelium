@@ -45,6 +45,7 @@ const DetailsCollection = ({currentEntry, detailsPage, setDetailsPage, setCollec
     }, [currentEntry])
     return (
         <CollectionView
+            shouldNoSetEntityHeader={true}
             hasNotAlert={true}
             hasViewSection={false}
             isListViewCard={false}

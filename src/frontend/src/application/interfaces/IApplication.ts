@@ -32,7 +32,7 @@ export type EntityIconKeyType =
     CollectionEntityKey | EmptyCollectionEntityKey |
     'schedule-form' | 'add-connection-form-without-connectors' | 'add-connection-form-with-connectors' | 'update-connection-form' |
     'user-form' | 'group-form-with-permission' | 'group-form-without-permission' | 'ldap-form-with-debug' | 'ldap-form-without-debug' |
-    'category-form' | 'notification-template-form'
+    'category-form' | 'notification-template-form' | 'license-management-offline' | 'license-management-online'
     ;
 
 export type CollectionEntityKey = 'connector-list' | 'connection-list' | 'schedule-list' |
