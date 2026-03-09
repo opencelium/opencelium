@@ -52,7 +52,6 @@ Download and unzip application, and create a link for it.
 	wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_latest.zip/download?distro_version_id=230" -P /opt/opencelium/
 	unzip -o -d /opt/opencelium/ /opt/opencelium/oc_latest.zip
 	rm /opt/opencelium/oc_latest.zip
-	cp /opt/opencelium/conf/nginx_default.conf /opt/opencelium/conf/nginx.conf
 	ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
 	chmod +x /usr/bin/oc
 		
@@ -110,7 +109,8 @@ Remove default config and link configuration file for OpenCelium.
 
 .. code-block:: sh
 	:linenos:
-	
+
+	cp /opt/opencelium/conf/nginx_default.conf /opt/opencelium/conf/nginx.conf	
 	rm /etc/nginx/sites-enabled/default
 	ln -s /opt/opencelium/conf/nginx.conf /etc/nginx/sites-enabled/oc.conf
 	
@@ -218,7 +218,6 @@ Download and unzip application, and create a link for it.
 	wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_latest.zip/download?distro_version_id=230" -P /opt/opencelium/
 	unzip -o -d /opt/opencelium/ /opt/opencelium/oc_latest.zip
 	rm /opt/opencelium/oc_latest.zip
-	cp /opt/opencelium/conf/nginx_default.conf /opt/opencelium/conf/nginx.conf
 	ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
 	chmod +x /usr/bin/oc
 		
@@ -276,7 +275,8 @@ Copy the configuration file for OpenCelium.
 
 .. code-block:: sh
 	:linenos:
-	
+
+	cp /opt/opencelium/conf/nginx_default.conf /opt/opencelium/conf/nginx.conf	
 	ln -s /opt/opencelium/conf/nginx.conf /etc/nginx/conf.d/oc.conf
 	
 .. note::
@@ -397,7 +397,6 @@ Download and unzip application, and create a link for it.
 	wget --content-disposition "https://packagecloud.io/becon/opencelium/packages/anyfile/oc_latest.zip/download?distro_version_id=230" -P /opt/opencelium/
 	unzip -o -d /opt/opencelium/ /opt/opencelium/oc_latest.zip
 	rm /opt/opencelium/oc_latest.zip
-	cp /opt/opencelium/conf/nginx_default.conf /opt/opencelium/conf/nginx.conf
 	ln -s /opt/opencelium/scripts/oc_service.sh /usr/bin/oc
 	chmod +x /usr/bin/oc
 		
@@ -456,6 +455,7 @@ Copy the configuration file for OpenCelium.
 .. code-block:: sh
 	:linenos:
 	
+	cp /opt/opencelium/conf/nginx_default.conf /opt/opencelium/conf/nginx.conf	
 	ln -s /opt/opencelium/conf/nginx.conf /etc/nginx/conf.d/oc.conf
 	
 .. note::
