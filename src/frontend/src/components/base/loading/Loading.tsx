@@ -27,9 +27,10 @@ const Loading: FC<LoadingProps> =
         className,
         theme,
         top,
+        style,
     }) => {
     return (
-        <LoadingStyled className={className} top={top} isLoading={true} name={''} size={size} color={theme?.menu?.background || color || ColorTheme.Blue}/>
+        <LoadingStyled styles={style} className={className} top={top} isLoading={true} name={''} size={size} color={theme?.menu?.background || color || ColorTheme.Blue}/>
     )
 }
 
