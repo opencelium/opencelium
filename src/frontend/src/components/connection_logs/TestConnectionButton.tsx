@@ -25,6 +25,7 @@ import {Button} from "@app_component/base/button/Button";
 import {terminateExecution} from "@entity/schedule/redux_toolkit/action_creators/ScheduleCreators";
 import {consoleLog} from "@application/utils/utils";
 import Subscription from "@entity/license_management/classes/Subscription";
+import {TinyTextSize} from "@entity/application/utils/constants";
 
 const TestConnectionButton = ({validateLogic}: any) => {
     const dispatch = useAppDispatch();
@@ -219,7 +220,6 @@ const TestConnectionButton = ({validateLogic}: any) => {
                 id={'test_connection_button'}
                 className={isLoading ? styles.testConnectionTitleLoading :  styles.testConnectionTitle}
                 isLoading={isLoading}
-                hasBackground={true}
                 isDisabled={isDisabled}
                 background={isTesting ? ColorTheme.Blue : ColorTheme.White}
                 color={isDisabled ? '#ccc !important' : isTesting ? ColorTheme.White : ColorTheme.Gray}
@@ -228,7 +228,14 @@ const TestConnectionButton = ({validateLogic}: any) => {
                 icon={isTesting ? "stop" : "play_arrow"}
                 loadingSize={TextSize.Size_14}
                 size={!isLabelDisabled && !isLicenseExpired ? '16px' : '12px'}
-                label={isTesting ? "Stop" : isLabelDisabled ? isLicenseExpired ? <span>Your license<br/>is expired</span> : <span>Websocket<br/>is inactive</span> : "Test run"}
+                subLabel={<div style={{
+                    fontSize: `${TinyTextSize}px`,
+                    position: 'absolute',
+                    right: '11px',
+                    bottom: 0,
+                    transform: 'none',
+                }}>{isLoading ? "connecting websocket" : isLabelDisabled ? isLicenseExpired ? "expired license" : "inactive websocket" : ""}</div>}
+                label={isTesting ? "Stop" : "Test run"}
             />
         </div>
     )
