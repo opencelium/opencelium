@@ -116,7 +116,7 @@ const DashboardMetricsOverviewWidget: FC = () => {
 		},
 		[metrics],
 	);
-
+	const isLoading = !metrics && !socketError;
 	return (
 		<DashboardMetricsOverviewWidgetStyled>
 			<div style={{marginTop: '15px'}}>

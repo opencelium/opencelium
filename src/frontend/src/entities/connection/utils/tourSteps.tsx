@@ -192,39 +192,8 @@ Cancels the creation process without saving changes.
         disableBeacon: true,
     },
 ];
-const ConnectionFormMethods: Step[] = [
-    {
-        title: 'Source Connector',
-        content:
-            'This panel represents the source connector and is used to define how data is requested or retrieved from the originating system.',
-        target: '#fromConnector_panel',
-        placement: 'top',
-        disableBeacon: true,
-    },
-    {
-        title: 'Target Connector',
-        content:
-            'This panel represents the target connector and defines how the processed data is sent to the receiving system.',
-        target: '#toConnector_panel',
-        placement: 'top',
-        disableBeacon: true,
-    },
-    {
-        title: 'Details Panel',
-        content:
-            'Displays configuration details of the currently selected method or element in the flow.',
-        target: '#connection-form-methods-details-panel',
-        placement: 'left',
-        disableBeacon: true,
-    },
-    {
-        title: 'Control Panel',
-        content:
-            'This panel provides tools for testing, saving, configuring, and managing the connection during the design process.',
-        target: '#button_panel',
-        placement: 'top',
-        disableBeacon: true,
-    },
+const ButtonPanel: Step[] = [
+
     {
         title: 'Test Run',
         content:
@@ -319,28 +288,50 @@ const ConnectionFormMethods: Step[] = [
         disableBeacon: true,
     },
 ]
-export const AddConnectionStepsWithConnectors: Step[] = [
-    ...AddConnectionStepsWithoutConnectors,
+const ConnectionFormMethodsWithoutOpenedButtonPanel: Step[] = [
     {
-        title: 'Mode Expert',
+        title: 'Source Connector',
         content:
-            'Create the connection from scratch with full control over methods, request configuration, and data flow logic.',
-        target: '#connection-form-mode-expert',
-        placement: 'bottom',
+            'This panel represents the source connector and is used to define how data is requested or retrieved from the originating system.',
+        target: '#fromConnector_panel',
+        placement: 'top',
         disableBeacon: true,
     },
     {
-        title: 'Mode Template',
+        title: 'Target Connector',
         content:
-            'Create the connection using a predefined template that provides a ready-made configuration structure.',
-        target: '#connection-form-mode-template',
-        placement: 'bottom',
+            'This panel represents the target connector and defines how the processed data is sent to the receiving system.',
+        target: '#toConnector_panel',
+        placement: 'top',
         disableBeacon: true,
     },
-    ...ConnectionFormMethods,
+    {
+        title: 'Details Panel',
+        content:
+            'Displays configuration details of the currently selected method or element in the flow.',
+        target: '#connection-form-methods-details-panel',
+        placement: 'left',
+        disableBeacon: true,
+    },
+    {
+        title: 'Control Panel',
+        content:
+            'This panel provides tools for testing, saving, configuring, and managing the connection during the design process.',
+        target: '#button_panel',
+        placement: 'top',
+        disableBeacon: true,
+    },
+]
+const ConnectionWithOpenedButtonPanel: Step[]= [
+    ...ConnectionFormMethodsWithoutOpenedButtonPanel,
+    ...ButtonPanel,
+]
+
+export const ConnectionFormWithPanel: Step[] = [
+    ...ConnectionWithOpenedButtonPanel,
 ];
-export const UpdateConnectionStepsWithConnectors: Step[] = [
-    ...ConnectionFormMethods,
+export const ConnectionFormWithoutPanel: Step[] = [
+    ...ConnectionFormMethodsWithoutOpenedButtonPanel,
 ];
 
 

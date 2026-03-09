@@ -6,9 +6,10 @@ import {
     UpdateConnectorWithMaskTourSteps, UpdateConnectorWithoutMaskTourSteps
 } from "@entity/connector/utils/tourSteps";
 import {
-    AddConnectionStepsWithConnectors, AddConnectionStepsWithoutConnectors,
+    ConnectionFormWithoutPanel,
+    ConnectionFormWithPanel,
     ConnectionListSteps,
-    EmptyConnectionListSteps, UpdateConnectionStepsWithConnectors
+    EmptyConnectionListSteps,
 } from "@root/utils/tourSteps";
 import {EmptyScheduleListSteps, ScheduleFormSteps, ScheduleListSteps} from "@entity/schedule/utils/tourSteps";
 import {AdminCardListSteps} from "@entity/admin_card/utils/tourSteps";
@@ -57,12 +58,10 @@ export function switchSteps(entityIconKey: EntityIconKeyType) {
             return ScheduleListSteps;
         case 'schedule-form':
             return ScheduleFormSteps;
-        case 'add-connection-form-without-connectors':
-            return AddConnectionStepsWithoutConnectors;
-        case 'add-connection-form-with-connectors':
-            return AddConnectionStepsWithConnectors;
-        case 'update-connection-form':
-            return UpdateConnectionStepsWithConnectors;
+        case 'connection-form-with-panel':
+            return ConnectionFormWithPanel;
+        case 'connection-form-without-panel':
+            return ConnectionFormWithoutPanel;
         case 'admin-card-list':
         case 'admin-card-list-empty':
             return AdminCardListSteps;
