@@ -114,11 +114,7 @@ const DashboardMetricsOverviewWidget: FC = () => {
 		},
 		[metrics],
 	);
-<<<<<<< HEAD
 	const isLoading = !metrics && !socketError;
-=======
-
->>>>>>> version4.8
 	return (
 		<DashboardMetricsOverviewWidgetStyled>
 			<div style={{marginTop: '15px'}}>

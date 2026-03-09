@@ -71,6 +71,7 @@ function mapStateToProps(state){
         checkTitleResult: connection.isCurrentConnectionHasUniqueTitle,
         validatingFormMethods: connection.validatingFormMethods,
         validateFormMethodsResult: connection.validateFormMethodsResult,
+        isButtonPanelOpened: connection.isButtonPanelOpened,
     };
 }
 
@@ -96,15 +97,17 @@ export default function(props) {
     const {
         entityIconKey,
     } = Application.getReduxState();
-    const {isDirty} = Connection.getReduxState();
-    const entityKey = 'update-connection-form';
+    const {isDirty, isButtonPanelOpened} = Connection.getReduxState();
     useConfirmLeave(isDirty);
     useBlockNavigation(isDirty);
     useEffect(() => {
-        dispatch(setFullScreen(true));
+        const entityKey = `connection-form-with${isButtonPanelOpened ? '' : 'out'}-panel`;
         if (entityIconKey !== entityKey) {
             dispatch(setEntityIconKey(entityKey));
         }
+    }, [isButtonPanelOpened]);
+    useEffect(() => {
+        dispatch(setFullScreen(true));
         return () => {
             dispatch(setTemplatePanelVisibility(false))
             dispatch(setSavePanelVisibility(false))

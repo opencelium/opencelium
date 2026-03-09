@@ -71,6 +71,7 @@ function mapStateToProps(state){
         categories: category.categories,
         gettingCategories: category.gettingCategories,
         activeCategory: category.activeCategory,
+        isButtonPanelOpened: connection.isButtonPanelOpened,
     };
 }
 
@@ -95,14 +96,17 @@ export default function(props) {
     const {
         entityIconKey,
     } = Application.getReduxState();
-    const {isDirty} = Connection.getReduxState();
-    const entityKey = 'add-connection-form-without-connectors';
+    const {isDirty, isButtonPanelOpened} = Connection.getReduxState();
+    const entityKey = 'connection-form-with-panel';
     useConfirmLeave(isDirty);
     useBlockNavigation(isDirty);
     useEffect(() => {
+        const entityKey = `connection-form-with${isButtonPanelOpened ? '' : 'out'}-panel`;
         if (entityIconKey !== entityKey) {
             dispatch(setEntityIconKey(entityKey));
         }
+    }, [isButtonPanelOpened]);
+    useEffect(() => {
         return () => {
             dispatch(setTemplatePanelVisibility(false))
             dispatch(setSavePanelVisibility(false))
