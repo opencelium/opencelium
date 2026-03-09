@@ -62,6 +62,7 @@ interface ButtonProps {
     icon?: string,
     label?: string | any,
     size?: string | number,
+    subLabel?: any,
     iconSize?: string,
     isDisabled?: boolean,
     isLoading?: boolean,

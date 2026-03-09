@@ -176,14 +176,14 @@ const ControlsBlock: FC<ControlsBlockProps> = (props: any) => {
           <TooltipButton
             position={"bottom"}
             icon={"sort"}
-            tooltip={!logPanelHeight ? "Show Logs" : "Hide Logs"}
+            tooltip={logPanelHeight === LogPanelHeight.Low ? "Show Logs" : "Hide Logs"}
             target={`show_log_panel`}
             hasBackground={true}
-            background={!logPanelHeight ? ColorTheme.White : ColorTheme.Blue}
-            color={!logPanelHeight ? ColorTheme.Gray : ColorTheme.White}
+            background={logPanelHeight === LogPanelHeight.Low ? ColorTheme.White : ColorTheme.Blue}
+            color={logPanelHeight === LogPanelHeight.Low ? ColorTheme.Gray : ColorTheme.White}
             padding="2px"
             handleClick={() =>
-              dispatch(setLogPanelHeight(!logPanelHeight ? LogPanelHeight.High : LogPanelHeight.Low))
+              dispatch(setLogPanelHeight(logPanelHeight === LogPanelHeight.Low ? LogPanelHeight.High : LogPanelHeight.Low))
             }
           />
         </div>
