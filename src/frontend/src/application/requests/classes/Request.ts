@@ -25,6 +25,7 @@ export class Request implements IRequest{
     isFullUrl: boolean;
     isIframeUrl: boolean;
     endpoint: string;
+    timeout: number;
 
     constructor(data: IRequestSettings) {
         this.url = data.url;
@@ -33,6 +34,7 @@ export class Request implements IRequest{
         this.hasAuthToken = data.hasOwnProperty('hasAuthToken') ? data.hasAuthToken : true;
         this.isFullUrl = data?.isFullUrl || false;
         this.isIframeUrl = data?.isIframeUrl || false;
+        this.timeout = data.timeout || 30000;
         this.endpoint = data?.endpoint || '';
     }
 
@@ -54,7 +56,7 @@ export class Request implements IRequest{
     getHeaders(settings?: AxiosRequestConfig):any{
         let headers: any = {
             'crossDomain': true,
-            'timeout': 40000,
+            'timeout': this.timeout,
             'content-type': 'application/json',
         };
         if(this.isFormData){

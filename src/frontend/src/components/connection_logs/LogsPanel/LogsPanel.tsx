@@ -53,6 +53,7 @@ const LogsPanel: React.FC<LogsPanelProps> = ({theme}) => {
   const [overflowY, setOverflowY] = useState<'hidden' | 'auto'>('hidden');
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const notMinimized = logPanelHeight !== LogPanelHeight.Low;
   const handleDeleteLogs = async (executionId: string) => {
     setIsDeleting(true);
     //await dispatch(deleteLogs({ executionId }));
@@ -60,7 +61,7 @@ const LogsPanel: React.FC<LogsPanelProps> = ({theme}) => {
     dispatch(clearSocketLog());
   };
     useEffect(() => {
-        if (logPanelHeight !== LogPanelHeight.Low) {
+        if (notMinimized) {
             setTimeout(() => {
                 setOverflowY('auto')
             }, 500)
@@ -91,17 +92,17 @@ const LogsPanel: React.FC<LogsPanelProps> = ({theme}) => {
               <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                   {logPanelHeight !== LogPanelHeight.Full && <MinimizeLogsButtonStyled
                       right={isDetailsOpened ? isFullScreen ? 359 : 347 : isFullScreen ? 59 : 47}
-                      tooltip={logPanelHeight !== LogPanelHeight.Low ? 'Hide' : 'Show'}
+                      tooltip={notMinimized ? 'Hide' : 'Show'}
                       target={`log_panel_hide`}
                       hasBackground={false}
                       handleClick={() => {
-                          if (logPanelHeight !== LogPanelHeight.Low) {
+                          if (notMinimized) {
                               dispatch(setLogPanelHeight(LogPanelHeight.Low))
                           } else {
                               dispatch(setLogPanelHeight(LogPanelHeight.High))
                           }
                       }}
-                      icon={logPanelHeight !== LogPanelHeight.Low ? 'keyboard_arrow_down' : 'keyboard_arrow_up'}
+                      icon={notMinimized ? 'keyboard_arrow_down' : 'keyboard_arrow_up'}
                       size={TextSize.Size_20}
                   />}
                   <FullLogsButtonStyled

@@ -37,6 +37,9 @@ export interface IRequestSettings{
 
     //true for request with token in the header
     hasAuthToken?: boolean,
+
+    //timeout in milliseconds
+    timeout?: number,
 }
 
 export interface IRequest extends IRequestSettings{

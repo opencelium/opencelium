@@ -39,10 +39,11 @@ const Dialog: FC<DialogProps> =
         styles,
         hasNoActions,
         hasNoBody,
+        autoFocus,
     }) => {
     const [isOpen, toggleDialog] = useState(active);
     useEffect(() => {
-        if (isOpen) {
+        if (isOpen && autoFocus) {
             setFocus();
         }
     },[]);
@@ -61,7 +62,7 @@ const Dialog: FC<DialogProps> =
             }}, 500);
     }
     return (
-        <Modal id={id || `modal_${title}`} autoFocus={true} isOpen={isOpen} toggle={toggle} style={styles.modal} className={dialogClassname} modalClassName={dialogTheme.modal} contentClassName={dialogTheme.content} wrapClassName={dialogTheme.wrapper} backdropClassName={dialogTheme.backdrop}>
+        <Modal id={id || `modal_${title}`} autoFocus={typeof autoFocus === 'undefined' ? true : autoFocus} isOpen={isOpen} toggle={toggle} style={styles.modal} className={dialogClassname} modalClassName={dialogTheme.modal} contentClassName={dialogTheme.content} wrapClassName={dialogTheme.wrapper} backdropClassName={dialogTheme.backdrop}>
             {title && <ModalHeader toggle={toggle} className={dialogTheme.title} style={styles.header}><HeaderText value={title} isBold={true}/></ModalHeader>}
             {hasNoBody ? children :
                 <ModalBody style={styles.body} className={dialogTheme.body}>

@@ -92,9 +92,7 @@ interface IStats {
 }
 
 const DashboardMetricsOverviewWidget: FC = () => {
-	const dispatch = useAppDispatch();
 	const {systemMetrics: metrics, socketError, isConnected} = useSocketData();
-	const [isLoading, setIsLoading] = useState<boolean>(true);
 	const stats = useMemo<IStats>(
 		() => {
 			const failedExecPerc = metrics?.total_failed_execs && metrics?.total_execs ? calculateClampedPercentage(metrics.total_execs, metrics.total_failed_execs) : '-';

@@ -18,7 +18,7 @@ import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import {CommonState} from "@application/utils/store";
 import {ICommonState} from "@application/interfaces/core";
 import {IResponse} from "@application/requests/interfaces/IResponse";
-import {getAllWidgets, getMetrics} from "../action_creators/WidgetCreators";
+import {getAllWidgets} from "../action_creators/WidgetCreators";
 import {IWidget} from "../../interfaces/IWidget";
 import {Metrics} from "@entity/dashboard/requests/interfaces/IWidget";
 
@@ -65,15 +65,6 @@ export const widgetSlice = createSlice({
         },
         [getAllWidgets.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.gettingAllWidgets = API_REQUEST_STATE.ERROR;
-            state.error = action.payload;
-        },
-        [getMetrics.pending.type]: (state) => {
-        },
-        [getMetrics.fulfilled.type]: (state, action: PayloadAction<Metrics>) => {
-            state.metrics = action.payload;
-            state.error = null;
-        },
-        [getMetrics.rejected.type]: (state, action: PayloadAction<IResponse>) => {
             state.error = action.payload;
         },
     }

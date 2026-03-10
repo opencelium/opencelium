@@ -92,6 +92,9 @@ class Form extends React.Component{
     componentDidUpdate(prevProps, prevState, snapshot) {
         const prevErrors = prevProps.contents.length > 2 ? prevProps.contents[2].inputs[1]?.errors || {} : {};
         const curErrors = this.props.contents.length > 2 ? this.props.contents[2].inputs[1]?.errors || {} : {};
+        if (prevProps.forceUpdateConnection !== this.props.forceUpdateConnection && this.props.forceUpdateConnection) {
+            this.updateEntity(this.props.entity);
+        }
         if(prevProps.entity.id !== this.props.entity.id){
             this.setState({
                 entity: this.props.entity,
@@ -282,6 +285,7 @@ class Form extends React.Component{
 }
 
 Form.propTypes = {
+    forceUpdateConnection: PropTypes.bool,
     shouldScroll: PropTypes.string,
     type: PropTypes.string,
     contents: PropTypes.array,
@@ -317,6 +321,7 @@ Form.defaultProps = {
     clearValidationMessage: () => {},
     action: () => {},
     additionalButtons: () => {},
+    forceUpdateConnection: false,
 };
 
 export default Form;

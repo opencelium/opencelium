@@ -43,7 +43,7 @@ interface DialogStylesProps{
 interface DialogProps{
     theme?: ITheme,
     active: boolean,
-    title: any,
+    title?: any,
     isConfirmation?: boolean,
     actions: ActionProps[],
     toggle: any,
@@ -53,6 +53,7 @@ interface DialogProps{
     hasNoBody?: boolean,
     hasNoActions?: boolean,
     id?: string,
+    autoFocus?: boolean,
 }
 
 export {
