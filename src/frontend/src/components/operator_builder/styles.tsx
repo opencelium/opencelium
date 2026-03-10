@@ -3,6 +3,7 @@ import Button from "@app_component/base/button/Button";
 import {GroupHeaderStyleProps, GroupStyleProps, RuleStyleProps} from "@app_component/operator_builder/props";
 import {TooltipButton} from "@app_component/base/tooltip_button/TooltipButton";
 import {ErrorColor} from "@app_component/operator_builder/OperatorBuilder";
+import {DefaultTextSize} from "@entity/application/utils/constants";
 
 export const RuleContainer = styled.div<RuleStyleProps>`
     position: relative;
@@ -121,8 +122,8 @@ export const ActionsContainer = styled.div`
 export const ActionButton = styled(Button)`
 
 `;
-export const ErrorMessage = styled.p`
-    font-size: 13px;
+export const ErrorMessage = styled.div`
+    font-size: ${DefaultTextSize}px;
 `;
 export const DeleteButtonContainer = styled.div`
     flex: 1;

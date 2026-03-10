@@ -137,6 +137,7 @@ class Body extends React.Component {
 		const { connection, method } = this.props;
 		let normalizedFieldName = fieldName
 			.replace(/^body\.\$\./, '')
+			.replace(/^status\./, '')
 			.replace(/^header\.\$\./, '')
 			.replace(/\.([0-9]+)/g, '[$1]');
 
@@ -145,6 +146,7 @@ class Body extends React.Component {
 				item.to.findIndex((elem) => {
 					let name = unwrapField(elem.field
 						.replace(/^body\.\$\./, '')
+						.replace(/^status\./, '')
 						.replace(/^header\.\$\./, '')
 						.replace(/\.([0-9]+)/g, '[$1]'));
 					return elem.color === method.color && name === normalizedFieldName;
@@ -442,18 +444,18 @@ class Body extends React.Component {
 						flexDirection: 'column',
 						maxHeight: !isToggledIcon ? '40px' : isToggledReferenceIcon ? '50%' : 'calc(100% - 40px)',
 					}}>
-						<div>
+						<div style={{position: 'relative', minHeight: '36px', display: 'flex'}}>
 							<b ref={this.BodyRef}>{bodyTitle}</b>
+							<div style={{marginTop: '-6px'}}>
+								<HelpIcon steps={tourSteps} inputRef={this.BodyRef}/>
+							</div>
 							<TooltipFontIcon
 								tooltipPosition={'right'}
-								style={{ verticalAlign: 'middle', cursor: 'pointer', marginLeft: '15px' }}
-								onClick={() => this.setState({ isToggledIcon: !isToggledIcon })}
+								style={{cursor: 'pointer'}}
+								onClick={() => this.setState({isToggledIcon: !isToggledIcon})}
 								tooltip={isToggledIcon ? 'Hide' : 'Show'}
 								value={isToggledIcon ? 'expand_less' : 'chevron_right'}
 							/>
-							<div style={{position: 'absolute', left: '100px', top: 0}}>
-								<HelpIcon steps={tourSteps} inputRef={this.BodyRef}/>
-							</div>
 						</div>
 						{isToggledIcon && this.renderBody({
 							flex: 1,
@@ -463,19 +465,22 @@ class Body extends React.Component {
 				</div>
 				{hasEnhancement && (
 					<div className={styles.body_enhancement} ref={this.EnhancementRef}>
-						<div className={styles.body_enhancement_title}>
+						<div className={styles.body_enhancement_title}
+							 style={{position: 'relative', minHeight: '36px', display: 'flex'}}>
 							<b>{'Enhancement'}</b>
-							<div style={{position: 'absolute', left: '115px', top: '-10px'}}>
+							<div style={{marginTop: '-6px'}}>
 								<HelpIcon steps={EnhancementSteps} inputRef={this.EnhancementRef}/>
 							</div>
 							{currentEnhancement && (
-								<Button
-									icon={'open_in_new'}
-									onClick={() => this.toggleEnhancement()}
-									iconSize={'13px'}
-									label={'Open script in new window'}
-									style={{marginBottom: '10px'}}
-								/>
+								<div className={styles.body_enhancement_button}>
+									<Button
+										icon={'open_in_new'}
+										onClick={() => this.toggleEnhancement()}
+										iconSize={'13px'}
+										label={'Open script in new window'}
+										style={{marginBottom: '10px'}}
+									/>
+								</div>
 							)}
 						</div>
 						{this.renderEnhancement()}

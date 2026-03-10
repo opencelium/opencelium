@@ -1,6 +1,7 @@
 import {LoopOperatorLabel, LoopOperatorName} from "@app_component/operator_builder/interfaces/OperatorName";
 import BaseOperatorProps, {IBaseOperator, OptionType} from "@app_component/operator_builder/interfaces/IBaseOperator";
 import {
+    APIResponseType,
     ConstantComponentType,
     ConstantSelectOptions,
     ReferenceType
@@ -12,6 +13,7 @@ export default class LoopBaseOperator implements IBaseOperator, BaseOperatorProp
     name: LoopOperatorName;
     placeholder?: string;
     defaultRefType: ReferenceType;
+    defaultAPIResponseType: APIResponseType;
     defaultConstantType: ConstantComponentType;
     selectOptions?: ConstantSelectOptions[];
     constructor(props: BaseOperatorProps<LoopOperatorName>) {
@@ -20,6 +22,7 @@ export default class LoopBaseOperator implements IBaseOperator, BaseOperatorProp
             this.placeholder = props.placeholder;
         }
         this.defaultRefType = props.defaultRefType || 'direct';
+        this.defaultAPIResponseType = props.defaultAPIResponseType || 'body';
         this.defaultConstantType = props.defaultConstantType || ConstantComponentType.Text;
         if (props.selectOptions && props.selectOptions.length > 0) {
             this.selectOptions = props.selectOptions;

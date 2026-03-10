@@ -61,7 +61,6 @@ const TopBar: FC<TopBarProps> =
                 style={{width: '50px', height: '50px', cursor: 'pointer', borderRadius: '50%', border: `1px solid ${theme.menu.background}`}}
                 onClick={() => navigate('/profile', {replace: false})}
             />;
-        console.log(isFullScreen)
         return (
             <TopBarStyled style={{transition: '0.5s', display: 'flex', justifyContent: 'space-between', paddingLeft: `calc(${isFullScreen ? '0px' : isMenuExpanded ? '180px' : '48px'} + 1rem)`, paddingRight: '1rem'}}>
                 <div style={{

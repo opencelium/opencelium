@@ -71,7 +71,7 @@ export function ConnectionForm(type) {
                     },
                     forceUpdateConnection: false,
                     validateLogicResult: {toggleFlag: false, operators: {[CONNECTOR_FROM]: [], [CONNECTOR_TO]: []}, methods: {[CONNECTOR_FROM]: [], [CONNECTOR_TO]: []}},
-                    connection: CConnection.createConnection(),
+                    connection: CConnection.createConnection(props.connection),
                     entity: null,
                     mode: EXPERT_MODE,
                 };
@@ -84,11 +84,11 @@ export function ConnectionForm(type) {
             componentDidMount(){
                 let { params } = this.props;
                 if(params){
-                    this.props.fetchConnection(params.id);
-                    this.props.getConnectionWebhooks(params.id);
+                    //this.props.fetchConnection(params.id);
+                    //this.props.getConnectionWebhooks(params.id);
                 }
                 if(this.props.fetchConnectors){
-                    this.props.fetchConnectors();
+                    //this.props.fetchConnectors();
                 }
                 setFocusById('input_title');
             }

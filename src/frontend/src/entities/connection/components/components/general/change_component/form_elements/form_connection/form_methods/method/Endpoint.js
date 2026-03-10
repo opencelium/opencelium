@@ -49,6 +49,11 @@ function visibleFromToken(tk) {
 	const inner = String(tk || '')
 		.replace(/^\{\%\s*#/, '')
 		.replace(/\s*\%\}$/, '');
+
+	// status case
+	if (/\.status(\.|$)/.test(inner)) {
+		return 'status';
+	}
 	let name = inner.replace(/^.*?(body|header)\.\$/, '');
 	name = name.replace(/^\./, '');
 	return name || inner;

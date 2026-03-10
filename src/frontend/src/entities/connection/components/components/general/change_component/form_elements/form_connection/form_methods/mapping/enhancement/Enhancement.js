@@ -22,6 +22,7 @@ import { getMarker, setFocusById } from '@application/utils/utils';
 import CEnhancement from '@classes/content/connection/field_binding/CEnhancement';
 import TooltipFontIcon from '@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon';
 import PropTypes from 'prop-types';
+import styles from '@entity/connection/components/themes/default/content/connections/connection_overview_2';
 import React, {Component, useState} from 'react';
 import { Col, Row } from 'react-grid-system';
 import {
@@ -36,6 +37,7 @@ import Languages from "@change_component/form_elements/form_connection/form_meth
 import {connect} from "react-redux";
 import {checkPolyglot} from "@entity/external_application/redux_toolkit/action_creators/ExternalApplicationCreators";
 import {ExternalApplicationStatus} from "@entity/external_application/requests/interfaces/IExternalApplication";
+import DefaultText from "@app_component/base/text/DefaultText";
 
 const languageOptions = [
 	{label: 'JavaScript', value: 'js'},
@@ -170,18 +172,34 @@ class Enhancement extends Component {
 
 		const output = result.map((item, key) => {
 			const method = connection.getMethodByColor(item.color);
+			//RESULT_VAR is passed to the biosVersion field in the AddComplexUnit request body.
+			let path = item.prop[item.prop.length - 1] === '.'
+				? item.prop.substring(0, item.prop.length - 1)
+				: item.prop;
+			let target = '';
+			if (path.indexOf('body.$.') === 0) {
+				target = 'body';
+				path = path.substring(7);
+			} else if (path.indexOf('header.$.') === 0) {
+				target = 'header';
+				path = path.substring(9);
+			} else if (path.indexOf('status') === 0) {
+				target = 'status';
+				path = path.substring(7);
+			}
+			const isResultVar = item.var === 'RESULT_VAR';
+			const isStatus = target === 'status';
 			return (
 				<ReferenceBlockStyled key={key} style={{ margin: '5px 0' }}>
-					<span>{`${item.var} equals to `}</span>
+					<DefaultText value={`${item.var} is ${isResultVar ? 'used as' : 'taken from'}${!isStatus ? ' the value of the ' : ''}`}/>
 					<SourceFieldStyled style={{ color: item.color }}>
-						{item.prop[item.prop.length - 1] === '.'
-							? item.prop.substring(0, item.prop.length - 1)
-							: item.prop}
+						<DefaultText value={path} />
 					</SourceFieldStyled>
-					<span>{' field of method '}</span>
+					<DefaultText value={<span>{`${!isStatus ? ' field in the' : ''} ${isResultVar ? 'request' : 'response'} `}<strong>{target}</strong>{` of the `}</span>}/>
 					<SourceMethodNameStyled style={{ background: item.color }}>
-						{method.label || method.name}
+						<DefaultText value={method.label || method.name}/>
 					</SourceMethodNameStyled>
+					<DefaultText value={` method.`}/>
 				</ReferenceBlockStyled>
 			);
 		});
@@ -197,10 +215,10 @@ class Enhancement extends Component {
 
 		const styleProps = {
 			display: 'inline-block',
-			width: 'calc(100% - 50px)',
+			width: '100%',
 			marginLeft: '46px',
 			marginBottom: 0,
-			height: 'calc(100% - 37px)',
+			flex: 1,
 			borderBottom: '1px solid #e9e9e9',
 		};
 		const lOptions = this.getOptions();
@@ -208,30 +226,32 @@ class Enhancement extends Component {
 			<>
 				<FieldBindingsBlockStyled
 					style={{
-						margin: '20px 0 30px 50px',
+						margin: '10px',
 						fontSize: '12px',
 						maxHeight: '100px',
-						minHeight: '80px',
+						minHeight: '60px',
+						overflowY: 'auto',
 					}}
 				>
 					{this.renderExpertVar(expertVar)}
 				</FieldBindingsBlockStyled>
-				<InputSelect
-					id={`input_language`}
-					icon={'code'}
-					marginBottom={'20px'}
-					label={'Language'}
-					options={lOptions}
-					onChange={(option) => this.updateCurrentLanguage(option.value)}
-					value={lOptions.find(o => o.value === currentLanguage)}
-				/>
+				<div style={{margin: '0 10px'}}>
+					<InputSelect
+						id={`input_language`}
+						label={'Language'}
+						options={lOptions}
+						onChange={(option) => this.updateCurrentLanguage(option.value)}
+						value={lOptions.find(o => o.value === currentLanguage)}
+					/>
+				</div>
 				<Input
+					className={styles.enhancement_code}
 					readOnly={readOnly}
 					value={expertCode}
 					display={'grid'}
 					hasUnderline={false}
-					labelMargin='-25px 0 0 0'
-					height={`calc(100% - 100px)`}
+					labelMargin='0 0 0 0'
+					height={`calc(100% - 20px)`}
 				>
 					<LimitedAceEditor
 						hasDiffLang
@@ -239,8 +259,6 @@ class Enhancement extends Component {
 						ref={this.props.enhancementRef}
 						style={{
 							...getReactXmlStyles({ ...styleProps, marginTop: '0' }),
-							marginLeft: '50px',
-							marginBottom: 0,
 							width: styleProps.width,
 							height: '100%',
 						}}
@@ -251,7 +269,6 @@ class Enhancement extends Component {
 						onChange={(newCode, e) => this.updateExpertCode(newCode, e)}
 						name='enhancement_code'
 						editorProps={{ $blockScrolling: true }}
-						showPrintMargin={true}
 						showGutter={true}
 						highlightActiveLine={true}
 						value={`${expertCode}`}

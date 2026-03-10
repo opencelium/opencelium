@@ -31,11 +31,11 @@ const EmptyOptionsStyled = styled.div`
     font-size: ${DefaultInputTextSize}px;
 `;
 
-const LineStyled = styled.div<ElementProps & {isToggled: boolean}>`
+const LineStyled = styled.div<ElementProps & {isToggled: boolean, hasIcon: boolean}>`
     border-bottom: 1px solid #e9e9e9;
-    width: calc(100% - 40px);
+    width: calc(100% - ${({hasIcon}) => hasIcon ? '40' : '0'}px);
     opacity: ${({isToggled}) => !isToggled ? 1 : 0} !important;
-    margin-left: 40px;
+    margin-left: ${({hasIcon}) => hasIcon ? '40' : '0'}px;
 `;
 
 const OptionsStyled = styled.div<OptionsStyledProps & {isToggled: boolean} | HTMLDivElement >`

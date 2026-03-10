@@ -1,4 +1,5 @@
 import {
+    APIResponseType,
     ConstantComponentType,
     ConstantSelectOptions,
     ReferenceType
@@ -8,6 +9,7 @@ export default interface BaseOperatorProps<Operator> {
     name: Operator;
     placeholder?: string,
     defaultRefType?: ReferenceType,
+    defaultAPIResponseType?: APIResponseType;
     defaultConstantType?: ConstantComponentType,
     selectOptions?: ConstantSelectOptions[],
 }

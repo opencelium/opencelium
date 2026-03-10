@@ -16,6 +16,7 @@ import LoopOperatorsConfigGenerator
     from "@app_component/operator_builder/classes/loop_operator/LoopOperatorsConfigGenerator";
 import IfOperatorsConfigGenerator from "@app_component/operator_builder/classes/if_operator/IfOperatorsConfigGenerator";
 import {Step} from "react-joyride";
+import DefaultText from "@app_component/base/text/DefaultText";
 
 
 const OperatorSelect: React.FC<OperatorSelectProps> = ({error, type, operator, updateOperator}) => {
@@ -42,7 +43,7 @@ const OperatorSelect: React.FC<OperatorSelectProps> = ({error, type, operator, u
         return newTourSteps;
     }, [operator])
     const [selectedOption, setSelectedOption] = useState<OptionType | null>(operator ? options.find(o => o.value === operator) : null);
-    const hasError = !!error && !operator;
+    const hasError = !!error && !operator && error !== 'Left field is missing.' && error !== 'Right field is missing.';
 
     useEffect(() => {
         const newOperator = selectedOption?.value as OperatorName || '';
@@ -60,61 +61,73 @@ const OperatorSelect: React.FC<OperatorSelectProps> = ({error, type, operator, u
         }
     }, [operator])
     return (
-        <div style={{minWidth: '200px', position: 'relative'}} ref={ref}>
-            <Select
-                placeholder={'Select Operator...'}
-                options={options}
-                value={selectedOption}
-                onChange={setSelectedOption}
-                menuPortalTarget={document.body}
-                menuPosition="absolute"
-                styles={{
-                    control: (base, state) => ({
-                        ...base,
-                        borderColor: !!error && !operator ? ErrorColor : state.isFocused ? "#666" : "#ccc",
-                    }),
-                    singleValue: (base) => ({
-                        ...base,
-                        fontSize: DefaultInputTextSize,
-                    }),
-                    input: (base) => ({
-                        ...base,
-                        input: {
-                            opacity: '1 !important',
+        <div style={{position: 'relative'}}>
+            <div style={{minWidth: '200px'}} ref={ref}>
+                <Select
+                    placeholder={'Select Operator...'}
+                    options={options}
+                    value={selectedOption}
+                    onChange={setSelectedOption}
+                    menuPortalTarget={document.body}
+                    menuPosition="absolute"
+                    styles={{
+                        control: (base, state) => ({
+                            ...base,
+                            borderColor: !!error && !operator ? ErrorColor : state.isFocused ? "#666" : "#ccc",
+                        }),
+                        singleValue: (base) => ({
+                            ...base,
                             fontSize: DefaultInputTextSize,
-                        },
-                    }),
-                    noOptionsMessage: (provided) => ({
-                        ...provided,
-                        fontSize: DefaultInputTextSize,
-                    }),
-                    multiValueLabel: (provided) => ({
-                        ...provided,
-                        fontSize: DefaultInputTextSize,
-                    }),
-                    multiValue: (provided) => ({
-                        ...provided,
-                        fontSize: DefaultInputTextSize,
-                    }),
-                    option: (provided) => ({
-                        ...provided,
-                        fontSize: DefaultInputTextSize,
-                    }),
-                    placeholder: (provided) => ({
-                        ...provided,
-                        fontSize: DefaultInputTextSize,
-                    }),
-                    menuPortal: (base) => ({ ...base, zIndex: 10000 }),
-                }}
-            />
-            {tourSteps.length > 0 && <div style={{
-                position: 'absolute',
-                right: '42px',
-                top: 0
-            }}>
-                <HelpIcon steps={tourSteps} inputRef={ref}/>
-            </div>}
-            {hasError && <ErrorMessage className={'error-scroll-target'} style={{color: ErrorColor, position: 'absolute', left: ref.current?.offsetLeft, bottom: -15}}>{`${error}`}</ErrorMessage>}
+                        }),
+                        input: (base) => ({
+                            ...base,
+                            input: {
+                                opacity: '1 !important',
+                                fontSize: DefaultInputTextSize,
+                            },
+                        }),
+                        noOptionsMessage: (provided) => ({
+                            ...provided,
+                            fontSize: DefaultInputTextSize,
+                        }),
+                        multiValueLabel: (provided) => ({
+                            ...provided,
+                            fontSize: DefaultInputTextSize,
+                        }),
+                        multiValue: (provided) => ({
+                            ...provided,
+                            fontSize: DefaultInputTextSize,
+                        }),
+                        option: (provided) => ({
+                            ...provided,
+                            fontSize: DefaultInputTextSize,
+                        }),
+                        placeholder: (provided) => ({
+                            ...provided,
+                            fontSize: DefaultInputTextSize,
+                        }),
+                        menuPortal: (base) => ({ ...base, zIndex: 10000 }),
+                    }}
+                />
+                {hasError && (
+                    <ErrorMessage
+                        className={'error-scroll-target'}
+                        style={{
+                            color: ErrorColor,
+                            position: 'absolute',
+                            left: ref.current?.offsetLeft,
+                            bottom: -19,
+                        }}
+                    ><DefaultText value={`${error}`}/></ErrorMessage>
+                )}
+                {tourSteps.length > 0 && <div style={{
+                    position: 'absolute',
+                    right: '42px',
+                    top: 0
+                }}>
+                    <HelpIcon steps={tourSteps} inputRef={ref}/>
+                </div>}
+            </div>
         </div>
     );
 };

@@ -320,18 +320,18 @@ class Header extends React.Component {
 						flexDirection: 'column',
 						maxHeight: !isToggledIcon ? '40px' : isToggledReferenceIcon ? '50%' : 'calc(100% - 40px)',
 					}}>
-						<div>
+						<div style={{position: 'relative', minHeight: '36px', display: 'flex'}}>
 							<b ref={this.HeaderRef}>{headerTitle || 'Request Data'}</b>
+							<div style={{marginTop: '-6px'}}>
+								<HelpIcon steps={tourSteps} inputRef={this.HeaderRef}/>
+							</div>
 							<TooltipFontIcon
 								tooltipPosition={'right'}
-								style={{verticalAlign: 'middle', cursor: 'pointer'}}
+								style={{cursor: 'pointer'}}
 								onClick={() => this.setState({isToggledIcon: !isToggledIcon})}
 								tooltip={isToggledIcon ? 'Hide' : 'Show'}
 								value={isToggledIcon ? 'expand_less' : 'chevron_right'}
 							/>
-							<div style={{position: 'absolute', left: '100px', top: 0}}>
-								<HelpIcon steps={tourSteps} inputRef={this.HeaderRef}/>
-							</div>
 						</div>
 						{isToggledIcon && this.renderHeader({
 							flex: 1,
@@ -341,19 +341,21 @@ class Header extends React.Component {
 				</div>
 				{hasEnhancement && (
 					<div className={styles.body_enhancement} ref={this.EnhancementRef}>
-						<div className={styles.body_enhancement_title}>
+						<div className={styles.body_enhancement_title} style={{position: 'relative', minHeight: '36px', display: 'flex'}}>
 							<b>{'Enhancement'}</b>
-							<div style={{position: 'absolute', left: '115px', top: '-10px'}}>
+							<div style={{marginTop: '-6px'}}>
 								<HelpIcon steps={EnhancementSteps} inputRef={this.EnhancementRef}/>
 							</div>
 							{currentEnhancement && (
-								<Button
-									icon={'open_in_new'}
-									onClick={() => this.toggleEnhancement()}
-									iconSize={'13px'}
-									label={'Open script in new window'}
-									style={{marginBottom: '10px'}}
-								/>
+								<div className={styles.body_enhancement_button}>
+									<Button
+										icon={'open_in_new'}
+										onClick={() => this.toggleEnhancement()}
+										iconSize={'13px'}
+										label={'Open script in new window'}
+										style={{marginBottom: '10px'}}
+									/>
+								</div>
 							)}
 						</div>
 						{this.renderEnhancement()}

@@ -1,6 +1,7 @@
 import BaseOperatorProps, {IBaseOperator, OptionType} from "@app_component/operator_builder/interfaces/IBaseOperator";
 import {OperatorLabel, OperatorName} from "@app_component/operator_builder/interfaces/OperatorName";
 import {
+    APIResponseType,
     ConstantComponentType,
     ConstantSelectOptions,
     ReferenceType
@@ -13,6 +14,7 @@ export default class IfBaseOperator implements IBaseOperator, BaseOperatorProps<
     name: OperatorName;
     placeholder?: string;
     defaultRefType: ReferenceType;
+    defaultAPIResponseType: APIResponseType;
     defaultConstantType: ConstantComponentType;
     selectOptions?: ConstantSelectOptions[];
     constructor(props: BaseOperatorProps<OperatorName>) {
@@ -21,6 +23,7 @@ export default class IfBaseOperator implements IBaseOperator, BaseOperatorProps<
             this.placeholder = props.placeholder;
         }
         this.defaultRefType = props.defaultRefType || 'direct';
+        this.defaultAPIResponseType = props.defaultAPIResponseType || 'body';
         this.defaultConstantType = props.defaultConstantType || ConstantComponentType.Text;
         if (props.selectOptions && props.selectOptions.length > 0) {
             this.selectOptions = props.selectOptions;
