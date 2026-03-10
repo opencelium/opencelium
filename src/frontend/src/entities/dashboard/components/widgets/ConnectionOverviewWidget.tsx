@@ -165,7 +165,7 @@ const ConnectionOverviewWidget: FC =
 
     const options = useMemo(() => ({
         physics: {
-            enabled: false
+            stabilization: true
         },
         edges: {
             chosen: false,

@@ -35,7 +35,7 @@ const WidgetItemStyled = styled.div<WidgetItemStyledProps>`
     background-clip: border-box;
     border: 1px solid #eee;
     border-radius: 4px;
-    min-height: ${({ widgetKey }) => widgetKey === 'METRICS_OVERVIEW' ? '210px' : '430px'};
+    min-height: ${({ widgetKey }) => widgetKey === 'METRICS_OVERVIEW' ? '180px' : '430px'};
     ${({isWidgetEditOn}) => isWidgetEditOn ? `
     cursor: move !important;
     &:hover{

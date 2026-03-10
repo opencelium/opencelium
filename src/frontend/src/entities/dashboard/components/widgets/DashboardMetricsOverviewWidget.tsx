@@ -26,6 +26,7 @@ import {Loading} from "@app_component/base/loading/Loading";
 import {useSocketData} from "../../../../socket/SocketDataContext";
 import HeaderText from "@app_component/base/text/HeaderText";
 import {ContentLoading} from "@app_component/base/loading/ContentLoading";
+import {WidgetTitle} from "@entity/dashboard/components/widget_title/WidgetTitle";
 function formatDuration(milliseconds: number): string {
 	const seconds = milliseconds / 1000;
 
@@ -117,11 +118,15 @@ const DashboardMetricsOverviewWidget: FC = () => {
 	const isLoading = !metrics && !socketError;
 	return (
 		<DashboardMetricsOverviewWidgetStyled>
+{/*
 			<div style={{marginTop: '15px'}}>
 				<WidgetCardHeaderStyled>
 					Overview last {stats.periodDays} days
 				</WidgetCardHeaderStyled>
 			</div>
+*/}
+
+			<WidgetTitle title={`Overview last ${stats.periodDays} days`}/>
 			{socketError ? <ErrorStyled><HeaderText value={'Websocket is inactive'}/></ErrorStyled>
 				: (isLoading || !metrics) ? <LoadingStyled><ContentLoading/></LoadingStyled> :
 			<MetricsGridStyled>
