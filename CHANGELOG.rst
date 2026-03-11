@@ -2,6 +2,28 @@
 Changelog
 *********
 
+4.8
+========
+ 
+:Date: March 12, 2026
+
+Features
+--------
+* Sleeker and clearer user interface
+* Connection history
+* Password reset
+* Dashboard widget for connection and system overview
+
+Fixes
+--------
+ 
+* Execution code optimization and Refactoring (OC-1303)
+* Get connectionId throws exception (OC-1324)
+* Bug when replacing a template (OC-1142)
+* Indexes are not displayed in the reference generator list (OC-1325)
+* Fix Version History button bug in Connection List (OC-1332)
+
+
 4.7.1
 ========
  
