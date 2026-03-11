@@ -1,45 +1,50 @@
-import React, {useEffect, useRef, useState} from 'react'
+import React, { useEffect, useState } from 'react'
 import Select from 'react-select'
-import { DefaultInputTextSize } from "@entity/application/utils/constants"
+import {DefaultFontFamily, DefaultInputTextSize} from "@entity/application/utils/constants"
 import { ErrorColor } from "@app_component/operator_builder/OperatorBuilder"
 import { ErrorMessage } from "@app_component/operator_builder/styles"
-import {DeepSelectProps} from "@app_component/operator_builder/reference_generator/props";
 
+interface HeaderSelectProps {
+    color: string
+    field: string
+    error?: string
+    connectionEditor: any
+    onValueSelect: (value: string) => void
+}
 
 interface OptionType {
     label: string
     value: string
 }
 
-const HeaderSelect: React.FC<DeepSelectProps> = ({
-    color,
-    field,
-    error,
-    connectionEditor,
-    onValueSelect
-}) => {
+const HeaderSelect: React.FC<HeaderSelectProps> = ({
+                                                       color,
+                                                       field,
+                                                       error,
+                                                       connectionEditor,
+                                                       onValueSelect
+                                                   }) => {
 
-    const ref = useRef<HTMLDivElement>(null);
-    const [options, setOptions] = useState<OptionType[]>([])
+    const [searchValue, setSearchValue] = useState<string>(field || '')
     const [selectedOption, setSelectedOption] = useState<OptionType | null>(null)
+    const [options, setOptions] = useState<OptionType[]>([])
+    const [menuIsOpen, toggleMenu] = useState<boolean>(false)
 
     const hasError = !!error && !field && !!color
 
+    // Load headers
     useEffect(() => {
-        if (!color) {
-            setOptions([])
-            return
-        }
+
+        if (!color) return
 
         const headers =
             connectionEditor.connection
                 .getMethodByColor(color)
-                ?.response?.success?.header || {}
+                ?.response?.success?.header || []
 
-
-        const opts: OptionType[] = headers.map((header: any) => ({
-            label: `${header.name}`,
-            value: header.name
+        const opts = headers.map((h: any) => ({
+            label: h.name,
+            value: h.name
         }))
 
         setOptions(opts)
@@ -47,45 +52,93 @@ const HeaderSelect: React.FC<DeepSelectProps> = ({
     }, [color, connectionEditor.connection])
 
 
+
+    // Sync with field value
     useEffect(() => {
-        if (!field) {
-            setSelectedOption(null)
-            return
-        }
 
-        const normalizedField = field?.replace(/^\$\./, '')
+        if (!field) return
 
-        const match = options.find(o => o.value === normalizedField)
+        const normalized = field.replace(/^\$\./, '')
 
-        if (match) {
-            setSelectedOption(match)
-        } else {
-            setSelectedOption({
-                label: normalizedField,
-                value: normalizedField
-            })
-        }
+        const option = options.find(o => o.value === normalized)
+
+        setSelectedOption(option || null)
+        setSearchValue(normalized)
 
     }, [field, options])
 
 
-    const handleChange = (selected: OptionType | null) => {
-        setSelectedOption(selected)
 
-        if (selected) {
-            onValueSelect(selected.value)
-        } else {
-            onValueSelect('')
+    const handleInputChange = (input: string, actionMeta: { action: string }) => {
+
+        if (actionMeta.action === 'input-change') {
+
+            setSearchValue(input)
+
+            const exactMatch = options.find(o => o.value === input)
+
+            if (!exactMatch) {
+                setSelectedOption(null)
+                onValueSelect(input)
+            }
         }
     }
 
+
+    useEffect(() => {
+        if (selectedOption === null && searchValue) {
+            onValueSelect(searchValue);
+        } else if (selectedOption) {
+            onValueSelect(selectedOption.value);
+        } else {
+            onValueSelect('');
+        }
+    }, [selectedOption]);
+
+    const handleChange = (selected: OptionType | null) => {
+        if (!selected) {
+            setSelectedOption(null)
+            setSearchValue('')
+        } else {
+            setSearchValue(selected.value)
+            const option = options.find(o => o.value === selected.value)
+            setSelectedOption(option || selected)
+        }
+    }
+
+
+
+    const getLabelForValue = (value: string) => {
+        const option = options.find(o => o.value === value)
+        return option?.label || value
+    }
+
+
+
     return (
-        <div ref={ref}>
+        <div>
+
             <Select
-                placeholder="Select Header..."
+                placeholder={'Select Header...'}
                 options={options}
-                value={selectedOption}
+                inputValue={
+                    menuIsOpen
+                        ? searchValue
+                        : searchValue
+                            ? getLabelForValue(searchValue)
+                            : searchValue
+                }
+                onInputChange={handleInputChange}
                 onChange={handleChange}
+                value={selectedOption}
+                onFocus={() => toggleMenu(true)}
+                onBlur={() => {
+                    if (!selectedOption && searchValue) {
+                        onValueSelect(searchValue)
+                    }
+                    toggleMenu(false)
+                }}
+                menuIsOpen={menuIsOpen}
                 isDisabled={!color}
                 styles={{
                     control: (base, state) => ({
@@ -97,11 +150,13 @@ const HeaderSelect: React.FC<DeepSelectProps> = ({
                                 : '#ccc',
                         opacity: 1,
                         fontSize: DefaultInputTextSize,
+                        fontFamily: DefaultFontFamily,
                     }),
                     singleValue: (base) => ({
                         ...base,
                         opacity: 1,
                         fontSize: DefaultInputTextSize,
+                        fontFamily: DefaultFontFamily,
                     }),
                     input: (base) => ({
                         ...base,
@@ -112,24 +167,29 @@ const HeaderSelect: React.FC<DeepSelectProps> = ({
                     noOptionsMessage: (provided) => ({
                         ...provided,
                         fontSize: DefaultInputTextSize,
+                        fontFamily: DefaultFontFamily,
                     }),
                     multiValueLabel: (provided) => ({
                         ...provided,
                         fontSize: DefaultInputTextSize,
+                        fontFamily: DefaultFontFamily,
                     }),
                     multiValue: (provided) => ({
                         ...provided,
                         fontSize: DefaultInputTextSize,
+                        fontFamily: DefaultFontFamily,
                     }),
                     option: (provided) => ({
                         ...provided,
                         fontSize: DefaultInputTextSize,
+                        fontFamily: DefaultFontFamily,
                     }),
                     placeholder: (provided) => ({
                         ...provided,
                         fontSize: DefaultInputTextSize,
+                        fontFamily: DefaultFontFamily,
                     }),
-                    menuPortal: (base) => ({ ...base, zIndex: 10000 }),
+                    menuPortal: (base) => ({ ...base, zIndex: 10000 }), 
                 }}
                 menuPortalTarget={document.body}
                 menuPosition="absolute"
@@ -141,13 +201,13 @@ const HeaderSelect: React.FC<DeepSelectProps> = ({
                     style={{
                         color: ErrorColor,
                         position: 'absolute',
-                        left: ref.current?.offsetLeft,
-                        bottom: 3
+                        bottom: -15
                     }}
                 >
                     {error}
                 </ErrorMessage>
             )}
+
         </div>
     )
 }
