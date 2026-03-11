@@ -73,7 +73,7 @@ export default class CEnhancement {
 		let expertCode =
 			enhancement && enhancement.hasOwnProperty('expertCode')
 				? enhancement.expertCode
-				: '';
+				: undefined;
 		let fieldBinding =
 			enhancement && enhancement.hasOwnProperty('fieldBinding')
 				? enhancement.fieldBinding
@@ -109,12 +109,18 @@ export default class CEnhancement {
 	}
 
 	setExpertCode(expertCode) {
-		let result = expertCode !== '' ? expertCode : '';
-		if (result === '') {
-			const generator = codeGeneratorRegistry[this.language](this._fieldBinding);
-			result = generator.getDefaultExpertCode();
+		if (typeof expertCode === 'string' && expertCode !== '') {
+			this._expertCode = expertCode;
+			return this._expertCode;
 		}
-		return result;
+
+		if (typeof this._expertCode === 'string' && this._expertCode !== '') {
+			return this._expertCode;
+		}
+
+		const generator = codeGeneratorRegistry[this.language](this._fieldBinding);
+		this._expertCode = generator.getDefaultExpertCode();
+		return this._expertCode;
 	}
 
 	updateExpertVar() {

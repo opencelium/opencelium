@@ -81,31 +81,37 @@ class Enhancement extends Component {
 	}
 
 	componentDidUpdate(prevProps, prevState, snapshot) {
-		const { enhancementRef } = this.props;
+		const { enhancementRef, enhancement } = this.props;
 		if (
-			prevProps.enhancement &&
-			(prevProps.enhancement.expertVar !== this.props.enhancement.expertVar ||
-				prevProps.enhancement.expertCode !==
-					this.props.enhancement.expertCode ||
-				prevProps.enhancement.name !== this.props.enhancement.name ||
-				prevProps.enhancement.description !==
-					this.props.enhancement.description)
-		) {
-			this.setState({
-				expertVar: this.props.enhancement.expertVar,
-				expertCode: this.props.enhancement.expertCode,
-				name: this.props.enhancement.name,
-				description: this.props.enhancement.description,
-			});
-		}
-		if (this.state.expertCode !== prevState.expertCode) {
-			const newMarkers = getMarker(
-				enhancementRef.current.editor,
-				this.state.expertCode,
-				CEnhancement.generateNotExistVar()
-			);
-			this.setState({ markers: newMarkers });
-		}
+				enhancement &&
+				(
+					prevProps.enhancement?.expertVar !== enhancement.expertVar ||
+					prevProps.enhancement?.expertCode !== enhancement.expertCode ||
+					prevProps.enhancement?.name !== enhancement.name ||
+					prevProps.enhancement?.description !== enhancement.description ||
+					prevProps.enhancement?.language !== enhancement.language
+				)
+			) {
+					this.setState({
+						expertVar: enhancement.expertVar,
+						expertCode: enhancement.expertCode,
+						currentLanguage: enhancement.language || 'js',
+						name: enhancement.name,
+						description: enhancement.description,
+					});
+			}
+
+			if (
+					enhancementRef?.current?.editor &&
+					this.state.expertCode !== prevState.expertCode
+			) {
+					const newMarkers = getMarker(
+						enhancementRef.current.editor,
+						this.state.expertCode,
+						CEnhancement.generateNotExistVar()
+					);
+					this.setState({ markers: newMarkers });
+			}
 	}
 
 	getOptions() {
@@ -122,11 +128,21 @@ class Enhancement extends Component {
 	}
 	updateCurrentLanguage(newLanguage) {
 		let { enhancement, setEnhancement, binding } = this.props;
-		const enhancementInstance = CEnhancement.createEnhancement({...enhancement, fieldBinding: binding});
+		const enhancementInstance = CEnhancement.createEnhancement({
+			...(enhancement || {}),
+			fieldBinding: binding,
+		});
+
 		enhancementInstance.language = newLanguage;
-		setEnhancement(enhancementInstance.getObject());
+
+		const nextEnhancement = enhancementInstance.getObject();
+
+		setEnhancement(nextEnhancement);
+
 		this.setState({
 			currentLanguage: newLanguage,
+			expertVar: nextEnhancement.expertVar,
+			expertCode: nextEnhancement.expertCode,
 		})
 	}
 
@@ -135,20 +151,26 @@ class Enhancement extends Component {
 	 */
 	updateDescription(description) {
 		let { enhancement, setEnhancement } = this.props;
-		enhancement.description = description;
-		setEnhancement(enhancement);
+		const nextEnhancement = {
+			...(enhancement || {}),
+			description,
+		};
+		setEnhancement(nextEnhancement);
 		this.setState({ description });
 	}
 
 	/**
 	 * to update expert code
 	 */
-	updateExpertCode(code, e) {
+	updateExpertCode(code) {
 		if (code.length <= Validation.TextLength.Long) {
-			const { setEnhancement } = this.props;
-			let { enhancement } = this.props;
-			enhancement.expertCode = code;
-			setEnhancement(enhancement);
+			const { enhancement, setEnhancement } = this.props;
+			const nextEnhancement = {
+				...(enhancement || {}),
+				expertCode: code,
+			};
+
+			setEnhancement(nextEnhancement);
 			this.setState({ expertCode: code });
 		}
 	}
