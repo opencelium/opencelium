@@ -220,7 +220,18 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 		}
 	}, [field]);
 
+	useEffect(() => {
+		if (!field) return;
 
+		const option =
+			allOptions.find(o => o.value === field) ||
+			filteredOptions.find(o => o.value === field);
+
+		if (option) {
+			setSelectedOption(option);
+			setSearchValue(option.value);
+		}
+	}, [field, allOptions]);
 	useEffect(() => {
 		setFilteredOptions(allOptions);
 	}, [allOptions]);
@@ -230,12 +241,23 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 			setAllOptions(getNestedOptions(''));
 		}
 	}, [color]);
+	const getLabelForValue = (value: string) => {
+		const option =
+			filteredOptions.find(o => o.value === value) ||
+			allOptions.find(o => o.value === value);
+
+		return option?.label || value;
+	};
 	return (
 		<div ref={ref}>
 			<Select
 				placeholder={'Select Field...'}
 				options={filteredOptions}
-				inputValue={menuIsOpen ? searchValue : !!searchValue ? filteredOptions.find(o => o.value === searchValue)?.label || searchValue : searchValue}
+				inputValue={menuIsOpen
+					? searchValue
+					: searchValue
+						? getLabelForValue(searchValue)
+						: searchValue}
 				onInputChange={handleInputChange}
 				onChange={handleChange}
 				value={selectedOption}

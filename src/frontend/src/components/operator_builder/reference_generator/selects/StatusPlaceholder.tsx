@@ -6,7 +6,7 @@ const StatusPlaceholder = () => (
     <div style={{
         lineHeight: '36px',
         borderBottom: '1px solid #cccccc',
-    }}><Text value={'Status'} size={`${DefaultInputTextSize}px`}/></div>
+    }}><Text value={'Response Status'} size={`${DefaultInputTextSize}px`}/></div>
 );
 
 export default StatusPlaceholder;
