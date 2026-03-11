@@ -25,7 +25,6 @@ export const Global = createGlobalStyle`
         background: #eee;
         position: relative;
         margin: 0;
-        transition: .5s;
         overflow-x: hidden;
     }
     *{

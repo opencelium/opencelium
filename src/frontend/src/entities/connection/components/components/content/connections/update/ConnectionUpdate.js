@@ -107,7 +107,6 @@ export default function(props) {
         }
     }, [isButtonPanelOpened]);
     useEffect(() => {
-        dispatch(setFullScreen(true));
         return () => {
             dispatch(setTemplatePanelVisibility(false))
             dispatch(setSavePanelVisibility(false))

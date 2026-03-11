@@ -178,7 +178,7 @@ const DashboardForm: FC<DashboardFormProps> =
                                 onTakeItem={onTakeItem}
                             />
                         }
-                        <ReactGridLayoutStyled isWidgetEditOn={isWidgetEditOn} isLayoutEmpty={layout.length === 0} {...gridSettings}>
+                        <ReactGridLayoutStyled measureBeforeMount isWidgetEditOn={isWidgetEditOn} isLayoutEmpty={layout.length === 0} {...gridSettings}>
                             {getWidgets()}
                         </ReactGridLayoutStyled>
                     </div>

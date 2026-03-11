@@ -16,7 +16,6 @@ import './scripts/config';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import {Provider} from "react-redux";
-import "@style/fonts/fonts.css";
 import "@style/css/bootstrap.css";
 import "@style/css/graphiql.css";
 import {store} from "@application/utils/store";
