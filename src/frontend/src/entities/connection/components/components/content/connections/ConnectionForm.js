@@ -40,7 +40,7 @@ import { Category } from "@entity/category/classes/Category";
 import {jsonToString} from "@app_component/operator_builder/utils";
 import Validation from "@application/classes/Validation";
 import DropdownActionButton from '@app_component/dropdown_action_button/DropdownActionButton';
-import {setEntityIconKey} from "@application/redux_toolkit/slices/ApplicationSlice";
+import {setEntityIconKey, setEntityHeader} from "@application/redux_toolkit/slices/ApplicationSlice";
 import SetConnectionBeforeAdd from "@components/add_connection/SetConnectionBeforeAddButton";
 
 /**
@@ -126,9 +126,14 @@ export function ConnectionForm(type) {
                         this.isAdd = this.type === 'add';
                         this.isView = this.type === 'view';
                     }
+                    const createdConnection = CConnection.createConnection({...this.props.connection, error});
                     this.setState({
-                        connection: CConnection.createConnection({...this.props.connection, error}),
-                    })
+                        connection: createdConnection,
+                    });
+                    this.props.setConnection(createdConnection);
+                    if (createdConnection?.title) {
+                        this.props.setEntityHeader(createdConnection.title);
+                    }
                 }
             }
 
@@ -136,7 +141,6 @@ export function ConnectionForm(type) {
                 this.props.setCurrentConnection(null);
                 this.props.setFullScreen(false);
                 this.props.setConnection(null);
-
             }
 
             setMode(mode, callback = null){
@@ -563,8 +567,18 @@ export function ConnectionForm(type) {
                             type={this.type}
                             forceUpdateConnection={forceUpdateConnection}
                         />
-                        <SetConnectionBeforeAdd isOpenedInit={this.isAdd && !connection.title} connection={connection} onSet={(c) => {
-                            this.setState({forceUpdateConnection: true, connection: c})}}/>
+                        <SetConnectionBeforeAdd
+                            isOpenedInit={this.isAdd && !connection.title}
+                            connection={connection}
+                            onSet={(c) => {
+                                this.setState({
+                                    forceUpdateConnection: true,
+                                    connection: c
+                                });
+                                this.props.setConnection(c);
+                                this.props.setEntityHeader(c?.title || 'Add Connection');
+                            }}
+                        />
                     </>
                 );
             }

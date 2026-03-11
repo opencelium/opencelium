@@ -82,7 +82,7 @@ function mapStateToProps(state){
 @connect(mapStateToProps, {
     updateConnection, addTemplate, fetchConnection, fetchConnectors, checkConnectionTitle,
     fetchTemplates, testConnection, setCurrentTechnicalItem, setCurrentConnection,
-    setFullScreen, getConnectionWebhooks, setConnection,
+    setFullScreen, getConnectionWebhooks, setConnection, setEntityHeader,
 })
 @permission(ConnectionPermissions.UPDATE, true)
 @withTranslation(['connections', 'app', 'basic_components'])

@@ -38,8 +38,49 @@ const IconStyled = styled.span`
     top: -12px;
 `;
 
+const ConnectionEditableTitleStyled = styled.span`
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 32px;
+`;
+
+const ConnectionTitleTextStyled = styled.span`
+    display: inline-flex;
+    align-items: center;
+`;
+
+const ConnectionTitleActionsStyled = styled.span`
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+`;
+
+const ConnectionTitleInputStyled = styled.input`
+    font-family: ${({theme}: {theme: ITheme}) => `Open Sans, "Arial", sans-serif`};
+    color: ${({theme}: {theme: ITheme}) => theme.collectionView.title.color.quite};
+    min-width: 220px;
+    max-width: 420px;
+    height: 30px;
+    padding: 0 8px;
+    border: 1px solid #c7c7c7;
+    border-radius: 4px;
+    outline: none;
+    font-size: 24px;
+    line-height: 1.2;
+    background: #fff;
+
+    &:focus{
+        border-color: #2372ba;
+    }
+`;
+
 export {
     TitleStyled,
     LinkStyled,
     IconStyled,
+    ConnectionEditableTitleStyled,
+    ConnectionTitleTextStyled,
+    ConnectionTitleActionsStyled,
+    ConnectionTitleInputStyled,
 }
