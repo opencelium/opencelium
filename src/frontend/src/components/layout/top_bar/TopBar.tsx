@@ -37,7 +37,7 @@ const TopBar: FC<TopBarProps> =
         const {authUser} = Auth.getReduxState();
         const {
             onlineServiceStatus, entityHeader,
-            isMenuExpanded,
+            isMenuExpanded, isFullScreen,
         } = Application.getReduxState();
         const navigate = useNavigate();
         const isOnline = onlineServiceStatus?.active || false;
@@ -62,7 +62,7 @@ const TopBar: FC<TopBarProps> =
                 onClick={() => navigate('/profile', {replace: false})}
             />;
         return (
-            <TopBarStyled style={{transition: '0.5s', display: 'flex', justifyContent: 'space-between', paddingLeft: `calc(${isMenuExpanded ? '180px' : '48px'} + 1rem)`, paddingRight: '1rem'}}>
+            <TopBarStyled style={{transition: '0.5s', display: 'flex', justifyContent: 'space-between', paddingLeft: `calc(${isFullScreen ? '0px' : isMenuExpanded ? '180px' : '48px'} + 1rem)`, paddingRight: '1rem'}}>
                 <div style={{
                     fontFamily: `${theme.text.fontFamily}`,
                     color: `${theme.collectionView.title.color.quite}`,

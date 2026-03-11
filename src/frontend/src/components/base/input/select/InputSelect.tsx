@@ -299,8 +299,9 @@ const InputSelect: FC<InputSelectProps> = ({
             </InputContainerStyled>
             {!isSearchable && <SelectStyled id={id} ref={inputSelectRef} tabIndex={-1} color={color} onClick={() => toggleOptions(isToggled)}/>}
             {!readOnly && <ToggleStyled noAnimation={isHidden} hasNotUnderline={isHidden} hasBackground={false} isLoading={!hasIcon && isLoading} emphasizeColor={color} size={16} color={ColorTheme.ToolboxBlue} icon={isToggled ? 'arrow_drop_up' : 'arrow_drop_down'} handleClick={() => toggleOptions(!isToggled)} position={'absolute'} right={1} top={`5px`}/>}
-            <LineStyled/>
-            {!categoryList && <OptionsStyled ref={selectRef} isVisible={isHidden} height={height} color={ColorTheme.DarkBlue}>
+            <div/>
+            <LineStyled isToggled={isToggled}/>
+            {!categoryList && <OptionsStyled ref={selectRef} isVisible={isHidden} isToggled={isToggled} height={height} color={ColorTheme.DarkBlue}>
                 {
                     localOptions.length > 0 ? sortAlphabeticallyByKey(localOptions, 'label').map((option:any, key:any) => {
                         return (
@@ -324,7 +325,7 @@ const InputSelect: FC<InputSelectProps> = ({
                     }) : <EmptyOptionsStyled>{emptyListText || 'There are no options'}</EmptyOptionsStyled>
                 }
             </OptionsStyled>}
-            {categoryList && <OptionsStyled categoryList={categoryList} ref={selectRef} isVisible={isHidden} height={height} color={ColorTheme.DarkBlue}>
+            {categoryList && <OptionsStyled categoryList={categoryList} ref={selectRef} isToggled={isToggled} isVisible={isHidden} height={height} color={ColorTheme.DarkBlue}>
                 {
 
                     localOptions.length > 0 ? CategoryList(localOptions).map((option:any, key:any) => {

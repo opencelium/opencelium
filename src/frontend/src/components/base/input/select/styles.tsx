@@ -31,16 +31,21 @@ const EmptyOptionsStyled = styled.div`
     font-size: ${DefaultInputTextSize}px;
 `;
 
-const LineStyled = styled.div<ElementProps>``
+const LineStyled = styled.div<ElementProps & {isToggled: boolean}>`
+    border-bottom: 1px solid #e9e9e9;
+    width: calc(100% - 40px);
+    opacity: ${({isToggled}) => !isToggled ? 1 : 0} !important;
+    margin-left: 40px;
+`;
 
-const OptionsStyled = styled.div<OptionsStyledProps | HTMLDivElement>`
+const OptionsStyled = styled.div<OptionsStyledProps & {isToggled: boolean} | HTMLDivElement >`
     transition: height 0.3s;
     user-select: none;
     position: absolute;
     z-index: ${({categoryList}) => categoryList ? '1001' : '1000'};
     border-bottom-left-radius: ${({height}) => height !== 0 ? `5px` : '0'};
     border-bottom-right-radius: ${({height}) => height !== 0 ? `5px` : '0'};
-    border: ${({isVisible}) => isVisible ? `1px solid #c1c1c1` : 'none'};
+    border: ${({isVisible, isToggled}) => isToggled ? `1px solid #e9e9e9` : 'none'};
     border-top: none;
     height: ${({height}) => `${height}px` || 0};
     max-height: 200px;

@@ -1,3 +1,5 @@
+export const TinyTextSize = 6;
+
 export const SmallTextSize = 10;
 
 export const DefaultTextSize = 12;

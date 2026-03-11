@@ -78,21 +78,19 @@ const SubscriptionOverviewWidgetStyled = styled.div`
 const DashboardMetricsOverviewWidgetStyled = styled.div`
 	width: 100%;
 	height: 100%;
-	padding: 15px;
+	padding: 1vw 1.5vw 0.5vw 1vw;
 	background: #fff;
 
 	${DefaultCardShadowStyles}
 	${DefaultShadowHoverStyles}
     display: flex;
 	flex-direction: column;
-	gap: 10px;
 `;
 
-const MetricsCardHeaderStyled = styled.div`
+const WidgetCardHeaderStyled = styled.span`
 	font-size: ${CategoryTextSize}px;
 	font-weight: 600;
 	color: ${ColorTheme.Gray};
-    margin-top: 15px;
 `;
 
 const ErrorStyled = styled.div`
@@ -184,7 +182,7 @@ export {
     MetricValueStyled,
     DashboardMetricsOverviewWidgetStyled,
     MetricsGridStyled,
-    MetricsCardHeaderStyled,
+    WidgetCardHeaderStyled,
     ErrorStyled,
     LoadingStyled,
 }

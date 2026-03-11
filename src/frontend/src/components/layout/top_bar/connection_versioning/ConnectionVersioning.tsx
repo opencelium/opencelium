@@ -22,7 +22,7 @@ import { API_REQUEST_STATE } from '@application/interfaces/IApplication';
 import {
 	updateConnection,
 	getConnectionVersions,
-	getConnectionVersionBySnapshot, setCurrentConnectionVersion,
+	getConnectionVersionBySnapshot, setCurrentConnectionVersion, updateConnectionVersionComment
 } from '@entity/connection/redux_toolkit/action_creators/ConnectionCreators';
 
 import ConnectionVersionHistoryPanel, {
@@ -33,6 +33,9 @@ import { ColorTheme, ITheme } from '@style/Theme';
 import TooltipButton from '@app_component/base/tooltip_button/TooltipButton';
 import Button from '@app_component/base/button/Button';
 import Confirmation from '@entity/connection/components/components/general/app/Confirmation';
+
+import Dialog from '@app_component/base/dialog/Dialog';
+import InputTextarea from '@app_component/base/input/textarea/InputTextarea';
 
 export interface ConnectionVersioningProps {
 	theme: ITheme;
@@ -54,6 +57,10 @@ const ConnectionVersioning: FC<ConnectionVersioningProps> = ({ theme }) => {
 
 	const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 	const [pendingOpenHistory, setPendingOpenHistory] = useState(false);
+
+	const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
+	const [saveComment, setSaveComment] = useState('');
+	const [isSavingWithComment, setIsSavingWithComment] = useState(false);
 
 	const [confirmOpenVersion, setConfirmOpenVersion] = useState<null | ConnectionVersionItem>(null);
 	const [
@@ -80,16 +87,13 @@ const ConnectionVersioning: FC<ConnectionVersioningProps> = ({ theme }) => {
 
 	const canShow = isEditorRoute && !!connectionId;
 
-	const isSaving =
-		connectionState?.updatingConnection === API_REQUEST_STATE.START;
+	const isSaving = connectionState?.updatingConnection === API_REQUEST_STATE.START || isSavingWithComment;
 
 	const onSave = useCallback(() => {
 		if (!connectionId) return;
-
-		const payload = connectionState?.connection || currentConnection;
-
-		dispatch(updateConnection(payload) as any);
-	}, [connectionId, connectionState?.connection, currentConnection, dispatch]);
+		setSaveComment('');
+		setIsSaveDialogOpen(true);
+	}, [connectionId]);
 
 	const onOpenHistory = useCallback(() => {
 		if (!connectionId) return;
@@ -169,6 +173,57 @@ const ConnectionVersioning: FC<ConnectionVersioningProps> = ({ theme }) => {
 		isHistoryOpen,
 	]);
 
+	const onCloseSaveDialog = useCallback(() => {
+		if (isSavingWithComment) return;
+		setIsSaveDialogOpen(false);
+		setSaveComment('');
+	}, [isSavingWithComment]);
+
+	const onConfirmSaveWithComment = useCallback(async () => {
+		if (!connectionId) return;
+
+		const payload = connectionState?.connection || currentConnection;
+		if (!payload) return;
+
+		setIsSavingWithComment(true);
+
+		try {
+			await dispatch(updateConnection(payload) as any).unwrap();
+
+			const versions = await dispatch(getConnectionVersions(connectionId) as any).unwrap();
+
+			const normalizedVersions = Array.isArray(versions) ? [...versions] : [];
+
+			const currentVersion =
+				normalizedVersions.find((v: any) => v?.current === true) ||
+				normalizedVersions.sort((a: any, b: any) => (b?.createdAt || 0) - (a?.createdAt || 0))[0];
+
+			const commentToSave = saveComment.trim();
+
+			if (commentToSave && currentVersion?.snapshotId) {
+				await dispatch(
+					updateConnectionVersionComment({
+						connectionId,
+						snapshotId: currentVersion.snapshotId,
+						comment: commentToSave,
+					}) as any,
+				).unwrap();
+			}
+
+			setIsSaveDialogOpen(false);
+			setSaveComment('');
+		} catch (e) {
+		} finally {
+			setIsSavingWithComment(false);
+		}
+	}, [
+		connectionId,
+		connectionState?.connection,
+		currentConnection,
+		dispatch,
+		saveComment,
+	]);
+
 	if (!canShow) return null;
 
 	return (
@@ -189,7 +244,7 @@ const ConnectionVersioning: FC<ConnectionVersioningProps> = ({ theme }) => {
 
 			<TooltipButton
 				target={`version_history`}
-				tooltip="Open Version History"
+				tooltip="Open Connection History"
 				handleClick={onOpenHistory}
 				icon={'history'}
 				isLoading={versionsLoading || pendingOpenHistory}
@@ -206,6 +261,34 @@ const ConnectionVersioning: FC<ConnectionVersioningProps> = ({ theme }) => {
 				onSelect={onSelectVersion}
 				theme={theme}
 			/>
+
+			<Dialog
+				active={isSaveDialogOpen}
+				toggle={onCloseSaveDialog}
+				title={'Save Version'}
+				actions={[
+					{
+						id: 'save_version_with_comment_ok',
+						label: isSavingWithComment ? 'Saving...' : 'Save',
+						onClick: onConfirmSaveWithComment,
+						isLoading: isSavingWithComment,
+					},
+					{
+						id: 'save_version_with_comment_cancel',
+						label: 'Cancel',
+						onClick: onCloseSaveDialog,
+					},
+				]}
+			>
+				<InputTextarea
+					id={'save_version_comment'}
+					onChange={(e) => setSaveComment(e.target.value)}
+					value={saveComment}
+					label={'Comment'}
+					name={'save_version_comment'}
+					icon={'notes'}
+				/>
+			</Dialog>
 
 			<Confirmation
 				active={!!confirmOpenVersion}

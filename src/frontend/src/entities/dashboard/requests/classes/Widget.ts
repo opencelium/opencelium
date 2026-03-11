@@ -30,9 +30,4 @@ export class WidgetRequest extends Request implements IWidgetRequest{
         this.endpoint = '/all';
         return super.get<IWidget[]>();
     }
-
-    async getMetrics(): Promise<AxiosResponse<Metrics>>{
-        this.endpoint = '/system/overview';
-        return super.get<Metrics>();
-    }
 }

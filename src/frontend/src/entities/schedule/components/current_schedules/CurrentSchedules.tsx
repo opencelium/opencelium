@@ -55,7 +55,7 @@ const CurrentSchedules: FC<CurrentSchedulesProps> =
                 )
             });
         } else{
-            if (!socket.connected) {
+            if (!socket?.connected) {
                 return (
                     <EmptyListStyled value={"Please, enable websocket to see the current schedules."} color={'#ccc'}/>
                 )

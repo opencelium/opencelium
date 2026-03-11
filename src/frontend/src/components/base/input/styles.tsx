@@ -49,7 +49,7 @@ const ErrorStyled = styled.span<ErrorStyledProps>`
     opacity: 1 !important;
     position: absolute;
     left: ${({hasIcon, isIconInside, theme}) => !hasIcon || isIconInside ? 0 : theme.input.iconInputDistance};
-    bottom: ${({theme, errorBottom}) => typeof errorBottom !== 'undefined' ? errorBottom : '-1px'};
+    bottom: ${({theme, errorBottom, hasIcon}) => typeof errorBottom !== 'undefined' ? errorBottom : hasIcon ? '-1px' : '-5px'};
     font-size: ${SmallTextSize}px;
     color: ${({color, theme}: {color?: string, theme: ITheme}) => color || theme.input.error.color};
     transition: color 0.5s;
@@ -74,11 +74,11 @@ const InputElementStyled = styled.div<InputStyledProps | HTMLDivElement>`
     background: ${({background}) => background || 'unset'};
 `;
 
-const NumberCounterStyled = styled.span`
+const NumberCounterStyled = styled.span<{hasIcon?: boolean}>`
     transition: opacity 0.3s ease-in-out;
     position: absolute;
     right: 0;
-    bottom: ${({theme}) => `-calc(${theme.input.inputElement.paddingTop} / 2)` || 0};
+    bottom: ${({theme, hasIcon}) => `calc(-${theme.input.inputElement.paddingTop} / 2${!hasIcon ? ' - 4px' : ''})` || 0};
     font-size: ${SmallTextSize}px;
     color: #888888;
 `;

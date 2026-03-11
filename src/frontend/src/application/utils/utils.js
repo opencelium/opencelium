@@ -73,7 +73,7 @@ export function resizeWindow(){
 }
 
 export function isValidIconUrl(icon){
-    return isString(icon) && icon !== '' && icon.substr(icon.length - 5) !== '/null';
+    return isString(icon) && icon !== '' && icon.substr(icon.length - 5) !== '/null' && icon.substr(icon.length - 10) !== '/undefined';
 }
 
 /**

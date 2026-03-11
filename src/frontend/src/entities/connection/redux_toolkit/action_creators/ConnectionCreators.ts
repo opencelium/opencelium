@@ -121,7 +121,7 @@ export const getAndUpdateConnectionTitle = createAsyncThunk(
             const request = new ConnectionRequest({endpoint: `/check/${title}`});
             const response = await request.checkConnectionTitle();
             if (response.data.message === ResponseMessages.EXISTS) {
-                return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.CONNECTOR_EXISTS}));
+                return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.CONNECTION_EXISTS}));
             }
             const GetConnectionRequest = new ConnectionRequest({endpoint: `/${connection.id}`});
             const GetConnectionResponse = await GetConnectionRequest.getConnectionById();

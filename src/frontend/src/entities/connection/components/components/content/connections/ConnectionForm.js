@@ -40,7 +40,8 @@ import { Category } from "@entity/category/classes/Category";
 import {jsonToString} from "@app_component/operator_builder/utils";
 import Validation from "@application/classes/Validation";
 import DropdownActionButton from '@app_component/dropdown_action_button/DropdownActionButton';
-import {setEntityIconKey} from "@application/redux_toolkit/slices/ApplicationSlice";
+import {setEntityIconKey, setEntityHeader} from "@application/redux_toolkit/slices/ApplicationSlice";
+import SetConnectionBeforeAdd from "@components/add_connection/SetConnectionBeforeAddButton";
 
 /**
  * common component to add and update Connection
@@ -60,14 +61,15 @@ export function ConnectionForm(type) {
                 this.state = {
                     runTest: false,
                     justUpdate: false,
-                    hasModeInputsSection: this.isUpdate,
-                    hasMethodsInputsSection: this.isUpdate,
+                    hasModeInputsSection: false,
+                    hasMethodsInputsSection: false,
                     validationMessages: {
                         title: '',
                         fromConnector: '',
                         toConnector: '',
                         template: '',
                     },
+                    forceUpdateConnection: false,
                     validateLogicResult: {toggleFlag: false, operators: {[CONNECTOR_FROM]: [], [CONNECTOR_TO]: []}, methods: {[CONNECTOR_FROM]: [], [CONNECTOR_TO]: []}},
                     connection: CConnection.createConnection(),
                     entity: null,
@@ -124,9 +126,14 @@ export function ConnectionForm(type) {
                         this.isAdd = this.type === 'add';
                         this.isView = this.type === 'view';
                     }
+                    const createdConnection = CConnection.createConnection({...this.props.connection, error});
                     this.setState({
-                        connection: CConnection.createConnection({...this.props.connection, error}),
-                    })
+                        connection: createdConnection,
+                    });
+                    this.props.setConnection(createdConnection);
+                    if (createdConnection?.title) {
+                        this.props.setEntityHeader(createdConnection.title);
+                    }
                 }
             }
 
@@ -134,7 +141,6 @@ export function ConnectionForm(type) {
                 this.props.setCurrentConnection(null);
                 this.props.setFullScreen(false);
                 this.props.setConnection(null);
-
             }
 
             setMode(mode, callback = null){
@@ -192,25 +198,6 @@ export function ConnectionForm(type) {
                         }
                     })
                 }
-            }
-
-            /**
-             * to redirect app after adding/updating Connection
-             */
-            redirect(){
-                this.props.navigate(this.redirectUrl, { replace: false });
-            }
-
-            getConnection(){
-                const {error} = this.props;
-                let connection;
-                if((this.isUpdate || this.isView) && this.props.connection){
-                    connection = CConnection.createConnection({...this.props.connection, error});
-                } else{
-                    connection = this.state.connection;
-                    connection.setError(error);
-                }
-                return connection;
             }
 
             /**
@@ -321,64 +308,6 @@ export function ConnectionForm(type) {
                 }
             }
 
-            /**
-             * to validate title
-             */
-            validateTitle(entity){
-                const {t, connection, checkConnectionTitle, checkTitleResult} = this.props;
-                const specialCharacters = /[\/\\]/;
-                if(entity.title.trim() === ''){
-                    return {value: false, message: t(`${this.translationKey}.VALIDATION_MESSAGES.TITLE_REQUIRED`)};
-                } else if(specialCharacters.test(entity.title)) {
-                    return {value: false, message: t(`${this.translationKey}.VALIDATION_MESSAGES.TITLE_CONTAINER_SPEC_CHAR`)};
-                } else{
-                    if(!this.isUpdate || (this.isUpdate && connection.title !== entity.title)) {
-                        if(!(this.state.entity && entity.title === this.state.entity.title && checkTitleResult === TRIPLET_STATE.TRUE)) {
-                            this.startCheckingTitle = true;
-                            checkConnectionTitle(entity);
-                            return {value: false, message: ''};
-                        }
-                    }
-                }
-                return {value: true, message: ''};
-            }
-
-            /**
-             * to validate from connector
-             */
-            validateFromConnector(entity){
-                const {t} = this.props;
-                if(entity.fromConnector.id === 0){
-                    return {value: false, message: t(`${this.translationKey}.VALIDATION_MESSAGES.FROM_CONNECTOR_REQUIRED`)};
-                }
-                return {value: true, message: ''};
-            }
-
-            /**
-             * to validate to connector
-             */
-            validateToConnector(entity){
-                const {t} = this.props;
-                if(entity.toConnector.id === 0){
-                    return {value: false, message: t(`${this.translationKey}.VALIDATION_MESSAGES.TO_CONNECTOR_REQUIRED`)};
-                }
-                return {value: true, message: ''};
-            }
-
-            /**
-             * to validate template
-             */
-            validateTemplate(entity){
-                const {t} = this.props;
-                if (entity.template && entity.template.mode === TEMPLATE_MODE && entity.template.templateId === -1) {
-                    if(entity.allTemplates.length === 0){
-                        return {value: false, message: t(`${this.translationKey}.VALIDATION_MESSAGES.NO_TEMPLATES`)};
-                    } else{
-                        return {value: false, message: t(`${this.translationKey}.VALIDATION_MESSAGES.TEMPLATE_REQUIRED`)};
-                    }
-                }
-                return {value: true, message: ''};
-            }
 
             /**
              * to validate methods and operators
@@ -493,7 +422,7 @@ export function ConnectionForm(type) {
                     formClassName: styles.mode_form,
                     hint: {text: t(`${this.translationKey}.FORM.HINT_2`)},
                     header: t(`${this.translationKey}.FORM.PAGE_2`),
-                    visible: (hasModeInputsSection && this.isAdd) || this.isView,
+                    visible: false,
                 }
             }
 
@@ -503,21 +432,12 @@ export function ConnectionForm(type) {
                 let connectorMenuItems = this.getConnectorMenuItems();
                 return {
                     inputs: [
-                        {
-                            ...INPUTS.CONNECTOR_READONLY,
-                            label: t(`${this.translationKey}.FORM.CONNECTORS`),
-                            placeholders: [t(`${this.translationKey}.FORM.CHOSEN_CONNECTOR_FROM`), t(`${this.translationKey}.FORM.CHOSEN_CONNECTOR_TO`)],
-                            source: connectorMenuItems,
-                            readOnly: true,
-                            hasAddMethod: true,
-                            style: {margin: '0 65px'},
-                        },
                         this.getMethodsFormSection(),
                     ],
-                    formClassName: this.props.isFullScreen ? styles.fullscreen_methods_form : styles.methods_form,
+                    formClassName: styles.fullscreen_methods_form,
                     hint: {text: t(`${this.translationKey}.FORM.HINT_3`)},
-                    header: this.isUpdate ? '' : t(`${this.translationKey}.FORM.PAGE_3`),
-                    visible: hasMethodsInputsSection || this.isView,
+                    header: '',
+                    visible: true,
                 }
             }
 
@@ -622,11 +542,8 @@ export function ConnectionForm(type) {
             }
 
             render(){
-                const {validationMessages, connection} = this.state;
-                const {t, error, checkingConnectionTitle, fetchingConnectors, setCurrentTechnicalItem, currentTechnicalItem, categories, connectors} = this.props;
-                if((!this.isView && fetchingConnectors !== API_REQUEST_STATE.FINISH) || (!this.isAdd && !this.isFetchedConnection)){
-                    return <ContentLoading/>;
-                }
+                const {connection, forceUpdateConnection} = this.state;
+                const {t, checkingConnectionTitle} = this.props;
                 let contentTranslations = {};
 
                 contentTranslations.header = `${capitalize(this.translationKey.toLowerCase())} Connection`;
@@ -635,175 +552,34 @@ export function ConnectionForm(type) {
                 } else{
                     contentTranslations.cancel_button = {title: t(`app:FORM.CANCEL`), link: this.redirectUrl};
                 }
-                // contentTranslations.action_button = this.isView ? null : {title: t(`${this.translationKey}.${this.translationKey}_BUTTON`), link: this.redirectUrl};
-                let categoryMenuItems;
-                let categorySelect;
-                if(this.isAdd){
-                    categoryMenuItems = Category.getOptionsForCategorySelect(categories)
 
-                    categorySelect = {
-                        ...INPUTS.CATEGORY,
-                        label: t(`${this.translationKey}.FORM.CATEGORY`),
-                        readOnly: this.isView,
-                        source: categoryMenuItems,
-                        placeholder: 'Choose category',
-                        categoryList: true,
-                    }
-                }
-                let contents = [
-                    {
-                        inputs: [
-                            {
-                                ...INPUTS.CONNECTION_TITLE,
-                                error: validationMessages.title,
-                                label: t(`${this.translationKey}.FORM.TITLE`),
-                                maxLength: Validation.TextLength.Short,
-                                required: true,
-                                readOnly: this.isView,
-                            },
-                            {...INPUTS.DESCRIPTION,
-                                label: t(`${this.translationKey}.FORM.DESCRIPTION`),
-                                readOnly: this.isView,
-                                maxLength: Validation.TextLength.Medium,
-                            },
-                            this.getFirstConnectorFormSection(),
-                        ],
-                        id: 'connection-form-direction',
-                        formClassName: this.isView ? styles.direction_form : '',
-                        hint: {text: t(`${this.translationKey}.FORM.HINT_1`)},
-                        header: t(`${this.translationKey}.FORM.PAGE_1`),
-                        visible: this.isAdd || this.isView,
-                    },
-                ];
-                if (!this.isView) {
-                    contents.push(this.getSecondFormSection());
-                }
-                contents.push(this.getThirdFormSection());
-                if(this.isAdd){
-                    contents[0].inputs.splice(2, 0, categorySelect)
-                }
-                const additionalButtons = (entity, updateEntity) => {
-                    if(this.isView || contents.length < 2){
-                        return null;
-                    }
-
-                    const isBusy =
-                        (this.props[this.actionName] === API_REQUEST_STATE.START ||
-                        checkingConnectionTitle === API_REQUEST_STATE.START);
-
-                    const items = [];
-
-                    if (this.isAdd) {
-                        items.push(
-                        {
-                            id: 'add_close',
-                            label: '& Close',
-                            onClick: () => this.doAction(entity),
-                            isLoading: !this.isNavigatingToScheduler && isBusy,
-                        },
-                        {
-                            id: 'add_go_add_scheduler',
-                            label: '& Go to Add Schedule',
-                            onClick: () => this.doActionAndGoToAddScheduler(entity),
-                            isLoading: this.isNavigatingToScheduler && isBusy,
-                        }
-                        );
-                    }
-
-                    if (this.isUpdate) {
-                        items.push(
-                        {
-                            id: 'update_close',
-                            label: '& Close',
-                            onClick: () => this.doAction(entity),
-                            isLoading: !this.isNavigatingToScheduler && isBusy,
-                        },
-                        {
-                            id: 'update_go_scheduler',
-                            label: t('UPDATE.UPDATE_BUTTON_AND_GO_TO_SCHEDULER'),
-                            onClick: () => this.doActionAndGoToScheduler(entity),
-                            isLoading: this.isNavigatingToScheduler && isBusy,
-                        }
-                        );
-                    }
-
-                    const isDisabled =
-                        entity.fromConnector.methods.length === 0 &&
-                        entity.fromConnector.operators.length === 0 &&
-                        entity.toConnector.methods.length === 0 &&
-                        entity.toConnector.operators.length === 0;
-
-                    return (
-                        <React.Fragment>
-                        <div style={{ float: 'left', marginRight: 10 }}>
-                            <DropdownActionButton
-                                id={'connection-form-add-options'}
-                                label={this.isAdd ? 'Add' : 'Update'}
-                                direction={'down'}
-                                isLoading={false}
-                                disabled={false}
-                                items={items}
-                            />
-                        </div>
-
-                        {!this.isUpdate && (
-                            <React.Fragment>
-                                <div style={{float: 'left'}}>
-                                    <AddTemplate
-                                        data={contents[2].inputs[1]}
-                                        entity={entity}
-                                        disabled={isDisabled}
-                                        buttonProps={{
-                                            id: 'connection-form-create-template',
-                                            icon: 'add',
-                                            title: t(`${this.translationKey}.FORM.ADD_TEMPLATE`)
-                                        }}
-                                    />
-                                </div>
-
-                                <div style={{float: 'left'}}>
-                                    <DataAggregatorButton
-                                        readOnly={this.isView}
-                                        connection={entity}
-                                        updateConnection={(e) => {
-                                            updateEntity(e);
-                                            if (currentTechnicalItem) {
-                                                const connector =
-                                                    currentTechnicalItem.connectorType === CONNECTOR_FROM ? e.fromConnector : e.toConnector;
-                                                const currentItem = connector.getSvgElementByIndex(currentTechnicalItem.entity.index);
-                                                setCurrentTechnicalItem(currentItem.getObject());
-                                            }
-                                        }}
-                                    />
-                                </div>
-
-                                <div style={{float: 'left'}}>
-                                    <Button
-                                        id={'connection-form-cancel'}
-                                        key={'cancel_button'}
-                                        label={'Cancel'}
-                                        icon={'cancel'}
-                                        href={'/connections'}
-                                    />
-                                </div>
-                            </React.Fragment>
-                            )}
-                        </React.Fragment>
-                    );
-                };
                 return (
-                    <Form
-                        shouldScroll={this.isUpdate ? 'methods' : ''}
-                        contents={contents}
-                        translations={contentTranslations}
-                        isActionInProcess={!this.isNavigatingToScheduler && (this.props[this.actionName] === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START)}
-                        permissions={ConnectionPermissions}
-                        clearValidationMessage={(a) => this.clearValidationMessage(a)}
-                        action={(a) => {this.doAction(a)}}
-                        entity={connection}
-                        type={this.type}
-                        additionalButtons={additionalButtons}
-                    />
+                    <>
+                        <Form
+                            shouldScroll={'methods'}
+                            contents={[this.getThirdFormSection()]}
+                            translations={contentTranslations}
+                            isActionInProcess={!this.isNavigatingToScheduler && (this.props[this.actionName] === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START)}
+                            permissions={ConnectionPermissions}
+                            clearValidationMessage={(a) => this.clearValidationMessage(a)}
+                            action={(a) => {this.doAction(a)}}
+                            entity={connection}
+                            type={this.type}
+                            forceUpdateConnection={forceUpdateConnection}
+                        />
+                        <SetConnectionBeforeAdd
+                            isOpenedInit={this.isAdd && !connection.title}
+                            connection={connection}
+                            onSet={(c) => {
+                                this.setState({
+                                    forceUpdateConnection: true,
+                                    connection: c
+                                });
+                                this.props.setConnection(c);
+                                this.props.setEntityHeader(c?.title || 'Add Connection');
+                            }}
+                        />
+                    </>
                 );
             }
         }

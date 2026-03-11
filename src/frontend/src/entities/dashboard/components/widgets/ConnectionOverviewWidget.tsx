@@ -29,7 +29,7 @@ import {
     getAllConnections,
     getAllMetaConnections
 } from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
-import {ConnectionOverviewTitle, ConnectionOverviewWidgetStyled} from './styles';
+import {ConnectionOverviewTitle, ConnectionOverviewWidgetStyled, WidgetCardHeaderStyled} from './styles';
 import {Urls} from "@entity/application/requests/classes/url";
 
 const TOAST_PORTAL_ID = 'connection_overview_description';
@@ -175,6 +175,11 @@ const ConnectionOverviewWidget: FC =
             },
             length: 100
         },
+        interaction: {
+            zoomView: false,
+            hover: false,
+            tooltipDelay: 0
+        },
         nodes:{
             color: {
                 border: "#ffffff00",
@@ -225,7 +230,13 @@ const ConnectionOverviewWidget: FC =
 
     return (
         <ConnectionOverviewWidgetStyled >
-            <ConnectionOverviewTitle title={'Connection Overview'}/>
+            <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                padding: '1vw 1.5vw 0.5vw 1vw',
+                zIndex: 1,
+            }}><WidgetCardHeaderStyled>{"Connection Overview"}</WidgetCardHeaderStyled></div>
             <div
                 ref={containerRef}
                 style={{
@@ -256,17 +267,6 @@ const ConnectionOverviewWidget: FC =
                                 network.off('initRedraw');
                             }
                         } catch (e) {}
-
-                        network.on("initRedraw", function() {
-                            try {
-                                if (typeof network.setSize === 'function') {
-                                    network.setSize('100%', '100%');
-                                }
-                                if (typeof network.redraw === 'function') {
-                                    network.redraw();
-                                }
-                            } catch (e) {}
-                        });
 
                         network.on("click", function(params: any) {
                             const selectedNodeId = params.nodes.length === 1 ? params.nodes[0] : null;

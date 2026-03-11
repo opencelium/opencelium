@@ -40,8 +40,8 @@ export const LogPanelStyled = styled.div<{
     max-height: ${({logPanelHeight}) => isNumber(logPanelHeight) ? `${logPanelHeight}px` : logPanelHeight};
     background: white;
     color: black;
-    margin-left: ${({isFullScreen, isMenuExpanded}) => isFullScreen ? isMenuExpanded ? '180px' : '48px' : '0'};
-    width: calc(100% - ${({isFullScreen, isDetailsOpened, isMenuExpanded}) => isDetailsOpened ? isFullScreen ? isMenuExpanded ? '480px' : `348px` : '300px' : isFullScreen ? isMenuExpanded ? '180px' : '48px' : '2px'});
+    margin-left: ${({isFullScreen, isMenuExpanded}) => isFullScreen ? '0' : isMenuExpanded ? '180px' : '48px'};
+    width: calc(100% - ${({isFullScreen, isDetailsOpened, isMenuExpanded}) => isFullScreen ? isDetailsOpened ? '300px' : '2px' : isDetailsOpened ? isMenuExpanded ? '480px' : '348px' : isMenuExpanded ? '180px' : '48px'});
     white-space: initial;
     overflow-y: auto;
     position: absolute;
@@ -81,7 +81,7 @@ export const HeaderStyled = styled(Text)`
     background-color: white;
     user-select: none;
     text-align: left;
-    margin-left: 20px;
+    margin-left: 1rem;
     color: #555;
     flex: 1;
 `;

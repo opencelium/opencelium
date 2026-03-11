@@ -40,6 +40,7 @@ const EntriesCollection = ({currentEntry, setCurrentEntry, collection, setCollec
     }, [currentEntry])
     return (
         <CollectionView
+            shouldNoSetEntityHeader={true}
             hasNotAlert={true}
             hasViewSection={false}
             isListViewCard={false}

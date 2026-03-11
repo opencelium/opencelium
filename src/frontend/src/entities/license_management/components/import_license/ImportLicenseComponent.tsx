@@ -48,6 +48,7 @@ const ImportLicenseComponent = () => {
                 {TokenFile}
             </Dialog>
             <Button
+                id={'license-management-import-license'}
                 label={'Import License'}
                 icon={'file_upload'}
                 handleClick={() => toggleDialog(true)}

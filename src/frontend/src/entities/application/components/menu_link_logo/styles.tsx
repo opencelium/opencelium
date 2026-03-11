@@ -11,6 +11,7 @@ const LogoImageStyled = styled.img`
 const LoadingStyled = styled(Loading)`
     width: 2.5rem;
     height: 2.5rem;
+    margin-left: 4px;
     background: none !important;
 `;
 
