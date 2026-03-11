@@ -1,17 +1,16 @@
 .react-grid-layout {
     position: relative;
-    transition: height 200ms ease;
+    transition: none;
 }
 .react-grid-item {
-    transition: all 200ms ease;
-    transition-property: left, top;
+    transition: none;
 }
 .react-grid-item img {
     pointer-events: none;
     user-select: none;
 }
 .react-grid-item.cssTransforms {
-    transition-property: transform;
+    transition: none;
 }
 .react-grid-item.resizing {
     z-index: 1;
@@ -29,9 +28,9 @@
 }
 
 .react-grid-item.react-grid-placeholder {
+    transition: none;
     background: red;
     opacity: 0.2;
-    transition-duration: 100ms;
     z-index: 2;
     -webkit-user-select: none;
     -moz-user-select: none;

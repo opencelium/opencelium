@@ -89,7 +89,7 @@ const LogsPanel: React.FC<LogsPanelProps> = ({theme}) => {
               isMenuExpanded={isMenuExpanded}
           >
               <HeaderStyled id={'test_execution_process'} value={'Logs'} width={isDetailsOpened ? 'calc(100% - 300px)' : '100%'}/>
-              <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+              <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden'}}>
                   {logPanelHeight !== LogPanelHeight.Full && <MinimizeLogsButtonStyled
                       right={isDetailsOpened ? isFullScreen ? 359 : 347 : isFullScreen ? 59 : 47}
                       tooltip={notMinimized ? 'Hide' : 'Show'}

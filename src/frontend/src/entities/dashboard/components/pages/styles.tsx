@@ -52,6 +52,9 @@ const DashboardViewStyled = styled.div`
 `;
 
 const ReactGridLayoutStyled = styled(ReactGridLayout)<ReactGridLayoutStyledProps>`
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
     ${({isWidgetEditOn}) => isWidgetEditOn ? `
         padding: 0;
         border: 1px solid #eee;

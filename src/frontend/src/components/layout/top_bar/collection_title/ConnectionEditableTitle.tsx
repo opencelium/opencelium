@@ -31,6 +31,7 @@ import {
 import { API_REQUEST_STATE } from '@application/interfaces/IApplication';
 import InputText from "@app_component/base/input/text/InputText";
 import {ResponseMessages} from "@application/requests/interfaces/IResponse";
+import {Loading} from "@app_component/base/loading/Loading";
 
 interface ConnectionEditableTitleProps {
 	title: string;
@@ -169,11 +170,13 @@ const ConnectionEditableTitle: FC<ConnectionEditableTitleProps> = ({
 			</ConnectionEditableTitleStyled>
 		);
 	}
-
+	if (resolvedTitle === 'Update Connection') {
+		return <Loading/>
+	}
 	return (
 		<ConnectionEditableTitleStyled>
 			<ConnectionTitleTextStyled>
-				<Text value={resolvedTitle} size={`${EntityHeaderTextSize}px`} />
+				<Text value={resolvedTitle === 'Add Connection' ? '[connection name]' : resolvedTitle} size={`${EntityHeaderTextSize}px`} />
 			</ConnectionTitleTextStyled>
 			{canEdit && (
 				<ConnectionTitleActionsStyled>

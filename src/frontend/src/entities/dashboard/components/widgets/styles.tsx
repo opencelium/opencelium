@@ -32,6 +32,7 @@ const CurrentSchedulesWidgetStyled = styled.div`
     background-color: #fff;
     ${DefaultCardShadowStyles}
     ${DefaultShadowHoverStyles}
+    transition: box-shadow 0.5s ease-in;
 `;
 
 const ConnectionOverviewWidgetStyled = styled.div`
@@ -42,6 +43,7 @@ const ConnectionOverviewWidgetStyled = styled.div`
     }
     ${DefaultCardShadowStyles}
     ${DefaultShadowHoverStyles}
+    transition: box-shadow 0.5s ease-in;
 `;
 
 const ConnectionOverviewTitle = styled(WidgetTitle)`
@@ -54,6 +56,7 @@ const MonitoringBoardsWidgetStyled = styled.div`
     background-color: #fff;
     ${DefaultCardShadowStyles}
     ${DefaultShadowHoverStyles}
+    transition: box-shadow 0.5s ease-in;
     height: calc(100% - 55px);
     max-width: 100%;
     &>iframe{
@@ -73,6 +76,7 @@ const SubscriptionOverviewWidgetStyled = styled.div`
     background-color: #fff;
     ${DefaultCardShadowStyles}
     ${DefaultShadowHoverStyles}
+    transition: box-shadow 0.5s ease-in;
 `;
 
 const DashboardMetricsOverviewWidgetStyled = styled.div`
@@ -83,6 +87,7 @@ const DashboardMetricsOverviewWidgetStyled = styled.div`
 
 	${DefaultCardShadowStyles}
 	${DefaultShadowHoverStyles}
+    transition: box-shadow 0.5s ease-in;
     display: flex;
 	flex-direction: column;
 `;
