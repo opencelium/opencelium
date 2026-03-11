@@ -110,7 +110,7 @@ const Title: FC<TitleProps> =
                 <Tour steps={steps} toggle={toggleTour} show={startTour}/>
                 <Button
                     position={'absolute'}
-                    right={!!icon ? -35 : -18}
+                    right={!!icon || isConnectionFormTitle ? -35 : -18}
                     hasBackground={false}
                     icon={'info'}
                     color={ColorTheme.Blue}

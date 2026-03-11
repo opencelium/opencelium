@@ -29,6 +29,9 @@ import {
 	ConnectionTitleTextStyled,
 } from './styles';
 import { API_REQUEST_STATE } from '@application/interfaces/IApplication';
+import InputText from "@app_component/base/input/text/InputText";
+import {ResponseMessages} from "@application/requests/interfaces/IResponse";
+import {Loading} from "@app_component/base/loading/Loading";
 
 interface ConnectionEditableTitleProps {
 	title: string;
@@ -40,8 +43,9 @@ const ConnectionEditableTitle: FC<ConnectionEditableTitleProps> = ({
 	title,
 }) => {
 	const dispatch = useAppDispatch();
-
-	const { connection, currentConnection, updatingConnection } = useAppSelector(
+	const [error, setError] = useState<string>('');
+	const [startSaving, setStartSaving] = useState<boolean>(false);
+	const { connection, currentConnection, updatingConnection, error: connectionError } = useAppSelector(
 		(state) => state.connectionReducer,
 	);
 
@@ -65,45 +69,66 @@ const ConnectionEditableTitle: FC<ConnectionEditableTitleProps> = ({
 
 	const [isEditing, setIsEditing] = useState(false);
 	const [draftTitle, setDraftTitle] = useState(resolvedTitle);
-
+	useEffect(() => {
+		if (connectionError) {
+			setError(connectionError.message === ResponseMessages.CONNECTION_EXISTS ? 'Connection with such title already exist' : connectionError.message);
+		} else {
+			setError('');
+		}
+	}, [connectionError]);
 	useEffect(() => {
 		if (!isEditing) {
 			setDraftTitle(resolvedTitle);
 		}
 	}, [resolvedTitle, isEditing]);
 
+	useEffect(() => {
+		if (startSaving) {
+			if (updatingConnection === API_REQUEST_STATE.FINISH) {
+				setIsEditing(false);
+				setStartSaving(false);
+			}
+			if (updatingConnection === API_REQUEST_STATE.ERROR) {
+				setStartSaving(false);
+			}
+		}
+
+	}, [startSaving, updatingConnection]);
+
 	const saveTitle = async () => {
 		const normalizedTitle = `${draftTitle || ''}`.trim();
 
-		if (!normalizedTitle) {
-			return;
+		if (title !== draftTitle) {
+			if (!normalizedTitle) {
+				return;
+			}
+			setStartSaving(true);
+			const baseConnection = connection || currentConnection || {};
+
+			const connectionId =
+				baseConnection?.id || baseConnection?.connectionId || null;
+
+			const updatedConnection = {
+				...baseConnection,
+				title: normalizedTitle,
+			};
+
+			dispatch(setEntityHeader(normalizedTitle));
+			dispatch(setConnection(updatedConnection as any));
+
+			if (connectionId) {
+				await dispatch(
+					getAndUpdateConnectionTitle({
+						...currentConnection,
+						...updatedConnection,
+						id: connectionId,
+						connectionId,
+					} as any),
+				);
+			}
+		} else {
+			setIsEditing(false);
 		}
-
-		const baseConnection = connection || currentConnection || {};
-
-		const connectionId =
-			baseConnection?.id || baseConnection?.connectionId || null;
-
-		const updatedConnection = {
-			...baseConnection,
-			title: normalizedTitle,
-		};
-
-		dispatch(setEntityHeader(normalizedTitle));
-		dispatch(setConnection(updatedConnection as any));
-
-		if (connectionId) {
-			await dispatch(
-				getAndUpdateConnectionTitle({
-					...currentConnection,
-					...updatedConnection,
-					id: connectionId,
-					connectionId,
-				} as any),
-			);
-		}
-
-		setIsEditing(false);
 	};
 
 	const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -121,39 +146,37 @@ const ConnectionEditableTitle: FC<ConnectionEditableTitleProps> = ({
 	if (isEditing) {
 		return (
 			<ConnectionEditableTitleStyled>
-				<ConnectionTitleInputStyled
-					autoFocus
+				<InputText
+					id={'connection-title'}
+					width={'250px'}
 					value={draftTitle}
-					onChange={(e) => setDraftTitle(e.target.value)}
-					onKeyDown={onKeyDown}
+					onChange={(e) => {
+						setError('');
+						setDraftTitle(e.target.value)}
+					}
 					maxLength={256}
+					onKeyDown={onKeyDown}
+					error={error}
 				/>
 				<ConnectionTitleActionsStyled>
 					<Button
 						hasBackground={false}
 						icon={'check'}
 						color={ColorTheme.Blue}
-						isLoading={updatingConnection === API_REQUEST_STATE.START}
+						isLoading={startSaving && updatingConnection === API_REQUEST_STATE.START}
 						handleClick={saveTitle}
-					/>
-					<Button
-						hasBackground={false}
-						icon={'close'}
-						color={ColorTheme.Gray}
-						handleClick={() => {
-							setDraftTitle(resolvedTitle);
-							setIsEditing(false);
-						}}
 					/>
 				</ConnectionTitleActionsStyled>
 			</ConnectionEditableTitleStyled>
 		);
 	}
-
+	if (resolvedTitle === 'Update Connection') {
+		return <Loading/>
+	}
 	return (
 		<ConnectionEditableTitleStyled>
 			<ConnectionTitleTextStyled>
-				<Text value={resolvedTitle} size={`${EntityHeaderTextSize}px`} />
+				<Text value={resolvedTitle === 'Add Connection' ? '[connection name]' : resolvedTitle} size={`${EntityHeaderTextSize}px`} />
 			</ConnectionTitleTextStyled>
 			{canEdit && (
 				<ConnectionTitleActionsStyled>

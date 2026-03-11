@@ -211,8 +211,8 @@ const TestConnectionButton = ({validateLogic}: any) => {
             setChannelId(connection.id || channelId);
         }
     }
-    const isDisabled = !socket.connected || isLicenseExpired || !!socketError;
-    const isLoading = !socket.connected && !socketError;
+    const isDisabled = !socket?.connected || isLicenseExpired || !!socketError;
+    const isLoading = !socket?.connected && !socketError;
     const isLabelDisabled = isDisabled && !isLoading;
     return (
         <div style={{position: 'relative'}}>

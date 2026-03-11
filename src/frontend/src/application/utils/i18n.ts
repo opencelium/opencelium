@@ -51,7 +51,7 @@ export default i18n
             escapeValue: false,
         },
         react: {
-            useSuspense: true,
+            useSuspense: false,
         },
         backend: {
             backends: [HttpBackend, resourcesToBackend(localResources)],

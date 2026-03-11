@@ -20,7 +20,6 @@ import Dialog from "@app_component/base/dialog/Dialog";
 import LoginFormInputs from "@app_component/default_pages/login/LoginFormInputs";
 import {ResponseMessages} from "@application/requests/interfaces/IResponse";
 import {useAppDispatch} from "@application/utils/store";
-import {useSocketData} from "../../../socket/SocketDataContext";
 import {Auth} from "@application/classes/Auth";
 import {TRIPLET_STATE} from "@application/interfaces/IApplication";
 import {getCurrentSubscription} from "@entity/license_management/redux_toolkit/action_creators/SubscriptionCreators";
