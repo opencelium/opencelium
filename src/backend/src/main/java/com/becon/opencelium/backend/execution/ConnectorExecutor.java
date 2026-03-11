@@ -23,10 +23,16 @@ import com.becon.opencelium.backend.resource.execution.OperatorEx;
 import com.becon.opencelium.backend.resource.execution.ResponseDTO;
 import com.becon.opencelium.backend.utility.Comparators;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
@@ -238,8 +244,8 @@ public class ConnectorExecutor {
         boolean hasMore = false;
         long duration = 0;
         RequestEntity<?> requestEntity;
-        Class<?> responseType;
         ResponseEntity<?> responseEntity;
+        Class<?> responseType = getResponseType(dto);
         do {
             requestEntity = RequestEntityBuilder.start()
                     .forOperation(dto)
@@ -262,11 +268,8 @@ public class ConnectorExecutor {
             logger.logAndSend(String.format("segment=REQUEST_HEADER data=%s", masking.applyMask(requestEntity.getHeaders(), toRef.apply("request", "header"))));
             logger.logAndSend(String.format("segment=REQUEST_PAYLOAD data=%s", masking.applyMask(requestEntity.getBody(), toRef.apply("request", "body"))));
 
-            HttpEntity<Object> httpEntity = new HttpEntity<>(requestEntity.getBody(), requestEntity.getHeaders());
-            responseType = getResponseType(dto);
-
             long startTime = System.currentTimeMillis();
-            responseEntity = this.restTemplate.exchange(uri, requestEntity.getMethod(), httpEntity, responseType);
+            responseEntity = sendRequest(uri, requestEntity, responseType);
             duration += (System.currentTimeMillis() - startTime);
 
             if (pagination != null) {
@@ -312,6 +315,45 @@ public class ConnectorExecutor {
 
         operation.addRequest(key, requestEntity);
         operation.addResponse(key, responseEntity);
+    }
+
+    private ResponseEntity<?> sendRequest(URI uri, RequestEntity<?> requestEntity, Class<?> responseType) {
+        HttpEntity<Object> httpEntity = new HttpEntity<>(requestEntity.getBody(), requestEntity.getHeaders());
+
+        try {
+            return this.restTemplate.exchange(uri, requestEntity.getMethod(), httpEntity, responseType);
+        } catch (Exception e) {
+            return convertException(e);
+        }
+    }
+
+    private ResponseEntity<?> convertException(Exception e) {
+        if (e instanceof RestClientResponseException rre) { // 4xx - 5xx
+            HttpHeaders headers = rre.getResponseHeaders() != null ? rre.getResponseHeaders() : new HttpHeaders();
+
+            return ResponseEntity
+                    .status(rre.getStatusCode())
+                    .headers(headers)
+                    .body(rre.getResponseBodyAsString());
+        }
+
+        if (e instanceof ResourceAccessException rae) {
+            Throwable root = rae.getMostSpecificCause();
+
+            return ResponseEntity
+                    .status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body("Connection error: " + (root != null ? root.getMessage() : rae.getMessage()));
+        }
+
+        if (e instanceof RestClientException rce) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Client error: " + rce.getMessage());
+        }
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Unexpected error: " + e.getMessage());
     }
 
     private Class<?> getResponseType(OperationDTO dto) {

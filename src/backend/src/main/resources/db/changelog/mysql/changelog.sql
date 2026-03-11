@@ -700,3 +700,22 @@ CREATE TABLE IF NOT EXISTS password_reset_token (
     is_valid BOOLEAN DEFAULT TRUE,
     FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--changeset 4.8:5 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE widget_setting ADD CONSTRAINT uq_widget_setting_widget_user UNIQUE (widget_id, user_id);
+
+--changeset 4.8:6 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+INSERT IGNORE INTO widget_setting (
+    x_axis,
+    y_axis,
+    width,
+    height,
+    min_width,
+    min_height,
+    widget_id,
+    user_id
+) VALUES
+(0, 6, 6, 4, 6, 4, 1, 1),
+(0, 2, 6, 4, 6, 4, 4, 1),
+(0, 0, 12, 2, 12, 2, 5, 1),
+(6, 2, 6, 4, 6, 4, 2, 1);
