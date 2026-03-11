@@ -39,17 +39,23 @@ export interface DeepSelectProps {
     error?: string,
 }
 export type ReferenceType = 'constant' | 'direct' | 'webhook';
+export type APIResponseType = 'body' | 'header' | 'status';
 export interface ReferenceSwitcherProps {
     referenceType: ReferenceType;
     changeReferenceType: (referenceType: ReferenceType) => void,
     hasNotConstant: boolean,
 }
-export interface ReferenceSwitcherStyleProps {
+export interface APIResponseSwitcherProps {
+    type: APIResponseType;
+    changeType: (type: APIResponseType) => void,
+}
+export interface RadioSwitcherStyleProps {
     isHidden?: boolean;
-    hasNotConstant: boolean;
+    hasNotConstant?: boolean;
 }
 export interface ReferenceGeneratorStyleProps {
     referenceType: ReferenceType,
+    apiResponseType: APIResponseType,
     isAbsolute?: boolean;
     parent?: boolean;
     endpointReference?: boolean;

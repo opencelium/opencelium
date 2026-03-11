@@ -13,7 +13,7 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, {Component, useEffect} from 'react';
+import React, {Component, useEffect, useState} from 'react';
 import {connect} from 'react-redux';
 import {withTranslation} from 'react-i18next';
 
@@ -21,7 +21,7 @@ import {
     addConnection,
     checkConnectionTitle,
     updateConnection,
-    testConnection, getConnectionWebhooks,
+    testConnection, getConnectionWebhooks, getConnectionById as fetchConnection,
 } from "@entity/connection/redux_toolkit/action_creators/ConnectionCreators";
 import {
     setCurrentTechnicalItem,
@@ -42,6 +42,7 @@ import {Application} from "@application/classes/Application";
 import {Connection} from "@root/classes/Connection";
 import {useConfirmLeave} from "@application/utils/hooks/useConfirmLeave";
 import {useBlockNavigation} from "@application/utils/hooks/useBlockNavigation";
+import {ContentLoading} from "@app_component/base/loading/ContentLoading";
 
 
 function mapStateToProps(state){
@@ -97,6 +98,7 @@ export default function(props) {
         entityIconKey,
     } = Application.getReduxState();
     const {isDirty, isButtonPanelOpened} = Connection.getReduxState();
+    const [isLoading, setIsLoading] = useState(true);
     const entityKey = 'connection-form-with-panel';
     useConfirmLeave(isDirty);
     useBlockNavigation(isDirty);
@@ -107,6 +109,15 @@ export default function(props) {
         }
     }, [isButtonPanelOpened]);
     useEffect(() => {
+        (async () => {
+            try {
+                await dispatch(fetchConnectors());
+            } catch(e) {
+
+            } finally {
+                setIsLoading(false);
+            }
+        })()
         return () => {
             dispatch(setTemplatePanelVisibility(false))
             dispatch(setSavePanelVisibility(false))
@@ -115,5 +126,8 @@ export default function(props) {
             dispatch(setEntityIconKey(''))
         }
     }, []);
+    if (isLoading) {
+        return <ContentLoading/>
+    }
     return <ConnectionAdd {...props} entityIconKey={entityIconKey} navigate={navigate} />;
 }

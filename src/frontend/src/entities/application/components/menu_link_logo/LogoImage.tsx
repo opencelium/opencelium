@@ -37,11 +37,9 @@ const LogoImage = (props: any) => {
         if(!!onlineServiceStatus?.active) {
             checkImage(logoPath, () => {
                 setIsLogoExist(true);
-                console.log('1', logoPath)
                 setSrc(logoPath);
             }, () => {
                 setIsLogoExist(false);
-                console.log('2', LogoOcWhiteImagePath)
                 setSrc(LogoOcWhiteImagePath);
             });
         }
@@ -50,12 +48,10 @@ const LogoImage = (props: any) => {
         if(isLogoExist && !!onlineServiceStatus?.active){
             const check = convertPngUrlToBase64(logoPath).then((data) => {
                 if(data) {
-                    console.log('3', data)
                     setSrc(data);
                 }
             });
         }
-        console.log('4')
         setSrc('');
     }, [isLogoExist])
     useEffect(() => {

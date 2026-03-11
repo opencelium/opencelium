@@ -65,7 +65,7 @@ export class CBodyEditor{
                         newItem.type = bindingItemSplitted[1].substr(1, bindingItemSplitted[1].length - 2);
                         newItem.field = bindingItemSplitted.slice(2, bindingItemSplitted.length).join('.');
 
-                        newItem.field = newItem.field.replace(/^header\.\$/, 'body.$');
+                        //newItem.field = newItem.field.replace(/^header\.\$/, 'body.$');
                         if(refStructure && refStructure.response) {
                             newItem.field = wrapField(newItem.field, refStructure.response);
                         }
@@ -89,11 +89,11 @@ export class CBodyEditor{
         if(bodyData.newValue === '' || typeof bodyData.newValue === 'undefined') {
             if (isString(bodyData.existingValue)) {
                 let existingValueSplitted = bodyData.existingValue.split('.');
-                if (existingValueSplitted.length > 3) {
+                if (existingValueSplitted.length >= 3) {
                     if (existingValueSplitted[1] === `(${STATEMENT_REQUEST})`
                         || existingValueSplitted[1] === `(${STATEMENT_RESPONSE})`) {
                         if (existingValueSplitted[2] === RESPONSE_SUCCESS
-                            || existingValueSplitted[2] === RESPONSE_FAIL || 'header' || 'body') {
+                            || existingValueSplitted[2] === RESPONSE_FAIL || 'header' || 'body' || 'status') {
                             let parents = bodyData.namespaces;
                             let currentItem = connection.toConnector.getCurrentItem();
                             let item = {};
@@ -135,11 +135,11 @@ export class CBodyEditor{
             && bodyData.hasOwnProperty('newValue')){
             if(isString(bodyData.existingValue)) {
                 let existingValueSplitted = bodyData.existingValue.split('.');
-                if (existingValueSplitted.length > 3) {
+                if (existingValueSplitted.length >= 3) {
                     if (existingValueSplitted[1] === `(${STATEMENT_REQUEST})`
                         || existingValueSplitted[1] === `(${STATEMENT_RESPONSE})`) {
                         if (existingValueSplitted[2] === RESPONSE_SUCCESS
-                            || existingValueSplitted[2] === RESPONSE_FAIL || 'header' || 'body') {
+                            || existingValueSplitted[2] === RESPONSE_FAIL || 'header' || 'body' || 'status') {
                             result = 2;
                         }
                     }
@@ -148,11 +148,11 @@ export class CBodyEditor{
             if(isString(bodyData.newValue)) {
                 let newValueSplitted = bodyData.newValue.split('.');
 
-                if (newValueSplitted.length > 3) {
+                if (newValueSplitted.length >= 3) {
                     if (newValueSplitted[1] === `(${STATEMENT_REQUEST})`
                         || newValueSplitted[1] === `(${STATEMENT_RESPONSE})`) {
                         if (newValueSplitted[2] === RESPONSE_SUCCESS
-                            || newValueSplitted[2] === RESPONSE_FAIL || newValueSplitted[2] === 'header' || newValueSplitted[2] === 'body') {
+                            || newValueSplitted[2] === RESPONSE_FAIL || newValueSplitted[2] === 'header' || newValueSplitted[2] === 'body' || newValueSplitted[2] === 'status') {
                             result = 1;
                         }
                     }

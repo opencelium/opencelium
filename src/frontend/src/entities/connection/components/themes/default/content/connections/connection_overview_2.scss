@@ -730,7 +730,14 @@ $DASHED_COLOR: #58854d;
 
 .body_enhancement_title {
 	display: flex;
-	justify-content: space-between;
+}
+.body_enhancement_button {
+	display: flex;
+	justify-content: end;
+	flex: 1;
+}
+.enhancement_code {
+	margin: 10px !important;
 }
 
 .body_data {

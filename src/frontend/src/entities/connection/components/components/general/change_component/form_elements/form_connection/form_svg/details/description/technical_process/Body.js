@@ -135,19 +135,35 @@ class Body extends React.Component {
 
 	getCurrentBindingItem(fieldName) {
 		const { connection, method } = this.props;
-		let normalizedFieldName = fieldName
-			.replace(/^body\.\$\./, '')
-			.replace(/^header\.\$\./, '')
-			.replace(/\.([0-9]+)/g, '[$1]');
+		const normalizeField = (value = '') => {
+			return unwrapField(String(value))
+				.replace(/\.([0-9]+)/g, '[$1]')
+				.trim();
+		};
+		const removeLocationPrefix = (value = '') => {
+			return normalizeField(value)
+				.replace(/^body\.\$\./, '')
+				.replace(/^header\.\$\./, '')
+				.replace(/^status\./, '');
+		};
+		const normalizedFullFieldName = normalizeField(fieldName);
+		const normalizedShortFieldName = removeLocationPrefix(fieldName);
 
 		return connection.fieldBinding.find((item) => {
 			return (
 				item.to.findIndex((elem) => {
-					let name = unwrapField(elem.field
-						.replace(/^body\.\$\./, '')
-						.replace(/^header\.\$\./, '')
-						.replace(/\.([0-9]+)/g, '[$1]'));
-					return elem.color === method.color && name === normalizedFieldName;
+					if (elem.color !== method.color) {
+						return false;
+					}
+					const elemFullField = normalizeField(elem.field);
+					const elemShortField = removeLocationPrefix(elem.field);
+
+					return (
+						elemFullField === normalizedFullFieldName ||
+						elemShortField === normalizedFullFieldName ||
+						elemFullField === normalizedShortFieldName ||
+						elemShortField === normalizedShortFieldName
+					);
 				}) !== -1
 			);
 		});
@@ -155,59 +171,59 @@ class Body extends React.Component {
 
 
 	setCurrentEnhancementClickingOnPointer(e, value, fieldName = '') {
-		const { connection, connector, method } = this.props;
-		/*if(connector.getConnectorType() === CONNECTOR_FROM){
-            return;
-        }*/
+		const { connection } = this.props;
+		let nextFieldName = fieldName;
 		let bindingItem = null;
-		if (fieldName === '') {
+		if (nextFieldName === '') {
 			if (value.namespace.length > 1) {
 				for (let i = 1; i < value.namespace.length; i++) {
 					if (
 						i + 1 < value.namespace.length &&
 						isNumber(value.namespace[i + 1])
 					) {
-						fieldName += markFieldNameAsArray(
+						nextFieldName += markFieldNameAsArray(
 							value.namespace[i],
 							value.namespace[i + 1]
 						);
 						i++;
 					} else {
-						fieldName += value.namespace[i];
+						nextFieldName += value.namespace[i];
 					}
-					fieldName += '.';
+					nextFieldName += '.';
 				}
 			}
 			const lastNamespace = value.namespace[value.namespace.length - 1];
 			if (value.variable.name !== lastNamespace) {
-				fieldName += value.variable.name;
+				nextFieldName += value.variable.name;
 			} else {
-				fieldName = fieldName.slice(0, -1);
+				nextFieldName = nextFieldName.slice(0, -1);
 			}
-			bindingItem = this.getCurrentBindingItem(unwrapField(fieldName));
+			bindingItem = this.getCurrentBindingItem(nextFieldName);
 		} else {
-			bindingItem = connection.fieldBinding.find((item) => {
-				return (
-					item.to.findIndex((elem) => {
-						return elem.color === method.color && elem.field === fieldName;
-					}) !== -1
-				);
+			bindingItem = this.getCurrentBindingItem(nextFieldName);
+		}
+
+		if (bindingItem && bindingItem.to && bindingItem.to[0]) {
+			connection.setCurrentFieldBindingTo(bindingItem.to[0]);
+			const enhancement = connection.getEnhancementByTo();
+			this.setState({
+				currentFieldName: nextFieldName,
+				currentEnhancement:
+					enhancement instanceof CEnhancement
+						? enhancement.getObject()
+						: enhancement,
 			});
+			return;
 		}
-		if (bindingItem) {
-			bindingItem = bindingItem.to[0];
-			connection.setCurrentFieldBindingTo(bindingItem);
-		}
-		this.setCurrentEnhancement(connection.getEnhancementByTo(), {
-			silent: true,
-		});
 		this.setState({
-			currentFieldName: fieldName,
+			currentFieldName: nextFieldName,
+			currentEnhancement: null,
 		});
 	}
 
 	setCurrentEnhancement(currentEnhancement, options = {}) {
 		const { connection } = this.props;
+		const { currentFieldName } = this.state;
 
 		const next =
 			currentEnhancement instanceof CEnhancement
@@ -227,13 +243,17 @@ class Body extends React.Component {
 			return;
 		}
 
-		if (options && options.silent) {
-			this.setState({ currentEnhancement: next });
-			return;
+		if (currentFieldName) {
+			const bindingItem = this.getCurrentBindingItem(currentFieldName);
+			if (bindingItem && bindingItem.to && bindingItem.to[0]) {
+				connection.setCurrentFieldBindingTo(bindingItem.to[0]);
+			}
 		}
 
-		connection.updateEnhancement(next);
-		this._isDirty = true;
+		if (!(options && options.silent)) {
+			connection.updateEnhancement(next);
+			this._markDirty();
+		}
 
 		this.setState({ currentEnhancement: next });
 	}
@@ -340,24 +360,25 @@ class Body extends React.Component {
 
 
 	renderEnhancement() {
-		const { currentEnhancement, isOpenedEnhancement } = this.state;
+		const { currentEnhancement, isOpenedEnhancement, currentFieldName } = this.state;
 		const { readOnly, connection, method, theme } = this.props;
 
-		let bindingItem = connection.fieldBinding.find(
-			(item) =>
-				item.to.findIndex((elem) => elem.color === method.color) !== -1
-		);
+		let bindingItem = null;
+		if (currentFieldName) {
+			bindingItem = this.getCurrentBindingItem(currentFieldName);
+		}
 		if (bindingItem) {
 			bindingItem = bindingItem.getObject();
 		}
 		const enhancementElement = (
 			<Enhancement
+				key={`enhancement-${currentFieldName || 'empty'}`}
 				binding={bindingItem}
 				method={method}
 				connection={connection}
 				ref={this.enhancementRef}
 				readOnly={readOnly}
-				enhancement={{ ...currentEnhancement }}
+				enhancement={currentEnhancement ? { ...currentEnhancement } : null}
 				setEnhancement={(a) => this.setCurrentEnhancement(a)}
 				isOpenedEnhancement={isOpenedEnhancement}
 				theme={theme}
@@ -442,18 +463,18 @@ class Body extends React.Component {
 						flexDirection: 'column',
 						maxHeight: !isToggledIcon ? '40px' : isToggledReferenceIcon ? '50%' : 'calc(100% - 40px)',
 					}}>
-						<div>
+						<div style={{position: 'relative', minHeight: '36px', display: 'flex'}}>
 							<b ref={this.BodyRef}>{bodyTitle}</b>
+							<div style={{marginTop: '-6px'}}>
+								<HelpIcon steps={tourSteps} inputRef={this.BodyRef}/>
+							</div>
 							<TooltipFontIcon
 								tooltipPosition={'right'}
-								style={{ verticalAlign: 'middle', cursor: 'pointer', marginLeft: '15px' }}
-								onClick={() => this.setState({ isToggledIcon: !isToggledIcon })}
+								style={{cursor: 'pointer'}}
+								onClick={() => this.setState({isToggledIcon: !isToggledIcon})}
 								tooltip={isToggledIcon ? 'Hide' : 'Show'}
 								value={isToggledIcon ? 'expand_less' : 'chevron_right'}
 							/>
-							<div style={{position: 'absolute', left: '100px', top: 0}}>
-								<HelpIcon steps={tourSteps} inputRef={this.BodyRef}/>
-							</div>
 						</div>
 						{isToggledIcon && this.renderBody({
 							flex: 1,
@@ -463,19 +484,22 @@ class Body extends React.Component {
 				</div>
 				{hasEnhancement && (
 					<div className={styles.body_enhancement} ref={this.EnhancementRef}>
-						<div className={styles.body_enhancement_title}>
+						<div className={styles.body_enhancement_title}
+							 style={{position: 'relative', minHeight: '36px', display: 'flex'}}>
 							<b>{'Enhancement'}</b>
-							<div style={{position: 'absolute', left: '115px', top: '-10px'}}>
+							<div style={{marginTop: '-6px'}}>
 								<HelpIcon steps={EnhancementSteps} inputRef={this.EnhancementRef}/>
 							</div>
 							{currentEnhancement && (
-								<Button
-									icon={'open_in_new'}
-									onClick={() => this.toggleEnhancement()}
-									iconSize={'13px'}
-									label={'Open script in new window'}
-									style={{marginBottom: '10px'}}
-								/>
+								<div className={styles.body_enhancement_button}>
+									<Button
+										icon={'open_in_new'}
+										onClick={() => this.toggleEnhancement()}
+										iconSize={'13px'}
+										label={'Open script in new window'}
+										style={{marginBottom: '10px'}}
+									/>
+								</div>
 							)}
 						</div>
 						{this.renderEnhancement()}

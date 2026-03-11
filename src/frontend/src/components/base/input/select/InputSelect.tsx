@@ -300,7 +300,7 @@ const InputSelect: FC<InputSelectProps> = ({
             {!isSearchable && <SelectStyled id={id} ref={inputSelectRef} tabIndex={-1} color={color} onClick={() => toggleOptions(isToggled)}/>}
             {!readOnly && <ToggleStyled noAnimation={isHidden} hasNotUnderline={isHidden} hasBackground={false} isLoading={!hasIcon && isLoading} emphasizeColor={color} size={16} color={ColorTheme.ToolboxBlue} icon={isToggled ? 'arrow_drop_up' : 'arrow_drop_down'} handleClick={() => toggleOptions(!isToggled)} position={'absolute'} right={1} top={`5px`}/>}
             <div/>
-            <LineStyled isToggled={isToggled}/>
+            <LineStyled isToggled={isToggled} hasIcon={hasIcon}/>
             {!categoryList && <OptionsStyled ref={selectRef} isVisible={isHidden} isToggled={isToggled} height={height} color={ColorTheme.DarkBlue}>
                 {
                     localOptions.length > 0 ? sortAlphabeticallyByKey(localOptions, 'label').map((option:any, key:any) => {

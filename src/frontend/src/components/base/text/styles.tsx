@@ -17,11 +17,12 @@ import styled from "styled-components";
 import {ITheme} from "@style/Theme";
 import {TextStyledProps} from './interfaces';
 import ContentLoading from "@app_component/base/loading/ContentLoading";
+import {DefaultFontFamily} from "@entity/application/utils/constants";
 
 const TextStyled = styled.span<TextStyledProps>`
     color: ${({color, theme}:{color:string, theme: ITheme}) => color || 'inherit'};
     font-size: ${({size, theme}:{size:string, theme: ITheme}) => size || theme.text.size || '12px'};
-    font-family: ${({theme}: {theme: ITheme}) => theme.text.fontFamily || `Open Sans, "Arial", sans-serif`};
+    font-family: ${({theme}: {theme: ITheme}) => theme.text.fontFamily || DefaultFontFamily};
     padding-left: ${({paddingLeft}) => paddingLeft || '0'};
     width: ${({width}) => width || 'unset'};
     display: ${({display}) => display || 'unset'};

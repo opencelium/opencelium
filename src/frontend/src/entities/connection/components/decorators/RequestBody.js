@@ -31,6 +31,7 @@ import styles from '@entity/connection/components/themes/default/general/form_me
 import React from 'react';
 import { transformDataFields } from '../components/general/change_component/form_elements/form_connection/form_svg/utils';
 import ToolboxThemeInput from "../hocs/ToolboxThemeInput";
+import DirectReference from "@app_component/operator_builder/classes/references/DirectReference";
 
 //[POST params|header|GET params].$.result:array
 export function RequestBody(CRequestType){
@@ -183,15 +184,18 @@ export function RequestBody(CRequestType){
 							target,
 						} = this.props;
 						connector.setCurrentItem(method);
-
+						const regex = /^#[A-Fa-f0-9]{6}\.\((?:response|request)\)\.(header|body|status)/;
+						const newValue = typeof data?.new_value === 'string' ? data.new_value : '';
+						const match = newValue.match(regex);
+						const apiDataType = match?.[1];
 						const transformedData = data instanceof CXmlEditor ? data : {
 							...data,
-							new_value: transformDataFields(data.new_value, 'body'),
-							updated_src: transformDataFields(data.updated_src, 'body'),
+							new_value: transformDataFields(data.new_value, apiDataType),
+							updated_src: transformDataFields(data.updated_src, apiDataType),
 						};
 
 						const fieldBindingData = CRequestType.convertForFieldBinding(transformedData)
-						
+
 						CRequestType.updateFieldsBinding(
 							connection,
 							connector,

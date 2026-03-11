@@ -1,29 +1,28 @@
 import React from 'react';
 import {
-    ReferenceSwitcherContainer,
-    ReferenceSwitchersContainer
+    RadioSwitcherContainer, RadioSwitchersContainer,
 } from "@app_component/operator_builder/reference_generator/styles";
 import {ReferenceSwitcherProps} from "@app_component/operator_builder/reference_generator/props";
 
 const ReferenceSwitcher = ({referenceType, changeReferenceType, hasNotConstant = false}: ReferenceSwitcherProps) => {
     return (
-        <ReferenceSwitchersContainer hasNotConstant={hasNotConstant}>
-            {!hasNotConstant && <ReferenceSwitcherContainer title={'method'} onClick={() => changeReferenceType('constant')}>
-                <span style={{fontSize: '14px'}} className="mdi mdi-alpha-c-circle"></span>
+        <RadioSwitchersContainer hasNotConstant={hasNotConstant}>
+            {!hasNotConstant && <RadioSwitcherContainer title={'method'} onClick={() => changeReferenceType('constant')}>
+                <span style={{fontSize: '14px'}} className="mdi mdi-alpha-c-circle-outline"></span>
                 <input style={{height: '10px'}} type={'radio'} checked={referenceType === 'constant'}
                        onChange={() => changeReferenceType('constant')}/>
-            </ReferenceSwitcherContainer>}
-            <ReferenceSwitcherContainer title={'method'} onClick={() => changeReferenceType('direct')}>
+            </RadioSwitcherContainer>}
+            <RadioSwitcherContainer title={'method'} onClick={() => changeReferenceType('direct')}>
                 <span style={{fontSize: '14px'}} className="mdi mdi-vector-radius"></span>
                 <input style={{height: '10px'}} type={'radio'} checked={referenceType === 'direct'}
                        onChange={() => changeReferenceType('direct')}/>
-            </ReferenceSwitcherContainer>
-            <ReferenceSwitcherContainer title={'webhook'} onClick={() => changeReferenceType('webhook')}>
+            </RadioSwitcherContainer>
+            <RadioSwitcherContainer title={'webhook'} onClick={() => changeReferenceType('webhook')}>
                 <span style={{fontSize: '14px'}} className="mdi mdi-webhook"></span>
                 <input style={{height: '10px'}} type={'radio'} checked={referenceType === 'webhook'}
                        onChange={() => changeReferenceType('webhook')}/>
-            </ReferenceSwitcherContainer>
-        </ReferenceSwitchersContainer>
+            </RadioSwitcherContainer>
+        </RadioSwitchersContainer>
     )
 }
 

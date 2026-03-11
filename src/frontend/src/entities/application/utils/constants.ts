@@ -34,3 +34,5 @@ export const DefaultCardShadowStyles = `
     transition: all 0.5s ease-in;
     ${DefaultShadowStyles}
 `;
+
+export const DefaultFontFamily = `Open Sans, "Arial", sans-serif`;
