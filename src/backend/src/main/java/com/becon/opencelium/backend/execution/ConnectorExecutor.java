@@ -23,6 +23,7 @@ import com.becon.opencelium.backend.resource.execution.OperatorEx;
 import com.becon.opencelium.backend.resource.execution.ResponseDTO;
 import com.becon.opencelium.backend.utility.Comparators;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
@@ -31,6 +32,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
@@ -326,20 +328,32 @@ public class ConnectorExecutor {
     }
 
     private ResponseEntity<?> convertException(Exception e) {
-        if (e instanceof HttpStatusCodeException sce) {
-            return ResponseEntity.status(sce.getStatusCode())
-                    .headers(sce.getResponseHeaders())
-                    .body(sce.getResponseBodyAsString());
-        } else if (e instanceof ResourceAccessException rae) {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                    .body("Connection/Resource access error: " + rae.getMessage());
-        } else if (e instanceof RestClientException rce) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("General client error: " + rce.getMessage());
-        } else {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Unexpected error: " + e.getMessage());
+        if (e instanceof RestClientResponseException rre) { // 4xx - 5xx
+            HttpHeaders headers = rre.getResponseHeaders() != null ? rre.getResponseHeaders() : new HttpHeaders();
+
+            return ResponseEntity
+                    .status(rre.getStatusCode())
+                    .headers(headers)
+                    .body(rre.getResponseBodyAsString());
         }
+
+        if (e instanceof ResourceAccessException rae) {
+            Throwable root = rae.getMostSpecificCause();
+
+            return ResponseEntity
+                    .status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body("Connection error: " + (root != null ? root.getMessage() : rae.getMessage()));
+        }
+
+        if (e instanceof RestClientException rce) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Client error: " + rce.getMessage());
+        }
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Unexpected error: " + e.getMessage());
     }
 
     private Class<?> getResponseType(OperationDTO dto) {
