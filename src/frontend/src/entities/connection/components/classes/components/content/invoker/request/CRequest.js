@@ -105,6 +105,24 @@ export default class CRequest{
     }
 
     setHeaderFields(fields){
+        if (Array.isArray(fields)) {
+            this._header = fields.map((item) => ({
+                ...item,
+                value: item?.value === null ? '' : item?.value,
+            }));
+            return;
+        }
+
+        if (fields && typeof fields === 'object') {
+            this._header = Object.fromEntries(
+                Object.entries(fields).map(([key, value]) => [
+                    key,
+                    value === null ? '' : value,
+                ])
+            );
+            return;
+        }
+
         this._header = fields;
     }
 

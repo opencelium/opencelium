@@ -185,7 +185,8 @@ export function RequestBody(CRequestType){
 						} = this.props;
 						connector.setCurrentItem(method);
 						const regex = /^#[A-Fa-f0-9]{6}\.\((?:response|request)\)\.(header|body|status)/;
-						const match = data.new_value.match(regex);
+						const newValue = typeof data?.new_value === 'string' ? data.new_value : '';
+						const match = newValue.match(regex);
 						const apiDataType = match?.[1];
 						const transformedData = data instanceof CXmlEditor ? data : {
 							...data,
