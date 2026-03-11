@@ -6,7 +6,6 @@ import com.becon.opencelium.backend.validation.password.ValidPassword;
 
 @PasswordMatches
 public record ChangePasswordDTO(
-        @ValidPassword
         String currentPassword,
         @ValidPassword
         String newPassword,
