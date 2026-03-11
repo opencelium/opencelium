@@ -29,6 +29,7 @@ import Button from "@app_component/base/button/Button";
 import {Step} from "react-joyride";
 import {DashboardTourSteps} from "@entity/dashboard/utils/tourSteps";
 import {switchSteps} from "@app_component/layout/top_bar/collection_title/switchSteps";
+import ConnectionEditableTitle from "./ConnectionEditableTitle";
 
 const Title: FC<TitleProps> =
     ({
@@ -49,6 +50,12 @@ const Title: FC<TitleProps> =
     useEffect(() => {
         setSteps(switchSteps(entityIconKey));
     }, [entityIconKey])
+
+    const isConnectionFormTitle =
+        typeof title === 'string' &&
+        entityIconKey &&
+        entityIconKey.indexOf('connection-form-with') === 0;
+
     if(isArray(title)){
         return(
             <TitleStyled className={className} style={{position: 'relative'}} id={`${entityIconKey}-header`}>
@@ -92,7 +99,11 @@ const Title: FC<TitleProps> =
     return (
         <TitleStyled className={className} style={{position: 'relative'}} id={`${entityIconKey}-header`}>
             <span>
-                <Text value={title} size={`${EntityHeaderTextSize}px`}/>
+                {isConnectionFormTitle ? (
+                    <ConnectionEditableTitle title={title}/>
+                ) : (
+                    <Text value={title} size={`${EntityHeaderTextSize}px`}/>
+                )}
                 <IconStyled>{icon}</IconStyled>
             </span>
             {steps.length > 0 ? <React.Fragment>
