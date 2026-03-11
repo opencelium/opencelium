@@ -21,6 +21,46 @@ export interface WidgetSettingsProps{
     widgetSettings: IWidgetSetting[],
 }
 
+export const DefaultWidgetSettings: IWidgetSetting[] = [
+    {
+        x: 0,
+        y: 6,
+        w: 6,
+        h: 4,
+        minW: 6,
+        minH: 4,
+        widgetId: 1,
+        i: 'CONNECTION_OVERVIEW',
+    },{
+        x: 0,
+        y: 2,
+        w: 6,
+        h: 4,
+        minW: 6,
+        minH: 4,
+        widgetId: 4,
+        i: 'SUBSCRIPTION_OVERVIEW',
+    }, {
+        x: 0,
+        y: 0,
+        w: 12,
+        h: 2,
+        minW: 12,
+        minH: 2,
+        widgetId: 5,
+        i: 'METRICS_OVERVIEW',
+    }, {
+        x: 6,
+        y: 2,
+        w: 6,
+        h: 4,
+        minW: 6,
+        minH: 4,
+        widgetId: 2,
+        i: 'CURRENT_SCHEDULER'
+    }
+]
+
 export interface IWidgetSettingRequest{
 
     //to get all widget settings by user id
