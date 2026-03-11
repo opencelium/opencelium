@@ -160,41 +160,15 @@ const ReferenceGenerator = React.forwardRef(
 			return '';
 		};
 
-		const formatReferenceForDisplay = (reference: string): string => {
-			const value = String(reference || '').trim();
-			if (!value) return '';
-
-			if (/\.status(\.|$)?/.test(value)) {
-				return 'Response Status';
-			}
-
-			const bodyMatch = value.match(/\.body\.\$(?:\.(.*))?$/);
-			if (bodyMatch) {
-				const field = bodyMatch[1] || '';
-				return field ? `B:${field}` : 'B:root object';
-			}
-
-			const headerMatch = value.match(/\.header\.\$(?:\.(.*))?$/);
-			if (headerMatch) {
-				const field = headerMatch[1] || '';
-				return field ? `H:${field}` : 'H:root object';
-			}
-
-			return value;
-		};
-
 		const setIdValue = () => {
 			const computedRef = getComputedReference();
-			const elem = document.getElementById(id);
-
-			if (!elem) return;
-
+			let elem = document.getElementById(id);
 			if (computedRef !== '') {
-				elem.innerText = formatReferenceForDisplay(computedRef);
-			} else {
-				elem.innerText = '';
+				if (elem) {
+					elem.innerText = computedRef;
+				}
 			}
-		};
+		}
 
 		const handleEscKey = (event: any) => {
 			if ((editCancel && event.key === 'Escape') || event.keyCode === 27) {
