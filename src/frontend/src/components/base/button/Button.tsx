@@ -52,7 +52,7 @@ const Button: FC<ButtonProps> =
     }) => {
     const [isConfirmationOpened, toggleConfirmation] = useState<boolean>(false);
     const hasIcon = !!icon;
-    const isLabelHidden = !icon;
+    const isLabelHidden = !icon && isLoading;
     const hasLabel = !!label && !isLabelHidden;
     let navigate = useNavigate();
     let onClick = (e: any) => {
@@ -73,7 +73,6 @@ const Button: FC<ButtonProps> =
     if(!icon && !label && !isLoading){
         return null;
     }
-    console.log('hasLabel', hasLabel, label)
     return (
         <ButtonStyled autoFocus={autoFocus} id={id} className={className} isDisabled={isDisabled} hasLabel={hasLabel} size={instanceSize.size} onClick={hasConfirmation ? () => toggleConfirmation(true) : onClick} color={color} background={background} disabled={isDisabled} hasBackground={hasBackground} isContentCentralized={isLabelHidden} {...styles}>
             <Icon isLoading={isLoading} name={icon} size={iconSize || instanceSize.size} loadingSize={loadingSize} color={ hasBackground ? color || theme.button.color.quite : background || theme.button.background.quite}/>
