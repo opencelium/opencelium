@@ -46,22 +46,23 @@ const ReferenceInformation: FC<ReferenceInformationProps> = ({
 	const hasFieldBindings = fieldBindings.length > 0;
 	return (
 		<ReferenceInformationStyled style={style} ref={ContainerRef}>
-			<div>
+			<div style={{position: 'relative', minHeight: '36px', display: 'flex'}}>
 				<b>{`Reference information`}</b>
-				<span style={{marginLeft: hasFieldBindings ? '0' : 15}}>{hasFieldBindings ? '' : ' (is empty now)'}</span>
-				{hasFieldBindings && (
+				<div style={{marginTop: '-6px'}}>
+					<HelpIcon steps={ReferenceInfoSteps} inputRef={ContainerRef}/>
+				</div>
+				{hasFieldBindings ? (
 					<TooltipFontIcon
 						tooltipPosition={'right'}
-						style={{verticalAlign: 'middle', cursor: 'pointer', marginLeft: '15px'}}
+						style={{cursor: 'pointer'}}
 						onClick={() => toggleIcon(!isToggledIcon)}
 						tooltip={isToggledIcon ? 'Hide' : 'Show'}
 						value={isToggledIcon ? 'expand_less' : 'chevron_right'}
 					/>
-				)}
+				) :
+				<span>{' (is empty now)'}</span>
+				}
 
-				<div style={{position: 'absolute', left: '170px', top: -10}}>
-					<HelpIcon steps={ReferenceInfoSteps} inputRef={ContainerRef}/>
-				</div>
 			</div>
 			{isToggledIcon && hasFieldBindings && (
 				<FieldBindingsBlockStyled>

@@ -64,6 +64,10 @@ export function putAsterixInEmptyBrackets(data) {
 }
 
 export function transformExpertVar(expertVar, from = 'body') {
+	if (expertVar === 'status') {
+		return expertVar;
+	}
+
 	if (expertVar.includes('header.$') || expertVar.includes('body.$')) {
 		return expertVar;
 	}

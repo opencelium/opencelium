@@ -66,33 +66,31 @@ export default class IfOperator {
                         }
                         updateRule({...rule, error: '', properties: {...rule?.properties, leftField, operator: '', rightField: EmptyString}})
                 }}/>
-                {leftField &&
-                    <React.Fragment>
-                        <OperatorSelect
+                <React.Fragment>
+                    <OperatorSelect
+                        error={rule.error}
+                        type={OperatorType.If}
+                        operator={rule?.properties?.operator || ''}
+                        updateOperator={(operator) => {
+                            updateRule({...rule, error: '', properties: {...rule?.properties, operator, rightField: EmptyString}})
+                        }}
+                    />
+                    {rule?.properties?.operator && isBinaryOperator(rule.properties.operator) &&
+                        <ReferenceGenerator
+                            isBuilder
                             error={rule.error}
-                            type={OperatorType.If}
-                            operator={rule?.properties?.operator || ''}
-                            updateOperator={(operator) => {
-                                updateRule({...rule, error: '', properties: {...rule?.properties, operator, rightField: EmptyString}})
+                            operator={rule.properties?.operator || ''}
+                            connectionEditor={connectionEditor}
+                            reference={rightField || ''}
+                            setReference={(rightField: string) => {
+                                if (isLikeOperator && !!(ReferenceFactory.createReferenceInstance(rightField))) {
+                                    rightField = `"${rightField}"`;
+                                }
+                                updateRule({...rule, error: '', properties: {...rule?.properties, rightField}})
                             }}
                         />
-                        {rule?.properties?.operator && isBinaryOperator(rule.properties.operator) &&
-                            <ReferenceGenerator
-                                isBuilder
-                                error={rule.error}
-                                operator={rule.properties?.operator || ''}
-                                connectionEditor={connectionEditor}
-                                reference={rightField || ''}
-                                setReference={(rightField: string) => {
-                                    if (isLikeOperator && !!(ReferenceFactory.createReferenceInstance(rightField))) {
-                                        rightField = `"${rightField}"`;
-                                    }
-                                    updateRule({...rule, error: '', properties: {...rule?.properties, rightField}})
-                                }}
-                            />
-                        }
-                    </React.Fragment>
-                }
+                    }
+                </React.Fragment>
             </React.Fragment>
         )
     }

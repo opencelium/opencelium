@@ -1,7 +1,7 @@
 import Button from "@app_component/base/button/Button";
 import {
 	ReferenceGeneratorStyleProps,
-	ReferenceSwitcherStyleProps
+	RadioSwitcherStyleProps
 } from "@app_component/operator_builder/reference_generator/props";
 import styled from 'styled-components';
 
@@ -41,25 +41,25 @@ export const ReferenceGeneratorContainer = styled.div<ReferenceGeneratorStylePro
 		`
         grid-template-columns: 30px 380px 30px;
     `}
-	${({ referenceType }) =>
+	${({ referenceType, apiResponseType }) =>
 		referenceType === 'direct' &&
 		`
-        grid-template-columns: 30px 180px 200px;
+        grid-template-columns: 30px 180px 30px 170px;
     `}
-	${({ referenceType, isLikeOperator }) =>
+	${({ referenceType, isLikeOperator, apiResponseType }) =>
 		referenceType === 'direct' && isLikeOperator && 
 		`
-        grid-template-columns: 30px 10px 180px 150px 10px;
+        grid-template-columns: 30px 10px 180px 30px 150px 10px;
     `}
-	${({ referenceType, isAbsolute, manualAdd }) =>
+	${({ referenceType, isAbsolute, manualAdd, apiResponseType }) =>
 		referenceType === 'direct' && (isAbsolute || manualAdd) &&
 		`
-        grid-template-columns: 30px 180px 200px 30px;
+        grid-template-columns: 30px 180px 30px 170px 30px;
     `}
-	${({ referenceType, isAbsolute, endpointReference }) =>
+	${({ referenceType, isAbsolute, endpointReference, apiResponseType }) =>
 		referenceType === 'direct' && isAbsolute && endpointReference &&
 		`
-        grid-template-columns: 180px 200px 30px;
+        grid-template-columns: 180px 30px 170px 30px;
     `}
 	${({ referenceType }) =>
 		referenceType === 'webhook' &&
@@ -100,17 +100,17 @@ export const ReferenceGeneratorContainer = styled.div<ReferenceGeneratorStylePro
 export const ConstantContainer = styled.div`
 `;
 
-export const ReferenceSwitchersContainer = styled.div<ReferenceSwitcherStyleProps>`
+export const RadioSwitchersContainer = styled.div<RadioSwitcherStyleProps>`
     float: left;
     display: ${({isHidden}) => isHidden ? 'none' : 'grid'};/*
-    height: ${({hasNotConstant}) => hasNotConstant ? '37px' : '47px'};
+    height: 47px;
     margin-top: -10px;
-    padding-bottom: ${({hasNotConstant}) => hasNotConstant ? '0' : '9px'};*/
+    padding-bottom: 9px;*/
     overflow: hidden;
     transition: width 0.3s ease 0s;
 `;
 
-export const ReferenceSwitcherContainer = styled.div`
+export const RadioSwitcherContainer = styled.div`
 	height: 14px;
 	display: flex;
 	justify-content: center;

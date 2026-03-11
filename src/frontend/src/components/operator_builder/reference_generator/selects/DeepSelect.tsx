@@ -3,7 +3,8 @@ import { DeepSelectProps } from '@app_component/operator_builder/reference_gener
 import { ErrorMessage } from '@app_component/operator_builder/styles';
 import React, { useEffect, useRef, useState } from 'react';
 import Select from 'react-select';
-import {DefaultInputTextSize} from "@entity/application/utils/constants";
+import {DefaultFontFamily, DefaultInputTextSize} from "@entity/application/utils/constants";
+import DefaultText from "@app_component/base/text/DefaultText";
 
 type DataStructure = {
 	[key: string]: DataStructure | null | DataStructure[] | any;
@@ -219,7 +220,18 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 		}
 	}, [field]);
 
+	useEffect(() => {
+		if (!field) return;
 
+		const option =
+			allOptions.find(o => o.value === field) ||
+			filteredOptions.find(o => o.value === field);
+
+		if (option) {
+			setSelectedOption(option);
+			setSearchValue(option.value);
+		}
+	}, [field, allOptions]);
 	useEffect(() => {
 		setFilteredOptions(allOptions);
 	}, [allOptions]);
@@ -229,12 +241,23 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 			setAllOptions(getNestedOptions(''));
 		}
 	}, [color]);
+	const getLabelForValue = (value: string) => {
+		const option =
+			filteredOptions.find(o => o.value === value) ||
+			allOptions.find(o => o.value === value);
+
+		return option?.label || value;
+	};
 	return (
 		<div ref={ref}>
 			<Select
 				placeholder={'Select Field...'}
 				options={filteredOptions}
-				inputValue={menuIsOpen ? searchValue : !!searchValue ? filteredOptions.find(o => o.value === searchValue)?.label || searchValue : searchValue}
+				inputValue={menuIsOpen
+					? searchValue
+					: searchValue
+						? getLabelForValue(searchValue)
+						: searchValue}
 				onInputChange={handleInputChange}
 				onChange={handleChange}
 				value={selectedOption}
@@ -259,11 +282,13 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 							: '#ccc',
 						opacity: 1,
 						fontSize: DefaultInputTextSize,
+						fontFamily: DefaultFontFamily,
 					}),
 					singleValue: (base) => ({
 						...base,
 						opacity: 1,
 						fontSize: DefaultInputTextSize,
+						fontFamily: DefaultFontFamily,
 					}),
 					input: (base) => ({
 						...base,
@@ -274,22 +299,27 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 					noOptionsMessage: (provided) => ({
 						...provided,
 						fontSize: DefaultInputTextSize,
+						fontFamily: DefaultFontFamily,
 					}),
 					multiValueLabel: (provided) => ({
 						...provided,
 						fontSize: DefaultInputTextSize,
+						fontFamily: DefaultFontFamily,
 					}),
 					multiValue: (provided) => ({
 						...provided,
 						fontSize: DefaultInputTextSize,
+						fontFamily: DefaultFontFamily,
 					}),
 					option: (provided) => ({
 						...provided,
 						fontSize: DefaultInputTextSize,
+						fontFamily: DefaultFontFamily,
 					}),
 					placeholder: (provided) => ({
 						...provided,
 						fontSize: DefaultInputTextSize,
+						fontFamily: DefaultFontFamily,
 					}),
 					menuPortal: (base) => ({ ...base, zIndex: 10000 }),
 				}}
@@ -303,9 +333,9 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 						color: ErrorColor,
 						position: 'absolute',
 						left: ref.current?.offsetLeft,
-						bottom: -15,
+						bottom: 3,
 					}}
-				>{`${error}`}</ErrorMessage>
+				><DefaultText value={`${error}`}/></ErrorMessage>
 			)}
 		</div>
 	);

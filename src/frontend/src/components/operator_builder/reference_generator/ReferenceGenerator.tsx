@@ -26,9 +26,9 @@ import React, { useEffect, useImperativeHandle, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import Select, { StylesConfig } from 'react-select';
 import DirectReference from '../classes/references/DirectReference';
-import DeepSelect from './DeepSelect';
 import MethodSelect from './MethodSelect';
 import {
+	APIResponseType,
 	ConstantComponentType,
 	ConstantSelectOptions,
 	ReferenceGeneratorProps,
@@ -39,6 +39,8 @@ import {
 	LikePercentageContainer,
 	ReferenceGeneratorContainer,
 } from './styles';
+import APIResponseSwitcher from "@app_component/operator_builder/reference_generator/APIResponseSwitcher";
+import ApiResponseSelect from "@app_component/operator_builder/reference_generator/selects/APIResponseSelect";
 
 export const EmptyString = '&nbsp';
 const ReferenceGenerator = React.forwardRef(
@@ -91,6 +93,9 @@ const ReferenceGenerator = React.forwardRef(
 		const [referenceType, updateReferenceType] = useState<ReferenceType>(
 			getOperatorClass()?.defaultRefType || 'direct'
 		);
+		const [apiResponseType, updateAPIResponseType] = useState<APIResponseType>(
+			getOperatorClass()?.defaultAPIResponseType || 'body'
+		);
 		const [coords, setCoords] = useState<{ top: number; left: number }>({
 			top: 0,
 			left: 0,
@@ -109,9 +114,15 @@ const ReferenceGenerator = React.forwardRef(
 		};
 
 		const applyReference = () => {
-			if (!currentField) return;
+			if (apiResponseType !== 'status' && !currentField) return;
 
-			let newReference = ReferenceFactory.getReference(referenceType, currentField, color, 'response');
+			let newReference = ReferenceFactory.getReference(
+				referenceType,
+				currentField,
+				color,
+				'response',
+				apiResponseType
+			);
 
 			if (isLikeOperator()) {
 				if (hasOpenPerc && !newReference.startsWith('%')) {
@@ -127,12 +138,13 @@ const ReferenceGenerator = React.forwardRef(
 			}
 		};
 		const getComputedReference = () => {
-			if (currentField !== '') {
+			if (currentField !== '' || apiResponseType === 'status') {
 				let reference = ReferenceFactory.getReference(
 					referenceType,
 					currentField,
 					color,
-					'response'
+					'response',
+					apiResponseType
 				);
 				if (reference.length > 3) {
 					if (
@@ -148,13 +160,39 @@ const ReferenceGenerator = React.forwardRef(
 			return '';
 		};
 
+		const formatReferenceForDisplay = (reference: string): string => {
+			const value = String(reference || '').trim();
+			if (!value) return '';
+
+			if (/\.status(\.|$)?/.test(value)) {
+				return 'Response Status';
+			}
+
+			const bodyMatch = value.match(/\.body\.\$(?:\.(.*))?$/);
+			if (bodyMatch) {
+				const field = bodyMatch[1] || '';
+				return field ? `B:${field}` : 'B:root object';
+			}
+
+			const headerMatch = value.match(/\.header\.\$(?:\.(.*))?$/);
+			if (headerMatch) {
+				const field = headerMatch[1] || '';
+				return field ? `H:${field}` : 'H:root object';
+			}
+
+			return value;
+		};
+
 		const setIdValue = () => {
 			const computedRef = getComputedReference();
-			let elem = document.getElementById(id);
+			const elem = document.getElementById(id);
+
+			if (!elem) return;
+
 			if (computedRef !== '') {
-				if (elem) {
-					elem.innerText = computedRef;
-				}
+				elem.innerText = formatReferenceForDisplay(computedRef);
+			} else {
+				elem.innerText = '';
 			}
 		};
 
@@ -211,6 +249,13 @@ const ReferenceGenerator = React.forwardRef(
 				setCurrentField('');
 			}
 		};
+		const changeApiResponseType = (newType: APIResponseType) => {
+			updateAPIResponseType(newType);
+			setCurrentField('');
+			if (isBuilder) {
+				setReference('');
+			}
+		}
 		const onColorSelect = (newColor: string) => {
 			setColor(newColor);
 			setCurrentField('');
@@ -349,6 +394,15 @@ const ReferenceGenerator = React.forwardRef(
 				applyReference();
 			}
 		}, [currentField, manualAdd]);
+		useEffect(() => {
+			if (apiResponseType === 'status') {
+				if (manualAdd) {
+					setIdValue();
+				} else {
+					applyReference();
+				}
+			}
+		}, [apiResponseType, manualAdd])
 
 		useEffect(() => {
 			if (reference) {
@@ -360,6 +414,7 @@ const ReferenceGenerator = React.forwardRef(
 					if (referenceInstance instanceof DirectReference) {
 						setColor(referenceData.color);
 						setCurrentField(referenceData.field);
+						updateAPIResponseType(referenceData.apiResponseType);
 						if (referenceType !== 'direct') {
 							updateReferenceType('direct');
 						} else {
@@ -430,6 +485,7 @@ const ReferenceGenerator = React.forwardRef(
 		const renderGenerator = () => {
 			return (
 				<ReferenceGeneratorContainer
+					apiResponseType={apiResponseType}
 					referenceType={referenceType}
 					style={{ ...containerStyle, ...style }}
 					isAbsolute={isAbsolute}
@@ -464,12 +520,19 @@ const ReferenceGenerator = React.forwardRef(
 								methodColor={color}
 								onMethodSelect={onColorSelect}
 							/>
-							<DeepSelect
-								error={error}
-								color={color}
-								connectionEditor={connectionEditor}
-								field={currentField}
-								onValueSelect={onFieldSelect}
+							<APIResponseSwitcher
+								type={apiResponseType}
+								changeType={changeApiResponseType}
+							/>
+							<ApiResponseSelect
+								selectProps={{
+									error,
+									color,
+									connectionEditor,
+									field: currentField,
+									onValueSelect: onFieldSelect,
+							}}
+								apiResponseType={apiResponseType}
 							/>
 						</React.Fragment>
 					)}

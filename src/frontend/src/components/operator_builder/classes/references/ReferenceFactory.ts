@@ -1,5 +1,5 @@
 import BaseReference from "@app_component/operator_builder/classes/references/BaseReference";
-import {ReferenceType} from "@app_component/operator_builder/reference_generator/props";
+import {APIResponseType, ReferenceType} from "@app_component/operator_builder/reference_generator/props";
 
 type ReferenceConstructor = new (...args: any[]) => BaseReference;
 
@@ -20,9 +20,9 @@ export default class ReferenceFactory {
         return null;
     }
 
-    static getReference(referenceType: ReferenceType, referenceOrColor: string, type?: string, field?: string): string {
+    static getReference(referenceType: ReferenceType, referenceOrColor: string, type?: string, field?: string, apiResponseType?: APIResponseType): string {
         for (const RefType of this.registeredTypes) {
-            const instance = new RefType(referenceOrColor, type, field);
+            const instance = new RefType(referenceOrColor, type, field, apiResponseType);
             if (instance.type === referenceType) {
                 return instance.reference;
             }

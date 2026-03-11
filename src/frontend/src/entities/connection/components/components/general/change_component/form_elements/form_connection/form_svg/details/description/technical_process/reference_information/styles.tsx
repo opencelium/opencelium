@@ -30,8 +30,6 @@ export const FieldBindingBlockStyled = styled.div`
 `;
 
 export const FieldBindingsBlockStyled = styled.div`
-    flex: 1;
-    overflow-y: auto;
 `;
 
 export const ReferenceInformationStyled = styled.div`
