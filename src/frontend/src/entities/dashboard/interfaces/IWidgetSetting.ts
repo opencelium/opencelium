@@ -17,7 +17,7 @@ import {WidgetKey} from "./IWidget";
 
 export interface IWidgetSetting{
     widgetId: number,
-    widgetSettingId: number,
+    widgetSettingId?: number,
 
     //x coordinate
     x: number,

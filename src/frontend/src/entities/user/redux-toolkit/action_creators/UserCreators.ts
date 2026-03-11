@@ -19,6 +19,8 @@ import {errorHandler} from "@application/utils/utils";
 import {IEntityWithImage} from "@application/requests/interfaces/IRequest";
 import UserRequest from "../../requests/classes/UserRequest";
 import ModelUserPoust from "../../requests/models/UserPoust";
+import {WidgetSettingRequest} from "@entity/dashboard/requests/classes/WidgetSetting";
+import {DefaultWidgetSettings} from "@entity/dashboard/requests/interfaces/IWidgetSetting";
 
 export interface UpdatePasswordRequestBody {
     currentPassword: string;
@@ -57,6 +59,9 @@ export const addUser = createAsyncThunk(
                 const uploadImageRequest = new UserRequest({isFormData: true});
                 await uploadImageRequest.uploadUserImage(data);
             }
+
+            const request = new WidgetSettingRequest();
+            await request.updateAllWidgetSettings({userId: response.data.userId, widgetSettings: DefaultWidgetSettings});
             return response.data;
         } catch(e){
             return thunkAPI.rejectWithValue(errorHandler(e));
