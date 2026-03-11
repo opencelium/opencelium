@@ -50,13 +50,23 @@ function visibleFromToken(tk) {
 		.replace(/^\{\%\s*#/, '')
 		.replace(/\s*\%\}$/, '');
 
-	// status case
 	if (/\.status(\.|$)/.test(inner)) {
-		return 'status';
+		return 'Response Status';
 	}
-	let name = inner.replace(/^.*?(body|header)\.\$/, '');
-	name = name.replace(/^\./, '');
-	return name || inner;
+
+	const bodyMatch = inner.match(/\.body\.\$(?:\.(.*))?$/);
+	if (bodyMatch) {
+		const field = bodyMatch[1] || '';
+		return field ? `B:${field}` : 'B:root object';
+	}
+
+	const headerMatch = inner.match(/\.header\.\$(?:\.(.*))?$/);
+	if (headerMatch) {
+		const field = headerMatch[1] || '';
+		return field ? `H:${field}` : 'H:root object';
+	}
+
+	return inner;
 }
 
 function tokenColor(tk) {
