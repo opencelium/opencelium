@@ -26,7 +26,7 @@ import {
 import {
     setCurrentTechnicalItem,
     setCurrentConnection, setConnection,
-    setTemplatePanelVisibility, setSavePanelVisibility, setWebhooks
+    setTemplatePanelVisibility, setSavePanelVisibility, setWebhooks, setIsDirty
 } from "@entity/connection/redux_toolkit/slices/ConnectionSlice";
 import {setEntityHeader, setEntityIconKey, setFullScreen} from "@application/redux_toolkit/slices/ApplicationSlice";
 import {addTemplate, getTemplatesByConnectors as fetchTemplates} from "@entity/template/redux_toolkit/action_creators/TemplateCreators";
@@ -83,7 +83,7 @@ function mapStateToProps(state){
 @connect(mapStateToProps, {
     updateConnection, addConnection, addTemplate, fetchConnectors, checkConnectionTitle,
     fetchTemplates, testConnection, setCurrentTechnicalItem, setCurrentConnection,
-    setFullScreen, setConnection, setEntityIconKey, setEntityHeader,
+    setFullScreen, setConnection, setEntityIconKey, setEntityHeader, setIsDirty
 })
 @permission(ConnectionPermissions.CREATE, true)
 @withTranslation(['connections', 'app', 'basic_components'])

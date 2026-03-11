@@ -127,7 +127,7 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
             {autoFocus: true, label: 'Post', value: EVENT_TYPE.POST, key: EVENT_TYPE.POST},
             {label: 'Alert', value: EVENT_TYPE.ALERT, key: EVENT_TYPE.ALERT}
         ],
-        helpMessage: NotificationTemplateEventTypeSteps,
+        //helpMessage: NotificationTemplateEventTypeSteps,
         required: true,
     }})
     const NotificationTypeComponent = notification.getSelect({
@@ -146,7 +146,7 @@ const ScheduleNotificationForm: FC<ScheduleNotificationFormProps> =
             options: notificationTemplatesOptions,
             required: true,
             isLoading: gettingNotificationTemplates === API_REQUEST_STATE.START,
-            helpMessage: NotificationTemplateInputSteps,
+            //helpMessage: NotificationTemplateInputSteps,
         }
     });
     const RecipientsComponent = notification.getSelect({

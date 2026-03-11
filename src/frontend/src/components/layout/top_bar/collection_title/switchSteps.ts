@@ -102,7 +102,7 @@ export function switchSteps(entityIconKey: EntityIconKeyType) {
         case 'notification-template-form':
             return NotificationTemplateFormSteps;
         case 'license-management-offline':
-            return LicenseManagementOfflineSteps;
+            return [];
         default:
             return [];
     }

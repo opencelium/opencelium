@@ -3,6 +3,8 @@ import Joyride, {ACTIONS, CallBackProps, EVENTS, STATUS, Step} from "react-joyri
 import DefaultText from "@app_component/base/text/DefaultText";
 import BeaconComponent from "@app_component/base/tour/BeaconComponent";
 import TourTooltip from "@app_component/base/tour/TourTooltip";
+import {HeaderTextSize} from "@entity/application/utils/constants";
+import {Text} from "@app_component/base/text/Text";
 
 interface TourProps{
     steps: Step[],
@@ -19,7 +21,7 @@ const Tour:FC<TourProps> =  ({
     steps = steps.map((step, index) => {
         return {
             ...step,
-            title: <DefaultText value={step.title}/>,
+            title: <Text value={step.title} size={`${HeaderTextSize}px`} isBold/>,
         }
     });
     useEffect(() => {
@@ -70,6 +72,7 @@ const Tour:FC<TourProps> =  ({
             setStepIndex(0);
         }
     };
+    const styles = steps.length > 0 ? steps[0]?.data?.styles : {};
     return (
         <Joyride
             key={show ? 'joyride-on' : 'joyride-off'}
@@ -91,11 +94,12 @@ const Tour:FC<TourProps> =  ({
                     zIndex: 20000,
                 },
                 options: {
-                    zIndex: 20000,
+                    zIndex: 120000,
                 },
                 spotlight: {
-                    transition: 'none', // Remove the 0.2s default sliding transition
-                }
+                    transition: 'none',
+                },
+                ...styles,
             }}
         />
     );

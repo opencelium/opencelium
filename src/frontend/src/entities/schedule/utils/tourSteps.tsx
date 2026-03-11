@@ -2,6 +2,15 @@ import React from 'react';
 import {Step} from "react-joyride";
 import {Link} from "react-router-dom";
 
+export const Spot = ({color}: {color: string}) => (<div style={{
+    width: '14px',
+    height: '14px',
+    background: color,
+    borderRadius: '50%',
+    fontSize: '12px',
+    display: 'inline-block',
+    marginRight: '5px',
+}}/>)
 export const EmptyScheduleListSteps: Step[] = [
     {
         title: 'Schedules',
@@ -64,7 +73,20 @@ export const ScheduleListSteps: Step[] = [
     {
         title: 'Status',
         content:
-            'Indicates the current execution status of the schedule, showing whether it is active - green, inactive - gray, or in an error state - red.',
+            <span>
+                Indicates the current execution status of the schedule, showing whether it is:
+            <ul style={{marginLeft: 20, marginTop: 10}}>
+                    <li style={{listStyleType: 'none'}}>
+                       <Spot color={'#c3f5c3'}/> Green — active
+                    </li>
+                    <li style={{listStyleType: 'none'}}>
+                        <Spot color={'#cccccc'}/> Gray — inactive
+                    </li>
+                    <li style={{listStyleType: 'none'}}>
+                        <Spot color={'#f5c3c3'}/> Red — error
+                    </li>
+                </ul>
+        </span>,
         target: '#collection-column-header-status',
         placement: 'bottom',
         disableBeacon: true,
@@ -128,7 +150,7 @@ export const ScheduleListSteps: Step[] = [
     {
         title: 'Update',
         content:
-            'Update the connection configuration.',
+            'Update the schedule configuration.',
         target: '[id^="update_entity_"]',
         placement: 'left',
         disableBeacon: true,
@@ -160,7 +182,10 @@ export const ScheduleListSteps: Step[] = [
     {
         title: 'Support Logs',
         content:
-            'If you have any problem with this schedule, press here to generate support logs. After finish you will be notified that support files are generated and are available in Admin Panel.',
+        <span>
+            If you have any problem with this schedule, press here to generate support logs. After finish you will be notified that support files are generated and are available <Link to={'/support_files'} target={'_blank'}>here</Link>.
+        </span>
+            ,
         target: '[id^="get_logs_entity_"]',
         placement: 'left',
         disableBeacon: true,
@@ -168,7 +193,10 @@ export const ScheduleListSteps: Step[] = [
     {
         title: 'Delete',
         content:
-            'Permanently remove the connection and assigned schedules from the system. This action cannot be undone.',
+            <p>
+                <p>Permanently remove the schedules from the system.</p><p><strong>This action
+                cannot be undone!</strong></p>
+            </p>,
         target: '[id^="delete_entity_"]',
         placement: 'left',
         disableBeacon: true,
@@ -224,10 +252,18 @@ export const NotificationTemplateInputSteps: Step[] = [{
             </span>
         </span>,
     target: '',
-    placement: 'right',
+    placement: 'bottom',
     disableBeacon: true,
     hideCloseButton: true,
     hideFooter: true,
+    data: {
+        styles: {
+            spotlight: {
+                marginTop: 90,
+                transition: 'none',
+            }
+        }
+    }
 }]
 export const NotificationTemplateEventTypeSteps: Step[] = [{
     title: 'Event Type',
@@ -240,8 +276,16 @@ export const NotificationTemplateEventTypeSteps: Step[] = [{
             </ul>
         </span>,
     target: '',
-    placement: 'right',
+    placement: 'bottom',
     disableBeacon: true,
     hideCloseButton: true,
     hideFooter: true,
+    data: {
+        styles: {
+            spotlight: {
+                marginTop: 90,
+                transition: 'none',
+            }
+        }
+    }
 }]
