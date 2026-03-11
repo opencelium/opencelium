@@ -199,7 +199,7 @@ class ConfigurationsIcon extends React.Component {
           connection.categoryId = category.value;
         }
         getAndUpdateConnectionTitle({...connectionObj, title, description, categoryId: category ? category?.value : null}).then((data) => {
-          if(data.payload.message === ResponseMessages.CONNECTOR_EXISTS){
+          if(data.payload.message === ResponseMessages.CONNECTION_EXISTS){
             this.setState({validationMessageTitle: 'Connection with such title already exist'});
             return
           }

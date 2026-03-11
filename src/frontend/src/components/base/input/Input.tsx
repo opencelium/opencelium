@@ -125,7 +125,7 @@ const Input: FC<InputProps> =
                 {showIcon && <IconStyled paddingTop={paddingTop ? paddingTop : '0'} top={hasLabel ? '24px' : '2px'} left={!isLoadingWithoutIcon && isIconInside ? '3px' : '10px'} right={isLoadingWithoutIcon ? isTextarea ? '15px' : '3px' : 'unset'}><Icon color={ColorTheme.LightGray} isLoading={isLoading} name={icon} size={`${ButtonIconSize}px`}/></IconStyled>}
                 {hasLabel && <LabelStyled labelMargin={labelMargin} paddingTop={paddingTop ? paddingTop : '0'} hasIcon={hasIcon} isIconInside={isIconInside}><Text value={label} size={`${SmallTextSize}px`}/></LabelStyled>}
                 {hasError && <ErrorStyled errorBottom={errorBottom} paddingLeft={paddingLeft} hasIcon={hasIcon} isIconInside={isIconInside}><Text value={error} size={`${SmallTextSize}px`} color={ColorTheme.Red}/></ErrorStyled>}
-                {hasMaxLength && <NumberCounterStyled>{`${value ? value.toString().length : 0}/${maxLength}`}</NumberCounterStyled>}
+                {hasMaxLength && <NumberCounterStyled hasIcon={hasIcon}>{`${value ? value.toString().length : 0}/${maxLength}`}</NumberCounterStyled>}
                 {afterInputComponent}
                 {!!helpMessage && <InputHelpIcon paddingRight={isSelect && !readOnly ? '20px' : !!afterInputComponent ? '25px' : 0} steps={helpMessage} inputRef={componentRef || inputRef}/>}
             </InputElementStyled>

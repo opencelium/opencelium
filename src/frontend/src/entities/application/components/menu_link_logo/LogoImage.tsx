@@ -37,9 +37,11 @@ const LogoImage = (props: any) => {
         if(!!onlineServiceStatus?.active) {
             checkImage(logoPath, () => {
                 setIsLogoExist(true);
+                console.log('1', logoPath)
                 setSrc(logoPath);
             }, () => {
                 setIsLogoExist(false);
+                console.log('2', LogoOcWhiteImagePath)
                 setSrc(LogoOcWhiteImagePath);
             });
         }
@@ -47,9 +49,13 @@ const LogoImage = (props: any) => {
     useEffect(() => {
         if(isLogoExist && !!onlineServiceStatus?.active){
             const check = convertPngUrlToBase64(logoPath).then((data) => {
-                if(data) setSrc(data);
+                if(data) {
+                    console.log('3', data)
+                    setSrc(data);
+                }
             });
         }
+        console.log('4')
         setSrc('');
     }, [isLogoExist])
     useEffect(() => {
@@ -67,13 +73,10 @@ const LogoImage = (props: any) => {
         setIsLogoExist(null);
         checkImage(logoPath, () => setIsLogoExist(true), () => setIsLogoExist(false));
     }, [logoDataStatus])
-    if(isLogoExist === null){
-        return <LoadingStyled className={props?.className || ''} size={TextSize.Size_18}/>;
-    }
     return(
         <LogoImageStyled
             ref={imageRef}
-            src={!!onlineServiceStatus?.active ? src || LogoOcWhiteImagePath : LogoOcWhiteImagePath}
+            src={!!onlineServiceStatus?.active ? isLogoExist === null ? LogoOcWhiteImagePath : src || LogoOcWhiteImagePath : LogoOcWhiteImagePath}
             alt={logoName}
             {...props}
         />

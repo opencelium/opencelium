@@ -32,6 +32,7 @@ import {useAppDispatch} from "@application/utils/store";
 const Global = createGlobalStyle`
     body{
         padding: 2rem 1rem 0 calc(48px + 1rem);
+        overflow-x: hidden !important;
     }
 `;
 
@@ -73,6 +74,9 @@ const Menu: FC<MenuProps> =
         if (bodyElement) {
             bodyElement.style['padding'] = '0 1rem 0 calc(48px + 1rem)';
         }
+        setTimeout(() => {
+            bodyElement.style['transition'] = '.5s';
+        }, 1000)
         return () => {
             if (bodyElement) {
                 bodyElement.style['padding'] = '0 1rem 0 calc(48px + 1rem)';

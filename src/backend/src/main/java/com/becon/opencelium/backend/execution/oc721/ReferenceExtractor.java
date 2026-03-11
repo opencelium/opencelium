@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import jakarta.annotation.Nullable;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -214,7 +215,7 @@ public class ReferenceExtractor implements Extractor {
         // ex.1) '#ababab.(response).header.$.Content-Type',
         // ex.2) '#ababab.(request).header.$.Content-Type',
         if (ref.getPart() == DirectReference.Part.HEADER) {
-            return entity.getHeaders().get(path);
+            return getFromHeader(entity.getHeaders(), path);
         }
 
         // CASE 4: has 4 sub-cases
@@ -245,6 +246,48 @@ public class ReferenceExtractor implements Extractor {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private Object getFromHeader(HttpHeaders headers, String path) {
+        if (headers == null || path == null || path.isBlank()) {
+            return "";
+        }
+
+        String headerName = path;
+        Integer index = null;
+        boolean allValues = false;
+
+        if (path.endsWith("[*]")) {
+            headerName = path.substring(0, path.length() - 3);
+            allValues = true;
+        } else {
+            int start = headerName.lastIndexOf('[');
+            int end = headerName.lastIndexOf(']');
+
+            if (start > 0 && end == headerName.length() - 1) {
+                try {
+                    index = Integer.parseInt(headerName.substring(start + 1, end));
+                    headerName = headerName.substring(0, start);
+                } catch (NumberFormatException ignored) {
+                }
+            }
+        }
+
+        List<String> values = headers.get(headerName);
+
+        if (values == null || values.isEmpty()) {
+            return allValues ? Collections.emptyList() : "";
+        }
+
+        if (allValues) {
+            return List.copyOf(values);
+        }
+
+        if (index != null) {
+            return index < values.size() ? values.get(index) : "";
+        }
+
+        return headers.getFirst(headerName);
     }
 
     private Object getFromJSON(Object body, String paths) {
