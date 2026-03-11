@@ -19,9 +19,8 @@ import {
 	MetricsGridStyled,
 	MetricCellStyled,
 	MetricLabelStyled,
-	MetricValueStyled, ErrorStyled, LoadingStyled, WidgetCardHeaderStyled,
+	MetricValueStyled, ErrorStyled, LoadingStyled,
 } from './styles';
-import {useAppDispatch} from "@application/utils/store";
 import {Loading} from "@app_component/base/loading/Loading";
 import {useSocketData} from "../../../../socket/SocketDataContext";
 import HeaderText from "@app_component/base/text/HeaderText";

@@ -943,7 +943,7 @@ const ConnectionVersionHistoryPanel: FC<ConnectionVersionHistoryPanelProps> = ({
 
 			<PanelRoot ref={panelRef} $open={open}>
 				<PanelHeader>
-					<PanelTitle value={'Version History'} isBold/>
+					<PanelTitle value={'Connection History'} isBold/>
 
 					<CloseBtn type='button' onClick={onClose} title='Close' tabIndex={open ? 0 : -1}>
 						×

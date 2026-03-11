@@ -244,7 +244,7 @@ const ConnectionVersioning: FC<ConnectionVersioningProps> = ({ theme }) => {
 
 			<TooltipButton
 				target={`version_history`}
-				tooltip="Open Version History"
+				tooltip="Open Connection History"
 				handleClick={onOpenHistory}
 				icon={'history'}
 				isLoading={versionsLoading || pendingOpenHistory}

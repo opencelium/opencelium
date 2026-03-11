@@ -20,6 +20,7 @@ export enum ResponseMessages{
     'TOKEN_IS_NOT_VALID'= 'Full authentication is required to access this resource',
     'CONNECTOR_COMMUNICATION_FAILED'= 'COMMUNICATION_FAILED',
     'CONNECTOR_EXISTS'= 'CONNECTOR_ALREADY_EXISTS',
+    'CONNECTION_EXISTS'= 'CONNECTION_ALREADY_EXISTS',
     'TITLE_EXISTS'= 'TITLE_EXISTS',
     'NETWORK_ERROR'= 'Network Error',
     'ACCESS_DENIED'= 'Access Denied',

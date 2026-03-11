@@ -16,6 +16,7 @@
 import {Link} from "react-router-dom";
 import styled from "styled-components";
 import {ITheme} from "@style/Theme";
+import {EntityHeaderTextSize} from "@entity/application/utils/constants";
 
 const TitleStyled = styled.div`
     font-family: ${({theme}: {theme: ITheme}) => `Open Sans, "Arial", sans-serif`};
@@ -34,7 +35,7 @@ const LinkStyled = styled(Link)`
 
 const IconStyled = styled.span`
     position: absolute;
-    right: -15px;
+    right: -18px;
     top: -12px;
 `;
 
@@ -53,21 +54,23 @@ const ConnectionTitleTextStyled = styled.span`
 const ConnectionTitleActionsStyled = styled.span`
     display: inline-flex;
     align-items: center;
-    gap: 2px;
+    gap: 2px;    
+    position: absolute;
+    right: -19px;
+    top: -3px;
 `;
 
 const ConnectionTitleInputStyled = styled.input`
     font-family: ${({theme}: {theme: ITheme}) => `Open Sans, "Arial", sans-serif`};
     color: ${({theme}: {theme: ITheme}) => theme.collectionView.title.color.quite};
-    min-width: 220px;
+    min-width: 150px;
     max-width: 420px;
-    height: 30px;
+    height: 24px;
     padding: 0 8px;
     border: 1px solid #c7c7c7;
     border-radius: 4px;
     outline: none;
-    font-size: 24px;
-    line-height: 1.2;
+    font-size: ${EntityHeaderTextSize}px;
     background: #fff;
 
     &:focus{

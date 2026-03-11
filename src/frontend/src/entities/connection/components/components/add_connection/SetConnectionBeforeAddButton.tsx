@@ -155,7 +155,6 @@ function SetConnectionBeforeAdd({ theme,  connection, onSet, isOpenedInit}: {onS
             if (category) {
                 connection.categoryId = category.value;
             }
-            console.log(connection);
             onSet(connection);
             toggleForm();
         }
