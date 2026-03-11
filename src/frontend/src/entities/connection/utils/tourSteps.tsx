@@ -120,7 +120,10 @@ export const ConnectionListSteps: Step[] = [
     {
         title: 'Delete',
         content:
-            'Permanently remove the connection and assigned schedules from the system. This action cannot be undone.',
+            <p>
+                <p>Permanently remove the connection and assigned schedules from the system.</p><p><strong>This action
+                cannot be undone!</strong></p>
+            </p>,
         target: '[id^="delete_entity_"]',
         placement: 'left',
         disableBeacon: true,

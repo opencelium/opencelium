@@ -23,24 +23,15 @@ import {
     CONNECTOR_FROM,
     CONNECTOR_TO
 } from "@entity/connection/components/classes/components/content/connection/CConnectorItem";
-import AddTemplate from "@change_component/form_elements/form_connection/form_methods/AddTemplate";
-import Button from "@app_component/base/button/Button";
 import {LocalStorage} from "@application/classes/LocalStorage";
 import {capitalize, findTopLeft, setFocusById} from "@application/utils/utils";
 import {API_REQUEST_STATE, TRIPLET_STATE} from "@application/interfaces/IApplication";
 
 import "@style/css/react_resizable.css";
 import "@style/css/graphiql.css";
-import ContentLoading from "@app_component/base/loading/ContentLoading";
 import {ConnectionPermissions} from "@root/constants";
 import CEnhancement from "@classes/content/connection/field_binding/CEnhancement";
-import DataAggregatorButton
-    from "@entity/data_aggregator/components/dialog_button/DataAggregatorButton";
-import { Category } from "@entity/category/classes/Category";
 import {jsonToString} from "@app_component/operator_builder/utils";
-import Validation from "@application/classes/Validation";
-import DropdownActionButton from '@app_component/dropdown_action_button/DropdownActionButton';
-import {setEntityIconKey, setEntityHeader} from "@application/redux_toolkit/slices/ApplicationSlice";
 import SetConnectionBeforeAdd from "@components/add_connection/SetConnectionBeforeAddButton";
 
 /**
@@ -107,7 +98,13 @@ export function ConnectionForm(type) {
                         }
                     } else{
                         if(this.redirectUrl){
-                            navigate(this.redirectUrl, { replace: false });
+                            this.props.setIsDirty(false);
+                            setTimeout(
+                                () => {
+
+                                    navigate(this.redirectUrl, { replace: false });
+                                }, 200
+                            )
                         }
                     }
                 }

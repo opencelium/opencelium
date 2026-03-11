@@ -39,32 +39,6 @@ export const UpdateConnectorWithMaskTourSteps: Step[] = [
     },
 ]
 export const UpdateConnectorWithoutMaskTourSteps: Step[] = AddConnectorTourSteps;
-export const UpdateConnectorTourSteps: Step[] = [
-    {
-        title: 'General Data',
-        content:
-            'The General Data section defines the basic configuration of the connector, including its name, description, execution settings, and the selected invoker.',
-        target: '#connector-form-general-data',
-        placement: 'right',
-        disableBeacon: true,
-    },
-    {
-        title: 'Credentials',
-        content:
-            'The Credentials section becomes available after an invoker is selected. It contains invoker-specific configuration fields required to authenticate and communicate with the target system.',
-        target: '#connector-form-credentials',
-        placement: 'left',
-        disableBeacon: true,
-    },
-    {
-        title: 'Test Credentials',
-        content:
-            'Test the connection to the target system using the provided authentication details.',
-        target: '#test_button',
-        placement: 'left',
-        disableBeacon: true,
-    },
-]
 
 export const InvokerInputStep: Step[] = [{
     title: 'Invoker',
@@ -171,8 +145,9 @@ export const ConnectorListSteps: Step[] = [
     },
     {
         title: 'Delete',
-        content:
-            'Permanently remove the connector and assigned connections from the system. This action cannot be undone.',
+        content:<p>
+            <p>Permanently remove the connector and assigned connections from the system.</p><p> <strong>This action cannot be undone!</strong></p>
+        </p>,
         target: '[id^="delete_entity_"]',
         placement: 'left',
         disableBeacon: true,

@@ -1,6 +1,7 @@
 import React from 'react';
 import {Step} from "react-joyride";
 import {Link} from "react-router-dom";
+import {Spot} from "@entity/schedule/utils/tourSteps";
 
 export const SupportFileEmptyListSteps: Step[] = [
     {
@@ -35,7 +36,7 @@ export const SupportFileListSteps: Step[] = [
     {
         title: 'Search',
         content:
-            'Type here to search for a group by connection\'s title.',
+            'Type here to search for a support file by connection\'s title.',
         target: '#collection-search-input',
         placement: 'bottom',
         disableBeacon: true,
@@ -69,12 +70,12 @@ export const SupportFileListSteps: Step[] = [
         content:
             <span>
                 Indicates whether the support file generation was successful or failed.
-                <ul style={{marginLeft: 20}}>
+                <ul style={{marginLeft: 20, marginTop: 10}}>
                     <li style={{ listStyleType: 'none' }}>
-                        🟢 Green — Generation successful
+                        <Spot color={'#c3f5c3'}/> Green — Generation successful
                     </li>
                     <li style={{ listStyleType: 'none' }}>
-                        🔴 Red — Generation failed
+                        <Spot color={'#f5c3c3'}/> Red — Generation failed
                     </li>
                 </ul>
 
@@ -94,7 +95,10 @@ export const SupportFileListSteps: Step[] = [
     {
         title: 'Delete',
         content:
-            'Permanently remove the support file from the system. This action cannot be undone.',
+            <p>
+                <p>Permanently remove the support file from the system.</p><p><strong>This action
+                cannot be undone!</strong></p>
+            </p>,
         target: '[id^="delete_entity_"]',
         placement: 'left',
         disableBeacon: true,
