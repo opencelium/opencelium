@@ -275,14 +275,8 @@ public class YAMLMigrator {
         ArrayList<Map<?, ?>> opList = new ArrayList<>();
         Map<String, Object> map = new HashMap<>();
         switch (changeSet.getOperation()) {
-            case ADD -> {
+            case ADD, MODIFY -> {
                 map.put("op", "add");
-                map.put("path", "/" + changeSet.getPath().replaceAll("\\.", "/"));
-                map.put("value", changeSet.getValue());
-                opList.add(map);
-            }
-            case MODIFY -> {
-                map.put("op", "replace");
                 map.put("path", "/" + changeSet.getPath().replaceAll("\\.", "/"));
                 map.put("value", changeSet.getValue());
                 opList.add(map);

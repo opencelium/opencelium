@@ -1,4 +1,9 @@
-# operations: add, modify, delete, rename, move.
+# Supported operations:
+#   add    – creates a new property; overwrites the value if the path already exists.
+#   modify – updates an existing property; also creates it if the path is absent.
+#   delete – removes an existing property.
+#   rename – renames a property key while preserving its value.
+#   move   – moves a property from one path to another.
 versions:
   - version: 4.0
     changes:
