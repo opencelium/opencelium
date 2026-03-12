@@ -19,12 +19,93 @@ const Code = ({code}: {code: string}) => {
     )
 }
 export const LoopOperatorTourContents: {[name in LoopOperatorName]: ReactNode} = {
-    [LoopOperatorName.For]: 'Unary operator: iterates over each element of an array. The operator processes every item in the selected array reference.',
-    [LoopOperatorName.ForIn]: 'Unary operator: iterates over each character of a string. The operator processes the string symbol by symbol.',
-    [LoopOperatorName.SplitString]: 'Splits a string using the specified delimiter and iterates over the resulting parts. The right value defines the separator.',
+    [LoopOperatorName.For]: <p>
+        <p><span>Description:</span> Iterates through an array.</p>
+        <p>
+            <span>Arguments:</span>
+            <ul style={{marginLeft: '20px'}}>
+                <li>
+                    <Code code={'o1'}/>:
+                    An array to iterate through.
+                </li>
+            </ul>
+        </p>
+        <p>
+            <span>Examples:</span>
+            <ul style={{marginLeft: '20px'}}>
+                <li>
+                    <Code code={`o1 = ["a", "b", "c"]`}/> → Iterates through <Code code={`"a", "b", "c"`}/>
+                </li>
+                <li>
+                    <Code code={`o1 = [1, 2, 3]`}/> → Iterates through <Code code={`1, 2, 3`}/>
+                </li>
+                <li>
+                    <Code code={`o1 = []`}/> → Performs no iterations
+                </li>
+            </ul>
+        </p>
+    </p>,
+    [LoopOperatorName.ForIn]: <p>
+        <p><span>Description:</span> Iterates through the properties of an object.</p>
+        <p>
+            <span>Arguments:</span>
+            <ul style={{marginLeft: '20px'}}>
+                <li>
+                    <Code code={'o1'}/>:
+                    An object whose properties should be iterated.
+                </li>
+            </ul>
+        </p>
+        <p>
+            <span>Examples:</span>
+            <ul style={{marginLeft: '20px'}}>
+                <li>
+                    <Code code={`o1 = {"name":"Hob","age":123}`}/> → Iterates through properties <Code
+                    code={`"name", "age"`}/>
+                </li>
+                <li>
+                    <Code code={`o1 = {"a":1,"b":2}`}/> → Iterates through properties <Code code={`"a", "b"`}/>
+                </li>
+                <li>
+                    <Code code={`o1 = {}`}/> → Performs no iterations
+                </li>
+            </ul>
+        </p>
+    </p>,
+    [LoopOperatorName.SplitString]: <p>
+        <p><span>Description:</span> Splits a string using a delimiter and iterates through the resulting array.</p>
+        <p>
+            <span>Arguments:</span>
+            <ul style={{marginLeft: '20px'}}>
+                <li>
+                    <Code code={'o1'}/>:
+                    A string to split.
+                </li>
+                <li>
+                    <Code code={'o2'}/>:
+                    A delimiter string.
+                </li>
+            </ul>
+        </p>
+        <p>
+            <span>Examples:</span>
+            <ul style={{marginLeft: '20px'}}>
+                <li>
+                    <Code code={`o1 = "a,b,c", o2 = ","`}/> → Iterates through <Code code={`"a", "b", "c"`}/>
+                </li>
+                <li>
+                    <Code code={`o1 = "one|two|three", o2 = "|"`}/> → Iterates through <Code
+                    code={`"one", "two", "three"`}/>
+                </li>
+                <li>
+                    <Code code={`o1 = "abc", o2 = ","`}/> → Iterates once through <Code code={`"abc"`}/>
+                </li>
+            </ul>
+        </p>
+    </p>,
 }
 
-export const IfOperatorTourContents: {[name in OperatorName]: ReactNode} = {
+export const IfOperatorTourContents: { [name in OperatorName]: ReactNode } = {
     [BinaryOperatorName.AllowList]: <p>
         <p><span>Description:</span> Checks if a string matches any patterns in a list.</p>
         <p>
@@ -41,7 +122,7 @@ export const IfOperatorTourContents: {[name in OperatorName]: ReactNode} = {
             </ul>
         </p>
         <p>
-            <span>Examples:</span>
+        <span>Examples:</span>
             <ul style={{marginLeft: '20px', display: 'grid', gap: '2px'}}>
                 <li>
                     <Code code={`o1 = "test1", o2 = "test1,test2,test3"`}/> → Returns <Code code={'true'}/>
@@ -653,6 +734,7 @@ export function getLoopOperatorTours(name: LoopOperatorName): Step[] {
             hideCloseButton: true,
             hideFooter: true,
             data: {
+                width: 800,
             }
         }
     ]
