@@ -4,15 +4,20 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /**
- * Represents the different types of operations that can be applied during YAML migration process
+ * Represents the different types of operations that can be applied during YAML migration process.
  *
- * <p>Supported operations:</p>
+ * <p>Each operation is translated to a JSON Patch (RFC 6902) operation when applied:</p>
  * <ul>
- *     <li>{@link #ADD} – Add a new property or value.</li>
- *     <li>{@link #DELETE} – Remove an existing property or value.</li>
- *     <li>{@link #MODIFY} – Replace an existing property or value with a new one.</li>
- *     <li>{@link #RENAME} – Rename a property by moving its value to a new key.</li>
- *     <li>{@link #MOVE} – Move a property or value from one location to another.</li>
+ *     <li>{@link #ADD} – Add a new property or value. Translates to JSON Patch {@code add}.
+ *         If the path already exists, the existing value is overwritten (same effect as replace).</li>
+ *     <li>{@link #DELETE} – Remove an existing property or value. Translates to JSON Patch {@code remove}.</li>
+ *     <li>{@link #MODIFY} – Update an existing property with a new value. Translates to JSON Patch {@code add},
+ *         which overwrites the value if the path exists or creates it if the path is absent,
+ *         avoiding the {@code replace} failure when the target path is missing.</li>
+ *     <li>{@link #RENAME} – Rename a property key while preserving its value. Implemented as
+ *         JSON Patch {@code add} (new key) followed by {@code remove} (old key).</li>
+ *     <li>{@link #MOVE} – Move a property or value from one path to another. Translates to
+ *         JSON Patch {@code add} (destination) followed by {@code move}.</li>
  * </ul>
  */
 public enum OperationType {
