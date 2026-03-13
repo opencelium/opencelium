@@ -54,7 +54,7 @@ class Templates extends ListCollection<TemplateProps>{
             <React.Fragment>
                 <ImportTemplateButton autoFocus={!hasSearch}/>
                 {/*{viewType === ViewType.LIST && this.entities.length !== 0 && <PermissionButton isDisabled={checkedIds.length === 0}  key={'upgrade_button'} icon={'play_arrow'} label={'Upgrade Selected'} handleClick={() => this.dispatch(updateTemplates([]))} permission={TemplatePermissions.UPDATE}/>}*/}
-                {viewType === ViewType.LIST && this.entities.length !== 0 && <PermissionButton isDisabled={checkedIds.length === 0} hasConfirmation confirmationText={'Do you really want to delete?'}  key={'delete_button'} icon={'delete'} label={'Delete Selected'} handleClick={() => this.dispatch(deleteTemplatesById(checkedIds))} permission={TemplatePermissions.DELETE}/>}
+                {viewType === ViewType.LIST && this.entities.length !== 0 && <PermissionButton id={'connection-template-list-delete-selected'} isDisabled={checkedIds.length === 0} hasConfirmation confirmationText={'Do you really want to delete?'}  key={'delete_button'} icon={'delete'} label={'Delete Selected'} handleClick={() => this.dispatch(deleteTemplatesById(checkedIds))} permission={TemplatePermissions.DELETE}/>}
             </React.Fragment>
         );
     };
@@ -71,7 +71,7 @@ class Templates extends ListCollection<TemplateProps>{
             <React.Fragment>
                 {/*<AddTemplateButton name={entity.name} description={entity.description} connection={entity.connection}/>*/}
                 <TemplateConversionIcon id={entity.id.toString()} data={{template: entity.getModel()}}/>
-                <PermissionTooltipButton target={`export_entity_${entity.id.toString()}`} position={'top'} tooltip={'Export'} hasBackground={false} handleClick={() => this.dispatch(exportTemplate(exportTemplateData))} icon={'file_download'} size={TextSize.Size_20} permission={componentPermission.READ}/>
+                <PermissionTooltipButton target={`download_entity_${entity.id.toString()}`} position={'top'} tooltip={'Download'} hasBackground={false} handleClick={() => this.dispatch(exportTemplate(exportTemplateData))} icon={'file_download'} size={TextSize.Size_20} permission={componentPermission.READ}/>
                 {/*<PermissionTooltipButton target={`update_entity_${entity.id.toString()}`} position={'top'} tooltip={'Update'} href={`${entity.id}/update`} hasBackground={false} icon={'edit'} color={ColorTheme.Turquoise} size={TextSize.Size_20} permission={componentPermission.READ}/>*/}
                 {hasDeleteButton && <PermissionTooltipButton target={`delete_entity_${entity.id.toString()}`} position={'top'} tooltip={'Delete'} hasConfirmation confirmationText={'Do you really want to delete?'} handleClick={() => entity.deleteById()} hasBackground={false} icon={'delete'} size={TextSize.Size_20} permission={componentPermission.DELETE}/>}
             </React.Fragment>

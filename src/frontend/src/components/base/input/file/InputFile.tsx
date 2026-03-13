@@ -43,6 +43,7 @@ const InputFile: FC<InputFileProps> = ({
     theme,
     showOnlyButton,
     buttonProps,
+    helpMessage,
     ...props
 }) => {
     const [fileName, setFileName] = useState('');
@@ -94,7 +95,7 @@ const InputFile: FC<InputFileProps> = ({
         )
     }
     return(
-        <Input readOnly={readOnly} value={value} placeholder={placeholder} required={required} label={label} icon={icon} error={error} isLoading={hasIcon && isLoading} isIconInside={isIconInside}>
+        <Input isFile helpMessage={helpMessage} readOnly={readOnly} value={value} placeholder={placeholder} required={required} label={label} icon={icon} error={error} isLoading={hasIcon && isLoading} isIconInside={isIconInside}>
             {hasCheckbox && <CheckboxStyled type={'checkbox'} checked={!hasNoImage} onChange={toggleImage}/>}
             <TextStyled hasCheckbox={hasCheckbox} hasBorder={!hasNoImage && !hasValue} color={textColor} paddingLeft={hasIcon ? '30px' : '0'} value={placeholder} display={'inline-block'}/>
             {!hasNoImage && <FileStyled accept={accept} hasCheckbox={hasCheckbox} onChange={(e) => onChooseImage(e)} ref={inputFile} tabIndex={-1} type={'file'} color={color}/>}

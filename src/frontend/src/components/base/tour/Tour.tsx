@@ -18,12 +18,26 @@ const Tour:FC<TourProps> =  ({
     show,
 }) => {
     const [stepIndex, setStepIndex] = useState<number>(0);
-    steps = steps.map((step, index) => {
-        return {
-            ...step,
-            title: <Text value={step.title} size={`${HeaderTextSize}px`} isBold/>,
-        }
-    });
+    steps = steps
+        .filter(step =>
+            {
+                if (typeof step.target === "string") {
+                    return !!document.querySelector(step.target);
+                }
+
+                if (step.target instanceof HTMLElement) {
+                    return document.body.contains(step.target);
+                }
+
+                return false;
+            }
+        )
+        .map((step, index) => {
+            return {
+                ...step,
+                title: <Text value={step.title} size={`${HeaderTextSize}px`} isBold/>,
+            }
+        });
     useEffect(() => {
         if (!show) return;
         let overlay: any = undefined;

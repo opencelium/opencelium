@@ -27,6 +27,7 @@ import {TemplatePermissions} from "@entity/template/constants";
 import {Template} from "@root/classes/Template";
 import Confirmation from "@entity/connection/components/components/general/app/Confirmation";
 import {API_REQUEST_STATE, TRIPLET_STATE} from "@application/interfaces/IApplication";
+import {ImportTemplateFile} from "@entity/template/utils/tourSteps";
 
 const ImportTemplateButton: FC<ImportTemplateButtonProps> =
     ({
@@ -75,12 +76,12 @@ const ImportTemplateButton: FC<ImportTemplateButtonProps> =
     }, [startImporting]);
     return (
         <ImportTemplateButtonStyled >
-            <PermissionButton autoFocus={autoFocus} key={'add_button'} icon={'add'} handleClick={toggleDialog} label={'Import Template'} permission={TemplatePermissions.CREATE}/>
+            <PermissionButton id={'connection-template-list-import'} autoFocus={autoFocus} key={'add_button'} icon={'add'} handleClick={toggleDialog} label={'Import Template(s)'} permission={TemplatePermissions.CREATE}/>
             <Dialog
                 actions={[
                     {id: 'import_ok', label: 'Ok', onClick: () => setStartImporting(true)},
                     {id: 'import_cancel', label: 'Cancel', onClick: toggleDialog}]}
-                title={'Import Template'} active={showDialog} toggle={toggleDialog}>
+                title={'Import Template(s)'} active={showDialog} toggle={toggleDialog}>
                 <InputFile
                     id={'import_file'}
                     icon={'upload'}
@@ -92,6 +93,7 @@ const ImportTemplateButton: FC<ImportTemplateButtonProps> =
                     value={templateFile}
                     accept={'application/JSON,application/zip'}
                     hasCrop={false}
+                    helpMessage={ImportTemplateFile}
                 />
             </Dialog>
             <Confirmation
