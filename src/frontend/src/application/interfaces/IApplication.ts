@@ -33,7 +33,8 @@ export type EntityIconKeyType =
     'schedule-form' | 'add-connection-form-without-connectors' | 'add-connection-form-with-connectors' | 'connection-form-with-panel' |
     'connection-form-without-panel' |
     'user-form' | 'group-form-with-permission' | 'group-form-without-permission' | 'ldap-form-with-debug' | 'ldap-form-without-debug' |
-    'category-form' | 'notification-template-form' | 'license-management-offline' | 'license-management-online'
+    'category-form' | 'notification-template-form' | 'license-management-offline' | 'license-management-online' |
+    'aggregator-form'
     ;
 
 export type CollectionEntityKey = 'connector-list' | 'connection-list' | 'schedule-list' |

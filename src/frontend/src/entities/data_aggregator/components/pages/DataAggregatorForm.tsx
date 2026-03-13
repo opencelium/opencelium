@@ -33,6 +33,7 @@ import {
 import AddArgument from '../arguments/AddArgument';
 import Arguments from '../arguments/Arguments';
 import { ArgumentFormContainer } from './styles';
+import {FormProps} from "@app_component/form/form/interfaces";
 
 const getStaticWordCompleter = (variables: string[]) => {
 	return {
@@ -314,7 +315,8 @@ const DataAggregatorDialogForm: FC<IForm> = ({
 		marginBottom: '50px',
 		theme,
 	};
-	const data = {
+	const data: FormProps = {
+		entityKey: 'aggregator-form',
 		title: [
 			{ name: 'Admin Panel', link: '/admin_cards' },
 			{ name: 'Data Aggregator', link: '/data_aggregator' },
@@ -322,7 +324,7 @@ const DataAggregatorDialogForm: FC<IForm> = ({
 		],
 		actions,
 		formSections: [
-			<FormSection label={{ value: 'General Data' }}>
+			<FormSection label={{ value: 'General Data' }} id={'aggregator-form-general-data'}>
 				<InputText
 					id={`input_aggregator_name`}
 					autoFocus={true}
@@ -363,7 +365,7 @@ const DataAggregatorDialogForm: FC<IForm> = ({
 					</ArgumentFormContainer>
 				</Input>
 			</FormSection>,
-			<FormSection label={{ value: 'Code' }}>
+			<FormSection label={{ value: 'Code' }} id={'aggregator-form-code'}>
 				<Input
 					required={true}
 					error={scriptSegmentError}

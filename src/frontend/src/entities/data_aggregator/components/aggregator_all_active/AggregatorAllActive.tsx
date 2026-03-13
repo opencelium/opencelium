@@ -26,7 +26,7 @@ const AggregatorAllActive: FC<AggregatorAllActiveProps> =
 }) => {
     return (
         <div style={{width: '150px', marginLeft: '85px', marginTop: '-5px'}}>
-            <InputSwitch name={isChecked ? 'Hide Archived' : 'Show archived'} color={ColorTheme.Turquoise} isChecked={isChecked} position={'middle'} onClick={doSwitch}/>
+            <InputSwitch id={'data-aggregator-list-archived-filter'} name={isChecked ? 'Hide Archived' : 'Show archived'} color={ColorTheme.Turquoise} isChecked={isChecked} position={'middle'} onClick={doSwitch}/>
         </div>
     );
 }

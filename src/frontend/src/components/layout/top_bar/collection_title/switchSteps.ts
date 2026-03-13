@@ -29,6 +29,11 @@ import {
 } from "@entity/notification_template/utils/tourSteps";
 import {LicenseManagementOfflineSteps} from "@entity/license_management/utils/tourSteps";
 import {ConnectionTemplateEmptyListSteps, ConnectionTemplateListSteps} from "@entity/template/utils/tourSteps";
+import {
+    AggregatorEmptyListSteps,
+    AggregatorFormTourSteps,
+    AggregatorListSteps
+} from "@entity/data_aggregator/utils/tourSteps";
 
 export function switchSteps(entityIconKey: EntityIconKeyType) {
 
@@ -108,6 +113,12 @@ export function switchSteps(entityIconKey: EntityIconKeyType) {
             return ConnectionTemplateListSteps;
         case 'template-list-empty':
             return ConnectionTemplateEmptyListSteps;
+        case 'aggregator-list':
+            return AggregatorListSteps;
+        case 'aggregator-list-empty':
+            return AggregatorEmptyListSteps;
+        case 'aggregator-form':
+            return AggregatorFormTourSteps;
         default:
             return [];
     }
