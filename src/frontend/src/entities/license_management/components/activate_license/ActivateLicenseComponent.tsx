@@ -65,6 +65,7 @@ const ActivateLicenseComponent = () => {
                 />
             </Dialog>
             <Button
+                id={'license-management-activate-license'}
                 size={14}
                 label={'Activate License'}
                 icon={'cloud_sync'}

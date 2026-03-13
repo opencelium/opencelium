@@ -27,13 +27,15 @@ import {
     NotificationTemplateEmptyListSteps, NotificationTemplateFormSteps,
     NotificationTemplateListSteps
 } from "@entity/notification_template/utils/tourSteps";
-import {LicenseManagementOfflineSteps} from "@entity/license_management/utils/tourSteps";
 import {ConnectionTemplateEmptyListSteps, ConnectionTemplateListSteps} from "@entity/template/utils/tourSteps";
 import {
     AggregatorEmptyListSteps,
     AggregatorFormTourSteps,
     AggregatorListSteps
 } from "@entity/data_aggregator/utils/tourSteps";
+import {LicenseManagementSteps} from "@entity/license_management/utils/tourSteps";
+import {InvokerEmptyListSteps, InvokerFormTours, InvokerListSteps} from "@entity/invoker/utils/tourSteps";
+import {UpdateAssistantSteps} from "@entity/update_assistant/utils/tourSteps";
 
 export function switchSteps(entityIconKey: EntityIconKeyType) {
 
@@ -107,8 +109,8 @@ export function switchSteps(entityIconKey: EntityIconKeyType) {
             return NotificationTemplateEmptyListSteps;
         case 'notification-template-form':
             return NotificationTemplateFormSteps;
-        case 'license-management-offline':
-            return [];
+        case 'license-management':
+            return LicenseManagementSteps;
         case 'template-list':
             return ConnectionTemplateListSteps;
         case 'template-list-empty':
@@ -119,6 +121,14 @@ export function switchSteps(entityIconKey: EntityIconKeyType) {
             return AggregatorEmptyListSteps;
         case 'aggregator-form':
             return AggregatorFormTourSteps;
+        case 'invoker-list-empty':
+            return InvokerEmptyListSteps;
+        case 'invoker-list':
+            return InvokerListSteps;
+        case 'invoker-form':
+            return InvokerFormTours;
+        case 'update-assistant':
+            return UpdateAssistantSteps;
         default:
             return [];
     }

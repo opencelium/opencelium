@@ -109,6 +109,7 @@ const LicenseManagement: FC<IForm> = ({}) => {
     if (!currentSubscription) {
         actions.push(
             <Button
+                id={'license-management-activate-free'}
                 key={'renew_free'}
                 icon={'check'}
                 label={'Activate Free License'}
@@ -117,7 +118,7 @@ const LicenseManagement: FC<IForm> = ({}) => {
             />);
     }
     const data: FormProps = {
-        entityKey: 'license-management-offline',
+        entityKey: `license-management`,
         title: [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Subscription Overview'}],
         actions,
         formSections: [

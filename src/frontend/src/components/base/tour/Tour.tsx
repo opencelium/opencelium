@@ -1,4 +1,4 @@
-import React, {FC, useEffect, useRef, useState} from "react";
+import React, {FC, useEffect, useMemo, useRef, useState} from "react";
 import Joyride, {ACTIONS, CallBackProps, EVENTS, STATUS, Step} from "react-joyride";
 import DefaultText from "@app_component/base/text/DefaultText";
 import BeaconComponent from "@app_component/base/tour/BeaconComponent";
@@ -28,14 +28,30 @@ const Tour:FC<TourProps> =  ({
     const rafRef = useRef<number | null>(null);
     const lastNavigationActionRef = useRef<'start' | 'next' | 'prev'>('start');
 
-    const preparedSteps = steps.map((step) => ({
-        ...step,
-        data: {
-            ...(step.data || {}),
-            focusAction: lastNavigationActionRef.current,
-        },
-        title: <Text value={step.title} size={`${HeaderTextSize}px`} isBold/>,
-    }));
+    const preparedSteps = useMemo(() => {
+        return steps
+            .filter(step =>
+                {
+                    if (typeof step.target === "string") {
+                        return !!document.querySelector(step.target);
+                    }
+
+                    if (step.target instanceof HTMLElement) {
+                        return document.body.contains(step.target);
+                    }
+
+                    return false;
+                }
+            )
+            .map((step) => ({
+            ...step,
+            data: {
+                ...(step.data || {}),
+                focusAction: lastNavigationActionRef.current,
+            },
+            title: <Text value={step.title} size={`${HeaderTextSize}px`} isBold/>,
+        }))
+    }, [steps]);
 
     const getTargetElement = (indexOverride?: number): {target: HTMLElement | null, step: (Step & { spotlightPadding?: number }) | null} => {
         const index = typeof indexOverride === "number" ? indexOverride : stepIndex;
