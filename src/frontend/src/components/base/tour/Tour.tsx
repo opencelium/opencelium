@@ -26,23 +26,14 @@ const Tour:FC<TourProps> =  ({
     const [instanceKey, setInstanceKey] = useState<number>(0);
 
     const rafRef = useRef<number | null>(null);
+    const lastNavigationActionRef = useRef<'start' | 'next' | 'prev'>('start');
 
-    const preparedSteps = steps
-        .filter(step =>
-            {
-                if (typeof step.target === "string") {
-                    return !!document.querySelector(step.target);
-                }
-
-                if (step.target instanceof HTMLElement) {
-                    return document.body.contains(step.target);
-                }
-
-                return false;
-            }
-        )
-        .map((step) => ({
+    const preparedSteps = steps.map((step) => ({
         ...step,
+        data: {
+            ...(step.data || {}),
+            focusAction: lastNavigationActionRef.current,
+        },
         title: <Text value={step.title} size={`${HeaderTextSize}px`} isBold/>,
     }));
 
@@ -115,6 +106,7 @@ const Tour:FC<TourProps> =  ({
     const resetTour = () => {
         setRun(false);
         setStepIndex(0);
+        lastNavigationActionRef.current = 'start';
     };
 
     useEffect(() => {
@@ -205,6 +197,7 @@ const Tour:FC<TourProps> =  ({
 
         if (action === ACTIONS.NEXT && type === EVENTS.STEP_AFTER) {
             const nextIndex = index + 1;
+            lastNavigationActionRef.current = 'next';
             setStepIndex(nextIndex);
             setTimeout(() => scheduleSync(true, nextIndex), 0);
             return;
@@ -212,6 +205,7 @@ const Tour:FC<TourProps> =  ({
 
         if (action === ACTIONS.PREV && type === EVENTS.STEP_AFTER) {
             const prevIndex = index - 1;
+            lastNavigationActionRef.current = 'prev';
             setStepIndex(prevIndex);
             setTimeout(() => scheduleSync(true, prevIndex), 0);
             return;
