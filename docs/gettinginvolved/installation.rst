@@ -71,7 +71,7 @@ Create database and mariadb user for OpenCelium, enable mariadb service and secu
 	systemctl restart mariadb
 	systemctl enable mariadb
 	mysql -u root -e "source /opt/opencelium/src/backend/database/oc_data.sql; GRANT ALL PRIVILEGES ON opencelium.* TO 'opencelium'@'localhost' IDENTIFIED BY 'secret1234'; FLUSH PRIVILEGES;"
-	mysql-secure-installation
+	mysql_secure_installation
 
 .. note::
 	| "mysql_secure_installation" is a command-line-tool to enhance the security of your MariaDB
@@ -109,7 +109,8 @@ Remove default config and link configuration file for OpenCelium.
 
 .. code-block:: sh
 	:linenos:
-	
+
+	cp /opt/opencelium/conf/nginx_default.conf /opt/opencelium/conf/nginx.conf	
 	rm /etc/nginx/sites-enabled/default
 	ln -s /opt/opencelium/conf/nginx.conf /etc/nginx/sites-enabled/oc.conf
 	
@@ -119,6 +120,7 @@ Remove default config and link configuration file for OpenCelium.
 	.. code-block:: sh
 		:linenos:
 	
+		cp /opt/opencelium/conf/nginx-ssl_default.conf /opt/opencelium/conf/nginx-ssl.conf
 		rm /etc/nginx/sites-enabled/default
 		ln -s /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/sites-enabled/oc.conf
 		
@@ -273,7 +275,8 @@ Copy the configuration file for OpenCelium.
 
 .. code-block:: sh
 	:linenos:
-	
+
+	cp /opt/opencelium/conf/nginx_default.conf /opt/opencelium/conf/nginx.conf	
 	ln -s /opt/opencelium/conf/nginx.conf /etc/nginx/conf.d/oc.conf
 	
 .. note::
@@ -282,6 +285,7 @@ Copy the configuration file for OpenCelium.
 	.. code-block:: sh
 		:linenos:
 	
+		cp /opt/opencelium/conf/nginx-ssl_default.conf /opt/opencelium/conf/nginx-ssl.conf
 		ln -s /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
 		
 	and change the certificates within the config (/opt/opencelium/conf/nginx-ssl.conf), with your own:	
@@ -451,6 +455,7 @@ Copy the configuration file for OpenCelium.
 .. code-block:: sh
 	:linenos:
 	
+	cp /opt/opencelium/conf/nginx_default.conf /opt/opencelium/conf/nginx.conf	
 	ln -s /opt/opencelium/conf/nginx.conf /etc/nginx/conf.d/oc.conf
 	
 .. note::
@@ -459,6 +464,7 @@ Copy the configuration file for OpenCelium.
 	.. code-block:: sh
 		:linenos:
 		
+		cp /opt/opencelium/conf/nginx-ssl_default.conf /opt/opencelium/conf/nginx-ssl.conf
 		ln -s /opt/opencelium/conf/nginx-ssl.conf /etc/nginx/conf.d/oc.conf
 		ln -s /etc/pki/tls/private/ /etc/ssl/private
 		
