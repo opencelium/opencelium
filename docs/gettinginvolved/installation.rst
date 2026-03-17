@@ -580,7 +580,6 @@ Use default Docker installation guide.
 
 	git clone https://github.com/opencelium/opencelium-docker.git /opt/opencelium-docker
 	cp /opt/opencelium-docker/conf/application_default.yml /opt/opencelium-docker/conf/application.yml
-	cp /opt/opencelium-docker/conf/settings_default.json /opt/opencelium-docker/conf/settings.json
 	cp /opt/opencelium-docker/conf/nginx_default.conf /opt/opencelium-docker/conf/nginx.conf
 	cp /opt/opencelium-docker/.env_default /opt/opencelium-docker/.env
 
