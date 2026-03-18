@@ -24,7 +24,6 @@ import { TextSize } from '@app_component/base/text/interfaces';
 import { toggleDetails } from '@root/redux_toolkit/slices/ConnectionSlice';
 import { toggleModalDetails } from '@root/redux_toolkit/slices/ModalConnectionSlice';
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
-import TestMethodButton from './test_method/TestMethodButton';
 import DefaultText from "@app_component/base/text/DefaultText";
 import HeaderText from "@app_component/base/text/HeaderText";
 
@@ -41,13 +40,19 @@ function mapStateToProps(state, props) {
     checkingConnectionTitle: connectionOverview.checkingConnectionTitle,
   };
 }
+
 @GetModalProp()
-@connect(mapStateToProps, { toggleDetails, toggleModalDetails }, null, {forwardRef: true})
+@connect(mapStateToProps, { toggleDetails, toggleModalDetails }, null, { forwardRef: true })
 class Details extends React.Component {
   constructor(props) {
     super(props);
     this.toggleDetails = props.isModal ? props.toggleModalDetails : props.toggleDetails;
-    this.descriptionRef = React.createRef()
+    this.descriptionRef = React.createRef();
+    this.handleToggleDetails = this.handleToggleDetails.bind(this);
+  }
+
+  handleToggleDetails() {
+    this.toggleDetails();
   }
 
   render() {
@@ -62,12 +67,14 @@ class Details extends React.Component {
     if (connection === null) {
       return null;
     }
-    let details = currentTechnicalItem ? currentTechnicalItem : null;
-    let detailsStyle = {overflow: 'hidden'};
+
+    const details = currentTechnicalItem || null;
+    const detailsStyle = { overflow: 'hidden' };
 
     return (
       <>
-      {!isDetailsOpened && <TooltipButton
+        {!isDetailsOpened && (
+          <TooltipButton
             size={TextSize.Size_20}
             position={'bottom'}
             className={styles.show_icon}
@@ -75,16 +82,22 @@ class Details extends React.Component {
             tooltip={'Show Details'}
             target={`show_connection_button`}
             hasBackground={false}
-            handleClick={() => this.toggleDetails()}
-        />}
+            handleClick={this.handleToggleDetails}
+          />
+        )}
+
         <div
-            id={'connection-form-methods-details-panel'}
+          id={'connection-form-methods-details-panel'}
           className={`${styles.details_maximized} ${styles.details_right}`}
-          style={{...detailsStyle, width: isDetailsOpened ? '300px' : 0}}
+          style={{ ...detailsStyle, width: isDetailsOpened ? '300px' : 0 }}
         >
           <SettingsPanel {...this.props} />
+
           <div className={styles.details_data}>
-            <div className={styles.title}><HeaderText value={'Details'} isBold/></div>
+            <div className={styles.title}>
+              <HeaderText value={'Details'} isBold />
+            </div>
+
             {details ? (
               <React.Fragment>
                 <div className={styles.label}>
@@ -97,7 +110,9 @@ class Details extends React.Component {
                 </div>
               </React.Fragment>
             ) : (
-              <div><DefaultText value={'There is no selected item'}/></div>
+              <div>
+                <DefaultText value={'There is no selected item'} />
+              </div>
             )}
           </div>
         </div>

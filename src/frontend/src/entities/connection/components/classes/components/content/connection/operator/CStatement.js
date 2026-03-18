@@ -45,20 +45,26 @@ export default class CStatement{
         let color = statement && statement.hasOwnProperty('color') && statement.color ? statement.color : '';
         let field = statement && statement.hasOwnProperty('field') ? statement.field : '';
         let rightPropertyValue = statement && statement.hasOwnProperty('rightPropertyValue') && statement.rightPropertyValue ? statement.rightPropertyValue : '';
-        let parent = statement && statement.hasOwnProperty('parent') ? statement.parent : null;
-        let type = statement && statement.hasOwnProperty('type') && statement.type ? statement.type : '';
-        if(isNumber(field)){
+        const parent = statement && statement.hasOwnProperty('parent') ? statement.parent : null;
+        const type = statement && statement.hasOwnProperty('type') && statement.type ? statement.type : '';
+
+        if (isNumber(field)) {
             field = `${field}`;
         }
-        let fieldSplitted = field !== '' ? field.split('.') : [];
+
         let responseType = '';
-        if(fieldSplitted.length > 0){
-            responseType = fieldSplitted[0] === RESPONSE_SUCCESS || fieldSplitted[0] === RESPONSE_FAIL ? fieldSplitted[0] : '';
-            if(responseType !== ''){
-                fieldSplitted.splice(0, 1);
-                field = fieldSplitted.join('.');
+        if (field !== '') {
+            const fieldSplitted = field.split('.');
+            if (fieldSplitted.length > 0) {
+                const firstPart = fieldSplitted[0];
+                if (firstPart === RESPONSE_SUCCESS || firstPart === RESPONSE_FAIL) {
+                    responseType = firstPart;
+                    fieldSplitted.splice(0, 1);
+                    field = fieldSplitted.join('.');
+                }
             }
         }
+
         return new CStatement(color, responseType, field, type, parent, rightPropertyValue);
     }
 
@@ -146,8 +152,13 @@ export default class CStatement{
     }
 
     getObject(){
-        if((this._color === DEFAULT_COLOR || this._color === '') && this.field === ''){             //for one statement operator
-            if(this._parent instanceof CCondition) {
+        const color = this._color;
+        const parent = this._parent;
+        let field = this._field;
+        const rightPropertyValue = this._rightPropertyValue;
+
+        if ((color === DEFAULT_COLOR || color === '') && field === '') {
+            if (parent instanceof CCondition) {
                 return {
                     color: '',
                     field: '',
@@ -155,41 +166,46 @@ export default class CStatement{
                 };
             }
             return null;
-        } else {
-            let field = this._field;
-            if((this._parent instanceof CSuccess || this._parent instanceof CFail) && typeof this._parent !== 'undefined'){
-                let fieldSplit = field.split('.');
-                let tmpField = '';
-                let newField = '';
-                for(let i = 0; i < fieldSplit.length; i++){
-                    let fieldSplitValue = fieldSplit[i];
-                    tmpField += tmpField !== '' ? `.${fieldSplitValue}` : fieldSplitValue;
-                    let findField = this._parent.getFields(tmpField).find(f => f.value === fieldSplitValue);
-                    if(findField && this.isNotElementWithIndex(findField.value) && findField.type === 'array'){
-                        fieldSplitValue = markFieldNameAsArray(fieldSplitValue);
-                    }
-                    newField += newField !== '' ? `.${fieldSplitValue}` : `${fieldSplitValue}`;
-                }
-                field = newField;
-            }
-            if(this._color === DEFAULT_COLOR){         //for static values
-                if(field !== ' ' && isNumber(field)){
-                    field = parseInt(field);
-                }
-                return {
-                    color: '',
-                    field: field !== '""' ? field : '',
-                    rightPropertyValue: this._rightPropertyValue !== '""' ? this._rightPropertyValue : '',
-                    type: '',
-                };
-            } else {
-                return {
-                    color: this._color,
-                    field: field ? `${this._responseType}.${field}` : this._responseType,
-                    type: this._type,
-                    rightPropertyValue: this._rightPropertyValue,
-                };
-            }
         }
+
+        if ((parent instanceof CSuccess || parent instanceof CFail) && typeof parent !== 'undefined') {
+            const fieldSplit = field.split('.');
+            let tmpField = '';
+            let newField = '';
+
+            for (let i = 0; i < fieldSplit.length; i++) {
+                let fieldSplitValue = fieldSplit[i];
+                tmpField += tmpField !== '' ? `.${fieldSplitValue}` : fieldSplitValue;
+
+                const findField = parent.getFields(tmpField).find(f => f.value === fieldSplitValue);
+                if (findField && this.isNotElementWithIndex(findField.value) && findField.type === 'array') {
+                    fieldSplitValue = markFieldNameAsArray(fieldSplitValue);
+                }
+
+                newField += newField !== '' ? `.${fieldSplitValue}` : `${fieldSplitValue}`;
+            }
+
+            field = newField;
+        }
+
+        if (color === DEFAULT_COLOR) {
+            if (field !== ' ' && isNumber(field)) {
+                field = parseInt(field);
+            }
+
+            return {
+                color: '',
+                field: field !== '""' ? field : '',
+                rightPropertyValue: rightPropertyValue !== '""' ? rightPropertyValue : '',
+                type: '',
+            };
+        }
+
+        return {
+            color,
+            field: field ? `${this._responseType}.${field}` : this._responseType,
+            type: this._type,
+            rightPropertyValue,
+        };
     }
 }

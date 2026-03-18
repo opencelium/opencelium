@@ -22,11 +22,27 @@ import React, { Component } from 'react';
 import { withTranslation } from 'react-i18next';
 import ReactJson from 'react-json-view';
 
+const JSON_BODY_BASE_STYLE = {
+	wordBreak: 'break-word',
+	padding: '8px 0',
+	width: '80%',
+	display: 'inline-block',
+	position: 'relative',
+};
+
 @withTranslation('basic_components')
 @RequestBody(CJsonEditor)
 class JsonBody extends Component {
-	constructor(props) {
-		super(props);
+	getSource() {
+		const { source, target, method } = this.props;
+
+		if (source !== null) {
+			return source;
+		}
+
+		return target === 'header'
+			? method.request.getHeaderFields()
+			: method.request.getBodyFields();
 	}
 
 	render() {
@@ -38,16 +54,11 @@ class JsonBody extends Component {
 			PointerComponent,
 			WebhookComponent,
 			onReferenceClick,
-			source,
-			target,
 			style,
 		} = this.props;
-		const src =
-			source === null
-				? target === 'header'
-					? method.request.getHeaderFields()
-					: method.request.getBodyFields()
-				: source;
+
+		const src = this.getSource();
+
 		return (
 			<ReactJson
 				ref={this.props.reactJsonRef}
@@ -58,11 +69,7 @@ class JsonBody extends Component {
 				onDelete={readOnly ? false : updateBody}
 				onAdd={readOnly ? false : updateBody}
 				style={{
-					wordBreak: 'break-word',
-					padding: '8px 0',
-					width: '80%',
-					display: 'inline-block',
-					position: 'relative',
+					...JSON_BODY_BASE_STYLE,
 					...style,
 				}}
 				ReferenceComponent={ReferenceComponent}

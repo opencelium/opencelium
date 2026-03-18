@@ -62,6 +62,9 @@ export const ALL_COLORS = [
 /**
  * Connection class for manipulating data in the Connection Component
  */
+
+const connectionInstanceCache = new WeakMap();
+
 export default class CConnection{
 
     constructor(connectionId = 0, title = '', description = '', fromConnector = null, toConnector = null, fieldBindingItems = [], template = null, error = null, readOnly = false, categoryId = null, ui = null){
@@ -86,39 +89,7 @@ export default class CConnection{
         this._fieldBinding = this.convertFieldBindingItems(fieldBindingItems);
         this._template = this.convertTemplate(template);
         this._allTemplates = [];
-        this._colors = [
-            '#FFCFB5', '#C77E7E', '#6477AB', '#98BEC7',
-            '#9EC798', '#BFC798', '#E6E6EA', '#F4B6C2',
-            '#E41298', '#F0E4E4', '#FE8A71', '#E7EFF6',
-            '#5FC798', '#AF28E4', '#A6E6EA', '#E1C798',
-            '#1FCFB5', '#F346C2', '#3477AB', '#44BEC7',
-            '#5EC798', '#B12798', '#76E6EA', '#84B6C2',
-            '#4173AB', '#A0E4E4', '#BE8A71', '#C7EFF6',
-            '#DFC798', '#EF3798', '#F6E6EA', '#11C798',
-            '#F12FB5', '#C1227E', '#6122AB', '#912EC7',
-            '#912798', '#6FC798', '#E123EA', '#277E7E',
-            '#B45DE0', '#F456E4', '#328A71', '#31EFF6',
-            '#312798', '#F11798', '#A3210A', '#E33798',
-            '#1363B0', '#561E7E', '#93CDE0', '#456EC7',
-            '#578998', '#687698', '#7543EA', '#8234C2',
-            '#977DE0', '#5F3798', '#BF2A71', '#C723F6',
-            '#D13298', '#B3CDE0', '#F512EA', '#4F3444',
-            '#1FCFB1', '#177EB1', '#1477B1', '#18BEB1',
-            '#1EC7B1', '#1FC7B1', '#16E6B1', '#14B6B1',
-            '#1412B1', '#10E4B1', '#1E8AB1', '#17EFB1',
-            '#1FC7B1', '#1F28B1', '#16E6B1', '#11C7B1',
-            '#1FCFB1', '#1346B1', '#1477B1', '#14BEB1',
-            '#1EC7B1', '#1127B1', '#16E6B1', '#14B6B1',
-            '#1173B1', '#10E4B1', '#1E8AB1', '#17EFB1',
-            '#1FC7B1', '#1F37B1', '#16E6B1', '#11C7B1',
-            '#112F11', '#112277', '#112231', '#112EF1',
-            '#1127B1', '#1FC7B1', '#1123B1', '#177EB1',
-            '#145DB1', '#1456B1', '#128AB1', '#11EFB1',
-            '#5127B1', '#2117B1', '#A321B1', '#4337B1',
-            '#1363B1', '#161EB1', '#13CDB1', '#156EB1',
-            '#1789B1', '#1876B1', '#1543B1', '#1234B1',
-            '#177DB1', '#1F37B1', '#1F2AB1', '#1723B1',
-            '#1132B1', '#13CDB1', '#1512B1', '#1F34B1',];
+        this._colors = [...ALL_COLORS];
         for(let i = 0; i < this._fromConnector.methods.length; i++){
             this.removeRestColor(this._fromConnector.methods[i].color);
         }
@@ -130,22 +101,57 @@ export default class CConnection{
         this._readOnly = readOnly;
     }
 
-    static createConnection(connection){
+    static createConnection(connection) {
+        if (!connection) {
+            return new CConnection();
+        }
+
+        if (connection instanceof CConnection) {
+            return connection;
+        }
+
+        if (typeof connection === 'object') {
+            const cachedConnection = connectionInstanceCache.get(connection);
+            if (cachedConnection) {
+                return cachedConnection;
+            }
+        }
+
         let connectionId = connection && connection.hasOwnProperty('connectionId') ? connection.connectionId : 0;
-        if(connectionId === 0){
+        if (connectionId === 0) {
             connectionId = connection && connection.hasOwnProperty('id') ? connection.id : 0;
         }
+
         const title = connection && connection.hasOwnProperty('title') ? connection.title : '';
         const description = connection && connection.hasOwnProperty('description') ? connection.description : '';
-        const fromConnector = connection && connection.hasOwnProperty('fromConnector') ? {...connection.fromConnector} : null;
-        const toConnector = connection && connection.hasOwnProperty('toConnector') ? {...connection.toConnector} : null;
+        const fromConnector = connection && connection.hasOwnProperty('fromConnector') ? { ...connection.fromConnector } : null;
+        const toConnector = connection && connection.hasOwnProperty('toConnector') ? { ...connection.toConnector } : null;
         const fieldBinding = connection && connection.hasOwnProperty('fieldBinding') ? connection.fieldBinding : [];
         const template = connection && connection.hasOwnProperty('template') ? connection.template : null;
         const error = connection && connection.hasOwnProperty('error') ? connection.error : null;
         const readOnly = connection && connection.hasOwnProperty('readOnly') ? connection.readOnly : false;
         const categoryId = connection && connection.hasOwnProperty('categoryId') ? connection.categoryId : null;
         const ui = connection && connection.hasOwnProperty('ui') ? connection.ui : null;
-        return new CConnection(connectionId, title, description, fromConnector, toConnector, fieldBinding, template, error, readOnly, categoryId, ui);
+
+        const result = new CConnection(
+            connectionId,
+            title,
+            description,
+            fromConnector,
+            toConnector,
+            fieldBinding,
+            template,
+            error,
+            readOnly,
+            categoryId,
+            ui
+        );
+
+        if (typeof connection === 'object') {
+            connectionInstanceCache.set(connection, result);
+        }
+
+        return result;
     }
 
     static duplicateConnection(connection){
@@ -368,39 +374,7 @@ export default class CConnection{
     resetToEmptyTemplate(){
         this._fromConnector.resetItems();
         this._toConnector.resetItems();
-        this._colors = [
-            '#FFCFB5', '#C77E7E', '#6477AB', '#98BEC7',
-            '#9EC798', '#BFC798', '#E6E6EA', '#F4B6C2',
-            '#E41298', '#F0E4E4', '#FE8A71', '#E7EFF6',
-            '#5FC798', '#AF28E4', '#A6E6EA', '#E1C798',
-            '#1FCFB5', '#F346C2', '#3477AB', '#44BEC7',
-            '#5EC798', '#B12798', '#76E6EA', '#84B6C2',
-            '#4173AB', '#A0E4E4', '#BE8A71', '#C7EFF6',
-            '#DFC798', '#EF3798', '#F6E6EA', '#11C798',
-            '#F12FB5', '#C1227E', '#6122AB', '#912EC7',
-            '#912798', '#6FC798', '#E123EA', '#277E7E',
-            '#B45DE0', '#F456E4', '#328A71', '#31EFF6',
-            '#312798', '#F11798', '#A3210A', '#E33798',
-            '#1363B0', '#561E7E', '#93CDE0', '#456EC7',
-            '#578998', '#687698', '#7543EA', '#8234C2',
-            '#977DE0', '#5F3798', '#BF2A71', '#C723F6',
-            '#D13298', '#B3CDE0', '#F512EA', '#4F3444',
-            '#1FCFB1', '#177EB1', '#1477B1', '#18BEB1',
-            '#1EC7B1', '#1FC7B1', '#16E6B1', '#14B6B1',
-            '#1412B1', '#10E4B1', '#1E8AB1', '#17EFB1',
-            '#1FC7B1', '#1F28B1', '#16E6B1', '#11C7B1',
-            '#1FCFB1', '#1346B1', '#1477B1', '#14BEB1',
-            '#1EC7B1', '#1127B1', '#16E6B1', '#14B6B1',
-            '#1173B1', '#10E4B1', '#1E8AB1', '#17EFB1',
-            '#1FC7B1', '#1F37B1', '#16E6B1', '#11C7B1',
-            '#112F11', '#112277', '#112231', '#112EF1',
-            '#1127B1', '#1FC7B1', '#1123B1', '#177EB1',
-            '#145DB1', '#1456B1', '#128AB1', '#11EFB1',
-            '#5127B1', '#2117B1', '#A321B1', '#4337B1',
-            '#1363B1', '#161EB1', '#13CDB1', '#156EB1',
-            '#1789B1', '#1876B1', '#1543B1', '#1234B1',
-            '#177DB1', '#1F37B1', '#1F2AB1', '#1723B1',
-            '#1132B1', '#13CDB1', '#1512B1', '#1F34B1',];
+        this._colors = [...ALL_COLORS];
         this._fieldBinding = [];
         this._allTemplates = [];
     }

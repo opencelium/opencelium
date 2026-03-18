@@ -111,7 +111,9 @@ function buildParts(raw) {
 function getVisualLength(raw) {
 	const parts = buildParts(String(raw || ''));
 	let v = 0;
-	for (const p of parts) v += p.isRef ? visibleFromToken(p.value).length : p.value.length;
+	for (let i = 0; i < parts.length; i++) {
+		v += parts[i].isRef ? visibleFromToken(parts[i].value).length : parts[i].value.length;
+	}
 	return v;
 }
 
@@ -226,7 +228,7 @@ function getVisualCaretPos(root) {
 
 	let pos = 0;
 
-	const walkDomForCaretPosition  = (node) => {
+	const walkDomForCaretPosition = (node) => {
 		if (!node) return false;
 
 		if (node.nodeType === Node.ELEMENT_NODE && isParamSpan(node) && node.contains(targetNode)) {
@@ -409,7 +411,8 @@ function getVisualStartOfNthRef(raw, n) {
 	let v = 0;
 	let refCounter = 0;
 
-	for (const p of parts) {
+	for (let i = 0; i < parts.length; i++) {
+		const p = parts[i];
 		if (!p.isRef) {
 			v += p.value.length;
 			continue;
@@ -439,15 +442,33 @@ class Endpoint extends Component {
 			actionButtonValue: 'add',
 			isCaretPositionFocusedOnReference: false,
 		};
+
+		this.handleSelectionChange = this._onSelectionChange.bind(this);
+	}
+
+	shouldComponentUpdate(nextProps, nextState) {
+		return (
+			nextProps.method !== this.props.method ||
+			nextProps.readOnly !== this.props.readOnly ||
+			nextProps.connection !== this.props.connection ||
+			nextProps.connector !== this.props.connector ||
+			nextProps.updateEntity !== this.props.updateEntity ||
+			nextProps.theme !== this.props.theme ||
+			nextState.caretPosition !== this.state.caretPosition ||
+			nextState.currentKeyCode !== this.state.currentKeyCode ||
+			nextState.actionButtonTooltip !== this.state.actionButtonTooltip ||
+			nextState.actionButtonValue !== this.state.actionButtonValue ||
+			nextState.isCaretPositionFocusedOnReference !== this.state.isCaretPositionFocusedOnReference
+		);
 	}
 
 	componentDidMount() {
 		this._renderFromRaw(this.raw, { focusEnd: true });
-		document.addEventListener('selectionchange', this._onSelectionChange);
+		document.addEventListener('selectionchange', this.handleSelectionChange);
 	}
 
 	componentWillUnmount() {
-		document.removeEventListener('selectionchange', this._onSelectionChange);
+		document.removeEventListener('selectionchange', this.handleSelectionChange);
 		this._saveEndpoint(this.raw);
 	}
 
@@ -504,12 +525,26 @@ class Endpoint extends Component {
 		return this.endpointValue.current || document.getElementById(this.getEndpointIdName());
 	}
 
-	_onSelectionChange = () => {
+	_onSelectionChange() {
 		const root = this.getEndpointHtmlElement();
 		if (!root) return;
 		if (!isSelectionInside(root)) return;
 		this.lastKnownCaretPos = getVisualCaretPos(root);
-	};
+	}
+
+	_setActionState(nextActionButtonTooltip, nextActionButtonValue, nextFocusedOnReference) {
+		if (
+			this.state.actionButtonTooltip !== nextActionButtonTooltip ||
+			this.state.actionButtonValue !== nextActionButtonValue ||
+			this.state.isCaretPositionFocusedOnReference !== nextFocusedOnReference
+		) {
+			this.setState({
+				actionButtonTooltip: nextActionButtonTooltip,
+				actionButtonValue: nextActionButtonValue,
+				isCaretPositionFocusedOnReference: nextFocusedOnReference,
+			});
+		}
+	}
 
 	_renderFromRaw(raw, opts) {
 		const root = this.getEndpointHtmlElement();
@@ -561,11 +596,7 @@ class Endpoint extends Component {
 		this.selectedRefIndex = null;
 		clearHighlight(root);
 
-		this.setState({
-			actionButtonTooltip: 'Add Reference',
-			actionButtonValue: 'add',
-			isCaretPositionFocusedOnReference: false,
-		});
+		this._setActionState('Add Reference', 'add', false);
 
 		this.raw = parseHtmlToRaw(root.innerHTML);
 	};
@@ -579,11 +610,7 @@ class Endpoint extends Component {
 		if (!span || !root.contains(span)) {
 			this.selectedRefIndex = null;
 			clearHighlight(root);
-			this.setState({
-				actionButtonTooltip: 'Add Reference',
-				actionButtonValue: 'add',
-				isCaretPositionFocusedOnReference: false,
-			});
+			this._setActionState('Add Reference', 'add', false);
 			return;
 		}
 
@@ -597,11 +624,7 @@ class Endpoint extends Component {
 		this.selectedRefIndex = idx;
 		highlightRefByIndex(root, idx);
 
-		this.setState({
-			actionButtonTooltip: 'Replace Reference',
-			actionButtonValue: 'autorenew',
-			isCaretPositionFocusedOnReference: true,
-		});
+		this._setActionState('Replace Reference', 'autorenew', true);
 
 		const startVis = getVisualStartOfNthRef(this.raw, idx);
 		const token = this._getNthTokenRaw(this.raw, idx);
@@ -651,11 +674,7 @@ class Endpoint extends Component {
 		if (isPrintable && this.selectedRefIndex != null) {
 			this.selectedRefIndex = null;
 			clearHighlight(root);
-			this.setState({
-				actionButtonTooltip: 'Add Reference',
-				actionButtonValue: 'add',
-				isCaretPositionFocusedOnReference: false,
-			});
+			this._setActionState('Add Reference', 'add', false);
 		}
 
 		requestAnimationFrame(() => {
@@ -741,11 +760,7 @@ class Endpoint extends Component {
 
 		this.selectedRefIndex = null;
 		clearHighlight(root);
-		this.setState({
-			actionButtonTooltip: 'Add Reference',
-			actionButtonValue: 'add',
-			isCaretPositionFocusedOnReference: false,
-		});
+		this._setActionState('Add Reference', 'add', false);
 
 		this.lastKnownCaretPos = Math.max(0, getVisualCaretPos(root));
 
@@ -781,11 +796,7 @@ class Endpoint extends Component {
 			this.lastKnownCaretPos = newCaretVis;
 
 			this.selectedRefIndex = null;
-			this.setState({
-				actionButtonTooltip: 'Add Reference',
-				actionButtonValue: 'add',
-				isCaretPositionFocusedOnReference: false,
-			});
+			this._setActionState('Add Reference', 'add', false);
 
 			this.raw = finalRaw;
 			this._renderFromRaw(finalRaw, { caretOverride: newCaretVis });

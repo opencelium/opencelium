@@ -25,7 +25,6 @@ import Items from "./Items";
 import Draft from "@change_component/form_elements/form_connection/form_methods/Draft";
 import {LocalStorage} from "@application/classes/LocalStorage";
 
-
 function mapStateToProps(state){
     const authUser = state.authReducer.authUser;
     return{
@@ -39,9 +38,20 @@ function mapStateToProps(state){
 @connect(mapStateToProps, {})
 @FormElement()
 class FormMethods extends Component{
-
     constructor(props){
         super(props);
+
+        this.handleUpdateEntity = this.updateEntity.bind(this);
+    }
+
+    shouldComponentUpdate(nextProps) {
+        return (
+            nextProps.entity !== this.props.entity ||
+            nextProps.data !== this.props.data ||
+            nextProps.isDraft !== this.props.isDraft ||
+            nextProps.noMethodTitle !== this.props.noMethodTitle ||
+            nextProps.authUser !== this.props.authUser
+        );
     }
 
     /**
@@ -50,7 +60,11 @@ class FormMethods extends Component{
     updateEntity(e = null){
         const {entity, updateEntity} = this.props;
         const storage = LocalStorage.getStorage();
-        storage.set(`${entity.fromConnector.invoker.name}&${entity.toConnector.invoker.name}`, JSON.stringify(entity.getObject()));
+        storage.set(
+            `${entity.fromConnector.invoker.name}&${entity.toConnector.invoker.name}`,
+            JSON.stringify(entity.getObject())
+        );
+
         if(e === null) {
             updateEntity(entity);
         } else{
@@ -58,16 +72,53 @@ class FormMethods extends Component{
         }
     }
 
+    getTourClassName(tourSteps){
+        if (!tourSteps || tourSteps.length === 0) {
+            return '';
+        }
+
+        const firstStep = tourSteps[0];
+        if (!firstStep || !firstStep.selector) {
+            return '';
+        }
+
+        return firstStep.selector.substr(1);
+    }
+
+    renderConnectorColumn(connector, readOnly, isDraft, withOffset = false) {
+        return (
+            <Col
+                offset={withOffset ? {xl: 2, lg: 2} : undefined}
+                xl={5}
+                lg={5}
+                md={6}
+                sm={6}
+                className={styles.form_select_method}
+            >
+                <Items
+                    isDraft={isDraft}
+                    readOnly={readOnly}
+                    connection={this.props.entity}
+                    connector={connector}
+                    updateEntity={this.handleUpdateEntity}
+                />
+                {!readOnly &&
+                    <DropdownMenu
+                        readOnly={readOnly}
+                        connection={this.props.entity}
+                        connector={connector}
+                        updateEntity={this.handleUpdateEntity}
+                    />
+                }
+            </Col>
+        );
+    }
+
     render(){
         const {entity, data, isDraft, noMethodTitle} = this.props;
-        const {readOnly} = data;
-        let {tourSteps} = data;
-        let tourClassNames = [];
-        if(tourSteps && tourSteps.length > 0){
-            for(let i = 0; i < tourSteps.length; i++){
-                tourClassNames.push(tourSteps[i].selector.substr(1));
-            }
-        }
+        const {readOnly, tourSteps} = data;
+        const tourClassName = this.getTourClassName(tourSteps);
+
         /*
         * TODO: uncomment AddParam when backend will be ready
         */
@@ -75,7 +126,7 @@ class FormMethods extends Component{
             <div style={{margin: '0 65px', padding: '20px 0'}}>
                 {!readOnly &&
                     <React.Fragment>
-                        <Draft connection={entity} updateEntity={(a) => this.updateEntity(a)}/>
+                        <Draft connection={entity} updateEntity={this.handleUpdateEntity}/>
                         <div style={{float: 'right'}}>
                             {/*<AddTemplate data={data} entity={entity} authUser={authUser}/>*/}
                             {/*<AddParam data={data} entity={entity} authUser={authUser}/>*/}
@@ -83,7 +134,7 @@ class FormMethods extends Component{
                     </React.Fragment>
                 }
                 <div>
-                    <div className={tourClassNames[0] ? tourClassNames[0] : ''}>
+                    <div className={tourClassName}>
                         {!noMethodTitle &&
                             <React.Fragment>
                                 <hr noshade="noshade" size="1" style={{marginTop: '56px'}} color={"#f0f0f0"}/>
@@ -91,40 +142,8 @@ class FormMethods extends Component{
                             </React.Fragment>
                         }
                         <Row>
-                            <Col xl={5} lg={5} md={6} sm={6} className={`${styles.form_select_method}`}>
-                                <Items
-                                    isDraft={isDraft}
-                                    readOnly={readOnly}
-                                    connection={entity}
-                                    connector={entity.fromConnector}
-                                    updateEntity={(a) => this.updateEntity(a)}
-                                />
-                                {!readOnly &&
-                                    <DropdownMenu
-                                        readOnly={readOnly}
-                                        connection={entity}
-                                        connector={entity.fromConnector}
-                                        updateEntity={(a) => this.updateEntity(a)}
-                                    />
-                                }
-                            </Col>
-                            <Col offset={{xl: 2, lg: 2}} xl={5} lg={5} md={6} sm={6} className={`${styles.form_select_method}`}>
-                                <Items
-                                    isDraft={isDraft}
-                                    readOnly={readOnly}
-                                    connection={entity}
-                                    connector={entity.toConnector}
-                                    updateEntity={(a) => this.updateEntity(a)}
-                                />
-                                {!readOnly &&
-                                    <DropdownMenu
-                                        readOnly={readOnly}
-                                        connection={entity}
-                                        connector={entity.toConnector}
-                                        updateEntity={(a) => this.updateEntity(a)}
-                                    />
-                                }
-                            </Col>
+                            {this.renderConnectorColumn(entity.fromConnector, readOnly, isDraft, false)}
+                            {this.renderConnectorColumn(entity.toConnector, readOnly, isDraft, true)}
                         </Row>
                     </div>
                 </div>
@@ -142,6 +161,5 @@ FormMethods.defaultProps = {
     isDraft: false,
     noMethodTitle: false,
 };
-
 
 export default FormMethods;

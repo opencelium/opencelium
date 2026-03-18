@@ -28,10 +28,10 @@ import TooltipFontIcon from '@entity/connection/components/components/general/ba
 import styles from '@entity/connection/components/themes/default/content/connections/connection_overview_2';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Col, Row } from 'react-grid-system';
+import { Col } from 'react-grid-system';
 import { withTheme } from 'styled-components';
 import HelpIcon from "@app_component/base/tour/HelpIcon";
-import {EnhancementSteps} from "@root/utils/tourSteps";
+import { EnhancementSteps } from "@root/utils/tourSteps";
 
 class Body extends React.Component {
 	constructor(props) {
@@ -44,14 +44,49 @@ class Body extends React.Component {
 			isToggledReferenceIcon: false,
 			isOpenedEnhancement: false,
 		};
+
 		this.JsonBodyRef = React.createRef();
 		this.EnhancementRef = React.createRef();
 		this.BodyRef = React.createRef();
 		this.enhancementRef = React.createRef();
+
 		this._isDirty = false;
 		this._openSnapshot = null;
 		this._isEnhancementInitializing = false;
 		this._hasUserTouchedEnhancement = false;
+
+		this.handleToggleBodyVisible = this.toggleBodyVisible.bind(this);
+		this.handleToggleEnhancement = this.toggleEnhancement.bind(this);
+		this.handleToggleResponseIcon = this.handleToggleResponseIcon.bind(this);
+		this.handleToggleReferenceIcon = this.toggleReferenceIcon.bind(this);
+		this.handleUpdateConnection = this.updateEntity.bind(this);
+	}
+
+	shouldComponentUpdate(nextProps, nextState) {
+		return (
+			nextProps.connector !== this.props.connector ||
+			nextProps.connection !== this.props.connection ||
+			nextProps.method !== this.props.method ||
+			nextProps.source !== this.props.source ||
+			nextProps.readOnly !== this.props.readOnly ||
+			nextProps.isDraft !== this.props.isDraft ||
+			nextProps.isExtended !== this.props.isExtended ||
+			nextProps.isCurrentInfo !== this.props.isCurrentInfo ||
+			nextProps.nameOfCurrentInfo !== this.props.nameOfCurrentInfo ||
+			nextProps.isBodyDialogOpened !== this.props.isBodyDialogOpened ||
+			nextProps.hasEnhancement !== this.props.hasEnhancement ||
+			nextProps.hasError !== this.props.hasError ||
+			nextProps.bodyTitle !== this.props.bodyTitle ||
+			nextProps.theme !== this.props.theme ||
+			nextProps.tourSteps !== this.props.tourSteps ||
+			nextProps.toggleBodyDialog !== this.props.toggleBodyDialog ||
+			nextProps.setCurrentInfo !== this.props.setCurrentInfo ||
+			nextState.currentFieldName !== this.state.currentFieldName ||
+			nextState.currentEnhancement !== this.state.currentEnhancement ||
+			nextState.isToggledIcon !== this.state.isToggledIcon ||
+			nextState.isToggledReferenceIcon !== this.state.isToggledReferenceIcon ||
+			nextState.isOpenedEnhancement !== this.state.isOpenedEnhancement
+		);
 	}
 
 	_markDirty() {
@@ -74,6 +109,12 @@ class Body extends React.Component {
 
 	toggleReferenceIcon(isToggledReferenceIcon) {
 		this.setState({ isToggledReferenceIcon });
+	}
+
+	handleToggleResponseIcon() {
+		this.setState((prevState) => ({
+			isToggledIcon: !prevState.isToggledIcon,
+		}));
 	}
 
 	toggleBodyVisible() {
@@ -135,17 +176,20 @@ class Body extends React.Component {
 
 	getCurrentBindingItem(fieldName) {
 		const { connection, method } = this.props;
+
 		const normalizeField = (value = '') => {
 			return unwrapField(String(value))
 				.replace(/\.([0-9]+)/g, '[$1]')
 				.trim();
 		};
+
 		const removeLocationPrefix = (value = '') => {
 			return normalizeField(value)
 				.replace(/^body\.\$\./, '')
 				.replace(/^header\.\$\./, '')
 				.replace(/^status\./, '');
 		};
+
 		const normalizedFullFieldName = normalizeField(fieldName);
 		const normalizedShortFieldName = removeLocationPrefix(fieldName);
 
@@ -155,6 +199,7 @@ class Body extends React.Component {
 					if (elem.color !== method.color) {
 						return false;
 					}
+
 					const elemFullField = normalizeField(elem.field);
 					const elemShortField = removeLocationPrefix(elem.field);
 
@@ -169,18 +214,15 @@ class Body extends React.Component {
 		});
 	}
 
-
 	setCurrentEnhancementClickingOnPointer(e, value, fieldName = '') {
 		const { connection } = this.props;
 		let nextFieldName = fieldName;
 		let bindingItem = null;
+
 		if (nextFieldName === '') {
 			if (value.namespace.length > 1) {
 				for (let i = 1; i < value.namespace.length; i++) {
-					if (
-						i + 1 < value.namespace.length &&
-						isNumber(value.namespace[i + 1])
-					) {
+					if (i + 1 < value.namespace.length && isNumber(value.namespace[i + 1])) {
 						nextFieldName += markFieldNameAsArray(
 							value.namespace[i],
 							value.namespace[i + 1]
@@ -192,12 +234,14 @@ class Body extends React.Component {
 					nextFieldName += '.';
 				}
 			}
+
 			const lastNamespace = value.namespace[value.namespace.length - 1];
 			if (value.variable.name !== lastNamespace) {
 				nextFieldName += value.variable.name;
 			} else {
 				nextFieldName = nextFieldName.slice(0, -1);
 			}
+
 			bindingItem = this.getCurrentBindingItem(nextFieldName);
 		} else {
 			bindingItem = this.getCurrentBindingItem(nextFieldName);
@@ -206,6 +250,7 @@ class Body extends React.Component {
 		if (bindingItem && bindingItem.to && bindingItem.to[0]) {
 			connection.setCurrentFieldBindingTo(bindingItem.to[0]);
 			const enhancement = connection.getEnhancementByTo();
+
 			this.setState({
 				currentFieldName: nextFieldName,
 				currentEnhancement:
@@ -215,6 +260,7 @@ class Body extends React.Component {
 			});
 			return;
 		}
+
 		this.setState({
 			currentFieldName: nextFieldName,
 			currentEnhancement: null,
@@ -233,8 +279,11 @@ class Body extends React.Component {
 		if (!next) return;
 
 		const stable = (v) => {
-			try { return JSON.stringify(v ?? null); }
-			catch { return String(v); }
+			try {
+				return JSON.stringify(v ?? null);
+			} catch {
+				return String(v);
+			}
 		};
 
 		const prev = this.state.currentEnhancement;
@@ -258,13 +307,15 @@ class Body extends React.Component {
 		this.setState({ currentEnhancement: next });
 	}
 
-
 	updateEntity(entity = null) {
 		const { currentFieldName } = this.state;
 		const { connection, updateConnection } = this.props;
+
 		let currentEntity = entity === null ? connection : entity;
+
 		this._markDirty('updateEntity');
 		updateConnection(currentEntity);
+
 		if (currentFieldName !== '') {
 			let bindingItem = this.getCurrentBindingItem(currentFieldName);
 			if (bindingItem) {
@@ -275,8 +326,24 @@ class Body extends React.Component {
 		}
 	}
 
+	getRenderContext() {
+		const { method, hasEnhancement, source } = this.props;
+		const { isToggledIcon, isToggledReferenceIcon, currentEnhancement } = this.state;
+
+		const isGraphQLData = method.isGraphQLData();
+		const hasEnhancementBlock = hasEnhancement && !isGraphQLData;
+
+		return {
+			isGraphQLData,
+			hasEnhancementBlock,
+			isToggledIcon,
+			isToggledReferenceIcon,
+			currentEnhancement,
+			source,
+		};
+	}
+
 	renderBody(style = {}) {
-		const { isToggledReferenceIcon } = this.state;
 		const {
 			readOnly,
 			method,
@@ -285,6 +352,9 @@ class Body extends React.Component {
 			source,
 			connector,
 		} = this.props;
+
+		const { isToggledReferenceIcon } = this.state;
+
 		if (method.isGraphQLData()) {
 			return (
 				<GraphQLBody
@@ -294,7 +364,7 @@ class Body extends React.Component {
 					method={connector.getMethodByIndex(method.index)}
 					connection={connection}
 					connector={connector}
-					updateEntity={(a) => this.updateEntity(a)}
+					updateEntity={this.handleUpdateConnection}
 					noPlaceholder={true}
 					source={source}
 					openEnhancement={(a, b) =>
@@ -303,6 +373,7 @@ class Body extends React.Component {
 				/>
 			);
 		}
+
 		switch (method.bodyFormat) {
 			case BODY_FORMAT.X_WWW_URL_ENCODED:
 			case BODY_FORMAT.JSON:
@@ -317,7 +388,7 @@ class Body extends React.Component {
 						method={connector.getMethodByIndex(method.index)}
 						connection={connection}
 						connector={connector}
-						updateEntity={(a) => this.updateEntity(a)}
+						updateEntity={this.handleUpdateConnection}
 						noPlaceholder={true}
 						source={source}
 						openEnhancement={(a, b) =>
@@ -326,6 +397,7 @@ class Body extends React.Component {
 						style={style}
 					/>
 				);
+
 			case BODY_FORMAT.XML:
 				return (
 					<XmlBody
@@ -336,7 +408,7 @@ class Body extends React.Component {
 						method={connector.getMethodByIndex(method.index)}
 						connection={connection}
 						connector={connector}
-						updateEntity={(a) => this.updateEntity(a)}
+						updateEntity={this.handleUpdateConnection}
 						noPlaceholder={true}
 						source={source}
 						openEnhancement={(a, b) =>
@@ -344,6 +416,9 @@ class Body extends React.Component {
 						}
 					/>
 				);
+
+			default:
+				return null;
 		}
 	}
 
@@ -358,7 +433,6 @@ class Body extends React.Component {
 		this.setState({ isOpenedEnhancement: willOpen });
 	}
 
-
 	renderEnhancement() {
 		const { currentEnhancement, isOpenedEnhancement, currentFieldName } = this.state;
 		const { readOnly, connection, method, theme } = this.props;
@@ -370,6 +444,7 @@ class Body extends React.Component {
 		if (bindingItem) {
 			bindingItem = bindingItem.getObject();
 		}
+
 		const enhancementElement = (
 			<Enhancement
 				key={`enhancement-${currentFieldName || 'empty'}`}
@@ -384,6 +459,7 @@ class Body extends React.Component {
 				theme={theme}
 			/>
 		);
+
 		if (!currentEnhancement) {
 			return (
 				<div className={styles.body_reference_not_selected_message}>
@@ -391,14 +467,15 @@ class Body extends React.Component {
 				</div>
 			);
 		}
+
 		return (
 			<div className={styles.data}>
 				{!isOpenedEnhancement && enhancementElement}
 				<Dialog
 					id={'open_enhancement_in_new_window'}
-					actions={[{ label: 'Ok', onClick: () => this.toggleEnhancement() }]}
+					actions={[{ label: 'Ok', onClick: this.handleToggleEnhancement }]}
 					active={isOpenedEnhancement}
-					toggle={() => this.toggleEnhancement()}
+					toggle={this.handleToggleEnhancement}
 					title={'Enhancement'}
 					theme={{
 						dialog: styles.enhancement_dialog,
@@ -413,38 +490,46 @@ class Body extends React.Component {
 
 	renderInfo() {
 		const {
-			isToggledIcon,
-			isToggledReferenceIcon,
-			currentEnhancement,
-		} = this.state;
-		const {
 			bodyTitle,
 			isExtended,
 			readOnly,
-			source,
 			method,
 			connector,
 			connection,
 			tourSteps,
+			source,
 		} = this.props;
-		const isGraphQLData = method.isGraphQLData();
-		const hasEnhancement = this.props.hasEnhancement && !isGraphQLData;
+
+		const context = this.getRenderContext();
+		const {
+			hasEnhancementBlock,
+			isToggledIcon,
+			isToggledReferenceIcon,
+			currentEnhancement,
+		} = context;
+
 		return (
 			<React.Fragment>
 				<div
 					className={
-						hasEnhancement
+						hasEnhancementBlock
 							? styles.body_data_with_enhancement
 							: styles.body_data_without_enhancement
 					}
 				>
-					{hasEnhancement && (
+					{hasEnhancementBlock && (
 						<ReferenceInformation
-							style={{maxHeight: !isToggledReferenceIcon ? '40px' : isToggledIcon ? '50%' : 'calc(100% - 40px)',}}
+							style={{
+								maxHeight: !isToggledReferenceIcon
+									? '40px'
+									: isToggledIcon
+									? '50%'
+									: 'calc(100% - 40px)',
+							}}
 							body={source}
 							method={method}
 							connection={connection}
-							toggleIcon={(a) => this.toggleReferenceIcon(a)}
+							toggleIcon={this.handleToggleReferenceIcon}
 							isToggledIcon={isToggledReferenceIcon}
 							onReferenceClick={(fieldName) =>
 								this.setCurrentEnhancementClickingOnPointer(
@@ -456,60 +541,76 @@ class Body extends React.Component {
 							location='body'
 						/>
 					)}
-					<div ref={this.BodyRef} style={{
-						position: 'relative',
-						flex: 1,
-						display: 'flex',
-						flexDirection: 'column',
-						maxHeight: !isToggledIcon ? '40px' : isToggledReferenceIcon ? '50%' : 'calc(100% - 40px)',
-					}}>
-						<div style={{position: 'relative', minHeight: '36px', display: 'flex'}}>
+
+					<div
+						ref={this.BodyRef}
+						style={{
+							position: 'relative',
+							flex: 1,
+							display: 'flex',
+							flexDirection: 'column',
+							maxHeight: !isToggledIcon
+								? '40px'
+								: isToggledReferenceIcon
+								? '50%'
+								: 'calc(100% - 40px)',
+						}}
+					>
+						<div style={{ position: 'relative', minHeight: '36px', display: 'flex' }}>
 							<b ref={this.BodyRef}>{bodyTitle}</b>
-							<div style={{marginTop: '-6px'}}>
-								<HelpIcon steps={tourSteps} inputRef={this.BodyRef}/>
+							<div style={{ marginTop: '-6px' }}>
+								<HelpIcon steps={tourSteps} inputRef={this.BodyRef} />
 							</div>
 							<TooltipFontIcon
 								tooltipPosition={'right'}
-								style={{cursor: 'pointer'}}
-								onClick={() => this.setState({isToggledIcon: !isToggledIcon})}
+								style={{ cursor: 'pointer' }}
+								onClick={this.handleToggleResponseIcon}
 								tooltip={isToggledIcon ? 'Hide' : 'Show'}
 								value={isToggledIcon ? 'expand_less' : 'chevron_right'}
 							/>
 						</div>
-						{isToggledIcon && this.renderBody({
-							flex: 1,
-							overflowY: 'auto',
-						})}
+
+						{isToggledIcon &&
+							this.renderBody({
+								flex: 1,
+								overflowY: 'auto',
+							})}
 					</div>
 				</div>
-				{hasEnhancement && (
+
+				{hasEnhancementBlock && (
 					<div className={styles.body_enhancement} ref={this.EnhancementRef}>
-						<div className={styles.body_enhancement_title}
-							 style={{position: 'relative', minHeight: '36px', display: 'flex'}}>
+						<div
+							className={styles.body_enhancement_title}
+							style={{ position: 'relative', minHeight: '36px', display: 'flex' }}
+						>
 							<b>{'Enhancement'}</b>
-							<div style={{marginTop: '-6px'}}>
-								<HelpIcon steps={EnhancementSteps} inputRef={this.EnhancementRef}/>
+							<div style={{ marginTop: '-6px' }}>
+								<HelpIcon steps={EnhancementSteps} inputRef={this.EnhancementRef} />
 							</div>
+
 							{currentEnhancement && (
 								<div className={styles.body_enhancement_button}>
 									<Button
 										icon={'open_in_new'}
-										onClick={() => this.toggleEnhancement()}
+										onClick={this.handleToggleEnhancement}
 										iconSize={'13px'}
 										label={'Open script in new window'}
-										style={{marginBottom: '10px'}}
+										style={{ marginBottom: '10px' }}
 									/>
 								</div>
 							)}
 						</div>
+
 						{this.renderEnhancement()}
 					</div>
 				)}
+
 				{isExtended && !readOnly && (
 					<Button
 						className={styles.extended_details_button_save_body}
 						title={'Save'}
-						onClick={(a) => this.toggleBodyVisible(a)}
+						onClick={this.handleToggleBodyVisible}
 					/>
 				)}
 			</React.Fragment>
@@ -518,7 +619,6 @@ class Body extends React.Component {
 
 	render() {
 		const {
-			connector,
 			isExtended,
 			isCurrentInfo,
 			method,
@@ -526,11 +626,14 @@ class Body extends React.Component {
 			hasError,
 			theme,
 		} = this.props;
+
+		const context = this.getRenderContext();
+		const { isGraphQLData, hasEnhancementBlock } = context;
+
 		const errorColor = hasError
 			? theme?.input?.error?.color || '#9b2e2e'
 			: 'unset';
-		const isGraphQLData = method.isGraphQLData();
-		const hasEnhancement = this.props.hasEnhancement && !isGraphQLData;
+
 		return (
 			<React.Fragment>
 				<Col
@@ -538,36 +641,39 @@ class Body extends React.Component {
 					xs={4}
 					className={`${styles.col} ${styles.entry_padding}`}
 				>{`Body`}</Col>
-				<Col id='body_option' xs={8} className={`${styles.col}`}>
+
+				<Col id='body_option' xs={8} className={styles.col}>
 					<TooltipFontIcon
 						tooltipPosition={'right'}
-						onClick={(a) => this.toggleBodyVisible(a)}
+						onClick={this.handleToggleBodyVisible}
 						size={14}
 						value={<span className={styles.more_details}>{`...`}</span>}
 						tooltip={'Show'}
 					/>
 				</Col>
+
 				{isExtended &&
 					isCurrentInfo &&
 					ReactDOM.createPortal(
 						this.renderInfo(),
 						document.getElementById('extended_details_information')
 					)}
+
 				<Dialog
 					actions={[
 						{
 							label: 'Close',
-							onClick: (a) => this.toggleBodyVisible(a),
+							onClick: this.handleToggleBodyVisible,
 							id: 'header_ok',
 						},
 					]}
 					active={isBodyDialogOpened && !isExtended}
-					toggle={(a) => this.toggleBodyVisible(a)}
+					toggle={this.handleToggleBodyVisible}
 					title={'Body'}
 					theme={{
 						dialog: isGraphQLData
 							? styles.body_dialog_graphql
-							: hasEnhancement
+							: hasEnhancementBlock
 							? styles.body_dialog_with_enhancement
 							: styles.body_dialog,
 						content: styles.body_content,

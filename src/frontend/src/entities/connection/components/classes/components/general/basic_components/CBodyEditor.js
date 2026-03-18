@@ -25,6 +25,20 @@ import { RESPONSE_FAIL, RESPONSE_SUCCESS } from "@entity/connection/components/c
 
 export class CBodyEditor{
 
+    static getParsedReferences(value = '') {
+        const references = CBodyEditor.splitReferences(value);
+        const result = [];
+
+        for (let i = 0; i < references.length; i++) {
+            const parsed = CBodyEditor.parseReference(references[i]);
+            if (parsed) {
+                result.push(parsed);
+            }
+        }
+
+        return result;
+    }
+
     static splitReferences(value = '') {
         return String(value || '')
             .split(';')
@@ -63,13 +77,14 @@ export class CBodyEditor{
 
     static updateFieldsBinding(connection, connector, method, bodyData, target = null, refStructure) {
         const checkBodyData = CBodyEditor.shouldUpdateFieldBinding(connector, bodyData);
-        let invokerBody = method.request.invokerBody;
+        const invokerBody = method.request.invokerBody;
 
         if (checkBodyData !== 0) {
             const parents = Array.isArray(bodyData.namespaces) ? bodyData.namespaces : [];
             const newValue = bodyData.newValue;
             const currentItem = connector.getCurrentItem();
             const item = {};
+
             item.color = currentItem.color;
 
             if (parents.length === 0) {
@@ -85,8 +100,10 @@ export class CBodyEditor{
             } else {
                 item.field = `body.$.${item.field.replace(/^body\.\$\.|header\.\$\./, '')}`;
             }
+
             item.type = 'request';
-            if(refStructure && refStructure.request){
+
+            if (refStructure && refStructure.request) {
                 item.field = wrapField(item.field, refStructure.request);
             }
 
@@ -94,14 +111,10 @@ export class CBodyEditor{
             const fromBindingItems = [];
 
             if (checkBodyData === 1) {
-                const references = CBodyEditor.splitReferences(newValue);
+                const parsedReferences = CBodyEditor.getParsedReferences(newValue);
 
-                for (let i = 0; i < references.length; i++) {
-                    const parsed = CBodyEditor.parseReference(references[i]);
-
-                    if (!parsed) {
-                        continue;
-                    }
+                for (let i = 0; i < parsedReferences.length; i++) {
+                    const parsed = parsedReferences[i];
 
                     const newItem = {
                         color: parsed.color,
@@ -133,12 +146,9 @@ export class CBodyEditor{
     static cleanFieldBinding(connection, bodyData) {
         if (bodyData.newValue === '' || typeof bodyData.newValue === 'undefined') {
             if (isString(bodyData.existingValue)) {
-                const existingReferences = CBodyEditor.splitReferences(bodyData.existingValue);
-                const hasExistingReference = existingReferences.some((reference) =>
-                    !!CBodyEditor.parseReference(reference)
-                );
+                const existingParsedReferences = CBodyEditor.getParsedReferences(bodyData.existingValue);
 
-                if (hasExistingReference) {
+                if (existingParsedReferences.length > 0) {
                     const parents = bodyData.namespaces;
                     const currentItem = connection.toConnector.getCurrentItem();
                     const item = {};
@@ -150,6 +160,7 @@ export class CBodyEditor{
                             item.field = bodyData.name;
                         } else {
                             item.field = '';
+
                             for (let i = 0; i < parents.length; i++) {
                                 if (i < parents.length - 1) {
                                     if (isNumber(parseInt(parents[i + 1]))) {
@@ -161,8 +172,10 @@ export class CBodyEditor{
                                 } else {
                                     item.field += `${parents[i]}`;
                                 }
+
                                 item.field += '.';
                             }
+
                             item.field += bodyData.name;
                         }
 
@@ -187,29 +200,24 @@ export class CBodyEditor{
             bodyData.hasOwnProperty('newValue')
         ) {
             if (isString(bodyData.existingValue)) {
-                const existingReferences = CBodyEditor.splitReferences(bodyData.existingValue);
-                const hasExistingReference = existingReferences.some((reference) =>
-                    !!CBodyEditor.parseReference(reference)
-                );
+                const existingParsedReferences = CBodyEditor.getParsedReferences(bodyData.existingValue);
 
-                if (hasExistingReference) {
+                if (existingParsedReferences.length > 0) {
                     result = 2;
                 }
             }
 
             if (isString(bodyData.newValue)) {
-                const newReferences = CBodyEditor.splitReferences(bodyData.newValue);
-                const hasNewReference = newReferences.some((reference) =>
-                    !!CBodyEditor.parseReference(reference)
-                );
+                const newParsedReferences = CBodyEditor.getParsedReferences(bodyData.newValue);
 
-                if (hasNewReference) {
+                if (newParsedReferences.length > 0) {
                     result = 1;
                 }
             } else {
                 result = 0;
             }
         }
+
         return result;
     }
 }

@@ -18,31 +18,64 @@ import CConnection from '@entity/connection/components/classes/components/conten
 import { CTechnicalOperator } from '@entity/connection/components/classes/components/content/connection_overview_2/operator/CTechnicalOperator';
 import { CTechnicalProcess } from '@entity/connection/components/classes/components/content/connection_overview_2/process/CTechnicalProcess';
 
+const mapItemsToClassesCache = {
+	modal: {
+		rawConnection: undefined,
+		rawTechnicalItem: undefined,
+		resultConnection: null,
+		resultTechnicalItem: null,
+	},
+	default: {
+		rawConnection: undefined,
+		rawTechnicalItem: undefined,
+		resultConnection: null,
+		resultTechnicalItem: null,
+	},
+};
+
 export function mapItemsToClasses(state, isModal = false) {
 	const connectionOverview = isModal
 		? state.modalConnectionReducer
 		: state.connectionReducer;
 
-	let connection = CConnection.createConnection(
-		Object.assign({}, connectionOverview.connection)
-	);
+	const cacheKey = isModal ? 'modal' : 'default';
+	const cache = mapItemsToClassesCache[cacheKey];
+
+	const rawConnection = connectionOverview.connection;
+	const rawTechnicalItem = connectionOverview.currentTechnicalItem;
 	const updateConnection = connectionOverview.updateConnection;
-	let currentTechnicalItem = connectionOverview.currentTechnicalItem;
-	if (
-		currentTechnicalItem !== null &&
-		(!(currentTechnicalItem instanceof CTechnicalProcess) ||
-			!(currentTechnicalItem instanceof CTechnicalOperator))
-	) {
-		if (currentTechnicalItem.hasOwnProperty('type')) {
-			currentTechnicalItem = CTechnicalOperator.createTechnicalOperator(
-				currentTechnicalItem
-			);
-		} else {
-			currentTechnicalItem = CTechnicalProcess.createTechnicalProcess(
-				currentTechnicalItem
-			);
-		}
+
+	let connection = cache.resultConnection;
+	if (cache.rawConnection !== rawConnection || connection === null) {
+		connection = CConnection.createConnection(rawConnection);
+		cache.rawConnection = rawConnection;
+		cache.resultConnection = connection;
 	}
+
+	let currentTechnicalItem = cache.resultTechnicalItem;
+	if (cache.rawTechnicalItem !== rawTechnicalItem) {
+		currentTechnicalItem = rawTechnicalItem;
+
+		if (
+			currentTechnicalItem !== null &&
+			!(currentTechnicalItem instanceof CTechnicalProcess) &&
+			!(currentTechnicalItem instanceof CTechnicalOperator)
+		) {
+			if (currentTechnicalItem.hasOwnProperty('type')) {
+				currentTechnicalItem = CTechnicalOperator.createTechnicalOperator(
+					currentTechnicalItem
+				);
+			} else {
+				currentTechnicalItem = CTechnicalProcess.createTechnicalProcess(
+					currentTechnicalItem
+				);
+			}
+		}
+
+		cache.rawTechnicalItem = rawTechnicalItem;
+		cache.resultTechnicalItem = currentTechnicalItem;
+	}
+
 	return {
 		connectionOverview,
 		currentTechnicalItem,

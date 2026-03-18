@@ -23,7 +23,7 @@ import CEnhancement from '@classes/content/connection/field_binding/CEnhancement
 import TooltipFontIcon from '@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon';
 import PropTypes from 'prop-types';
 import styles from '@entity/connection/components/themes/default/content/connections/connection_overview_2';
-import React, {Component, useState} from 'react';
+import React, { Component } from 'react';
 import { Col, Row } from 'react-grid-system';
 import {
 	FieldBindingsBlockStyled,
@@ -32,25 +32,26 @@ import {
 	SourceMethodNameStyled,
 } from '../../../form_svg/details/description/technical_process/reference_information/styles';
 import InputSelect from "@app_component/base/input/select/InputSelect";
-import {codeGeneratorRegistry} from "@classes/content/connection/field_binding/code_generators/registry";
-import Languages from "@change_component/form_elements/form_connection/form_methods/mapping/enhancement/Languages";
-import {connect} from "react-redux";
-import {checkPolyglot} from "@entity/external_application/redux_toolkit/action_creators/ExternalApplicationCreators";
-import {ExternalApplicationStatus} from "@entity/external_application/requests/interfaces/IExternalApplication";
+import { codeGeneratorRegistry } from "@classes/content/connection/field_binding/code_generators/registry";
+import { connect } from "react-redux";
+import { checkPolyglot } from "@entity/external_application/redux_toolkit/action_creators/ExternalApplicationCreators";
+import { ExternalApplicationStatus } from "@entity/external_application/requests/interfaces/IExternalApplication";
 import DefaultText from "@app_component/base/text/DefaultText";
 
 const languageOptions = [
-	{label: 'JavaScript', value: 'js'},
+	{ label: 'JavaScript', value: 'js' },
 	//{label: 'Python2', value: 'python2'},
-	{label: 'Python3', value: 'python3'},
-	{label: 'Ruby', value: 'ruby'},
+	{ label: 'Python3', value: 'python3' },
+	{ label: 'Ruby', value: 'ruby' },
 ];
+
 const modeMap = {
 	'js': 'javascript',
 	'python2': 'python',
 	'python3': 'python',
 	'ruby': 'ruby',
-}
+};
+
 const mapStateToProps = (state) => ({
 	polyglotStatus: state.externalApplicationReducer.polyglotStatus,
 });
@@ -58,13 +59,15 @@ const mapStateToProps = (state) => ({
 /**
  * Enhancement Component
  */
-@connect(mapStateToProps, {checkPolyglot})
+@connect(mapStateToProps, { checkPolyglot })
 class Enhancement extends Component {
 	constructor(props) {
 		super(props);
+
 		let { enhancement } = props;
 		let expertVar = enhancement ? enhancement.expertVar : '';
 		let expertCode = enhancement ? enhancement.expertCode : '';
+
 		this.state = {
 			expertVar,
 			expertCode,
@@ -74,60 +77,89 @@ class Enhancement extends Component {
 			markers: [],
 			isDescriptionToggled: false,
 		};
+
+		this._optionsCache = {
+			status: undefined,
+			value: languageOptions,
+		};
+
+		this._expertVarCache = {
+			input: null,
+			currentLanguage: null,
+			connection: null,
+			value: null,
+		};
+
+		this.updateCurrentLanguage = this.updateCurrentLanguage.bind(this);
+		this.updateDescription = this.updateDescription.bind(this);
+		this.updateExpertCode = this.updateExpertCode.bind(this);
+		this.toggleDescriptionIcon = this.toggleDescriptionIcon.bind(this);
 	}
 
 	componentDidMount() {
 		setFocusById('enhancement_description');
 	}
 
-	componentDidUpdate(prevProps, prevState, snapshot) {
+	componentDidUpdate(prevProps, prevState) {
 		const { enhancementRef, enhancement } = this.props;
-		if (
-				enhancement &&
-				(
-					prevProps.enhancement?.expertVar !== enhancement.expertVar ||
-					prevProps.enhancement?.expertCode !== enhancement.expertCode ||
-					prevProps.enhancement?.name !== enhancement.name ||
-					prevProps.enhancement?.description !== enhancement.description ||
-					prevProps.enhancement?.language !== enhancement.language
-				)
-			) {
-					this.setState({
-						expertVar: enhancement.expertVar,
-						expertCode: enhancement.expertCode,
-						currentLanguage: enhancement.language || 'js',
-						name: enhancement.name,
-						description: enhancement.description,
-					});
-			}
 
-			if (
-					enhancementRef?.current?.editor &&
-					this.state.expertCode !== prevState.expertCode
-			) {
-					const newMarkers = getMarker(
-						enhancementRef.current.editor,
-						this.state.expertCode,
-						CEnhancement.generateNotExistVar()
-					);
-					this.setState({ markers: newMarkers });
-			}
+		if (
+			enhancement &&
+			(
+				prevProps.enhancement?.expertVar !== enhancement.expertVar ||
+				prevProps.enhancement?.expertCode !== enhancement.expertCode ||
+				prevProps.enhancement?.name !== enhancement.name ||
+				prevProps.enhancement?.description !== enhancement.description ||
+				prevProps.enhancement?.language !== enhancement.language
+			)
+		) {
+			this.setState({
+				expertVar: enhancement.expertVar,
+				expertCode: enhancement.expertCode,
+				currentLanguage: enhancement.language || 'js',
+				name: enhancement.name,
+				description: enhancement.description,
+			});
+		}
+
+		if (
+			enhancementRef?.current?.editor &&
+			this.state.expertCode !== prevState.expertCode
+		) {
+			const newMarkers = getMarker(
+				enhancementRef.current.editor,
+				this.state.expertCode,
+				CEnhancement.generateNotExistVar()
+			);
+			this.setState({ markers: newMarkers });
+		}
 	}
 
 	getOptions() {
-		const { polyglotStatus } = this.props;
+		const status = this.props.polyglotStatus?.status;
 
-		if (polyglotStatus?.status === ExternalApplicationStatus.DOWN) {
-			return languageOptions.map(l => ({
-				value: l.value,
-				label: l.value === 'js' ? l.label : `${l.label} (not configured)`,
-			}));
-		} else {
-			return languageOptions;
+		if (this._optionsCache.status === status) {
+			return this._optionsCache.value;
 		}
+
+		const nextOptions = status === ExternalApplicationStatus.DOWN
+			? languageOptions.map((l) => ({
+					value: l.value,
+					label: l.value === 'js' ? l.label : `${l.label} (not configured)`,
+			  }))
+			: languageOptions;
+
+		this._optionsCache = {
+			status,
+			value: nextOptions,
+		};
+
+		return nextOptions;
 	}
+
 	updateCurrentLanguage(newLanguage) {
 		let { enhancement, setEnhancement, binding } = this.props;
+
 		const enhancementInstance = CEnhancement.createEnhancement({
 			...(enhancement || {}),
 			fieldBinding: binding,
@@ -143,7 +175,7 @@ class Enhancement extends Component {
 			currentLanguage: newLanguage,
 			expertVar: nextEnhancement.expertVar,
 			expertCode: nextEnhancement.expertCode,
-		})
+		});
 	}
 
 	/**
@@ -151,10 +183,12 @@ class Enhancement extends Component {
 	 */
 	updateDescription(description) {
 		let { enhancement, setEnhancement } = this.props;
+
 		const nextEnhancement = {
 			...(enhancement || {}),
 			description,
 		};
+
 		setEnhancement(nextEnhancement);
 		this.setState({ description });
 	}
@@ -165,6 +199,7 @@ class Enhancement extends Component {
 	updateExpertCode(code) {
 		if (code.length <= Validation.TextLength.Long) {
 			const { enhancement, setEnhancement } = this.props;
+
 			const nextEnhancement = {
 				...(enhancement || {}),
 				expertCode: code,
@@ -177,7 +212,16 @@ class Enhancement extends Component {
 
 	renderExpertVar(input) {
 		const { connection } = this.props;
-		const {currentLanguage} = this.state;
+		const { currentLanguage } = this.state;
+
+		if (
+			this._expertVarCache.input === input &&
+			this._expertVarCache.currentLanguage === currentLanguage &&
+			this._expertVarCache.connection === connection
+		) {
+			return this._expertVarCache.value;
+		}
+
 		const LanguageGenerator = codeGeneratorRegistry[currentLanguage]();
 		const regex = LanguageGenerator.getExpertVarRegExp();
 		let match;
@@ -194,11 +238,13 @@ class Enhancement extends Component {
 
 		const output = result.map((item, key) => {
 			const method = connection.getMethodByColor(item.color);
-			//RESULT_VAR is passed to the biosVersion field in the AddComplexUnit request body.
+
 			let path = item.prop[item.prop.length - 1] === '.'
 				? item.prop.substring(0, item.prop.length - 1)
 				: item.prop;
+
 			let target = '';
+
 			if (path.indexOf('body.$.') === 0) {
 				target = 'body';
 				path = path.substring(7);
@@ -209,31 +255,40 @@ class Enhancement extends Component {
 				target = 'status';
 				path = path.substring(7);
 			}
+
 			const isResultVar = item.var === 'RESULT_VAR';
 			const isStatus = target === 'status';
+
 			return (
 				<ReferenceBlockStyled key={key} style={{ margin: '5px 0' }}>
-					<DefaultText value={`${item.var} is ${isResultVar ? 'used as' : 'taken from'}${!isStatus ? ' the value of the ' : ''}`}/>
+					<DefaultText value={`${item.var} is ${isResultVar ? 'used as' : 'taken from'}${!isStatus ? ' the value of the ' : ''}`} />
 					<SourceFieldStyled style={{ color: item.color }}>
 						<DefaultText value={path} />
 					</SourceFieldStyled>
-					<DefaultText value={<span>{`${!isStatus ? ' field in the' : ''} ${isResultVar ? 'request' : 'response'} `}<strong>{target}</strong>{` of the `}</span>}/>
+					<DefaultText value={<span>{`${!isStatus ? ' field in the' : ''} ${isResultVar ? 'request' : 'response'} `}<strong>{target}</strong>{` of the `}</span>} />
 					<SourceMethodNameStyled style={{ background: item.color }}>
-						<DefaultText value={method.label || method.name}/>
+						<DefaultText value={method.label || method.name} />
 					</SourceMethodNameStyled>
-					<DefaultText value={` method.`}/>
+					<DefaultText value={` method.`} />
 				</ReferenceBlockStyled>
 			);
 		});
+
+		this._expertVarCache = {
+			input,
+			currentLanguage,
+			connection,
+			value: output,
+		};
 
 		return output;
 	}
 
 	renderEnhancement() {
-		const { expertVar, markers } = this.state;
+		const { expertVar, markers, expertCode, currentLanguage } = this.state;
 		let { readOnly, theme } = this.props;
-		let { expertCode, currentLanguage } = this.state;
-		const options = this.getOptions();
+
+		const lOptions = this.getOptions();
 
 		const styleProps = {
 			display: 'inline-block',
@@ -243,7 +298,7 @@ class Enhancement extends Component {
 			flex: 1,
 			borderBottom: '1px solid #e9e9e9',
 		};
-		const lOptions = this.getOptions();
+
 		return (
 			<>
 				<FieldBindingsBlockStyled
@@ -257,15 +312,17 @@ class Enhancement extends Component {
 				>
 					{this.renderExpertVar(expertVar)}
 				</FieldBindingsBlockStyled>
-				<div style={{margin: '0 10px'}}>
+
+				<div style={{ margin: '0 10px' }}>
 					<InputSelect
 						id={`input_language`}
 						label={'Language'}
 						options={lOptions}
 						onChange={(option) => this.updateCurrentLanguage(option.value)}
-						value={lOptions.find(o => o.value === currentLanguage)}
+						value={lOptions.find((o) => o.value === currentLanguage)}
 					/>
 				</div>
+
 				<Input
 					className={styles.enhancement_code}
 					readOnly={readOnly}
@@ -318,6 +375,7 @@ class Enhancement extends Component {
 	render() {
 		const { description, isDescriptionToggled } = this.state;
 		let { readOnly, isOpenedEnhancement } = this.props;
+
 		return (
 			<div
 				style={{
@@ -328,6 +386,7 @@ class Enhancement extends Component {
 				}}
 			>
 				{this.renderEnhancement()}
+
 				{!isOpenedEnhancement && (
 					<>
 						<div>
@@ -335,11 +394,12 @@ class Enhancement extends Component {
 							<TooltipFontIcon
 								tooltipPosition={'right'}
 								style={{ verticalAlign: 'middle', cursor: 'pointer' }}
-								onClick={() => this.toggleDescriptionIcon()}
+								onClick={this.toggleDescriptionIcon}
 								tooltip={isDescriptionToggled ? 'Hide' : 'Show'}
 								value={isDescriptionToggled ? 'expand_less' : 'chevron_right'}
 							/>
 						</div>
+
 						{isDescriptionToggled && (
 							<Row>
 								<Col md={12}>

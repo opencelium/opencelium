@@ -25,26 +25,42 @@ import {withTheme} from "styled-components";
  */
 @FormElement()
 class FormComponent extends Component{
-
-    constructor(props){
-        super(props);
+    shouldComponentUpdate(nextProps) {
+        return (
+            nextProps.entity !== this.props.entity ||
+            nextProps.data !== this.props.data ||
+            nextProps.updateEntity !== this.props.updateEntity ||
+            nextProps.theme !== this.props.theme
+        );
     }
 
     render(){
-        const {name, label, icon, style} = this.props.data;
+        const {name, label, icon} = this.props.data;
         const {entity, updateEntity} = this.props;
-        let {tourStep, Component, componentProps} = this.props.data;
+        let {Component, componentProps} = this.props.data;
+
         if(!componentProps){
             componentProps = {};
         }
-        let value = entity[name];
+
         if(!icon){
-            return <Component entity={entity} updateEntity={updateEntity} {...componentProps}/>;
+            return (
+                <Component
+                    entity={entity}
+                    updateEntity={updateEntity}
+                    {...componentProps}
+                />
+            );
         }
+
         return (
             <Input label={label} icon={icon} minHeight={'300'}>
                 <ComponentStyled>
-                    <Component entity={entity} updateEntity={updateEntity} {...componentProps}/>
+                    <Component
+                        entity={entity}
+                        updateEntity={updateEntity}
+                        {...componentProps}
+                    />
                 </ComponentStyled>
             </Input>
         );
@@ -55,6 +71,5 @@ FormComponent.propTypes = {
     entity: PropTypes.object.isRequired,
     data: PropTypes.object.isRequired,
 };
-
 
 export default withTheme(FormComponent);

@@ -35,17 +35,16 @@ import {
     LikePercentageStyled
 } from "@change_component/form_elements/form_connection/form_svg/details/description/operator/condition/styles";
 
-
 /**
  * IfOperator Component
  */
 class IfOperator extends Component{
-
     constructor(props){
         super(props);
         let leftField = props.operator.condition.leftStatement.getFieldWithoutArrayBrackets();
         let rightProperty = props.operator.condition.rightStatement.getRightPropertyValueWithoutArrayBrackets();
         let rightField = props.operator.condition.rightStatement.getFieldWithoutArrayBrackets();
+
         this.state = {
             responseType: RESPONSE_SUCCESS,
             responseTypeRight: RESPONSE_SUCCESS,
@@ -53,6 +52,70 @@ class IfOperator extends Component{
             rightField,
             rightProperty,
             isMouseOverPlaceholder: false,
+        };
+
+        this.toggleIsMouseOverPlaceholder = this.toggleIsMouseOverPlaceholder.bind(this);
+        this.updateLeftField = this.updateLeftField.bind(this);
+        this.onChangeField = this.onChangeField.bind(this);
+        this.onChangeResponseType = this.onChangeResponseType.bind(this);
+        this.onChangeResponseTypeRight = this.onChangeResponseTypeRight.bind(this);
+        this.onChangeRightField = this.onChangeRightField.bind(this);
+        this.onChangeRightProperty = this.onChangeRightProperty.bind(this);
+        this.updateColor = this.updateColor.bind(this);
+        this.updateColorRight = this.updateColorRight.bind(this);
+        this.updateRelationalOperator = this.updateRelationalOperator.bind(this);
+        this.updateRightField = this.updateRightField.bind(this);
+        this.selectRightField = this.selectRightField.bind(this);
+        this.updateRightPropertyValue = this.updateRightPropertyValue.bind(this);
+        this.setCurrentItem = this.setCurrentItem.bind(this);
+        this.setLeftLikeSign = this.setLeftLikeSign.bind(this);
+        this.setRightLikeSign = this.setRightLikeSign.bind(this);
+    }
+
+    getOperatorCondition() {
+        return this.props.operator.condition;
+    }
+
+    getFunctionalOperator() {
+        const condition = this.getOperatorCondition();
+        return FUNCTIONAL_OPERATORS_FOR_IF.find(o => o.value === condition.relationalOperator) || null;
+    }
+
+    getMethodAndConnectorByColor(color) {
+        const {connection} = this.props;
+
+        let method = connection.toConnector.getMethodByColor(color);
+        let connector = connection.toConnector;
+
+        if(!method){
+            method = connection.fromConnector.getMethodByColor(color);
+            connector = connection.fromConnector;
+        }
+
+        return {method, connector};
+    }
+
+    getOperatorValueConfig(){
+        const functionalOperator = this.getFunctionalOperator();
+
+        return {
+            hasValue: functionalOperator ? functionalOperator.hasValue : false,
+            isRightStatementText: functionalOperator ? functionalOperator.isRightStatementText : false,
+            isRightStatementOption: functionalOperator && functionalOperator.hasOwnProperty('isRightStatementOption')
+                ? functionalOperator.isRightStatementOption
+                : false,
+            options: functionalOperator && functionalOperator.hasOwnProperty('options')
+                ? functionalOperator.options
+                : [],
+            isMultiline: functionalOperator && functionalOperator.hasOwnProperty('isMultiline')
+                ? functionalOperator.isMultiline
+                : false,
+            popupInputStyles: functionalOperator && functionalOperator.hasOwnProperty('popupInputStyles')
+                ? functionalOperator.popupInputStyles
+                : null,
+            hasThreeValues: functionalOperator && functionalOperator.hasOwnProperty('hasThreeValues')
+                ? functionalOperator.hasThreeValues
+                : false,
         };
     }
 
@@ -149,13 +212,8 @@ class IfOperator extends Component{
     }
 
     checkIfOperatorHasThreeParams(){
-        const {operator} = this.props;
-        let relationalOperatorValue = operator.condition.relationalOperator;
-        let functionalOperator = FUNCTIONAL_OPERATORS_FOR_IF.find(o => o.value === relationalOperatorValue);
-        if(functionalOperator && functionalOperator.hasOwnProperty('hasThreeValues')){
-            return functionalOperator.hasThreeValues;
-        }
-        return false;
+        const config = this.getOperatorValueConfig();
+        return config.hasThreeValues;
     }
 
     getParamSource(statement){
@@ -238,12 +296,11 @@ class IfOperator extends Component{
         updateEntity();
     }
 
-
     /**
      * to select right field
      */
     selectRightField(rightField){
-        this.onChangeRightField(rightField.value, (a) => this.updateRightField(a));
+        this.onChangeRightField(rightField.value, () => this.updateRightField());
     }
 
     /**
@@ -263,34 +320,7 @@ class IfOperator extends Component{
     }
 
     isOperatorHasValue(){
-        let hasValue = false;
-        let isRightStatementText = false;
-        let isRightStatementOption = false;
-        let isMultiline = false;
-        let popupInputStyles = null;
-        let options = [];
-        const {operator} = this.props;
-        let value = operator.condition.relationalOperator;
-        let hasValueItem = FUNCTIONAL_OPERATORS_FOR_IF.find(fo => fo.value === value);
-        if(hasValueItem){
-            hasValue = hasValueItem.hasValue;
-            isRightStatementText = hasValueItem.isRightStatementText;
-            if(hasValueItem.hasOwnProperty('isRightStatementOption')) {
-                isRightStatementOption = hasValueItem.isRightStatementOption;
-            }
-            if(hasValueItem.hasOwnProperty('isMultiline')){
-                isMultiline = hasValueItem.isMultiline;
-            }
-            if(hasValueItem.hasOwnProperty('popupInputStyles')){
-                popupInputStyles = hasValueItem.popupInputStyles;
-            }
-        }
-        if(isRightStatementOption){
-            if(hasValueItem.hasOwnProperty('options')) {
-                options = hasValueItem.options;
-            }
-        }
-        return {hasValue, isRightStatementText, isRightStatementOption, options, isMultiline, popupInputStyles} ;
+        return this.getOperatorValueConfig();
     }
 
     renderPlaceholder(){
@@ -370,12 +400,9 @@ class IfOperator extends Component{
         let indexSplitted = operator.index.split('_');
         let pointerWidthValue = indexSplitted.length > 0 ? 260 - ((indexSplitted.length - 1) * 20) + 'px' : '260px';
         let statement = operator.condition.leftStatement;
-        let method = connection.toConnector.getMethodByColor(statement.color);
-        let connector = connection.toConnector;
-        if(!method){
-            method = connection.fromConnector.getMethodByColor(statement.color);
-            connector = connection.fromConnector;
-        }
+        let methodConnectorData = this.getMethodAndConnectorByColor(statement.color);
+        let method = methodConnectorData.method;
+        let connector = methodConnectorData.connector;
         let value = method ? method.getValueForSelectInput(connector) : null;
         let selectThemeInputStyle = {width: hasValue ? '10%' : '20%', float: 'left', transition: 'width 0.3s ease 0s',};
         let generalStyles = {width: '95%', float: 'right'};
@@ -387,7 +414,7 @@ class IfOperator extends Component{
                 <Select
                     name={'method'}
                     value={value}
-                    onChange={(a) => this.updateColor(a)}
+                    onChange={this.updateColor}
                     options={source.length > 0 ? source : [{label: 'No params', value: 0, color: 'white'}]}
                     closeOnSelect={false}
                     placeholder={'...'}
@@ -465,7 +492,7 @@ class IfOperator extends Component{
                 name='response_type'
                 label={''}
                 value={responseType}
-                handleChange={(a) => this.onChangeResponseType(a)}
+                handleChange={this.onChangeResponseType}
                 disabled={!hasMethod}
                 radios={[
                     {
@@ -497,8 +524,8 @@ class IfOperator extends Component{
                     placeholder={'param'}
                     type={'text'}
                     value={leftField}
-                    onChange={(a) => this.onChangeField(a)}
-                    onBlur={(a) => this.updateLeftField(a)}
+                    onChange={this.onChangeField}
+                    onBlur={this.updateLeftField}
                     readOnly={readOnly || !hasMethod}
                     theme={inputTheme}
                     isPopupInput={true}
@@ -513,8 +540,8 @@ class IfOperator extends Component{
                         placeholder={'param'}
                         items={hasMethod ? this.getParamSource('leftStatement') : []}
                         readOnly={readOnly || !hasMethod}
-                        doAction={(a) => this.onChangeField(a)}
-                        onInputChange={(a) => this.onChangeField(a)}
+                        doAction={this.onChangeField}
+                        onInputChange={this.onChangeField}
                         inputValue={leftField}
                         currentConnector={connector}
                     />
@@ -540,7 +567,7 @@ class IfOperator extends Component{
                 <Select
                     name={'relational_operators'}
                     value={value !== '' ? {value, label} : null}
-                    onChange={(a) => this.updateRelationalOperator(a)}
+                    onChange={this.updateRelationalOperator}
                     options={operators}
                     closeOnSelect={false}
                     placeholder={`...`}
@@ -630,8 +657,8 @@ class IfOperator extends Component{
                         placeholder={'param'}
                         type={'text'}
                         value={rightProperty}
-                        onChange={(a) => this.onChangeRightProperty(a)}
-                        onBlur={(a) => this.updateRightPropertyValue(a)}
+                        onChange={this.onChangeRightProperty}
+                        onBlur={this.updateRightPropertyValue}
                         readOnly={readOnly}
                         theme={inputTheme}
                         isPopupInput={true}
@@ -647,8 +674,8 @@ class IfOperator extends Component{
                             placeholder={'param'}
                             items={this.getParamSource('leftStatement')}
                             readOnly={readOnly}
-                            doAction={(a) => this.onChangeRightProperty(a)}
-                            onInputChange={(a) => this.onChangeRightProperty(a)}
+                            doAction={this.onChangeRightProperty}
+                            onInputChange={this.onChangeRightProperty}
                             inputValue={rightProperty}
                             predicator={leftField}
                             currentConnector={connector}
@@ -669,12 +696,9 @@ class IfOperator extends Component{
         let indexSplitted = operator.index.split('_');
         let pointerWidthValue = indexSplitted.length > 0 ? 260 - ((indexSplitted.length - 1) * 20) + 'px' : '260px';
         let statement = operator.condition.rightStatement;
-        let method = connection.toConnector.getMethodByColor(statement.color);
-        let connector = connection.toConnector;
-        if(!method){
-            method = connection.fromConnector.getMethodByColor(statement.color);
-            connector = connection.fromConnector;
-        }
+        let methodConnectorData = this.getMethodAndConnectorByColor(statement.color);
+        let method = methodConnectorData.method;
+        let connector = methodConnectorData.connector;
         let value = method ? method.getValueForSelectInput(connector) : null;
         let isVisible = hasValue && !(rightField !== '' && value === null);
         if(isRightStatementText || isRightStatementOption){
@@ -695,7 +719,7 @@ class IfOperator extends Component{
                 <Select
                     name={'method'}
                     value={value}
-                    onChange={(a) => this.updateColorRight(a)}
+                    onChange={this.updateColorRight}
                     options={source.length > 0 ? source : [{label: 'No params', value: 0, color: 'white'}]}
                     closeOnSelect={false}
                     placeholder={rightField !== '' && value === null ? '' : '...'}
@@ -780,7 +804,7 @@ class IfOperator extends Component{
                 name='response_type'
                 label={''}
                 value={responseType}
-                handleChange={(a) => this.onChangeResponseTypeRight(a)}
+                handleChange={this.onChangeResponseTypeRight}
                 disabled={!hasMethod}
                 radios={[
                     {
@@ -802,10 +826,8 @@ class IfOperator extends Component{
         const {connection, connector, operator, readOnly, updateEntity} = this.props;
         let isOperatorHasThreeParams = this.checkIfOperatorHasThreeParams();
         let statement = operator.condition.rightStatement;
-        let method = connection.toConnector.getMethodByColor(statement.color);
-        if(!method){
-            method = connection.fromConnector.getMethodByColor(statement.color);
-        }
+        let methodConnectorData = this.getMethodAndConnectorByColor(statement.color);
+        let method = methodConnectorData.method;
         let methodValue = method ? {label: method.name, value: method.index, color: method.color} : null;
         let isMethodSelectRightInvisible = methodValue === null && rightField !== '' || isRightStatementText;
         let inputTheme = {inputElement: hasValue ? styles.input_element_pointer_compare_statement_visible : styles.input_element_pointer_compare_statement_not_visible};
@@ -831,7 +853,7 @@ class IfOperator extends Component{
                     <Select
                         name={'relational_operators'}
                         value={rightField !== '' ? options.find(option => option.value === rightField) : null}
-                        onChange={(a) => this.selectRightField(a)}
+                        onChange={this.selectRightField}
                         options={options}
                         closeOnSelect={false}
                         placeholder={`...`}
@@ -913,8 +935,8 @@ class IfOperator extends Component{
                     placeholder={'param'}
                     type={'text'}
                     value={rightField}
-                    onChange={(a) => this.onChangeRightField(a)}
-                    onBlur={(a) => this.updateRightField(a)}
+                    onChange={this.onChangeRightField}
+                    onBlur={this.updateRightField}
                     readOnly={readOnly}
                     theme={inputTheme}
                     isPopupInput={true}
@@ -931,8 +953,8 @@ class IfOperator extends Component{
                         placeholder={'param'}
                         items={this.getParamSource('rightStatement')}
                         readOnly={readOnly}
-                        doAction={(a) => this.onChangeRightField(a)}
-                        onInputChange={(a) => this.onChangeRightField(a)}
+                        doAction={this.onChangeRightField}
+                        onInputChange={this.onChangeRightField}
                         inputValue={rightField}
                         currentConnector={connector}
                         isPopupMultiline={isMultiline}
@@ -1014,12 +1036,12 @@ class IfOperator extends Component{
             <React.Fragment>
                 {this.renderPropertyInputRight()}
                 <LikePercentageStyled isLikeOperator={isLikeOperator} hasSign={hasLeftLikeSign}>
-                    <div onClick={() => this.setLeftLikeSign()}>%</div>
+                    <div onClick={this.setLeftLikeSign}>%</div>
                 </LikePercentageStyled>
                 {this.renderMethodSelectRight()}
                 {this.renderParamInputRight()}
                 <LikePercentageStyled isLikeOperator={isLikeOperator} hasSign={hasRightLikeSign}>
-                    <div onClick={() => this.setRightLikeSign()}>%</div>
+                    <div onClick={this.setRightLikeSign}>%</div>
                 </LikePercentageStyled>
             </React.Fragment>
         );
@@ -1028,7 +1050,6 @@ class IfOperator extends Component{
     render(){
         const {connector, operator, tooltip, isVisibleMenuEdit, renderCloseMenuEditButton, intend} = this.props;
         let classNames = styles.operator_icon;
-        let isOperatorHasThreeParams = this.checkIfOperatorHasThreeParams();
         let isCurrentItem = connector.getCurrentItem() && operator ? connector.getCurrentItem().index === operator.index : false;
         let operatorStyle = {
             height: '57.6px',
@@ -1057,14 +1078,14 @@ class IfOperator extends Component{
                             style={{transform: "rotate(180deg)"}}
                             tooltip={tooltip}
                             value={'call_split'}
-                            onClick={(a) => this.setCurrentItem(a)}
+                            onClick={this.setCurrentItem}
                             tooltipPosition={'top'}
                         />
                     </div>
                     {
                         isVisibleMenuEdit
                         ?
-                            <div className={styles.menu_edit} style={menuEditStyles} onClick={(a) => this.setCurrentItem(a)}>
+                            <div className={styles.menu_edit} style={menuEditStyles} onClick={this.setCurrentItem}>
                                 {this.renderLeftStatement()}
                                 {this.renderOperatorInput()}
                                 {this.renderRightStatement()}
