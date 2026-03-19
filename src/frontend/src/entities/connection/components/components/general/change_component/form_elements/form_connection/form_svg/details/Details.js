@@ -78,7 +78,7 @@ class Details extends React.Component {
             handleClick={() => this.toggleDetails()}
         />}
         <div
-            id={'connection-form-methods-details-panel'}
+          id={isDetailsOpened ? 'connection-form-methods-details-panel' : ''}
           className={`${styles.details_maximized} ${styles.details_right}`}
           style={{...detailsStyle, width: isDetailsOpened ? '300px' : 0}}
         >

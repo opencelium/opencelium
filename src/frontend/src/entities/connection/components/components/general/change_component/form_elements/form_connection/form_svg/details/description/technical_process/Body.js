@@ -462,6 +462,7 @@ class Body extends React.Component {
 						display: 'flex',
 						flexDirection: 'column',
 						maxHeight: !isToggledIcon ? '40px' : isToggledReferenceIcon ? '50%' : 'calc(100% - 40px)',
+						minHeight: !hasEnhancement ? 0 : 'auto'
 					}}>
 						<div style={{position: 'relative', minHeight: '36px', display: 'flex'}}>
 							<b ref={this.BodyRef}>{bodyTitle}</b>
