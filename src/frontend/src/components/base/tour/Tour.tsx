@@ -185,6 +185,20 @@ const Tour:FC<TourProps> =  ({
         };
     };
 
+    const isConnectorPanelStep = (indexOverride?: number): boolean => {
+        const index = typeof indexOverride === "number" ? indexOverride : stepIndex;
+        const step = preparedSteps[index] as PreparedStep | undefined;
+
+        if (!step?.target || typeof step.target !== "string") {
+            return false;
+        }
+
+        return (
+            step.target.includes("#fromConnector_panel") ||
+            step.target.includes("#toConnector_panel")
+        );
+    };
+
     const getTechnicalLayoutContext = (target: HTMLElement | null): TechnicalLayoutContext => {
         const regularLayout = document.getElementById(TECHNICAL_LAYOUT_ID) as HTMLElement | null;
         const modalLayout = document.getElementById(MODAL_TECHNICAL_LAYOUT_ID) as HTMLElement | null;
@@ -292,7 +306,7 @@ const Tour:FC<TourProps> =  ({
         const targetSelector = typeof step.target === "string" ? step.target : "";
         const isFromConnectorStep = targetSelector.includes("#fromConnector_panel");
         const isToConnectorStep = targetSelector.includes("#toConnector_panel");
-        const isConnectorPanelStep = isFromConnectorStep || isToConnectorStep;
+        const isConnectorStep = isFromConnectorStep || isToConnectorStep;
 
         const readRects = () => {
             const currentTarget = getTargetElement(indexOverride).target ?? target;
@@ -338,7 +352,7 @@ const Tour:FC<TourProps> =  ({
             let deltaPixelsX = 0;
             let deltaPixelsY = 0;
 
-            if (isConnectorPanelStep) {
+            if (isConnectorStep) {
                 const desiredLeft = layoutRect.left + (layoutRect.width * 0.25);
                 deltaPixelsX = targetRect.left - desiredLeft;
             } else {
@@ -369,7 +383,7 @@ const Tour:FC<TourProps> =  ({
             let correctiveDeltaX = 0;
             let correctiveDeltaY = 0;
 
-            if (isConnectorPanelStep) {
+            if (isConnectorStep) {
                 const correctedDesiredLeft = layoutRect.left + (layoutRect.width * 0.25);
                 correctiveDeltaX = targetRect.left - correctedDesiredLeft;
             } else {
@@ -416,6 +430,16 @@ const Tour:FC<TourProps> =  ({
         isTransitioningRef.current = true;
 
         try {
+            const connectorStep = isConnectorPanelStep(nextIndex);
+
+            if (!connectorStep) {
+                setStepIndex(nextIndex);
+                await waitFrames(2);
+                await forceFloaterRecalc();
+                scheduleSync(false, nextIndex);
+                return;
+            }
+
             setTourVisibility(false);
 
             await ensureTargetInSafeArea(nextIndex);
@@ -482,6 +506,13 @@ const Tour:FC<TourProps> =  ({
         const onResizeOrScroll = async () => {
             if (isTransitioningRef.current) return;
 
+            const connectorStep = isConnectorPanelStep(stepIndex);
+
+            if (!connectorStep) {
+                scheduleSync(false, stepIndex);
+                return;
+            }
+
             setTourVisibility(false);
 
             await ensureTargetInSafeArea(stepIndex);
@@ -507,7 +538,7 @@ const Tour:FC<TourProps> =  ({
                 rafRef.current = null;
             }
         };
-    }, [run, stepIndex, instanceKey]);
+    }, [run, stepIndex, instanceKey, preparedSteps]);
 
     useEffect(() => {
         if (!run) return;
