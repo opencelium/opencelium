@@ -86,6 +86,9 @@ export const ALL_COLORS = [
     '#2C73D2', '#0081CF', '#0089BA', '#008E9B',
     '#4B4453', '#C34A36', '#FF8066', '#FF9671',
     '#FFC75F', '#F9F871', '#008F7A', '#B39CD0',
+    '#0F4C5C', '#E36414', '#9A031E', '#5F0F40',
+    '#2ECF6E', '#F72525', '#3C6E71', '#FF9F1C',
+    '#6A994E', '#BC4749', '#577590', '#8D99AE',
 ];
 
 /**
@@ -177,6 +180,9 @@ export default class CConnection{
             '#2C73D2', '#0081CF', '#0089BA', '#008E9B',
             '#4B4453', '#C34A36', '#FF8066', '#FF9671',
             '#FFC75F', '#F9F871', '#008F7A', '#B39CD0',
+            '#0F4C5C', '#E36414', '#9A031E', '#5F0F40',
+            '#2ECF6E', '#F72525', '#3C6E71', '#FF9F1C',
+            '#6A994E', '#BC4749', '#577590', '#8D99AE',
         ];
         for(let i = 0; i < this._fromConnector.methods.length; i++){
             this.removeRestColor(this._fromConnector.methods[i].color);
