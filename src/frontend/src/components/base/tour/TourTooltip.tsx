@@ -7,8 +7,7 @@ import {HeaderTextSize} from "@entity/application/utils/constants";
 import DefaultText from "@app_component/base/text/DefaultText";
 
 function TourTooltip(props: TooltipRenderProps) {
-    const { backProps, closeProps, continuous, index, primaryProps, skipProps, step, tooltipProps } =
-        props;
+    const { backProps, continuous, index, primaryProps, step, tooltipProps } = props;
 
     const tooltipRef = useRef<HTMLDivElement | null>(null);
 
@@ -45,25 +44,55 @@ function TourTooltip(props: TooltipRenderProps) {
     }, [index, step, continuous]);
 
     const width = (step.data as any)?.width || 360;
+    const onCustomClose = (step.data as any)?.onCustomClose as (() => void) | undefined;
+    const isLastStepButton = primaryProps?.title === 'Last';
+
     return (
-        <div className="tooltip__body"
-             {...tooltipProps}
-             ref={tooltipRef}
-             style={{ maxWidth: width }}
+        <div
+            className="tooltip__body"
+            {...tooltipProps}
+            ref={tooltipRef}
+            style={{ maxWidth: width }}
         >
-            <button className="tooltip__close" {...closeProps}>
+            <button
+                type="button"
+                className="tooltip__close"
+                aria-label="Close"
+                onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onCustomClose?.();
+                }}
+            >
                 &times;
             </button>
-            {step.title && <p className="tooltip__title">{step.title}</p>}
-            <div className="tooltip__content"><DefaultText value={step.content}/></div>
-            <div className="tooltip__footer">
 
+            {step.title && <p className="tooltip__title">{step.title}</p>}
+
+            <div className="tooltip__content">
+                <DefaultText value={step.content} />
+            </div>
+
+            <div className="tooltip__footer">
                 <div className="tooltip__spacer">
                     {index > 0 && (
-                        <Button {...backProps} label={backProps.title}/>
+                        <Button {...backProps} label={backProps.title} />
                     )}
-                    {continuous && (
-                        <Button {...primaryProps} label={primaryProps.title === 'Last' ? 'Close' : 'Next'}/>
+
+                    {continuous && !isLastStepButton && (
+                        <Button
+                            {...primaryProps}
+                            label="Next"
+                        />
+                    )}
+
+                    {continuous && isLastStepButton && (
+                        <Button
+                            label="Close"
+                            onClick={() => {
+                                onCustomClose?.();
+                            }}
+                        />
                     )}
                 </div>
             </div>

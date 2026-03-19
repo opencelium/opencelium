@@ -32,6 +32,7 @@ const MODAL_TECHNICAL_LAYOUT_SVG_ID = "modal_technical_layout_svg";
 
 type PreparedStep = Step & {
     spotlightPadding?: number;
+    data?: Record<string, any>;
 };
 
 type TargetResult = {
@@ -58,10 +59,83 @@ const Tour:FC<TourProps> =  ({
     const rafRef = useRef<number | null>(null);
     const isTransitioningRef = useRef<boolean>(false);
     const lastNavigationActionRef = useRef<'start' | 'next' | 'prev'>('start');
+    const closeTourRef = useRef<() => void>(() => {});
+
+    const waitFrame = (): Promise<void> => {
+        return new Promise((resolve) => {
+            requestAnimationFrame(() => resolve());
+        });
+    };
+
+    const waitFrames = async (count = 1): Promise<void> => {
+        for (let i = 0; i < count; i++) {
+            await waitFrame();
+        }
+    };
+
+    const hideTourUi = () => {
+        const spotlight = document.querySelector(SPOTLIGHT_SELECTOR) as HTMLElement | null;
+        const tooltip = document.querySelector(TOOLTIP_SELECTOR) as HTMLElement | null;
+        const overlay = document.querySelector(OVERLAY_SELECTOR) as HTMLElement | null;
+
+        if (spotlight) {
+            spotlight.style.opacity = "0";
+            spotlight.style.pointerEvents = "none";
+            spotlight.style.transition = "none";
+        }
+
+        if (tooltip) {
+            tooltip.style.opacity = "0";
+            tooltip.style.pointerEvents = "none";
+            tooltip.style.transition = "none";
+        }
+
+        if (overlay) {
+            overlay.style.opacity = "0";
+            overlay.style.pointerEvents = "none";
+            overlay.style.transition = "none";
+        }
+    };
+
+    const setTourVisibility = (isVisible: boolean) => {
+        const spotlight = document.querySelector(SPOTLIGHT_SELECTOR) as HTMLElement | null;
+        const tooltip = document.querySelector(TOOLTIP_SELECTOR) as HTMLElement | null;
+        const overlay = document.querySelector(OVERLAY_SELECTOR) as HTMLElement | null;
+
+        if (spotlight) {
+            spotlight.style.opacity = isVisible ? "1" : "0";
+            spotlight.style.transition = "none";
+            spotlight.style.pointerEvents = isVisible ? "auto" : "none";
+        }
+
+        if (tooltip) {
+            tooltip.style.opacity = isVisible ? "1" : "0";
+            tooltip.style.transition = "none";
+            tooltip.style.pointerEvents = isVisible ? "auto" : "none";
+        }
+
+        if (overlay) {
+            overlay.style.opacity = isVisible ? "1" : "0";
+            overlay.style.transition = "none";
+            overlay.style.pointerEvents = isVisible ? "auto" : "none";
+        }
+    };
+
+    const closeTour = () => {
+        hideTourUi();
+        isTransitioningRef.current = false;
+        lastNavigationActionRef.current = "start";
+        setRun(false);
+        setStepIndex(0);
+        setInstanceKey((prev) => prev + 1);
+        toggle(false);
+    };
+
+    closeTourRef.current = closeTour;
 
     const preparedSteps = useMemo<PreparedStep[]>(() => {
         return steps
-            .filter(step => {
+            .filter((step) => {
                 if (typeof step.target === "string") {
                     return !!document.querySelector(step.target);
                 }
@@ -77,22 +151,11 @@ const Tour:FC<TourProps> =  ({
                 data: {
                     ...(step.data || {}),
                     focusAction: lastNavigationActionRef.current,
+                    onCustomClose: () => closeTourRef.current(),
                 },
                 title: <Text value={step.title} size={`${HeaderTextSize}px`} isBold />,
             }));
     }, [steps, stepIndex, instanceKey]);
-
-    const waitFrame = (): Promise<void> => {
-        return new Promise((resolve) => {
-            requestAnimationFrame(() => resolve());
-        });
-    };
-
-    const waitFrames = async (count = 1): Promise<void> => {
-        for (let i = 0; i < count; i++) {
-            await waitFrame();
-        }
-    };
 
     const getTargetElement = (indexOverride?: number): TargetResult => {
         const index = typeof indexOverride === "number" ? indexOverride : stepIndex;
@@ -152,23 +215,6 @@ const Tour:FC<TourProps> =  ({
             layoutId: "",
             svgId: "",
         };
-    };
-
-    const setTourVisibility = (isVisible: boolean) => {
-        const spotlight = document.querySelector(SPOTLIGHT_SELECTOR) as HTMLElement | null;
-        const tooltip = document.querySelector(TOOLTIP_SELECTOR) as HTMLElement | null;
-
-        if (spotlight) {
-            spotlight.style.opacity = isVisible ? "1" : "0";
-            spotlight.style.transition = "none";
-            spotlight.style.pointerEvents = isVisible ? "auto" : "none";
-        }
-
-        if (tooltip) {
-            tooltip.style.opacity = isVisible ? "1" : "0";
-            tooltip.style.transition = "none";
-            tooltip.style.pointerEvents = isVisible ? "auto" : "none";
-        }
     };
 
     const syncSpotlight = (hideFirst = false, indexOverride?: number): boolean => {
@@ -391,6 +437,7 @@ const Tour:FC<TourProps> =  ({
         setStepIndex(0);
         isTransitioningRef.current = false;
         lastNavigationActionRef.current = 'start';
+        hideTourUi();
     };
 
     useEffect(() => {
@@ -425,7 +472,10 @@ const Tour:FC<TourProps> =  ({
     }, [show]);
 
     useEffect(() => {
-        if (!run) return;
+        if (!run) {
+            hideTourUi();
+            return;
+        }
 
         const onResizeOrScroll = async () => {
             if (isTransitioningRef.current) return;
@@ -463,11 +513,7 @@ const Tour:FC<TourProps> =  ({
         let overlay: HTMLElement | null = null;
 
         const onOverlayClick = () => {
-            toggle(false);
-            setStepIndex(0);
-            setRun(false);
-            isTransitioningRef.current = false;
-            lastNavigationActionRef.current = 'start';
+            closeTour();
         };
 
         const timer = setTimeout(() => {
@@ -488,60 +534,49 @@ const Tour:FC<TourProps> =  ({
     }, [run, toggle]);
 
     const handleJoyrideCallback = async (data: CallBackProps) => {
-        const { status, action, index, type } = data;
+        const { status, index, type } = data;
+
+        if ((data.action as string) === ACTIONS.CLOSE) {
+            closeTour();
+            return;
+        }
 
         if (isTransitioningRef.current) {
             return;
         }
 
-        if (action === ACTIONS.CLOSE) {
-            toggle(false);
-            setStepIndex(0);
-            setRun(false);
-            isTransitioningRef.current = false;
-            lastNavigationActionRef.current = 'start';
-            return;
-        }
-
         if (type === EVENTS.TARGET_NOT_FOUND) {
-            toggle(false);
-            setStepIndex(0);
-            setRun(false);
-            isTransitioningRef.current = false;
-            lastNavigationActionRef.current = 'start';
+            closeTour();
             return;
         }
 
-        if (action === ACTIONS.NEXT && type === EVENTS.STEP_AFTER) {
+        if (data.action === ACTIONS.NEXT && type === EVENTS.STEP_AFTER) {
             const nextIndex = index + 1;
 
             if (nextIndex >= preparedSteps.length) {
+                closeTour();
                 return;
             }
 
-            lastNavigationActionRef.current = 'next';
+            lastNavigationActionRef.current = "next";
             await goToStep(nextIndex, true);
             return;
         }
 
-        if (action === ACTIONS.PREV && type === EVENTS.STEP_AFTER) {
+        if (data.action === ACTIONS.PREV && type === EVENTS.STEP_AFTER) {
             const prevIndex = index - 1;
 
             if (prevIndex < 0) {
                 return;
             }
 
-            lastNavigationActionRef.current = 'prev';
+            lastNavigationActionRef.current = "prev";
             await goToStep(prevIndex, true);
             return;
         }
 
         if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
-            toggle(false);
-            setStepIndex(0);
-            setRun(false);
-            isTransitioningRef.current = false;
-            lastNavigationActionRef.current = 'start';
+            closeTour();
         }
     };
 
