@@ -38,6 +38,7 @@ import {connect} from "react-redux";
 import {checkPolyglot} from "@entity/external_application/redux_toolkit/action_creators/ExternalApplicationCreators";
 import {ExternalApplicationStatus} from "@entity/external_application/requests/interfaces/IExternalApplication";
 import DefaultText from "@app_component/base/text/DefaultText";
+import { ColorTheme } from '@style/Theme';
 
 const languageOptions = [
 	{label: 'JavaScript', value: 'js'},
@@ -214,7 +215,7 @@ class Enhancement extends Component {
 			return (
 				<ReferenceBlockStyled key={key} style={{ margin: '5px 0' }}>
 					<DefaultText value={`${item.var} is ${isResultVar ? 'used as' : 'taken from'}${!isStatus ? ' the value of the ' : ''}`}/>
-					<SourceFieldStyled style={{ color: item.color }}>
+					<SourceFieldStyled style={{ color: ColorTheme.Black, fontWeight: 'bold' }}>
 						<DefaultText value={path} />
 					</SourceFieldStyled>
 					<DefaultText value={<span>{`${!isStatus ? ' field in the' : ''} ${isResultVar ? 'request' : 'response'} `}<strong>{target}</strong>{` of the `}</span>}/>
