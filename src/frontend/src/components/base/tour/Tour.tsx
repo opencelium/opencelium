@@ -91,9 +91,7 @@ const Tour:FC<TourProps> =  ({
         }
 
         if (overlay) {
-            overlay.style.opacity = "0";
             overlay.style.pointerEvents = "none";
-            overlay.style.transition = "none";
         }
     };
 
@@ -115,14 +113,23 @@ const Tour:FC<TourProps> =  ({
         }
 
         if (overlay) {
-            overlay.style.opacity = isVisible ? "1" : "0";
+            overlay.style.opacity = "1";
             overlay.style.transition = "none";
             overlay.style.pointerEvents = isVisible ? "auto" : "none";
         }
     };
 
     const closeTour = () => {
+        const overlay = document.querySelector(OVERLAY_SELECTOR) as HTMLElement | null;
+
         hideTourUi();
+
+        if (overlay) {
+            overlay.style.opacity = "0";
+            overlay.style.pointerEvents = "none";
+            overlay.style.transition = "none";
+        }
+
         isTransitioningRef.current = false;
         lastNavigationActionRef.current = "start";
         setRun(false);
@@ -401,7 +408,7 @@ const Tour:FC<TourProps> =  ({
         return hasMoved;
     };
 
-    const goToStep = async (nextIndex: number, hideFirst = true) => {
+    const goToStep = async (nextIndex: number) => {
         if (isTransitioningRef.current) {
             return;
         }
@@ -412,21 +419,16 @@ const Tour:FC<TourProps> =  ({
             setTourVisibility(false);
 
             await ensureTargetInSafeArea(nextIndex);
-            await waitFrames(2);
+            await waitFrames(1);
 
             setStepIndex(nextIndex);
             await waitFrames(2);
-
-            await forceFloaterRecalc();
-            scheduleSync(hideFirst, nextIndex);
-            await waitFrames(1);
 
             await forceFloaterRecalc();
             scheduleSync(false, nextIndex);
             await waitFrames(1);
 
             setTourVisibility(true);
-            scheduleSync(false, nextIndex);
         } finally {
             isTransitioningRef.current = false;
         }
@@ -461,7 +463,7 @@ const Tour:FC<TourProps> =  ({
 
             if (!isMounted) return;
 
-            await goToStep(0, true);
+            await goToStep(0);
         };
 
         startTour();
@@ -559,7 +561,7 @@ const Tour:FC<TourProps> =  ({
             }
 
             lastNavigationActionRef.current = "next";
-            await goToStep(nextIndex, true);
+            await goToStep(nextIndex);
             return;
         }
 
@@ -571,7 +573,7 @@ const Tour:FC<TourProps> =  ({
             }
 
             lastNavigationActionRef.current = "prev";
-            await goToStep(prevIndex, true);
+            await goToStep(prevIndex);
             return;
         }
 
