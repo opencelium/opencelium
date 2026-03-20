@@ -15,60 +15,111 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import {Row, Col} from "react-grid-system";
+import { Row, Col } from "react-grid-system";
 import styles from "@entity/connection/components/themes/default/content/connections/connection_overview_2";
 import COperator from "@entity/connection/components/classes/components/content/connection_overview_2/operator/COperator";
 import Condition from "@change_component/form_elements/form_connection/form_svg/details/description/operator/Condition";
 import OperatorType from "@change_component/form_elements/form_connection/form_svg/details/description/operator/OperatorType";
 import TechnicalProcessDescription
     from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/TechnicalProcessDescription";
-import {CTechnicalProcess} from "@entity/connection/components/classes/components/content/connection_overview_2/process/CTechnicalProcess";
-import {withTheme} from "styled-components";
-import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
-import {connect} from "react-redux";
+import { CTechnicalProcess } from "@entity/connection/components/classes/components/content/connection_overview_2/process/CTechnicalProcess";
+import { withTheme } from "styled-components";
+import { mapItemsToClasses } from "@change_component/form_elements/form_connection/form_svg/utils";
+import { connect } from "react-redux";
 import DataAggregator
     from "@change_component/form_elements/form_connection/form_svg/details/description/technical_process/DataAggregator";
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 import DefaultText from "@app_component/base/text/DefaultText";
 
 function mapStateToProps(state, props){
-    const {connection} = mapItemsToClasses(state, props.isModal);
-    return{
+    const { connection } = mapItemsToClasses(state, props.isModal);
+    return {
         connection,
     };
 }
 
 @GetModalProp()
-@connect(mapStateToProps, {}, null, {forwardRef: true})
-class Description extends React.Component{
+@connect(mapStateToProps, {}, null, { forwardRef: true })
+class Description extends React.Component {
     constructor(props) {
         super(props);
         this.conditionRef = React.createRef();
         this.technicalProcessDescriptionRef = React.createRef();
     }
 
-    renderForOperator(){
-        const {details, connection, updateConnection, isExtended, currentInfo, setCurrentInfo, readOnly, theme} = this.props;
-        const operatorItem = details.entity;
-        const errorColor = theme?.input?.error?.color || '#9b2e2e';
-        const connector = connection.getConnectorByType(details.connectorType);
-        const errorMessages = connector ? connector.getOperatorByIndex(operatorItem.index)?.error?.messages || [] : [];
-        return(
+    shouldComponentUpdate(nextProps) {
+        return (
+            nextProps.details !== this.props.details ||
+            nextProps.connection !== this.props.connection ||
+            nextProps.updateConnection !== this.props.updateConnection ||
+            nextProps.isExtended !== this.props.isExtended ||
+            nextProps.currentInfo !== this.props.currentInfo ||
+            nextProps.setCurrentInfo !== this.props.setCurrentInfo ||
+            nextProps.readOnly !== this.props.readOnly ||
+            nextProps.theme !== this.props.theme
+        );
+    }
+
+    getOperatorContext() {
+        const { details, connection } = this.props;
+        const operatorItem = details?.entity || null;
+        const connector = details ? connection.getConnectorByType(details.connectorType) : null;
+        const connectorOperator = connector && operatorItem
+            ? connector.getOperatorByIndex(operatorItem.index)
+            : null;
+
+        return {
+            operatorItem,
+            connector,
+            errorMessages: connectorOperator?.error?.messages || [],
+        };
+    }
+
+    renderForOperator() {
+        const {
+            details,
+            connection,
+            updateConnection,
+            isExtended,
+            currentInfo,
+            setCurrentInfo,
+            readOnly,
+        } = this.props;
+
+        const { operatorItem } = this.getOperatorContext();
+
+        return (
             <Row className={styles.row}>
-                <OperatorType readOnly={readOnly} details={details} connection={connection} updateConnection={updateConnection}/>
-                {
-                    operatorItem.iterator &&
+                <OperatorType
+                    readOnly={readOnly}
+                    details={details}
+                    connection={connection}
+                    updateConnection={updateConnection}
+                />
+
+                {operatorItem?.iterator && (
                     <React.Fragment>
-                        <Col xs={4} className={`${styles.col}`}><DefaultText value={`Iterator`} /></Col>
-                        <Col xs={8} className={`${styles.col} ${styles.value}`}><DefaultText value={operatorItem.iterator} /></Col>
+                        <Col xs={4} className={styles.col}>
+                            <DefaultText value={`Iterator`} />
+                        </Col>
+                        <Col xs={8} className={`${styles.col} ${styles.value}`}>
+                            <DefaultText value={operatorItem.iterator} />
+                        </Col>
                     </React.Fragment>
-                }
-                <Condition ref={this.conditionRef} readOnly={readOnly} nameOfCurrentInfo={'operator_condition'} isCurrentInfo={currentInfo === 'operator_condition'} setCurrentInfo={setCurrentInfo} isExtended={isExtended} updateConnection={updateConnection} connection={connection} details={details}/>
-                {/*{
-                    errorMessages.map(error => {
-                        return <div style={{color: errorColor, width: '100%'}}>{error}</div>
-                    })
-                }*/}
+                )}
+
+                <Condition
+                    ref={this.conditionRef}
+                    readOnly={readOnly}
+                    nameOfCurrentInfo={'operator_condition'}
+                    isCurrentInfo={currentInfo === 'operator_condition'}
+                    setCurrentInfo={setCurrentInfo}
+                    isExtended={isExtended}
+                    updateConnection={updateConnection}
+                    connection={connection}
+                    details={details}
+                />
+
                 <DataAggregator
                     readOnly={readOnly}
                     details={details}
@@ -80,11 +131,18 @@ class Description extends React.Component{
         );
     }
 
-    render(){
-        const {details} = this.props;
-        return(
+    render() {
+        const { details } = this.props;
+
+        return (
             <div className={styles.description}>
-                {details instanceof CTechnicalProcess && <TechnicalProcessDescription {...this.props} ref={this.technicalProcessDescriptionRef}/>}
+                {details instanceof CTechnicalProcess && (
+                    <TechnicalProcessDescription
+                        {...this.props}
+                        ref={this.technicalProcessDescriptionRef}
+                    />
+                )}
+
                 {details instanceof COperator && this.renderForOperator()}
             </div>
         );

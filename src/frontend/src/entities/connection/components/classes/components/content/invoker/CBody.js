@@ -54,6 +54,7 @@ export default class CBody{
         const format = body && body.hasOwnProperty('format') ? body.format : BODY_FORMAT.JSON;
         const data = body && body.hasOwnProperty('data') ? body.data : BODY_DATA.RAW;
         const fields = body && body.hasOwnProperty('fields') ? body.fields : isObject(body) ? body : {};
+
         return new CBody(type, format, data, fields);
     }
 
@@ -141,20 +142,26 @@ export default class CBody{
     }
 
     _getSubField(fields, property){
-        if (isString(fields[property])) {
-            fields = fields[property];
-        } else if (isArray(fields[property])) {
-            fields = fields[property][0];
-        } else {
-            fields = fields[property];
+        const value = fields[property];
+
+        if (isString(value)) {
+            return value;
         }
-        return fields;
+
+        if (isArray(value)) {
+            return value[0];
+        }
+
+        return value;
     }
 
     _addFoundedProperty(result, fields, property, connector = null){
+        const value = fields[property];
         let type = FIELD_TYPE_OBJECT;
-        if(isString(fields[property])){
+
+        if (isString(value)) {
             type = FIELD_TYPE_STRING;
+
             if (connector !== null) {
                 const previousLoopOperators = connector.getPreviousLoopOperators();
                 for (let i = 0; i < previousLoopOperators.length; i++) {
@@ -169,38 +176,45 @@ export default class CBody{
                 }
             }
         }
-        if(isArray(fields[property])){
+
+        if (isArray(value)) {
             type = FIELD_TYPE_ARRAY;
+
             result.push({
                 value: `${property}[0]`,
                 type,
                 label: `${property} (1-st element of array)`,
             });
-            if(connector !== null){
+
+            if (connector !== null) {
                 const previousIterators = connector.getPreviousIterators();
-                for(let i = 0; i < previousIterators.length; i++){
+                for (let i = 0; i < previousIterators.length; i++) {
                     result.push({
                         value: `${property}[${previousIterators[i]}]`,
                         type,
                         label: `${property} (${previousIterators[i]} loop)`,
                     });
-
                 }
             }
+
             result.push({
                 value: `${property}${WHOLE_ARRAY}`,
                 type,
                 label: `${property} (the whole array)`,
             });
+
             return;
         }
+
         if (this._isAttributeProperty(property)) {
             property = ATTRIBUTES_MARK;
             type = FIELD_TYPE_STRING;
         }
+
         if (this._isValueProperty(property)) {
             return;
         }
+
         result.push({
             value: property,
             type,
@@ -209,13 +223,24 @@ export default class CBody{
     }
 
     _ifFoundAddProperty(result, fields, item, searchValue, connector = null){
-        if (item.toLowerCase().includes(searchValue.toLowerCase())) {
+        const itemLower = item.toLowerCase();
+        const searchValueLower = searchValue.toLowerCase();
+
+        if (itemLower.includes(searchValueLower)) {
             this._addFoundedProperty(result, fields, item, connector);
         }
     }
 
     _sortResultFields(fields){
-        return fields.sort((field1, field2) => (field1.label > field2.label) ? 1 : ((field2.label > field1.label) ? -1 : 0));
+        if (!Array.isArray(fields) || fields.length < 2) {
+            return fields;
+        }
+
+        return fields.sort((field1, field2) => {
+            if (field1.label > field2.label) return 1;
+            if (field2.label > field1.label) return -1;
+            return 0;
+        });
     }
 
     _getLabel(type, label){
@@ -252,57 +277,57 @@ export default class CBody{
 
     getFieldsForSelectSearch(searchValue, connector = null){
         let result = [];
-        let cleanedSearchValue = this._cleanSearchValue(searchValue);
-        let properties = cleanedSearchValue.split('.');
+        const cleanedSearchValue = this._cleanSearchValue(searchValue);
+        const properties = cleanedSearchValue.split('.');
         let fields = isArray(this._fields) && this._fields.length > 0 ? this._fields[0] : this._fields;
-        if(fields) {
-            for (let i = 0; i < properties.length; i++) {
-                let property = this._getProperty(properties[i]);
-                let hasProperty = fields.hasOwnProperty(property);
-                if (i < properties.length - 1) {
-                    if (hasProperty) {
-                        fields = this._getSubField(fields, property);
-                        if(!fields){
-                            return [];
-                        }
-                    } else {
-                        return [];
-                    }
-                } else if (i === properties.length - 1) {
-                    hasProperty = fields.hasOwnProperty(property);
-                    if(hasProperty) {
-                        if(this._isAttributeProperty(property)){
-                            for (let item in fields[property]) {
-                                if(fields[property].hasOwnProperty(item)) {
-                                    result.push({
-                                        value: `${ATTRIBUTES_MARK}${item}`,
-                                        type: FIELD_TYPE_STRING,
-                                        label: item
-                                    });
-                                }
-                            }
-                            return this._sortResultFields(result);
-                        }
-                        if(this._isValueProperty(property)){
-                            return [];
-                        }
-                        this._addFoundedProperty(result, fields, property, connector);
-                    } else {
-                        for (let item in fields) {
-                            this._ifFoundAddProperty(result, fields, item, property, connector);
+
+        if (!fields) {
+            return this._sortResultFields(result);
+        }
+
+        for (let i = 0; i < properties.length; i++) {
+            let property = this._getProperty(properties[i]);
+            let hasProperty = fields.hasOwnProperty(property);
+
+            if (i < properties.length - 1) {
+                if (!hasProperty) {
+                    return [];
+                }
+
+                fields = this._getSubField(fields, property);
+                if (!fields) {
+                    return [];
+                }
+
+                continue;
+            }
+
+            if (hasProperty) {
+                if (this._isAttributeProperty(property)) {
+                    for (let item in fields[property]) {
+                        if (fields[property].hasOwnProperty(item)) {
+                            result.push({
+                                value: `${ATTRIBUTES_MARK}${item}`,
+                                type: FIELD_TYPE_STRING,
+                                label: item,
+                            });
                         }
                     }
-                    /*
-                    * the case when user wants to select the whole xml tag segment
-                    * TODO: implement converter from invoker structure to xml string
-                    *  depending on property and paste it in value
-                    */
-                    /*if(this._format === BODY_FORMAT.XML){
-                        result.unshift({label: `<${properties[i]}/>`, value: `<xml/>`})
-                    }*/
+                    return this._sortResultFields(result);
+                }
+
+                if (this._isValueProperty(property)) {
+                    return [];
+                }
+
+                this._addFoundedProperty(result, fields, property, connector);
+            } else {
+                for (let item in fields) {
+                    this._ifFoundAddProperty(result, fields, item, property, connector);
                 }
             }
         }
+
         return this._sortResultFields(result);
     }
 
@@ -316,7 +341,11 @@ export default class CBody{
             type: this._type,
             format: this._format,
             data: this._data,
-            fields: isEmptyObject(this._fields) ? null : isArray(this._fields) ? this._fields[0] : this._fields,
+            fields: isEmptyObject(this._fields)
+                ? null
+                : isArray(this._fields)
+                    ? this._fields[0]
+                    : this._fields,
         };
     }
 
@@ -324,9 +353,10 @@ export default class CBody{
      * get object of the class
      */
     getObject(){
-        if(isEmptyObject(this._fields) || this._fields === null){
+        if (isEmptyObject(this._fields) || this._fields === null) {
             return null;
         }
+
         return this.convertToObject();
     }
 }

@@ -33,12 +33,10 @@ import Input from "@entity/connection/components/components/general/basic_compon
 import RadioButtons from "@entity/connection/components/components/general/basic_components/inputs/RadioButtons";
 import Select from "@entity/connection/components/components/general/basic_components/inputs/Select";
 
-
 /**
  * LoopOperator Component
  */
 class LoopOperator extends Component{
-
     constructor(props){
         super(props);
         let field = props.operator.condition.leftStatement.getFieldWithoutArrayBrackets();
@@ -46,6 +44,41 @@ class LoopOperator extends Component{
             field,
             responseType: RESPONSE_SUCCESS,
         };
+
+        this.updateField = this.updateField.bind(this);
+        this.onChangeField = this.onChangeField.bind(this);
+        this.onChangeResponseType = this.onChangeResponseType.bind(this);
+        this.updateColor = this.updateColor.bind(this);
+        this.setCurrentItem = this.setCurrentItem.bind(this);
+    }
+
+    getLeftStatement() {
+        return this.props.operator.condition.leftStatement;
+    }
+
+    getMethodAndConnectorByColor(color) {
+        const {connection} = this.props;
+
+        let method = connection.toConnector.getMethodByColor(color);
+        let connector = connection.toConnector;
+
+        if(!method){
+            method = connection.fromConnector.getMethodByColor(color);
+            connector = connection.fromConnector;
+        }
+
+        return {method, connector};
+    }
+
+    getPointerWidthValue() {
+        const {operator} = this.props;
+        let indexSplitted = operator.index.split('_');
+        return indexSplitted.length > 0 ? 260 - ((indexSplitted.length - 1) * 20) + 'px' : '260px';
+    }
+
+    hasSelectedMethod() {
+        const leftStatement = this.getLeftStatement();
+        return leftStatement.color !== '' && leftStatement.color !== DEFAULT_COLOR;
     }
 
     /**
@@ -145,30 +178,24 @@ class LoopOperator extends Component{
     }
 
     renderMethodSelect(){
-        const {connection, operator, readOnly} = this.props;
-        let indexSplitted = operator.index.split('_');
-        let pointerWidthValue = indexSplitted.length > 0 ? 260 - ((indexSplitted.length - 1) * 20) + 'px' : '260px';
-        let myStyles = {width: pointerWidthValue, paddingLeft: styles.paddingLeft ? styles.paddingLeft : 0};
-        let statement = operator.condition.leftStatement;
-        let method = connection.toConnector.getMethodByColor(statement.color);
-        let connector = connection.toConnector;
-        if(!method){
-            method = connection.fromConnector.getMethodByColor(statement.color);
-            connector = connection.fromConnector;
-        }
-        let value = method ? method.getValueForSelectInput(connector) : null;
-        let selectThemeInputStyle = {width: '30%', float: 'left'};
-        let generalStyles = {width: '95%', float: 'right'};
-        let source = this.getOptionsForMethods();
-        generalStyles.width = myStyles.width;
-        selectThemeInputStyle.padding = 0;
+        const {operator, readOnly} = this.props;
+        const statement = operator.condition.leftStatement;
+        const pointerWidthValue = this.getPointerWidthValue();
+        const methodConnectorData = this.getMethodAndConnectorByColor(statement.color);
+        const method = methodConnectorData.method;
+        const connector = methodConnectorData.connector;
+        const value = method ? method.getValueForSelectInput(connector) : null;
+        const selectThemeInputStyle = {width: '30%', float: 'left'};
+        const source = this.getOptionsForMethods();
+        const hasSource = source.length > 0;
+
         return (
             <div style={selectThemeInputStyle}>
                 <Select
                     name={'method'}
                     value={value}
-                    onChange={(a) => this.updateColor(a)}
-                    options={source.length > 0 ? source : [{label: 'No params', value: 0, color: 'white'}]}
+                    onChange={this.updateColor}
+                    options={hasSource ? source : [{label: 'No params', value: 0, color: 'white'}]}
                     closeOnSelect={false}
                     placeholder={'...'}
                     isDisabled={readOnly}
@@ -195,7 +222,7 @@ class LoopOperator extends Component{
                                 marginBottom: '8px',
                                 zIndex: '1',
                             };
-                            if(isDisabled || source.length === 0){
+                            if(isDisabled || !hasSource){
                                 s = {
                                     ...styles,
                                     display: 'none'
@@ -221,14 +248,13 @@ class LoopOperator extends Component{
 
     renderResponseTypeGroup(){
         const {responseType} = this.state;
-        const {operator} = this.props;
-        let hasMethod = operator.condition.leftStatement.color !== '' && operator.condition.leftStatement.color !== DEFAULT_COLOR;
+        const hasMethod = this.hasSelectedMethod();
         return(
             <RadioButtons
                 name='response_type'
                 label={''}
                 value={responseType}
-                handleChange={(a) => this.onChangeResponseType(a)}
+                handleChange={this.onChangeResponseType}
                 disabled={!hasMethod}
                 radios={[
                     {
@@ -247,7 +273,7 @@ class LoopOperator extends Component{
     renderParamInput(){
         let {field} = this.state;
         const {connection, operator, connector, readOnly, updateEntity} = this.props;
-        let hasMethod = operator.condition.leftStatement.color !== '' && operator.condition.leftStatement.color !== DEFAULT_COLOR;
+        let hasMethod = this.hasSelectedMethod();
         let inputTheme = {};
         let divStyles = {float: 'left', width: '70%'};
         inputTheme.input = styles.input_pointer_param_loop;
@@ -258,8 +284,8 @@ class LoopOperator extends Component{
                     placeholder={'param'}
                     type={'text'}
                     value={field}
-                    onChange={(a) => this.onChangeField(a)}
-                    onBlur={(a) => this.updateField(a)}
+                    onChange={this.onChangeField}
+                    onBlur={this.updateField}
                     readOnly={readOnly || !hasMethod}
                     theme={inputTheme}
                     isPopupInput={true}
@@ -274,8 +300,8 @@ class LoopOperator extends Component{
                         placeholder={'param'}
                         items={hasMethod ? this.getParamSource() : []}
                         readOnly={readOnly || !hasMethod}
-                        doAction={(a) => this.onChangeField(a)}
-                        onInputChange={(a) => this.onChangeField(a)}
+                        doAction={this.onChangeField}
+                        onInputChange={this.onChangeField}
                         inputValue={field}
                         currentConnector={connector}
                     />
@@ -303,21 +329,21 @@ class LoopOperator extends Component{
         return (
             <div style={{display: 'flex'}}>
                 <div style={{height: '57.6px', width: intend, transition: 'width 0.5s ease 0s'}}/>
-                <div style={operatorStyle} onClick={(a) => this.setCurrentItem(a)}>
+                <div style={operatorStyle} onClick={this.setCurrentItem}>
                     <div style={{float: 'left', width: '10%', marginTop: '10px'}}>
                         <TooltipFontIcon
                             className={classNames}
                             tooltip={tooltip}
                             value={'loop'}
-                            onClick={(a) => this.setCurrentItem(a)}
+                            onClick={this.setCurrentItem}
                             tooltipPosition={'top'}
                         />
                     </div>
-                    <span title={'Iterator'}className={styles.operator_iterator}>{operator.iterator}</span>
+                    <span title={'Iterator'} className={styles.operator_iterator}>{operator.iterator}</span>
                     {
                         isVisibleMenuEdit
                         ?
-                            <div className={styles.menu_edit} onClick={(a) => this.setCurrentItem(a)}>
+                            <div className={styles.menu_edit} onClick={this.setCurrentItem}>
                                 {this.renderMethodSelect()}
                                 {this.renderParamInput()}
                                 {renderCloseMenuEditButton()}

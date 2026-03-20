@@ -22,6 +22,12 @@ export const LOOP_OPERATOR = 'loop';
 /**
  * Operator Item class for Connector Item class
  */
+
+const OPERATOR_TYPES_FOR_SELECT = [
+    { label: 'if', value: IF_OPERATOR },
+    { label: 'loop', value: LOOP_OPERATOR },
+];
+
 export default class COperatorItem{
 
     constructor(index = '', type = '', condition = null, error = null, isMinimized = false, isToggled = false, iterator = '', dataAggregator = null, expression = '', uiId = '', connection){
@@ -42,38 +48,56 @@ export default class COperatorItem{
     }
 
     static createOperatorItem(operatorItem, connection){
-        let index = operatorItem && operatorItem.hasOwnProperty('index') ? operatorItem.index : '';
-        let type = operatorItem && operatorItem.hasOwnProperty('type') ? operatorItem.type : '';
-        let condition = operatorItem && operatorItem.hasOwnProperty('condition') ? operatorItem.condition : null;
-        let error = operatorItem && operatorItem.hasOwnProperty('error') ? operatorItem.error : null;
-        let isMinimized = operatorItem && operatorItem.hasOwnProperty('isMinimized') ? operatorItem.isMinimized : false;
-        let isToggled = operatorItem && operatorItem.hasOwnProperty('isToggled') ? operatorItem.isToggled : false;
-        let iterator = operatorItem && operatorItem.hasOwnProperty('iterator') ? operatorItem.iterator : '';
-        let dataAggregator = operatorItem && operatorItem.hasOwnProperty('dataAggregator') ? operatorItem.dataAggregator : null;
-        let expression = operatorItem && operatorItem.hasOwnProperty('expression') ? operatorItem.expression : '';
-        let uiId = operatorItem && operatorItem.hasOwnProperty('uiId') ? operatorItem.uiId : '';
-        return new COperatorItem(index, type, condition, error, isMinimized, isToggled, iterator, dataAggregator, expression, uiId, connection);
+        const index = operatorItem && operatorItem.hasOwnProperty('index') ? operatorItem.index : '';
+        const type = operatorItem && operatorItem.hasOwnProperty('type') ? operatorItem.type : '';
+        const condition = operatorItem && operatorItem.hasOwnProperty('condition') ? operatorItem.condition : null;
+        const error = operatorItem && operatorItem.hasOwnProperty('error') ? operatorItem.error : null;
+        const isMinimized = operatorItem && operatorItem.hasOwnProperty('isMinimized') ? operatorItem.isMinimized : false;
+        const isToggled = operatorItem && operatorItem.hasOwnProperty('isToggled') ? operatorItem.isToggled : false;
+        const iterator = operatorItem && operatorItem.hasOwnProperty('iterator') ? operatorItem.iterator : '';
+        const dataAggregator = operatorItem && operatorItem.hasOwnProperty('dataAggregator') ? operatorItem.dataAggregator : null;
+        const expression = operatorItem && operatorItem.hasOwnProperty('expression') ? operatorItem.expression : '';
+        const uiId = operatorItem && operatorItem.hasOwnProperty('uiId') ? operatorItem.uiId : '';
+
+        return new COperatorItem(
+            index,
+            type,
+            condition,
+            error,
+            isMinimized,
+            isToggled,
+            iterator,
+            dataAggregator,
+            expression,
+            uiId,
+            connection
+        );
     }
 
     cleanConditionFromReference(methodColor) {
-        if(this.condition.leftStatement.color === methodColor) {
-            this.condition.leftStatement.color = DEFAULT_COLOR;
-            this.condition.relationalOperator = '';
-            this.condition.rightStatement.color = DEFAULT_COLOR;
+        const condition = this._condition;
+
+        if (condition.leftStatement.color === methodColor) {
+            condition.leftStatement.color = DEFAULT_COLOR;
+            condition.relationalOperator = '';
+            condition.rightStatement.color = DEFAULT_COLOR;
         }
-        if(this.condition.rightStatement.color === methodColor) {
-            this.condition.rightStatement.color = DEFAULT_COLOR;
+
+        if (condition.rightStatement.color === methodColor) {
+            condition.rightStatement.color = DEFAULT_COLOR;
         }
-        if (this.expression.indexOf(methodColor) !== -1 && this._connection) {
+
+        if (this._expression.indexOf(methodColor) !== -1 && this._connection) {
             this._expression = this._connection.cleanUIFromReferences(this, methodColor);
         }
     }
+    
     cleanFromReference(methodColor) {
         this.cleanConditionFromReference(methodColor);
     }
 
     static getOperatorTypesForSelect(){
-        return [{label: 'if', value: IF_OPERATOR},{label: 'loop', value: LOOP_OPERATOR}];
+        return OPERATOR_TYPES_FOR_SELECT;
     }
 
     deleteError(){
@@ -164,35 +188,35 @@ export default class COperatorItem{
     }
 
     setStatementColorByType(type, color){
-        switch(type){
-            case 'leftStatement':
-                this.setLeftStatementColor(color);
-                break;
-            case 'rightStatement':
-                this.setRightStatementColor(color);
-                break;
+        if (type === 'leftStatement') {
+            this.setLeftStatementColor(color);
+            return;
+        }
+
+        if (type === 'rightStatement') {
+            this.setRightStatementColor(color);
         }
     }
 
     setStatementFieldByType(type, field){
-        switch(type){
-            case 'leftStatement':
-                this.setLeftStatementField(field);
-                break;
-            case 'rightStatement':
-                this.setRightStatementField(field);
-                break;
+        if (type === 'leftStatement') {
+            this.setLeftStatementField(field);
+            return;
+        }
+
+        if (type === 'rightStatement') {
+            this.setRightStatementField(field);
         }
     }
 
     setStatementParentByType(type, parent){
-        switch(type){
-            case 'leftStatement':
-                this.setLeftStatementParent(parent);
-                break;
-            case 'rightStatement':
-                this.setRightStatementParent(parent);
-                break;
+        if (type === 'leftStatement') {
+            this.setLeftStatementParent(parent);
+            return;
+        }
+
+        if (type === 'rightStatement') {
+            this.setRightStatementParent(parent);
         }
     }
 

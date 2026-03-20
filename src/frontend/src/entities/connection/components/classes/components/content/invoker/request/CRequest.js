@@ -22,6 +22,7 @@ import CBody from "@entity/connection/components/classes/components/content/invo
 import COperation from "@entity/connection/components/classes/components/content/invoker/COperation";
 import { API_METHOD } from "@entity/connection/components/utils/constants/app";
 import { instanceOf } from "prop-types";
+import { consoleError } from '@application/utils/utils';
 export const METHOD_TYPES = [
     {value: API_METHOD.POST, label: 'POST'},
     {value: API_METHOD.GET, label: 'GET'},
@@ -97,11 +98,10 @@ export default class CRequest{
     }
 
     getHeaderFields(){
-        const result = this._header.reduce((acc, item) => {
+        return this._header.reduce((acc, item) => {
             acc[item.name] = item.value;
             return acc;
         }, {});
-        return result;
     }
 
     setHeaderFields(fields){
@@ -124,10 +124,6 @@ export default class CRequest{
         }
 
         this._header = fields;
-    }
-
-    setBodyFields(fields){
-        this._body.fields = fields;
     }
 
     get method(){
@@ -164,7 +160,8 @@ export default class CRequest{
 
     setHeader(headerItems){
         this._header = [];
-        if(isArray(headerItems)) {
+
+        if (isArray(headerItems)) {
             for (let i = 0; i < headerItems.length; i++) {
                 this._header.push(headerItems[i]);
             }
@@ -206,20 +203,20 @@ export default class CRequest{
      * @returns Object (mostly for backend api request only)
      */
     getObject(params = {bodyOnlyConvert: false}){
-        let obj = {
+        const obj = {
             endpoint: this._endpoint,
             body: params.bodyOnlyConvert ? this._body.convertToObject() : this._body.getObject(),
             method: this._method,
         };
+
         if (this._header && Object.keys(this._header).length > 0) {
-            
             if (typeof this._header === 'object' && !Array.isArray(this._header)) {
                 obj.header = this._header;
-            }
-            else{
+            } else {
                 obj.header = convertHeaderFormatToObject(this._header);
             }
         }
+
         return obj;
     }
 }
