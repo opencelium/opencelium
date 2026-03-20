@@ -2,6 +2,21 @@
 Changelog
 *********
 
+
+4.8.1
+========
+ 
+:Date: March 23, 2026
+
+Fixes
+--------
+ 
+* Operation Issue (OC-1352)
+* Enhancement Issue (OC-1355)
+* Fix changelog sql (OC-1357)
+* Fix tour bug in dialogs (OC-1346)
+
+
 4.8
 ========
  
