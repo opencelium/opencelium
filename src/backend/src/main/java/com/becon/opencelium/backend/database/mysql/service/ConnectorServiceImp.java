@@ -271,20 +271,33 @@ public class ConnectorServiceImp implements ConnectorService {
         Map<String, RequestData> existingMap = connector.getRequestData().stream()
                 .collect(Collectors.toMap(RequestData::getField, rd -> rd));
 
-        // Handle updates
+        // Build a map of invoker's required data keyed by field name
+        Invoker invoker = invokerService.findByName(connector.getInvoker());
+        Map<String, RequiredData> invokerFields = invoker.getRequiredData().stream()
+                .collect(Collectors.toMap(RequiredData::getName, rd -> rd));
+
+        // Handle updates and inserts
         for (Map.Entry<String, String> entry : newRequestDataMap.entrySet()) {
             String field = entry.getKey();
             String value = entry.getValue();
 
             RequestData existing = existingMap.get(field);
             if (existing == null) {
-                throw new GeneralServiceException(ExceptionConstant.REQUIRED_DATA_NOT_FOUND, ExceptionMessages.REQUIRED_DATA_NOT_FOUND.formatted(field));
+                RequiredData invokerField = invokerFields.get(field);
+                if (invokerField == null) {
+                    throw new GeneralServiceException(ExceptionConstant.REQUIRED_DATA_NOT_FOUND, ExceptionMessages.REQUIRED_DATA_NOT_FOUND.formatted(field));
+                }
+                RequestData newRequestData = new RequestData(field, encoder.encrypt(value));
+                newRequestData.setConnector(connector);
+                newRequestData.setVisibility(invokerField.getVisibility());
+                existingMap.put(field, newRequestData);
+            } else {
+                existing.setValue(encoder.encrypt(value));
+                existingMap.put(field, existing);
             }
-
-            existing.setValue(encoder.encrypt(value));
         }
 
-        requestDataService.saveAll(connector.getRequestData());
+        requestDataService.saveAll(new ArrayList<>(existingMap.values()));
     }
 
     @Override
