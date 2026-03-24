@@ -6,7 +6,11 @@ Changelog
 4.8.1
 ========
  
-:Date: March 23, 2026
+:Date: March 24, 2026
+
+Features
+--------
+* Update required data (OC-1359)
 
 Fixes
 --------
