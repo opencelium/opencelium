@@ -138,7 +138,6 @@ export const applicationSlice = createSlice({
             state.entityHeader = action.payload;
         },
         setEntityIconKey: (state, action: PayloadAction<EntityIconKeyType>) => {
-            console.log(action.payload);
             state.entityIconKey = action.payload;
         },
         toggleMenu: (state, action: PayloadAction<boolean>) => {
