@@ -16,20 +16,21 @@ Please read this guide in full before submitting your first PR. It exists to mak
    - 5.1 [src/test — unit and slice tests](#51-srctest--unit-and-slice-tests)
    - 5.2 [src/integrationTest — full-stack integration tests](#52-srcintegrationtest--full-stack-integration-tests)
    - 5.3 [Test resources](#53-test-resources)
-6. [Test naming conventions](#6-test-naming-conventions)
-7. [Running the tests](#7-running-the-tests)
-8. [Test dependencies](#8-test-dependencies)
-9. [Pull request standards](#9-pull-request-standards)
-   - 9.1 [What a PR must include](#91-what-a-pr-must-include)
-   - 9.2 [What to leave out](#92-what-to-leave-out)
-   - 9.3 [PR size](#93-pr-size)
-   - 9.4 [PR description template](#94-pr-description-template)
-   - 9.5 [Commit message format](#95-commit-message-format)
-10. [Code review standards](#10-code-review-standards)
-    - 10.1 [Reviewer responsibilities](#101-reviewer-responsibilities)
-    - 10.2 [Comment conventions](#102-comment-conventions)
-11. [PR lifecycle](#11-pr-lifecycle)
-12. [Migrating existing tests](#12-migrating-existing-tests)
+6. [Test file location](#6-test-file-location)
+7. [Test naming conventions](#6-test-naming-conventions)
+8. [Running the tests](#7-running-the-tests)
+9. [Test dependencies](#8-test-dependencies)
+10. [Pull request standards](#9-pull-request-standards)
+    - 10.1 [What a PR must include](#91-what-a-pr-must-include)
+    - 10.2 [What to leave out](#92-what-to-leave-out)
+    - 10.3 [PR size](#93-pr-size)
+    - 10.4 [PR description template](#94-pr-description-template)
+    - 10.5 [Commit message format](#95-commit-message-format)
+11. [Code review standards](#10-code-review-standards)
+    - 11.1 [Reviewer responsibilities](#101-reviewer-responsibilities)
+    - 11.2 [Comment conventions](#102-comment-conventions)
+12. [PR lifecycle](#11-pr-lifecycle)
+13. [Migrating existing tests](#12-migrating-existing-tests)
 
 ---
 
@@ -307,7 +308,41 @@ Use for SQL seed scripts (`.sql`) and CSV input tables for parameterised tests.
 
 ---
 
-## 6. Test naming conventions
+## 6. Test file location
+
+Test files mirror the production class path. Replace `main` with the test source root and insert the layer (`unit`, `slice`, `integration`).
+
+```
+src/main/java/.../service/UserRoleServiceImpl.java
+→ src/test/java/.../unit/service/UserRoleServiceImplTest.java
+```
+
+| Test type | Location |
+|----------|--------|
+| Unit | `src/test/.../unit/.../*Test.java` |
+| Slice | `src/test/.../slice/.../*Test.java` |
+| Integration | `src/integrationTest/.../integration/.../*IT.java` |
+
+The package name follows the same structure:
+
+```java
+// Production
+package com.example.service;
+
+// Unit test
+package com.example.unit.service;
+```
+
+Shared test utilities go under `testutil/`:
+
+```
+src/test/.../testutil/fixture/
+src/test/.../testutil/assertion/
+```
+
+---
+
+## 7. Test naming conventions
 
 Consistent naming lets Gradle route tests to the correct task automatically and makes it immediately clear what a test is doing.
 
@@ -348,7 +383,7 @@ Use `@DisplayName` for additional human-readable context when the method name al
 
 ---
 
-## 7. Running the tests
+## 8. Running the tests
 
 ```bash
 # Unit and slice tests only — fast, no Docker
@@ -392,7 +427,7 @@ in CI and locally.
 
 ---
 
-## 8. Test dependencies
+## 9. Test dependencies
 
 All test dependencies are declared in `build.gradle`. The `integrationTestImplementation` configuration extends `testImplementation`, so every dependency below is available in both source roots.
 
@@ -405,9 +440,9 @@ All test dependencies are declared in `build.gradle`. The `integrationTestImplem
 
 ---
 
-## 9. Pull request standards
+## 10. Pull request standards
 
-### 9.1 What a PR must include
+### 10.1 What a PR must include
 
 **Title.** Written in imperative mood, 50 characters or fewer. The limit exists
 because titles appear in git log, release notes, and JIRA — a long title gets
@@ -454,7 +489,7 @@ assess it independently.
 
 ---
 
-### 9.2 What to leave out
+### 10.2 What to leave out
 
 - **Unrelated refactors or style fixes.** They make diffs unreadable and mix
   concerns. Open a separate PR.
@@ -472,7 +507,7 @@ assess it independently.
   the value is already in git history. Use environment variables or a secrets
   manager going forward.
 
-### 9.3 PR size
+### 10.3 PR size
 
 | Lines changed | Status | Action |
 |---------------|--------|--------|
@@ -491,7 +526,7 @@ Review quality drops noticeably above about 400 lines. Smaller PRs merge faster,
 
 **Exception:** a pure rename or package restructure may be large but still acceptable if it contains no logic changes. In that case, state this clearly in the PR description and keep the change mechanically clean.
 
-### 9.4 PR description template
+### 10.4 PR description template
 
 Copy this template when opening a PR. The template is also available at
 `.github/pull_request_template.md` and is pre-loaded by GitHub automatically.
@@ -523,7 +558,7 @@ Closes OC-
 
 See [`pull_request_template_example.md`][pr-example] for a fully filled-in example.
 
-### 9.5 Commit message format
+### 10.5 Commit message format
 
 Every commit message must follow this format:
 
@@ -596,9 +631,9 @@ All four parts are required on a single line. No multi-line bodies or footers.
 
 ---
 
-## 10. Code review standards
+## 11. Code review standards
 
-### 10.1 Reviewer responsibilities
+### 11.1 Reviewer responsibilities
 
 - **Respond within two business day.** Stale PRs block the team. If you cannot review in time, say so and suggest another reviewer.
 - **Check out the branch for logic-heavy changes.** Complex business logic cannot be reviewed reliably from a diff alone.
@@ -608,7 +643,7 @@ All four parts are required on a single line. No multi-line bodies or footers.
 - **Do not rubber-stamp large PRs.** If a PR is too large to review meaningfully, request a split before approving.
 - **Do not use review comments for architecture debates.** If the design needs broader discussion, open a ticket or schedule a sync. PR comments are for the code in front of you.
 
-### 10.2 Comment conventions
+### 11.2 Comment conventions
 
 Prefix every review comment with one of the following labels so the author knows immediately whether a response is required:
 
@@ -638,13 +673,13 @@ suggestion: Consider adding existsByRole to the @SliceTest for UserRoleControlle
 
 ---
 
-## 11. PR lifecycle
+## 12. PR lifecycle
 
 
 
 ---
 
-## 12. Migrating existing tests
+## 13. Migrating existing tests
 
 
 
