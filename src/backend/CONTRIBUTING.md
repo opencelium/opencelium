@@ -17,20 +17,20 @@ Please read this guide in full before submitting your first PR. It exists to mak
    - 5.2 [src/integrationTest — full-stack integration tests](#52-srcintegrationtest--full-stack-integration-tests)
    - 5.3 [Test resources](#53-test-resources)
 6. [Test file location](#6-test-file-location)
-7. [Test naming conventions](#6-test-naming-conventions)
-8. [Running the tests](#7-running-the-tests)
-9. [Test dependencies](#8-test-dependencies)
-10. [Pull request standards](#9-pull-request-standards)
-    - 10.1 [What a PR must include](#91-what-a-pr-must-include)
-    - 10.2 [What to leave out](#92-what-to-leave-out)
-    - 10.3 [PR size](#93-pr-size)
-    - 10.4 [PR description template](#94-pr-description-template)
-    - 10.5 [Commit message format](#95-commit-message-format)
-11. [Code review standards](#10-code-review-standards)
-    - 11.1 [Reviewer responsibilities](#101-reviewer-responsibilities)
-    - 11.2 [Comment conventions](#102-comment-conventions)
-12. [PR lifecycle](#11-pr-lifecycle)
-13. [Migrating existing tests](#12-migrating-existing-tests)
+7. [Test naming conventions](#7-test-naming-conventions)
+8. [Running the tests](#8-running-the-tests)
+9. [Test dependencies](#9-test-dependencies)
+10. [Pull request standards](#10-pull-request-standards)
+    - 10.1 [What a PR must include](#101-what-a-pr-must-include)
+    - 10.2 [What to leave out](#102-what-to-leave-out)
+    - 10.3 [PR size](#103-pr-size)
+    - 10.4 [PR description template](#104-pr-description-template)
+    - 10.5 [Commit message format](#105-commit-message-format)
+11. [Code review standards](#11-code-review-standards)
+    - 11.1 [Reviewer responsibilities](#111-reviewer-responsibilities)
+    - 11.2 [Comment conventions](#112-comment-conventions)
+12. [PR lifecycle](#12-pr-lifecycle)
+13. [Migrating existing tests](#13-migrating-existing-tests)
 
 ---
 
@@ -444,87 +444,15 @@ All test dependencies are declared in `build.gradle`. The `integrationTestImplem
 
 ### 10.1 What a PR must include
 
-**Title.** Written in imperative mood, 50 characters or fewer. The limit exists
-because titles appear in git log, release notes, and JIRA — a long title gets
-truncated or wrapped in all three.
-```
-# Correct — imperative mood, specific, short
-Add UserRoleService existsByRole validation
-Fix NPE in UserRoleServiceImpl getOne method
-
-# Avoid — past tense
-Fixed NPE in UserRoleServiceImpl
-
-# Avoid — vague, could mean anything
-Changes to user service
-```
-
-**Description.** Explains what changed and why — not how. Reviewers can read
-the how in the diff. Include the linked JIRA ticket. Call out breaking changes
-explicitly.
-```
-# Correct — what and why, ticket linked
-Adds null check to getOne() to prevent NPE when the role id does not exist
-in the database. Previously the service called repository.getOne() directly
-which throws EntityNotFoundException instead of our domain RoleNotFoundException.
-Closes OC-1389.
-
-# Avoid — describes the how, not the why
-Changed getOne() to use findById().orElseThrow() with a lambda.
-```
-
-**Tests.** Every logic change requires a test. Use this sentence pattern in
-the description so reviewers know what to look for:
-```
-Added unit test UserRoleServiceImplTest.getOneThrowsRoleNotFoundExceptionWhenIdDoesNotExist
-covering the exception path in UserRoleServiceImpl.getOne().
-```
-
-If no test is needed, explain why — for example "no logic change, documentation
-only" or "covered by existing UserRoleControllerFlowIT".
-
-**Scope.** One concern per PR. If you refactored unrelated code while working
-on your change, open a separate PR or call it out clearly so reviewers can
-assess it independently.
-
 ---
 
 ### 10.2 What to leave out
 
-- **Unrelated refactors or style fixes.** They make diffs unreadable and mix
-  concerns. Open a separate PR.
-- **Commented-out code.** Delete it. Git history preserves everything — use
-  `git log -S "the code you deleted"` to find it again if needed.
-- **Debug or print statements.** These sneak into production. Review your own
-  diff in the PR UI before requesting review.
-- **Generated or build artefact files.** `.class` files, `build/`, `.gradle/`,
-  IDE configs not covered by `.gitignore`.
-- **WIP commits in the final branch.** Squash or rebase before marking the PR
-  as Ready for Review. See section 10 for the full lifecycle. Commit messages
-  like `wip`, `fixup`, and `asdf` pollute the history and make bisect useless.
-- **Credentials or secrets.** If accidentally committed, rotate the credential
-  immediately — do not wait for the PR to be closed or the branch to be deleted,
-  the value is already in git history. Use environment variables or a secrets
-  manager going forward.
+---
 
 ### 10.3 PR size
 
-| Lines changed | Status | Action |
-|---------------|--------|--------|
-| ≤ 200 | Ideal | No action needed |
-| 200 – 400 | Acceptable | No action needed |
-| 400 – 700 | Justify the size | Explain in the description why the PR cannot be split cleanly |
-| > 700 | Split the PR | Open multiple smaller PRs |
-
-Review quality drops noticeably above about 400 lines. Smaller PRs merge faster, receive better review, and are easier to revert safely.
-
-**How to split a large PR:**
-
-- Separate infrastructure from logic. For example: PR 1 adds the Gradle source set and empty folders; PR 2 migrates the first test class; PR 3 migrates the rest.
-- Separate dependency additions from their usage. PR 1 adds Testcontainers to `build.gradle`; PR 2 introduces the first `*IT` test.
-- Use stacked PRs. A dependent PR should target the parent PR’s branch so each change can be reviewed independently. After the parent PR is merged, rebase and retarget the child PR to `main`.
-
-**Exception:** a pure rename or package restructure may be large but still acceptable if it contains no logic changes. In that case, state this clearly in the PR description and keep the change mechanically clean.
+---
 
 ### 10.4 PR description template
 
@@ -538,7 +466,7 @@ Copy this template when opening a PR. The template is also available at
 
 ---
 
-\```markdown
+```markdown
 ## What
 
 
@@ -554,9 +482,11 @@ Closes OC-
 - [ ] Tests added or updated — name them here
 - [ ] No secrets, debug logs, or commented-out code
 - [ ] WIP commits squashed
-  \```
+```
 
 See [`pull_request_template_example.md`][pr-example] for a fully filled-in example.
+
+---
 
 ### 10.5 Commit message format
 
@@ -565,22 +495,6 @@ Every commit message must follow this format:
 ```
 [Type] Ticket-Number #comment Subject #time XhYm
 ```
-
-All four parts are required on a single line. No multi-line bodies or footers.
-
----
-
-**Format breakdown:**
-
-| Part | Syntax          | Description |
-|------|-----------------|-------------|
-| Type | `[Type]`        | Bracketed word describing the nature of the change. See type list below. |
-| Ticket number | `OC-1234`       | The JIRA ticket this commit belongs to. Always include — commits without a ticket number cannot be traced. |
-| `#comment` | literal keyword | Required keyword that separates the ticket from the subject. |
-| Subject | plain text      | Short description of what changed. No trailing full stop. |
-| `#time` | `#time Xh Ym`   | Time spent on this commit. Use `h` for hours, `m` for minutes. |
-
----
 
 **Types:**
 
@@ -593,27 +507,6 @@ All four parts are required on a single line. No multi-line bodies or footers.
 | `Refactored` | Internal restructuring with no behaviour change |
 | `Tested` | Test-only commit — no production code changed |
 | `Documented` | Documentation, comments, or CONTRIBUTING changes only |
-
----
-
-**Time format:**
-
-| Spent | Write |
-|-------|-------|
-| 30 minutes | `#time 30m` |
-| 1 hour | `#time 1h` |
-| 1 hour 30 minutes | `#time 1h 30m` |
-| 2 hours | `#time 2h` |
-
----
-
-**Rules:**
-
-- The ticket number must match an existing JIRA ticket. Do not invent numbers.
-- `#comment` is a literal keyword — do not replace it with anything else.
-- The subject describes *what* changed, not *why*. Keep it under 72 characters.
-- `#time` reflects the time spent on this specific commit, not the whole ticket.
-- Do not use past tense. Write "add unit tests" not "added unit tests".
 
 ---
 
@@ -642,6 +535,8 @@ All four parts are required on a single line. No multi-line bodies or footers.
 - **Ask questions rather than issuing commands.** "Have you considered X?" is more productive than "Do X." It invites dialogue and may reveal context you were missing.
 - **Do not rubber-stamp large PRs.** If a PR is too large to review meaningfully, request a split before approving.
 - **Do not use review comments for architecture debates.** If the design needs broader discussion, open a ticket or schedule a sync. PR comments are for the code in front of you.
+
+---
 
 ### 11.2 Comment conventions
 
