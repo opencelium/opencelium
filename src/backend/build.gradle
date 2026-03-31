@@ -30,58 +30,153 @@ repositories {
 }
 
 ext {
-	grpcVersion = '1.66.0'
-	protobufVersion = '3.25.1'
+	// gRPC / Protobuf
+	grpcVersion      = '1.66.0'
+	protobufVersion  = '3.25.1'
+
+	// Test infrastructure
+	testcontainersVersion = '1.19.8'
+	awaitilityVersion     = '4.2.1'
+
+	// Application dependencies with explicit versions
+	mariadbVersion     = '3.1.2'
+	nashornVersion     = '15.4'
+	nimbusJwtVersion   = '9.30.2'
+	jgitVersion        = '6.5.0.202303070854-r'
+	springdocVersion   = '2.1.0'
+	httpclient5Version = '5.2.1'
+	jsonPatchVersion   = '1.13'
+	javaxJsonVersion   = '1.1.4'
+	jsoupVersion       = '1.13.1'
+	zxingVersion       = '3.4.1'
+	googleAuthVersion  = '1.4.0'
+	jacksonJsr310Ver   = '2.14.1'
+	mapstructVersion   = '1.5.5.Final'
+	tomcatAnnotVer     = '6.0.53'
+	mockitoInlineVer   = '5.2.0'
 }
 
 tasks.named('bootJar') {
 	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+//  Test tasks
+//
+//  Two tasks, two purposes:
+//    test             — unit + slice tests, fast, no Docker required
+//    integrationTest  — full @SpringBootTest + Testcontainers, Docker required
+//
+//  Task routing is driven by naming convention:
+//    *Test.java  → picked up by the default `test` task
+//    *IT.java    → picked up by `integrationTest` via its own source set
+//
+//  CI commands:
+//    ./gradlew test                       — fast feedback only
+//    ./gradlew integrationTest            — integration tests only
+//    ./gradlew clean test integrationTest — full suite
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Unit + slice tests — no Docker required
+// Activates the "test" Spring profile so application-test.yml is loaded.
 test {
 	useJUnitPlatform()
+	description = 'Runs unit and slice tests.'
+	group       = 'verification'
+
+	systemProperty 'spring.profiles.active', 'test'
+
+	testLogging {
+		events 'passed', 'skipped', 'failed'
+	}
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+//  Dependencies
+// ─────────────────────────────────────────────────────────────────────────────
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-hateoas'
-	implementation 'org.springframework.boot:spring-boot-starter-quartz'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-data-ldap'
+
+	// ── Spring Boot starters ──────────────────────────────────────────────────
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-web-services'
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
-	implementation 'org.springframework.session:spring-session-core'
-	implementation 'org.springframework.security:spring-security-ldap'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+	implementation 'org.springframework.boot:spring-boot-starter-data-ldap'
+	implementation 'org.springframework.boot:spring-boot-starter-hateoas'
+	implementation 'org.springframework.boot:spring-boot-starter-quartz'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
-	implementation 'org.springframework.boot:spring-boot-starter-validation:3.0.4'
-	implementation 'org.mariadb.jdbc:mariadb-java-client:3.1.2'
+	implementation "org.springframework.boot:spring-boot-starter-validation:3.0.4"
+	implementation 'org.springframework.session:spring-session-core'
+	implementation 'org.springframework.security:spring-security-ldap'
+
+	// ── Database ──────────────────────────────────────────────────────────────
+	implementation "org.mariadb.jdbc:mariadb-java-client:${mariadbVersion}"
 	implementation 'org.liquibase:liquibase-core'
-	implementation 'org.openjdk.nashorn:nashorn-core:15.4'
-	implementation 'com.nimbusds:nimbus-jose-jwt:9.30.2'
-	implementation 'org.eclipse.jgit:org.eclipse.jgit:6.5.0.202303070854-r'
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
-	implementation 'wsdl4j:wsdl4j:1.6.3'
-	implementation 'org.apache.httpcomponents.client5:httpclient5:5.2.1'
-	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
-	implementation 'com.github.java-json-tools:json-patch:1.13'
-	implementation 'javax.json:javax.json-api:1.1.4'
-	implementation 'org.jsoup:jsoup:1.13.1'
-	implementation 'com.google.zxing:core:3.4.1'
-	implementation 'com.warrenstrange:googleauth:1.4.0'
-	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.1'
-	implementation "io.grpc:grpc-protobuf:1.66.0"
-	implementation "io.grpc:grpc-stub:1.66.0"
-	implementation "io.grpc:grpc-netty-shaded:1.66.0"
-	implementation "com.google.protobuf:protobuf-java-util:3.25.1"
-	compileOnly 'org.apache.tomcat:annotations-api:6.0.53'
-	compileOnly 'org.mapstruct:mapstruct:1.5.5.Final'
-	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
-	runtimeOnly 'mysql:mysql-connector-java'
+	runtimeOnly    'mysql:mysql-connector-java'
+
+	// ── gRPC / Protobuf ───────────────────────────────────────────────────────
+	implementation "io.grpc:grpc-protobuf:${grpcVersion}"
+	implementation "io.grpc:grpc-stub:${grpcVersion}"
+	implementation "io.grpc:grpc-netty-shaded:${grpcVersion}"
+	implementation "com.google.protobuf:protobuf-java-util:${protobufVersion}"
+
+	// ── Security & auth ───────────────────────────────────────────────────────
+	implementation "com.nimbusds:nimbus-jose-jwt:${nimbusJwtVersion}"
+	implementation "com.warrenstrange:googleauth:${googleAuthVersion}"
+	implementation "com.google.zxing:core:${zxingVersion}"
+
+	// ── HTTP & web utilities ──────────────────────────────────────────────────
+	implementation "org.apache.httpcomponents.client5:httpclient5:${httpclient5Version}"
+	implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
+	implementation "wsdl4j:wsdl4j:1.6.3"
+	implementation "org.jsoup:jsoup:${jsoupVersion}"
+
+	// ── Data processing ───────────────────────────────────────────────────────
+	implementation "com.github.java-json-tools:json-patch:${jsonPatchVersion}"
+	implementation "javax.json:javax.json-api:${javaxJsonVersion}"
+	implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonJsr310Ver}"
+
+	// ── Scripting & tooling ───────────────────────────────────────────────────
+	implementation "org.openjdk.nashorn:nashorn-core:${nashornVersion}"
+	implementation "org.eclipse.jgit:org.eclipse.jgit:${jgitVersion}"
+
+	// ── Code generation (compile-time only) ───────────────────────────────────
+	compileOnly         "org.mapstruct:mapstruct:${mapstructVersion}"
+	compileOnly         "org.apache.tomcat:annotations-api:${tomcatAnnotVer}"
+	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+
+	// ── Unit + slice test dependencies ────────────────────────────────────────
+	// spring-boot-starter-test pulls in JUnit 5, Mockito, AssertJ, MockMvc,
+	// JSONassert, and JsonPath — do not declare these individually.
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
-	testImplementation 'org.mockito:mockito-inline:5.2.0'
+	testImplementation "org.mockito:mockito-inline:${mockitoInlineVer}"
+
+	// ── Testcontainers ────────────────────────────────────────────────────────
+	// The BOM aligns all Testcontainers module versions — never pin individual
+	// module versions manually, always rely on the BOM.
+	testImplementation platform("org.testcontainers:testcontainers-bom:${testcontainersVersion}")
+	testImplementation 'org.testcontainers:junit-jupiter'  // @Container lifecycle
+	testImplementation 'org.testcontainers:mariadb'        // MariaDBContainer
+	testImplementation 'org.testcontainers:mongodb'        // MongoDBContainer
+
+	// ── Async assertions ──────────────────────────────────────────────────────
+	// Use await().untilAsserted(…) instead of Thread.sleep() in event-driven
+	// and async tests.
+	testImplementation "org.awaitility:awaitility:${awaitilityVersion}"
+
+	// ── Test runtime ──────────────────────────────────────────────────────────
+	// H2 — in-memory database for @DataJpaTest slice tests (no Docker needed).
+	testRuntimeOnly 'com.h2database:h2'
+
+	// MariaDB JDBC driver — required at runtime so Testcontainers can open a
+	// JDBC connection to the MariaDB container in integration tests.
+	// Without this, Spring throws "No suitable driver found for jdbc:mariadb://…"
+	// even though the container started successfully.
+	testRuntimeOnly "org.mariadb.jdbc:mariadb-java-client:${mariadbVersion}"
 }
 
 def generatedFilesBaseDir = "${buildDir}/generated/source/proto"
@@ -106,9 +201,36 @@ protobuf {
 
 sourceSets {
 	main {
+		// Adds protobuf-generated Java and gRPC stub sources so the
+		// compiler finds them alongside hand-written production code.
 		java {
 			srcDir "${generatedFilesBaseDir}/main/java"
 			srcDir "${generatedFilesBaseDir}/main/grpc"
 		}
 	}
+	integrationTest {
+		java {
+			srcDirs = ['src/integrationTest/java']
+		}
+		resources {
+			srcDirs = ['src/integrationTest/resources']
+		}
+		// Gives integration tests access to everything compiled from main
+		// and test — including testutil fixtures, fakes, and annotations.
+		compileClasspath += sourceSets.main.output + sourceSets.test.output
+		runtimeClasspath += sourceSets.main.output + sourceSets.test.output
+	}
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Configurations
+//
+//  integrationTestImplementation extends testImplementation so that every
+//  dependency declared under testImplementation — JUnit, Mockito, AssertJ,
+//  Testcontainers — is automatically available in integration tests too.
+//  No need to redeclare them.
+// ─────────────────────────────────────────────────────────────────────────────
+configurations {
+	integrationTestImplementation.extendsFrom testImplementation
+	integrationTestRuntimeOnly.extendsFrom    testRuntimeOnly
 }

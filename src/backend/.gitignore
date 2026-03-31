@@ -6,7 +6,7 @@ support-files/
 runtime/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**
-!**/src/test/**
+#!**/src/test/**
 src/main/resources/templates/**
 assistant/temporary
 assistant/versions
@@ -25,12 +25,12 @@ src/main/resources/support-files/**
 src/main/resources/logs/**
 src/main/resources/updating-backup
 src/main/resources/backup
-src/test/
-src/test/java/com/becon/opencelium/backend/ApplicationTests.java
-!src/test/OCELTest.java
-!src/test/OCELFunctionsTest.java
-!src/test/ValidationTest.java
-!src/test/EvaluationTest.java
+#src/test/
+#src/test/java/com/becon/opencelium/backend/ApplicationTests.java
+#!src/test/OCELTest.java
+#!src/test/OCELFunctionsTest.java
+#!src/test/ValidationTest.java
+#!src/test/EvaluationTest.java
 .DS_Store
 
 ### STS ###
