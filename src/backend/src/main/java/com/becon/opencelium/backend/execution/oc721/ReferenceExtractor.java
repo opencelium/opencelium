@@ -45,11 +45,11 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.becon.opencelium.backend.reference.utility.ReferenceUtility.ARRAY_LETTER_INDEX_PATTERN;
+import static com.becon.opencelium.backend.reference.utility.ReferenceUtility.FOR_IN_KEY_PATTERN;
+import static com.becon.opencelium.backend.reference.utility.ReferenceUtility.FOR_IN_VALUE_PATTERN;
+import static com.becon.opencelium.backend.reference.utility.ReferenceUtility.SPLIT_STRING_PATTERN;
 import static com.becon.opencelium.backend.utility.Comparators.NUMERIC_PARTS;
-import static com.becon.opencelium.backend.reference.utility.ReferenceUtility.ARRAY_LETTER_INDEX;
-import static com.becon.opencelium.backend.reference.utility.ReferenceUtility.IS_FOR_IN_KEY_TYPE;
-import static com.becon.opencelium.backend.reference.utility.ReferenceUtility.IS_FOR_IN_VALUE_TYPE;
-import static com.becon.opencelium.backend.reference.utility.ReferenceUtility.IS_SPLIT_STRING_TYPE;
 
 public class ReferenceExtractor implements Extractor {
     private final ExecutionManager executionManager;
@@ -302,30 +302,22 @@ public class ReferenceExtractor implements Extractor {
             // replace invalid reference part if exists
             path = path.replace("[]", "[*]");
 
-            Pattern pattern;
-            Matcher matcher;
-
             // CASE 4.1: FOR_IN operator, there are 2 sub-cases
             //   CASE 4.1.1: index types for KEY(s), there are 3 sub-cases:
             //     CASE 4.1.1.1: obj['i']~            - field name on ith index (indexing starts from 0)
             //     CASE 4.1.1.2: obj['*']~            - all field names
             //     CASE 4.1.1.3: obj['field_name']~   - field_name itself
-
-            pattern = Pattern.compile(IS_FOR_IN_KEY_TYPE);
-            matcher = pattern.matcher(path);
-
-            if (matcher.find()) { // FOR_IN for KEY(s) always comes last in path so after finding result just return
-                String match = matcher.group(1);
+            Matcher keyMatcher = FOR_IN_KEY_PATTERN.matcher(path);
+            if (keyMatcher.find()) { // FOR_IN for KEY(s) always comes last in path so after finding result just return
+                String match = keyMatcher.group(1);
 
                 if (Loop.isIterator(match)) { // CASE 4.1.1.1
                     // find loop by iterator, loop stores current value of the iterator
-                    Loop loop = getLoopByIterator(match);
-
-                    return loop.getValue();
+                    return getLoopByIterator(match).getValue();
                 }
 
                 if ("*".equals(match)) { // CASE 4.1.1.2
-                    String pathToCurrentObject = path.replace(matcher.group(0), ""); // just remove FOR_IN operators (comes always last)
+                    String pathToCurrentObject = path.replace(keyMatcher.group(0), ""); // just remove FOR_IN operators (comes always last)
                     Object currentObject = getFromJSON(result, pathToCurrentObject); // path might contain other operators, so continue calling method on result
 
                     return getFieldNames(currentObject);
@@ -337,22 +329,12 @@ public class ReferenceExtractor implements Extractor {
             // CASE 4.1.2: index types for VALUE(s), there are 2 sub-cases:
             //   CASE 4.1.2.1: obj['i']             - value of the field on ith index (indexing starts from 0)
             //   CASE 4.1.2.2: obj['field_name']    - value of the field by its name
-
-            pattern = Pattern.compile(IS_FOR_IN_VALUE_TYPE);
-            matcher = pattern.matcher(path);
-
-            while (matcher.find()) {
-                String match = matcher.group(1);
-                String fieldName;
-
-                if (Loop.isIterator(match)) { // CASE 4.1.2.1
-                    // find loop by iterator, loop stores current value of the iterator
-                    Loop loop = getLoopByIterator(match);
-
-                    fieldName = loop.getValue();
-                } else { // CASE 4.1.2.2
-                    fieldName = match;
-                }
+            Matcher valueMatcher = FOR_IN_VALUE_PATTERN.matcher(path);
+            while (valueMatcher.find()) {
+                String match = valueMatcher.group(1);
+                String fieldName = Loop.isIterator(match)
+                        ? getLoopByIterator(match).getValue() // CASE 4.1.2.1
+                        : match; // CASE 4.1.2.2
 
                 // FOR_IN type for VALUE(s) is supported by library so just build the correct path
                 // it will be resolved in CASE 4.4
@@ -363,25 +345,19 @@ public class ReferenceExtractor implements Extractor {
             //   CASE 4.2.1: field[i]~                  - string on the ith index (indexing starts from 0)
             //   CASE 4.2.2: field[*]~                  - all strings (after splitting)
             //   CASE 4.2.3: field[2]~                  - string on the 2nd index (indexing starts from 0)
-
-            pattern = Pattern.compile(IS_SPLIT_STRING_TYPE);
-            matcher = pattern.matcher(path);
-
-            if (matcher.find()) { // SPLIT_STRING always comes last in path so after finding result just return
-                String match = matcher.group(1);
+            Matcher splitMatcher = SPLIT_STRING_PATTERN.matcher(path);
+            if (splitMatcher.find()) { // SPLIT_STRING always comes last in path so after finding result just return
+                String match = splitMatcher.group(1);
 
                 if (Loop.isIterator(match)) { // CASE 4.2.1
-                    // find loop by iterator, loop stores current value of the iterator
-                    Loop loop = getLoopByIterator(match);
-
-                    return loop.getValue();
+                    return getLoopByIterator(match).getValue();
                 }
 
                 // find loop to get delimiter
                 // NOTE. There will not be more than one loop for SPLIT_STRING
                 Loop loop = getSplitStringLoop();
 
-                String pathToCurrentString = path.replace(matcher.group(0), ""); // just remove SPLIT_STRING operators (comes always last)
+                String pathToCurrentString = path.replace(splitMatcher.group(0), ""); // just remove SPLIT_STRING operators (comes always last)
                 Object currentString = getFromJSON(result, pathToCurrentString); // path might contain other operators, so continue calling method on result
 
                 if ("*".equals(match)) { // CASE 4.2.2
@@ -389,13 +365,7 @@ public class ReferenceExtractor implements Extractor {
                 }
 
                 // CASE 4.2.3
-                int index;
-                try {
-                    index = Integer.parseInt(match);
-                } catch (Exception e) {
-                    throw new RuntimeException("Non-integer index in SPLIT STRING, operator = " + matcher.group(0));
-                }
-
+                int index = Integer.parseInt(match);
                 return ((String) currentString).split(loop.getDelimiter())[index];
             }
 
@@ -403,18 +373,11 @@ public class ReferenceExtractor implements Extractor {
             //   CASE 4.3.1: array[i]                   - value on the ith index (indexing starts from 0)
             //   CASE 4.3.2: array[3]                   - value on the 3rd index (indexing starts from 0) (handled in CASE 4.4)
             //   CASE 4.3.3: array[*]                   - all values (handled in CASE 4.4)
-
-            pattern = Pattern.compile(ARRAY_LETTER_INDEX);
-            matcher = pattern.matcher(path);
-
-            while (matcher.find()) { // CASE 4.3.1
-                String iterator = matcher.group(1);
-
-                // find loop by iterator, loop stores current value of the iterator
-                Loop loop = getLoopByIterator(iterator);
-
-                // just build the correct path it will be resolved by library
-                path = path.replace("[" + iterator + "]", "[" + loop.getValue() + "]");
+            Matcher arrayMatcher = ARRAY_LETTER_INDEX_PATTERN.matcher(path);
+            while (arrayMatcher.find()) { // CASE 4.3.1
+                String iterator = arrayMatcher.group(1);
+                String value = getLoopByIterator(iterator).getValue();
+                path = path.replace("[" + iterator + "]", "[" + value + "]");
             }
 
             String jsonPath = (result instanceof List && !path.startsWith("[") ? "$[*]." : "$.") + path;

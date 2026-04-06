@@ -12,10 +12,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ReferenceUtility {
-    public static final String IS_FOR_IN_KEY_TYPE = "\\['([^\\[\\]'']*)'\\]~";
-    public static final String IS_FOR_IN_VALUE_TYPE = "\\['([^\\[\\]'']*)'\\]";
-    public static final String IS_SPLIT_STRING_TYPE = "\\[([a-z0-9*]+)\\]~";
-    public static final String ARRAY_LETTER_INDEX = "\\[([a-z])\\]";
+    public static final Pattern FOR_IN_KEY_PATTERN = Pattern.compile("\\['([^\\[\\]']*)'\\]~");
+    public static final Pattern FOR_IN_VALUE_PATTERN = Pattern.compile("\\['([^\\[\\]']*)'\\]");
+    public static final Pattern SPLIT_STRING_PATTERN = Pattern.compile("\\[([a-z0-9*]+)\\]~");
+    public static final Pattern ARRAY_LETTER_INDEX_PATTERN = Pattern.compile("\\[([a-z])\\]");
 
     public static String getContainedReferenceAndType(String expression) {
         if (ReferenceDetector.containsReference(expression)) {
