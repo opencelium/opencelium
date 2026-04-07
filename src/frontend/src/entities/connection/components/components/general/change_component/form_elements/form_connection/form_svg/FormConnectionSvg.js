@@ -82,6 +82,10 @@ class FormConnectionSvg extends Component {
     this.technicalLayoutRef = React.createRef();
     this.createElementPalenRef = React.createRef();
     this.detailsRef = React.createRef();
+
+    this.handleUpdateConnection = this.updateEntity.bind(this);
+    this.handleSetCreateElementPanelPosition = this.setCreateElementPanelPosition.bind(this);
+    this.handleSetIsCreateElementPanelOpened = this.setIsCreateElementPanelOpened.bind(this);
   }
 
   setCreateElementPanelPosition(position) {
@@ -153,74 +157,78 @@ class FormConnectionSvg extends Component {
 
 
   render() {
-    const {
-      data,
-      connection,
-      currentTechnicalItem,
-      isFullScreen,
-      entity,
-      updateEntity,
-      setCurrentTechnicalItem,
-      theme
-    } = this.props;
-    const {
-      isCreateElementPanelOpened,
-      createElementPanelConnectorType,
-      createElementPanelPosition,
-    } = this.state;
-    return (
-      <FormConnectionSvgStyled
-        className={`${styles.connection_editor}`}
-        style={{
-          padding: "0",
-      }}
-      >
-        <Details
-          ref={this.detailsRef}
-          readOnly={data.readOnly}
-          updateConnection={(a, b) => this.updateEntity(a, b)}
-        />
-        <TechnicalLayout
-          formConnectionSvg={this}
-          ref={this.technicalLayoutRef}
-          readOnly={data.readOnly}
-          setIsCreateElementPanelOpened={(a, b) =>
-            this.setIsCreateElementPanelOpened(a, b)
-          }
-          isCreateElementPanelOpened={isCreateElementPanelOpened}
-          createElementPanelConnectorType={createElementPanelConnectorType}
-          setCreateElementPanelPosition={(a) =>
-            this.setCreateElementPanelPosition(a)
-          }
-          updateConnection={(a, b) => this.updateEntity(a, b)}
-        />
-        {!data.readOnly && (
-          <CreateElementPanel
-            ref={this.createElementPalenRef}
-            createElementPanelConnectorType={createElementPanelConnectorType}
-            x={createElementPanelPosition.x}
-            y={createElementPanelPosition.y}
-            type={createElementPanelPosition.type}
-            itemPosition={createElementPanelPosition.itemPosition}
-            connectorType={
-              currentTechnicalItem ? currentTechnicalItem.connectorType : ""
-            }
-            connection={connection}
-            isCreateElementPanelOpened={isCreateElementPanelOpened}
-            setCreateElementPanelPosition={(a) =>
-              this.setCreateElementPanelPosition(a)
-            }
-            setIsCreateElementPanelOpened={(a, b) =>
-              this.setIsCreateElementPanelOpened(a, b)
-            }
-            updateConnection={(a, b) => this.updateEntity(a, b)}
+      const {
+        data,
+        connection,
+        currentTechnicalItem,
+        isFullScreen,
+        entity,
+        updateEntity,
+        setCurrentTechnicalItem,
+        theme
+      } = this.props;
+
+      const {
+        isCreateElementPanelOpened,
+        createElementPanelConnectorType,
+        createElementPanelPosition,
+      } = this.state;
+
+      return (
+        <FormConnectionSvgStyled
+          className={`${styles.connection_editor}`}
+          style={{
+            padding: "0",
+          }}
+        >
+          <Details
+            ref={this.detailsRef}
+            readOnly={data.readOnly}
+            updateConnection={this.handleUpdateConnection}
           />
-        )}
-        <ButtonPanel readOnly={data.readOnly} data={data} entity={entity} updateEntity={updateEntity} currentTechnicalItem={currentTechnicalItem} setCurrentTechnicalItem={setCurrentTechnicalItem} />
-{/*        <LogPanel />*/}
-        <LogsPanel theme={theme}/>
-      </FormConnectionSvgStyled>
-    );
+
+          <TechnicalLayout
+            formConnectionSvg={this}
+            ref={this.technicalLayoutRef}
+            readOnly={data.readOnly}
+            setIsCreateElementPanelOpened={this.handleSetIsCreateElementPanelOpened}
+            isCreateElementPanelOpened={isCreateElementPanelOpened}
+            createElementPanelConnectorType={createElementPanelConnectorType}
+            setCreateElementPanelPosition={this.handleSetCreateElementPanelPosition}
+            updateConnection={this.handleUpdateConnection}
+          />
+
+          {!data.readOnly && (
+            <CreateElementPanel
+              ref={this.createElementPalenRef}
+              createElementPanelConnectorType={createElementPanelConnectorType}
+              x={createElementPanelPosition.x}
+              y={createElementPanelPosition.y}
+              type={createElementPanelPosition.type}
+              itemPosition={createElementPanelPosition.itemPosition}
+              connectorType={
+                currentTechnicalItem ? currentTechnicalItem.connectorType : ""
+              }
+              connection={connection}
+              isCreateElementPanelOpened={isCreateElementPanelOpened}
+              setCreateElementPanelPosition={this.handleSetCreateElementPanelPosition}
+              setIsCreateElementPanelOpened={this.handleSetIsCreateElementPanelOpened}
+              updateConnection={this.handleUpdateConnection}
+            />
+          )}
+
+          <ButtonPanel
+            readOnly={data.readOnly}
+            data={data}
+            entity={entity}
+            updateEntity={updateEntity}
+            currentTechnicalItem={currentTechnicalItem}
+            setCurrentTechnicalItem={setCurrentTechnicalItem}
+          />
+
+          <LogsPanel theme={theme} />
+        </FormConnectionSvgStyled>
+      );
   }
 }
 

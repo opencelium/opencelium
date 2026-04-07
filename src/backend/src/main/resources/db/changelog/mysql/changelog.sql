@@ -720,6 +720,6 @@ INSERT IGNORE INTO widget_setting (
 (0, 0, 12, 2, 12, 2, 5, 1),
 (6, 2, 6, 4, 6, 4, 2, 1);
 
---changeset 4.8:7 stripComments:true splitStatements:true endDelimiter:;
+--changeset 4.8.1:1 stripComments:true splitStatements:true endDelimiter:;
 ALTER TABLE `enhancement` DROP FOREIGN KEY `fk_enhancement_connection1`;
 ALTER TABLE `enhancement` ADD CONSTRAINT `fk_enhancement_connection1` FOREIGN KEY (`connection_id`) REFERENCES `connection` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;

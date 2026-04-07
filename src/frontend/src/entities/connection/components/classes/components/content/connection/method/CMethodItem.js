@@ -25,10 +25,14 @@ export const FIELD_TYPE_OBJECT = 'object';
 /**
  * Method Item class for Connector Item class
  */
+
+const methodItemInstanceCache = new WeakMap();
+const methodReferenceRegExp = /\#[0-9a-fA-F]{6}\.\((request|response)\)\.(?:success|body\.\$)\.[^\"]*/g;
+
 export default class CMethodItem{
 
     constructor(index = '', name = '', color = '', request = null, response = null, invoker = null, error = null, isToggled = false, label = '', dataAggregator = null){
-        this._uniqueIndex = `${new Date().getTime()}_${Math.random(10000)}`;
+        this._uniqueIndex = `${Date.now()}_${Math.random().toString(36).slice(2)}`;
         this._index = index;
         this._invoker = this.convertInvoker(invoker);
         this._name = name;
@@ -45,17 +49,46 @@ export default class CMethodItem{
     }
 
     static createMethodItem(methodItem){
-        let index = methodItem && methodItem.hasOwnProperty('index') ? methodItem.index : '';
-        let name = methodItem && methodItem.hasOwnProperty('name') ? methodItem.name : '';
-        let color = methodItem && methodItem.hasOwnProperty('color') ? methodItem.color : '';
-        let request = methodItem ? methodItem.request : null;
-        let response = methodItem ? methodItem.response : null;
-        let invoker = methodItem && methodItem.hasOwnProperty('invoker') ? methodItem.invoker : null;
-        let error = methodItem && methodItem.hasOwnProperty('error') ? methodItem.error : null;
-        let isToggled = methodItem && methodItem.hasOwnProperty('isToggled') ? methodItem.isToggled : false;
-        let label = methodItem && methodItem.hasOwnProperty('label') ? methodItem.label : '';
-        let dataAggregator = methodItem && methodItem.hasOwnProperty('dataAggregator') ? methodItem.dataAggregator : null;
-        return new CMethodItem(index, name, color, request, response, invoker, error, isToggled, label, dataAggregator);
+        if (!methodItem) {
+            return new CMethodItem();
+        }
+
+        if (methodItem instanceof CMethodItem) {
+            return methodItem;
+        }
+
+        const cached = methodItemInstanceCache.get(methodItem);
+        if (cached) {
+            return cached;
+        }
+
+        const index = methodItem && methodItem.hasOwnProperty('index') ? methodItem.index : '';
+        const name = methodItem && methodItem.hasOwnProperty('name') ? methodItem.name : '';
+        const color = methodItem && methodItem.hasOwnProperty('color') ? methodItem.color : '';
+        const request = methodItem ? methodItem.request : null;
+        const response = methodItem ? methodItem.response : null;
+        const invoker = methodItem && methodItem.hasOwnProperty('invoker') ? methodItem.invoker : null;
+        const error = methodItem && methodItem.hasOwnProperty('error') ? methodItem.error : null;
+        const isToggled = methodItem && methodItem.hasOwnProperty('isToggled') ? methodItem.isToggled : false;
+        const label = methodItem && methodItem.hasOwnProperty('label') ? methodItem.label : '';
+        const dataAggregator = methodItem && methodItem.hasOwnProperty('dataAggregator') ? methodItem.dataAggregator : null;
+
+        const instance = new CMethodItem(
+            index,
+            name,
+            color,
+            request,
+            response,
+            invoker,
+            error,
+            isToggled,
+            label,
+            dataAggregator
+        );
+
+        methodItemInstanceCache.set(methodItem, instance);
+
+        return instance;
     }
 
     deleteError(){
@@ -66,13 +99,18 @@ export default class CMethodItem{
     }
 
     getReferences(){
-        const fieldsString = JSON.stringify(this._request.body.fields) + JSON.stringify(this._request.endpoint);
-        //const referenceRegExp = /\#[0-9a-fA-F]{6}\.\((request|response)\)\./g;
-        // const referenceRegExp = /\#[0-9a-fA-F]{6}\.\((request|response)\)\.[^\"]*\"/g;
-        const referenceRegExp = /\#[0-9a-fA-F]{6}\.\((request|response)\)\.(?:success|body\.\$)\.[^\"]*/g;
+        const bodyFieldsString = this._request?.body?.fields
+            ? JSON.stringify(this._request.body.fields)
+            : '';
 
-        const references = fieldsString.match(referenceRegExp);
-        return new Set(references ? references/*.map(ref => ref.substring(0, 7))*/ : []);
+        const endpointString = this._request?.endpoint
+            ? String(this._request.endpoint)
+            : '';
+
+        const fieldsString = `${bodyFieldsString}${endpointString}`;
+        const references = fieldsString.match(methodReferenceRegExp);
+
+        return new Set(references ? references : []);
     }
 
     cleanEndpointFromReference(methodColor) {
@@ -162,25 +200,34 @@ export default class CMethodItem{
     }
 
     convertRequest(request){
-        if(!(request instanceof CRequest)) {
-            let operation = this._invoker && this._invoker.operations ? this._invoker.operations.find(o => o.name === this._name) : null;
-            return CRequest.createRequest({...request, operation});
+        if (request instanceof CRequest) {
+            return request;
         }
-        return request;
+
+        const operation = this._invoker && this._invoker.operations
+            ? this._invoker.operations.find(o => o.name === this._name)
+            : null;
+
+        return CRequest.createRequest({
+            ...request,
+            operation,
+        });
     }
 
     convertResponse(response){
-        if(!(response instanceof CResponse)) {
-            return CResponse.createResponse(response);
+        if (response instanceof CResponse) {
+            return response;
         }
-        return response;
+
+        return CResponse.createResponse(response);
     }
 
     convertInvoker(invoker){
-        if(!(invoker instanceof CInvoker)) {
-            return CInvoker.createInvoker(invoker);
+        if (invoker instanceof CInvoker) {
+            return invoker;
         }
-        return invoker;
+
+        return CInvoker.createInvoker(invoker);
     }
 
     updateOperation(){

@@ -29,27 +29,14 @@ import FontIcon from "@entity/connection/components/components/general/basic_com
 import CardTitle from "@entity/connection/components/components/general/basic_components/card/CardTitle";
 import TooltipFontIcon from "@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon";
 import {deepObjectsMerge, isEqualObjectParams} from "@application/utils/utils";
-import _ from "lodash";
-
 
 /**
  * MethodTitle Component
  */
 class MethodTitle extends Component{
-
     constructor(props){
         super(props);
 
-        let hasRefreshIcon = false;
-
-        const newInvokerData = props.method.invoker._operations.find(o => o.name === props.method.name);
-        if(newInvokerData){
-            if(!isEqualObjectParams(newInvokerData.request.body.fields, props.method.request.body.fields)
-                || !isEqualObjectParams(newInvokerData.response.success.body.fields, props.method.response.success.body.fields)
-                || !isEqualObjectParams(newInvokerData.response.fail.body.fields, props.method.response.fail.body.fields)){
-                hasRefreshIcon = true;
-            }
-        }
         this.state = {
             hasDeleteButton: false,
             showSettings: false,
@@ -57,8 +44,56 @@ class MethodTitle extends Component{
             showConfirm: false,
             onDeleteButtonOver: false,
             isRefreshingFromInvoker: false,
-            hasRefreshIcon,
+            hasRefreshIcon: this.hasInvokerChanges(props),
         };
+
+        this.showDeleteButton = this.showDeleteButton.bind(this);
+        this.hideDeleteButton = this.hideDeleteButton.bind(this);
+        this.isOnDeleteButtonOver = this.isOnDeleteButtonOver.bind(this);
+        this.isNotOnDeleteButtonOver = this.isNotOnDeleteButtonOver.bind(this);
+        this.toggleConfirm = this.toggleConfirm.bind(this);
+        this.refreshInvoker = this.refreshInvoker.bind(this);
+        this.removeMethod = this.removeMethod.bind(this);
+        this.setCurrentItem = this.setCurrentItem.bind(this);
+    }
+
+    componentDidUpdate(prevProps) {
+        if (
+            prevProps.method !== this.props.method ||
+            prevProps.method?.invoker !== this.props.method?.invoker ||
+            prevProps.method?.request?.body?.fields !== this.props.method?.request?.body?.fields ||
+            prevProps.method?.response?.success?.body?.fields !== this.props.method?.response?.success?.body?.fields ||
+            prevProps.method?.response?.fail?.body?.fields !== this.props.method?.response?.fail?.body?.fields
+        ) {
+            const nextHasRefreshIcon = this.hasInvokerChanges(this.props);
+            if (nextHasRefreshIcon !== this.state.hasRefreshIcon) {
+                this.setState({ hasRefreshIcon: nextHasRefreshIcon });
+            }
+        }
+    }
+
+    getInvokerOperation(props = this.props) {
+        const { method } = props;
+        const operations = method?.invoker?._operations;
+        if (!operations || !method) {
+            return null;
+        }
+        return operations.find((o) => o.name === method.name) || null;
+    }
+
+    hasInvokerChanges(props = this.props) {
+        const { method } = props;
+        const newInvokerData = this.getInvokerOperation(props);
+
+        if (!newInvokerData) {
+            return false;
+        }
+
+        return (
+            !isEqualObjectParams(newInvokerData.request.body.fields, method.request.body.fields) ||
+            !isEqualObjectParams(newInvokerData.response.success.body.fields, method.response.success.body.fields) ||
+            !isEqualObjectParams(newInvokerData.response.fail.body.fields, method.response.fail.body.fields)
+        );
     }
 
     /**
@@ -80,7 +115,7 @@ class MethodTitle extends Component{
      */
     showDeleteButton(){
         const {readOnly} = this.props;
-        if(!readOnly) {
+        if(!readOnly && !this.state.hasDeleteButton) {
             this.setState({
                 hasDeleteButton: true,
             });
@@ -91,9 +126,11 @@ class MethodTitle extends Component{
      * to hide delete button if has not
      */
     hideDeleteButton(){
-        this.setState({
-            hasDeleteButton: false,
-        });
+        if (this.state.hasDeleteButton) {
+            this.setState({
+                hasDeleteButton: false,
+            });
+        }
     }
 
     /**
@@ -107,23 +144,33 @@ class MethodTitle extends Component{
      * to refresh data from invoker
      */
     refreshInvoker(){
-        const that = this;
         const {method, updateEntity} = this.props;
-        let newInvokerData = method.invoker._operations.find(o => o.name === method.name);
+        const newInvokerData = this.getInvokerOperation();
+
         if(newInvokerData){
-            let newRequestInvokerData = deepObjectsMerge(newInvokerData.request.body.fields, method.request.body.fields);
-            let newResponseSuccessInvokerData = deepObjectsMerge(newInvokerData.response.success.body.fields, method.response.success.body.fields);
-            let newResponseFailInvokerData = deepObjectsMerge(newInvokerData.response.fail.body.fields, method.response.fail.body.fields);
+            const newRequestInvokerData = deepObjectsMerge(newInvokerData.request.body.fields, method.request.body.fields);
+            const newResponseSuccessInvokerData = deepObjectsMerge(newInvokerData.response.success.body.fields, method.response.success.body.fields);
+            const newResponseFailInvokerData = deepObjectsMerge(newInvokerData.response.fail.body.fields, method.response.fail.body.fields);
+
             method.setRequestBodyFields(newRequestInvokerData);
             method.setResponseSuccessBodyFields(newResponseSuccessInvokerData);
             method.setResponseFailBodyFields(newResponseFailInvokerData);
             method.setRequestBodyType(newInvokerData.request.body.type);
             method.setResponseSuccessBodyType(newInvokerData.response.success.body.type);
             method.setResponseFailBodyType(newInvokerData.response.fail.body.type);
+
             updateEntity();
+
             this.setState({
                 isRefreshingFromInvoker: true,
-            }, () => setTimeout(() => that.setState({isRefreshingFromInvoker: false, hasRefreshIcon: false,}), 600));
+            }, () => {
+                setTimeout(() => {
+                    this.setState({
+                        isRefreshingFromInvoker: false,
+                        hasRefreshIcon: false,
+                    });
+                }, 600);
+            });
         }
     }
 
@@ -132,25 +179,28 @@ class MethodTitle extends Component{
      */
     removeMethod(){
         const {toggleDeleteMethod} = this.props;
-        let that = this;
-        that.toggleConfirm();
-        setTimeout(
-            () => {
-                toggleDeleteMethod();
-                setTimeout(() => {
-                    const {connection, connector, method, updateEntity} = that.props;
-                    let connectorType = connector.getConnectorType();
-                    switch (connectorType) {
-                        case CONNECTOR_FROM:
-                            connection.removeFromConnectorMethod(method);
-                            break;
-                        case CONNECTOR_TO:
-                            connection.removeToConnectorMethod(method);
-                            break;
-                    }
-                    updateEntity();
-                }, 300);
-            }, 200);
+
+        this.toggleConfirm();
+
+        setTimeout(() => {
+            toggleDeleteMethod();
+
+            setTimeout(() => {
+                const {connection, connector, method, updateEntity} = this.props;
+                const connectorType = connector.getConnectorType();
+
+                switch (connectorType) {
+                    case CONNECTOR_FROM:
+                        connection.removeFromConnectorMethod(method);
+                        break;
+                    case CONNECTOR_TO:
+                        connection.removeToConnectorMethod(method);
+                        break;
+                }
+
+                updateEntity();
+            }, 300);
+        }, 200);
     }
 
     /**
@@ -165,51 +215,61 @@ class MethodTitle extends Component{
     render(){
         const {connector, method, readOnly, showParams, toggleShowParams} = this.props;
         const {showConfirm, onDeleteButtonOver, hasDeleteButton, isRefreshingFromInvoker, hasRefreshIcon} = this.state;
-        let methodStyles = {};
-        let methodTitleStyles = {backgroundColor: method.color, borderRadius: '3px'};
-        let isCurrentItem = connector.getCurrentItem().index === method.index;
+
+        const methodStyles = {};
+        const methodTitleStyles = {backgroundColor: method.color, borderRadius: '3px'};
+        const currentItem = connector.getCurrentItem();
+        const isCurrentItem = currentItem && currentItem.index === method.index;
+
         if(isCurrentItem){
             methodTitleStyles.borderBottomStyle = 'none';
             methodStyles.boxShadow = `0 0 0 0 rgba(0, 0, 0, .14), 0 2px 11px 2px ${chroma(method.color).darken(3)}, 0 1px 5px 0 rgba(0, 0, 0, .12)`;
         }
-        let indexSplitter = method.index.split('_');
-        let marginLeftTimes = indexSplitter.length;
+
+        const indexSplitter = method.index.split('_');
+        const marginLeftTimes = indexSplitter.length;
         if(marginLeftTimes > 1) {
             methodStyles.marginLeft = (marginLeftTimes - 1) * 20 + 'px';
         }
+
         return (
             <div>
                 <CardTitle
                     style={methodTitleStyles}
-                    onMouseEnter={() => this.showDeleteButton()}
-                    onMouseLeave={() => this.hideDeleteButton()}
-                    onClick={() => this.setCurrentItem()}
+                    onMouseEnter={this.showDeleteButton}
+                    onMouseLeave={this.hideDeleteButton}
+                    onClick={this.setCurrentItem}
                     theme={{cardTitle: styles.item_card_title}}
                 >
                     <div style={{width: '100%', position: 'relative'}}>
-                        <div style={{cursor: 'pointer', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap'}} onClick={toggleShowParams}>
+                        <div
+                            style={{cursor: 'pointer', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap'}}
+                            onClick={toggleShowParams}
+                        >
                             <FontIcon value={showParams ? 'keyboard_arrow_down' : 'keyboard_arrow_right'} className={styles.item_title_arrow}/>
                             <span className={styles.item_title} title={method.name}>{method.name}</span>
                         </div>
                         {
                             !readOnly && (isCurrentItem || hasDeleteButton) ?
                                 <div>
-                                    {(hasRefreshIcon || isRefreshingFromInvoker) && <TooltipFontIcon
-                                        size={isRefreshingFromInvoker ? 16 : 20}
-                                        isButton={true}
-                                        className={styles.item_refresh_button}
-                                        value={isRefreshingFromInvoker ? 'loading' : 'refresh'}
-                                        onClick={() => this.refreshInvoker()}
-                                        tooltip={'Refresh'}
-                                    />}
+                                    {(hasRefreshIcon || isRefreshingFromInvoker) && (
+                                        <TooltipFontIcon
+                                            size={isRefreshingFromInvoker ? 16 : 20}
+                                            isButton={true}
+                                            className={styles.item_refresh_button}
+                                            value={isRefreshingFromInvoker ? 'loading' : 'refresh'}
+                                            onClick={this.refreshInvoker}
+                                            tooltip={'Refresh'}
+                                        />
+                                    )}
                                     <TooltipFontIcon
                                         size={20}
                                         isButton={true}
                                         className={styles.item_delete_button}
                                         value={onDeleteButtonOver ? 'delete_forever' : 'delete'}
-                                        onMouseOver={() => this.isOnDeleteButtonOver()}
-                                        onMouseLeave={() => this.isNotOnDeleteButtonOver()}
-                                        onClick={() => this.toggleConfirm()}
+                                        onMouseOver={this.isOnDeleteButtonOver}
+                                        onMouseLeave={this.isNotOnDeleteButtonOver}
+                                        onClick={this.toggleConfirm}
                                         tooltip={'Delete'}
                                     />
                                 </div>
@@ -219,8 +279,8 @@ class MethodTitle extends Component{
                     </div>
                 </CardTitle>
                 <Confirmation
-                    okClick={() => this.removeMethod()}
-                    cancelClick={() => this.toggleConfirm()}
+                    okClick={this.removeMethod}
+                    cancelClick={this.toggleConfirm}
                     active={showConfirm}
                     title={'Confirmation'}
                     message={'Deletion can influence on the workflow. Do you really want to remove?'}
@@ -237,6 +297,5 @@ MethodTitle.propTypes = {
     updateEntity: PropTypes.func.isRequired,
     toggleDeleteMethod: PropTypes.func.isRequired,
 };
-
 
 export default MethodTitle;

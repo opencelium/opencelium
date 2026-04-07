@@ -13,19 +13,20 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { isNumber } from '@application/utils/utils';
+import { markFieldNameAsArray } from '@change_component//form_elements/form_connection/form_methods/help';
 import CEnhancement from '@entity/connection/components/classes/components/content/connection/field_binding/CEnhancement';
 import Button from '@entity/connection/components/components/general/basic_components/buttons/Button';
 import Dialog from '@entity/connection/components/components/general/basic_components/Dialog';
 import TooltipFontIcon from '@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon';
 import styles from '@entity/connection/components/themes/default/content/connections/connection_overview_2';
 import React from 'react';
-import ReactDOM from 'react-dom';
-import { Col, Row } from 'react-grid-system';
+import { Col } from 'react-grid-system';
 import Enhancement from '../../../../form_methods/mapping/enhancement/Enhancement';
 import JsonBody from '../../../../form_methods/method/JsonBody';
 import ReferenceInformation from './reference_information/ReferenceInformation';
 import HelpIcon from "@app_component/base/tour/HelpIcon";
-import {EnhancementSteps} from "@root/utils/tourSteps";
+import { EnhancementSteps } from "@root/utils/tourSteps";
 
 class Header extends React.Component {
 	constructor(props) {
@@ -39,14 +40,46 @@ class Header extends React.Component {
 			isOpenedEnhancement: false,
 			isToggledIcon: true,
 		};
+
 		this.EnhancementRef = React.createRef();
 		this.HeaderRef = React.createRef();
 		this.JsonBodyRef = React.createRef();
 		this.enhancementRef = React.createRef();
+
 		this._isDirty = false;
 		this._openSnapshot = null;
 		this._isEnhancementInitializing = false;
 		this._hasUserTouchedEnhancement = false;
+
+		this.handleToggleHeaderVisible = this.toggleHeaderVisible.bind(this);
+		this.handleToggleEnhancement = this.toggleEnhancement.bind(this);
+		this.handleToggleIcon = this.toggleIcon.bind(this);
+		this.handleUpdateEntity = this.updateEntity.bind(this);
+	}
+
+	shouldComponentUpdate(nextProps, nextState) {
+		return (
+			nextProps.connection !== this.props.connection ||
+			nextProps.connector !== this.props.connector ||
+			nextProps.method !== this.props.method ||
+			nextProps.source !== this.props.source ||
+			nextProps.readOnly !== this.props.readOnly ||
+			nextProps.isDraft !== this.props.isDraft ||
+			nextProps.isExtended !== this.props.isExtended ||
+			nextProps.isCurrentInfo !== this.props.isCurrentInfo ||
+			nextProps.nameOfCurrentInfo !== this.props.nameOfCurrentInfo ||
+			nextProps.hasEnhancement !== this.props.hasEnhancement ||
+			nextProps.headerTitle !== this.props.headerTitle ||
+			nextProps.tourSteps !== this.props.tourSteps ||
+			nextProps.updateConnection !== this.props.updateConnection ||
+			nextProps.setCurrentInfo !== this.props.setCurrentInfo ||
+			nextState.isHeaderVisible !== this.state.isHeaderVisible ||
+			nextState.isToggledReferenceIcon !== this.state.isToggledReferenceIcon ||
+			nextState.currentFieldName !== this.state.currentFieldName ||
+			nextState.currentEnhancement !== this.state.currentEnhancement ||
+			nextState.isOpenedEnhancement !== this.state.isOpenedEnhancement ||
+			nextState.isToggledIcon !== this.state.isToggledIcon
+		);
 	}
 
 	_markDirty() {
@@ -72,6 +105,7 @@ class Header extends React.Component {
 			updateConnection,
 			connection,
 		} = this.props;
+
 		const willOpen = !this.state.isHeaderVisible;
 
 		if (willOpen) {
@@ -117,15 +151,23 @@ class Header extends React.Component {
 		this.setState({ isToggledReferenceIcon });
 	}
 
+	toggleIcon() {
+		this.setState((prevState) => ({
+			isToggledIcon: !prevState.isToggledIcon,
+		}));
+	}
+
 	addParam(param) {}
 
 	getCurrentBindingItem(fieldName) {
 		const { connection, method } = this.props;
+
 		const normalizeField = (value = '') => {
 			return String(value)
 				.replace(/\.([0-9]+)/g, '[$1]')
 				.trim();
 		};
+
 		const removeLocationPrefix = (value = '') => {
 			return normalizeField(value)
 				.replace(/^body\.\$\./, '')
@@ -161,6 +203,7 @@ class Header extends React.Component {
 		const { connection } = this.props;
 		let nextFieldName = fieldName;
 		let bindingItem = null;
+
 		if (nextFieldName === '') {
 			if (value.namespace.length > 1) {
 				for (let i = 1; i < value.namespace.length; i++) {
@@ -176,7 +219,7 @@ class Header extends React.Component {
 					} else {
 						nextFieldName += value.namespace[i];
 					}
-						nextFieldName += '.';
+					nextFieldName += '.';
 				}
 			}
 			nextFieldName += value.variable.name;
@@ -184,6 +227,7 @@ class Header extends React.Component {
 		} else {
 			bindingItem = this.getCurrentBindingItem(nextFieldName);
 		}
+
 		if (bindingItem && bindingItem.to && bindingItem.to[0]) {
 			connection.setCurrentFieldBindingTo(bindingItem.to[0]);
 			const enhancement = connection.getEnhancementByTo();
@@ -217,8 +261,11 @@ class Header extends React.Component {
 		if (!next) return;
 
 		const stable = (v) => {
-			try { return JSON.stringify(v ?? null); }
-			catch { return String(v); }
+			try {
+				return JSON.stringify(v ?? null);
+			} catch {
+				return String(v);
+			}
 		};
 
 		const prev = this.state.currentEnhancement;
@@ -242,15 +289,15 @@ class Header extends React.Component {
 		this.setState({ currentEnhancement: next });
 	}
 
-
-
-
 	updateEntity(entity = null) {
 		const { currentFieldName } = this.state;
 		const { connection, updateConnection } = this.props;
+
 		let currentEntity = entity === null ? connection : entity;
-		this._markDirty('updateEntity');
+
+		this._markDirty();
 		updateConnection(currentEntity);
+
 		if (currentFieldName !== '') {
 			let bindingItem = this.getCurrentBindingItem(currentFieldName);
 			if (bindingItem) {
@@ -271,6 +318,7 @@ class Header extends React.Component {
 			source,
 			method,
 		} = this.props;
+
 		return (
 			<JsonBody
 				target='header'
@@ -282,7 +330,7 @@ class Header extends React.Component {
 				method={connector.getMethodByIndex(method.index)}
 				connection={connection}
 				connector={connector}
-				updateEntity={(a) => this.updateEntity(a)}
+				updateEntity={this.handleUpdateEntity}
 				noPlaceholder={true}
 				source={source}
 				openEnhancement={(a, b) =>
@@ -293,23 +341,89 @@ class Header extends React.Component {
 		);
 	}
 
+	toggleEnhancement() {
+		const willOpen = !this.state.isOpenedEnhancement;
+
+		if (willOpen) {
+			this._isEnhancementInitializing = true;
+			this._hasUserTouchedEnhancement = false;
+		}
+
+		this.setState({ isOpenedEnhancement: willOpen });
+	}
+
+	renderEnhancement() {
+		const { currentEnhancement, isOpenedEnhancement, currentFieldName } = this.state;
+		const { readOnly, connection, method } = this.props;
+
+		let bindingItem = null;
+		if (currentFieldName) {
+			bindingItem = this.getCurrentBindingItem(currentFieldName);
+		}
+		if (bindingItem) {
+			bindingItem = bindingItem.getObject();
+		}
+
+		const enhancementElement = (
+			<Enhancement
+				key={`enhancement-${currentFieldName || 'empty'}`}
+				binding={bindingItem}
+				method={method}
+				connection={connection}
+				ref={this.enhancementRef}
+				readOnly={readOnly}
+				enhancement={currentEnhancement ? { ...currentEnhancement } : null}
+				setEnhancement={(a) => this.setCurrentEnhancement(a)}
+				isOpenedEnhancement={isOpenedEnhancement}
+			/>
+		);
+
+		if (!currentEnhancement) {
+			return (
+				<div className={styles.body_reference_not_selected_message}>
+					Please, click on the reference
+				</div>
+			);
+		}
+
+		return (
+			<div className={styles.data}>
+				{!isOpenedEnhancement && enhancementElement}
+				<Dialog
+					id={'open_enhancement_in_new_window'}
+					actions={[{ label: 'Ok', onClick: this.handleToggleEnhancement }]}
+					active={isOpenedEnhancement}
+					toggle={this.handleToggleEnhancement}
+					title={'Enhancement'}
+					theme={{
+						dialog: styles.enhancement_dialog,
+						content: styles.enhancement_dialog_content,
+					}}
+				>
+					{isOpenedEnhancement && enhancementElement}
+				</Dialog>
+			</div>
+		);
+	}
+
 	renderInfo() {
 		const {
 			isToggledIcon,
 			isToggledReferenceIcon,
 			currentEnhancement,
 		} = this.state;
+
 		const {
 			isExtended,
 			readOnly,
 			source,
 			method,
-			connector,
 			connection,
 			hasEnhancement,
 			headerTitle,
 			tourSteps,
 		} = this.props;
+
 		return (
 			<React.Fragment>
 				<div
@@ -321,7 +435,13 @@ class Header extends React.Component {
 				>
 					{hasEnhancement && (
 						<ReferenceInformation
-							style={{maxHeight: !isToggledReferenceIcon ? '40px' : isToggledIcon ? '50%' : 'calc(100% - 40px)',}}
+							style={{
+								maxHeight: !isToggledReferenceIcon
+									? '40px'
+									: isToggledIcon
+									? '50%'
+									: 'calc(100% - 40px)',
+							}}
 							body={source}
 							method={method}
 							connection={connection}
@@ -337,130 +457,84 @@ class Header extends React.Component {
 							location='header'
 						/>
 					)}
-					<div style={{
-						position: 'relative',
-						flex: 1,
-						display: 'flex',
-						flexDirection: 'column',
-						maxHeight: !isToggledIcon ? '40px' : isToggledReferenceIcon ? '50%' : 'calc(100% - 40px)',
-					}}>
-						<div style={{position: 'relative', minHeight: '36px', display: 'flex'}}>
+
+					<div
+						style={{
+							position: 'relative',
+							flex: 1,
+							display: 'flex',
+							flexDirection: 'column',
+							maxHeight: !isToggledIcon
+								? '40px'
+								: isToggledReferenceIcon
+								? '50%'
+								: 'calc(100% - 40px)',
+						}}
+					>
+						<div style={{ position: 'relative', minHeight: '36px', display: 'flex' }}>
 							<b ref={this.HeaderRef}>{headerTitle || 'Request Data'}</b>
-							<div style={{marginTop: '-6px'}}>
-								<HelpIcon steps={tourSteps} inputRef={this.HeaderRef}/>
+							<div style={{ marginTop: '-6px' }}>
+								<HelpIcon steps={tourSteps} inputRef={this.HeaderRef} />
 							</div>
 							<TooltipFontIcon
 								tooltipPosition={'right'}
-								style={{cursor: 'pointer'}}
-								onClick={() => this.setState({isToggledIcon: !isToggledIcon})}
+								style={{ cursor: 'pointer' }}
+								onClick={this.handleToggleIcon}
 								tooltip={isToggledIcon ? 'Hide' : 'Show'}
 								value={isToggledIcon ? 'expand_less' : 'chevron_right'}
 							/>
 						</div>
+
 						{isToggledIcon && this.renderHeader({
 							flex: 1,
 							overflowY: 'auto',
 						})}
 					</div>
 				</div>
+
 				{hasEnhancement && (
 					<div className={styles.body_enhancement} ref={this.EnhancementRef}>
-						<div className={styles.body_enhancement_title} style={{position: 'relative', minHeight: '36px', display: 'flex'}}>
+						<div
+							className={styles.body_enhancement_title}
+							style={{ position: 'relative', minHeight: '36px', display: 'flex' }}
+						>
 							<b>{'Enhancement'}</b>
-							<div style={{marginTop: '-6px'}}>
-								<HelpIcon steps={EnhancementSteps} inputRef={this.EnhancementRef}/>
+							<div style={{ marginTop: '-6px' }}>
+								<HelpIcon steps={EnhancementSteps} inputRef={this.EnhancementRef} />
 							</div>
+
 							{currentEnhancement && (
 								<div className={styles.body_enhancement_button}>
 									<Button
 										icon={'open_in_new'}
-										onClick={() => this.toggleEnhancement()}
+										onClick={this.handleToggleEnhancement}
 										iconSize={'13px'}
 										label={'Open script in new window'}
-										style={{marginBottom: '10px'}}
+										style={{ marginBottom: '10px' }}
 									/>
 								</div>
 							)}
 						</div>
+
 						{this.renderEnhancement()}
 					</div>
 				)}
+
 				{isExtended && !readOnly && (
 					<Button
 						className={styles.extended_details_button_save_body}
 						title={'Save'}
-						onClick={(a) => this.toggleBodyVisible(a)}
+						onClick={this.handleToggleHeaderVisible}
 					/>
 				)}
 			</React.Fragment>
 		);
 	}
 
-	toggleEnhancement() {
-		const willOpen = !this.state.isOpenedEnhancement;
-
-		if (willOpen) {
-			this._isEnhancementInitializing = true;
-			this._hasUserTouchedEnhancement = false;
-		}
-
-		this.setState({ isOpenedEnhancement: willOpen });
-	}
-
-
-	renderEnhancement() {
-		const { currentEnhancement, isOpenedEnhancement, currentFieldName } = this.state;
-		const { readOnly, connection, method } = this.props;
-		let bindingItem = null;
-		if (currentFieldName) {
-			bindingItem = this.getCurrentBindingItem(currentFieldName);
-		}
-		if (bindingItem) {
-			bindingItem = bindingItem.getObject();
-		}
-		const enhancementElement = (
-			<Enhancement
-				key={`enhancement-${currentFieldName || 'empty'}`}
-				binding={bindingItem}
-				method={method}
-				connection={connection}
-				ref={this.enhancementRef}
-				readOnly={readOnly}
-				enhancement={currentEnhancement ? { ...currentEnhancement } : null}
-				setEnhancement={(a) => this.setCurrentEnhancement(a)}
-				isOpenedEnhancement={isOpenedEnhancement}
-			/>
-		);
-		if (!currentEnhancement) {
-			return (
-				<div className={styles.body_reference_not_selected_message}>
-					Please, click on the reference
-				</div>
-			);
-		}
-		return (
-			<div className={styles.data}>
-				{!isOpenedEnhancement && enhancementElement}
-				<Dialog
-					id={'open_enhancement_in_new_window'}
-					actions={[{ label: 'Ok', onClick: () => this.toggleEnhancement() }]}
-					active={isOpenedEnhancement}
-					toggle={() => this.toggleEnhancement()}
-					title={'Enhancement'}
-					theme={{
-						dialog: styles.enhancement_dialog,
-						content: styles.enhancement_dialog_content,
-					}}
-				>
-					{isOpenedEnhancement && enhancementElement}
-				</Dialog>
-			</div>
-		);
-	}
-
 	render() {
 		const { isHeaderVisible } = this.state;
 		const { isExtended, hasEnhancement } = this.props;
+
 		return (
 			<React.Fragment>
 				<Col
@@ -468,30 +542,32 @@ class Header extends React.Component {
 					xs={4}
 					className={`${styles.col} ${styles.entry_padding}`}
 				>{`Header`}</Col>
-				<Col id='header_option' xs={8} className={`${styles.col}`}>
+
+				<Col id='header_option' xs={8} className={styles.col}>
 					<TooltipFontIcon
 						tooltipPosition={'right'}
-						onClick={() => this.toggleHeaderVisible()}
+						onClick={this.handleToggleHeaderVisible}
 						size={14}
 						value={<span className={styles.more_details}>{`H`}</span>}
 						tooltip={'Show'}
 					/>
 				</Col>
+
 				<Dialog
 					actions={[
 						{
 							label: 'Close',
-							onClick: () => this.toggleHeaderVisible(),
+							onClick: this.handleToggleHeaderVisible,
 							id: 'header_ok',
 						},
 					]}
 					active={isHeaderVisible && !isExtended}
-					toggle={() => this.toggleHeaderVisible()}
+					toggle={this.handleToggleHeaderVisible}
 					title={'Header'}
 					theme={{
 						dialog: hasEnhancement
-								? styles.body_dialog_with_enhancement
-								: styles.body_dialog,
+							? styles.body_dialog_with_enhancement
+							: styles.body_dialog,
 						body: styles.enhancement_dialog_body,
 						content: styles.body_content,
 					}}

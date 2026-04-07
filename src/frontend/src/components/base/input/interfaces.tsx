@@ -66,6 +66,7 @@ interface InputProps extends InputElementProps{
     errorBottom?: string | number,
     helpMessage?: Step[],
     isSelect?: boolean,
+    isFile?: boolean,
 }
 
 /*

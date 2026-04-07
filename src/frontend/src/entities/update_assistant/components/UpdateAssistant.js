@@ -31,6 +31,7 @@ import {
 import {logout as logoutUserFulfilled} from "@application/redux_toolkit/slices/AuthSlice";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
 import Loading from "@components/general/app/Loading";
+import {setEntityIconKey} from "@application/redux_toolkit/slices/ApplicationSlice";
 
 
 function mapStateToProps(state){
@@ -49,7 +50,10 @@ function mapStateToProps(state){
 /**
  * Layout for UpdateAssistant
  */
-@connect(mapStateToProps, {updateSystem, logoutUserFulfilled, checkResetFiles, getInstallationInfo})
+@connect(mapStateToProps, {
+    updateSystem, logoutUserFulfilled, checkResetFiles, getInstallationInfo,
+    setEntityIconKey,
+})
 @withTranslation(['update_assistant', 'app'])
 class UpdateAssistant extends Component{
 
@@ -97,6 +101,11 @@ class UpdateAssistant extends Component{
 
     componentDidMount() {
         this.props.getInstallationInfo();
+        this.props.setEntityIconKey('update-assistant');
+    }
+
+    componentWillUnmount() {
+        this.props.setEntityIconKey('');
     }
 
     setValidationMessage(param, validationMessage){
@@ -212,6 +221,7 @@ class UpdateAssistant extends Component{
                     componentProps: {openNextForm: () => this.showNextFormSection('hasAvailableUpdates')},
                 },
             ],
+            id: 'update-assistant-system-check',
             hint: {text: t('FORM.HINT_1')},
             header: t(`FORM.PAGE_1`),
         },{
@@ -225,6 +235,7 @@ class UpdateAssistant extends Component{
                     componentProps: {openNextForm: () => this.showNextFormSection('hasFinishUpdate'),hideNextForm: () => this.hideNextFormSection('hasFinishUpdate')},
                 },
             ],
+            id: 'update-assistant-available-updates',
             hint: {text: t('FORM.HINT_2')},
             header: t(`FORM.PAGE_2`),
             visible: hasAvailableUpdates,
@@ -238,6 +249,7 @@ class UpdateAssistant extends Component{
                     componentProps: {updateSystem: (entity) => this.updateSystem(entity)}
                 },
             ],
+            id: 'update-assistant-update-process',
             header: t(`FORM.PAGE_6`),
             visible: hasFinishUpdate,
         },

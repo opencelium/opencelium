@@ -54,7 +54,7 @@ import TooltipFontIcon from "@entity/connection/components/components/general/ba
 import styles from "@entity/connection/components/themes/default/general/form_component.scss";
 import { withTheme } from "styled-components";
 import { FormSectionIconsStyled } from "./styles";
-import {Card} from "@app_component/base/card/Card";
+import { Card } from "@app_component/base/card/Card";
 
 export const ModalContext = React.createContext({
   isModal: false,
@@ -79,18 +79,52 @@ class FormSection extends Component {
     };
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    return (
+      nextProps.entity !== this.props.entity ||
+      nextProps.updateEntity !== this.props.updateEntity ||
+      nextProps.focusedInput !== this.props.focusedInput ||
+      nextProps.isSubFormSection !== this.props.isSubFormSection ||
+      nextProps.content !== this.props.content ||
+      nextProps.shouldScroll !== this.props.shouldScroll ||
+      nextProps.clearValidationMessage !== this.props.clearValidationMessage ||
+      nextProps.theme !== this.props.theme ||
+      nextProps.isOneFormSectionFullScreen !== this.props.isOneFormSectionFullScreen ||
+      nextProps.setFocusInput !== this.props.setFocusInput ||
+      nextState.isFormSectionMinimized !== this.state.isFormSectionMinimized
+    );
+  }
+
   toggle() {
     if (!this.props.content.hasFullScreenFunction) {
-      this.setState({
-        isFormSectionMinimized: !this.state.isFormSectionMinimized,
-      });
+      this.setState((prevState) => ({
+        isFormSectionMinimized: !prevState.isFormSectionMinimized,
+      }));
     }
   }
 
   componentDidMount() {
-      if(!!this.props.shouldScroll){
-          window.scrollTo({top: findTopLeft(`label_form_section_label_${this.props.shouldScroll}`).top - 4, behavior: "smooth"});
-      }
+    if (!!this.props.shouldScroll) {
+      window.scrollTo({
+        top: findTopLeft(`label_form_section_label_${this.props.shouldScroll}`).top - 4,
+        behavior: "smooth"
+      });
+    }
+  }
+
+  normalizeInputData(data) {
+    const { focusedInput, setFocusInput } = this.props;
+
+    return {
+      ...data,
+      tourStep:
+        data["tourStep"] && isString(data["tourStep"])
+          ? data["tourStep"].substr(1)
+          : data["tourStep"],
+      setFocusInput,
+      focused: focusedInput !== "" && focusedInput === data.name,
+      visible: data.hasOwnProperty("visible") ? data.visible : true,
+    };
   }
 
   /**
@@ -98,6 +132,7 @@ class FormSection extends Component {
    */
   mapInputs(data, key) {
     const { entity, updateEntity, clearValidationMessage, theme } = this.props;
+
     switch (data.type) {
       case "select+description":
         return (
@@ -108,6 +143,7 @@ class FormSection extends Component {
             data={data}
           />
         );
+
       case "select":
         return (
           <FormSelect
@@ -117,6 +153,7 @@ class FormSection extends Component {
             data={data}
           />
         );
+
       case "multiselect":
         return (
           <FormMultiSelect
@@ -126,6 +163,7 @@ class FormSection extends Component {
             data={data}
           />
         );
+
       case "file":
         return (
           <FormInputImage
@@ -135,6 +173,7 @@ class FormSection extends Component {
             data={data}
           />
         );
+
       case "secret":
         return (
           <FormSecretInput
@@ -144,6 +183,7 @@ class FormSection extends Component {
             data={data}
           />
         );
+
       case "component":
         return (
           <FormComponent
@@ -153,6 +193,7 @@ class FormSection extends Component {
             data={data}
           />
         );
+
       case "password":
       case "text":
       case "email":
@@ -165,6 +206,7 @@ class FormSection extends Component {
             data={data}
           />
         );
+
       case "connection_title":
         return (
           <FormConnectionTitle
@@ -175,6 +217,7 @@ class FormSection extends Component {
             clearValidationMessage={clearValidationMessage}
           />
         );
+
       case "connectors":
         return (
           <FormConnectors
@@ -184,6 +227,7 @@ class FormSection extends Component {
             data={data}
           />
         );
+
       case "category":
         return (
           <FormCategory
@@ -193,6 +237,7 @@ class FormSection extends Component {
             data={data}
           />
         );
+
       case "connection_mode":
         return (
           <FormMode
@@ -202,6 +247,7 @@ class FormSection extends Component {
             data={data}
           />
         );
+
       case "methods":
         return (
           <FormMethods
@@ -211,6 +257,7 @@ class FormSection extends Component {
             data={data}
           />
         );
+
       case "connection_svg":
         return (
           <ModalContext.Provider key={key} value={{ isModal: false }}>
@@ -222,6 +269,7 @@ class FormSection extends Component {
             />
           </ModalContext.Provider>
         );
+
       case "invoker_name":
         return (
           <FormInvokerName
@@ -231,6 +279,7 @@ class FormSection extends Component {
             data={data}
           />
         );
+
       case "invoker_description":
         return (
           <FormInvokerDescription
@@ -240,6 +289,7 @@ class FormSection extends Component {
             data={data}
           />
         );
+
       case "invoker_hint":
         return (
           <FormInvokerHint
@@ -249,6 +299,7 @@ class FormSection extends Component {
             data={data}
           />
         );
+
       case "invoker_icon":
         return (
           <FormInvokerIcon
@@ -258,6 +309,7 @@ class FormSection extends Component {
             data={data}
           />
         );
+
       case "invoker_connection":
         return (
           <FormConnection
@@ -268,6 +320,7 @@ class FormSection extends Component {
             clearValidationMessage={clearValidationMessage}
           />
         );
+
       case "invoker_authentication":
         return (
           <FormAuthentication
@@ -277,6 +330,7 @@ class FormSection extends Component {
             data={data}
           />
         );
+
       case "invoker_operations":
         return (
           <FormOperations
@@ -287,6 +341,7 @@ class FormSection extends Component {
             clearValidationMessage={clearValidationMessage}
           />
         );
+
       case "user_title":
         return (
           <FormUserTitle
@@ -296,6 +351,7 @@ class FormSection extends Component {
             data={data}
           />
         );
+
       case "notification_template_name":
         return (
           <FormNotificationTemplateName
@@ -305,6 +361,7 @@ class FormSection extends Component {
             data={data}
           />
         );
+
       case "notification_template_type":
         return (
           <FormNotificationTemplateType
@@ -314,6 +371,7 @@ class FormSection extends Component {
             data={data}
           />
         );
+
       case "notification_template_content":
         return (
           <FormContent
@@ -323,12 +381,16 @@ class FormSection extends Component {
             data={data}
           />
         );
+
       case "user_group_view":
         return <FormUserGroupView key={key} entity={entity} data={data} />;
+
       case "user_photo_view":
         return <FormUserPhoto key={key} entity={entity} data={data} />;
+
       case "user_group_icon_view":
         return <FormUserGroupIcon key={key} entity={entity} data={data} />;
+
       case "switch":
         return (
           <FormSwitch
@@ -338,96 +400,100 @@ class FormSection extends Component {
             data={data}
           />
         );
+
       case "test_button":
         return <TestButton key={key} entity={entity} data={data} />;
+
+      default:
+        return null;
     }
-    return null;
   }
 
   /**
    * to generate Input Fields
    */
   generateInputs() {
-    let result;
-    const { content, focusedInput, setFocusInput } = this.props;
-    if (Array.isArray(content.inputs)) {
-      result = content.inputs.map((data, key) => {
-        data["tourStep"] =
-          data["tourStep"] && isString(data["tourStep"])
-            ? data["tourStep"].substr(1)
-            : data["tourStep"];
-        data["setFocusInput"] = setFocusInput;
-        data["focused"] = focusedInput !== "" && focusedInput === data.name;
-        data["visible"] = data.hasOwnProperty("visible") ? data.visible : true;
-        return this.mapInputs(Object.assign({}, data), key);
-      });
+    const { content } = this.props;
+
+    if (!Array.isArray(content.inputs)) {
+      return [];
     }
-    return result.map((Element) => {
-      return Element;
+
+    return content.inputs.map((data, key) => {
+      const normalizedData = this.normalizeInputData(data);
+      return this.mapInputs(normalizedData, key);
     });
   }
 
-    render(){
-        const {isFormSectionMinimized} = this.state;
-        const {isSubFormSection, isOneFormSectionFullScreen, id } = this.props;
-        let style = {};
-        const content = {
-            visible: true,
-            header: '',
-            formClassName: '',
-            hasFullScreenFunction: false,
-            AdditionalIcon: null,
-            ...this.props.content,
-        };
-        if(!content.visible){
-            style.height = 0;
-            style.overflow = 'hidden';
-            style.padding = 0;
-            style.margin = 0;
-        }
-        const hasHeader = content.header !== '' && !isOneFormSectionFullScreen;/*
-        if(isOneFormSectionFullScreen && (!content.hasOwnProperty('hasFullScreenFunction') || !content.hasFullScreenFunction)){
-            return null;
-        }*/
-        const hasIcons = content.hasFullScreenFunction || !!content.AdditionalIcon;
-        return (
-            <Card
-                id={id}
-                className={`${!isSubFormSection ? styles.form : ''} ${
-                  content.visible ? content.formClassName : ''
-                } ${isFormSectionMinimized ? styles.minimized_form : ''} ${
-                  isOneFormSectionFullScreen ? styles.full_screen : ''
-                }`}
-                style={style}
-                padding={"50px 30px 10px 10px"}
-                margin={"21px 0 0"}
-            >
-                {hasHeader &&
-                    <Label id={`form_section_label_${content.header}`} value={content.header} position={'absolute'}/>
-                }
-                {hasIcons &&
-                    <div className={styles.form_methods_icons}>
-                        <FormSectionIconsStyled>
-                            <div>...</div>
-                            <div>
-                                {
-                                    content.AdditionalIcon
-                                }
-                            </div>
-                        </FormSectionIconsStyled>
-                    </div>
-                }
-                {this.generateInputs()}
-                {content.hasHint &&
-                <div className={styles.hint_area}>
-                    <span className={styles.hint}>
-                        {`Hint: `}
-                    </span>
-                    {content.hint.text}
-                </div>}
-            </Card>
-        );
+  render() {
+    const { isFormSectionMinimized } = this.state;
+    const { isSubFormSection, isOneFormSectionFullScreen, id } = this.props;
+
+    let style = {};
+    const content = {
+      visible: true,
+      header: '',
+      formClassName: '',
+      hasFullScreenFunction: false,
+      AdditionalIcon: null,
+      ...this.props.content,
+    };
+
+    if (!content.visible) {
+      style.height = 0;
+      style.overflow = 'hidden';
+      style.padding = 0;
+      style.margin = 0;
     }
+
+    const hasHeader = content.header !== '' && !isOneFormSectionFullScreen;
+    const hasIcons = content.hasFullScreenFunction || !!content.AdditionalIcon;
+    const generatedInputs = this.generateInputs();
+
+    return (
+      <Card
+        id={id}
+        className={`${!isSubFormSection ? styles.form : ''} ${
+          content.visible ? content.formClassName : ''
+        } ${isFormSectionMinimized ? styles.minimized_form : ''} ${
+          isOneFormSectionFullScreen ? styles.full_screen : ''
+        }`}
+        style={style}
+        padding={"50px 30px 10px 10px"}
+        margin={"21px 0 0"}
+      >
+        {hasHeader && (
+          <Label
+            id={`form_section_label_${content.header}`}
+            value={content.header}
+            position={'absolute'}
+          />
+        )}
+
+        {hasIcons && (
+          <div className={styles.form_methods_icons}>
+            <FormSectionIconsStyled>
+              <div>...</div>
+              <div>
+                {content.AdditionalIcon}
+              </div>
+            </FormSectionIconsStyled>
+          </div>
+        )}
+
+        {generatedInputs}
+
+        {content.hasHint && (
+          <div className={styles.hint_area}>
+            <span className={styles.hint}>
+              {`Hint: `}
+            </span>
+            {content.hint.text}
+          </div>
+        )}
+      </Card>
+    );
+  }
 }
 
 FormSection.propTypes = {

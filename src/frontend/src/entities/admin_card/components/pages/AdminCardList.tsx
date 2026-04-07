@@ -31,7 +31,7 @@ const cards = [
     {id: 4, name: 'Support Files', link: `/support_files`},
     {id: 5, name: 'License Management', link: `/license_management`},
     {id: 6, name: 'Invokers', link: '/invokers'},
-    {id: 7, name: 'Templates', link: '/templates'},
+    {id: 7, name: 'Connection Templates', link: '/templates'},
     {id: 8, name: 'Data Aggregator', link: '/data_aggregator'},
     {id: 9, name: 'Notification Templates', link: '/notification_templates'},
     {id: 10, name: 'Update Assistant', link: '/update_assistant', isLoading: true, isDisabled: true},

@@ -21,6 +21,11 @@ import {LOOP_OPERATOR} from "@classes/content/connection/operator/COperatorItem"
 import CMethodItem from "@classes/content/connection/method/CMethodItem";
 import Webhook from "@root/classes/Webhook";
 
+
+const sortFunctionalOperators = (f1, f2) => (
+    f1.value > f2.value ? 1 : f1.value === f2.value ? 0 : -1
+);
+
 const OPERATOR_LABELS_FOR_IF = {
     IS_TYPE_OF: (isPlaceholder = false) => {const styles = isPlaceholder ? {fontSize: '12px', justifyContent: 'center', display: 'flex'} : {fontSize: '12px'}; return (<span style={styles}>{`<T>`}</span>);},
     ALLOW_LIST: (isPlaceholder = false) => {const styles = isPlaceholder ? {justifyContent: 'center', display: 'flex'} : {}; return (<span style={styles}>✔</span>);},
@@ -75,15 +80,24 @@ export const FUNCTIONAL_OPERATORS_FOR_IF = [
     {value: 'NotNull', hasValue: false},
     {value: 'IsEmpty', hasValue: false},
     {value: 'NotEmpty', hasValue: false}
-].sort((f1, f2) => f1.value > f2.value ? 1 : f1.value === f2.value ? 0 : -1);
+].sort(sortFunctionalOperators);
 export const FUNCTIONAL_OPERATORS_FOR_LOOP = [
     {value: 'SplitString', label: <span>SplitString({OPERATOR_LABELS_FOR_LOOP.SPLIT_STRING()})</span>, hasValue: true, isRightStatementText: true, placeholderValue: OPERATOR_LABELS_FOR_LOOP.SPLIT_STRING(true)},
     {value: 'forin', hasValue: false, label: <span>{OPERATOR_LABELS_FOR_LOOP.FOR_IN()}</span>, placeholderValue: OPERATOR_LABELS_FOR_LOOP.FOR_IN(true)},
-].sort((f1, f2) => f1.value > f2.value ? 1 : f1.value === f2.value ? 0 : -1);
+].sort(sortFunctionalOperators);
 
 /**
  * Condition class for Operator Item class
  */
+
+const FUNCTIONAL_OPERATOR_VALUES_FOR_IF = new Set(
+    FUNCTIONAL_OPERATORS_FOR_IF.map((item) => item.value)
+);
+
+const FUNCTIONAL_OPERATOR_VALUES_FOR_LOOP = new Set(
+    FUNCTIONAL_OPERATORS_FOR_LOOP.map((item) => item.value)
+);
+
 export default class CCondition{
 
     constructor(leftStatement = null, relationalOperator = '', rightStatement = null, operatorType = ''){
@@ -94,9 +108,18 @@ export default class CCondition{
     }
 
     static createCondition(condition, operatorType){
-        let leftStatement = condition && condition.hasOwnProperty('leftStatement') ? condition.leftStatement : null;
-        let relationalOperator = condition && condition.hasOwnProperty('relationalOperator') ? condition.relationalOperator : '';
-        let rightStatement = condition && condition.hasOwnProperty('rightStatement') ? condition.rightStatement : null;
+        const leftStatement = condition && condition.hasOwnProperty('leftStatement')
+            ? condition.leftStatement
+            : null;
+
+        const relationalOperator = condition && condition.hasOwnProperty('relationalOperator')
+            ? condition.relationalOperator
+            : '';
+
+        const rightStatement = condition && condition.hasOwnProperty('rightStatement')
+            ? condition.rightStatement
+            : null;
+
         return new CCondition(leftStatement, relationalOperator, rightStatement, operatorType);
     }
 
@@ -109,12 +132,14 @@ export default class CCondition{
     }
 
     getStatementByType(type){
-        switch(type){
-            case 'leftStatement':
-                return this._leftStatement;
-            case 'rightStatement':
-                return this._rightStatement;
+        if (type === 'leftStatement') {
+            return this._leftStatement;
         }
+
+        if (type === 'rightStatement') {
+            return this._rightStatement;
+        }
+
         consoleLog('CCondition. getStatementByType. Type is incorrect ' + type);
         return null;
     }
@@ -129,63 +154,74 @@ export default class CCondition{
     }
 
     generateStatementText(isOnlyText = false) {
+        const operatorType = this._operatorType;
+        const leftStatement = this._leftStatement;
+        const rightStatement = this._rightStatement;
+        const relationalOperator = this._relationalOperator;
+
         let statement = '';
-        if (this._operatorType === LOOP_OPERATOR) {
-            if (this.leftStatement && this.leftStatement.field !== '') {
-                let leftStatementText = clearFieldNameFromArraySign(this.leftStatement.field);
-                leftStatementText = Webhook.isWebhookSnippet(leftStatementText) ? this.getWebhookComponent(leftStatementText, isOnlyText) : leftStatementText
+
+        if (operatorType === LOOP_OPERATOR) {
+            if (leftStatement && leftStatement.field !== '') {
+                let leftStatementText = clearFieldNameFromArraySign(leftStatement.field);
+                leftStatementText = Webhook.isWebhookSnippet(leftStatementText)
+                    ? this.getWebhookComponent(leftStatementText, isOnlyText)
+                    : leftStatementText;
+
                 statement = !isOnlyText ? (
                     <span>
                         <span>{`For each element of the `}</span>
-                        {this.relationalOperator === 'SplitString' ? <span>{`split `}</span> : ''}
-                        <b>{Webhook.isWebhookSnippet(leftStatementText) ? this.getWebhookComponent(leftStatementText) : leftStatementText}</b>
+                        {relationalOperator === 'SplitString' ? <span>{`split `}</span> : ''}
+                        <b>
+                            {Webhook.isWebhookSnippet(leftStatementText)
+                                ? this.getWebhookComponent(leftStatementText)
+                                : leftStatementText}
+                        </b>
                     </span>
-                ) : `For each element of the ${this.relationalOperator === 'SplitString' ? `split` : ''} ${leftStatementText}`;
+                ) : `For each element of the ${relationalOperator === 'SplitString' ? `split` : ''} ${leftStatementText}`;
             }
         } else {
             let leftStatementText = '';
-            if (this.leftStatement && this.leftStatement.field !== '') {
-                leftStatementText = clearFieldNameFromArraySign(this.leftStatement.field);
-                leftStatementText = Webhook.isWebhookSnippet(leftStatementText) ? this.getWebhookComponent(leftStatementText, isOnlyText) : leftStatementText
+            if (leftStatement && leftStatement.field !== '') {
+                leftStatementText = clearFieldNameFromArraySign(leftStatement.field);
+                leftStatementText = Webhook.isWebhookSnippet(leftStatementText)
+                    ? this.getWebhookComponent(leftStatementText, isOnlyText)
+                    : leftStatementText;
             }
+
             let rightStatementText = '';
-            if (this.rightStatement && this.rightStatement.field !== '') {
-                rightStatementText = clearFieldNameFromArraySign(this.rightStatement.field);
-                rightStatementText = Webhook.isWebhookSnippet(rightStatementText) ? this.getWebhookComponent(rightStatementText, isOnlyText) : rightStatementText;
+            if (rightStatement && rightStatement.field !== '') {
+                rightStatementText = clearFieldNameFromArraySign(rightStatement.field);
+                rightStatementText = Webhook.isWebhookSnippet(rightStatementText)
+                    ? this.getWebhookComponent(rightStatementText, isOnlyText)
+                    : rightStatementText;
             }
-            const isLikeOperator = CCondition.isLikeOperator(this.relationalOperator);
-            /*if(isLikeOperator){
-                if(rightStatementText[rightStatementText.length - 1] === '}'){
-                    rightStatementText = rightStatementText.slice(0, rightStatementText.length - 1);
-                } else{
-                    rightStatementText = `${rightStatementText.slice(0, rightStatementText.length - 2)}${rightStatementText[rightStatementText.length - 1]}`;
-                }
-                if(rightStatementText[0] === '{'){
-                    rightStatementText = rightStatementText.slice(1);
-                } else{
-                    rightStatementText = `${rightStatementText[0]}${rightStatementText.slice(2)}`;
-                }
-            }*/
-            if(leftStatementText !== '') {
+
+            if (leftStatementText !== '') {
                 statement = !isOnlyText ? (
                     <span>
                         {`If `}
                         <b>{leftStatementText}</b>
-                        <span>{` ${this.relationalOperator} `}</span>
+                        <span>{` ${relationalOperator} `}</span>
                         <b>{rightStatementText}</b>
                     </span>
-                ) : `If ${leftStatementText} ${this.relationalOperator} ${rightStatementText}`;
+                ) : `If ${leftStatementText} ${relationalOperator} ${rightStatementText}`;
             }
         }
-        if(statement === ''){
+
+        if (statement === '') {
             statement = 'Some data is missing';
         }
+
         return statement;
     }
 
     checkRelationalOperator(relationalOperator){
-        const options = this._operatorType === LOOP_OPERATOR ? FUNCTIONAL_OPERATORS_FOR_LOOP : FUNCTIONAL_OPERATORS_FOR_IF;
-        return options.findIndex(fo => fo.value === relationalOperator) !== -1;
+        const values = this._operatorType === LOOP_OPERATOR
+            ? FUNCTIONAL_OPERATOR_VALUES_FOR_LOOP
+            : FUNCTIONAL_OPERATOR_VALUES_FOR_IF;
+
+        return values.has(relationalOperator);
     }
 
     get leftStatement(){
@@ -237,14 +273,19 @@ export default class CCondition{
     }
 
     getObject(){
-        let obj = {
-            leftStatement: this._leftStatement.getObject(),
+        const leftStatement = this._leftStatement.getObject();
+        const rightStatement = this._rightStatement.getObject();
+
+        const obj = {
+            leftStatement,
             relationalOperator: this._relationalOperator,
-            rightStatement: this._rightStatement.getObject(),
+            rightStatement,
         };
+
         if (!obj?.leftStatement?.field){
             return null;
         }
+
         return obj;
     }
 }

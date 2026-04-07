@@ -29,6 +29,7 @@ import {InvokerPermissions} from "../../constants";
 import InvokerGeneralData from "../invoker_general_data/InvokerGeneralData";
 import {OperationItems} from "../operation_items/OperationItems";
 import {setFocusById} from "@application/utils/utils";
+import {FormProps} from "@app_component/form/form/interfaces";
 
 
 const InvokerForm: FC<IForm> = permission<IForm>(InvokerPermissions.CREATE)(({isAdd, isUpdate, isView}) => {
@@ -151,19 +152,20 @@ const InvokerForm: FC<IForm> = permission<IForm>(InvokerPermissions.CREATE)(({is
             isLoading={addingInvoker === API_REQUEST_STATE.START || updatingInvoker === API_REQUEST_STATE.START}
         />);
     }
-    const data = {
+    const data: FormProps = {
+        entityKey: 'invoker-form',
         title: [{name: 'Admin Panel', link: '/admin_cards'}, {name: 'Invokers', link: '/invokers'}, {name: formData.formTitle}],
         actions,
         formSections: [
-            <FormSection label={{value: 'General Data'}}>
+            <FormSection label={{value: 'General Data'}} id={'invoker-form-general-data'}>
                 <InvokerGeneralData setNameValidationMessage={setNameValidationMessage} nameValidationMessage={nameValidationMessage} invoker={invoker} isAdd={isAdd} isView={isView} isReadonly={isView}/>
                 {/*!isView && Icon*/}
             </FormSection>,
-            <FormSection label={{value: 'Authentication'}}>
+            <FormSection label={{value: 'Authentication'}} id={'invoker-form-authentication'}>
                 {AuthTypeInput}
                 {RequiredDataComponent}
             </FormSection>,
-            <FormSection label={{value: "Operations"}} hasFullWidthInForm={true}>
+            <FormSection label={{value: "Operations"}} hasFullWidthInForm={true} id={'invoker-form-operations'}>
                 <OperationItems setOperationsValidationMessage={setOperationsValidationMessage} error={operationsValidationMessage} validations={isNotValidOperations} operations={localOperations} updateOperations={setLocalOperations} isReadonly={isView}/>
             </FormSection>,
         ]

@@ -14,31 +14,31 @@
  */
 
 import React from 'react';
-import {connect} from 'react-redux';
+import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import styles from "../../../../../../../../themes/default/content/connections/connection_overview_2.scss";
-import {CTechnicalProcess} from "@classes/content/connection_overview_2/process/CTechnicalProcess";
-import {isString} from "@application/utils/utils";
+import { CTechnicalProcess } from "@classes/content/connection_overview_2/process/CTechnicalProcess";
+import { isString } from "@application/utils/utils";
 import DeleteIcon from "@change_component/form_elements/form_connection/form_svg/elements/DeleteIcon";
-import {COLOR_MODE} from "@classes/content/connection_overview_2/CSvg";
-import {mapItemsToClasses} from "@change_component/form_elements/form_connection/form_svg/utils";
+import { COLOR_MODE } from "@classes/content/connection_overview_2/CSvg";
+import { mapItemsToClasses } from "@change_component/form_elements/form_connection/form_svg/utils";
 import ReactDOM from "react-dom";
-import {ARROW_WIDTH} from "@change_component/form_elements/form_connection/form_svg/elements/Arrow";
+import { ARROW_WIDTH } from "@change_component/form_elements/form_connection/form_svg/elements/Arrow";
 import COperator from "@classes/content/connection_overview_2/operator/COperator";
-import {CTechnicalOperator} from "@classes/content/connection_overview_2/operator/CTechnicalOperator";
-import {OUTSIDE_ITEM} from "@classes/content/connection/CConnectorItem";
+import { CTechnicalOperator } from "@classes/content/connection_overview_2/operator/CTechnicalOperator";
+import { OUTSIDE_ITEM } from "@classes/content/connection/CConnectorItem";
 import DashedElement from "./DashedElement";
-import ConnectionLogs from "@application/classes/socket/ConnectionLogs";
 import CreatePanel from "@change_component/form_elements/form_connection/form_svg/elements/process/CreatePanel";
-import {LogPanelHeight, setJustDeletedItem} from "@root/redux_toolkit/slices/ConnectionSlice";
-import {toggleRequestBodyDialog} from "@root/redux_toolkit/slices/EditorSlice";
-import {setModalJustDeletedItem} from "@root/redux_toolkit/slices/ModalConnectionSlice";
+import { LogPanelHeight, setJustDeletedItem } from "@root/redux_toolkit/slices/ConnectionSlice";
+import { toggleRequestBodyDialog } from "@root/redux_toolkit/slices/EditorSlice";
+import { setModalJustDeletedItem } from "@root/redux_toolkit/slices/ModalConnectionSlice";
 import GetModalProp from '@entity/connection/components/decorators/GetModalProp';
 
-function mapStateToProps(state, props){
-    const {currentTechnicalItem, connectionOverview} = mapItemsToClasses(state, props.isModal);
-    const {currentLog, currentDirection} = state.connectionLogReducer;
-    return{
+function mapStateToProps(state, props) {
+    const { currentTechnicalItem, connectionOverview } = mapItemsToClasses(state, props.isModal);
+    const { currentLog, currentDirection } = state.connectionLogReducer;
+
+    return {
         isTestingConnection: connectionOverview.isTestingConnection,
         colorMode: connectionOverview.colorMode,
         logPanelHeight: connectionOverview.logPanelHeight,
@@ -49,14 +49,20 @@ function mapStateToProps(state, props){
         currentTechnicalItem,
         currentLog,
         currentDirection,
-    }
+    };
 }
 
 @GetModalProp()
-@connect(mapStateToProps, {setJustDeletedItem, setModalJustDeletedItem, toggleRequestBodyDialog}, null, {forwardRef: true})
-class Process extends React.Component{
+@connect(
+    mapStateToProps,
+    { setJustDeletedItem, setModalJustDeletedItem, toggleRequestBodyDialog },
+    null,
+    { forwardRef: true }
+)
+class Process extends React.Component {
     constructor(props) {
-        super(props)
+        super(props);
+
         this.state = {
             technicalRectClassName: '',
             isMouseOverPlaceholder: false,
@@ -64,323 +70,655 @@ class Process extends React.Component{
             isMouseOverSvg: false,
             isMouseOver: false,
             showCreatePanel: false,
-        }
+        };
+
         this.createPanelRef = React.createRef();
+        this.createPanelTimer = null;
+        this.deleteTimer = null;
+        this.isUnmounted = false;
+
         this.setJustDeletedItem = props.isModal ? props.setModalJustDeletedItem : props.setJustDeletedItem;
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const {process, justCreatedItem, currentTechnicalItem} = this.props;
-        if(process && justCreatedItem && currentTechnicalItem){
-            if(currentTechnicalItem.entity.index !== justCreatedItem.index){
-                if(this.isJustCreatedItem()){
-                    this.onClick();
-                }
+    componentDidUpdate(prevProps) {
+        const { process, justCreatedItem, currentTechnicalItem } = this.props;
+
+        if (
+            process &&
+            justCreatedItem &&
+            currentTechnicalItem &&
+            justCreatedItem !== prevProps.justCreatedItem &&
+            currentTechnicalItem !== prevProps.currentTechnicalItem
+        ) {
+            if (
+                currentTechnicalItem.entity.index !== justCreatedItem.index &&
+                this.isJustCreatedItem()
+            ) {
+                this.onClick();
             }
         }
     }
 
-    isJustCreatedItem(){
-        const {process, justCreatedItem} = this.props;
-        if(process && justCreatedItem){
-            return process.entity.index === justCreatedItem.index
-                && process.connectorType === justCreatedItem.connectorType;
+    componentWillUnmount() {
+        this.isUnmounted = true;
+        this.clearCreatePanelTimer();
+        this.clearDeleteTimer();
+    }
+
+    clearCreatePanelTimer = () => {
+        if (this.createPanelTimer) {
+            clearTimeout(this.createPanelTimer);
+            this.createPanelTimer = null;
+        }
+    };
+
+    clearDeleteTimer = () => {
+        if (this.deleteTimer) {
+            clearTimeout(this.deleteTimer);
+            this.deleteTimer = null;
+        }
+    };
+
+    setStateIfChanged = (nextState, callback) => {
+        const hasChanges = Object.keys(nextState).some((key) => this.state[key] !== nextState[key]);
+        if (hasChanges) {
+            this.setState(nextState, callback);
+        } else if (callback) {
+            callback();
+        }
+    };
+
+    isJustCreatedItem() {
+        const { process, justCreatedItem } = this.props;
+        if (process && justCreatedItem) {
+            return (
+                process.entity.index === justCreatedItem.index &&
+                process.connectorType === justCreatedItem.connectorType
+            );
         }
         return false;
     }
 
-    isJustDeletedItem(){
-        const {process, justDeletedItem} = this.props;
-        if(process && justDeletedItem){
-            return process.entity.index === justDeletedItem.index
-                && process.connectorType === justDeletedItem.connectorType;
+    isJustDeletedItem() {
+        const { process, justDeletedItem } = this.props;
+        if (process && justDeletedItem) {
+            return (
+                process.entity.index === justDeletedItem.index &&
+                process.connectorType === justDeletedItem.connectorType
+            );
         }
         return false;
     }
 
-    onMouseOverPlaceholder(){
-        if(!this.state.isMouseOverPlaceholder){
-            this.setState({
-                isMouseOverPlaceholder: true,
-            })
-        }
-    }
+    onMouseEnterPlaceholder = () => {
+        this.setStateIfChanged({
+            isMouseOverPlaceholder: true,
+        });
+    };
 
-    onMouseLeavePlaceholder(){
-        if(this.state.isMouseOverPlaceholder) {
-            this.setState({
-                isMouseOverPlaceholder: false,
-            })
-        }
-    }
+    onMouseLeavePlaceholder = () => {
+        this.setStateIfChanged({
+            isMouseOverPlaceholder: false,
+        });
+    };
 
-    onMouseOverSvg(e){
-        const {currentTechnicalItem, connection, process, isItemDraggable, isCreateElementPanelOpened, readOnly} = this.props;
-        const isCurrentItemDragged = currentTechnicalItem && currentTechnicalItem.isDragged;
-        const isItemOver = isItemDraggable && isCurrentItemDragged && !this.state.isMouseOverSvg && currentTechnicalItem.entity.index !== process.entity.index;
+    scheduleCreatePanel = (params) => {
+        const {
+            isCreateElementPanelOpened,
+            currentTechnicalItem,
+            process,
+            readOnly,
+        } = this.props;
+
+        const {
+            isItemOver,
+            isCurrentItemDragged,
+        } = params;
+
         if (readOnly) return;
-        if(!this.state.isMouseOver){
-            this.setState({
+
+        this.clearCreatePanelTimer();
+
+        this.createPanelTimer = setTimeout(() => {
+            if (this.isUnmounted) return;
+
+            const shouldOpen =
+                this.state.isMouseOver &&
+                !this.state.showCreatePanel &&
+                !isCreateElementPanelOpened &&
+                !isItemOver &&
+                !(isCurrentItemDragged && currentTechnicalItem?.entity.index === process.entity.index);
+
+            if (shouldOpen) {
+                this.setStateIfChanged({
+                    showCreatePanel: true,
+                });
+            }
+        }, 100);
+    };
+
+    onMouseEnterSvg = () => {
+        const {
+            currentTechnicalItem,
+            connection,
+            process,
+            isItemDraggable,
+            readOnly,
+        } = this.props;
+
+        if (readOnly) return;
+
+        const isCurrentItemDragged = !!(currentTechnicalItem && currentTechnicalItem.isDragged);
+        const isItemOver =
+            !!(
+                isItemDraggable &&
+                isCurrentItemDragged &&
+                !this.state.isMouseOverSvg &&
+                currentTechnicalItem &&
+                currentTechnicalItem.entity.index !== process.entity.index
+            );
+
+        let nextState = null;
+
+        if (!this.state.isMouseOver) {
+            nextState = {
+                ...(nextState || {}),
                 isMouseOver: true,
-            }, () => {
-                setTimeout(() => {
-                    if(this.state.isMouseOver && !this.state.showCreatePanel && !isCreateElementPanelOpened && !isItemOver && !(isCurrentItemDragged && currentTechnicalItem.entity.index === process.entity.index)){
-                        this.setState({
-                            showCreatePanel: true,
-                        })
-                    }
-                }, 100)
-            })
+            };
         }
-        if(isItemOver){
+
+        if (isItemOver) {
             const isOperator = currentTechnicalItem instanceof COperator;
             const connector = connection.getConnectorByType(currentTechnicalItem.connectorType);
-            let isAvailableForDragging = connector.areIndexesUnderScope(process.entity, currentTechnicalItem.entity, OUTSIDE_ITEM, currentTechnicalItem.isSelectedAll);
-            if(isAvailableForDragging){
-                if(isOperator && currentTechnicalItem){
-                    if(process.entity.index.indexOf(currentTechnicalItem.entity.index) === 0){
-                        isAvailableForDragging = false;
-                    }
+
+            let isAvailableForDragging = connector.areIndexesUnderScope(
+                process.entity,
+                currentTechnicalItem.entity,
+                OUTSIDE_ITEM,
+                currentTechnicalItem.isSelectedAll
+            );
+
+            if (isAvailableForDragging && isOperator && currentTechnicalItem) {
+                if (process.entity.index.indexOf(currentTechnicalItem.entity.index) === 0) {
+                    isAvailableForDragging = false;
                 }
             }
-            this.setState({
+
+            nextState = {
+                ...(nextState || {}),
                 isMouseOverSvg: true,
                 isAvailableForDragging,
-            })
+            };
         }
-    }
 
-    onMouseLeaveSvg(e){
-        if(this.state.isMouseOverSvg){
-            this.setState({
-                isMouseOverSvg: false,
-            })
+        if (nextState) {
+            this.setStateIfChanged(nextState, () => {
+                if (!isItemOver) {
+                    this.scheduleCreatePanel({ isItemOver, isCurrentItemDragged });
+                }
+            });
+        } else if (!isItemOver) {
+            this.scheduleCreatePanel({ isItemOver, isCurrentItemDragged });
         }
-        if(this.state.isMouseOver){
-            if(!e || e.relatedTarget.id !== 'create_panel_right') {
-                this.setState({
-                    isMouseOver: false,
-                    showCreatePanel: false,
-                })
+    };
+
+    onMouseLeaveSvg = (e) => {
+        this.clearCreatePanelTimer();
+
+        const shouldKeepPanelOpen = e?.relatedTarget?.id === 'create_panel_right';
+
+        if (shouldKeepPanelOpen) {
+            if (this.state.isMouseOverSvg) {
+                this.setStateIfChanged({
+                    isMouseOverSvg: false,
+                });
             }
+            return;
         }
-    }
 
-    onMouseDown(e){
+        this.setStateIfChanged({
+            isMouseOverSvg: false,
+            isMouseOver: false,
+            showCreatePanel: false,
+            isMouseOverPlaceholder: false,
+        });
+    };
+
+    onMouseDown = (e) => {
         const {
-            connection, setCurrentItem, process, isDisabled, isItemDraggable,
-            currentTechnicalItem, readOnly
+            connection,
+            setCurrentItem,
+            process,
+            isDisabled,
+            isItemDraggable,
+            currentTechnicalItem,
+            readOnly
         } = this.props;
-        if(!isDisabled && !readOnly) {
-            if (connection) {
-                if(isItemDraggable){
-                    process.isDragged = true;
-                    process.isDraggedForCopy = e.altKey;
-                    if(this.state.showCreatePanel){
-                        this.setState({
-                            showCreatePanel: false,
-                        })
-                    }
-                }
-                if(currentTechnicalItem && currentTechnicalItem.index === process.index){
-                    process.isSelectedAll = currentTechnicalItem.isSelectedAll;
-                }
-                setCurrentItem(process);
+
+        if (isDisabled || readOnly) return;
+        if (!connection) return;
+
+        if (isItemDraggable) {
+            process.isDragged = true;
+            process.isDraggedForCopy = e.altKey;
+
+            if (this.state.showCreatePanel) {
+                this.setStateIfChanged({
+                    showCreatePanel: false,
+                });
             }
         }
-    }
 
-    onClick(){
-        const {setCurrentItem, process, isDisabled} = this.props;
-        if(!isDisabled) {
-            process.isDragged = false;
-            setCurrentItem(process);
+        if (currentTechnicalItem && currentTechnicalItem.index === process.index) {
+            process.isSelectedAll = currentTechnicalItem.isSelectedAll;
         }
-    }
 
-    onDoubleClick(){
+        setCurrentItem(process);
+    };
+
+    onClick = () => {
+        const { setCurrentItem, process, isDisabled } = this.props;
+        if (isDisabled) return;
+
+        process.isDragged = false;
+        setCurrentItem(process);
+    };
+
+    onDoubleClick = () => {
         this.onClick();
         this.props.toggleRequestBodyDialog();
-    }
+    };
 
-    deleteProcess(e){
-        const {deleteProcess, process} = this.props;
-        this.setJustDeletedItem({index: process.entity.index, connectorType: process.connectorType});
-        this.setState({
+    deleteProcess = (e) => {
+        const { deleteProcess, process } = this.props;
+
+        this.clearDeleteTimer();
+
+        this.setJustDeletedItem({
+            index: process.entity.index,
+            connectorType: process.connectorType,
+        });
+
+        this.setStateIfChanged({
             showCreatePanel: false,
-        })
-        setTimeout(() => {
+        });
+
+        this.deleteTimer = setTimeout(() => {
+            if (this.isUnmounted) return;
+
             this.setJustDeletedItem(null);
             deleteProcess(process);
-        }, 450)
-        if(e){
+        }, 450);
+
+        if (e) {
             e.stopPropagation();
         }
-    }
+    };
 
-    shouldShowPlaceholder(){
-        const {isMouseOverSvg} = this.state;
-        const {connection, currentTechnicalItem, isCurrent, process} = this.props;
+    shouldShowPlaceholder() {
+        const { isMouseOverSvg } = this.state;
+        const { connection, currentTechnicalItem, isCurrent, process } = this.props;
+
+        if (!isMouseOverSvg || isCurrent || !currentTechnicalItem || !currentTechnicalItem.isDragged) {
+            return false;
+        }
+
         const connector = connection.getConnectorByType(process.connectorType);
         const hasNextItem = !!connector.getNextOutsideItem(process.entity);
-        return isMouseOverSvg && !hasNextItem && !isCurrent && currentTechnicalItem && currentTechnicalItem.isDragged && process.connectorType === currentTechnicalItem.connectorType;
+
+        return !hasNextItem && process.connectorType === currentTechnicalItem.connectorType;
     }
 
-    render(){
+    hasLogStroke = () => {
         const {
-            technicalRectClassName, isMouseOverSvg, isMouseOverPlaceholder,
-            isAvailableForDragging, showCreatePanel,
-        } = this.state;
-        const {
-            process, isNotDraggable, isCurrent, isHighlighted, currentLogs,logPanelHeight,
-            isDisabled, colorMode, readOnly, connection, currentTechnicalItem, textSize,
-            isTestingConnection, setIsCreateElementPanelOpened, setCoordinatesForCreateElementPanel,
-            setCurrentItem, justDeletedItem, currentLog, currentDirection,
+            logPanelHeight,
+            currentLogs,
+            process,
         } = this.props;
-        const isRejectedPlaceholder = currentTechnicalItem && !isAvailableForDragging;
+
+        if (logPanelHeight === LogPanelHeight.Low || !currentLogs || currentLogs.length === 0) {
+            return false;
+        }
+
+        return currentLogs.some(
+            (l) =>
+                l.shouldDraw &&
+                l.index === process.entity.index &&
+                l.connectorType === process.connectorType
+        );
+    };
+
+    renderPlaceholder = ({
+        process,
+        stroke,
+        isAvailableForDragging,
+        isMouseOverPlaceholder,
+        isRejectedPlaceholder,
+        isDraggableItemOperator,
+    }) => {
+        return (
+            <React.Fragment>
+                <line
+                    x1={process.width}
+                    y1={process.height / 2}
+                    x2={process.width + 20}
+                    y2={process.height / 2}
+                    stroke={stroke}
+                    strokeWidth={ARROW_WIDTH}
+                />
+                {
+                    isDraggableItemOperator
+                        ? (
+                            <polygon
+                                id={`arrow_from__${process.id}`}
+                                data-movable={isAvailableForDragging}
+                                onMouseEnter={this.onMouseEnterPlaceholder}
+                                onMouseLeave={this.onMouseLeavePlaceholder}
+                                className={
+                                    isMouseOverPlaceholder
+                                        ? (isRejectedPlaceholder
+                                            ? styles.operator_placeholder_over_rejected
+                                            : styles.operator_placeholder_over)
+                                        : styles.operator_placeholder_leave
+                                }
+                                stroke={stroke}
+                                points={COperator.getPoints(process.width + 20, 25, 30)}
+                            />
+                        )
+                        : (
+                            <rect
+                                id={`arrow_from__${process.id}`}
+                                data-movable={isAvailableForDragging}
+                                onMouseEnter={this.onMouseEnterPlaceholder}
+                                onMouseLeave={this.onMouseLeavePlaceholder}
+                                className={
+                                    isMouseOverPlaceholder
+                                        ? (isRejectedPlaceholder
+                                            ? styles.operator_placeholder_over_rejected
+                                            : styles.operator_placeholder_over)
+                                        : styles.operator_placeholder_leave
+                                }
+                                stroke={stroke}
+                                rx={5}
+                                ry={5}
+                                x={process.width + 20}
+                                y={30}
+                                width={30}
+                                height={20}
+                            />
+                        )
+                }
+                {isMouseOverPlaceholder && isRejectedPlaceholder && (
+                    <text
+                        dominantBaseline={"middle"}
+                        textAnchor={"middle"}
+                        fill={stroke}
+                        fontSize={'10px'}
+                        x={process.width + 35}
+                        y={60}
+                    >
+                        {'dependency'}
+                    </text>
+                )}
+            </React.Fragment>
+        );
+    };
+
+    renderDraggablePortal = ({ process, borderRadius, currentTechnicalItem }) => {
+        const container = document.getElementById('technical_layout_svg');
+        if (!container) return null;
+
+        return ReactDOM.createPortal(
+            <React.Fragment>
+                <svg id={'draggable_process'} x={process.x} y={process.y}>
+                    <rect
+                        className={styles.draggable_process}
+                        rx={borderRadius}
+                        ry={borderRadius}
+                        width={process.width}
+                        height={process.height}
+                    />
+                    {currentTechnicalItem.isDraggedForCopy && (
+                        <svg xmlns="http://www.w3.org/2000/svg" x={process.width - 20} width={20} height={20}>
+                            <path
+                                x={20}
+                                stroke={"#00acc2"}
+                                d="M4.5 18q-.625 0-1.062-.438Q3 17.125 3 16.5V5h1.5v11.5H14V18Zm3-3q-.625 0-1.062-.438Q6 14.125 6 13.5v-10q0-.625.438-1.062Q6.875 2 7.5 2h8q.625 0 1.062.438Q17 2.875 17 3.5v10q0 .625-.438 1.062Q16.125 15 15.5 15Zm0-1.5h8v-10h-8v10Zm0 0v-10 10Z"
+                            />
+                        </svg>
+                    )}
+                </svg>
+            </React.Fragment>,
+            container
+        );
+    };
+
+    render() {
+        const {
+            technicalRectClassName,
+            isMouseOverSvg,
+            isMouseOverPlaceholder,
+            isAvailableForDragging,
+            showCreatePanel,
+        } = this.state;
+
+        const {
+            process,
+            isNotDraggable,
+            isCurrent,
+            isHighlighted,
+            logPanelHeight,
+            isDisabled,
+            colorMode,
+            readOnly,
+            currentTechnicalItem,
+            textSize,
+            isTestingConnection,
+            setIsCreateElementPanelOpened,
+            setCoordinatesForCreateElementPanel,
+            setCurrentItem,
+            justDeletedItem,
+            currentLog,
+            currentDirection,
+        } = this.props;
+
         const method = process.entity;
         const borderRadius = 10;
         const labelX = '50%';
         const labelY = '50%';
         const closeX = process.width - 15;
         const closeY = 15;
-        const methodName = method ? method.label ? method.label : method.name ? method.name : '' : '';
-        let label = methodName === '' ? isString(process.name) ? process.name : '' : methodName;
-        let stroke = '#5d5b5b';
-        if(isMouseOverPlaceholder){
-            if(isRejectedPlaceholder){
-                stroke = '#d24545';
-            } else{
-                stroke = '#00acc2';
-            }
-        }
+        const htmlId = process.getHtmlIdName();
+
+        const methodName = method ? (method.label ? method.label : method.name ? method.name : '') : '';
+        const label = methodName === '' ? (isString(process.name) ? process.name : '') : methodName;
+
+        const maxLabelLength = ((20 - textSize) * 2 + 12);
+        const shortLabel =
+            isString(label) && label.length > maxLabelLength
+                ? `${label.substring(0, maxLabelLength - 3)}...`
+                : label;
+
         const color = method ? method.color : '';
-        let hasColor = color !== '';
-        let shortLabel = label;
-        if(isString(label) && label.length > ((20 - textSize) * 2 + 12)){
-            shortLabel = `${label.substring(0, (20 - textSize) * 2 + 9)}...`;
+        const hasColor = color !== '';
+
+        const isRejectedPlaceholder = currentTechnicalItem && !isAvailableForDragging;
+        let stroke = '#5d5b5b';
+
+        if (isMouseOverPlaceholder) {
+            stroke = isRejectedPlaceholder ? '#d24545' : '#00acc2';
         }
-        //shortLabel = method.color;
+
         const isDisabledStyle = isDisabled ? styles.disabled_process : '';
         const hasDraggableItem = isCurrent && currentTechnicalItem && currentTechnicalItem.isDragged;
         const isSelected = isCurrent && !readOnly;
         const hasDeleteIcon = isSelected && !isTestingConnection;
         const showPlaceholder = this.shouldShowPlaceholder();
         const isDraggableItemOperator = showPlaceholder && currentTechnicalItem instanceof CTechnicalOperator;
+
         const svgSize = {
-            width: process.width,
+            width: isMouseOverSvg && showPlaceholder ? process.width + 90 : process.width,
             height: process.height,
-        }
-        if(isMouseOverSvg){
-            if(showPlaceholder){
-                svgSize.width += 90;
-            }
-        }
-        const hasDashAnimation = currentDirection && currentLog?.indexPath === process.entity.index && process.getHtmlIdName().indexOf(currentDirection === 'source' ? 'fromConnector' : 'toConnector') === 0;
-        let logStroke = logPanelHeight !== LogPanelHeight.Low && currentLogs.findIndex(l => l.shouldDraw && l.index === process.entity.index && l.connectorType === process.connectorType) !== -1 ? '#58854d' : '';
+        };
+
+        const hasDashAnimation =
+            currentDirection &&
+            currentLog?.indexPath === process.entity.index &&
+            htmlId.indexOf(currentDirection === 'source' ? 'fromConnector' : 'toConnector') === 0;
+
+        let logStroke = this.hasLogStroke() ? '#58854d' : '';
         if (hasDashAnimation && !!currentLog?.error?.message) {
             logStroke = '#d24545';
         }
+
         const isJustCreatedItem = this.isJustCreatedItem();
-        const isJustDeletedItem = this.isJustDeletedItem() || !!justDeletedItem && isHighlighted;
-        return(
+        const isJustDeletedItem = this.isJustDeletedItem() || (!!justDeletedItem && isHighlighted);
+
+        return (
             <React.Fragment>
-                <svg id={process.getHtmlIdName()} data-movable={isAvailableForDragging} onMouseOver={(a) => this.onMouseOverSvg(a)} onMouseLeave={(a) => this.onMouseLeaveSvg(a)} x={process.x} y={process.y} className={`${isDisabledStyle} ${isHighlighted && !isCurrent ? styles.highlighted_process : ''} confine`} width={svgSize.width} height={svgSize.height}>
-                    <rect rx={borderRadius} ry={borderRadius} x={0} y={0} width={svgSize.width} height={svgSize.height} fill={'transparent'}/>
+                <svg
+                    id={htmlId}
+                    data-movable={isAvailableForDragging}
+                    onMouseEnter={this.onMouseEnterSvg}
+                    onMouseLeave={this.onMouseLeaveSvg}
+                    x={process.x}
+                    y={process.y}
+                    className={`${isDisabledStyle} ${isHighlighted && !isCurrent ? styles.highlighted_process : ''} confine`}
+                    width={svgSize.width}
+                    height={svgSize.height}
+                >
+                    <rect
+                        rx={borderRadius}
+                        ry={borderRadius}
+                        x={0}
+                        y={0}
+                        width={svgSize.width}
+                        height={svgSize.height}
+                        fill={'transparent'}
+                    />
+
                     <DashedElement
-                        getElement={(props) => {
-                            return (
-                                <rect
-                                    {...props}
-                                    id={`${process.getHtmlIdName()}_rect`}
-                                    fill={colorMode !== COLOR_MODE.BACKGROUND || !hasColor ? '#fff' : color}
-                                    onClick={() => this.onClick()}
-                                    onDoubleClick={() => this.onDoubleClick()}
-                                    onMouseDown={(a) => {this.onMouseDown(a)}}
-                                    x={1} y={1} rx={borderRadius} ry={borderRadius} width={process.width - 2} height={process.height - 2}
-                                    className={`${isJustDeletedItem ? styles.item_disappear : ''} ${isJustCreatedItem ? styles.item_appear : ''} ${technicalRectClassName} ${styles.process_rect} ${isCurrent ? styles.current_process : ''} ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable} draggable`}
-                                />);
-                        }}
+                        getElement={(props) => (
+                            <rect
+                                {...props}
+                                id={`${htmlId}_rect`}
+                                fill={colorMode !== COLOR_MODE.BACKGROUND || !hasColor ? '#fff' : color}
+                                onClick={this.onClick}
+                                onDoubleClick={this.onDoubleClick}
+                                onMouseDown={this.onMouseDown}
+                                x={1}
+                                y={1}
+                                rx={borderRadius}
+                                ry={borderRadius}
+                                width={process.width - 2}
+                                height={process.height - 2}
+                                className={`
+                                    ${isJustDeletedItem ? styles.item_disappear : ''}
+                                    ${isJustCreatedItem ? styles.item_appear : ''}
+                                    ${technicalRectClassName}
+                                    ${styles.process_rect}
+                                    ${isCurrent ? styles.current_process : ''}
+                                    ${isNotDraggable ? styles.not_draggable : styles.process_rect_draggable}
+                                    draggable
+                                `}
+                            />
+                        )}
                         hasDashAnimation={hasDashAnimation}
                         stroke={logStroke}
                     />
+
                     <svg x={0} y={0} width={process.width} height={process.height}>
-                        <text dominantBaseline={"middle"} textAnchor={"middle"} className={`${isJustDeletedItem ? styles.item_disappear : ''} ${isJustCreatedItem ? styles.item_appear : ''} ${styles.process_label}`} x={labelX} y={labelY} fontSize={textSize}>
+                        <text
+                            dominantBaseline={"middle"}
+                            textAnchor={"middle"}
+                            className={`
+                                ${isJustDeletedItem ? styles.item_disappear : ''}
+                                ${isJustCreatedItem ? styles.item_appear : ''}
+                                ${styles.process_label}
+                            `}
+                            x={labelX}
+                            y={labelY}
+                            fontSize={textSize}
+                        >
                             {shortLabel}
                         </text>
                     </svg>
+
                     <title>{label}</title>
-                    {hasColor && colorMode === COLOR_MODE.RECTANGLE_TOP && <rect className={`${isJustDeletedItem ? styles.item_disappear : ''} ${isJustCreatedItem ? styles.item_appear : ''} ${styles.process_color_rect}`} fill={color} x={10} y={5} width={isSelected && !isTestingConnection ? 95 : 110} height={15} rx={5} ry={5}/>}
-                    {hasColor && colorMode === COLOR_MODE.CIRCLE_LEFT_TOP && <circle className={`${isJustDeletedItem ? styles.item_disappear : ''} ${isJustCreatedItem ? styles.item_appear : ''} ${styles.process_color_circle}`} cx={15} cy={15} r="10" fill={color}/>}
-                    {hasDeleteIcon &&
-                        <DeleteIcon isJustDeletedItem={isJustDeletedItem} isJustCreatedItem={isJustCreatedItem} svgX={105} svgY={2} x={closeX} y={closeY} onClick={(a) => this.deleteProcess(a)}/>
-                    }
-                    {
-                        showPlaceholder
-                            ?
-                            <React.Fragment>
-                                <line x1={process.width} y1={process.height / 2} x2={process.width + 20} y2={process.height / 2} stroke={stroke} strokeWidth={ARROW_WIDTH}/>
-                                {
-                                    isDraggableItemOperator
-                                        ?
-                                        <polygon
-                                            id={`arrow_from__${process.id}`}
-                                            data-movable={isAvailableForDragging}
-                                            onMouseOver={(a) => this.onMouseOverPlaceholder(a)}
-                                            onMouseLeave={(a) => this.onMouseLeavePlaceholder(a)}
-                                            className={isMouseOverPlaceholder ? isRejectedPlaceholder ? styles.operator_placeholder_over_rejected : styles.operator_placeholder_over : styles.operator_placeholder_leave}
-                                            stroke={stroke}
-                                            points={COperator.getPoints(process.width + 20, 25, 30)}
-                                        />
-                                        :
-                                        <rect
-                                            id={`arrow_from__${process.id}`}
-                                            data-movable={isAvailableForDragging}
-                                            onMouseOver={(a) => this.onMouseOverPlaceholder(a)}
-                                            onMouseLeave={(a) => this.onMouseLeavePlaceholder(a)}
-                                            className={isMouseOverPlaceholder ? isRejectedPlaceholder ? styles.operator_placeholder_over_rejected : styles.operator_placeholder_over : styles.operator_placeholder_leave}
-                                            stroke={stroke}
-                                            rx={5} ry={5}
-                                            x={process.width + 20}
-                                            y={30}
-                                            width={30}
-                                            height={20}
-                                        />
-                                }
-                                {isMouseOverPlaceholder && isRejectedPlaceholder &&
-                                    <text dominantBaseline={"middle"} textAnchor={"middle"} fill={stroke} fontSize={'10px'} x={process.width + 35} y={60}>
-                                        {'dependency'}
-                                    </text>
-                                }
-                            </React.Fragment>
-                            :
-                            null
-                    }
+
+                    {hasColor && colorMode === COLOR_MODE.RECTANGLE_TOP && (
+                        <rect
+                            className={`
+                                ${isJustDeletedItem ? styles.item_disappear : ''}
+                                ${isJustCreatedItem ? styles.item_appear : ''}
+                                ${styles.process_color_rect}
+                            `}
+                            fill={color}
+                            x={10}
+                            y={5}
+                            width={isSelected && !isTestingConnection ? 95 : 110}
+                            height={15}
+                            rx={5}
+                            ry={5}
+                        />
+                    )}
+
+                    {hasColor && colorMode === COLOR_MODE.CIRCLE_LEFT_TOP && (
+                        <circle
+                            className={`
+                                ${isJustDeletedItem ? styles.item_disappear : ''}
+                                ${isJustCreatedItem ? styles.item_appear : ''}
+                                ${styles.process_color_circle}
+                            `}
+                            cx={15}
+                            cy={15}
+                            r="10"
+                            fill={color}
+                        />
+                    )}
+
+                    {hasDeleteIcon && (
+                        <DeleteIcon
+                            isJustDeletedItem={isJustDeletedItem}
+                            isJustCreatedItem={isJustCreatedItem}
+                            svgX={105}
+                            svgY={2}
+                            x={closeX}
+                            y={closeY}
+                            onClick={this.deleteProcess}
+                        />
+                    )}
+
+                    {showPlaceholder
+                        ? this.renderPlaceholder({
+                            process,
+                            stroke,
+                            isAvailableForDragging,
+                            isMouseOverPlaceholder,
+                            isRejectedPlaceholder,
+                            isDraggableItemOperator,
+                        })
+                        : null}
                 </svg>
+
                 {hasDraggableItem &&
-                    ReactDOM.createPortal(
-                        <React.Fragment>
-                            <svg id={'draggable_process'} x={process.x} y={process.y}>
-                                <rect className={styles.draggable_process} rx={borderRadius} ry={borderRadius} width={process.width} height={process.height}/>
-                                {currentTechnicalItem.isDraggedForCopy && <svg xmlns="http://www.w3.org/2000/svg" x={process.width - 20} width={20} height={20}>
-                                    <path x={20} stroke={"#00acc2"} d="M4.5 18q-.625 0-1.062-.438Q3 17.125 3 16.5V5h1.5v11.5H14V18Zm3-3q-.625 0-1.062-.438Q6 14.125 6 13.5v-10q0-.625.438-1.062Q6.875 2 7.5 2h8q.625 0 1.062.438Q17 2.875 17 3.5v10q0 .625-.438 1.062Q16.125 15 15.5 15Zm0-1.5h8v-10h-8v10Zm0 0v-10 10Z"/>
-                                </svg>}
-                            </svg>
-                        </React.Fragment>,
-                        document.getElementById('technical_layout_svg')
-                    )
-                }
-                {showCreatePanel &&
+                    this.renderDraggablePortal({
+                        process,
+                        borderRadius,
+                        currentTechnicalItem,
+                    })}
+
+                {showCreatePanel && (
                     <CreatePanel
                         ref={this.createPanelRef}
                         element={process}
-                        onMouseLeave={(a) => this.onMouseLeaveSvg(a)}
+                        onMouseLeave={this.onMouseLeaveSvg}
                         setIsCreateElementPanelOpened={setIsCreateElementPanelOpened}
-                        sourceId={`${process.getHtmlIdName()}`}
+                        sourceId={htmlId}
                         setCoordinatesForCreateElementPanel={setCoordinatesForCreateElementPanel}
                         setCurrentItem={setCurrentItem}
                     />
-                }
+                )}
             </React.Fragment>
         );
     }

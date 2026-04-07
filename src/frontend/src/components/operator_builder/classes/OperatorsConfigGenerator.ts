@@ -42,10 +42,10 @@ export default class OperatorsConfigGenerator {
         }
         const properties: RulePropertyProps = {
             leftField,
-            operator: match[5] as OperatorName,
+            operator: match[6] as OperatorName,
         }
-        if (match[6]) {
-            let rightField = match[6];
+        if (match[7]) {
+            let rightField = match[7];
             if (rightField.startsWith(`'`) && rightField.endsWith(`'`)) {
                 rightField = rightField.substring(1, rightField.length - 1);
             }

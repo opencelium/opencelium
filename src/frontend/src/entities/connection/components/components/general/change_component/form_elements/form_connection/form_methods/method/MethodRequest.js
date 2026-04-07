@@ -29,39 +29,80 @@ import GraphQLBody from "@change_component/form_elements/form_connection/form_me
 import Dialog from "@entity/connection/components/components/general/basic_components/Dialog";
 import TooltipFontIcon from "@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon";
 
-
 class MethodRequest extends Component{
-
     constructor(props){
         super(props);
+
         this.state = {
             showDialog: false,
-        }
+        };
+
+        this.openTimeout = null;
+        this.overflowTimeout = null;
+
+        this.handleToggleDialog = this.toggleDialog.bind(this);
+        this.handleUpdateEntity = this.updateEntity.bind(this);
+    }
+
+    shouldComponentUpdate(nextProps, nextState){
+        return (
+            nextProps.id !== this.props.id ||
+            nextProps.readOnly !== this.props.readOnly ||
+            nextProps.method !== this.props.method ||
+            nextProps.connector !== this.props.connector ||
+            nextProps.connection !== this.props.connection ||
+            nextProps.updateEntity !== this.props.updateEntity ||
+            nextProps.isDraft !== this.props.isDraft ||
+            nextState.showDialog !== this.state.showDialog
+        );
     }
 
     componentDidMount(){
-        let that = this;
-        const {id} = that.props;
-        setTimeout(function(){
+        const {id} = this.props;
+
+        this.openTimeout = setTimeout(() => {
             const elem = document.getElementById(id);
             if(elem) {
                 elem.classList.remove(styles.item_card_text);
                 elem.classList.add(styles.item_card_text_show);
-                setTimeout(() => {
+
+                this.overflowTimeout = setTimeout(() => {
                     elem.style.overflow = 'visible';
                 }, 500);
             }
         }, 200);
     }
 
+    componentWillUnmount() {
+        if (this.openTimeout) {
+            clearTimeout(this.openTimeout);
+            this.openTimeout = null;
+        }
+
+        if (this.overflowTimeout) {
+            clearTimeout(this.overflowTimeout);
+            this.overflowTimeout = null;
+        }
+    }
+
     toggleDialog(){
-        this.setState({
-            showDialog: !this.state.showDialog,
-        })
+        this.setState((prevState) => ({
+            showDialog: !prevState.showDialog,
+        }));
+    }
+
+    updateEntity(entity = null){
+        const {updateEntity} = this.props;
+        if (entity === null) {
+            updateEntity();
+        } else {
+            updateEntity(entity);
+        }
     }
 
     renderBody(){
-        const {id, readOnly, method, connector, connection, updateEntity, isDraft} = this.props;
+        const {id, readOnly, method, connector, connection, isDraft} = this.props;
+
         if(method.isGraphQLData()) {
             return (
                 <GraphQLBody
@@ -71,10 +112,11 @@ class MethodRequest extends Component{
                     method={method}
                     connection={connection}
                     connector={connector}
-                    updateEntity={updateEntity}
+                    updateEntity={this.handleUpdateEntity}
                 />
             );
         }
+
         switch(method.bodyFormat){
             case BODY_FORMAT.X_WWW_URL_ENCODED:
             case BODY_FORMAT.JSON:
@@ -86,9 +128,10 @@ class MethodRequest extends Component{
                         method={method}
                         connection={connection}
                         connector={connector}
-                        updateEntity={updateEntity}
+                        updateEntity={this.handleUpdateEntity}
                     />
                 );
+
             case BODY_FORMAT.XML:
                 return (
                     <XmlBody
@@ -98,23 +141,28 @@ class MethodRequest extends Component{
                         method={method}
                         connection={connection}
                         connector={connector}
-                        updateEntity={updateEntity}
+                        updateEntity={this.handleUpdateEntity}
                     />
                 );
+
+            default:
+                return null;
         }
-        return null;
     }
 
     render(){
         const {showDialog} = this.state;
-        const {id, readOnly, method, connector, connection, updateEntity} = this.props;
+        const {id, readOnly, method, connector, connection} = this.props;
+
         let bodyHasError = false;
         if(method.error.hasError){
             if(method.error.location === 'body'){
                 bodyHasError = true;
             }
         }
+
         const isGraphQLData = method.isGraphQLData();
+
         return (
             <div id={id} className={styles.item_card_text}>
                 <CardText>
@@ -124,28 +172,47 @@ class MethodRequest extends Component{
                             connector={connector}
                             connection={connection}
                             readOnly={readOnly}
-                            updateEntity={updateEntity}
+                            updateEntity={this.handleUpdateEntity}
                         />
-                        <ToolboxThemeInput className={styles.method_body_label} label={<span className={`${styles.body_label}`} style={bodyHasError ? {color: 'red'} : {}}>{'Body'}</span>}>
-                            {isGraphQLData ?
+                        <ToolboxThemeInput
+                            className={styles.method_body_label}
+                            label={
+                                <span
+                                    className={styles.body_label}
+                                    style={bodyHasError ? {color: 'red'} : {}}
+                                >
+                                    {'Body'}
+                                </span>
+                            }
+                        >
+                            {isGraphQLData ? (
                                 <React.Fragment>
                                     <Dialog
                                         actions={[{
                                             label: 'Ok',
-                                            onClick: () => this.toggleDialog(),
+                                            onClick: this.handleToggleDialog,
                                             id: 'header_ok'
                                         }]}
                                         active={showDialog}
-                                        toggle={(a) => this.toggleDialog(a)}
+                                        toggle={this.handleToggleDialog}
                                         title={'Body'}
-                                        theme={{dialog: styles.body_dialog_graphql, content: styles.body_content}}
+                                        theme={{
+                                            dialog: styles.body_dialog_graphql,
+                                            content: styles.body_content
+                                        }}
                                     >
                                         {this.renderBody()}
                                     </Dialog>
-                                    <TooltipFontIcon onClick={() => this.toggleDialog()} size={14} value={<span className={styles.more_details}>{`graphql`}</span>} tooltip={'Body'}/>
-                                </React.Fragment> :
+                                    <TooltipFontIcon
+                                        onClick={this.handleToggleDialog}
+                                        size={14}
+                                        value={<span className={styles.more_details}>{`graphql`}</span>}
+                                        tooltip={'Body'}
+                                    />
+                                </React.Fragment>
+                            ) : (
                                 this.renderBody()
-                            }
+                            )}
                         </ToolboxThemeInput>
                     </div>
                 </CardText>

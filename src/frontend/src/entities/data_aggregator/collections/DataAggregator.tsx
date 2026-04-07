@@ -62,7 +62,7 @@ class DataAggregatorCollection extends ListCollection<ModelDataAggregatorProps>{
         const hasSearch = this.hasSearch && this.entities.length > 0;
         return(
             <React.Fragment>
-                <Button autoFocus={!hasSearch} key={'add_button'} icon={'add'} href={'add'} label={'Add Aggregator'}/>
+                <Button id={'data-aggregator-list-add'} autoFocus={!hasSearch} key={'add_button'} icon={'add'} href={'add'} label={'Add Aggregator'}/>
             </React.Fragment>
         );
     };

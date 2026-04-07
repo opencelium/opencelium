@@ -56,9 +56,9 @@ class Invokers extends ListCollection<InvokerProps>{
         const hasSearch = this.hasSearch && this.entities.length > 0;
         return(
             <React.Fragment>
-                <PermissionButton autoFocus={!hasSearch} key={'add_button'} icon={'add'} href={'add'} label={'Add Invoker'} permission={InvokerPermissions.CREATE}/>
+                <PermissionButton id={'invoker-list-add'} autoFocus={!hasSearch} key={'add_button'} icon={'add'} href={'add'} label={'Add Invoker'} permission={InvokerPermissions.CREATE}/>
                 <ImportInvokerButton/>
-                {viewType === ViewType.LIST && this.entities.length !== 0 && <PermissionButton isDisabled={checkedNames.length === 0} hasConfirmation confirmationText={'Do you really want to delete?'}  key={'delete_button'} icon={'delete'} label={'Delete Selected'} handleClick={() => this.dispatch(deleteInvokersByName(checkedNames))} permission={InvokerPermissions.DELETE}/>}
+                {viewType === ViewType.LIST && this.entities.length !== 0 && <PermissionButton id={'invoker-list-delete-selected'} isDisabled={checkedNames.length === 0} hasConfirmation confirmationText={'Do you really want to delete?'}  key={'delete_button'} icon={'delete'} label={'Delete Selected'} handleClick={() => this.dispatch(deleteInvokersByName(checkedNames))} permission={InvokerPermissions.DELETE}/>}
             </React.Fragment>
         );
     };

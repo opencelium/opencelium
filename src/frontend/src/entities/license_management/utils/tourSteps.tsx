@@ -45,7 +45,7 @@ const LicenseManagementCommonSteps: Step[] = [
     },
 ]
 
-export const LicenseManagementOfflineSteps: Step[] = [
+export const LicenseManagementSteps: Step[] = [
     {
         title: 'Subscription Overview',
         content:
@@ -53,7 +53,25 @@ export const LicenseManagementOfflineSteps: Step[] = [
                 This page provides an overview of your current subscription and API usage statistics.
 It helps monitor API consumption and track usage per Connection.
             </span>,
-        target: '#license-management-offline-header',
+        target: '#license-management-header',
+        placement: 'bottom',
+        disableBeacon: true,
+    },
+    {
+        title: 'Activate License',
+        content:
+            <div>
+                <p>
+                    Activate your license using synchronisation with Service Portal (SP).
+                </p>
+                <p>
+                    In order to do that, your application.yml file should contain configurations to connect with SP.
+                </p>
+                <p>See <a target={'_blank'}
+                          href={'https://docs.opencelium.io/en/prod/management/license_management.html'}>docs</a> for more
+                    information.</p>
+            </div>,
+        target: '#license-management-activate-license',
         placement: 'bottom',
         disableBeacon: true,
     },
@@ -120,6 +138,16 @@ It helps monitor API consumption and track usage per Connection.
                 </ul>
             </span>,
         target: '#license-management-extra-ops',
+        placement: 'bottom',
+        disableBeacon: true,
+    },
+    {
+        title: 'Activate Free License',
+        content:
+            <span>
+                You can activate a free license pressing on this button. It will provide you 25K API requests.
+            </span>,
+        target: '#license-management-activate-free',
         placement: 'bottom',
         disableBeacon: true,
     },

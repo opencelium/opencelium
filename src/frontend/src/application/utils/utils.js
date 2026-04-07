@@ -532,9 +532,21 @@ export function parseConnectionPointer(connectionPointer){
     return result;
 }
 
-export function sortByIndex(array){
-    const collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'});
-    return array.sort(sortByIndexFunction, collator);
+const connectorItemIndexCollator = new Intl.Collator(undefined, {
+	numeric: true,
+	sensitivity: 'base',
+});
+
+export function sortByIndex(array) {
+	if (!Array.isArray(array) || array.length < 2) {
+		return array;
+	}
+
+	return array.sort((a, b) => {
+		const aIndex = a?.index ?? '';
+		const bIndex = b?.index ?? '';
+		return connectorItemIndexCollator.compare(aIndex, bIndex);
+	});
 }
 
 /**
@@ -939,14 +951,14 @@ function placeBinding(action, fieldBinding){
     }
 }
 
-export function sortConnectorItemIndexes(indexes){
-    const collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'});
-    return indexes.sort((a, b) => {
-        return a.localeCompare(b, undefined, {
-            numeric: true,
-            sensitivity: 'base'
-        });
-    }, collator);
+export function sortConnectorItemIndexes(indexes) {
+	if (!Array.isArray(indexes) || indexes.length < 2) {
+		return indexes;
+	}
+
+	return indexes.sort((a, b) => {
+		return connectorItemIndexCollator.compare(a ?? '', b ?? '');
+	});
 }
 
 export const convertFileToBase64 = file => new Promise((resolve, reject) => {

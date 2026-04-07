@@ -17,6 +17,7 @@ import React, {InputHTMLAttributes} from "react";
 import {ITheme} from "@style/Theme";
 import {ElementProps, InputElementProps} from "../interfaces";
 import {ButtonProps} from "@app_component/base/button/interfaces";
+import {Step} from "react-joyride";
 
 interface InputFileProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "value">, Omit<InputElementProps, "value">{
     value?: readonly string[],
@@ -27,6 +28,7 @@ interface InputFileProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "va
     theme?: ITheme,
     showOnlyButton?: boolean,
     buttonProps?: ButtonProps,
+    helpMessage?: Step[],
 }
 
 interface InputProps extends ElementProps{

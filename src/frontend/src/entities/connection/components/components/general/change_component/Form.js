@@ -39,37 +39,41 @@ function mapStateToProps(state, props){
     return {
         authUser,
         currentTechnicalItem,
-    }
+    };
 }
 
 @GetModalProp()
-@connect(mapStateToProps, {setConnectionData, setCurrentTechnicalItem, setModalConnectionData, setModalCurrentTechnicalItem, setEntityHeader})
-class Form extends React.Component{
+@connect(
+    mapStateToProps,
+    {
+        setConnectionData,
+        setCurrentTechnicalItem,
+        setModalConnectionData,
+        setModalCurrentTechnicalItem,
+        setEntityHeader
+    }
+)
+class Form extends React.Component {
     constructor(props) {
         super(props);
-        let onlyInputs = [];
-        for(let i = 0; i < props.contents.length; i++){
-            if(isArray(props.contents[i])){
-                for(let j = 0; j < props.contents[i].length; j++){
-                    onlyInputs = onlyInputs.concat(props.contents[i][j].inputs);
-                }
-            } else{
-                onlyInputs = onlyInputs.concat(props.contents[i].inputs);
-            }
-        }
+
+        const onlyInputs = this.collectInputs(props.contents);
+
         let entity = [];
-        if(!props.entity || isEmptyObject(props.entity)){
+        if (!props.entity || isEmptyObject(props.entity)) {
             entity = this.getInputsState(onlyInputs);
-        } else{
+        } else {
             entity = props.entity;
         }
-        for(let i = 0; i < onlyInputs.length; i++){
-            if(onlyInputs[i].hasOwnProperty('callback')){
-                if(typeof onlyInputs[i].callback === 'function'){
+
+        for (let i = 0; i < onlyInputs.length; i++) {
+            if (onlyInputs[i].hasOwnProperty('callback')) {
+                if (typeof onlyInputs[i].callback === 'function') {
                     onlyInputs[i].callback(entity[onlyInputs[i].name]);
                 }
             }
         }
+
         this.state = {
             entity,
             page: 0,
@@ -81,203 +85,330 @@ class Form extends React.Component{
             makingRequest: false,
             contentsLength: props.contents ? props.contents.length : 0,
         };
+
         this.setData = props.isModal ? props.setModalConnectionData : props.setConnectionData;
         this.setCurrentTechnicalItem = props.isModal ? props.setModalCurrentTechnicalItem : props.setCurrentTechnicalItem;
+
+        this.handleDoAction = this.doAction.bind(this);
+        this.handleUpdateEntity = this.updateEntity.bind(this);
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        return (
+            nextProps.contents !== this.props.contents ||
+            nextProps.entity !== this.props.entity ||
+            nextProps.translations !== this.props.translations ||
+            nextProps.permissions !== this.props.permissions ||
+            nextProps.isActionInProcess !== this.props.isActionInProcess ||
+            nextProps.additionalButtons !== this.props.additionalButtons ||
+            nextProps.clearValidationMessage !== this.props.clearValidationMessage ||
+            nextProps.shouldScroll !== this.props.shouldScroll ||
+            nextProps.type !== this.props.type ||
+            nextProps.forceUpdateConnection !== this.props.forceUpdateConnection ||
+            nextProps.currentTechnicalItem !== this.props.currentTechnicalItem ||
+            nextState.entity !== this.state.entity ||
+            nextState.page !== this.state.page ||
+            nextState.hasError !== this.state.hasError ||
+            nextState.hasRequired !== this.state.hasRequired ||
+            nextState.isValidated !== this.state.isValidated ||
+            nextState.validationMessage !== this.state.validationMessage ||
+            nextState.makingRequest !== this.state.makingRequest ||
+            nextState.contentsLength !== this.state.contentsLength
+        );
     }
 
     componentDidMount() {
-        this.props.setEntityHeader(this.props.translations.header)
+        this.props.setEntityHeader(this.props.translations.header);
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        const prevErrors = prevProps.contents.length > 2 ? prevProps.contents[2].inputs[1]?.errors || {} : {};
-        const curErrors = this.props.contents.length > 2 ? this.props.contents[2].inputs[1]?.errors || {} : {};
+    componentDidUpdate(prevProps) {
+        const prevErrors = this.getContentErrors(prevProps.contents);
+        const curErrors = this.getContentErrors(this.props.contents);
+
         if (prevProps.forceUpdateConnection !== this.props.forceUpdateConnection && this.props.forceUpdateConnection) {
             this.updateEntity(this.props.entity);
         }
-        if(prevProps.entity.id !== this.props.entity.id){
+
+        if ((prevProps.entity?.id || null) !== (this.props.entity?.id || null)) {
             this.setState({
                 entity: this.props.entity,
-            })
+            });
         }
-        if(JSON.stringify(prevErrors) !== JSON.stringify(curErrors)){
-            const {entity} = this.state;
-            const {setCurrentTechnicalItem, currentTechnicalItem} = this.props;
-            const fromConnectorOperatorErrors = curErrors.operators.fromConnector;
-            const toConnectorOperatorErrors = curErrors.operators.toConnector;
-            const fromConnectorMethodErrors = curErrors.methods.fromConnector;
-            const toConnectorMethodErrors = curErrors.methods.toConnector;
-            let hasErrors = false;
-            let currentItem = null;
-            if(fromConnectorOperatorErrors.length > 0){
-                hasErrors = entity.fromConnector.setErrorsForOperators(fromConnectorOperatorErrors);
-                currentItem = entity.fromConnector.getSvgElementByIndex(fromConnectorOperatorErrors[0].index);
-                const currentItemInConnector = entity.fromConnector.getCurrentItem();
-                if (currentItemInConnector) {
-                    if (currentItemInConnector.index !== currentItem.entity.index || (currentTechnicalItem && currentItem.entity.index !== currentTechnicalItem.index)) {
-                        entity.fromConnector.setCurrentItem(currentItem.entity);
-                    } else{
-                        currentItem = null;
-                    }
+
+        if (!this.areErrorsEqual(prevErrors, curErrors)) {
+            this.processErrors(curErrors);
+        }
+    }
+
+    collectInputs(contents) {
+        let onlyInputs = [];
+
+        for (let i = 0; i < contents.length; i++) {
+            if (isArray(contents[i])) {
+                for (let j = 0; j < contents[i].length; j++) {
+                    onlyInputs = onlyInputs.concat(contents[i][j].inputs);
+                }
+            } else {
+                onlyInputs = onlyInputs.concat(contents[i].inputs);
+            }
+        }
+
+        return onlyInputs;
+    }
+
+    getContentErrors(contents = []) {
+        return contents.length > 2 ? contents[2].inputs[1]?.errors || {} : {};
+    }
+
+    areErrorsEqual(prevErrors = {}, curErrors = {}) {
+        return JSON.stringify(prevErrors) === JSON.stringify(curErrors);
+    }
+
+    getCurrentItemFromErrors(entity, currentTechnicalItem, connectorType, operatorErrors = [], methodErrors = []) {
+        const connector = connectorType === 'fromConnector'
+            ? entity.fromConnector
+            : entity.toConnector;
+
+        let hasErrors = false;
+        let currentItem = null;
+
+        if (operatorErrors.length > 0) {
+            hasErrors = connector.setErrorsForOperators(operatorErrors);
+            currentItem = connector.getSvgElementByIndex(operatorErrors[0].index);
+            const currentItemInConnector = connector.getCurrentItem();
+
+            if (currentItemInConnector && currentItem) {
+                if (
+                    currentItemInConnector.index !== currentItem.entity.index ||
+                    (currentTechnicalItem && currentItem.entity.index !== currentTechnicalItem.index)
+                ) {
+                    connector.setCurrentItem(currentItem.entity);
+                } else {
+                    currentItem = null;
                 }
             }
-            if(toConnectorOperatorErrors.length > 0){
-                hasErrors = entity.toConnector.setErrorsForOperators(toConnectorOperatorErrors);
-                currentItem = entity.toConnector.getSvgElementByIndex(toConnectorOperatorErrors[0].index);
-                const currentItemInConnector = entity.toConnector.getCurrentItem();
-                if (!currentItem && currentItemInConnector) {
-                    if (currentItemInConnector.index !== currentItem.entity.index || (currentTechnicalItem && currentItem.entity.index !== currentTechnicalItem.index)) {
-                        entity.toConnector.setCurrentItem(currentItem.entity);
-                    } else{
-                        currentItem = null;
-                    }
+        }
+
+        if (methodErrors.length > 0) {
+            hasErrors = connector.setErrorsForMethods(methodErrors) || hasErrors;
+            if (!currentItem) {
+                currentItem = connector.getSvgElementByIndex(methodErrors[0].index);
+            }
+
+            const currentItemInConnector = connector.getCurrentItem();
+            if (currentItemInConnector && currentItem) {
+                if (
+                    currentItemInConnector.index !== currentItem.entity.index ||
+                    (currentTechnicalItem && currentItem.entity.index !== currentTechnicalItem.index)
+                ) {
+                    connector.setCurrentItem(currentItem.entity);
+                } else {
+                    currentItem = null;
                 }
             }
-            if(fromConnectorMethodErrors.length > 0){
-                hasErrors = entity.fromConnector.setErrorsForMethods(fromConnectorMethodErrors);
-                currentItem = entity.fromConnector.getSvgElementByIndex(fromConnectorMethodErrors[0].index);
-                const currentItemInConnector = entity.fromConnector.getCurrentItem();
-                if (currentItemInConnector) {
-                    if (currentItemInConnector.index !== currentItem.entity.index || (currentTechnicalItem && currentItem.entity.index !== currentTechnicalItem.index)) {
-                        entity.fromConnector.setCurrentItem(currentItem.entity);
-                    } else{
-                        currentItem = null;
-                    }
-                }
-            }
-            if(toConnectorMethodErrors.length > 0){
-                hasErrors = entity.toConnector.setErrorsForMethods(toConnectorMethodErrors);
-                currentItem = entity.toConnector.getSvgElementByIndex(toConnectorMethodErrors[0].index);
-                const currentItemInConnector = entity.toConnector.getCurrentItem();
-                if (currentItemInConnector) {
-                    if (currentItemInConnector.index !== currentItem.entity.index || (currentTechnicalItem && currentItem.entity.index !== currentTechnicalItem.index)) {
-                        entity.toConnector.setCurrentItem(currentItem.entity);
-                    } else{
-                        currentItem = null;
-                    }
-                }
-            }
-            if(hasErrors){
-                if(currentItem){
-                    this.setCurrentTechnicalItem(currentItem.getObject());
-                    const elementWithError = document.getElementById(`${currentItem.connectorType}__${currentItem.connectorType}_${currentItem.entity.index}`)
-                    if(elementWithError){
-                        const firstElement = document.querySelector('[id^=fromConnector__fromConnector_0]');
-                        if(firstElement){
-                            let viewBox = {x: -250, y: -50, width: 1800, height: 715};
-                            CSvg.setViewBox('technical_layout_svg', viewBox);
-                            const x = -300 + elementWithError.getBoundingClientRect().x - firstElement.getBoundingClientRect().x;
-                            const y = -100 + elementWithError.getBoundingClientRect().y - firstElement.getBoundingClientRect().y;
-                            viewBox = {x, y, width: 1800, height: 715};
-                            CSvg.setViewBox('technical_layout_svg', viewBox);
-                        }
-                    }
-                }
-                this.updateEntity(entity);
-                this.setData({connection: entity.getObjectForConnectionOverview()});
-                window.scrollTo({top: findTopLeft(`technical_layout_svg`).top - 4, behavior: "instant"});
+        }
+
+        return { hasErrors, currentItem };
+    }
+
+    focusErroredSvgItem(currentItem) {
+        if (!currentItem) return;
+
+        this.setCurrentTechnicalItem(currentItem.getObject());
+
+        const elementWithError = document.getElementById(
+            `${currentItem.connectorType}__${currentItem.connectorType}_${currentItem.entity.index}`
+        );
+
+        if (elementWithError) {
+            const firstElement = document.querySelector('[id^=fromConnector__fromConnector_0]');
+            if (firstElement) {
+                let viewBox = {x: -250, y: -50, width: 1800, height: 715};
+                CSvg.setViewBox('technical_layout_svg', viewBox);
+
+                const x = -300 + elementWithError.getBoundingClientRect().x - firstElement.getBoundingClientRect().x;
+                const y = -100 + elementWithError.getBoundingClientRect().y - firstElement.getBoundingClientRect().y;
+
+                viewBox = {x, y, width: 1800, height: 715};
+                CSvg.setViewBox('technical_layout_svg', viewBox);
             }
         }
     }
 
-    getInputsState(inputs){
+    processErrors(curErrors = {}) {
+        const {entity} = this.state;
+        const {currentTechnicalItem} = this.props;
+
+        if (!entity) return;
+
+        const fromOperatorErrors = curErrors?.operators?.fromConnector || [];
+        const toOperatorErrors = curErrors?.operators?.toConnector || [];
+        const fromMethodErrors = curErrors?.methods?.fromConnector || [];
+        const toMethodErrors = curErrors?.methods?.toConnector || [];
+
+        const fromResult = this.getCurrentItemFromErrors(
+            entity,
+            currentTechnicalItem,
+            'fromConnector',
+            fromOperatorErrors,
+            fromMethodErrors
+        );
+
+        const toResult = this.getCurrentItemFromErrors(
+            entity,
+            currentTechnicalItem,
+            'toConnector',
+            toOperatorErrors,
+            toMethodErrors
+        );
+
+        const hasErrors = fromResult.hasErrors || toResult.hasErrors;
+        const currentItem = fromResult.currentItem || toResult.currentItem;
+
+        if (hasErrors) {
+            if (currentItem) {
+                this.focusErroredSvgItem(currentItem);
+            }
+
+            this.updateEntity(entity);
+            this.setData({connection: entity.getObjectForConnectionOverview()});
+            window.scrollTo({
+                top: findTopLeft(`technical_layout_svg`).top - 4,
+                behavior: "instant"
+            });
+        }
+    }
+
+    getInputsState(inputs) {
         let obj = {};
-        if(Array.isArray(inputs)) {
+        if (Array.isArray(inputs)) {
             inputs.forEach(input => {
-                return input.hasOwnProperty('defaultValue') ? obj[input.name] = input.defaultValue : obj[input.name] = '';
+                obj[input.name] = input.hasOwnProperty('defaultValue') ? input.defaultValue : '';
             });
         }
         return obj;
     }
 
-    updateEntity(entity, name){
+    updateEntity(entity, name) {
         this.setState({
             entity,
         });
-        let connection = entity instanceof CConnection ? entity.getObjectForConnectionOverview() : entity;
+
+        const connection = entity instanceof CConnection
+            ? entity.getObjectForConnectionOverview()
+            : entity;
+
         this.setData({connection});
         this.props.clearValidationMessage(name);
     }
 
-    doAction(){
+    doAction() {
         const {entity} = this.state;
         const {action} = this.props;
-        if(typeof action === 'function'){
+
+        if (typeof action === 'function') {
             action(entity);
         }
     }
 
-    render(){
+    renderButtonsPanel(entity, hasActionButton, hasListButton, hasCancelButton) {
+        const {translations, permissions, isActionInProcess, additionalButtons, type} = this.props;
+
+        if (type === 'update') {
+            return null;
+        }
+
+        return (
+            <React.Fragment>
+                {hasActionButton && (
+                    <ActionButton
+                        {...this.props}
+                        doAction={this.handleDoAction}
+                        isActionInProcess={isActionInProcess}
+                    />
+                )}
+
+                {hasListButton && (
+                    <ListButton
+                        title={translations.list_button.title}
+                        link={translations.list_button.link}
+                        permission={permissions.READ}
+                    />
+                )}
+
+                {additionalButtons(entity, this.handleUpdateEntity)}
+
+                {hasCancelButton && (
+                    <CancelButton
+                        title={translations.cancel_button.title}
+                        link={translations.cancel_button.link}
+                        permission={permissions.READ}
+                    />
+                )}
+            </React.Fragment>
+        );
+    }
+
+    renderContentSections(contents, entity) {
+        const {clearValidationMessage, shouldScroll} = this.props;
+
+        return contents.map((form, key1) => {
+            if (isArray(form)) {
+                return (
+                    <SubFormSections
+                        shouldScroll={shouldScroll}
+                        key={key1}
+                        key1={key1}
+                        form={form}
+                        contents={contents}
+                        entity={entity}
+                        clearValidationMessage={clearValidationMessage}
+                        updateEntity={this.handleUpdateEntity}
+                    />
+                );
+            }
+
+            return (
+                <FormSection
+                    id={form?.id}
+                    shouldScroll={shouldScroll}
+                    key={key1}
+                    isSubFormSection={false}
+                    content={form}
+                    entity={entity}
+                    updateEntity={this.handleUpdateEntity}
+                    clearValidationMessage={clearValidationMessage}
+                />
+            );
+        });
+    }
+
+    render() {
         const {entity} = this.state;
-        const {contents, translations, permissions, isActionInProcess, additionalButtons, clearValidationMessage, shouldScroll, type} = this.props;
+        const {
+            contents,
+            translations,
+        } = this.props;
+
         const hasActionButton = translations && translations.action_button;
         const hasListButton = translations && translations.list_button;
         const hasCancelButton = translations && translations.cancel_button;
-        return(
+        const visibleContentsCount = contents.filter(c => c.visible).length;
+        const rowGap = visibleContentsCount > 1 ? '30px' : 0;
+
+        return (
             <div style={{margin: '0 0 20px', padding: 0, paddingBottom: '30px'}}>
                 <LicenseAlertMessage/>
+
                 <div className={styles.buttons_panel}>
-                    {type !== 'update' &&
-                        <React.Fragment>
-                            {hasActionButton &&
-                                <ActionButton
-                                    {...this.props}
-                                    doAction={(a) => this.doAction(a)}
-                                    isActionInProcess={isActionInProcess}
-                                />
-                            }
-                            {hasListButton &&
-                                <ListButton
-                                    title={translations.list_button.title}
-                                    link={translations.list_button.link}
-                                    permission={permissions.READ}
-                                />
-                            }
-                            {
-                                additionalButtons(entity, (a, b) => this.updateEntity(a, b))
-                            }
-                            {hasCancelButton &&
-                                <CancelButton
-                                    title={translations.cancel_button.title}
-                                    link={translations.cancel_button.link}
-                                    permission={permissions.READ}
-                                />
-                            }
-                        </React.Fragment>
-                    }
+                    {this.renderButtonsPanel(entity, hasActionButton, hasListButton, hasCancelButton)}
                 </div>
-                <div className={styles.form_component} style={{rowGap: contents.filter(c => c.visible).length > 1 ? '30px' : 0}}>
-                    {
-                        contents.map((form, key1) => {
-                            if(isArray((form))){
-                                return (
-                                    <SubFormSections
-                                        shouldScroll={shouldScroll}
-                                        key={key1}
-                                        key1={key1}
-                                        form={form}
-                                        contents={contents}
-                                        entity={entity}
-                                        clearValidationMessage={clearValidationMessage}
-                                        updateEntity={(a, b) => this.updateEntity(a, b)}
-                                    />
-                                );
-                            } else {
-                                return (
-                                    <FormSection
-                                        id={form?.id}
-                                        shouldScroll={shouldScroll}
-                                        key={key1}
-                                        isSubFormSection={false}
-                                        content={form}
-                                        entity={entity}
-                                        updateEntity={(a, b) => this.updateEntity(a, b)}
-                                        clearValidationMessage={clearValidationMessage}
-                                    />
-                                );
-                            }
-                        })
-                    }
+
+                <div
+                    className={styles.form_component}
+                    style={{rowGap}}
+                >
+                    {this.renderContentSections(contents, entity)}
                 </div>
             </div>
         );
@@ -311,7 +442,7 @@ Form.propTypes = {
     permissions: PropTypes.object,
     clearValidationMessage: PropTypes.func,
     action: PropTypes.func,
-}
+};
 
 Form.defaultProps = {
     shouldScroll: '',

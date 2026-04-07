@@ -14,34 +14,32 @@
  */
 
 import React from "react";
-import {INPUTS} from "@entity/connection/components/utils/constants/inputs";
+import { INPUTS } from "@entity/connection/components/utils/constants/inputs";
 import Form from "@change_component/Form";
 import CConnection from "@entity/connection/components/classes/components/content/connection/CConnection";
-import {EXPERT_MODE, TEMPLATE_MODE} from "@entity/connection/components/classes/components/content/connection/CTemplate";
+import { EXPERT_MODE, TEMPLATE_MODE } from "@entity/connection/components/classes/components/content/connection/CTemplate";
 import styles from '@entity/connection/components/themes/default/content/connections/change.scss';
 import {
     CONNECTOR_FROM,
     CONNECTOR_TO
 } from "@entity/connection/components/classes/components/content/connection/CConnectorItem";
-import {LocalStorage} from "@application/classes/LocalStorage";
-import {capitalize, findTopLeft, setFocusById} from "@application/utils/utils";
-import {API_REQUEST_STATE, TRIPLET_STATE} from "@application/interfaces/IApplication";
+import { LocalStorage } from "@application/classes/LocalStorage";
+import { capitalize, setFocusById } from "@application/utils/utils";
+import { API_REQUEST_STATE, TRIPLET_STATE } from "@application/interfaces/IApplication";
 
 import "@style/css/react_resizable.css";
 import "@style/css/graphiql.css";
-import {ConnectionPermissions} from "@root/constants";
+import { ConnectionPermissions } from "@root/constants";
 import CEnhancement from "@classes/content/connection/field_binding/CEnhancement";
-import {jsonToString} from "@app_component/operator_builder/utils";
+import { jsonToString } from "@app_component/operator_builder/utils";
 import SetConnectionBeforeAdd from "@components/add_connection/SetConnectionBeforeAddButton";
 
-/**
- * common component to add and update Connection
- */
 export function ConnectionForm(type) {
     return function (Component) {
         return class extends Component {
             constructor(props) {
                 super(props);
+
                 this.type = type;
                 this.redirectUrl = '/connections';
                 this.translationKey = this.type.toUpperCase();
@@ -49,6 +47,7 @@ export function ConnectionForm(type) {
                 this.isAdd = this.type === 'add';
                 this.isView = this.type === 'view';
                 this.actionName = this.isUpdate ? `updatingConnection` : `addingConnection`;
+
                 this.state = {
                     runTest: false,
                     justUpdate: false,
@@ -61,100 +60,130 @@ export function ConnectionForm(type) {
                         template: '',
                     },
                     forceUpdateConnection: false,
-                    validateLogicResult: {toggleFlag: false, operators: {[CONNECTOR_FROM]: [], [CONNECTOR_TO]: []}, methods: {[CONNECTOR_FROM]: [], [CONNECTOR_TO]: []}},
+                    validateLogicResult: {
+                        toggleFlag: false,
+                        operators: { [CONNECTOR_FROM]: [], [CONNECTOR_TO]: [] },
+                        methods: { [CONNECTOR_FROM]: [], [CONNECTOR_TO]: [] }
+                    },
                     connection: CConnection.createConnection(props.connection),
                     entity: null,
                     mode: EXPERT_MODE,
                 };
+
                 this.isNavigatingToScheduler = false;
                 this.startCheckingTitle = false;
                 this.startAction = false;
                 this.isFetchedConnection = false;
+
+                this.handleClearValidationMessage = this.clearValidationMessage.bind(this);
+                this.handleFormAction = this.doAction.bind(this);
+                this.handleSetConnectionBeforeAdd = this.handleSetConnectionBeforeAdd.bind(this);
             }
 
-            componentDidMount(){
-                let { params } = this.props;
-                if(params){
+            componentDidMount() {
+                const { params } = this.props;
+                if (params) {
                     //this.props.fetchConnection(params.id);
                     //this.props.getConnectionWebhooks(params.id);
                 }
-                if(this.props.fetchConnectors){
+                if (this.props.fetchConnectors) {
                     //this.props.fetchConnectors();
                 }
                 setFocusById('input_title');
             }
 
-            componentDidUpdate(prevProps, prevState, snapshot) {
-                const {checkingConnectionTitle, checkTitleResult, t, navigate, error} = this.props;
-                this.checkValidationRequest('title', checkingConnectionTitle === API_REQUEST_STATE.FINISH, checkTitleResult === TRIPLET_STATE.FALSE, t(`${this.translationKey}.VALIDATION_MESSAGES.TITLE_EXIST`));
-                if(this.props[this.actionName] === API_REQUEST_STATE.FINISH && this.startAction){
-                    this.startAction = false;
-                    if(this.state.justUpdate){
-                        if(this.state.runTest){
-                            this.setState({justUpdate: false, runTest: false});
-                            this.props.testConnection(this.props.connection);
-                        } else{
-                            this.setState({justUpdate: false});
-                        }
-                    } else{
-                        if(this.redirectUrl){
-                            this.props.setIsDirty(false);
-                            setTimeout(
-                                () => {
+            componentDidUpdate(prevProps) {
+                const { checkingConnectionTitle, checkTitleResult, t, navigate, error } = this.props;
 
-                                    navigate(this.redirectUrl, { replace: false });
-                                }, 200
-                            )
+                this.checkValidationRequest(
+                    'title',
+                    checkingConnectionTitle === API_REQUEST_STATE.FINISH,
+                    checkTitleResult === TRIPLET_STATE.FALSE,
+                    t(`${this.translationKey}.VALIDATION_MESSAGES.TITLE_EXIST`)
+                );
+
+                if (this.props[this.actionName] === API_REQUEST_STATE.FINISH && this.startAction) {
+                    this.startAction = false;
+
+                    if (this.state.justUpdate) {
+                        if (this.state.runTest) {
+                            this.setState({ justUpdate: false, runTest: false });
+                            this.props.testConnection(this.props.connection);
+                        } else {
+                            this.setState({ justUpdate: false });
+                        }
+                    } else {
+                        if (this.redirectUrl) {
+                            this.props.setIsDirty(false);
+                            setTimeout(() => {
+                                navigate(this.redirectUrl, { replace: false });
+                            }, 200);
                         }
                     }
                 }
-                if(this.props.fetchingConnection && prevProps.fetchingConnection === API_REQUEST_STATE.START && this.props.fetchingConnection === API_REQUEST_STATE.ERROR) {
-                    if(error) {
+
+                if (
+                    this.props.fetchingConnection &&
+                    prevProps.fetchingConnection === API_REQUEST_STATE.START &&
+                    this.props.fetchingConnection === API_REQUEST_STATE.ERROR
+                ) {
+                    if (error) {
                         navigate(this.redirectUrl, { replace: false });
                     }
                 }
-                if((this.props.fetchingConnection && prevProps.fetchingConnection === API_REQUEST_STATE.START && this.props.fetchingConnection === API_REQUEST_STATE.FINISH)
-                || (prevProps.connection === null && this.props.connection !== null)){
+
+                if (
+                    (this.props.fetchingConnection &&
+                        prevProps.fetchingConnection === API_REQUEST_STATE.START &&
+                        this.props.fetchingConnection === API_REQUEST_STATE.FINISH) ||
+                    (prevProps.connection === null && this.props.connection !== null)
+                ) {
                     this.isFetchedConnection = true;
-                    if(!this.isView) {
+
+                    if (!this.isView) {
                         this.type = 'update';
                         this.translationKey = this.type.toUpperCase();
                         this.isUpdate = this.type === 'update';
                         this.isAdd = this.type === 'add';
                         this.isView = this.type === 'view';
                     }
-                    const createdConnection = CConnection.createConnection({...this.props.connection, error});
+
+                    const createdConnection = CConnection.createConnection({
+                        ...this.props.connection,
+                        error
+                    });
+
                     this.setState({
                         connection: createdConnection,
                     });
+
                     this.props.setConnection(createdConnection);
+
                     if (createdConnection?.title) {
                         this.props.setEntityHeader(createdConnection.title);
                     }
                 }
             }
 
-            componentWillUnmount(){
+            componentWillUnmount() {
                 this.props.setCurrentConnection(null);
                 this.props.setFullScreen(false);
                 this.props.setConnection(null);
             }
 
-            setMode(mode, callback = null){
-                this.setState({mode}, callback);
+            setMode(mode, callback = null) {
+                this.setState({ mode }, callback);
             }
 
-            /**
-             * to clear validation message by name
-             */
-            clearValidationMessage(name){
+            clearValidationMessage(name) {
                 this.setValidationMessage(name, '');
             }
 
-            checkValidationRequest(propertyName, propertyWasChecked, checkingResult, validationMessage){
-                if(this.startDoingAction && this.startCheckingTitle && propertyWasChecked){
+            checkValidationRequest(propertyName, propertyWasChecked, checkingResult, validationMessage) {
+                if (this.startDoingAction && this.startCheckingTitle && propertyWasChecked) {
                     this.startCheckingTitle = false;
-                    if(checkingResult) {
+
+                    if (checkingResult) {
                         this.setState({
                             validationMessages: {
                                 ...this.state.validationMessages,
@@ -163,73 +192,86 @@ export function ConnectionForm(type) {
                             runTest: false,
                             justUpdate: false,
                         });
-                        setFocusById(`input_${propertyName}`)
+
+                        setFocusById(`input_${propertyName}`);
                         this.startDoingAction = false;
-                    } else{
+                    } else {
                         let isFreeToDoAction = true;
-                        for(let param in this.state.validationMessages){
-                            if(this.state.validationMessages[param] !== ''){
+                        for (let param in this.state.validationMessages) {
+                            if (this.state.validationMessages[param] !== '') {
                                 setFocusById(`input_${param}`);
                                 isFreeToDoAction = false;
                                 break;
                             }
                         }
-                        if(isFreeToDoAction){
-                            if(this.isNavigatingToScheduler){
+
+                        if (isFreeToDoAction) {
+                            if (this.isNavigatingToScheduler) {
                                 this.doAction(this.state.entity, this.redirectUrl, true);
-                            } else{
+                            } else {
                                 this.doAction(this.state.entity);
                             }
                         }
+
                         this.startDoingAction = false;
                     }
                 }
             }
 
-            setValidationMessage(name, value){
-                if(this.state.validationMessages.hasOwnProperty(name)) {
+            setValidationMessage(name, value) {
+                if (this.state.validationMessages.hasOwnProperty(name)) {
                     this.setState({
                         validationMessages: {
                             ...this.state.validationMessages,
                             [name]: value,
                         }
-                    })
+                    });
                 }
             }
 
-            /**
-             * to get items for connector menu
-             */
-            getConnectorMenuItems(){
-                const {connectors} = this.props;
+            getConnectorMenuItems() {
+                const { connectors } = this.props;
                 let result = [];
-                if(connectors) {
-                    connectors.map(connector => {
-                        result.push({label: connector.title, value: connector.connectorId});
+
+                if (connectors) {
+                    connectors.forEach((connector) => {
+                        result.push({ label: connector.title, value: connector.connectorId });
                     });
                 }
+
                 return result;
             }
 
-            getFirstConnectorFormSection(){
-                const {validationMessages} = this.state;
-                const {t, connectors} = this.props;
-                let connectorMenuItems = this.getConnectorMenuItems();
-                if(this.isUpdate || this.isView){
+            getFirstConnectorFormSection() {
+                const { validationMessages } = this.state;
+                const { t, connectors } = this.props;
+                const connectorMenuItems = this.getConnectorMenuItems();
+
+                if (this.isUpdate || this.isView) {
                     return {
                         ...INPUTS.CONNECTOR_READONLY,
                         label: t('UPDATE.FORM.CONNECTORS'),
-                        placeholders: [t('UPDATE.FORM.CHOSEN_CONNECTOR_FROM'), t('UPDATE.FORM.CHOSEN_CONNECTOR_TO')],
+                        placeholders: [
+                            t('UPDATE.FORM.CHOSEN_CONNECTOR_FROM'),
+                            t('UPDATE.FORM.CHOSEN_CONNECTOR_TO')
+                        ],
                         source: connectorMenuItems,
                         connectors,
                         readOnly: true,
                     };
                 }
+
                 return {
                     ...INPUTS.CONNECTOR,
-                    error: {fromConnector: validationMessages.fromConnector, toConnector: validationMessages.toConnector},
+                    error: {
+                        fromConnector: validationMessages.fromConnector,
+                        toConnector: validationMessages.toConnector
+                    },
                     label: t(`${this.translationKey}.FORM.CONNECTORS`),
-                    placeholders: [t(`${this.translationKey}.FORM.CONNECTORS_PLACEHOLDER_1`), t(`${this.translationKey}.FORM.CONNECTORS_PLACEHOLDER_2`)],
+                    placeholders: [
+                        t(`${this.translationKey}.FORM.CONNECTORS_PLACEHOLDER_1`),
+                        t(`${this.translationKey}.FORM.CONNECTORS_PLACEHOLDER_2`)
+                    ],
                     required: true,
                     source: connectorMenuItems,
                     callback: (a, b) => this.setMethods(a, b),
@@ -237,28 +279,40 @@ export function ConnectionForm(type) {
                 };
             }
 
-            getMethodsFormSection(){
-                const {t, connectors, checkingConnectionTitle} = this.props;
+            getMethodsFormSection() {
+                const { t, connectors, checkingConnectionTitle } = this.props;
+
                 const additionalButtonsProps = {
                     saveAndExit: {
-                        isLoading: !this.isNavigatingToScheduler && (this.props[this.actionName] === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START),
+                        isLoading: !this.isNavigatingToScheduler &&
+                            (this.props[this.actionName] === API_REQUEST_STATE.START ||
+                                checkingConnectionTitle === API_REQUEST_STATE.START),
                         onClick: (a) => this.doAction(a)
                     },
-                    saveAndGoToSchedule:{
-                        isLoading: this.isNavigatingToScheduler && (this.props[this.actionName] === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START),
+                    saveAndGoToSchedule: {
+                        isLoading: this.isNavigatingToScheduler &&
+                            (this.props[this.actionName] === API_REQUEST_STATE.START ||
+                                checkingConnectionTitle === API_REQUEST_STATE.START),
                         onClick: (a) => this.doActionAndGoToScheduler(a)
                     },
                 };
-                if(!this.isView) {
+
+                if (!this.isView) {
                     additionalButtonsProps.loadTemplate = {
                         data: this.getSecondFormSection().inputs[1]
                     };
                 }
+
                 return {
                     ...INPUTS.CONNECTION_SVG,
                     label: t(`${this.translationKey}.FORM.METHODS`),
-                    templateLabels: {addTemplate: t(`${this.translationKey}.FORM.ADD_TEMPLATE`), addTemplateTitle: t(`${this.translationKey}.FORM.ADD_TEMPLATE_TITLE`)},
-                    actions: {addTemplate: (a) => this.addTemplate(a)},
+                    templateLabels: {
+                        addTemplate: t(`${this.translationKey}.FORM.ADD_TEMPLATE`),
+                        addTemplateTitle: t(`${this.translationKey}.FORM.ADD_TEMPLATE_TITLE`)
+                    },
+                    actions: {
+                        addTemplate: (a) => this.addTemplate(a)
+                    },
                     source: Object.freeze(connectors),
                     readOnly: this.isView,
                     errors: this.state.validateLogicResult,
@@ -270,32 +324,34 @@ export function ConnectionForm(type) {
                 };
             }
 
-            /**
-             * to set methods state
-             */
-            setMethods(value, connectorType){
-                if(value !== '' && connectorType) {
-                    const {connection} = this.state;
+            setMethods(value, connectorType) {
+                if (value !== '' && connectorType) {
+                    const { connection } = this.state;
                     let connectorValidationMessage = {};
-                    if(connectorType === CONNECTOR_FROM){
+
+                    if (connectorType === CONNECTOR_FROM) {
                         connectorValidationMessage.fromConnector = '';
-                    } else{
+                    } else {
                         connectorValidationMessage.toConnector = '';
                     }
-                    let fromConnectorId = connection.fromConnector.id;
-                    let toConnectorId = connection.toConnector.id;
-                    if(connection.template.mode === TEMPLATE_MODE){
-                        this.props.fetchTemplates({from: fromConnectorId, to: toConnectorId});
+
+                    const fromConnectorId = connection.fromConnector.id;
+                    const toConnectorId = connection.toConnector.id;
+
+                    if (connection.template.mode === TEMPLATE_MODE) {
+                        this.props.fetchTemplates({ from: fromConnectorId, to: toConnectorId });
                     }
+
                     if (fromConnectorId !== 0 && toConnectorId !== 0) {
                         if (this.isAdd && this.props.entityIconKey !== 'add-connection-form-with-connectors') {
-                            this.props?.setEntityIconKey('add-connection-form-with-connectors')
+                            this.props?.setEntityIconKey('add-connection-form-with-connectors');
                         }
                     }
+
                     this.setState({
                         hasModeInputsSection: fromConnectorId !== 0 && toConnectorId !== 0,
                         hasMethodsInputsSection: fromConnectorId !== 0 && toConnectorId !== 0,
-                        validationMessages:{
+                        validationMessages: {
                             ...this.state.validationMessages,
                             template: '',
                             ...connectorValidationMessage,
@@ -305,110 +361,131 @@ export function ConnectionForm(type) {
                 }
             }
 
-
-            /**
-             * to validate methods and operators
-             */
             validateLogic(entity) {
                 const fromConnectorOperators = entity.fromConnector.operators;
                 const toConnectorOperators = entity.toConnector.operators;
-                const errors = {operators: {[CONNECTOR_FROM]: [], [CONNECTOR_TO]: []}, methods: {[CONNECTOR_FROM]: [], [CONNECTOR_TO]: []}};
+
+                const errors = {
+                    operators: { [CONNECTOR_FROM]: [], [CONNECTOR_TO]: [] },
+                    methods: { [CONNECTOR_FROM]: [], [CONNECTOR_TO]: [] }
+                };
+
                 const checkOperator = (connector, connectorType) => {
                     connector.forEach((operator) => {
-                        const condition = operator.condition;
                         let operatorErrors = [];
-                        /*if (operator.type === LOOP_OPERATOR) {
-                            if(!condition.leftStatement || !condition.leftStatement.color || !condition.leftStatement.field){
-                                if (!Webhook.isWebhookSnippet(condition.leftStatement.field)){
-                                    operatorErrors.push('Left Statement is missing');
-                                }
-                            }
-                        }*/
                         const uiTree = entity.ui?.operators.find(o => o.id === operator.uiId);
+
                         if (uiTree) {
                             const jsonToStringResult = jsonToString(uiTree, operator.type);
-                            if (jsonToStringResult.isNotValid){
+                            if (jsonToStringResult.isNotValid) {
                                 operatorErrors.push('Some data is undefined.');
                             }
-                        } else {
-                            //operatorErrors.push('Some data is missing.');
                         }
-                        if(operatorErrors.length > 0){
+
+                        if (operatorErrors.length > 0) {
                             errors.operators[connectorType].push({
                                 index: operator.index,
                                 errors: [],
-                            })
+                            });
                         }
-                    })
-                }
+                    });
+                };
+
                 const checkFieldBinding = () => {
                     entity.fieldBinding.forEach((binding) => {
                         let newError = '';
-                        if(binding.to){
-                            if(binding.to.length === 1){
-                                if(binding.enhancement.expertCode.split(CEnhancement.generateNotExistVar()).length > 1){
+
+                        if (binding.to) {
+                            if (binding.to.length === 1) {
+                                if (binding.enhancement.expertCode.split(CEnhancement.generateNotExistVar()).length > 1) {
                                     newError = `Such variable does not exist in the enhancement for the field: ${binding.to[0].field}.`;
                                 }
                             }
                         }
-                        if(newError){
+
+                        if (newError) {
                             const color = binding.to[0].color;
                             const index = entity.getMethodByColor(color).index;
                             const connectorType = entity.getConnectorByMethodColor(color).getConnectorType();
-                            let findIndex = errors.methods[connectorType].findIndex(e => e.index === index);
-                            if(findIndex === -1){
+                            const findIndex = errors.methods[connectorType].findIndex(e => e.index === index);
+
+                            if (findIndex === -1) {
                                 errors.methods[connectorType].push({
                                     index: entity.getMethodByColor(color).index,
                                     location: 'request.body.fields',
                                     errors: [newError],
-                                })
-                            } else{
+                                });
+                            } else {
                                 errors.methods[connectorType][findIndex].errors.push(newError);
                             }
                         }
-                    })
-                }
+                    });
+                };
+
                 checkOperator(fromConnectorOperators, CONNECTOR_FROM);
                 checkOperator(toConnectorOperators, CONNECTOR_TO);
                 checkFieldBinding();
-                const hasErrors = errors.operators[CONNECTOR_FROM].length > 0 || errors.operators[CONNECTOR_TO].length > 0 || errors.methods[CONNECTOR_FROM].length > 0 || errors.methods[CONNECTOR_TO].length > 0;
-                if(hasErrors) {
+
+                const hasErrors =
+                    errors.operators[CONNECTOR_FROM].length > 0 ||
+                    errors.operators[CONNECTOR_TO].length > 0 ||
+                    errors.methods[CONNECTOR_FROM].length > 0 ||
+                    errors.methods[CONNECTOR_TO].length > 0;
+
+                if (hasErrors) {
                     this.setState({
-                        validateLogicResult: {toggleFlag: !this.state.validateLogicResult.toggleFlag, ...errors},
-                    })
+                        validateLogicResult: {
+                            toggleFlag: !this.state.validateLogicResult.toggleFlag,
+                            ...errors
+                        },
+                    });
                 }
-                return {passed: !hasErrors, result: errors};
+
+                return { passed: !hasErrors, result: errors };
             }
 
-            /**
-             * to add template
-             */
-            addTemplate(template){
-                const {addTemplate} = this.props;
-                addTemplate({version: template.version, name: template.name, description: template.description, connection: template.entity.getObjectWithoutDataAggregator()});
+            addTemplate(template) {
+                const { addTemplate } = this.props;
+                addTemplate({
+                    version: template.version,
+                    name: template.name,
+                    description: template.description,
+                    connection: template.entity.getObjectWithoutDataAggregator()
+                });
             }
 
-            getSecondFormSection(){
-                const {hasModeInputsSection, validationMessages, hasMethodsInputsSection, mode} = this.state;
-                const {t, connectors, checkingConnectionTitle} = this.props;
-                let connectorMenuItems = this.getConnectorMenuItems();
+            getSecondFormSection() {
+                const { validationMessages, mode } = this.state;
+                const { t, connectors } = this.props;
+                const connectorMenuItems = this.getConnectorMenuItems();
+
                 return {
                     inputs: [
                         {
                             ...INPUTS.CONNECTOR_READONLY,
                             label: t(`${this.translationKey}.FORM.CONNECTORS`),
-                            placeholders: [t(`${this.translationKey}.FORM.CHOSEN_CONNECTOR_FROM`), t(`${this.translationKey}.FORM.CHOSEN_CONNECTOR_TO`)],
+                            placeholders: [
+                                t(`${this.translationKey}.FORM.CHOSEN_CONNECTOR_FROM`),
+                                t(`${this.translationKey}.FORM.CHOSEN_CONNECTOR_TO`)
+                            ],
                             source: connectorMenuItems,
                             connectors,
                             hasApiDocs: true,
                             readOnly: true,
-                            style: {margin: '0 65px'},
-                        },{
+                            style: { margin: '0 65px' },
+                        },
+                        {
                             ...INPUTS.MODE,
                             error: validationMessages.template,
                             label: t(`${this.translationKey}.FORM.MODE`),
-                            confirmationLabels:{title: t(`${this.translationKey}.CONFIRMATION.TITLE`), message: t(`${this.translationKey}.CONFIRMATION.MESSAGE`)},
-                            modeLabels: {expert: t(`${this.translationKey}.FORM.EXPERT_MODE`), template: t(`${this.translationKey}.FORM.TEMPLATE_MODE`)},
+                            confirmationLabels: {
+                                title: t(`${this.translationKey}.CONFIRMATION.TITLE`),
+                                message: t(`${this.translationKey}.CONFIRMATION.MESSAGE`)
+                            },
+                            modeLabels: {
+                                expert: t(`${this.translationKey}.FORM.EXPERT_MODE`),
+                                template: t(`${this.translationKey}.FORM.TEMPLATE_MODE`)
+                            },
                             required: true,
                             readOnly: false,
                             connectors: connectors,
@@ -417,56 +494,58 @@ export function ConnectionForm(type) {
                         },
                     ],
                     formClassName: styles.mode_form,
-                    hint: {text: t(`${this.translationKey}.FORM.HINT_2`)},
+                    hint: { text: t(`${this.translationKey}.FORM.HINT_2`) },
                     header: t(`${this.translationKey}.FORM.PAGE_2`),
                     visible: false,
-                }
+                };
             }
 
-            getThirdFormSection(){
-                const {hasMethodsInputsSection} = this.state;
-                const {t} = this.props;
-                let connectorMenuItems = this.getConnectorMenuItems();
+            getThirdFormSection() {
                 return {
                     inputs: [
                         this.getMethodsFormSection(),
                     ],
                     formClassName: styles.fullscreen_methods_form,
-                    hint: {text: t(`${this.translationKey}.FORM.HINT_3`)},
+                    hint: { text: '' },
                     header: '',
                     visible: true,
-                }
+                };
             }
 
-            justUpdate(entity){
+            justUpdate(entity) {
                 this.setState({
                     justUpdate: true,
-                })
-                this.do(entity)
+                });
+                this.do(entity);
                 this.redirectUrl = '';
             }
 
-            testConnection(entity){
+            testConnection(entity) {
                 this.setState({
                     runTest: true,
-                })
-                this.do(entity)
+                });
+                this.do(entity);
                 this.redirectUrl = '';
             }
 
-            do(entity){
-                const {validationMessages} = this.state;
+            do(entity) {
+                const { validationMessages } = this.state;
+
                 this.redirectUrl = '/connections';
                 this.startDoingAction = true;
-                let validationNames = Object.keys(validationMessages);
+
+                const validationNames = Object.keys(validationMessages);
                 let isValidationPassed = true;
                 let validations = {};
                 let firstValidationName = '';
-                for(let i = 0; i < validationNames.length; i++){
-                    if(typeof this[`validate${capitalize(validationNames[i])}`] === 'function') {
+
+                for (let i = 0; i < validationNames.length; i++) {
+                    if (typeof this[`validate${capitalize(validationNames[i])}`] === 'function') {
                         const result = this[`validate${capitalize(validationNames[i])}`](entity);
+
                         if (!result.value) {
                             validations[validationNames[i]] = result.message;
+
                             if (isValidationPassed) {
                                 isValidationPassed = false;
                                 firstValidationName = validationNames[i];
@@ -476,105 +555,154 @@ export function ConnectionForm(type) {
                         }
                     }
                 }
+
                 const logicValidation = this.validateLogic(entity);
                 isValidationPassed = isValidationPassed && logicValidation.passed;
-                if(isValidationPassed){
+
+                if (isValidationPassed) {
                     this.action(entity);
                     this.startDoingAction = false;
-                } else{
-                    const convertedObject = typeof entity.getObjectForBackend === 'function' ? entity.getObjectForBackend() : typeof entity.getObject === 'function' ? entity.getObject() : entity;
-                    const allValidations = {...validationMessages, ...validations};
+                } else {
+                    const convertedObject =
+                        typeof entity.getObjectForBackend === 'function'
+                            ? entity.getObjectForBackend()
+                            : typeof entity.getObject === 'function'
+                                ? entity.getObject()
+                                : entity;
+
+                    const allValidations = { ...validationMessages, ...validations };
                     let hasErrorMessage = false;
-                    for(let param in allValidations){
-                        if(allValidations[param] !== ''){
+
+                    for (let param in allValidations) {
+                        if (allValidations[param] !== '') {
                             hasErrorMessage = true;
                         }
                     }
+
                     let newState = {
                         validationMessages: allValidations,
                         entity: Object.assign({}, convertedObject),
-                        //validateLogicResult: {toggleFlag: !this.state.validateLogicResult.toggleFlag, ...logicValidation.result},
-                    }
-                    if(hasErrorMessage){
+                    };
+
+                    if (hasErrorMessage) {
                         newState.runTest = false;
                         newState.justUpdate = false;
                     }
+
                     this.setState(newState);
-                    if(firstValidationName !== ''){
-                        if(validations[firstValidationName] !== '') {
+
+                    if (firstValidationName !== '') {
+                        if (validations[firstValidationName] !== '') {
                             setFocusById(`input_${firstValidationName}`);
                         }
                     }
                 }
             }
 
-            action(entity){
+            action(entity) {
                 this.startAction = true;
-                if(this.isUpdate){
-                    this.props.updateConnection(typeof entity.getObjectForBackend === 'function' ? entity.getObjectForBackend() : entity);
+
+                if (this.isUpdate) {
+                    this.props.updateConnection(
+                        typeof entity.getObjectForBackend === 'function'
+                            ? entity.getObjectForBackend()
+                            : entity
+                    );
                 }
-                if(this.isAdd){
-                    this.props.addConnection(typeof entity.getObjectForBackend === 'function' ? entity.getObjectForBackend() : entity);
+
+                if (this.isAdd) {
+                    this.props.addConnection(
+                        typeof entity.getObjectForBackend === 'function'
+                            ? entity.getObjectForBackend()
+                            : entity
+                    );
                 }
             }
 
-            /**
-             * to add/update Connection
-             */
-            doAction(entity, redirectUrl, isNavigatingToScheduler = false){
+            doAction(entity, redirectUrl, isNavigatingToScheduler = false) {
                 this.isNavigatingToScheduler = isNavigatingToScheduler;
+
                 const storage = LocalStorage.getStorage();
                 storage.remove(`${entity.fromConnector.invoker.name}&${entity.toConnector.invoker.name}`);
-                this.do(entity)
-                if(redirectUrl)
+
+                this.do(entity);
+
+                if (redirectUrl) {
                     this.redirectUrl = redirectUrl;
+                }
             }
 
-            doActionAndGoToAddScheduler(entity){
+            doActionAndGoToAddScheduler(entity) {
                 this.doAction(entity, '/schedules/add', true);
             }
 
-            doActionAndGoToScheduler(entity){
+            doActionAndGoToScheduler(entity) {
                 this.doAction(entity, '/schedules', true);
             }
 
-            render(){
-                const {connection, forceUpdateConnection} = this.state;
-                const {t, checkingConnectionTitle} = this.props;
+            getContentTranslations() {
+                const { t } = this.props;
                 let contentTranslations = {};
 
                 contentTranslations.header = `${capitalize(this.translationKey.toLowerCase())} Connection`;
-                if(this.isView){
-                    contentTranslations.list_button = {title: t(`connections:VIEW.LIST_BUTTON`), link: this.redirectUrl};
-                } else{
-                    contentTranslations.cancel_button = {title: t(`app:FORM.CANCEL`), link: this.redirectUrl};
+
+                if (this.isView) {
+                    contentTranslations.list_button = {
+                        title: t(`connections:VIEW.LIST_BUTTON`),
+                        link: this.redirectUrl
+                    };
+                } else {
+                    contentTranslations.cancel_button = {
+                        title: t(`app:FORM.CANCEL`),
+                        link: this.redirectUrl
+                    };
                 }
+
+                return contentTranslations;
+            }
+
+            handleSetConnectionBeforeAdd(c) {
+                this.setState({
+                    forceUpdateConnection: true,
+                    connection: c
+                });
+
+                this.props.setConnection(c);
+                this.props.setEntityHeader(c?.title || 'Add Connection');
+            }
+
+            render() {
+                const { connection, forceUpdateConnection } = this.state;
+                const { checkingConnectionTitle } = this.props;
+
+                const contentTranslations = this.getContentTranslations();
+                const contents = [this.getThirdFormSection()];
 
                 return (
                     <>
                         <Form
                             shouldScroll={'methods'}
-                            contents={[this.getThirdFormSection()]}
+                            contents={contents}
                             translations={contentTranslations}
-                            isActionInProcess={!this.isNavigatingToScheduler && (this.props[this.actionName] === API_REQUEST_STATE.START || checkingConnectionTitle === API_REQUEST_STATE.START)}
+                            isActionInProcess={
+                                !this.isNavigatingToScheduler &&
+                                (
+                                    this.props[this.actionName] === API_REQUEST_STATE.START ||
+                                    checkingConnectionTitle === API_REQUEST_STATE.START
+                                )
+                            }
                             permissions={ConnectionPermissions}
-                            clearValidationMessage={(a) => this.clearValidationMessage(a)}
-                            action={(a) => {this.doAction(a)}}
+                            clearValidationMessage={this.handleClearValidationMessage}
+                            action={this.handleFormAction}
                             entity={connection}
                             type={this.type}
                             forceUpdateConnection={forceUpdateConnection}
                         />
+
                         <SetConnectionBeforeAdd
                             isOpenedInit={this.isAdd && !connection.title}
                             connection={connection}
-                            onSet={(c) => {
-                                this.setState({
-                                    forceUpdateConnection: true,
-                                    connection: c
-                                });
-                                this.props.setConnection(c);
-                                this.props.setEntityHeader(c?.title || 'Add Connection');
-                            }}
+                            onSet={this.handleSetConnectionBeforeAdd}
                         />
                     </>
                 );
