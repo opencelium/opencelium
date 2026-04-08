@@ -59,12 +59,16 @@ const PANEL_MARGIN_RECT = 1;
  * Connector class for manipulating data in the Connector Component
  * also it is a part of Connection Component
  */
+
+const connectorInstanceCache = new WeakMap();
+
 export default class CConnectorItem{
 
     constructor(
         connectorId = 0, title = '', icon, invoker = null, methods = [], operators = [],
         connectorType = '', shiftXForSvgItems = 0, currentItemIndex = '', svgItems = [], arrows = [], sslCert = false,
-        connection = null){
+        connection = null
+    ){
         this._id = isId(connectorId) ? connectorId : 0;
         this._connection = connection;
         this._title = title === '' ? 'Please, choose connector' : title;
@@ -74,9 +78,19 @@ export default class CConnectorItem{
         this._shiftXForSvgItems = shiftXForSvgItems;
         this._methods = this.convertMethods(methods);
         this._operators = this.convertOperators(operators);
-        this._currentItem = currentItemIndex !== '' ? this.getItemByIndex(currentItemIndex) : null;
         this._svgItems = svgItems;
         this._arrows = arrows;
+
+        this._methodsByIndex = new Map();
+        this._operatorsByIndex = new Map();
+        this._methodsByColor = new Map();
+        this._itemsByIndex = new Map();
+        this._svgItemsByIndex = new Map();
+        this._sortedItems = [];
+
+        this.rebuildRuntimeCaches();
+
+        this._currentItem = currentItemIndex !== '' ? this.getItemByIndex(currentItemIndex) : null;
         this._pagination = this.setConnectorPagination();
         this._currentProgress = this.getCurrentProgress();
         this._operatorsHistory = [];
@@ -85,19 +99,76 @@ export default class CConnectorItem{
     }
 
     static createConnectorItem(connectorItem, connection){
-        let connectorId = connectorItem && connectorItem.hasOwnProperty('connectorId') ? connectorItem.connectorId : 0;
-        let title = connectorItem && connectorItem.hasOwnProperty('title') ? connectorItem.title : '';
-        let icon = connectorItem && connectorItem.hasOwnProperty('icon') ? connectorItem.icon : '';
-        let invoker = connectorItem && connectorItem.hasOwnProperty('invoker') ? connectorItem.invoker : null;
-        let methods = connectorItem && connectorItem.hasOwnProperty('methods') ? connectorItem.methods : [];
-        let operators = connectorItem && connectorItem.hasOwnProperty('operators') ? connectorItem.operators : [];
-        let connectorType = connectorItem && connectorItem.hasOwnProperty('connectorType') ? connectorItem.connectorType : '';
-        let shiftXForSvgItems = connectorItem && connectorItem.hasOwnProperty('shiftXForSvgItems') ? connectorItem.shiftXForSvgItems : 0;
-        let currentItemIndex = connectorItem && connectorItem.hasOwnProperty('currentItemIndex') ? connectorItem.currentItemIndex : '';
-        let svgItems = connectorItem && connectorItem.hasOwnProperty('svgItems') ? connectorItem.svgItems : [];
-        let arrows = connectorItem && connectorItem.hasOwnProperty('arrows') ? connectorItem.arrows : [];
-        let sslCert = connectorItem && connectorItem.hasOwnProperty('sslCert') ? connectorItem.sslCert : false;
-        return new CConnectorItem(connectorId, title, icon, invoker, methods, operators, connectorType, shiftXForSvgItems, currentItemIndex, svgItems, arrows, sslCert, connection);
+        if (!connectorItem) {
+            return new CConnectorItem(0, '', '', null, [], [], '', 0, '', [], [], false, connection);
+        }
+
+        if (connectorItem instanceof CConnectorItem) {
+            return connectorItem;
+        }
+
+        const cached = connectorInstanceCache.get(connectorItem);
+        if (cached && cached.connection === connection) {
+            return cached.instance;
+        }
+
+        const connectorId = connectorItem && connectorItem.hasOwnProperty('connectorId') ? connectorItem.connectorId : 0;
+        const title = connectorItem && connectorItem.hasOwnProperty('title') ? connectorItem.title : '';
+        const icon = connectorItem && connectorItem.hasOwnProperty('icon') ? connectorItem.icon : '';
+        const invoker = connectorItem && connectorItem.hasOwnProperty('invoker') ? connectorItem.invoker : null;
+        const methods = connectorItem && connectorItem.hasOwnProperty('methods') ? connectorItem.methods : [];
+        const operators = connectorItem && connectorItem.hasOwnProperty('operators') ? connectorItem.operators : [];
+        const connectorType = connectorItem && connectorItem.hasOwnProperty('connectorType') ? connectorItem.connectorType : '';
+        const shiftXForSvgItems = connectorItem && connectorItem.hasOwnProperty('shiftXForSvgItems') ? connectorItem.shiftXForSvgItems : 0;
+        const currentItemIndex = connectorItem && connectorItem.hasOwnProperty('currentItemIndex') ? connectorItem.currentItemIndex : '';
+        const svgItems = connectorItem && connectorItem.hasOwnProperty('svgItems') ? connectorItem.svgItems : [];
+        const arrows = connectorItem && connectorItem.hasOwnProperty('arrows') ? connectorItem.arrows : [];
+        const sslCert = connectorItem && connectorItem.hasOwnProperty('sslCert') ? connectorItem.sslCert : false;
+
+        const instance = new CConnectorItem(
+            connectorId,
+            title,
+            icon,
+            invoker,
+            methods,
+            operators,
+            connectorType,
+            shiftXForSvgItems,
+            currentItemIndex,
+            svgItems,
+            arrows,
+            sslCert,
+            connection
+        );
+
+        connectorInstanceCache.set(connectorItem, {
+            connection,
+            instance,
+        });
+
+        return instance;
+    }
+
+    rebuildRuntimeCaches(){
+        this._methodsByIndex = new Map();
+        this._operatorsByIndex = new Map();
+        this._methodsByColor = new Map();
+        this._itemsByIndex = new Map();
+
+        for(let i = 0; i < this._methods.length; i++){
+            const method = this._methods[i];
+            this._methodsByIndex.set(method.index, method);
+            this._methodsByColor.set(method.color, method);
+            this._itemsByIndex.set(method.index, method);
+        }
+
+        for(let i = 0; i < this._operators.length; i++){
+            const operator = this._operators[i];
+            this._operatorsByIndex.set(operator.index, operator);
+            this._itemsByIndex.set(operator.index, operator);
+        }
+
+        this._sortedItems = sortByIndex([...this._methods, ...this._operators]);
     }
 
     static hasIcon(icon){
@@ -174,7 +245,7 @@ export default class CConnectorItem{
     }
 
     getSvgElementByIndex(index){
-        return this._svgItems.find(svgItem => svgItem.entity.index === index);
+        return this._svgItemsByIndex.get(index) || null;
     }
 
     setErrorsForOperators(errors){
@@ -520,36 +591,56 @@ export default class CConnectorItem{
     }
 
     setSvgItems(){
-        this._svgItems = [];
-        this._arrows = [];
-        let items = [...this.methods, ...this.operators];
-        items = sortByIndex(items);
+        this.rebuildRuntimeCaches();
+
+        const svgItems = [];
+        const arrows = [];
+        const svgItemsByIndex = new Map();
+
         let xIterator = 0;
-        for(let i = 0; i < items.length; i++){
-            let svgElement = {};
-            svgElement.name = items[i].name ? items[i].name : '';
-            svgElement.label = items[i].label ? items[i].label : '';
-            svgElement.entity = items[i];
-            if(items[i].type) {
-                svgElement.type = items[i].type;
-            }
-            let currentSplitIndex = items[i].index.split('_');
+
+        for(let i = 0; i < this._sortedItems.length; i++){
+            const item = this._sortedItems[i];
+            const currentSplitIndex = item.index.split('_');
+
             if(currentSplitIndex[currentSplitIndex.length - 1] !== '0'){
                 xIterator += 200;
             }
-            svgElement.x = xIterator + this._shiftXForSvgItems;
-            svgElement.y = 150 * (currentSplitIndex.length - 1);
-            svgElement.connectorType = this.getConnectorType();
-            if(items[i].type && items.length !== 1){
-                svgElement.x += 35;
-                svgElement.y += 10;
+
+            const svgElement = {
+                name: item.name ? item.name : '',
+                label: item.label ? item.label : '',
+                entity: item,
+                x: xIterator + this._shiftXForSvgItems,
+                y: 150 * (currentSplitIndex.length - 1),
+                connectorType: this.getConnectorType(),
+                id: `${this.getConnectorType()}_${item.index}`,
+            };
+
+            if(item.type){
+                svgElement.type = item.type;
+                if(this._sortedItems.length !== 1){
+                    svgElement.x += 35;
+                    svgElement.y += 10;
+                }
             }
-            svgElement.id = `${this.getConnectorType()}_${items[i].index}`;
-            this._svgItems.push(CConnectorItem.getSvgElement(svgElement));
-            if(items[i].index !== '0') {
-                this.arrows.push({from: `${this.getConnectorType()}_${this.getPrevIndex(items[i].index)}`, to: `${this.getConnectorType()}_${items[i].index}`});
+
+            const technicalElement = CConnectorItem.getSvgElement(svgElement);
+
+            svgItems.push(technicalElement);
+            svgItemsByIndex.set(item.index, technicalElement);
+
+            if(item.index !== '0'){
+                arrows.push({
+                    from: `${this.getConnectorType()}_${this.getPrevIndex(item.index)}`,
+                    to: `${this.getConnectorType()}_${item.index}`,
+                });
             }
         }
+
+        this._svgItems = svgItems;
+        this._svgItemsByIndex = svgItemsByIndex;
+        this._arrows = arrows;
     }
 
     getNextSiblings(item){
@@ -685,11 +776,7 @@ export default class CConnectorItem{
     }
 
     getMethodByColor(color){
-        let method = this._methods.find(m => m.color === color);
-        if(method){
-            return method;
-        }
-        return null;
+        return this._methodsByColor.get(color) || null;
     }
 
     checkConnectorType(connectorType){
@@ -714,12 +801,11 @@ export default class CConnectorItem{
     }
 
     convertMethods(methods){
-        let result = [];
+        const result = new Array(methods.length);
         for(let i = 0; i < methods.length; i++){
-            result.push(this.convertMethod(methods[i]));
+            result[i] = this.convertMethod(methods[i]);
         }
-        result = sortByIndex(result);
-        return result;
+        return sortByIndex(result);
     }
 
     convertOperator(operator){
@@ -730,12 +816,11 @@ export default class CConnectorItem{
     }
 
     convertOperators(operators){
-        let result = [];
+        const result = new Array(operators.length);
         for(let i = 0; i < operators.length; i++){
-            result.push(this.convertOperator(operators[i]));
+            result[i] = this.convertOperator(operators[i]);
         }
-        result = sortByIndex(result);
-        return result;
+        return sortByIndex(result);
     }
 
     setConnectorPagination(){
@@ -1306,42 +1391,33 @@ export default class CConnectorItem{
         if(!operator){
             return null;
         }
-        let items = [...this.methods, ...this.operators];
-        let nextOperatorIndex = `${operator.index}_0`;
-        let nextItem = items.find(item => item.index === nextOperatorIndex);
-        return nextItem || null;
+
+        return this.getItemByIndex(`${operator.index}_0`);
     }
 
     getNextOutsideItem(item){
         if(!item){
             return null;
         }
-        let items = [...this.methods, ...this.operators];
-        let indexPath = item.index.split('_');
+
+        const indexPath = item.index.split('_');
         if(indexPath.length >= 1){
             indexPath[indexPath.length - 1] = parseInt(indexPath[indexPath.length - 1]) + 1;
         }
-        let nextOperatorIndex = indexPath.join('_');
-        let nextItem = items.find(item => item.index === nextOperatorIndex);
-        return nextItem || null;
+
+        return this.getItemByIndex(indexPath.join('_'));
     }
 
     getItemByIndex(index){
-        const method = this.getMethodByIndex(index);
-        if(method === null){
-            return this.getOperatorByIndex(index);
-        }
-        return method;
+        return this._itemsByIndex.get(index) || null;
     }
 
     getMethodByIndex(index){
-        let method = this._methods.find(m => m.index === index);
-        return method ? method : null;
+        return this._methodsByIndex.get(index) || null;
     }
 
     getOperatorByIndex(index){
-        let operator = this._operators.find(o => o.index === index);
-        return operator ? operator : null;
+        return this._operatorsByIndex.get(index) || null;
     }
 
     getPreviousLoopOperators(item = null){

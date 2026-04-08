@@ -478,34 +478,33 @@ public class ConnectionServiceImp implements ConnectionService {
             if (Utils.compare(ocProps.getVersion(), connection.getOcVersion()) > 0 && !isTestConnection(connection.getTitle())) {
 
                 List<ConnectionMng> connections = connectionMngService.getAllByConnectionId(connection.getId());
-                ConnectionMng connectionMng;
                 if (connections.isEmpty()) {
                     log.error("Failed to find Connection[id={}, name={}] on MongoDB. Skipped updating", connection.getId(), connection.getTitle());
                     continue;
-                } else if (connections.size() > 1) {
-                    log.error("{} instances found for Connection[id={}, name={}] on MongoDB. Skipped updating", connections.size(), connection.getId(), connection.getTitle());
-                    continue;
-                } else {
-                    connectionMng = connections.get(0);
                 }
 
                 try {
-                    connectionMngEntityUpdater.updateToCurrentVersion(connectionMng);
+                    for (ConnectionMng connectionMng : connections) {
+                        connectionMngEntityUpdater.updateToCurrentVersion(connectionMng);
+                        connectionMng.setVersion(ocProps.getVersion());
 
-                    log.info("Connection[id={}, name={}, version={}] successfully updated to {} version", connection.getId(), connection.getTitle(), connection.getOcVersion(), connectionMng.getVersion());
+                        if (connectionMng.getCreatedBy() == null) {
+                            connectionMng.setCreatedBy(connection.getCreatedBy());
+                        }
+                        connectionMngService.save(connectionMng);
+                    }
+
+                    log.info("Connection[id={}, name={}, version={}] successfully updated to {} version", connection.getId(), connection.getTitle(), connection.getOcVersion(), ocProps.getVersion());
                 } catch (Exception e) {
                     log.error("Failed to update Connection[id={}, name={}, version={}]", connection.getId(), connection.getTitle(), connection.getOcVersion(), e);
                     continue;
                 }
 
-                if (connectionMng.getCreatedBy() == null) {
-                    connectionMng.setCreatedBy(connection.getCreatedBy());
-                }
-                connectionMngService.save(connectionMng);
-
                 if (connection.getSnapshotId() == null) {
-                    connection.setSnapshotId(connectionMng.getId());
+                    ConnectionMng lastConnection = connections.stream().max(Comparator.comparing(ConnectionMng::getCreatedAt)).get();
+                    connection.setSnapshotId(lastConnection.getId());
                 }
+
                 connection.setOcVersion(ocProps.getVersion());
                 connectionRepository.save(connection);
             }

@@ -31,12 +31,10 @@ import IfOperator from "./IfOperator";
 import LoopOperator from "./LoopOperator";
 import TooltipFontIcon from "@entity/connection/components/components/general/basic_components/tooltips/TooltipFontIcon";
 
-
 /**
  * Operator Item Component
  */
 class OperatorItem extends Component{
-
     constructor(props){
         super(props);
 
@@ -48,49 +46,90 @@ class OperatorItem extends Component{
             isHidden: false,
             deletingOperator: false,
         };
+
         this.isDisabledMouse = false;
+        this.hideTimeout = null;
+
+        this.handleUpdateEntity = this.updateEntity.bind(this);
+        this.handleToggleDeleteOperator = this.toggleDeleteOperator.bind(this);
+        this.handleToggleIsVisibleMenuEdit = this.toggleIsVisibleMenuEdit.bind(this);
+        this.handleToggleItem = this.toggleItem.bind(this);
+        this.handleShowDeleteButton = this.showDeleteButton.bind(this);
+        this.handleHideDeleteButton = this.hideDeleteButton.bind(this);
+        this.handleSetCurrentItem = this.setCurrentItem.bind(this);
+        this.handleRemoveOperator = this.removeOperator.bind(this);
+        this.handleToggleDisableMouse = this.toggleDisableMouse.bind(this);
+    }
+
+    shouldComponentUpdate(nextProps, nextState){
+        return (
+            nextProps.connection !== this.props.connection ||
+            nextProps.connector !== this.props.connector ||
+            nextProps.operator !== this.props.operator ||
+            nextProps.readOnly !== this.props.readOnly ||
+            nextProps.index !== this.props.index ||
+            nextState.hasDeleteButton !== this.state.hasDeleteButton ||
+            nextState.isVisibleMenuEdit !== this.state.isVisibleMenuEdit ||
+            nextState.isToggled !== this.state.isToggled ||
+            nextState.operatorClassName !== this.state.operatorClassName ||
+            nextState.isHidden !== this.state.isHidden ||
+            nextState.deletingOperator !== this.state.deletingOperator
+        );
     }
 
     componentDidUpdate(prevProps, prevState){
-        let {isHidden, deletingOperator} = this.state;
-        let operatorClassName = '';
         const curOperator = this.props.operator;
-        if(deletingOperator && this.state.operatorClassName !== styles.item_toggle_out){
-            operatorClassName = styles.item_toggle_out;
-            this.setState({
-                operatorClassName,
-            });
-            return;
-        }
-        if(curOperator.isToggled){
-            operatorClassName = styles.item_toggle_out;
-            isHidden = true;
-        } else{
-            operatorClassName = styles.item_toggle_in;
-            isHidden = false;
-        }
-        if(operatorClassName !== prevState.operatorClassName) {
-            if(isHidden !== prevState.isHidden){
-                this.setState({
-                    //operatorClassName,
-                    isHidden,
-                });
+        const nextState = {};
+
+        if (this.state.deletingOperator) {
+            if (this.state.operatorClassName !== styles.item_toggle_out) {
+                nextState.operatorClassName = styles.item_toggle_out;
+            }
+        } else {
+            const nextOperatorClassName = curOperator.isToggled
+                ? styles.item_toggle_out
+                : styles.item_toggle_in;
+            const nextIsHidden = !!curOperator.isToggled;
+
+            if (nextOperatorClassName !== this.state.operatorClassName) {
+                nextState.operatorClassName = nextOperatorClassName;
+            }
+
+            if (nextIsHidden !== this.state.isHidden) {
+                if (this.hideTimeout) {
+                    clearTimeout(this.hideTimeout);
+                    this.hideTimeout = null;
+                }
+
+                this.hideTimeout = setTimeout(() => {
+                    this.setState({isHidden: nextIsHidden});
+                    this.hideTimeout = null;
+                }, 300);
             }
         }
-        if(isHidden !== prevState.isHidden){
-            let that = this;
-            setTimeout(() => that.setState({isHidden}), 300);
+
+        if (Object.keys(nextState).length > 0) {
+            this.setState(nextState);
+        }
+    }
+
+    componentWillUnmount() {
+        if (this.hideTimeout) {
+            clearTimeout(this.hideTimeout);
+            this.hideTimeout = null;
         }
     }
 
     toggleDeleteOperator(){
         const {isToggled} = this.state;
         const {connector, operator, updateEntity} = this.props;
+
         connector.toggleByItem(operator, !isToggled);
         updateEntity();
-        this.setState({
-            deletingOperator: !this.state.deletingOperator,
-        });
+
+        this.setState((prevState) => ({
+            deletingOperator: !prevState.deletingOperator,
+        }));
     }
 
     /**
@@ -98,7 +137,9 @@ class OperatorItem extends Component{
      */
     toggleIsVisibleMenuEdit(){
         this.setCurrentItem();
-        this.setState({isVisibleMenuEdit: !this.state.isVisibleMenuEdit});
+        this.setState((prevState) => ({
+            isVisibleMenuEdit: !prevState.isVisibleMenuEdit,
+        }));
     }
 
     /**
@@ -113,7 +154,7 @@ class OperatorItem extends Component{
      */
     showDeleteButton(){
         const {readOnly} = this.props;
-        if(!this.isDisabledMouse && !readOnly) {
+        if(!this.isDisabledMouse && !readOnly && !this.state.hasDeleteButton) {
             this.setState({
                 hasDeleteButton: true,
             });
@@ -124,7 +165,7 @@ class OperatorItem extends Component{
      * to hide delete button
      */
     hideDeleteButton(){
-        if(!this.isDisabledMouse) {
+        if(!this.isDisabledMouse && this.state.hasDeleteButton) {
             this.setState({
                 hasDeleteButton: false,
             });
@@ -136,7 +177,8 @@ class OperatorItem extends Component{
      */
     removeOperator(){
         const {connection, connector, operator, updateEntity} = this.props;
-        let connectorType = connector.getConnectorType();
+        const connectorType = connector.getConnectorType();
+
         switch (connectorType){
             case CONNECTOR_FROM:
                 connection.removeFromConnectorOperator(operator);
@@ -145,6 +187,7 @@ class OperatorItem extends Component{
                 connection.removeToConnectorOperator(operator);
                 break;
         }
+
         updateEntity();
     }
 
@@ -165,62 +208,78 @@ class OperatorItem extends Component{
 
     isCurrentItem(){
         const {connector, operator} = this.props;
-        return connector.getCurrentItem() && operator ? connector.getCurrentItem().index === operator.index : false;
+        const currentItem = connector.getCurrentItem();
+        return currentItem && operator ? currentItem.index === operator.index : false;
     }
 
     toggleItem(){
         const {isToggled} = this.state;
         const {connector, operator, updateEntity} = this.props;
+
         connector.toggleByItem(operator, !isToggled);
         connector.setCurrentItem(operator);
         updateEntity();
-        this.setState({isToggled: !isToggled});
+
+        this.setState((prevState) => ({
+            isToggled: !prevState.isToggled,
+        }));
     }
 
     renderOperatorType(){
         const {isVisibleMenuEdit} = this.state;
         const {connection, connector, operator, readOnly} = this.props;
+        const intend = `${operator.intend * 20}px`;
+
         switch (operator.type){
             case IF_OPERATOR:
-                return <IfOperator
-                    tooltip={'if'}
-                    readOnly={readOnly}
-                    connection={connection}
-                    connector={connector}
-                    operator={operator}
-                    updateEntity={(a) => this.updateEntity(a)}
-                    isVisibleMenuEdit={isVisibleMenuEdit}
-                    toggleIsVisibleMenuEdit={(a) => this.toggleIsVisibleMenuEdit(a)}
-                    renderCloseMenuEditButton={(a) => this.renderCloseMenuEditButton(a)}
-                    intend={`${operator.intend * 20}px`}
-                />;
+                return (
+                    <IfOperator
+                        tooltip={'if'}
+                        readOnly={readOnly}
+                        connection={connection}
+                        connector={connector}
+                        operator={operator}
+                        updateEntity={this.handleUpdateEntity}
+                        isVisibleMenuEdit={isVisibleMenuEdit}
+                        toggleIsVisibleMenuEdit={this.handleToggleIsVisibleMenuEdit}
+                        renderCloseMenuEditButton={this.renderCloseMenuEditButton.bind(this)}
+                        intend={intend}
+                    />
+                );
+
             case LOOP_OPERATOR:
-                return <LoopOperator
-                    tooltip={'loop'}
-                    readOnly={readOnly}
-                    connection={connection}
-                    connector={connector}
-                    operator={operator}
-                    updateEntity={(a) => this.updateEntity(a)}
-                    isVisibleMenuEdit={isVisibleMenuEdit}
-                    toggleIsVisibleMenuEdit={(a) => this.toggleIsVisibleMenuEdit(a)}
-                    renderCloseMenuEditButton={(a) => this.renderCloseMenuEditButton(a)}
-                    intend={`${operator.intend * 20}px`}
-                />;
+                return (
+                    <LoopOperator
+                        tooltip={'loop'}
+                        readOnly={readOnly}
+                        connection={connection}
+                        connector={connector}
+                        operator={operator}
+                        updateEntity={this.handleUpdateEntity}
+                        isVisibleMenuEdit={isVisibleMenuEdit}
+                        toggleIsVisibleMenuEdit={this.handleToggleIsVisibleMenuEdit}
+                        renderCloseMenuEditButton={this.renderCloseMenuEditButton.bind(this)}
+                        intend={intend}
+                    />
+                );
+
+            default:
+                return null;
         }
-        return null;
     }
 
     renderDeleteIcon(){
         const {hasDeleteButton, isVisibleMenuEdit} = this.state;
+
         if((!hasDeleteButton && !this.isCurrentItem()) || isVisibleMenuEdit){
             return null;
         }
+
         return(
             <DeleteIcon
-                toggleDeleteOperator={() => this.toggleDeleteOperator()}
-                removeOperator={() => this.removeOperator()}
-                disableMouseForOperator={() => this.toggleDisableMouse()}
+                toggleDeleteOperator={this.handleToggleDeleteOperator}
+                removeOperator={this.handleRemoveOperator}
+                disableMouseForOperator={this.handleToggleDisableMouse}
             />
         );
     }
@@ -233,7 +292,7 @@ class OperatorItem extends Component{
                 className={styles.operator_close_menu_edit}
                 value={'check_circle_outline'}
                 tooltip={'Apply'}
-                onClick={() => this.toggleIsVisibleMenuEdit()}
+                onClick={this.handleToggleIsVisibleMenuEdit}
             />
         );
     }
@@ -241,17 +300,22 @@ class OperatorItem extends Component{
     renderTogglePanel(){
         const {deletingOperator} = this.state;
         const {connector, operator} = this.props;
-        let hasChildren = connector.hasItemChildren(operator);
+        const hasChildren = connector.hasItemChildren(operator);
+
         if(!hasChildren){
             return null;
         }
-        let togglePanelStyles = {};
+
         const intend = `${operator.intend * 20}px`;
-        togglePanelStyles.marginLeft = intend;
+        const togglePanelStyles = {
+            marginLeft: intend,
+        };
+
         if(operator.isMinimized && !deletingOperator) {
             togglePanelStyles.left = `calc(50% - ${intend})`;
             togglePanelStyles.bottom = '-26px';
         }
+
         return(
             <div className={styles.toggle_panel} style={togglePanelStyles}>
                 {this.renderToggleIcon()}
@@ -263,44 +327,59 @@ class OperatorItem extends Component{
     renderToggleIcon(){
         const {hasDeleteButton, isVisibleMenuEdit} = this.state;
         const {operator} = this.props;
+
         if((!hasDeleteButton && !this.isCurrentItem()) || isVisibleMenuEdit || operator.isMinimized){
             return null;
         }
-        let value = 'vertical_align_top';
-        let tooltip = 'Minimize';
-        let fontIconStyles = {};
+
         return(
-            <TooltipFontIcon value={value} tooltip={tooltip} className={styles.toggle_icon} style={fontIconStyles} onClick={() => this.toggleItem()}/>
+            <TooltipFontIcon
+                value={'vertical_align_top'}
+                tooltip={'Minimize'}
+                className={styles.toggle_icon}
+                style={{}}
+                onClick={this.handleToggleItem}
+            />
         );
     }
 
     renderMoreIcon(){
         const {deletingOperator} = this.state;
         const {operator} = this.props;
+
         if(!operator.isMinimized || deletingOperator){
             return null;
         }
+
         return(
-            <TooltipFontIcon value={'more_horiz'} tooltip={'Maximize'} className={styles.more_icon} onClick={() => this.toggleItem()}/>
+            <TooltipFontIcon
+                value={'more_horiz'}
+                tooltip={'Maximize'}
+                className={styles.more_icon}
+                onClick={this.handleToggleItem}
+            />
         );
     }
 
     render(){
         const {operatorClassName, isHidden} = this.state;
         const {connector, operator, index} = this.props;
+
         if(isHidden){
             return null;
         }
+
         if(operator.isToggled){
             return null;
         }
+
         return (
             <div
                 id={`${operator.index}__${connector.getConnectorType()}`}
                 className={`${styles.operator} ${operatorClassName}`}
                 style={{zIndex: 99 - index, textAlign: 'left'}}
-                onMouseEnter={(a) => this.showDeleteButton(a)}
-                onMouseLeave={(a) => this.hideDeleteButton(a)}
+                onMouseEnter={this.handleShowDeleteButton}
+                onMouseLeave={this.handleHideDeleteButton}
             >
                 {this.renderOperatorType()}
                 {this.renderDeleteIcon()}

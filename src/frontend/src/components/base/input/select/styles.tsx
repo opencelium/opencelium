@@ -50,7 +50,7 @@ const OptionsStyled = styled.div<OptionsStyledProps & {isToggled: boolean} | HTM
     height: ${({height}) => `${height}px` || 0};
     max-height: 200px;
     overflow-x: auto;
-    overflow-y: ${({height}) => height > '200' ? `auto` : 'hidden'};
+    overflow-y: ${({height}) => `auto`};
     margin-left: ${({hasIcon, isIconInside, theme}) => !hasIcon || isIconInside ? 0 : theme.input.iconInputDistance};
     width: ${({width, isIconInside, hasIcon, theme}) => width || isIconInside || !hasIcon ? '100%' : `calc(100% - ${theme.input.iconInputDistance})`};
     background-color: #fff;

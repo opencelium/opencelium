@@ -22,22 +22,56 @@ export const COLOR_MODE = {
 
 export default class CSvg{
 
-    static setViewBox(elementId, viewBox = {x: 0, y: 0, width: 0, height: 0}){
+    static setViewBox(elementId, viewBox = {}) {
         const svgElement = document.getElementById(elementId);
-        if(svgElement) {
-            if (svgElement.viewBox.baseVal === null) {
-                viewBox = {x: 0, y: 0, width: 0, height: 0, ...viewBox};
-                svgElement.setAttribute("viewBox", `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
-            } else {
-                if(viewBox.x && svgElement.viewBox.baseVal.x !== viewBox.x) svgElement.viewBox.baseVal.x = viewBox.x;
-                if(viewBox.y && svgElement.viewBox.baseVal.y !== viewBox.y) svgElement.viewBox.baseVal.y = viewBox.y;
-                if(viewBox.width && svgElement.viewBox.baseVal.width !== viewBox.width) svgElement.viewBox.baseVal.width = viewBox.width;
-                if(viewBox.height && svgElement.viewBox.baseVal.height !== viewBox.height) svgElement.viewBox.baseVal.height = viewBox.height;
-            }
+
+        if (!svgElement) {
+            return;
+        }
+
+        if (svgElement.viewBox.baseVal === null) {
+            const normalizedViewBox = {
+                x: 0,
+                y: 0,
+                width: 0,
+                height: 0,
+                ...viewBox,
+            };
+
+            svgElement.setAttribute(
+                'viewBox',
+                `${normalizedViewBox.x} ${normalizedViewBox.y} ${normalizedViewBox.width} ${normalizedViewBox.height}`
+            );
+
+            return;
+        }
+
+        if (typeof viewBox.x === 'number' && svgElement.viewBox.baseVal.x !== viewBox.x) {
+            svgElement.viewBox.baseVal.x = viewBox.x;
+        }
+
+        if (typeof viewBox.y === 'number' && svgElement.viewBox.baseVal.y !== viewBox.y) {
+            svgElement.viewBox.baseVal.y = viewBox.y;
+        }
+
+        if (
+            typeof viewBox.width === 'number' &&
+            viewBox.width > 0 &&
+            svgElement.viewBox.baseVal.width !== viewBox.width
+        ) {
+            svgElement.viewBox.baseVal.width = viewBox.width;
+        }
+
+        if (
+            typeof viewBox.height === 'number' &&
+            viewBox.height > 0 &&
+            svgElement.viewBox.baseVal.height !== viewBox.height
+        ) {
+            svgElement.viewBox.baseVal.height = viewBox.height;
         }
     }
 
-    static getMousePosition(event, element){
+    static getMousePosition(event, element) {
         const CTM = element.getScreenCTM();
         return {
             x: (event.clientX - CTM.e) / CTM.a,
@@ -45,12 +79,12 @@ export default class CSvg{
         };
     }
 
-    static resizeSVG(layoutId, svgId){
+    static resizeSVG(layoutId, svgId) {
         const layout = document.getElementById(layoutId);
-        if(layout) {
+        if (layout) {
             const width = layout.offsetWidth;
             const height = layout.offsetHeight;
-            CSvg.setViewBox(svgId, {width: width + 300, height: height + 300});
+            CSvg.setViewBox(svgId, { width: width + 300, height: height + 300 });
         }
     }
 }

@@ -61,6 +61,7 @@ const SyncButton = ({invoker}: any) => {
     return (
         <React.Fragment>
             <TooltipButton
+                margin={'0 3px 0 0'}
                 target={`sync_entity_${invoker.id}`}
                 position={'top'}
                 tooltip={isDisabled ? 'Please, activate online service in application.yml file' : 'Sync with Service Portal'}

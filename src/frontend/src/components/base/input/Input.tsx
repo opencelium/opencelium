@@ -61,6 +61,7 @@ const Input: FC<InputProps> =
         marginBottom,
         checkboxProps,
         helpMessage,
+        isFile,
     }) => {
         const inputRef = useRef(null);
         const hasMaxLength = maxLength !== Infinity && !readOnly;
@@ -127,7 +128,7 @@ const Input: FC<InputProps> =
                 {hasError && <ErrorStyled errorBottom={errorBottom} paddingLeft={paddingLeft} hasIcon={hasIcon} isIconInside={isIconInside}><Text value={error} size={`${SmallTextSize}px`} color={ColorTheme.Red}/></ErrorStyled>}
                 {hasMaxLength && <NumberCounterStyled hasIcon={hasIcon}>{`${value ? value.toString().length : 0}/${maxLength}`}</NumberCounterStyled>}
                 {afterInputComponent}
-                {!!helpMessage && <InputHelpIcon paddingRight={isSelect && !readOnly ? '20px' : !!afterInputComponent ? '25px' : 0} steps={helpMessage} inputRef={componentRef || inputRef}/>}
+                {!!helpMessage && <InputHelpIcon top={isFile ? '0' : ''} paddingRight={isSelect && !readOnly ? '20px' : isFile ? '93px' : !!afterInputComponent ? '25px' : 0} steps={helpMessage} inputRef={componentRef || inputRef}/>}
             </InputElementStyled>
         );
 }
@@ -146,6 +147,7 @@ Input.defaultProps = {
     height: 'unset',
     className: '',
     marginBottom: 0,
+    isFile: false,
 }
 
 export default Input;

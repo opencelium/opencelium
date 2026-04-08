@@ -240,7 +240,7 @@ const InputSelect: FC<InputSelectProps> = ({
         return flattenedCategories
     };
     const hasIcon = !!icon;
-    let height = isToggled ? (localOptions.length > 0 ? categoryList ? CategoryList(localOptions).length : localOptions.length : 1) * 28 + 1 : 0;
+    let height = isToggled ? (localOptions.length > 0 ? categoryList ? CategoryList(localOptions).length : localOptions.length : 1) * 34 + 1 : 0;
     let multipleLabels = [];
     let hasValue = !!value;
     if(isMultiple){
