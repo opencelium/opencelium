@@ -1,4 +1,10 @@
-import {GroupProps, OperatorType, RulePropertyProps, RuleUIProps} from "@app_component/operator_builder/props";
+import {
+    GroupProps,
+    OperatorType,
+    RulePropertyProps,
+    RuleProps,
+    RuleUIProps
+} from "@app_component/operator_builder/props";
 import {
     AllOperatorNames,
     BinaryOperatorName,
@@ -60,19 +66,42 @@ export default class IfOperator {
         }
         return (
             <React.Fragment>
-                <ReferenceGenerator error={rule.error} isBuilder connectionEditor={connectionEditor} reference={leftField || ''} setReference={(leftField: string) => {
+                <ReferenceGenerator
+                    error={rule.error}
+                    isBuilder
+                    connectionEditor={connectionEditor}
+                    reference={leftField || ''}
+                    setReference={(leftField: string) => {
                         if (isLikeOperator && !!(ReferenceFactory.createReferenceInstance(leftField))) {
                             leftField = `"${leftField}"`;
                         }
-                        updateRule({...rule, error: '', properties: {...rule?.properties, leftField, operator: '', rightField: EmptyString}})
-                }}/>
+                        updateRule(prev => ({
+                            ...prev,
+                            error: '',
+                            properties: {
+                                ...prev.properties,
+                                leftField,
+                                operator: '', // если тебе реально нужно
+                                rightField: EmptyString
+                            }
+                        }));
+                    }}
+                />
                 <React.Fragment>
                     <OperatorSelect
                         error={rule.error}
                         type={OperatorType.If}
                         operator={rule?.properties?.operator || ''}
                         updateOperator={(operator) => {
-                            updateRule({...rule, error: '', properties: {...rule?.properties, operator, rightField: EmptyString}})
+                            updateRule(prev => ({
+                                ...prev,
+                                error: '',
+                                properties: {
+                                    ...prev.properties,
+                                    operator,
+                                    rightField: EmptyString
+                                }
+                            }))
                         }}
                     />
                     {rule?.properties?.operator && isBinaryOperator(rule.properties.operator) &&
@@ -86,7 +115,14 @@ export default class IfOperator {
                                 if (isLikeOperator && !!(ReferenceFactory.createReferenceInstance(rightField))) {
                                     rightField = `"${rightField}"`;
                                 }
-                                updateRule({...rule, error: '', properties: {...rule?.properties, rightField}})
+                                updateRule(prev => ({
+                                    ...prev,
+                                    error: '',
+                                    properties: {
+                                        ...prev.properties,
+                                        rightField
+                                    }
+                                }));
                             }}
                         />
                     }

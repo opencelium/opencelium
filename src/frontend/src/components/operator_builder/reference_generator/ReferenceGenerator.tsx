@@ -53,7 +53,12 @@ export const EmptyString = '&nbsp';
 const customSelectStyles: StylesConfig<ConstantSelectOptions, false> = {
 	menuPortal: (base) => ({ ...base, zIndex: 10000 }),
 };
-
+const stripPercents = (value: string) => {
+	let v = value;
+	if (v.startsWith('%')) v = v.slice(1);
+	if (v.endsWith('%')) v = v.slice(0, -1);
+	return v;
+};
 const ReferenceGenerator = React.forwardRef(
 	(
 		{
@@ -129,7 +134,12 @@ const ReferenceGenerator = React.forwardRef(
 		const isLikeOperator = useCallback((): boolean => {
 			return referenceType !== 'webhook' && Like.isLikeOperator(operator);
 		}, [referenceType, operator]);
-
+		useEffect(() => {
+			if (!isLikeOperator()) {
+				toggleOpenPerc(false);
+				toggleClosedPerc(false);
+			}
+		}, [referenceType, operator]);
 		const onUpdateOperator = useCallback(() => {
 			const newOperatorClass = getOperatorClass();
 			setOperatorClass(newOperatorClass);
@@ -195,7 +205,6 @@ const ReferenceGenerator = React.forwardRef(
 			hasOpenPerc,
 			isLikeOperator,
 			reference,
-			referenceType,
 		]);
 
 		const setIdValue = useCallback(() => {
@@ -247,6 +256,8 @@ const ReferenceGenerator = React.forwardRef(
 		const changeReferenceType = useCallback((newReferenceType: ReferenceType) => {
 			updateReferenceType(newReferenceType);
 			setColor('');
+			toggleOpenPerc(false);
+			toggleClosedPerc(false);
 			updateReference('');
 			setCurrentField(newReferenceType === 'constant' ? EmptyString : '');
 		}, []);
@@ -278,10 +289,8 @@ const ReferenceGenerator = React.forwardRef(
 		}, [onNamespacesChange]);
 
 		const handleConstantInputChange = useCallback((e: any) => {
-			setCurrentField(
-				`${hasOpenPerc ? '%' : ''}${e.target.value}${hasClosedPerc ? '%' : ''}`
-			);
-		}, [hasClosedPerc, hasOpenPerc]);
+			setCurrentField(e.target.value);
+		}, []);
 
 		const handleConstantSelectChange = useCallback((selected: any) => {
 			setCurrentField(selected.value);
@@ -305,70 +314,6 @@ const ReferenceGenerator = React.forwardRef(
 		useImperativeHandle(ref, () => ({
 			setIdValue,
 		}));
-
-		useEffect(() => {
-			switch (referenceType) {
-				case 'constant':
-					if (hasOpenPerc) {
-						if (currentField && currentField[0] !== '%') {
-							const newVal = currentField === EmptyString ? '%' : `%${currentField}`;
-							if (newVal !== currentField) setCurrentField(newVal);
-						}
-					} else {
-						if (currentField && currentField?.startsWith('%')) {
-							const newVal = currentField.substring(1);
-							if (newVal !== currentField) setCurrentField(newVal);
-						}
-					}
-					break;
-				case 'direct':
-					if (hasOpenPerc) {
-						if (reference && !reference.startsWith('%')) {
-							updateReference(reference === EmptyString ? '%' : `%${reference}`);
-						}
-					} else {
-						if (reference && reference.startsWith('%')) {
-							updateReference(reference.substring(1));
-						}
-					}
-					break;
-				default:
-					break;
-			}
-		}, [hasOpenPerc, currentField, reference, referenceType]);
-
-		useEffect(() => {
-			switch (referenceType) {
-				case 'constant':
-					if (hasClosedPerc) {
-						if (currentField && currentField[currentField.length - 1] !== '%') {
-							const newVal = currentField === EmptyString ? '%' : `${currentField}%`;
-							if (newVal !== currentField) setCurrentField(newVal);
-						}
-					} else {
-						if (currentField && currentField?.endsWith('%')) {
-							const newVal = currentField.slice(0, -1);
-							if (newVal !== currentField) setCurrentField(newVal);
-						}
-					}
-					break;
-				case 'direct':
-					if (hasClosedPerc) {
-						if (reference && !reference.endsWith('%')) {
-							updateReference(reference === EmptyString ? '%' : `${reference}%`);
-						}
-					} else {
-						if (reference && reference.endsWith('%')) {
-							updateReference(reference.substring(0, reference.length - 1));
-						}
-					}
-					break;
-				case 'webhook':
-					break;
-				default:
-					break;
-			}
-		}, [hasClosedPerc, currentField, reference, referenceType]);
 
 		useEffect(() => {
 			if (hasOpenPerc) {
@@ -410,18 +355,11 @@ const ReferenceGenerator = React.forwardRef(
 
 			if (referenceType === 'constant') {
 				if (isLikeOperator()) {
-					if (!hasOpenPerc) {
-						if (currentField?.startsWith('%')) {
-							toggleOpenPerc(true);
-						}
+					if (!hasOpenPerc && currentField?.startsWith('%')) {
+						toggleOpenPerc(true);
 					}
-					if (!hasClosedPerc) {
-						if (
-							currentField.length > 1 &&
-							currentField?.endsWith('%')
-						) {
-							toggleClosedPerc(true);
-						}
+					if (!hasClosedPerc && currentField?.endsWith('%')) {
+						toggleClosedPerc(true);
 					}
 				}
 			}
@@ -461,8 +399,16 @@ const ReferenceGenerator = React.forwardRef(
 				if (referenceInstance) {
 					const referenceData = referenceInstance.extractData();
 					if (referenceInstance instanceof DirectReference) {
+						const hasOpen = reference.startsWith('%');
+						const hasClose = reference.endsWith('%');
+
+						toggleOpenPerc(hasOpen);
+						toggleClosedPerc(hasClose);
+						let cleanRef = reference;
+						if (hasOpen) cleanRef = cleanRef.slice(1);
+						if (hasClose) cleanRef = cleanRef.slice(0, -1);
 						setColor(referenceData.color);
-						setCurrentField(referenceData.field);
+						setCurrentField(stripPercents(referenceData.field));
 						updateAPIResponseType(referenceData.apiResponseType);
 						if (referenceType !== 'direct') {
 							updateReferenceType('direct');
@@ -495,7 +441,18 @@ const ReferenceGenerator = React.forwardRef(
 				} else {
 					if (referenceType === 'constant') {
 						setColor('');
-						setCurrentField(reference);
+						const hasOpen = reference.startsWith('%');
+						const hasClose = reference.endsWith('%');
+
+						toggleOpenPerc(hasOpen);
+						toggleClosedPerc(hasClose);
+
+						let cleanValue = reference;
+						if (hasOpen) cleanValue = cleanValue.slice(1);
+						if (hasClose) cleanValue = cleanValue.slice(0, -1);
+
+						setColor('');
+						setCurrentField(cleanValue);
 					}
 					if (!isInitializedRef.current) {
 						updateReferenceType('constant');
@@ -508,9 +465,8 @@ const ReferenceGenerator = React.forwardRef(
 			hasOpenPerc,
 			isLikeOperator,
 			reference,
-			referenceType,
 		]);
-
+		console.log('isLIkeOperator', isLikeOperator(), referenceType, operator)
 		const containerStyle = useMemo(
 			() => (parent && isAbsolute ? { top: coords.top + 10, left: coords.left } : {}),
 			[parent, isAbsolute, coords.top, coords.left]
@@ -519,9 +475,6 @@ const ReferenceGenerator = React.forwardRef(
 		let inputTextValue = currentField === EmptyString ? '' : currentField;
 		if (isLikeOperator()) {
 			if (inputTextValue) {
-				if (inputTextValue[0] === '%') {
-					inputTextValue = inputTextValue.substring(1);
-				}
 				if (inputTextValue[inputTextValue.length - 1] === '%') {
 					inputTextValue = inputTextValue.substring(
 						0,

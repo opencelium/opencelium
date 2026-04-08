@@ -20,7 +20,13 @@ const Rule = (props: RuleUIProps) => {
     const ruleComponent = (new OperatorTypeFactory(type)).getRuleComponent(props);
     const hasError = !!rule.error;
     return (
-        <RuleContainer isLoop={isLoop} hasNext={hasNext} onMouseOver={onMouseOver} onMouseLeave={onMouseLeave} style={{paddingBottom: hasError ? '20px' : '10px'}}>
+        <RuleContainer
+            isLoop={isLoop}
+            hasNext={hasNext}
+            onMouseOver={onMouseOver}
+            onMouseLeave={onMouseLeave}
+            style={{paddingBottom: hasError ? '20px' : '10px'}}
+        >
             {ruleComponent}
             {showActions && type === OperatorType.If &&
                 <DeleteButtonContainer>
