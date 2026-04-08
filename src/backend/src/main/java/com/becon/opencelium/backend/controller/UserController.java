@@ -56,7 +56,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -105,11 +104,11 @@ public class UserController {
                 ResponseEntity.ok(new UserResource(p))).orElseThrow(() -> new UserNotFoundException(id));
     }
 
-    @Operation(summary = "Checks the existence of an user email in the system")
+    @Operation(summary = "Checks whether a user with the given email exists in the system")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",
-                description = "The email address exists in the system.",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+                description = "Returns true if the email is registered, false otherwise",
+                content = @Content(schema = @Schema(implementation = ResultDTO.class))),
         @ApiResponse( responseCode = "401",
                 description = "Unauthorized",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -118,12 +117,8 @@ public class UserController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/check/{email}")
-    public ResponseEntity<?> emailExists(@PathVariable("email") String email) {
-        if (userService.existsByEmail(email)) {
-            throw new ResponseStatusException(HttpStatus.OK, "EXISTS");
-        } else {
-            throw new ResponseStatusException(HttpStatus.OK, "NOT_EXISTS");
-        }
+    public ResponseEntity<ResultDTO<Boolean>> emailExists(@PathVariable("email") String email) {
+        return ResponseEntity.ok(ResultDTO.of(userService.existsByEmail(email)));
     }
 
     @Operation(summary = "Retrieves a list of all users in the application")

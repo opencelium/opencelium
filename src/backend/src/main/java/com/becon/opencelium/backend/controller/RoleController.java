@@ -38,7 +38,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
+import com.becon.opencelium.backend.resource.application.ResultDTO;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
 import java.io.IOException;
@@ -217,11 +217,11 @@ public class RoleController {
         return ResponseEntity.created(uri).body(resource);
     }
 
-    @Operation(summary = "Checks existence of role in OC")
+    @Operation(summary = "Checks whether a role with the given name exists in the system")
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",
-                description = "Returns EXISTS or NOT_EXISTS",
-                content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+                description = "Returns true if the role exists, false otherwise",
+                content = @Content(schema = @Schema(implementation = ResultDTO.class))),
         @ApiResponse( responseCode = "401",
                 description = "Unauthorized",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
@@ -230,12 +230,8 @@ public class RoleController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/exists/{role}")
-    public ResponseEntity<?> roleExists(@PathVariable("role") String role) throws IOException{
-        if (userRoleService.existsByRole(role)){
-            throw new ResponseStatusException(HttpStatus.OK, "EXISTS");
-        } else {
-            throw new ResponseStatusException(HttpStatus.OK, "NOT_EXISTS");
-        }
+    public ResponseEntity<ResultDTO<Boolean>> roleExists(@PathVariable("role") String role) {
+        return ResponseEntity.ok(ResultDTO.of(userRoleService.existsByRole(role)));
     }
 
     @Operation(summary = "Deletes an User Role from system by provided role ID")
