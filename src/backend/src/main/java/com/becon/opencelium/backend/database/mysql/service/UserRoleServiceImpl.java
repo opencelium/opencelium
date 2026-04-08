@@ -21,6 +21,7 @@ import com.becon.opencelium.backend.database.mysql.entity.UserRole;
 import com.becon.opencelium.backend.database.mysql.repository.UserRoleRepository;
 import com.becon.opencelium.backend.resource.user.UserRoleResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,14 +32,17 @@ import java.util.stream.Collectors;
 @Service
 public class UserRoleServiceImpl implements UserRoleService {
 
-    @Autowired
     private UserRoleRepository userRoleRepository;
+    private PermissionService permissionService;
+    private ComponentService componentService;
 
-    @Autowired
-    private PermissionServiceImpl permissionService;
-
-    @Autowired
-    private ComponentServiceImpl componentService;
+    public UserRoleServiceImpl(@Qualifier("PermissionServiceImpl") PermissionService permissionService,
+                               @Qualifier("ComponentServiceImpl") ComponentService componentService,
+                               UserRoleRepository userRoleRepository) {
+        this.userRoleRepository = userRoleRepository;
+        this.permissionService = permissionService;
+        this.componentService = componentService;
+    }
 
     @Override
     public boolean existsById(int id) {

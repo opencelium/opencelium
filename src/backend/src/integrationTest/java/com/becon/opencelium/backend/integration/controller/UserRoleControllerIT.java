@@ -16,7 +16,7 @@
 
 package com.becon.opencelium.backend.integration.controller;
 
-import com.becon.opencelium.backend.testutil.IntegrationTest;
+import com.becon.opencelium.backend.testutil.annotation.IntegrationTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MariaDBContainer;

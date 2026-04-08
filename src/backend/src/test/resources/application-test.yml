@@ -1,0 +1,70 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  Spring profile: test
+#
+#  Activated by @ActiveProfiles("test") on every unit and slice test.
+#  Replaces production databases with in-memory equivalents so no external
+#  infrastructure is required to run ./gradlew test.
+#
+#  H2          — replaces MariaDB for @DataJpaTest slice tests
+#  Flapdoodle  — replaces MongoDB for @DataMongoTest slice tests
+# ─────────────────────────────────────────────────────────────────────────────
+
+spring:
+
+  # ── Relational database ─────────────────────────────────────────────────────
+  #  H2 in-memory database — used by @DataJpaTest.
+  #  MODE=MySQL makes H2 behave like MariaDB so SQL syntax is compatible.
+  #  DB_CLOSE_DELAY=-1 keeps the database alive for the full JVM lifetime —
+  #  without it H2 closes between test method executions.
+  datasource:
+    url: jdbc:h2:mem:opencelium_test;DB_CLOSE_DELAY=-1;MODE=MySQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      # create-drop: builds the schema from @Entity classes when the context
+      # starts and drops it when the context closes — clean slate every run.
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        # Disable Liquibase schema management in tests — DDL is handled by
+        # Hibernate create-drop above. Running Liquibase against H2 will fail
+        # because the changelog may contain MariaDB-specific SQL.
+    open-in-view: false
+
+  # ── Liquibase ───────────────────────────────────────────────────────────────
+  #  Disabled for slice tests — schema is managed by Hibernate ddl-auto above.
+  #  Liquibase changesets may contain MariaDB-specific SQL that H2 cannot run.
+  liquibase:
+    enabled: false
+
+  # ── Document database ───────────────────────────────────────────────────────
+  #  Flapdoodle embedded MongoDB — used by @DataMongoTest.
+  #  Spring Boot auto-configures the connection when Flapdoodle is on the
+  #  classpath. The URI below is a placeholder — Flapdoodle overrides it with
+  #  the actual embedded instance URI at runtime.
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/opencelium_test
+      auto-index-creation: true
+
+  # ── Security ────────────────────────────────────────────────────────────────
+  #  Disables default Spring Security auto-configuration in web slice tests
+  #  so MockMvc requests are not blocked by authentication filters.
+  #  Individual tests that need security can re-enable it with @WithMockUser.
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration
+
+# ── Logging ───────────────────────────────────────────────────────────────────
+logging:
+  level:
+    root: WARN
+    com.becon.opencelium: DEBUG
+    org.hibernate.SQL: DEBUG         # logs generated SQL — useful when a query is wrong
+    org.springframework.web: WARN

@@ -583,7 +583,7 @@ suggestion: Consider adding existsByRole to the @SliceTest for UserRoleControlle
 <!-- ── Links ────────────────────────────────────────────────────────────────── -->
 [unit-example]: https://github.com/opencelium/opencelium/blob/main/src/test/java/com/becon/opencelium/backend/unit/database/mysql/service/UserRoleServiceImplTest.java
 [slice-example]: https://github.com/opencelium/opencelium/blob/main/src/test/java/com/becon/opencelium/backend/slice/controller/RoleControllerTest.java
-[it-example]: https://github.com/opencelium/opencelium/blob/main/src/integrationTest/java/com/becon/opencelium/backend/integration/controller/UserRoleControllerFlowIT.java
+[it-example]: https://github.com/opencelium/opencelium/blob/main/src/integrationTest/java/com/becon/opencelium/backend/integration/controller/UserRoleControllerIT.java
 [fixture-example]: https://github.com/opencelium/opencelium/blob/main/src/test/java/com/becon/opencelium/backend/testutil/fixture/UserRoleFixture.java
 [assertion-example]: https://github.com/opencelium/opencelium/blob/main/src/test/java/com/becon/opencelium/backend/testutil/assertion/UserRoleAssertions.java
 [fake-example]: https://github.com/opencelium/opencelium/blob/main/src/test/java/com/becon/opencelium/backend/testutil/fake/InMemoryUserRoleRepository.java
