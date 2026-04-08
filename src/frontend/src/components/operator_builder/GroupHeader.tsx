@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Conjunction, GroupHeaderUIProps} from "@app_component/operator_builder/props";
+import {Conjunction, GroupHeaderUIProps, GroupProps} from "@app_component/operator_builder/props";
 import {generateUUID} from "@app_component/operator_builder/utils";
 import {
     ActionButton,
@@ -22,38 +22,38 @@ const GroupHeader = ({updateGroup, deleteGroup, group, isInitial}: GroupHeaderUI
     const isOr = group?.properties?.conjunction === Conjunction.OR;
     useEffect(() => {
         if (group?.items) {
-            if (group.items.length <= 1) {
-                updateGroup({
-                    ...group,
+            if (group?.items?.length <= 1) {
+                updateGroup(prev => ({
+                    ...prev,
                     properties: {
-                        ...group.properties,
+                        ...prev.properties,
                         conjunction: undefined,
                     },
-                })
+                }))
             }
         }
     }, [group?.items]);
     const addRule = () => {
         const items = group?.items || [];
-        updateGroup({
-            ...group,
+        updateGroup(prev => ({
+            ...prev,
             error: '',
             items: [
-                ...items,
+                ...(prev.items || []),
                 {
                     id: generateUUID(),
                     type: 'rule'
                 }
             ]
-        })
+        }))
     }
     const addGroup = () => {
         const items = group?.items || [];
-        updateGroup({
-            ...group,
+        updateGroup(prev => ({
+            ...prev,
             error: '',
             items: [
-                ...items,
+                ...(prev.items || []),
                 {
                     id: generateUUID(),
                     type: 'group',
@@ -62,17 +62,20 @@ const GroupHeader = ({updateGroup, deleteGroup, group, isInitial}: GroupHeaderUI
                     },
                 }
             ],
-        })
+        }))
     }
     const setConjunction = (conjunction: Conjunction) => {
-        updateGroup({
-            ...group,
+        updateGroup(prev => ({
+            ...prev,
             error: '',
             properties: {
-                ...group.properties,
-                conjunction: group.properties.conjunction === conjunction ? undefined : conjunction,
+                ...prev.properties,
+                conjunction:
+                    prev.properties.conjunction === conjunction
+                        ? undefined
+                        : conjunction,
             },
-        })
+        }))
     }
     const onMouseOver = () => {
         if (!showActions){

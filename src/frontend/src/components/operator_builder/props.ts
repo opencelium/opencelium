@@ -4,6 +4,8 @@ import CConnectorItem from "@classes/content/connection/CConnectorItem";
 import COperatorItem from "@classes/content/connection/operator/COperatorItem";
 import CMethodItem from "@classes/content/connection/method/CMethodItem";
 
+type Updater<T> = T | ((prev: T) => T);
+
 export interface RulePropertyProps {
     leftField: string,
     operator: OperatorName | LoopOperatorName | '',
@@ -33,7 +35,7 @@ export interface RuleStyleProps {
     isLoop: boolean,
 }
 export interface UpdateRuleProps {
-    updateRule: (newRule: RuleProps) => void,
+    updateRule: (updater: Updater<RuleProps>) => void;
     deleteRule: (ruleId: string) => void,
 }
 export enum OperatorType {
@@ -75,7 +77,7 @@ export interface GroupStyleProps {
     hasNext: boolean,
 }
 export interface UpdateGroupProps {
-    updateGroup: (newGroup: GroupProps) => void;
+    updateGroup: (updater: Updater<GroupProps>) => void;
     deleteGroup?: (groupId: string) => void,
 }
 

@@ -1,4 +1,10 @@
-import {GroupProps, OperatorType, RulePropertyProps, RuleUIProps} from "@app_component/operator_builder/props";
+import {
+    GroupProps,
+    OperatorType,
+    RulePropertyProps,
+    RuleProps,
+    RuleUIProps
+} from "@app_component/operator_builder/props";
 import {LoopOperatorName} from "@app_component/operator_builder/interfaces/OperatorName";
 import {generateUUID, getEnumKeyByValue} from "@app_component/operator_builder/utils";
 import React from "react";
@@ -51,13 +57,37 @@ export default class LoopOperator {
                     type={OperatorType.Loop}
                     operator={rule?.properties?.operator || ''}
                     updateOperator={(operator) => {
-                        updateRule({...rule, error: '', properties: {...rule?.properties, operator, leftField: '', rightField: ''}})
+                        updateRule(prev => ({
+                            ...prev,
+                            error: '',
+                            properties: {
+                                ...prev.properties,
+                                operator,
+                                leftField: '',
+                                rightField: ''
+                            }
+                        }))
                     }}
                 />
                 {rule?.properties?.operator && <React.Fragment>
-                    <ReferenceGenerator error={rule.error} isBuilder style={{marginLeft: '10px'}} connectionEditor={connectionEditor} reference={rule?.properties?.leftField || ''} setReference={(leftField: string) => {
-                        updateRule({...rule, error: '', properties: {...rule?.properties, leftField, rightField: ''}})
-                    }}/>
+                    <ReferenceGenerator
+                        error={rule.error}
+                        isBuilder
+                        style={{marginLeft: '10px'}}
+                        connectionEditor={connectionEditor}
+                        reference={rule?.properties?.leftField || ''}
+                        setReference={(leftField: string) => {
+                            updateRule(prev => ({
+                                ...prev,
+                                error: '',
+                                properties: {
+                                    ...prev.properties,
+                                    leftField,
+                                    rightField: ''
+                                }
+                            }))
+                        }}
+                    />
                     {rule?.properties?.leftField &&
                         <React.Fragment>
                             {rule?.properties?.operator === LoopOperatorName.SplitString &&
@@ -68,7 +98,14 @@ export default class LoopOperator {
                                     connectionEditor={connectionEditor}
                                     reference={rule?.properties?.rightField || ''}
                                     setReference={(rightField: string) => {
-                                        updateRule({...rule, error: '', properties: {...rule?.properties, rightField}})
+                                        updateRule(prev => ({
+                                            ...prev,
+                                            error: '',
+                                            properties: {
+                                                ...prev.properties,
+                                                rightField
+                                            }
+                                        }))
                                     }}
                                     isBuilder
                                 />
