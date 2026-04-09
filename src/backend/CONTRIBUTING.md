@@ -13,9 +13,9 @@ Please read this guide in full before submitting your first PR. It exists to mak
 3. [Getting started](#3-getting-started)
 4. [Project structure](#4-project-structure)
 5. [Test structure and package purposes](#5-test-structure-and-package-purposes)
-   - 5.1 [src/test — unit and slice tests](#51-srctest--unit-and-slice-tests)
-   - 5.2 [src/integrationTest — full-stack integration tests](#52-srcintegrationtest--full-stack-integration-tests)
-   - 5.3 [Test resources](#53-test-resources)
+    - 5.1 [src/test — unit and slice tests](#51-srctest--unit-and-slice-tests)
+    - 5.2 [src/integrationTest — full-stack integration tests](#52-srcintegrationtest--full-stack-integration-tests)
+    - 5.3 [Test resources](#53-test-resources)
 6. [Test file location](#6-test-file-location)
 7. [Test naming conventions](#7-test-naming-conventions)
 8. [Running the tests](#8-running-the-tests)
@@ -228,7 +228,7 @@ See the following files for working examples:
 - [`UserRoleFixture.java`][fixture-example] — entity and resource builders
 - [`UserRoleAssertions.java`][assertion-example] — custom AssertJ assertions for `UserRole`
 - [`InMemoryUserRoleRepository.java`][fake-example] — use when a test needs
-    realistic save/find/delete behaviour without a mock
+  realistic save/find/delete behaviour without a mock
 - [`SliceTest.java`][slice-annotation] and [`IntegrationTest.java`][it-annotation]
   — apply one annotation instead of repeating the three-annotation combination
   on every test class
@@ -284,12 +284,12 @@ JSON files used as MockMvc request bodies or in JSONassert comparisons.
 
 ```java
 String body = new ClassPathResource("json/create-user-role.json")
-                    .getContentAsString(StandardCharsets.UTF_8);
+        .getContentAsString(StandardCharsets.UTF_8);
 
-mockMvc.perform(post("/api/userRoles")
+        mockMvc.perform(post("/api/userRoles")
         .contentType(MediaType.APPLICATION_JSON)
         .content(body))
-       .andExpect(status().isCreated());
+        .andExpect(status().isCreated());
 ```
 
 Name each file after the operation it represents: `create-user-role.json`, `user-role-response.json`. Do not reuse payload files across unrelated tests.
@@ -444,13 +444,53 @@ All test dependencies are declared in `build.gradle`. The `integrationTestImplem
 
 ### 10.1 What a PR must include
 
+Every pull request must satisfy all of the following before it is marked **Ready for Review**:
+
+| Requirement | Detail |
+|-------------|--------|
+| **Passing tests** | `./gradlew test` must pass locally. If the PR touches integration paths, `./gradlew integrationTest` must also pass. |
+| **New or updated tests** | Every changed behaviour must be covered by at least one test. Name the added or modified test classes in the PR description. |
+| **Single responsibility** | One PR = one logical change. A feature and its refactor belong in separate PRs unless they are inseparable. |
+| **Linked ticket** | The PR title or description must reference the Jira ticket (`OC-NNNN`). |
+| **Filled PR template** | All sections of the template in §10.4 must be completed — no placeholder text left in. |
+| **No secrets or debug artefacts** | No API keys, passwords, hardcoded credentials, `System.out.println`, or commented-out code blocks. |
+| **Squashed WIP commits** | All work-in-progress commits must be squashed before the PR is marked ready. The remaining commits must each follow the format in §10.5. |
+| **Self-review completed** | Read your own diff in the GitHub UI before requesting review. Catch typos, leftover TODOs, and obvious logic gaps yourself first. |
+
 ---
 
 ### 10.2 What to leave out
 
+The following must never appear in a PR:
+
+- **Unrelated changes.** Refactoring a class you happened to open, fixing an unrelated test, adjusting code style in files not touched by the feature — these belong in a separate PR with their own ticket.
+- **Commented-out code.** Delete it. Version control preserves history; comments do not add value.
+- **Debug or diagnostic code.** `System.out.println`, `log.debug("here")`, or temporary `@Disabled` annotations must be removed before review.
+- **Secrets and credentials.** No passwords, API keys, tokens, or connection strings — even in test resources. Use environment variables or Spring property placeholders.
+- **Auto-formatter noise.** Do not reformat files you did not otherwise modify. Wholesale import-sort or whitespace changes obscure the real diff and waste reviewer time.
+- **Dependency upgrades bundled with features.** A version bump that affects the whole project needs its own PR so it can be reverted independently if needed.
+- **TODO comments without a ticket.** Either fix it now or open a ticket and reference it: `// TODO OC-1500 — replace with domain exception`.
+
 ---
 
 ### 10.3 PR size
+
+Small PRs are reviewed faster, merged sooner, and reverted more safely.
+
+| Lines changed (excluding tests and generated code) | Expectation |
+|----------------------------------------------------|-------------|
+| ≤ 200 | Ideal. Reviewers can give a thorough review in one pass. |
+| 201 – 400 | Acceptable for self-contained features. Add a short summary at the top of the description to orient reviewers. |
+| 401 – 700 | Borderline. Split if there is any natural seam — separate the data-access layer from the service layer, or the feature from its refactor. |
+| > 700 | Not acceptable for review without prior agreement. Break it up or schedule a pairing session before opening the PR. |
+
+**How to split a large PR:**
+
+1. Open a base branch from `dev` (e.g. `feature/OC-1412-base`) and push only the shared infrastructure — new entities, interfaces, repository methods.
+2. Open each follow-on PR targeting the base branch rather than `dev`.
+3. Once all child PRs are merged into the base branch, open a final thin PR from the base branch to `dev`. The diff is now a merge-commit; reviewers already reviewed each piece.
+
+Generated code (Liquibase changelogs, OpenAPI specs, MapStruct implementations) does not count toward the line limit but must still be reviewed for correctness.
 
 ---
 
@@ -570,23 +610,102 @@ suggestion: Consider adding existsByRole to the @SliceTest for UserRoleControlle
 
 ## 12. PR lifecycle
 
+A PR moves through the following states in order. Each transition has a clear owner and a clear exit criterion.
 
+```
+Draft → Ready for Review → In Review → Changes Requested → Approved → Merged
+```
+
+### States and responsibilities
+
+| State | Owner | Entry action | Exit criterion |
+|-------|-------|--------------|----------------|
+| **Draft** | Author | Open the PR as a draft while work is still in progress. Push freely — CI runs but reviewers are not expected to engage. | Author marks it **Ready for Review**. |
+| **Ready for Review** | Author | All checklist items in §10.1 are satisfied. Assign at least one reviewer. | A reviewer picks it up and begins review. |
+| **In Review** | Reviewer | Reviewer has 2 business days to respond (see §11.1). Leave comments using the prefix conventions in §11.2. | Reviewer submits a review: **Approved** or **Changes Requested**. |
+| **Changes Requested** | Author | Address every `blocking:` comment. Reply to every `question:` comment inline or with a code change. Nits and suggestions are at your discretion. Re-request review when done — do not rely on the reviewer to re-check spontaneously. | All blocking comments are resolved and review is re-requested. |
+| **Approved** | Author | At least one approval with no outstanding `blocking:` comments. | PR is merged into the target branch. |
+| **Merged** | Author | Squash-merge into `dev` (or the base branch if using a stacked-PR flow). Delete the source branch. Close the linked Jira ticket or move it to the appropriate status. | Branch deleted; ticket updated. |
+
+### Rules
+
+- **Do not merge your own PR** unless it has at least one approval from another team member.
+- **Do not force-push** to a branch that is actively under review. If you need to rebase, coordinate with the active reviewer first.
+- **Do not leave a PR open longer than 5 business days** without a status update. If it is blocked on external input, add a comment explaining why and tag the relevant person.
+- **CI must be green before merge.** A red pipeline is not a reason to skip review — it is a reason to fix the build first.
+- **Resolve your own threads** once you have addressed a comment. Reviewers re-check resolved threads to confirm the fix before re-approving — they do not re-open resolved threads unless the fix introduced a new problem.
 
 ---
 
 ## 13. Migrating existing tests
 
+Existing tests that predate this guide may be in the wrong source root, use the wrong naming suffix, or lack the `@ActiveProfiles` annotation. Migrate them incrementally — do not attempt a bulk migration in a single PR.
 
+### When to migrate
+
+Migrate a test when you are already touching its class as part of a feature or bug-fix PR. Do not open migration-only PRs for tests you are not otherwise changing — the risk/reward is unfavourable and it pollutes blame history.
+
+### Migration checklist
+
+Work through these steps in order. Each step can be its own commit (`[Refactored]` type) so the rename and the logic change are separable in the log.
+
+**Step 1 — Identify the correct target**
+
+| Current location | Current suffix | Correct target | Required suffix |
+|-----------------|----------------|----------------|-----------------|
+| `src/test/.../` but loads `@SpringBootTest` with Docker | `*Test` | `src/integrationTest/.../integration/` | `*IT` |
+| `src/integrationTest/.../` but uses only mocks or H2 | `*IT` | `src/test/.../unit/` or `src/test/.../slice/` | `*Test` |
+| `src/test/.../` with no layer sub-package | any | `src/test/.../unit/` or `src/test/.../slice/` | `*Test` |
+
+**Step 2 — Move the file**
+
+Rename the class and file to match the target suffix. Update the `package` declaration to include the layer segment (`unit`, `slice`, or `integration`).
+
+```
+Before: src/test/.../UserRoleServiceTest.java  (package com.example)
+After:  src/test/.../unit/service/UserRoleServiceImplTest.java  (package com.example.unit.service)
+```
+
+**Step 3 — Fix annotations**
+
+- Add `@ActiveProfiles("test")` to every slice test that is missing it.
+- Replace ad-hoc `@SpringBootTest` usage in unit tests with `@ExtendWith(MockitoExtension.class)` and direct instantiation.
+- Replace `@SpringBootTest` + real DB in `src/test/` with `@DataJpaTest` + H2, or move to `src/integrationTest/` if real DB behaviour is required.
+- Replace any `@SpringBootTest` in `src/integrationTest/` that lacks `@Testcontainers` and `@DynamicPropertySource` — these are the source of port-collision and flaky-test issues.
+
+**Step 4 — Apply `testutil/` infrastructure**
+
+Replace inline test-object construction with fixtures from `testutil/fixture/`. Replace chains of `assertThat(x.getField()).isEqualTo(y)` with custom assertions from `testutil/assertion/` where they exist.
+
+**Step 5 — Rename test methods (if time permits)**
+
+Rename methods that violate §7 naming conventions. This is lower priority than structural correctness — defer if the PR is already large.
+
+**Step 6 — Verify**
+
+```bash
+# Confirm the migrated test runs in its new task and not the old one
+./gradlew test --tests "*.UserRoleServiceImplTest"
+./gradlew integrationTest --tests "*.UserRoleFlowIT"
+
+# Confirm the full suite still passes
+./gradlew clean test integrationTest
+```
+
+### Common pitfalls
+
+- **`*IT` classes left in `src/test/`** — Gradle's `test` task picks them up, Docker is not available in the unit-test phase, and the test fails with a `ContainerLaunchException`. Always check the source root after renaming.
+- **Missing `@DynamicPropertySource` after moving to `src/integrationTest/`** — hardcoded ports collide when Testcontainers assigns a random one. Follow the pattern in [`UserRoleFlowIT.java`][it-example].
+- **H2 compatibility gaps** — some MariaDB-specific SQL (e.g. `JSON` columns, `FULLTEXT` indexes) does not work in H2. If the test fails with an H2 syntax error after migration, move it to `src/integrationTest/` instead of hacking the schema.
 
 ---
 
-<!-- ── Links ────────────────────────────────────────────────────────────────── -->
-[unit-example]: https://github.com/opencelium/opencelium/blob/main/src/test/java/com/becon/opencelium/backend/unit/database/mysql/service/UserRoleServiceImplTest.java
-[slice-example]: https://github.com/opencelium/opencelium/blob/main/src/test/java/com/becon/opencelium/backend/slice/controller/RoleControllerTest.java
-[it-example]: https://github.com/opencelium/opencelium/blob/main/src/integrationTest/java/com/becon/opencelium/backend/integration/controller/UserRoleControllerIT.java
-[fixture-example]: https://github.com/opencelium/opencelium/blob/main/src/test/java/com/becon/opencelium/backend/testutil/fixture/UserRoleFixture.java
-[assertion-example]: https://github.com/opencelium/opencelium/blob/main/src/test/java/com/becon/opencelium/backend/testutil/assertion/UserRoleAssertions.java
-[fake-example]: https://github.com/opencelium/opencelium/blob/main/src/test/java/com/becon/opencelium/backend/testutil/fake/InMemoryUserRoleRepository.java
-[slice-annotation]: https://github.com/opencelium/opencelium/blob/main/src/test/java/com/becon/opencelium/backend/testutil/annotation/SliceTest.java
-[it-annotation]: https://github.com/opencelium/opencelium/blob/main/src/test/java/com/becon/opencelium/backend/testutil/annotation/IntegrationTest.java
-[pr-example]: https://github.com/opencelium/opencelium/tree/dev/src/backend/docs/pull_request_template_example.md
+[unit-example]: https://github.com/opencelium/opencelium/blob/dev/src/backend/src/test/java/com/becon/opencelium/backend/unit/database/mysql/service/UserRoleServiceImplTest.java
+[slice-example]: https://github.com/opencelium/opencelium/blob/dev/src/backend/src/test/java/com/becon/opencelium/backend/slice/controller/RoleControllerTest.java
+[it-example]: https://github.com/opencelium/opencelium/blob/dev/dev/integrationTest/java/com/becon/opencelium/backend/integration/controller/UserRoleControllerIT.java
+[fixture-example]: https://github.com/opencelium/opencelium/blob/dev/src/backend/src/test/java/com/becon/opencelium/backend/testutil/fixture/UserRoleFixture.java
+[assertion-example]: https://github.com/opencelium/opencelium/blob/dev/src/backend/src/test/java/com/becon/opencelium/backend/testutil/assertion/UserRoleAssertions.java
+[fake-example]: https://github.com/opencelium/opencelium/blob/dev/src/backend/src/test/java/com/becon/opencelium/backend/testutil/fake/InMemoryUserRoleRepository.java
+[slice-annotation]: https://github.com/opencelium/opencelium/blob/dev/src/backend/src/test/java/com/becon/opencelium/backend/testutil/annotation/SliceTest.java
+[it-annotation]: https://github.com/opencelium/opencelium/blob/dev/src/backend/src/test/java/com/becon/opencelium/backend/testutil/annotation/IntegrationTest.java
+[pr-example]: https://github.com/opencelium/opencelium/blob/dev/src/backend/docs/pull_request_template_example.md
