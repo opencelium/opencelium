@@ -195,7 +195,7 @@ interact correctly — but the overhead of a real database is not justified.
 
 - Use `@SpringBootTest` with a limited component scan, or combine `@DataJpaTest`
   with `@Import` to bring in the service bean
-- H2 replaces MariaDB; Flapdoodle replaces MongoDB
+- **H2** replaces MariaDB; **Flapdoodle** replaces MongoDB
 - Always declare `@ActiveProfiles("test")` so `application-test.yml` is loaded
 - If the test needs real database behaviour that H2 cannot reproduce, move it
   to `src/integrationTest/` instead
