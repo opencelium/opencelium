@@ -113,4 +113,23 @@ class UserRoleServiceImplTest {
 
         assertThat(userRoleService.existsByRole("ROLE_UNKNOWN")).isFalse();
     }
+
+    // ── save ─────────────────────────────────────────────────────────────────
+    //
+    // save() returns void so there is nothing to assert on the return value.
+    // The correct approach is to verify that the service delegated the call
+    // to the repository — that is the full contract of this method.
+
+    @Test
+    @DisplayName("saveDelegatesToRepositorySave")
+    void saveDelegatesToRepositorySave() {
+        UserRole role = UserRoleFixture.aStandardUserRole();
+
+        userRoleService.save(role);
+
+        // verify() confirms the repository was called exactly once with the role.
+        // If the service forgot to call the repository, or called it with a
+        // different argument, this test fails.
+        verify(userRoleRepository).save(role);
+    }
 }
