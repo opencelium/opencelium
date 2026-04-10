@@ -122,7 +122,7 @@ class TechnicalLayout extends React.Component {
                     fromItems,
                     fromConnector.shiftXForSvgItems
                 ),
-                invokerName: fromConnector.invoker.name,
+                invokerName: fromConnector.title || fromConnector.invoker.name,
             }
             : null;
 
@@ -136,7 +136,7 @@ class TechnicalLayout extends React.Component {
                     toItems,
                     toConnector.shiftXForSvgItems
                 ),
-                invokerName: toConnector.invoker.name,
+                invokerName: toConnector.title || toConnector.invoker.name,
             }
             : null;
 
