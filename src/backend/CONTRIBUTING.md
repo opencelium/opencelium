@@ -310,7 +310,7 @@ Use for SQL seed scripts (`.sql`) and CSV input tables for parameterised tests.
 
 ## 6. Test file location
 
-Test files mirror the production class path. Replace `main` with the test source root and insert the layer (`unit`, `slice`, `integration`).
+Test files mirror the production class path. Replace `main` with the `test` source root and insert the layer (`unit`, `slice`, `integration`).
 
 ```
 src/main/java/.../service/UserRoleServiceImpl.java
@@ -446,16 +446,16 @@ All test dependencies are declared in `build.gradle`. The `integrationTestImplem
 
 Every pull request must satisfy all of the following before it is marked **Ready for Review**:
 
-| Requirement | Detail |
-|-------------|--------|
-| **Passing tests** | `./gradlew test` must pass locally. If the PR touches integration paths, `./gradlew integrationTest` must also pass. |
-| **New or updated tests** | Every changed behaviour must be covered by at least one test. Name the added or modified test classes in the PR description. |
-| **Single responsibility** | One PR = one logical change. A feature and its refactor belong in separate PRs unless they are inseparable. |
-| **Linked ticket** | The PR title or description must reference the Jira ticket (`OC-NNNN`). |
-| **Filled PR template** | All sections of the template in §10.4 must be completed — no placeholder text left in. |
-| **No secrets or debug artefacts** | No API keys, passwords, hardcoded credentials, `System.out.println`, or commented-out code blocks. |
-| **Squashed WIP commits** | All work-in-progress commits must be squashed before the PR is marked ready. The remaining commits must each follow the format in §10.5. |
-| **Self-review completed** | Read your own diff in the GitHub UI before requesting review. Catch typos, leftover TODOs, and obvious logic gaps yourself first. |
+| Requirement | Detail                                                                                                                                       |
+|-------------|----------------------------------------------------------------------------------------------------------------------------------------------|
+| **Passing tests** | `./gradlew test` must pass locally. If the PR touches integration paths, `./gradlew integrationTest` must also pass.                         |
+| **New or updated tests** | Every changed behaviour must be covered by at least one test. Name the added or modified test classes in the PR description.                 |
+| **Single responsibility** | One PR = one logical change. A feature and its refactor belong in separate PRs unless they are inseparable.                                  |
+| **Linked ticket** | The PR title or description must reference the Jira ticket (`OC-NNNN`).                                                                      |
+| **Filled PR template** | All sections of the template in [§10.4](#104-pr-description-template) must be completed — no placeholder text left in.                       |
+| **No secrets or debug artefacts** | No API keys, passwords, hardcoded credentials, `System.out.println`, or commented-out code blocks.                                           |
+| **Squashed WIP commits** | All work-in-progress commits must be squashed before the PR is marked ready. The remaining commits must each follow the format in [§10.5](#105-commit-message-format). |
+| **Self-review completed** | Read your own diff in the GitHub UI before requesting review. Catch typos, leftover TODOs, and obvious logic gaps yourself first.            |
 
 ---
 
@@ -618,14 +618,14 @@ Draft → Ready for Review → In Review → Changes Requested → Approved → 
 
 ### States and responsibilities
 
-| State | Owner | Entry action | Exit criterion |
-|-------|-------|--------------|----------------|
-| **Draft** | Author | Open the PR as a draft while work is still in progress. Push freely — CI runs but reviewers are not expected to engage. | Author marks it **Ready for Review**. |
-| **Ready for Review** | Author | All checklist items in §10.1 are satisfied. Assign at least one reviewer. | A reviewer picks it up and begins review. |
-| **In Review** | Reviewer | Reviewer has 2 business days to respond (see §11.1). Leave comments using the prefix conventions in §11.2. | Reviewer submits a review: **Approved** or **Changes Requested**. |
+| State | Owner | Entry action                                                                                                                                                                                                                          | Exit criterion |
+|-------|-------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------|
+| **Draft** | Author | Open the PR as a draft while work is still in progress. Push freely — CI runs but reviewers are not expected to engage.                                                                                                               | Author marks it **Ready for Review**. |
+| **Ready for Review** | Author | All checklist items in [§10.1](#101-what-a-pr-must-include) are satisfied. Assign at least one reviewer.                                                                                                                              | A reviewer picks it up and begins review. |
+| **In Review** | Reviewer | Reviewer has 2 business days to respond (see §11.1). Leave comments using the prefix conventions in [§11.2](#112-comment-conventions).                                                                                                                        | Reviewer submits a review: **Approved** or **Changes Requested**. |
 | **Changes Requested** | Author | Address every `blocking:` comment. Reply to every `question:` comment inline or with a code change. Nits and suggestions are at your discretion. Re-request review when done — do not rely on the reviewer to re-check spontaneously. | All blocking comments are resolved and review is re-requested. |
-| **Approved** | Author | At least one approval with no outstanding `blocking:` comments. | PR is merged into the target branch. |
-| **Merged** | Author | Squash-merge into `dev` (or the base branch if using a stacked-PR flow). Delete the source branch. Close the linked Jira ticket or move it to the appropriate status. | Branch deleted; ticket updated. |
+| **Approved** | Author | At least one approval with no outstanding `blocking:` comments.                                                                                                                                                                       | PR is merged into the target branch. |
+| **Merged** | Author | Squash-merge into `dev` (or the base branch if using a stacked-PR flow). Delete the source branch. Close the linked Jira ticket or move it to the appropriate status.                                                                 | Branch deleted; ticket updated. |
 
 ### Rules
 
@@ -679,7 +679,7 @@ Replace inline test-object construction with fixtures from `testutil/fixture/`. 
 
 **Step 5 — Rename test methods (if time permits)**
 
-Rename methods that violate §7 naming conventions. This is lower priority than structural correctness — defer if the PR is already large.
+Rename methods that violate [§7](#7-test-naming-conventions) naming conventions. This is lower priority than structural correctness — defer if the PR is already large.
 
 **Step 6 — Verify**
 
