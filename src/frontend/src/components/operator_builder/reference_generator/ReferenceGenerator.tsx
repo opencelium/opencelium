@@ -131,6 +131,8 @@ const ReferenceGenerator = React.forwardRef(
 		const referenceRef: any = useRef();
 		const webhookRef: any = useRef();
 
+		const instanceRef = useRef({});
+
 		const isLikeOperator = useCallback((): boolean => {
 			return referenceType !== 'webhook' && Like.isLikeOperator(operator);
 		}, [referenceType, operator]);
@@ -332,7 +334,6 @@ const ReferenceGenerator = React.forwardRef(
 
 		useEffect(() => {
 			if (parent) {
-				const instanceRef = useRef({});
 
 				addCloseParamGeneratorNavigation(instanceRef.current);
 				document.addEventListener('mousedown', handleClickOutside);
@@ -466,7 +467,6 @@ const ReferenceGenerator = React.forwardRef(
 			isLikeOperator,
 			reference,
 		]);
-		console.log('isLIkeOperator', isLikeOperator(), referenceType, operator)
 		const containerStyle = useMemo(
 			() => (parent && isAbsolute ? { top: coords.top + 10, left: coords.left } : {}),
 			[parent, isAbsolute, coords.top, coords.left]
