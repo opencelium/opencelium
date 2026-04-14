@@ -115,7 +115,7 @@ class UserRoleServiceImplFakeTest {
 
     @Test
     @DisplayName("saveStoresRoleInRepository")
-    void saveStoresRoleInRepository() {
+    void savePersistUserRoleWhenNotNull() {
         UserRole role = UserRoleFixture.aStandardUserRole();
 
         userRoleService.save(role);
