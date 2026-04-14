@@ -113,6 +113,22 @@ class UserRoleServiceImplFakeTest {
         assertThat(userRoleService.existsById(role.getId())).isFalse();
     }
 
+    @Test
+    @DisplayName("saveStoresRoleInRepository")
+    void saveStoresRoleInRepository() {
+        UserRole role = UserRoleFixture.aStandardUserRole();
+
+        userRoleService.save(role);
+
+        // Assert the observable outcome — the role can be retrieved after saving.
+        // If save() does nothing, findById returns empty and this test fails.
+        UserRole saved = userRoleService.findById(role.getId()).orElseThrow();
+        UserRoleAssertions.assertThat(saved)
+                .isStandardUser()
+                .hasDescription("Standard user role")
+                .hasNoIcon();
+    }
+
     // ── existsByRole ──────────────────────────────────────────────────────────
 
     @Test
