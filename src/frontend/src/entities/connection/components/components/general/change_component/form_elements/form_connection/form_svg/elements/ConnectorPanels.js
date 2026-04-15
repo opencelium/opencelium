@@ -14,7 +14,7 @@
  */
 
 import React from 'react';
-import ConnectorPanel from "@change_component/form_elements/form_connection/form_svg/elements/Panel";
+    import ConnectorPanel from "@change_component/form_elements/form_connection/form_svg/elements/Panel";
 import {CONNECTOR_FROM, CONNECTOR_TO} from "@entity/connection/components/classes/components/content/connection/CConnectorItem";
 
 const ARROW_INTEND_TOP = 50;

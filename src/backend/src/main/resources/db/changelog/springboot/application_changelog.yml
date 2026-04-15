@@ -208,3 +208,9 @@ versions:
         operation: add
         value: 4.8.1
         path: opencelium.version
+  - version: 4.8.2
+    changes:
+      - changeset: 1
+        operation: add
+        value: 4.8.2
+        path: opencelium.version

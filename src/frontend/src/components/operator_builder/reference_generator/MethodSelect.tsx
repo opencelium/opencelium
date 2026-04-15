@@ -124,7 +124,7 @@ const MethodSelect: React.FC<MethodSelectProps> = ({onMethodSelect, methodColor,
                 menuPortalTarget={document.body}
                 menuPosition="absolute"
             />
-            {hasError && <ErrorMessage className={'error-scroll-target'} style={{color: ErrorColor, position: 'absolute', left: ref.current?.offsetLeft, bottom: -15}}>{`${error}`}</ErrorMessage>}
+            {hasError && <ErrorMessage className={'error-scroll-target'} style={{color: ErrorColor, position: 'absolute', left: ref.current?.offsetLeft, bottom: 3}}>{`${error}`}</ErrorMessage>}
         </div>
     );
 };
