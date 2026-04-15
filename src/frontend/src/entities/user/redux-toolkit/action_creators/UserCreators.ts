@@ -47,7 +47,7 @@ export const addUser = createAsyncThunk(
         try {
             const checkEmailRequest = new UserRequest({endpoint: `/check/${entityData.email}`});
             const responseEmailRequest = await checkEmailRequest.checkUserEmail();
-            if (responseEmailRequest.data.message === ResponseMessages.EXISTS) {
+            if (responseEmailRequest.data.result === true) {
                 return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.EXISTS}));
             }
             const addUserRequest = new UserRequest();
@@ -78,7 +78,7 @@ export const updateUser = createAsyncThunk(
             if(userState.currentUser.email !== entityData.email ){
                 const checkEmailRequest = new UserRequest({endpoint: `/check/${entityData.email}`});
                 const responseEmailRequest = await checkEmailRequest.checkUserEmail();
-                if (responseEmailRequest.data.message === ResponseMessages.EXISTS) {
+                if (responseEmailRequest.data.result === true) {
                     return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.EXISTS}));
                 }
             }
