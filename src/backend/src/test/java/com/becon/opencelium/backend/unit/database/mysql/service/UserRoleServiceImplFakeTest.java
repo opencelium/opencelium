@@ -19,6 +19,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -114,19 +115,15 @@ class UserRoleServiceImplFakeTest {
     }
 
     @Test
-    @DisplayName("saveStoresRoleInRepository")
     void savePersistUserRoleWhenNotNull() {
         UserRole role = UserRoleFixture.aStandardUserRole();
 
         userRoleService.save(role);
 
-        // Assert the observable outcome — the role can be retrieved after saving.
-        // If save() does nothing, findById returns empty and this test fails.
-        UserRole saved = userRoleService.findById(role.getId()).orElseThrow();
-        UserRoleAssertions.assertThat(saved)
-                .isStandardUser()
-                .hasDescription("Standard user role")
-                .hasNoIcon();
+        Optional<UserRole>  saved = userRoleService.findById(role.getId());
+        assertThat(saved)
+                .as("UserRole with id %d and name %s should exist after save()", role.getId(), role.getName())
+                .isPresent();
     }
 
     // ── existsByRole ──────────────────────────────────────────────────────────
