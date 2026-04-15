@@ -16,6 +16,7 @@ Fixes
 * Fix tour bug in connector form (OC-1387)
 * Change invoker name into connector name in ConnectorPanel (OC-1383)
 
+
 4.8.1
 ========
  
