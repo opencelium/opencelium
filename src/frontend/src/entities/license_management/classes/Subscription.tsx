@@ -37,6 +37,16 @@ export default class Subscription {
         return !subscription || (currentWithCredits >= totalWithCredits && totalWithCredits !== 0)
     }
 
+    static isSubscriptionExpired (sub: SubscriptionModel): boolean {
+        // inactive subscription is always expired
+        if (!sub.active) return true;
+
+        // 0 means unlimited (never expires)
+        if (!sub.endDate || sub.endDate === 0) return false;
+
+        return Date.now() > sub.endDate;
+    };
+
     static getTotalOpsWithCredits(subscription: SubscriptionModel): number {
         return (subscription?.totalOperationUsage || 0) + (subscription?.extraOps?.reduce((sum, obj) => sum + obj.totalOpsUsage, 0) || 0);
     }

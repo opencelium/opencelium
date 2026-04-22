@@ -92,6 +92,8 @@ const MenuLinkWithSubLinksStyled = styled.div<MenuLinkStyledProps>`
         text-decoration: underline;
     }
     grid-template-columns: 30px max-content 1fr;
+    margin: 0 5px;
+    padding: 10px 7px;
 `;
 
 const MenuLinkLabelStyled = styled(Text)`

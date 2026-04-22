@@ -1,10 +1,7 @@
 import {useEffect, useRef, useState} from "react";
-import { Socket } from "socket.io-client";
 import SubscriptionModel from "@entity/license_management/requests/models/SubscriptionModel";
 import Subscription from "@entity/license_management/classes/Subscription";
 import {Client} from "@stomp/stompjs";
-import ModelCurrentSchedule from "@entity/schedule/requests/models/CurrentSchedule";
-import {SocketAppPrefix} from "../socket";
 import {Auth} from "@application/classes/Auth";
 import {consoleLog} from "@application/utils/utils";
 
