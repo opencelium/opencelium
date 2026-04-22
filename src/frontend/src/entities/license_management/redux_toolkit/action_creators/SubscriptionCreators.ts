@@ -1,8 +1,6 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
 import {errorHandler} from "@application/utils/utils";
 import SubscriptionRequest from "@entity/license_management/requests/classes/SubscriptionRequest";
-import {ActivateLicenseFileRequest} from "@entity/license_management/requests/interfaces/ILicenseRequest";
-import LicenseRequest from "@entity/license_management/requests/classes/LicenseRequest";
 export const getCurrentSubscription = createAsyncThunk(
     'subscription/get/current',
     async(data: never, thunkAPI) => {
