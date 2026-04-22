@@ -57,35 +57,95 @@ export function clearFieldNameFromArraySign(fieldName){
 }
 
 export function convertFieldNameForBackend(invokerBody, fieldName){
-    let fieldNameSplitted = fieldName.split('.');
+    const tokens = isString(fieldName)
+        ? fieldName.match(/\['[^']+'\]|\["[^"]+"\]|\[[^\]]+\]|[^.[\]]+/g) || []
+        : [];
+    const resultParts = [];
     let subValue = invokerBody;
-    let result = '';
-    for(let i = 0; i < fieldNameSplitted.length; i++){
-        let hasProperty = subValue.hasOwnProperty(fieldNameSplitted[i]);
-        if(hasProperty) {
-            let elem = subValue[fieldNameSplitted[i]];
-            if (isString(elem)) {
-                result += `${fieldNameSplitted[i]}`;
-                subValue = elem;
-            } else if (isArray(elem) && fieldNameSplitted[i] !== WHOLE_ARRAY) {
-                let index = i + 1 < fieldNameSplitted.length ? parseInt(fieldNameSplitted[i + 1]) : '';
-                result += markFieldNameAsArray(fieldNameSplitted[i], index);
-                if(index !== ''){
-                    i++;
-                }
-                subValue = elem[0];
-            } else {
-                result += `${fieldNameSplitted[i]}`;
-                subValue = elem;
-            }
-        } else{
-            result += `${fieldNameSplitted[i]}`;
+
+    const hasOwn = (value, key) =>
+        !!value &&
+        typeof value === 'object' &&
+        Object.prototype.hasOwnProperty.call(value, key);
+
+    const isQuotedToken = (token) => /^\['[^']+'\]$|^\["[^"]+"\]$/.test(token);
+    const isBracketToken = (token) => /^\[[^\]]+\]$/.test(token) && !isQuotedToken(token);
+    const getQuotedKey = (token) => {
+        const match = token.match(/^\['([^']+)'\]$|^\["([^"]+)"\]$/);
+        return match ? (match[1] !== undefined ? match[1] : match[2]) : token;
+    };
+    const appendBracketToLastPart = (token) => {
+        if (resultParts.length > 0) {
+            resultParts[resultParts.length - 1] += token;
+        } else {
+            resultParts.push(token);
         }
-        if(i !== fieldNameSplitted.length - 1){
-            result += '.';
+    };
+
+    for(let i = 0; i < tokens.length; i++){
+        const token = tokens[i];
+
+        if (isQuotedToken(token)) {
+            const key = getQuotedKey(token);
+            resultParts.push(token.replace(/^\["([^"]+)"\]$/, "['$1']"));
+            subValue = hasOwn(subValue, key) ? subValue[key] : undefined;
+            continue;
+        }
+
+        if (isBracketToken(token)) {
+            appendBracketToLastPart(token);
+
+            if (isArray(subValue)) {
+                subValue = subValue[0];
+            } else {
+                const inner = token.slice(1, -1);
+                subValue = hasOwn(subValue, inner) ? subValue[inner] : undefined;
+            }
+            continue;
+        }
+
+        const key = token;
+
+        if (isArray(subValue) && isNumber(parseInt(key))) {
+            appendBracketToLastPart(`[${key}]`);
+            subValue = subValue[0];
+            continue;
+        }
+
+        if (hasOwn(subValue, key)) {
+            const elem = subValue[key];
+
+            if (isArray(elem) && key !== WHOLE_ARRAY) {
+                const nextToken = i + 1 < tokens.length ? tokens[i + 1] : '';
+
+                if (isBracketToken(nextToken)) {
+                    resultParts.push(`${key}${nextToken}`);
+                    subValue = elem[0];
+                    i++;
+                    continue;
+                }
+
+                if (isNumber(parseInt(nextToken))) {
+                    resultParts.push(markFieldNameAsArray(key, parseInt(nextToken)));
+                    subValue = elem[0];
+                    i++;
+                    continue;
+                }
+
+                resultParts.push(markFieldNameAsArray(key));
+                subValue = elem[0];
+                continue;
+            }
+
+            resultParts.push(key);
+            subValue = elem;
+        } else{
+            resultParts.push(key);
+            subValue = undefined;
         }
     }
-    return result;
+
+    return resultParts.join('.');
 }
 
 export function hasArrayMark(str){

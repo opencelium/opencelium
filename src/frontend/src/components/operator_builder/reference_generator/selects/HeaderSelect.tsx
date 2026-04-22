@@ -31,6 +31,9 @@ const HeaderSelect: React.FC<HeaderSelectProps> = ({
     const [menuIsOpen, toggleMenu] = useState<boolean>(false)
 
     const hasError = !!error && !field && !!color
+    const normalizeCommittedValue = (value: string) => {
+        return value.replace(/\["([^"]*)"\]/g, "['$1']");
+    }
 
     // Load headers
     useEffect(() => {
@@ -87,9 +90,9 @@ const HeaderSelect: React.FC<HeaderSelectProps> = ({
 
     useEffect(() => {
         if (selectedOption === null && searchValue) {
-            onValueSelect(searchValue);
+            onValueSelect(normalizeCommittedValue(searchValue));
         } else if (selectedOption) {
-            onValueSelect(selectedOption.value);
+            onValueSelect(normalizeCommittedValue(selectedOption.value));
         } else {
             onValueSelect('');
         }
@@ -134,7 +137,7 @@ const HeaderSelect: React.FC<HeaderSelectProps> = ({
                 onFocus={() => toggleMenu(true)}
                 onBlur={() => {
                     if (!selectedOption && searchValue) {
-                        onValueSelect(searchValue)
+                        onValueSelect(normalizeCommittedValue(searchValue))
                     }
                     toggleMenu(false)
                 }}
