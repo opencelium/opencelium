@@ -32,6 +32,9 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 	const [iterators, setIterators] = useState<string[]>([]);
 	const [menuIsOpen, toggleMenu] = useState<boolean>(false);
 	const hasError = !!error && !field && !!color;
+	const normalizeCommittedValue = (value: string) => {
+		return value.replace(/\["([^"]*)"\]/g, "['$1']");
+	};
 	const isSpaceInsertionAllowed = (nextValue: string, prevValue: string) => {
 		if (nextValue.length <= prevValue.length) {
 			return true;
@@ -64,8 +67,9 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 		setAllOptions(getNestedOptions(''));
 	}, []);
 	const getNestedOptions = (path: string): OptionType[] => {
-		const isRoot = path === '$.';
-		const normalizedPath = isRoot ? '' : path.replace(/^\$\./, '');
+	const startsFromRoot = path.startsWith('$');
+	const isRoot = path === '$.' || path === '$' || path === '';
+	const normalizedPath = isRoot ? '' : path.replace(/^\$(?:\.|(?=\[))/, '');
 
 		const keys =
 			normalizedPath.match(/[^.[\]]+|\[\*]|\[\d+]|\[\w+]/g) || [];
@@ -124,17 +128,17 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 			options.push(
 				{
 					label: 'First element of the array',
-					value: lastValidPath === '$' ? `$[0]` : `${lastValidPath}[0]`,
+					value: lastValidPath === '$' ? `[0]` : `${lastValidPath}[0]`,
 				},
 				{
 					label: 'The whole array',
-					value: lastValidPath === '$' ? `$[*]` : `${lastValidPath}[*]`,
+					value: lastValidPath === '$' ? `[*]` : `${lastValidPath}[*]`,
 				},
 				...iterators.map((it) => ({
 					label: `(${it} loop)`,
 					value:
 						lastValidPath === '$'
-							? `$[${it}]`
+							? `[${it}]`
 							: `${lastValidPath}[${it}]`,
 				}))
 			);
@@ -148,7 +152,7 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 					label: key,
 					value:
 						lastValidPath === '$'
-							? `$.${key}`
+							? `${key}`
 							: lastValidPath
 								? `${lastValidPath}.${key}`
 								: key,
@@ -175,12 +179,8 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 				return;
 			}
 
-
-			const exactMatch = newOptions.find((opt) => opt.value === input);
-			if (!exactMatch) {
-				setSelectedOption(null);
-				onValueSelect(input, {});
-			}
+			setSelectedOption(null);
+			onValueSelect(input, {});
 		}
 	};
 
@@ -197,10 +197,10 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 				request: requestStructure,
 				response: responseStructure,
 			};
-			onValueSelect(selected.value, structure);
+			onValueSelect(normalizeCommittedValue(selected.value), structure);
 		} else {
 			if (searchValue) {
-				onValueSelect(searchValue, {});
+				onValueSelect(normalizeCommittedValue(searchValue), {});
 			} else {
 				setSearchValue('');
 				setFilteredOptions(allOptions);
@@ -210,9 +210,8 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 	};
 	useEffect(() => {
 		if (selectedOption === null && searchValue) {
-			onValueSelect(searchValue);
 		} else if (selectedOption) {
-			onValueSelect(selectedOption.value);
+			onValueSelect(normalizeCommittedValue(selectedOption.value));
 		}
 	}, [selectedOption]);
 	useEffect(() => {
@@ -224,7 +223,7 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 			}
 		}
 
-		const normalized = field?.replace(/\["([^"]+)"\]/g, "['$1']") || '';
+		const normalized = field || '';
 
 		if (normalized !== searchValue) {
 			handleInputChange(normalized, { action: 'input-change' });
@@ -285,7 +284,7 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 				}}
 				onBlur={() => {
 					if (!selectedOption && searchValue) {
-						onValueSelect(searchValue);
+						onValueSelect(normalizeCommittedValue(searchValue));
 					}
 					if (menuIsOpen) toggleMenu(false);
 				}}
