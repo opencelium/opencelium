@@ -38,6 +38,9 @@ export default class Subscription {
     }
 
     static isSubscriptionExpired (sub: SubscriptionModel): boolean {
+        if (!sub) {
+            return false;
+        }
         // inactive subscription is always expired
         if (!sub.active) return true;
 
