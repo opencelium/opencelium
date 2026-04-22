@@ -66,13 +66,23 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 	useEffect(() => {
 		setAllOptions(getNestedOptions(''));
 	}, []);
+
+	const getLookupKey = (token: string) => {
+		const quotedMatch = token.match(/^\[(["'])(.*)\1\]$/);
+
+		if (quotedMatch) {
+			return quotedMatch[2];
+		}
+
+		return token;
+	};
+
 	const getNestedOptions = (path: string): OptionType[] => {
-	const startsFromRoot = path.startsWith('$');
 	const isRoot = path === '$.' || path === '$' || path === '';
 	const normalizedPath = isRoot ? '' : path.replace(/^\$(?:\.|(?=\[))/, '');
 
 		const keys =
-			normalizedPath.match(/[^.[\]]+|\[\*]|\[\d+]|\[\w+]/g) || [];
+			normalizedPath.match(/\['[^']+'\]|\["[^"]+"\]|\[\*]|\[\d+]|\[\w+]|\[[^\]]+\]|[^.[\]]+/g) || [];
 
 		let currentData: DataStructure | null = !color
 			? {}
@@ -88,7 +98,12 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 			if (!key) break;
 
 			const isArrayAccess = key.startsWith('[') && key.endsWith(']');
-			const isIterator = isArrayAccess && iterators.includes(key.slice(1, -1));
+			const lookupKey = getLookupKey(key);
+			const isQuotedKey = lookupKey !== key;
+			const isIterator =
+				isArrayAccess &&
+				!isQuotedKey &&
+				iterators.includes(key.slice(1, -1));
 
 			if (
 				Array.isArray(currentData) &&
@@ -98,9 +113,9 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 			} else if (
 				currentData &&
 				typeof currentData === 'object' &&
-				key in currentData
+				lookupKey in currentData
 			) {
-				currentData = (currentData as DataStructure)[key] as DataStructure;
+				currentData = (currentData as DataStructure)[lookupKey] as DataStructure;
 			} else {
 				break;
 			}
