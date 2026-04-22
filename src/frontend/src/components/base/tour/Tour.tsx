@@ -12,7 +12,17 @@ interface TourProps{
     toggle: any,
     show: boolean,
 }
+function isTargetExist(target: string | HTMLElement): HTMLElement | null {
+    if (typeof target === "string") {
+        return document.querySelector(target);
+    }
 
+    if (target instanceof HTMLElement) {
+        return target;
+    }
+
+    return null;
+}
 const SPOTLIGHT_SELECTOR = ".react-joyride__spotlight";
 const OVERLAY_SELECTOR = ".react-joyride__overlay";
 const TOOLTIP_SELECTOR = ".tooltip__body";
@@ -136,7 +146,7 @@ const Tour:FC<TourProps> =  ({
 
     const preparedSteps = useMemo<PreparedStep[]>(() => {
         return steps
-            .filter((step) => !!step.target)
+            .filter((step) => !!step.target && isTargetExist(step.target))
             .map((step) => ({
                 ...step,
                 data: {
