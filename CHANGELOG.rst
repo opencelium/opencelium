@@ -3,6 +3,22 @@ Changelog
 *********
 
 
+4.8.3
+========
+
+:Date: April 30, 2026
+
+
+Fixes
+--------
+
+* Fix tour in details panel of connection form (OC-1347)
+* Fix apostrophe bug in method reference (OC-1388)
+* Fix zoom in/out position (OC-1391)
+* Enable version history for Add Connection Form (OC-1392)
+* Fix alert message for expired subscription (OC-1393)
+
+
 4.8.2
 ========
  
