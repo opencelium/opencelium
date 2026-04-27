@@ -18,8 +18,10 @@ import { useLocation } from 'react-router';
 
 import { useAppDispatch, useAppSelector } from '@application/utils/store';
 import { API_REQUEST_STATE } from '@application/interfaces/IApplication';
+import { setConnection } from '@entity/connection/redux_toolkit/slices/ConnectionSlice';
 
 import {
+	addConnection,
 	updateConnection,
 	getConnectionVersions,
 	getConnectionVersionBySnapshot, setCurrentConnectionVersion, updateConnectionVersionComment
@@ -72,11 +74,14 @@ const ConnectionVersioning: FC<ConnectionVersioningProps> = ({ theme }) => {
 	const isEditorRoute = useMemo(() => isConnectionEditorLikeRoute(pathname), [
 		pathname,
 	]);
+	const isAddRoute = useMemo(() => /\/connections\/add\b/.test(pathname), [pathname]);
 
 	const connectionState = useAppSelector((s: any) => s.connectionReducer);
 
 	const currentConnection =
 		connectionState?.currentConnection || connectionState?.connection || null;
+	const payloadConnection = connectionState?.connection || currentConnection || null;
+	const draftConnection = connectionState?.connection || null;
 
 	const connectionId = useMemo(() => {
 		if (!currentConnection) return null;
@@ -84,16 +89,30 @@ const ConnectionVersioning: FC<ConnectionVersioningProps> = ({ theme }) => {
 	}, [currentConnection]);
 
 	const isDirty = !!connectionState?.isDirty;
+	const hasFilledDraftConnection = !!(
+		draftConnection?.title &&
+		`${draftConnection.title}`.trim() !== '' &&
+		(draftConnection?.fromConnector?.id > 0 || draftConnection?.fromConnector?.connectorId > 0) &&
+		(draftConnection?.toConnector?.id > 0 || draftConnection?.toConnector?.connectorId > 0)
+	);
 
-	const canShow = isEditorRoute && !!connectionId;
+	const canShow = isEditorRoute && (!!connectionId || (isAddRoute && hasFilledDraftConnection));
 
-	const isSaving = connectionState?.updatingConnection === API_REQUEST_STATE.START || isSavingWithComment;
+	const isSaving =
+		connectionState?.updatingConnection === API_REQUEST_STATE.START ||
+		connectionState?.addingConnection === API_REQUEST_STATE.START ||
+		isSavingWithComment;
+	const isUnsavedAdd = isAddRoute && !connectionId;
+	const saveButtonDisabled = isUnsavedAdd
+		? !payloadConnection || isSaving
+		: (!isDirty && !!connectionId) || !payloadConnection || isSaving;
+	const saveButtonLabel = isSaving ? 'Saving...' : (isUnsavedAdd || isDirty ? 'Save' : 'Saved');
 
 	const onSave = useCallback(() => {
-		if (!connectionId) return;
+		if (!payloadConnection) return;
 		setSaveComment('');
 		setIsSaveDialogOpen(true);
-	}, [connectionId]);
+	}, [payloadConnection]);
 
 	const onOpenHistory = useCallback(() => {
 		if (!connectionId) return;
@@ -180,17 +199,27 @@ const ConnectionVersioning: FC<ConnectionVersioningProps> = ({ theme }) => {
 	}, [isSavingWithComment]);
 
 	const onConfirmSaveWithComment = useCallback(async () => {
-		if (!connectionId) return;
-
-		const payload = connectionState?.connection || currentConnection;
+		const payload = payloadConnection;
 		if (!payload) return;
 
 		setIsSavingWithComment(true);
 
 		try {
-			await dispatch(updateConnection(payload) as any).unwrap();
+			const isCreate = !connectionId && isAddRoute;
+			const savedConnection = isCreate
+				? await dispatch(addConnection(payload) as any).unwrap()
+				: await dispatch(updateConnection(payload) as any).unwrap();
 
-			const versions = await dispatch(getConnectionVersions(connectionId) as any).unwrap();
+			const savedConnectionId =
+				savedConnection?.id || savedConnection?.connectionId || connectionId || null;
+
+			if (!savedConnectionId) {
+				setIsSaveDialogOpen(false);
+				setSaveComment('');
+				return;
+			}
+
+			const versions = await dispatch(getConnectionVersions(savedConnectionId) as any).unwrap();
 
 			const normalizedVersions = Array.isArray(versions) ? [...versions] : [];
 
@@ -203,7 +232,7 @@ const ConnectionVersioning: FC<ConnectionVersioningProps> = ({ theme }) => {
 			if (commentToSave && currentVersion?.snapshotId) {
 				await dispatch(
 					updateConnectionVersionComment({
-						connectionId,
+						connectionId: savedConnectionId,
 						snapshotId: currentVersion.snapshotId,
 						comment: commentToSave,
 					}) as any,
@@ -212,15 +241,18 @@ const ConnectionVersioning: FC<ConnectionVersioningProps> = ({ theme }) => {
 
 			setIsSaveDialogOpen(false);
 			setSaveComment('');
+			if (isCreate && savedConnection) {
+				dispatch(setConnection(savedConnection as any));
+			}
 		} catch (e) {
 		} finally {
 			setIsSavingWithComment(false);
 		}
 	}, [
 		connectionId,
-		connectionState?.connection,
-		currentConnection,
 		dispatch,
+		isAddRoute,
+		payloadConnection,
 		saveComment,
 	]);
 
@@ -237,8 +269,8 @@ const ConnectionVersioning: FC<ConnectionVersioningProps> = ({ theme }) => {
 		>
 			<Button
 				handleClick={onSave}
-				isDisabled={!isDirty || isSaving}
-				label={isSaving ? 'Saving...' : (isDirty ? 'Save' : 'Saved')}
+				isDisabled={saveButtonDisabled}
+				label={saveButtonLabel}
 			/>
 
 
