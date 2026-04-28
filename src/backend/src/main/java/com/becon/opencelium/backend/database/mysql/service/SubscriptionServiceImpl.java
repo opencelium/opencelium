@@ -11,6 +11,8 @@ import com.becon.opencelium.backend.database.mysql.repository.SubscriptionReposi
 import com.becon.opencelium.backend.enums.ActivReqStatus;
 import com.becon.opencelium.backend.execution.socket.SocketConstant;
 import com.becon.opencelium.backend.execution.socket.WebSocketNotificationQueue;
+import com.becon.opencelium.backend.quartz.DeactivateExpiredSubscriptionJob;
+import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
 import com.becon.opencelium.backend.quartz.ResetLimitsJob;
 import com.becon.opencelium.backend.resource.execution.ConnectionEx;
 import com.becon.opencelium.backend.resource.subs.SubsDTO;
@@ -41,6 +43,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     private final SubscriptionRepository subscriptionRepository;
     private final Scheduler scheduler;
+    private final QuartzJobScheduler quartzJobScheduler;
     private final OperationUsageHistoryService operationUsageHistoryService;
     private final OperationUsageHistoryDetailService operationUsageHistoryDetailService;
     private final ActivationRequestService activationRequestService;
@@ -59,6 +62,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                                    WebSocketNotificationQueue notificationQueue) {
         this.subscriptionRepository = subscriptionRepository;
         this.scheduler = scheduler;
+        this.quartzJobScheduler = new QuartzJobScheduler(scheduler);
         this.operationUsageHistoryService = operationUsageHistoryService;
         this.operationUsageHistoryDetailService = operationUsageHistoryDetailService;
         this.activationRequestService = activationRequestService;
@@ -148,6 +152,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         subscription.setCurrentUsageHmac(HmacUtility
                 .encode(subscription.getId() + subscription.getCurrentUsage()));
         initUsageResetJob(subscription);
+        initExpiryJob(subscription);
         subscriptionRepository.save(subscription);
     }
 
@@ -274,7 +279,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                     newDetail.setStartDate(Instant.ofEpochMilli(startTime).atZone(ZoneId.of("UTC")).toLocalDateTime());
                     newDetail.setOperationUsageHistory(history);  // Set the bidirectional relationship
                     operationUsageHistoryDetailService.save(newDetail);
-                         // Add the new detail to the existing list
+                        // Add the new detail to the existing list
 //                    history.getDetails().add(newDetail);
                     return history;
                 })
@@ -395,11 +400,45 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
     }
 
+    @Override
+    public void deactivateExpiredSubscription(String subId) {
+        Optional<Subscription> optional = subscriptionRepository.findById(subId);
+        if (optional.isEmpty()) {
+            logger.warn("Subscription not found when trying to deactivate expired: {}", subId);
+            return;
+        }
+        Subscription subscription = optional.get();
+        LicenseKey licenseKey = LicenseKeyUtility.decrypt(subscription.getLicenseKey());
+        if (licenseKey.getEndDate() < System.currentTimeMillis()) {
+            subscription.setActive(false);
+            subscriptionRepository.save(subscription);
+            logger.info("Subscription {} deactivated — license expired at {}", subId,
+                    Instant.ofEpochMilli(licenseKey.getEndDate()));
+            sendNotification();
+        }
+    }
+
+    private void initExpiryJob(Subscription subscription) {
+        LicenseKey lk = LicenseKeyUtility.decrypt(subscription.getLicenseKey());
+        if (lk.getEndDate() == SubscriptionConstant.freeLicenseEndDate) {
+            return;
+        }
+        quartzJobScheduler.scheduleOnce(
+                DeactivateExpiredSubscriptionJob.class,
+                "LicenseExpiryJob-" + subscription.getId(),
+                "LicenseExpiryJobs",
+                "localSubId",
+                subscription.getId(),
+                Date.from(Instant.ofEpochMilli(lk.getEndDate()))
+        );
+    }
+
     private void killAllTasks() {
         try {
-            Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupEquals("LicenseJobs"));
-            for (JobKey jobKey : jobKeys) {
-                scheduler.deleteJob(jobKey);
+            for (String group : List.of("LicenseJobs", "LicenseExpiryJobs")) {
+                for (JobKey jobKey : scheduler.getJobKeys(GroupMatcher.jobGroupEquals(group))) {
+                    scheduler.deleteJob(jobKey);
+                }
             }
         } catch (SchedulerException e) {
             e.printStackTrace();

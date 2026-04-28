@@ -9,6 +9,7 @@ import com.becon.opencelium.backend.exception.SchedulerNotFoundException;
 import org.quartz.CronExpression;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
+import org.quartz.Job;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -16,6 +17,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
 import org.quartz.JobPersistenceException;
 import org.quartz.SchedulerException;
+import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
@@ -24,6 +26,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -303,6 +306,40 @@ public class QuartzJobScheduler implements SchedulingStrategy {
             }
 
             quartzScheduler.interrupt(jobKey);
+        } catch (SchedulerException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void scheduleOnce(Class<? extends Job> jobClass, String jobKey, String group,
+                             String dataKey, String dataValue, Date fireAt) {
+        JobKey jobIdentity = new JobKey(jobKey, group);
+        TriggerKey triggerKey = new TriggerKey(jobKey, group);
+
+        // If the app was down when fireAt passed, fire immediately on the next startup.
+        SimpleScheduleBuilder schedule = SimpleScheduleBuilder.simpleSchedule()
+                .withRepeatCount(0)
+                .withMisfireHandlingInstructionFireNow();
+        try {
+            if (quartzScheduler.checkExists(jobIdentity)) {
+                Trigger newTrigger = TriggerBuilder.newTrigger()
+                        .withIdentity(triggerKey)
+                        .startAt(fireAt)
+                        .withSchedule(schedule)
+                        .build();
+                quartzScheduler.rescheduleJob(triggerKey, newTrigger);
+            } else {
+                JobDetail job = JobBuilder.newJob(jobClass)
+                        .withIdentity(jobKey, group)
+                        .usingJobData(dataKey, dataValue)
+                        .build();
+                Trigger trigger = TriggerBuilder.newTrigger()
+                        .withIdentity(triggerKey)
+                        .startAt(fireAt)
+                        .withSchedule(schedule)
+                        .build();
+                quartzScheduler.scheduleJob(job, trigger);
+            }
         } catch (SchedulerException e) {
             throw new RuntimeException(e);
         }
