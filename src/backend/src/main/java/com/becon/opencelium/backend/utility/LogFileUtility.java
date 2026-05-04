@@ -19,12 +19,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
-import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -46,6 +44,13 @@ public class LogFileUtility {
 
     public static String toFilename(String timestamp, long connectionId, String type, long executionId, String extension) {
         return timestamp + NAME_PARTS_SEPARATOR + connectionId + NAME_PARTS_SEPARATOR + type + NAME_PARTS_SEPARATOR + executionId + "." + extension;
+    }
+
+    public static Path buildUncategorizedLogFilePath(String timestamp, long connectionId, long executionId) {
+        return toPath(
+                LOG_LOCATION,
+                toFilename(timestamp, connectionId, UNCATEGORIZED, executionId, LOG_FILE_EXTENSION)
+        );
     }
 
     public static void create(String base) throws IOException {
@@ -75,24 +80,6 @@ public class LogFileUtility {
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    public static void move(Long connectionId, long executionId, String timestamp, String type, int fileLimit) {
-        Path sourcePath = toPath(LOG_LOCATION, toFilename(timestamp, connectionId, UNCATEGORIZED, executionId, LOG_FILE_EXTENSION));
-        Path destinationPath = toPath(LOG_LOCATION, connectionId.toString(), toFilename(timestamp, connectionId, type, executionId, LOG_FILE_EXTENSION));
-        if (!Files.exists(sourcePath)) {
-            return;
-        }
-
-        try {
-            Files.createDirectories(destinationPath.getParent());
-
-            Files.move(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            enforceLimit(LOG_LOCATION, connectionId, type, fileLimit);
         }
     }
 

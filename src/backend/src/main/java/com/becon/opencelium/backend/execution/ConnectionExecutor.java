@@ -2,13 +2,11 @@ package com.becon.opencelium.backend.execution;
 
 import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
 import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
-import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.oc721.Connector;
 import com.becon.opencelium.backend.execution.oc721.FieldBind;
 import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.execution.masking.MaskingService;
 import com.becon.opencelium.backend.execution.masking.MaskingServiceImp;
-import com.becon.opencelium.backend.execution.logger.OcLogger;
 import com.becon.opencelium.backend.resource.execution.ConnectionEx;
 import com.becon.opencelium.backend.resource.execution.ExecutionObj;
 import com.becon.opencelium.backend.resource.execution.ProxyEx;
@@ -23,17 +21,15 @@ import java.util.stream.Collectors;
 public class ConnectionExecutor {
     private final Map<String, Object> webhookVars;
     private final ConnectionEx connection;
-    private final OcLogger<ExecutionLog> executionLogger;
     private final MaskingService masking;
     private final ProxyEx proxy;
     private ExecutionManager executionManager;
 
-    public ConnectionExecutor(ExecutionObj executionObj, OcLogger<ExecutionLog> executionLogger, List<MaskingRule> rules) {
+    public ConnectionExecutor(ExecutionObj executionObj, List<MaskingRule> rules) {
         this.webhookVars = executionObj.getWebhookVars();
         this.connection = executionObj.getConnection();
         this.proxy = executionObj.getProxy();
 
-        this.executionLogger = executionLogger;
         this.masking = new MaskingServiceImp(rules);
     }
 
@@ -44,8 +40,8 @@ public class ConnectionExecutor {
 
         executionManager = new ExecutionManagerImpl(webhookVars, source, target, fieldBind);
 
-        ConnectorExecutor sourceEx = new ConnectorExecutor(connection.getSource(), executionManager, getRestTemplate(source), executionLogger, masking, "source");
-        ConnectorExecutor targetEx = new ConnectorExecutor(connection.getTarget(), executionManager, getRestTemplate(target), executionLogger, masking, "target");
+        ConnectorExecutor sourceEx = new ConnectorExecutor(connection.getSource(), executionManager, getRestTemplate(source), masking, "source");
+        ConnectorExecutor targetEx = new ConnectorExecutor(connection.getTarget(), executionManager, getRestTemplate(target), masking, "target");
 
         sourceEx.start();
         targetEx.start();

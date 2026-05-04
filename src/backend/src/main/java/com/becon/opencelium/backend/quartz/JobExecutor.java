@@ -20,6 +20,7 @@ import com.becon.opencelium.backend.database.mysql.entity.Subscription;
 import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
 import com.becon.opencelium.backend.execution.ConnectionExecutor;
 import com.becon.opencelium.backend.execution.logger.OcLogger;
+import com.becon.opencelium.backend.execution.logger.ThreadLocalOcLogger;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.service.ExecutionObjectService;
 import com.becon.opencelium.backend.execution.service.ExecutionObjectServiceImp;
@@ -86,19 +87,19 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
             ExecutionObj executionObj = executionObjectService.buildObj(data);
 
             // setup execution logger:
-            OcLogger<ExecutionLog> executionLogger = new OcLogger<>(
-                    data.getExecType(), debugMode, new ExecutionLog(), connectionId, timestamp, execId
-            );
+            boolean loggingEnabled = debugMode || data.getExecType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE;
+            OcLogger<ExecutionLog> executionLogger = new OcLogger<>(loggingEnabled, new ExecutionLog(), connectionId, timestamp, execId);
+            ThreadLocalOcLogger.set(executionLogger);
 
-            ConnectionExecutor executor = new ConnectionExecutor(executionObj, executionLogger, data.getRules());
+            ConnectionExecutor executor = new ConnectionExecutor(executionObj, data.getRules());
 
             long startTime = System.currentTimeMillis();
             try {
-                executionLogger.logAndSend(String.format("phase=EXECUTION_START id=%d connectionId=%d schedulerId=%d", execId, connectionId, schedulerId));
+                executionLogger.logAndSend("phase=EXECUTION_START id=%d connectionId=%d schedulerId=%d".formatted(execId, connectionId, schedulerId));
                 executor.start();
             } finally {
-                executionLogger.logAndSend(String.format("phase=EXECUTION_END id=%d connectionId=%d schedulerId=%d", execId, connectionId, schedulerId));
-                executionLogger.close(); // release resources
+                executionLogger.logAndSend("phase=EXECUTION_END id=%d connectionId=%d schedulerId=%d".formatted(execId, connectionId, schedulerId));
+                ThreadLocalOcLogger.clear();
 
                 context.put("operationsEx", executor.getOperations());
             }

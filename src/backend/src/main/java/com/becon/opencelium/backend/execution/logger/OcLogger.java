@@ -4,117 +4,63 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.FileAppender;
-import com.becon.opencelium.backend.execution.logger.dto.LogDataDTO;
-import com.becon.opencelium.backend.execution.socket.WebSocketNotificationService;
-import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
-import com.becon.opencelium.backend.utility.ApplicationContextUtility;
+import com.becon.opencelium.backend.constant.LogConstant;
 import com.becon.opencelium.backend.utility.LogFileUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.RandomAccessFile;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Optional;
-import java.util.concurrent.BlockingQueue;
 import java.util.function.Consumer;
 
-import static com.becon.opencelium.backend.constant.LogConstant.LOG_FILE_EXTENSION;
-import static com.becon.opencelium.backend.constant.LogConstant.LOG_LINE_PATTERN;
-import static com.becon.opencelium.backend.constant.LogConstant.LOG_LOCATION;
-import static com.becon.opencelium.backend.constant.LogConstant.UNCATEGORIZED;
-
 public class OcLogger<T extends LogMessage> {
-    private final boolean debugMode;
-    private final boolean webSocket;
-    private final boolean supportFile;
     private final T logEntity;
-    private final WebSocketNotificationService socketNotificationService;
-    private final LogLineDispatcher logLineDispatcher;
-    private final long connectionId;
-    private final Path filepath;
+    private final boolean enabled; // debug is ON || SUPPORT_FILE is enabled
     private final Logger logger;
 
-    // --- async logging state ---
-//    private final AsyncLogDispatcher asyncDispatcher;
 
-    public OcLogger(
-            QuartzJobScheduler.TriggerType triggerType, boolean debugMode, T logEntity,
-            long connectionId, String timestamp, long executionId
-    ) {
-        this.debugMode = debugMode;
-        this.webSocket = (QuartzJobScheduler.TriggerType.EXECUTION_TEST == triggerType);
-        this.supportFile = (QuartzJobScheduler.TriggerType.SUPPORT_FILE == triggerType);
-
-        this.socketNotificationService = ApplicationContextUtility.getBean(WebSocketNotificationService.class);
-        this.logLineDispatcher = new LogLineDispatcher();
-        this.connectionId = connectionId;
+    public OcLogger(boolean enabled, T logEntity, long connectionId, String timestamp, long executionId) {
+        this.enabled = enabled;
         this.logEntity = logEntity;
 
-        // delete existing log files with the same 'executionId'
-        LogFileUtility.deleteByExecutionId(executionId);
+        Path filepath = LogFileUtility.buildUncategorizedLogFilePath(timestamp, connectionId, executionId);
+        String loggerId = String.valueOf(executionId);
+        ch.qos.logback.classic.Logger classicLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(loggerId);
 
-        // set up the logger to create temporary log file in base log directory: type = u (uncategorized), not s (success) or f (fail):
-        String loggerId = String.format("%d-%d", executionId, connectionId);
-        String filename = LogFileUtility.toFilename(timestamp, connectionId, UNCATEGORIZED, executionId, LOG_FILE_EXTENSION);
+        if (enabled) {
+            LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 
-        this.filepath = LogFileUtility.toPath(LOG_LOCATION, filename);
+            PatternLayoutEncoder encoder = new PatternLayoutEncoder();
+            encoder.setContext(context);
+            encoder.setPattern(LogConstant.LOG_LINE_PATTERN);
+            encoder.setCharset(StandardCharsets.UTF_8);
+            encoder.start();
 
-        LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-        FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
-        fileAppender.setName("FileAppender-" + loggerId);
-        fileAppender.setContext(context);
-        fileAppender.setFile(filepath.toString());
+            FileAppender<ILoggingEvent> fileAppender = new OffsetTrackingAppender(executionId);
+            fileAppender.setName("Appender-" + loggerId);
+            fileAppender.setContext(context);
+            fileAppender.setFile(filepath.toString());
+            fileAppender.setEncoder(encoder);
+            fileAppender.start();
 
-        PatternLayoutEncoder encoder = new PatternLayoutEncoder();
-        encoder.setContext(context);
-        encoder.setPattern(LOG_LINE_PATTERN);
-        encoder.setCharset(StandardCharsets.UTF_8);
-        encoder.start();
+            classicLogger.addAppender(fileAppender);
+            classicLogger.setAdditive(false);
+        }
 
-        fileAppender.setEncoder(encoder);
-        fileAppender.start();
-
-        ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(loggerId);
-        logger.addAppender(fileAppender);
-        logger.setAdditive(false); // do not pass message to parent, just write to the file
-
-        this.logger = logger;
-
-//        // create async dispatcher ONLY if we are actually logging to file
-//        if (debugMode || supportFile) {
-//            String threadName = "OcLogger-" + connectionId + "-" + executionId;
-//            this.asyncDispatcher = new AsyncLogDispatcher(threadName);
-//        } else {
-//            this.asyncDispatcher = null;
-//        }
+        this.logger = classicLogger;
     }
 
-    public void close() {
-        // Stop async worker so no more writes happen
-//        if (asyncDispatcher != null) {
-//            asyncDispatcher.close();   // waits for queue to drain and thread to finish
-//        }
-
-        if (logger instanceof ch.qos.logback.classic.Logger classicLogger) {
+    public void clear() {
+        if (enabled && logger instanceof ch.qos.logback.classic.Logger classicLogger) {
             classicLogger.iteratorForAppenders().forEachRemaining(appender -> {
                 if (appender instanceof FileAppender) {
                     appender.stop();
                 }
             });
-            classicLogger.detachAndStopAllAppenders();
-        }
 
-        if (!debugMode && !supportFile) {
-            // debugMode = false && supportFile = false then there is nothing in logfile
-            // so just delete it
-            try {
-                LogFileUtility.delete(filepath);
-            } catch (IOException e) {}
+            classicLogger.detachAndStopAllAppenders();
         }
     }
 
@@ -122,58 +68,24 @@ public class OcLogger<T extends LogMessage> {
         return logEntity;
     }
 
-    public void logAndSend(String message){
-//        if (asyncDispatcher != null) {
-//            asyncDispatcher.submit(() -> logAndSendSync(logger::info, message));
-//        } else {
-            logAndSendSync(logger::info, message);
-//        }
+    public void logAndSend(String message) {
+        logAndSend(logger::info, message);
     }
 
-    public void logAndSend(Exception e){
+    public void logAndSend(Exception e) {
         String stackTrace = getStackTraceAsString(e);
         String logMessage = "segment=EXCEPTION data=" + stackTrace;
-//        if (asyncDispatcher != null) {
-//            asyncDispatcher.submit(() -> logAndSendSync(logger::info, logMessage));
-//        } else {
-            logAndSendSync(logger::info, logMessage);
-//        }
+
+        logAndSend(logger::info, logMessage);
     }
 
 
-    private <E> void logAndSendSync(Consumer<E> t, E message) {
-        if (!debugMode && !supportFile) {
+    private <E> void logAndSend(Consumer<E> writer, E message) {
+        if (!enabled) {
             return;
         }
 
-        // evaluate startOffset before writing to a logfile
-        long startOffset = getStartOffset();
-        t.accept(message);
-        long endOffset = getStartOffset();
-        Optional<LogDataDTO> logData = logLineDispatcher.dispatch(message.toString(), startOffset, endOffset);
-        if (webSocket && logData.isPresent()) {
-            socketNotificationService.send(connectionId, logData);
-        }
-    }
-
-    private long getStartOffset() {
-        try {
-            return evaluateUsingFiles();
-        } catch (IOException e) {
-            return evaluateUsingRAF();
-        }
-    }
-
-    private long evaluateUsingFiles() throws IOException {
-        return Files.size(filepath);
-    }
-
-    private long evaluateUsingRAF() {
-        try (RandomAccessFile raf = new RandomAccessFile(filepath.toFile(), "r")) {
-            return raf.length();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        writer.accept(message);
     }
 
     private String getStackTraceAsString(Throwable e) {

@@ -31,7 +31,7 @@ import com.becon.opencelium.backend.database.mysql.entity.LastExecution;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.entity.Subscription;
 import com.becon.opencelium.backend.database.mysql.entity.User;
-import com.becon.opencelium.backend.database.mysql.service.ConnectionServiceImp;
+import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.database.mysql.service.DataAggregatorService;
 import com.becon.opencelium.backend.database.mysql.service.ExecutionService;
 import com.becon.opencelium.backend.database.mysql.service.LastExecutionService;
@@ -39,16 +39,17 @@ import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
 import com.becon.opencelium.backend.database.mysql.service.SubscriptionService;
 import com.becon.opencelium.backend.database.mysql.service.UserService;
 import com.becon.opencelium.backend.enums.LangEnum;
+import com.becon.opencelium.backend.exception.ExecutionTerminatedException;
 import com.becon.opencelium.backend.execution.JSHttpObject;
+import com.becon.opencelium.backend.execution.logger.pubsub.ExecutionEventPublisher;
+import com.becon.opencelium.backend.execution.logger.pubsub.event.ExecutionFinishedEvent;
+import com.becon.opencelium.backend.execution.logger.pubsub.event.ExecutionStartedEvent;
 import com.becon.opencelium.backend.execution.logger.service.LogDataService;
-import com.becon.opencelium.backend.execution.logger.service.LogDataServiceImp;
 import com.becon.opencelium.backend.execution.notification.EmailServiceImpl;
 import com.becon.opencelium.backend.execution.notification.IncomingWebhookService;
 import com.becon.opencelium.backend.execution.oc721.Operation;
-import com.becon.opencelium.backend.execution.socket.Connection2WebSocketChannelMapping;
 import com.becon.opencelium.backend.execution.socket.SocketConstant;
 import com.becon.opencelium.backend.execution.socket.WebSocketNotificationService;
-import com.becon.opencelium.backend.execution.supportfile.SupportFileService;
 import com.becon.opencelium.backend.quartz.JobExecutor;
 import com.becon.opencelium.backend.quartz.QuartzJobScheduler;
 import com.becon.opencelium.backend.resource.schedule.RunningJobsResource;
@@ -63,7 +64,6 @@ import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -85,6 +85,7 @@ import java.util.stream.Collectors;
 
 import static com.becon.opencelium.backend.constant.LogConstant.FAIL;
 import static com.becon.opencelium.backend.constant.LogConstant.SUCCESS;
+import static com.becon.opencelium.backend.constant.LogConstant.TERMINATED;
 
 @Aspect
 @Component
@@ -99,11 +100,10 @@ public class ExecutionAspect {
     private final Environment env;
     private final LastExecutionService lastExecutionService;
     private final DataAggregatorService dataAggregatorService;
-    private final SupportFileService supportFileService;
-    private final Connection2WebSocketChannelMapping connection2ChannelMapping;
     private final SubscriptionService subscriptionService;
     private final WebSocketNotificationService notificationService;
     private final LogDataService logDataService;
+    private final ConnectionService connectionService;
 
     public ExecutionAspect(
             @Qualifier("schedulerServiceImp") SchedulerService schedulerService,
@@ -116,9 +116,8 @@ public class ExecutionAspect {
             IncomingWebhookService incomingWebhookService,
             EmailServiceImpl emailService,
             Environment env,
-            SupportFileService supportFileService,
-            Connection2WebSocketChannelMapping connection2ChannelMapping,
-            WebSocketNotificationService notificationService) {
+            WebSocketNotificationService notificationService,
+            ConnectionService connectionService) {
         this.schedulerService = schedulerService;
         this.userService = userService;
         this.incomingWebhookService = incomingWebhookService;
@@ -127,11 +126,10 @@ public class ExecutionAspect {
         this.env = env;
         this.lastExecutionService = lastExecutionService;
         this.dataAggregatorService = dataAggregatorService;
-        this.supportFileService = supportFileService;
         this.subscriptionService = subscriptionService;
-        this.connection2ChannelMapping = connection2ChannelMapping;
         this.notificationService = notificationService;
         this.logDataService = logDataService;
+        this.connectionService = connectionService;
     }
 
     @Before("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
@@ -146,10 +144,14 @@ public class ExecutionAspect {
         QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
         int schedulerId = data != null ? data.getScheduleId() : jobDataMap.getIntValue("schedulerId");
         long execId = initExecutionObj(schedulerId);
-        jobDataMap.put("execId", execId);
-
         Scheduler scheduler = schedulerService.getById(schedulerId);
-        jobDataMap.put("connectionId", scheduler.getConnection().getId());
+        long connectionId = scheduler.getConnection().getId();
+        String timestamp = LocalDateTime.now().format(LogConstant.DATE_TIME_FORMATTER);
+
+        // save required data on job execution context
+        jobDataMap.put("execId", execId);
+        jobDataMap.put("connectionId", connectionId);
+        jobDataMap.put("timestamp", timestamp);
         jobDataMap.put("debugMode", scheduler.getDebugMode());
 
         List<EventNotification> eventNotifications = schedulerService.getAllNotifications(schedulerId);
@@ -157,8 +159,12 @@ public class ExecutionAspect {
 
         sendRunningJobsNotification();
 
-        String timestamp = LocalDateTime.now().format(LogConstant.DATE_TIME_FORMATTER);
-        jobDataMap.put("timestamp", timestamp);
+        // delete existing log files with the same 'executionId'
+        LogFileUtility.deleteByExecutionId(execId);
+
+        ExecutionEventPublisher.publish(
+                new ExecutionStartedEvent(execId, connectionId, schedulerId, timestamp)
+        );
     }
 
     @AfterReturning("execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)")
@@ -170,40 +176,22 @@ public class ExecutionAspect {
         }
 
         long execId = jobDataMap.getLong("execId");
-        long connectionId = jobDataMap.getLong("connectionId");
-        boolean debugMode = jobDataMap.getBoolean("debugMode");
-        String timestamp = jobDataMap.getString("timestamp");
         QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
         int schedulerId = data.getScheduleId();
 
-        updateExecutionObj(execId, true, debugMode);
+        updateExecutionObj(execId, true);
         List<Operation> operations = (List<Operation>) context.get("operationsEx");
         executeAggregator(operations, execId);
-
-        if (data.getExecType() == QuartzJobScheduler.TriggerType.EXECUTION_TEST) {
-            // delete temporarily created scheduler
-            schedulerService.deleteById(schedulerId);
-            // delete temporarily created connection
-            connectionServiceImp.deleteById(connectionId);
-            // remove mapping
-            connection2ChannelMapping.remove(connectionId);
-
-            // move temporarily log file under /connectionId folder if debug is enabled
-            move(connectionId, execId, timestamp, SUCCESS, debugMode);
-        } else if (data.getExecType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE) {
-            supportFileService.collectFiles(connectionId, execId, timestamp, SUCCESS);
-
-            // delete temporarily created scheduler
-            schedulerService.deleteById(schedulerId);
-        } else {
-            // move temporarily log file under /connectionId folder if debug is enabled
-            move(connectionId, execId, timestamp, SUCCESS, debugMode);
-        }
 
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
         triggerNotifications(en, "post", null);
 
         sendRunningJobsNotification(schedulerId);
+
+
+        ExecutionEventPublisher.publish(
+                new ExecutionFinishedEvent(execId, data.getExecType(), SUCCESS)
+        );
     }
 
     @AfterThrowing(pointcut = "execution(* com.becon.opencelium.backend.quartz.JobExecutor.executeInternal(..)) && args(context)",
@@ -216,40 +204,22 @@ public class ExecutionAspect {
         }
 
         long execId = jobDataMap.getLong("execId");
-        long connectionId = jobDataMap.getLong("connectionId");
-        boolean debugMode = jobDataMap.getBoolean("debugMode");
-        String timestamp = jobDataMap.getString("timestamp");
         QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jobDataMap.get("data");
         int schedulerId = data.getScheduleId();
 
-        updateExecutionObj(execId, false, debugMode);
+        updateExecutionObj(execId, false);
         List<Operation> operations = (List<Operation>) context.get("operationsEx");
         executeAggregator(operations, execId);
-
-        if (data.getExecType() == QuartzJobScheduler.TriggerType.EXECUTION_TEST) {
-            // delete temporarily created scheduler
-            schedulerService.deleteById(schedulerId);
-            // delete temporarily created connection
-            connectionServiceImp.deleteById(connectionId);
-            // remove mapping
-            connection2ChannelMapping.remove(connectionId);
-
-            // move temporarily log file under /connectionId folder if debug is enabled
-            move(connectionId, execId, timestamp, FAIL, debugMode);
-        } else if (data.getExecType() == QuartzJobScheduler.TriggerType.SUPPORT_FILE) {
-            supportFileService.collectFiles(connectionId, execId, timestamp, FAIL);
-
-            // delete temporarily created scheduler
-            schedulerService.deleteById(schedulerId);
-        } else {
-            // move temporarily log file under /connectionId folder if debug is enabled
-            move(connectionId, execId, timestamp, FAIL, debugMode);
-        }
 
         List<EventNotification> en = schedulerService.getAllNotifications(schedulerId);
         triggerNotifications(en, "alert", ex);
 
         sendRunningJobsNotification(schedulerId);
+
+        final String result = ex instanceof ExecutionTerminatedException ? TERMINATED : FAIL;
+        ExecutionEventPublisher.publish(
+                new ExecutionFinishedEvent(execId, data.getExecType(), result)
+        );
     }
 
     private long initExecutionObj(int schedulerId) {
@@ -262,12 +232,12 @@ public class ExecutionAspect {
                 .getId();
     }
 
-    private void updateExecutionObj(long execId, boolean success, boolean hasLog) {
+    private void updateExecutionObj(long execId, boolean success) {
         Execution execution = executionService.getById(execId);
         execution.setEndTime(new Date());
         execution.setStatus(success ? "S" : "F");
         executionService.save(execution);
-        hasLog = LogFileUtility.logFileExistForExecId(execId) && logDataService.findRootByExecutionId(execId).isPresent();
+        boolean hasLog = LogFileUtility.logFileExistForExecId(execId) && logDataService.findRootByExecutionId(execId).isPresent();
         LastExecution le;
         if (lastExecutionService.existsBySchedulerId(execution.getScheduler().getId())) {
             le = lastExecutionService.findBySchedulerId(execution.getScheduler().getId());
@@ -425,16 +395,13 @@ public class ExecutionAspect {
         return constants;
     }
 
-    @Autowired
-    private ConnectionServiceImp connectionServiceImp;
-
     private Map<String, String> getConstantValues(List<String> constants, User user, Exception ex, EventNotification en) {
         if (constants == null || constants.isEmpty()) {
             return null;
         }
         Scheduler scheduler = schedulerService.findById(en.getScheduler()
                 .getId()).orElseThrow(() -> new RuntimeException("SCHEDULER_NOT_FOUND"));
-        Connection connection = connectionServiceImp.getById(scheduler.getConnection().getId());
+        Connection connection = connectionService.getById(scheduler.getConnection().getId());
         Map<String, String> cValues = new HashMap<>();
         constants.forEach(c -> {
             switch (c) {
@@ -543,17 +510,5 @@ public class ExecutionAspect {
     private void sendRunningJobsNotification(int schedulerId) {
         List<RunningJobsResource> allRunningJobs = schedulerService.getAllRunningJobsExcludingOne(schedulerId);
         notificationService.send(SocketConstant.SCHEDULER_DESTINATION, allRunningJobs);
-    }
-
-    private void move(Long connectionId, long execId, String timestamp, String type, boolean debugMode) {
-        if (debugMode) {
-            int fileLimit;
-            if (SUCCESS.equals(type)) {
-                fileLimit = env.getProperty(AppYamlPath.LOG_FILE_SUCCESS_LIMIT, Integer.class, 2);
-            } else {
-                fileLimit = env.getProperty(AppYamlPath.LOG_FILE_FAIL_LIMIT, Integer.class, 3);
-            }
-            LogFileUtility.move(connectionId, execId, timestamp, type, fileLimit);
-        }
     }
 }
