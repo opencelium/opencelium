@@ -16,6 +16,7 @@ import com.becon.opencelium.backend.database.mysql.service.UserRoleServiceImpl;
 import com.becon.opencelium.backend.exception.RoleNotFoundException;
 import com.becon.opencelium.backend.resource.user.UserRoleResource;
 //import com.becon.opencelium.backend.testutil.fixture.UserRoleFixture;
+import com.becon.opencelium.backend.testutil.assertion.UserRoleAssertions;
 import com.becon.opencelium.backend.testutil.fixture.UserRoleFixture;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -19,6 +19,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -111,6 +112,18 @@ class UserRoleServiceImplFakeTest {
         userRoleService.deleteById(role.getId());
 
         assertThat(userRoleService.existsById(role.getId())).isFalse();
+    }
+
+    @Test
+    void savePersistUserRoleWhenNotNull() {
+        UserRole role = UserRoleFixture.aStandardUserRole();
+
+        userRoleService.save(role);
+
+        Optional<UserRole>  saved = userRoleService.findById(role.getId());
+        assertThat(saved)
+                .as("UserRole with id %d and name %s should exist after save()", role.getId(), role.getName())
+                .isPresent();
     }
 
     // ── existsByRole ──────────────────────────────────────────────────────────
