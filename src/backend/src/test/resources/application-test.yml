@@ -17,7 +17,9 @@ spring:
   #  DB_CLOSE_DELAY=-1 keeps the database alive for the full JVM lifetime —
   #  without it H2 closes between test method executions.
   datasource:
-    url: jdbc:h2:mem:opencelium_test;DB_CLOSE_DELAY=-1;MODE=MySQL
+    # NON_KEYWORDS stops H2 treating USER and VALUE as reserved words.
+    # H2 2.x rejects "create table user" and "column value varchar" without this.
+    url: jdbc:h2:mem:opencelium_test;DB_CLOSE_DELAY=-1;MODE=MySQL;NON_KEYWORDS=USER,VALUE
     driver-class-name: org.h2.Driver
     username: sa
     password:

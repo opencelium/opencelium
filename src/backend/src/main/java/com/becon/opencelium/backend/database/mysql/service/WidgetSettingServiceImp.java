@@ -19,11 +19,11 @@ public class WidgetSettingServiceImp implements WidgetSettingService {
     private WidgetSettingRepository widgetSettingRepository;
 
     @Autowired
-    private WidgetServiceImp widgetServiceImp;
+    private WidgetService widgetServiceImp;
 
     @Autowired
     @Lazy
-    private UserServiceImpl userService;
+    private UserService userService;
 
     @Override
     public void create(WidgetSetting widgetSetting) {

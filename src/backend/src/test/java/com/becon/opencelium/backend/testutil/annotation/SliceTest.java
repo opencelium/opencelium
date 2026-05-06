@@ -8,6 +8,7 @@
 
 package com.becon.opencelium.backend.testutil.annotation;
 
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -24,7 +25,12 @@ import java.lang.annotation.Target;
  *
  * Equivalent to:
  *   @DataJpaTest
+ *   @AutoConfigureTestDatabase(replace = Replace.NONE)
  *   @ActiveProfiles("test")
+ *
+ * Replace.NONE tells Spring to use the datasource from application-test.yml
+ * rather than auto-generating one, so the custom H2 URL (including NON_KEYWORDS)
+ * is honored.
  *
  * Usage:
  *   @SliceTest
@@ -33,6 +39,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
 public @interface SliceTest {
 }
