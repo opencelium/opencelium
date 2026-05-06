@@ -8,9 +8,11 @@
 
 package com.becon.opencelium.backend.testutil.fixture;
 
+import com.becon.opencelium.backend.database.mysql.entity.User;
 import com.becon.opencelium.backend.database.mysql.entity.Widget;
 import com.becon.opencelium.backend.database.mysql.entity.WidgetSetting;
 import com.becon.opencelium.backend.resource.user.WidgetResource;
+import com.becon.opencelium.backend.resource.user.WidgetSettingResource;
 
 /**
  * Object mother for {@link Widget}, {@link WidgetSetting}, and their resource counterparts.
@@ -67,6 +69,57 @@ public final class WidgetFixture {
         resource.setI("system-metrics");
         resource.setIcon("metrics-icon.png");
         resource.setTooltipTranslationKey("widget.system_metrics");
+        return resource;
+    }
+
+    // ── WidgetSetting entity factories ────────────────────────────────────────
+
+    /**
+     * WidgetSetting with a pre-set id — suitable for unit tests where JPA is not involved.
+     */
+    public static WidgetSetting aWidgetSetting(Widget widget) {
+        return aWidgetSetting(widget, UserFixture.anEmptyUser());
+    }
+
+    /**
+     * WidgetSetting with a pre-set id and an explicit user — use when the test needs to control
+     * which user the setting belongs to.
+     */
+    public static WidgetSetting aWidgetSetting(Widget widget, User user) {
+        WidgetSetting ws = aTransientWidgetSetting(widget, user);
+        ws.setId(10);
+        return ws;
+    }
+
+    /**
+     * WidgetSetting with id left at 0 — suitable for JPA slice tests where
+     * {@code TestEntityManager.persist()} must let the database assign the id.
+     */
+    public static WidgetSetting aTransientWidgetSetting(Widget widget, User user) {
+        WidgetSetting ws = new WidgetSetting();
+        ws.setAxisX(0);
+        ws.setAxisY(0);
+        ws.setWidth(4);
+        ws.setHeight(3);
+        ws.setMinWidth(2);
+        ws.setMinHeight(2);
+        ws.setWidget(widget);
+        ws.setUser(user);
+        return ws;
+    }
+
+    // ── WidgetSettingResource factories ───────────────────────────────────────
+
+    public static WidgetSettingResource aWidgetSettingResource() {
+        WidgetSettingResource resource = new WidgetSettingResource();
+        resource.setWidgetSettingId(0);
+        resource.setWidgetId(1);
+        resource.setX(0);
+        resource.setY(0);
+        resource.setW(4);
+        resource.setH(3);
+        resource.setMinW(2);
+        resource.setMinH(2);
         return resource;
     }
 }
