@@ -3,7 +3,7 @@ async function loadCompatibility() {
 const jsonUrl =
     `${DOCUMENTATION_OPTIONS.URL_ROOT}_static/data/compatibility.json`;
 
-const response = await fetch(jsonUrl);
+    const response = await fetch(jsonUrl);
     const data = await response.json();
 
    $('#compatibility-table').html(`
