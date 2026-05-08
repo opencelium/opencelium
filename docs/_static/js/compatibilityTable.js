@@ -40,7 +40,6 @@ const jsonUrl =
                 }
             },
     
-            { data: 'os', title: 'OS' },
             { data: 'notes', title: 'Notes' }
         ],
 
