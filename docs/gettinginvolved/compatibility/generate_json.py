@@ -5,7 +5,9 @@ from pathlib import Path
 BASE_DIR = Path(__file__).parent
 
 EXCEL_FILE = BASE_DIR / "compatibility.xlsx"
-OUTPUT_FILE = BASE_DIR / "compatibility.json"
+OUTPUT_FILE = (
+    BASE_DIR.parent / "_static" / "js" / "compatibility.json"
+)
 
 df = pd.read_excel(EXCEL_FILE)
 
