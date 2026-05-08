@@ -5,9 +5,15 @@ Updating
 Compatibility Matrix
 """""""""""""""""""""
 
-<div id="compatibility-table"></div>
+.. raw:: html
 
-<script src="compatibility/compatibility.js"></script>
+    <div class="compatibility-toolbar">
+        <input type="text"
+               id="compatibility-search"
+               placeholder="Search compatibility..." />
+    </div>
+
+    <div id="compatibility-table"></div>
 
 .. warning::
         | Before updating, always do a full backup of your system! 
