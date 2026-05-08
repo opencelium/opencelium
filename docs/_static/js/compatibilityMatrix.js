@@ -24,7 +24,7 @@ async function loadCompatibility() {
                 }
             },
             {
-                data: 'statusIcon',
+                data: 'status',
                 title: '',
                 render: function (data) {
                     if (data === "OK") return "✅";
