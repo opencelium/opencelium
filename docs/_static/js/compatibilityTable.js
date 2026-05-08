@@ -6,72 +6,54 @@ const jsonUrl =
 const response = await fetch(jsonUrl);
     const data = await response.json();
 
-    let html = `
-        <table class="compatibility-table">
-            <thead>
-                <tr>
-                    <th>Source</th>
-                    <th>Target</th>
-                    <th>Status</th>
-                    <th>Notes</th>
-                </tr>
-            </thead>
-            <tbody id="compatibility-body"></tbody>
+   $('#compatibility-table').html(`
+        <table id="compatibility-datatable"
+               class="display">
         </table>
-    `;
-alert("hier");
-    document.getElementById("compatibility-table").innerHTML = html;
+    `);
+    
+    $('#compatibility-datatable').DataTable({
+    
+        data: data,
+    
+        columns: [
+            { data: 'source', title: 'Source' },
+            { data: 'target', title: 'Target' },
+    
+            {
+                data: 'status',
+                title: 'Status',
+                render: function (data, type, row) {
+    
+                    let badge = "⚪ UNKNOWN";
+    
+                    if (data === "OK")
+                        badge = "✅ SUPPORTED";
+    
+                    if (data === "PARTIAL")
+                        badge = "⚠️ PARTIAL";
+    
+                    if (data === "FAIL")
+                        badge = "❌ NOT SUPPORTED";
+    
+                    return badge;
+                }
+            },
+    
+            { data: 'database', title: 'Database' },
+            { data: 'php', title: 'PHP' },
+            { data: 'docker', title: 'Docker' },
+            { data: 'os', title: 'OS' },
+            { data: 'notes', title: 'Notes' }
+        ],
 
-    const tbody = document.getElementById("compatibility-body");
+        pageLength: 25,
+        responsive: true
+    });
 
-    function render(filter = "") {
-
-        tbody.innerHTML = "";
-
-        data
-            .filter(row =>
-                JSON.stringify(row)
-                    .toLowerCase()
-                    .includes(filter.toLowerCase())
-            )
-            .forEach(row => {
-
-                let badge = "⚪ UNKNOWN";
-
-                if (row.status === "OK")
-                    badge = "✅ SUPPORTED";
-
-                if (row.status === "PARTIAL")
-                    badge = "⚠️ PARTIAL";
-
-                if (row.status === "FAIL")
-                    badge = "❌ NOT SUPPORTED";
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${row.source}</td>
-                        <td>${row.target}</td>
-                        <td>${badge}</td>
-                        <td>${row.database}</td>
-                        <td>${row.php}</td>
-                        <td>${row.docker}</td>
-                        <td>${row.os}</td>
-                        <td>${row.notes}</td>
-                    </tr>
-                `;
-            });
-    }
-
-    render();
-
-    document
-        .getElementById("search")
-        .addEventListener("input", e => {
-            render(e.target.value);
-        });
 }
-
-document.addEventListener(
+    document.addEventListener(
     "DOMContentLoaded",
     loadCompatibility
 );
+
