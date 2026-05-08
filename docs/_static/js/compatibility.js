@@ -20,7 +20,7 @@ async function loadCompatibility() {
             <tbody id="compatibility-body"></tbody>
         </table>
     `;
-
+alert("hier");
     document.getElementById("compatibility-table").innerHTML = html;
 
     const tbody = document.getElementById("compatibility-body");
