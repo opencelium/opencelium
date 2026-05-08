@@ -1,20 +1,30 @@
-.dt-toolbar {
-    position: sticky;
-    top: 0;
-    z-index: 1050;
-    background: #fff;
-    padding: 10px;
-    border-bottom: 1px solid #dee2e6;
-
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.wy-side-nav-search {
+	background-color: #fcfcfc !important;
+	border-right: 1px solid #e1e4e5;
 }
 
-.dt-filters select {
-    min-width: 160px;
+.wy-side-nav-search > a, .wy-side-nav-search .wy-dropdown > a {
+	color: black !important;
 }
 
-.dt-search input {
-    width: 220px;
+.wy-side-nav-search > div.version {
+	color: black !important;
+}
+
+.ethical-sidebar{
+	display: none !important;
+}
+
+.ethical-footer{
+	display: none !important;
+}
+
+.underline {
+    text-decoration: underline;
+}
+
+.align-middle{
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
 }
