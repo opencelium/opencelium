@@ -28,7 +28,6 @@ html_extra_path = ['api_docs']
 
 html_js_files = [
     'js/custom.js',
-    'js/compatibility.js',
 ]
 html_css_files = [
     'css/custom.css',
