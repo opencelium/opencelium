@@ -28,8 +28,11 @@ html_extra_path = ['api_docs']
 
 html_js_files = [
     'js/custom.js',
-    'js/compatibilityTable.js',    
+    'https://code.jquery.com/jquery-3.7.1.min.js',
+    'https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js',
+    'js/compatibilityTable.js',
 ]
 html_css_files = [
     'css/custom.css',
+    'https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css',
 ]
