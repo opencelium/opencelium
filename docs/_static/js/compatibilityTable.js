@@ -13,9 +13,6 @@ const response = await fetch(jsonUrl);
                     <th>Source</th>
                     <th>Target</th>
                     <th>Status</th>
-                    <th>Database</th>
-                    <th>PHP</th>
-                    <th>Docker</th>
                     <th>OS</th>
                     <th>Notes</th>
                 </tr>
