@@ -7,9 +7,9 @@ Compatibility Matrix
 
 .. raw:: html
 	
-	<div class="dt-toolbar-matrix">
-	    <div class="dt-filters-matrix row g-2"></div>
-	    <div class="dt-search-matrix ms-auto"></div>
+	<div class="dt-toolbar">
+	    <div class="dt-filters row g-2"></div>
+	    <div class="dt-search ms-auto"></div>
 	</div>
 	
 	<table id="compatibility-datatable" class="table table-striped table-hover w-100"></table>
