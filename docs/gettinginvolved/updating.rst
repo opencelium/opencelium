@@ -6,8 +6,13 @@ Compatibility Matrix
 """""""""""""""""""""
 
 .. raw:: html
-
-    <div id="compatibility-table"></div>
+	
+	<div class="dt-toolbar">
+    	<div class="dt-filters"></div>
+    	<div class="dt-search"></div>
+	</div>
+	
+	<table id="compatibility-datatable" class="display" style="width:100%"></table>
 
 | 
 |
