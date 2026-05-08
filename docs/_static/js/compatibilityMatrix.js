@@ -16,22 +16,12 @@ async function loadCompatibility() {
                 data: 'status',
                 title: 'Status',
                 render: function (data) {
-                    if (data === "OK") return "SUPPORTED";
-                    if (data === "PARTIAL") return "PARTIAL";
-                    if (data === "FAIL") return "NOT SUPPORTED";
+                    if (data === "OK") return "✅ SUPPORTED";
+                    if (data === "PARTIAL") return "⚠️ PARTIAL";
+                    if (data === "FAIL") return "❌ NOT SUPPORTED";
                     return "UNKNOWN";
                 }
             },
-            {
-                data: 'status',
-                title: '',
-                render: function (data) {
-                    if (data === "OK") return "✅";
-                    if (data === "PARTIAL") return "⚠️";
-                    if (data === "FAIL") return "❌";
-                    return "⚪";
-                }
-            },            
             { data: 'notes', title: 'Notes', searchable: true }
         ],
 
@@ -66,7 +56,7 @@ async function loadCompatibility() {
         const column = this;
         const title = $(column.header()).text();
 
-        if (title === '' || title === 'Notes') return;
+        if (title === 'Notes') return;
 
         // unique values holen
         const uniqueValues = new Set();
@@ -82,7 +72,7 @@ async function loadCompatibility() {
 
         select.append(`<option value="">All ${title}</option>`);
 
-        [...uniqueValues].sort().forEach(val => {
+        [...uniqueValues].sort().forEach(val => {            
             select.append(`<option value="${val}">${val}</option>`);
         });
 
