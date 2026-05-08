@@ -1,14 +1,66 @@
 [
-  {
-    "source": "4.8.2",
-    "target": "4.8.3",
-    "status": "OK",
-    "notes": "Clean Upgrade"
-  },
-  {
-    "source": "4.7.0",
-    "target": "4.8.3",
-    "status": "FAIL",
-    "notes": "Migration Error"
-  }
+  {"source":"4.4","target":"4.5","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.4","target":"4.5.1","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.4","target":"4.6","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.4","target":"4.6.1","status":"FAIL","notes":"Error: Injection of autowired dependencies failed. Solution: add websocket in application.yml and add websocket in nginx.conf"},
+  {"source":"4.4","target":"4.7","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.4","target":"4.7.1","status":"FAIL","notes":"Clean Upgrade"},
+  {"source":"4.4","target":"4.8","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.4","target":"4.8.1","status":"FAIL","notes":"Clean Upgrade"},
+  {"source":"4.4","target":"4.8.2","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.4","target":"4.8.3","status":"FAIL","notes":"Clean Upgrade"},
+
+  {"source":"4.5","target":"4.5.1","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.5","target":"4.6","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.5","target":"4.6.1","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.5","target":"4.7","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.5","target":"4.7.1","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.5","target":"4.8","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.5","target":"4.8.1","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.5","target":"4.8.2","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.5","target":"4.8.3","status":"OK","notes":"Clean Upgrade"},
+
+  {"source":"4.5.1","target":"4.6","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.5.1","target":"4.6.1","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.5.1","target":"4.7","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.5.1","target":"4.7.1","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.5.1","target":"4.8","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.5.1","target":"4.8.1","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.5.1","target":"4.8.2","status":"FAIL","notes":"YAML-Migrator breaks with changelog 4.6:5.OC Version stopped with 4.6"},
+  {"source":"4.5.1","target":"4.8.3","status":"FAIL","notes":"YAML-Migrator breaks with changelog 4.6:5.OC Version stopped with 4.6"},
+
+  {"source":"4.6","target":"4.6.1","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.6","target":"4.7","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.6","target":"4.7.1","status":"FAIL","notes":"Error: Failed to bind properties under 'opencelium.service-portal'. Solution: add correct service portal url in application.yml"},
+  {"source":"4.6","target":"4.8","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.6","target":"4.8.1","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.6","target":"4.8.2","status":"FAIL","notes":"YAML-Migrator breaks with changelog 4.6:5.OC Version stopped with 4.6"},
+  {"source":"4.6","target":"4.8.3","status":"FAIL","notes":"YAML-Migrator breaks with changelog 4.6:5.OC Version stopped with 4.6"},
+
+  {"source":"4.6.1","target":"4.7","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.6.1","target":"4.7.1","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.6.1","target":"4.8","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.6.1","target":"4.8.1","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.6.1","target":"4.8.2","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.6.1","target":"4.8.3","status":"OK","notes":"Clean Upgrade"},
+
+  {"source":"4.7","target":"4.7.1","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.7","target":"4.8","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.7","target":"4.8.1","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.7","target":"4.8.2","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.7","target":"4.8.3","status":"OK","notes":"Clean Upgrade"},
+
+  {"source":"4.7.1","target":"4.8","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.7.1","target":"4.8.1","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.7.1","target":"4.8.2","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.7.1","target":"4.8.3","status":"OK","notes":"Clean Upgrade"},
+
+  {"source":"4.8","target":"4.8.1","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.8","target":"4.8.2","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.8","target":"4.8.3","status":"OK","notes":"Clean Upgrade"},
+
+  {"source":"4.8.1","target":"4.8.2","status":"OK","notes":"Clean Upgrade"},
+  {"source":"4.8.1","target":"4.8.3","status":"OK","notes":"Clean Upgrade"},
+
+  {"source":"4.8.2","target":"4.8.3","status":"OK","notes":"Clean Upgrade"}
 ]
