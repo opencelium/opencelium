@@ -30,7 +30,7 @@ html_js_files = [
     'js/custom.js',
     'https://code.jquery.com/jquery-3.7.1.min.js',
     'https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js',
-    'js/compatibilityMatrix2.js',
+    'js/compatibility.js',
 ]
 html_css_files = [
     'css/compatibilityMatrix.css',
