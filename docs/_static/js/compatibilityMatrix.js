@@ -5,10 +5,11 @@ async function loadCompatibility() {
 
     const response = await fetch(jsonUrl);
     const data = await response.json();
-    
+
+
     const table = $('#compatibility-datatable').DataTable({
         data: data,
-    
+
         columns: [
             { data: 'source', title: 'Source' },
             { data: 'target', title: 'Target' },
@@ -16,57 +17,78 @@ async function loadCompatibility() {
                 data: 'status',
                 title: 'Status',
                 render: function (data) {
-                    if (data === "OK") return "✅ SUPPORTED";
-                    if (data === "PARTIAL") return "⚠️ PARTIAL";
-                    if (data === "FAIL") return "❌ NOT SUPPORTED";
-                    return "⚪ UNKNOWN";
+                    if (data === "OK") return "OK";
+                    if (data === "PARTIAL") return "PARTIAL";
+                    if (data === "FAIL") return "FAIL";
+                    return "UNKNOWN";
                 }
             },
             { data: 'notes', title: 'Notes', searchable: false }
         ],
-    
+
         pageLength: 10,
         responsive: true,
-        dom: 't<"bottom"ip>' // kein Default-Suchfeld
+        dom: 't<"bottom"ip>'
     });
-    
-    
+
+
     // ==============================
-    // 🔍 Global Search (rechts oben)
+    // 🔍 GLOBAL SEARCH (Bootstrap)
     // ==============================
     const searchBox = $('<input>', {
         type: 'text',
+        class: 'form-control form-control-sm',
         placeholder: 'Search...'
     });
-    
+
     searchBox.on('keyup', function () {
         table.search(this.value).draw();
     });
-    
+
     $('.dt-search').append(searchBox);
-    
-    
+
+
     // ==============================
-    // 🧩 Column Filters (Sticky Bar)
+    // 🧩 DROPDOWN FILTERS (Bootstrap 5)
     // ==============================
     table.columns().every(function () {
+
         const column = this;
         const title = $(column.header()).text();
-    
+
         if (title === 'Notes') return;
-    
-        const input = $('<input>', {
-            type: 'text',
-            placeholder: 'Filter ' + title
+
+        // unique values holen
+        const uniqueValues = new Set();
+        column.data().each(function (d) {
+            if (d !== null && d !== undefined) {
+                uniqueValues.add(d);
+            }
         });
-    
-        input.on('keyup change clear', function () {
-            column.search(this.value).draw();
+
+        const select = $('<select>', {
+            class: 'form-select form-select-sm'
         });
-    
-        $('.dt-filters').append(input);
+
+        select.append(`<option value="">All ${title}</option>`);
+
+        [...uniqueValues].sort().forEach(val => {
+            select.append(`<option value="${val}">${val}</option>`);
+        });
+
+        select.on('change', function () {
+            const val = $.fn.dataTable.util.escapeRegex($(this).val());
+
+            column
+                .search(val ? '^' + val + '$' : '', true, false)
+                .draw();
+        });
+
+        $('.dt-filters').append(
+            $('<div class="col-auto"></div>').append(select)
+        );
     });
-  
+
 }
 
 document.addEventListener("DOMContentLoaded", loadCompatibility);
