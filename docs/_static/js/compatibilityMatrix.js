@@ -44,7 +44,7 @@ const jsonUrl =
         ],
 
         pageLength: 10,
-        responsive: true
+        responsive: true,
     
         initComplete: function () {
             const api = this.api();
