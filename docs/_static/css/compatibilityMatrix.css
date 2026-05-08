@@ -1,4 +1,4 @@
-.dt-toolbar {
+.dt-toolbar-matrix {
     position: sticky;
     top: 0;
     z-index: 1000;
@@ -10,19 +10,19 @@
     border-bottom: 1px solid #ddd;
 }
 
-.dt-filters {
+.dt-filters-matrix {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
 }
 
-.dt-filters input {
+.dt-filters-matrix input {
     padding: 5px;
     font-size: 12px;
     width: 120px;
 }
 
-.dt-search input {
+.dt-search-matrix input {
     padding: 5px;
     font-size: 12px;
     width: 200px;
