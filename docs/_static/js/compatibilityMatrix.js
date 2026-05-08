@@ -24,7 +24,7 @@ async function loadCompatibility() {
             },
             {
                 data: 'status',
-                title: null,
+                title: '',
                 render: function (data) {
                     if (data === "OK") return "✅";
                     if (data === "PARTIAL") return "⚠️";
@@ -66,7 +66,7 @@ async function loadCompatibility() {
         const column = this;
         const title = $(column.header()).text();
 
-        if (title === null || title === 'Notes') return;
+        if (title === '' || title === 'Notes') return;
 
         // unique values holen
         const uniqueValues = new Set();
