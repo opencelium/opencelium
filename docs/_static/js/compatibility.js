@@ -1,6 +1,6 @@
 async function loadCompatibility() {
 
-    const response = await fetch("_static/compatibility.json");
+    const response = await fetch("docs/gettinginvolved/compatibility/compatibility.json");
     const data = await response.json();
 
     let html = `
