@@ -43,8 +43,30 @@ const jsonUrl =
             { data: 'notes', title: 'Notes' }
         ],
 
-        pageLength: 25,
+        pageLength: 10,
         responsive: true
+    
+        initComplete: function () {
+            const api = this.api();
+    
+            api.columns().every(function () {
+                const column = this;
+                const title = $(column.header()).text();
+    
+                if (title === 'Notes') return;
+    
+                const input = document.createElement("input");
+                input.placeholder = "Filter " + title;
+                input.style.width = "100%";
+    
+                $(input).appendTo($(column.header()).empty())
+                    .on('keyup change clear', function () {
+                        if (column.search() !== this.value) {
+                            column.search(this.value).draw();
+                        }
+                    });
+            });
+        }        
     });
 
 }
