@@ -2,6 +2,13 @@
 Updating
 ##################
 
+Compatibility Matrix
+"""""""""""""""""""""
+
+<div id="compatibility-table"></div>
+
+<script src="compatibility/compatibility.js"></script>
+
 .. warning::
         | Before updating, always do a full backup of your system! 
 
