@@ -1,0 +1,29 @@
+.dt-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: white;
+    padding: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.dt-filters {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.dt-filters input {
+    padding: 5px;
+    font-size: 12px;
+    width: 120px;
+}
+
+.dt-search input {
+    padding: 5px;
+    font-size: 12px;
+    width: 200px;
+}
