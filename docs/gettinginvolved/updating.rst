@@ -9,6 +9,9 @@ Compatibility Matrix
 
     <div id="compatibility-table"></div>
 
+| 
+|
+
 .. warning::
         | Before updating, always do a full backup of your system! 
 
