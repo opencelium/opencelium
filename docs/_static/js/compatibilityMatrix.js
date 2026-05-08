@@ -6,7 +6,39 @@ async function loadCompatibility() {
     const response = await fetch(jsonUrl);
     const data = await response.json();
 
+    const table = $('#compatibility-datatable').DataTable({
+        data: data,
 
+        columns: [
+            { data: 'source', title: 'Source' },
+            { data: 'target', title: 'Target' },
+            {
+                data: 'status',
+                title: 'Status',
+                render: function (data) {
+                    if (data === "OK") return "SUPPORTED";
+                    if (data === "PARTIAL") return "PARTIAL";
+                    if (data === "FAIL") return "NOT SUPPORTED";
+                    return "UNKNOWN";
+                }
+            },
+            {
+                data: 'status',
+                title: null,
+                render: function (data) {
+                    if (data === "OK") return "✅";
+                    if (data === "PARTIAL") return "⚠️";
+                    if (data === "FAIL") return "❌";
+                    return "⚪";
+                }
+            },            
+            { data: 'notes', title: 'Notes', searchable: true }
+        ],
+
+        pageLength: 10,
+        responsive: true,
+        dom: 't<"bottom"ip>'
+    });
 
 
 
