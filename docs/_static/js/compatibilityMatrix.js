@@ -12,16 +12,17 @@ async function loadCompatibility() {
         columns: [
             { data: 'source', title: 'Source' },
             { data: 'target', title: 'Target' },
+            { data: 'status', title: 'Status' },
             {
                 data: 'status',
-                title: 'Status',
+                title: '',
                 render: function (data) {
-                    if (data === "OK") return "✅ SUPPORTED";
-                    if (data === "PARTIAL") return "⚠️ PARTIAL";
-                    if (data === "FAIL") return "❌ NOT SUPPORTED";
+                    if (data === "SUPPORTED") return "✅";
+                    if (data === "PARTIAL") return "⚠️";
+                    if (data === "NOT SUPPORTED") return "❌";
                     return "UNKNOWN";
                 }
-            },
+            },            
             { data: 'notes', title: 'Notes', searchable: true }
         ],
 
