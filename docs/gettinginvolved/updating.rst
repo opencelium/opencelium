@@ -7,12 +7,6 @@ Compatibility Matrix
 
 .. raw:: html
 
-    <div class="compatibility-toolbar">
-        <input type="text"
-               id="compatibility-search"
-               placeholder="Search compatibility..." />
-    </div>
-
     <div id="compatibility-table"></div>
 
 .. warning::
