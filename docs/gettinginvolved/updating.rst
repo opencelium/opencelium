@@ -6,7 +6,11 @@ Compatibility Matrix
 """""""""""""""""""""
 
 .. raw:: html
-	
+
+	<div>The tests were conducted using the archived package version (ZIP) and the Ubuntu 24.04 LTS operating system.</div>
+
+	<br>
+
 	<div class="dt-toolbar">
 	    <div class="dt-filters row g-2"></div>
 	    <div class="dt-search ms-auto"></div>
