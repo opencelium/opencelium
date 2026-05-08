@@ -8,11 +8,11 @@ Compatibility Matrix
 .. raw:: html
 	
 	<div class="dt-toolbar">
-    	<div class="dt-filters"></div>
-    	<div class="dt-search"></div>
+	    <div class="dt-filters row g-2"></div>
+	    <div class="dt-search ms-auto"></div>
 	</div>
 	
-	<table id="compatibility-datatable" class="display" style="width:100%"></table>
+	<table id="compatibility-datatable" class="table table-striped table-hover w-100"></table>
 
 | 
 |
