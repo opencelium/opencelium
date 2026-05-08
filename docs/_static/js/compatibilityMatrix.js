@@ -57,7 +57,7 @@ async function loadCompatibility() {
         const column = this;
         const title = $(column.header()).text();
 
-        if (title === 'Notes') return;
+        if (title === '' || title === 'Notes') return;
 
         // unique values holen
         const uniqueValues = new Set();
