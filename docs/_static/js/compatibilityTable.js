@@ -40,9 +40,6 @@ const jsonUrl =
                 }
             },
     
-            { data: 'database', title: 'Database' },
-            { data: 'php', title: 'PHP' },
-            { data: 'docker', title: 'Docker' },
             { data: 'os', title: 'OS' },
             { data: 'notes', title: 'Notes' }
         ],
