@@ -1,4 +1,4 @@
-async function loadCompatibility() {
+async function loadCompatibility2() {
 
 const jsonUrl =
     `${DOCUMENTATION_OPTIONS.URL_ROOT}_static/data/compatibility.json`;
@@ -77,5 +77,5 @@ alert("hier");
 
 document.addEventListener(
     "DOMContentLoaded",
-    loadCompatibility
+    loadCompatibility2
 );
