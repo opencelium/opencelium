@@ -17,13 +17,23 @@ async function loadCompatibility() {
                 data: 'status',
                 title: 'Status',
                 render: function (data) {
-                    if (data === "OK") return "✅ SUPPORTED";
-                    if (data === "PARTIAL") return "⚠️ PARTIAL";
-                    if (data === "FAIL") return "❌ NOT SUPPORTED";
-                    return "⚪ UNKNOWN";
+                    if (data === "OK") return "SUPPORTED";
+                    if (data === "PARTIAL") return "PARTIAL";
+                    if (data === "FAIL") return "NOT SUPPORTED";
+                    return "UNKNOWN";
                 }
             },
-            { data: 'notes', title: 'Notes', searchable: false }
+            {
+                data: 'statusIcon',
+                title: '',
+                render: function (data) {
+                    if (data === "OK") return "✅";
+                    if (data === "PARTIAL") return "⚠️";
+                    if (data === "FAIL") return "❌";
+                    return "⚪";
+                }
+            },            
+            { data: 'notes', title: 'Notes', searchable: true }
         ],
 
         pageLength: 10,
