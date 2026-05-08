@@ -13,7 +13,6 @@ const response = await fetch(jsonUrl);
                     <th>Source</th>
                     <th>Target</th>
                     <th>Status</th>
-                    <th>OS</th>
                     <th>Notes</th>
                 </tr>
             </thead>
