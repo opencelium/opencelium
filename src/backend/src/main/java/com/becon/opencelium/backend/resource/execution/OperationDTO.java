@@ -21,6 +21,16 @@ public class OperationDTO {
     private List<ResponseDTO> responses;
     private OpType operationType;
     private Pagination pagination;
+    /**
+     * ID of the connector this method belongs to in multi-connector mode.
+     * <p>
+     * Mapped from {@code MethodMng.connector.connectorId}. Use this to look up
+     * the resolved connector config in {@link ConnectionEx#getConnectors()}.
+     * <p>
+     * <b>Null for legacy (two-connector) connections</b> — the connector is determined
+     * by whether the method lives under {@code source} or {@code target} on {@link ConnectionEx}.
+     */
+    private Integer connectorId;
 
     public String getPath() {
         return path;
@@ -116,5 +126,13 @@ public class OperationDTO {
 
     public void setOperationType(OpType operationType) {
         this.operationType = operationType;
+    }
+
+    public Integer getConnectorId() {
+        return connectorId;
+    }
+
+    public void setConnectorId(Integer connectorId) {
+        this.connectorId = connectorId;
     }
 }

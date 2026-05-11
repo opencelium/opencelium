@@ -5,6 +5,16 @@ import com.becon.opencelium.backend.invoker.entity.Pagination;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Execution representation of a connector for legacy (two-connector) connections.
+ * <p>
+ * Populated via {@link ConnectionEx#getSource()} and {@link ConnectionEx#getTarget()}.
+ * <p>
+ * <b>Not used in multi-connector connections.</b> In that mode {@link ConnectionEx#getSource()}
+ * and {@link ConnectionEx#getTarget()} are {@code null} — connector metadata is carried per-method
+ * in {@link ConnectionEx#getConnectors()} as {@link MethodConnectorEx} instances.
+ * Always null-check before accessing either field on {@link ConnectionEx}.
+ */
 public class ConnectorEx {
     private int id;
     private String fchartId;
