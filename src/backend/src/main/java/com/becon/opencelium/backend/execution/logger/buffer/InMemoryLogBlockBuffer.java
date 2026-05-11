@@ -10,20 +10,23 @@ public class InMemoryLogBlockBuffer implements LogBlockBuffer {
 
     // buffer + index
     private final List<LogDataMng> buffer;
-    private final Map<String, LogDataMng> index;
+    private final Map<String, LogDataMng> blockByKey;
+    private final Map<String, LogDataMng> blockById;
 
     public InMemoryLogBlockBuffer(int batchSize, LogBlockKeyExtractor keyExtractor) {
         this.batchSize = batchSize;
         this.keyExtractor = keyExtractor;
         this.buffer = new ArrayList<>(batchSize);
-        this.index = new HashMap<>(batchSize * 2);
+        this.blockByKey = new HashMap<>(batchSize * 2);
+        this.blockById = new HashMap<>(batchSize);
     }
 
     @Override
     public synchronized List<LogDataMng> buffer(LogDataMng block) {
         String key = keyExtractor.extractKey(block);
         buffer.add(block);
-        index.put(key, block);
+        blockByKey.put(key, block);
+        blockById.put(block.getId(), block);
 
         if (buffer.size() >= batchSize) {
             return flushInternal();
@@ -32,9 +35,14 @@ public class InMemoryLogBlockBuffer implements LogBlockBuffer {
     }
 
     @Override
-    public synchronized Optional<LogDataMng> findInBuffer(LogDataMng example) {
+    public synchronized Optional<LogDataMng> findInBufferByKey(LogDataMng example) {
         String key = keyExtractor.extractKey(example);
-        return Optional.ofNullable(index.get(key));
+        return Optional.ofNullable(blockByKey.get(key));
+    }
+
+    @Override
+    public Optional<LogDataMng> findInBufferById(String elementId) {
+        return Optional.ofNullable(blockById.get(elementId));
     }
 
     @Override
@@ -48,7 +56,8 @@ public class InMemoryLogBlockBuffer implements LogBlockBuffer {
     private List<LogDataMng> flushInternal() {
         List<LogDataMng> copy = new ArrayList<>(buffer);
         buffer.clear();
-        index.clear();
+        blockByKey.clear();
+        blockById.clear();
         return copy;
     }
 }
