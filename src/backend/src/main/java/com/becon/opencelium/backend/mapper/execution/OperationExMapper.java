@@ -2,8 +2,6 @@ package com.becon.opencelium.backend.mapper.execution;
 
 import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.database.mongodb.entity.*;
-import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
-import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.enums.execution.DataType;
 import com.becon.opencelium.backend.enums.execution.ParamLocation;
@@ -25,7 +23,6 @@ import java.util.*;
 @Component
 public class OperationExMapper {
     private final InvokerService invokerService;
-    private final ConnectionMngService connectionMngService;
     private final ConnectorService connectorService;
     private static final String REGEX_DEEP_OBJECT_IN_QUERY = ".+[\\[.+\\]]";
     private static final String REGEX_ARRAY_PARAMETER_IN_PATH = ".+[&|,\\s]+.*";
@@ -36,26 +33,29 @@ public class OperationExMapper {
 
     public OperationExMapper(
             @Qualifier("invokerServiceImp") InvokerService invokerService,
-            @Qualifier("connectionMngServiceImp") ConnectionMngService connectionMngService,
             @Qualifier("connectorServiceImp") ConnectorService connectorService
     ) {
         this.invokerService = invokerService;
-        this.connectionMngService = connectionMngService;
         this.connectorService = connectorService;
     }
 
-    public List<OperationDTO> toOperationAll(List<MethodMng> methods, String connectionId, String invoker) {
+    public List<OperationDTO> toOperationAll(List<MethodMng> methods, String invoker) {
         if (methods == null || methods.isEmpty()) {
             return Collections.emptyList();
         }
         List<OperationDTO> operations = new ArrayList<>();
         for (MethodMng method : methods) {
-            operations.add(toOperation(method, connectionId, invoker));
+            if (invoker == null) {
+                String methodInvoker = connectorService.getById(method.getConnector().getConnectorId()).getInvoker();
+                operations.add(toOperation(method, methodInvoker));
+            } else {
+                operations.add(toOperation(method, invoker));
+            }
         }
         return operations;
     }
 
-    public OperationDTO toOperation(@NonNull MethodMng method, String connectionId, String invokerStr) {
+    public OperationDTO toOperation(@NonNull MethodMng method, String invokerStr) {
         Invoker invoker = invokerService.findByName(invokerStr);
         List<FunctionInvoker> operations = invoker.getOperations();
         FunctionInvoker fiv = operations.stream()
@@ -71,7 +71,8 @@ public class OperationExMapper {
         operationDTO.setAggregatorId(method.getDataAggregator());
         operationDTO.setPath(method.getRequest().getEndpoint());
         operationDTO.setExecOrder(method.getIndex());
-        operationDTO.setRequestBody(getRequestBody(method.getRequest().getBody(), connectionId, method.getName(), mediaType));
+        operationDTO.setConnectorId(method.getConnector() != null ? method.getConnector().getConnectorId() : null);
+        operationDTO.setRequestBody(getRequestBody(method.getRequest().getBody(), invoker, method.getName(), mediaType));
         operationDTO.setResponses(getResponses(method.getResponse(), fiv));
         operationDTO.setParameters(getParameters(method.getRequest(), mediaType));
         return operationDTO;
@@ -382,13 +383,13 @@ public class OperationExMapper {
         return parameters;
     }
 
-    private RequestBodyDTO getRequestBody(BodyMng body, String connectionId, String methodName, MediaType mediaType) {
+    private RequestBodyDTO getRequestBody(BodyMng body, Invoker invoker, String methodName, MediaType mediaType) {
         if (body == null || body.getFormat() == null || body.getFields() == null) {
             return null;
         }
         RequestBodyDTO requestBodyDTO = new RequestBodyDTO();
         requestBodyDTO.setContent(mediaType);
-        requestBodyDTO.setSchema(getSchema(body, connectionId, methodName));
+        requestBodyDTO.setSchema(getSchema(body, invoker, methodName));
         return requestBodyDTO;
     }
 
@@ -403,7 +404,7 @@ public class OperationExMapper {
         };
     }
 
-    private SchemaDTO getSchema(BodyMng body, String connectionId, String methodName) {
+    private SchemaDTO getSchema(BodyMng body, Invoker invoker, String methodName) {
         Map<String, Object> fields = body.getFields();
         if (fields == null) {
             return null;
@@ -416,7 +417,7 @@ public class OperationExMapper {
             body.setType("object");
             schemaDTO.setType(DataType.ARRAY);
             schemaDTO.setItems(new ArrayList<>() {{
-                add(getSchema(body, connectionId, methodName));
+                add(getSchema(body, invoker, methodName));
             }});
             return schemaDTO;
         }
@@ -439,9 +440,9 @@ public class OperationExMapper {
                 if (name.matches("^[a-zA-Z ]+:.*$")) {
                     name = name.substring(name.indexOf(":") + 1);
                 }
-                props.put(name, getSchemaFromObjectXML(hierarchy, entry.getValue(), connectionId, methodName));
+                props.put(name, getSchemaFromObjectXML(hierarchy, entry.getValue(), invoker, methodName));
             } else {
-                props.put(entry.getKey(), getSchemaFromObjectJSON(hierarchy, entry.getValue(), connectionId, methodName));
+                props.put(entry.getKey(), getSchemaFromObjectJSON(hierarchy, entry.getValue(), invoker, methodName));
             }
         }
         if (body.getFormat().equals("xml")) {
@@ -492,7 +493,7 @@ public class OperationExMapper {
         currSchema.setXml(xmlObjectDTO);
     }
 
-    private SchemaDTO getSchemaFromObjectXML(LinkedList<String> hierarchy, Object value, String connectionId, String methodName) {
+    private SchemaDTO getSchemaFromObjectXML(LinkedList<String> hierarchy, Object value, Invoker invoker, String methodName) {
         SchemaDTO schemaDTO = new SchemaDTO();
         DataType type = getType(value);
 
@@ -503,7 +504,7 @@ public class OperationExMapper {
             // INTEGER, NUMBER, STRING, BOOLEAN
 
             String stringVal = String.valueOf(value);
-            schemaDTO.setType(findTypeOfReference(stringVal, connectionId, methodName, hierarchy));
+            schemaDTO.setType(findTypeOfReference(stringVal, invoker, methodName, hierarchy));
             schemaDTO.setValue(stringVal);
         } else if (type == DataType.OBJECT) {
             Map<String, Object> map = (Map<String, Object>) value;
@@ -518,7 +519,7 @@ public class OperationExMapper {
                     schemaDTO.setType(DataType.NUMBER);
                 } else {
                     hierarchy.add(OC_VALUE);
-                    schemaDTO.setType(findTypeOfReference(strVal, connectionId, methodName, hierarchy));
+                    schemaDTO.setType(findTypeOfReference(strVal, invoker, methodName, hierarchy));
                     hierarchy.remove(OC_VALUE);
                 }
                 Object attr = map.get(OC_ATTRIBUTES);
@@ -547,7 +548,7 @@ public class OperationExMapper {
                             name = name.split(":")[1];
                         }
                         hierarchy.add(entry.getKey());
-                        fields.put(name, getSchemaFromObjectXML(hierarchy, entry.getValue(), connectionId, methodName));
+                        fields.put(name, getSchemaFromObjectXML(hierarchy, entry.getValue(), invoker, methodName));
                     }
                 }
             }
@@ -558,7 +559,7 @@ public class OperationExMapper {
             schemaDTO.setItems(elements);
             for (int i = 0; i < items.size(); i++) {
                 hierarchy.add("[" + i + "]");
-                elements.add(getSchemaFromObjectXML(hierarchy, items.get(i), connectionId, methodName));
+                elements.add(getSchemaFromObjectXML(hierarchy, items.get(i), invoker, methodName));
             }
             XmlObjectDTO xod = new XmlObjectDTO();
             schemaDTO.setXml(xod);
@@ -572,14 +573,14 @@ public class OperationExMapper {
     }
 
     @SuppressWarnings("unchecked")
-    private SchemaDTO getSchemaFromObjectJSON(LinkedList<String> hierarchy, Object obj, String connectionId, String methodName) {
+    private SchemaDTO getSchemaFromObjectJSON(LinkedList<String> hierarchy, Object obj, Invoker invoker, String methodName) {
         SchemaDTO schemaDTO = new SchemaDTO();
         DataType type = getType(obj);
         if (obj == null || type == null)
             return null;
         if (type == DataType.STRING) {
             String value = String.valueOf(obj);
-            schemaDTO.setType(findTypeOfReference(value, connectionId, methodName, hierarchy));
+            schemaDTO.setType(findTypeOfReference(value, invoker, methodName, hierarchy));
             schemaDTO.setValue(value);
         } else if (type != DataType.OBJECT && type != DataType.ARRAY) {
             schemaDTO.setType(type);
@@ -589,7 +590,7 @@ public class OperationExMapper {
             List<SchemaDTO> elements = new ArrayList<>();
             for (int i = 0; i < items.size(); i++) {
                 hierarchy.add("[" + i + "]");
-                elements.add(getSchemaFromObjectJSON(hierarchy, items.get(i), connectionId, methodName));
+                elements.add(getSchemaFromObjectJSON(hierarchy, items.get(i), invoker, methodName));
             }
             schemaDTO.setItems(elements);
         } else {
@@ -598,7 +599,7 @@ public class OperationExMapper {
             Map<String, SchemaDTO> fields = new LinkedHashMap<>();
             for (Map.Entry<String, ?> entry : map.entrySet()) {
                 hierarchy.add(entry.getKey());
-                fields.put(entry.getKey(), getSchemaFromObjectJSON(hierarchy, entry.getValue(), connectionId, methodName));
+                fields.put(entry.getKey(), getSchemaFromObjectJSON(hierarchy, entry.getValue(), invoker, methodName));
             }
             schemaDTO.setProperties(fields);
         }
@@ -606,24 +607,12 @@ public class OperationExMapper {
         return schemaDTO;
     }
 
-    private DataType findTypeOfReference(String value, String connectionId, String methodName, LinkedList<String> hierarchy) {
+    private DataType findTypeOfReference(String value, Invoker invoker, String methodName, LinkedList<String> hierarchy) {
         if (value.matches(RegExpression.requiredData)
                 || value.matches(RegExpression.enhancement)
                 || value.matches(RegExpression.directRef)
                 || value.matches(RegExpression.webhook)) {
-
-            ConnectionMng connectionMng = connectionMngService.getById(connectionId);
-            Connector fromConnector = connectorService.getById(connectionMng.getFromConnector().getConnectorId());
-            Connector toConnector = connectorService.getById(connectionMng.getToConnector().getConnectorId());
-
-            DataType dataType = invokerService.findFieldType(fromConnector.getInvoker(), methodName, (LinkedList<String>) hierarchy.clone());
-            if (dataType == null) {
-                dataType = invokerService.findFieldType(toConnector.getInvoker(), methodName, (LinkedList<String>) hierarchy.clone());
-                if (dataType == null) {
-                    throw new RuntimeException("METHOD_NOT_FOUND_IN_INVOKER");
-                }
-            }
-            return dataType;
+            return invokerService.findFieldType(invoker, methodName, (LinkedList<String>) hierarchy.clone());
         } else {
             return DataType.STRING;
         }

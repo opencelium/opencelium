@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
+import com.becon.opencelium.backend.constant.ConnectionConstants;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.EventNotification;
@@ -299,10 +300,14 @@ public class SchedulerServiceImp implements SchedulerService {
             jobsResource.setAvgDuration(avg);
 
             Connection connection = connectionService.getById(connId);
-            Connector fromCotr = connectorService.getById(connection.getFromConnector());
-            Connector toCtor = connectorService.getById(connection.getToConnector());
-            jobsResource.setToConnector(toCtor.getTitle());
-            jobsResource.setFromConnector(fromCotr.getTitle());
+            if(!Objects.equals(connection.getFromConnector(), ConnectionConstants.DEFAULT_CONNECTOR_ID)){
+                Connector fromCotr = connectorService.getById(connection.getFromConnector());
+                jobsResource.setFromConnector(fromCotr.getTitle());
+            }
+            if (connection.getToConnector() != null) {
+                Connector toCtor = connectorService.getById(connection.getToConnector());
+                jobsResource.setToConnector(toCtor.getTitle());
+            }
 
             runningJobsResources.add(jobsResource);
         });
@@ -325,10 +330,16 @@ public class SchedulerServiceImp implements SchedulerService {
                 jobsResource.setAvgDuration(avg);
 
                 Connection connection = connectionService.getById(connId);
-                Connector fromCotr = connectorService.getById(connection.getFromConnector());
-                Connector toCtor = connectorService.getById(connection.getToConnector());
-                jobsResource.setToConnector(toCtor.getTitle());
-                jobsResource.setFromConnector(fromCotr.getTitle());
+                if (!Objects.equals(connection.getFromConnector(), ConnectionConstants.DEFAULT_CONNECTOR_ID)) {
+                    Connector fromCotr = connectorService.getById(connection.getFromConnector());
+                    jobsResource.setFromConnector(fromCotr.getTitle());
+                } else {
+                    jobsResource.setFromConnector(ConnectionConstants.DEFAULT_CONNECTOR_NAME);
+                }
+                if (connection.getToConnector() != null) {
+                    Connector toCtor = connectorService.getById(connection.getToConnector());
+                    jobsResource.setToConnector(toCtor.getTitle());
+                }
 
                 runningJobsResources.add(jobsResource);
             }
