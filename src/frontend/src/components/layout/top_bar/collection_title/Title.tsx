@@ -49,6 +49,7 @@ const Title: FC<TitleProps> =
     }
     useEffect(() => {
         setSteps(switchSteps(entityIconKey));
+        toggleTour(false);
     }, [entityIconKey])
 
     const isConnectionFormTitle =

@@ -12,7 +12,17 @@ interface TourProps{
     toggle: any,
     show: boolean,
 }
+function isTargetExist(target: string | HTMLElement): HTMLElement | null {
+    if (typeof target === "string") {
+        return document.querySelector(target);
+    }
 
+    if (target instanceof HTMLElement) {
+        return target;
+    }
+
+    return null;
+}
 const SPOTLIGHT_SELECTOR = ".react-joyride__spotlight";
 const OVERLAY_SELECTOR = ".react-joyride__overlay";
 const TOOLTIP_SELECTOR = ".tooltip__body";
@@ -91,7 +101,9 @@ const Tour:FC<TourProps> =  ({
         }
 
         if (overlay) {
+            overlay.style.opacity = "0";
             overlay.style.pointerEvents = "none";
+            overlay.style.transition = "none";
         }
     };
 
@@ -120,15 +132,7 @@ const Tour:FC<TourProps> =  ({
     };
 
     const closeTour = () => {
-        const overlay = document.querySelector(OVERLAY_SELECTOR) as HTMLElement | null;
-
         hideTourUi();
-
-        if (overlay) {
-            overlay.style.opacity = "0";
-            overlay.style.pointerEvents = "none";
-            overlay.style.transition = "none";
-        }
 
         isTransitioningRef.current = false;
         lastNavigationActionRef.current = "start";
@@ -142,17 +146,7 @@ const Tour:FC<TourProps> =  ({
 
     const preparedSteps = useMemo<PreparedStep[]>(() => {
         return steps
-            .filter((step) => {
-                if (typeof step.target === "string") {
-                    return !!document.querySelector(step.target);
-                }
-
-                if (step.target instanceof HTMLElement) {
-                    return document.body.contains(step.target);
-                }
-
-                return false;
-            })
+            .filter((step) => !!step.target && isTargetExist(step.target))
             .map((step) => ({
                 ...step,
                 data: {
@@ -180,7 +174,9 @@ const Tour:FC<TourProps> =  ({
         }
 
         return {
-            target: step.target as HTMLElement,
+            target: document.body.contains(step.target as HTMLElement)
+                ? step.target as HTMLElement
+                : null,
             step,
         };
     };
@@ -463,7 +459,6 @@ const Tour:FC<TourProps> =  ({
         setStepIndex(0);
         isTransitioningRef.current = false;
         lastNavigationActionRef.current = 'start';
-        hideTourUi();
     };
 
     useEffect(() => {
@@ -498,8 +493,13 @@ const Tour:FC<TourProps> =  ({
     }, [show]);
 
     useEffect(() => {
-        if (!run) {
+        return () => {
             hideTourUi();
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!run) {
             return;
         }
 

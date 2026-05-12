@@ -40,10 +40,12 @@ import GetModalProp from "@entity/connection/components/decorators/GetModalProp"
 
 function mapStateToProps(state, props) {
     const { currentTechnicalItem, connectionOverview } = mapItemsToClasses(state, props.isModal);
+    const {isFullScreen} = state.applicationReducer;;
 
     return {
         currentTechnicalItem,
         isTestingConnection: connectionOverview.isTestingConnection,
+        isFullScreen,
     };
 }
 
@@ -832,6 +834,7 @@ class Svg extends React.Component {
             connection,
             createElementPanelConnectorType,
             readOnly,
+            isFullScreen,
         } = this.props;
 
         const svgStyle = this.props.style ? { ...this.props.style } : {};
@@ -842,12 +845,13 @@ class Svg extends React.Component {
                     style={{
                         position: "absolute",
                         top: '30px',
-                        left: '5px',
+                        left: isFullScreen ? '16px' : '64px',
                         display: 'grid',
                         background: '#fff',
                         padding: '5px',
                         borderRadius: '3px',
                         boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
+                        transition: '.5s'
                     }}
                 >
                     <TooltipFontIcon

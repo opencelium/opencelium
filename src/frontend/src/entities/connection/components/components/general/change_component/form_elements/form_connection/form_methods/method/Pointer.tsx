@@ -1,6 +1,6 @@
 import Button from '@app_component/base/button/Button';
 import { TextSize } from "@app_component/base/text/interfaces";
-import { replaceVariables, wrapField } from "@application/utils/utils";
+import { replaceVariables } from "@application/utils/utils";
 import CConnection from "@classes/content/connection/CConnection";
 import CEnhancement from "@classes/content/connection/field_binding/CEnhancement";
 import Confirmation from "@entity/connection/components/components/general/app/Confirmation";
@@ -42,13 +42,15 @@ const Pointer: FC<PointerProps> = ({connection, pointer, pointers, submitEdit, o
         submitEdit(filteredPointers);
         toggleConfirmation(false);
     }
-    const titleString = pointerSplit.slice(2, pointerSplit.length).join('.').replace('[]', '');
-    const titleRefStructure = connection.getMethodByColor(pointerSplit[0]).response.success.body.fields;
+    const apiResponseType = pointerSplit[2];
+    const rawTitleString = pointerSplit.slice(3, pointerSplit.length).join('.').replace('[]', '');
+    const titleString = rawTitleString.replace(/^\$\./, '').replace(/^\$/, '');
+    const title = apiResponseType === 'status' ? 'status' : `${apiResponseType}.$.${titleString}`;
     return (
         <div
             onMouseOver={() => {if(!showIcon) toggleIcon(!showIcon)}}
             onMouseLeave={() => {if(showIcon) toggleIcon(!showIcon)}}
-            title={wrapField(titleString, titleRefStructure)}
+            title={title}
             style={{position: 'relative', float: 'left', margin: '7px 2px', width: '20px', height: '10px', background: pointerSplit[0]}}
         >
             {showIcon && <div style={{position: "absolute", right: '-5px', top: '-12px'}}>
