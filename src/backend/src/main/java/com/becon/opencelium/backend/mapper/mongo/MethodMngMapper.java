@@ -16,7 +16,8 @@ import java.util.List;
         componentModel = "spring",
         uses = {
                 RequestMngMapper.class,
-                ResponseMngMapper.class
+                ResponseMngMapper.class,
+                MethodConnectorMngMapper.class
         }
 )
 @Named("methodMngMapper")

@@ -31,6 +31,7 @@ public class MethodDTO {
     private Integer dataAggregator;
     private RequestDTO request;
     private ResponseDTO response;
+    private MethodConnectorDTO connector;
 
     public String getId() {
         return id;
@@ -94,6 +95,14 @@ public class MethodDTO {
 
     public void setDataAggregator(Integer dataAggregator) {
         this.dataAggregator = dataAggregator;
+    }
+
+    public MethodConnectorDTO getConnector() {
+        return connector;
+    }
+
+    public void setConnector(MethodConnectorDTO connector) {
+        this.connector = connector;
     }
 
     @Override

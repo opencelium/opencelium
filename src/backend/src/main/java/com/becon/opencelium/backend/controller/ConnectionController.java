@@ -210,9 +210,11 @@ public class ConnectionController {
             c.getFromConnector().getInvoker().setOperations(null);
             c.getFromConnector().getInvoker().setRequiredData(null);
 
-            c.getToConnector().setRequestData(null);
-            c.getToConnector().getInvoker().setOperations(null);
-            c.getToConnector().getInvoker().setRequiredData(null);
+            if (c.getToConnector() != null) {
+                c.getToConnector().setRequestData(null);
+                c.getToConnector().getInvoker().setOperations(null);
+                c.getToConnector().getInvoker().setRequiredData(null);
+            }
         });
         return ResponseEntity.ok(connectionResources);
     }

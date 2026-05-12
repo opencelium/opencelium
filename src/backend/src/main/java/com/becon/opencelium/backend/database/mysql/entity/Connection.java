@@ -46,10 +46,17 @@ public class Connection {
     private String description;
 
     @Column(name = "from_connector")
-    private int fromConnector;
+    private Integer fromConnector;
 
+    /**
+     * ID of the target connector in legacy (two-connector) connections.
+     * <p>
+     * <b>Null for multi-connector connections</b> — in that mode each method on
+     * {@code fromConnector} carries its own connector reference via
+     * {@code MethodMng.connector.connectorId}.
+     */
     @Column(name = "to_connector")
-    private int toConnector;
+    private Integer toConnector;
 
     @CreatedBy
     @Column(name = "created_by", updatable = false)
@@ -119,19 +126,19 @@ public class Connection {
         this.description = description;
     }
 
-    public int getFromConnector() {
+    public Integer getFromConnector() {
         return fromConnector;
     }
 
-    public void setFromConnector(int fromConnector) {
+    public void setFromConnector(Integer fromConnector) {
         this.fromConnector = fromConnector;
     }
 
-    public int getToConnector() {
+    public Integer getToConnector() {
         return toConnector;
     }
 
-    public void setToConnector(int toConnector) {
+    public void setToConnector(Integer toConnector) {
         this.toConnector = toConnector;
     }
 

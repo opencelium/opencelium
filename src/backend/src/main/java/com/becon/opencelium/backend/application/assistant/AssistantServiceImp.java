@@ -471,7 +471,9 @@ public class AssistantServiceImp implements ApplicationService {
         Invoker toInvoker = invokerService.findByName(toInvokerStr);
 
         addHeaderFromInvokerHelper(connectionMng.getFromConnector().getMethods(), fromInvoker);
-        addHeaderFromInvokerHelper(connectionMng.getToConnector().getMethods(), toInvoker);
+        if (connectionMng.getToConnector() != null) {
+            addHeaderFromInvokerHelper(connectionMng.getToConnector().getMethods(), toInvoker);
+        }
     }
 
     private void addHeaderFromInvokerHelper(List<MethodMng> methods, Invoker invoker) {
