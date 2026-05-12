@@ -1,0 +1,55 @@
+{
+  "status": "ok",
+  "meta": {
+    "response-id": "142",
+    "version": 3
+  },
+  "items": [
+    {
+      "name": "complex Split String",
+      "string": "x-y-z"
+    }
+  ],
+  "data": {
+    "items": [
+      {
+        "id": 1,
+        "name": "first",
+        "tags": [
+          "a",
+          "b",
+          "c"
+        ],
+        "metrics": {
+          "count": 10,
+          "ratio": 0.5
+        }
+      },
+      {
+        "id": 2,
+        "name": "second",
+        "tags": [
+          "x",
+          "y"
+        ],
+        "metrics": {
+          "count": 20,
+          "ratio": 1.5
+        }
+      }
+    ],
+    "key_with_underscore": {
+      "key.with.dot": {
+        "inner-value": 42
+      }
+    }
+  },
+  "list": [
+    "L1",
+    "L2",
+    "L3"
+  ],
+  "string_with_delimiter": "a;b;c;d",
+  "string_array": "[\"a\", \"b\", \"c\"]",
+  "last": true
+}

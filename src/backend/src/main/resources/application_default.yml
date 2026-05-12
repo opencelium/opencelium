@@ -90,7 +90,7 @@ spring:
         id:
           new_generator_mappings: false
     hibernate:
-      dll-auto: validate
+      ddl-auto: validate
     open-in-view: false
   servlet:
     multipart:
@@ -114,7 +114,7 @@ spring:
     throw-exception-if-no-handler-found: true #enables exception handling for endpoints that is not defined in controllers
   web:
     resources:
-      add-mappings=false:
+      add-mappings: false
   ######################################################################
   #                                                                    #
   #   LDAP configuration section.                                      #
@@ -309,8 +309,8 @@ opencelium:
 #  online-services:
 #    invoker-sync:
 #      time: 0 0 0 * * *
-#      active: "false"
+#      active: false
 #    template-sync:
 #      time: 0 0 0 * * *
-#      active: "false"
-#    active: "false"
+#      active: false
+#    active: false

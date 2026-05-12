@@ -33,6 +33,10 @@ src/main/resources/backup
 #!src/test/EvaluationTest.java
 .DS_Store
 
+### CLAUDE ###
+CLAUDE.md
+.claude
+
 ### STS ###
 .apt_generated
 .classpath
