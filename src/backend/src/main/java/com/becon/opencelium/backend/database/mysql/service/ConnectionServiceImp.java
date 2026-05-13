@@ -134,15 +134,24 @@ public class ConnectionServiceImp implements ConnectionService {
             throw new RuntimeException("TITLE_HAS_ALREADY_TAKEN");
         }
 
-        //checking existence of connectors
-        Connector from = connectorService.getById(connection.getToConnector());
-        Connector to = connectorService.getById(connection.getFromConnector());
-
-        connectionMng.getFromConnector().setTitle(from.getTitle());
-        connectionMng.getToConnector().setTitle(to.getTitle());
+        if (connection.getFromConnector() == null) {
+            throw new GeneralServiceException(ExceptionConstant.CONNECTOR_NOT_FOUND, ExceptionMessages.FROM_CONNECTOR_IS_NULL);
+        }
 
         connectionMng.getFromConnector().setFlowId(UUID.randomUUID().toString());
-        connectionMng.getToConnector().setFlowId(UUID.randomUUID().toString());
+
+        if (Objects.equals(connection.getFromConnector(), ConnectionConstants.DEFAULT_CONNECTOR_ID)) {
+            connectionMng.getFromConnector().setTitle(ConnectionConstants.DEFAULT_CONNECTOR_NAME);
+        } else {
+            Connector from = connectorService.getById(connection.getFromConnector());
+            connectionMng.getFromConnector().setTitle(from.getTitle());
+        }
+
+        if (connection.getToConnector() != null) {
+            Connector to = connectorService.getById(connection.getToConnector());
+            connectionMng.getToConnector().setTitle(to.getTitle());
+            connectionMng.getToConnector().setFlowId(UUID.randomUUID().toString());
+        }
 
         //checking existence of category
         if (connection.getCategoryId() != null) {
@@ -175,15 +184,24 @@ public class ConnectionServiceImp implements ConnectionService {
 
         ConnectionMng oldMng = connectionMngService.getById(sCon.getSnapshotId());
 
-        //checking existence of connectors
-        Connector from = connectorService.getById(connection.getToConnector());
-        Connector to = connectorService.getById(connection.getFromConnector());
-
-        connectionMng.getFromConnector().setTitle(from.getTitle());
-        connectionMng.getToConnector().setTitle(to.getTitle());
+        if (connection.getFromConnector() == null) {
+            throw new GeneralServiceException(ExceptionConstant.CONNECTOR_NOT_FOUND, ExceptionMessages.FROM_CONNECTOR_IS_NULL);
+        }
 
         connectionMng.getFromConnector().setFlowId(oldMng.getFromConnector().getFlowId());
-        connectionMng.getToConnector().setFlowId(oldMng.getToConnector().getFlowId());
+
+        if (Objects.equals(connection.getFromConnector(), ConnectionConstants.DEFAULT_CONNECTOR_ID)) {
+            connectionMng.getFromConnector().setTitle(ConnectionConstants.DEFAULT_CONNECTOR_NAME);
+        } else {
+            Connector from = connectorService.getById(connection.getFromConnector());
+            connectionMng.getFromConnector().setTitle(from.getTitle());
+        }
+
+        if (connection.getToConnector() != null) {
+            Connector to = connectorService.getById(connection.getToConnector());
+            connectionMng.getToConnector().setTitle(to.getTitle());
+            connectionMng.getToConnector().setFlowId(oldMng.getToConnector().getFlowId());
+        }
 
         //checking existence of category
         if (connection.getCategoryId() != null && !connection.getCategoryId().equals(sCon.getCategoryId())) {
@@ -340,13 +358,15 @@ public class ConnectionServiceImp implements ConnectionService {
         connectionDTOMng.setCategoryId(connectionDTO.getCategoryId());
 
         if (connectionDTOMng.getFromConnector() != null) {
-            ConnectorDTO temp = connectionDTOMng.getFromConnector();
-            connectionDTOMng.setFromConnector(connectorMapper.toDTO(connectorService.getById(connection.getFromConnector())));
-            connectionDTOMng.getFromConnector().setOperators(temp.getOperators() == null ? new ArrayList<>() : temp.getOperators());
-            connectionDTOMng.getFromConnector().setMethods(temp.getMethods() == null ? new ArrayList<>() : temp.getMethods());
+            if(!Objects.equals(ConnectionConstants.DEFAULT_CONNECTOR_ID, connectionDTOMng.getFromConnector().getConnectorId())) {
+                ConnectorDTO temp = connectionDTOMng.getFromConnector();
+                connectionDTOMng.setFromConnector(connectorMapper.toDTO(connectorService.getById(connection.getFromConnector())));
+                connectionDTOMng.getFromConnector().setOperators(temp.getOperators() == null ? new ArrayList<>() : temp.getOperators());
+                connectionDTOMng.getFromConnector().setMethods(temp.getMethods() == null ? new ArrayList<>() : temp.getMethods());
+            }
         }
 
-        if (connectionDTOMng.getToConnector() != null) {
+        if (connection.getToConnector() != null) {
             ConnectorDTO temp = connectionDTOMng.getToConnector();
             connectionDTOMng.setToConnector(connectorMapper.toDTO(connectorService.getById(connection.getToConnector())));
             connectionDTOMng.getToConnector().setOperators(temp.getOperators() == null ? new ArrayList<>() : temp.getOperators());
