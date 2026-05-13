@@ -25,25 +25,64 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 	const ref = useRef<HTMLDivElement>(null);
 	const [searchValue, setSearchValue] = useState<string>(field);
 	const [selectedOption, setSelectedOption] = useState<OptionType | null>(
-		undefined
+		null
 	);
 	const [filteredOptions, setFilteredOptions] = useState<OptionType[]>([]);
 	const [allOptions, setAllOptions] = useState<OptionType[]>([]);
 	const [iterators, setIterators] = useState<string[]>([]);
 	const [menuIsOpen, toggleMenu] = useState<boolean>(false);
 	const hasError = !!error && !field && !!color;
+	const normalizeCommittedValue = (value: string) => {
+		return value.replace(/\["([^"]*)"\]/g, "['$1']");
+	};
+	const isSpaceInsertionAllowed = (nextValue: string, prevValue: string) => {
+		if (nextValue.length <= prevValue.length) {
+			return true;
+		}
+
+		let changedIndex = -1;
+		const maxLength = Math.max(nextValue.length, prevValue.length);
+
+		for (let i = 0; i < maxLength; i++) {
+			if ((nextValue[i] || '') !== (prevValue[i] || '')) {
+				changedIndex = i;
+				break;
+			}
+		}
+
+		if (changedIndex === -1 || nextValue[changedIndex] !== ' ') {
+			return true;
+		}
+
+		const beforeCursor = nextValue.slice(0, changedIndex + 1);
+		const hasOpenSingle = /\['[^']*$/.test(beforeCursor);
+		const hasOpenDouble = /\["[^"]*$/.test(beforeCursor);
+
+		return hasOpenSingle || hasOpenDouble;
+	};
 	useEffect(() => {
 		setIterators(connectionEditor.connector.getPreviousIterators());
 	}, [connectionEditor.connector]);
 	useEffect(() => {
 		setAllOptions(getNestedOptions(''));
 	}, []);
+
+	const getLookupKey = (token: string) => {
+		const quotedMatch = token.match(/^\[(["'])(.*)\1\]$/);
+
+		if (quotedMatch) {
+			return quotedMatch[2];
+		}
+
+		return token;
+	};
+
 	const getNestedOptions = (path: string): OptionType[] => {
-		const isRoot = path === '$.';
-		const normalizedPath = isRoot ? '' : path.replace(/^\$\./, '');
+	const isRoot = path === '$.' || path === '$' || path === '';
+	const normalizedPath = isRoot ? '' : path.replace(/^\$(?:\.|(?=\[))/, '');
 
 		const keys =
-			normalizedPath.match(/[^.[\]]+|\[\*]|\[\d+]|\[\w+]/g) || [];
+			normalizedPath.match(/\['[^']+'\]|\["[^"]+"\]|\[\*]|\[\d+]|\[\w+]|\[[^\]]+\]|[^.[\]]+/g) || [];
 
 		let currentData: DataStructure | null = !color
 			? {}
@@ -59,7 +98,12 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 			if (!key) break;
 
 			const isArrayAccess = key.startsWith('[') && key.endsWith(']');
-			const isIterator = isArrayAccess && iterators.includes(key.slice(1, -1));
+			const lookupKey = getLookupKey(key);
+			const isQuotedKey = lookupKey !== key;
+			const isIterator =
+				isArrayAccess &&
+				!isQuotedKey &&
+				iterators.includes(key.slice(1, -1));
 
 			if (
 				Array.isArray(currentData) &&
@@ -69,9 +113,9 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 			} else if (
 				currentData &&
 				typeof currentData === 'object' &&
-				key in currentData
+				lookupKey in currentData
 			) {
-				currentData = (currentData as DataStructure)[key] as DataStructure;
+				currentData = (currentData as DataStructure)[lookupKey] as DataStructure;
 			} else {
 				break;
 			}
@@ -99,17 +143,17 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 			options.push(
 				{
 					label: 'First element of the array',
-					value: lastValidPath === '$' ? `$[0]` : `${lastValidPath}[0]`,
+					value: lastValidPath === '$' ? `[0]` : `${lastValidPath}[0]`,
 				},
 				{
 					label: 'The whole array',
-					value: lastValidPath === '$' ? `$[*]` : `${lastValidPath}[*]`,
+					value: lastValidPath === '$' ? `[*]` : `${lastValidPath}[*]`,
 				},
 				...iterators.map((it) => ({
 					label: `(${it} loop)`,
 					value:
 						lastValidPath === '$'
-							? `$[${it}]`
+							? `[${it}]`
 							: `${lastValidPath}[${it}]`,
 				}))
 			);
@@ -123,7 +167,7 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 					label: key,
 					value:
 						lastValidPath === '$'
-							? `$.${key}`
+							? `${key}`
 							: lastValidPath
 								? `${lastValidPath}.${key}`
 								: key,
@@ -137,6 +181,10 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 
 	const handleInputChange = (input: string, actionMeta: { action: string }) => {
 		if (actionMeta.action === 'input-change') {
+			if (!isSpaceInsertionAllowed(input, searchValue)) {
+				return searchValue;
+			}
+
 			setSearchValue(input);
 
 			const newOptions = getNestedOptions(input);
@@ -146,12 +194,8 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 				return;
 			}
 
-
-			const exactMatch = newOptions.find((opt) => opt.value === input);
-			if (!exactMatch) {
-				setSelectedOption(null);
-				onValueSelect(input, {});
-			}
+			setSelectedOption(null);
+			onValueSelect(input, {});
 		}
 	};
 
@@ -168,10 +212,10 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 				request: requestStructure,
 				response: responseStructure,
 			};
-			onValueSelect(selected.value, structure);
+			onValueSelect(normalizeCommittedValue(selected.value), structure);
 		} else {
 			if (searchValue) {
-				onValueSelect(searchValue, {});
+				onValueSelect(normalizeCommittedValue(searchValue), {});
 			} else {
 				setSearchValue('');
 				setFilteredOptions(allOptions);
@@ -181,42 +225,23 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 	};
 	useEffect(() => {
 		if (selectedOption === null && searchValue) {
-			onValueSelect(searchValue);
 		} else if (selectedOption) {
-			onValueSelect(selectedOption.value);
+			onValueSelect(normalizeCommittedValue(selectedOption.value));
 		}
 	}, [selectedOption]);
 	useEffect(() => {
 		// ✅ Root should pass through untouched
-		if (field === '$.' || field === '') {
+		if (field === '') {
 			if (searchValue !== '') {
-				if (searchValue !== '$.') {
-					handleInputChange('$.', {action: 'input-change'});
-				}
+				handleInputChange('', {action: 'input-change'});
 				return;
 			}
 		}
 
-		const unwrapped =
-			field
-				?.replace(/^\$\./, '')
-				?.replace(/\['(.*?)'\]/g, (match, val, offset, str) => {
-					const prevChar = str[offset - 1];
+		const normalized = field || '';
 
-					if (prevChar === '.') {
-						return val;
-					}
-
-					if (offset === 0) {
-						return val;
-					}
-
-					return `.${val}`;
-				})
-				.replace(/\.\./g, '.') || '';
-
-		if (unwrapped !== searchValue) {
-			handleInputChange(unwrapped, { action: 'input-change' });
+		if (normalized !== searchValue) {
+			handleInputChange(normalized, { action: 'input-change' });
 		}
 	}, [field]);
 
@@ -242,6 +267,14 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 		}
 	}, [color]);
 	const getLabelForValue = (value: string) => {
+		if (value === '$.' || value.includes("['") || value.includes('["')) {
+			return value;
+		}
+
+		if (value.startsWith('$.')) {
+			return value.replace(/^\$\./, '');
+		}
+
 		const option =
 			filteredOptions.find(o => o.value === value) ||
 			allOptions.find(o => o.value === value);
@@ -266,7 +299,7 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 				}}
 				onBlur={() => {
 					if (!selectedOption && searchValue) {
-						onValueSelect(searchValue);
+						onValueSelect(normalizeCommittedValue(searchValue));
 					}
 					if (menuIsOpen) toggleMenu(false);
 				}}

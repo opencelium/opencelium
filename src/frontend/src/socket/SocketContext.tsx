@@ -1,7 +1,6 @@
 import React, {createContext, useContext, useEffect, useRef, useState} from "react";
 import {disableSocket, getSocket} from "./socket";
 import {Client} from "@stomp/stompjs";
-import {consoleLog} from "@application/utils/utils";
 
 const SocketContext = createContext<{socket: Client | null, setSocket: () => void, resetSocket: () => void, deactivateSocket: () => Promise<void>}>({socket: null, setSocket: () => {}, resetSocket: () => {}, deactivateSocket: async () => {}});
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import {GroupItemsContainer, IfGroupContainer, LoopGroupContainer} from "./styles";
-import {GroupUIProps, OperatorType} from './props';
+import {GroupProps, GroupUIProps, OperatorType} from './props';
 import GroupHeader from "@app_component/operator_builder/GroupHeader";
 import Rule from "@app_component/operator_builder/Rule";
 
@@ -19,22 +19,26 @@ const Group = ({updateGroup, deleteGroup, group, isInitial, hasNext, connectionE
                                     type={type}
                                     connectionEditor={connectionEditor}
                                     hasNext={index !== group.items.length - 1}
-                                    updateGroup={(newGroup) => {
-                                        updateGroup({
-                                            ...group,
-                                            items: group.items.map(i => {
-                                                return i.id === item.id ? {...newGroup} : i;
+                                    updateGroup={(updater) => {
+                                        updateGroup((prevGroup) => ({
+                                            ...prevGroup,
+                                            items: prevGroup.items.map(i => {
+                                                if (i.id !== item.id) return i;
+
+                                                const current = i as GroupProps;
+
+                                                return typeof updater === 'function'
+                                                    ? updater(current)
+                                                    : updater;
                                             })
-                                        })
+                                        }));
                                     }}
                                     deleteGroup={(groupId) => {
-                                        updateGroup({
-                                            ...group,
-                                            items: group.items.filter(i => {
-                                                return i.id !== groupId;
-                                            }),
+                                        updateGroup((prevGroup: GroupProps) => ({
+                                            ...prevGroup,
+                                            items: prevGroup.items.filter(i => i.id !== groupId),
                                             error: '',
-                                        })
+                                        }))
                                     }}
                                     group={item}
                                 />;
@@ -45,22 +49,24 @@ const Group = ({updateGroup, deleteGroup, group, isInitial, hasNext, connectionE
                                     connectionEditor={connectionEditor}
                                     hasNext={index !== group.items.length - 1}
                                     rule={item}
-                                    updateRule={(newRule) => {
-                                        updateGroup({
-                                            ...group,
-                                            items: group.items.map((i) => {
-                                                return i.id === item.id ? {...newRule} : i;
+                                    updateRule={(updater) => {
+                                        updateGroup((prevGroup: GroupProps) => ({
+                                            ...prevGroup,
+                                            items: prevGroup.items.map((i) => {
+                                                if (i.id !== item.id || i.type !== 'rule') return i;
+
+                                                return typeof updater === 'function'
+                                                    ? updater(i)
+                                                    : updater;
                                             })
-                                        })
+                                        }));
                                     }}
                                     deleteRule={(ruleId) => {
-                                        updateGroup({
-                                            ...group,
-                                            items: group.items.filter((i) => {
-                                                return i.id !== ruleId;
-                                            }),
+                                        updateGroup((prevGroup: GroupProps) => ({
+                                            ...prevGroup,
+                                            items: prevGroup.items.filter(i => i.id !== ruleId),
                                             error: '',
-                                        })
+                                        }))
                                     }}
                                 />;
                         }

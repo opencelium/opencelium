@@ -42,14 +42,8 @@ const OperatorBuilder = (props: OperatorBuilderProps) => {
     };
 
     const validateRule = (rule: RuleProps): string | undefined => {
-        if (!rule.properties) {
-            return `Rule is not defined.`;
-        }
-        if (!rule.properties.leftField) {
-            return `Left field is missing.`;
-        }
-        if (!rule.properties.operator) {
-            return `Operator is missing.`;
+        if (!rule?.properties?.leftField || !rule?.properties?.operator) {
+            return `Value is missing`;
         }
         //@ts-ignore
         if (rule.properties.operator === LoopOperatorName.For || Object.values(UnaryOperatorName).indexOf(rule.properties.operator) !== -1) {
@@ -151,7 +145,20 @@ const OperatorBuilder = (props: OperatorBuilderProps) => {
     }
     return (
         <div style={{margin: "0 20px 20px"}} id={'operator-builder'}>
-            <Group type={props.type} connectionEditor={props} isInitial={true} hasNext={false} updateGroup={(newGroup) => setTree({...newGroup})} group={tree}/>
+            <Group
+                type={props.type}
+                connectionEditor={props}
+                isInitial={true}
+                hasNext={false}
+                updateGroup={(updater) => {
+                    setTree((prevTree) => {
+                        return typeof updater === 'function'
+                            ? updater(prevTree)
+                            : { ...updater };
+                    });
+                }}
+                group={tree}
+            />
             {showDetails && <React.Fragment><p>
                 {jsonToString(tree, props.type).result}
             </p>
