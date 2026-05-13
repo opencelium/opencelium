@@ -11,7 +11,6 @@ import com.becon.opencelium.backend.execution.logger.msg.ConnectorLog;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.logger.msg.MethodData;
 import com.becon.opencelium.backend.execution.masking.MaskingService;
-import com.becon.opencelium.backend.execution.oc721.Connector;
 import com.becon.opencelium.backend.execution.oc721.Loop;
 import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.invoker.entity.Pagination;
@@ -33,7 +32,6 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
-import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -53,12 +51,11 @@ import static com.becon.opencelium.backend.utility.MediaTypeUtility.isJsonCompat
 
 public class ConnectorExecutor {
     private final ExpressionProcessor expressionProcessor;
-    private final Connector connector;
     private final ExecutionManager executionManager;
-    private final RestTemplate restTemplate;
     private final List<Object> executables;
     private final OcLogger<ExecutionLog> logger;
     private final MaskingService masking;
+    private final Pagination pagination;
 
     // log related variables:
     private final String flowId;
@@ -70,32 +67,14 @@ public class ConnectorExecutor {
 
     public ConnectorExecutor(
             ConnectorEx connectorEx, ExecutionManager executionManager,
-            RestTemplate restTemplate, MaskingService masking, String direction
+            MaskingService masking, String direction
     ) {
         this.expressionProcessor = ExpressionProcessorFactory.get(ProcessorType.POSTFIX);
         this.executionManager = executionManager;
-        this.restTemplate = restTemplate;
+        this.executables = buildExecutables(connectorEx);
         this.logger = ThreadLocalOcLogger.get();
         this.masking = masking;
-
-        this.executables = new ArrayList<>();
-        if (Objects.nonNull(connectorEx.getMethods())) {
-            connectorEx.getMethods().forEach(o -> {
-                o.setInvoker(connectorEx.getInvoker());
-                executables.add(o);
-            });
-        }
-        if (Objects.nonNull(connectorEx.getOperators())) {
-            this.executables.addAll(connectorEx.getOperators());
-        }
-        this.executables.sort(
-                Comparator.comparing(
-                        ConnectorExecutor::extractIndex,
-                        Comparators.NUMERIC_PARTS
-                )
-        );
-
-        this.connector = Connector.fromEx(connectorEx);
+        this.pagination = connectorEx.getPagination();
 
         // initialize log related variables:
         this.flowId = connectorEx.getFchartId();
@@ -147,9 +126,11 @@ public class ConnectorExecutor {
             logger.getLogEntity().setMethodData(new MethodData(operation.getOperationId()));
             logger.logAndSend(String.format("phase=OPERATION_START indexPath=%s name=\"%s\" %s", index, operation.getName(), getLoopData()));
             endPhases.push(String.format("phase=OPERATION_END indexPath=%s name=\"%s\" %s", index, operation.getName(), getLoopData()));
+            executionManager.setCurrentCtorId(operation.getConnectorId());
 
             executeOperation(operation);
 
+            executionManager.setCurrentCtorId(connectorId);
             logger.logAndSend(endPhases.pop());
             logger.getLogEntity().setMethodData(null);
         } else if (executable instanceof OperatorEx operator && "if".equals(operator.getType())) {
@@ -278,7 +259,7 @@ public class ConnectorExecutor {
         HttpEntity<Object> httpEntity = new HttpEntity<>(requestEntity.getBody(), requestEntity.getHeaders());
 
         try {
-            return this.restTemplate.exchange(uri, requestEntity.getMethod(), httpEntity, responseType);
+            return executionManager.getRestTemplate().exchange(uri, requestEntity.getMethod(), httpEntity, responseType);
         } catch (Exception e) {
             return convertException(e);
         }
@@ -372,7 +353,7 @@ public class ConnectorExecutor {
 
     private Pagination resolvePagination(OperationDTO dto) {
         if (dto.getOperationType() == OpType.PAGINATION) {
-            Pagination pagination = dto.getPagination() != null ? dto.getPagination() : connector.getPagination();
+            Pagination pagination = dto.getPagination() != null ? dto.getPagination() : this.pagination;
 
             if (pagination != null) {
                 return pagination.clone();
@@ -423,6 +404,30 @@ public class ConnectorExecutor {
             Thread.interrupted(); // clear the flag
             throw new ExecutionTerminatedException("Execution terminated.");
         }
+    }
+
+    private List<Object> buildExecutables(ConnectorEx connector) {
+        List<Object> result = new ArrayList<>();
+
+        if (Objects.nonNull(connector.getMethods())) {
+            connector.getMethods().forEach(o -> {
+                o.setInvoker(connector.getInvoker());
+                result.add(o);
+            });
+        }
+
+        if (Objects.nonNull(connector.getOperators())) {
+            result.addAll(connector.getOperators());
+        }
+
+        result.sort(
+                Comparator.comparing(
+                        ConnectorExecutor::extractIndex,
+                        Comparators.NUMERIC_PARTS
+                )
+        );
+
+        return result;
     }
 
     private void flushEndPhases() {
