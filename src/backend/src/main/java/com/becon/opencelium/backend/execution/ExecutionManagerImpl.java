@@ -25,26 +25,29 @@ import java.util.stream.Collectors;
 
 public class ExecutionManagerImpl implements ExecutionManager {
     private final Map<String, Object> webhookVars;
-    private final Map<Integer, RestTemplate> restTemplate;
     private final Map<Integer, Map<String, String>> requestData;
+    private final Map<Integer, RestTemplate> restTemplate;
+    private final Map<Integer, Pagination> pagination;
     private final Extractor refExtractor;
     private final List<Loop> loops = new ArrayList<>();
     private final List<FieldBind> fieldBind;
     private final List<Operation> operations = new ArrayList<>();
     private final ScriptExecutionManager scriptExecutionManager;
-    private Integer currentCtorId;
-    private Pagination pagination;
+    private Integer currentConnectorId;
+    private Pagination currentPagination;
 
     public ExecutionManagerImpl(
             Map<String, Object> webhookVars,
             List<FieldBind> fieldBind,
+            Map<Integer, Map<String, String>> requestData,
             Map<Integer, RestTemplate> restTemplate,
-            Map<Integer, Map<String, String>> requestData
+            Map<Integer, Pagination> pagination
     ) {
         this.webhookVars = webhookVars;
         this.fieldBind = fieldBind;
-        this.restTemplate = restTemplate;
         this.requestData = requestData;
+        this.restTemplate = restTemplate;
+        this.pagination = pagination;
 
         this.refExtractor = new ReferenceExtractor(this);
         this.scriptExecutionManager = ScriptExecutionManagerProvider.get();
@@ -79,19 +82,24 @@ public class ExecutionManagerImpl implements ExecutionManager {
     }
 
     @Override
-    public RestTemplate getRestTemplate() {
-        return restTemplate.get(currentCtorId);
-    }
-
-    @Override
     public Map<String, String> getRequestData(Integer ctorId) {
-        ctorId = ctorId == null ? this.currentCtorId : ctorId;
+        ctorId = ctorId == null ? this.currentConnectorId : ctorId;
 
         if (requestData.containsKey(ctorId)) {
             return requestData.get(ctorId);
         }
 
         throw new RuntimeException("Non existing connector id 'ctorId' = " + ctorId);
+    }
+
+    @Override
+    public RestTemplate resolveRestTemplate() {
+        return restTemplate.get(currentConnectorId);
+    }
+
+    @Override
+    public Pagination resolvePagination() {
+        return pagination.get(currentConnectorId);
     }
 
     @Override
@@ -163,17 +171,17 @@ public class ExecutionManagerImpl implements ExecutionManager {
     @Override
     public void setCurrentCtorId(Integer ctorId) {
         if (ctorId != null) {
-            this.currentCtorId = ctorId;
+            this.currentConnectorId = ctorId;
         }
     }
 
     @Override
     public void setPagination(Pagination pagination) {
-        this.pagination = pagination;
+        this.currentPagination = pagination;
     }
 
     @Override
     public String getPaginationParamValue(PageParam pageParam) {
-        return pagination.getParamValue(pageParam);
+        return currentPagination.getParamValue(pageParam);
     }
 }

@@ -41,6 +41,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Stack;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
@@ -55,7 +56,6 @@ public class ConnectorExecutor {
     private final List<Object> executables;
     private final OcLogger<ExecutionLog> logger;
     private final MaskingService masking;
-    private final Pagination pagination;
 
     // log related variables:
     private final String flowId;
@@ -74,7 +74,6 @@ public class ConnectorExecutor {
         this.executables = buildExecutables(connectorEx);
         this.logger = ThreadLocalOcLogger.get();
         this.masking = masking;
-        this.pagination = connectorEx.getPagination();
 
         // initialize log related variables:
         this.flowId = connectorEx.getFchartId();
@@ -259,7 +258,7 @@ public class ConnectorExecutor {
         HttpEntity<Object> httpEntity = new HttpEntity<>(requestEntity.getBody(), requestEntity.getHeaders());
 
         try {
-            return executionManager.getRestTemplate().exchange(uri, requestEntity.getMethod(), httpEntity, responseType);
+            return executionManager.resolveRestTemplate().exchange(uri, requestEntity.getMethod(), httpEntity, responseType);
         } catch (Exception e) {
             return convertException(e);
         }
@@ -353,7 +352,8 @@ public class ConnectorExecutor {
 
     private Pagination resolvePagination(OperationDTO dto) {
         if (dto.getOperationType() == OpType.PAGINATION) {
-            Pagination pagination = dto.getPagination() != null ? dto.getPagination() : this.pagination;
+            Pagination pagination = Optional.ofNullable(dto.getPagination())
+                    .orElseGet(executionManager::resolvePagination);
 
             if (pagination != null) {
                 return pagination.clone();

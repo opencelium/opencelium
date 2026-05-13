@@ -14,7 +14,7 @@ import java.util.Map;
  * <p>
  * Not used in legacy (two-connector) connections — see {@link ConnectorEx} instead.
  */
-public class MethodConnectorEx {
+public class MethodConnectorEx implements ExecutionConnector {
 
     private Integer id;
 

@@ -6,7 +6,9 @@ import com.becon.opencelium.backend.execution.masking.MaskingService;
 import com.becon.opencelium.backend.execution.masking.MaskingServiceImp;
 import com.becon.opencelium.backend.execution.oc721.FieldBind;
 import com.becon.opencelium.backend.execution.oc721.Operation;
+import com.becon.opencelium.backend.invoker.entity.Pagination;
 import com.becon.opencelium.backend.resource.execution.ConnectionEx;
+import com.becon.opencelium.backend.resource.execution.ExecutionConnector;
 import com.becon.opencelium.backend.resource.execution.ExecutionObj;
 import com.becon.opencelium.backend.resource.execution.ProxyEx;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -16,6 +18,7 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 public class ConnectionExecutor {
@@ -34,7 +37,13 @@ public class ConnectionExecutor {
     }
 
     public void start() {
-        executionManager = new ExecutionManagerImpl(webhookVars, getFieldBind(), getRestTemplate(), getRequestData());
+        executionManager = new ExecutionManagerImpl(
+                webhookVars,
+                getFieldBind(),
+                getRequestData(),
+                getRestTemplate(),
+                getPagination()
+        );
 
         if (connection.getSource() != null) {
             ConnectorExecutor source = new ConnectorExecutor(connection.getSource(), executionManager, masking, "source");
@@ -64,21 +73,9 @@ public class ConnectionExecutor {
     private Map<Integer, RestTemplate> getRestTemplate() {
         Map<Integer, RestTemplate> result = new HashMap<>();
 
-        if (connection.getSource() != null) {
-            var source = connection.getSource();
-            result.put(source.getId(), buildRestTemplate(source.isSslCert(), source.getTimeout()));
-        }
-
-        if (connection.getTarget() != null) {
-            var target = connection.getTarget();
-            result.put(target.getId(), buildRestTemplate(target.isSslCert(), target.getTimeout()));
-        }
-
-        if (connection.getConnectors() != null) {
-            connection.getConnectors().forEach((id, connector) -> {
-                result.put(id, buildRestTemplate(connector.isSslCert(), connector.getTimeout()));
-            });
-        }
+        processConnectors((id, connector) ->
+                result.put(id, buildRestTemplate(connector.isSslCert(), connector.getTimeout()))
+        );
 
         return result;
     }
@@ -86,21 +83,19 @@ public class ConnectionExecutor {
     private Map<Integer, Map<String, String>> getRequestData() {
         Map<Integer, Map<String, String>> result = new HashMap<>();
 
-        if (connection.getSource() != null) {
-            var source = connection.getSource();
-            result.put(source.getId(), source.getRequiredData());
-        }
+        processConnectors((id, connector) ->
+                result.put(id, connector.getRequiredData())
+        );
 
-        if (connection.getTarget() != null) {
-            var target = connection.getTarget();
-            result.put(target.getId(), target.getRequiredData());
-        }
+        return result;
+    }
 
-        if (connection.getConnectors() != null) {
-            connection.getConnectors().forEach((id, connector) -> {
-                result.put(id, connector.getRequiredData());
-            });
-        }
+    private Map<Integer, Pagination> getPagination() {
+        Map<Integer, Pagination> result = new HashMap<>();
+
+        processConnectors((id, connector) ->
+                result.put(id, connector.getPagination())
+        );
 
         return result;
     }
@@ -114,5 +109,21 @@ public class ConnectionExecutor {
         }
 
         return restTemplateBuilder.build();
+    }
+
+    private void processConnectors(BiConsumer<Integer, ExecutionConnector> consumer) {
+        if (connection.getSource() != null) {
+            var source = connection.getSource();
+            consumer.accept(source.getId(), source);
+        }
+
+        if (connection.getTarget() != null) {
+            var target = connection.getTarget();
+            consumer.accept(target.getId(), target);
+        }
+
+        if (connection.getConnectors() != null) {
+            connection.getConnectors().forEach(consumer);
+        }
     }
 }

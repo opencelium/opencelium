@@ -14,7 +14,8 @@ public interface ExecutionManager {
     Map<String, Object> getWebhookVars();
     List<Loop> getLoops();
     String generateKey(int loopDepth);
-    RestTemplate getRestTemplate();
+    RestTemplate resolveRestTemplate();
+    Pagination resolvePagination();
     Map<String, String> getRequestData(Integer ctorId);
     Optional<Operation> findOperationByColor(String color);
     Object executeScript(String bindId);
