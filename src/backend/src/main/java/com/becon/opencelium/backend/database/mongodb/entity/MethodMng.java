@@ -31,6 +31,14 @@ public class MethodMng {
     private RequestMng request;
     private ResponseMng response;
 
+    /**
+     * Connector reference for multi-connector connections.
+     * <p>
+     * <b>Null for legacy (two-connector) connections</b> — in that case the connector
+     * is determined by whether this method lives under {@code fromConnector} or {@code toConnector} on {@link ConnectionMng}
+     */
+    @Field("connector")
+    private MethodConnectorMng connector;
 
     public MethodMng() {
     }
@@ -102,5 +110,13 @@ public class MethodMng {
     @Override
     public boolean equals(Object obj) {
         return this == obj;
+    }
+
+    public MethodConnectorMng getConnector() {
+        return connector;
+    }
+
+    public void setConnector(MethodConnectorMng connector) {
+        this.connector = connector;
     }
 }
