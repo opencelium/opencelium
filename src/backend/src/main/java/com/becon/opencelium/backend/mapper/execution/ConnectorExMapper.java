@@ -1,6 +1,9 @@
 package com.becon.opencelium.backend.mapper.execution;
 
+import com.becon.opencelium.backend.constant.ConnectionConstants;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectorMng;
+import com.becon.opencelium.backend.database.mongodb.entity.MethodConnectorMng;
+import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.RequestData;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
@@ -10,13 +13,13 @@ import com.becon.opencelium.backend.execution.rdata.RequiredDataServiceImp;
 import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.resource.execution.ConnectorEx;
+import com.becon.opencelium.backend.resource.execution.MethodConnectorEx;
 import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class ConnectorExMapper {
@@ -37,40 +40,90 @@ public class ConnectorExMapper {
         this.invokerService = invokerService;
     }
 
-    ConnectorEx toEntity(ConnectorMng dto, String connectionId) {
-        Connector connector = connectorService.getById(dto.getConnectorId());
+    ConnectorEx toEntity(ConnectorMng dto) {
+        if (dto == null) return null;
         ConnectorEx connectorEx = new ConnectorEx();
+        if(!Objects.equals(ConnectionConstants.DEFAULT_CONNECTOR_ID, dto.getConnectorId())){
+            Connector connector = connectorService.getById(dto.getConnectorId());
+            List<RequestData> requestData = connector.getRequestData();
 
-        List<RequestData> requestData = connector.getRequestData();
+            Invoker invoker = invokerService.findByName(connector.getInvoker());
+            invoker.getRequiredData().forEach(rd -> {
+                if (requestData.stream().noneMatch(rqsd -> rqsd.getField().equals(rd.getName()))) {
+                    requestData.add(new RequestData(rd));
+                }
+            });
 
-        Invoker invoker = invokerService.findByName(connector.getInvoker());
-        invoker.getRequiredData().forEach(rd -> {
-            if (requestData.stream().noneMatch(rqsd -> rqsd.getField().equals(rd.getName()))) {
-                requestData.add(new RequestData(rd));
-            }
-        });
+            RequiredDataService requiredDataService = new RequiredDataServiceImp(connector,requestData, invoker.getOperations());
+            requestData.forEach(rqsd -> {
+                String value = requiredDataService.getValue(rqsd).orElse(null);
+                rqsd.setValue(value);
+            });
 
-        RequiredDataService requiredDataService = new RequiredDataServiceImp(connector,requestData, invoker.getOperations());
-        requestData.forEach(rqsd -> {
-            String value = requiredDataService.getValue(rqsd).orElse(null);
-            rqsd.setValue(value);
-        });
+            Map<String, String> map = new HashMap<>();
+            requestData.forEach(r -> map.put(r.getField(), r.getValue()));
 
-        Map<String, String> map = new HashMap<>();
-        requestData.forEach(r -> map.put(r.getField(), r.getValue()));
+            connectorEx.setSslCert(connector.isSslValidation());
+            connectorEx.setInvoker(connector.getInvoker());
+            connectorEx.setRequiredData(map);
 
-        connectorEx.setName(connector.getTitle());
-        connectorEx.setSslCert(connector.isSslValidation());
-        connectorEx.setInvoker(connector.getInvoker());
-        connectorEx.setRequiredData(map);
+            setPagination(connectorEx, invoker);
+            connectorEx.setMethods(operationExMapper.toOperationAll(dto.getMethods(), connector.getInvoker()));
+        } else {
+            connectorEx.setMethods(operationExMapper.toOperationAll(dto.getMethods(), null));
+        }
 
+        connectorEx.setName(dto.getTitle());
         connectorEx.setId(dto.getConnectorId());
         connectorEx.setFchartId(dto.getFlowId());
-        connectorEx.setMethods(operationExMapper.toOperationAll(dto.getMethods(), connectionId, connector.getInvoker()));
         connectorEx.setOperators(operatorExMapper.toEntityAll(dto.getOperators()));
 
-        setPagination(connectorEx, invoker);
         return connectorEx;
+    }
+
+    // Builds the connectors map for multi-connector connections. Collects unique connectorIds
+    // from methods that carry their own connector reference, loads each once, and returns a map
+    // keyed by connector ID for fast lookup during execution.
+    Map<Integer, MethodConnectorEx> toMethodConnectorMap(ConnectorMng fromConnector) {
+        if (fromConnector == null || fromConnector.getMethods() == null) {
+            return Map.of();
+        }
+        Map<Integer, MethodConnectorEx> result = new HashMap<>();
+        fromConnector.getMethods().stream()
+                .filter(m -> m.getConnector() != null && m.getConnector().getConnectorId() != null)
+                .map(MethodMng::getConnector)
+                .collect(Collectors.toMap(
+                        MethodConnectorMng::getConnectorId,
+                        MethodConnectorMng::getConnectorId,
+                        (a, b) -> a))
+                .keySet()
+                .forEach(connectorId -> {
+                    Connector connector = connectorService.getById(connectorId);
+                    Invoker invoker = invokerService.findByName(connector.getInvoker());
+
+                    List<RequestData> requestData = connector.getRequestData();
+                    invoker.getRequiredData().forEach(rd -> {
+                        if (requestData.stream().noneMatch(rqsd -> rqsd.getField().equals(rd.getName()))) {
+                            requestData.add(new RequestData(rd));
+                        }
+                    });
+                    RequiredDataService requiredDataService = new RequiredDataServiceImp(connector, requestData, invoker.getOperations());
+                    requestData.forEach(rqsd -> rqsd.setValue(requiredDataService.getValue(rqsd).orElse(null)));
+
+                    Map<String, String> requiredDataMap = new HashMap<>();
+                    requestData.forEach(r -> requiredDataMap.put(r.getField(), r.getValue()));
+
+                    MethodConnectorEx mcEx = new MethodConnectorEx();
+                    mcEx.setId(connector.getId());
+                    mcEx.setTitle(connector.getTitle());
+                    mcEx.setSslCert(connector.isSslValidation());
+                    mcEx.setTimeout(connector.getTimeout());
+                    mcEx.setInvoker(connector.getInvoker());
+                    mcEx.setRequiredData(requiredDataMap);
+                    mcEx.setPagination(invoker.getPagination());
+                    result.put(connectorId, mcEx);
+                });
+        return result;
     }
 
     private void setPagination(ConnectorEx connectorEx, Invoker invoker) {

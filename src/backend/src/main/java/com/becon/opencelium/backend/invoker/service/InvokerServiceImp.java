@@ -52,15 +52,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -254,9 +246,7 @@ public class InvokerServiceImp implements InvokerService {
     }
 
     @Override
-    public DataType findFieldType(String invokerName, String methodName, LinkedList<String> hierarchy) {
-
-        Invoker invoker = findByName(invokerName);
+    public DataType findFieldType(Invoker invoker, String methodName, LinkedList<String> hierarchy) {
 
         Optional<FunctionInvoker> functionInvokerOp = invoker
                 .getOperations()
