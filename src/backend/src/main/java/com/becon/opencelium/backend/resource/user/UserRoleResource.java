@@ -43,7 +43,7 @@ public class UserRoleResource {
         this.name = userRole.getName();
         this.description = userRole.getDescription();
         if (userRole.getIcon() != null){
-            this.icon = "imagePath" + userRole.getIcon();
+            this.icon = imagePath + userRole.getIcon();
         }
         this.components = userRole.getComponents().stream()
                 .map(RoleHasPermission::getComponent)
