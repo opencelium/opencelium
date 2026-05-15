@@ -1,0 +1,24 @@
+
+.ant-dialog-custom {
+    padding-bottom: 40px;
+}
+
+.ant-dialog-custom .ant-modal-content {
+    border-radius: var(--radius-lg);
+}
+
+.ant-dialog-fullscreen {
+    top: 0 !important;
+    padding: 0;
+    margin: 0;
+}
+
+.ant-dialog-fullscreen .ant-modal-content {
+    height: 100vh;
+    border-radius: 0;
+}
+
+.ant-dialog-fullscreen .ant-modal-body {
+    height: calc(100vh - 55px); /* header */
+    overflow: auto;
+}

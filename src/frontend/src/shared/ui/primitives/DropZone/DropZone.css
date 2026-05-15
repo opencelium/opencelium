@@ -1,0 +1,54 @@
+.dropzone {
+    border: 2px dashed var(--color-action-primary);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    background: var(--color-background-surface);
+    cursor: pointer;
+    width: 100%;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    min-height: 100px;
+}
+
+.dropzone__content {
+    font-size: 18px;
+}
+
+.dropzone--active {
+    background: var(--color-action-primary);
+    color: var(--color-text-on-action);
+}
+
+.file-item {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 12px;
+}
+
+.file-item__preview {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+}
+
+.file-item__progress {
+    height: 4px;
+    background: var(--color-background-page);
+    margin-top: 4px;
+}
+
+.file-item__progress-bar {
+    height: 100%;
+    background: var(--color-action-primary);
+    transition: width 0.2s;
+}
+
+.file-item__remove {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--color-action-danger);
+}

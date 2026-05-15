@@ -1,0 +1,54 @@
+{
+  "fields": {
+    "url": {
+      "label": "Url"
+    },
+    "userDn": {
+      "label": "UserDN"
+    },
+    "groupDn": {
+      "label": "GroupDN"
+    },
+    "readAccountDn": {
+      "label": "Read Account DN"
+    },
+    "readAccountPassword": {
+      "label": "Read Account Password"
+    },
+    "userSearchFilter": {
+      "label": "User Search Filter"
+    },
+    "groupSearchFilter": {
+      "label": "Group Search Filter"
+    }
+  },
+  "sections": {
+    "configurations": {
+      "title": "Configurations"
+    }
+  },
+  "wizard": {
+    "modes": {
+      "view": {
+        "header": "LDAP Configurations",
+        "subheader": "Test it."
+      }
+    },
+    "recommendations": {
+      "1": "Create User",
+      "2": "Create Role"
+    },
+    "steps": {
+      "configurations": {
+        "header": "Configurations",
+        "subheader": "Test LDAP configurations",
+        "actions": {
+          "nextLabel": "Test"
+        },
+        "remote": {
+          "error": "Could not test ldap connection"
+        }
+      }
+    }
+  }
+}

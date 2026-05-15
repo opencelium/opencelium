@@ -1,0 +1,61 @@
+{
+  "list": {
+    "title": "Datenaggregator",
+    "subTitle": "Ein Datenaggregator ist eine Funktion, die eine strukturierte Benachrichtigungsverarbeitung ermöglicht, nachdem eine Verbindung in einem Zeitplan ausgelöst wurde. Wenn ein Zeitplan eine Verbindung ausführt, verarbeitet der Aggregator die Ausführungsdaten und bereitet sie für die Benachrichtigungszustellung vor (z. B. über <ntLink>Benachrichtigungsvorlagen</ntLink>).",
+    "filters": {
+      "showArchived": "Archivierte anzeigen"
+    }
+  },
+  "fields": {
+    "name": { "label": "Name" },
+    "args": { "label": "Argumente" },
+    "script": { "label": "Skript" },
+    "archived": { "label": "Archiviert" }
+  },
+  "sections": {
+    "general-data": { "title": "Allgemeine Daten" },
+    "code": { "title": "Code" }
+  },
+  "wizard": {
+    "modes": {
+      "create": {
+        "header": "Datenaggregator erstellen",
+        "subheader": "Datenaggregato definieren Skripte zum Sammeln und Transformieren von Daten für Benachrichtigungsvorlagen.",
+        "successMessage": "Datenaggregator \"{{name}}\" wurde erfolgreich erstellt"
+      },
+      "update": {
+        "header": "Datenaggregator aktualisieren",
+        "subheader": "Datenaggregato definieren Skripte zum Sammeln und Transformieren von Daten für Benachrichtigungsvorlagen.",
+        "successMessage": "Datenaggregator \"{{name}}\" wurde erfolgreich aktualisiert"
+      },
+      "view": {
+        "header": "Datenaggregator Details",
+        "subheader": "Datenaggregato definieren Skripte zum Sammeln und Transformieren von Daten für Benachrichtigungsvorlagen."
+      }
+    },
+    "recommendations": {
+      "1": "Weiteren Datenaggregator erstellen",
+      "2": "Benachrichtigungsvorlage erstellen"
+    },
+    "steps": {
+      "general-data": {
+        "header": "Allgemeine Daten",
+        "subheader": "Name und Argumente des Datenaggregators definieren."
+      },
+      "code": {
+        "header": "Skript",
+        "subheader": "Logik des Aggregationsskripts definieren."
+      }
+    }
+  },
+  "validation": {
+    "scriptContainsNotExistedArgs": "Das Skript enthält nicht existierende Argumente.",
+    "argNameInvalid": "Muss mit einem Buchstaben, _ oder $ beginnen und nur Buchstaben, Ziffern, _ oder $ enthalten."
+  },
+  "confirmation": {
+    "delete": {
+      "byName": "Datenaggregator mit Name \"{{name}}\" löschen?",
+      "byId": "Datenaggregator mit ID {{id}} löschen?"
+    }
+  }
+}

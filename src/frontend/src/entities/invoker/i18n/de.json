@@ -1,0 +1,131 @@
+{
+  "list": {
+    "title": "Invoker",
+    "subTitle": "Der Bereich Invoker enthält alle in OpenCelium konfigurierten Integrationen für externe Systeme. Ein Invoker stellt eine Verbindungsschnittstelle zu einer externen API oder einem externen Dienst dar. Er definiert, wie OpenCelium mit externen Systemen kommuniziert.\n\nWeitere Informationen finden Sie in der Dokumentation.",
+    "upload": {
+      "button": "Hochladen",
+      "confirmReplace": {
+        "title": "Vorhandenen Invoker ersetzen?",
+        "message": "Ein Invoker mit diesem Dateinamen existiert bereits. Er wird ersetzt. Sind Sie sicher?"
+      },
+      "success": "Invoker erfolgreich hochgeladen: {{name}}",
+      "error": "Hochladen der Invoker-Datei fehlgeschlagen."
+    }
+  },
+  "fields": {
+    "name": {
+      "label": "Name",
+      "errors": {
+        "name_already_exists": "Ein Invoker mit diesem Namen existiert bereits"
+      }
+    },
+    "description": {
+      "label": "Beschreibung"
+    },
+    "hint": {
+      "label": "Hinweis"
+    },
+    "authType": {
+      "label": "Authentifizierungstyp",
+      "options": {
+        "apikey": "API-Schlüssel",
+        "basic": "Einfach",
+        "endpointAuth": "Endpunkt-Authentifizierung",
+        "token": "Token"
+      }
+    },
+    "requiredData": {
+      "label": "Erforderliche Daten",
+      "item": {
+        "name": "Name",
+        "visibility": "Sichtbarkeit",
+        "value": "Standardwert"
+      },
+      "visibility": {
+        "public": "Öffentlich",
+        "protected": "Geschützt",
+        "private": "Privat"
+      },
+      "add": "Feld hinzufügen",
+      "empty": "Keine erforderlichen Datenfelder.",
+      "errors": {
+        "required": "Mindestens ein erforderliches Datenfeld muss definiert werden"
+      }
+    },
+    "operations": {
+      "label": "Operationen",
+      "item": {
+        "name": "Operationsname",
+        "endpoint": "Endpunkt",
+        "method": "Methode",
+        "testConnection": "Verbindungstest",
+        "request": "Anfrage",
+        "responseSuccess": "Antwort (Erfolg)",
+        "responseFail": "Antwort (Fehler)",
+        "status": "Status",
+        "headers": "Header",
+        "data": "Daten",
+        "format": "Format",
+        "type": "Typ",
+        "body": "Inhalt"
+      },
+      "add": "Operation hinzufügen",
+      "empty": "Keine Operationen definiert.",
+      "errors": {
+        "required": "Mindestens eine Operation muss definiert werden",
+        "nameRequired": "Operationsname ist erforderlich",
+        "endpointRequired": "Endpunkt ist erforderlich",
+        "incompleteOperations": "Alle Operationen müssen einen Namen und einen Endpunkt haben",
+        "noTestOperation": "Mindestens eine Operation muss den Verbindungstest aktiviert haben",
+        "invalidJson": "Ungültiges JSON"
+      }
+    }
+  },
+  "sections": {
+    "general-data": {
+      "title": "Allgemeine Daten"
+    },
+    "authentication": {
+      "title": "Authentifizierung"
+    },
+    "operations": {
+      "title": "Operationen"
+    }
+  },
+  "wizard": {
+    "modes": {
+      "create": {
+        "header": "Invoker erstellen",
+        "subheader": "Ein Invoker definiert die HTTP-Operationen und Authentifizierungskonfiguration für die Kommunikation mit einem externen System.",
+        "successMessage": "Invoker erfolgreich erstellt"
+      },
+      "view": {
+        "header": "Invoker-Details",
+        "subheader": "Invoker-Konfiguration anzeigen."
+      }
+    },
+    "recommendations": {
+      "1": "Weiteren Invoker erstellen",
+      "2": "Connector erstellen"
+    },
+    "steps": {
+      "general-data": {
+        "header": "Allgemeine Daten",
+        "subheader": "Grundlegende Informationen für diesen Invoker definieren."
+      },
+      "authentication": {
+        "header": "Authentifizierung",
+        "subheader": "Authentifizierungstyp und erforderliche Datenfelder konfigurieren."
+      },
+      "operations": {
+        "header": "Operationen",
+        "subheader": "HTTP-Operationen definieren, die dieser Invoker bereitstellt."
+      }
+    }
+  },
+  "confirmation": {
+    "delete": {
+      "byName": "Invoker \"{{name}}\" löschen?"
+    }
+  }
+}

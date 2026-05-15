@@ -1,0 +1,24 @@
+{
+  "list": {
+    "title": "Connections",
+    "subTitle": "Connections define how connectors interact with each other, including request flow, data mapping, and communication logic.",
+    "searchPlaceholder": "Search by title or description",
+    "columns": {
+      "title": "Title",
+      "description": "Description"
+    },
+    "downloadTemplate": {
+      "tooltip": "Download as template",
+      "success": "Template \"{{name}}\" downloaded",
+      "error": "Failed to download template"
+    }
+  },
+  "fields": {
+    "title": {
+      "label": "Title"
+    },
+    "description": {
+      "label": "Description"
+    }
+  }
+}

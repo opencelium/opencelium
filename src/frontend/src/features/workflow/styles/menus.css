@@ -1,0 +1,118 @@
+.primaryButton,
+.iconButton {
+  border: 1px solid #d1d5db;
+  background: #fff;
+  border-radius: 10px;
+  height: 36px;
+  padding: 0 14px;
+  cursor: pointer;
+}
+
+.primaryButton {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+
+.iconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+}
+
+.headerMenu,
+.contextMenu {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+  padding: 6px;
+  z-index: 40;
+}
+
+.headerMenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 260px;
+  padding: 14px 12px;
+}
+
+.contextMenu {
+  position: fixed;
+  min-width: 290px;
+  padding: 18px;
+}
+
+.headerMenuItem,
+.contextMenuItem {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.headerMenuSection {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.headerMenuSection + .headerMenuSection {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed #9ca3af;
+}
+
+.headerMenuItem {
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 15px;
+  line-height: 1.25;
+}
+
+.headerMenuItem:hover,
+.contextMenuItem:hover {
+  background: #f3f4f6;
+}
+
+.contextMenuHeader {
+  margin-bottom: 16px;
+}
+
+.contextMenuTitle {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+.contextMenuDescription {
+  margin-top: 14px;
+  color: #4b5563;
+  font-size: 14px;
+}
+
+.contextMenuSections {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.contextMenuSection {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.contextMenuGroupLabel {
+  padding: 10px 12px 6px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+  cursor: default;
+}

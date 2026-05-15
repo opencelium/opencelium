@@ -1,0 +1,33 @@
+{
+  "fields": {
+    "theme": {
+      "label": "Design"
+    },
+    "commandNode": {
+      "label": "Darstellungsmodus"
+    }
+  },
+  "wizard": {
+    "steps": {
+      "theme": {
+        "header": "Design",
+        "subheader": "Wählen Sie zwischen hellem und dunklem Erscheinungsbild für die gesamte Anwendung."
+      },
+      "commander": {
+        "header": "Commander",
+        "subheader": "Er ermöglicht es Benutzern, über eine tastaturgesteuerte Oberfläche schnell zu suchen, zu navigieren und Aktionen auszuführen — aufgerufen mit Tastenkürzeln wie Strg + K."
+      }
+    },
+    "modes": {
+      "update": {
+        "header": "UI-Einstellungen",
+        "subheader": "Hier können Sie Konfigurationen für die Benutzeroberfläche anpassen, z. B. Menü, Commander, Verbindungseditor.",
+        "successMessage": "UI-Einstellungen aktualisiert"
+      }
+    }
+  },
+  "messages": {
+    "themeUpdated": "Design aktualisiert",
+    "commandModeUpdated": "Commander-Modus aktualisiert"
+  }
+}

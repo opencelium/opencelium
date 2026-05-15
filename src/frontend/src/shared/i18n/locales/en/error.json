@@ -1,0 +1,14 @@
+{
+  "api": {
+    "forbidden": "Your session is expired",
+    "unknownError": "Unknown Error in {{place}}"
+  },
+  "field": {
+    "required": "Required field",
+    "minLength": "Minimum {{min}} characters",
+    "maxLength": "Maximum {{max}} characters",
+    "invalidEmail": "Invalid email",
+    "mustNumber": "Must be a number",
+    "failedAsyncOptions": "Failed to fetch options"
+  }
+}

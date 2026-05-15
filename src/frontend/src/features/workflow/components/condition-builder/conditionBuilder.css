@@ -1,0 +1,345 @@
+.conditionBuilderModal {
+	top: 18px;
+	max-width: calc(100vw - 48px);
+	padding-bottom: 0;
+}
+
+.conditionBuilderModal-loop {
+	min-width: min(1200px, calc(100vw - 48px));
+}
+
+.conditionBuilderModal .ant-modal-content {
+	min-height: 250px;
+	padding: 0;
+	border-radius: 4px;
+}
+
+.conditionBuilderModal .ant-modal-header {
+	margin: 0;
+	padding: 18px 24px;
+	border-bottom: 1px solid #e5e5e5;
+}
+
+.conditionBuilderModal .ant-modal-title {
+	font-size: 16px;
+	font-weight: 400;
+}
+
+.conditionBuilderModal .ant-modal-close {
+	top: 16px;
+	right: 18px;
+	color: #2f68b7;
+}
+
+.conditionClose {
+	font-size: 22px;
+	font-weight: 300;
+	line-height: 1;
+}
+
+.conditionBuilderModal .ant-modal-body {
+	min-height: 250px;
+	overflow: auto;
+	padding: 20px 28px 0;
+}
+
+.conditionBuilderModal-loop .ant-modal-body {
+	overflow-x: hidden;
+}
+
+.conditionBuilderModal .ant-modal-footer {
+	margin: 0;
+	padding: 10px 28px 28px;
+	border-top: 0;
+}
+
+.conditionBuilder {
+	margin: 0 0 20px;
+	min-width: 0;
+}
+
+.conditionBuilderModal-loop .conditionBuilder {
+	min-width: 0;
+}
+
+.conditionGroup {
+	position: relative;
+	display: grid;
+	gap: 10px;
+	padding-bottom: 10px;
+	overflow-x: visible;
+	border: 1px solid #dcc896;
+	border-radius: 5px;
+	background: rgba(250, 240, 210, 0.5);
+}
+
+.conditionLoopGroup {
+	position: relative;
+	width: 100%;
+}
+
+.conditionGroupHeader {
+	position: relative;
+	display: flex;
+	align-items: stretch;
+	justify-content: space-between;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	padding-right: 10px;
+	padding-left: 10px;
+}
+
+.conditionGroupToggle {
+	z-index: 1;
+	display: flex;
+}
+
+.conditionGroupToggle button {
+	min-width: 34px;
+	height: 24px;
+	border: 1px solid #aaa;
+	background: #aaa;
+	color: #000;
+	font-size: 12px;
+	cursor: pointer;
+}
+
+.conditionGroupToggle button:first-child {
+	border-radius: 5px 0 0 5px;
+}
+
+.conditionGroupToggle button:last-child {
+	border-radius: 0 5px 5px 0;
+}
+
+.conditionGroupToggle button.active {
+	border-color: #4778be;
+	background: #4778be;
+	color: #fff;
+}
+
+.conditionGroupToggle button:disabled {
+	border-color: #d2d0ca;
+	background: #d2d0ca;
+	color: #fff;
+	cursor: default;
+}
+
+.conditionGroupActions {
+	display: flex;
+	gap: 20px;
+}
+
+.conditionGroupActions .ant-btn {
+	height: 30px;
+	border-radius: 4px;
+	background: #4778be;
+	font-size: 14px;
+}
+
+.conditionGroupBody {
+	position: relative;
+	display: grid;
+	gap: 10px;
+	padding-right: 10px;
+	padding-left: 24px;
+}
+
+.conditionGroupBody::before {
+	position: absolute;
+	top: -22px;
+	bottom: var(--condition-tree-bottom, 24px);
+	left: 11px;
+	box-sizing: border-box;
+	border-color: #ccc;
+	border-style: solid;
+	border-width: 0 0 0 2px;
+	content: '';
+}
+
+.conditionGroupBody:empty::before {
+	display: none;
+}
+
+.conditionGroupBody > .conditionGroup::before {
+	position: absolute;
+	top: 23px;
+	left: -13px;
+	z-index: 0;
+	box-sizing: border-box;
+	width: 13px;
+	height: 0;
+	border-color: #ccc;
+	border-style: solid;
+	border-width: 0 0 2px;
+	content: '';
+}
+
+.conditionLoopGroup .conditionGroupBody {
+	padding: 0;
+	width: 100%;
+}
+
+.conditionLoopGroup .conditionGroupBody::before {
+	display: none;
+}
+
+.conditionRule {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	min-height: 48px;
+	padding: 10px;
+	border-radius: 5px;
+	background: #fff;
+}
+
+.conditionRule:not(.conditionRuleLoop)::before {
+	position: absolute;
+	top: calc(50% - 1px);
+	left: -13px;
+	z-index: 0;
+	box-sizing: border-box;
+	width: 13px;
+	height: 0;
+	border-color: #ccc;
+	border-style: solid;
+	border-width: 0 0 2px;
+	content: '';
+}
+
+.conditionRuleLoop {
+	justify-content: flex-start;
+	width: 100%;
+	min-height: 48px;
+	padding: 10px 0;
+}
+
+.conditionValueInput {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.conditionValueInputWebhook {
+	min-width: 430px;
+}
+
+.conditionSourceSwitcher,
+.conditionResponseTypeSwitcher {
+	display: grid;
+	width: 30px;
+	flex: 0 0 30px;
+	overflow: hidden;
+}
+
+.conditionRadioRow {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 14px;
+	margin: 0;
+	color: #111;
+	font-size: 12px;
+	line-height: 1;
+	cursor: pointer;
+}
+
+.conditionRadioRow input {
+	width: 12px;
+	height: 10px;
+	margin: 0 0 0 2px;
+	accent-color: #4778be;
+}
+
+.conditionRadioIcon {
+	display: inline-flex;
+	width: 14px;
+	height: 14px;
+	align-items: center;
+	justify-content: center;
+	color: #111;
+	font-size: 12px;
+}
+
+.conditionResponseTypeIcon {
+	font-size: 11px;
+	font-weight: 600;
+}
+
+.conditionMethodSelect {
+	width: 180px;
+}
+
+.conditionFieldSelect {
+	width: 170px;
+}
+
+.conditionFieldSelect > div,
+.conditionFieldSelect .bodyLegacyGeneratorSelect {
+	width: 100%;
+}
+
+.conditionOperatorSelect {
+	width: 170px;
+}
+
+.conditionLoopOperatorSelect {
+	width: 180px;
+}
+
+.conditionConstantInput {
+	width: 390px;
+	height: 34px;
+	border-radius: 4px;
+}
+
+.conditionMethodOption {
+	display: inline-flex;
+	min-width: 0;
+	align-items: center;
+	gap: 8px;
+}
+
+.conditionMethodDot {
+	width: 10px;
+	height: 10px;
+	flex: 0 0 10px;
+	border-radius: 50%;
+}
+
+.conditionBuilder .ant-select-selector {
+	min-height: 34px !important;
+	border-radius: 4px !important;
+}
+
+.conditionBuilder .ant-select-selection-item,
+.conditionBuilder .ant-select-selection-placeholder,
+.conditionBuilder .ant-select-selection-search-input {
+	line-height: 32px !important;
+}
+
+.conditionBuilder .bodyLegacyWebhookSelect {
+	width: 390px;
+}
+
+.conditionBuilder .bodyLegacyWebhookSelect .ant-select-selector {
+	min-height: 34px !important;
+}
+
+.conditionBuilder .bodyLegacyWebhookSelect .ant-select-selection-search-input,
+.conditionBuilder .bodyLegacyWebhookSelect .ant-select-selection-placeholder,
+.conditionBuilder .bodyLegacyWebhookSelect .ant-select-selection-item {
+	line-height: 32px !important;
+}
+
+.conditionDeleteButton {
+	margin-left: auto;
+	width: 24px;
+	min-width: 24px;
+	height: 24px;
+	padding: 0;
+	color: #111;
+}

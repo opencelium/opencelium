@@ -1,0 +1,117 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+import { Select } from 'antd';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { MethodWithId } from '../../../types/connection';
+import { getReferenceOptions, isExpandableReferencePath, type ResponseType } from './requestReferenceOptions';
+
+type Props = {
+  method?: MethodWithId;
+  type: ResponseType;
+  value?: string;
+  disabled?: boolean;
+  iterators?: string[];
+  onChange: (value?: string) => void;
+};
+
+export function LegacyResponseFieldSelect({ method, type, value, disabled, iterators = [], onChange }: Props) {
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const selectingRef = useRef(false);
+  const userInteractionRef = useRef(false);
+  const [path, setPath] = useState(value || '');
+  const [optionsBase, setOptionsBase] = useState('');
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    setPath(value || '');
+    setOptionsBase(isExpandableReferencePath(method, type, value || '', iterators) ? value || '' : '');
+  }, [iterators, method, type, value]);
+
+  const options = useMemo(
+    () =>
+      getReferenceOptions(method, type, optionsBase, iterators).map((item) => ({
+        label: item.label,
+        value: item.value,
+      })),
+    [iterators, method, optionsBase, type],
+  );
+
+  const focusInputToEnd = () => {
+    requestAnimationFrame(() => {
+      const input = wrapperRef.current?.querySelector('input');
+      if (!(input instanceof HTMLInputElement)) return;
+      input.focus();
+      const end = input.value.length;
+      input.setSelectionRange(end, end);
+    });
+  };
+
+  return (
+    <div
+      ref={wrapperRef}
+      onMouseDownCapture={() => {
+        userInteractionRef.current = true;
+      }}
+      onKeyDownCapture={() => {
+        userInteractionRef.current = true;
+      }}
+    >
+      <Select
+        placeholder={type === 'status' ? 'Response Status' : method ? 'Select Field...' : 'Select Method...'}
+        value={undefined}
+        searchValue={type === 'status' ? 'status' : path}
+        className='bodyLegacyGeneratorSelect'
+        disabled={disabled || type === 'status'}
+        showSearch
+        filterOption={false}
+        getPopupContainer={() => document.body}
+        styles={{ popup: { root: { zIndex: 13010 } } }}
+        options={options}
+        open={disabled || type === 'status' ? false : open}
+        onSearch={(nextValue) => {
+          if (!userInteractionRef.current) return;
+          if (selectingRef.current && nextValue === '') {
+            selectingRef.current = false;
+            return;
+          }
+          setPath(nextValue);
+          onChange(nextValue || undefined);
+          if (isExpandableReferencePath(method, type, nextValue, iterators)) {
+            setOptionsBase(nextValue);
+          }
+          setOpen(userInteractionRef.current);
+        }}
+        onSelect={(nextValue) => {
+          selectingRef.current = true;
+          const nextPath = String(nextValue || '');
+          setPath(nextPath);
+          onChange(nextPath || undefined);
+          const expandable = isExpandableReferencePath(method, type, nextPath, iterators);
+          if (expandable) {
+            setOptionsBase(nextPath);
+            setOpen(true);
+            focusInputToEnd();
+            return;
+          }
+          setOpen(false);
+        }}
+        onFocus={() => {
+          if (!userInteractionRef.current) return;
+          setOpen(true);
+          focusInputToEnd();
+        }}
+        onBlur={() => {
+          requestAnimationFrame(() => {
+            userInteractionRef.current = false;
+            setOpen(false);
+          });
+        }}
+        onClear={() => {
+          setPath('');
+          setOptionsBase('');
+          onChange(undefined);
+        }}
+        allowClear
+      />
+    </div>
+  );
+}

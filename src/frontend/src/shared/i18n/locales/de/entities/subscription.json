@@ -1,0 +1,46 @@
+{
+  "wizard": {
+    "header": "Abonnement",
+    "subheader": "Überprüfen Sie Ihre Lizenz, die monatliche API-Nutzung und die Ausführungshistorie pro Verbindung."
+  },
+  "steps": {
+    "license": {
+      "header": "Lizenzinformationen",
+      "subheader": "Aktueller Plan, Limits und monatlicher Verbrauch."
+    },
+    "operationUsage": {
+      "header": "Nutzung pro Verbindung",
+      "subheader": "API-Aufrufe summiert pro Verbindung.",
+      "rowHint": "Klicken Sie auf eine Zeile, um die Ausführungen anzuzeigen."
+    },
+    "operationDetails": {
+      "header": "Ausführungen der Verbindung",
+      "subheader": "Verbrauch pro Ausführung für die gewählte Verbindung."
+    }
+  },
+  "license": {
+    "status": "Status",
+    "type": "Typ",
+    "totalOperations": "Anzahl API-Aufrufe",
+    "expirationDate": "Ablaufdatum",
+    "monthlyPeriod": "Monatszeitraum",
+    "extraOps": "Zusätzliche Aufrufe",
+    "valid": "Gültig",
+    "invalid": "Ungültig",
+    "infinite": "∞",
+    "usageOf": "{{used}} / {{total}}"
+  },
+  "columns": {
+    "connection": "Verbindung",
+    "apiOperations": "API-Aufrufe",
+    "startDate": "Startdatum"
+  },
+  "actions": {
+    "back": "Zurück",
+    "details": "Details anzeigen"
+  },
+  "empty": {
+    "operations": "Für diesen Zeitraum wurden keine API-Aufrufe erfasst.",
+    "details": "Keine Ausführungen gefunden."
+  }
+}

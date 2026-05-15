@@ -1,0 +1,43 @@
+.headerDialogOverlay {
+	position: absolute;
+	inset: 0;
+	background: rgba(17, 24, 39, 0.28);
+	display: flex;
+	align-items: flex-start;
+	justify-content: center;
+	padding-top: 50px;
+	z-index: 40;
+}
+
+.headerDialog {
+	width: 420px;
+	max-width: calc(100vw - 32px);
+	border-radius: 12px;
+	background: #fff;
+	padding: 16px;
+	box-shadow: 0 12px 30px rgba(0, 0, 0, 0.16);
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.headerDialogTitle {
+	font-size: 18px;
+	font-weight: 700;
+}
+
+.headerDialogTextarea {
+	width: 100%;
+	min-height: 120px;
+	border: 1px solid #d1d5db;
+	border-radius: 10px;
+	padding: 10px 12px;
+	resize: none;
+	outline: 0;
+}
+
+.headerDialogActions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+}

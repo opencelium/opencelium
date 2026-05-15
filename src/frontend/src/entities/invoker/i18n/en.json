@@ -1,0 +1,131 @@
+{
+  "list": {
+    "title": "Invokers",
+    "subTitle": "The Invokers section contains all configured external system integrations available in OpenCelium. An Invoker represents a connection interface to an external API or service. It defines how OpenCelium communicates with external systems.\n\nSee docs for more information.",
+    "upload": {
+      "button": "Upload",
+      "confirmReplace": {
+        "title": "Replace existing invoker?",
+        "message": "The invoker with such filename already exists. It will be replaced. Are you sure?"
+      },
+      "success": "Invoker uploaded successfully: {{name}}",
+      "error": "Failed to upload invoker file."
+    }
+  },
+  "fields": {
+    "name": {
+      "label": "Name",
+      "errors": {
+        "name_already_exists": "An invoker with this name already exists"
+      }
+    },
+    "description": {
+      "label": "Description"
+    },
+    "hint": {
+      "label": "Hint"
+    },
+    "authType": {
+      "label": "Authentication Type",
+      "options": {
+        "apikey": "API Key",
+        "basic": "Basic",
+        "endpointAuth": "Endpoint Auth",
+        "token": "Token"
+      }
+    },
+    "requiredData": {
+      "label": "Required Data",
+      "item": {
+        "name": "Name",
+        "visibility": "Visibility",
+        "value": "Default Value"
+      },
+      "visibility": {
+        "public": "Public",
+        "protected": "Protected",
+        "private": "Private"
+      },
+      "add": "Add Field",
+      "empty": "No required data fields.",
+      "errors": {
+        "required": "At least one required data field must be defined"
+      }
+    },
+    "operations": {
+      "label": "Operations",
+      "item": {
+        "name": "Name",
+        "endpoint": "Endpoint",
+        "method": "Method",
+        "testConnection": "Test Connection",
+        "request": "Request",
+        "responseSuccess": "Response (Success)",
+        "responseFail": "Response (Fail)",
+        "status": "Status",
+        "headers": "Headers",
+        "data": "Data",
+        "format": "Format",
+        "type": "Type",
+        "body": "Body"
+      },
+      "add": "Add Operation",
+      "empty": "No operations defined.",
+      "errors": {
+        "required": "At least one operation must be defined",
+        "nameRequired": "Name is required",
+        "endpointRequired": "Endpoint is required",
+        "incompleteOperations": "All operations must have a name and endpoint defined",
+        "noTestOperation": "At least one operation must have Test Operation enabled",
+        "invalidJson": "Invalid JSON"
+      }
+    }
+  },
+  "sections": {
+    "general-data": {
+      "title": "General Data"
+    },
+    "authentication": {
+      "title": "Authentication"
+    },
+    "operations": {
+      "title": "Operations"
+    }
+  },
+  "wizard": {
+    "modes": {
+      "create": {
+        "header": "Create Invoker",
+        "subheader": "An invoker defines the HTTP operations and authentication configuration for communicating with an external system.",
+        "successMessage": "Successfully Created a new Invoker: {{name}}!"
+      },
+      "view": {
+        "header": "Invoker Details",
+        "subheader": "View invoker configuration."
+      }
+    },
+    "recommendations": {
+      "1": "Create another Invoker",
+      "2": "Create Connector"
+    },
+    "steps": {
+      "general-data": {
+        "header": "General Data",
+        "subheader": "Define the basic information for this invoker."
+      },
+      "authentication": {
+        "header": "Authentication",
+        "subheader": "Configure the authentication type and the required data fields for connecting to the target system."
+      },
+      "operations": {
+        "header": "Operations",
+        "subheader": "Define the HTTP operations that this invoker exposes."
+      }
+    }
+  },
+  "confirmation": {
+    "delete": {
+      "byName": "Delete invoker \"{{name}}\"?"
+    }
+  }
+}

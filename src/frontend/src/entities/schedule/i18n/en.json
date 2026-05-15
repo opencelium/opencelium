@@ -1,0 +1,146 @@
+{
+  "list": {
+    "title": "Schedules",
+    "subTitle": "Schedules determine when specific connections are executed, either on a defined timetable or based on triggers. Status legend: <blueDot/> running, <greenDot/> last run succeeded, <redDot/> last run failed, <grayDot/> no cron and no run history. The number under the circle is a countdown to the next cron trigger.",
+    "searchPlaceholder": "Search by connection name",
+    "columns": {
+      "status": "Status",
+      "connection": "Connection",
+      "cronExp": "Cron",
+      "lastSuccessExecution": "Last Success",
+      "lastFailExecution": "Last Fail",
+      "lastDuration": "Duration",
+      "debugMode": "Debug",
+      "webhook": "Webhook"
+    }
+  },
+  "webhook": {
+    "copied": "Webhook URL copied to clipboard",
+    "copyTooltip": "Copy webhook URL",
+    "createTooltip": "Generate webhook URL",
+    "created": "Webhook URL generated",
+    "deleteTooltip": "Remove webhook",
+    "deleted": "Webhook removed",
+    "confirmDelete": {
+      "title": "Remove webhook?",
+      "message": "The webhook URL will stop working immediately. This action cannot be undone."
+    }
+  },
+  "start": {
+    "tooltip": "Start execution",
+    "success": "Schedule execution started"
+  },
+  "terminate": {
+    "tooltip": "Terminate execution",
+    "success": "Schedule execution terminated"
+  },
+  "notifications": {
+    "tooltip": "Notifications",
+    "dialogTitle": "Notifications",
+    "subtitle": "Configure who gets notified when this schedule runs.",
+    "addButton": "Add notification",
+    "empty": "No notifications yet.",
+    "close": "Close",
+    "cancel": "Cancel",
+    "unnamedItem": "Untitled notification",
+    "deleteTooltip": "Delete notification",
+    "aggregatorHint": "Data Aggregator works only for Post",
+    "created": "Notification created",
+    "updated": "Notification updated",
+    "deleted": "Notification deleted",
+    "fields": {
+      "name": "Name",
+      "eventType": "Event type",
+      "notificationType": "Notification type",
+      "template": "Template",
+      "recipients": "Recipients",
+      "webhookUrl": "Webhook URL"
+    },
+    "eventTypeOptions": {
+      "pre": "Pre",
+      "post": "Post",
+      "alert": "Alert"
+    },
+    "actions": {
+      "create": "Create",
+      "update": "Update",
+      "delete": "Delete"
+    },
+    "errors": {
+      "nameRequired": "Name is required",
+      "notificationTypeRequired": "Notification type is required",
+      "templateRequired": "Template is required",
+      "recipientsEmailsRequired": "Select at least one recipient",
+      "webhookUrlRequired": "Webhook URL is required",
+      "eventTypeInvalid": "Invalid event type"
+    },
+    "confirmDelete": {
+      "title": "Delete notification?",
+      "message": "This notification will be removed permanently."
+    }
+  },
+  "debugMode": {
+    "enableSuccess": "Debug mode enabled",
+    "disableSuccess": "Debug mode disabled"
+  },
+  "fields": {
+    "connection": {
+      "label": "Connection"
+    },
+    "debugMode": {
+      "label": "Logs",
+      "text": {
+        "on": "Logs are activated",
+        "off": "Logs are deactivated"
+      }
+    },
+    "cronExp": {
+      "label": "Cron Expression",
+      "error": {
+        "invalid": "Invalid cron expression"
+      }
+    }
+  },
+  "sections": {
+    "general-data": {
+      "title": "General Data"
+    }
+  },
+  "wizard": {
+    "modes": {
+      "create": {
+        "header": "Create Schedule",
+        "subheader": "Follow the simple 3 steps to complete schedule creation.",
+        "successMessage": "Schedule for connection \"{{connectionTitle}}\" was successfully created",
+        "successMessageWithCron": "Schedule for connection \"{{connectionTitle}}\" with cron \"{{cronExp}}\" was successfully created"
+      },
+      "update": {
+        "header": "Update Schedule",
+        "subheader": "Modify schedule information and save changes.",
+        "successMessage": "Schedule for connection \"{{connectionTitle}}\" was successfully updated",
+        "successMessageWithCron": "Schedule for connection \"{{connectionTitle}}\" with cron \"{{cronExp}}\" was successfully updated"
+      },
+      "view": {
+        "header": "Schedule Details",
+        "subheader": "View schedule information."
+      }
+    },
+    "recommendations": {
+      "1": "Create Schedule",
+      "2": "Create Connection",
+      "3": "Create Connector"
+    },
+    "steps": {
+      "general-data": {
+        "header": "General Data",
+        "subheader": "General information about schedule"
+      }
+    }
+  },
+  "confirmation": {
+    "delete": {
+      "byConnectionTitle": "Delete schedule by connection title \"{{connectionTitle}}\"?",
+      "byId": "Delete schedule by id \"{{id}}\"?"
+    }
+  }
+}

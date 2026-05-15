@@ -1,0 +1,46 @@
+{
+  "wizard": {
+    "header": "Subscription",
+    "subheader": "Review your license, monthly API operation usage, and per-connection execution history."
+  },
+  "steps": {
+    "license": {
+      "header": "License Information",
+      "subheader": "Current plan, limits and monthly usage."
+    },
+    "operationUsage": {
+      "header": "Usage by Connection",
+      "subheader": "API operations summed by connection.",
+      "rowHint": "Click a row to inspect its executions."
+    },
+    "operationDetails": {
+      "header": "Connection Executions",
+      "subheader": "Per-execution usage for the selected connection."
+    }
+  },
+  "license": {
+    "status": "Status",
+    "type": "Type",
+    "totalOperations": "Amount of API Operations",
+    "expirationDate": "Expiration Date",
+    "monthlyPeriod": "Monthly Period",
+    "extraOps": "Extra Operations",
+    "valid": "Valid",
+    "invalid": "Invalid",
+    "infinite": "∞",
+    "usageOf": "{{used}} / {{total}}"
+  },
+  "columns": {
+    "connection": "Connection",
+    "apiOperations": "API Operations",
+    "startDate": "Start Date"
+  },
+  "actions": {
+    "back": "Back",
+    "details": "View details"
+  },
+  "empty": {
+    "operations": "No API operations recorded for this period.",
+    "details": "No executions found."
+  }
+}

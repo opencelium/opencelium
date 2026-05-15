@@ -1,0 +1,33 @@
+{
+  "fields": {
+    "theme": {
+      "label": "Theme"
+    },
+    "commandNode": {
+      "label": "Mode Appearance"
+    }
+  },
+  "wizard": {
+    "steps": {
+      "theme": {
+        "header": "Theme",
+        "subheader": "Choose between the light and dark appearance for the whole application."
+      },
+      "commander": {
+        "header": "Commander",
+        "subheader": "It enables users to quickly search, navigate, and execute actions through a keyboard-driven interface, triggered by shortcuts like Ctrl + K"
+      }
+    },
+    "modes": {
+      "update": {
+        "header": "UI Settings",
+        "subheader": "Here you can update configurations for User Interface, like menu, commander, connection editor.",
+        "successMessage": "UI settings updated"
+      }
+    }
+  },
+  "messages": {
+    "themeUpdated": "Theme updated",
+    "commandModeUpdated": "Commander mode updated"
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "fields": {
+    "name": {
+      "label": "Name"
+    },
+    "description": {
+      "label": "Description"
+    },
+    "components": {
+      "label": "Components"
+    }
+  },
+  "sections": {
+    "group-details": {
+      "title": "Group Details"
+    },
+    "components": {
+      "title": "Components"
+    }
+  },
+  "wizard": {
+    "modes": {
+      "create": {
+        "header": "Create Role",
+        "subheader": "Follow the simple 3 steps to complete role creation.",
+        "successMessage": "Role successfully created"
+      },
+      "update": {
+        "header": "Update Role",
+        "subheader": "Modify role information and save changes.",
+        "successMessage": "Role successfully updated"
+      },
+      "view": {
+        "header": "Role Details",
+        "subheader": "View role information."
+      }
+    },
+    "recommendations": {
+      "1": "Create Connector",
+      "2": "Create Connection"
+    },
+    "steps": {
+      "group-details": {
+        "header": "Group Details",
+        "subheader": "General information about role"
+      },
+      "components": {
+        "header": "Components",
+        "subheader": "Components data"
+      }
+    }
+  }
+}

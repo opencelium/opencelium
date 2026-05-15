@@ -1,0 +1,40 @@
+.nodeToolbar {
+  position: absolute;
+  top: -44px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  z-index: 30;
+}
+
+.nodeToolbarButton {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #374151;
+}
+
+.nodeToolbarButton:hover {
+  background: #f9fafb;
+}
+
+.nodeToolbarButtonDanger {
+  color: #dc2626;
+}
+
+.nodeToolbarButtonDanger:hover {
+  background: #fef2f2;
+}

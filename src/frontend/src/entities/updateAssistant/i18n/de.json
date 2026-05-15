@@ -1,0 +1,121 @@
+{
+  "fields": {
+    "systemHealth": {
+      "label": "Systemzustand"
+    },
+    "updateMode": {
+      "label": "Aktualisierungsmodus",
+      "options": {
+        "online": "Online",
+        "offline": "Offline"
+      }
+    },
+    "versionsDisplay": {
+      "label": "Verfügbare Versionen"
+    },
+    "file": {
+      "label": "Update-Paket",
+      "hint": "Laden Sie ein Offline-Update-Paket hoch (.zip)"
+    },
+    "runUpdateAction": {
+      "label": "Update ausführen"
+    }
+  },
+  "wizard": {
+    "modes": {
+      "view": {
+        "header": "Update-Assistent",
+        "subheader": "Systemzustand verwalten und Updates anwenden"
+      }
+    },
+    "steps": {
+      "system-check": {
+        "header": "Systemprüfung",
+        "subheader": "Aktuellen Zustand aller Systemkomponenten prüfen"
+      },
+      "available-updates": {
+        "header": "Verfügbare Updates",
+        "subheader": "Online- oder Offline-Update-Pakete durchsuchen"
+      },
+      "update-process": {
+        "header": "Update anwenden",
+        "subheader": "System-Update durchführen",
+        "actions": {
+          "runUpdate": "Update ausführen"
+        }
+      }
+    },
+    "recommendations": {
+      "1": "Systemzustand vor Updates prüfen",
+      "2": "Daten vor dem Update sichern"
+    }
+  },
+  "health": {
+    "groups": {
+      "required": "Erforderlich",
+      "optional": "Optional"
+    },
+    "columns": {
+      "component": "Komponente",
+      "status": "Status"
+    },
+    "status": {
+      "UP": "Betriebsbereit",
+      "DOWN": "Ausgefallen",
+      "UNKNOWN": "Unbekannt"
+    },
+    "components": {
+      "email": "E-Mail",
+      "mariaDB": "MariaDB",
+      "mongoDB": "MongoDB",
+      "opencelium": "OpenCelium",
+      "os": "Betriebssystem",
+      "polyglot": "Polyglot"
+    },
+    "hint": "Bitte, do not forget to create a backup of the system, before you start the update (see <1>docs</1>)."
+  },
+  "validation": {
+    "requiredComponentsDown": "Eine oder mehrere erforderliche Komponenten sind nicht betriebsbereit. Alle erforderlichen Dienste müssen laufen, bevor Sie mit dem Update fortfahren können.",
+    "versionNotSelected": "Bitte wählen Sie eine Version aus, um mit dem Update fortzufahren."
+  },
+  "versions": {
+    "columns": {
+      "name": "Version",
+      "status": "Status",
+      "changelog": "Änderungsprotokoll"
+    },
+    "status": {
+      "old": "Veraltet",
+      "current": "Aktuell",
+      "new": "Verfügbar"
+    },
+    "empty": "Keine Updates verfügbar",
+    "actions": {
+      "delete": "Version löschen",
+      "deleteConfirm": {
+        "title": "Version {{version}} löschen",
+        "message": "Möchten Sie Version {{version}} wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+        "confirm": "Löschen",
+        "cancel": "Abbrechen"
+      },
+      "deleteSuccess": "Version {{version}} erfolgreich gelöscht"
+    },
+    "upload": {
+      "button": "Paket hochladen",
+      "success": "Paket erfolgreich hochgeladen",
+      "error": "Fehler beim Hochladen des Pakets",
+      "uploading": "Lade {{fileName}} hoch — {{progress}}%",
+      "cancel": "Abbrechen"
+    }
+  },
+  "update": {
+    "confirm": "Möchten Sie das Update wirklich anwenden? Das System wird neu gestartet.",
+    "success": "Update erfolgreich gestartet",
+    "error": "Update konnte nicht gestartet werden"
+  },
+  "changelog": {
+    "title": "Changelog von {{version}}",
+    "close": "Schließen",
+    "error": "Fehler beim Laden des Änderungsprotokolls"
+  }
+}

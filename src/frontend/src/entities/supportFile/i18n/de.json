@@ -1,0 +1,19 @@
+{
+  "list": {
+    "title": "Support-Dateien",
+    "subTitle": "Diagnose-Pakete, die von Verbindungsausführungen erzeugt wurden. Laden Sie ein Paket herunter, um es an den Support weiterzugeben, oder entfernen Sie nicht mehr benötigte Pakete.",
+    "searchPlaceholder": "Nach Verbindung suchen",
+    "deletedConnection": "GELÖSCHTE VERBINDUNG",
+    "columns": {
+      "status": "Status",
+      "connection": "Verbindung",
+      "filePath": "Dateipfad",
+      "timestamp": "Zeitstempel"
+    },
+    "download": {
+      "tooltip": "Support-Datei herunterladen",
+      "success": "Support-Datei heruntergeladen",
+      "error": "Support-Datei konnte nicht heruntergeladen werden"
+    }
+  }
+}

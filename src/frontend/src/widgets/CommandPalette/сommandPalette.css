@@ -1,0 +1,126 @@
+/* Command root */
+.cmdk-palette-container {
+    display: grid;
+    gap: 50px;
+    line-height: normal !important;
+}
+.cmdk-container {
+    justify-content: center;
+    display: flex;
+    align-items: flex-start;
+    z-index: 1;
+}
+.cmdk-loading {
+    position: absolute;
+    left: 5px;
+    top: 10px;
+}
+.cmdk-content {
+    justify-content: center;
+    display: flex;
+    align-items: center;
+}
+[cmdk-root] {
+    position: relative;
+    width: 80%;
+    background: color-mix(in srgb, var(--color-background-surface) 80%, transparent);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border-subtle);
+
+/* Input */
+[cmdk-input] {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    padding: 8px;
+    background: transparent;
+    color: var(--color-text-primary);
+}
+
+/* Dropdown wraps the list and the footer */
+.cmdk-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    margin-top: 8px;
+    background: var(--color-background-surface);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border-subtle);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* List */
+[cmdk-list] {
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+/* Footer */
+.cmdk-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    gap: 16px;
+    padding: 8px 12px;
+    border-top: 1px solid var(--color-border-subtle);
+    background: var(--color-background-elevated);
+    flex-wrap: wrap;
+}
+}
+
+/* Group */
+[cmdk-group-heading] {
+    padding: 8px 12px 4px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-secondary);
+    font-weight: 600;
+}
+[cmdk-group] + [cmdk-group] [cmdk-group-heading] {
+    border-top: 1px solid var(--color-border-subtle);
+    margin-top: 4px;
+}
+
+/* Item */
+[cmdk-item] {
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    color: var(--color-text-primary);
+}
+[cmdk-item]:hover {
+    background: var(--color-background-elevated);
+}
+[cmdk-item][aria-selected="true"] {
+    background: var(--color-action-primary);
+    color: var(--color-text-inverted);
+}
+
+.cmdk-item-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+.cmdk-item-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 18px;
+    width: 18px;
+}
+.cmdk-item-value {
+    flex: 0 0 auto;
+}
+.cmdk-item-description {
+    margin-left: auto;
+    font-size: 12px;
+    color: inherit;
+    opacity: 0.7;
+}

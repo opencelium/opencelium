@@ -1,0 +1,74 @@
+.xmlField {
+  padding-left: 14px;
+  border-left: 2px solid #eef2f7;
+}
+
+.xmlFieldHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.xmlFieldLabel {
+  color: #6b7280;
+  font-size: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.xmlFieldInput textarea,
+.xmlFieldInput input,
+.xmlRaw textarea {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.xmlFieldPreview {
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #fafafa;
+  color: #334155;
+  cursor: pointer;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  min-height: 34px;
+  padding: 7px 10px;
+  text-align: left;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  width: 100%;
+  word-break: break-word;
+}
+
+.xmlFieldPreview:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.xmlFieldPreviewSelected {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.18);
+}
+
+.xmlFieldInput textarea {
+  border-radius: 6px;
+  border-color: #e5e7eb;
+  background: #fafafa;
+}
+
+.xmlField:hover .xmlFieldActions {
+  opacity: 1;
+}
+
+.xmlFieldActions {
+  opacity: 0.35;
+  transition: opacity 0.15s ease;
+}
+
+.xmlIconButton {
+  opacity: 0.45;
+}
+
+.xmlActionButton {
+  font-size: 12px;
+  opacity: 0.75;
+}

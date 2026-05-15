@@ -1,0 +1,61 @@
+.sidebarList,
+.historyPanelList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebarItem {
+  width: 100%;
+  text-align: left;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.sidebarItem:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.sidebarItem span {
+  color: #6b7280;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.sidebarItemMuted {
+  opacity: 0.75;
+  cursor: default;
+}
+
+.sidebarItemStandalone {
+  margin-top: 8px;
+}
+
+.historyItem {
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.historyItem:hover {
+  background: #f9fafb;
+}
+
+.historyItem span,
+.historyItem small {
+  color: #6b7280;
+}
