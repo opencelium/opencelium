@@ -725,3 +725,5 @@ ALTER TABLE `enhancement` DROP FOREIGN KEY `fk_enhancement_connection1`;
 ALTER TABLE `enhancement` ADD CONSTRAINT `fk_enhancement_connection1` FOREIGN KEY (`connection_id`) REFERENCES `connection` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 --changeset 5.0:1 stripComments:true splitStatements:true endDelimiter:;
 ALTER TABLE `connection` MODIFY COLUMN `to_connector` INT NULL;
+--changeset 5.0:2 stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE `operation_usage_history` MODIFY COLUMN `to_invoker` VARCHAR(255) NULL;

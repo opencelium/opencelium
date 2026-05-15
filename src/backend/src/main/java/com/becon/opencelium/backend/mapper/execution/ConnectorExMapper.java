@@ -71,6 +71,7 @@ public class ConnectorExMapper {
             setPagination(connectorEx, invoker);
         } else {
             connectorEx.setMethods(operationExMapper.toOperationAll(dto.getMethods(), null));
+            connectorEx.setInvoker(ConnectionConstants.DEFAULT_INVOKER_NAME);
         }
 
         connectorEx.setName(dto.getTitle());
