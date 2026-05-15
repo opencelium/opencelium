@@ -54,7 +54,12 @@
   },
   "sidebar": {
     "expand": "Seitenleiste ausklappen",
-    "collapse": "Seitenleiste einklappen"
+    "collapse": "Seitenleiste einklappen",
+    "logout": "Abmelden",
+    "confirmLogout": {
+      "title": "Abmelden",
+      "message": "Möchten Sie sich wirklich abmelden?"
+    }
   },
   "topbar": {
     "switchToGerman": "Auf Deutsch umschalten",

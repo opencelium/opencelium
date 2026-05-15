@@ -4,8 +4,23 @@ import de from '@entities/connection/i18n/de.json'
 import type { Connection } from '@entities/connection/model/types'
 import { DownloadAsTemplateAction } from '@entities/connection/ui/DownloadAsTemplateAction'
 import { CreateConnectionButton } from '@entities/connection/ui/CreateConnectionButton'
+import { createEntityCommands } from '@/engine/entity/command/createEntityCommands'
+import { resolveConnectionTitles } from '@entities/connection/command/resolvers/resolveConnectionTitles'
+import { resolveConnectionIds } from '@entities/connection/command/resolvers/resolveConnectionIds'
+import { findConnectionIdByTitle } from '@entities/connection/command/connectionCache'
 
 const baseKey = 'connection'
+
+const resolveConnectionId = (value: string): string => {
+    if (/^\d+$/.test(value)) return value
+    return String(findConnectionIdByTitle(value) ?? value)
+}
+
+const buildConnectionPageUrl = (verb: 'view' | 'update', value: string): string =>
+    `/connection/${verb}/${encodeURIComponent(resolveConnectionId(value))}`
+
+const buildConnectionFetchUrl = (value: string): string =>
+    `/connection/${encodeURIComponent(resolveConnectionId(value))}`
 
 export const connectionDefinition: EntityDefinition = {
     name: baseKey,
@@ -18,7 +33,7 @@ export const connectionDefinition: EntityDefinition = {
         baseUrl: '/connection',
         identifierField: 'title',
         primaryKey: 'id',
-        resolveIdentifier: async () => [],
+        resolveIdentifier: resolveConnectionTitles,
     },
 
     list: {
@@ -35,8 +50,14 @@ export const connectionDefinition: EntityDefinition = {
             },
         ],
         actions: [
-            { type: 'view' },
-            { type: 'update' },
+            {
+                type: 'view',
+                buildNavigationUrl: (_entity, value) => `/connection/view/${encodeURIComponent(value)}`,
+            },
+            {
+                type: 'update',
+                buildNavigationUrl: (_entity, value) => `/connection/update/${encodeURIComponent(value)}`,
+            },
             { type: 'delete' },
             {
                 type: 'custom',
@@ -80,4 +101,47 @@ export const connectionDefinition: EntityDefinition = {
     wizard: {
         steps: [],
     },
+
+    commands: (def) => [
+        ...createEntityCommands({
+            def,
+            config: { include: ['update', 'view'] },
+            dsl: {
+                update: {
+                    by: [
+                        {
+                            field: 'id',
+                            resolve: resolveConnectionIds,
+                            customPath: true,
+                            buildFetchUrl: (_def, value) => buildConnectionFetchUrl(value),
+                            buildNavigationUrl: (_def, value) => buildConnectionPageUrl('update', value),
+                        },
+                        {
+                            field: 'title',
+                            resolve: resolveConnectionTitles,
+                            buildFetchUrl: (_def, value) => buildConnectionFetchUrl(value),
+                            buildNavigationUrl: (_def, value) => buildConnectionPageUrl('update', value),
+                        },
+                    ],
+                },
+                view: {
+                    by: [
+                        {
+                            field: 'id',
+                            resolve: resolveConnectionIds,
+                            customPath: true,
+                            buildFetchUrl: (_def, value) => buildConnectionFetchUrl(value),
+                            buildNavigationUrl: (_def, value) => buildConnectionPageUrl('view', value),
+                        },
+                        {
+                            field: 'title',
+                            resolve: resolveConnectionTitles,
+                            buildFetchUrl: (_def, value) => buildConnectionFetchUrl(value),
+                            buildNavigationUrl: (_def, value) => buildConnectionPageUrl('view', value),
+                        },
+                    ],
+                },
+            },
+        }),
+    ],
 }

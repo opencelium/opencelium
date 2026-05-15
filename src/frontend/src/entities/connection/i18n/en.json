@@ -1,4 +1,14 @@
 {
+  "messages": {
+    "saved": {
+      "create": "Connection \"{{title}}\" created",
+      "update": "Connection \"{{title}}\" updated"
+    },
+    "saveFailed": {
+      "create": "Failed to create connection \"{{title}}\"",
+      "update": "Failed to update connection \"{{title}}\""
+    }
+  },
   "list": {
     "title": "Connections",
     "subTitle": "Connections define how connectors interact with each other, including request flow, data mapping, and communication logic.",

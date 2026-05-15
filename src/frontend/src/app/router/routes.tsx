@@ -71,6 +71,10 @@ export function getRoutes(): RouteConfig[] {
                         path: '/connection/update/:connectionId',
                         element: <ResettableRoute><Workflow/></ResettableRoute>
                     },
+                    {
+                        path: '/connection/view/:connectionId',
+                        element: <ResettableRoute><Workflow readOnly /></ResettableRoute>
+                    },
                 ],
             }],
         },

@@ -55,6 +55,7 @@ export type ViewByConfig = {
     field: string;
     customPath?: boolean;
     resolve?: (input: string) => Promise<any>;
+    buildFetchUrl?: (def: EntityDefinition, value: string) => string;
     buildNavigationUrl?: (def: EntityDefinition, value: string) => string;
     beforeOpen?: (value: string, ctx: any) => Promise<void>;
     afterOpen?: (value: string, ctx: any) => Promise<void>;

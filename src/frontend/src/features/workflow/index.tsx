@@ -1,6 +1,9 @@
 import { Background } from '@xyflow/react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { message } from 'antd';
+import { Loading } from '@shared/ui/primitives/Loading/Loading';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 import './styles.css';
 import { NodeContextMenu } from './components/NodeContextMenu';
 import { WorkflowCanvas } from './components/WorkflowCanvas';
@@ -55,16 +58,22 @@ const hydrateNodesWithOperationResponses = (
   });
 };
 
-export default function Workflow() {
+type WorkflowProps = {
+  readOnly?: boolean;
+};
+
+export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const { connectionId } = useParams<{ connectionId: string }>();
   const navigate = useNavigate();
+  const { t: tEntities } = useI18n('entities');
   const workflow = useWorkflowPage();
-  const { data: connectors = [] } = useGetConnectorsQuery({ page: 0, limit: 1000 });
+  const { data: connectors = [], isLoading: isConnectorsLoading } = useGetConnectorsQuery({ page: 0, limit: 1000 });
   const [headerState, setHeaderState] = useState({
-    title: 'i-doit 2 Znuny example',
-    description: 'This interface delivering data into znuny and creates a ticket if the specified object is missing.',
+    title: '[Empty Name]',
+    description: '[Empty Description]',
   });
   const [loadedFieldBindings, setLoadedFieldBindings] = useState<any[] | undefined>();
+  const [isConnectionLoading, setIsConnectionLoading] = useState<boolean>(Boolean(connectionId));
   const hydratedNodes = useMemo(
     () => hydrateNodesWithOperationResponses(workflow.nodes, connectors),
     [connectors, workflow.nodes],
@@ -89,31 +98,53 @@ export default function Workflow() {
   }, [hydratedNodes, loadedFieldBindings, workflow.edges]);
 
   useEffect(() => {
-    if (!connectionId) return;
+    if (!connectionId) {
+      setIsConnectionLoading(false);
+      return;
+    }
     let cancelled = false;
-    loadWorkflowConnection(connectionId).then((state) => {
-      if (cancelled) return;
-      workflow.setWorkflowGraph(state.nodes, state.edges, state.viewport, { centerStart: true });
-      setHeaderState({ title: state.title, description: state.description });
-      setLoadedFieldBindings(state.fieldBindings);
-    });
+    setIsConnectionLoading(true);
+    loadWorkflowConnection(connectionId)
+      .then((state) => {
+        if (cancelled) return;
+        workflow.setWorkflowGraph(state.nodes, state.edges, state.viewport, { centerStart: true });
+        setHeaderState({ title: state.title, description: state.description });
+        setLoadedFieldBindings(state.fieldBindings);
+      })
+      .finally(() => {
+        if (!cancelled) setIsConnectionLoading(false);
+      });
     return () => {
       cancelled = true;
     };
   }, [connectionId]);
 
+  const isLoading = isConnectionLoading || isConnectorsLoading;
+
   const handleSave = async ({ title, description, comment }: { title: string; description: string; comment: string }) => {
-    const response = await saveWorkflowConnection({
-      connectionId,
-      title,
-      description,
-      comment,
-      nodes: hydratedNodes,
-      edges: workflow.edges,
-      viewport: workflow.getViewport(),
-    });
+    const isCreate = !connectionId;
+    let response;
+    try {
+      response = await saveWorkflowConnection({
+        connectionId,
+        title,
+        description,
+        comment,
+        nodes: hydratedNodes,
+        edges: workflow.edges,
+        viewport: workflow.getViewport(),
+      });
+    } catch (error) {
+      message.error(
+        tEntities(isCreate ? 'connection.messages.saveFailed.create' : 'connection.messages.saveFailed.update', { title }),
+      );
+      throw error;
+    }
     const savedId = (response.data as any)?.connectionId;
-    if (!connectionId && savedId) navigate(`/connection/update/${savedId}`);
+    message.success(
+      tEntities(isCreate ? 'connection.messages.saved.create' : 'connection.messages.saved.update', { title }),
+    );
+    if (isCreate && savedId) navigate(`/connection/update/${savedId}`);
   };
 
   return (
@@ -123,43 +154,52 @@ export default function Workflow() {
         initialDescription={headerState.description}
         onSave={handleSave}
         onOpenHistory={() => { workflow.setHistoryOpen(true); workflow.setSidebarAction(null); workflow.setContextMenu(null); workflow.setConditionEditor(null); }}
+        readOnly={readOnly}
       />
       <div className="workflowMain">
-        <WorkflowCanvas
-          nodes={workflow.nodes}
-          edges={workflow.edges}
-          restoredViewport={workflow.restoredViewport}
-          viewportRestoreVersion={workflow.viewportRestoreVersion}
-          centerStartVersion={workflow.centerStartVersion}
-          onInit={workflow.setReactFlowInstance}
-          activeAction={workflow.sidebarAction}
-          onNodesChange={workflow.onNodesChange}
-          onEdgesChange={workflow.onEdgesChange}
-          onConnect={workflow.onConnect}
-          onOpenAddStep={workflow.onOpenAddStep}
-          onOpenContextMenu={workflow.setContextMenu}
-          onNodeDoubleClick={(_, node) => {
-            workflow.setSidebarAction(null);
-            workflow.setContextMenu(null);
-            workflow.setHistoryOpen(false);
+        {isLoading ? (
+          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Loading size="lg" />
+          </div>
+        ) : (
+          <>
+            <WorkflowCanvas
+              nodes={workflow.nodes}
+              edges={workflow.edges}
+              restoredViewport={workflow.restoredViewport}
+              viewportRestoreVersion={workflow.viewportRestoreVersion}
+              centerStartVersion={workflow.centerStartVersion}
+              onInit={workflow.setReactFlowInstance}
+              activeAction={workflow.sidebarAction}
+              onNodesChange={workflow.onNodesChange}
+              onEdgesChange={workflow.onEdgesChange}
+              onConnect={workflow.onConnect}
+              onOpenAddStep={workflow.onOpenAddStep}
+              onOpenContextMenu={workflow.setContextMenu}
+              onNodeDoubleClick={(_, node) => {
+                workflow.setSidebarAction(null);
+                workflow.setContextMenu(null);
+                workflow.setHistoryOpen(false);
 
-            if (node.type === 'connector' || node.type === 'system') {
-              workflow.setConditionEditor(null);
-              workflow.setMethodEditor({ nodeId: node.id, mode: 'body' });
-              return;
-            }
+                if (node.type === 'connector' || node.type === 'system') {
+                  workflow.setConditionEditor(null);
+                  workflow.setMethodEditor({ nodeId: node.id, mode: 'body' });
+                  return;
+                }
 
-            if (node.type === 'if' || node.type === 'loop') {
-              workflow.setMethodEditor(null);
-              workflow.setConditionEditor({ nodeId: node.id });
-            }
-          }}
-          onDeleteNode={workflow.onDeleteNode}
-          onPaneClick={() => { workflow.setSidebarAction(null); workflow.setContextMenu(null); workflow.setHistoryOpen(false); workflow.setConditionEditor(null); }}
-        >
-          <Background gap={16} size={1} />
-        </WorkflowCanvas>
-        <WorkflowLogs />
+                if (node.type === 'if' || node.type === 'loop') {
+                  workflow.setMethodEditor(null);
+                  workflow.setConditionEditor({ nodeId: node.id });
+                }
+              }}
+              onDeleteNode={workflow.onDeleteNode}
+              onPaneClick={() => { workflow.setSidebarAction(null); workflow.setContextMenu(null); workflow.setHistoryOpen(false); workflow.setConditionEditor(null); }}
+            >
+              <Background gap={16} size={1} />
+            </WorkflowCanvas>
+            <WorkflowLogs />
+          </>
+        )}
       </div>
       <WorkflowSidebar action={workflow.sidebarAction} selectedNode={selectedNode} onClose={() => workflow.setSidebarAction(null)} onSelect={workflow.onAddStep} />
       <HistoryPanel open={workflow.historyOpen} onClose={() => workflow.setHistoryOpen(false)} />

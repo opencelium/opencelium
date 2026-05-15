@@ -85,6 +85,11 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
         sidebar: {
             expand: string
             collapse: string
+            logout: string
+            confirmLogout: {
+                title: string
+                message: string
+            }
         }
         topbar: {
             switchToGerman: string

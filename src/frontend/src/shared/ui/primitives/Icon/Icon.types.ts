@@ -24,6 +24,7 @@ export type IconName =
     | 'search'
     | 'list'
     | 'login'
+    | 'logout'
     | 'history'
     | 'arrow-left'
     | 'more'

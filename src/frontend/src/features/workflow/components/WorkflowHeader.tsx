@@ -10,10 +10,11 @@ type Props = {
 	initialDescription?: string;
 	onOpenHistory: () => void;
 	onSave: (values: { title: string; description: string; comment: string }) => void | Promise<void>;
+	readOnly?: boolean;
 };
 type EditField = 'name' | 'description' | null;
 
-export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initialDescription = 'This interface delivering data into znuny and creates a ticket if the specified object is missing.', onOpenHistory, onSave }: Props) {
+export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initialDescription = 'This interface delivering data into znuny and creates a ticket if the specified object is missing.', onOpenHistory, onSave, readOnly = false }: Props) {
 	const [name, setName] = useState(initialName);
 	const [description, setDescription] = useState(initialDescription);
 	const [draftName, setDraftName] = useState(name);
@@ -78,9 +79,9 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 					) : (
 						<div
 							className='headerInlineName'
-							onClick={() => setEditing('name')}
-							role='button'
-							tabIndex={0}
+							onClick={() => { if (!readOnly) setEditing('name'); }}
+							role={readOnly ? undefined : 'button'}
+							tabIndex={readOnly ? undefined : 0}
 						>
 							{name}
 						</div>
@@ -101,9 +102,9 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 					) : (
 						<div
 							className='headerInlineDescription'
-							onClick={() => setEditing('description')}
-							role='button'
-							tabIndex={0}
+							onClick={() => { if (!readOnly) setEditing('description'); }}
+							role={readOnly ? undefined : 'button'}
+							tabIndex={readOnly ? undefined : 0}
 						>
 							{description}
 						</div>
@@ -111,13 +112,15 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 				</div>
 
 				<div className='headerActions'>
-					<button
-						className='primaryButton headerPrimaryButton'
-						type='button'
-						onClick={() => setSaveDialogOpen(true)}
-					>
-						Save
-					</button>
+					{!readOnly && (
+						<button
+							className='primaryButton headerPrimaryButton'
+							type='button'
+							onClick={() => setSaveDialogOpen(true)}
+						>
+							Save
+						</button>
+					)}
 					<button
 						className='iconButton'
 						type='button'

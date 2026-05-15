@@ -1,15 +1,30 @@
 import { NavigationMenu } from './NavigationMenu';
-import {MenuFoldOutlined, MenuUnfoldOutlined} from "@ant-design/icons";
+import {LogoutOutlined, MenuFoldOutlined, MenuUnfoldOutlined} from "@ant-design/icons";
 import {useLayoutStore} from "@app/layouts/AppLayout/layout.store.ts";
 import {Button} from "@shared/ui/primitives/Button";
 import {Tooltip} from "@shared/ui/primitives/Tooltip";
 import {useTheme} from "@shared/theme/hooks/useTheme.tsx";
 import {useI18n} from "@shared/i18n/hooks/useI18n.ts";
+import {useAuth} from "@features/auth/useAuth.ts";
+import {useConfirm} from "@shared/ui/confirm/ConfirmDialogContext";
 
 export const Sidebar = () => {
     const { collapsed, toggleCollapsed } = useLayoutStore();
     const { theme } = useTheme();
     const { t: tCommon } = useI18n('common');
+    const { logout } = useAuth();
+    const confirm = useConfirm();
+
+    const logoutLabel = tCommon('sidebar.logout');
+
+    const handleLogout = async () => {
+        const ok = await confirm({
+            title: tCommon('sidebar.confirmLogout.title'),
+            message: tCommon('sidebar.confirmLogout.message'),
+        });
+        if (!ok) return;
+        await logout();
+    };
 
     return (
         <div style={{
@@ -46,6 +61,33 @@ export const Sidebar = () => {
                 overflowY: 'auto'
             }}>
                 <NavigationMenu />
+            </div>
+
+            {/* FOOTER — logout */}
+            <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: collapsed ? 'center' : 'flex-start',
+                padding: `8px ${collapsed ? '0' : '12px'}`,
+                boxSizing: 'border-box',
+            }}>
+                <Tooltip content={logoutLabel} placement="right">
+                    <Button
+                        type="text"
+                        onClick={() => { void handleLogout(); }}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 8,
+                            width: collapsed ? undefined : '100%',
+                            justifyContent: collapsed ? 'center' : 'flex-start',
+                            color: '#fff',
+                        }}
+                    >
+                        <LogoutOutlined style={{ color: '#fff' }} />
+                        {!collapsed && <span>{logoutLabel}</span>}
+                    </Button>
+                </Tooltip>
             </div>
         </div>
     );

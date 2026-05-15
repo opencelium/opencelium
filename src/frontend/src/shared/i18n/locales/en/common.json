@@ -54,7 +54,12 @@
   },
   "sidebar": {
     "expand": "Expand sidebar",
-    "collapse": "Collapse sidebar"
+    "collapse": "Collapse sidebar",
+    "logout": "Sign Out",
+    "confirmLogout": {
+      "title": "Sign out",
+      "message": "Are you sure you want to sign out?"
+    }
   },
   "topbar": {
     "switchToGerman": "Switch to German",
