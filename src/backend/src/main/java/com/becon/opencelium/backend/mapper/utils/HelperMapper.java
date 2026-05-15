@@ -1,5 +1,6 @@
 package com.becon.opencelium.backend.mapper.utils;
 
+import com.becon.opencelium.backend.constant.ConnectionConstants;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectorMng;
 import com.becon.opencelium.backend.database.mysql.entity.Category;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
@@ -83,11 +84,31 @@ public abstract class HelperMapper {
 
     @Named("getConnectorDTOById")
     public ConnectorDTO getConnectorDTOById(int id) {
+        if (ConnectionConstants.DEFAULT_CONNECTOR_ID.equals(id)) {
+            ConnectorDTO connectorDTO = new ConnectorDTO();
+            connectorDTO.setConnectorId(ConnectionConstants.DEFAULT_CONNECTOR_ID);
+            connectorDTO.setTitle(ConnectionConstants.DEFAULT_CONNECTOR_NAME);
+
+            InvokerDTO invokerDTO = new InvokerDTO();
+            invokerDTO.setName(ConnectionConstants.DEFAULT_INVOKER_NAME);
+            connectorDTO.setInvoker(invokerDTO);
+            return connectorDTO;
+        }
         return connectorMapper.toDTO(connectorService.findById(id).orElse(null));
     }
 
     @Named("getConnectorResourceById")
     public ConnectorResource getConnectorResourceById(int id) {
+        if (ConnectionConstants.DEFAULT_CONNECTOR_ID.equals(id)) {
+            ConnectorResource connector = new ConnectorResource();
+            connector.setConnectorId(ConnectionConstants.DEFAULT_CONNECTOR_ID);
+            connector.setTitle(ConnectionConstants.DEFAULT_CONNECTOR_NAME);
+
+            InvokerDTO invokerDTO = new InvokerDTO();
+            invokerDTO.setName(ConnectionConstants.DEFAULT_INVOKER_NAME);
+            connector.setInvoker(invokerDTO);
+            return connector;
+        }
         return connectorResourceMapper.toDTO(connectorService.findById(id).orElse(null));
     }
 
