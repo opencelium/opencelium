@@ -15,8 +15,8 @@ import java.util.Map;
  * in {@link ConnectionEx#getConnectors()} as {@link MethodConnectorEx} instances.
  * Always null-check before accessing either field on {@link ConnectionEx}.
  */
-public class ConnectorEx {
-    private int id;
+public class ConnectorEx implements ExecutionConnector {
+    private Integer id;
     private String fchartId;
     private String name;
     private boolean sslCert;
@@ -63,11 +63,11 @@ public class ConnectorEx {
         this.requiredData = requiredData;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

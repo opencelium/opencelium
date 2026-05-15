@@ -2,20 +2,23 @@ package com.becon.opencelium.backend.execution;
 
 import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
 import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
-import com.becon.opencelium.backend.execution.oc721.Connector;
-import com.becon.opencelium.backend.execution.oc721.FieldBind;
-import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.execution.masking.MaskingService;
 import com.becon.opencelium.backend.execution.masking.MaskingServiceImp;
+import com.becon.opencelium.backend.execution.oc721.FieldBind;
+import com.becon.opencelium.backend.execution.oc721.Operation;
+import com.becon.opencelium.backend.invoker.entity.Pagination;
 import com.becon.opencelium.backend.resource.execution.ConnectionEx;
+import com.becon.opencelium.backend.resource.execution.ExecutionConnector;
 import com.becon.opencelium.backend.resource.execution.ExecutionObj;
 import com.becon.opencelium.backend.resource.execution.ProxyEx;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 public class ConnectionExecutor {
@@ -34,17 +37,23 @@ public class ConnectionExecutor {
     }
 
     public void start() {
-        Connector source = Connector.fromEx(connection.getSource());
-        Connector target = Connector.fromEx(connection.getTarget());
-        List<FieldBind> fieldBind = connection.getFieldBind().stream().map(FieldBind::fromEx).collect(Collectors.toList());
+        executionManager = new ExecutionManagerImpl(
+                webhookVars,
+                getFieldBind(),
+                getRequestData(),
+                getRestTemplate(),
+                getPagination()
+        );
 
-        executionManager = new ExecutionManagerImpl(webhookVars, source, target, fieldBind);
+        if (connection.getSource() != null) {
+            ConnectorExecutor source = new ConnectorExecutor(connection.getSource(), executionManager, masking, "source");
+            source.start();
+        }
 
-        ConnectorExecutor sourceEx = new ConnectorExecutor(connection.getSource(), executionManager, getRestTemplate(source), masking, "source");
-        ConnectorExecutor targetEx = new ConnectorExecutor(connection.getTarget(), executionManager, getRestTemplate(target), masking, "target");
-
-        sourceEx.start();
-        targetEx.start();
+        if (connection.getTarget() != null) {
+            ConnectorExecutor target = new ConnectorExecutor(connection.getTarget(), executionManager, masking, "target");
+            target.start();
+        }
     }
 
     public List<Operation> getOperations() {
@@ -54,14 +63,67 @@ public class ConnectionExecutor {
         return executionManager.getAllOperations();
     }
 
-    private RestTemplate getRestTemplate(Connector connector) {
-        int timeout = connector.getTimeout();
-        RestTemplateBuilder restTemplateBuilder =
-                new RestTemplateBuilder(new RestCustomizer(proxy.getHost(), proxy.getPort(), proxy.getUser(), proxy.getPassword(), connector.isSslCert(), timeout));
+
+    private List<FieldBind> getFieldBind() {
+        return connection.getFieldBind().stream()
+                .map(FieldBind::fromEx)
+                .collect(Collectors.toList());
+    }
+
+    private Map<Integer, RestTemplate> getRestTemplate() {
+        Map<Integer, RestTemplate> result = new HashMap<>();
+
+        processConnectors((id, connector) ->
+                result.put(id, buildRestTemplate(connector.isSslCert(), connector.getTimeout()))
+        );
+
+        return result;
+    }
+
+    private Map<Integer, Map<String, String>> getRequestData() {
+        Map<Integer, Map<String, String>> result = new HashMap<>();
+
+        processConnectors((id, connector) ->
+                result.put(id, connector.getRequiredData())
+        );
+
+        return result;
+    }
+
+    private Map<Integer, Pagination> getPagination() {
+        Map<Integer, Pagination> result = new HashMap<>();
+
+        processConnectors((id, connector) ->
+                result.put(id, connector.getPagination())
+        );
+
+        return result;
+    }
+
+    private RestTemplate buildRestTemplate(boolean sslCert, int timeout) {
+        RestCustomizer customizer = new RestCustomizer(proxy.getHost(), proxy.getPort(), proxy.getUser(), proxy.getPassword(), sslCert, timeout);
+        RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder(customizer);
+
         if (timeout > 0) {
             restTemplateBuilder.setReadTimeout(Duration.ofMillis(timeout));
         }
 
         return restTemplateBuilder.build();
+    }
+
+    private void processConnectors(BiConsumer<Integer, ExecutionConnector> consumer) {
+        if (connection.getSource() != null) {
+            var source = connection.getSource();
+            consumer.accept(source.getId(), source);
+        }
+
+        if (connection.getTarget() != null) {
+            var target = connection.getTarget();
+            consumer.accept(target.getId(), target);
+        }
+
+        if (connection.getConnectors() != null) {
+            connection.getConnectors().forEach(consumer);
+        }
     }
 }

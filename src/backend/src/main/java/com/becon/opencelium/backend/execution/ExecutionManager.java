@@ -4,6 +4,7 @@ import com.becon.opencelium.backend.enums.PageParam;
 import com.becon.opencelium.backend.execution.oc721.Loop;
 import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.invoker.entity.Pagination;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,8 @@ public interface ExecutionManager {
     Map<String, Object> getWebhookVars();
     List<Loop> getLoops();
     String generateKey(int loopDepth);
+    RestTemplate resolveRestTemplate();
+    Pagination resolvePagination();
     Map<String, String> getRequestData(Integer ctorId);
     Optional<Operation> findOperationByColor(String color);
     Object executeScript(String bindId);
