@@ -40,7 +40,7 @@ public class OperationUsageHistory {
     @Column(name = "from_invoker", nullable = false, length = 255)
     private String fromInvoker;
 
-    @Column(name = "to_invoker", nullable = false, length = 255)
+    @Column(name = "to_invoker", nullable = true, length = 255)
     private String toInvoker;
 
     @OneToMany(mappedBy = "operationUsageHistory", cascade = CascadeType.ALL, orphanRemoval = true)
