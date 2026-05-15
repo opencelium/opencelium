@@ -30,7 +30,11 @@ export function useAuth() {
     isLoading,
 
     login: async (payload?: unknown) => {
-      dispatch(authActions.setLoading())
+      // Intentionally not dispatching setLoading here: the auth slice's 'loading'
+      // status is reserved for the initial refresh-on-mount path that AuthBootstrap
+      // gates rendering on. The submit-button spinner is driven by LoginForm's own
+      // local isSubmitting state, which keeps the user on the login page while the
+      // request is in flight and lets the error path render inline.
       const session = await auth.login(payload)
       dispatch(authActions.setSession(session))
     },

@@ -9,6 +9,7 @@ export function useLoginForm() {
         defaultValues: {
             email: '',
             password: '',
+            rememberMe: false,
         },
     })
 

@@ -1,7 +1,8 @@
 import type {MetaSchema} from "@shared/i18n/types/schemes/meta.scheme.ts";
 import type {DashboardSchema} from "@shared/i18n/types/schemes/dashboard.scheme.ts";
+import type {AuthSchema} from "@shared/i18n/types/schemes/auth.scheme.ts";
 
-export interface I18nSchema extends MetaSchema, DashboardSchema {
+export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
     common: {
         welcome: string,
         items: string,

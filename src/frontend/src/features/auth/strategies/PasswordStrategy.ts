@@ -5,34 +5,69 @@ import { decodeJwt } from '@shared/api/decodeJwt'
 import {extractNormalizedUser} from "@features/auth/utils.ts";
 
 const TOKEN_KEY = 'oc_auth_token'
+const PERSISTENT_KEY = 'oc_auth_persistent'
 
-export class PasswordStrategy
-    implements AuthStrategy<{ email: string; password: string }>
-{
-    async login(payload: { email: string; password: string }): Promise<AuthSession> {
-        const { headers } = await apiFetch('/login', { method: 'POST', body: payload })
+type LoginPayload = { email: string; password: string; rememberMe?: boolean }
+
+function readToken(): { token: string | null; persistent: boolean } {
+    const persistent = localStorage.getItem(PERSISTENT_KEY) === '1'
+    const token =
+        (persistent ? localStorage.getItem(TOKEN_KEY) : sessionStorage.getItem(TOKEN_KEY)) ??
+        // fall back to either store so legacy sessions survive the upgrade
+        localStorage.getItem(TOKEN_KEY) ??
+        sessionStorage.getItem(TOKEN_KEY)
+    return { token, persistent }
+}
+
+function writeToken(token: string, rememberMe: boolean) {
+    // wipe both stores first so we never have stale tokens in the unused slot
+    localStorage.removeItem(TOKEN_KEY)
+    sessionStorage.removeItem(TOKEN_KEY)
+    if (rememberMe) {
+        localStorage.setItem(TOKEN_KEY, token)
+        localStorage.setItem(PERSISTENT_KEY, '1')
+    } else {
+        sessionStorage.setItem(TOKEN_KEY, token)
+        localStorage.removeItem(PERSISTENT_KEY)
+    }
+}
+
+function clearToken() {
+    localStorage.removeItem(TOKEN_KEY)
+    localStorage.removeItem(PERSISTENT_KEY)
+    sessionStorage.removeItem(TOKEN_KEY)
+}
+
+export class PasswordStrategy implements AuthStrategy<LoginPayload> {
+    async login(payload: LoginPayload): Promise<AuthSession> {
+        const { email, password, rememberMe = false } = payload
+        const { headers } = await apiFetch('/login', {
+            method: 'POST',
+            body: { email, password },
+            timeoutMs: 15_000,
+        })
         const accessToken = (headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '')
-        localStorage.setItem(TOKEN_KEY, accessToken)
+        writeToken(accessToken, rememberMe)
         const user = await this.fetchUser(accessToken)
         const normalizedUser = extractNormalizedUser(user);
         return { accessToken, user, normalizedUser }
     }
 
     async refresh(): Promise<AuthSession | null> {
-        const accessToken = localStorage.getItem(TOKEN_KEY)
+        const { token: accessToken } = readToken()
         if (!accessToken) return null
         try {
             const user = await this.fetchUser(accessToken)
             const normalizedUser = extractNormalizedUser(user);
             return { accessToken, user, normalizedUser }
         } catch {
-            localStorage.removeItem(TOKEN_KEY)
+            clearToken()
             return null
         }
     }
 
     async logout() {
-        localStorage.removeItem(TOKEN_KEY)
+        clearToken()
         await apiFetch('/auth/logout', { method: 'POST' }).catch(() => null)
     }
 
