@@ -16,4 +16,5 @@ public interface ExceptionMessages {
     String ONLY_OWNER_CAN_PERFORM_ACTION = "Only owner can perform this action";
     String ONLY_OWNER_OR_ADMIN_CAN_PERFORM_ACTION = "Only owner or admin can perform this action";
     String FROM_CONNECTOR_IS_NULL = "fromConnector is null";
+    String METHOD_NAME_MUST_BE_NON_NULL = "Method name must not be null";
 }

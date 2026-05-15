@@ -1,13 +1,17 @@
 package com.becon.opencelium.backend.database.mongodb.service;
 
+import com.becon.opencelium.backend.constant.ExceptionConstant;
+import com.becon.opencelium.backend.constant.ExceptionMessages;
 import com.becon.opencelium.backend.constant.props.OpenceliumProps;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
 import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
 import com.becon.opencelium.backend.database.mongodb.entity.OperatorMng;
 import com.becon.opencelium.backend.database.mongodb.repository.ConnectionMngRepository;
+import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.mapper.mongo.ConnectionMngMapper;
 import com.becon.opencelium.backend.resource.connection.ConnectionVersionUpdateRequest;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -43,6 +47,8 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     @Override
     public ConnectionMng create(ConnectionMng connectionMng) {
         if (Objects.isNull(connectionMng)) return null;
+
+        validate(connectionMng);
 
         connectionMng.setVersion(ocProps.getVersion());
         connectionMng.setId(null);
@@ -150,6 +156,24 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
                 if (fieldBindingMng.getId() == null || replaceable) {
                     fieldBindingMng.setId(ObjectId.get().toHexString());
                 }
+            }
+        }
+    }
+
+    private void validate(ConnectionMng connectionMng) {
+        if (connectionMng.getFromConnector() != null && connectionMng.getFromConnector().getMethods() != null) {
+            validateMethods(connectionMng.getFromConnector().getMethods());
+        }
+
+        if (connectionMng.getToConnector() != null && connectionMng.getToConnector().getMethods() != null) {
+            validateMethods(connectionMng.getToConnector().getMethods());
+        }
+    }
+
+    private void validateMethods(List<MethodMng> methods) {
+        for (MethodMng method : methods) {
+            if (StringUtils.isBlank(method.getName())) {
+                throw new GeneralServiceException(ExceptionConstant.INVALID_DATA, ExceptionMessages.METHOD_NAME_MUST_BE_NON_NULL);
             }
         }
     }
