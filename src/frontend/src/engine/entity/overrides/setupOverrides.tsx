@@ -1,4 +1,4 @@
-import { overrideRegistry } from './OverrideRegistry';
+import { overrideRegistry } from './overrideRegistry';
 import {FieldEditor} from "@shared/ui/wizard-step/editor/field-editor/FieldEditor.tsx";
 import {PolicyEditor} from "@shared/ui/wizard-step/editor/policy-editor/PolicyEditor.tsx";
 import {CrossValidationEditor} from "@shared/ui/wizard-step/editor/cross-validation-editor/CrossValidationEditor.tsx";
