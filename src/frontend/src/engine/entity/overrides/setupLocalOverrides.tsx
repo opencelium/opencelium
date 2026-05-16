@@ -1,4 +1,4 @@
-import { overrideRegistry } from './OverrideRegistry';
+import { overrideRegistry } from './overrideRegistry';
 import {LdapLogs} from "@shared/ui/wizard-step/view/ldap-logs/LdapLogs.tsx";
 import {PermissionEditor} from "@shared/ui/wizard-step/editor/permission-editor/PermissionEditor.tsx";
 import {CredentialEditor} from "@shared/ui/wizard-step/editor/credential-editor/CredentialEditor.tsx";
