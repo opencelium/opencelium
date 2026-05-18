@@ -1,5 +1,6 @@
 import type { EndpointArg } from '../../../types/connection';
 import { getReferenceDisplayLabel } from '../shared/referenceDisplay';
+import { createId as createStableId } from '@shared/lib/createId';
 
 export const PROHIBITED_ENDPOINT_CHARACTERS = ['<', '>', 'Enter'];
 export const URL_FORBIDDEN_INPUT_RE = /[\u0000-\u001F\u007F\s"<>`{}|\\^[\]]/g;
@@ -9,8 +10,7 @@ export const ARG_TOKEN_RE = /(#{%\s*([A-Za-z0-9_-]+)\s*%})/g;
 const BACKEND_REFERENCE_RE =
 	/\{%\s*(#[A-Fa-f0-9]{6}\.\((?:request|response)\)\.(?:body|header|status)(?:\.[^%{}]*)?)\s*%}/g;
 
-export const createId = () =>
-	globalThis.crypto?.randomUUID?.() ?? `arg_${Date.now()}_${Math.random()}`;
+export const createId = () => createStableId();
 
 export const escapeHtml = (s: string) =>
 	(s || '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' } as any)[c]);

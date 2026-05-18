@@ -1,3 +1,5 @@
+import { createShortId } from '@shared/lib/createId';
+
 type XmlAttributes = Record<string, string>;
 
 export type XmlTreeNode = {
@@ -15,7 +17,7 @@ export type XmlSelection =
 const ATTR = '__oc__attributes';
 const VALUE = '__oc__value';
 
-const createId = () => crypto.randomUUID().slice(0, 8);
+const createId = () => createShortId();
 
 const normalizeObject = (value: unknown): Record<string, unknown> =>
   value && typeof value === 'object' ? (value as Record<string, unknown>) : {};

@@ -1,5 +1,6 @@
 import { type Connection, type Enhancement } from '../../../types/connection';
 import { buildBodyEnhancement, buildRequestResultField, getParsedReferences } from './bodyReference';
+import { createShortId } from '@shared/lib/createId';
 
 type BodyEditData = {
   namespace?: string[];
@@ -18,7 +19,7 @@ export const collectEnhancementsFromObject = (
     if (typeof value === 'string') {
       const refs = getParsedReferences(value);
       if (refs.length > 0 && resultField) {
-        const id = crypto.randomUUID().slice(0, 8);
+        const id = createShortId();
         seen.set(id, buildBodyEnhancement(id, `${methodColor}.(request).${resultField}`, refs));
       }
       return;
@@ -53,7 +54,7 @@ export const updateRequestFieldBindings = (
   const previous = connection.fieldBindings.find(
     (binding) => binding.enhancement?.args?.RESULT_VAR === resultVar,
   );
-  const next = buildBodyEnhancement(previous?.enhancement.enhanceId || crypto.randomUUID().slice(0, 8), resultVar, refs);
+  const next = buildBodyEnhancement(previous?.enhancement.enhanceId || createShortId(), resultVar, refs);
   return { ...connection, fieldBindings: [...current, { enhancement: next }] };
 };
 

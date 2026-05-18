@@ -5,6 +5,7 @@ import { getDefaultSourceHandle, getDefaultTargetHandle, getNodeType } from './g
 import { findFreePosition, getBranchMaxX, rebalanceOperatorRightChains, shiftNodesByIds } from './graph.layout';
 import { collectDescendantNodeIds } from './graph.traversal';
 import { createMethodConfigFromOperation } from './requestConfig';
+import { createShortId } from '@shared/lib/createId';
 
 function findOutgoingEdgeForAction(sourceNodeId: string, action: CreateNodeFromActionArgs['action'], edges: WorkflowEdgeModel[]) {
   return edges.find(
@@ -14,7 +15,7 @@ function findOutgoingEdgeForAction(sourceNodeId: string, action: CreateNodeFromA
 
 function buildNewNode(args: CreateNodeFromActionArgs, sourceNode: WorkflowNodeModel, interceptedTargetNode?: WorkflowNodeModel) {
   const nodeType = getNodeType(args.action.kind!);
-  const nextId = `${args.action.kind}-${crypto.randomUUID().slice(0, 8)}`;
+  const nextId = createShortId(args.action.kind);
   const baseX = sourceNode.type === 'if' || sourceNode.type === 'loop'
     ? getBranchMaxX(sourceNode.id, args.nodes, args.edges)
     : sourceNode.position.x;

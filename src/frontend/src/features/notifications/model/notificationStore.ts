@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { Notification, NotificationType } from './types'
+import { createId } from '@shared/lib/createId'
 
 type NotificationState = {
     notifications: Notification[]
@@ -20,7 +21,7 @@ export const useNotificationStore = create<NotificationState>((set) => ({
             notifications: [
                 ...state.notifications,
                 {
-                    id: crypto.randomUUID(),
+                    id: createId(),
                     type,
                     messageKey,
                     params,

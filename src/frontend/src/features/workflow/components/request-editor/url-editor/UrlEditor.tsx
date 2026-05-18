@@ -34,6 +34,7 @@ import {
 	ARG_TOKEN_RE,
 	buildQueryFromParams,
 	buildQueryParamsFromEndpoint,
+	createId,
 	ensureTemplateRow,
 	normalizeReference,
 	splitEndpoint,
@@ -271,9 +272,7 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 	const createArgTokenForInlineEditors = useCallback(
 		(sourceRefRaw: string, existingTokenIds: string[]) => {
 			const sourceRef = normalizeReference(sourceRefRaw);
-			const newArgId =
-				(globalThis as any)?.crypto?.randomUUID?.() ||
-				`arg_${Date.now()}_${Math.random()}`;
+			const newArgId = createId();
 			const token = `#{%${newArgId}%}`;
 
 			const nextEndpointArgs: Record<string, EndpointArg> = {

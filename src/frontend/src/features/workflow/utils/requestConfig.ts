@@ -1,8 +1,9 @@
 import type { WorkflowMethodConfig, WorkflowQueryParam } from '../types/request-config.types';
 import type { InvokerOperation } from '@entities/invoker/model/types';
 import { buildQueryParamsFromEndpoint } from '../components/request-editor/url-editor/urlEditor.utils';
+import { createShortId } from '@shared/lib/createId';
 
-const createId = (prefix: string) => `${prefix}-${crypto.randomUUID().slice(0, 8)}`;
+const createId = (prefix: string) => createShortId(prefix);
 
 const createTemplateRow = (): WorkflowQueryParam => ({
   id: createId('query'),
