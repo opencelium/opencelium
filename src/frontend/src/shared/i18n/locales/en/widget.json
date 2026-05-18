@@ -1,0 +1,19 @@
+{
+  "masterPassword": {
+    "input": {
+      "label": "Master Password",
+      "info": {
+        "title": "Master Password",
+        "content": "The Request Data section defines the payload that will be sent to the target system. You can specify static values or dynamically reference data from previous request results and webhooks."
+      }
+    },
+    "button": {
+      "label": "send"
+    },
+    "error": {
+      "MASTER_PASSWORD_WRONG": "Invalid master password",
+      "default": "Unknown error",
+      "nonAsciiError": "Password contains <1>non-ASCII</1> characters!"
+    }
+  }
+}

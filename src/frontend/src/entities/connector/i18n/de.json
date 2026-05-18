@@ -1,0 +1,77 @@
+{
+  "list": {
+    "title": "Konnektoren",
+    "subTitle": "Konnektoren sind Kernkomponenten von OpenCelium. Sie repräsentieren externe oder interne Systeme, die zum Senden von Anfragen und zum Empfangen von Antworten verwendet werden."
+  },
+  "fields": {
+    "title": {
+      "label": "Title"
+    },
+    "description": {
+      "label": "Description"
+    },
+    "invoker": {
+      "label": "Invoker"
+    },
+    "timeout": {
+      "label": "Timeout"
+    },
+    "sslCert": {
+      "label": "Enable SSL Validation",
+      "text": {
+        "on": "SSL Validation is activated",
+        "off": "SSL Validation is deactivated"
+      }
+    },
+    "image": {
+      "label": "Image"
+    },
+    "url": {
+      "label": "Url"
+    },
+    "password": {
+      "label": "Password"
+    }
+  },
+  "sections": {
+    "general-data": {
+      "title": "General Data"
+    },
+    "credentials": {
+      "title": "Credentials"
+    }
+  },
+  "wizard": {
+    "modes": {
+      "create": {
+        "header": "Konnektor erstellen",
+        "subheader": "Folgen Sie den 3 einfachen Schritten zur Erstellung des Konnektors.",
+        "successMessage": "Konnektor \"{{title}}\" wurde erfolgreich erstellt"
+      },
+      "update": {
+        "header": "Konnektor bearbeiten",
+        "subheader": "Konnektor-Informationen ändern und Änderungen speichern.",
+        "successMessage": "Konnektor \"{{title}}\" wurde erfolgreich aktualisiert"
+      },
+      "view": {
+        "header": "Connector Details",
+        "subheader": "View connector information."
+      }
+    },
+    "recommendations": {
+      "1": "Create another Connector",
+      "2": "Create Connection",
+      "3": "Create Invoker"
+    },
+    "steps": {
+      "general-data": {
+        "header": "General Data",
+        "subheader": "General information about connector"
+      },
+      "credentials": {
+        "header": "Credentials",
+        "subheader": "Authentication data"
+      }
+    }
+  }
+}

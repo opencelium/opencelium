@@ -1,0 +1,34 @@
+{
+  "messages": {
+    "saved": {
+      "create": "Verbindung \"{{title}}\" erstellt",
+      "update": "Verbindung \"{{title}}\" aktualisiert"
+    },
+    "saveFailed": {
+      "create": "Verbindung \"{{title}}\" konnte nicht erstellt werden",
+      "update": "Verbindung \"{{title}}\" konnte nicht aktualisiert werden"
+    }
+  },
+  "list": {
+    "title": "Verbindungen",
+    "subTitle": "Verbindungen definieren, wie Konnektoren miteinander interagieren – einschließlich Anforderungsablauf, Datenzuordnung und Kommunikationslogik.",
+    "searchPlaceholder": "Nach Titel oder Beschreibung suchen",
+    "columns": {
+      "title": "Titel",
+      "description": "Beschreibung"
+    },
+    "downloadTemplate": {
+      "tooltip": "Als Vorlage herunterladen",
+      "success": "Vorlage \"{{name}}\" heruntergeladen",
+      "error": "Vorlage konnte nicht heruntergeladen werden"
+    }
+  },
+  "fields": {
+    "title": {
+      "label": "Titel"
+    },
+    "description": {
+      "label": "Beschreibung"
+    }
+  }
+}

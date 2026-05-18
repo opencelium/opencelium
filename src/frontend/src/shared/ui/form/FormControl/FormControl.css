@@ -1,0 +1,33 @@
+.form-control {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.form-control__label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+}
+
+.form-control__required {
+    color: var(--color-action-danger);
+    margin-left: 4px;
+}
+
+.form-control__field {
+    display: flex;
+    align-items: center;
+    min-height: 30px;
+}
+
+.form-control__hint {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+}
+
+.form-control__error {
+    font-size: 12px;
+    color: var(--color-action-danger);
+
+}

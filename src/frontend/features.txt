@@ -1,0 +1,21 @@
+- база реакт (react, react-dom, react-router-dom)
+- создание базовый компонентов для Header, SubHeader, Index (own modules) (system context + abstract factory + bridge + facade
+    -Accessibility,Consistency audit (loading,disabled), Tokens freeze (color,radius,spacing,font,zIndex,shadow)
+- поддежка различных тем (CI) (own module) (theme context + strategy)
+- мультиязычность (i18next)
+- аутентификация (own module) (factory + strategy)
+- оповещения на определенные действия или ответы api запросов (own module)
+- система role/permission (own module)
+- api запросы через rtk (@reduxjs/toolkit)
+- отображение списка сущностей через таблицы с paginator (@tanstack/react-table)
+- сущности имеют формы для create/update/read (react-hook-form, @hookform/resolvers, zod)
+- global error handling
+
+- integrate cmdk
+
+Accessibility
+
+Consistency audit
+
+Form coverage
+

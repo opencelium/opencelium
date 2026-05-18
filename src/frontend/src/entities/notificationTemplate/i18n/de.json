@@ -1,0 +1,69 @@
+{
+  "list": {
+    "title": "Benachrichtigungsvorlagen",
+    "subTitle": "Verwalten Sie wiederverwendbare Vorlagen, die für Benachrichtigungen in Zeitplänen verwendet werden."
+  },
+  "fields": {
+    "name": {
+      "label": "Name"
+    },
+    "type": {
+      "label": "Typ"
+    },
+    "aggregator": {
+      "label": "Aggregator"
+    },
+    "subject": {
+      "label": "Betreff"
+    },
+    "body": {
+      "label": "Inhalt"
+    }
+  },
+  "sections": {
+    "general-data": {
+      "title": "Allgemeine Daten"
+    },
+    "template-content": {
+      "title": "Vorlageninhalt"
+    }
+  },
+  "wizard": {
+    "modes": {
+      "create": {
+        "header": "Benachrichtigungsvorlage erstellen",
+        "subheader": "Benachrichtigungsvorlagen definieren den Inhalt und das Format von Nachrichten, die vom System gesendet werden.",
+        "successMessage": "Benachrichtigungsvorlage \"{{name}}\" wurde erfolgreich erstellt"
+      },
+      "update": {
+        "header": "Benachrichtigungsvorlage aktualisieren",
+        "subheader": "Benachrichtigungsvorlagen definieren den Inhalt und das Format von Nachrichten, die vom System gesendet werden.",
+        "successMessage": "Benachrichtigungsvorlage \"{{name}}\" wurde erfolgreich aktualisiert"
+      },
+      "view": {
+        "header": "Details der Benachrichtigungsvorlage",
+        "subheader": "Benachrichtigungsvorlagen definieren den Inhalt und das Format von Nachrichten, die vom System gesendet werden."
+      }
+    },
+    "recommendations": {
+      "1": "Weitere Benachrichtigungsvorlage erstellen",
+      "2": "Zeitplan erstellen"
+    },
+    "steps": {
+      "general-data": {
+        "header": "Allgemeine Daten",
+        "subheader": "Definieren Sie die grundlegenden Informationen für die Benachrichtigungsvorlage."
+      },
+      "template-content": {
+        "header": "Vorlageninhalt",
+        "subheader": "Definieren Sie Aggregator, Betreff und Inhalt der Benachrichtigungsvorlage."
+      }
+    }
+  },
+  "confirmation": {
+    "delete": {
+      "byName": "Benachrichtigungsvorlage mit Name \"{{name}}\" löschen?",
+      "byId": "Benachrichtigungsvorlage mit ID \"{{id}}\" löschen?"
+    }
+  }
+}

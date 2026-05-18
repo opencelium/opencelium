@@ -1,0 +1,140 @@
+{
+  "list": {
+    "title": "Zeitpläne",
+    "subTitle": "Zeitpläne bestimmen, wann bestimmte Verbindungen ausgeführt werden — nach festem Zeitplan oder durch Auslöser. Statuslegende: <blueDot/> läuft, <greenDot/> letzte Ausführung erfolgreich, <redDot/> letzte Ausführung fehlgeschlagen, <grayDot/> kein Cron und keine Historie. Die Zahl unter dem Kreis zählt bis zum nächsten Cron-Trigger herunter.",
+    "searchPlaceholder": "Nach Verbindungsname suchen",
+    "columns": {
+      "status": "Status",
+      "connection": "Verbindung",
+      "cronExp": "Cron",
+      "lastSuccessExecution": "Letzter Erfolg",
+      "lastFailExecution": "Letzter Fehler",
+      "lastDuration": "Dauer",
+      "debugMode": "Debug",
+      "webhook": "Webhook"
+    }
+  },
+  "webhook": {
+    "copied": "Webhook-URL in die Zwischenablage kopiert",
+    "copyTooltip": "Webhook-URL kopieren",
+    "createTooltip": "Webhook-URL erzeugen",
+    "created": "Webhook-URL erstellt",
+    "deleteTooltip": "Webhook entfernen",
+    "deleted": "Webhook entfernt",
+    "confirmDelete": {
+      "title": "Webhook entfernen?",
+      "message": "Die Webhook-URL funktioniert sofort nicht mehr. Diese Aktion kann nicht rückgängig gemacht werden."
+    }
+  },
+  "start": {
+    "tooltip": "Ausführung starten",
+    "success": "Zeitplan-Ausführung gestartet"
+  },
+  "terminate": {
+    "tooltip": "Ausführung beenden",
+    "success": "Zeitplan-Ausführung beendet"
+  },
+  "notifications": {
+    "tooltip": "Benachrichtigungen",
+    "dialogTitle": "Benachrichtigungen",
+    "subtitle": "Legen Sie fest, wer benachrichtigt wird, wenn dieser Zeitplan ausgeführt wird.",
+    "addButton": "Benachrichtigung hinzufügen",
+    "empty": "Noch keine Benachrichtigungen.",
+    "close": "Schließen",
+    "cancel": "Abbrechen",
+    "unnamedItem": "Unbenannte Benachrichtigung",
+    "deleteTooltip": "Benachrichtigung löschen",
+    "aggregatorHint": "Datenaggregator funktioniert nur für Post",
+    "created": "Benachrichtigung erstellt",
+    "updated": "Benachrichtigung aktualisiert",
+    "deleted": "Benachrichtigung gelöscht",
+    "fields": {
+      "name": "Name",
+      "eventType": "Ereignistyp",
+      "notificationType": "Benachrichtigungstyp",
+      "template": "Vorlage",
+      "recipients": "Empfänger",
+      "webhookUrl": "Webhook-URL"
+    },
+    "eventTypeOptions": {
+      "pre": "Pre",
+      "post": "Post",
+      "alert": "Alert"
+    },
+    "actions": {
+      "create": "Erstellen",
+      "update": "Aktualisieren",
+      "delete": "Löschen"
+    },
+    "errors": {
+      "nameRequired": "Name ist erforderlich",
+      "notificationTypeRequired": "Benachrichtigungstyp ist erforderlich",
+      "templateRequired": "Vorlage ist erforderlich",
+      "recipientsEmailsRequired": "Mindestens einen Empfänger auswählen",
+      "webhookUrlRequired": "Webhook-URL ist erforderlich",
+      "eventTypeInvalid": "Ungültiger Ereignistyp"
+    },
+    "confirmDelete": {
+      "title": "Benachrichtigung löschen?",
+      "message": "Diese Benachrichtigung wird unwiderruflich entfernt."
+    }
+  },
+  "debugMode": {
+    "enableSuccess": "Debug-Modus aktiviert",
+    "disableSuccess": "Debug-Modus deaktiviert"
+  },
+  "fields": {
+    "connection": {
+      "label": "Connection"
+    },
+    "debugMode": {
+      "label": "Logs",
+      "text": {
+        "on": "Logs are activated",
+        "off": "Logs are deactivated"
+      }
+    },
+    "cronExp": {
+      "label": "Cron Expression",
+      "error": {
+        "invalid": "Invalid cron expression"
+      }
+    }
+  },
+  "sections": {
+    "general-data": {
+      "title": "General Data"
+    }
+  },
+  "wizard": {
+    "modes": {
+      "create": {
+        "header": "Zeitplan erstellen",
+        "subheader": "Folgen Sie den 3 einfachen Schritten zur Erstellung des Zeitplans.",
+        "successMessage": "Zeitplan für die Verbindung \"{{connectionTitle}}\" wurde erfolgreich erstellt",
+        "successMessageWithCron": "Zeitplan für die Verbindung \"{{connectionTitle}}\" mit Cron \"{{cronExp}}\" wurde erfolgreich erstellt"
+      },
+      "update": {
+        "header": "Zeitplan bearbeiten",
+        "subheader": "Zeitplan-Informationen ändern und Änderungen speichern.",
+        "successMessage": "Zeitplan für die Verbindung \"{{connectionTitle}}\" wurde erfolgreich aktualisiert",
+        "successMessageWithCron": "Zeitplan für die Verbindung \"{{connectionTitle}}\" mit Cron \"{{cronExp}}\" wurde erfolgreich aktualisiert"
+      },
+      "view": {
+        "header": "Schedule Details",
+        "subheader": "View schedule information."
+      }
+    },
+    "recommendations": {
+      "1": "Create Schedule",
+      "2": "Create Connection",
+      "3": "Create Connector"
+    },
+    "steps": {
+      "general-data": {
+        "header": "General Data",
+        "subheader": "General information about schedule"
+      }
+    }
+  }
+}

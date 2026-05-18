@@ -1,0 +1,9 @@
+
+.button-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.button-content.sm { gap: 4px; }
+.button-content.md { gap: 8px; }
+.button-content.lg { gap: 12px; }

@@ -1,0 +1,101 @@
+{
+  "question": {
+    "confirmation": {
+      "delete": "Sind Sie sicher, dass Sie {{entityName}} nach {{field}} {{value}} löschen möchten?"
+    }
+  },
+  "menu": {
+    "connectors": "Konnektoren",
+    "connections": "Verbindungen",
+    "schedules": "Zeitpläne",
+    "usersAccess": "Benutzer & Zugriff",
+    "users": "Benutzer",
+    "groups": "Gruppen",
+    "ldapCheck": "LDAP-Prüfung",
+    "configurations": "Konfigurationen",
+    "invokers": "Aufrufer",
+    "connectionTemplates": "Verbindungsvorlagen",
+    "dataAggregator": "Daten-Aggregator",
+    "notificationTemplates": "Benachrichtigungsvorlagen",
+    "categories": "Kategorien",
+    "supportFiles": "Support-Dateien",
+    "licenseSystem": "Lizenz & System",
+    "licenseManagement": "Lizenzverwaltung",
+    "updateAssistant": "Update-Assistent",
+    "systemCheck": "Systemprüfung",
+    "ui": "UI"
+  },
+  "commandPalette": {
+    "placeholder": "Befehl eingeben...",
+    "groups": {
+      "recent": "Zuletzt verwendet",
+      "navigate": "Navigieren",
+      "create": "Erstellen",
+      "manage": "Verwalten",
+      "system": "System",
+      "general": "Allgemein"
+    },
+    "descriptions": {
+      "create": "Einen neuen Eintrag erstellen",
+      "update": "Einen vorhandenen Eintrag aktualisieren",
+      "delete": "Einen Eintrag löschen",
+      "find": "Einen Eintrag öffnen oder ansehen",
+      "list": "Die Eintragsliste öffnen",
+      "login": "Aktuelle Rolle wechseln",
+      "system": "Systemaktionen",
+      "checkLicense": "Lizenz und API-Aufrufverbrauch prüfen"
+    },
+    "footer": {
+      "select": "Auswählen",
+      "autocomplete": "Vervollständigen",
+      "navigate": "Navigieren",
+      "close": "Schließen"
+    }
+  },
+  "sidebar": {
+    "expand": "Seitenleiste ausklappen",
+    "collapse": "Seitenleiste einklappen",
+    "logout": "Abmelden",
+    "confirmLogout": {
+      "title": "Abmelden",
+      "message": "Möchten Sie sich wirklich abmelden?"
+    }
+  },
+  "topbar": {
+    "switchToGerman": "Auf Deutsch umschalten",
+    "switchToEnglish": "Auf Englisch umschalten",
+    "notifications": "Benachrichtigungen",
+    "switchToAdminMenu": "Zum Admin-Menü wechseln",
+    "switchToMainMenu": "Zum Hauptmenü wechseln",
+    "profile": "Profil"
+  },
+  "actions": {
+    "prev": "Zurück",
+    "submit": "Absenden",
+    "next": "Weiter",
+    "create": "Erstellen",
+    "view": "Ansehen",
+    "edit": "Bearbeiten",
+    "delete": "Löschen"
+  },
+  "field": {
+    "required": "Pflichtfeld"
+  },
+  "hintLabel": "Hinweis",
+  "list": {
+    "searchPlaceholder": "Suchen...",
+    "empty": "Keine Daten",
+    "actions": "Aktionen",
+    "manage": "Verwalten Sie Ihre {{name}}-Einträge",
+    "deleteSelected": "Auswahl löschen ({{count}})",
+    "deleteSelectedSuccess": "{{count}} Einträge erfolgreich gelöscht",
+    "deleteSelectedSuccess_one": "{{count}} Eintrag erfolgreich gelöscht",
+    "filtersTooltip": "Filter",
+    "confirmDelete": {
+      "title": "Löschen",
+      "message": "Möchten Sie dieses {{name}} wirklich löschen?",
+      "bulkMessage": "{{count}} ausgewählte Einträge löschen?",
+      "bulkMessage_one": "{{count}} ausgewählten Eintrag löschen?"
+    }
+  }
+}

@@ -1,0 +1,94 @@
+.historyBody {
+  padding: 0 12px 16px 6px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.historyScroll {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 3px;
+}
+
+.historyTimeline {
+  position: relative;
+  overflow: visible;
+}
+
+.historyTimelineLine {
+  position: absolute;
+  left: 45px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #e5e7eb;
+}
+
+.historyDateRow,
+.historyEntryRow {
+  display: flex;
+  gap: 12px;
+  overflow: visible;
+}
+
+.historyDateRow {
+  align-items: center;
+  margin: 10px 0;
+}
+
+.historyDateSpacer,
+.historyTimeCol {
+  width: 50px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.historyDateInner {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.historyDateHr {
+  flex: 1;
+  height: 1px;
+  background: #e5e7eb;
+}
+
+.historyDateLabel,
+.historyTimeLabel,
+.historyConfirmDialog span {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.historyTimeLabel {
+  position: absolute;
+  left: 3px;
+  top: 10px;
+  width: 34px;
+  text-align: right;
+}
+
+.historyDot {
+  position: absolute;
+  left: 40px;
+  top: 12px;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  border: 1px solid #d1d5db;
+  z-index: 1;
+}
+
+.historyDotCurrent {
+  background: #2563eb;
+}
+
+.historyPanelDrawer {
+  overflow: hidden;
+}

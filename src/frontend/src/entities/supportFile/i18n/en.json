@@ -1,0 +1,19 @@
+{
+  "list": {
+    "title": "Support Files",
+    "subTitle": "Diagnostic bundles produced by connection runs. Download a bundle to share it with support, or remove ones you no longer need.",
+    "searchPlaceholder": "Search by connection",
+    "deletedConnection": "DELETED CONNECTION",
+    "columns": {
+      "status": "Status",
+      "connection": "Connection",
+      "filePath": "File Path",
+      "timestamp": "Timestamp"
+    },
+    "download": {
+      "tooltip": "Download support file",
+      "success": "Support file downloaded",
+      "error": "Failed to download support file"
+    }
+  }
+}

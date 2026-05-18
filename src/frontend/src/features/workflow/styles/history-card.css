@@ -1,0 +1,59 @@
+.historyCard {
+  position: relative;
+  flex: 1;
+  margin-bottom: 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+  padding: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.16s ease, transform 0.16s ease;
+  cursor: pointer;
+  overflow: visible;
+}
+
+.historyCardSelected {
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+}
+
+.historyCard:hover {
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.16);
+}
+
+.historyCardHeader,
+.historySaveRow,
+.historyConfirmActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.historyCardActivator {
+  cursor: pointer;
+}
+
+.historyDotsButton,
+.historySaveButton,
+.historyDangerButton,
+.historyMenuItem {
+  cursor: pointer;
+}
+
+.historyDotsButton {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.historySaveRow {
+  justify-content: flex-end;
+  margin-top: 8px;
+  clear: both;
+}

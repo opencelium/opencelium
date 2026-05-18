@@ -1,0 +1,6 @@
+.ant-switch-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-text-primary);
+}

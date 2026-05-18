@@ -1,0 +1,167 @@
+import { CloseOutlined } from '@ant-design/icons';
+import { Button, Modal } from 'antd';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { Provider } from 'react-redux';
+import { useSelector } from 'react-redux';
+import LegacyUrlEditor from './url-editor/UrlEditor';
+import { BodyEditor } from './body-editor/BodyEditor';
+import { HeaderEditor } from './header-editor/HeaderEditor';
+import { MethodProvider } from '../../providers/MethodContext';
+import { clearConnection, setConnection, setFlowchart } from '../../store/connection/connectionSlice';
+import type { RootState } from '../../store';
+import { createLegacyStore } from '../../store';
+import type { WorkflowMethodConfig } from '../../types/request-config.types';
+import type { WorkflowEdgeModel, WorkflowNodeModel } from '../../types/workflow.types';
+import { buildLegacyConnection, extractWorkflowMethodConfig } from './legacyAdapter';
+import { buildFromConnectorPayload } from '../../api/connectionPayload';
+
+type Props = {
+  open: boolean;
+  node: WorkflowNodeModel | null;
+  mode: 'url' | 'body' | 'header' | null;
+  nodes: WorkflowNodeModel[];
+  edges?: WorkflowEdgeModel[];
+  fieldBindings?: any[];
+  onClose: () => void;
+  onSave: (nodeId: string, config: WorkflowMethodConfig) => void;
+};
+
+function LegacyUrlEditorContent({ nodeId }: { nodeId: string }) {
+  const method = useSelector((state: RootState) =>
+    state.connection.connection?.fromConnector.method
+      .find((item) => item.id === nodeId) ?? null,
+  );
+
+  if (!method) return null;
+
+  return (
+    <MethodProvider value={{ method }}>
+      <LegacyUrlEditor />
+    </MethodProvider>
+  );
+}
+
+function LegacyBodyEditorContent({ nodeId }: { nodeId: string }) {
+  const method = useSelector((state: RootState) =>
+    state.connection.connection?.fromConnector.method
+      .find((item) => item.id === nodeId) ?? null,
+  );
+
+  if (!method) return null;
+
+  return (
+    <MethodProvider value={{ method }}>
+      <BodyEditor />
+    </MethodProvider>
+  );
+}
+
+function LegacyHeaderEditorContent({ nodeId }: { nodeId: string }) {
+  const method = useSelector((state: RootState) =>
+    state.connection.connection?.fromConnector.method
+      .find((item) => item.id === nodeId) ?? null,
+  );
+
+  if (!method) return null;
+
+  return (
+    <MethodProvider value={{ method }}>
+      <HeaderEditor />
+    </MethodProvider>
+  );
+}
+
+export function MethodConfigDialog({ open, node, mode, nodes, edges, fieldBindings, onClose, onSave }: Props) {
+  const store = useMemo(() => createLegacyStore(), []);
+  const connection = useMemo(() => {
+    const legacyConnection = buildLegacyConnection(nodes);
+    const fromConnectorPayload = buildFromConnectorPayload(nodes, edges ?? []) as any;
+    const indexById = new Map<string, string>(
+      (fromConnectorPayload.methods ?? []).map((method: any) => [method.id, method.index]),
+    );
+    return {
+      ...legacyConnection,
+      ...(Array.isArray(fieldBindings) ? { fieldBindings } : {}),
+      fromConnector: {
+        ...legacyConnection.fromConnector,
+        method: legacyConnection.fromConnector.method.map((method) => ({
+          ...method,
+          index: indexById.get(method.id) ?? method.index,
+        })),
+        operator: fromConnectorPayload.operators ?? [],
+      },
+      ui: {
+        ...legacyConnection.ui,
+        workflowEdges: edges ?? [],
+      } as any,
+    };
+  }, [edges, fieldBindings, nodes]);
+  const isPersistingRef = useRef(false);
+
+  useEffect(() => {
+    if (!open) return;
+    store.dispatch(setConnection(connection));
+    store.dispatch(setFlowchart('workflow-flow'));
+    return () => {
+      store.dispatch(clearConnection());
+    };
+  }, [connection, open, store]);
+
+  const persistCurrentConfig = useCallback(() => {
+    if (!node || isPersistingRef.current) return;
+
+    isPersistingRef.current = true;
+
+    const activeElement = document.activeElement;
+    if (activeElement instanceof HTMLElement) activeElement.blur();
+
+    requestAnimationFrame(() => {
+      const config = extractWorkflowMethodConfig(store.getState().connection.connection, node.id);
+      if (config) {
+        onSave(node.id, config);
+      } else {
+        onClose();
+      }
+      isPersistingRef.current = false;
+    });
+  }, [node, onClose, onSave, store]);
+
+  if (!open || !node) return null;
+  const title = mode === 'body' ? 'Body' : mode === 'header' ? 'Header' : 'Request Url';
+  const width = mode === 'url' ? 1180 : '94vw';
+
+  return (
+    <Modal
+      open={open}
+      onCancel={persistCurrentConfig}
+      width={width}
+      style={mode !== 'url' ? { top: 18 } : undefined}
+      destroyOnHidden
+      title={title}
+      closeIcon={<CloseOutlined />}
+      styles={{
+        body: {
+          paddingTop: 8,
+          ...(mode !== 'url' ? { height: 'calc(100vh - 191px)', overflow: 'hidden' } : null),
+        },
+      }}
+      footer={[
+        <Button key="close" type="primary" onClick={persistCurrentConfig}>
+          Close
+        </Button>,
+      ]}
+    >
+      <div style={{ height: mode !== 'url' ? 'calc(100vh - 199px)' : undefined }}>
+        <Provider store={store}>
+          {mode === 'body' ? (
+            <LegacyBodyEditorContent nodeId={node.id} />
+          ) : mode === 'header' ? (
+            <LegacyHeaderEditorContent nodeId={node.id} />
+          ) : (
+            <LegacyUrlEditorContent nodeId={node.id} />
+          )}
+        </Provider>
+      </div>
+    </Modal>
+  );
+}

@@ -1,0 +1,53 @@
+{
+  "list": {
+    "title": "Kategorien",
+    "subTitle": "Kategorien werden verwendet, um Verbindungen und Zeitpläne zu organisieren und für eine bessere Struktur und Navigation zu gruppieren."
+  },
+  "fields": {
+    "name": {
+      "label": "Name"
+    },
+    "parentCategory": {
+      "label": "Übergeordnete Kategorie"
+    }
+  },
+  "sections": {
+    "general-data": {
+      "title": "Allgemeine Daten"
+    }
+  },
+  "wizard": {
+    "modes": {
+      "create": {
+        "header": "Kategorie erstellen",
+        "subheader": "Erstellen Sie eine neue Kategorie zur Organisation Ihrer Ressourcen.",
+        "successMessage": "Kategorie \"{{name}}\" wurde erfolgreich erstellt"
+      },
+      "update": {
+        "header": "Kategorie aktualisieren",
+        "subheader": "Kategorieinformationen bearbeiten und Änderungen speichern.",
+        "successMessage": "Kategorie \"{{name}}\" wurde erfolgreich aktualisiert"
+      },
+      "view": {
+        "header": "Kategoriedetails",
+        "subheader": "Kategorieinformationen anzeigen."
+      }
+    },
+    "recommendations": {
+      "1": "Weitere Kategorie erstellen",
+      "2": "Verbindung erstellen"
+    },
+    "steps": {
+      "general-data": {
+        "header": "Allgemeine Daten",
+        "subheader": "Grundlegende Informationen der Kategorie definieren."
+      }
+    }
+  },
+  "confirmation": {
+    "delete": {
+      "byName": "Kategorie mit dem Namen \"{{name}}\" löschen?",
+      "byId": "Kategorie mit der ID \"{{id}}\" löschen?"
+    }
+  }
+}

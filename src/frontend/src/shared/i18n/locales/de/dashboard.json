@@ -1,0 +1,55 @@
+{
+  "header": {
+    "title": "Dashboard",
+    "subtitle": "Betrieblicher Überblick über Ihre OpenCelium-Umgebung"
+  },
+  "rangeFilter": {
+    "last7days": "Letzte 7 Tage",
+    "last30days": "Letzte 30 Tage",
+    "last24h": "Letzte 24 Stunden"
+  },
+  "metrics": {
+    "executions": "Ausführungen",
+    "failureRate": "Fehlerquote",
+    "avgRuntime": "Ø Laufzeit",
+    "runningJobs": "Laufende Jobs",
+    "apiUsage": "API-Verbrauch",
+    "noData": "—"
+  },
+  "delta": {
+    "vsPrevious": "ggü. Vorperiode"
+  },
+  "attention": {
+    "title": "Erfordert Aufmerksamkeit",
+    "viewAll": "Alle anzeigen",
+    "empty": "Aktuell ist nichts zu tun"
+  },
+  "recentActivity": {
+    "title": "Letzte Aktivität",
+    "viewAll": "Alle anzeigen",
+    "empty": "Keine kürzliche Aktivität"
+  },
+  "systemHealth": {
+    "title": "Systemzustand",
+    "healthy": "Gesund",
+    "warning": "Warnung",
+    "critical": "Kritisch",
+    "statusHealthy": "Gesund"
+  },
+  "executionsChart": {
+    "title": "Ausführungen & Fehler",
+    "executions": "Ausführungen",
+    "failures": "Fehler"
+  },
+  "resourceUsage": {
+    "title": "Ressourcenverbrauch",
+    "cpu": "CPU",
+    "memory": "Speicher"
+  },
+  "topConnectors": {
+    "title": "Top-Konnektoren",
+    "name": "Konnektor",
+    "executions": "Ausführungen",
+    "failureRate": "Fehlerquote"
+  }
+}

@@ -1,0 +1,76 @@
+.headerInlineDescription {
+  color: #6b7280;
+}
+
+.headerInlineDivider {
+  color: #9ca3af;
+  flex: 0 0 auto;
+}
+
+.headerInlineEditor {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.headerInlineEditorWide {
+  flex: 0 1 auto;
+}
+
+.headerInlineInput {
+  border: 1px solid #d1d5db;
+  outline: 0;
+  background: #fff;
+  border-radius: 8px;
+  padding: 6px 10px;
+  min-width: 0;
+  height: 34px;
+}
+
+.headerInlineNameInput {
+  width: 260px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.headerInlineDescriptionInput {
+  width: 520px;
+  color: #4b5563;
+}
+
+.headerInlineAction {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #4b5563;
+  flex: 0 0 auto;
+}
+
+.headerInlineAction:hover {
+  background: #f9fafb;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.headerPrimaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.headerActionWrap {
+  position: relative;
+}
+

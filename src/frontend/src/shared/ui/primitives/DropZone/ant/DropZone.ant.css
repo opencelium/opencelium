@@ -1,0 +1,63 @@
+.ant-upload-wrapper {
+    width: 100%;
+}
+
+/* ── File list ──────────────────────────────── */
+
+.dz-file-list {
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dz-file-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    background: var(--color-background-surface);
+    border: 1px solid var(--color-border-default);
+    font-size: 13px;
+    color: var(--color-text-primary);
+}
+
+.dz-file-item__icon {
+    color: var(--color-action-primary);
+    display: flex;
+    align-items: center;
+}
+
+.dz-file-item__name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dz-file-item__size {
+    flex-shrink: 0;
+    color: var(--color-text-secondary, #8c8c8c);
+    font-size: 12px;
+}
+
+.dz-file-item__remove {
+    flex-shrink: 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--color-action-danger);
+    padding: 0 2px;
+    font-size: 12px;
+    line-height: 1;
+    opacity: 0.7;
+    transition: opacity 0.15s;
+}
+
+.dz-file-item__remove:hover {
+    opacity: 1;
+}

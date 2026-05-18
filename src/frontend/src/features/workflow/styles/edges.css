@@ -1,0 +1,56 @@
+.react-flow__edges,
+.react-flow__edge {
+  z-index: 3 !important;
+}
+
+.react-flow__nodes,
+.react-flow__node {
+  z-index: 6 !important;
+}
+
+.react-flow__edge-path,
+.workflowEdgePath {
+  stroke: #9ca3af;
+  stroke-width: 1.8;
+  color: #9ca3af;
+  overflow: visible;
+}
+
+.edgeStartPoint {
+  fill: #9ca3af;
+  stroke: #9ca3af;
+  stroke-width: 0;
+}
+
+.workflowEdgePathHighlighted {
+  stroke: #2563eb;
+  color: #2563eb;
+}
+
+.edgeStartPointHighlighted {
+  fill: #2563eb;
+  stroke: #2563eb;
+  stroke-width: 0;
+}
+
+.rightDrawerShifted {
+  transform: translateX(-300px);
+}
+
+.rightDrawerShiftedFar {
+  transform: translateX(-600px);
+}
+
+.rightDrawerSecondary {
+  z-index: 36;
+}
+
+.operatorInnerText {
+  transform: rotate(-45deg);
+  font-size: 12px;
+  font-weight: 600;
+  color: #111827;
+  line-height: 1;
+  user-select: none;
+  pointer-events: none;
+}

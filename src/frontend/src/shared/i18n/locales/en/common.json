@@ -1,0 +1,101 @@
+{
+  "question": {
+    "confirmation": {
+      "delete": "Are you sure you want to delete {{entityName}} by {{field}} {{value}}?"
+    }
+  },
+  "menu": {
+    "connectors": "Connectors",
+    "connections": "Connections",
+    "schedules": "Schedules",
+    "usersAccess": "Users & Access",
+    "users": "Users",
+    "groups": "Groups",
+    "ldapCheck": "LDAP Check",
+    "configurations": "Configurations",
+    "invokers": "Invokers",
+    "connectionTemplates": "Connection Templates",
+    "dataAggregator": "Data Aggregator",
+    "notificationTemplates": "Notification Templates",
+    "categories": "Categories",
+    "supportFiles": "Support Files",
+    "licenseSystem": "License & System",
+    "licenseManagement": "License Management",
+    "updateAssistant": "Update Assistant",
+    "systemCheck": "System Check",
+    "ui": "UI"
+  },
+  "commandPalette": {
+    "placeholder": "Type a command...",
+    "groups": {
+      "recent": "Recent",
+      "navigate": "Navigate",
+      "create": "Create",
+      "manage": "Manage",
+      "system": "System",
+      "general": "General"
+    },
+    "descriptions": {
+      "create": "Create a new entry",
+      "update": "Update an existing entry",
+      "delete": "Delete an entry",
+      "find": "Open or view an entry",
+      "list": "Open the entry list",
+      "login": "Switch the current role",
+      "system": "System actions",
+      "checkLicense": "Check license and API operation usage"
+    },
+    "footer": {
+      "select": "Select",
+      "autocomplete": "Autocomplete",
+      "navigate": "Navigate",
+      "close": "Close"
+    }
+  },
+  "sidebar": {
+    "expand": "Expand sidebar",
+    "collapse": "Collapse sidebar",
+    "logout": "Sign Out",
+    "confirmLogout": {
+      "title": "Sign out",
+      "message": "Are you sure you want to sign out?"
+    }
+  },
+  "topbar": {
+    "switchToGerman": "Switch to German",
+    "switchToEnglish": "Switch to English",
+    "notifications": "Notifications",
+    "switchToAdminMenu": "Switch to admin menu",
+    "switchToMainMenu": "Switch to main menu",
+    "profile": "Profile"
+  },
+  "actions": {
+    "prev": "Back",
+    "submit": "Submit",
+    "next": "Next",
+    "create": "Create",
+    "view": "View",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "field": {
+    "required": "Required field"
+  },
+  "hintLabel": "Hint",
+  "list": {
+    "searchPlaceholder": "Search...",
+    "empty": "No data",
+    "actions": "Actions",
+    "manage": "Manage your {{name}} entities",
+    "deleteSelected": "Delete selected ({{count}})",
+    "deleteSelectedSuccess": "{{count}} entries deleted successfully",
+    "deleteSelectedSuccess_one": "{{count}} entry deleted successfully",
+    "filtersTooltip": "Filters",
+    "confirmDelete": {
+      "title": "Delete",
+      "message": "Are you sure you want to delete this {{name}}?",
+      "bulkMessage": "Delete {{count}} selected entries?",
+      "bulkMessage_one": "Delete {{count}} selected entry?"
+    }
+  }
+}

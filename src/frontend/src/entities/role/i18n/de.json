@@ -1,0 +1,80 @@
+{
+  "list": {
+    "title": "Rollen",
+    "subTitle": "Verwalten Sie Rollen, zugewiesene Komponenten und Berechtigungsstufen für Systembenutzer."
+  },
+  "actions": {
+    "delete": {
+      "cannotDeleteOwnRole": "Sie können die Rolle des aktuell angemeldeten Benutzers nicht löschen."
+    }
+  },
+  "fields": {
+    "name": {
+      "label": "Name",
+      "errors": {
+        "name_already_exists": "Eine Rolle mit diesem Namen existiert bereits"
+      }
+    },
+    "description": {
+      "label": "Beschreibung"
+    },
+    "groupIcon": {
+      "label": "Bild"
+    },
+    "components": {
+      "label": "Komponenten"
+    },
+    "permissions": {
+      "label": "Berechtigungen",
+      "errors": {
+        "required": "Jede Komponente muss mindestens eine Berechtigung haben"
+      }
+    }
+  },
+  "sections": {
+    "group-details": {
+      "title": "Rollendetails"
+    },
+    "components": {
+      "title": "Komponenten"
+    }
+  },
+  "wizard": {
+    "modes": {
+      "create": {
+        "header": "Rolle erstellen",
+        "subheader": "Gruppen definieren Rollen und Berechtigungsstufen innerhalb des Systems. Jede Gruppe steuert, was Benutzer erstellen, anzeigen, bearbeiten oder löschen dürfen.",
+        "successMessage": "Rolle \"{{name}}\" wurde erfolgreich erstellt"
+      },
+      "update": {
+        "header": "Rolle aktualisieren",
+        "subheader": "Rolleninformationen ändern und speichern.",
+        "successMessage": "Rolle \"{{name}}\" wurde erfolgreich aktualisiert"
+      },
+      "view": {
+        "header": "Rollendetails",
+        "subheader": "Rolleninformationen anzeigen."
+      }
+    },
+    "recommendations": {
+      "1": "Connector erstellen",
+      "2": "Verbindung erstellen"
+    },
+    "steps": {
+      "group-details": {
+        "header": "Rollendetails",
+        "subheader": "Grundlegende Informationen zur Definition der Rolle."
+      },
+      "permissions": {
+        "header": "Berechtigungen",
+        "subheader": "Wählen Sie die Systemmodule aus, auf die diese Gruppe Zugriff hat."
+      }
+    }
+  },
+  "confirmation": {
+    "delete": {
+      "byName": "Rolle mit dem Namen „{{name}}“ löschen?",
+      "byId": "Rolle mit der ID „{{id}}“ löschen?"
+    }
+  }
+}

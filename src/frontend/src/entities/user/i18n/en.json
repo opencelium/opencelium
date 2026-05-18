@@ -1,0 +1,130 @@
+{
+  "list": {
+    "title": "Users",
+    "subTitle": "This section allows administrators to manage system users, assign groups, enable two-factor authentication (2FA), and control access permissions."
+  },
+  "crossValidations": {
+    "repeatPassword": {
+      "message": "Passwords do not match"
+    }
+  },
+  "fields": {
+    "userDetail": {
+      "name": {
+        "label": "Name",
+        "info": "The User Details section contains personal and organizational information associated with the account, including contact details and role-related metadata."
+      },
+      "surname": {
+        "label": "Surname"
+      },
+      "department": {
+        "label": "Department"
+      },
+      "organization": {
+        "label": "Organization"
+      },
+      "phoneNumber": {
+        "label": "Phone Number",
+        "validation1": "Invalid phone number format"
+      },
+      "documents": {
+        "label": "Documents"
+      }
+    },
+    "email": {
+      "label": "Email",
+      "errors": {
+        "email_already_exists": "The user with such e-mail is already created"
+      }
+    },
+    "password": {
+      "label": "Password",
+      "info": "Password should be minimum 8 char length and have at least one uppercase, one lowercase, number and special character.",
+      "validation1": "Must contain uppercase letter",
+      "validation2": "Must contain lowercase letter",
+      "validation3": "Must contain a number",
+      "validation4": "Must contain special character"
+    },
+    "repeatPassword": {
+      "label": "Repeat Password"
+    },
+    "userGroup": {
+      "label": "Role"
+    },
+    "totpEnabled": {
+      "label": "2FA"
+    }
+  },
+  "sections": {
+    "details": {
+      "title": "User Details"
+    },
+    "credentials": {
+      "title": "Credentials"
+    },
+    "role": {
+      "title": "Role"
+    }
+  },
+  "wizard": {
+    "modes": {
+      "create": {
+        "header": "Create User",
+        "subheader": "User in OpenCelium refers to managing all people who can access the system, including their credentials, personal details, and assigned roles/groups. It allows administrators to create, edit, view, and delete users, as well as control their permissions and security settings like 2FA.",
+        "successMessage": "User \"{{name}}\" was successfully created",
+        "info": "Follow the simple 3 steps to complete user creation."
+      },
+      "update": {
+        "header": "Update User",
+        "subheader": "Modify user information and save changes.",
+        "successMessage": "User \"{{name}}\" was successfully updated"
+      },
+      "view": {
+        "header": "User Details",
+        "subheader": "View user information."
+      }
+    },
+    "recommendations": {
+      "1": "Create Connector",
+      "2": "Create Role"
+    },
+    "steps": {
+      "details": {
+        "header": "User Details",
+        "subheader": "Basic personal information of the user. These fields define the user profile within the system.",
+        "info": "The User Details section contains personal and organizational information associated with the account, including contact details and role-related metadata."
+      },
+      "credentials": {
+        "header": "Credentials",
+        "subheader": "Login credentials used to access the system. The email serves as the username."
+      },
+      "role": {
+        "header": "Role",
+        "subheader": "Defines the permission level and access rights of the user within the system."
+      }
+    }
+  },
+  "confirmation": {
+    "delete": {
+      "byEmail": "Delete user by email \"{{email}}\"?",
+      "byId": "Delete user by id \"{{id}}\"?"
+    }
+  },
+  "actions": {
+    "delete": {
+      "cannotDeleteSelf": "You cannot delete the authorized user."
+    }
+  },
+  "totp": {
+    "confirmDisable": {
+      "title": "Disable 2FA",
+      "message": "Are you sure you want to disable two-factor authentication for this user?"
+    },
+    "enableSuccess": "Two-factor authentication enabled",
+    "disableSuccess": "Two-factor authentication disabled",
+    "bulkEnable": {
+      "label": "Enable 2FA",
+      "success": "Two-factor authentication enabled for {{count}} user(s)"
+    }
+  }
+}

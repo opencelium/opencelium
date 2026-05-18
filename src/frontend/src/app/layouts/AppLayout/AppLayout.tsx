@@ -1,0 +1,24 @@
+import { Layout } from 'antd';
+import { LayoutHeader } from './TopBar/LayoutHeader.tsx';
+import {LayoutSidebar} from "@app/layouts/AppLayout/Sidebar/LayoutSidebar.tsx";
+import {LayoutContent} from "@app/layouts/AppLayout/Content/LayoutContent.tsx";
+import {GlobalModal} from "@app/layouts/AppLayout/GlobalModal/GlobalModal.tsx";
+
+type AppLayoutProps = {
+    isNotCard?: boolean;
+    hasNoHeader?: boolean;
+}
+export const AppLayout = ({isNotCard, hasNoHeader}: AppLayoutProps) => {
+    return (
+        <Layout style={{ minHeight: '100vh' }}>
+            <LayoutSidebar />
+
+            <Layout style={{ height: '100vh', overflow: 'hidden' }}>
+                {!hasNoHeader && <LayoutHeader />}
+                <LayoutContent isNotCard={isNotCard}/>
+            </Layout>
+
+            <GlobalModal />
+        </Layout>
+    );
+};
