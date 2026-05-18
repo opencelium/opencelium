@@ -46,9 +46,18 @@ public class OperationExMapper {
         List<OperationDTO> operations = new ArrayList<>();
         for (MethodMng method : methods) {
             if (invoker == null) {
-                String methodInvoker = connectorService.getById(method.getConnector().getConnectorId()).getInvoker();
-                operations.add(toOperation(method, methodInvoker));
+                if (method.getConnector() == null) {
+                    // fromConnector/toConnector are not set and method's own connector is null
+
+                    operations.add(toOperation(method, null));
+                } else {
+                    // fromConnector/toConnector are not set and method has its own connector
+
+                    String methodInvoker = connectorService.getById(method.getConnector().getConnectorId()).getInvoker();
+                    operations.add(toOperation(method, methodInvoker));
+                }
             } else {
+                // method is within either fromConnector or toConnector
                 operations.add(toOperation(method, invoker));
             }
         }
@@ -56,13 +65,35 @@ public class OperationExMapper {
     }
 
     public OperationDTO toOperation(@NonNull MethodMng method, String invokerStr) {
-        Invoker invoker = invokerService.findByName(invokerStr);
-        List<FunctionInvoker> operations = invoker.getOperations();
-        FunctionInvoker fiv = operations.stream()
-                .filter(o -> o.getName().equals(method.getName()))
-                .findAny()
-                .orElseThrow(() -> new RuntimeException("No operation found for name: " + method.getName()));
-        MediaType mediaType = getMediaType(method, fiv);
+        Invoker invoker;
+        MediaType requestMediaType;
+        MediaType responseMediaType;
+        if (invokerStr != null) {
+            // method has invoker
+            invoker = invokerService.findByName(invokerStr);
+
+            FunctionInvoker fiv = invoker.getOperations().stream()
+                    .filter(o -> o.getName().equals(method.getName()))
+                    .findAny()
+                    .orElseThrow(() -> new RuntimeException("No operation found for name: " + method.getName()));
+
+            // determines request mediaType from operation on invoker
+            requestMediaType = getMediaType(method, fiv);
+
+            // determines response mediaType from operation on invoker
+            responseMediaType = fiv.getResponse().getSuccess().getBody() != null
+                    ? getMediaTypeFromBody(fiv.getResponse().getSuccess().getBody().getFormat())
+                    : MediaType.APPLICATION_JSON;
+        } else {
+            // no invoker is used on method
+            invoker = null;
+
+            // determines request mediaType from method itself
+            requestMediaType = getMediaType(method);
+
+            // falls back to request's media-type because method hasn't invoker, and we cannot determine its response format
+            responseMediaType = requestMediaType;
+        }
 
         OperationDTO operationDTO = new OperationDTO();
         operationDTO.setOperationId(method.getColor());
@@ -72,9 +103,9 @@ public class OperationExMapper {
         operationDTO.setPath(method.getRequest().getEndpoint());
         operationDTO.setExecOrder(method.getIndex());
         operationDTO.setConnectorId(method.getConnector() != null ? method.getConnector().getConnectorId() : null);
-        operationDTO.setRequestBody(getRequestBody(method.getRequest().getBody(), invoker, method.getName(), mediaType));
-        operationDTO.setResponses(getResponses(method.getResponse(), fiv));
-        operationDTO.setParameters(getParameters(method.getRequest(), mediaType));
+        operationDTO.setRequestBody(getRequestBody(method.getRequest().getBody(), invoker, method.getName(), requestMediaType));
+        operationDTO.setResponses(getResponses(method.getResponse(), responseMediaType));
+        operationDTO.setParameters(getParameters(method.getRequest(), requestMediaType));
         return operationDTO;
     }
 
@@ -98,6 +129,22 @@ public class OperationExMapper {
                 || (mediaType = getMediaTypeFromBody(fiv.getRequest().getBody().getFormat())) == null
                 ? MediaType.APPLICATION_JSON
                 : mediaType;
+    }
+
+    private MediaType getMediaType(MethodMng methodMng) {
+        MediaType mediaType;
+        if ((mediaType = getContentTypeFromHeader(methodMng.getRequest().getHeader())) != null) {
+            return mediaType;
+        }
+
+        if (methodMng.getRequest().getBody() != null
+                && methodMng.getRequest().getBody().getFormat() != null
+                && (mediaType = getMediaTypeFromBody(methodMng.getRequest().getBody().getFormat())) != null) {
+            return mediaType;
+        }
+
+        // fallback
+        return MediaType.APPLICATION_JSON;
     }
 
     private MediaType getContentTypeFromHeader(Map<String, String> header) {
@@ -125,7 +172,7 @@ public class OperationExMapper {
         };
     }
 
-    private List<ResponseDTO> getResponses(ResponseMng response, FunctionInvoker fiv) {
+    private List<ResponseDTO> getResponses(ResponseMng response, MediaType mediaType) {
         List<ResponseDTO> res = new ArrayList<>(2);
         if (response == null) {
             return res;
@@ -139,10 +186,7 @@ public class OperationExMapper {
                 success.setData(response.getSuccess().getBody().getData());
             }
             res.add(success);
-            MediaType mt = fiv.getResponse().getSuccess().getBody() != null
-                    ? getMediaTypeFromBody(fiv.getResponse().getSuccess().getBody().getFormat())
-                    : MediaType.APPLICATION_JSON;
-            success.setContent(mt == null ? MediaType.APPLICATION_JSON : mt);
+            success.setContent(mediaType);
         }
         if (response.getFail() != null) {
             ResponseDTO fail = new ResponseDTO();
@@ -153,10 +197,7 @@ public class OperationExMapper {
                 fail.setData(response.getFail().getBody().getData());
             }
             res.add(fail);
-            MediaType mt = fiv.getResponse().getFail().getBody() != null
-                    ? getMediaTypeFromBody(fiv.getResponse().getFail().getBody().getFormat())
-                    : MediaType.APPLICATION_JSON;
-            fail.setContent(mt == null ? MediaType.APPLICATION_JSON : mt);
+            fail.setContent(mediaType);
         }
         return res;
     }
@@ -612,6 +653,10 @@ public class OperationExMapper {
                 || value.matches(RegExpression.enhancement)
                 || value.matches(RegExpression.directRef)
                 || value.matches(RegExpression.webhook)) {
+            if (invoker == null) {
+                // method has no invoker, fallback
+                return DataType.UNDEFINED;
+            }
             return invokerService.findFieldType(invoker, methodName, (LinkedList<String>) hierarchy.clone());
         } else {
             return DataType.STRING;
