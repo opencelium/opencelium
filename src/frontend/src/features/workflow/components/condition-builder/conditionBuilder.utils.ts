@@ -1,4 +1,5 @@
 import type { WorkflowNodeModel } from '../../types/workflow.types';
+import { createShortId } from '@shared/lib/createId';
 import {
 	Conjunction,
 	IfOperatorName,
@@ -12,7 +13,7 @@ import {
 } from './conditionBuilder.types';
 
 export const createConditionId = (prefix: string) =>
-	`${prefix}-${crypto.randomUUID().slice(0, 8)}`;
+	createShortId(prefix);
 
 export const createEmptyRule = (): ConditionRule => ({
 	id: createConditionId('rule'),
