@@ -168,6 +168,11 @@ dependencies {
 	// and async tests.
 	testImplementation "org.awaitility:awaitility:${awaitilityVersion}"
 
+	// ── Embedded LDAP ─────────────────────────────────────────────────────────
+	// In-process directory server for slice-testing LdapVerificationService.
+	// Test-scope only — never reachable from src/main, never in the boot JAR.
+	testImplementation 'com.unboundid:unboundid-ldapsdk:6.0.11'
+
 	// ── Test runtime ──────────────────────────────────────────────────────────
 	// H2 — in-memory database for @DataJpaTest slice tests (no Docker needed).
 	testRuntimeOnly 'com.h2database:h2'
