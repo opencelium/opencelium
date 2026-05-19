@@ -99,7 +99,7 @@ class CategoryRepositoryTest {
     // ── entity mapping — self-referential tree ────────────────────────────────
 
     @Test
-    void findByIdLoadsParentAndSubCategoriesEagerly() {
+    void findByIdLoadsParentAndChildrenWhenRowExists() {
         Category parent = CategoryFixture.aTransientCategory("Region");
         em.persist(parent);
 
@@ -145,7 +145,7 @@ class CategoryRepositoryTest {
     // ── deleteById ────────────────────────────────────────────────────────────
 
     @Test
-    void deleteByIdRemovesRowFromCategoryTable() {
+    void deleteByIdRemovesRowWhenIdExists() {
         Category category = CategoryFixture.aTransientCategory("Doomed");
         em.persistAndFlush(category);
         Integer id = category.getId();

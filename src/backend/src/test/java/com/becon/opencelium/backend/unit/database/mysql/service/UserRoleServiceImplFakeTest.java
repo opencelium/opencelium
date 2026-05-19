@@ -57,7 +57,7 @@ class UserRoleServiceImplFakeTest {
 
     @Test
     @DisplayName("existsByIdReturnsTrueAfterSave")
-    void existsByIdReturnsTrueAfterSave() {
+    void existsByIdReturnsTrueWhenRoleWasSaved() {
         UserRole role = UserRoleFixture.aStandardUserRole();
 
         userRoleService.save(role);
@@ -75,7 +75,7 @@ class UserRoleServiceImplFakeTest {
 
     @Test
     @DisplayName("findByIdReturnsCorrectRoleAfterSave")
-    void findByIdReturnsCorrectRoleAfterSave() {
+    void findByIdReturnsRoleWhenRoleWasSaved() {
         UserRole role = UserRoleFixture.anAdminRole();
         userRoleService.save(role);
 
@@ -91,7 +91,7 @@ class UserRoleServiceImplFakeTest {
 
     @Test
     @DisplayName("findAllReturnsAllRolesSavedInBulk")
-    void findAllReturnsAllRolesSavedInBulk() {
+    void findAllReturnsAllRolesWhenMultipleSaved() {
         // saveAll — bulk load for tests that need multiple roles as starting state
         repository.saveAll(List.of(
                 UserRoleFixture.aStandardUserRole(),
@@ -105,7 +105,7 @@ class UserRoleServiceImplFakeTest {
 
     @Test
     @DisplayName("existsByIdReturnsFalseAfterDeleteById")
-    void existsByIdReturnsFalseAfterDeleteById() {
+    void existsByIdReturnsFalseWhenRoleWasDeleted() {
         UserRole role = UserRoleFixture.aStandardUserRole();
         userRoleService.save(role);
 
@@ -115,7 +115,7 @@ class UserRoleServiceImplFakeTest {
     }
 
     @Test
-    void savePersistUserRoleWhenNotNull() {
+    void savePersistsUserRoleWhenNotNull() {
         UserRole role = UserRoleFixture.aStandardUserRole();
 
         userRoleService.save(role);
@@ -130,7 +130,7 @@ class UserRoleServiceImplFakeTest {
 
     @Test
     @DisplayName("existsByRoleReturnsTrueAfterSave")
-    void existsByRoleReturnsTrueAfterSave() {
+    void existsByRoleReturnsTrueWhenRoleWasSaved() {
         userRoleService.save(UserRoleFixture.anAdminRole());
 
         assertThat(userRoleService.existsByRole("ROLE_ADMIN")).isTrue();

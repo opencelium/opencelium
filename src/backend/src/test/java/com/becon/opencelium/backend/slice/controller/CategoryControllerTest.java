@@ -123,7 +123,7 @@ class CategoryControllerTest {
     // ── GET /category/all ─────────────────────────────────────────────────────
 
     @Test
-    void getAllReturnsCategoriesWithStatus200() throws Exception {
+    void getAllReturns200WithCategoriesWhenServiceReturnsList() throws Exception {
         Category a = CategoryFixture.aCategoryWithId(1, "A");
         Category b = CategoryFixture.aCategoryWithId(2, "B");
         CategoryResponseDTO dtoA = CategoryFixture.aResponseDto(1, "A");
@@ -197,7 +197,7 @@ class CategoryControllerTest {
     // ── PUT /category/{id} ────────────────────────────────────────────────────
 
     @Test
-    void updateForcesPathIdOntoDtoBeforeDelegatingToService() throws Exception {
+    void updateOverwritesDtoIdWhenPathIdDiffers() throws Exception {
         Category updated = CategoryFixture.aCategoryWithId(5, "Sales-Renamed");
         CategoryResponseDTO dto = CategoryFixture.aResponseDto(5, "Sales-Renamed");
         when(categoryService.get(5)).thenReturn(updated);
@@ -238,7 +238,7 @@ class CategoryControllerTest {
     // ── DELETE /category/cascade-delete/{id} ──────────────────────────────────
 
     @Test
-    void cascadeDeleteReturns204AndDelegatesToServiceWhenIdProvided() throws Exception {
+    void cascadeDeleteReturns204WhenIdProvided() throws Exception {
         mockMvc.perform(delete("/category/cascade-delete/{id}", 1))
                 .andExpect(status().isNoContent());
 
@@ -257,7 +257,7 @@ class CategoryControllerTest {
     // ── PUT /category/list/cascade-delete ─────────────────────────────────────
 
     @Test
-    void cascadeDeleteFromListReturns204AndForwardsIdentifiersToService() throws Exception {
+    void cascadeDeleteFromListReturns204WhenIdentifiersProvided() throws Exception {
         mockMvc.perform(put("/category/list/cascade-delete")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -274,7 +274,7 @@ class CategoryControllerTest {
     }
 
     @Test
-    void cascadeDeleteFromListAcceptsEmptyIdentifiers() throws Exception {
+    void cascadeDeleteFromListReturns204WhenIdentifiersAreEmpty() throws Exception {
         mockMvc.perform(put("/category/list/cascade-delete")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -293,7 +293,7 @@ class CategoryControllerTest {
     // ── DELETE /category/{id} ─────────────────────────────────────────────────
 
     @Test
-    void deleteReturns204AndDelegatesToServiceWhenIdProvided() throws Exception {
+    void deleteReturns204WhenIdProvided() throws Exception {
         mockMvc.perform(delete("/category/{id}", 1))
                 .andExpect(status().isNoContent());
 
@@ -303,7 +303,7 @@ class CategoryControllerTest {
     // ── PUT /category/list/delete ─────────────────────────────────────────────
 
     @Test
-    void deleteFromListReturns204AndForwardsIdentifiersToService() throws Exception {
+    void deleteFromListReturns204WhenIdentifiersProvided() throws Exception {
         mockMvc.perform(put("/category/list/delete")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""

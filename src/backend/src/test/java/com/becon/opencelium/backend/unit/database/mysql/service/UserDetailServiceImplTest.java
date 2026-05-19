@@ -39,7 +39,7 @@ class UserDetailServiceImplTest {
     UserDetailServiceImpl userDetailService;
 
     @Test
-    void saveDelegatesToRepository() {
+    void savePersistsEntityWhenCalled() {
         UserDetail detail = new UserDetail();
 
         userDetailService.save(detail);
@@ -50,7 +50,7 @@ class UserDetailServiceImplTest {
     }
 
     @Test
-    void existsByIdDelegatesToRepository() {
+    void existsByIdReturnsTrueWhenRepositoryReportsExists() {
         when(userDetailRepository.existsById(42)).thenReturn(true);
 
         boolean result = userDetailService.existsById(42);

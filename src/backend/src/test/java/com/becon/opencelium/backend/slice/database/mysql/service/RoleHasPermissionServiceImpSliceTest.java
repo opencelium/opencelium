@@ -49,7 +49,7 @@ class RoleHasPermissionServiceImpSliceTest {
     private RoleHasPermissionRepository repository;
 
     @Test
-    void deleteByUserRoleIdRemovesEveryRowWithMatchingRoleIdAndLeavesOthersIntact() {
+    void deleteByUserRoleIdRemovesMatchingRowsWhenRoleHasPermissions() {
         UserRole roleA = persistedRole("ROLE_A");
         UserRole roleB = persistedRole("ROLE_B");
         Component component = persistedComponent("Module-A");

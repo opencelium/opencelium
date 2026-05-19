@@ -39,7 +39,7 @@ class RoleHasPermissionServiceImpTest {
     private RoleHasPermissionServiceImp service;
 
     @Test
-    void deleteDelegatesToRepositoryWithGivenId() {
+    void deleteInvokesRepositoryWhenIdProvided() {
         RoleHasPermission.RoleHasPermissionId id = new RoleHasPermission.RoleHasPermissionId(1, 2, 3);
 
         service.delete(id);
@@ -48,7 +48,7 @@ class RoleHasPermissionServiceImpTest {
     }
 
     @Test
-    void deleteByUserRoleIdDelegatesToRepository() {
+    void deleteByUserRoleIdInvokesRepositoryWhenCalled() {
         service.deleteByUserRoleId(7);
 
         verify(repository).deleteByUserRoleId(7);

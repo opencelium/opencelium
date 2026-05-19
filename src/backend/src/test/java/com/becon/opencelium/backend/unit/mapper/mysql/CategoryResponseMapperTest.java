@@ -51,7 +51,7 @@ class CategoryResponseMapperTest {
     // ── toDTO — happy paths ───────────────────────────────────────────────────
 
     @Test
-    void toDtoMapsIdAndNameFromEntity() {
+    void toDtoMapsIdAndNameWhenEntityIsFlat() {
         Category entity = CategoryFixture.aCategoryWithId(1, "Sales");
 
         CategoryResponseDTO dto = mapper.toDTO(entity);
@@ -61,7 +61,7 @@ class CategoryResponseMapperTest {
     }
 
     @Test
-    void toDtoMapsParentToShallowDtoCarryingOnlyIdAndName() {
+    void toDtoMapsParentToShallowDtoWhenEntityHasParent() {
         Category grandparent = CategoryFixture.aCategoryWithId(99, "Grand");
         Category parent = CategoryFixture.aCategoryWithId(5, "Region");
         parent.setParentCategory(grandparent);
@@ -92,7 +92,7 @@ class CategoryResponseMapperTest {
     }
 
     @Test
-    void toDtoMapsSubCategoriesToIdSet() {
+    void toDtoMapsSubCategoriesToIdSetWhenEntityHasChildren() {
         Category entity = CategoryFixture.aCategoryWithSubCategories(1, "Sales", 7, 8, 9);
 
         CategoryResponseDTO dto = mapper.toDTO(entity);
@@ -135,7 +135,7 @@ class CategoryResponseMapperTest {
     // ── toEntity — explicit no-op contract ────────────────────────────────────
 
     @Test
-    void toEntityAlwaysReturnsNullByExplicitContract() {
+    void toEntityReturnsNullWhenCalled() {
         // The interface deliberately overrides toEntity to return null —
         // categories never need DTO → entity mapping in this codebase.
         Category result = mapper.toEntity(CategoryFixture.aResponseDto(1, "Sales"));
@@ -146,7 +146,7 @@ class CategoryResponseMapperTest {
     // ── toDTOAll — default method on Mapper ───────────────────────────────────
 
     @Test
-    void toDtoAllMapsEveryEntityInOrder() {
+    void toDtoAllPreservesOrderWhenInputHasMultipleEntities() {
         Category a = CategoryFixture.aCategoryWithId(1, "A");
         Category b = CategoryFixture.aCategoryWithId(2, "B");
 
@@ -176,7 +176,7 @@ class CategoryResponseMapperTest {
     // ── HelperMapper contract — pinned through the mapper ─────────────────────
 
     @Test
-    void mapCategoriesToIdsThroughMapperPreservesOnlyIds() {
+    void mapCategoriesToIdsReturnsIdsOnlyWhenCalled() {
         // Confirms via the mapper that the helper extracts ids and discards
         // every other field — names, parents, nested subs are not exposed.
         Category entity = CategoryFixture.aCategoryWithId(1, "Sales");

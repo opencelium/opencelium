@@ -355,7 +355,7 @@ class CategoryServiceImpTest {
     }
 
     @Test
-    void updateAttachesNewSubCategoriesNotPreviouslyAttached() {
+    void updateAttachesNewSubCategoriesWhenDtoIntroducesThem() {
         Category old = CategoryFixture.aCategoryWithSubCategories(1, "Sales", 7);
         Category child8 = CategoryFixture.aCategoryWithId(8, "Outsider");
 
@@ -380,7 +380,7 @@ class CategoryServiceImpTest {
     }
 
     @Test
-    void updateDetachesSubCategoriesRemovedFromDto() {
+    void updateDetachesSubCategoriesWhenDtoRemovesThem() {
         Category old = CategoryFixture.aCategoryWithSubCategories(1, "Sales", 7, 8);
         Category staleChild = old.getSubCategories().stream()
                 .filter(c -> c.getId() == 8)
@@ -483,7 +483,7 @@ class CategoryServiceImpTest {
     }
 
     @Test
-    void getAllReturnsRepositoryResult() {
+    void getAllReturnsCategoriesWhenRepositoryHasEntries() {
         List<Category> all = List.of(
                 CategoryFixture.aCategoryWithId(1, "A"),
                 CategoryFixture.aCategoryWithId(2, "B")
@@ -496,7 +496,7 @@ class CategoryServiceImpTest {
     }
 
     @Test
-    void getAllByIdsDelegatesToRepository() {
+    void getAllByIdsReturnsCategoriesWhenIdsProvided() {
         List<Integer> ids = List.of(1, 2);
         List<Category> categories = List.of(CategoryFixture.aCategoryWithId(1, "A"));
         when(repository.findAllById(ids)).thenReturn(categories);
@@ -509,7 +509,7 @@ class CategoryServiceImpTest {
     // ── deleteOnly ────────────────────────────────────────────────────────────
 
     @Test
-    void deleteOnlyNullsConnectionCategoryForEachRelatedConnection() {
+    void deleteOnlyNullsConnectionCategoryWhenConnectionsExist() {
         Category category = CategoryFixture.aCategoryWithId(1, "Sales");
         Connection c1 = mock(Connection.class);
         Connection c2 = mock(Connection.class);
@@ -524,7 +524,7 @@ class CategoryServiceImpTest {
     }
 
     @Test
-    void deleteOnlyDetachesSubCategoriesByNullingTheirParent() {
+    void deleteOnlyDetachesSubCategoriesWhenChildrenExist() {
         Category category = CategoryFixture.aCategoryWithSubCategories(1, "Sales", 7, 8);
 
         when(repository.findById(1)).thenReturn(Optional.of(category));
@@ -537,7 +537,7 @@ class CategoryServiceImpTest {
     }
 
     @Test
-    void deleteOnlyDeletesTheCategoryAfterDetachingDependents() {
+    void deleteOnlyDeletesCategoryWhenDependentsDetached() {
         Category category = CategoryFixture.aCategoryWithId(1, "Sales");
 
         when(repository.findById(1)).thenReturn(Optional.of(category));
@@ -618,7 +618,7 @@ class CategoryServiceImpTest {
     }
 
     @Test
-    void deleteAllOnlyDeletesEveryProvidedId() {
+    void deleteAllOnlyDeletesEveryIdWhenAllExist() {
         Category cat1 = CategoryFixture.aCategoryWithId(1, "A");
         Category cat2 = CategoryFixture.aCategoryWithId(2, "B");
 
@@ -652,7 +652,7 @@ class CategoryServiceImpTest {
     }
 
     @Test
-    void cascadeDeleteRecursesIntoEntireSubtreeAndDeletesEveryLevel() {
+    void cascadeDeleteRemovesEntireSubtreeWhenTreeIsDeep() {
         Category root = CategoryFixture.aThreeLevelChain(); // 10 → 11 → 12
         Category level1 = root.getSubCategories().iterator().next();
         Category level2 = level1.getSubCategories().iterator().next();
@@ -722,7 +722,7 @@ class CategoryServiceImpTest {
     }
 
     @Test
-    void cascadeDeleteAllDeletesEveryProvidedSubtree() {
+    void cascadeDeleteAllRemovesEverySubtreeWhenIdsProvided() {
         Category cat1 = CategoryFixture.aCategoryWithId(1, "A");
         Category cat2 = CategoryFixture.aCategoryWithId(2, "B");
 

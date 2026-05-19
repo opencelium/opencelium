@@ -49,7 +49,7 @@ class PermissionServiceImplTest {
     // ── findByName ────────────────────────────────────────────────────────────
 
     @Test
-    void findByNameDelegatesToRepositoryAndReturnsResult() {
+    void findByNameReturnsPermissionWhenRepositoryFindsIt() {
         Permission permission = UserRoleFixture.aPermission(100, "READ");
         when(permissionRepository.findByName("READ")).thenReturn(Optional.of(permission));
 
@@ -70,7 +70,7 @@ class PermissionServiceImplTest {
     // ── toResource ────────────────────────────────────────────────────────────
 
     @Test
-    void toResourceReturnsPermissionNamesAsSet() {
+    void toResourceReturnsPermissionNamesWhenInputHasRoleHasPermissions() {
         UserRole role = UserRoleFixture.aStandardUserRole();
         Component component = UserRoleFixture.aComponent(10, "Module-A");
         RoleHasPermission read = new RoleHasPermission(role, component, UserRoleFixture.aPermission(100, "READ"));

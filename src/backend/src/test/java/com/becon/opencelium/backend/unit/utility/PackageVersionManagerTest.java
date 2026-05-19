@@ -125,7 +125,7 @@ class PackageVersionManagerTest {
     }
 
     @Test
-    void extractVersionOfJarFileReturnsVersionBetweenPrefixAndExtension() {
+    void extractVersionOfJarFileReturnsVersionWhenFileNameIsStandard() {
         String result = PackageVersionManager.extractVersionOfJarFile("opencelium.backend-1.2.3.jar");
 
         assertThat(result).isEqualTo("1.2.3");
@@ -152,7 +152,7 @@ class PackageVersionManagerTest {
     }
 
     @Test
-    void getPackageVersionsStripsOcPrefixAndZipSuffixFromPackageNames() {
+    void getPackageVersionsStripsOcPrefixAndZipSuffixWhenNamesAreWrapped() {
         List<AvailableUpdate> result = PackageVersionManager.getPackageVersions(Set.of("oc_1.0.0.zip"), "1.0.0");
 
         assertThat(result)
@@ -180,7 +180,7 @@ class PackageVersionManagerTest {
     }
 
     @Test
-    void getPackageVersionsMarksFirstHigherVersionAsAvailableAndRestAsNotAvailable() {
+    void getPackageVersionsMarksFirstHigherAsAvailableWhenMultipleAreNewer() {
         List<AvailableUpdate> result = PackageVersionManager.getPackageVersions(
                 Set.of("oc_1.2.0.zip", "oc_1.1.0.zip", "oc_2.0.0.zip"), "1.0.0");
 
@@ -193,7 +193,7 @@ class PackageVersionManagerTest {
     }
 
     @Test
-    void getPackageVersionsAssignsStatusesAcrossAllCategories() {
+    void getPackageVersionsAssignsAllStatusesWhenInputMixesCategories() {
         List<AvailableUpdate> result = PackageVersionManager.getPackageVersions(
                 Set.of("oc_0.9.0.zip", "oc_1.0.0.zip", "oc_1.1.0.zip", "oc_1.2.0.zip"), "1.0.0");
 
@@ -207,7 +207,7 @@ class PackageVersionManagerTest {
     }
 
     @Test
-    void getPackageVersionsReturnsResultsSortedAscendingByNumericVersion() {
+    void getPackageVersionsReturnsAscendingOrderWhenVersionsAreUnsorted() {
         List<AvailableUpdate> result = PackageVersionManager.getPackageVersions(
                 Set.of("oc_1.10.0.zip", "oc_1.9.0.zip", "oc_1.2.0.zip"), "1.0.0");
 

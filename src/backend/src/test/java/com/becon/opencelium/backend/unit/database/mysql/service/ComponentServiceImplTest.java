@@ -67,7 +67,7 @@ class ComponentServiceImplTest {
     }
 
     @Test
-    void findAllReturnsRepositoryResult() {
+    void findAllReturnsComponentsWhenRepositoryHasEntries() {
         List<Component> all = List.of(
                 UserRoleFixture.aComponent(10, "Module-A"),
                 UserRoleFixture.aComponent(20, "Module-B")

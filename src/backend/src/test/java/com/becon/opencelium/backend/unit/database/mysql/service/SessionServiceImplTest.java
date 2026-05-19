@@ -71,7 +71,7 @@ class SessionServiceImplTest {
     // ── save ──────────────────────────────────────────────────────────────────
 
     @Test
-    void saveDelegatesToRepository() {
+    void savePersistsEntityWhenCalled() {
         Session session = SessionFixture.anActiveSession(1);
 
         service.save(session);
@@ -101,7 +101,7 @@ class SessionServiceImplTest {
     // ── deleteByUserId ────────────────────────────────────────────────────────
 
     @Test
-    void deleteByUserIdDelegatesToRepository() {
+    void deleteByUserIdInvokesRepositoryWhenCalled() {
         service.deleteByUserId(42);
 
         verify(sessionRepository).deleteByUserId(42);
@@ -110,7 +110,7 @@ class SessionServiceImplTest {
     // ── replace ───────────────────────────────────────────────────────────────
 
     @Test
-    void replaceDeletesOldSessionBeforeSavingNew() {
+    void replaceDeletesOldSessionWhenReplacing() {
         when(sessionRepository.save(any(Session.class))).thenAnswer(inv -> inv.getArgument(0));
 
         service.replace(42);
@@ -121,7 +121,7 @@ class SessionServiceImplTest {
     }
 
     @Test
-    void replaceCreatesNewSessionWithFreshUuidActiveTrueAndZeroAttempts() {
+    void replaceCreatesActiveSessionWithFreshUuidWhenInvoked() {
         when(sessionRepository.save(any(Session.class))).thenAnswer(inv -> inv.getArgument(0));
 
         service.replace(42);
@@ -139,7 +139,7 @@ class SessionServiceImplTest {
     }
 
     @Test
-    void replaceReturnsSessionFromRepositorySave() {
+    void replaceReturnsSavedSessionWhenInvoked() {
         Session saved = SessionFixture.anActiveSession(42);
         when(sessionRepository.save(any(Session.class))).thenReturn(saved);
 
@@ -151,7 +151,7 @@ class SessionServiceImplTest {
     }
 
     @Test
-    void replaceGeneratesDistinctIdsAcrossInvocations() {
+    void replaceGeneratesDistinctIdsWhenCalledRepeatedly() {
         when(sessionRepository.save(any(Session.class))).thenAnswer(inv -> inv.getArgument(0));
 
         service.replace(1);
@@ -168,7 +168,7 @@ class SessionServiceImplTest {
     // ── updateLastAccessedTime ────────────────────────────────────────────────
 
     @Test
-    void updateLastAccessedTimeDelegatesToRepositoryWithCurrentTime() {
+    void updateLastAccessedTimeWritesCurrentTimeWhenCalled() {
         long before = System.currentTimeMillis();
 
         service.updateLastAccessedTime("abc");

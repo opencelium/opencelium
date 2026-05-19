@@ -38,7 +38,7 @@ class PostfixExpressionProcessorTest {
 
     @ParameterizedTest
     @MethodSource("logicalBooleanExpressions")
-    void evaluateHandlesLogicalBooleanExpressionsCorrectly(String expression, boolean expected) throws InvalidExpressionException {
+    void evaluateReturnsExpectedResultWhenExpressionIsLogicalBoolean(String expression, boolean expected) throws InvalidExpressionException {
         assertThat(expressionProcessor.evaluate(expression)).isEqualTo(expected);
     }
 
@@ -69,7 +69,7 @@ class PostfixExpressionProcessorTest {
 
     @ParameterizedTest
     @MethodSource("comparisonWithLogicalOperatorExpressions")
-    void evaluateHandlesComparisonWithLogicalOperatorsCorrectly(String expression, boolean expected) throws InvalidExpressionException {
+    void evaluateReturnsExpectedResultWhenLogicalOperatorsCombineComparisons(String expression, boolean expected) throws InvalidExpressionException {
         assertThat(expressionProcessor.evaluate(expression)).isEqualTo(expected);
     }
 
@@ -103,7 +103,7 @@ class PostfixExpressionProcessorTest {
 
     @ParameterizedTest
     @MethodSource("dateAndNumberComparisonExpressions")
-    void evaluateCombinesDateAndNumberComparisonsWithLogicalOperators(String expression, boolean expected) throws InvalidExpressionException {
+    void evaluateReturnsExpectedResultWhenLogicalOperatorsCombineDateAndNumber(String expression, boolean expected) throws InvalidExpressionException {
         assertThat(expressionProcessor.evaluate(expression)).isEqualTo(expected);
     }
 
@@ -124,7 +124,7 @@ class PostfixExpressionProcessorTest {
 
     @ParameterizedTest
     @MethodSource("typeAndNullCheckExpressions")
-    void evaluateCombinesTypeAndNullChecksWithLogicalOperators(String expression, boolean expected) throws InvalidExpressionException {
+    void evaluateReturnsExpectedResultWhenLogicalOperatorsCombineTypeAndNullChecks(String expression, boolean expected) throws InvalidExpressionException {
         assertThat(expressionProcessor.evaluate(expression)).isEqualTo(expected);
     }
 
@@ -159,7 +159,7 @@ class PostfixExpressionProcessorTest {
 
     @ParameterizedTest
     @MethodSource("invalidLiteralExpressions")
-    void evaluateThrowsInvalidExpressionExceptionForInvalidExpressions(String expression) {
+    void evaluateThrowsInvalidExpressionExceptionWhenExpressionIsInvalid(String expression) {
         assertThatThrownBy(() -> expressionProcessor.evaluate(expression))
                 .isInstanceOf(InvalidExpressionException.class);
     }
@@ -180,7 +180,7 @@ class PostfixExpressionProcessorTest {
 
     @ParameterizedTest
     @MethodSource("logicalOperatorReferenceExpressions")
-    void evaluateHandlesLogicalOperatorsWithReferenceValues(String expression, boolean expected) throws InvalidExpressionException {
+    void evaluateReturnsExpectedResultWhenLogicalOperatorsUseReferences(String expression, boolean expected) throws InvalidExpressionException {
         assertThat(expressionProcessor.evaluate(expression, referenceExtractor::getValue)).isEqualTo(expected);
     }
 
@@ -211,7 +211,7 @@ class PostfixExpressionProcessorTest {
 
     @ParameterizedTest
     @MethodSource("equalityAndInequalityReferenceExpressions")
-    void evaluateHandlesEqualityAndInequalityWithReferenceValues(String expression, boolean expected) throws InvalidExpressionException {
+    void evaluateReturnsExpectedResultWhenEqualityCheckUsesReferences(String expression, boolean expected) throws InvalidExpressionException {
         assertThat(expressionProcessor.evaluate(expression, referenceExtractor::getValue)).isEqualTo(expected);
     }
 
@@ -267,7 +267,7 @@ class PostfixExpressionProcessorTest {
 
     @ParameterizedTest
     @MethodSource("greaterAndLesserReferenceExpressions")
-    void evaluateHandlesGreaterAndLesserComparisonsWithReferenceValues(String expression, boolean expected) throws InvalidExpressionException {
+    void evaluateReturnsExpectedResultWhenOrderingComparisonUsesReferences(String expression, boolean expected) throws InvalidExpressionException {
         assertThat(expressionProcessor.evaluate(expression, referenceExtractor::getValue)).isEqualTo(expected);
     }
 
@@ -302,7 +302,7 @@ class PostfixExpressionProcessorTest {
 
     @ParameterizedTest
     @MethodSource("isNullAndNotNullReferenceExpressions")
-    void evaluateHandlesIsNullAndNotNullWithReferenceValues(String expression, boolean expected) throws InvalidExpressionException {
+    void evaluateReturnsExpectedResultWhenNullCheckUsesReferences(String expression, boolean expected) throws InvalidExpressionException {
         assertThat(expressionProcessor.evaluate(expression, referenceExtractor::getValue)).isEqualTo(expected);
     }
 
@@ -333,7 +333,7 @@ class PostfixExpressionProcessorTest {
 
     @ParameterizedTest
     @MethodSource("isEmptyAndNotEmptyExpressions")
-    void evaluateHandlesIsEmptyAndNotEmptyOnCollections(String expression, boolean expected) throws InvalidExpressionException {
+    void evaluateReturnsExpectedResultWhenEmptyCheckTargetsCollection(String expression, boolean expected) throws InvalidExpressionException {
         assertThat(expressionProcessor.evaluate(expression, referenceExtractor::getValue)).isEqualTo(expected);
     }
 
@@ -350,7 +350,7 @@ class PostfixExpressionProcessorTest {
 
     @ParameterizedTest
     @MethodSource("likeAndNotLikeExpressions")
-    void evaluateHandlesLikeAndNotLikeOnStrings(String expression, boolean expected) throws InvalidExpressionException {
+    void evaluateReturnsExpectedResultWhenLikeOperatorTargetsString(String expression, boolean expected) throws InvalidExpressionException {
         assertThat(expressionProcessor.evaluate(expression, referenceExtractor::getValue)).isEqualTo(expected);
     }
 
@@ -367,7 +367,7 @@ class PostfixExpressionProcessorTest {
 
     @ParameterizedTest
     @MethodSource("innerReferenceExpressions")
-    void evaluateResolvesInnerReferencesCorrectly(String expression) throws InvalidExpressionException {
+    void evaluateResolvesInnerReferencesWhenExpressionContainsThem(String expression) throws InvalidExpressionException {
         assertThat(expressionProcessor.evaluate(expression, referenceExtractor::getValue)).isEqualTo(Boolean.TRUE);
     }
 
@@ -382,7 +382,7 @@ class PostfixExpressionProcessorTest {
     }
 
     @Test
-    void evaluateSerializesObjectsCorrectly() throws InvalidExpressionException {
+    void evaluateSerializesObjectsWhenResultIsComplex() throws InvalidExpressionException {
         assertThat(expressionProcessor.evaluate("\"SS{%#ffffff.(request).body.$.object%}\" = \"SS{\"id\": 1, \"name\": \"A\"}\"", referenceExtractor::getValue)).isEqualTo(Boolean.TRUE);
         assertThat(expressionProcessor.evaluate("\"PREFIX-{%#ffffff.(request).body.$.object%}-SUFFIX\" Like \"%\"id\": 1, \"name\": \"A\"%\"", referenceExtractor::getValue)).isEqualTo(Boolean.TRUE);
         assertThat(expressionProcessor.evaluate("\"A{%#ffffff.(request).body.$.array_of_objects%}\" = \"A[{\"id\": 1, \"name\": \"A\"}]\"", referenceExtractor::getValue)).isEqualTo(Boolean.TRUE);
@@ -393,7 +393,7 @@ class PostfixExpressionProcessorTest {
     // ── current_date / current_date_time / current_time_mills / date_parse ─────
 
     @Test
-    void evaluateCurrentDateFunctionReturnsFormattedDateForTimezone() throws InvalidExpressionException {
+    void evaluateReturnsFormattedDateWhenCurrentDateFunctionUsesTimezone() throws InvalidExpressionException {
         assertThat(expressionProcessor.evaluate("current_date(\"America/New_York\")"))
                 .isEqualTo(LocalDate.now(ZoneId.of("America/New_York")).toString());
         assertThat(expressionProcessor.evaluate("current_date(\"+02:00\")"))
@@ -402,7 +402,7 @@ class PostfixExpressionProcessorTest {
 
     @ParameterizedTest
     @MethodSource("currentDateComparisonExpressions")
-    void evaluateCurrentDateFunctionSupportsComparisonOperators(String expression) throws InvalidExpressionException {
+    void evaluateReturnsExpectedResultWhenCurrentDateIsCompared(String expression) throws InvalidExpressionException {
         assertThat(expressionProcessor.evaluate(expression)).isEqualTo(Boolean.TRUE);
     }
 
@@ -416,7 +416,7 @@ class PostfixExpressionProcessorTest {
 
     @ParameterizedTest
     @MethodSource("currentDateTimeComparisonExpressions")
-    void evaluateCurrentDateTimeFunctionSupportsComparisonOperators(String expression) throws InvalidExpressionException {
+    void evaluateReturnsExpectedResultWhenCurrentDateTimeIsCompared(String expression) throws InvalidExpressionException {
         assertThat(expressionProcessor.evaluate(expression)).isEqualTo(Boolean.TRUE);
     }
 
@@ -429,7 +429,7 @@ class PostfixExpressionProcessorTest {
 
     @ParameterizedTest
     @MethodSource("currentTimeMillsComparisonExpressions")
-    void evaluateCurrentTimeMillsFunctionReturnsTimestampComparisons(String expression, boolean expected) throws InvalidExpressionException {
+    void evaluateReturnsExpectedResultWhenCurrentTimeMillsIsCompared(String expression, boolean expected) throws InvalidExpressionException {
         assertThat(expressionProcessor.evaluate(expression)).isEqualTo(expected);
     }
 
@@ -443,7 +443,7 @@ class PostfixExpressionProcessorTest {
 
     @ParameterizedTest
     @MethodSource("dateParsedComparisonExpressions")
-    void evaluateDateParseComparesFormattedDatesAcrossFormats(String expression) throws InvalidExpressionException {
+    void evaluateReturnsExpectedResultWhenDateParseHandlesMultipleFormats(String expression) throws InvalidExpressionException {
         assertThat(expressionProcessor.evaluate(expression)).isEqualTo(Boolean.TRUE);
     }
 
@@ -459,7 +459,7 @@ class PostfixExpressionProcessorTest {
 
     @ParameterizedTest
     @MethodSource("throwingShortCircuitExpressions")
-    void evaluateThrowsWhenShortCircuitDoesNotProtectInvalidExpression(String expression) {
+    void evaluateThrowsWhenShortCircuitDoesNotGuardInvalidBranch(String expression) {
         assertThatThrownBy(() -> expressionProcessor.evaluate(expression, referenceExtractor::getValue))
                 .isInstanceOf(InvalidExpressionException.class);
     }
@@ -488,7 +488,7 @@ class PostfixExpressionProcessorTest {
 
     @ParameterizedTest
     @MethodSource("shortCircuitReturnValueExpressions")
-    void evaluateReturnsExpectedValueWithShortCircuit(String expression, boolean expected) throws InvalidExpressionException {
+    void evaluateReturnsExpectedValueWhenShortCircuitApplies(String expression, boolean expected) throws InvalidExpressionException {
         assertThat(expressionProcessor.evaluate(expression, referenceExtractor::getValue)).isEqualTo(expected);
     }
 
