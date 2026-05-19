@@ -7,6 +7,10 @@
     "saveFailed": {
       "create": "Failed to create connection \"{{title}}\"",
       "update": "Failed to update connection \"{{title}}\""
+    },
+    "history": {
+      "activeDeleteBlocked": "The selected version is active and therefore cannot be deleted.",
+      "unsavedVersionSwitch": "You have unsaved changes. If you open another version without saving, these changes will be lost."
     }
   },
   "list": {

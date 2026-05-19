@@ -80,6 +80,8 @@ type WorkflowProps = {
   readOnly?: boolean;
 };
 
+type WorkflowChangeSource = 'clean' | 'manual' | 'history';
+
 type Template = {
   templateId: string | number;
   [key: string]: unknown;
@@ -162,6 +164,8 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const [loadedFieldBindings, setLoadedFieldBindings] = useState<any[] | undefined>();
   const [historyVersions, setHistoryVersions] = useState<HistoryVersionItem[]>([]);
   const [baselineSnapshot, setBaselineSnapshot] = useState<string | null>(null);
+  const [changeSource, setChangeSource] = useState<WorkflowChangeSource>('clean');
+  const [historyPreviewSnapshot, setHistoryPreviewSnapshot] = useState<string | null>(null);
   const [isConnectionLoading, setIsConnectionLoading] = useState<boolean>(Boolean(connectionId));
   const hydratedNodes = useMemo(
     () => hydrateNodesWithOperationResponses(workflow.nodes, connectors),
@@ -202,6 +206,8 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
 
   useEffect(() => {
     setBaselineSnapshot(null);
+    setChangeSource('clean');
+    setHistoryPreviewSnapshot(null);
     if (!connectionId) {
       setIsConnectionLoading(false);
       return;
@@ -226,11 +232,25 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
 
   const isLoading = isConnectionLoading || isConnectorsLoading;
   const hasConnectionChanges = baselineSnapshot !== null && currentChangeSnapshot !== baselineSnapshot;
+  const hasManualUnsavedChanges = hasConnectionChanges && changeSource === 'manual';
 
   useEffect(() => {
     if (isLoading || baselineSnapshot !== null) return;
     setBaselineSnapshot(currentChangeSnapshot);
+    setChangeSource('clean');
+    setHistoryPreviewSnapshot(null);
   }, [baselineSnapshot, currentChangeSnapshot, isLoading]);
+
+  useEffect(() => {
+    if (isLoading || baselineSnapshot === null) return;
+    if (currentChangeSnapshot === baselineSnapshot) {
+      setChangeSource('clean');
+      setHistoryPreviewSnapshot(null);
+      return;
+    }
+    if (changeSource === 'history' && currentChangeSnapshot === historyPreviewSnapshot) return;
+    setChangeSource('manual');
+  }, [baselineSnapshot, changeSource, currentChangeSnapshot, historyPreviewSnapshot, isLoading]);
 
   const handleSave = async ({ title, description, comment }: { title: string; description: string; comment: string }) => {
     const isCreate = !connectionId;
@@ -261,6 +281,8 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       nodes: hydratedNodes,
       edges: workflow.edges,
     }));
+    setChangeSource('clean');
+    setHistoryPreviewSnapshot(null);
     if (nextConnectionId) {
       setHistoryVersions(await loadConnectionVersions(nextConnectionId));
     }
@@ -353,13 +375,24 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       <HistoryPanel
         open={workflow.historyOpen}
         items={displayedHistoryVersions}
+        hasUnsavedChanges={hasManualUnsavedChanges}
         onClose={() => workflow.setHistoryOpen(false)}
         onSelectVersion={async (snapshotId) => {
           if (!connectionId) return;
           const state = await loadWorkflowConnectionVersion(connectionId, snapshotId);
+          const nextNodes = hydrateNodesWithOperationResponses(state.nodes, connectors);
+          const nextSnapshot = buildWorkflowChangeSnapshot({
+            connectionId,
+            title: state.title,
+            description: state.description,
+            nodes: nextNodes,
+            edges: state.edges,
+          });
           workflow.setWorkflowGraph(state.nodes, state.edges, state.viewport, { centerStart: true });
           setHeaderState({ title: state.title, description: state.description });
           setLoadedFieldBindings(state.fieldBindings);
+          setHistoryPreviewSnapshot(nextSnapshot);
+          setChangeSource(nextSnapshot === baselineSnapshot ? 'clean' : 'history');
           workflow.setSidebarAction(null);
           workflow.setContextMenu(null);
           workflow.setMethodEditor(null);

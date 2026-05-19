@@ -7,6 +7,10 @@
     "saveFailed": {
       "create": "Verbindung \"{{title}}\" konnte nicht erstellt werden",
       "update": "Verbindung \"{{title}}\" konnte nicht aktualisiert werden"
+    },
+    "history": {
+      "activeDeleteBlocked": "Die ausgewählte Version ist aktiv und kann daher nicht gelöscht werden.",
+      "unsavedVersionSwitch": "Sie haben ungespeicherte Änderungen. Wenn Sie eine andere Version öffnen, ohne zu speichern, gehen diese Änderungen verloren."
     }
   },
   "list": {

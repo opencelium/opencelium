@@ -1,5 +1,6 @@
 import { message } from 'antd';
 import { CloseOutlined } from '@ant-design/icons';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { HistoryConfirmDialog } from './HistoryConfirmDialog';
 import { HistoryTimelineRow } from './HistoryTimelineRow';
 import { useHistoryPanelState } from './useHistoryPanelState';
@@ -13,10 +14,12 @@ type Props = {
 	onDownloadTemplate?: (snapshotId: string) => Promise<void> | void;
 	onSelectVersion?: (snapshotId: string) => Promise<void> | void;
 	onSaveComment?: (snapshotId: string, comment: string) => Promise<void> | void;
+	hasUnsavedChanges?: boolean;
 };
 
-export function HistoryPanel({ open, items, onClose, onDeleteVersion, onDownloadTemplate, onSelectVersion, onSaveComment }: Props) {
+export function HistoryPanel({ open, items, onClose, onDeleteVersion, onDownloadTemplate, onSelectVersion, onSaveComment, hasUnsavedChanges = false }: Props) {
 	const state = useHistoryPanelState({ open, items, onClose });
+	const { t: tEntities } = useI18n('entities');
 
 	const saveComment = async (id: string) => {
 		const item = state.items.find((current) => current.id === id);
@@ -31,14 +34,26 @@ export function HistoryPanel({ open, items, onClose, onDeleteVersion, onDownload
 	const deleteItem = async () => {
 		if (!state.confirmId) return;
 		const item = state.items.find((current) => current.id === state.confirmId);
-		if (item?.id === state.selectedId) {
-			message.warning('Selected history version cannot be deleted.');
+		if (!item) {
 			state.setConfirmId(null);
 			state.setMenuId(null);
 			return;
 		}
-		if (item) await onDeleteVersion?.(item.snapshotId);
-		state.setItems((current) => current.filter((item) => item.id !== state.confirmId));
+		if (item.current) {
+			message.warning(tEntities('connection.messages.history.activeDeleteBlocked'));
+			state.setConfirmId(null);
+			state.setMenuId(null);
+			return;
+		}
+		const wasSelected = item.id === state.selectedId;
+		const nextItems = state.items.filter((current) => current.id !== item.id);
+		await onDeleteVersion?.(item.snapshotId);
+		state.setItems(nextItems);
+		if (wasSelected) {
+			const currentVersion = nextItems.find((current) => current.current) ?? nextItems[0];
+			state.setSelectedId(currentVersion?.id ?? null);
+			if (currentVersion) await onSelectVersion?.(currentVersion.snapshotId);
+		}
 		state.setConfirmId(null);
 		state.setMenuId(null);
 	};
@@ -54,10 +69,26 @@ export function HistoryPanel({ open, items, onClose, onDeleteVersion, onDownload
 		state.setExpandedCommentId(id);
 	};
 
-	const selectVersion = async (id: string) => {
+	const applySelectedVersion = async (id: string) => {
 		state.setSelectedId(id);
 		const item = state.items.find((current) => current.id === id);
 		if (item) await onSelectVersion?.(item.snapshotId);
+	};
+
+	const selectVersion = async (id: string) => {
+		if (id === state.selectedId) return;
+		if (hasUnsavedChanges) {
+			state.setPendingSelectId(id);
+			return;
+		}
+		await applySelectedVersion(id);
+	};
+
+	const confirmSelectVersion = async () => {
+		if (!state.pendingSelectId) return;
+		const nextId = state.pendingSelectId;
+		state.setPendingSelectId(null);
+		await applySelectedVersion(nextId);
 	};
 
 	const downloadTemplate = async (snapshotId: string) => {
@@ -147,7 +178,25 @@ export function HistoryPanel({ open, items, onClose, onDeleteVersion, onDownload
 					</div>
 				</div>
 			</aside>
-			{state.confirmId ? <HistoryConfirmDialog onCancel={() => state.setConfirmId(null)} onDelete={deleteItem} /> : null}
+			{state.confirmId ? (
+				<HistoryConfirmDialog
+					title='Delete version?'
+					message='This action removes the selected version from history.'
+					confirmText='Delete'
+					confirmVariant='danger'
+					onCancel={() => state.setConfirmId(null)}
+					onConfirm={deleteItem}
+				/>
+			) : null}
+			{state.pendingSelectId ? (
+				<HistoryConfirmDialog
+					title='Unsaved changes'
+					message={tEntities('connection.messages.history.unsavedVersionSwitch')}
+					confirmText='Open version'
+					onCancel={() => state.setPendingSelectId(null)}
+					onConfirm={confirmSelectVersion}
+				/>
+			) : null}
 		</>
 	);
 }

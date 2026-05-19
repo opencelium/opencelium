@@ -15,6 +15,7 @@ export function useHistoryPanelState({ open, onClose, items: initialItems = hist
   const [selectedId, setSelectedId] = useState<string | null>(historyItems[0]?.id ?? null);
   const [menuId, setMenuId] = useState<string | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [pendingSelectId, setPendingSelectId] = useState<string | null>(null);
   const panelRef = useRef<HTMLElement | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const commentRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -34,6 +35,7 @@ export function useHistoryPanelState({ open, onClose, items: initialItems = hist
     const onEscape = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return;
       if (confirmId) return setConfirmId(null);
+      if (pendingSelectId) return setPendingSelectId(null);
       if (menuId) return setMenuId(null);
       onClose();
     };
@@ -47,7 +49,7 @@ export function useHistoryPanelState({ open, onClose, items: initialItems = hist
       window.removeEventListener('keydown', onEscape);
       window.removeEventListener('mousedown', onPointerDown);
     };
-  }, [confirmId, menuId, onClose, open]);
+  }, [confirmId, menuId, onClose, open, pendingSelectId]);
 
   const computeExpandedWidth = (id: string) => {
     const panelRect = panelRef.current?.getBoundingClientRect();
@@ -74,6 +76,7 @@ export function useHistoryPanelState({ open, onClose, items: initialItems = hist
     menuId,
     menuRef,
     panelRef,
+    pendingSelectId,
     rows,
     selectedId,
     setActiveId,
@@ -83,6 +86,7 @@ export function useHistoryPanelState({ open, onClose, items: initialItems = hist
     setHoveredCommentId,
     setItems,
     setMenuId,
+    setPendingSelectId,
     setSelectedId,
     computeExpandedWidth,
   };

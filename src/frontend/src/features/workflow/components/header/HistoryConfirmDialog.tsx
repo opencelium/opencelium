@@ -1,17 +1,33 @@
-type Props = { onCancel: () => void; onDelete: () => void };
+type Props = {
+  cancelText?: string;
+  confirmText?: string;
+  confirmVariant?: 'primary' | 'danger';
+  message: string;
+  title: string;
+  onCancel: () => void;
+  onConfirm: () => void;
+};
 
-export function HistoryConfirmDialog({ onCancel, onDelete }: Props) {
+export function HistoryConfirmDialog({
+  cancelText = 'Cancel',
+  confirmText = 'Confirm',
+  confirmVariant = 'primary',
+  message,
+  title,
+  onCancel,
+  onConfirm,
+}: Props) {
   return (
     <div className='historyConfirmOverlay'>
       <div className='historyConfirmDialog'>
-        <strong>Delete version?</strong>
-        <span>This action removes the selected version from history.</span>
+        <strong>{title}</strong>
+        <span>{message}</span>
         <div className='historyConfirmActions'>
           <button className='iconButton' type='button' onClick={onCancel}>
-            Cancel
+            {cancelText}
           </button>
-          <button className='primaryButton historyDangerButton' type='button' onClick={onDelete}>
-            Delete
+          <button className={`primaryButton ${confirmVariant === 'danger' ? 'historyDangerButton' : ''}`} type='button' onClick={onConfirm}>
+            {confirmText}
           </button>
         </div>
       </div>
