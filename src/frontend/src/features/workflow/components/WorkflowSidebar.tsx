@@ -18,6 +18,19 @@ import { getMethodSidebarCopy, getSecondarySidebarCopy, type SecondarySidebarMod
 
 const getConnectorKey = (connectorId: number) => String(connectorId);
 
+const resolveConnectorIconUrl = (icon?: string | null) => {
+  if (!icon?.trim()) return null;
+  if (/^(blob:|data:|https?:\/\/)/i.test(icon)) return icon;
+
+  const normalizedIcon = icon.replace(/^\.\//, '');
+  if (normalizedIcon.startsWith('storage/')) {
+    const baseUrl = ((import.meta.env.VITE_API_URL as string | undefined) ?? '').replace(/\/$/, '');
+    return `${baseUrl}/${normalizedIcon}`;
+  }
+
+  return icon;
+};
+
 type Props = {
   action: WorkflowAction | null;
   selectedNode: WorkflowNodeModel | null;
@@ -25,7 +38,7 @@ type Props = {
   onSelect: (
     kind: WorkflowCreateKind,
     methodName?: string,
-    connector?: { connectorId: number; title: string },
+    connector?: { connectorId: number; title: string; icon?: string | null },
     methodOperation?: InvokerOperation,
   ) => void;
 };
@@ -59,6 +72,7 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
       key: getConnectorKey(connector.connectorId),
       title: connector.title,
       text: connector.description || `Methods from ${connector.invoker?.name ?? connector.title} invoker.`,
+      imageUrl: resolveConnectorIconUrl(connector.icon),
     })),
     [connectors],
   );
@@ -203,6 +217,7 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
                   ? {
                       connectorId: selectedConnector.connectorId,
                       title: selectedConnector.title,
+                      icon: selectedConnector.icon,
                     }
                   : undefined,
                 methodOperation,

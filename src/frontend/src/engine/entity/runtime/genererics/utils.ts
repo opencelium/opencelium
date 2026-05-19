@@ -8,6 +8,10 @@ export const executeAction = async (name: string, ctx: any, entity: any) => {
         return;
     }
 
+    if (action.execute) {
+        return action.execute(ctx);
+    }
+
     const url =
         typeof action.url === 'function'
             ? action.url(ctx)

@@ -76,6 +76,13 @@
   border-style: dashed;
 }
 
+.circleNodeImage {
+  max-width: 42px;
+  max-height: 42px;
+  object-fit: contain;
+  display: block;
+}
+
 .ifNode {
   width: 42px;
   height: 42px;

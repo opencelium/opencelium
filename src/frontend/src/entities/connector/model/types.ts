@@ -4,6 +4,7 @@ export type Connector = {
   connectorId: number
   title: string
   description: string
+  icon?: string | File | null
   invoker: Invoker
   requestData?: Record<string, string>
   sslCert: boolean

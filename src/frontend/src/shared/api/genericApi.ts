@@ -8,11 +8,12 @@ export const genericApi = baseApi.injectEndpoints({
             providesTags: (result, error, url) => [{ type: 'Entity' as any, id: url }],
         }),
         // 🟢 Generic create
-        createEntity: build.mutation<any, { url: string; body: any }>({
-            query: ({ url, body }) => ({
+        createEntity: build.mutation<any, { url: string; body: any; headers?: Record<string, string> }>({
+            query: ({ url, body, headers }) => ({
                 url,
                 method: 'POST',
                 body,
+                headers,
             }),
             invalidatesTags: ['Entity' as any],
         }),

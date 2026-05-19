@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo} from 'react'
+import React, {useEffect, useMemo, useState} from 'react'
 import type { Mode } from '../EntityDefinition'
 import {entityRegistry} from "@/engine/entity/EntityRegistry.ts";
 import {buildZodSchema} from "@/engine/entity/builders/buildZodSchema.ts";
@@ -15,6 +15,61 @@ import {PolicyProvider} from "@/engine/policy/PolicyReactContext.tsx";
 import NoAccess from "@shared/ui/feedback/NoAccess.tsx";
 import {entityResolver} from "@/engine/entity/entityResolver.ts";
 import {apiExecutor} from "@shared/api/apiExecutor.ts";
+
+const isFileValue = (value: unknown): value is File =>
+    typeof File !== 'undefined' && value instanceof File;
+
+const resolveWizardImageSrc = (value: string) => {
+    if (/^(blob:|data:|https?:\/\/)/i.test(value)) return value;
+
+    const normalizedValue = value.replace(/^\.\//, '');
+
+    if (normalizedValue.startsWith('storage/')) {
+        const baseUrl = ((import.meta.env.VITE_API_URL as string | undefined) ?? '').replace(/\/$/, '');
+        return `${baseUrl}/${normalizedValue}`;
+    }
+
+    return value;
+};
+
+const renderCircularWizardImage = (src: string) => (
+    <div
+        style={{
+            width: 260,
+            height: 120,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+        }}
+    >
+        <div
+            style={{
+                width: 120,
+                height: 120,
+                border: '5px solid #000',
+                borderRadius: '50%',
+                boxSizing: 'border-box',
+                background: '#fff',
+                overflow: 'hidden',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 12,
+            }}
+        >
+            <img
+                src={src}
+                alt="wizard"
+                style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain',
+                    display: 'block',
+                }}
+            />
+        </div>
+    </div>
+);
 
 export type SubmitMeta = {
     /** Name of the field that triggered the change (live-update mode only). */
@@ -134,6 +189,35 @@ export function EntityWizard<EntityFormValues>({
         })
         return () => sub.unsubscribe()
     }, [form, liveUpdate, onSubmit])
+
+    const imageFieldValue = entity.wizard?.imageField
+        ? form.watch(entity.wizard.imageField as any)
+        : undefined;
+    const selectedImageValue = Array.isArray(imageFieldValue)
+        ? imageFieldValue[0]
+        : imageFieldValue;
+    const [fieldImageUrl, setFieldImageUrl] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!isFileValue(selectedImageValue)) {
+            setFieldImageUrl(null);
+            return;
+        }
+
+        const objectUrl = URL.createObjectURL(selectedImageValue);
+        setFieldImageUrl(objectUrl);
+
+        return () => URL.revokeObjectURL(objectUrl);
+    }, [selectedImageValue]);
+
+    const wizardImage = useMemo(() => {
+        if (fieldImageUrl) return renderCircularWizardImage(fieldImageUrl);
+        if (typeof selectedImageValue === 'string' && selectedImageValue.trim()) {
+            return renderCircularWizardImage(resolveWizardImageSrc(selectedImageValue));
+        }
+        return entity.wizard?.image;
+    }, [entity.wizard?.image, fieldImageUrl, selectedImageValue]);
+
     const constraints = buildConstraintsFromSchema(schema, entity)
 
     const wizardReadOnly =
@@ -274,7 +358,7 @@ export function EntityWizard<EntityFormValues>({
                                 ?? 'success'
                             }
                             recommendations={entity.wizard?.recommendations}
-                            image={entity.wizard?.image}
+                            image={wizardImage}
                             form={form}
                             skipSuccessState={skipSuccessState}
                             hideSubmit={liveUpdate}

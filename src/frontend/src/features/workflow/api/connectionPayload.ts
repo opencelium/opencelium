@@ -501,6 +501,7 @@ export function normalizeConnectionPayload(payload: any) {
 				connector: {
 					connectorId: method?.connector?.connectorId ?? method?.connectorId ?? -1,
 					title: method?.connector?.title ?? method?.connectorTitle ?? method?.connector?.name ?? 'DEFAULT',
+					icon: method?.connector?.icon ?? null,
 				},
 			})),
 			operator: sourceOperators.map((operator: any, index: number) => ({

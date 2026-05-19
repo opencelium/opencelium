@@ -19,6 +19,7 @@ export type WorkflowAction = {
 	connector?: {
 		connectorId: number;
 		title: string;
+		icon?: string | null;
 	};
 };
 
@@ -36,6 +37,7 @@ export type WorkflowNodeData = {
 	connector?: {
 		connectorId: number;
 		title: string;
+		icon?: string | null;
 	};
 	methodConfig?: WorkflowMethodConfig;
 	conditionConfig?: ConditionConfig;

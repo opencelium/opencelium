@@ -6,6 +6,7 @@ import { Dropzone } from '@shared/ui/primitives/DropZone/DropZone'
 interface FormFileDropZoneProps {
     name: string
     label?: string
+    labelKey?: string
     hint?: string
     multiple?: boolean
     accept?: string
@@ -15,6 +16,7 @@ interface FormFileDropZoneProps {
 export const FormFileDropZone: React.FC<FormFileDropZoneProps> = ({
     name,
     label,
+    labelKey,
     hint,
     multiple,
     accept,
@@ -28,7 +30,7 @@ export const FormFileDropZone: React.FC<FormFileDropZoneProps> = ({
             name={name}
             control={control}
             render={({ field }) => (
-                <FormControl label={label} error={error}>
+                <FormControl label={label} labelKey={labelKey} error={error} name={name}>
                     <Dropzone
                         multiple={multiple}
                         accept={accept}

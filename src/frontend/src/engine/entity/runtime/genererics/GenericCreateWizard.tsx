@@ -2,6 +2,7 @@ import React from 'react';
 import { entityRegistry } from "@/engine/entity/EntityRegistry";
 import { EntityWizard } from "@/engine/entity/runtime/EntityWizard";
 import {genericApi, useCreateEntityMutation} from "@/shared/api/genericApi";
+import {runStage} from "@/engine/entity/runtime/genererics/utils.ts";
 
 interface Props {
     entityName: string;
@@ -17,11 +18,23 @@ export const GenericCreateWizard: React.FC<Props> = ({ entityName, onSuccess }) 
             // If the definition has a "to backend" mapper, use it
             const payload = entity?.api?.mapToApi ? entity.api.mapToApi({mode: 'create', data}) : data;
             if (entity.api) {
-                await createTrigger({
+                const response = await createTrigger({
                     url: entity.api.baseUrl,
                     body: payload,
-                    headers: entity?.api?.getHeaders?.({mode: 'update'}) || {},
+                    headers: entity?.api?.getHeaders?.({mode: 'create'}) || {},
                 }).unwrap();
+
+                await runStage(
+                    entity.api.lifecycle?.create?.after,
+                    {
+                        payload,
+                        formData: data,
+                        response,
+                        mode: 'create',
+                        entity,
+                    },
+                    entity,
+                );
             }
             onSuccess?.();
         } catch (error) {

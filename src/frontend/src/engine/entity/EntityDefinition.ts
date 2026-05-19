@@ -150,6 +150,7 @@ export type WizardModeConfig = {
 
 export type WizardDefinition = {
     image?: unknown
+    imageField?: string
     overrideKey?: string
     recommendations?: Recommendation[]
     steps: WizardStepDefinition[]
@@ -177,6 +178,7 @@ export type EntityRoute =
 ================================ */
 
 type ApiAction<TCtx = any> = {
+    execute?: (ctx: TCtx) => Promise<unknown> | unknown;
     url: string | ((ctx: TCtx) => string);
     method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
 

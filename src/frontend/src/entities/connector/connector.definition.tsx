@@ -12,8 +12,36 @@ import {CONNECTOR_TAG} from "@entities/connector/api/connector.tags.ts";
 import {connectorApi} from "@entities/connector/api/connectorApi.ts";
 import {showApiError} from "@shared/api/handleApiError.ts";
 import {useAppStore} from "@app/store/app.store.ts";
+import {selectAccessToken} from "@entities/auth/model/authSelectors.ts";
 
 const baseKey = 'connector';
+
+const isImageFile = (value: unknown): value is File =>
+    typeof File !== 'undefined' && value instanceof File;
+
+const uploadConnectorIcon = async (ctx: { formData?: ConnectorUpdateDto; response?: Connector; payload?: Connector }) => {
+    const icon = ctx.formData?.icon;
+    const connectorId = ctx.response?.connectorId ?? ctx.payload?.connectorId;
+
+    if (!isImageFile(icon) || !connectorId) return;
+
+    const formData = new FormData();
+    formData.append('file', icon);
+    formData.append('connectorId', String(connectorId));
+
+    const token = selectAccessToken(store.getState());
+    const baseUrl = (import.meta.env.VITE_API_URL as string) ?? '';
+    const response = await fetch(`${baseUrl}/storage/connector`, {
+        method: 'POST',
+        headers: token ? {Authorization: `Bearer ${token}`} : undefined,
+        body: formData,
+        credentials: 'include',
+    });
+
+    if (!response.ok) {
+        throw new Error(`Failed to upload connector icon: HTTP ${response.status}`);
+    }
+};
 
 export const connectorDefinition: EntityDefinition = {
     name: baseKey,
@@ -46,9 +74,10 @@ export const connectorDefinition: EntityDefinition = {
                 invoker: invoker?.name
             }
         },
-        mapToApi: ({data: {invoker, timeout,requestData, ...formData}, mode}: {data: ConnectorUpdateDto, mode: Mode}): Connector => {
+        mapToApi: ({data: {invoker, timeout, requestData, icon, ...formData}, mode}: {data: ConnectorUpdateDto, mode: Mode}): Connector => {
             const payload: Connector = {
                 ...formData,
+                ...(typeof icon === 'string' ? {icon} : {}),
                 timeout: +timeout,
                 invoker: {
                     name: invoker,
@@ -76,10 +105,18 @@ export const connectorDefinition: EntityDefinition = {
                     return !!useAppStore.getState().masterPassword;
                 }
             },
+            uploadIcon: {
+                url: '/storage/connector',
+                execute: uploadConnectorIcon,
+                condition: (ctx) => isImageFile(ctx.formData?.icon),
+            },
         },
         lifecycle: {
+            create: {
+                after: ['uploadIcon'],
+            },
             update: {
-                after: ['saveRequestData'],
+                after: ['saveRequestData', 'uploadIcon'],
             }
         }
     },
@@ -205,19 +242,19 @@ export const connectorDefinition: EntityDefinition = {
                     }
                 }
             },
-        },/*
+        },
         {
-            name: 'image',
+            name: 'icon',
             type: 'other',
             ui: {
                 component: 'file-dropzone',
                 props: {
-                    multiple: true,
-                    accept: ".png.jpg",
-                    labelKey: `${baseKey}.fields.icon.label`,
+                    multiple: false,
+                    accept: "image/png, image/jpeg",
+                    labelKey: `${baseKey}.fields.image.label`,
                 }
             },
-        },*/
+        },
         //credentials
         {
             name: 'requestData',
@@ -264,6 +301,7 @@ export const connectorDefinition: EntityDefinition = {
                 'invoker',
                 'timeout',
                 'sslCert',
+                'icon',
             ]
         },{
             id: 'credentials',
@@ -277,6 +315,7 @@ export const connectorDefinition: EntityDefinition = {
 
     wizard: {
         image: connectorWizardImage as string,
+        imageField: 'icon',
 
         modes: {
             create: {

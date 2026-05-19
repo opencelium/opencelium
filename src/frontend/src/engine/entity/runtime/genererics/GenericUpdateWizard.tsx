@@ -72,7 +72,7 @@ export const GenericUpdateWizard: React.FC<Props> =
                         headers: entity.api.getHeaders?.({ mode: 'update' }) || {},
                     }).unwrap();
 
-                    await runStage(lifecycle?.after, { ...ctx, response }, entity);
+                    await runStage(lifecycle?.after, { ...ctx, formData, response }, entity);
                 }
             }
             onSuccess?.();

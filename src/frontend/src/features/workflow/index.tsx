@@ -42,17 +42,27 @@ const hydrateNodesWithOperationResponses = (
 
     const connector = connectors.find((item) => item.connectorId === connectorId);
     const operation = connector?.invoker?.operations?.find((item) => item.name.toLowerCase() === methodName.toLowerCase());
-    if (!operation?.response) return node;
+    if (!connector && !operation?.response) return node;
 
     return {
       ...node,
       data: {
         ...node.data,
-        methodConfig: {
-          ...createEmptyMethodConfig(),
-          ...node.data.methodConfig,
-          response: toWorkflowResponse(node.id, operation.response),
-        },
+        connector: connector
+          ? {
+              ...node.data.connector,
+              connectorId: connector.connectorId,
+              title: connector.title,
+              icon: connector.icon,
+            }
+          : node.data.connector,
+        methodConfig: operation?.response
+          ? {
+              ...createEmptyMethodConfig(),
+              ...node.data.methodConfig,
+              response: toWorkflowResponse(node.id, operation.response),
+            }
+          : node.data.methodConfig,
       },
     };
   });
