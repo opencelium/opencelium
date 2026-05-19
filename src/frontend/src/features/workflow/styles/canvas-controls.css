@@ -33,6 +33,15 @@
   opacity: 0;
   transition: opacity 0.18s ease;
   z-index: 10;
+  outline: 0;
+  box-shadow: none;
+}
+
+.addTrigger:focus,
+.addTrigger:focus-visible,
+.addTrigger:active {
+  outline: 0;
+  box-shadow: none;
 }
 
 .addTriggerLocked {
@@ -105,6 +114,13 @@
   align-items: center;
   justify-content: center;
   color: #4b5563;
+}
+
+.addTrigger:focus .addCircle,
+.addTrigger:focus-visible .addCircle,
+.addTrigger:active .addCircle {
+  outline: 0;
+  box-shadow: none;
 }
 
 .addTriggerRight .addCircle {

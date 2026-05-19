@@ -1,5 +1,5 @@
 .historyBody {
-  padding: 0 12px 16px 6px;
+  padding: 14px 18px 16px 14px;
   flex: 1;
   min-height: 0;
   overflow: hidden;
@@ -19,28 +19,28 @@
 
 .historyTimelineLine {
   position: absolute;
-  left: 45px;
+  left: 41px;
   top: 0;
   bottom: 0;
-  width: 2px;
+  width: 1px;
   background: #e5e7eb;
 }
 
 .historyDateRow,
 .historyEntryRow {
   display: flex;
-  gap: 12px;
+  gap: 14px;
   overflow: visible;
 }
 
 .historyDateRow {
   align-items: center;
-  margin: 10px 0;
+  margin: 8px 0 12px;
 }
 
 .historyDateSpacer,
 .historyTimeCol {
-  width: 50px;
+  width: 54px;
   flex-shrink: 0;
   position: relative;
 }
@@ -62,23 +62,23 @@
 .historyTimeLabel,
 .historyConfirmDialog span {
   color: #6b7280;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .historyTimeLabel {
   position: absolute;
-  left: 3px;
-  top: 10px;
-  width: 34px;
+  left: 0;
+  top: 13px;
+  width: 32px;
   text-align: right;
 }
 
 .historyDot {
   position: absolute;
-  left: 40px;
-  top: 12px;
-  width: 12px;
-  height: 12px;
+  left: 36px;
+  top: 15px;
+  width: 10px;
+  height: 10px;
   border-radius: 999px;
   background: #e5e7eb;
   border: 1px solid #d1d5db;
@@ -90,5 +90,24 @@
 }
 
 .historyPanelDrawer {
+  width: 420px;
   overflow: hidden;
+}
+
+.historyPanelDrawer .drawerHeader {
+  padding: 16px 18px;
+  align-items: center;
+}
+
+.historyPanelDrawer .drawerTitle {
+  font-size: 18px;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.historyPanelDrawer .iconButton {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  padding: 0;
 }

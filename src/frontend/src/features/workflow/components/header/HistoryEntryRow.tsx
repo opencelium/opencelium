@@ -1,4 +1,5 @@
-import { EllipsisVertical, Maximize2, Minimize2 } from 'lucide-react';
+import { MoreOutlined } from '@ant-design/icons';
+import { Maximize2, Minimize2 } from 'lucide-react';
 import type { RefObject } from 'react';
 import type { HistoryVersionItem } from './historyPanel.data';
 import { formatTime } from './historyPanel.utils';
@@ -18,6 +19,7 @@ type Props = {
   onChangeComment: (id: string, value: string) => void;
   onCopySnapshot: (snapshotId: string) => void;
   onDelete: (id: string) => void;
+  onDownloadTemplate: (snapshotId: string) => void;
   onFocus: (id: string) => void;
   onHover: (id: string | null) => void;
   onSave: (id: string) => void;
@@ -29,6 +31,8 @@ type Props = {
 
 export function HistoryEntryRow(props: Props) {
   const showExpand = props.hoveredCommentId === props.item.id || props.activeId === props.item.id;
+  const hasComment = props.commentValue.trim().length > 0;
+  const isEditing = props.activeId === props.item.id || props.expandedCommentId === props.item.id;
 
   return (
     <div className='historyEntryRow'>
@@ -40,7 +44,7 @@ export function HistoryEntryRow(props: Props) {
         <div className='historyCardHeader historyCardActivator' onClick={() => props.onSelect(props.item.id)}>
           <strong>Author: {props.item.author}</strong>
           <button className='historyDotsButton' type='button' onClick={(event) => { event.stopPropagation(); props.onToggleMenu(props.item.id); }}>
-            <EllipsisVertical size={14} />
+            <MoreOutlined />
           </button>
         </div>
         <div ref={(element) => props.setCommentRef(props.item.id, element)} className='historyCommentWrap' onMouseEnter={() => props.onHover(props.item.id)} onMouseLeave={() => props.onHover(null)}>
@@ -50,8 +54,9 @@ export function HistoryEntryRow(props: Props) {
             </button>
           ) : null}
           <textarea
-            className={`historyComment ${props.expandedCommentId === props.item.id ? 'historyCommentExpanded' : ''}`}
+            className={`historyComment ${!hasComment && !isEditing ? 'historyCommentEmpty' : ''} ${props.expandedCommentId === props.item.id ? 'historyCommentExpanded' : ''}`}
             style={props.expandedCommentId === props.item.id ? { width: props.expandedWidth, marginLeft: -props.expandedShiftLeft } : undefined}
+            placeholder='Comment'
             value={props.commentValue}
             onClick={(event) => event.stopPropagation()}
             onFocus={() => props.onFocus(props.item.id)}
@@ -69,7 +74,7 @@ export function HistoryEntryRow(props: Props) {
         {props.menuOpen ? (
           <div ref={props.menuRef} className='historyMenu'>
             <button className='historyMenuItem' type='button' onClick={() => props.onCopySnapshot(props.item.snapshotId)}>Copy snapshotid</button>
-            <button className='historyMenuItem' type='button'>Download as Template</button>
+            <button className='historyMenuItem' type='button' onClick={() => props.onDownloadTemplate(props.item.snapshotId)}>Download as Template</button>
             <button className='historyMenuItem historyMenuItemDanger' type='button' onClick={() => props.onDelete(props.item.id)}>Delete</button>
           </div>
         ) : null}

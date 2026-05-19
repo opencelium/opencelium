@@ -53,6 +53,10 @@ export async function apiFetch<T = unknown>(
         throw new Error(message || `Request failed with status ${res.status}`)
     }
 
-    const data = res.status === 204 ? (null as T) : (await res.json()) as T
+    const text = res.status === 204 ? '' : await res.text()
+    const contentType = res.headers.get('content-type') ?? ''
+    const data = text
+        ? (contentType.includes('application/json') ? JSON.parse(text) : text) as T
+        : null as T
     return { data, headers: res.headers }
 }

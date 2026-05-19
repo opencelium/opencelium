@@ -6,6 +6,7 @@ type Props = {
 	onChange: (value: string) => void;
 	onClose: () => void;
 	onSave: () => void;
+	saveDisabled?: boolean;
 };
 
 export function HeaderSaveDialog({
@@ -14,6 +15,7 @@ export function HeaderSaveDialog({
 	onChange,
 	onClose,
 	onSave,
+	saveDisabled = false,
 }: Props) {
 	useEffect(() => {
 		if (!open) return;
@@ -42,7 +44,7 @@ export function HeaderSaveDialog({
 					<button className='iconButton' type='button' onClick={onClose}>
 						Cancel
 					</button>
-					<button className='primaryButton' type='button' onClick={onSave}>
+					<button className='primaryButton' type='button' disabled={saveDisabled} onClick={onSave}>
 						Save
 					</button>
 				</div>

@@ -1,10 +1,5 @@
-export type HistoryVersionItem = {
-  id: string;
-  snapshotId: string;
-  createdAt: number;
-  author: string;
-  comment: string;
-  current?: boolean;
-};
+import type { HistoryVersionItem } from '../../types/history.types';
+
+export type { HistoryVersionItem } from '../../types/history.types';
 
 export const historyItems: HistoryVersionItem[] = [];

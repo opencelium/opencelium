@@ -1,5 +1,6 @@
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
 import type { WorkflowMethodConfig } from '../types/request-config.types';
+import type { HistoryVersionItem } from '../types/history.types';
 import { initialEdges, initialNodes } from '../data/initialGraph';
 import { OFFSETS } from '../utils/graph.constants';
 import { getBottomSourceHandle, getRightSourceHandle } from '../utils/graph.handles';
@@ -11,6 +12,7 @@ export type WorkflowConnectionState = {
 	nodes: WorkflowNodeModel[];
 	edges: WorkflowEdgeModel[];
 	fieldBindings: any[];
+	versions: HistoryVersionItem[];
 	viewport?: { x: number; y: number; zoom: number };
 };
 
@@ -516,6 +518,7 @@ export function mapConnectionToWorkflowState(
 			: Array.isArray(connection.fieldBindings)
 				? connection.fieldBindings
 				: [],
+		versions: [],
 		viewport: savedViewport,
 	};
 }

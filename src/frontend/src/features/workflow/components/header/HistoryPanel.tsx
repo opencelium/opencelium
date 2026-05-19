@@ -1,14 +1,26 @@
-import { X } from 'lucide-react';
+import { message } from 'antd';
+import { CloseOutlined } from '@ant-design/icons';
 import { HistoryConfirmDialog } from './HistoryConfirmDialog';
 import { HistoryTimelineRow } from './HistoryTimelineRow';
 import { useHistoryPanelState } from './useHistoryPanelState';
+import type { HistoryVersionItem } from '../../types/history.types';
 
-type Props = { open: boolean; onClose: () => void };
+type Props = {
+	open: boolean;
+	items?: HistoryVersionItem[];
+	onClose: () => void;
+	onDeleteVersion?: (snapshotId: string) => Promise<void> | void;
+	onDownloadTemplate?: (snapshotId: string) => Promise<void> | void;
+	onSelectVersion?: (snapshotId: string) => Promise<void> | void;
+	onSaveComment?: (snapshotId: string, comment: string) => Promise<void> | void;
+};
 
-export function HistoryPanel({ open, onClose }: Props) {
-	const state = useHistoryPanelState({ open, onClose });
+export function HistoryPanel({ open, items, onClose, onDeleteVersion, onDownloadTemplate, onSelectVersion, onSaveComment }: Props) {
+	const state = useHistoryPanelState({ open, items, onClose });
 
-	const saveComment = (id: string) => {
+	const saveComment = async (id: string) => {
+		const item = state.items.find((current) => current.id === id);
+		if (item) await onSaveComment?.(item.snapshotId, state.comments[id] ?? '');
 		state.setItems((current) =>
 			current.map((item) =>
 				item.id === id ? { ...item, comment: state.comments[id] ?? '' } : item,
@@ -16,8 +28,16 @@ export function HistoryPanel({ open, onClose }: Props) {
 		);
 	};
 
-	const deleteItem = () => {
+	const deleteItem = async () => {
 		if (!state.confirmId) return;
+		const item = state.items.find((current) => current.id === state.confirmId);
+		if (item?.id === state.selectedId) {
+			message.warning('Selected history version cannot be deleted.');
+			state.setConfirmId(null);
+			state.setMenuId(null);
+			return;
+		}
+		if (item) await onDeleteVersion?.(item.snapshotId);
 		state.setItems((current) => current.filter((item) => item.id !== state.confirmId));
 		state.setConfirmId(null);
 		state.setMenuId(null);
@@ -34,6 +54,21 @@ export function HistoryPanel({ open, onClose }: Props) {
 		state.setExpandedCommentId(id);
 	};
 
+	const selectVersion = async (id: string) => {
+		state.setSelectedId(id);
+		const item = state.items.find((current) => current.id === id);
+		if (item) await onSelectVersion?.(item.snapshotId);
+	};
+
+	const downloadTemplate = async (snapshotId: string) => {
+		try {
+			await onDownloadTemplate?.(snapshotId);
+			state.setMenuId(null);
+		} catch {
+			message.error('Failed to download template.');
+		}
+	};
+
 	return (
 		<>
 			<div
@@ -45,9 +80,9 @@ export function HistoryPanel({ open, onClose }: Props) {
 				className={`rightDrawer historyPanelDrawer ${open ? 'rightDrawerOpen' : ''}`}
 			>
 				<div className='drawerHeader'>
-					<div className='drawerTitle'>Connection history</div>
+					<div className='drawerTitle'>Version History</div>
 					<button className='iconButton' type='button' onClick={onClose}>
-						<X size={16} />
+						<CloseOutlined />
 					</button>
 				</div>
 				<div className='drawerBody historyBody'>
@@ -78,7 +113,7 @@ export function HistoryPanel({ open, onClose }: Props) {
 										}
 										menuOpen={row.kind === 'item' && state.menuId === row.item.id}
 										menuRef={state.menuRef}
-										onSelect={state.setSelectedId}
+										onSelect={selectVersion}
 										onHover={state.setHoveredCommentId}
 										onToggleExpand={toggleExpandedComment}
 										onFocus={state.setActiveId}
@@ -100,6 +135,7 @@ export function HistoryPanel({ open, onClose }: Props) {
 											await navigator.clipboard.writeText(snapshotId);
 											state.setMenuId(null);
 										}}
+										onDownloadTemplate={downloadTemplate}
 										onDelete={state.setConfirmId}
 										setCommentRef={(id, element) => {
 											state.commentRefs.current[id] = element;

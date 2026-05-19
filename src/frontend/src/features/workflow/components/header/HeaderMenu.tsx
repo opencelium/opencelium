@@ -5,9 +5,10 @@ type Props = {
   open: boolean;
   items: WorkflowHeaderMenuItem[];
   onClose: () => void;
+  onSelect?: (item: WorkflowHeaderMenuItem) => void;
 };
 
-export function HeaderMenu({ open, items, onClose }: Props) {
+export function HeaderMenu({ open, items, onClose, onSelect }: Props) {
   const ref = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -53,7 +54,10 @@ export function HeaderMenu({ open, items, onClose }: Props) {
               key={item.id}
               className="headerMenuItem"
               type="button"
-              onClick={onClose}
+              onClick={() => {
+                onSelect?.(item);
+                onClose();
+              }}
             >
               {item.label}
             </button>

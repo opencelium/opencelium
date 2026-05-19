@@ -27,6 +27,7 @@ type Props = {
 	onSave: (id: string) => void;
 	onToggleMenu: (id: string) => void;
 	onCopySnapshot: (snapshotId: string) => void;
+	onDownloadTemplate: (snapshotId: string) => void;
 	onDelete: (id: string) => void;
 	setCommentRef: (id: string, element: HTMLDivElement | null) => void;
 };
@@ -51,6 +52,7 @@ export function HistoryTimelineRow({
 	onSave,
 	onToggleMenu,
 	onCopySnapshot,
+	onDownloadTemplate,
 	onDelete,
 	setCommentRef,
 }: Props) {
@@ -71,6 +73,7 @@ export function HistoryTimelineRow({
 			onChangeComment={onChangeComment}
 			onCopySnapshot={onCopySnapshot}
 			onDelete={onDelete}
+			onDownloadTemplate={onDownloadTemplate}
 			onFocus={onFocus}
 			onHover={onHover}
 			onSave={onSave}

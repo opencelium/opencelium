@@ -1,6 +1,6 @@
 .historyCommentWrap {
 	position: relative;
-	margin-top: 8px;
+	margin-top: 10px;
 }
 
 .historyExpandButton {
@@ -29,15 +29,28 @@
 	width: 100%;
 	min-height: 84px;
 	box-sizing: border-box;
-	border: 1px solid #d1d5db;
-	border-radius: 8px;
-	padding: 10px 42px 10px 10px;
+	border: 1px solid #d9d9d9;
+	border-radius: 0;
+	padding: 10px 12px;
 	resize: none;
 	outline: 0;
+	color: #111827;
+	font-size: 14px;
+	line-height: 1.45;
 }
 
 .historyComment:focus {
-	border-color: #d1d5db;
+	border-color: #d9d9d9;
+	box-shadow: none;
+}
+
+.historyComment::placeholder {
+	color: #9ca3af;
+}
+
+.historyCommentEmpty:not(:focus) {
+	min-height: 84px;
+	color: #111827;
 }
 
 .historyCommentExpanded {

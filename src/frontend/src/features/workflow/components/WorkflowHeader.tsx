@@ -4,17 +4,21 @@ import { HeaderEditableField } from './header/HeaderEditableField';
 import { HeaderMenu } from './header/HeaderMenu';
 import { HeaderSaveDialog } from './header/HeaderSaveDialog';
 import { headerMenuItems } from './header/headerMenuItems';
+import type { WorkflowHeaderMenuItem } from '../types/workflow.types';
 
 type Props = {
 	initialName?: string;
 	initialDescription?: string;
 	onOpenHistory: () => void;
 	onSave: (values: { title: string; description: string; comment: string }) => void | Promise<void>;
+	onChange?: (values: { title: string; description: string }) => void;
+	onMenuItemSelect?: (item: WorkflowHeaderMenuItem) => void;
+	saveDisabled?: boolean;
 	readOnly?: boolean;
 };
 type EditField = 'name' | 'description' | null;
 
-export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initialDescription = 'This interface delivering data into znuny and creates a ticket if the specified object is missing.', onOpenHistory, onSave, readOnly = false }: Props) {
+export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initialDescription = 'This interface delivering data into znuny and creates a ticket if the specified object is missing.', onOpenHistory, onSave, onChange, onMenuItemSelect, saveDisabled = false, readOnly = false }: Props) {
 	const [name, setName] = useState(initialName);
 	const [description, setDescription] = useState(initialDescription);
 	const [draftName, setDraftName] = useState(name);
@@ -70,7 +74,9 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 							value={draftName}
 							onChange={setDraftName}
 							onSubmit={() => {
-								setName(draftName.trim() || name);
+								const nextName = draftName.trim() || name;
+								setName(nextName);
+								onChange?.({ title: nextName, description });
 								setEditing(null);
 							}}
 							onCancel={cancelEdit}
@@ -93,7 +99,9 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 							value={draftDescription}
 							onChange={setDraftDescription}
 							onSubmit={() => {
-								setDescription(draftDescription.trim() || description);
+								const nextDescription = draftDescription.trim() || description;
+								setDescription(nextDescription);
+								onChange?.({ title: name, description: nextDescription });
 								setEditing(null);
 							}}
 							onCancel={cancelEdit}
@@ -116,6 +124,7 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 						<button
 							className='primaryButton headerPrimaryButton'
 							type='button'
+							disabled={saveDisabled}
 							onClick={() => setSaveDialogOpen(true)}
 						>
 							Save
@@ -143,6 +152,7 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 							open={menuOpen}
 							items={headerMenuItems}
 							onClose={() => setMenuOpen(false)}
+							onSelect={onMenuItemSelect}
 						/>
 					</div>
 				</div>
@@ -152,6 +162,7 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 				value={saveComment}
 				onChange={setSaveComment}
 				onClose={closeSaveDialog}
+				saveDisabled={saveDisabled}
 				onSave={async () => {
 					await onSave({ title: name, description, comment: saveComment });
 					closeSaveDialog();

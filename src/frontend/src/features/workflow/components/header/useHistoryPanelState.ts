@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { historyItems } from './historyPanel.data';
+import type { HistoryVersionItem } from '../../types/history.types';
 import { buildHistoryRows } from './historyPanel.utils';
 
-type Props = { open: boolean; onClose: () => void };
+type Props = { open: boolean; onClose: () => void; items?: HistoryVersionItem[] };
 
-export function useHistoryPanelState({ open, onClose }: Props) {
-  const [items, setItems] = useState(historyItems);
+export function useHistoryPanelState({ open, onClose, items: initialItems = historyItems }: Props) {
+  const [items, setItems] = useState(initialItems);
   const [comments, setComments] = useState<Record<string, string>>({});
   const [activeId, setActiveId] = useState<string | null>(null);
   const [hoveredCommentId, setHoveredCommentId] = useState<string | null>(null);
@@ -18,6 +19,11 @@ export function useHistoryPanelState({ open, onClose }: Props) {
   const menuRef = useRef<HTMLDivElement | null>(null);
   const commentRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const rows = useMemo(() => buildHistoryRows(items), [items]);
+
+  useEffect(() => {
+    setItems(initialItems);
+    setSelectedId(initialItems.find((item) => item.current)?.id ?? initialItems[0]?.id ?? null);
+  }, [initialItems]);
 
   useEffect(() => {
     setComments(Object.fromEntries(items.map((item) => [item.id, item.comment])));

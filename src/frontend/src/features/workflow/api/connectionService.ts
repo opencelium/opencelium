@@ -1,5 +1,6 @@
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
-import { createConnection, getConnectionById, updateConnection } from './connectionApi';
+import type { ConnectionVersionResource, HistoryVersionItem } from '../types/history.types';
+import { createConnection, deleteConnectionVersion, getConnectionById, getConnectionVersion, getConnectionVersions, updateConnection, updateConnectionVersion } from './connectionApi';
 import { mapConnectionToWorkflowState } from './connectionMapper';
 import { buildConnectionPayload, buildFromConnectorPayload } from './connectionPayload';
 
@@ -80,6 +81,34 @@ const storeCanvas = (connectionId: string | number | undefined, ui?: any) => {
 	}
 };
 
+const normalizeVersion = (version: ConnectionVersionResource, fallbackIndex: number): HistoryVersionItem => {
+	const snapshotId = version.snapshotId || String(version.connectionId ?? fallbackIndex);
+	return {
+		id: snapshotId,
+		snapshotId,
+		createdAt: typeof version.createdAt === 'number' ? version.createdAt : Date.now(),
+		author: String(version.author ?? 'Unknown'),
+		comment: version.comment ?? '',
+		current: Boolean(version.current ?? version.isCurrent),
+	};
+};
+
+export async function loadConnectionVersions(connectionId: string | number): Promise<HistoryVersionItem[]> {
+	const response = await getConnectionVersions(connectionId);
+	const versions = Array.isArray(response.data) ? response.data : [];
+	return versions
+		.map(normalizeVersion)
+		.sort((left, right) => right.createdAt - left.createdAt);
+}
+
+export async function saveConnectionVersionComment(connectionId: string | number, snapshotId: string, comment: string) {
+	await updateConnectionVersion(connectionId, snapshotId, { comment });
+}
+
+export async function removeConnectionVersion(connectionId: string | number, snapshotId: string) {
+	await deleteConnectionVersion(connectionId, snapshotId);
+}
+
 const mergeCanvasFallback = (responseData: any, storedUi: any) => {
 	if (!storedUi) return responseData;
 
@@ -117,13 +146,27 @@ export async function saveWorkflowConnection(args: SaveWorkflowConnectionArgs) {
 		? updateConnection(args.connectionId, body)
 		: createConnection(body);
 	const result = await response;
-	storeCanvas(args.connectionId ?? (result.data as any)?.connectionId, body.ui);
+	const savedConnectionId = args.connectionId ?? (result.data as any)?.connectionId;
+	const snapshotId = (result.data as any)?.nodeId;
+	if (savedConnectionId && snapshotId && args.comment !== undefined) {
+		await saveConnectionVersionComment(savedConnectionId, snapshotId, args.comment);
+	}
+	storeCanvas(savedConnectionId, body.ui);
 	return result;
 }
 
 export async function loadWorkflowConnection(connectionId: string) {
 	const response = await getConnectionById(connectionId);
+	const versions = await loadConnectionVersions(connectionId);
 	const storedUi = readStoredCanvas(connectionId);
 	const mergedResponseData = mergeCanvasFallback(response.data, storedUi);
-	return mapConnectionToWorkflowState(mergedResponseData);
+	return {
+		...mapConnectionToWorkflowState(mergedResponseData),
+		versions,
+	};
+}
+
+export async function loadWorkflowConnectionVersion(connectionId: string | number, snapshotId: string) {
+	const response = await getConnectionVersion(connectionId, snapshotId);
+	return mapConnectionToWorkflowState(response.data);
 }

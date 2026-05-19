@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { message } from 'antd';
 import { Loading } from '@shared/ui/primitives/Loading/Loading';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { apiExecutor } from '@shared/api/apiExecutor';
 import './styles.css';
 import { NodeContextMenu } from './components/NodeContextMenu';
 import { WorkflowCanvas } from './components/WorkflowCanvas';
@@ -15,11 +16,15 @@ import { ConditionBuilderDialog } from './components/condition-builder/Condition
 import { MethodConfigDialog } from './components/request-editor/MethodConfigDialog';
 import { buildLegacyConnection } from './components/request-editor/legacyAdapter';
 import { useWorkflowPage } from './useWorkflowPage';
-import { loadWorkflowConnection, saveWorkflowConnection } from './api/connectionService';
-import { buildFromConnectorPayload } from './api/connectionPayload';
+import { loadConnectionVersions, loadWorkflowConnection, loadWorkflowConnectionVersion, removeConnectionVersion, saveConnectionVersionComment, saveWorkflowConnection } from './api/connectionService';
+import { buildConnectionPayload, buildFromConnectorPayload } from './api/connectionPayload';
 import { useGetConnectorsQuery } from '@entities/connector/api/connectorApi';
+import { selectAuthUser } from '@entities/auth/model/authSelectors';
+import { useAppSelector } from '@shared/lib/storeHooks';
 import type { Connector } from '@entities/connector/model/types';
-import type { WorkflowNodeModel } from './types/workflow.types';
+import type { AuthUser } from '@entities/auth/model/types';
+import type { HistoryVersionItem } from './types/history.types';
+import type { WorkflowEdgeModel, WorkflowHeaderMenuItem, WorkflowNodeModel } from './types/workflow.types';
 import { createEmptyMethodConfig } from './utils/requestConfig';
 
 const toWorkflowResponse = (nodeId: string, response: NonNullable<Connector['invoker']>['operations'][number]['response']) => ({
@@ -27,6 +32,9 @@ const toWorkflowResponse = (nodeId: string, response: NonNullable<Connector['inv
   success: response.success,
   fail: response.fail,
 });
+
+const normalizeConnectorIcon = (icon: Connector['icon']) =>
+  typeof icon === 'string' ? icon : null;
 
 const hydrateNodesWithOperationResponses = (
   nodes: WorkflowNodeModel[],
@@ -53,7 +61,7 @@ const hydrateNodesWithOperationResponses = (
               ...node.data.connector,
               connectorId: connector.connectorId,
               title: connector.title,
-              icon: connector.icon,
+              icon: normalizeConnectorIcon(connector.icon),
             }
           : node.data.connector,
         methodConfig: operation?.response
@@ -72,21 +80,106 @@ type WorkflowProps = {
   readOnly?: boolean;
 };
 
+type Template = {
+  templateId: string | number;
+  [key: string]: unknown;
+};
+
+const getProfileAuthorName = (user: AuthUser | null) => {
+  const fullName = [user?.userDetail?.name, user?.userDetail?.surname]
+    .map((part) => part?.trim())
+    .filter(Boolean)
+    .join(' ');
+  return fullName || user?.username || user?.email || undefined;
+};
+
+const applyProfileAuthor = (versions: HistoryVersionItem[], user: AuthUser | null) => {
+  const profileAuthor = getProfileAuthorName(user);
+  if (!profileAuthor) return versions;
+
+  return versions.map((version) =>
+    String(version.author) === String(user?.userId)
+      ? { ...version, author: profileAuthor }
+      : version,
+  );
+};
+
+const sortValue = (value: unknown): unknown => {
+  if (Array.isArray(value)) return value.map(sortValue);
+  if (!value || typeof value !== 'object') return value;
+
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>)
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([key, nested]) => [key, sortValue(nested)]),
+  );
+};
+
+const buildWorkflowChangeSnapshot = ({
+  connectionId,
+  title,
+  description,
+  nodes,
+  edges,
+}: {
+  connectionId?: string;
+  title: string;
+  description: string;
+  nodes: WorkflowNodeModel[];
+  edges: WorkflowEdgeModel[];
+}) =>
+  JSON.stringify(sortValue(buildConnectionPayload({
+    connectionId,
+    title,
+    description,
+    nodes,
+    edges,
+  })));
+
+const triggerJsonDownload = (filename: string, payload: unknown) => {
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = filename.endsWith('.json') ? filename : `${filename}.json`;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
+};
+
 export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const { connectionId } = useParams<{ connectionId: string }>();
   const navigate = useNavigate();
   const { t: tEntities } = useI18n('entities');
   const workflow = useWorkflowPage();
+  const authUser = useAppSelector(selectAuthUser);
   const { data: connectors = [], isLoading: isConnectorsLoading } = useGetConnectorsQuery({ page: 0, limit: 1000 });
   const [headerState, setHeaderState] = useState({
     title: '[Empty Name]',
     description: '[Empty Description]',
   });
   const [loadedFieldBindings, setLoadedFieldBindings] = useState<any[] | undefined>();
+  const [historyVersions, setHistoryVersions] = useState<HistoryVersionItem[]>([]);
+  const [baselineSnapshot, setBaselineSnapshot] = useState<string | null>(null);
   const [isConnectionLoading, setIsConnectionLoading] = useState<boolean>(Boolean(connectionId));
   const hydratedNodes = useMemo(
     () => hydrateNodesWithOperationResponses(workflow.nodes, connectors),
     [connectors, workflow.nodes],
+  );
+  const displayedHistoryVersions = useMemo(
+    () => applyProfileAuthor(historyVersions, authUser),
+    [authUser, historyVersions],
+  );
+  const currentChangeSnapshot = useMemo(
+    () => buildWorkflowChangeSnapshot({
+      connectionId,
+      title: headerState.title,
+      description: headerState.description,
+      nodes: hydratedNodes,
+      edges: workflow.edges,
+    }),
+    [connectionId, headerState.description, headerState.title, hydratedNodes, workflow.edges],
   );
   const selectedNode = hydratedNodes.find((node) => node.id === workflow.sidebarAction?.sourceNodeId) ?? null;
   const contextMenuNode = hydratedNodes.find((node) => node.id === workflow.contextMenu?.nodeId) ?? null;
@@ -108,6 +201,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   }, [hydratedNodes, loadedFieldBindings, workflow.edges]);
 
   useEffect(() => {
+    setBaselineSnapshot(null);
     if (!connectionId) {
       setIsConnectionLoading(false);
       return;
@@ -120,6 +214,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         workflow.setWorkflowGraph(state.nodes, state.edges, state.viewport, { centerStart: true });
         setHeaderState({ title: state.title, description: state.description });
         setLoadedFieldBindings(state.fieldBindings);
+        setHistoryVersions(state.versions);
       })
       .finally(() => {
         if (!cancelled) setIsConnectionLoading(false);
@@ -130,6 +225,12 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   }, [connectionId]);
 
   const isLoading = isConnectionLoading || isConnectorsLoading;
+  const hasConnectionChanges = baselineSnapshot !== null && currentChangeSnapshot !== baselineSnapshot;
+
+  useEffect(() => {
+    if (isLoading || baselineSnapshot !== null) return;
+    setBaselineSnapshot(currentChangeSnapshot);
+  }, [baselineSnapshot, currentChangeSnapshot, isLoading]);
 
   const handleSave = async ({ title, description, comment }: { title: string; description: string; comment: string }) => {
     const isCreate = !connectionId;
@@ -151,10 +252,44 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       throw error;
     }
     const savedId = (response.data as any)?.connectionId;
+    const nextConnectionId = connectionId ?? savedId;
+    setHeaderState({ title, description });
+    setBaselineSnapshot(buildWorkflowChangeSnapshot({
+      connectionId: nextConnectionId ? String(nextConnectionId) : connectionId,
+      title,
+      description,
+      nodes: hydratedNodes,
+      edges: workflow.edges,
+    }));
+    if (nextConnectionId) {
+      setHistoryVersions(await loadConnectionVersions(nextConnectionId));
+    }
     message.success(
       tEntities(isCreate ? 'connection.messages.saved.create' : 'connection.messages.saved.update', { title }),
     );
     if (isCreate && savedId) navigate(`/connection/update/${savedId}`);
+  };
+
+  const downloadConnectionTemplate = async () => {
+    if (!connectionId) return;
+    try {
+      const template = (await apiExecutor({
+        url: `/template/connection/${connectionId}`,
+        method: 'GET',
+      })) as Template;
+      const filename = String(template?.templateId ?? connectionId);
+      triggerJsonDownload(filename, template);
+      message.success(tEntities('connection.list.downloadTemplate.success', { name: filename }));
+    } catch (err) {
+      console.error(err);
+      message.error(tEntities('connection.list.downloadTemplate.error'));
+    }
+  };
+
+  const handleHeaderMenuSelect = (item: WorkflowHeaderMenuItem) => {
+    if (item.id === 'download-template') {
+      void downloadConnectionTemplate();
+    }
   };
 
   return (
@@ -162,7 +297,10 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       <WorkflowHeader
         initialName={headerState.title}
         initialDescription={headerState.description}
+        onChange={setHeaderState}
+        onMenuItemSelect={handleHeaderMenuSelect}
         onSave={handleSave}
+        saveDisabled={isLoading || !hasConnectionChanges}
         onOpenHistory={() => { workflow.setHistoryOpen(true); workflow.setSidebarAction(null); workflow.setContextMenu(null); workflow.setConditionEditor(null); }}
         readOnly={readOnly}
       />
@@ -212,7 +350,33 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         )}
       </div>
       <WorkflowSidebar action={workflow.sidebarAction} selectedNode={selectedNode} onClose={() => workflow.setSidebarAction(null)} onSelect={workflow.onAddStep} />
-      <HistoryPanel open={workflow.historyOpen} onClose={() => workflow.setHistoryOpen(false)} />
+      <HistoryPanel
+        open={workflow.historyOpen}
+        items={displayedHistoryVersions}
+        onClose={() => workflow.setHistoryOpen(false)}
+        onSelectVersion={async (snapshotId) => {
+          if (!connectionId) return;
+          const state = await loadWorkflowConnectionVersion(connectionId, snapshotId);
+          workflow.setWorkflowGraph(state.nodes, state.edges, state.viewport, { centerStart: true });
+          setHeaderState({ title: state.title, description: state.description });
+          setLoadedFieldBindings(state.fieldBindings);
+          workflow.setSidebarAction(null);
+          workflow.setContextMenu(null);
+          workflow.setMethodEditor(null);
+          workflow.setConditionEditor(null);
+        }}
+        onSaveComment={async (snapshotId, comment) => {
+          if (!connectionId) return;
+          await saveConnectionVersionComment(connectionId, snapshotId, comment);
+          setHistoryVersions(await loadConnectionVersions(connectionId));
+        }}
+        onDeleteVersion={async (snapshotId) => {
+          if (!connectionId) return;
+          await removeConnectionVersion(connectionId, snapshotId);
+          setHistoryVersions(await loadConnectionVersions(connectionId));
+        }}
+        onDownloadTemplate={downloadConnectionTemplate}
+      />
       <NodeContextMenu
         menu={workflow.contextMenu}
         node={contextMenuNode}
