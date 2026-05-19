@@ -5,6 +5,7 @@ type Props = PropsWithChildren<{
   open: boolean;
   title: string;
   subtitle: string;
+  iconUrl?: string | null;
   onClose: () => void;
   shifted?: boolean;
   shiftedFar?: boolean;
@@ -16,6 +17,7 @@ export function SidebarDrawer({
   open,
   title,
   subtitle,
+  iconUrl,
   onClose,
   shifted,
   shiftedFar,
@@ -30,9 +32,16 @@ export function SidebarDrawer({
       } ${shiftedFar ? 'rightDrawerShiftedFar' : ''} ${secondary ? 'rightDrawerSecondary' : ''} ${tertiary ? 'rightDrawerTertiary' : ''}`}
     >
       <div className="drawerHeader">
-        <div>
-          <div className="drawerTitle">{title}</div>
-          <div className="drawerSubTitle">{subtitle}</div>
+        <div className="drawerHeaderContent">
+          {iconUrl ? (
+            <div className="drawerHeaderIcon" aria-hidden="true">
+              <img src={iconUrl} alt="" />
+            </div>
+          ) : null}
+          <div>
+            <div className="drawerTitle">{title}</div>
+            <div className="drawerSubTitle">{subtitle}</div>
+          </div>
         </div>
 
         <button className="iconButton" type="button" onClick={onClose}>

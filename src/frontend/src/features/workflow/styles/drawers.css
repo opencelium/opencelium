@@ -117,9 +117,33 @@
   align-items: flex-start;
 }
 
+.drawerHeaderContent {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.drawerHeaderIcon {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.drawerHeaderIcon img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
 .drawerTitle {
   font-size: 18px;
   font-weight: 700;
+  overflow-wrap: anywhere;
 }
 
 .drawerSubTitle {

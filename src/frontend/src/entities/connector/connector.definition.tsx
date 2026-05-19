@@ -13,11 +13,55 @@ import {connectorApi} from "@entities/connector/api/connectorApi.ts";
 import {showApiError} from "@shared/api/handleApiError.ts";
 import {useAppStore} from "@app/store/app.store.ts";
 import {selectAccessToken} from "@entities/auth/model/authSelectors.ts";
+import {genericApi} from "@shared/api/genericApi.ts";
 
 const baseKey = 'connector';
 
 const isImageFile = (value: unknown): value is File =>
     typeof File !== 'undefined' && value instanceof File;
+
+const resolveConnectorIconUrl = (icon?: string | null) => {
+    if (!icon?.trim()) return null;
+    if (/^(blob:|data:|https?:\/\/)/i.test(icon)) return icon;
+
+    const normalizedIcon = icon.replace(/^\.\//, '');
+    if (normalizedIcon.startsWith('storage/')) {
+        const baseUrl = ((import.meta.env.VITE_API_URL as string | undefined) ?? '').replace(/\/$/, '');
+        return `${baseUrl}/${normalizedIcon}`;
+    }
+
+    return icon;
+};
+
+const renderConnectorIcon = (icon: unknown) => {
+    const iconUrl = resolveConnectorIconUrl(typeof icon === 'string' ? icon : null);
+    if (!iconUrl) return null;
+
+    return (
+        <img
+            src={iconUrl}
+            alt=""
+            style={{
+                width: 28,
+                height: 28,
+                objectFit: 'contain',
+                display: 'block',
+            }}
+        />
+    );
+};
+
+const renderConnectorTitle = (row: unknown, value: unknown) => {
+    const connector = row as Connector;
+    const icon = renderConnectorIcon(connector.icon);
+
+    return (
+        <span style={{display: 'inline-flex', alignItems: 'center', gap: 8}}>
+            {icon}
+            <span>{String(value ?? '')}</span>
+        </span>
+    );
+};
 
 const uploadConnectorIcon = async (ctx: { formData?: ConnectorUpdateDto; response?: Connector; payload?: Connector }) => {
     const icon = ctx.formData?.icon;
@@ -41,6 +85,12 @@ const uploadConnectorIcon = async (ctx: { formData?: ConnectorUpdateDto; respons
     if (!response.ok) {
         throw new Error(`Failed to upload connector icon: HTTP ${response.status}`);
     }
+
+    store.dispatch(genericApi.util.invalidateTags(['Entity' as any]));
+    store.dispatch(connectorApi.util.invalidateTags([
+        {type: CONNECTOR_TAG, id: 'LIST'},
+        {type: CONNECTOR_TAG, id: connectorId},
+    ]));
 };
 
 export const connectorDefinition: EntityDefinition = {
@@ -160,6 +210,7 @@ export const connectorDefinition: EntityDefinition = {
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.title.label`,
+                render: renderConnectorTitle,
             }
         },
         {

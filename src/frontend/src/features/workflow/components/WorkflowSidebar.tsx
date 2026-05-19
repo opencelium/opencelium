@@ -18,6 +18,9 @@ import { getMethodSidebarCopy, getSecondarySidebarCopy, type SecondarySidebarMod
 
 const getConnectorKey = (connectorId: number) => String(connectorId);
 
+const normalizeConnectorIcon = (icon?: string | File | null) =>
+  typeof icon === 'string' ? icon : null;
+
 const resolveConnectorIconUrl = (icon?: string | null) => {
   if (!icon?.trim()) return null;
   if (/^(blob:|data:|https?:\/\/)/i.test(icon)) return icon;
@@ -72,7 +75,7 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
       key: getConnectorKey(connector.connectorId),
       title: connector.title,
       text: connector.description || `Methods from ${connector.invoker?.name ?? connector.title} invoker.`,
-      imageUrl: resolveConnectorIconUrl(connector.icon),
+      imageUrl: resolveConnectorIconUrl(normalizeConnectorIcon(connector.icon)),
     })),
     [connectors],
   );
@@ -123,6 +126,7 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
   const [secondaryTitle, secondarySubtitle, secondaryPlaceholder] = getSecondarySidebarCopy(activeSecondaryPanel ?? 'connector');
   const [methodTitle, methodSubtitle, methodPlaceholder] = getMethodSidebarCopy(selectedConnector?.title);
   const methodOpen = activeSecondaryPanel === 'connector' && !!selectedConnectorKey;
+  const selectedConnectorIconUrl = resolveConnectorIconUrl(normalizeConnectorIcon(selectedConnector?.icon));
 
   return (
     <>
@@ -198,6 +202,7 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
         open={methodOpen}
         title={methodTitle}
         subtitle={methodSubtitle}
+        iconUrl={selectedConnectorIconUrl}
         onClose={() => {
           setSelectedConnectorKey(null);
           setMethodSearch('');
@@ -217,7 +222,7 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
                   ? {
                       connectorId: selectedConnector.connectorId,
                       title: selectedConnector.title,
-                      icon: selectedConnector.icon,
+                      icon: normalizeConnectorIcon(selectedConnector.icon),
                     }
                   : undefined,
                 methodOperation,
