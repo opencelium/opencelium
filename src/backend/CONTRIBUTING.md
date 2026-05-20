@@ -38,13 +38,13 @@ Please read this guide in full before submitting your first PR. It exists to mak
 
 Before contributing, ensure the following tools are installed and available on your `PATH`:
 
-| Tool | Minimum version       | Purpose |
-|------|-----------------------|---------|
-| JDK | 17                    | Compilation and test execution |
-| Docker | 24                    | Testcontainers (integration tests only) |
-| Gradle | wrapper (`./gradlew`) | Build and test orchestration |
-| MariaDB | Running locally on the default port `3306` |
-| MongoDB | Running locally on the default port `27017` |
+| Tool    | Minimum version       | Purpose                                                                                          |
+|---------|-----------------------|--------------------------------------------------------------------------------------------------|
+| JDK     | 17                    | Compilation and test execution                                                                   |
+| Docker  | 24                    | Testcontainers (integration tests only)                                                          |
+| Gradle  | wrapper (`./gradlew`) | Build and test orchestration                                                                     |
+| MariaDB | 10.6+                 | Primary relational store — must be reachable on default port `3306` when running the application |
+| MongoDB | 6.0+                  | Document store for connections and execution logs — must be reachable on default port `27017`    |
 
 Docker is required only to run integration tests locally. Unit and slice tests run without it.
 
@@ -53,22 +53,32 @@ Docker is required only to run integration tests locally. Unit and slice tests r
 ## 2. Database setup
 
 Import the initial database schema and seed data before starting the application
-for the first time:
+for the first time. Run the command from `src/backend/`, where `database/data.sql`
+lives:
+
 ```bash
-mysql -u <username> -p  < database/data.sql
+mysql -u <username> -p < database/data.sql
 ```
 
-This only needs to be done once. If the schema changes in a future version,
-the change will be applied automatically by Liquibase on the next application
-start
+This only needs to be done once. Subsequent schema changes are applied
+automatically by **Liquibase** on application start — changelogs live under
+[`src/main/resources/db/changelog/`](src/main/resources/db/changelog). Add a
+new changeset there whenever you change the relational schema; never rely on
+JPA reflection (`ddl-auto` is set to `validate`).
+
+---
 
 ## 3. Getting started
 
 ```bash
 # Clone the repository
 git clone https://github.com/opencelium/opencelium.git
-cd opencelium
+cd opencelium/src/backend
 ```
+
+> All `./gradlew` commands in this guide run from `src/backend/`. The repository
+> root contains both `src/backend/` and `src/frontend/` — make sure your shell is
+> in the backend directory before invoking the wrapper.
 
 ### Build
 ```bash
@@ -99,8 +109,8 @@ API documentation is available at `http://localhost:9090/docs`.
 # Integration tests only — requires Docker
 ./gradlew integrationTest
 
-# Full test suite
-./gradlew clean check integrationTest
+# Full test suite (unit + slice + integration)
+./gradlew clean test integrationTest
 ```
 
 ---
@@ -110,12 +120,12 @@ API documentation is available at `http://localhost:9090/docs`.
 ```
 src/
   main/
-    java/com/opencelium/          # Production source code
+    java/com/becon/opencelium/backend/          # Production source code
     resources/
       application.yml             # Base Spring configuration
 
   test/
-    java/com/opencelium/
+    java/com/becon/opencelium/backend/
       unit/                       # Pure unit tests — no Spring context
       slice/                      # Spring slice tests (@WebMvcTest, @DataJpaTest, …)
       integration/                # Lightweight in-memory integration (optional)
@@ -130,7 +140,7 @@ src/
       fixtures/                   # SQL seed scripts, CSV data files
 
   integrationTest/
-    java/com/opencelium/
+    java/com/becon/opencelium/backend/
       integration/                # Full @SpringBootTest + Testcontainers (*IT.java)
     resources/
       application-integration.yml # Spring config for profile "integration"
@@ -184,8 +194,6 @@ database or fail to resolve required properties.
 See [`RoleControllerTest.java`][slice-example] for a working example covering
 `GET /role/{id}` (200 and 404) and `POST /role` (409 conflict).
 
----
-
 #### `integration/` (inside `src/test/`)
 
 Lightweight integration tests that load a partial Spring context and wire real
@@ -202,8 +210,6 @@ interact correctly — but the overhead of a real database is not justified.
 
 See [`UserRoleServiceIntegrationTest.java`][integration-light-example] for a
 working example.
-
-[integration-light-example]: https://github.com/opencelium/opencelium/blob/main/src/test/java/com/becon/opencelium/backend/integration/service/UserRoleServiceIntegrationTest.java
 
 #### `testutil/`
 
@@ -249,12 +255,12 @@ Every class in this package must:
   `@SpringBootTest`, `@Testcontainers`, and `@ActiveProfiles("integration")`
 - Declare a `@Container` field for every database the test touches
 - Override datasource URLs at runtime with `@DynamicPropertySource` —
-  never hard-code ports or credentials. See [`UserRoleFlowIT.java`][it-example]
+  never hard-code ports or credentials. See [`UserRoleControllerIT.java`][it-example]
   for a documented example of how and where to declare it.
 - Use the `*IT` naming suffix so Gradle routes them to `integrationTest`
   and not to the default `test` task
 
-See [`UserRoleFlowIT.java`][it-example] for a working example covering
+See [`UserRoleControllerIT.java`][it-example] for a working example covering
 role creation end-to-end and deletion against a real MariaDB container.
 
 ---
@@ -286,9 +292,9 @@ JSON files used as MockMvc request bodies or in JSONassert comparisons.
 String body = new ClassPathResource("json/create-user-role.json")
         .getContentAsString(StandardCharsets.UTF_8);
 
-        mockMvc.perform(post("/api/userRoles")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(body))
+mockMvc.perform(post("/api/userRoles")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body))
         .andExpect(status().isCreated());
 ```
 
@@ -317,11 +323,12 @@ src/main/java/.../service/UserRoleServiceImpl.java
 → src/test/java/.../unit/service/UserRoleServiceImplTest.java
 ```
 
-| Test type | Location |
-|----------|--------|
-| Unit | `src/test/.../unit/.../*Test.java` |
-| Slice | `src/test/.../slice/.../*Test.java` |
-| Integration | `src/integrationTest/.../integration/.../*IT.java` |
+| Test type               | Location                                              |
+|-------------------------|-------------------------------------------------------|
+| Unit                    | `src/test/.../unit/.../*Test.java`                    |
+| Slice                   | `src/test/.../slice/.../*Test.java`                   |
+| Lightweight integration | `src/test/.../integration/.../*Test.java`             |
+| Full integration        | `src/integrationTest/.../integration/.../*IT.java`    |
 
 The package name follows the same structure:
 
@@ -368,15 +375,15 @@ camelCase, present tense, no `test_` prefix.
 ```java
 // Correct
 existsByIdReturnsTrueWhenRoleExists()
-        existsByIdReturnsFalseWhenRoleDoesNotExist()
-        getOneThrowsRoleNotFoundExceptionWhenIdDoesNotExist()
-        findByIdReturnsEmptyWhenRoleNotFound()
+existsByIdReturnsFalseWhenRoleDoesNotExist()
+getOneThrowsRoleNotFoundExceptionWhenIdDoesNotExist()
+findByIdReturnsEmptyWhenRoleNotFound()
 
 // Avoid
-        testExistsById()                          // redundant test prefix
-        existsById_returnsTrueWhenRoleExists()    // underscore style
-        existsByIdReturnedTrue()                  // past tense
-        existsById_callsRepository()             // describes implementation, not behaviour
+testExistsById()                         // redundant test prefix
+existsById_returnsTrueWhenRoleExists()   // underscore style
+existsByIdReturnedTrue()                 // past tense
+existsById_callsRepository()             // describes implementation, not behaviour
 ```
 
 Use `@DisplayName` for additional human-readable context when the method name alone is not sufficient.
@@ -402,10 +409,10 @@ Use `@DisplayName` for additional human-readable context when the method name al
 ./gradlew test --tests "*.UserRoleServiceImplTest"
 
 # Run a single integration test class — full path
-./gradlew integrationTest --tests "com.becon.opencelium.backend.integration.controller.UserRoleControllerFlowIT"
+./gradlew integrationTest --tests "com.becon.opencelium.backend.integration.controller.UserRoleControllerIT"
 
 # Run a single integration test class — short pattern
-./gradlew integrationTest --tests "*.UserRoleControllerFlowIT"
+./gradlew integrationTest --tests "*.UserRoleControllerIT"
 
 # Run all tests in a package
 ./gradlew test --tests "com.becon.opencelium.backend.unit.*"
@@ -431,12 +438,33 @@ in CI and locally.
 
 All test dependencies are declared in `build.gradle`. The `integrationTestImplementation` configuration extends `testImplementation`, so every dependency below is available in both source roots.
 
-**Rules:**
+### What is already on the classpath
+
+`spring-boot-starter-test` pulls in the bulk of what you need transitively — do
+not redeclare any of these:
+
+| Library         | Source                          | Purpose                                  |
+|-----------------|---------------------------------|------------------------------------------|
+| JUnit 5         | `spring-boot-starter-test`      | Test runner (`@Test`, `@ParameterizedTest`) |
+| Mockito         | `spring-boot-starter-test`      | Mocks for unit tests                     |
+| AssertJ         | `spring-boot-starter-test`      | Fluent assertions (`assertThat(...)`)    |
+| Spring Test     | `spring-boot-starter-test`      | `MockMvc`, `@SpringBootTest` machinery   |
+| JSONassert      | `spring-boot-starter-test`      | JSON comparison in MockMvc tests         |
+| Mockito-inline  | declared explicitly             | Mocking `final` classes and `static` methods |
+| Testcontainers  | BOM `testcontainers-bom`        | `MariaDBContainer`, `MongoDBContainer`, JUnit-Jupiter integration |
+| Awaitility      | declared explicitly             | Async assertions — replaces `Thread.sleep()` |
+| H2              | `testRuntimeOnly`               | In-memory DB for `@DataJpaTest` slices   |
+
+Version pins live in the `ext { … }` block of `build.gradle`. Update them there,
+never in individual dependency declarations.
+
+### Rules
 
 - Do not duplicate a dependency already provided transitively by `spring-boot-starter-test`.
 - Always use the Testcontainers BOM. Never pin individual Testcontainers module versions.
 - Use `awaitility` for async assertions. Do not use `Thread.sleep()`.
 - H2 is `testRuntimeOnly`. It must never appear in the `implementation` or `runtimeOnly` configurations.
+- Place a new test-only dependency under `testImplementation` (or `testRuntimeOnly` if it is a driver). Do not use `implementation` for anything that production code never touches.
 
 ---
 
@@ -499,7 +527,7 @@ Generated code (Liquibase changelogs, OpenAPI specs, MapStruct implementations) 
 Copy this template when opening a PR. The template is also available at
 `.github/pull_request_template.md` and is pre-loaded by GitHub automatically.
 
-- **What** — what changed, imperative mood, 1–3 sentences
+- **What** — what changed, past tense, 1–3 sentences (e.g. "Added a `UserRoleService.existsByRole` check…")
 - **Why** — why it is needed, ticket number, breaking changes if any
 - **How to test** — which Gradle command, whether Docker is needed
 - **Checklist** — self-audit before marking Ready for Review
@@ -533,8 +561,12 @@ See [`pull_request_template_example.md`][pr-example] for a fully filled-in examp
 Every commit message must follow this format:
 
 ```
-[Type] Ticket-Number #comment Subject #time XhYm
+[Type] OC-NNNN: <subject>
 ```
+
+- **Type** — one of the labels in the table below, in square brackets, capitalised.
+- **OC-NNNN** — the Jira ticket the commit belongs to. Every commit is tied to a ticket; no exceptions.
+- **Subject** — short imperative or descriptive phrase explaining what changed. Keep the full line under ~100 characters.
 
 **Types:**
 
@@ -553,13 +585,13 @@ Every commit message must follow this format:
 **Examples:**
 
 ```
-[Added] OC-1412 #comment add UserRoleService existsByRole validation #time 1h
-[Modified] OC-1307 #comment minor modifications to UserRoleServiceImpl #time 10m
-[Fixed] OC-1389 #comment fix NPE in UserRoleServiceImpl getOne when id not found #time 20m
-[Tested] OC-1412 #comment add UserRoleServiceTest for existsById and getOne #time 2h
-[Refactored] OC-1350 #comment extract UserRole mapping logic to UserRoleMapper #time 45m
-[Documented] OC-1412 #comment add CONTRIBUTING_TEST.md test structure guide #time 30m
-[Removed] OC-1401 #comment remove deprecated UserRole findAll unused overload #time 15m
+[Added] OC-1412: add UserRoleService existsByRole validation
+[Modified] OC-1307: minor modifications to UserRoleServiceImpl
+[Fixed] OC-1389: fix NPE in UserRoleServiceImpl getOne when id not found
+[Tested] OC-1412: add UserRoleServiceTest for existsById and getOne
+[Refactored] OC-1350: extract UserRole mapping logic to UserRoleMapper
+[Documented] OC-1412: add CONTRIBUTING.md test structure guide
+[Removed] OC-1401: remove deprecated UserRole findAll unused overload
 ```
 
 ---
@@ -568,7 +600,7 @@ Every commit message must follow this format:
 
 ### 11.1 Reviewer responsibilities
 
-- **Respond within two business day.** Stale PRs block the team. If you cannot review in time, say so and suggest another reviewer.
+- **Respond within two business days.** Stale PRs block the team. If you cannot review in time, say so and suggest another reviewer.
 - **Check out the branch for logic-heavy changes.** Complex business logic cannot be reviewed reliably from a diff alone.
 - **Distinguish blocking comments from suggestions** using the prefixes described below. Ambiguity wastes everyone's time.
 - **Approve with outstanding nits explicitly stated.** If only style-level comments remain, approve and note "feel free to address or ignore". Do not block a merge on nit-level issues.
@@ -624,7 +656,7 @@ Draft → Ready for Review → In Review → Changes Requested → Approved → 
 | **Ready for Review** | Author | All checklist items in [§10.1](#101-what-a-pr-must-include) are satisfied. Assign at least one reviewer.                                                                                                                              | A reviewer picks it up and begins review. |
 | **In Review** | Reviewer | Reviewer has 2 business days to respond (see §11.1). Leave comments using the prefix conventions in [§11.2](#112-comment-conventions).                                                                                                                        | Reviewer submits a review: **Approved** or **Changes Requested**. |
 | **Changes Requested** | Author | Address every `blocking:` comment. Reply to every `question:` comment inline or with a code change. Nits and suggestions are at your discretion. Re-request review when done — do not rely on the reviewer to re-check spontaneously. | All blocking comments are resolved and review is re-requested. |
-| **Approved** | Author | At least one approval with no outstanding `blocking:` comments.                                                                                                                                                                       | PR is merged into the target branch. |
+| **Approved** | Reviewer (transitions) → Author (merges) | Reviewer submits approval with no outstanding `blocking:` comments. The author then performs the merge.                                                                                                                              | PR is merged into the target branch. |
 | **Merged** | Author | Squash-merge into `dev` (or the base branch if using a stacked-PR flow). Delete the source branch. Close the linked Jira ticket or move it to the appropriate status.                                                                 | Branch deleted; ticket updated. |
 
 ### Rules
@@ -671,7 +703,7 @@ After:  src/test/.../unit/service/UserRoleServiceImplTest.java  (package com.exa
 - Add `@ActiveProfiles("test")` to every slice test that is missing it.
 - Replace ad-hoc `@SpringBootTest` usage in unit tests with `@ExtendWith(MockitoExtension.class)` and direct instantiation.
 - Replace `@SpringBootTest` + real DB in `src/test/` with `@DataJpaTest` + H2, or move to `src/integrationTest/` if real DB behaviour is required.
-- Replace any `@SpringBootTest` in `src/integrationTest/` that lacks `@Testcontainers` and `@DynamicPropertySource` — these are the source of port-collision and flaky-test issues.
+- For any `@SpringBootTest` in `src/integrationTest/` that lacks `@Testcontainers` and `@DynamicPropertySource`, add both — declare a `@Container` per database the test touches and bind its URL via `@DynamicPropertySource`. Hard-coded ports and missing container lifecycle are the source of port-collision and flaky-test issues.
 
 **Step 4 — Apply `testutil/` infrastructure**
 
@@ -681,12 +713,14 @@ Replace inline test-object construction with fixtures from `testutil/fixture/`. 
 
 Rename methods that violate [§7](#7-test-naming-conventions) naming conventions. This is lower priority than structural correctness — defer if the PR is already large.
 
+Renames are in scope **only for the test class you are already migrating** in this PR. Do not bulk-rename methods in test classes you are not otherwise touching — that contradicts [§10.2](#102-what-to-leave-out)'s rule against unrelated changes and should be its own ticket.
+
 **Step 6 — Verify**
 
 ```bash
 # Confirm the migrated test runs in its new task and not the old one
 ./gradlew test --tests "*.UserRoleServiceImplTest"
-./gradlew integrationTest --tests "*.UserRoleFlowIT"
+./gradlew integrationTest --tests "*.UserRoleControllerIT"
 
 # Confirm the full suite still passes
 ./gradlew clean test integrationTest
@@ -695,14 +729,15 @@ Rename methods that violate [§7](#7-test-naming-conventions) naming conventions
 ### Common pitfalls
 
 - **`*IT` classes left in `src/test/`** — Gradle's `test` task picks them up, Docker is not available in the unit-test phase, and the test fails with a `ContainerLaunchException`. Always check the source root after renaming.
-- **Missing `@DynamicPropertySource` after moving to `src/integrationTest/`** — hardcoded ports collide when Testcontainers assigns a random one. Follow the pattern in [`UserRoleFlowIT.java`][it-example].
+- **Missing `@DynamicPropertySource` after moving to `src/integrationTest/`** — hardcoded ports collide when Testcontainers assigns a random one. Follow the pattern in [`UserRoleControllerIT.java`][it-example].
 - **H2 compatibility gaps** — some MariaDB-specific SQL (e.g. `JSON` columns, `FULLTEXT` indexes) does not work in H2. If the test fails with an H2 syntax error after migration, move it to `src/integrationTest/` instead of hacking the schema.
 
 ---
 
 [unit-example]: https://github.com/opencelium/opencelium/blob/dev/src/backend/src/test/java/com/becon/opencelium/backend/unit/database/mysql/service/UserRoleServiceImplTest.java
 [slice-example]: https://github.com/opencelium/opencelium/blob/dev/src/backend/src/test/java/com/becon/opencelium/backend/slice/controller/RoleControllerTest.java
-[it-example]: https://github.com/opencelium/opencelium/blob/dev/dev/integrationTest/java/com/becon/opencelium/backend/integration/controller/UserRoleControllerIT.java
+[integration-light-example]: https://github.com/opencelium/opencelium/blob/dev/src/backend/src/test/java/com/becon/opencelium/backend/integration/service/UserRoleServiceIntegrationTest.java
+[it-example]: https://github.com/opencelium/opencelium/blob/dev/src/backend/src/integrationTest/java/com/becon/opencelium/backend/integration/controller/UserRoleControllerIT.java
 [fixture-example]: https://github.com/opencelium/opencelium/blob/dev/src/backend/src/test/java/com/becon/opencelium/backend/testutil/fixture/UserRoleFixture.java
 [assertion-example]: https://github.com/opencelium/opencelium/blob/dev/src/backend/src/test/java/com/becon/opencelium/backend/testutil/assertion/UserRoleAssertions.java
 [fake-example]: https://github.com/opencelium/opencelium/blob/dev/src/backend/src/test/java/com/becon/opencelium/backend/testutil/fake/InMemoryUserRoleRepository.java
