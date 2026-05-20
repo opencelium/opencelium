@@ -15,10 +15,12 @@ type Props = {
 	onSelectVersion?: (snapshotId: string) => Promise<void> | void;
 	onSaveComment?: (snapshotId: string, comment: string) => Promise<void> | void;
 	hasUnsavedChanges?: boolean;
+	selectedId?: string | null;
+	onSelectedIdChange?: (id: string | null) => void;
 };
 
-export function HistoryPanel({ open, items, onClose, onDeleteVersion, onDownloadTemplate, onSelectVersion, onSaveComment, hasUnsavedChanges = false }: Props) {
-	const state = useHistoryPanelState({ open, items, onClose });
+export function HistoryPanel({ open, items, onClose, onDeleteVersion, onDownloadTemplate, onSelectVersion, onSaveComment, hasUnsavedChanges = false, selectedId, onSelectedIdChange }: Props) {
+	const state = useHistoryPanelState({ open, items, onClose, selectedId, onSelectedIdChange });
 	const { t: tEntities } = useI18n('entities');
 
 	const saveComment = async (id: string) => {

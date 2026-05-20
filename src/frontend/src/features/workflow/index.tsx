@@ -163,6 +163,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   });
   const [loadedFieldBindings, setLoadedFieldBindings] = useState<any[] | undefined>();
   const [historyVersions, setHistoryVersions] = useState<HistoryVersionItem[]>([]);
+  const [selectedHistoryVersionId, setSelectedHistoryVersionId] = useState<string | null>(null);
   const [baselineSnapshot, setBaselineSnapshot] = useState<string | null>(null);
   const [changeSource, setChangeSource] = useState<WorkflowChangeSource>('clean');
   const [historyPreviewSnapshot, setHistoryPreviewSnapshot] = useState<string | null>(null);
@@ -221,6 +222,11 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         setHeaderState({ title: state.title, description: state.description });
         setLoadedFieldBindings(state.fieldBindings);
         setHistoryVersions(state.versions);
+        setSelectedHistoryVersionId((currentSelectedId) =>
+          currentSelectedId && state.versions.some((version) => version.id === currentSelectedId)
+            ? currentSelectedId
+            : state.versions.find((version) => version.current)?.id ?? state.versions[0]?.id ?? null,
+        );
       })
       .finally(() => {
         if (!cancelled) setIsConnectionLoading(false);
@@ -284,7 +290,9 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     setChangeSource('clean');
     setHistoryPreviewSnapshot(null);
     if (nextConnectionId) {
-      setHistoryVersions(await loadConnectionVersions(nextConnectionId));
+      const nextVersions = await loadConnectionVersions(nextConnectionId);
+      setHistoryVersions(nextVersions);
+      setSelectedHistoryVersionId(nextVersions[0]?.id ?? null);
     }
     message.success(
       tEntities(isCreate ? 'connection.messages.saved.create' : 'connection.messages.saved.update', { title }),
@@ -314,6 +322,23 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     }
   };
 
+  const handleOpenHistory = () => {
+    workflow.setHistoryOpen(true);
+    workflow.setSidebarAction(null);
+    workflow.setContextMenu(null);
+    workflow.setConditionEditor(null);
+    if (connectionId) {
+      void loadConnectionVersions(connectionId).then((nextVersions) => {
+        setHistoryVersions(nextVersions);
+        setSelectedHistoryVersionId((currentSelectedId) =>
+          currentSelectedId && nextVersions.some((version) => version.id === currentSelectedId)
+            ? currentSelectedId
+            : nextVersions.find((version) => version.current)?.id ?? nextVersions[0]?.id ?? null,
+        );
+      });
+    }
+  };
+
   return (
     <div className="page">
       <WorkflowHeader
@@ -323,7 +348,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         onMenuItemSelect={handleHeaderMenuSelect}
         onSave={handleSave}
         saveDisabled={isLoading || !hasConnectionChanges}
-        onOpenHistory={() => { workflow.setHistoryOpen(true); workflow.setSidebarAction(null); workflow.setContextMenu(null); workflow.setConditionEditor(null); }}
+        onOpenHistory={handleOpenHistory}
         readOnly={readOnly}
       />
       <div className="workflowMain">
@@ -375,10 +400,13 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       <HistoryPanel
         open={workflow.historyOpen}
         items={displayedHistoryVersions}
+        selectedId={selectedHistoryVersionId}
+        onSelectedIdChange={setSelectedHistoryVersionId}
         hasUnsavedChanges={hasManualUnsavedChanges}
         onClose={() => workflow.setHistoryOpen(false)}
         onSelectVersion={async (snapshotId) => {
           if (!connectionId) return;
+          setSelectedHistoryVersionId(snapshotId);
           const state = await loadWorkflowConnectionVersion(connectionId, snapshotId);
           const nextNodes = hydrateNodesWithOperationResponses(state.nodes, connectors);
           const nextSnapshot = buildWorkflowChangeSnapshot({
@@ -406,7 +434,13 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         onDeleteVersion={async (snapshotId) => {
           if (!connectionId) return;
           await removeConnectionVersion(connectionId, snapshotId);
-          setHistoryVersions(await loadConnectionVersions(connectionId));
+          const nextVersions = await loadConnectionVersions(connectionId);
+          setHistoryVersions(nextVersions);
+          setSelectedHistoryVersionId((currentSelectedId) =>
+            currentSelectedId && nextVersions.some((version) => version.id === currentSelectedId)
+              ? currentSelectedId
+              : nextVersions.find((version) => version.current)?.id ?? nextVersions[0]?.id ?? null,
+          );
         }}
         onDownloadTemplate={downloadConnectionTemplate}
       />

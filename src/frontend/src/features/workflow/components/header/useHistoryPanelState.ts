@@ -1,18 +1,24 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { historyItems } from './historyPanel.data';
 import type { HistoryVersionItem } from '../../types/history.types';
 import { buildHistoryRows } from './historyPanel.utils';
 
-type Props = { open: boolean; onClose: () => void; items?: HistoryVersionItem[] };
+type Props = {
+  open: boolean;
+  onClose: () => void;
+  items?: HistoryVersionItem[];
+  selectedId?: string | null;
+  onSelectedIdChange?: (id: string | null) => void;
+};
 
-export function useHistoryPanelState({ open, onClose, items: initialItems = historyItems }: Props) {
+export function useHistoryPanelState({ open, onClose, items: initialItems = historyItems, selectedId: controlledSelectedId, onSelectedIdChange }: Props) {
   const [items, setItems] = useState(initialItems);
   const [comments, setComments] = useState<Record<string, string>>({});
   const [activeId, setActiveId] = useState<string | null>(null);
   const [hoveredCommentId, setHoveredCommentId] = useState<string | null>(null);
   const [expandedCommentId, setExpandedCommentId] = useState<string | null>(null);
   const [expandedMetrics, setExpandedMetrics] = useState<Record<string, { width: number; shiftLeft: number }>>({});
-  const [selectedId, setSelectedId] = useState<string | null>(historyItems[0]?.id ?? null);
+  const [internalSelectedId, setInternalSelectedId] = useState<string | null>(historyItems[0]?.id ?? null);
   const [menuId, setMenuId] = useState<string | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [pendingSelectId, setPendingSelectId] = useState<string | null>(null);
@@ -20,14 +26,32 @@ export function useHistoryPanelState({ open, onClose, items: initialItems = hist
   const menuRef = useRef<HTMLDivElement | null>(null);
   const commentRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const rows = useMemo(() => buildHistoryRows(items), [items]);
+  const selectedId = controlledSelectedId !== undefined ? controlledSelectedId : internalSelectedId;
+  const setSelectedId = useCallback((next: string | null | ((current: string | null) => string | null)) => {
+    const nextId = typeof next === 'function' ? next(selectedId) : next;
+    setInternalSelectedId(nextId);
+    onSelectedIdChange?.(nextId);
+  }, [onSelectedIdChange, selectedId]);
 
   useEffect(() => {
     setItems(initialItems);
-    setSelectedId(initialItems.find((item) => item.current)?.id ?? initialItems[0]?.id ?? null);
+    setSelectedId((currentSelectedId) => {
+      if (currentSelectedId && initialItems.some((item) => item.id === currentSelectedId)) {
+        return currentSelectedId;
+      }
+      return initialItems.find((item) => item.current)?.id ?? initialItems[0]?.id ?? null;
+    });
   }, [initialItems]);
 
   useEffect(() => {
-    setComments(Object.fromEntries(items.map((item) => [item.id, item.comment])));
+    setComments((currentComments) =>
+      Object.fromEntries(
+        items.map((item) => [
+          item.id,
+          item.comment || currentComments[item.id] || '',
+        ]),
+      ),
+    );
   }, [items]);
 
   useEffect(() => {
