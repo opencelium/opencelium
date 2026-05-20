@@ -1,5 +1,6 @@
 import type { WorkflowEdgeModel, WorkflowNodeData, WorkflowNodeModel } from '../types/workflow.types';
 import { buildLegacyConnection } from '../components/request-editor/legacyAdapter';
+import { ITERATOR_NAMES } from '../components/request-editor/body-editor/requestReferenceOptions';
 import { ALL_COLORS } from '../constants/colors';
 
 type BuildConnectionPayloadArgs = {
@@ -366,15 +367,51 @@ const buildMethodPayload = (node: WorkflowNodeModel, index: string, order: numbe
 	};
 };
 
-const buildOperatorPayload = (node: WorkflowNodeModel, index: string) => ({
+const buildOperatorPayload = (node: WorkflowNodeModel, index: string, iterator?: string) => ({
 	id: node.id,
 	index,
 	type: nodeKind(node),
 	expression: node.data.conditionConfig?.expression ?? '',
-	...(nodeKind(node) === 'loop' && (node.data.conditionConfig as any)?.iterator
-		? { iterator: (node.data.conditionConfig as any).iterator }
+	...(nodeKind(node) === 'loop' && iterator
+		? { iterator }
 		: {}),
 });
+
+const getParentIndex = (index: string, depth: number) =>
+	index.split('_').slice(0, -depth).join('_');
+
+const getLoopIterator = (
+	node: WorkflowNodeModel,
+	index: string,
+	operators: Array<{ index: string; type: string; iterator?: string }>,
+) => {
+	const existing = (node.data.conditionConfig as any)?.iterator;
+	if (existing) return existing;
+
+	let result = ITERATOR_NAMES[0];
+	const splitOperatorIndex = index.split('_');
+
+	if (splitOperatorIndex.length > 1) {
+		let decreaseIterator = 1;
+		let previousOperator: { type: string; iterator?: string } | undefined;
+
+		while (true) {
+			const decreasedOperatorIndex = getParentIndex(index, decreaseIterator);
+			previousOperator = operators.find((operator) => operator.index === decreasedOperatorIndex);
+			if (!previousOperator || previousOperator.type === 'loop') break;
+			decreaseIterator += 1;
+		}
+
+		if (previousOperator?.iterator) {
+			const previousIteratorIndex = ITERATOR_NAMES.indexOf(previousOperator.iterator);
+			if (previousIteratorIndex >= 0) {
+				result = ITERATOR_NAMES[previousIteratorIndex + 1] ?? 'ii';
+			}
+		}
+	}
+
+	return result;
+};
 
 const parseBindingReference = (reference: unknown) => {
 	const match = String(reference ?? '')
@@ -437,9 +474,23 @@ export function buildFromConnectorPayload(nodes: WorkflowNodeModel[], edges: Wor
 		.filter(isMethodNode)
 		.map((node, index) => buildMethodPayload(node, normalizeIndex(workflowIndexes.get(node.id), index), index))
 		.sort(compareIndex);
-	const operators = nodes
+	const operatorEntries = nodes
 		.filter(isOperatorNode)
-		.map((node, index) => buildOperatorPayload(node, workflowIndexes.get(node.id) ?? String(methods.length + index)))
+		.map((node, index) => ({
+			node,
+			index: workflowIndexes.get(node.id) ?? String(methods.length + index),
+		}))
+		.sort(compareIndex);
+	const builtOperators: Array<{ index: string; type: string; iterator?: string }> = [];
+	const operators = operatorEntries
+		.map(({ node, index }) => {
+			const iterator = nodeKind(node) === 'loop'
+				? getLoopIterator(node, index, builtOperators)
+				: undefined;
+			const operator = buildOperatorPayload(node, index, iterator);
+			builtOperators.push(operator);
+			return operator;
+		})
 		.sort(compareIndex);
 
 	const fromConnector = {

@@ -99,6 +99,11 @@ export const ReferenceInfo: React.FC<ReferenceInfoProps> = ({
 		return `${base}${f}`;
 	};
 
+	const formatSourceField = (messagePropertyName: string, field: string) => {
+		const f = (field || '').trim();
+		return f ? `${messagePropertyName}.$.${f}` : `${messagePropertyName}.$`;
+	};
+
 	return (
 		<div style={{ fontFamily: 'Inter, sans-serif', fontSize: 14 }}>
 			{Object.entries(fieldReferences).map(([field, refs]) => {
@@ -185,7 +190,7 @@ export const ReferenceInfo: React.FC<ReferenceInfoProps> = ({
 											fontWeight: 500,
 										}}
 									>
-										{`${r.sourceMessageProperty}.$.${r.target}`}
+										{formatSourceField(r.sourceMessageProperty, r.target)}
 									</span>
 									<span>{i === refs.length - 1 ? ' field.' : ' field; '}</span>
 								</div>

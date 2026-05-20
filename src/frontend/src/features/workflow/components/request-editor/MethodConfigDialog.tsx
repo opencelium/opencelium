@@ -23,7 +23,7 @@ type Props = {
   edges?: WorkflowEdgeModel[];
   fieldBindings?: any[];
   onClose: () => void;
-  onSave: (nodeId: string, config: WorkflowMethodConfig) => void;
+  onSave: (nodeId: string, config: WorkflowMethodConfig, fieldBindings?: any[]) => void;
 };
 
 function LegacyUrlEditorContent({ nodeId }: { nodeId: string }) {
@@ -116,9 +116,10 @@ export function MethodConfigDialog({ open, node, mode, nodes, edges, fieldBindin
     if (activeElement instanceof HTMLElement) activeElement.blur();
 
     requestAnimationFrame(() => {
-      const config = extractWorkflowMethodConfig(store.getState().connection.connection, node.id);
+      const currentConnection = store.getState().connection.connection;
+      const config = extractWorkflowMethodConfig(currentConnection, node.id);
       if (config) {
-        onSave(node.id, config);
+        onSave(node.id, config, currentConnection?.fieldBindings);
       } else {
         onClose();
       }

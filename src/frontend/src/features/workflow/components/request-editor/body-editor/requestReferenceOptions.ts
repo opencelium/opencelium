@@ -1,4 +1,4 @@
-import type { Connection, MethodWithId } from '../../../types/connection';
+import { OperatorType, type Connection, type LoopOperatorWithId, type MethodWithId, type OperatorWithId } from '../../../types/connection';
 
 export type ResponseType = 'body' | 'header' | 'status';
 
@@ -22,8 +22,25 @@ const getSource = (method: MethodWithId | undefined, type: ResponseType) => {
 
 const normalizePath = (path: string) => path.replace(/^\$\.?/, '');
 
+const isRootPath = (path: string) => path === '$' || path === '$.';
+
 const getArrayAccessIterator = (part: string) =>
   part.startsWith('[') && part.endsWith(']') ? part.slice(1, -1) : '';
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  !!value && typeof value === 'object' && !Array.isArray(value);
+
+const isArrayNode = (value: unknown) =>
+  Array.isArray(value) || (isRecord(value) && value.type === 'array' && 'fields' in value);
+
+const getArrayItem = (value: unknown) => {
+  if (Array.isArray(value)) return value[0];
+  if (isRecord(value) && value.type === 'array') {
+    const fields = value.fields;
+    return Array.isArray(fields) ? fields[0] : fields;
+  }
+  return undefined;
+};
 
 const exactReadAtPath = (source: unknown, path: string, iterators: string[] = []) => {
   if (!path) return source;
@@ -31,12 +48,12 @@ const exactReadAtPath = (source: unknown, path: string, iterators: string[] = []
   let current = source;
   for (const part of parts) {
     const iterator = getArrayAccessIterator(part);
-    if (Array.isArray(current) && (part === '[0]' || part === '[*]' || iterators.includes(iterator))) {
-      current = current[0];
+    if (isArrayNode(current) && (part === '[0]' || part === '[*]' || iterators.includes(iterator))) {
+      current = getArrayItem(current);
       continue;
     }
-    if (current && typeof current === 'object') {
-      current = (current as Record<string, unknown>)[part];
+    if (isRecord(current)) {
+      current = current[part];
       continue;
     }
     return undefined;
@@ -63,13 +80,13 @@ const getContext = (
 
   for (const part of parts) {
     const iterator = getArrayAccessIterator(part);
-    if (Array.isArray(current) && (part === '[0]' || part === '[*]' || iterators.includes(iterator))) {
-      current = current[0];
+    if (isArrayNode(current) && (part === '[0]' || part === '[*]' || iterators.includes(iterator))) {
+      current = getArrayItem(current);
       lastValidPath = appendPath(lastValidPath, part);
       continue;
     }
-    if (current && typeof current === 'object' && part in (current as Record<string, unknown>)) {
-      current = (current as Record<string, unknown>)[part];
+    if (isRecord(current) && part in current) {
+      current = current[part];
       lastValidPath = appendPath(lastValidPath, part);
       continue;
     }
@@ -90,10 +107,10 @@ export const getReferenceOptions = (
   const options: ReferenceOption[] = [];
 
   if (!normalizePath(currentPath)) {
-    options.push({ label: 'The root object', value: '$' });
+    options.push({ label: 'The root object', value: '$.' });
   }
 
-  if (Array.isArray(node)) {
+  if (isArrayNode(node)) {
     return [
       ...options,
       { label: 'First element of the array', value: appendPath(lastValidPath, '[0]') },
@@ -105,8 +122,8 @@ export const getReferenceOptions = (
     ];
   }
 
-  if (node && typeof node === 'object') {
-    options.push(...Object.keys(node as Record<string, unknown>).map((key) => ({
+  if (isRecord(node)) {
+    options.push(...Object.keys(node).map((key) => ({
       label: key,
       value: appendPath(lastValidPath, key),
     })));
@@ -117,7 +134,7 @@ export const getReferenceOptions = (
 
 export const buildReferenceValue = (color: string, type: ResponseType, path: string) => {
   if (type === 'status') return `${color}.(response).status`;
-  if (path === '$' || path === '$.') return `${color}.(response).${type}.$`;
+  if (path === '$') return `${color}.(response).${type}.$`;
   if (path.startsWith('$.') || path.startsWith('$[')) return `${color}.(response).${type}.${path}`;
   return path.startsWith('[') ? `${color}.(response).${type}.$${path}` : `${color}.(response).${type}.$.${path}`;
 };
@@ -129,24 +146,64 @@ export const isExpandableReferencePath = (
   iterators: string[] = [],
 ) => {
   if (type === 'status') return false;
+  if (isRootPath(path)) return false;
   const source = getSource(method, type);
   const current = exactReadAtPath(source, path, iterators);
-  return Array.isArray(current) || (!!current && typeof current === 'object');
+  return isArrayNode(current) || isRecord(current);
 };
 
-const isChildIndex = (childIndex?: string, parentIndex?: string) =>
-  !!childIndex && !!parentIndex && childIndex !== parentIndex && childIndex.startsWith(`${parentIndex}_`);
+const parseIndexPath = (value: unknown) =>
+  String(value ?? '')
+    .split('_')
+    .map((part) => Number(part))
+    .map((part) => (Number.isFinite(part) ? part : 0));
+
+const compareIndex = (left?: unknown, right?: unknown) => {
+  const leftPath = parseIndexPath(left);
+  const rightPath = parseIndexPath(right);
+  const length = Math.max(leftPath.length, rightPath.length);
+
+  for (let index = 0; index < length; index += 1) {
+    const leftPart = leftPath[index] ?? -1;
+    const rightPart = rightPath[index] ?? -1;
+    if (leftPart !== rightPart) return leftPart - rightPart;
+  }
+
+  return leftPath.length - rightPath.length;
+};
+
+const isLoopOperator = (operator: OperatorWithId | undefined): operator is LoopOperatorWithId =>
+  operator?.type === OperatorType.Loop;
 
 export const getIteratorsForIndex = (
   connection: Connection,
   targetIndex: string | undefined,
 ): string[] => {
   if (!targetIndex) return [];
-  return connection.fromConnector.operator
-    .filter((operator) => operator.type === 'loop' && isChildIndex(targetIndex, operator.index))
-    .sort((left, right) => left.index.split('_').length - right.index.split('_').length)
-    .map((operator, index) => (operator as any).iterator || ITERATOR_NAMES[index])
-    .filter((iterator): iterator is string => !!iterator);
+  const splitMethodIndex = targetIndex.split('_');
+  const previousOperatorIndex = splitMethodIndex.length === 1 ? '-1' : splitMethodIndex.slice(0, -1).join('_');
+  const operators = [...connection.fromConnector.operator].sort((left, right) => compareIndex(left.index, right.index));
+  let previousOperatorArrayIndex = operators.findIndex((operator) => operator.index === previousOperatorIndex);
+
+  if (previousOperatorArrayIndex === -1) return [];
+
+  while (true) {
+    if (operators[previousOperatorArrayIndex]?.type === 'loop') break;
+    if (previousOperatorArrayIndex === 0) break;
+    previousOperatorArrayIndex -= 1;
+  }
+
+  const previousOperator = operators[previousOperatorArrayIndex];
+  const iteratorName = isLoopOperator(previousOperator) ? previousOperator.iterator : undefined;
+  if (!iteratorName) return [];
+  if (ITERATOR_NAMES.indexOf(iteratorName) === -1) return [];
+
+  const previousIterators: string[] = [];
+  for (const iterator of ITERATOR_NAMES) {
+    previousIterators.push(iterator);
+    if (iterator === iteratorName) break;
+  }
+  return previousIterators;
 };
 
 export const getIteratorsForMethod = (

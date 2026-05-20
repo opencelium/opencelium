@@ -72,14 +72,6 @@ export function LegacyBodyReferenceGenerator({ connection, currentMethod, onAppl
     () => getIteratorsForMethod(connection, currentMethod),
     [connection, currentMethod],
   );
-  const selectedMethodIterators = useMemo(
-    () => getIteratorsForMethod(connection, selectedMethod),
-    [connection, selectedMethod],
-  );
-  const iterators = useMemo(
-    () => Array.from(new Set([...currentMethodIterators, ...selectedMethodIterators])),
-    [currentMethodIterators, selectedMethodIterators],
-  );
   const shellClassName =
     referenceType === 'webhook'
       ? 'bodyLegacyGeneratorShell bodyLegacyGeneratorShellWebhook'
@@ -138,7 +130,7 @@ export function LegacyBodyReferenceGenerator({ connection, currentMethod, onAppl
             type={responseType}
             value={field}
             disabled={!methodId}
-            iterators={iterators}
+            iterators={currentMethodIterators}
             onChange={setField}
           />
           <Button

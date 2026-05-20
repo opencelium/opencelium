@@ -13,11 +13,12 @@ export function parseEnhancementArg(value: string): ParsedArg | null {
 	if (!match) return null;
 
 	const [, color, direction, messageProperty, path] = match;
+	const normalizedPath = path === '$' || path === '$.' ? '' : path || '';
 
 	return {
 		color: `#${color}`,
 		direction: direction as 'request' | 'response',
 		messageProperty,
-		path: path || '',
+		path: normalizedPath,
 	};
 }

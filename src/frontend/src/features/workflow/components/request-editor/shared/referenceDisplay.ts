@@ -26,8 +26,8 @@ export const getReferenceDisplayLabel = (reference = '') => {
   const parsed = parseReferenceDisplay(reference);
   if (!parsed) return reference;
   if (parsed.messageProperty === 'status') return 'Response Status';
-  if (parsed.messageProperty === 'header') return `H:${parsed.path}`;
-  return `B:${parsed.path}`;
+  if (parsed.messageProperty === 'header') return parsed.path ? `H:${parsed.path}` : 'H:root object';
+  return parsed.path ? `B:${parsed.path}` : 'B:root object';
 };
 
 export const getReferenceDisplayTitle = (reference = '') => {

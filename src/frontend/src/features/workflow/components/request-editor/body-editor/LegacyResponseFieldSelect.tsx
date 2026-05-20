@@ -23,7 +23,7 @@ export function LegacyResponseFieldSelect({ method, type, value, disabled, itera
 
   useEffect(() => {
     setPath(value || '');
-    setOptionsBase(isExpandableReferencePath(method, type, value || '', iterators) ? value || '' : '');
+    setOptionsBase(value || '');
   }, [iterators, method, type, value]);
 
   const options = useMemo(
@@ -66,18 +66,17 @@ export function LegacyResponseFieldSelect({ method, type, value, disabled, itera
         getPopupContainer={() => document.body}
         styles={{ popup: { root: { zIndex: 13010 } } }}
         options={options}
-        open={disabled || type === 'status' ? false : open}
+        notFoundContent={path ? null : undefined}
+        open={disabled || type === 'status' || (open && path && options.length === 0) ? false : open}
         onSearch={(nextValue) => {
           if (!userInteractionRef.current) return;
-          if (selectingRef.current && nextValue === '') {
+          if (selectingRef.current) {
             selectingRef.current = false;
             return;
           }
           setPath(nextValue);
           onChange(nextValue || undefined);
-          if (isExpandableReferencePath(method, type, nextValue, iterators)) {
-            setOptionsBase(nextValue);
-          }
+          setOptionsBase(nextValue);
           setOpen(userInteractionRef.current);
         }}
         onSelect={(nextValue) => {

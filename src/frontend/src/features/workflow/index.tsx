@@ -426,7 +426,12 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         edges={workflow.edges}
         fieldBindings={loadedFieldBindings}
         onClose={() => workflow.setMethodEditor(null)}
-        onSave={workflow.onSaveMethodConfig}
+        onSave={(nodeId, config, nextFieldBindings) => {
+          if (Array.isArray(nextFieldBindings)) {
+            setLoadedFieldBindings(nextFieldBindings);
+          }
+          workflow.onSaveMethodConfig(nodeId, config);
+        }}
       />
       <ConditionBuilderDialog
         open={!!workflow.conditionEditor}

@@ -55,7 +55,18 @@ export const EnhancementArgs: React.FC<EnhancementArgsProps> = ({ enhancement })
     };
 
     const stripRootPath = (path: string) =>
-        String(path || '').replace(/^\$\./, '').replace(/^\$/, '');
+        String(path || '')
+            .replace(/\.$/, '')
+            .replace(/^\$\./, '')
+            .replace(/^\$/, '');
+
+    const getFieldName = (entry: ParsedArgEntry) => {
+        const fieldName = stripRootPath(entry.path);
+        if (!fieldName && (entry.messageProperty === 'body' || entry.messageProperty === 'header')) {
+            return `${entry.messageProperty}.$`;
+        }
+        return fieldName;
+    };
 
     const renderSourceDescription = (entry: ParsedArgEntry) => {
         if (entry.direction === 'response' && entry.messageProperty === 'status') {
@@ -79,7 +90,7 @@ export const EnhancementArgs: React.FC<EnhancementArgsProps> = ({ enhancement })
             );
         }
 
-        const fieldName = stripRootPath(entry.path);
+        const fieldName = getFieldName(entry);
         const locationLabel =
             entry.direction === 'response'
                 ? entry.messageProperty === 'body'

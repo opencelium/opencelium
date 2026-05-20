@@ -13,7 +13,6 @@ import { LegacyResponseFieldSelect } from '../request-editor/body-editor/LegacyR
 import { LegacyWebhookReferenceSelect } from '../request-editor/body-editor/LegacyWebhookReferenceSelect';
 import {
 	buildReferenceValue,
-	getIteratorsForMethod,
 	ITERATOR_NAMES,
 	type ResponseType,
 } from '../request-editor/body-editor/requestReferenceOptions';
@@ -273,14 +272,12 @@ function ConditionValueInput({
 	properties,
 	methods,
 	iterators,
-	iteratorsByMethodId,
 	onChange,
 }: {
 	side: 'left' | 'right';
 	properties: ConditionRuleProperties;
 	methods: MethodWithId[];
 	iterators: string[];
-	iteratorsByMethodId: Map<string, string[]>;
 	onChange: (patch: Partial<ConditionRuleProperties>) => void;
 }) {
 	const fieldKey = side === 'left' ? 'leftField' : 'rightField';
@@ -294,11 +291,6 @@ function ConditionValueInput({
 	const methodId = draftMethodId || parsedMethod?.id;
 	const responseType = normalizeResponseType(draftResponseType);
 	const selectedMethod = methods.find((method) => method.id === methodId);
-	const methodIterators = methodId ? iteratorsByMethodId.get(methodId) ?? [] : [];
-	const mergedIterators = useMemo(
-		() => Array.from(new Set([...iterators, ...methodIterators])),
-		[iterators, methodIterators],
-	);
 
 	useEffect(() => {
 		if (!fieldValue) return;
@@ -370,7 +362,7 @@ function ConditionValueInput({
 					type={responseType}
 					value={parsePathFromReference(fieldValue)}
 					disabled={!methodId}
-					iterators={mergedIterators}
+					iterators={iterators}
 					onChange={(value) => {
 						const path = parsePathFromReference(value);
 						onChange({
@@ -391,7 +383,6 @@ function RuleRow({
 	operatorType,
 	methods,
 	iterators,
-	iteratorsByMethodId,
 	canDelete,
 	onChange,
 	onDelete,
@@ -400,7 +391,6 @@ function RuleRow({
 	operatorType: 'if' | 'loop';
 	methods: MethodWithId[];
 	iterators: string[];
-	iteratorsByMethodId: Map<string, string[]>;
 	canDelete: boolean;
 	onChange: (patch: Partial<ConditionRuleProperties>) => void;
 	onDelete: () => void;
@@ -430,7 +420,6 @@ function RuleRow({
 					properties={properties}
 					methods={methods}
 					iterators={iterators}
-					iteratorsByMethodId={iteratorsByMethodId}
 					onChange={onChange}
 				/>
 			)}
@@ -451,7 +440,6 @@ function RuleRow({
 					properties={properties}
 					methods={methods}
 					iterators={iterators}
-					iteratorsByMethodId={iteratorsByMethodId}
 					onChange={onChange}
 				/>
 			) : !isLoop && hasBinaryRight ? (
@@ -460,7 +448,6 @@ function RuleRow({
 					properties={properties}
 					methods={methods}
 					iterators={iterators}
-					iteratorsByMethodId={iteratorsByMethodId}
 					onChange={onChange}
 				/>
 			) : null}
@@ -470,7 +457,6 @@ function RuleRow({
 					properties={properties}
 					methods={methods}
 					iterators={iterators}
-					iteratorsByMethodId={iteratorsByMethodId}
 					onChange={onChange}
 				/>
 			) : null}
@@ -489,14 +475,12 @@ function GroupEditor({
 	operatorType,
 	methods,
 	iterators,
-	iteratorsByMethodId,
 	onChange,
 }: {
 	group: ConditionGroup;
 	operatorType: 'if' | 'loop';
 	methods: MethodWithId[];
 	iterators: string[];
-	iteratorsByMethodId: Map<string, string[]>;
 	onChange: (group: ConditionGroup) => void;
 }) {
 	const items = group.items || [];
@@ -581,7 +565,6 @@ function GroupEditor({
 							operatorType={operatorType}
 							methods={methods}
 							iterators={iterators}
-							iteratorsByMethodId={iteratorsByMethodId}
 							canDelete={operatorType === 'if'}
 							onDelete={() => onChange(removeChildById(group, child.id))}
 							onChange={(patch) => onChange(updateRuleProperties(group, child.id, patch))}
@@ -593,7 +576,6 @@ function GroupEditor({
 							operatorType={operatorType}
 							methods={methods}
 							iterators={iterators}
-							iteratorsByMethodId={iteratorsByMethodId}
 							onChange={(nextGroup) => {
 								onChange({
 									...group,
@@ -629,13 +611,6 @@ export function ConditionBuilderDialog({
 		() => getPreviousIterators(connection, node),
 		[connection, node],
 	);
-	const iteratorsByMethodId = useMemo(() => {
-		const map = new Map<string, string[]>();
-		methods.forEach((method) => {
-			map.set(method.id, getIteratorsForMethod(connection, method));
-		});
-		return map;
-	}, [connection, methods]);
 	const loopIterator = useMemo(
 		() => getCurrentLoopIterator(connection, node),
 		[connection, node],
@@ -678,7 +653,6 @@ export function ConditionBuilderDialog({
 					operatorType={operatorType}
 					methods={methods}
 					iterators={iterators}
-					iteratorsByMethodId={iteratorsByMethodId}
 					onChange={setTree}
 				/>
 			</div>

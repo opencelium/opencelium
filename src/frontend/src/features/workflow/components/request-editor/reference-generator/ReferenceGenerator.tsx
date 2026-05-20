@@ -4,6 +4,7 @@ import { Button } from 'antd';
 import type { Connection, MethodWithId } from '../../../types/connection';
 import {
 	buildReferenceValue,
+	getIteratorsForMethod,
 	getReferenceOptions,
 	isExpandableReferencePath,
 	type ResponseType,
@@ -23,6 +24,14 @@ interface OptionType {
 	label: string;
 	value: string;
 }
+
+const getReferenceFilterTerm = (value: string) => {
+	const normalized = String(value || '');
+	const lastDotIndex = normalized.lastIndexOf('.');
+	const lastBracketIndex = normalized.lastIndexOf(']');
+	const splitIndex = Math.max(lastDotIndex, lastBracketIndex);
+	return splitIndex >= 0 ? normalized.slice(splitIndex + 1).toLowerCase() : normalized.toLowerCase();
+};
 
 type WorkflowEdgeLike = {
 	source?: string;
@@ -152,6 +161,10 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 		() => methods.find((m) => m.id === selectedMethodId),
 		[methods, selectedMethodId],
 	);
+	const currentMethodIterators = useMemo(
+		() => (connection ? getIteratorsForMethod(connection, currentMethod) : []),
+		[connection, currentMethod],
+	);
 
 	useEffect(() => {
 		if (!open) {
@@ -222,7 +235,7 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 
 		setSearchValue('');
 		setSelectedOption(null);
-		const nextOptions = getReferenceOptions(selectedMethod, responseType, '');
+		const nextOptions = getReferenceOptions(selectedMethod, responseType, '', currentMethodIterators);
 		setFilteredOptions(nextOptions);
 		setDropdownPosition(null);
 		setMethodDropdownPosition(null);
@@ -230,7 +243,7 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 			fieldInputRef.current?.focus();
 			updateDropdownPosition();
 		});
-	}, [selectedMethod, responseType]);
+	}, [currentMethodIterators, selectedMethod, responseType]);
 
 	const updateDropdownPosition = () => {
 		if (!fieldInputRef.current) return;
@@ -339,12 +352,18 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 
 		if (!value) {
 			setSelectedOption(null);
-			setFilteredOptions(getReferenceOptions(selectedMethod, responseType, ''));
+			setFilteredOptions(getReferenceOptions(selectedMethod, responseType, '', currentMethodIterators));
 			return;
 		}
 
-		const baseOptions = getReferenceOptions(selectedMethod, responseType, value);
-		const term = value.toLowerCase();
+		if (value === '$' || value === '$.') {
+			setSelectedOption({ label: 'The root object', value: '$.' });
+			setFilteredOptions([]);
+			return;
+		}
+
+		const baseOptions = getReferenceOptions(selectedMethod, responseType, value, currentMethodIterators);
+		const term = getReferenceFilterTerm(value);
 
 		const filtered =
 			term === ''
@@ -373,7 +392,7 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 		setSearchValue('');
 		setSelectedOption(null);
 		if (selectedMethod) {
-			const nextOptions = getReferenceOptions(selectedMethod, nextType, '');
+			const nextOptions = getReferenceOptions(selectedMethod, nextType, '', currentMethodIterators);
 			setFilteredOptions(nextOptions);
 			requestAnimationFrame(() => {
 				fieldInputRef.current?.focus();
@@ -387,8 +406,14 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 		setSearchValue(opt.value);
 		if (!selectedMethod) return;
 
-		if (isExpandableReferencePath(selectedMethod, responseType, opt.value)) {
-			const nextOptions = getReferenceOptions(selectedMethod, responseType, opt.value);
+		if (opt.value === '$' || opt.value === '$.') {
+			setFilteredOptions([]);
+			setDropdownPosition(null);
+			return;
+		}
+
+		if (isExpandableReferencePath(selectedMethod, responseType, opt.value, currentMethodIterators)) {
+			const nextOptions = getReferenceOptions(selectedMethod, responseType, opt.value, currentMethodIterators);
 			setFilteredOptions(nextOptions);
 			return;
 		}
@@ -683,6 +708,7 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 											selectedMethod,
 											responseType,
 											path,
+											currentMethodIterators,
 										);
 										setFilteredOptions(nextOptions);
 										updateDropdownPosition();
