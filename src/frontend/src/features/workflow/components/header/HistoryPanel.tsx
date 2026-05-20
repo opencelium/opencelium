@@ -25,12 +25,20 @@ export function HistoryPanel({ open, items, onClose, onDeleteVersion, onDownload
 
 	const saveComment = async (id: string) => {
 		const item = state.items.find((current) => current.id === id);
-		if (item) await onSaveComment?.(item.snapshotId, state.comments[id] ?? '');
-		state.setItems((current) =>
-			current.map((item) =>
-				item.id === id ? { ...item, comment: state.comments[id] ?? '' } : item,
-			),
-		);
+		try {
+			if (item) await onSaveComment?.(item.snapshotId, state.comments[id] ?? '');
+			state.setItems((current) =>
+				current.map((item) =>
+					item.id === id ? { ...item, comment: state.comments[id] ?? '' } : item,
+				),
+			);
+			state.setActiveId((current) => (current === id ? null : current));
+			state.setExpandedCommentId((current) => (current === id ? null : current));
+			(document.activeElement as HTMLElement | null)?.blur?.();
+			message.success('Comment saved.');
+		} catch {
+			message.error('Failed to save comment.');
+		}
 	};
 
 	const deleteItem = async () => {

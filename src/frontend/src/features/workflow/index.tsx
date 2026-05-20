@@ -20,6 +20,8 @@ import { loadConnectionVersions, loadWorkflowConnection, loadWorkflowConnectionV
 import { buildConnectionPayload, buildFromConnectorPayload } from './api/connectionPayload';
 import { useGetConnectorsQuery } from '@entities/connector/api/connectorApi';
 import { selectAuthUser } from '@entities/auth/model/authSelectors';
+import { store } from '@app/store/store';
+import { genericApi } from '@shared/api/genericApi';
 import { useAppSelector } from '@shared/lib/storeHooks';
 import type { Connector } from '@entities/connector/model/types';
 import type { AuthUser } from '@entities/auth/model/types';
@@ -294,6 +296,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       setHistoryVersions(nextVersions);
       setSelectedHistoryVersionId(nextVersions[0]?.id ?? null);
     }
+    store.dispatch(genericApi.util.invalidateTags([{ type: 'Entity', id: '/connection/all/meta' }] as any));
     message.success(
       tEntities(isCreate ? 'connection.messages.saved.create' : 'connection.messages.saved.update', { title }),
     );

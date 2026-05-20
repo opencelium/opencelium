@@ -66,7 +66,18 @@ export function HistoryEntryRow(props: Props) {
         </div>
         {props.activeId === props.item.id || props.expandedCommentId === props.item.id ? (
           <div className='historySaveRow'>
-            <button className='primaryButton historySaveButton' type='button' onClick={(event) => { event.stopPropagation(); props.onSave(props.item.id); }}>
+            <button
+              className='primaryButton historySaveButton'
+              type='button'
+              onMouseDown={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+              }}
+              onClick={(event) => {
+                event.stopPropagation();
+                props.onSave(props.item.id);
+              }}
+            >
               Save
             </button>
           </div>
