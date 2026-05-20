@@ -78,7 +78,7 @@ class UserServiceImplSliceTest {
     }
 
     @Test
-    void changePasswordPersistsNewPasswordViaDirtyCheckingWithoutExplicitSave() {
+    void changePasswordPersistsNewPasswordWhenSessionFlushes() {
         User persisted = UserFixture.anEmptyUser();
         persisted.setEmail("alice@example.com");
         persisted.setAuthMethod(AuthMethod.BASIC);

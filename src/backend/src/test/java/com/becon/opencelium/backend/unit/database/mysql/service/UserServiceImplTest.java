@@ -205,7 +205,7 @@ class UserServiceImplTest {
     // ── existsByEmail / existsById / deleteById / findAll ─────────────────────
 
     @Test
-    void existsByEmailDelegatesToRepository() {
+    void existsByEmailReturnsTrueWhenRepositoryReportsExists() {
         when(userRepository.existsByEmail("a@b.com")).thenReturn(true);
 
         boolean result = userService.existsByEmail("a@b.com");
@@ -216,7 +216,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void existsByIdDelegatesToRepository() {
+    void existsByIdReturnsTrueWhenRepositoryReportsExists() {
         when(userRepository.existsById(42)).thenReturn(true);
 
         boolean result = userService.existsById(42);
@@ -227,7 +227,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void deleteByIdDelegatesToRepository() {
+    void deleteByIdInvokesRepositoryWhenCalled() {
         userService.deleteById(13);
 
         verify(userRepository).deleteOneById(13);
@@ -235,7 +235,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void findAllReturnsAllUsersFromRepository() {
+    void findAllReturnsAllUsersWhenRepositoryHasEntries() {
         User one = UserFixture.anEmptyUser();
         one.setId(1);
         User two = UserFixture.anEmptyUser();
@@ -252,7 +252,7 @@ class UserServiceImplTest {
     // ── encodePassword / toResource / toEntity ────────────────────────────────
 
     @Test
-    void encodePasswordReturnsEncoderResult() {
+    void encodePasswordReturnsEncoderOutputWhenCalled() {
         when(bCryptPasswordEncoder.encode("rawPw")).thenReturn("$2a$encoded");
 
         String result = userService.encodePassword("rawPw");
@@ -263,7 +263,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void toResourceWrapsEntity() {
+    void toResourceReturnsResourceWhenEntityProvided() {
         UserDetail detail = new UserDetail();
         detail.setTutorial(false);
 
@@ -282,7 +282,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void toEntityMapsWidgetSettingsAndDelegatesPerSetting() {
+    void toEntityMapsWidgetSettingsWhenResourceHasSettings() {
         WidgetSettingResource wsr1 = new WidgetSettingResource();
         wsr1.setWidgetId(101);
         WidgetSettingResource wsr2 = new WidgetSettingResource();
@@ -316,7 +316,7 @@ class UserServiceImplTest {
     // ── requestToEntity ───────────────────────────────────────────────────────
 
     @Test
-    void requestToEntityCreatesNewUserAndEncodesPasswordWhenUserDoesNotExist() {
+    void requestToEntityCreatesNewUserWhenUserDoesNotExist() {
         UserRequestResource request = aRequestResource(0, "alice@example.com", "rawPw", 7);
         UserDetail mappedDetail = new UserDetail();
         UserRole role = UserRoleFixture.aStandardUserRole();

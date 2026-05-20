@@ -36,7 +36,7 @@ class NashornEngineTest {
     // ── execute — no bindings ─────────────────────────────────────────────────
 
     @Test
-    void executeReturnsEvaluatedExpressionWithoutBindings() {
+    void executeReturnsResultWhenBindingsAreAbsent() {
         assertThat(engine.execute("1 + 2")).isEqualTo(3);
     }
 
@@ -53,18 +53,18 @@ class NashornEngineTest {
     // ── execute — primitive bindings ──────────────────────────────────────────
 
     @Test
-    void executeReturnsResultWithPrimitiveBinding() {
+    void executeReturnsResultWhenBindingIsPrimitive() {
         assertThat(engine.execute("a + 5", Map.of("a", 10))).isEqualTo(15.0);
     }
 
     @Test
-    void executeReturnsConcatenatedStringWithStringBinding() {
+    void executeReturnsConcatenatedStringWhenBindingIsString() {
         assertThat(engine.execute("greeting + ', world!'", Map.of("greeting", "Hello")))
                 .isEqualTo("Hello, world!");
     }
 
     @Test
-    void executeReturnsStringWithNullBinding() {
+    void executeReturnsStringWhenBindingIsNull() {
         Map<String, Object> bindings = new HashMap<>();
         bindings.put("name", null);
 
@@ -74,7 +74,7 @@ class NashornEngineTest {
     // ── execute — collection and object bindings ──────────────────────────────
 
     @Test
-    void executeReturnsStringFromObjectPropertiesWithMapBinding() {
+    void executeReadsObjectPropertiesWhenBindingIsMap() {
         assertThat(engine.execute(
                 "user.name + ' is ' + user.age + ' years old'",
                 Map.of("user", Map.of("name", "Alice", "age", 30))
@@ -82,18 +82,18 @@ class NashornEngineTest {
     }
 
     @Test
-    void executeReturnsSumOfListElementsWithListBinding() {
+    void executeReturnsSumWhenBindingIsList() {
         assertThat(engine.execute("data[0] + data[1]", Map.of("data", List.of(3, 4)))).isEqualTo(7.0);
     }
 
     @Test
-    void executeReturnsArrayLengthWithListBinding() {
+    void executeReturnsArrayLengthWhenBindingIsList() {
         assertThat(((Number) engine.execute("items.length", Map.of("items", List.of(1, 2, 3)))).intValue())
                 .isEqualTo(3);
     }
 
     @Test
-    void executeReturnsMappedValueWithMapBinding() {
+    void executeReturnsMappedValueWhenBindingIsMap() {
         assertThat(((Number) engine.execute("myMap.value", Map.of("myMap", Map.of("value", 42)))).intValue())
                 .isEqualTo(42);
     }
@@ -118,7 +118,7 @@ class NashornEngineTest {
     // ── execute — reference extractor ─────────────────────────────────────────
 
     @Test
-    void executeReplacesReferenceValuesUsingExtractor() {
+    void executeReplacesReferenceValuesWhenExpressionContainsThem() {
         String ref = "{%#ffffff.(request).url%}";
         String url = "https://www.google.com";
         Map<String, Object> referenceValues = Map.of(ref, url);
@@ -130,7 +130,7 @@ class NashornEngineTest {
     // ── execute — errors ──────────────────────────────────────────────────────
 
     @Test
-    void executeThrowsScriptExecutionExceptionForSyntaxError() {
+    void executeThrowsScriptExecutionExceptionWhenScriptHasSyntaxError() {
         assertThatThrownBy(() -> engine.execute("function() {", null))
                 .isInstanceOf(ScriptExecutionException.class);
     }
@@ -138,12 +138,12 @@ class NashornEngineTest {
     // ── validate ──────────────────────────────────────────────────────────────
 
     @Test
-    void validateDoesNotThrowForValidScript() {
+    void validateDoesNotThrowWhenScriptIsValid() {
         assertThatCode(() -> engine.validate("var x = 10;")).doesNotThrowAnyException();
     }
 
     @Test
-    void validateThrowsInvalidScriptExceptionForSyntaxError() {
+    void validateThrowsInvalidScriptExceptionWhenScriptHasSyntaxError() {
         assertThatThrownBy(() -> engine.validate("function() {"))
                 .isInstanceOf(InvalidScriptException.class);
     }

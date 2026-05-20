@@ -122,7 +122,7 @@ class UserRoleServiceImplTest {
 
     @Test
     @DisplayName("getOneReturnsRoleReferenceFromRepository")
-    void getOneReturnsRoleReferenceFromRepository() {
+    void getOneReturnsRoleWhenRepositoryHasEntry() {
         UserRole expected = UserRoleFixture.aStandardUserRole();
         when(userRoleRepository.getReferenceById(1)).thenReturn(expected);
 
@@ -172,7 +172,7 @@ class UserRoleServiceImplTest {
 
     @Test
     @DisplayName("toEntityFlattensComponentsAndPermissionsIntoRoleHasPermission")
-    void toEntityFlattensComponentsAndPermissionsIntoRoleHasPermission() {
+    void toEntityFlattensComponentsAndPermissionsWhenResourceHasComponents() {
         UserRoleResource resource = UserRoleFixture.aResourceWithTwoComponentsTwoPermissionsEach();
 
         Component moduleA = UserRoleFixture.aComponent(10, "Module-A");
@@ -242,7 +242,7 @@ class UserRoleServiceImplTest {
 
     @Test
     @DisplayName("toResourceDedupesComponentsAcrossRoleHasPermission")
-    void toResourceDedupesComponentsAcrossRoleHasPermission() {
+    void toResourceDedupesComponentsWhenSameComponentRepeats() {
         UserRole role = UserRoleFixture.aRoleWithSharedComponent();
 
         UserRoleResource resource = userRoleService.toResource(role);

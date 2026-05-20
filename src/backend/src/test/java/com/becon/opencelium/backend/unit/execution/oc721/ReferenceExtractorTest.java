@@ -52,7 +52,7 @@ public class ReferenceExtractorTest {
     //-----------------------------------------------------------
 
     @Test
-    void extractValueReturnsAllResponseEntities() {
+    void extractValueReturnsAllEntitiesWhenPathTargetsResponseList() {
         // GIVEN
         Operation operation = OperationFixture.anOperationInDoubleLoop();
 
@@ -68,7 +68,7 @@ public class ReferenceExtractorTest {
     }
 
     @Test
-    void extractValueReturnsAllResponseEntityStatuses() {
+    void extractValueReturnsAllStatusesWhenPathTargetsResponseList() {
         // GIVEN
         Operation operation = OperationFixture.anOperationInDoubleLoop();
 
@@ -89,7 +89,7 @@ public class ReferenceExtractorTest {
     }
 
     @Test
-    void extractValueReturnsAllResponseEntityHeaders() {
+    void extractValueReturnsAllHeadersWhenPathTargetsResponseList() {
         // GIVEN
         Operation operation = OperationFixture.anOperationInDoubleLoop();
 
@@ -109,7 +109,7 @@ public class ReferenceExtractorTest {
     }
 
     @Test
-    void extractValueReturnsAllResponseEntityBodies() {
+    void extractValueReturnsAllBodiesWhenPathTargetsResponseList() {
         // GIVEN
         Operation operation = OperationFixture.anOperationInDoubleLoop();
 
@@ -150,7 +150,7 @@ public class ReferenceExtractorTest {
 
     @Test
     @DisplayName("obj['i']~ - field name on ith index (indexing starts from 0)")
-    void extractValueReturnsFieldNameOnIthIndex() {
+    void extractValueReturnsFieldNameWhenIndexIsSpecified() {
         // GIVEN
         Operation operation = OperationFixture.anOperationWithResponseBody();
 
@@ -177,7 +177,7 @@ public class ReferenceExtractorTest {
 
     @Test
     @DisplayName("obj['*']~ - all field names")
-    void extractValueReturnsAllFieldNames() {
+    void extractValueReturnsAllFieldNamesWhenPathTargetsObject() {
         // GIVEN
         Operation operation = OperationFixture.anOperationWithResponseBody();
 
@@ -196,7 +196,7 @@ public class ReferenceExtractorTest {
 
     @Test
     @DisplayName("obj['field_name']~ - field_name itself")
-    void extractValueReturnsFieldNameItself() {
+    void extractValueReturnsFieldNameWhenPathPointsToField() {
         // GIVEN
         Operation operation = OperationFixture.anOperationWithResponseBody();
 
@@ -215,7 +215,7 @@ public class ReferenceExtractorTest {
 
     @Test
     @DisplayName("obj['i'] - value of the field on ith index (indexing starts from 0)")
-    void extractValueReturnsFieldValueOnIthIndex() {
+    void extractValueReturnsFieldValueWhenIndexIsSpecified() {
         // GIVEN
         Operation operation = OperationFixture.anOperationWithResponseBody();
 
@@ -249,7 +249,7 @@ public class ReferenceExtractorTest {
 
     @Test
     @DisplayName("obj['field_name'] - value of the field by its name")
-    void extractValueReturnsFieldValueByFieldName() {
+    void extractValueReturnsFieldValueWhenFieldNameProvided() {
         // GIVEN
         Operation operation = OperationFixture.anOperationWithResponseBody();
 
@@ -276,7 +276,7 @@ public class ReferenceExtractorTest {
 
     @Test
     @DisplayName("field[i]~ - string on the ith index (indexing starts from 0)")
-    void extractValueReturnsStringValueOnIthIndexAfterSplitting() {
+    void extractValueReturnsStringTokenWhenIndexFollowsSplit() {
         // GIVEN
         Operation operation = OperationFixture.anOperationWithResponseBody();
 
@@ -300,7 +300,7 @@ public class ReferenceExtractorTest {
 
     @Test
     @DisplayName("field[*]~- all strings (after splitting)")
-    void extractValueReturnsAllStringValuesAfterSplitting() {
+    void extractValueReturnsAllTokensWhenPathContainsSplit() {
         // GIVEN
         Operation operation = OperationFixture.anOperationWithResponseBody();
 
@@ -325,7 +325,7 @@ public class ReferenceExtractorTest {
 
     @Test
     @DisplayName("field[2]~ - string on the 2nd index (indexing starts from 0)")
-    void extractValueReturnsStringValueOnSpecifiedIndexAfterSplitting() {
+    void extractValueReturnsTokenWhenExplicitIndexFollowsSplit() {
         // GIVEN
         Operation operation = OperationFixture.anOperationWithResponseBody();
 
@@ -354,7 +354,7 @@ public class ReferenceExtractorTest {
 
     @Test
     @DisplayName("array[i] - value on the ith index (indexing starts from 0)")
-    void extractValueReturnsArrayElementOnIthIndex() {
+    void extractValueReturnsArrayElementWhenIndexIsSpecified() {
         // GIVEN
         Operation operation = OperationFixture.anOperationWithResponseBody();
 
@@ -383,7 +383,7 @@ public class ReferenceExtractorTest {
 
     @Test
     @DisplayName("array[i].field - field value of object on the ith index (indexing starts from 0)")
-    void extractValueReturnsArrayElementFieldValuesOnIthIndex() {
+    void extractValueReturnsElementFieldValuesWhenIndexIsSpecified() {
         // GIVEN
         Operation operation = OperationFixture.anOperationWithResponseBody();
 
@@ -415,7 +415,7 @@ public class ReferenceExtractorTest {
 
     @Test
     @DisplayName("array[3] - value on the 3rd index (indexing starts from 0)")
-    void extractValueReturnsArrayElementOnSpecifiedIndex() {
+    void extractValueReturnsArrayElementWhenExplicitIndexProvided() {
         // GIVEN
         Operation operation = OperationFixture.anOperationWithResponseBody();
 
@@ -434,7 +434,7 @@ public class ReferenceExtractorTest {
 
     @Test
     @DisplayName("array[*] - all values")
-    void extractValueReturnsAllArrayElements() {
+    void extractValueReturnsAllArrayElementsWhenPathTargetsArray() {
         // GIVEN
         Operation operation = OperationFixture.anOperationWithResponseBody();
 

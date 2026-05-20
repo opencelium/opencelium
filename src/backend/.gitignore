@@ -36,6 +36,7 @@ src/main/resources/backup
 ### CLAUDE ###
 CLAUDE.md
 .claude
+docs/service_test_coverage.md
 
 ### STS ###
 .apt_generated
