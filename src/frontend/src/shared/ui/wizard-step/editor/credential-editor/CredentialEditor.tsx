@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import {useFormContext} from "react-hook-form";
 import {FormInput} from "@shared/ui/form/FormInput";
 import type {Invoker} from "@entities/invoker/model/types.ts";
@@ -72,7 +72,7 @@ export const CredentialEditor: React.FC<CredentialEditorProps> = ({ name, label,
     const { t: commonT } = useI18n('common');
     const { watch, setValue } = useFormContext();
     const {masterPassword} = useAppStore();
-    const { id } = useParams();
+    const { id: routeId } = useParams();
     const {
         formState,
         getFieldState,
@@ -82,35 +82,29 @@ export const CredentialEditor: React.FC<CredentialEditorProps> = ({ name, label,
     const { error: rhfError } = getFieldState(name, formState);
     const error = rhfError?.message;
     const invokerName: string = watch('invoker') || '';
+    const connectorId = String(watch('connectorId') ?? routeId ?? '').trim();
     const [requestData, setRequestData] = useState<Record<string, string>>(null);
     const { data = [] ,  isLoading = false } = useGetInvokersQuery();
     const allInvokers: Invoker[] = data ?? [];
-    const fetchRequestData = async () => {
-        const result = await getConnector({masterPassword, id});
+    const fetchRequestData = useCallback(async () => {
+        if (!connectorId || !masterPassword) {
+            return;
+        }
+
+        const result = await getConnector({masterPassword, id: connectorId});
         setValue('requestData', result.data.requestData, {shouldDirty: true});
-    }
+    }, [connectorId, getConnector, masterPassword, setValue]);
     useEffect(() => {
-        (async () => {
-            switch (mode) {
-                case 'create':
-                    toggleHasAccess(true)
-                    break;
-                case 'update':
-                    if (masterPassword) {
-                        await fetchRequestData()
-                    }
-                    break;
-            }
-        })()
+        if (mode === 'create') {
+            toggleHasAccess(true)
+        }
     }, [mode]);
     useEffect(() => {
         if (masterPassword) {
             toggleHasAccess(true);
-            (async () => {
-                await fetchRequestData()
-            })()
+            void fetchRequestData()
         }
-    }, [masterPassword]);
+    }, [fetchRequestData, masterPassword]);
     useEffect(() => {
         const foundInvoker = allInvokers.find(i => i.name === invokerName)
         if (foundInvoker) {
