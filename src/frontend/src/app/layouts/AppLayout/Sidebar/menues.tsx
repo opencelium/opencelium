@@ -1,11 +1,11 @@
 import {ApiOutlined, BranchesOutlined, ScheduleOutlined, UserAddOutlined} from "@ant-design/icons";
 import {MdNotificationAdd, MdOutlineAssistantPhoto, MdOutlineSettingsAccessibility} from "react-icons/md";
-import {GrAggregate, GrConfigure, GrGroup, GrLicense, GrSystem} from "react-icons/gr";
+import {GrAggregate, GrConfigure, GrDocumentConfig, GrGroup, GrLicense, GrSystem} from "react-icons/gr";
 import {PiTreeStructureLight} from "react-icons/pi";
 import {FaRegFileCode} from "react-icons/fa";
 import {ImInsertTemplate} from "react-icons/im";
 import {BiCategory} from "react-icons/bi";
-import {LuFileQuestion} from "react-icons/lu";
+import {LuFileQuestion, LuFileCog} from "react-icons/lu";
 import {TbLicense} from "react-icons/tb";
 import {BsLayoutTextWindowReverse} from "react-icons/bs";
 import {useMemo} from "react";
@@ -55,6 +55,7 @@ export const useAdminMenu = (): any[] => {
                 {key: '/license', icon: <GrLicense/>, label: t('menu.licenseManagement')},
                 {key: '/update-assistant', icon: <MdOutlineAssistantPhoto/>, label: t('menu.updateAssistant')},
                 {key: '/system-check', icon: <GrSystem/>, label: t('menu.systemCheck')},
+                {key: '/system-config', icon: <GrDocumentConfig />, label: t('menu.config')},
             ],
         },
         {key: '/ui/config', icon: <BsLayoutTextWindowReverse/>, label: t('menu.ui')},

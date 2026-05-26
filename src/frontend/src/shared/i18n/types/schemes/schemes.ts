@@ -53,6 +53,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             licenseManagement: string
             updateAssistant: string
             systemCheck: string
+            config: string
             ui: string
         }
         commandPalette: {
@@ -74,6 +75,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 login: string
                 system: string
                 checkLicense: string
+                updateSystemConfig: string
             }
             footer: {
                 select: string

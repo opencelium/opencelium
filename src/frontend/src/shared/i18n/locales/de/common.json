@@ -23,6 +23,7 @@
     "licenseManagement": "Lizenzverwaltung",
     "updateAssistant": "Update-Assistent",
     "systemCheck": "Systemprüfung",
+    "config": "Konfiguration",
     "ui": "UI"
   },
   "commandPalette": {
@@ -43,7 +44,8 @@
       "list": "Die Eintragsliste öffnen",
       "login": "Aktuelle Rolle wechseln",
       "system": "Systemaktionen",
-      "checkLicense": "Lizenz und API-Aufrufverbrauch prüfen"
+      "checkLicense": "Lizenz und API-Aufrufverbrauch prüfen",
+      "updateSystemConfig": "Anwendungskonfiguration auf der Festplatte bearbeiten"
     },
     "footer": {
       "select": "Auswählen",

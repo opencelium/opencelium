@@ -15,6 +15,7 @@ import { systemCheckDefinition } from '@entities/systemCheck/systemCheck.definit
 import { supportFileDefinition } from '@entities/supportFile/supportFile.definition.tsx'
 import { connectionDefinition } from '@entities/connection/connection.definition.tsx'
 import { subscriptionDefinition } from '@entities/subscription/subscription.definition.tsx'
+import { systemConfigDefinition } from '@entities/systemConfig/systemConfig.definition.tsx'
 import {entityRegistry} from "@/engine/entity/EntityRegistry.ts";
 import {setupGlobalOverrides} from "@/engine/entity/overrides/setupOverrides.tsx";
 import {setupLocalOverrides} from "@/engine/entity/overrides/setupLocalOverrides.tsx";
@@ -41,4 +42,5 @@ export function registerEntities() {
     entityRegistry.register(supportFileDefinition);
     entityRegistry.register(connectionDefinition);
     entityRegistry.register(subscriptionDefinition);
+    entityRegistry.register(systemConfigDefinition);
 }

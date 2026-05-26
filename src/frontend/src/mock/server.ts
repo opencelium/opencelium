@@ -10,6 +10,7 @@ import { updateAssistantHandlers } from '@/mock/updateAssistant/handler.ts'
 import { supportFileHandlers } from '@/mock/supportFile/handler.ts'
 import { connectionHandlers } from '@/mock/connection/handler.ts'
 import { subscriptionHandlers } from '@/mock/subscription/handler.ts'
+import { systemConfigHandlers } from '@/mock/systemConfig/handler.ts'
 
 export const worker = setupWorker(
     ...authHandlers,
@@ -23,4 +24,5 @@ export const worker = setupWorker(
     ...supportFileHandlers,
     ...connectionHandlers,
     ...subscriptionHandlers,
+    ...systemConfigHandlers,
 )

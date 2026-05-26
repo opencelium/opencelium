@@ -1,0 +1,23 @@
+{
+  "page": {
+    "title": "System Configuration",
+    "subtitle": "Edit the on-disk application.yml from this UI. Changes are persisted but require an application restart to take effect."
+  },
+  "hint": {
+    "secrets": "Secrets (passwords, tokens) are masked. Type a new value to replace them."
+  },
+  "actions": {
+    "save": "Save",
+    "reset": "Reset"
+  },
+  "messages": {
+    "saved": "Configuration saved.",
+    "noChanges": "No changes to save.",
+    "saveFailed": "Failed to save configuration.",
+    "loadFailed": "Failed to load configuration."
+  },
+  "restart": {
+    "title": "Restart required",
+    "message": "Configuration saved. Restart the application for changes to take effect."
+  }
+}

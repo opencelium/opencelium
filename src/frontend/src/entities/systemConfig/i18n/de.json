@@ -1,0 +1,23 @@
+{
+  "page": {
+    "title": "Systemkonfiguration",
+    "subtitle": "Bearbeiten Sie die auf der Festplatte gespeicherte application.yml über diese Oberfläche. Änderungen werden gespeichert, erfordern aber einen Neustart der Anwendung."
+  },
+  "hint": {
+    "secrets": "Passwörter und Tokens sind maskiert. Geben Sie einen neuen Wert ein, um sie zu ersetzen."
+  },
+  "actions": {
+    "save": "Speichern",
+    "reset": "Zurücksetzen"
+  },
+  "messages": {
+    "saved": "Konfiguration gespeichert.",
+    "noChanges": "Keine Änderungen zum Speichern.",
+    "saveFailed": "Konfiguration konnte nicht gespeichert werden.",
+    "loadFailed": "Konfiguration konnte nicht geladen werden."
+  },
+  "restart": {
+    "title": "Neustart erforderlich",
+    "message": "Konfiguration gespeichert. Starten Sie die Anwendung neu, damit die Änderungen wirksam werden."
+  }
+}

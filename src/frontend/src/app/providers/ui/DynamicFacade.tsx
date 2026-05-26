@@ -48,6 +48,8 @@ import {AlertFactory} from "@shared/ui/primitives/Alert/Alert.factory.ts";
 import type {AlertComponent} from "@shared/ui/primitives/Alert/Alert.types.ts";
 import {RadioFactory} from "@shared/ui/primitives/Radio/Radio.factory.ts";
 import type {RadioComponent} from "@shared/ui/primitives/Radio/Radio.types.ts";
+import {TreeFactory} from "@shared/ui/primitives/Tree/Tree.factory.ts";
+import type {TreeComponent} from "@shared/ui/primitives/Tree/Tree.types.ts";
 
 export interface DynamicUI {
     Button: ButtonComponent;
@@ -73,6 +75,7 @@ export interface DynamicUI {
     Dropzone: DropzoneComponent,
     Alert: AlertComponent,
     Radio: RadioComponent,
+    Tree: TreeComponent,
 }
 const systemCapabilities = {
     custom: {
@@ -99,6 +102,7 @@ const systemCapabilities = {
         Dropzone: false,
         Alert: false,
         Radio: false,
+        Tree: true,
     },
     material: {
         Button: true,
@@ -124,6 +128,7 @@ const systemCapabilities = {
         Dropzone: true,
         Alert: true,
         Radio: true,
+        Tree: true,
     },
 };
 function resolveComponent<T>(
@@ -172,6 +177,7 @@ export function useDynamicUI(): DynamicUI {
         Dropzone: resolveComponent(DropzoneFactory, system, 'Dropzone'),
         Alert: resolveComponent(AlertFactory, system, 'Alert'),
         Radio: resolveComponent(RadioFactory, system, 'Radio'),
+        Tree: resolveComponent(TreeFactory, system, 'Tree'),
     }), [system]);
 }
 
