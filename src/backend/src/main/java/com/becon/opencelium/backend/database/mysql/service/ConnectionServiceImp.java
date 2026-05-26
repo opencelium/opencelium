@@ -80,6 +80,7 @@ public class ConnectionServiceImp implements ConnectionService {
     private final Mapper<Connection, ConnectionDTO> connectionMapper;
     private final ConnectionUpdateTracker updateTracker;
     private final MaskingRuleRepository ruleRepository;
+    private final ExecutionArgumentService executionArgumentService;
     private final PatchHelper patchHelper;
     private final WebhookService webhookService;
     private final OpenceliumProps ocProps;
@@ -101,6 +102,7 @@ public class ConnectionServiceImp implements ConnectionService {
             Mapper<Connection, ConnectionDTO> connectionMapper,
             ConnectionUpdateTracker updateTracker,
             MaskingRuleRepository ruleRepository,
+            ExecutionArgumentService executionArgumentService,
             EntityVersionManager entityVersionManager,
             OpenceliumProps ocProps,
             OwnershipSecurity ownershipSecurity
@@ -119,6 +121,7 @@ public class ConnectionServiceImp implements ConnectionService {
         this.schedulerService = schedulerService;
         this.webhookService = webhookService;
         this.ruleRepository = ruleRepository;
+        this.executionArgumentService = executionArgumentService;
         this.ocProps = ocProps;
         this.connectionMngEntityUpdater = entityVersionManager.getUpdater(ConnectionMng.class);
         this.ownershipSecurity = ownershipSecurity;
@@ -260,6 +263,9 @@ public class ConnectionServiceImp implements ConnectionService {
     public void deleteById(Long id) {
         Connection connection = getById(id);
 
+        // Strip execution_argument rows
+        executionArgumentService.deleteByConnectionId(id);
+
         deleteSchedules(connection);
 
         connectionRepository.deleteById(id);
@@ -281,6 +287,9 @@ public class ConnectionServiceImp implements ConnectionService {
     public void deleteAndTrackIt(Long id) {
         Connection connection = getById(id);
 
+        // Strip execution_argument rows
+        executionArgumentService.deleteByConnectionId(id);
+
         deleteSchedules(connection);
 
         connectionRepository.deleteById(id);
@@ -294,6 +303,10 @@ public class ConnectionServiceImp implements ConnectionService {
     @Transactional
     public void deleteOnlyConnection(Long id) {
         Connection connection = getById(id);
+
+        // Strip execution_argument rows
+        executionArgumentService.deleteByConnectionId(id);
+
         deleteSchedules(connection);
         connectionRepository.deleteById(id);
     }
