@@ -115,7 +115,7 @@ export const dataAggregatorDefinition: EntityDefinition = {
                     transKey: `${baseKey}.fields.name.errors.name_already_exists`,
                     encodeParams: false,
                     handleResponse: (data, error) => {
-                        return !data.result;
+                        return data.result;
                     }
                 }
             },

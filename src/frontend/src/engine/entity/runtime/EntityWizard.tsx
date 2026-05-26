@@ -123,9 +123,16 @@ export function EntityWizard<EntityFormValues>({
     }, [formState]);
     useEffect(() => {
         if (initialValues) {
+            console.log('[EntityWizard] form.reset(initialValues)', initialValues)
             form.reset(initialValues)
         }
     }, [initialValues])
+    useEffect(() => {
+        const sub = form.watch((values, info) => {
+            console.log('[EntityWizard] form.watch change', info, values)
+        })
+        return () => sub.unsubscribe()
+    }, [form])
     useEffect(() => {
         if (!liveUpdate || !onSubmit) return
         const sub = form.watch((values, {type, name}) => {
@@ -260,7 +267,15 @@ export function EntityWizard<EntityFormValues>({
                             readOnly={readOnly || wizardReadOnly}
 
                             onSubmit={(e) =>
-                                form.handleSubmit((data) => onSubmit?.(data))(e)
+                                form.handleSubmit(
+                                    (data) => {
+                                        console.log('[EntityWizard] valid submit, data=', data, 'getValues=', form.getValues())
+                                        return onSubmit?.(data)
+                                    },
+                                    (errors) => {
+                                        console.log('[EntityWizard] invalid submit, errors=', errors)
+                                    },
+                                )(e)
                             }
                             successMessage={
                                 entity.wizard.modes?.[mode]?.getSuccessMessage?.(form.getValues())

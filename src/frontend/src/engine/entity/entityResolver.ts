@@ -11,6 +11,8 @@ export const entityResolver =
     (schema: any, entity: any, apiExecutor: any, initialValues: any, mode: Mode): Resolver =>
         async (values, context, options) => {
 
+            console.log('[entityResolver] called with values=', values, 'options.names=', options?.names)
+
             const { setLoading } = useRemoteValidationStore.getState()
             const t = i18n.getFixedT(i18n.language, 'error');
             const baseResult = await zodResolver(schema)(
@@ -18,6 +20,7 @@ export const entityResolver =
                 context,
                 options
             )
+            console.log('[entityResolver] zodResolver result.values=', baseResult.values, 'errors=', baseResult.errors)
 
             const validatingFields = options.names ?? []
 
