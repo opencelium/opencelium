@@ -47,7 +47,7 @@ export const FormControl: React.FC<FormControlProps> = ({
             <div className="form-control__field">
                 {children}
             </div>
-            <div>
+            {(!!error || !!hint) ? <div>
                 {error ? (
                     <div className="form-control__error">
                         {typeof error === 'string' ?
@@ -60,7 +60,7 @@ export const FormControl: React.FC<FormControlProps> = ({
                         <EntityText i18nKey={hint}/>
                     </div>
                 ) : null}
-            </div>
+            </div> : null}
         </div>
     );
 };

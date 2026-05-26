@@ -3,7 +3,7 @@ import { Controller, FormProvider } from 'react-hook-form'
 import { message } from 'antd'
 import { useLoginForm } from '../model/useLoginForm'
 import { useAuth } from '@features/auth/useAuth'
-import { API_TIMEOUT_ERROR_NAME } from '@shared/api/apiFetch'
+import { API_TIMEOUT_ERROR_NAME, ApiFetchError } from '@shared/api/apiFetch'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { FormConstraintsProvider } from '@shared/form/FormConstraintsContext.tsx'
 import type { LoginFormValues } from '../model/login.schema'
@@ -31,13 +31,14 @@ export function LoginForm() {
         try {
             await login(data)
         } catch (e) {
-            const name = e instanceof Error ? e.name : ''
-            const raw = e instanceof Error ? e.message : ''
-            if (name === API_TIMEOUT_ERROR_NAME) {
+            if (e instanceof Error && e.name === API_TIMEOUT_ERROR_NAME) {
                 setError(t('errors.network'))
+            } else if (e instanceof TypeError) {
+                setError(t('errors.network'))
+            } else if (e instanceof ApiFetchError && e.status === 401) {
+                setError(t('errors.invalidCredentials'))
             } else {
-                const isAuthFailure = /401|invalid|credentials|unauthor/i.test(raw)
-                setError(t(isAuthFailure ? 'errors.invalidCredentials' : 'errors.failed'))
+                setError(t('errors.failed'))
             }
         } finally {
             setIsSubmitting(false)

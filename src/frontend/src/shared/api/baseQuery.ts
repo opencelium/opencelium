@@ -8,8 +8,15 @@ import type { RootState } from '@app/store/types'
 const rawBaseQuery = fetchBaseQuery({
     baseUrl: import.meta.env.VITE_API_URL,
     credentials: 'include',
-    prepareHeaders: (headers, { getState, extra }) => {
-        if (!headers.has('content-type')) {
+    prepareHeaders: (headers, { getState, extra, arg }) => {
+        const isMultipart =
+            typeof arg === 'object' &&
+            arg !== null &&
+            'body' in arg &&
+            typeof FormData !== 'undefined' &&
+            (arg as { body?: unknown }).body instanceof FormData
+
+        if (!headers.has('content-type') && !isMultipart) {
             headers.set('content-type', 'application/json')
         }
 
@@ -23,6 +30,11 @@ const rawBaseQuery = fetchBaseQuery({
                 headers.set(key, value)
             })
         }
+
+        if (isMultipart) {
+            headers.delete('content-type')
+        }
+
         return headers
     },
 })

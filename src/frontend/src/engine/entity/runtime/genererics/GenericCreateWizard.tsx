@@ -1,53 +1,19 @@
-import React from 'react';
-import { entityRegistry } from "@/engine/entity/EntityRegistry";
-import { EntityWizard } from "@/engine/entity/runtime/EntityWizard";
-import {genericApi, useCreateEntityMutation} from "@/shared/api/genericApi";
-import {runStage} from "@/engine/entity/runtime/genererics/utils.ts";
+import React from 'react'
+import { EntityWizard } from '@/engine/entity/runtime/EntityWizard'
+import { useWizardSubmit } from './useWizardSubmit'
 
 interface Props {
-    entityName: string;
-    onSuccess?: () => void;
+    entityName: string
+    onSuccess?: () => void
 }
 
 export const GenericCreateWizard: React.FC<Props> = ({ entityName, onSuccess }) => {
-    const entity = entityRegistry.get(entityName);
-    const [createTrigger] = useCreateEntityMutation();
+    const submit = useWizardSubmit({ entityName, mode: 'create' })
 
-    const handleSubmit = async (data: any) => {
-        try {
-            // If the definition has a "to backend" mapper, use it
-            const payload = entity?.api?.mapToApi ? entity.api.mapToApi({mode: 'create', data}) : data;
-            if (entity.api) {
-                const response = await createTrigger({
-                    url: entity.api.baseUrl,
-                    body: payload,
-                    headers: entity?.api?.getHeaders?.({mode: 'create'}) || {},
-                }).unwrap();
+    const handleSubmit = async (data: unknown) => {
+        await submit(data)
+        onSuccess?.()
+    }
 
-                await runStage(
-                    entity.api.lifecycle?.create?.after,
-                    {
-                        payload,
-                        formData: data,
-                        response,
-                        mode: 'create',
-                        entity,
-                    },
-                    entity,
-                );
-            }
-            onSuccess?.();
-        } catch (error) {
-            console.error(`Failed to create ${entityName}:`, error);
-            throw error;
-        }
-    };
-
-    return (
-        <EntityWizard
-            entityName={entityName}
-            mode="create"
-            onSubmit={handleSubmit}
-        />
-    );
-};
+    return <EntityWizard entityName={entityName} mode="create" onSubmit={handleSubmit} />
+}

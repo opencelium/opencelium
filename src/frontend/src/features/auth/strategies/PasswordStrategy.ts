@@ -1,6 +1,7 @@
 import type { AuthStrategy } from '@features/auth/strategies/AuthStrategy.ts'
 import type { AuthSession, AuthUser } from '@entities/auth/model/types.ts'
-import { apiFetch } from '@shared/api/apiFetch'
+import { apiFetchWithHeaders } from '@shared/api/apiFetch'
+import { apiExecutor } from '@shared/api/apiExecutor'
 import { decodeJwt } from '@shared/api/decodeJwt'
 import {extractNormalizedUser} from "@features/auth/utils.ts";
 
@@ -41,7 +42,7 @@ function clearToken() {
 export class PasswordStrategy implements AuthStrategy<LoginPayload> {
     async login(payload: LoginPayload): Promise<AuthSession> {
         const { email, password, rememberMe = false } = payload
-        const { headers } = await apiFetch('/login', {
+        const { headers } = await apiFetchWithHeaders('/login', {
             method: 'POST',
             body: { email, password },
             timeoutMs: 15_000,
@@ -68,12 +69,17 @@ export class PasswordStrategy implements AuthStrategy<LoginPayload> {
 
     async logout() {
         clearToken()
-        await apiFetch('/auth/logout', { method: 'POST' }).catch(() => null)
+        await apiExecutor({
+            url: '/auth/logout',
+            method: 'POST',
+            options: { ignoreError: true },
+        }).catch(() => null)
     }
 
     private async fetchUser(token: string): Promise<AuthUser> {
         const { userId } = decodeJwt<{ userId: number }>(token)
-        const { data } = await apiFetch<AuthUser>(`/user/${userId}`, { token })
+        const { data } = await apiFetchWithHeaders<AuthUser>(`/user/${userId}`, { token })
+        if (!data) throw new Error('Empty user response')
         return data
     }
 }

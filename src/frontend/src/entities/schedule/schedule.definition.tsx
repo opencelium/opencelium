@@ -123,21 +123,6 @@ export const scheduleDefinition: EntityDefinition = {
     fields: [
         // General Data
         {
-            name: 'title',
-            type: 'string',
-            ui: {
-                component: 'input',
-                props: {
-                    autoFocus: true,
-                    labelKey: `${baseKey}.fields.title.label`,
-                },
-            },
-            validation: {
-                required: true,
-                max: 255,
-            },
-        },
-        {
             name: 'connectionId',
             type: 'number',
             ui: {
@@ -311,7 +296,6 @@ export const scheduleDefinition: EntityDefinition = {
         {
             id: 'general-data',
             fields: [
-                'title',
                 'connectionId',
                 'debugMode',
                 'cronExp',
@@ -366,7 +350,7 @@ export const scheduleDefinition: EntityDefinition = {
                 header: `${baseKey}.wizard.steps.general-data.header`,
                 subheader: `${baseKey}.wizard.steps.general-data.subheader`,
                 sectionIds: ['general-data'],
-                validateFields: ['title', 'connectionId', 'cronExp'],
+                validateFields: ['connectionId', 'cronExp'],
             },
         ]
     },

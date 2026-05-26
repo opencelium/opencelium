@@ -9,6 +9,8 @@
     "maxLength": "Maximum {{max}} characters",
     "invalidEmail": "Invalid email",
     "mustNumber": "Must be a number",
+    "mustFile": "Must be a file",
+    "fileTooLarge": "File is too large (max {{max}} bytes)",
     "failedAsyncOptions": "Failed to fetch options"
   }
 }

@@ -65,7 +65,7 @@ const MasterPasswordDialog = () => {
                     value={localPassword}
                     onChange={(e) => onChangeMasterPassword(e.target.value)}
                 />
-                <Button loading={isLoading} htmlType={'button'} onClick={check}>{widgetT('masterPassword.button.label')}</Button>
+                <Button style={{alignSelf: !!error ? 'center' : 'flex-end'}} loading={isLoading} htmlType={'button'} onClick={check}>{widgetT('masterPassword.button.label')}</Button>
             </div>
         </Card>
     )

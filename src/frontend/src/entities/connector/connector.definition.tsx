@@ -1,5 +1,6 @@
 import type {EntityDefinition, Mode} from '@/engine/entity/EntityDefinition'
 import connectorWizardImage from '@/assets/images/wizard/connector.gif'
+import {ConnectorWizardImage} from "@entities/connector/ui/ConnectorWizardImage";
 import {createEntityCommands} from "@/engine/entity/command/createEntityCommands.tsx";
 import en from "@entities/connector/i18n/en.json";
 import de from "@entities/connector/i18n/de.json";
@@ -12,86 +13,10 @@ import {CONNECTOR_TAG} from "@entities/connector/api/connector.tags.ts";
 import {connectorApi} from "@entities/connector/api/connectorApi.ts";
 import {showApiError} from "@shared/api/handleApiError.ts";
 import {useAppStore} from "@app/store/app.store.ts";
-import {selectAccessToken} from "@entities/auth/model/authSelectors.ts";
-import {genericApi} from "@shared/api/genericApi.ts";
+import {renderConnectorTitle} from "@entities/connector/ui/renderConnectorTitle";
+import {hasConnectorIconFile, uploadConnectorIcon} from "@entities/connector/model/connectorIconUpload";
 
 const baseKey = 'connector';
-
-const isImageFile = (value: unknown): value is File =>
-    typeof File !== 'undefined' && value instanceof File;
-
-const resolveConnectorIconUrl = (icon?: string | null) => {
-    if (!icon?.trim()) return null;
-    if (/^(blob:|data:|https?:\/\/)/i.test(icon)) return icon;
-
-    const normalizedIcon = icon.replace(/^\.\//, '');
-    if (normalizedIcon.startsWith('storage/')) {
-        const baseUrl = ((import.meta.env.VITE_API_URL as string | undefined) ?? '').replace(/\/$/, '');
-        return `${baseUrl}/${normalizedIcon}`;
-    }
-
-    return icon;
-};
-
-const renderConnectorIcon = (icon: unknown) => {
-    const iconUrl = resolveConnectorIconUrl(typeof icon === 'string' ? icon : null);
-    if (!iconUrl) return null;
-
-    return (
-        <img
-            src={iconUrl}
-            alt=""
-            style={{
-                width: 28,
-                height: 28,
-                objectFit: 'contain',
-                display: 'block',
-            }}
-        />
-    );
-};
-
-const renderConnectorTitle = (row: unknown, value: unknown) => {
-    const connector = row as Connector;
-    const icon = renderConnectorIcon(connector.icon);
-
-    return (
-        <span style={{display: 'inline-flex', alignItems: 'center', gap: 8}}>
-            {icon}
-            <span>{String(value ?? '')}</span>
-        </span>
-    );
-};
-
-const uploadConnectorIcon = async (ctx: { formData?: ConnectorUpdateDto; response?: Connector; payload?: Connector }) => {
-    const icon = ctx.formData?.icon;
-    const connectorId = ctx.response?.connectorId ?? ctx.payload?.connectorId;
-
-    if (!isImageFile(icon) || !connectorId) return;
-
-    const formData = new FormData();
-    formData.append('file', icon);
-    formData.append('connectorId', String(connectorId));
-
-    const token = selectAccessToken(store.getState());
-    const baseUrl = (import.meta.env.VITE_API_URL as string) ?? '';
-    const response = await fetch(`${baseUrl}/storage/connector`, {
-        method: 'POST',
-        headers: token ? {Authorization: `Bearer ${token}`} : undefined,
-        body: formData,
-        credentials: 'include',
-    });
-
-    if (!response.ok) {
-        throw new Error(`Failed to upload connector icon: HTTP ${response.status}`);
-    }
-
-    store.dispatch(genericApi.util.invalidateTags(['Entity' as any]));
-    store.dispatch(connectorApi.util.invalidateTags([
-        {type: CONNECTOR_TAG, id: 'LIST'},
-        {type: CONNECTOR_TAG, id: connectorId},
-    ]));
-};
 
 export const connectorDefinition: EntityDefinition = {
     name: baseKey,
@@ -156,9 +81,10 @@ export const connectorDefinition: EntityDefinition = {
                 }
             },
             uploadIcon: {
-                url: '/storage/connector',
                 execute: uploadConnectorIcon,
-                condition: (ctx) => isImageFile(ctx.formData?.icon),
+                condition: hasConnectorIconFile,
+                bestEffort: true,
+                errorMessageKey: `${baseKey}.lifecycle.uploadIcon.failed`,
             },
         },
         lifecycle: {
@@ -296,13 +222,14 @@ export const connectorDefinition: EntityDefinition = {
         },
         {
             name: 'icon',
-            type: 'other',
+            type: 'file',
+            defaultValue: null,
             ui: {
                 component: 'file-dropzone',
                 props: {
                     multiple: false,
                     accept: "image/png, image/jpeg",
-                    labelKey: `${baseKey}.fields.image.label`,
+                    labelKey: `${baseKey}.fields.icon.label`,
                 }
             },
         },
@@ -367,6 +294,7 @@ export const connectorDefinition: EntityDefinition = {
     wizard: {
         image: connectorWizardImage as string,
         imageField: 'icon',
+        renderImage: ConnectorWizardImage,
 
         modes: {
             create: {

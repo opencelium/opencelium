@@ -31,8 +31,8 @@
         "off": "SSL Validation is deactivated"
       }
     },
-    "image": {
-      "label": "Image"
+    "icon": {
+      "label": "Icon"
     },
     "url": {
       "label": "Url"
@@ -93,6 +93,11 @@
     "delete": {
       "byName": "Delete connector by title \"{{title}}\"?",
       "byId": "Delete connector by id \"{{id}}\"?"
+    }
+  },
+  "lifecycle": {
+    "uploadIcon": {
+      "failed": "Connector saved, but the icon upload failed. You can retry from edit."
     }
   }
 }

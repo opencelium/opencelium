@@ -44,7 +44,7 @@ export type FieldDefinition = {
     label?: string
     labelKey?: string
 
-    type: 'string' | 'number' | 'boolean' | 'date' | 'enum' | 'other' | 'array'
+    type: 'string' | 'number' | 'boolean' | 'date' | 'enum' | 'other' | 'array' | 'file'
     placeholder?: string
     defaultValue?: string | number | boolean | Date | unknown
     getDefaultValue?: () => Promise<string | number | boolean | Date | unknown>,
@@ -151,6 +151,12 @@ export type WizardModeConfig = {
 export type WizardDefinition = {
     image?: unknown
     imageField?: string
+    /**
+     * Optional dynamic preview rendered in place of `image` while the form is active.
+     * The component is rendered inside FormProvider so it can `useWatch` form fields.
+     * Engines must NOT decorate this — the entity owns the styling.
+     */
+    renderImage?: React.ComponentType
     overrideKey?: string
     recommendations?: Recommendation[]
     steps: WizardStepDefinition[]
@@ -177,17 +183,45 @@ export type EntityRoute =
    ENTITY
 ================================ */
 
-type ApiAction<TCtx = any> = {
-    execute?: (ctx: TCtx) => Promise<unknown> | unknown;
+/**
+ * Context passed to lifecycle actions. `formData` is the un-mapped form data
+ * (still has File objects for file fields); `payload` is the mapToApi'd shape.
+ * `response` is the main mutation's result and is only present in `after` stages.
+ */
+export type LifecycleCtx<TForm = unknown, TPayload = unknown, TResponse = unknown> = {
+    mode: Mode
+    entity: EntityDefinition
+    payload: TPayload
+    formData: TForm
+    identifier?: string
+    response?: TResponse
+}
+
+type ActionShared<TCtx = any> = {
+    condition?: (ctx: TCtx) => boolean;
+    /**
+     * When true, a thrown error is logged + surfaced via `errorMessageKey` toast
+     * but does NOT abort the lifecycle stage or fail the main mutation.
+     * Use for non-critical follow-ups (file uploads, telemetry, cache touches).
+     */
+    bestEffort?: boolean;
+    /** i18n key (entities namespace) for the toast shown when bestEffort=true and the action throws. */
+    errorMessageKey?: string;
+};
+
+type DeclarativeApiAction<TCtx = any> = ActionShared<TCtx> & {
     url: string | ((ctx: TCtx) => string);
     method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
-
     mapBody?: (ctx: TCtx) => any;
     mapHeaders?: (ctx: TCtx) => Record<string, string>;
-
-    // optional
-    condition?: (ctx: TCtx) => boolean;
+    ignoreError?: boolean;
 };
+
+type ImperativeApiAction<TCtx = any> = ActionShared<TCtx> & {
+    execute: (ctx: TCtx) => Promise<unknown> | unknown;
+};
+
+type ApiAction<TCtx = any> = DeclarativeApiAction<TCtx> | ImperativeApiAction<TCtx>;
 
 type LifecycleStage = {
     before?: string[]; // action names

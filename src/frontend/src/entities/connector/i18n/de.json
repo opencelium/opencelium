@@ -23,8 +23,8 @@
         "off": "SSL Validation is deactivated"
       }
     },
-    "image": {
-      "label": "Image"
+    "icon": {
+      "label": "Symbol"
     },
     "url": {
       "label": "Url"
@@ -72,6 +72,11 @@
         "header": "Credentials",
         "subheader": "Authentication data"
       }
+    }
+  },
+  "lifecycle": {
+    "uploadIcon": {
+      "failed": "Konnektor gespeichert, aber das Hochladen des Symbols ist fehlgeschlagen. Sie können es im Bearbeitungsmodus erneut versuchen."
     }
   }
 }
