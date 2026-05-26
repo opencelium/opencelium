@@ -209,14 +209,26 @@ versions:
         value: 4.8.1
         path: opencelium.version
   - version: 4.8.2
-      changes:
+    changes:
       - changeset: 1
         operation: add
         value: 4.8.2
         path: opencelium.version
   - version: 5.0
-      changes:
+    changes:
       - changeset: 1
         operation: add
         value: 5.0
         path: opencelium.version
+      - changeset: 2
+        operation: add
+        value: src/main/resources/application.yml
+        path: opencelium.config.file-path
+      - changeset: 3
+        operation: add
+        value: runtime/backup/application
+        path: opencelium.config.backup.directory
+      - changeset: 4
+        operation: add
+        value: 10
+        path: opencelium.config.backup.keep
