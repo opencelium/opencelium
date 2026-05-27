@@ -16,7 +16,6 @@ public interface ReportModule {
      * @param payload a {@code String} containing the report data to be sent; must not be {@code null}
      *                or empty. The content is expected to be formatted according to the server's
      *                specifications (e.g., JSON, XML).
-     * @param payload
      */
     void sendReport(Object payload);
 

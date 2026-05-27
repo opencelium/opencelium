@@ -139,6 +139,10 @@ dependencies {
 	implementation "javax.json:javax.json-api:${javaxJsonVersion}"
 	implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonJsr310Ver}"
 
+	// Comment-aware YAML parser used by the application-config endpoints to
+	// round-trip application.yml without losing comments.
+	implementation 'org.snakeyaml:snakeyaml-engine:2.7'
+
 	// ── Scripting & tooling ───────────────────────────────────────────────────
 	implementation "org.openjdk.nashorn:nashorn-core:${nashornVersion}"
 	implementation "org.eclipse.jgit:org.eclipse.jgit:${jgitVersion}"
