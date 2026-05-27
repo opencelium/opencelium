@@ -7,6 +7,8 @@ import { API_TIMEOUT_ERROR_NAME, ApiFetchError } from '@shared/api/apiFetch'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { FormConstraintsProvider } from '@shared/form/FormConstraintsContext.tsx'
 import type { LoginFormValues } from '../model/login.schema'
+import type { TotpChallenge } from '@entities/auth/model/types'
+import { TotpLoginDialog } from './TotpLoginDialog'
 import { Alert } from '@shared/ui/primitives/Alert'
 import { Button } from '@shared/ui/primitives/Button'
 import { Card } from '@shared/ui/primitives/Card'
@@ -24,12 +26,16 @@ export function LoginForm() {
     const { t } = useI18n('auth')
     const [error, setError] = useState<string | null>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [totp, setTotp] = useState<{ challenge: TotpChallenge; rememberMe: boolean } | null>(null)
 
     const onSubmit = async (data: LoginFormValues) => {
         setError(null)
         setIsSubmitting(true)
         try {
-            await login(data)
+            const result = await login(data)
+            if (result.status === 'totp-required') {
+                setTotp({ challenge: result.challenge, rememberMe: data.rememberMe ?? false })
+            }
         } catch (e) {
             if (e instanceof Error && e.name === API_TIMEOUT_ERROR_NAME) {
                 setError(t('errors.network'))
@@ -55,6 +61,7 @@ export function LoginForm() {
     const passwordErrorKey = errors.password?.message as AuthKey | undefined
 
     return (
+        <>
         <Card style={{ width: FORM_WIDTH }}>
             <FormProvider {...form}>
                 <FormConstraintsProvider constraints={constraints}>
@@ -161,5 +168,12 @@ export function LoginForm() {
                 </FormConstraintsProvider>
             </FormProvider>
         </Card>
+        <TotpLoginDialog
+            open={!!totp}
+            challenge={totp?.challenge ?? null}
+            rememberMe={totp?.rememberMe ?? false}
+            onClose={() => setTotp(null)}
+        />
+        </>
     )
 }

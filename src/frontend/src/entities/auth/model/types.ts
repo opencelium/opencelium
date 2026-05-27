@@ -58,6 +58,28 @@ export interface AuthSession {
     normalizedUser: NormalizedUser
 }
 
+// --- Two-factor (TOTP) login ---
+/**
+ * Challenge returned by /login when the account requires TOTP — no token is issued yet.
+ * Two shapes come back, tagged on arrival:
+ *  - 'setup'  — first activation: includes the QR + secret to enrol an authenticator.
+ *  - 'verify' — already enrolled: only the session to validate the next code against.
+ */
+export type TotpChallenge =
+    | { mode: 'setup'; sessionId: string; secretKey: string; qr: string }
+    | { mode: 'verify'; sessionId: string }
+
+/** A login attempt either authenticates outright or stalls on a TOTP challenge. */
+export type LoginResult =
+    | { status: 'authenticated'; session: AuthSession }
+    | { status: 'totp-required'; challenge: TotpChallenge }
+
+export type TotpValidateInput = {
+    code: string
+    sessionId: string
+    rememberMe?: boolean
+}
+
 // --- Main Auth User ---
 export interface AuthUser {
     userId: number;

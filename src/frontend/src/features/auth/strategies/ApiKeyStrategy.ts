@@ -1,12 +1,12 @@
 import { AuthStrategy } from './AuthStrategy'
-import { AuthSession } from '@/entities/auth/model/types'
+import { AuthSession, LoginResult } from '@/entities/auth/model/types'
 
 export class ApiKeyStrategy
     implements AuthStrategy<{ apiKey: string }>
 {
     constructor(private readonly storageKey = 'api_key') {}
 
-    async login({ apiKey }: { apiKey: string }): Promise<AuthSession> {
+    async login({ apiKey }: { apiKey: string }): Promise<LoginResult> {
         const res = await fetch('/auth/api-key', {
             method: 'POST',
             headers: {
@@ -19,12 +19,12 @@ export class ApiKeyStrategy
             throw new Error('Invalid API key')
         }
 
-        const session = await res.json()
+        const session = (await res.json()) as AuthSession
 
         // API key can live for a long time — persist it
         localStorage.setItem(this.storageKey, apiKey)
 
-        return session
+        return { status: 'authenticated', session }
     }
 
     async refresh(): Promise<AuthSession | null> {

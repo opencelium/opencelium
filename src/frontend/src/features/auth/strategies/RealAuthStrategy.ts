@@ -1,8 +1,8 @@
 import type { AuthStrategy } from './AuthStrategy'
-import type {AuthSession} from "@entities/auth/model/types.ts";
+import type {AuthSession, LoginResult} from "@entities/auth/model/types.ts";
 
 export class RealAuthStrategy implements AuthStrategy {
-    async login(payload?: unknown): Promise<AuthSession> {
+    async login(): Promise<LoginResult> {
         // fetch / axios
         throw new Error('Not implemented')
     }
