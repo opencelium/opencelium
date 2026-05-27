@@ -26,9 +26,9 @@ export const ListFilters: React.FC<Props> = ({ filters, state, onChange }) => {
                 flexDirection: 'column',
                 gap: 12,
                 padding: 16,
-                border: '1px solid var(--color-border, #e5e7eb)',
+                border: '1px solid var(--color-border-subtle)',
                 borderRadius: 6,
-                background: 'var(--color-surface-subtle, #fafafa)',
+                background: 'var(--color-background-surface)',
             }}
         >
             {filters.map((filter) => {
