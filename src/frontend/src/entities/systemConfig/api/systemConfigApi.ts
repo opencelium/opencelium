@@ -1,9 +1,9 @@
 import { baseApi } from '@shared/api/baseApi'
 import { SYSTEM_CONFIG_TAG } from './systemConfig.tags'
 import type {
+    ApplicationConfigPatchRequest,
     ApplicationConfigPatchResponse,
     ApplicationConfigResponse,
-    ConfigData,
 } from '../model/types'
 
 export const systemConfigApi = baseApi.injectEndpoints({
@@ -12,7 +12,7 @@ export const systemConfigApi = baseApi.injectEndpoints({
             query: () => '/application-config',
             providesTags: [{ type: SYSTEM_CONFIG_TAG as never, id: 'CONFIG' }],
         }),
-        updateApplicationConfig: b.mutation<ApplicationConfigPatchResponse, Partial<ConfigData>>({
+        updateApplicationConfig: b.mutation<ApplicationConfigPatchResponse, ApplicationConfigPatchRequest>({
             query: (body) => ({
                 url: '/application-config',
                 method: 'PATCH',

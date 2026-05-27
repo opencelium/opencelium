@@ -21,6 +21,11 @@ export type ApplicationConfigResponse = {
     comments: ConfigComment[]
 }
 
+export type ApplicationConfigPatchRequest = {
+    data: Partial<ConfigData>
+    comments?: ConfigComment[]
+}
+
 export type ApplicationConfigPatchResponse = {
     status: string
     restartRequired: boolean

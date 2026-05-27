@@ -27,23 +27,28 @@ function joinPath(parent: string, segment: string | number): string {
 }
 
 function CommentLine({text, kind}: {text: string; kind: 'before' | 'after'}) {
+    const content = text.split('\n').map((line) => `#${line}`).join('\n')
     return (
-        <div
+        <pre
             className={`config-tree__comment config-tree__comment--${kind}`}
             style={{
                 color: 'var(--color-text-subtle)',
                 fontStyle: 'italic',
                 fontFamily: 'var(--font-mono, monospace)',
                 fontSize: 12,
+                margin: 0,
                 whiteSpace: 'pre-wrap',
             }}
         >
-            #{text}
-        </div>
+            {content}
+        </pre>
     )
 }
 
 function InlineComment({text}: {text: string}) {
+    const lines = text.split('\n')
+    const isMultiline = lines.length > 1
+    const content = lines.map((line) => `#${line}`).join('\n')
     return (
         <span
             className="config-tree__comment config-tree__comment--inline"
@@ -53,9 +58,10 @@ function InlineComment({text}: {text: string}) {
                 fontFamily: 'var(--font-mono, monospace)',
                 fontSize: 12,
                 marginLeft: 8,
+                whiteSpace: isMultiline ? 'pre-wrap' : 'normal',
             }}
         >
-            #{text}
+            {content}
         </span>
     )
 }

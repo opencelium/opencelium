@@ -1,5 +1,6 @@
 import {http, HttpResponse} from 'msw'
 import type {
+    ApplicationConfigPatchRequest,
     ApplicationConfigResponse,
     ConfigComment,
     ConfigData,
@@ -16,6 +17,9 @@ const initialConfig: ConfigData = {
             url: 'jdbc:mariadb://localhost:3306/opencelium',
             username: 'root',
             password: 'root',
+        },
+        main: {
+            'banner-mode': 'off',
         },
     },
     opencelium: {
@@ -34,7 +38,11 @@ const initialConfig: ConfigData = {
 const comments: ConfigComment[] = [
     {path: '$.header', position: 'before', text: ' Webserver configuration section'},
     {path: 'server.port', position: 'inline', text: ' default http port'},
-    {path: 'spring.datasource', position: 'before', text: ' Database section'},
+    {
+        path: 'spring.main',
+        position: 'before',
+        text: '##############################################################################\n#\n   Configuration of third party tools                                         #\n#\n##############################################################################',
+    },
     {path: 'opencelium.token.activity-time', position: 'after', text: ' session lifetime in seconds'},
     {path: '$.footer', position: 'after', text: ' end of file'},
 ]
@@ -55,6 +63,19 @@ function deepMerge(target: ConfigValue, patch: ConfigValue): ConfigValue {
     return out
 }
 
+function badRequest(message: string) {
+    return HttpResponse.json(
+        {
+            timestamp: new Date().toISOString(),
+            status: 400,
+            error: 'BAD_REQUEST',
+            message,
+            path: '/application-config',
+        },
+        {status: 400},
+    )
+}
+
 export const systemConfigHandlers = [
     http.get('/application-config', () => {
         const body: ApplicationConfigResponse = {data: current, comments}
@@ -62,20 +83,26 @@ export const systemConfigHandlers = [
     }),
 
     http.patch('/application-config', async ({request}) => {
-        const body = (await request.json()) as ConfigValue
-        if (!isPlainObject(body)) {
-            return HttpResponse.json(
-                {
-                    timestamp: new Date().toISOString(),
-                    status: 400,
-                    error: 'BAD_REQUEST',
-                    message: 'Payload must be a JSON object',
-                    path: '/application-config',
-                },
-                {status: 400},
-            )
+        let body: unknown
+        try {
+            body = await request.json()
+        } catch {
+            return badRequest('Malformed JSON')
         }
-        current = deepMerge(current, body) as ConfigData
+
+        if (!isPlainObject(body)) {
+            return badRequest('Body must be a JSON object')
+        }
+        const envelope = body as Partial<ApplicationConfigPatchRequest>
+        if (!('data' in envelope)) {
+            return badRequest('Missing "data" field')
+        }
+        if (!isPlainObject(envelope.data)) {
+            return badRequest('"data" must be an object')
+        }
+
+        current = deepMerge(current, envelope.data as ConfigValue) as ConfigData
+
         return HttpResponse.json({
             status: 'saved',
             restartRequired: true,

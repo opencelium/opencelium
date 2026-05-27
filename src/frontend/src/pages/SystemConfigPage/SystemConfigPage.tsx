@@ -23,8 +23,9 @@ import {buildPatch} from './buildPatch'
 import {parsePath, setValueAtPath} from './setValueAtPath'
 
 function CommentBanner({text, kind}: {text: string; kind: 'header' | 'footer'}) {
+    const content = text.split('\n').map((line) => `#${line}`).join('\n')
     return (
-        <div
+        <pre
             className={`system-config__banner system-config__banner--${kind}`}
             style={{
                 color: 'var(--color-text-subtle)',
@@ -32,11 +33,12 @@ function CommentBanner({text, kind}: {text: string; kind: 'header' | 'footer'}) 
                 fontFamily: 'var(--font-mono, monospace)',
                 fontSize: 12,
                 padding: '4px 0',
+                margin: 0,
                 whiteSpace: 'pre-wrap',
             }}
         >
-            #{text}
-        </div>
+            {content}
+        </pre>
     )
 }
 
@@ -91,7 +93,7 @@ export function SystemConfigPage() {
             message.info(t('system-config.messages.noChanges'))
             return
         }
-        const res = await updateConfig(patch as Partial<ConfigData>)
+        const res = await updateConfig({ data: patch as Partial<ConfigData> })
         if ('error' in res && res.error) {
             message.error(t('system-config.messages.saveFailed'))
             return
