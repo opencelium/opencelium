@@ -90,49 +90,12 @@ export function EntityWizard<EntityFormValues>({
         defaultValues,
         shouldFocusError: true,
     })
-    const {setFocus, formState} = form;
 
-    function getFirstErrorField(errors: any, prefix = ''): string | null {
-        for (const key in errors) {
-            const value = errors[key];
-
-            if (value?.type) {
-                return prefix ? `${prefix}.${key}` : key;
-            }
-
-            if (typeof value === 'object') {
-                const nested = getFirstErrorField(
-                    value,
-                    prefix ? `${prefix}.${key}` : key
-                );
-
-                if (nested) return nested;
-            }
-        }
-
-        return null;
-    }
-    useEffect(() => {
-        if (!formState.errors) return;
-
-        const firstField = getFirstErrorField(formState.errors);
-
-        if (firstField) {
-            setFocus(firstField);
-        }
-    }, [formState]);
     useEffect(() => {
         if (initialValues) {
-            console.log('[EntityWizard] form.reset(initialValues)', initialValues)
             form.reset(initialValues)
         }
     }, [initialValues])
-    useEffect(() => {
-        const sub = form.watch((values, info) => {
-            console.log('[EntityWizard] form.watch change', info, values)
-        })
-        return () => sub.unsubscribe()
-    }, [form])
     useEffect(() => {
         if (!liveUpdate || !onSubmit) return
         const sub = form.watch((values, {type, name}) => {
@@ -196,11 +159,13 @@ export function EntityWizard<EntityFormValues>({
                 ),
                 validate: async () => {
                     if (!step.validateFields) {
-                        return await form.trigger();
+                        return await form.trigger(undefined, { shouldFocus: true });
                     }
 
-                    // Trigger validation for all fields in the current step
-                    const result = await form.trigger(step.validateFields as any);
+                    // Trigger validation for all fields in the current step.
+                    // shouldFocus moves focus to the first invalid field on Next,
+                    // instead of a render-driven effect that re-focuses on every keystroke.
+                    const result = await form.trigger(step.validateFields as any, { shouldFocus: true });
 
                     // If step-level field validation passes, double-check if any
                     // cross-validation issues exist for these specific fields.
@@ -267,15 +232,7 @@ export function EntityWizard<EntityFormValues>({
                             readOnly={readOnly || wizardReadOnly}
 
                             onSubmit={(e) =>
-                                form.handleSubmit(
-                                    (data) => {
-                                        console.log('[EntityWizard] valid submit, data=', data, 'getValues=', form.getValues())
-                                        return onSubmit?.(data)
-                                    },
-                                    (errors) => {
-                                        console.log('[EntityWizard] invalid submit, errors=', errors)
-                                    },
-                                )(e)
+                                form.handleSubmit((data) => onSubmit?.(data))(e)
                             }
                             successMessage={
                                 entity.wizard.modes?.[mode]?.getSuccessMessage?.(form.getValues())

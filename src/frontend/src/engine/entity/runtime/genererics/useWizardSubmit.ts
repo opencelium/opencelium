@@ -40,7 +40,6 @@ export function useWizardSubmit({ entityName, mode, identifier }: Args) {
             if (!api) return
 
             const payload = api.mapToApi ? api.mapToApi({ mode, data: formData }) : formData
-            console.log('[useWizardSubmit] mode=', mode, 'identifier=', identifier, 'formData=', formData, 'payload=', payload)
 
             const wizardModeOnSubmit = entity.wizard?.modes?.[mode]?.onSubmit
             if (wizardModeOnSubmit) await wizardModeOnSubmit(payload)
