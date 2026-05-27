@@ -44,7 +44,7 @@ export const LayoutContent = ({isNotCard}: LayoutContentProps) => {
                         key={location.pathname}
                         initial={{
                             opacity: 0,
-                            y: 40,
+                            y: 8,
                             scale: 0.96,
                         }}
                         animate={{
@@ -54,7 +54,7 @@ export const LayoutContent = ({isNotCard}: LayoutContentProps) => {
                         }}
                         exit={{
                             opacity: 0,
-                            y: 30,
+                            y: 8,
                             scale: 0.95,
                         }}
                         transition={{

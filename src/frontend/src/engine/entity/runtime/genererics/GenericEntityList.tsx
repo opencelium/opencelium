@@ -21,6 +21,7 @@ import { getValueByPath } from '@shared/utils/getValueByPath';
 
 import { Table } from '@shared/ui/primitives/Table';
 import { Input } from '@shared/ui/primitives/Input';
+import { Icon } from '@shared/ui/primitives/Icon';
 import { Button } from '@shared/ui/primitives/Button';
 import { IconButton } from '@shared/ui/primitives/IconButton';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
@@ -297,6 +298,7 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
                                     }
                                     value={globalFilter}
                                     onChange={(e) => setGlobalFilter(e.target.value)}
+                                    leftSlot={<Icon name="search" size={16} isSubtle />}
                                 />
                             </div>
                         )}
