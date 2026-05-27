@@ -205,6 +205,9 @@ export const userDefinition: EntityDefinition = {
                     map: (fieldValue) => ({ email: fieldValue }),
                     transKey: `${baseKey}.fields.email.errors.email_already_exists`,
                     encodeParams: false,
+                    // On update, the user's own email already exists — only re-check
+                    // uniqueness when the value actually changed from the loaded record.
+                    skipIfUnchanged: true,
                     handleResponse: (data, error) => {
                         return !data.result;
                     }
