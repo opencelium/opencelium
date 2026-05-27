@@ -23,7 +23,7 @@ import {
 
 import type { IconComponent } from './Icon.types';
 import {RiListSettingsLine, RiListSettingsFill  } from "react-icons/ri";
-import {MdKeyboardCommandKey, MdContentCopy, MdPlayArrow, MdStop} from "react-icons/md";
+import {MdKeyboardCommandKey, MdContentCopy, MdPlayArrow, MdStop, MdUnfoldMore, MdUnfoldLess, MdToggleOn, MdToggleOff} from "react-icons/md";
 import {TbWebhook} from "react-icons/tb";
 import {Component} from "lucide-react";
 
@@ -55,6 +55,10 @@ const iconMap = {
     history: HistoryOutlined,
     'arrow-left': ArrowLeftOutlined,
     more: MoreOutlined,
+    expand: MdUnfoldMore,
+    collapse: MdUnfoldLess,
+    'toggle-on': MdToggleOn,
+    'toggle-off': MdToggleOff,
 };
 
 export const AntIcon: IconComponent = ({
@@ -72,6 +76,7 @@ export const AntIcon: IconComponent = ({
         primary: 'var(--color-action-primary)',
         secondary: 'var(--color-action-secondary)',
         danger: 'var(--color-action-danger)',
+        inherit: 'currentColor',
     };
 
     return (

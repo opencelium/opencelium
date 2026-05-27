@@ -21,7 +21,13 @@ export const NavigationMenu = () => {
             >
                 <Menu
                     mode="inline"
-                    onClick={({ key }) => navigate(key)}
+                    onClick={({ key, domEvent }) => {
+                        // Modifier-held clicks fall through to the label's <a href>,
+                        // letting the browser open the route in a new tab.
+                        if (domEvent.metaKey || domEvent.ctrlKey || domEvent.shiftKey) return;
+                        domEvent.preventDefault();
+                        navigate(key);
+                    }}
                     items={items}
                     openKeys={openSubmenuKeys}
                     onOpenChange={(keys) => setOpenSubmenuKeys(keys as string[])}

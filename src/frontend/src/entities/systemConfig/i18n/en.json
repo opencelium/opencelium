@@ -1,14 +1,28 @@
 {
   "page": {
     "title": "System Configuration",
-    "subtitle": "Edit the on-disk application.yml from this UI. Changes are persisted but require an application restart to take effect."
+    "subtitle": "Edit the on-disk application.yml from this UI. Changes are persisted but require an application restart to take effect. Secrets (passwords, tokens) are masked — type a new value to replace them."
+  },
+  "comments": {
+    "label": "Comments",
+    "hint": "Fields marked with the info icon have a comment — hover the icon to read it."
   },
   "hint": {
-    "secrets": "Secrets (passwords, tokens) are masked. Type a new value to replace them."
+    "afterSave": "After saving the configuration, please update the server for the changes to take effect."
+  },
+  "search": {
+    "placeholder": "Search by field…",
+    "empty": "No fields match your search."
+  },
+  "status": {
+    "enable": "Enable this setting (uncomment on save)",
+    "disable": "Disable this setting (comment out on save)"
   },
   "actions": {
     "save": "Save",
-    "reset": "Reset"
+    "reset": "Reset",
+    "expandAll": "Expand all",
+    "collapseAll": "Collapse all"
   },
   "messages": {
     "saved": "Configuration saved.",

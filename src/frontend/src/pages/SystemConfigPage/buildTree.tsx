@@ -1,177 +1,156 @@
 import React from 'react'
 import type {TreeNode} from '@shared/ui/primitives/Tree'
-import type {ConfigComment, ConfigValue} from '@entities/systemConfig/model/types'
+import {Tooltip} from '@shared/ui/primitives/Tooltip'
+import {Icon} from '@shared/ui/primitives/Icon'
+import type {
+    ConfigNode,
+    ConfigScalar,
+    ConfigStatus,
+    NodeEdit,
+} from '@entities/systemConfig/model/types'
+import {isContainerNode} from '@entities/systemConfig/model/types'
 import {ConfigLeafEditor} from './ConfigLeafEditor'
+import {CommentInfo} from './CommentInfo'
 
-type CommentsByPath = Map<string, ConfigComment[]>
+type LeafValue = ConfigScalar | ConfigScalar[]
 
 export type BuildTreeArgs = {
-    data: ConfigValue
-    comments: ConfigComment[]
-    onLeafChange: (path: string, value: ConfigValue) => void
+    fields: ConfigNode[]
+    edits: Record<string, NodeEdit>
+    onValueChange: (path: string, value: LeafValue) => void
+    onToggleStatus: (path: string) => void
+    statusLabels: {enable: string; disable: string}
 }
 
-function groupComments(comments: ConfigComment[]): CommentsByPath {
-    const map: CommentsByPath = new Map()
-    for (const c of comments) {
-        const list = map.get(c.path) ?? []
-        list.push(c)
-        map.set(c.path, list)
-    }
-    return map
-}
-
-function joinPath(parent: string, segment: string | number): string {
-    if (typeof segment === 'number') return `${parent}[${segment}]`
-    return parent ? `${parent}.${segment}` : segment
-}
-
-function CommentLine({text, kind}: {text: string; kind: 'before' | 'after'}) {
-    const content = text.split('\n').map((line) => `#${line}`).join('\n')
-    return (
-        <pre
-            className={`config-tree__comment config-tree__comment--${kind}`}
-            style={{
-                color: 'var(--color-text-subtle)',
-                fontStyle: 'italic',
-                fontFamily: 'var(--font-mono, monospace)',
-                fontSize: 12,
-                margin: 0,
-                whiteSpace: 'pre-wrap',
-            }}
-        >
-            {content}
-        </pre>
-    )
-}
-
-function InlineComment({text}: {text: string}) {
-    const lines = text.split('\n')
-    const isMultiline = lines.length > 1
-    const content = lines.map((line) => `#${line}`).join('\n')
-    return (
-        <span
-            className="config-tree__comment config-tree__comment--inline"
-            style={{
-                color: 'var(--color-text-subtle)',
-                fontStyle: 'italic',
-                fontFamily: 'var(--font-mono, monospace)',
-                fontSize: 12,
-                marginLeft: 8,
-                whiteSpace: isMultiline ? 'pre-wrap' : 'normal',
-            }}
-        >
-            {content}
-        </span>
-    )
-}
-
-function isPlainObject(value: ConfigValue): value is { [key: string]: ConfigValue } {
-    return value !== null && typeof value === 'object' && !Array.isArray(value)
-}
-
-function buildNodeTitle(opts: {
-    label: string
+function StatusToggle({
+    isActive,
+    path,
+    onToggleStatus,
+    labels,
+}: {
+    isActive: boolean
     path: string
-    value: ConfigValue
-    commentsForPath: ConfigComment[] | undefined
-    onLeafChange: BuildTreeArgs['onLeafChange']
-}): React.ReactNode {
-    const {label, path, value, commentsForPath, onLeafChange} = opts
-    const before = commentsForPath?.filter((c) => c.position === 'before') ?? []
-    const inline = commentsForPath?.find((c) => c.position === 'inline')
-    const after = commentsForPath?.filter((c) => c.position === 'after') ?? []
+    onToggleStatus: (path: string) => void
+    labels: {enable: string; disable: string}
+}) {
+    return (
+        <Tooltip content={isActive ? labels.disable : labels.enable} placement="top">
+            <span
+                role="button"
+                tabIndex={0}
+                onClick={(e) => {
+                    e.stopPropagation()
+                    onToggleStatus(path)
+                }}
+                style={{display: 'inline-flex', alignItems: 'center', cursor: 'pointer', flexShrink: 0}}
+            >
+                <Icon
+                    name={isActive ? 'toggle-on' : 'toggle-off'}
+                    size={18}
+                    color={isActive ? 'primary' : 'default'}
+                    isSubtle={!isActive}
+                />
+            </span>
+        </Tooltip>
+    )
+}
 
-    const isLeaf =
-        value === null ||
-        typeof value === 'string' ||
-        typeof value === 'number' ||
-        typeof value === 'boolean'
+function buildNodeTitle(node: ConfigNode, args: BuildTreeArgs): React.ReactNode {
+    const {edits, onValueChange, onToggleStatus, statusLabels} = args
+    const edit = edits[node.path]
+    const isActive = (edit?.status ?? node.status) === 'active'
+    const isLeaf = !isContainerNode(node)
+    const value = (edit?.value ?? node.value) as LeafValue
 
     return (
-        <div style={{display: 'flex', flexDirection: 'column', gap: 2, padding: '2px 0'}}>
-            {before.map((c, idx) => (
-                <CommentLine key={`b-${idx}`} text={c.text} kind="before" />
-            ))}
-            <div style={{display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap'}}>
-                <span style={{fontWeight: 500, color: 'var(--color-text-primary)'}}>
-                    {label}
-                    {isLeaf ? ':' : ''}
-                </span>
-                {isLeaf && (
+        <div style={{display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'nowrap', width: '100%', height: 32}}>
+            <StatusToggle
+                isActive={isActive}
+                path={node.path}
+                onToggleStatus={onToggleStatus}
+                labels={statusLabels}
+            />
+            <span
+                style={{
+                    fontWeight: 500,
+                    whiteSpace: 'nowrap',
+                    color: isActive ? 'var(--color-text-primary)' : 'var(--color-text-secondary)',
+                }}
+            >
+                {node.key}
+                {isLeaf ? ':' : ''}
+            </span>
+            {isLeaf && (
+                <span style={{display: 'inline-flex', opacity: isActive ? 1 : 0.6}}>
                     <ConfigLeafEditor
-                        path={path}
+                        path={node.path}
                         value={value}
-                        onChange={(next) => onLeafChange(path, next)}
+                        onChange={(next) => onValueChange(node.path, next)}
                     />
-                )}
-                {inline && <InlineComment text={inline.text} />}
-            </div>
-            {after.map((c, idx) => (
-                <CommentLine key={`a-${idx}`} text={c.text} kind="after" />
-            ))}
+                </span>
+            )}
+            <CommentInfo comments={node.comments} />
         </div>
     )
 }
 
-function buildNodes(
-    value: ConfigValue,
-    parentPath: string,
-    commentsByPath: CommentsByPath,
-    onLeafChange: BuildTreeArgs['onLeafChange'],
-): TreeNode[] {
-    if (Array.isArray(value)) {
-        return value.map((item, idx) => {
-            const path = joinPath(parentPath, idx)
-            const children = buildNodes(item, path, commentsByPath, onLeafChange)
-            const isLeaf = !Array.isArray(item) && !isPlainObject(item)
-            return {
-                key: path,
-                isLeaf,
-                title: buildNodeTitle({
-                    label: `[${idx}]`,
-                    path,
-                    value: item,
-                    commentsForPath: commentsByPath.get(path),
-                    onLeafChange,
-                }),
-                children: isLeaf ? undefined : children,
-            }
-        })
+function buildNodes(nodes: ConfigNode[], args: BuildTreeArgs): TreeNode[] {
+    return nodes.map((node) => {
+        const container = isContainerNode(node)
+        return {
+            key: node.path,
+            isLeaf: !container,
+            title: buildNodeTitle(node, args),
+            children: container ? buildNodes(node.value as ConfigNode[], args) : undefined,
+        }
+    })
+}
+
+export function buildTree(args: BuildTreeArgs): TreeNode[] {
+    return buildNodes(args.fields, args)
+}
+
+export function hasAnyNodeComment(nodes: ConfigNode[]): boolean {
+    for (const node of nodes) {
+        if (node.comments && node.comments.length > 0) return true
+        if (isContainerNode(node) && hasAnyNodeComment(node.value as ConfigNode[])) return true
     }
+    return false
+}
 
-    if (isPlainObject(value)) {
-        return Object.entries(value).map(([key, child]) => {
-            const path = joinPath(parentPath, key)
-            const children = buildNodes(child, path, commentsByPath, onLeafChange)
-            const isLeaf = !Array.isArray(child) && !isPlainObject(child)
-            return {
-                key: path,
-                isLeaf,
-                title: buildNodeTitle({
-                    label: key,
-                    path,
-                    value: child,
-                    commentsForPath: commentsByPath.get(path),
-                    onLeafChange,
-                }),
-                children: isLeaf ? undefined : children,
-            }
-        })
+function nodeLabel(key: string): string {
+    const lastDot = key.lastIndexOf('.')
+    return lastDot >= 0 ? key.slice(lastDot + 1) : key
+}
+
+/**
+ * Prune the tree to nodes whose field label matches `query` (case-insensitive
+ * substring). A self-match keeps the node's whole subtree; a descendant match
+ * keeps the ancestor chain so the match stays reachable.
+ */
+export function filterTree(nodes: TreeNode[], query: string): TreeNode[] {
+    const q = query.trim().toLowerCase()
+    if (!q) return nodes
+    const out: TreeNode[] = []
+    for (const node of nodes) {
+        if (nodeLabel(node.key).toLowerCase().includes(q)) {
+            out.push(node)
+            continue
+        }
+        if (node.children?.length) {
+            const kids = filterTree(node.children, q)
+            if (kids.length > 0) out.push({...node, children: kids})
+        }
     }
-
-    return []
+    return out
 }
 
-export function buildTree({data, comments, onLeafChange}: BuildTreeArgs): TreeNode[] {
-    const map = groupComments(comments)
-    return buildNodes(data, '', map, onLeafChange)
-}
-
-export function getHeaderComments(comments: ConfigComment[]): ConfigComment[] {
-    return comments.filter((c) => c.path === '$.header')
-}
-
-export function getFooterComments(comments: ConfigComment[]): ConfigComment[] {
-    return comments.filter((c) => c.path === '$.footer')
+export function collectExpandableKeys(nodes: TreeNode[], acc: string[] = []): string[] {
+    for (const node of nodes) {
+        if (node.children && node.children.length > 0) {
+            acc.push(node.key)
+            collectExpandableKeys(node.children, acc)
+        }
+    }
+    return acc
 }

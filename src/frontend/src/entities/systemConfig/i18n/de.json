@@ -1,14 +1,28 @@
 {
   "page": {
     "title": "Systemkonfiguration",
-    "subtitle": "Bearbeiten Sie die auf der Festplatte gespeicherte application.yml über diese Oberfläche. Änderungen werden gespeichert, erfordern aber einen Neustart der Anwendung."
+    "subtitle": "Bearbeiten Sie die auf der Festplatte gespeicherte application.yml über diese Oberfläche. Änderungen werden gespeichert, erfordern aber einen Neustart der Anwendung. Passwörter und Tokens sind maskiert – geben Sie einen neuen Wert ein, um sie zu ersetzen."
+  },
+  "comments": {
+    "label": "Kommentare",
+    "hint": "Felder mit dem Info-Symbol haben einen Kommentar — bewegen Sie den Mauszeiger darüber, um ihn zu lesen."
   },
   "hint": {
-    "secrets": "Passwörter und Tokens sind maskiert. Geben Sie einen neuen Wert ein, um sie zu ersetzen."
+    "afterSave": "Aktualisieren Sie nach dem Speichern der Konfiguration bitte den Server, damit die Änderungen wirksam werden."
+  },
+  "search": {
+    "placeholder": "Nach Feld suchen…",
+    "empty": "Keine Felder entsprechen Ihrer Suche."
+  },
+  "status": {
+    "enable": "Diese Einstellung aktivieren (beim Speichern einkommentieren)",
+    "disable": "Diese Einstellung deaktivieren (beim Speichern auskommentieren)"
   },
   "actions": {
     "save": "Speichern",
-    "reset": "Zurücksetzen"
+    "reset": "Zurücksetzen",
+    "expandAll": "Alle aufklappen",
+    "collapseAll": "Alle einklappen"
   },
   "messages": {
     "saved": "Konfiguration gespeichert.",

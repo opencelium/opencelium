@@ -73,6 +73,7 @@ export const MaterialTree: TreeComponent = ({
     defaultExpandAll,
     expandedKeys,
     onExpand,
+    height,
     className,
     style,
 }) => {
@@ -105,7 +106,13 @@ export const MaterialTree: TreeComponent = ({
     }, [onExpand]);
 
     return (
-        <div className={className} style={style}>
+        <div
+            className={className}
+            style={{
+                ...style,
+                ...(height ? {maxHeight: height, overflowY: 'auto'} : {}),
+            }}
+        >
             {treeData.map((node) => (
                 <TreeRow
                     key={node.key}

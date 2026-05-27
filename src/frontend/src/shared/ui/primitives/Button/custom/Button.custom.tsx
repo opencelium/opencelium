@@ -18,12 +18,12 @@ export const CustomButton: ButtonComponent =
         <button className={`btn btn-${variant}`} onClick={onClick}>
             <span className="custom-btn-content">
                 {!loading && iconLeft && (
-                    <Icon name={iconLeft} size={16}/>
+                    <Icon name={iconLeft} size={16} color="inherit"/>
                 )}
                 {loading && <Loading size="xs" inline/>}
                 {children}
                 {!loading && iconRight && (
-                    <Icon name={iconRight} size={16}/>
+                    <Icon name={iconRight} size={16} color="inherit"/>
                 )}
             </span>
         </button>
