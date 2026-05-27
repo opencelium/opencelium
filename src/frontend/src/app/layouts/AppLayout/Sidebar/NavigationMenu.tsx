@@ -36,13 +36,30 @@ const findAncestorKeys = (items: MenuItem[], targetKey: string): string[] | null
 export const NavigationMenu = () => {
     const navigate = useNavigate();
     const { pathname } = useLocation();
-    const { menuType, openSubmenuKeys, setOpenSubmenuKeys } = useLayoutStore();
+    const { menuType, openSubmenuKeys, setOpenSubmenuKeys, setMenu } = useLayoutStore();
 
     const mainMenu = useMainMenu();
     const adminMenu = useAdminMenu();
     const items = menuType === 'main' ? mainMenu : adminMenu;
 
-    const selectedKey = useMemo(() => findSelectedKey(items, pathname), [items, pathname]);
+    // A route lives in at most one menu; resolve the match in each so we can
+    // both highlight the active item and detect when it belongs to the menu
+    // that isn't currently shown.
+    const mainKey = useMemo(() => findSelectedKey(mainMenu, pathname), [mainMenu, pathname]);
+    const adminKey = useMemo(() => findSelectedKey(adminMenu, pathname), [adminMenu, pathname]);
+    const selectedKey = menuType === 'main' ? mainKey : adminKey;
+
+    // Landing on a route owned by the other menu (e.g. /invoker while the main
+    // menu is shown, or a refresh that restored the wrong menuType) switches to
+    // its menu. Guarded by pathname so a manual menu toggle on the same page
+    // isn't overridden.
+    const switchedForPath = useRef<string | undefined>(undefined);
+    useEffect(() => {
+        if (switchedForPath.current === pathname) return;
+        switchedForPath.current = pathname;
+        const owner = mainKey ? 'main' : adminKey ? 'admin' : undefined;
+        if (owner && owner !== menuType) setMenu(owner);
+    }, [pathname, mainKey, adminKey, menuType, setMenu]);
 
     // Open the group(s) holding the active route only when the route actually
     // changes — guarded by the selected-key *value*, not the effect deps,
