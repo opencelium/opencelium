@@ -32,7 +32,7 @@ export const systemConfigDefinition: EntityDefinition = {
                 {
                     type: 'literal',
                     value: 'system-config',
-                    aliases: ['config', 'application-config', 'system config'],
+                    aliases: ['config', 'application-config'],
                     icon: 'settings',
                     description: 'commandPalette.descriptions.updateSystemConfig',
                     execute: (_, ctx) => ctx.navigate(route),
