@@ -306,7 +306,7 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
                             <Tooltip content={tCommon('list.filtersTooltip')}>
                                 <IconButton
                                     type={areFiltersOpen ? 'primary' : 'default'}
-                                    iconProps={{ name: 'filter' }}
+                                    iconProps={{ name: 'filter', color: 'secondary' }}
                                     onClick={() => setAreFiltersOpen((v) => !v)}
                                 />
                             </Tooltip>

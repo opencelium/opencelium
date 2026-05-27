@@ -172,7 +172,7 @@ export const dataAggregatorDefinition: EntityDefinition = {
                 labelKey: `${baseKey}.fields.archived.label`,
                 render: (row, _value) => {
                     const r = row as DataAggregator
-                    return <ActiveSwitchCell id={r.id} active={!!r.active} />
+                    return <ActiveSwitchCell id={r.id} archived={r.active === false} />
                 },
             },
         },

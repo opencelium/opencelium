@@ -4,24 +4,26 @@ import { apiExecutor } from '@shared/api/apiExecutor'
 
 type Props = {
     id: number
-    active: boolean
+    archived: boolean
 }
 
-export function ActiveSwitchCell({ id, active }: Props) {
+// The column represents "archived": the switch is ON when the aggregator is
+// archived (active === false). Toggling it flips the underlying `active` flag.
+export function ActiveSwitchCell({ id, archived }: Props) {
     const [loading, setLoading] = useState(false)
 
-    const handleChange = async (next: boolean) => {
+    const handleChange = async (nextArchived: boolean) => {
         setLoading(true)
         try {
             await apiExecutor({
                 url: `/aggregator/${id}/status`,
                 method: 'PUT',
-                body: { active: next },
+                body: { active: !nextArchived },
             })
         } finally {
             setLoading(false)
         }
     }
 
-    return <Switch checked={active} loading={loading} onChange={handleChange} />
+    return <Switch checked={archived} loading={loading} onChange={handleChange} />
 }
