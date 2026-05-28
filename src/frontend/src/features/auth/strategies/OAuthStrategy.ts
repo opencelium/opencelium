@@ -1,8 +1,8 @@
 import type {AuthStrategy} from "@features/auth/strategies/AuthStrategy.ts";
-import type {AuthSession} from "@entities/auth/model/types.ts";
+import type {AuthSession, LoginResult} from "@entities/auth/model/types.ts";
 
 export class OAuthStrategy implements AuthStrategy<void> {
-    async login(): Promise<AuthSession> {
+    async login(): Promise<LoginResult> {
         window.location.href = '/auth/oauth/redirect'
         throw new Error('OAuth redirect')
     }

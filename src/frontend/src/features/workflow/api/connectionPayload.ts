@@ -468,6 +468,58 @@ const serializeFieldBinding = (binding: any) => {
 const serializeFieldBindings = (fieldBindings: any) =>
 	Array.isArray(fieldBindings) ? fieldBindings.map(serializeFieldBinding) : fieldBindings;
 
+const buildBindingReference = (reference: any) => {
+	if (!reference?.color || !reference?.type || !reference?.field) return undefined;
+	return `${reference.color}.(${reference.type}).${reference.field}`;
+};
+
+const stableBindingId = (value: string) => {
+	let hash = 0;
+	for (let index = 0; index < value.length; index += 1) {
+		hash = (hash * 31 + value.charCodeAt(index)) >>> 0;
+	}
+	return `enh_${hash.toString(16)}`;
+};
+
+const normalizeFieldBinding = (binding: any) => {
+	const enhancement = binding?.enhancement;
+	if (!enhancement) return binding;
+
+	if (enhancement.enhanceId && enhancement.args) {
+		return {
+			...binding,
+			enhancement: {
+				...enhancement,
+				enhanceId: String(enhancement.enhanceId),
+			},
+		};
+	}
+
+	const to = Array.isArray(binding?.to) ? binding.to[0] : undefined;
+	const from: any[] = Array.isArray(binding?.from) ? binding.from : [];
+	const resultVar = buildBindingReference(to);
+	const fromArgs = from.reduce<Record<string, string>>((args, item: any, index: number) => {
+		const value = buildBindingReference(item);
+		if (typeof value === 'string') {
+			args[`VAR_${index}`] = value;
+		}
+		return args;
+	}, {});
+
+	return {
+		...binding,
+		enhancement: {
+			...enhancement,
+			enhanceId: String(enhancement.enhancementId ?? enhancement.enhanceId ?? binding.id ?? stableBindingId(resultVar ?? JSON.stringify(binding))),
+			script: enhancement.script ?? enhancement.expertCode ?? 'RESULT_VAR = VAR_0;',
+			args: resultVar ? { RESULT_VAR: resultVar, ...fromArgs } : enhancement.args ?? {},
+		},
+	};
+};
+
+const normalizeFieldBindings = (fieldBindings: any) =>
+	Array.isArray(fieldBindings) ? fieldBindings.map(normalizeFieldBinding) : [];
+
 export function buildFromConnectorPayload(nodes: WorkflowNodeModel[], edges: WorkflowEdgeModel[]) {
 	const workflowIndexes = buildWorkflowIndexes(nodes, edges);
 	const methods = nodes
@@ -542,6 +594,8 @@ export function normalizeConnectionPayload(payload: any) {
 		...payload,
 		title: payload?.title ?? payload?.name ?? 'Workflow Connection',
 		name: payload?.name ?? payload?.title ?? 'Workflow Connection',
+		fieldBinding: normalizeFieldBindings(payload?.fieldBinding),
+		fieldBindings: normalizeFieldBindings(payload?.fieldBindings),
 		fromConnector: {
 			...sourceFromConnector,
 			connectorId: -1,

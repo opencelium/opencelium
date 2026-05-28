@@ -14,10 +14,14 @@ export const connectorApi = baseApi.injectEndpoints({
       providesTags: (result) =>
           result
               ? [
+                { type: 'Entity' as any, id: '/connector/all' },
                 { type: CONNECTOR_TAG, id: 'LIST' },
                 ...result.map((u) => ({ type: CONNECTOR_TAG, id: u.connectorId })),
               ]
-              : [{ type: CONNECTOR_TAG, id: 'LIST' }],
+              : [
+                { type: 'Entity' as any, id: '/connector/all' },
+                { type: CONNECTOR_TAG, id: 'LIST' },
+              ],
     }),
     getConnector: b.mutation<
       any,

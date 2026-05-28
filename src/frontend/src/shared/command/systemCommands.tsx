@@ -31,9 +31,11 @@ export const systemCommands: CommandNode<any>[] = [
                                 // Use MockAuthStrategy directly or via dispatch
                                 // Since we have access to store.dispatch:
                                 const strategy = new MockAuthStrategy();
-                                const session = await strategy.login({ role });
+                                const result = await strategy.login({ role });
 
-                                store.dispatch(authActions.setSession(session));
+                                if (result.status === 'authenticated') {
+                                    store.dispatch(authActions.setSession(result.session));
+                                }
                             } catch (e) {
                                 ctx.notify(`Failed to login as ${role}`, 'error');
                             }

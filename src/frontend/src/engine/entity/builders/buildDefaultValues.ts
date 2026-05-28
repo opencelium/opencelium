@@ -36,7 +36,9 @@ export function buildDefaultValues(entity: EntityDefinition) {
                         ? undefined
                         : field.type === 'boolean'
                             ? false
-                            : undefined
+                            : field.type === 'file'
+                                ? null
+                                : undefined
 
         setNestedValue(result, field.name, value)
     })

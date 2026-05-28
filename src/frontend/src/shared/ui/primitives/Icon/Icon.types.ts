@@ -28,12 +28,17 @@ export type IconName =
     | 'history'
     | 'arrow-left'
     | 'more'
+    | 'expand'
+    | 'collapse'
+    | 'toggle-on'
+    | 'toggle-off'
 
 export type IconColor =
     | 'default'
     | 'primary'
     | 'secondary'
-    | 'danger';
+    | 'danger'
+    | 'inherit';
 
 export interface IconProps {
     name: IconName;

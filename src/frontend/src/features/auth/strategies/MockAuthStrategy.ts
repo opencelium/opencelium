@@ -1,12 +1,12 @@
 import type { AuthStrategy } from "./AuthStrategy";
-import type {AuthSession} from "@entities/auth/model/types.ts";
+import type {AuthSession, LoginResult} from "@entities/auth/model/types.ts";
 
 export type MockLoginPayload = {
     role: 'admin' | 'reporter' | 'user';
 };
 
 export class MockAuthStrategy implements AuthStrategy<MockLoginPayload> {
-    async login(payload: MockLoginPayload) {
+    async login(payload: MockLoginPayload): Promise<LoginResult> {
         //await new Promise(res => setTimeout(res, 500));
         // Send a request to the same endpoint, but with the mock flag
         const res = await fetch('/auth/mock-login', {
@@ -19,7 +19,8 @@ export class MockAuthStrategy implements AuthStrategy<MockLoginPayload> {
             throw new Error('Mock login failed');
         }
 
-        return res.json(); // Returns an AuthSession with the requested role
+        const session = (await res.json()) as AuthSession // Returns an AuthSession with the requested role
+        return { status: 'authenticated', session }
     }
 
     async refresh(): Promise<AuthSession | null> {

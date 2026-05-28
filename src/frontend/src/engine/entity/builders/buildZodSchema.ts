@@ -120,6 +120,29 @@ export function buildFieldSchema(
             if (v.min !== undefined) schema = (schema as z.ZodNumber).min(v.min, t('field.minLength', { min: v.min }));
             if (v.max !== undefined) schema = (schema as z.ZodNumber).max(v.max, t('field.maxLength', { max: v.max }));
         }
+    } else if (field.type === 'file') {
+        // Files can arrive as a freshly picked File, a server-stored path string, or null.
+        schema = schema.pipe(
+            z.union([
+                z.instanceof(File),
+                z.string(),
+                z.null(),
+            ], { errorMap: () => ({ message: t('field.mustFile') }) })
+        );
+
+        if (v?.max !== undefined) {
+            schema = schema.superRefine((val, ctx) => {
+                if (val instanceof File && val.size > v.max!) {
+                    ctx.addIssue({
+                        code: z.ZodIssueCode.too_big,
+                        maximum: v.max!,
+                        type: 'number',
+                        inclusive: true,
+                        message: t('field.fileTooLarge', { max: v.max }),
+                    });
+                }
+            });
+        }
     }
 
     /* ===============================

@@ -23,3 +23,6 @@ export const selectIsAuthenticated = (state: RootState) =>
 
 export const selectIsAuthLoading = (state: RootState) =>
     state.auth.status === 'loading'
+
+export const selectIntentionalLogout = (state: RootState) =>
+    state.auth.intentionalLogout

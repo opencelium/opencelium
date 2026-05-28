@@ -33,5 +33,19 @@ export interface AuthSchema {
             show: string
             hide: string
         }
+        totp: {
+            title: string
+            hint: string
+            verifyHint: string
+            or: string
+            qrAlt: string
+            codeLabel: string
+            codePlaceholder: string
+            submit: string
+            errors: {
+                required: string
+                invalidCode: string
+            }
+        }
     }
 }

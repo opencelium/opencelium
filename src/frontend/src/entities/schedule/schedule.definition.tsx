@@ -11,7 +11,6 @@ import {resolveScheduleIds} from "@entities/schedule/command/resolvers/resolveSc
 import {scheduleApi} from "@entities/schedule/api/scheduleApi.ts";
 import {SCHEDULE_TAG} from "@entities/schedule/api/schedule.tags.ts";
 import {genericApi} from "@shared/api/genericApi.ts";
-import type {Role, RoleUpdateDTO} from "@entities/role/model/types.ts";
 import type {Schedule, ScheduleUpdateDTO} from "@entities/schedule/model/types.ts";
 import {stripSeconds} from "@shared/ui/wizard-step/editor/cron-editor/cron-editor.utils.ts";
 import {StatusCell} from "@entities/schedule/ui/StatusCell.tsx";

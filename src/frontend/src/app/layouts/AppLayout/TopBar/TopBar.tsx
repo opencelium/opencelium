@@ -69,14 +69,14 @@ export const TopBar = () => {
                         {lang.toUpperCase()}
                     </Button>
                 </Tooltip>
-                <Tooltip content={tCommon('topbar.notifications')}>
+               {/* <Tooltip content={tCommon('topbar.notifications')}>
                     <IconButton
                         size="xs"
                         type={'text'}
                         iconProps={{name: 'notification', color: 'primary'}}
                         onClick={() => {}}
                     />
-                </Tooltip>
+                </Tooltip>*/}
                 <MenuSwitcher/>
                 <Tooltip content={tCommon('topbar.profile')}>
                     <IconButton

@@ -1,7 +1,13 @@
 {
   "api": {
+    "unauthorized": "Your session has expired. Please log in again.",
     "forbidden": "Your session is expired",
-    "unknownError": "Unknown Error in {{place}}"
+    "unknownError": "Unknown Error in {{place}}",
+    "login": {
+      "network": "Could not reach the server. Please try again.",
+      "invalidCredentials": "Invalid email or password",
+      "failed": "Login failed"
+    }
   },
   "field": {
     "required": "Required field",
@@ -9,6 +15,8 @@
     "maxLength": "Maximum {{max}} characters",
     "invalidEmail": "Invalid email",
     "mustNumber": "Must be a number",
+    "mustFile": "Must be a file",
+    "fileTooLarge": "File is too large (max {{max}} bytes)",
     "failedAsyncOptions": "Failed to fetch options"
   }
 }

@@ -20,6 +20,10 @@ import {
     History,
     ArrowBack,
     MoreVert,
+    UnfoldMore,
+    UnfoldLess,
+    ToggleOn,
+    ToggleOff,
 } from '@mui/icons-material';
 
 import type { IconComponent } from './Icon.types';
@@ -45,6 +49,10 @@ const iconMap = {
     history: History,
     'arrow-left': ArrowBack,
     more: MoreVert,
+    expand: UnfoldMore,
+    collapse: UnfoldLess,
+    'toggle-on': ToggleOn,
+    'toggle-off': ToggleOff,
 };
 
 export const MaterialIcon: IconComponent = ({
@@ -61,6 +69,7 @@ export const MaterialIcon: IconComponent = ({
         primary: 'var(--color-action-primary)',
         secondary: 'var(--color-action-secondary)',
         danger: 'var(--color-action-danger)',
+        inherit: 'currentColor',
     };
 
     return (

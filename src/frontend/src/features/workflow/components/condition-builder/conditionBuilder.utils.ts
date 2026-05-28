@@ -90,11 +90,21 @@ export const removeChildById = (group: ConditionGroup, childId: string): Conditi
 		.map((child) => (child.type === 'group' ? removeChildById(child, childId) : child)),
 });
 
-const isReference = (value?: string) =>
-	!!value && (/^#?[A-Fa-f0-9]{6}\.\(response\)\./.test(value) || /^\$\{.*}$/.test(value));
+const DIRECT_REFERENCE_PATTERN = /^#?[A-Fa-f0-9]{6}\.\(response\)\./;
+const WRAPPED_DIRECT_REFERENCE_PATTERN = /^\{%#?[A-Fa-f0-9]{6}\.\(response\)\..*%}$/;
 
-const formatField = (value?: string) => {
+const isDirectReference = (value?: string) =>
+	!!value && DIRECT_REFERENCE_PATTERN.test(value);
+
+const isReference = (value?: string) =>
+	!!value && (isDirectReference(value) || WRAPPED_DIRECT_REFERENCE_PATTERN.test(value) || /^\$\{.*}$/.test(value));
+
+const wrapDirectReference = (value: string) =>
+	WRAPPED_DIRECT_REFERENCE_PATTERN.test(value) ? value : `{%${value.startsWith('#') ? value : `#${value}`}%}`;
+
+const formatField = (value?: string, wrapReference = false) => {
 	if (!value) return '';
+	if (wrapReference && isDirectReference(value)) return wrapDirectReference(value);
 	return isReference(value) ? value : `'${value}'`;
 };
 
@@ -105,8 +115,9 @@ export const conditionTreeToExpression = (
 	if (child.type === 'rule') {
 		const properties = child.properties || {};
 		const operator = properties.operator || '';
-		const left = formatField(properties.leftField);
-		const right = formatField(properties.rightField);
+		const wrapReference = operatorType === 'loop';
+		const left = formatField(properties.leftField, wrapReference);
+		const right = formatField(properties.rightField, wrapReference);
 		if (operatorType === 'loop') {
 			if (operator === LoopOperatorName.SplitString) {
 				return right ? `${left} ${operator} ${right}` : `${left} ${operator}`;

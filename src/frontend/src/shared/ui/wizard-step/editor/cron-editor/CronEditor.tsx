@@ -48,7 +48,7 @@ export const CronEditor: React.FC<CronEditorProps> = ({ name, label, mode }) => 
         val.trim().split(/\s+/).length === 6;
 
     return (
-        <div>
+        <div style={{display: 'grid', gap: 4}}>
             <FormInput
                 label={label}
                 value={fullCron}

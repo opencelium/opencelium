@@ -110,7 +110,18 @@ export const findRequestEnhancement = (
   namespace: string[],
   name: string,
   messageProperty: 'body' | 'header',
+  value?: unknown,
 ) => {
   const resultVar = `${methodColor}.(request).${buildRequestResultField(messageProperty, namespace, name)}`;
-  return connection?.fieldBindings.find((binding) => binding.enhancement?.args?.RESULT_VAR === resultVar)?.enhancement;
+  const exact = connection?.fieldBindings.find((binding) => binding.enhancement?.args?.RESULT_VAR === resultVar)?.enhancement;
+  if (exact) return exact;
+
+  const refs = getParsedReferences(typeof value === 'string' ? value : '');
+  if (refs.length === 0) return undefined;
+  const refValues = refs.map((reference) => `${reference.color}.(${reference.type}).${reference.field}`);
+
+  return connection?.fieldBindings.find((binding) => {
+    const args = binding.enhancement?.args || {};
+    return refValues.every((refValue, index) => args[`VAR_${index}`] === refValue);
+  })?.enhancement;
 };

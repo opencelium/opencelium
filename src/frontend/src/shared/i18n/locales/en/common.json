@@ -23,6 +23,7 @@
     "licenseManagement": "License Management",
     "updateAssistant": "Update Assistant",
     "systemCheck": "System Check",
+    "config": "Configurations",
     "ui": "UI"
   },
   "commandPalette": {
@@ -43,7 +44,8 @@
       "list": "Open the entry list",
       "login": "Switch the current role",
       "system": "System actions",
-      "checkLicense": "Check license and API operation usage"
+      "checkLicense": "Check license and API operation usage",
+      "updateSystemConfig": "Update on-disk application configuration"
     },
     "footer": {
       "select": "Select",

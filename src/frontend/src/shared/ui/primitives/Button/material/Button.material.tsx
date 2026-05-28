@@ -57,13 +57,13 @@ export const MaterialButton: ButtonComponent = ({
                 )}
 
               {!loading && iconLeft && (
-                  <Icon name={iconLeft} size={16}/>
+                  <Icon name={iconLeft} size={16} color="inherit"/>
               )}
               <span style={{opacity: loading ? 0.7 : 1}}>
                         {children}
                     </span>
               {!loading && iconRight && (
-                  <Icon name={iconRight} size={16}/>
+                  <Icon name={iconRight} size={16} color="inherit"/>
               )}
           </span>
         </MuiButton>
