@@ -14,6 +14,11 @@
       "emailRecoveryFailed": "Es gibt ein Problem mit Ihrer E-Mail-Konfiguration. Aus Sicherheitsgründen wurde die detaillierte Fehlermeldung in die Opencelium-Logs geschrieben. Bitte prüfen Sie die Logs für weitere Informationen.",
       "network": "Der Server ist nicht erreichbar. Bitte versuchen Sie es erneut.",
       "failed": "Die Wiederherstellungs-E-Mail konnte nicht gesendet werden. Bitte versuchen Sie es erneut."
+    },
+    "setPassword": {
+      "invalidToken": "Der Zurücksetzungslink ist ungültig oder abgelaufen. Bitte fordern Sie einen neuen an.",
+      "network": "Der Server ist nicht erreichbar. Bitte versuchen Sie es erneut.",
+      "failed": "Das Passwort konnte nicht zurückgesetzt werden. Bitte versuchen Sie es erneut."
     }
   },
   "field": {

@@ -34,6 +34,35 @@ export interface AuthSchema {
             backToLogin: string
             success: string
         }
+        setPassword: {
+            title: string
+            description: string
+            submit: string
+            backToLogin: string
+            success: {
+                message: string
+                redirect: string
+            }
+            fields: {
+                password: {
+                    label: string
+                    placeholder: string
+                    required: string
+                    minLength: string
+                    maxLength: string
+                    upper: string
+                    lower: string
+                    number: string
+                    special: string
+                }
+                repeatPassword: {
+                    label: string
+                    placeholder: string
+                    required: string
+                    mismatch: string
+                }
+            }
+        }
         passwordVisibility: {
             show: string
             hide: string
