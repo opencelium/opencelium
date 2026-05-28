@@ -8,6 +8,7 @@ export function initApiErrorNotifySubscriber() {
             message: error.details?.message,
             transKey: error?.messageKey,
             group: 'api',
+            durationSec: error.durationSec,
         })
     })
 }

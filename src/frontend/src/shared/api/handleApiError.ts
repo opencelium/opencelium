@@ -9,6 +9,7 @@ type ApiError = {
     namespace?: string,
     transKey?: string;
     message?: string;
+    durationSec?: number;
 };
 
 export const showApiError = (error: ApiError) => {
@@ -34,8 +35,8 @@ export const showApiError = (error: ApiError) => {
             : undefined,
     }) : error.message;
     if (!translated) {
-        message.error(`Unknown error: ${JSON.stringify(error)}`);
+        message.error(`Unknown error: ${JSON.stringify(error)}`, error.durationSec);
     } else {
-        message.error(translated);
+        message.error(translated, error.durationSec);
     }
 };

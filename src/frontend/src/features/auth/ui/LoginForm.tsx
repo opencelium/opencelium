@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Controller, FormProvider } from 'react-hook-form'
-import { message } from 'antd'
+import { useNavigate } from 'react-router-dom'
 import { useLoginForm } from '../model/useLoginForm'
 import { useAuth } from '@features/auth/useAuth'
 import { API_TIMEOUT_ERROR_NAME, ApiFetchError } from '@shared/api/apiFetch'
@@ -34,6 +34,7 @@ export function LoginForm() {
     const { form, constraints } = useLoginForm()
     const { login } = useAuth()
     const { t } = useI18n('auth')
+    const navigate = useNavigate()
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [totp, setTotp] = useState<{ challenge: TotpChallenge; rememberMe: boolean } | null>(null)
 
@@ -60,7 +61,7 @@ export function LoginForm() {
     }
 
     const handleForgotPassword = () => {
-        message.info(t('forgotPassword.notAvailable'))
+        navigate('/forgot-password')
     }
 
     const { control, handleSubmit, formState: { errors } } = form

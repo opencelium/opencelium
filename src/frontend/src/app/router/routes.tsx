@@ -15,6 +15,7 @@ import CheckLdapPage from "@pages/LdapPage/CheckLdapPage.tsx";
 import UIPage from "@pages/UIPage/UIPage.tsx";
 
 const LoginPage = lazy(() => import('@pages/LoginPage'))
+const ForgotPasswordPage = lazy(() => import('@pages/ForgotPasswordPage'))
 const ProfilePage = lazy(() => import('@pages/ProfilePage/ProfilePage.tsx'))
 const DashboardPage = lazy(() => import('@pages/DashboardPage'))
 
@@ -31,6 +32,7 @@ export function getRoutes(): RouteConfig[] {
             element: <PublicLayout/>,
             children: [
                 {path: '/login', element: <LoginPage/>},
+                {path: '/forgot-password', element: <ForgotPasswordPage/>},
             ],
         },
         {

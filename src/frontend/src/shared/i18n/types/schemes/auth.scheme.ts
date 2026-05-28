@@ -28,6 +28,11 @@ export interface AuthSchema {
         }
         forgotPassword: {
             notAvailable: string
+            title: string
+            description: string
+            submit: string
+            backToLogin: string
+            success: string
         }
         passwordVisibility: {
             show: string
