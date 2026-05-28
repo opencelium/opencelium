@@ -14,7 +14,7 @@
  * // along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.becon.opencelium.backend.applicationConfig.service;
+package com.becon.opencelium.backend.appYml.service;
 
 import com.becon.opencelium.backend.exception.ApplicationConfigWriteException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -29,6 +29,7 @@ import org.snakeyaml.engine.v2.nodes.MappingNode;
 import org.snakeyaml.engine.v2.nodes.Node;
 import org.snakeyaml.engine.v2.nodes.NodeTuple;
 import org.snakeyaml.engine.v2.nodes.ScalarNode;
+import org.snakeyaml.engine.v2.nodes.SequenceNode;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -73,6 +74,141 @@ public class YamlConfigWriter {
         }
 
         return String.join("\n", lines);
+    }
+
+    /**
+     * Enables (uncomments) each given dotted path in place by stripping every
+     * leading {@code #} marker from that path's <em>key line only</em>.
+     * Container key lines are stripped, but their child lines stay commented
+     * unless the caller also passes those child paths — cascading is the
+     * caller's responsibility (see {@code ApplicationConfigServiceImpl}).
+     *
+     * <p>All leading {@code #}s on an anchor line are stripped, so a
+     * doubly-commented property like {@code "  #  #    enabled: false"}
+     * becomes fully active in one PATCH. Non-anchor lines (inner doc
+     * comments, decorative borders) are left untouched. Throws if the path
+     * doesn't exist as an inactive node in the file.</p>
+     */
+    public String uncomment(String originalYaml, List<String> paths) {
+        if (paths == null || paths.isEmpty()) {
+            return originalYaml;
+        }
+
+        YamlShadow.Result built = YamlShadow.build(originalYaml);
+
+        LoadSettings loadSettings = LoadSettings.builder().setParseComments(true).build();
+        Optional<Node> rootOpt;
+        try {
+            rootOpt = new Compose(loadSettings).composeString(built.shadow());
+        } catch (Exception e) {
+            throw new ApplicationConfigWriteException("Failed to parse application.yml", e);
+        }
+        if (rootOpt.isEmpty() || !(rootOpt.get() instanceof MappingNode rootMapping)) {
+            throw new ApplicationConfigWriteException("application.yml must have a mapping root");
+        }
+
+        String[] originalLines = originalYaml.split("\n", -1);
+        java.util.BitSet linesToUncomment = new java.util.BitSet(originalLines.length);
+        for (String path : paths) {
+            NodeTuple tuple = findTuple(rootMapping, path).orElseThrow(() ->
+                    new ApplicationConfigWriteException("Cannot enable unknown path: " + path));
+            // Strip only the key line — caller controls cascade by listing
+            // every descendant path it wants enabled.
+            linesToUncomment.set(markLine(tuple.getKeyNode()));
+        }
+
+        List<String> lines = new ArrayList<>(Arrays.asList(originalLines));
+        for (int i = linesToUncomment.nextSetBit(0); i >= 0; i = linesToUncomment.nextSetBit(i + 1)) {
+            if (i >= lines.size()) {
+                break;
+            }
+            String line = lines.get(i);
+            if (YamlShadow.isAnchor(line)) {
+                lines.set(i, YamlShadow.stripAllLeadingHashes(line));
+            }
+        }
+        return String.join("\n", lines);
+    }
+
+    /**
+     * Disables (comments out) each given dotted path in place by prefixing
+     * {@code # } to every line of the node's block, from its key line down to
+     * the last line of its value. Blank and already-commented lines are left
+     * untouched. Surrounding comments and formatting are preserved. Throws if a
+     * path does not exist as an active node on disk.
+     */
+    public String commentOut(String originalYaml, List<String> paths) {
+        if (paths == null || paths.isEmpty()) {
+            return originalYaml;
+        }
+
+        LoadSettings loadSettings = LoadSettings.builder().setParseComments(true).build();
+        Optional<Node> rootOpt;
+        try {
+            rootOpt = new Compose(loadSettings).composeString(originalYaml);
+        } catch (Exception e) {
+            throw new ApplicationConfigWriteException("Failed to parse application.yml", e);
+        }
+        if (rootOpt.isEmpty() || !(rootOpt.get() instanceof MappingNode rootMapping)) {
+            throw new ApplicationConfigWriteException("application.yml must have a mapping root");
+        }
+
+        List<String> lines = new ArrayList<>(Arrays.asList(originalYaml.split("\n", -1)));
+        List<Edit> edits = new ArrayList<>();
+        for (String path : paths) {
+            NodeTuple tuple = findTuple(rootMapping, path).orElseThrow(() ->
+                    new ApplicationConfigWriteException("Cannot disable unknown path: " + path));
+            int start = markLine(tuple.getKeyNode());
+            int end = lastContentLine(tuple.getValueNode());
+            edits.add(new CommentLineRange(start, end));
+        }
+
+        edits.sort(Comparator.comparingInt(Edit::sortKey).reversed());
+        for (Edit edit : edits) {
+            edit.apply(lines);
+        }
+        return String.join("\n", lines);
+    }
+
+    private Optional<NodeTuple> findTuple(MappingNode mapping, String dottedPath) {
+        String[] segments = dottedPath.split("\\.");
+        MappingNode current = mapping;
+        NodeTuple found = null;
+        for (int i = 0; i < segments.length; i++) {
+            found = null;
+            for (NodeTuple tuple : current.getValue()) {
+                if (tuple.getKeyNode() instanceof ScalarNode s && s.getValue().equals(segments[i])) {
+                    found = tuple;
+                    break;
+                }
+            }
+            if (found == null) {
+                return Optional.empty();
+            }
+            if (i < segments.length - 1) {
+                if (found.getValueNode() instanceof MappingNode nested) {
+                    current = nested;
+                } else {
+                    return Optional.empty();
+                }
+            }
+        }
+        return Optional.ofNullable(found);
+    }
+
+    private int lastContentLine(Node node) {
+        int max = markLine(node);
+        if (node instanceof MappingNode mapping) {
+            for (NodeTuple tuple : mapping.getValue()) {
+                max = Math.max(max, lastContentLine(tuple.getKeyNode()));
+                max = Math.max(max, lastContentLine(tuple.getValueNode()));
+            }
+        } else if (node instanceof SequenceNode sequence) {
+            for (Node item : sequence.getValue()) {
+                max = Math.max(max, lastContentLine(item));
+            }
+        }
+        return max;
     }
 
     private void planMappingMerge(MappingNode mapping, ObjectNode patch, int parentChildIndent, List<Edit> edits) {
@@ -211,10 +347,42 @@ public class YamlConfigWriter {
         return new ApplicationConfigWriteException("YAML node has no source position");
     }
 
-    private sealed interface Edit permits ReplaceInLine, ReplaceLineRange, InsertAfter {
+    private sealed interface Edit permits ReplaceInLine, ReplaceLineRange, InsertAfter, CommentLineRange {
         int sortKey();
 
         void apply(List<String> lines);
+    }
+
+    private record CommentLineRange(int startLine, int endLine) implements Edit {
+        @Override
+        public int sortKey() {
+            return startLine;
+        }
+
+        @Override
+        public void apply(List<String> lines) {
+            // Prepend `#` at column 0 — matches the bundled-file convention
+            // (`#  ssl:` etc.) and makes activate/deactivate round-trip stable.
+            // The companion uncommenter strips exactly one leading `#`, so the
+            // two ops are inverses: a deactivate-then-activate cycle returns
+            // the line to its starting bytes.
+            int from = Math.max(0, startLine);
+            int to = Math.min(endLine, lines.size() - 1);
+            for (int i = from; i <= to; i++) {
+                String line = lines.get(i);
+                int indent = 0;
+                while (indent < line.length() && line.charAt(indent) == ' ') {
+                    indent++;
+                }
+                if (indent >= line.length()) {
+                    continue; // blank line
+                }
+                if (line.charAt(indent) == '#') {
+                    continue; // already commented
+                }
+                lines.set(i, "#" + line);
+            }
+        }
     }
 
     private record ReplaceInLine(int line, int startCol, int endCol, String newText) implements Edit {

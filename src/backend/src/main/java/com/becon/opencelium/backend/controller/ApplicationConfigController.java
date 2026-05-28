@@ -16,9 +16,9 @@
 
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.applicationConfig.dto.ApplicationConfigPatchResponse;
-import com.becon.opencelium.backend.applicationConfig.dto.ApplicationConfigResponse;
-import com.becon.opencelium.backend.applicationConfig.service.ApplicationConfigService;
+import com.becon.opencelium.backend.appYml.dto.ApplicationConfigPatchResponse;
+import com.becon.opencelium.backend.appYml.dto.ApplicationConfigResponse;
+import com.becon.opencelium.backend.appYml.service.ApplicationConfigService;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.Operation;
@@ -67,10 +67,11 @@ public class ApplicationConfigController {
     }
 
     @Operation(
-            summary = "Deep-merges the 'data' field of the envelope into application.yml. Restart required to apply.",
-            description = "Accepts the same envelope shape returned by GET: { data, comments }. "
-                    + "Only 'data' is applied; 'comments' is read-only and ignored on write — "
-                    + "comments on disk are preserved automatically."
+            summary = "Applies the 'fields' array of the envelope to application.yml. Restart required to apply.",
+            description = "Accepts the same envelope shape returned by GET: { fields, comments }. "
+                    + "Nodes are matched by 'path' — values are edited, new keys added, and nodes "
+                    + "with status 'inactive' are commented out. 'comments' is read-only and ignored "
+                    + "on write; comments on disk are preserved automatically."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
@@ -89,17 +90,17 @@ public class ApplicationConfigController {
     @PreAuthorize("hasAuthority('Admin')")
     @PatchMapping
     public ResponseEntity<ApplicationConfigPatchResponse> patch(@RequestBody JsonNode envelope) {
-        if (envelope == null || !envelope.isObject() || !envelope.has("data")) {
+        if (envelope == null || !envelope.isObject() || !envelope.has("fields")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Request body must be an object containing a 'data' field, "
+                    "Request body must be an object containing a 'fields' array, "
                             + "matching the shape returned by GET /application-config.");
         }
-        JsonNode data = envelope.get("data");
-        if (!data.isObject()) {
+        JsonNode fields = envelope.get("fields");
+        if (!fields.isArray()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "'data' must be a JSON object.");
+                    "'fields' must be a JSON array.");
         }
-        service.patch(data);
+        service.patch(fields);
         return ResponseEntity.ok(ApplicationConfigPatchResponse.saved());
     }
 }

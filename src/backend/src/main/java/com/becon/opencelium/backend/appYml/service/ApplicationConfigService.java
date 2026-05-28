@@ -14,14 +14,19 @@
  * // along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.becon.opencelium.backend.applicationConfig.service;
+package com.becon.opencelium.backend.appYml.service;
 
-import com.becon.opencelium.backend.applicationConfig.dto.ApplicationConfigResponse;
+import com.becon.opencelium.backend.appYml.dto.ApplicationConfigResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 
 public interface ApplicationConfigService {
 
     ApplicationConfigResponse read();
 
-    void patch(JsonNode payload);
+    /**
+     * Applies the {@code fields} array of the PATCH envelope to the on-disk
+     * {@code application.yml}: edits values, adds new keys, and disables
+     * ({@code status: inactive}) nodes. Comments are read-only and preserved.
+     */
+    void patch(JsonNode fields);
 }
