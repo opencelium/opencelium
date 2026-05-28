@@ -1,7 +1,13 @@
 {
   "api": {
+    "unauthorized": "Your session has expired. Please log in again.",
     "forbidden": "Your session is expired",
-    "unknownError": "Unknown Error in {{place}}"
+    "unknownError": "Unknown Error in {{place}}",
+    "login": {
+      "network": "Could not reach the server. Please try again.",
+      "invalidCredentials": "Invalid email or password",
+      "failed": "Login failed"
+    }
   },
   "field": {
     "required": "Required field",

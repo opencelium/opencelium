@@ -6,10 +6,10 @@ import { useAuth } from '@features/auth/useAuth'
 import { API_TIMEOUT_ERROR_NAME, ApiFetchError } from '@shared/api/apiFetch'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { FormConstraintsProvider } from '@shared/form/FormConstraintsContext.tsx'
+import { errorBus } from '@shared/errors/api/errorBus'
 import type { LoginFormValues } from '../model/login.schema'
 import type { TotpChallenge } from '@entities/auth/model/types'
 import { TotpLoginDialog } from './TotpLoginDialog'
-import { Alert } from '@shared/ui/primitives/Alert'
 import { Button } from '@shared/ui/primitives/Button'
 import { Card } from '@shared/ui/primitives/Card'
 import { Checkbox } from '@shared/ui/primitives/Checkbox'
@@ -20,16 +20,24 @@ const FORM_WIDTH = 400
 
 type AuthKey = Parameters<ReturnType<typeof useI18n<'auth'>>['t']>[0]
 
+/**
+ * Treat any 401 as bad credentials, but also accept other statuses (some
+ * backends return 400 + a "Bad credentials" body message instead of 401).
+ */
+function isBadCredentials(error: ApiFetchError): boolean {
+    if (error.status === 401) return true
+    const body = error.body as { message?: unknown } | null | undefined
+    return typeof body?.message === 'string' && /bad\s*credentials/i.test(body.message)
+}
+
 export function LoginForm() {
     const { form, constraints } = useLoginForm()
     const { login } = useAuth()
     const { t } = useI18n('auth')
-    const [error, setError] = useState<string | null>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [totp, setTotp] = useState<{ challenge: TotpChallenge; rememberMe: boolean } | null>(null)
 
     const onSubmit = async (data: LoginFormValues) => {
-        setError(null)
         setIsSubmitting(true)
         try {
             const result = await login(data)
@@ -38,13 +46,13 @@ export function LoginForm() {
             }
         } catch (e) {
             if (e instanceof Error && e.name === API_TIMEOUT_ERROR_NAME) {
-                setError(t('errors.network'))
+                errorBus.emit({ type: 'NETWORK', messageKey: 'login.network' })
             } else if (e instanceof TypeError) {
-                setError(t('errors.network'))
-            } else if (e instanceof ApiFetchError && e.status === 401) {
-                setError(t('errors.invalidCredentials'))
+                errorBus.emit({ type: 'NETWORK', messageKey: 'login.network' })
+            } else if (e instanceof ApiFetchError && isBadCredentials(e)) {
+                errorBus.emit({ type: 'VALIDATION', messageKey: 'login.invalidCredentials' })
             } else {
-                setError(t('errors.failed'))
+                errorBus.emit({ type: 'UNKNOWN', messageKey: 'login.failed' })
             }
         } finally {
             setIsSubmitting(false)
@@ -69,16 +77,6 @@ export function LoginForm() {
                         onSubmit={handleSubmit(onSubmit)}
                         style={{ display: 'flex', flexDirection: 'column', gap: 16 }}
                     >
-                        {error && (
-                            <Alert
-                                type="error"
-                                message={error}
-                                showIcon
-                                closable
-                                onClose={() => setError(null)}
-                            />
-                        )}
-
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                             <Typography variant="label" isBold>
                                 {t('fields.email.label')}

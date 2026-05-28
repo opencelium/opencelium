@@ -1,0 +1,22 @@
+{
+  "api": {
+    "unauthorized": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
+    "forbidden": "Ihre Sitzung ist abgelaufen",
+    "unknownError": "Unbekannter Fehler in {{place}}",
+    "login": {
+      "network": "Der Server ist nicht erreichbar. Bitte versuchen Sie es erneut.",
+      "invalidCredentials": "Ungültige E-Mail oder Passwort",
+      "failed": "Anmeldung fehlgeschlagen"
+    }
+  },
+  "field": {
+    "required": "Pflichtfeld",
+    "minLength": "Mindestens {{min}} Zeichen",
+    "maxLength": "Maximal {{max}} Zeichen",
+    "invalidEmail": "Ungültige E-Mail-Adresse",
+    "mustNumber": "Muss eine Zahl sein",
+    "mustFile": "Muss eine Datei sein",
+    "fileTooLarge": "Datei ist zu groß (max. {{max}} Bytes)",
+    "failedAsyncOptions": "Optionen konnten nicht geladen werden"
+  }
+}

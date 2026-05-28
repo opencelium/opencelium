@@ -1,5 +1,7 @@
 import {store} from '@app/store/store'
 import {selectAccessToken} from '@entities/auth/model/authSelectors'
+import {errorBus} from '@shared/errors/api/errorBus'
+import {normalizeError} from '@shared/errors/api/normalizeError'
 
 type ApiFetchOptions = {
     method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
@@ -152,6 +154,21 @@ export async function apiFetchWithHeaders<T = unknown>(
         const errorBody = await parseResponseBody(res).catch(() => null)
         const message =
             extractErrorMessage(errorBody) ?? res.statusText ?? `Request failed with status ${res.status}`
+
+        // Mirror the baseQuery → errorBus path for auth failures so the global
+        // notify / logout subscribers fire. 403 covers the Spring Security
+        // "Full authentication is required to access this resource" response.
+        // We skip only when the user is already 'unauthenticated' — that covers
+        // the login form's 401 (wrong password) without swallowing 401/403 from
+        // the initial-refresh path (status === 'loading'), where we DO want the
+        // pendingError to land for the LoginForm Alert.
+        if (
+            (res.status === 401 || res.status === 403) &&
+            store.getState().auth.status !== 'unauthenticated'
+        ) {
+            errorBus.emit(normalizeError({status: res.status, data: errorBody}))
+        }
+
         throw new ApiFetchError(message, {
             status: res.status,
             code: extractErrorCode(errorBody),

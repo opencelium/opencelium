@@ -5,6 +5,7 @@ import type {AuthSession} from "@entities/auth/model/types.ts";
 const initialState: AuthState = {
     status: 'loading',
     session: null,
+    intentionalLogout: false,
 }
 
 const authSlice = createSlice({
@@ -14,13 +15,18 @@ const authSlice = createSlice({
         setSession(state, action: PayloadAction<AuthSession>) {
             state.session = action.payload
             state.status = 'authenticated'
+            state.intentionalLogout = false
         },
-        clearSession(state) {
+        clearSession(state, action: PayloadAction<{ intentional?: boolean } | undefined>) {
             state.session = null
             state.status = 'unauthenticated'
+            state.intentionalLogout = action.payload?.intentional ?? false
         },
         setLoading(state) {
             state.status = 'loading'
+        },
+        clearIntentionalLogout(state) {
+            state.intentionalLogout = false
         },
     },
 })

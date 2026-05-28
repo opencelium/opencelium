@@ -51,7 +51,7 @@ export function useAuth() {
 
     logout: async () => {
       await auth.logout()
-      dispatch(authActions.clearSession())
+      dispatch(authActions.clearSession({ intentional: true }))
     },
   }
 }

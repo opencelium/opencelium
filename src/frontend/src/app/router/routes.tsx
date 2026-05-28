@@ -34,9 +34,9 @@ export function getRoutes(): RouteConfig[] {
             ],
         },
         {
-            element: <AppLayout/>,
+            element: <AuthGuard/>,
             children: [{
-                element: <AuthGuard/>,
+                element: <AppLayout/>,
                 children: [
                     {path: '/sandbox', element: <Sandbox/>},
                     ...appRoutes,
@@ -49,9 +49,9 @@ export function getRoutes(): RouteConfig[] {
             }],
         },
         {
-            element: <AppLayout isNotCard/>,
+            element: <AuthGuard/>,
             children: [{
-                element: <AuthGuard/>,
+                element: <AppLayout isNotCard/>,
                 children: [
                     {path: '/', element: <DashboardPage/>},
                     {path: '/profile', element: <ProfilePage/>},
@@ -59,9 +59,9 @@ export function getRoutes(): RouteConfig[] {
             }],
         },
         {
-            element: <AppLayout isNotCard hasNoHeader/>,
+            element: <AuthGuard/>,
             children: [{
-                element: <AuthGuard/>,
+                element: <AppLayout isNotCard hasNoHeader/>,
                 children: [
                     {
                         path: '/connection/create',

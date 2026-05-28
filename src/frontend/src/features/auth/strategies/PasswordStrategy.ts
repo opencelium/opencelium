@@ -60,6 +60,8 @@ function clearToken() {
     sessionStorage.removeItem(TOKEN_KEY)
 }
 
+export const clearAuthTokens = clearToken
+
 export class PasswordStrategy implements AuthStrategy<LoginPayload> {
     async login(payload: LoginPayload): Promise<LoginResult> {
         const { email, password, rememberMe = false } = payload
