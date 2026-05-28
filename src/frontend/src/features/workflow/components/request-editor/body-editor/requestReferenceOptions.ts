@@ -62,8 +62,14 @@ const exactReadAtPath = (source: unknown, path: string, iterators: string[] = []
 };
 
 const appendPath = (base: string, part: string) => {
-  if (base === '$') return part.startsWith('[') ? `$${part}` : `$.${part}`;
+  if (base === '$') return part.startsWith('[') ? `$.${part}` : `$.${part}`;
   return base ? `${base}${part.startsWith('[') ? '' : '.'}${part}` : part;
+};
+
+const normalizeRootArrayPath = (path: string) => {
+  if (path.startsWith('$[')) return `$.${path.slice(1)}`;
+  if (path.startsWith('[')) return `$.${path}`;
+  return path;
 };
 
 const getContext = (
@@ -133,10 +139,11 @@ export const getReferenceOptions = (
 };
 
 export const buildReferenceValue = (color: string, type: ResponseType, path: string) => {
+  const normalizedPath = normalizeRootArrayPath(path);
   if (type === 'status') return `${color}.(response).status`;
-  if (path === '$') return `${color}.(response).${type}.$`;
-  if (path.startsWith('$.') || path.startsWith('$[')) return `${color}.(response).${type}.${path}`;
-  return path.startsWith('[') ? `${color}.(response).${type}.$${path}` : `${color}.(response).${type}.$.${path}`;
+  if (normalizedPath === '$') return `${color}.(response).${type}.$`;
+  if (normalizedPath.startsWith('$.')) return `${color}.(response).${type}.${normalizedPath}`;
+  return `${color}.(response).${type}.$.${normalizedPath}`;
 };
 
 export const isExpandableReferencePath = (

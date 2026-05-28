@@ -69,7 +69,7 @@ export function useRequestObjectEditor({ messageProperty, source }: Props) {
     if (!next) return;
     setSelection(next);
     setValidationError(null);
-    const enhancement = findRequestEnhancement(connection, method.color, next.namespace, next.name, messageProperty);
+    const enhancement = findRequestEnhancement(connection, method.color, next.namespace, next.name, messageProperty, next.value);
     setSelectedEnhanceId(enhancement?.enhanceId);
   };
 
@@ -77,7 +77,7 @@ export function useRequestObjectEditor({ messageProperty, source }: Props) {
     const next = { namespace, name, value, pathLabel: [...namespace, name].join('.') };
     setSelection(next);
     setValidationError(null);
-    const enhancement = findRequestEnhancement(connection, method.color, namespace, name, messageProperty);
+    const enhancement = findRequestEnhancement(connection, method.color, namespace, name, messageProperty, value);
     setSelectedEnhanceId(enhancement?.enhanceId);
   };
 
@@ -94,7 +94,7 @@ export function useRequestObjectEditor({ messageProperty, source }: Props) {
       new_value: nextValue as never,
     });
     if (next) {
-      const enhancement = findRequestEnhancement(next, method.color, selection.namespace, selection.name, messageProperty);
+      const enhancement = findRequestEnhancement(next, method.color, selection.namespace, selection.name, messageProperty, nextValue);
       setSelectedEnhanceId(enhancement?.enhanceId);
     }
     setSelection({ ...selection, value: nextValue });
