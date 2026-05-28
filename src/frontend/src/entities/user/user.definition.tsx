@@ -1,5 +1,5 @@
 import type { EntityDefinition } from '@/engine/entity/EntityDefinition.ts'
-import userWizardImage from '@assets/images/wizard/user-wizard.webp'
+import userWizardImage from '@assets/images/wizard/user-wizard.gif'
 import {createEntityCommands} from "@/engine/entity/command/createEntityCommands.tsx";
 import {resolveUserEmails} from "@entities/user/command/resolvers/resolveUserEmails.ts";
 import {store} from "@app/store/store.ts";
