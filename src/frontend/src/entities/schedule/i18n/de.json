@@ -84,6 +84,9 @@
     "disableSuccess": "Debug-Modus deaktiviert"
   },
   "fields": {
+    "title": {
+      "label": "Titel"
+    },
     "connection": {
       "label": "Connection"
     },
