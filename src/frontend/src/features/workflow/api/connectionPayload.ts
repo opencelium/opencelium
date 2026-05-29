@@ -11,6 +11,7 @@ type BuildConnectionPayloadArgs = {
 	nodes: WorkflowNodeModel[];
 	edges: WorkflowEdgeModel[];
 	viewport?: { x: number; y: number; zoom: number };
+	fieldBindings?: any[];
 };
 
 const normalizeIndex = (value: unknown, fallback: number) =>
@@ -568,6 +569,7 @@ export function buildConnectionPayload({
 	nodes,
 	edges,
 	viewport,
+	fieldBindings,
 }: BuildConnectionPayloadArgs) {
 	const connection = buildLegacyConnection(nodes);
 	return {
@@ -575,7 +577,7 @@ export function buildConnectionPayload({
 		title,
 		name: title,
 		description,
-		fieldBinding: serializeFieldBindings(connection.fieldBindings),
+		fieldBinding: serializeFieldBindings(fieldBindings ?? connection.fieldBindings),
 		fromConnector: buildFromConnectorPayload(nodes, edges),
 		toConnector: null,
 		ui: buildUiPayload(nodes, edges, viewport),

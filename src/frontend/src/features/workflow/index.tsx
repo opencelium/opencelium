@@ -125,12 +125,14 @@ const buildWorkflowChangeSnapshot = ({
   description,
   nodes,
   edges,
+  fieldBindings,
 }: {
   connectionId?: string;
   title: string;
   description: string;
   nodes: WorkflowNodeModel[];
   edges: WorkflowEdgeModel[];
+  fieldBindings?: any[];
 }) =>
   JSON.stringify(sortValue(buildConnectionPayload({
     connectionId,
@@ -138,6 +140,7 @@ const buildWorkflowChangeSnapshot = ({
     description,
     nodes,
     edges,
+    fieldBindings,
   })));
 
 const triggerJsonDownload = (filename: string, payload: unknown) => {
@@ -185,8 +188,9 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       description: headerState.description,
       nodes: hydratedNodes,
       edges: workflow.edges,
+      fieldBindings: loadedFieldBindings,
     }),
-    [connectionId, headerState.description, headerState.title, hydratedNodes, workflow.edges],
+    [connectionId, headerState.description, headerState.title, hydratedNodes, loadedFieldBindings, workflow.edges],
   );
   const selectedNode = hydratedNodes.find((node) => node.id === workflow.sidebarAction?.sourceNodeId) ?? null;
   const contextMenuNode = hydratedNodes.find((node) => node.id === workflow.contextMenu?.nodeId) ?? null;
@@ -272,6 +276,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         nodes: hydratedNodes,
         edges: workflow.edges,
         viewport: workflow.getViewport(),
+        fieldBindings: loadedFieldBindings,
       });
     } catch (error) {
       message.error(
@@ -288,6 +293,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       description,
       nodes: hydratedNodes,
       edges: workflow.edges,
+      fieldBindings: loadedFieldBindings,
     }));
     setChangeSource('clean');
     setHistoryPreviewSnapshot(null);
@@ -462,6 +468,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         nodes={hydratedNodes}
         edges={workflow.edges}
         fieldBindings={loadedFieldBindings}
+        onFieldBindingsChange={setLoadedFieldBindings}
         onClose={() => workflow.setMethodEditor(null)}
         onSave={(nodeId, config, nextFieldBindings) => {
           if (Array.isArray(nextFieldBindings)) {

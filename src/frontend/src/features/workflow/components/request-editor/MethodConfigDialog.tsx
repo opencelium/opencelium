@@ -22,6 +22,7 @@ type Props = {
   nodes: WorkflowNodeModel[];
   edges?: WorkflowEdgeModel[];
   fieldBindings?: any[];
+  onFieldBindingsChange?: (fieldBindings: any[]) => void;
   onClose: () => void;
   onSave: (nodeId: string, config: WorkflowMethodConfig, fieldBindings?: any[]) => void;
 };
@@ -71,7 +72,7 @@ function LegacyHeaderEditorContent({ nodeId }: { nodeId: string }) {
   );
 }
 
-export function MethodConfigDialog({ open, node, mode, nodes, edges, fieldBindings, onClose, onSave }: Props) {
+export function MethodConfigDialog({ open, node, mode, nodes, edges, fieldBindings, onFieldBindingsChange, onClose, onSave }: Props) {
   const store = useMemo(() => createLegacyStore(), []);
   const connection = useMemo(() => {
     const legacyConnection = buildLegacyConnection(nodes);
@@ -106,6 +107,21 @@ export function MethodConfigDialog({ open, node, mode, nodes, edges, fieldBindin
       store.dispatch(clearConnection());
     };
   }, [connection, open, store]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const syncBindings = () => {
+      const nextFieldBindings = store.getState().connection.connection?.fieldBindings;
+      if (Array.isArray(nextFieldBindings)) {
+        onFieldBindingsChange?.(nextFieldBindings);
+      }
+    };
+
+    syncBindings();
+    const unsubscribe = store.subscribe(syncBindings);
+    return unsubscribe;
+  }, [onFieldBindingsChange, open, store]);
 
   const persistCurrentConfig = useCallback(() => {
     if (!node || isPersistingRef.current) return;
