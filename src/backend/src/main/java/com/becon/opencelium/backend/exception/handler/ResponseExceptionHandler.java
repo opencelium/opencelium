@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.exception.handler;
 
 import com.becon.opencelium.backend.exception.ApplicationConfigReadException;
+import com.becon.opencelium.backend.exception.ApplicationConfigValidationException;
 import com.becon.opencelium.backend.exception.ApplicationConfigWriteException;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,6 +30,14 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
         String uri = ((ServletWebRequest) req).getRequest().getRequestURI();
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(new ErrorResource(ex, HttpStatus.FORBIDDEN, uri));
+    }
+
+    @ExceptionHandler(ApplicationConfigValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<Object> applicationConfigValidationHandler(RuntimeException ex, WebRequest req) {
+        String uri = ((ServletWebRequest) req).getRequest().getRequestURI();
+        return ResponseEntity.badRequest()
+                .body(new ErrorResource(ex, HttpStatus.BAD_REQUEST, uri));
     }
 
     @ExceptionHandler({ApplicationConfigReadException.class, ApplicationConfigWriteException.class})

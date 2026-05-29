@@ -14,14 +14,15 @@
  * // along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.becon.opencelium.backend.applicationConfig.dto;
+package com.becon.opencelium.backend.appYml.dto;
 
-public record YamlComment(String path, String position, String text) {
+public record ApplicationConfigPatchResponse(String status, boolean restartRequired, String message) {
 
-    public static final String POSITION_BEFORE = "before";
-    public static final String POSITION_INLINE = "inline";
-    public static final String POSITION_AFTER = "after";
-
-    public static final String HEADER_PATH = "$.header";
-    public static final String FOOTER_PATH = "$.footer";
+    public static ApplicationConfigPatchResponse saved() {
+        return new ApplicationConfigPatchResponse(
+                "saved",
+                true,
+                "Configuration saved. Restart the application for changes to take effect."
+        );
+    }
 }

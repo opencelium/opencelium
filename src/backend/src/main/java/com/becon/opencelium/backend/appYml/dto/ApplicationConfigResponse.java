@@ -14,11 +14,14 @@
  * // along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.becon.opencelium.backend.applicationConfig.dto;
-
-import com.fasterxml.jackson.databind.JsonNode;
+package com.becon.opencelium.backend.appYml.dto;
 
 import java.util.List;
 
-public record ApplicationConfigResponse(JsonNode data, List<YamlComment> comments) {
+/**
+ * Envelope returned by {@code GET /application-config}. {@code fields} is the
+ * node tree of every key in the file; {@code comments} holds only the orphan
+ * header/footer comments that belong to no field.
+ */
+public record ApplicationConfigResponse(List<ConfigNode> fields, List<NodeComment> comments) {
 }

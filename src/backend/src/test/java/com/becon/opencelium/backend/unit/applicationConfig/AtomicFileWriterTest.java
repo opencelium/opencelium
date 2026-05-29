@@ -8,7 +8,7 @@
 
 package com.becon.opencelium.backend.unit.applicationConfig;
 
-import com.becon.opencelium.backend.applicationConfig.service.AtomicFileWriter;
+import com.becon.opencelium.backend.appYml.service.AtomicFileWriter;
 import com.becon.opencelium.backend.exception.ApplicationConfigWriteException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -8,13 +8,17 @@
 
 package com.becon.opencelium.backend.unit.applicationConfig;
 
-import com.becon.opencelium.backend.applicationConfig.service.YamlConfigWriter;
+import com.becon.opencelium.backend.appYml.service.YamlConfigWriter;
+import com.becon.opencelium.backend.exception.ApplicationConfigWriteException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("YamlConfigWriter — deep-merge with comment and order preservation")
 class YamlConfigWriterTest {
@@ -181,5 +185,210 @@ class YamlConfigWriterTest {
         assertThat(merged).contains("http://c");
         assertThat(merged).doesNotContain("http://a");
         assertThat(merged).doesNotContain("http://b");
+    }
+
+    // ── commentOut (disable) ──────────────────────────────────────────────────
+
+    @Test
+    void commentOutDisablesLeafWhilePreservingSiblingsWhenPathIsScalar() {
+        String original = """
+                server:
+                  port: 9090
+                  address: 127.0.0.1
+                """;
+
+        String result = writer.commentOut(original, List.of("server.address"));
+
+        // The `#` is prepended at column 0 — the bundled-file convention. The
+        // line's original indent is preserved as the gap between `#` and key.
+        assertThat(result).contains("port: 9090");
+        assertThat(result).contains("#  address: 127.0.0.1");
+        assertThat(result).doesNotContain("\n  address: 127.0.0.1");
+    }
+
+    @Test
+    void commentOutDisablesWholeBlockWhenPathIsContainer() {
+        String original = """
+                server:
+                  port: 9090
+                  ssl:
+                    enabled: true
+                    key-store-type: PKCS12
+                """;
+
+        String result = writer.commentOut(original, List.of("server.ssl"));
+
+        assertThat(result).contains("port: 9090");
+        assertThat(result).contains("#  ssl:");
+        assertThat(result).contains("#    enabled: true");
+        assertThat(result).contains("#    key-store-type: PKCS12");
+    }
+
+    @Test
+    void commentOutPreservesSurroundingCommentsWhenDisabling() {
+        String original = """
+                server:
+                  # the bind port
+                  port: 9090
+                  address: 127.0.0.1
+                """;
+
+        String result = writer.commentOut(original, List.of("server.address"));
+
+        assertThat(result).contains("# the bind port");
+        assertThat(result).contains("port: 9090");
+        assertThat(result).contains("#  address: 127.0.0.1");
+    }
+
+    @Test
+    void commentOutAndUncommentAreInversesAcrossARoundTrip() {
+        // Activate → deactivate → activate must return the same bytes for the
+        // inactive block. Earlier impl prepended `# ` (2 chars), uncomment
+        // stripped only `#` (1 char), so each cycle drifted the indent by 1
+        // and eventually broke YAML parsing for nested blocks.
+        String pristine = """
+                websocket:
+                  endpoint: /websocket
+                #  ssl:
+                #    enabled: true
+                #    key-store-type: PKCS12
+                """;
+
+        String activated = writer.uncomment(pristine, List.of("websocket.ssl"));
+        String reDeactivated = writer.commentOut(activated, List.of("websocket.ssl"));
+        String reActivated = writer.uncomment(reDeactivated, List.of("websocket.ssl"));
+
+        assertThat(reDeactivated).isEqualTo(pristine);
+        assertThat(reActivated).isEqualTo(activated);
+    }
+
+    @Test
+    void commentOutReturnsOriginalWhenNoPathsGiven() {
+        String original = """
+                server:
+                  port: 9090
+                """;
+
+        assertThat(writer.commentOut(original, List.of())).isEqualTo(original);
+    }
+
+    // ── uncomment (enable) ────────────────────────────────────────────────────
+
+    @Test
+    void uncommentEnablesInactiveLeafWhilePreservingSiblings() {
+        String original = """
+                server:
+                  port: 9090
+                #  address: 127.0.0.1
+                """;
+
+        String result = writer.uncomment(original, List.of("server.address"));
+
+        assertThat(result).contains("port: 9090");
+        assertThat(result).contains("address: 127.0.0.1");
+        assertThat(result).doesNotContain("# address: 127.0.0.1");
+        assertThat(result).doesNotContain("#  address: 127.0.0.1");
+    }
+
+    @Test
+    void uncommentEnablesEachListedPathButLeavesUnlistedSiblingsCommented() {
+        // Writer strips ONLY the key lines of paths it's given — no automatic
+        // cascade to children. The service is responsible for expanding a
+        // container activation into its descendants.
+        String original = """
+                server:
+                  port: 9090
+                #  ssl:
+                #    enabled: true
+                #    key-store-type: PKCS12
+                """;
+
+        String result = writer.uncomment(original,
+                List.of("server.ssl", "server.ssl.enabled"));
+
+        // ssl and enabled listed → uncommented.
+        assertThat(result).contains("\n  ssl:");
+        assertThat(result).contains("\n    enabled: true");
+        // key-store-type NOT listed → stays commented.
+        assertThat(result).contains("#    key-store-type: PKCS12");
+    }
+
+    @Test
+    void uncommentStripsBothHashesFromDoublyCommentedProperty() {
+        // `# # ...` is doubly inactive — one activation must remove both #s.
+        String original = """
+                spring:
+                #  mail:
+                #    opencelium:
+                #      from: noreply@opencelium.io
+                #  #    enabled: false
+                #    host: smtp.gmail.com
+                """;
+
+        String result = writer.uncomment(
+                original, List.of("spring.mail.opencelium.enabled"));
+
+        assertThat(result).contains("    enabled: false");
+        assertThat(result).doesNotContain("#    enabled: false");
+        assertThat(result).doesNotContain("#  #    enabled: false");
+        // Sibling lines are untouched — they were not in the request.
+        assertThat(result).contains("#  mail:");
+        assertThat(result).contains("#    host: smtp.gmail.com");
+    }
+
+    @Test
+    void uncommentLeavesInnerDocCommentsIntact() {
+        // The `# LDAP server URL` line inside the block is documentation, not
+        // a YAML property — enabling the surrounding block must keep it
+        // exactly as-is.
+        String original = """
+                spring:
+                #  security:
+                #    ldap:
+                #      # LDAP server URL
+                #      urls: ldap://localhost:7389
+                """;
+
+        String result = writer.uncomment(original,
+                List.of("spring.security", "spring.security.ldap",
+                        "spring.security.ldap.urls"));
+
+        assertThat(result).contains("\n  security:");
+        assertThat(result).contains("\n    ldap:");
+        assertThat(result).contains("\n      urls: ldap://localhost:7389");
+        // Inner doc comment preserved verbatim.
+        assertThat(result).contains("#      # LDAP server URL");
+    }
+
+    @Test
+    void uncommentReturnsOriginalWhenNoPathsGiven() {
+        String original = """
+                server:
+                #  port: 9090
+                """;
+
+        assertThat(writer.uncomment(original, List.of())).isEqualTo(original);
+    }
+
+    @Test
+    void uncommentThrowsWhenPathDoesNotExist() {
+        String original = """
+                server:
+                  port: 9090
+                """;
+
+        assertThatThrownBy(() -> writer.uncomment(original, List.of("server.missing")))
+                .isInstanceOf(ApplicationConfigWriteException.class);
+    }
+
+    @Test
+    void commentOutThrowsWhenPathDoesNotExist() {
+        String original = """
+                server:
+                  port: 9090
+                """;
+
+        assertThatThrownBy(() -> writer.commentOut(original, List.of("server.missing")))
+                .isInstanceOf(ApplicationConfigWriteException.class);
     }
 }

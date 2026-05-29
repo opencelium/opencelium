@@ -91,9 +91,10 @@ public class SchedulerServiceImp implements SchedulerService {
     @Override
     @Transactional(rollbackFor = {RuntimeException.class})
     public void save(@NonNull Scheduler scheduler) {
-        if (existsByTitle(scheduler.getTitle())) {
-            throw new RuntimeException("TITLE_ALREADY_EXISTS");
-        }
+        // As requested by the UI team, the title in the scheduler will no longer be used.
+//        if (existsByTitle(scheduler.getTitle())) {
+//            throw new RuntimeException("TITLE_ALREADY_EXISTS");
+//        }
         Scheduler saved = schedulerRepository.save(scheduler);
         schedulingStrategy.addJob(saved);
     }

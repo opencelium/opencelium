@@ -14,15 +14,17 @@
  * // along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.becon.opencelium.backend.applicationConfig.dto;
+package com.becon.opencelium.backend.exception;
 
-public record ApplicationConfigPatchResponse(String status, boolean restartRequired, String message) {
+/**
+ * Thrown when a PATCH payload is structurally valid JSON but violates an
+ * application-config rule the caller can fix — e.g. a node missing its
+ * {@code path}, or an {@code active} container left with no active child.
+ * Maps to HTTP 400.
+ */
+public class ApplicationConfigValidationException extends RuntimeException {
 
-    public static ApplicationConfigPatchResponse saved() {
-        return new ApplicationConfigPatchResponse(
-                "saved",
-                true,
-                "Configuration saved. Restart the application for changes to take effect."
-        );
+    public ApplicationConfigValidationException(String message) {
+        super(message);
     }
 }
