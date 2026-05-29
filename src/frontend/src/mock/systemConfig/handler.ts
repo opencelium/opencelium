@@ -26,6 +26,7 @@ function initialFields(): ConfigNode[] {
             node('ssl', 'server.ssl', 'inactive', [
                 node('enabled', 'server.ssl.enabled', 'inactive', true),
                 node('key-store-type', 'server.ssl.key-store-type', 'inactive', 'PKCS12'),
+                node('key-store-password', 'server.ssl.key-store-password', 'inactive', 'root'),
             ]),
         ], [{position: 'before', text: ' Webserver configuration section'}]),
         node('spring', 'spring', 'active', [
@@ -48,6 +49,13 @@ function initialFields(): ConfigNode[] {
             node('cors', 'opencelium.cors', 'active', [
                 node('origins', 'opencelium.cors.origins', 'active', ['http://localhost:3000']),
             ]),
+            node('polyglot', 'opencelium.polyglot', 'inactive', [
+                node('enabled', 'opencelium.polyglot.enabled', 'inactive', true, [
+                    {position: 'before', text: ' Enables or disables the polyglot service integration.'},
+                ]),
+                node('protocol', 'opencelium.polyglot.protocol', 'inactive', 'http'),
+                node('host', 'opencelium.polyglot.host', 'inactive', 'localhost'),
+            ], [{position: 'before', text: '#######################\n   Polyglot Engine Configuration\n#######################'}]),
             node('debug-mode', 'opencelium.debug-mode', 'active', true),
         ]),
     ]
@@ -64,29 +72,28 @@ function isContainer(n: ConfigNode): boolean {
     return Array.isArray(n.value) && n.value.length > 0 && typeof n.value[0] === 'object' && n.value[0] !== null
 }
 
-function findNode(nodes: ConfigNode[], path: string): ConfigNode | undefined {
+function indexTree(nodes: ConfigNode[], map = new Map<string, ConfigNode>()): Map<string, ConfigNode> {
     for (const n of nodes) {
-        if (n.path === path) return n
-        if (isContainer(n)) {
-            const found = findNode(n.value as ConfigNode[], path)
-            if (found) return found
-        }
+        map.set(n.path, n)
+        if (isContainer(n)) indexTree(n.value as ConfigNode[], map)
     }
-    return undefined
+    return map
 }
 
-/** Every active container must reach at least one active leaf descendant. */
-function violatesInvariant(nodes: ConfigNode[]): string | null {
-    for (const n of nodes) {
-        if (isContainer(n)) {
-            const inner = violatesInvariant(n.value as ConfigNode[])
-            if (inner) return inner
-            if (n.status === 'active' && !(n.value as ConfigNode[]).some((c) => c.status === 'active')) {
-                return n.path
-            }
-        }
+function descendantsOf(n: ConfigNode): ConfigNode[] {
+    if (!isContainer(n)) return []
+    const out: ConfigNode[] = []
+    for (const c of n.value as ConfigNode[]) {
+        out.push(c, ...descendantsOf(c))
     }
-    return null
+    return out
+}
+
+function ancestorPaths(path: string): string[] {
+    const parts = path.split('.')
+    const out: string[] = []
+    for (let i = 1; i < parts.length; i++) out.push(parts.slice(0, i).join('.'))
+    return out
 }
 
 function badRequest(message: string) {
@@ -123,24 +130,95 @@ export const systemConfigHandlers = [
             return badRequest('Missing or invalid "fields" array')
         }
 
-        // Apply against a clone so we can validate before committing.
         const draft: ConfigNode[] = structuredClone(fields)
+        const index = indexTree(draft)
+
+        const activate: string[] = []
+        const disable = new Set<string>()
+        const valueEdits: {path: string; value: unknown}[] = []
+
         for (const patch of envelope.fields) {
             if (!patch || typeof patch.path !== 'string') {
                 return badRequest('Each field requires a "path"')
             }
-            const target = findNode(draft, patch.path)
-            if (!target) continue // unknown path → would be appended; skip in mock
-            if (patch.status) target.status = patch.status
-            if (patch.value !== undefined && !isContainer(target)) target.value = patch.value
+            const existing = index.get(patch.path)
+            if (!existing) {
+                // Unknown path: append a new key only when an active value is supplied.
+                if (patch.status === 'active' && patch.value !== undefined) {
+                    const parentPath = ancestorPaths(patch.path).at(-1)
+                    const parent = parentPath ? index.get(parentPath) : undefined
+                    if (parent && isContainer(parent)) {
+                        const newNode = node(
+                            patch.path.split('.').at(-1) as string,
+                            patch.path,
+                            'active',
+                            patch.value as ConfigNode['value'],
+                        )
+                        ;(parent.value as ConfigNode[]).push(newNode)
+                        index.set(patch.path, newNode)
+                        continue
+                    }
+                }
+                return badRequest(
+                    `Cannot ${patch.status === 'inactive' ? 'disable' : 'enable'} unknown path '${patch.path}'`,
+                )
+            }
+            if (patch.status === 'active') activate.push(patch.path)
+            if (patch.status === 'inactive') disable.add(patch.path)
+            if (patch.value !== undefined) valueEdits.push({path: patch.path, value: patch.value})
         }
 
-        const offending = violatesInvariant(draft)
-        if (offending) {
-            return badRequest(
-                `Active section '${offending}' must have at least one active child. ` +
-                    `Enable a child setting or set '${offending}' to inactive.`,
-            )
+        // Contradiction: activating a path whose ancestor is explicitly disabled.
+        for (const a of activate) {
+            const blockedBy = ancestorPaths(a).find((p) => disable.has(p))
+            if (blockedBy) {
+                return badRequest(
+                    `Cannot activate '${a}' while ancestor '${blockedBy}' is being disabled in the same patch.`,
+                )
+            }
+        }
+        // Contradiction: activating a container while disabling all of its descendants.
+        for (const a of activate) {
+            const n = index.get(a)
+            if (n && isContainer(n)) {
+                const leaves = descendantsOf(n).filter((d) => !isContainer(d))
+                if (leaves.length > 0 && leaves.every((d) => disable.has(d.path))) {
+                    return badRequest(`Cannot activate '${a}' while disabling all its descendants.`)
+                }
+            }
+        }
+
+        // Apply activate (down + up), then value edits, then disable (down + up) — so an
+        // explicit disable wins over the activate cascade, matching the writer order.
+        for (const a of activate) {
+            const n = index.get(a)
+            if (!n) continue
+            n.status = 'active'
+            for (const d of descendantsOf(n)) d.status = 'active'
+            for (const anc of ancestorPaths(a)) {
+                const ancNode = index.get(anc)
+                if (ancNode) ancNode.status = 'active'
+            }
+        }
+
+        for (const {path, value} of valueEdits) {
+            const n = index.get(path)
+            if (n && !isContainer(n)) n.value = value as ConfigNode['value']
+        }
+
+        for (const d of disable) {
+            const n = index.get(d)
+            if (!n) continue
+            n.status = 'inactive'
+            for (const child of descendantsOf(n)) child.status = 'inactive'
+            // Cascade up: disable each ancestor that is left with no active child.
+            for (const anc of ancestorPaths(d).reverse()) {
+                const ancNode = index.get(anc)
+                if (!ancNode || !isContainer(ancNode)) continue
+                const hasActiveChild = (ancNode.value as ConfigNode[]).some((c) => c.status === 'active')
+                if (ancNode.status === 'active' && !hasActiveChild) ancNode.status = 'inactive'
+                else break
+            }
         }
 
         fields = draft

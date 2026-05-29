@@ -7,16 +7,13 @@
     "label": "Kommentare",
     "hint": "Felder mit dem Info-Symbol haben einen Kommentar — bewegen Sie den Mauszeiger darüber, um ihn zu lesen."
   },
-  "hint": {
-    "afterSave": "Aktualisieren Sie nach dem Speichern der Konfiguration bitte den Server, damit die Änderungen wirksam werden."
-  },
   "search": {
     "placeholder": "Nach Feld suchen…",
     "empty": "Keine Felder entsprechen Ihrer Suche."
   },
   "status": {
-    "enable": "Diese Einstellung aktivieren (beim Speichern einkommentieren)",
-    "disable": "Diese Einstellung deaktivieren (beim Speichern auskommentieren)"
+    "enable": "Aktivieren (beim Speichern einkommentieren). Das Aktivieren eines Abschnitts aktiviert auch dessen Inhalt.",
+    "disable": "Deaktivieren (beim Speichern auskommentieren). Das Deaktivieren eines Abschnitts deaktiviert auch dessen Inhalt."
   },
   "actions": {
     "save": "Speichern",
@@ -32,6 +29,6 @@
   },
   "restart": {
     "title": "Neustart erforderlich",
-    "message": "Konfiguration gespeichert. Starten Sie die Anwendung neu, damit die Änderungen wirksam werden."
+    "message": "Konfiguration gespeichert. Starten Sie den Server neu, damit die Änderungen wirksam werden."
   }
 }

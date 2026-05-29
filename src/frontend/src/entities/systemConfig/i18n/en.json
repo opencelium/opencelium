@@ -7,16 +7,13 @@
     "label": "Comments",
     "hint": "Fields marked with the info icon have a comment — hover the icon to read it."
   },
-  "hint": {
-    "afterSave": "After saving the configuration, please update the server for the changes to take effect."
-  },
   "search": {
     "placeholder": "Search by field…",
     "empty": "No fields match your search."
   },
   "status": {
-    "enable": "Enable this setting (uncomment on save)",
-    "disable": "Disable this setting (comment out on save)"
+    "enable": "Enable (uncomment on save). Enabling a section also enables its contents.",
+    "disable": "Disable (comment out on save). Disabling a section also disables its contents."
   },
   "actions": {
     "save": "Save",
@@ -32,6 +29,6 @@
   },
   "restart": {
     "title": "Restart required",
-    "message": "Configuration saved. Restart the application for changes to take effect."
+    "message": "Configuration saved. Restart the server for changes to take effect."
   }
 }
