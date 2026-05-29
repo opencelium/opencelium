@@ -115,7 +115,7 @@ export const conditionTreeToExpression = (
 	if (child.type === 'rule') {
 		const properties = child.properties || {};
 		const operator = properties.operator || '';
-		const wrapReference = operatorType === 'loop';
+		const wrapReference = true;
 		const left = formatField(properties.leftField, wrapReference);
 		const right = formatField(properties.rightField, wrapReference);
 		if (operatorType === 'loop') {

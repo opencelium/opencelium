@@ -367,11 +367,17 @@ const buildMethodPayload = (node: WorkflowNodeModel, index: string, order: numbe
 	};
 };
 
+const normalizeOperatorExpression = (expression: string) =>
+	String(expression ?? '').replace(
+		/(?<!\{%)(#[A-Za-z0-9]{6}\.\((?:response|request)\)\.[^\s)]+)/g,
+		'{%$1%}',
+	);
+
 const buildOperatorPayload = (node: WorkflowNodeModel, index: string, iterator?: string) => ({
 	id: node.id,
 	index,
 	type: nodeKind(node),
-	expression: node.data.conditionConfig?.expression ?? '',
+	expression: normalizeOperatorExpression(node.data.conditionConfig?.expression ?? ''),
 	...(nodeKind(node) === 'loop' && iterator
 		? { iterator }
 		: {}),
