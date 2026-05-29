@@ -12,6 +12,7 @@ type SaveWorkflowConnectionArgs = {
 	nodes: WorkflowNodeModel[];
 	edges: WorkflowEdgeModel[];
 	viewport?: { x: number; y: number; zoom: number };
+	fieldBindings?: any[];
 };
 
 const canvasStorageKey = (connectionId: string | number) => `workflow.connection.${connectionId}.canvas`;
