@@ -83,6 +83,9 @@
   "field": {
     "required": "Pflichtfeld"
   },
+  "credentialEditor": {
+    "updateWithoutMasterPassword": "Sie können auch ohne Master-Passwort speichern – es werden dann nur die allgemeinen Daten aktualisiert. Um die erforderlichen Anmeldedaten zu ändern, geben Sie zuerst das Master-Passwort ein."
+  },
   "hintLabel": "Hinweis",
   "list": {
     "searchPlaceholder": "Suchen...",

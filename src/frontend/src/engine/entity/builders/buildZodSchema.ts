@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { EntityDefinition, FieldDefinition } from '../EntityDefinition'
+import type { EntityDefinition, FieldDefinition, Mode } from '../EntityDefinition'
 import {PolicyContext, policyEngine} from "@/engine/policy";
 import {i18n} from "@shared/i18n/config/i18n.ts";
 function setNestedPlainShape(
@@ -45,7 +45,8 @@ function buildZodObjectFromPlainShape(
 }
 export function buildFieldSchema(
     field: FieldDefinition,
-    skipValidation: boolean
+    skipValidation: boolean,
+    mode?: Mode
 ) {
     const t = i18n.getFixedT(i18n.language, 'error');
     const v = field.validation;
@@ -152,7 +153,7 @@ export function buildFieldSchema(
         schema = schema.superRefine((val, ctx) => {
             if (!v.required && (val === undefined || val === null || val === '')) return
             for (const rule of v.custom!) {
-                if (!rule.validate(val, {})) {
+                if (!rule.validate(val, {}, mode)) {
                     ctx.addIssue({ code: z.ZodIssueCode.custom, message: rule.message })
                 }
             }
@@ -188,7 +189,8 @@ export function buildZodSchema(
 
         const fieldSchema = buildFieldSchema(
             field,
-            skipValidation
+            skipValidation,
+            ctx.mode
         )
 
         setNestedPlainShape(

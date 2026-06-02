@@ -83,6 +83,9 @@
   "field": {
     "required": "Required field"
   },
+  "credentialEditor": {
+    "updateWithoutMasterPassword": "You can save without entering the master password — only the general data will be updated. To change the required credentials, enter the master password first."
+  },
   "hintLabel": "Hint",
   "list": {
     "searchPlaceholder": "Search...",

@@ -18,6 +18,9 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             loading: string
             empty: string
         }
+        credentialEditor: {
+            updateWithoutMasterPassword: string
+        }
         list: {
             searchPlaceholder: string
             empty: string

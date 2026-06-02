@@ -4,6 +4,7 @@ import {FormInput} from "@shared/ui/form/FormInput";
 import type {Invoker} from "@entities/invoker/model/types.ts";
 import {useGetInvokersQuery} from "@entities/invoker/api/invokerApi.ts";
 import {Loading} from "@shared/ui/primitives/Loading/Loading.tsx";
+import {Hint} from "@shared/ui/primitives/Hint";
 import {capitalizeWords} from "@shared/utils/stringUtils.ts";
 import {useI18n} from "@shared/i18n/hooks/useI18n.ts";
 import MasterPasswordDialog from "@widgets/MasterPasswordDialog/MasterPasswordDialog.tsx";
@@ -151,6 +152,11 @@ export const CredentialEditor: React.FC<CredentialEditorProps> = ({ name, label,
             {!hasAccess && <div style={{position: 'absolute', top: 0, width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                 <MasterPasswordDialog/>
             </div>}
+            {mode === 'update' && !masterPassword && (
+                <div style={{ bottom: '-60px', position: 'absolute'}}>
+                    <Hint noPrefix>{commonT('credentialEditor.updateWithoutMasterPassword')}</Hint>
+                </div>
+            )}
         </div>
     )
 }

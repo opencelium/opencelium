@@ -22,7 +22,7 @@ export type ValidationConfig = {
     allowEmptyString?: boolean
     remote?: FormRemoteProps
     custom?: {
-        validate: (value: any, values: any) => boolean
+        validate: (value: any, values: any, mode?: Mode) => boolean
         message: string
     }[]
 }
