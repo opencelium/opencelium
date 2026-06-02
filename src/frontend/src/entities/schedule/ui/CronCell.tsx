@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { IconButton } from '@shared/ui/primitives/IconButton'
 import { Tooltip } from '@shared/ui/primitives/Tooltip'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
@@ -10,7 +11,7 @@ type Props = {
     schedule: Schedule
 }
 
-export function CronCell({ schedule }: Props) {
+export const CronCell = memo(function CronCell({ schedule }: Props) {
     const { t: tEntities } = useI18n('entities')
     const dialog = useDialog()
 
@@ -51,4 +52,4 @@ export function CronCell({ schedule }: Props) {
             </Tooltip>
         </span>
     )
-}
+})

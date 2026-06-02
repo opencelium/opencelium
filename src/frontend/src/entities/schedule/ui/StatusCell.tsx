@@ -1,4 +1,4 @@
-import {useEffect, useState, type ReactNode} from 'react'
+import {memo, useEffect, useState, type ReactNode} from 'react'
 import {message, Progress} from 'antd'
 import {IconButton} from '@shared/ui/primitives/IconButton'
 import {Loading} from '@shared/ui/primitives/Loading/Loading'
@@ -249,7 +249,7 @@ function pickBody(
     }
 }
 
-export function StatusCell({schedule}: Props) {
+export const StatusCell = memo(function StatusCell({schedule}: Props) {
     const {getRunStatus} = useCurrentSchedules()
     const status = getRunStatus(schedule.schedulerId)
     return (
@@ -260,4 +260,4 @@ export function StatusCell({schedule}: Props) {
             <CronCountdown cronExp={schedule.cronExp} />
         </div>
     )
-}
+})

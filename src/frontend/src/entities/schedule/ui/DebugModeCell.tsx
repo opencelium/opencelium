@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import { message } from 'antd'
 import { Switch } from '@shared/ui/primitives/Switch'
 import { useGeneralRequestMutation } from '@shared/api/genericApi'
@@ -9,7 +9,7 @@ type Props = {
     schedule: Schedule
 }
 
-export function DebugModeCell({ schedule }: Props) {
+export const DebugModeCell = memo(function DebugModeCell({ schedule }: Props) {
     const [generalRequest] = useGeneralRequestMutation()
     const { t: tEntities } = useI18n('entities')
     const [pending, setPending] = useState(false)
@@ -42,4 +42,4 @@ export function DebugModeCell({ schedule }: Props) {
     }
 
     return <Switch checked={checked} loading={pending} onChange={handleChange} />
-}
+})

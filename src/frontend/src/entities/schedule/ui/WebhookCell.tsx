@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import { message } from 'antd'
 import { IconButton } from '@shared/ui/primitives/IconButton'
 import { Tooltip } from '@shared/ui/primitives/Tooltip'
@@ -14,7 +14,7 @@ type Props = {
     schedule: Schedule
 }
 
-export function WebhookCell({ schedule }: Props) {
+export const WebhookCell = memo(function WebhookCell({ schedule }: Props) {
     const { t: tEntities } = useI18n('entities')
     const confirm = useConfirm()
     const [generalRequest] = useGeneralRequestMutation()
@@ -123,4 +123,4 @@ export function WebhookCell({ schedule }: Props) {
             </Tooltip>
         </span>
     )
-}
+})

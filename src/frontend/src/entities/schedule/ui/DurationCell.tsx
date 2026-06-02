@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { memo, useEffect, useMemo, useState } from 'react'
 import { usePrevious } from './usePrevious'
 
 const REFRESH_TIMEOUT = 1000
@@ -7,7 +7,7 @@ type Props = {
     duration?: number
 }
 
-export function DurationCell({ duration }: Props) {
+export const DurationCell = memo(function DurationCell({ duration }: Props) {
     const prevDuration = usePrevious(duration)
     const [isRefreshing, setIsRefreshing] = useState(false)
 
@@ -31,4 +31,4 @@ export function DurationCell({ duration }: Props) {
             {formattedValue}
         </span>
     )
-}
+})
