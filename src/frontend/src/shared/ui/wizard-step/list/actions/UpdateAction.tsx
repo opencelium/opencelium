@@ -1,7 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IconButton } from '@shared/ui/primitives/IconButton';
+import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { useDialog } from '@shared/ui/dialog/useDialog';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { EntityDialogContent } from '@/engine/entity/runtime/genererics/EntityDialogContent';
 import type { UpdateActionProps } from './types';
 import { resolveActionValue } from './resolveAction';
@@ -9,6 +11,7 @@ import { resolveActionValue } from './resolveAction';
 export const UpdateAction: React.FC<UpdateActionProps> = ({ entity, row, rowId, config }) => {
     const dialog = useDialog();
     const navigate = useNavigate();
+    const { t: tCommon } = useI18n('common');
 
     const handleClick = () => {
         const value = resolveActionValue(row, config.field, rowId);
@@ -31,5 +34,9 @@ export const UpdateAction: React.FC<UpdateActionProps> = ({ entity, row, rowId, 
         });
     };
 
-    return <IconButton iconProps={{ name: 'edit', color: 'primary' }} type={'text'} size={'xs'} onClick={handleClick} />;
+    return (
+        <Tooltip content={tCommon('actions.edit')}>
+            <IconButton iconProps={{ name: 'edit', color: 'primary' }} type={'text'} size={'xs'} onClick={handleClick} />
+        </Tooltip>
+    );
 };
