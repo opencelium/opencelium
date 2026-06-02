@@ -1,7 +1,9 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Dialog } from '@/shared/ui/primitives/Dialog';
 import { Button } from '@/shared/ui/primitives/Button';
+import { useAppSelector } from '@shared/lib/storeHooks';
+import { selectIsAuthenticated } from '@entities/auth/model/authSelectors';
 import type {ConfirmOptions} from "@shared/ui/confirm/ConfirmDialog.types.ts";
 import ConfirmDialogContext from "@shared/ui/confirm/ConfirmDialogContext.tsx";
 
@@ -43,6 +45,14 @@ export const ConfirmDialogProvider: React.FC<{
         // so callers can render their pending UI on an unobscured page.
         window.setTimeout(() => resolve?.(result), CLOSE_ANIMATION_MS);
     };
+
+    // When the session ends (expiry or logout) dismiss any open confirm and
+    // resolve its awaiting caller with `false`, so the dialog doesn't linger on
+    // the /login screen and the pending promise never hangs.
+    const isAuthenticated = useAppSelector(selectIsAuthenticated);
+    useEffect(() => {
+        if (!isAuthenticated && resolverRef.current) close(false);
+    }, [isAuthenticated]);
 
     return (
         <ConfirmDialogContext.Provider value={{ confirm }}>
