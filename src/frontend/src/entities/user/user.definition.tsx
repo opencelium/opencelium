@@ -110,6 +110,13 @@ export const userDefinition: EntityDefinition = {
             validation: {
                 required: true,
                 max: 255
+            },
+            table: {
+                visible: true,
+                order: 2,
+                sortable: true,
+                searchable: true,
+                labelKey: `${baseKey}.fields.userDetail.name.label`,
             }
         },
         {
@@ -124,6 +131,13 @@ export const userDefinition: EntityDefinition = {
             validation: {
                 required: true,
                 max: 255
+            },
+            table: {
+                visible: true,
+                order: 3,
+                sortable: true,
+                searchable: true,
+                labelKey: `${baseKey}.fields.userDetail.surname.label`,
             }
         },
         {
@@ -303,7 +317,7 @@ export const userDefinition: EntityDefinition = {
             },
             table: {
                 visible: true,
-                order: 2,
+                order: 4,
                 searchable: true,
                 labelKey: `${baseKey}.fields.userGroup.label`,
                 mapToValue: (_row, raw) => {
@@ -321,7 +335,9 @@ export const userDefinition: EntityDefinition = {
             ui: { component: 'switch' },
             table: {
                 visible: true,
-                order: 3,
+                order: 5,
+                width: 1,
+                align: 'center',
                 labelKey: `${baseKey}.fields.totpEnabled.label`,
                 render: (row, value) => {
                     const user = row as User
