@@ -20,6 +20,7 @@ import {ExecutionCell} from "@entities/schedule/ui/ExecutionCell.tsx";
 import {DurationCell} from "@entities/schedule/ui/DurationCell.tsx";
 import {DebugModeCell} from "@entities/schedule/ui/DebugModeCell.tsx";
 import {WebhookCell} from "@entities/schedule/ui/WebhookCell.tsx";
+import {CronCell} from "@entities/schedule/ui/CronCell.tsx";
 import {NotificationsAction} from "@entities/schedule/ui/NotificationsAction.tsx";
 import {SupportLogsAction} from "@entities/schedule/ui/SupportLogsAction.tsx";
 
@@ -111,7 +112,6 @@ export const scheduleDefinition: EntityDefinition = {
                 key: 'notifications',
                 render: ({ row }) => <NotificationsAction schedule={row as Schedule} />,
             },
-            { type: 'update' },
             { type: 'delete' },
         ],
     },
@@ -211,7 +211,7 @@ export const scheduleDefinition: EntityDefinition = {
                 order: 3,
                 align: 'center',
                 labelKey: `${baseKey}.list.columns.cronExp`,
-                render: (_row, value) => (value ? String(value) : '-'),
+                render: (row) => <CronCell schedule={row as Schedule} />,
             },
         },
 

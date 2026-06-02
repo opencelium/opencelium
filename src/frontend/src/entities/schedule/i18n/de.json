@@ -107,6 +107,15 @@
     "enableSuccess": "Debug-Modus aktiviert",
     "disableSuccess": "Debug-Modus deaktiviert"
   },
+  "cronEdit": {
+    "tooltip": "Cron-Ausdruck bearbeiten",
+    "title": "Cron-Ausdruck bearbeiten",
+    "subtitle": "Ändern Sie, wann dieser Zeitplan ausgeführt wird. Beim Speichern wird der Zeitplan mit dem neuen Cron-Ausdruck aktualisiert.",
+    "submit": "Speichern",
+    "cancel": "Abbrechen",
+    "success": "Der Cron-Ausdruck für die Connection \"{{connectionTitle}}\" wurde erfolgreich auf \"{{cronExp}}\" aktualisiert",
+    "error": "Cron-Ausdruck konnte nicht aktualisiert werden"
+  },
   "fields": {
     "title": {
       "label": "Titel"
