@@ -23,6 +23,7 @@ import {WebhookCell} from "@entities/schedule/ui/WebhookCell.tsx";
 import {CronCell} from "@entities/schedule/ui/CronCell.tsx";
 import {NotificationsAction} from "@entities/schedule/ui/NotificationsAction.tsx";
 import {SupportLogsAction} from "@entities/schedule/ui/SupportLogsAction.tsx";
+import {BulkNotificationsDialogContent} from "@entities/schedule/ui/BulkNotificationsDialogContent.tsx";
 
 const baseKey = 'schedule';
 
@@ -92,6 +93,28 @@ export const scheduleDefinition: EntityDefinition = {
         searchPlaceholderKey: `${baseKey}.list.searchPlaceholder`,
         defaultSort: { field: 'connectionTitle', direction: 'asc' },
         bulkDelete: true,
+        bulkActions: [
+            {
+                key: 'notifications',
+                labelKey: `${baseKey}.notifications.bulk.button`,
+                run: ({ ids, dialog, clearSelection }) => {
+                    const schedulerIds = ids
+                        .map(Number)
+                        .filter((id) => Number.isFinite(id))
+                    if (schedulerIds.length === 0) return
+                    const dialogId = dialog.open({
+                        width: 720,
+                        content: (
+                            <BulkNotificationsDialogContent
+                                schedulerIds={schedulerIds}
+                                onClose={() => dialog.closeById(dialogId)}
+                                onCreated={clearSelection}
+                            />
+                        ),
+                    })
+                },
+            },
+        ],
         useRowDecoration: () => {
             const {wasRecentlyUpdated} = useCurrentSchedules();
             return {

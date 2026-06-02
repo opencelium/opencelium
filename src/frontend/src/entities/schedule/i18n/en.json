@@ -77,6 +77,14 @@
     "confirmDelete": {
       "title": "Delete notification?",
       "message": "This notification will be removed permanently."
+    },
+    "bulk": {
+      "button": "Notifications",
+      "title": "Add notification to selected schedules",
+      "subtitle": "This notification will be created for {{count}} selected schedule(s).",
+      "create": "Create for {{count}} schedule(s)",
+      "success": "Notification created for {{count}} schedule(s)",
+      "partialError": "Failed to create notification for {{count}} schedule(s)"
     }
   },
   "supportLogs": {

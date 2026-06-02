@@ -77,6 +77,14 @@
     "confirmDelete": {
       "title": "Benachrichtigung löschen?",
       "message": "Diese Benachrichtigung wird unwiderruflich entfernt."
+    },
+    "bulk": {
+      "button": "Benachrichtigungen",
+      "title": "Benachrichtigung zu ausgewählten Zeitplänen hinzufügen",
+      "subtitle": "Diese Benachrichtigung wird für {{count}} ausgewählte(n) Zeitplan/-pläne erstellt.",
+      "create": "Für {{count}} Zeitplan/-pläne erstellen",
+      "success": "Benachrichtigung für {{count}} Zeitplan/-pläne erstellt",
+      "partialError": "Benachrichtigung für {{count}} Zeitplan/-pläne konnte nicht erstellt werden"
     }
   },
   "supportLogs": {

@@ -4,7 +4,7 @@ import { selectIsAuthenticated } from '@entities/auth/model/authSelectors';
 import type { OpenDialogOptions } from './types';
 import type { DialogStackItem } from './DialogStack.types';
 
-interface DialogController {
+export interface DialogController {
     open: (options: OpenDialogOptions) => string;
     close: () => void;
     closeById: (id: string) => void;
