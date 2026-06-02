@@ -15,5 +15,8 @@
       "success": "Support-Datei heruntergeladen",
       "error": "Support-Datei konnte nicht heruntergeladen werden"
     }
+  },
+  "events": {
+    "created": "Support-Datei ist bereit"
   }
 }

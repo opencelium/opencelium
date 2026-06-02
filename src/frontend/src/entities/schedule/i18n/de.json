@@ -79,6 +79,30 @@
       "message": "Diese Benachrichtigung wird unwiderruflich entfernt."
     }
   },
+  "supportLogs": {
+    "tooltip": "Support-Logs",
+    "title": "Support-Logs",
+    "titleHint": "Erzeugt eine maskierte Support-Logs-Datei für diese Verbindung. Wählen Sie über die Augen-Schalter, welche Teile vor dem Download maskiert werden.",
+    "levelLabel": "Maskierungsstufe",
+    "levels": {
+      "custom": "Benutzerdefiniert",
+      "light": "Leicht",
+      "medium": "Mittel",
+      "strict": "Streng"
+    },
+    "sections": {
+      "url": "URL",
+      "headers": "Header",
+      "request": "Anfrage",
+      "response": "Antwort"
+    },
+    "mask": "Diesen Abschnitt maskieren",
+    "unmask": "Maskierung dieses Abschnitts aufheben",
+    "submit": "Support-Logs erstellen",
+    "cancel": "Abbrechen",
+    "started": "Sammlung der Support-Logs für \"{{connectionTitle}}\" gestartet. Sie werden benachrichtigt, sobald die Datei bereit ist.",
+    "error": "Sammlung der Support-Logs konnte nicht gestartet werden"
+  },
   "debugMode": {
     "enableSuccess": "Debug-Modus aktiviert",
     "disableSuccess": "Debug-Modus deaktiviert"

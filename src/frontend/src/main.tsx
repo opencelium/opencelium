@@ -10,7 +10,9 @@ import { ReactFlowProvider } from '@xyflow/react';
 registerEntities()
 initEntityI18n();
 
-if (import.meta.env.DEV) {
+// Mocks run in dev unless explicitly disabled with VITE_ENABLE_MOCKS=false,
+// in which case every request goes to the real backend at VITE_API_URL.
+if (import.meta.env.DEV && import.meta.env.VITE_ENABLE_MOCKS !== 'false') {
 	const { worker } = await import('@/mock/server');
 	await worker.start();
 }

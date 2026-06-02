@@ -15,5 +15,8 @@
       "success": "Support file downloaded",
       "error": "Failed to download support file"
     }
+  },
+  "events": {
+    "created": "Support file is ready"
   }
 }

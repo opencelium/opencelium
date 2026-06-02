@@ -70,4 +70,20 @@ export const supportFileHandlers = [
         supportFiles = supportFiles.filter((f) => !filenames.has(basename(f.supportFile)))
         return HttpResponse.json({ valid: true })
     }),
+
+    http.post('/connection/execute/:connectionId/support-file', async ({ params }) => {
+        const connectionId = Number(params.connectionId ?? 0)
+        const filename = `2026-06-02_12-00_${connectionId}_s_99.zip`
+        supportFiles = [
+            ...supportFiles,
+            {
+                connectionId,
+                connectionTitle: null,
+                supportFile: `/connection/support-file/${connectionId}/${filename}`,
+                status: 'CONNECTION_FOUND',
+                message: 'Connection is found.',
+            },
+        ]
+        return HttpResponse.json({ valid: true })
+    }),
 ]

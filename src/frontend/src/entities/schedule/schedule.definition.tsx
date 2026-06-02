@@ -21,6 +21,7 @@ import {DurationCell} from "@entities/schedule/ui/DurationCell.tsx";
 import {DebugModeCell} from "@entities/schedule/ui/DebugModeCell.tsx";
 import {WebhookCell} from "@entities/schedule/ui/WebhookCell.tsx";
 import {NotificationsAction} from "@entities/schedule/ui/NotificationsAction.tsx";
+import {SupportLogsAction} from "@entities/schedule/ui/SupportLogsAction.tsx";
 
 const baseKey = 'schedule';
 
@@ -100,6 +101,11 @@ export const scheduleDefinition: EntityDefinition = {
             };
         },
         actions: [
+            {
+                type: 'custom',
+                key: 'support-logs',
+                render: ({ row }) => <SupportLogsAction schedule={row as Schedule} />,
+            },
             {
                 type: 'custom',
                 key: 'notifications',

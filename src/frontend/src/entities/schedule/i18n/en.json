@@ -79,6 +79,30 @@
       "message": "This notification will be removed permanently."
     }
   },
+  "supportLogs": {
+    "tooltip": "Support logs",
+    "title": "Support Logs",
+    "titleHint": "Generate a masked support-logs file for this connection. Use the eye toggles to choose which parts are masked before downloading.",
+    "levelLabel": "Level Of Masking",
+    "levels": {
+      "custom": "Custom",
+      "light": "Light",
+      "medium": "Medium",
+      "strict": "Strict"
+    },
+    "sections": {
+      "url": "URL",
+      "headers": "Headers",
+      "request": "Request",
+      "response": "Response"
+    },
+    "mask": "Mask this section",
+    "unmask": "Unmask this section",
+    "submit": "Create Support-Logs",
+    "cancel": "Cancel",
+    "started": "Started collecting support logs for \"{{connectionTitle}}\". You'll be notified when the file is ready.",
+    "error": "Failed to start collecting support logs"
+  },
   "debugMode": {
     "enableSuccess": "Debug mode enabled",
     "disableSuccess": "Debug mode disabled"

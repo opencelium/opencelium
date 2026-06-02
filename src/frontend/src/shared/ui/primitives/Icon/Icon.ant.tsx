@@ -19,12 +19,15 @@ import {
     HistoryOutlined,
     ArrowLeftOutlined,
     MoreOutlined,
+    EyeOutlined,
+    EyeInvisibleOutlined,
 } from '@ant-design/icons';
 
 import type { IconComponent } from './Icon.types';
 import {RiListSettingsLine, RiListSettingsFill  } from "react-icons/ri";
 import {MdKeyboardCommandKey, MdContentCopy, MdPlayArrow, MdStop, MdUnfoldMore, MdUnfoldLess, MdToggleOn, MdToggleOff} from "react-icons/md";
 import {TbWebhook} from "react-icons/tb";
+import {BsJournalText} from "react-icons/bs";
 import {Component} from "lucide-react";
 
 const iconMap = {
@@ -59,6 +62,9 @@ const iconMap = {
     collapse: MdUnfoldLess,
     'toggle-on': MdToggleOn,
     'toggle-off': MdToggleOff,
+    'journal-text': BsJournalText,
+    eye: EyeOutlined,
+    'eye-off': EyeInvisibleOutlined,
 };
 
 export const AntIcon: IconComponent = ({

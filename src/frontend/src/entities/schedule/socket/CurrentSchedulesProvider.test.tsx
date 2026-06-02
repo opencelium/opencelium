@@ -20,14 +20,24 @@ vi.mock('@shared/api/socket/useStompSubscription', () => ({
     },
 }))
 
-const dispatchMock = vi.fn()
+const unwrapMock = vi.fn()
+const dispatchMock = vi.fn((action: unknown) => {
+    if (action && typeof action === 'object' && '__getByIds' in action) {
+        return {unwrap: () => unwrapMock()}
+    }
+    return undefined
+})
 vi.mock('@app/store/store', () => ({
     store: {dispatch: (...args: unknown[]) => dispatchMock(...args)},
 }))
 
-const apiExecutorMock = vi.fn()
-vi.mock('@shared/api/apiExecutor', () => ({
-    apiExecutor: (...args: unknown[]) => apiExecutorMock(...args),
+const initiateMock = vi.fn((ids: number[]) => ({__getByIds: ids}))
+vi.mock('@entities/schedule/api/scheduleApi', () => ({
+    scheduleApi: {
+        endpoints: {
+            getSchedulesByIds: {initiate: (ids: number[]) => initiateMock(ids)},
+        },
+    },
 }))
 
 const updateQueryDataMock = vi.fn(
@@ -58,8 +68,9 @@ describe('CurrentSchedulesProvider', () => {
         lastDestination = ''
         lastHandler = null
         dispatchMock.mockClear()
-        apiExecutorMock.mockReset()
-        apiExecutorMock.mockResolvedValue([])
+        initiateMock.mockClear()
+        unwrapMock.mockReset()
+        unwrapMock.mockResolvedValue([])
         updateQueryDataMock.mockClear()
         vi.useFakeTimers()
     })
@@ -147,9 +158,9 @@ describe('CurrentSchedulesProvider', () => {
         expect(status.kind).toBe('idle')
     })
 
-    it('POSTs to /scheduler/list/get with the disappeared id and patches the list cache', async () => {
+    it('fetches the disappeared id by id and patches the list cache without invalidating', async () => {
         const refreshed = [{schedulerId: 1, title: 'A', lastExecution: {success: {startTime: 1, taId: 't'}}}]
-        apiExecutorMock.mockResolvedValueOnce(refreshed)
+        unwrapMock.mockResolvedValueOnce(refreshed)
 
         render(
             <CurrentSchedulesProvider>
@@ -157,14 +168,10 @@ describe('CurrentSchedulesProvider', () => {
             </CurrentSchedulesProvider>,
         )
         act(() => lastHandler!([{schedulerId: 1, title: 'A', avgDuration: 10000}]))
-        expect(apiExecutorMock).not.toHaveBeenCalled()
+        expect(initiateMock).not.toHaveBeenCalled()
 
         act(() => lastHandler!([]))
-        expect(apiExecutorMock).toHaveBeenCalledWith({
-            url: '/scheduler/list/get',
-            method: 'POST',
-            body: {identifiers: [1]},
-        })
+        expect(initiateMock).toHaveBeenCalledWith([1])
 
         await act(async () => {
             await Promise.resolve()
@@ -179,7 +186,7 @@ describe('CurrentSchedulesProvider', () => {
 
     it('flags refreshed schedules via wasRecentlyUpdated, then clears after the highlight window', async () => {
         const refreshed = [{schedulerId: 1, title: 'A', lastExecution: {success: {startTime: 1, taId: 't'}}}]
-        apiExecutorMock.mockResolvedValueOnce(refreshed)
+        unwrapMock.mockResolvedValueOnce(refreshed)
         let highlighted = false
         render(
             <CurrentSchedulesProvider>
@@ -198,7 +205,7 @@ describe('CurrentSchedulesProvider', () => {
     })
 
     it('does not patch the cache when the refresh returns nothing', async () => {
-        apiExecutorMock.mockResolvedValueOnce([])
+        unwrapMock.mockResolvedValueOnce([])
         render(
             <CurrentSchedulesProvider>
                 <Probe schedulerId={1} onValue={() => {}} />
