@@ -358,19 +358,30 @@ const buildMethodPayload = (node: WorkflowNodeModel, index: string, order: numbe
 	};
 };
 
-const unwrapExpressionReferences = (expression: string) =>
-	expression.replace(/\{%\s*(#[A-Fa-f0-9]{6}\.\((?:response|request)\)\.[^%]+?)\s*%}/g, '$1');
+const wrapExpressionReferences = (expression: string) =>
+	expression.replace(
+		/(?<!\{%)(#[A-Za-z0-9]{6}\.\((?:response|request)\)\.[^\s)%]+)/g,
+		'{%$1%}',
+	);
+
+const unwrapWholeExpression = (expression: string) => {
+	const match = expression.match(/^\{%\s*(.*)\s*%}$/);
+	return match ? match[1].trim() : expression;
+};
+
+const wrapIfExpression = (expression: string) => {
+	const value = expression.trim();
+	if (!value) return '';
+	return value.startsWith('(') && value.endsWith(')') ? value : `(${value})`;
+};
 
 const normalizeOperatorExpression = (expression: string, type: string) => {
-	const value = unwrapExpressionReferences(String(expression ?? '').trim());
+	const value = wrapExpressionReferences(unwrapWholeExpression(String(expression ?? '').trim()));
 	if (!value) return '';
 	if (type !== 'if') {
-		return value.replace(
-			/(?<!\{%)(#[A-Za-z0-9]{6}\.\((?:response|request)\)\.[^\s)]+)/g,
-			'{%$1%}',
-		);
+		return value;
 	}
-	return `{%${value}%}`;
+	return wrapIfExpression(value);
 };
 
 const buildOperatorPayload = (node: WorkflowNodeModel, index: string, iterator?: string) => {

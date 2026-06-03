@@ -64,6 +64,7 @@ export const updateGroupConjunction = (
 		group.id === groupId
 			? { ...(group.properties || {}), conjunction }
 			: group.properties,
+	error: group.id === groupId ? undefined : group.error,
 	items: (group.items || []).map((child) =>
 		child.type === 'group' ? updateGroupConjunction(child, groupId, conjunction) : child,
 	),
@@ -130,10 +131,11 @@ export const conditionTreeToExpression = (
 	}
 	const items = child.items || [];
 	const conjunction = child.properties?.conjunction;
-	return items
+	const expression = items
 		.map((item) => conditionTreeToExpression(item, operatorType))
 		.filter(Boolean)
 		.join(` ${conjunction || ''} `);
+	return operatorType === 'if' ? `(${expression})` : expression;
 };
 
 const isRuleValid = (rule: ConditionRule, operatorType: 'if' | 'loop') => {
@@ -154,10 +156,55 @@ const UNARY_OPERATORS = new Set<string>([
 
 export const validateConditionTree = (group: ConditionGroup, operatorType: 'if' | 'loop'): boolean => {
 	const items = group.items || [];
+	if (operatorType === 'if') {
+		if (items.length === 1 && group.properties?.conjunction !== undefined) return false;
+		if (items.length > 1 && group.properties?.conjunction === undefined) return false;
+	}
 	return items.length > 0 &&
 		items.every((child) =>
 			child.type === 'group' ? validateConditionTree(child, operatorType) : isRuleValid(child, operatorType),
 		);
+};
+
+const getGroupError = (group: ConditionGroup, operatorType: 'if' | 'loop') => {
+	const items = group.items || [];
+	if (items.length === 0) return 'There are no rules in this group.';
+	if (operatorType === 'if') {
+		if (items.length === 1 && group.properties?.conjunction !== undefined) {
+			return `Group with one item must not have conjunction. Conjunction: ${group.properties.conjunction}`;
+		}
+		if (items.length > 1 && group.properties?.conjunction === undefined) {
+			return 'Group with multiple conditions must have a conjunction. Conjunction is missing.';
+		}
+	}
+	return undefined;
+};
+
+export const validateConditionTreeWithErrors = (
+	group: ConditionGroup,
+	operatorType: 'if' | 'loop',
+): { tree: ConditionGroup; isValid: boolean } => {
+	const groupError = getGroupError(group, operatorType);
+	let isValid = !groupError;
+	const items = (group.items || []).map((child) => {
+		if (child.type === 'group') {
+			const result = validateConditionTreeWithErrors(child, operatorType);
+			if (!result.isValid) isValid = false;
+			return result.tree;
+		}
+		const ruleValid = isRuleValid(child, operatorType);
+		if (!ruleValid) isValid = false;
+		return child;
+	});
+
+	return {
+		tree: {
+			...group,
+			error: groupError,
+			items,
+		},
+		isValid,
+	};
 };
 
 export const buildConditionConfig = (

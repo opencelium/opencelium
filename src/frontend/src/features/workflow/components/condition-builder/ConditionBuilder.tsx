@@ -39,6 +39,7 @@ import {
 	removeChildById,
 	updateGroupConjunction,
 	updateRuleProperties,
+	validateConditionTreeWithErrors,
 } from './conditionBuilder.utils';
 import '../request-editor/body-editor/bodyLegacy.css';
 import './conditionBuilder.css';
@@ -489,7 +490,9 @@ function GroupEditor({
 	const isConjunctionDisabled = items.length <= 1;
 	const conjunction = group.properties?.conjunction;
 	const activeConjunction = conjunction;
-	const groupClassName = operatorType === 'loop' ? 'conditionLoopGroup' : 'conditionGroup';
+	const groupClassName = operatorType === 'loop'
+		? 'conditionLoopGroup'
+		: `conditionGroup${group.error ? ' conditionGroupInvalid' : ''}`;
 	const groupBodyStyle = {
 		'--condition-tree-bottom': `${treeLineBottom}px`,
 	} as CSSProperties;
@@ -523,23 +526,26 @@ function GroupEditor({
 	return (
 		<div className={groupClassName}>
 			{operatorType === 'if' ? <div className="conditionGroupHeader">
-				<div className="conditionGroupToggle">
-					<button
-						disabled={isConjunctionDisabled}
-						type="button"
-						className={activeConjunction === Conjunction.AND ? 'active' : ''}
-						onClick={() => onChange(updateGroupConjunction(group, group.id, conjunction === Conjunction.AND ? undefined : Conjunction.AND))}
-					>
-						AND
-					</button>
-					<button
-						disabled={isConjunctionDisabled}
-						type="button"
-						className={activeConjunction === Conjunction.OR ? 'active' : ''}
-						onClick={() => onChange(updateGroupConjunction(group, group.id, conjunction === Conjunction.OR ? undefined : Conjunction.OR))}
-					>
-						OR
-					</button>
+				<div className="conditionGroupStatus">
+					<div className="conditionGroupToggle">
+						<button
+							disabled={isConjunctionDisabled}
+							type="button"
+							className={activeConjunction === Conjunction.AND ? 'active' : ''}
+							onClick={() => onChange(updateGroupConjunction(group, group.id, conjunction === Conjunction.AND ? undefined : Conjunction.AND))}
+						>
+							AND
+						</button>
+						<button
+							disabled={isConjunctionDisabled}
+							type="button"
+							className={activeConjunction === Conjunction.OR ? 'active' : ''}
+							onClick={() => onChange(updateGroupConjunction(group, group.id, conjunction === Conjunction.OR ? undefined : Conjunction.OR))}
+						>
+							OR
+						</button>
+					</div>
+					{group.error ? <div className="conditionGroupError">{group.error}</div> : null}
 				</div>
 				<div className="conditionGroupActions">
 					<Button
@@ -640,7 +646,10 @@ export function ConditionBuilderDialog({
 					disabled={!node}
 					onClick={() => {
 						if (!node) return;
-						onSave(node.id, buildConditionConfig(operatorType, tree, loopIterator));
+						const result = validateConditionTreeWithErrors(tree, operatorType);
+						setTree(result.tree);
+						if (!result.isValid) return;
+						onSave(node.id, buildConditionConfig(operatorType, result.tree, loopIterator));
 					}}
 				>
 					Save
