@@ -1,5 +1,5 @@
 import { Background } from '@xyflow/react';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button, Input, Modal, Select, message } from 'antd';
 import { Loading } from '@shared/ui/primitives/Loading/Loading';
@@ -99,6 +99,20 @@ const EMPTY_DESCRIPTION_LABEL = '[Empty Description]';
 const toDisplayDescription = (description?: string) =>
   description && description.trim() ? description : EMPTY_DESCRIPTION_LABEL;
 
+const FIELD_BINDING_COLOR_RE = /#[A-Fa-f0-9]{6}/g;
+
+const getFieldBindingColors = (binding: any) =>
+  Object.values(binding?.enhancement?.args || {})
+    .flatMap((value) => typeof value === 'string' ? value.match(FIELD_BINDING_COLOR_RE) || [] : [])
+    .map((color) => color.toLowerCase());
+
+const removeFieldBindingsByMethodColors = (fieldBindings: any[] | undefined, methodColors: Set<string>) => {
+  if (!Array.isArray(fieldBindings) || methodColors.size === 0) return fieldBindings;
+  return fieldBindings.filter((binding) =>
+    getFieldBindingColors(binding).every((color) => !methodColors.has(color)),
+  );
+};
+
 const getProfileAuthorName = (user: AuthUser | null) => {
   const fullName = [user?.userDetail?.name, user?.userDetail?.surname]
     .map((part) => part?.trim())
@@ -169,7 +183,6 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const { connectionId } = useParams<{ connectionId: string }>();
   const navigate = useNavigate();
   const { t: tEntities } = useI18n('entities');
-  const workflow = useWorkflowPage();
   const authUser = useAppSelector(selectAuthUser);
   const { data: connectors = [], isLoading: isConnectorsLoading } = useGetConnectorsQuery({ page: 0, limit: 1000 });
   const [headerState, setHeaderState] = useState({
@@ -177,6 +190,19 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     description: '[Empty Description]',
   });
   const [loadedFieldBindings, setLoadedFieldBindings] = useState<any[] | undefined>();
+  const cleanDeletedNodeFieldBindings = useCallback((deletedNodeIds: string[], previousNodes: WorkflowNodeModel[]) => {
+    const deletedIds = new Set(deletedNodeIds);
+    const deletedMethodColors = new Set(
+      buildLegacyConnection(previousNodes).fromConnector.method
+        .filter((method) => deletedIds.has(method.id))
+        .map((method) => method.color.toLowerCase()),
+    );
+    previousNodes
+      .filter((node) => deletedIds.has(node.id) && typeof (node.data as any).color === 'string')
+      .forEach((node) => deletedMethodColors.add(String((node.data as any).color).toLowerCase()));
+    setLoadedFieldBindings((current) => removeFieldBindingsByMethodColors(current, deletedMethodColors));
+  }, []);
+  const workflow = useWorkflowPage({ onDeleteNodes: cleanDeletedNodeFieldBindings });
   const [historyVersions, setHistoryVersions] = useState<HistoryVersionItem[]>([]);
   const [selectedHistoryVersionId, setSelectedHistoryVersionId] = useState<string | null>(null);
   const [baselineSnapshot, setBaselineSnapshot] = useState<string | null>(null);

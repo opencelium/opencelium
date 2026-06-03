@@ -9,7 +9,11 @@ import type { WorkflowConditionEditorState, WorkflowMethodConfig, WorkflowMethod
 import type { ConditionConfig } from './components/condition-builder/conditionBuilder.types';
 import { createNodeFromAction, deleteNodeGraph } from './utils/graphUtils';
 
-export function useWorkflowPage() {
+type UseWorkflowPageOptions = {
+  onDeleteNodes?: (deletedNodeIds: string[], previousNodes: WorkflowNodeModel[]) => void;
+};
+
+export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
   const reactFlowInstance = useRef<ReactFlowInstance<WorkflowNodeModel, WorkflowEdgeModel> | null>(null);
   const [nodes, setNodes, onNodesChange] = useNodesState<WorkflowNodeModel>(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<WorkflowEdgeModel>(initialEdges);
@@ -74,6 +78,13 @@ export function useWorkflowPage() {
       const targetNode = nodes.find((node) => node.id === nodeId);
       if (!targetNode || targetNode.type === 'start') return;
       const result = deleteNodeGraph(nodeId, nodes, edges);
+      const nextNodeIds = new Set(result.nodes.map((node) => node.id));
+      const deletedNodeIds = nodes
+        .filter((node) => !nextNodeIds.has(node.id))
+        .map((node) => node.id);
+      if (deletedNodeIds.length > 0) {
+        options.onDeleteNodes?.(deletedNodeIds, nodes);
+      }
       setNodes(result.nodes);
       setEdges(result.edges);
       setContextMenu(null);
