@@ -10,6 +10,7 @@ import { Tooltip } from "@shared/ui/primitives/Tooltip";
 import { useI18n } from "@shared/i18n/hooks/useI18n";
 import type { DialogComponent } from "./Dialog.types";
 import { DialogFullscreenProvider } from "./DialogFullscreenContext";
+import { DialogHeaderSlotProvider } from "./DialogHeaderSlotContext";
 
 export const MaterialDialog: DialogComponent = ({
   open,
@@ -26,6 +27,7 @@ export const MaterialDialog: DialogComponent = ({
   const { t } = useI18n("common");
   const isMobile = window.matchMedia("(max-width: 768px)").matches;
   const [maximized, setMaximized] = useState(fullscreen);
+  const [headerSlot, setHeaderSlot] = useState<HTMLSpanElement | null>(null);
   const isFullscreen = isMobile || maximized;
   const showMaximize = maximizable && !isMobile;
 
@@ -45,15 +47,21 @@ export const MaterialDialog: DialogComponent = ({
         },
       }}
     >
-      {showMaximize && (
-        <Tooltip content={t(maximized ? "dialog.restore" : "dialog.maximize")}>
-          <span
-            style={{
-              position: "absolute",
-              top: 8,
-              insetInlineEnd: 8,
-              zIndex: 10,
-            }}
+      <span
+        style={{
+          position: "absolute",
+          top: 8,
+          insetInlineEnd: 8,
+          zIndex: 10,
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 4,
+        }}
+      >
+        <span ref={setHeaderSlot} style={{ display: "inline-flex", gap: 4 }} />
+        {showMaximize && (
+          <Tooltip
+            content={t(maximized ? "dialog.restore" : "dialog.maximize")}
           >
             <IconButton
               iconProps={{ name: maximized ? "minimize" : "maximize" }}
@@ -61,15 +69,17 @@ export const MaterialDialog: DialogComponent = ({
               type="text"
               onClick={() => setMaximized((v) => !v)}
             />
-          </span>
-        </Tooltip>
-      )}
+          </Tooltip>
+        )}
+      </span>
 
       {title && <DialogTitle>{title}</DialogTitle>}
 
       <DialogContent dividers>
         <DialogFullscreenProvider value={isFullscreen}>
-          {children}
+          <DialogHeaderSlotProvider value={headerSlot}>
+            {children}
+          </DialogHeaderSlotProvider>
         </DialogFullscreenProvider>
       </DialogContent>
 

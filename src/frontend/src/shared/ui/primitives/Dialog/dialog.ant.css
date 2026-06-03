@@ -32,10 +32,14 @@
     overflow: auto;
 }
 
-/* Maximize/restore toggle sits just left of antd's close icon (top-right). */
-.ant-dialog-maximize-btn {
+/* Header action icons (content-contributed actions + maximize/restore) sit
+   just left of antd's close icon (top-right). */
+.ant-dialog-header-actions {
     position: absolute;
     top: 12px;
     inset-inline-end: 52px;
     z-index: 10;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
 }

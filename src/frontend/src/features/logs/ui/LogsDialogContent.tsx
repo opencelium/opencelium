@@ -2,11 +2,13 @@ import { useMemo, useState } from "react";
 import { Select } from "@shared/ui/primitives/Select";
 import { Typography } from "@shared/ui/primitives/Typography";
 import { useDialogFullscreen } from "@shared/ui/primitives/Dialog/DialogFullscreenContext";
+import { DialogHeaderActions } from "@shared/ui/primitives/Dialog/DialogHeaderSlotContext";
 import { useI18n } from "@shared/i18n/hooks/useI18n";
 import { useGetLogFilesQuery } from "../api/logsApi";
 import type { LogFileStatus } from "../model/types";
 import { parseLogFileName } from "./parseLogFileName";
 import { ExecutionLogTree } from "./ExecutionLogTree";
+import { DownloadLogsButton } from "./DownloadLogsButton";
 import { MethodDetailViewStateProvider } from "./methodDetailViewState";
 
 type Props = {
@@ -41,6 +43,11 @@ export function LogsDialogContent({ connectionId, schedulerId, status }: Props) 
 
   return (
     <MethodDetailViewStateProvider>
+      {executionId && (
+        <DialogHeaderActions>
+          <DownloadLogsButton executionId={executionId} />
+        </DialogHeaderActions>
+      )}
       <div
         style={
           isFullscreen

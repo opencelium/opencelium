@@ -7,6 +7,11 @@
   "empty": "No logs to display.",
   "childrenError": "Failed to load log elements.",
   "detailsError": "Failed to load method details.",
+  "download": {
+    "tooltip": "Download logs",
+    "error": "Failed to download logs",
+    "tooBig": "The log is too big to download. You can find it on the server at {{path}}."
+  },
   "tabs": {
     "requestHeader": "Request Header",
     "requestBody": "Request Body",

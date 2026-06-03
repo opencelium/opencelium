@@ -5,6 +5,7 @@ import { Tooltip } from "@shared/ui/primitives/Tooltip";
 import { useI18n } from "@shared/i18n/hooks/useI18n";
 import type { DialogComponent } from "./Dialog.types";
 import { DialogFullscreenProvider } from "./DialogFullscreenContext";
+import { DialogHeaderSlotProvider } from "./DialogHeaderSlotContext";
 import "./dialog.ant.css";
 
 export const AntDialog: DialogComponent = ({
@@ -22,6 +23,7 @@ export const AntDialog: DialogComponent = ({
   const { t } = useI18n("common");
   const isMobile = window.matchMedia("(max-width: 768px)").matches;
   const [maximized, setMaximized] = useState(fullscreen);
+  const [headerSlot, setHeaderSlot] = useState<HTMLSpanElement | null>(null);
   // On mobile the dialog is always fullscreen and the toggle is hidden.
   const isFullscreen = isMobile || maximized;
   const showMaximize = maximizable && !isMobile;
@@ -39,20 +41,26 @@ export const AntDialog: DialogComponent = ({
       width={isFullscreen ? "100%" : width}
       className={isFullscreen ? "ant-dialog-fullscreen" : "ant-dialog-custom"}
     >
-      {showMaximize && (
-        <Tooltip content={t(maximized ? "dialog.restore" : "dialog.maximize")}>
-          <span className="ant-dialog-maximize-btn">
+      <span className="ant-dialog-header-actions">
+        {/* Portal target for content-contributed actions (e.g. download). */}
+        <span ref={setHeaderSlot} style={{ display: "inline-flex", gap: 4 }} />
+        {showMaximize && (
+          <Tooltip
+            content={t(maximized ? "dialog.restore" : "dialog.maximize")}
+          >
             <IconButton
               iconProps={{ name: maximized ? "minimize" : "maximize" }}
               size="xs"
               type="text"
               onClick={() => setMaximized((v) => !v)}
             />
-          </span>
-        </Tooltip>
-      )}
+          </Tooltip>
+        )}
+      </span>
       <DialogFullscreenProvider value={isFullscreen}>
-        {children}
+        <DialogHeaderSlotProvider value={headerSlot}>
+          {children}
+        </DialogHeaderSlotProvider>
       </DialogFullscreenProvider>
     </Modal>
   );

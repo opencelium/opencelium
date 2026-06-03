@@ -7,6 +7,11 @@
   "empty": "Keine Logs vorhanden.",
   "childrenError": "Log-Elemente konnten nicht geladen werden.",
   "detailsError": "Methodendetails konnten nicht geladen werden.",
+  "download": {
+    "tooltip": "Logs herunterladen",
+    "error": "Logs konnten nicht heruntergeladen werden",
+    "tooBig": "Das Log ist zu groß zum Herunterladen. Sie finden es auf dem Server unter {{path}}."
+  },
   "tabs": {
     "requestHeader": "Anfrage-Header",
     "requestBody": "Anfrage-Body",
