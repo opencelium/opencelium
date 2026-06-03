@@ -21,9 +21,30 @@ type PlayVariant = 'bare' | 'neutral' | RingStatus
 const NEUTRAL_STROKE = '#bfbfbf'
 const NEUTRAL_TRAIL = '#f0f0f0'
 
+const START_ERROR_DURATION_SEC = 8
 const CIRCLE_SIZE = 28
 const PROGRESS_TICK_MS = 200
 const TERMINATE_GRACE_MS = 5000
+
+// The backend rejects a manual trigger while the schedule is already running
+// with this code; it can surface in the error body's message/error/code field.
+function isConcurrentTestForbidden(error: unknown): boolean {
+    if (!error || typeof error !== 'object') return false
+    const data = (error as {data?: unknown}).data
+    const candidates = [error, data].flatMap((source) =>
+        source && typeof source === 'object'
+            ? [
+                  (source as Record<string, unknown>).message,
+                  (source as Record<string, unknown>).error,
+                  (source as Record<string, unknown>).code,
+              ]
+            : [source]
+    )
+    return candidates.some(
+        (value) =>
+            typeof value === 'string' && value.includes('CONCURRENT_TEST_IS_FORBIDDEN')
+    )
+}
 
 function computeEndTime(run?: ScheduleExecutionRun): number {
     if (!run?.startTime) return 0
@@ -155,11 +176,14 @@ function PlayControl({schedule, variant}: {schedule: Schedule; variant: PlayVari
             await generalRequest({
                 url: `/scheduler/execute/${schedule.schedulerId}`,
                 method: 'GET',
-                options: {},
+                options: {ignoreError: true},
             }).unwrap()
             message.success(tEntities('schedule.start.success'))
-        } catch {
-            // error surfaced by errorBus
+        } catch (error) {
+            const key = isConcurrentTestForbidden(error)
+                ? 'schedule.start.error.concurrentForbidden'
+                : 'schedule.start.error.failed'
+            message.error(tEntities(key), START_ERROR_DURATION_SEC)
         } finally {
             setPending(false)
         }

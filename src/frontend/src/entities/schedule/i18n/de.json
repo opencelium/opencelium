@@ -28,7 +28,11 @@
   },
   "start": {
     "tooltip": "Ausführung starten",
-    "success": "Zeitplan-Ausführung gestartet"
+    "success": "Zeitplan-Ausführung gestartet",
+    "error": {
+      "concurrentForbidden": "Ein anderer Zeitplan für diese Verbindung läuft bereits. Warten Sie, bis er abgeschlossen ist, bevor Sie diesen starten.",
+      "failed": "Zeitplan-Ausführung konnte nicht gestartet werden"
+    }
   },
   "terminate": {
     "tooltip": "Ausführung beenden",
