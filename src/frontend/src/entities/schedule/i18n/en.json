@@ -115,6 +115,23 @@
     "started": "Started collecting support logs for \"{{connectionTitle}}\". You'll be notified when the file is ready.",
     "error": "Failed to start collecting support logs"
   },
+  "executionLogs": {
+    "seeLogs": "see logs",
+    "title": "Execution Logs",
+    "subtitle": "Pick an execution to inspect its connector, method and operator logs.",
+    "selectLabel": "Execution",
+    "selectPlaceholder": "Select an execution",
+    "selectHint": "Select an execution to view its logs.",
+    "empty": "No logs to display.",
+    "childrenError": "Failed to load log elements.",
+    "detailsError": "Failed to load method details.",
+    "tabs": {
+      "requestHeader": "Request Header",
+      "requestBody": "Request Body",
+      "responseHeader": "Response Header",
+      "responseBody": "Response Body"
+    }
+  },
   "debugMode": {
     "enableSuccess": "Debug mode enabled",
     "disableSuccess": "Debug mode disabled"

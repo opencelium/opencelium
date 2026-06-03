@@ -27,6 +27,11 @@ import {
     Description,
     Visibility,
     VisibilityOff,
+    ChevronRight,
+    ChevronLeft,
+    ExpandMore,
+    Fullscreen,
+    FullscreenExit,
 } from '@mui/icons-material';
 
 import type { IconComponent } from './Icon.types';
@@ -59,6 +64,11 @@ const iconMap = {
     'journal-text': Description,
     eye: Visibility,
     'eye-off': VisibilityOff,
+    'chevron-right': ChevronRight,
+    'chevron-left': ChevronLeft,
+    'chevron-down': ExpandMore,
+    maximize: Fullscreen,
+    minimize: FullscreenExit,
 };
 
 export const MaterialIcon: IconComponent = ({

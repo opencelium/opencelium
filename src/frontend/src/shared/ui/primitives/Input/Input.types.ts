@@ -1,5 +1,5 @@
 import React from "react";
-import type { ChangeEventHandler, CSSProperties, ReactNode, Ref } from 'react';
+import type { ChangeEventHandler, CSSProperties, KeyboardEventHandler, ReactNode, Ref } from 'react';
 
 export type InputVariant = 'default' | 'outlined' | 'filled';
 
@@ -20,6 +20,7 @@ export interface InputProps {
     onChange?: ChangeEventHandler<HTMLInputElement>;
     onBlur?: () => void;
     onFocus?: () => void;
+    onKeyDown?: KeyboardEventHandler<HTMLInputElement>;
 
     leftSlot?: ReactNode;
     rightSlot?: ReactNode;

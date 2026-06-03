@@ -1,0 +1,252 @@
+import { useState, type ReactNode } from "react";
+import { Loading } from "@shared/ui/primitives/Loading/Loading";
+import { Typography } from "@shared/ui/primitives/Typography";
+import { useI18n } from "@shared/i18n/hooks/useI18n";
+import { useGetElementChildrenQuery } from "../../api/executionLogApi";
+import type { FlowchartChildLog } from "../../model/executionLog.types";
+import { LogRow, MethodBadge, StatusBadge } from "./logRowUi";
+import { MethodLogDetails } from "./MethodLogDetails";
+import { LoopPager } from "./LoopPager";
+
+const INDENT_STEP = 22;
+
+function Url({ children }: { children: string }) {
+  return (
+    <span
+      style={{
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+        fontSize: 13,
+      }}
+      title={children}
+    >
+      {children}
+    </span>
+  );
+}
+
+function OperatorLabel({ label, hint }: { label: string; hint?: string }) {
+  return (
+    <span style={{ display: "inline-flex", alignItems: "baseline", gap: 6 }}>
+      <Typography variant="label" isBold>
+        {label}
+      </Typography>
+      {hint ? (
+        <Typography variant="caption" isSubtle>
+          {hint}
+        </Typography>
+      ) : null}
+    </span>
+  );
+}
+
+function Meta({ children }: { children: ReactNode }) {
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
+      {children}
+    </span>
+  );
+}
+
+// Lets a parent (e.g. a loop) own its children's expand/collapse state keyed by
+// position, so the state survives switching iterations even though each
+// iteration's rows remount with new ids.
+type ChildExpansion = {
+  isOpen: (index: number) => boolean;
+  toggle: (index: number) => void;
+};
+
+// Renders the children of an element (connector or operator) for one loop iteration.
+export function ElementChildren({
+  id,
+  loopIndex,
+  depth,
+  expansion,
+  path,
+}: {
+  id: string;
+  loopIndex?: number;
+  depth: number;
+  expansion?: ChildExpansion;
+  // Structural path of the parent, independent of the loop iteration, used to
+  // scope per-row view state (open tab / resized heights).
+  path: string;
+}) {
+  const { t: tEntities } = useI18n("entities");
+  const { data, isFetching, isError } = useGetElementChildrenQuery({
+    id,
+    loopIndex,
+  });
+
+  const pad: React.CSSProperties = {
+    padding: `8px 0 8px ${24 + depth * INDENT_STEP}px`,
+  };
+
+  if (isFetching) {
+    return (
+      <div style={pad}>
+        <Loading size="sm" inline />
+      </div>
+    );
+  }
+  if (isError) {
+    return (
+      <div style={pad}>
+        <Typography variant="caption" isDanger>
+          {tEntities("schedule.executionLogs.childrenError")}
+        </Typography>
+      </div>
+    );
+  }
+  if (!data || data.length === 0) {
+    return (
+      <div style={pad}>
+        <Typography variant="caption" isSubtle>
+          {tEntities("schedule.executionLogs.empty")}
+        </Typography>
+      </div>
+    );
+  }
+  return (
+    <>
+      {data.map((child, index) => (
+        <LogElementRow
+          key={child.id}
+          log={child}
+          depth={depth}
+          path={`${path}.${index}`}
+          expanded={expansion ? expansion.isOpen(index) : undefined}
+          onToggle={expansion ? () => expansion.toggle(index) : undefined}
+        />
+      ))}
+    </>
+  );
+}
+
+export function LogElementRow({
+  log,
+  depth,
+  path,
+  expanded: expandedProp,
+  onToggle,
+}: {
+  log: FlowchartChildLog;
+  depth: number;
+  // Structural path of this row, stable across loop iterations.
+  path: string;
+  // When `onToggle` is provided the row is controlled by its parent (used so a
+  // loop can persist its children's open state across iterations).
+  expanded?: boolean;
+  onToggle?: () => void;
+}) {
+  const [internalExpanded, setInternalExpanded] = useState(false);
+  const [loopIndex, setLoopIndex] = useState(0);
+  // Per-position open state for this row's children, kept across iteration
+  // changes (only consumed by the LOOP branch).
+  const [expandedChildren, setExpandedChildren] = useState<
+    Record<number, boolean>
+  >({});
+
+  const isControlled = onToggle !== undefined;
+  const expanded = isControlled ? !!expandedProp : internalExpanded;
+  const toggle = isControlled ? onToggle : () => setInternalExpanded((v) => !v);
+
+  const childExpansion = {
+    isOpen: (index: number) => !!expandedChildren[index],
+    toggle: (index: number) =>
+      setExpandedChildren((prev) => ({ ...prev, [index]: !prev[index] })),
+  };
+
+  switch (log.type) {
+    case "OPERATION": {
+      const { request, response } = log.segment;
+      return (
+        <>
+          <LogRow
+            depth={depth}
+            expandable
+            expanded={expanded}
+            onToggle={toggle}
+            left={
+              <>
+                <MethodBadge method={request.http_method} />
+                <Url>{request.url}</Url>
+              </>
+            }
+            right={
+              <Meta>
+                <StatusBadge status={response.status} />
+                <Typography variant="caption" isSubtle>
+                  {response.duration}
+                </Typography>
+              </Meta>
+            }
+          />
+          {expanded ? (
+            <MethodLogDetails id={log.id} depth={depth + 1} path={path} />
+          ) : null}
+        </>
+      );
+    }
+    case "LOOP": {
+      return (
+        <>
+          <LogRow
+            depth={depth}
+            expandable
+            expanded={expanded}
+            onToggle={toggle}
+            left={<OperatorLabel label="LOOP" hint={log.properties.iterator} />}
+            right={
+              <LoopPager
+                index={loopIndex}
+                size={log.properties.size}
+                onChange={setLoopIndex}
+              />
+            }
+          />
+          {expanded ? (
+            <ElementChildren
+              id={log.id}
+              loopIndex={loopIndex}
+              depth={depth + 1}
+              expansion={childExpansion}
+              path={path}
+            />
+          ) : null}
+        </>
+      );
+    }
+    case "IF": {
+      return (
+        <>
+          <LogRow
+            depth={depth}
+            expandable
+            expanded={expanded}
+            onToggle={toggle}
+            left={<OperatorLabel label="IF" hint={log.properties.expression} />}
+            right={
+              <Typography variant="caption" isSubtle>
+                {log.segment.result}
+              </Typography>
+            }
+          />
+          {expanded ? (
+            <ElementChildren
+              id={log.id}
+              loopIndex={0}
+              depth={depth + 1}
+              path={path}
+            />
+          ) : null}
+        </>
+      );
+    }
+    default: {
+      const _exhaustive: never = log;
+      return _exhaustive;
+    }
+  }
+}

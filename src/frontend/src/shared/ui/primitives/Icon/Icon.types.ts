@@ -35,6 +35,11 @@ export type IconName =
     | 'journal-text'
     | 'eye'
     | 'eye-off'
+    | 'chevron-right'
+    | 'chevron-left'
+    | 'chevron-down'
+    | 'maximize'
+    | 'minimize'
 
 export type IconColor =
     | 'default'

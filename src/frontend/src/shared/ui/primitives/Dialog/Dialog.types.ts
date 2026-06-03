@@ -11,6 +11,8 @@ export interface DialogProps {
     width?: number | string;
     closable?: boolean;
     fullscreen?: boolean;
+    /** Shows a maximize/restore toggle next to the close icon. `fullscreen` seeds its initial state. */
+    maximizable?: boolean;
 
     /** Fires once the dialog has fully unmounted from the DOM (after the close animation). */
     afterClose?: () => void;

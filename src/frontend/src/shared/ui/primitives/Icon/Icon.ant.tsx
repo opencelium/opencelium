@@ -21,6 +21,11 @@ import {
     MoreOutlined,
     EyeOutlined,
     EyeInvisibleOutlined,
+    RightOutlined,
+    LeftOutlined,
+    DownOutlined,
+    FullscreenOutlined,
+    FullscreenExitOutlined,
 } from '@ant-design/icons';
 
 import type { IconComponent } from './Icon.types';
@@ -65,6 +70,11 @@ const iconMap = {
     'journal-text': BsJournalText,
     eye: EyeOutlined,
     'eye-off': EyeInvisibleOutlined,
+    'chevron-right': RightOutlined,
+    'chevron-left': LeftOutlined,
+    'chevron-down': DownOutlined,
+    maximize: FullscreenOutlined,
+    minimize: FullscreenExitOutlined,
 };
 
 export const AntIcon: IconComponent = ({

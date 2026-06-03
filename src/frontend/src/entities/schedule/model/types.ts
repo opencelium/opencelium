@@ -3,6 +3,7 @@ export type ScheduleExecutionRun = {
     startTime: number
     taId: string
     duration?: number
+    hasLog?: boolean
 }
 
 export type ScheduleLastExecution = {

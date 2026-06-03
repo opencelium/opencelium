@@ -279,7 +279,14 @@ export const scheduleDefinition: EntityDefinition = {
                 labelKey: `${baseKey}.list.columns.lastSuccessExecution`,
                 mapToValue: (row) => (row as Schedule).lastExecution?.success?.startTime ?? 0,
                 render: (row) => (
-                    <ExecutionCell execution={(row as Schedule).lastExecution?.success} />
+                    <ExecutionCell
+                        execution={(row as Schedule).lastExecution?.success}
+                        logs={{
+                            connectionId: (row as Schedule).connection.connectionId,
+                            schedulerId: (row as Schedule).schedulerId,
+                            status: 's',
+                        }}
+                    />
                 ),
             },
         },
@@ -295,7 +302,14 @@ export const scheduleDefinition: EntityDefinition = {
                 labelKey: `${baseKey}.list.columns.lastFailExecution`,
                 mapToValue: (row) => (row as Schedule).lastExecution?.fail?.startTime ?? 0,
                 render: (row) => (
-                    <ExecutionCell execution={(row as Schedule).lastExecution?.fail} />
+                    <ExecutionCell
+                        execution={(row as Schedule).lastExecution?.fail}
+                        logs={{
+                            connectionId: (row as Schedule).connection.connectionId,
+                            schedulerId: (row as Schedule).schedulerId,
+                            status: 'f',
+                        }}
+                    />
                 ),
             },
         },

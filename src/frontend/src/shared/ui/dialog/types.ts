@@ -7,6 +7,7 @@ export interface OpenDialogOptions {
     width?: number | string;
     closable?: boolean;
     fullscreen?: boolean;
+    maximizable?: boolean;
 }
 export interface ConfirmOptions {
     title?: string;

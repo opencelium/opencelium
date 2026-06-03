@@ -87,6 +87,10 @@
     "updateWithoutMasterPassword": "You can save without entering the master password — only the general data will be updated. To change the required credentials, enter the master password first."
   },
   "hintLabel": "Hint",
+  "dialog": {
+    "maximize": "Maximize",
+    "restore": "Restore"
+  },
   "list": {
     "searchPlaceholder": "Search...",
     "empty": "No data",
