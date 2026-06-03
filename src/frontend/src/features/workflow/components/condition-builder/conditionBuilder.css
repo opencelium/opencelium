@@ -73,6 +73,11 @@
 	background: rgba(250, 240, 210, 0.5);
 }
 
+.conditionGroupInvalid {
+	border-color: #d8b85f;
+	background: #fff8e8;
+}
+
 .conditionLoopGroup {
 	position: relative;
 	width: 100%;
@@ -92,6 +97,13 @@
 .conditionGroupToggle {
 	z-index: 1;
 	display: flex;
+}
+
+.conditionGroupStatus {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 2px;
 }
 
 .conditionGroupToggle button {
@@ -123,6 +135,25 @@
 	background: #d2d0ca;
 	color: #fff;
 	cursor: default;
+}
+
+.conditionGroupInvalid .conditionGroupToggle button {
+	border-color: #a42525;
+	background: #a42525;
+	color: #fff;
+}
+
+.conditionGroupInvalid .conditionGroupToggle button.active {
+	border-color: #a42525;
+	background: #a42525;
+	color: #fff;
+}
+
+.conditionGroupError {
+	margin-left: 8px;
+	color: #a42525;
+	font-size: 12px;
+	line-height: 1.2;
 }
 
 .conditionGroupActions {
