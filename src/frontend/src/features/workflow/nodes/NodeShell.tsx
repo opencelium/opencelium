@@ -1,4 +1,4 @@
-import type { MouseEvent, PropsWithChildren } from 'react';
+import type { MouseEvent, PropsWithChildren, ReactNode } from 'react';
 import { AddStepTrigger } from './AddStepTrigger';
 import { NodeToolbar } from '../components/node/NodeToolbar';
 import type {
@@ -18,6 +18,7 @@ type Props = PropsWithChildren<{
   selected?: boolean;
   topLabel?: string;
   bottomLabel?: string;
+  bottomExtra?: ReactNode;
   rightAdd?: AddConfig;
   bottomAdd?: AddConfig;
 }>;
@@ -28,6 +29,7 @@ export function NodeShell({
   selected,
   topLabel,
   bottomLabel,
+  bottomExtra,
   rightAdd,
   bottomAdd,
   children,
@@ -96,6 +98,7 @@ export function NodeShell({
       </div>
 
       {bottomLabel && <div className="nodeBottomLabel">{bottomLabel}</div>}
+      {bottomExtra}
     </div>
   );
 }

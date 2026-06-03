@@ -17,5 +17,16 @@
     "requestBody": "Request Body",
     "responseHeader": "Response Header",
     "responseBody": "Response Body"
+  },
+  "live": {
+    "title": "Logs",
+    "empty": "No logs yet. Run a test to see execution logs.",
+    "running": "Running…",
+    "finished": "TEST FINISHED in {{time}}",
+    "stopped": "TEST STOPPED",
+    "failed": "TEST FAILED",
+    "expand": "Expand logs panel",
+    "collapse": "Collapse logs panel",
+    "clear": "Clear logs"
   }
 }

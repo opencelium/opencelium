@@ -30,6 +30,15 @@ export function updateConnection(connectionId: string | number, body: unknown) {
 	return apiFetchWithHeaders(connectionEndpoints.update(connectionId), { method: 'PUT', body: withWorkflowFromConnector(body) });
 }
 
+// Backend creates a temporary connection + debug scheduler, streams logs to
+// the STOMP topic /execution/logs/{channelId} and returns the schedulerId.
+export function testConnectionExecution(body: unknown, channelId: string) {
+	return apiFetchWithHeaders<{ schedulerId: number }>(connectionEndpoints.test(channelId), {
+		method: 'POST',
+		body: withWorkflowFromConnector(body),
+	});
+}
+
 export function getConnectionById(connectionId: string | number) {
 	return apiFetchWithHeaders(connectionEndpoints.getById(connectionId));
 }

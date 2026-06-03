@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Icon } from "@shared/ui/primitives/Icon";
+import { Typography } from "@shared/ui/primitives/Typography";
 import { LogJsonView } from "@shared/ui/json-view/LogJsonView";
 import type { HttpMethod } from "../model/types";
 
@@ -39,6 +40,45 @@ export function StatusBadge({ status }: { status: string }) {
       style={{ ...badgeBase, backgroundColor: isOk ? "#52c41a" : "#ff4d4f" }}
     >
       {status}
+    </span>
+  );
+}
+
+export function Url({ children }: { children: string }) {
+  return (
+    <span
+      style={{
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+        fontSize: 13,
+      }}
+      title={children}
+    >
+      {children}
+    </span>
+  );
+}
+
+export function OperatorLabel({ label, hint }: { label: string; hint?: string }) {
+  return (
+    <span style={{ display: "inline-flex", alignItems: "baseline", gap: 6 }}>
+      <Typography variant="label" isBold>
+        {label}
+      </Typography>
+      {hint ? (
+        <Typography variant="caption" isSubtle>
+          {hint}
+        </Typography>
+      ) : null}
+    </span>
+  );
+}
+
+export function Meta({ children }: { children: ReactNode }) {
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
+      {children}
     </span>
   );
 }

@@ -1,53 +1,14 @@
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 import { Loading } from "@shared/ui/primitives/Loading/Loading";
 import { Typography } from "@shared/ui/primitives/Typography";
 import { useI18n } from "@shared/i18n/hooks/useI18n";
 import { useGetElementChildrenQuery } from "../api/logsApi";
 import type { FlowchartChildLog } from "../model/types";
-import { LogRow, MethodBadge, StatusBadge } from "./logRowUi";
+import { LogRow, Meta, MethodBadge, OperatorLabel, StatusBadge, Url } from "./logRowUi";
 import { MethodLogDetails } from "./MethodLogDetails";
 import { LoopPager } from "./LoopPager";
 
 const INDENT_STEP = 22;
-
-function Url({ children }: { children: string }) {
-  return (
-    <span
-      style={{
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        whiteSpace: "nowrap",
-        fontSize: 13,
-      }}
-      title={children}
-    >
-      {children}
-    </span>
-  );
-}
-
-function OperatorLabel({ label, hint }: { label: string; hint?: string }) {
-  return (
-    <span style={{ display: "inline-flex", alignItems: "baseline", gap: 6 }}>
-      <Typography variant="label" isBold>
-        {label}
-      </Typography>
-      {hint ? (
-        <Typography variant="caption" isSubtle>
-          {hint}
-        </Typography>
-      ) : null}
-    </span>
-  );
-}
-
-function Meta({ children }: { children: ReactNode }) {
-  return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
-      {children}
-    </span>
-  );
-}
 
 // Lets a parent (e.g. a loop) own its children's expand/collapse state keyed by
 // position, so the state survives switching iterations even though each

@@ -17,5 +17,16 @@
     "requestBody": "Anfrage-Body",
     "responseHeader": "Antwort-Header",
     "responseBody": "Antwort-Body"
+  },
+  "live": {
+    "title": "Logs",
+    "empty": "Noch keine Logs. Starten Sie einen Test, um Ausführungs-Logs zu sehen.",
+    "running": "Läuft…",
+    "finished": "TEST BEENDET in {{time}}",
+    "stopped": "TEST GESTOPPT",
+    "failed": "TEST FEHLGESCHLAGEN",
+    "expand": "Log-Panel ausklappen",
+    "collapse": "Log-Panel einklappen",
+    "clear": "Logs löschen"
   }
 }

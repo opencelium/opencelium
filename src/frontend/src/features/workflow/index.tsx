@@ -16,6 +16,7 @@ import { ConditionBuilderDialog } from './components/condition-builder/Condition
 import { MethodConfigDialog } from './components/request-editor/MethodConfigDialog';
 import { buildLegacyConnection } from './components/request-editor/legacyAdapter';
 import { useWorkflowPage } from './useWorkflowPage';
+import { TestRunProvider } from './test-run/TestRunProvider';
 import { loadConnectionVersions, loadWorkflowConnection, loadWorkflowConnectionVersion, removeConnectionVersion, saveConnectionVersionComment, saveWorkflowConnection } from './api/connectionService';
 import { mapConnectionToWorkflowState } from './api/connectionMapper';
 import { buildConnectionPayload, buildFromConnectorPayload } from './api/connectionPayload';
@@ -489,6 +490,29 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     }
   };
 
+  const buildTestPayload = useCallback(() => {
+    const hasMethodNode = hydratedNodes.some(
+      (node) => node.type === 'connector' || node.type === 'system',
+    );
+    if (!hasMethodNode) {
+      message.error(tEntities('connection.test.noMethods'));
+      return null;
+    }
+    return {
+      ...buildConnectionPayload({
+        connectionId,
+        title: headerState.title,
+        description: headerState.description === EMPTY_DESCRIPTION_LABEL ? '' : headerState.description,
+        nodes: hydratedNodes,
+        edges: workflow.edges,
+        viewport: workflow.getViewport(),
+        fieldBindings: loadedFieldBindings,
+      }),
+      fromConnector: buildFromConnectorPayload(hydratedNodes, workflow.edges),
+      toConnector: null,
+    };
+  }, [connectionId, headerState.description, headerState.title, hydratedNodes, loadedFieldBindings, tEntities, workflow]);
+
   const handleOpenHistory = () => {
     workflow.setHistoryOpen(true);
     workflow.setSidebarAction(null);
@@ -507,6 +531,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   };
 
   return (
+    <TestRunProvider connectionId={connectionId} buildTestPayload={buildTestPayload}>
     <div className="page">
       <WorkflowHeader
         initialName={headerState.title}
@@ -734,5 +759,6 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         onSave={workflow.onSaveConditionConfig}
       />
     </div>
+    </TestRunProvider>
   );
 }

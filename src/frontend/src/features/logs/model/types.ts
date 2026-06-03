@@ -112,3 +112,43 @@ export type DetailedMethodLog = LogIdentifier & {
   segment: DetailedMethodSegment;
   error: LogError;
 };
+
+// Error attached to a live socket line. `originOfErrorPath` is the indexPath
+// of the element where the error actually happened — the carrying line may be
+// a parent (or the EXECUTION end line), so display the message at the origin.
+export type SocketLogError = {
+  message: string;
+  code: string | null;
+  originOfErrorPath: string;
+  stackTrace: string | null;
+} | null;
+
+// Live log line pushed over STOMP to /execution/logs/{channelId} while a
+// connection test runs (LogDataDTO on the backend). Unlike the REST tree
+// types above, properties/segment arrive as loose partial maps, and LOOP
+// entries carry the comma-separated `loopIndex` of the current iteration.
+export type SocketLogProperties = Partial<FlowchartProperty> &
+  Partial<MethodProperty> &
+  Partial<LoopProperty> &
+  Partial<IfProperty> & {
+    loopIndex?: string;
+  };
+
+// Method lines carry url/http_method from the start and fill in status,
+// duration and (when logged) header/payload as the phase completes.
+export type SocketLogSegment = {
+  request?: Partial<DetailedMethodSegment["request"]>;
+  response?: Partial<DetailedMethodSegment["response"]>;
+  result?: LightIfSegment["result"];
+};
+
+export type ExecutionSocketLog = LogIdentifier & {
+  id: string;
+  status: LogStatus;
+  type: LogType;
+  connectorName: string | null;
+  properties: SocketLogProperties | null;
+  segment: SocketLogSegment | null;
+  error: SocketLogError;
+  message?: string;
+};

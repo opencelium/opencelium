@@ -34,5 +34,15 @@
     "description": {
       "label": "Description"
     }
+  },
+  "test": {
+    "start": "Test run",
+    "stop": "Stop test",
+    "socketConnecting": "Connecting websocket…",
+    "socketDisconnected": "WebSocket is not connected",
+    "noMethods": "Add at least one method before running a test",
+    "startFailed": "Failed to start the test run",
+    "stopFailed": "Failed to stop the test run",
+    "terminated": "Test run terminated"
   }
 }

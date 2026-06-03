@@ -56,17 +56,40 @@ textarea {
   overflow: hidden;
 }
 
+.logsHeaderRow {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding-right: 6px;
+}
+
 .logsHeader {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   padding: 10px 12px;
   min-height: 46px;
   font-weight: 600;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   border: 0;
   background: transparent;
   cursor: pointer;
+}
+
+.logsHeaderIconButton {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 8px;
+  display: inline-flex;
+  align-items: center;
+  color: #6b7280;
+  border-radius: 6px;
+}
+
+.logsHeaderIconButton:hover {
+  background: #f3f4f6;
+  color: #111827;
 }
 
 .logsCaret {
@@ -84,6 +107,66 @@ textarea {
   border-top: 1px solid #e5e7eb;
 }
 
+.logsHeaderTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logsRunning {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #2563eb;
+}
+
+.logsRunningSpinner {
+  animation: logsRunningSpin 0.9s linear infinite;
+}
+
+@keyframes logsRunningSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Hosts the logs-feature ExecutionLogTree (rendered with `fill`): the fixed
+   height + flex column let the tree own its internal scrolling. In the full
+   panel state the body stretches to whatever the card gives it instead. */
+.logsBodyTree {
+  height: 360px;
+  display: flex;
+  flex-direction: column;
+}
+
+.logsCardFull .logsBodyTree {
+  height: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.logsResult {
+  flex-shrink: 0;
+  padding-top: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.logsResult--finished {
+  color: #16a34a;
+}
+
+.logsResult--stopped {
+  color: #b45309;
+}
+
+.logsResult--failed {
+  color: #dc2626;
+}
+
 .headerCard {
   position: absolute;
   top: 0;
@@ -97,6 +180,8 @@ textarea {
   align-items: center;
 }
 
+/* Three panel states: minimized (header bar only), normal (fixed-height tree)
+   and full (stretches up to just below the floating header card). */
 .logsCard {
   position: absolute;
   left: 0;
@@ -105,12 +190,19 @@ textarea {
   z-index: 20;
   min-height: 46px;
   max-height: 46px;
+  display: flex;
+  flex-direction: column;
   transition: max-height 0.2s ease;
   overflow: hidden;
 }
 
 .logsCardExpanded {
-  max-height: 220px;
+  max-height: 430px;
+}
+
+.logsCardFull {
+  top: 72px;
+  max-height: none;
 }
 
 .headerInlineInfo {
