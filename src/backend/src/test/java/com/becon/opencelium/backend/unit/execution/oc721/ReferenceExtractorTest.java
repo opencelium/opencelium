@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -493,6 +494,27 @@ public class ReferenceExtractorTest {
 
         Object val3 = extractValue("#ababab.(response).body.$.data.key_with_underscore.['key.with.dot'].inner-value");
         assertEquals(42, val3);
+    }
+
+    @Test
+    void extractValueThrowsExceptionWhenHttpExceptionIsWrappedInResponse() {
+        // GIVEN
+        String ref = "#ababab.(response).body.$.data";
+        String message = "NOT_FOUND message";
+
+        Operation operation = OperationFixture.anOperationWithErrorResponseBody(message);
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        // WHEN - THEN
+        assertThatThrownBy(() -> extractValue(ref))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining(ref)
+                .hasMessageContaining(message);
     }
 
     @Test

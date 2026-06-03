@@ -56,6 +56,21 @@ public final class OperationFixture {
         return operation;
     }
 
+    public static Operation anOperationWithErrorResponseBody(String message) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE);
+
+        ResponseEntity<?> response = new ResponseEntity<>(message, headers, HttpStatus.NOT_FOUND);
+
+        Operation operation = new Operation();
+        operation.setColor("#ababab");
+        operation.setLoopDepth(0);
+
+        operation.getResponses().put("#", response);
+
+        return operation;
+    }
+
     public static Operation anOperationInDoubleLoop() {
         String body = "{\"index\": \"%s\"}";
 
