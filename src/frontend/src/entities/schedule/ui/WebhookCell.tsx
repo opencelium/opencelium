@@ -1,14 +1,11 @@
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import { message } from 'antd'
-import { TbWebhook } from 'react-icons/tb'
-import { MdContentCopy } from 'react-icons/md'
 import { IconButton } from '@shared/ui/primitives/IconButton'
-import { Loading } from '@shared/ui/primitives/Loading/Loading'
 import { Tooltip } from '@shared/ui/primitives/Tooltip'
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { apiExecutor } from '@shared/api/apiExecutor'
-import { useGeneralRequestMutation } from '@shared/api/genericApi'
+import { genericApi, useGeneralRequestMutation } from '@shared/api/genericApi'
 import { selectAuthUser } from '@entities/auth/model/authSelectors'
 import { store } from '@app/store/store'
 import type { Schedule, ScheduleWebhook } from '../model/types'
@@ -17,7 +14,7 @@ type Props = {
     schedule: Schedule
 }
 
-export function WebhookCell({ schedule }: Props) {
+export const WebhookCell = memo(function WebhookCell({ schedule }: Props) {
     const { t: tEntities } = useI18n('entities')
     const confirm = useConfirm()
     const [generalRequest] = useGeneralRequestMutation()
@@ -71,6 +68,19 @@ export function WebhookCell({ schedule }: Props) {
             })) as ScheduleWebhook | undefined
 
             if (response?.url && response?.webhookId != null) {
+                const created: ScheduleWebhook = {
+                    url: response.url,
+                    webhookId: response.webhookId,
+                }
+                store.dispatch(
+                    genericApi.util.updateQueryData('fetchEntities', '/scheduler/all', (draft) => {
+                        if (!Array.isArray(draft)) return
+                        const row = draft.find(
+                            (r: Schedule) => r.schedulerId === schedule.schedulerId,
+                        )
+                        if (row) row.webhook = created
+                    }),
+                )
                 message.success(tEntities('schedule.webhook.created'))
             }
         } finally {
@@ -113,4 +123,4 @@ export function WebhookCell({ schedule }: Props) {
             </Tooltip>
         </span>
     )
-}
+})

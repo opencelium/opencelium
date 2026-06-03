@@ -32,6 +32,9 @@ export type IconName =
     | 'collapse'
     | 'toggle-on'
     | 'toggle-off'
+    | 'journal-text'
+    | 'eye'
+    | 'eye-off'
 
 export type IconColor =
     | 'default'

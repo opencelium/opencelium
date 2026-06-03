@@ -5,9 +5,10 @@ import { useWizardSubmit } from './useWizardSubmit'
 interface Props {
     entityName: string
     onSuccess?: () => void
+    skipSuccessState?: boolean
 }
 
-export const GenericCreateWizard: React.FC<Props> = ({ entityName, onSuccess }) => {
+export const GenericCreateWizard: React.FC<Props> = ({ entityName, onSuccess, skipSuccessState }) => {
     const submit = useWizardSubmit({ entityName, mode: 'create' })
 
     const handleSubmit = async (data: unknown) => {
@@ -15,5 +16,5 @@ export const GenericCreateWizard: React.FC<Props> = ({ entityName, onSuccess }) 
         onSuccess?.()
     }
 
-    return <EntityWizard entityName={entityName} mode="create" onSubmit={handleSubmit} />
+    return <EntityWizard entityName={entityName} mode="create" onSubmit={handleSubmit} skipSuccessState={skipSuccessState} />
 }

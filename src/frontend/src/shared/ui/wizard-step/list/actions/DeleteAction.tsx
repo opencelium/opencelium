@@ -60,7 +60,5 @@ export const DeleteAction: React.FC<DeleteActionProps> = ({ entity, row, rowId, 
         />
     );
 
-    return disabledReason
-        ? <Tooltip content={disabledReason}>{button}</Tooltip>
-        : button;
+    return <Tooltip content={disabledReason ?? tCommon('actions.delete')}>{button}</Tooltip>;
 };

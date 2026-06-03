@@ -24,6 +24,9 @@ import {
     UnfoldLess,
     ToggleOn,
     ToggleOff,
+    Description,
+    Visibility,
+    VisibilityOff,
 } from '@mui/icons-material';
 
 import type { IconComponent } from './Icon.types';
@@ -53,6 +56,9 @@ const iconMap = {
     collapse: UnfoldLess,
     'toggle-on': ToggleOn,
     'toggle-off': ToggleOff,
+    'journal-text': Description,
+    eye: Visibility,
+    'eye-off': VisibilityOff,
 };
 
 export const MaterialIcon: IconComponent = ({

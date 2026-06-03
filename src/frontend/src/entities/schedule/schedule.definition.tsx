@@ -20,7 +20,10 @@ import {ExecutionCell} from "@entities/schedule/ui/ExecutionCell.tsx";
 import {DurationCell} from "@entities/schedule/ui/DurationCell.tsx";
 import {DebugModeCell} from "@entities/schedule/ui/DebugModeCell.tsx";
 import {WebhookCell} from "@entities/schedule/ui/WebhookCell.tsx";
+import {CronCell} from "@entities/schedule/ui/CronCell.tsx";
 import {NotificationsAction} from "@entities/schedule/ui/NotificationsAction.tsx";
+import {SupportLogsAction} from "@entities/schedule/ui/SupportLogsAction.tsx";
+import {BulkNotificationsDialogContent} from "@entities/schedule/ui/BulkNotificationsDialogContent.tsx";
 
 const baseKey = 'schedule';
 
@@ -90,6 +93,28 @@ export const scheduleDefinition: EntityDefinition = {
         searchPlaceholderKey: `${baseKey}.list.searchPlaceholder`,
         defaultSort: { field: 'connectionTitle', direction: 'asc' },
         bulkDelete: true,
+        bulkActions: [
+            {
+                key: 'notifications',
+                labelKey: `${baseKey}.notifications.bulk.button`,
+                run: ({ ids, dialog, clearSelection }) => {
+                    const schedulerIds = ids
+                        .map(Number)
+                        .filter((id) => Number.isFinite(id))
+                    if (schedulerIds.length === 0) return
+                    const dialogId = dialog.open({
+                        width: 720,
+                        content: (
+                            <BulkNotificationsDialogContent
+                                schedulerIds={schedulerIds}
+                                onClose={() => dialog.closeById(dialogId)}
+                                onCreated={clearSelection}
+                            />
+                        ),
+                    })
+                },
+            },
+        ],
         useRowDecoration: () => {
             const {wasRecentlyUpdated} = useCurrentSchedules();
             return {
@@ -102,10 +127,14 @@ export const scheduleDefinition: EntityDefinition = {
         actions: [
             {
                 type: 'custom',
+                key: 'support-logs',
+                render: ({ row }) => <SupportLogsAction schedule={row as Schedule} />,
+            },
+            {
+                type: 'custom',
                 key: 'notifications',
                 render: ({ row }) => <NotificationsAction schedule={row as Schedule} />,
             },
-            { type: 'update' },
             { type: 'delete' },
         ],
     },
@@ -205,7 +234,7 @@ export const scheduleDefinition: EntityDefinition = {
                 order: 3,
                 align: 'center',
                 labelKey: `${baseKey}.list.columns.cronExp`,
-                render: (_row, value) => (value ? String(value) : '-'),
+                render: (row) => <CronCell schedule={row as Schedule} />,
             },
         },
 

@@ -68,7 +68,7 @@ export const connectorDefinition: EntityDefinition = {
                 url: (ctx) => `/connector/${ctx.payload.connectorId}/required-data`,
                 method: 'PUT',
                 mapBody: (ctx) => ({
-                    ...ctx.payload.requestData,
+                    ...ctx.formData.requestData,
                 }),
                 mapHeaders: (ctx) => {
                     const masterPassword = useAppStore.getState().masterPassword

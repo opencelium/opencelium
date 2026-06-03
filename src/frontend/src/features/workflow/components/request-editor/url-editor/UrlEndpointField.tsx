@@ -10,8 +10,6 @@ import {
 	getInlineVisualLength,
 	buildInlineHtml,
 	parseHtmlToRaw,
-	computeRawInsertAtFromVisualCaret,
-	getQueryValueTokenPolicyAtRawPos,
 	sanitizePlainTextPaste,
 	removeInlineTokenByIndex,
 	sanitizeUrlInputValue,
@@ -21,6 +19,7 @@ import {
 type Props = {
 	readOnly?: boolean;
 	value: string;
+	afterNode?: React.ReactNode;
 
 	endpointArgs: Record<string, EndpointArg>;
 	endpointArgsRef: React.RefObject<Record<string, EndpointArg>>;
@@ -39,6 +38,7 @@ const CLS = 'oc-endpoint-ref';
 export const UrlEndpointField: React.FC<Props> = ({
 	readOnly,
 	value,
+	afterNode,
 	endpointArgs,
 	endpointArgsRef,
 	divRef,
@@ -106,9 +106,12 @@ export const UrlEndpointField: React.FC<Props> = ({
 		if (value === domRaw || value === lastRendered.current) return;
 
 		const end = getInlineVisualLength(value || '', endpointArgsRef.current);
-		lastCaretRef.current = end;
+		const nextCaret = Number.isFinite(lastCaretRef.current)
+			? Math.max(0, Math.min(lastCaretRef.current, end))
+			: end;
+		lastCaretRef.current = nextCaret;
 		selectedTokenIndexRef.current = null;
-		render(value || '', end);
+		render(value || '', nextCaret);
 	}, [
 		value,
 		render,
@@ -168,28 +171,6 @@ export const UrlEndpointField: React.FC<Props> = ({
 		return true;
 	};
 
-	const enforceQueryPolicy = (key: string) => {
-		if (key.length !== 1) return false;
-
-		const root = divRef.current;
-		if (!root) return false;
-
-		const caretVis = getCaretPositionOfDivEditable(root);
-		const raw = readRaw();
-
-		const rawPos = computeRawInsertAtFromVisualCaret(
-			raw,
-			Number.isFinite(caretVis) ? caretVis : 0,
-			endpointArgsRef.current
-		);
-
-		const pol = getQueryValueTokenPolicyAtRawPos(raw, rawPos);
-		if (!pol.inValue || !pol.hasToken) return false;
-
-		if (!pol.isAfterToken) return true;
-		return key !== '&';
-	};
-
 	const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
 		if (readOnly) return void e.preventDefault();
 
@@ -201,29 +182,10 @@ export const UrlEndpointField: React.FC<Props> = ({
 		));
 		if (!pasted) return void e.preventDefault();
 
-		const caretVis = getCaretPositionOfDivEditable(root);
-		const raw = readRaw();
-
-		const rawPos = computeRawInsertAtFromVisualCaret(
-			raw,
-			Number.isFinite(caretVis) ? caretVis : 0,
-			endpointArgsRef.current
-		);
-
-		const pol = getQueryValueTokenPolicyAtRawPos(raw, rawPos);
-
 		e.preventDefault();
-
-		if (pol.inValue && pol.hasToken) {
-			if (!pol.isAfterToken || pasted !== '&') return;
-			try {
-				document.execCommand('insertText', false, '&');
-			} catch {}
-		} else {
-			try {
-				document.execCommand('insertText', false, pasted);
-			} catch {}
-		}
+		try {
+			document.execCommand('insertText', false, pasted);
+		} catch {}
 
 		requestAnimationFrame(() => {
 			const next = sanitizeUrlInputValue(parseHtmlToRaw(root.innerHTML, CLS));
@@ -257,7 +219,18 @@ export const UrlEndpointField: React.FC<Props> = ({
 	};
 
 	return (
-		<div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+		<div
+			style={{
+				display: 'flex',
+				alignItems: 'center',
+				gap: 8,
+				minHeight: 48,
+				padding: '11px 14px',
+				border: '1px solid #d9d9d9',
+				borderRadius: 8,
+				background: readOnly ? '#fafafa' : '#fff',
+			}}
+		>
 			<div
 				ref={divRef}
 				contentEditable={!readOnly}
@@ -284,8 +257,6 @@ export const UrlEndpointField: React.FC<Props> = ({
 						handleTokenDelete();
 						return;
 					}
-
-					if (enforceQueryPolicy(e.key)) e.preventDefault();
 				}}
 				onMouseDownCapture={(e) => {
 					const root = divRef.current;
@@ -307,20 +278,18 @@ export const UrlEndpointField: React.FC<Props> = ({
 				}}
 				onPaste={handlePaste}
 				style={{
-					minHeight: 48,
-					padding: '11px 14px',
-					border: '1px solid #d9d9d9',
-					borderRadius: 8,
+					minHeight: 24,
 					fontFamily: 'ui-monospace, SFMono-Regular, SF Mono, Menlo, monospace',
 					whiteSpace: 'pre-wrap',
 					wordBreak: 'break-all',
 					outline: 'none',
 					cursor: readOnly ? 'default' : 'text',
 					flex: 1,
-					background: readOnly ? '#fafafa' : '#fff',
+					background: 'transparent',
 					boxShadow: 'none',
 				}}
 			/>
+			{afterNode}
 		</div>
 	);
 };

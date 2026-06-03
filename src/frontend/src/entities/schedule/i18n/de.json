@@ -28,7 +28,11 @@
   },
   "start": {
     "tooltip": "Ausführung starten",
-    "success": "Zeitplan-Ausführung gestartet"
+    "success": "Zeitplan-Ausführung gestartet",
+    "error": {
+      "concurrentForbidden": "Ein anderer Zeitplan für diese Verbindung läuft bereits. Warten Sie, bis er abgeschlossen ist, bevor Sie diesen starten.",
+      "failed": "Zeitplan-Ausführung konnte nicht gestartet werden"
+    }
   },
   "terminate": {
     "tooltip": "Ausführung beenden",
@@ -77,11 +81,52 @@
     "confirmDelete": {
       "title": "Benachrichtigung löschen?",
       "message": "Diese Benachrichtigung wird unwiderruflich entfernt."
+    },
+    "bulk": {
+      "button": "Benachrichtigungen",
+      "title": "Benachrichtigung zu ausgewählten Zeitplänen hinzufügen",
+      "subtitle": "Diese Benachrichtigung wird für {{count}} ausgewählte(n) Zeitplan/-pläne erstellt.",
+      "create": "Für {{count}} Zeitplan/-pläne erstellen",
+      "success": "Benachrichtigung für {{count}} Zeitplan/-pläne erstellt",
+      "partialError": "Benachrichtigung für {{count}} Zeitplan/-pläne konnte nicht erstellt werden"
     }
+  },
+  "supportLogs": {
+    "tooltip": "Support-Logs",
+    "title": "Support-Logs",
+    "titleHint": "Erzeugt eine maskierte Support-Logs-Datei für diese Verbindung. Wählen Sie über die Augen-Schalter, welche Teile vor dem Download maskiert werden.",
+    "levelLabel": "Maskierungsstufe",
+    "levels": {
+      "custom": "Benutzerdefiniert",
+      "light": "Leicht",
+      "medium": "Mittel",
+      "strict": "Streng"
+    },
+    "sections": {
+      "url": "URL",
+      "headers": "Header",
+      "request": "Anfrage",
+      "response": "Antwort"
+    },
+    "mask": "Diesen Abschnitt maskieren",
+    "unmask": "Maskierung dieses Abschnitts aufheben",
+    "submit": "Support-Logs erstellen",
+    "cancel": "Abbrechen",
+    "started": "Sammlung der Support-Logs für \"{{connectionTitle}}\" gestartet. Sie werden benachrichtigt, sobald die Datei bereit ist.",
+    "error": "Sammlung der Support-Logs konnte nicht gestartet werden"
   },
   "debugMode": {
     "enableSuccess": "Debug-Modus aktiviert",
     "disableSuccess": "Debug-Modus deaktiviert"
+  },
+  "cronEdit": {
+    "tooltip": "Cron-Ausdruck bearbeiten",
+    "title": "Cron-Ausdruck bearbeiten",
+    "subtitle": "Ändern Sie, wann dieser Zeitplan ausgeführt wird. Beim Speichern wird der Zeitplan mit dem neuen Cron-Ausdruck aktualisiert.",
+    "submit": "Speichern",
+    "cancel": "Abbrechen",
+    "success": "Der Cron-Ausdruck für die Connection \"{{connectionTitle}}\" wurde erfolgreich auf \"{{cronExp}}\" aktualisiert",
+    "error": "Cron-Ausdruck konnte nicht aktualisiert werden"
   },
   "fields": {
     "title": {

@@ -49,7 +49,7 @@ export const notificationsFormSchema = z.object({
     items: z.array(notificationItemSchema),
 })
 
-const baseItemConstraints: FormConstraints = buildConstraintsFromSchema(
+export const baseItemConstraints: FormConstraints = buildConstraintsFromSchema(
     baseItemSchema as never,
     scheduleNotificationDefinition,
 )

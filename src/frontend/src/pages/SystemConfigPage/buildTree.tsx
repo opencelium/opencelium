@@ -1,7 +1,7 @@
 import React from 'react'
 import type {TreeNode} from '@shared/ui/primitives/Tree'
 import {Tooltip} from '@shared/ui/primitives/Tooltip'
-import {Icon} from '@shared/ui/primitives/Icon'
+import {Checkbox} from '@shared/ui/primitives/Checkbox'
 import type {
     ConfigNode,
     ConfigScalar,
@@ -9,8 +9,9 @@ import type {
     NodeEdit,
 } from '@entities/systemConfig/model/types'
 import {isContainerNode} from '@entities/systemConfig/model/types'
+import {Icon} from '@shared/ui/primitives/Icon'
 import {ConfigLeafEditor} from './ConfigLeafEditor'
-import {CommentInfo} from './CommentInfo'
+import {CommentTooltipBody} from './CommentInfo'
 
 type LeafValue = ConfigScalar | ConfigScalar[]
 
@@ -36,20 +37,10 @@ function StatusToggle({
     return (
         <Tooltip content={isActive ? labels.disable : labels.enable} placement="top">
             <span
-                role="button"
-                tabIndex={0}
-                onClick={(e) => {
-                    e.stopPropagation()
-                    onToggleStatus(path)
-                }}
-                style={{display: 'inline-flex', alignItems: 'center', cursor: 'pointer', flexShrink: 0}}
+                onClick={(e) => e.stopPropagation()}
+                style={{display: 'inline-flex', alignItems: 'center', flexShrink: 0}}
             >
-                <Icon
-                    name={isActive ? 'toggle-on' : 'toggle-off'}
-                    size={18}
-                    color={isActive ? 'primary' : 'default'}
-                    isSubtle={!isActive}
-                />
+                <Checkbox checked={isActive} onChange={() => onToggleStatus(path)} />
             </span>
         </Tooltip>
     )
@@ -61,6 +52,8 @@ function buildNodeTitle(node: ConfigNode, args: BuildTreeArgs): React.ReactNode 
     const isActive = (edit?.status ?? node.status) === 'active'
     const isLeaf = !isContainerNode(node)
     const value = (edit?.value ?? node.value) as LeafValue
+
+    const hasComments = !!node.comments && node.comments.length > 0
 
     return (
         <div style={{display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'nowrap', width: '100%', height: 32}}>
@@ -89,7 +82,16 @@ function buildNodeTitle(node: ConfigNode, args: BuildTreeArgs): React.ReactNode 
                     />
                 </span>
             )}
-            <CommentInfo comments={node.comments} />
+            {/* Pin the comment icon to the far right of the row. */}
+            <span style={{marginLeft: 'auto', flexShrink: 0}}>
+                {hasComments && (
+                    <Tooltip content={<CommentTooltipBody comments={node.comments!} />} placement="left">
+                        <span style={{display: 'inline-flex', alignItems: 'center', cursor: 'help', paddingRight: 10}}>
+                            <Icon name="info" size={14} color="secondary" isSubtle />
+                        </span>
+                    </Tooltip>
+                )}
+            </span>
         </div>
     )
 }

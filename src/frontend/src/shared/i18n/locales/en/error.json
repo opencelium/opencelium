@@ -7,6 +7,18 @@
       "network": "Could not reach the server. Please try again.",
       "invalidCredentials": "Invalid email or password",
       "failed": "Login failed"
+    },
+    "forgotPassword": {
+      "emailNotExists": "No account is registered with this email address.",
+      "tooManyAttempts": "Too many attempts. Please try again later.",
+      "emailRecoveryFailed": "There is an issue with your email configuration. For security reasons, the detailed error message has been written to your Opencelium logs. Please review the logs for more information.",
+      "network": "Could not reach the server. Please try again.",
+      "failed": "Could not send the recovery email. Please try again."
+    },
+    "setPassword": {
+      "invalidToken": "The reset link is invalid or has expired. Please request a new one.",
+      "network": "Could not reach the server. Please try again.",
+      "failed": "Could not reset password. Please try again."
     }
   },
   "field": {

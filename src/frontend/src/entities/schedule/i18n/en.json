@@ -28,7 +28,11 @@
   },
   "start": {
     "tooltip": "Start execution",
-    "success": "Schedule execution started"
+    "success": "Schedule execution started",
+    "error": {
+      "concurrentForbidden": "Another schedule for this connection is already running. Wait for it to finish before starting this one.",
+      "failed": "Could not start the schedule execution"
+    }
   },
   "terminate": {
     "tooltip": "Terminate execution",
@@ -77,11 +81,52 @@
     "confirmDelete": {
       "title": "Delete notification?",
       "message": "This notification will be removed permanently."
+    },
+    "bulk": {
+      "button": "Notifications",
+      "title": "Add notification to selected schedules",
+      "subtitle": "This notification will be created for {{count}} selected schedule(s).",
+      "create": "Create for {{count}} schedule(s)",
+      "success": "Notification created for {{count}} schedule(s)",
+      "partialError": "Failed to create notification for {{count}} schedule(s)"
     }
+  },
+  "supportLogs": {
+    "tooltip": "Support logs",
+    "title": "Support Logs",
+    "titleHint": "Generate a masked support-logs file for this connection. Use the eye toggles to choose which parts are masked before downloading.",
+    "levelLabel": "Level Of Masking",
+    "levels": {
+      "custom": "Custom",
+      "light": "Light",
+      "medium": "Medium",
+      "strict": "Strict"
+    },
+    "sections": {
+      "url": "URL",
+      "headers": "Headers",
+      "request": "Request",
+      "response": "Response"
+    },
+    "mask": "Mask this section",
+    "unmask": "Unmask this section",
+    "submit": "Create Support-Logs",
+    "cancel": "Cancel",
+    "started": "Started collecting support logs for \"{{connectionTitle}}\". You'll be notified when the file is ready.",
+    "error": "Failed to start collecting support logs"
   },
   "debugMode": {
     "enableSuccess": "Debug mode enabled",
     "disableSuccess": "Debug mode disabled"
+  },
+  "cronEdit": {
+    "tooltip": "Edit cron expression",
+    "title": "Edit Cron Expression",
+    "subtitle": "Change when this schedule runs. Saving updates the schedule with the new cron expression.",
+    "submit": "Save",
+    "cancel": "Cancel",
+    "success": "Cron expression for connection \"{{connectionTitle}}\" was successfully updated to \"{{cronExp}}\"",
+    "error": "Failed to update cron expression"
   },
   "fields": {
     "title": {

@@ -28,7 +28,7 @@ export const EntityDialogContent: React.FC<Props> = ({ entityName, mode, identif
     }, [data]);
 
     if (mode === 'create') {
-        return <GenericCreateWizard entityName={entityName} onSuccess={onSuccess} />;
+        return <GenericCreateWizard entityName={entityName} onSuccess={onSuccess} skipSuccessState />;
     }
 
     if (isLoading) {
@@ -59,6 +59,7 @@ export const EntityDialogContent: React.FC<Props> = ({ entityName, mode, identif
             identifier={identifier}
             initialRecord={record}
             onSuccess={onSuccess}
+            skipSuccessState
         />
     );
 };

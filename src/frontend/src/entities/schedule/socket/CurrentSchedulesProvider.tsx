@@ -3,8 +3,8 @@ import type {CurrentSchedule, Schedule} from "@entities/schedule/model/types"
 import {useSocket} from "@shared/api/socket/useSocket"
 import {useStompSubscription} from "@shared/api/socket/useStompSubscription"
 import {store} from "@app/store/store"
-import {apiExecutor} from "@shared/api/apiExecutor"
 import {genericApi} from "@shared/api/genericApi"
+import {scheduleApi} from "@entities/schedule/api/scheduleApi"
 import {
     CurrentSchedulesContext,
     type CurrentSchedulesContextValue,
@@ -18,11 +18,9 @@ const SCHEDULE_LIST_URL = '/scheduler/all'
 async function refreshFinishedSchedules(ids: number[]): Promise<number[]> {
     if (ids.length === 0) return []
     try {
-        const updated = (await apiExecutor({
-            url: '/scheduler/list/get',
-            method: 'POST',
-            body: {identifiers: ids},
-        })) as Schedule[] | undefined
+        const updated = await store
+            .dispatch(scheduleApi.endpoints.getSchedulesByIds.initiate(ids))
+            .unwrap()
         if (!Array.isArray(updated) || updated.length === 0) return []
         store.dispatch(
             genericApi.util.updateQueryData('fetchEntities', SCHEDULE_LIST_URL, (draft) => {

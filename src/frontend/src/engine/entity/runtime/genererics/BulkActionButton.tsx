@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@shared/ui/primitives/Button';
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
+import { useDialog } from '@shared/ui/dialog/useDialog';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { BulkAction, EntityDefinition } from '@/engine/entity/EntityDefinition';
 
@@ -20,6 +21,7 @@ export const BulkActionButton: React.FC<Props> = ({
     clearSelection,
 }) => {
     const confirm = useConfirm();
+    const dialog = useDialog();
     const { t: tEntities } = useI18n('entities');
     const [isRunning, setIsRunning] = useState(false);
 
@@ -41,7 +43,7 @@ export const BulkActionButton: React.FC<Props> = ({
 
         setIsRunning(true);
         try {
-            await action.run({ rows, ids, entity, clearSelection });
+            await action.run({ rows, ids, entity, clearSelection, dialog });
         } catch (err) {
             console.error(err);
         } finally {

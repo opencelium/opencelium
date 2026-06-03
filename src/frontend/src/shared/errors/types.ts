@@ -13,6 +13,8 @@ export type AppError = {
     messageKey: string        // i18n key
     details?: unknown
     originalError?: unknown
+    // Toast lifetime in seconds. Undefined → antd default (3s). 0 → sticky.
+    durationSec?: number
 }
 
 export type BoundaryError = {

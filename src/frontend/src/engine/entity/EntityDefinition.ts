@@ -2,6 +2,7 @@ import type {PartialStepProps} from "@shared/ui/tour/Tour.tsx";
 import type {PolicyDefinition} from "@/engine/policy";
 import type {CommandNode} from "@shared/command/types.ts";
 import type {FormRemoteProps, StepRemoteProps} from "@shared/ui/form/FormControl/FormControl.type.ts";
+import type {DialogController} from "@shared/ui/dialog/DialogContext.tsx";
 import React from "react";
 
 export type Mode = 'create' | 'update' | 'view'
@@ -22,7 +23,7 @@ export type ValidationConfig = {
     allowEmptyString?: boolean
     remote?: FormRemoteProps
     custom?: {
-        validate: (value: any, values: any) => boolean
+        validate: (value: any, values: any, mode?: Mode) => boolean
         message: string
     }[]
 }
@@ -416,6 +417,8 @@ export type BulkActionContext = {
     entity: EntityDefinition
     /** Clears the table's row-selection state. */
     clearSelection: () => void
+    /** Global dialog controller, for actions that open a form/confirmation dialog. */
+    dialog: DialogController
 }
 
 /* ===============================

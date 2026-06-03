@@ -5,7 +5,6 @@ import {Typography} from '@shared/ui/primitives/Typography'
 import {Button} from '@shared/ui/primitives/Button'
 import {Input} from '@shared/ui/primitives/Input'
 import {Alert} from '@shared/ui/primitives/Alert'
-import {Hint} from '@shared/ui/primitives/Hint'
 import {Loading} from '@shared/ui/primitives/Loading/Loading'
 import {Tree} from '@shared/ui/primitives/Tree'
 import {Tooltip} from '@shared/ui/primitives/Tooltip'
@@ -153,6 +152,7 @@ export function SystemConfigPage() {
     // leaving room for the hint + action buttons below. Recomputed on resize and
     // whenever layout above the tree changes (restart alert, search toggle, load).
     const treeWrapRef = useRef<HTMLDivElement>(null)
+    const footerRef = useRef<HTMLDivElement>(null)
     const [treeHeight, setTreeHeight] = useState<number | undefined>(undefined)
 
     useLayoutEffect(() => {
@@ -160,13 +160,22 @@ export function SystemConfigPage() {
         if (!el) return
         const compute = () => {
             const top = el.getBoundingClientRect().top
-            const bottomReserve = 180 // hint + Reset/Save row beneath the tree
-            setTreeHeight(Math.max(240, Math.round(window.innerHeight - top - bottomReserve)))
+            // Reserve exactly the footer (hint + Save/Reset) height so the tree fills
+            // the remaining viewport without pushing the footer below the fold.
+            const footerH = footerRef.current?.offsetHeight ?? 0
+            const gap = 24 // breathing room between tree and footer
+            setTreeHeight(Math.max(650, Math.round(window.innerHeight - top - footerH - gap)))
         }
         compute()
+        // Re-measure after the surrounding rows have settled — measuring in the same
+        // tick as the data flip can read a stale (too-large) top and shrink the tree.
+        const raf = requestAnimationFrame(compute)
         window.addEventListener('resize', compute)
-        return () => window.removeEventListener('resize', compute)
-    }, [isLoading, isError, restartRequired, isSearching])
+        return () => {
+            cancelAnimationFrame(raf)
+            window.removeEventListener('resize', compute)
+        }
+    }, [isLoading, isError, restartRequired, isSearching, fields.length])
 
     const isDirty = Object.keys(edits).length > 0
 
@@ -221,19 +230,6 @@ export function SystemConfigPage() {
                         </Typography>
                     </div>
                 </header>
-
-                {restartRequired && (
-                    <div style={{marginTop: 12}}>
-                        <Alert
-                            type="warning"
-                            showIcon
-                            message={t('system-config.restart.title')}
-                            description={t('system-config.restart.message')}
-                            closable
-                            onClose={() => setRestartRequired(false)}
-                        />
-                    </div>
-                )}
 
                 <div style={{marginTop: 16}}>
                     {isLoading && (
@@ -346,22 +342,33 @@ export function SystemConfigPage() {
                     )}
                 </div>
 
-                <div style={{marginTop: 16}}>
-                    <Hint>{t('system-config.hint.afterSave')}</Hint>
-                </div>
+                <div ref={footerRef}>
+                    {restartRequired && (
+                        <div style={{marginTop: 16}}>
+                            <Alert
+                                type="warning"
+                                showIcon
+                                message={t('system-config.restart.title')}
+                                description={t('system-config.restart.message')}
+                                closable
+                                onClose={() => setRestartRequired(false)}
+                            />
+                        </div>
+                    )}
 
-                <div style={{display: 'flex', gap: 8, marginTop: 12, justifyContent: 'flex-end'}}>
-                    <Button onClick={handleReset}>
-                        {t('system-config.actions.reset')}
-                    </Button>
-                    <Button
-                        type="primary"
-                        onClick={handleSave}
-                        loading={isSaving}
-                        disabled={!isDirty}
-                    >
-                        {t('system-config.actions.save')}
-                    </Button>
+                    <div style={{display: 'flex', gap: 8, marginTop: 12, justifyContent: 'flex-end'}}>
+                        <Button onClick={handleReset}>
+                            {t('system-config.actions.reset')}
+                        </Button>
+                        <Button
+                            type="primary"
+                            onClick={handleSave}
+                            loading={isSaving}
+                            disabled={!isDirty}
+                        >
+                            {t('system-config.actions.save')}
+                        </Button>
+                    </div>
                 </div>
             </div>
         </PageWrapper>

@@ -11,6 +11,7 @@ type BuildConnectionPayloadArgs = {
 	nodes: WorkflowNodeModel[];
 	edges: WorkflowEdgeModel[];
 	viewport?: { x: number; y: number; zoom: number };
+	fieldBindings?: any[];
 };
 
 const normalizeIndex = (value: unknown, fallback: number) =>
@@ -367,11 +368,17 @@ const buildMethodPayload = (node: WorkflowNodeModel, index: string, order: numbe
 	};
 };
 
+const normalizeOperatorExpression = (expression: string) =>
+	String(expression ?? '').replace(
+		/(?<!\{%)(#[A-Za-z0-9]{6}\.\((?:response|request)\)\.[^\s)]+)/g,
+		'{%$1%}',
+	);
+
 const buildOperatorPayload = (node: WorkflowNodeModel, index: string, iterator?: string) => ({
 	id: node.id,
 	index,
 	type: nodeKind(node),
-	expression: node.data.conditionConfig?.expression ?? '',
+	expression: normalizeOperatorExpression(node.data.conditionConfig?.expression ?? ''),
 	...(nodeKind(node) === 'loop' && iterator
 		? { iterator }
 		: {}),
@@ -562,6 +569,7 @@ export function buildConnectionPayload({
 	nodes,
 	edges,
 	viewport,
+	fieldBindings,
 }: BuildConnectionPayloadArgs) {
 	const connection = buildLegacyConnection(nodes);
 	return {
@@ -569,7 +577,7 @@ export function buildConnectionPayload({
 		title,
 		name: title,
 		description,
-		fieldBinding: serializeFieldBindings(connection.fieldBindings),
+		fieldBinding: serializeFieldBindings(fieldBindings ?? connection.fieldBindings),
 		fromConnector: buildFromConnectorPayload(nodes, edges),
 		toConnector: null,
 		ui: buildUiPayload(nodes, edges, viewport),
