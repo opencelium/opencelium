@@ -43,8 +43,11 @@ export const hasMixedReferenceValue = (value: unknown) => {
   return refs.length > 0 && refs.length !== getParsedReferences(value).length;
 };
 
-const normalizeBodySegment = (segment: string) =>
-  segment.replace(/\[(\d+)]/g, '.$1').replace(/^\./, '');
+const normalizeBodySegment = (segment: string) => {
+  const value = String(segment || '').trim();
+  const indexMatch = value.match(/^\[?(\d+)]?$/);
+  return indexMatch ? `[${indexMatch[1]}]` : value;
+};
 
 export const buildRequestResultField = (
   messageProperty: 'body' | 'header',

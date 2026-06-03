@@ -338,16 +338,6 @@ const serializeHeaderReferences = (value: unknown, endpointArgs?: Record<string,
 const serializePayloadData = (body: unknown, endpointArgs?: Record<string, any>, format = 'json') =>
 	serializeHeaderReferences(normalizePayloadData(body, format), endpointArgs);
 
-const serializeMethodResponse = (
-	response: any,
-	fallbackBody: unknown,
-	endpointArgs: Record<string, any>,
-	format = 'json',
-) => ({
-	...response,
-	body: serializePayloadData(response?.body ?? fallbackBody, endpointArgs, format),
-});
-
 const buildMethodPayload = (node: WorkflowNodeModel, index: string, order: number) => {
 	const config = node.data.methodConfig as any;
 	const endpointArgs = config?.endpointArgs ?? {};
@@ -368,21 +358,33 @@ const buildMethodPayload = (node: WorkflowNodeModel, index: string, order: numbe
 	};
 };
 
-const normalizeOperatorExpression = (expression: string) =>
-	String(expression ?? '').replace(
-		/(?<!\{%)(#[A-Za-z0-9]{6}\.\((?:response|request)\)\.[^\s)]+)/g,
-		'{%$1%}',
-	);
+const unwrapExpressionReferences = (expression: string) =>
+	expression.replace(/\{%\s*(#[A-Fa-f0-9]{6}\.\((?:response|request)\)\.[^%]+?)\s*%}/g, '$1');
 
-const buildOperatorPayload = (node: WorkflowNodeModel, index: string, iterator?: string) => ({
-	id: node.id,
-	index,
-	type: nodeKind(node),
-	expression: normalizeOperatorExpression(node.data.conditionConfig?.expression ?? ''),
-	...(nodeKind(node) === 'loop' && iterator
-		? { iterator }
-		: {}),
-});
+const normalizeOperatorExpression = (expression: string, type: string) => {
+	const value = unwrapExpressionReferences(String(expression ?? '').trim());
+	if (!value) return '';
+	if (type !== 'if') {
+		return value.replace(
+			/(?<!\{%)(#[A-Za-z0-9]{6}\.\((?:response|request)\)\.[^\s)]+)/g,
+			'{%$1%}',
+		);
+	}
+	return `{%${value}%}`;
+};
+
+const buildOperatorPayload = (node: WorkflowNodeModel, index: string, iterator?: string) => {
+	const type = nodeKind(node);
+	return {
+		id: node.id,
+		index,
+		type,
+		expression: normalizeOperatorExpression(node.data.conditionConfig?.expression ?? '', type),
+		...(type === 'loop' && iterator
+			? { iterator }
+			: {}),
+	};
+};
 
 const getParentIndex = (index: string, depth: number) =>
 	index.split('_').slice(0, -depth).join('_');

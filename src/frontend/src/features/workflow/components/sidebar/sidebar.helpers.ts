@@ -1,9 +1,3 @@
-type SidebarListItem = {
-  key: string;
-  title: string;
-  text: string;
-};
-
 export const normalizeSidebarQuery = (value: string) =>
   value
     .toLowerCase()
@@ -15,8 +9,3 @@ export const matchesSidebarTitle = (title: string, query: string, hasSearch: boo
   if (!query) return false;
   return title.toLowerCase().includes(query);
 };
-
-export const mapNamesToSidebarItems = (
-  items: readonly string[],
-  text: string,
-): SidebarListItem[] => items.map((item) => ({ key: item, title: item, text }));

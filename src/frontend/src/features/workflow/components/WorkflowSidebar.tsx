@@ -10,13 +10,13 @@ import {
   sidebarItems,
 } from './sidebar/sidebar.data';
 import {
-  mapNamesToSidebarItems,
   matchesSidebarTitle,
   normalizeSidebarQuery,
 } from './sidebar/sidebar.helpers';
 import { getMethodSidebarCopy, getSecondarySidebarCopy, type SecondarySidebarMode } from './sidebar/sidebarSecondary';
 
 const getConnectorKey = (connectorId: number) => String(connectorId);
+const getMethodKey = (operation: InvokerOperation, index: number) => `${index}:${operation.name}`;
 
 const normalizeConnectorIcon = (icon?: string | File | null) =>
   typeof icon === 'string' ? icon : null;
@@ -79,20 +79,20 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
     })),
     [connectors],
   );
-  const methodNames = useMemo(
-    () => (selectedConnector?.invoker?.operations ?? [])
-      .filter((operation) => operation.type !== 'test')
-      .map((operation) => operation.name),
+  const methodOperations = useMemo(
+    () => selectedConnector?.invoker?.operations ?? [],
     [selectedConnector],
   );
-  const methodOperations = useMemo(
-    () => (selectedConnector?.invoker?.operations ?? [])
-      .filter((operation) => operation.type !== 'test'),
-    [selectedConnector],
+  const methodItems = useMemo(
+    () => methodOperations.map((operation, index) => ({
+      key: getMethodKey(operation, index),
+      title: operation.name,
+      text: 'Invoker method',
+    })),
+    [methodOperations],
   );
   const filteredConnectorItems = connectorItems.filter((item) => matchesSidebarTitle(item.title, secondaryQuery, hasSecondarySearch));
-  const filteredMethodItems = mapNamesToSidebarItems(methodNames, 'Invoker method')
-    .filter((item) => matchesSidebarTitle(item.title, methodQuery, hasMethodSearch));
+  const filteredMethodItems = methodItems.filter((item) => matchesSidebarTitle(item.title, methodQuery, hasMethodSearch));
   const filteredOperatorItems = operatorItems.filter((item) => matchesSidebarTitle(item.title, secondaryQuery, hasSecondarySearch));
 
   const resetSidebar = () => {
@@ -213,8 +213,9 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
         {filteredMethodItems.length ? (
           <SidebarList
             items={filteredMethodItems}
-            onSelect={(methodName) => {
-              const methodOperation = methodOperations.find((operation) => operation.name === methodName);
+            onSelect={(methodKey) => {
+              const methodOperation = methodOperations.find((operation, index) => getMethodKey(operation, index) === methodKey);
+              const methodName = methodOperation?.name;
               onSelect(
                 'connector',
                 methodName,

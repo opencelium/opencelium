@@ -1,7 +1,7 @@
 import { Background } from '@xyflow/react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { message } from 'antd';
+import { Button, Input, Modal, Select, message } from 'antd';
 import { Loading } from '@shared/ui/primitives/Loading/Loading';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { apiExecutor } from '@shared/api/apiExecutor';
@@ -17,6 +17,7 @@ import { MethodConfigDialog } from './components/request-editor/MethodConfigDial
 import { buildLegacyConnection } from './components/request-editor/legacyAdapter';
 import { useWorkflowPage } from './useWorkflowPage';
 import { loadConnectionVersions, loadWorkflowConnection, loadWorkflowConnectionVersion, removeConnectionVersion, saveConnectionVersionComment, saveWorkflowConnection } from './api/connectionService';
+import { mapConnectionToWorkflowState } from './api/connectionMapper';
 import { buildConnectionPayload, buildFromConnectorPayload } from './api/connectionPayload';
 import { useGetConnectorsQuery } from '@entities/connector/api/connectorApi';
 import { selectAuthUser } from '@entities/auth/model/authSelectors';
@@ -86,8 +87,17 @@ type WorkflowChangeSource = 'clean' | 'manual' | 'history';
 
 type Template = {
   templateId: string | number;
+  name?: string;
+  description?: string;
+  connection?: unknown;
   [key: string]: unknown;
 };
+
+const CONNECTION_TEMPLATE_VERSION = '5.0';
+const EMPTY_DESCRIPTION_LABEL = '[Empty Description]';
+
+const toDisplayDescription = (description?: string) =>
+  description && description.trim() ? description : EMPTY_DESCRIPTION_LABEL;
 
 const getProfileAuthorName = (user: AuthUser | null) => {
   const fullName = [user?.userDetail?.name, user?.userDetail?.surname]
@@ -173,6 +183,16 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const [changeSource, setChangeSource] = useState<WorkflowChangeSource>('clean');
   const [historyPreviewSnapshot, setHistoryPreviewSnapshot] = useState<string | null>(null);
   const [isConnectionLoading, setIsConnectionLoading] = useState<boolean>(Boolean(connectionId));
+  const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
+  const [templateName, setTemplateName] = useState('');
+  const [templateDescription, setTemplateDescription] = useState('');
+  const [templateNameError, setTemplateNameError] = useState('');
+  const [isSavingTemplate, setIsSavingTemplate] = useState(false);
+  const [loadTemplateDialogOpen, setLoadTemplateDialogOpen] = useState(false);
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>();
+  const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
+  const [isApplyingTemplate, setIsApplyingTemplate] = useState(false);
   const hydratedNodes = useMemo(
     () => hydrateNodesWithOperationResponses(workflow.nodes, connectors),
     [connectors, workflow.nodes],
@@ -225,7 +245,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       .then((state) => {
         if (cancelled) return;
         workflow.setWorkflowGraph(state.nodes, state.edges, state.viewport, { centerStart: true });
-        setHeaderState({ title: state.title, description: state.description });
+        setHeaderState({ title: state.title, description: toDisplayDescription(state.description) });
         setLoadedFieldBindings(state.fieldBindings);
         setHistoryVersions(state.versions);
         setSelectedHistoryVersionId((currentSelectedId) =>
@@ -265,13 +285,19 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   }, [baselineSnapshot, changeSource, currentChangeSnapshot, historyPreviewSnapshot, isLoading]);
 
   const handleSave = async ({ title, description, comment }: { title: string; description: string; comment: string }) => {
+    if (title.trim() === '[Empty Name]') {
+      message.error('Please enter connection name');
+      throw new Error('Connection name is required');
+    }
+
+    const normalizedDescription = description.trim() === EMPTY_DESCRIPTION_LABEL ? '' : description;
     const isCreate = !connectionId;
     let response;
     try {
       response = await saveWorkflowConnection({
         connectionId,
         title,
-        description,
+        description: normalizedDescription,
         comment,
         nodes: hydratedNodes,
         edges: workflow.edges,
@@ -286,11 +312,11 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     }
     const savedId = (response.data as any)?.connectionId;
     const nextConnectionId = connectionId ?? savedId;
-    setHeaderState({ title, description });
+    setHeaderState({ title, description: toDisplayDescription(normalizedDescription) });
     setBaselineSnapshot(buildWorkflowChangeSnapshot({
       connectionId: nextConnectionId ? String(nextConnectionId) : connectionId,
       title,
-      description,
+      description: normalizedDescription,
       nodes: hydratedNodes,
       edges: workflow.edges,
       fieldBindings: loadedFieldBindings,
@@ -325,9 +351,115 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     }
   };
 
+  const openSaveTemplateDialog = () => {
+    setTemplateName('');
+    setTemplateDescription('');
+    setTemplateNameError('');
+    setTemplateDialogOpen(true);
+  };
+
+  const closeSaveTemplateDialog = () => {
+    if (isSavingTemplate) return;
+    setTemplateDialogOpen(false);
+    setTemplateNameError('');
+  };
+
+  const saveConnectionAsTemplate = async () => {
+    const name = templateName.trim();
+    if (!name) {
+      setTemplateNameError('Name is required');
+      return;
+    }
+
+    setIsSavingTemplate(true);
+    try {
+      const connection = buildConnectionPayload({
+        title: headerState.title,
+        description: headerState.description,
+        nodes: hydratedNodes,
+        edges: workflow.edges,
+        viewport: workflow.getViewport(),
+        fieldBindings: loadedFieldBindings,
+      });
+
+      const response = await apiExecutor({
+        url: '/template',
+        method: 'POST',
+        body: {
+          version: CONNECTION_TEMPLATE_VERSION,
+          name,
+          description: templateDescription,
+          connection,
+        },
+      });
+      if ((response as any)?.status || (response as any)?.error) throw response;
+
+      store.dispatch(genericApi.util.invalidateTags([{ type: 'Entity', id: '/template/all' }] as any));
+      setTemplateDialogOpen(false);
+      message.success(`Template "${name}" saved`);
+    } catch (err) {
+      console.error(err);
+      message.error('Failed to save template');
+    } finally {
+      setIsSavingTemplate(false);
+    }
+  };
+
+  const openLoadTemplateDialog = async () => {
+    setLoadTemplateDialogOpen(true);
+    setSelectedTemplateId(undefined);
+    setIsLoadingTemplates(true);
+    try {
+      const response = await apiExecutor({
+        url: '/template/all',
+        method: 'GET',
+      });
+      const nextTemplates = Array.isArray(response) ? response : [];
+      setTemplates(nextTemplates);
+    } catch (err) {
+      console.error(err);
+      message.error('Failed to load templates');
+    } finally {
+      setIsLoadingTemplates(false);
+    }
+  };
+
+  const closeLoadTemplateDialog = () => {
+    if (isApplyingTemplate) return;
+    setLoadTemplateDialogOpen(false);
+    setSelectedTemplateId(undefined);
+  };
+
+  const applySelectedTemplate = async () => {
+    const selectedTemplate = templates.find((template) => String(template.templateId) === selectedTemplateId);
+    if (!selectedTemplate?.connection) {
+      message.error('Please select a template');
+      return;
+    }
+
+    setIsApplyingTemplate(true);
+    try {
+      const state = mapConnectionToWorkflowState(selectedTemplate.connection);
+      workflow.setWorkflowGraph(state.nodes, state.edges, state.viewport, { centerStart: true });
+      setLoadedFieldBindings(state.fieldBindings);
+      setLoadTemplateDialogOpen(false);
+      setSelectedTemplateId(undefined);
+      message.success(`Template "${selectedTemplate.name ?? selectedTemplate.templateId}" loaded`);
+    } catch (err) {
+      console.error(err);
+      message.error('Failed to load template');
+    } finally {
+      setIsApplyingTemplate(false);
+    }
+  };
+
   const handleHeaderMenuSelect = (item: WorkflowHeaderMenuItem) => {
     if (item.id === 'download-template') {
       void downloadConnectionTemplate();
+    } else if (item.id === 'save-template') {
+      openSaveTemplateDialog();
+    } else if (item.id === 'load-template') {
+      void openLoadTemplateDialog();
     }
   };
 
@@ -360,6 +492,96 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         onOpenHistory={handleOpenHistory}
         readOnly={readOnly}
       />
+      <Modal
+        open={templateDialogOpen}
+        title="Add Template"
+        onCancel={closeSaveTemplateDialog}
+        destroyOnHidden
+        width={520}
+        footer={[
+          <Button key="cancel" onClick={closeSaveTemplateDialog} disabled={isSavingTemplate}>
+            Cancel
+          </Button>,
+          <Button key="ok" type="primary" loading={isSavingTemplate} onClick={saveConnectionAsTemplate}>
+            Ok
+          </Button>,
+        ]}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <span>
+              Name
+              <span style={{ color: '#d4380d' }}> *</span>
+            </span>
+            <Input
+              autoFocus
+              maxLength={255}
+              value={templateName}
+              status={templateNameError ? 'error' : undefined}
+              onChange={(event) => {
+                setTemplateName(event.target.value);
+                if (templateNameError) setTemplateNameError('');
+              }}
+              onPressEnter={saveConnectionAsTemplate}
+              showCount
+            />
+            {templateNameError ? <span style={{ color: '#d4380d', fontSize: 12 }}>{templateNameError}</span> : null}
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <span>Description</span>
+            <div style={{ position: 'relative' }}>
+              <Input.TextArea
+                maxLength={5000}
+                rows={4}
+                value={templateDescription}
+                onChange={(event) => setTemplateDescription(event.target.value)}
+                style={{ paddingBottom: 26 }}
+              />
+              <span style={{ position: 'absolute', right: 12, bottom: 6, color: '#8c8c8c', pointerEvents: 'none' }}>
+                {templateDescription.length} / 5000
+              </span>
+            </div>
+          </label>
+        </div>
+      </Modal>
+      <Modal
+        open={loadTemplateDialogOpen}
+        title="Load Template"
+        onCancel={closeLoadTemplateDialog}
+        destroyOnHidden
+        width={520}
+        footer={[
+          <Button key="cancel" onClick={closeLoadTemplateDialog} disabled={isApplyingTemplate}>
+            Cancel
+          </Button>,
+          <Button key="load" type="primary" loading={isApplyingTemplate} onClick={applySelectedTemplate}>
+            Load
+          </Button>,
+        ]}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ color: '#8c8c8c' }}>
+            If you load a template, all your current workflow changes will be replaced.
+          </div>
+          <Select
+            loading={isLoadingTemplates}
+            value={selectedTemplateId}
+            placeholder="Select template"
+            onChange={setSelectedTemplateId}
+            options={templates.map((template) => ({
+              value: String(template.templateId),
+              label: template.description
+                ? `${template.name ?? template.templateId} - ${template.description}`
+                : String(template.name ?? template.templateId),
+            }))}
+            showSearch={{
+              filterOption: (input, option) =>
+                String(option?.label ?? '').toLowerCase().includes(input.toLowerCase()),
+            }}
+            style={{ width: '100%' }}
+          />
+        </div>
+      </Modal>
       <div className="workflowMain">
         {isLoading ? (
           <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -426,7 +648,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
             edges: state.edges,
           });
           workflow.setWorkflowGraph(state.nodes, state.edges, state.viewport, { centerStart: true });
-          setHeaderState({ title: state.title, description: state.description });
+          setHeaderState({ title: state.title, description: toDisplayDescription(state.description) });
           setLoadedFieldBindings(state.fieldBindings);
           setHistoryPreviewSnapshot(nextSnapshot);
           setChangeSource(nextSnapshot === baselineSnapshot ? 'clean' : 'history');

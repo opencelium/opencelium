@@ -98,15 +98,28 @@ export function MethodConfigDialog({ open, node, mode, nodes, edges, fieldBindin
     };
   }, [edges, fieldBindings, nodes]);
   const isPersistingRef = useRef(false);
+  const activeSessionRef = useRef<string | null>(null);
+  const sessionKey = open && node ? `${node.id}:${mode ?? ''}` : null;
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || !sessionKey) return;
+    if (activeSessionRef.current === sessionKey) return;
+    activeSessionRef.current = sessionKey;
     store.dispatch(setConnection(connection));
     store.dispatch(setFlowchart('workflow-flow'));
-    return () => {
+  }, [connection, open, sessionKey, store]);
+
+  useEffect(() => {
+    if (open) return;
+    if (activeSessionRef.current) {
+      activeSessionRef.current = null;
       store.dispatch(clearConnection());
-    };
-  }, [connection, open, store]);
+    }
+  }, [open, store]);
+
+  useEffect(() => () => {
+    store.dispatch(clearConnection());
+  }, [store]);
 
   useEffect(() => {
     if (!open) return;
