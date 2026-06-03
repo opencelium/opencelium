@@ -7,3 +7,4 @@ export type I18nNamespace =
     | 'success'
     | 'widget'
     | 'dashboard'
+    | 'logs'

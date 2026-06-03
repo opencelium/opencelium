@@ -24,6 +24,7 @@ export const AntSelectImpl: SelectComponent = ({
     isLoading,
     autoFocus,
     onRefresh,
+    sortOptions = true,
 }) => {
     const [inputValue, setInputValue] = useState('');
     const [isOpen, setIsOpen] = useState(false);
@@ -91,13 +92,16 @@ export const AntSelectImpl: SelectComponent = ({
             onDropdownVisibleChange={setIsOpen}
             suffixIcon={suffixIcon}
             loading={isLoading}
-            options={[...options.map((opt) => ({
-                value: opt.value,
-                label: opt.label,
-                disabled: opt.disabled,
-            }))].sort((a, b) =>
-                a.label.localeCompare(b.label)
-            ) || []}
+            options={(() => {
+                const mapped = options.map((opt) => ({
+                    value: opt.value,
+                    label: opt.label,
+                    disabled: opt.disabled,
+                }));
+                return sortOptions
+                    ? mapped.sort((a, b) => a.label.localeCompare(b.label))
+                    : mapped;
+            })()}
             dropdownRender={(menu) => (
                 <>
                     {createOptionUrl && (

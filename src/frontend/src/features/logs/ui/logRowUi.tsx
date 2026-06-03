@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Icon } from "@shared/ui/primitives/Icon";
-import { LogJsonView } from "../LogJsonView";
-import type { HttpMethod } from "../../model/executionLog.types";
+import { LogJsonView } from "@shared/ui/json-view/LogJsonView";
+import type { HttpMethod } from "../model/types";
 
 const INDENT_STEP = 22;
 

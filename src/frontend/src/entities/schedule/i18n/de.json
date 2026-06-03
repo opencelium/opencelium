@@ -116,21 +116,7 @@
     "error": "Sammlung der Support-Logs konnte nicht gestartet werden"
   },
   "executionLogs": {
-    "seeLogs": "Logs anzeigen",
-    "title": "Ausführungs-Logs",
-    "subtitle": "Wählen Sie eine Ausführung, um deren Konnektor-, Methoden- und Operator-Logs einzusehen.",
-    "selectLabel": "Ausführung",
-    "selectPlaceholder": "Ausführung auswählen",
-    "selectHint": "Wählen Sie eine Ausführung, um deren Logs anzuzeigen.",
-    "empty": "Keine Logs vorhanden.",
-    "childrenError": "Log-Elemente konnten nicht geladen werden.",
-    "detailsError": "Methodendetails konnten nicht geladen werden.",
-    "tabs": {
-      "requestHeader": "Anfrage-Header",
-      "requestBody": "Anfrage-Body",
-      "responseHeader": "Antwort-Header",
-      "responseBody": "Antwort-Body"
-    }
+    "seeLogs": "Logs anzeigen"
   },
   "debugMode": {
     "enableSuccess": "Debug-Modus aktiviert",

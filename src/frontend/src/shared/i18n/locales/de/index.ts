@@ -4,6 +4,7 @@ import entities from './entities'
 import dashboard from './dashboard.json'
 import auth from './auth.json'
 import error from './error.json'
+import logs from './logs.json'
 
 export default {
     common,
@@ -12,4 +13,5 @@ export default {
     dashboard,
     auth,
     error,
+    logs,
 }

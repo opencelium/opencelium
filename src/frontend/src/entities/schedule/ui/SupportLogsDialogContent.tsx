@@ -23,7 +23,7 @@ import {
     URL_EXAMPLE,
 } from '../model/supportLogs'
 import { SupportLogsSection } from './SupportLogsSection'
-import { LogJsonView } from './LogJsonView'
+import { LogJsonView } from '@shared/ui/json-view/LogJsonView'
 
 type Props = {
     connectionId: number

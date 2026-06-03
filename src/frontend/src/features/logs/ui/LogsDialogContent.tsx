@@ -1,11 +1,10 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { Select } from "@shared/ui/primitives/Select";
 import { Typography } from "@shared/ui/primitives/Typography";
-import { StepHeader } from "@shared/ui/step-form/StepHeader";
 import { useDialogFullscreen } from "@shared/ui/primitives/Dialog/DialogFullscreenContext";
 import { useI18n } from "@shared/i18n/hooks/useI18n";
-import { useGetLogFilesQuery } from "../../api/executionLogApi";
-import type { LogFileStatus } from "../../model/executionLog.types";
+import { useGetLogFilesQuery } from "../api/logsApi";
+import type { LogFileStatus } from "../model/types";
 import { parseLogFileName } from "./parseLogFileName";
 import { ExecutionLogTree } from "./ExecutionLogTree";
 import { MethodDetailViewStateProvider } from "./methodDetailViewState";
@@ -16,13 +15,8 @@ type Props = {
   status: LogFileStatus;
 };
 
-export function LogsDialogContent({
-  connectionId,
-  schedulerId,
-  status,
-}: Props) {
-  const { t: tEntities } = useI18n("entities");
-  const containerRef = useRef<HTMLDivElement>(null);
+export function LogsDialogContent({ connectionId, schedulerId, status }: Props) {
+  const { t } = useI18n("logs");
   const [executionId, setExecutionId] = useState<string>();
   const isFullscreen = useDialogFullscreen();
 
@@ -39,6 +33,8 @@ export function LogsDialogContent({
         .filter(
           (parsed): parsed is NonNullable<typeof parsed> => parsed !== null,
         )
+        // Newest execution first (highest executionId).
+        .sort((a, b) => Number(b.executionId) - Number(a.executionId))
         .map((parsed) => ({ value: parsed.executionId, label: parsed.label })),
     [files],
   );
@@ -46,7 +42,6 @@ export function LogsDialogContent({
   return (
     <MethodDetailViewStateProvider>
       <div
-        ref={containerRef}
         style={
           isFullscreen
             ? {
@@ -58,21 +53,23 @@ export function LogsDialogContent({
             : undefined
         }
       >
-        <StepHeader
-          containerRef={containerRef}
-          header="schedule.executionLogs.title"
-          subheader="schedule.executionLogs.subtitle"
-        />
+        <div style={{ marginBottom: 20 }}>
+          <Typography variant="headline" as="h1">
+            {t("title")}
+          </Typography>
+          <Typography variant="body" isSubtle>
+            {t("subtitle")}
+          </Typography>
+        </div>
 
-        <Typography variant="label">
-          {tEntities("schedule.executionLogs.selectLabel")}
-        </Typography>
+        <Typography variant="label">{t("selectLabel")}</Typography>
         <Select<string>
           value={executionId}
           onChange={setExecutionId}
           options={options}
+          sortOptions={false}
           isLoading={isFetching}
-          placeholder={tEntities("schedule.executionLogs.selectPlaceholder")}
+          placeholder={t("selectPlaceholder")}
         />
 
         <div
@@ -92,7 +89,7 @@ export function LogsDialogContent({
             <ExecutionLogTree executionId={executionId} fill={isFullscreen} />
           ) : (
             <Typography variant="caption" isSubtle>
-              {tEntities("schedule.executionLogs.selectHint")}
+              {t("selectHint")}
             </Typography>
           )}
         </div>

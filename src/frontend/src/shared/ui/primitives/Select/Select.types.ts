@@ -26,6 +26,9 @@ export interface SelectProps<T = string> {
     onChange?: (value: T) => void;
     readOnly?: boolean;
     multiple?: boolean,
+    // Defaults to true: options are sorted alphabetically by label. Set false to
+    // render options in the order provided.
+    sortOptions?: boolean,
     asyncOptions?: AsyncOptionsConfig,
     creatable?: boolean;
     createOptionUrl?: string;

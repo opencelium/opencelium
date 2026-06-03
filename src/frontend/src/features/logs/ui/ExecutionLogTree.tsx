@@ -1,7 +1,7 @@
 import { Loading } from "@shared/ui/primitives/Loading/Loading";
 import { Typography } from "@shared/ui/primitives/Typography";
 import { useI18n } from "@shared/i18n/hooks/useI18n";
-import { useGetExecutionConnectorsQuery } from "../../api/executionLogApi";
+import { useGetExecutionConnectorsQuery } from "../api/logsApi";
 import { ConnectorLogRow } from "./ConnectorLogRow";
 
 export function ExecutionLogTree({
@@ -11,7 +11,7 @@ export function ExecutionLogTree({
   executionId: string;
   fill?: boolean;
 }) {
-  const { t: tEntities } = useI18n("entities");
+  const { t } = useI18n("logs");
   const { data, isFetching, isError } =
     useGetExecutionConnectorsQuery(executionId);
 
@@ -26,7 +26,7 @@ export function ExecutionLogTree({
     return (
       <div style={{ padding: 24, textAlign: "center" }}>
         <Typography variant="caption" isSubtle>
-          {tEntities("schedule.executionLogs.empty")}
+          {t("empty")}
         </Typography>
       </div>
     );

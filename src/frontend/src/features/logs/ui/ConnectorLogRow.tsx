@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Typography } from "@shared/ui/primitives/Typography";
-import type { FlowchartLog } from "../../model/executionLog.types";
+import type { FlowchartLog } from "../model/types";
 import { LogRow } from "./logRowUi";
 import { ElementChildren } from "./LogElementRow";
 
@@ -22,7 +22,7 @@ export function ConnectorLogRow({
         onToggle={() => setExpanded((v) => !v)}
         left={
           <Typography variant="label" isBold isUppercase>
-            {log.connectorName}
+            {log.connectorName !== 'DEFAULT' ? log.connectorName : 'WORKFLOW'}
           </Typography>
         }
       />

@@ -22,10 +22,13 @@ export function ResizableJsonView({
     const el = ref.current;
     if (!el) return;
     // border-box height matches the applied inline height, so writing it back
-    // is a no-op until the user actually drags the resize handle.
-    const observer = new ResizeObserver(() =>
-      setHeight(storageKey, el.offsetHeight),
-    );
+    // is a no-op until the user actually drags the resize handle. Ignore a
+    // 0 height: an inactive antd tab pane is kept in the DOM as display:none,
+    // and persisting that would wipe the saved size.
+    const observer = new ResizeObserver(() => {
+      const next = el.offsetHeight;
+      if (next > 0) setHeight(storageKey, next);
+    });
     observer.observe(el);
     return () => observer.disconnect();
   }, [storageKey, setHeight]);

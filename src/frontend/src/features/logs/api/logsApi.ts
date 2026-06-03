@@ -4,9 +4,9 @@ import type {
   FlowchartChildLog,
   FlowchartLog,
   LogFileStatus,
-} from "../model/executionLog.types";
+} from "../model/types";
 
-export const executionLogApi = baseApi.injectEndpoints({
+export const logsApi = baseApi.injectEndpoints({
   endpoints: (b) => ({
     // List the stored log files for a connection/schedule, filtered by run status.
     getLogFiles: b.query<
@@ -45,4 +45,4 @@ export const {
   useGetExecutionConnectorsQuery,
   useGetElementChildrenQuery,
   useGetMethodDetailsQuery,
-} = executionLogApi;
+} = logsApi;

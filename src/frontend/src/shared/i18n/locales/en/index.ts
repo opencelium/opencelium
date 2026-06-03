@@ -6,6 +6,7 @@ import success from "./success.json";
 import widget from "./widget.json";
 import dashboard from "./dashboard.json";
 import auth from "./auth.json";
+import logs from "./logs.json";
 
 export default {
     common,
@@ -16,4 +17,5 @@ export default {
     widget,
     dashboard,
     auth,
+    logs,
 }

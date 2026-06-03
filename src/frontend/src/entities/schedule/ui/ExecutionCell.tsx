@@ -3,9 +3,8 @@ import { Button } from "@shared/ui/primitives/Button";
 import { useDialog } from "@shared/ui/dialog/useDialog";
 import { useI18n } from "@shared/i18n/hooks/useI18n";
 import type { ScheduleExecutionRun } from "../model/types";
-import type { LogFileStatus } from "../model/executionLog.types";
+import { LogsDialogContent, type LogFileStatus } from "@features/logs";
 import { formatExecutionDate } from "./formatExecutionDate";
-import { LogsDialogContent } from "./executionLog/LogsDialogContent";
 
 type LogsContext = {
   connectionId: number;

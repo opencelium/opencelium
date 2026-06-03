@@ -2,7 +2,7 @@ import { Loading } from "@shared/ui/primitives/Loading/Loading";
 import { Tabs } from "@shared/ui/primitives/Tabs";
 import { Typography } from "@shared/ui/primitives/Typography";
 import { useI18n } from "@shared/i18n/hooks/useI18n";
-import { useGetMethodDetailsQuery } from "../../api/executionLogApi";
+import { useGetMethodDetailsQuery } from "../api/logsApi";
 import { ResizableJsonView } from "./ResizableJsonView";
 import { useMethodDetailViewState } from "./methodDetailViewState";
 
@@ -15,7 +15,7 @@ type Props = {
 };
 
 export function MethodLogDetails({ id, depth, path }: Props) {
-  const { t: tEntities } = useI18n("entities");
+  const { t } = useI18n("logs");
   const { tabs, setTab } = useMethodDetailViewState();
   const { data, isFetching, isError } = useGetMethodDetailsQuery(id);
 
@@ -47,7 +47,7 @@ export function MethodLogDetails({ id, depth, path }: Props) {
     return (
       <div style={wrapStyle}>
         <Typography variant="caption" isDanger>
-          {tEntities("schedule.executionLogs.detailsError")}
+          {t("detailsError")}
         </Typography>
       </div>
     );
@@ -65,20 +65,20 @@ export function MethodLogDetails({ id, depth, path }: Props) {
             items={[
               {
                 key: "header",
-                label: tEntities("schedule.executionLogs.tabs.requestHeader"),
+                label: t("tabs.requestHeader"),
                 content: (
                   <ResizableJsonView
-                    storageKey={`${path}/requestHeader`}
+                    storageKey={`${path}/requestHeight`}
                     value={request.header}
                   />
                 ),
               },
               {
                 key: "body",
-                label: tEntities("schedule.executionLogs.tabs.requestBody"),
+                label: t("tabs.requestBody"),
                 content: (
                   <ResizableJsonView
-                    storageKey={`${path}/requestBody`}
+                    storageKey={`${path}/requestHeight`}
                     value={request.payload}
                   />
                 ),
@@ -93,20 +93,20 @@ export function MethodLogDetails({ id, depth, path }: Props) {
             items={[
               {
                 key: "header",
-                label: tEntities("schedule.executionLogs.tabs.responseHeader"),
+                label: t("tabs.responseHeader"),
                 content: (
                   <ResizableJsonView
-                    storageKey={`${path}/responseHeader`}
+                    storageKey={`${path}/responseHeight`}
                     value={response.header}
                   />
                 ),
               },
               {
                 key: "body",
-                label: tEntities("schedule.executionLogs.tabs.responseBody"),
+                label: t("tabs.responseBody"),
                 content: (
                   <ResizableJsonView
-                    storageKey={`${path}/responseBody`}
+                    storageKey={`${path}/responseHeight`}
                     value={response.payload}
                   />
                 ),

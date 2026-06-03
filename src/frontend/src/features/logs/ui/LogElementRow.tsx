@@ -2,8 +2,8 @@ import { useState, type ReactNode } from "react";
 import { Loading } from "@shared/ui/primitives/Loading/Loading";
 import { Typography } from "@shared/ui/primitives/Typography";
 import { useI18n } from "@shared/i18n/hooks/useI18n";
-import { useGetElementChildrenQuery } from "../../api/executionLogApi";
-import type { FlowchartChildLog } from "../../model/executionLog.types";
+import { useGetElementChildrenQuery } from "../api/logsApi";
+import type { FlowchartChildLog } from "../model/types";
 import { LogRow, MethodBadge, StatusBadge } from "./logRowUi";
 import { MethodLogDetails } from "./MethodLogDetails";
 import { LoopPager } from "./LoopPager";
@@ -73,7 +73,7 @@ export function ElementChildren({
   // scope per-row view state (open tab / resized heights).
   path: string;
 }) {
-  const { t: tEntities } = useI18n("entities");
+  const { t } = useI18n("logs");
   const { data, isFetching, isError } = useGetElementChildrenQuery({
     id,
     loopIndex,
@@ -94,7 +94,7 @@ export function ElementChildren({
     return (
       <div style={pad}>
         <Typography variant="caption" isDanger>
-          {tEntities("schedule.executionLogs.childrenError")}
+          {t("childrenError")}
         </Typography>
       </div>
     );
@@ -103,7 +103,7 @@ export function ElementChildren({
     return (
       <div style={pad}>
         <Typography variant="caption" isSubtle>
-          {tEntities("schedule.executionLogs.empty")}
+          {t("empty")}
         </Typography>
       </div>
     );
@@ -226,7 +226,7 @@ export function LogElementRow({
             expandable
             expanded={expanded}
             onToggle={toggle}
-            left={<OperatorLabel label="IF" hint={log.properties.expression} />}
+            left={<OperatorLabel label="IF" />}
             right={
               <Typography variant="caption" isSubtle>
                 {log.segment.result}
