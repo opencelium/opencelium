@@ -23,6 +23,7 @@ import jakarta.annotation.Nullable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -209,6 +210,10 @@ public class ReferenceExtractor implements Extractor {
         final HttpEntity<?> entity;
         if (ref.getExchangeType() == ExchangeType.RESPONSE) {
             entity = operation.getResponses().get(key);
+
+            if (isErrorResponse(entity)) {
+                throw new RuntimeException((String) entity.getBody());
+            }
         } else {
             entity = operation.getRequests().get(key);
         }
@@ -523,6 +528,10 @@ public class ReferenceExtractor implements Extractor {
         }
 
         return input;
+    }
+
+    private boolean isErrorResponse(HttpEntity<?> entity) {
+        return entity instanceof ResponseEntity<?> responseEntity && responseEntity.getStatusCode().isError();
     }
 
     private Loop getLoopByIterator(String iterator) {
