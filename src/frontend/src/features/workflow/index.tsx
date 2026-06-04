@@ -1,6 +1,6 @@
 import { Background } from '@xyflow/react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { Button, Input, Modal, Select, message } from 'antd';
 import { Loading } from '@shared/ui/primitives/Loading/Loading';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
@@ -181,10 +181,10 @@ const triggerJsonDownload = (filename: string, payload: unknown) => {
 
 export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const { connectionId } = useParams<{ connectionId: string }>();
-  const navigate = useNavigate();
   const { t: tEntities } = useI18n('entities');
   const authUser = useAppSelector(selectAuthUser);
   const { data: connectors = [], isLoading: isConnectorsLoading } = useGetConnectorsQuery({ page: 0, limit: 1000 });
+  const [createdConnectionId, setCreatedConnectionId] = useState<string>();
   const [headerState, setHeaderState] = useState({
     title: '[Empty Name]',
     description: '[Empty Description]',
@@ -223,20 +223,21 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     () => hydrateNodesWithOperationResponses(workflow.nodes, connectors),
     [connectors, workflow.nodes],
   );
+  const activeConnectionId = createdConnectionId ?? connectionId;
   const displayedHistoryVersions = useMemo(
     () => applyProfileAuthor(historyVersions, authUser),
     [authUser, historyVersions],
   );
   const currentChangeSnapshot = useMemo(
     () => buildWorkflowChangeSnapshot({
-      connectionId,
+      connectionId: activeConnectionId,
       title: headerState.title,
       description: headerState.description,
       nodes: hydratedNodes,
       edges: workflow.edges,
       fieldBindings: loadedFieldBindings,
     }),
-    [connectionId, headerState.description, headerState.title, hydratedNodes, loadedFieldBindings, workflow.edges],
+    [activeConnectionId, headerState.description, headerState.title, hydratedNodes, loadedFieldBindings, workflow.edges],
   );
   const selectedNode = hydratedNodes.find((node) => node.id === workflow.sidebarAction?.sourceNodeId) ?? null;
   const contextMenuNode = hydratedNodes.find((node) => node.id === workflow.contextMenu?.nodeId) ?? null;
@@ -258,6 +259,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   }, [hydratedNodes, loadedFieldBindings, workflow.edges]);
 
   useEffect(() => {
+    setCreatedConnectionId(undefined);
     setBaselineSnapshot(null);
     setChangeSource('clean');
     setHistoryPreviewSnapshot(null);
@@ -317,11 +319,11 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     }
 
     const normalizedDescription = description.trim() === EMPTY_DESCRIPTION_LABEL ? '' : description;
-    const isCreate = !connectionId;
+    const isCreate = !activeConnectionId;
     let response;
     try {
       response = await saveWorkflowConnection({
-        connectionId,
+        connectionId: activeConnectionId,
         title,
         description: normalizedDescription,
         comment,
@@ -337,10 +339,10 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       throw error;
     }
     const savedId = (response.data as any)?.connectionId;
-    const nextConnectionId = connectionId ?? savedId;
+    const nextConnectionId = activeConnectionId ?? savedId;
     setHeaderState({ title, description: toDisplayDescription(normalizedDescription) });
     setBaselineSnapshot(buildWorkflowChangeSnapshot({
-      connectionId: nextConnectionId ? String(nextConnectionId) : connectionId,
+      connectionId: nextConnectionId ? String(nextConnectionId) : activeConnectionId,
       title,
       description: normalizedDescription,
       nodes: hydratedNodes,
@@ -358,17 +360,21 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     message.success(
       tEntities(isCreate ? 'connection.messages.saved.create' : 'connection.messages.saved.update', { title }),
     );
-    if (isCreate && savedId) navigate(`/connection/update/${savedId}`);
+    if (isCreate && savedId) {
+      const savedIdString = String(savedId);
+      setCreatedConnectionId(savedIdString);
+      window.history.replaceState(window.history.state, '', `/connection/update/${savedIdString}`);
+    }
   };
 
   const downloadConnectionTemplate = async () => {
-    if (!connectionId) return;
+    if (!activeConnectionId) return;
     try {
       const template = (await apiExecutor({
-        url: `/template/connection/${connectionId}`,
+        url: `/template/connection/${activeConnectionId}`,
         method: 'GET',
       })) as Template;
-      const filename = String(template?.templateId ?? connectionId);
+      const filename = String(template?.templateId ?? activeConnectionId);
       triggerJsonDownload(filename, template);
       message.success(tEntities('connection.list.downloadTemplate.success', { name: filename }));
     } catch (err) {
@@ -494,8 +500,8 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     workflow.setSidebarAction(null);
     workflow.setContextMenu(null);
     workflow.setConditionEditor(null);
-    if (connectionId) {
-      void loadConnectionVersions(connectionId).then((nextVersions) => {
+    if (activeConnectionId) {
+      void loadConnectionVersions(activeConnectionId).then((nextVersions) => {
         setHistoryVersions(nextVersions);
         setSelectedHistoryVersionId((currentSelectedId) =>
           currentSelectedId && nextVersions.some((version) => version.id === currentSelectedId)
@@ -662,12 +668,12 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         hasUnsavedChanges={hasManualUnsavedChanges}
         onClose={() => workflow.setHistoryOpen(false)}
         onSelectVersion={async (snapshotId) => {
-          if (!connectionId) return;
+          if (!activeConnectionId) return;
           setSelectedHistoryVersionId(snapshotId);
-          const state = await loadWorkflowConnectionVersion(connectionId, snapshotId);
+          const state = await loadWorkflowConnectionVersion(activeConnectionId, snapshotId);
           const nextNodes = hydrateNodesWithOperationResponses(state.nodes, connectors);
           const nextSnapshot = buildWorkflowChangeSnapshot({
-            connectionId,
+            connectionId: activeConnectionId,
             title: state.title,
             description: state.description,
             nodes: nextNodes,
@@ -684,14 +690,14 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           workflow.setConditionEditor(null);
         }}
         onSaveComment={async (snapshotId, comment) => {
-          if (!connectionId) return;
-          await saveConnectionVersionComment(connectionId, snapshotId, comment);
-          setHistoryVersions(await loadConnectionVersions(connectionId));
+          if (!activeConnectionId) return;
+          await saveConnectionVersionComment(activeConnectionId, snapshotId, comment);
+          setHistoryVersions(await loadConnectionVersions(activeConnectionId));
         }}
         onDeleteVersion={async (snapshotId) => {
-          if (!connectionId) return;
-          await removeConnectionVersion(connectionId, snapshotId);
-          const nextVersions = await loadConnectionVersions(connectionId);
+          if (!activeConnectionId) return;
+          await removeConnectionVersion(activeConnectionId, snapshotId);
+          const nextVersions = await loadConnectionVersions(activeConnectionId);
           setHistoryVersions(nextVersions);
           setSelectedHistoryVersionId((currentSelectedId) =>
             currentSelectedId && nextVersions.some((version) => version.id === currentSelectedId)
