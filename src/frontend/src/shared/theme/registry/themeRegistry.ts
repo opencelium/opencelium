@@ -60,20 +60,8 @@ export const themeRegistry = new ThemeRegistry()
 
 // Built-ins self-register on module load so every consumer (providers as well as
 // statically-evaluated entity definitions) always sees a populated registry.
-themeRegistry.register({
-    id: 'ant-light',
-    label: 'Light',
-    family: 'ant',
-    mode: 'light',
-    palette: createAntPalette('light'),
-})
-themeRegistry.register({
-    id: 'ant-dark',
-    label: 'Dark',
-    family: 'ant',
-    mode: 'dark',
-    palette: createAntPalette('dark'),
-})
+// Registration order matters: the first entry is the product default
+// (getDefault()) and drives the picker order.
 
 // OpenCelium Corporate Identity themes (Open Sans is the corporate font; the
 // sidebar carries the brand slate, same tone the landing page uses for sections).
@@ -96,6 +84,21 @@ themeRegistry.register({
     palette: createCiPalette('dark'),
     fontFamily: CI_FONT,
     sidebar: CI_SIDEBAR,
+})
+
+themeRegistry.register({
+    id: 'ant-light',
+    label: 'Light',
+    family: 'ant',
+    mode: 'light',
+    palette: createAntPalette('light'),
+})
+themeRegistry.register({
+    id: 'ant-dark',
+    label: 'Dark',
+    family: 'ant',
+    mode: 'dark',
+    palette: createAntPalette('dark'),
 })
 
 // A previously saved user theme re-registers itself on startup so it shows up

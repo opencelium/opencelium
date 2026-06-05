@@ -50,8 +50,9 @@ export const CustomThemeSection = () => {
         removeCustomTheme()
         setIsSaved(false)
         if (isCustomActive) {
+            const defaultFamily = themeRegistry.getDefault().family
             const fallback =
-                themeRegistry.getAll().find(def => def.family === 'ant' && def.mode === themeMode) ??
+                themeRegistry.getAll().find(def => def.family === defaultFamily && def.mode === themeMode) ??
                 themeRegistry.getDefault()
             setTheme(fallback.id)
         }
