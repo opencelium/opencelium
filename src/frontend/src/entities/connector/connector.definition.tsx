@@ -106,7 +106,6 @@ export const connectorDefinition: EntityDefinition = {
         {
             name: 'title',
             type: 'string',
-            defaultValue: 'test',
             ui: {
                 component: 'input',
                 props: {
