@@ -12,7 +12,7 @@ import { readCustomThemeSeeds } from '@shared/theme/themeStorage'
 import { useTheme } from '@shared/theme/hooks/useTheme'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { Button } from '@shared/ui/primitives/Button'
-import { Card } from '@shared/ui/primitives/Card'
+import { FormControl } from '@shared/ui/form/FormControl'
 import { Typography } from '@shared/ui/primitives/Typography'
 
 const DEFAULT_SEEDS: Required<CustomThemeSeeds> = {
@@ -60,16 +60,18 @@ export const CustomThemeSection = () => {
     }
 
     return (
-        <Card title={tEntities('ui.customTheme.title')}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        // FormControl gives the block the exact label styling of the
+        // surrounding wizard fields, so the editor reads as one more form row.
+        <FormControl label="ui.customTheme.title">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%' }}>
                 <Typography variant="body" isSubtle>
                     {tEntities('ui.customTheme.description')}
                 </Typography>
 
-                <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
                     {SEED_FIELDS.map(field => (
-                        <div key={field.key} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                            <Typography variant="label">{tEntities(field.labelKey)}</Typography>
+                        <div key={field.key} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                            <Typography variant="caption" isSubtle>{tEntities(field.labelKey)}</Typography>
                             <ColorPicker
                                 value={seeds[field.key]}
                                 disabledAlpha
@@ -93,6 +95,6 @@ export const CustomThemeSection = () => {
                     )}
                 </div>
             </div>
-        </Card>
+        </FormControl>
     )
 }

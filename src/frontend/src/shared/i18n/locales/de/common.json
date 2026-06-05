@@ -45,7 +45,8 @@
       "login": "Aktuelle Rolle wechseln",
       "system": "Systemaktionen",
       "checkLicense": "Lizenz und API-Aufrufverbrauch prüfen",
-      "updateSystemConfig": "Anwendungskonfiguration auf der Festplatte bearbeiten"
+      "updateSystemConfig": "Anwendungskonfiguration auf der Festplatte bearbeiten",
+      "changeTheme": "Anwendungsdesign wechseln"
     },
     "footer": {
       "select": "Auswählen",

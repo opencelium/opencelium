@@ -32,7 +32,7 @@
   },
   "customTheme": {
     "title": "Custom theme",
-    "description": "Pick your three main colors — primary, accent and neutral tone. A full light and dark theme is generated from them and added to the theme list.",
+    "description": "Pick your four main colors — primary, accent, neutral tone and sidebar. A full light and dark theme is generated from them and added to the theme list.",
     "primary": "Primary color",
     "accent": "Accent color",
     "neutral": "Neutral tone",

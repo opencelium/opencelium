@@ -2,28 +2,45 @@ import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import ThemeContext from "@shared/theme/context/ThemeContext.tsx";
 import {applyTheme} from "@shared/theme/applyTheme.ts";
 import {buildTheme} from "@shared/theme/buildTheme.ts";
-import {themeRegistry} from "@shared/theme/registry/themeRegistry.ts";
+import {themeRegistry, type ThemeDefinition} from "@shared/theme/registry/themeRegistry.ts";
+import {registerThemeSetter} from "@shared/theme/themeController.ts";
 import {readStoredThemeId, storeThemeId} from "@shared/theme/themeStorage.ts";
+import {DEVICE_THEME_ID, type ThemeMode} from "@shared/theme/types.ts";
 
-function resolveInitialThemeId(initialThemeId?: string): string {
+function systemMode(): ThemeMode {
+    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+// 'device' is the default for visitors without an explicit choice, so a fresh
+// browser follows the OS color scheme out of the box.
+function resolveInitialThemeId(): string {
     const stored = readStoredThemeId();
-    if (stored && themeRegistry.has(stored)) return stored;
-    if (initialThemeId && themeRegistry.has(initialThemeId)) return initialThemeId;
-    return themeRegistry.getDefault().id;
+    if (stored && (stored === DEVICE_THEME_ID || themeRegistry.has(stored))) return stored;
+    return DEVICE_THEME_ID;
+}
+
+function resolveDefinition(themeId: string): ThemeDefinition {
+    if (themeId === DEVICE_THEME_ID) {
+        const base = themeRegistry.getDefault();
+        if (base.mode !== systemMode()) {
+            return themeRegistry.getCounterpart(base.id) ?? base;
+        }
+        return base;
+    }
+    return themeRegistry.get(themeId) ?? themeRegistry.getDefault();
 }
 
 export const ThemeProvider: React.FC<{
-    initialThemeId?: string;
     children: React.ReactNode;
-}> = ({ initialThemeId, children }) => {
-    const [themeId, setThemeId] = useState<string>(() => resolveInitialThemeId(initialThemeId));
-    // Bumped on every setTheme so re-registering a theme under the same id
-    // (custom theme edits) still triggers a render; the registry then returns
-    // a fresh definition object and the memo below recomputes.
+}> = ({ children }) => {
+    const [themeId, setThemeId] = useState<string>(resolveInitialThemeId);
+    // Render trigger for changes the id alone doesn't capture: a theme
+    // re-registered under the same id (custom theme edits) or an OS
+    // color-scheme flip while in device mode.
     const [, setVersion] = useState(0);
 
     const setTheme = useCallback((id: string) => {
-        if (!themeRegistry.has(id)) return;
+        if (id !== DEVICE_THEME_ID && !themeRegistry.has(id)) return;
         storeThemeId(id);
         setThemeId(id);
         setVersion(v => v + 1);
@@ -31,13 +48,26 @@ export const ThemeProvider: React.FC<{
 
     const toggleTheme = useCallback(() => {
         setThemeId(current => {
-            const next = themeRegistry.getCounterpart(current)?.id ?? current;
+            const next = themeRegistry.getCounterpart(resolveDefinition(current).id)?.id ?? current;
             storeThemeId(next);
             return next;
         });
     }, []);
 
-    const definition = themeRegistry.get(themeId) ?? themeRegistry.getDefault();
+    // Expose setTheme to non-React call sites (command palette executors).
+    useEffect(() => registerThemeSetter(setTheme), [setTheme]);
+
+    // In device mode, follow OS color-scheme switches live.
+    useEffect(() => {
+        if (themeId !== DEVICE_THEME_ID) return;
+        const query = window.matchMedia?.('(prefers-color-scheme: dark)');
+        if (!query) return;
+        const onChange = () => setVersion(v => v + 1);
+        query.addEventListener('change', onChange);
+        return () => query.removeEventListener('change', onChange);
+    }, [themeId]);
+
+    const definition = resolveDefinition(themeId);
     const theme = useMemo(
         () => buildTheme(definition.palette, definition.mode, {
             fontFamily: definition.fontFamily,
@@ -52,7 +82,7 @@ export const ThemeProvider: React.FC<{
 
     return (
         <ThemeContext.Provider
-            value={{ theme, themeId: definition.id, themeMode: definition.mode, setTheme, toggleTheme }}
+            value={{ theme, themeId, themeMode: definition.mode, setTheme, toggleTheme }}
         >
             {children}
         </ThemeContext.Provider>

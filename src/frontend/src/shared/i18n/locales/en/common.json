@@ -45,7 +45,8 @@
       "login": "Switch the current role",
       "system": "System actions",
       "checkLicense": "Check license and API operation usage",
-      "updateSystemConfig": "Update on-disk application configuration"
+      "updateSystemConfig": "Update on-disk application configuration",
+      "changeTheme": "Change the application theme"
     },
     "footer": {
       "select": "Select",

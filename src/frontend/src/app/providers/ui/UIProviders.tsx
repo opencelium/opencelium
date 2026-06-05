@@ -12,7 +12,7 @@ type Props = {
 export function UIProviders({ children }: Props) {
     return (
         <KitProvider initialSystem="ant">
-            <ThemeProvider initialThemeId="ci-light">
+            <ThemeProvider>
                 <ThemeBridge>
                     <ConfirmDialogProvider>
                         {/*

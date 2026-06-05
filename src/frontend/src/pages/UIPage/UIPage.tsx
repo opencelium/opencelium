@@ -5,8 +5,8 @@ import PageWrapper from "@pages/PageWrapper/PageWrapper.tsx";
 import {useCommandPaletteUIStore} from "@widgets/CommandPalette/command-palette.store.ts";
 import {useTheme} from "@shared/theme/hooks/useTheme.tsx";
 import {themeRegistry} from "@shared/theme/registry/themeRegistry.ts";
+import {DEVICE_THEME_ID} from "@shared/theme/types.ts";
 import {useI18n} from "@shared/i18n/hooks/useI18n.ts";
-import {CustomThemeSection} from "@pages/UIPage/CustomThemeSection.tsx";
 
 const UIPage = () => {
     const {setTheme, themeId} = useTheme();
@@ -29,7 +29,7 @@ const UIPage = () => {
                     const {commandMode, theme} = formData;
                     switch (meta?.changedField) {
                         case 'theme':
-                            if (typeof theme === 'string' && themeRegistry.has(theme)) {
+                            if (typeof theme === 'string' && (theme === DEVICE_THEME_ID || themeRegistry.has(theme))) {
                                 setTheme(theme);
                                 message.success(tEntities('ui.messages.themeUpdated' as any));
                             }
@@ -41,9 +41,6 @@ const UIPage = () => {
                     }
                 }}
             />
-            <div style={{marginTop: 24}}>
-                <CustomThemeSection />
-            </div>
         </PageWrapper>
     );
 };

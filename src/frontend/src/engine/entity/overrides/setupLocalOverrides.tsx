@@ -1,4 +1,5 @@
 import { overrideRegistry } from './overrideRegistry';
+import { FieldRenderer } from '@/engine/entity/runtime/FieldRenderer';
 import {LdapLogs} from "@shared/ui/wizard-step/view/ldap-logs/LdapLogs.tsx";
 import {PermissionEditor} from "@shared/ui/wizard-step/editor/permission-editor/PermissionEditor.tsx";
 import {CredentialEditor} from "@shared/ui/wizard-step/editor/credential-editor/CredentialEditor.tsx";
@@ -14,6 +15,7 @@ import {InvokerOperationsEditor} from "@shared/ui/wizard-step/editor/invoker-ope
 import {UpdateAssistantHealthViewer} from "@shared/ui/wizard-step/editor/update-assistant-health-viewer/UpdateAssistantHealthViewer.tsx";
 import {UpdateAssistantVersionsTable} from "@shared/ui/wizard-step/editor/update-assistant-versions-table/UpdateAssistantVersionsTable.tsx";
 import {UpdateAssistantRunButton} from "@shared/ui/wizard-step/editor/update-assistant-run-button/UpdateAssistantRunButton.tsx";
+import {CustomThemeSection} from "@entities/ui/ui/CustomThemeSection";
 import {NotificationEventTypeField} from "@entities/schedule/notification/overrides/NotificationEventTypeField";
 import {NotificationTemplateField} from "@entities/schedule/notification/overrides/NotificationTemplateField";
 import {NotificationRecipientsEmailsField} from "@entities/schedule/notification/overrides/NotificationRecipientsEmailsField";
@@ -64,6 +66,16 @@ export function setupLocalOverrides() {
     ));
     overrideRegistry.registerField('updateAssistantRunButton', ({ field, mode }) => (
         <UpdateAssistantRunButton name={field.name} label={field.label} mode={mode} />
+    ));
+    // Theme step of the UI settings wizard: theme select + custom theme editor
+    // below it, spaced with the step form's standard 15px grid gap.
+    overrideRegistry.registerSection('uiThemeSection', ({ fields, mode }) => (
+        <div style={{ marginBottom: 32, display: 'grid', gap: 15 }}>
+            {fields.map(field => (
+                <FieldRenderer key={field.name} field={field} mode={mode} />
+            ))}
+            <CustomThemeSection />
+        </div>
     ));
     overrideRegistry.registerField('scheduleNotificationEventType', NotificationEventTypeField);
     overrideRegistry.registerField('scheduleNotificationTemplate', NotificationTemplateField);

@@ -32,7 +32,7 @@
   },
   "customTheme": {
     "title": "Eigenes Design",
-    "description": "Wählen Sie Ihre drei Hauptfarben — Primärfarbe, Akzentfarbe und Neutralton. Daraus wird ein vollständiges helles und dunkles Design erzeugt und der Designliste hinzugefügt.",
+    "description": "Wählen Sie Ihre vier Hauptfarben — Primärfarbe, Akzentfarbe, Neutralton und Seitenleistenfarbe. Daraus wird ein vollständiges helles und dunkles Design erzeugt und der Designliste hinzugefügt.",
     "primary": "Primärfarbe",
     "accent": "Akzentfarbe",
     "neutral": "Neutralton",
