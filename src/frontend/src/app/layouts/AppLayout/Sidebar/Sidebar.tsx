@@ -39,7 +39,7 @@ export const Sidebar = () => {
                 alignItems: 'center',
                 justifyContent: collapsed ? 'center' : 'flex-start',
                 padding: `0 ${collapsed ? '0' : '5px'} 0 ${collapsed ? 0 : '12px'}`,
-                borderBottom: `1px solid ${theme.color.border.subtle}`,
+                borderBottom: `1px solid ${theme.color.sidebar.border}`,
                 boxSizing: 'border-box',
             }}>
                 <Tooltip
@@ -48,8 +48,8 @@ export const Sidebar = () => {
                 >
                     <Button type="text" onClick={toggleCollapsed}>
                         {collapsed
-                            ? <MenuUnfoldOutlined style={{ color: '#fff' }} />
-                            : <MenuFoldOutlined style={{ color: '#fff' }} />
+                            ? <MenuUnfoldOutlined style={{ color: theme.color.sidebar.fg }} />
+                            : <MenuFoldOutlined style={{ color: theme.color.sidebar.fg }} />
                         }
                     </Button>
                 </Tooltip>
@@ -81,10 +81,10 @@ export const Sidebar = () => {
                             gap: 8,
                             width: collapsed ? undefined : '100%',
                             justifyContent: collapsed ? 'center' : 'flex-start',
-                            color: '#fff',
+                            color: theme.color.sidebar.fg,
                         }}
                     >
-                        <LogoutOutlined style={{ color: '#fff' }} />
+                        <LogoutOutlined style={{ color: theme.color.sidebar.fg }} />
                         {!collapsed && <span>{logoutLabel}</span>}
                     </Button>
                 </Tooltip>

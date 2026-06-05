@@ -36,6 +36,7 @@
     "primary": "Primary color",
     "accent": "Accent color",
     "neutral": "Neutral tone",
+    "sidebar": "Sidebar color",
     "apply": "Apply custom theme",
     "remove": "Remove custom theme",
     "applied": "Custom theme applied",

@@ -4,6 +4,16 @@ export type StatusTokens = {
     border: string
 }
 
+export type SidebarTokens = {
+    bg: string
+    fg: string
+    fgSubtle: string
+    hover: string
+    selectedBg: string
+    selectedFg: string
+    border: string
+}
+
 export type ThemeTokens = {
     color: {
         text: {
@@ -41,6 +51,7 @@ export type ThemeTokens = {
             error: StatusTokens
             info: StatusTokens
         }
+        sidebar: SidebarTokens
     }
 
     typography: {

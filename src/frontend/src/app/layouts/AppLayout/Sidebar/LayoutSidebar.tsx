@@ -15,6 +15,7 @@ export const LayoutSidebar = () => {
             collapsible
             collapsed={collapsed}
             trigger={null}
+            theme="light"
             style={{
                 height: '100vh',
                 overflow: 'hidden',
@@ -24,6 +25,10 @@ export const LayoutSidebar = () => {
                 left: 0,
                 top: 0,
                 zIndex: isMobile && !collapsed ? 1000 : 'auto',
+                // The sidebar owns its surface tokens: it follows the theme by
+                // default, or carries a per-theme color (CI slate, custom seed).
+                background: 'var(--color-sidebar-bg)',
+                borderRight: '1px solid var(--color-sidebar-border)',
             }}
         >
             <Sidebar />

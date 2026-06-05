@@ -15,22 +15,26 @@ import { Button } from '@shared/ui/primitives/Button'
 import { Card } from '@shared/ui/primitives/Card'
 import { Typography } from '@shared/ui/primitives/Typography'
 
-const DEFAULT_SEEDS: CustomThemeSeeds = {
+const DEFAULT_SEEDS: Required<CustomThemeSeeds> = {
     primary: '#1677ff',
     accent: '#2f54eb',
     neutral: '#8c8c8c',
+    sidebar: '#2c3d49',
 }
 
 const SEED_FIELDS: { key: keyof CustomThemeSeeds; labelKey: string }[] = [
     { key: 'primary', labelKey: 'ui.customTheme.primary' },
     { key: 'accent', labelKey: 'ui.customTheme.accent' },
     { key: 'neutral', labelKey: 'ui.customTheme.neutral' },
+    { key: 'sidebar', labelKey: 'ui.customTheme.sidebar' },
 ]
 
 export const CustomThemeSection = () => {
     const { t: tEntities } = useI18n('entities')
     const { themeId, themeMode, setTheme } = useTheme()
-    const [seeds, setSeeds] = useState<CustomThemeSeeds>(() => readCustomThemeSeeds() ?? DEFAULT_SEEDS)
+    // Spread over defaults so seeds stored before the sidebar color existed
+    // still populate all pickers.
+    const [seeds, setSeeds] = useState<CustomThemeSeeds>(() => ({ ...DEFAULT_SEEDS, ...readCustomThemeSeeds() }))
     const [isSaved, setIsSaved] = useState(hasCustomTheme)
 
     const isCustomActive = themeId === CUSTOM_THEME_IDS.light || themeId === CUSTOM_THEME_IDS.dark

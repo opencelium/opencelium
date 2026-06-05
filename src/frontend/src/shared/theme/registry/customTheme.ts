@@ -10,12 +10,14 @@ export const CUSTOM_THEME_IDS = {
 /** Persists the seeds and (re)registers both custom theme variants. */
 export function applyCustomThemeSeeds(seeds: CustomThemeSeeds) {
     storeCustomThemeSeeds(seeds)
+    const sidebar = seeds.sidebar ? { bg: seeds.sidebar } : undefined
     themeRegistry.register({
         id: CUSTOM_THEME_IDS.light,
         label: 'Custom Light',
         family: 'custom',
         mode: 'light',
         palette: createCustomPalette(seeds, 'light'),
+        sidebar,
     })
     themeRegistry.register({
         id: CUSTOM_THEME_IDS.dark,
@@ -23,6 +25,7 @@ export function applyCustomThemeSeeds(seeds: CustomThemeSeeds) {
         family: 'custom',
         mode: 'dark',
         palette: createCustomPalette(seeds, 'dark'),
+        sidebar,
     })
 }
 

@@ -49,6 +49,10 @@ export const ThemeBridge = ({ children }) => {
             divider: theme.color.border.default,
         },
 
+        typography: {
+            fontFamily: theme.typography.fontFamily.body,
+        },
+
         shape: {
             borderRadius: theme.radius.md,
         },
@@ -79,6 +83,7 @@ export const ThemeBridge = ({ children }) => {
                     colorBorder: theme.color.border.default,
                     colorBorderSecondary: theme.color.border.subtle,
 
+                    fontFamily: theme.typography.fontFamily.body,
                     borderRadius: theme.radius.md,
                 }
             }}

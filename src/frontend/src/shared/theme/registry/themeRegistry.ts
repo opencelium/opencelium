@@ -1,4 +1,6 @@
+import type { SidebarSeed, ThemeFontFamily } from '@shared/theme/buildTheme'
 import { createAntPalette } from '@shared/theme/palette/antPalette'
+import { CI_SEEDS, createCiPalette } from '@shared/theme/palette/ciPalette'
 import { createCustomPalette } from '@shared/theme/palette/customPalette'
 import type { Palette } from '@shared/theme/palette/types'
 import { readCustomThemeSeeds } from '@shared/theme/themeStorage'
@@ -11,6 +13,10 @@ export type ThemeDefinition = {
     family: string
     mode: ThemeMode
     palette: Palette
+    /** Per-theme font override; defaults applied by buildTheme when absent. */
+    fontFamily?: ThemeFontFamily
+    /** Own sidebar surface color; the sidebar follows the theme surface when absent. */
+    sidebar?: SidebarSeed
 }
 
 export class ThemeRegistry {
@@ -69,16 +75,41 @@ themeRegistry.register({
     palette: createAntPalette('dark'),
 })
 
+// OpenCelium Corporate Identity themes (Open Sans is the corporate font; the
+// sidebar carries the brand slate, same tone the landing page uses for sections).
+const CI_FONT: ThemeFontFamily = { body: "'Open Sans', Inter, system-ui, sans-serif" }
+const CI_SIDEBAR: SidebarSeed = { bg: CI_SEEDS.neutral }
+themeRegistry.register({
+    id: 'ci-light',
+    label: 'OpenCelium Light',
+    family: 'ci',
+    mode: 'light',
+    palette: createCiPalette('light'),
+    fontFamily: CI_FONT,
+    sidebar: CI_SIDEBAR,
+})
+themeRegistry.register({
+    id: 'ci-dark',
+    label: 'OpenCelium Dark',
+    family: 'ci',
+    mode: 'dark',
+    palette: createCiPalette('dark'),
+    fontFamily: CI_FONT,
+    sidebar: CI_SIDEBAR,
+})
+
 // A previously saved user theme re-registers itself on startup so it shows up
 // in every theme picker alongside the built-ins.
 const storedSeeds = readCustomThemeSeeds()
 if (storedSeeds) {
+    const customSidebar = storedSeeds.sidebar ? { bg: storedSeeds.sidebar } : undefined
     themeRegistry.register({
         id: 'custom-light',
         label: 'Custom Light',
         family: 'custom',
         mode: 'light',
         palette: createCustomPalette(storedSeeds, 'light'),
+        sidebar: customSidebar,
     })
     themeRegistry.register({
         id: 'custom-dark',
@@ -86,5 +117,6 @@ if (storedSeeds) {
         family: 'custom',
         mode: 'dark',
         palette: createCustomPalette(storedSeeds, 'dark'),
+        sidebar: customSidebar,
     })
 }

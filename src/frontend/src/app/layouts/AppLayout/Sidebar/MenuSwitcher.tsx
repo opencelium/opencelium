@@ -11,7 +11,7 @@ export const MenuSwitcher = () => {
             <IconButton
                 size="xs"
                 type={menuType === 'admin' ? "primary" : "text"}
-                iconProps={{ name: 'settings', color: menuType === 'admin' ? "secondary" : 'primary' }}
+                iconProps={{ name: 'settings', color: menuType === 'admin' ? 'inherit' : 'primary' }}
                 onClick={() => setMenu(menuType === 'main' ? 'admin' : 'main')}
             />
         </Tooltip>

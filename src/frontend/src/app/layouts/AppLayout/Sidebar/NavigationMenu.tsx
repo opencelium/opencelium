@@ -1,8 +1,9 @@
-import { Menu } from 'antd';
+import { ConfigProvider, Menu } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useMemo, useRef } from 'react';
 import {useLayoutStore} from "@app/layouts/AppLayout/layout.store.ts";
 import {useAdminMenu, useMainMenu} from "@app/layouts/AppLayout/Sidebar/menues.tsx";
+import {useTheme} from "@shared/theme/hooks/useTheme.tsx";
 import {AnimatePresence, motion} from "framer-motion";
 
 type MenuItem = { key: string; children?: MenuItem[] };
@@ -36,7 +37,9 @@ const findAncestorKeys = (items: MenuItem[], targetKey: string): string[] | null
 export const NavigationMenu = () => {
     const navigate = useNavigate();
     const { pathname } = useLocation();
+    const { theme } = useTheme();
     const { menuType, openSubmenuKeys, setOpenSubmenuKeys, setMenu } = useLayoutStore();
+    const sidebar = theme.color.sidebar;
 
     const mainMenu = useMainMenu();
     const adminMenu = useAdminMenu();
@@ -78,29 +81,52 @@ export const NavigationMenu = () => {
         if (missing.length > 0) setOpenSubmenuKeys([...current, ...missing]);
     }, [selectedKey, items, setOpenSubmenuKeys]);
     return (
-        <AnimatePresence mode="wait">
-            <motion.div
-                key={menuType}
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.95, opacity: 0 }}
-                transition={{ duration: 0.25 }}
-            >
-                <Menu
-                    mode="inline"
-                    onClick={({ key, domEvent }) => {
-                        // Modifier-held clicks fall through to the label's <a href>,
-                        // letting the browser open the route in a new tab.
-                        if (domEvent.metaKey || domEvent.ctrlKey || domEvent.shiftKey) return;
-                        domEvent.preventDefault();
-                        navigate(key);
-                    }}
-                    items={items}
-                    selectedKeys={selectedKey ? [selectedKey] : []}
-                    openKeys={openSubmenuKeys}
-                    onOpenChange={(keys) => setOpenSubmenuKeys(keys as string[])}
-                />
-            </motion.div>
-        </AnimatePresence>
+        // The menu lives on the sidebar's own surface (which may differ from the
+        // app surface, e.g. the CI slate rail), so its item tokens derive from
+        // the sidebar token group instead of the global antd container colors.
+        <ConfigProvider
+            theme={{
+                components: {
+                    Menu: {
+                        itemBg: 'transparent',
+                        subMenuItemBg: 'transparent',
+                        itemColor: sidebar.fg,
+                        groupTitleColor: sidebar.fgSubtle,
+                        itemHoverBg: sidebar.hover,
+                        itemHoverColor: sidebar.fg,
+                        itemActiveBg: sidebar.hover,
+                        itemSelectedBg: sidebar.selectedBg,
+                        itemSelectedColor: sidebar.selectedFg,
+                        popupBg: sidebar.bg,
+                    },
+                },
+            }}
+        >
+            <AnimatePresence mode="wait">
+                <motion.div
+                    key={menuType}
+                    initial={{ scale: 0.95, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.95, opacity: 0 }}
+                    transition={{ duration: 0.25 }}
+                >
+                    <Menu
+                        mode="inline"
+                        style={{ background: 'transparent', borderInlineEnd: 'none' }}
+                        onClick={({ key, domEvent }) => {
+                            // Modifier-held clicks fall through to the label's <a href>,
+                            // letting the browser open the route in a new tab.
+                            if (domEvent.metaKey || domEvent.ctrlKey || domEvent.shiftKey) return;
+                            domEvent.preventDefault();
+                            navigate(key);
+                        }}
+                        items={items}
+                        selectedKeys={selectedKey ? [selectedKey] : []}
+                        openKeys={openSubmenuKeys}
+                        onOpenChange={(keys) => setOpenSubmenuKeys(keys as string[])}
+                    />
+                </motion.div>
+            </AnimatePresence>
+        </ConfigProvider>
     );
 };

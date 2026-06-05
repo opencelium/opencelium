@@ -39,7 +39,10 @@ export const ThemeProvider: React.FC<{
 
     const definition = themeRegistry.get(themeId) ?? themeRegistry.getDefault();
     const theme = useMemo(
-        () => buildTheme(definition.palette, definition.mode),
+        () => buildTheme(definition.palette, definition.mode, {
+            fontFamily: definition.fontFamily,
+            sidebar: definition.sidebar,
+        }),
         [definition],
     );
 

@@ -36,6 +36,7 @@
     "primary": "Primärfarbe",
     "accent": "Akzentfarbe",
     "neutral": "Neutralton",
+    "sidebar": "Seitenleistenfarbe",
     "apply": "Eigenes Design anwenden",
     "remove": "Eigenes Design entfernen",
     "applied": "Eigenes Design angewendet",

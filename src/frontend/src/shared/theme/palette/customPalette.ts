@@ -18,6 +18,8 @@ export type CustomThemeSeeds = {
     primary: string
     accent: string
     neutral: string
+    /** Optional own sidebar surface; the sidebar follows the theme surface when absent. */
+    sidebar?: string
 }
 
 export const isValidSeedColor = (value: unknown): value is string =>
@@ -26,7 +28,12 @@ export const isValidSeedColor = (value: unknown): value is string =>
 export const isValidSeeds = (value: unknown): value is CustomThemeSeeds => {
     if (!value || typeof value !== 'object') return false
     const seeds = value as Record<keyof CustomThemeSeeds, unknown>
-    return isValidSeedColor(seeds.primary) && isValidSeedColor(seeds.accent) && isValidSeedColor(seeds.neutral)
+    return (
+        isValidSeedColor(seeds.primary) &&
+        isValidSeedColor(seeds.accent) &&
+        isValidSeedColor(seeds.neutral) &&
+        (seeds.sidebar === undefined || isValidSeedColor(seeds.sidebar))
+    )
 }
 
 // antd's dark algorithm derives palettes against this background; keep in sync with it
