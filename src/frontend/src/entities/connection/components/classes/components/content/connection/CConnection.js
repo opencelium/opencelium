@@ -939,6 +939,120 @@ export default class CConnection{
         return false;
     }
 
+    fieldMatchesDeletedPath(deletedItem, currentItem) {
+        deletedItem = CFieldBinding.convertBindingItem(deletedItem);
+        currentItem = CFieldBinding.convertBindingItem(currentItem);
+
+        if (deletedItem.color !== currentItem.color || deletedItem.type !== currentItem.type) {
+            return false;
+        }
+
+        const normalizeField = (field = '') => String(field)
+            .replace(/\.([0-9]+)/g, '[$1]')
+            .trim();
+        const deletedField = normalizeField(deletedItem.field);
+        const currentField = normalizeField(currentItem.field);
+        const deletedFields = [deletedField];
+
+        if (deletedField.endsWith('[*]')) {
+            deletedFields.push(deletedField.slice(0, -3));
+        }
+
+        return deletedFields.some(field =>
+            currentField === field
+            || currentField.startsWith(`${field}.`)
+            || currentField.startsWith(`${field}[`)
+        );
+    }
+
+    cleanFieldBindingField(connectorType, deletedItem) {
+        for (let i = this._fieldBinding.length - 1; i >= 0; i--) {
+            const binding = this._fieldBinding[i];
+            const connectorTypeBinding = connectorType === CONNECTOR_FROM ? binding.from : binding.to;
+
+            for (let j = connectorTypeBinding.length - 1; j >= 0; j--) {
+                if (this.fieldMatchesDeletedPath(deletedItem, connectorTypeBinding[j])) {
+                    connectorTypeBinding.splice(j, 1);
+                }
+            }
+
+            if (binding.from.length === 0 && binding.to.length === 0) {
+                this._fieldBinding.splice(i, 1);
+            } else {
+                binding.enhancement.updateExpertVar();
+            }
+        }
+    }
+
+    getFieldPathTokens(field = '', location = 'body') {
+        let path = String(field).replace(new RegExp(`^${location}\\.\\$\\.?`), '');
+        return path.match(/\['[^']+'\]|\["[^"]+"\]|\[[^\]]+\]|[^.[\]]+/g) || [];
+    }
+
+    getTokenKey(token = '') {
+        const quoted = token.match(/^\['([^']+)'\]$|^\["([^"]+)"\]$/);
+
+        if (quoted) {
+            return quoted[1] !== undefined ? quoted[1] : quoted[2];
+        }
+
+        return token;
+    }
+
+    fieldPathExists(source, field = '', location = 'body') {
+        const tokens = this.getFieldPathTokens(field, location);
+        let current = source;
+
+        for (let i = 0; i < tokens.length; i++) {
+            const token = tokens[i];
+            const bracket = token.match(/^\[([^\]]+)\]$/);
+
+            if (bracket) {
+                if (!Array.isArray(current)) {
+                    return false;
+                }
+
+                current = current.length > 0 ? current[0] : undefined;
+                continue;
+            }
+
+            const key = this.getTokenKey(token);
+
+            if (!current || typeof current !== 'object' || !Object.prototype.hasOwnProperty.call(current, key)) {
+                return false;
+            }
+
+            current = current[key];
+        }
+
+        return true;
+    }
+
+    cleanMissingToFieldBindings(methodColor, location = 'body', source = null) {
+        for (let i = this._fieldBinding.length - 1; i >= 0; i--) {
+            const binding = this._fieldBinding[i];
+
+            for (let j = binding.to.length - 1; j >= 0; j--) {
+                const item = binding.to[j];
+
+                if (
+                    item.color === methodColor &&
+                    item.type === STATEMENT_REQUEST &&
+                    item.field.startsWith(`${location}.$`) &&
+                    !this.fieldPathExists(source, item.field, location)
+                ) {
+                    binding.to.splice(j, 1);
+                }
+            }
+
+            if (binding.from.length === 0 && binding.to.length === 0) {
+                this._fieldBinding.splice(i, 1);
+            } else {
+                binding.enhancement.updateExpertVar();
+            }
+        }
+    }
+
     cleanFieldBinding(connectorType, relatedFieldBindings = []) {
         if (!Array.isArray(relatedFieldBindings)) {
             relatedFieldBindings = [relatedFieldBindings];

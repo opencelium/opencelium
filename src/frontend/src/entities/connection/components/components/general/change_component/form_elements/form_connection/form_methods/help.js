@@ -42,7 +42,7 @@ export const dotColor = (color = '#ccc') => (color !== '#ccc' ? {
  */
 export function markFieldNameAsArray(fieldName, index = null){
     if(isString(fieldName)) {
-        return isNumber(index) ? `${fieldName}[${index}]` : `${fieldName}${ARRAY_SIGN}`;
+        return index !== null && index !== '' && isNumber(index) ? `${fieldName}[${index}]` : `${fieldName}${ARRAY_SIGN}`;
     }
     return fieldName;
 }
@@ -93,12 +93,17 @@ export function convertFieldNameForBackend(invokerBody, fieldName){
         }
 
         if (isBracketToken(token)) {
+            const inner = token.slice(1, -1);
+
+            if (inner === '' || inner === 'null') {
+                continue;
+            }
+
             appendBracketToLastPart(token);
 
             if (isArray(subValue)) {
                 subValue = subValue[0];
             } else {
-                const inner = token.slice(1, -1);
                 subValue = hasOwn(subValue, inner) ? subValue[inner] : undefined;
             }
             continue;

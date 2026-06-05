@@ -54,6 +54,7 @@ export class CJsonEditor extends CBodyEditor{
                 newValue: reactJson.new_value,
                 name: reactJson.name,
                 existingValue: reactJson.existing_value,
+                updatedSrc: reactJson.updated_src,
             };
         }
         return null;

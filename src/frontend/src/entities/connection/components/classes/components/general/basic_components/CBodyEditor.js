@@ -139,52 +139,90 @@ export class CBodyEditor{
             );
         }
 
-        CBodyEditor.cleanFieldBinding(connection, bodyData);
+        CBodyEditor.cleanFieldBinding(connection, method, bodyData, target, refStructure);
+        CBodyEditor.cleanMissingFieldBindings(connection, connector, bodyData, target);
+    }
+
+    static cleanMissingFieldBindings(connection, connector, bodyData, target = null) {
+        if (
+            !bodyData ||
+            !bodyData.hasOwnProperty('updatedSrc') ||
+            (bodyData.newValue !== '' && typeof bodyData.newValue !== 'undefined') ||
+            typeof connection.cleanMissingToFieldBindings !== 'function'
+        ) {
+            return;
+        }
+
+        const currentItem = connector.getCurrentItem();
+
+        if (!currentItem) {
+            return;
+        }
+
+        connection.cleanMissingToFieldBindings(currentItem.color, target === 'header' ? 'header' : 'body', bodyData.updatedSrc);
     }
 
 
-    static cleanFieldBinding(connection, bodyData) {
+    static cleanFieldBinding(connection, method, bodyData, target = null, refStructure) {
+        if (
+            !bodyData ||
+            !bodyData.hasOwnProperty('namespaces') ||
+            !bodyData.hasOwnProperty('name')
+        ) {
+            return;
+        }
+
         if (bodyData.newValue === '' || typeof bodyData.newValue === 'undefined') {
-            if (isString(bodyData.existingValue)) {
-                const existingParsedReferences = CBodyEditor.getParsedReferences(bodyData.existingValue);
+            const parents = Array.isArray(bodyData.namespaces) ? bodyData.namespaces : [];
+            const currentItem = connection.toConnector.getCurrentItem();
+            const item = {};
 
-                if (existingParsedReferences.length > 0) {
-                    const parents = bodyData.namespaces;
-                    const currentItem = connection.toConnector.getCurrentItem();
-                    const item = {};
+            if (currentItem) {
+                item.color = currentItem.color;
 
-                    if (currentItem) {
-                        item.color = currentItem.color;
+                if (parents.length === 0) {
+                    item.field = bodyData.name;
+                } else {
+                    item.field = '';
 
-                        if (parents.length === 0) {
-                            item.field = bodyData.name;
-                        } else {
-                            item.field = '';
-
-                            for (let i = 0; i < parents.length; i++) {
-                                if (i < parents.length - 1) {
-                                    if (isNumber(parseInt(parents[i + 1]))) {
-                                        item.field += markFieldNameAsArray(parents[i], parents[i + 1]);
-                                        i++;
-                                    } else {
-                                        item.field += `${parents[i]}`;
-                                    }
-                                } else {
-                                    item.field += `${parents[i]}`;
-                                }
-
-                                item.field += '.';
+                    for (let i = 0; i < parents.length; i++) {
+                        if (i < parents.length - 1) {
+                            if (isNumber(parseInt(parents[i + 1]))) {
+                                item.field += markFieldNameAsArray(parents[i], parents[i + 1]);
+                                i++;
+                            } else {
+                                item.field += `${parents[i]}`;
                             }
-
-                            item.field += bodyData.name;
+                        } else {
+                            item.field += `${parents[i]}`;
                         }
 
-                        item.type = 'request';
-
-                        connection.cleanFieldBinding(CONNECTOR_TO, {
-                            to: [CBindingItem.createBindingItem(item)],
-                        });
+                        item.field += '.';
                     }
+
+                    item.field += bodyData.name;
+                }
+
+                item.field = convertFieldNameForBackend(method.request.invokerBody.fields, item.field, true);
+
+                if (target === 'header') {
+                    item.field = `header.$.${item.field.replace(/^body\.\$\.|header\.\$\./, '')}`;
+                } else {
+                    item.field = `body.$.${item.field.replace(/^body\.\$\.|header\.\$\./, '')}`;
+                }
+
+                item.type = 'request';
+
+                if (refStructure && refStructure.request) {
+                    item.field = wrapField(item.field, refStructure.request);
+                }
+
+                if (typeof connection.cleanFieldBindingField === 'function') {
+                    connection.cleanFieldBindingField(CONNECTOR_TO, CBindingItem.createBindingItem(item));
+                } else {
+                    connection.cleanFieldBinding(CONNECTOR_TO, {
+                        to: [CBindingItem.createBindingItem(item)],
+                    });
                 }
             }
         }
@@ -199,12 +237,11 @@ export class CBodyEditor{
             bodyData.hasOwnProperty('name') &&
             bodyData.hasOwnProperty('newValue')
         ) {
-            if (isString(bodyData.existingValue)) {
-                const existingParsedReferences = CBodyEditor.getParsedReferences(bodyData.existingValue);
-
-                if (existingParsedReferences.length > 0) {
-                    result = 2;
-                }
+            if (
+                isString(bodyData.existingValue) &&
+                CBodyEditor.getParsedReferences(bodyData.existingValue).length > 0
+            ) {
+                result = 2;
             }
 
             if (isString(bodyData.newValue)) {
@@ -212,9 +249,9 @@ export class CBodyEditor{
 
                 if (newParsedReferences.length > 0) {
                     result = 1;
+                } else if (result !== 2) {
+                    result = 0;
                 }
-            } else {
-                result = 0;
             }
         }
 
