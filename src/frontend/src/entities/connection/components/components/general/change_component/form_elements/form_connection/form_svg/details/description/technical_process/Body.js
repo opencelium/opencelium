@@ -321,8 +321,13 @@ class Body extends React.Component {
 			if (bindingItem) {
 				bindingItem = bindingItem.to[0];
 				currentEntity.setCurrentFieldBindingTo(bindingItem);
+				this.setCurrentEnhancement(currentEntity.getEnhancementByTo());
+			} else {
+				this.setState({
+					currentEnhancement: null,
+					isOpenedEnhancement: false,
+				});
 			}
-			this.setCurrentEnhancement(currentEntity.getEnhancementByTo());
 		}
 	}
 
