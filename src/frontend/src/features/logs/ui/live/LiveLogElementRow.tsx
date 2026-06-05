@@ -4,6 +4,7 @@ import { Typography } from "@shared/ui/primitives/Typography";
 import type { LiveLogNode, LiveLogTree } from "../../model/liveLogTree";
 import { LogRow, Meta, MethodBadge, OperatorLabel, StatusBadge, Url } from "../logRowUi";
 import { LoopPager } from "../LoopPager";
+import { ElementChildren } from "../LogElementRow";
 import { MethodLogDetails } from "../MethodLogDetails";
 
 // Mirrors the REST tree's status colors: started rows show a spinner, finished
@@ -117,12 +118,16 @@ export function LiveLogElementRow({
       );
     }
     case "LOOP": {
-      // Iterations stream in one by one; the pager pages over what arrived.
-      const iterationKeys = Object.keys(node.iterations).sort(
-        (a, b) => Number(a) - Number(b),
-      );
-      const position = Math.min(iterationPos, Math.max(iterationKeys.length - 1, 0));
-      const currentIteration = iterationKeys[position];
+      // Only the first iteration's subtree lives in memory; later iterations
+      // only grew the counter. Paging to them loads the persisted children
+      // over REST, exactly like the stored-logs viewer. The total is the
+      // number of iterations observed so far — it grows as the logs arrive
+      // rather than jumping to the declared size up front.
+      const total = node.iterationCount;
+      const position = Math.min(iterationPos, Math.max(total - 1, 0));
+      const storedPosition =
+        node.storedIteration !== null ? Number(node.storedIteration) : null;
+      const showStored = storedPosition !== null && position === storedPosition;
       return (
         <>
           <LogRow
@@ -133,24 +138,25 @@ export function LiveLogElementRow({
             left={<OperatorLabel label="LOOP" hint={node.properties.iterator} />}
             right={
               <Meta>
-                {iterationKeys.length > 0 ? (
-                  <LoopPager
-                    index={position}
-                    size={iterationKeys.length}
-                    onChange={setIterationPos}
-                  />
+                {total > 0 ? (
+                  <LoopPager index={position} size={total} onChange={setIterationPos} />
                 ) : null}
                 <LiveStatusIndicator status={node.status} />
               </Meta>
             }
           />
           <LiveErrorRow node={node} depth={depth + 1} />
-          {expanded && currentIteration !== undefined ? (
-            <LiveChildren
-              tree={tree}
-              childKeys={node.iterations[currentIteration] ?? []}
-              depth={depth + 1}
-            />
+          {expanded ? (
+            showStored ? (
+              <LiveChildren tree={tree} childKeys={node.childKeys} depth={depth + 1} />
+            ) : node.id ? (
+              <ElementChildren
+                id={node.id}
+                loopIndex={position}
+                depth={depth + 1}
+                path={node.key}
+              />
+            ) : null
           ) : null}
         </>
       );

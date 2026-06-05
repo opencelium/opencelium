@@ -12,6 +12,13 @@ import type {
 // loop-iteration context — because the same indexPath repeats once per loop
 // iteration. FLOWCHART lines (no indexPath) become the connector roots;
 // everything below them attaches via its indexPath prefix.
+//
+// Memory bound: only the FIRST iteration of every loop is stored locally.
+// Lines from later iterations just bump the loop's `iterationCount` and are
+// dropped — a loop with a million iterations costs one subtree plus a
+// counter. Other iterations are persisted server-side and fetched on demand
+// when the user pages to them (same REST lazy-loading as the stored-logs
+// viewer).
 export type LiveLogNode = {
   key: string;
   // Persisted element id used to fetch full method details (same REST
@@ -30,9 +37,13 @@ export type LiveLogNode = {
   properties: SocketLogProperties;
   segment: SocketLogSegment;
   error: SocketLogError;
+  // Ordered children; for LOOP nodes these are the stored iteration's children.
   childKeys: string[];
-  // LOOP nodes only: ordered child keys per iteration index.
-  iterations: Record<string, string[]>;
+  // LOOP nodes only: which iteration index is kept locally (the first seen),
+  // the latest iteration observed, and how many distinct iterations ran.
+  storedIteration: string | null;
+  latestIteration: string | null;
+  iterationCount: number;
 };
 
 export type LiveLogTree = {
@@ -65,7 +76,9 @@ const createNode = (key: string, log: ExecutionSocketLog): LiveLogNode => ({
   segment: log.segment ?? {},
   error: null,
   childKeys: [],
-  iterations: {},
+  storedIteration: null,
+  latestIteration: null,
+  iterationCount: 0,
 });
 
 // A phase emits one line when it starts (PENDING) and one when it ends
@@ -105,38 +118,57 @@ const reduceFlowchart = (tree: LiveLogTree, log: ExecutionSocketLog): LiveLogTre
   };
 };
 
-// Attach a freshly created node to its parent. Returns the parent patch, or
-// null when no parent was found (orphans fall back to the current connector).
-const attachToParent = (
-  tree: LiveLogTree,
-  node: LiveLogNode,
-): Record<string, LiveLogNode> | null => {
+// Attach a freshly created node to its parent.
+//  - { patch, keepChild: true }  — store the node under its parent
+//  - { patch, keepChild: false } — loop bookkeeping only, node is dropped
+//  - "drop"                      — ancestor was dropped, discard silently
+//  - null                        — top-level element, attach to the connector
+type AttachOutcome =
+  | { patch: Record<string, LiveLogNode>; keepChild: boolean }
+  | "drop"
+  | null;
+
+const attachToParent = (tree: LiveLogTree, node: LiveLogNode): AttachOutcome => {
   const parentPath = node.indexPath.split("_").slice(0, -1).join("_");
   if (!parentPath) return null;
 
   // Parent in the same loop context (connector child, IF child, …).
   const direct = tree.nodes[nodeKey(parentPath, node.loopIndex)];
   if (direct && direct.type !== "LOOP") {
-    return { [direct.key]: { ...direct, childKeys: [...direct.childKeys, node.key] } };
+    return {
+      patch: { [direct.key]: { ...direct, childKeys: [...direct.childKeys, node.key] } },
+      keepChild: true,
+    };
   }
 
   // Loop parent: the child's loopIndex is the parent's plus one trailing
-  // iteration index — strip it to find the loop, use it as the bucket.
+  // iteration index. Only the first iteration's children are stored; later
+  // iterations only advance the counter.
   const parts = node.loopIndex.split(",");
   const iteration = parts[parts.length - 1] ?? "";
   const loopParent = tree.nodes[nodeKey(parentPath, parts.slice(0, -1).join(","))];
   if (loopParent?.type === "LOOP" && node.loopIndex) {
+    const storedIteration = loopParent.storedIteration ?? iteration;
+    const isNewIteration = loopParent.latestIteration !== iteration;
+    const keepChild = iteration === storedIteration;
     return {
-      [loopParent.key]: {
-        ...loopParent,
-        iterations: {
-          ...loopParent.iterations,
-          [iteration]: [...(loopParent.iterations[iteration] ?? []), node.key],
+      patch: {
+        [loopParent.key]: {
+          ...loopParent,
+          storedIteration,
+          latestIteration: iteration,
+          iterationCount: loopParent.iterationCount + (isNewIteration ? 1 : 0),
+          childKeys: keepChild
+            ? [...loopParent.childKeys, node.key]
+            : loopParent.childKeys,
         },
       },
+      keepChild,
     };
   }
-  return null;
+
+  // The parent itself was dropped (it lives in a non-stored loop iteration).
+  return "drop";
 };
 
 // Most recently created node at a given indexPath — for elements inside a
@@ -219,10 +251,16 @@ export function reduceLiveLog(tree: LiveLogTree, log: ExecutionSocketLog): LiveL
   }
 
   const node = createNode(key, log);
-  const parentPatch = attachToParent(tree, node);
-  if (parentPatch) {
+  const outcome = attachToParent(tree, node);
+  if (outcome === "drop") return tree;
+  if (outcome) {
     return attachError(
-      { ...tree, nodes: { ...tree.nodes, ...parentPatch, [key]: node } },
+      {
+        ...tree,
+        nodes: outcome.keepChild
+          ? { ...tree.nodes, ...outcome.patch, [key]: node }
+          : { ...tree.nodes, ...outcome.patch },
+      },
       log,
     );
   }
