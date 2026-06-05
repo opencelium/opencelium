@@ -73,7 +73,7 @@ export function StepHeader({
                         </div>}</span>
                 </h1>
                 {subheader && (
-                    <div style={{color: "#888"}}>
+                    <div style={{color: "var(--color-text-secondary)"}}>
                         <EntityText i18nKey={subheader}/>
                     </div>
                 )}

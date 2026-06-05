@@ -14,7 +14,7 @@ export function ConnectionCell({ row }: Props) {
     }
 
     if (!row.connectionTitle) {
-        return <span style={{ color: '#999' }}>{tEntities('support-file.list.deletedConnection')}</span>
+        return <span style={{ color: 'var(--color-text-disabled)' }}>{tEntities('support-file.list.deletedConnection')}</span>
     }
 
     return <span>{row.connectionTitle}</span>

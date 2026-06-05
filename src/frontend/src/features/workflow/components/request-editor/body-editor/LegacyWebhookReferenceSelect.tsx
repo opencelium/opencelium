@@ -75,7 +75,7 @@ export function LegacyWebhookReferenceSelect({ value, onChange }: Props) {
           value={name}
           onChange={(event) => setName(event.target.value)}
           placeholder='Name'
-          prefix={<UserOutlined style={{ color: '#bfbfbf' }} />}
+          prefix={<UserOutlined style={{ color: 'var(--color-text-disabled)' }} />}
           variant='borderless'
           className='bodyLegacyWebhookModalInput'
         />
@@ -85,7 +85,7 @@ export function LegacyWebhookReferenceSelect({ value, onChange }: Props) {
           onChange={setType}
           options={WEBHOOK_TYPES.map((item) => ({ label: item, value: item }))}
           style={{ width: '100%', marginTop: 12 }}
-          prefix={<FontSizeOutlined style={{ color: '#bfbfbf' }} />}
+          prefix={<FontSizeOutlined style={{ color: 'var(--color-text-disabled)' }} />}
           variant='borderless'
           className='bodyLegacyWebhookModalSelect'
           getPopupContainer={(trigger) => trigger.parentElement || document.body}

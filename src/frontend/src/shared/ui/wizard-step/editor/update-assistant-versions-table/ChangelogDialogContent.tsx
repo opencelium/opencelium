@@ -48,7 +48,7 @@ export function ChangelogDialogContent({ changelogLink }: Props) {
 
     if (hasError) {
         return (
-            <div style={{ color: '#8c8c8c', padding: 16 }}>
+            <div style={{ color: 'var(--color-text-secondary)', padding: 16 }}>
                 {t('update-assistant.changelog.error')}
             </div>
         )

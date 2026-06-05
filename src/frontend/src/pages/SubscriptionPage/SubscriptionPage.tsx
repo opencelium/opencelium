@@ -70,7 +70,7 @@ export function SubscriptionPage() {
                     <Typography variant="headline">
                         {t('subscription.wizard.header' as never)}
                     </Typography>
-                    <div style={{ color: '#888', marginTop: 8 }}>
+                    <div style={{ color: 'var(--color-text-secondary)', marginTop: 8 }}>
                         <Typography>
                             {t('subscription.wizard.subheader' as never)}
                         </Typography>

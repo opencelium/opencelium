@@ -15,7 +15,7 @@ export class RequiredDataReference implements ReferenceStrategy {
     render({ref, props}: {ref: Reference, props: React.HTMLProps<HTMLSpanElement>}): React.ReactNode {
         if (ref.type !== "requiredData") return null;
         return (
-            <span style={{ color: "#228B22" }} {...props}>
+            <span style={{ color: "var(--color-status-success-fg)" }} {...props}>
                 🔑 Required: {ref.key}
             </span>
         );

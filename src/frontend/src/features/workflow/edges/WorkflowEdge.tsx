@@ -77,8 +77,8 @@ export function WorkflowEdge({
 				style={
 					isHighlighted
 						? {
-								stroke: '#2563eb',
-								color: '#2563eb',
+								stroke: 'var(--color-action-primary)',
+								color: 'var(--color-action-primary)',
 							}
 						: undefined
 				}
@@ -95,7 +95,7 @@ export function WorkflowEdge({
 						orient='auto'
 						markerUnits='userSpaceOnUse'
 					>
-						<path d='M0,0 L0,6 L10,3 z' fill='#9ca3af' />
+						<path d='M0,0 L0,6 L10,3 z' className='workflowArrowMarker' />
 					</marker>
 					<marker
 						id='workflow-arrow-highlighted'
@@ -106,7 +106,7 @@ export function WorkflowEdge({
 						orient='auto'
 						markerUnits='userSpaceOnUse'
 					>
-						<path d='M0,0 L0,6 L10,3 z' fill='#2563eb' />
+						<path d='M0,0 L0,6 L10,3 z' className='workflowArrowMarkerHighlighted' />
 					</marker>
 				</defs>
 			</svg>

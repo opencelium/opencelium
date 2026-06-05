@@ -4,10 +4,8 @@ import {SystemSwitcher} from "@shared/ui/system/SystemSwitcher.tsx";
 import React from "react";
 import {useAuth} from "@features/auth/useAuth.ts";
 import {CommonText} from "@shared/ui/primitives/Text";
-import {Switch} from "@shared/ui/primitives/Switch";
 import {useI18n} from "@shared/i18n/hooks/useI18n.ts";
 import {Button} from "@shared/ui/primitives/Button";
-import {ThemeName} from "@shared/theme/types.ts";
 
 export function TopBar() {
     const { user } = useAuth()
@@ -16,7 +14,7 @@ export function TopBar() {
         <header
             style={{
                 height: 100,
-                borderBottom: '1px solid #eee',
+                borderBottom: '1px solid var(--color-border-subtle)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',

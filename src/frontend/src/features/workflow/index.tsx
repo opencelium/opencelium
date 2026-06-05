@@ -568,7 +568,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <span>
               Name
-              <span style={{ color: '#d4380d' }}> *</span>
+              <span style={{ color: 'var(--color-status-error-fg)' }}> *</span>
             </span>
             <Input
               autoFocus
@@ -582,7 +582,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
               onPressEnter={saveConnectionAsTemplate}
               showCount
             />
-            {templateNameError ? <span style={{ color: '#d4380d', fontSize: 12 }}>{templateNameError}</span> : null}
+            {templateNameError ? <span style={{ color: 'var(--color-status-error-fg)', fontSize: 12 }}>{templateNameError}</span> : null}
           </label>
           <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <span>Description</span>
@@ -594,7 +594,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
                 onChange={(event) => setTemplateDescription(event.target.value)}
                 style={{ paddingBottom: 26 }}
               />
-              <span style={{ position: 'absolute', right: 12, bottom: 6, color: '#8c8c8c', pointerEvents: 'none' }}>
+              <span style={{ position: 'absolute', right: 12, bottom: 6, color: 'var(--color-text-secondary)', pointerEvents: 'none' }}>
                 {templateDescription.length} / 5000
               </span>
             </div>
@@ -617,7 +617,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         ]}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div style={{ color: '#8c8c8c' }}>
+          <div style={{ color: 'var(--color-text-secondary)' }}>
             If you load a template, all your current workflow changes will be replaced.
           </div>
           <Select

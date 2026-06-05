@@ -6,17 +6,17 @@ import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { recentActivity, type ActivityKind } from '../dashboard.mock'
 
 const kindBg: Record<ActivityKind, string> = {
-    success: 'rgba(22, 163, 74, 0.14)',
-    failure: 'rgba(220, 38, 38, 0.12)',
-    info: 'rgba(37, 99, 235, 0.12)',
-    warning: 'rgba(234, 88, 12, 0.14)',
+    success: 'var(--color-status-success-bg)',
+    failure: 'var(--color-status-error-bg)',
+    info: 'var(--color-status-info-bg)',
+    warning: 'var(--color-status-warning-bg)',
 }
 
 const kindFg: Record<ActivityKind, string> = {
-    success: '#16a34a',
-    failure: '#dc2626',
-    info: '#2563eb',
-    warning: '#ea580c',
+    success: 'var(--color-status-success-fg)',
+    failure: 'var(--color-status-error-fg)',
+    info: 'var(--color-status-info-fg)',
+    warning: 'var(--color-status-warning-fg)',
 }
 
 export function RecentActivityCard() {

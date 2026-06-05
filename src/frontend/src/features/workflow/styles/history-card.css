@@ -2,9 +2,9 @@
   position: relative;
   flex: 1;
   margin-bottom: 12px;
-  border: 1px solid #d9d9d9;
+  border: 1px solid var(--color-border-default);
   border-radius: 8px;
-  background: #fff;
+  background: var(--color-background-surface);
   padding: 10px 12px 12px;
   box-shadow: none;
   transition: border-color 0.16s ease, box-shadow 0.16s ease;
@@ -13,13 +13,13 @@
 }
 
 .historyCardSelected {
-  border-color: #91caff;
-  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+  border-color: var(--color-action-primary);
+  box-shadow: 0 0 0 2px var(--color-action-primary-subtle);
 }
 
 .historyCard:hover {
-  border-color: #bfbfbf;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-sm);
 }
 
 .historyCardHeader,
@@ -51,13 +51,13 @@
 .historyDotsButton {
   width: 26px;
   height: 26px;
-  border: 1px solid #d9d9d9;
+  border: 1px solid var(--color-border-default);
   border-radius: 6px;
-  background: #fff;
+  background: var(--color-background-surface);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #262626;
+  color: var(--color-text-primary);
 }
 
 .historySaveRow {

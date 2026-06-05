@@ -16,25 +16,29 @@ type Props = {
 }
 
 const toneToBg: Record<Tone, string> = {
-    blue: 'rgba(37, 99, 235, 0.12)',
-    red: 'rgba(220, 38, 38, 0.12)',
-    orange: 'rgba(234, 88, 12, 0.14)',
-    violet: 'rgba(124, 58, 237, 0.14)',
-    green: 'rgba(22, 163, 74, 0.14)',
+    blue: 'var(--color-status-info-bg)',
+    red: 'var(--color-status-error-bg)',
+    orange: 'var(--color-status-warning-bg)',
+    violet: 'var(--color-action-primary-subtle)',
+    green: 'var(--color-status-success-bg)',
 }
 
 const toneToFg: Record<Tone, string> = {
-    blue: '#2563eb',
-    red: '#dc2626',
-    orange: '#ea580c',
-    violet: '#7c3aed',
-    green: '#16a34a',
+    blue: 'var(--color-status-info-fg)',
+    red: 'var(--color-status-error-fg)',
+    orange: 'var(--color-status-warning-fg)',
+    violet: 'var(--color-action-secondary)',
+    green: 'var(--color-status-success-fg)',
 }
 
 export function MetricTile({ label, value, icon, tone, delta }: Props) {
     const { t, lang } = useI18n('dashboard')
     const deltaColor =
-        delta === undefined ? undefined : delta >= 0 ? '#16a34a' : '#dc2626'
+        delta === undefined
+            ? undefined
+            : delta >= 0
+              ? 'var(--color-status-success-fg)'
+              : 'var(--color-status-error-fg)'
     const deltaFormatted =
         delta === undefined
             ? null
@@ -76,7 +80,7 @@ export function MetricTile({ label, value, icon, tone, delta }: Props) {
                                 <span style={{ color: deltaColor, fontWeight: 500 }}>
                                     {deltaFormatted}
                                 </span>{' '}
-                                <span style={{ color: '#888' }}>
+                                <span style={{ color: 'var(--color-text-secondary)' }}>
                                     {t('delta.vsPrevious')}
                                 </span>
                             </Typography>

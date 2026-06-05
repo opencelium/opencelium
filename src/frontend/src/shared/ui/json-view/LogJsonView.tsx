@@ -1,7 +1,6 @@
 import React from "react";
 import ReactJson from "react-json-view";
 import { useTheme } from "@shared/theme/hooks/useTheme";
-import { ThemeName } from "@shared/theme/types";
 
 type Props = {
   data: object;
@@ -24,7 +23,7 @@ export function LogJsonView({
   minHeight = 96,
   bare = false,
 }: Props) {
-  const { themeName } = useTheme();
+  const { themeMode } = useTheme();
 
   return (
     <div
@@ -48,7 +47,7 @@ export function LogJsonView({
         enableClipboard={false}
         displayDataTypes={false}
         displayObjectSize={false}
-        theme={themeName === ThemeName.Dark ? "twilight" : "rjv-default"}
+        theme={themeMode === "dark" ? "twilight" : "rjv-default"}
         style={{
           background: "transparent",
           fontSize: 13,

@@ -35,7 +35,7 @@ export const ReferenceItem: React.FC<ReferenceItemProps> = ({
             style={{
                 position: "relative",
                 backgroundColor: parsed.color,
-                color: "#fff",
+                color: "var(--color-text-on-action)",
                 marginLeft: '2px',
                 padding: "4px 10px",
                 borderRadius: 6,
@@ -43,7 +43,7 @@ export const ReferenceItem: React.FC<ReferenceItemProps> = ({
                 cursor: "default",
                 transition: "transform 0.15s ease",
                 transform: isHovered ? "translateY(-2px)" : "none",
-                boxShadow: isHovered ? "0 2px 5px rgba(0,0,0,0.25)" : "none",
+                boxShadow: isHovered ? "var(--shadow-md)" : "none",
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -58,7 +58,7 @@ export const ReferenceItem: React.FC<ReferenceItemProps> = ({
                         position: "absolute",
                         top: "-6px",
                         right: "-6px",
-                        background: "#fff",
+                        background: "var(--color-background-elevated)",
                         borderRadius: "50%",
                         border: "none",
                         cursor: "pointer",
@@ -67,7 +67,7 @@ export const ReferenceItem: React.FC<ReferenceItemProps> = ({
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        boxShadow: "0 1px 2px rgba(0,0,0,0.3)",
+                        boxShadow: "var(--shadow-sm)",
                     }}
                 >
                     <CloseOutlined style={{ color: parsed.color, fontSize: 12, pointerEvents: "none" }} />

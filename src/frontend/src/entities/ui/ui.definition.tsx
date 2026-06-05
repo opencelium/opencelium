@@ -4,7 +4,8 @@ import {useCommandPaletteUIStore} from "@widgets/CommandPalette/command-palette.
 import {GenericUpdateWizard} from "@/engine/entity/runtime/genererics/GenericUpdateWizard.tsx";
 import React from "react";
 import type {CommandNode} from "@shared/command/types.ts";
-import {ThemeName} from "@shared/theme/types.ts";
+import {themeRegistry} from "@shared/theme/registry/themeRegistry.ts";
+import {readStoredThemeId} from "@shared/theme/themeStorage.ts";
 
 const baseKey = 'ui';
 
@@ -15,18 +16,15 @@ export const uiDefinition: EntityDefinition = {
         {
             name: 'theme',
             type: 'string',
-            defaultValue:
-                localStorage.getItem('theme') === ThemeName.Dark
-                    ? ThemeName.Dark
-                    : ThemeName.Light,
+            getDefaultValue: async () => {
+                const stored = readStoredThemeId();
+                return stored && themeRegistry.has(stored) ? stored : themeRegistry.getDefault().id;
+            },
             ui: {
                 component: 'select',
                 props: {
                     labelKey: `${baseKey}.fields.theme.label`,
-                    options: [
-                        {value: ThemeName.Light, label: 'Light'},
-                        {value: ThemeName.Dark, label: 'Dark'},
-                    ]
+                    options: themeRegistry.getAll().map(def => ({value: def.id, label: def.label})),
                 }
             }
         },

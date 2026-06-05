@@ -17,9 +17,9 @@ type ComponentKey = (typeof REQUIRED_COMPONENTS)[number] | (typeof OPTIONAL_COMP
 type HealthRow = { key: ComponentKey; status: HealthStatus }
 
 const STATUS_DOT: Record<HealthStatus, string> = {
-    UP: '#52c41a',
-    DOWN: '#ff4d4f',
-    UNKNOWN: '#faad14',
+    UP: 'var(--color-status-success-fg)',
+    DOWN: 'var(--color-status-error-fg)',
+    UNKNOWN: 'var(--color-status-warning-fg)',
 }
 
 type Props = { name: string; label?: string }
@@ -129,7 +129,7 @@ export function UpdateAssistantHealthViewer({ name }: Props) {
         groupLabelKey: string,
     ) => (
         <div>
-            <p style={{ fontWeight: 600, marginBottom: 6, fontSize: 13, color: 'var(--color-text-secondary, #8c8c8c)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            <p style={{ fontWeight: 600, marginBottom: 6, fontSize: 13, color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 {t(groupLabelKey as any)}
             </p>
             <Table data={rows} columns={columns} tableInstance={tableInstance} />

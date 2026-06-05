@@ -1,6 +1,6 @@
 .xmlField {
   padding-left: 14px;
-  border-left: 2px solid #eef2f7;
+  border-left: 2px solid var(--color-border-subtle);
 }
 
 .xmlFieldHeader {
@@ -11,7 +11,7 @@
 }
 
 .xmlFieldLabel {
-  color: #6b7280;
+  color: var(--color-text-secondary);
   font-size: 12px;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
@@ -23,10 +23,10 @@
 }
 
 .xmlFieldPreview {
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-border-subtle);
   border-radius: 6px;
-  background: #fafafa;
-  color: #334155;
+  background: var(--color-background-hover);
+  color: var(--color-text-primary);
   cursor: pointer;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 13px;
@@ -40,19 +40,19 @@
 }
 
 .xmlFieldPreview:hover {
-  background: #f3f4f6;
-  border-color: #d1d5db;
+  background: var(--color-background-hover);
+  border-color: var(--color-border-default);
 }
 
 .xmlFieldPreviewSelected {
-  border-color: #f59e0b;
-  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.18);
+  border-color: var(--color-status-warning-border);
+  box-shadow: 0 0 0 1px var(--color-status-warning-border);
 }
 
 .xmlFieldInput textarea {
   border-radius: 6px;
-  border-color: #e5e7eb;
-  background: #fafafa;
+  border-color: var(--color-border-subtle);
+  background: var(--color-background-hover);
 }
 
 .xmlField:hover .xmlFieldActions {

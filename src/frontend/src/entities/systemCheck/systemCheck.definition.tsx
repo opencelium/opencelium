@@ -43,9 +43,9 @@ type ServiceRow = {
 }
 
 const STATUS_DOT: Record<HealthStatus, string> = {
-    UP: '#52c41a',
-    DOWN: '#ff4d4f',
-    UNKNOWN: '#faad14',
+    UP: 'var(--color-status-success-fg)',
+    DOWN: 'var(--color-status-error-fg)',
+    UNKNOWN: 'var(--color-status-warning-fg)',
 }
 
 const StatusCell: React.FC<{ status: HealthStatus }> = ({ status }) => {

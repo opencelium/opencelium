@@ -21,9 +21,9 @@ import { ChangelogDialogContent } from './ChangelogDialogContent'
 import ErrorMessage from '@shared/ui/primitives/ErrorMessage/ErrorMessage'
 
 const STATUS_COLOR: Record<UpdateVersionStatus, string> = {
-    old: '#8c8c8c',
-    current: 'rgb(0, 0, 0, 0.88)',
-    available: '#52c41a',
+    old: 'var(--color-text-secondary)',
+    current: 'var(--color-text-primary)',
+    available: 'var(--color-status-success-fg)',
 }
 
 function parseSemver(v: string): number[] {
@@ -216,7 +216,7 @@ export function UpdateAssistantVersionsTable({ name, label }: Props) {
                 tableInstance={tableInstance}
                 isLoading={result.isLoading}
                 emptyState={
-                    <div style={{ color: '#8c8c8c' }}>{t('update-assistant.versions.empty')}</div>
+                    <div style={{ color: 'var(--color-text-secondary)' }}>{t('update-assistant.versions.empty')}</div>
                 }
             />
 

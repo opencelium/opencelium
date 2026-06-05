@@ -174,7 +174,7 @@ export function MultiRecordForm({
                                 )}
                             </div>
                         ) : (
-                            <div style={{ color: '#888' }}>
+                            <div style={{ color: 'var(--color-text-secondary)' }}>
                                 {emptyKey ? <EntityText i18nKey={emptyKey} /> : null}
                             </div>
                         )}

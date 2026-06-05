@@ -4,10 +4,10 @@
 	top: 42px;
 	display: inline-block;
 	width: max-content;
-	border: 1px solid #e5e7eb;
+	border: 1px solid var(--color-border-subtle);
 	border-radius: 10px;
-	background: #fff;
-	box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+	background: var(--color-background-elevated);
+	box-shadow: var(--shadow-lg);
 	overflow: hidden;
 	z-index: 50;
 }
@@ -18,17 +18,17 @@
 	box-sizing: border-box;
 	text-align: left;
 	border: 0;
-	background: #fff;
+	background: var(--color-background-elevated);
 	padding: 10px 12px;
 	white-space: nowrap;
 }
 
 .historyMenuItem:hover {
-	background: #f3f4f6;
+	background: var(--color-background-hover);
 }
 
 .historyMenuItemDanger {
-	color: #dc2626;
+	color: var(--color-action-danger);
 }
 
 .historyConfirmOverlay {
@@ -44,9 +44,9 @@
 .historyConfirmDialog {
 	width: 320px;
 	border-radius: 12px;
-	background: #fff;
+	background: var(--color-background-elevated);
 	padding: 16px;
-	box-shadow: 0 12px 30px rgba(0, 0, 0, 0.16);
+	box-shadow: var(--shadow-lg);
 	display: flex;
 	flex-direction: column;
 	gap: 10px;

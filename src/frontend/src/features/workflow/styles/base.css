@@ -1,7 +1,7 @@
 :root {
   font-family: Inter, system-ui, sans-serif;
-  color: #111827;
-  background: #f3f4f6;
+  color: var(--color-text-primary);
+  background: var(--color-background-hover);
 }
 
 * {
@@ -44,9 +44,9 @@ textarea {
 .headerCard,
 .canvasCard,
 .logsCard {
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+  background: var(--color-background-surface);
+  border: 1px solid var(--color-border-subtle);
+  box-shadow: var(--shadow-lg);
 }
 
 .canvasCard {
@@ -83,13 +83,13 @@ textarea {
   padding: 8px;
   display: inline-flex;
   align-items: center;
-  color: #6b7280;
+  color: var(--color-text-secondary);
   border-radius: 6px;
 }
 
 .logsHeaderIconButton:hover {
-  background: #f3f4f6;
-  color: #111827;
+  background: var(--color-background-hover);
+  color: var(--color-text-primary);
 }
 
 .logsCaret {
@@ -103,8 +103,8 @@ textarea {
 .logsBody {
   display: block;
   padding: 12px;
-  color: #6b7280;
-  border-top: 1px solid #e5e7eb;
+  color: var(--color-text-secondary);
+  border-top: 1px solid var(--color-border-subtle);
 }
 
 .logsHeaderTitle {
@@ -119,7 +119,7 @@ textarea {
   gap: 5px;
   font-size: 12px;
   font-weight: 500;
-  color: #2563eb;
+  color: var(--color-action-primary);
 }
 
 .logsRunningSpinner {
@@ -156,15 +156,15 @@ textarea {
 }
 
 .logsResult--finished {
-  color: #16a34a;
+  color: var(--color-status-success-fg);
 }
 
 .logsResult--stopped {
-  color: #b45309;
+  color: var(--color-status-warning-fg);
 }
 
 .logsResult--failed {
-  color: #dc2626;
+  color: var(--color-status-error-fg);
 }
 
 .headerCard {

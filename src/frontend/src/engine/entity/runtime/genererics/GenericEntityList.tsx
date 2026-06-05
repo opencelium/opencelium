@@ -226,7 +226,7 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
                     <h1 style={{ marginBottom: 8 }}>
                         <Typography variant="headline" as="span">{titleText}</Typography>
                     </h1>
-                    <div style={{ color: '#888' }}>
+                    <div style={{ color: 'var(--color-text-secondary)' }}>
                         <Typography variant="body">{subtitleNode}</Typography>
                     </div>
                 </div>

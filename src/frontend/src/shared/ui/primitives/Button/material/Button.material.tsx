@@ -47,7 +47,7 @@ export const MaterialButton: ButtonComponent = ({
                             ? 'var(--color-action-primary-hover)'
                             : variant === 'danger'
                                 ? 'var(--color-action-danger-hover)'
-                                : 'rgba(0,0,0,0.04)',
+                                : 'var(--color-background-hover)',
                 },
             }}
         >

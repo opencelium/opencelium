@@ -76,7 +76,7 @@ export function ParentCategoryEditor({ name, label, mode }: ParentCategoryEditor
                 status={fieldState.error ? 'error' : undefined}
             />
             {fieldState.error?.message && (
-                <span style={{ color: '#ff4d4f', fontSize: 12 }}>
+                <span style={{ color: 'var(--color-status-error-fg)', fontSize: 12 }}>
                     {t(fieldState.error.message, { defaultValue: fieldState.error.message })}
                 </span>
             )}

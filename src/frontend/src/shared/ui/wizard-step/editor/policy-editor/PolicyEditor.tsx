@@ -97,7 +97,7 @@ export const PolicyEditor: React.FC<PolicyEditorProps> = ({ name, label }) => {
                                PBAC
                             =============================== */}
                             <div>
-                                <h4 style={{ margin: '0 0 10px 0', fontSize: 12, color: '#666' }}>
+                                <h4 style={{ margin: '0 0 10px 0', fontSize: 12, color: 'var(--color-text-secondary)' }}>
                                     PBAC (Permission Based Access Control)
                                 </h4>
 
@@ -126,7 +126,7 @@ export const PolicyEditor: React.FC<PolicyEditorProps> = ({ name, label }) => {
                                RBAC
                             =============================== */}
                             <div>
-                                <h4 style={{ margin: '0 0 10px 0', fontSize: 12, color: '#666' }}>
+                                <h4 style={{ margin: '0 0 10px 0', fontSize: 12, color: 'var(--color-text-secondary)' }}>
                                     RBAC (Role Based Access Control)
                                 </h4>
 
@@ -165,7 +165,7 @@ export const PolicyEditor: React.FC<PolicyEditorProps> = ({ name, label }) => {
                                ABAC
                             =============================== */}
                             <div>
-                                <h4 style={{ margin: '0 0 10px 0', fontSize: 12, color: '#666' }}>
+                                <h4 style={{ margin: '0 0 10px 0', fontSize: 12, color: 'var(--color-text-secondary)' }}>
                                     ABAC (Attribute Based Access Control)
                                 </h4>
 

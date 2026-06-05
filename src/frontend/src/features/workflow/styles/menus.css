@@ -1,7 +1,7 @@
 .primaryButton,
 .iconButton {
-  border: 1px solid #d1d5db;
-  background: #fff;
+  border: 1px solid var(--color-border-default);
+  background: var(--color-background-surface);
   border-radius: 10px;
   height: 36px;
   padding: 0 14px;
@@ -9,15 +9,15 @@
 }
 
 .primaryButton {
-  background: #2563eb;
-  color: #fff;
-  border-color: #2563eb;
+  background: var(--color-action-primary);
+  color: var(--color-text-on-action);
+  border-color: var(--color-action-primary);
 }
 
 .primaryButton:disabled {
-  background: #cbd5e1;
-  border-color: #cbd5e1;
-  color: #ffffff;
+  background: var(--color-background-disabled);
+  border-color: var(--color-background-disabled);
+  color: var(--color-text-on-action);
   cursor: not-allowed;
 }
 
@@ -30,10 +30,10 @@
 
 .headerMenu,
 .contextMenu {
-  background: #fff;
-  border: 1px solid #e5e7eb;
+  background: var(--color-background-elevated);
+  border: 1px solid var(--color-border-subtle);
   border-radius: 12px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-lg);
   padding: 6px;
   z-index: 40;
 }
@@ -72,7 +72,7 @@
 .headerMenuSection + .headerMenuSection {
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px dashed #9ca3af;
+  border-top: 1px dashed var(--color-border-strong);
 }
 
 .headerMenuItem {
@@ -84,7 +84,7 @@
 
 .headerMenuItem:hover,
 .contextMenuItem:hover {
-  background: #f3f4f6;
+  background: var(--color-background-hover);
 }
 
 .contextMenuHeader {
@@ -100,7 +100,7 @@
 
 .contextMenuDescription {
   margin-top: 14px;
-  color: #4b5563;
+  color: var(--color-text-secondary);
   font-size: 14px;
 }
 
@@ -120,6 +120,6 @@
   padding: 10px 12px 6px;
   font-size: 15px;
   font-weight: 600;
-  color: #111827;
+  color: var(--color-text-primary);
   cursor: default;
 }

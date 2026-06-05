@@ -77,7 +77,7 @@ export const EnhancementArgs: React.FC<EnhancementArgsProps> = ({ enhancement })
                     <span
                         style={{
                             backgroundColor: entry.color,
-                            color: "white",
+                            color: "var(--color-text-on-action)",
                             borderRadius: 4,
                             padding: "2px 6px",
                             fontWeight: 600,
@@ -110,7 +110,7 @@ export const EnhancementArgs: React.FC<EnhancementArgsProps> = ({ enhancement })
                     <span
                         style={{
                             backgroundColor: entry.color,
-                            color: "white",
+                            color: "var(--color-text-on-action)",
                             borderRadius: 4,
                             padding: "2px 6px",
                             fontWeight: 600,
@@ -132,7 +132,7 @@ export const EnhancementArgs: React.FC<EnhancementArgsProps> = ({ enhancement })
                 <span
                     style={{
                         backgroundColor: entry.color,
-                        color: "white",
+                        color: "var(--color-text-on-action)",
                         borderRadius: 4,
                         padding: "2px 6px",
                         fontWeight: 600,

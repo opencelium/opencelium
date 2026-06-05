@@ -52,7 +52,7 @@ export function AggregatorWithArgsEditor({ name, label, mode }: AggregatorWithAr
             />
             <div style={{minHeight: '20px'}}>
             {fieldState.error?.message && (
-                <span style={{ color: '#ff4d4f', fontSize: 12 }}>
+                <span style={{ color: 'var(--color-status-error-fg)', fontSize: 12 }}>
                     {t(fieldState.error.message, { defaultValue: fieldState.error.message })}
                 </span>
             )}
@@ -73,7 +73,7 @@ export function AggregatorWithArgsEditor({ name, label, mode }: AggregatorWithAr
                 </div>
             )}
             {selectedAggregator && !selectedAggregator.active && (
-                <span style={{ color: '#ff4d4f', fontSize: 12 }}>
+                <span style={{ color: 'var(--color-status-error-fg)', fontSize: 12 }}>
                     This aggregator is inactive. Its arguments will be replaced with {'{'}{'{'}OC_ARG_NOT_EXIST{'}'}{'}'}
                 </span>
             )}

@@ -41,7 +41,7 @@
 
 .dz-file-item__size {
     flex-shrink: 0;
-    color: var(--color-text-secondary, #8c8c8c);
+    color: var(--color-text-secondary);
     font-size: 12px;
 }
 

@@ -14,7 +14,7 @@ type Props = {
 export function BodyPointer({ pointer, pointers, onClick, onRemove }: Props) {
   const [hovered, setHovered] = useState(false);
   const parsed = useMemo(() => parseEnhancementArg(pointer), [pointer]);
-  const color = parsed?.color || '#999999';
+  const color = parsed?.color || 'var(--color-text-disabled)';
   const title = parsed ? `${parsed.messageProperty}.$.${parsed.path}` : pointer;
 
   const remove = (event: MouseEvent<HTMLButtonElement>) => {
@@ -52,7 +52,7 @@ export function BodyPointer({ pointer, pointers, onClick, onRemove }: Props) {
             cursor: 'pointer',
           }}
         >
-          <DeleteOutlined style={{ fontSize: 10, color: '#222' }} />
+          <DeleteOutlined style={{ fontSize: 10, color: 'var(--color-text-primary)' }} />
         </button>
       ) : null}
     </div>

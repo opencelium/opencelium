@@ -49,8 +49,8 @@ export function StepSidebar({
                                     textDecoration: isActive ? 'underline' : 'unset',
                                     fontWeight: isCompleted || isActive ? 600 : 500,
                                     color: isCompleted || isActive
-                                        ? "#1A1A1A"
-                                        : "#6A6A6A",
+                                        ? "var(--color-text-primary)"
+                                        : "var(--color-text-secondary)",
 
                                 }}
                             >
@@ -61,7 +61,7 @@ export function StepSidebar({
                                 <div
                                     style={{
                                         fontSize: 13,
-                                        color: "#9A9A9A",
+                                        color: "var(--color-text-disabled)",
                                         marginTop: 4,
                                     }}
                                 >
@@ -79,7 +79,7 @@ export function StepSidebar({
                                         right: 17,
                                         width: 2,
                                         height: 30,
-                                        background: "#E0E0E0",
+                                        background: "var(--color-border-subtle)",
                                     }}
                                 />
                             )}
@@ -98,7 +98,7 @@ export function StepSidebar({
                                         right: 17,
                                         width: 2,
                                         height: 40,
-                                        background: "#E0E0E0",
+                                        background: "var(--color-border-subtle)",
                                     }}
                                 />
                             )}

@@ -125,7 +125,7 @@ export function buildTokenSpanHtml(opts: {
 	cursorPointer?: boolean;
 }): string {
 	const { className, dataMain, refIndex, color, label, cursorPointer } = opts;
-	return `<span class="${className}" data-main="${escapeHtml(dataMain)}" data-ref-index="${refIndex}" contenteditable="false" style="display:inline-block;margin:0 2px;padding:0 6px;border-radius:4px;background:${color};color:#fff;font-size:12px;line-height:1.6;vertical-align:middle;user-select:text;${cursorPointer ? 'cursor:pointer;' : ''}">${escapeHtml(label)}</span>`;
+	return `<span class="${className}" data-main="${escapeHtml(dataMain)}" data-ref-index="${refIndex}" contenteditable="false" style="display:inline-block;margin:0 2px;padding:0 6px;border-radius:4px;background:${color};color:var(--color-text-on-action);font-size:12px;line-height:1.6;vertical-align:middle;user-select:text;${cursorPointer ? 'cursor:pointer;' : ''}">${escapeHtml(label)}</span>`;
 }
 
 export function buildInlineHtml(
@@ -154,7 +154,7 @@ export function buildInlineHtml(
 				className,
 				dataMain: p.value,
 				refIndex: idx++,
-				color: extractColorFromSourceRef(src) ?? '#2372ba',
+				color: extractColorFromSourceRef(src) ?? 'var(--color-action-primary)',
 				label: src ? visibleFromSourceRef(src) : id,
 				cursorPointer,
 			})

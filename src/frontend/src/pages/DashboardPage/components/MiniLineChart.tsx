@@ -56,7 +56,7 @@ export function MiniLineChart({ series, height = 220, yFormat }: Props) {
                                 x2={width - PADDING.right}
                                 y1={y}
                                 y2={y}
-                                stroke="#e5e7eb"
+                                style={{ stroke: 'var(--color-border-subtle)' }}
                                 strokeDasharray={i === 0 ? undefined : '3 3'}
                             />
                             <text
@@ -65,7 +65,7 @@ export function MiniLineChart({ series, height = 220, yFormat }: Props) {
                                 textAnchor="end"
                                 dominantBaseline="middle"
                                 fontSize={10}
-                                fill="#6b7280"
+                                style={{ fill: 'var(--color-text-secondary)' }}
                             >
                                 {yFormat ? yFormat(tick) : Math.round(tick)}
                             </text>
@@ -85,7 +85,7 @@ export function MiniLineChart({ series, height = 220, yFormat }: Props) {
                             <path
                                 d={path}
                                 fill="none"
-                                stroke={s.color}
+                                style={{ stroke: s.color }}
                                 strokeWidth={2}
                                 strokeLinejoin="round"
                                 strokeLinecap="round"
@@ -96,7 +96,7 @@ export function MiniLineChart({ series, height = 220, yFormat }: Props) {
                                     cx={xFor(i, s.points.length)}
                                     cy={yFor(p.value)}
                                     r={2.5}
-                                    fill={s.color}
+                                    style={{ fill: s.color }}
                                 />
                             ))}
                         </g>
@@ -110,7 +110,7 @@ export function MiniLineChart({ series, height = 220, yFormat }: Props) {
                         y={height - PADDING.bottom + 16}
                         textAnchor="middle"
                         fontSize={10}
-                        fill="#6b7280"
+                        style={{ fill: 'var(--color-text-secondary)' }}
                     >
                         {label}
                     </text>

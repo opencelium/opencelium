@@ -15,7 +15,7 @@ const FieldsSection = ({label, children}: FieldsSectionTypes) => {
             <div style={{
                 margin: '0px 0px 10px',
                 fontSize: '12px',
-                color: 'rgb(102, 102, 102)'
+                color: 'var(--color-text-secondary)'
             }}>
                 <MetaText i18nKey={label} typoProps={{variant: 'section-label', isBold: true}}/>
             </div>{/*

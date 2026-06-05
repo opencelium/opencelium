@@ -127,8 +127,8 @@ export const ReferenceInfo: React.FC<ReferenceInfoProps> = ({
 						}}
 						onMouseEnter={(e) => {
 							const el = e.currentTarget as HTMLDivElement;
-							el.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.15)';
-							el.style.background = '#f5f5f5';
+							el.style.boxShadow = 'var(--shadow-md)';
+							el.style.background = 'var(--color-background-hover)';
 						}}
 						onMouseLeave={(e) => {
 							const el = e.currentTarget as HTMLDivElement;
@@ -139,7 +139,7 @@ export const ReferenceInfo: React.FC<ReferenceInfoProps> = ({
 						<div style={{ marginBottom: 4 }}>
 							<span
 								style={{
-									color: '#357EDD',
+									color: 'var(--color-action-primary)',
 									fontFamily: 'monospace',
 									fontWeight: 600,
 								}}
@@ -166,14 +166,14 @@ export const ReferenceInfo: React.FC<ReferenceInfoProps> = ({
 										gap: 4,
 										padding: '4px 6px',
 										borderRadius: 6,
-										border: '1px solid #e0e0e0',
-										background: '#fafafa',
+										border: '1px solid var(--color-border-subtle)',
+										background: 'var(--color-background-hover)',
 									}}
 								>
 									<span
 										style={{
 											backgroundColor: r.method?.color || r.color,
-											color: 'white',
+											color: 'var(--color-text-on-action)',
 											padding: '2px 6px',
 											borderRadius: 4,
 											fontWeight: 600,

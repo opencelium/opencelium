@@ -224,7 +224,7 @@ export function SystemConfigPage() {
                             {t('system-config.page.title')}
                         </Typography>
                     </h1>
-                    <div style={{color: '#888'}}>
+                    <div style={{color: 'var(--color-text-secondary)'}}>
                         <Typography variant="body">
                             {t('system-config.page.subtitle')}
                         </Typography>

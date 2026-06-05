@@ -6,8 +6,8 @@
 }
 
 .cron-cell__chip {
-    font-family: var(--typography-fontFamily-mono);
-    font-size: var(--typography-fontSize-sm);
+    font-family: var(--typography-font-family-mono);
+    font-size: var(--typography-font-size-sm);
     line-height: 1.4;
     padding: 2px 8px;
     border-radius: var(--radius-sm);

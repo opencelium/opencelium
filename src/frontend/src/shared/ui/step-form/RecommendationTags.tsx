@@ -19,7 +19,7 @@ export function RecommendationTags({
             <div
                 style={{
                     fontSize: 14,
-                    color: "#888",
+                    color: "var(--color-text-secondary)",
                     marginBottom: 12,
                     textAlign: 'left'
                 }}
@@ -42,10 +42,10 @@ export function RecommendationTags({
                             style={{
                                 padding: "6px 14px",
                                 borderRadius: 20,
-                                border: "1px solid #E0E0E0",
+                                border: "1px solid var(--color-border-subtle)",
                                 textDecoration: "none",
                                 fontSize: 13,
-                                color: "#6F4FF2",
+                                color: "var(--color-action-primary)",
                                 transition: "all 0.2s ease",
                             }}
                         >

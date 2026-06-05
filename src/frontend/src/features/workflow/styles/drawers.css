@@ -1,6 +1,6 @@
 .contextMenuSection + .contextMenuSection {
   padding-top: 14px;
-  border-top: 1px dashed #9ca3af;
+  border-top: 1px dashed var(--color-border-strong);
 }
 
 .contextMenuEditor {
@@ -13,15 +13,15 @@
 .contextMenuInput {
   width: 100%;
   height: 38px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--color-border-default);
   border-radius: 10px;
   padding: 0 12px;
   outline: 0;
 }
 
 .contextMenuInput:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  border-color: var(--color-action-primary);
+  box-shadow: 0 0 0 3px var(--color-action-primary-subtle);
 }
 
 .contextMenuActions {
@@ -31,8 +31,8 @@
 }
 
 .contextMenuActionButton {
-  border: 1px solid #d1d5db;
-  background: #fff;
+  border: 1px solid var(--color-border-default);
+  background: var(--color-background-surface);
   border-radius: 8px;
   height: 32px;
   padding: 0 12px;
@@ -40,24 +40,24 @@
 }
 
 .contextMenuActionButtonPrimary {
-  background: #2563eb;
-  border-color: #2563eb;
-  color: #fff;
+  background: var(--color-action-primary);
+  border-color: var(--color-action-primary);
+  color: var(--color-text-on-action);
 }
 
 .contextMenuItem {
   padding: 10px 12px;
   border-radius: 10px;
   font-size: 15px;
-  color: #111827;
+  color: var(--color-text-primary);
   transition:
     background 0.16s ease,
     color 0.16s ease;
 }
 
 .contextMenuItem:hover {
-  background: #eef4ff;
-  color: #1d4ed8;
+  background: var(--color-action-primary-subtle);
+  color: var(--color-action-primary-hover);
 }
 
 .contextMenuItemIndented {
@@ -86,9 +86,9 @@
   right: 0;
   width: 300px;
   max-width: 84vw;
-  background: #fff;
-  border-left: 1px solid #e5e7eb;
-  box-shadow: -8px 0 30px rgba(0, 0, 0, 0.08);
+  background: var(--color-background-surface);
+  border-left: 1px solid var(--color-border-subtle);
+  box-shadow: var(--shadow-lg);
   transform: translateX(100%);
   transition: transform 0.22s ease;
   z-index: 35;
@@ -110,7 +110,7 @@
 
 .drawerHeader {
   padding: 16px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--color-border-subtle);
   display: flex;
   justify-content: space-between;
   gap: 12px;
@@ -148,7 +148,7 @@
 
 .drawerSubTitle {
   margin-top: 4px;
-  color: #6b7280;
+  color: var(--color-text-secondary);
   font-size: 13px;
 }
 
@@ -161,7 +161,7 @@
 .searchInput {
   width: 100%;
   height: 38px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--color-border-default);
   border-radius: 10px;
   padding: 0 12px;
   margin-bottom: 12px;

@@ -56,7 +56,7 @@ export const UsageBar: React.FC<{ used: number; total: number; lang: string }> =
                         left: percent,
                         transform: 'translateX(-50%)',
                         background: 'var(--color-action-primary, #1677ff)',
-                        color: '#fff',
+                        color: 'var(--color-text-on-action)',
                         padding: '2px 8px',
                         borderRadius: 4,
                         fontSize: 12,

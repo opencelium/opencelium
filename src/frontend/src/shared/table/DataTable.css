@@ -15,5 +15,5 @@
     background: var(--color-background-surface);
     padding: 12px;
 
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border-default);
 }

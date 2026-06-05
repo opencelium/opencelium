@@ -5,9 +5,9 @@ import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { systemHealth, type HealthSlice } from '../dashboard.mock'
 
 const sliceColor: Record<HealthSlice['key'], string> = {
-    healthy: '#16a34a',
-    warning: '#ea580c',
-    critical: '#dc2626',
+    healthy: 'var(--color-status-success-fg)',
+    warning: 'var(--color-status-warning-fg)',
+    critical: 'var(--color-status-error-fg)',
 }
 
 const SIZE = 140
@@ -57,7 +57,7 @@ export function SystemHealthCard() {
                             cy={SIZE / 2}
                             r={RADIUS}
                             fill="none"
-                            stroke="#eef0f3"
+                            style={{ stroke: 'var(--color-border-subtle)' }}
                             strokeWidth={STROKE}
                         />
                         {segments.map((segment) => (
@@ -67,7 +67,7 @@ export function SystemHealthCard() {
                                 cy={SIZE / 2}
                                 r={RADIUS}
                                 fill="none"
-                                stroke={segment.color}
+                                style={{ stroke: segment.color }}
                                 strokeWidth={STROKE}
                                 strokeDasharray={segment.dasharray}
                                 strokeDashoffset={segment.dashoffset}

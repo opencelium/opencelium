@@ -108,9 +108,9 @@ export const AntSelectImpl: SelectComponent = ({
                         <div
                             style={{
                                 padding: 8,
-                                borderBottom: '1px solid #f0f0f0',
+                                borderBottom: '1px solid var(--color-border-subtle)',
                                 cursor: 'pointer',
-                                color: '#1890ff',
+                                color: 'var(--color-action-primary)',
                             }}
                             onMouseDown={(e) => e.preventDefault()}
                             onClick={() => window.open(createOptionUrl, '_blank', 'noopener,noreferrer')}
@@ -123,9 +123,9 @@ export const AntSelectImpl: SelectComponent = ({
                         <div
                             style={{
                                 padding: 8,
-                                borderTop: '1px solid #f0f0f0',
+                                borderTop: '1px solid var(--color-border-subtle)',
                                 cursor: 'pointer',
-                                color: '#1890ff'
+                                color: 'var(--color-action-primary)'
                             }}
                             onMouseDown={(e) => e.preventDefault()}
                             onClick={handleCreate}

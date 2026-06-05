@@ -4,8 +4,8 @@ import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { MiniLineChart, type Series } from './MiniLineChart'
 import { executionsChart } from '../dashboard.mock'
 
-const EXECUTIONS_COLOR = '#2563eb'
-const FAILURES_COLOR = '#dc2626'
+const EXECUTIONS_COLOR = 'var(--color-action-primary)'
+const FAILURES_COLOR = 'var(--color-status-error-fg)'
 
 export function ExecutionsChartCard() {
     const { t } = useI18n('dashboard')

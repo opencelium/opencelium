@@ -31,9 +31,9 @@ export function StepCircle({
             <div
                 style={{
                     ...baseStyle,
-                    backgroundColor: "#7BC67B",
-                    color: "white",
-                    border: `2px solid #7BC67B`,
+                    backgroundColor: "var(--color-status-success-fg)",
+                    color: "var(--color-text-on-action)",
+                    border: `2px solid var(--color-status-success-fg)`,
                 }}
             >
                 ✓
@@ -46,9 +46,9 @@ export function StepCircle({
             style={{
                 ...baseStyle,
                 border: `2px solid ${
-                    isActive ? "#6F4FF2" : "#D6D6D6"
+                    isActive ? "var(--color-action-primary)" : "var(--color-border-default)"
                 }`,
-                color: isActive ? "#6F4FF2" : "#9A9A9A",
+                color: isActive ? "var(--color-action-primary)" : "var(--color-text-disabled)",
             }}
         >
             {index + 1}

@@ -1,11 +1,6 @@
 import type {ThemeTokens} from "@shared/theme/tokens.ts";
 
-export const ThemeName = {
-    Light: 'light',
-    Dark: 'dark',
-} as const;
-
-export type ThemeName = typeof ThemeName[keyof typeof ThemeName];
+export type ThemeMode = 'light' | 'dark';
 
 export type UISystem = 'material' | 'ant' | 'custom';
 
@@ -16,7 +11,8 @@ export interface SystemContextValue {
 
 export interface ThemeContextValue {
     theme: ThemeTokens;
-    themeName: ThemeName;
-    setTheme: (name: ThemeName) => void;
+    themeId: string;
+    themeMode: ThemeMode;
+    setTheme: (id: string) => void;
     toggleTheme: () => void;
 }

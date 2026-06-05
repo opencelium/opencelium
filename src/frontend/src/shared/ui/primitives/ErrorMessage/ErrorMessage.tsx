@@ -5,9 +5,9 @@ const ErrorMessage = ({message}: {message: string | ReactNode}) => (
     <div style={{
         padding: '10px 14px',
         borderRadius: 'var(--radius-sm)',
-        background: 'rgba(255,77,79,0.08)',
-        border: '1px solid #ff4d4f',
-        color: '#ff4d4f',
+        background: 'var(--color-status-error-bg)',
+        border: '1px solid var(--color-status-error-border)',
+        color: 'var(--color-status-error-fg)',
     }}>
         {message}
     </div>

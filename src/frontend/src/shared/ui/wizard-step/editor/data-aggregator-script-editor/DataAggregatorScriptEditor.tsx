@@ -16,15 +16,15 @@ interface DataAggregatorScriptEditorProps {
 }
 
 const panelStyle: React.CSSProperties = {
-    border: '1px solid #d9d9d9',
+    border: '1px solid var(--color-border-default)',
     borderRadius: 4,
     overflow: 'hidden',
     width: '100%',
 }
 
 const panelHeaderStyle: React.CSSProperties = {
-    background: '#f5f5f5',
-    borderBottom: '1px solid #d9d9d9',
+    background: 'var(--color-background-hover)',
+    borderBottom: '1px solid var(--color-border-default)',
     padding: '2px 8px',
 }
 
@@ -63,15 +63,15 @@ export function DataAggregatorScriptEditor({ name, label, mode }: DataAggregator
             {/* Section 1: header comment as pre + var declarations in ace */}
             <div style={panelStyle}>
                 <div style={panelHeaderStyle}>
-                    <span style={{ fontSize: 11, color: '#888' }}>Auto-generated (read-only)</span>
+                    <span style={{ fontSize: 11, color: 'var(--color-text-secondary)' }}>Auto-generated (read-only)</span>
                 </div>
                 <pre style={{
                     fontFamily: 'monospace',
                     fontSize: 12,
-                    color: '#998',
+                    color: 'var(--color-text-secondary)',
                     margin: 0,
                     padding: '6px 4px 0 4px',
-                    background: '#fff',
+                    background: 'var(--color-background-surface)',
                     lineHeight: '14px',
                 }}>
                     {SECTION1_HEADER}
@@ -93,15 +93,15 @@ export function DataAggregatorScriptEditor({ name, label, mode }: DataAggregator
             <style>{`.oc-script-arg-not-exist { position: absolute; background: rgba(255,77,79,0.35); }`}</style>
             <div style={panelStyle}>
                 <div style={panelHeaderStyle}>
-                    <span style={{ fontSize: 11, color: '#888' }}>Your script</span>
+                    <span style={{ fontSize: 11, color: 'var(--color-text-secondary)' }}>Your script</span>
                 </div>
                 <pre style={{
                     fontFamily: 'monospace',
                     fontSize: 12,
-                    color: '#998',
+                    color: 'var(--color-text-secondary)',
                     margin: 0,
                     padding: '6px 4px 0 4px',
-                    background: '#fff',
+                    background: 'var(--color-background-surface)',
                     lineHeight: '14px',
                 }}>
                     {SECTION2_COMMENT}
@@ -122,7 +122,7 @@ export function DataAggregatorScriptEditor({ name, label, mode }: DataAggregator
             </div>
 
             {error && (
-                <span style={{ color: '#ff4d4f', fontSize: 12 }}>
+                <span style={{ color: 'var(--color-status-error-fg)', fontSize: 12 }}>
                     {t(error, { defaultValue: error })}
                 </span>
             )}

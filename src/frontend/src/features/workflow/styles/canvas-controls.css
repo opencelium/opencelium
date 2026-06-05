@@ -86,7 +86,7 @@
 
 .addLine {
   position: absolute;
-  background: #9ca3af;
+  background: var(--color-border-strong);
 }
 
 .addTriggerRight .addLine {
@@ -108,12 +108,12 @@
   width: 22px;
   height: 22px;
   border-radius: 999px;
-  border: 1px solid #d1d5db;
-  background: #fff;
+  border: 1px solid var(--color-border-default);
+  background: var(--color-background-surface);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #4b5563;
+  color: var(--color-text-secondary);
 }
 
 .addTrigger:focus .addCircle,

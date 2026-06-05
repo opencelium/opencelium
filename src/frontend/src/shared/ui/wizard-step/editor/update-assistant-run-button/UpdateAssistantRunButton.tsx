@@ -42,19 +42,19 @@ export function UpdateAssistantRunButton({ name, label, mode }: Props) {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {confirmed && (
-                <div style={{ color: '#faad14', fontSize: 13 }}>
+                <div style={{ color: 'var(--color-status-warning-fg)', fontSize: 13 }}>
                     {t('update-assistant.update.confirm')}
                 </div>
             )}
 
             {isSuccess && (
-                <div style={{ color: '#52c41a', fontSize: 13 }}>
+                <div style={{ color: 'var(--color-status-success-fg)', fontSize: 13 }}>
                     {t('update-assistant.update.success')}
                 </div>
             )}
 
             {isError && (
-                <div style={{ color: '#ff4d4f', fontSize: 13 }}>
+                <div style={{ color: 'var(--color-status-error-fg)', fontSize: 13 }}>
                     {t('update-assistant.update.error')}
                 </div>
             )}

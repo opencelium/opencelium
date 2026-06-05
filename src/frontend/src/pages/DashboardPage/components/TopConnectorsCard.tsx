@@ -5,9 +5,9 @@ import { topConnectors } from '../dashboard.mock'
 import { formatNumber, formatPercent } from '../utils/format'
 
 const failureColor = (rate: number): string => {
-    if (rate >= 5) return '#dc2626'
-    if (rate >= 1) return '#ea580c'
-    return '#16a34a'
+    if (rate >= 5) return 'var(--color-status-error-fg)'
+    if (rate >= 1) return 'var(--color-status-warning-fg)'
+    return 'var(--color-status-success-fg)'
 }
 
 export function TopConnectorsCard() {
@@ -22,7 +22,7 @@ export function TopConnectorsCard() {
                         gridTemplateColumns: '1.6fr 1fr 1fr',
                         gap: 8,
                         padding: '6px 0',
-                        borderBottom: '1px solid #eef0f3',
+                        borderBottom: '1px solid var(--color-border-subtle)',
                     }}
                 >
                     <Typography variant="caption" isSubtle isBold>

@@ -39,14 +39,14 @@ export const WizardModeEditor: React.FC<WizardModeEditorProps> = ({ name }) => {
                             width: 8,
                             height: 8,
                             borderRadius: '50%',
-                            backgroundColor: '#10b981'
+                            backgroundColor: 'var(--color-status-success-fg)'
                         }} />
                     )}
                 </div>
             ),
             content: (
                 <Card style={{  marginTop: 10 }}>
-                    <div style={{ marginBottom: 20, paddingBottom: 15, borderBottom: '1px solid #f0f0f0' }}>
+                    <div style={{ marginBottom: 20, paddingBottom: 15, borderBottom: '1px solid var(--color-border-subtle)' }}>
                         <FormCheckbox
                             name={`${modePath}.enabled`}
                             label={`Enable ${mode.label} mode`}
@@ -83,7 +83,7 @@ export const WizardModeEditor: React.FC<WizardModeEditorProps> = ({ name }) => {
                         <div style={{
                             padding: '10px 0',
                             textAlign: 'center',
-                            color: '#999',
+                            color: 'var(--color-text-disabled)',
                             fontSize: '14px'
                         }}>
                             This mode is currently disabled and won't be generated.

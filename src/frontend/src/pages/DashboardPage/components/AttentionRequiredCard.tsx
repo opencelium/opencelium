@@ -5,15 +5,15 @@ import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { attentionItems, type AttentionSeverity } from '../dashboard.mock'
 
 const severityColor: Record<AttentionSeverity, string> = {
-    critical: '#dc2626',
-    warning: '#ea580c',
-    info: '#2563eb',
+    critical: 'var(--color-status-error-fg)',
+    warning: 'var(--color-status-warning-fg)',
+    info: 'var(--color-status-info-fg)',
 }
 
 const severityBg: Record<AttentionSeverity, string> = {
-    critical: 'rgba(220, 38, 38, 0.12)',
-    warning: 'rgba(234, 88, 12, 0.14)',
-    info: 'rgba(37, 99, 235, 0.12)',
+    critical: 'var(--color-status-error-bg)',
+    warning: 'var(--color-status-warning-bg)',
+    info: 'var(--color-status-info-bg)',
 }
 
 export function AttentionRequiredCard() {

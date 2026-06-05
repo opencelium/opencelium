@@ -8,8 +8,8 @@
 .sidebarItem {
   width: 100%;
   text-align: left;
-  border: 1px solid #e5e7eb;
-  background: #fff;
+  border: 1px solid var(--color-border-subtle);
+  background: var(--color-background-surface);
   border-radius: 12px;
   padding: 14px 12px;
   cursor: pointer;
@@ -44,12 +44,12 @@
 }
 
 .sidebarItem:hover {
-  background: #f9fafb;
-  border-color: #d1d5db;
+  background: var(--color-background-hover);
+  border-color: var(--color-border-default);
 }
 
 .sidebarItem span {
-  color: #6b7280;
+  color: var(--color-text-secondary);
   font-size: 12px;
   line-height: 1.35;
 }
@@ -64,8 +64,8 @@
 }
 
 .historyItem {
-  border: 1px solid #e5e7eb;
-  background: #fff;
+  border: 1px solid var(--color-border-subtle);
+  background: var(--color-background-surface);
   border-radius: 10px;
   padding: 10px 12px;
   display: flex;
@@ -76,10 +76,10 @@
 }
 
 .historyItem:hover {
-  background: #f9fafb;
+  background: var(--color-background-hover);
 }
 
 .historyItem span,
 .historyItem small {
-  color: #6b7280;
+  color: var(--color-text-secondary);
 }

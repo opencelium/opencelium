@@ -226,9 +226,9 @@ export const UrlEndpointField: React.FC<Props> = ({
 				gap: 8,
 				minHeight: 48,
 				padding: '11px 14px',
-				border: '1px solid #d9d9d9',
+				border: '1px solid var(--color-border-default)',
 				borderRadius: 8,
-				background: readOnly ? '#fafafa' : '#fff',
+				background: readOnly ? 'var(--color-background-disabled)' : 'var(--color-background-surface)',
 			}}
 		>
 			<div

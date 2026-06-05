@@ -17,7 +17,7 @@
 .conditionBuilderModal .ant-modal-header {
 	margin: 0;
 	padding: 18px 24px;
-	border-bottom: 1px solid #e5e5e5;
+	border-bottom: 1px solid var(--color-border-subtle);
 }
 
 .conditionBuilderModal .ant-modal-title {
@@ -28,7 +28,7 @@
 .conditionBuilderModal .ant-modal-close {
 	top: 16px;
 	right: 18px;
-	color: #2f68b7;
+	color: var(--color-action-primary);
 }
 
 .conditionClose {
@@ -68,14 +68,14 @@
 	gap: 10px;
 	padding-bottom: 10px;
 	overflow-x: visible;
-	border: 1px solid #dcc896;
+	border: 1px solid var(--color-status-warning-border);
 	border-radius: 5px;
-	background: rgba(250, 240, 210, 0.5);
+	background: var(--color-status-warning-bg);
 }
 
 .conditionGroupInvalid {
-	border-color: #d8b85f;
-	background: #fff8e8;
+	border-color: var(--color-status-warning-border);
+	background: var(--color-status-warning-bg);
 }
 
 .conditionLoopGroup {
@@ -109,9 +109,9 @@
 .conditionGroupToggle button {
 	min-width: 34px;
 	height: 24px;
-	border: 1px solid #aaa;
-	background: #aaa;
-	color: #000;
+	border: 1px solid var(--color-border-default);
+	background: var(--color-background-disabled);
+	color: var(--color-text-primary);
 	font-size: 12px;
 	cursor: pointer;
 }
@@ -125,33 +125,33 @@
 }
 
 .conditionGroupToggle button.active {
-	border-color: #4778be;
-	background: #4778be;
-	color: #fff;
+	border-color: var(--color-action-primary);
+	background: var(--color-action-primary);
+	color: var(--color-text-on-action);
 }
 
 .conditionGroupToggle button:disabled {
-	border-color: #d2d0ca;
-	background: #d2d0ca;
-	color: #fff;
+	border-color: var(--color-border-default);
+	background: var(--color-background-disabled);
+	color: var(--color-text-on-action);
 	cursor: default;
 }
 
 .conditionGroupInvalid .conditionGroupToggle button {
-	border-color: #a42525;
-	background: #a42525;
-	color: #fff;
+	border-color: var(--color-status-error-fg);
+	background: var(--color-status-error-fg);
+	color: var(--color-text-on-action);
 }
 
 .conditionGroupInvalid .conditionGroupToggle button.active {
-	border-color: #a42525;
-	background: #a42525;
-	color: #fff;
+	border-color: var(--color-status-error-fg);
+	background: var(--color-status-error-fg);
+	color: var(--color-text-on-action);
 }
 
 .conditionGroupError {
 	margin-left: 8px;
-	color: #a42525;
+	color: var(--color-status-error-fg);
 	font-size: 12px;
 	line-height: 1.2;
 }
@@ -164,7 +164,7 @@
 .conditionGroupActions .ant-btn {
 	height: 30px;
 	border-radius: 4px;
-	background: #4778be;
+	background: var(--color-action-primary);
 	font-size: 14px;
 }
 
@@ -182,7 +182,7 @@
 	bottom: var(--condition-tree-bottom, 24px);
 	left: 11px;
 	box-sizing: border-box;
-	border-color: #ccc;
+	border-color: var(--color-border-default);
 	border-style: solid;
 	border-width: 0 0 0 2px;
 	content: '';
@@ -200,7 +200,7 @@
 	box-sizing: border-box;
 	width: 13px;
 	height: 0;
-	border-color: #ccc;
+	border-color: var(--color-border-default);
 	border-style: solid;
 	border-width: 0 0 2px;
 	content: '';
@@ -223,7 +223,7 @@
 	min-height: 48px;
 	padding: 10px;
 	border-radius: 5px;
-	background: #fff;
+	background: var(--color-background-surface);
 }
 
 .conditionRule:not(.conditionRuleLoop)::before {
@@ -234,7 +234,7 @@
 	box-sizing: border-box;
 	width: 13px;
 	height: 0;
-	border-color: #ccc;
+	border-color: var(--color-border-default);
 	border-style: solid;
 	border-width: 0 0 2px;
 	content: '';
@@ -272,7 +272,7 @@
 	width: 30px;
 	height: 14px;
 	margin: 0;
-	color: #111;
+	color: var(--color-text-primary);
 	font-size: 12px;
 	line-height: 1;
 	cursor: pointer;
@@ -282,7 +282,7 @@
 	width: 12px;
 	height: 10px;
 	margin: 0 0 0 2px;
-	accent-color: #4778be;
+	accent-color: var(--color-action-primary);
 }
 
 .conditionRadioIcon {
@@ -291,7 +291,7 @@
 	height: 14px;
 	align-items: center;
 	justify-content: center;
-	color: #111;
+	color: var(--color-text-primary);
 	font-size: 12px;
 }
 
@@ -372,5 +372,5 @@
 	min-width: 24px;
 	height: 24px;
 	padding: 0;
-	color: #111;
+	color: var(--color-text-primary);
 }

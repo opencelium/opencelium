@@ -7,11 +7,11 @@ import type { HttpMethod } from "../model/types";
 const INDENT_STEP = 22;
 
 const METHOD_COLORS: Record<HttpMethod, string> = {
-  GET: "#1677ff",
-  POST: "#52c41a",
-  PUT: "#fa8c16",
-  DELETE: "#ff4d4f",
-  PATCH: "#722ed1",
+  GET: "var(--color-status-info-fg)",
+  POST: "var(--color-status-success-fg)",
+  PUT: "var(--color-status-warning-fg)",
+  DELETE: "var(--color-status-error-fg)",
+  PATCH: "var(--color-action-secondary)",
 };
 
 const badgeBase: React.CSSProperties = {
@@ -22,13 +22,13 @@ const badgeBase: React.CSSProperties = {
   borderRadius: 4,
   fontSize: 12,
   fontWeight: 600,
-  color: "#fff",
+  color: "var(--color-text-on-action)",
   lineHeight: 1,
   whiteSpace: "nowrap",
 };
 
 export function MethodBadge({ method }: { method: string }) {
-  const color = METHOD_COLORS[method as HttpMethod] ?? "#8c8c8c";
+  const color = METHOD_COLORS[method as HttpMethod] ?? "var(--color-text-secondary)";
   return <span style={{ ...badgeBase, backgroundColor: color }}>{method}</span>;
 }
 
@@ -37,7 +37,7 @@ export function StatusBadge({ status }: { status: string }) {
   const isOk = Number.isFinite(code) && code >= 200 && code < 400;
   return (
     <span
-      style={{ ...badgeBase, backgroundColor: isOk ? "#52c41a" : "#ff4d4f" }}
+      style={{ ...badgeBase, backgroundColor: isOk ? "var(--color-status-success-fg)" : "var(--color-status-error-fg)" }}
     >
       {status}
     </span>

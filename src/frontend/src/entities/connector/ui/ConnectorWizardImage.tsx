@@ -17,10 +17,10 @@ const wrapperStyle = {
 const frameStyle = {
     width: 120,
     height: 120,
-    border: '5px solid var(--oc-color-border, #000)',
+    border: '5px solid var(--color-border-strong)',
     borderRadius: '50%',
     boxSizing: 'border-box',
-    background: 'var(--oc-color-surface, #fff)',
+    background: 'var(--color-background-surface)',
     overflow: 'hidden',
     display: 'flex',
     alignItems: 'center',

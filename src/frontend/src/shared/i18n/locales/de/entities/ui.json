@@ -29,5 +29,16 @@
   "messages": {
     "themeUpdated": "Design aktualisiert",
     "commandModeUpdated": "Commander-Modus aktualisiert"
+  },
+  "customTheme": {
+    "title": "Eigenes Design",
+    "description": "Wählen Sie Ihre drei Hauptfarben — Primärfarbe, Akzentfarbe und Neutralton. Daraus wird ein vollständiges helles und dunkles Design erzeugt und der Designliste hinzugefügt.",
+    "primary": "Primärfarbe",
+    "accent": "Akzentfarbe",
+    "neutral": "Neutralton",
+    "apply": "Eigenes Design anwenden",
+    "remove": "Eigenes Design entfernen",
+    "applied": "Eigenes Design angewendet",
+    "removed": "Eigenes Design entfernt"
   }
 }

@@ -1,27 +1,45 @@
+export type StatusTokens = {
+    fg: string
+    bg: string
+    border: string
+}
+
 export type ThemeTokens = {
     color: {
         text: {
             primary: string
             secondary: string
+            disabled: string
             inverted: string
             onAction: string
         }
         background: {
             app: string
+            page: string
             surface: string
             elevated: string
-            page: string
+            hover: string
+            disabled: string
         }
         border: {
             subtle: string
-            strong: string
             default: string
+            strong: string
         }
         action: {
             primary: string
             primaryHover: string
+            primaryActive: string
+            primarySubtle: string
             secondary: string
             danger: string
+            dangerHover: string
+        }
+        status: {
+            success: StatusTokens
+            warning: StatusTokens
+            error: StatusTokens
+            info: StatusTokens
         }
     }
 

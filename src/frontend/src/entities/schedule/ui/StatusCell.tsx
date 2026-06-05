@@ -19,8 +19,8 @@ type Props = {
 type RingStatus = 'success' | 'exception'
 type PlayVariant = 'bare' | 'neutral' | RingStatus
 
-const NEUTRAL_STROKE = '#bfbfbf'
-const NEUTRAL_TRAIL = '#f0f0f0'
+const NEUTRAL_STROKE = 'var(--color-border-strong)'
+const NEUTRAL_TRAIL = 'var(--color-border-subtle)'
 
 const START_ERROR_DURATION_SEC = 8
 const CIRCLE_SIZE = 28

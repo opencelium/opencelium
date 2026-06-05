@@ -18,7 +18,7 @@ export function LiveStatusIndicator({ status }: { status: LiveLogNode["status"] 
         height: 8,
         borderRadius: "50%",
         display: "inline-block",
-        backgroundColor: status === "COMPLETE" ? "#52c41a" : "#ff4d4f",
+        backgroundColor: status === "COMPLETE" ? "var(--color-status-success-fg)" : "var(--color-status-error-fg)",
       }}
     />
   );

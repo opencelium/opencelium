@@ -12,11 +12,11 @@ const CredentialsSectionOverride: React.FC<SectionOverrideProps> = ({
     return (
         <div
             style={{
-                border: '1px solid #ddd',
+                border: '1px solid var(--color-border-default)',
                 padding: 20,
                 borderRadius: 8,
                 marginBottom: 20,
-                background: '#fafafa'
+                background: 'var(--color-background-hover)'
             }}
         >
             <h3 style={{ marginBottom: 16 }}>

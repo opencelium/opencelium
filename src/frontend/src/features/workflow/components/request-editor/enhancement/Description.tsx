@@ -26,7 +26,7 @@ const Description = ({ onChangeDescription, description, readOnly }: Description
 	}, [description, localValue, onChangeDescription]);
 
 	return (
-		<div style={{ borderTop: '1px solid #f0f0f0', paddingTop: 8 }}>
+		<div style={{ borderTop: '1px solid var(--color-border-subtle)', paddingTop: 8 }}>
 			<div className='bodyLegacyDescriptionHeader'>
 				<b>Description</b>
 				<Button

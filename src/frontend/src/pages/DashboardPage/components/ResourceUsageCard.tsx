@@ -6,8 +6,8 @@ import { MiniLineChart, type Series } from './MiniLineChart'
 import { resourceUsage, type ResourceSeries } from '../dashboard.mock'
 import { formatBytes, formatPercent } from '../utils/format'
 
-const CPU_COLOR = '#7c3aed'
-const MEMORY_COLOR = '#16a34a'
+const CPU_COLOR = 'var(--color-action-secondary)'
+const MEMORY_COLOR = 'var(--color-status-success-fg)'
 
 export function ResourceUsageCard() {
     const { t, lang } = useI18n('dashboard')

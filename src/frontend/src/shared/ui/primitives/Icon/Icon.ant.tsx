@@ -104,7 +104,7 @@ export const AntIcon: IconComponent = ({
             className={className}
             style={{
                 fontSize: size,
-                color: isSubtle ? 'rgb(102, 102, 102)' : colorMap[color],
+                color: isSubtle ? 'var(--color-text-secondary)' : colorMap[color],
             }}
             onClick={onClick}
         />

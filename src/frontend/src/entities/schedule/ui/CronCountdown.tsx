@@ -41,7 +41,7 @@ export function CronCountdown({cronExp}: Props) {
     if (nextMs == null) return null
 
     return (
-        <span style={{fontSize: 9, color: '#888', lineHeight: 1, whiteSpace: 'nowrap', position: 'absolute', marginTop: 45}}>
+        <span style={{fontSize: 9, color: 'var(--color-text-secondary)', lineHeight: 1, whiteSpace: 'nowrap', position: 'absolute', marginTop: 45}}>
             {formatRemaining(nextMs - now)}
         </span>
     )

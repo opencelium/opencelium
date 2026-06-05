@@ -29,10 +29,10 @@ const METHOD_OPTIONS: RadioOption[] = [
 ]
 
 const METHOD_COLORS: Record<string, string> = {
-    GET: '#1677ff',
-    POST: '#52c41a',
-    PUT: '#fa8c16',
-    DELETE: '#ff4d4f',
+    GET: 'var(--color-action-primary)',
+    POST: 'var(--color-status-success-fg)',
+    PUT: 'var(--color-status-warning-fg)',
+    DELETE: 'var(--color-status-error-fg)',
 }
 
 const DATA_OPTIONS: RadioOption[] = [
@@ -139,7 +139,7 @@ function JsonEditorField({
 
     return (
         <FormControl label={label} name={name} error={localError}>
-            <div style={{ border: '1px solid #d9d9d9', borderRadius: 4, overflow: 'hidden', width: '100%' }}>
+            <div style={{ border: '1px solid var(--color-border-default)', borderRadius: 4, overflow: 'hidden', width: '100%' }}>
                 <AceEditor
                     mode="json"
                     theme="github"
@@ -242,7 +242,7 @@ function OperationItemHeader({
         >
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: 1 }}>
                 {testConnection && (
-                    <span style={{ color: '#faad14', fontSize: 14, flexShrink: 0 }}>★</span>
+                    <span style={{ color: 'var(--color-status-warning-fg)', fontSize: 14, flexShrink: 0 }}>★</span>
                 )}
                 <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, fontWeight: 500 }}>
                     {name || '(unnamed)'}
@@ -255,7 +255,7 @@ function OperationItemHeader({
                             width: 8,
                             height: 8,
                             borderRadius: '50%',
-                            background: '#ff4d4f',
+                            background: 'var(--color-status-error-fg)',
                             flexShrink: 0,
                             display: 'inline-block',
                         }}
@@ -264,8 +264,8 @@ function OperationItemHeader({
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
                 <span
                     style={{
-                        background: METHOD_COLORS[method] ?? '#888',
-                        color: '#fff',
+                        background: METHOD_COLORS[method] ?? 'var(--color-text-secondary)',
+                        color: 'var(--color-text-on-action)',
                         borderRadius: 4,
                         padding: '2px 7px',
                         fontSize: 11,

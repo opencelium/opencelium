@@ -7,9 +7,9 @@ type Props = {
 
 function resolveBackground(row: SupportFile): string {
     const status = extractRunStatus(row.supportFile)
-    if (status === 'success') return '#c3f5c3'
-    if (status === 'fail') return '#f5c3c3'
-    return '#cccccc'
+    if (status === 'success') return 'var(--color-status-success-bg)'
+    if (status === 'fail') return 'var(--color-status-error-bg)'
+    return 'var(--color-background-disabled)'
 }
 
 export function StatusCell({ row }: Props) {

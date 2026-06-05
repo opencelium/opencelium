@@ -1,5 +1,4 @@
 import React from "react";
-import {ThemeName} from "@shared/theme/types.ts";
 import { DialogProvider } from '@/shared/ui/dialog/DialogContext';
 import {KitProvider} from "@app/providers/ui/KitProvider.tsx";
 import {ThemeProvider} from "@app/providers/ui/ThemeProvider.tsx";
@@ -13,7 +12,7 @@ type Props = {
 export function UIProviders({ children }: Props) {
     return (
         <KitProvider initialSystem="ant">
-            <ThemeProvider initialTheme={ThemeName.Light}>
+            <ThemeProvider initialThemeId="ant-light">
                 <ThemeBridge>
                     <ConfirmDialogProvider>
                         {/*

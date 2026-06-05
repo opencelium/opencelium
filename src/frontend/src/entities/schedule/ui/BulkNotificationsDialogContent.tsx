@@ -127,7 +127,7 @@ export function BulkNotificationsDialogContent({ schedulerIds, onClose, onCreate
                             <Typography variant="title" as="h2">
                                 {tEntities('schedule.notifications.bulk.title')}
                             </Typography>
-                            <div style={{ color: '#888' }}>
+                            <div style={{ color: 'var(--color-text-secondary)' }}>
                                 <Typography variant="body">
                                     {tEntities('schedule.notifications.bulk.subtitle', {
                                         count: schedulerIds.length,

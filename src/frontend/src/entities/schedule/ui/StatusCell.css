@@ -1,6 +1,6 @@
 @keyframes schedule-row-highlight-pulse {
     0% {
-        background-color: rgba(22, 119, 255, 0.25);
+        background-color: var(--color-action-primary-subtle);
     }
     100% {
         background-color: transparent;

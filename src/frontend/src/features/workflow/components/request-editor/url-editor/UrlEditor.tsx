@@ -401,9 +401,9 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 			{!readOnly && isEndpointReferenceGeneratorOpen ? (
 				<div
 					style={{
-						border: '1px solid #f0f0f0',
+						border: '1px solid var(--color-border-subtle)',
 						borderRadius: 12,
-						background: '#fff',
+						background: 'var(--color-background-surface)',
 						padding: 12,
 					}}
 				>

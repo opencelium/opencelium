@@ -45,7 +45,7 @@ export const MaterialDropzone: DropzoneComponent = ({
                 borderRadius: 'var(--radius-md)',
                 padding: '24px 16px',
                 background: isDragging
-                    ? 'var(--color-action-primary-subtle, rgba(25,118,210,0.05))'
+                    ? 'var(--color-action-primary-subtle)'
                     : 'var(--color-background-surface)',
                 cursor: disabled ? 'not-allowed' : 'pointer',
                 display: 'flex',
