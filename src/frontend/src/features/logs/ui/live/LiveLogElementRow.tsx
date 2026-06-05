@@ -45,21 +45,38 @@ function LiveErrorRow({ node, depth }: { node: LiveLogNode; depth: number }) {
   );
 }
 
+// Same parent-owned expansion contract as the REST tree: a loop keeps its
+// children's open state keyed by position, so it survives iteration switches
+// even though each iteration renders different rows.
+type ChildExpansion = {
+  isOpen: (index: number) => boolean;
+  toggle: (index: number) => void;
+};
+
 export function LiveChildren({
   tree,
   childKeys,
   depth,
+  expansion,
 }: {
   tree: LiveLogTree;
   childKeys: string[];
   depth: number;
+  expansion?: ChildExpansion;
 }) {
   return (
     <>
-      {childKeys.map((key) => {
+      {childKeys.map((key, index) => {
         const node = tree.nodes[key];
         return node ? (
-          <LiveLogElementRow key={key} tree={tree} node={node} depth={depth} />
+          <LiveLogElementRow
+            key={key}
+            tree={tree}
+            node={node}
+            depth={depth}
+            expanded={expansion ? expansion.isOpen(index) : undefined}
+            onToggle={expansion ? () => expansion.toggle(index) : undefined}
+          />
         ) : null;
       })}
     </>
@@ -70,14 +87,32 @@ export function LiveLogElementRow({
   tree,
   node,
   depth,
+  expanded: expandedProp,
+  onToggle,
 }: {
   tree: LiveLogTree;
   node: LiveLogNode;
   depth: number;
+  // When `onToggle` is provided the row is controlled by its parent loop so
+  // the open state persists across iteration changes.
+  expanded?: boolean;
+  onToggle?: () => void;
 }) {
-  const [expanded, setExpanded] = useState(false);
+  const [internalExpanded, setInternalExpanded] = useState(false);
   const [iterationPos, setIterationPos] = useState(0);
-  const toggle = () => setExpanded((v) => !v);
+  // Per-position open state of this row's children, kept across iteration
+  // changes (only consumed by the LOOP branch).
+  const [expandedChildren, setExpandedChildren] = useState<Record<number, boolean>>({});
+
+  const isControlled = onToggle !== undefined;
+  const expanded = isControlled ? !!expandedProp : internalExpanded;
+  const toggle = isControlled ? onToggle : () => setInternalExpanded((v) => !v);
+
+  const childExpansion: ChildExpansion = {
+    isOpen: (index) => !!expandedChildren[index],
+    toggle: (index) =>
+      setExpandedChildren((prev) => ({ ...prev, [index]: !prev[index] })),
+  };
 
   switch (node.type) {
     case "OPERATION": {
@@ -148,12 +183,18 @@ export function LiveLogElementRow({
           <LiveErrorRow node={node} depth={depth + 1} />
           {expanded ? (
             showStored ? (
-              <LiveChildren tree={tree} childKeys={node.childKeys} depth={depth + 1} />
+              <LiveChildren
+                tree={tree}
+                childKeys={node.childKeys}
+                depth={depth + 1}
+                expansion={childExpansion}
+              />
             ) : node.id ? (
               <ElementChildren
                 id={node.id}
                 loopIndex={position}
                 depth={depth + 1}
+                expansion={childExpansion}
                 path={node.key}
               />
             ) : null
