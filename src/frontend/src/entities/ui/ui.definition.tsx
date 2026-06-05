@@ -143,10 +143,19 @@ export const uiDefinition: EntityDefinition = {
                     children: [{
                         type: 'entity',
                         name: 'theme',
-                        resolve: async () => [
-                            DEVICE_THEME_ID,
-                            ...themeRegistry.getAll().map(t => t.id),
-                        ],
+                        resolve: async (input) => {
+                            const all = [
+                                DEVICE_THEME_ID,
+                                ...themeRegistry.getAll().map(t => t.id),
+                            ];
+                            const query = typeof input === 'string' ? input.trim().toLowerCase() : '';
+                            if (!query) return all;
+                            // match ids and display labels ("opencelium" finds ci-light/ci-dark)
+                            return all.filter(id =>
+                                id.toLowerCase().includes(query) ||
+                                themeRegistry.get(id)?.label.toLowerCase().includes(query)
+                            );
+                        },
                         execute: ({ theme }) => {
                             if (typeof theme !== 'string') return;
                             if (theme !== DEVICE_THEME_ID && !themeRegistry.has(theme)) return;

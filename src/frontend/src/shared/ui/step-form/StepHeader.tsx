@@ -41,15 +41,31 @@ export function StepHeader({
         }}
     >
         {typeof image === "string" ? (
-            <img
-                src={image}
-                alt="wizard"
+            // Square frame keeps the radius a true circle regardless of the
+            // gif's aspect ratio; the image sits slightly inset so it isn't cropped.
+            <div
                 style={{
-                    maxWidth: "100%",
-                    maxHeight: "100%",
-                    objectFit: "contain",
+                    width: 100,
+                    height: 100,
+                    borderRadius: '50%',
+                    background: 'white',
+                    overflow: 'hidden',
+                    flexShrink: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                 }}
-            />
+            >
+                <img
+                    src={image}
+                    alt="wizard"
+                    style={{
+                        width: "85%",
+                        height: "85%",
+                        objectFit: "contain",
+                    }}
+                />
+            </div>
         ) : (
             image
         )}
