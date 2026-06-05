@@ -2,6 +2,10 @@
   "api": {
     "unauthorized": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
     "forbidden": "Ihre Sitzung ist abgelaufen",
+    "unknown": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+    "validation": "Die Anfrage wurde als ungültig abgelehnt. Bitte überprüfen Sie Ihre Eingaben.",
+    "notFound": "Die angeforderte Ressource wurde nicht gefunden.",
+    "default": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
     "unknownError": "Unbekannter Fehler in {{place}}",
     "login": {
       "network": "Der Server ist nicht erreichbar. Bitte versuchen Sie es erneut.",

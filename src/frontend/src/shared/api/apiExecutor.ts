@@ -17,7 +17,7 @@ export type ApiExecutorOptions = {
 
 type ApiExecutorArgs = {
     url: string
-    method: 'GET' | 'POST' | 'PUT' | 'PATCH'
+    method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
     body?: any
     options?: ApiExecutorOptions
 }

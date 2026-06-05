@@ -6,6 +6,7 @@ import type {
     OperationUsageQuery,
     OperationUsageRow,
     PagedResponse,
+    SyncStatus,
 } from '@entities/subscription/model/types'
 import { SUBSCRIPTION_TAG } from '@entities/subscription/api/subscription.tags'
 
@@ -14,6 +15,10 @@ export const subscriptionApi = baseApi.injectEndpoints({
         getActiveSubscription: b.query<ActiveSubscription, void>({
             query: () => '/subs/active',
             providesTags: [{ type: SUBSCRIPTION_TAG, id: 'ACTIVE' }],
+        }),
+        getSyncStatus: b.query<SyncStatus, void>({
+            query: () => '/sync-history/status',
+            providesTags: [{ type: SUBSCRIPTION_TAG, id: 'SYNC' }],
         }),
         getOperationUsage: b.query<
             PagedResponse<OperationUsageRow>,
@@ -38,6 +43,7 @@ export const subscriptionApi = baseApi.injectEndpoints({
 
 export const {
     useGetActiveSubscriptionQuery,
+    useGetSyncStatusQuery,
     useGetOperationUsageQuery,
     useGetOperationUsageDetailsQuery,
 } = subscriptionApi

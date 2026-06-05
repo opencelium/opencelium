@@ -30,6 +30,40 @@
     "infinite": "∞",
     "usageOf": "{{used}} / {{total}}"
   },
+  "manage": {
+    "noSubscription": "Kein aktives Abonnement.",
+    "error": "Die Aktion ist fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    "generateRequest": {
+      "button": "Aktivierungsanfrage erstellen",
+      "success": "Aktivierungsanfrage wurde heruntergeladen."
+    },
+    "importLicense": {
+      "button": "Lizenz importieren",
+      "success": "Lizenz wurde importiert."
+    },
+    "activate": {
+      "button": "Aktivieren",
+      "dialogTitle": "Lizenz aktivieren",
+      "placeholder": "Abonnement auswählen…",
+      "cancel": "Abbrechen",
+      "submit": "Lizenz aktivieren",
+      "success": "Lizenz wurde aktiviert."
+    },
+    "extraOps": {
+      "button": "Extra Ops",
+      "success": "Zusätzliche Aufrufe wurden importiert."
+    },
+    "deleteLicense": {
+      "button": "Lizenz löschen",
+      "confirmTitle": "Lizenz löschen",
+      "confirmMessage": "Möchten Sie die aktuelle Lizenz wirklich löschen?",
+      "success": "Lizenz wurde gelöscht."
+    },
+    "activateFree": {
+      "button": "Kostenlose Lizenz aktivieren",
+      "success": "Kostenlose Lizenz wurde aktiviert."
+    }
+  },
   "columns": {
     "connection": "Verbindung",
     "apiOperations": "API-Aufrufe",

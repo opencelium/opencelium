@@ -31,7 +31,7 @@ export const AntButton: ButtonComponent = ({
                 <Icon name={iconLeft} size={16} color="inherit"/>
             )}
             {loading && <div style={{display: 'inline', marginRight: 5} }><Loading size="xs" inline /></div>}
-            {!loading && children}
+            {children}
             {!loading && iconRight && (
                 <Icon name={iconRight} size={16} color="inherit"/>
             )}

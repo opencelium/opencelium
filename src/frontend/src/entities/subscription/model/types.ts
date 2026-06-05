@@ -29,6 +29,17 @@ export type ActiveSubscription = {
     extraOps: number | null
 }
 
+export type SyncStatus = {
+    active: boolean
+    invoker_sync: { active: boolean }
+    template_sync: { active: boolean }
+}
+
+export type SubscriptionListItem = {
+    _id: string
+    subscriptionType: string
+}
+
 export type OperationUsageRow = {
     id: number
     licenseId: string

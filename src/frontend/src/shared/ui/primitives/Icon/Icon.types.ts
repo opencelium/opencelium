@@ -19,6 +19,8 @@ export type IconName =
     | 'play'
     | 'stop'
     | 'download'
+    | 'upload'
+    | 'key'
     | 'convert'
     | 'filter'
     | 'search'

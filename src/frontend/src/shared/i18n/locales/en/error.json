@@ -2,6 +2,10 @@
   "api": {
     "unauthorized": "Your session has expired. Please log in again.",
     "forbidden": "Your session is expired",
+    "unknown": "An unexpected error occurred. Please try again.",
+    "validation": "The request was rejected as invalid. Please check your input.",
+    "notFound": "The requested resource was not found.",
+    "default": "An unexpected error occurred. Please try again.",
     "unknownError": "Unknown Error in {{place}}",
     "login": {
       "network": "Could not reach the server. Please try again.",

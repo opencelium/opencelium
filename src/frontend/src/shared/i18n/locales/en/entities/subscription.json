@@ -30,6 +30,40 @@
     "infinite": "∞",
     "usageOf": "{{used}} / {{total}}"
   },
+  "manage": {
+    "noSubscription": "No active subscription.",
+    "error": "The operation failed. Please try again.",
+    "generateRequest": {
+      "button": "Generate Activation Request",
+      "success": "Activation request downloaded."
+    },
+    "importLicense": {
+      "button": "Import License",
+      "success": "License imported."
+    },
+    "activate": {
+      "button": "Activate",
+      "dialogTitle": "Activate License",
+      "placeholder": "Select a subscription…",
+      "cancel": "Cancel",
+      "submit": "Activate License",
+      "success": "License activated."
+    },
+    "extraOps": {
+      "button": "Extra Ops",
+      "success": "Extra operations imported."
+    },
+    "deleteLicense": {
+      "button": "Delete License",
+      "confirmTitle": "Delete license",
+      "confirmMessage": "Are you sure you want to delete the current license?",
+      "success": "License deleted."
+    },
+    "activateFree": {
+      "button": "Activate Free License",
+      "success": "Free license activated."
+    }
+  },
   "columns": {
     "connection": "Connection",
     "apiOperations": "API Operations",
