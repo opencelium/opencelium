@@ -30,6 +30,12 @@
     "infinite": "∞",
     "usageOf": "{{used}} / {{total}}"
   },
+  "banner": {
+    "noSubscription": "Es ist kein aktives Abonnement vorhanden. Bitte aktivieren Sie eine Lizenz.",
+    "expired": "Ihr Abonnement ist abgelaufen. Bitte erneuern Sie Ihre Lizenz.",
+    "opsLimit": "Sie haben Ihr Limit an API-Aufrufen erreicht. Bitte erweitern Sie Ihre Lizenz.",
+    "link": "Zur Lizenzseite"
+  },
   "manage": {
     "noSubscription": "Kein aktives Abonnement.",
     "error": "Die Aktion ist fehlgeschlagen. Bitte versuchen Sie es erneut.",

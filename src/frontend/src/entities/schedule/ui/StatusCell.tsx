@@ -6,6 +6,7 @@ import {Tooltip} from '@shared/ui/primitives/Tooltip'
 import {useGeneralRequestMutation} from '@shared/api/genericApi'
 import {useI18n} from '@shared/i18n/hooks/useI18n'
 import {useCurrentSchedules} from '@entities/schedule/socket/useCurrentSchedules'
+import {useSubscriptionIssue} from '@entities/subscription/model/useSubscriptionIssue'
 import {CronCountdown} from '@entities/schedule/ui/CronCountdown'
 import type {Schedule, ScheduleExecutionRun} from '../model/types'
 import {Icon} from "@shared/ui/primitives/Icon";
@@ -165,10 +166,20 @@ function FinishedCircle({schedule, lastProgressPercent}: {schedule: Schedule; la
     )
 }
 
-function PlayControl({schedule, variant}: {schedule: Schedule; variant: PlayVariant}) {
+function PlayControl({
+    schedule,
+    variant,
+    blockedHint,
+}: {
+    schedule: Schedule
+    variant: PlayVariant
+    blockedHint: string | null
+}) {
     const {t: tEntities} = useI18n('entities')
     const [generalRequest] = useGeneralRequestMutation()
     const [pending, setPending] = useState(false)
+    const isBlocked = blockedHint != null
+    const tooltip = blockedHint ?? tEntities('schedule.start.tooltip')
 
     const handleClick = async () => {
         setPending(true)
@@ -191,14 +202,18 @@ function PlayControl({schedule, variant}: {schedule: Schedule; variant: PlayVari
 
     if (variant === 'bare') {
         return (
-            <Tooltip content={tEntities('schedule.start.tooltip')}>
-                <IconButton
-                    iconProps={{name: 'play', color: 'primary'}}
-                    size="xs"
-                    type="text"
-                    loading={pending}
-                    onClick={handleClick}
-                />
+            <Tooltip content={tooltip}>
+                {/* span keeps tooltip hover events alive over a disabled button */}
+                <span style={{display: 'inline-flex'}}>
+                    <IconButton
+                        iconProps={{name: 'play', color: isBlocked ? 'default' : 'primary', isSubtle: isBlocked}}
+                        size="xs"
+                        type="text"
+                        loading={pending}
+                        disabled={isBlocked}
+                        onClick={handleClick}
+                    />
+                </span>
             </Tooltip>
         )
     }
@@ -209,34 +224,43 @@ function PlayControl({schedule, variant}: {schedule: Schedule; variant: PlayVari
             : {status: variant}
 
     return (
-        <Tooltip content={tEntities('schedule.start.tooltip')}>
-            <button
-                type="button"
-                onClick={handleClick}
-                disabled={pending}
-                style={{
-                    border: 'none',
-                    background: 'transparent',
-                    padding: 0,
-                    cursor: pending ? 'wait' : 'pointer',
-                    display: 'inline-flex',
-                    lineHeight: 0,
-                }}
-            >
-                <Progress
-                    type="circle"
-                    percent={100}
-                    size={CIRCLE_SIZE}
-                    {...ringProps}
-                    format={() =>
-                        pending ? (
-                            <Loading inline size="xs" />
-                        ) : (
-                            <Icon name="play" size={14} color="primary" />
-                        )
-                    }
-                />
-            </button>
+        <Tooltip content={tooltip}>
+            {/* span keeps tooltip hover events alive over a disabled button */}
+            <span style={{display: 'inline-flex'}}>
+                <button
+                    type="button"
+                    onClick={handleClick}
+                    disabled={pending || isBlocked}
+                    style={{
+                        border: 'none',
+                        background: 'transparent',
+                        padding: 0,
+                        cursor: isBlocked ? 'not-allowed' : pending ? 'wait' : 'pointer',
+                        opacity: isBlocked ? 0.5 : 1,
+                        display: 'inline-flex',
+                        lineHeight: 0,
+                    }}
+                >
+                    <Progress
+                        type="circle"
+                        percent={100}
+                        size={CIRCLE_SIZE}
+                        {...ringProps}
+                        format={() =>
+                            pending ? (
+                                <Loading inline size="xs" />
+                            ) : (
+                                <Icon
+                                    name="play"
+                                    size={14}
+                                    color={isBlocked ? 'default' : 'primary'}
+                                    isSubtle={isBlocked}
+                                />
+                            )
+                        }
+                    />
+                </button>
+            </span>
         </Tooltip>
     )
 }
@@ -244,6 +268,7 @@ function PlayControl({schedule, variant}: {schedule: Schedule; variant: PlayVari
 function pickBody(
     schedule: Schedule,
     status: ReturnType<ReturnType<typeof useCurrentSchedules>['getRunStatus']>,
+    blockedHint: string | null,
 ): ReactNode {
     switch (status.kind) {
         case 'running':
@@ -264,7 +289,7 @@ function pickBody(
         case 'idle': {
             const ring = resolveRing(schedule)
             const variant: PlayVariant = ring ?? (schedule.cronExp?.trim() ? 'bare' : 'neutral')
-            return <PlayControl schedule={schedule} variant={variant} />
+            return <PlayControl schedule={schedule} variant={variant} blockedHint={blockedHint} />
         }
         default: {
             const _exhaustive: never = status
@@ -275,13 +300,16 @@ function pickBody(
 
 export const StatusCell = memo(function StatusCell({schedule}: Props) {
     const {getRunStatus} = useCurrentSchedules()
+    const {t: tEntities} = useI18n('entities')
+    const {issue} = useSubscriptionIssue()
     const status = getRunStatus(schedule.schedulerId)
+    const blockedHint = issue ? tEntities(`subscription.banner.${issue}` as never) : null
     return (
         <div className="status-cell">
             <div style={{minHeight: 34}}>
-                {pickBody(schedule, status)}
+                {pickBody(schedule, status, blockedHint)}
             </div>
-            <CronCountdown cronExp={schedule.cronExp} />
+            {!issue && <CronCountdown cronExp={schedule.cronExp} />}
         </div>
     )
 })

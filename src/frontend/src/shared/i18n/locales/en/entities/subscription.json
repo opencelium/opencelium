@@ -30,6 +30,12 @@
     "infinite": "∞",
     "usageOf": "{{used}} / {{total}}"
   },
+  "banner": {
+    "noSubscription": "There is no active subscription. Please activate a license.",
+    "expired": "Your subscription has expired. Please renew your license.",
+    "opsLimit": "You have reached your API operation limit. Please upgrade your license.",
+    "link": "Go to license page"
+  },
   "manage": {
     "noSubscription": "No active subscription.",
     "error": "The operation failed. Please try again.",

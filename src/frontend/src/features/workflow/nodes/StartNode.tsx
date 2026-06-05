@@ -5,6 +5,7 @@ import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { NodeShell } from './NodeShell';
 import { useTestRun } from '../test-run/useTestRun';
+import { useSubscriptionIssue } from '@entities/subscription/model/useSubscriptionIssue';
 import type { StartWorkflowNode } from '../types/workflow.types';
 
 export function StartNode({
@@ -14,6 +15,7 @@ export function StartNode({
 }: NodeProps<StartWorkflowNode>) {
 	const testRun = useTestRun();
 	const { t: tEntities } = useI18n('entities');
+	const { issue: subscriptionIssue } = useSubscriptionIssue();
 
 	const socketStatus = testRun?.socketStatus ?? 'idle';
 	const phase = testRun?.phase ?? 'idle';
@@ -21,9 +23,11 @@ export function StartNode({
 	const isSocketConnecting = socketStatus === 'idle' || socketStatus === 'connecting';
 	const isRunning = phase === 'starting' || phase === 'running';
 	const isBusy = phase === 'starting' || phase === 'stopping';
+	// A blocked subscription forbids starting a test run, but stopping a running one stays allowed.
+	const isSubscriptionBlocked = subscriptionIssue !== null && !isRunning;
 
 	const handleClick = () => {
-		if (!testRun || !isSocketConnected || isBusy) return;
+		if (!testRun || !isSocketConnected || isBusy || isSubscriptionBlocked) return;
 		if (isRunning) void testRun.stopTest();
 		else void testRun.startTest();
 	};
@@ -50,6 +54,16 @@ export function StartNode({
 			</div>
 		) : null;
 
+	const subscriptionAlert =
+		testRun && isSubscriptionBlocked ? (
+			<div className='startNodeAlert'>
+				<TriangleAlert size={12} />
+				<span>
+					{tEntities(`subscription.banner.${subscriptionIssue}` as never)}
+				</span>
+			</div>
+		) : null;
+
 	const button = (
 		<button
 			type='button'
@@ -57,10 +71,10 @@ export function StartNode({
 				'startNode',
 				'startNodeButton',
 				isRunning ? 'startNodeRunning' : '',
-				!isSocketConnected ? 'startNodeUnavailable' : '',
+				!isSocketConnected || isSubscriptionBlocked ? 'startNodeUnavailable' : '',
 			].join(' ')}
 			onClick={handleClick}
-			disabled={!isSocketConnected || isBusy}
+			disabled={!isSocketConnected || isBusy || isSubscriptionBlocked}
 			aria-label={tEntities(isRunning ? 'connection.test.stop' : 'connection.test.start')}
 		>
 			{icon}
@@ -73,7 +87,7 @@ export function StartNode({
 			data={data}
 			selected={selected}
 			bottomLabel={data.title}
-			bottomExtra={socketAlert}
+			bottomExtra={subscriptionAlert ?? socketAlert}
 			rightAdd={{
 				action: { sourceNodeId: id, direction: 'right' },
 				showAlways: !!data.alwaysShowRightAdd,
@@ -84,13 +98,15 @@ export function StartNode({
 				<div className='startNode'>
 					<Play size={26} />
 				</div>
-			) : isSocketConnected ? (
+			) : isSocketConnected && !isSubscriptionBlocked ? (
 				<Tooltip
 					content={tEntities(isRunning ? 'connection.test.stop' : 'connection.test.start')}
 				>
 					{button}
 				</Tooltip>
 			) : (
+				// The disabled button swallows hover events; the alert below the
+				// node already explains why the test run is unavailable.
 				button
 			)}
 
