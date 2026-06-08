@@ -25,10 +25,18 @@
     "saved": "Configuration saved.",
     "noChanges": "No changes to save.",
     "saveFailed": "Failed to save configuration.",
-    "loadFailed": "Failed to load configuration."
+    "loadFailed": "Failed to load configuration.",
+    "reset": "Configuration reloaded from the server."
   },
   "restart": {
     "title": "Restart required",
     "message": "Configuration saved. Restart the server for changes to take effect."
+  },
+  "masterPassword": {
+    "title": "Enter the master password to view and edit the system configuration.",
+    "info": {
+      "title": "Master Password",
+      "content": "The system configuration is protected. Enter the master password to unlock it."
+    }
   }
 }

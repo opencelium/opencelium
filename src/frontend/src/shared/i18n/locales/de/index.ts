@@ -6,6 +6,7 @@ import auth from './auth.json'
 import error from './error.json'
 import logs from './logs.json'
 import workflow from './workflow.json'
+import widget from './widget.json'
 
 export default {
     common,
@@ -16,4 +17,5 @@ export default {
     error,
     logs,
     workflow,
+    widget,
 }

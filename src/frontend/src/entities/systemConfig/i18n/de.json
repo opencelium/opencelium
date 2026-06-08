@@ -25,10 +25,18 @@
     "saved": "Konfiguration gespeichert.",
     "noChanges": "Keine Änderungen zum Speichern.",
     "saveFailed": "Konfiguration konnte nicht gespeichert werden.",
-    "loadFailed": "Konfiguration konnte nicht geladen werden."
+    "loadFailed": "Konfiguration konnte nicht geladen werden.",
+    "reset": "Konfiguration vom Server neu geladen."
   },
   "restart": {
     "title": "Neustart erforderlich",
     "message": "Konfiguration gespeichert. Starten Sie den Server neu, damit die Änderungen wirksam werden."
+  },
+  "masterPassword": {
+    "title": "Geben Sie das Master-Passwort ein, um die Systemkonfiguration anzuzeigen und zu bearbeiten.",
+    "info": {
+      "title": "Master-Passwort",
+      "content": "Die Systemkonfiguration ist geschützt. Geben Sie das Master-Passwort ein, um sie freizuschalten."
+    }
   }
 }

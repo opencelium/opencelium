@@ -7,9 +7,9 @@ import {Loading} from "@shared/ui/primitives/Loading/Loading.tsx";
 import {Hint} from "@shared/ui/primitives/Hint";
 import {capitalizeWords} from "@shared/utils/stringUtils.ts";
 import {useI18n} from "@shared/i18n/hooks/useI18n.ts";
-import MasterPasswordDialog from "@widgets/MasterPasswordDialog/MasterPasswordDialog.tsx";
+import {MasterPasswordDialog} from "@features/master-password";
 import type {Mode} from "@/engine/entity/EntityDefinition.ts";
-import {useAppStore} from "@app/store/app.store.ts";
+import {useMasterPasswordStore} from "@features/master-password";
 import {useGetConnectorMutation} from "@entities/connector/api/connectorApi.ts";
 import {useParams} from "react-router-dom";
 interface CredentialEditorProps {
@@ -72,7 +72,7 @@ export function formatLabel(value: string): string {
 export const CredentialEditor: React.FC<CredentialEditorProps> = ({ name, label, mode }) => {
     const { t: commonT } = useI18n('common');
     const { watch, setValue } = useFormContext();
-    const {masterPassword} = useAppStore();
+    const {masterPassword} = useMasterPasswordStore();
     const { id: routeId } = useParams();
     const {
         formState,

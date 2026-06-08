@@ -3,7 +3,7 @@ import { baseApi } from '@/shared/api/baseApi'
 export const masterPasswordApi = baseApi.injectEndpoints({
     endpoints: (b) => ({
         checkMasterPassword: b.mutation<
-            any,
+            unknown,
             { masterPassword: string }
         >({
             query: ({ masterPassword }) => ({
@@ -13,13 +13,11 @@ export const masterPasswordApi = baseApi.injectEndpoints({
                     'x-master-password': masterPassword,
                 },
                 customOptions: {
-                    ignoreError: true
-                }
+                    ignoreError: true,
+                },
             }),
         }),
     }),
 })
 
-export const {
-    useCheckMasterPasswordMutation,
-} = masterPasswordApi
+export const { useCheckMasterPasswordMutation } = masterPasswordApi

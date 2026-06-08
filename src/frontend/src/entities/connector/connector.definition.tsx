@@ -12,7 +12,7 @@ import {resolveConnectorIds} from "@entities/connector/command/resolvers/resolve
 import {CONNECTOR_TAG} from "@entities/connector/api/connector.tags.ts";
 import {connectorApi} from "@entities/connector/api/connectorApi.ts";
 import {showApiError} from "@shared/api/handleApiError.ts";
-import {useAppStore} from "@app/store/app.store.ts";
+import {useMasterPasswordStore} from "@features/master-password";
 import {renderConnectorTitle} from "@entities/connector/ui/renderConnectorTitle";
 import {hasConnectorIconFile, uploadConnectorIcon} from "@entities/connector/model/connectorIconUpload";
 
@@ -71,13 +71,13 @@ export const connectorDefinition: EntityDefinition = {
                     ...ctx.formData.requestData,
                 }),
                 mapHeaders: (ctx) => {
-                    const masterPassword = useAppStore.getState().masterPassword
+                    const masterPassword = useMasterPasswordStore.getState().masterPassword
                     return {
                         'x-master-password': masterPassword,
                     }
                 },
                 condition: () => {
-                    return !!useAppStore.getState().masterPassword;
+                    return !!useMasterPasswordStore.getState().masterPassword;
                 }
             },
             uploadIcon: {
@@ -247,7 +247,7 @@ export const connectorDefinition: EntityDefinition = {
                         validate: (value, values, mode) =>
                             {
                                 if (mode === 'update') {
-                                    const masterPassword = useAppStore.getState().masterPassword
+                                    const masterPassword = useMasterPasswordStore.getState().masterPassword
                                     if (!masterPassword) {
                                         return true;
                                     }
@@ -361,7 +361,7 @@ export const connectorDefinition: EntityDefinition = {
                     ignoreError: true,
                     map: (fieldValue, formValues) => ({...formValues, invoker: {name: formValues.invoker}}),
                     shouldSkip: () => {
-                        const masterPassword = useAppStore.getState().masterPassword
+                        const masterPassword = useMasterPasswordStore.getState().masterPassword
                         return !masterPassword;
                     },
                     handleResponse: (data, error) => {

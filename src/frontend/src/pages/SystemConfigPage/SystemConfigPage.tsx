@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react'
+import React, {useCallback, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react'
 import {message} from 'antd'
 import PageWrapper from '@pages/PageWrapper/PageWrapper'
 import {Typography} from '@shared/ui/primitives/Typography'
@@ -28,17 +28,25 @@ import {
     hasAnyNodeComment,
 } from './buildTree'
 import {CommentTooltipBody} from './CommentInfo'
+import {MasterPasswordGate, useMasterPasswordStore} from '@features/master-password'
 
 type LeafValue = ConfigScalar | ConfigScalar[]
 
 export function SystemConfigPage() {
     const {t, lang} = useI18n('entities')
-    const {data, isLoading, isError, refetch} = useGetApplicationConfigQuery()
+    const {masterPassword} = useMasterPasswordStore()
+    const {data, isLoading, isFetching, isError, refetch} = useGetApplicationConfigQuery(undefined, {
+        skip: !masterPassword,
+    })
     const [updateConfig, {isLoading: isSaving}] = useUpdateApplicationConfigMutation()
     const [edits, setEdits] = useState<Record<string, NodeEdit>>({})
     const [restartRequired, setRestartRequired] = useState(false)
     const [expandedKeys, setExpandedKeys] = useState<string[] | null>(null)
     const [search, setSearch] = useState('')
+    // Filtering + the (large) tree re-render are deferred so typing stays
+    // responsive: the input tracks `search` immediately, the heavy derivations
+    // below run at lower priority off `deferredSearch`.
+    const deferredSearch = useDeferredValue(search)
 
     const fields = useMemo(() => data?.fields ?? [], [data?.fields])
 
@@ -120,7 +128,7 @@ export function SystemConfigPage() {
         }
     }, [allExpandableKeys, expandedKeys])
 
-    const isSearching = search.trim().length > 0
+    const isSearching = deferredSearch.trim().length > 0
 
     const isAllExpanded =
         allExpandableKeys.length > 0 &&
@@ -131,8 +139,8 @@ export function SystemConfigPage() {
     }, [isAllExpanded, allExpandableKeys])
 
     const displayedTreeData = useMemo(
-        () => filterTree(treeData, search),
-        [treeData, search],
+        () => filterTree(treeData, deferredSearch),
+        [treeData, deferredSearch],
     )
 
     // While searching, force every surviving branch open so matches are visible;
@@ -179,10 +187,16 @@ export function SystemConfigPage() {
 
     const isDirty = Object.keys(edits).length > 0
 
-    const handleReset = useCallback(() => {
+    const handleReset = useCallback(async () => {
         setEdits({})
         setRestartRequired(false)
-    }, [])
+        const res = await refetch()
+        if ('error' in res && res.error) {
+            message.error(t('system-config.messages.loadFailed'))
+            return
+        }
+        message.success(t('system-config.messages.reset'))
+    }, [refetch, t])
 
     const handleSave = useCallback(async () => {
         const paths = Object.keys(edits)
@@ -231,6 +245,13 @@ export function SystemConfigPage() {
                     </div>
                 </header>
 
+                <MasterPasswordGate
+                    title={t('system-config.masterPassword.title')}
+                    info={{
+                        title: t('system-config.masterPassword.info.title'),
+                        content: t('system-config.masterPassword.info.content'),
+                    }}
+                >
                 <div style={{marginTop: 16}}>
                     {isLoading && (
                         <div
@@ -327,7 +348,7 @@ export function SystemConfigPage() {
                                         onExpand={setExpandedKeys}
                                         showLine
                                         blockNode
-                                        height={isSearching ? undefined : treeHeight}
+                                        height={treeHeight}
                                         itemHeight={36}
                                     />
                                 ) : (
@@ -357,7 +378,12 @@ export function SystemConfigPage() {
                     )}
 
                     <div style={{display: 'flex', gap: 8, marginTop: 12, justifyContent: 'flex-end'}}>
-                        <Button onClick={handleReset}>
+                        <Button
+                            type="primary"
+                            onClick={handleReset}
+                            loading={isFetching}
+                            disabled={isSaving}
+                        >
                             {t('system-config.actions.reset')}
                         </Button>
                         <Button
@@ -370,6 +396,7 @@ export function SystemConfigPage() {
                         </Button>
                     </div>
                 </div>
+                </MasterPasswordGate>
             </div>
         </PageWrapper>
     )
