@@ -1,62 +1,73 @@
-﻿:orphan:
+##################
+Welcome to OpenCelium documentation
+##################
 
-#########################
-OpenCelium Documentation
-#########################
-
-This guide brings together installation instructions, operational
-runbooks, and implementation details so operators, developers, and
-solution architects can understand the platform end-to-end. Begin with
-*Getting Started* for prerequisites and installation steps, then dive
-into the remaining chapters as needed.
+This documentation is organized into a couple of sections:
 
 .. toctree::
    :caption: Getting Started
    :maxdepth: 2
 
-   gettinginvolved/index
+   gettinginvolved/introduction
+   gettinginvolved/requirements
+   gettinginvolved/installation
+   gettinginvolved/updating
+   gettinginvolved/administration
 
 .. toctree::
-   :caption: Usage
+   :caption: Usage Guide
    :maxdepth: 2
 
-   usage/index
+   usage/login
+   usage/application_management
+   usage/connectors
+   usage/connections
+   usage/schedules
+   usage/admin
 
 .. toctree::
-   :caption: Management
+   :caption: Management Reference
    :maxdepth: 2
 
-   management/index
+   management/authentication
+   management/license_management
+   management/template
+   management/notification_template
+   management/aggregator
+   management/invoker
+   management/smart_sync
 
 .. toctree::
    :caption: Services & Tools
    :maxdepth: 2
 
-   services/index
-   tools/index
+   services/db2api
+   services/csv2api
+   tools/idoit
+   tools/otrs
 
 .. toctree::
    :caption: Media & Sources
    :maxdepth: 2
 
-   media
-   sources
+    Website <https://opencelium.io>
+    Service Portal (only for subscribers) <https://service.opencelium.io>
+    Video Tutorials <https://www.youtube.com/playlist?list=PLh_5t7kd2fySIqh6XxCB94lGXvU5lXbQ4>
+    Webinars <https://www.youtube.com/playlist?list=PLh_5t7kd2fyScueyWSRhOn16acRFEBmgO>
+    Download <https://packagecloud.io/becon/opencelium/>
+    Repository <https://github.com/opencelium/opencelium/>
+    Changelog <https://github.com/opencelium/opencelium/blob/prod/CHANGELOG.rst>
 
 .. toctree::
    :caption: REST API
-   :maxdepth: 1
 
-   api/index
+   api/overview
 
-.. toctree::
-   :caption: Licence
-   :maxdepth: 1
+##################
+License
+##################
 
-   LICENSE 
+`OpenCelium`_ © 2020-2026 OpenCelium GmbH
 
-`becon`_ © 2013-2025 becon GmbH
-
-.. _becon: LICENSE.html
-
-api_docs/index
+.. _OpenCelium: LICENSE.html
       

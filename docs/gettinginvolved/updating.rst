@@ -2,6 +2,25 @@
 Updating
 ##################
 
+Compatibility Matrix
+"""""""""""""""""""""
+
+.. raw:: html
+
+	<div>The tests were conducted using the archived package version (ZIP) and the Ubuntu 24.04 LTS operating system.</div>
+
+	<br>
+
+	<div class="dt-toolbar">
+	    <div class="dt-filters row g-2"></div>
+	    <div class="dt-search ms-auto"></div>
+	</div>
+	
+	<table id="compatibility-datatable" class="table table-striped table-hover w-100"></table>
+
+| 
+|
+
 .. warning::
         | Before updating, always do a full backup of your system! 
 
