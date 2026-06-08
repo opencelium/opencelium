@@ -1,0 +1,283 @@
+{
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "apply": "Apply",
+    "close": "Close",
+    "ok": "Ok",
+    "delete": "Delete",
+    "edit": "Edit",
+    "createNew": "Create new",
+    "insertReference": "Insert reference",
+    "addAttribute": "Add attribute",
+    "addWebhook": "Add Webhook",
+    "openScriptNewWindow": "Open script in new window",
+    "load": "Load"
+  },
+  "template": {
+    "addTitle": "Add Template",
+    "loadTitle": "Load Template",
+    "nameLabel": "Name",
+    "selectPlaceholder": "Select template",
+    "loadWarning": "If you load a template, all your current workflow changes will be replaced."
+  },
+  "history": {
+    "title": "Version History",
+    "author": "Author: {{name}}",
+    "copySnapshotId": "Copy snapshotid",
+    "downloadAsTemplate": "Download as Template",
+    "commentSaved": "Comment saved.",
+    "commentSaveFailed": "Failed to save comment.",
+    "commentPlaceholder": "Comment",
+    "deleteVersion": {
+      "title": "Delete version?",
+      "message": "This action removes the selected version from history.",
+      "confirm": "Delete"
+    },
+    "unsavedChanges": {
+      "title": "Unsaved changes",
+      "confirm": "Open version"
+    }
+  },
+  "messages": {
+    "enterWorkflowName": "Please enter a workflow name",
+    "saveTemplateFailed": "Failed to save template",
+    "loadTemplatesFailed": "Failed to load templates",
+    "selectTemplate": "Please select a template",
+    "loadTemplateFailed": "Failed to load template",
+    "downloadTemplateFailed": "Failed to download template."
+  },
+  "sidebar": {
+    "useConnector": {
+      "title": "Use Connector",
+      "description": "Browse through the list of available api calls of your connector."
+    },
+    "addOperator": {
+      "title": "Add Operator",
+      "description": "Add an IF or LOOP operator."
+    },
+    "addHttpRequest": {
+      "title": "Add HTTP Request",
+      "description": "Add a simple http request and add your url."
+    },
+    "operatorOption": {
+      "if": {
+        "title": "If",
+        "description": "Branch the workflow into true and false paths."
+      },
+      "loop": {
+        "title": "Loop",
+        "description": "Repeat the workflow step sequence."
+      }
+    },
+    "operatorStep": {
+      "header": "Choose operator type",
+      "subtitle": "Select an operator",
+      "searchPlaceholder": "search operator"
+    },
+    "connectorStep": {
+      "header": "Choose connector",
+      "subtitle": "Select a connector first",
+      "searchPlaceholder": "search connector"
+    },
+    "methodStep": {
+      "header": "Choose method",
+      "subtitle": "Select a method for {{connector}}",
+      "searchPlaceholder": "search method",
+      "connectorFallback": "Connector"
+    },
+    "chooseNextStep": "Choose your next step",
+    "from": "From: {{name}}",
+    "searchPlaceholder": "search",
+    "triggerConnection": {
+      "title": "Trigger Connection",
+      "description": "Runs another connection if this step is successfully finished."
+    },
+    "connectorsLoading": {
+      "title": "Loading connectors...",
+      "description": "Please wait while connectors are loaded."
+    },
+    "connectorsError": {
+      "title": "Failed to load connectors",
+      "description": "Check the backend connection and try again."
+    },
+    "connectorsEmpty": {
+      "title": "No connectors found",
+      "description": "There are no connectors matching this search."
+    },
+    "methodsEmpty": {
+      "title": "No methods found",
+      "description": "There are no methods matching this search."
+    },
+    "methodItemText": "Invoker method",
+    "connectorMethodsFallback": "Methods from {{invoker}} invoker."
+  },
+  "headerMenu": {
+    "downloadAsTemplate": "download as template",
+    "saveAsTemplate": "save as template",
+    "loadTemplate": "load template",
+    "editorAppearance": "editor appearance",
+    "shortcuts": "shortcuts",
+    "exit": "exit"
+  },
+  "contextMenu": {
+    "changeLabel": "Change Label",
+    "openConfiguration": "Open Configuration",
+    "configureAggregator": "Configure Aggregator",
+    "runThisCallOnly": "Run This Call Only",
+    "request": "Request",
+    "editUrl": "Edit URL",
+    "editHeader": "Edit Header",
+    "editBody": "Edit Body",
+    "showResponse": "Show Response",
+    "newLabelPlaceholder": "New label"
+  },
+  "node": {
+    "if": "If",
+    "loop": "Loop",
+    "branchTrue": "true",
+    "branchFalse": "false"
+  },
+  "saveDialog": {
+    "title": "Save Version",
+    "commentPlaceholder": "Comment"
+  },
+  "placeholders": {
+    "selectMethod": "Select Method...",
+    "selectField": "Select Field...",
+    "selectOperator": "Select Operator...",
+    "selectWebhook": "Select Webhook...",
+    "constant": "Constant",
+    "selectMethodFirst": "Select method first",
+    "selectConnector": "Select connector...",
+    "noPreviousMethods": "No previous methods"
+  },
+  "conditionBuilder": {
+    "dialogTitle": "Condition",
+    "addCondition": "Add Condition",
+    "addGroup": "Add Group",
+    "source": {
+      "constant": "Constant",
+      "method": "Method",
+      "webhook": "Webhook"
+    },
+    "responseType": {
+      "body": "Body",
+      "header": "Header",
+      "status": "Status"
+    },
+    "operators": {
+      "if": {
+        "equal": "=",
+        "notEqual": "!=",
+        "like": "Like",
+        "notLike": "Not Like",
+        "greaterThan": ">",
+        "greaterOrEqual": ">=",
+        "lessThan": "<",
+        "lessOrEqual": "<=",
+        "contains": "Contains",
+        "notContains": "Not Contains",
+        "containsSubStr": "Contains Substring",
+        "notContainsSubStr": "Not Contains Substring",
+        "allowList": "Allow List",
+        "denyList": "Deny List",
+        "isTypeOf": "Is Type Of",
+        "propertyExists": "Property Exists",
+        "propertyNotExists": "Property Not Exists",
+        "regEx": "Reg Exp",
+        "isEmpty": "Is Empty",
+        "isNotEmpty": "Is Not Empty",
+        "isNull": "Is Null",
+        "isNotNull": "Is Not Null"
+      },
+      "loop": {
+        "for": "For",
+        "forIn": "ForIn",
+        "splitString": "SplitString"
+      }
+    }
+  },
+  "methodConfig": {
+    "body": "Body",
+    "header": "Header",
+    "requestUrl": "Request Url"
+  },
+  "xmlBody": {
+    "tree": "Tree",
+    "rawData": "Raw data",
+    "rawXml": "Raw XML",
+    "xmlBody": "XML body"
+  },
+  "xmlDialog": {
+    "editTag": "Edit tag",
+    "tagName": "Tag name",
+    "editText": "Edit text",
+    "textValue": "Text value",
+    "editAttribute": "Edit attribute",
+    "attributeName": "Attribute name",
+    "attributeValue": "Attribute value"
+  },
+  "xmlNode": {
+    "level": "level {{depth}}",
+    "text": "Text",
+    "textValue": "Text value",
+    "attributePlaceholder": "Attribute {{name}}",
+    "empty": "Empty"
+  },
+  "enhancement": {
+    "title": "Enhancement",
+    "language": "Language",
+    "emptyState": "Please, click on the reference to see its enhancement."
+  },
+  "description": {
+    "label": "Description"
+  },
+  "args": {
+    "fromResponseStatus": "is taken from response status of the <method></method> method.",
+    "usedAsField": "is used as the value of the <field>{{field}}</field> field in the {{location}} of the <method></method> method.",
+    "takenFromField": "is taken from the value of the <field>{{field}}</field> field in the {{location}} of the <method></method> method.",
+    "locations": {
+      "requestBody": "request body",
+      "requestHeader": "request header",
+      "requestUrl": "request url",
+      "responseStatus": "response status",
+      "responseBody": "response body",
+      "responseHeader": "response header"
+    }
+  },
+  "references": {
+    "responseStatus": "Response Status",
+    "rootObject": "The root object",
+    "firstArrayElement": "First element of the array",
+    "wholeArray": "The whole array",
+    "iteratorLoop": "({{iterator}} loop)",
+    "noVariableReferences": "No variable references"
+  },
+  "refGenerator": {
+    "connector": "Connector",
+    "method": "Method",
+    "field": "Field"
+  },
+  "webhook": {
+    "noWebhooks": "No webhooks yet",
+    "namePlaceholder": "Name",
+    "typePlaceholder": "Type"
+  },
+  "inspector": {
+    "empty": "Empty",
+    "selectField": "Select a field",
+    "clear": "Clear",
+    "selectedValue": "Selected value",
+    "mixedValueTitle": "Mixed value",
+    "mixedValueDescription": "This field should contain either plain text or references only. Mixed values are not allowed.",
+    "help": "Select a primitive field in the JSON tree to inspect and attach references."
+  },
+  "referenceInfo": {
+    "title": "Reference Information",
+    "legacyTitle": "Reference information",
+    "empty": "(is empty now)"
+  },
+  "requestData": "Request data"
+}

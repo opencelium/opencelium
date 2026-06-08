@@ -5,6 +5,7 @@ import dashboard from './dashboard.json'
 import auth from './auth.json'
 import error from './error.json'
 import logs from './logs.json'
+import workflow from './workflow.json'
 
 export default {
     common,
@@ -14,4 +15,5 @@ export default {
     auth,
     error,
     logs,
+    workflow,
 }

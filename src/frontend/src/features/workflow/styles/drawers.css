@@ -17,6 +17,8 @@
   border-radius: 10px;
   padding: 0 12px;
   outline: 0;
+  background: var(--color-background-surface);
+  color: var(--color-text-primary);
 }
 
 .contextMenuInput:focus {
@@ -37,6 +39,7 @@
   height: 32px;
   padding: 0 12px;
   cursor: pointer;
+  color: var(--color-text-primary);
 }
 
 .contextMenuActionButtonPrimary {
@@ -87,6 +90,7 @@
   width: 300px;
   max-width: 84vw;
   background: var(--color-background-surface);
+  color: var(--color-text-primary);
   border-left: 1px solid var(--color-border-subtle);
   box-shadow: var(--shadow-lg);
   transform: translateX(100%);
@@ -165,4 +169,15 @@
   border-radius: 10px;
   padding: 0 12px;
   margin-bottom: 12px;
+  background: var(--color-background-surface);
+  color: var(--color-text-primary);
+  outline: 0;
+}
+
+.searchInput::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.searchInput:focus {
+  border-color: var(--color-action-primary);
 }

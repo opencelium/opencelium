@@ -70,7 +70,7 @@
 	overflow-x: visible;
 	border: 1px solid var(--color-status-warning-border);
 	border-radius: 5px;
-	background: var(--color-status-warning-bg);
+	background: transparent;
 }
 
 .conditionGroupInvalid {
@@ -244,13 +244,13 @@
 	justify-content: flex-start;
 	width: 100%;
 	min-height: 48px;
-	padding: 10px 0;
+	padding: 10px 0 10px 8px;
 }
 
 .conditionValueInput {
 	display: flex;
 	align-items: center;
-	gap: 10px;
+	gap: 0;
 }
 
 .conditionValueInputWebhook {
@@ -259,30 +259,14 @@
 
 .conditionSourceSwitcher,
 .conditionResponseTypeSwitcher {
-	display: grid;
-	width: 30px;
-	flex: 0 0 30px;
-	overflow: hidden;
-}
-
-.conditionRadioRow {
-	display: flex;
-	align-items: center;
+	flex: 0 0 auto;
 	justify-content: center;
-	width: 30px;
-	height: 14px;
-	margin: 0;
-	color: var(--color-text-primary);
-	font-size: 12px;
-	line-height: 1;
-	cursor: pointer;
 }
 
-.conditionRadioRow input {
-	width: 12px;
-	height: 10px;
-	margin: 0 0 0 2px;
-	accent-color: var(--color-action-primary);
+/* The response-type switcher follows the method select, so keep a separating
+   gap on its left; every other seam (radio→its select) stays flush. */
+.conditionResponseTypeSwitcher {
+	margin-left: 8px;
 }
 
 .conditionRadioIcon {
@@ -372,5 +356,12 @@
 	min-width: 24px;
 	height: 24px;
 	padding: 0;
-	color: var(--color-text-primary);
+	color: var(--color-action-danger);
+}
+
+/* antd's text-button hover color has very high specificity, so force ours to
+   keep the delete affordance red on hover/focus. */
+.conditionDeleteButton.ant-btn:not(:disabled):hover,
+.conditionDeleteButton.ant-btn:not(:disabled):focus {
+	color: var(--color-action-danger-hover) !important;
 }

@@ -9,6 +9,9 @@ import {
 	isExpandableReferencePath,
 	type ResponseType,
 } from '../body-editor/requestReferenceOptions';
+import { Radio } from '@shared/ui/primitives/Radio';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
+import '../body-editor/bodyLegacy.css';
 
 interface ReferenceGeneratorProps {
 	open: boolean;
@@ -75,6 +78,7 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 	resetKey,
 	allowResponseTypes = ['body'],
 }) => {
+	const { t } = useI18n('workflow');
 	const [selectedConnector, setSelectedConnector] = useState<string>('');
 	const [isConnectorDropdownOpen, setIsConnectorDropdownOpen] =
 		useState<boolean>(false);
@@ -235,7 +239,7 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 
 		setSearchValue('');
 		setSelectedOption(null);
-		const nextOptions = getReferenceOptions(selectedMethod, responseType, '', currentMethodIterators);
+		const nextOptions = getReferenceOptions(selectedMethod, responseType, '', currentMethodIterators, t);
 		setFilteredOptions(nextOptions);
 		setDropdownPosition(null);
 		setMethodDropdownPosition(null);
@@ -352,7 +356,7 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 
 		if (!value) {
 			setSelectedOption(null);
-			setFilteredOptions(getReferenceOptions(selectedMethod, responseType, '', currentMethodIterators));
+			setFilteredOptions(getReferenceOptions(selectedMethod, responseType, '', currentMethodIterators, t));
 			return;
 		}
 
@@ -362,7 +366,7 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 			return;
 		}
 
-		const baseOptions = getReferenceOptions(selectedMethod, responseType, value, currentMethodIterators);
+		const baseOptions = getReferenceOptions(selectedMethod, responseType, value, currentMethodIterators, t);
 		const term = getReferenceFilterTerm(value);
 
 		const filtered =
@@ -392,7 +396,7 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 		setSearchValue('');
 		setSelectedOption(null);
 		if (selectedMethod) {
-			const nextOptions = getReferenceOptions(selectedMethod, nextType, '', currentMethodIterators);
+			const nextOptions = getReferenceOptions(selectedMethod, nextType, '', currentMethodIterators, t);
 			setFilteredOptions(nextOptions);
 			requestAnimationFrame(() => {
 				fieldInputRef.current?.focus();
@@ -413,7 +417,7 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 		}
 
 		if (isExpandableReferencePath(selectedMethod, responseType, opt.value, currentMethodIterators)) {
-			const nextOptions = getReferenceOptions(selectedMethod, responseType, opt.value, currentMethodIterators);
+			const nextOptions = getReferenceOptions(selectedMethod, responseType, opt.value, currentMethodIterators, t);
 			setFilteredOptions(nextOptions);
 			return;
 		}
@@ -472,10 +476,10 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 	const selectedMethodLabel = selectedMethod
 		? getMethodLabel(selectedMethod)
 		: methods.length
-			? 'Select method...'
-			: 'No previous methods';
+			? t('placeholders.selectMethod')
+			: t('placeholders.noPreviousMethods');
 
-	const selectedConnectorLabel = selectedConnector || 'Select connector...';
+	const selectedConnectorLabel = selectedConnector || t('placeholders.selectConnector');
 
 	return (
 		<>
@@ -502,7 +506,7 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 						style={{ flex: 1, position: 'relative' }}
 						ref={connectorSelectRef}
 					>
-						<div style={{ marginBottom: 4 }}>Connector</div>
+						<div style={{ marginBottom: 4 }}>{t('refGenerator.connector')}</div>
 
 						<div
 							onClick={() => {
@@ -548,7 +552,7 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 							style={{ flex: '0 0 48%', position: 'relative' }}
 							ref={methodSelectRef}
 						>
-							<div style={{ marginBottom: 4 }}>Method</div>
+							<div style={{ marginBottom: 4 }}>{t('refGenerator.method')}</div>
 
 							<div
 								onClick={() => {
@@ -617,82 +621,34 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 									gap: 8,
 								}}
 							>
-								<div>Field</div>
+								<div>{t('refGenerator.field')}</div>
 							</div>
-							<div style={{ display: 'flex', gap: 6, alignItems: 'stretch' }}>
+							<div style={{ display: 'flex', gap: 0, alignItems: 'stretch' }}>
 								{allowResponseTypes.length > 1 ? (
 									<div
-										style={{
-											display: 'flex',
-											flexDirection: 'column',
-											gap: 3,
-											flexShrink: 0,
-											minWidth: 30,
-											height: 40,
-											justifyContent: 'flex-start',
-											paddingTop: 0,
-											paddingBottom: 0,
-										}}
+										className='compactRadioGroup'
+										style={{ flexShrink: 0, justifyContent: 'center' }}
 									>
 										{allowResponseTypes.includes('body') ? (
-											<label
-												style={{
-													display: 'flex',
-													alignItems: 'center',
-													justifyContent: 'space-between',
-													gap: 4,
-													cursor: 'pointer',
-													lineHeight: 1,
-													minHeight: 11,
-												}}
-											>
-												<span style={{ fontSize: 12 }}>B</span>
-												<input
-													type='radio'
-													checked={responseType === 'body'}
-													onChange={() => applyResponseType('body')}
-												/>
-											</label>
+											<Radio
+												checked={responseType === 'body'}
+												onChange={() => applyResponseType('body')}
+												label={<span style={{ fontSize: 12 }}>B</span>}
+											/>
 										) : null}
 										{allowResponseTypes.includes('header') ? (
-											<label
-												style={{
-													display: 'flex',
-													alignItems: 'center',
-													justifyContent: 'space-between',
-													gap: 4,
-													cursor: 'pointer',
-													lineHeight: 1,
-													minHeight: 11,
-												}}
-											>
-												<span style={{ fontSize: 12 }}>H</span>
-												<input
-													type='radio'
-													checked={responseType === 'header'}
-													onChange={() => applyResponseType('header')}
-												/>
-											</label>
+											<Radio
+												checked={responseType === 'header'}
+												onChange={() => applyResponseType('header')}
+												label={<span style={{ fontSize: 12 }}>H</span>}
+											/>
 										) : null}
 										{allowResponseTypes.includes('status') ? (
-											<label
-												style={{
-													display: 'flex',
-													alignItems: 'center',
-													justifyContent: 'space-between',
-													gap: 4,
-													cursor: 'pointer',
-													lineHeight: 1,
-													minHeight: 11,
-												}}
-											>
-												<span style={{ fontSize: 12 }}>S</span>
-												<input
-													type='radio'
-													checked={responseType === 'status'}
-													onChange={() => applyResponseType('status')}
-												/>
-											</label>
+											<Radio
+												checked={responseType === 'status'}
+												onChange={() => applyResponseType('status')}
+												label={<span style={{ fontSize: 12 }}>S</span>}
+											/>
 										) : null}
 									</div>
 								) : null}
@@ -709,6 +665,7 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 											responseType,
 											path,
 											currentMethodIterators,
+											t,
 										);
 										setFilteredOptions(nextOptions);
 										updateDropdownPosition();
@@ -720,10 +677,10 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 								}}
 								placeholder={
 									!selectedMethod
-										? 'Select method first'
+										? t('placeholders.selectMethodFirst')
 										: responseType === 'status'
-										? 'Response Status'
-										: 'Select Field...'
+										? t('references.responseStatus')
+										: t('placeholders.selectField')
 								}
 								disabled={!selectedMethod || responseType === 'status'}
 								style={{
@@ -746,7 +703,7 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 				</div>
 
 				<div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-					<Button onClick={onClose}>Cancel</Button>
+					<Button onClick={onClose}>{t('actions.cancel')}</Button>
 					<Button type='primary' onClick={handleApply} disabled={!canInsert}>
 						Insert
 					</Button>

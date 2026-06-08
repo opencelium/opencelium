@@ -19,7 +19,6 @@ const ScriptLanguage = ({language, onChangeLanguage, readOnly}: ScriptLanguagePr
             value={language}
             onChange={(value) => onChangeLanguage(value as Language)}
             style={{ width: '100%' }}
-            size="large"
             disabled={readOnly}
             options={languageOptions}
         />

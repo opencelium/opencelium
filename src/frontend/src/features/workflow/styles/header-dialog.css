@@ -14,6 +14,7 @@
 	max-width: calc(100vw - 32px);
 	border-radius: 12px;
 	background: var(--color-background-elevated);
+	color: var(--color-text-primary);
 	padding: 16px;
 	box-shadow: var(--shadow-lg);
 	display: flex;
@@ -34,6 +35,8 @@
 	padding: 10px 12px;
 	resize: none;
 	outline: 0;
+	background: var(--color-background-surface);
+	color: var(--color-text-primary);
 }
 
 .headerDialogActions {

@@ -14,6 +14,7 @@ import type { WorkflowMethodConfig } from '../../types/request-config.types';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../../types/workflow.types';
 import { buildLegacyConnection, extractWorkflowMethodConfig } from './legacyAdapter';
 import { buildFromConnectorPayload } from '../../api/connectionPayload';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 
 type Props = {
   open: boolean;
@@ -73,6 +74,7 @@ function LegacyHeaderEditorContent({ nodeId }: { nodeId: string }) {
 }
 
 export function MethodConfigDialog({ open, node, mode, nodes, edges, fieldBindings, onFieldBindingsChange, onClose, onSave }: Props) {
+  const { t } = useI18n('workflow');
   const store = useMemo(() => createLegacyStore(), []);
   const connection = useMemo(() => {
     const legacyConnection = buildLegacyConnection(nodes);
@@ -157,7 +159,7 @@ export function MethodConfigDialog({ open, node, mode, nodes, edges, fieldBindin
   }, [node, onClose, onSave, store]);
 
   if (!open || !node) return null;
-  const title = mode === 'body' ? 'Body' : mode === 'header' ? 'Header' : 'Request Url';
+  const title = mode === 'body' ? t('methodConfig.body') : mode === 'header' ? t('methodConfig.header') : t('methodConfig.requestUrl');
   const width = mode === 'url' ? 1180 : '94vw';
 
   return (
@@ -177,7 +179,7 @@ export function MethodConfigDialog({ open, node, mode, nodes, edges, fieldBindin
       }}
       footer={[
         <Button key="close" type="primary" onClick={persistCurrentConfig}>
-          Close
+          {t('actions.close')}
         </Button>,
       ]}
     >

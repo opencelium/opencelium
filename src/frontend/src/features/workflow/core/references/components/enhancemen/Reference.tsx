@@ -9,6 +9,7 @@ import type { RootState } from "../../../store";
 import {updateConnection} from "../../../store/connection/connectionSlice";
 import {EnhancementReference} from "../../strategies/EnhancementReference";
 import {Button} from "antd";
+import { useI18n } from "@shared/i18n/hooks/useI18n";
 
 interface ReferenceProps {
     enhancement: Enhancement;
@@ -23,6 +24,7 @@ export const Reference: React.FC<ReferenceProps> = ({
     clearValue,
     onClick,
 }) => {
+    const { t } = useI18n('workflow');
     const dispatch = useDispatch();
     const connection = useSelector((state: RootState) => state.connection.connection);
     const args = enhancement.args || {};
@@ -49,7 +51,7 @@ export const Reference: React.FC<ReferenceProps> = ({
         }
     }
     if (variableEntries.length === 0)
-        return <div style={{ opacity: 0.6 }}>No variable references</div>;
+        return <div style={{ opacity: 0.6 }}>{t('references.noVariableReferences')}</div>;
 
     return (
         <div

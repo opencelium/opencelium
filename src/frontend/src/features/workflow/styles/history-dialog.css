@@ -19,6 +19,7 @@
 	text-align: left;
 	border: 0;
 	background: var(--color-background-elevated);
+	color: var(--color-text-primary);
 	padding: 10px 12px;
 	white-space: nowrap;
 }

@@ -1,8 +1,10 @@
 import React, {useMemo} from "react";
 import {useSelector} from "react-redux";
+import { Trans } from "react-i18next";
 import {parseEnhancementArg} from "../utils/parseEnhancementArg";
 import type { Enhancement } from "../../../types/connection";
 import type { RootState } from "../../../store";
+import { useI18n } from "@shared/i18n/hooks/useI18n";
 
 interface EnhancementArgsProps {
     enhancement: Enhancement;
@@ -18,6 +20,7 @@ interface ParsedArgEntry {
 }
 
 export const EnhancementArgs: React.FC<EnhancementArgsProps> = ({ enhancement }) => {
+    const { t } = useI18n('workflow');
     const connection = useSelector((state: RootState) => state.connection.connection);
 
     const methods = connection?.fromConnector.method || [];
@@ -46,13 +49,35 @@ export const EnhancementArgs: React.FC<EnhancementArgsProps> = ({ enhancement })
             .filter(Boolean) as ParsedArgEntry[];
     }, [enhancement.args, methods]);
 
-    const humanizeMessageProperty = (messageProperty: string) => {
-        if (messageProperty === 'body') return 'request body';
-        if (messageProperty === 'header') return 'request header';
-        if (messageProperty === 'endpoint') return 'request url';
-        if (messageProperty === 'status') return 'response status';
-        return messageProperty;
+    const getLocationLabel = (entry: ParsedArgEntry): string => {
+        if (entry.direction === 'response') {
+            if (entry.messageProperty === 'body') return t('args.locations.responseBody');
+            if (entry.messageProperty === 'header') return t('args.locations.responseHeader');
+            return entry.messageProperty;
+        }
+        switch (entry.messageProperty) {
+            case 'body': return t('args.locations.requestBody');
+            case 'header': return t('args.locations.requestHeader');
+            case 'endpoint': return t('args.locations.requestUrl');
+            case 'status': return t('args.locations.responseStatus');
+            default: return entry.messageProperty;
+        }
     };
+
+    const renderMethodBadge = (entry: ParsedArgEntry) => (
+        <span
+            style={{
+                backgroundColor: entry.color,
+                color: 'var(--color-text-on-action)',
+                borderRadius: 4,
+                padding: '2px 6px',
+                fontWeight: 600,
+                opacity: 1,
+            }}
+        >
+            {entry.methodName}
+        </span>
+    );
 
     const stripRootPath = (path: string) =>
         String(path || '')
@@ -71,77 +96,31 @@ export const EnhancementArgs: React.FC<EnhancementArgsProps> = ({ enhancement })
     const renderSourceDescription = (entry: ParsedArgEntry) => {
         if (entry.direction === 'response' && entry.messageProperty === 'status') {
             return (
-                <>
-                    <span style={{ opacity: 0.7 }}>is taken from</span>{' '}
-                    <span style={{ opacity: 0.7 }}>response status of the</span>{' '}
-                    <span
-                        style={{
-                            backgroundColor: entry.color,
-                            color: "var(--color-text-on-action)",
-                            borderRadius: 4,
-                            padding: "2px 6px",
-                            fontWeight: 600,
-                        }}
-                    >
-                        {entry.methodName}
-                    </span>{' '}
-                    <span style={{ opacity: 0.7 }}>method.</span>
-                </>
+                <span style={{ opacity: 0.7 }}>
+                    <Trans
+                        ns="workflow"
+                        i18nKey="args.fromResponseStatus"
+                        components={{ method: renderMethodBadge(entry) }}
+                    />
+                </span>
             );
         }
 
         const fieldName = getFieldName(entry);
-        const locationLabel =
-            entry.direction === 'response'
-                ? entry.messageProperty === 'body'
-                    ? 'response body'
-                    : entry.messageProperty === 'header'
-                    ? 'response header'
-                    : entry.messageProperty
-                : humanizeMessageProperty(entry.messageProperty);
-
-        if (entry.key === 'RESULT_VAR') {
-            return (
-                <>
-                    <span style={{ opacity: 0.7 }}>is used as the value of the</span>{' '}
-                    <span style={{ color: entry.color, fontWeight: 500 }}>{fieldName}</span>{' '}
-                    <span style={{ opacity: 0.7 }}>field in the</span>{' '}
-                    <span style={{ opacity: 0.7 }}>{locationLabel} of the</span>{' '}
-                    <span
-                        style={{
-                            backgroundColor: entry.color,
-                            color: "var(--color-text-on-action)",
-                            borderRadius: 4,
-                            padding: "2px 6px",
-                            fontWeight: 600,
-                        }}
-                    >
-                        {entry.methodName}
-                    </span>{' '}
-                    <span style={{ opacity: 0.7 }}>method.</span>
-                </>
-            );
-        }
+        const location = getLocationLabel(entry);
 
         return (
-            <>
-                <span style={{ opacity: 0.7 }}>is taken from the value of the</span>{' '}
-                <span style={{ color: entry.color, fontWeight: 500 }}>{fieldName}</span>{' '}
-                <span style={{ opacity: 0.7 }}>field in the</span>{' '}
-                <span style={{ opacity: 0.7 }}>{locationLabel} of the</span>{' '}
-                <span
-                    style={{
-                        backgroundColor: entry.color,
-                        color: "var(--color-text-on-action)",
-                        borderRadius: 4,
-                        padding: "2px 6px",
-                        fontWeight: 600,
+            <span style={{ opacity: 0.7 }}>
+                <Trans
+                    ns="workflow"
+                    i18nKey={entry.key === 'RESULT_VAR' ? 'args.usedAsField' : 'args.takenFromField'}
+                    values={{ field: fieldName, location }}
+                    components={{
+                        field: <span style={{ color: entry.color, fontWeight: 500, opacity: 1 }} />,
+                        method: renderMethodBadge(entry),
                     }}
-                >
-                    {entry.methodName}
-                </span>{' '}
-                <span style={{ opacity: 0.7 }}>method.</span>
-            </>
+                />
+            </span>
         );
     };
 

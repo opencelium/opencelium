@@ -2,12 +2,14 @@ import { Handle, Position } from '@xyflow/react';
 import type { NodeProps } from '@xyflow/react';
 import { NodeShell } from './NodeShell';
 import type { IfWorkflowNode } from '../types/workflow.types';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 
 export function IfOperatorNode({
 	id,
 	data,
 	selected,
 }: NodeProps<IfWorkflowNode>) {
+	const { t } = useI18n('workflow');
 	return (
 		<NodeShell
 			id={id}
@@ -33,11 +35,11 @@ export function IfOperatorNode({
 			}}
 		>
 			<div className='ifNode'>
-				<div className='operatorInnerText'>If</div>
+				<div className='operatorInnerText'>{t('node.if')}</div>
 			</div>
 
-			<div className='ifFalseLabel'>false</div>
-			<div className='ifTrueLabel'>true</div>
+			<div className='ifFalseLabel'>{t('node.branchFalse')}</div>
+			<div className='ifTrueLabel'>{t('node.branchTrue')}</div>
 
 			<Handle
 				id='left'

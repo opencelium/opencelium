@@ -74,6 +74,7 @@ textarea {
   border: 0;
   background: transparent;
   cursor: pointer;
+  color: var(--color-text-primary);
 }
 
 .logsHeaderIconButton {
@@ -83,13 +84,13 @@ textarea {
   padding: 8px;
   display: inline-flex;
   align-items: center;
-  color: var(--color-text-secondary);
+  color: var(--color-action-primary);
   border-radius: 6px;
 }
 
 .logsHeaderIconButton:hover {
   background: var(--color-background-hover);
-  color: var(--color-text-primary);
+  color: var(--color-action-primary-hover);
 }
 
 .logsCaret {
@@ -226,4 +227,5 @@ textarea {
 .headerInlineName {
   font-size: 18px;
   font-weight: 700;
+  color: var(--color-text-primary);
 }

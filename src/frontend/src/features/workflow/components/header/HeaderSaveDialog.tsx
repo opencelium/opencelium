@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 
 type Props = {
 	open: boolean;
@@ -17,6 +18,7 @@ export function HeaderSaveDialog({
 	onSave,
 	saveDisabled = false,
 }: Props) {
+	const { t } = useI18n('workflow');
 	useEffect(() => {
 		if (!open) return;
 		const onEscape = (event: KeyboardEvent) =>
@@ -33,19 +35,19 @@ export function HeaderSaveDialog({
 				className='headerDialog'
 				onClick={(event) => event.stopPropagation()}
 			>
-				<div className='headerDialogTitle'>Save Version</div>
+				<div className='headerDialogTitle'>{t('saveDialog.title')}</div>
 				<textarea
 					className='headerDialogTextarea'
-					placeholder='Comment'
+					placeholder={t('saveDialog.commentPlaceholder')}
 					value={value}
 					onChange={(event) => onChange(event.target.value)}
 				/>
 				<div className='headerDialogActions'>
 					<button className='iconButton' type='button' onClick={onClose}>
-						Cancel
+						{t('actions.cancel')}
 					</button>
 					<button className='primaryButton' type='button' disabled={saveDisabled} onClick={onSave}>
-						Save
+						{t('actions.save')}
 					</button>
 				</div>
 			</div>

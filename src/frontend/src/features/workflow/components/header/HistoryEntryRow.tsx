@@ -3,6 +3,7 @@ import { Maximize2, Minimize2 } from 'lucide-react';
 import type { RefObject } from 'react';
 import type { HistoryVersionItem } from './historyPanel.data';
 import { formatTime } from './historyPanel.utils';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 
 type Props = {
   activeId: string | null;
@@ -30,6 +31,7 @@ type Props = {
 };
 
 export function HistoryEntryRow(props: Props) {
+  const { t } = useI18n('workflow');
   const showExpand = props.hoveredCommentId === props.item.id || props.activeId === props.item.id;
   const hasComment = props.commentValue.trim().length > 0;
   const isEditing = props.activeId === props.item.id || props.expandedCommentId === props.item.id;
@@ -42,7 +44,7 @@ export function HistoryEntryRow(props: Props) {
       </div>
       <div className={`historyCard ${props.selectedId === props.item.id ? 'historyCardSelected' : ''}`}>
         <div className='historyCardHeader historyCardActivator' onClick={() => props.onSelect(props.item.id)}>
-          <strong>Author: {props.item.author}</strong>
+          <strong>{t('history.author', { name: props.item.author })}</strong>
           <button className='historyDotsButton' type='button' onClick={(event) => { event.stopPropagation(); props.onToggleMenu(props.item.id); }}>
             <MoreOutlined />
           </button>
@@ -56,7 +58,7 @@ export function HistoryEntryRow(props: Props) {
           <textarea
             className={`historyComment ${!hasComment && !isEditing ? 'historyCommentEmpty' : ''} ${props.expandedCommentId === props.item.id ? 'historyCommentExpanded' : ''}`}
             style={props.expandedCommentId === props.item.id ? { width: props.expandedWidth, marginLeft: -props.expandedShiftLeft } : undefined}
-            placeholder='Comment'
+            placeholder={t('history.commentPlaceholder')}
             value={props.commentValue}
             onClick={(event) => event.stopPropagation()}
             onFocus={() => props.onFocus(props.item.id)}
@@ -84,9 +86,9 @@ export function HistoryEntryRow(props: Props) {
         ) : null}
         {props.menuOpen ? (
           <div ref={props.menuRef} className='historyMenu'>
-            <button className='historyMenuItem' type='button' onClick={() => props.onCopySnapshot(props.item.snapshotId)}>Copy snapshotid</button>
-            <button className='historyMenuItem' type='button' onClick={() => props.onDownloadTemplate(props.item.snapshotId)}>Download as Template</button>
-            <button className='historyMenuItem historyMenuItemDanger' type='button' onClick={() => props.onDelete(props.item.id)}>Delete</button>
+            <button className='historyMenuItem' type='button' onClick={() => props.onCopySnapshot(props.item.snapshotId)}>{t('history.copySnapshotId')}</button>
+            <button className='historyMenuItem' type='button' onClick={() => props.onDownloadTemplate(props.item.snapshotId)}>{t('history.downloadAsTemplate')}</button>
+            <button className='historyMenuItem historyMenuItemDanger' type='button' onClick={() => props.onDelete(props.item.id)}>{t('actions.delete')}</button>
           </div>
         ) : null}
       </div>

@@ -5,10 +5,12 @@ import ReferenceGenerator from '../reference-generator/ReferenceGenerator';
 import { XmlNodeCard } from './xml/XmlNodeCard';
 import { addChildNode, removeNode, updateNode } from './xml/xmlTree';
 import { useXmlBodyEditor } from './xml/useXmlBodyEditor';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 
 type Props = { readOnly?: boolean };
 
 export function XmlBodyEditor({ readOnly }: Props) {
+  const { t } = useI18n('workflow');
   const editor = useXmlBodyEditor();
 
   return (
@@ -25,14 +27,14 @@ export function XmlBodyEditor({ readOnly }: Props) {
             }
           }}
           options={[
-            { label: 'Tree', value: 'tree' },
-            { label: 'Raw data', value: 'raw' },
+            { label: t('xmlBody.tree'), value: 'tree' },
+            { label: t('xmlBody.rawData'), value: 'raw' },
           ]}
         />
       </Space>
       {editor.rawError ? <Alert style={{ marginBottom: 12 }} type="error" message={editor.rawError} /> : null}
       {editor.mode === 'raw' ? (
-        <Card title="Raw XML" style={{ borderRadius: 12 }}>
+        <Card title={t('xmlBody.rawXml')} style={{ borderRadius: 12 }}>
           <Input.TextArea
             className="xmlRaw"
             value={editor.rawXml}
@@ -49,7 +51,7 @@ export function XmlBodyEditor({ readOnly }: Props) {
         </Card>
       ) : (
         <Card
-          title="XML body"
+          title={t('xmlBody.xmlBody')}
           extra={
             <Space size={12}>
               {editor.selectionInfo ? <Tag color="blue">{editor.selectionInfo.label}</Tag> : null}

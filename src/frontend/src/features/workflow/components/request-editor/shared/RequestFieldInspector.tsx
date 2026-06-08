@@ -2,6 +2,7 @@ import { Alert, Button, Card, Space, Tag, Typography } from 'antd';
 import type { BodySelection } from '../body-editor/bodyValue';
 import { hasMixedReferenceValue, hasOnlyReferences } from '../body-editor/bodyReference';
 import { RequestReferenceTokens } from './RequestReferenceTokens';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 
 type Props = {
   title: string;
@@ -22,14 +23,15 @@ export function RequestFieldInspector({
   onClear,
   onChangeReferences,
 }: Props) {
+  const { t } = useI18n('workflow');
   const stringValue = typeof value === 'string' ? value : '';
   const isReferenceValue = hasOnlyReferences(value);
   const isMixedValue = hasMixedReferenceValue(value);
   const preview =
     typeof value === 'string'
-      ? value || 'Empty'
+      ? value || t('inspector.empty')
       : value === undefined
-        ? 'Select a field'
+        ? t('inspector.selectField')
         : JSON.stringify(value, null, 2);
 
   return (
@@ -39,8 +41,8 @@ export function RequestFieldInspector({
         selection ? (
           <Space size={12}>
             <Tag color="blue">{selection.pathLabel}</Tag>
-            <Button type="primary" disabled={readOnly} onClick={onInsertReference}>Insert reference</Button>
-            <Button disabled={readOnly} onClick={onClear}>Clear</Button>
+            <Button type="primary" disabled={readOnly} onClick={onInsertReference}>{t('actions.insertReference')}</Button>
+            <Button disabled={readOnly} onClick={onClear}>{t('inspector.clear')}</Button>
           </Space>
         ) : null
       }
@@ -48,12 +50,12 @@ export function RequestFieldInspector({
     >
       {selection ? (
         <div style={{ display: 'grid', gap: 12 }}>
-          <Typography.Text type="secondary">Selected value</Typography.Text>
+          <Typography.Text type="secondary">{t('inspector.selectedValue')}</Typography.Text>
           {isMixedValue ? (
             <Alert
               type="warning"
-              message="Mixed value"
-              description="This field should contain either plain text or references only. Mixed values are not allowed."
+              message={t('inspector.mixedValueTitle')}
+              description={t('inspector.mixedValueDescription')}
             />
           ) : null}
           {isReferenceValue ? (
@@ -65,7 +67,7 @@ export function RequestFieldInspector({
           )}
         </div>
       ) : (
-        <Typography.Text type="secondary">Select a primitive field in the JSON tree to inspect and attach references.</Typography.Text>
+        <Typography.Text type="secondary">{t('inspector.help')}</Typography.Text>
       )}
     </Card>
   );

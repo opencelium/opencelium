@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useGetConnectorsQuery } from '@entities/connector/api/connectorApi';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { InvokerOperation } from '@entities/invoker/model/types';
 import type { WorkflowAction, WorkflowCreateKind, WorkflowNodeModel } from '../types/workflow.types';
 import { SidebarDrawer } from './sidebar/SidebarDrawer';
@@ -47,6 +48,7 @@ type Props = {
 };
 
 export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Props) {
+  const { t } = useI18n('workflow');
   const [activeSecondaryPanel, setActiveSecondaryPanel] = useState<SecondarySidebarMode | null>(null);
   const [selectedConnectorKey, setSelectedConnectorKey] = useState<string | null>(null);
   const [mainSearch, setMainSearch] = useState('');
@@ -68,16 +70,21 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
   const hasSecondarySearch = secondarySearch.trim().length > 0;
   const hasMethodSearch = methodSearch.trim().length > 0;
 
-  const filteredSidebarItems = sidebarItems.filter((item) => matchesSidebarTitle(item.title, mainQuery, hasMainSearch));
+  const translatedSidebarItems = sidebarItems.map((item) => ({
+    key: item.key,
+    title: t(item.titleKey),
+    text: t(item.textKey),
+  }));
+  const filteredSidebarItems = translatedSidebarItems.filter((item) => matchesSidebarTitle(item.title, mainQuery, hasMainSearch));
   const selectedConnector = connectors.find((item) => getConnectorKey(item.connectorId) === selectedConnectorKey);
   const connectorItems = useMemo(
     () => connectors.map((connector) => ({
       key: getConnectorKey(connector.connectorId),
       title: connector.title,
-      text: connector.description || `Methods from ${connector.invoker?.name ?? connector.title} invoker.`,
+      text: connector.description || t('sidebar.connectorMethodsFallback', { invoker: connector.invoker?.name ?? connector.title }),
       imageUrl: resolveConnectorIconUrl(normalizeConnectorIcon(connector.icon)),
     })),
-    [connectors],
+    [connectors, t],
   );
   const methodOperations = useMemo(
     () => selectedConnector?.invoker?.operations ?? [],
@@ -87,13 +94,18 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
     () => methodOperations.map((operation, index) => ({
       key: getMethodKey(operation, index),
       title: operation.name,
-      text: 'Invoker method',
+      text: t('sidebar.methodItemText'),
     })),
-    [methodOperations],
+    [methodOperations, t],
   );
+  const translatedOperatorItems = operatorItems.map((item) => ({
+    key: item.key,
+    title: t(item.titleKey),
+    text: t(item.textKey),
+  }));
   const filteredConnectorItems = connectorItems.filter((item) => matchesSidebarTitle(item.title, secondaryQuery, hasSecondarySearch));
   const filteredMethodItems = methodItems.filter((item) => matchesSidebarTitle(item.title, methodQuery, hasMethodSearch));
-  const filteredOperatorItems = operatorItems.filter((item) => matchesSidebarTitle(item.title, secondaryQuery, hasSecondarySearch));
+  const filteredOperatorItems = translatedOperatorItems.filter((item) => matchesSidebarTitle(item.title, secondaryQuery, hasSecondarySearch));
 
   const resetSidebar = () => {
     setActiveSecondaryPanel(null);
@@ -123,8 +135,8 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
     setActiveSecondaryPanel('connector');
   };
 
-  const [secondaryTitle, secondarySubtitle, secondaryPlaceholder] = getSecondarySidebarCopy(activeSecondaryPanel ?? 'connector');
-  const [methodTitle, methodSubtitle, methodPlaceholder] = getMethodSidebarCopy(selectedConnector?.title);
+  const [secondaryTitle, secondarySubtitle, secondaryPlaceholder] = getSecondarySidebarCopy(activeSecondaryPanel ?? 'connector', t);
+  const [methodTitle, methodSubtitle, methodPlaceholder] = getMethodSidebarCopy(t, selectedConnector?.title);
   const methodOpen = activeSecondaryPanel === 'connector' && !!selectedConnectorKey;
   const selectedConnectorIconUrl = resolveConnectorIconUrl(normalizeConnectorIcon(selectedConnector?.icon));
 
@@ -133,18 +145,18 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
       <div className={`drawerOverlay ${action ? 'drawerOverlayOpen' : ''}`} onClick={closeSidebar} />
       <SidebarDrawer
         open={!!action}
-        title="Choose your next step"
-        subtitle={`From: ${selectedNode?.data.title || selectedNode?.id || ''}`}
+        title={t('sidebar.chooseNextStep')}
+        subtitle={t('sidebar.from', { name: selectedNode?.data.title || selectedNode?.id || '' })}
         onClose={closeSidebar}
         shifted={!!activeSecondaryPanel}
         shiftedFar={methodOpen}
         secondary
       >
-        <SidebarSearch placeholder="search" value={mainSearch} onChange={setMainSearch} />
+        <SidebarSearch placeholder={t('sidebar.searchPlaceholder')} value={mainSearch} onChange={setMainSearch} />
         <SidebarList items={filteredSidebarItems} onSelect={onSelectMain} />
         <button className="sidebarItem sidebarItemMuted sidebarItemStandalone" type="button">
-          <strong>Trigger Connection</strong>
-          <span>Runs another connection if this step is successfully finished.</span>
+          <strong>{t('sidebar.triggerConnection.title')}</strong>
+          <span>{t('sidebar.triggerConnection.description')}</span>
         </button>
       </SidebarDrawer>
 
@@ -165,13 +177,13 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
         {activeSecondaryPanel === 'connector' ? (
           connectorsFetching ? (
             <button className="sidebarItem sidebarItemMuted" type="button" disabled>
-              <strong>Loading connectors...</strong>
-              <span>Please wait while connectors are loaded.</span>
+              <strong>{t('sidebar.connectorsLoading.title')}</strong>
+              <span>{t('sidebar.connectorsLoading.description')}</span>
             </button>
           ) : connectorsError ? (
             <button className="sidebarItem sidebarItemMuted" type="button" disabled>
-              <strong>Failed to load connectors</strong>
-              <span>Check the backend connection and try again.</span>
+              <strong>{t('sidebar.connectorsError.title')}</strong>
+              <span>{t('sidebar.connectorsError.description')}</span>
             </button>
           ) : filteredConnectorItems.length ? (
             <SidebarList
@@ -183,8 +195,8 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
             />
           ) : (
             <button className="sidebarItem sidebarItemMuted" type="button" disabled>
-              <strong>No connectors found</strong>
-              <span>There are no connectors matching this search.</span>
+              <strong>{t('sidebar.connectorsEmpty.title')}</strong>
+              <span>{t('sidebar.connectorsEmpty.description')}</span>
             </button>
           )
         ) : (
@@ -233,8 +245,8 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
           />
         ) : (
           <button className="sidebarItem sidebarItemMuted" type="button" disabled>
-            <strong>No methods found</strong>
-            <span>There are no methods matching this search.</span>
+            <strong>{t('sidebar.methodsEmpty.title')}</strong>
+            <span>{t('sidebar.methodsEmpty.description')}</span>
           </button>
         )}
       </SidebarDrawer>

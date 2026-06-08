@@ -81,11 +81,11 @@ export type CreateNodeFromActionArgs = {
 
 export type WorkflowHeaderMenuItem = {
 	id: string;
-	label: string;
+	labelKey: string;
 	section?: 'template' | 'editor' | 'exit';
 };
 
 export type WorkflowNodeMenuItem = {
 	id: string;
-	label: string;
+	labelKey: string;
 };

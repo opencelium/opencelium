@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { WorkflowHeaderMenuItem } from '../../types/workflow.types';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 
 type Props = {
   open: boolean;
@@ -9,6 +10,7 @@ type Props = {
 };
 
 export function HeaderMenu({ open, items, onClose, onSelect }: Props) {
+  const { t } = useI18n('workflow');
   const ref = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -59,7 +61,7 @@ export function HeaderMenu({ open, items, onClose, onSelect }: Props) {
                 onClose();
               }}
             >
-              {item.label}
+              {t(item.labelKey)}
             </button>
           ))}
         </div>

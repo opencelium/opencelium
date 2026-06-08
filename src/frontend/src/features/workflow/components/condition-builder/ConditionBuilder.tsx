@@ -18,9 +18,9 @@ import {
 } from '../request-editor/body-editor/requestReferenceOptions';
 import { extractWebhookValue, webhookSnippet } from '../request-editor/body-editor/bodyWebhook';
 import {
-	IF_OPERATOR_LABELS,
+	IF_OPERATOR_LABEL_KEYS,
 	IfOperatorName,
-	LOOP_OPERATOR_LABELS,
+	LOOP_OPERATOR_LABEL_KEYS,
 	LoopOperatorName,
 	UNARY_IF_OPERATORS,
 	Conjunction,
@@ -41,6 +41,8 @@ import {
 	updateRuleProperties,
 	validateConditionTreeWithErrors,
 } from './conditionBuilder.utils';
+import { Radio } from '@shared/ui/primitives/Radio';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 import '../request-editor/body-editor/bodyLegacy.css';
 import './conditionBuilder.css';
 
@@ -53,26 +55,26 @@ type Props = {
 	onSave: (nodeId: string, config: ConditionConfig) => void;
 };
 
-const SOURCE_OPTIONS: { value: ConditionValueSource; title: string; icon: ReactNode }[] = [
-	{ value: 'constant', title: 'Constant', icon: <NumberOutlined /> },
-	{ value: 'direct', title: 'Method', icon: <ApiOutlined /> },
-	{ value: 'webhook', title: 'Webhook', icon: <LinkOutlined /> },
+const SOURCE_OPTIONS: { value: ConditionValueSource; titleKey: string; icon: ReactNode }[] = [
+	{ value: 'constant', titleKey: 'conditionBuilder.source.constant', icon: <NumberOutlined /> },
+	{ value: 'direct', titleKey: 'conditionBuilder.source.method', icon: <ApiOutlined /> },
+	{ value: 'webhook', titleKey: 'conditionBuilder.source.webhook', icon: <LinkOutlined /> },
 ];
 
-const RESPONSE_TYPE_OPTIONS: { value: ResponseType; label: string; title: string }[] = [
-	{ value: 'body', label: 'B', title: 'Body' },
-	{ value: 'header', label: 'H', title: 'Header' },
-	{ value: 'status', label: 'S', title: 'Status' },
+const RESPONSE_TYPE_OPTIONS: { value: ResponseType; label: string; titleKey: string }[] = [
+	{ value: 'body', label: 'B', titleKey: 'conditionBuilder.responseType.body' },
+	{ value: 'header', label: 'H', titleKey: 'conditionBuilder.responseType.header' },
+	{ value: 'status', label: 'S', titleKey: 'conditionBuilder.responseType.status' },
 ];
 
 const IF_OPERATOR_OPTIONS = Object.values(IfOperatorName).map((value) => ({
 	value,
-	label: IF_OPERATOR_LABELS[value],
+	labelKey: IF_OPERATOR_LABEL_KEYS[value],
 }));
 
 const LOOP_OPERATOR_OPTIONS = Object.values(LoopOperatorName).map((value) => ({
 	value,
-	label: LOOP_OPERATOR_LABELS[value],
+	labelKey: LOOP_OPERATOR_LABEL_KEYS[value],
 }));
 
 const normalizeSource = (source?: ConditionValueSource): ConditionValueSource => source || 'direct';
@@ -199,17 +201,16 @@ function SourceSwitcher({
 	value: ConditionValueSource;
 	onChange: (value: ConditionValueSource) => void;
 }) {
+	const { t } = useI18n('workflow');
 	return (
-		<div className="conditionSourceSwitcher">
+		<div className="conditionSourceSwitcher compactRadioGroup">
 			{SOURCE_OPTIONS.map((option) => (
-				<label key={option.value} className="conditionRadioRow" title={option.title}>
-					<span className="conditionRadioIcon">{option.icon}</span>
-					<input
-						type="radio"
-						checked={value === option.value}
-						onChange={() => onChange(option.value)}
-					/>
-				</label>
+				<Radio
+					key={option.value}
+					checked={value === option.value}
+					onChange={() => onChange(option.value)}
+					label={<span className="conditionRadioIcon" title={t(option.titleKey)}>{option.icon}</span>}
+				/>
 			))}
 		</div>
 	);
@@ -222,17 +223,16 @@ function ResponseTypeSwitcher({
 	value: ResponseType;
 	onChange: (value: ResponseType) => void;
 }) {
+	const { t } = useI18n('workflow');
 	return (
-		<div className="conditionResponseTypeSwitcher">
+		<div className="conditionResponseTypeSwitcher compactRadioGroup">
 			{RESPONSE_TYPE_OPTIONS.map((option) => (
-				<label key={option.value} className="conditionRadioRow" title={option.title}>
-					<span className="conditionRadioIcon conditionResponseTypeIcon">{option.label}</span>
-					<input
-						type="radio"
-						checked={value === option.value}
-						onChange={() => onChange(option.value)}
-					/>
-				</label>
+				<Radio
+					key={option.value}
+					checked={value === option.value}
+					onChange={() => onChange(option.value)}
+					label={<span className="conditionRadioIcon conditionResponseTypeIcon" title={t(option.titleKey)}>{option.label}</span>}
+				/>
 			))}
 		</div>
 	);
@@ -247,9 +247,10 @@ function MethodSelect({
 	value?: string;
 	onChange: (value?: string) => void;
 }) {
+	const { t } = useI18n('workflow');
 	return (
 		<Select
-			placeholder="Select Method..."
+			placeholder={t('placeholders.selectMethod')}
 			value={value}
 			className="conditionMethodSelect"
 			onChange={onChange}
@@ -281,6 +282,7 @@ function ConditionValueInput({
 	iterators: string[];
 	onChange: (patch: Partial<ConditionRuleProperties>) => void;
 }) {
+	const { t } = useI18n('workflow');
 	const fieldKey = side === 'left' ? 'leftField' : 'rightField';
 	const fieldValue = properties[fieldKey] || '';
 	const parsedMethod = parseMethodFromReference(methods, fieldValue);
@@ -313,7 +315,7 @@ function ConditionValueInput({
 			<div className="conditionValueInput">
 				<SourceSwitcher value={source} onChange={setSource} />
 				<Input
-					placeholder="Constant"
+					placeholder={t('placeholders.constant')}
 					value={fieldValue}
 					onChange={(event) => onChange({ [fieldKey]: event.target.value })}
 					className="conditionConstantInput"
@@ -396,6 +398,7 @@ function RuleRow({
 	onChange: (patch: Partial<ConditionRuleProperties>) => void;
 	onDelete: () => void;
 }) {
+	const { t } = useI18n('workflow');
 	const properties = rule.properties || {};
 	const operator = properties.operator;
 	const isLoop = operatorType === 'loop';
@@ -407,10 +410,10 @@ function RuleRow({
 		<div className={`conditionRule ${isLoop ? 'conditionRuleLoop' : ''}`}>
 			{isLoop ? (
 				<Select
-					placeholder="Select Operator..."
+					placeholder={t('placeholders.selectOperator')}
 					value={operator}
 					className="conditionOperatorSelect conditionLoopOperatorSelect"
-					options={LOOP_OPERATOR_OPTIONS}
+					options={LOOP_OPERATOR_OPTIONS.map((option) => ({ value: option.value, label: t(option.labelKey) }))}
 					onChange={(value) => onChange({ operator: value, leftField: undefined, rightField: undefined })}
 					suffixIcon={<DownOutlined />}
 					getPopupContainer={() => document.body}
@@ -426,10 +429,10 @@ function RuleRow({
 			)}
 			{isLoop ? null : (
 				<Select
-					placeholder="Select Operator..."
+					placeholder={t('placeholders.selectOperator')}
 					value={operator}
 					className="conditionOperatorSelect"
-					options={IF_OPERATOR_OPTIONS}
+					options={IF_OPERATOR_OPTIONS.map((option) => ({ value: option.value, label: t(option.labelKey) }))}
 					onChange={(value) => onChange({ operator: value, rightField: undefined })}
 					suffixIcon={<DownOutlined />}
 					getPopupContainer={() => document.body}
@@ -484,6 +487,7 @@ function GroupEditor({
 	iterators: string[];
 	onChange: (group: ConditionGroup) => void;
 }) {
+	const { t } = useI18n('workflow');
 	const items = group.items || [];
 	const groupBodyRef = useRef<HTMLDivElement | null>(null);
 	const [treeLineBottom, setTreeLineBottom] = useState(24);
@@ -552,13 +556,13 @@ function GroupEditor({
 						type="primary"
 						onClick={() => onChange(appendChildToGroup(group, group.id, createEmptyRule()))}
 					>
-						Add Condition
+						{t('conditionBuilder.addCondition')}
 					</Button>
 					<Button
 						type="primary"
 						onClick={() => onChange(appendChildToGroup(group, group.id, createEmptyGroup(operatorType)))}
 					>
-						Add Group
+						{t('conditionBuilder.addGroup')}
 					</Button>
 				</div>
 			</div> : null}
@@ -606,6 +610,7 @@ export function ConditionBuilderDialog({
 	onClose,
 	onSave,
 }: Props) {
+	const { t } = useI18n('workflow');
 	const operatorType = node?.type === 'loop' ? 'loop' : 'if';
 	const [tree, setTree] = useState<ConditionGroup>(() => getInitialTreeFromConfig(node, operatorType));
 	const [renderKey, setRenderKey] = useState(0);
@@ -633,7 +638,7 @@ export function ConditionBuilderDialog({
 			open={open}
 			destroyOnHidden
 			focusable={{ focusTriggerAfterClose: false }}
-			title="Condition"
+			title={t('conditionBuilder.dialogTitle')}
 			width="90vw"
 			centered={false}
 			className={`conditionBuilderModal conditionBuilderModal-${operatorType}`}
@@ -652,7 +657,7 @@ export function ConditionBuilderDialog({
 						onSave(node.id, buildConditionConfig(operatorType, result.tree, loopIterator));
 					}}
 				>
-					Save
+					{t('actions.save')}
 				</Button>,
 			]}
 		>

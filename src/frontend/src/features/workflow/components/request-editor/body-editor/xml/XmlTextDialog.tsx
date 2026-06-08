@@ -1,5 +1,6 @@
 import { Input, Modal } from 'antd';
 import { useEffect, useState } from 'react';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 
 type Props = {
   open: boolean;
@@ -9,6 +10,7 @@ type Props = {
 };
 
 export function XmlTextDialog({ open, value, onClose, onSave }: Props) {
+  const { t } = useI18n('workflow');
   const [nextValue, setNextValue] = useState(value);
 
   useEffect(() => {
@@ -18,16 +20,16 @@ export function XmlTextDialog({ open, value, onClose, onSave }: Props) {
   return (
     <Modal
       open={open}
-      title="Edit text"
+      title={t('xmlDialog.editText')}
       onCancel={onClose}
       onOk={() => onSave(nextValue)}
-      okText="Apply"
+      okText={t('actions.apply')}
     >
       <Input.TextArea
         value={nextValue}
         onChange={(event) => setNextValue(event.target.value)}
         autoSize={{ minRows: 4, maxRows: 8 }}
-        placeholder="Text value"
+        placeholder={t('xmlDialog.textValue')}
       />
     </Modal>
   );

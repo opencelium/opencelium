@@ -8,3 +8,4 @@ export type I18nNamespace =
     | 'widget'
     | 'dashboard'
     | 'logs'
+    | 'workflow'

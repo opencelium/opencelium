@@ -1,14 +1,31 @@
 export type SecondarySidebarMode = 'connector' | 'operator';
 
+type TFn = (key: string, values?: Record<string, unknown>) => string;
+
 export const getSecondarySidebarCopy = (
   mode: SecondarySidebarMode,
+  t: TFn,
 ) => {
   if (mode === 'operator') {
-    return ['Choose operator type', 'Select an operator', 'search operator'] as const;
+    return [
+      t('sidebar.operatorStep.header'),
+      t('sidebar.operatorStep.subtitle'),
+      t('sidebar.operatorStep.searchPlaceholder'),
+    ] as const;
   }
 
-  return ['Choose connector', 'Select a connector first', 'search connector'] as const;
+  return [
+    t('sidebar.connectorStep.header'),
+    t('sidebar.connectorStep.subtitle'),
+    t('sidebar.connectorStep.searchPlaceholder'),
+  ] as const;
 };
 
-export const getMethodSidebarCopy = (connectorTitle?: string) =>
-  ['Choose method', `Select a method for ${connectorTitle ?? 'Connector'}`, 'search method'] as const;
+export const getMethodSidebarCopy = (t: TFn, connectorTitle?: string) =>
+  [
+    t('sidebar.methodStep.header'),
+    t('sidebar.methodStep.subtitle', {
+      connector: connectorTitle ?? t('sidebar.methodStep.connectorFallback'),
+    }),
+    t('sidebar.methodStep.searchPlaceholder'),
+  ] as const;

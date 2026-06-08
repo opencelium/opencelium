@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { DownOutlined, UpOutlined } from '@ant-design/icons';
 import { Button, Input } from 'antd';
 import { DebounceDelay } from '../../../constants/constants';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 
 interface DescriptionProps {
 	description: string;
@@ -10,6 +11,7 @@ interface DescriptionProps {
 }
 
 const Description = ({ onChangeDescription, description, readOnly }: DescriptionProps) => {
+	const { t } = useI18n('workflow');
 	const [showDescription, setShowDescription] = useState(false);
 	const [localValue, setLocalValue] = useState(description);
 
@@ -28,7 +30,7 @@ const Description = ({ onChangeDescription, description, readOnly }: Description
 	return (
 		<div style={{ borderTop: '1px solid var(--color-border-subtle)', paddingTop: 8 }}>
 			<div className='bodyLegacyDescriptionHeader'>
-				<b>Description</b>
+				<b>{t('description.label')}</b>
 				<Button
 					type="text"
 					size="small"

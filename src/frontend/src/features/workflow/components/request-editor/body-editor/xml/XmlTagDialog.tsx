@@ -1,5 +1,6 @@
 import { Input, Modal } from 'antd';
 import { useEffect, useState } from 'react';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 
 type Props = {
   open: boolean;
@@ -9,6 +10,7 @@ type Props = {
 };
 
 export function XmlTagDialog({ open, value, onClose, onSave }: Props) {
+  const { t } = useI18n('workflow');
   const [nextValue, setNextValue] = useState(value);
 
   useEffect(() => {
@@ -18,12 +20,12 @@ export function XmlTagDialog({ open, value, onClose, onSave }: Props) {
   return (
     <Modal
       open={open}
-      title="Edit tag"
+      title={t('xmlDialog.editTag')}
       onCancel={onClose}
       onOk={() => onSave(nextValue.trim() || 'tag')}
-      okText="Apply"
+      okText={t('actions.apply')}
     >
-      <Input value={nextValue} onChange={(event) => setNextValue(event.target.value)} placeholder="Tag name" />
+      <Input value={nextValue} onChange={(event) => setNextValue(event.target.value)} placeholder={t('xmlDialog.tagName')} />
     </Modal>
   );
 }

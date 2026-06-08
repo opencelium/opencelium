@@ -24,7 +24,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: var(--color-text-secondary);
+  color: var(--color-action-primary);
 }
 
 .nodeToolbarButton:hover {

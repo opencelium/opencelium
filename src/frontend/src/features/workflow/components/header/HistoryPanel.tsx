@@ -22,6 +22,7 @@ type Props = {
 export function HistoryPanel({ open, items, onClose, onDeleteVersion, onDownloadTemplate, onSelectVersion, onSaveComment, hasUnsavedChanges = false, selectedId, onSelectedIdChange }: Props) {
 	const state = useHistoryPanelState({ open, items, onClose, selectedId, onSelectedIdChange });
 	const { t: tEntities } = useI18n('entities');
+	const { t } = useI18n('workflow');
 
 	const saveComment = async (id: string) => {
 		const item = state.items.find((current) => current.id === id);
@@ -35,9 +36,9 @@ export function HistoryPanel({ open, items, onClose, onDeleteVersion, onDownload
 			state.setActiveId((current) => (current === id ? null : current));
 			state.setExpandedCommentId((current) => (current === id ? null : current));
 			(document.activeElement as HTMLElement | null)?.blur?.();
-			message.success('Comment saved.');
+			message.success(t('history.commentSaved'));
 		} catch {
-			message.error('Failed to save comment.');
+			message.error(t('history.commentSaveFailed'));
 		}
 	};
 
@@ -106,7 +107,7 @@ export function HistoryPanel({ open, items, onClose, onDeleteVersion, onDownload
 			await onDownloadTemplate?.(snapshotId);
 			state.setMenuId(null);
 		} catch {
-			message.error('Failed to download template.');
+			message.error(t('messages.downloadTemplateFailed'));
 		}
 	};
 
@@ -121,7 +122,7 @@ export function HistoryPanel({ open, items, onClose, onDeleteVersion, onDownload
 				className={`rightDrawer historyPanelDrawer ${open ? 'rightDrawerOpen' : ''}`}
 			>
 				<div className='drawerHeader'>
-					<div className='drawerTitle'>Version History</div>
+					<div className='drawerTitle'>{t('history.title')}</div>
 					<button className='iconButton' type='button' onClick={onClose}>
 						<CloseOutlined />
 					</button>
@@ -190,9 +191,9 @@ export function HistoryPanel({ open, items, onClose, onDeleteVersion, onDownload
 			</aside>
 			{state.confirmId ? (
 				<HistoryConfirmDialog
-					title='Delete version?'
-					message='This action removes the selected version from history.'
-					confirmText='Delete'
+					title={t('history.deleteVersion.title')}
+					message={t('history.deleteVersion.message')}
+					confirmText={t('history.deleteVersion.confirm')}
 					confirmVariant='danger'
 					onCancel={() => state.setConfirmId(null)}
 					onConfirm={deleteItem}
@@ -200,9 +201,9 @@ export function HistoryPanel({ open, items, onClose, onDeleteVersion, onDownload
 			) : null}
 			{state.pendingSelectId ? (
 				<HistoryConfirmDialog
-					title='Unsaved changes'
+					title={t('history.unsavedChanges.title')}
 					message={tEntities('connection.messages.history.unsavedVersionSwitch')}
-					confirmText='Open version'
+					confirmText={t('history.unsavedChanges.confirm')}
 					onCancel={() => state.setPendingSelectId(null)}
 					onConfirm={confirmSelectVersion}
 				/>

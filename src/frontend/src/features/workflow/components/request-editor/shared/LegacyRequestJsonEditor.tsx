@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react';
 import { DownOutlined, RightOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { useMethodContext } from '../../../providers/MethodContext';
+import { useTheme } from '@shared/theme/hooks/useTheme';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { useRequestObjectEditor } from './useRequestObjectEditor';
 import ReferenceEnhancement from '../enhancement/Enhancement';
 import ReactJson from 'react-json-view';
@@ -50,6 +52,8 @@ type Props = {
 
 export function LegacyRequestJsonEditor({ messageProperty, source, readOnly }: Props) {
   const { method } = useMethodContext();
+  const { themeMode } = useTheme();
+  const { t } = useI18n('workflow');
   const [isDataOpen, setIsDataOpen] = useState(true);
   const editor = useRequestObjectEditor({ messageProperty, source });
   const PatchedReactJson = ReactJson as unknown as React.ComponentType<Record<string, unknown>>;
@@ -161,7 +165,7 @@ export function LegacyRequestJsonEditor({ messageProperty, source, readOnly }: P
       <div className='bodyLegacyLeft'>
         <LegacyReferenceInfoSection messageProperty={messageProperty} onReferenceClick={editor.setSelectedEnhanceId} />
         <div className='bodyLegacyDataHeader'>
-          <b>Request data</b>
+          <b>{t('requestData')}</b>
           <Button type='text' size='small' className='bodyLegacyCollapseButton' icon={isDataOpen ? <DownOutlined /> : <RightOutlined />} onClick={() => setIsDataOpen((value) => !value)} />
         </div>
         {isDataOpen ? (
@@ -194,6 +198,7 @@ export function LegacyRequestJsonEditor({ messageProperty, source, readOnly }: P
                 if (!field) return;
                 editor.selectField(field.namespace, field.name, field.value);
               }}
+              theme={themeMode === 'dark' ? 'twilight' : 'rjv-default'}
               style={{ wordBreak: 'break-word', padding: '8px 0', background: 'transparent', fontSize: 13 }}
             />
           </div>

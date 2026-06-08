@@ -5,6 +5,7 @@ import { HeaderMenu } from './header/HeaderMenu';
 import { HeaderSaveDialog } from './header/HeaderSaveDialog';
 import { headerMenuItems } from './header/headerMenuItems';
 import type { WorkflowHeaderMenuItem } from '../types/workflow.types';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 
 type Props = {
 	initialName?: string;
@@ -19,6 +20,7 @@ type Props = {
 type EditField = 'name' | 'description' | null;
 
 export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initialDescription = 'This interface delivering data into znuny and creates a ticket if the specified object is missing.', onOpenHistory, onSave, onChange, onMenuItemSelect, saveDisabled = false, readOnly = false }: Props) {
+	const { t } = useI18n('workflow');
 	const [name, setName] = useState(initialName);
 	const [description, setDescription] = useState(initialDescription);
 	const [draftName, setDraftName] = useState(name);
@@ -127,7 +129,7 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 							disabled={saveDisabled}
 							onClick={() => setSaveDialogOpen(true)}
 						>
-							Save
+							{t('actions.save')}
 						</button>
 					)}
 					<button

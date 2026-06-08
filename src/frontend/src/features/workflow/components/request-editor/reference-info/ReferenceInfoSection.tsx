@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import { ReferenceInfo } from './ReferenceInfo';
 import type { MessageProperty } from '../shared/messageProperty';
 import type { RootState } from '../../../store';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 
 interface ReferenceInfoProps {
 	messageProperty: MessageProperty;
@@ -17,6 +18,7 @@ export const ReferenceInfoSection: React.FC<ReferenceInfoProps> = ({
 	data,
 	onReferenceClick,
 }) => {
+	const { t } = useI18n('workflow');
 	const [showReference, setShowReference] = useState(true);
 	const connection = useSelector((state: RootState) => state.connection.connection);
 
@@ -31,7 +33,7 @@ export const ReferenceInfoSection: React.FC<ReferenceInfoProps> = ({
 				overflow: 'hidden',
 				borderRadius: 12,
 			}}
-			title="Reference Information"
+			title={t('referenceInfo.title')}
 			extra={
 				<Button
 					type="text"

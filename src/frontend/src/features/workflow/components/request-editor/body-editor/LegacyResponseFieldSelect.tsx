@@ -3,6 +3,7 @@ import { Select } from 'antd';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { MethodWithId } from '../../../types/connection';
 import { getReferenceOptions, isExpandableReferencePath, type ResponseType } from './requestReferenceOptions';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 
 type Props = {
   method?: MethodWithId;
@@ -14,6 +15,7 @@ type Props = {
 };
 
 export function LegacyResponseFieldSelect({ method, type, value, disabled, iterators = [], onChange }: Props) {
+  const { t } = useI18n('workflow');
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const selectingRef = useRef(false);
   const userInteractionRef = useRef(false);
@@ -28,11 +30,11 @@ export function LegacyResponseFieldSelect({ method, type, value, disabled, itera
 
   const options = useMemo(
     () =>
-      getReferenceOptions(method, type, optionsBase, iterators).map((item) => ({
+      getReferenceOptions(method, type, optionsBase, iterators, t).map((item) => ({
         label: item.label,
         value: item.value,
       })),
-    [iterators, method, optionsBase, type],
+    [iterators, method, optionsBase, type, t],
   );
 
   const focusInputToEnd = () => {
@@ -56,7 +58,7 @@ export function LegacyResponseFieldSelect({ method, type, value, disabled, itera
       }}
     >
       <Select
-        placeholder={type === 'status' ? 'Response Status' : method ? 'Select Field...' : 'Select Method...'}
+        placeholder={type === 'status' ? t('references.responseStatus') : method ? t('placeholders.selectField') : t('placeholders.selectMethod')}
         value={undefined}
         searchValue={type === 'status' ? 'status' : path}
         className='bodyLegacyGeneratorSelect'

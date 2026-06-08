@@ -3,7 +3,7 @@ import type { MenuEntry, MenuSection } from './contextMenuData';
 export function buildContextMenuEntries(sections: MenuSection[]): MenuEntry[] {
   return sections.reduce<MenuEntry[]>((acc, section) => {
     if (section.id === 'request') {
-      acc.push({ id: 'request-label', type: 'label', label: 'Request' });
+      acc.push({ id: 'request-label', type: 'label', labelKey: 'contextMenu.request' });
       section.items.filter((item) => item.id !== 'request').forEach((item) => {
         acc.push({ id: item.id, type: 'action', item, indented: true });
       });

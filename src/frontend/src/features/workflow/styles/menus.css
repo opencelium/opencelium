@@ -26,11 +26,13 @@
   align-items: center;
   justify-content: center;
   padding: 0 10px;
+  color: var(--color-action-primary);
 }
 
 .headerMenu,
 .contextMenu {
   background: var(--color-background-elevated);
+  color: var(--color-text-primary);
   border: 1px solid var(--color-border-subtle);
   border-radius: 12px;
   box-shadow: var(--shadow-lg);
@@ -80,6 +82,7 @@
   border-radius: 8px;
   font-size: 15px;
   line-height: 1.25;
+  color: var(--color-text-primary);
 }
 
 .headerMenuItem:hover,

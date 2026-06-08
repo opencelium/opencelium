@@ -1,0 +1,283 @@
+{
+  "actions": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "confirm": "Bestätigen",
+    "apply": "Übernehmen",
+    "close": "Schließen",
+    "ok": "Ok",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "createNew": "Neu erstellen",
+    "insertReference": "Referenz einfügen",
+    "addAttribute": "Attribut hinzufügen",
+    "addWebhook": "Webhook hinzufügen",
+    "openScriptNewWindow": "Skript in neuem Fenster öffnen",
+    "load": "Laden"
+  },
+  "template": {
+    "addTitle": "Vorlage hinzufügen",
+    "loadTitle": "Vorlage laden",
+    "nameLabel": "Name",
+    "selectPlaceholder": "Vorlage auswählen",
+    "loadWarning": "Wenn Sie eine Vorlage laden, werden alle Ihre aktuellen Workflow-Änderungen ersetzt."
+  },
+  "history": {
+    "title": "Versionsverlauf",
+    "author": "Autor: {{name}}",
+    "copySnapshotId": "Snapshot-ID kopieren",
+    "downloadAsTemplate": "Als Vorlage herunterladen",
+    "commentSaved": "Kommentar gespeichert.",
+    "commentSaveFailed": "Kommentar konnte nicht gespeichert werden.",
+    "commentPlaceholder": "Kommentar",
+    "deleteVersion": {
+      "title": "Version löschen?",
+      "message": "Diese Aktion entfernt die ausgewählte Version aus dem Verlauf.",
+      "confirm": "Löschen"
+    },
+    "unsavedChanges": {
+      "title": "Ungespeicherte Änderungen",
+      "confirm": "Version öffnen"
+    }
+  },
+  "messages": {
+    "enterWorkflowName": "Bitte geben Sie einen Workflow-Namen ein",
+    "saveTemplateFailed": "Vorlage konnte nicht gespeichert werden",
+    "loadTemplatesFailed": "Vorlagen konnten nicht geladen werden",
+    "selectTemplate": "Bitte wählen Sie eine Vorlage aus",
+    "loadTemplateFailed": "Vorlage konnte nicht geladen werden",
+    "downloadTemplateFailed": "Vorlage konnte nicht heruntergeladen werden."
+  },
+  "sidebar": {
+    "useConnector": {
+      "title": "Konnektor verwenden",
+      "description": "Durchsuchen Sie die Liste der verfügbaren API-Aufrufe Ihres Konnektors."
+    },
+    "addOperator": {
+      "title": "Operator hinzufügen",
+      "description": "Fügen Sie einen IF- oder LOOP-Operator hinzu."
+    },
+    "addHttpRequest": {
+      "title": "HTTP-Anfrage hinzufügen",
+      "description": "Fügen Sie eine einfache HTTP-Anfrage hinzu und geben Sie Ihre URL ein."
+    },
+    "operatorOption": {
+      "if": {
+        "title": "If",
+        "description": "Verzweigt den Workflow in einen True- und einen False-Pfad."
+      },
+      "loop": {
+        "title": "Loop",
+        "description": "Wiederholt die Schrittfolge des Workflows."
+      }
+    },
+    "operatorStep": {
+      "header": "Operatortyp wählen",
+      "subtitle": "Wählen Sie einen Operator",
+      "searchPlaceholder": "Operator suchen"
+    },
+    "connectorStep": {
+      "header": "Konnektor wählen",
+      "subtitle": "Wählen Sie zuerst einen Konnektor",
+      "searchPlaceholder": "Konnektor suchen"
+    },
+    "methodStep": {
+      "header": "Methode wählen",
+      "subtitle": "Wählen Sie eine Methode für {{connector}}",
+      "searchPlaceholder": "Methode suchen",
+      "connectorFallback": "Konnektor"
+    },
+    "chooseNextStep": "Wählen Sie Ihren nächsten Schritt",
+    "from": "Von: {{name}}",
+    "searchPlaceholder": "suchen",
+    "triggerConnection": {
+      "title": "Workflow auslösen",
+      "description": "Führt einen anderen Workflow aus, wenn dieser Schritt erfolgreich abgeschlossen wurde."
+    },
+    "connectorsLoading": {
+      "title": "Konnektoren werden geladen...",
+      "description": "Bitte warten Sie, während die Konnektoren geladen werden."
+    },
+    "connectorsError": {
+      "title": "Konnektoren konnten nicht geladen werden",
+      "description": "Überprüfen Sie die Backend-Verbindung und versuchen Sie es erneut."
+    },
+    "connectorsEmpty": {
+      "title": "Keine Konnektoren gefunden",
+      "description": "Es gibt keine Konnektoren, die zu dieser Suche passen."
+    },
+    "methodsEmpty": {
+      "title": "Keine Methoden gefunden",
+      "description": "Es gibt keine Methoden, die zu dieser Suche passen."
+    },
+    "methodItemText": "Invoker-Methode",
+    "connectorMethodsFallback": "Methoden vom Invoker {{invoker}}."
+  },
+  "headerMenu": {
+    "downloadAsTemplate": "Als Vorlage herunterladen",
+    "saveAsTemplate": "Als Vorlage speichern",
+    "loadTemplate": "Vorlage laden",
+    "editorAppearance": "Editor-Darstellung",
+    "shortcuts": "Tastenkürzel",
+    "exit": "Beenden"
+  },
+  "contextMenu": {
+    "changeLabel": "Bezeichnung ändern",
+    "openConfiguration": "Konfiguration öffnen",
+    "configureAggregator": "Aggregator konfigurieren",
+    "runThisCallOnly": "Nur diesen Aufruf ausführen",
+    "request": "Anfrage",
+    "editUrl": "URL bearbeiten",
+    "editHeader": "Header bearbeiten",
+    "editBody": "Body bearbeiten",
+    "showResponse": "Antwort anzeigen",
+    "newLabelPlaceholder": "Neue Bezeichnung"
+  },
+  "node": {
+    "if": "If",
+    "loop": "Loop",
+    "branchTrue": "true",
+    "branchFalse": "false"
+  },
+  "saveDialog": {
+    "title": "Version speichern",
+    "commentPlaceholder": "Kommentar"
+  },
+  "placeholders": {
+    "selectMethod": "Methode auswählen...",
+    "selectField": "Feld auswählen...",
+    "selectOperator": "Operator auswählen...",
+    "selectWebhook": "Webhook auswählen...",
+    "constant": "Konstante",
+    "selectMethodFirst": "Zuerst Methode auswählen",
+    "selectConnector": "Konnektor auswählen...",
+    "noPreviousMethods": "Keine vorherigen Methoden"
+  },
+  "conditionBuilder": {
+    "dialogTitle": "Bedingung",
+    "addCondition": "Bedingung hinzufügen",
+    "addGroup": "Gruppe hinzufügen",
+    "source": {
+      "constant": "Konstante",
+      "method": "Methode",
+      "webhook": "Webhook"
+    },
+    "responseType": {
+      "body": "Body",
+      "header": "Header",
+      "status": "Status"
+    },
+    "operators": {
+      "if": {
+        "equal": "=",
+        "notEqual": "!=",
+        "like": "Ähnlich",
+        "notLike": "Nicht ähnlich",
+        "greaterThan": ">",
+        "greaterOrEqual": ">=",
+        "lessThan": "<",
+        "lessOrEqual": "<=",
+        "contains": "Enthält",
+        "notContains": "Enthält nicht",
+        "containsSubStr": "Enthält Teilzeichenfolge",
+        "notContainsSubStr": "Enthält Teilzeichenfolge nicht",
+        "allowList": "Zulassungsliste",
+        "denyList": "Sperrliste",
+        "isTypeOf": "Ist vom Typ",
+        "propertyExists": "Eigenschaft existiert",
+        "propertyNotExists": "Eigenschaft existiert nicht",
+        "regEx": "Regulärer Ausdruck",
+        "isEmpty": "Ist leer",
+        "isNotEmpty": "Ist nicht leer",
+        "isNull": "Ist Null",
+        "isNotNull": "Ist nicht Null"
+      },
+      "loop": {
+        "for": "For",
+        "forIn": "ForIn",
+        "splitString": "String aufteilen"
+      }
+    }
+  },
+  "methodConfig": {
+    "body": "Body",
+    "header": "Header",
+    "requestUrl": "Request-URL"
+  },
+  "xmlBody": {
+    "tree": "Baum",
+    "rawData": "Rohdaten",
+    "rawXml": "Rohes XML",
+    "xmlBody": "XML-Body"
+  },
+  "xmlDialog": {
+    "editTag": "Tag bearbeiten",
+    "tagName": "Tag-Name",
+    "editText": "Text bearbeiten",
+    "textValue": "Textwert",
+    "editAttribute": "Attribut bearbeiten",
+    "attributeName": "Attributname",
+    "attributeValue": "Attributwert"
+  },
+  "xmlNode": {
+    "level": "Ebene {{depth}}",
+    "text": "Text",
+    "textValue": "Textwert",
+    "attributePlaceholder": "Attribut {{name}}",
+    "empty": "Leer"
+  },
+  "enhancement": {
+    "title": "Enhancement",
+    "language": "Sprache",
+    "emptyState": "Bitte klicken Sie auf die Referenz, um ihr Enhancement anzuzeigen."
+  },
+  "description": {
+    "label": "Beschreibung"
+  },
+  "args": {
+    "fromResponseStatus": "wird aus dem Response-Status der Methode <method></method> übernommen.",
+    "usedAsField": "wird als Wert des Felds <field>{{field}}</field> im {{location}} der Methode <method></method> verwendet.",
+    "takenFromField": "wird aus dem Wert des Felds <field>{{field}}</field> im {{location}} der Methode <method></method> übernommen.",
+    "locations": {
+      "requestBody": "Request-Body",
+      "requestHeader": "Request-Header",
+      "requestUrl": "Request-URL",
+      "responseStatus": "Response-Status",
+      "responseBody": "Response-Body",
+      "responseHeader": "Response-Header"
+    }
+  },
+  "references": {
+    "responseStatus": "Response-Status",
+    "rootObject": "Das Wurzelobjekt",
+    "firstArrayElement": "Erstes Element des Arrays",
+    "wholeArray": "Das gesamte Array",
+    "iteratorLoop": "({{iterator}}-Schleife)",
+    "noVariableReferences": "Keine Variablenreferenzen"
+  },
+  "refGenerator": {
+    "connector": "Konnektor",
+    "method": "Methode",
+    "field": "Feld"
+  },
+  "webhook": {
+    "noWebhooks": "Noch keine Webhooks",
+    "namePlaceholder": "Name",
+    "typePlaceholder": "Typ"
+  },
+  "inspector": {
+    "empty": "Leer",
+    "selectField": "Feld auswählen",
+    "clear": "Leeren",
+    "selectedValue": "Ausgewählter Wert",
+    "mixedValueTitle": "Gemischter Wert",
+    "mixedValueDescription": "Dieses Feld sollte entweder nur Klartext oder nur Referenzen enthalten. Gemischte Werte sind nicht zulässig.",
+    "help": "Wählen Sie ein primitives Feld im JSON-Baum aus, um es zu inspizieren und Referenzen anzuhängen."
+  },
+  "referenceInfo": {
+    "title": "Referenzinformationen",
+    "legacyTitle": "Referenzinformationen",
+    "empty": "(ist jetzt leer)"
+  },
+  "requestData": "Anfragedaten"
+}

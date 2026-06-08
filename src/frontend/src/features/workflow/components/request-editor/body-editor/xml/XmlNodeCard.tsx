@@ -5,6 +5,7 @@ import { XmlFieldEditor } from './XmlFieldEditor';
 import { XmlNodeDialogs } from './XmlNodeDialogs';
 import type { XmlSelection, XmlTreeNode } from './xmlTree';
 import { getNextAttributeName } from './xmlNodeHelpers';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 import './xmlNode.css';
 
 type Props = {
@@ -21,6 +22,7 @@ type Props = {
 };
 
 export function XmlNodeCard({ node, depth = 0, readOnly, selected, onChangeNode, onAddChild, onRemove, onSelect, onReferenceClick, onInsertReference }: Props) {
+  const { t } = useI18n('workflow');
   const [isTagDialogOpen, setIsTagDialogOpen] = useState(false);
   const [editingAttribute, setEditingAttribute] = useState<string | null>(null);
   const [isTextDialogOpen, setIsTextDialogOpen] = useState(false);
@@ -35,7 +37,7 @@ export function XmlNodeCard({ node, depth = 0, readOnly, selected, onChangeNode,
           <span className="xmlBracket">&lt;</span>
           <span className="xmlTagName">{node.name || 'tag'}</span>
           <span className="xmlBracket">&gt;</span>
-          <span className="xmlMeta">level {depth}</span>
+          <span className="xmlMeta">{t('xmlNode.level', { depth })}</span>
           {!readOnly ? <Button className="xmlIconButton" type="text" size="small" icon={<EditOutlined />} onClick={() => setIsTagDialogOpen(true)} /> : null}
         </div>
         {!readOnly ? (
@@ -47,9 +49,9 @@ export function XmlNodeCard({ node, depth = 0, readOnly, selected, onChangeNode,
       </div>
       <div className="xmlNodeBody">
         <XmlFieldEditor
-          label="Text"
+          label={t('xmlNode.text')}
           value={node.text}
-          placeholder="Text value"
+          placeholder={t('xmlNode.textValue')}
           selection={{ nodeId: node.id, kind: 'text' }}
           selected={selectedText}
           readOnly={readOnly}
@@ -67,7 +69,7 @@ export function XmlNodeCard({ node, depth = 0, readOnly, selected, onChangeNode,
             key={attribute}
             label={`@${attribute}`}
             value={value}
-            placeholder={`Attribute ${attribute}`}
+            placeholder={t('xmlNode.attributePlaceholder', { name: attribute })}
             selection={{ nodeId: node.id, kind: 'attribute', attribute }}
             selected={selected?.nodeId === node.id && selected.kind === 'attribute' && selected.attribute === attribute}
             readOnly={readOnly}
@@ -94,7 +96,7 @@ export function XmlNodeCard({ node, depth = 0, readOnly, selected, onChangeNode,
               onSelect({ nodeId: node.id, kind: 'attribute', attribute: name });
             }}
           >
-            Add attribute
+            {t('actions.addAttribute')}
           </Button>
         ) : null}
         <div className="xmlChildren">

@@ -183,6 +183,7 @@ const triggerJsonDownload = (filename: string, payload: unknown) => {
 export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const { connectionId } = useParams<{ connectionId: string }>();
   const { t: tEntities } = useI18n('entities');
+  const { t } = useI18n('workflow');
   const authUser = useAppSelector(selectAuthUser);
   const { data: connectors = [], isLoading: isConnectorsLoading } = useGetConnectorsQuery({ page: 0, limit: 1000 });
   const [createdConnectionId, setCreatedConnectionId] = useState<string>();
@@ -315,7 +316,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
 
   const handleSave = async ({ title, description, comment }: { title: string; description: string; comment: string }) => {
     if (title.trim() === '[Empty Name]') {
-      message.error('Please enter connection name');
+      message.error(t('messages.enterWorkflowName'));
       throw new Error('Connection name is required');
     }
 
@@ -432,7 +433,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       message.success(`Template "${name}" saved`);
     } catch (err) {
       console.error(err);
-      message.error('Failed to save template');
+      message.error(t('messages.saveTemplateFailed'));
     } finally {
       setIsSavingTemplate(false);
     }
@@ -451,7 +452,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       setTemplates(nextTemplates);
     } catch (err) {
       console.error(err);
-      message.error('Failed to load templates');
+      message.error(t('messages.loadTemplatesFailed'));
     } finally {
       setIsLoadingTemplates(false);
     }
@@ -466,7 +467,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const applySelectedTemplate = async () => {
     const selectedTemplate = templates.find((template) => String(template.templateId) === selectedTemplateId);
     if (!selectedTemplate?.connection) {
-      message.error('Please select a template');
+      message.error(t('messages.selectTemplate'));
       return;
     }
 
@@ -480,7 +481,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       message.success(`Template "${selectedTemplate.name ?? selectedTemplate.templateId}" loaded`);
     } catch (err) {
       console.error(err);
-      message.error('Failed to load template');
+      message.error(t('messages.loadTemplateFailed'));
     } finally {
       setIsApplyingTemplate(false);
     }
@@ -551,23 +552,23 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       />
       <Modal
         open={templateDialogOpen}
-        title="Add Template"
+        title={t('template.addTitle')}
         onCancel={closeSaveTemplateDialog}
         destroyOnHidden
         width={520}
         footer={[
           <Button key="cancel" onClick={closeSaveTemplateDialog} disabled={isSavingTemplate}>
-            Cancel
+            {t('actions.cancel')}
           </Button>,
           <Button key="ok" type="primary" loading={isSavingTemplate} onClick={saveConnectionAsTemplate}>
-            Ok
+            {t('actions.ok')}
           </Button>,
         ]}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <span>
-              Name
+              {t('template.nameLabel')}
               <span style={{ color: 'var(--color-status-error-fg)' }}> *</span>
             </span>
             <Input
@@ -585,7 +586,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
             {templateNameError ? <span style={{ color: 'var(--color-status-error-fg)', fontSize: 12 }}>{templateNameError}</span> : null}
           </label>
           <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <span>Description</span>
+            <span>{t('description.label')}</span>
             <div style={{ position: 'relative' }}>
               <Input.TextArea
                 maxLength={5000}
@@ -603,27 +604,27 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       </Modal>
       <Modal
         open={loadTemplateDialogOpen}
-        title="Load Template"
+        title={t('template.loadTitle')}
         onCancel={closeLoadTemplateDialog}
         destroyOnHidden
         width={520}
         footer={[
           <Button key="cancel" onClick={closeLoadTemplateDialog} disabled={isApplyingTemplate}>
-            Cancel
+            {t('actions.cancel')}
           </Button>,
           <Button key="load" type="primary" loading={isApplyingTemplate} onClick={applySelectedTemplate}>
-            Load
+            {t('actions.load')}
           </Button>,
         ]}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{ color: 'var(--color-text-secondary)' }}>
-            If you load a template, all your current workflow changes will be replaced.
+            {t('template.loadWarning')}
           </div>
           <Select
             loading={isLoadingTemplates}
             value={selectedTemplateId}
-            placeholder="Select template"
+            placeholder={t('template.selectPlaceholder')}
             onChange={setSelectedTemplateId}
             options={templates.map((template) => ({
               value: String(template.templateId),

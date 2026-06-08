@@ -3,26 +3,26 @@ import type { WorkflowOperatorKind } from '../../types/workflow.types';
 export const sidebarItems = [
   {
     key: 'connector',
-    title: 'Use Connector',
-    text: 'Browse through the list of available api calls of your connector.',
+    titleKey: 'sidebar.useConnector.title',
+    textKey: 'sidebar.useConnector.description',
   },
   {
     key: 'operator',
-    title: 'Add Operator',
-    text: 'Add an IF or LOOP operator.',
+    titleKey: 'sidebar.addOperator.title',
+    textKey: 'sidebar.addOperator.description',
   },
   {
     key: 'system',
-    title: 'Add HTTP Request',
-    text: 'Add a simple http request and add your url.',
+    titleKey: 'sidebar.addHttpRequest.title',
+    textKey: 'sidebar.addHttpRequest.description',
   },
 ] as const;
 
 export const operatorItems: {
   key: WorkflowOperatorKind;
-  title: string;
-  text: string;
+  titleKey: string;
+  textKey: string;
 }[] = [
-  { key: 'if', title: 'If', text: 'Branch the workflow into true and false paths.' },
-  { key: 'loop', title: 'Loop', text: 'Repeat the workflow step sequence.' },
+  { key: 'if', titleKey: 'sidebar.operatorOption.if.title', textKey: 'sidebar.operatorOption.if.description' },
+  { key: 'loop', titleKey: 'sidebar.operatorOption.loop.title', textKey: 'sidebar.operatorOption.loop.description' },
 ];

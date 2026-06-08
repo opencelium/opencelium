@@ -5,6 +5,7 @@ import type { WorkflowContextMenu, WorkflowNodeModel } from '../types/workflow.t
 import { ContextMenuEditor } from './context-menu/ContextMenuEditor';
 import { buildContextMenuEntries, filterEntriesForSection } from './context-menu/contextMenuEntries';
 import { menuByType } from './context-menu/contextMenuData';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 
 type Props = {
   menu: WorkflowContextMenu | null;
@@ -16,6 +17,7 @@ type Props = {
 };
 
 export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequestEditor, onOpenConditionEditor }: Props) {
+  const { t } = useI18n('workflow');
   const ref = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [isEditingLabel, setIsEditingLabel] = useState(false);
@@ -70,7 +72,7 @@ export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequ
             <div key={section.id} className="contextMenuSection">
               {filterEntriesForSection(section, entries).map((entry) =>
                 entry.type === 'label' ? (
-                  <div key={entry.id} className="contextMenuGroupLabel">{entry.label}</div>
+                  <div key={entry.id} className="contextMenuGroupLabel">{t(entry.labelKey)}</div>
                 ) : (
                   <button
                     key={entry.id}
@@ -85,7 +87,7 @@ export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequ
                       onClose();
                     }}
                   >
-                    {entry.item.label}
+                    {t(entry.item.labelKey)}
                   </button>
                 ),
               )}

@@ -6,6 +6,8 @@ import { buildReferenceValue, getIteratorsForMethod, type ResponseType } from '.
 import { LegacyWebhookReferenceSelect } from './LegacyWebhookReferenceSelect';
 import { LegacyResponseFieldSelect } from './LegacyResponseFieldSelect';
 import { webhookSnippet } from './bodyWebhook';
+import { Radio } from '@shared/ui/primitives/Radio';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 import './bodyLegacy.css';
 
 type Props = {
@@ -48,6 +50,7 @@ const getUpstreamNodeIds = (currentMethodId: string, edges: WorkflowEdgeLike[]) 
 };
 
 export function LegacyBodyReferenceGenerator({ connection, currentMethod, onApply }: Props) {
+  const { t } = useI18n('workflow');
   const [referenceType, setReferenceType] = useState<'direct' | 'webhook'>('direct');
   const [responseType, setResponseType] = useState<ResponseType>('body');
   const [methodId, setMethodId] = useState<string>();
@@ -79,20 +82,22 @@ export function LegacyBodyReferenceGenerator({ connection, currentMethod, onAppl
 
   return (
     <div className={shellClassName}>
-      <div className='bodyLegacyGeneratorSwitch'>
-        <label className='bodyLegacyRadioRow'>
-          <span className='bodyLegacyRadioIcon'><ApiOutlined /></span>
-          <input type='radio' checked={referenceType === 'direct'} onChange={() => setReferenceType('direct')} />
-        </label>
-        <label className='bodyLegacyRadioRow'>
-          <span className='bodyLegacyRadioIcon'><LinkOutlined /></span>
-          <input type='radio' checked={referenceType === 'webhook'} onChange={() => setReferenceType('webhook')} />
-        </label>
+      <div className='bodyLegacyGeneratorSwitch compactRadioGroup'>
+        <Radio
+          checked={referenceType === 'direct'}
+          onChange={() => setReferenceType('direct')}
+          label={<span className='bodyLegacyRadioIcon'><ApiOutlined /></span>}
+        />
+        <Radio
+          checked={referenceType === 'webhook'}
+          onChange={() => setReferenceType('webhook')}
+          label={<span className='bodyLegacyRadioIcon'><LinkOutlined /></span>}
+        />
       </div>
       {referenceType === 'direct' ? (
         <>
           <Select
-            placeholder='Select Method...'
+            placeholder={t('placeholders.selectMethod')}
             value={methodId}
             className='bodyLegacyGeneratorSelect'
             onChange={(value) => {
@@ -111,19 +116,22 @@ export function LegacyBodyReferenceGenerator({ connection, currentMethod, onAppl
             getPopupContainer={() => document.body}
             styles={{ popup: { root: { zIndex: 13010 } } }}
           />
-          <div className='bodyLegacyGeneratorResponse'>
-            <label className='bodyLegacyRadioRow'>
-              <span className='bodyLegacyRadioIcon'>B</span>
-              <input type='radio' checked={responseType === 'body'} onChange={() => { setResponseType('body'); setField(undefined); }} />
-            </label>
-            <label className='bodyLegacyRadioRow'>
-              <span className='bodyLegacyRadioIcon'>H</span>
-              <input type='radio' checked={responseType === 'header'} onChange={() => { setResponseType('header'); setField(undefined); }} />
-            </label>
-            <label className='bodyLegacyRadioRow'>
-              <span className='bodyLegacyRadioIcon'>S</span>
-              <input type='radio' checked={responseType === 'status'} onChange={() => { setResponseType('status'); setField('status'); }} />
-            </label>
+          <div className='bodyLegacyGeneratorResponse compactRadioGroup'>
+            <Radio
+              checked={responseType === 'body'}
+              onChange={() => { setResponseType('body'); setField(undefined); }}
+              label={<span className='bodyLegacyRadioIcon'>B</span>}
+            />
+            <Radio
+              checked={responseType === 'header'}
+              onChange={() => { setResponseType('header'); setField(undefined); }}
+              label={<span className='bodyLegacyRadioIcon'>H</span>}
+            />
+            <Radio
+              checked={responseType === 'status'}
+              onChange={() => { setResponseType('status'); setField('status'); }}
+              label={<span className='bodyLegacyRadioIcon'>S</span>}
+            />
           </div>
           <LegacyResponseFieldSelect
             method={selectedMethod}

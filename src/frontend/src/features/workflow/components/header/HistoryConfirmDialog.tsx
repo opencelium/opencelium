@@ -1,3 +1,5 @@
+import { useI18n } from '@shared/i18n/hooks/useI18n';
+
 type Props = {
   cancelText?: string;
   confirmText?: string;
@@ -9,14 +11,15 @@ type Props = {
 };
 
 export function HistoryConfirmDialog({
-  cancelText = 'Cancel',
-  confirmText = 'Confirm',
+  cancelText,
+  confirmText,
   confirmVariant = 'primary',
   message,
   title,
   onCancel,
   onConfirm,
 }: Props) {
+  const { t } = useI18n('workflow');
   return (
     <div className='historyConfirmOverlay'>
       <div className='historyConfirmDialog'>
@@ -24,10 +27,10 @@ export function HistoryConfirmDialog({
         <span>{message}</span>
         <div className='historyConfirmActions'>
           <button className='iconButton' type='button' onClick={onCancel}>
-            {cancelText}
+            {cancelText ?? t('actions.cancel')}
           </button>
           <button className={`primaryButton ${confirmVariant === 'danger' ? 'historyDangerButton' : ''}`} type='button' onClick={onConfirm}>
-            {confirmText}
+            {confirmText ?? t('actions.confirm')}
           </button>
         </div>
       </div>

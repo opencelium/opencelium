@@ -102,27 +102,30 @@ const getContext = (
   return { node: current, lastValidPath };
 };
 
+type ReferenceLabelT = (key: string, values?: Record<string, unknown>) => string;
+
 export const getReferenceOptions = (
   method: MethodWithId | undefined,
   type: ResponseType,
   currentPath = '',
   iterators: string[] = [],
+  t: ReferenceLabelT = (key) => key,
 ): ReferenceOption[] => {
-  if (type === 'status') return [{ label: 'Response Status', value: 'status' }];
+  if (type === 'status') return [{ label: t('references.responseStatus'), value: 'status' }];
   const { node, lastValidPath } = getContext(method, type, currentPath, iterators);
   const options: ReferenceOption[] = [];
 
   if (!normalizePath(currentPath)) {
-    options.push({ label: 'The root object', value: '$.' });
+    options.push({ label: t('references.rootObject'), value: '$.' });
   }
 
   if (isArrayNode(node)) {
     return [
       ...options,
-      { label: 'First element of the array', value: appendPath(lastValidPath, '[0]') },
-      { label: 'The whole array', value: appendPath(lastValidPath, '[*]') },
+      { label: t('references.firstArrayElement'), value: appendPath(lastValidPath, '[0]') },
+      { label: t('references.wholeArray'), value: appendPath(lastValidPath, '[*]') },
       ...iterators.map((iterator) => ({
-        label: `(${iterator} loop)`,
+        label: t('references.iteratorLoop', { iterator }),
         value: appendPath(lastValidPath, `[${iterator}]`),
       })),
     ];

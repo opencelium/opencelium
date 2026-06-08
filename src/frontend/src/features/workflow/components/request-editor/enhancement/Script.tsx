@@ -3,6 +3,7 @@ import type { Enhancement } from "../../../types/connection";
 import {DebounceDelay} from "../../../constants/constants";
 import type { Validation } from "../../../types/constants";
 import CustomAceEditor from "../../custom_ace_editor/CustomAceEditor";
+import { useTheme } from "@shared/theme/hooks/useTheme";
 
 const modeMap = {
     'js': 'javascript',
@@ -16,6 +17,7 @@ interface ScriptProps {
     readOnly?: boolean,
 }
 const Script = ({enhancement, onChangeScript, readOnly}: ScriptProps) => {
+    const { themeMode } = useTheme();
     const [markers, setMarkers] = useState<any[]>([]);
     const scriptRef: any = React.useRef(null);
     const [localScript, setLocalScript] = useState(enhancement.script);
@@ -54,7 +56,7 @@ const Script = ({enhancement, onChangeScript, readOnly}: ScriptProps) => {
             }}
             markers={markers}
             mode={modeMap[enhancement.language]}
-            editorTheme='tomorrow'
+            editorTheme={themeMode === 'dark' ? 'tomorrow_night' : 'tomorrow'}
             name='enhancement_code'
             editorProps={{ $blockScrolling: true }}
             showPrintMargin={true}

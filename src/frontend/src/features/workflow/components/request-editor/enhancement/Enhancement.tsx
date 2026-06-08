@@ -11,6 +11,7 @@ import { Language } from '../../../types/connection';
 import type { Enhancement } from '../../../types/connection';
 import type { RootState } from '../../../store';
 import { updateEnhancementInConnection } from '../../../store/connection/utils';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 import '../body-editor/bodyLegacy.css';
 
 interface EnhancementProps {
@@ -19,6 +20,7 @@ interface EnhancementProps {
 }
 
 const ReferenceEnhancement = ({ enhancement, readOnly }: EnhancementProps) => {
+	const { t } = useI18n('workflow');
 	const dispatch = useDispatch();
 	const connection = useSelector((state: RootState) => state.connection.connection);
 	const [isScriptDialogOpen, setIsScriptDialogOpen] = useState(false);
@@ -47,11 +49,11 @@ const ReferenceEnhancement = ({ enhancement, readOnly }: EnhancementProps) => {
 		<div className='bodyLegacyEnhancementContent'>
 			<div className='bodyLegacyEnhancementTop'>
 				<div className='bodyLegacyEnhancementTitleWrap'>
-					<b className='bodyLegacyEnhancementTitle'>Enhancement</b>
+					<b className='bodyLegacyEnhancementTitle'>{t('enhancement.title')}</b>
 				</div>
 				{hasEnhancement ? (
 					<Button type="primary" icon={<ExpandAltOutlined />} onClick={() => setIsScriptDialogOpen(true)}>
-						Open script in new window
+						{t('actions.openScriptNewWindow')}
 					</Button>
 				) : null}
 			</div>
@@ -61,7 +63,7 @@ const ReferenceEnhancement = ({ enhancement, readOnly }: EnhancementProps) => {
 					<div className='bodyLegacyEnhancementArgs'>
 						<EnhancementArgs enhancement={enhancement!} />
 					</div>
-					<div className='bodyLegacyEnhancementLabel'>Language</div>
+					<div className='bodyLegacyEnhancementLabel'>{t('enhancement.language')}</div>
 					<div className='bodyLegacyEnhancementLanguage'>
 						<ScriptLanguage readOnly={readOnly} language={enhancement!.language} onChangeLanguage={onChangeLanguage} />
 					</div>
@@ -79,7 +81,7 @@ const ReferenceEnhancement = ({ enhancement, readOnly }: EnhancementProps) => {
 			) : (
 				<div className='bodyLegacyEnhancementEmpty'>
 					<Typography.Text type="secondary">
-						Please, click on the reference to see its enhancement.
+						{t('enhancement.emptyState')}
 					</Typography.Text>
 				</div>
 			)}
@@ -89,10 +91,10 @@ const ReferenceEnhancement = ({ enhancement, readOnly }: EnhancementProps) => {
 					open={isScriptDialogOpen}
 					onCancel={() => setIsScriptDialogOpen(false)}
 					width="90vw"
-					title="Enhancement"
+					title={t('enhancement.title')}
 					footer={[
 						<Button key="close" type="primary" onClick={() => setIsScriptDialogOpen(false)}>
-							Ok
+							{t('actions.ok')}
 						</Button>,
 					]}
 				>

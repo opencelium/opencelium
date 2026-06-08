@@ -2,12 +2,14 @@ import { Handle, Position } from '@xyflow/react';
 import type { NodeProps } from '@xyflow/react';
 import { NodeShell } from './NodeShell';
 import type { LoopWorkflowNode } from '../types/workflow.types';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 
 export function LoopOperatorNode({
 	id,
 	data,
 	selected,
 }: NodeProps<LoopWorkflowNode>) {
+	const { t } = useI18n('workflow');
 	return (
 		<NodeShell
 			id={id}
@@ -33,7 +35,7 @@ export function LoopOperatorNode({
 			}}
 		>
 			<div className='ifNode'>
-				<div className='operatorInnerText'>Loop</div>
+				<div className='operatorInnerText'>{t('node.loop')}</div>
 			</div>
 
 			<Handle

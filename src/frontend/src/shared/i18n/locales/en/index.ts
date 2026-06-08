@@ -7,6 +7,7 @@ import widget from "./widget.json";
 import dashboard from "./dashboard.json";
 import auth from "./auth.json";
 import logs from "./logs.json";
+import workflow from "./workflow.json";
 
 export default {
     common,
@@ -18,4 +19,5 @@ export default {
     dashboard,
     auth,
     logs,
+    workflow,
 }

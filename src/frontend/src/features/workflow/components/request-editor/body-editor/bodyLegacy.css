@@ -140,6 +140,7 @@
 
 .bodyLegacyEnhancementTitle {
   font-size: 14px;
+  color: var(--color-text-primary);
 }
 
 .bodyLegacyEnhancementBody {
@@ -185,8 +186,8 @@
 
 .bodyLegacyGeneratorShell {
   display: grid;
-  grid-template-columns: 28px 214px 28px 214px 22px;
-  gap: 8px;
+  grid-template-columns: 28px 214px auto 214px 22px;
+  gap: 0;
   align-items: center;
   min-height: 52px;
   padding: 6px 10px;
@@ -201,23 +202,48 @@
   min-width: 452px;
 }
 
-.bodyLegacyGeneratorSwitch,
+/* The response (B/H/S) switcher follows the method select, so keep a
+   separating gap on its left; it still hugs its own field select on the right
+   (grid gap is 0). */
 .bodyLegacyGeneratorResponse {
-  display: grid;
-  gap: 0;
+  margin-left: 8px;
 }
 
-.bodyLegacyRadioRow {
+/* Shared compact radio group: vertical stack of small radios sized so a
+   2–3 option stack stays close to a single select field's height. Used by the
+   body reference generator, the condition source/response switchers, and the
+   reference-generator response-type picker. */
+.compactRadioGroup {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 2px;
-  font-size: 12px;
-  cursor: pointer;
-  line-height: 1;
 }
 
-.bodyLegacyRadioRow input {
+.compactRadioGroup .ant-radio-wrapper {
   margin: 0;
+  font-size: 12px;
+  line-height: 1;
+  align-items: center;
+  color: var(--color-text-primary);
+}
+
+.compactRadioGroup .ant-radio-wrapper > span:last-child {
+  padding-inline-start: 5px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.compactRadioGroup .ant-radio,
+.compactRadioGroup .ant-radio-inner {
+  width: 12px;
+  height: 12px;
+}
+
+.compactRadioGroup .ant-radio-inner::after {
+  width: 12px;
+  height: 12px;
+  margin-block-start: -6px;
+  margin-inline-start: -6px;
 }
 
 .bodyLegacyRadioIcon {

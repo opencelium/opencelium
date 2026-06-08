@@ -3,6 +3,7 @@ import { Button, Input, Space, Typography } from 'antd';
 import { hasOnlyReferences } from '../bodyReference';
 import { XmlReferenceTokens } from './XmlReferenceTokens';
 import type { XmlSelection } from './xmlTree';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 import './xmlField.css';
 
 type Props = {
@@ -38,8 +39,9 @@ export function XmlFieldEditor({
   onEdit,
   inlineEditable = false,
 }: Props) {
+  const { t } = useI18n('workflow');
   const referenceOnly = hasOnlyReferences(value);
-  const preview = value.trim() ? value : placeholder || 'Empty';
+  const preview = value.trim() ? value : placeholder || t('xmlNode.empty');
   return (
     <div className="xmlField" style={{ display: 'grid', gap: 6 }}>
       <Space className="xmlFieldHeader" style={{ justifyContent: 'space-between', width: '100%' }}>
@@ -56,10 +58,10 @@ export function XmlFieldEditor({
                   onInsertReference(selection);
                 }}
               >
-                Insert reference
+                {t('actions.insertReference')}
               </Button>
             ) : null}
-            {onEdit ? <Button className="xmlActionButton" size="small" type="text" onClick={onEdit}>Edit</Button> : null}
+            {onEdit ? <Button className="xmlActionButton" size="small" type="text" onClick={onEdit}>{t('actions.edit')}</Button> : null}
             {onAddEmpty ? <Button className="xmlIconButton" size="small" type="text" icon={<PlusOutlined />} onClick={onAddEmpty} /> : null}
             {onRemove ? <Button className="xmlIconButton" size="small" danger type="text" icon={<DeleteOutlined />} onClick={onRemove} /> : null}
           </Space>

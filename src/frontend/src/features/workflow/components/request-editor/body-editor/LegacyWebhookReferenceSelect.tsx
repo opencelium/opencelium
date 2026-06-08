@@ -2,6 +2,7 @@ import { PlusOutlined, UserOutlined, FontSizeOutlined } from '@ant-design/icons'
 import { Input, Modal, Select } from 'antd';
 import { useMemo, useState } from 'react';
 import { createWebhookOption, getWebhookOptions, type WebhookType, upsertWebhookOption, WEBHOOK_TYPES } from './bodyWebhook';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 import './bodyLegacy.css';
 
 type Props = {
@@ -10,6 +11,7 @@ type Props = {
 };
 
 export function LegacyWebhookReferenceSelect({ value, onChange }: Props) {
+  const { t } = useI18n('workflow');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [name, setName] = useState('');
   const [type, setType] = useState<WebhookType | undefined>();
@@ -22,7 +24,7 @@ export function LegacyWebhookReferenceSelect({ value, onChange }: Props) {
   return (
     <>
       <Select
-        placeholder='Select Webhook...'
+        placeholder={t('placeholders.selectWebhook')}
         value={selected?.value}
         onChange={onChange}
         options={options.map((item) => ({ label: item.label, value: item.value }))}
@@ -31,7 +33,7 @@ export function LegacyWebhookReferenceSelect({ value, onChange }: Props) {
         optionFilterProp='label'
         getPopupContainer={() => document.body}
         styles={{ popup: { root: { zIndex: 13010 } } }}
-        notFoundContent='No webhooks yet'
+        notFoundContent={t('webhook.noWebhooks')}
         popupRender={(menu) => (
           <>
             <button
@@ -40,7 +42,7 @@ export function LegacyWebhookReferenceSelect({ value, onChange }: Props) {
               onMouseDown={(event) => event.preventDefault()}
               onClick={() => setIsModalOpen(true)}
             >
-              <span>Create new</span>
+              <span>{t('actions.createNew')}</span>
               <span className='bodyLegacyWebhookCreatePlus'>
                 <PlusOutlined />
               </span>
@@ -51,7 +53,7 @@ export function LegacyWebhookReferenceSelect({ value, onChange }: Props) {
       />
       <Modal
         open={isModalOpen}
-        title='Add Webhook'
+        title={t('actions.addWebhook')}
         zIndex={13020}
         rootClassName='bodyLegacyWebhookModalRoot'
         closeIcon={null}
@@ -74,13 +76,13 @@ export function LegacyWebhookReferenceSelect({ value, onChange }: Props) {
         <Input
           value={name}
           onChange={(event) => setName(event.target.value)}
-          placeholder='Name'
+          placeholder={t('webhook.namePlaceholder')}
           prefix={<UserOutlined style={{ color: 'var(--color-text-disabled)' }} />}
           variant='borderless'
           className='bodyLegacyWebhookModalInput'
         />
         <Select
-          placeholder='Type'
+          placeholder={t('webhook.typePlaceholder')}
           value={type}
           onChange={setType}
           options={WEBHOOK_TYPES.map((item) => ({ label: item, value: item }))}
