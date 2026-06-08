@@ -747,7 +747,7 @@ public class ConnectionController {
     })
     @PutMapping(path = "/list/delete")
     public ResponseEntity<?> deleteCtionByIdIn(@RequestBody IdentifiersDTO<Long> ids) {
-        ids.getIdentifiers().forEach(connectionService::deleteById);
+        connectionService.deleteByIds(ids.getIdentifiers(), schedulerService.getRunningConnectionIds());
         return ResponseEntity.noContent().build();
     }
 

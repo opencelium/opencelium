@@ -669,6 +669,39 @@ public class ConnectionServiceImp implements ConnectionService {
                 .toList();
     }
 
+    /**
+     * Deletes connections by id, tolerating concurrent changes:
+     * <ul>
+     *   <li>ids that no longer exist are skipped (e.g. a test connection finished and was auto-cleaned
+     *       between listing and this call), so a stale id never aborts the whole batch;</li>
+     *   <li>a test connection that is currently running (its id present in {@code runningConnectionIds})
+     *       is skipped, so an active test in progress is never removed.</li>
+     * </ul>
+     */
+    @Override
+    @Transactional
+    public void deleteByIds(List<Long> ids, Set<Long> runningConnectionIds) {
+        if (ids == null || ids.isEmpty()) {
+            return;
+        }
+        Set<Long> running = runningConnectionIds == null ? Set.of() : runningConnectionIds;
+        for (Long id : ids) {
+            if (id == null) {
+                continue;
+            }
+            Optional<Connection> connection = connectionRepository.findById(id);
+            if (connection.isEmpty()) {
+                log.info("Skipping deletion of connection id={}: already removed", id);
+                continue;
+            }
+            if (running.contains(id) && isTestConnection(connection.get().getTitle())) {
+                log.info("Skipping deletion of running test connection id={}", id);
+                continue;
+            }
+            deleteById(id);
+        }
+    }
+
     @Transactional
     protected int deleteSqlChunk(List<Long> chunk) {
         chunk.forEach(this::deleteById);

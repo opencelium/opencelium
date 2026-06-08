@@ -105,6 +105,8 @@ public interface ConnectionService {
 
     List<Connection> filterTestConnectionEntities(List<Connection> connections, boolean includeTest, Set<Long> runningConnectionIds);
 
+    void deleteByIds(List<Long> ids, Set<Long> runningConnectionIds);
+
     List<ConnectionVersionedDTO> getConnectionVersions(Long connectionId);
 
     void deleteSnapshot(Long connectionId, String snapshotId);
