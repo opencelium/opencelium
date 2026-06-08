@@ -148,8 +148,8 @@ public class ConnectionController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping(path = "/all")
-    public ResponseEntity<?> getAll() {
-        List<ConnectionDTO> all = connectionService.getAllFullConnection();
+    public ResponseEntity<?> getAll(@RequestParam(name = "test", defaultValue = "false") boolean test) {
+        List<ConnectionDTO> all = schedulerService.filterByTestFlag(connectionService.getAllFullConnection(), test);
         return ResponseEntity.ok(connectionOldDTOMapper.toDTOAll(all));
     }
 
@@ -166,7 +166,8 @@ public class ConnectionController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping(path = "/dependency/{invokerName}")
-    public ResponseEntity<?> getByInvokerName(@PathVariable String invokerName) {
+    public ResponseEntity<?> getByInvokerName(@PathVariable String invokerName,
+                                              @RequestParam(name = "test", defaultValue = "false") boolean test) {
         List<Integer> connectorIds = connectorService.findAllByInvoker(invokerName).stream().map(Connector::getId).toList();
 
         List<ConnectionDTO> connections = new ArrayList<>();
@@ -182,7 +183,7 @@ public class ConnectionController {
             }
         }
 
-        List<ConnectionOldDTO> result = connections.stream()
+        List<ConnectionOldDTO> result = schedulerService.filterByTestFlag(connections, test).stream()
                 .map(connectionOldDTOMapper::toDTO)
                 .toList();
         return ResponseEntity.ok(result);
@@ -201,8 +202,8 @@ public class ConnectionController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping(path = "/all/meta")
-    public ResponseEntity<?> getAllMeta() {
-        List<Connection> connections = connectionService.findAll();
+    public ResponseEntity<?> getAllMeta(@RequestParam(name = "test", defaultValue = "false") boolean test) {
+        List<Connection> connections = schedulerService.filterEntitiesByTestFlag(connectionService.findAll(), test);
         List<ConnectionResource> connectionResources = connectionResourceMapper.toDTOAll(connections);
         //unnecessary fields
         connectionResources.forEach(c -> {
@@ -232,8 +233,9 @@ public class ConnectionController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(path = "/all/by-ids")
-    public ResponseEntity<?> getAllMetaById(@RequestBody IdentifiersDTO<Long> ids) {
-        List<Connection> connections = connectionService.findAllByIds(ids);
+    public ResponseEntity<?> getAllMetaById(@RequestBody IdentifiersDTO<Long> ids,
+                                            @RequestParam(name = "test", defaultValue = "false") boolean test) {
+        List<Connection> connections = schedulerService.filterEntitiesByTestFlag(connectionService.findAllByIds(ids), test);
         List<ConnectionResource> connectionResources = connectionResourceMapper.toDTOAll(connections);
         //unnecessary fields
         connectionResources.forEach(c -> {
@@ -972,4 +974,5 @@ public class ConnectionController {
         ResultDTO<List<String>> logFileNames = new ResultDTO<>(connectionService.getLogFileNameListById(connectionId));
         return ResponseEntity.ok(logFileNames);
     }
+
 }

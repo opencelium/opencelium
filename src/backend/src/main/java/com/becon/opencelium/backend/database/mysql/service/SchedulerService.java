@@ -16,9 +16,11 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
+import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.EventNotification;
 import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
+import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.notification.NotificationResource;
 import com.becon.opencelium.backend.resource.request.SchedulerRequestResource;
 import com.becon.opencelium.backend.resource.schedule.RunningJobsResource;
@@ -64,6 +66,8 @@ public interface SchedulerService {
     List<RunningJobsResource> getAllRunningJobs() throws Exception;
     List<RunningJobsResource> getAllRunningJobsExcludingOne(int schedulerId);
     Set<Long> getRunningConnectionIds();
+    List<ConnectionDTO> filterByTestFlag(List<ConnectionDTO> connections, boolean test);
+    List<Connection> filterEntitiesByTestFlag(List<Connection> connections, boolean test);
     List<EventNotification> getAllNotifications(int schedulerId);
     Optional<EventNotification> getNotification(int notificationId);
     EventNotification toNotificationEntity(NotificationResource resource);

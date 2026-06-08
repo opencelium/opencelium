@@ -640,6 +640,35 @@ public class ConnectionServiceImp implements ConnectionService {
         return cleanupResult;
     }
 
+    /**
+     * Filters out test connections (titles matching {@code !*test_connection_...}) unless {@code includeTest} is true.
+     * A test connection that is currently running (its id present in {@code runningConnectionIds}) is always excluded,
+     * so an active test is never offered for cleanup.
+     */
+    @Override
+    public List<ConnectionDTO> filterTestConnections(List<ConnectionDTO> connections, boolean includeTest, Set<Long> runningConnectionIds) {
+        if (connections == null || connections.isEmpty()) {
+            return connections;
+        }
+        Set<Long> runningIds = runningConnectionIds == null ? Set.of() : runningConnectionIds;
+        return connections.stream()
+                .filter(c -> !isTestConnection(c.getTitle())
+                        || (includeTest && c.getId() != null && !runningIds.contains(Long.valueOf(c.getId()))))
+                .toList();
+    }
+
+    @Override
+    public List<Connection> filterTestConnectionEntities(List<Connection> connections, boolean includeTest, Set<Long> runningConnectionIds) {
+        if (connections == null || connections.isEmpty()) {
+            return connections;
+        }
+        Set<Long> runningIds = runningConnectionIds == null ? Set.of() : runningConnectionIds;
+        return connections.stream()
+                .filter(c -> !isTestConnection(c.getTitle())
+                        || (includeTest && c.getId() != null && !runningIds.contains(c.getId())))
+                .toList();
+    }
+
     @Transactional
     protected int deleteSqlChunk(List<Long> chunk) {
         chunk.forEach(this::deleteById);
