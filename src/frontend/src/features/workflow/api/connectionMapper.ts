@@ -246,6 +246,12 @@ const mergeSavedNodeData = (
 	if (!savedData) return builtData;
 
 	const {
+		title,
+		subtitle,
+		kind,
+		connector,
+		methodConfig,
+		conditionConfig,
 		isLeaf,
 		rightLeaf,
 		bottomLeaf,
@@ -256,6 +262,12 @@ const mergeSavedNodeData = (
 
 	return {
 		...builtData,
+		...(title !== undefined ? { title } : {}),
+		...(subtitle !== undefined ? { subtitle } : {}),
+		...(kind !== undefined ? { kind } : {}),
+		...(connector !== undefined ? { connector } : {}),
+		...(methodConfig !== undefined ? { methodConfig } : {}),
+		...(conditionConfig !== undefined ? { conditionConfig } : {}),
 		...(isLeaf !== undefined ? { isLeaf } : {}),
 		...(rightLeaf !== undefined ? { rightLeaf } : {}),
 		...(bottomLeaf !== undefined ? { bottomLeaf } : {}),
