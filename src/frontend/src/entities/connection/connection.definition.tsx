@@ -105,6 +105,7 @@ export const connectionDefinition: EntityDefinition = {
     commands: (def) => [
         ...createEntityCommands({
             def,
+            commandName: 'workflow',
             config: { include: ['update', 'view'] },
             dsl: {
                 update: {

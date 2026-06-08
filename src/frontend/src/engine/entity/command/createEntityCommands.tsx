@@ -8,12 +8,12 @@ import {createUpdateByCommand} from "@/engine/entity/command/update-by/createUpd
 import {createDeleteByCommand} from "@/engine/entity/command/delete-by/createDeleteByCommand.tsx";
 import {createViewByCommand} from "@/engine/entity/command/view-by/createViewByCommand.tsx";
 
-export function createEntityCommands({def, config, dsl}: CreateEntityCommandsType): CommandNode<any>[] {
+export function createEntityCommands({def, config, dsl, commandName}: CreateEntityCommandsType): CommandNode<any>[] {
     if (!config) {
         config =  { include: ['create', 'list', 'update', 'view', 'delete'] }
     }
     const commands: CommandNode<any>[] = [];
-    const name = def.name.toLowerCase();
+    const name = (commandName ?? def.name).toLowerCase();
 
     const isEnabled = (type: EntityCommandType) => {
         if (config?.exclude?.includes(type)) return false;

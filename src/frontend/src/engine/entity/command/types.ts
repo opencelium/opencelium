@@ -31,6 +31,9 @@ export type CreateEntityCommandsType = {
     def: EntityDefinition,
     config?: EntityCommandConfig,
     dsl?: EntityCommandDSL,
+    // Override the word users type/see in the command palette without changing
+    // the entity registry name (which is tied to routes and the backend API path).
+    commandName?: string,
 }
 
 export type GeneralCommandType = CreateEntityCommandsType & {

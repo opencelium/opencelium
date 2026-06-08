@@ -1,12 +1,12 @@
 {
   "messages": {
     "saved": {
-      "create": "Connection \"{{title}}\" created",
-      "update": "Connection \"{{title}}\" updated"
+      "create": "Workflow \"{{title}}\" created",
+      "update": "Workflow \"{{title}}\" updated"
     },
     "saveFailed": {
-      "create": "Failed to create connection \"{{title}}\"",
-      "update": "Failed to update connection \"{{title}}\""
+      "create": "Failed to create workflow \"{{title}}\"",
+      "update": "Failed to update workflow \"{{title}}\""
     },
     "history": {
       "activeDeleteBlocked": "The selected version is active and therefore cannot be deleted.",
@@ -14,8 +14,8 @@
     }
   },
   "list": {
-    "title": "Connections",
-    "subTitle": "Connections define how connectors interact with each other, including request flow, data mapping, and communication logic.",
+    "title": "Workflows",
+    "subTitle": "Workflows define how connectors interact with each other, including request flow, data mapping, and communication logic.",
     "searchPlaceholder": "Search by title or description",
     "columns": {
       "title": "Title",

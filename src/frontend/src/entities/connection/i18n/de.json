@@ -1,12 +1,12 @@
 {
   "messages": {
     "saved": {
-      "create": "Verbindung \"{{title}}\" erstellt",
-      "update": "Verbindung \"{{title}}\" aktualisiert"
+      "create": "Workflow \"{{title}}\" erstellt",
+      "update": "Workflow \"{{title}}\" aktualisiert"
     },
     "saveFailed": {
-      "create": "Verbindung \"{{title}}\" konnte nicht erstellt werden",
-      "update": "Verbindung \"{{title}}\" konnte nicht aktualisiert werden"
+      "create": "Workflow \"{{title}}\" konnte nicht erstellt werden",
+      "update": "Workflow \"{{title}}\" konnte nicht aktualisiert werden"
     },
     "history": {
       "activeDeleteBlocked": "Die ausgewählte Version ist aktiv und kann daher nicht gelöscht werden.",
@@ -14,8 +14,8 @@
     }
   },
   "list": {
-    "title": "Verbindungen",
-    "subTitle": "Verbindungen definieren, wie Konnektoren miteinander interagieren – einschließlich Anforderungsablauf, Datenzuordnung und Kommunikationslogik.",
+    "title": "Workflows",
+    "subTitle": "Workflows definieren, wie Konnektoren miteinander interagieren – einschließlich Anforderungsablauf, Datenzuordnung und Kommunikationslogik.",
     "searchPlaceholder": "Nach Titel oder Beschreibung suchen",
     "columns": {
       "title": "Titel",
