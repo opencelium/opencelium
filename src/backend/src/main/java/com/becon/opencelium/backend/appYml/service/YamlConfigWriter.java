@@ -57,7 +57,7 @@ public class YamlConfigWriter {
         try {
             rootOpt = new Compose(loadSettings).composeString(originalYaml);
         } catch (Exception e) {
-            throw new ApplicationConfigWriteException("Failed to parse application.yml", e);
+            throw new ApplicationConfigWriteException(YamlShadow.describeParseFailure(originalYaml, e), e);
         }
         if (rootOpt.isEmpty() || !(rootOpt.get() instanceof MappingNode rootMapping)) {
             throw new ApplicationConfigWriteException("application.yml must have a mapping root");
@@ -101,7 +101,7 @@ public class YamlConfigWriter {
         try {
             rootOpt = new Compose(loadSettings).composeString(built.shadow());
         } catch (Exception e) {
-            throw new ApplicationConfigWriteException("Failed to parse application.yml", e);
+            throw new ApplicationConfigWriteException(YamlShadow.describeParseFailure(originalYaml, e), e);
         }
         if (rootOpt.isEmpty() || !(rootOpt.get() instanceof MappingNode rootMapping)) {
             throw new ApplicationConfigWriteException("application.yml must have a mapping root");
@@ -147,7 +147,7 @@ public class YamlConfigWriter {
         try {
             rootOpt = new Compose(loadSettings).composeString(originalYaml);
         } catch (Exception e) {
-            throw new ApplicationConfigWriteException("Failed to parse application.yml", e);
+            throw new ApplicationConfigWriteException(YamlShadow.describeParseFailure(originalYaml, e), e);
         }
         if (rootOpt.isEmpty() || !(rootOpt.get() instanceof MappingNode rootMapping)) {
             throw new ApplicationConfigWriteException("application.yml must have a mapping root");

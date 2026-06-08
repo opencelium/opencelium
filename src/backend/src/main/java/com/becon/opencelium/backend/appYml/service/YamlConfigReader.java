@@ -79,7 +79,7 @@ public class YamlConfigReader {
         try {
             rootOpt = new Compose(settings).composeString(built.shadow());
         } catch (Exception e) {
-            throw new ApplicationConfigReadException("Failed to parse application.yml", e);
+            throw new ApplicationConfigReadException(YamlShadow.describeParseFailure(yamlText, e), e);
         }
 
         List<ConfigNode> fields = new ArrayList<>();
