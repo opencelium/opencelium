@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -44,6 +45,9 @@ public final class OperationFixture {
     public static Operation anOperationWithResponseBody() {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE);
+        headers.put("X-Empty", List.of());
+        headers.add("Set-Cookie", "expires=Mon, 17-Jul-2017 16:06:00 GMT; Max-Age=31449600; Path=/; secure");
+        headers.put("Vary", List.of("Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
 
         ResponseEntity<?> response = new ResponseEntity<>(body, headers, HttpStatus.OK);
 
