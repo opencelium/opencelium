@@ -266,6 +266,11 @@ public class SchedulerServiceImp implements SchedulerService {
     }
 
     @Override
+    public Set<Long> getRunningConnectionIds() {
+        return new HashSet<>(schedulingStrategy.getRunningJobs().keySet());
+    }
+
+    @Override
     public void saveEntity(Scheduler scheduler) {
         schedulerRepository.save(scheduler);
     }

@@ -232,7 +232,7 @@ public class ConnectionController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(path = "/all/by-ids")
-    public ResponseEntity<?> getAllMeta(@RequestBody IdentifiersDTO<Long> ids) {
+    public ResponseEntity<?> getAllMetaById(@RequestBody IdentifiersDTO<Long> ids) {
         List<Connection> connections = connectionService.findAllByIds(ids);
         List<ConnectionResource> connectionResources = connectionResourceMapper.toDTOAll(connections);
         //unnecessary fields

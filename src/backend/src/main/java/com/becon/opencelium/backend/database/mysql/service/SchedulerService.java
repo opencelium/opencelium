@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public interface SchedulerService {
 
@@ -62,6 +63,7 @@ public interface SchedulerService {
 
     List<RunningJobsResource> getAllRunningJobs() throws Exception;
     List<RunningJobsResource> getAllRunningJobsExcludingOne(int schedulerId);
+    Set<Long> getRunningConnectionIds();
     List<EventNotification> getAllNotifications(int schedulerId);
     Optional<EventNotification> getNotification(int notificationId);
     EventNotification toNotificationEntity(NotificationResource resource);
