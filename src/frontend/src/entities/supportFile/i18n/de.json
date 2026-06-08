@@ -1,12 +1,12 @@
 {
   "list": {
     "title": "Support-Dateien",
-    "subTitle": "Diagnose-Pakete, die von Verbindungsausführungen erzeugt wurden. Laden Sie ein Paket herunter, um es an den Support weiterzugeben, oder entfernen Sie nicht mehr benötigte Pakete.",
-    "searchPlaceholder": "Nach Verbindung suchen",
-    "deletedConnection": "GELÖSCHTE VERBINDUNG",
+    "subTitle": "Diagnose-Pakete, die von Workflowsausführungen erzeugt wurden. Laden Sie ein Paket herunter, um es an den Support weiterzugeben, oder entfernen Sie nicht mehr benötigte Pakete.",
+    "searchPlaceholder": "Nach Workflow suchen",
+    "deletedConnection": "Gelöschte Workflow",
     "columns": {
       "status": "Status",
-      "connection": "Verbindung",
+      "connection": "Workflow",
       "filePath": "Dateipfad",
       "timestamp": "Zeitstempel"
     },

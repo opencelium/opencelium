@@ -6,7 +6,7 @@
   },
   "menu": {
     "connectors": "Konnektoren",
-    "connections": "Verbindungen",
+    "connections": "Workflows",
     "schedules": "Zeitpläne",
     "usersAccess": "Benutzer & Zugriff",
     "users": "Benutzer",
@@ -14,7 +14,7 @@
     "ldapCheck": "LDAP-Prüfung",
     "configurations": "Konfigurationen",
     "invokers": "Aufrufer",
-    "connectionTemplates": "Verbindungsvorlagen",
+    "connectionTemplates": "Workflow Templates",
     "dataAggregator": "Daten-Aggregator",
     "notificationTemplates": "Benachrichtigungsvorlagen",
     "categories": "Kategorien",

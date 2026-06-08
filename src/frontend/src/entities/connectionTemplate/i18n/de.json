@@ -1,7 +1,7 @@
 {
   "list": {
-    "title": "Verbindungsvorlagen",
-    "subTitle": "Der Bereich Vorlagen enthält vordefinierte Verbindungskonfigurationen, die wiederverwendet werden können, um schnell neue Verbindungen zu erstellen.",
+    "title": "Workflow Templates",
+    "subTitle": "Der Bereich Vorlagen enthält vordefinierte Workflowskonfigurationen, die wiederverwendet werden können, um schnell neue Workflows zu erstellen.",
     "upload": {
       "button": "Hochladen",
       "confirmReplace": {

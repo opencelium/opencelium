@@ -21,7 +21,7 @@
     "modes": {
       "update": {
         "header": "UI-Einstellungen",
-        "subheader": "Hier können Sie Konfigurationen für die Benutzeroberfläche anpassen, z. B. Menü, Commander, Verbindungseditor.",
+        "subheader": "Hier können Sie Konfigurationen für die Benutzeroberfläche anpassen, z. B. Menü, Commander, Workflowseditor.",
         "successMessage": "UI-Einstellungen aktualisiert"
       }
     }

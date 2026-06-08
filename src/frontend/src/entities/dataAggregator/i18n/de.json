@@ -1,7 +1,7 @@
 {
   "list": {
     "title": "Datenaggregator",
-    "subTitle": "Ein Datenaggregator ist eine Funktion, die eine strukturierte Benachrichtigungsverarbeitung ermöglicht, nachdem eine Verbindung in einem Zeitplan ausgelöst wurde. Wenn ein Zeitplan eine Verbindung ausführt, verarbeitet der Aggregator die Ausführungsdaten und bereitet sie für die Benachrichtigungszustellung vor (z. B. über <ntLink>Benachrichtigungsvorlagen</ntLink>).",
+    "subTitle": "Ein Datenaggregator ist eine Funktion, die eine strukturierte Benachrichtigungsverarbeitung ermöglicht, nachdem ein Workflow in einem Zeitplan ausgelöst wurde. Wenn ein Zeitplan ein Workflow ausführt, verarbeitet der Aggregator die Ausführungsdaten und bereitet sie für die Benachrichtigungszustellung vor (z. B. über <ntLink>Benachrichtigungsvorlagen</ntLink>).",
     "filters": {
       "showArchived": "Archivierte anzeigen"
     }

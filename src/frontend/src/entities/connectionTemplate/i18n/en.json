@@ -1,7 +1,7 @@
 {
   "list": {
     "title": "Connection Templates",
-    "subTitle": "The Templates section contains predefined connection configurations that can be reused to quickly create new Connections.",
+    "subTitle": "The Templates section contains predefined connection configurations that can be reused to quickly create new Workflows.",
     "upload": {
       "button": "Upload",
       "confirmReplace": {

@@ -1,7 +1,7 @@
 {
   "list": {
     "title": "Kategorien",
-    "subTitle": "Kategorien werden verwendet, um Verbindungen und Zeitpläne zu organisieren und für eine bessere Struktur und Navigation zu gruppieren."
+    "subTitle": "Kategorien werden verwendet, um Workflows und Zeitpläne zu organisieren und für eine bessere Struktur und Navigation zu gruppieren."
   },
   "fields": {
     "name": {
@@ -35,7 +35,7 @@
     },
     "recommendations": {
       "1": "Weitere Kategorie erstellen",
-      "2": "Verbindung erstellen"
+      "2": "Workflow erstellen"
     },
     "steps": {
       "general-data": {

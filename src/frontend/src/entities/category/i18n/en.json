@@ -1,7 +1,7 @@
 {
   "list": {
     "title": "Categories",
-    "subTitle": "Categories are used to organize and group Connections and Schedules for better structure and navigation."
+    "subTitle": "Categories are used to organize and group Workflows and Schedules for better structure and navigation."
   },
   "fields": {
     "name": {
@@ -23,17 +23,17 @@
     "modes": {
       "create": {
         "header": "Create Category",
-        "subheader": "Categories are used to organize and group Connections and Schedules for better structure and navigation.",
+        "subheader": "Categories are used to organize and group Workflows and Schedules for better structure and navigation.",
         "successMessage": "Category \"{{name}}\" was successfully created"
       },
       "update": {
         "header": "Update Category",
-        "subheader": "Categories are used to organize and group Connections and Schedules for better structure and navigation.",
+        "subheader": "Categories are used to organize and group Workflows and Schedules for better structure and navigation.",
         "successMessage": "Category \"{{name}}\" was successfully updated"
       },
       "view": {
         "header": "Category Details",
-        "subheader": "Categories are used to organize and group Connections and Schedules for better structure and navigation."
+        "subheader": "Categories are used to organize and group Workflows and Schedules for better structure and navigation."
       }
     },
     "recommendations": {

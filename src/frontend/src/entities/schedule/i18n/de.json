@@ -1,11 +1,11 @@
 {
   "list": {
     "title": "Zeitpläne",
-    "subTitle": "Zeitpläne bestimmen, wann bestimmte Verbindungen ausgeführt werden — nach festem Zeitplan oder durch Auslöser. Statuslegende: <blueDot/> läuft, <greenDot/> letzte Ausführung erfolgreich, <redDot/> letzte Ausführung fehlgeschlagen, <grayDot/> kein Cron und keine Historie. Die Zahl unter dem Kreis zählt bis zum nächsten Cron-Trigger herunter.",
-    "searchPlaceholder": "Nach Verbindungsname suchen",
+    "subTitle": "Zeitpläne bestimmen, wann bestimmte Worflows ausgeführt werden — nach festem Zeitplan oder durch Auslöser. Statuslegende: <blueDot/> läuft, <greenDot/> letzte Ausführung erfolgreich, <redDot/> letzte Ausführung fehlgeschlagen, <grayDot/> kein Cron und keine Historie. Die Zahl unter dem Kreis zählt bis zum nächsten Cron-Trigger herunter.",
+    "searchPlaceholder": "Nach Workflowsname suchen",
     "columns": {
       "status": "Status",
-      "connection": "Verbindung",
+      "connection": "Workflow",
       "cronExp": "Cron",
       "lastSuccessExecution": "Letzter Erfolg",
       "lastFailExecution": "Letzter Fehler",
@@ -30,7 +30,7 @@
     "tooltip": "Ausführung starten",
     "success": "Zeitplan-Ausführung gestartet",
     "error": {
-      "concurrentForbidden": "Ein anderer Zeitplan für diese Verbindung läuft bereits. Warten Sie, bis er abgeschlossen ist, bevor Sie diesen starten.",
+      "concurrentForbidden": "Ein anderer Zeitplan für dies Workflow läuft bereits. Warten Sie, bis er abgeschlossen ist, bevor Sie diesen starten.",
       "failed": "Zeitplan-Ausführung konnte nicht gestartet werden"
     }
   },
@@ -94,7 +94,7 @@
   "supportLogs": {
     "tooltip": "Support-Logs",
     "title": "Support-Logs",
-    "titleHint": "Erzeugt eine maskierte Support-Logs-Datei für diese Verbindung. Wählen Sie über die Augen-Schalter, welche Teile vor dem Download maskiert werden.",
+    "titleHint": "Erzeugt eine maskierte Support-Logs-Datei für dieses Workflow. Wählen Sie über die Augen-Schalter, welche Teile vor dem Download maskiert werden.",
     "levelLabel": "Maskierungsstufe",
     "levels": {
       "custom": "Benutzerdefiniert",
@@ -162,14 +162,14 @@
       "create": {
         "header": "Zeitplan erstellen",
         "subheader": "Folgen Sie den 3 einfachen Schritten zur Erstellung des Zeitplans.",
-        "successMessage": "Zeitplan für die Verbindung \"{{connectionTitle}}\" wurde erfolgreich erstellt",
-        "successMessageWithCron": "Zeitplan für die Verbindung \"{{connectionTitle}}\" mit Cron \"{{cronExp}}\" wurde erfolgreich erstellt"
+        "successMessage": "Zeitplan für das Workflow \"{{connectionTitle}}\" wurde erfolgreich erstellt",
+        "successMessageWithCron": "Zeitplan für das Workflow \"{{connectionTitle}}\" mit Cron \"{{cronExp}}\" wurde erfolgreich erstellt"
       },
       "update": {
         "header": "Zeitplan bearbeiten",
         "subheader": "Zeitplan-Informationen ändern und Änderungen speichern.",
-        "successMessage": "Zeitplan für die Verbindung \"{{connectionTitle}}\" wurde erfolgreich aktualisiert",
-        "successMessageWithCron": "Zeitplan für die Verbindung \"{{connectionTitle}}\" mit Cron \"{{cronExp}}\" wurde erfolgreich aktualisiert"
+        "successMessage": "Zeitplan für das Workflow \"{{connectionTitle}}\" wurde erfolgreich aktualisiert",
+        "successMessageWithCron": "Zeitplan für das Workflow \"{{connectionTitle}}\" mit Cron \"{{cronExp}}\" wurde erfolgreich aktualisiert"
       },
       "view": {
         "header": "Schedule Details",
