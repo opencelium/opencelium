@@ -2,6 +2,16 @@
 Changelog
 *********
 
+4.8.4
+========
+
+:Date: June 8, 2026
+
+
+Fixes
+--------
+
+* Fix [null] reference bug (OC-1434)
 
 4.8.3
 ========
