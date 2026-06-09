@@ -1,4 +1,4 @@
-import {ApiOutlined, BranchesOutlined, ScheduleOutlined, UserAddOutlined} from "@ant-design/icons";
+import {ApiOutlined, BranchesOutlined, DashboardOutlined, ScheduleOutlined, UserAddOutlined} from "@ant-design/icons";
 import {MdNotificationAdd, MdOutlineAssistantPhoto, MdOutlineSettingsAccessibility} from "react-icons/md";
 import {GrAggregate, GrConfigure, GrDocumentConfig, GrGroup, GrLicense, GrSystem} from "react-icons/gr";
 import {PiTreeStructureLight} from "react-icons/pi";
@@ -24,6 +24,7 @@ const link = (to: string, label: ReactNode): ReactNode => (
 export const useMainMenu = (): any[] => {
     const {t} = useI18n('common');
     return useMemo(() => [
+        {key: '/', icon: <DashboardOutlined/>, label: link('/', t('menu.dashboard'))},
         {key: '/connector', icon: <BranchesOutlined/>, label: link('/connector', t('menu.connectors'))},
         {key: '/connection', icon: <ApiOutlined/>, label: link('/connection', t('menu.connections'))},
         {key: '/schedule', icon: <ScheduleOutlined/>, label: link('/schedule', t('menu.schedules'))},

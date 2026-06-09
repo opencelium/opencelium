@@ -186,7 +186,7 @@
 
 .bodyLegacyGeneratorShell {
   display: grid;
-  grid-template-columns: 28px 214px auto 214px 22px;
+  grid-template-columns: 40px 214px auto 214px 22px;
   gap: 0;
   align-items: center;
   min-height: 52px;
@@ -202,11 +202,17 @@
   min-width: 452px;
 }
 
-/* The response (B/H/S) switcher follows the method select, so keep a
-   separating gap on its left; it still hugs its own field select on the right
-   (grid gap is 0). */
+/* The response (B/H/S) switcher follows the method select; keep it close to the
+   select on its left (it still hugs its own field select on the right, grid gap
+   is 0). */
 .bodyLegacyGeneratorResponse {
-  margin-left: 8px;
+  margin-left: 2px;
+}
+
+/* The B/H/S labels sit directly before the field select — drop antd's default
+   right padding on the label so they don't leave a trailing gap. */
+.bodyLegacyGeneratorResponse .ant-radio-wrapper > span:last-child {
+  padding-inline-end: 0;
 }
 
 /* Shared compact radio group: vertical stack of small radios sized so a
@@ -216,7 +222,6 @@
 .compactRadioGroup {
   display: flex;
   flex-direction: column;
-  gap: 2px;
 }
 
 .compactRadioGroup .ant-radio-wrapper {

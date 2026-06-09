@@ -54,12 +54,6 @@ export const ConnectorWizardImage = () => {
         src = resolveConnectorIconUrl(selected) ?? connectorWizardImage
     }
 
-    const isCircularPreview = !!objectUrl || (typeof selected === 'string' && selected.trim().length > 0)
-
-    if (!isCircularPreview) {
-        return <img src={src} alt="wizard" style={imgStyle} />
-    }
-
     return (
         <div style={wrapperStyle}>
             <div style={frameStyle}>

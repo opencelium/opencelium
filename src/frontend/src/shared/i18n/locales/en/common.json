@@ -5,6 +5,7 @@
     }
   },
   "menu": {
+    "dashboard": "Dashboard",
     "connectors": "Connectors",
     "connections": "Workflows",
     "schedules": "Schedules",

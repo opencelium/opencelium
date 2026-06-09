@@ -42,6 +42,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             }
         }
         menu: {
+            dashboard: string
             connectors: string
             connections: string
             schedules: string
