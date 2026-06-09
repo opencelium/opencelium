@@ -5,6 +5,7 @@ import { createId as createStableId } from '@shared/lib/createId';
 export const PROHIBITED_ENDPOINT_CHARACTERS = ['<', '>', 'Enter'];
 export const URL_FORBIDDEN_INPUT_RE = /[\u0000-\u001F\u007F\s"<>`|\\^[\]]/g;
 const URL_FORBIDDEN_INPUT_SINGLE_RE = /[\u0000-\u001F\u007F\s"<>`|\\^[\]]/;
+const CARET_BOUNDARY = '\u200B';
 
 export const ARG_TOKEN_RE = /(#{%\s*([A-Za-z0-9_-]+)\s*%})/g;
 const BACKEND_REFERENCE_RE =
@@ -25,14 +26,6 @@ export const extractColorFromSourceRef = (ref?: string) =>
 
 export const visibleFromSourceRef = (ref?: string) =>
 	getReferenceDisplayLabel(ref || '');
-
-export const clearHighlight = (base: ParentNode, selector: string) =>
-	base.querySelectorAll<HTMLElement>(selector).forEach((s) => {
-		s.style.outline = 'none';
-		s.style.boxShadow = 'none';
-	});
-
-export const hasAnyTokenInString = (s: string) => /#{%\s*[A-Za-z0-9_-]+\s*%}/.test(s || '');
 
 const referenceTokenId = (source: string) => {
 	let hash = 0;
@@ -125,7 +118,7 @@ export function buildTokenSpanHtml(opts: {
 	cursorPointer?: boolean;
 }): string {
 	const { className, dataMain, refIndex, color, label, cursorPointer } = opts;
-	return `<span class="${className}" data-main="${escapeHtml(dataMain)}" data-ref-index="${refIndex}" contenteditable="false" style="display:inline-block;margin:0 2px;padding:0 6px;border-radius:4px;background:${color};color:var(--color-text-on-action);font-size:12px;line-height:1.6;vertical-align:middle;user-select:text;${cursorPointer ? 'cursor:pointer;' : ''}">${escapeHtml(label)}</span>`;
+	return `<span class="${className}" data-main="${escapeHtml(dataMain)}" data-ref-index="${refIndex}" contenteditable="false" style="display:inline-block;margin:0 2px;padding:0 6px;border-radius:4px;background:${color};color:var(--color-text-on-action);font-size:12px;line-height:1.6;vertical-align:middle;user-select:none;${cursorPointer ? 'cursor:pointer;' : ''}">${escapeHtml(label)}</span>`;
 }
 
 export function buildInlineHtml(
@@ -150,14 +143,14 @@ export function buildInlineHtml(
 		const id = p.argId || '';
 		const src = endpointArgs?.[id]?.source;
 		out.push(
-			buildTokenSpanHtml({
+			`${CARET_BOUNDARY}${buildTokenSpanHtml({
 				className,
 				dataMain: p.value,
 				refIndex: idx++,
 				color: extractColorFromSourceRef(src) ?? 'var(--color-action-primary)',
 				label: src ? visibleFromSourceRef(src) : id,
 				cursorPointer,
-			})
+			})}${CARET_BOUNDARY}`
 		);
 	}
 	return out.join('');
@@ -169,7 +162,9 @@ export function parseHtmlToRaw(html: string, tokenClass: string): string {
 	container.innerHTML = html;
 
 	const walk = (n: ChildNode): string => {
-		if (n.nodeType === Node.TEXT_NODE) return (n.textContent || '').replace(/\u00a0/g, ' ');
+		if (n.nodeType === Node.TEXT_NODE) {
+			return (n.textContent || '').replace(/\u200B/g, '').replace(/\u00a0/g, ' ');
+		}
 		if (n.nodeType !== Node.ELEMENT_NODE) return '';
 
 		const el = n as HTMLElement;
@@ -211,19 +206,6 @@ export function computeRawInsertAtFromVisualCaret(
 	return (raw || '').length;
 }
 
-export function valueForFilter(raw: string, endpointArgs?: Record<string, EndpointArg>): string {
-	let out = '';
-	for (const p of buildInlineParts(raw || '')) {
-		if (p.kind === 'text') out += p.value;
-		else {
-			const id = p.argId || '';
-			const src = endpointArgs?.[id]?.source;
-			out += src ? visibleFromSourceRef(src) : id;
-		}
-	}
-	return out;
-}
-
 export function removeInlineTokenByIndex(raw: string, tokenIndex: number): string {
 	let idx = 0;
 	const out: string[] = [];
@@ -234,29 +216,23 @@ export function removeInlineTokenByIndex(raw: string, tokenIndex: number): strin
 	return out.join('');
 }
 
-export type ParsedEndpoint = { base: string; queryRaw: string; hasQuestion: boolean };
+type ParsedEndpoint = { base: string; queryRaw: string; hasQuestion: boolean };
 
-export const splitEndpoint = (endpoint: string): ParsedEndpoint => {
+const splitEndpoint = (endpoint: string): ParsedEndpoint => {
 	const s = endpoint || '';
 	const i = s.indexOf('?');
 	return i === -1 ? { base: s, queryRaw: '', hasQuestion: false } : { base: s.slice(0, i), queryRaw: s.slice(i + 1), hasQuestion: true };
 };
 
-export const parseQueryToPairs = (queryRaw: string) =>
+const parseQueryToPairs = (queryRaw: string) =>
 	(queryRaw ? queryRaw.split('&') : []).filter(Boolean).map((ch) => {
 		const eq = ch.indexOf('=');
 		return eq === -1 ? { key: ch, value: '' } : { key: ch.slice(0, eq), value: ch.slice(eq + 1) };
 	});
 
-export type QueryParamLite = { id: string; key: string; value: string; enabled: boolean };
+type QueryParamLite = { id: string; key: string; value: string; enabled: boolean };
 
-export const buildQueryFromParams = (params: QueryParamLite[]) =>
-	params
-		.filter((p) => p.enabled && p.key.trim() !== '')
-		.map((p) => `${p.key}=${p.value ?? ''}`)
-		.join('&');
-
-export function ensureTemplateRow<T extends QueryParamLite>(params: T[]): T[] {
+function ensureTemplateRow<T extends QueryParamLite>(params: T[]): T[] {
 	const last = params[params.length - 1];
 	const isTemplate = !!last && !last.enabled && !last.key.trim() && !last.value.trim();
 	return isTemplate
@@ -264,15 +240,15 @@ export function ensureTemplateRow<T extends QueryParamLite>(params: T[]): T[] {
 		: [...(params.length ? params : []), ({ id: createId(), key: '', value: '', enabled: false } as T)];
 }
 
-export const isTemplateRow = (p: QueryParamLite) => !p.enabled && !p.key.trim() && !p.value.trim();
+const isTemplateRow = (p: QueryParamLite) => !p.enabled && !p.key.trim() && !p.value.trim();
 
-export const stripTemplateRows = <T extends QueryParamLite>(params: T[]) =>
+const stripTemplateRows = <T extends QueryParamLite>(params: T[]) =>
 	(params || []).filter((p) => !isTemplateRow(p) && p.key.trim() !== '');
 
-export const isMockActiveRow = (p: QueryParamLite) =>
+const isMockActiveRow = (p: QueryParamLite) =>
 	p.key.trim().toLowerCase() === 'mock' && String(p.value ?? '').trim().toLowerCase() === 'active';
 
-export const stripMockActiveRows = <T extends QueryParamLite>(params: T[]) =>
+const stripMockActiveRows = <T extends QueryParamLite>(params: T[]) =>
 	(params || []).filter((p) => !isMockActiveRow(p));
 
 export function stripMockActiveFromEndpoint(endpointStr: string) {
@@ -284,14 +260,14 @@ export function stripMockActiveFromEndpoint(endpointStr: string) {
 	return query ? `${endpoint.base}?${query}` : endpoint.base;
 }
 
-export function buildQueryParamsFromEndpoint<T extends QueryParamLite>(endpointStr: string, prev?: T[]): T[] {
+export function buildQueryParamsFromEndpoint<T extends QueryParamLite>(endpointStr: string, prev?: T[], includeTemplateRow = true): T[] {
 	const pairs = parseQueryToPairs(splitEndpoint(stripMockActiveFromEndpoint(endpointStr || '')).queryRaw);
 	const prevMeaningful = stripMockActiveRows(stripTemplateRows(prev || []));
-	return ensureTemplateRow(
-		pairs
-			.filter((pair) => !isMockActiveRow({ id: '', enabled: true, key: pair.key, value: pair.value }))
-			.map((pair, i) => ({ id: prevMeaningful[i]?.id || createId(), key: pair.key, value: pair.value, enabled: true } as T))
-	);
+	const params = pairs
+		.filter((pair) => !isMockActiveRow({ id: '', enabled: true, key: pair.key, value: pair.value }))
+		.map((pair, i) => ({ id: prevMeaningful[i]?.id || createId(), key: pair.key, value: pair.value, enabled: true } as T));
+
+	return includeTemplateRow ? ensureTemplateRow(params) : params;
 }
 
 export const normalizeReference = (ref: string) => {
@@ -299,48 +275,6 @@ export const normalizeReference = (ref: string) => {
 	if (r.startsWith('{%') && r.endsWith('%}')) r = r.slice(2, -2).trim();
 	return r.startsWith('#') ? r : `#${r}`;
 };
-
-export type QueryValueTokenPolicy = { inQuery: boolean; inValue: boolean; hasToken: boolean; isAfterToken: boolean };
-
-export function getQueryValueTokenPolicyAtRawPos(endpointRaw: string, rawPos: number): QueryValueTokenPolicy {
-	const s = endpointRaw || '';
-	const qStart = s.indexOf('?');
-	if (qStart === -1) return { inQuery: false, inValue: false, hasToken: false, isAfterToken: false };
-
-	const qPos = rawPos - (qStart + 1);
-	if (qPos < 0) return { inQuery: false, inValue: false, hasToken: false, isAfterToken: false };
-
-	const queryRaw = s.slice(qStart + 1);
-	const chunks = queryRaw.split('&');
-
-	let acc = 0;
-	for (const seg of chunks) {
-		const segStart = acc;
-		const segEnd = acc + (seg || '').length;
-
-		if (qPos >= segStart && qPos <= segEnd) {
-			const eq = (seg || '').indexOf('=');
-			if (eq === -1 || qPos <= segStart + eq)
-				return { inQuery: true, inValue: false, hasToken: false, isAfterToken: false };
-
-			const valuePart = (seg || '').slice(eq + 1);
-			const valueAbsStart = qStart + 1 + (segStart + eq + 1);
-
-			const matches = Array.from(valuePart.matchAll(/#{%\s*[A-Za-z0-9_-]+\s*%}/g));
-			if (!matches.length) return { inQuery: true, inValue: true, hasToken: false, isAfterToken: false };
-
-			const last = matches[matches.length - 1];
-			const lastStart = valueAbsStart + (last.index ?? 0);
-			const lastEnd = lastStart + last[0].length;
-
-			return { inQuery: true, inValue: true, hasToken: true, isAfterToken: rawPos >= lastEnd };
-		}
-
-		acc = segEnd + 1;
-	}
-
-	return { inQuery: true, inValue: false, hasToken: false, isAfterToken: false };
-}
 
 export const sanitizePlainTextPaste = (s: string) => (s || '').replace(/\r?\n/g, '').replace(/\t/g, ' ');
 

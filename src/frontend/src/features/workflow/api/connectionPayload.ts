@@ -486,7 +486,14 @@ const serializeFieldBinding = (binding: any) => {
 };
 
 const serializeFieldBindings = (fieldBindings: any) =>
-	Array.isArray(fieldBindings) ? fieldBindings.map(serializeFieldBinding) : fieldBindings;
+	Array.isArray(fieldBindings)
+		? fieldBindings
+			.filter((binding) => {
+				const result = parseBindingReference(binding?.enhancement?.args?.RESULT_VAR);
+				return result?.type !== 'request' || result.field !== 'endpoint';
+			})
+			.map(serializeFieldBinding)
+		: fieldBindings;
 
 const buildBindingReference = (reference: any) => {
 	if (!reference?.color || !reference?.type || !reference?.field) return undefined;

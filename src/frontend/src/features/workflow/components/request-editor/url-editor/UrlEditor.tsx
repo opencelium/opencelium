@@ -7,15 +7,11 @@ import type { RootState } from '../../../store';
 import type {
 	Connection,
 	EndpointArg,
-	Enhancement,
-	QueryParam,
 } from '../../../types/connection';
-import { Language } from '../../../types/connection';
 import {
 	updateEndpoint,
 	updateQueryParams,
 	upsertEndpointArg,
-	upsertFieldBinding,
 } from '../../../store/connection/connectionSlice';
 
 import { UrlEndpointField } from './UrlEndpointField';
@@ -23,15 +19,14 @@ import ReferenceGenerator from '../reference-generator/ReferenceGenerator';
 
 import {
 	buildQueryParamsFromEndpoint,
-	computeRawInsertAtFromVisualCaret,
 	createId,
-	ensureTemplateRow,
 	getInlineVisualLength,
 	normalizeReference,
 	stripMockActiveFromEndpoint,
-	stripTemplateRows,
-	stripMockActiveRows,
 } from './urlEditor.utils';
+import {
+	setFocusByCaretPositionInDivEditable,
+} from './utils/contentEditable';
 
 const TOKEN_ID_RE = /#{%\s*([A-Za-z0-9_-]+)\s*%}/g;
 const extractTokenIds = (s: string) =>
@@ -46,6 +41,7 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 
 	const endpointDivRef = useRef<HTMLDivElement | null>(null);
 	const lastKnownCaretPosRef = useRef(0);
+	const lastKnownRawCaretPosRef = useRef(0);
 	const selectedEndpointTokenIndexRef = useRef<number | null>(null);
 
 	const initialEndpoint = stripMockActiveFromEndpoint(
@@ -63,19 +59,6 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 		...(method.request.endpointArgs || {}),
 	});
 
-	const [queryParams, setQueryParams] = useState<QueryParam[]>(() => {
-		const stored = stripMockActiveRows(
-			(method.request.queryParams || []).map((p) => ({
-				...p,
-			})) as QueryParam[],
-		);
-		return stored?.length
-			? ensureTemplateRow(stored)
-			: (buildQueryParamsFromEndpoint(
-					method.request.endpoint || '',
-				) as QueryParam[]);
-	});
-
 	const [
 		isEndpointReferenceGeneratorOpen,
 		setIsEndpointReferenceGeneratorOpen,
@@ -90,7 +73,6 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 	const dispatchSaveAll = useCallback(
 		(
 			nextEndpoint: string,
-			nextQueryParams: QueryParam[],
 			nextEndpointArgs: Record<string, EndpointArg>,
 		) => {
 			if (readOnly) return;
@@ -104,7 +86,7 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 			dispatch(
 				updateQueryParams({
 					methodId: method.id,
-					queryParams: stripTemplateRows(nextQueryParams),
+					queryParams: buildQueryParamsFromEndpoint(nextEndpoint, undefined, false),
 				} as any),
 			);
 
@@ -127,10 +109,9 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 		if (readOnly) return;
 		dispatchSaveAll(
 			rawRef.current || endpointRaw || '',
-			queryParams,
 			endpointArgsRef.current,
 		);
-	}, [dispatchSaveAll, endpointRaw, queryParams, readOnly]);
+	}, [dispatchSaveAll, endpointRaw, readOnly]);
 
 	const createArgTokenForInlineEditors = useCallback(
 		(sourceRefRaw: string, existingTokenIds: string[]) => {
@@ -157,31 +138,10 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 				}
 			};
 
-			const attachEnhancementToIds = (
-				ids: string[],
-				enhancement: Enhancement,
-			) => {
-				for (const id of ids) {
-					if (nextEndpointArgs[id])
-						nextEndpointArgs[id] = { ...nextEndpointArgs[id], enhancement };
-				}
-			};
-
 			if (!existingTokenIds?.length) {
-				const enhancement: Enhancement = {
-					enhanceId: newArgId,
-					language: Language.JavaScript,
-					script: 'RESULT_VAR = VAR_0',
-					args: {
-						RESULT_VAR: `${method.color}.(request).endpoint`,
-						VAR_0: sourceRef,
-					},
-				};
-
 				nextEndpointArgs[newArgId] = {
 					id: newArgId,
 					source: sourceRef,
-					enhancement,
 				};
 
 				endpointArgsRef.current = nextEndpointArgs;
@@ -195,7 +155,6 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 							patch: nextEndpointArgs[newArgId],
 						} as any),
 					);
-					dispatch(upsertFieldBinding({ enhancement } as any));
 				}
 
 				return {
@@ -205,37 +164,9 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 				};
 			}
 
-			const baseTokenId = existingTokenIds[0];
-			const baseEnh = nextEndpointArgs[baseTokenId]?.enhancement;
-
-			const nextIndex = existingTokenIds.length;
-
-			const enhancement: Enhancement = baseEnh
-				? {
-						...baseEnh,
-						enhanceId: baseEnh.enhanceId || baseTokenId,
-						language: baseEnh.language || Language.JavaScript,
-						script: baseEnh.script || 'RESULT_VAR = VAR_0',
-						args: { ...(baseEnh.args || {}), [`VAR_${nextIndex}`]: sourceRef },
-					}
-				: {
-						enhanceId: baseTokenId,
-						language: Language.JavaScript,
-						script: 'RESULT_VAR = VAR_0',
-						args: {
-							RESULT_VAR: `${method.color}.(request).endpoint`,
-							VAR_0: normalizeReference(
-								nextEndpointArgs[baseTokenId]?.source || '',
-							),
-							[`VAR_${nextIndex}`]: sourceRef,
-						},
-					};
-
-			attachEnhancementToIds(existingTokenIds, enhancement);
 			nextEndpointArgs[newArgId] = {
 				id: newArgId,
 				source: sourceRef,
-				enhancement,
 			};
 
 			endpointArgsRef.current = nextEndpointArgs;
@@ -243,7 +174,6 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 
 			if (!readOnly) {
 				upsertMany([...existingTokenIds, newArgId]);
-				dispatch(upsertFieldBinding({ enhancement } as any));
 			}
 
 			return {
@@ -252,7 +182,7 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 				endpointArgsNext: nextEndpointArgs,
 			};
 		},
-		[dispatch, method.color, method.id, readOnly],
+		[dispatch, method.id, readOnly],
 	);
 
 	useEffect(() => {
@@ -267,21 +197,11 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 		setEndpointRaw(incomingEndpoint);
 		rawRef.current = incomingEndpoint;
 
-		const stored = stripMockActiveRows(
-			(method.request.queryParams || []).map((p) => ({
-				...p,
-			})) as QueryParam[],
-		);
-		setQueryParams(
-			stored?.length
-				? ensureTemplateRow(stored)
-				: (buildQueryParamsFromEndpoint(incomingEndpoint) as QueryParam[]),
-		);
-
 		lastKnownCaretPosRef.current = getInlineVisualLength(
 			incomingEndpoint,
 			nextArgs,
 		);
+		lastKnownRawCaretPosRef.current = incomingEndpoint.length;
 		selectedEndpointTokenIndexRef.current = null;
 		setIsEndpointReferenceGeneratorOpen(false);
 		lastDispatchedEndpointRef.current = null;
@@ -306,10 +226,8 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 			incoming,
 			endpointArgsRef.current,
 		);
+		lastKnownRawCaretPosRef.current = incoming.length;
 		selectedEndpointTokenIndexRef.current = null;
-		setQueryParams(
-			(prev) => buildQueryParamsFromEndpoint(incoming, prev) as QueryParam[],
-		);
 	}, [method.request.endpoint]);
 
 	useEffect(() => {
@@ -317,44 +235,47 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 			if (readOnly) return;
 			dispatchSaveAll(
 				rawRef.current || '',
-				queryParams,
 				endpointArgsRef.current,
 			);
 		};
-	}, [dispatchSaveAll, queryParams, readOnly]);
+	}, [dispatchSaveAll, readOnly]);
 
 	const applyReferenceToEndpoint = useCallback(
 		(reference: string) => {
 			const currentRaw = rawRef.current || endpointRaw || '';
-			const { token, tokenLabel } = createArgTokenForInlineEditors(
+			const { token } = createArgTokenForInlineEditors(
 				reference,
 				extractTokenIds(currentRaw),
 			);
-			const insertAt = computeRawInsertAtFromVisualCaret(
-				currentRaw,
-				lastKnownCaretPosRef.current,
-				endpointArgsRef.current,
+			const insertAt = Math.max(
+				0,
+				Math.min(lastKnownRawCaretPosRef.current, currentRaw.length),
 			);
 			const nextRaw = `${currentRaw.slice(0, insertAt)}${token}${currentRaw.slice(
 				insertAt,
 			)}`;
-			const nextQueryParams = buildQueryParamsFromEndpoint(
-				nextRaw,
-				queryParams,
-			) as QueryParam[];
+			const nextRawCaret = insertAt + token.length;
 			const nextCaret =
-				lastKnownCaretPosRef.current + (tokenLabel?.length || 0);
+				getInlineVisualLength(nextRaw.slice(0, nextRawCaret), endpointArgsRef.current);
 
 			selectedEndpointTokenIndexRef.current = null;
 			lastKnownCaretPosRef.current = nextCaret;
+			lastKnownRawCaretPosRef.current = nextRawCaret;
 			rawRef.current = nextRaw;
 			setEndpointRaw(nextRaw);
-			setQueryParams(nextQueryParams);
 			lastDispatchedEndpointRef.current = nextRaw;
-			dispatchSaveAll(nextRaw, nextQueryParams, endpointArgsRef.current);
+			dispatchSaveAll(nextRaw, endpointArgsRef.current);
 			setIsEndpointReferenceGeneratorOpen(false);
+			requestAnimationFrame(() => {
+				requestAnimationFrame(() => {
+					setFocusByCaretPositionInDivEditable(
+						endpointDivRef.current,
+						nextCaret,
+					);
+				});
+			});
 		},
-		[createArgTokenForInlineEditors, dispatchSaveAll, endpointRaw, queryParams],
+		[createArgTokenForInlineEditors, dispatchSaveAll, endpointRaw],
 	);
 
 	if (!connection) return null;
@@ -370,19 +291,26 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 				endpointArgsRef={endpointArgsRef}
 				divRef={endpointDivRef}
 				lastCaretRef={lastKnownCaretPosRef}
+				lastRawCaretRef={lastKnownRawCaretPosRef}
 				selectedTokenIndexRef={selectedEndpointTokenIndexRef}
+				onRawCaretChange={(rawCaret, visualCaret) => {
+					lastKnownRawCaretPosRef.current = rawCaret;
+					lastKnownCaretPosRef.current = visualCaret;
+				}}
 				onRawChange={(nextRaw) => {
+					const prevRaw = rawRef.current || '';
+					if (nextRaw.length > prevRaw.length && nextRaw.startsWith(prevRaw)) {
+						lastKnownRawCaretPosRef.current = nextRaw.length;
+						lastKnownCaretPosRef.current = getInlineVisualLength(
+							nextRaw,
+							endpointArgsRef.current,
+						);
+					}
 					setEndpointRaw(nextRaw);
 					rawRef.current = nextRaw;
 					lastDispatchedEndpointRef.current = null;
 				}}
 				onBlurCommit={saveAllNow}
-				onAfterManualEditRebuildParams={(nextRaw) => {
-					setQueryParams(
-						(prev) =>
-							buildQueryParamsFromEndpoint(nextRaw, prev) as QueryParam[],
-					);
-				}}
 				afterNode={
 					!readOnly ? (
 						<Button
