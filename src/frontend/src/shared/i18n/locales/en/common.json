@@ -15,7 +15,7 @@
     "ldapCheck": "LDAP Check",
     "configurations": "Configurations",
     "invokers": "Invokers",
-    "connectionTemplates": "Connection Templates",
+    "connectionTemplates": "Workflow Templates",
     "dataAggregator": "Data Aggregator",
     "notificationTemplates": "Notification Templates",
     "categories": "Categories",
