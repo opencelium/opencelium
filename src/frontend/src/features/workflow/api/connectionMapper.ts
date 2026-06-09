@@ -17,6 +17,7 @@ export type WorkflowConnectionState = {
 };
 
 const methodToConfig = (method: any): WorkflowMethodConfig => ({
+	name: method?.name,
 	url: method?.request?.endpoint ?? '',
 	method: method?.request?.method ?? 'GET',
 	headers: method?.request?.header ?? {},
@@ -74,7 +75,9 @@ const compareIndexPath = (left: number[], right: number[]) => {
 const sortByIndex = <T extends { path: number[] }>(items: T[]) =>
 	[...items].sort((left, right) => compareIndexPath(left.path, right.path));
 
-const getMethodName = (method: any, index: number) => method?.name ?? method?.label ?? `Method ${index + 1}`;
+// The node subtitle is the user-facing label: prefer the saved label, falling
+// back to the operation name (legacy connections only carried `name`).
+const getMethodName = (method: any, index: number) => method?.label ?? method?.name ?? `Method ${index + 1}`;
 
 const getNodePosition = (path: number[]) => {
 	const startPosition = initialNodes[0]?.position ?? { x: 120, y: 220 };
@@ -102,6 +105,7 @@ const toMethodEntry = (method: any, index: number): IndexedWorkflowEntry => {
 			data: {
 				title: method?.connector?.title ?? 'Connector',
 				subtitle: getMethodName(method, index),
+				labelEdited: Boolean(method?.label),
 				kind: 'connector' as const,
 				connector: {
 					connectorId: method?.connector?.connectorId ?? -1,

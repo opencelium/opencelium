@@ -73,6 +73,7 @@ const iconMap = {
     'chevron-down': ExpandMore,
     maximize: Fullscreen,
     minimize: FullscreenExit,
+    'arrow-switch': SwapHoriz,
 };
 
 export const MaterialIcon: IconComponent = ({

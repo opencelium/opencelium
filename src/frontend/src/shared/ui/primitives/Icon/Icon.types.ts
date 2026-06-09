@@ -42,6 +42,7 @@ export type IconName =
     | 'chevron-down'
     | 'maximize'
     | 'minimize'
+    | 'arrow-switch'
 
 export type IconColor =
     | 'default'

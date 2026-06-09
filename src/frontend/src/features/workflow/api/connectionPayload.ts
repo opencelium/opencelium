@@ -344,7 +344,10 @@ const buildMethodPayload = (node: WorkflowNodeModel, index: string, order: numbe
 
 	return {
 		id: node.id,
-		name: node.data.subtitle,
+		// `name` stays the operation name. The subtitle is only persisted as a
+		// `label` once the user has renamed the node themselves.
+		name: config?.name ?? node.data.subtitle,
+		...(node.data.labelEdited ? { label: node.data.subtitle } : {}),
 		index,
 		color: normalizeColor((node.data as any).color, ALL_COLORS[order % ALL_COLORS.length]),
 		connector: node.data.connector,

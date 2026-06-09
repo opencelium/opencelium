@@ -25,9 +25,7 @@
     "failed": "Failed to copy to clipboard"
   },
   "methodView": {
-    "tooltip": "Switch method display between URL and name",
-    "url": "URL",
-    "name": "Name"
+    "tooltip": "Switch method display between URL and name"
   },
   "live": {
     "title": "Logs",

@@ -1,5 +1,5 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
-import { Switch } from "@shared/ui/primitives/Switch";
+import { IconButton } from "@shared/ui/primitives/IconButton";
 import { Tooltip } from "@shared/ui/primitives/Tooltip";
 import { useI18n } from "@shared/i18n/hooks/useI18n";
 import type { MethodViewMode } from "./methodView";
@@ -39,13 +39,12 @@ export function MethodViewSwitcher() {
   const { mode, setMode } = useMethodViewMode();
   return (
     <Tooltip content={t("methodView.tooltip")}>
-      <span style={{ display: "inline-flex" }}>
-        <Switch
-          checked={mode === "name"}
-          onChange={(checked) => setMode(checked ? "name" : "url")}
-          text={{ on: t("methodView.name"), off: t("methodView.url") }}
-        />
-      </span>
+      <IconButton
+        iconProps={{ name: "arrow-switch", size: 16, color: mode === "name" ? "inherit" : "primary" }}
+        type={mode === "name" ? "primary" : "text"}
+        size="xs"
+        onClick={() => setMode(mode === "url" ? "name" : "url")}
+      />
     </Tooltip>
   );
 }
