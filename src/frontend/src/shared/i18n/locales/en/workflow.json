@@ -46,7 +46,8 @@
     "loadTemplatesFailed": "Failed to load templates",
     "selectTemplate": "Please select a template",
     "loadTemplateFailed": "Failed to load template",
-    "downloadTemplateFailed": "Failed to download template."
+    "downloadTemplateFailed": "Failed to download template.",
+    "unsavedLeaveConfirm": "You have unsaved changes that will be lost. Are you sure you want to leave this page without saving?"
   },
   "sidebar": {
     "useConnector": {

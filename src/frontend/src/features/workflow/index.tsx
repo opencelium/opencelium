@@ -16,6 +16,7 @@ import { ConditionBuilderDialog } from './components/condition-builder/Condition
 import { MethodConfigDialog } from './components/request-editor/MethodConfigDialog';
 import { buildLegacyConnection } from './components/request-editor/legacyAdapter';
 import { useWorkflowPage } from './useWorkflowPage';
+import { useUnsavedChangesGuard } from './useUnsavedChangesGuard';
 import { TestRunProvider } from './test-run/TestRunProvider';
 import { loadConnectionVersions, loadWorkflowConnection, loadWorkflowConnectionVersion, removeConnectionVersion, saveConnectionVersionComment, saveWorkflowConnection } from './api/connectionService';
 import { mapConnectionToWorkflowState } from './api/connectionMapper';
@@ -295,6 +296,8 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const isLoading = isConnectionLoading || isConnectorsLoading;
   const hasConnectionChanges = baselineSnapshot !== null && currentChangeSnapshot !== baselineSnapshot;
   const hasManualUnsavedChanges = hasConnectionChanges && changeSource === 'manual';
+
+  useUnsavedChangesGuard(!readOnly && hasConnectionChanges, t('messages.unsavedLeaveConfirm'));
 
   useEffect(() => {
     if (isLoading || baselineSnapshot !== null) return;

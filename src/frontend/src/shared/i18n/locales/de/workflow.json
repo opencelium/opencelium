@@ -46,7 +46,8 @@
     "loadTemplatesFailed": "Vorlagen konnten nicht geladen werden",
     "selectTemplate": "Bitte wählen Sie eine Vorlage aus",
     "loadTemplateFailed": "Vorlage konnte nicht geladen werden",
-    "downloadTemplateFailed": "Vorlage konnte nicht heruntergeladen werden."
+    "downloadTemplateFailed": "Vorlage konnte nicht heruntergeladen werden.",
+    "unsavedLeaveConfirm": "Sie haben ungespeicherte Änderungen, die verloren gehen. Möchten Sie diese Seite wirklich verlassen, ohne zu speichern?"
   },
   "sidebar": {
     "useConnector": {
