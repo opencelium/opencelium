@@ -11,27 +11,27 @@ const wrapperStyle = {
     height: 120,
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'flex-end',
+    justifyContent: 'right',
 } as const
 
+// Square frame keeps the radius a true circle regardless of the
+// image's aspect ratio; the image sits slightly inset so it isn't cropped.
 const frameStyle = {
-    width: 120,
-    height: 120,
-    border: '5px solid var(--color-border-strong)',
+    width: 100,
+    height: 100,
     borderRadius: '50%',
-    boxSizing: 'border-box',
-    background: 'var(--color-background-surface)',
+    background: 'white',
     overflow: 'hidden',
+    flexShrink: 0,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 12,
 } as const
 
 const imgStyle = {
-    height: '100%',
+    width: '85%',
+    height: '85%',
     objectFit: 'contain',
-    display: 'block',
 } as const
 
 export const ConnectorWizardImage = () => {
