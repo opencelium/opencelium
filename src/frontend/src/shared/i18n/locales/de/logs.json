@@ -24,6 +24,11 @@
     "success": "In die Zwischenablage kopiert",
     "failed": "Kopieren in die Zwischenablage fehlgeschlagen"
   },
+  "methodView": {
+    "tooltip": "Methodenanzeige zwischen URL und Name umschalten",
+    "url": "URL",
+    "name": "Name"
+  },
   "live": {
     "title": "Logs",
     "empty": "Noch keine Logs. Starten Sie einen Test, um Ausführungs-Logs zu sehen.",

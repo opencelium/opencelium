@@ -24,6 +24,11 @@
     "success": "Copied to clipboard",
     "failed": "Failed to copy to clipboard"
   },
+  "methodView": {
+    "tooltip": "Switch method display between URL and name",
+    "url": "URL",
+    "name": "Name"
+  },
   "live": {
     "title": "Logs",
     "empty": "No logs yet. Run a test to see execution logs.",

@@ -9,6 +9,8 @@ import { MethodLogDetails } from "./MethodLogDetails";
 import { LoopPager } from "./LoopPager";
 import { CopyButton } from "./CopyButton";
 import { serializeLogElement } from "./serializeLogElement";
+import { useMethodViewMode } from "./methodViewMode";
+import { methodDisplayText } from "./methodView";
 
 const INDENT_STEP = 22;
 
@@ -111,6 +113,8 @@ export function LogElementRow({
     Record<number, boolean>
   >({});
 
+  const { mode } = useMethodViewMode();
+
   const isControlled = onToggle !== undefined;
   const expanded = isControlled ? !!expandedProp : internalExpanded;
   const toggle = isControlled ? onToggle : () => setInternalExpanded((v) => !v);
@@ -124,6 +128,11 @@ export function LogElementRow({
   switch (log.type) {
     case "OPERATION": {
       const { request, response } = log.segment;
+      const displayText = methodDisplayText(mode, {
+        url: request.url,
+        label: log.properties.label,
+        name: log.properties.name,
+      });
       return (
         <>
           <LogRow
@@ -134,8 +143,8 @@ export function LogElementRow({
             left={
               <>
                 <MethodBadge method={request.http_method} />
-                <Url>{request.url}</Url>
-                <CopyButton value={request.url} className="oc-copy-on-hover" />
+                <Url>{displayText}</Url>
+                <CopyButton value={displayText} className="oc-copy-on-hover" />
               </>
             }
             right={

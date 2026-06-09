@@ -10,6 +10,7 @@ import { parseLogFileName } from "./parseLogFileName";
 import { ExecutionLogTree } from "./ExecutionLogTree";
 import { DownloadLogsButton } from "./DownloadLogsButton";
 import { MethodDetailViewStateProvider } from "./methodDetailViewState";
+import { MethodViewModeProvider, MethodViewSwitcher } from "./methodViewMode";
 
 type Props = {
   connectionId: number;
@@ -43,11 +44,13 @@ export function LogsDialogContent({ connectionId, schedulerId, status }: Props) 
 
   return (
     <MethodDetailViewStateProvider>
-      {executionId && (
-        <DialogHeaderActions>
-          <DownloadLogsButton executionId={executionId} />
-        </DialogHeaderActions>
-      )}
+      <MethodViewModeProvider>
+        {executionId && (
+          <DialogHeaderActions>
+            <MethodViewSwitcher />
+            <DownloadLogsButton executionId={executionId} />
+          </DialogHeaderActions>
+        )}
       <div
         style={
           isFullscreen
@@ -101,6 +104,7 @@ export function LogsDialogContent({ connectionId, schedulerId, status }: Props) 
           )}
         </div>
       </div>
+      </MethodViewModeProvider>
     </MethodDetailViewStateProvider>
   );
 }

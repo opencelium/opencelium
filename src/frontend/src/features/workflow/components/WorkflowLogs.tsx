@@ -2,7 +2,7 @@ import { ChevronUp, Loader2, Maximize2, Minimize2, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
-import { EMPTY_LIVE_LOG_TREE, LiveExecutionLogTree } from '@features/logs';
+import { EMPTY_LIVE_LOG_TREE, LiveExecutionLogTree, MethodViewModeProvider, MethodViewSwitcher } from '@features/logs';
 import { useTestRun } from '../test-run/useTestRun';
 import type { TestRunResult } from '../test-run/TestRunContext';
 
@@ -64,6 +64,7 @@ export function WorkflowLogs() {
 		setPanel((current) => (current === 'full' ? 'normal' : 'full'));
 
 	return (
+		<MethodViewModeProvider>
 		<div
 			className={`logsCard ${isExpanded ? 'logsCardExpanded' : ''} ${
 				panel === 'full' ? 'logsCardFull' : ''
@@ -86,6 +87,11 @@ export function WorkflowLogs() {
 						)}
 					</span>
 				</button>
+				{isExpanded && hasLogs && (
+					<span style={{ display: 'inline-flex', alignItems: 'center' }}>
+						<MethodViewSwitcher />
+					</span>
+				)}
 				{isExpanded && hasLogs && !isRunning && (
 					<Tooltip content={tLogs('live.clear')}>
 						<button
@@ -132,5 +138,6 @@ export function WorkflowLogs() {
 				</div>
 			)}
 		</div>
+		</MethodViewModeProvider>
 	);
 }

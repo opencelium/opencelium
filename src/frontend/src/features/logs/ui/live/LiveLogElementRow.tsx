@@ -8,6 +8,8 @@ import { ElementChildren } from "../LogElementRow";
 import { MethodLogDetails } from "../MethodLogDetails";
 import { CopyButton } from "../CopyButton";
 import { serializeLogElement } from "../serializeLogElement";
+import { useMethodViewMode } from "../methodViewMode";
+import { methodDisplayText } from "../methodView";
 
 // Mirrors the REST tree's status colors: started rows show a spinner, finished
 // rows a green/red dot.
@@ -106,6 +108,8 @@ export function LiveLogElementRow({
   // changes (only consumed by the LOOP branch).
   const [expandedChildren, setExpandedChildren] = useState<Record<number, boolean>>({});
 
+  const { mode } = useMethodViewMode();
+
   const isControlled = onToggle !== undefined;
   const expanded = isControlled ? !!expandedProp : internalExpanded;
   const toggle = isControlled ? onToggle : () => setInternalExpanded((v) => !v);
@@ -122,7 +126,11 @@ export function LiveLogElementRow({
       // Details are fetched by the persisted element id — without one (no
       // socket line carried it) there is nothing to request.
       const expandable = node.id !== "";
-      const urlText = request?.url ?? node.properties.name ?? "";
+      const displayText = methodDisplayText(mode, {
+        url: request?.url,
+        label: node.properties.label,
+        name: node.properties.name,
+      });
       return (
         <>
           <LogRow
@@ -133,8 +141,10 @@ export function LiveLogElementRow({
             left={
               <>
                 <MethodBadge method={request?.http_method ?? ""} />
-                <Url>{urlText}</Url>
-                {urlText ? <CopyButton value={urlText} className="oc-copy-on-hover" /> : null}
+                <Url>{displayText}</Url>
+                {displayText ? (
+                  <CopyButton value={displayText} className="oc-copy-on-hover" />
+                ) : null}
               </>
             }
             right={
