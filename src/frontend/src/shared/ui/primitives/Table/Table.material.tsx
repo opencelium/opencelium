@@ -8,7 +8,7 @@ import {
     TablePagination,
     Checkbox,
 } from '@mui/material';
-import { renderTruncatedCell } from './Table.utils';
+import { isRowClickIgnored, renderTruncatedCell } from './Table.utils';
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
@@ -110,7 +110,14 @@ export const MaterialTable = ({
                             key={row.id}
                             className={extraClassName}
                             hover={clickable}
-                            onClick={clickable ? () => onRowClick(row.original) : undefined}
+                            onClick={
+                                clickable
+                                    ? (e) => {
+                                          if (isRowClickIgnored(e.target)) return;
+                                          onRowClick(row.original);
+                                      }
+                                    : undefined
+                            }
                             sx={
                                 isDisabled
                                     ? { opacity: 0.5, pointerEvents: 'none' }

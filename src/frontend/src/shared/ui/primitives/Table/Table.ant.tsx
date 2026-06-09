@@ -2,7 +2,7 @@
 import { Table, Pagination } from 'antd';
 import { flexRender } from '@tanstack/react-table';
 import React, { useCallback, useMemo } from 'react';
-import { renderTruncatedCell } from './Table.utils';
+import { isRowClickIgnored, renderTruncatedCell } from './Table.utils';
 
 const PAGE_SIZE_OPTIONS = ['10', '20', '50', '100'];
 
@@ -131,7 +131,12 @@ export const AntTable = ({
                 ...(clickable ? { style: { cursor: 'pointer' } } : {}),
                 ...(className ? { className } : {}),
                 ...(clickable && row
-                    ? { onClick: () => onRowClick(row.original) }
+                    ? {
+                          onClick: (e: React.MouseEvent) => {
+                              if (isRowClickIgnored(e.target)) return;
+                              onRowClick(row.original);
+                          },
+                      }
                     : {}),
             };
         },

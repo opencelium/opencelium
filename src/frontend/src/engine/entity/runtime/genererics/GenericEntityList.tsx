@@ -35,7 +35,9 @@ import type {
     ListAction,
     ListFilterState,
     ListFilterValue,
+    UpdateActionConfig,
 } from '@/engine/entity/EntityDefinition';
+import { useEntityUpdateOpener } from '@shared/ui/wizard-step/list/actions/useEntityUpdateOpener';
 import { buildEntityColumns } from './buildEntityColumns';
 import { buildRowActionsColumn } from './buildRowActionsColumn';
 import { BulkActionButton } from './BulkActionButton';
@@ -84,6 +86,7 @@ const emptyRowDecoration = () => EMPTY_ROW_DECORATION;
 export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
     const entity = entityRegistry.get(entityName);
     const dialog = useDialog();
+    const openUpdate = useEntityUpdateOpener();
     const confirm = useConfirm();
     const { t: tEntities } = useI18n('entities');
     const { t: tCommon } = useI18n('common');
@@ -113,6 +116,14 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
     const selectable = !!bulkConfig || bulkActions.length > 0 || !!entity.list?.selectable;
     const rowKey = entity.list?.rowKey ?? entity.api?.primaryKey ?? 'id';
     const bulkField = bulkConfig?.field ?? rowKey;
+
+    // A row is clickable only when the list exposes an update action — clicking
+    // it opens the same update flow as the row's edit action.
+    const updateAction = actions.find((a): a is UpdateActionConfig => a.type === 'update');
+    const handleRowClick = updateAction
+        ? (row: EntityRow) =>
+              openUpdate(entity, updateAction, row, String(getValueByPath(row, rowKey) ?? ''))
+        : undefined;
 
     const columns = useMemo<ColumnDef<EntityRow>[]>(() => {
         const cols = buildEntityColumns<EntityRow>(entity, { tEntities });
@@ -330,6 +341,7 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
                 emptyState={entity.list?.emptyKey ? tEntities(entity.list.emptyKey) : tCommon('list.empty')}
                 disabledRowIds={pendingDeleteIds}
                 rowClassName={rowClassName}
+                onRowClick={handleRowClick}
             />
         </div>
     );
