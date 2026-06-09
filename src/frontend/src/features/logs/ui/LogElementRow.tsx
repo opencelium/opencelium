@@ -7,6 +7,8 @@ import type { FlowchartChildLog } from "../model/types";
 import { LogRow, Meta, MethodBadge, OperatorLabel, StatusBadge, Url } from "./logRowUi";
 import { MethodLogDetails } from "./MethodLogDetails";
 import { LoopPager } from "./LoopPager";
+import { CopyButton } from "./CopyButton";
+import { serializeLogElement } from "./serializeLogElement";
 
 const INDENT_STEP = 22;
 
@@ -133,6 +135,7 @@ export function LogElementRow({
               <>
                 <MethodBadge method={request.http_method} />
                 <Url>{request.url}</Url>
+                <CopyButton value={request.url} className="oc-copy-on-hover" />
               </>
             }
             right={
@@ -158,7 +161,12 @@ export function LogElementRow({
             expandable
             expanded={expanded}
             onToggle={toggle}
-            left={<OperatorLabel label="LOOP" hint={log.properties.iterator} />}
+            left={
+              <>
+                <OperatorLabel label="LOOP" hint={log.properties.iterator} />
+                <CopyButton value={serializeLogElement(log)} className="oc-copy-on-hover" />
+              </>
+            }
             right={
               <LoopPager
                 index={loopIndex}
@@ -187,7 +195,12 @@ export function LogElementRow({
             expandable
             expanded={expanded}
             onToggle={toggle}
-            left={<OperatorLabel label="IF" />}
+            left={
+              <>
+                <OperatorLabel label="IF" />
+                <CopyButton value={serializeLogElement(log)} className="oc-copy-on-hover" />
+              </>
+            }
             right={
               <Typography variant="caption" isSubtle>
                 {log.segment.result}

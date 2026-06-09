@@ -18,6 +18,12 @@
     "responseHeader": "Response Header",
     "responseBody": "Response Body"
   },
+  "copy": {
+    "tooltip": "Copy to clipboard",
+    "empty": "Nothing to copy",
+    "success": "Copied to clipboard",
+    "failed": "Failed to copy to clipboard"
+  },
   "live": {
     "title": "Logs",
     "empty": "No logs yet. Run a test to see execution logs.",

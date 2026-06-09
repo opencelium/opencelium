@@ -6,6 +6,8 @@ import { LogRow, Meta, MethodBadge, OperatorLabel, StatusBadge, Url } from "../l
 import { LoopPager } from "../LoopPager";
 import { ElementChildren } from "../LogElementRow";
 import { MethodLogDetails } from "../MethodLogDetails";
+import { CopyButton } from "../CopyButton";
+import { serializeLogElement } from "../serializeLogElement";
 
 // Mirrors the REST tree's status colors: started rows show a spinner, finished
 // rows a green/red dot.
@@ -120,6 +122,7 @@ export function LiveLogElementRow({
       // Details are fetched by the persisted element id — without one (no
       // socket line carried it) there is nothing to request.
       const expandable = node.id !== "";
+      const urlText = request?.url ?? node.properties.name ?? "";
       return (
         <>
           <LogRow
@@ -130,7 +133,8 @@ export function LiveLogElementRow({
             left={
               <>
                 <MethodBadge method={request?.http_method ?? ""} />
-                <Url>{request?.url ?? node.properties.name ?? ""}</Url>
+                <Url>{urlText}</Url>
+                {urlText ? <CopyButton value={urlText} className="oc-copy-on-hover" /> : null}
               </>
             }
             right={
@@ -170,7 +174,12 @@ export function LiveLogElementRow({
             expandable
             expanded={expanded}
             onToggle={toggle}
-            left={<OperatorLabel label="LOOP" hint={node.properties.iterator} />}
+            left={
+              <>
+                <OperatorLabel label="LOOP" hint={node.properties.iterator} />
+                <CopyButton value={serializeLogElement(node)} className="oc-copy-on-hover" />
+              </>
+            }
             right={
               <Meta>
                 {total > 0 ? (
@@ -210,7 +219,12 @@ export function LiveLogElementRow({
             expandable
             expanded={expanded}
             onToggle={toggle}
-            left={<OperatorLabel label="IF" />}
+            left={
+              <>
+                <OperatorLabel label="IF" />
+                <CopyButton value={serializeLogElement(node)} className="oc-copy-on-hover" />
+              </>
+            }
             right={
               <Meta>
                 {node.segment.result !== undefined ? (
