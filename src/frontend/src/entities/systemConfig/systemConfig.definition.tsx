@@ -2,6 +2,7 @@ import React from 'react'
 import type {EntityDefinition} from '@/engine/entity/EntityDefinition'
 import type {CommandNode} from '@shared/command/types'
 import {SystemConfigPage} from '@pages/SystemConfigPage/SystemConfigPage'
+import {buildSystemConfigCommand} from '@entities/systemConfig/command/systemConfigCommand'
 import en from '@entities/systemConfig/i18n/en.json'
 import de from '@entities/systemConfig/i18n/de.json'
 
@@ -39,5 +40,6 @@ export const systemConfigDefinition: EntityDefinition = {
                 },
             ],
         },
+        buildSystemConfigCommand(),
     ],
 }

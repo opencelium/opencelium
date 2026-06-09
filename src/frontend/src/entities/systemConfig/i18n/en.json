@@ -38,5 +38,11 @@
       "title": "Master Password",
       "content": "The system configuration is protected. Enter the master password to unlock it."
     }
+  },
+  "commandPalette": {
+    "provideMasterPassword": "Provide master password to search the configuration",
+    "editTitle": "Edit configuration value",
+    "valueLabel": "Value",
+    "statusLabel": "Enabled"
   }
 }

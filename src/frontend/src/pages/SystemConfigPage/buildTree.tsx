@@ -5,12 +5,12 @@ import {Checkbox} from '@shared/ui/primitives/Checkbox'
 import type {
     ConfigNode,
     ConfigScalar,
-    ConfigStatus,
     NodeEdit,
 } from '@entities/systemConfig/model/types'
 import {isContainerNode} from '@entities/systemConfig/model/types'
+import {nodeLabel} from '@entities/systemConfig/model/helpers'
 import {Icon} from '@shared/ui/primitives/Icon'
-import {ConfigLeafEditor} from './ConfigLeafEditor'
+import {ConfigLeafEditor} from '@entities/systemConfig/ui/ConfigLeafEditor'
 import {CommentTooltipBody} from './CommentInfo'
 
 type LeafValue = ConfigScalar | ConfigScalar[]
@@ -118,11 +118,6 @@ export function hasAnyNodeComment(nodes: ConfigNode[]): boolean {
         if (isContainerNode(node) && hasAnyNodeComment(node.value as ConfigNode[])) return true
     }
     return false
-}
-
-function nodeLabel(key: string): string {
-    const lastDot = key.lastIndexOf('.')
-    return lastDot >= 0 ? key.slice(lastDot + 1) : key
 }
 
 /**

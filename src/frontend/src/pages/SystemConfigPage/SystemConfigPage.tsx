@@ -15,12 +15,12 @@ import {
     useUpdateApplicationConfigMutation,
 } from '@entities/systemConfig/api/systemConfigApi'
 import type {
-    ConfigNode,
     ConfigPatchNode,
     ConfigScalar,
     NodeEdit,
 } from '@entities/systemConfig/model/types'
 import {isContainerNode} from '@entities/systemConfig/model/types'
+import {buildNodeByPathMap} from '@entities/systemConfig/model/helpers'
 import {
     buildTree,
     collectExpandableKeys,
@@ -50,17 +50,7 @@ export function SystemConfigPage() {
 
     const fields = useMemo(() => data?.fields ?? [], [data?.fields])
 
-    const nodeByPath = useMemo(() => {
-        const map = new Map<string, ConfigNode>()
-        const walk = (nodes: ConfigNode[]) => {
-            for (const n of nodes) {
-                map.set(n.path, n)
-                if (isContainerNode(n)) walk(n.value as ConfigNode[])
-            }
-        }
-        walk(fields)
-        return map
-    }, [fields])
+    const nodeByPath = useMemo(() => buildNodeByPathMap(fields), [fields])
 
     const handleValueChange = useCallback((path: string, value: LeafValue) => {
         setEdits((prev) => {

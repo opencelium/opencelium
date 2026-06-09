@@ -14,6 +14,9 @@ export interface CommandExecutionContext {
     notify: (message: string, type?: 'success' | 'error') => void;
 
     setInputValue: (v: string) => void,
+
+    /** Return keyboard focus to the palette input (e.g. after a modal closes). */
+    focusInput?: () => void,
 }
 
 export type CommandNodeType =

@@ -16,11 +16,13 @@ type MasterPasswordDialogProps = {
     label?: string
     info?: MasterPasswordInfo
     onUnlock?: (masterPassword: string) => void
+    /** Render without the Card wrapper, centered — for hosting inside a modal. */
+    bare?: boolean
 }
 
 const ASCII_ONLY = /^[\x20-\x7E]*$/
 
-export const MasterPasswordDialog: React.FC<MasterPasswordDialogProps> = ({ label, info, onUnlock }) => {
+export const MasterPasswordDialog: React.FC<MasterPasswordDialogProps> = ({ label, info, onUnlock, bare }) => {
     const { t: widgetT } = useI18n('widget')
     const { t: commonT } = useI18n('common')
     const [localPassword, setLocalPassword] = useState('')
@@ -63,45 +65,63 @@ export const MasterPasswordDialog: React.FC<MasterPasswordDialogProps> = ({ labe
         setLocalPassword(value)
     }
 
-    return (
-        <Card style={{ width: 500 }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <Typography variant="label" isBold>
-                        {resolvedLabel}
-                    </Typography>
-                    <Tooltip content={resolvedInfo.content} placement="top">
-                        <span style={{ display: 'inline-flex', cursor: 'help' }}>
-                            <Icon name="info" size={14} color="secondary" isSubtle />
-                        </span>
-                    </Tooltip>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                    <div style={{ flex: 1 }}>
-                        <Input
-                            autoFocus
-                            type="password"
-                            name="masterPassword"
-                            value={localPassword}
-                            error={!!error}
-                            onChange={(e) => onChange(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') void check()
-                            }}
-                        />
-                        {error && (
-                            <div style={{ marginTop: 4 }}>
-                                <Typography variant="caption" isDanger>
-                                    {error}
-                                </Typography>
-                            </div>
-                        )}
-                    </div>
-                    <Button loading={isLoading} htmlType="button" onClick={check}>
-                        {widgetT('masterPassword.button.label')}
-                    </Button>
-                </div>
+    const form = (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Typography variant="label" isBold>
+                    {resolvedLabel}
+                </Typography>
+                <Tooltip content={resolvedInfo.content} placement="top">
+                    <span style={{ display: 'inline-flex', cursor: 'help' }}>
+                        <Icon name="info" size={14} color="secondary" isSubtle />
+                    </span>
+                </Tooltip>
             </div>
-        </Card>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                <div style={{ flex: 1 }}>
+                    <Input
+                        autoFocus
+                        type="password"
+                        name="masterPassword"
+                        value={localPassword}
+                        error={!!error}
+                        onChange={(e) => onChange(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') void check()
+                        }}
+                    />
+                    {error && (
+                        <div style={{ marginTop: 4 }}>
+                            <Typography variant="caption" isDanger>
+                                {error}
+                            </Typography>
+                        </div>
+                    )}
+                </div>
+                <Button loading={isLoading} htmlType="button" onClick={check}>
+                    {widgetT('masterPassword.button.label')}
+                </Button>
+            </div>
+        </div>
     )
+
+    if (bare) {
+        return (
+            <div
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 16,
+                    width: '100%',
+                    minHeight: 250,
+                }}
+            >
+                <div style={{ width: '100%', maxWidth: 480 }}>{form}</div>
+            </div>
+        )
+    }
+
+    return <Card style={{ width: 500 }}>{form}</Card>
 }

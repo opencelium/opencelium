@@ -38,5 +38,11 @@
       "title": "Master-Passwort",
       "content": "Die Systemkonfiguration ist geschützt. Geben Sie das Master-Passwort ein, um sie freizuschalten."
     }
+  },
+  "commandPalette": {
+    "provideMasterPassword": "Master-Passwort eingeben, um die Konfiguration zu durchsuchen",
+    "editTitle": "Konfigurationswert bearbeiten",
+    "valueLabel": "Wert",
+    "statusLabel": "Aktiviert"
   }
 }

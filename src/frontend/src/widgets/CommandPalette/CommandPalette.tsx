@@ -88,6 +88,7 @@ export const CommandPalette = () => {
                 alert(message);
             },
             setInputValue: (v: string) => setValue(v),
+            focusInput: () => inputRef.current?.focus(),
         });
     };
     useEffect(() => {
@@ -129,18 +130,22 @@ export const CommandPalette = () => {
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             // Ctrl + K (Windows/Linux) or Cmd + K (Mac)
-            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+            if ((e.ctrlKey || e.metaKey) && !e.altKey && e.key.toLowerCase() === 'k') {
+                // Capture phase + stopPropagation so we win the keystroke before a
+                // focused editor/overlay can swallow it — otherwise preventDefault
+                // never runs and Chrome's Ctrl+K omnibox shortcut takes over.
                 e.preventDefault();
+                e.stopPropagation();
 
                 inputRef.current?.focus();
                 setIsActive(true);
             }
         };
 
-        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('keydown', handleKeyDown, { capture: true });
 
         return () => {
-            window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener('keydown', handleKeyDown, { capture: true });
         };
     }, []);
 

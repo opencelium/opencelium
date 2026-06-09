@@ -25,7 +25,7 @@ function valueToText(value: LeafValue): string {
 
 /**
  * Scalar/array input with a local draft. Typing only updates local state — the
- * shared config tree is rebuilt once, on blur, instead of on every keystroke.
+ * committed `value` is emitted once, on blur, instead of on every keystroke.
  * The committed `value` prop re-syncs the draft when it changes externally.
  */
 const TextLikeInput: React.FC<Props & {kind: 'number' | 'string' | 'array' | 'null'}> = ({
