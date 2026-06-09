@@ -3,7 +3,7 @@ import type {PolicyDefinition} from "@/engine/policy";
 import type {IconName} from "@shared/ui/primitives/Icon/Icon.types.ts";
 
 export interface CommandExecutionContext {
-    openModal: (node: React.ReactNode) => void;
+    openModal: (node: React.ReactNode, options?: {width?: number | string}) => void;
     navigate: (url: string) => void;
     openNewTab: (url: string) => void;
     render: (node: React.ReactNode) => void;

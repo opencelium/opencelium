@@ -47,8 +47,8 @@
     "memory": "Memory"
   },
   "topConnectors": {
-    "title": "Top connectors",
-    "name": "Connector",
+    "title": "Top workflows",
+    "name": "Workflow",
     "executions": "Executions",
     "failureRate": "Failure rate"
   }

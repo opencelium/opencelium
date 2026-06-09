@@ -1,6 +1,5 @@
 import React, {useState} from 'react'
 import {message} from 'antd'
-import {Card} from '@shared/ui/primitives/Card'
 import {Button} from '@shared/ui/primitives/Button'
 import {Switch} from '@shared/ui/primitives/Switch'
 import {Typography} from '@shared/ui/primitives/Typography'
@@ -32,9 +31,9 @@ export const ConfigLeafEditDialog: React.FC<Props> = ({path, onSaved}) => {
 
     if (!node) {
         return (
-            <Card style={{width: 520}}>
+            <div style={{display: 'flex', justifyContent: 'center', padding: 24}}>
                 <Loading />
-            </Card>
+            </div>
         )
     }
 
@@ -59,32 +58,30 @@ const LeafEditForm: React.FC<{node: ConfigNode; onSaved: () => void}> = ({node, 
     }
 
     return (
-        <Card style={{width: 520}}>
-            <div style={{display: 'flex', flexDirection: 'column', gap: 16}}>
-                <Typography variant="title">{t('system-config.commandPalette.editTitle')}</Typography>
-                <Typography variant="caption" isSubtle as="div">
-                    {node.path}
-                </Typography>
+        <div style={{display: 'flex', flexDirection: 'column', gap: 16}}>
+            <Typography variant="title">{t('system-config.commandPalette.editTitle')}</Typography>
+            <Typography variant="caption" isSubtle as="div">
+                {node.path}
+            </Typography>
 
-                <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
-                    <Typography variant="label">{t('system-config.commandPalette.valueLabel')}</Typography>
-                    <ConfigLeafEditor path={node.path} value={value} onChange={setValue} />
-                </div>
-
-                <div style={{display: 'flex', alignItems: 'center', gap: 10}}>
-                    <Typography variant="label">{t('system-config.commandPalette.statusLabel')}</Typography>
-                    <Switch
-                        checked={status === 'active'}
-                        onChange={(checked) => setStatus(checked ? 'active' : 'inactive')}
-                    />
-                </div>
-
-                <div style={{display: 'flex', justifyContent: 'flex-end'}}>
-                    <Button type="primary" htmlType="button" loading={isSaving} onClick={handleSave}>
-                        {t('system-config.actions.save')}
-                    </Button>
-                </div>
+            <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
+                <Typography variant="label">{t('system-config.commandPalette.valueLabel')}</Typography>
+                <ConfigLeafEditor path={node.path} value={value} onChange={setValue} />
             </div>
-        </Card>
+
+            <div style={{display: 'flex', alignItems: 'center', gap: 10}}>
+                <Typography variant="label">{t('system-config.commandPalette.statusLabel')}</Typography>
+                <Switch
+                    checked={status === 'active'}
+                    onChange={(checked) => setStatus(checked ? 'active' : 'inactive')}
+                />
+            </div>
+
+            <div style={{display: 'flex', justifyContent: 'flex-end'}}>
+                <Button type="primary" htmlType="button" loading={isSaving} onClick={handleSave}>
+                    {t('system-config.actions.save')}
+                </Button>
+            </div>
+        </div>
     )
 }

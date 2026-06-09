@@ -35,7 +35,9 @@ async function executeSystemConfig(args: {query?: string}, ctx: CommandExecution
         return
     }
 
-    ctx.openModal(<ConfigLeafEditDialog path={path} onSaved={() => returnToSearch(ctx)} />)
+    ctx.openModal(<ConfigLeafEditDialog path={path} onSaved={() => returnToSearch(ctx)} />, {
+        width: 'fit-content',
+    })
 }
 
 export function buildSystemConfigCommand(): CommandNode<unknown> {
