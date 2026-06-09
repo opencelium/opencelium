@@ -4,7 +4,7 @@ import {applyTheme} from "@shared/theme/applyTheme.ts";
 import {buildTheme} from "@shared/theme/buildTheme.ts";
 import {themeRegistry, type ThemeDefinition} from "@shared/theme/registry/themeRegistry.ts";
 import {registerThemeSetter} from "@shared/theme/themeController.ts";
-import {readStoredThemeId, storeThemeId} from "@shared/theme/themeStorage.ts";
+import {readStoredThemeId, storeThemeId, THEME_STORAGE_KEY} from "@shared/theme/themeStorage.ts";
 import {DEVICE_THEME_ID, type ThemeMode} from "@shared/theme/types.ts";
 
 function systemMode(): ThemeMode {
@@ -56,6 +56,21 @@ export const ThemeProvider: React.FC<{
 
     // Expose setTheme to non-React call sites (command palette executors).
     useEffect(() => registerThemeSetter(setTheme), [setTheme]);
+
+    // Sync the theme across tabs: the `storage` event fires only in *other*
+    // tabs/windows, so picking up the new id here mirrors a change made
+    // elsewhere without writing it back (which would loop).
+    useEffect(() => {
+        const onStorage = (event: StorageEvent) => {
+            if (event.key !== THEME_STORAGE_KEY || event.newValue === null) return;
+            const next = readStoredThemeId();
+            if (!next || (next !== DEVICE_THEME_ID && !themeRegistry.has(next))) return;
+            setThemeId(next);
+            setVersion(v => v + 1);
+        };
+        window.addEventListener('storage', onStorage);
+        return () => window.removeEventListener('storage', onStorage);
+    }, []);
 
     // In device mode, follow OS color-scheme switches live.
     useEffect(() => {

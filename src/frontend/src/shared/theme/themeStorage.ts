@@ -1,6 +1,6 @@
 import { isValidSeeds, type CustomThemeSeeds } from '@shared/theme/palette/customPalette'
 
-const THEME_STORAGE_KEY = 'theme'
+export const THEME_STORAGE_KEY = 'theme'
 const CUSTOM_SEEDS_STORAGE_KEY = 'oc_custom_theme_seeds'
 
 // Values stored before the theme registry existed (binary light/dark switch).
