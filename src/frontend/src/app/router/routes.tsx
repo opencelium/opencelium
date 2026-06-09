@@ -68,15 +68,15 @@ export function getRoutes(): RouteConfig[] {
                 element: <AppLayout isNotCard hasNoHeader/>,
                 children: [
                     {
-                        path: '/connection/create',
+                        path: '/workflow/create',
                         element: <ResettableRoute><Workflow/></ResettableRoute>
                     },
                     {
-                        path: '/connection/update/:connectionId',
+                        path: '/workflow/update/:connectionId',
                         element: <ResettableRoute><Workflow/></ResettableRoute>
                     },
                     {
-                        path: '/connection/view/:connectionId',
+                        path: '/workflow/view/:connectionId',
                         element: <ResettableRoute><Workflow readOnly /></ResettableRoute>
                     },
                 ],

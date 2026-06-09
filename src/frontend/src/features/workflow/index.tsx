@@ -368,7 +368,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     if (isCreate && savedId) {
       const savedIdString = String(savedId);
       setCreatedConnectionId(savedIdString);
-      window.history.replaceState(window.history.state, '', `/connection/update/${savedIdString}`);
+      window.history.replaceState(window.history.state, '', `/workflow/update/${savedIdString}`);
     }
   };
 

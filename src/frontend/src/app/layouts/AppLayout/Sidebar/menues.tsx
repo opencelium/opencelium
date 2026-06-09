@@ -27,7 +27,7 @@ export const useMainMenu = (): any[] => {
     return useMemo(() => [
         {key: '/', icon: <DashboardOutlined/>, label: link('/', t('menu.dashboard'))},
         {key: '/connector', icon: <BranchesOutlined/>, label: link('/connector', t('menu.connectors'))},
-        {key: '/connection', icon: <GoWorkflow/>, label: link('/connection', t('menu.connections'))},
+        {key: '/workflow', icon: <GoWorkflow/>, label: link('/workflow', t('menu.connections'))},
         {key: '/schedule', icon: <ScheduleOutlined/>, label: link('/schedule', t('menu.schedules'))},
     ], [t]);
 };
