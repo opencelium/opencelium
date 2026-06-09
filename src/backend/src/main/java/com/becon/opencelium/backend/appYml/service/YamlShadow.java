@@ -16,7 +16,11 @@
 
 package com.becon.opencelium.backend.appYml.service;
 
+import org.snakeyaml.engine.v2.exceptions.Mark;
+import org.snakeyaml.engine.v2.exceptions.MarkedYamlEngineException;
+
 import java.util.BitSet;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
@@ -151,5 +155,70 @@ public final class YamlShadow {
             }
         }
         return -1;
+    }
+
+    /**
+     * Turns a snakeyaml parse failure into a message an operator can act on.
+     *
+     * <p>The shadow only deletes {@code #} characters <em>within</em> lines — it
+     * never adds or removes newlines — so a problem mark's line number maps 1:1
+     * back to {@code originalYaml}. We surface the offending line as the user
+     * actually wrote it (with its {@code #}), 1-based.</p>
+     *
+     * <p>The most common and most confusing cause is a hand-edited commented-out
+     * property whose indentation, once the {@code #} is removed, no longer lines
+     * up with the active keys at its level — e.g. {@code "  #     address: x"}
+     * under {@code "  port: 9090"} re-aligns to column 7 and reads as a child of
+     * {@code port} instead of its sibling. When the flagged line is such an
+     * inactive anchor we explain exactly that; otherwise we fall back to a
+     * generic-but-located syntax message. Either way the result is never less
+     * informative than the raw {@code "Failed to parse application.yml"}.</p>
+     *
+     * @param originalYaml the file as it is on disk (not the shadow)
+     * @param cause        the exception thrown by snakeyaml's compose step
+     * @return a human-readable, located description of the failure
+     */
+    public static String describeParseFailure(String originalYaml, Throwable cause) {
+        Optional<Mark> markOpt = problemMark(cause);
+        if (markOpt.isEmpty()) {
+            return "Failed to parse application.yml: the file contains invalid YAML. "
+                    + "Please review it for syntax or indentation errors.";
+        }
+
+        Mark mark = markOpt.get();
+        String[] lines = originalYaml.replace("\r\n", "\n").replace("\r", "\n").split("\n", -1);
+        int lineIdx = mark.getLine();
+        if (lineIdx < 0 || lineIdx >= lines.length) {
+            return "Failed to parse application.yml: the file contains invalid YAML "
+                    + "(near line " + (lineIdx + 1) + "). Please review it for syntax "
+                    + "or indentation errors.";
+        }
+
+        String originalLine = lines[lineIdx];
+        int lineNo = lineIdx + 1;
+
+        if (isAnchor(originalLine)) {
+            return "Failed to parse application.yml: the commented-out property on line "
+                    + lineNo + " is mis-indented. Once its leading '#' is removed it is "
+                    + "indented more deeply than the active properties around it, so it "
+                    + "reads as a child of the line above instead of a sibling at the same "
+                    + "level. Fix it by making the spaces after '#' match the indentation "
+                    + "of the other keys at that level (the spaces after '#' decide its "
+                    + "nesting). Offending line:\n"
+                    + lineNo + ": " + originalLine;
+        }
+
+        return "Failed to parse application.yml: invalid YAML syntax on line " + lineNo
+                + ". Please check this line's indentation and structure.\n"
+                + lineNo + ": " + originalLine;
+    }
+
+    private static Optional<Mark> problemMark(Throwable cause) {
+        for (Throwable t = cause; t != null; t = t.getCause()) {
+            if (t instanceof MarkedYamlEngineException marked) {
+                return marked.getProblemMark();
+            }
+        }
+        return Optional.empty();
     }
 }

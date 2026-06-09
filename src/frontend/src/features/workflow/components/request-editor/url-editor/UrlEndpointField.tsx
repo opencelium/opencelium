@@ -1,6 +1,10 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import {
 	getCaretPositionOfDivEditable,
+	getCaretPositionOfDivEditableByPoint,
+	getRawCaretPositionOfDivEditable,
+	getRawCaretPositionOfDivEditableByPoint,
+	isCaretReportedAtEditableRootStart,
 	setFocusByCaretPositionInDivEditable,
 } from './utils/contentEditable';
 import type { EndpointArg } from '../../../types/connection';
@@ -9,6 +13,7 @@ import {
 	isSelectionInside,
 	getInlineVisualLength,
 	buildInlineHtml,
+	computeRawInsertAtFromVisualCaret,
 	parseHtmlToRaw,
 	sanitizePlainTextPaste,
 	removeInlineTokenByIndex,
@@ -26,14 +31,40 @@ type Props = {
 
 	divRef: React.RefObject<HTMLDivElement | null>;
 	lastCaretRef: React.RefObject<number>;
+	lastRawCaretRef: React.RefObject<number>;
 	selectedTokenIndexRef: React.RefObject<number | null>;
 
 	onRawChange: (nextRaw: string) => void;
-	onAfterManualEditRebuildParams: (nextRaw: string) => void;
 	onBlurCommit: () => void;
+	onRawCaretChange?: (rawCaret: number, visualCaret: number) => void;
 };
 
 const CLS = 'oc-endpoint-ref';
+
+const getCaretFromRawChange = (
+	prevRaw: string,
+	nextRaw: string,
+) => {
+	let prefix = 0;
+	while (
+		prefix < prevRaw.length &&
+		prefix < nextRaw.length &&
+		prevRaw[prefix] === nextRaw[prefix]
+	) {
+		prefix += 1;
+	}
+
+	let suffix = 0;
+	while (
+		suffix < prevRaw.length - prefix &&
+		suffix < nextRaw.length - prefix &&
+		prevRaw[prevRaw.length - 1 - suffix] === nextRaw[nextRaw.length - 1 - suffix]
+	) {
+		suffix += 1;
+	}
+
+	return nextRaw.length - suffix;
+};
 
 export const UrlEndpointField: React.FC<Props> = ({
 	readOnly,
@@ -43,14 +74,14 @@ export const UrlEndpointField: React.FC<Props> = ({
 	endpointArgsRef,
 	divRef,
 	lastCaretRef,
+	lastRawCaretRef,
 	selectedTokenIndexRef,
 	onRawChange,
-	onAfterManualEditRebuildParams,
 	onBlurCommit,
+	onRawCaretChange,
 }) => {
 	const lastRendered = useRef('');
 	const typing = useRef(false);
-	const raf = useRef<number | null>(null);
 
 	useEffect(() => {
 		endpointArgsRef.current = endpointArgs;
@@ -76,6 +107,11 @@ export const UrlEndpointField: React.FC<Props> = ({
 					: end;
 
 			lastCaretRef.current = caret;
+			lastRawCaretRef.current = computeRawInsertAtFromVisualCaret(
+				raw,
+				caret,
+				endpointArgsRef.current,
+			);
 
 			if (!readOnly && document.activeElement === root) {
 				try {
@@ -84,18 +120,6 @@ export const UrlEndpointField: React.FC<Props> = ({
 			}
 		},
 		[divRef, endpointArgsRef, lastCaretRef, readOnly]
-	);
-
-	const scheduleRebuild = useCallback(
-		(nextRaw: string) => {
-			if (raf.current) cancelAnimationFrame(raf.current);
-			raf.current = requestAnimationFrame(() => {
-				raf.current = null;
-				typing.current = false;
-				onAfterManualEditRebuildParams(nextRaw);
-			});
-		},
-		[onAfterManualEditRebuildParams]
 	);
 
 	useEffect(() => {
@@ -110,6 +134,11 @@ export const UrlEndpointField: React.FC<Props> = ({
 			? Math.max(0, Math.min(lastCaretRef.current, end))
 			: end;
 		lastCaretRef.current = nextCaret;
+		lastRawCaretRef.current = computeRawInsertAtFromVisualCaret(
+			value || '',
+			nextCaret,
+			endpointArgsRef.current,
+		);
 		selectedTokenIndexRef.current = null;
 		render(value || '', nextCaret);
 	}, [
@@ -118,6 +147,7 @@ export const UrlEndpointField: React.FC<Props> = ({
 		divRef,
 		endpointArgsRef,
 		lastCaretRef,
+		lastRawCaretRef,
 		selectedTokenIndexRef,
 	]);
 
@@ -126,11 +156,18 @@ export const UrlEndpointField: React.FC<Props> = ({
 			const root = divRef.current;
 			if (!root || !isSelectionInside(root)) return;
 			const caret = getCaretPositionOfDivEditable(root);
-			if (caret >= 0) lastCaretRef.current = caret;
+			if (caret >= 0) {
+				lastCaretRef.current = caret;
+				const rawCaret = getRawCaretPositionOfDivEditable(root);
+				if (rawCaret > 0 || !(value || '')) {
+					lastRawCaretRef.current = rawCaret;
+					onRawCaretChange?.(rawCaret, caret);
+				}
+			}
 		};
 		document.addEventListener('selectionchange', onSel);
 		return () => document.removeEventListener('selectionchange', onSel);
-	}, [divRef, lastCaretRef]);
+	}, [divRef, endpointArgsRef, lastCaretRef, lastRawCaretRef, onRawCaretChange, value]);
 
 	const readRaw = () => {
 		const root = divRef.current;
@@ -145,13 +182,85 @@ export const UrlEndpointField: React.FC<Props> = ({
 
 		if (isSelectionInside(root)) {
 			const caret = getCaretPositionOfDivEditable(root);
-			if (caret >= 0) lastCaretRef.current = caret;
+			if (caret >= 0) {
+				lastCaretRef.current = caret;
+			}
 		}
 
 		const next = sanitizeUrlInputValue(parseHtmlToRaw(root.innerHTML, CLS));
+		if (next !== value) {
+			const rawCaret = getCaretFromRawChange(value || '', next);
+			lastRawCaretRef.current = rawCaret;
+			lastCaretRef.current = getInlineVisualLength(
+				next.slice(0, rawCaret),
+				endpointArgsRef.current,
+			);
+			onRawCaretChange?.(rawCaret, lastCaretRef.current);
+		} else if (
+			lastCaretRef.current === 0 &&
+			isCaretReportedAtEditableRootStart(root)
+		) {
+			lastCaretRef.current = getInlineVisualLength(next, endpointArgsRef.current);
+			lastRawCaretRef.current = next.length;
+			onRawCaretChange?.(lastRawCaretRef.current, lastCaretRef.current);
+		}
 		selectedTokenIndexRef.current = null;
 		onRawChange(next);
-		scheduleRebuild(next);
+		typing.current = false;
+	};
+
+	const captureCaretFromSelection = () => {
+		const root = divRef.current;
+		if (!root || !isSelectionInside(root)) return;
+		const caret = getCaretPositionOfDivEditable(root);
+		if (caret >= 0) {
+			lastCaretRef.current = caret;
+			const rawCaret = getRawCaretPositionOfDivEditable(root);
+			if (rawCaret > 0 || !(value || '')) {
+				lastRawCaretRef.current = rawCaret;
+				onRawCaretChange?.(rawCaret, caret);
+			}
+		}
+	};
+
+	const captureCaretFromMouse = (e: React.MouseEvent<HTMLDivElement>) => {
+		const root = divRef.current;
+		if (!root) return;
+
+		const rootRect = root.getBoundingClientRect();
+		if (e.clientX >= rootRect.right - 2) {
+			lastCaretRef.current = getInlineVisualLength(value || '', endpointArgsRef.current);
+			lastRawCaretRef.current = (value || '').length;
+			onRawCaretChange?.(lastRawCaretRef.current, lastCaretRef.current);
+			return;
+		}
+
+		const rawCaret = getRawCaretPositionOfDivEditableByPoint(
+			root,
+			e.clientX,
+			e.clientY,
+		);
+		if (rawCaret >= 0) {
+			lastRawCaretRef.current = rawCaret;
+			lastCaretRef.current = getInlineVisualLength(
+				(value || '').slice(0, rawCaret),
+				endpointArgsRef.current,
+			);
+			onRawCaretChange?.(rawCaret, lastCaretRef.current);
+			return;
+		}
+
+		const caret = getCaretPositionOfDivEditableByPoint(
+			root,
+			e.clientX,
+			e.clientY,
+		);
+		if (caret >= 0) {
+			lastCaretRef.current = caret;
+			return;
+		}
+
+		requestAnimationFrame(captureCaretFromSelection);
 	};
 
 	const handleTokenDelete = () => {
@@ -165,9 +274,10 @@ export const UrlEndpointField: React.FC<Props> = ({
 
 		const end = getInlineVisualLength(next, endpointArgsRef.current);
 		lastCaretRef.current = Math.min(lastCaretRef.current, end);
+		lastRawCaretRef.current = Math.min(lastRawCaretRef.current, next.length);
+		onRawCaretChange?.(lastRawCaretRef.current, lastCaretRef.current);
 
 		render(next, lastCaretRef.current);
-		onAfterManualEditRebuildParams(next);
 		return true;
 	};
 
@@ -189,9 +299,18 @@ export const UrlEndpointField: React.FC<Props> = ({
 
 		requestAnimationFrame(() => {
 			const next = sanitizeUrlInputValue(parseHtmlToRaw(root.innerHTML, CLS));
+			if (next !== value) {
+				const rawCaret = getCaretFromRawChange(value || '', next);
+				lastRawCaretRef.current = rawCaret;
+				lastCaretRef.current = getInlineVisualLength(
+					next.slice(0, rawCaret),
+					endpointArgsRef.current,
+				);
+				onRawCaretChange?.(rawCaret, lastCaretRef.current);
+			}
 			typing.current = true;
 			onRawChange(next);
-			scheduleRebuild(next);
+			typing.current = false;
 		});
 	};
 
@@ -236,6 +355,10 @@ export const UrlEndpointField: React.FC<Props> = ({
 				contentEditable={!readOnly}
 				onBeforeInput={handleBeforeInput}
 				onInput={updateFromDom}
+				onMouseDown={captureCaretFromMouse}
+				onClick={captureCaretFromMouse}
+				onMouseUp={captureCaretFromMouse}
+				onKeyUp={captureCaretFromSelection}
 				onKeyDown={(e) => {
 					if (readOnly) return;
 
@@ -289,7 +412,9 @@ export const UrlEndpointField: React.FC<Props> = ({
 					boxShadow: 'none',
 				}}
 			/>
-			{afterNode}
+			{afterNode ? (
+				<div>{afterNode}</div>
+			) : null}
 		</div>
 	);
 };

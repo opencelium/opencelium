@@ -165,6 +165,7 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 		() => methods.find((m) => m.id === selectedMethodId),
 		[methods, selectedMethodId],
 	);
+	const previousFieldResetKeyRef = useRef('');
 	const currentMethodIterators = useMemo(
 		() => (connection ? getIteratorsForMethod(connection, currentMethod) : []),
 		[connection, currentMethod],
@@ -172,6 +173,7 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 
 	useEffect(() => {
 		if (!open) {
+			previousFieldResetKeyRef.current = '';
 			setSelectedConnector('');
 			setIsConnectorDropdownOpen(false);
 
@@ -191,6 +193,7 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 	useEffect(() => {
 		if (!open) return;
 
+		previousFieldResetKeyRef.current = '';
 		setSelectedConnector('');
 		setIsConnectorDropdownOpen(false);
 
@@ -228,6 +231,10 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 			return;
 		}
 
+		const fieldResetKey = `${selectedMethod.id}:${responseType}`;
+		if (previousFieldResetKeyRef.current === fieldResetKey) return;
+		previousFieldResetKeyRef.current = fieldResetKey;
+
 		if (responseType === 'status') {
 			setSearchValue('Response Status');
 			setSelectedOption({ label: 'Response Status', value: 'status' });
@@ -247,7 +254,7 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 			fieldInputRef.current?.focus();
 			updateDropdownPosition();
 		});
-	}, [currentMethodIterators, selectedMethod, responseType]);
+	}, [selectedMethod, responseType]);
 
 	const updateDropdownPosition = () => {
 		if (!fieldInputRef.current) return;

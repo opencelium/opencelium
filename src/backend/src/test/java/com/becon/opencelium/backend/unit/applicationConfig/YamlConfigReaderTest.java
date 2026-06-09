@@ -11,6 +11,7 @@ package com.becon.opencelium.backend.unit.applicationConfig;
 import com.becon.opencelium.backend.appYml.dto.ConfigNode;
 import com.becon.opencelium.backend.appYml.dto.NodeComment;
 import com.becon.opencelium.backend.appYml.service.YamlConfigReader;
+import com.becon.opencelium.backend.exception.ApplicationConfigReadException;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("YamlConfigReader — node tree projection and comment extraction")
 class YamlConfigReaderTest {
@@ -371,6 +373,42 @@ class YamlConfigReaderTest {
         assertThat(scalar(find(result.fields(), "values.ratio")).asDouble()).isEqualTo(0.5);
         assertThat(scalar(find(result.fields(), "values.enabled")).asBoolean()).isTrue();
         assertThat(scalar(find(result.fields(), "values.missing")).isNull()).isTrue();
+    }
+
+    @Test
+    @DisplayName("mis-indented commented-out property → clear, located error naming the offending line")
+    void readThrowsClearMessageWhenCommentedPropertyIsMisIndented() {
+        // The commented `address` re-aligns to a deeper column than `port` once
+        // its `#` is stripped, so snakeyaml reads it as a child of the scalar
+        // `port` and fails. The user must be told exactly which line to fix.
+        String yaml = """
+                server:
+                  port: 9090
+                  #     address: 127.0.0.1
+                """;
+
+        assertThatThrownBy(() -> reader.read(yaml))
+                .isInstanceOf(ApplicationConfigReadException.class)
+                .hasMessageContaining("line 3")
+                .hasMessageContaining("commented-out property")
+                .hasMessageContaining("indent")
+                .hasMessageContaining("#     address: 127.0.0.1");
+    }
+
+    @Test
+    @DisplayName("malformed active YAML → generic but located syntax error, no false commented-out claim")
+    void readThrowsLocatedGenericMessageWhenActiveYamlIsMalformed() {
+        String yaml = """
+                server:
+                  port: 9090
+                    address: 127.0.0.1
+                """;
+
+        assertThatThrownBy(() -> reader.read(yaml))
+                .isInstanceOf(ApplicationConfigReadException.class)
+                .hasMessageContaining("line 3")
+                .hasMessageContaining("invalid YAML syntax")
+                .hasMessageNotContaining("commented-out");
     }
 
     // ── helpers ──────────────────────────────────────────────────────────────
