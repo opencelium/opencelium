@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -87,6 +88,25 @@ public final class OperationFixture {
         );
 
         return operation("#ababab", 2, responses);
+    }
+
+    public static Operation anOperationWithRootArrayResponseBody() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE);
+
+        ResponseEntity<?> response = new ResponseEntity<>(
+                List.of("A", "B", "C"),
+                headers,
+                HttpStatus.OK
+        );
+
+        Operation operation = new Operation();
+        operation.setColor("#ababab");
+        operation.setLoopDepth(0);
+
+        operation.getResponses().put("#", response);
+
+        return operation;
     }
 
 
