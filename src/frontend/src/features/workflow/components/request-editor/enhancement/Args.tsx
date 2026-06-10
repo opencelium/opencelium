@@ -41,7 +41,7 @@ export const EnhancementArgs: React.FC<EnhancementArgsProps> = ({ enhancement })
                     key,
                     path: parsed.path,
                     color: parsed.color,
-                    methodName: method?.name || "UnknownMethod",
+                    methodName: method?.label || method?.name || String(method?.index ?? "UnknownMethod"),
                     direction: parsed.direction,
                     messageProperty: parsed.messageProperty,
                 };
@@ -100,6 +100,7 @@ export const EnhancementArgs: React.FC<EnhancementArgsProps> = ({ enhancement })
                     <Trans
                         ns="workflow"
                         i18nKey="args.fromResponseStatus"
+                        values={{ method: entry.methodName }}
                         components={{ method: renderMethodBadge(entry) }}
                     />
                 </span>
@@ -114,7 +115,7 @@ export const EnhancementArgs: React.FC<EnhancementArgsProps> = ({ enhancement })
                 <Trans
                     ns="workflow"
                     i18nKey={entry.key === 'RESULT_VAR' ? 'args.usedAsField' : 'args.takenFromField'}
-                    values={{ field: fieldName, location }}
+                    values={{ field: fieldName, location, method: entry.methodName }}
                     components={{
                         field: <span style={{ color: entry.color, fontWeight: 500, opacity: 1 }} />,
                         method: renderMethodBadge(entry),

@@ -116,7 +116,7 @@ export const getReferenceOptions = (
   const options: ReferenceOption[] = [];
 
   if (!normalizePath(currentPath)) {
-    options.push({ label: t('references.rootObject'), value: '$.' });
+    options.push({ label: t('references.rootObject'), value: '$' });
   }
 
   if (isArrayNode(node)) {

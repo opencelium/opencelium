@@ -236,9 +236,9 @@
     "label": "Beschreibung"
   },
   "args": {
-    "fromResponseStatus": "wird aus dem Response-Status der Methode <method></method> übernommen.",
-    "usedAsField": "wird als Wert des Felds <field>{{field}}</field> im {{location}} der Methode <method></method> verwendet.",
-    "takenFromField": "wird aus dem Wert des Felds <field>{{field}}</field> im {{location}} der Methode <method></method> übernommen.",
+    "fromResponseStatus": "wird aus dem Response-Status der Methode <method>{{method}}</method> übernommen.",
+    "usedAsField": "wird als Wert des Felds <field>{{field}}</field> im {{location}} der Methode <method>{{method}}</method> verwendet.",
+    "takenFromField": "wird aus dem Wert des Felds <field>{{field}}</field> im {{location}} der Methode <method>{{method}}</method> übernommen.",
     "locations": {
       "requestBody": "Request-Body",
       "requestHeader": "Request-Header",

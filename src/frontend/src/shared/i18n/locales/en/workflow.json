@@ -236,9 +236,9 @@
     "label": "Description"
   },
   "args": {
-    "fromResponseStatus": "is taken from response status of the <method></method> method.",
-    "usedAsField": "is used as the value of the <field>{{field}}</field> field in the {{location}} of the <method></method> method.",
-    "takenFromField": "is taken from the value of the <field>{{field}}</field> field in the {{location}} of the <method></method> method.",
+    "fromResponseStatus": "is taken from response status of the <method>{{method}}</method> method.",
+    "usedAsField": "is used as the value of the <field>{{field}}</field> field in the {{location}} of the <method>{{method}}</method> method.",
+    "takenFromField": "is taken from the value of the <field>{{field}}</field> field in the {{location}} of the <method>{{method}}</method> method.",
     "locations": {
       "requestBody": "request body",
       "requestHeader": "request header",
