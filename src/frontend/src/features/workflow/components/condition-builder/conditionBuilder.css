@@ -161,11 +161,17 @@
 	gap: 20px;
 }
 
-.conditionGroupActions .ant-btn {
+.conditionGroupActions .ant-btn:not(.conditionGroupDeleteButton) {
 	height: 30px;
 	border-radius: 4px;
 	background: var(--color-action-primary);
 	font-size: 14px;
+}
+
+.conditionGroupActions .conditionGroupDeleteButton {
+	width: 30px;
+	height: 30px;
+	border-radius: 4px;
 }
 
 .conditionGroupBody {

@@ -479,12 +479,14 @@ function GroupEditor({
 	operatorType,
 	methods,
 	iterators,
+	onDelete,
 	onChange,
 }: {
 	group: ConditionGroup;
 	operatorType: 'if' | 'loop';
 	methods: MethodWithId[];
 	iterators: string[];
+	onDelete?: () => void;
 	onChange: (group: ConditionGroup) => void;
 }) {
 	const { t } = useI18n('workflow');
@@ -564,6 +566,14 @@ function GroupEditor({
 					>
 						{t('conditionBuilder.addGroup')}
 					</Button>
+					{onDelete ? (
+						<Button
+							type="text"
+							className="conditionGroupDeleteButton"
+							icon={<DeleteOutlined />}
+							onClick={onDelete}
+						/>
+					) : null}
 				</div>
 			</div> : null}
 			<div ref={groupBodyRef} className="conditionGroupBody" style={groupBodyStyle}>
@@ -586,6 +596,7 @@ function GroupEditor({
 							operatorType={operatorType}
 							methods={methods}
 							iterators={iterators}
+							onDelete={() => onChange(removeChildById(group, child.id))}
 							onChange={(nextGroup) => {
 								onChange({
 									...group,
