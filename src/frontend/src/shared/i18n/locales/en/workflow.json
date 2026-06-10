@@ -156,7 +156,8 @@
     "noPreviousMethods": "No previous methods"
   },
   "conditionBuilder": {
-    "dialogTitle": "Condition",
+    "dialogTitleIf": "IF Condition",
+    "dialogTitleLoop": "LOOP Condition",
     "addCondition": "Add Condition",
     "addGroup": "Add Group",
     "loopInfo": {

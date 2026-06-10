@@ -1,4 +1,3 @@
-import { CloseOutlined } from '@ant-design/icons';
 import { Button, Modal } from 'antd';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Provider } from 'react-redux';
@@ -15,6 +14,7 @@ import type { WorkflowEdgeModel, WorkflowNodeModel } from '../../types/workflow.
 import { buildLegacyConnection, extractWorkflowMethodConfig } from './legacyAdapter';
 import { buildFromConnectorPayload } from '../../api/connectionPayload';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
+import '../dialogHeader.css';
 
 type Props = {
   open: boolean;
@@ -170,7 +170,8 @@ export function MethodConfigDialog({ open, node, mode, nodes, edges, fieldBindin
       style={mode !== 'url' ? { top: 18 } : undefined}
       destroyOnHidden
       title={title}
-      closeIcon={<CloseOutlined />}
+      className="wfDialog"
+      closeIcon={<span className="wfDialogClose">×</span>}
       styles={{
         body: {
           paddingTop: 8,

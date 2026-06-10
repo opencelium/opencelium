@@ -46,6 +46,7 @@ import { Radio } from '@shared/ui/primitives/Radio';
 import { ConnectorIcon } from '@entities/connector/ui/ConnectorIcon';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import '../request-editor/body-editor/bodyLegacy.css';
+import '../dialogHeader.css';
 import './conditionBuilder.css';
 
 type Props = {
@@ -733,11 +734,11 @@ export function ConditionBuilderDialog({
 			open={open}
 			destroyOnHidden
 			focusable={{ focusTriggerAfterClose: false }}
-			title={t('conditionBuilder.dialogTitle')}
+			title={t(isLoop ? 'conditionBuilder.dialogTitleLoop' : 'conditionBuilder.dialogTitleIf')}
 			width="90vw"
 			centered={false}
-			className={`conditionBuilderModal conditionBuilderModal-${operatorType}`}
-			closeIcon={<span className="conditionClose">×</span>}
+			className={`wfDialog conditionBuilderModal conditionBuilderModal-${operatorType}`}
+			closeIcon={<span className="wfDialogClose">×</span>}
 			onCancel={onClose}
 			footer={[
 				<Button

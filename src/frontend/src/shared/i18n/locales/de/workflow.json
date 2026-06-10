@@ -156,7 +156,8 @@
     "noPreviousMethods": "Keine vorherigen Methoden"
   },
   "conditionBuilder": {
-    "dialogTitle": "Bedingung",
+    "dialogTitleIf": "IF-Bedingung",
+    "dialogTitleLoop": "LOOP-Bedingung",
     "addCondition": "Bedingung hinzufügen",
     "addGroup": "Gruppe hinzufügen",
     "loopInfo": {
