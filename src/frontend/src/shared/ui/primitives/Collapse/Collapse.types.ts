@@ -6,6 +6,8 @@ export interface CollapseItem {
     label: ReactNode;
     content: ReactNode;
     disabled?: boolean;
+    /** When false, hides the arrow and makes the panel static — always open, header not toggleable. */
+    showArrow?: boolean;
 }
 
 export interface CollapseProps {

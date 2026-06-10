@@ -24,6 +24,9 @@ export const AntCollapse: CollapseComponent = ({
                 label: item.label,
                 children: item.content,
                 disabled: item.disabled,
+                showArrow: item.showArrow,
+                // No arrow → make the header non-interactive so the panel can't toggle.
+                collapsible: item.showArrow === false ? 'icon' : undefined,
             }))}
         />
     );

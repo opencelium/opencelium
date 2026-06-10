@@ -38,29 +38,32 @@ export const MaterialCollapse: CollapseComponent = ({
 
     return (
         <div className={className} style={style}>
-            {items.map((item) => (
-                <Accordion
-                    key={item.key}
-                    expanded={openKeys.includes(item.key)}
-                    disabled={item.disabled}
-                    onChange={(_, expanded) => handleChange(item.key, expanded)}
-                    sx={{
-                        border: '1px solid var(--color-border-default)',
-                        borderRadius: 'var(--radius-md) !important',
-                        marginBottom: '4px',
-                        '&:before': { display: 'none' },
-                        backgroundColor: 'var(--color-background-surface)',
-                    }}
-                >
-                    <AccordionSummary
-                        expandIcon={<ExpandMoreIcon />}
-                        sx={{ fontWeight: 500 }}
+            {items.map((item) => {
+                const isStatic = item.showArrow === false;
+                return (
+                    <Accordion
+                        key={item.key}
+                        expanded={isStatic ? true : openKeys.includes(item.key)}
+                        disabled={item.disabled}
+                        onChange={isStatic ? undefined : (_, expanded) => handleChange(item.key, expanded)}
+                        sx={{
+                            border: '1px solid var(--color-border-default)',
+                            borderRadius: 'var(--radius-md) !important',
+                            marginBottom: '4px',
+                            '&:before': { display: 'none' },
+                            backgroundColor: 'var(--color-background-surface)',
+                        }}
                     >
-                        {item.label}
-                    </AccordionSummary>
-                    <AccordionDetails>{item.content}</AccordionDetails>
-                </Accordion>
-            ))}
+                        <AccordionSummary
+                            expandIcon={isStatic ? null : <ExpandMoreIcon />}
+                            sx={{ fontWeight: 500, ...(isStatic ? { cursor: 'default' } : {}) }}
+                        >
+                            {item.label}
+                        </AccordionSummary>
+                        <AccordionDetails>{item.content}</AccordionDetails>
+                    </Accordion>
+                );
+            })}
         </div>
     );
 };

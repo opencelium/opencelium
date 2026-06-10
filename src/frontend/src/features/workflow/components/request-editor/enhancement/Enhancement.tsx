@@ -53,6 +53,7 @@ const ReferenceEnhancement = ({ enhancement, readOnly }: EnhancementProps) => {
 					{
 						key: 'enhancement',
 						label: t('enhancement.title'),
+						showArrow: false,
 						content: hasEnhancement ? (
 							<div className='bodyLegacyEnhancementBody'>
 								<div className='bodyLegacyEnhancementArgs'>

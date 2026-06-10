@@ -55,8 +55,8 @@
   z-index: 20;
 }
 
-/* Splitter draws the divider now; the pane just needs breathing room from the bar
-   and scrolls as a whole, matching the left (Collapse) pane. */
+/* Splitter draws the divider now; the pane just needs breathing room from the bar.
+   The enhancement is a static (non-toggleable) panel that always fills the pane. */
 .bodyLegacyEnhancement {
   min-width: 0;
   height: 100%;
@@ -64,18 +64,51 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
-  overflow: auto;
+  overflow: hidden;
 }
 
+/* Pure-flex chain (no percentage heights) so the enhancement fills the pane and
+   the script can flex-grow. antd Collapse internals must each be flex:1 columns,
+   otherwise the chain breaks at the animated content region. */
 .bodyLegacyEnhancementContent {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.bodyLegacyEnhancementCollapse {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.bodyLegacyEnhancementCollapse .ant-collapse-item {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.bodyLegacyEnhancementCollapse .ant-collapse-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.bodyLegacyEnhancementCollapse .ant-collapse-content-box {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
   min-height: 0;
 }
 
 .bodyLegacyEnhancementBody {
   display: flex;
   flex-direction: column;
+  flex: 1;
   min-height: 0;
 }
 
@@ -93,9 +126,20 @@
   margin-bottom: 10px;
 }
 
+/* Script grows to fill the remaining enhancement height. The ACE editor's own
+   container uses inline height:100%, which won't resolve against a flex item — so
+   pin it absolutely to this relative box, which the flex chain sizes definitely. */
 .bodyLegacyEnhancementScript {
   flex: 1;
-  min-height: 320px;
+  min-height: 0;
+  position: relative;
+}
+
+.bodyLegacyEnhancementScript > * {
+  position: absolute;
+  inset: 0;
+  height: auto !important;
+  width: auto !important;
 }
 
 .bodyLegacyEnhancementDescription {
