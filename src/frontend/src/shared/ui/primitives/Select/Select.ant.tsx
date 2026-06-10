@@ -84,8 +84,12 @@ export const AntSelectImpl: SelectComponent = ({
             disabled={disabled || readOnly || isLoading}
             placeholder={placeholder}
             mode={multiple ? 'multiple' : undefined}
-            showSearch={{
-                optionFilterProp: 'label'
+            showSearch
+            filterOption={(input, option) => {
+                const text =
+                    (option as { searchLabel?: string })?.searchLabel ??
+                    (typeof option?.label === 'string' ? option.label : '');
+                return text.toLowerCase().includes(input.toLowerCase());
             }}
             onSearch={setInputValue}
             onChange={onChange}
@@ -97,9 +101,12 @@ export const AntSelectImpl: SelectComponent = ({
                     value: opt.value,
                     label: opt.label,
                     disabled: opt.disabled,
+                    searchLabel: opt.searchLabel,
                 }));
+                const sortText = (opt: (typeof mapped)[number]) =>
+                    opt.searchLabel ?? (typeof opt.label === 'string' ? opt.label : '');
                 return sortOptions
-                    ? mapped.sort((a, b) => a.label.localeCompare(b.label))
+                    ? mapped.sort((a, b) => sortText(a).localeCompare(sortText(b)))
                     : mapped;
             })()}
             dropdownRender={(menu) => (

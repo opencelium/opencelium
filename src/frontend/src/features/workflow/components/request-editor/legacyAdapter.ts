@@ -90,6 +90,7 @@ export const buildLegacyConnection = (nodes: WorkflowNodeModel[]): Connection =>
         connector: {
           connectorId: node.data.connector?.connectorId ?? -1,
           title: node.data.connector?.title ?? 'DEFAULT',
+          icon: node.data.connector?.icon ?? null,
         },
         request: {
           requestId: `request-${node.id}`,

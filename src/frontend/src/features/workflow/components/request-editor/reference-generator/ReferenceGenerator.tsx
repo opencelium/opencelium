@@ -10,6 +10,7 @@ import {
 	type ResponseType,
 } from '../body-editor/requestReferenceOptions';
 import { Radio } from '@shared/ui/primitives/Radio';
+import { Select } from '@shared/ui/primitives/Select';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import '../body-editor/bodyLegacy.css';
 
@@ -84,8 +85,6 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 		useState<boolean>(false);
 
 	const [selectedMethodId, setSelectedMethodId] = useState<string>('');
-	const [isMethodDropdownOpen, setIsMethodDropdownOpen] =
-		useState<boolean>(false);
 
 	const [searchValue, setSearchValue] = useState<string>('');
 	const [selectedOption, setSelectedOption] = useState<OptionType | null>(null);
@@ -97,17 +96,10 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 	const fieldContainerRef = useRef<HTMLDivElement | null>(null);
 	const fieldDropdownRef = useRef<HTMLDivElement | null>(null);
 	const fieldInputRef = useRef<HTMLInputElement | null>(null);
-	const methodSelectRef = useRef<HTMLDivElement | null>(null);
 	const connectorSelectRef = useRef<HTMLDivElement | null>(null);
-	const methodDropdownRef = useRef<HTMLDivElement | null>(null);
 	const connectorDropdownRef = useRef<HTMLDivElement | null>(null);
 
 	const [dropdownPosition, setDropdownPosition] = useState<{
-		top: number;
-		left: number;
-		width: number;
-	} | null>(null);
-	const [methodDropdownPosition, setMethodDropdownPosition] = useState<{
 		top: number;
 		left: number;
 		width: number;
@@ -161,6 +153,40 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 		[eligibleMethods, selectedConnector],
 	);
 
+	const getMethodLabel = (m: MethodWithId) =>
+		String(m.label || m.name || (m as any).index || m.id);
+
+	const methodOptions = useMemo(
+		() =>
+			methods.map((m) => ({
+				value: m.id,
+				searchLabel: getMethodLabel(m),
+				label: (
+					<span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+						<span
+							style={{
+								display: 'inline-block',
+								width: 10,
+								height: 10,
+								borderRadius: '50%',
+								backgroundColor: m.color,
+								flexShrink: 0,
+							}}
+						/>
+						<span>{getMethodLabel(m)}</span>
+					</span>
+				),
+			})),
+		[methods],
+	);
+
+	const handleMethodChange = (id: string) => {
+		setSelectedMethodId(id);
+		setSearchValue('');
+		setSelectedOption(null);
+		setFilteredOptions([]);
+	};
+
 	const selectedMethod: MethodWithId | undefined = useMemo(
 		() => methods.find((m) => m.id === selectedMethodId),
 		[methods, selectedMethodId],
@@ -178,14 +204,12 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 			setIsConnectorDropdownOpen(false);
 
 			setSelectedMethodId('');
-			setIsMethodDropdownOpen(false);
 
 			setResponseType(allowResponseTypes[0] ?? 'body');
 			setSearchValue('');
 			setSelectedOption(null);
 			setFilteredOptions([]);
 			setDropdownPosition(null);
-			setMethodDropdownPosition(null);
 			setConnectorDropdownPosition(null);
 		}
 	}, [open]);
@@ -198,14 +222,12 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 		setIsConnectorDropdownOpen(false);
 
 		setSelectedMethodId('');
-		setIsMethodDropdownOpen(false);
 
 		setResponseType(allowResponseTypes[0] ?? 'body');
 		setSearchValue('');
 		setSelectedOption(null);
 		setFilteredOptions([]);
 		setDropdownPosition(null);
-		setMethodDropdownPosition(null);
 		setConnectorDropdownPosition(null);
 
 		requestAnimationFrame(() => {
@@ -227,7 +249,6 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 			setSelectedOption(null);
 			setFilteredOptions([]);
 			setDropdownPosition(null);
-			setMethodDropdownPosition(null);
 			return;
 		}
 
@@ -240,7 +261,6 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 			setSelectedOption({ label: 'Response Status', value: 'status' });
 			setFilteredOptions([]);
 			setDropdownPosition(null);
-			setMethodDropdownPosition(null);
 			return;
 		}
 
@@ -249,7 +269,6 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 		const nextOptions = getReferenceOptions(selectedMethod, responseType, '', currentMethodIterators, t);
 		setFilteredOptions(nextOptions);
 		setDropdownPosition(null);
-		setMethodDropdownPosition(null);
 		requestAnimationFrame(() => {
 			fieldInputRef.current?.focus();
 			updateDropdownPosition();
@@ -261,16 +280,6 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 
 		const rect = fieldInputRef.current.getBoundingClientRect();
 		setDropdownPosition({
-			top: rect.bottom + window.scrollY,
-			left: rect.left + window.scrollX,
-			width: rect.width,
-		});
-	};
-	const updateMethodDropdownPosition = () => {
-		if (!methodSelectRef.current) return;
-
-		const rect = methodSelectRef.current.getBoundingClientRect();
-		setMethodDropdownPosition({
 			top: rect.bottom + window.scrollY,
 			left: rect.left + window.scrollX,
 			width: rect.width,
@@ -288,8 +297,6 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 	};
 
 	const isDropdownOpen = !!selectedMethod && filteredOptions.length > 0;
-	const isMethodListOpen =
-		isMethodDropdownOpen && methods.length > 0 && !!selectedConnector;
 	const isConnectorListOpen =
 		isConnectorDropdownOpen && connectorOptions.length > 0;
 
@@ -312,25 +319,6 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 			window.removeEventListener('resize', handleResize);
 		};
 	}, [isDropdownOpen]);
-	useEffect(() => {
-		if (!isMethodListOpen) {
-			setMethodDropdownPosition(null);
-			return;
-		}
-
-		updateMethodDropdownPosition();
-
-		const handleScroll = () => updateMethodDropdownPosition();
-		const handleResize = () => updateMethodDropdownPosition();
-
-		window.addEventListener('scroll', handleScroll, true);
-		window.addEventListener('resize', handleResize);
-
-		return () => {
-			window.removeEventListener('scroll', handleScroll, true);
-			window.removeEventListener('resize', handleResize);
-		};
-	}, [isMethodListOpen]);
 	useEffect(() => {
 		if (!isConnectorListOpen) {
 			setConnectorDropdownPosition(null);
@@ -432,23 +420,18 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 	};
 
 	useEffect(() => {
-		if (!isMethodDropdownOpen && !isConnectorDropdownOpen) return;
+		if (!isConnectorDropdownOpen) return;
 
 		const handleClickOutside = (e: MouseEvent) => {
 			const target = e.target as Node;
 
-			const inMethod =
-				methodSelectRef.current && methodSelectRef.current.contains(target);
 			const inConnector =
 				connectorSelectRef.current &&
 				connectorSelectRef.current.contains(target);
-			const inMethodDropdown =
-				methodDropdownRef.current && methodDropdownRef.current.contains(target);
 			const inConnectorDropdown =
 				connectorDropdownRef.current &&
 				connectorDropdownRef.current.contains(target);
 
-			if (!inMethod && !inMethodDropdown) setIsMethodDropdownOpen(false);
 			if (!inConnector && !inConnectorDropdown)
 				setIsConnectorDropdownOpen(false);
 		};
@@ -457,7 +440,7 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 		return () => {
 			document.removeEventListener('mousedown', handleClickOutside);
 		};
-	}, [isMethodDropdownOpen, isConnectorDropdownOpen]);
+	}, [isConnectorDropdownOpen]);
 
 	if (!open) return null;
 
@@ -477,14 +460,9 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 
 	const canInsert = !!selectedMethod && !!(selectedOption || searchValue.trim());
 
-	const getMethodLabel = (m: MethodWithId) =>
-		m.label || m.name || (m as any).index || m.id;
-
-	const selectedMethodLabel = selectedMethod
-		? getMethodLabel(selectedMethod)
-		: methods.length
-			? t('placeholders.selectMethod')
-			: t('placeholders.noPreviousMethods');
+	const methodPlaceholder = methods.length
+		? t('placeholders.selectMethod')
+		: t('placeholders.noPreviousMethods');
 
 	const selectedConnectorLabel = selectedConnector || t('placeholders.selectConnector');
 
@@ -555,68 +533,17 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 					</div>
 
 					<div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-						<div
-							style={{ flex: '0 0 48%', position: 'relative' }}
-							ref={methodSelectRef}
-						>
+						<div style={{ flex: '0 0 48%', position: 'relative' }}>
 							<div style={{ marginBottom: 4 }}>{t('refGenerator.method')}</div>
 
-							<div
-								onClick={() => {
-									if (!selectedConnector) return;
-									if (!methods.length) return;
-									setIsMethodDropdownOpen((prev) => !prev);
-								}}
-								style={{
-									width: '100%',
-									padding: '5px 8px',
-									fontSize: 12,
-									minHeight: 32,
-									height: 32,
-									boxSizing: 'border-box',
-									border: '1px solid var(--color-border-default)',
-									borderRadius: 4,
-									display: 'flex',
-									alignItems: 'center',
-									justifyContent: 'space-between',
-									backgroundColor:
-										selectedConnector && methods.length ? 'var(--color-background-surface)' : 'var(--color-background-disabled)',
-									cursor:
-										selectedConnector && methods.length
-											? 'pointer'
-											: 'not-allowed',
-									opacity: selectedConnector ? 1 : 0.6,
-								}}
-							>
-								<div
-									style={{
-										display: 'flex',
-										alignItems: 'center',
-										gap: 6,
-										overflow: 'hidden',
-										textOverflow: 'ellipsis',
-										whiteSpace: 'nowrap',
-									}}
-								>
-									{selectedMethod && (
-										<span
-											style={{
-												display: 'inline-block',
-												width: 10,
-												height: 10,
-												borderRadius: '50%',
-												backgroundColor: selectedMethod.color,
-											}}
-										/>
-									)}
-									<span style={{ opacity: selectedMethod ? 1 : 0.7 }}>
-										{selectedMethodLabel}
-									</span>
-								</div>
-								<span style={{ fontSize: 10, marginLeft: 8, opacity: 0.7 }}>
-									{isMethodDropdownOpen ? '▲' : '▼'}
-								</span>
-							</div>
+							<Select
+								value={selectedMethodId || undefined}
+								options={methodOptions}
+								onChange={handleMethodChange}
+								placeholder={methodPlaceholder}
+								disabled={!selectedConnector || !methods.length}
+								sortOptions={false}
+							/>
 						</div>
 
 						<div style={{ flex: '0 0 52%' }} ref={fieldContainerRef}>
@@ -755,65 +682,6 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 					</div>,
 					document.body,
 				)}
-			{isMethodListOpen &&
-				methodDropdownPosition &&
-				createPortal(
-					<div
-						ref={methodDropdownRef}
-						style={{
-							position: 'absolute',
-							top: methodDropdownPosition.top,
-							left: methodDropdownPosition.left,
-							width: methodDropdownPosition.width,
-							zIndex: 4000,
-							marginTop: 2,
-							border: '1px solid var(--color-border-default)',
-							borderRadius: 4,
-							backgroundColor: 'var(--color-background-elevated)',
-							boxShadow: 'var(--shadow-md)',
-							maxHeight: 220,
-							overflowY: 'auto',
-							fontSize: 12,
-						}}
-					>
-						{methods.map((m) => (
-							<div
-								key={m.id}
-								onMouseDown={(e) => {
-									e.preventDefault();
-									setSelectedMethodId(m.id);
-									setIsMethodDropdownOpen(false);
-									setSearchValue('');
-									setSelectedOption(null);
-									setFilteredOptions([]);
-								}}
-								style={{
-									display: 'flex',
-									alignItems: 'center',
-									gap: 6,
-									padding: '4px 6px',
-									cursor: 'pointer',
-									whiteSpace: 'nowrap',
-									overflow: 'hidden',
-									textOverflow: 'ellipsis',
-								}}
-							>
-								<span
-									style={{
-										display: 'inline-block',
-										width: 10,
-										height: 10,
-										borderRadius: '50%',
-										backgroundColor: m.color,
-										flexShrink: 0,
-									}}
-								/>
-								<span>{getMethodLabel(m)}</span>
-							</div>
-						))}
-					</div>,
-					document.body,
-				)}
 			{isConnectorListOpen &&
 				connectorDropdownPosition &&
 				createPortal(
@@ -843,6 +711,7 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 									setSelectedConnector(c.value);
 									setIsConnectorDropdownOpen(false);
 									setSelectedMethodId('');
+									setMethodSearch('');
 									setSearchValue('');
 									setSelectedOption(null);
 									setFilteredOptions([]);

@@ -318,17 +318,30 @@
 }
 
 .conditionMethodOption {
-	display: inline-flex;
+	display: flex;
+	width: 100%;
 	min-width: 0;
 	align-items: center;
 	gap: 8px;
 }
 
-.conditionMethodDot {
-	width: 10px;
-	height: 10px;
-	flex: 0 0 10px;
-	border-radius: 50%;
+.conditionMethodName {
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.conditionMethodConnector {
+	flex: 0 0 auto;
+	max-width: 45%;
+	padding-left: 12px;
+	color: var(--color-text-secondary);
+	font-size: 11px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .conditionBuilder .ant-select-selector {

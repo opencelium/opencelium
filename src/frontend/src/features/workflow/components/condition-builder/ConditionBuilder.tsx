@@ -42,6 +42,7 @@ import {
 	validateConditionTreeWithErrors,
 } from './conditionBuilder.utils';
 import { Radio } from '@shared/ui/primitives/Radio';
+import { ConnectorIcon } from '@entities/connector/ui/ConnectorIcon';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import '../request-editor/body-editor/bodyLegacy.css';
 import './conditionBuilder.css';
@@ -248,22 +249,47 @@ function MethodSelect({
 	onChange: (value?: string) => void;
 }) {
 	const { t } = useI18n('workflow');
+	const selected = methods.find((method) => method.id === value);
 	return (
 		<Select
 			placeholder={t('placeholders.selectMethod')}
 			value={value}
 			className="conditionMethodSelect"
+			showSearch
+			filterOption={(input, option) => {
+				const term = input.toLowerCase();
+				const data = option as { label?: unknown; connectorTitle?: string };
+				return (
+					String(data?.label ?? '').toLowerCase().includes(term) ||
+					String(data?.connectorTitle ?? '').toLowerCase().includes(term)
+				);
+			}}
+			// Pin the connector icon as a prefix so it stays visible while typing;
+			// antd indents the search text after it.
+			prefix={selected ? (
+				<span title={selected.connector.title} style={{ display: 'inline-flex' }}>
+					<ConnectorIcon icon={selected.connector.icon} size={18} />
+				</span>
+			) : undefined}
 			onChange={onChange}
 			options={methods.map((method) => ({
 				value: method.id,
-				label: (
-					<span className="conditionMethodOption">
-						<span className="conditionMethodDot" style={{ background: method.color }} />
-						<span>{getMethodLabel(method)}</span>
-					</span>
-				),
+				label: getMethodLabel(method),
+				connectorTitle: method.connector.title,
+				connectorIcon: method.connector.icon ?? null,
 			}))}
+			optionRender={(option) => {
+				const data = option.data as { connectorTitle?: string; connectorIcon?: string | null };
+				return (
+					<span className="conditionMethodOption">
+						<ConnectorIcon icon={data.connectorIcon} size={18} style={{ flexShrink: 0 }} />
+						<span className="conditionMethodName">{option.label}</span>
+						<span className="conditionMethodConnector" title={data.connectorTitle}>{data.connectorTitle}</span>
+					</span>
+				);
+			}}
 			getPopupContainer={() => document.body}
+			popupMatchSelectWidth={320}
 			styles={{ popup: { root: { zIndex: 13010 } } }}
 		/>
 	);
