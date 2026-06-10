@@ -50,6 +50,10 @@ import {RadioFactory} from "@shared/ui/primitives/Radio/Radio.factory.ts";
 import type {RadioComponent} from "@shared/ui/primitives/Radio/Radio.types.ts";
 import {TreeFactory} from "@shared/ui/primitives/Tree/Tree.factory.ts";
 import type {TreeComponent} from "@shared/ui/primitives/Tree/Tree.types.ts";
+import {EmptyFactory} from "@shared/ui/primitives/Empty/Empty.factory.ts";
+import type {EmptyComponent} from "@shared/ui/primitives/Empty/Empty.types.ts";
+import {SplitterFactory} from "@shared/ui/primitives/Splitter/Splitter.factory.ts";
+import type {SplitterComponent} from "@shared/ui/primitives/Splitter/Splitter.types.ts";
 
 export interface DynamicUI {
     Button: ButtonComponent;
@@ -76,6 +80,8 @@ export interface DynamicUI {
     Alert: AlertComponent,
     Radio: RadioComponent,
     Tree: TreeComponent,
+    Empty: EmptyComponent,
+    Splitter: SplitterComponent,
 }
 const systemCapabilities = {
     custom: {
@@ -103,6 +109,8 @@ const systemCapabilities = {
         Alert: false,
         Radio: false,
         Tree: true,
+        Empty: false,
+        Splitter: false,
     },
     material: {
         Button: true,
@@ -129,6 +137,8 @@ const systemCapabilities = {
         Alert: true,
         Radio: true,
         Tree: true,
+        Empty: true,
+        Splitter: true,
     },
 };
 function resolveComponent<T>(
@@ -178,6 +188,8 @@ export function useDynamicUI(): DynamicUI {
         Alert: resolveComponent(AlertFactory, system, 'Alert'),
         Radio: resolveComponent(RadioFactory, system, 'Radio'),
         Tree: resolveComponent(TreeFactory, system, 'Tree'),
+        Empty: resolveComponent(EmptyFactory, system, 'Empty'),
+        Splitter: resolveComponent(SplitterFactory, system, 'Splitter'),
     }), [system]);
 }
 

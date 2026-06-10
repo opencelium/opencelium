@@ -1,40 +1,14 @@
 .bodyLegacyLayout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 48%;
-  gap: 20px;
-  min-height: 0;
   height: 100%;
-}
-
-.bodyLegacyLeft {
-  display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr);
-  gap: 8px;
-  min-width: 0;
   min-height: 0;
 }
 
-.bodyLegacyInfoHeader,
-.bodyLegacyDataHeader,
-.bodyLegacyEnhancementHeader {
-  min-height: 32px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-}
-
-.bodyLegacyInfoEmpty {
-  color: var(--color-text-secondary);
-  font-size: 13px;
-}
-
-.bodyLegacyCollapseButton {
-  width: 20px;
-  min-width: 20px;
-  height: 20px;
-  padding: 0;
-  color: var(--color-text-primary);
+/* Left Splitter pane scrolls as a whole; the request-data JSON can be tall. */
+.bodyLegacyLeft {
+  height: 100%;
+  min-height: 0;
+  overflow: auto;
+  padding-right: 12px;
 }
 
 .bodyLegacyJsonWrap {
@@ -81,74 +55,28 @@
   z-index: 20;
 }
 
+/* Splitter draws the divider now; the pane just needs breathing room from the bar
+   and scrolls as a whole, matching the left (Collapse) pane. */
 .bodyLegacyEnhancement {
   min-width: 0;
-  border-left: 1px solid var(--color-border-subtle);
-  padding-left: 20px;
+  height: 100%;
+  padding-left: 16px;
   display: flex;
   flex-direction: column;
   min-height: 0;
-  overflow: hidden;
-}
-
-.bodyLegacyEnhancement .ant-card {
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-  background: transparent;
-}
-
-.bodyLegacyEnhancement .ant-card-head {
-  border-bottom: 0;
-  padding: 0;
-  min-height: 0;
-}
-
-.bodyLegacyEnhancement .ant-card-head-title {
-  padding: 0;
-}
-
-.bodyLegacyEnhancement .ant-card-body {
-  padding: 0;
-}
-
-.bodyLegacyEnhancement .ant-typography {
-  color: var(--color-text-disabled);
+  overflow: auto;
 }
 
 .bodyLegacyEnhancementContent {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  height: 100%;
-  overflow: hidden;
-}
-
-.bodyLegacyEnhancementTop {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 10px;
-}
-
-.bodyLegacyEnhancementTitleWrap {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.bodyLegacyEnhancementTitle {
-  font-size: 14px;
-  color: var(--color-text-primary);
 }
 
 .bodyLegacyEnhancementBody {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  height: 100%;
-  overflow: hidden;
 }
 
 .bodyLegacyEnhancementArgs {
@@ -347,12 +275,6 @@
 .bodyLegacyWebhookModalSelect .ant-select-selector {
   border: 0 !important;
   box-shadow: none !important;
-}
-
-.bodyLegacyDescriptionHeader {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
 }
 
 .bodyLegacyWebhookWrap {

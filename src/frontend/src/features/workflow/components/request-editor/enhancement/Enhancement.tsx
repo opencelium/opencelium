@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { ExpandAltOutlined } from '@ant-design/icons';
-import { Button, Modal, Typography } from 'antd';
+import React from 'react';
+import { Collapse } from '@shared/ui/primitives/Collapse';
+import { Empty } from '@shared/ui/primitives/Empty';
 import { useDispatch, useSelector } from 'react-redux';
 import { EnhancementArgs } from './Args';
 import Description from './Description';
@@ -23,7 +23,6 @@ const ReferenceEnhancement = ({ enhancement, readOnly }: EnhancementProps) => {
 	const { t } = useI18n('workflow');
 	const dispatch = useDispatch();
 	const connection = useSelector((state: RootState) => state.connection.connection);
-	const [isScriptDialogOpen, setIsScriptDialogOpen] = useState(false);
 
 	if (!connection) return null;
 
@@ -47,66 +46,41 @@ const ReferenceEnhancement = ({ enhancement, readOnly }: EnhancementProps) => {
 
 	return (
 		<div className='bodyLegacyEnhancementContent'>
-			<div className='bodyLegacyEnhancementTop'>
-				<div className='bodyLegacyEnhancementTitleWrap'>
-					<b className='bodyLegacyEnhancementTitle'>{t('enhancement.title')}</b>
-				</div>
-				{hasEnhancement ? (
-					<Button type="primary" icon={<ExpandAltOutlined />} onClick={() => setIsScriptDialogOpen(true)}>
-						{t('actions.openScriptNewWindow')}
-					</Button>
-				) : null}
-			</div>
-
-			{hasEnhancement ? (
-				<div className='bodyLegacyEnhancementBody'>
-					<div className='bodyLegacyEnhancementArgs'>
-						<EnhancementArgs enhancement={enhancement!} />
-					</div>
-					<div className='bodyLegacyEnhancementLabel'>{t('enhancement.language')}</div>
-					<div className='bodyLegacyEnhancementLanguage'>
-						<ScriptLanguage readOnly={readOnly} language={enhancement!.language} onChangeLanguage={onChangeLanguage} />
-					</div>
-					<div className='bodyLegacyEnhancementScript'>
-						<Script readOnly={readOnly} enhancement={enhancement!} onChangeScript={onChangeScript} />
-					</div>
-					<div className='bodyLegacyEnhancementDescription'>
-						<Description
-							readOnly={readOnly}
-							description={enhancement.description || ''}
-							onChangeDescription={onChangeDescription}
-						/>
-					</div>
-				</div>
-			) : (
-				<div className='bodyLegacyEnhancementEmpty'>
-					<Typography.Text type="secondary">
-						{t('enhancement.emptyState')}
-					</Typography.Text>
-				</div>
-			)}
-
-			{hasEnhancement && (
-				<Modal
-					open={isScriptDialogOpen}
-					onCancel={() => setIsScriptDialogOpen(false)}
-					width="90vw"
-					title={t('enhancement.title')}
-					footer={[
-						<Button key="close" type="primary" onClick={() => setIsScriptDialogOpen(false)}>
-							{t('actions.ok')}
-						</Button>,
-					]}
-				>
-					<div style={{ height: '70vh', display: 'flex', flexDirection: 'column', gap: 16 }}>
-						<EnhancementArgs enhancement={enhancement!} />
-						<ScriptLanguage readOnly={readOnly} language={enhancement!.language} onChangeLanguage={onChangeLanguage} />
-						<div style={{ flex: 1, minHeight: 0 }}>
-							<Script readOnly={readOnly} enhancement={enhancement!} onChangeScript={onChangeScript} />
-						</div>
-					</div>
-				</Modal>
-			)}
+			<Collapse
+				className='bodyLegacyEnhancementCollapse'
+				defaultActiveKeys={['enhancement']}
+				items={[
+					{
+						key: 'enhancement',
+						label: t('enhancement.title'),
+						content: hasEnhancement ? (
+							<div className='bodyLegacyEnhancementBody'>
+								<div className='bodyLegacyEnhancementArgs'>
+									<EnhancementArgs enhancement={enhancement!} />
+								</div>
+								<div className='bodyLegacyEnhancementLabel'>{t('enhancement.language')}</div>
+								<div className='bodyLegacyEnhancementLanguage'>
+									<ScriptLanguage readOnly={readOnly} language={enhancement!.language} onChangeLanguage={onChangeLanguage} />
+								</div>
+								<div className='bodyLegacyEnhancementScript'>
+									<Script readOnly={readOnly} enhancement={enhancement!} onChangeScript={onChangeScript} />
+								</div>
+								<div className='bodyLegacyEnhancementDescription'>
+									<Description
+										readOnly={readOnly}
+										description={enhancement.description || ''}
+										onChangeDescription={onChangeDescription}
+									/>
+								</div>
+							</div>
+						) : (
+							<div className='bodyLegacyEnhancementEmpty'>
+								<Empty description={t('enhancement.emptyState')} />
+							</div>
+						),
+					},
+				]}
+			/>
 		</div>
 	);
 };
