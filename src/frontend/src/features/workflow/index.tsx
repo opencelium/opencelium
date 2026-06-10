@@ -101,6 +101,9 @@ const EMPTY_DESCRIPTION_LABEL = '[Empty Description]';
 const toDisplayDescription = (description?: string) =>
   description && description.trim() ? description : EMPTY_DESCRIPTION_LABEL;
 
+const toPayloadDescription = (description?: string) =>
+  description?.trim() === EMPTY_DESCRIPTION_LABEL ? '' : description ?? '';
+
 const FIELD_BINDING_COLOR_RE = /#[A-Fa-f0-9]{6}/g;
 
 const getFieldBindingColors = (binding: any) =>
@@ -235,7 +238,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     () => buildWorkflowChangeSnapshot({
       connectionId: activeConnectionId,
       title: headerState.title,
-      description: headerState.description,
+      description: toPayloadDescription(headerState.description),
       nodes: hydratedNodes,
       edges: workflow.edges,
       fieldBindings: loadedFieldBindings,
@@ -323,7 +326,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       throw new Error('Connection name is required');
     }
 
-    const normalizedDescription = description.trim() === EMPTY_DESCRIPTION_LABEL ? '' : description;
+    const normalizedDescription = toPayloadDescription(description);
     const isCreate = !activeConnectionId;
     let response;
     try {
@@ -512,7 +515,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       ...buildConnectionPayload({
         connectionId,
         title: headerState.title,
-        description: headerState.description === EMPTY_DESCRIPTION_LABEL ? '' : headerState.description,
+        description: toPayloadDescription(headerState.description),
         nodes: hydratedNodes,
         edges: workflow.edges,
         viewport: workflow.getViewport(),
@@ -704,9 +707,10 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           const nextSnapshot = buildWorkflowChangeSnapshot({
             connectionId: activeConnectionId,
             title: state.title,
-            description: state.description,
+            description: toPayloadDescription(state.description),
             nodes: nextNodes,
             edges: state.edges,
+            fieldBindings: state.fieldBindings,
           });
           workflow.setWorkflowGraph(state.nodes, state.edges, state.viewport, { centerStart: true });
           setHeaderState({ title: state.title, description: toDisplayDescription(state.description) });
