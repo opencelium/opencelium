@@ -166,7 +166,7 @@ public class ReferenceExtractor implements Extractor {
         //   CASE 1.4: '#ababab.(response).[*].body'
 
         if (ref.getPart() == DirectReference.Part.ALL) {
-            if (path == null) { // CASE 1.1
+            if (path.isBlank()) { // CASE 1.1
                 TreeMap<String, ResponseEx> responses = new TreeMap<>(NUMERIC_PARTS);
                 operation.getResponses().forEach((K, V) -> responses.put(K, ResponseEx.of(V)));
 
@@ -316,7 +316,7 @@ public class ReferenceExtractor implements Extractor {
         // C1: 'parts' contains values supported by JsonPath -> extract at once
         if (!hasForInKey && !hasSplit) {
             String resolvedPath = resolveLoops(paths);
-            String jsonPath = resolvedPath.startsWith("[") ? "$" + resolvedPath : "$." + resolvedPath;
+            String jsonPath = toJsonPath(resolvedPath);
 
             return JsonPath.read(normalizedBody, jsonPath);
         }
@@ -349,7 +349,7 @@ public class ReferenceExtractor implements Extractor {
         if (basePath.isEmpty()) {
             base = body;
         } else {
-            String jsonPath = basePath.startsWith("[") ? "$" + basePath : "$." + basePath;
+            String jsonPath = toJsonPath(basePath);
             base = JsonPath.read(normalizedBody, jsonPath);
         }
 
@@ -576,6 +576,12 @@ public class ReferenceExtractor implements Extractor {
         }
 
         return path;
+    }
+
+    private String toJsonPath(String paths) {
+        return paths.startsWith("[") || paths.isBlank()
+                ? "$" + paths
+                : "$." + paths;
     }
 
     private List<String> getFieldNames(Object body) {
