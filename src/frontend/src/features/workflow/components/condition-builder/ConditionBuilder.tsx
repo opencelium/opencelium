@@ -41,6 +41,7 @@ import {
 	updateRuleProperties,
 	validateConditionTreeWithErrors,
 } from './conditionBuilder.utils';
+import { LoopInfoPanel } from './LoopInfoPanel';
 import { Radio } from '@shared/ui/primitives/Radio';
 import { ConnectorIcon } from '@entities/connector/ui/ConnectorIcon';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
@@ -193,6 +194,32 @@ const getCurrentLoopIterator = (
 	const existing = node.data.conditionConfig?.iterator || (getCurrentOperator(connection, node) as any)?.iterator;
 	if (existing) return existing;
 	return ITERATOR_NAMES[getLoopAncestors(connection, node).length];
+};
+
+// The collection the loop iterates over is the first rule's left-hand reference.
+const getFirstRuleLeftField = (group: ConditionGroup): string | undefined => {
+	for (const item of group.items ?? []) {
+		if (item.type === 'rule') {
+			if (item.properties?.leftField) return item.properties.leftField;
+		} else {
+			const nested = getFirstRuleLeftField(item);
+			if (nested) return nested;
+		}
+	}
+	return undefined;
+};
+
+// The chosen loop operator (for / forin / SplitString) — taken from the first rule.
+const getFirstRuleOperator = (group: ConditionGroup): string | undefined => {
+	for (const item of group.items ?? []) {
+		if (item.type === 'rule') {
+			if (item.properties?.operator) return item.properties.operator;
+		} else {
+			const nested = getFirstRuleOperator(item);
+			if (nested) return nested;
+		}
+	}
+	return undefined;
 };
 
 function SourceSwitcher({
@@ -668,6 +695,28 @@ export function ConditionBuilderDialog({
 		() => getCurrentLoopIterator(connection, node),
 		[connection, node],
 	);
+	const isLoop = operatorType === 'loop';
+	const loopCollectionRef = useMemo(
+		() => (isLoop ? getFirstRuleLeftField(tree) : undefined),
+		[isLoop, tree],
+	);
+	const loopOperator = useMemo(
+		() => (isLoop ? getFirstRuleOperator(tree) : undefined),
+		[isLoop, tree],
+	);
+	const loopExample = useMemo(() => {
+		// Only show once the operator, method and field (the collection reference)
+		// are all chosen.
+		if (!isLoop || !loopOperator || !loopCollectionRef) return undefined;
+		const method = parseMethodFromReference(methods, loopCollectionRef);
+		if (!method) return undefined;
+		return {
+			methodLabel: method.label || method.name,
+			connectorIcon: method.connector.icon ?? null,
+			hasMethod: true,
+			responseType: parseResponseTypeFromReference(loopCollectionRef) || 'body',
+		};
+	}, [isLoop, loopOperator, loopCollectionRef, methods]);
 
 	useEffect(() => {
 		if (!open) return;
@@ -711,6 +760,13 @@ export function ConditionBuilderDialog({
 					iterators={iterators}
 					onChange={setTree}
 				/>
+				{isLoop ? (
+					<LoopInfoPanel
+						iterator={loopIterator}
+						operator={loopOperator}
+						example={loopExample}
+					/>
+				) : null}
 			</div>
 		</Modal>
 	);

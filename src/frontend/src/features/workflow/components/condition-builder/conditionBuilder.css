@@ -59,7 +59,123 @@
 }
 
 .conditionBuilderModal-loop .conditionBuilder {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
 	min-width: 0;
+}
+
+.loopInfoPanel {
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	padding: 16px;
+	border: 1px solid var(--color-border-subtle);
+	border-radius: 6px;
+	background: var(--color-background-subtle, var(--color-background-hover));
+}
+
+.loopInfoHelp {
+	font-size: 12px;
+	color: var(--color-text-secondary);
+}
+
+.loopInfoColumns {
+	display: flex;
+	align-items: flex-start;
+	gap: 24px;
+}
+
+.loopInfoCol {
+	flex: 1 1 50%;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.loopInfoExample {
+	display: flex;
+	align-items: stretch;
+	gap: 8px;
+	width: 460px;
+	max-width: 100%;
+}
+
+.loopInfoExampleBox {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-height: 38px;
+	padding: 0 10px;
+	border: 1px solid var(--color-border-default);
+	border-radius: 2px;
+	background: var(--color-background-surface);
+	color: var(--color-text-primary);
+	font-size: 13px;
+	box-sizing: border-box;
+}
+
+.loopInfoExampleMethod {
+	flex: 0 1 auto;
+	min-width: 0;
+}
+
+.loopInfoExampleText {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.loopInfoExampleType {
+	flex: 0 0 auto;
+	justify-content: center;
+	min-width: 34px;
+	font-weight: 600;
+}
+
+.loopInfoExampleField {
+	flex: 1 1 auto;
+	min-width: 0;
+	gap: 6px;
+	font-family: monospace;
+	overflow: hidden;
+}
+
+.loopInfoExampleLoop {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: var(--color-text-primary);
+}
+
+.loopInfoBlock {
+	min-width: 0;
+	font-size: 12px;
+	color: var(--color-text-secondary);
+}
+
+.loopInfoLabel {
+	font-weight: 600;
+	color: var(--color-text-primary);
+}
+
+.loopInfoList {
+	margin: 4px 0 0;
+	padding-left: 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.loopInfoInlineCode {
+	padding: 1px 5px;
+	border-radius: 3px;
+	background: var(--color-background-surface);
+	border: 1px solid var(--color-border-default);
+	font-family: monospace;
+	color: var(--color-text-primary);
 }
 
 .conditionGroup {
@@ -250,7 +366,7 @@
 	justify-content: flex-start;
 	width: 100%;
 	min-height: 48px;
-	padding: 10px 0 10px 8px;
+	padding: 10px 0;
 }
 
 .conditionValueInput {

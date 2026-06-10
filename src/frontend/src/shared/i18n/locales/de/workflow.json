@@ -159,6 +159,45 @@
     "dialogTitle": "Bedingung",
     "addCondition": "Bedingung hinzufügen",
     "addGroup": "Gruppe hinzufügen",
+    "loopInfo": {
+      "iteratorLabel": "Schleifenvariable",
+      "iteratorHelp": "Verwenden Sie diese Variable in den Schleifenschritten, um das aktuelle Element zu lesen:",
+      "descriptionLabel": "Beschreibung",
+      "argumentsLabel": "Argumente",
+      "examplesLabel": "Beispiele",
+      "operators": {
+        "for": {
+          "description": "Iteriert durch ein Array.",
+          "args": [{ "code": "o1", "text": "Ein Array, durch das iteriert wird." }],
+          "examples": [
+            { "code": "o1 = [\"a\", \"b\", \"c\"]", "result": "Iteriert durch \"a\", \"b\", \"c\"" },
+            { "code": "o1 = [1, 2, 3]", "result": "Iteriert durch 1, 2, 3" },
+            { "code": "o1 = []", "result": "Führt keine Iterationen aus" }
+          ]
+        },
+        "forin": {
+          "description": "Iteriert durch die Eigenschaften eines Objekts.",
+          "args": [{ "code": "o1", "text": "Ein Objekt, dessen Eigenschaften iteriert werden sollen." }],
+          "examples": [
+            { "code": "o1 = {\"name\":\"Hob\",\"age\":123}", "result": "Iteriert durch die Eigenschaften \"name\", \"age\"" },
+            { "code": "o1 = {\"a\":1,\"b\":2}", "result": "Iteriert durch die Eigenschaften \"a\", \"b\"" },
+            { "code": "o1 = {}", "result": "Führt keine Iterationen aus" }
+          ]
+        },
+        "SplitString": {
+          "description": "Teilt eine Zeichenkette anhand eines Trennzeichens und iteriert durch das resultierende Array.",
+          "args": [
+            { "code": "o1", "text": "Eine zu teilende Zeichenkette." },
+            { "code": "o2", "text": "Ein Trennzeichen." }
+          ],
+          "examples": [
+            { "code": "o1 = \"a,b,c\", o2 = \",\"", "result": "Iteriert durch \"a\", \"b\", \"c\"" },
+            { "code": "o1 = \"one|two|three\", o2 = \"|\"", "result": "Iteriert durch \"one\", \"two\", \"three\"" },
+            { "code": "o1 = \"abc\", o2 = \",\"", "result": "Iteriert einmal durch \"abc\"" }
+          ]
+        }
+      }
+    },
     "source": {
       "constant": "Konstante",
       "method": "Methode",
