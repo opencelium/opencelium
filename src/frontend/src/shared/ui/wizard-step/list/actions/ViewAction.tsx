@@ -23,6 +23,7 @@ export const ViewAction: React.FC<ViewActionProps> = ({ entity, row, rowId, conf
 
         const id = dialog.open({
             width: 1000,
+            top: 18,
             content: (
                 <EntityDialogContent
                     entityName={entity.name}

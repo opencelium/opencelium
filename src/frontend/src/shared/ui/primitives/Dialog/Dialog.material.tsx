@@ -19,6 +19,7 @@ export const MaterialDialog: DialogComponent = ({
   footer,
   children,
   width = 480,
+  top,
   closable = true,
   fullscreen = false,
   maximizable = false,
@@ -38,10 +39,16 @@ export const MaterialDialog: DialogComponent = ({
       TransitionProps={afterClose ? { onExited: afterClose } : undefined}
       fullScreen={isFullscreen}
       maxWidth={false}
+      sx={
+        !isFullscreen && top !== undefined
+          ? { "& .MuiDialog-container": { alignItems: "flex-start" } }
+          : undefined
+      }
       PaperProps={{
         sx: {
           width: isFullscreen ? "100%" : width,
           borderRadius: isFullscreen ? 0 : "var(--radius-lg)",
+          marginTop: !isFullscreen && top !== undefined ? top : undefined,
           marginBottom: isFullscreen ? 0 : "40px",
           position: "relative",
         },
