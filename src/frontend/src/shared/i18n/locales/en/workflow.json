@@ -42,6 +42,7 @@
   },
   "messages": {
     "enterWorkflowName": "Please enter a workflow name",
+    "workflowNameExists": "A workflow with this title already exists",
     "saveTemplateFailed": "Failed to save template",
     "loadTemplatesFailed": "Failed to load templates",
     "selectTemplate": "Please select a template",

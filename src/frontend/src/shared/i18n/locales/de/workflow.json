@@ -42,6 +42,7 @@
   },
   "messages": {
     "enterWorkflowName": "Bitte geben Sie einen Workflow-Namen ein",
+    "workflowNameExists": "Ein Workflow mit diesem Titel existiert bereits",
     "saveTemplateFailed": "Vorlage konnte nicht gespeichert werden",
     "loadTemplatesFailed": "Vorlagen konnten nicht geladen werden",
     "selectTemplate": "Bitte wählen Sie eine Vorlage aus",

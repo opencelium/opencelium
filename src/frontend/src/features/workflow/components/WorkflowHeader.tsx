@@ -14,13 +14,15 @@ type Props = {
 	onSave: (values: { title: string; description: string; comment: string }) => void | Promise<void>;
 	onChange?: (values: { title: string; description: string }) => void;
 	onMenuItemSelect?: (item: WorkflowHeaderMenuItem) => void;
+	/** Async title check; returns a translated error message to show inline, or null when the title is acceptable. */
+	validateTitle?: (title: string) => Promise<string | null>;
 	saveDisabled?: boolean;
 	readOnly?: boolean;
 };
 type EditField = 'name' | 'description' | null;
 const EMPTY_NAME_LABEL = '[Empty Name]';
 
-export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initialDescription = 'This interface delivering data into znuny and creates a ticket if the specified object is missing.', onOpenHistory, onSave, onChange, onMenuItemSelect, saveDisabled = false, readOnly = false }: Props) {
+export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initialDescription = 'This interface delivering data into znuny and creates a ticket if the specified object is missing.', onOpenHistory, onSave, onChange, onMenuItemSelect, validateTitle, saveDisabled = false, readOnly = false }: Props) {
 	const { t } = useI18n('workflow');
 	const [name, setName] = useState(initialName);
 	const [description, setDescription] = useState(initialDescription);
@@ -31,6 +33,7 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 	const [saveDialogOpen, setSaveDialogOpen] = useState(false);
 	const [saveComment, setSaveComment] = useState('');
 	const [nameError, setNameError] = useState('');
+	const [isCheckingName, setIsCheckingName] = useState(false);
 	const nameInputRef = useRef<HTMLInputElement | null>(null);
 	const descriptionInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -63,10 +66,43 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 		setEditing(null);
 	};
 
-	const commitName = () => {
+	const focusNameWithError = (value: string, errorMessage: string) => {
+		setNameError(errorMessage);
+		setSaveDialogOpen(false);
+		setEditing('name');
+		setDraftName(value);
+		window.setTimeout(() => {
+			nameInputRef.current?.focus();
+		}, 0);
+	};
+
+	const runTitleCheck = async (value: string): Promise<string | null> => {
+		if (!validateTitle) return null;
+		setIsCheckingName(true);
+		try {
+			return await validateTitle(value);
+		} finally {
+			setIsCheckingName(false);
+		}
+	};
+
+	const commitName = async () => {
 		const nextName = draftName.trim();
+		if (!nextName) {
+			setName(nextName);
+			setNameError('');
+			onChange?.({ title: nextName, description });
+			setEditing(null);
+			return;
+		}
+		const titleError = await runTitleCheck(nextName);
+		if (titleError) {
+			// Reject the duplicate: keep editing, refocus, don't accept the value.
+			focusNameWithError(nextName, titleError);
+			return;
+		}
 		setName(nextName);
-		if (nextName) setNameError('');
+		setNameError('');
 		onChange?.({ title: nextName, description });
 		setEditing(null);
 	};
@@ -80,19 +116,18 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 
 	const isNameEmpty = (value: string) => !value.trim() || value.trim() === EMPTY_NAME_LABEL;
 
-	const openSaveDialog = () => {
+	const openSaveDialog = async () => {
 		const nextName = editing === 'name' ? draftName.trim() : name;
 		const nextDescription = editing === 'description' ? draftDescription.trim() : description;
 
-		const errorMessage = t('messages.enterWorkflowName');
 		if (isNameEmpty(nextName)) {
-			setNameError(errorMessage);
-			setSaveDialogOpen(false);
-			setEditing('name');
-			setDraftName(nextName);
-			window.setTimeout(() => {
-				nameInputRef.current?.focus();
-			}, 0);
+			focusNameWithError(nextName, t('messages.enterWorkflowName'));
+			return;
+		}
+
+		const titleError = await runTitleCheck(nextName);
+		if (titleError) {
+			focusNameWithError(nextName, titleError);
 			return;
 		}
 
@@ -122,6 +157,7 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 								onSubmit={commitName}
 								onBlur={commitName}
 								onCancel={cancelEdit}
+								loading={isCheckingName}
 								inputRef={nameInputRef}
 							/>
 							{nameError ? <div className='headerInlineErrorMessage'>{nameError}</div> : null}

@@ -65,24 +65,6 @@
   color: var(--color-text-secondary);
 }
 
-.headerInlineAction {
-  width: 28px;
-  height: 28px;
-  border: 1px solid var(--color-border-default);
-  background: var(--color-background-surface);
-  border-radius: 8px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: var(--color-text-secondary);
-  flex: 0 0 auto;
-}
-
-.headerInlineAction:hover {
-  background: var(--color-background-hover);
-}
-
 .headerActions {
   display: flex;
   align-items: center;
