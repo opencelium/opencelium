@@ -56,7 +56,29 @@ export const ThemeBridge = ({ children }) => {
         shape: {
             borderRadius: theme.radius.md,
         },
+
+        components: {
+            MuiOutlinedInput: {
+                styleOverrides: {
+                    root: { backgroundColor: theme.color.background.input },
+                },
+            },
+            MuiFilledInput: {
+                styleOverrides: {
+                    root: {
+                        backgroundColor: theme.color.background.input,
+                        '&:hover': { backgroundColor: theme.color.background.input },
+                        '&.Mui-focused': { backgroundColor: theme.color.background.input },
+                    },
+                },
+            },
+        },
     }), [theme, themeMode]);
+
+    // Form controls share colorBgContainer with cards/dialogs by default, so an
+    // input nested in a surface becomes invisible. Override the fill per control
+    // so fields render on background.input (white in light mode) instead.
+    const controlBg = { colorBgContainer: theme.color.background.input };
 
     return (
         <ConfigProvider
@@ -85,7 +107,17 @@ export const ThemeBridge = ({ children }) => {
 
                     fontFamily: theme.typography.fontFamily.body,
                     borderRadius: theme.radius.md,
-                }
+                },
+                components: {
+                    Input: controlBg,
+                    InputNumber: controlBg,
+                    Select: controlBg,
+                    DatePicker: controlBg,
+                    TimePicker: controlBg,
+                    Cascader: controlBg,
+                    TreeSelect: controlBg,
+                    Mentions: controlBg,
+                },
             }}
         >
             <ThemeProvider theme={muiTheme}>

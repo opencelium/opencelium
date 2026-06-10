@@ -2,6 +2,12 @@
     width: 100%;
 }
 
+/* Dragger defaults to antd's colorFillAlter; match the input fill so the drop
+   area reads as a field (white in light mode) rather than a tinted surface. */
+.ant-upload-wrapper .ant-upload-drag {
+    background: var(--color-background-input);
+}
+
 /* ── File list ──────────────────────────────── */
 
 .dz-file-list {
