@@ -3,18 +3,57 @@
   min-height: 0;
 }
 
-/* Left Splitter pane scrolls as a whole; the request-data JSON can be tall. */
+/* Left Splitter pane: the two sections share the height and each scrolls inside
+   itself, so the pane never scrolls as a whole. */
 .bodyLegacyLeft {
   height: 100%;
   min-height: 0;
-  overflow: auto;
+  overflow: hidden;
   padding-right: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.bodyLegacyLeftCollapse {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.bodyLegacyLeftCollapse .ant-collapse-item {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* Open sections split the free space (~50% each when both are open; a single
+   open section takes it all). */
+.bodyLegacyLeftCollapse .ant-collapse-item-active {
+  flex: 1;
+}
+
+.bodyLegacyLeftCollapse .ant-collapse-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Scroll lives inside each section's content box, not the pane. */
+.bodyLegacyLeftCollapse .ant-collapse-content-box {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
 }
 
 .bodyLegacyJsonWrap {
   position: relative;
   min-height: 0;
   overflow: auto;
+  background: var(--color-background-input);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
 }
 
 .bodyLegacyJsonWrap .copy-to-clipboard-container,

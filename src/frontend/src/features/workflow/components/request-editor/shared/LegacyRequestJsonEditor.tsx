@@ -227,7 +227,7 @@ export function LegacyRequestJsonEditor({ messageProperty, source, readOnly }: P
           max: '74%',
           content: (
             <div className='bodyLegacyLeft'>
-              <Collapse items={leftItems} defaultActiveKeys={['requestData']} />
+              <Collapse className='bodyLegacyLeftCollapse' items={leftItems} defaultActiveKeys={['requestData']} />
             </div>
           ),
         },
