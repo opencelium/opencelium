@@ -174,8 +174,9 @@ public class ExtraOpsServiceImp implements ExtraOpsService {
                 extraOps.setCurrentOpsUsage(extraOps.getTotalOpsUsage());
                 extraOps.setCurrentOpsUsageHmac(constructHmac(extraOps, extraOps.getTotalOpsUsage()));
                 extraOps.setStatus(ExtraOpsStatus.CONSUMED);
-                // Deduct the amount consumed from opsUsage.
-                opsUsage = availableOps - opsUsage;
+                // Deduct the amount consumed from opsUsage so any remainder
+                // cascades to the next pack on the following loop iteration.
+                opsUsage = opsUsage - availableOps;
             } else {
                 // If remaining opsUsage is not enough to consume the extraOps fully:
                 long operationUsage = extraOps.getCurrentOpsUsage() + opsUsage;
