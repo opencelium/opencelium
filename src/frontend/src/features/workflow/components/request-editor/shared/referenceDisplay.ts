@@ -34,5 +34,6 @@ export const getReferenceDisplayTitle = (reference = '') => {
   const parsed = parseReferenceDisplay(reference);
   if (!parsed) return reference;
   if (parsed.messageProperty === 'status') return 'Response Status';
+  if (!parsed.path) return `${parsed.messageProperty}.$`;
   return `${parsed.messageProperty}.$.${parsed.path}`;
 };

@@ -68,8 +68,8 @@ export const CommandPalette = () => {
                 setContentKey(prev => prev + 1);
                 setContent(node);
             },
-            openModal: (node) => {
-                openModalStore(node);
+            openModal: (node, options) => {
+                openModalStore(node, options);
             },
             navigate: (url) => {
                 navigate(url);

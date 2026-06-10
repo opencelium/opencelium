@@ -30,6 +30,7 @@ export const createMethodConfigFromOperation = (operation?: InvokerOperation): W
   const request = operation.request || {};
   const fallback = createEmptyMethodConfig();
   return {
+    name: operation.name,
     url: request.endpoint || fallback.url,
     method: request.method || 'GET',
     headers: request.header || {},
@@ -46,6 +47,7 @@ export const createMethodConfigFromOperation = (operation?: InvokerOperation): W
 };
 
 export const ensureMethodConfig = (config?: Partial<WorkflowMethodConfig>): WorkflowMethodConfig => ({
+  name: config?.name,
   url: config?.url ?? createEmptyMethodConfig().url,
   method: config?.method ?? 'GET',
   headers: config?.headers ?? createEmptyMethodConfig().headers,

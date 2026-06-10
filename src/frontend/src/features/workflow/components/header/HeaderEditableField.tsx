@@ -7,6 +7,7 @@ type Props = {
   onChange: (value: string) => void;
   onSubmit: () => void;
   onCancel: () => void;
+  onBlur?: () => void;
   inputRef: RefObject<HTMLInputElement | null>;
 };
 
@@ -16,10 +17,17 @@ export function HeaderEditableField({
   onChange,
   onSubmit,
   onCancel,
+  onBlur,
   inputRef,
 }: Props) {
   return (
-    <div className="headerInlineEditor">
+    <div
+      className="headerInlineEditor"
+      onBlur={(event) => {
+        if (event.currentTarget.contains(event.relatedTarget as Node | null)) return;
+        onBlur?.();
+      }}
+    >
       <input
         ref={inputRef}
         className={`headerInlineInput ${className}`}

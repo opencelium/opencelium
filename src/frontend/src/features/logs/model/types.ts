@@ -26,7 +26,7 @@ export type FlowchartProperty = {
   DIRECTION: "source" | "target";
 };
 
-export type MethodProperty = { name: string };
+export type MethodProperty = { name: string; label?: string };
 export type LoopProperty = {
   expression: string;
   size: number;

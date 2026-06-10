@@ -93,6 +93,12 @@ textarea {
   color: var(--color-action-primary-hover);
 }
 
+.logsHeaderIconButton--active,
+.logsHeaderIconButton--active:hover {
+  background: var(--color-action-primary);
+  color: var(--color-text-on-action);
+}
+
 .logsCaret {
   transition: transform 0.18s ease;
 }

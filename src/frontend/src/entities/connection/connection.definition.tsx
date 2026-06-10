@@ -17,7 +17,7 @@ const resolveConnectionId = (value: string): string => {
 }
 
 const buildConnectionPageUrl = (verb: 'view' | 'update', value: string): string =>
-    `/connection/${verb}/${encodeURIComponent(resolveConnectionId(value))}`
+    `/workflow/${verb}/${encodeURIComponent(resolveConnectionId(value))}`
 
 const buildConnectionFetchUrl = (value: string): string =>
     `/connection/${encodeURIComponent(resolveConnectionId(value))}`
@@ -26,7 +26,10 @@ export const connectionDefinition: EntityDefinition = {
     name: baseKey,
 
     routes: [
-        { type: 'list' },
+        // The list lives at /workflow (the create/view/update editor pages are the
+        // custom Workflow component, also under /workflow — see app/router/routes.tsx).
+        // The backend API path stays /connection (see api.baseUrl below).
+        { type: 'list', entityRouteName: 'workflow' },
     ],
 
     api: {
@@ -52,11 +55,11 @@ export const connectionDefinition: EntityDefinition = {
         actions: [
             {
                 type: 'view',
-                buildNavigationUrl: (_entity, value) => `/connection/view/${encodeURIComponent(value)}`,
+                buildNavigationUrl: (_entity, value) => `/workflow/view/${encodeURIComponent(value)}`,
             },
             {
                 type: 'update',
-                buildNavigationUrl: (_entity, value) => `/connection/update/${encodeURIComponent(value)}`,
+                buildNavigationUrl: (_entity, value) => `/workflow/update/${encodeURIComponent(value)}`,
             },
             { type: 'delete' },
             {

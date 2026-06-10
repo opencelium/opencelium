@@ -8,7 +8,7 @@ export const CreateConnectionButton: React.FC = () => {
     const { t: tCommon } = useI18n('common')
 
     return (
-        <Button type="primary" onClick={() => navigate('/connection/create')}>
+        <Button type="primary" onClick={() => navigate('/workflow/create')}>
             {tCommon('actions.create')}
         </Button>
     )

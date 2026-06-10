@@ -143,7 +143,7 @@ export const categoryDefinition: EntityDefinition = {
             },
             {
                 title: `${baseKey}.wizard.recommendations.2`,
-                link: '/connection/create',
+                link: '/workflow/create',
             },
         ],
 

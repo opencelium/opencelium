@@ -7,6 +7,10 @@ import type { FlowchartChildLog } from "../model/types";
 import { LogRow, Meta, MethodBadge, OperatorLabel, StatusBadge, Url } from "./logRowUi";
 import { MethodLogDetails } from "./MethodLogDetails";
 import { LoopPager } from "./LoopPager";
+import { CopyButton } from "./CopyButton";
+import { serializeLogElement } from "./serializeLogElement";
+import { useMethodViewMode } from "./methodViewMode";
+import { methodDisplayText } from "./methodView";
 
 const INDENT_STEP = 22;
 
@@ -109,6 +113,8 @@ export function LogElementRow({
     Record<number, boolean>
   >({});
 
+  const { mode } = useMethodViewMode();
+
   const isControlled = onToggle !== undefined;
   const expanded = isControlled ? !!expandedProp : internalExpanded;
   const toggle = isControlled ? onToggle : () => setInternalExpanded((v) => !v);
@@ -122,6 +128,11 @@ export function LogElementRow({
   switch (log.type) {
     case "OPERATION": {
       const { request, response } = log.segment;
+      const displayText = methodDisplayText(mode, {
+        url: request.url,
+        label: log.properties.label,
+        name: log.properties.name,
+      });
       return (
         <>
           <LogRow
@@ -132,7 +143,8 @@ export function LogElementRow({
             left={
               <>
                 <MethodBadge method={request.http_method} />
-                <Url>{request.url}</Url>
+                <Url>{displayText}</Url>
+                <CopyButton value={displayText} className="oc-copy-on-hover" />
               </>
             }
             right={
@@ -158,7 +170,12 @@ export function LogElementRow({
             expandable
             expanded={expanded}
             onToggle={toggle}
-            left={<OperatorLabel label="LOOP" hint={log.properties.iterator} />}
+            left={
+              <>
+                <OperatorLabel label="LOOP" hint={log.properties.iterator} />
+                <CopyButton value={serializeLogElement(log)} className="oc-copy-on-hover" />
+              </>
+            }
             right={
               <LoopPager
                 index={loopIndex}
@@ -187,7 +204,12 @@ export function LogElementRow({
             expandable
             expanded={expanded}
             onToggle={toggle}
-            left={<OperatorLabel label="IF" />}
+            left={
+              <>
+                <OperatorLabel label="IF" />
+                <CopyButton value={serializeLogElement(log)} className="oc-copy-on-hover" />
+              </>
+            }
             right={
               <Typography variant="caption" isSubtle>
                 {log.segment.result}

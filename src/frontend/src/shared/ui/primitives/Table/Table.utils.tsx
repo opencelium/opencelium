@@ -3,6 +3,17 @@ import type { Cell, RowData } from '@tanstack/react-table';
 
 const MAX_CELL_TEXT_LENGTH = 150;
 
+/**
+ * True when a row click originated from an interactive element (action buttons,
+ * checkboxes, links, inputs) or a cell explicitly opted out with
+ * `data-row-click-ignore`. Lets a row-level `onRowClick` coexist with in-row
+ * controls without hijacking their clicks.
+ */
+export const isRowClickIgnored = (target: EventTarget | null): boolean => {
+    const el = target as HTMLElement | null;
+    return !!el?.closest?.('button, a, input, select, textarea, label, [data-row-click-ignore]');
+};
+
 export const truncateCellNode = (node: ReactNode): ReactNode => {
     if (typeof node !== 'string' && typeof node !== 'number') return node;
     const text = String(node);

@@ -14,8 +14,8 @@ const collectLeafKeys = (items: MenuItem[]): string[] =>
     items.flatMap((item) => (item.children ? collectLeafKeys(item.children) : [item.key]));
 
 // The active item is the leaf whose route is the longest prefix of the current
-// pathname, matched on segment boundaries so '/connection' doesn't swallow
-// '/connection-template' while '/invoker/5/edit' still selects '/invoker'.
+// pathname, matched on segment boundaries so a short key doesn't swallow an
+// unrelated longer route while '/invoker/5/edit' still selects '/invoker'.
 const findSelectedKey = (items: MenuItem[], pathname: string): string | undefined =>
     collectLeafKeys(items)
         .filter((key) => pathname === key || pathname.startsWith(`${key}/`))

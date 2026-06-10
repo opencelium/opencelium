@@ -35,6 +35,7 @@ import {RiListSettingsLine, RiListSettingsFill  } from "react-icons/ri";
 import {MdKeyboardCommandKey, MdContentCopy, MdPlayArrow, MdStop, MdUnfoldMore, MdUnfoldLess, MdToggleOn, MdToggleOff} from "react-icons/md";
 import {TbWebhook} from "react-icons/tb";
 import {BsJournalText} from "react-icons/bs";
+import {GoArrowSwitch} from "react-icons/go";
 import {Component} from "lucide-react";
 
 const iconMap = {
@@ -79,6 +80,7 @@ const iconMap = {
     'chevron-down': DownOutlined,
     maximize: FullscreenOutlined,
     minimize: FullscreenExitOutlined,
+    'arrow-switch': GoArrowSwitch,
 };
 
 export const AntIcon: IconComponent = ({

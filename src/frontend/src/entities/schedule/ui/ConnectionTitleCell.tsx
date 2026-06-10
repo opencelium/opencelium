@@ -12,5 +12,5 @@ export const ConnectionTitleCell = memo(function ConnectionTitleCell({ schedule 
 
     if (connectionId == null) return <span>{title}</span>
 
-    return <Link to={`/connection/update/${connectionId}`}>{title}</Link>
+    return <Link to={`/workflow/update/${connectionId}`}>{title}</Link>
 })

@@ -54,7 +54,7 @@ export function buildRowActionsColumn<T extends Record<string, unknown>>(
             const original = row.original;
             const rowId = String(getValueByPath(original as Record<string, unknown>, rowKey) ?? '');
             return (
-                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <div data-row-click-ignore style={{ display: 'flex', justifyContent: 'center' }}>
                     <Popover
                         trigger={['hover', 'click']}
                         placement="leftTop"

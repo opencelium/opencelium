@@ -89,9 +89,11 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       setEdges(result.edges);
       setContextMenu(null);
     },
-    onChangeNodeLabel: (nodeId: string, label: string) => setNodes((currentNodes) => currentNodes.map((node) => node.id === nodeId ? { ...node, data: { ...node.data, subtitle: label } } : node)),
+    onChangeNodeLabel: (nodeId: string, label: string) => setNodes((currentNodes) => currentNodes.map((node) => node.id === nodeId ? { ...node, data: { ...node.data, subtitle: label, labelEdited: true } } : node)),
     onSaveMethodConfig: (nodeId: string, methodConfig: WorkflowMethodConfig) => {
-      setNodes((currentNodes) => currentNodes.map((node) => node.id === nodeId ? { ...node, data: { ...node.data, methodConfig } } : node));
+      // The request editor rebuilds the config without the operation `name`;
+      // keep the existing one so it stays read-only across method-config edits.
+      setNodes((currentNodes) => currentNodes.map((node) => node.id === nodeId ? { ...node, data: { ...node.data, methodConfig: { ...methodConfig, name: methodConfig.name ?? node.data.methodConfig?.name } } } : node));
       setMethodEditor(null);
     },
     onSaveConditionConfig: (nodeId: string, conditionConfig: ConditionConfig) => {

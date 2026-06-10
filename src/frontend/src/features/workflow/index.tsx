@@ -16,6 +16,7 @@ import { ConditionBuilderDialog } from './components/condition-builder/Condition
 import { MethodConfigDialog } from './components/request-editor/MethodConfigDialog';
 import { buildLegacyConnection } from './components/request-editor/legacyAdapter';
 import { useWorkflowPage } from './useWorkflowPage';
+import { useUnsavedChangesGuard } from './useUnsavedChangesGuard';
 import { TestRunProvider } from './test-run/TestRunProvider';
 import { loadConnectionVersions, loadWorkflowConnection, loadWorkflowConnectionVersion, removeConnectionVersion, saveConnectionVersionComment, saveWorkflowConnection } from './api/connectionService';
 import { mapConnectionToWorkflowState } from './api/connectionMapper';
@@ -99,6 +100,9 @@ const EMPTY_DESCRIPTION_LABEL = '[Empty Description]';
 
 const toDisplayDescription = (description?: string) =>
   description && description.trim() ? description : EMPTY_DESCRIPTION_LABEL;
+
+const toPayloadDescription = (description?: string) =>
+  description?.trim() === EMPTY_DESCRIPTION_LABEL ? '' : description ?? '';
 
 const FIELD_BINDING_COLOR_RE = /#[A-Fa-f0-9]{6}/g;
 
@@ -234,7 +238,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     () => buildWorkflowChangeSnapshot({
       connectionId: activeConnectionId,
       title: headerState.title,
-      description: headerState.description,
+      description: toPayloadDescription(headerState.description),
       nodes: hydratedNodes,
       edges: workflow.edges,
       fieldBindings: loadedFieldBindings,
@@ -296,6 +300,8 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const hasConnectionChanges = baselineSnapshot !== null && currentChangeSnapshot !== baselineSnapshot;
   const hasManualUnsavedChanges = hasConnectionChanges && changeSource === 'manual';
 
+  useUnsavedChangesGuard(!readOnly && hasConnectionChanges, t('messages.unsavedLeaveConfirm'));
+
   useEffect(() => {
     if (isLoading || baselineSnapshot !== null) return;
     setBaselineSnapshot(currentChangeSnapshot);
@@ -315,12 +321,12 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   }, [baselineSnapshot, changeSource, currentChangeSnapshot, historyPreviewSnapshot, isLoading]);
 
   const handleSave = async ({ title, description, comment }: { title: string; description: string; comment: string }) => {
-    if (title.trim() === '[Empty Name]') {
+    if (!title.trim() || title.trim() === '[Empty Name]') {
       message.error(t('messages.enterWorkflowName'));
       throw new Error('Connection name is required');
     }
 
-    const normalizedDescription = description.trim() === EMPTY_DESCRIPTION_LABEL ? '' : description;
+    const normalizedDescription = toPayloadDescription(description);
     const isCreate = !activeConnectionId;
     let response;
     try {
@@ -365,7 +371,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     if (isCreate && savedId) {
       const savedIdString = String(savedId);
       setCreatedConnectionId(savedIdString);
-      window.history.replaceState(window.history.state, '', `/connection/update/${savedIdString}`);
+      window.history.replaceState(window.history.state, '', `/workflow/update/${savedIdString}`);
     }
   };
 
@@ -509,7 +515,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       ...buildConnectionPayload({
         connectionId,
         title: headerState.title,
-        description: headerState.description === EMPTY_DESCRIPTION_LABEL ? '' : headerState.description,
+        description: toPayloadDescription(headerState.description),
         nodes: hydratedNodes,
         edges: workflow.edges,
         viewport: workflow.getViewport(),
@@ -701,9 +707,10 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           const nextSnapshot = buildWorkflowChangeSnapshot({
             connectionId: activeConnectionId,
             title: state.title,
-            description: state.description,
+            description: toPayloadDescription(state.description),
             nodes: nextNodes,
             edges: state.edges,
+            fieldBindings: state.fieldBindings,
           });
           workflow.setWorkflowGraph(state.nodes, state.edges, state.viewport, { centerStart: true });
           setHeaderState({ title: state.title, description: toDisplayDescription(state.description) });

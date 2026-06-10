@@ -41,6 +41,9 @@ export type WorkflowNodeData = {
 	};
 	methodConfig?: WorkflowMethodConfig;
 	conditionConfig?: ConditionConfig;
+	// Set once the user renames the node via "Change Label". `name` always stays
+	// the operation name; the subtitle is persisted as `label` only when this is set.
+	labelEdited?: boolean;
 	isLeaf?: boolean;
 	rightLeaf?: boolean;
 	bottomLeaf?: boolean;

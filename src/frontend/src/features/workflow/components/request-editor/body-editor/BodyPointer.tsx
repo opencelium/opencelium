@@ -15,7 +15,11 @@ export function BodyPointer({ pointer, pointers, onClick, onRemove }: Props) {
   const [hovered, setHovered] = useState(false);
   const parsed = useMemo(() => parseEnhancementArg(pointer), [pointer]);
   const color = parsed?.color || 'var(--color-text-disabled)';
-  const title = parsed ? `${parsed.messageProperty}.$.${parsed.path}` : pointer;
+  const title = parsed
+    ? parsed.path
+      ? `${parsed.messageProperty}.$.${parsed.path}`
+      : `${parsed.messageProperty}.$`
+    : pointer;
 
   const remove = (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();

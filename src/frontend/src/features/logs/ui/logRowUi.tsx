@@ -3,6 +3,7 @@ import { Icon } from "@shared/ui/primitives/Icon";
 import { Typography } from "@shared/ui/primitives/Typography";
 import { LogJsonView } from "@shared/ui/json-view/LogJsonView";
 import type { HttpMethod } from "../model/types";
+import "./logs.css";
 
 const INDENT_STEP = 22;
 
@@ -52,6 +53,10 @@ export function Url({ children }: { children: string }) {
         textOverflow: "ellipsis",
         whiteSpace: "nowrap",
         fontSize: 13,
+        // Allow the flex item to shrink below its content width so the URL
+        // ellipsizes instead of overflowing and pushing the copy icon off-row.
+        minWidth: 0,
+        flexShrink: 1,
       }}
       title={children}
     >
@@ -112,6 +117,7 @@ export function LogRow({
 }: LogRowProps) {
   return (
     <div
+      className="oc-log-row"
       onClick={expandable ? onToggle : undefined}
       style={{
         display: "flex",

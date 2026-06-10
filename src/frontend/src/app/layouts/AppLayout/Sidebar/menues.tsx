@@ -27,7 +27,7 @@ export const useMainMenu = (): any[] => {
     return useMemo(() => [
         {key: '/', icon: <DashboardOutlined/>, label: link('/', t('menu.dashboard'))},
         {key: '/connector', icon: <BranchesOutlined/>, label: link('/connector', t('menu.connectors'))},
-        {key: '/connection', icon: <GoWorkflow/>, label: link('/connection', t('menu.connections'))},
+        {key: '/workflow', icon: <GoWorkflow/>, label: link('/workflow', t('menu.connections'))},
         {key: '/schedule', icon: <ScheduleOutlined/>, label: link('/schedule', t('menu.schedules'))},
     ], [t]);
 };
@@ -51,7 +51,7 @@ export const useAdminMenu = (): any[] => {
             icon: <GrConfigure/>,
             children: [
                 {key: '/invoker', icon: <FaRegFileCode/>, label: link('/invoker', t('menu.invokers'))},
-                {key: '/connection-template', icon: <ImInsertTemplate/>, label: link('/connection-template', t('menu.connectionTemplates'))},
+                {key: '/workflow-template', icon: <ImInsertTemplate/>, label: link('/workflow-template', t('menu.connectionTemplates'))},
                 {key: '/data-aggregator', icon: <GrAggregate/>, label: link('/data-aggregator', t('menu.dataAggregator'))},
                 {key: '/notification-template', icon: <MdNotificationAdd/>, label: link('/notification-template', t('menu.notificationTemplates'))},
                 {key: '/category', icon: <BiCategory/>, label: link('/category', t('menu.categories'))},

@@ -1,8 +1,9 @@
 import { ChevronUp, Loader2, Maximize2, Minimize2, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
+import { Icon } from '@shared/ui/primitives/Icon';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
-import { EMPTY_LIVE_LOG_TREE, LiveExecutionLogTree } from '@features/logs';
+import { EMPTY_LIVE_LOG_TREE, LiveExecutionLogTree, MethodViewModeProvider, useMethodViewMode } from '@features/logs';
 import { useTestRun } from '../test-run/useTestRun';
 import type { TestRunResult } from '../test-run/TestRunContext';
 
@@ -38,6 +39,26 @@ function TestRunResultLine({ result }: { result: TestRunResult }) {
 	}
 }
 
+// Header toggle between the URL and method-name views, styled to match the
+// panel's clear/maximize icon buttons. Lives inside MethodViewModeProvider.
+function MethodViewButton() {
+	const { t: tLogs } = useI18n('logs');
+	const { mode, setMode } = useMethodViewMode();
+	const active = mode === 'name';
+	return (
+		<Tooltip content={tLogs('methodView.tooltip')}>
+			<button
+				className={`logsHeaderIconButton ${active ? 'logsHeaderIconButton--active' : ''}`}
+				type='button'
+				onClick={() => setMode(active ? 'url' : 'name')}
+				aria-label={tLogs('methodView.tooltip')}
+			>
+				<Icon name='arrow-switch' size={15} color='inherit' />
+			</button>
+		</Tooltip>
+	);
+}
+
 export function WorkflowLogs() {
 	const [panel, setPanel] = useState<PanelState>('minimized');
 	const { t: tLogs } = useI18n('logs');
@@ -64,6 +85,7 @@ export function WorkflowLogs() {
 		setPanel((current) => (current === 'full' ? 'normal' : 'full'));
 
 	return (
+		<MethodViewModeProvider>
 		<div
 			className={`logsCard ${isExpanded ? 'logsCardExpanded' : ''} ${
 				panel === 'full' ? 'logsCardFull' : ''
@@ -86,6 +108,7 @@ export function WorkflowLogs() {
 						)}
 					</span>
 				</button>
+				{isExpanded && hasLogs && <MethodViewButton />}
 				{isExpanded && hasLogs && !isRunning && (
 					<Tooltip content={tLogs('live.clear')}>
 						<button
@@ -132,5 +155,6 @@ export function WorkflowLogs() {
 				</div>
 			)}
 		</div>
+		</MethodViewModeProvider>
 	);
 }

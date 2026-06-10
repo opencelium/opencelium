@@ -12,7 +12,9 @@ export const connectionTemplateDefinition: EntityDefinition = {
     plural: 'connectionTemplates',
 
     routes: [
-        { type: 'list' },
+        // List lives at /workflow-template; the entity name stays connection-template
+        // (i18n keys, registry lookup) and the API baseUrl stays /template.
+        { type: 'list', entityRouteName: 'workflow-template' },
     ],
 
     list: {

@@ -479,12 +479,14 @@ function GroupEditor({
 	operatorType,
 	methods,
 	iterators,
+	onDelete,
 	onChange,
 }: {
 	group: ConditionGroup;
 	operatorType: 'if' | 'loop';
 	methods: MethodWithId[];
 	iterators: string[];
+	onDelete?: () => void;
 	onChange: (group: ConditionGroup) => void;
 }) {
 	const { t } = useI18n('workflow');
@@ -527,6 +529,11 @@ function GroupEditor({
 		return () => observer.disconnect();
 	}, [items.length, operatorType]);
 
+	useEffect(() => {
+		if (operatorType !== 'if' || items.length > 1 || conjunction === undefined) return;
+		onChange(updateGroupConjunction(group, group.id, undefined));
+	}, [conjunction, group, items.length, onChange, operatorType]);
+
 	return (
 		<div className={groupClassName}>
 			{operatorType === 'if' ? <div className="conditionGroupHeader">
@@ -564,6 +571,14 @@ function GroupEditor({
 					>
 						{t('conditionBuilder.addGroup')}
 					</Button>
+					{onDelete ? (
+						<Button
+							type="text"
+							className="conditionGroupDeleteButton"
+							icon={<DeleteOutlined />}
+							onClick={onDelete}
+						/>
+					) : null}
 				</div>
 			</div> : null}
 			<div ref={groupBodyRef} className="conditionGroupBody" style={groupBodyStyle}>
@@ -586,6 +601,7 @@ function GroupEditor({
 							operatorType={operatorType}
 							methods={methods}
 							iterators={iterators}
+							onDelete={() => onChange(removeChildById(group, child.id))}
 							onChange={(nextGroup) => {
 								onChange({
 									...group,

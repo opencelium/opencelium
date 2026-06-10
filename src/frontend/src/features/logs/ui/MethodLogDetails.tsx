@@ -5,6 +5,17 @@ import { useI18n } from "@shared/i18n/hooks/useI18n";
 import { useGetMethodDetailsQuery } from "../api/logsApi";
 import { ResizableJsonView } from "./ResizableJsonView";
 import { useMethodDetailViewState } from "./methodDetailViewState";
+import { CopyButton } from "./CopyButton";
+
+// A tab label with a copy button (for the tab's raw content) next to the text.
+function LabelWithCopy({ label, value }: { label: string; value: string }) {
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+      {label}
+      <CopyButton value={value} />
+    </span>
+  );
+}
 
 type Props = {
   id: string;
@@ -65,22 +76,16 @@ export function MethodLogDetails({ id, depth, path }: Props) {
             items={[
               {
                 key: "header",
-                label: t("tabs.requestHeader"),
+                label: <LabelWithCopy label={t("tabs.requestHeader")} value={request.header} />,
                 content: (
-                  <ResizableJsonView
-                    storageKey={`${path}/requestHeight`}
-                    value={request.header}
-                  />
+                  <ResizableJsonView storageKey={`${path}/requestHeight`} value={request.header} />
                 ),
               },
               {
                 key: "body",
-                label: t("tabs.requestBody"),
+                label: <LabelWithCopy label={t("tabs.requestBody")} value={request.payload} />,
                 content: (
-                  <ResizableJsonView
-                    storageKey={`${path}/requestHeight`}
-                    value={request.payload}
-                  />
+                  <ResizableJsonView storageKey={`${path}/requestHeight`} value={request.payload} />
                 ),
               },
             ]}
@@ -93,22 +98,16 @@ export function MethodLogDetails({ id, depth, path }: Props) {
             items={[
               {
                 key: "header",
-                label: t("tabs.responseHeader"),
+                label: <LabelWithCopy label={t("tabs.responseHeader")} value={response.header} />,
                 content: (
-                  <ResizableJsonView
-                    storageKey={`${path}/responseHeight`}
-                    value={response.header}
-                  />
+                  <ResizableJsonView storageKey={`${path}/responseHeight`} value={response.header} />
                 ),
               },
               {
                 key: "body",
-                label: t("tabs.responseBody"),
+                label: <LabelWithCopy label={t("tabs.responseBody")} value={response.payload} />,
                 content: (
-                  <ResizableJsonView
-                    storageKey={`${path}/responseHeight`}
-                    value={response.payload}
-                  />
+                  <ResizableJsonView storageKey={`${path}/responseHeight`} value={response.payload} />
                 ),
               },
             ]}
