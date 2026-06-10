@@ -25,6 +25,19 @@
       "tooltip": "Download as template",
       "success": "Template \"{{name}}\" downloaded",
       "error": "Failed to download template"
+    },
+    "duplicate": {
+      "tooltip": "Duplicate",
+      "dialogTitle": "Duplicate workflow",
+      "titleLabel": "Title",
+      "descriptionLabel": "Description",
+      "titleRequired": "Title is a required field",
+      "titleExists": "A workflow with this title already exists",
+      "defaultTitle": "{{title}} (copy)",
+      "cancel": "Cancel",
+      "submit": "Duplicate",
+      "success": "Workflow \"{{name}}\" duplicated",
+      "error": "Failed to duplicate workflow"
     }
   },
   "fields": {

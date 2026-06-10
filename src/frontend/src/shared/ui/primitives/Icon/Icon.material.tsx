@@ -34,6 +34,7 @@ import {
     ExpandMore,
     Fullscreen,
     FullscreenExit,
+    ContentCopy,
 } from '@mui/icons-material';
 
 import type { IconComponent } from './Icon.types';
@@ -74,6 +75,7 @@ const iconMap = {
     maximize: Fullscreen,
     minimize: FullscreenExit,
     'arrow-switch': SwapHoriz,
+    'content-copy': ContentCopy,
 };
 
 export const MaterialIcon: IconComponent = ({
