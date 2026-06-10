@@ -529,6 +529,11 @@ function GroupEditor({
 		return () => observer.disconnect();
 	}, [items.length, operatorType]);
 
+	useEffect(() => {
+		if (operatorType !== 'if' || items.length > 1 || conjunction === undefined) return;
+		onChange(updateGroupConjunction(group, group.id, undefined));
+	}, [conjunction, group, items.length, onChange, operatorType]);
+
 	return (
 		<div className={groupClassName}>
 			{operatorType === 'if' ? <div className="conditionGroupHeader">
