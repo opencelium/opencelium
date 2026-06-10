@@ -466,6 +466,8 @@ function RuleRow({
 					placeholder={t('placeholders.selectOperator')}
 					value={operator}
 					className="conditionOperatorSelect conditionLoopOperatorSelect"
+					showSearch
+					optionFilterProp="label"
 					options={LOOP_OPERATOR_OPTIONS.map((option) => ({ value: option.value, label: t(option.labelKey) }))}
 					onChange={(value) => onChange({ operator: value, leftField: undefined, rightField: undefined })}
 					suffixIcon={<DownOutlined />}
@@ -485,6 +487,8 @@ function RuleRow({
 					placeholder={t('placeholders.selectOperator')}
 					value={operator}
 					className="conditionOperatorSelect"
+					showSearch
+					optionFilterProp="label"
 					options={IF_OPERATOR_OPTIONS.map((option) => ({ value: option.value, label: t(option.labelKey) }))}
 					onChange={(value) => onChange({ operator: value, rightField: undefined })}
 					suffixIcon={<DownOutlined />}
