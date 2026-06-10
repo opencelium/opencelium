@@ -318,7 +318,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   }, [baselineSnapshot, changeSource, currentChangeSnapshot, historyPreviewSnapshot, isLoading]);
 
   const handleSave = async ({ title, description, comment }: { title: string; description: string; comment: string }) => {
-    if (title.trim() === '[Empty Name]') {
+    if (!title.trim() || title.trim() === '[Empty Name]') {
       message.error(t('messages.enterWorkflowName'));
       throw new Error('Connection name is required');
     }

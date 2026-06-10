@@ -18,6 +18,7 @@ type Props = {
 	readOnly?: boolean;
 };
 type EditField = 'name' | 'description' | null;
+const EMPTY_NAME_LABEL = '[Empty Name]';
 
 export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initialDescription = 'This interface delivering data into znuny and creates a ticket if the specified object is missing.', onOpenHistory, onSave, onChange, onMenuItemSelect, saveDisabled = false, readOnly = false }: Props) {
 	const { t } = useI18n('workflow');
@@ -29,6 +30,7 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [saveDialogOpen, setSaveDialogOpen] = useState(false);
 	const [saveComment, setSaveComment] = useState('');
+	const [nameError, setNameError] = useState('');
 	const nameInputRef = useRef<HTMLInputElement | null>(null);
 	const descriptionInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -61,6 +63,47 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 		setEditing(null);
 	};
 
+	const commitName = () => {
+		const nextName = draftName.trim();
+		setName(nextName);
+		if (nextName) setNameError('');
+		onChange?.({ title: nextName, description });
+		setEditing(null);
+	};
+
+	const commitDescription = () => {
+		const nextDescription = draftDescription.trim();
+		setDescription(nextDescription);
+		onChange?.({ title: name, description: nextDescription });
+		setEditing(null);
+	};
+
+	const isNameEmpty = (value: string) => !value.trim() || value.trim() === EMPTY_NAME_LABEL;
+
+	const openSaveDialog = () => {
+		const nextName = editing === 'name' ? draftName.trim() : name;
+		const nextDescription = editing === 'description' ? draftDescription.trim() : description;
+
+		const errorMessage = t('messages.enterWorkflowName');
+		if (isNameEmpty(nextName)) {
+			setNameError(errorMessage);
+			setSaveDialogOpen(false);
+			setEditing('name');
+			setDraftName(nextName);
+			window.setTimeout(() => {
+				nameInputRef.current?.focus();
+			}, 0);
+			return;
+		}
+
+		setName(nextName);
+		setDescription(nextDescription);
+		setNameError('');
+		onChange?.({ title: nextName, description: nextDescription });
+		setEditing(null);
+		setSaveDialogOpen(true);
+	};
+
 	const closeSaveDialog = () => {
 		setSaveDialogOpen(false);
 		setSaveComment('');
@@ -71,27 +114,29 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 			<div className='headerCard'>
 				<div className='headerInlineInfo'>
 					{editing === 'name' ? (
-						<HeaderEditableField
-							className='headerInlineNameInput'
-							value={draftName}
-							onChange={setDraftName}
-							onSubmit={() => {
-								const nextName = draftName.trim() || name;
-								setName(nextName);
-								onChange?.({ title: nextName, description });
-								setEditing(null);
-							}}
-							onCancel={cancelEdit}
-							inputRef={nameInputRef}
-						/>
+						<div className='headerInlineFieldWrap'>
+							<HeaderEditableField
+								className={`headerInlineNameInput ${nameError ? 'headerInlineInputError' : ''}`}
+								value={draftName}
+								onChange={setDraftName}
+								onSubmit={commitName}
+								onBlur={commitName}
+								onCancel={cancelEdit}
+								inputRef={nameInputRef}
+							/>
+							{nameError ? <div className='headerInlineErrorMessage'>{nameError}</div> : null}
+						</div>
 					) : (
-						<div
-							className='headerInlineName'
-							onClick={() => { if (!readOnly) setEditing('name'); }}
-							role={readOnly ? undefined : 'button'}
-							tabIndex={readOnly ? undefined : 0}
-						>
-							{name}
+						<div className='headerInlineFieldWrap'>
+							<div
+								className={`headerInlineName ${nameError ? 'headerInlineErrorText' : ''}`}
+								onClick={() => { if (!readOnly) setEditing('name'); }}
+								role={readOnly ? undefined : 'button'}
+								tabIndex={readOnly ? undefined : 0}
+							>
+								{name || EMPTY_NAME_LABEL}
+							</div>
+							{nameError ? <div className='headerInlineErrorMessage'>{nameError}</div> : null}
 						</div>
 					)}
 					<div className='headerInlineDivider'>-</div>
@@ -100,12 +145,8 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 							className='headerInlineDescriptionInput headerInlineEditorWide'
 							value={draftDescription}
 							onChange={setDraftDescription}
-							onSubmit={() => {
-								const nextDescription = draftDescription.trim() || description;
-								setDescription(nextDescription);
-								onChange?.({ title: name, description: nextDescription });
-								setEditing(null);
-							}}
+							onSubmit={commitDescription}
+							onBlur={commitDescription}
 							onCancel={cancelEdit}
 							inputRef={descriptionInputRef}
 						/>
@@ -127,7 +168,7 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 							className='primaryButton headerPrimaryButton'
 							type='button'
 							disabled={saveDisabled}
-							onClick={() => setSaveDialogOpen(true)}
+							onClick={openSaveDialog}
 						>
 							{t('actions.save')}
 						</button>

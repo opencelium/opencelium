@@ -18,6 +18,13 @@
   flex: 0 1 auto;
 }
 
+.headerInlineFieldWrap {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
 .headerInlineInput {
   border: 1px solid var(--color-border-default);
   outline: 0;
@@ -27,6 +34,24 @@
   padding: 6px 10px;
   min-width: 0;
   height: 34px;
+}
+
+.headerInlineInputError {
+  border-color: var(--color-status-error-fg);
+}
+
+.headerInlineInputError:focus {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-status-error-fg) 20%, transparent);
+}
+
+.headerInlineErrorText {
+  color: var(--color-status-error-fg);
+}
+
+.headerInlineErrorMessage {
+  color: var(--color-status-error-fg);
+  font-size: 12px;
+  line-height: 1.2;
 }
 
 .headerInlineNameInput {
@@ -74,4 +99,3 @@
 .headerActionWrap {
   position: relative;
 }
-
