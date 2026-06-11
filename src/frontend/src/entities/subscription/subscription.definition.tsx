@@ -1,4 +1,5 @@
 import React from 'react'
+import subscribeWizardImage from '@assets/images/wizard/subscription.gif'
 import type { EntityDefinition } from '@/engine/entity/EntityDefinition'
 import type { CommandNode } from '@shared/command/types'
 import SubscriptionPage from '@pages/SubscriptionPage/SubscriptionPage'
@@ -15,7 +16,10 @@ export const subscriptionDefinition: EntityDefinition = {
 
     fields: [],
     sections: [],
-    wizard: { steps: [] },
+    wizard: {
+        image: subscribeWizardImage as string,
+        steps: []
+    },
 
     commands: (): CommandNode<unknown>[] => [
         {

@@ -1,18 +1,20 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import PageWrapper from '@pages/PageWrapper/PageWrapper'
 import { Steps } from '@shared/ui/primitives/Steps'
-import { Typography } from '@shared/ui/primitives/Typography'
+import { StepHeader } from '@shared/ui/step-form/StepHeader'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { useBreakpoints } from '@app/hooks/useBreakpoints'
 import { LicenseInformationStep } from '@pages/SubscriptionPage/LicenseInformationStep'
 import { OperationUsageStep } from '@pages/SubscriptionPage/OperationUsageStep'
 import { OperationDetailsStep } from '@pages/SubscriptionPage/OperationDetailsStep'
+import subscriptionWizardImage from '@assets/images/wizard/subscription.gif'
 
 type StepIndex = 0 | 1 | 2
 
 export function SubscriptionPage() {
     const { t } = useI18n('entities')
     const { isTabletOrMobile } = useBreakpoints()
+    const headerRef = useRef(null)
     const [currentStep, setCurrentStep] = useState<StepIndex>(0)
     const [selectedOperationId, setSelectedOperationId] = useState<number | null>(null)
 
@@ -66,16 +68,12 @@ export function SubscriptionPage() {
     return (
         <PageWrapper>
             <div style={{ padding: 18 }}>
-                <div style={{ marginBottom: 20 }}>
-                    <Typography variant="headline">
-                        {t('subscription.wizard.header' as never)}
-                    </Typography>
-                    <div style={{ color: 'var(--color-text-secondary)', marginTop: 8 }}>
-                        <Typography>
-                            {t('subscription.wizard.subheader' as never)}
-                        </Typography>
-                    </div>
-                </div>
+                <StepHeader
+                    containerRef={headerRef}
+                    header="subscription.wizard.header"
+                    subheader="subscription.wizard.subheader"
+                    image={subscriptionWizardImage}
+                />
 
                 <div
                     style={{
