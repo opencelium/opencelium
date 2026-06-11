@@ -23,7 +23,7 @@
 [cmdk-root] {
     position: relative;
     width: 80%;
-    background: color-mix(in srgb, var(--color-background-surface) 80%, transparent);
+    background: var(--color-background-input);
     border-radius: var(--radius-lg);
     border: 1px solid var(--color-border-subtle);
 

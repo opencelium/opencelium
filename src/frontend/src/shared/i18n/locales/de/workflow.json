@@ -50,6 +50,8 @@
     "selectTemplate": "Bitte wählen Sie eine Vorlage aus",
     "loadTemplateFailed": "Vorlage konnte nicht geladen werden",
     "downloadTemplateFailed": "Vorlage konnte nicht heruntergeladen werden.",
+    "copySnapshotIdSuccess": "Snapshot-ID in die Zwischenablage kopiert",
+    "deleteVersionSuccess": "Version gelöscht",
     "unsavedLeaveConfirm": "Sie haben ungespeicherte Änderungen, die verloren gehen. Möchten Sie diese Seite wirklich verlassen, ohne zu speichern?"
   },
   "sidebar": {

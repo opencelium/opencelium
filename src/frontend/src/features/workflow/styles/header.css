@@ -39,7 +39,7 @@
 .headerInlineInput {
   border: 1px solid var(--color-border-default);
   outline: 0;
-  background: var(--color-background-surface);
+  background: var(--color-background-input);
   color: var(--color-text-primary);
   border-radius: 8px;
   padding: 6px 10px;

@@ -67,6 +67,7 @@ export function HistoryPanel({ open, items, onClose, onDeleteVersion, onDownload
 		}
 		state.setConfirmId(null);
 		state.setMenuId(null);
+		message.success(t('messages.deleteVersionSuccess'));
 	};
 
 	const toggleExpandedComment = (id: string) => {
@@ -176,6 +177,7 @@ export function HistoryPanel({ open, items, onClose, onDeleteVersion, onDownload
 										onCopySnapshot={async (snapshotId) => {
 											await navigator.clipboard.writeText(snapshotId);
 											state.setMenuId(null);
+											message.success(t('messages.copySnapshotIdSuccess'));
 										}}
 										onDownloadTemplate={downloadTemplate}
 										onDelete={state.setConfirmId}
