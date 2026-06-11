@@ -18,11 +18,12 @@ type Props = {
 	validateTitle?: (title: string) => Promise<string | null>;
 	saveDisabled?: boolean;
 	readOnly?: boolean;
+	loading?: boolean;
 };
 type EditField = 'name' | 'description' | null;
 const EMPTY_NAME_LABEL = '[Empty Name]';
 
-export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initialDescription = 'This interface delivering data into znuny and creates a ticket if the specified object is missing.', onOpenHistory, onSave, onChange, onMenuItemSelect, validateTitle, saveDisabled = false, readOnly = false }: Props) {
+export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initialDescription = 'This interface delivering data into znuny and creates a ticket if the specified object is missing.', onOpenHistory, onSave, onChange, onMenuItemSelect, validateTitle, saveDisabled = false, readOnly = false, loading = false }: Props) {
 	const { t } = useI18n('workflow');
 	const [name, setName] = useState(initialName);
 	const [description, setDescription] = useState(initialDescription);
@@ -148,6 +149,9 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 		<>
 			<div className='headerCard'>
 				<div className='headerInlineInfo'>
+					{loading ? (
+						<span className="headerInlineLoading" aria-hidden />
+					) : (<>
 					{editing === 'name' ? (
 						<div className='headerInlineFieldWrap'>
 							<HeaderEditableField
@@ -196,6 +200,7 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 							{description}
 						</div>
 					)}
+					</>)}
 				</div>
 
 				<div className='headerActions'>

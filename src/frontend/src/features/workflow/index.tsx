@@ -574,6 +574,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         saveDisabled={isLoading || !hasConnectionChanges}
         onOpenHistory={handleOpenHistory}
         readOnly={readOnly}
+        loading={isConnectionLoading}
       />
       <Modal
         open={templateDialogOpen}
