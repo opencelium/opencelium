@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { ConfigProvider } from 'antd';
 import { useMethodContext } from '../../../providers/MethodContext';
 import { useTheme } from '@shared/theme/hooks/useTheme';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
@@ -227,7 +228,12 @@ export function LegacyRequestJsonEditor({ messageProperty, source, readOnly }: P
           max: '74%',
           content: (
             <div className='bodyLegacyLeft'>
-              <Collapse className='bodyLegacyLeftCollapse' items={leftItems} defaultActiveKeys={['requestData']} />
+              {/* Disable collapse motion: the height animation expands the panel to
+                  full content height before flex clamps it to ~50%, causing a visible
+                  "open full then jump up" glitch. Instant toggle avoids it. */}
+              <ConfigProvider theme={{ token: { motion: false } }}>
+                <Collapse className='bodyLegacyLeftCollapse' items={leftItems} defaultActiveKeys={['requestData']} />
+              </ConfigProvider>
             </div>
           ),
         },

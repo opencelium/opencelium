@@ -13,6 +13,8 @@
     "addAttribute": "Attribut hinzufügen",
     "addWebhook": "Webhook hinzufügen",
     "openScriptNewWindow": "Skript in neuem Fenster öffnen",
+    "maximizeScript": "Skript maximieren",
+    "minimizeScript": "Skript minimieren",
     "load": "Laden"
   },
   "template": {

@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import type { Enhancement } from "../../../types/connection";
 import {DebounceDelay} from "../../../constants/constants";
-import type { Validation } from "../../../types/constants";
 import CustomAceEditor from "../../custom_ace_editor/CustomAceEditor";
 import { useTheme } from "@shared/theme/hooks/useTheme";
 

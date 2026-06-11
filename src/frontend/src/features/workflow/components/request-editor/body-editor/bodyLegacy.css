@@ -45,7 +45,9 @@
   flex: 1;
 }
 
-.bodyLegacyLeftCollapse .ant-collapse-panel {
+/* Only OPEN sections get the flex display — scoping to -active leaves a closed
+   section's panel at antd's hidden default, so the toggle keeps working. */
+.bodyLegacyLeftCollapse .ant-collapse-item-active > .ant-collapse-panel {
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -53,7 +55,7 @@
 }
 
 /* Scroll lives inside each section's body (vertical), not the pane. */
-.bodyLegacyLeftCollapse .ant-collapse-body {
+.bodyLegacyLeftCollapse .ant-collapse-item-active > .ant-collapse-panel > .ant-collapse-body {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
@@ -194,10 +196,34 @@
   position: relative;
 }
 
-.bodyLegacyEnhancementScript > * {
+/* The editor wrapper (and the ACE container inside it) fill the relative script
+   box; the maximize toggle floats above them. */
+.bodyLegacyEnhancementScriptEditor {
+  position: absolute;
+  inset: 0;
+}
+
+.bodyLegacyEnhancementScriptEditor > * {
   position: absolute;
   inset: 0;
   width: auto !important;
+}
+
+.bodyLegacyScriptToggle {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  z-index: 5;
+  background: var(--color-background-surface);
+}
+
+/* Maximized: pinned (via inline position:fixed + the modal-body rect) to fill the
+   dialog body, not the viewport. This rule supplies the surface/elevation. */
+.bodyLegacyEnhancementScriptMaximized {
+  z-index: 1100;
+  flex: none;
+  padding: 8px;
+  background: var(--color-background-surface);
 }
 
 .bodyLegacyEnhancementDescription {
