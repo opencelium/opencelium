@@ -37,6 +37,7 @@ const Description = ({ onChangeDescription, description, readOnly }: Description
 						<Input.TextArea
 							readOnly={readOnly}
 							rows={9}
+							placeholder={t('description.placeholder')}
 							value={localValue}
 							onChange={(e) => setLocalValue(e.target.value)}
 							style={{ resize: 'none' }}

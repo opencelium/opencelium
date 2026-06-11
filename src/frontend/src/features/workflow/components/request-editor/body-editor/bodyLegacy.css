@@ -3,10 +3,19 @@
   min-height: 0;
 }
 
+/* antd stretches each splitter panel to full height but without an explicit
+   `height`, so percentage-height children don't resolve. Make the panel a flex
+   column and let the panes fill with flex:1 instead. */
+.bodyLegacyLayout .ant-splitter-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
 /* Left Splitter pane: the two sections share the height and each scrolls inside
    itself, so the pane never scrolls as a whole. */
 .bodyLegacyLeft {
-  height: 100%;
+  flex: 1;
   min-height: 0;
   overflow: hidden;
   padding-right: 12px;
@@ -26,6 +35,9 @@
   flex-direction: column;
   min-height: 0;
 }
+.bodyLegacyLeftCollapse .ant-collapse-item .ant-collapse-panel{
+  overflow-y: auto;
+}
 
 /* Open sections split the free space (~50% each when both are open; a single
    open section takes it all). */
@@ -33,18 +45,18 @@
   flex: 1;
 }
 
-.bodyLegacyLeftCollapse .ant-collapse-content {
+.bodyLegacyLeftCollapse .ant-collapse-panel {
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 0;
 }
 
-/* Scroll lives inside each section's content box, not the pane. */
-.bodyLegacyLeftCollapse .ant-collapse-content-box {
+/* Scroll lives inside each section's body (vertical), not the pane. */
+.bodyLegacyLeftCollapse .ant-collapse-body {
   flex: 1;
   min-height: 0;
-  overflow: auto;
+  overflow-y: auto;
 }
 
 .bodyLegacyJsonWrap {
@@ -98,7 +110,7 @@
    The enhancement is a static (non-toggleable) panel that always fills the pane. */
 .bodyLegacyEnhancement {
   min-width: 0;
-  height: 100%;
+  flex: 1;
   padding-left: 16px;
   display: flex;
   flex-direction: column;
@@ -123,21 +135,25 @@
   min-height: 0;
 }
 
-.bodyLegacyEnhancementCollapse .ant-collapse-item {
+/* Direct-child combinators only: these flex rules must apply to the OUTER
+   enhancement collapse, not the nested Variable Information / Description
+   collapses (forcing display:flex on their panels would break their toggle).
+   antd v6 class names: -panel is the content region, -body the padded inner box. */
+.bodyLegacyEnhancementCollapse > .ant-collapse-item {
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 0;
 }
 
-.bodyLegacyEnhancementCollapse .ant-collapse-content {
+.bodyLegacyEnhancementCollapse > .ant-collapse-item > .ant-collapse-panel {
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 0;
 }
 
-.bodyLegacyEnhancementCollapse .ant-collapse-content-box {
+.bodyLegacyEnhancementCollapse > .ant-collapse-item > .ant-collapse-panel > .ant-collapse-body {
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -153,6 +169,10 @@
 
 .bodyLegacyEnhancementArgs {
   margin-bottom: 12px;
+}
+
+.bodyLegacyEnhancementArgs .ant-collapse-panel {
+  overflow-y: auto;
 }
 
 .bodyLegacyEnhancementLabel {
@@ -177,7 +197,6 @@
 .bodyLegacyEnhancementScript > * {
   position: absolute;
   inset: 0;
-  height: auto !important;
   width: auto !important;
 }
 

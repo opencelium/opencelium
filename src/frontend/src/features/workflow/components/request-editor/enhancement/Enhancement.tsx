@@ -57,7 +57,16 @@ const ReferenceEnhancement = ({ enhancement, readOnly }: EnhancementProps) => {
 						content: hasEnhancement ? (
 							<div className='bodyLegacyEnhancementBody'>
 								<div className='bodyLegacyEnhancementArgs'>
-									<EnhancementArgs enhancement={enhancement!} />
+									<Collapse
+										defaultActiveKeys={['variableInfo']}
+										items={[
+											{
+												key: 'variableInfo',
+												label: t('args.sectionTitle'),
+												content: <EnhancementArgs enhancement={enhancement!} />,
+											},
+										]}
+									/>
 								</div>
 								<div className='bodyLegacyEnhancementLabel'>{t('enhancement.language')}</div>
 								<div className='bodyLegacyEnhancementLanguage'>
