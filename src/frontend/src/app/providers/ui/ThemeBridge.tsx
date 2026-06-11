@@ -78,7 +78,12 @@ export const ThemeBridge = ({ children }) => {
     // Form controls share colorBgContainer with cards/dialogs by default, so an
     // input nested in a surface becomes invisible. Override the fill per control
     // so fields render on background.input (white in light mode) instead.
-    const controlBg = { colorBgContainer: theme.color.background.input };
+    // colorBgElevated drives the popup/options panel, so the dropdown list matches
+    // the field background too.
+    const controlBg = {
+        colorBgContainer: theme.color.background.input,
+        colorBgElevated: theme.color.background.input,
+    };
 
     return (
         <ConfigProvider
