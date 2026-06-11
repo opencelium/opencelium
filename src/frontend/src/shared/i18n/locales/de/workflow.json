@@ -273,6 +273,7 @@
   "enhancement": {
     "title": "Enhancement",
     "language": "Sprache",
+    "script": "Skript",
     "emptyState": "Bitte klicken Sie auf die Referenz, um ihr Enhancement anzuzeigen."
   },
   "description": {

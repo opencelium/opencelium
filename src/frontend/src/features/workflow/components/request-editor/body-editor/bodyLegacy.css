@@ -190,17 +190,22 @@
 /* Script grows to fill the remaining enhancement height. The ACE editor's own
    container uses inline height:100%, which won't resolve against a flex item — so
    pin it absolutely to this relative box, which the flex chain sizes definitely. */
+/* Flex column: the label (and the maximize toggle) sit at the top and stay
+   visible in both normal and maximized views; the editor fills below. */
 .bodyLegacyEnhancementScript {
   flex: 1;
   min-height: 0;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
-/* The editor wrapper (and the ACE container inside it) fill the relative script
-   box; the maximize toggle floats above them. */
+/* The editor wrapper fills the remaining height; the ACE container inside pins
+   absolutely to this relative box. */
 .bodyLegacyEnhancementScriptEditor {
-  position: absolute;
-  inset: 0;
+  position: relative;
+  flex: 1;
+  min-height: 0;
 }
 
 .bodyLegacyEnhancementScriptEditor > * {
@@ -211,7 +216,7 @@
 
 .bodyLegacyScriptToggle {
   position: absolute;
-  top: 4px;
+  top: 0;
   right: 6px;
   z-index: 5;
   background: var(--color-background-surface);

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Select } from 'antd';
+import { Select } from '@shared/ui/primitives/Select';
 import {Language} from "../../../types/connection";
 
 
@@ -15,11 +15,11 @@ interface ScriptLanguageProps {
 }
 const ScriptLanguage = ({language, onChangeLanguage, readOnly}: ScriptLanguageProps) => {
     return (
-        <Select
+        <Select<Language>
             value={language}
-            onChange={(value) => onChangeLanguage(value as Language)}
-            style={{ width: '100%' }}
-            disabled={readOnly}
+            onChange={(value) => onChangeLanguage(value)}
+            readOnly={readOnly}
+            sortOptions={false}
             options={languageOptions}
         />
     )

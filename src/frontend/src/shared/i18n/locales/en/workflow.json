@@ -273,6 +273,7 @@
   "enhancement": {
     "title": "Enhancement",
     "language": "Language",
+    "script": "Script",
     "emptyState": "Please, click on the reference to see its enhancement."
   },
   "description": {

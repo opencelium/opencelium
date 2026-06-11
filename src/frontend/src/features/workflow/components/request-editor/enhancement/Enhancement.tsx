@@ -104,12 +104,13 @@ const ReferenceEnhancement = ({ enhancement, readOnly }: EnhancementProps) => {
 									className={isScriptMaximized ? 'bodyLegacyEnhancementScript bodyLegacyEnhancementScriptMaximized' : 'bodyLegacyEnhancementScript'}
 									style={isScriptMaximized ? maximizedStyle : undefined}
 								>
+									<div className='bodyLegacyEnhancementLabel'>{t('enhancement.script')}</div>
 									<span className='bodyLegacyScriptToggle'>
 										<Tooltip content={t(isScriptMaximized ? 'actions.minimizeScript' : 'actions.maximizeScript')}>
 											<IconButton
-												iconProps={{ name: isScriptMaximized ? 'minimize' : 'maximize' }}
+												iconProps={{ name: isScriptMaximized ? 'minimize' : 'maximize', color: isScriptMaximized ? 'inherit' : 'default' }}
 												size='xs'
-												type='text'
+												type={isScriptMaximized ? 'primary' : 'text'}
 												onClick={toggleScriptMaximized}
 											/>
 										</Tooltip>
