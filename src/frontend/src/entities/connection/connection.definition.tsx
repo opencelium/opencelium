@@ -65,10 +65,6 @@ export const connectionDefinition: EntityDefinition = {
                 render: ({ row }) => <DownloadAsTemplateAction row={row as Connection} />,
             },
             {
-                type: 'view',
-                buildNavigationUrl: (_entity, value) => `/workflow/view/${encodeURIComponent(value)}`,
-            },
-            {
                 type: 'update',
                 buildNavigationUrl: (_entity, value) => `/workflow/update/${encodeURIComponent(value)}`,
             },
@@ -115,7 +111,7 @@ export const connectionDefinition: EntityDefinition = {
         ...createEntityCommands({
             def,
             commandName: 'workflow',
-            config: { include: ['update', 'view'] },
+            config: { include: ['update'] },
             dsl: {
                 update: {
                     by: [
@@ -131,23 +127,6 @@ export const connectionDefinition: EntityDefinition = {
                             resolve: resolveConnectionTitles,
                             buildFetchUrl: (_def, value) => buildConnectionFetchUrl(value),
                             buildNavigationUrl: (_def, value) => buildConnectionPageUrl('update', value),
-                        },
-                    ],
-                },
-                view: {
-                    by: [
-                        {
-                            field: 'id',
-                            resolve: resolveConnectionIds,
-                            customPath: true,
-                            buildFetchUrl: (_def, value) => buildConnectionFetchUrl(value),
-                            buildNavigationUrl: (_def, value) => buildConnectionPageUrl('view', value),
-                        },
-                        {
-                            field: 'title',
-                            resolve: resolveConnectionTitles,
-                            buildFetchUrl: (_def, value) => buildConnectionFetchUrl(value),
-                            buildNavigationUrl: (_def, value) => buildConnectionPageUrl('view', value),
                         },
                     ],
                 },
