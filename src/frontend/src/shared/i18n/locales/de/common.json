@@ -89,6 +89,13 @@
     "updateWithoutMasterPassword": "Sie können auch ohne Master-Passwort speichern – es werden dann nur die allgemeinen Daten aktualisiert. Um die erforderlichen Anmeldedaten zu ändern, geben Sie zuerst das Master-Passwort ein."
   },
   "hintLabel": "Hinweis",
+  "notFound": {
+    "code": "404",
+    "title": "Seite nicht gefunden",
+    "subtitle": "Die gesuchte Seite existiert nicht oder wurde möglicherweise verschoben.",
+    "goBack": "Zurück",
+    "goHome": "Zum Dashboard"
+  },
   "dialog": {
     "maximize": "Maximieren",
     "restore": "Wiederherstellen"

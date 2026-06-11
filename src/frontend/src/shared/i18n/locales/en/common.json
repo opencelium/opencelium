@@ -89,6 +89,13 @@
     "updateWithoutMasterPassword": "You can save without entering the master password — only the general data will be updated. To change the required credentials, enter the master password first."
   },
   "hintLabel": "Hint",
+  "notFound": {
+    "code": "404",
+    "title": "Page not found",
+    "subtitle": "The page you're looking for doesn't exist or may have been moved.",
+    "goBack": "Go back",
+    "goHome": "Go to Dashboard"
+  },
   "dialog": {
     "maximize": "Maximize",
     "restore": "Restore"

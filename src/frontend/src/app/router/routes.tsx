@@ -19,6 +19,7 @@ const ForgotPasswordPage = lazy(() => import('@pages/ForgotPasswordPage'))
 const SetPasswordPage = lazy(() => import('@pages/SetPasswordPage'))
 const ProfilePage = lazy(() => import('@pages/ProfilePage/ProfilePage.tsx'))
 const DashboardPage = lazy(() => import('@pages/DashboardPage'))
+const NotFoundPage = lazy(() => import('@pages/NotFoundPage'))
 
 type RouteConfig = {
     element: JSX.Element
@@ -59,6 +60,7 @@ export function getRoutes(): RouteConfig[] {
                 children: [
                     {path: '/', element: <DashboardPage/>},
                     {path: '/profile', element: <ProfilePage/>},
+                    {path: '*', element: <NotFoundPage/>},
                 ],
             }],
         },

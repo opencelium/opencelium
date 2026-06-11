@@ -21,6 +21,13 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
         credentialEditor: {
             updateWithoutMasterPassword: string
         }
+        notFound: {
+            code: string
+            title: string
+            subtitle: string
+            goBack: string
+            goHome: string
+        }
         dialog: {
             maximize: string
             restore: string
