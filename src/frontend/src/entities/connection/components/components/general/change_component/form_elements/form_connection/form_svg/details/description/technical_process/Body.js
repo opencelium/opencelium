@@ -183,6 +183,16 @@ class Body extends React.Component {
 				.trim();
 		};
 
+		const normalizeWildcardArrayField = (value = '') => {
+			return normalizeField(value).replace(/\[(?:\*|\d+)?\]/g, '[*]');
+		};
+
+		const normalizeBareArrayField = (value = '') => {
+			return normalizeField(value).replace(/\[(?:\*)?\]/g, '');
+		};
+
+		const hasGenericArray = (value = '') => /\[(?:\*)?\]/.test(normalizeField(value));
+
 		const removeLocationPrefix = (value = '') => {
 			return normalizeField(value)
 				.replace(/^body\.\$\./, '')
@@ -192,26 +202,67 @@ class Body extends React.Component {
 
 		const normalizedFullFieldName = normalizeField(fieldName);
 		const normalizedShortFieldName = removeLocationPrefix(fieldName);
+		const normalizedWildcardFieldName = normalizeWildcardArrayField(fieldName);
+		const normalizedShortWildcardFieldName = normalizeWildcardArrayField(normalizedShortFieldName);
+		const normalizedBareArrayFieldName = normalizeBareArrayField(fieldName);
+		const normalizedShortBareArrayFieldName = normalizeBareArrayField(normalizedShortFieldName);
 
-		return connection.fieldBinding.find((item) => {
-			return (
-				item.to.findIndex((elem) => {
-					if (elem.color !== method.color) {
-						return false;
-					}
+		const findBinding = (matchField) =>
+			connection.fieldBinding.find((item) => {
+				return (
+					item.to.findIndex((elem) => {
+						if (elem.color !== method.color) {
+							return false;
+						}
 
-					const elemFullField = normalizeField(elem.field);
-					const elemShortField = removeLocationPrefix(elem.field);
+						return matchField(elem);
+					}) !== -1
+				);
+			});
 
-					return (
-						elemFullField === normalizedFullFieldName ||
-						elemShortField === normalizedFullFieldName ||
-						elemFullField === normalizedShortFieldName ||
-						elemShortField === normalizedShortFieldName
-					);
-				}) !== -1
-			);
-		});
+		return (
+			findBinding((elem) => {
+				const elemFullField = normalizeField(elem.field);
+				const elemShortField = removeLocationPrefix(elem.field);
+
+				return (
+					elemFullField === normalizedFullFieldName ||
+					elemShortField === normalizedFullFieldName ||
+					elemFullField === normalizedShortFieldName ||
+					elemShortField === normalizedShortFieldName
+				);
+			}) ||
+			findBinding((elem) => {
+				if (!hasGenericArray(elem.field) && !hasGenericArray(fieldName)) {
+					return false;
+				}
+
+				const elemWildcardField = normalizeWildcardArrayField(elem.field);
+				const elemShortWildcardField = normalizeWildcardArrayField(removeLocationPrefix(elem.field));
+
+				return (
+					elemWildcardField === normalizedWildcardFieldName ||
+					elemShortWildcardField === normalizedWildcardFieldName ||
+					elemWildcardField === normalizedShortWildcardFieldName ||
+					elemShortWildcardField === normalizedShortWildcardFieldName
+				);
+			}) ||
+			findBinding((elem) => {
+				if (!hasGenericArray(elem.field) && !hasGenericArray(fieldName)) {
+					return false;
+				}
+
+				const elemBareArrayField = normalizeBareArrayField(elem.field);
+				const elemShortBareArrayField = normalizeBareArrayField(removeLocationPrefix(elem.field));
+
+				return (
+					elemBareArrayField === normalizedBareArrayFieldName ||
+					elemShortBareArrayField === normalizedBareArrayFieldName ||
+					elemBareArrayField === normalizedShortBareArrayFieldName ||
+					elemShortBareArrayField === normalizedShortBareArrayFieldName
+				);
+			})
+		);
 	}
 
 	setCurrentEnhancementClickingOnPointer(e, value, fieldName = '') {
