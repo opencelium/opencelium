@@ -8,12 +8,14 @@ export const AntCheckbox: CheckboxComponent = ({
     disabled,
     onChange,
     label,
+    testId,
 }) => {
     return (
             <AntCheckboxBase
             checked={checked}
             disabled={disabled}
             onChange={(e) => onChange?.(e.target.checked)}
+            data-testid={testId}
             className="ant-checkbox-custom"
         >
             {label}

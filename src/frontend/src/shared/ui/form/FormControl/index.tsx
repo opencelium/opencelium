@@ -4,6 +4,7 @@ import React, {useRef} from "react";
 import {useFormConstraints} from "@shared/form/FormConstraintsContext.tsx";
 import HelpIcon from "@shared/ui/tour/HelpIcon.tsx";
 import {EntityText} from "@shared/ui/primitives/Text";
+import {buildTestId} from "@shared/testing/testId.ts";
 
 export const FormControl: React.FC<FormControlProps> = ({
     label,
@@ -14,13 +15,14 @@ export const FormControl: React.FC<FormControlProps> = ({
     name,
     info,
     style,
+    testId,
 }) => {
     const ref = useRef(null);
     const constraints = useFormConstraints();
     const fieldConstraints = constraints && name ? constraints[name] : undefined;
     const required = fieldConstraints ? fieldConstraints?.required : false;
     return (
-        <div className="form-control" style={{position: 'relative', ...style}} ref={ref}>
+        <div className="form-control" data-testid={buildTestId(testId, 'control')} style={{position: 'relative', ...style}} ref={ref}>
             {(labelKey || label) && (
                 <label className="form-control__label">
                     <span style={{position: 'relative'}}>

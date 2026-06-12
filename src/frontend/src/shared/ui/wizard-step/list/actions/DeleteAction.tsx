@@ -9,7 +9,7 @@ import { i18n } from '@shared/i18n/config/i18n';
 import type { DeleteActionProps } from './types';
 import { buildDeleteUrl, resolveActionValue } from './resolveAction';
 
-export const DeleteAction: React.FC<DeleteActionProps> = ({ entity, row, rowId, config }) => {
+export const DeleteAction: React.FC<DeleteActionProps> = ({ entity, row, rowId, config, testId }) => {
     const confirm = useConfirm();
     const { t: tCommon } = useI18n('common');
     const [deleteEntity, { isLoading }] = useDeleteEntityMutation();
@@ -57,6 +57,7 @@ export const DeleteAction: React.FC<DeleteActionProps> = ({ entity, row, rowId, 
             onClick={handleClick}
             type={'text'}
             size={'xs'}
+            testId={testId}
         />
     );
 

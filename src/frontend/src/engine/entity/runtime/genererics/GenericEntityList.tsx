@@ -18,6 +18,7 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { apiExecutor } from '@shared/api/apiExecutor';
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import { getValueByPath } from '@shared/utils/getValueByPath';
+import { buildTestId } from '@shared/testing/testId';
 
 import { Table } from '@shared/ui/primitives/Table';
 import { Input } from '@shared/ui/primitives/Input';
@@ -231,7 +232,7 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
     const isBulkDeleting = pendingDeleteIds.length > 0;
 
     return (
-        <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div data-testid={buildTestId(entity.name, 'list')} style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
             <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
                 <div style={{ flex: 1 }}>
                     <h1 style={{ marginBottom: 8 }}>
@@ -265,6 +266,7 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
                             loading={isBulkDeleting}
                             disabled={isBulkDeleteDisabled}
                             onClick={handleBulkDelete}
+                            testId={buildTestId(entity.name, 'bulk-delete')}
                         >
                             {tCommon('list.deleteSelected', { count: selectedIds.length })}
                         </Button>
@@ -277,10 +279,12 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
                     {hasCreateRoute && (
                         <Button
                             type="primary"
+                            testId={buildTestId(entity.name, 'create')}
                             onClick={() => {
                                 const id = dialog.open({
                                     width: 1000,
                                     top: 18,
+                                    testId: buildTestId(entity.name, 'create-dialog'),
                                     content: (
                                         <EntityDialogContent
                                             entityName={entity.name}
@@ -311,6 +315,7 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
                                     value={globalFilter}
                                     onChange={(e) => setGlobalFilter(e.target.value)}
                                     leftSlot={<Icon name="search" size={16} isSubtle />}
+                                    testId={buildTestId(entity.name, 'search')}
                                 />
                             </div>
                         )}
@@ -320,6 +325,7 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
                                     type={areFiltersOpen ? 'primary' : 'default'}
                                     iconProps={{ name: 'filter', color: 'secondary' }}
                                     onClick={() => setAreFiltersOpen((v) => !v)}
+                                    testId={buildTestId(entity.name, 'filters-toggle')}
                                 />
                             </Tooltip>
                         )}

@@ -89,6 +89,7 @@ export const MasterPasswordDialog: React.FC<MasterPasswordDialogProps> = ({ labe
                         onKeyDown={(e) => {
                             if (e.key === 'Enter') void check()
                         }}
+                        testId="master-password-input"
                     />
                     {error && (
                         <div style={{ marginTop: 4 }}>
@@ -98,7 +99,7 @@ export const MasterPasswordDialog: React.FC<MasterPasswordDialogProps> = ({ labe
                         </div>
                     )}
                 </div>
-                <Button loading={isLoading} htmlType="button" onClick={check}>
+                <Button loading={isLoading} htmlType="button" onClick={check} testId="master-password-submit">
                     {widgetT('masterPassword.button.label')}
                 </Button>
             </div>

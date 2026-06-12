@@ -9,6 +9,8 @@ export interface OpenDialogOptions {
     closable?: boolean;
     fullscreen?: boolean;
     maximizable?: boolean;
+    /** Stable selector for e2e tests; emitted as `data-testid` on the dialog body. */
+    testId?: string;
 }
 export interface ConfirmOptions {
     title?: string;

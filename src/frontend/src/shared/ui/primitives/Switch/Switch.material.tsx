@@ -10,6 +10,7 @@ export const MaterialSwitch: SwitchComponent = ({
     label,
     loading,
     readOnly,
+    testId,
 }) => {
     const spinner = loading ? <CircularProgress size={12} thickness={5} /> : undefined;
     return (
@@ -21,6 +22,7 @@ export const MaterialSwitch: SwitchComponent = ({
                     defaultChecked={defaultChecked}
                     disabled={disabled || readOnly || loading}
                     onChange={(_, value) => onChange?.(value)}
+                    inputProps={{ 'data-testid': testId } as React.InputHTMLAttributes<HTMLInputElement>}
                     icon={spinner}
                     checkedIcon={spinner}
                     sx={{

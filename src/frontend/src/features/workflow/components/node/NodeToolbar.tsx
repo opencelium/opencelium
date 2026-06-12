@@ -16,6 +16,7 @@ export function NodeToolbar({ canDelete, onDelete }: Props) {
         className="nodeToolbarButton nodeToolbarButtonDanger"
         type="button"
         title={t('actions.delete')}
+        data-testid="workflow-node-delete"
         onClick={onDelete}
       >
         <Trash2 size={14} />

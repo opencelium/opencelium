@@ -13,6 +13,7 @@ export const AntSwitchImpl: SwitchComponent = ({
     textKey,
     readOnly,
     loading,
+    testId,
 }) => {
     return (
         <label className="ant-switch-wrapper">
@@ -22,6 +23,7 @@ export const AntSwitchImpl: SwitchComponent = ({
                 disabled={disabled || readOnly}
                 loading={loading}
                 onChange={onChange}
+                data-testid={testId}
             />
             {textKey
                 ?

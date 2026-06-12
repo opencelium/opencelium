@@ -29,6 +29,8 @@ export interface InputProps {
     className?: string;
     style?: CSSProperties;
     inputRef?: Ref<HTMLInputElement>;
+    /** Stable selector for e2e tests; emitted as `data-testid` on the input. */
+    testId?: string;
 }
 
 export type InputComponent = React.FC<InputProps>;

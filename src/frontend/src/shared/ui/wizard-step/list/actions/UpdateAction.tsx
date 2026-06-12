@@ -5,7 +5,7 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { UpdateActionProps } from './types';
 import { useEntityUpdateOpener } from './useEntityUpdateOpener';
 
-export const UpdateAction: React.FC<UpdateActionProps> = ({ entity, row, rowId, config }) => {
+export const UpdateAction: React.FC<UpdateActionProps> = ({ entity, row, rowId, config, testId }) => {
     const openUpdate = useEntityUpdateOpener();
     const { t: tCommon } = useI18n('common');
 
@@ -16,6 +16,7 @@ export const UpdateAction: React.FC<UpdateActionProps> = ({ entity, row, rowId, 
                 type={'text'}
                 size={'xs'}
                 onClick={() => openUpdate(entity, config, row, rowId)}
+                testId={testId}
             />
         </Tooltip>
     );

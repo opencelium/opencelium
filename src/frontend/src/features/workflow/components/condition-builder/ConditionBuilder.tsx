@@ -619,12 +619,14 @@ function GroupEditor({
 				<div className="conditionGroupActions">
 					<Button
 						type="primary"
+						data-testid="workflow-condition-add-condition"
 						onClick={() => onChange(appendChildToGroup(group, group.id, createEmptyRule()))}
 					>
 						{t('conditionBuilder.addCondition')}
 					</Button>
 					<Button
 						type="primary"
+						data-testid="workflow-condition-add-group"
 						onClick={() => onChange(appendChildToGroup(group, group.id, createEmptyGroup(operatorType)))}
 					>
 						{t('conditionBuilder.addGroup')}
@@ -745,6 +747,7 @@ export function ConditionBuilderDialog({
 					key="save"
 					type="primary"
 					disabled={!node}
+					data-testid="workflow-condition-save"
 					onClick={() => {
 						if (!node) return;
 						const result = validateConditionTreeWithErrors(tree, operatorType);
@@ -757,7 +760,7 @@ export function ConditionBuilderDialog({
 				</Button>,
 			]}
 		>
-			<div key={renderKey} className="conditionBuilder">
+			<div key={renderKey} className="conditionBuilder" data-testid="workflow-condition-builder">
 				<GroupEditor
 					group={tree}
 					operatorType={operatorType}

@@ -10,10 +10,12 @@ export const AntMultiSelectImpl: MultiSelectComponent = ({
     options,
     placeholder,
     onChange,
+    testId,
 }) => {
     return (
         <AntSelect
             mode="multiple"
+            data-testid={testId}
             className="ant-select-custom"
             value={value}
             defaultValue={defaultValue}

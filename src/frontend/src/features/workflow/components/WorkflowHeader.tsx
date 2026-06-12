@@ -210,6 +210,7 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 							type='button'
 							disabled={saveDisabled}
 							onClick={openSaveDialog}
+							data-testid='workflow-save'
 						>
 							{t('actions.save')}
 						</button>
@@ -217,6 +218,7 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 					<button
 						className='iconButton'
 						type='button'
+						data-testid='workflow-history'
 						onClick={() => {
 							setMenuOpen(false);
 							onOpenHistory();
@@ -228,6 +230,7 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 						<button
 							className='iconButton'
 							type='button'
+							data-testid='workflow-menu'
 							onClick={() => setMenuOpen((prev) => !prev)}
 						>
 							<MoreHorizontal size={16} />

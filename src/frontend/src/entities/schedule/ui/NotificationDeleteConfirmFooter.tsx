@@ -27,7 +27,7 @@ export function NotificationDeleteConfirmFooter({
 
     return (
         <>
-            <Button onClick={onCancel} disabled={loading}>
+            <Button onClick={onCancel} disabled={loading} testId="schedule-notification-delete-cancel">
                 {cancelText}
             </Button>
             <Button
@@ -35,6 +35,7 @@ export function NotificationDeleteConfirmFooter({
                 variant="solid"
                 onClick={handleConfirm}
                 loading={loading}
+                testId="schedule-notification-delete-confirm"
             >
                 {confirmText}
             </Button>

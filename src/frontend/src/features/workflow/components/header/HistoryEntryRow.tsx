@@ -4,6 +4,7 @@ import type { RefObject } from 'react';
 import type { HistoryVersionItem } from './historyPanel.data';
 import { formatTime } from './historyPanel.utils';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { buildTestId } from '@shared/testing/testId';
 
 type Props = {
   activeId: string | null;
@@ -37,15 +38,15 @@ export function HistoryEntryRow(props: Props) {
   const isEditing = props.activeId === props.item.id || props.expandedCommentId === props.item.id;
 
   return (
-    <div className='historyEntryRow'>
+    <div className='historyEntryRow' data-testid={buildTestId('workflow-history-row', props.item.snapshotId)}>
       <div className='historyTimeCol'>
         <div className='historyTimeLabel'>{formatTime(props.item.createdAt)}</div>
         <div className={`historyDot ${props.selectedId === props.item.id ? 'historyDotCurrent' : ''}`} />
       </div>
       <div className={`historyCard ${props.selectedId === props.item.id ? 'historyCardSelected' : ''}`}>
-        <div className='historyCardHeader historyCardActivator' onClick={() => props.onSelect(props.item.id)}>
+        <div className='historyCardHeader historyCardActivator' data-testid={buildTestId('workflow-history-select', props.item.snapshotId)} onClick={() => props.onSelect(props.item.id)}>
           <strong>{t('history.author', { name: props.item.author })}</strong>
-          <button className='historyDotsButton' type='button' onClick={(event) => { event.stopPropagation(); props.onToggleMenu(props.item.id); }}>
+          <button className='historyDotsButton' type='button' data-testid={buildTestId('workflow-history-menu', props.item.snapshotId)} onClick={(event) => { event.stopPropagation(); props.onToggleMenu(props.item.id); }}>
             <MoreOutlined />
           </button>
         </div>
@@ -86,9 +87,9 @@ export function HistoryEntryRow(props: Props) {
         ) : null}
         {props.menuOpen ? (
           <div ref={props.menuRef} className='historyMenu'>
-            <button className='historyMenuItem' type='button' onClick={() => props.onCopySnapshot(props.item.snapshotId)}>{t('history.copySnapshotId')}</button>
-            <button className='historyMenuItem' type='button' onClick={() => props.onDownloadTemplate(props.item.snapshotId)}>{t('history.downloadAsTemplate')}</button>
-            <button className='historyMenuItem historyMenuItemDanger' type='button' onClick={() => props.onDelete(props.item.id)}>{t('actions.delete')}</button>
+            <button className='historyMenuItem' type='button' data-testid={buildTestId('workflow-history-copy', props.item.snapshotId)} onClick={() => props.onCopySnapshot(props.item.snapshotId)}>{t('history.copySnapshotId')}</button>
+            <button className='historyMenuItem' type='button' data-testid={buildTestId('workflow-history-download', props.item.snapshotId)} onClick={() => props.onDownloadTemplate(props.item.snapshotId)}>{t('history.downloadAsTemplate')}</button>
+            <button className='historyMenuItem historyMenuItemDanger' type='button' data-testid={buildTestId('workflow-history-delete', props.item.snapshotId)} onClick={() => props.onDelete(props.item.id)}>{t('actions.delete')}</button>
           </div>
         ) : null}
       </div>

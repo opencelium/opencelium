@@ -62,11 +62,13 @@ export const ConfirmDialogProvider: React.FC<{
                 open={state.open}
                 onClose={() => close(false)}
                 title={state.title}
+                testId="confirm-dialog"
                 footer={
                     <>
                         <Button
                             variant="secondary"
                             onClick={() => close(false)}
+                            testId="confirm-dialog-cancel"
                         >
                             {state.cancelText ?? 'Cancel'}
                         </Button>
@@ -74,6 +76,7 @@ export const ConfirmDialogProvider: React.FC<{
                         <Button
                             variant={state.confirmVariant ?? 'primary'}
                             onClick={() => close(true)}
+                            testId="confirm-dialog-confirm"
                         >
                             {state.confirmText ?? 'Confirm'}
                         </Button>

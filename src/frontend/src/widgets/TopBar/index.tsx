@@ -12,6 +12,7 @@ export function TopBar() {
     const { setLang, lang } = useI18n()
     return (
         <header
+            data-testid="topbar"
             style={{
                 height: 100,
                 borderBottom: '1px solid var(--color-border-subtle)',
@@ -38,6 +39,7 @@ export function TopBar() {
                     <Button
                         variant="secondary"
                         onClick={() => setLang(lang === 'en' ? 'de' : 'en')}
+                        testId="topbar-lang-toggle"
                     >
                         {lang.toUpperCase()}
                     </Button>

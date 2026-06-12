@@ -24,6 +24,7 @@ export const MaterialDialog: DialogComponent = ({
   fullscreen = false,
   maximizable = false,
   afterClose,
+  testId,
 }) => {
   const { t } = useI18n("common");
   const isMobile = window.matchMedia("(max-width: 768px)").matches;
@@ -82,7 +83,7 @@ export const MaterialDialog: DialogComponent = ({
 
       {title && <DialogTitle>{title}</DialogTitle>}
 
-      <DialogContent dividers>
+      <DialogContent dividers data-testid={testId}>
         <DialogFullscreenProvider value={isFullscreen}>
           <DialogHeaderSlotProvider value={headerSlot}>
             {children}

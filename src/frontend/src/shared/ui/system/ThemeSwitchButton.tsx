@@ -7,6 +7,6 @@ export const ThemeSwitchButton: React.FC = () => {
     const isLight = themeMode === 'light';
 
     return (
-        <Switch checked={isLight} label={isLight ? '️☀️ Light mode' : '🌙 Dark mode'} onChange={() => toggleTheme()}/>
+        <Switch checked={isLight} label={isLight ? '️☀️ Light mode' : '🌙 Dark mode'} onChange={() => toggleTheme()} testId="theme-switch"/>
     );
 };

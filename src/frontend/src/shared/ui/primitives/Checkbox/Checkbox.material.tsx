@@ -10,6 +10,7 @@ export const MaterialCheckbox: CheckboxComponent = ({
     disabled,
     onChange,
     label,
+    testId,
 }) => {
     return (
         <FormControlLabel
@@ -18,6 +19,7 @@ export const MaterialCheckbox: CheckboxComponent = ({
                     checked={checked}
                     disabled={disabled}
                     onChange={(_, value) => onChange?.(value)}
+                    inputProps={{ 'data-testid': testId } as React.InputHTMLAttributes<HTMLInputElement>}
                     sx={{
                         color: 'var(--color-action-primary)',
                         '&.Mui-checked': {

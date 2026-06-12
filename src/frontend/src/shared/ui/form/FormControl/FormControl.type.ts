@@ -12,6 +12,8 @@ export interface FormControlProps {
     children: ReactNode;
     style?: CSSProperties | undefined;
     autoFocus?: boolean;
+    /** Stable selector for e2e tests; the wrapper emits `${testId}-control`. */
+    testId?: string;
 }
 
 export interface RemoteApiProps {

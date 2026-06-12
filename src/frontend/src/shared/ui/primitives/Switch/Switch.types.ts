@@ -20,6 +20,8 @@ export interface SwitchProps {
         on: ReactNode,
         off: ReactNode,
     };
+    /** Stable selector for e2e tests; emitted as `data-testid`. */
+    testId?: string;
 }
 
 export type SwitchComponent = React.FC<SwitchProps>;

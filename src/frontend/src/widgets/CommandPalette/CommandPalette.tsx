@@ -22,6 +22,7 @@ import {setUserPolicyContext} from "@/engine/policy";
 import {useI18n} from "@shared/i18n/hooks/useI18n.ts";
 import {getRecentCommands, pushRecentCommand} from "@widgets/CommandPalette/recent.ts";
 import {PaletteFooter} from "@widgets/CommandPalette/PaletteFooter.tsx";
+import {buildTestId} from "@shared/testing/testId.ts";
 
 const GROUP_ORDER = ['recent', 'navigate', 'create', 'manage', 'system', 'general'];
 
@@ -216,6 +217,7 @@ export const CommandPalette = () => {
                 <Command shouldFilter={false} value={highlighted} onValueChange={setHighlighted} style={{position: 'relative', paddingLeft: 20, paddingRight: 80}}>
                     <Command.Input
                         ref={inputRef}
+                        data-testid="command-palette-input"
                         onFocus={() => setIsActive(true)}
                         onBlur={() => setIsActive(false)}
                         value={value}
@@ -262,6 +264,7 @@ export const CommandPalette = () => {
                                             <Command.Item
                                                 key={`${group.key}:${s.value}`}
                                                 value={`${group.key}:${s.value}`}
+                                                data-testid={buildTestId('command-palette-item', group.key, s.value)}
                                                 onMouseDown={(e) => e.preventDefault()}
                                                 onSelect={() => group.key === 'recent' ? handleSelectRecent(s.value) : handleSelect(s.value)}
                                             >

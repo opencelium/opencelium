@@ -14,6 +14,8 @@ export interface CheckboxGroupProps {
 
   direction?: 'vertical' | 'horizontal';
   error?: boolean;
+  /** Stable selector prefix for e2e tests; each option emits `${testId}-${value}`. */
+  testId?: string;
 }
 
 export type CheckboxGroupComponent = React.FC<CheckboxGroupProps>;

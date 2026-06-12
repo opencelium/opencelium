@@ -13,6 +13,7 @@ export const AntInput = forwardRef<any, InputComponent>((props, ref) => {
         name,
         rightSlot,
         leftSlot,
+        testId,
         ...rest
     } = props;
     const isLoading = useRemoteValidationStore(
@@ -23,6 +24,7 @@ export const AntInput = forwardRef<any, InputComponent>((props, ref) => {
         <div style={{width: '100%', position: 'relative'}}>
             <InputComponent
                 {...rest}
+                data-testid={testId}
                 ref={(node) => {
                     if (!node) return;
 

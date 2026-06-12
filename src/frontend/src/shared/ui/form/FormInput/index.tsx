@@ -24,6 +24,7 @@ export const FormInput: React.FC<FormInputProps> = ({
     disabled,
     style,
     rules,
+    testId,
 }) => {
     const {
         control,
@@ -73,6 +74,7 @@ export const FormInput: React.FC<FormInputProps> = ({
                         name={name}
                         info={info}
                         style={style}
+                        testId={testId}
                     >
                         <Input
                             type={type}
@@ -87,6 +89,7 @@ export const FormInput: React.FC<FormInputProps> = ({
                             autoFocus={autoFocus}
                             name={name}
                             disabled={disabled}
+                            testId={testId}
                         />
                     </FormControl>
                 );

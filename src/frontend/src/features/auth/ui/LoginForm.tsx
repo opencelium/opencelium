@@ -95,6 +95,7 @@ export function LoginForm() {
                                         placeholder={t('fields.email.placeholder')}
                                         error={!!emailErrorKey}
                                         autoFocus
+                                        testId="login-email"
                                     />
                                 )}
                             />
@@ -121,6 +122,7 @@ export function LoginForm() {
                                         name={field.name}
                                         placeholder={t('fields.password.placeholder')}
                                         error={!!passwordErrorKey}
+                                        testId="login-password"
                                     />
                                 )}
                             />
@@ -147,10 +149,11 @@ export function LoginForm() {
                                         checked={!!field.value}
                                         onChange={field.onChange}
                                         label={t('fields.rememberMe.label')}
+                                        testId="login-remember-me"
                                     />
                                 )}
                             />
-                            <Button type="link" onClick={handleForgotPassword}>
+                            <Button type="link" onClick={handleForgotPassword} testId="login-forgot-password">
                                 {t('actions.forgotPassword')}
                             </Button>
                         </div>
@@ -160,6 +163,7 @@ export function LoginForm() {
                             type="primary"
                             loading={isSubmitting}
                             style={{ width: '100%' }}
+                            testId="login-submit"
                         >
                             {t('actions.signIn')}
                         </Button>

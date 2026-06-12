@@ -4,6 +4,7 @@ import type { ColumnDef } from '@tanstack/react-table';
 import type { EntityDefinition, ListAction } from '@/engine/entity/EntityDefinition';
 import { getValueByPath } from '@shared/utils/getValueByPath';
 import { IconButton } from '@shared/ui/primitives/IconButton';
+import { buildTestId } from '@shared/testing/testId';
 import {
     ViewAction,
     UpdateAction,
@@ -17,13 +18,14 @@ const renderAction = (
     row: unknown,
     rowId: string,
 ): React.ReactNode => {
+    const testId = buildTestId(entity.name, 'row-action', action.type, rowId);
     switch (action.type) {
         case 'view':
-            return <ViewAction key={`view-${index}`} entity={entity} row={row} rowId={rowId} config={action} />;
+            return <ViewAction key={`view-${index}`} entity={entity} row={row} rowId={rowId} config={action} testId={testId} />;
         case 'update':
-            return <UpdateAction key={`update-${index}`} entity={entity} row={row} rowId={rowId} config={action} />;
+            return <UpdateAction key={`update-${index}`} entity={entity} row={row} rowId={rowId} config={action} testId={testId} />;
         case 'delete':
-            return <DeleteAction key={`delete-${index}`} entity={entity} row={row} rowId={rowId} config={action} />;
+            return <DeleteAction key={`delete-${index}`} entity={entity} row={row} rowId={rowId} config={action} testId={testId} />;
         case 'custom':
             return (
                 <React.Fragment key={`custom-${action.key}`}>
@@ -54,7 +56,7 @@ export function buildRowActionsColumn<T extends Record<string, unknown>>(
             const original = row.original;
             const rowId = String(getValueByPath(original as Record<string, unknown>, rowKey) ?? '');
             return (
-                <div data-row-click-ignore style={{ display: 'flex', justifyContent: 'center' }}>
+                <div data-row-click-ignore data-testid={buildTestId(entity.name, 'row', rowId)} style={{ display: 'flex', justifyContent: 'center' }}>
                     <Popover
                         trigger={['hover', 'click']}
                         placement="leftTop"
@@ -66,7 +68,7 @@ export function buildRowActionsColumn<T extends Record<string, unknown>>(
                             </div>
                         }
                     >
-                        <IconButton iconProps={{ name: 'more' }} type="text" size="xs" />
+                        <IconButton iconProps={{ name: 'more' }} type="text" size="xs" testId={buildTestId(entity.name, 'row-actions-trigger', rowId)} />
                     </Popover>
                 </div>
             );

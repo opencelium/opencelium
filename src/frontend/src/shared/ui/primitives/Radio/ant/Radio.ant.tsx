@@ -8,6 +8,7 @@ export const AntRadio: RadioComponent = ({
     label,
     name,
     value,
+    testId,
 }) => {
     return (
         <AntRadioBase
@@ -16,6 +17,7 @@ export const AntRadio: RadioComponent = ({
             name={name}
             value={value}
             onChange={(e) => onChange?.(e.target.checked)}
+            data-testid={testId}
         >
             {label}
         </AntRadioBase>

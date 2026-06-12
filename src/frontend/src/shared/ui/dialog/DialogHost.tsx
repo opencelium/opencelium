@@ -23,6 +23,7 @@ export const DialogHost = () => {
                         closable={dialog.closable}
                         fullscreen={dialog.fullscreen}
                         maximizable={dialog.maximizable}
+                        testId={dialog.testId}
                     >
                         {dialog.content}
                     </Dialog>

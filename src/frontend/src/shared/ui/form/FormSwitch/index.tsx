@@ -15,6 +15,7 @@ export const FormSwitch: React.FC<FormSwitchProps> = ({
     textKey,
     disabled,
     readOnly,
+    testId,
 }) => {
     const {
         control,
@@ -32,6 +33,7 @@ export const FormSwitch: React.FC<FormSwitchProps> = ({
                     label={label}
                     labelKey={labelKey}
                     error={error}
+                    testId={testId}
                 >
                     <Switch
                         checked={!!field.value}
@@ -39,6 +41,7 @@ export const FormSwitch: React.FC<FormSwitchProps> = ({
                         disabled={disabled}
                         readOnly={readOnly}
                         textKey={textKey}
+                        testId={testId}
                     />
                 </FormControl>
             )}

@@ -123,6 +123,7 @@ export function ForgotPasswordForm() {
                                             placeholder={t('fields.email.placeholder')}
                                             error={!!emailErrorKey}
                                             autoFocus
+                                            testId="forgot-password-email"
                                         />
                                     )}
                                 />
@@ -138,6 +139,7 @@ export function ForgotPasswordForm() {
                                 type="primary"
                                 loading={isSubmitting}
                                 style={{ width: '100%' }}
+                                testId="forgot-password-submit"
                             >
                                 {t('forgotPassword.submit')}
                             </Button>

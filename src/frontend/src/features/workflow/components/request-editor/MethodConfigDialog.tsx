@@ -179,12 +179,12 @@ export function MethodConfigDialog({ open, node, mode, nodes, edges, fieldBindin
         },
       }}
       footer={[
-        <Button key="close" type="primary" onClick={persistCurrentConfig}>
+        <Button key="close" type="primary" onClick={persistCurrentConfig} data-testid="workflow-method-dialog-close">
           {t('actions.close')}
         </Button>,
       ]}
     >
-      <div style={{ height: mode !== 'url' ? 'calc(100vh - 199px)' : undefined }}>
+      <div data-testid={`workflow-method-dialog-${mode}`} style={{ height: mode !== 'url' ? 'calc(100vh - 199px)' : undefined }}>
         <Provider store={store}>
           {mode === 'body' ? (
             <LegacyBodyEditorContent nodeId={node.id} />

@@ -13,6 +13,8 @@ export type ListActionButtonProps<TConfig> = {
     /** The pre-resolved row identifier (entity.list.rowKey ?? api.primaryKey ?? 'id'). */
     rowId: string;
     config: TConfig;
+    /** Stable selector for e2e tests; emitted as `data-testid` on the action button. */
+    testId?: string;
 };
 
 export type ViewActionProps = ListActionButtonProps<ViewActionConfig>;

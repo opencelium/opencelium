@@ -14,6 +14,7 @@ export const AntButton: ButtonComponent = ({
     iconRight,
     color,
     style,
+    testId,
    ...rest
 }) => {
     const additionalStyles: CSSProperties = {minWidth: '51px'};
@@ -21,6 +22,7 @@ export const AntButton: ButtonComponent = ({
     return (
         <AntButtonBase
             {...rest}
+            data-testid={testId}
             style={style}
             loading={false}
             color={color}

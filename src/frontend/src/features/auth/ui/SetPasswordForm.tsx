@@ -112,6 +112,7 @@ export function SetPasswordForm() {
                                         placeholder={t('setPassword.fields.password.placeholder')}
                                         error={!!passwordErrorKey}
                                         autoFocus
+                                        testId="set-password-password"
                                     />
                                 )}
                             />
@@ -138,6 +139,7 @@ export function SetPasswordForm() {
                                         name={field.name}
                                         placeholder={t('setPassword.fields.repeatPassword.placeholder')}
                                         error={!!repeatErrorKey}
+                                        testId="set-password-repeat"
                                     />
                                 )}
                             />
@@ -153,6 +155,7 @@ export function SetPasswordForm() {
                             type="primary"
                             loading={isSubmitting}
                             style={{ width: '100%' }}
+                            testId="set-password-submit"
                         >
                             {t('setPassword.submit')}
                         </Button>

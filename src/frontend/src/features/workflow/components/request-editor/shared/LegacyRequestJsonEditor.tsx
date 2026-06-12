@@ -182,6 +182,7 @@ export function LegacyRequestJsonEditor({ messageProperty, source, readOnly }: P
       content: (
         <div
           className='bodyLegacyJsonWrap'
+          data-testid={`workflow-request-${messageProperty}`}
           onMouseDownCapture={(event) => {
             const target = event.target as HTMLElement | null;
             const trigger = target?.closest('.click-to-reference') as HTMLElement | null;

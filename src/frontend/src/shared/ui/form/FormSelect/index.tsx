@@ -25,6 +25,7 @@ export function FormSelect<T>({
     createOptionUrl,
     creatable,
     onCreate,
+    testId,
 }: FormSelectProps<T>) {
     const {
         control,
@@ -80,8 +81,10 @@ export function FormSelect<T>({
                     error={displayError}
                     name={name}
                     info={info}
+                    testId={testId}
                 >
                     <Select
+                        testId={testId}
                         creatable={creatable}
                         onCreate={onCreate}
                         createOptionUrl={createOptionUrl}

@@ -16,6 +16,7 @@ export const MaterialMultiSelect: MultiSelectComponent = ({
     options,
     placeholder,
     onChange,
+    testId,
 }) => {
     return (
         <MuiFormControl fullWidth>
@@ -23,6 +24,7 @@ export const MaterialMultiSelect: MultiSelectComponent = ({
 
             <MuiSelect
                 multiple
+                data-testid={testId}
                 value={value}
                 defaultValue={defaultValue}
                 disabled={disabled}

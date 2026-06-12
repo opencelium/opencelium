@@ -19,6 +19,8 @@ export interface MultiSelectProps<T = string> {
     onChange?: (values: T[]) => void;
 
     inputRef?: Ref<HTMLInputElement>;
+    /** Stable selector for e2e tests; emitted as `data-testid`. */
+    testId?: string;
 }
 
 export type MultiSelectComponent<T = string> =

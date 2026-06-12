@@ -152,8 +152,8 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
         shiftedFar={methodOpen}
         secondary
       >
-        <SidebarSearch placeholder={t('sidebar.searchPlaceholder')} value={mainSearch} onChange={setMainSearch} />
-        <SidebarList items={filteredSidebarItems} onSelect={onSelectMain} />
+        <SidebarSearch placeholder={t('sidebar.searchPlaceholder')} value={mainSearch} onChange={setMainSearch} testId="workflow-sidebar-search-main" />
+        <SidebarList items={filteredSidebarItems} onSelect={onSelectMain} testIdPrefix="workflow-sidebar-main" />
         <button className="sidebarItem sidebarItemMuted sidebarItemStandalone" type="button">
           <strong>{t('sidebar.triggerConnection.title')}</strong>
           <span>{t('sidebar.triggerConnection.description')}</span>
@@ -173,7 +173,7 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
         secondary
         shifted={methodOpen}
       >
-        <SidebarSearch placeholder={secondaryPlaceholder} value={secondarySearch} onChange={setSecondarySearch} />
+        <SidebarSearch placeholder={secondaryPlaceholder} value={secondarySearch} onChange={setSecondarySearch} testId="workflow-sidebar-search-secondary" />
         {activeSecondaryPanel === 'connector' ? (
           connectorsFetching ? (
             <button className="sidebarItem sidebarItemMuted" type="button" disabled>
@@ -188,6 +188,7 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
           ) : filteredConnectorItems.length ? (
             <SidebarList
               items={filteredConnectorItems}
+              testIdPrefix="workflow-sidebar-connector"
               onSelect={(connectorKey) => {
                 setSelectedConnectorKey(connectorKey);
                 setMethodSearch('');
@@ -202,6 +203,7 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
         ) : (
           <SidebarList
             items={filteredOperatorItems}
+            testIdPrefix="workflow-sidebar-operator"
             onSelect={(key) => {
               onSelect(key as WorkflowCreateKind);
               resetSidebar();
@@ -221,10 +223,11 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
         }}
         tertiary
       >
-        <SidebarSearch placeholder={methodPlaceholder} value={methodSearch} onChange={setMethodSearch} />
+        <SidebarSearch placeholder={methodPlaceholder} value={methodSearch} onChange={setMethodSearch} testId="workflow-sidebar-search-method" />
         {filteredMethodItems.length ? (
           <SidebarList
             items={filteredMethodItems}
+            testIdPrefix="workflow-sidebar-method"
             onSelect={(methodKey) => {
               const methodOperation = methodOperations.find((operation, index) => getMethodKey(operation, index) === methodKey);
               const methodName = methodOperation?.name;

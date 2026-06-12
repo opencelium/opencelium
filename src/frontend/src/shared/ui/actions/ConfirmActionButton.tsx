@@ -9,6 +9,7 @@ export const ConfirmActionButton: React.FC<ConfirmActionButtonProps> = ({
     variant = 'primary',
     disabled,
     loading: externalLoading,
+    testId,
     children,
 }) => {
     const confirmAction = useConfirm();
@@ -33,6 +34,7 @@ export const ConfirmActionButton: React.FC<ConfirmActionButtonProps> = ({
             variant={variant}
             disabled={disabled || loading}
             onClick={handleClick}
+            testId={testId}
         >
             {loading ? '…' : children}
         </Button>

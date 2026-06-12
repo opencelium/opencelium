@@ -6,6 +6,7 @@ import { ContextMenuEditor } from './context-menu/ContextMenuEditor';
 import { buildContextMenuEntries, filterEntriesForSection } from './context-menu/contextMenuEntries';
 import { menuByType } from './context-menu/contextMenuData';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { buildTestId } from '@shared/testing/testId';
 
 type Props = {
   menu: WorkflowContextMenu | null;
@@ -52,7 +53,7 @@ export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequ
   const entries = buildContextMenuEntries(sections);
 
   return createPortal(
-    <div ref={ref} className="contextMenu" style={{ left: menu.x, top: menu.y }}>
+    <div ref={ref} className="contextMenu" data-testid="workflow-context-menu" style={{ left: menu.x, top: menu.y }}>
       {isEditingLabel ? (
         <ContextMenuEditor
           inputRef={inputRef}
@@ -78,6 +79,7 @@ export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequ
                     key={entry.id}
                     className={`contextMenuItem ${entry.indented ? 'contextMenuItemIndented' : ''}`}
                     type="button"
+                    data-testid={buildTestId('workflow-context-menu', entry.item.id)}
                     onClick={() => {
                       if (entry.item.id === 'change-label') return setIsEditingLabel(true);
                       if (entry.item.id === 'open-config' && (node?.type === 'if' || node?.type === 'loop')) onOpenConditionEditor(menu.nodeId);

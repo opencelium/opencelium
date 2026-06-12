@@ -4,6 +4,7 @@ import {useDialog} from '@shared/ui/dialog/useDialog';
 import {EntityDialogContent} from '@/engine/entity/runtime/genererics/EntityDialogContent';
 import type {EntityDefinition, UpdateActionConfig} from '@/engine/entity/EntityDefinition';
 import {resolveActionValue} from './resolveAction';
+import {buildTestId} from '@shared/testing/testId';
 
 /**
  * Open the entity update flow for a row — a custom navigation URL when the
@@ -26,6 +27,7 @@ export function useEntityUpdateOpener() {
             const id = dialog.open({
                 width: 1000,
                 top: 18,
+                testId: buildTestId(entity.name, 'update-dialog'),
                 content: (
                     <EntityDialogContent
                         entityName={entity.name}

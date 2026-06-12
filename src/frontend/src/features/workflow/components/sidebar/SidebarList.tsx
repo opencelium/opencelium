@@ -1,3 +1,5 @@
+import { buildTestId } from '@shared/testing/testId';
+
 type SidebarItem = {
   key: string;
   title: string;
@@ -8,9 +10,11 @@ type SidebarItem = {
 type Props = {
   items: readonly SidebarItem[];
   onSelect: (key: string) => void;
+  /** When set, each item emits `${testIdPrefix}-item-${key}` as data-testid. */
+  testIdPrefix?: string;
 };
 
-export function SidebarList({ items, onSelect }: Props) {
+export function SidebarList({ items, onSelect, testIdPrefix }: Props) {
   return (
     <div className="sidebarList">
       {items.map((item) => (
@@ -18,6 +22,7 @@ export function SidebarList({ items, onSelect }: Props) {
           key={item.key}
           className={`sidebarItem${item.imageUrl ? ' sidebarItemWithImage' : ''}`}
           type="button"
+          data-testid={buildTestId(testIdPrefix, 'item', item.key)}
           onClick={() => onSelect(item.key)}
         >
           <strong>{item.title}</strong>

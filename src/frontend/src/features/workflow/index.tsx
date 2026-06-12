@@ -563,7 +563,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
 
   return (
     <TestRunProvider connectionId={connectionId} buildTestPayload={buildTestPayload}>
-    <div className="page">
+    <div className="page" data-testid="workflow-page">
       <WorkflowHeader
         initialName={headerState.title}
         initialDescription={headerState.description}
@@ -583,10 +583,10 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         destroyOnHidden
         width={520}
         footer={[
-          <Button key="cancel" onClick={closeSaveTemplateDialog} disabled={isSavingTemplate}>
+          <Button key="cancel" onClick={closeSaveTemplateDialog} disabled={isSavingTemplate} data-testid="workflow-save-template-cancel">
             {t('actions.cancel')}
           </Button>,
-          <Button key="ok" type="primary" loading={isSavingTemplate} onClick={saveConnectionAsTemplate}>
+          <Button key="ok" type="primary" loading={isSavingTemplate} onClick={saveConnectionAsTemplate} data-testid="workflow-save-template-ok">
             {t('actions.ok')}
           </Button>,
         ]}
@@ -608,6 +608,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
               }}
               onPressEnter={saveConnectionAsTemplate}
               showCount
+              data-testid="workflow-save-template-name"
             />
             {templateNameError ? <span style={{ color: 'var(--color-status-error-fg)', fontSize: 12 }}>{templateNameError}</span> : null}
           </label>
@@ -620,6 +621,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
                 value={templateDescription}
                 onChange={(event) => setTemplateDescription(event.target.value)}
                 style={{ paddingBottom: 26 }}
+                data-testid="workflow-save-template-description"
               />
               <span style={{ position: 'absolute', right: 12, bottom: 6, color: 'var(--color-text-secondary)', pointerEvents: 'none' }}>
                 {templateDescription.length} / 5000
@@ -635,10 +637,10 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         destroyOnHidden
         width={520}
         footer={[
-          <Button key="cancel" onClick={closeLoadTemplateDialog} disabled={isApplyingTemplate}>
+          <Button key="cancel" onClick={closeLoadTemplateDialog} disabled={isApplyingTemplate} data-testid="workflow-load-template-cancel">
             {t('actions.cancel')}
           </Button>,
-          <Button key="load" type="primary" loading={isApplyingTemplate} onClick={applySelectedTemplate}>
+          <Button key="load" type="primary" loading={isApplyingTemplate} onClick={applySelectedTemplate} data-testid="workflow-load-template-load">
             {t('actions.load')}
           </Button>,
         ]}
@@ -651,6 +653,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
             loading={isLoadingTemplates}
             value={selectedTemplateId}
             placeholder={t('template.selectPlaceholder')}
+            data-testid="workflow-load-template-select"
             onChange={setSelectedTemplateId}
             options={templates.map((template) => ({
               value: String(template.templateId),

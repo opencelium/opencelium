@@ -24,6 +24,7 @@ export const MaterialSelect: SelectComponent = ({
     onCreate,
     onRefresh,
     isLoading,
+    testId,
 }) => {
     const [inputValue, setInputValue] = useState('');
 
@@ -127,6 +128,7 @@ export const MaterialSelect: SelectComponent = ({
                 <TextField
                     {...params}
                     label={placeholder}
+                    inputProps={{ ...params.inputProps, 'data-testid': testId }}
                     InputProps={{
                         ...params.InputProps,
                         endAdornment: (

@@ -123,10 +123,11 @@ export function NotificationActions({ index, schedulerId, onDeleted }: Props) {
                 variant="outlined"
                 onClick={handleDelete}
                 disabled={isCreating || isUpdating}
+                testId="schedule-notification-delete"
             >
                 {tEntities('schedule.notifications.actions.delete')}
             </Button>
-            <Button type="primary" onClick={handleSave} loading={isCreating || isUpdating}>
+            <Button type="primary" onClick={handleSave} loading={isCreating || isUpdating} testId="schedule-notification-save">
                 {tEntities(watchedSaveLabel)}
             </Button>
         </>

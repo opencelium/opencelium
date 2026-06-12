@@ -12,6 +12,7 @@ import {FormConstraintsProvider} from "@shared/form/FormConstraintsContext.tsx";
 import {createPolicyContext, policyEngine, setUserPolicyContext} from "@/engine/policy";
 import {useAuth} from "@features/auth/useAuth.ts";
 import {PolicyProvider} from "@/engine/policy/PolicyReactContext.tsx";
+import {TestScopeProvider} from "@shared/testing/TestScopeContext.tsx";
 import NoAccess from "@shared/ui/feedback/NoAccess.tsx";
 import {entityResolver} from "@/engine/entity/entityResolver.ts";
 import {apiExecutor} from "@shared/api/apiExecutor.ts";
@@ -211,6 +212,7 @@ export function EntityWizard<EntityFormValues>({
     }
     return (
         <PolicyProvider value={policyContext}>
+            <TestScopeProvider scope={entity.name}>
             <FormProvider key={entity.name} {...form}>
                 <FormConstraintsProvider constraints={constraints}>
                     <form
@@ -248,6 +250,7 @@ export function EntityWizard<EntityFormValues>({
                     </form>
                 </FormConstraintsProvider>
             </FormProvider>
+            </TestScopeProvider>
         </PolicyProvider>
     )
 }

@@ -442,6 +442,7 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 
 	return (
 		<div
+			data-testid="workflow-url-editor"
 			style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}
 		>
 			<UrlEndpointField
@@ -483,6 +484,7 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 								setIsEndpointReferenceGeneratorOpen((prev) => !prev)
 							}
 							style={{ flexShrink: 0 }}
+							data-testid="workflow-url-insert-reference"
 						>
 							Insert Reference
 						</Button>

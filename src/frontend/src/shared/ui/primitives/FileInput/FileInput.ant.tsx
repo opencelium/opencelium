@@ -8,6 +8,7 @@ export const AntFileInput: FileInputComponent = ({
     accept,
     disabled,
     onChange,
+    testId,
 }) => {
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -32,6 +33,7 @@ export const AntFileInput: FileInputComponent = ({
                 accept={accept}
                 disabled={disabled}
                 onChange={handleChange}
+                data-testid={testId}
             />
 
             <Button onClick={handleClick} disabled={disabled}>

@@ -3,6 +3,7 @@ import { Button } from '@shared/ui/primitives/Button';
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import { useDialog } from '@shared/ui/dialog/useDialog';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { buildTestId } from '@shared/testing/testId';
 import type { BulkAction, EntityDefinition } from '@/engine/entity/EntityDefinition';
 
 type Props = {
@@ -57,6 +58,7 @@ export const BulkActionButton: React.FC<Props> = ({
             loading={isRunning}
             disabled={isDisabled}
             onClick={handleClick}
+            testId={buildTestId(entity.name, 'bulk-action', action.key)}
         >
             {label}
         </Button>

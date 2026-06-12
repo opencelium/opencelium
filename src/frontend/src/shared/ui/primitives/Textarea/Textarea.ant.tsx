@@ -6,11 +6,13 @@ import './textarea.ant.css';
 export const AntTextarea: TextareaComponent = ({
     textareaRef,
     error,
+    testId,
     ...props
 }) => {
     return (
         <Input.TextArea
             {...props}
+            data-testid={testId}
             rows={4}
             ref={textareaRef}
             status={error ? 'error' : undefined}

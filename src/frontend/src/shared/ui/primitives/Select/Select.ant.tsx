@@ -25,6 +25,7 @@ export const AntSelectImpl: SelectComponent = ({
     autoFocus,
     onRefresh,
     sortOptions = true,
+    testId,
 }) => {
     const [inputValue, setInputValue] = useState('');
     const [isOpen, setIsOpen] = useState(false);
@@ -77,6 +78,7 @@ export const AntSelectImpl: SelectComponent = ({
         <AntSelect
             ref={selectRef}
             autoFocus={autoFocus}
+            data-testid={testId}
             style={{ width: '100%' }}
             className="ant-select-custom"
             value={isLoading || !value ? null : value}

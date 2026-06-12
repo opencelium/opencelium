@@ -10,6 +10,7 @@ export const MaterialInput: InputComponent = ({
     disabled,
     readOnly,
     type,
+    testId,
   ...rest
 }) => {
     return (
@@ -21,6 +22,7 @@ export const MaterialInput: InputComponent = ({
             type={type}
             fullWidth={true}
             variant={variant === 'filled' ? 'filled' : 'outlined'}
+            inputProps={{ 'data-testid': testId }}
             InputProps={{
                 startAdornment: leftSlot && (
                     <InputAdornment position="start">

@@ -1,3 +1,4 @@
+import React from "react";
 import {Radio as MuiRadio, FormControlLabel} from "@mui/material";
 import type {RadioComponent} from "@shared/ui/primitives/Radio/Radio.types.ts";
 
@@ -8,6 +9,7 @@ export const MaterialRadio: RadioComponent = ({
     label,
     name,
     value,
+    testId,
 }) => {
     const control = (
         <MuiRadio
@@ -16,6 +18,7 @@ export const MaterialRadio: RadioComponent = ({
             name={name}
             value={value}
             onChange={(_, value) => onChange?.(value)}
+            inputProps={{ 'data-testid': testId } as React.InputHTMLAttributes<HTMLInputElement>}
             sx={{
                 color: 'var(--color-action-primary)',
                 '&.Mui-checked': {

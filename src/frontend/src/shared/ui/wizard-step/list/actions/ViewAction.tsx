@@ -7,8 +7,9 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { EntityDialogContent } from '@/engine/entity/runtime/genererics/EntityDialogContent';
 import type { ViewActionProps } from './types';
 import { resolveActionValue } from './resolveAction';
+import { buildTestId } from '@shared/testing/testId';
 
-export const ViewAction: React.FC<ViewActionProps> = ({ entity, row, rowId, config }) => {
+export const ViewAction: React.FC<ViewActionProps> = ({ entity, row, rowId, config, testId }) => {
     const dialog = useDialog();
     const navigate = useNavigate();
     const { t: tCommon } = useI18n('common');
@@ -24,6 +25,7 @@ export const ViewAction: React.FC<ViewActionProps> = ({ entity, row, rowId, conf
         const id = dialog.open({
             width: 1000,
             top: 18,
+            testId: buildTestId(entity.name, 'view-dialog'),
             content: (
                 <EntityDialogContent
                     entityName={entity.name}
@@ -37,7 +39,7 @@ export const ViewAction: React.FC<ViewActionProps> = ({ entity, row, rowId, conf
 
     return (
         <Tooltip content={tCommon('actions.view')} placement="right">
-            <IconButton iconProps={{ name: 'info', color: 'primary' }} type={'text'} size={'xs'} onClick={handleClick} />
+            <IconButton iconProps={{ name: 'info', color: 'primary' }} type={'text'} size={'xs'} onClick={handleClick} testId={testId} />
         </Tooltip>
     );
 };

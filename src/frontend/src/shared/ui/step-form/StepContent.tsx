@@ -6,6 +6,8 @@ import React, {useMemo, useRef} from "react";
 import type {PartialStepProps} from "@shared/ui/tour/Tour.tsx";
 import {CommonText, EntityText} from "@shared/ui/primitives/Text";
 import {useBreakpoints} from "@app/hooks/useBreakpoints.tsx";
+import {useTestScope} from "@shared/testing/TestScopeContext.tsx";
+import {buildTestId} from "@shared/testing/testId.ts";
 
 interface Props {
     steps: StepDefinition[]
@@ -22,6 +24,7 @@ export function StepContent({
 }: Props) {
     const {isTabletOrMobile} = useBreakpoints();
     const containerRef = useRef(null);
+    const testScope = useTestScope();
     const { currentStep, next: nextStep, prev, isLast } =
         useStepForm()
 
@@ -88,17 +91,18 @@ export function StepContent({
                 {currentStep > 0 && <Button
                     onClick={prev}
                     disabled={currentStep === 0}
+                    testId={buildTestId(testScope, 'wizard', 'prev')}
                 >
                     <CommonText i18nKey={step.actions?.prevLabel || 'actions.prev'} />
                 </Button>
                 }
 
                 {isLast ? onSubmit && !readOnly ? (
-                    <Button onClick={onSubmit} loading={isSubmitting}>
+                    <Button onClick={onSubmit} loading={isSubmitting} testId={buildTestId(testScope, 'wizard', 'submit')}>
                         {!!step?.actions?.submitLabel ? <EntityText i18nKey={step.actions?.submitLabel} /> : <CommonText i18nKey={'actions.submit'} />}
                     </Button>
                 ) : null : (
-                    <Button onClick={next} loading={isSubmitting}>
+                    <Button onClick={next} loading={isSubmitting} testId={buildTestId(testScope, 'wizard', 'next')}>
                         {step.actions?.nextLabel ? <EntityText i18nKey={step.actions.nextLabel} /> : <CommonText i18nKey={'actions.next'} />}
                     </Button>
                 )}

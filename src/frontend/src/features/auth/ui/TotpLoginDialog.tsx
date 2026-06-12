@@ -70,7 +70,7 @@ export function TotpLoginDialog({ open, challenge, rememberMe, onClose }: Props)
     }
 
     return (
-        <Dialog open={open} onClose={handleClose} title={t('totp.title')} width={520}>
+        <Dialog open={open} onClose={handleClose} title={t('totp.title')} width={520} testId="totp-dialog">
             <FormProvider {...form}>
                 <FormConstraintsProvider constraints={constraints}>
                     <form
@@ -119,6 +119,7 @@ export function TotpLoginDialog({ open, challenge, rememberMe, onClose }: Props)
                             error={displayError}
                             disabled={form.formState.isSubmitting}
                             autoFocus
+                            testId="totp-code"
                         />
 
                         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -126,6 +127,7 @@ export function TotpLoginDialog({ open, challenge, rememberMe, onClose }: Props)
                                 htmlType="submit"
                                 type="primary"
                                 loading={form.formState.isSubmitting}
+                                testId="totp-submit"
                             >
                                 {t('totp.submit')}
                             </Button>

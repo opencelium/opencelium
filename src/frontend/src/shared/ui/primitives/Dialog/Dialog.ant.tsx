@@ -20,6 +20,7 @@ export const AntDialog: DialogComponent = ({
   fullscreen = false,
   maximizable = false,
   afterClose,
+  testId,
 }) => {
   const { t } = useI18n("common");
   const isMobile = window.matchMedia("(max-width: 768px)").matches;
@@ -61,7 +62,9 @@ export const AntDialog: DialogComponent = ({
       </span>
       <DialogFullscreenProvider value={isFullscreen}>
         <DialogHeaderSlotProvider value={headerSlot}>
-          {children}
+          <div data-testid={testId} style={{ display: "contents" }}>
+            {children}
+          </div>
         </DialogHeaderSlotProvider>
       </DialogFullscreenProvider>
     </Modal>

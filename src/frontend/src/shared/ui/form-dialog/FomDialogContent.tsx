@@ -36,10 +36,11 @@ const FormDialogContent = <T,>({
             // could use ConfirmActionButton here
             dialog.open({
                 title: 'Discard changes?',
+                testId: 'form-dialog-discard',
                 content: <p>You have unsaved changes.</p>,
                 footer: (
                     <>
-                        <Button onClick={() => dialog.close()}>
+                        <Button onClick={() => dialog.close()} testId="form-dialog-discard-cancel">
                             Cancel
                         </Button>
                         <Button
@@ -47,6 +48,7 @@ const FormDialogContent = <T,>({
                                 dialog.close(); // confirm
                                 dialog.close(); // editor
                             }}
+                            testId="form-dialog-discard-confirm"
                         >
                             Discard
                         </Button>
@@ -66,7 +68,7 @@ const FormDialogContent = <T,>({
                 {render({ form, close })}
 
                 <div style={{ marginTop: 24, display: 'flex', gap: 12 }}>
-                    <Button variant="secondary" onClick={close}>
+                    <Button variant="secondary" onClick={close} testId="form-dialog-cancel">
                         {cancelText ?? 'Cancel'}
                     </Button>
 
@@ -80,6 +82,7 @@ const FormDialogContent = <T,>({
                                 console.log('INVALID', errors);
                             })}
                         confirm={confirmOptions}
+                        testId="form-dialog-submit"
                     >
                         {submitText ?? 'Save'}
                     </ConfirmActionButton>

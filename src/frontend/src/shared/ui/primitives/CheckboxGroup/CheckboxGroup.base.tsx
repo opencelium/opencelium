@@ -1,5 +1,6 @@
 import React from 'react';
 import { Checkbox } from '@/shared/ui/primitives/Checkbox';
+import { buildTestId } from '@shared/testing/testId';
 import type { CheckboxGroupComponent } from './CheckboxGroup.types';
 
 export const BaseCheckboxGroup: CheckboxGroupComponent = ({
@@ -7,6 +8,7 @@ export const BaseCheckboxGroup: CheckboxGroupComponent = ({
     options,
     onChange,
     direction = 'vertical',
+    testId,
 }) => {
     const toggle = (optionValue: string, checked: boolean) => {
         if (checked) {
@@ -30,6 +32,7 @@ export const BaseCheckboxGroup: CheckboxGroupComponent = ({
                     checked={value.includes(option.value)}
                     disabled={option.disabled}
                     label={option.label}
+                    testId={buildTestId(testId, option.value)}
                     onChange={(checked) => toggle(option.value, checked)}
                 />
             ))}

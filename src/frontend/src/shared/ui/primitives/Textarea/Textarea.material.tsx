@@ -5,6 +5,7 @@ import type { TextareaComponent } from './Textarea.types';
 export const MaterialTextarea: TextareaComponent = ({
     textareaRef,
     error,
+    testId,
     ...props
 }) => {
     return (
@@ -14,6 +15,7 @@ export const MaterialTextarea: TextareaComponent = ({
             minRows={3}
             inputRef={textareaRef}
             error={error}
+            inputProps={{ 'data-testid': testId }}
             sx={{
                 '& .MuiOutlinedInput-root': {
                     borderRadius: 'var(--radius-md)',

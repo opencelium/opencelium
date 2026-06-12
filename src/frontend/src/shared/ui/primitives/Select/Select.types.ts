@@ -37,6 +37,8 @@ export interface SelectProps<T = string> {
     isLoading?: boolean;
     selectRef?: Ref<HTMLInputElement>;
     onRefresh?: () => void;
+    /** Stable selector for e2e tests; emitted as `data-testid`. */
+    testId?: string;
     onCreate?: (value: string) => Promise<{
         label: string;
         value: string;

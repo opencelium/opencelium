@@ -18,12 +18,14 @@ export const MaterialButton: ButtonComponent = ({
     children,
     iconLeft,
     iconRight,
+    testId,
     ...rest
 }) => {
     return (
         <MuiButton
             variant={variantMap[variant]}
             {...rest}
+            data-testid={testId}
             disabled={disabled || loading}
             sx={{
                 position: 'relative',

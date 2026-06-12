@@ -13,6 +13,8 @@ export interface ConfirmActionButtonProps {
     variant?: ButtonVariant;
     disabled?: boolean;
     loading?: boolean;
+    /** Stable selector for e2e tests; emitted as `data-testid`. */
+    testId?: string;
 
     children: ReactNode;
 }

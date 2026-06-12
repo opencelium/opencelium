@@ -33,6 +33,7 @@ export const AntDropzone: DropzoneComponent = ({
     hint,
     className,
     style,
+    testId,
 }) => {
     const { t } = useI18n()
     const [files, setFiles] = useState<File[]>([])
@@ -52,7 +53,7 @@ export const AntDropzone: DropzoneComponent = ({
     }
 
     return (
-        <div className={className} style={{ ...style, width: '100%'}}>
+        <div className={className} data-testid={testId} style={{ ...style, width: '100%'}}>
             <Dragger
                 multiple={multiple}
                 accept={accept}

@@ -12,6 +12,7 @@ export const MaterialDropzone: DropzoneComponent = ({
     hint,
     className,
     style,
+    testId,
 }) => {
     const { t } = useI18n()
     const inputRef = useRef<HTMLInputElement>(null)
@@ -26,6 +27,7 @@ export const MaterialDropzone: DropzoneComponent = ({
         <Box
             className={className}
             style={style}
+            data-testid={testId}
             onClick={() => !disabled && inputRef.current?.click()}
             onDragOver={(e) => {
                 e.preventDefault()

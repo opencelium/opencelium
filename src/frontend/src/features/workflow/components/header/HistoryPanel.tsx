@@ -120,7 +120,8 @@ export function HistoryPanel({ open, items, onClose, onDeleteVersion, onDownload
 			/>
 			<aside
 				ref={state.panelRef}
-				className={`rightDrawer historyPanelDrawer ${open ? 'rightDrawerOpen' : ''}`}
+				data-testid="workflow-history-panel"
+					className={`rightDrawer historyPanelDrawer ${open ? 'rightDrawerOpen' : ''}`}
 			>
 				<div className='drawerHeader'>
 					<div className='drawerTitle'>{t('history.title')}</div>

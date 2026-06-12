@@ -89,15 +89,17 @@ export const DuplicateConnectionForm: React.FC<Props> = ({ row, onClose }) => {
                         labelKey="connection.list.duplicate.titleLabel"
                         readOnly={isSubmitting}
                         autoFocus
+                        testId="connection-duplicate-title"
                     />
                     <FormTextarea
                         name="description"
                         labelKey="connection.list.duplicate.descriptionLabel"
                         readOnly={isSubmitting}
+                        testId="connection-duplicate-description"
                     />
 
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-                        <Button type="default" onClick={onClose} disabled={isSubmitting}>
+                        <Button type="default" onClick={onClose} disabled={isSubmitting} testId="connection-duplicate-cancel">
                             {tEntities('connection.list.duplicate.cancel')}
                         </Button>
                         <Button
@@ -105,6 +107,7 @@ export const DuplicateConnectionForm: React.FC<Props> = ({ row, onClose }) => {
                             type="primary"
                             iconLeft="content-copy"
                             loading={isSubmitting}
+                            testId="connection-duplicate-submit"
                         >
                             {tEntities('connection.list.duplicate.submit')}
                         </Button>

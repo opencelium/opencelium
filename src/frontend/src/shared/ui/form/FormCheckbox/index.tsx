@@ -9,6 +9,7 @@ interface FormCheckboxProps {
     label?: string;
     required?: boolean;
     error?: string;
+    testId?: string;
 }
 
 export const FormCheckbox: React.FC<FormCheckboxProps> = ({
@@ -17,6 +18,7 @@ export const FormCheckbox: React.FC<FormCheckboxProps> = ({
     required,
     error: externalError,
     text,
+    testId,
 }) => {
     const {
         control,
@@ -35,12 +37,14 @@ export const FormCheckbox: React.FC<FormCheckboxProps> = ({
                     label={label}
                     error={error}
                     required={required}
+                    testId={testId}
                 >
                     <Checkbox
                         checked={!!field.value}
                         onChange={field.onChange}
                         label={text}
                         error={!!error}
+                        testId={testId}
                     />
                 </FormControl>
             )}

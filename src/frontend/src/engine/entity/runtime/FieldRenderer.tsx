@@ -10,6 +10,8 @@ import {policyEngine} from "@/engine/policy";
 import {usePolicyContext} from "@/engine/policy/PolicyReactContext.tsx";
 import {FormTextarea} from "@shared/ui/form/FormTextarea";
 import {FormSwitch} from "@shared/ui/form/FormSwitch";
+import {useTestScope} from "@shared/testing/TestScopeContext.tsx";
+import {buildTestId} from "@shared/testing/testId.ts";
 
 
 
@@ -27,6 +29,11 @@ export function FieldRenderer({
 
 
     const policyContext = usePolicyContext()
+    const testScope = useTestScope()
+    // Entity-scoped, auto-derived selector. Override per-field via ui.props.testId.
+    const fieldTestId =
+        (field.ui.props?.testId as string | undefined) ??
+        buildTestId(testScope, 'field', field.name)
     /* ===============================
        2️⃣ EVALUATE POLICY
     ============================== */
@@ -88,6 +95,7 @@ export function FieldRenderer({
                         label={field.label}
                         readOnly={readOnly}
                         {...field.ui.props}
+                        testId={fieldTestId}
                     />
                 )
 
@@ -99,6 +107,7 @@ export function FieldRenderer({
                         label={field.label}
                         readOnly={readOnly}
                         {...field.ui.props}
+                        testId={fieldTestId}
                     />
                 )
 
@@ -110,6 +119,7 @@ export function FieldRenderer({
                         type="password"
                         readOnly={readOnly}
                         {...field.ui.props}
+                        testId={fieldTestId}
                     />
                 )
 
@@ -121,6 +131,7 @@ export function FieldRenderer({
                         readOnly={readOnly}
                         options={field.ui.props?.options ?? []}
                         {...field.ui.props}
+                        testId={fieldTestId}
                     />
                 )
 
@@ -131,6 +142,7 @@ export function FieldRenderer({
                         label={field.label}
                         disabled={readOnly}
                         {...field.ui.props}
+                        testId={fieldTestId}
                     />
                 )
 
@@ -142,6 +154,7 @@ export function FieldRenderer({
                         type="date"
                         readOnly={readOnly}
                         {...field.ui.props}
+                        testId={fieldTestId}
                     />
                 )
 
@@ -152,6 +165,7 @@ export function FieldRenderer({
                         label={field.label}
                         disabled={readOnly}
                         {...field.ui.props}
+                        testId={fieldTestId}
                     />
                 )
 
@@ -162,6 +176,7 @@ export function FieldRenderer({
                         label={field.label}
                         readOnly={readOnly}
                         {...field.ui.props}
+                        testId={fieldTestId}
                     />
                 )
         }

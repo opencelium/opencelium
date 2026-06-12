@@ -20,6 +20,7 @@ export const DuplicateConnectionAction: React.FC<Props> = ({ row }) => {
         dialog.open({
             title: tEntities('connection.list.duplicate.dialogTitle'),
             width: 480,
+            testId: 'connection-duplicate-dialog',
             content: <DuplicateConnectionForm row={row} onClose={dialog.close} />,
         })
     }
@@ -31,6 +32,7 @@ export const DuplicateConnectionAction: React.FC<Props> = ({ row }) => {
                 type={'text'}
                 size={'xs'}
                 onClick={open}
+                testId="connection-duplicate-trigger"
             />
         </Tooltip>
     )

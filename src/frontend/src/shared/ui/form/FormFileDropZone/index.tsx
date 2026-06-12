@@ -11,6 +11,7 @@ interface FormFileDropZoneProps {
     multiple?: boolean
     accept?: string
     disabled?: boolean
+    testId?: string
 }
 
 export const FormFileDropZone: React.FC<FormFileDropZoneProps> = ({
@@ -21,6 +22,7 @@ export const FormFileDropZone: React.FC<FormFileDropZoneProps> = ({
     multiple,
     accept,
     disabled,
+    testId,
 }) => {
     const { control, formState } = useFormContext()
     const error = formState.errors[name]?.message as string | undefined
@@ -30,12 +32,13 @@ export const FormFileDropZone: React.FC<FormFileDropZoneProps> = ({
             name={name}
             control={control}
             render={({ field }) => (
-                <FormControl label={label} labelKey={labelKey} error={error} name={name}>
+                <FormControl label={label} labelKey={labelKey} error={error} name={name} testId={testId}>
                     <Dropzone
                         multiple={multiple}
                         accept={accept}
                         disabled={disabled}
                         hint={hint}
+                        testId={testId}
                         onFiles={(files) =>
                             field.onChange(multiple ? files : (files[0] ?? null))
                         }

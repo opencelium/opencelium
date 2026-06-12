@@ -21,6 +21,7 @@ export const FormTextarea: React.FC<FormTextareaProps> = ({
     showCounter,
     readOnly,
     error: externalError,
+    testId,
 }) => {
     const {
         control,
@@ -76,6 +77,7 @@ export const FormTextarea: React.FC<FormTextareaProps> = ({
                         labelKey={labelKey}
                         hint={counter || hint}
                         error={error}
+                        testId={testId}
                     >
                         <Textarea
                             value={value}
@@ -85,6 +87,7 @@ export const FormTextarea: React.FC<FormTextareaProps> = ({
                             placeholder={placeholder}
                             readOnly={readOnly}
                             error={!!error}
+                            testId={testId}
                         />
                     </FormControl>
                 );
