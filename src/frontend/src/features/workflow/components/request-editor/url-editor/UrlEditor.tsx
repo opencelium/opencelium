@@ -7,6 +7,7 @@ import type { RootState } from '../../../store';
 import type {
 	Connection,
 	EndpointArg,
+	QueryParam,
 } from '../../../types/connection';
 import {
 	updateEndpoint,
@@ -15,14 +16,21 @@ import {
 } from '../../../store/connection/connectionSlice';
 
 import { UrlEndpointField } from './UrlEndpointField';
+import { UrlQueryParamsTable } from './UrlQueryParamsTable';
 import ReferenceGenerator from '../reference-generator/ReferenceGenerator';
 
 import {
+	buildQueryFromParams,
 	buildQueryParamsFromEndpoint,
 	createId,
+	decodeQueryParamValue,
+	ensureTemplateRow,
 	getInlineVisualLength,
 	normalizeReference,
+	splitEndpoint,
 	stripMockActiveFromEndpoint,
+	stripMockActiveRows,
+	stripTemplateRows,
 } from './urlEditor.utils';
 import {
 	setFocusByCaretPositionInDivEditable,
@@ -31,6 +39,12 @@ import {
 const TOKEN_ID_RE = /#{%\s*([A-Za-z0-9_-]+)\s*%}/g;
 const extractTokenIds = (s: string) =>
 	Array.from((s || '').matchAll(TOKEN_ID_RE), (m) => m[1]);
+
+type QueryCaretTarget = {
+	rowId: string;
+	field: 'key' | 'value';
+	caret: number;
+};
 
 const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 	const { method } = useMethodContext();
@@ -43,6 +57,7 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 	const lastKnownCaretPosRef = useRef(0);
 	const lastKnownRawCaretPosRef = useRef(0);
 	const selectedEndpointTokenIndexRef = useRef<number | null>(null);
+	const queryCaretTargetRef = useRef<QueryCaretTarget | null>(null);
 
 	const initialEndpoint = stripMockActiveFromEndpoint(
 		method.request.endpoint || '',
@@ -58,6 +73,15 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 	const endpointArgsRef = useRef<Record<string, EndpointArg>>({
 		...(method.request.endpointArgs || {}),
 	});
+	const [queryParams, setQueryParams] = useState<QueryParam[]>(() => {
+		const stored = stripMockActiveRows(
+			(method.request.queryParams || []).map((param) => ({ ...param })),
+		) as QueryParam[];
+		return stored.length
+			? ensureTemplateRow(stored)
+			: (buildQueryParamsFromEndpoint(initialEndpoint) as QueryParam[]);
+	});
+	const queryParamsRef = useRef<QueryParam[]>(queryParams);
 
 	const [
 		isEndpointReferenceGeneratorOpen,
@@ -70,9 +94,14 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 		rawRef.current = endpointRaw;
 	}, [endpointRaw]);
 
+	useEffect(() => {
+		queryParamsRef.current = queryParams;
+	}, [queryParams]);
+
 	const dispatchSaveAll = useCallback(
 		(
 			nextEndpoint: string,
+			nextQueryParams: QueryParam[],
 			nextEndpointArgs: Record<string, EndpointArg>,
 		) => {
 			if (readOnly) return;
@@ -86,7 +115,7 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 			dispatch(
 				updateQueryParams({
 					methodId: method.id,
-					queryParams: buildQueryParamsFromEndpoint(nextEndpoint, undefined, false),
+					queryParams: stripTemplateRows(nextQueryParams),
 				} as any),
 			);
 
@@ -109,9 +138,25 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 		if (readOnly) return;
 		dispatchSaveAll(
 			rawRef.current || endpointRaw || '',
+			queryParams,
 			endpointArgsRef.current,
 		);
-	}, [dispatchSaveAll, endpointRaw, readOnly]);
+	}, [dispatchSaveAll, endpointRaw, queryParams, readOnly]);
+
+	const commitParamsToEndpoint = useCallback(
+		(nextParams: QueryParam[]) => {
+			const current = rawRef.current || endpointRaw || '';
+			const { base } = splitEndpoint(current);
+			const query = buildQueryFromParams(nextParams);
+			const finalEndpoint = query ? `${base}?${query}` : base;
+
+			rawRef.current = finalEndpoint;
+			setEndpointRaw(finalEndpoint);
+			lastDispatchedEndpointRef.current = finalEndpoint;
+			dispatchSaveAll(finalEndpoint, nextParams, endpointArgsRef.current);
+		},
+		[dispatchSaveAll, endpointRaw],
+	);
 
 	const createArgTokenForInlineEditors = useCallback(
 		(sourceRefRaw: string, existingTokenIds: string[]) => {
@@ -196,6 +241,14 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 
 		setEndpointRaw(incomingEndpoint);
 		rawRef.current = incomingEndpoint;
+		const stored = stripMockActiveRows(
+			(method.request.queryParams || []).map((param) => ({ ...param })),
+		) as QueryParam[];
+		setQueryParams(
+			stored.length
+				? ensureTemplateRow(stored)
+				: (buildQueryParamsFromEndpoint(incomingEndpoint) as QueryParam[]),
+		);
 
 		lastKnownCaretPosRef.current = getInlineVisualLength(
 			incomingEndpoint,
@@ -222,6 +275,9 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 
 		setEndpointRaw(incoming);
 		rawRef.current = incoming;
+		setQueryParams(
+			(prev) => buildQueryParamsFromEndpoint(incoming, prev) as QueryParam[],
+		);
 		lastKnownCaretPosRef.current = getInlineVisualLength(
 			incoming,
 			endpointArgsRef.current,
@@ -235,6 +291,7 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 			if (readOnly) return;
 			dispatchSaveAll(
 				rawRef.current || '',
+				queryParamsRef.current,
 				endpointArgsRef.current,
 			);
 		};
@@ -242,6 +299,58 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 
 	const applyReferenceToEndpoint = useCallback(
 		(reference: string) => {
+			const queryTarget = queryCaretTargetRef.current;
+			if (queryTarget) {
+				const row = queryParams.find((param) => param.id === queryTarget.rowId);
+				if (row) {
+					const storedValue = String(row[queryTarget.field] ?? '');
+					const decodedValue =
+						queryTarget.field === 'value'
+							? decodeQueryParamValue(storedValue)
+							: storedValue;
+					const currentValue =
+						queryTarget.field === 'value' &&
+						extractTokenIds(storedValue).length === 0 &&
+						extractTokenIds(decodedValue).length > 0
+							? decodedValue
+							: storedValue;
+					const { token } = createArgTokenForInlineEditors(
+						reference,
+						extractTokenIds(currentValue),
+					);
+					const insertAt = Math.max(
+						0,
+						Math.min(queryTarget.caret, currentValue.length),
+					);
+					const nextValue = `${currentValue.slice(0, insertAt)}${token}${currentValue.slice(
+						insertAt,
+					)}`;
+					const nextParams = ensureTemplateRow(
+						queryParams.map((param) =>
+							param.id === queryTarget.rowId
+								? { ...param, [queryTarget.field]: nextValue, enabled: true }
+								: param,
+						),
+					);
+					const current = rawRef.current || endpointRaw || '';
+					const { base } = splitEndpoint(current);
+					const query = buildQueryFromParams(nextParams);
+					const nextRaw = query ? `${base}?${query}` : base;
+
+					queryCaretTargetRef.current = {
+						...queryTarget,
+						caret: insertAt + token.length,
+					};
+					rawRef.current = nextRaw;
+					setEndpointRaw(nextRaw);
+					setQueryParams(nextParams);
+					lastDispatchedEndpointRef.current = nextRaw;
+					dispatchSaveAll(nextRaw, nextParams, endpointArgsRef.current);
+					setIsEndpointReferenceGeneratorOpen(false);
+					return;
+				}
+			}
+
 			const currentRaw = rawRef.current || endpointRaw || '';
 			const { token } = createArgTokenForInlineEditors(
 				reference,
@@ -263,8 +372,13 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 			lastKnownRawCaretPosRef.current = nextRawCaret;
 			rawRef.current = nextRaw;
 			setEndpointRaw(nextRaw);
+			const nextQueryParams = buildQueryParamsFromEndpoint(
+				nextRaw,
+				queryParams,
+			) as QueryParam[];
+			setQueryParams(nextQueryParams);
 			lastDispatchedEndpointRef.current = nextRaw;
-			dispatchSaveAll(nextRaw, endpointArgsRef.current);
+			dispatchSaveAll(nextRaw, nextQueryParams, endpointArgsRef.current);
 			setIsEndpointReferenceGeneratorOpen(false);
 			requestAnimationFrame(() => {
 				requestAnimationFrame(() => {
@@ -275,7 +389,53 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 				});
 			});
 		},
-		[createArgTokenForInlineEditors, dispatchSaveAll, endpointRaw],
+		[createArgTokenForInlineEditors, dispatchSaveAll, endpointRaw, queryParams],
+	);
+
+	const onChangeParam = useCallback(
+		(id: string, patch: Partial<QueryParam>) => {
+			let next = queryParams.map((param) =>
+				param.id === id ? { ...param, ...patch } : param,
+			);
+
+			const index = next.findIndex((param) => param.id === id);
+			if (index >= 0) {
+				const row = next[index];
+				const becameNonEmpty =
+					(row.key || '').trim() !== '' || (row.value || '').trim() !== '';
+				const prevRow = queryParams[index];
+				const prevWasTemplate =
+					prevRow &&
+					!prevRow.enabled &&
+					(prevRow.key || '').trim() === '' &&
+					(prevRow.value || '').trim() === '';
+
+				if (prevWasTemplate && becameNonEmpty) {
+					next[index] = { ...row, enabled: true };
+				}
+			}
+
+			next = ensureTemplateRow(next);
+			setQueryParams(next);
+			commitParamsToEndpoint(next);
+		},
+		[commitParamsToEndpoint, queryParams],
+	);
+
+	const onToggleEnabled = useCallback(
+		(id: string, enabled: boolean) => onChangeParam(id, { enabled }),
+		[onChangeParam],
+	);
+
+	const removeParamRow = useCallback(
+		(id: string) => {
+			const next = ensureTemplateRow(
+				queryParams.filter((param) => param.id !== id),
+			);
+			setQueryParams(next);
+			commitParamsToEndpoint(next);
+		},
+		[commitParamsToEndpoint, queryParams],
 	);
 
 	if (!connection) return null;
@@ -294,6 +454,7 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 				lastRawCaretRef={lastKnownRawCaretPosRef}
 				selectedTokenIndexRef={selectedEndpointTokenIndexRef}
 				onRawCaretChange={(rawCaret, visualCaret) => {
+					queryCaretTargetRef.current = null;
 					lastKnownRawCaretPosRef.current = rawCaret;
 					lastKnownCaretPosRef.current = visualCaret;
 				}}
@@ -308,6 +469,9 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 					}
 					setEndpointRaw(nextRaw);
 					rawRef.current = nextRaw;
+					setQueryParams(
+						(prev) => buildQueryParamsFromEndpoint(nextRaw, prev) as QueryParam[],
+					);
 					lastDispatchedEndpointRef.current = null;
 				}}
 				onBlurCommit={saveAllNow}
@@ -324,6 +488,18 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 						</Button>
 					) : null
 				}
+			/>
+
+			<UrlQueryParamsTable
+				readOnly={readOnly}
+				rows={queryParams}
+				endpointArgs={endpointArgsState}
+				onToggleEnabled={onToggleEnabled}
+				onChangeParam={onChangeParam}
+				onRemoveParamRow={removeParamRow}
+				onCaretChange={(target) => {
+					queryCaretTargetRef.current = target;
+				}}
 			/>
 
 			{!readOnly && isEndpointReferenceGeneratorOpen ? (

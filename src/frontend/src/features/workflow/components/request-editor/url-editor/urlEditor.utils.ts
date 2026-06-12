@@ -218,7 +218,7 @@ export function removeInlineTokenByIndex(raw: string, tokenIndex: number): strin
 
 type ParsedEndpoint = { base: string; queryRaw: string; hasQuestion: boolean };
 
-const splitEndpoint = (endpoint: string): ParsedEndpoint => {
+export const splitEndpoint = (endpoint: string): ParsedEndpoint => {
 	const s = endpoint || '';
 	const i = s.indexOf('?');
 	return i === -1 ? { base: s, queryRaw: '', hasQuestion: false } : { base: s.slice(0, i), queryRaw: s.slice(i + 1), hasQuestion: true };
@@ -232,7 +232,13 @@ const parseQueryToPairs = (queryRaw: string) =>
 
 type QueryParamLite = { id: string; key: string; value: string; enabled: boolean };
 
-function ensureTemplateRow<T extends QueryParamLite>(params: T[]): T[] {
+export const buildQueryFromParams = (params: QueryParamLite[]) =>
+	(params || [])
+		.filter((p) => p.enabled && p.key.trim() !== '')
+		.map((p) => `${p.key}=${p.value ?? ''}`)
+		.join('&');
+
+export function ensureTemplateRow<T extends QueryParamLite>(params: T[]): T[] {
 	const last = params[params.length - 1];
 	const isTemplate = !!last && !last.enabled && !last.key.trim() && !last.value.trim();
 	return isTemplate
@@ -240,15 +246,15 @@ function ensureTemplateRow<T extends QueryParamLite>(params: T[]): T[] {
 		: [...(params.length ? params : []), ({ id: createId(), key: '', value: '', enabled: false } as T)];
 }
 
-const isTemplateRow = (p: QueryParamLite) => !p.enabled && !p.key.trim() && !p.value.trim();
+export const isTemplateRow = (p: QueryParamLite) => !p.enabled && !p.key.trim() && !p.value.trim();
 
-const stripTemplateRows = <T extends QueryParamLite>(params: T[]) =>
+export const stripTemplateRows = <T extends QueryParamLite>(params: T[]) =>
 	(params || []).filter((p) => !isTemplateRow(p) && p.key.trim() !== '');
 
 const isMockActiveRow = (p: QueryParamLite) =>
 	p.key.trim().toLowerCase() === 'mock' && String(p.value ?? '').trim().toLowerCase() === 'active';
 
-const stripMockActiveRows = <T extends QueryParamLite>(params: T[]) =>
+export const stripMockActiveRows = <T extends QueryParamLite>(params: T[]) =>
 	(params || []).filter((p) => !isMockActiveRow(p));
 
 export function stripMockActiveFromEndpoint(endpointStr: string) {
@@ -283,3 +289,28 @@ export const sanitizeUrlInputValue = (s: string) =>
 
 export const shouldBlockUrlKeyInput = (key: string) =>
 	key.length === 1 && URL_FORBIDDEN_INPUT_SINGLE_RE.test(key);
+
+const transformQueryTextPreservingRefs = (
+	value: string,
+	transform: (part: string) => string,
+) =>
+	buildInlineParts(value || '')
+		.map((part) => (part.kind === 'arg' ? part.value : transform(part.value)))
+		.join('');
+
+const safeDecodeURIComponent = (value: string) => {
+	try {
+		return decodeURIComponent((value || '').replace(/\+/g, ' '));
+	} catch {
+		return value;
+	}
+};
+
+export const decodeQueryParamValue = (value: string) =>
+	transformQueryTextPreservingRefs(value, safeDecodeURIComponent);
+
+export const encodeQueryParamValue = (value: string) =>
+	transformQueryTextPreservingRefs(
+		decodeQueryParamValue(value || ''),
+		encodeURIComponent,
+	);
