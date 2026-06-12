@@ -147,7 +147,7 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 
 	return (
 		<>
-			<div className='headerCard'>
+			<div className={`headerCard ${nameError ? 'headerCardWithInlineError' : ''}`}>
 				<div className='headerInlineInfo'>
 					{loading ? (
 						<span className="headerInlineLoading" aria-hidden />

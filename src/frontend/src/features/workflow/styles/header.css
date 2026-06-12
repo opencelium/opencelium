@@ -32,8 +32,8 @@
 .headerInlineFieldWrap {
   display: inline-flex;
   flex-direction: column;
-  gap: 4px;
   min-width: 0;
+  position: relative;
 }
 
 .headerInlineInput {
@@ -60,9 +60,13 @@
 }
 
 .headerInlineErrorMessage {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
   color: var(--color-status-error-fg);
   font-size: 12px;
   line-height: 1.2;
+  white-space: nowrap;
 }
 
 .headerInlineNameInput {
