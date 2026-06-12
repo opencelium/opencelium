@@ -7,6 +7,7 @@ import { LegacyWebhookReferenceSelect } from './LegacyWebhookReferenceSelect';
 import { LegacyResponseFieldSelect } from './LegacyResponseFieldSelect';
 import { webhookSnippet } from './bodyWebhook';
 import { Radio } from '@shared/ui/primitives/Radio';
+import { ConnectorIcon } from '@entities/connector/ui/ConnectorIcon';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import './bodyLegacy.css';
 
@@ -100,20 +101,46 @@ export function LegacyBodyReferenceGenerator({ connection, currentMethod, onAppl
             placeholder={t('placeholders.selectMethod')}
             value={methodId}
             className='bodyLegacyGeneratorSelect'
+            showSearch
+            filterOption={(input, option) => {
+              const term = input.toLowerCase();
+              const data = option as { label?: unknown; connectorTitle?: string };
+              return (
+                String(data?.label ?? '').toLowerCase().includes(term) ||
+                String(data?.connectorTitle ?? '').toLowerCase().includes(term)
+              );
+            }}
+            // Pin the connector icon as a prefix so it stays visible while typing;
+            // antd indents the search text after it.
+            prefix={selectedMethod ? (
+              <span title={selectedMethod.connector.title} style={{ display: 'inline-flex' }}>
+                <ConnectorIcon icon={selectedMethod.connector.icon} size={18} />
+              </span>
+            ) : undefined}
             onChange={(value) => {
               setMethodId(value);
               setField(undefined);
             }}
             options={methods.map((method) => ({
-              label: (
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: method.color, display: 'inline-block' }} />
-                  <span>{method.label || method.name}</span>
-                </span>
-              ),
+              label: method.label || method.name,
               value: method.id,
+              connectorTitle: method.connector.title,
+              connectorIcon: method.connector.icon ?? null,
             }))}
+            optionRender={(option) => {
+              const data = option.data as { connectorTitle?: string; connectorIcon?: string | null };
+              return (
+                <span style={{ display: 'flex', width: '100%', alignItems: 'center', gap: 8 }}>
+                  <ConnectorIcon icon={data.connectorIcon} size={18} style={{ flexShrink: 0 }} />
+                  <span style={{ flex: '1 1 auto', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{option.label}</span>
+                  <span title={data.connectorTitle} style={{ flex: '0 0 auto', maxWidth: '45%', paddingLeft: 12, color: 'var(--color-text-secondary)', fontSize: 11, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {data.connectorTitle}
+                  </span>
+                </span>
+              );
+            }}
             getPopupContainer={() => document.body}
+            popupMatchSelectWidth={320}
             styles={{ popup: { root: { zIndex: 13010 } } }}
           />
           <div className='bodyLegacyGeneratorResponse compactRadioGroup'>

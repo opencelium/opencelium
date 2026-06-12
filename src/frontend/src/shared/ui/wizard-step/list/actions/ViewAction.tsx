@@ -23,6 +23,7 @@ export const ViewAction: React.FC<ViewActionProps> = ({ entity, row, rowId, conf
 
         const id = dialog.open({
             width: 1000,
+            top: 18,
             content: (
                 <EntityDialogContent
                     entityName={entity.name}
@@ -35,7 +36,7 @@ export const ViewAction: React.FC<ViewActionProps> = ({ entity, row, rowId, conf
     };
 
     return (
-        <Tooltip content={tCommon('actions.view')}>
+        <Tooltip content={tCommon('actions.view')} placement="right">
             <IconButton iconProps={{ name: 'info', color: 'primary' }} type={'text'} size={'xs'} onClick={handleClick} />
         </Tooltip>
     );

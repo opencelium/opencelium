@@ -1,15 +1,17 @@
-import { useMemo, useState } from 'react';
-import { DownOutlined, RightOutlined } from '@ant-design/icons';
-import { Button } from 'antd';
+import { useMemo } from 'react';
 import { useMethodContext } from '../../../providers/MethodContext';
 import { useTheme } from '@shared/theme/hooks/useTheme';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { useRequestObjectEditor } from './useRequestObjectEditor';
 import ReferenceEnhancement from '../enhancement/Enhancement';
 import ReactJson from 'react-json-view';
+import { Splitter } from '@shared/ui/primitives/Splitter';
+import { Collapse } from '@shared/ui/primitives/Collapse';
+import type { CollapseItem } from '@shared/ui/primitives/Collapse/Collapse.types';
+import { Empty } from '@shared/ui/primitives/Empty';
+import { ReferenceInfo } from '../reference-info/ReferenceInfo';
 import { splitReferences } from '../body-editor/bodyReference';
 import { setBodySelectionValue } from '../body-editor/bodyValue';
-import { LegacyReferenceInfoSection } from '../body-editor/LegacyReferenceInfoSection';
 import { BodyPointer } from '../body-editor/BodyPointer';
 import { BodyWebhookReference } from '../body-editor/BodyWebhookReference';
 import { getJsonReferenceField } from '../body-editor/bodyJsonHooks';
@@ -54,8 +56,11 @@ export function LegacyRequestJsonEditor({ messageProperty, source, readOnly }: P
   const { method } = useMethodContext();
   const { themeMode } = useTheme();
   const { t } = useI18n('workflow');
-  const [isDataOpen, setIsDataOpen] = useState(true);
   const editor = useRequestObjectEditor({ messageProperty, source });
+  const hasReferenceInfo = !!editor.connection?.fieldBindings.some((binding) => {
+    const result = binding.enhancement?.args?.RESULT_VAR;
+    return typeof result === 'string' && result.startsWith(`${method.color}.(request).${messageProperty}.$`);
+  });
   const PatchedReactJson = ReactJson as unknown as React.ComponentType<Record<string, unknown>>;
 
   const updateReferencedField = (matcher: (value: string) => string | null) => {
@@ -160,53 +165,81 @@ export function LegacyRequestJsonEditor({ messageProperty, source, readOnly }: P
     },
   }), [editor.connection, editor.method, messageProperty, method.id]);
 
-  return (
-    <div className='bodyLegacyLayout'>
-      <div className='bodyLegacyLeft'>
-        <LegacyReferenceInfoSection messageProperty={messageProperty} onReferenceClick={editor.setSelectedEnhanceId} />
-        <div className='bodyLegacyDataHeader'>
-          <b>{t('requestData')}</b>
-          <Button type='text' size='small' className='bodyLegacyCollapseButton' icon={isDataOpen ? <DownOutlined /> : <RightOutlined />} onClick={() => setIsDataOpen((value) => !value)} />
-        </div>
-        {isDataOpen ? (
-          <div
-            className='bodyLegacyJsonWrap'
-            onMouseDownCapture={(event) => {
-              const target = event.target as HTMLElement | null;
-              const trigger = target?.closest('.click-to-reference') as HTMLElement | null;
-              if (!trigger) return;
-              const row = (trigger.closest('.variable-row') as HTMLElement | null) || (trigger.closest('.object-key-val') as HTMLElement | null) || trigger;
-              const container = (trigger.closest('.bodyLegacyLeft') as HTMLElement | null) || (trigger.closest('.bodyLegacyJsonWrap') as HTMLElement | null);
-              const rect = row.getBoundingClientRect();
-              const containerRect = container?.getBoundingClientRect();
-              setLastBodyReferenceTriggerRect({ left: rect.left, top: rect.top, width: rect.width, height: rect.height, containerLeft: containerRect?.left, containerRight: containerRect?.right });
+  const leftItems: CollapseItem[] = [
+    {
+      key: 'referenceInfo',
+      label: t('referenceInfo.legacyTitle'),
+      content: hasReferenceInfo ? (
+        <ReferenceInfo messageProperty={messageProperty} data={{}} onReferenceClick={editor.setSelectedEnhanceId} />
+      ) : (
+        <Empty description={t('referenceInfo.empty')} />
+      ),
+    },
+    {
+      key: 'requestData',
+      label: t('requestData'),
+      content: (
+        <div
+          className='bodyLegacyJsonWrap'
+          onMouseDownCapture={(event) => {
+            const target = event.target as HTMLElement | null;
+            const trigger = target?.closest('.click-to-reference') as HTMLElement | null;
+            if (!trigger) return;
+            const row = (trigger.closest('.variable-row') as HTMLElement | null) || (trigger.closest('.object-key-val') as HTMLElement | null) || trigger;
+            const container = (trigger.closest('.bodyLegacyLeft') as HTMLElement | null) || (trigger.closest('.bodyLegacyJsonWrap') as HTMLElement | null);
+            const rect = row.getBoundingClientRect();
+            const containerRect = container?.getBoundingClientRect();
+            setLastBodyReferenceTriggerRect({ left: rect.left, top: rect.top, width: rect.width, height: rect.height, containerLeft: containerRect?.left, containerRight: containerRect?.right });
+          }}
+        >
+          <PatchedReactJson
+            name={false}
+            collapsed={false}
+            src={source}
+            onSelect={editor.onSelect}
+            onEdit={readOnly ? false : editor.syncSource}
+            onDelete={readOnly ? false : editor.syncSource}
+            onAdd={readOnly ? false : editor.syncSource}
+            PointerComponent={pointerComponent}
+            ReferenceComponent={referenceComponent}
+            WebhookComponent={webhookComponent}
+            onReferenceClick={(_event: unknown, data: Record<string, unknown>) => {
+              const field = getJsonReferenceField(data);
+              if (!field) return;
+              editor.selectField(field.namespace, field.name, field.value);
             }}
-          >
-            <PatchedReactJson
-              name={false}
-              collapsed={false}
-              src={source}
-              onSelect={editor.onSelect}
-              onEdit={readOnly ? false : editor.syncSource}
-              onDelete={readOnly ? false : editor.syncSource}
-              onAdd={readOnly ? false : editor.syncSource}
-              PointerComponent={pointerComponent}
-              ReferenceComponent={referenceComponent}
-              WebhookComponent={webhookComponent}
-              onReferenceClick={(_event: unknown, data: Record<string, unknown>) => {
-                const field = getJsonReferenceField(data);
-                if (!field) return;
-                editor.selectField(field.namespace, field.name, field.value);
-              }}
-              theme={themeMode === 'dark' ? 'twilight' : 'rjv-default'}
-              style={{ wordBreak: 'break-word', padding: '8px 0', background: 'transparent', fontSize: 13 }}
-            />
-          </div>
-        ) : null}
-      </div>
-      <div className='bodyLegacyEnhancement'>
-        <ReferenceEnhancement readOnly={readOnly} enhancement={editor.currentEnhancement} />
-      </div>
-    </div>
+            theme={themeMode === 'dark' ? 'twilight' : 'rjv-default'}
+            style={{ wordBreak: 'break-word', padding: '8px 0', background: 'transparent', fontSize: 13 }}
+          />
+        </div>
+      ),
+    },
+  ];
+
+  return (
+    <Splitter
+      className='bodyLegacyLayout'
+      panels={[
+        {
+          key: 'left',
+          defaultSize: '52%',
+          min: '32%',
+          max: '74%',
+          content: (
+            <div className='bodyLegacyLeft'>
+              <Collapse className='bodyLegacyLeftCollapse' items={leftItems} defaultActiveKeys={['requestData']} />
+            </div>
+          ),
+        },
+        {
+          key: 'enhancement',
+          content: (
+            <div className='bodyLegacyEnhancement'>
+              <ReferenceEnhancement readOnly={readOnly} enhancement={editor.currentEnhancement} />
+            </div>
+          ),
+        },
+      ]}
+    />
   );
 }

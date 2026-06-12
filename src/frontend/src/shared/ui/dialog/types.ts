@@ -5,6 +5,7 @@ export interface OpenDialogOptions {
     content: ReactNode;
     footer?: ReactNode;
     width?: number | string;
+    top?: number | string;
     closable?: boolean;
     fullscreen?: boolean;
     maximizable?: boolean;

@@ -3,6 +3,7 @@ import en from '@entities/connection/i18n/en.json'
 import de from '@entities/connection/i18n/de.json'
 import type { Connection } from '@entities/connection/model/types'
 import { DownloadAsTemplateAction } from '@entities/connection/ui/DownloadAsTemplateAction'
+import { DuplicateConnectionAction } from '@entities/connection/ui/DuplicateConnectionAction'
 import { CreateConnectionButton } from '@entities/connection/ui/CreateConnectionButton'
 import { createEntityCommands } from '@/engine/entity/command/createEntityCommands'
 import { resolveConnectionTitles } from '@entities/connection/command/resolvers/resolveConnectionTitles'
@@ -54,6 +55,16 @@ export const connectionDefinition: EntityDefinition = {
         ],
         actions: [
             {
+                type: 'custom',
+                key: 'duplicate-connection',
+                render: ({ row }) => <DuplicateConnectionAction row={row as Connection} />,
+            },
+            {
+                type: 'custom',
+                key: 'download-as-template',
+                render: ({ row }) => <DownloadAsTemplateAction row={row as Connection} />,
+            },
+            {
                 type: 'view',
                 buildNavigationUrl: (_entity, value) => `/workflow/view/${encodeURIComponent(value)}`,
             },
@@ -62,11 +73,6 @@ export const connectionDefinition: EntityDefinition = {
                 buildNavigationUrl: (_entity, value) => `/workflow/update/${encodeURIComponent(value)}`,
             },
             { type: 'delete' },
-            {
-                type: 'custom',
-                key: 'download-as-template',
-                render: ({ row }) => <DownloadAsTemplateAction row={row as Connection} />,
-            },
         ],
     },
 

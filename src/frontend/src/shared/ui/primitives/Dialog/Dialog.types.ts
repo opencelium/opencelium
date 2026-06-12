@@ -9,6 +9,8 @@ export interface DialogProps {
     footer?: ReactNode;
 
     width?: number | string;
+    /** Distance from the top of the viewport. Defaults to the kit's centered-ish position; ignored when fullscreen. */
+    top?: number | string;
     closable?: boolean;
     fullscreen?: boolean;
     /** Shows a maximize/restore toggle next to the close icon. `fullscreen` seeds its initial state. */

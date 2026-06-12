@@ -135,17 +135,19 @@ export function WorkflowLogs() {
 						</button>
 					</Tooltip>
 				)}
-				<button
-					className='logsHeaderIconButton'
-					type='button'
-					onClick={toggleMinimized}
-					aria-label={tLogs(isExpanded ? 'live.collapse' : 'live.expand')}
-				>
-					<ChevronUp
-						size={18}
-						className={`logsCaret ${isExpanded ? 'logsCaretExpanded' : ''}`}
-					/>
-				</button>
+				<Tooltip content={tLogs(isExpanded ? 'live.collapse' : 'live.expand')}>
+					<button
+						className='logsHeaderIconButton'
+						type='button'
+						onClick={toggleMinimized}
+						aria-label={tLogs(isExpanded ? 'live.collapse' : 'live.expand')}
+					>
+						<ChevronUp
+							size={18}
+							className={`logsCaret ${isExpanded ? 'logsCaretExpanded' : ''}`}
+						/>
+					</button>
+				</Tooltip>
 			</div>
 
 			{isExpanded && (

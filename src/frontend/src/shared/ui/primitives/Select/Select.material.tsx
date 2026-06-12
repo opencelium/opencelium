@@ -111,7 +111,17 @@ export const MaterialSelect: SelectComponent = ({
                 if (typeof option === 'string') return option;
                 if (option.isCreateExternal) return '';
                 if (option.inputValue) return option.inputValue;
-                return option.label;
+                return option.searchLabel ?? (typeof option.label === 'string' ? option.label : '');
+            }}
+            renderOption={(props, option) => {
+                const { key, ...rest } = props as React.HTMLAttributes<HTMLLIElement> & {
+                    key?: React.Key;
+                };
+                return (
+                    <li key={key} {...rest}>
+                        {option.label}
+                    </li>
+                );
             }}
             renderInput={(params) => (
                 <TextField

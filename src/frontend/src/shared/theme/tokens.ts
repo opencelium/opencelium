@@ -28,6 +28,8 @@ export type ThemeTokens = {
             page: string
             surface: string
             elevated: string
+            /** Fill for form controls (inputs, selects, pickers); kept distinct from surface so fields don't melt into cards. */
+            input: string
             hover: string
             disabled: string
         }

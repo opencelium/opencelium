@@ -60,6 +60,7 @@ export interface MethodWithId extends Method {
     connector: {
         connectorId: number,
         title: string,
+        icon?: string | null,
     },
 }
 

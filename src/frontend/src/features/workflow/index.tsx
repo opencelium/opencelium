@@ -195,6 +195,9 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     title: '[Empty Name]',
     description: '[Empty Description]',
   });
+  // The title as last loaded/saved on the backend — used to skip the uniqueness
+  // check when the title is unchanged (a workflow's own title always "exists").
+  const [persistedTitle, setPersistedTitle] = useState('');
   const [loadedFieldBindings, setLoadedFieldBindings] = useState<any[] | undefined>();
   const cleanDeletedNodeFieldBindings = useCallback((deletedNodeIds: string[], previousNodes: WorkflowNodeModel[]) => {
     const deletedIds = new Set(deletedNodeIds);
@@ -280,6 +283,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         if (cancelled) return;
         workflow.setWorkflowGraph(state.nodes, state.edges, state.viewport, { centerStart: true });
         setHeaderState({ title: state.title, description: toDisplayDescription(state.description) });
+        setPersistedTitle(state.title);
         setLoadedFieldBindings(state.fieldBindings);
         setHistoryVersions(state.versions);
         setSelectedHistoryVersionId((currentSelectedId) =>
@@ -320,6 +324,19 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     setChangeSource('manual');
   }, [baselineSnapshot, changeSource, currentChangeSnapshot, historyPreviewSnapshot, isLoading]);
 
+  // Block reusing another workflow's title; surfaced inline on the header title
+  // field. Skipped when the title is unchanged from the loaded/saved one — a
+  // workflow's own title always reports as taken.
+  const validateTitle = useCallback(async (title: string): Promise<string | null> => {
+    const trimmed = title.trim();
+    if (!trimmed || trimmed === '[Empty Name]' || trimmed === persistedTitle) return null;
+    const check = await apiExecutor({ url: `/connection/check/${encodeURIComponent(trimmed)}`, method: 'GET' });
+    if (check && typeof check === 'object' && 'message' in check && (check as { message?: string }).message === 'EXISTS') {
+      return t('messages.workflowNameExists');
+    }
+    return null;
+  }, [persistedTitle, t]);
+
   const handleSave = async ({ title, description, comment }: { title: string; description: string; comment: string }) => {
     if (!title.trim() || title.trim() === '[Empty Name]') {
       message.error(t('messages.enterWorkflowName'));
@@ -349,6 +366,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     const savedId = (response.data as any)?.connectionId;
     const nextConnectionId = activeConnectionId ?? savedId;
     setHeaderState({ title, description: toDisplayDescription(normalizedDescription) });
+    setPersistedTitle(title);
     setBaselineSnapshot(buildWorkflowChangeSnapshot({
       connectionId: nextConnectionId ? String(nextConnectionId) : activeConnectionId,
       title,
@@ -551,6 +569,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         initialDescription={headerState.description}
         onChange={setHeaderState}
         onMenuItemSelect={handleHeaderMenuSelect}
+        validateTitle={validateTitle}
         onSave={handleSave}
         saveDisabled={isLoading || !hasConnectionChanges}
         onOpenHistory={handleOpenHistory}

@@ -25,6 +25,19 @@
       "tooltip": "Als Vorlage herunterladen",
       "success": "Vorlage \"{{name}}\" heruntergeladen",
       "error": "Vorlage konnte nicht heruntergeladen werden"
+    },
+    "duplicate": {
+      "tooltip": "Duplizieren",
+      "dialogTitle": "Workflow duplizieren",
+      "titleLabel": "Titel",
+      "descriptionLabel": "Beschreibung",
+      "titleRequired": "Titel ist ein Pflichtfeld",
+      "titleExists": "Ein Workflow mit diesem Titel existiert bereits",
+      "defaultTitle": "{{title}} (Kopie)",
+      "cancel": "Abbrechen",
+      "submit": "Duplizieren",
+      "success": "Workflow \"{{name}}\" dupliziert",
+      "error": "Workflow konnte nicht dupliziert werden"
     }
   },
   "fields": {

@@ -41,9 +41,12 @@ import {
 	updateRuleProperties,
 	validateConditionTreeWithErrors,
 } from './conditionBuilder.utils';
+import { LoopInfoPanel } from './LoopInfoPanel';
 import { Radio } from '@shared/ui/primitives/Radio';
+import { ConnectorIcon } from '@entities/connector/ui/ConnectorIcon';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import '../request-editor/body-editor/bodyLegacy.css';
+import '../dialogHeader.css';
 import './conditionBuilder.css';
 
 type Props = {
@@ -194,6 +197,32 @@ const getCurrentLoopIterator = (
 	return ITERATOR_NAMES[getLoopAncestors(connection, node).length];
 };
 
+// The collection the loop iterates over is the first rule's left-hand reference.
+const getFirstRuleLeftField = (group: ConditionGroup): string | undefined => {
+	for (const item of group.items ?? []) {
+		if (item.type === 'rule') {
+			if (item.properties?.leftField) return item.properties.leftField;
+		} else {
+			const nested = getFirstRuleLeftField(item);
+			if (nested) return nested;
+		}
+	}
+	return undefined;
+};
+
+// The chosen loop operator (for / forin / SplitString) — taken from the first rule.
+const getFirstRuleOperator = (group: ConditionGroup): string | undefined => {
+	for (const item of group.items ?? []) {
+		if (item.type === 'rule') {
+			if (item.properties?.operator) return item.properties.operator;
+		} else {
+			const nested = getFirstRuleOperator(item);
+			if (nested) return nested;
+		}
+	}
+	return undefined;
+};
+
 function SourceSwitcher({
 	value,
 	onChange,
@@ -248,22 +277,47 @@ function MethodSelect({
 	onChange: (value?: string) => void;
 }) {
 	const { t } = useI18n('workflow');
+	const selected = methods.find((method) => method.id === value);
 	return (
 		<Select
 			placeholder={t('placeholders.selectMethod')}
 			value={value}
 			className="conditionMethodSelect"
+			showSearch
+			filterOption={(input, option) => {
+				const term = input.toLowerCase();
+				const data = option as { label?: unknown; connectorTitle?: string };
+				return (
+					String(data?.label ?? '').toLowerCase().includes(term) ||
+					String(data?.connectorTitle ?? '').toLowerCase().includes(term)
+				);
+			}}
+			// Pin the connector icon as a prefix so it stays visible while typing;
+			// antd indents the search text after it.
+			prefix={selected ? (
+				<span title={selected.connector.title} style={{ display: 'inline-flex' }}>
+					<ConnectorIcon icon={selected.connector.icon} size={18} />
+				</span>
+			) : undefined}
 			onChange={onChange}
 			options={methods.map((method) => ({
 				value: method.id,
-				label: (
-					<span className="conditionMethodOption">
-						<span className="conditionMethodDot" style={{ background: method.color }} />
-						<span>{getMethodLabel(method)}</span>
-					</span>
-				),
+				label: getMethodLabel(method),
+				connectorTitle: method.connector.title,
+				connectorIcon: method.connector.icon ?? null,
 			}))}
+			optionRender={(option) => {
+				const data = option.data as { connectorTitle?: string; connectorIcon?: string | null };
+				return (
+					<span className="conditionMethodOption">
+						<ConnectorIcon icon={data.connectorIcon} size={18} style={{ flexShrink: 0 }} />
+						<span className="conditionMethodName">{option.label}</span>
+						<span className="conditionMethodConnector" title={data.connectorTitle}>{data.connectorTitle}</span>
+					</span>
+				);
+			}}
 			getPopupContainer={() => document.body}
+			popupMatchSelectWidth={320}
 			styles={{ popup: { root: { zIndex: 13010 } } }}
 		/>
 	);
@@ -413,6 +467,8 @@ function RuleRow({
 					placeholder={t('placeholders.selectOperator')}
 					value={operator}
 					className="conditionOperatorSelect conditionLoopOperatorSelect"
+					showSearch
+					optionFilterProp="label"
 					options={LOOP_OPERATOR_OPTIONS.map((option) => ({ value: option.value, label: t(option.labelKey) }))}
 					onChange={(value) => onChange({ operator: value, leftField: undefined, rightField: undefined })}
 					suffixIcon={<DownOutlined />}
@@ -432,6 +488,8 @@ function RuleRow({
 					placeholder={t('placeholders.selectOperator')}
 					value={operator}
 					className="conditionOperatorSelect"
+					showSearch
+					optionFilterProp="label"
 					options={IF_OPERATOR_OPTIONS.map((option) => ({ value: option.value, label: t(option.labelKey) }))}
 					onChange={(value) => onChange({ operator: value, rightField: undefined })}
 					suffixIcon={<DownOutlined />}
@@ -642,6 +700,28 @@ export function ConditionBuilderDialog({
 		() => getCurrentLoopIterator(connection, node),
 		[connection, node],
 	);
+	const isLoop = operatorType === 'loop';
+	const loopCollectionRef = useMemo(
+		() => (isLoop ? getFirstRuleLeftField(tree) : undefined),
+		[isLoop, tree],
+	);
+	const loopOperator = useMemo(
+		() => (isLoop ? getFirstRuleOperator(tree) : undefined),
+		[isLoop, tree],
+	);
+	const loopExample = useMemo(() => {
+		// Only show once the operator, method and field (the collection reference)
+		// are all chosen.
+		if (!isLoop || !loopOperator || !loopCollectionRef) return undefined;
+		const method = parseMethodFromReference(methods, loopCollectionRef);
+		if (!method) return undefined;
+		return {
+			methodLabel: method.label || method.name,
+			connectorIcon: method.connector.icon ?? null,
+			hasMethod: true,
+			responseType: parseResponseTypeFromReference(loopCollectionRef) || 'body',
+		};
+	}, [isLoop, loopOperator, loopCollectionRef, methods]);
 
 	useEffect(() => {
 		if (!open) return;
@@ -654,11 +734,11 @@ export function ConditionBuilderDialog({
 			open={open}
 			destroyOnHidden
 			focusable={{ focusTriggerAfterClose: false }}
-			title={t('conditionBuilder.dialogTitle')}
+			title={t(isLoop ? 'conditionBuilder.dialogTitleLoop' : 'conditionBuilder.dialogTitleIf')}
 			width="90vw"
 			centered={false}
-			className={`conditionBuilderModal conditionBuilderModal-${operatorType}`}
-			closeIcon={<span className="conditionClose">×</span>}
+			className={`wfDialog conditionBuilderModal conditionBuilderModal-${operatorType}`}
+			closeIcon={<span className="wfDialogClose">×</span>}
 			onCancel={onClose}
 			footer={[
 				<Button
@@ -685,6 +765,13 @@ export function ConditionBuilderDialog({
 					iterators={iterators}
 					onChange={setTree}
 				/>
+				{isLoop ? (
+					<LoopInfoPanel
+						iterator={loopIterator}
+						operator={loopOperator}
+						example={loopExample}
+					/>
+				) : null}
 			</div>
 		</Modal>
 	);

@@ -1,4 +1,5 @@
 import { FastColor } from '@ant-design/fast-color'
+import { ANT_NEUTRAL } from '@shared/theme/palette/antPalette'
 import type { ColorScale, Palette } from '@shared/theme/palette/types'
 import type { SidebarTokens, StatusTokens, ThemeTokens } from '@shared/theme/tokens'
 import type { ThemeMode } from '@shared/theme/types'
@@ -82,6 +83,10 @@ export function buildTheme(palette: Palette, mode: ThemeMode, options?: BuildThe
                 page: isDark ? n[12] : n[2],
                 surface: isDark ? n[11] : n[0],
                 elevated: isDark ? n[10] : n[0],
+                // Light: untinted pure white so fields read crisply against a
+                // (possibly brand-tinted) surface. Dark: same as surface — dark
+                // controls separate via border, not fill.
+                input: isDark ? n[11] : ANT_NEUTRAL[0],
                 hover: isDark ? n[9] : n[1],
                 disabled: isDark ? n[9] : n[3],
             },

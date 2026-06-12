@@ -12,29 +12,7 @@
 	min-height: 250px;
 	padding: 0;
 	border-radius: 4px;
-}
-
-.conditionBuilderModal .ant-modal-header {
-	margin: 0;
-	padding: 18px 24px;
-	border-bottom: 1px solid var(--color-border-subtle);
-}
-
-.conditionBuilderModal .ant-modal-title {
-	font-size: 16px;
-	font-weight: 400;
-}
-
-.conditionBuilderModal .ant-modal-close {
-	top: 16px;
-	right: 18px;
-	color: var(--color-action-primary);
-}
-
-.conditionClose {
-	font-size: 22px;
-	font-weight: 300;
-	line-height: 1;
+	background: var(--color-background-page);
 }
 
 .conditionBuilderModal .ant-modal-body {
@@ -59,7 +37,123 @@
 }
 
 .conditionBuilderModal-loop .conditionBuilder {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
 	min-width: 0;
+}
+
+.loopInfoPanel {
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	padding: 16px;
+	border: 1px solid var(--color-border-subtle);
+	border-radius: 6px;
+	background: var(--color-background-subtle, var(--color-background-hover));
+}
+
+.loopInfoHelp {
+	font-size: 12px;
+	color: var(--color-text-secondary);
+}
+
+.loopInfoColumns {
+	display: flex;
+	align-items: flex-start;
+	gap: 24px;
+}
+
+.loopInfoCol {
+	flex: 1 1 50%;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.loopInfoExample {
+	display: flex;
+	align-items: stretch;
+	gap: 8px;
+	width: 460px;
+	max-width: 100%;
+}
+
+.loopInfoExampleBox {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-height: 38px;
+	padding: 0 10px;
+	border: 1px solid var(--color-border-default);
+	border-radius: 2px;
+	background: var(--color-background-surface);
+	color: var(--color-text-primary);
+	font-size: 13px;
+	box-sizing: border-box;
+}
+
+.loopInfoExampleMethod {
+	flex: 0 1 auto;
+	min-width: 0;
+}
+
+.loopInfoExampleText {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.loopInfoExampleType {
+	flex: 0 0 auto;
+	justify-content: center;
+	min-width: 34px;
+	font-weight: 600;
+}
+
+.loopInfoExampleField {
+	flex: 1 1 auto;
+	min-width: 0;
+	gap: 6px;
+	font-family: monospace;
+	overflow: hidden;
+}
+
+.loopInfoExampleLoop {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: var(--color-text-primary);
+}
+
+.loopInfoBlock {
+	min-width: 0;
+	font-size: 12px;
+	color: var(--color-text-secondary);
+}
+
+.loopInfoLabel {
+	font-weight: 600;
+	color: var(--color-text-primary);
+}
+
+.loopInfoList {
+	margin: 4px 0 0;
+	padding-left: 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.loopInfoInlineCode {
+	padding: 1px 5px;
+	border-radius: 3px;
+	background: var(--color-background-surface);
+	border: 1px solid var(--color-border-default);
+	font-family: monospace;
+	color: var(--color-text-primary);
 }
 
 .conditionGroup {
@@ -68,14 +162,14 @@
 	gap: 10px;
 	padding-bottom: 10px;
 	overflow-x: visible;
-	border: 1px solid var(--color-status-warning-border);
+	border: 1px solid var(--color-border-default);
 	border-radius: 5px;
 	background: transparent;
 }
 
 .conditionGroupInvalid {
-	border-color: var(--color-status-warning-border);
-	background: var(--color-status-warning-bg);
+	border-color: var(--color-status-error-border);
+	background: var(--color-status-error-bg);
 }
 
 .conditionLoopGroup {
@@ -133,7 +227,7 @@
 .conditionGroupToggle button:disabled {
 	border-color: var(--color-border-default);
 	background: var(--color-background-disabled);
-	color: var(--color-text-on-action);
+	color: var(--color-text-disabled);
 	cursor: default;
 }
 
@@ -172,6 +266,12 @@
 	width: 30px;
 	height: 30px;
 	border-radius: 4px;
+	color: var(--color-action-danger);
+}
+
+.conditionGroupDeleteButton.ant-btn:not(:disabled):hover,
+.conditionGroupDeleteButton.ant-btn:not(:disabled):focus {
+	color: var(--color-action-danger-hover) !important;
 }
 
 .conditionGroupBody {
@@ -188,7 +288,7 @@
 	bottom: var(--condition-tree-bottom, 24px);
 	left: 11px;
 	box-sizing: border-box;
-	border-color: var(--color-border-default);
+	border-color: var(--color-border-strong);
 	border-style: solid;
 	border-width: 0 0 0 2px;
 	content: '';
@@ -206,7 +306,7 @@
 	box-sizing: border-box;
 	width: 13px;
 	height: 0;
-	border-color: var(--color-border-default);
+	border-color: var(--color-border-strong);
 	border-style: solid;
 	border-width: 0 0 2px;
 	content: '';
@@ -232,6 +332,11 @@
 	background: var(--color-background-surface);
 }
 
+.conditionRule:not(.conditionRuleLoop) {
+	border: 1px solid var(--color-border-default);
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
 .conditionRule:not(.conditionRuleLoop)::before {
 	position: absolute;
 	top: calc(50% - 1px);
@@ -240,7 +345,7 @@
 	box-sizing: border-box;
 	width: 13px;
 	height: 0;
-	border-color: var(--color-border-default);
+	border-color: var(--color-border-strong);
 	border-style: solid;
 	border-width: 0 0 2px;
 	content: '';
@@ -250,7 +355,7 @@
 	justify-content: flex-start;
 	width: 100%;
 	min-height: 48px;
-	padding: 10px 0 10px 8px;
+	padding: 10px 0;
 }
 
 .conditionValueInput {
@@ -318,17 +423,30 @@
 }
 
 .conditionMethodOption {
-	display: inline-flex;
+	display: flex;
+	width: 100%;
 	min-width: 0;
 	align-items: center;
 	gap: 8px;
 }
 
-.conditionMethodDot {
-	width: 10px;
-	height: 10px;
-	flex: 0 0 10px;
-	border-radius: 50%;
+.conditionMethodName {
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.conditionMethodConnector {
+	flex: 0 0 auto;
+	max-width: 45%;
+	padding-left: 12px;
+	color: var(--color-text-secondary);
+	font-size: 11px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .conditionBuilder .ant-select-selector {

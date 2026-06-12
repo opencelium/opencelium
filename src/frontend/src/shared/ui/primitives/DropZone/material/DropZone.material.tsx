@@ -46,7 +46,7 @@ export const MaterialDropzone: DropzoneComponent = ({
                 padding: '24px 16px',
                 background: isDragging
                     ? 'var(--color-action-primary-subtle)'
-                    : 'var(--color-background-surface)',
+                    : 'var(--color-background-input)',
                 cursor: disabled ? 'not-allowed' : 'pointer',
                 display: 'flex',
                 flexDirection: 'column',

@@ -42,6 +42,7 @@
   },
   "messages": {
     "enterWorkflowName": "Please enter a workflow name",
+    "workflowNameExists": "A workflow with this title already exists",
     "saveTemplateFailed": "Failed to save template",
     "loadTemplatesFailed": "Failed to load templates",
     "selectTemplate": "Please select a template",
@@ -155,9 +156,49 @@
     "noPreviousMethods": "No previous methods"
   },
   "conditionBuilder": {
-    "dialogTitle": "Condition",
+    "dialogTitleIf": "IF Condition",
+    "dialogTitleLoop": "LOOP Condition",
     "addCondition": "Add Condition",
     "addGroup": "Add Group",
+    "loopInfo": {
+      "iteratorLabel": "Loop variable",
+      "iteratorHelp": "Use this variable inside the loop steps to read the current item:",
+      "descriptionLabel": "Description",
+      "argumentsLabel": "Arguments",
+      "examplesLabel": "Examples",
+      "operators": {
+        "for": {
+          "description": "Iterates through an array.",
+          "args": [{ "code": "o1", "text": "An array to iterate through." }],
+          "examples": [
+            { "code": "o1 = [\"a\", \"b\", \"c\"]", "result": "Iterates through \"a\", \"b\", \"c\"" },
+            { "code": "o1 = [1, 2, 3]", "result": "Iterates through 1, 2, 3" },
+            { "code": "o1 = []", "result": "Performs no iterations" }
+          ]
+        },
+        "forin": {
+          "description": "Iterates through the properties of an object.",
+          "args": [{ "code": "o1", "text": "An object whose properties should be iterated." }],
+          "examples": [
+            { "code": "o1 = {\"name\":\"Hob\",\"age\":123}", "result": "Iterates through properties \"name\", \"age\"" },
+            { "code": "o1 = {\"a\":1,\"b\":2}", "result": "Iterates through properties \"a\", \"b\"" },
+            { "code": "o1 = {}", "result": "Performs no iterations" }
+          ]
+        },
+        "SplitString": {
+          "description": "Splits a string using a delimiter and iterates through the resulting array.",
+          "args": [
+            { "code": "o1", "text": "A string to split." },
+            { "code": "o2", "text": "A delimiter string." }
+          ],
+          "examples": [
+            { "code": "o1 = \"a,b,c\", o2 = \",\"", "result": "Iterates through \"a\", \"b\", \"c\"" },
+            { "code": "o1 = \"one|two|three\", o2 = \"|\"", "result": "Iterates through \"one\", \"two\", \"three\"" },
+            { "code": "o1 = \"abc\", o2 = \",\"", "result": "Iterates once through \"abc\"" }
+          ]
+        }
+      }
+    },
     "source": {
       "constant": "Constant",
       "method": "Method",

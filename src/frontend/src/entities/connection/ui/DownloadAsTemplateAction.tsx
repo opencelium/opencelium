@@ -53,7 +53,7 @@ export const DownloadAsTemplateAction: React.FC<Props> = ({ row }) => {
     }
 
     return (
-        <Tooltip content={tEntities('connection.list.downloadTemplate.tooltip')}>
+        <Tooltip content={tEntities('connection.list.downloadTemplate.tooltip')} placement="right">
             <IconButton
                 iconProps={{ name: 'download', color: 'primary' }}
                 type={'text'}

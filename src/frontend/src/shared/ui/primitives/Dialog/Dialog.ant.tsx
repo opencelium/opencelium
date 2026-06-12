@@ -15,6 +15,7 @@ export const AntDialog: DialogComponent = ({
   footer,
   children,
   width = 480,
+  top,
   closable = true,
   fullscreen = false,
   maximizable = false,
@@ -39,6 +40,7 @@ export const AntDialog: DialogComponent = ({
       title={title}
       closable={closable}
       width={isFullscreen ? "100%" : width}
+      style={!isFullscreen && top !== undefined ? { top } : undefined}
       className={isFullscreen ? "ant-dialog-fullscreen" : "ant-dialog-custom"}
     >
       <span className="ant-dialog-header-actions">

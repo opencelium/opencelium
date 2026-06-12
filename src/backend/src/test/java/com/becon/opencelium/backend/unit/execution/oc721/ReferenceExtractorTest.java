@@ -150,6 +150,50 @@ public class ReferenceExtractorTest {
     }
 
     @Test
+    @DisplayName("$ - root object")
+    void extractValueReturnsRootAsObjectWhenPathTargetsRoot() {
+        // GIVEN
+        Operation operation = OperationFixture.anOperationWithResponseBody();
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        // WHEN
+        Object val = extractValue("#ababab.(response).body.$");
+
+        // THEN
+        assertInstanceOf(Map.class, val);
+
+        Map<String, Object> root = (Map<String, Object>) val;
+        assertEquals("ok", root.get("status"));
+        assertTrue(root.containsKey("meta"));
+        assertTrue(root.containsKey("data"));
+    }
+
+    @Test
+    @DisplayName("$ - root array")
+    void extractValueReturnsRootAsArrayWhenPathTargetsRoot() {
+        // GIVEN
+        Operation operation = OperationFixture.anOperationWithRootArrayResponseBody();
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        // WHEN
+        Object val = extractValue("#ababab.(response).body.$");
+
+        // THEN
+        assertInstanceOf(List.class, val);
+        assertEquals(List.of("A", "B", "C"), val);
+    }
+
+    @Test
     @DisplayName("obj['i']~ - field name on ith index (indexing starts from 0)")
     void extractValueReturnsFieldNameWhenIndexIsSpecified() {
         // GIVEN

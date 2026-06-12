@@ -5,6 +5,8 @@ export interface SelectOption<T = string> {
     value: T;
     label: ReactNode;
     disabled?: boolean;
+    /** Plain-text used for search filtering and sorting when `label` is a ReactNode. */
+    searchLabel?: string;
 }
 
 export interface AsyncOptionsConfig {

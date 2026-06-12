@@ -2,7 +2,7 @@
     border: 2px dashed var(--color-action-primary);
     border-radius: var(--radius-md);
     padding: 20px;
-    background: var(--color-background-surface);
+    background: var(--color-background-input);
     cursor: pointer;
     width: 100%;
     align-items: center;
