@@ -3,8 +3,8 @@ import { getReferenceDisplayLabel } from '../shared/referenceDisplay';
 import { createId as createStableId } from '@shared/lib/createId';
 
 export const PROHIBITED_ENDPOINT_CHARACTERS = ['<', '>', 'Enter'];
-export const URL_FORBIDDEN_INPUT_RE = /[\u0000-\u001F\u007F\s"<>`|\\^[\]]/g;
-const URL_FORBIDDEN_INPUT_SINGLE_RE = /[\u0000-\u001F\u007F\s"<>`|\\^[\]]/;
+export const URL_FORBIDDEN_INPUT_RE = /[\u0000-\u001F\u007F"<>`|\\^[\]]/g;
+const URL_FORBIDDEN_INPUT_SINGLE_RE = /[\u0000-\u001F\u007F"<>`|\\^[\]]/;
 const CARET_BOUNDARY = '\u200B';
 
 export const ARG_TOKEN_RE = /(#{%\s*([A-Za-z0-9_-]+)\s*%})/g;
