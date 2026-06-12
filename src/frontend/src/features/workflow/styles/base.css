@@ -139,9 +139,6 @@ textarea {
   }
 }
 
-/* Hosts the logs-feature ExecutionLogTree (rendered with `fill`): the fixed
-   height + flex column let the tree own its internal scrolling. In the full
-   panel state the body stretches to whatever the card gives it instead. */
 .logsBodyTree {
   height: 360px;
   display: flex;
@@ -187,8 +184,10 @@ textarea {
   align-items: center;
 }
 
-/* Three panel states: minimized (header bar only), normal (fixed-height tree)
-   and full (stretches up to just below the floating header card). */
+.headerCardWithInlineError {
+  padding-bottom: 30px;
+}
+
 .logsCard {
   position: absolute;
   left: 0;
@@ -219,6 +218,10 @@ textarea {
   align-items: center;
   gap: 10px;
   overflow: hidden;
+}
+
+.headerCardWithInlineError .headerInlineInfo {
+  overflow: visible;
 }
 
 .headerInlineName,
