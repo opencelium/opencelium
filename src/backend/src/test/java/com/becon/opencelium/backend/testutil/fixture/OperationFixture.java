@@ -47,6 +47,7 @@ public final class OperationFixture {
         headers.add(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE);
         headers.put("X-Empty", List.of());
         headers.add("Set-Cookie", "expires=Mon, 17-Jul-2017 16:06:00 GMT; Max-Age=31449600; Path=/; secure");
+        headers.add("Set-Cookie", "token=123; SameSite=Lax; Priority=High; MyCustomFlag=ABC");
         headers.put("Vary", List.of("Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
 
         ResponseEntity<?> response = new ResponseEntity<>(body, headers, HttpStatus.OK);

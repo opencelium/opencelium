@@ -195,6 +195,24 @@ public class ReferenceExtractorTest {
     }
 
     @Test
+    void extractValueReturnsSingleHeaderAsListWhenFullArraySyntaxIsUsed() {
+        // GIVEN
+        Operation operation = OperationFixture.anOperationWithResponseBody();
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        // WHEN
+        Object result = extractValue("#ababab.(response).header.$.Content-Type[*]");
+
+        // THEN
+        assertEquals(List.of("application/json"), result);
+    }
+
+    @Test
     void extractValueReturnsHeaderValueWhenHeaderIndexIsSpecified() {
         // GIVEN
         Operation operation = OperationFixture.anOperationWithResponseBody();
@@ -210,6 +228,24 @@ public class ReferenceExtractorTest {
 
         // THEN
         assertEquals("Access-Control-Request-Method", result);
+    }
+
+    @Test
+    void extractValueReturnsEmptyStringWhenHeaderIndexIsOutOfBounds() {
+        // GIVEN
+        Operation operation = OperationFixture.anOperationWithResponseBody();
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        // WHEN
+        Object result = extractValue("#ababab.(response).header.$.Vary[99]");
+
+        // THEN
+        assertEquals("", result);
     }
 
     @Test
@@ -281,6 +317,23 @@ public class ReferenceExtractorTest {
         assertEquals("31449600", extractValue("#ababab.(response).header.$.Set-Cookie[\"max-age\"]"));
         assertEquals("/", extractValue("#ababab.(response).header.$.Set-Cookie[\"path\"]"));
         assertEquals("secure", extractValue("#ababab.(response).header.$.Set-Cookie[\"SECURE\"]"));
+    }
+
+    @Test
+    void extractValueReturnsCookieAttributeFromSecondSetCookieHeader() {
+        // GIVEN
+        Operation operation = OperationFixture.anOperationWithResponseBody();
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        // WHEN - THEN
+        assertEquals("Lax", extractValue("#ababab.(response).header.$.Set-Cookie[\"SameSite\"]"));
+        assertEquals("High", extractValue("#ababab.(response).header.$.Set-Cookie[\"Priority\"]"));
+        assertEquals("ABC", extractValue("#ababab.(response).header.$.Set-Cookie[\"MyCustomFlag\"]"));
     }
 
     @Test
