@@ -65,11 +65,11 @@ export const addConnector = createAsyncThunk(
             if (responseTitleRequest.data.result) {
                 return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.CONNECTOR_EXISTS}));
             }
-            const testDataRequest = new ConnectorRequest({endpoint: '/check'});
-            const responseDataRequest = await testDataRequest.testRequestData(entityData);
-            if(responseDataRequest.data.message === ResponseMessages.CONNECTOR_COMMUNICATION_FAILED || parseInt(responseDataRequest.data.status.toString()) > 299){
-                return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.CONNECTOR_COMMUNICATION_FAILED}));
-            }
+            // const testDataRequest = new ConnectorRequest({endpoint: '/check'});
+            // const responseDataRequest = await testDataRequest.testRequestData(entityData);
+            // if(responseDataRequest.data.message === ResponseMessages.CONNECTOR_COMMUNICATION_FAILED || parseInt(responseDataRequest.data.status.toString()) > 299){
+            //     return thunkAPI.rejectWithValue(errorHandler({message: ResponseMessages.CONNECTOR_COMMUNICATION_FAILED}));
+            // }
             const addConnectorRequest = new ConnectorRequest();
             const response = await addConnectorRequest.addConnector(entityData);
             if(iconFile){

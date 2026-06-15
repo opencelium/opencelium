@@ -33,7 +33,7 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 	const [menuIsOpen, toggleMenu] = useState<boolean>(false);
 	const hasError = !!error && !field && !!color;
 	const normalizeCommittedValue = (value: string) => {
-		return value.replace(/\["([^"]*)"\]/g, "['$1']");
+		return (value === '$.' ? '$' : value).replace(/\["([^"]*)"\]/g, "['$1']");
 	};
 	const isSpaceInsertionAllowed = (nextValue: string, prevValue: string) => {
 		if (nextValue.length <= prevValue.length) {
@@ -135,7 +135,7 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 		if (normalizedPath === '') {
 			options.push({
 				label: 'The root object',
-				value: '$.',
+				value: '$',
 			});
 		}
 
@@ -238,7 +238,7 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 			}
 		}
 
-		const normalized = field || '';
+		const normalized = field === '$.' ? '$' : field || '';
 
 		if (normalized !== searchValue) {
 			handleInputChange(normalized, { action: 'input-change' });
@@ -267,7 +267,11 @@ const DeepSelect: React.FC<DeepSelectProps> = ({
 		}
 	}, [color]);
 	const getLabelForValue = (value: string) => {
-		if (value === '$.' || value.includes("['") || value.includes('["')) {
+		if (value === '$.') {
+			return '$';
+		}
+
+		if (value.includes("['") || value.includes('["')) {
 			return value;
 		}
 
