@@ -194,7 +194,7 @@ management:
           UP: 200
 
 opencelium:
-  version: 4.8.4
+  version: 4.8.5
   ###########################################################################
   #                                                                         #
   #   Is customizable                                                       #
