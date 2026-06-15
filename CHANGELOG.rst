@@ -2,6 +2,18 @@
 Changelog
 *********
 
+4.8.5
+========
+
+:Date: June 15, 2026
+
+
+Fixes
+--------
+
+* Fix reference bug loaded from template (OC-1451)
+* Fix root object reference bug (OC-1452)
+
 4.8.4
 ========
 
@@ -31,13 +43,13 @@ Fixes
 
 4.8.2
 ========
- 
+
 :Date: April 15, 2026
 
 
 Fixes
 --------
- 
+
 * Fix bug in operator switch reference type (OC-1380)
 * Fix tour bug in connector form (OC-1387)
 * Change invoker name into connector name in ConnectorPanel (OC-1383)
@@ -45,7 +57,7 @@ Fixes
 
 4.8.1
 ========
- 
+
 :Date: March 24, 2026
 
 Features
@@ -54,7 +66,7 @@ Features
 
 Fixes
 --------
- 
+
 * Operation Issue (OC-1352)
 * Enhancement Issue (OC-1355)
 * Fix changelog sql (OC-1357)
@@ -63,7 +75,7 @@ Fixes
 
 4.8
 ========
- 
+
 :Date: March 12, 2026
 
 Features
@@ -75,7 +87,7 @@ Features
 
 Fixes
 --------
- 
+
 * Execution code optimization and Refactoring (OC-1303)
 * Get connectionId throws exception (OC-1324)
 * Bug when replacing a template (OC-1142)
@@ -85,12 +97,12 @@ Fixes
 
 4.7.1
 ========
- 
+
 :Date: January 27, 2026
- 
+
 Fixes
 --------
- 
+
 * Execution code optimization and Refactoring (OC-1303)
 * Webhook is not supported in SplitString (OC-1305)
 * Bug with LIKE operator (OC-1307)
