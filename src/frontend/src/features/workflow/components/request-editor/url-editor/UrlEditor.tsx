@@ -23,6 +23,7 @@ import {
 	buildQueryFromParams,
 	buildQueryParamsFromEndpoint,
 	createId,
+	decodeEndpointQuery,
 	decodeQueryParamValue,
 	ensureTemplateRow,
 	getInlineVisualLength,
@@ -39,6 +40,14 @@ import {
 const TOKEN_ID_RE = /#{%\s*([A-Za-z0-9_-]+)\s*%}/g;
 const extractTokenIds = (s: string) =>
 	Array.from((s || '').matchAll(TOKEN_ID_RE), (m) => m[1]);
+
+const decodeStoredQueryParams = (params: QueryParam[]) =>
+	params.map((param) => ({
+		...param,
+		key: decodeQueryParamValue(param.key || ''),
+		value: decodeQueryParamValue(param.value || ''),
+		autoEncode: param.autoEncode ?? true,
+	}));
 
 type QueryCaretTarget = {
 	rowId: string;
@@ -62,8 +71,9 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 	const initialEndpoint = stripMockActiveFromEndpoint(
 		method.request.endpoint || '',
 	);
-	const [endpointRaw, setEndpointRaw] = useState(initialEndpoint);
-	const rawRef = useRef(initialEndpoint);
+	const initialDisplayEndpoint = decodeEndpointQuery(initialEndpoint);
+	const [endpointRaw, setEndpointRaw] = useState(initialDisplayEndpoint);
+	const rawRef = useRef(initialDisplayEndpoint);
 
 	const [endpointArgsState, setEndpointArgsState] = useState<
 		Record<string, EndpointArg>
@@ -74,12 +84,12 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 		...(method.request.endpointArgs || {}),
 	});
 	const [queryParams, setQueryParams] = useState<QueryParam[]>(() => {
-		const stored = stripMockActiveRows(
+		const stored = decodeStoredQueryParams(stripMockActiveRows(
 			(method.request.queryParams || []).map((param) => ({ ...param })),
-		) as QueryParam[];
+		) as QueryParam[]);
 		return stored.length
 			? ensureTemplateRow(stored)
-			: (buildQueryParamsFromEndpoint(initialEndpoint) as QueryParam[]);
+			: (buildQueryParamsFromEndpoint(initialDisplayEndpoint) as QueryParam[]);
 	});
 	const queryParamsRef = useRef<QueryParam[]>(queryParams);
 
@@ -105,11 +115,14 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 			nextEndpointArgs: Record<string, EndpointArg>,
 		) => {
 			if (readOnly) return;
+			const { base } = splitEndpoint(nextEndpoint);
+			const query = buildQueryFromParams(nextQueryParams, true);
+			const endpointForServer = query ? `${base}?${query}` : base;
 
 			dispatch(
 				updateEndpoint({
 					methodId: method.id,
-					endpoint: nextEndpoint,
+					endpoint: endpointForServer,
 				} as any),
 			);
 			dispatch(
@@ -147,7 +160,7 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 		(nextParams: QueryParam[]) => {
 			const current = rawRef.current || endpointRaw || '';
 			const { base } = splitEndpoint(current);
-			const query = buildQueryFromParams(nextParams);
+			const query = buildQueryFromParams(nextParams, true);
 			const finalEndpoint = query ? `${base}?${query}` : base;
 
 			rawRef.current = finalEndpoint;
@@ -234,39 +247,40 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 		const incomingEndpoint = stripMockActiveFromEndpoint(
 			method.request.endpoint || '',
 		);
+		const incomingDisplayEndpoint = decodeEndpointQuery(incomingEndpoint);
 
 		const nextArgs = { ...(method.request.endpointArgs || {}) } as any;
 		endpointArgsRef.current = nextArgs;
 		setEndpointArgsState(nextArgs);
 
-		setEndpointRaw(incomingEndpoint);
-		rawRef.current = incomingEndpoint;
-		const stored = stripMockActiveRows(
+		setEndpointRaw(incomingDisplayEndpoint);
+		rawRef.current = incomingDisplayEndpoint;
+		const stored = decodeStoredQueryParams(stripMockActiveRows(
 			(method.request.queryParams || []).map((param) => ({ ...param })),
-		) as QueryParam[];
+		) as QueryParam[]);
 		setQueryParams(
 			stored.length
 				? ensureTemplateRow(stored)
-				: (buildQueryParamsFromEndpoint(incomingEndpoint) as QueryParam[]),
+				: (buildQueryParamsFromEndpoint(incomingDisplayEndpoint) as QueryParam[]),
 		);
 
 		lastKnownCaretPosRef.current = getInlineVisualLength(
-			incomingEndpoint,
+			incomingDisplayEndpoint,
 			nextArgs,
 		);
-		lastKnownRawCaretPosRef.current = incomingEndpoint.length;
+		lastKnownRawCaretPosRef.current = incomingDisplayEndpoint.length;
 		selectedEndpointTokenIndexRef.current = null;
 		setIsEndpointReferenceGeneratorOpen(false);
 		lastDispatchedEndpointRef.current = null;
 	}, [method.id]);
 
 	useEffect(() => {
-		const incoming = stripMockActiveFromEndpoint(method.request.endpoint || '');
+		const incoming = decodeEndpointQuery(stripMockActiveFromEndpoint(method.request.endpoint || ''));
 		if (incoming === endpointRaw) return;
 
 		if (
 			lastDispatchedEndpointRef.current &&
-			incoming === lastDispatchedEndpointRef.current
+			incoming === decodeEndpointQuery(lastDispatchedEndpointRef.current)
 		) {
 			setEndpointRaw(incoming);
 			rawRef.current = incoming;
@@ -334,7 +348,7 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 					);
 					const current = rawRef.current || endpointRaw || '';
 					const { base } = splitEndpoint(current);
-					const query = buildQueryFromParams(nextParams);
+					const query = buildQueryFromParams(nextParams, true);
 					const nextRaw = query ? `${base}?${query}` : base;
 
 					queryCaretTargetRef.current = {

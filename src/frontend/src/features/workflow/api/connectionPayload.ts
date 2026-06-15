@@ -165,11 +165,42 @@ const sanitizeUiReferences = (value: unknown, endpointArgs?: Record<string, any>
 	return value;
 };
 
+const WRAPPED_REFERENCE_RE =
+	/(\{%\s*#[A-Fa-f0-9]{6}\.\((?:request|response)\)\.(?:body|header|status)(?:\.[^%{}]*)?\s*%})/g;
+
+const encodeUrlPartPreservingReferences = (value: string) =>
+	String(value || '')
+		.split(WRAPPED_REFERENCE_RE)
+		.map((part) => {
+			if (!part) return part;
+			if (WRAPPED_REFERENCE_RE.test(part)) {
+				WRAPPED_REFERENCE_RE.lastIndex = 0;
+				return part;
+			}
+			WRAPPED_REFERENCE_RE.lastIndex = 0;
+			try {
+				return encodeURIComponent(decodeURIComponent(part.replace(/\+/g, ' ')));
+			} catch {
+				return encodeURIComponent(part);
+			}
+		})
+		.join('');
+
 const sanitizeQueryParams = (queryParams: unknown, endpointArgs?: Record<string, any>) =>
 	Array.isArray(queryParams)
 		? queryParams
 			.filter((param: any) => param?.enabled && String(param?.key ?? '').trim() !== '')
-			.map((param) => stripEnhancementObjects(sanitizeUiReferences(param, endpointArgs)))
+			.map((param) => {
+				const sanitized = stripEnhancementObjects(sanitizeUiReferences(param, endpointArgs)) as any;
+				if (!sanitized || typeof sanitized !== 'object' || sanitized.autoEncode === false) {
+					return sanitized;
+				}
+				return {
+					...sanitized,
+					key: encodeUrlPartPreservingReferences(String(sanitized.key ?? '')),
+					value: encodeUrlPartPreservingReferences(String(sanitized.value ?? '')),
+				};
+			})
 		: queryParams;
 
 const sanitizeMethodConfig = (methodConfig: unknown) => {

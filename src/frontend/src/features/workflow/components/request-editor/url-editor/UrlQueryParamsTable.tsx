@@ -1,11 +1,9 @@
 import React from 'react';
 import { DeleteOutlined } from '@ant-design/icons';
-import { Button, Checkbox, Input, Table, Tooltip } from 'antd';
+import { Button, Checkbox, Input, Switch, Table, Tooltip } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { EndpointArg, QueryParam } from '../../../types/connection';
 import {
-	decodeQueryParamValue,
-	encodeQueryParamValue,
 	ARG_TOKEN_RE,
 	isTemplateRow,
 	sanitizePlainTextPaste,
@@ -33,19 +31,6 @@ const inputStyle: React.CSSProperties = {
 	fontSize: 14,
 };
 
-const transformIconStyle: React.CSSProperties = {
-	fontSize: 11,
-	fontWeight: 600,
-	lineHeight: 1,
-	whiteSpace: 'nowrap',
-};
-
-const TransformIcon: React.FC<{ from: string; to: string }> = ({ from, to }) => (
-	<span aria-hidden="true" style={transformIconStyle}>
-		{from} → {to}
-	</span>
-);
-
 const preventInvalidKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
 	if (shouldBlockUrlKeyInput(e.key)) e.preventDefault();
 };
@@ -58,13 +43,6 @@ const hasArgToken = (value: string) => {
 	const result = ARG_TOKEN_RE.test(value || '');
 	ARG_TOKEN_RE.lastIndex = 0;
 	return result;
-};
-
-const getDisplayValue = (value: string) => {
-	if (hasArgToken(value || '')) return value || '';
-
-	const decoded = decodeQueryParamValue(value || '');
-	return hasArgToken(decoded) ? decoded : value || '';
 };
 
 export const UrlQueryParamsTable: React.FC<Props> = ({
@@ -108,11 +86,11 @@ export const UrlQueryParamsTable: React.FC<Props> = ({
 			title: 'Key',
 			dataIndex: 'key',
 			render: (_, row) => {
-				const displayKey = getDisplayValue(row.key || '');
-				if (hasArgToken(displayKey)) {
+				const key = row.key || '';
+				if (hasArgToken(key)) {
 					return (
 						<UrlInlineValueEditor
-							value={displayKey}
+							value={key}
 							endpointArgs={endpointArgs}
 							readOnly={readOnly}
 							onChange={(key) => onChangeParam(row.id, { key })}
@@ -155,11 +133,11 @@ export const UrlQueryParamsTable: React.FC<Props> = ({
 			title: 'Value',
 			dataIndex: 'value',
 			render: (_, row) => {
-				const displayValue = getDisplayValue(row.value || '');
-				if (hasArgToken(displayValue)) {
+				const value = row.value || '';
+				if (hasArgToken(value)) {
 					return (
 						<UrlInlineValueEditor
-							value={displayValue}
+							value={value}
 							endpointArgs={endpointArgs}
 							readOnly={readOnly}
 							onChange={(value) => onChangeParam(row.id, { value })}
@@ -201,40 +179,20 @@ export const UrlQueryParamsTable: React.FC<Props> = ({
 		{
 			title: 'Actions',
 			key: 'actions',
-			width: 176,
+			width: 112,
 			align: 'right',
 			render: (_, row) => {
 				const disabled = !!readOnly || isTemplateRow(row);
 				return (
-					<div style={{ display: 'flex', justifyContent: 'flex-end', gap: 4 }}>
-						<Button
-							type="text"
-							size="small"
-							disabled={disabled}
-							aria-label="Encode parameter"
-							icon={<TransformIcon from="Aa" to="%" />}
-							style={{ width: 48 }}
-							onClick={() =>
-								onChangeParam(row.id, {
-									key: encodeQueryParamValue(row.key || ''),
-									value: encodeQueryParamValue(row.value || ''),
-								})
-							}
-						/>
-						<Button
-							type="text"
-							size="small"
-							disabled={disabled}
-							aria-label="Decode parameter"
-							icon={<TransformIcon from="%" to="Aa" />}
-							style={{ width: 48 }}
-							onClick={() =>
-								onChangeParam(row.id, {
-									key: decodeQueryParamValue(row.key || ''),
-									value: decodeQueryParamValue(row.value || ''),
-								})
-							}
-						/>
+					<div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 8 }}>
+						<Tooltip title={row.autoEncode === false ? 'Send as entered' : 'Encode before sending'}>
+							<Switch
+								size="small"
+								checked={row.autoEncode !== false}
+								disabled={disabled}
+								onChange={(autoEncode) => onChangeParam(row.id, { autoEncode })}
+							/>
+						</Tooltip>
 						<Tooltip title="Delete param">
 							<Button
 								type="text"

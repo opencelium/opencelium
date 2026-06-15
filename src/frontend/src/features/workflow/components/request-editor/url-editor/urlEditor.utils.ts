@@ -230,12 +230,16 @@ const parseQueryToPairs = (queryRaw: string) =>
 		return eq === -1 ? { key: ch, value: '' } : { key: ch.slice(0, eq), value: ch.slice(eq + 1) };
 	});
 
-type QueryParamLite = { id: string; key: string; value: string; enabled: boolean };
+export type QueryParamLite = { id: string; key: string; value: string; enabled: boolean; autoEncode?: boolean };
 
-export const buildQueryFromParams = (params: QueryParamLite[]) =>
+export const buildQueryFromParams = (params: QueryParamLite[], encoded = false) =>
 	(params || [])
 		.filter((p) => p.enabled && p.key.trim() !== '')
-		.map((p) => `${p.key}=${p.value ?? ''}`)
+		.map((p) => {
+			const key = encoded && p.autoEncode !== false ? encodeQueryParamValue(p.key || '') : p.key;
+			const value = encoded && p.autoEncode !== false ? encodeQueryParamValue(p.value ?? '') : p.value ?? '';
+			return `${key}=${value}`;
+		})
 		.join('&');
 
 export function ensureTemplateRow<T extends QueryParamLite>(params: T[]): T[] {
@@ -271,9 +275,23 @@ export function buildQueryParamsFromEndpoint<T extends QueryParamLite>(endpointS
 	const prevMeaningful = stripMockActiveRows(stripTemplateRows(prev || []));
 	const params = pairs
 		.filter((pair) => !isMockActiveRow({ id: '', enabled: true, key: pair.key, value: pair.value }))
-		.map((pair, i) => ({ id: prevMeaningful[i]?.id || createId(), key: pair.key, value: pair.value, enabled: true } as T));
+		.map((pair, i) => ({
+			id: prevMeaningful[i]?.id || createId(),
+			key: decodeQueryParamValue(pair.key),
+			value: decodeQueryParamValue(pair.value),
+			enabled: true,
+			autoEncode: prevMeaningful[i]?.autoEncode ?? true,
+		} as T));
 
 	return includeTemplateRow ? ensureTemplateRow(params) : params;
+}
+
+export function decodeEndpointQuery(endpointStr: string) {
+	const endpoint = splitEndpoint(endpointStr || '');
+	if (!endpoint.hasQuestion) return endpointStr || '';
+	const params = buildQueryParamsFromEndpoint<QueryParamLite>(endpointStr, [], false);
+	const query = params.map((param) => `${param.key}=${param.value ?? ''}`).join('&');
+	return query ? `${endpoint.base}?${query}` : endpoint.base;
 }
 
 export const normalizeReference = (ref: string) => {

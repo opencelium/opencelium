@@ -75,6 +75,7 @@ export interface QueryParam {
 	key: string;
 	value: string;
 	enabled: boolean;
+	autoEncode?: boolean;
     argId?: string;
 }
 
