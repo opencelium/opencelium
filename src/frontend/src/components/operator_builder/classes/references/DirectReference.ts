@@ -33,8 +33,10 @@ export default class DirectReference extends BaseReference {
     ): string {
         switch (apiResponseType) {
             case 'body':
-            case 'header':
-                return `{%${color}.(${type}).${apiResponseType}.${!field ? field : field.startsWith('$.') ? field : field === '$' ? '$' : `$.${field}`}%}`;
+            case 'header': {
+                const referenceField = field === '$.' ? '$' : field;
+                return `{%${color}.(${type}).${apiResponseType}.${!referenceField ? referenceField : referenceField.startsWith('$.') ? referenceField : referenceField === '$' ? '$' : `$.${referenceField}`}%}`;
+            }
             case 'status':
                 return `{%${color}.(${type}).status%}`;
         }

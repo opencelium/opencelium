@@ -45,7 +45,7 @@ const Pointer: FC<PointerProps> = ({connection, pointer, pointers, submitEdit, o
     const apiResponseType = pointerSplit[2];
     const rawTitleString = pointerSplit.slice(3, pointerSplit.length).join('.').replace('[]', '');
     const titleString = rawTitleString.replace(/^\$\./, '').replace(/^\$/, '');
-    const title = apiResponseType === 'status' ? 'status' : `${apiResponseType}.$.${titleString}`;
+    const title = apiResponseType === 'status' ? 'status' : `${apiResponseType}.$${titleString ? `.${titleString}` : ''}`;
     return (
         <div
             onMouseOver={() => {if(!showIcon) toggleIcon(!showIcon)}}
