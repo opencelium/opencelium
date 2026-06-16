@@ -1,5 +1,7 @@
 import { CloseOutlined } from '@ant-design/icons';
 import { Button, Tag } from 'antd';
+import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { getParsedReferences, splitReferences } from '../bodyReference';
 
 type Props = {
@@ -19,6 +21,8 @@ const getLabel = (reference: string) => {
 };
 
 export function XmlReferenceTokens({ value, onChange, onClick, readOnly }: Props) {
+  const confirm = useConfirm();
+  const { t: tWorkflow } = useI18n('workflow');
   const refs = splitReferences(value);
   if (!refs.length) return null;
 
@@ -39,8 +43,13 @@ export function XmlReferenceTokens({ value, onChange, onClick, readOnly }: Props
                 type="text"
                 size="small"
                 icon={<CloseOutlined />}
-                onClick={(event) => {
+                onClick={async (event) => {
                   event.stopPropagation();
+                  const ok = await confirm({
+                    title: tWorkflow('references.confirmDelete.title'),
+                    message: tWorkflow('references.confirmDelete.message'),
+                  });
+                  if (!ok) return;
                   const next = refs.filter((_, current) => current !== index).join('; ');
                   onChange(next);
                 }}

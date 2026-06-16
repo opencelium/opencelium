@@ -63,6 +63,7 @@ export const ConfirmDialogProvider: React.FC<{
                 onClose={() => close(false)}
                 title={state.title}
                 testId="confirm-dialog"
+                zIndex={20000}
                 footer={
                     <>
                         <Button

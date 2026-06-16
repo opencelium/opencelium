@@ -21,6 +21,7 @@ export const AntDialog: DialogComponent = ({
   maximizable = false,
   afterClose,
   testId,
+  zIndex,
 }) => {
   const { t } = useI18n("common");
   const isMobile = window.matchMedia("(max-width: 768px)").matches;
@@ -41,6 +42,7 @@ export const AntDialog: DialogComponent = ({
       title={title}
       closable={closable}
       width={isFullscreen ? "100%" : width}
+      zIndex={zIndex}
       style={!isFullscreen && top !== undefined ? { top } : undefined}
       className={isFullscreen ? "ant-dialog-fullscreen" : "ant-dialog-custom"}
     >
