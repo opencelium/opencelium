@@ -21,6 +21,7 @@ export interface DialogProps {
 
     /** Stable selector for e2e tests; emitted as `data-testid` on the dialog body. */
     testId?: string;
+    zIndex?: number;
 
     children: ReactNode;
 }

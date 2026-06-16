@@ -302,7 +302,11 @@
     "firstArrayElement": "First element of the array",
     "wholeArray": "The whole array",
     "iteratorLoop": "({{iterator}} loop)",
-    "noVariableReferences": "No variable references"
+    "noVariableReferences": "No variable references",
+    "confirmDelete": {
+      "title": "Delete reference",
+      "message": "Do you really want to delete this reference?"
+    }
   },
   "refGenerator": {
     "connector": "Connector",

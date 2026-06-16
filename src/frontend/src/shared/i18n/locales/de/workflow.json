@@ -302,7 +302,11 @@
     "firstArrayElement": "Erstes Element des Arrays",
     "wholeArray": "Das gesamte Array",
     "iteratorLoop": "({{iterator}}-Schleife)",
-    "noVariableReferences": "Keine Variablenreferenzen"
+    "noVariableReferences": "Keine Variablenreferenzen",
+    "confirmDelete": {
+      "title": "Referenz löschen",
+      "message": "Möchten Sie diese Referenz wirklich löschen?"
+    }
   },
   "refGenerator": {
     "connector": "Konnektor",

@@ -19,11 +19,10 @@ export type WorkflowQueryParam = {
   key: string;
   value: string;
   enabled: boolean;
+  autoEncode?: boolean;
 };
 
 export type WorkflowMethodConfig = {
-  // The connector operation name — stable identity, kept distinct from the
-  // user-editable label (the node subtitle) so saving a label doesn't overwrite it.
   name?: string;
   url: string;
   method?: string;

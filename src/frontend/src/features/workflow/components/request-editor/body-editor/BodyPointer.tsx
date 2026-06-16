@@ -1,6 +1,8 @@
 import { DeleteOutlined } from '@ant-design/icons';
 import type { MouseEvent } from 'react';
 import { useMemo, useState } from 'react';
+import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { parseEnhancementArg } from '../utils/parseEnhancementArg';
 
 type Props = {
@@ -13,6 +15,8 @@ type Props = {
 
 export function BodyPointer({ pointer, pointers, onClick, onRemove }: Props) {
   const [hovered, setHovered] = useState(false);
+  const confirm = useConfirm();
+  const { t: tWorkflow } = useI18n('workflow');
   const parsed = useMemo(() => parseEnhancementArg(pointer), [pointer]);
   const color = parsed?.color || 'var(--color-text-disabled)';
   const title = parsed
@@ -21,8 +25,13 @@ export function BodyPointer({ pointer, pointers, onClick, onRemove }: Props) {
       : `${parsed.messageProperty}.$`
     : pointer;
 
-  const remove = (event: MouseEvent<HTMLButtonElement>) => {
+  const remove = async (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
+    const ok = await confirm({
+      title: tWorkflow('references.confirmDelete.title'),
+      message: tWorkflow('references.confirmDelete.message'),
+    });
+    if (!ok) return;
     onRemove?.(pointer, pointers);
   };
 

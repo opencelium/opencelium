@@ -25,6 +25,7 @@ export const MaterialDialog: DialogComponent = ({
   maximizable = false,
   afterClose,
   testId,
+  zIndex,
 }) => {
   const { t } = useI18n("common");
   const isMobile = window.matchMedia("(max-width: 768px)").matches;
@@ -32,6 +33,12 @@ export const MaterialDialog: DialogComponent = ({
   const [headerSlot, setHeaderSlot] = useState<HTMLSpanElement | null>(null);
   const isFullscreen = isMobile || maximized;
   const showMaximize = maximizable && !isMobile;
+  const sx = {
+    ...(zIndex !== undefined ? { zIndex } : {}),
+    ...(!isFullscreen && top !== undefined
+      ? { "& .MuiDialog-container": { alignItems: "flex-start" } }
+      : {}),
+  };
 
   return (
     <MuiDialog
@@ -40,11 +47,7 @@ export const MaterialDialog: DialogComponent = ({
       TransitionProps={afterClose ? { onExited: afterClose } : undefined}
       fullScreen={isFullscreen}
       maxWidth={false}
-      sx={
-        !isFullscreen && top !== undefined
-          ? { "& .MuiDialog-container": { alignItems: "flex-start" } }
-          : undefined
-      }
+      sx={Object.keys(sx).length ? sx : undefined}
       PaperProps={{
         sx: {
           width: isFullscreen ? "100%" : width,
