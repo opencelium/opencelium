@@ -196,10 +196,10 @@ public class ConnectorServiceImp implements ConnectorService {
         FunctionInvoker function = invokerService.getTestFunction(connector.getInvoker());
         List<RequestData> requestData = buildRequestData(connector);
 
-        String port = env.getProperty(AppYamlPath.PROXY_PORT);
-        String host = env.getProperty(AppYamlPath.PROXY_HOST);
-        String user = env.getProperty(AppYamlPath.PROXY_USER);
-        String password = env.getProperty(AppYamlPath.PROXY_PASS);
+        String port = env.getProperty(AppYamlPath.PROXY_PORT, "");
+        String host = env.getProperty(AppYamlPath.PROXY_HOST, "");
+        String user = env.getProperty(AppYamlPath.PROXY_USER, "");
+        String password = env.getProperty(AppYamlPath.PROXY_PASS, "");
 
         return invokerRequestBuilder
                 .setFunction(function)
