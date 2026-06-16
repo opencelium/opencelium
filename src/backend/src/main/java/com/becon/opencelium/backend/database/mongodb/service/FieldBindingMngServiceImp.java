@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.database.mongodb.service;
 
 import com.becon.opencelium.backend.database.mongodb.entity.*;
+import com.becon.opencelium.backend.exception.FieldTypeMismatchException;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.mapper.base.MapperUpdatable;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
@@ -8,6 +9,8 @@ import com.becon.opencelium.backend.resource.connection.MethodDTO;
 import com.becon.opencelium.backend.resource.connection.binding.FieldBindingDTO;
 import com.becon.opencelium.backend.utility.BindingUtility;
 import com.becon.opencelium.backend.utility.PathAndReferenceUtility;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +18,8 @@ import java.util.*;
 
 @Service
 public class FieldBindingMngServiceImp implements FieldBindingMngService {
+    private static final Logger log = LogManager.getLogger(FieldBindingMngServiceImp.class);
+
     private final Mapper<FieldBindingMng, FieldBindingDTO> fieldBindingMngMapper;
     private final MapperUpdatable<MethodMng, MethodDTO> methodMngMapper;
     private final MongoTemplate mongoTemplate;
@@ -87,8 +92,14 @@ public class FieldBindingMngServiceImp implements FieldBindingMngService {
                         case "body" -> {
                             String field = PathAndReferenceUtility.getActualPathOfBody(toField.getField());
                             List<String> fieldPaths = PathAndReferenceUtility.splitByDelimiter(field, '.', true, true);
-                            Map<String, Object> boundFields = BindingUtility.doWithBody(method.getRequest().getBody(), fieldPaths, fb.getId(), method.getRequest().getBody().getFormat());
-                            method.getRequest().getBody().setFields(boundFields);
+                            try {
+                                Map<String, Object> boundFields = BindingUtility.doWithBody(method.getRequest().getBody(), fieldPaths, fb.getId(), method.getRequest().getBody().getFormat());
+                                method.getRequest().getBody().setFields(boundFields);
+                            } catch (FieldTypeMismatchException e) {
+                                FieldTypeMismatchException enriched = e.withFieldPath(toField.getField());
+                                log.error("Failed to bind field '{}' on method '{}' [{}]: {}", toField.getField(), method.getName(), method.getColor(), enriched.getMessage(), e);
+                                throw enriched;
+                            }
                         }
                         default -> throw new RuntimeException("UNSUPPORTED_TYPE: " + type);
                     }
