@@ -221,6 +221,184 @@ public class ReferenceExtractorTest {
     }
 
     @Test
+    void extractValueReturnsListWhenJsonPathUsesFullArraySyntax() {
+        // GIVEN
+        Operation operation = OperationFixture.anOperationWithResponseBody();
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        // WHEN
+        Object val = extractValue("#ababab.(response).header.$.Vary[*]");
+
+        // THEN
+        assertEquals(List.of("Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"), val);
+    }
+
+    @Test
+    void extractValueReturnsSingleHeaderAsListWhenFullArraySyntaxIsUsed() {
+        // GIVEN
+        Operation operation = OperationFixture.anOperationWithResponseBody();
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        // WHEN
+        Object result = extractValue("#ababab.(response).header.$.Content-Type[*]");
+
+        // THEN
+        assertEquals(List.of("application/json"), result);
+    }
+
+    @Test
+    void extractValueReturnsHeaderValueWhenHeaderIndexIsSpecified() {
+        // GIVEN
+        Operation operation = OperationFixture.anOperationWithResponseBody();
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        // WHEN
+        Object result = extractValue("#ababab.(response).header.$.Vary[1]");
+
+        // THEN
+        assertEquals("Access-Control-Request-Method", result);
+    }
+
+    @Test
+    void extractValueReturnsEmptyStringWhenHeaderIndexIsOutOfBounds() {
+        // GIVEN
+        Operation operation = OperationFixture.anOperationWithResponseBody();
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        // WHEN
+        Object result = extractValue("#ababab.(response).header.$.Vary[99]");
+
+        // THEN
+        assertEquals("", result);
+    }
+
+    @Test
+    void extractValueReturnsFirstHeaderValueWhenHeaderIndexIsNotSpecified() {
+        // GIVEN
+        Operation operation = OperationFixture.anOperationWithResponseBody();
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        // WHEN
+        Object result = extractValue("#ababab.(response).header.$.Content-Type");
+
+        // THEN
+        assertEquals("application/json", result);
+    }
+
+    @Test
+    void extractValueReturnsEmptyStringWhenHeaderExistsButHasNoValues() {
+        // GIVEN
+        Operation operation = OperationFixture.anOperationWithResponseBody();
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        // WHEN
+        Object result = extractValue("#ababab.(response).header.$.X-Empty");
+
+        // THEN
+        assertEquals("", result);
+    }
+
+    @Test
+    void extractValueReturnsHeaderAttributesWhenJsonPathUsed() {
+        // GIVEN
+        Operation operation = OperationFixture.anOperationWithResponseBody();
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        // WHEN
+        Object result = extractValue("#ababab.(response).header.$.Set-Cookie[\"expires\"]");
+
+        // THEN
+        assertEquals("Mon, 17-Jul-2017 16:06:00 GMT", result);
+    }
+
+    @Test
+    void extractValueReturnsHeaderAttributesCaseInsensitivelyWhenJsonPathUsed() {
+        // GIVEN
+        Operation operation = OperationFixture.anOperationWithResponseBody();
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        // WHEN - THEN
+        assertEquals("31449600", extractValue("#ababab.(response).header.$.Set-Cookie[\"max-age\"]"));
+        assertEquals("/", extractValue("#ababab.(response).header.$.Set-Cookie[\"path\"]"));
+        assertEquals("secure", extractValue("#ababab.(response).header.$.Set-Cookie[\"SECURE\"]"));
+    }
+
+    @Test
+    void extractValueReturnsCookieAttributeFromSecondSetCookieHeader() {
+        // GIVEN
+        Operation operation = OperationFixture.anOperationWithResponseBody();
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        // WHEN - THEN
+        assertEquals("Lax", extractValue("#ababab.(response).header.$.Set-Cookie[\"SameSite\"]"));
+        assertEquals("High", extractValue("#ababab.(response).header.$.Set-Cookie[\"Priority\"]"));
+        assertEquals("ABC", extractValue("#ababab.(response).header.$.Set-Cookie[\"MyCustomFlag\"]"));
+    }
+
+    @Test
+    void extractValueReturnsEmptyStringWhenAttributeDoesNotExistByGivenJsonPath() {
+        // GIVEN
+        Operation operation = OperationFixture.anOperationWithResponseBody();
+
+        when(executionManager.findOperationByColor("#ababab"))
+                .thenReturn(Optional.of(operation));
+
+        when(executionManager.generateKey(operation.getLoopDepth()))
+                .thenReturn("#");
+
+        // WHEN
+        Object result = extractValue("#ababab.(response).header.$.Set-Cookie[\"non-existing-attribute\"]");
+
+        // THEN
+        assertEquals("", result);
+    }
+
+    @Test
     @DisplayName("obj['*']~ - all field names")
     void extractValueReturnsAllFieldNamesWhenPathTargetsObject() {
         // GIVEN

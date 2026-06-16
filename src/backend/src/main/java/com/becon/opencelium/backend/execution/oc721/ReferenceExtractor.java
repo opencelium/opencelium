@@ -263,8 +263,15 @@ public class ReferenceExtractor implements Extractor {
         String headerName = path;
         Integer index = null;
         boolean allValues = false;
+        String cookieAttribute = null;
 
-        if (path.endsWith("[*]")) {
+        int attrStart = headerName.lastIndexOf("[\"");
+        int attrEnd = headerName.lastIndexOf("\"]");
+
+        if (attrStart > 0 && attrEnd == headerName.length() - 2) {
+            cookieAttribute = headerName.substring(attrStart + 2, attrEnd);
+            headerName = headerName.substring(0, attrStart);
+        } else if (path.endsWith("[*]")) {
             headerName = path.substring(0, path.length() - 3);
             allValues = true;
         } else {
@@ -286,6 +293,10 @@ public class ReferenceExtractor implements Extractor {
             return allValues ? Collections.emptyList() : "";
         }
 
+        if (cookieAttribute != null) {
+            return extractCookieAttribute(values, cookieAttribute);
+        }
+
         if (allValues) {
             return List.copyOf(values);
         }
@@ -295,6 +306,44 @@ public class ReferenceExtractor implements Extractor {
         }
 
         return headers.getFirst(headerName);
+    }
+
+    private String extractCookieAttribute(List<String> cookies, String requestedAttribute) {
+        for (String cookie : cookies) {
+            String value = extractCookieAttribute(cookie, requestedAttribute);
+            if (!value.isEmpty()) {
+                return value;
+            }
+        }
+
+        return "";
+    }
+
+    private String extractCookieAttribute(String cookie, String requestedAttribute) {
+        if (cookie == null || cookie.isBlank() || requestedAttribute == null || requestedAttribute.isBlank()) {
+            return "";
+        }
+
+        String[] parts = cookie.split(";");
+
+        for (String part : parts) {
+            String trimmed = part.trim();
+
+            int equalsIndex = trimmed.indexOf('=');
+
+            if (equalsIndex > 0) {
+                String name = trimmed.substring(0, equalsIndex).trim();
+                String value = trimmed.substring(equalsIndex + 1).trim();
+
+                if (name.equalsIgnoreCase(requestedAttribute)) {
+                    return value;
+                }
+            } else if (trimmed.equalsIgnoreCase(requestedAttribute)) {
+                return trimmed;
+            }
+        }
+
+        return "";
     }
 
     private Object getFromJSON(Object body, String paths) {
