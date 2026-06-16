@@ -13,17 +13,8 @@ Fixes
 
 * Fix reference bug loaded from template (OC-1451)
 * Fix root object reference bug (OC-1452)
-
-4.8.4
-========
-
-:Date: June 8, 2026
-
-
-Fixes
---------
-
 * Fix [null] reference bug (OC-1434)
+
 
 4.8.3
 ========
