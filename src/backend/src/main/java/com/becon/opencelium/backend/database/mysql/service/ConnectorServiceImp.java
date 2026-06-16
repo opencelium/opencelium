@@ -196,10 +196,10 @@ public class ConnectorServiceImp implements ConnectorService {
         FunctionInvoker function = invokerService.getTestFunction(connector.getInvoker());
         List<RequestData> requestData = buildRequestData(connector);
 
-        String port = env.getProperty("opencelium.rest_template.proxy.port");
-        String host = env.getProperty("opencelium.rest_template.proxy.host");
-        String user = env.getProperty("opencelium.rest_template.proxy.username");
-        String password = env.getProperty("opencelium.rest_template.proxy.password");
+        String port = env.getProperty(AppYamlPath.PROXY_PORT);
+        String host = env.getProperty(AppYamlPath.PROXY_HOST);
+        String user = env.getProperty(AppYamlPath.PROXY_USER);
+        String password = env.getProperty(AppYamlPath.PROXY_PASS);
 
         return invokerRequestBuilder
                 .setFunction(function)
