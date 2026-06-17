@@ -8,7 +8,7 @@ import java.util.Optional;
 public interface ActivationRequestService {
     ActivationRequest save(ActivationRequest activationRequest);
     boolean verify(ActivationRequest activationRequest, String hmac);
-    ActivationRequest generateActivReq();
+    ActivationRequest generateActiveReq();
     void activateTTL(ActivationRequest activationRequest);
     void deactivateAll();
     ActivationRequest getActiveAR();

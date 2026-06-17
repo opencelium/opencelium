@@ -132,7 +132,7 @@ class ActivationRequestServiceImpTest {
                     .thenReturn(hmac);
 
             // WHEN
-            ActivationRequest result = service.generateActivReq();
+            ActivationRequest result = service.generateActiveReq();
 
             // THEN
             assertThat(result.getId()).isNotBlank();
