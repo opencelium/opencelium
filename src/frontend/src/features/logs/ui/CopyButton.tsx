@@ -2,6 +2,7 @@ import { message } from "antd";
 import { IconButton } from "@shared/ui/primitives/IconButton";
 import { Tooltip } from "@shared/ui/primitives/Tooltip";
 import { useI18n } from "@shared/i18n/hooks/useI18n";
+import { copyToClipboard } from "@shared/utils/copyToClipboard";
 
 type Props = {
   value: string;
@@ -19,10 +20,9 @@ export function CopyButton({ value, className }: Props) {
 
   const handleCopy = async () => {
     if (isEmpty) return;
-    try {
-      await navigator.clipboard.writeText(value);
+    if (await copyToClipboard(value)) {
       message.success(t("copy.success"));
-    } catch {
+    } else {
       message.error(t("copy.failed"));
     }
   };

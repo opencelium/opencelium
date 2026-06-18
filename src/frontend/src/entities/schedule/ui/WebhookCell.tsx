@@ -5,6 +5,7 @@ import { Tooltip } from '@shared/ui/primitives/Tooltip'
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { apiExecutor } from '@shared/api/apiExecutor'
+import { copyToClipboard } from '@shared/utils/copyToClipboard'
 import { genericApi, useGeneralRequestMutation } from '@shared/api/genericApi'
 import { selectAuthUser } from '@entities/auth/model/authSelectors'
 import { store } from '@app/store/store'
@@ -25,12 +26,10 @@ export const WebhookCell = memo(function WebhookCell({ schedule }: Props) {
     const handleCopy = async () => {
         if (!webhook?.url) return
         const baseUrl = (import.meta.env.VITE_API_URL as string) ?? ''
-        try {
-            await navigator.clipboard.writeText(`${baseUrl}${webhook.url}`)
+        if (await copyToClipboard(`${baseUrl}${webhook.url}`)) {
             message.success(tEntities('schedule.webhook.copied'))
-        } catch {
-            // clipboard rejection is non-critical
         }
+        // clipboard rejection is non-critical
     }
 
     const handleDelete = async () => {

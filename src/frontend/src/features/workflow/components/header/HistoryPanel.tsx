@@ -1,6 +1,7 @@
 import { message } from 'antd';
 import { CloseOutlined } from '@ant-design/icons';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { copyToClipboard } from '@shared/utils/copyToClipboard';
 import { HistoryConfirmDialog } from './HistoryConfirmDialog';
 import { HistoryTimelineRow } from './HistoryTimelineRow';
 import { useHistoryPanelState } from './useHistoryPanelState';
@@ -176,9 +177,9 @@ export function HistoryPanel({ open, items, onClose, onDeleteVersion, onDownload
 											state.setMenuId((current) => (current === id ? null : id))
 										}
 										onCopySnapshot={async (snapshotId) => {
-											await navigator.clipboard.writeText(snapshotId);
+											const copied = await copyToClipboard(snapshotId);
 											state.setMenuId(null);
-											message.success(t('messages.copySnapshotIdSuccess'));
+											if (copied) message.success(t('messages.copySnapshotIdSuccess'));
 										}}
 										onDownloadTemplate={downloadTemplate}
 										onDelete={state.setConfirmId}
