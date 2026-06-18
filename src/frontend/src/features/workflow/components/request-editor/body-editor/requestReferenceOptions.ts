@@ -4,6 +4,12 @@ export type ResponseType = 'body' | 'header' | 'status';
 
 export type ReferenceOption = { label: string; value: string };
 
+export const getMethodConnectorTitle = (method: MethodWithId) =>
+  method.connector?.title ?? 'HTTP Request';
+
+export const getMethodConnectorIcon = (method: MethodWithId) =>
+  method.connector?.icon ?? null;
+
 const PATH_RE = /[^.[\]]+|\[\*]|\[\d+]|\[\w+]/g;
 
 export const ITERATOR_NAMES = [

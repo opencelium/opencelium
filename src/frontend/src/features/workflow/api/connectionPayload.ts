@@ -57,7 +57,7 @@ const nodeKind = (node: WorkflowNodeModel) => {
 
 const isMethodNode = (node: WorkflowNodeModel) => {
 	const kind = nodeKind(node);
-	return kind === 'connector';
+	return kind === 'connector' || kind === 'system';
 };
 
 const isOperatorNode = (node: WorkflowNodeModel) => {
@@ -372,23 +372,37 @@ const serializePayloadData = (body: unknown, endpointArgs?: Record<string, any>,
 const buildMethodPayload = (node: WorkflowNodeModel, index: string, order: number) => {
 	const config = node.data.methodConfig as any;
 	const endpointArgs = config?.endpointArgs ?? {};
+	const isHttpRequest = nodeKind(node) === 'system';
+	const response = config?.response ?? (isHttpRequest
+		? {
+			responseId: `response-${node.id}`,
+			success: {
+				status: '200',
+				header: {},
+				body: buildPayloadData({}),
+			},
+			fail: {
+				status: '500',
+				header: {},
+				body: buildPayloadData({}),
+			},
+		}
+		: undefined);
 
 	return {
 		id: node.id,
-		// `name` stays the operation name. The subtitle is only persisted as a
-		// `label` once the user has renamed the node themselves.
 		name: config?.name ?? node.data.subtitle,
 		...(node.data.labelEdited ? { label: node.data.subtitle } : {}),
 		index,
 		color: normalizeColor((node.data as any).color, ALL_COLORS[order % ALL_COLORS.length]),
-		connector: node.data.connector,
+		connector: isHttpRequest ? null : node.data.connector,
 		request: {
 			endpoint: serializeReferenceString(config?.url ?? '', endpointArgs),
 			method: config?.method ?? 'GET',
 			header: serializeHeaderReferences(config?.headers ?? {}, endpointArgs),
 			body: serializePayloadData(config?.body, endpointArgs, config?.bodyFormat),
 		},
-		...(config?.response ? { response: config.response } : {}),
+		...(response ? { response } : {}),
 	};
 };
 
@@ -665,11 +679,13 @@ export function normalizeConnectionPayload(payload: any) {
 			method: sourceMethods.map((method: any, index: number) => ({
 				...method,
 				index: normalizeIndex(method?.index, index),
-				connector: {
-					connectorId: method?.connector?.connectorId ?? method?.connectorId ?? -1,
-					title: method?.connector?.title ?? method?.connectorTitle ?? method?.connector?.name ?? 'DEFAULT',
-					icon: method?.connector?.icon ?? null,
-				},
+				connector: method?.connector === null
+					? null
+					: {
+						connectorId: method?.connector?.connectorId ?? method?.connectorId ?? -1,
+						title: method?.connector?.title ?? method?.connectorTitle ?? method?.connector?.name ?? 'DEFAULT',
+						icon: method?.connector?.icon ?? null,
+					},
 			})),
 			operator: sourceOperators.map((operator: any, index: number) => ({
 				...operator,

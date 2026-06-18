@@ -61,7 +61,7 @@ export interface MethodWithId extends Method {
         connectorId: number,
         title: string,
         icon?: string | null,
-    },
+    } | null,
 }
 
 export interface EndpointArg {

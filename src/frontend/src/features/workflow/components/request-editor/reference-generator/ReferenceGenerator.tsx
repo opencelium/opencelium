@@ -5,6 +5,7 @@ import type { Connection, MethodWithId } from '../../../types/connection';
 import {
 	buildReferenceValue,
 	getIteratorsForMethod,
+	getMethodConnectorTitle,
 	getReferenceOptions,
 	isExpandableReferencePath,
 	type ResponseType,
@@ -137,7 +138,7 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 	const connectorOptions = useMemo(() => {
 		const seen = new Set<string>();
 		return eligibleMethods.reduce<{ label: string; value: string }[]>((options, method) => {
-			const title = method.connector.title;
+			const title = getMethodConnectorTitle(method);
 			if (seen.has(title)) return options;
 			seen.add(title);
 			options.push({ label: title, value: title });
@@ -148,7 +149,7 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 	const methods = useMemo(
 		() =>
 			selectedConnector
-				? eligibleMethods.filter((method) => method.connector.title === selectedConnector)
+				? eligibleMethods.filter((method) => getMethodConnectorTitle(method) === selectedConnector)
 				: [],
 		[eligibleMethods, selectedConnector],
 	);
@@ -711,7 +712,6 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 									setSelectedConnector(c.value);
 									setIsConnectorDropdownOpen(false);
 									setSelectedMethodId('');
-									setMethodSearch('');
 									setSearchValue('');
 									setSelectedOption(null);
 									setFilteredOptions([]);
