@@ -75,7 +75,16 @@
 .startNodeButton {
   cursor: pointer;
   padding: 0;
+  position: relative;
   transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+/* Extend the clickable area beyond the visible circle without resizing it. */
+.startNodeButton::before {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  border-radius: 999px;
 }
 
 .startNodeButton:not(:disabled):hover {
