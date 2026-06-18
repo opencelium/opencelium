@@ -44,6 +44,7 @@ import com.becon.opencelium.backend.utility.LogFileUtility;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.becon.opencelium.backend.versionmanager.EntityUpdater;
 import com.becon.opencelium.backend.versionmanager.EntityVersionManager;
+import com.becon.opencelium.backend.versionmanager.base.UpdaterVersion;
 import com.becon.opencelium.backend.versionmanager.base.Utils;
 import com.github.fge.jsonpatch.JsonPatch;
 import jakarta.persistence.EntityNotFoundException;
@@ -83,7 +84,7 @@ public class ConnectionServiceImp implements ConnectionService {
     private final PatchHelper patchHelper;
     private final WebhookService webhookService;
     private final OpenceliumProps ocProps;
-    private final EntityUpdater<ConnectionMng> connectionMngEntityUpdater;
+    private final EntityUpdater<ConnectionMng> connectionMngStartupUpdater;
     private final OwnershipSecurity ownershipSecurity;
 
     public ConnectionServiceImp(
@@ -120,7 +121,7 @@ public class ConnectionServiceImp implements ConnectionService {
         this.webhookService = webhookService;
         this.ruleRepository = ruleRepository;
         this.ocProps = ocProps;
-        this.connectionMngEntityUpdater = entityVersionManager.getUpdater(ConnectionMng.class);
+        this.connectionMngStartupUpdater = entityVersionManager.getUpdater(ConnectionMng.class, UpdaterVersion.VERSION_4_8);
         this.ownershipSecurity = ownershipSecurity;
     }
 
@@ -160,11 +161,13 @@ public class ConnectionServiceImp implements ConnectionService {
 
         ConnectionMng savedMng = connectionMngService.create(connectionMng);
 
-        connection.setOcVersion(ocProps.getVersion());
+        String version = resolveVersion(connection);
+        connection.setOcVersion(version);
         connection.setSnapshotId(savedMng.getId());
         Connection savedConnection = connectionRepository.save(connection);
 
         savedMng.setConnectionId(savedConnection.getId());
+        savedMng.setVersion(version);
         connectionMngService.save(savedMng);
 
         connectionHistoryService.makeHistoryAndSave(savedConnection, null, Action.CREATE);
@@ -212,7 +215,11 @@ public class ConnectionServiceImp implements ConnectionService {
         connectionMng.setConnectionId(connection.getId());
         ConnectionMng savedMng = connectionMngService.create(connectionMng);
 
-        connection.setOcVersion(ocProps.getVersion());
+        String version = resolveVersion(connection);
+        savedMng.setVersion(version);
+        connectionMngService.save(savedMng);
+
+        connection.setOcVersion(version);
         connection.setSnapshotId(savedMng.getId());
         connection.setRevision(sCon.getRevision());
         connectionRepository.save(connection);
@@ -368,9 +375,11 @@ public class ConnectionServiceImp implements ConnectionService {
 
         if (connection.getToConnector() != null) {
             ConnectorDTO temp = connectionDTOMng.getToConnector();
-            connectionDTOMng.setToConnector(connectorMapper.toDTO(connectorService.getById(connection.getToConnector())));
-            connectionDTOMng.getToConnector().setOperators(temp.getOperators() == null ? new ArrayList<>() : temp.getOperators());
-            connectionDTOMng.getToConnector().setMethods(temp.getMethods() == null ? new ArrayList<>() : temp.getMethods());
+            if (temp != null) {
+                connectionDTOMng.setToConnector(connectorMapper.toDTO(connectorService.getById(connection.getToConnector())));
+                connectionDTOMng.getToConnector().setOperators(temp.getOperators() == null ? new ArrayList<>() : temp.getOperators());
+                connectionDTOMng.getToConnector().setMethods(temp.getMethods() == null ? new ArrayList<>() : temp.getMethods());
+            }
         }
 
         if (connectionDTOMng.getFieldBinding() == null) {
@@ -491,13 +500,15 @@ public class ConnectionServiceImp implements ConnectionService {
 
     @Override
     public void updateConnectionsToCurrentVersion() {
+        // Startup migration stops at 4.8; the 5.0 transform is applied on the read path only.
+        String targetVersion = UpdaterVersion.VERSION_4_8.getVersion();
         List<Long> ids = connectionRepository.findIds();
 
         for (Long id : ids) {
             Connection connection = getById(id);
-            if (Utils.compare(ocProps.getVersion(), connection.getOcVersion()) > 0 && !isTestConnection(connection.getTitle())) {
+            if (Utils.compare(targetVersion, connection.getOcVersion()) > 0 && !isTestConnection(connection.getTitle())) {
 
-                List<ConnectionMng> connections = connectionMngService.getAllByConnectionId(connection.getId());
+                List<ConnectionMng> connections = connectionMngService.getAllByConnectionIdRaw(connection.getId());
                 if (connections.isEmpty()) {
                     log.error("Failed to find Connection[id={}, name={}] on MongoDB. Skipped updating", connection.getId(), connection.getTitle());
                     continue;
@@ -505,8 +516,7 @@ public class ConnectionServiceImp implements ConnectionService {
 
                 try {
                     for (ConnectionMng connectionMng : connections) {
-                        connectionMngEntityUpdater.updateToCurrentVersion(connectionMng);
-                        connectionMng.setVersion(ocProps.getVersion());
+                        connectionMngStartupUpdater.updateToCurrentVersion(connectionMng);
 
                         if (connectionMng.getCreatedBy() == null) {
                             connectionMng.setCreatedBy(connection.getCreatedBy());
@@ -514,7 +524,7 @@ public class ConnectionServiceImp implements ConnectionService {
                         connectionMngService.save(connectionMng);
                     }
 
-                    log.info("Connection[id={}, name={}, version={}] successfully updated to {} version", connection.getId(), connection.getTitle(), connection.getOcVersion(), ocProps.getVersion());
+                    log.info("Connection[id={}, name={}, version={}] successfully updated to {} version", connection.getId(), connection.getTitle(), connection.getOcVersion(), targetVersion);
                 } catch (Exception e) {
                     log.error("Failed to update Connection[id={}, name={}, version={}]", connection.getId(), connection.getTitle(), connection.getOcVersion(), e);
                     continue;
@@ -525,7 +535,7 @@ public class ConnectionServiceImp implements ConnectionService {
                     connection.setSnapshotId(lastConnection.getId());
                 }
 
-                connection.setOcVersion(ocProps.getVersion());
+                connection.setOcVersion(targetVersion);
                 connectionRepository.save(connection);
             }
         }
@@ -725,6 +735,12 @@ public class ConnectionServiceImp implements ConnectionService {
 
     private boolean isTestConnection(String title) {
         return title != null && title.matches(RegExpression.TEST_CONNECTION_REGEX);
+    }
+
+    private String resolveVersion(Connection connection) {
+        return connection.getToConnector() == null
+                ? ocProps.getVersion()
+                : UpdaterVersion.VERSION_4_8.getVersion();
     }
 
     private void extractVars(Object json, List<String> varList) {
