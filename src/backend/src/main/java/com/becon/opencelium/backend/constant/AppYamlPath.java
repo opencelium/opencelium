@@ -4,10 +4,10 @@ public interface AppYamlPath {
     String OC_VERSION = "opencelium.version";
     String CONNECTOR_SECRET_KEY = "opencelium.connector.security.key";
     String MASTER_PASSWORD = "opencelium.connector.master-password";
-    String PROXY_HOST = "opencelium.rest_template.proxy.host";
-    String PROXY_PORT = "opencelium.rest_template.proxy.port";
-    String PROXY_USER = "opencelium.rest_template.proxy.username";
-    String PROXY_PASS = "opencelium.rest_template.proxy.password";
+    String PROXY_HOST = "opencelium.rest-template.proxy.host";
+    String PROXY_PORT = "opencelium.rest-template.proxy.port";
+    String PROXY_USER = "opencelium.rest-template.proxy.username";
+    String PROXY_PASS = "opencelium.rest-template.proxy.password";
     String INCOMING_WEBHOOK = "opencelium.notification.tools.incoming-webhook.url";
     String INSTALLATION = "opencelium.installation";
 
