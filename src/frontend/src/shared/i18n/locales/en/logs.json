@@ -36,6 +36,7 @@
     "failed": "TEST FAILED",
     "expand": "Expand logs panel",
     "collapse": "Collapse logs panel",
-    "clear": "Clear logs"
+    "clear": "Clear logs",
+    "orphaned": "This test was started before the page was reopened, so its live logs are no longer available. Please stop the test and run it again to see the logs."
   }
 }

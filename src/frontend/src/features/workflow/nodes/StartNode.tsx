@@ -25,9 +25,13 @@ export function StartNode({
 	const isBusy = phase === 'starting' || phase === 'stopping';
 	// A blocked subscription forbids starting a test run, but stopping a running one stays allowed.
 	const isSubscriptionBlocked = subscriptionIssue !== null && !isRunning;
+	// Only one workflow test may run at a time system-wide; another one in flight
+	// blocks starting here (it can never block stopping our own — that path needs
+	// isRunning, which excludes this).
+	const isOtherTestRunning = testRun?.isOtherTestRunning ?? false;
 
 	const handleClick = () => {
-		if (!testRun || !isSocketConnected || isBusy || isSubscriptionBlocked) return;
+		if (!testRun || !isSocketConnected || isBusy || isSubscriptionBlocked || isOtherTestRunning) return;
 		if (isRunning) void testRun.stopTest();
 		else void testRun.startTest();
 	};
@@ -64,6 +68,16 @@ export function StartNode({
 			</div>
 		) : null;
 
+	const otherTestAlert =
+		testRun && isOtherTestRunning && isSocketConnected && !isSubscriptionBlocked ? (
+			<div className='startNodeAlert'>
+				<TriangleAlert size={12} />
+				<span>{tEntities('connection.test.otherTestRunning')}</span>
+			</div>
+		) : null;
+
+	const isStartUnavailable = !isSocketConnected || isSubscriptionBlocked || isOtherTestRunning;
+
 	const button = (
 		<button
 			type='button'
@@ -71,10 +85,10 @@ export function StartNode({
 				'startNode',
 				'startNodeButton',
 				isRunning ? 'startNodeRunning' : '',
-				!isSocketConnected || isSubscriptionBlocked ? 'startNodeUnavailable' : '',
+				isStartUnavailable ? 'startNodeUnavailable' : '',
 			].join(' ')}
 			onClick={handleClick}
-			disabled={!isSocketConnected || isBusy || isSubscriptionBlocked}
+			disabled={!isSocketConnected || isBusy || isSubscriptionBlocked || isOtherTestRunning}
 			aria-label={tEntities(isRunning ? 'connection.test.stop' : 'connection.test.start')}
 		>
 			{icon}
@@ -87,7 +101,7 @@ export function StartNode({
 			data={data}
 			selected={selected}
 			bottomLabel={data.title}
-			bottomExtra={subscriptionAlert ?? socketAlert}
+			bottomExtra={subscriptionAlert ?? socketAlert ?? otherTestAlert}
 			rightAdd={{
 				action: { sourceNodeId: id, direction: 'right' },
 				showAlways: !!data.alwaysShowRightAdd,
@@ -98,7 +112,7 @@ export function StartNode({
 				<div className='startNode'>
 					<Play size={26} />
 				</div>
-			) : isSocketConnected && !isSubscriptionBlocked ? (
+			) : isSocketConnected && !isSubscriptionBlocked && !isOtherTestRunning ? (
 				<Tooltip
 					content={tEntities(isRunning ? 'connection.test.stop' : 'connection.test.start')}
 				>

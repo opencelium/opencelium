@@ -13,6 +13,8 @@ type ApiFetchOptions = {
     signal?: AbortSignal
     /** Extra request headers; override Content-Type / Authorization when present. */
     headers?: Record<string, string>
+    /** Let the request outlive the page (for fire-and-forget calls during unload). */
+    keepalive?: boolean
 }
 
 const DEFAULT_TIMEOUT_MS = 30_000
@@ -91,6 +93,7 @@ export async function apiFetchWithHeaders<T = unknown>(
         timeoutMs = DEFAULT_TIMEOUT_MS,
         signal: externalSignal,
         headers: extraHeaders,
+        keepalive,
     }: ApiFetchOptions = {},
 ): Promise<{data: T | null; headers: Headers; status: number}> {
     const accessToken = token ?? selectAccessToken(store.getState())
@@ -139,6 +142,7 @@ export async function apiFetchWithHeaders<T = unknown>(
             credentials: 'include',
             headers: requestHeaders,
             signal: controller.signal,
+            ...(keepalive && {keepalive: true}),
             ...(requestBody !== undefined && {body: requestBody}),
         })
     } catch (e) {

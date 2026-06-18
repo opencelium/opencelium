@@ -114,6 +114,16 @@ textarea {
   border-top: 1px solid var(--color-border-subtle);
 }
 
+.logsOrphanNotice {
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--color-status-warning-bg);
+  border: 1px solid var(--color-status-warning-border);
+  color: var(--color-status-warning-fg);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 .logsHeaderTitle {
   display: flex;
   align-items: center;

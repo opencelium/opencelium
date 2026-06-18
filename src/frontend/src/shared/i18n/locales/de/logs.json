@@ -36,6 +36,7 @@
     "failed": "TEST FEHLGESCHLAGEN",
     "expand": "Log-Panel ausklappen",
     "collapse": "Log-Panel einklappen",
-    "clear": "Logs löschen"
+    "clear": "Logs löschen",
+    "orphaned": "Dieser Test wurde gestartet, bevor die Seite erneut geöffnet wurde. Daher sind die Live-Logs nicht mehr verfügbar. Bitte stoppen Sie den Test und führen Sie ihn erneut aus, um die Logs zu sehen."
   }
 }

@@ -68,8 +68,9 @@ export function WorkflowLogs() {
 	const phase = testRun?.phase ?? 'idle';
 	const logTree = testRun?.logTree ?? EMPTY_LIVE_LOG_TREE;
 	const result = testRun?.result ?? null;
+	const isOrphaned = testRun?.isOrphaned ?? false;
 	const isRunning = phase !== 'idle';
-	const hasLogs = logTree.rootKeys.length > 0;
+	const hasLogs = !isOrphaned && logTree.rootKeys.length > 0;
 	const isExpanded = panel !== 'minimized';
 
 	// Render-phase adjustment: open the panel when a test run starts.
@@ -152,8 +153,14 @@ export function WorkflowLogs() {
 
 			{isExpanded && (
 				<div className={`logsBody ${hasLogs ? 'logsBodyTree' : ''}`}>
-					{hasLogs ? <LiveExecutionLogTree tree={logTree} fill /> : tLogs('live.empty')}
-					{result && <TestRunResultLine result={result} />}
+					{isOrphaned ? (
+						<div className='logsOrphanNotice'>{tLogs('live.orphaned')}</div>
+					) : hasLogs ? (
+						<LiveExecutionLogTree tree={logTree} fill />
+					) : (
+						tLogs('live.empty')
+					)}
+					{!isOrphaned && result && <TestRunResultLine result={result} />}
 				</div>
 			)}
 		</div>

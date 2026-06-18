@@ -19,6 +19,15 @@ export type TestRunContextValue = {
 	// from the socket stream — no REST requests happen during a run.
 	logTree: LiveLogTree;
 	result: TestRunResult | null;
+	// True when the running state was resumed from a previous page session: the
+	// test was started before the page was reloaded/reopened, so its logs are no
+	// longer available. The stop button stays active, but the panel shows a
+	// notice instead of logs (the user must stop and re-run to see fresh logs).
+	isOrphaned: boolean;
+	// True when a test run for a *different* workflow is currently executing on
+	// the backend. Only one workflow test may run at a time system-wide, so this
+	// blocks starting a test here until the other one finishes.
+	isOtherTestRunning: boolean;
 	startTest: () => Promise<void>;
 	stopTest: () => Promise<void>;
 	// Clears the locally collected logs (and the result line). No-op while a
