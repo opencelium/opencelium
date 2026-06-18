@@ -14,18 +14,25 @@ type Props = {
   onChange: (value?: string) => void;
 };
 
+const normalizeSelectPath = (value?: string) => {
+  if (value === '$.') return '$';
+  return value || '';
+};
+
 export function LegacyResponseFieldSelect({ method, type, value, disabled, iterators = [], onChange }: Props) {
   const { t } = useI18n('workflow');
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const selectingRef = useRef(false);
   const userInteractionRef = useRef(false);
-  const [path, setPath] = useState(value || '');
+  const [path, setPath] = useState(normalizeSelectPath(value));
   const [optionsBase, setOptionsBase] = useState('');
   const [open, setOpen] = useState(false);
+  const displayPath = path === '$' ? t('references.rootObject') : path;
 
   useEffect(() => {
-    setPath(value || '');
-    setOptionsBase(value || '');
+    const nextPath = normalizeSelectPath(value);
+    setPath(nextPath);
+    setOptionsBase(nextPath);
   }, [iterators, method, type, value]);
 
   const options = useMemo(
@@ -60,7 +67,7 @@ export function LegacyResponseFieldSelect({ method, type, value, disabled, itera
       <Select
         placeholder={type === 'status' ? t('references.responseStatus') : method ? t('placeholders.selectField') : t('placeholders.selectMethod')}
         value={undefined}
-        searchValue={type === 'status' ? 'status' : path}
+        searchValue={type === 'status' ? 'status' : displayPath}
         className='bodyLegacyGeneratorSelect'
         disabled={disabled || type === 'status'}
         showSearch
@@ -76,14 +83,15 @@ export function LegacyResponseFieldSelect({ method, type, value, disabled, itera
             selectingRef.current = false;
             return;
           }
-          setPath(nextValue);
-          onChange(nextValue || undefined);
-          setOptionsBase(nextValue);
+          const nextPath = normalizeSelectPath(nextValue);
+          setPath(nextPath);
+          onChange(nextPath || undefined);
+          setOptionsBase(nextPath);
           setOpen(userInteractionRef.current);
         }}
         onSelect={(nextValue) => {
           selectingRef.current = true;
-          const nextPath = String(nextValue || '');
+          const nextPath = normalizeSelectPath(String(nextValue || ''));
           setPath(nextPath);
           onChange(nextPath || undefined);
           const expandable = isExpandableReferencePath(method, type, nextPath, iterators);

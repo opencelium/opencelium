@@ -13,6 +13,8 @@ import { LegacyResponseFieldSelect } from '../request-editor/body-editor/LegacyR
 import { LegacyWebhookReferenceSelect } from '../request-editor/body-editor/LegacyWebhookReferenceSelect';
 import {
 	buildReferenceValue,
+	getMethodConnectorIcon,
+	getMethodConnectorTitle,
 	ITERATOR_NAMES,
 	type ResponseType,
 } from '../request-editor/body-editor/requestReferenceOptions';
@@ -100,10 +102,11 @@ const parseResponseTypeFromReference = (value?: string): ResponseType | undefine
 
 const parsePathFromReference = (value?: string) => {
 	if (!value) return undefined;
+	if (value === '$' || value === '$.') return '$';
 	if (value.includes('(response).status')) return 'status';
 	const match = value.match(/\.(body|header)(?:\.\$\.?|\.)?(.*)$/);
+	if (match && match[2] === '') return '$';
 	const path = match?.[2] || value;
-	if (match && path === '') return '$';
 	return path.replace(/^#?[A-Fa-f0-9]{6}\.\(response\)\.(body|header)\.\$\.?/, '');
 };
 
@@ -292,19 +295,17 @@ function MethodSelect({
 					String(data?.connectorTitle ?? '').toLowerCase().includes(term)
 				);
 			}}
-			// Pin the connector icon as a prefix so it stays visible while typing;
-			// antd indents the search text after it.
 			prefix={selected ? (
-				<span title={selected.connector.title} style={{ display: 'inline-flex' }}>
-					<ConnectorIcon icon={selected.connector.icon} size={18} />
+				<span title={getMethodConnectorTitle(selected)} style={{ display: 'inline-flex' }}>
+					<ConnectorIcon icon={getMethodConnectorIcon(selected)} size={18} />
 				</span>
 			) : undefined}
 			onChange={onChange}
 			options={methods.map((method) => ({
 				value: method.id,
 				label: getMethodLabel(method),
-				connectorTitle: method.connector.title,
-				connectorIcon: method.connector.icon ?? null,
+				connectorTitle: getMethodConnectorTitle(method),
+				connectorIcon: getMethodConnectorIcon(method),
 			}))}
 			optionRender={(option) => {
 				const data = option.data as { connectorTitle?: string; connectorIcon?: string | null };
@@ -719,7 +720,7 @@ export function ConditionBuilderDialog({
 		if (!method) return undefined;
 		return {
 			methodLabel: method.label || method.name,
-			connectorIcon: method.connector.icon ?? null,
+			connectorIcon: getMethodConnectorIcon(method),
 			hasMethod: true,
 			responseType: parseResponseTypeFromReference(loopCollectionRef) || 'body',
 		};

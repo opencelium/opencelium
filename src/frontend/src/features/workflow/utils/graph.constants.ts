@@ -6,15 +6,14 @@ export const OFFSETS = {
 } as const;
 
 export const TITLES: Record<WorkflowCreateKind, string> = {
-  connector: 'HTTP Request',
-  system: 'i-doit',
+  connector: 'Connector',
+  system: 'HTTP Request',
   if: 'If',
   loop: 'Loop',
 };
 
 export const SUBTITLES: Partial<Record<WorkflowCreateKind, string>> = {
-  connector: 'Label',
-  system: 'cmd:object.create',
+  system: 'GET',
 };
 
 export const COLLISION_LIMITS = {

@@ -29,7 +29,9 @@ function buildNewNode(args: CreateNodeFromActionArgs, sourceNode: WorkflowNodeMo
     type: nodeType,
     position: targetPosition,
     data: {
-      title: TITLES[args.action.kind!],
+      title: args.action.kind === 'connector' && args.action.connector
+        ? args.action.connector.title
+        : TITLES[args.action.kind!],
       subtitle: args.action.methodName ?? SUBTITLES[args.action.kind!],
       kind: nodeType,
       connector: args.action.connector,
