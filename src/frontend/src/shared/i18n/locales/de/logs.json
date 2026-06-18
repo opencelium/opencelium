@@ -25,7 +25,7 @@
     "failed": "Kopieren in die Zwischenablage fehlgeschlagen"
   },
   "methodView": {
-    "tooltip": "Methodenanzeige zwischen URL und Name umschalten"
+    "tooltip": "URL / Name umschalten"
   },
   "live": {
     "title": "Logs",

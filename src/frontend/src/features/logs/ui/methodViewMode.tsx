@@ -38,7 +38,7 @@ export function MethodViewSwitcher() {
   const { t } = useI18n("logs");
   const { mode, setMode } = useMethodViewMode();
   return (
-    <Tooltip content={t("methodView.tooltip")}>
+    <Tooltip content={t("methodView.tooltip")} placement="topLeft">
       <IconButton
         iconProps={{ name: "arrow-switch", size: 16, color: mode === "name" ? "inherit" : "primary" }}
         type={mode === "name" ? "primary" : "text"}

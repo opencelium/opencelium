@@ -49,7 +49,7 @@ export function DownloadLogsButton({ executionId }: { executionId: string }) {
   };
 
   return (
-    <Tooltip content={t("download.tooltip")}>
+    <Tooltip content={t("download.tooltip")} placement="topLeft">
       <IconButton
         iconProps={{ name: "download" }}
         size="xs"

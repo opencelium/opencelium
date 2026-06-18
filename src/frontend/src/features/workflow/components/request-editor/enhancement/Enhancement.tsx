@@ -85,7 +85,7 @@ const ReferenceEnhancement = ({ enhancement, readOnly }: EnhancementProps) => {
 							<div className='bodyLegacyEnhancementBody'>
 								<div className='bodyLegacyEnhancementArgs'>
 									<Collapse
-										defaultActiveKeys={['variableInfo']}
+										defaultActiveKeys={[]}
 										items={[
 											{
 												key: 'variableInfo',
