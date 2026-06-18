@@ -71,7 +71,7 @@ export function MethodLogDetails({ id, depth, path }: Props) {
       <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
         <div style={{ flex: 1, minWidth: 280 }}>
           <Tabs
-            value={tabs[requestTabKey] ?? "header"}
+            value={tabs[requestTabKey] ?? "body"}
             onChange={(key) => setTab(requestTabKey, key)}
             items={[
               {
@@ -93,7 +93,7 @@ export function MethodLogDetails({ id, depth, path }: Props) {
         </div>
         <div style={{ flex: 1, minWidth: 280 }}>
           <Tabs
-            value={tabs[responseTabKey] ?? "header"}
+            value={tabs[responseTabKey] ?? "body"}
             onChange={(key) => setTab(responseTabKey, key)}
             items={[
               {
