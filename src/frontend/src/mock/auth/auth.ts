@@ -1,4 +1,5 @@
 import { http, HttpResponse } from 'msw'
+import {createId} from "@shared/lib/createId.ts";
 
 // payload: {"userId":1} → base64url: eyJ1c2VySWQiOjF9
 const MOCK_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjF9.mock-signature'
@@ -40,7 +41,7 @@ export const authHandlers = [
 
         const lower = email?.toLowerCase() ?? ''
         if (lower.startsWith('2fa')) {
-            const sessionId = crypto.randomUUID()
+            const sessionId = createId()
             totpSessions.add(sessionId)
             if (lower.startsWith('2fa-setup')) {
                 return HttpResponse.json(

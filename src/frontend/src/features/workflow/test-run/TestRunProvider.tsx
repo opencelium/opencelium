@@ -17,6 +17,7 @@ import {
 	type TestRunPhase,
 	type TestRunResult,
 } from './TestRunContext';
+import {createId} from "@shared/lib/createId.ts";
 
 type Props = {
 	connectionId?: string;
@@ -97,7 +98,7 @@ export function TestRunProvider({ connectionId, buildTestPayload, children }: Pr
 		const payload = buildTestPayload();
 		if (!payload) return;
 
-		const channelId = connectionId || crypto.randomUUID();
+		const channelId = connectionId || createId();
 		setLogTree(EMPTY_LIVE_LOG_TREE);
 		setResult(null);
 		startTimeRef.current = Date.now();
