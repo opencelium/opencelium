@@ -40,21 +40,24 @@ export function TotpLoginDialog({ open, challenge, rememberMe, onClose }: Props)
     // Only the first-time enrolment ('setup') carries a QR + secret to display.
     const setupChallenge = challenge?.mode === 'setup' ? challenge : null
 
-    const onSubmit = async ({ code }: TotpCodeValues) => {
+    const onSubmit = async (data: TotpCodeValues) => {
         if (!challenge) return
+        const {code} = data;
         try {
             // On success the session lands in Redux and LoginPage redirects away — the
             // dialog unmounts with the rest of the login screen, so there is nothing to close.
             await validateTotp({ code: code.trim(), sessionId: challenge.sessionId, rememberMe })
         } catch (e) {
-            const messageKey: AuthKey =
-                e instanceof Error && e.name === API_TIMEOUT_ERROR_NAME
-                    ? 'errors.network'
-                    : e instanceof TypeError
-                      ? 'errors.network'
-                      : e instanceof ApiFetchError && e.status === 401
-                        ? 'totp.errors.invalidCode'
-                        : 'errors.failed'
+            // Only a genuine fetch failure ("Failed to fetch") is a network error;
+            // other TypeErrors are programming bugs and must not be hidden as such.
+            const isNetworkError =
+                (e instanceof Error && e.name === API_TIMEOUT_ERROR_NAME) ||
+                (e instanceof TypeError && e.message === 'Failed to fetch')
+            const messageKey: AuthKey = isNetworkError
+                ? 'errors.network'
+                : e instanceof ApiFetchError && e.status === 401
+                  ? 'totp.errors.invalidCode'
+                  : 'errors.failed'
             form.setError('code', { type: 'server', message: messageKey })
         }
     }
@@ -117,7 +120,9 @@ export function TotpLoginDialog({ open, challenge, rememberMe, onClose }: Props)
                             label={t('totp.codeLabel')}
                             placeholder={t('totp.codePlaceholder')}
                             error={displayError}
-                            disabled={form.formState.isSubmitting}
+                            // readOnly, not disabled: a disabled RHF Controller unsets its
+                            // value on submit, so `data.code` would arrive undefined.
+                            readOnly={form.formState.isSubmitting}
                             autoFocus
                             testId="totp-code"
                         />
