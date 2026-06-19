@@ -70,22 +70,18 @@ export function WorkflowLogs() {
 	const result = testRun?.result ?? null;
 	const isOrphaned = testRun?.isOrphaned ?? false;
 	const errorRevealNonce = testRun?.errorRevealNonce ?? 0;
+	const revealPending = testRun?.revealPending ?? false;
 	const isRunning = phase !== 'idle';
 	const hasLogs = !isOrphaned && logTree.rootKeys.length > 0;
 	const isExpanded = panel !== 'minimized';
 
-	// Render-phase adjustment: open the panel when a test run starts.
-	const [wasRunning, setWasRunning] = useState(false);
-	if (isRunning !== wasRunning) {
-		setWasRunning(isRunning);
-		if (isRunning && panel === 'minimized') setPanel('normal');
-	}
-
-	// A failed run reveals the error — make sure the panel is open to show it.
-	const [seenRevealNonce, setSeenRevealNonce] = useState(0);
-	if (errorRevealNonce !== seenRevealNonce) {
-		setSeenRevealNonce(errorRevealNonce);
-		if (errorRevealNonce > 0 && panel === 'minimized') setPanel('normal');
+	// Render-phase adjustment: open the panel while a test runs or while we wait
+	// to reveal a failure, so the loading state and the reveal are visible.
+	const isActive = isRunning || revealPending;
+	const [wasActive, setWasActive] = useState(false);
+	if (isActive !== wasActive) {
+		setWasActive(isActive);
+		if (isActive && panel === 'minimized') setPanel('normal');
 	}
 
 	const toggleMinimized = () =>
@@ -168,7 +164,15 @@ export function WorkflowLogs() {
 					) : (
 						tLogs('live.empty')
 					)}
-					{!isOrphaned && result && <TestRunResultLine result={result} />}
+					{!isOrphaned && revealPending && (
+						<div className='logsRunning'>
+							<Loader2 size={13} className='logsRunningSpinner' />
+							{tLogs('live.collecting')}
+						</div>
+					)}
+					{!isOrphaned && !revealPending && result && (
+						<TestRunResultLine result={result} />
+					)}
 				</div>
 			)}
 		</div>

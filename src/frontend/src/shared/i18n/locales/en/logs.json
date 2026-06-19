@@ -31,6 +31,7 @@
     "title": "Logs",
     "empty": "No logs yet. Run a test to see execution logs.",
     "running": "Running…",
+    "collecting": "Collecting logs…",
     "finished": "TEST FINISHED in {{time}}",
     "stopped": "TEST STOPPED",
     "failed": "TEST FAILED",

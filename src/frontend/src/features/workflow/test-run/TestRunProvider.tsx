@@ -24,6 +24,7 @@ import { clearActiveTestRun, getActiveTestRun, saveActiveTestRun } from './testR
 import { useTestRunLeaveGuard } from './useTestRunLeaveGuard';
 import {createId} from "@shared/lib/createId.ts";
 
+const TIMEOUT_TO_COLLECT_LOGS = 3000;
 // Backend names every temporary test scheduler "!*test_schedule_<millis>_<title>"
 // (ConnectionController.test). The running-jobs feed lists them while they run,
 // which is how we detect that a test is in progress anywhere in the system.
@@ -65,6 +66,11 @@ export function TestRunProvider({ connectionId, buildTestPayload, children }: Pr
 	// Bumped once per failed run so the logs panel reveals the failing element.
 	const [errorRevealNonce, setErrorRevealNonce] = useState(0);
 	const hasRevealedErrorRef = useRef(false);
+	// True during the short pause after a failure before the reveal starts — the
+	// backend needs a moment to finish persisting the run before we can fetch the
+	// failing element's path. The panel shows a loading state meanwhile.
+	const [revealPending, setRevealPending] = useState(false);
+	const revealTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const schedulerIdRef = useRef<number | null>(resumedRun?.schedulerId ?? null);
 	const channelIdRef = useRef<string | null>(resumedRun?.channelId ?? null);
 	const unsubscribeRef = useRef<(() => void) | null>(null);
@@ -89,7 +95,13 @@ export function TestRunProvider({ connectionId, buildTestPayload, children }: Pr
 		setLogTree(failPendingNodes);
 	}, []);
 
-	useEffect(() => () => unsubscribeRef.current?.(), []);
+	useEffect(
+		() => () => {
+			unsubscribeRef.current?.();
+			if (revealTimerRef.current) clearTimeout(revealTimerRef.current);
+		},
+		[],
+	);
 
 	// If the transport drops mid-run the backend can no longer reach this
 	// channel — reset so the button doesn't stay stuck on "stop". The phase
@@ -124,10 +136,16 @@ export function TestRunProvider({ connectionId, buildTestPayload, children }: Pr
 			if (log.error?.message || (log.type === 'EXECUTION' && log.status === 'FAIL')) {
 				settleResult({ kind: 'failed' });
 				// First failure of the run drives the panel to expand to the error.
-				// The tree (with the error node) is updated in the same batch above.
+				// Wait ~1.5s before revealing: the backend needs a moment to finish
+				// persisting the run, otherwise the on-demand child fetches race it.
+				// Show a loading state during the pause.
 				if (!hasRevealedErrorRef.current) {
 					hasRevealedErrorRef.current = true;
-					setErrorRevealNonce((n) => n + 1);
+					setRevealPending(true);
+					revealTimerRef.current = setTimeout(() => {
+						setRevealPending(false);
+						setErrorRevealNonce((n) => n + 1);
+					}, TIMEOUT_TO_COLLECT_LOGS);
 				}
 			} else if (log.type === 'EXECUTION' && log.status === 'COMPLETE') {
 				settleResult({
@@ -247,6 +265,8 @@ export function TestRunProvider({ connectionId, buildTestPayload, children }: Pr
 		setResult(null);
 		setIsOrphaned(false);
 		hasRevealedErrorRef.current = false;
+		if (revealTimerRef.current) clearTimeout(revealTimerRef.current);
+		setRevealPending(false);
 		startTimeRef.current = startedAt;
 		setPhase('starting');
 		// Persist before the run is triggered so a page reload mid-test can still
@@ -365,11 +385,12 @@ export function TestRunProvider({ connectionId, buildTestPayload, children }: Pr
 			isOrphaned,
 			isOtherTestRunning,
 			errorRevealNonce,
+			revealPending,
 			startTest,
 			stopTest,
 			clearLogs,
 		}),
-		[status, phase, logTree, result, isOrphaned, isOtherTestRunning, errorRevealNonce, startTest, stopTest, clearLogs],
+		[status, phase, logTree, result, isOrphaned, isOtherTestRunning, errorRevealNonce, revealPending, startTest, stopTest, clearLogs],
 	);
 
 	return <TestRunContext.Provider value={value}>{children}</TestRunContext.Provider>;

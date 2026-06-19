@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Loading } from "@shared/ui/primitives/Loading/Loading";
 import { Typography } from "@shared/ui/primitives/Typography";
 import { useI18n } from "@shared/i18n/hooks/useI18n";
@@ -18,10 +18,12 @@ const INDENT_STEP = 22;
 
 // Lets a parent (e.g. a loop) own its children's expand/collapse state keyed by
 // position, so the state survives switching iterations even though each
-// iteration's rows remount with new ids.
+// iteration's rows remount with new ids. `open` is the idempotent set-true used
+// by auto-reveal (a controlled child can't expand itself).
 type ChildExpansion = {
   isOpen: (index: number) => boolean;
   toggle: (index: number) => void;
+  open: (index: number) => void;
 };
 
 // Renders the children of an element (connector or operator) for one loop iteration.
@@ -90,6 +92,7 @@ export function ElementChildren({
           loopIndexPath={loopIndexPath}
           expanded={expansion ? expansion.isOpen(index) : undefined}
           onToggle={expansion ? () => expansion.toggle(index) : undefined}
+          onReveal={expansion ? () => expansion.open(index) : undefined}
         />
       ))}
     </>
@@ -103,6 +106,7 @@ export function LogElementRow({
   loopIndexPath = "",
   expanded: expandedProp,
   onToggle,
+  onReveal,
 }: {
   log: FlowchartChildLog;
   depth: number;
@@ -115,6 +119,9 @@ export function LogElementRow({
   // loop can persist its children's open state across iterations).
   expanded?: boolean;
   onToggle?: () => void;
+  // Idempotent "open me" from the parent (controlled rows), so auto-reveal can
+  // open a row it doesn't directly own.
+  onReveal?: () => void;
 }) {
   const [internalExpanded, setInternalExpanded] = useState(false);
   const [loopIndex, setLoopIndex] = useState(0);
@@ -125,21 +132,44 @@ export function LogElementRow({
   >({});
 
   const { mode } = useMethodViewMode();
-  const isOnTrace = useLogErrorTrace();
+  const { nonce, isOnTrace, isTarget, loopIteration } = useLogErrorTrace();
+  const anchorRef = useRef<HTMLDivElement>(null);
   // REST rows carry no status dot, so the trace marker is shown on every row on
   // the path to the error (the failing element and its ancestors), matched by
   // indexPath *and* this row's loop-iteration context.
   const onTrace = isOnTrace(log.indexPath, loopIndexPath);
+  const target = isTarget(log.indexPath, loopIndexPath);
 
   const isControlled = onToggle !== undefined;
   const expanded = isControlled ? !!expandedProp : internalExpanded;
   const toggle = isControlled ? onToggle : () => setInternalExpanded((v) => !v);
 
-  const childExpansion = {
+  const childExpansion: ChildExpansion = {
     isOpen: (index: number) => !!expandedChildren[index],
     toggle: (index: number) =>
       setExpandedChildren((prev) => ({ ...prev, [index]: !prev[index] })),
+    open: (index: number) =>
+      setExpandedChildren((prev) => (prev[index] ? prev : { ...prev, [index]: true })),
   };
+
+  // Auto-reveal: follow the error trail through this (REST-fetched) iteration —
+  // open the row, page a loop to the failing iteration (its children are then
+  // fetched on demand and continue the trail), and scroll the target in.
+  useEffect(() => {
+    if (nonce === 0 || !isOnTrace(log.indexPath, loopIndexPath)) return;
+    if (isControlled) onReveal?.();
+    else setInternalExpanded(true);
+    if (log.type === "LOOP") {
+      const iter = loopIteration(log.indexPath, loopIndexPath);
+      if (iter !== null) setLoopIndex(iter);
+    }
+    if (target) {
+      anchorRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nonce]);
+
+  const scrollAnchor = target ? <div ref={anchorRef} aria-hidden /> : null;
 
   switch (log.type) {
     case "OPERATION": {
@@ -147,6 +177,7 @@ export function LogElementRow({
       // failed before its request was built), so guard every field.
       const request = log.segment?.request;
       const response = log.segment?.response;
+      const hasError = !!log.error?.message;
       const displayText = methodDisplayText(mode, {
         url: request?.url,
         label: log.properties?.label,
@@ -154,6 +185,7 @@ export function LogElementRow({
       });
       return (
         <>
+          {scrollAnchor}
           <LogRow
             depth={depth}
             expandable
@@ -164,7 +196,7 @@ export function LogElementRow({
                 {request?.http_method ? (
                   <MethodBadge method={request.http_method} />
                 ) : null}
-                <Url>{displayText}</Url>
+                <Url isError={hasError || target}>{displayText}</Url>
                 {displayText ? (
                   <CopyButton value={displayText} className="oc-copy-on-hover" />
                 ) : null}
@@ -191,6 +223,7 @@ export function LogElementRow({
     case "LOOP": {
       return (
         <>
+          {scrollAnchor}
           <LogRow
             depth={depth}
             expandable
@@ -229,6 +262,7 @@ export function LogElementRow({
     case "IF": {
       return (
         <>
+          {scrollAnchor}
           <LogRow
             depth={depth}
             expandable

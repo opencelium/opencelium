@@ -31,6 +31,9 @@ export type TestRunContextValue = {
 	// Bumped once per failed run so the logs panel can auto-expand and scroll to
 	// the element where the error happened. 0 means no failure to reveal yet.
 	errorRevealNonce: number;
+	// True during the short pause after a failure, before the reveal starts —
+	// gives the backend time to persist the run. The panel shows a loading state.
+	revealPending: boolean;
 	startTest: () => Promise<void>;
 	stopTest: () => Promise<void>;
 	// Clears the locally collected logs (and the result line). No-op while a

@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Typography } from "@shared/ui/primitives/Typography";
 import { useI18n } from "@shared/i18n/hooks/useI18n";
 import {
-  findErrorRevealPath,
+  isErrorTarget,
+  loopRevealIteration,
   makeErrorTraceMatcher,
   type LiveLogNode,
   type LiveLogTree,
@@ -10,18 +11,21 @@ import {
 import { LogRow, Meta, TraceDot } from "../logRowUi";
 import { MethodDetailViewStateProvider } from "../methodDetailViewState";
 import { LiveChildren, LiveStatusIndicator } from "./LiveLogElementRow";
-import { LiveRevealContext, useLiveReveal, type LiveRevealState } from "./liveReveal";
-import { LogErrorTraceContext, useLogErrorTrace } from "../logErrorTrace";
+import {
+  LogErrorTraceContext,
+  useLogErrorTrace,
+  type LogErrorTrace,
+} from "../logErrorTrace";
 
 function LiveConnectorRow({ tree, node }: { tree: LiveLogTree; node: LiveLogNode }) {
   const [expanded, setExpanded] = useState(true);
-  const { nonce, revealKeys } = useLiveReveal();
-  const isOnTrace = useLogErrorTrace();
+  const { nonce, isOnTrace } = useLogErrorTrace();
   const onTrace = isOnTrace(node.indexPath, node.loopIndex) && node.status !== "FAIL";
 
-  // Re-open a connector the user had collapsed when the error lives inside it.
+  // Re-open a connector the user had collapsed when a run fails (the error trail
+  // starts at the connector root).
   useEffect(() => {
-    if (nonce > 0 && revealKeys.has(node.key)) setExpanded(true);
+    if (nonce > 0) setExpanded(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nonce]);
 
@@ -60,28 +64,32 @@ export function LiveExecutionLogTree({
 }: {
   tree: LiveLogTree;
   fill?: boolean;
-  // Bumped by the test-run provider when a run fails; triggers the tree to
-  // expand down to (and scroll to) the failing element.
+  // Bumped by the test-run provider when a run fails; triggers the tree to page
+  // loops to the failing iterations and expand down to the failing element.
   revealNonce?: number;
 }) {
   const { t } = useI18n("logs");
 
-  const errorTrace = useMemo(
-    () => makeErrorTraceMatcher(tree.errorLocations),
-    [tree.errorLocations],
-  );
-
-  const reveal = useMemo<LiveRevealState>(() => {
-    if (revealNonce === 0) {
-      return { nonce: 0, revealKeys: new Set<string>(), targetKey: null };
+  // TEMP diagnostic: surface what was captured from the socket so we can see
+  // whether the reveal has anything to work with and what the loopIndex base is.
+  useEffect(() => {
+    if (revealNonce > 0) {
+      // eslint-disable-next-line no-console
+      console.log("[logs reveal] errorLocations:", JSON.stringify(tree.errorLocations));
     }
-    const found = findErrorRevealPath(tree);
+  }, [revealNonce, tree.errorLocations]);
+
+  const errorCtx = useMemo<LogErrorTrace>(() => {
+    const matcher = makeErrorTraceMatcher(tree.errorLocations);
     return {
       nonce: revealNonce,
-      revealKeys: new Set(found?.pathKeys ?? []),
-      targetKey: found?.targetKey ?? null,
+      isOnTrace: matcher,
+      isTarget: (indexPath, loopIndexPath) =>
+        isErrorTarget(tree.errorLocations, indexPath, loopIndexPath),
+      loopIteration: (indexPath, loopIndexPath) =>
+        loopRevealIteration(tree.errorLocations, indexPath, loopIndexPath),
     };
-  }, [revealNonce, tree]);
+  }, [revealNonce, tree.errorLocations]);
 
   if (tree.rootKeys.length === 0) {
     return (
@@ -94,26 +102,24 @@ export function LiveExecutionLogTree({
   }
 
   return (
-    <LiveRevealContext.Provider value={reveal}>
-      <LogErrorTraceContext.Provider value={errorTrace}>
-        <MethodDetailViewStateProvider>
-          <div
-            style={{
-              border: "1px solid var(--color-border-default)",
-              borderRadius: 6,
-              overflow: "auto",
-              ...(fill ? { flex: 1, minHeight: 0 } : { maxHeight: "60vh" }),
-            }}
-          >
-            {tree.rootKeys.map((key) => {
-              const node = tree.nodes[key];
-              return node ? (
-                <LiveConnectorRow key={key} tree={tree} node={node} />
-              ) : null;
-            })}
-          </div>
-        </MethodDetailViewStateProvider>
-      </LogErrorTraceContext.Provider>
-    </LiveRevealContext.Provider>
+    <LogErrorTraceContext.Provider value={errorCtx}>
+      <MethodDetailViewStateProvider>
+        <div
+          style={{
+            border: "1px solid var(--color-border-default)",
+            borderRadius: 6,
+            overflow: "auto",
+            ...(fill ? { flex: 1, minHeight: 0 } : { maxHeight: "60vh" }),
+          }}
+        >
+          {tree.rootKeys.map((key) => {
+            const node = tree.nodes[key];
+            return node ? (
+              <LiveConnectorRow key={key} tree={tree} node={node} />
+            ) : null;
+          })}
+        </div>
+      </MethodDetailViewStateProvider>
+    </LogErrorTraceContext.Provider>
   );
 }

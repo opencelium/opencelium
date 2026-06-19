@@ -31,6 +31,7 @@
     "title": "Logs",
     "empty": "Noch keine Logs. Starten Sie einen Test, um Ausführungs-Logs zu sehen.",
     "running": "Läuft…",
+    "collecting": "Logs werden gesammelt…",
     "finished": "TEST BEENDET in {{time}}",
     "stopped": "TEST GESTOPPT",
     "failed": "TEST FEHLGESCHLAGEN",

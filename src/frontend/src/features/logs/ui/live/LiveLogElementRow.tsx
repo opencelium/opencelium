@@ -11,7 +11,6 @@ import { CopyButton } from "../CopyButton";
 import { serializeLogElement } from "../serializeLogElement";
 import { useMethodViewMode } from "../methodViewMode";
 import { methodDisplayText } from "../methodView";
-import { useLiveReveal } from "./liveReveal";
 import { useLogErrorTrace } from "../logErrorTrace";
 
 // Mirrors the REST tree's status colors: started rows show a spinner, finished
@@ -30,7 +29,6 @@ export function LiveStatusIndicator({ status }: { status: LiveLogNode["status"] 
     />
   );
 }
-
 
 // Error routed to this node via `originOfErrorPath` — shown right under the
 // row where the error happened. The stack trace (when present) is on hover.
@@ -55,10 +53,12 @@ function LiveErrorRow({ node, depth }: { node: LiveLogNode; depth: number }) {
 
 // Same parent-owned expansion contract as the REST tree: a loop keeps its
 // children's open state keyed by position, so it survives iteration switches
-// even though each iteration renders different rows.
+// even though each iteration renders different rows. `open` is the idempotent
+// set-true used by auto-reveal (a controlled child can't expand itself).
 type ChildExpansion = {
   isOpen: (index: number) => boolean;
   toggle: (index: number) => void;
+  open: (index: number) => void;
 };
 
 export function LiveChildren({
@@ -84,6 +84,7 @@ export function LiveChildren({
             depth={depth}
             expanded={expansion ? expansion.isOpen(index) : undefined}
             onToggle={expansion ? () => expansion.toggle(index) : undefined}
+            onReveal={expansion ? () => expansion.open(index) : undefined}
           />
         ) : null;
       })}
@@ -97,6 +98,7 @@ export function LiveLogElementRow({
   depth,
   expanded: expandedProp,
   onToggle,
+  onReveal,
 }: {
   tree: LiveLogTree;
   node: LiveLogNode;
@@ -105,6 +107,9 @@ export function LiveLogElementRow({
   // the open state persists across iteration changes.
   expanded?: boolean;
   onToggle?: () => void;
+  // Idempotent "open me" from the parent (controlled rows), so auto-reveal can
+  // open a row it doesn't directly own.
+  onReveal?: () => void;
 }) {
   const [internalExpanded, setInternalExpanded] = useState(false);
   const [iterationPos, setIterationPos] = useState(0);
@@ -113,14 +118,14 @@ export function LiveLogElementRow({
   const [expandedChildren, setExpandedChildren] = useState<Record<number, boolean>>({});
 
   const { mode } = useMethodViewMode();
-  const { nonce, revealKeys, targetKey } = useLiveReveal();
-  const isOnTrace = useLogErrorTrace();
+  const { nonce, isOnTrace, isTarget, loopIteration } = useLogErrorTrace();
   const anchorRef = useRef<HTMLDivElement>(null);
 
   // Mark this row as part of the trace to an error (matched by structural
   // indexPath *and* this node's loop-iteration context), unless it already
   // shows a red FAIL dot — no double marker.
   const onTrace = isOnTrace(node.indexPath, node.loopIndex) && node.status !== "FAIL";
+  const target = isTarget(node.indexPath, node.loopIndex);
 
   const isControlled = onToggle !== undefined;
   const expanded = isControlled ? !!expandedProp : internalExpanded;
@@ -130,34 +135,29 @@ export function LiveLogElementRow({
     isOpen: (index) => !!expandedChildren[index],
     toggle: (index) =>
       setExpandedChildren((prev) => ({ ...prev, [index]: !prev[index] })),
+    open: (index) =>
+      setExpandedChildren((prev) => (prev[index] ? prev : { ...prev, [index]: true })),
   };
 
-  // After a failed run, expand this row down the path to the error, page loops
-  // to the stored iteration that holds it, open the failing method's detail, and
-  // scroll it into view. Gated on `nonce` so it fires once per reveal and never
-  // re-opens what the user has since collapsed.
+  // After a failed run, follow the error trail: open this row, page a loop to the
+  // failing iteration so its (REST-fetched) children continue the trail, and
+  // scroll the failing element into view. Gated on `nonce` so it fires once per
+  // reveal and never re-opens what the user has since collapsed.
   useEffect(() => {
-    if (nonce === 0 || !revealKeys.has(node.key)) return;
-    if (!isControlled) setInternalExpanded(true);
+    if (nonce === 0 || !isOnTrace(node.indexPath, node.loopIndex)) return;
+    if (isControlled) onReveal?.();
+    else setInternalExpanded(true);
     if (node.type === "LOOP") {
-      if (node.storedIteration !== null) setIterationPos(Number(node.storedIteration));
-      // The failing element lives in the stored iteration's subtree; open the
-      // child on the path (loop children are parent-controlled by index).
-      const pathChildIndex = node.childKeys.findIndex((key) => revealKeys.has(key));
-      if (pathChildIndex >= 0) {
-        setExpandedChildren((prev) =>
-          prev[pathChildIndex] ? prev : { ...prev, [pathChildIndex]: true },
-        );
-      }
+      const iter = loopIteration(node.indexPath, node.loopIndex);
+      if (iter !== null) setIterationPos(iter);
     }
-    if (node.key === targetKey) {
+    if (target) {
       anchorRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nonce]);
 
-  const scrollAnchor =
-    node.key === targetKey ? <div ref={anchorRef} aria-hidden /> : null;
+  const scrollAnchor = target ? <div ref={anchorRef} aria-hidden /> : null;
 
   switch (node.type) {
     case "OPERATION": {
@@ -185,7 +185,7 @@ export function LiveLogElementRow({
                 {request?.http_method ? (
                   <MethodBadge method={request.http_method} />
                 ) : null}
-                <Url>{displayText}</Url>
+                <Url isError={hasError || target}>{displayText}</Url>
                 {displayText ? (
                   <CopyButton value={displayText} className="oc-copy-on-hover" />
                 ) : null}

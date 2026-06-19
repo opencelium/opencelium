@@ -45,7 +45,7 @@ export function StatusBadge({ status }: { status: string }) {
   );
 }
 
-export function Url({ children }: { children: string }) {
+export function Url({ children, isError = false }: { children: string; isError?: boolean }) {
   return (
     <span
       style={{
@@ -57,6 +57,7 @@ export function Url({ children }: { children: string }) {
         // ellipsizes instead of overflowing and pushing the copy icon off-row.
         minWidth: 0,
         flexShrink: 1,
+        ...(isError ? { color: "var(--color-status-error-fg)" } : {}),
       }}
       title={children}
     >

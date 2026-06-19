@@ -248,45 +248,41 @@ export function failPendingNodes(tree: LiveLogTree): LiveLogTree {
   };
 }
 
-// Locate the element where a failed run actually broke and the chain of node
-// keys from a connector root down to it, so the live tree can auto-expand
-// straight to the error after a test run. Prefers nodes carrying an error
-// message (the true origin, routed via `originOfErrorPath`) and falls back to
-// FAIL nodes; the deepest match wins, ties broken toward the latest arrival.
-// Returns null when nothing failed or the failing element is not in the tree
-// (e.g. it lived in a non-stored loop iteration).
-export function findErrorRevealPath(
-  tree: LiveLogTree,
-): { pathKeys: string[]; targetKey: string } | null {
-  const nodes = Object.values(tree.nodes);
-  const errored = nodes.filter((node) => node.error?.message);
-  const candidates =
-    errored.length > 0 ? errored : nodes.filter((node) => node.status === "FAIL");
-  if (candidates.length === 0) return null;
+// Whether a row is the failing element itself (exact indexPath + iteration
+// context) — used by auto-reveal to open its detail and scroll to it.
+export function isErrorTarget(
+  errorLocations: ErrorLocation[],
+  indexPath: string,
+  loopIndexPath: string,
+): boolean {
+  return errorLocations.some(
+    (e) => e.indexPath === indexPath && e.loopIndex === loopIndexPath,
+  );
+}
 
-  const parentOf: Record<string, string> = {};
-  for (const node of nodes) {
-    for (const childKey of node.childKeys) parentOf[childKey] = node.key;
+// For a loop on the trace, the iteration its pager must move to so the trail
+// continues toward the error — the loop-index component right after this loop's
+// own iteration context. Null when no captured error runs through this loop.
+// This is what makes auto-reveal page nested loops to the failing iterations
+// (e.g. i, then j, then k) before fetching the next level over REST.
+export function loopRevealIteration(
+  errorLocations: ErrorLocation[],
+  indexPath: string,
+  loopIndexPath: string,
+): number | null {
+  for (const err of errorLocations) {
+    const indexMatch =
+      err.indexPath === indexPath || err.indexPath.startsWith(`${indexPath}_`);
+    if (!indexMatch) continue;
+    let rest: string;
+    if (loopIndexPath === "") rest = err.loopIndex;
+    else if (err.loopIndex.startsWith(`${loopIndexPath},`))
+      rest = err.loopIndex.slice(loopIndexPath.length + 1);
+    else continue;
+    const next = rest.split(",")[0];
+    if (next !== "") return Number(next);
   }
-
-  const pathTo = (key: string): string[] => {
-    const path = [key];
-    let current = key;
-    while (parentOf[current]) {
-      current = parentOf[current];
-      path.unshift(current);
-    }
-    return path;
-  };
-
-  let best: { pathKeys: string[]; targetKey: string } | null = null;
-  for (const node of candidates) {
-    const pathKeys = pathTo(node.key);
-    if (!best || pathKeys.length >= best.pathKeys.length) {
-      best = { pathKeys, targetKey: node.key };
-    }
-  }
-  return best;
+  return null;
 }
 
 // Build a predicate that tells whether a row (identified by its structural
@@ -323,8 +319,11 @@ const captureErrorLocation = (
   tree: LiveLogTree,
   log: ExecutionSocketLog,
 ): LiveLogTree => {
-  if (!log.error?.message) return tree;
-  const indexPath = log.error.originOfErrorPath || log.indexPath || "";
+  const error = log.error;
+  // Capture on any error indicator — a line can carry `originOfErrorPath`
+  // without a `message` (the message may ride on a different line).
+  if (!error || (!error.message && !error.originOfErrorPath)) return tree;
+  const indexPath = error.originOfErrorPath || log.indexPath || "";
   if (!indexPath) return tree;
   const loopIndex = log.properties?.loopIndex ?? "";
   const exists = tree.errorLocations.some(
