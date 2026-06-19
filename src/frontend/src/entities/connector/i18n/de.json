@@ -24,7 +24,13 @@
       }
     },
     "icon": {
-      "label": "Symbol"
+      "label": "Symbol",
+      "delete": "Aktuelles Symbol löschen",
+      "options": {
+        "leave": "Aktuelles Symbol behalten",
+        "delete": "Aktuelles Symbol löschen",
+        "new": "Neues Symbol festlegen"
+      }
     },
     "url": {
       "label": "Url"

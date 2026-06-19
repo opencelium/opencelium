@@ -20,6 +20,7 @@ import {NotificationEventTypeField} from "@entities/schedule/notification/overri
 import {NotificationTemplateField} from "@entities/schedule/notification/overrides/NotificationTemplateField";
 import {NotificationRecipientsEmailsField} from "@entities/schedule/notification/overrides/NotificationRecipientsEmailsField";
 import {NotificationRecipientsWebhookField} from "@entities/schedule/notification/overrides/NotificationRecipientsWebhookField";
+import {ConnectorIconField} from "@entities/connector/ui/ConnectorIconField";
 
 export function setupLocalOverrides() {
     overrideRegistry.registerField('permissionEditor', ({ field, mode }) => (
@@ -77,6 +78,7 @@ export function setupLocalOverrides() {
             <CustomThemeSection />
         </div>
     ));
+    overrideRegistry.registerField('connectorIconEditor', ConnectorIconField);
     overrideRegistry.registerField('scheduleNotificationEventType', NotificationEventTypeField);
     overrideRegistry.registerField('scheduleNotificationTemplate', NotificationTemplateField);
     overrideRegistry.registerField('scheduleNotificationRecipientsEmails', NotificationRecipientsEmailsField);

@@ -52,7 +52,10 @@ export const connectorDefinition: EntityDefinition = {
         mapToApi: ({data: {invoker, timeout, requestData, icon, ...formData}, mode}: {data: ConnectorUpdateDto, mode: Mode}): Connector => {
             const payload: Connector = {
                 ...formData,
-                ...(typeof icon === 'string' ? {icon} : {}),
+                // Only send `icon` to clear it (explicit null on delete). An unchanged icon
+                // (string) and a fresh File upload are both omitted: the server keeps the stored
+                // icon when the property is absent, and uploadIcon persists a new File separately.
+                ...(icon === null ? {icon: null} : {}),
                 timeout: +timeout,
                 invoker: {
                     name: invoker,
@@ -225,6 +228,7 @@ export const connectorDefinition: EntityDefinition = {
             defaultValue: null,
             ui: {
                 component: 'file-dropzone',
+                overrideKey: 'connectorIconEditor',
                 props: {
                     multiple: false,
                     accept: "image/png, image/jpeg",
@@ -359,7 +363,16 @@ export const connectorDefinition: EntityDefinition = {
                     transKey: `${baseKey}.wizard.steps.credentials.remote.error`,
                     encodeParams: false,
                     ignoreError: true,
-                    map: (fieldValue, formValues) => ({...formValues, invoker: {name: formValues.invoker}}),
+                    map: (fieldValue, formValues) => {
+                        // Drop a freshly-picked icon File: the connection test doesn't need it,
+                        // and a File serializes to {} which the backend's String `icon` rejects (400).
+                        const {icon, ...rest} = formValues
+                        return {
+                            ...rest,
+                            ...(typeof icon === 'string' ? {icon} : {}),
+                            invoker: {name: formValues.invoker},
+                        }
+                    },
                     shouldSkip: () => {
                         const masterPassword = useMasterPasswordStore.getState().masterPassword
                         return !masterPassword;

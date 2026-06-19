@@ -32,7 +32,13 @@
       }
     },
     "icon": {
-      "label": "Icon"
+      "label": "Icon",
+      "delete": "Delete current icon",
+      "options": {
+        "leave": "Leave current icon",
+        "delete": "Delete current icon",
+        "new": "Set a new icon"
+      }
     },
     "url": {
       "label": "Url"
