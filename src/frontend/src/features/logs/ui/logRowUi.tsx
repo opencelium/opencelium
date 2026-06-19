@@ -88,6 +88,23 @@ export function Meta({ children }: { children: ReactNode }) {
   );
 }
 
+// Red marker drawn on every row on a path to an error (the failing element and
+// each of its ancestors), so the trace from the top down to the error reads as
+// a column of red dots. Shared by the live and REST trees.
+export function TraceDot() {
+  return (
+    <span
+      style={{
+        width: 8,
+        height: 8,
+        borderRadius: "50%",
+        display: "inline-block",
+        backgroundColor: "var(--color-status-error-fg)",
+      }}
+    />
+  );
+}
+
 export function ExpandChevron({ expanded }: { expanded: boolean }) {
   return (
     <Icon

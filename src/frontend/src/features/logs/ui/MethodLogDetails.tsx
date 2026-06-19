@@ -6,6 +6,7 @@ import { useGetMethodDetailsQuery } from "../api/logsApi";
 import { ResizableJsonView } from "./ResizableJsonView";
 import { useMethodDetailViewState } from "./methodDetailViewState";
 import { CopyButton } from "./CopyButton";
+import { ErrorDetail } from "./ErrorDetail";
 
 // A tab label with a copy button (for the tab's raw content) next to the text.
 function LabelWithCopy({ label, value }: { label: string; value: string }) {
@@ -64,7 +65,26 @@ export function MethodLogDetails({ id, depth, path }: Props) {
     );
   }
 
-  const { request, response } = data.segment;
+  // A failed call shows its error in place of the request/response tabs.
+  if (data.error?.message) {
+    return (
+      <ErrorDetail
+        message={data.error.message}
+        stackTrace={data.error.stack_trace}
+        depth={depth}
+      />
+    );
+  }
+
+  // A failed method may have an incomplete segment (no request/response, or
+  // missing header/payload) — fall back to empty strings, which the JSON views
+  // render as an empty object.
+  const request = data.segment?.request;
+  const response = data.segment?.response;
+  const requestHeader = request?.header ?? "";
+  const requestPayload = request?.payload ?? "";
+  const responseHeader = response?.header ?? "";
+  const responsePayload = response?.payload ?? "";
 
   return (
     <div style={wrapStyle}>
@@ -76,16 +96,16 @@ export function MethodLogDetails({ id, depth, path }: Props) {
             items={[
               {
                 key: "header",
-                label: <LabelWithCopy label={t("tabs.requestHeader")} value={request.header} />,
+                label: <LabelWithCopy label={t("tabs.requestHeader")} value={requestHeader} />,
                 content: (
-                  <ResizableJsonView storageKey={`${path}/requestHeight`} value={request.header} />
+                  <ResizableJsonView storageKey={`${path}/requestHeight`} value={requestHeader} />
                 ),
               },
               {
                 key: "body",
-                label: <LabelWithCopy label={t("tabs.requestBody")} value={request.payload} />,
+                label: <LabelWithCopy label={t("tabs.requestBody")} value={requestPayload} />,
                 content: (
-                  <ResizableJsonView storageKey={`${path}/requestHeight`} value={request.payload} />
+                  <ResizableJsonView storageKey={`${path}/requestHeight`} value={requestPayload} />
                 ),
               },
             ]}
@@ -98,16 +118,16 @@ export function MethodLogDetails({ id, depth, path }: Props) {
             items={[
               {
                 key: "header",
-                label: <LabelWithCopy label={t("tabs.responseHeader")} value={response.header} />,
+                label: <LabelWithCopy label={t("tabs.responseHeader")} value={responseHeader} />,
                 content: (
-                  <ResizableJsonView storageKey={`${path}/responseHeight`} value={response.header} />
+                  <ResizableJsonView storageKey={`${path}/responseHeight`} value={responseHeader} />
                 ),
               },
               {
                 key: "body",
-                label: <LabelWithCopy label={t("tabs.responseBody")} value={response.payload} />,
+                label: <LabelWithCopy label={t("tabs.responseBody")} value={responsePayload} />,
                 content: (
-                  <ResizableJsonView storageKey={`${path}/responseHeight`} value={response.payload} />
+                  <ResizableJsonView storageKey={`${path}/responseHeight`} value={responsePayload} />
                 ),
               },
             ]}

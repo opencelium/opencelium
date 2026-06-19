@@ -28,6 +28,9 @@ export type TestRunContextValue = {
 	// the backend. Only one workflow test may run at a time system-wide, so this
 	// blocks starting a test here until the other one finishes.
 	isOtherTestRunning: boolean;
+	// Bumped once per failed run so the logs panel can auto-expand and scroll to
+	// the element where the error happened. 0 means no failure to reveal yet.
+	errorRevealNonce: number;
 	startTest: () => Promise<void>;
 	stopTest: () => Promise<void>;
 	// Clears the locally collected logs (and the result line). No-op while a

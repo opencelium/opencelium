@@ -62,6 +62,9 @@ export function TestRunProvider({ connectionId, buildTestPayload, children }: Pr
 	const [isOrphaned, setIsOrphaned] = useState(!!resumedRun);
 	// Whether any test run is executing system-wide (this workflow's or another's).
 	const [isAnyTestRunning, setIsAnyTestRunning] = useState(false);
+	// Bumped once per failed run so the logs panel reveals the failing element.
+	const [errorRevealNonce, setErrorRevealNonce] = useState(0);
+	const hasRevealedErrorRef = useRef(false);
 	const schedulerIdRef = useRef<number | null>(resumedRun?.schedulerId ?? null);
 	const channelIdRef = useRef<string | null>(resumedRun?.channelId ?? null);
 	const unsubscribeRef = useRef<(() => void) | null>(null);
@@ -120,6 +123,12 @@ export function TestRunProvider({ connectionId, buildTestPayload, children }: Pr
 				log.type === 'EXECUTION' && (log.status === 'COMPLETE' || log.status === 'FAIL');
 			if (log.error?.message || (log.type === 'EXECUTION' && log.status === 'FAIL')) {
 				settleResult({ kind: 'failed' });
+				// First failure of the run drives the panel to expand to the error.
+				// The tree (with the error node) is updated in the same batch above.
+				if (!hasRevealedErrorRef.current) {
+					hasRevealedErrorRef.current = true;
+					setErrorRevealNonce((n) => n + 1);
+				}
 			} else if (log.type === 'EXECUTION' && log.status === 'COMPLETE') {
 				settleResult({
 					kind: 'finished',
@@ -237,6 +246,7 @@ export function TestRunProvider({ connectionId, buildTestPayload, children }: Pr
 		setLogTree(EMPTY_LIVE_LOG_TREE);
 		setResult(null);
 		setIsOrphaned(false);
+		hasRevealedErrorRef.current = false;
 		startTimeRef.current = startedAt;
 		setPhase('starting');
 		// Persist before the run is triggered so a page reload mid-test can still
@@ -354,11 +364,12 @@ export function TestRunProvider({ connectionId, buildTestPayload, children }: Pr
 			result,
 			isOrphaned,
 			isOtherTestRunning,
+			errorRevealNonce,
 			startTest,
 			stopTest,
 			clearLogs,
 		}),
-		[status, phase, logTree, result, isOrphaned, isOtherTestRunning, startTest, stopTest, clearLogs],
+		[status, phase, logTree, result, isOrphaned, isOtherTestRunning, errorRevealNonce, startTest, stopTest, clearLogs],
 	);
 
 	return <TestRunContext.Provider value={value}>{children}</TestRunContext.Provider>;

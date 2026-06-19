@@ -69,6 +69,7 @@ export function WorkflowLogs() {
 	const logTree = testRun?.logTree ?? EMPTY_LIVE_LOG_TREE;
 	const result = testRun?.result ?? null;
 	const isOrphaned = testRun?.isOrphaned ?? false;
+	const errorRevealNonce = testRun?.errorRevealNonce ?? 0;
 	const isRunning = phase !== 'idle';
 	const hasLogs = !isOrphaned && logTree.rootKeys.length > 0;
 	const isExpanded = panel !== 'minimized';
@@ -78,6 +79,13 @@ export function WorkflowLogs() {
 	if (isRunning !== wasRunning) {
 		setWasRunning(isRunning);
 		if (isRunning && panel === 'minimized') setPanel('normal');
+	}
+
+	// A failed run reveals the error — make sure the panel is open to show it.
+	const [seenRevealNonce, setSeenRevealNonce] = useState(0);
+	if (errorRevealNonce !== seenRevealNonce) {
+		setSeenRevealNonce(errorRevealNonce);
+		if (errorRevealNonce > 0 && panel === 'minimized') setPanel('normal');
 	}
 
 	const toggleMinimized = () =>
@@ -156,7 +164,7 @@ export function WorkflowLogs() {
 					{isOrphaned ? (
 						<div className='logsOrphanNotice'>{tLogs('live.orphaned')}</div>
 					) : hasLogs ? (
-						<LiveExecutionLogTree tree={logTree} fill />
+						<LiveExecutionLogTree tree={logTree} fill revealNonce={errorRevealNonce} />
 					) : (
 						tLogs('live.empty')
 					)}

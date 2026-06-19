@@ -46,20 +46,37 @@ export type LiveLogNode = {
   iterationCount: number;
 };
 
+// Where an error originated: its structural indexPath plus the loop-iteration
+// context it happened in (the enclosing loops' iteration indices, outermost
+// first, e.g. "9,1,1"). Captured straight from the socket so it survives the
+// tree dropping the failing loop iteration's subtree.
+export type ErrorLocation = { indexPath: string; loopIndex: string };
+
 export type LiveLogTree = {
   rootKeys: string[];
   nodes: Record<string, LiveLogNode>;
   executionStatus: LogStatus | null;
+  // Origins of every error seen this run. The trace markers are derived from
+  // this (see `makeErrorTraceMatcher`) so they light up the exact path —
+  // including the specific loop iterations — that led to the failure.
+  errorLocations: ErrorLocation[];
 };
 
 export const EMPTY_LIVE_LOG_TREE: LiveLogTree = {
   rootKeys: [],
   nodes: {},
   executionStatus: null,
+  errorLocations: [],
 };
 
 const nodeKey = (indexPath: string, loopIndex: string) =>
   `${indexPath}@${loopIndex}`;
+
+// Extend a loop-iteration context with one more enclosing loop's iteration —
+// used to thread the cumulative context down to (REST-fetched) children, so it
+// stays comparable with a node's `loopIndex` and the captured error locations.
+export const appendLoopIndex = (base: string, iteration: number | string): string =>
+  base === "" ? String(iteration) : `${base},${iteration}`;
 
 // Errors are intentionally not stored here: a line may carry an error that
 // originated in another element — `attachError` routes it via
@@ -231,35 +248,126 @@ export function failPendingNodes(tree: LiveLogTree): LiveLogTree {
   };
 }
 
+// Locate the element where a failed run actually broke and the chain of node
+// keys from a connector root down to it, so the live tree can auto-expand
+// straight to the error after a test run. Prefers nodes carrying an error
+// message (the true origin, routed via `originOfErrorPath`) and falls back to
+// FAIL nodes; the deepest match wins, ties broken toward the latest arrival.
+// Returns null when nothing failed or the failing element is not in the tree
+// (e.g. it lived in a non-stored loop iteration).
+export function findErrorRevealPath(
+  tree: LiveLogTree,
+): { pathKeys: string[]; targetKey: string } | null {
+  const nodes = Object.values(tree.nodes);
+  const errored = nodes.filter((node) => node.error?.message);
+  const candidates =
+    errored.length > 0 ? errored : nodes.filter((node) => node.status === "FAIL");
+  if (candidates.length === 0) return null;
+
+  const parentOf: Record<string, string> = {};
+  for (const node of nodes) {
+    for (const childKey of node.childKeys) parentOf[childKey] = node.key;
+  }
+
+  const pathTo = (key: string): string[] => {
+    const path = [key];
+    let current = key;
+    while (parentOf[current]) {
+      current = parentOf[current];
+      path.unshift(current);
+    }
+    return path;
+  };
+
+  let best: { pathKeys: string[]; targetKey: string } | null = null;
+  for (const node of candidates) {
+    const pathKeys = pathTo(node.key);
+    if (!best || pathKeys.length >= best.pathKeys.length) {
+      best = { pathKeys, targetKey: node.key };
+    }
+  }
+  return best;
+}
+
+// Build a predicate that tells whether a row (identified by its structural
+// indexPath and the loop-iteration context it is rendered in) lies on a path to
+// an error — i.e. it is the failing element or one of its ancestors, *in the
+// matching loop iterations*. A row qualifies when, for some captured error:
+//   - the error's indexPath is the row's indexPath or a descendant of it, AND
+//   - the row's loop-iteration context is a prefix of the error's (so paging a
+//     loop away from the failing iteration hides that branch's markers).
+// Index-path + loop-index based (not node-key based) so it works for non-stored
+// loop iterations, whose rows are re-fetched over REST.
+export function makeErrorTraceMatcher(
+  errorLocations: ErrorLocation[],
+): (indexPath: string, loopIndexPath: string) => boolean {
+  return (indexPath, loopIndexPath) => {
+    if (!indexPath) return false;
+    return errorLocations.some((err) => {
+      const indexMatch =
+        err.indexPath === indexPath || err.indexPath.startsWith(`${indexPath}_`);
+      if (!indexMatch) return false;
+      return (
+        loopIndexPath === "" ||
+        err.loopIndex === loopIndexPath ||
+        err.loopIndex.startsWith(`${loopIndexPath},`)
+      );
+    });
+  };
+}
+
+// Record where an error originated, straight from the socket line, before any
+// node-storage decision — so a failure in a dropped loop iteration is still
+// captured (structural indexPath + the iteration context it happened in).
+const captureErrorLocation = (
+  tree: LiveLogTree,
+  log: ExecutionSocketLog,
+): LiveLogTree => {
+  if (!log.error?.message) return tree;
+  const indexPath = log.error.originOfErrorPath || log.indexPath || "";
+  if (!indexPath) return tree;
+  const loopIndex = log.properties?.loopIndex ?? "";
+  const exists = tree.errorLocations.some(
+    (e) => e.indexPath === indexPath && e.loopIndex === loopIndex,
+  );
+  if (exists) return tree;
+  return {
+    ...tree,
+    errorLocations: [...tree.errorLocations, { indexPath, loopIndex }],
+  };
+};
+
 export function reduceLiveLog(tree: LiveLogTree, log: ExecutionSocketLog): LiveLogTree {
+  const t = captureErrorLocation(tree, log);
+
   if (log.type === "EXECUTION") {
-    return attachError({ ...tree, executionStatus: log.status }, log);
+    return attachError({ ...t, executionStatus: log.status }, log);
   }
   if (!log.indexPath) {
     return log.type === "FLOWCHART"
-      ? attachError(reduceFlowchart(tree, log), log)
-      : tree;
+      ? attachError(reduceFlowchart(t, log), log)
+      : t;
   }
 
   const key = nodeKey(log.indexPath, log.properties?.loopIndex ?? "");
-  const existing = tree.nodes[key];
+  const existing = t.nodes[key];
   if (existing) {
     return attachError(
-      { ...tree, nodes: { ...tree.nodes, [key]: mergeNode(existing, log) } },
+      { ...t, nodes: { ...t.nodes, [key]: mergeNode(existing, log) } },
       log,
     );
   }
 
   const node = createNode(key, log);
-  const outcome = attachToParent(tree, node);
-  if (outcome === "drop") return tree;
+  const outcome = attachToParent(t, node);
+  if (outcome === "drop") return t;
   if (outcome) {
     return attachError(
       {
-        ...tree,
+        ...t,
         nodes: outcome.keepChild
-          ? { ...tree.nodes, ...outcome.patch, [key]: node }
-          : { ...tree.nodes, ...outcome.patch },
+          ? { ...t.nodes, ...outcome.patch, [key]: node }
+          : { ...t.nodes, ...outcome.patch },
       },
       log,
     );
@@ -267,15 +375,15 @@ export function reduceLiveLog(tree: LiveLogTree, log: ExecutionSocketLog): LiveL
 
   // Top-level element (or orphan): attach to the open connector root.
   const rootKey =
-    [...tree.rootKeys].reverse().find((k) => tree.nodes[k].status === "PENDING") ??
-    tree.rootKeys[tree.rootKeys.length - 1];
-  if (!rootKey) return tree;
-  const root = tree.nodes[rootKey];
+    [...t.rootKeys].reverse().find((k) => t.nodes[k].status === "PENDING") ??
+    t.rootKeys[t.rootKeys.length - 1];
+  if (!rootKey) return t;
+  const root = t.nodes[rootKey];
   return attachError(
     {
-      ...tree,
+      ...t,
       nodes: {
-        ...tree.nodes,
+        ...t.nodes,
         [rootKey]: { ...root, childKeys: [...root.childKeys, key] },
         [key]: node,
       },

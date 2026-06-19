@@ -1,15 +1,18 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Loading } from "@shared/ui/primitives/Loading/Loading";
 import { Typography } from "@shared/ui/primitives/Typography";
-import type { LiveLogNode, LiveLogTree } from "../../model/liveLogTree";
-import { LogRow, Meta, MethodBadge, OperatorLabel, StatusBadge, Url } from "../logRowUi";
+import { appendLoopIndex, type LiveLogNode, type LiveLogTree } from "../../model/liveLogTree";
+import { LogRow, Meta, MethodBadge, OperatorLabel, StatusBadge, TraceDot, Url } from "../logRowUi";
 import { LoopPager } from "../LoopPager";
 import { ElementChildren } from "../LogElementRow";
 import { MethodLogDetails } from "../MethodLogDetails";
+import { ErrorDetail } from "../ErrorDetail";
 import { CopyButton } from "../CopyButton";
 import { serializeLogElement } from "../serializeLogElement";
 import { useMethodViewMode } from "../methodViewMode";
 import { methodDisplayText } from "../methodView";
+import { useLiveReveal } from "./liveReveal";
+import { useLogErrorTrace } from "../logErrorTrace";
 
 // Mirrors the REST tree's status colors: started rows show a spinner, finished
 // rows a green/red dot.
@@ -27,6 +30,7 @@ export function LiveStatusIndicator({ status }: { status: LiveLogNode["status"] 
     />
   );
 }
+
 
 // Error routed to this node via `originOfErrorPath` — shown right under the
 // row where the error happened. The stack trace (when present) is on hover.
@@ -109,6 +113,14 @@ export function LiveLogElementRow({
   const [expandedChildren, setExpandedChildren] = useState<Record<number, boolean>>({});
 
   const { mode } = useMethodViewMode();
+  const { nonce, revealKeys, targetKey } = useLiveReveal();
+  const isOnTrace = useLogErrorTrace();
+  const anchorRef = useRef<HTMLDivElement>(null);
+
+  // Mark this row as part of the trace to an error (matched by structural
+  // indexPath *and* this node's loop-iteration context), unless it already
+  // shows a red FAIL dot — no double marker.
+  const onTrace = isOnTrace(node.indexPath, node.loopIndex) && node.status !== "FAIL";
 
   const isControlled = onToggle !== undefined;
   const expanded = isControlled ? !!expandedProp : internalExpanded;
@@ -120,12 +132,41 @@ export function LiveLogElementRow({
       setExpandedChildren((prev) => ({ ...prev, [index]: !prev[index] })),
   };
 
+  // After a failed run, expand this row down the path to the error, page loops
+  // to the stored iteration that holds it, open the failing method's detail, and
+  // scroll it into view. Gated on `nonce` so it fires once per reveal and never
+  // re-opens what the user has since collapsed.
+  useEffect(() => {
+    if (nonce === 0 || !revealKeys.has(node.key)) return;
+    if (!isControlled) setInternalExpanded(true);
+    if (node.type === "LOOP") {
+      if (node.storedIteration !== null) setIterationPos(Number(node.storedIteration));
+      // The failing element lives in the stored iteration's subtree; open the
+      // child on the path (loop children are parent-controlled by index).
+      const pathChildIndex = node.childKeys.findIndex((key) => revealKeys.has(key));
+      if (pathChildIndex >= 0) {
+        setExpandedChildren((prev) =>
+          prev[pathChildIndex] ? prev : { ...prev, [pathChildIndex]: true },
+        );
+      }
+    }
+    if (node.key === targetKey) {
+      anchorRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nonce]);
+
+  const scrollAnchor =
+    node.key === targetKey ? <div ref={anchorRef} aria-hidden /> : null;
+
   switch (node.type) {
     case "OPERATION": {
       const { request, response } = node.segment;
-      // Details are fetched by the persisted element id — without one (no
-      // socket line carried it) there is nothing to request.
-      const expandable = node.id !== "";
+      const hasError = !!node.error?.message;
+      // A failed call expands to its error (in place of request/response).
+      // Otherwise details are fetched by the persisted element id — without one
+      // (no socket line carried it) there is nothing to request.
+      const expandable = node.id !== "" || hasError;
       const displayText = methodDisplayText(mode, {
         url: request?.url,
         label: node.properties.label,
@@ -133,6 +174,7 @@ export function LiveLogElementRow({
       });
       return (
         <>
+          {scrollAnchor}
           <LogRow
             depth={depth}
             expandable={expandable}
@@ -140,7 +182,9 @@ export function LiveLogElementRow({
             onToggle={toggle}
             left={
               <>
-                <MethodBadge method={request?.http_method ?? ""} />
+                {request?.http_method ? (
+                  <MethodBadge method={request.http_method} />
+                ) : null}
                 <Url>{displayText}</Url>
                 {displayText ? (
                   <CopyButton value={displayText} className="oc-copy-on-hover" />
@@ -155,13 +199,22 @@ export function LiveLogElementRow({
                     {response.duration}
                   </Typography>
                 ) : null}
+                {onTrace ? <TraceDot /> : null}
                 <LiveStatusIndicator status={node.status} />
               </Meta>
             }
           />
-          <LiveErrorRow node={node} depth={depth + 1} />
           {expandable && expanded ? (
-            <MethodLogDetails id={node.id} depth={depth + 1} path={node.key} />
+            hasError ? (
+              <ErrorDetail
+                message={node.error!.message}
+                code={node.error!.code}
+                stackTrace={node.error!.stackTrace}
+                depth={depth + 1}
+              />
+            ) : (
+              <MethodLogDetails id={node.id} depth={depth + 1} path={node.key} />
+            )
           ) : null}
         </>
       );
@@ -179,6 +232,7 @@ export function LiveLogElementRow({
       const showStored = storedPosition !== null && position === storedPosition;
       return (
         <>
+          {scrollAnchor}
           <LogRow
             depth={depth}
             expandable
@@ -195,6 +249,7 @@ export function LiveLogElementRow({
                 {total > 0 ? (
                   <LoopPager index={position} size={total} onChange={setIterationPos} />
                 ) : null}
+                {onTrace ? <TraceDot /> : null}
                 <LiveStatusIndicator status={node.status} />
               </Meta>
             }
@@ -215,6 +270,7 @@ export function LiveLogElementRow({
                 depth={depth + 1}
                 expansion={childExpansion}
                 path={node.key}
+                loopIndexPath={appendLoopIndex(node.loopIndex, position)}
               />
             ) : null
           ) : null}
@@ -224,6 +280,7 @@ export function LiveLogElementRow({
     case "IF": {
       return (
         <>
+          {scrollAnchor}
           <LogRow
             depth={depth}
             expandable
@@ -242,6 +299,7 @@ export function LiveLogElementRow({
                     {node.segment.result}
                   </Typography>
                 ) : null}
+                {onTrace ? <TraceDot /> : null}
                 <LiveStatusIndicator status={node.status} />
               </Meta>
             }
@@ -256,10 +314,16 @@ export function LiveLogElementRow({
     default:
       return (
         <>
+          {scrollAnchor}
           <LogRow
             depth={depth}
             left={<OperatorLabel label={node.type} hint={node.properties.name} />}
-            right={<LiveStatusIndicator status={node.status} />}
+            right={
+              <Meta>
+                {onTrace ? <TraceDot /> : null}
+                <LiveStatusIndicator status={node.status} />
+              </Meta>
+            }
           />
           <LiveErrorRow node={node} depth={depth + 1} />
         </>

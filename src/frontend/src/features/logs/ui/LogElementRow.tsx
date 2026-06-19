@@ -3,14 +3,16 @@ import { Loading } from "@shared/ui/primitives/Loading/Loading";
 import { Typography } from "@shared/ui/primitives/Typography";
 import { useI18n } from "@shared/i18n/hooks/useI18n";
 import { useGetElementChildrenQuery } from "../api/logsApi";
+import { appendLoopIndex } from "../model/liveLogTree";
 import type { FlowchartChildLog } from "../model/types";
-import { LogRow, Meta, MethodBadge, OperatorLabel, StatusBadge, Url } from "./logRowUi";
+import { LogRow, Meta, MethodBadge, OperatorLabel, StatusBadge, TraceDot, Url } from "./logRowUi";
 import { MethodLogDetails } from "./MethodLogDetails";
 import { LoopPager } from "./LoopPager";
 import { CopyButton } from "./CopyButton";
 import { serializeLogElement } from "./serializeLogElement";
 import { useMethodViewMode } from "./methodViewMode";
 import { methodDisplayText } from "./methodView";
+import { useLogErrorTrace } from "./logErrorTrace";
 
 const INDENT_STEP = 22;
 
@@ -29,6 +31,7 @@ export function ElementChildren({
   depth,
   expansion,
   path,
+  loopIndexPath = "",
 }: {
   id: string;
   loopIndex?: number;
@@ -37,6 +40,9 @@ export function ElementChildren({
   // Structural path of the parent, independent of the loop iteration, used to
   // scope per-row view state (open tab / resized heights).
   path: string;
+  // Cumulative loop-iteration context these children are rendered in (enclosing
+  // loops' iteration indices), used to match the error trace per iteration.
+  loopIndexPath?: string;
 }) {
   const { t } = useI18n("logs");
   const { data, isFetching, isError } = useGetElementChildrenQuery({
@@ -81,6 +87,7 @@ export function ElementChildren({
           log={child}
           depth={depth}
           path={`${path}.${index}`}
+          loopIndexPath={loopIndexPath}
           expanded={expansion ? expansion.isOpen(index) : undefined}
           onToggle={expansion ? () => expansion.toggle(index) : undefined}
         />
@@ -93,6 +100,7 @@ export function LogElementRow({
   log,
   depth,
   path,
+  loopIndexPath = "",
   expanded: expandedProp,
   onToggle,
 }: {
@@ -100,6 +108,9 @@ export function LogElementRow({
   depth: number;
   // Structural path of this row, stable across loop iterations.
   path: string;
+  // Cumulative loop-iteration context this row is rendered in, used to match the
+  // error trace per iteration (so markers track the failing iteration only).
+  loopIndexPath?: string;
   // When `onToggle` is provided the row is controlled by its parent (used so a
   // loop can persist its children's open state across iterations).
   expanded?: boolean;
@@ -114,6 +125,11 @@ export function LogElementRow({
   >({});
 
   const { mode } = useMethodViewMode();
+  const isOnTrace = useLogErrorTrace();
+  // REST rows carry no status dot, so the trace marker is shown on every row on
+  // the path to the error (the failing element and its ancestors), matched by
+  // indexPath *and* this row's loop-iteration context.
+  const onTrace = isOnTrace(log.indexPath, loopIndexPath);
 
   const isControlled = onToggle !== undefined;
   const expanded = isControlled ? !!expandedProp : internalExpanded;
@@ -127,11 +143,14 @@ export function LogElementRow({
 
   switch (log.type) {
     case "OPERATION": {
-      const { request, response } = log.segment;
+      // Backend rows can arrive with an incomplete segment (e.g. a method that
+      // failed before its request was built), so guard every field.
+      const request = log.segment?.request;
+      const response = log.segment?.response;
       const displayText = methodDisplayText(mode, {
-        url: request.url,
-        label: log.properties.label,
-        name: log.properties.name,
+        url: request?.url,
+        label: log.properties?.label,
+        name: log.properties?.name,
       });
       return (
         <>
@@ -142,17 +161,24 @@ export function LogElementRow({
             onToggle={toggle}
             left={
               <>
-                <MethodBadge method={request.http_method} />
+                {request?.http_method ? (
+                  <MethodBadge method={request.http_method} />
+                ) : null}
                 <Url>{displayText}</Url>
-                <CopyButton value={displayText} className="oc-copy-on-hover" />
+                {displayText ? (
+                  <CopyButton value={displayText} className="oc-copy-on-hover" />
+                ) : null}
               </>
             }
             right={
               <Meta>
-                <StatusBadge status={response.status} />
-                <Typography variant="caption" isSubtle>
-                  {response.duration}
-                </Typography>
+                {response?.status ? <StatusBadge status={response.status} /> : null}
+                {response?.duration ? (
+                  <Typography variant="caption" isSubtle>
+                    {response.duration}
+                  </Typography>
+                ) : null}
+                {onTrace ? <TraceDot /> : null}
               </Meta>
             }
           />
@@ -177,11 +203,14 @@ export function LogElementRow({
               </>
             }
             right={
-              <LoopPager
-                index={loopIndex}
-                size={log.properties.size}
-                onChange={setLoopIndex}
-              />
+              <Meta>
+                <LoopPager
+                  index={loopIndex}
+                  size={log.properties.size}
+                  onChange={setLoopIndex}
+                />
+                {onTrace ? <TraceDot /> : null}
+              </Meta>
             }
           />
           {expanded ? (
@@ -191,6 +220,7 @@ export function LogElementRow({
               depth={depth + 1}
               expansion={childExpansion}
               path={path}
+              loopIndexPath={appendLoopIndex(loopIndexPath, loopIndex)}
             />
           ) : null}
         </>
@@ -211,9 +241,12 @@ export function LogElementRow({
               </>
             }
             right={
-              <Typography variant="caption" isSubtle>
-                {log.segment.result}
-              </Typography>
+              <Meta>
+                <Typography variant="caption" isSubtle>
+                  {log.segment?.result}
+                </Typography>
+                {onTrace ? <TraceDot /> : null}
+              </Meta>
             }
           />
           {expanded ? (
@@ -222,6 +255,7 @@ export function LogElementRow({
               loopIndex={0}
               depth={depth + 1}
               path={path}
+              loopIndexPath={loopIndexPath}
             />
           ) : null}
         </>
