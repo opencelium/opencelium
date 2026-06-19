@@ -7,8 +7,16 @@ import { SocketStatusDot } from './SocketStatusDot'
 import { formatKilobytes } from '../utils/format'
 import './resourceUsageCard.css'
 
-const CPU_COLOR = 'var(--color-action-secondary)'
-const MEMORY_COLOR = 'var(--color-status-success-fg)'
+const BASE_COLOR = 'var(--color-action-secondary)'
+
+// Shared gauge color: the base color below 60% usage, blending toward red as
+// it climbs to 100% (fully red at the top).
+const usageColor = (percent: number): string => {
+    const clamped = Math.min(100, Math.max(0, percent))
+    if (clamped <= 60) return BASE_COLOR
+    const redMix = Math.round(((clamped - 60) / 40) * 100)
+    return `color-mix(in srgb, var(--color-status-error-fg) ${redMix}%, ${BASE_COLOR})`
+}
 
 export function ResourceUsageCard() {
     const { t } = useI18n('dashboard')
@@ -45,14 +53,14 @@ export function ResourceUsageCard() {
                     percent={cpuPercent}
                     valueText={cpuText}
                     label={t('resourceUsage.cpu')}
-                    color={CPU_COLOR}
+                    color={usageColor(cpuPercent)}
                     loading={isLoading}
                 />
                 <RadialGauge
                     percent={memoryPercent}
                     valueText={memoryText}
                     label={t('resourceUsage.memory')}
-                    color={MEMORY_COLOR}
+                    color={usageColor(memoryPercent)}
                     loading={isLoading}
                 />
             </div>
