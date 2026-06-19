@@ -6,8 +6,6 @@
   "comingSoon": "Coming soon",
   "waitingApi": "Waiting API",
   "connection": {
-    "errorTitle": "Connection lost",
-    "errorDescription": "Live metrics are unavailable. Trying to reconnect…",
     "statusConnected": "Live — synced in real time",
     "statusConnecting": "Connecting to live updates…",
     "statusDisconnected": "Connection lost — data may be stale"

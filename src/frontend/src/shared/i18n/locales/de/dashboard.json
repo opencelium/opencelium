@@ -6,8 +6,6 @@
   "comingSoon": "Demnächst verfügbar",
   "waitingApi": "Warten auf API",
   "connection": {
-    "errorTitle": "Verbindung verloren",
-    "errorDescription": "Live-Metriken sind nicht verfügbar. Verbindung wird wiederhergestellt…",
     "statusConnected": "Live — in Echtzeit synchronisiert",
     "statusConnecting": "Verbindung zu Live-Updates wird hergestellt…",
     "statusDisconnected": "Verbindung verloren — Daten möglicherweise veraltet"

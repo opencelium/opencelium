@@ -9,30 +9,21 @@ import { ExecutionsChartCard } from './components/ExecutionsChartCard'
 import { ResourceUsageCard } from './components/ResourceUsageCard'
 import { TopConnectorsCard } from './components/TopConnectorsCard'
 import { ComingSoonOverlay } from './components/ComingSoonOverlay'
-import { ConnectionStatusAlert } from './components/ConnectionStatusAlert'
+import { useSocketConnectionNotifications } from './useSocketConnectionNotifications'
 
 export default function DashboardPage() {
     const { t } = useI18n('dashboard')
 
+    useSocketConnectionNotifications()
+
     return (
         <PageWrapper>
             <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <div
-                    style={{
-                        display: 'flex',
-                        alignItems: 'flex-start',
-                        justifyContent: 'space-between',
-                        gap: 16,
-                        flexWrap: 'wrap',
-                    }}
-                >
-                    <div>
-                        <Typography variant="headline">{t('header.title')}</Typography>
-                        <div style={{ marginTop: 4 }}>
-                            <Typography isSubtle>{t('header.subtitle')}</Typography>
-                        </div>
+                <div>
+                    <Typography variant="headline">{t('header.title')}</Typography>
+                    <div style={{ marginTop: 4 }}>
+                        <Typography isSubtle>{t('header.subtitle')}</Typography>
                     </div>
-                    <ConnectionStatusAlert />
                 </div>
 
                 <MetricTiles />

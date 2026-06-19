@@ -44,6 +44,12 @@ export function SocketTransportProvider({children}: Props) {
                 setError('WebSocket connection error')
                 setStatus('error')
             },
+            // Abrupt closes (server death, network drop) fire here, not
+            // onDisconnect. Ignore closes for a client we've already swapped
+            // out so teardown/reconnect-to-new-client doesn't flip the status.
+            onWebSocketClose: () => {
+                if (activeClientRef.current === next) setStatus('disconnected')
+            },
         })
         activeClientRef.current = next
         setClient(next)

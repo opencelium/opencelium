@@ -1,5 +1,8 @@
 {
   "api": {
     "deleted": "Successfully deleted"
+  },
+  "connection": {
+    "reconnected": "Live connection restored. Metrics are updating again."
   }
 }

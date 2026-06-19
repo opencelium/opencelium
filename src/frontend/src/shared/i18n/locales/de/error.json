@@ -7,6 +7,7 @@
     "notFound": "Die angeforderte Ressource wurde nicht gefunden.",
     "default": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
     "unknownError": "Unbekannter Fehler in {{place}}",
+    "socketDisconnected": "Live-Verbindung verloren. Metriken werden nicht mehr aktualisiert.",
     "login": {
       "network": "Der Server ist nicht erreichbar. Bitte versuchen Sie es erneut.",
       "invalidCredentials": "Ungültige E-Mail oder Passwort",

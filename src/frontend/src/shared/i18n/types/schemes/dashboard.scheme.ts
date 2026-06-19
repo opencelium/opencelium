@@ -7,8 +7,6 @@ export interface DashboardSchema {
         comingSoon: string
         waitingApi: string
         connection: {
-            errorTitle: string
-            errorDescription: string
             statusConnected: string
             statusConnecting: string
             statusDisconnected: string

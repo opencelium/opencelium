@@ -9,6 +9,7 @@ type CreateSocketClientArgs = {
     onDisconnect?: () => void
     onStompError?: (message: string) => void
     onWebSocketError?: (event: Event) => void
+    onWebSocketClose?: (event: CloseEvent) => void
 }
 
 const debug = (...args: unknown[]) => {
@@ -23,6 +24,7 @@ export function createSocketClient({
     onDisconnect,
     onStompError,
     onWebSocketError,
+    onWebSocketClose,
 }: CreateSocketClientArgs): Client {
     const resolvedClientId = clientId ?? `${Date.now()}-${Math.random()}`
 
@@ -49,6 +51,10 @@ export function createSocketClient({
         onWebSocketError: (event) => {
             console.error('[socket] WebSocket error', event)
             onWebSocketError?.(event)
+        },
+        onWebSocketClose: (event) => {
+            debug('websocket closed', event?.code)
+            onWebSocketClose?.(event)
         },
     })
 }
