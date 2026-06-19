@@ -11,8 +11,12 @@ import com.becon.opencelium.backend.database.mongodb.repository.ConnectionMngRep
 import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.mapper.mongo.ConnectionMngMapper;
 import com.becon.opencelium.backend.resource.connection.ConnectionVersionUpdateRequest;
+import com.becon.opencelium.backend.versionmanager.EntityUpdater;
+import com.becon.opencelium.backend.versionmanager.EntityVersionManager;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -21,20 +25,25 @@ import java.util.Objects;
 
 @Service
 public class ConnectionMngServiceImp implements ConnectionMngService {
+    private static final Logger log = LoggerFactory.getLogger(ConnectionMngServiceImp.class);
+
     private final ConnectionMngRepository connectionMngRepository;
     private final FieldBindingMngService fieldBindingMngService;
     private final OpenceliumProps ocProps;
     private final ConnectionMngMapper connectionMngMapper;
+    private final EntityUpdater<ConnectionMng> connectionMngEntityUpdater;
 
     public ConnectionMngServiceImp(
             ConnectionMngRepository connectionMngRepository,
             @Qualifier("fieldBindingMngServiceImp") FieldBindingMngService fieldBindingMngService,
-            OpenceliumProps ocProps, ConnectionMngMapper connectionMngMapper
+            OpenceliumProps ocProps, ConnectionMngMapper connectionMngMapper,
+            EntityVersionManager entityVersionManager
     ) {
         this.connectionMngRepository = connectionMngRepository;
         this.fieldBindingMngService = fieldBindingMngService;
         this.ocProps = ocProps;
         this.connectionMngMapper = connectionMngMapper;
+        this.connectionMngEntityUpdater = entityVersionManager.getUpdater(ConnectionMng.class);
     }
 
     @Override
@@ -62,7 +71,9 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
 
     @Override
     public List<ConnectionMng> getAll() {
-        return connectionMngRepository.findAll();
+        List<ConnectionMng> all = connectionMngRepository.findAll();
+        all.forEach(this::applyVersionUpdater);
+        return all;
     }
 
     @Override
@@ -84,13 +95,36 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
 
     @Override
     public ConnectionMng getById(String id) {
-        return connectionMngRepository.findById(id)
+        ConnectionMng connectionMng = connectionMngRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("CONNECTION_NOT_FOUND"));
+        applyVersionUpdater(connectionMng);
+        return connectionMng;
     }
 
     @Override
     public List<ConnectionMng> getAllByConnectionId(Long id) {
+        List<ConnectionMng> all = connectionMngRepository.findAllByConnectionIdOrderByConnectionIdDesc(id);
+        all.forEach(this::applyVersionUpdater);
+        return all;
+    }
+
+    @Override
+    public List<ConnectionMng> getAllByConnectionIdRaw(Long id) {
         return connectionMngRepository.findAllByConnectionIdOrderByConnectionIdDesc(id);
+    }
+
+    /**
+     * Migrates the in-memory ConnectionMng to the running OpenCelium version without persisting the change.
+     * The DB document stays at its original version; conversion happens only on the read path.
+     */
+    private void applyVersionUpdater(ConnectionMng connectionMng) {
+        if (connectionMng == null) return;
+        try {
+            connectionMngEntityUpdater.updateToCurrentVersion(connectionMng);
+        } catch (Exception e) {
+            log.error("Failed to convert ConnectionMng[id={}, version={}] to current version on read",
+                    connectionMng.getId(), connectionMng.getVersion(), e);
+        }
     }
 
     @Override

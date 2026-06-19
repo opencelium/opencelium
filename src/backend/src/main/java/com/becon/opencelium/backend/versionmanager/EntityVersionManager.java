@@ -28,4 +28,12 @@ public class EntityVersionManager {
             case TEMPLATE -> (EntityUpdater<T>) templateUpdaterProvider.getUpdater(currentVersion);
         };
     }
+
+    @SuppressWarnings("unchecked")
+    public <T> EntityUpdater<T> getUpdater(Class<T> clazz, UpdaterVersion maxVersion) {
+        return switch (UpdaterType.getByClass(clazz)) {
+            case CONNECTION_MNG -> (EntityUpdater<T>) connectionMngUpdaterProvider.getUpdater(maxVersion);
+            case TEMPLATE -> (EntityUpdater<T>) templateUpdaterProvider.getUpdater(maxVersion);
+        };
+    }
 }

@@ -24,6 +24,21 @@ const buildMethodResponse = (
 ): MethodResponse => {
   const response = (node.data as any).response?.[type] ?? config.response?.[type];
   if (response) return response;
+  const emptyBody = buildPayload({});
+
+  if (node.type === 'system') {
+    return type === 'success'
+      ? {
+        status: '200',
+        header: {},
+        body: emptyBody,
+      }
+      : {
+        status: '500',
+        header: {},
+        body: emptyBody,
+      };
+  }
 
   return type === 'success'
     ? {
@@ -76,22 +91,25 @@ const collectFieldBindings = (methods: MethodWithId[]): FieldBinding[] => {
 
 export const buildLegacyConnection = (nodes: WorkflowNodeModel[]): Connection => {
   const methods: MethodWithId[] = nodes
-    .filter((node) => node.type === 'connector')
+    .filter((node) => node.type === 'connector' || node.type === 'system')
     .map((node, index) => {
       const config = deserializeMethodConfigReferences(ensureMethodConfig(node.data.methodConfig));
       const name = node.data.subtitle || node.data.title || node.id;
       const color = ALL_COLORS[index % ALL_COLORS.length];
+      const isHttpRequest = node.type === 'system';
       return {
         id: node.id,
         index: String(index),
         name,
         color,
         label: name,
-        connector: {
-          connectorId: node.data.connector?.connectorId ?? -1,
-          title: node.data.connector?.title ?? 'DEFAULT',
-          icon: node.data.connector?.icon ?? null,
-        },
+        connector: !isHttpRequest && node.data.connector
+          ? {
+            connectorId: node.data.connector.connectorId,
+            title: node.data.connector.title,
+            icon: node.data.connector.icon ?? null,
+          }
+          : null,
         request: {
           requestId: `request-${node.id}`,
           endpoint: config.url,

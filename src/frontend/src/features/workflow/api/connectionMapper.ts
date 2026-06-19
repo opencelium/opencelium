@@ -100,18 +100,22 @@ const toMethodEntry = (method: any, index: number): IndexedWorkflowEntry => {
 		source: method,
 		node: {
 			id: method?.id ?? `method-${index}`,
-			type: 'connector' as const,
+			type: method?.connector === null ? 'system' as const : 'connector' as const,
 			position: getNodePosition(path),
 			data: {
-				title: method?.connector?.title ?? 'Connector',
+				title: method?.connector === null ? 'HTTP Request' : method?.connector?.title ?? 'Connector',
 				subtitle: getMethodName(method, index),
 				labelEdited: Boolean(method?.label),
-				kind: 'connector' as const,
-				connector: {
-					connectorId: method?.connector?.connectorId ?? -1,
-					title: method?.connector?.title ?? 'DEFAULT',
-					icon: method?.connector?.icon ?? null,
-				},
+				kind: method?.connector === null ? 'system' as const : 'connector' as const,
+				...(method?.connector === null
+					? {}
+					: {
+						connector: {
+							connectorId: method?.connector?.connectorId ?? -1,
+							title: method?.connector?.title ?? 'DEFAULT',
+							icon: method?.connector?.icon ?? null,
+						},
+					}),
 				methodConfig: methodToConfig(method),
 			},
 		},
@@ -284,6 +288,9 @@ const mergeSavedNodeData = (
 const normalizeMatchValue = (value: unknown) =>
 	String(value ?? '').trim().toLowerCase();
 
+const savedTypeMatchesEntry = (savedType: WorkflowNodeModel['type'] | undefined, entryType: WorkflowNodeModel['type']) =>
+	!savedType || savedType === entryType || (savedType === 'connector' && entryType === 'system');
+
 const findSavedNode = (
 	node: WorkflowNodeModel,
 	entry: IndexedWorkflowEntry | undefined,
@@ -302,7 +309,7 @@ const findSavedNode = (
 
 		const match = savedUiNodes.find((savedNode) => {
 			if (usedSavedNodeIds.has(savedNode.id)) return false;
-			if (node.type !== 'start' && savedNode.type && savedNode.type !== node.type) return false;
+			if (node.type !== 'start' && !savedTypeMatchesEntry(savedNode.type, node.type)) return false;
 			const savedCandidates = getSavedValues(savedNode).map(normalizeMatchValue).filter(Boolean);
 			return candidates.some((candidate) => savedCandidates.includes(candidate));
 		});
@@ -328,7 +335,7 @@ const findEntryForSavedNode = (
 
 		const match = entries.find((entry) => {
 			if (usedEntryIds.has(entry.node.id)) return false;
-			if (savedNode.type && savedNode.type !== entry.node.type) return false;
+			if (!savedTypeMatchesEntry(savedNode.type, entry.node.type)) return false;
 			const entryCandidates = getEntryValues(entry).map(normalizeMatchValue).filter(Boolean);
 			return candidates.some((candidate) => entryCandidates.includes(candidate));
 		});
@@ -376,7 +383,11 @@ const restoreNodesFromUi = (
 				...entry.node,
 				id: savedNode.id,
 				position: savedNode.position,
-				data: mergeSavedNodeData(entry.node.data, savedNode.data),
+				data: {
+					...mergeSavedNodeData(entry.node.data, savedNode.data),
+					kind: entry.node.data.kind,
+					...(entry.node.type === 'system' ? { connector: undefined } : {}),
+				},
 				draggable: savedNode.draggable ?? entry.node.draggable,
 				deletable: savedNode.deletable ?? entry.node.deletable,
 			};

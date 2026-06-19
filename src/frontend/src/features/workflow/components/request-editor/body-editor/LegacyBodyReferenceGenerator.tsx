@@ -2,7 +2,7 @@ import { ApiOutlined, LinkOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button, Select } from 'antd';
 import { useMemo, useState } from 'react';
 import type { Connection, MethodWithId } from '../../../types/connection';
-import { buildReferenceValue, getIteratorsForMethod, type ResponseType } from './requestReferenceOptions';
+import { buildReferenceValue, getIteratorsForMethod, getMethodConnectorIcon, getMethodConnectorTitle, type ResponseType } from './requestReferenceOptions';
 import { LegacyWebhookReferenceSelect } from './LegacyWebhookReferenceSelect';
 import { LegacyResponseFieldSelect } from './LegacyResponseFieldSelect';
 import { webhookSnippet } from './bodyWebhook';
@@ -110,11 +110,9 @@ export function LegacyBodyReferenceGenerator({ connection, currentMethod, onAppl
                 String(data?.connectorTitle ?? '').toLowerCase().includes(term)
               );
             }}
-            // Pin the connector icon as a prefix so it stays visible while typing;
-            // antd indents the search text after it.
             prefix={selectedMethod ? (
-              <span title={selectedMethod.connector.title} style={{ display: 'inline-flex' }}>
-                <ConnectorIcon icon={selectedMethod.connector.icon} size={18} />
+              <span title={getMethodConnectorTitle(selectedMethod)} style={{ display: 'inline-flex' }}>
+                <ConnectorIcon icon={getMethodConnectorIcon(selectedMethod)} size={18} />
               </span>
             ) : undefined}
             onChange={(value) => {
@@ -124,8 +122,8 @@ export function LegacyBodyReferenceGenerator({ connection, currentMethod, onAppl
             options={methods.map((method) => ({
               label: method.label || method.name,
               value: method.id,
-              connectorTitle: method.connector.title,
-              connectorIcon: method.connector.icon ?? null,
+              connectorTitle: getMethodConnectorTitle(method),
+              connectorIcon: getMethodConnectorIcon(method),
             }))}
             optionRender={(option) => {
               const data = option.data as { connectorTitle?: string; connectorIcon?: string | null };

@@ -90,7 +90,7 @@ public class SubscriptionController {
     @PostMapping(path = "/{subId}")
     public ResponseEntity<?> setSubscription(@PathVariable String subId) {
         // generate activationReq object
-        ActivationRequest ar = activationRequestService.generateActivReq();
+        ActivationRequest ar = activationRequestService.generateActiveReq();
         String encodedAr = Base64Utility.encode(ar);
 
         // request Service Portal for a license
@@ -107,7 +107,7 @@ public class SubscriptionController {
     // -------------------- OFFLINE -------------------- //
     @GetMapping("/activation/request/generate")
     public ResponseEntity<Resource> generateActivationRequest() {
-        ActivationRequest ar = activationRequestService.generateActivReq();
+        ActivationRequest ar = activationRequestService.generateActiveReq();
         ActivationRequestDTO dto = activationRequestMapper.toDTO(ar);
         String encrypted = Base64Utility.encode(dto);
 
