@@ -57,7 +57,7 @@
     "startFailed": "Failed to start the test run",
     "stopFailed": "Failed to stop the test run",
     "terminated": "Test run terminated",
-    "otherTestRunning": "Another workflow test is already running. Only one test can run at a time — wait for it to finish or stop it first.",
+    "otherTestRunning": "A test for this connection is already running. Wait for it to finish or stop it first.",
     "leaveConfirm": {
       "title": "Stop the running test?",
       "message": "Your test is running. If you leave this page, the test will be terminated. Do you want to continue?"

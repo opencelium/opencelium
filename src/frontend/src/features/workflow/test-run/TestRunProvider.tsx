@@ -26,32 +26,64 @@ import {createId} from "@shared/lib/createId.ts";
 
 const TIMEOUT_TO_COLLECT_LOGS = 3000;
 // Backend names every temporary test scheduler "!*test_schedule_<millis>_<title>"
-// (ConnectionController.test). The running-jobs feed lists them while they run,
-// which is how we detect that a test is in progress anywhere in the system.
+// (ConnectionController.test). The running-jobs feed lists them while they run.
 const TEST_SCHEDULE_TITLE_PREFIX = '!*test_schedule_';
 
 type RunningJob = { schedulerId: number; title?: string };
 
-const hasRunningTest = (jobs: unknown): boolean =>
+// A running job conflicts with starting/running a test on this connection only
+// when it is a test scheduler for the SAME connection. The backend now allows
+// parallel tests across different connections and gates duplicates by matching
+// the connection title as a suffix of the scheduler title — `endsWith(title)` in
+// ConnectionController.test (the feed exposes no connectionId, so title is the
+// only available discriminator). We mirror that predicate exactly so the start
+// button reflects what the backend will actually accept.
+// `excludeSchedulerId` is our own run's scheduler, which must not count as a
+// conflict — neither while it executes nor during the lag window after we stop
+// it, before the running-jobs feed drops it.
+const isConflictingTest = (job: RunningJob, connectionTitle: string): boolean =>
+	typeof job?.title === 'string' &&
+	job.title.startsWith(TEST_SCHEDULE_TITLE_PREFIX) &&
+	job.title.endsWith(connectionTitle);
+
+const hasConflictingTest = (
+	jobs: unknown,
+	connectionTitle: string,
+	excludeSchedulerId: number | null,
+): boolean =>
+	!!connectionTitle &&
 	Array.isArray(jobs) &&
 	jobs.some(
 		(job) =>
-			typeof (job as RunningJob)?.title === 'string' &&
-			(job as RunningJob).title!.startsWith(TEST_SCHEDULE_TITLE_PREFIX),
+			isConflictingTest(job as RunningJob, connectionTitle) &&
+			(job as RunningJob).schedulerId !== excludeSchedulerId,
 	);
+
+const isOwnJobListed = (jobs: unknown, ownSchedulerId: number | null): boolean =>
+	ownSchedulerId != null &&
+	Array.isArray(jobs) &&
+	jobs.some((job) => (job as RunningJob)?.schedulerId === ownSchedulerId);
 
 type Props = {
 	connectionId?: string;
+	// This connection's title — the backend keys the single-test-per-connection
+	// rule on it (see hasConflictingTest). Must be the same value sent as the
+	// payload title so the conflict prediction matches the backend's decision.
+	connectionTitle?: string;
 	// Returns the save-shaped connection body, or null when the graph is not
 	// testable (the builder is responsible for surfacing the reason).
 	buildTestPayload: () => unknown | null;
 	children: ReactNode;
 };
 
-export function TestRunProvider({ connectionId, buildTestPayload, children }: Props) {
+export function TestRunProvider({ connectionId, connectionTitle = '', buildTestPayload, children }: Props) {
 	const { client, status } = useSocket();
 	const { t: tEntities } = useI18n('entities');
 	const confirm = useConfirm();
+	// Read from a ref inside the feed/snapshot callbacks so editing the title
+	// doesn't churn the STOMP subscription (handleRunningJobs stays stable).
+	const connectionTitleRef = useRef(connectionTitle);
+	connectionTitleRef.current = connectionTitle;
 	// Resume a run started in a previous page session that may still be executing
 	// on the backend. Read once on first render, keyed by connectionId (which is
 	// the STOMP channelId for a saved connection — see startTest). Seeds the
@@ -61,8 +93,10 @@ export function TestRunProvider({ connectionId, buildTestPayload, children }: Pr
 	const [logTree, setLogTree] = useState(EMPTY_LIVE_LOG_TREE);
 	const [result, setResult] = useState<TestRunResult | null>(null);
 	const [isOrphaned, setIsOrphaned] = useState(!!resumedRun);
-	// Whether any test run is executing system-wide (this workflow's or another's).
-	const [isAnyTestRunning, setIsAnyTestRunning] = useState(false);
+	// Whether a test for THIS connection is already running elsewhere (another tab
+	// or user) — the only thing that now blocks starting here. Our own run is
+	// excluded (see ownSchedulerIdRef).
+	const [isConflictingTestRunning, setIsConflictingTestRunning] = useState(false);
 	// Bumped once per failed run so the logs panel reveals the failing element.
 	const [errorRevealNonce, setErrorRevealNonce] = useState(0);
 	const hasRevealedErrorRef = useRef(false);
@@ -72,6 +106,10 @@ export function TestRunProvider({ connectionId, buildTestPayload, children }: Pr
 	const [revealPending, setRevealPending] = useState(false);
 	const revealTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const schedulerIdRef = useRef<number | null>(resumedRun?.schedulerId ?? null);
+	// The scheduler of our own run, kept alive past finishRun() so the lingering
+	// entry in the running-jobs feed is not mistaken for another test. Cleared
+	// only once the feed confirms our job is actually gone (see handleRunningJobs).
+	const ownSchedulerIdRef = useRef<number | null>(resumedRun?.schedulerId ?? null);
 	const channelIdRef = useRef<string | null>(resumedRun?.channelId ?? null);
 	const unsubscribeRef = useRef<(() => void) | null>(null);
 	const startTimeRef = useRef(resumedRun?.startedAt ?? 0);
@@ -90,6 +128,12 @@ export function TestRunProvider({ connectionId, buildTestPayload, children }: Pr
 		schedulerIdRef.current = null;
 		setIsOrphaned(false);
 		setPhase('idle');
+		// Our run was the only test allowed for this connection, so no conflict
+		// remains now. Clear the flag immediately instead of waiting for the feed to
+		// drop our (briefly lingering) own job, which would otherwise flash "another
+		// test running". ownSchedulerIdRef stays set so that lingering entry is
+		// ignored by the snapshot/feed until the backend actually drops it.
+		setIsConflictingTestRunning(false);
 		// No more lines will arrive — turn leftover spinners into red dots so
 		// the user can see where an interrupted/failed run stopped.
 		setLogTree(failPendingNodes);
@@ -217,13 +261,21 @@ export function TestRunProvider({ connectionId, buildTestPayload, children }: Pr
 		unsubscribeRef.current = () => subscription.unsubscribe();
 	}, [isOrphaned, status, client, handleOrphanLog]);
 
-	// Only one workflow test may run at a time system-wide. Track the global set
-	// of running test schedulers: live via the running-jobs feed, plus an initial
-	// REST snapshot (the feed only pushes on job start/finish, so a test already
-	// running at page load wouldn't be seen otherwise). Re-snapshot whenever our
-	// own run settles so the block lifts promptly.
+	// Only one test per connection may run at a time (parallel tests on different
+	// connections are allowed). Track whether a test for THIS connection is running
+	// elsewhere: live via the running-jobs feed, plus an initial REST snapshot (the
+	// feed only pushes on job start/finish, so a test already running at page load
+	// wouldn't be seen otherwise). Re-snapshot whenever our own run settles so the
+	// block lifts promptly.
 	const handleRunningJobs = useCallback((jobs: RunningJob[]) => {
-		setIsAnyTestRunning(hasRunningTest(jobs));
+		// Once the feed no longer lists our own run, stop excluding it — a future
+		// scheduler reusing the same id must then count as a real conflict.
+		if (ownSchedulerIdRef.current != null && !isOwnJobListed(jobs, ownSchedulerIdRef.current)) {
+			ownSchedulerIdRef.current = null;
+		}
+		setIsConflictingTestRunning(
+			hasConflictingTest(jobs, connectionTitleRef.current, ownSchedulerIdRef.current),
+		);
 	}, []);
 	useStompSubscription<RunningJob[]>(
 		client,
@@ -240,7 +292,10 @@ export function TestRunProvider({ connectionId, buildTestPayload, children }: Pr
 				method: 'GET',
 				options: { ignoreError: true },
 			});
-			if (!cancelled) setIsAnyTestRunning(hasRunningTest(jobs));
+			if (!cancelled)
+				setIsConflictingTestRunning(
+					hasConflictingTest(jobs, connectionTitleRef.current, ownSchedulerIdRef.current),
+				);
 		})();
 		return () => {
 			cancelled = true;
@@ -249,9 +304,9 @@ export function TestRunProvider({ connectionId, buildTestPayload, children }: Pr
 
 	const startTest = useCallback(async () => {
 		if (phase !== 'idle' || !client || status !== 'connected') return;
-		// Enforce the system-wide single-test rule (the button is also disabled,
-		// this guards against a race where another test started moments ago).
-		if (isAnyTestRunning) {
+		// Enforce the single-test-per-connection rule (the button is also disabled,
+		// this guards against a race where a test for this connection started moments ago).
+		if (isConflictingTestRunning) {
 			message.error(tEntities('connection.test.otherTestRunning'));
 			return;
 		}
@@ -286,6 +341,7 @@ export function TestRunProvider({ connectionId, buildTestPayload, children }: Pr
 		try {
 			const response = await testConnectionExecution(payload, channelId);
 			schedulerIdRef.current = response.data?.schedulerId ?? null;
+			ownSchedulerIdRef.current = schedulerIdRef.current;
 			// The run may have finished (and cleared the record) while the POST was
 			// in flight — only persist the schedulerId if this run is still active.
 			if (channelIdRef.current === channelId) {
@@ -298,7 +354,7 @@ export function TestRunProvider({ connectionId, buildTestPayload, children }: Pr
 			message.error(tEntities('connection.test.startFailed'));
 			finishRun();
 		}
-	}, [phase, client, status, isAnyTestRunning, buildTestPayload, connectionId, handleSocketLog, finishRun, tEntities]);
+	}, [phase, client, status, isConflictingTestRunning, buildTestPayload, connectionId, handleSocketLog, finishRun, tEntities]);
 
 	const stopTest = useCallback(async () => {
 		if (phase !== 'running' && phase !== 'starting') return;
@@ -373,8 +429,9 @@ export function TestRunProvider({ connectionId, buildTestPayload, children }: Pr
 
 	useTestRunLeaveGuard(phase !== 'idle', confirmLeaveDuringTest, terminateOnUnload);
 
-	// Another workflow's test is blocking us only when we have no run of our own.
-	const isOtherTestRunning = phase === 'idle' && isAnyTestRunning;
+	// A test for this connection running elsewhere blocks us only when we have no
+	// run of our own.
+	const isOtherTestRunning = phase === 'idle' && isConflictingTestRunning;
 
 	const value = useMemo<TestRunContextValue>(
 		() => ({

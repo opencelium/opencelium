@@ -562,7 +562,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   };
 
   return (
-    <TestRunProvider connectionId={connectionId} buildTestPayload={buildTestPayload}>
+    <TestRunProvider connectionId={connectionId} connectionTitle={headerState.title} buildTestPayload={buildTestPayload}>
     <div className="page" data-testid="workflow-page">
       <WorkflowHeader
         initialName={headerState.title}

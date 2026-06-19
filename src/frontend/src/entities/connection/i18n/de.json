@@ -57,7 +57,7 @@
     "startFailed": "Testlauf konnte nicht gestartet werden",
     "stopFailed": "Testlauf konnte nicht gestoppt werden",
     "terminated": "Testlauf abgebrochen",
-    "otherTestRunning": "Es läuft bereits ein anderer Workflow-Test. Es kann immer nur ein Test gleichzeitig laufen — warten Sie, bis er fertig ist, oder stoppen Sie ihn zuerst.",
+    "otherTestRunning": "Für diese Verbindung läuft bereits ein Test. Warten Sie, bis er fertig ist, oder stoppen Sie ihn zuerst.",
     "leaveConfirm": {
       "title": "Laufenden Test stoppen?",
       "message": "Ihr Test läuft. Wenn Sie diese Seite verlassen, wird der Test abgebrochen. Möchten Sie fortfahren?"
