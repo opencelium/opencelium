@@ -2,6 +2,8 @@ import { useRef, useState } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 import type { FieldOverrideProps } from '@/engine/entity/overrides/types'
 import { Radio } from '@shared/ui/primitives/Radio'
+import { FormFileDropZone } from '@shared/ui/form/FormFileDropZone'
+import { EntityText } from '@shared/ui/primitives/Text'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { resolveConnectorIconUrl } from '@entities/connector/model/iconUrl'
 
@@ -44,10 +46,20 @@ export function ConnectorIconField({ field, mode, defaultRender }: FieldOverride
         setValue(field.name, next === 'leave' ? originalIcon : null, { shouldDirty: true })
     }
 
+    // The icon has no place on the read-only view; hide it entirely.
+    if (mode === 'view') return null
     if (!hasOriginal) return <>{defaultRender()}</>
+
+    const labelKey = field.ui.props?.labelKey as string | undefined
+    const { multiple, accept } = (field.ui.props ?? {}) as { multiple?: boolean; accept?: string }
 
     return (
         <div style={{ display: 'grid', gap: 8 }}>
+            {labelKey && (
+                <label className="form-control__label">
+                    <EntityText i18nKey={labelKey} typoProps={{ isBold: true }} />
+                </label>
+            )}
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 {previewUrl && (
                     <img
@@ -90,7 +102,14 @@ export function ConnectorIconField({ field, mode, defaultRender }: FieldOverride
                     />
                 </div>
             </div>
-            {choice === 'new' && defaultRender()}
+            {choice === 'new' && (
+                <FormFileDropZone
+                    name={field.name}
+                    multiple={multiple}
+                    accept={accept}
+                    testId="connector-field-icon"
+                />
+            )}
         </div>
     )
 }
