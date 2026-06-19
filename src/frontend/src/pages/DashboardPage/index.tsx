@@ -1,6 +1,4 @@
-import { useState } from 'react'
 import { Typography } from '@shared/ui/primitives/Typography'
-import { Select } from '@shared/ui/primitives/Select'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import PageWrapper from '@pages/PageWrapper/PageWrapper'
 import { MetricTiles } from './components/MetricTiles'
@@ -10,18 +8,11 @@ import { SystemHealthCard } from './components/SystemHealthCard'
 import { ExecutionsChartCard } from './components/ExecutionsChartCard'
 import { ResourceUsageCard } from './components/ResourceUsageCard'
 import { TopConnectorsCard } from './components/TopConnectorsCard'
-
-type DashboardRange = 'last7days' | 'last30days' | 'last24h'
+import { ComingSoonOverlay } from './components/ComingSoonOverlay'
+import { ConnectionStatusAlert } from './components/ConnectionStatusAlert'
 
 export default function DashboardPage() {
     const { t } = useI18n('dashboard')
-    const [range, setRange] = useState<DashboardRange>('last7days')
-
-    const rangeOptions = [
-        { value: 'last24h', label: t('rangeFilter.last24h') },
-        { value: 'last7days', label: t('rangeFilter.last7days') },
-        { value: 'last30days', label: t('rangeFilter.last30days') },
-    ] as const
 
     return (
         <PageWrapper>
@@ -41,28 +32,10 @@ export default function DashboardPage() {
                             <Typography isSubtle>{t('header.subtitle')}</Typography>
                         </div>
                     </div>
-                    <div style={{ minWidth: 180 }}>
-                        <Select<DashboardRange>
-                            value={range}
-                            onChange={setRange}
-                            options={[...rangeOptions]}
-                        />
-                    </div>
+                    <ConnectionStatusAlert />
                 </div>
 
                 <MetricTiles />
-
-                <div
-                    style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                        gap: 16,
-                    }}
-                >
-                    <AttentionRequiredCard />
-                    <RecentActivityCard />
-                    <SystemHealthCard />
-                </div>
 
                 <div
                     style={{
@@ -71,9 +44,31 @@ export default function DashboardPage() {
                         gap: 16,
                     }}
                 >
-                    <ExecutionsChartCard />
+                    <ComingSoonOverlay labelKey="waitingApi">
+                        <ExecutionsChartCard />
+                    </ComingSoonOverlay>
                     <ResourceUsageCard />
-                    <TopConnectorsCard />
+                    <ComingSoonOverlay labelKey="waitingApi">
+                        <TopConnectorsCard />
+                    </ComingSoonOverlay>
+                </div>
+
+                <div
+                    style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                        gap: 16,
+                    }}
+                >
+                    <ComingSoonOverlay>
+                        <AttentionRequiredCard />
+                    </ComingSoonOverlay>
+                    <ComingSoonOverlay>
+                        <RecentActivityCard />
+                    </ComingSoonOverlay>
+                    <ComingSoonOverlay>
+                        <SystemHealthCard />
+                    </ComingSoonOverlay>
                 </div>
             </div>
         </PageWrapper>

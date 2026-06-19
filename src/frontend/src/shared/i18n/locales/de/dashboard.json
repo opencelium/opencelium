@@ -3,21 +3,22 @@
     "title": "Dashboard",
     "subtitle": "Betrieblicher Überblick über Ihre OpenCelium-Umgebung"
   },
-  "rangeFilter": {
-    "last7days": "Letzte 7 Tage",
-    "last30days": "Letzte 30 Tage",
-    "last24h": "Letzte 24 Stunden"
+  "comingSoon": "Demnächst verfügbar",
+  "waitingApi": "Warten auf API",
+  "connection": {
+    "errorTitle": "Verbindung verloren",
+    "errorDescription": "Live-Metriken sind nicht verfügbar. Verbindung wird wiederhergestellt…",
+    "statusConnected": "Live — in Echtzeit synchronisiert",
+    "statusConnecting": "Verbindung zu Live-Updates wird hergestellt…",
+    "statusDisconnected": "Verbindung verloren — Daten möglicherweise veraltet"
   },
   "metrics": {
     "executions": "Ausführungen",
     "failureRate": "Fehlerquote",
     "avgRuntime": "Ø Laufzeit",
-    "runningJobs": "Laufende Jobs",
-    "apiUsage": "API-Verbrauch",
+    "runtime": "Laufzeit",
+    "logs": "Logs",
     "noData": "—"
-  },
-  "delta": {
-    "vsPrevious": "ggü. Vorperiode"
   },
   "attention": {
     "title": "Erfordert Aufmerksamkeit",

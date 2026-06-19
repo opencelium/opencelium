@@ -4,21 +4,22 @@ export interface DashboardSchema {
             title: string
             subtitle: string
         }
-        rangeFilter: {
-            last7days: string
-            last30days: string
-            last24h: string
+        comingSoon: string
+        waitingApi: string
+        connection: {
+            errorTitle: string
+            errorDescription: string
+            statusConnected: string
+            statusConnecting: string
+            statusDisconnected: string
         }
         metrics: {
             executions: string
             failureRate: string
             avgRuntime: string
-            runningJobs: string
-            apiUsage: string
+            runtime: string
+            logs: string
             noData: string
-        }
-        delta: {
-            vsPrevious: string
         }
         attention: {
             title: string

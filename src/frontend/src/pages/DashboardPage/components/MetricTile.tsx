@@ -3,7 +3,7 @@ import { Card } from '@shared/ui/primitives/Card'
 import { Icon } from '@shared/ui/primitives/Icon'
 import type { IconName } from '@shared/ui/primitives/Icon/Icon.types'
 import { Typography } from '@shared/ui/primitives/Typography'
-import { useI18n } from '@shared/i18n/hooks/useI18n'
+import { Loading } from '@shared/ui/primitives/Loading/Loading'
 
 type Tone = 'blue' | 'red' | 'orange' | 'violet' | 'green'
 
@@ -12,7 +12,8 @@ type Props = {
     value: ReactNode
     icon: IconName
     tone: Tone
-    delta?: number
+    loading?: boolean
+    cornerSlot?: ReactNode
 }
 
 const toneToBg: Record<Tone, string> = {
@@ -31,25 +32,13 @@ const toneToFg: Record<Tone, string> = {
     green: 'var(--color-status-success-fg)',
 }
 
-export function MetricTile({ label, value, icon, tone, delta }: Props) {
-    const { t, lang } = useI18n('dashboard')
-    const deltaColor =
-        delta === undefined
-            ? undefined
-            : delta >= 0
-              ? 'var(--color-status-success-fg)'
-              : 'var(--color-status-error-fg)'
-    const deltaFormatted =
-        delta === undefined
-            ? null
-            : `${delta > 0 ? '+' : ''}${new Intl.NumberFormat(lang, {
-                  minimumFractionDigits: 1,
-                  maximumFractionDigits: 1,
-              }).format(delta)}%`
-
+export function MetricTile({ label, value, icon, tone, loading, cornerSlot }: Props) {
     return (
         <Card>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 12 }}>
+                {cornerSlot && (
+                    <span style={{ position: 'absolute', top: 0, right: 0 }}>{cornerSlot}</span>
+                )}
                 <div
                     style={{
                         width: 40,
@@ -70,22 +59,14 @@ export function MetricTile({ label, value, icon, tone, delta }: Props) {
                         {label}
                     </Typography>
                     <div style={{ marginTop: 2 }}>
-                        <Typography variant="title" isBold>
-                            {value}
-                        </Typography>
-                    </div>
-                    {deltaFormatted !== null && (
-                        <div style={{ marginTop: 2 }}>
-                            <Typography variant="caption">
-                                <span style={{ color: deltaColor, fontWeight: 500 }}>
-                                    {deltaFormatted}
-                                </span>{' '}
-                                <span style={{ color: 'var(--color-text-secondary)' }}>
-                                    {t('delta.vsPrevious')}
-                                </span>
+                        {loading ? (
+                            <Loading inline size="sm" />
+                        ) : (
+                            <Typography variant="title" isBold>
+                                {value}
                             </Typography>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
             </div>
         </Card>

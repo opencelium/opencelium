@@ -1,5 +1,4 @@
 import type { IconName } from '@shared/ui/primitives/Icon/Icon.types'
-import type { Metrics } from '@widgets/SystemMetrics/model/types'
 
 export type AttentionSeverity = 'critical' | 'warning' | 'info'
 
@@ -29,11 +28,6 @@ export type HealthSlice = {
 }
 
 export type ChartPoint = { label: string; value: number }
-
-export type ResourceSeries = {
-    current: number
-    points: ChartPoint[]
-}
 
 export type TopConnector = {
     id: string
@@ -150,33 +144,6 @@ export const executionsChart: { executions: ChartPoint[]; failures: ChartPoint[]
     ],
 }
 
-export const resourceUsage: { cpu: ResourceSeries; memory: ResourceSeries } = {
-    cpu: {
-        current: 0.91,
-        points: [
-            { label: 'Mon', value: 0.42 },
-            { label: 'Tue', value: 0.58 },
-            { label: 'Wed', value: 0.51 },
-            { label: 'Thu', value: 0.76 },
-            { label: 'Fri', value: 1.04 },
-            { label: 'Sat', value: 0.62 },
-            { label: 'Sun', value: 0.91 },
-        ],
-    },
-    memory: {
-        current: 4.56 * 1024 * 1024 * 1024,
-        points: [
-            { label: 'Mon', value: 3.1 * 1024 * 1024 * 1024 },
-            { label: 'Tue', value: 3.4 * 1024 * 1024 * 1024 },
-            { label: 'Wed', value: 3.6 * 1024 * 1024 * 1024 },
-            { label: 'Thu', value: 3.9 * 1024 * 1024 * 1024 },
-            { label: 'Fri', value: 4.2 * 1024 * 1024 * 1024 },
-            { label: 'Sat', value: 4.4 * 1024 * 1024 * 1024 },
-            { label: 'Sun', value: 4.56 * 1024 * 1024 * 1024 },
-        ],
-    },
-}
-
 export const topConnectors: TopConnector[] = [
     { id: 'c-1', name: 'SAP_to_Salesforce', executions: 1245, failureRate: 4.2 },
     { id: 'c-2', name: 'Shopify_to_Postgres', executions: 982, failureRate: 1.1 },
@@ -184,16 +151,3 @@ export const topConnectors: TopConnector[] = [
     { id: 'c-4', name: 'KIA_Tickets', executions: 624, failureRate: 11.8 },
     { id: 'c-5', name: 'NetFlix_to_S3', executions: 510, failureRate: 2.3 },
 ]
-
-export const systemMetricsMock: Metrics = {
-    executions: 1046,
-    failureRate: 13.7,
-    avgRuntimeMs: 4520,
-    runningJobs: 7,
-    apiUsageBytes: 2.4 * 1024 * 1024 * 1024,
-    executionsDelta: 8.4,
-    failureRateDelta: -2.1,
-    avgRuntimeDelta: -5.6,
-    runningJobsDelta: 16.7,
-    apiUsageDelta: 3.2,
-}
