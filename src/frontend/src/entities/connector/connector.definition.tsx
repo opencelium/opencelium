@@ -52,10 +52,10 @@ export const connectorDefinition: EntityDefinition = {
         mapToApi: ({data: {invoker, timeout, requestData, icon, ...formData}, mode}: {data: ConnectorUpdateDto, mode: Mode}): Connector => {
             const payload: Connector = {
                 ...formData,
-                // Only send `icon` to clear it (explicit null on delete). An unchanged icon
-                // (string) and a fresh File upload are both omitted: the server keeps the stored
-                // icon when the property is absent, and uploadIcon persists a new File separately.
-                ...(icon === null ? {icon: null} : {}),
+                // Send `icon` when it's a string (unchanged — "leave as is") or null (delete).
+                // A fresh File upload is omitted: it serializes to {} which the backend rejects,
+                // and uploadIcon persists the new File separately.
+                ...(typeof icon === 'string' || icon === null ? {icon} : {}),
                 timeout: +timeout,
                 invoker: {
                     name: invoker,
