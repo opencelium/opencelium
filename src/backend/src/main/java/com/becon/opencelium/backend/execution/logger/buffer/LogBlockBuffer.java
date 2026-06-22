@@ -23,7 +23,7 @@ public interface LogBlockBuffer {
      */
     Optional<LogDataMng> findInBufferById(String elementId);
 
-    List<LogDataMng> findAllCompletedByExecutionId(String executionId);
+    List<LogDataMng> findAllByExecutionId(String executionId);
 
     /**
      * Explicit flush (e.g., on shutdown).

@@ -47,9 +47,8 @@ public class InMemoryLogBlockBuffer implements LogBlockBuffer {
     }
 
     @Override
-    public synchronized List<LogDataMng> findAllCompletedByExecutionId(String executionId) {
+    public synchronized List<LogDataMng> findAllByExecutionId(String executionId) {
         return buffer.stream()
-                .filter(block -> block.getStatus() == PhaseStatus.COMPLETE)
                 .filter(block -> Objects.equals(block.getExecutionId(), executionId))
                 .toList();
     }

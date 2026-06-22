@@ -369,7 +369,7 @@ public class LogDataServiceImp implements LogDataService {
 
         var savedChildren = metaDataLogRepository.findChildren(executionId, FLOWCHART.name(), SORT_ASCENDING);
 
-        var bufferedChildren = buffer.findAllCompletedByExecutionId(executionId).stream()
+        var bufferedChildren = buffer.findAllByExecutionId(executionId).stream()
                 .filter(child -> child.getType() == FLOWCHART)
                 .toList();
 
@@ -425,7 +425,7 @@ public class LogDataServiceImp implements LogDataService {
     private List<LogDataMng> findBufferedChildren(String executionId, String flowchartId, String regex, String loopIndex) {
         Pattern pattern = Pattern.compile(regex);
 
-        return buffer.findAllCompletedByExecutionId(executionId).stream()
+        return buffer.findAllByExecutionId(executionId).stream()
                 .filter(child -> Objects.equals(child.getFlowId(), flowchartId))
                 .filter(child -> child.getIndexPath() != null)
                 .filter(child -> pattern.matcher(child.getIndexPath()).matches())
