@@ -17,6 +17,10 @@
     "minimizeScript": "Skript minimieren",
     "load": "Laden"
   },
+  "confirmDelete": {
+    "title": "Schritt löschen",
+    "message": "Möchten Sie diesen Schritt wirklich löschen? Alle darin verschachtelten Schritte werden ebenfalls entfernt. Diese Aktion kann nicht rückgängig gemacht werden."
+  },
   "template": {
     "addTitle": "Vorlage hinzufügen",
     "loadTitle": "Vorlage laden",
