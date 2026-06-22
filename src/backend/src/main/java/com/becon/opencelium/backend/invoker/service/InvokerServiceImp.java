@@ -309,12 +309,13 @@ public class InvokerServiceImp implements InvokerService {
             idx = idx.replaceAll("[\\[|\\]]", "");
             index = Integer.parseInt(idx);
             if (list.isEmpty()) {
-                throw new RuntimeException(
-                        String.format(
-                                "No such element in list. You tried to reference the %s element of the '%s' array, but this array is empty in the invoker file. Please populate the array with at least %s elements or modify the reference path.",
-                                idx,
-                                String.join(".", seen),
-                                idx));
+                return DataType.OBJECT;
+//                throw new RuntimeException(
+//                        String.format(
+//                                "No such element in list. You tried to reference the %s element of the '%s' array, but this array is empty in the invoker file. Please populate the array with at least %s elements or modify the reference path.",
+//                                idx,
+//                                String.join(".", seen),
+//                                idx));
             }
 
             if (index >= list.size()) {

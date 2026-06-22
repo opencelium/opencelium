@@ -17,12 +17,16 @@
 package com.becon.opencelium.backend.database.mysql.repository;
 
 import com.becon.opencelium.backend.database.mysql.entity.Execution;
+import com.becon.opencelium.backend.database.mysql.repository.projection.DailyExecutionStatsProjection;
 import com.becon.opencelium.backend.database.mysql.repository.projection.ExecutionStatsProjection;
+import com.becon.opencelium.backend.database.mysql.repository.projection.TopWorkflowProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -38,6 +42,34 @@ public interface ExecutionRepository extends JpaRepository<Execution, Long> {
             FROM execution
             """)
     ExecutionStatsProjection getAggregatedStats();
+
+    // "Executions & failures" widget: per-day totals since the given instant.
+    // Only days that had executions are returned; gaps are zero-filled in the service.
+    @Query(nativeQuery = true, value = """
+            SELECT DATE(start_time) AS day,
+                COUNT(*) AS executions,
+                COALESCE(SUM(CASE WHEN status = 'F' THEN 1 ELSE 0 END), 0) AS failures
+            FROM execution
+            WHERE start_time >= :since
+            GROUP BY DATE(start_time)
+            ORDER BY day
+            """)
+    List<DailyExecutionStatsProjection> getDailyStatsSince(@Param("since") LocalDateTime since);
+
+    // "Top workflows" widget: all-time execution count and failure rate (%) per connection.
+    @Query(nativeQuery = true, value = """
+            SELECT c.id AS connectionId,
+                c.title AS title,
+                COUNT(e.id) AS executions,
+                COALESCE(SUM(CASE WHEN e.status = 'F' THEN 1 ELSE 0 END), 0) * 100.0 / COUNT(e.id) AS failureRate
+            FROM execution e
+            JOIN scheduler s ON e.scheduler_id = s.id
+            JOIN connection c ON s.connection_id = c.id
+            GROUP BY c.id, c.title
+            ORDER BY executions DESC
+            LIMIT :limit
+            """)
+    List<TopWorkflowProjection> getTopWorkflows(@Param("limit") int limit);
 
     List<Execution> findByEndTimeIsNull();
 

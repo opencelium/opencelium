@@ -1,7 +1,6 @@
 package com.becon.opencelium.backend.execution.logger.buffer;
 
 import com.becon.opencelium.backend.database.mongodb.entity.LogDataMng;
-import com.becon.opencelium.backend.execution.logger.enums.PhaseStatus;
 
 import java.util.*;
 
@@ -36,20 +35,19 @@ public class InMemoryLogBlockBuffer implements LogBlockBuffer {
     }
 
     @Override
-    public synchronized Optional<LogDataMng> findInBufferByKey(LogDataMng example) {
+    public synchronized Optional<LogDataMng> findByKey(LogDataMng example) {
         String key = keyExtractor.extractKey(example);
         return Optional.ofNullable(blockByKey.get(key));
     }
 
     @Override
-    public synchronized Optional<LogDataMng> findInBufferById(String elementId) {
+    public synchronized Optional<LogDataMng> findById(String elementId) {
         return Optional.ofNullable(blockById.get(elementId));
     }
 
     @Override
-    public synchronized List<LogDataMng> findAllCompletedByExecutionId(String executionId) {
+    public synchronized List<LogDataMng> findAllByExecutionId(String executionId) {
         return buffer.stream()
-                .filter(block -> block.getStatus() == PhaseStatus.COMPLETE)
                 .filter(block -> Objects.equals(block.getExecutionId(), executionId))
                 .toList();
     }
