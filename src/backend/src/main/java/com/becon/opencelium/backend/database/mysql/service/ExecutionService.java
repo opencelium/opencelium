@@ -35,4 +35,6 @@ public interface ExecutionService {
     Optional<Execution> findById(long id);
 
     Execution getById(long id);
+
+    double getAvgDurationOfExecution(int schedulerId);
 }
