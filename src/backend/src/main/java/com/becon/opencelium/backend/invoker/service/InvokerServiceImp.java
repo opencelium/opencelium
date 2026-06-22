@@ -309,13 +309,10 @@ public class InvokerServiceImp implements InvokerService {
             idx = idx.replaceAll("[\\[|\\]]", "");
             index = Integer.parseInt(idx);
             if (list.isEmpty()) {
-                return DataType.OBJECT;
-//                throw new RuntimeException(
-//                        String.format(
-//                                "No such element in list. You tried to reference the %s element of the '%s' array, but this array is empty in the invoker file. Please populate the array with at least %s elements or modify the reference path.",
-//                                idx,
-//                                String.join(".", seen),
-//                                idx));
+                // Primitive array declared as <field name="tests" type="array"/> with no
+                // child schema. We can't know the element's type, so report it
+                // as undefined instead of failing the whole type resolution.
+                return DataType.UNDEFINED;
             }
 
             if (index >= list.size()) {
