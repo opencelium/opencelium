@@ -345,7 +345,7 @@ public class LogDataServiceImp implements LogDataService {
         return metaDataLogRepository.findById(phaseId)
                 .or(() -> metaDataLogRepository.findByExecutionIdAndType(phaseId, EXECUTION.name()))
                 .or(() -> metaDataLogRepository.findByFlowIdAndType(phaseId, FLOWCHART.name()))
-                .or(() -> buffer.findInBufferById(phaseId))
+                .or(() -> buffer.findById(phaseId))
                 .orElseThrow(() -> new RuntimeException("LogData element not found with specified id = " + phaseId));
     }
 
@@ -501,7 +501,7 @@ public class LogDataServiceImp implements LogDataService {
      * First check in-memory buffer, then DB.
      */
     private Optional<LogDataMng> findExistingBlock(LogDataMng block) {
-        Optional<LogDataMng> inBuffer = buffer.findInBufferByKey(block);
+        Optional<LogDataMng> inBuffer = buffer.findByKey(block);
         if (inBuffer.isPresent()) {
             return inBuffer;
         }
