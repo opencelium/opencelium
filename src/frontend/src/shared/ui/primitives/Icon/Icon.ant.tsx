@@ -4,7 +4,6 @@ import {
     CloseOutlined,
     UserOutlined,
     DeleteOutlined,
-    DeleteFilled,
     EditOutlined,
     InfoOutlined,
     PlusOutlined,
@@ -36,7 +35,6 @@ import {MdKeyboardCommandKey, MdContentCopy, MdPlayArrow, MdStop, MdUnfoldMore, 
 import {TbWebhook} from "react-icons/tb";
 import {BsJournalText} from "react-icons/bs";
 import {GoArrowSwitch} from "react-icons/go";
-import {Component} from "lucide-react";
 
 const iconMap = {
     check: CheckOutlined,

@@ -6,6 +6,7 @@ export interface DashboardSchema {
         }
         comingSoon: string
         waitingApi: string
+        refresh: string
         connection: {
             statusConnected: string
             statusConnecting: string

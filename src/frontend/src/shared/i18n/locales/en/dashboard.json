@@ -5,6 +5,7 @@
   },
   "comingSoon": "Coming soon",
   "waitingApi": "Waiting API",
+  "refresh": "Refresh",
   "connection": {
     "statusConnected": "Live — synced in real time",
     "statusConnecting": "Connecting to live updates…",

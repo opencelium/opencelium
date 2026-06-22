@@ -35,13 +35,9 @@ export default function DashboardPage() {
                         gap: 16,
                     }}
                 >
-                    <ComingSoonOverlay labelKey="waitingApi">
-                        <ExecutionsChartCard />
-                    </ComingSoonOverlay>
+                    <ExecutionsChartCard />
                     <ResourceUsageCard />
-                    <ComingSoonOverlay labelKey="waitingApi">
-                        <TopConnectorsCard />
-                    </ComingSoonOverlay>
+                    <TopConnectorsCard />
                 </div>
 
                 <div

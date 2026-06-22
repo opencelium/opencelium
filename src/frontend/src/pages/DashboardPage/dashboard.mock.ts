@@ -27,15 +27,6 @@ export type HealthSlice = {
     label: string
 }
 
-export type ChartPoint = { label: string; value: number }
-
-export type TopConnector = {
-    id: string
-    name: string
-    executions: number
-    failureRate: number
-}
-
 export const attentionItems: AttentionItem[] = [
     {
         id: 'a-1',
@@ -121,33 +112,4 @@ export const systemHealth: HealthSlice[] = [
     { key: 'healthy', value: 78, label: 'Healthy' },
     { key: 'warning', value: 16, label: 'Warning' },
     { key: 'critical', value: 6, label: 'Critical' },
-]
-
-export const executionsChart: { executions: ChartPoint[]; failures: ChartPoint[] } = {
-    executions: [
-        { label: 'Mon', value: 124 },
-        { label: 'Tue', value: 162 },
-        { label: 'Wed', value: 148 },
-        { label: 'Thu', value: 198 },
-        { label: 'Fri', value: 240 },
-        { label: 'Sat', value: 96 },
-        { label: 'Sun', value: 78 },
-    ],
-    failures: [
-        { label: 'Mon', value: 18 },
-        { label: 'Tue', value: 22 },
-        { label: 'Wed', value: 14 },
-        { label: 'Thu', value: 33 },
-        { label: 'Fri', value: 41 },
-        { label: 'Sat', value: 9 },
-        { label: 'Sun', value: 6 },
-    ],
-}
-
-export const topConnectors: TopConnector[] = [
-    { id: 'c-1', name: 'SAP_to_Salesforce', executions: 1245, failureRate: 4.2 },
-    { id: 'c-2', name: 'Shopify_to_Postgres', executions: 982, failureRate: 1.1 },
-    { id: 'c-3', name: 'M365_to_Slack', executions: 781, failureRate: 0.5 },
-    { id: 'c-4', name: 'KIA_Tickets', executions: 624, failureRate: 11.8 },
-    { id: 'c-5', name: 'NetFlix_to_S3', executions: 510, failureRate: 2.3 },
 ]
