@@ -97,7 +97,12 @@ type Template = {
 };
 
 const CONNECTION_TEMPLATE_VERSION = '5.0';
+const EMPTY_NAME_LABEL = '[Empty Name]';
 const EMPTY_DESCRIPTION_LABEL = '[Empty Description]';
+
+const isHeaderNameEmpty = (title: string) => !title.trim() || title.trim() === EMPTY_NAME_LABEL;
+const isHeaderDescriptionEmpty = (description: string) =>
+  !description.trim() || description.trim() === EMPTY_DESCRIPTION_LABEL;
 
 const toDisplayDescription = (description?: string) =>
   description && description.trim() ? description : EMPTY_DESCRIPTION_LABEL;
@@ -512,6 +517,15 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       const state = mapConnectionToWorkflowState(selectedTemplate.connection);
       workflow.setWorkflowGraph(state.nodes, state.edges, state.viewport, { centerStart: true });
       setLoadedFieldBindings(state.fieldBindings);
+      const templateName = selectedTemplate.name?.trim();
+      const templateDescription = selectedTemplate.description?.trim();
+      setHeaderState((prev) => ({
+        title: isHeaderNameEmpty(prev.title) && templateName ? templateName : prev.title,
+        description:
+          isHeaderDescriptionEmpty(prev.description) && templateDescription
+            ? toDisplayDescription(templateDescription)
+            : prev.description,
+      }));
       setLoadTemplateDialogOpen(false);
       setSelectedTemplateId(undefined);
       message.success(`Template "${selectedTemplate.name ?? selectedTemplate.templateId}" loaded`);
