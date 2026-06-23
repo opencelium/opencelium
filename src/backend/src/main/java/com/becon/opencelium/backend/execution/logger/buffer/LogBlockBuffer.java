@@ -16,14 +16,14 @@ public interface LogBlockBuffer {
     /**
      * Find an existing block in the in-memory buffer by key (if any).
      */
-    Optional<LogDataMng> findInBufferByKey(LogDataMng example);
+    Optional<LogDataMng> findByKey(LogDataMng example);
 
     /**
      * Find an existing block in the in-memory buffer by elementId (if any).
      */
-    Optional<LogDataMng> findInBufferById(String elementId);
+    Optional<LogDataMng> findById(String elementId);
 
-    List<LogDataMng> findAllCompletedByExecutionId(String executionId);
+    List<LogDataMng> findAllByExecutionId(String executionId);
 
     /**
      * Explicit flush (e.g., on shutdown).

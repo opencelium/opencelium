@@ -15,6 +15,8 @@ import {
   type InvalidReference,
   type WorkflowDropMode,
 } from './utils/graph.dragDrop';
+import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 
 type UseWorkflowPageOptions = {
   onDeleteNodes?: (deletedNodeIds: string[], previousNodes: WorkflowNodeModel[]) => void;
@@ -27,6 +29,8 @@ const DROP_EDGE_MAX_DISTANCE = 90;
 const DROP_LEAF_MAX_DISTANCE = 70;
 
 export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
+  const confirm = useConfirm();
+  const { t } = useI18n('workflow');
   const reactFlowInstance = useRef<ReactFlowInstance<WorkflowNodeModel, WorkflowEdgeModel> | null>(null);
   const dragSnapshot = useRef<{
     nodes: WorkflowNodeModel[];
@@ -386,9 +390,17 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       setEdges(result.edges);
       setSidebarAction(null);
     },
-    onDeleteNode: (nodeId: string) => {
+    onDeleteNode: async (nodeId: string) => {
       const targetNode = nodes.find((node) => node.id === nodeId);
       if (!targetNode || targetNode.type === 'start') return;
+      const confirmed = await confirm({
+        title: t('confirmDelete.title'),
+        message: t('confirmDelete.message'),
+        confirmText: t('actions.delete'),
+        cancelText: t('actions.cancel'),
+        confirmVariant: 'solid',
+      });
+      if (!confirmed) return;
       const result = deleteNodeGraph(nodeId, nodes, edges);
       const nextNodeIds = new Set(result.nodes.map((node) => node.id));
       const deletedNodeIds = nodes
