@@ -33,12 +33,8 @@
     },
     "icon": {
       "label": "Icon",
-      "delete": "Delete current icon",
-      "options": {
-        "leave": "Leave current icon",
-        "delete": "Delete current icon",
-        "new": "Set a new icon"
-      }
+      "uploadHint": "Click to upload an icon (PNG or JPG)",
+      "delete": "Delete icon"
     },
     "url": {
       "label": "Url"
@@ -104,6 +100,9 @@
   "lifecycle": {
     "uploadIcon": {
       "failed": "Connector saved, but the icon upload failed. You can retry from edit."
+    },
+    "deleteIcon": {
+      "failed": "Connector saved, but removing the icon failed. You can retry from edit."
     }
   }
 }

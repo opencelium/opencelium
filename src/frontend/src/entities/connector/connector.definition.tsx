@@ -14,7 +14,7 @@ import {connectorApi} from "@entities/connector/api/connectorApi.ts";
 import {showApiError} from "@shared/api/handleApiError.ts";
 import {useMasterPasswordStore} from "@features/master-password";
 import {renderConnectorTitle} from "@entities/connector/ui/renderConnectorTitle";
-import {hasConnectorIconFile, uploadConnectorIcon} from "@entities/connector/model/connectorIconUpload";
+import {deleteConnectorIcon, hasConnectorIconFile, shouldDeleteConnectorIcon, uploadConnectorIcon} from "@entities/connector/model/connectorIconUpload";
 
 const baseKey = 'connector';
 
@@ -46,20 +46,26 @@ export const connectorDefinition: EntityDefinition = {
             return {
                 ...connectorModel,
                 timeout: timeout?.toString() ?? '',
-                invoker: invoker?.name
+                invoker: invoker?.name,
+                // Snapshot the saved icon so the PUT can echo it back unchanged; the
+                // interactive `icon` field then carries the user's pending change.
+                iconOriginal: typeof connectorModel.icon === 'string' ? connectorModel.icon : null,
             }
         },
-        mapToApi: ({data: {invoker, timeout, requestData, icon, ...formData}, mode}: {data: ConnectorUpdateDto, mode: Mode}): Connector => {
+        mapToApi: ({data: {invoker, timeout, requestData, icon, iconOriginal, ...formData}, mode}: {data: ConnectorUpdateDto, mode: Mode}): Connector => {
             const payload: Connector = {
                 ...formData,
-                // Send `icon` when it's a string (unchanged — "leave as is") or null (delete).
-                // A fresh File upload is omitted: it serializes to {} which the backend rejects,
-                // and uploadIcon persists the new File separately.
-                ...(typeof icon === 'string' || icon === null ? {icon} : {}),
                 timeout: +timeout,
                 invoker: {
                     name: invoker,
                 },
+            }
+            // The connector PUT sets the icon column unconditionally, so echo the
+            // saved path back to preserve it (and to keep the old file around for the
+            // replace endpoint to delete). All real icon changes run as after-actions
+            // against the dedicated /connector/{id}/icon endpoints.
+            if (mode === 'update') {
+                payload.icon = iconOriginal ?? null
             }
             if (mode === 'create')  {
                 payload.requestData = requestData;
@@ -89,13 +95,19 @@ export const connectorDefinition: EntityDefinition = {
                 bestEffort: true,
                 errorMessageKey: `${baseKey}.lifecycle.uploadIcon.failed`,
             },
+            deleteIcon: {
+                execute: deleteConnectorIcon,
+                condition: shouldDeleteConnectorIcon,
+                bestEffort: true,
+                errorMessageKey: `${baseKey}.lifecycle.deleteIcon.failed`,
+            },
         },
         lifecycle: {
             create: {
                 after: ['uploadIcon'],
             },
             update: {
-                after: ['saveRequestData', 'uploadIcon'],
+                after: ['saveRequestData', 'uploadIcon', 'deleteIcon'],
             }
         }
     },
@@ -223,17 +235,30 @@ export const connectorDefinition: EntityDefinition = {
             },
         },
         {
+            // The icon is edited from the wizard's top-right image (ConnectorWizardImage),
+            // not as a form field — so it is intentionally left out of every section.
+            // Value semantics: File = upload/replace, null = delete, string = unchanged.
             name: 'icon',
             type: 'file',
             defaultValue: null,
             ui: {
                 component: 'file-dropzone',
-                overrideKey: 'connectorIconEditor',
                 props: {
                     multiple: false,
                     accept: "image/png, image/jpeg",
                     labelKey: `${baseKey}.fields.icon.label`,
                 }
+            },
+        },
+        {
+            // Hidden companion holding the saved icon path; never rendered (no section),
+            // but carried in form state so mapToApi can preserve it and the delete
+            // after-action can tell whether there was an icon to remove.
+            name: 'iconOriginal',
+            type: 'file',
+            defaultValue: null,
+            ui: {
+                component: 'input',
             },
         },
         //credentials
@@ -282,7 +307,6 @@ export const connectorDefinition: EntityDefinition = {
                 'invoker',
                 'timeout',
                 'sslCert',
-                'icon',
             ]
         },{
             id: 'credentials',

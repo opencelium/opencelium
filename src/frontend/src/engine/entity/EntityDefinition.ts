@@ -156,8 +156,9 @@ export type WizardDefinition = {
      * Optional dynamic preview rendered in place of `image` while the form is active.
      * The component is rendered inside FormProvider so it can `useWatch` form fields.
      * Engines must NOT decorate this — the entity owns the styling.
+     * Receives the active `mode` so the preview can disable editing in view mode.
      */
-    renderImage?: React.ComponentType
+    renderImage?: React.ComponentType<{ mode?: Mode }>
     overrideKey?: string
     recommendations?: Recommendation[]
     steps: WizardStepDefinition[]

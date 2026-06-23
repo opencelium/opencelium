@@ -18,4 +18,9 @@ export type ConnectorCreateDto = Omit<Connector, "connectorId" | "invoker" | "ti
 
 export type ConnectorUpdateDto = ConnectorCreateDto & {
   connectorId: number,
+  // The icon path loaded from the server, kept untouched so the connector PUT can
+  // echo it back. ConnectorService.update sets the column unconditionally, so a
+  // missing value would clear it (and orphan the file). Real icon changes go
+  // through the dedicated POST/DELETE /connector/{id}/icon endpoints instead.
+  iconOriginal?: string | null,
 }

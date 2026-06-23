@@ -107,7 +107,7 @@ export function EntityWizard<EntityFormValues>({
     }, [form, liveUpdate, onSubmit])
 
     const WizardImageComponent = entity.wizard?.renderImage
-    const wizardImage = WizardImageComponent ? <WizardImageComponent /> : entity.wizard?.image
+    const wizardImage = WizardImageComponent ? <WizardImageComponent mode={mode} /> : entity.wizard?.image
 
     const constraints = buildConstraintsFromSchema(schema, entity)
 

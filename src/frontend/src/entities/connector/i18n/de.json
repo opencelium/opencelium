@@ -25,12 +25,8 @@
     },
     "icon": {
       "label": "Symbol",
-      "delete": "Aktuelles Symbol löschen",
-      "options": {
-        "leave": "Aktuelles Symbol behalten",
-        "delete": "Aktuelles Symbol löschen",
-        "new": "Neues Symbol festlegen"
-      }
+      "uploadHint": "Klicken, um ein Symbol hochzuladen (PNG oder JPG)",
+      "delete": "Symbol löschen"
     },
     "url": {
       "label": "Url"
@@ -83,6 +79,9 @@
   "lifecycle": {
     "uploadIcon": {
       "failed": "Konnektor gespeichert, aber das Hochladen des Symbols ist fehlgeschlagen. Sie können es im Bearbeitungsmodus erneut versuchen."
+    },
+    "deleteIcon": {
+      "failed": "Konnektor gespeichert, aber das Entfernen des Symbols ist fehlgeschlagen. Sie können es im Bearbeitungsmodus erneut versuchen."
     }
   }
 }
