@@ -98,7 +98,7 @@
       "connectorFallback": "Connector"
     },
     "chooseNextStep": "Choose your next step",
-    "from": "From: {{name}}",
+    "willBeAddedAfter": "It will be added after: {{name}}",
     "searchPlaceholder": "search",
     "triggerConnection": {
       "title": "Trigger Connection",
@@ -119,6 +119,10 @@
     "methodsEmpty": {
       "title": "No methods found",
       "description": "There are no methods matching this search."
+    },
+    "searchEmpty": {
+      "title": "No results found",
+      "description": "No connectors, operators, or methods match your search."
     },
     "methodItemText": "Invoker method",
     "connectorMethodsFallback": "Methods from {{invoker}} invoker."

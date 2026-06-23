@@ -98,7 +98,7 @@
       "connectorFallback": "Konnektor"
     },
     "chooseNextStep": "Wählen Sie Ihren nächsten Schritt",
-    "from": "Von: {{name}}",
+    "willBeAddedAfter": "Wird hinzugefügt nach: {{name}}",
     "searchPlaceholder": "suchen",
     "triggerConnection": {
       "title": "Workflow auslösen",
@@ -119,6 +119,10 @@
     "methodsEmpty": {
       "title": "Keine Methoden gefunden",
       "description": "Es gibt keine Methoden, die zu dieser Suche passen."
+    },
+    "searchEmpty": {
+      "title": "Keine Ergebnisse gefunden",
+      "description": "Keine Konnektoren, Operatoren oder Methoden entsprechen Ihrer Suche."
     },
     "methodItemText": "Invoker-Methode",
     "connectorMethodsFallback": "Methoden vom Invoker {{invoker}}."
