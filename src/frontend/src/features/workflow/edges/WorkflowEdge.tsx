@@ -14,6 +14,7 @@ export function WorkflowEdge({
 }: EdgeProps<WorkflowEdgeModel>) {
 	const isIfBranch = data?.branch === 'true' || data?.branch === 'false';
 	const isHighlighted = !!data?.highlighted;
+	const isDropInvalid = !!data?.dropInvalid;
 
 	const GAP = 3;
 
@@ -75,7 +76,12 @@ export function WorkflowEdge({
 				}
 				className={`workflowEdgePath ${isHighlighted ? 'workflowEdgePathHighlighted' : ''}`}
 				style={
-					isHighlighted
+					isDropInvalid
+						? {
+								stroke: 'var(--color-status-error-fg)',
+								color: 'var(--color-status-error-fg)',
+							}
+						: isHighlighted
 						? {
 								stroke: 'var(--color-action-primary)',
 								color: 'var(--color-action-primary)',

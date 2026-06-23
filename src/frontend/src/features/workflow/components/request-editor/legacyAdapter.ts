@@ -95,7 +95,7 @@ export const buildLegacyConnection = (nodes: WorkflowNodeModel[]): Connection =>
     .map((node, index) => {
       const config = deserializeMethodConfigReferences(ensureMethodConfig(node.data.methodConfig));
       const name = node.data.subtitle || node.data.title || node.id;
-      const color = ALL_COLORS[index % ALL_COLORS.length];
+      const color = node.data.color ?? ALL_COLORS[index % ALL_COLORS.length];
       const isHttpRequest = node.type === 'system';
       return {
         id: node.id,

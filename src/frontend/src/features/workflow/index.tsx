@@ -26,6 +26,7 @@ import { selectAuthUser } from '@entities/auth/model/authSelectors';
 import { store } from '@app/store/store';
 import { genericApi } from '@shared/api/genericApi';
 import { useAppSelector } from '@shared/lib/storeHooks';
+import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import type { Connector } from '@entities/connector/model/types';
 import type { AuthUser } from '@entities/auth/model/types';
 import type { HistoryVersionItem } from './types/history.types';
@@ -188,6 +189,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const { connectionId } = useParams<{ connectionId: string }>();
   const { t: tEntities } = useI18n('entities');
   const { t } = useI18n('workflow');
+  const confirm = useConfirm();
   const authUser = useAppSelector(selectAuthUser);
   const { data: connectors = [], isLoading: isConnectorsLoading } = useGetConnectorsQuery({ page: 0, limit: 1000 });
   const [createdConnectionId, setCreatedConnectionId] = useState<string>();
@@ -211,7 +213,17 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       .forEach((node) => deletedMethodColors.add(String((node.data as any).color).toLowerCase()));
     setLoadedFieldBindings((current) => removeFieldBindingsByMethodColors(current, deletedMethodColors));
   }, []);
-  const workflow = useWorkflowPage({ onDeleteNodes: cleanDeletedNodeFieldBindings });
+  const workflow = useWorkflowPage({
+    onDeleteNodes: cleanDeletedNodeFieldBindings,
+    fieldBindings: loadedFieldBindings,
+    onFieldBindingsChange: setLoadedFieldBindings,
+    confirmDependencyDrop: (invalidReferences) => confirm({
+      title: 'Dependency conflict',
+      message: `This drop breaks ${invalidReferences.length} reference${invalidReferences.length === 1 ? '' : 's'}. If you continue, broken references will be removed.`,
+      confirmText: 'Continue',
+      confirmVariant: 'danger',
+    }),
+  });
   const [historyVersions, setHistoryVersions] = useState<HistoryVersionItem[]>([]);
   const [selectedHistoryVersionId, setSelectedHistoryVersionId] = useState<string | null>(null);
   const [baselineSnapshot, setBaselineSnapshot] = useState<string | null>(null);
@@ -687,6 +699,9 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
               onNodesChange={workflow.onNodesChange}
               onEdgesChange={workflow.onEdgesChange}
               onConnect={workflow.onConnect}
+              onNodeDragStart={workflow.onNodeDragStart}
+              onNodeDrag={workflow.onNodeDrag}
+              onNodeDragStop={workflow.onNodeDragStop}
               onOpenAddStep={workflow.onOpenAddStep}
               onOpenContextMenu={workflow.setContextMenu}
               onNodeDoubleClick={(_, node) => {
@@ -791,6 +806,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         open={!!workflow.conditionEditor}
         node={conditionNode}
         nodes={hydratedNodes}
+        edges={workflow.edges}
         connection={conditionConnection}
         onClose={() => workflow.setConditionEditor(null)}
         onSave={workflow.onSaveConditionConfig}

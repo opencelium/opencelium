@@ -2,6 +2,7 @@ import { Controls, ReactFlow } from '@xyflow/react';
 import type {
   OnConnect,
   OnEdgesChange,
+  OnNodeDrag,
   NodeMouseHandler,
   OnNodesChange,
   ReactFlowInstance,
@@ -33,6 +34,9 @@ type Props = PropsWithChildren<{
   onNodesChange: OnNodesChange<WorkflowNodeModel>;
   onEdgesChange: OnEdgesChange<WorkflowEdgeModel>;
   onConnect: OnConnect;
+  onNodeDragStart?: OnNodeDrag<WorkflowNodeModel>;
+  onNodeDrag?: OnNodeDrag<WorkflowNodeModel>;
+  onNodeDragStop?: OnNodeDrag<WorkflowNodeModel>;
   onOpenAddStep: (action: WorkflowAction) => void;
   onOpenContextMenu: (menu: WorkflowContextMenu | null) => void;
   onNodeDoubleClick?: NodeMouseHandler<WorkflowNodeModel>;
@@ -82,6 +86,9 @@ export function WorkflowCanvas({
   onNodesChange,
   onEdgesChange,
   onConnect,
+  onNodeDragStart,
+  onNodeDrag,
+  onNodeDragStop,
   onOpenAddStep,
   onOpenContextMenu,
   onNodeDoubleClick,
@@ -133,7 +140,7 @@ export function WorkflowCanvas({
         rightLeaf,
         bottomLeaf,
         alwaysShowRightAdd: node.type === 'start' && onlyStartNode,
-        highlighted: highlightedBranch.nodeIds.has(node.id),
+        highlighted: Boolean(node.data.highlighted) || highlightedBranch.nodeIds.has(node.id),
         suppressHoverAddControls: activeAction?.sourceNodeId === node.id,
         lockVisibleAddControls: activeAction?.sourceNodeId === node.id,
         onAddStep: onOpenAddStep,
@@ -147,7 +154,7 @@ export function WorkflowCanvas({
     ...edge,
     data: {
       ...edge.data,
-      highlighted: highlightedBranch.edgeIds.has(edge.id),
+      highlighted: Boolean(edge.data?.highlighted) || highlightedBranch.edgeIds.has(edge.id),
     },
   }));
 
@@ -186,6 +193,9 @@ export function WorkflowCanvas({
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onNodeDragStart={onNodeDragStart}
+        onNodeDrag={onNodeDrag}
+        onNodeDragStop={onNodeDragStop}
         onNodeDoubleClick={onNodeDoubleClick}
         onPaneClick={onPaneClick}
         nodesDraggable

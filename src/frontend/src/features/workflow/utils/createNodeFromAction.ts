@@ -6,6 +6,7 @@ import { findFreePosition, getBranchMaxX, rebalanceOperatorRightChains, shiftNod
 import { collectDescendantNodeIds } from './graph.traversal';
 import { createMethodConfigFromOperation } from './requestConfig';
 import { createShortId } from '@shared/lib/createId';
+import { ALL_COLORS } from '../constants/colors';
 
 function findOutgoingEdgeForAction(sourceNodeId: string, action: CreateNodeFromActionArgs['action'], edges: WorkflowEdgeModel[]) {
   return edges.find(
@@ -16,6 +17,10 @@ function findOutgoingEdgeForAction(sourceNodeId: string, action: CreateNodeFromA
 function buildNewNode(args: CreateNodeFromActionArgs, sourceNode: WorkflowNodeModel, interceptedTargetNode?: WorkflowNodeModel) {
   const nodeType = getNodeType(args.action.kind!);
   const nextId = createShortId(args.action.kind);
+  const usedColors = new Set(args.nodes.map((node) => node.data.color?.toLowerCase()).filter(Boolean));
+  const nextColor = nodeType === 'connector' || nodeType === 'system'
+    ? ALL_COLORS.find((color) => !usedColors.has(color.toLowerCase()))
+    : undefined;
   const baseX = sourceNode.type === 'if' || sourceNode.type === 'loop'
     ? getBranchMaxX(sourceNode.id, args.nodes, args.edges)
     : sourceNode.position.x;
@@ -35,6 +40,7 @@ function buildNewNode(args: CreateNodeFromActionArgs, sourceNode: WorkflowNodeMo
       subtitle: args.action.methodName ?? SUBTITLES[args.action.kind!],
       kind: nodeType,
       connector: args.action.connector,
+      color: nextColor,
       methodConfig: nodeType === 'connector' || nodeType === 'system' ? createMethodConfigFromOperation(args.action.methodOperation) : undefined,
     },
   };

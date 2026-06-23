@@ -8,7 +8,7 @@ import {
 import { Button, Input, Modal, Select } from 'antd';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import type { Connection, MethodWithId } from '../../types/connection';
-import type { WorkflowNodeModel } from '../../types/workflow.types';
+import type { WorkflowEdgeModel, WorkflowNodeModel } from '../../types/workflow.types';
 import { LegacyResponseFieldSelect } from '../request-editor/body-editor/LegacyResponseFieldSelect';
 import { LegacyWebhookReferenceSelect } from '../request-editor/body-editor/LegacyWebhookReferenceSelect';
 import {
@@ -55,6 +55,7 @@ type Props = {
 	open: boolean;
 	node: WorkflowNodeModel | null;
 	nodes: WorkflowNodeModel[];
+	edges: WorkflowEdgeModel[];
 	connection: Connection;
 	onClose: () => void;
 	onSave: (nodeId: string, config: ConditionConfig) => void;
@@ -85,40 +86,77 @@ const LOOP_OPERATOR_OPTIONS = Object.values(LoopOperatorName).map((value) => ({
 const normalizeSource = (source?: ConditionValueSource): ConditionValueSource => source || 'direct';
 const normalizeResponseType = (type?: ResponseType): ResponseType => type || 'body';
 
+const unwrapConditionReference = (value?: string) =>
+	value
+		?.trim()
+		.replace(/^\{%\s*/, '')
+		.replace(/\s*%}$/, '');
+
 const parseMethodFromReference = (methods: MethodWithId[], value?: string) => {
-	if (!value) return undefined;
-	const color = value.match(/^#?([A-Fa-f0-9]{6})\.\(response\)\./)?.[1];
+	const reference = unwrapConditionReference(value);
+	if (!reference) return undefined;
+	const color = reference.match(/^#?([A-Fa-f0-9]{6})\.\(response\)\./)?.[1];
 	return color
 		? methods.find((method) => method.color.replace('#', '').toLowerCase() === color.toLowerCase())
 		: undefined;
 };
 
 const parseResponseTypeFromReference = (value?: string): ResponseType | undefined => {
-	if (value?.includes('.header.')) return 'header';
-	if (value?.includes('.status')) return 'status';
-	if (value?.includes('.body.')) return 'body';
+	const reference = unwrapConditionReference(value);
+	if (reference?.includes('.header.')) return 'header';
+	if (reference?.includes('.status')) return 'status';
+	if (reference?.includes('.body.')) return 'body';
 	return undefined;
 };
 
 const parsePathFromReference = (value?: string) => {
-	if (!value) return undefined;
-	if (value === '$' || value === '$.') return '$';
-	if (value.includes('(response).status')) return 'status';
-	const match = value.match(/\.(body|header)(?:\.\$\.?|\.)?(.*)$/);
+	const reference = unwrapConditionReference(value);
+	if (!reference) return undefined;
+	if (reference === '$' || reference === '$.') return '$';
+	if (reference.includes('(response).status')) return 'status';
+	const match = reference.match(/\.(body|header)(?:\.\$\.?|\.)?(.*)$/);
 	if (match && match[2] === '') return '$';
-	const path = match?.[2] || value;
+	const path = match?.[2] || reference;
 	return path.replace(/^#?[A-Fa-f0-9]{6}\.\(response\)\.(body|header)\.\$\.?/, '');
 };
 
 const getSourceFromField = (field?: string): ConditionValueSource => {
-	if (!field) return 'direct';
-	if (field.startsWith('${') && field.endsWith('}')) return 'webhook';
-	if (/^#?[A-Fa-f0-9]{6}\.\(response\)\./.test(field)) return 'direct';
+	const reference = unwrapConditionReference(field);
+	if (!reference) return 'direct';
+	if (reference.startsWith('${') && reference.endsWith('}')) return 'webhook';
+	if (/^#?[A-Fa-f0-9]{6}\.\(response\)\./.test(reference)) return 'direct';
 	return 'constant';
 };
 
 const getMethodLabel = (method: MethodWithId) =>
 	method.label || method.name || method.index || method.id;
+
+const buildNodeBackedMethods = (
+	methods: MethodWithId[],
+	nodes: WorkflowNodeModel[],
+) => {
+	const methodsById = new Map(methods.map((method) => [method.id, method]));
+	return nodes
+		.filter((node) => node.type === 'connector' || node.type === 'system')
+		.map((node) => {
+			const method = methodsById.get(node.id);
+			const label = node.data.subtitle || node.data.title || method?.label || method?.name || node.id;
+			return {
+				...(method ?? {
+					id: node.id,
+					index: '',
+					name: label,
+					label,
+					connector: node.type === 'system' ? null : node.data.connector ?? null,
+					request: {},
+					response: {},
+				}),
+				color: node.data.color ?? method?.color ?? '',
+				name: method?.name || label,
+				label: method?.label || label,
+			} as MethodWithId;
+		});
+};
 
 const parseWorkflowIndex = (value: unknown) =>
 	String(value ?? '')
@@ -143,10 +181,28 @@ const compareWorkflowIndex = (left?: unknown, right?: unknown) => {
 const getSourceMethods = (
 	connection: Connection,
 	nodes: WorkflowNodeModel[],
+	edges: WorkflowEdgeModel[],
 	node: WorkflowNodeModel | null,
 ) => {
 	const methods = connection.fromConnector.method;
 	if (!node) return methods;
+	if (edges.length > 0) {
+		const canReach = (fromNodeId: string, toNodeId: string) => {
+			const visited = new Set<string>();
+			const stack = [fromNodeId];
+			while (stack.length > 0) {
+				const current = stack.pop();
+				if (!current || visited.has(current)) continue;
+				if (current === toNodeId) return true;
+				visited.add(current);
+				edges.forEach((edge) => {
+					if (edge.source === current && !visited.has(edge.target)) stack.push(edge.target);
+				});
+			}
+			return false;
+		};
+		return methods.filter((method) => canReach(method.id, node.id));
+	}
 	const operator = connection.fromConnector.operator.find((item) => item.id === node.id);
 	if (operator?.index !== undefined) {
 		return methods.filter((method) => compareWorkflowIndex(method.index, operator.index) < 0);
@@ -272,15 +328,20 @@ function ResponseTypeSwitcher({
 
 function MethodSelect({
 	methods,
+	selectedMethod,
 	value,
 	onChange,
 }: {
 	methods: MethodWithId[];
+	selectedMethod?: MethodWithId;
 	value?: string;
 	onChange: (value?: string) => void;
 }) {
 	const { t } = useI18n('workflow');
-	const selected = methods.find((method) => method.id === value);
+	const selected = methods.find((method) => method.id === value) ?? selectedMethod;
+	const options = selectedMethod && !methods.some((method) => method.id === selectedMethod.id)
+		? [selectedMethod, ...methods]
+		: methods;
 	return (
 		<Select
 			placeholder={t('placeholders.selectMethod')}
@@ -301,7 +362,7 @@ function MethodSelect({
 				</span>
 			) : undefined}
 			onChange={onChange}
-			options={methods.map((method) => ({
+			options={options.map((method) => ({
 				value: method.id,
 				label: getMethodLabel(method),
 				connectorTitle: getMethodConnectorTitle(method),
@@ -328,27 +389,29 @@ function ConditionValueInput({
 	side,
 	properties,
 	methods,
+	allMethods,
 	iterators,
 	onChange,
 }: {
 	side: 'left' | 'right';
 	properties: ConditionRuleProperties;
 	methods: MethodWithId[];
+	allMethods: MethodWithId[];
 	iterators: string[];
 	onChange: (patch: Partial<ConditionRuleProperties>) => void;
 }) {
 	const { t } = useI18n('workflow');
 	const fieldKey = side === 'left' ? 'leftField' : 'rightField';
 	const fieldValue = properties[fieldKey] || '';
-	const parsedMethod = parseMethodFromReference(methods, fieldValue);
+	const parsedMethod = parseMethodFromReference(allMethods, fieldValue);
 	const parsedResponseType = parseResponseTypeFromReference(fieldValue);
 	const [draftSource, setDraftSource] = useState<ConditionValueSource>(() => getSourceFromField(fieldValue));
 	const [draftMethodId, setDraftMethodId] = useState<string | undefined>(() => parsedMethod?.id);
 	const [draftResponseType, setDraftResponseType] = useState<ResponseType>(() => parsedResponseType || 'body');
 	const source = normalizeSource(fieldValue ? getSourceFromField(fieldValue) : draftSource);
-	const methodId = draftMethodId || parsedMethod?.id;
+	const methodId = fieldValue ? parsedMethod?.id : draftMethodId;
 	const responseType = normalizeResponseType(draftResponseType);
-	const selectedMethod = methods.find((method) => method.id === methodId);
+	const selectedMethod = allMethods.find((method) => method.id === methodId);
 
 	useEffect(() => {
 		if (!fieldValue) return;
@@ -396,6 +459,7 @@ function ConditionValueInput({
 			<SourceSwitcher value={source} onChange={setSource} />
 			<MethodSelect
 				methods={methods}
+				selectedMethod={selectedMethod}
 				value={methodId}
 				onChange={(value) => {
 					setDraftMethodId(value);
@@ -440,6 +504,7 @@ function RuleRow({
 	rule,
 	operatorType,
 	methods,
+	allMethods,
 	iterators,
 	canDelete,
 	onChange,
@@ -448,6 +513,7 @@ function RuleRow({
 	rule: ConditionRule;
 	operatorType: 'if' | 'loop';
 	methods: MethodWithId[];
+	allMethods: MethodWithId[];
 	iterators: string[];
 	canDelete: boolean;
 	onChange: (patch: Partial<ConditionRuleProperties>) => void;
@@ -480,6 +546,7 @@ function RuleRow({
 					side="left"
 					properties={properties}
 					methods={methods}
+					allMethods={allMethods}
 					iterators={iterators}
 					onChange={onChange}
 				/>
@@ -502,6 +569,7 @@ function RuleRow({
 					side="left"
 					properties={properties}
 					methods={methods}
+					allMethods={allMethods}
 					iterators={iterators}
 					onChange={onChange}
 				/>
@@ -510,6 +578,7 @@ function RuleRow({
 					side="right"
 					properties={properties}
 					methods={methods}
+					allMethods={allMethods}
 					iterators={iterators}
 					onChange={onChange}
 				/>
@@ -519,6 +588,7 @@ function RuleRow({
 					side="right"
 					properties={properties}
 					methods={methods}
+					allMethods={allMethods}
 					iterators={iterators}
 					onChange={onChange}
 				/>
@@ -537,6 +607,7 @@ function GroupEditor({
 	group,
 	operatorType,
 	methods,
+	allMethods,
 	iterators,
 	onDelete,
 	onChange,
@@ -544,6 +615,7 @@ function GroupEditor({
 	group: ConditionGroup;
 	operatorType: 'if' | 'loop';
 	methods: MethodWithId[];
+	allMethods: MethodWithId[];
 	iterators: string[];
 	onDelete?: () => void;
 	onChange: (group: ConditionGroup) => void;
@@ -650,6 +722,7 @@ function GroupEditor({
 							rule={child}
 							operatorType={operatorType}
 							methods={methods}
+							allMethods={allMethods}
 							iterators={iterators}
 							canDelete={operatorType === 'if'}
 							onDelete={() => onChange(removeChildById(group, child.id))}
@@ -661,6 +734,7 @@ function GroupEditor({
 							group={child}
 							operatorType={operatorType}
 							methods={methods}
+							allMethods={allMethods}
 							iterators={iterators}
 							onDelete={() => onChange(removeChildById(group, child.id))}
 							onChange={(nextGroup) => {
@@ -683,6 +757,7 @@ export function ConditionBuilderDialog({
 	open,
 	node,
 	nodes,
+	edges,
 	connection,
 	onClose,
 	onSave,
@@ -692,8 +767,12 @@ export function ConditionBuilderDialog({
 	const [tree, setTree] = useState<ConditionGroup>(() => getInitialTreeFromConfig(node, operatorType));
 	const [renderKey, setRenderKey] = useState(0);
 	const methods = useMemo(
-		() => getSourceMethods(connection, nodes, node),
-		[connection, node, nodes],
+		() => getSourceMethods(connection, nodes, edges, node),
+		[connection, edges, node, nodes],
+	);
+	const allMethods = useMemo(
+		() => buildNodeBackedMethods(connection.fromConnector.method, nodes),
+		[connection.fromConnector.method, nodes],
 	);
 	const iterators = useMemo(
 		() => getPreviousIterators(connection, node),
@@ -716,7 +795,7 @@ export function ConditionBuilderDialog({
 		// Only show once the operator, method and field (the collection reference)
 		// are all chosen.
 		if (!isLoop || !loopOperator || !loopCollectionRef) return undefined;
-		const method = parseMethodFromReference(methods, loopCollectionRef);
+		const method = parseMethodFromReference(allMethods, loopCollectionRef);
 		if (!method) return undefined;
 		return {
 			methodLabel: method.label || method.name,
@@ -724,7 +803,7 @@ export function ConditionBuilderDialog({
 			hasMethod: true,
 			responseType: parseResponseTypeFromReference(loopCollectionRef) || 'body',
 		};
-	}, [isLoop, loopOperator, loopCollectionRef, methods]);
+	}, [isLoop, loopOperator, loopCollectionRef, allMethods]);
 
 	useEffect(() => {
 		if (!open) return;
@@ -766,6 +845,7 @@ export function ConditionBuilderDialog({
 					group={tree}
 					operatorType={operatorType}
 					methods={methods}
+					allMethods={allMethods}
 					iterators={iterators}
 					onChange={setTree}
 				/>

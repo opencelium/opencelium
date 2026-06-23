@@ -7,6 +7,11 @@
     border-radius: var(--radius-lg);
 }
 
+.ant-dialog-custom .ant-modal-content:focus,
+.ant-dialog-custom .ant-modal-content:focus-visible {
+    outline-offset: 0;
+}
+
 .ant-dialog-fullscreen {
     top: 0 !important;
     /* Override antd's default centering + max-width that otherwise leave a gap,

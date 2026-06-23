@@ -34,6 +34,7 @@ export type WorkflowNodeData = {
 	title: string;
 	subtitle?: string;
 	kind: WorkflowNodeType;
+	color?: string;
 	connector?: {
 		connectorId: number;
 		title: string;
@@ -41,14 +42,14 @@ export type WorkflowNodeData = {
 	};
 	methodConfig?: WorkflowMethodConfig;
 	conditionConfig?: ConditionConfig;
-	// Set once the user renames the node via "Change Label". `name` always stays
-	// the operation name; the subtitle is persisted as `label` only when this is set.
 	labelEdited?: boolean;
 	isLeaf?: boolean;
 	rightLeaf?: boolean;
 	bottomLeaf?: boolean;
 	alwaysShowRightAdd?: boolean;
 	highlighted?: boolean;
+	dropTarget?: boolean;
+	dropInvalid?: boolean;
 	suppressHoverAddControls?: boolean;
 	lockVisibleAddControls?: boolean;
 	onAddStep?: (action: WorkflowAction) => void;
@@ -59,6 +60,8 @@ export type WorkflowNodeData = {
 export type WorkflowEdgeData = {
 	branch?: 'true' | 'false';
 	highlighted?: boolean;
+	dropTarget?: boolean;
+	dropInvalid?: boolean;
 };
 
 export type StartWorkflowNode = Node<WorkflowNodeData, 'start'>;

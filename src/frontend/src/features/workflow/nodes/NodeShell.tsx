@@ -37,6 +37,11 @@ export function NodeShell({
   const onAddStep = data.onAddStep;
 
   const onContextMenu = (event: MouseEvent<HTMLDivElement>) => {
+    if (event.ctrlKey) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
     if (data.kind === 'start') return;
 
     event.preventDefault();
@@ -70,6 +75,8 @@ export function NodeShell({
       <div
         className={`nodeBody ${selected ? 'nodeBodySelected' : ''} ${
           data.highlighted ? 'nodeBodyHighlighted' : ''
+        } ${data.dropTarget ? 'nodeBodyDropTarget' : ''} ${
+          data.dropInvalid ? 'nodeBodyDropInvalid' : ''
         }`}
       >
         {children}

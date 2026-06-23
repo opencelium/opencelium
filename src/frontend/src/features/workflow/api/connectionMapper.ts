@@ -107,6 +107,7 @@ const toMethodEntry = (method: any, index: number): IndexedWorkflowEntry => {
 				subtitle: getMethodName(method, index),
 				labelEdited: Boolean(method?.label),
 				kind: method?.connector === null ? 'system' as const : 'connector' as const,
+				color: method?.color,
 				...(method?.connector === null
 					? {}
 					: {

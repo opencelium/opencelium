@@ -241,7 +241,7 @@ const sanitizeUiNode = (node: WorkflowNodeModel) => ({
 	deletable: node.deletable,
 });
 
-const buildWorkflowIndexes = (nodes: WorkflowNodeModel[], edges: WorkflowEdgeModel[]) => {
+export const buildWorkflowIndexes = (nodes: WorkflowNodeModel[], edges: WorkflowEdgeModel[]) => {
 	const nodeById = new Map(nodes.map((node) => [node.id, node]));
 	const indexes = new Map<string, string>();
 	const visited = new Set<string>();

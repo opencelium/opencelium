@@ -30,6 +30,20 @@
   box-shadow: 0 0 0 4px var(--color-action-primary-subtle);
 }
 
+.nodeBodyDropTarget .startNode,
+.nodeBodyDropTarget .circleNode,
+.nodeBodyDropTarget .ifNode {
+  border-color: var(--color-status-success-fg);
+  box-shadow: 0 0 0 4px var(--color-status-success-bg);
+}
+
+.nodeBodyDropInvalid .startNode,
+.nodeBodyDropInvalid .circleNode,
+.nodeBodyDropInvalid .ifNode {
+  border-color: var(--color-status-error-fg);
+  box-shadow: 0 0 0 4px var(--color-status-error-bg);
+}
+
 .nodeTopLabel {
   position: absolute;
   left: 50%;
