@@ -93,6 +93,8 @@ export type WorkflowHeaderMenuItem = {
 	id: string;
 	labelKey: string;
 	section?: 'template' | 'editor' | 'exit';
+	/** Keep the menu open after selecting (for async actions that show in-place loading). */
+	keepOpenOnSelect?: boolean;
 };
 
 export type WorkflowNodeMenuItem = {

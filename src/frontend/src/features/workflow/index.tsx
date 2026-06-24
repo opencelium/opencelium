@@ -1,6 +1,6 @@
 import { Background } from '@xyflow/react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Button, Input, Modal, Select, message } from 'antd';
 import { Loading } from '@shared/ui/primitives/Loading/Loading';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
@@ -192,6 +192,7 @@ const triggerJsonDownload = (filename: string, payload: unknown) => {
 
 export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const { connectionId } = useParams<{ connectionId: string }>();
+  const navigate = useNavigate();
   const { t: tEntities } = useI18n('entities');
   const { t } = useI18n('workflow');
   const confirm = useConfirm();
@@ -245,6 +246,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>();
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
   const [isApplyingTemplate, setIsApplyingTemplate] = useState(false);
+  const [isDownloadingTemplate, setIsDownloadingTemplate] = useState(false);
   const hydratedNodes = useMemo(
     () => hydrateNodesWithOperationResponses(workflow.nodes, connectors),
     [connectors, workflow.nodes],
@@ -412,6 +414,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
 
   const downloadConnectionTemplate = async () => {
     if (!activeConnectionId) return;
+    setIsDownloadingTemplate(true);
     try {
       const template = (await apiExecutor({
         url: `/template/connection/${activeConnectionId}`,
@@ -423,6 +426,8 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     } catch (err) {
       console.error(err);
       message.error(tEntities('connection.list.downloadTemplate.error'));
+    } finally {
+      setIsDownloadingTemplate(false);
     }
   };
 
@@ -544,6 +549,8 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       openSaveTemplateDialog();
     } else if (item.id === 'load-template') {
       void openLoadTemplateDialog();
+    } else if (item.id === 'exit') {
+      navigate('/workflow');
     }
   };
 
@@ -595,6 +602,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         initialDescription={headerState.description}
         onChange={setHeaderState}
         onMenuItemSelect={handleHeaderMenuSelect}
+        menuLoadingItemId={isDownloadingTemplate ? 'download-template' : null}
         validateTitle={validateTitle}
         onSave={handleSave}
         saveDisabled={isLoading || !hasConnectionChanges}
@@ -676,6 +684,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
             {t('template.loadWarning')}
           </div>
           <Select
+            autoFocus
             loading={isLoadingTemplates}
             value={selectedTemplateId}
             placeholder={t('template.selectPlaceholder')}

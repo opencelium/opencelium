@@ -128,12 +128,12 @@
     "connectorMethodsFallback": "Methods from {{invoker}} invoker."
   },
   "headerMenu": {
-    "downloadAsTemplate": "download as template",
-    "saveAsTemplate": "save as template",
-    "loadTemplate": "load template",
-    "editorAppearance": "editor appearance",
-    "shortcuts": "shortcuts",
-    "exit": "exit"
+    "downloadAsTemplate": "Download as Template",
+    "saveAsTemplate": "Save as Template",
+    "loadTemplate": "Load Template",
+    "editorAppearance": "Editor Appearance",
+    "shortcuts": "Shortcuts",
+    "exit": "Exit"
   },
   "contextMenu": {
     "changeLabel": "Change Label",

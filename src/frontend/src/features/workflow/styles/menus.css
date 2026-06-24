@@ -78,6 +78,10 @@
 }
 
 .headerMenuItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   padding: 8px 10px;
   border-radius: 8px;
   font-size: 15px;
@@ -85,9 +89,13 @@
   color: var(--color-text-primary);
 }
 
-.headerMenuItem:hover,
+.headerMenuItem:hover:not(:disabled),
 .contextMenuItem:hover {
   background: var(--color-background-hover);
+}
+
+.headerMenuItem:disabled {
+  cursor: default;
 }
 
 .contextMenuHeader {
