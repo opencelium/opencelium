@@ -23,6 +23,7 @@ import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -60,6 +61,17 @@ public interface ConnectorService {
     List<RequestData> buildRequestData(Connector connector);
 
     Connector update(Integer connectorId, ConnectorResource connectorResource);
+
+    /**
+     * Stores the given image as the icon of the connector, replacing (and removing from
+     * storage) any previously stored icon. Returns the updated connector.
+     */
+    Connector storeIcon(int connectorId, MultipartFile file);
+
+    /**
+     * Removes the connector's icon from storage and clears the icon reference on the connector.
+     */
+    void deleteIcon(int connectorId);
 
     void updateRequestData(Integer connectorId, Map<String, String> requestData);
 
