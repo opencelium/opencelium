@@ -37,6 +37,7 @@ export function NodeShell({
   const onAddStep = data.onAddStep;
 
   const onContextMenu = (event: MouseEvent<HTMLDivElement>) => {
+    if (data.dragGhost || data.dropPlaceholder) return;
     if (event.ctrlKey) {
       event.preventDefault();
       event.stopPropagation();
@@ -62,7 +63,10 @@ export function NodeShell({
     !(data.suppressHoverAddControls && !bottomAdd.showAlways);
 
   return (
-    <div className="nodeWrap" onContextMenu={onContextMenu}>
+    <div
+      className={`nodeWrap ${data.dragGhost ? 'nodeWrapDragGhost' : ''} ${data.dropPlaceholder ? 'nodeWrapDropPlaceholder' : ''}`}
+      onContextMenu={onContextMenu}
+    >
       {selected && (
         <NodeToolbar
           canDelete={data.kind !== 'start'}

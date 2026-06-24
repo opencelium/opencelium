@@ -32,6 +32,7 @@ type DropTarget = {
 };
 
 const REFERENCE_COLOR_RE = /#[A-Fa-f0-9]{6}\.\((?:request|response)\)/g;
+const ENDPOINT_ARG_TOKEN_RE = /#\{%\s*([A-Za-z0-9_-]+)\s*%}/g;
 
 const isMethodNode = (node: WorkflowNodeModel) =>
   node.type === 'connector' || node.type === 'system';
@@ -186,6 +187,65 @@ const removeColors = (value: unknown, colors: Set<string>): unknown => {
     );
   }
   return value;
+};
+
+const endpointArgIdsForColors = (
+  methodConfig: unknown,
+  colors: Set<string>,
+) => {
+  if (!methodConfig || typeof methodConfig !== 'object') return new Set<string>();
+  const endpointArgs = (methodConfig as Record<string, any>).endpointArgs;
+  if (!endpointArgs || typeof endpointArgs !== 'object') return new Set<string>();
+  return new Set(
+    Object.entries(endpointArgs)
+      .filter(([, arg]: [string, any]) =>
+        [...collectReferenceColors(arg?.source)].some((color) => colors.has(color)),
+      )
+      .map(([id]) => id),
+  );
+};
+
+const removeEndpointArgTokens = (value: string, argIds: Set<string>) =>
+  value.replace(ENDPOINT_ARG_TOKEN_RE, (token, argId: string) => (argIds.has(argId) ? '' : token));
+
+const removeEndpointArgReferences = (
+  methodConfig: unknown,
+  colors: Set<string>,
+  sourceMethodConfig = methodConfig,
+) => {
+  const argIds = endpointArgIdsForColors(sourceMethodConfig, colors);
+  if (!methodConfig || typeof methodConfig !== 'object') return methodConfig;
+  const config = methodConfig as Record<string, any>;
+  const cleanedConfig = removeColors(config, colors) as Record<string, any>;
+  if (argIds.size === 0) return cleanedConfig;
+  return {
+    ...cleanedConfig,
+    url: typeof config.url === 'string' ? removeEndpointArgTokens(config.url, argIds) : config.url,
+    queryParams: Array.isArray(config.queryParams)
+      ? config.queryParams
+        .map((param: any) => ({
+          ...param,
+          key: typeof param?.key === 'string' ? removeEndpointArgTokens(param.key, argIds) : param?.key,
+          value: typeof param?.value === 'string' ? removeEndpointArgTokens(param.value, argIds) : param?.value,
+        }))
+      : config.queryParams,
+    endpointArgs: Object.fromEntries(
+      Object.entries(cleanedConfig.endpointArgs ?? {}).filter(([id]) => !argIds.has(id)),
+    ),
+  };
+};
+
+const removeNodeDataColors = (
+  data: WorkflowNodeModel['data'],
+  colors: Set<string>,
+): WorkflowNodeModel['data'] => {
+  const { methodConfig, ...restData } = data;
+  const cleaned = removeColors(restData, colors) as Omit<WorkflowNodeModel['data'], 'methodConfig'>;
+  if (!methodConfig) return cleaned as WorkflowNodeModel['data'];
+  return {
+    ...cleaned,
+    methodConfig: removeEndpointArgReferences(methodConfig, colors, methodConfig) as WorkflowNodeModel['data']['methodConfig'],
+  };
 };
 
 const removeConditionRulesWithColors = (
@@ -388,9 +448,10 @@ const insertSubtree = (
   }
 
   const nextNodes = rebalanceOperatorRightChains([...shiftedExistingNodes, ...shiftedInsertNodes], nextEdges);
+  const normalizedNodes = normalizeWorkflowPositions(nextNodes, nextEdges);
 
   return {
-    nodes: normalizeWorkflowPositions(nextNodes, nextEdges),
+    nodes: rebalanceOperatorRightChains(normalizedNodes, nextEdges),
     edges: nextEdges,
   };
 };
@@ -722,7 +783,7 @@ const cleanInvalidReferences = (
       }
       return {
         ...node,
-        data: removeColors(node.data, colors) as WorkflowNodeModel['data'],
+        data: removeNodeDataColors(node.data, colors),
       };
     }),
     fieldBindings: Array.isArray(fieldBindings)

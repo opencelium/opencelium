@@ -115,6 +115,7 @@ export function WorkflowCanvas({
     : { nodeIds: new Set<string>(), edgeIds: new Set<string>() };
 
   const preparedNodes: WorkflowNodeModel[] = nodes.map((node) => {
+    const isPreviewNode = Boolean(node.data.dragGhost || node.data.dropPlaceholder);
     const outgoingCount = getOutgoingCount(node.id, edges);
 
     const rightLeaf =
@@ -133,16 +134,17 @@ export function WorkflowCanvas({
 
     return {
       ...node,
-      selectable: node.type !== 'start',
+      selectable: node.type !== 'start' && !isPreviewNode,
+      draggable: !isPreviewNode,
       data: {
         ...node.data,
         isLeaf: outgoingCount === 0,
-        rightLeaf,
-        bottomLeaf,
-        alwaysShowRightAdd: node.type === 'start' && onlyStartNode,
+        rightLeaf: isPreviewNode ? false : rightLeaf,
+        bottomLeaf: isPreviewNode ? false : bottomLeaf,
+        alwaysShowRightAdd: !isPreviewNode && node.type === 'start' && onlyStartNode,
         highlighted: Boolean(node.data.highlighted) || highlightedBranch.nodeIds.has(node.id),
-        suppressHoverAddControls: activeAction?.sourceNodeId === node.id,
-        lockVisibleAddControls: activeAction?.sourceNodeId === node.id,
+        suppressHoverAddControls: isPreviewNode || activeAction?.sourceNodeId === node.id,
+        lockVisibleAddControls: !isPreviewNode && activeAction?.sourceNodeId === node.id,
         onAddStep: onOpenAddStep,
         onOpenContextMenu,
         onDeleteNode,
