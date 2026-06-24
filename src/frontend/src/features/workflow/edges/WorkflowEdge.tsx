@@ -15,6 +15,7 @@ export function WorkflowEdge({
 	const isIfBranch = data?.branch === 'true' || data?.branch === 'false';
 	const isHighlighted = !!data?.highlighted;
 	const isDropInvalid = !!data?.dropInvalid;
+	const isPreviewEdge = !!data?.dragGhost || !!data?.dropPlaceholder;
 
 	const GAP = 3;
 
@@ -80,6 +81,13 @@ export function WorkflowEdge({
 						? {
 								stroke: 'var(--color-status-error-fg)',
 								color: 'var(--color-status-error-fg)',
+							}
+						: isPreviewEdge
+						? {
+								opacity: data?.dragGhost ? 0.45 : 0.55,
+								stroke: 'var(--color-action-primary)',
+								color: 'var(--color-action-primary)',
+								strokeDasharray: data?.dropPlaceholder ? '6 6' : undefined,
 							}
 						: isHighlighted
 						? {
