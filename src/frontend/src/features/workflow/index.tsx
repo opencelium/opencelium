@@ -12,6 +12,7 @@ import { WorkflowHeader } from './components/WorkflowHeader';
 import { WorkflowLogs } from './components/WorkflowLogs';
 import { WorkflowSidebar } from './components/WorkflowSidebar';
 import { HistoryPanel } from './components/header/HistoryPanel';
+import { ShortcutsDialog } from './components/header/ShortcutsDialog';
 import { ConditionBuilderDialog } from './components/condition-builder/ConditionBuilder';
 import { MethodConfigDialog } from './components/request-editor/MethodConfigDialog';
 import { buildLegacyConnection } from './components/request-editor/legacyAdapter';
@@ -247,6 +248,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
   const [isApplyingTemplate, setIsApplyingTemplate] = useState(false);
   const [isDownloadingTemplate, setIsDownloadingTemplate] = useState(false);
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const hydratedNodes = useMemo(
     () => hydrateNodesWithOperationResponses(workflow.nodes, connectors),
     [connectors, workflow.nodes],
@@ -549,6 +551,8 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       openSaveTemplateDialog();
     } else if (item.id === 'load-template') {
       void openLoadTemplateDialog();
+    } else if (item.id === 'shortcuts') {
+      setIsShortcutsOpen(true);
     } else if (item.id === 'exit') {
       navigate('/workflow');
     }
@@ -704,6 +708,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           />
         </div>
       </Modal>
+      <ShortcutsDialog open={isShortcutsOpen} onClose={() => setIsShortcutsOpen(false)} />
       <div className="workflowMain">
         {isLoading ? (
           <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

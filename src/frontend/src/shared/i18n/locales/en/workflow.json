@@ -135,6 +135,31 @@
     "shortcuts": "Shortcuts",
     "exit": "Exit"
   },
+  "shortcutsDialog": {
+    "title": "Keyboard & mouse shortcuts",
+    "groups": {
+      "canvas": "Canvas",
+      "nodes": "Nodes",
+      "general": "General"
+    },
+    "keys": {
+      "drag": "Drag",
+      "scroll": "Scroll",
+      "click": "Click",
+      "doubleClick": "Double-click",
+      "ctrl": "Ctrl",
+      "esc": "Esc"
+    },
+    "items": {
+      "pan": "Pan the canvas",
+      "zoom": "Zoom in and out",
+      "openConfig": "Open node configuration",
+      "moveNode": "Move a node",
+      "duplicate": "Duplicate a node instead of moving it",
+      "multiSelect": "Select multiple nodes",
+      "close": "Close the open menu, dialog, or panel"
+    }
+  },
   "contextMenu": {
     "changeLabel": "Change Label",
     "openConfiguration": "Open Configuration",

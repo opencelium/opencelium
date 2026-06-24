@@ -135,6 +135,31 @@
     "shortcuts": "Tastenkürzel",
     "exit": "Beenden"
   },
+  "shortcutsDialog": {
+    "title": "Tastatur- und Maus-Kurzbefehle",
+    "groups": {
+      "canvas": "Arbeitsfläche",
+      "nodes": "Knoten",
+      "general": "Allgemein"
+    },
+    "keys": {
+      "drag": "Ziehen",
+      "scroll": "Scrollen",
+      "click": "Klick",
+      "doubleClick": "Doppelklick",
+      "ctrl": "Strg",
+      "esc": "Esc"
+    },
+    "items": {
+      "pan": "Arbeitsfläche verschieben",
+      "zoom": "Vergrößern und verkleinern",
+      "openConfig": "Knotenkonfiguration öffnen",
+      "moveNode": "Knoten verschieben",
+      "duplicate": "Knoten duplizieren statt verschieben",
+      "multiSelect": "Mehrere Knoten auswählen",
+      "close": "Geöffnetes Menü, Dialog oder Panel schließen"
+    }
+  },
   "contextMenu": {
     "changeLabel": "Bezeichnung ändern",
     "openConfiguration": "Konfiguration öffnen",
