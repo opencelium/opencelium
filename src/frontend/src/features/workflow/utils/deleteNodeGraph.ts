@@ -50,12 +50,16 @@ export function deleteNodeGraph(
         edge.targetHandle === outgoingEdge.targetHandle,
       );
       if (duplicate || incomingEdge.source === outgoingEdge.target) return [];
+      const reconnectsVerticalBranch = incomingEdge.targetHandle === 'top' ||
+        incomingEdge.sourceHandle === 'true' ||
+        incomingEdge.sourceHandle === 'bottom';
+      const targetHandle = reconnectsVerticalBranch ? 'top' : outgoingEdge.targetHandle;
       return [{
-        id: `edge-${incomingEdge.source}-${outgoingEdge.target}-${incomingEdge.sourceHandle ?? 'default'}-${outgoingEdge.targetHandle ?? 'default'}`,
+        id: `edge-${incomingEdge.source}-${outgoingEdge.target}-${incomingEdge.sourceHandle ?? 'default'}-${targetHandle ?? 'default'}`,
         source: incomingEdge.source,
         target: outgoingEdge.target,
         sourceHandle: incomingEdge.sourceHandle,
-        targetHandle: outgoingEdge.targetHandle,
+        targetHandle,
         type: 'workflow-edge' as const,
         markerEnd: { type: MarkerType.ArrowClosed },
         data: { branch: incomingEdge.data?.branch },

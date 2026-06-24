@@ -50,6 +50,8 @@ export type WorkflowNodeData = {
 	highlighted?: boolean;
 	dropTarget?: boolean;
 	dropInvalid?: boolean;
+	dragGhost?: boolean;
+	dropPlaceholder?: boolean;
 	suppressHoverAddControls?: boolean;
 	lockVisibleAddControls?: boolean;
 	onAddStep?: (action: WorkflowAction) => void;
@@ -62,6 +64,8 @@ export type WorkflowEdgeData = {
 	highlighted?: boolean;
 	dropTarget?: boolean;
 	dropInvalid?: boolean;
+	dragGhost?: boolean;
+	dropPlaceholder?: boolean;
 };
 
 export type StartWorkflowNode = Node<WorkflowNodeData, 'start'>;

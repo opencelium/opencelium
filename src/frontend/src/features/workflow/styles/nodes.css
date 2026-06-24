@@ -5,6 +5,37 @@
   z-index: 6;
 }
 
+.nodeWrapDragGhost,
+.nodeWrapDropPlaceholder {
+  pointer-events: none;
+}
+
+.nodeWrapDragGhost {
+  opacity: 0.45;
+  z-index: 20;
+}
+
+.nodeWrapDropPlaceholder {
+  opacity: 0.55;
+  z-index: 5;
+}
+
+.nodeWrapDropPlaceholder .nodeTopLabel,
+.nodeWrapDropPlaceholder .nodeBottomLabel,
+.nodeWrapDropPlaceholder .ifFalseLabel,
+.nodeWrapDropPlaceholder .ifTrueLabel {
+  display: none;
+}
+
+.nodeWrapDropPlaceholder .startNode,
+.nodeWrapDropPlaceholder .circleNode,
+.nodeWrapDropPlaceholder .ifNode {
+  background: transparent;
+  border-style: dashed;
+  border-color: var(--color-action-primary);
+  box-shadow: 0 0 0 4px var(--color-action-primary-subtle);
+}
+
 .nodeBody {
   position: absolute;
   left: 50%;
