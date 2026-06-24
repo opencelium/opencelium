@@ -5,10 +5,12 @@ import type { HistoryVersionItem } from './historyPanel.data';
 import { formatTime } from './historyPanel.utils';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { buildTestId } from '@shared/testing/testId';
+import { WorkflowMenuItem } from './WorkflowMenuItem';
 
 type Props = {
   activeId: string | null;
   commentValue: string;
+  downloadingSnapshotId: string | null;
   expandedCommentId: string | null;
   expandedShiftLeft: number;
   expandedWidth: number;
@@ -87,9 +89,9 @@ export function HistoryEntryRow(props: Props) {
         ) : null}
         {props.menuOpen ? (
           <div ref={props.menuRef} className='historyMenu'>
-            <button className='historyMenuItem' type='button' data-testid={buildTestId('workflow-history-copy', props.item.snapshotId)} onClick={() => props.onCopySnapshot(props.item.snapshotId)}>{t('history.copySnapshotId')}</button>
-            <button className='historyMenuItem' type='button' data-testid={buildTestId('workflow-history-download', props.item.snapshotId)} onClick={() => props.onDownloadTemplate(props.item.snapshotId)}>{t('history.downloadAsTemplate')}</button>
-            <button className='historyMenuItem historyMenuItemDanger' type='button' data-testid={buildTestId('workflow-history-delete', props.item.snapshotId)} onClick={() => props.onDelete(props.item.id)}>{t('actions.delete')}</button>
+            <WorkflowMenuItem className='historyMenuItem' testId={buildTestId('workflow-history-copy', props.item.snapshotId)} label={t('history.copySnapshotId')} onClick={() => props.onCopySnapshot(props.item.snapshotId)} />
+            <WorkflowMenuItem className='historyMenuItem' testId={buildTestId('workflow-history-download', props.item.snapshotId)} label={t('history.downloadAsTemplate')} loading={props.downloadingSnapshotId === props.item.snapshotId} onClick={() => props.onDownloadTemplate(props.item.snapshotId)} />
+            <WorkflowMenuItem className='historyMenuItem historyMenuItemDanger' testId={buildTestId('workflow-history-delete', props.item.snapshotId)} label={t('actions.delete')} onClick={() => props.onDelete(props.item.id)} />
           </div>
         ) : null}
       </div>

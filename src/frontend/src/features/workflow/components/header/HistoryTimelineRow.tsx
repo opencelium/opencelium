@@ -11,6 +11,7 @@ type Props = {
 	row: HistoryRow;
 	selectedId: string | null;
 	activeId: string | null;
+	downloadingSnapshotId: string | null;
 	hoveredCommentId: string | null;
 	expandedCommentId: string | null;
 	commentValue: string;
@@ -36,6 +37,7 @@ export function HistoryTimelineRow({
 	row,
 	selectedId,
 	activeId,
+	downloadingSnapshotId,
 	hoveredCommentId,
 	expandedCommentId,
 	commentValue,
@@ -61,6 +63,7 @@ export function HistoryTimelineRow({
 		<HistoryEntryRow
 			activeId={activeId}
 			commentValue={commentValue}
+			downloadingSnapshotId={downloadingSnapshotId}
 			expandedCommentId={expandedCommentId}
 			expandedShiftLeft={expandedShiftLeft}
 			expandedWidth={expandedWidth}

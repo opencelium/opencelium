@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { WorkflowHeaderMenuItem } from '../../types/workflow.types';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
-import { Loading } from '@shared/ui/primitives/Loading/Loading';
+import { WorkflowMenuItem } from './WorkflowMenuItem';
 
 type Props = {
   open: boolean;
@@ -65,20 +65,16 @@ export function HeaderMenu({ open, items, onClose, onSelect, loadingItemId }: Pr
           {sectionItems.map((item) => {
             const isLoading = item.id === loadingItemId;
             return (
-              <button
+              <WorkflowMenuItem
                 key={item.id}
                 className="headerMenuItem"
-                type="button"
-                disabled={isLoading}
+                label={t(item.labelKey)}
+                loading={isLoading}
                 onClick={() => {
-                  if (isLoading) return;
                   onSelect?.(item);
                   if (!item.keepOpenOnSelect) onClose();
                 }}
-              >
-                <span>{t(item.labelKey)}</span>
-                {isLoading && <Loading inline size="xs" />}
-              </button>
+              />
             );
           })}
         </div>
