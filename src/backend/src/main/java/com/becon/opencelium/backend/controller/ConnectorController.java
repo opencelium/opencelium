@@ -52,6 +52,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
@@ -230,6 +231,43 @@ public class ConnectorController {
                         connectorService.update(id, connectorResource)
                 )
         );
+    }
+
+    @Operation(summary = "Uploads (or replaces) the icon of a connector by its ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Connector icon has been successfully stored",
+                    content = @Content(schema = @Schema(implementation = ConnectorResource.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PostMapping(path = "/{id}/icon", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ConnectorResource> uploadIcon(@PathVariable int id,
+                                                        @RequestParam("file") MultipartFile file) {
+        Connector connector = connectorService.storeIcon(id, file);
+        return ResponseEntity.ok(connectorResourceMapper.toDTO(connector));
+    }
+
+    @Operation(summary = "Deletes the icon of a connector by its ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204",
+                    description = "Connector icon has been successfully deleted",
+                    content = @Content),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @DeleteMapping(path = "/{id}/icon")
+    public ResponseEntity<?> deleteIcon(@PathVariable int id) {
+        connectorService.deleteIcon(id);
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Modifies connector's required data")

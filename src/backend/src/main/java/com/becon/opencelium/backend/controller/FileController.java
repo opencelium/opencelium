@@ -472,7 +472,14 @@ public class FileController {
     }
 
 
-    @Operation(summary = "Uploads connector json file")
+    /**
+     * @deprecated Connector icon management has moved to the connector resource itself.
+     * Use {@code POST /connector/{id}/icon} instead. Kept temporarily so the frontend can
+     * migrate without a hard break; delegates to {@link ConnectorServiceImp#storeIcon}.
+     */
+    @Deprecated
+    @Operation(summary = "Uploads a connector icon. Deprecated: use POST /connector/{id}/icon instead.",
+            deprecated = true)
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",
                 description = "Connector has been successfully uploaded",
@@ -487,28 +494,8 @@ public class FileController {
     @PostMapping(value = "/connector", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> connectorUpload(@RequestParam("file") MultipartFile file,
                                              @RequestParam("connectorId") int connectorId) {
-
-        Connector connector = connectorService.findById(connectorId).orElseThrow(() ->
-                new RuntimeException("CONNECTOR_NOT_FOUND"));
-        // Get extension
-        String extension = FileNameUtils.getExtension(file.getOriginalFilename());
-        Objects.requireNonNull(extension);
-        if (!checkImageExtension(extension)){
-            throw new StorageException("File should be jpg or png");
-        }
-
-        try {
-            //Generate new file name
-            String newFilename = UUID.randomUUID().toString() + "." + extension;
-            connector.setIcon(newFilename);
-            // Save file in storage
-            storageService.store(file, newFilename);
-            connectorService.save(connector);
-            ConnectorResource resource = connectorMapper.toDTO(connector);
-            return ResponseEntity.ok().body(resource);
-        } catch (Exception e){
-            throw new RuntimeException(e);
-        }
+        Connector connector = connectorService.storeIcon(connectorId, file);
+        return ResponseEntity.ok().body(connectorMapper.toDTO(connector));
     }
 
     private boolean checkJsonExtension(String extension){
@@ -533,11 +520,7 @@ public class FileController {
     }
 
     private boolean checkImageExtension(String extension){
-        if (!(extension.equals("jpeg") || extension.equals("png")
-                || extension.equals("jpg"))){
-            return false;
-        }
-        return true;
+        return FileNameUtils.isSupportedImageExtension(extension);
     }
 
     private static String readJsonContent(InputStream inputStream) throws IOException {
