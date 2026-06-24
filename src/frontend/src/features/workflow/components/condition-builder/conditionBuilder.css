@@ -427,11 +427,18 @@
 	width: 100%;
 	min-width: 0;
 	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.conditionMethodLeft {
+	display: inline-flex;
+	align-items: center;
 	gap: 8px;
+	min-width: 0;
 }
 
 .conditionMethodName {
-	flex: 1 1 auto;
 	min-width: 0;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -439,12 +446,19 @@
 }
 
 .conditionMethodConnector {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
 	flex: 0 0 auto;
-	max-width: 45%;
-	padding-left: 12px;
+	max-width: 50%;
 	color: var(--color-text-secondary);
 	font-size: 11px;
 	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.conditionMethodConnectorName {
 	overflow: hidden;
 	text-overflow: ellipsis;
 }

@@ -46,6 +46,8 @@ import {
 import { LoopInfoPanel } from './LoopInfoPanel';
 import { Radio } from '@shared/ui/primitives/Radio';
 import { ConnectorIcon } from '@entities/connector/ui/ConnectorIcon';
+import { MethodColorDot } from '../MethodColorDot';
+import { getDuplicateMethodIndexByColor } from '../../utils/methodColor';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import '../request-editor/body-editor/bodyLegacy.css';
 import '../dialogHeader.css';
@@ -342,6 +344,7 @@ function MethodSelect({
 	const options = selectedMethod && !methods.some((method) => method.id === selectedMethod.id)
 		? [selectedMethod, ...methods]
 		: methods;
+	const duplicateIndexByColor = getDuplicateMethodIndexByColor(options);
 	return (
 		<Select
 			placeholder={t('placeholders.selectMethod')}
@@ -367,14 +370,21 @@ function MethodSelect({
 				label: getMethodLabel(method),
 				connectorTitle: getMethodConnectorTitle(method),
 				connectorIcon: getMethodConnectorIcon(method),
+				color: method.color,
+				dupIndex: method.color ? duplicateIndexByColor.get(method.color.toLowerCase()) : undefined,
 			}))}
 			optionRender={(option) => {
-				const data = option.data as { connectorTitle?: string; connectorIcon?: string | null };
+				const data = option.data as { connectorTitle?: string; connectorIcon?: string | null; color?: string; dupIndex?: number };
 				return (
 					<span className="conditionMethodOption">
-						<ConnectorIcon icon={data.connectorIcon} size={18} style={{ flexShrink: 0 }} />
-						<span className="conditionMethodName">{option.label}</span>
-						<span className="conditionMethodConnector" title={data.connectorTitle}>{data.connectorTitle}</span>
+						<span className="conditionMethodLeft">
+							<MethodColorDot color={data.color} index={data.dupIndex} />
+							<span className="conditionMethodName">{option.label}</span>
+						</span>
+						<span className="conditionMethodConnector" title={data.connectorTitle}>
+							<ConnectorIcon icon={data.connectorIcon} size={16} style={{ flexShrink: 0 }} />
+							<span className="conditionMethodConnectorName">{data.connectorTitle}</span>
+						</span>
 					</span>
 				);
 			}}

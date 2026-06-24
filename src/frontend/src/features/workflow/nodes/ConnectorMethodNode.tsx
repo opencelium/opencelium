@@ -2,20 +2,9 @@ import { Handle, Position } from '@xyflow/react';
 import type { NodeProps } from '@xyflow/react';
 import { Globe } from 'lucide-react';
 import { NodeShell } from './NodeShell';
+import { MethodColorBadge } from './MethodColorBadge';
+import { resolveConnectorIconUrl } from '@entities/connector/model/iconUrl';
 import type { ConnectorWorkflowNode } from '../types/workflow.types';
-
-const resolveConnectorIconUrl = (icon?: string | null) => {
-  if (!icon?.trim()) return null;
-  if (/^(blob:|data:|https?:\/\/)/i.test(icon)) return icon;
-
-  const normalizedIcon = icon.replace(/^\.\//, '');
-  if (normalizedIcon.startsWith('storage/')) {
-    const baseUrl = ((import.meta.env.VITE_API_URL as string | undefined) ?? '').replace(/\/$/, '');
-    return `${baseUrl}/${normalizedIcon}`;
-  }
-
-  return icon;
-};
 
 export function ConnectorMethodNode({
   id,
@@ -42,6 +31,7 @@ export function ConnectorMethodNode({
         ) : (
           <Globe size={24} />
         )}
+        <MethodColorBadge color={data.duplicateMethodColor} index={data.duplicateMethodIndex} />
       </div>
 
       <Handle

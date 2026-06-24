@@ -15,25 +15,13 @@ import {
   normalizeSidebarQuery,
 } from './sidebar/sidebar.helpers';
 import { getMethodSidebarCopy, getSecondarySidebarCopy, type SecondarySidebarMode } from './sidebar/sidebarSecondary';
+import { resolveConnectorIconUrl } from '@entities/connector/model/iconUrl';
 
 const getConnectorKey = (connectorId: number) => String(connectorId);
 const getMethodKey = (operation: InvokerOperation, index: number) => `${index}:${operation.name}`;
 
 const normalizeConnectorIcon = (icon?: string | File | null) =>
   typeof icon === 'string' ? icon : null;
-
-const resolveConnectorIconUrl = (icon?: string | null) => {
-  if (!icon?.trim()) return null;
-  if (/^(blob:|data:|https?:\/\/)/i.test(icon)) return icon;
-
-  const normalizedIcon = icon.replace(/^\.\//, '');
-  if (normalizedIcon.startsWith('storage/')) {
-    const baseUrl = ((import.meta.env.VITE_API_URL as string | undefined) ?? '').replace(/\/$/, '');
-    return `${baseUrl}/${normalizedIcon}`;
-  }
-
-  return icon;
-};
 
 type Props = {
   action: WorkflowAction | null;
