@@ -21,12 +21,14 @@ export const ConfirmDialogProvider: React.FC<{
     children: React.ReactNode;
 }> = ({ children }) => {
     const [state, setState] = useState<InternalState>({ open: false });
+    const [loading, setLoading] = useState(false);
 
     const resolverRef = useRef<((value: boolean) => void) | null>(null);
 
     const confirm = useCallback((options: ConfirmOptions) => {
         return new Promise<boolean>((resolve) => {
             resolverRef.current = resolve;
+            setLoading(false);
 
             setState({
                 ...options,
@@ -39,11 +41,29 @@ export const ConfirmDialogProvider: React.FC<{
         const resolve = resolverRef.current;
         resolverRef.current = null;
 
+        setLoading(false);
         setState({ open: false });
 
         // Defer the resolve until after the modal+backdrop have animated out,
         // so callers can render their pending UI on an unobscured page.
         window.setTimeout(() => resolve?.(result), CLOSE_ANIMATION_MS);
+    };
+
+    // When `onConfirm` is provided, run it with the confirm button in a loading
+    // state and the dialog held open, so an API request started on confirm shows
+    // its progress in place instead of closing immediately.
+    const handleConfirm = async () => {
+        if (!state.onConfirm) {
+            close(true);
+            return;
+        }
+        setLoading(true);
+        try {
+            await state.onConfirm();
+            close(true);
+        } catch {
+            close(false);
+        }
     };
 
     // When the session ends (expiry or logout) dismiss any open confirm and
@@ -60,14 +80,16 @@ export const ConfirmDialogProvider: React.FC<{
 
             <Dialog
                 open={state.open}
-                onClose={() => close(false)}
+                onClose={() => { if (!loading) close(false); }}
                 title={state.title}
+                closable={!loading}
                 testId="confirm-dialog"
                 zIndex={20000}
                 footer={
                     <>
                         <Button
                             variant="secondary"
+                            disabled={loading}
                             onClick={() => close(false)}
                             testId="confirm-dialog-cancel"
                         >
@@ -76,7 +98,8 @@ export const ConfirmDialogProvider: React.FC<{
 
                         <Button
                             variant={state.confirmVariant ?? 'primary'}
-                            onClick={() => close(true)}
+                            loading={loading}
+                            onClick={handleConfirm}
                             testId="confirm-dialog-confirm"
                         >
                             {state.confirmText ?? 'Confirm'}

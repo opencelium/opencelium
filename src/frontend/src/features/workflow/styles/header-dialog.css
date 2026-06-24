@@ -35,7 +35,7 @@
 	padding: 10px 12px;
 	resize: none;
 	outline: 0;
-	background: var(--color-background-surface);
+	background: var(--color-background-input);
 	color: var(--color-text-primary);
 }
 

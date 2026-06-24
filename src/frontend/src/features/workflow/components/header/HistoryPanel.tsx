@@ -62,17 +62,19 @@ export function HistoryPanel({ open, items, onClose, onDeleteVersion, onDownload
 			message: t('history.deleteVersion.message'),
 			confirmText: t('history.deleteVersion.confirm'),
 			cancelText: t('actions.cancel'),
+			onConfirm: async () => {
+				const wasSelected = item.id === state.selectedId;
+				const nextItems = state.items.filter((current) => current.id !== item.id);
+				await onDeleteVersion?.(item.snapshotId);
+				state.setItems(nextItems);
+				if (wasSelected) {
+					const currentVersion = nextItems.find((current) => current.current) ?? nextItems[0];
+					state.setSelectedId(currentVersion?.id ?? null);
+					if (currentVersion) await onSelectVersion?.(currentVersion.snapshotId);
+				}
+			},
 		});
 		if (!ok) return;
-		const wasSelected = item.id === state.selectedId;
-		const nextItems = state.items.filter((current) => current.id !== item.id);
-		await onDeleteVersion?.(item.snapshotId);
-		state.setItems(nextItems);
-		if (wasSelected) {
-			const currentVersion = nextItems.find((current) => current.current) ?? nextItems[0];
-			state.setSelectedId(currentVersion?.id ?? null);
-			if (currentVersion) await onSelectVersion?.(currentVersion.snapshotId);
-		}
 		state.setMenuId(null);
 		message.success(t('messages.deleteVersionSuccess'));
 	};
@@ -97,13 +99,16 @@ export function HistoryPanel({ open, items, onClose, onDeleteVersion, onDownload
 	const selectVersion = async (id: string) => {
 		if (id === state.selectedId) return;
 		if (hasUnsavedChanges) {
-			const ok = await confirm({
+			// The version load runs inside onConfirm, so the confirm button shows
+			// its progress; nothing left to do once the dialog settles.
+			await confirm({
 				title: t('history.unsavedChanges.title'),
 				message: tEntities('connection.messages.history.unsavedVersionSwitch'),
 				confirmText: t('history.unsavedChanges.confirm'),
 				cancelText: t('actions.cancel'),
+				onConfirm: () => applySelectedVersion(id),
 			});
-			if (!ok) return;
+			return;
 		}
 		await applySelectedVersion(id);
 	};
