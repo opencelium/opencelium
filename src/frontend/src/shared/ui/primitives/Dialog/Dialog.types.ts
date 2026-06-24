@@ -19,6 +19,9 @@ export interface DialogProps {
     /** Fires once the dialog has fully unmounted from the DOM (after the close animation). */
     afterClose?: () => void;
 
+    /** Fires after the open/close transition settles (`true` once fully open). Use to move focus once the dialog is interactive. */
+    afterOpenChange?: (open: boolean) => void;
+
     /** Stable selector for e2e tests; emitted as `data-testid` on the dialog body. */
     testId?: string;
     zIndex?: number;

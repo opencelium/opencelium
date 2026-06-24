@@ -37,6 +37,21 @@ export const ConfirmDialogProvider: React.FC<{
         });
     }, []);
 
+    // Move focus to the default button (Cancel, unless `autoFocusConfirm`) once
+    // the open animation settles. Doing it here — not via the button's autoFocus
+    // — is what actually works: rc-dialog focuses the dialog itself on the
+    // motion's visible-change, and this fires right after, overriding it.
+    const handleAfterOpenChange = (opened: boolean) => {
+        if (!opened) return;
+        // Single confirm dialog at a time (singleton provider), so a document
+        // query by the button's stable test id is safe and avoids wrapping the
+        // footer (which would break antd's adjacent-button spacing).
+        const selector = state.autoFocusConfirm
+            ? '[data-testid="confirm-dialog-confirm"]'
+            : '[data-testid="confirm-dialog-cancel"]';
+        document.querySelector<HTMLButtonElement>(selector)?.focus();
+    };
+
     const close = (result: boolean) => {
         const resolve = resolverRef.current;
         resolverRef.current = null;
@@ -81,6 +96,7 @@ export const ConfirmDialogProvider: React.FC<{
             <Dialog
                 open={state.open}
                 onClose={() => { if (!loading) close(false); }}
+                afterOpenChange={handleAfterOpenChange}
                 title={state.title}
                 closable={!loading}
                 testId="confirm-dialog"
