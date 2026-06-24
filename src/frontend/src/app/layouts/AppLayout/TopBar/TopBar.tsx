@@ -1,7 +1,6 @@
 import {CommandPalette} from "@widgets/CommandPalette/CommandPalette.tsx";
 import React from "react";
 import {useNavigate} from "react-router-dom";
-import {Typography} from "@shared/ui/primitives/Typography";
 import {DesktopOutlined, NotificationOutlined, PieChartOutlined, UserOutlined,} from "@ant-design/icons";
 import logoImage from "@assets/images/logo_oc_white.png";
 import {useBreakpoints} from "@app/hooks/useBreakpoints.tsx";
@@ -29,9 +28,13 @@ export const TopBar = () => {
             {/* LEFT */}
             <div style={{display: 'flex', alignItems: 'center'}}>
                 {!isTabletOrMobile && (
-                    <Typography variant="title">
-                        OpenCelium v5.0
-                    </Typography>
+                    <Button
+                        type="primary"
+                        iconLeft="workflow"
+                        onClick={() => navigate('/workflow/create')}
+                    >
+                        {tCommon('topbar.createWorkflow')}
+                    </Button>
                 )}
             </div>
 
