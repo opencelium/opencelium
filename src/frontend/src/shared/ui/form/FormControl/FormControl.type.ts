@@ -31,7 +31,7 @@ export interface RemoteApiProps {
     ignoreError?: boolean
     encodeParams?: boolean
     skipIfUnchanged?: boolean
-    shouldSkip?: () => boolean
+    shouldSkip?: (values?: any) => boolean
     /**
      * response handling
      * true → ok

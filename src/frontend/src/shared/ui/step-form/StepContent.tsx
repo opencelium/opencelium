@@ -1,28 +1,35 @@
 import { useStepForm } from "./context"
-import type {StepDefinition} from "./types"
+import type {StepActionDefinition, StepDefinition} from "./types"
 import { Button } from "@shared/ui/primitives/Button"
 import HelpIcon from "@shared/ui/tour/HelpIcon.tsx";
 import React, {useMemo, useRef} from "react";
 import type {PartialStepProps} from "@shared/ui/tour/Tour.tsx";
-import {CommonText, EntityText} from "@shared/ui/primitives/Text";
+import {EntityText} from "@shared/ui/primitives/Text";
 import {useBreakpoints} from "@app/hooks/useBreakpoints.tsx";
 import {useTestScope} from "@shared/testing/TestScopeContext.tsx";
 import {buildTestId} from "@shared/testing/testId.ts";
+import {useI18n} from "@shared/i18n/hooks/useI18n.ts";
 
 interface Props {
     steps: StepDefinition[]
     onSubmit?: () => void
+    onRunAction?: (action: StepActionDefinition) => void
     isSubmitting: boolean
+    runningActionId?: string | null
     readOnly?: boolean
 }
 
 export function StepContent({
     steps,
     onSubmit,
+    onRunAction,
     isSubmitting,
+    runningActionId,
     readOnly,
 }: Props) {
     const {isTabletOrMobile} = useBreakpoints();
+    const {t: tCommon} = useI18n('common')
+    const {t: tEntities} = useI18n('entities')
     const containerRef = useRef(null);
     const testScope = useTestScope();
     const { currentStep, next: nextStep, prev, isLast } =
@@ -93,17 +100,30 @@ export function StepContent({
                     disabled={currentStep === 0}
                     testId={buildTestId(testScope, 'wizard', 'prev')}
                 >
-                    <CommonText i18nKey={step.actions?.prevLabel || 'actions.prev'} />
+                    {tCommon((step.actions?.prevLabel || 'actions.prev') as any)}
                 </Button>
                 }
 
+                {!readOnly && onRunAction && step.actionButtons?.map((action) => (
+                    <Button
+                        key={action.id}
+                        type={action.type ?? 'primary'}
+                        onClick={() => onRunAction(action)}
+                        loading={runningActionId === action.id}
+                        disabled={isSubmitting || (runningActionId != null && runningActionId !== action.id)}
+                        testId={buildTestId(testScope, 'wizard', `action-${action.id}`)}
+                    >
+                        {tEntities(action.label as any)}
+                    </Button>
+                ))}
+
                 {isLast ? onSubmit && !readOnly ? (
-                    <Button onClick={onSubmit} loading={isSubmitting} testId={buildTestId(testScope, 'wizard', 'submit')}>
-                        {!!step?.actions?.submitLabel ? <EntityText i18nKey={step.actions?.submitLabel} /> : <CommonText i18nKey={'actions.submit'} />}
+                    <Button type="primary" onClick={onSubmit} loading={isSubmitting} disabled={runningActionId != null} testId={buildTestId(testScope, 'wizard', 'submit')}>
+                        {step?.actions?.submitLabel ? tEntities(step.actions.submitLabel as any) : tCommon('actions.submit')}
                     </Button>
                 ) : null : (
                     <Button onClick={next} loading={isSubmitting} testId={buildTestId(testScope, 'wizard', 'next')}>
-                        {step.actions?.nextLabel ? <EntityText i18nKey={step.actions.nextLabel} /> : <CommonText i18nKey={'actions.next'} />}
+                        {step.actions?.nextLabel ? tEntities(step.actions.nextLabel as any) : tCommon('actions.next')}
                     </Button>
                 )}
             </div>

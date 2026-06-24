@@ -142,6 +142,8 @@ export function EntityWizard<EntityFormValues>({
                 subheader: step.subheader,
                 info: step.info,
                 remote: step.remote,
+                actionButtons: step.actionButtons,
+                confirmOnRemoteFailure: step.confirmOnRemoteFailure,
                 actions: step.actions,
                 render: () => (
                     <>

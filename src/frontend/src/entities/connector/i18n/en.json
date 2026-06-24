@@ -82,6 +82,14 @@
       "credentials": {
         "header": "Credentials",
         "subheader": "It contains invoker-specific configuration fields required to authenticate and communicate with the target system.",
+        "test": {
+          "button": "Test connection",
+          "success": "Connection test succeeded",
+          "confirm": {
+            "title": "Connection test failed",
+            "message": "The connection test failed. Do you still want to save this connector?"
+          }
+        },
         "remote": {
           "error": {
             "default": "Unknown error during the connector test",

@@ -15,8 +15,50 @@ import {showApiError} from "@shared/api/handleApiError.ts";
 import {useMasterPasswordStore} from "@features/master-password";
 import {renderConnectorTitle} from "@entities/connector/ui/renderConnectorTitle";
 import {deleteConnectorIcon, hasConnectorIconFile, shouldDeleteConnectorIcon, uploadConnectorIcon} from "@entities/connector/model/connectorIconUpload";
+import type {StepRemoteProps} from "@shared/ui/form/FormControl/FormControl.type.ts";
 
 const baseKey = 'connector';
+
+/**
+ * The `/connector/check` connection test. Shared by the credentials step's submit-time gate
+ * (`remote`) and its "Test connection" action button so both fire the exact same request.
+ */
+const connectorCheckRemote: StepRemoteProps = {
+    url: `/connector/check`,
+    method: 'POST',
+    transKey: `${baseKey}.wizard.steps.credentials.remote.error`,
+    encodeParams: false,
+    ignoreError: true,
+    map: (_fieldValue, formValues) => {
+        // Drop a freshly-picked icon File: the connection test doesn't need it,
+        // and a File serializes to {} which the backend's String `icon` rejects (400).
+        const {icon, ...rest} = formValues
+        return {
+            ...rest,
+            ...(typeof icon === 'string' ? {icon} : {}),
+            invoker: {name: formValues.invoker},
+        }
+    },
+    shouldSkip: (values) => {
+        // Update mode keeps the stored credentials encrypted until the master
+        // password is entered — there is nothing to test until then. A create
+        // has no connectorId and always carries the freshly typed credentials,
+        // so the test must always run there.
+        const masterPassword = useMasterPasswordStore.getState().masterPassword
+        return !!values?.connectorId && !masterPassword;
+    },
+    handleResponse: (data, error) => {
+        if (data?.status === "200") {
+            return true;
+        } else {
+            showApiError({
+                namespace: 'entities',
+                transKey:  `${baseKey}.wizard.steps.credentials.remote.error.${data.data.message}`,
+            })
+            return false;
+        }
+    },
+};
 
 export const connectorDefinition: EntityDefinition = {
     name: baseKey,
@@ -381,38 +423,20 @@ export const connectorDefinition: EntityDefinition = {
                 subheader: `${baseKey}.wizard.steps.credentials.subheader`,
                 sectionIds: ['credentials'],
                 validateFields: ['requestData'],
-                remote: {
-                    url: `/connector/check`,
-                    method: 'POST',
-                    transKey: `${baseKey}.wizard.steps.credentials.remote.error`,
-                    encodeParams: false,
-                    ignoreError: true,
-                    map: (fieldValue, formValues) => {
-                        // Drop a freshly-picked icon File: the connection test doesn't need it,
-                        // and a File serializes to {} which the backend's String `icon` rejects (400).
-                        const {icon, ...rest} = formValues
-                        return {
-                            ...rest,
-                            ...(typeof icon === 'string' ? {icon} : {}),
-                            invoker: {name: formValues.invoker},
-                        }
+                actionButtons: [
+                    {
+                        id: 'test',
+                        label: `${baseKey}.wizard.steps.credentials.test.button`,
+                        type: 'primary',
+                        successMessage: `${baseKey}.wizard.steps.credentials.test.success`,
+                        remote: connectorCheckRemote,
                     },
-                    shouldSkip: () => {
-                        const masterPassword = useMasterPasswordStore.getState().masterPassword
-                        return !masterPassword;
-                    },
-                    handleResponse: (data, error) => {
-                        if (data?.status === "200") {
-                            return true;
-                        } else {
-                            showApiError({
-                                namespace: 'entities',
-                                transKey:  `${baseKey}.wizard.steps.credentials.remote.error.${data.data.message}`,
-                            })
-                            return false;
-                        }
-                    }
-                }
+                ],
+                confirmOnRemoteFailure: {
+                    title: `${baseKey}.wizard.steps.credentials.test.confirm.title`,
+                    message: `${baseKey}.wizard.steps.credentials.test.confirm.message`,
+                },
+                remote: connectorCheckRemote,
             },
         ]
     },

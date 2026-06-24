@@ -72,7 +72,15 @@
       },
       "credentials": {
         "header": "Credentials",
-        "subheader": "Authentication data"
+        "subheader": "Authentication data",
+        "test": {
+          "button": "Verbindung testen",
+          "success": "Verbindungstest erfolgreich",
+          "confirm": {
+            "title": "Verbindungstest fehlgeschlagen",
+            "message": "Der Verbindungstest ist fehlgeschlagen. Möchten Sie diesen Konnektor trotzdem speichern?"
+          }
+        }
       }
     }
   },
