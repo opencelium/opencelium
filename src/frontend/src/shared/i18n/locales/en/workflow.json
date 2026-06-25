@@ -133,6 +133,7 @@
     "saveAsTemplate": "Save as Template",
     "loadTemplate": "Load Template",
     "editorAppearance": "Editor Appearance",
+    "inDevelopment": "In development",
     "shortcuts": "Shortcuts",
     "exit": "Exit"
   },

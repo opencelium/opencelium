@@ -70,7 +70,10 @@ export function HeaderMenu({ open, items, onClose, onSelect, loadingItemId }: Pr
                 className="headerMenuItem"
                 label={t(item.labelKey)}
                 loading={isLoading}
+                disabled={item.disabled}
+                badge={item.badgeKey ? <span className="headerMenuBadge">{t(item.badgeKey)}</span> : undefined}
                 onClick={() => {
+                  if (item.disabled) return;
                   onSelect?.(item);
                   if (!item.keepOpenOnSelect) onClose();
                 }}

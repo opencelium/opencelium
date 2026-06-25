@@ -133,6 +133,7 @@
     "saveAsTemplate": "Als Vorlage speichern",
     "loadTemplate": "Vorlage laden",
     "editorAppearance": "Editor-Darstellung",
+    "inDevelopment": "In Entwicklung",
     "shortcuts": "Tastenkürzel",
     "exit": "Beenden"
   },

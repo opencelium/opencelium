@@ -99,6 +99,10 @@ export type WorkflowHeaderMenuItem = {
 	section?: 'template' | 'editor' | 'exit';
 	/** Keep the menu open after selecting (for async actions that show in-place loading). */
 	keepOpenOnSelect?: boolean;
+	/** Render the item non-interactive (e.g. a feature not yet shipped). */
+	disabled?: boolean;
+	/** i18n key for a small badge shown next to the label (e.g. "In development"). */
+	badgeKey?: string;
 };
 
 export type WorkflowNodeMenuItem = {
