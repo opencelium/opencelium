@@ -238,7 +238,7 @@ export const ldapDefinition: EntityDefinition = {
                         value: 'ldap',
                         execute: (_, ctx) => {
                             const url = `/ldap/check`;
-                            const { mode } = useCommandPaletteUIStore.getState();
+                            const mode = useCommandPaletteUIStore.getState().resolveMode();
 
                             if (mode === 'route') {
                                 return ctx.navigate(url);

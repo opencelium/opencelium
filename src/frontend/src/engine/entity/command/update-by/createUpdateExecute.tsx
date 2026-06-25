@@ -20,7 +20,7 @@ export const createUpdateExecute = ({ def, config, by }) => {
                 : `/${def.name}/update/${by.field}/${value}`);
 
         ctx.setLoading(true);
-        const { mode } = useCommandPaletteUIStore.getState();
+        const mode = useCommandPaletteUIStore.getState().resolveMode();
 
         try {
             const result = await store.dispatch(

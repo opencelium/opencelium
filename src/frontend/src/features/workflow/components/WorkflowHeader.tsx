@@ -6,6 +6,7 @@ import { HeaderSaveDialog } from './header/HeaderSaveDialog';
 import { headerMenuItems } from './header/headerMenuItems';
 import type { WorkflowHeaderMenuItem } from '../types/workflow.types';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { CommandPalette } from '@widgets/CommandPalette/CommandPalette';
 
 type Props = {
 	initialName?: string;
@@ -205,6 +206,7 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 				</div>
 
 				<div className='headerActions'>
+					<CommandPalette collapsible forceMode="modal" />
 					{!readOnly && (
 						<button
 							className='primaryButton headerPrimaryButton'
