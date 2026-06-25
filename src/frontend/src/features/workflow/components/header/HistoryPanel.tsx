@@ -4,6 +4,7 @@ import { CloseOutlined } from '@ant-design/icons';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import { copyToClipboard } from '@shared/utils/copyToClipboard';
+import { Empty } from '@shared/ui/primitives/Empty';
 import { HistoryTimelineRow } from './HistoryTimelineRow';
 import { useHistoryPanelState } from './useHistoryPanelState';
 import type { HistoryVersionItem } from '../../types/history.types';
@@ -202,7 +203,12 @@ export function HistoryPanel({ open, items, onClose, onDeleteVersion, onDownload
 									/>
 								))}
 							</div>
-						) : null}
+						) : (
+							<Empty
+								className='historyEmpty'
+								description={t('history.empty')}
+							/>
+						)}
 					</div>
 				</div>
 			</aside>

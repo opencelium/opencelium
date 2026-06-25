@@ -36,6 +36,7 @@
     "commentSaved": "Kommentar gespeichert.",
     "commentSaveFailed": "Kommentar konnte nicht gespeichert werden.",
     "commentPlaceholder": "Kommentar",
+    "empty": "Noch kein Versionsverlauf",
     "deleteVersion": {
       "title": "Version löschen?",
       "message": "Diese Aktion entfernt die ausgewählte Version aus dem Verlauf.",
