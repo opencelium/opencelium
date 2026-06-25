@@ -97,10 +97,10 @@ export const CommandPalette = ({ collapsible = false, forceMode }: CommandPalett
                 window.open(url, '_blank');
             },
 
-            confirm: async (message) => {
-                return await confirmAction({
-                    message,
-                });
+            confirm: async (options) => {
+                return await confirmAction(
+                    typeof options === 'string' ? { message: options } : options,
+                );
             },
 
             notify: (message) => {

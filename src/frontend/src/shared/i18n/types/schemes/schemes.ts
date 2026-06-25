@@ -92,6 +92,9 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 checkLicense: string
                 updateSystemConfig: string
                 changeTheme: string
+                uploadTemplate: string
+                uploadInvoker: string
+                systemCheck: string
             }
             footer: {
                 select: string

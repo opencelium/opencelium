@@ -47,7 +47,10 @@
       "system": "System actions",
       "checkLicense": "Check license and API operation usage",
       "updateSystemConfig": "Update on-disk application configuration",
-      "changeTheme": "Change the application theme"
+      "changeTheme": "Change the application theme",
+      "uploadTemplate": "Upload a workflow template file",
+      "uploadInvoker": "Upload an invoker file",
+      "systemCheck": "Open the system check page"
     },
     "footer": {
       "select": "Select",

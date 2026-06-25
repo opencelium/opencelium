@@ -47,7 +47,10 @@
       "system": "Systemaktionen",
       "checkLicense": "Lizenz und API-Aufrufverbrauch prüfen",
       "updateSystemConfig": "Anwendungskonfiguration auf der Festplatte bearbeiten",
-      "changeTheme": "Anwendungsdesign wechseln"
+      "changeTheme": "Anwendungsdesign wechseln",
+      "uploadTemplate": "Workflow-Vorlagendatei hochladen",
+      "uploadInvoker": "Invoker-Datei hochladen",
+      "systemCheck": "Systemprüfungsseite öffnen"
     },
     "footer": {
       "select": "Auswählen",

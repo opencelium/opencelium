@@ -1,4 +1,6 @@
+import { message } from 'antd'
 import type { EntityDefinition } from '@/engine/entity/EntityDefinition'
+import type { CommandNode } from '@shared/command/types'
 import invokerWizardImage from '@assets/images/wizard/invoker-wizard.gif'
 import { createEntityCommands } from '@/engine/entity/command/createEntityCommands.tsx'
 import { i18n } from '@shared/i18n/config/i18n.ts'
@@ -7,6 +9,7 @@ import de from '@entities/invoker/i18n/de.json'
 import { resolveInvokerNames } from '@entities/invoker/command/resolvers/resolveInvokerNames'
 import type { Invoker } from '@entities/invoker/model/types'
 import { InvokerUploadButton } from '@entities/invoker/components/InvokerUploadButton'
+import { pickInvokerFile, uploadInvoker } from '@entities/invoker/lib/uploadInvoker'
 
 const baseKey = 'invoker'
 
@@ -480,5 +483,46 @@ export const invokerDefinition: EntityDefinition = {
                 },
             },
         }),
+        {
+            type: 'literal',
+            value: 'upload',
+            group: 'create',
+            icon: 'upload',
+            description: 'commandPalette.descriptions.uploadInvoker',
+            children: [
+                {
+                    type: 'literal',
+                    value: 'invoker',
+                    aliases: ['invokers'],
+                    icon: 'upload',
+                    description: 'commandPalette.descriptions.uploadInvoker',
+                    execute: async (_, ctx) => {
+                        const tEntities = i18n.getFixedT(i18n.language, 'entities')
+                        const file = await pickInvokerFile()
+                        if (!file) return
+
+                        ctx.setLoading(true)
+                        try {
+                            const uploaded = await uploadInvoker(file, () =>
+                                ctx.confirm({
+                                    title: tEntities('invoker.list.upload.confirmReplace.title'),
+                                    message: tEntities('invoker.list.upload.confirmReplace.message'),
+                                }),
+                            )
+                            if (uploaded) {
+                                message.success(
+                                    tEntities('invoker.list.upload.success', { name: file.name }),
+                                )
+                            }
+                        } catch (err) {
+                            console.error(err)
+                            message.error(tEntities('invoker.list.upload.error'))
+                        } finally {
+                            ctx.setLoading(false)
+                        }
+                    },
+                },
+            ],
+        },
     ]),
 }
