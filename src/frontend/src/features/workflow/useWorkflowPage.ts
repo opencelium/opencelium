@@ -127,6 +127,8 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       highlighted: false,
       dropTarget: false,
       dropInvalid: false,
+      hideAddControls: false,
+      dragSourceMoving: false,
     },
   }));
 
@@ -270,6 +272,26 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     return new Set([sourceNodeId, ...getOperatorBottomBranch(source.id, sourceNodes, sourceEdges).nodeIds]);
   };
 
+  const setDraggedAddControlsHidden = (
+    sourceNodeId: string,
+    sourceNodes: WorkflowNodeModel[],
+    sourceEdges: WorkflowEdgeModel[],
+    hidden: boolean,
+    moving = false,
+  ) => {
+    const draggedIds = getDragSubtreeNodeIds(sourceNodeId, sourceNodes, sourceEdges);
+    return sourceNodes.map((item) => draggedIds.has(item.id)
+      ? {
+          ...item,
+          data: {
+            ...item.data,
+            hideAddControls: hidden,
+            dragSourceMoving: moving,
+          },
+        }
+      : item);
+  };
+
   const buildCopyGhostNodes = (
     sourceNodeId: string,
     draggedNode: WorkflowNodeModel,
@@ -299,6 +321,8 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
         data: {
           ...item.data,
           dragGhost: true,
+          hideAddControls: true,
+          dragSourceMoving: false,
           highlighted: false,
           dropTarget: false,
           dropInvalid: false,
@@ -354,6 +378,8 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
         dropInvalid: invalid,
         suppressHoverAddControls: true,
         lockVisibleAddControls: false,
+        hideAddControls: true,
+        dragSourceMoving: false,
       },
     })) as WorkflowNodeModel[];
 
@@ -403,7 +429,11 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     }));
     const ghostNodes = buildCopyGhostNodes(sourceNodeId, draggedNode, snapshotNodes, snapshotEdges);
     const placeholderNodes = preview ? buildDropPlaceholderNodes(preview.nodes, placeholderIds, invalid) : [];
-    return [...baseNodes, ...ghostNodes, ...placeholderNodes];
+    return [
+      ...setDraggedAddControlsHidden(sourceNodeId, baseNodes, snapshotEdges, true, false),
+      ...ghostNodes,
+      ...placeholderNodes,
+    ];
   };
 
   const buildDragPreviewEdges = (
@@ -461,7 +491,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     }));
     return [
       ...baseNodes,
-      ...movingNodes,
+      ...setDraggedAddControlsHidden(sourceNodeId, movingNodes, snapshotEdges, true, true),
       ...buildDropPlaceholderNodes(preview.nodes, placeholderIds, invalid),
     ];
   };
@@ -570,10 +600,12 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       const highlightedBranch = draggedNode && (draggedNode.type === 'if' || draggedNode.type === 'loop')
         ? getOperatorBottomBranch(draggedNode.id, stableNodes, edges)
         : { nodeIds: new Set<string>(), edgeIds: new Set<string>() };
+      const mode: WorkflowDropMode = event?.ctrlKey ? 'copy' : 'move';
+      const draggedIds = getDragSubtreeNodeIds(node.id, stableNodes, edges);
       dragSnapshot.current = {
         nodes: stableNodes,
         edges,
-        mode: event?.ctrlKey ? 'copy' : 'move',
+        mode,
         operatorConfigs: new Map(
           stableNodes
             .filter((item) => (item.type === 'if' || item.type === 'loop') && item.data.conditionConfig)
@@ -582,14 +614,16 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
         highlightedNodeIds: highlightedBranch.nodeIds,
         highlightedEdgeIds: highlightedBranch.edgeIds,
       };
+      setNodes((currentNodes) => currentNodes.map((item) => ({
+        ...item,
+        data: {
+          ...item.data,
+          highlighted: highlightedBranch.nodeIds.has(item.id),
+          hideAddControls: draggedIds.has(item.id),
+          dragSourceMoving: mode === 'move' && draggedIds.has(item.id),
+        },
+      })));
       if (highlightedBranch.nodeIds.size > 0) {
-        setNodes((currentNodes) => currentNodes.map((item) => ({
-          ...item,
-          data: {
-            ...item.data,
-            highlighted: highlightedBranch.nodeIds.has(item.id),
-          },
-        })));
         setEdges((currentEdges) => currentEdges.map((item) => ({
           ...item,
           data: {
@@ -622,6 +656,8 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
           data: {
             ...item.data,
             highlighted: snapshot.highlightedNodeIds.has(item.id),
+            hideAddControls: getDragSubtreeNodeIds(node.id, snapshot.nodes, snapshot.edges).has(item.id),
+            dragSourceMoving: getDragSubtreeNodeIds(node.id, snapshot.nodes, snapshot.edges).has(item.id),
           },
         })));
         updateDragPreviewEdges(
