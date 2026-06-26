@@ -6,6 +6,7 @@ import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
 import com.becon.opencelium.backend.exception.SchedulerNotFoundException;
+import com.becon.opencelium.backend.resource.schedule.RunningJob;
 import org.quartz.CronExpression;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
@@ -273,15 +274,21 @@ public class QuartzJobScheduler implements SchedulingStrategy {
     }
 
     @Override
-    public Map<Long, Integer> getRunningJobs() {
+    public List<RunningJob> getRunningJobs() {
         try {
             return quartzScheduler.getCurrentlyExecutingJobs()
                     .stream()
-                    .map(JobExecutionContext::getJobDetail)
-                    .map(JobDetail::getKey)
-                    .filter(k -> k.getName().split("-")[0].matches("-?\\d+(\\.\\d+)?") && k.getName().split("-")[1].matches("-?\\d+(\\.\\d+)?"))
-                    .collect(Collectors.toMap(e ->
-                            Long.valueOf(e.getName().split("-")[0]), e -> Integer.parseInt(e.getName().split("-")[1])));
+                    .map(JobExecutionContext::getMergedJobDataMap)
+                    .map(jdm -> {
+                        QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jdm.get("data");
+
+                        long connectionId = jdm.getLong("connectionId");
+                        int schedulerId = data.getScheduleId();
+                        long execId = jdm.getLong("execId");
+
+                        return new RunningJob(connectionId, schedulerId, execId);
+                    })
+                    .toList();
         } catch (SchedulerException e) {
             throw new RuntimeException(e);
         }

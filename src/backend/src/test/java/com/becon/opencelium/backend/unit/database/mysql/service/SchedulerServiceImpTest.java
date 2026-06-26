@@ -10,9 +10,12 @@ package com.becon.opencelium.backend.unit.database.mysql.service;
 
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
+import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
 import com.becon.opencelium.backend.database.mysql.service.SchedulerServiceImp;
 import com.becon.opencelium.backend.quartz.SchedulingStrategy;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
+import com.becon.opencelium.backend.resource.schedule.RunningJob;
+import com.becon.opencelium.backend.testutil.fixture.RunningJobFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,12 +26,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -54,7 +57,7 @@ class SchedulerServiceImpTest {
     @Captor
     private ArgumentCaptor<Set<Long>> runningIdsCaptor;
 
-    private SchedulerServiceImp schedulerService;
+    private SchedulerService schedulerService;
 
     @BeforeEach
     void setUp() {
@@ -70,23 +73,36 @@ class SchedulerServiceImpTest {
 
     @Test
     void getRunningConnectionIdsReturnsConnectionIdsFromStrategy() {
-        when(schedulingStrategy.getRunningJobs()).thenReturn(Map.of(1L, 10, 2L, 20));
+        // GIVEN
+        var runningJobs = List.of(
+                RunningJobFixture.aRunningJob(1L, 2, 1L),
+                RunningJobFixture.aRunningJob(2L, 3, 2L)
+        );
 
+        when(schedulingStrategy.getRunningJobs()).thenReturn(runningJobs);
+
+        // WHEN
         Set<Long> result = schedulerService.getRunningConnectionIds();
 
+        // THEN
         assertThat(result).containsExactlyInAnyOrder(1L, 2L);
     }
 
     @Test
-    void getRunningConnectionIdsReturnsDefensiveCopy() {
-        Map<Long, Integer> runningJobs = new HashMap<>();
-        runningJobs.put(1L, 10);
+    void getRunningConnectionIdsReturnsUnmodifiableSet() {
+        // GIVEN
+        var runningJobs = new ArrayList<RunningJob>();
+
+        runningJobs.add(RunningJobFixture.aRunningJob(1L, 2, 1L));
+        runningJobs.add(RunningJobFixture.aRunningJob(2L, 3, 2L));
+
         when(schedulingStrategy.getRunningJobs()).thenReturn(runningJobs);
 
+        // WHEN-THEN
         Set<Long> result = schedulerService.getRunningConnectionIds();
-        result.add(99L);
 
-        assertThat(runningJobs).containsOnlyKeys(1L);
+        assertThatThrownBy(() -> result.add(99L))
+                .isInstanceOf(UnsupportedOperationException.class);
     }
 
     // ── filterByTestFlag (List<ConnectionDTO>) ────────────────────────────────
@@ -109,7 +125,7 @@ class SchedulerServiceImpTest {
     void filterByTestFlagPassesRunningIdsWhenTestIsTrue() {
         List<ConnectionDTO> input = List.of(dto("7", "!*test_connection_1700000000000_X"));
         List<ConnectionDTO> delegated = List.of();
-        when(schedulingStrategy.getRunningJobs()).thenReturn(Map.of(7L, 1));
+        when(schedulingStrategy.getRunningJobs()).thenReturn(List.of(RunningJobFixture.aRunningJob(7L, 2, 1L)));
         when(connectionService.filterTestConnections(eq(input), eq(true), any())).thenReturn(delegated);
 
         List<ConnectionDTO> result = schedulerService.filterByTestFlag(input, true);
@@ -125,7 +141,7 @@ class SchedulerServiceImpTest {
     void filterEntitiesByTestFlagPassesRunningIdsWhenTestIsTrue() {
         List<Connection> input = List.of(entity(7L, "!*test_connection_1700000000000_X"));
         List<Connection> delegated = List.of();
-        when(schedulingStrategy.getRunningJobs()).thenReturn(Map.of(7L, 1));
+        when(schedulingStrategy.getRunningJobs()).thenReturn(List.of(RunningJobFixture.aRunningJob(7L, 2, 1L)));
         when(connectionService.filterTestConnectionEntities(eq(input), eq(true), any())).thenReturn(delegated);
 
         List<Connection> result = schedulerService.filterEntitiesByTestFlag(input, true);
