@@ -8,6 +8,8 @@ import { LegacyResponseFieldSelect } from './LegacyResponseFieldSelect';
 import { webhookSnippet } from './bodyWebhook';
 import { Radio } from '@shared/ui/primitives/Radio';
 import { ConnectorIcon } from '@entities/connector/ui/ConnectorIcon';
+import { MethodColorDot } from '../../MethodColorDot';
+import { getDuplicateMethodIndexByColor } from '../../../utils/methodColor';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import './bodyLegacy.css';
 
@@ -72,6 +74,7 @@ export function LegacyBodyReferenceGenerator({ connection, currentMethod, onAppl
   }, [connection, currentMethod.index, currentMethod.id]);
 
   const selectedMethod = methods.find((method) => method.id === methodId);
+  const duplicateIndexByColor = useMemo(() => getDuplicateMethodIndexByColor(methods), [methods]);
   const currentMethodIterators = useMemo(
     () => getIteratorsForMethod(connection, currentMethod),
     [connection, currentMethod],
@@ -124,15 +127,20 @@ export function LegacyBodyReferenceGenerator({ connection, currentMethod, onAppl
               value: method.id,
               connectorTitle: getMethodConnectorTitle(method),
               connectorIcon: getMethodConnectorIcon(method),
+              color: method.color,
+              dupIndex: method.color ? duplicateIndexByColor.get(method.color.toLowerCase()) : undefined,
             }))}
             optionRender={(option) => {
-              const data = option.data as { connectorTitle?: string; connectorIcon?: string | null };
+              const data = option.data as { connectorTitle?: string; connectorIcon?: string | null; color?: string; dupIndex?: number };
               return (
-                <span style={{ display: 'flex', width: '100%', alignItems: 'center', gap: 8 }}>
-                  <ConnectorIcon icon={data.connectorIcon} size={18} style={{ flexShrink: 0 }} />
-                  <span style={{ flex: '1 1 auto', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{option.label}</span>
-                  <span title={data.connectorTitle} style={{ flex: '0 0 auto', maxWidth: '45%', paddingLeft: 12, color: 'var(--color-text-secondary)', fontSize: 11, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {data.connectorTitle}
+                <span style={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+                    <MethodColorDot color={data.color} index={data.dupIndex} />
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{option.label}</span>
+                  </span>
+                  <span title={data.connectorTitle} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, flex: '0 0 auto', maxWidth: '50%', color: 'var(--color-text-secondary)', fontSize: 11, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <ConnectorIcon icon={data.connectorIcon} size={16} style={{ flexShrink: 0 }} />
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{data.connectorTitle}</span>
                   </span>
                 </span>
               );

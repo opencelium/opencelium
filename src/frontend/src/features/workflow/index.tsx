@@ -1,6 +1,6 @@
 import { Background } from '@xyflow/react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Button, Input, Modal, Select, message } from 'antd';
 import { Loading } from '@shared/ui/primitives/Loading/Loading';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
@@ -12,6 +12,7 @@ import { WorkflowHeader } from './components/WorkflowHeader';
 import { WorkflowLogs } from './components/WorkflowLogs';
 import { WorkflowSidebar } from './components/WorkflowSidebar';
 import { HistoryPanel } from './components/header/HistoryPanel';
+import { ShortcutsDialog } from './components/header/ShortcutsDialog';
 import { ConditionBuilderDialog } from './components/condition-builder/ConditionBuilder';
 import { MethodConfigDialog } from './components/request-editor/MethodConfigDialog';
 import { buildLegacyConnection } from './components/request-editor/legacyAdapter';
@@ -97,7 +98,12 @@ type Template = {
 };
 
 const CONNECTION_TEMPLATE_VERSION = '5.0';
+const EMPTY_NAME_LABEL = '[Empty Name]';
 const EMPTY_DESCRIPTION_LABEL = '[Empty Description]';
+
+const isHeaderNameEmpty = (title: string) => !title.trim() || title.trim() === EMPTY_NAME_LABEL;
+const isHeaderDescriptionEmpty = (description: string) =>
+  !description.trim() || description.trim() === EMPTY_DESCRIPTION_LABEL;
 
 const toDisplayDescription = (description?: string) =>
   description && description.trim() ? description : EMPTY_DESCRIPTION_LABEL;
@@ -187,6 +193,7 @@ const triggerJsonDownload = (filename: string, payload: unknown) => {
 
 export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const { connectionId } = useParams<{ connectionId: string }>();
+  const navigate = useNavigate();
   const { t: tEntities } = useI18n('entities');
   const { t } = useI18n('workflow');
   const confirm = useConfirm();
@@ -240,6 +247,8 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>();
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
   const [isApplyingTemplate, setIsApplyingTemplate] = useState(false);
+  const [isDownloadingTemplate, setIsDownloadingTemplate] = useState(false);
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const hydratedNodes = useMemo(
     () => hydrateNodesWithOperationResponses(workflow.nodes, connectors),
     [connectors, workflow.nodes],
@@ -407,6 +416,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
 
   const downloadConnectionTemplate = async () => {
     if (!activeConnectionId) return;
+    setIsDownloadingTemplate(true);
     try {
       const template = (await apiExecutor({
         url: `/template/connection/${activeConnectionId}`,
@@ -418,6 +428,8 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     } catch (err) {
       console.error(err);
       message.error(tEntities('connection.list.downloadTemplate.error'));
+    } finally {
+      setIsDownloadingTemplate(false);
     }
   };
 
@@ -512,6 +524,15 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       const state = mapConnectionToWorkflowState(selectedTemplate.connection);
       workflow.setWorkflowGraph(state.nodes, state.edges, state.viewport, { centerStart: true });
       setLoadedFieldBindings(state.fieldBindings);
+      const templateName = selectedTemplate.name?.trim();
+      const templateDescription = selectedTemplate.description?.trim();
+      setHeaderState((prev) => ({
+        title: isHeaderNameEmpty(prev.title) && templateName ? templateName : prev.title,
+        description:
+          isHeaderDescriptionEmpty(prev.description) && templateDescription
+            ? toDisplayDescription(templateDescription)
+            : prev.description,
+      }));
       setLoadTemplateDialogOpen(false);
       setSelectedTemplateId(undefined);
       message.success(`Template "${selectedTemplate.name ?? selectedTemplate.templateId}" loaded`);
@@ -530,6 +551,10 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       openSaveTemplateDialog();
     } else if (item.id === 'load-template') {
       void openLoadTemplateDialog();
+    } else if (item.id === 'shortcuts') {
+      setIsShortcutsOpen(true);
+    } else if (item.id === 'exit') {
+      navigate('/workflow');
     }
   };
 
@@ -581,6 +606,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         initialDescription={headerState.description}
         onChange={setHeaderState}
         onMenuItemSelect={handleHeaderMenuSelect}
+        menuLoadingItemId={isDownloadingTemplate ? 'download-template' : null}
         validateTitle={validateTitle}
         onSave={handleSave}
         saveDisabled={isLoading || !hasConnectionChanges}
@@ -662,6 +688,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
             {t('template.loadWarning')}
           </div>
           <Select
+            autoFocus
             loading={isLoadingTemplates}
             value={selectedTemplateId}
             placeholder={t('template.selectPlaceholder')}
@@ -681,6 +708,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           />
         </div>
       </Modal>
+      <ShortcutsDialog open={isShortcutsOpen} onClose={() => setIsShortcutsOpen(false)} />
       <div className="workflowMain">
         {isLoading ? (
           <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

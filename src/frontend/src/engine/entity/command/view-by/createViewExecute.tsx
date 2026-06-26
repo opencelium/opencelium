@@ -26,7 +26,7 @@ export const createViewExecute = ({ def, config, by }) => {
                 : `/${def.name}/view/${by.field}/${encoded}`);
 
         ctx.setLoading(true);
-        const { mode } = useCommandPaletteUIStore.getState();
+        const mode = useCommandPaletteUIStore.getState().resolveMode();
 
         try {
             const result = await store.dispatch(

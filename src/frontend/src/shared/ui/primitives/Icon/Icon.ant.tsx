@@ -34,7 +34,7 @@ import {RiListSettingsLine, RiListSettingsFill  } from "react-icons/ri";
 import {MdKeyboardCommandKey, MdContentCopy, MdPlayArrow, MdStop, MdUnfoldMore, MdUnfoldLess, MdToggleOn, MdToggleOff} from "react-icons/md";
 import {TbWebhook} from "react-icons/tb";
 import {BsJournalText} from "react-icons/bs";
-import {GoArrowSwitch} from "react-icons/go";
+import {GoArrowSwitch, GoWorkflow} from "react-icons/go";
 
 const iconMap = {
     check: CheckOutlined,
@@ -79,6 +79,7 @@ const iconMap = {
     maximize: FullscreenOutlined,
     minimize: FullscreenExitOutlined,
     'arrow-switch': GoArrowSwitch,
+    workflow: GoWorkflow,
 };
 
 export const AntIcon: IconComponent = ({

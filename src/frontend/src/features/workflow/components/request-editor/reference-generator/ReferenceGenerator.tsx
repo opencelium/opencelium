@@ -5,6 +5,7 @@ import type { Connection, MethodWithId } from '../../../types/connection';
 import {
 	buildReferenceValue,
 	getIteratorsForMethod,
+	getMethodConnectorIcon,
 	getMethodConnectorTitle,
 	getReferenceOptions,
 	isExpandableReferencePath,
@@ -12,6 +13,9 @@ import {
 } from '../body-editor/requestReferenceOptions';
 import { Radio } from '@shared/ui/primitives/Radio';
 import { Select } from '@shared/ui/primitives/Select';
+import { ConnectorIcon } from '@entities/connector/ui/ConnectorIcon';
+import { MethodColorDot } from '../../MethodColorDot';
+import { getDuplicateMethodIndexByColor } from '../../../utils/methodColor';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import '../body-editor/bodyLegacy.css';
 
@@ -157,29 +161,46 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 	const getMethodLabel = (m: MethodWithId) =>
 		String(m.label || m.name || (m as any).index || m.id);
 
-	const methodOptions = useMemo(
-		() =>
-			methods.map((m) => ({
+	const methodOptions = useMemo(() => {
+			const duplicateIndexByColor = getDuplicateMethodIndexByColor(methods);
+			return methods.map((m) => ({
 				value: m.id,
 				searchLabel: getMethodLabel(m),
 				label: (
-					<span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+					<span
+						style={{
+							display: 'flex',
+							alignItems: 'center',
+							justifyContent: 'space-between',
+							gap: 12,
+							width: '100%',
+						}}
+					>
+						<span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+							<MethodColorDot
+								color={m.color}
+								index={m.color ? duplicateIndexByColor.get(m.color.toLowerCase()) : undefined}
+							/>
+							<span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+								{getMethodLabel(m)}
+							</span>
+						</span>
 						<span
 							style={{
-								display: 'inline-block',
-								width: 10,
-								height: 10,
-								borderRadius: '50%',
-								backgroundColor: m.color,
+								display: 'inline-flex',
+								alignItems: 'center',
+								gap: 6,
 								flexShrink: 0,
+								color: 'var(--color-text-secondary)',
 							}}
-						/>
-						<span>{getMethodLabel(m)}</span>
+						>
+							<ConnectorIcon icon={getMethodConnectorIcon(m)} size={16} style={{ flexShrink: 0 }} />
+							<span style={{ fontSize: 12 }}>{getMethodConnectorTitle(m)}</span>
+						</span>
 					</span>
 				),
-			})),
-		[methods],
-	);
+			}));
+	}, [methods]);
 
 	const handleMethodChange = (id: string) => {
 		setSelectedMethodId(id);

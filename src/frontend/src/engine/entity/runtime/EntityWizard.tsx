@@ -107,7 +107,7 @@ export function EntityWizard<EntityFormValues>({
     }, [form, liveUpdate, onSubmit])
 
     const WizardImageComponent = entity.wizard?.renderImage
-    const wizardImage = WizardImageComponent ? <WizardImageComponent /> : entity.wizard?.image
+    const wizardImage = WizardImageComponent ? <WizardImageComponent mode={mode} /> : entity.wizard?.image
 
     const constraints = buildConstraintsFromSchema(schema, entity)
 
@@ -142,6 +142,8 @@ export function EntityWizard<EntityFormValues>({
                 subheader: step.subheader,
                 info: step.info,
                 remote: step.remote,
+                actionButtons: step.actionButtons,
+                confirmOnRemoteFailure: step.confirmOnRemoteFailure,
                 actions: step.actions,
                 render: () => (
                     <>

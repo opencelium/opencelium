@@ -92,6 +92,9 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 checkLicense: string
                 updateSystemConfig: string
                 changeTheme: string
+                uploadTemplate: string
+                uploadInvoker: string
+                systemCheck: string
             }
             footer: {
                 select: string
@@ -116,6 +119,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             switchToAdminMenu: string
             switchToMainMenu: string
             profile: string
+            createWorkflow: string
         }
     },
 }

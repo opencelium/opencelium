@@ -10,6 +10,15 @@ export interface ConfirmOptions {
 
     confirmVariant?: ButtonVariant;
     autoFocusConfirm?: boolean;
+
+    /**
+     * Action to run when the user confirms. While it is in flight the confirm
+     * button shows a spinner and the dialog stays open (cancel/close disabled).
+     * On success the dialog closes and `confirm()` resolves `true`; if it throws,
+     * the dialog closes and `confirm()` resolves `false` so callers skip their
+     * success path (the failure itself is surfaced by the action, e.g. errorBus).
+     */
+    onConfirm?: () => Promise<void> | void;
 }
 
 export interface ConfirmContextValue {

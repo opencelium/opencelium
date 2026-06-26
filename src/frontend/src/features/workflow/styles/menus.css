@@ -9,6 +9,10 @@
 }
 
 .primaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   background: var(--color-action-primary);
   color: var(--color-text-on-action);
   border-color: var(--color-action-primary);
@@ -27,6 +31,11 @@
   justify-content: center;
   padding: 0 10px;
   color: var(--color-action-primary);
+}
+
+.iconButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .headerMenu,
@@ -78,6 +87,10 @@
 }
 
 .headerMenuItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   padding: 8px 10px;
   border-radius: 8px;
   font-size: 15px;
@@ -85,9 +98,30 @@
   color: var(--color-text-primary);
 }
 
-.headerMenuItem:hover,
+.headerMenuItem:hover:not(:disabled),
 .contextMenuItem:hover {
   background: var(--color-background-hover);
+}
+
+.headerMenuItem:disabled {
+  cursor: default;
+}
+
+.headerMenuItem:disabled > span:first-child {
+  opacity: 0.5;
+}
+
+.headerMenuBadge {
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--color-background-hover);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
 }
 
 .contextMenuHeader {

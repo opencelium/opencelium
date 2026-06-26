@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { message } from 'antd';
 import { CloseOutlined } from '@ant-design/icons';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import { copyToClipboard } from '@shared/utils/copyToClipboard';
-import { HistoryConfirmDialog } from './HistoryConfirmDialog';
+import { Empty } from '@shared/ui/primitives/Empty';
 import { HistoryTimelineRow } from './HistoryTimelineRow';
 import { useHistoryPanelState } from './useHistoryPanelState';
 import type { HistoryVersionItem } from '../../types/history.types';
@@ -24,6 +26,8 @@ export function HistoryPanel({ open, items, onClose, onDeleteVersion, onDownload
 	const state = useHistoryPanelState({ open, items, onClose, selectedId, onSelectedIdChange });
 	const { t: tEntities } = useI18n('entities');
 	const { t } = useI18n('workflow');
+	const confirm = useConfirm();
+	const [downloadingSnapshotId, setDownloadingSnapshotId] = useState<string | null>(null);
 
 	const saveComment = async (id: string) => {
 		const item = state.items.find((current) => current.id === id);
@@ -43,30 +47,35 @@ export function HistoryPanel({ open, items, onClose, onDeleteVersion, onDownload
 		}
 	};
 
-	const deleteItem = async () => {
-		if (!state.confirmId) return;
-		const item = state.items.find((current) => current.id === state.confirmId);
+	const requestDelete = async (id: string) => {
+		const item = state.items.find((current) => current.id === id);
 		if (!item) {
-			state.setConfirmId(null);
 			state.setMenuId(null);
 			return;
 		}
 		if (item.current) {
 			message.warning(tEntities('connection.messages.history.activeDeleteBlocked'));
-			state.setConfirmId(null);
 			state.setMenuId(null);
 			return;
 		}
-		const wasSelected = item.id === state.selectedId;
-		const nextItems = state.items.filter((current) => current.id !== item.id);
-		await onDeleteVersion?.(item.snapshotId);
-		state.setItems(nextItems);
-		if (wasSelected) {
-			const currentVersion = nextItems.find((current) => current.current) ?? nextItems[0];
-			state.setSelectedId(currentVersion?.id ?? null);
-			if (currentVersion) await onSelectVersion?.(currentVersion.snapshotId);
-		}
-		state.setConfirmId(null);
+		const ok = await confirm({
+			title: t('history.deleteVersion.title'),
+			message: t('history.deleteVersion.message'),
+			confirmText: t('history.deleteVersion.confirm'),
+			cancelText: t('actions.cancel'),
+			onConfirm: async () => {
+				const wasSelected = item.id === state.selectedId;
+				const nextItems = state.items.filter((current) => current.id !== item.id);
+				await onDeleteVersion?.(item.snapshotId);
+				state.setItems(nextItems);
+				if (wasSelected) {
+					const currentVersion = nextItems.find((current) => current.current) ?? nextItems[0];
+					state.setSelectedId(currentVersion?.id ?? null);
+					if (currentVersion) await onSelectVersion?.(currentVersion.snapshotId);
+				}
+			},
+		});
+		if (!ok) return;
 		state.setMenuId(null);
 		message.success(t('messages.deleteVersionSuccess'));
 	};
@@ -91,25 +100,29 @@ export function HistoryPanel({ open, items, onClose, onDeleteVersion, onDownload
 	const selectVersion = async (id: string) => {
 		if (id === state.selectedId) return;
 		if (hasUnsavedChanges) {
-			state.setPendingSelectId(id);
+			// The version load runs inside onConfirm, so the confirm button shows
+			// its progress; nothing left to do once the dialog settles.
+			await confirm({
+				title: t('history.unsavedChanges.title'),
+				message: tEntities('connection.messages.history.unsavedVersionSwitch'),
+				confirmText: t('history.unsavedChanges.confirm'),
+				cancelText: t('actions.cancel'),
+				onConfirm: () => applySelectedVersion(id),
+			});
 			return;
 		}
 		await applySelectedVersion(id);
 	};
 
-	const confirmSelectVersion = async () => {
-		if (!state.pendingSelectId) return;
-		const nextId = state.pendingSelectId;
-		state.setPendingSelectId(null);
-		await applySelectedVersion(nextId);
-	};
-
 	const downloadTemplate = async (snapshotId: string) => {
+		setDownloadingSnapshotId(snapshotId);
 		try {
 			await onDownloadTemplate?.(snapshotId);
 			state.setMenuId(null);
 		} catch {
 			message.error(t('messages.downloadTemplateFailed'));
+		} finally {
+			setDownloadingSnapshotId(null);
 		}
 	};
 
@@ -141,6 +154,7 @@ export function HistoryPanel({ open, items, onClose, onDeleteVersion, onDownload
 										row={row}
 										selectedId={state.selectedId}
 										activeId={state.activeId}
+										downloadingSnapshotId={downloadingSnapshotId}
 										hoveredCommentId={state.hoveredCommentId}
 										expandedCommentId={state.expandedCommentId}
 										commentValue={
@@ -182,36 +196,22 @@ export function HistoryPanel({ open, items, onClose, onDeleteVersion, onDownload
 											if (copied) message.success(t('messages.copySnapshotIdSuccess'));
 										}}
 										onDownloadTemplate={downloadTemplate}
-										onDelete={state.setConfirmId}
+										onDelete={requestDelete}
 										setCommentRef={(id, element) => {
 											state.commentRefs.current[id] = element;
 										}}
 									/>
 								))}
 							</div>
-						) : null}
+						) : (
+							<Empty
+								className='historyEmpty'
+								description={t('history.empty')}
+							/>
+						)}
 					</div>
 				</div>
 			</aside>
-			{state.confirmId ? (
-				<HistoryConfirmDialog
-					title={t('history.deleteVersion.title')}
-					message={t('history.deleteVersion.message')}
-					confirmText={t('history.deleteVersion.confirm')}
-					confirmVariant='danger'
-					onCancel={() => state.setConfirmId(null)}
-					onConfirm={deleteItem}
-				/>
-			) : null}
-			{state.pendingSelectId ? (
-				<HistoryConfirmDialog
-					title={t('history.unsavedChanges.title')}
-					message={tEntities('connection.messages.history.unsavedVersionSwitch')}
-					confirmText={t('history.unsavedChanges.confirm')}
-					onCancel={() => state.setPendingSelectId(null)}
-					onConfirm={confirmSelectVersion}
-				/>
-			) : null}
 		</>
 	);
 }

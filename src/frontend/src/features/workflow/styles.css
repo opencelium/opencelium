@@ -1,6 +1,7 @@
 @import './styles/base.css';
 @import './styles/header.css';
 @import './styles/header-dialog.css';
+@import './styles/shortcuts.css';
 @import './styles/menus.css';
 @import './styles/drawers.css';
 @import './styles/history.css';

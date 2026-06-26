@@ -184,37 +184,37 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
     const handleBulkDelete = async () => {
         if (!bulkConfig || !entity.api || selectedIds.length === 0) return;
 
+        const url = bulkConfig.url ?? `${entity.api.baseUrl}/list/delete`;
+        const body = bulkConfig.buildPayload
+            ? bulkConfig.buildPayload(selectedIds)
+            : { identifiers: selectedIds };
+
         const confirmed = await confirm({
             title: tCommon('list.confirmDelete.title'),
             message: tCommon('list.confirmDelete.bulkMessage', {
                 count: selectedIds.length,
                 name: entity.name,
             }),
+            onConfirm: async () => {
+                setPendingDeleteIds(selectedIds);
+                try {
+                    await apiExecutor({
+                        url,
+                        method: bulkConfig.method ?? 'PUT',
+                        body,
+                    });
+                    await bulkConfig.afterDelete?.(selectedIds);
+                    setRowSelection({});
+                } finally {
+                    setPendingDeleteIds([]);
+                }
+            },
         });
         if (!confirmed) return;
 
-        const url = bulkConfig.url ?? `${entity.api.baseUrl}/list/delete`;
-        const body = bulkConfig.buildPayload
-            ? bulkConfig.buildPayload(selectedIds)
-            : { identifiers: selectedIds };
-
-        setPendingDeleteIds(selectedIds);
-        try {
-            await apiExecutor({
-                url,
-                method: bulkConfig.method ?? 'PUT',
-                body,
-            });
-            await bulkConfig.afterDelete?.(selectedIds);
-            message.success(
-                tCommon('list.deleteSelectedSuccess', { count: selectedIds.length }),
-            );
-            setRowSelection({});
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setPendingDeleteIds([]);
-        }
+        message.success(
+            tCommon('list.deleteSelectedSuccess', { count: selectedIds.length }),
+        );
     };
 
     const titleText = entity.list?.titleKey

@@ -23,8 +23,7 @@
 }
 
 .historyCardHeader,
-.historySaveRow,
-.historyConfirmActions {
+.historySaveRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -43,7 +42,6 @@
 
 .historyDotsButton,
 .historySaveButton,
-.historyDangerButton,
 .historyMenuItem {
   cursor: pointer;
 }

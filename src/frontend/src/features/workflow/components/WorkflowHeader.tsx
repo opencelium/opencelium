@@ -6,6 +6,7 @@ import { HeaderSaveDialog } from './header/HeaderSaveDialog';
 import { headerMenuItems } from './header/headerMenuItems';
 import type { WorkflowHeaderMenuItem } from '../types/workflow.types';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { CommandPalette } from '@widgets/CommandPalette/CommandPalette';
 
 type Props = {
 	initialName?: string;
@@ -14,6 +15,7 @@ type Props = {
 	onSave: (values: { title: string; description: string; comment: string }) => void | Promise<void>;
 	onChange?: (values: { title: string; description: string }) => void;
 	onMenuItemSelect?: (item: WorkflowHeaderMenuItem) => void;
+	menuLoadingItemId?: string | null;
 	/** Async title check; returns a translated error message to show inline, or null when the title is acceptable. */
 	validateTitle?: (title: string) => Promise<string | null>;
 	saveDisabled?: boolean;
@@ -23,7 +25,7 @@ type Props = {
 type EditField = 'name' | 'description' | null;
 const EMPTY_NAME_LABEL = '[Empty Name]';
 
-export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initialDescription = 'This interface delivering data into znuny and creates a ticket if the specified object is missing.', onOpenHistory, onSave, onChange, onMenuItemSelect, validateTitle, saveDisabled = false, readOnly = false, loading = false }: Props) {
+export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initialDescription = 'This interface delivering data into znuny and creates a ticket if the specified object is missing.', onOpenHistory, onSave, onChange, onMenuItemSelect, menuLoadingItemId, validateTitle, saveDisabled = false, readOnly = false, loading = false }: Props) {
 	const { t } = useI18n('workflow');
 	const [name, setName] = useState(initialName);
 	const [description, setDescription] = useState(initialDescription);
@@ -204,6 +206,7 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 				</div>
 
 				<div className='headerActions'>
+					<CommandPalette collapsible forceMode="modal" />
 					{!readOnly && (
 						<button
 							className='primaryButton headerPrimaryButton'
@@ -240,6 +243,7 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 							items={headerMenuItems}
 							onClose={() => setMenuOpen(false)}
 							onSelect={onMenuItemSelect}
+							loadingItemId={menuLoadingItemId}
 						/>
 					</div>
 				</div>

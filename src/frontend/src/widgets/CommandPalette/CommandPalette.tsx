@@ -12,7 +12,9 @@ import {CommandPalettePortal} from "@widgets/CommandPalette/CommanPalettePortal.
 import {useAuth} from "@features/auth/useAuth.ts";
 import {Loading} from "@shared/ui/primitives/Loading/Loading.tsx";
 import {useLayoutStore} from "@app/layouts/AppLayout/layout.store.ts";
+import {useCommandPaletteUIStore, type CommandRenderMode} from "@widgets/CommandPalette/command-palette.store.ts";
 import {openModalStore} from "@app/layouts/AppLayout/GlobalModal/GlobalModal.tsx";
+import {useModalStore} from "@app/layouts/AppLayout/GlobalModal/global-modal.store.ts";
 import {useNavigate} from "react-router-dom";
 import HotKey from "@widgets/CommandPalette/HotKey.tsx";
 import {Icon} from "@shared/ui/primitives/Icon";
@@ -32,7 +34,17 @@ const orderGroups = (groups: string[]): string[] => {
     return [...known, ...unknown];
 };
 
-export const CommandPalette = () => {
+type CommandPaletteProps = {
+    /** Render as a compact icon + hotkey pill that animates open to the full
+     * input on focus. Used where horizontal space is contested (workflow header). */
+    collapsible?: boolean;
+    /** Force a render mode for every command regardless of the user's UI setting.
+     * The workflow editor passes 'modal' so commands open as dialogs over the
+     * canvas instead of navigating away, opening a new tab, or rendering inline. */
+    forceMode?: CommandRenderMode;
+};
+
+export const CommandPalette = ({ collapsible = false, forceMode }: CommandPaletteProps = {}) => {
     const {isMobile} = useBreakpoints();
     const { showCommandContent, toggleCommandContent } = useLayoutStore();
     const {t: tCommon} = useI18n('common');
@@ -66,6 +78,12 @@ export const CommandPalette = () => {
         await executeAST(ast, {
             setLoading: (loading) => setIsLoading(loading),
             render: (node) => {
+                // When a mode is forced to 'modal', commands that hard-code inline
+                // rendering (ignoring the store mode) must still open as a dialog.
+                if (forceMode === 'modal') {
+                    openModalStore(node);
+                    return;
+                }
                 setContentKey(prev => prev + 1);
                 setContent(node);
             },
@@ -79,10 +97,10 @@ export const CommandPalette = () => {
                 window.open(url, '_blank');
             },
 
-            confirm: async (message) => {
-                return await confirmAction({
-                    message,
-                });
+            confirm: async (options) => {
+                return await confirmAction(
+                    typeof options === 'string' ? { message: options } : options,
+                );
             },
 
             notify: (message) => {
@@ -150,6 +168,14 @@ export const CommandPalette = () => {
         };
     }, []);
 
+    // Apply this palette's forced render mode for as long as it is mounted, then
+    // restore the user's preference on unmount.
+    useEffect(() => {
+        if (!forceMode) return;
+        useCommandPaletteUIStore.getState().setModeOverride(forceMode);
+        return () => useCommandPaletteUIStore.getState().setModeOverride(null);
+    }, [forceMode]);
+
     const handleSelect = async (suggestion: string) => {
         changeSourceRef.current = 'select';
         const rawTokens = value.trim().length === 0
@@ -210,16 +236,36 @@ export const CommandPalette = () => {
 
     const hasItems = displayGroups.some(g => g.items.length > 0);
 
+    // Collapsed only while idle: focus or any typed text expands it.
+    const isCollapsed = collapsible && !isActive && value.trim().length === 0;
 
     return (
-        <div className="cmdk-palette-container">
-            <div className="cmdk-container" style={{justifyContent: isMobile ? 'left' : 'center'}}>
+        <div className={`cmdk-palette-container${collapsible ? ' cmdk-collapsible' : ''}${isCollapsed ? ' cmdk-collapsed' : ''}`}>
+            <div
+                className="cmdk-container"
+                style={{justifyContent: collapsible ? 'flex-start' : isMobile ? 'left' : 'center'}}
+                onMouseDown={isCollapsed ? (e) => { e.preventDefault(); inputRef.current?.focus(); setIsActive(true); } : undefined}
+            >
                 <Command shouldFilter={false} value={highlighted} onValueChange={setHighlighted} style={{position: 'relative', paddingLeft: 20, paddingRight: 80}}>
                     <Command.Input
                         ref={inputRef}
                         data-testid="command-palette-input"
                         onFocus={() => setIsActive(true)}
-                        onBlur={() => setIsActive(false)}
+                        onBlur={() => {
+                            // Switching browser tabs/windows blurs the input too; ignore
+                            // it so the typed value and open state survive returning.
+                            if (!document.hasFocus()) return;
+                            setIsActive(false);
+                            // Clicking away should close the collapsible pill even with
+                            // typed text — clear it so it collapses back to icon + hotkey.
+                            // But a command opening a modal also blurs the input: keep the
+                            // value (and the expanded pill) so it's intact when the modal
+                            // closes and focus returns.
+                            if (collapsible && !useModalStore.getState().isOpen) {
+                                changeSourceRef.current = 'input';
+                                setValue('');
+                            }
+                        }}
                         value={value}
                         onValueChange={(v) => {
                             changeSourceRef.current = 'input';

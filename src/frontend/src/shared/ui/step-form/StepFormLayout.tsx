@@ -3,8 +3,10 @@ import { StepContent } from "./StepContent"
 import { StepFormContext } from "./context"
 import type {
     GenericStepFormProps,
+    StepActionDefinition,
     StepContext, StepDefinition,
 } from "./types"
+import type {StepRemoteProps} from "@shared/ui/form/FormControl/FormControl.type.ts";
 import {StepHeader} from "@shared/ui/step-form/StepHeader.tsx";
 import {SuccessState} from "@shared/ui/step-form/SuccessState.tsx";
 import {Steps} from "@shared/ui/primitives/Steps";
@@ -14,6 +16,7 @@ import {executeStepRemote} from "@/engine/entity/stepResolver.ts";
 import {apiExecutor} from "@shared/api/apiExecutor.ts";
 import {message} from "antd";
 import {useI18n} from "@shared/i18n/hooks/useI18n.ts";
+import {useConfirm} from "@shared/ui/confirm/ConfirmDialogContext.tsx";
 
 export function StepFormLayout({
     header,
@@ -32,11 +35,13 @@ export function StepFormLayout({
 }: GenericStepFormProps) {
     const {isTabletOrMobile} = useBreakpoints();
     const {t: tEntities} = useI18n('entities')
+    const confirm = useConfirm()
     const ref = useRef(null);
     const [currentStep, setCurrentStep] = useState(0)
 
     const [isSuccess, setIsSuccess] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [runningActionId, setRunningActionId] = useState<string | null>(null)
     const items = useMemo(() => {
         return steps.map((s, key) => ({
             ...s,
@@ -67,7 +72,17 @@ export function StepFormLayout({
                 if (isValid) {
                     const remoteResult = await validateRemote(step);
                     if (typeof remoteResult !== 'undefined' && !remoteResult.success) {
-                        return;
+                        const confirmOnFailure = step.confirmOnRemoteFailure
+                        // Without an explicit confirm-on-failure config, a failed remote
+                        // blocks the submit (the historical behavior for every other step).
+                        if (!confirmOnFailure) {
+                            return;
+                        }
+                        const proceed = await confirm({
+                            title: tEntities(confirmOnFailure.title as any),
+                            message: tEntities(confirmOnFailure.message as any),
+                        })
+                        if (!proceed) return
                     }
                     setIsSubmitting(true)
                     await onSubmit?.()
@@ -101,19 +116,41 @@ export function StepFormLayout({
             setCurrentStep((s) => s + 1)
         }
     }
+    const runRemoteConfig = async (remote: StepRemoteProps) => {
+        if (remote.shouldSkip?.(form.getValues())) {
+            return {success: true, skipped: true}
+        }
+        return await executeStepRemote({
+            remote,
+            values: form.getValues(),
+            apiExecutor: apiExecutor,
+        })
+    }
     const validateRemote = async (step: StepDefinition) => {
-        if (step.remote) {
-            if (step.remote.shouldSkip?.()) {
-                return {success: true}
+        if (!step.remote) return undefined
+        setIsSubmitting(true)
+        const result = await runRemoteConfig(step.remote)
+        setIsSubmitting(false)
+        return result
+    }
+    const runAction = async (action: StepActionDefinition) => {
+        const step = steps[currentStep]
+        // Validate the step's fields (e.g. required inputs) before firing the request —
+        // a request against incomplete data is rarely meaningful. Opt out per-action.
+        if (action.validateBeforeRun !== false && step.validate) {
+            const isValid = await step.validate()
+            if (!isValid) return
+        }
+        setRunningActionId(action.id)
+        try {
+            const result = await runRemoteConfig(action.remote)
+            // A skipped remote (shouldSkip) and a failure (already surfaced by the remote's
+            // handleResponse) both stay silent here; only a genuine pass earns the toast.
+            if (result?.success && !(result as { skipped?: boolean }).skipped && action.successMessage) {
+                message.success(tEntities(action.successMessage as any))
             }
-            setIsSubmitting(true)
-            const result = await executeStepRemote({
-                remote: step.remote,
-                values: form.getValues(),
-                apiExecutor: apiExecutor,
-            })
-            setIsSubmitting(false)
-            return result;
+        } finally {
+            setRunningActionId(null)
         }
     }
     const ctx: StepContext = {
@@ -173,7 +210,9 @@ export function StepFormLayout({
                                 readOnly={readOnly}
                                 steps={steps}
                                 onSubmit={hideSubmit ? undefined : handleSubmit}
+                                onRunAction={runAction}
                                 isSubmitting={isSubmitting}
+                                runningActionId={runningActionId}
                             />
                         )}
                     </div>

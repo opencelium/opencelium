@@ -12,6 +12,14 @@
   padding-right: 3px;
 }
 
+.historyEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
 .historyTimeline {
   position: relative;
   overflow: visible;
@@ -59,8 +67,7 @@
 }
 
 .historyDateLabel,
-.historyTimeLabel,
-.historyConfirmDialog span {
+.historyTimeLabel {
   color: var(--color-text-secondary);
   font-size: 13px;
 }

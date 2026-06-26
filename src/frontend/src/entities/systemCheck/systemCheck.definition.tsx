@@ -1,11 +1,28 @@
 import React from 'react'
 import type { EntityDefinition } from '@/engine/entity/EntityDefinition'
+import type { CommandExecutionContext, CommandNode } from '@shared/command/types'
+import { GenericEntityList } from '@/engine/entity/runtime/genererics/GenericEntityList'
+import { useCommandPaletteUIStore } from '@widgets/CommandPalette/command-palette.store'
 import { i18n } from '@shared/i18n/config/i18n'
 import en from '@entities/systemCheck/i18n/en.json'
 import de from '@entities/systemCheck/i18n/de.json'
 import type { HealthStatus, SystemHealth } from '@entities/updateAssistant/model/types'
 
 const baseKey = 'system-check'
+const SYSTEM_CHECK_URL = `/${baseKey}`
+
+/**
+ * Opens the system-check page honouring the command-palette UI mode, exactly like
+ * the generated entity-list command: navigate (route), open a tab (new-tab), open a
+ * dialog (modal), or render inline in the palette (default).
+ */
+const openSystemCheck = (ctx: CommandExecutionContext) => {
+    const mode = useCommandPaletteUIStore.getState().resolveMode()
+    if (mode === 'route') return ctx.navigate(SYSTEM_CHECK_URL)
+    if (mode === 'new-tab') return ctx.openNewTab(SYSTEM_CHECK_URL)
+    if (mode === 'modal') return ctx.openModal(<GenericEntityList entityName={baseKey} />)
+    return ctx.render(<GenericEntityList entityName={baseKey} />)
+}
 
 export const SYSTEM_CHECK_SERVICES = [
     'mariaDB',
@@ -164,4 +181,44 @@ export const systemCheckDefinition: EntityDefinition = {
     sections: [],
 
     wizard: { steps: [] },
+
+    // Two phrasings both navigating to /system-check: "system check" and "check system".
+    commands: (): CommandNode<unknown>[] => [
+        {
+            type: 'literal',
+            value: 'system',
+            group: 'navigate',
+            icon: 'check',
+            description: 'commandPalette.descriptions.systemCheck',
+            children: [
+                {
+                    type: 'literal',
+                    value: 'check',
+                    aliases: ['health', 'status'],
+                    group: 'navigate',
+                    icon: 'check',
+                    description: 'commandPalette.descriptions.systemCheck',
+                    execute: (_, ctx) => openSystemCheck(ctx),
+                },
+            ],
+        },
+        {
+            type: 'literal',
+            value: 'check',
+            group: 'navigate',
+            icon: 'check',
+            description: 'commandPalette.descriptions.systemCheck',
+            children: [
+                {
+                    type: 'literal',
+                    value: 'system',
+                    aliases: ['health', 'status'],
+                    group: 'navigate',
+                    icon: 'check',
+                    description: 'commandPalette.descriptions.systemCheck',
+                    execute: (_, ctx) => openSystemCheck(ctx),
+                },
+            ],
+        },
+    ],
 }

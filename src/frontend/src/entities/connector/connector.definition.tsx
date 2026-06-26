@@ -14,9 +14,51 @@ import {connectorApi} from "@entities/connector/api/connectorApi.ts";
 import {showApiError} from "@shared/api/handleApiError.ts";
 import {useMasterPasswordStore} from "@features/master-password";
 import {renderConnectorTitle} from "@entities/connector/ui/renderConnectorTitle";
-import {hasConnectorIconFile, uploadConnectorIcon} from "@entities/connector/model/connectorIconUpload";
+import {deleteConnectorIcon, hasConnectorIconFile, shouldDeleteConnectorIcon, uploadConnectorIcon} from "@entities/connector/model/connectorIconUpload";
+import type {StepRemoteProps} from "@shared/ui/form/FormControl/FormControl.type.ts";
 
 const baseKey = 'connector';
+
+/**
+ * The `/connector/check` connection test. Shared by the credentials step's submit-time gate
+ * (`remote`) and its "Test connection" action button so both fire the exact same request.
+ */
+const connectorCheckRemote: StepRemoteProps = {
+    url: `/connector/check`,
+    method: 'POST',
+    transKey: `${baseKey}.wizard.steps.credentials.remote.error`,
+    encodeParams: false,
+    ignoreError: true,
+    map: (_fieldValue, formValues) => {
+        // Drop a freshly-picked icon File: the connection test doesn't need it,
+        // and a File serializes to {} which the backend's String `icon` rejects (400).
+        const {icon, ...rest} = formValues
+        return {
+            ...rest,
+            ...(typeof icon === 'string' ? {icon} : {}),
+            invoker: {name: formValues.invoker},
+        }
+    },
+    shouldSkip: (values) => {
+        // Update mode keeps the stored credentials encrypted until the master
+        // password is entered — there is nothing to test until then. A create
+        // has no connectorId and always carries the freshly typed credentials,
+        // so the test must always run there.
+        const masterPassword = useMasterPasswordStore.getState().masterPassword
+        return !!values?.connectorId && !masterPassword;
+    },
+    handleResponse: (data, error) => {
+        if (data?.status === "200") {
+            return true;
+        } else {
+            showApiError({
+                namespace: 'entities',
+                transKey:  `${baseKey}.wizard.steps.credentials.remote.error.${data.data.message}`,
+            })
+            return false;
+        }
+    },
+};
 
 export const connectorDefinition: EntityDefinition = {
     name: baseKey,
@@ -46,20 +88,26 @@ export const connectorDefinition: EntityDefinition = {
             return {
                 ...connectorModel,
                 timeout: timeout?.toString() ?? '',
-                invoker: invoker?.name
+                invoker: invoker?.name,
+                // Snapshot the saved icon so the PUT can echo it back unchanged; the
+                // interactive `icon` field then carries the user's pending change.
+                iconOriginal: typeof connectorModel.icon === 'string' ? connectorModel.icon : null,
             }
         },
-        mapToApi: ({data: {invoker, timeout, requestData, icon, ...formData}, mode}: {data: ConnectorUpdateDto, mode: Mode}): Connector => {
+        mapToApi: ({data: {invoker, timeout, requestData, icon, iconOriginal, ...formData}, mode}: {data: ConnectorUpdateDto, mode: Mode}): Connector => {
             const payload: Connector = {
                 ...formData,
-                // Send `icon` when it's a string (unchanged — "leave as is") or null (delete).
-                // A fresh File upload is omitted: it serializes to {} which the backend rejects,
-                // and uploadIcon persists the new File separately.
-                ...(typeof icon === 'string' || icon === null ? {icon} : {}),
                 timeout: +timeout,
                 invoker: {
                     name: invoker,
                 },
+            }
+            // The connector PUT sets the icon column unconditionally, so echo the
+            // saved path back to preserve it (and to keep the old file around for the
+            // replace endpoint to delete). All real icon changes run as after-actions
+            // against the dedicated /connector/{id}/icon endpoints.
+            if (mode === 'update') {
+                payload.icon = iconOriginal ?? null
             }
             if (mode === 'create')  {
                 payload.requestData = requestData;
@@ -89,13 +137,19 @@ export const connectorDefinition: EntityDefinition = {
                 bestEffort: true,
                 errorMessageKey: `${baseKey}.lifecycle.uploadIcon.failed`,
             },
+            deleteIcon: {
+                execute: deleteConnectorIcon,
+                condition: shouldDeleteConnectorIcon,
+                bestEffort: true,
+                errorMessageKey: `${baseKey}.lifecycle.deleteIcon.failed`,
+            },
         },
         lifecycle: {
             create: {
                 after: ['uploadIcon'],
             },
             update: {
-                after: ['saveRequestData', 'uploadIcon'],
+                after: ['saveRequestData', 'uploadIcon', 'deleteIcon'],
             }
         }
     },
@@ -223,17 +277,30 @@ export const connectorDefinition: EntityDefinition = {
             },
         },
         {
+            // The icon is edited from the wizard's top-right image (ConnectorWizardImage),
+            // not as a form field — so it is intentionally left out of every section.
+            // Value semantics: File = upload/replace, null = delete, string = unchanged.
             name: 'icon',
             type: 'file',
             defaultValue: null,
             ui: {
                 component: 'file-dropzone',
-                overrideKey: 'connectorIconEditor',
                 props: {
                     multiple: false,
                     accept: "image/png, image/jpeg",
                     labelKey: `${baseKey}.fields.icon.label`,
                 }
+            },
+        },
+        {
+            // Hidden companion holding the saved icon path; never rendered (no section),
+            // but carried in form state so mapToApi can preserve it and the delete
+            // after-action can tell whether there was an icon to remove.
+            name: 'iconOriginal',
+            type: 'file',
+            defaultValue: null,
+            ui: {
+                component: 'input',
             },
         },
         //credentials
@@ -282,7 +349,6 @@ export const connectorDefinition: EntityDefinition = {
                 'invoker',
                 'timeout',
                 'sslCert',
-                'icon',
             ]
         },{
             id: 'credentials',
@@ -357,38 +423,20 @@ export const connectorDefinition: EntityDefinition = {
                 subheader: `${baseKey}.wizard.steps.credentials.subheader`,
                 sectionIds: ['credentials'],
                 validateFields: ['requestData'],
-                remote: {
-                    url: `/connector/check`,
-                    method: 'POST',
-                    transKey: `${baseKey}.wizard.steps.credentials.remote.error`,
-                    encodeParams: false,
-                    ignoreError: true,
-                    map: (fieldValue, formValues) => {
-                        // Drop a freshly-picked icon File: the connection test doesn't need it,
-                        // and a File serializes to {} which the backend's String `icon` rejects (400).
-                        const {icon, ...rest} = formValues
-                        return {
-                            ...rest,
-                            ...(typeof icon === 'string' ? {icon} : {}),
-                            invoker: {name: formValues.invoker},
-                        }
+                actionButtons: [
+                    {
+                        id: 'test',
+                        label: `${baseKey}.wizard.steps.credentials.test.button`,
+                        type: 'primary',
+                        successMessage: `${baseKey}.wizard.steps.credentials.test.success`,
+                        remote: connectorCheckRemote,
                     },
-                    shouldSkip: () => {
-                        const masterPassword = useMasterPasswordStore.getState().masterPassword
-                        return !masterPassword;
-                    },
-                    handleResponse: (data, error) => {
-                        if (data?.status === "200") {
-                            return true;
-                        } else {
-                            showApiError({
-                                namespace: 'entities',
-                                transKey:  `${baseKey}.wizard.steps.credentials.remote.error.${data.data.message}`,
-                            })
-                            return false;
-                        }
-                    }
-                }
+                ],
+                confirmOnRemoteFailure: {
+                    title: `${baseKey}.wizard.steps.credentials.test.confirm.title`,
+                    message: `${baseKey}.wizard.steps.credentials.test.confirm.message`,
+                },
+                remote: connectorCheckRemote,
             },
         ]
     },

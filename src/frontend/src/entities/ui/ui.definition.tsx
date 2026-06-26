@@ -109,7 +109,7 @@ export const uiDefinition: EntityDefinition = {
                     type: 'literal',
                     value: 'ui',
                     execute: (args, ctx) => {
-                        const { mode } = useCommandPaletteUIStore.getState();
+                        const mode = useCommandPaletteUIStore.getState().resolveMode();
                         const url = `/ui/config`;
 
                         const wizard = (

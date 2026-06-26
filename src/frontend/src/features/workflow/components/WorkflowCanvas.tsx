@@ -20,6 +20,7 @@ import {
   getOutgoingCount,
   isLeafNode,
 } from '../utils/graphUtils';
+import { ALL_COLORS } from '../constants/colors';
 import type {
   WorkflowAction,
   WorkflowContextMenu,
@@ -114,6 +115,40 @@ export function WorkflowCanvas({
     ? getOperatorBottomBranch(selectedOperator.id, nodes, edges)
     : { nodeIds: new Set<string>(), edgeIds: new Set<string>() };
 
+  // Tag connector/system nodes that reuse the same connector+method with a
+  // 1-based index + a guaranteed badge color, so the otherwise-identical
+  // instances can be told apart on the canvas. A node may lack a stored color
+  // (e.g. loaded workflows), so fall back to a distinct palette color —
+  // otherwise the first instance's badge wouldn't render and numbers would
+  // appear to start at 2.
+  const methodInstanceById = new Map<string, { index: number; color: string }>();
+  {
+    const groups = new Map<string, WorkflowNodeModel[]>();
+    for (const node of nodes) {
+      if (node.type !== 'connector' && node.type !== 'system') continue;
+      if (node.data.dragGhost || node.data.dropPlaceholder) continue;
+      const key = `${node.data.connector?.connectorId ?? 'system'}::${node.data.subtitle ?? node.data.title}`;
+      const list = groups.get(key) ?? [];
+      list.push(node);
+      groups.set(key, list);
+    }
+    const usedColors = new Set(
+      nodes.map((node) => node.data.color?.toLowerCase()).filter(Boolean) as string[],
+    );
+    for (const members of groups.values()) {
+      if (members.length < 2) continue;
+      members.forEach((member, index) => {
+        let color = member.data.color;
+        if (!color) {
+          color = ALL_COLORS.find((candidate) => !usedColors.has(candidate.toLowerCase()))
+            ?? ALL_COLORS[index % ALL_COLORS.length];
+          usedColors.add(color.toLowerCase());
+        }
+        methodInstanceById.set(member.id, { index: index + 1, color });
+      });
+    }
+  }
+
   const preparedNodes: WorkflowNodeModel[] = nodes.map((node) => {
     const isPreviewNode = Boolean(node.data.dragGhost || node.data.dropPlaceholder);
     const outgoingCount = getOutgoingCount(node.id, edges);
@@ -141,6 +176,8 @@ export function WorkflowCanvas({
         isLeaf: outgoingCount === 0,
         rightLeaf: isPreviewNode ? false : rightLeaf,
         bottomLeaf: isPreviewNode ? false : bottomLeaf,
+        duplicateMethodIndex: methodInstanceById.get(node.id)?.index,
+        duplicateMethodColor: methodInstanceById.get(node.id)?.color,
         alwaysShowRightAdd: !isPreviewNode && node.type === 'start' && onlyStartNode,
         highlighted: Boolean(node.data.highlighted) || highlightedBranch.nodeIds.has(node.id),
         suppressHoverAddControls: isPreviewNode || activeAction?.sourceNodeId === node.id,

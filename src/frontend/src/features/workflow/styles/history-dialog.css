@@ -4,6 +4,7 @@
 	top: 42px;
 	display: inline-block;
 	width: max-content;
+	min-width: 220px;
 	border: 1px solid var(--color-border-subtle);
 	border-radius: 10px;
 	background: var(--color-background-elevated);
@@ -13,7 +14,10 @@
 }
 
 .historyMenuItem {
-	display: block;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
 	width: 100%;
 	box-sizing: border-box;
 	text-align: left;
@@ -24,31 +28,14 @@
 	white-space: nowrap;
 }
 
-.historyMenuItem:hover {
+.historyMenuItem:hover:not(:disabled) {
 	background: var(--color-background-hover);
+}
+
+.historyMenuItem:disabled {
+	cursor: default;
 }
 
 .historyMenuItemDanger {
 	color: var(--color-action-danger);
-}
-
-.historyConfirmOverlay {
-	position: absolute;
-	inset: 0;
-	background: rgba(17, 24, 39, 0.28);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	z-index: 60;
-}
-
-.historyConfirmDialog {
-	width: 320px;
-	border-radius: 12px;
-	background: var(--color-background-elevated);
-	padding: 16px;
-	box-shadow: var(--shadow-lg);
-	display: flex;
-	flex-direction: column;
-	gap: 10px;
 }

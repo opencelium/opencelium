@@ -20,6 +20,7 @@ export const AntDialog: DialogComponent = ({
   fullscreen = false,
   maximizable = false,
   afterClose,
+  afterOpenChange,
   testId,
   zIndex,
 }) => {
@@ -36,6 +37,7 @@ export const AntDialog: DialogComponent = ({
       open={open}
       onCancel={onClose}
       afterClose={afterClose}
+      afterOpenChange={afterOpenChange}
       // antd renders default OK/Cancel when footer is undefined; coerce to null
       // so our primitive matches the Material adapter (no footer = no footer).
       footer={footer ?? null}

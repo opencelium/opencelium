@@ -36,6 +36,7 @@
     "commentSaved": "Kommentar gespeichert.",
     "commentSaveFailed": "Kommentar konnte nicht gespeichert werden.",
     "commentPlaceholder": "Kommentar",
+    "empty": "Noch kein Versionsverlauf",
     "deleteVersion": {
       "title": "Version löschen?",
       "message": "Diese Aktion entfernt die ausgewählte Version aus dem Verlauf.",
@@ -98,7 +99,7 @@
       "connectorFallback": "Konnektor"
     },
     "chooseNextStep": "Wählen Sie Ihren nächsten Schritt",
-    "from": "Von: {{name}}",
+    "willBeAddedAfter": "Wird hinzugefügt nach: {{name}}",
     "searchPlaceholder": "suchen",
     "triggerConnection": {
       "title": "Workflow auslösen",
@@ -120,6 +121,10 @@
       "title": "Keine Methoden gefunden",
       "description": "Es gibt keine Methoden, die zu dieser Suche passen."
     },
+    "searchEmpty": {
+      "title": "Keine Ergebnisse gefunden",
+      "description": "Keine Konnektoren, Operatoren oder Methoden entsprechen Ihrer Suche."
+    },
     "methodItemText": "Invoker-Methode",
     "connectorMethodsFallback": "Methoden vom Invoker {{invoker}}."
   },
@@ -128,8 +133,34 @@
     "saveAsTemplate": "Als Vorlage speichern",
     "loadTemplate": "Vorlage laden",
     "editorAppearance": "Editor-Darstellung",
+    "inDevelopment": "In Entwicklung",
     "shortcuts": "Tastenkürzel",
     "exit": "Beenden"
+  },
+  "shortcutsDialog": {
+    "title": "Tastatur- und Maus-Kurzbefehle",
+    "groups": {
+      "canvas": "Arbeitsfläche",
+      "nodes": "Knoten",
+      "general": "Allgemein"
+    },
+    "keys": {
+      "drag": "Ziehen",
+      "scroll": "Scrollen",
+      "click": "Klick",
+      "doubleClick": "Doppelklick",
+      "ctrl": "Strg",
+      "esc": "Esc"
+    },
+    "items": {
+      "pan": "Arbeitsfläche verschieben",
+      "zoom": "Vergrößern und verkleinern",
+      "openConfig": "Knotenkonfiguration öffnen",
+      "moveNode": "Knoten verschieben",
+      "duplicate": "Knoten duplizieren statt verschieben",
+      "multiSelect": "Mehrere Knoten auswählen",
+      "close": "Geöffnetes Menü, Dialog oder Panel schließen"
+    }
   },
   "contextMenu": {
     "changeLabel": "Bezeichnung ändern",

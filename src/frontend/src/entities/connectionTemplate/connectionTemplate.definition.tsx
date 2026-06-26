@@ -1,9 +1,16 @@
+import { message } from 'antd'
 import type { EntityDefinition } from '@/engine/entity/EntityDefinition'
+import type { CommandNode } from '@shared/command/types'
+import { i18n } from '@shared/i18n/config/i18n'
 import en from '@entities/connectionTemplate/i18n/en.json'
 import de from '@entities/connectionTemplate/i18n/de.json'
 import type { ConnectionTemplate } from '@entities/connectionTemplate/model/types'
 import { ConnectionTemplateUploadButton } from '@entities/connectionTemplate/components/ConnectionTemplateUploadButton'
 import { ConnectionTemplateDownloadAction } from '@entities/connectionTemplate/components/ConnectionTemplateDownloadAction'
+import {
+    pickConnectionTemplateFile,
+    uploadConnectionTemplate,
+} from '@entities/connectionTemplate/lib/uploadConnectionTemplate'
 
 const baseKey = 'connection-template'
 
@@ -109,6 +116,56 @@ export const connectionTemplateDefinition: EntityDefinition = {
     wizard: {
         steps: [],
     },
+
+    commands: (): CommandNode<unknown>[] => [
+        {
+            type: 'literal',
+            value: 'upload',
+            group: 'create',
+            icon: 'upload',
+            description: 'commandPalette.descriptions.uploadTemplate',
+            children: [
+                {
+                    type: 'literal',
+                    value: 'template',
+                    aliases: ['workflow-template', 'connection-template'],
+                    icon: 'upload',
+                    description: 'commandPalette.descriptions.uploadTemplate',
+                    execute: async (_, ctx) => {
+                        const tEntities = i18n.getFixedT(i18n.language, 'entities')
+                        const file = await pickConnectionTemplateFile()
+                        if (!file) return
+
+                        ctx.setLoading(true)
+                        try {
+                            const uploaded = await uploadConnectionTemplate(file, () =>
+                                ctx.confirm({
+                                    title: tEntities(
+                                        'connection-template.list.upload.confirmReplace.title',
+                                    ),
+                                    message: tEntities(
+                                        'connection-template.list.upload.confirmReplace.message',
+                                    ),
+                                }),
+                            )
+                            if (uploaded) {
+                                message.success(
+                                    tEntities('connection-template.list.upload.success', {
+                                        name: file.name,
+                                    }),
+                                )
+                            }
+                        } catch (err) {
+                            console.error(err)
+                            message.error(tEntities('connection-template.list.upload.error'))
+                        } finally {
+                            ctx.setLoading(false)
+                        }
+                    },
+                },
+            ],
+        },
+    ],
 }
 
 export type { ConnectionTemplate }

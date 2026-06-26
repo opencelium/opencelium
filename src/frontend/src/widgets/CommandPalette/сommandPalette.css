@@ -15,6 +15,31 @@
     left: 5px;
     top: 10px;
 }
+
+/* Collapsible variant — used in the workflow header, where the full-width input
+   would compete with the editable name/description fields. Collapsed it shows
+   just the command icon + hotkey; focusing it animates the width open. */
+.cmdk-collapsible {
+    display: inline-flex;
+    gap: 0;
+}
+.cmdk-collapsible .cmdk-container {
+    width: auto;
+}
+.cmdk-collapsible [cmdk-root] {
+    width: 340px;
+    transition: width 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.cmdk-collapsible.cmdk-collapsed [cmdk-root] {
+    width: 124px;
+    cursor: pointer;
+}
+.cmdk-collapsible.cmdk-collapsed [cmdk-input] {
+    cursor: pointer;
+}
+.cmdk-collapsible.cmdk-collapsed [cmdk-input]::placeholder {
+    color: transparent;
+}
 .cmdk-content {
     justify-content: center;
     display: flex;
