@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { flexRender } from '@tanstack/react-table';
 import {
     Table as MuiTable,
@@ -32,7 +33,8 @@ export const MaterialTable = ({
     const totalRows = isServerPaginated
         ? serverTotal
         : isPaginated
-            ? tableInstance.getPrePaginationRowModel().rows.length
+            // Count top-level rows only — expanded sub-rows ride along and aren't paginated.
+            ? tableInstance.getPrePaginationRowModel().rows.filter((r) => r.depth === 0).length
             : 0;
 
     if (isLoading) return <div>Loading...</div>;
@@ -103,8 +105,19 @@ export const MaterialTable = ({
             <TableBody>
                 {rows.map((row) => {
                     const isDisabled = disabledIdSet.has(row.id);
+                    const isSubRow = row.depth > 0;
                     const extraClassName = rowClassName ? rowClassName(row.original, row.id) : undefined;
-                    const clickable = !!onRowClick && !isDisabled;
+                    // Row-click maps to the parent's update flow — only top-level rows opt in.
+                    const clickable = !!onRowClick && !isDisabled && !isSubRow;
+                    const fullWidth = row.original as { __fullWidth?: boolean; __fullWidthContent?: ReactNode };
+                    if (fullWidth.__fullWidth) {
+                        const colSpan = row.getVisibleCells().length + (hasRowSelection ? 1 : 0);
+                        return (
+                            <TableRow key={row.id} className={extraClassName}>
+                                <TableCell colSpan={colSpan}>{fullWidth.__fullWidthContent}</TableCell>
+                            </TableRow>
+                        );
+                    }
                     return (
                         <TableRow
                             key={row.id}
@@ -128,11 +141,14 @@ export const MaterialTable = ({
                         >
                             {hasRowSelection && (
                                 <TableCell padding="checkbox">
-                                    <Checkbox
-                                        checked={row.getIsSelected()}
-                                        disabled={!row.getCanSelect() || isDisabled}
-                                        onChange={row.getToggleSelectedHandler()}
-                                    />
+                                    {/* Sub-rows ride along with their parent and aren't selectable. */}
+                                    {!isSubRow && (
+                                        <Checkbox
+                                            checked={row.getIsSelected()}
+                                            disabled={!row.getCanSelect() || isDisabled}
+                                            onChange={row.getToggleSelectedHandler()}
+                                        />
+                                    )}
                                 </TableCell>
                             )}
 

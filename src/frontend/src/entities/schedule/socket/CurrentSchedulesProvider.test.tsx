@@ -1,19 +1,19 @@
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest'
 import {act, render} from '@testing-library/react'
-import type {CurrentSchedule} from '@entities/schedule/model/types'
+import type {CurrentExecution} from '@entities/schedule/model/types'
 
 vi.mock('@shared/api/socket/useSocket', () => ({
     useSocket: () => ({client: {}, status: 'connected', error: null}),
 }))
 
 let lastDestination = ''
-let lastHandler: ((data: CurrentSchedule[]) => void) | null = null
+let lastHandler: ((data: CurrentExecution[]) => void) | null = null
 vi.mock('@shared/api/socket/useStompSubscription', () => ({
     useStompSubscription: (
         _client: unknown,
         _isConnected: boolean,
         destination: string,
-        onMessage: (data: CurrentSchedule[]) => void,
+        onMessage: (data: CurrentExecution[]) => void,
     ) => {
         lastDestination = destination
         lastHandler = onMessage
@@ -49,17 +49,29 @@ vi.mock('@shared/api/genericApi', () => ({
 
 import {CurrentSchedulesProvider} from './CurrentSchedulesProvider'
 import {useCurrentSchedules} from './useCurrentSchedules'
-import type {ScheduleRunStatus} from './CurrentSchedulesContext'
+import type {RunningExecution} from './CurrentSchedulesContext'
+
+function exec(overrides: Partial<CurrentExecution> & {execId: number; schedulerId: number}): CurrentExecution {
+    return {
+        connectionId: 1,
+        title: 'A',
+        startTime: '2026-06-26T09:38:25.000+00:00',
+        avgDuration: 10000,
+        fromConnector: null,
+        toConnector: null,
+        ...overrides,
+    }
+}
 
 function Probe({
     onValue,
     schedulerId,
 }: {
-    onValue: (data: CurrentSchedule[], status: ScheduleRunStatus, highlighted: boolean) => void
+    onValue: (running: RunningExecution[], highlighted: boolean) => void
     schedulerId: number
 }) {
-    const {currentSchedules, getRunStatus, wasRecentlyUpdated} = useCurrentSchedules()
-    onValue(currentSchedules, getRunStatus(schedulerId), wasRecentlyUpdated(schedulerId))
+    const {getRunningExecutions, wasRecentlyUpdated} = useCurrentSchedules()
+    onValue(getRunningExecutions(schedulerId), wasRecentlyUpdated(schedulerId))
     return null
 }
 
@@ -88,77 +100,80 @@ describe('CurrentSchedulesProvider', () => {
         expect(lastDestination).toBe('/scheduler/running/all')
     })
 
-    it('exposes empty list and idle status before any message', () => {
-        let received: CurrentSchedule[] = []
-        let status: ScheduleRunStatus = {kind: 'idle'}
+    it('exposes no running executions before any message', () => {
+        let running: RunningExecution[] = [{} as RunningExecution]
         render(
             <CurrentSchedulesProvider>
-                <Probe
-                    schedulerId={1}
-                    onValue={(v, s) => {
-                        received = v
-                        status = s
-                    }}
-                />
+                <Probe schedulerId={1} onValue={(r) => (running = r)} />
             </CurrentSchedulesProvider>,
         )
-        expect(received).toEqual([])
-        expect(status).toEqual({kind: 'idle'})
+        expect(running).toEqual([])
     })
 
-    it('transitions idle → running when schedule appears in payload', () => {
-        let status: ScheduleRunStatus = {kind: 'idle'}
+    it('exposes a running execution when one appears, parsing the server start time', () => {
+        let running: RunningExecution[] = []
         render(
             <CurrentSchedulesProvider>
-                <Probe schedulerId={1} onValue={(_v, s) => (status = s)} />
+                <Probe schedulerId={1} onValue={(r) => (running = r)} />
             </CurrentSchedulesProvider>,
         )
-        const payload: CurrentSchedule[] = [{schedulerId: 1, title: 'A', avgDuration: 10000}]
-        act(() => lastHandler!(payload))
-        expect(status.kind).toBe('running')
-        if (status.kind === 'running') {
-            expect(status.avgDuration).toBe(10000)
-            expect(typeof status.localStartTime).toBe('number')
-        }
+        act(() => lastHandler!([exec({execId: 26, schedulerId: 1, avgDuration: 10000})]))
+        expect(running).toHaveLength(1)
+        expect(running[0].execId).toBe(26)
+        expect(running[0].avgDuration).toBe(10000)
+        expect(running[0].serverStartTime).toBe(Date.parse('2026-06-26T09:38:25.000+00:00'))
+        expect(typeof running[0].localStartTime).toBe('number')
     })
 
-    it('preserves localStartTime across subsequent messages for the same schedule', () => {
-        let status: ScheduleRunStatus = {kind: 'idle'}
+    it('groups multiple parallel executions under the same schedule, sorted by start time', () => {
+        let running: RunningExecution[] = []
         render(
             <CurrentSchedulesProvider>
-                <Probe schedulerId={1} onValue={(_v, s) => (status = s)} />
+                <Probe schedulerId={1} onValue={(r) => (running = r)} />
             </CurrentSchedulesProvider>,
         )
-        act(() => lastHandler!([{schedulerId: 1, title: 'A', avgDuration: 10000}]))
-        const firstSeen = status.kind === 'running' ? status.localStartTime : 0
+        act(() =>
+            lastHandler!([
+                exec({execId: 27, schedulerId: 1, startTime: '2026-06-26T09:38:35.000+00:00'}),
+                exec({execId: 26, schedulerId: 1, startTime: '2026-06-26T09:38:25.000+00:00'}),
+                exec({execId: 99, schedulerId: 2}),
+            ]),
+        )
+        expect(running.map((r) => r.execId)).toEqual([26, 27])
+    })
+
+    it('preserves localStartTime per execId across subsequent messages', () => {
+        let running: RunningExecution[] = []
+        render(
+            <CurrentSchedulesProvider>
+                <Probe schedulerId={1} onValue={(r) => (running = r)} />
+            </CurrentSchedulesProvider>,
+        )
+        act(() => lastHandler!([exec({execId: 26, schedulerId: 1})]))
+        const firstSeen = running[0].localStartTime
         act(() => vi.advanceTimersByTime(1000))
-        act(() => lastHandler!([{schedulerId: 1, title: 'A', avgDuration: 10000}]))
-        expect(status.kind).toBe('running')
-        if (status.kind === 'running') {
-            expect(status.localStartTime).toBe(firstSeen)
-        }
+        act(() => lastHandler!([exec({execId: 26, schedulerId: 1})]))
+        expect(running[0].localStartTime).toBe(firstSeen)
     })
 
-    it('transitions running → just-finished when schedule disappears, then idle after 5s', () => {
-        let status: ScheduleRunStatus = {kind: 'idle'}
+    it('drops an execution from the group when its execId disappears', () => {
+        let running: RunningExecution[] = []
         render(
             <CurrentSchedulesProvider>
-                <Probe schedulerId={1} onValue={(_v, s) => (status = s)} />
+                <Probe schedulerId={1} onValue={(r) => (running = r)} />
             </CurrentSchedulesProvider>,
         )
-        act(() => lastHandler!([{schedulerId: 1, title: 'A', avgDuration: 10000}]))
-        act(() => vi.advanceTimersByTime(5000))
-        act(() => lastHandler!([]))
-        expect(status.kind).toBe('just-finished')
-        if (status.kind === 'just-finished') {
-            expect(status.lastProgressPercent).toBeGreaterThan(0)
-            expect(status.lastProgressPercent).toBeLessThanOrEqual(95)
-        }
-        act(() => vi.advanceTimersByTime(5001))
-        expect(status.kind).toBe('idle')
+        act(() =>
+            lastHandler!([
+                exec({execId: 26, schedulerId: 1}),
+                exec({execId: 27, schedulerId: 1}),
+            ]),
+        )
+        act(() => lastHandler!([exec({execId: 27, schedulerId: 1})]))
+        expect(running.map((r) => r.execId)).toEqual([27])
     })
 
-    it('fetches the disappeared id by id and patches the list cache without invalidating', async () => {
+    it('refetches the schedule by id and patches the list cache when an execution finishes', async () => {
         const refreshed = [{schedulerId: 1, title: 'A', lastExecution: {success: {startTime: 1, taId: 't'}}}]
         unwrapMock.mockResolvedValueOnce(refreshed)
 
@@ -167,7 +182,7 @@ describe('CurrentSchedulesProvider', () => {
                 <Probe schedulerId={1} onValue={() => {}} />
             </CurrentSchedulesProvider>,
         )
-        act(() => lastHandler!([{schedulerId: 1, title: 'A', avgDuration: 10000}]))
+        act(() => lastHandler!([exec({execId: 26, schedulerId: 1})]))
         expect(initiateMock).not.toHaveBeenCalled()
 
         act(() => lastHandler!([]))
@@ -184,16 +199,16 @@ describe('CurrentSchedulesProvider', () => {
         expect(dispatchMock).toHaveBeenCalled()
     })
 
-    it('flags refreshed schedules via wasRecentlyUpdated, then clears after the highlight window', async () => {
+    it('flags the refreshed schedule via wasRecentlyUpdated, then clears it after the highlight window', async () => {
         const refreshed = [{schedulerId: 1, title: 'A', lastExecution: {success: {startTime: 1, taId: 't'}}}]
         unwrapMock.mockResolvedValueOnce(refreshed)
         let highlighted = false
         render(
             <CurrentSchedulesProvider>
-                <Probe schedulerId={1} onValue={(_v, _s, h) => (highlighted = h)} />
+                <Probe schedulerId={1} onValue={(_r, h) => (highlighted = h)} />
             </CurrentSchedulesProvider>,
         )
-        act(() => lastHandler!([{schedulerId: 1, title: 'A', avgDuration: 10000}]))
+        act(() => lastHandler!([exec({execId: 26, schedulerId: 1})]))
         expect(highlighted).toBe(false)
         act(() => lastHandler!([]))
         await act(async () => {
@@ -211,7 +226,7 @@ describe('CurrentSchedulesProvider', () => {
                 <Probe schedulerId={1} onValue={() => {}} />
             </CurrentSchedulesProvider>,
         )
-        act(() => lastHandler!([{schedulerId: 1, title: 'A', avgDuration: 10000}]))
+        act(() => lastHandler!([exec({execId: 26, schedulerId: 1})]))
         act(() => lastHandler!([]))
         await act(async () => {
             await Promise.resolve()
@@ -219,35 +234,21 @@ describe('CurrentSchedulesProvider', () => {
         expect(updateQueryDataMock).not.toHaveBeenCalled()
     })
 
-    it('caps progress percent at 95 when elapsed exceeds avgDuration (100 is reserved for success)', () => {
-        let status: ScheduleRunStatus = {kind: 'idle'}
+    it('keeps the schedule running if another of its executions is still active', () => {
         render(
             <CurrentSchedulesProvider>
-                <Probe schedulerId={1} onValue={(_v, s) => (status = s)} />
+                <Probe schedulerId={1} onValue={() => {}} />
             </CurrentSchedulesProvider>,
         )
-        act(() => lastHandler!([{schedulerId: 1, title: 'A', avgDuration: 1000}]))
-        act(() => vi.advanceTimersByTime(10_000))
-        act(() => lastHandler!([]))
-        expect(status.kind).toBe('just-finished')
-        if (status.kind === 'just-finished') {
-            expect(status.lastProgressPercent).toBe(95)
-        }
-    })
-
-    it('returns running (not just-finished) if a schedule reappears within the 5s window', () => {
-        let status: ScheduleRunStatus = {kind: 'idle'}
-        render(
-            <CurrentSchedulesProvider>
-                <Probe schedulerId={1} onValue={(_v, s) => (status = s)} />
-            </CurrentSchedulesProvider>,
+        act(() =>
+            lastHandler!([
+                exec({execId: 26, schedulerId: 1}),
+                exec({execId: 27, schedulerId: 1}),
+            ]),
         )
-        act(() => lastHandler!([{schedulerId: 1, title: 'A', avgDuration: 10000}]))
-        act(() => vi.advanceTimersByTime(1000))
-        act(() => lastHandler!([]))
-        expect(status.kind).toBe('just-finished')
-        act(() => vi.advanceTimersByTime(1000))
-        act(() => lastHandler!([{schedulerId: 1, title: 'A', avgDuration: 10000}]))
-        expect(status.kind).toBe('running')
+        // One finishes, one stays — the schedule still has a running execution, but
+        // a finish still triggers a refetch so the last-execution columns refresh.
+        act(() => lastHandler!([exec({execId: 27, schedulerId: 1})]))
+        expect(initiateMock).toHaveBeenCalledWith([1])
     })
 })

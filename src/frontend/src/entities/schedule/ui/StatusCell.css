@@ -18,6 +18,29 @@
     padding: 4px 0;
 }
 
+.status-cell__exec {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.1;
+}
+
+.status-cell__exec-time {
+    font-size: 9px;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+/* Running-execution sub-rows: subtle tint + left accent to group them under
+   their parent schedule, theme-aware via tokens. */
+.schedule-row--execution > td {
+    background-color: var(--color-background-hover);
+}
+
+.schedule-row--execution > td:first-child {
+    box-shadow: inset 3px 0 0 var(--color-border-strong);
+}
+
 .schedule-row--highlighted > td {
     animation: schedule-row-highlight-pulse 1.5s ease-out;
 }

@@ -1,5 +1,5 @@
 import {type ReactNode, useCallback, useMemo, useRef, useState} from "react"
-import type {CurrentSchedule, Schedule} from "@entities/schedule/model/types"
+import type {CurrentExecution, Schedule} from "@entities/schedule/model/types"
 import {useSocket} from "@shared/api/socket/useSocket"
 import {useStompSubscription} from "@shared/api/socket/useStompSubscription"
 import {store} from "@app/store/store"
@@ -8,10 +8,9 @@ import {scheduleApi} from "@entities/schedule/api/scheduleApi"
 import {
     CurrentSchedulesContext,
     type CurrentSchedulesContextValue,
-    type ScheduleRunStatus,
+    type RunningExecution,
 } from "./CurrentSchedulesContext"
 
-const FINISH_FLASH_MS = 5000
 const HIGHLIGHT_MS = 1800
 const SCHEDULE_LIST_URL = '/scheduler/all'
 
@@ -39,122 +38,82 @@ async function refreshFinishedSchedules(ids: number[]): Promise<number[]> {
     }
 }
 
-type RunningEntry = {
-    localStartTime: number
-    avgDuration: number
-}
-
-type FinishedEntry = {
-    finishedAt: number
-    lastProgressPercent: number
-}
-
 type Props = {children: ReactNode}
 
 export function CurrentSchedulesProvider({children}: Props) {
     const {client, status} = useSocket()
-    const [currentSchedules, setCurrentSchedules] = useState<CurrentSchedule[]>([])
-    const [runningMap, setRunningMap] = useState<Map<number, RunningEntry>>(new Map())
-    const [finishedMap, setFinishedMap] = useState<Map<number, FinishedEntry>>(new Map())
+    // Running executions keyed by execId — the same schedulerId may have several.
+    const [runningMap, setRunningMap] = useState<Map<number, RunningExecution>>(new Map())
     const [highlightedIds, setHighlightedIds] = useState<Set<number>>(new Set())
-    const previousRunningRef = useRef<Map<number, RunningEntry>>(new Map())
+    const previousRunningRef = useRef<Map<number, RunningExecution>>(new Map())
 
-    const handleMessage = useCallback((schedules: CurrentSchedule[]) => {
+    const handleMessage = useCallback((executions: CurrentExecution[]) => {
+        console.log(executions)
         const now = Date.now()
         const prev = previousRunningRef.current
-        const incomingIds = new Set(schedules.map((s) => s.schedulerId))
+        const incomingIds = new Set(executions.map((e) => e.execId))
 
-        const nextRunning = new Map<number, RunningEntry>()
-        for (const s of schedules) {
-            const existing = prev.get(s.schedulerId)
-            nextRunning.set(s.schedulerId, {
+        const nextRunning = new Map<number, RunningExecution>()
+        for (const e of executions) {
+            const existing = prev.get(e.execId)
+            const parsed = Date.parse(e.startTime)
+            nextRunning.set(e.execId, {
+                execId: e.execId,
+                schedulerId: e.schedulerId,
+                // Preserve our first-seen instant so the ring doesn't reset on heartbeats.
                 localStartTime: existing?.localStartTime ?? now,
-                avgDuration: s.avgDuration,
+                serverStartTime: Number.isNaN(parsed) ? now : parsed,
+                avgDuration: e.avgDuration,
             })
         }
 
-        const disappeared: Array<{id: number; pct: number}> = []
-        for (const [id, entry] of prev) {
-            if (!incomingIds.has(id)) {
-                const elapsed = now - entry.localStartTime
-                const pct = entry.avgDuration > 0
-                    ? Math.min(95, Math.max(0, (elapsed / entry.avgDuration) * 100))
-                    : 0
-                disappeared.push({id, pct})
-            }
+        // An execId present last time but gone now means that execution finished.
+        const finishedSchedulerIds = new Set<number>()
+        for (const [execId, entry] of prev) {
+            if (!incomingIds.has(execId)) finishedSchedulerIds.add(entry.schedulerId)
         }
 
         previousRunningRef.current = nextRunning
-        setCurrentSchedules(schedules)
         setRunningMap(nextRunning)
 
-        if (disappeared.length === 0) return
+        if (finishedSchedulerIds.size === 0) return
 
-        setFinishedMap((fm) => {
-            const next = new Map(fm)
-            for (const {id, pct} of disappeared) {
-                next.set(id, {finishedAt: now, lastProgressPercent: pct})
-            }
-            return next
-        })
-
-        refreshFinishedSchedules(disappeared.map((d) => d.id)).then((updatedIds) => {
+        // Refetch the affected schedules so their last-execution columns update, then
+        // flash the row. Patches the list cache in place (see scheduleApi note).
+        refreshFinishedSchedules([...finishedSchedulerIds]).then((updatedIds) => {
             if (updatedIds.length === 0) return
-            setHighlightedIds((prev) => {
-                const next = new Set(prev)
+            setHighlightedIds((prevIds) => {
+                const next = new Set(prevIds)
                 for (const id of updatedIds) next.add(id)
                 return next
             })
             setTimeout(() => {
-                setHighlightedIds((prev) => {
-                    if (updatedIds.every((id) => !prev.has(id))) return prev
-                    const next = new Set(prev)
+                setHighlightedIds((prevIds) => {
+                    if (updatedIds.every((id) => !prevIds.has(id))) return prevIds
+                    const next = new Set(prevIds)
                     for (const id of updatedIds) next.delete(id)
                     return next
                 })
             }, HIGHLIGHT_MS)
         })
-
-        for (const {id} of disappeared) {
-            setTimeout(() => {
-                setFinishedMap((fm) => {
-                    if (!fm.has(id)) return fm
-                    const next = new Map(fm)
-                    next.delete(id)
-                    return next
-                })
-            }, FINISH_FLASH_MS)
-        }
     }, [])
 
-    useStompSubscription<CurrentSchedule[]>(
+    useStompSubscription<CurrentExecution[]>(
         client,
         status === 'connected',
         '/scheduler/running/all',
         handleMessage,
     )
 
-    const getRunStatus = useCallback(
-        (schedulerId: number): ScheduleRunStatus => {
-            const running = runningMap.get(schedulerId)
-            if (running) {
-                return {
-                    kind: 'running',
-                    localStartTime: running.localStartTime,
-                    avgDuration: running.avgDuration,
-                }
+    const getRunningExecutions = useCallback(
+        (schedulerId: number): RunningExecution[] => {
+            const list: RunningExecution[] = []
+            for (const entry of runningMap.values()) {
+                if (entry.schedulerId === schedulerId) list.push(entry)
             }
-            const finished = finishedMap.get(schedulerId)
-            if (finished) {
-                return {
-                    kind: 'just-finished',
-                    finishedAt: finished.finishedAt,
-                    lastProgressPercent: finished.lastProgressPercent,
-                }
-            }
-            return {kind: 'idle'}
+            return list.sort((a, b) => a.serverStartTime - b.serverStartTime)
         },
-        [runningMap, finishedMap],
+        [runningMap],
     )
 
     const wasRecentlyUpdated = useCallback(
@@ -163,8 +122,8 @@ export function CurrentSchedulesProvider({children}: Props) {
     )
 
     const value = useMemo<CurrentSchedulesContextValue>(
-        () => ({currentSchedules, getRunStatus, wasRecentlyUpdated}),
-        [currentSchedules, getRunStatus, wasRecentlyUpdated],
+        () => ({getRunningExecutions, wasRecentlyUpdated}),
+        [getRunningExecutions, wasRecentlyUpdated],
     )
 
     return (

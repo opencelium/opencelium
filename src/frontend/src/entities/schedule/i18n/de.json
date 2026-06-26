@@ -4,15 +4,17 @@
     "subTitle": "Zeitpläne bestimmen, wann bestimmte Worflows ausgeführt werden — nach festem Zeitplan oder durch Auslöser. Statuslegende: <blueDot/> läuft, <greenDot/> letzte Ausführung erfolgreich, <redDot/> letzte Ausführung fehlgeschlagen, <grayDot/> kein Cron und keine Historie. Die Zahl unter dem Kreis zählt bis zum nächsten Cron-Trigger herunter.",
     "searchPlaceholder": "Nach Workflowsname suchen",
     "columns": {
+      "executions": "Ausführungen",
       "status": "Status",
       "connection": "Workflow",
       "cronExp": "Cron",
       "lastSuccessExecution": "Letzter Erfolg",
       "lastFailExecution": "Letzter Fehler",
-      "lastDuration": "Dauer",
+      "lastDuration": "Ø Dauer",
       "debugMode": "Debug",
       "webhook": "Webhook"
-    }
+    },
+    "noExecutions": "Keine laufenden Ausführungen"
   },
   "webhook": {
     "copied": "Webhook-URL in die Zwischenablage kopiert",
