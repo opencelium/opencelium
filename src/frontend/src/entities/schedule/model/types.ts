@@ -38,8 +38,16 @@ export type ScheduleUpdateDTO = Omit<Schedule, "connection" | "lastExecution" | 
     connectionId: string
 }
 
-export type CurrentSchedule = {
-    avgDuration: number,
+// One in-flight execution as broadcast on /scheduler/running/all. The same
+// schedulerId/connectionId can appear multiple times concurrently — each run is
+// uniquely identified by execId. startTime is an ISO-8601 string from the server.
+export type CurrentExecution = {
+    connectionId: number
     schedulerId: number
+    execId: number
     title: string
+    startTime: string
+    avgDuration: number
+    fromConnector: unknown
+    toConnector: unknown
 }

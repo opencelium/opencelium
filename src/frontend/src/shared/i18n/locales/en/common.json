@@ -113,6 +113,8 @@
     "deleteSelectedSuccess": "{{count}} entries deleted successfully",
     "deleteSelectedSuccess_one": "{{count}} entry deleted successfully",
     "filtersTooltip": "Filters",
+    "expandRow": "Show executions",
+    "collapseRow": "Hide executions",
     "confirmDelete": {
       "title": "Delete",
       "message": "Are you sure you want to delete this {{name}}?",

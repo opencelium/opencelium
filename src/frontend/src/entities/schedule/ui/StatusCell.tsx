@@ -1,61 +1,18 @@
-import {memo, useEffect, useState, type ReactNode} from 'react'
-import {message, Progress} from 'antd'
-import {IconButton} from '@shared/ui/primitives/IconButton'
-import {Loading} from '@shared/ui/primitives/Loading/Loading'
-import {Tooltip} from '@shared/ui/primitives/Tooltip'
-import {useGeneralRequestMutation} from '@shared/api/genericApi'
+import {memo} from 'react'
 import {useI18n} from '@shared/i18n/hooks/useI18n'
-import {useCurrentSchedules} from '@entities/schedule/socket/useCurrentSchedules'
 import {useSubscriptionIssue} from '@entities/subscription/model/useSubscriptionIssue'
 import {CronCountdown} from '@entities/schedule/ui/CronCountdown'
+import {PlayControl, type PlayVariant, type RingStatus} from './PlayControl'
 import type {Schedule, ScheduleExecutionRun} from '../model/types'
-import {Icon} from "@shared/ui/primitives/Icon";
 import './StatusCell.css'
 
 type Props = {
     schedule: Schedule
 }
 
-type RingStatus = 'success' | 'exception'
-type PlayVariant = 'bare' | 'neutral' | RingStatus
-
-const NEUTRAL_STROKE = 'var(--color-border-strong)'
-const NEUTRAL_TRAIL = 'var(--color-border-subtle)'
-
-const START_ERROR_DURATION_SEC = 8
-const CIRCLE_SIZE = 28
-const PROGRESS_TICK_MS = 200
-const TERMINATE_GRACE_MS = 5000
-
-// The backend rejects a manual trigger while the schedule is already running
-// with this code; it can surface in the error body's message/error/code field.
-function isConcurrentTestForbidden(error: unknown): boolean {
-    if (!error || typeof error !== 'object') return false
-    const data = (error as {data?: unknown}).data
-    const candidates = [error, data].flatMap((source) =>
-        source && typeof source === 'object'
-            ? [
-                  (source as Record<string, unknown>).message,
-                  (source as Record<string, unknown>).error,
-                  (source as Record<string, unknown>).code,
-              ]
-            : [source]
-    )
-    return candidates.some(
-        (value) =>
-            typeof value === 'string' && value.includes('CONCURRENT_TEST_IS_FORBIDDEN')
-    )
-}
-
 function computeEndTime(run?: ScheduleExecutionRun): number {
     if (!run?.startTime) return 0
     return run.startTime + (run.duration ?? 0)
-}
-
-function computePercent(localStartTime: number, avgDuration: number, now: number): number {
-    if (avgDuration <= 0) return 0
-    const elapsed = now - localStartTime
-    return Math.min(95, Math.max(0, (elapsed / avgDuration) * 100))
 }
 
 function resolveRing(schedule: Schedule): RingStatus | null {
@@ -65,250 +22,16 @@ function resolveRing(schedule: Schedule): RingStatus | null {
     return successEnd >= failEnd ? 'success' : 'exception'
 }
 
-function RunningCircle({
-    schedule,
-    localStartTime,
-    avgDuration,
-}: {
-    schedule: Schedule
-    localStartTime: number
-    avgDuration: number
-}) {
-    const {t: tEntities} = useI18n('entities')
-    const [generalRequest] = useGeneralRequestMutation()
-    const [now, setNow] = useState(() => Date.now())
-    const [hovered, setHovered] = useState(false)
-    const [pending, setPending] = useState(false)
-
-    useEffect(() => {
-        const handle = setInterval(() => setNow(Date.now()), PROGRESS_TICK_MS)
-        return () => clearInterval(handle)
-    }, [])
-
-    const percent = computePercent(localStartTime, avgDuration, now)
-    const elapsed = now - localStartTime
-    const showTerminate = elapsed < TERMINATE_GRACE_MS || hovered
-
-    const handleTerminate = async () => {
-        setPending(true)
-        try {
-            await generalRequest({
-                url: `/scheduler/terminate/${schedule.schedulerId}`,
-                method: 'GET',
-                options: {},
-            }).unwrap()
-            message.success(tEntities('schedule.terminate.success'))
-        } catch {
-            // error surfaced by errorBus
-        } finally {
-            setPending(false)
-        }
-    }
-
-    const center = pending ? (
-        <Loading inline size="xs" />
-    ) : showTerminate ? (
-        <Icon name="stop" size={14} color="danger" />
-    ) : (
-        <span style={{fontSize: 9}}>{Math.round(percent)}%</span>
-    )
-
-    return (
-        <Tooltip content={tEntities('schedule.terminate.tooltip')}>
-            <button
-                type="button"
-                onClick={handleTerminate}
-                disabled={pending}
-                onMouseEnter={() => setHovered(true)}
-                onMouseLeave={() => setHovered(false)}
-                style={{
-                    border: 'none',
-                    background: 'transparent',
-                    padding: 0,
-                    cursor: pending ? 'wait' : 'pointer',
-                    display: 'inline-flex',
-                    lineHeight: 0,
-                }}
-            >
-                <Progress
-                    type="circle"
-                    percent={percent}
-                    size={CIRCLE_SIZE}
-                    status="active"
-                    format={() => center}
-                />
-            </button>
-        </Tooltip>
-    )
-}
-
-function FinishedCircle({schedule, lastProgressPercent}: {schedule: Schedule; lastProgressPercent: number}) {
-    const ring = resolveRing(schedule)
-    if (ring === 'success') {
-        return (
-            <Progress
-                type="circle"
-                percent={100}
-                size={CIRCLE_SIZE}
-                status="success"
-                format={() => <Icon name="check" size={14} color="default" />}
-            />
-        )
-    }
-    return (
-        <Progress
-            type="circle"
-            percent={lastProgressPercent}
-            size={CIRCLE_SIZE}
-            status="exception"
-            format={() => <Icon name="close" size={14} color="danger" />}
-        />
-    )
-}
-
-function PlayControl({
-    schedule,
-    variant,
-    blockedHint,
-}: {
-    schedule: Schedule
-    variant: PlayVariant
-    blockedHint: string | null
-}) {
-    const {t: tEntities} = useI18n('entities')
-    const [generalRequest] = useGeneralRequestMutation()
-    const [pending, setPending] = useState(false)
-    const isBlocked = blockedHint != null
-    const tooltip = blockedHint ?? tEntities('schedule.start.tooltip')
-
-    const handleClick = async () => {
-        setPending(true)
-        try {
-            await generalRequest({
-                url: `/scheduler/execute/${schedule.schedulerId}`,
-                method: 'GET',
-                options: {ignoreError: true},
-            }).unwrap()
-            message.success(tEntities('schedule.start.success'))
-        } catch (error) {
-            const key = isConcurrentTestForbidden(error)
-                ? 'schedule.start.error.concurrentForbidden'
-                : 'schedule.start.error.failed'
-            message.error(tEntities(key), START_ERROR_DURATION_SEC)
-        } finally {
-            setPending(false)
-        }
-    }
-
-    if (variant === 'bare') {
-        return (
-            <Tooltip content={tooltip}>
-                {/* span keeps tooltip hover events alive over a disabled button */}
-                <span style={{display: 'inline-flex'}}>
-                    <IconButton
-                        iconProps={{name: 'play', color: isBlocked ? 'default' : 'primary', isSubtle: isBlocked}}
-                        size="xs"
-                        type="text"
-                        loading={pending}
-                        disabled={isBlocked}
-                        onClick={handleClick}
-                    />
-                </span>
-            </Tooltip>
-        )
-    }
-
-    const ringProps =
-        variant === 'neutral'
-            ? {strokeColor: NEUTRAL_STROKE, trailColor: NEUTRAL_TRAIL}
-            : {status: variant}
-
-    return (
-        <Tooltip content={tooltip}>
-            {/* span keeps tooltip hover events alive over a disabled button */}
-            <span style={{display: 'inline-flex'}}>
-                <button
-                    type="button"
-                    onClick={handleClick}
-                    disabled={pending || isBlocked}
-                    style={{
-                        border: 'none',
-                        background: 'transparent',
-                        padding: 0,
-                        cursor: isBlocked ? 'not-allowed' : pending ? 'wait' : 'pointer',
-                        opacity: isBlocked ? 0.5 : 1,
-                        display: 'inline-flex',
-                        lineHeight: 0,
-                    }}
-                >
-                    <Progress
-                        type="circle"
-                        percent={100}
-                        size={CIRCLE_SIZE}
-                        {...ringProps}
-                        format={() =>
-                            pending ? (
-                                <Loading inline size="xs" />
-                            ) : (
-                                <Icon
-                                    name="play"
-                                    size={14}
-                                    color={isBlocked ? 'default' : 'primary'}
-                                    isSubtle={isBlocked}
-                                />
-                            )
-                        }
-                    />
-                </button>
-            </span>
-        </Tooltip>
-    )
-}
-
-function pickBody(
-    schedule: Schedule,
-    status: ReturnType<ReturnType<typeof useCurrentSchedules>['getRunStatus']>,
-    blockedHint: string | null,
-): ReactNode {
-    switch (status.kind) {
-        case 'running':
-            return (
-                <RunningCircle
-                    schedule={schedule}
-                    localStartTime={status.localStartTime}
-                    avgDuration={status.avgDuration}
-                />
-            )
-        case 'just-finished':
-            return (
-                <FinishedCircle
-                    schedule={schedule}
-                    lastProgressPercent={status.lastProgressPercent}
-                />
-            )
-        case 'idle': {
-            const ring = resolveRing(schedule)
-            const variant: PlayVariant = ring ?? (schedule.cronExp?.trim() ? 'bare' : 'neutral')
-            return <PlayControl schedule={schedule} variant={variant} blockedHint={blockedHint} />
-        }
-        default: {
-            const _exhaustive: never = status
-            return _exhaustive
-        }
-    }
-}
-
 export const StatusCell = memo(function StatusCell({schedule}: Props) {
-    const {getRunStatus} = useCurrentSchedules()
     const {t: tEntities} = useI18n('entities')
     const {issue} = useSubscriptionIssue()
-    const status = getRunStatus(schedule.schedulerId)
     const blockedHint = issue ? tEntities(`subscription.banner.${issue}` as never) : null
+    const ring = resolveRing(schedule)
+    const variant: PlayVariant = ring ?? (schedule.cronExp?.trim() ? 'bare' : 'neutral')
+
     return (
         <div className="status-cell">
-            <div style={{minHeight: 34}}>
-                {pickBody(schedule, status, blockedHint)}
-            </div>
+            <PlayControl schedule={schedule} variant={variant} blockedHint={blockedHint} />
             {!issue && <CronCountdown cronExp={schedule.cronExp} />}
         </div>
     )

@@ -56,28 +56,52 @@ export const AntTable = ({
                       selectedRowKeys,
                       onChange: handleSelectionChange,
                       preserveSelectedRowKeys: true,
-                      getCheckboxProps: (record: { key?: string }) => ({
-                          disabled: !!record.key && disabledIdSet.has(record.key),
-                      }),
+                      getCheckboxProps: (record: { key?: string }) => {
+                          const row = record.key ? rowsByKey.get(record.key) : undefined;
+                          const isSubRow = !!row && row.depth > 0;
+                          return {
+                              // Disabling excludes sub-rows from antd's "select all".
+                              disabled: isSubRow || (!!record.key && disabledIdSet.has(record.key)),
+                          };
+                      },
+                      // Sub-rows (depth > 0) ride along with their parent and aren't selectable.
+                      renderCell: (
+                          _value: boolean,
+                          record: { key?: string },
+                          _index: number,
+                          originNode: React.ReactNode,
+                      ) => {
+                          const row = record.key ? rowsByKey.get(record.key) : undefined;
+                          return row && row.depth > 0 ? null : originNode;
+                      },
                   }
                 : undefined,
-        [hasRowSelection, selectedRowKeys, handleSelectionChange, disabledIdSet],
+        [hasRowSelection, selectedRowKeys, handleSelectionChange, disabledIdSet, rowsByKey],
     );
+
+    const columnCount = flatHeaders.length;
 
     const columns = useMemo(
         () =>
-            flatHeaders.map((header) => {
+            flatHeaders.map((header, colIndex) => {
                 const column = header.column;
                 const sorted = column.getIsSorted();
                 const canSort = column.getCanSort();
                 const explicitSize = column.columnDef.size;
                 const align = (column.columnDef.meta as { align?: 'left' | 'center' | 'right' } | undefined)?.align;
+                const isFirstColumn = colIndex === 0;
 
                 return {
                     key: column.id,
                     dataIndex: column.id,
                     ...(explicitSize !== undefined ? { width: explicitSize } : {}),
                     ...(align ? { align } : {}),
+                    // Full-width rows (e.g. an empty-state placeholder under an expanded
+                    // parent) collapse all data columns into one spanning cell.
+                    onCell: (record: { __fullWidth?: boolean }) => {
+                        if (!record?.__fullWidth) return {};
+                        return isFirstColumn ? { colSpan: columnCount } : { colSpan: 0 };
+                    },
                     title: (
                         <div
                             onClick={canSort ? column.getToggleSortingHandler() : undefined}
@@ -104,6 +128,10 @@ export const AntTable = ({
                     render: (_: unknown, __: unknown, index: number) => {
                         const row = rows[index];
                         if (!row) return null;
+                        const original = row.original as { __fullWidth?: boolean; __fullWidthContent?: React.ReactNode };
+                        if (original.__fullWidth) {
+                            return isFirstColumn ? original.__fullWidthContent : null;
+                        }
                         const cell = row
                             .getVisibleCells()
                             .find((c) => c.column.id === column.id);
@@ -111,7 +139,7 @@ export const AntTable = ({
                     },
                 };
             }),
-        [flatHeaders, rows],
+        [flatHeaders, rows, columnCount],
     );
 
     const dataSource = useMemo(
@@ -125,7 +153,8 @@ export const AntTable = ({
             const isDisabled = !!(key && disabledIdSet.has(key));
             const row = key ? rowsByKey.get(key) : undefined;
             const className = row && rowClassName ? rowClassName(row.original, row.id) : undefined;
-            const clickable = !!onRowClick && !isDisabled && !!row;
+            // Row-click maps to the parent's update flow — only top-level rows opt in.
+            const clickable = !!onRowClick && !isDisabled && !!row && row.depth === 0;
             return {
                 ...(isDisabled ? { style: { opacity: 0.5, pointerEvents: 'none' as const } } : {}),
                 ...(clickable ? { style: { cursor: 'pointer' } } : {}),
@@ -149,7 +178,8 @@ export const AntTable = ({
     const totalRows = isServerPaginated
         ? serverTotal
         : isPaginated
-            ? tableInstance.getPrePaginationRowModel().rows.length
+            // Count top-level rows only — expanded sub-rows ride along and aren't paginated.
+            ? tableInstance.getPrePaginationRowModel().rows.filter((r) => r.depth === 0).length
             : 0;
 
     return (

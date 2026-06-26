@@ -14,7 +14,12 @@ import {genericApi} from "@shared/api/genericApi.ts";
 import type {Schedule, ScheduleUpdateDTO} from "@entities/schedule/model/types.ts";
 import {stripSeconds} from "@shared/ui/wizard-step/editor/cron-editor/cron-editor.utils.ts";
 import {StatusCell} from "@entities/schedule/ui/StatusCell.tsx";
+import {RunningExecBadge} from "@entities/schedule/ui/RunningExecBadge.tsx";
+import {RunningDurationCell} from "@entities/schedule/ui/RunningDurationCell.tsx";
+import {isScheduleExecRow} from "@entities/schedule/ui/scheduleExecRow.ts";
+import {ScheduleExecConnectionCell} from "@entities/schedule/ui/ScheduleExecConnectionCell.tsx";
 import {useCurrentSchedules} from "@entities/schedule/socket/useCurrentSchedules";
+import {useScheduleSubRows} from "@entities/schedule/socket/useScheduleSubRows";
 import {ConnectionTitleCell} from "@entities/schedule/ui/ConnectionTitleCell.tsx";
 import {ExecutionCell} from "@entities/schedule/ui/ExecutionCell.tsx";
 import {DurationCell} from "@entities/schedule/ui/DurationCell.tsx";
@@ -119,11 +124,16 @@ export const scheduleDefinition: EntityDefinition = {
             const {wasRecentlyUpdated} = useCurrentSchedules();
             return {
                 rowClassName: (row) => {
+                    if (isScheduleExecRow(row) || (row as {__placeholder?: boolean}).__placeholder) {
+                        return 'schedule-row--execution';
+                    }
                     const schedulerId = (row as Schedule).schedulerId;
                     return wasRecentlyUpdated(schedulerId) ? 'schedule-row--highlighted' : undefined;
                 },
             };
         },
+        useRowSubRows: useScheduleSubRows,
+        subRowsColumnLabelKey: `${baseKey}.list.columns.executions`,
         actions: [
             {
                 type: 'custom',
@@ -204,7 +214,7 @@ export const scheduleDefinition: EntityDefinition = {
                 order: 7,
                 align: 'center',
                 labelKey: `${baseKey}.list.columns.debugMode`,
-                render: (row) => <DebugModeCell schedule={row as Schedule} />,
+                render: (row) => (isScheduleExecRow(row) ? null : <DebugModeCell schedule={row as Schedule} />),
             },
         },
         {
@@ -234,7 +244,7 @@ export const scheduleDefinition: EntityDefinition = {
                 order: 3,
                 align: 'center',
                 labelKey: `${baseKey}.list.columns.cronExp`,
-                render: (row) => <CronCell schedule={row as Schedule} />,
+                render: (row) => (isScheduleExecRow(row) ? null : <CronCell schedule={row as Schedule} />),
             },
         },
 
@@ -246,11 +256,20 @@ export const scheduleDefinition: EntityDefinition = {
             table: {
                 visible: true,
                 order: 1,
-                width: 56,
+                width: 110,
                 align: 'center',
                 labelKey: `${baseKey}.list.columns.status`,
                 mapToValue: () => null,
-                render: (row) => <StatusCell schedule={row as Schedule} />,
+                render: (row) =>
+                    isScheduleExecRow(row) ? (
+                        <RunningExecBadge
+                            localStartTime={row.execution.localStartTime}
+                            serverStartTime={row.execution.serverStartTime}
+                            avgDuration={row.execution.avgDuration}
+                        />
+                    ) : (
+                        <StatusCell schedule={row as Schedule} />
+                    ),
             },
         },
         {
@@ -264,7 +283,12 @@ export const scheduleDefinition: EntityDefinition = {
                 searchable: true,
                 labelKey: `${baseKey}.list.columns.connection`,
                 mapToValue: (row) => (row as Schedule).connection?.title ?? '',
-                render: (row) => <ConnectionTitleCell schedule={row as Schedule} />,
+                render: (row) =>
+                    isScheduleExecRow(row) ? (
+                        <ScheduleExecConnectionCell title={row.connection?.title} />
+                    ) : (
+                        <ConnectionTitleCell schedule={row as Schedule} />
+                    ),
             },
         },
         {
@@ -278,16 +302,17 @@ export const scheduleDefinition: EntityDefinition = {
                 align: 'center',
                 labelKey: `${baseKey}.list.columns.lastSuccessExecution`,
                 mapToValue: (row) => (row as Schedule).lastExecution?.success?.startTime ?? 0,
-                render: (row) => (
-                    <ExecutionCell
-                        execution={(row as Schedule).lastExecution?.success}
-                        logs={{
-                            connectionId: (row as Schedule).connection.connectionId,
-                            schedulerId: (row as Schedule).schedulerId,
-                            status: 's',
-                        }}
-                    />
-                ),
+                render: (row) =>
+                    isScheduleExecRow(row) ? null : (
+                        <ExecutionCell
+                            execution={(row as Schedule).lastExecution?.success}
+                            logs={{
+                                connectionId: (row as Schedule).connection.connectionId,
+                                schedulerId: (row as Schedule).schedulerId,
+                                status: 's',
+                            }}
+                        />
+                    ),
             },
         },
         {
@@ -301,16 +326,17 @@ export const scheduleDefinition: EntityDefinition = {
                 align: 'center',
                 labelKey: `${baseKey}.list.columns.lastFailExecution`,
                 mapToValue: (row) => (row as Schedule).lastExecution?.fail?.startTime ?? 0,
-                render: (row) => (
-                    <ExecutionCell
-                        execution={(row as Schedule).lastExecution?.fail}
-                        logs={{
-                            connectionId: (row as Schedule).connection.connectionId,
-                            schedulerId: (row as Schedule).schedulerId,
-                            status: 'f',
-                        }}
-                    />
-                ),
+                render: (row) =>
+                    isScheduleExecRow(row) ? null : (
+                        <ExecutionCell
+                            execution={(row as Schedule).lastExecution?.fail}
+                            logs={{
+                                connectionId: (row as Schedule).connection.connectionId,
+                                schedulerId: (row as Schedule).schedulerId,
+                                status: 'f',
+                            }}
+                        />
+                    ),
             },
         },
         {
@@ -324,9 +350,12 @@ export const scheduleDefinition: EntityDefinition = {
                 align: 'center',
                 labelKey: `${baseKey}.list.columns.lastDuration`,
                 mapToValue: (row) => (row as Schedule).lastExecution?.success?.duration ?? 0,
-                render: (row) => (
-                    <DurationCell duration={(row as Schedule).lastExecution?.success?.duration} />
-                ),
+                render: (row) =>
+                    isScheduleExecRow(row) ? (
+                        <RunningDurationCell serverStartTime={row.execution.serverStartTime} />
+                    ) : (
+                        <DurationCell duration={(row as Schedule).lastExecution?.success?.duration} />
+                    ),
             },
         },
         {
@@ -340,7 +369,7 @@ export const scheduleDefinition: EntityDefinition = {
                 align: 'center',
                 labelKey: `${baseKey}.list.columns.webhook`,
                 mapToValue: () => null,
-                render: (row) => <WebhookCell schedule={row as Schedule} />,
+                render: (row) => (isScheduleExecRow(row) ? null : <WebhookCell schedule={row as Schedule} />),
             },
         },
     ],

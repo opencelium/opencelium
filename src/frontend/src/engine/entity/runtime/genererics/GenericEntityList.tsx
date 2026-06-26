@@ -7,7 +7,9 @@ import {
     getFilteredRowModel,
     getSortedRowModel,
     getPaginationRowModel,
+    getExpandedRowModel,
     type ColumnDef,
+    type Row,
     type RowSelectionState,
     type SortingState,
 } from '@tanstack/react-table';
@@ -41,6 +43,7 @@ import type {
 import { useEntityUpdateOpener } from '@shared/ui/wizard-step/list/actions/useEntityUpdateOpener';
 import { buildEntityColumns } from './buildEntityColumns';
 import { buildRowActionsColumn } from './buildRowActionsColumn';
+import { buildExpanderColumn } from './buildExpanderColumn';
 import { BulkActionButton } from './BulkActionButton';
 import {
     ListFilters,
@@ -84,6 +87,9 @@ const resolveBulkConfig = (entity: EntityDefinition): BulkDeleteConfig | null =>
 const EMPTY_ROW_DECORATION = {};
 const emptyRowDecoration = () => EMPTY_ROW_DECORATION;
 
+const IDENTITY_SUB_ROWS = (rows: EntityRow[]) => rows;
+const noRowSubRows = () => IDENTITY_SUB_ROWS;
+
 export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
     const entity = entityRegistry.get(entityName);
     const dialog = useDialog();
@@ -97,6 +103,10 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
 
     const useRowDecoration = entity.list?.useRowDecoration ?? emptyRowDecoration;
     const { rowClassName } = useRowDecoration();
+
+    const useRowSubRows = entity.list?.useRowSubRows ?? noRowSubRows;
+    const attachSubRows = useRowSubRows();
+    const hasSubRows = !!entity.list?.useRowSubRows;
 
     // List rows use the raw API shape — `api.mapToForm` is meant for form rendering,
     // not for table cells. Use FieldDefinition.table.mapToValue for per-column shaping.
@@ -128,11 +138,17 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
 
     const columns = useMemo<ColumnDef<EntityRow>[]>(() => {
         const cols = buildEntityColumns<EntityRow>(entity, { tEntities });
+        if (hasSubRows) {
+            const expanderLabel = entity.list?.subRowsColumnLabelKey
+                ? tEntities(entity.list.subRowsColumnLabelKey)
+                : undefined;
+            cols.unshift(buildExpanderColumn<EntityRow>(entity, expanderLabel));
+        }
         if (actions.length > 0) {
             cols.push(buildRowActionsColumn<EntityRow>(entity, actions));
         }
         return cols;
-    }, [entity, actions, tEntities]);
+    }, [entity, actions, tEntities, hasSubRows]);
 
     const initialSorting: SortingState = entity.list?.defaultSort
         ? [{ id: entity.list.defaultSort.field, desc: entity.list.defaultSort.direction === 'desc' }]
@@ -152,28 +168,59 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
         [rows, filters, filterState],
     );
 
+    // Attach live sub-rows (e.g. running executions) just before the table reads
+    // the data, so a new array identity invalidates the row model when they change.
+    const tableRows = useMemo(
+        () => attachSubRows(filteredRows),
+        [attachSubRows, filteredRows],
+    );
+
     const handleFilterChange = (key: string, value: ListFilterValue) => {
         setFilterState((prev) => ({ ...prev, [key]: value }));
     };
 
     const table = useReactTable({
-        data: filteredRows,
+        data: tableRows,
         columns,
         state: { sorting, globalFilter, rowSelection },
-        enableRowSelection: selectable,
+        // Sub-rows (depth > 0) are decorative children of their parent and never selectable.
+        enableRowSelection: selectable
+            ? hasSubRows
+                ? (row: Row<EntityRow>) => row.depth === 0
+                : true
+            : false,
         enableSorting: true,
         enableGlobalFilter: true,
         onSortingChange: setSorting,
         onGlobalFilterChange: setGlobalFilter,
         onRowSelectionChange: setRowSelection,
-        getRowId: selectable
-            ? (row) => String(getValueByPath(row, rowKey) ?? '')
-            : undefined,
+        getRowId:
+            selectable || hasSubRows
+                ? (row, index, parent) => {
+                      const explicit = (row as EntityRow).__rowId;
+                      if (typeof explicit === 'string') return explicit;
+                      const base = String(getValueByPath(row, rowKey) ?? index);
+                      return parent ? `${parent.id}.${base}` : base;
+                  }
+                : undefined,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
-        initialState: { pagination: { pageIndex: 0, pageSize: entity.list?.pageSize ?? 15 } },
+        ...(hasSubRows
+            ? {
+                  getSubRows: (row: EntityRow) => row.__subRows as EntityRow[] | undefined,
+                  getExpandedRowModel: getExpandedRowModel(),
+                  // Keep sub-rows attached to their parent's page instead of counting
+                  // toward page size or splitting across page boundaries.
+                  paginateExpandedRows: false,
+                  autoResetExpanded: false,
+              }
+            : {}),
+        // Sub-rows start collapsed — the user reveals them via the expander column.
+        initialState: {
+            pagination: { pageIndex: 0, pageSize: entity.list?.pageSize ?? 15 },
+        },
     });
 
     const selectedRows = selectable ? table.getSelectedRowModel().rows : [];
@@ -341,7 +388,7 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
             )}
 
             <Table
-                data={filteredRows}
+                data={tableRows}
                 columns={columns}
                 tableInstance={table}
                 isLoading={isLoading}
