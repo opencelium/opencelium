@@ -56,15 +56,16 @@ export function NodeShell({
   };
 
   const showRightAddTrigger =
-    !!rightAdd && !!onAddStep && !(data.suppressHoverAddControls && !rightAdd.showAlways);
+    !!rightAdd && !!onAddStep && !data.hideAddControls && !(data.suppressHoverAddControls && !rightAdd.showAlways);
   const showBottomAddTrigger =
     !!bottomAdd &&
     !!onAddStep &&
+    !data.hideAddControls &&
     !(data.suppressHoverAddControls && !bottomAdd.showAlways);
 
   return (
     <div
-      className={`nodeWrap ${data.dragGhost ? 'nodeWrapDragGhost' : ''} ${data.dropPlaceholder ? 'nodeWrapDropPlaceholder' : ''}`}
+      className={`nodeWrap ${data.dragGhost ? 'nodeWrapDragGhost' : ''} ${data.dropPlaceholder ? 'nodeWrapDropPlaceholder' : ''} ${data.dragSourceMoving ? 'nodeWrapDragSourceMoving' : ''}`}
       onContextMenu={onContextMenu}
     >
       {selected && (

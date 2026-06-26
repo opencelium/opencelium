@@ -56,6 +56,8 @@ export type WorkflowNodeData = {
 	dropInvalid?: boolean;
 	dragGhost?: boolean;
 	dropPlaceholder?: boolean;
+	dragSourceMoving?: boolean;
+	hideAddControls?: boolean;
 	suppressHoverAddControls?: boolean;
 	lockVisibleAddControls?: boolean;
 	onAddStep?: (action: WorkflowAction) => void;

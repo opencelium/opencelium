@@ -6,7 +6,8 @@
 }
 
 .nodeWrapDragGhost,
-.nodeWrapDropPlaceholder {
+.nodeWrapDropPlaceholder,
+.nodeWrapDragSourceMoving {
   pointer-events: none;
 }
 
@@ -18,6 +19,10 @@
 .nodeWrapDropPlaceholder {
   opacity: 0.55;
   z-index: 5;
+}
+
+.nodeWrapDragSourceMoving {
+  opacity: 0.4;
 }
 
 .nodeWrapDropPlaceholder .nodeTopLabel,
