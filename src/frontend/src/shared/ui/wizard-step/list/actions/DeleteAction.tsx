@@ -29,24 +29,22 @@ export const DeleteAction: React.FC<DeleteActionProps> = ({ entity, row, rowId, 
                 value,
             });
 
-        const ok = await confirm({
-            title: tCommon('list.confirmDelete.title'),
-            message: message$,
-        });
-        if (!ok) return;
-
         const url = config.buildDeleteUrl
             ? config.buildDeleteUrl(entity, value, row)
             : buildDeleteUrl(entity, config.field, config.customPath, value);
 
-        try {
-            await deleteEntity({ url }).unwrap();
-            await config.afterDelete?.(value, row);
-            const successT = i18n.getFixedT(i18n.language, 'success');
-            message.success(successT('api.deleted'));
-        } catch (err) {
-            console.error(err);
-        }
+        const ok = await confirm({
+            title: tCommon('list.confirmDelete.title'),
+            message: message$,
+            onConfirm: async () => {
+                await deleteEntity({ url }).unwrap();
+                await config.afterDelete?.(value, row);
+            },
+        });
+        if (!ok) return;
+
+        const successT = i18n.getFixedT(i18n.language, 'success');
+        message.success(successT('api.deleted'));
     };
 
     const button = (

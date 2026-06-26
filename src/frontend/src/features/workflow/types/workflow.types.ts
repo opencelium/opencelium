@@ -46,6 +46,10 @@ export type WorkflowNodeData = {
 	isLeaf?: boolean;
 	rightLeaf?: boolean;
 	bottomLeaf?: boolean;
+	/** Derived at render time: 1-based position among nodes that reuse the same connector+method, so duplicates can be told apart by a color badge. Unset when the method is used only once. */
+	duplicateMethodIndex?: number;
+	/** Derived at render time: the badge color for a duplicate instance — `color` when present, otherwise a distinct palette fallback so the badge always renders. */
+	duplicateMethodColor?: string;
 	alwaysShowRightAdd?: boolean;
 	highlighted?: boolean;
 	dropTarget?: boolean;
@@ -95,6 +99,8 @@ export type WorkflowHeaderMenuItem = {
 	id: string;
 	labelKey: string;
 	section?: 'template' | 'editor' | 'exit';
+	/** Keep the menu open after selecting (for async actions that show in-place loading). */
+	keepOpenOnSelect?: boolean;
 };
 
 export type WorkflowNodeMenuItem = {

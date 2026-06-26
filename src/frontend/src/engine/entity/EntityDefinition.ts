@@ -2,6 +2,7 @@ import type {PartialStepProps} from "@shared/ui/tour/Tour.tsx";
 import type {PolicyDefinition} from "@/engine/policy";
 import type {CommandNode} from "@shared/command/types.ts";
 import type {FormRemoteProps, StepRemoteProps} from "@shared/ui/form/FormControl/FormControl.type.ts";
+import type {StepActionDefinition} from "@shared/ui/step-form/types.ts";
 import type {DialogController} from "@shared/ui/dialog/DialogContext.tsx";
 import React from "react";
 
@@ -138,6 +139,11 @@ export type WizardStepDefinition = {
     info?: PartialStepProps[],
 
     remote?: StepRemoteProps,
+    actionButtons?: StepActionDefinition[],
+    confirmOnRemoteFailure?: {
+        title: string
+        message: string
+    },
 }
 
 export type WizardModeConfig = {
@@ -156,8 +162,9 @@ export type WizardDefinition = {
      * Optional dynamic preview rendered in place of `image` while the form is active.
      * The component is rendered inside FormProvider so it can `useWatch` form fields.
      * Engines must NOT decorate this — the entity owns the styling.
+     * Receives the active `mode` so the preview can disable editing in view mode.
      */
-    renderImage?: React.ComponentType
+    renderImage?: React.ComponentType<{ mode?: Mode }>
     overrideKey?: string
     recommendations?: Recommendation[]
     steps: WizardStepDefinition[]

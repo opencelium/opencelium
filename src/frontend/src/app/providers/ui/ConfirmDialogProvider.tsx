@@ -21,12 +21,14 @@ export const ConfirmDialogProvider: React.FC<{
     children: React.ReactNode;
 }> = ({ children }) => {
     const [state, setState] = useState<InternalState>({ open: false });
+    const [loading, setLoading] = useState(false);
 
     const resolverRef = useRef<((value: boolean) => void) | null>(null);
 
     const confirm = useCallback((options: ConfirmOptions) => {
         return new Promise<boolean>((resolve) => {
             resolverRef.current = resolve;
+            setLoading(false);
 
             setState({
                 ...options,
@@ -35,15 +37,48 @@ export const ConfirmDialogProvider: React.FC<{
         });
     }, []);
 
+    // Move focus to the default button (Cancel, unless `autoFocusConfirm`) once
+    // the open animation settles. Doing it here — not via the button's autoFocus
+    // — is what actually works: rc-dialog focuses the dialog itself on the
+    // motion's visible-change, and this fires right after, overriding it.
+    const handleAfterOpenChange = (opened: boolean) => {
+        if (!opened) return;
+        // Single confirm dialog at a time (singleton provider), so a document
+        // query by the button's stable test id is safe and avoids wrapping the
+        // footer (which would break antd's adjacent-button spacing).
+        const selector = state.autoFocusConfirm
+            ? '[data-testid="confirm-dialog-confirm"]'
+            : '[data-testid="confirm-dialog-cancel"]';
+        document.querySelector<HTMLButtonElement>(selector)?.focus();
+    };
+
     const close = (result: boolean) => {
         const resolve = resolverRef.current;
         resolverRef.current = null;
 
+        setLoading(false);
         setState({ open: false });
 
         // Defer the resolve until after the modal+backdrop have animated out,
         // so callers can render their pending UI on an unobscured page.
         window.setTimeout(() => resolve?.(result), CLOSE_ANIMATION_MS);
+    };
+
+    // When `onConfirm` is provided, run it with the confirm button in a loading
+    // state and the dialog held open, so an API request started on confirm shows
+    // its progress in place instead of closing immediately.
+    const handleConfirm = async () => {
+        if (!state.onConfirm) {
+            close(true);
+            return;
+        }
+        setLoading(true);
+        try {
+            await state.onConfirm();
+            close(true);
+        } catch {
+            close(false);
+        }
     };
 
     // When the session ends (expiry or logout) dismiss any open confirm and
@@ -60,14 +95,17 @@ export const ConfirmDialogProvider: React.FC<{
 
             <Dialog
                 open={state.open}
-                onClose={() => close(false)}
+                onClose={() => { if (!loading) close(false); }}
+                afterOpenChange={handleAfterOpenChange}
                 title={state.title}
+                closable={!loading}
                 testId="confirm-dialog"
                 zIndex={20000}
                 footer={
                     <>
                         <Button
                             variant="secondary"
+                            disabled={loading}
                             onClick={() => close(false)}
                             testId="confirm-dialog-cancel"
                         >
@@ -76,7 +114,8 @@ export const ConfirmDialogProvider: React.FC<{
 
                         <Button
                             variant={state.confirmVariant ?? 'primary'}
-                            onClick={() => close(true)}
+                            loading={loading}
+                            onClick={handleConfirm}
                             testId="confirm-dialog-confirm"
                         >
                             {state.confirmText ?? 'Confirm'}

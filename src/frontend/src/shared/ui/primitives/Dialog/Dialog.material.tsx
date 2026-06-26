@@ -24,6 +24,7 @@ export const MaterialDialog: DialogComponent = ({
   fullscreen = false,
   maximizable = false,
   afterClose,
+  afterOpenChange,
   testId,
   zIndex,
 }) => {
@@ -44,7 +45,13 @@ export const MaterialDialog: DialogComponent = ({
     <MuiDialog
       open={open}
       onClose={closable ? onClose : undefined}
-      TransitionProps={afterClose ? { onExited: afterClose } : undefined}
+      TransitionProps={{
+        onEntered: afterOpenChange ? () => afterOpenChange(true) : undefined,
+        onExited: () => {
+          afterClose?.();
+          afterOpenChange?.(false);
+        },
+      }}
       fullScreen={isFullscreen}
       maxWidth={false}
       sx={Object.keys(sx).length ? sx : undefined}

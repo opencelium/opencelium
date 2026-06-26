@@ -98,7 +98,7 @@
       "connectorFallback": "Connector"
     },
     "chooseNextStep": "Choose your next step",
-    "from": "From: {{name}}",
+    "willBeAddedAfter": "It will be added after: {{name}}",
     "searchPlaceholder": "search",
     "triggerConnection": {
       "title": "Trigger Connection",
@@ -120,16 +120,45 @@
       "title": "No methods found",
       "description": "There are no methods matching this search."
     },
+    "searchEmpty": {
+      "title": "No results found",
+      "description": "No connectors, operators, or methods match your search."
+    },
     "methodItemText": "Invoker method",
     "connectorMethodsFallback": "Methods from {{invoker}} invoker."
   },
   "headerMenu": {
-    "downloadAsTemplate": "download as template",
-    "saveAsTemplate": "save as template",
-    "loadTemplate": "load template",
-    "editorAppearance": "editor appearance",
-    "shortcuts": "shortcuts",
-    "exit": "exit"
+    "downloadAsTemplate": "Download as Template",
+    "saveAsTemplate": "Save as Template",
+    "loadTemplate": "Load Template",
+    "editorAppearance": "Editor Appearance",
+    "shortcuts": "Shortcuts",
+    "exit": "Exit"
+  },
+  "shortcutsDialog": {
+    "title": "Keyboard & mouse shortcuts",
+    "groups": {
+      "canvas": "Canvas",
+      "nodes": "Nodes",
+      "general": "General"
+    },
+    "keys": {
+      "drag": "Drag",
+      "scroll": "Scroll",
+      "click": "Click",
+      "doubleClick": "Double-click",
+      "ctrl": "Ctrl",
+      "esc": "Esc"
+    },
+    "items": {
+      "pan": "Pan the canvas",
+      "zoom": "Zoom in and out",
+      "openConfig": "Open node configuration",
+      "moveNode": "Move a node",
+      "duplicate": "Duplicate a node instead of moving it",
+      "multiSelect": "Select multiple nodes",
+      "close": "Close the open menu, dialog, or panel"
+    }
   },
   "contextMenu": {
     "changeLabel": "Change Label",

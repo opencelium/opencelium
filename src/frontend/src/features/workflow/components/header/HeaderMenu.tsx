@@ -1,17 +1,28 @@
 import { useEffect, useRef } from 'react';
 import type { WorkflowHeaderMenuItem } from '../../types/workflow.types';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { WorkflowMenuItem } from './WorkflowMenuItem';
 
 type Props = {
   open: boolean;
   items: WorkflowHeaderMenuItem[];
   onClose: () => void;
   onSelect?: (item: WorkflowHeaderMenuItem) => void;
+  /** Id of the item whose async action is currently in flight; renders a spinner beside its label. */
+  loadingItemId?: string | null;
 };
 
-export function HeaderMenu({ open, items, onClose, onSelect }: Props) {
+export function HeaderMenu({ open, items, onClose, onSelect, loadingItemId }: Props) {
   const { t } = useI18n('workflow');
   const ref = useRef<HTMLDivElement | null>(null);
+  const wasLoadingRef = useRef(false);
+
+  useEffect(() => {
+    const isLoading = loadingItemId != null;
+    // Close the menu once a kept-open async action finishes (loading → idle).
+    if (wasLoadingRef.current && !isLoading) onClose();
+    wasLoadingRef.current = isLoading;
+  }, [loadingItemId, onClose]);
 
   useEffect(() => {
     if (!open) return;
@@ -51,19 +62,21 @@ export function HeaderMenu({ open, items, onClose, onSelect }: Props) {
     <div ref={ref} className="headerMenu">
       {Object.entries(sections).map(([sectionKey, sectionItems]) => (
         <div key={sectionKey} className="headerMenuSection">
-          {sectionItems.map((item) => (
-            <button
-              key={item.id}
-              className="headerMenuItem"
-              type="button"
-              onClick={() => {
-                onSelect?.(item);
-                onClose();
-              }}
-            >
-              {t(item.labelKey)}
-            </button>
-          ))}
+          {sectionItems.map((item) => {
+            const isLoading = item.id === loadingItemId;
+            return (
+              <WorkflowMenuItem
+                key={item.id}
+                className="headerMenuItem"
+                label={t(item.labelKey)}
+                loading={isLoading}
+                onClick={() => {
+                  onSelect?.(item);
+                  if (!item.keepOpenOnSelect) onClose();
+                }}
+              />
+            );
+          })}
         </div>
       ))}
     </div>

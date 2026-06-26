@@ -43,6 +43,7 @@ export type IconName =
     | 'maximize'
     | 'minimize'
     | 'arrow-switch'
+    | 'workflow'
 
 export type IconColor =
     | 'default'

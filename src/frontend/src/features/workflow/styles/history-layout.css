@@ -59,8 +59,7 @@
 }
 
 .historyDateLabel,
-.historyTimeLabel,
-.historyConfirmDialog span {
+.historyTimeLabel {
   color: var(--color-text-secondary);
   font-size: 13px;
 }

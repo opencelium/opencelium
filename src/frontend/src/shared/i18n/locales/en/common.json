@@ -71,7 +71,8 @@
     "notifications": "Notifications",
     "switchToAdminMenu": "Switch to admin menu",
     "switchToMainMenu": "Switch to main menu",
-    "profile": "Profile"
+    "profile": "Profile",
+    "createWorkflow": "Create Workflow"
   },
   "actions": {
     "prev": "Back",

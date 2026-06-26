@@ -20,8 +20,6 @@ export function useHistoryPanelState({ open, onClose, items: initialItems = hist
   const [expandedMetrics, setExpandedMetrics] = useState<Record<string, { width: number; shiftLeft: number }>>({});
   const [internalSelectedId, setInternalSelectedId] = useState<string | null>(historyItems[0]?.id ?? null);
   const [menuId, setMenuId] = useState<string | null>(null);
-  const [confirmId, setConfirmId] = useState<string | null>(null);
-  const [pendingSelectId, setPendingSelectId] = useState<string | null>(null);
   const panelRef = useRef<HTMLElement | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const commentRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -58,8 +56,6 @@ export function useHistoryPanelState({ open, onClose, items: initialItems = hist
     if (!open) return;
     const onEscape = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return;
-      if (confirmId) return setConfirmId(null);
-      if (pendingSelectId) return setPendingSelectId(null);
       if (menuId) return setMenuId(null);
       onClose();
     };
@@ -73,7 +69,7 @@ export function useHistoryPanelState({ open, onClose, items: initialItems = hist
       window.removeEventListener('keydown', onEscape);
       window.removeEventListener('mousedown', onPointerDown);
     };
-  }, [confirmId, menuId, onClose, open, pendingSelectId]);
+  }, [menuId, onClose, open]);
 
   const computeExpandedWidth = (id: string) => {
     const panelRect = panelRef.current?.getBoundingClientRect();
@@ -92,7 +88,6 @@ export function useHistoryPanelState({ open, onClose, items: initialItems = hist
     activeId,
     commentRefs,
     comments,
-    confirmId,
     expandedCommentId,
     expandedMetrics,
     hoveredCommentId,
@@ -100,17 +95,14 @@ export function useHistoryPanelState({ open, onClose, items: initialItems = hist
     menuId,
     menuRef,
     panelRef,
-    pendingSelectId,
     rows,
     selectedId,
     setActiveId,
     setComments,
-    setConfirmId,
     setExpandedCommentId,
     setHoveredCommentId,
     setItems,
     setMenuId,
-    setPendingSelectId,
     setSelectedId,
     computeExpandedWidth,
   };

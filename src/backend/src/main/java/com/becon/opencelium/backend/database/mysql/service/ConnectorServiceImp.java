@@ -26,6 +26,7 @@ import com.becon.opencelium.backend.database.mysql.repository.ConnectorRepositor
 import com.becon.opencelium.backend.exception.ConnectorAlreadyExistsException;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
+import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.execution.logger.mapper.ParsedLogLineMapper;
 import com.becon.opencelium.backend.execution.rdata.RequiredDataService;
 import com.becon.opencelium.backend.execution.rdata.RequiredDataServiceImp;
@@ -36,6 +37,9 @@ import com.becon.opencelium.backend.invoker.entity.RequiredData;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
+import com.becon.opencelium.backend.storage.StorageService;
+import com.becon.opencelium.backend.utility.FileNameUtils;
+import com.becon.opencelium.backend.utility.StringUtility;
 import com.becon.opencelium.backend.utility.crypto.Encoder;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -44,6 +48,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -57,13 +62,15 @@ public class ConnectorServiceImp implements ConnectorService {
     private final Encoder encoder;
     private final RequestDataService requestDataService;
     private final Environment env;
+    private final StorageService storageService;
 
     public ConnectorServiceImp(
             ConnectorProps connectorProps, ConnectorRepository connectorRepository,
             @Qualifier("invokerServiceImp") InvokerService invokerService,
             @Qualifier("requestDataServiceImp") RequestDataServiceImp requestDataService,
             Encoder encoder,
-            Environment env
+            Environment env,
+            StorageService storageService
     ) {
         this.connectorProps = connectorProps;
         this.connectorRepository = connectorRepository;
@@ -71,6 +78,7 @@ public class ConnectorServiceImp implements ConnectorService {
         this.encoder = encoder;
         this.requestDataService = requestDataService;
         this.env = env;
+        this.storageService = storageService;
     }
 
     @Override
@@ -250,7 +258,10 @@ public class ConnectorServiceImp implements ConnectorService {
 
         // requestData and invoker can't be updated
         connector.setTitle(connectorResource.getTitle());
-        connector.setIcon(connectorResource.getIcon());
+        // The incoming icon may be a full URL (e.g. "/storage/files/<uuid>.png") that was
+        // produced by a previous toDTO mapping. Extract just the filename so the prefix is not
+        // prepended twice when the entity is mapped back to a DTO (icon path doubling on update).
+        connector.setIcon(StringUtility.findImageFromUrl(connectorResource.getIcon()));
         connector.setDescription(connectorResource.getDescription());
         connector.setSslValidation(connectorResource.isSslCert());
         connector.setTimeout(connectorResource.getTimeout());
@@ -260,6 +271,47 @@ public class ConnectorServiceImp implements ConnectorService {
         decrypt(connector);
 
         return connector;
+    }
+
+    @Override
+    public Connector storeIcon(int connectorId, MultipartFile file) {
+        // findById decrypts the connector; the paired save() re-encrypts it.
+        Connector connector = findById(connectorId)
+                .orElseThrow(() -> new ConnectorNotFoundException(connectorId));
+
+        if (file == null || file.isEmpty()) {
+            throw new StorageException("Failed to store empty connector icon");
+        }
+        String extension = FileNameUtils.getExtension(file.getOriginalFilename());
+        if (!FileNameUtils.isSupportedImageExtension(extension)) {
+            throw new StorageException("File should be jpg, jpeg or png");
+        }
+
+        // Remove the previously stored icon so replacing it does not leave an orphaned file.
+        String previousIcon = connector.getIcon();
+        if (previousIcon != null && !previousIcon.isBlank()) {
+            storageService.delete(StringUtility.findImageFromUrl(previousIcon));
+        }
+
+        String newFilename = UUID.randomUUID() + "." + extension;
+        storageService.store(file, newFilename);
+        connector.setIcon(newFilename);
+
+        return save(connector);
+    }
+
+    @Override
+    public void deleteIcon(int connectorId) {
+        // findById decrypts the connector; the paired save() re-encrypts it.
+        Connector connector = findById(connectorId)
+                .orElseThrow(() -> new ConnectorNotFoundException(connectorId));
+
+        String icon = connector.getIcon();
+        if (icon != null && !icon.isBlank()) {
+            storageService.delete(StringUtility.findImageFromUrl(icon));
+        }
+        connector.setIcon(null);
+        save(connector);
     }
 
     @Override

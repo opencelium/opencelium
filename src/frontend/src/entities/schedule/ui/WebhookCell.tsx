@@ -37,22 +37,22 @@ export const WebhookCell = memo(function WebhookCell({ schedule }: Props) {
         const ok = await confirm({
             title: tEntities('schedule.webhook.confirmDelete.title'),
             message: tEntities('schedule.webhook.confirmDelete.message'),
+            onConfirm: async () => {
+                setPending(true)
+                try {
+                    await generalRequest({
+                        url: `/webhook/${webhook.webhookId}`,
+                        method: 'DELETE',
+                        options: {},
+                    }).unwrap()
+                } finally {
+                    setPending(false)
+                }
+            },
         })
         if (!ok) return
 
-        setPending(true)
-        try {
-            await generalRequest({
-                url: `/webhook/${webhook.webhookId}`,
-                method: 'DELETE',
-                options: {},
-            }).unwrap()
-            message.success(tEntities('schedule.webhook.deleted'))
-        } catch {
-            // error surfaced by errorBus
-        } finally {
-            setPending(false)
-        }
+        message.success(tEntities('schedule.webhook.deleted'))
     }
 
     const handleCreate = async () => {
