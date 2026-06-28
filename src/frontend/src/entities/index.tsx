@@ -34,6 +34,7 @@ import MigrationToolkit from './migrate/redux_toolkit';
 import CategoryToolkit from './category/redux_toolkit';
 import LicenseManagementToolkit from './license_management/redux_toolkit';
 import LdapManagementToolkit from './ldap/redux_toolkit';
+import OidcToolkit from './oidc/redux_toolkit';
 import TotpToolkit from './totp/redux_toolkit';
 
 const ActionCreators = {
@@ -53,6 +54,7 @@ const ActionCreators = {
     ...CategoryToolkit.actionCreators,
     ...LicenseManagementToolkit.actionCreators,
     ...LdapManagementToolkit.actionCreators,
+    ...OidcToolkit.actionCreators,
     ...TotpToolkit.actionCreators,
 }
 
@@ -74,6 +76,7 @@ const reducers = {
     ...CategoryToolkit.reducers,
     ...LicenseManagementToolkit.reducers,
     ...LdapManagementToolkit.reducers,
+    ...OidcToolkit.reducers,
     ...TotpToolkit.reducers,
 }
 

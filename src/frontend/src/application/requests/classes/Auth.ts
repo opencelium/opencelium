@@ -43,6 +43,20 @@ export class AuthRequest extends Request implements IAuth{
         return super.post<IUser & LoginTOTPResponse>(credentials);
     }
 
+    async getOidcInfo(): Promise<AxiosResponse<{enabled: boolean, buttonText: string}>>{
+        this.url = 'oidc/info';
+        this.hasAuthToken = false;
+
+        return super.get<{enabled: boolean, buttonText: string}>();
+    }
+
+    async exchangeOidcCode(code: string): Promise<AxiosResponse<IUser & LoginTOTPResponse>>{
+        this.url = 'oidc/token';
+        this.hasAuthToken = false;
+
+        return super.post<IUser & LoginTOTPResponse>({code});
+    }
+
     async forgotPassword(email: string): Promise<AxiosResponse<SimpleMessageResponse>>{
         this.url = 'auth/forgot-password';
         this.hasAuthToken = false;

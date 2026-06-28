@@ -16,7 +16,7 @@
 import { Middleware } from 'redux'
 import {logout, setLoginInfo} from '@application/redux_toolkit/slices/AuthSlice';
 import {AppDispatch, RootState} from "@application/utils/store";
-import {login} from "@application/redux_toolkit/action_creators/AuthCreators";
+import {login, loginOidc} from "@application/redux_toolkit/action_creators/AuthCreators";
 import {LocalStorage} from "@application/classes/LocalStorage";
 import {IResponse, ResponseMessages} from "@application/requests/interfaces/IResponse";
 import {LogoutProps} from "@application/interfaces/IAuth";
@@ -54,7 +54,7 @@ export const authMiddleware: Middleware<{}, RootState> = storeApi => next => act
     if (validateTotp.fulfilled.type === action.type) {
         dispatch(setLoginInfo(action.payload));
     }
-    if (login.fulfilled.type === action.type || setLoginInfo.type === action.type) {
+    if (login.fulfilled.type === action.type || loginOidc.fulfilled.type === action.type || setLoginInfo.type === action.type) {
         const storage = LocalStorage.getStorage(true);
         storage.set('authUser', action.payload);
         dispatch(setQrCode(''));

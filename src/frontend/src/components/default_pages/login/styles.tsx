@@ -51,13 +51,13 @@ const HeaderStyled = styled.div<HeaderStyledProps>`
     ` : ''}
 `;
 
-const ForgotPasswordLink = styled.div`
+const ForgotPasswordLink = styled.div<{ $hasOidc?: boolean }>`
     overflow: unset;
     font-size: ${DefaultInputTextSize}px;
     color: ${ColorTheme.Blue};
     cursor: pointer;
     position: absolute;
-    top: 310px;
+    top: ${({$hasOidc}) => ($hasOidc ? 310 + 55 : 310)}px;
     left: 50%;
     transform: translateX(-50%);
     &:hover {
@@ -65,8 +65,25 @@ const ForgotPasswordLink = styled.div`
     }
 `
 
+const OidcButton = styled.button`
+    display: block;
+    width: calc(100% - 20px);
+    margin: 4px auto 16px auto;
+    padding: 8px 12px;
+    background: ${ColorTheme.White};
+    color: ${({theme}) => theme.menu.background || '#012E55'};
+    border: none;
+    border-radius: 4px;
+    font-size: ${DefaultInputTextSize}px;
+    cursor: pointer;
+    &:hover {
+        opacity: 0.9;
+    }
+`
+
 export {
     LoginFormStyled,
     HeaderStyled,
-    ForgotPasswordLink
+    ForgotPasswordLink,
+    OidcButton
 }

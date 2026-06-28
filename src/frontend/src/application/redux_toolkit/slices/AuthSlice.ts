@@ -18,7 +18,7 @@ import IAuthUser from "@entity/user/interfaces/IAuthUser";
 import {API_REQUEST_STATE, TRIPLET_STATE} from "../../interfaces/IApplication";
 import {CommonState} from "../../utils/store";
 import {ICommonState} from "../../interfaces/core";
-import {login} from "../action_creators/AuthCreators";
+import {login, loginOidc} from "../action_creators/AuthCreators";
 import {LocalStorage} from "../../classes/LocalStorage";
 import {IResponse} from "../../requests/interfaces/IResponse";
 import {LogoutProps} from "../../interfaces/IAuth";
@@ -106,6 +106,24 @@ export const authSlice = createSlice({
             if(action.payload.message === 'SESSION_ID_IS_REQUIRED') {
                 state.sessionId = action.payload.sessionId;
             }
+            state.error = action.payload;
+        },
+        [loginOidc.pending.type]: (state, action: PayloadAction<any>) => {
+            state.logining = API_REQUEST_STATE.START;
+            state.sessionId = '';
+            state.message = '';
+        },
+        [loginOidc.fulfilled.type]: (state, action: PayloadAction<IAuthUser>) => {
+            state.sessionId = '';
+            state.logining = API_REQUEST_STATE.FINISH;
+            state.error = null;
+            state.isAuth = true;
+            state.authUser = action.payload;
+            state.wasAccessDenied = false;
+        },
+        [loginOidc.rejected.type]: (state, action: PayloadAction<IResponse>) => {
+            state.logining = API_REQUEST_STATE.ERROR;
+            state.sessionId = '';
             state.error = action.payload;
         },
     }

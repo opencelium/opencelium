@@ -723,3 +723,6 @@ INSERT IGNORE INTO widget_setting (
 --changeset 4.8.1:1 stripComments:true splitStatements:true endDelimiter:;
 ALTER TABLE `enhancement` DROP FOREIGN KEY `fk_enhancement_connection1`;
 ALTER TABLE `enhancement` ADD CONSTRAINT `fk_enhancement_connection1` FOREIGN KEY (`connection_id`) REFERENCES `connection` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
+
+--changeset 4.8.1:2 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE user MODIFY COLUMN auth_method ENUM('LDAP', 'BASIC', 'OIDC') NOT NULL DEFAULT 'BASIC';

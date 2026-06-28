@@ -150,6 +150,63 @@ spring:
 #      default-role: User
 #      # Timeout for LDAP authentication (in milliseconds)
 #      timeout: 30000
+  ######################################################################
+  #                                                                    #
+  #   OpenID Connect (OIDC) configuration section.                     #
+  #   Authorization Code flow with a confidential client.              #
+  #   Endpoints can be discovered via issuer-uri or set by hand.       #
+  #                                                                    #
+  ######################################################################
+#    security:
+#      oidc:
+#        # Enables the "Sign in with SSO" button and the /oidc/* endpoints
+#        enabled: true
+#        # Label shown on the login button
+#        button-text: Sign in with SSO
+#        # When set, authorization/token/jwks/userinfo endpoints are resolved
+#        # via {issuer-uri}/.well-known/openid-configuration
+#        issuer-uri: https://idp.example.com/realms/opencelium
+#        # Alternatively, configure the endpoints by hand (leave issuer-uri empty)
+#        # authorization-uri: https://idp.example.com/authorize
+#        # token-uri: https://idp.example.com/token
+#        # jwk-set-uri: https://idp.example.com/keys
+#        # user-info-uri: https://idp.example.com/userinfo
+#        # Confidential client credentials (client authentication)
+#        client-id: opencelium
+#        client-secret: CLIENT_SECRET
+#        client-authentication-method: client_secret_basic
+#        scopes:
+#          - openid
+#          - profile
+#          - email
+#        # Backend callback registered at the provider; must also be an allowed redirect URI at the IdP.
+#        redirect-uri: https://opencelium.example.com/oidc/callback
+#        # SPA base URL to return to after login. MUST point at where the frontend is served, NOT the
+#        # backend. If left blank it is derived from the request (the backend origin), so the backend
+#        # redirects to its own /oidc/callback and login loops with error=invalid_state.
+#        # Prod (behind nginx): the site root, e.g. https://opencelium.example.com
+#        # Dev (webpack dev server on :8888, backend on :9090): http://localhost:8888
+#        frontend-redirect-uri: https://opencelium.example.com
+#        # Which ID-token claims to read
+#        username-claim: preferred_username
+#        email-claim: email
+#        given-name-claim: given_name
+#        family-name-claim: family_name
+#        phone-number-claim: phone_number
+#        # department/organization have no standard claim; map them to your provider's claim names
+#        department-claim: department
+#        organization-claim: organization
+#        groups-claim: groups
+#        # Maps provider groups to OpenCelium roles (a group mapped to Admin grants admin)
+#        group-role-mapping:
+#          - oidc-group: oc-admins
+#            oc-role: Admin
+#          - oidc-group: oc-users
+#            oc-role: User
+#        # Role assigned when no group mapping matches
+#        default-role: User
+#        # Create users on first login (JIT). Set to false to only allow existing users.
+#        jit-provisioning: true
 
 springdoc:
   swagger-ui:

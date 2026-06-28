@@ -18,14 +18,16 @@ import {useNavigate} from "react-router";
 import {Toast, ToastBody, ToastHeader} from "reactstrap";
 
 import {Auth} from "@application/classes/Auth";
+import {AuthRequest} from "@application/requests/classes/Auth";
 import {IAuth} from "@application/interfaces/IAuth";
 import {onEnter} from "@application/utils/utils";
 import {InputTextType} from "@app_component/base/input/text/interfaces";
 import {ColorTheme} from "@style/Theme";
-import {ForgotPasswordLink, HeaderStyled, LoginFormStyled} from "./styles";
+import {ForgotPasswordLink, HeaderStyled, LoginFormStyled, OidcButton} from "./styles";
 import {LoginIcon} from "./login_icon/LoginIcon";
 import AuthCode from "@app_component/default_pages/login/AuthCode";
 import {API_REQUEST_STATE} from "@application/interfaces/IApplication";
+import {Urls} from "@entity/application/requests/classes/url";
 
 const WRONG_LOGIN_MESSAGE = "Username or password is wrong.";
 
@@ -36,6 +38,19 @@ const LoginFormInputs = ({isAuth, hasAnimation, hasForgotPassword}: {isAuth: boo
     const {sessionId, logining, error} = authRedux;
 
     const LoginForm = Auth.createState<IAuth>();
+
+    const [oidc, setOidc] = React.useState<{enabled: boolean, buttonText: string}>({enabled: false, buttonText: ''});
+
+    React.useEffect(() => {
+        const request = new AuthRequest({hasAuthToken: false, isApi: false});
+        request.getOidcInfo()
+            .then(response => setOidc(response.data))
+            .catch(() => setOidc({enabled: false, buttonText: ''}));
+    }, []);
+
+    const onOidcLogin = React.useCallback(() => {
+        window.location.href = Urls.baseUrl + 'oidc/authorize';
+    }, []);
 
   const onForgotPasswordClick = React.useCallback(() => {
     navigate("/forgot-password");
@@ -102,11 +117,16 @@ const LoginFormInputs = ({isAuth, hasAnimation, hasForgotPassword}: {isAuth: boo
                 {PasswordInput}
 
                 <LoginIcon hasAnimation={hasAnimation} login={() => LoginForm.login()}/>
+                {oidc.enabled && !isAuth && (
+                    <OidcButton type="button" onClick={onOidcLogin}>
+                        {oidc.buttonText || 'Sign in with SSO'}
+                    </OidcButton>
+                )}
                 {!!sessionId && <AuthCode/>}
             </LoginFormStyled>
 
             {!isAuth && hasForgotPassword && (
-                <ForgotPasswordLink onClick={onForgotPasswordClick}>
+                <ForgotPasswordLink $hasOidc={oidc.enabled} onClick={onForgotPasswordClick}>
                 Forgot password?
                 </ForgotPasswordLink>
             )}

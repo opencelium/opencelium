@@ -2,6 +2,17 @@
 Changelog
 *********
 
+4.9.0
+========
+
+:Date: June 28, 2026
+
+
+Features
+--------
+
+* Add OpenID Connect (OIDC) single sign-on: Authorization Code flow with client authentication, endpoint configuration via ``.well-known/openid-configuration`` discovery or by hand, custom claim-to-role mapping for group membership and admin privileges, and optional just-in-time user provisioning
+
 4.8.4
 ========
 

@@ -104,6 +104,106 @@ For login using LDAP credentials, please have a look into OpenCelium Logs for tr
 	journalctl -xe -u opencelium -f
  
 
+OpenID Connect (OIDC)
+"""""""""""""""""""""""
+
+OpenCelium can delegate authentication to an OpenID Connect identity provider (e.g. Keycloak,
+Microsoft Entra ID, Okta, Auth0) using the Authorization Code flow with a confidential client.
+When enabled, a *Sign in with SSO* button appears on the login page; users authenticate at the
+provider and are redirected back to OpenCelium.
+
+To establish OIDC authentication, configure the *application.yml* file. Under *spring* -> *security*,
+set the required parameters. The endpoints can either be discovered automatically from the provider's
+``.well-known/openid-configuration`` document (set ``issuer-uri``) or configured by hand:
+
+.. code-block:: yaml
+
+   oidc:
+      # Enables the SSO button and the /oidc/* endpoints
+      enabled: true
+      button-text: Sign in with SSO
+
+      # Option A: discover endpoints via {issuer-uri}/.well-known/openid-configuration
+      issuer-uri: https://idp.example.com/realms/opencelium
+
+      # Option B: configure endpoints by hand (leave issuer-uri empty)
+      # authorization-uri: https://idp.example.com/authorize
+      # token-uri: https://idp.example.com/token
+      # jwk-set-uri: https://idp.example.com/keys
+      # user-info-uri: https://idp.example.com/userinfo
+
+      # Confidential client credentials (client authentication)
+      client-id: opencelium
+      client-secret: CLIENT_SECRET
+      client-authentication-method: client_secret_basic
+      scopes:
+        - openid
+        - profile
+        - email
+
+      # Backend callback registered at the provider; must also be an allowed redirect URI at the IdP
+      redirect-uri: https://opencelium.example.com/oidc/callback
+      # SPA base URL to return to after login. Must point at where the frontend is served, not the backend
+      frontend-redirect-uri: https://opencelium.example.com
+
+      # Which ID-token claims to read
+      username-claim: preferred_username
+      email-claim: email
+      given-name-claim: given_name
+      family-name-claim: family_name
+      phone-number-claim: phone_number
+      # department/organization have no standard claim; map them to your provider's claim names
+      department-claim: department
+      organization-claim: organization
+      groups-claim: groups
+
+      # Maps provider groups to OpenCelium roles (a group mapped to Admin grants admin rights)
+      group-role-mapping:
+        - oidc-group: oc-admins
+          oc-role: Admin
+        - oidc-group: oc-users
+          oc-role: User
+
+      # Role assigned when no group mapping matches
+      default-role: User
+
+      # Create users on first login (JIT). Set to false to only allow already existing users.
+      jit-provisioning: true
+
+The ``redirect-uri`` (``.../oidc/callback``) must be registered as an allowed redirect URI at the
+identity provider.
+
+.. warning::
+    ``frontend-redirect-uri`` must point at the origin where the **frontend** is served, never the
+    backend. If it is left blank it is derived from the incoming request (the backend origin), so the
+    backend redirects to its own ``/oidc/callback`` and login loops with ``error=invalid_state`` even
+    though authentication succeeded. Behind nginx the frontend and backend share a host, so the site
+    root is correct. In a split dev setup they differ — e.g. backend on ``http://localhost:9090`` and
+    the webpack dev server on ``http://localhost:8888``::
+
+        redirect-uri: http://localhost:9090/oidc/callback
+        frontend-redirect-uri: http://localhost:8888
+
+.. note::
+    Group membership and admin privileges are derived from the ``groups-claim`` of the ID token via
+    ``group-role-mapping``. Ensure the provider includes that claim in the ID token, or set
+    ``user-info-uri`` so the claim can be read from the UserInfo endpoint.
+
+.. note::
+    With ``jit-provisioning: true`` an OpenCelium user is created automatically on first successful
+    login. With ``jit-provisioning: false`` only users that already exist in OpenCelium may log in;
+    unknown users are rejected.
+
+.. warning::
+    OIDC (and LDAP) users authenticate against an external system and therefore cannot use the
+    *Forgot password* function — password management is handled by the identity provider.
+
+.. warning::
+    After updating the application.yml file, please restart the opencelium service.
+
+The current OIDC configuration can be reviewed in *Admin Panel* -> *OpenID Connect*.
+
+
 .. |image1| image:: ../img/management/authentication/1.png
    :align: middle
    :width: 400

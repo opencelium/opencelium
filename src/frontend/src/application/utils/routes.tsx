@@ -28,6 +28,7 @@ import ErrorBoundary from "../../components/base/error_boundary/ErrorBoundary";
 import Sandbox from "@app_component/sandbox/Sandbox";
 import ForgotPassword from '@app_component/default_pages/login/ForgotPassword';
 import SetPassword from '@app_component/default_pages/login/SetPassword';
+import OidcCallback from '@app_component/default_pages/login/OidcCallback';
 
 function RequireAuth({ children }: { children: JSX.Element }) {
     let location = useLocation();
@@ -51,6 +52,7 @@ export const getRoutes = () => {
             <Route path="/*" element={<ErrorBoundary><PageNotFound/></ErrorBoundary>}/>
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/set-password" element={<SetPassword />} />
+            <Route path="/oidc/callback" element={<ErrorBoundary><OidcCallback /></ErrorBoundary>} />
         </Routes>
     )
 }
