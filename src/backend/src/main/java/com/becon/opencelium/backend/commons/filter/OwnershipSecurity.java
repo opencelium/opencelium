@@ -47,4 +47,10 @@ public class OwnershipSecurity {
             throw new GeneralServiceException(HttpStatus.FORBIDDEN, ExceptionConstant.FORBIDDEN, ExceptionMessages.ONLY_OWNER_OR_ADMIN_CAN_PERFORM_ACTION);
         }
     }
+
+    public void checkAdmin() {
+        if (!isAdmin()) {
+            throw new GeneralServiceException(HttpStatus.FORBIDDEN, ExceptionConstant.FORBIDDEN, ExceptionMessages.ONLY_ADMIN_CAN_PERFORM_ACTION);
+        }
+    }
 }

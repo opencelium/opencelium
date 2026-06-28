@@ -20,6 +20,7 @@ import com.becon.opencelium.backend.constant.SecurityConstant;
 import com.becon.opencelium.backend.database.mysql.entity.User;
 import com.becon.opencelium.backend.database.mysql.service.SessionServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.UserService;
+import com.becon.opencelium.backend.enums.AuthMethod;
 import com.becon.opencelium.backend.utility.EmailUtility;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -93,7 +94,11 @@ public class AuthorizationFilter extends OncePerRequestFilter {
         if (EmailUtility.isEmail(principal)) {
             optionalUser = userService.findByEmail(principal);
         } else {
+            // username-based principals belong to externally authenticated users (LDAP or OIDC)
             optionalUser = userService.findByUsername(principal);
+            if (optionalUser.isEmpty()) {
+                optionalUser = userService.findByUsernameAndAuthMethod(principal, AuthMethod.OIDC);
+            }
         }
         User user = optionalUser.orElseThrow(() -> new UsernameNotFoundException(principal));
 

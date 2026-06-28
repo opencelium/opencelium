@@ -64,7 +64,9 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         User userNotLocked = userService.findByEmail(email)
                 .orElseThrow(() -> new GeneralServiceException(HttpStatus.BAD_REQUEST, ExceptionConstant.EMAIL_NOT_EXISTS, "email does not exists"));
 
-        if (userNotLocked.getAuthMethod() == AuthMethod.LDAP) {
+        // Only locally authenticated (BASIC) users have an OpenCelium-managed password. LDAP and OIDC
+        // users authenticate against an external system, so a local password reset must be refused.
+        if (userNotLocked.getAuthMethod() != AuthMethod.BASIC) {
             throw new ServiceUnavailableException(ExceptionConstant.EMAIL_RECOVERY_FAILED, "There is an issue with your email configuration. For security reasons, the detailed error message has been written to your Opencelium logs. Please review the logs for more information.");
         }
 

@@ -17,6 +17,7 @@
 package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.database.mysql.entity.User;
+import com.becon.opencelium.backend.enums.AuthMethod;
 import com.becon.opencelium.backend.resource.ChangePasswordDTO;
 import com.becon.opencelium.backend.resource.request.UserRequestResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
@@ -29,6 +30,8 @@ public interface UserService {
     Optional<User> findByEmail(String email);
 
     Optional<User> findByUsername(String username);
+
+    Optional<User> findByUsernameAndAuthMethod(String username, AuthMethod authMethod);
 
     Optional<User> findById(int id);
 

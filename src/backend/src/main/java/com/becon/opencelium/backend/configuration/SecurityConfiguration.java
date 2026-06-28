@@ -99,7 +99,11 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/auth/forgot-password",
-                                "/auth/reset-password"
+                                "/auth/reset-password",
+                                "/oidc/info",
+                                "/oidc/authorize",
+                                "/oidc/callback",
+                                "/oidc/token"
                         ).permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement()

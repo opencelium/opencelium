@@ -44,6 +44,24 @@ export const login = createAsyncThunk(
     }
 )
 
+export const loginOidc = createAsyncThunk(
+    'loginOidc',
+    async(code: string, thunkAPI) => {
+        try {
+            const request = new AuthRequest({hasAuthToken: false, isApi: false});
+            const loginResponseData = await request.exchangeOidcCode(code);
+            const authUser = User.getUserFromLoginResponse(loginResponseData);
+            if(!authUser){
+                return thunkAPI.rejectWithValue(errorHandler({message: 'Your token is not valid'}));
+            }
+            return {...authUser};
+        } catch(e){
+            return thunkAPI.rejectWithValue(errorHandler(e));
+        }
+    }
+)
+
 export default {
     login,
+    loginOidc,
 }

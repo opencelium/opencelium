@@ -15,4 +15,5 @@ public interface ExceptionMessages {
     String CANT_REMOVE_LAST_VERSION_CONNECTION = "Can't remove last version connection";
     String ONLY_OWNER_CAN_PERFORM_ACTION = "Only owner can perform this action";
     String ONLY_OWNER_OR_ADMIN_CAN_PERFORM_ACTION = "Only owner or admin can perform this action";
+    String ONLY_ADMIN_CAN_PERFORM_ACTION = "Only admin can perform this action";
 }

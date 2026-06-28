@@ -78,6 +78,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Optional<User> findByUsernameAndAuthMethod(String username, AuthMethod authMethod) {
+        return userRepository.findByUsernameAndAuthMethod(username, authMethod);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public Optional<User> findById(int id) {
         return userRepository.findOneById(id);
@@ -204,7 +209,8 @@ public class UserServiceImpl implements UserService {
     public void changePassword(ChangePasswordDTO dto) {
         User user = getCurrentUser();
 
-        if (user.getAuthMethod() == AuthMethod.LDAP) {
+        // Only BASIC users have an OpenCelium-managed password; LDAP and OIDC are managed externally.
+        if (user.getAuthMethod() != AuthMethod.BASIC) {
             throw new ServiceUnavailableException(ExceptionConstant.PASSWORD_MANAGED_EXTERNALLY, "Password is managed externally.");
         }
 

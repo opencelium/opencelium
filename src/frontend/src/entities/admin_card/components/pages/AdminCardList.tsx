@@ -28,6 +28,7 @@ const cards = [
     {id: 1, name: 'Users', link: '/users'},
     {id: 2, name: 'Groups', link: '/usergroups'},
     {id: 3, name: 'LDAP check', link: '/ldap'},
+    {id: 15, name: 'OpenID Connect', link: '/oidc'},
     {id: 4, name: 'Support Files', link: `/support_files`},
     {id: 5, name: 'License Management', link: `/license_management`},
     {id: 6, name: 'Invokers', link: '/invokers'},
