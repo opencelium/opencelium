@@ -727,3 +727,5 @@ ALTER TABLE `enhancement` ADD CONSTRAINT `fk_enhancement_connection1` FOREIGN KE
 ALTER TABLE `connection` MODIFY COLUMN `to_connector` INT NULL;
 --changeset 5.0:2 stripComments:true splitStatements:true endDelimiter:;
 ALTER TABLE `operation_usage_history` MODIFY COLUMN `to_invoker` VARCHAR(255) NULL;
+--changeset 5.0:3 stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE `webhook` ADD CONSTRAINT `uq_webhook_uuid` UNIQUE (`uuid`);
