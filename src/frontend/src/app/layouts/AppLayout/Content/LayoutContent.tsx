@@ -4,6 +4,8 @@ import {Card} from "@shared/ui/primitives/Card";
 import {useLayoutStore} from "@app/layouts/AppLayout/layout.store.ts";
 import {AnimatePresence, motion} from "framer-motion";
 import React, {useEffect} from "react";
+import {ErrorBoundary} from "@shared/errors/boundary/ErrorBoundary.tsx";
+import {PageCrash} from "@shared/ui/feedback/crash/PageCrash.tsx";
 
 const { Content } = Layout;
 
@@ -21,11 +23,16 @@ export const LayoutContent = ({isNotCard}: LayoutContentProps) => {
             toggleCommandContent(false);
         }
     }, [location.pathname])
+    const pageContent = (
+        <ErrorBoundary scope="page" resetKeys={[location.pathname]} fallback={(props) => <PageCrash {...props} />}>
+            <Outlet/>
+        </ErrorBoundary>
+    );
     const OutletComponent = !isNotCard && !isContentLoading ?
         <Card style={{margin: 20}}>
-            <Outlet/>
+            {pageContent}
         </Card> :
-        <Outlet/>;
+        pageContent;
     return (
         <Content
             style={{

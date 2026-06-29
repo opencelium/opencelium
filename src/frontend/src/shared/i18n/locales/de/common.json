@@ -93,6 +93,22 @@
     "updateWithoutMasterPassword": "Sie können auch ohne Master-Passwort speichern – es werden dann nur die allgemeinen Daten aktualisiert. Um die erforderlichen Anmeldedaten zu ändern, geben Sie zuerst das Master-Passwort ein."
   },
   "hintLabel": "Hinweis",
+  "errorBoundary": {
+    "retry": "Erneut versuchen",
+    "reload": "Seite neu laden",
+    "app": {
+      "title": "Etwas ist schiefgelaufen",
+      "subtitle": "In der Anwendung ist ein unerwarteter Fehler aufgetreten. Sie können es erneut versuchen oder die Seite neu laden."
+    },
+    "page": {
+      "title": "Diese Seite hat ein Problem",
+      "subtitle": "Beim Anzeigen dieser Seite ist ein unerwarteter Fehler aufgetreten. Der Rest der Anwendung ist weiterhin verfügbar."
+    },
+    "widget": {
+      "title": "Dieser Bereich konnte nicht geladen werden",
+      "subtitle": "Hier ist ein unerwarteter Fehler aufgetreten. Der Rest der Seite funktioniert weiterhin."
+    }
+  },
   "notFound": {
     "code": "404",
     "title": "Seite nicht gefunden",

@@ -93,6 +93,22 @@
     "updateWithoutMasterPassword": "You can save without entering the master password — only the general data will be updated. To change the required credentials, enter the master password first."
   },
   "hintLabel": "Hint",
+  "errorBoundary": {
+    "retry": "Try again",
+    "reload": "Reload page",
+    "app": {
+      "title": "Something went wrong",
+      "subtitle": "The application ran into an unexpected error. You can try again or reload the page."
+    },
+    "page": {
+      "title": "This page ran into a problem",
+      "subtitle": "An unexpected error occurred while displaying this page. The rest of the app is still available."
+    },
+    "widget": {
+      "title": "This section failed to load",
+      "subtitle": "An unexpected error occurred here. The rest of the page still works."
+    }
+  },
   "notFound": {
     "code": "404",
     "title": "Page not found",

@@ -9,6 +9,7 @@ import { ExecutionsChartCard } from './components/ExecutionsChartCard'
 import { ResourceUsageCard } from './components/ResourceUsageCard'
 import { TopConnectorsCard } from './components/TopConnectorsCard'
 import { ComingSoonOverlay } from './components/ComingSoonOverlay'
+import { DashboardCardBoundary } from './components/DashboardCardBoundary'
 import { useSocketConnectionNotifications } from './useSocketConnectionNotifications'
 
 export default function DashboardPage() {
@@ -35,9 +36,15 @@ export default function DashboardPage() {
                         gap: 16,
                     }}
                 >
-                    <ExecutionsChartCard />
-                    <ResourceUsageCard />
-                    <TopConnectorsCard />
+                    <DashboardCardBoundary>
+                        <ExecutionsChartCard />
+                    </DashboardCardBoundary>
+                    <DashboardCardBoundary>
+                        <ResourceUsageCard />
+                    </DashboardCardBoundary>
+                    <DashboardCardBoundary>
+                        <TopConnectorsCard />
+                    </DashboardCardBoundary>
                 </div>
 
                 <div
