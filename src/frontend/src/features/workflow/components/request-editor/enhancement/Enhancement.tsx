@@ -30,9 +30,6 @@ const ReferenceEnhancement = ({ enhancement, readOnly }: EnhancementProps) => {
 	const [maximizedStyle, setMaximizedStyle] = useState<React.CSSProperties | undefined>();
 	const scriptBoxRef = useRef<HTMLDivElement>(null);
 
-	// Maximize to the dialog body (not the viewport): pin the box to the modal
-	// body's rect with position:fixed so it stays in the DOM (ACE isn't remounted),
-	// then nudge ACE to re-measure for the new size.
 	const toggleScriptMaximized = () => {
 		setIsScriptMaximized((prev) => {
 			const next = !prev;
@@ -70,8 +67,6 @@ const ReferenceEnhancement = ({ enhancement, readOnly }: EnhancementProps) => {
 
 	return (
 		<div className='bodyLegacyEnhancementContent'>
-			{/* Motion off cascades to the nested Variable Information / Description
-			    collapses so toggling them doesn't expand-then-jump like the left pane. */}
 			<ConfigProvider theme={{ token: { motion: false } }}>
 			<Collapse
 				className='bodyLegacyEnhancementCollapse'

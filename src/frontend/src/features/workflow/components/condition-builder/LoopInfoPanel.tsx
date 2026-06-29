@@ -31,7 +31,7 @@ export function LoopInfoPanel({ iterator, operator, example }: Props) {
 
 	const tour =
 		operator && KNOWN_OPERATORS.has(operator)
-			? (t(`conditionBuilder.loopInfo.operators.${operator}`, { returnObjects: true }) as LoopTour)
+			? (t(`conditionBuilder.loopInfo.operators.${operator}`, { returnObjects: true }) as unknown as LoopTour)
 			: undefined;
 
 	return (

@@ -1,6 +1,6 @@
 import React from 'react';
-import {ReferenceStrategy} from "../ReferenceStrategy";
-import {Reference} from "../ReferenceTypes";
+import type {ReferenceStrategy} from "../ReferenceStrategy";
+import type {Reference} from "../ReferenceTypes";
 
 export class RequiredDataReference implements ReferenceStrategy {
     match(value: string): boolean {

@@ -1,7 +1,3 @@
-/* Shared workflow dialog header: white surface bar, subtle bottom border,
-   plain 16px title, primary-tinted close glyph. Applied to both the operator
-   (condition builder) and the method body/header/URL dialogs so their headers
-   match. */
 .wfDialog .ant-modal-header {
 	margin: 0;
 	padding: 18px 24px;

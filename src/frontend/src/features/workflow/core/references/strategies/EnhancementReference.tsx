@@ -1,7 +1,7 @@
 import React from 'react';
-import { ReferenceStrategy } from "../ReferenceStrategy";
-import { Reference } from "../ReferenceTypes";
-import type { Enhancement } from "../../types/connection";
+import type { ReferenceStrategy } from "../ReferenceStrategy";
+import type { Reference } from "../ReferenceTypes";
+import type { Enhancement } from "../../../types/connection";
 import { Reference as ReferenceComponent } from '../components/enhancemen/Reference';
 
 export class EnhancementReference implements ReferenceStrategy {

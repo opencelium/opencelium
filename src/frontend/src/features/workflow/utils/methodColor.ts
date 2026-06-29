@@ -1,9 +1,5 @@
 import type { MethodWithId } from '../types/connection';
 
-/**
- * Pick black/white text for contrast against an arbitrary palette color so a
- * label stays legible (the palette spans both light and dark hues).
- */
 export function readableTextColor(hex: string): string {
   const normalized = hex.replace('#', '');
   if (normalized.length < 6) return '#ffffff';
@@ -14,18 +10,10 @@ export function readableTextColor(hex: string): string {
   return luminance > 0.6 ? '#1a1a1a' : '#ffffff';
 }
 
-/**
- * Map each method's color → 1-based index among methods that reuse the same
- * connector+method name. Only groups with more than one instance are included,
- * so single-use methods get no number (matching the canvas node badges). Keyed
- * by lowercased color, the per-instance-unique identity shared with the nodes.
- */
 export function getDuplicateMethodIndexByColor(methods: MethodWithId[]): Map<string, number> {
   const groups = new Map<string, MethodWithId[]>();
   for (const method of methods) {
     const connectorKey = method.connector?.connectorId ?? method.connector?.title ?? 'system';
-    // Group by method name (the node's subtitle), not the editable label, so the
-    // numbering lines up with the canvas node badges.
     const key = `${connectorKey}::${method.name}`;
     const list = groups.get(key) ?? [];
     list.push(method);
