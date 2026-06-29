@@ -2,6 +2,11 @@ import React from "react";
 import type {PolicyDefinition} from "@/engine/policy";
 import type {IconName} from "@shared/ui/primitives/Icon/Icon.types.ts";
 
+export interface CommandConfirmOptions {
+    title?: React.ReactNode;
+    message?: React.ReactNode;
+}
+
 export interface CommandExecutionContext {
     openModal: (node: React.ReactNode, options?: {width?: number | string}) => void;
     navigate: (url: string) => void;
@@ -9,7 +14,7 @@ export interface CommandExecutionContext {
     render: (node: React.ReactNode) => void;
     setLoading: (isLoading: boolean) => void;
 
-    confirm: (message: string) => Promise<boolean>;
+    confirm: (options: string | CommandConfirmOptions) => Promise<boolean>;
 
     notify: (message: string, type?: 'success' | 'error') => void;
 

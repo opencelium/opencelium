@@ -101,8 +101,6 @@
 
 .rightDrawerOpen {
   transform: translateX(0);
-  /* Only cast the shadow when open; when closed the drawer sits just off the
-     right edge and its shadow would otherwise bleed onto the visible screen. */
   box-shadow: var(--shadow-lg);
 }
 

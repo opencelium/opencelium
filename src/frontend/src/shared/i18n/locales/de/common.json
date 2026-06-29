@@ -47,7 +47,10 @@
       "system": "Systemaktionen",
       "checkLicense": "Lizenz und API-Aufrufverbrauch prüfen",
       "updateSystemConfig": "Anwendungskonfiguration auf der Festplatte bearbeiten",
-      "changeTheme": "Anwendungsdesign wechseln"
+      "changeTheme": "Anwendungsdesign wechseln",
+      "uploadTemplate": "Workflow-Vorlagendatei hochladen",
+      "uploadInvoker": "Invoker-Datei hochladen",
+      "systemCheck": "Systemprüfungsseite öffnen"
     },
     "footer": {
       "select": "Auswählen",
@@ -110,6 +113,8 @@
     "deleteSelectedSuccess": "{{count}} Einträge erfolgreich gelöscht",
     "deleteSelectedSuccess_one": "{{count}} Eintrag erfolgreich gelöscht",
     "filtersTooltip": "Filter",
+    "expandRow": "Ausführungen anzeigen",
+    "collapseRow": "Ausführungen ausblenden",
     "confirmDelete": {
       "title": "Löschen",
       "message": "Möchten Sie dieses {{name}} wirklich löschen?",

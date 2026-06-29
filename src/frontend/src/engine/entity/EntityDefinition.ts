@@ -391,6 +391,22 @@ export type ListDefinition = {
     useRowDecoration?: () => {
         rowClassName?: (row: unknown, rowId: string) => string | undefined
     }
+    /**
+     * Optional React hook invoked once per list render to attach expandable sub-rows
+     * to the fetched rows. Returns a transform that receives the (already filtered)
+     * top-level rows and returns them with a `__subRows` array on any row that should
+     * render nested rows beneath it; sub-rows ride along with their parent through
+     * sort / search / pagination (never sorted or paginated independently). Each
+     * sub-row must carry a unique `__rowId` string. Lets entities derive nested rows
+     * from live state (e.g. a STOMP subscription). Must follow the rules of hooks.
+     */
+    useRowSubRows?: () => (rows: Record<string, unknown>[]) => Record<string, unknown>[]
+    /**
+     * Header label (entities-namespace i18n key) for the sub-row expander column.
+     * Only meaningful alongside `useRowSubRows`; when omitted the expander column
+     * renders a blank header.
+     */
+    subRowsColumnLabelKey?: string
 }
 
 export type HeaderActionContext = {

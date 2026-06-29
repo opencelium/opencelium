@@ -12,7 +12,7 @@ export const LoadingOverlay: React.FC<{
                     style={{
                         position: 'absolute',
                         inset: 0,
-                        background: 'rgba(255,255,255,0.6)',
+                        background: 'color-mix(in srgb, var(--color-background-surface) 60%, transparent)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',

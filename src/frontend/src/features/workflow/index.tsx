@@ -204,8 +204,6 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     title: '[Empty Name]',
     description: '[Empty Description]',
   });
-  // The title as last loaded/saved on the backend — used to skip the uniqueness
-  // check when the title is unchanged (a workflow's own title always "exists").
   const [persistedTitle, setPersistedTitle] = useState('');
   const [loadedFieldBindings, setLoadedFieldBindings] = useState<any[] | undefined>();
   const cleanDeletedNodeFieldBindings = useCallback((deletedNodeIds: string[], previousNodes: WorkflowNodeModel[]) => {
@@ -345,9 +343,6 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     setChangeSource('manual');
   }, [baselineSnapshot, changeSource, currentChangeSnapshot, historyPreviewSnapshot, isLoading]);
 
-  // Block reusing another workflow's title; surfaced inline on the header title
-  // field. Skipped when the title is unchanged from the loaded/saved one — a
-  // workflow's own title always reports as taken.
   const validateTitle = useCallback(async (title: string): Promise<string | null> => {
     const trimmed = title.trim();
     if (!trimmed || trimmed === '[Empty Name]' || trimmed === persistedTitle) return null;
@@ -425,8 +420,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       const filename = String(template?.templateId ?? activeConnectionId);
       triggerJsonDownload(filename, template);
       message.success(tEntities('connection.list.downloadTemplate.success', { name: filename }));
-    } catch (err) {
-      console.error(err);
+    } catch {
       message.error(tEntities('connection.list.downloadTemplate.error'));
     } finally {
       setIsDownloadingTemplate(false);
@@ -479,8 +473,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       store.dispatch(genericApi.util.invalidateTags([{ type: 'Entity', id: '/template/all' }] as any));
       setTemplateDialogOpen(false);
       message.success(`Template "${name}" saved`);
-    } catch (err) {
-      console.error(err);
+    } catch {
       message.error(t('messages.saveTemplateFailed'));
     } finally {
       setIsSavingTemplate(false);
@@ -498,8 +491,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       });
       const nextTemplates = Array.isArray(response) ? response : [];
       setTemplates(nextTemplates);
-    } catch (err) {
-      console.error(err);
+    } catch {
       message.error(t('messages.loadTemplatesFailed'));
     } finally {
       setIsLoadingTemplates(false);
@@ -536,8 +528,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       setLoadTemplateDialogOpen(false);
       setSelectedTemplateId(undefined);
       message.success(`Template "${selectedTemplate.name ?? selectedTemplate.templateId}" loaded`);
-    } catch (err) {
-      console.error(err);
+    } catch {
       message.error(t('messages.loadTemplateFailed'));
     } finally {
       setIsApplyingTemplate(false);

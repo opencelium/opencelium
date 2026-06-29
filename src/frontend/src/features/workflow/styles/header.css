@@ -2,8 +2,6 @@
   color: var(--color-text-secondary);
 }
 
-/* Placeholder shown while the workflow connection is still loading, so the name
-   and description don't flash default/placeholder values before data arrives. */
 .headerInlineLoading {
   display: inline-block;
   width: 280px;

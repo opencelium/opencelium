@@ -68,8 +68,6 @@
   opacity: 0.45;
 }
 
-/* Brand the non-destructive XML add/edit buttons; antd's `danger` delete
-   keeps its red via .ant-btn-dangerous, which this selector excludes. */
 .xmlIconButton:not(.ant-btn-dangerous) {
   color: var(--color-action-primary);
 }

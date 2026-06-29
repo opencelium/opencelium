@@ -23,11 +23,7 @@ export function StartNode({
 	const isSocketConnecting = socketStatus === 'idle' || socketStatus === 'connecting';
 	const isRunning = phase === 'starting' || phase === 'running';
 	const isBusy = phase === 'starting' || phase === 'stopping';
-	// A blocked subscription forbids starting a test run, but stopping a running one stays allowed.
 	const isSubscriptionBlocked = subscriptionIssue !== null && !isRunning;
-	// Only one workflow test may run at a time system-wide; another one in flight
-	// blocks starting here (it can never block stopping our own — that path needs
-	// isRunning, which excludes this).
 	const isOtherTestRunning = testRun?.isOtherTestRunning ?? false;
 
 	const handleClick = () => {
@@ -119,8 +115,6 @@ export function StartNode({
 					{button}
 				</Tooltip>
 			) : (
-				// The disabled button swallows hover events; the alert below the
-				// node already explains why the test run is unavailable.
 				button
 			)}
 

@@ -12,8 +12,6 @@ type Props = {
 	saveDisabled?: boolean;
 };
 
-// Render the spinner dots in the on-action color so they stay visible on the
-// primary-filled save button (they default to --color-action-primary).
 const spinnerStyle = { ['--color-action-primary']: 'var(--color-text-on-action)' } as CSSProperties;
 
 export function HeaderSaveDialog({
@@ -43,7 +41,7 @@ export function HeaderSaveDialog({
 		try {
 			await onSave();
 		} catch {
-			// Error surfaced by the save handler (toast); keep the dialog open to retry.
+			
 		} finally {
 			setIsSaving(false);
 		}

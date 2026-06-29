@@ -1,5 +1,5 @@
 import React from 'react';
-import {Reference} from "./ReferenceTypes";
+import type {Reference} from "./ReferenceTypes";
 
 export interface ReferenceStrategy {
     match(value: string): boolean;

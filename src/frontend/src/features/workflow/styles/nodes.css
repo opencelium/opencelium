@@ -6,7 +6,8 @@
 }
 
 .nodeWrapDragGhost,
-.nodeWrapDropPlaceholder {
+.nodeWrapDropPlaceholder,
+.nodeWrapDragSourceMoving {
   pointer-events: none;
 }
 
@@ -20,8 +21,14 @@
   z-index: 5;
 }
 
-.nodeWrapDropPlaceholder .nodeTopLabel,
-.nodeWrapDropPlaceholder .nodeBottomLabel,
+.nodeWrapDragSourceMoving {
+  opacity: 0.4;
+}
+
+.nodeWrapDragSourceFaint {
+  opacity: 0.2;
+}
+
 .nodeWrapDropPlaceholder .ifFalseLabel,
 .nodeWrapDropPlaceholder .ifTrueLabel {
   display: none;
@@ -145,7 +152,6 @@
   transition: border-color 0.15s ease, color 0.15s ease;
 }
 
-/* Extend the clickable area beyond the visible circle without resizing it. */
 .startNodeButton::before {
   content: '';
   position: absolute;

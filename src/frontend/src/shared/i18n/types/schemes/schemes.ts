@@ -41,6 +41,8 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             deleteSelectedSuccess: string
             deleteSelectedSuccess_one: string
             filtersTooltip: string
+            expandRow: string
+            collapseRow: string
             confirmDelete: {
                 title: string
                 message: string
@@ -92,6 +94,9 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 checkLicense: string
                 updateSystemConfig: string
                 changeTheme: string
+                uploadTemplate: string
+                uploadInvoker: string
+                systemCheck: string
             }
             footer: {
                 select: string

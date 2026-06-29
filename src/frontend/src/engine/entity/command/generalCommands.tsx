@@ -21,7 +21,7 @@ export const getListCommand = ({def, config, name}: GeneralCommandType): Command
             icon: 'list',
             execute: (_, ctx) => {
                 const url = `/${def.name}`;
-                const { mode } = useCommandPaletteUIStore.getState();
+                const mode = useCommandPaletteUIStore.getState().resolveMode();
 
                 if (mode === 'route') return ctx.navigate(url);
                 if (mode === 'new-tab') return ctx.openNewTab(url);
@@ -52,7 +52,7 @@ export const getCreateCommand = ({ def, config, name }: GeneralCommandType): Com
             icon: 'plus',
             execute: (_, ctx) => {
                 const url = `/${def.name}/create`;
-                const { mode } = useCommandPaletteUIStore.getState();
+                const mode = useCommandPaletteUIStore.getState().resolveMode();
 
                 if (mode === 'route') {
                     return ctx.navigate(url);

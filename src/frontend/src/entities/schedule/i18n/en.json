@@ -4,15 +4,17 @@
     "subTitle": "Schedules determine when specific workflows are executed, either on a defined timetable or based on triggers. Status legend: <blueDot/> running, <greenDot/> last run succeeded, <redDot/> last run failed, <grayDot/> no cron and no run history. The number under the circle is a countdown to the next cron trigger.",
     "searchPlaceholder": "Search by connection name",
     "columns": {
+      "executions": "Executions",
       "status": "Status",
       "connection": "Connection",
       "cronExp": "Cron",
       "lastSuccessExecution": "Last Success",
       "lastFailExecution": "Last Fail",
-      "lastDuration": "Duration",
+      "lastDuration": "Avg Duration",
       "debugMode": "Debug",
       "webhook": "Webhook"
-    }
+    },
+    "noExecutions": "No running executions"
   },
   "webhook": {
     "copied": "Webhook URL copied to clipboard",

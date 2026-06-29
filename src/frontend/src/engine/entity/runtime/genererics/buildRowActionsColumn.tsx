@@ -53,6 +53,8 @@ export function buildRowActionsColumn<T extends Record<string, unknown>>(
         enableGlobalFilter: false,
         meta: { align: 'center' },
         cell: ({ row }) => {
+            // Sub-rows (depth > 0) are decorative children — they carry no actions.
+            if (row.depth > 0) return null;
             const original = row.original;
             const rowId = String(getValueByPath(original as Record<string, unknown>, rowKey) ?? '');
             return (

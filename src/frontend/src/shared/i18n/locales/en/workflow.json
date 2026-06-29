@@ -36,6 +36,7 @@
     "commentSaved": "Comment saved.",
     "commentSaveFailed": "Failed to save comment.",
     "commentPlaceholder": "Comment",
+    "empty": "No version history yet",
     "deleteVersion": {
       "title": "Delete version?",
       "message": "This action removes the selected version from history.",
@@ -132,6 +133,7 @@
     "saveAsTemplate": "Save as Template",
     "loadTemplate": "Load Template",
     "editorAppearance": "Editor Appearance",
+    "inDevelopment": "In development",
     "shortcuts": "Shortcuts",
     "exit": "Exit"
   },

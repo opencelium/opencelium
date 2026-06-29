@@ -6,9 +6,11 @@ export type LayoutState = {
     showCommandContent: boolean;
     isContentLoading: boolean;
     openSubmenuKeys: string[];
+    lastPathByMenu: Record<MenuType, string>;
     toggleIsContentLoading: (value: boolean) => void;
     toggleCollapsed: () => void;
     toggleCommandContent: (value: boolean) => void;
     setMenu: (type: MenuType) => void;
     setOpenSubmenuKeys: (keys: string[]) => void;
+    setLastPath: (menu: MenuType, path: string) => void;
 };

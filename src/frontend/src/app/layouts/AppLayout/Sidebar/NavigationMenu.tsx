@@ -38,7 +38,7 @@ export const NavigationMenu = () => {
     const navigate = useNavigate();
     const { pathname } = useLocation();
     const { theme } = useTheme();
-    const { menuType, openSubmenuKeys, setOpenSubmenuKeys, setMenu } = useLayoutStore();
+    const { menuType, openSubmenuKeys, setOpenSubmenuKeys, setMenu, setLastPath } = useLayoutStore();
     const sidebar = theme.color.sidebar;
 
     const mainMenu = useMainMenu();
@@ -63,6 +63,15 @@ export const NavigationMenu = () => {
         const owner = mainKey ? 'main' : adminKey ? 'admin' : undefined;
         if (owner && owner !== menuType) setMenu(owner);
     }, [pathname, mainKey, adminKey, menuType, setMenu]);
+
+    // Remember the active leaf of whichever menu owns the current route, so the
+    // menu switcher can restore it when the user toggles back. The leaf key (not
+    // the raw pathname) is recorded so the restored target is always a valid
+    // menu destination rather than a stale deep route like '/invoker/5/edit'.
+    useEffect(() => {
+        if (mainKey) setLastPath('main', mainKey);
+        else if (adminKey) setLastPath('admin', adminKey);
+    }, [mainKey, adminKey, setLastPath]);
 
     // Open the group(s) holding the active route only when the route actually
     // changes — guarded by the selected-key *value*, not the effect deps,
