@@ -17,6 +17,7 @@
 package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.constant.ExceptionConstant;
+import com.becon.opencelium.backend.constant.ExceptionMessages;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.entity.Webhook;
 import com.becon.opencelium.backend.database.mysql.repository.WebhookRepository;
@@ -49,9 +50,37 @@ public class WebhookServiceImp implements WebhookService {
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
 
-    //TODO: rename method - gets some info from token
+    // Resolves the credential found in the execute URL path segment into the data needed to trigger a
+    // webhook. Two formats are supported:
+    //   - legacy JWT (contains '.'): the userId/uuid/schedulerId are read from the signed claims.
+    //   - uuid (no '.'): the row is looked up by uuid and scheduler/createdBy are read from it. The row's
+    //     existence is itself the proof of authenticity (only the backend ever inserts one), so no token
+    //     signing or verification is required.
     @Override
     public Optional<WebhookTokenResource> getTokenObject(String token) {
+        if (token != null && token.contains(".")) {
+            return getTokenObjectFromJwt(token);
+        }
+        return getTokenObjectFromUuid(token);
+    }
+
+    private Optional<WebhookTokenResource> getTokenObjectFromUuid(String uuid) {
+        Webhook webhook = webhookRepository.findByUuid(uuid).orElse(null);
+        if (webhook == null) {
+            return Optional.empty();
+        }
+
+        if (webhook.getScheduler() == null) {
+            throw new GeneralServiceException(ExceptionConstant.SCHEDULER_NOT_FOUND, ExceptionMessages.SCHEDULER_NOT_FOUND);
+        }
+
+        int schedulerId = webhook.getScheduler().getId();
+        int userId = webhook.getCreatedBy() != null ? webhook.getCreatedBy() : -1;
+
+        return Optional.of(new WebhookTokenResource(userId, uuid, schedulerId));
+    }
+
+    private Optional<WebhookTokenResource> getTokenObjectFromJwt(String token) {
         JWTClaimsSet claims = jwtTokenUtil.getAllClaimsFromToken(token);
 
         String uuid = claims.getClaim("uuid").toString();
@@ -79,25 +108,10 @@ public class WebhookServiceImp implements WebhookService {
     public Webhook save(int userId, Scheduler scheduler) {
         Webhook webhook = new Webhook();
         UUID uuid = UUID.randomUUID();
-        String token = generateWebhookToken(userId, uuid.toString(), scheduler.getId());
 
         webhook.setUuid(uuid.toString());
-        webhook.setToken(token);
         webhook.setScheduler(scheduler);
         return webhookRepository.save(webhook);
-    }
-
-    @Override
-    public String generateWebhookToken(int userId, String uuid, int schedulerId) {
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-                .subject("webhook")
-                .claim("userId", userId)
-                .claim("uuid", uuid)
-                .claim("schedulerId", schedulerId)
-                .jwtID(Long.toString(schedulerId))
-                .build();
-
-        return jwtTokenUtil.generateToken(claimsSet);
     }
 
     @Override
@@ -125,7 +139,7 @@ public class WebhookServiceImp implements WebhookService {
     @Override
     public String buildUrl(Webhook webhook) {
 //        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
-        return "./webhook/execute/" + webhook.getToken();
+        return "./webhook/execute/" + webhook.getUuid();
     }
 
     @Override
