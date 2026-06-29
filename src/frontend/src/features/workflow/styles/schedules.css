@@ -172,3 +172,31 @@
   align-items: flex-end !important;
   text-align: right;
 }
+
+/* Lets the value take the remaining row width so the executions strip can scroll. */
+.wf-schedule-row--fill .wf-schedule-row__value {
+  flex: 1;
+  min-width: 0;
+  justify-content: flex-start;
+}
+
+/* Running executions (live STOMP feed): a single horizontally-scrolling strip,
+   anchored to the right. row-reverse over the oldest-first feed renders the newest
+   on the left, so new executions appear from the left edge. */
+.wf-schedule-execs {
+  display: flex;
+  flex-direction: row-reverse;
+  flex-wrap: nowrap;
+  gap: 12px;
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.wf-schedule-execs > * {
+  flex: 0 0 auto;
+}
+
+.wf-schedule-exec-empty {
+  color: var(--color-text-disabled);
+}

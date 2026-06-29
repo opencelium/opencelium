@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useFetchEntitiesQuery } from '@shared/api/genericApi'
 import { useCurrentSchedules } from '@entities/schedule/socket/useCurrentSchedules'
+import type { RunningExecution } from '@entities/schedule/socket/CurrentSchedulesContext'
 import type { Schedule, ScheduleExecutionRun } from '@entities/schedule/model/types'
 
 export type ScheduleAggregateStatus = 'running' | 'error' | 'ok' | 'idle'
@@ -9,6 +10,7 @@ export type WorkflowScheduleItem = {
     schedule: Schedule
     isRunning: boolean
     status: ScheduleAggregateStatus
+    executions: RunningExecution[]
     avgDuration?: number
     recentlyUpdated: boolean
 }
@@ -68,13 +70,14 @@ export function useWorkflowSchedules(connectionId?: string) {
     const items = useMemo<WorkflowScheduleItem[]>(
         () =>
             schedules.map((schedule) => {
-                const running = getRunningExecutions(schedule.schedulerId)
-                const isRunning = running.length > 0
+                const executions = getRunningExecutions(schedule.schedulerId)
+                const isRunning = executions.length > 0
                 return {
                     schedule,
                     isRunning,
                     status: scheduleStatus(schedule, isRunning),
-                    avgDuration: running[0]?.avgDuration ?? schedule.lastExecution?.success?.duration,
+                    executions,
+                    avgDuration: executions[0]?.avgDuration ?? schedule.lastExecution?.success?.duration,
                     recentlyUpdated: wasRecentlyUpdated(schedule.schedulerId),
                 }
             }),

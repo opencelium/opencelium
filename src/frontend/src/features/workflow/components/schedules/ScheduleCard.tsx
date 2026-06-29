@@ -11,6 +11,7 @@ import { ExecutionCell } from '@entities/schedule/ui/ExecutionCell'
 import { DurationCell } from '@entities/schedule/ui/DurationCell'
 import { DebugModeCell } from '@entities/schedule/ui/DebugModeCell'
 import { WebhookCell } from '@entities/schedule/ui/WebhookCell'
+import { RunningExecBadge } from '@entities/schedule/ui/RunningExecBadge'
 import { NotificationsAction } from '@entities/schedule/ui/NotificationsAction'
 import { SupportLogsAction } from '@entities/schedule/ui/SupportLogsAction'
 import { ScheduleNextRun } from './ScheduleNextRun'
@@ -20,9 +21,9 @@ type Props = {
     item: WorkflowScheduleItem
 }
 
-function Row({ label, children }: { label: string; children: ReactNode }) {
+function Row({ label, children, fill }: { label: string; children: ReactNode; fill?: boolean }) {
     return (
-        <div className="wf-schedule-row">
+        <div className={`wf-schedule-row ${fill ? 'wf-schedule-row--fill' : ''}`}>
             <span className="wf-schedule-row__label">{label}</span>
             <span className="wf-schedule-row__value">{children}</span>
         </div>
@@ -30,7 +31,7 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
 }
 
 export const ScheduleCard = memo(function ScheduleCard({ item }: Props) {
-    const { schedule, avgDuration, recentlyUpdated } = item
+    const { schedule, executions, avgDuration, recentlyUpdated } = item
     const { t } = useI18n('workflow')
     const { t: tEntities } = useI18n('entities')
     const confirm = useConfirm()
@@ -110,6 +111,22 @@ export const ScheduleCard = memo(function ScheduleCard({ item }: Props) {
 
             {expanded && (
                 <div className="wf-schedule-card__details">
+                    <Row label={tEntities('schedule.list.columns.executions')} fill>
+                        {executions.length === 0 ? (
+                            <span className="wf-schedule-exec-empty">—</span>
+                        ) : (
+                            <div className="wf-schedule-execs">
+                                {executions.map((execution) => (
+                                    <RunningExecBadge
+                                        key={execution.execId}
+                                        localStartTime={execution.localStartTime}
+                                        serverStartTime={execution.serverStartTime}
+                                        avgDuration={execution.avgDuration}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                    </Row>
                     <Row label={tEntities('schedule.list.columns.cronExp')}>
                         <CronCell schedule={schedule} tooltipPlacement="left" />
                     </Row>
