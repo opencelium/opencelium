@@ -8,6 +8,7 @@ import com.becon.opencelium.backend.resource.template.CtionTemplateResource;
 import com.becon.opencelium.backend.resource.template.CtorTemplateResource;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.versionmanager.Wrapper;
+import com.becon.opencelium.backend.versionmanager.base.FlowIndexUtils;
 import com.becon.opencelium.backend.versionmanager.base.UpdaterVersion;
 import com.becon.opencelium.backend.versionmanager.base.Utils;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -24,7 +25,8 @@ import java.util.Objects;
  * Brings a Template up to the v5.0 multi-connector layout:
  * <ul>
  *   <li>Stamps every method with the connector it originally belonged to (MethodConnectorDTO).</li>
- *   <li>Prefixes from-side indexes with {@code "0_"} and to-side indexes with {@code "1_"}.</li>
+ *   <li>Keeps from-side indexes unchanged and shifts the root component of every to-side index
+ *       so the to-side flow continues the from-side flow at root level.</li>
  *   <li>Merges all from/to methods + operators under a single {@code fromConnector}.</li>
  *   <li>Sets {@code fromConnector.connectorId = -1} and {@code title = "DEFAULT"}.</li>
  *   <li>Clears {@code toConnector}.</li>
@@ -36,8 +38,6 @@ import java.util.Objects;
 public class Template50Updater implements TemplateUpdater {
 
     private static final UpdaterVersion currentVersion = UpdaterVersion.VERSION_5_0;
-    private static final String FROM_INDEX_PREFIX = "0_";
-    private static final String TO_INDEX_PREFIX = "1_";
     private static final Logger log = LoggerFactory.getLogger(Template50Updater.class);
 
     private final Template44Updater template44Updater;
@@ -80,13 +80,19 @@ public class Template50Updater implements TemplateUpdater {
         MethodConnectorDTO fromRef = refOf(oldFrom);
         MethodConnectorDTO toRef = refOf(oldTo);
 
+        List<MethodDTO> fromMethods = methodsOf(oldFrom);
+        List<OperatorDTO> fromOperators = operatorsOf(oldFrom);
+
+        // To-side root indexes continue right after the from-side root indexes.
+        int toOffset = FlowIndexUtils.rootOffset(indexesOf(fromMethods, fromOperators));
+
         List<MethodDTO> mergedMethods = new ArrayList<>();
-        mergedMethods.addAll(stampMethods(methodsOf(oldFrom), fromRef, FROM_INDEX_PREFIX));
-        mergedMethods.addAll(stampMethods(methodsOf(oldTo), toRef, TO_INDEX_PREFIX));
+        mergedMethods.addAll(stampMethods(fromMethods, fromRef, 0));
+        mergedMethods.addAll(stampMethods(methodsOf(oldTo), toRef, toOffset));
 
         List<OperatorDTO> mergedOperators = new ArrayList<>();
-        mergedOperators.addAll(reindexOperators(operatorsOf(oldFrom), FROM_INDEX_PREFIX));
-        mergedOperators.addAll(reindexOperators(operatorsOf(oldTo), TO_INDEX_PREFIX));
+        mergedOperators.addAll(reindexOperators(fromOperators, 0));
+        mergedOperators.addAll(reindexOperators(operatorsOf(oldTo), toOffset));
 
         CtorTemplateResource merged = new CtorTemplateResource();
         merged.setConnectorId(ConnectionConstants.DEFAULT_CONNECTOR_ID);
@@ -132,24 +138,32 @@ public class Template50Updater implements TemplateUpdater {
         }
     }
 
-    private static List<MethodDTO> stampMethods(List<MethodDTO> methods, MethodConnectorDTO ref, String indexPrefix) {
+    private static List<MethodDTO> stampMethods(List<MethodDTO> methods, MethodConnectorDTO ref, int rootOffset) {
         for (MethodDTO method : methods) {
             if (method == null) continue;
             method.setConnector(ref);
-            method.setIndex(prefixIndex(method.getIndex(), indexPrefix));
+            method.setIndex(FlowIndexUtils.shiftRoot(method.getIndex(), rootOffset));
         }
         return methods;
     }
 
-    private static List<OperatorDTO> reindexOperators(List<OperatorDTO> operators, String indexPrefix) {
+    private static List<OperatorDTO> reindexOperators(List<OperatorDTO> operators, int rootOffset) {
         for (OperatorDTO operator : operators) {
             if (operator == null) continue;
-            operator.setIndex(prefixIndex(operator.getIndex(), indexPrefix));
+            operator.setIndex(FlowIndexUtils.shiftRoot(operator.getIndex(), rootOffset));
         }
         return operators;
     }
 
-    private static String prefixIndex(String index, String prefix) {
-        return prefix + index;
+    /** Collects the flow indexes of every from-side method and operator. */
+    private static List<String> indexesOf(List<MethodDTO> methods, List<OperatorDTO> operators) {
+        List<String> indexes = new ArrayList<>();
+        for (MethodDTO method : methods) {
+            if (method != null) indexes.add(method.getIndex());
+        }
+        for (OperatorDTO operator : operators) {
+            if (operator != null) indexes.add(operator.getIndex());
+        }
+        return indexes;
     }
 }

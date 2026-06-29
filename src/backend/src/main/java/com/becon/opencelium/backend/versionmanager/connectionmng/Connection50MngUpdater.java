@@ -7,6 +7,7 @@ import com.becon.opencelium.backend.database.mongodb.entity.MethodConnectorMng;
 import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
 import com.becon.opencelium.backend.database.mongodb.entity.OperatorMng;
 import com.becon.opencelium.backend.versionmanager.Wrapper;
+import com.becon.opencelium.backend.versionmanager.base.FlowIndexUtils;
 import com.becon.opencelium.backend.versionmanager.base.UpdaterVersion;
 import com.becon.opencelium.backend.versionmanager.base.Utils;
 import org.springframework.stereotype.Component;
@@ -19,7 +20,8 @@ import java.util.Objects;
  * Brings a ConnectionMng up to the v5.0 multi-connector layout:
  * <ul>
  *   <li>Stamps every method with the connector it originally belonged to (MethodConnectorMng).</li>
- *   <li>Prefixes from-side indexes with {@code "0_"} and to-side indexes with {@code "1_"}.</li>
+ *   <li>Keeps from-side indexes unchanged and shifts the root component of every to-side index
+ *       so the to-side flow continues the from-side flow at root level.</li>
  *   <li>Merges all from/to methods + operators under a single {@code fromConnector}.</li>
  *   <li>Sets {@code fromConnector.connectorId = -1} and {@code title = "DEFAULT"};
  *       {@code flowId} is preserved from the original fromConnector.</li>
@@ -32,8 +34,6 @@ import java.util.Objects;
 public class Connection50MngUpdater implements ConnectionMngUpdater {
 
     private static final UpdaterVersion currentVersion = UpdaterVersion.VERSION_5_0;
-    private static final String FROM_INDEX_PREFIX = "0_";
-    private static final String TO_INDEX_PREFIX = "1_";
 
     private final Connection48MngUpdater connection48MngUpdater;
 
@@ -67,13 +67,16 @@ public class Connection50MngUpdater implements ConnectionMngUpdater {
         MethodConnectorMng fromRef = refOf(oldFrom);
         MethodConnectorMng toRef = refOf(oldTo);
 
+        // To-side root indexes continue right after the from-side root indexes.
+        int toOffset = FlowIndexUtils.rootOffset(indexesOf(oldFrom));
+
         List<MethodMng> mergedMethods = new ArrayList<>();
-        mergedMethods.addAll(stampMethods(methodsOf(oldFrom), fromRef, FROM_INDEX_PREFIX));
-        mergedMethods.addAll(stampMethods(methodsOf(oldTo), toRef, TO_INDEX_PREFIX));
+        mergedMethods.addAll(stampMethods(methodsOf(oldFrom), fromRef, 0));
+        mergedMethods.addAll(stampMethods(methodsOf(oldTo), toRef, toOffset));
 
         List<OperatorMng> mergedOperators = new ArrayList<>();
-        mergedOperators.addAll(reindexOperators(operatorsOf(oldFrom), FROM_INDEX_PREFIX));
-        mergedOperators.addAll(reindexOperators(operatorsOf(oldTo), TO_INDEX_PREFIX));
+        mergedOperators.addAll(reindexOperators(operatorsOf(oldFrom), 0));
+        mergedOperators.addAll(reindexOperators(operatorsOf(oldTo), toOffset));
 
         ConnectorMng merged = new ConnectorMng();
         merged.setConnectorId(ConnectionConstants.DEFAULT_CONNECTOR_ID);
@@ -110,24 +113,32 @@ public class Connection50MngUpdater implements ConnectionMngUpdater {
         return connector.getOperators();
     }
 
-    private static List<MethodMng> stampMethods(List<MethodMng> methods, MethodConnectorMng ref, String indexPrefix) {
+    private static List<MethodMng> stampMethods(List<MethodMng> methods, MethodConnectorMng ref, int rootOffset) {
         for (MethodMng method : methods) {
             if (method == null) continue;
             method.setConnector(ref);
-            method.setIndex(prefixIndex(method.getIndex(), indexPrefix));
+            method.setIndex(FlowIndexUtils.shiftRoot(method.getIndex(), rootOffset));
         }
         return methods;
     }
 
-    private static List<OperatorMng> reindexOperators(List<OperatorMng> operators, String indexPrefix) {
+    private static List<OperatorMng> reindexOperators(List<OperatorMng> operators, int rootOffset) {
         for (OperatorMng operator : operators) {
             if (operator == null) continue;
-            operator.setIndex(prefixIndex(operator.getIndex(), indexPrefix));
+            operator.setIndex(FlowIndexUtils.shiftRoot(operator.getIndex(), rootOffset));
         }
         return operators;
     }
 
-    private static String prefixIndex(String index, String prefix) {
-        return prefix + index;
+    /** Collects the flow indexes of every method and operator of {@code connector}. */
+    private static List<String> indexesOf(ConnectorMng connector) {
+        List<String> indexes = new ArrayList<>();
+        for (MethodMng method : methodsOf(connector)) {
+            if (method != null) indexes.add(method.getIndex());
+        }
+        for (OperatorMng operator : operatorsOf(connector)) {
+            if (operator != null) indexes.add(operator.getIndex());
+        }
+        return indexes;
     }
 }
