@@ -11,6 +11,7 @@ import { ALL_COLORS } from './constants/colors';
 import { createNodeFromAction, deleteNodeGraph } from './utils/graphUtils';
 import { collectDescendantNodeIds, getOperatorBottomBranch } from './utils/graph.traversal';
 import { OFFSETS } from './utils/graph.constants';
+import { getRightSourceHandle } from './utils/graph.handles';
 import {
   moveOrCopyWorkflowNodes,
   type InvalidReference,
@@ -38,7 +39,6 @@ type XY = { x: number; y: number };
 type InsertionLayout = {
   draggedIds: Set<string>;
   placeholderIds: Set<string>;
-  draggedOrder: string[];
   positionsByRealId: Map<string, XY>;
   sourcePositionByDraggedId: Map<string, XY>;
   placeholderPositionByDraggedId: Map<string, XY>;
@@ -55,12 +55,6 @@ const COLLISION_PADDING = 56;
 const COLLISION_MAX_STEPS = 24;
 
 type Bounds = { minX: number; minY: number; maxX: number; maxY: number };
-
-const getNodeBounds = (node: WorkflowNodeModel): Bounds => {
-  const width = node.measured?.width ?? node.width ?? NODE_BOX_SIZE;
-  const height = node.measured?.height ?? node.height ?? NODE_BOX_SIZE;
-  return { minX: node.position.x, minY: node.position.y, maxX: node.position.x + width, maxY: node.position.y + height };
-};
 
 const boundsFromPosition = (pos: XY): Bounds => ({
   minX: pos.x,
@@ -108,6 +102,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     highlightedNodeIds: Set<string>;
     highlightedEdgeIds: Set<string>;
     previewEdgeKey?: string;
+    previewNodeKey?: string;
     activeDropTarget?: DragDropTarget;
     pointerOffsetFromRoot?: { x: number; y: number };
     lastGhostRootPosition?: { x: number; y: number };
@@ -119,6 +114,16 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     };
   } | null>(null);
   const [nodes, setNodes, onNodesChange] = useNodesState<WorkflowNodeModel>(initialNodes);
+  const draggedPositionLockRef = useRef<Set<string> | null>(null);
+  const handleNodesChange: typeof onNodesChange = (changes) => {
+    const locked = draggedPositionLockRef.current;
+    if (!locked || locked.size === 0) {
+      onNodesChange(changes);
+      return;
+    }
+    onNodesChange(changes.filter((change) =>
+      !(change.type === 'position' && locked.has(change.id))));
+  };
   const [edges, setEdges, onEdgesChange] = useEdgesState<WorkflowEdgeModel>(initialEdges);
   const [sidebarAction, setSidebarAction] = useState<WorkflowAction | null>(null);
   const [contextMenu, setContextMenu] = useState<WorkflowContextMenu | null>(null);
@@ -438,27 +443,80 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     snapshotNodes: WorkflowNodeModel[],
     snapshotEdges: WorkflowEdgeModel[],
     preview: WorkflowDropResult,
+    mode: WorkflowDropMode,
+    includeRemovalGapFill: boolean,
   ): InsertionLayout => {
     const snapshotById = new Map(snapshotNodes.map((item) => [item.id, item]));
     const draggedIds = getDragSubtreeNodeIds(sourceNodeId, snapshotNodes, snapshotEdges);
     const placeholderIds = getPreviewPlaceholderIds(sourceNodeId, snapshotNodes, snapshotEdges, preview.nodes, 'copy');
     const draggedNodes = snapshotNodes.filter((item) => draggedIds.has(item.id));
-    const draggedOrder = draggedNodes.map((item) => item.id);
     const draggedRoot = snapshotById.get(sourceNodeId);
     const anchorA = snapshotById.get(dropTarget.target.nodeId);
     const direction = dropTarget.target.direction;
     const offset = OFFSETS[direction];
 
-    const downstreamRoot = dropTarget.edge ? snapshotById.get(dropTarget.edge.target) : undefined;
+    const removalShiftById = new Map<string, XY>();
+    if (mode === 'move' && includeRemovalGapFill) {
+      snapshotEdges
+        .filter((item) => draggedIds.has(item.source) && !draggedIds.has(item.target))
+        .forEach((exitEdge) => {
+          const removed = snapshotById.get(exitEdge.source);
+          const filler = snapshotById.get(exitEdge.target);
+          if (!removed || !filler) return;
+          const isVertical = exitEdge.targetHandle === 'top' || exitEdge.sourceHandle === 'bottom';
+          const removalShift = isVertical
+            ? { x: 0, y: removed.position.y - filler.position.y }
+            : { x: removed.position.x - filler.position.x, y: 0 };
+          collectDescendantNodeIds(filler.id, snapshotEdges).forEach((id) => {
+            if (!draggedIds.has(id)) removalShiftById.set(id, removalShift);
+          });
+        });
+    }
+    const posOf = (node: WorkflowNodeModel): XY => {
+      const s = removalShiftById.get(node.id);
+      return s ? { x: node.position.x + s.x, y: node.position.y + s.y } : { x: node.position.x, y: node.position.y };
+    };
+
+    const continuationTargetHandle = direction === 'bottom' ? 'top' : 'left';
+    const continuationEdge = dropTarget.edge ?? snapshotEdges.find((item) =>
+      item.source === dropTarget.target.nodeId &&
+      (direction === 'bottom'
+        ? item.targetHandle === continuationTargetHandle || item.sourceHandle === 'true' || item.sourceHandle === 'bottom'
+        : item.targetHandle === continuationTargetHandle || item.sourceHandle === 'false' || item.sourceHandle === 'right' || !item.sourceHandle));
+    const downstreamRoot = continuationEdge ? snapshotById.get(continuationEdge.target) : undefined;
     const downstreamIds = downstreamRoot ? collectDescendantNodeIds(downstreamRoot.id, snapshotEdges) : new Set<string>();
+
+    let makeRoomRoot = downstreamRoot;
+    if (!makeRoomRoot && direction === 'right') {
+      const branchOwners = snapshotNodes.filter((item) => {
+        if (item.type !== 'if' && item.type !== 'loop') return false;
+        return getOperatorBottomBranch(item.id, snapshotNodes, snapshotEdges).nodeIds.has(dropTarget.target.nodeId);
+      });
+      const branchOwner = branchOwners.sort((left, right) =>
+        getOperatorBottomBranch(left.id, snapshotNodes, snapshotEdges).nodeIds.size -
+        getOperatorBottomBranch(right.id, snapshotNodes, snapshotEdges).nodeIds.size)[0];
+      const rightEdge = branchOwner
+        ? snapshotEdges.find((item) =>
+          item.source === branchOwner.id && item.sourceHandle === getRightSourceHandle(branchOwner.type))
+        : undefined;
+      makeRoomRoot = rightEdge ? snapshotById.get(rightEdge.target) : undefined;
+    }
+
+    const anchorDescendants = anchorA ? collectDescendantNodeIds(anchorA.id, snapshotEdges) : new Set<string>();
     const occupiedBounds = snapshotNodes
-      .filter((item) => !draggedIds.has(item.id)
+      .filter((item) => anchorDescendants.has(item.id)
         && item.id !== dropTarget.target.nodeId
-        && !downstreamIds.has(item.id))
-      .map(getNodeBounds);
+        && !downstreamIds.has(item.id)
+        && !draggedIds.has(item.id))
+      .map((item) => {
+        const p = posOf(item);
+        const width = item.measured?.width ?? item.width ?? NODE_BOX_SIZE;
+        const height = item.measured?.height ?? item.height ?? NODE_BOX_SIZE;
+        return { minX: p.x, minY: p.y, maxX: p.x + width, maxY: p.y + height };
+      });
 
     const placeholderBase = anchorA && draggedRoot
-      ? { x: anchorA.position.x + offset.x, y: anchorA.position.y + offset.y }
+      ? { x: posOf(anchorA).x + offset.x, y: posOf(anchorA).y + offset.y }
       : undefined;
     const placeholderPositionByDraggedId = new Map<string, XY>();
     const placeholderPositionByPreviewId = new Map<string, XY>();
@@ -491,16 +549,29 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     }
 
     let shift: XY = { x: 0, y: 0 };
-    if (downstreamRoot && placeholderPositionByDraggedId.size > 0) {
-      const placeholderPositions = [...placeholderPositionByDraggedId.values()];
-      if (direction === 'right') {
-        const placeholderMaxX = Math.max(...placeholderPositions.map((pos) => pos.x));
-        const requiredX = placeholderMaxX + OFFSETS.right.x;
-        shift = { x: Math.max(0, requiredX - downstreamRoot.position.x), y: 0 };
-      } else {
-        const placeholderMaxY = Math.max(...placeholderPositions.map((pos) => pos.y));
-        const requiredY = placeholderMaxY + OFFSETS.bottom.y;
-        shift = { x: 0, y: Math.max(0, requiredY - downstreamRoot.position.y) };
+    const insertionShiftIds = new Set<string>();
+    if (makeRoomRoot && placeholderPositionByDraggedId.size > 0) {
+      const placeholderMaxX = Math.max(...[...placeholderPositionByDraggedId.values()].map((pos) => pos.x));
+      const requiredX = placeholderMaxX + OFFSETS.right.x;
+      const downstreamX = posOf(makeRoomRoot).x;
+      shift = { x: Math.max(0, requiredX - downstreamX), y: 0 };
+      if (shift.x !== 0) {
+        const ancestors = new Set<string>();
+        let frontier: string[] = [makeRoomRoot.id];
+        while (frontier.length > 0) {
+          const nextFrontier: string[] = [];
+          snapshotEdges.forEach((item) => {
+            if (frontier.includes(item.target) && !ancestors.has(item.source)) {
+              ancestors.add(item.source);
+              nextFrontier.push(item.source);
+            }
+          });
+          frontier = nextFrontier;
+        }
+        snapshotNodes.forEach((item) => {
+          if (draggedIds.has(item.id) || ancestors.has(item.id)) return;
+          if (posOf(item).x >= downstreamX) insertionShiftIds.add(item.id);
+        });
       }
     }
 
@@ -508,9 +579,12 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     snapshotNodes
       .filter((item) => !draggedIds.has(item.id))
       .forEach((item) => {
-        positionsByRealId.set(item.id, downstreamIds.has(item.id)
-          ? { x: item.position.x + shift.x, y: item.position.y + shift.y }
-          : { x: item.position.x, y: item.position.y });
+        const base = posOf(item);
+        const insertionShift = insertionShiftIds.has(item.id) ? shift : { x: 0, y: 0 };
+        positionsByRealId.set(item.id, {
+          x: base.x + insertionShift.x,
+          y: base.y + insertionShift.y,
+        });
       });
     const sourcePositionByDraggedId = new Map<string, XY>();
     draggedNodes.forEach((item) => sourcePositionByDraggedId.set(item.id, { x: item.position.x, y: item.position.y }));
@@ -518,7 +592,6 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     return {
       draggedIds,
       placeholderIds,
-      draggedOrder,
       positionsByRealId,
       sourcePositionByDraggedId,
       placeholderPositionByDraggedId,
@@ -555,29 +628,34 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     ];
   };
 
+  const buildCopiedPlaceholderPositions = (
+    idMap: Map<string, string> | undefined,
+    layout: InsertionLayout,
+  ) => {
+    const copiedPositionByFinalId = new Map<string, XY>();
+    (idMap ?? new Map<string, string>()).forEach((finalId, sourceId) => {
+      const pos = layout.placeholderPositionByDraggedId.get(sourceId);
+      if (pos) copiedPositionByFinalId.set(finalId, pos);
+    });
+    return copiedPositionByFinalId;
+  };
+
   const applyInsertionPreviewPositions = (
     mode: WorkflowDropMode,
-    nextNodes: WorkflowNodeModel[],
-    snapshotNodes: WorkflowNodeModel[],
+    finalNodes: WorkflowNodeModel[],
+    idMap: Map<string, string> | undefined,
     layout: InsertionLayout,
   ) => {
     if (mode === 'move') {
-      return nextNodes.map((item) => {
+      return finalNodes.map((item) => {
         const moved = layout.placeholderPositionByDraggedId.get(item.id);
         if (moved) return { ...item, position: moved };
         const existing = layout.positionsByRealId.get(item.id);
         return existing ? { ...item, position: existing } : item;
       });
     }
-    const snapshotIds = new Set(snapshotNodes.map((item) => item.id));
-    const copiedPositionByFinalId = new Map<string, XY>();
-    nextNodes
-      .filter((item) => !snapshotIds.has(item.id))
-      .forEach((item, index) => {
-        const pos = layout.placeholderPositionByDraggedId.get(layout.draggedOrder[index]);
-        if (pos) copiedPositionByFinalId.set(item.id, pos);
-      });
-    return nextNodes.map((item) => {
+    const copiedPositionByFinalId = buildCopiedPlaceholderPositions(idMap, layout);
+    return finalNodes.map((item) => {
       const copied = copiedPositionByFinalId.get(item.id);
       if (copied) return { ...item, position: copied };
       const original = layout.sourcePositionByDraggedId.get(item.id);
@@ -656,6 +734,16 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     if (snapshot.previewEdgeKey === key) return;
     snapshot.previewEdgeKey = key;
     setEdges(nextEdges);
+  };
+
+  const updateDragPreviewNodes = (
+    snapshot: NonNullable<typeof dragSnapshot.current>,
+    key: string,
+    buildNodes: () => WorkflowNodeModel[],
+  ) => {
+    if (snapshot.previewNodeKey === key) return;
+    snapshot.previewNodeKey = key;
+    setNodes(buildNodes());
   };
 
   const buildPreviewGraphForTarget = (
@@ -741,7 +829,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     setReactFlowInstance: (instance: ReactFlowInstance<WorkflowNodeModel, WorkflowEdgeModel>) => {
       reactFlowInstance.current = instance;
     },
-    onNodesChange,
+    onNodesChange: handleNodesChange,
     onEdgesChange,
     setContextMenu,
     setHistoryOpen,
@@ -769,6 +857,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
         : { nodeIds: new Set<string>(), edgeIds: new Set<string>() };
       const mode: WorkflowDropMode = event?.ctrlKey ? 'copy' : 'move';
       const draggedIds = getDragSubtreeNodeIds(node.id, stableNodes, edges);
+      draggedPositionLockRef.current = new Set(draggedIds);
       const instance = reactFlowInstance.current;
       const pointerOffsetFromRoot = draggedNode && instance
         && typeof event?.clientX === 'number' && typeof event?.clientY === 'number'
@@ -820,6 +909,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       if (!dropTarget) {
         snapshot.activeDropTarget = undefined;
         snapshot.lastInsertionPreview = undefined;
+        snapshot.previewNodeKey = undefined;
         setNodes(buildFreeDragNodes(node.id, snapshot.nodes, delta));
         updateDragPreviewEdges(
           snapshot,
@@ -835,78 +925,90 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
         snapshot.nodes,
         snapshot.edges,
       );
-      const layout = computeInsertionLayout(dropTarget, node.id, snapshot.nodes, snapshot.edges, preview);
+      const layout = computeInsertionLayout(dropTarget, node.id, snapshot.nodes, snapshot.edges, preview, snapshot.mode, false);
       snapshot.lastInsertionPreview = {
         sourceNodeId: node.id,
         targetNodeId: dropTarget.target.nodeId,
         direction: dropTarget.target.direction,
         layout,
       };
-      setNodes(buildInsertionPreviewNodes(layout, snapshot.nodes, preview, invalid));
+      const previewKey = `${snapshot.mode}:${dropTarget.target.nodeId}:${dropTarget.target.direction}:${invalid}`;
+      updateDragPreviewNodes(snapshot, previewKey, () => buildInsertionPreviewNodes(layout, snapshot.nodes, preview, invalid));
       updateDragPreviewEdges(
         snapshot,
-        `${snapshot.mode}:${dropTarget.target.nodeId}:${dropTarget.target.direction}:${invalid}`,
+        previewKey,
         buildInsertionPreviewEdges(node.id, snapshot.nodes, snapshot.edges, preview, invalid),
       );
     },
     onNodeDragStop: async (event: any, node: WorkflowNodeModel) => {
       const snapshot = dragSnapshot.current;
       dragSnapshot.current = null;
-      if (!snapshot || node.type === 'start') return;
-
-      const releaseGhostRoot = computeGhostRootPosition(event, snapshot);
-      if (releaseGhostRoot) snapshot.lastGhostRootPosition = releaseGhostRoot;
-
-      const dropTarget = snapshot.activeDropTarget
-        ?? findDropTarget(event, node.id, snapshot.nodes, snapshot.edges);
-
-      if (!dropTarget) {
-        if (snapshot.mode === 'copy') {
-          clearAllDragPreviewState(snapshot);
-          return;
-        }
-        commitFreeReposition(snapshot, node.id);
+      if (!snapshot || node.type === 'start') {
+        draggedPositionLockRef.current = null;
         return;
       }
-      const preview = moveOrCopyWorkflowNodes({
-        sourceNodeId: node.id,
-        target: dropTarget.target,
-        mode: snapshot.mode,
-        nodes: snapshot.nodes,
-        edges: snapshot.edges,
-        fieldBindings: options.fieldBindings,
-      });
 
-      let next = preview;
-      if (preview.invalidReferences.length > 0) {
-        clearAllDragPreviewState(snapshot);
-        const ok = await options.confirmDependencyDrop?.(preview.invalidReferences);
-        if (!ok) {
-          clearAllDragPreviewState(snapshot);
+      try {
+        const releaseGhostRoot = computeGhostRootPosition(event, snapshot);
+        if (releaseGhostRoot) snapshot.lastGhostRootPosition = releaseGhostRoot;
+
+        const releasedTarget = findDropTarget(event, node.id, snapshot.nodes, snapshot.edges);
+        const storedPreview = snapshot.lastInsertionPreview?.sourceNodeId === node.id
+          ? snapshot.lastInsertionPreview
+          : undefined;
+
+        const commitDropTarget: DragDropTarget | undefined = releasedTarget
+          ?? (storedPreview
+            ? { target: { nodeId: storedPreview.targetNodeId, direction: storedPreview.direction }, distance: 0 }
+            : undefined);
+        let commitTarget: { nodeId: string; direction: 'right' | 'bottom' } | undefined;
+        let commitLayout: InsertionLayout | undefined;
+        if (commitDropTarget) {
+          commitTarget = commitDropTarget.target;
+          const { preview } = buildPreviewGraphForTarget(
+            node.id, commitDropTarget.target, snapshot.mode, snapshot.nodes, snapshot.edges,
+          );
+          commitLayout = computeInsertionLayout(
+            commitDropTarget, node.id, snapshot.nodes, snapshot.edges, preview, snapshot.mode, true,
+          );
+        }
+
+        if (!commitTarget || !commitLayout) {
+          if (snapshot.mode === 'copy') clearAllDragPreviewState(snapshot);
+          else commitFreeReposition(snapshot, node.id);
           return;
         }
-        next = moveOrCopyWorkflowNodes({
+
+        const dropArgs = {
           sourceNodeId: node.id,
-          target: dropTarget.target,
+          target: commitTarget,
           mode: snapshot.mode,
           nodes: snapshot.nodes,
           edges: snapshot.edges,
           fieldBindings: options.fieldBindings,
-          cleanInvalid: true,
-        });
+        };
+        const preview = moveOrCopyWorkflowNodes(dropArgs);
+
+        let next = preview;
+        if (preview.invalidReferences.length > 0) {
+          clearAllDragPreviewState(snapshot);
+          const ok = await options.confirmDependencyDrop?.(preview.invalidReferences);
+          if (!ok) {
+            clearAllDragPreviewState(snapshot);
+            return;
+          }
+          next = moveOrCopyWorkflowNodes({ ...dropArgs, cleanInvalid: true });
+        }
+
+        const restored = restoreStableNodeData(next.nodes, snapshot.nodes, snapshot.operatorConfigs);
+        const positionedNodes = applyInsertionPreviewPositions(snapshot.mode, restored, next.idMap, commitLayout);
+
+        setNodes(clearDragFlags(positionedNodes));
+        setEdges(clearEdgeDragFlags(next.edges));
+        options.onFieldBindingsChange?.(next.fieldBindings);
+      } finally {
+        requestAnimationFrame(() => { draggedPositionLockRef.current = null; });
       }
-
-      const insertion = snapshot.lastInsertionPreview;
-      const positionedNodes = insertion
-        && insertion.sourceNodeId === node.id
-        && insertion.targetNodeId === dropTarget.target.nodeId
-        && insertion.direction === dropTarget.target.direction
-        ? applyInsertionPreviewPositions(snapshot.mode, next.nodes, snapshot.nodes, insertion.layout)
-        : next.nodes;
-
-      setNodes(clearDragFlags(restoreStableNodeData(positionedNodes, snapshot.nodes, snapshot.operatorConfigs)));
-      setEdges(clearEdgeDragFlags(next.edges));
-      options.onFieldBindingsChange?.(next.fieldBindings);
     },
     onOpenAddStep: (action: WorkflowAction) => { setSidebarAction(action); setContextMenu(null); setHistoryOpen(false); setMethodEditor(null); setConditionEditor(null); },
     onAddStep: (

@@ -19,6 +19,7 @@ export type WorkflowDropResult = {
   edges: WorkflowEdgeModel[];
   fieldBindings?: any[];
   invalidReferences: InvalidReference[];
+  idMap?: Map<string, string>;
 };
 
 export type InvalidReference = {
@@ -1019,6 +1020,7 @@ export function moveOrCopyWorkflowNodes({
       edges: inserted.edges,
       fieldBindings: nextFieldBindings,
       invalidReferences,
+      idMap: prepared.idMap,
     };
   }
 
@@ -1029,5 +1031,6 @@ export function moveOrCopyWorkflowNodes({
     edges: inserted.edges,
     fieldBindings: cleaned.fieldBindings,
     invalidReferences: [],
+    idMap: prepared.idMap,
   };
 }
