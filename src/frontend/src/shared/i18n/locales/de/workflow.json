@@ -167,8 +167,7 @@
     "downloadAsTemplate": "Als Vorlage herunterladen",
     "saveAsTemplate": "Als Vorlage speichern",
     "loadTemplate": "Vorlage laden",
-    "editorAppearance": "Editor-Darstellung",
-    "inDevelopment": "In Entwicklung",
+    "versionHistory": "Versionsverlauf",
     "shortcuts": "Tastenkürzel",
     "exit": "Beenden"
   },

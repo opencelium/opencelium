@@ -1,4 +1,4 @@
-import { Clock3, MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { HeaderEditableField } from './header/HeaderEditableField';
 import { HeaderMenu } from './header/HeaderMenu';
@@ -146,6 +146,14 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 		setSaveComment('');
 	};
 
+	const handleMenuItemSelect = (item: WorkflowHeaderMenuItem) => {
+		if (item.id === 'version-history') {
+			onOpenHistory();
+			return;
+		}
+		onMenuItemSelect?.(item);
+	};
+
 	return (
 		<>
 			<div className={`headerCard ${nameError ? 'headerCardWithInlineError' : ''}`}>
@@ -218,17 +226,6 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 							{t('actions.save')}
 						</button>
 					)}
-					<button
-						className='iconButton'
-						type='button'
-						data-testid='workflow-history'
-						onClick={() => {
-							setMenuOpen(false);
-							onOpenHistory();
-						}}
-					>
-						<Clock3 size={16} />
-					</button>
 					<div className='headerActionWrap'>
 						<button
 							className='iconButton'
@@ -242,7 +239,7 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 							open={menuOpen}
 							items={headerMenuItems}
 							onClose={() => setMenuOpen(false)}
-							onSelect={onMenuItemSelect}
+							onSelect={handleMenuItemSelect}
 							loadingItemId={menuLoadingItemId}
 						/>
 					</div>

@@ -97,7 +97,7 @@ export type CreateNodeFromActionArgs = {
 export type WorkflowHeaderMenuItem = {
 	id: string;
 	labelKey: string;
-	section?: 'template' | 'editor' | 'exit';
+	section?: 'template' | 'history' | 'shortcuts' | 'exit';
 	keepOpenOnSelect?: boolean;
 	disabled?: boolean;
 	badgeKey?: string;

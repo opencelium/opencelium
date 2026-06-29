@@ -167,8 +167,7 @@
     "downloadAsTemplate": "Download as Template",
     "saveAsTemplate": "Save as Template",
     "loadTemplate": "Load Template",
-    "editorAppearance": "Editor Appearance",
-    "inDevelopment": "In development",
+    "versionHistory": "Version History",
     "shortcuts": "Shortcuts",
     "exit": "Exit"
   },
