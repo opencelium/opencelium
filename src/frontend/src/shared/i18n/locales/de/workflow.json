@@ -28,6 +28,41 @@
     "selectPlaceholder": "Vorlage auswählen",
     "loadWarning": "Wenn Sie eine Vorlage laden, werden alle Ihre aktuellen Workflow-Änderungen ersetzt."
   },
+  "schedules": {
+    "title": "Zeitpläne",
+    "add": "Zeitplan hinzufügen",
+    "nextRun": "Nächste Ausführung in {{duration}}",
+    "manual": "Nur manuell",
+    "expand": "Details anzeigen",
+    "collapse": "Details ausblenden",
+    "empty": "Noch keine Zeitpläne für diesen Workflow.",
+    "saveFirst": "Speichern Sie den Workflow, um Zeitpläne hinzuzufügen.",
+    "pill": {
+      "tooltip": "Zeitpläne für diesen Workflow"
+    },
+    "aggregate": {
+      "running": "Ein Zeitplan wird ausgeführt",
+      "error": "Letzte Ausführung fehlgeschlagen",
+      "ok": "Alle Zeitpläne fehlerfrei",
+      "idle": "Keine kürzlichen Ausführungen"
+    },
+    "actions": {
+      "delete": "Zeitplan löschen"
+    },
+    "create": {
+      "title": "Neuer Zeitplan",
+      "subtitle": "Erstellen Sie einen Zeitplan für \"{{title}}\".",
+      "submit": "Erstellen",
+      "cancel": "Abbrechen",
+      "success": "Zeitplan für \"{{title}}\" erstellt.",
+      "error": "Zeitplan konnte nicht erstellt werden."
+    },
+    "delete": {
+      "title": "Zeitplan löschen",
+      "message": "Möchten Sie den Zeitplan \"{{title}}\" wirklich löschen?",
+      "success": "Zeitplan \"{{title}}\" gelöscht."
+    }
+  },
   "history": {
     "title": "Versionsverlauf",
     "author": "Autor: {{name}}",

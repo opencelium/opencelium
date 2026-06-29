@@ -1,5 +1,5 @@
 import { Clock3, MoreHorizontal } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { HeaderEditableField } from './header/HeaderEditableField';
 import { HeaderMenu } from './header/HeaderMenu';
 import { HeaderSaveDialog } from './header/HeaderSaveDialog';
@@ -20,11 +20,12 @@ type Props = {
 	saveDisabled?: boolean;
 	readOnly?: boolean;
 	loading?: boolean;
+	schedulesSlot?: ReactNode;
 };
 type EditField = 'name' | 'description' | null;
 const EMPTY_NAME_LABEL = '[Empty Name]';
 
-export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initialDescription = 'This interface delivering data into znuny and creates a ticket if the specified object is missing.', onOpenHistory, onSave, onChange, onMenuItemSelect, menuLoadingItemId, validateTitle, saveDisabled = false, readOnly = false, loading = false }: Props) {
+export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initialDescription = 'This interface delivering data into znuny and creates a ticket if the specified object is missing.', onOpenHistory, onSave, onChange, onMenuItemSelect, menuLoadingItemId, validateTitle, saveDisabled = false, readOnly = false, loading = false, schedulesSlot }: Props) {
 	const { t } = useI18n('workflow');
 	const [name, setName] = useState(initialName);
 	const [description, setDescription] = useState(initialDescription);
@@ -205,6 +206,7 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 
 				<div className='headerActions'>
 					<CommandPalette collapsible forceMode="modal" />
+					{schedulesSlot}
 					{!readOnly && (
 						<button
 							className='primaryButton headerPrimaryButton'

@@ -11,6 +11,8 @@ import { WorkflowCanvas } from './components/WorkflowCanvas';
 import { WorkflowHeader } from './components/WorkflowHeader';
 import { WorkflowLogs } from './components/WorkflowLogs';
 import { WorkflowSidebar } from './components/WorkflowSidebar';
+import { WorkflowSchedulesPill } from './components/schedules/WorkflowSchedulesPill';
+import { WorkflowSchedulesPanel } from './components/schedules/WorkflowSchedulesPanel';
 import { HistoryPanel } from './components/header/HistoryPanel';
 import { ShortcutsDialog } from './components/header/ShortcutsDialog';
 import { ConditionBuilderDialog } from './components/condition-builder/ConditionBuilder';
@@ -247,6 +249,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const [isApplyingTemplate, setIsApplyingTemplate] = useState(false);
   const [isDownloadingTemplate, setIsDownloadingTemplate] = useState(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
+  const [schedulesOpen, setSchedulesOpen] = useState(false);
   const hydratedNodes = useMemo(
     () => hydrateNodesWithOperationResponses(workflow.nodes, connectors),
     [connectors, workflow.nodes],
@@ -574,6 +577,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
 
   const handleOpenHistory = () => {
     workflow.setHistoryOpen(true);
+    setSchedulesOpen(false);
     workflow.setSidebarAction(null);
     workflow.setContextMenu(null);
     workflow.setConditionEditor(null);
@@ -604,6 +608,20 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         onOpenHistory={handleOpenHistory}
         readOnly={readOnly}
         loading={isConnectionLoading}
+        schedulesSlot={
+          activeConnectionId ? (
+            <WorkflowSchedulesPill
+              connectionId={activeConnectionId}
+              open={schedulesOpen}
+              onToggle={() => {
+                setSchedulesOpen((prev) => {
+                  if (!prev) workflow.setHistoryOpen(false);
+                  return !prev;
+                });
+              }}
+            />
+          ) : null
+        }
       />
       <Modal
         open={templateDialogOpen}
@@ -749,6 +767,12 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         )}
       </div>
       <WorkflowSidebar action={workflow.sidebarAction} selectedNode={selectedNode} onClose={() => workflow.setSidebarAction(null)} onSelect={workflow.onAddStep} />
+      <WorkflowSchedulesPanel
+        open={schedulesOpen}
+        connectionId={activeConnectionId}
+        connectionTitle={headerState.title}
+        onClose={() => setSchedulesOpen(false)}
+      />
       <HistoryPanel
         open={workflow.historyOpen}
         items={displayedHistoryVersions}

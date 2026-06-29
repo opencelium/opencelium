@@ -8,9 +8,10 @@ import { NotificationsDialogContent } from './NotificationsDialogContent'
 
 type Props = {
     schedule: Schedule
+    tooltipPlacement?: 'top' | 'bottom' | 'left' | 'right'
 }
 
-export function NotificationsAction({ schedule }: Props) {
+export function NotificationsAction({ schedule, tooltipPlacement }: Props) {
     const { t: tEntities } = useI18n('entities')
     const dialog = useDialog()
 
@@ -27,7 +28,7 @@ export function NotificationsAction({ schedule }: Props) {
     }
 
     return (
-        <Tooltip content={tEntities('schedule.notifications.tooltip')}>
+        <Tooltip content={tEntities('schedule.notifications.tooltip')} placement={tooltipPlacement}>
             <IconButton
                 iconProps={{ name: 'notification', color: 'primary' }}
                 size="xs"

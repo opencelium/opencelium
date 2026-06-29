@@ -1,0 +1,174 @@
+/* ---- Header status pill ---- */
+.wf-schedules-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 12px;
+  color: var(--color-text-primary);
+}
+
+.wf-schedules-pill--active {
+  border-color: var(--color-action-primary);
+  color: var(--color-action-primary);
+}
+
+.wf-schedules-pill__count {
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 8px;
+  text-align: center;
+}
+
+.wf-schedules-pill__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: 0 0 8px;
+}
+
+.wf-schedules-pill__dot--ok {
+  background: var(--color-status-success-fg);
+}
+
+.wf-schedules-pill__dot--error {
+  background: var(--color-status-error-fg);
+}
+
+.wf-schedules-pill__dot--idle {
+  background: var(--color-text-disabled);
+}
+
+.wf-schedules-pill__dot--running {
+  background: var(--color-status-info-fg);
+  animation: wf-schedule-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes wf-schedule-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.7);
+  }
+}
+
+/* ---- Drawer ---- */
+.wf-schedules-drawer {
+  width: 360px;
+}
+
+.wf-schedules-toolbar {
+  padding: 12px 16px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.wf-schedule-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.wf-schedule-loading {
+  display: flex;
+  justify-content: center;
+  padding: 32px 0;
+}
+
+.wf-schedule-empty {
+  margin-top: 24px;
+}
+
+/* ---- Card ---- */
+.wf-schedule-card {
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 12px;
+  background: var(--color-background-elevated);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.wf-schedule-card--flash {
+  border-color: var(--color-status-success-fg);
+  box-shadow: 0 0 0 2px var(--color-status-success-bg, var(--color-action-primary-subtle));
+}
+
+.wf-schedule-card__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  /* StatusCell renders an absolutely-positioned next-run countdown ~45px below the
+     play control; reserve room in the header so it isn't clipped. */
+  min-height: 56px;
+}
+
+/* Anchors StatusCell's absolutely-positioned countdown to the header. */
+.wf-schedule-card__status {
+  position: relative;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+}
+
+.wf-schedule-nextrun {
+  flex: 0 0 auto;
+  font-size: 13px;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+}
+
+.wf-schedule-nextrun--muted {
+  color: var(--color-text-secondary);
+}
+
+.wf-schedule-card__spacer {
+  flex: 1;
+}
+
+.wf-schedule-card__details {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---- Rows (vertical field stack) ---- */
+.wf-schedule-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 32px;
+  padding: 2px 0;
+  border-top: 1px dashed var(--color-border-subtle);
+}
+
+.wf-schedule-row:first-of-type {
+  border-top: none;
+}
+
+.wf-schedule-row__label {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  flex: 0 0 auto;
+}
+
+.wf-schedule-row__value {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+/* ExecutionCell stacks the date + "see logs" link centered via inline styles;
+   right-align them to match the right-aligned value column. */
+.wf-schedule-exec-cell > div {
+  align-items: flex-end !important;
+  text-align: right;
+}
