@@ -103,6 +103,7 @@ function CronEditForm({ schedule, connectionTitle, onClose }: FormProps) {
                     <CronEditor
                         name="cronExp"
                         mode="update"
+                        autoFocus
                         label={tEntities('schedule.fields.cronExp.label')}
                     />
                     <div

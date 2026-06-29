@@ -16,8 +16,9 @@ interface CronEditorProps {
     name: string;
     mode: Mode;
     label?: string;
+    autoFocus?: boolean;
 }
-export const CronEditor: React.FC<CronEditorProps> = ({ name, label, mode }) => {
+export const CronEditor: React.FC<CronEditorProps> = ({ name, label, mode, autoFocus }) => {
     const { control, getValues, setValue } = useFormContext();
 
     const initial = getValues()[name] || '';
@@ -51,6 +52,7 @@ export const CronEditor: React.FC<CronEditorProps> = ({ name, label, mode }) => 
         <div style={{display: 'grid', gap: 4}}>
             <FormInput
                 label={label}
+                autoFocus={autoFocus}
                 value={fullCron}
                 onChange={(e) => {
                     const val = e.target.value;
