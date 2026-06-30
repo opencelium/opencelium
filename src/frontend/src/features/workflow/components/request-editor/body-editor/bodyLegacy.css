@@ -180,20 +180,28 @@
   position: relative;
   flex: 1;
   min-height: 0;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  overflow: hidden;
 }
 
-.bodyLegacyEnhancementScriptEditor > * {
+.bodyLegacyEnhancementScriptEditor > :not(.bodyLegacyScriptToggle) {
   position: absolute;
   inset: 0;
   width: auto !important;
 }
 
+/* Light-gray active line so it reads as selected without blending into the enhancement container. */
+.bodyLegacyEnhancementScriptEditor .ace_marker-layer .ace_active-line,
+.bodyLegacyEnhancementScriptEditor .ace_gutter-active-line {
+  background: var(--color-background-disabled);
+}
+
 .bodyLegacyScriptToggle {
   position: absolute;
-  top: 0;
-  right: 6px;
+  top: 6px;
+  right: 8px;
   z-index: 5;
-  background: var(--color-background-surface);
 }
 
 .bodyLegacyEnhancementScriptMaximized {
