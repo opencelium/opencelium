@@ -294,48 +294,53 @@ public class FileController {
     })
     @PostMapping(value = "/template/zip", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadZip(@RequestParam("file") MultipartFile zip) {
-        // Get extension
         String extension = FileNameUtils.getExtension(zip.getOriginalFilename());
-        if (extension == null) {
-            throw new RuntimeException("Extension not found");
+
+        if (!"zip".equalsIgnoreCase(extension)) {
+            throw new RuntimeException("ZIP_FILE_REQUIRED");
         }
 
         List<FileDTO> files = new ArrayList<>();
-        try {
-            if (extension.equals("zip")) {
+        List<Template> templates = new ArrayList<>();
+
+        try (
                 InputStream inputStream = zip.getInputStream();
                 ZipInputStream zis = new ZipInputStream(inputStream);
-                ObjectMapper objectMapper = new ObjectMapper();
-                ZipEntry zipEntry;
-                List<Template> templates = new ArrayList<>();
-                while ((zipEntry = zis.getNextEntry()) != null) {
+        ) {
+            ZipEntry zipEntry;
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            while ((zipEntry = zis.getNextEntry()) != null) {
+                try {
                     if (zipEntry.isDirectory() || !zipEntry.getName().endsWith(".json")) {
                         continue;
                     }
+
                     //Generate new file name
                     String id = UUID.randomUUID().toString();
                     String jsonContent = new String(zis.readAllBytes(), StandardCharsets.UTF_8);
+
                     Template template = objectMapper.readValue(jsonContent, Template.class);
                     template.setTemplateId(id);
+
                     updateTemplate(template);
                     templates.add(template);
+                } finally {
+                    zis.closeEntry();
                 }
-                zis.close();
-
-                templates.forEach(tmpl -> {
-                    templateService.save(tmpl);
-                    URI uri = getUri(tmpl.getTemplateId() + ".json");
-                    FileDTO fileDTO = new FileDTO(tmpl.getTemplateId(), uri.toString());
-                    files.add(fileDTO);
-                });
-            } else {
-                throw new RuntimeException("Zip file is required");
             }
-        } catch (Exception e) {
+
+            templates.forEach(tmpl -> {
+                templateService.save(tmpl);
+
+                URI uri = getUri(tmpl.getTemplateId() + ".json");
+                files.add(new FileDTO(tmpl.getTemplateId(), uri.toString()));
+            });
+
+            return ResponseEntity.ok().body(files);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        return ResponseEntity.ok().body(files);
     }
 
     @Operation(summary = "Uploads invoker xml file")
@@ -396,46 +401,50 @@ public class FileController {
     public ResponseEntity<?> uploadInvokerZip(@RequestParam("file") MultipartFile file) {
         String filename = file.getOriginalFilename();
         String extension = FileNameUtils.getExtension(file.getOriginalFilename());
+
+        if (file.isEmpty()) {
+            throw new StorageException("Failed to store empty file " + filename);
+        }
+
+        if (filename == null || filename.isBlank()) {
+            throw new StorageException("Failed to store file with empty name");
+        }
+
+        if (!"zip".equalsIgnoreCase(extension)) {
+            throw new RuntimeException("ZIP_FILE_REQUIRED");
+        }
+
         List<FileDTO> fileDTOList = new ArrayList<>();
-        try {
-            if (file.isEmpty()) {
-                throw new StorageException("Failed to store empty file " + filename);
-            }
-            Objects.requireNonNull(filename);
-            if (filename.contains("..")) {
-                // This is a security check
-                throw new StorageException(
-                        "Cannot store file with relative path outside current directory "
-                                + filename);
-            }
-            Objects.requireNonNull(extension);
-            if (extension.equals("zip")) {
+
+        try (
                 InputStream inputStream = file.getInputStream();
-                ZipInputStream zis = new ZipInputStream(inputStream);
-                ZipEntry zipEntry;
-                while ((zipEntry = zis.getNextEntry()) != null) {
-                    if(zipEntry.isDirectory() || !zipEntry.getName().endsWith(".xml")) {
+                ZipInputStream zis = new ZipInputStream(inputStream)
+        ) {
+            ZipEntry zipEntry;
+
+            while ((zipEntry = zis.getNextEntry()) != null) {
+                try {
+                    if (zipEntry.isDirectory() || !zipEntry.getName().endsWith(".xml")) {
                         continue;
                     }
+
                     Xml xml = saveXmlFile(zis, zipEntry.getName());
                     String name = xml.getValueByXPath("//invoker/name");
-                    FileDTO fileDTO = new FileDTO(name);
-                    fileDTOList.add(fileDTO);
+
+                    fileDTOList.add(new FileDTO(name));
 
                     // update invoker sync table to store latest files information
                     invokerSyncService.updateSync(name);
+                } finally {
+                    zis.closeEntry();
                 }
-                zis.close();
-            } else {
-                throw new RuntimeException("ZIP_FILE_REQUIRED");
             }
+
+            return ResponseEntity.ok(fileDTOList);
         } catch (Exception e) {
-            fileDTOList.forEach(f -> {
-                invokerServiceImp.delete(f.getId());
-            });
+            fileDTOList.forEach(f -> invokerServiceImp.delete(f.getId()));
             throw new StorageException("Failed to store file " + filename, e);
         }
-        return ResponseEntity.ok(fileDTOList);
     }
 
     private Xml saveXmlFile(InputStream inputStream, String filename) {
