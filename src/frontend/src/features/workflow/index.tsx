@@ -1,5 +1,5 @@
 import { Background } from '@xyflow/react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button, Input, Modal, Select, message } from 'antd';
 import { Loading } from '@shared/ui/primitives/Loading/Loading';
@@ -571,6 +571,35 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       toConnector: null,
     };
   }, [connectionId, headerState.description, headerState.title, hydratedNodes, loadedFieldBindings, tEntities, workflow]);
+
+  const deleteSelectedNode = () => {
+    if (readOnly) return;
+    if (
+      workflow.methodEditor ||
+      workflow.conditionEditor ||
+      workflow.historyOpen ||
+      templateDialogOpen ||
+      loadTemplateDialogOpen ||
+      isShortcutsOpen
+    ) return;
+    const selected = workflow.nodes.find((node) => node.selected && node.type !== 'start');
+    if (!selected) return;
+    void workflow.onDeleteNode(selected.id);
+  };
+  const deleteSelectedNodeRef = useRef(deleteSelectedNode);
+  deleteSelectedNodeRef.current = deleteSelectedNode;
+
+  useEffect(() => {
+    const handleDeleteShortcut = (event: KeyboardEvent) => {
+      if (event.key !== 'Delete') return;
+      const target = event.target as HTMLElement | null;
+      // Don't hijack Delete while the user is editing text or a code editor.
+      if (target?.closest('input, textarea, select, [contenteditable="true"], .ace_editor')) return;
+      deleteSelectedNodeRef.current();
+    };
+    window.addEventListener('keydown', handleDeleteShortcut);
+    return () => window.removeEventListener('keydown', handleDeleteShortcut);
+  }, []);
 
   const handleOpenHistory = () => {
     workflow.setHistoryOpen(true);

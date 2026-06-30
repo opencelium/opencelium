@@ -27,6 +27,7 @@ const SHORTCUT_GROUPS: ShortcutGroup[] = [
       { keys: ['drag'], descKey: 'shortcutsDialog.items.moveNode' },
       { keys: ['ctrl', 'drag'], descKey: 'shortcutsDialog.items.duplicate' },
       { keys: ['ctrl', 'click'], descKey: 'shortcutsDialog.items.multiSelect' },
+      { keys: ['delete'], descKey: 'shortcutsDialog.items.deleteNode' },
     ],
   },
   {

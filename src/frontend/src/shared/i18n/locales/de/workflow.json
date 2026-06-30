@@ -151,7 +151,8 @@
       "doubleClick": "Doppelklick",
       "ctrl": "Strg",
       "esc": "Esc",
-      "s": "S"
+      "s": "S",
+      "delete": "Entf"
     },
     "items": {
       "pan": "Arbeitsfläche verschieben",
@@ -160,6 +161,7 @@
       "moveNode": "Knoten verschieben",
       "duplicate": "Knoten duplizieren statt verschieben",
       "multiSelect": "Mehrere Knoten auswählen",
+      "deleteNode": "Ausgewählten Knoten löschen",
       "save": "Workflow speichern",
       "close": "Geöffnetes Menü, Dialog oder Panel schließen"
     }

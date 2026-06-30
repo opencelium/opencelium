@@ -151,7 +151,8 @@
       "doubleClick": "Double-click",
       "ctrl": "Ctrl",
       "esc": "Esc",
-      "s": "S"
+      "s": "S",
+      "delete": "Delete"
     },
     "items": {
       "pan": "Pan the canvas",
@@ -160,6 +161,7 @@
       "moveNode": "Move a node",
       "duplicate": "Duplicate a node instead of moving it",
       "multiSelect": "Select multiple nodes",
+      "deleteNode": "Delete the selected node",
       "save": "Save the workflow",
       "close": "Close the open menu, dialog, or panel"
     }
