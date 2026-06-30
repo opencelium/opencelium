@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -85,20 +86,22 @@ public class AssistantServiceImp implements ApplicationService {
 
     @Override
     public void deleteZipFile(Path path) {
-        if (path.equals("")) {
+        if (path == null || Files.notExists(path)) {
             return;
         }
-        try {
-            File tempFile = new File(path.toString());
-            if (!tempFile.exists()) {
-                return;
-            }
-            Files.walk(path)
-                    .sorted(Comparator.reverseOrder())
-                    .map(Path::toFile)
-                    .forEach(File::delete);
-        } catch (IOException e) {
-            throw new StorageException("Failed to delete stored file", e);
+
+        try (Stream<Path> paths = Files.walk(path)) {
+            paths.sorted(Comparator.reverseOrder())
+                    .forEach(p -> {
+                        try {
+                            Files.deleteIfExists(p);
+                        } catch (IOException e) {
+                            throw new UncheckedIOException(e);
+                        }
+                    });
+        } catch (IOException | UncheckedIOException e) {
+            Throwable cause = e instanceof UncheckedIOException ? e.getCause() : e;
+            throw new StorageException("Failed to delete stored file", cause);
         }
     }
 
@@ -149,10 +152,13 @@ public class AssistantServiceImp implements ApplicationService {
         } else {
             throw new RuntimeException("Zip file in folder \"versions/" + dir + "\" not found.");
         }
-        InputStream inputStream = Files.newInputStream(zipFile.toPath());
+
         Path appRoot = Paths.get(backendRoot.getAbsolutePath()).getParent().getParent();
         log.info(zipFile.toPath() + ", " + appRoot);
-        ZipUtils.extractZip(inputStream, appRoot);
+
+        try (InputStream inputStream = Files.newInputStream(zipFile.toPath());) {
+            ZipUtils.extractZip(inputStream, appRoot);
+        }
     }
 
     @Override
