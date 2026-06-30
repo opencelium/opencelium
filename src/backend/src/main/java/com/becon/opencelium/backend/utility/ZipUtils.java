@@ -1,14 +1,11 @@
 package com.becon.opencelium.backend.utility;
 
-import com.becon.opencelium.backend.application.assistant.AssistantServiceImp;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
-import org.eclipse.jgit.util.IO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -21,7 +18,6 @@ public class ZipUtils {
         File f = new File("../frontend");
         FileUtils.deleteDirectory(f);
         try (ZipInputStream zis = new ZipInputStream(new BufferedInputStream(zipInputStream))) {
-//            ZipEntry zipEntry = zis.getNextEntry();
             ZipEntry zipEntry;
 
             while ((zipEntry = zis.getNextEntry()) != null) {
@@ -64,25 +60,5 @@ public class ZipUtils {
         }
         Files.copy(inputStream, zipFilePath,
                 StandardCopyOption.REPLACE_EXISTING);
-    }
-
-    private static void clearFolder(Path folder) throws IOException {
-        if (Files.exists(folder)) {
-            Files.walkFileTree(folder, new SimpleFileVisitor<Path>() {
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    Files.delete(file);
-                    return FileVisitResult.CONTINUE;
-                }
-
-                @Override
-                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                    if (!dir.equals(folder)) {
-                        Files.delete(dir);
-                    }
-                    return FileVisitResult.CONTINUE;
-                }
-            });
-        }
     }
 }

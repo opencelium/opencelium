@@ -2,57 +2,37 @@ package com.becon.opencelium.backend.application.assistant;
 
 import com.becon.opencelium.backend.application.entity.SystemOverview;
 import com.becon.opencelium.backend.application.repository.SystemOverviewRepository;
+import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.constant.ExceptionConstant;
 import com.becon.opencelium.backend.constant.ExceptionMessages;
 import com.becon.opencelium.backend.constant.PathConstant;
-import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.constant.props.OpenceliumProps;
-import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
-import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.exception.StorageException;
-import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
-import com.becon.opencelium.backend.invoker.entity.Invoker;
-import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.resource.application.SystemOverviewResource;
-import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.updateassistant.InstallationDTO;
 import com.becon.opencelium.backend.resource.updateassistant.JarFileDescriptor;
 import com.becon.opencelium.backend.utility.PackageVersionManager;
 import com.becon.opencelium.backend.utility.ZipUtils;
 import com.becon.opencelium.backend.versionmanager.base.Utils;
-import com.jayway.jsonpath.JsonPath;
-import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Stream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 @Service
 public class AssistantServiceImp implements ApplicationService {
@@ -65,13 +45,7 @@ public class AssistantServiceImp implements ApplicationService {
     private Environment env;
 
     @Autowired
-    private RestTemplate restTemplate;
-
-    @Autowired
     private OpenceliumProps ocProps;
-
-    @Autowired
-    private InvokerService invokerService;
 
     @Override
     public SystemOverview getSystemOverview() {
@@ -138,26 +112,6 @@ public class AssistantServiceImp implements ApplicationService {
         return systemOverviewResource;
     }
 
-    @Override
-    public void createTmpDir(String dir) {
-        Path filePath = Paths.get(PathConstant.ASSISTANT + "temporary/" + dir + "/");
-        if (Files.notExists(filePath)) {
-            File directory = new File(PathConstant.ASSISTANT + "temporary/" + dir + "/");
-            directory.mkdir();
-            System.out.println("Directory has been created: " + PathConstant.ASSISTANT + "temporary/" + dir + "/");
-        }
-
-        List<String> folders = Arrays.asList("connection/", "template/", "invoker/");
-        folders.forEach(f -> {
-            Path path = Paths.get(PathConstant.ASSISTANT + "temporary/" + dir + "/" + f);
-            if (Files.notExists(path)) {
-                File directory = new File(PathConstant.ASSISTANT + "temporary/" + dir + "/" + f);
-                directory.mkdir();
-                System.out.println("Directory has been created: " + PathConstant.ASSISTANT + "temporary/" + dir + "/" + f);
-            }
-        });
-    }
-
     // TODO: test
     @Override
     public String getCurrentVersion() {
@@ -178,81 +132,14 @@ public class AssistantServiceImp implements ApplicationService {
         return new InstallationDTO(installType);
     }
 
-    public void moveToTmpFolder(Path filePath, String folder, String fileExtension) throws IOException {
-        List<File> templates = Files.list(filePath)
-                .filter(Files::isRegularFile)
-                .filter(path -> path.toString().endsWith(fileExtension))
-                .map(Path::toFile)
-                .collect(Collectors.toList());
-        templates.forEach(f -> {
-            moveFiles(f.getPath(), folder + f.getName());
-        });
-    }
 
     public String getVersion(InputStream inputStream) {
         return systemOverviewRepository.getVersionFromStream(inputStream);
     }
 
-    public void saveTmpInvoker(String xmlInvoker, String dir) {
-        Document doc = convertStringToXMLDocument(xmlInvoker);
-        NodeList nodeList = doc.getChildNodes();
-        Node node = nodeList.item(0);
-        Node nameNode = node.getChildNodes().item(1);
-        String filename = nameNode.getTextContent();
-
-        try {
-            TransformerFactory tFactory = TransformerFactory.newInstance();
-            Transformer transformer = tFactory.newTransformer();
-            DOMSource source = new DOMSource(doc);
-            StreamResult result = new StreamResult(new File(PathConstant.ASSISTANT + "temporary/" + dir + "/" + filename + ".xml"));
-            transformer.transform(source, result);
-        } catch (TransformerException ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-
-    public void saveTmpTemplate(String template, String dir) {
-        try {
-            String jsonPath = "$.templateId";
-            String filename = JsonPath.read(template, jsonPath) + ".json";
-            FileWriter jsonTemplate = new FileWriter(PathConstant.ASSISTANT + "temporary/" + dir + "/" + filename);
-            jsonTemplate.write(template);
-            jsonTemplate.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void saveTmpConnection(String template, String dir) {
-        try {
-            String jsonPath = "$.connection.connectionId";
-            String filename = JsonPath.read(template, jsonPath) + ".json";
-            FileWriter jsonTemplate = new FileWriter(PathConstant.ASSISTANT + "temporary/" + dir + "/" + filename);
-            jsonTemplate.write(template);
-            jsonTemplate.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void updateOn(String version) throws Exception {
-//        String path = version.charAt(0) == 'v' ? version.substring(1) : version;
-//        String url = "https://packagecloud.io/becon/opencelium/packages/anyfile/" +
-//                "oc_" + path + ".zip/download?distro_version_id=230";
-////        InputStream inputStream = downloadFile(url);
-//        File backendRoot = new File("");
-//        Path appRoot = Paths.get(backendRoot.getAbsolutePath()).getParent().getParent();
-//        System.out.println(appRoot);
-//        unzipFolder(inputStream, appRoot);
-//        ZipUtils.extractZip(inputStream, appRoot);
-    }
-
-
     @Override
     public void updateOff(String dir) throws Exception { // removed version parameter
         dir = PathConstant.ASSISTANT + PathConstant.VERSIONS + dir;
-//            InputStream oc = Files.newInputStream(Paths.get(dir));
         File backendRoot = new File("");
         File file = new File(dir);
         File[] dirFiles = file.listFiles();
@@ -265,167 +152,7 @@ public class AssistantServiceImp implements ApplicationService {
         InputStream inputStream = Files.newInputStream(zipFile.toPath());
         Path appRoot = Paths.get(backendRoot.getAbsolutePath()).getParent().getParent();
         log.info(zipFile.toPath() + ", " + appRoot);
-//        unzipFolder(inputStream, appRoot);
         ZipUtils.extractZip(inputStream, appRoot);
-    }
-
-    @Override
-    public boolean checkRepoConnection() {
-        try {
-            String url = "https://api.bitbucket.org/2.0/repositories/becon_gmbh/opencelium/refs/tags";
-            HttpMethod method = HttpMethod.GET;
-            HttpHeaders header = new HttpHeaders();
-            header.set("Content-Type", "application/json");
-            HttpEntity<Object> httpEntity = new HttpEntity<Object>(header);
-            ResponseEntity<String> response = restTemplate.exchange(url, method, httpEntity, String.class);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    public void moveFiles(String fromDir, String toDir) {
-        Path result = null;
-        try {
-            result = Files.move(Paths.get(fromDir), Paths.get(toDir), StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            System.out.println("Exception while moving file: " + e.getMessage());
-        }
-        if (result != null) {
-            System.out.println("File moved successfully.");
-        } else {
-            System.out.println("File movement failed.");
-        }
-    }
-
-    @Override
-    public void updateConnection(ConnectionDTO connectionDTO) {
-
-    }
-
-    @Override
-    public void restore() {
-
-    }
-
-    private static Document convertStringToXMLDocument(String xmlString) {
-        //Parser that produces DOM object trees from XML content
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-
-        //API to obtain DOM Document instance
-        DocumentBuilder builder = null;
-        try {
-            //Create DocumentBuilder with default configuration
-            builder = factory.newDocumentBuilder();
-
-            //Parse the content to Document object
-            Document doc = builder.parse(new InputSource(new StringReader(xmlString)));
-            return doc;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public Path unzipFolder(InputStream inputStream, Path target) throws IOException {
-        File f = new File("../frontend");
-        FileUtils.deleteDirectory(f);
-        String os = System.getProperty("os.name");
-        if (os.contains("Windows")) {
-            File destDir = new File(target.toString());
-            byte[] buffer = new byte[1024];
-            ZipInputStream zis = new ZipInputStream(inputStream);
-            ZipEntry zipEntry = zis.getNextEntry();
-
-            String rootName = zipEntry.getName();
-            String vFolder = zipSlipProtect(zipEntry, target).toString().replace(rootName, "");
-            Path folder = Paths.get(vFolder);
-            while (zipEntry != null) {
-                File newFile = newFile(destDir, zipEntry);
-                if (zipEntry.isDirectory()) {
-                    if (!newFile.isDirectory() && !newFile.mkdirs()) {
-                        throw new IOException("Failed to create directory " + newFile);
-                    }
-                } else {
-                    // fix for Windows-created archives
-                    File parent = newFile.getParentFile();
-                    if (!parent.isDirectory() && !parent.mkdirs()) {
-                        throw new IOException("Failed to create directory " + parent);
-                    }
-
-                    // write file content
-                    FileOutputStream fos = new FileOutputStream(newFile);
-                    int len;
-                    while ((len = zis.read(buffer)) > 0) {
-                        fos.write(buffer, 0, len);
-                    }
-                    fos.close();
-                }
-                zipEntry = zis.getNextEntry();
-
-            }
-            zis.closeEntry();
-            zis.close();
-            return folder.getParent();
-        } else {
-            try (ZipInputStream zis = new ZipInputStream(inputStream)) {
-
-                ZipEntry zipEntry = zis.getNextEntry();
-                String rootName = zipEntry.getName();
-//                Path folder = zipSlipProtect(zipEntry, target);
-                while (zipEntry != null) {
-                    boolean isDirectory = false;
-                    if (zipEntry.getName().endsWith(File.separator)) {
-                        isDirectory = true;
-                    }
-
-                    String vFolder = zipSlipProtect(zipEntry, target).toString().replace(rootName, "");
-                    Path newPath = Paths.get(vFolder);
-                    if (isDirectory) {
-                        Files.createDirectories(newPath);
-                    } else {
-                        // example 1.2
-                        // some zip stored file path only, need create parent directories
-                        // e.g data/folder/file.txt
-                        if (newPath.getParent() != null) {
-                            if (Files.notExists(newPath.getParent())) {
-                                Files.createDirectories(newPath.getParent());
-                            }
-                        }
-                        System.out.println(zipEntry.getName() + ", " + newPath);
-                        Files.copy(zis, newPath, StandardCopyOption.REPLACE_EXISTING);
-                    }
-                    zipEntry = zis.getNextEntry();
-                }
-                zis.closeEntry();
-                zis.close();
-                return target;
-            }
-        }
-    }
-
-    private File newFile(File destinationDir, ZipEntry zipEntry) throws IOException {
-        File destFile = new File(destinationDir, zipEntry.getName());
-
-        String destDirPath = destinationDir.getCanonicalPath();
-        String destFilePath = destFile.getCanonicalPath();
-
-        if (!destFilePath.startsWith(destDirPath + File.separator)) {
-            throw new IOException("Entry is outside of the target dir: " + zipEntry.getName());
-        }
-
-        return destFile;
-    }
-
-    private Path zipSlipProtect(ZipEntry zipEntry, Path targetDir)
-            throws IOException {
-        Path targetDirResolved = targetDir.resolve(zipEntry.getName());
-        Path normalizePath = targetDirResolved.normalize();
-        if (!normalizePath.startsWith(targetDir)) {
-            throw new IOException("Bad zip entry: " + zipEntry.getName());
-        }
-
-        return normalizePath;
     }
 
     @Override
@@ -464,43 +191,5 @@ public class AssistantServiceImp implements ApplicationService {
         });
 
         return oldJarFiles;
-    }
-
-    private void addHeaderFromInvoker(ConnectionMng connectionMng, String fromInvokerStr, String toInvokerStr) {
-        Invoker fromInvoker = invokerService.findByName(fromInvokerStr);
-        Invoker toInvoker = invokerService.findByName(toInvokerStr);
-
-        addHeaderFromInvokerHelper(connectionMng.getFromConnector().getMethods(), fromInvoker);
-        if (connectionMng.getToConnector() != null) {
-            addHeaderFromInvokerHelper(connectionMng.getToConnector().getMethods(), toInvoker);
-        }
-    }
-
-    private void addHeaderFromInvokerHelper(List<MethodMng> methods, Invoker invoker) {
-        for (MethodMng method : methods) {
-            if (method.getRequest() != null) {
-                Map<String, String> header = method.getRequest().getHeader();
-
-                FunctionInvoker fv = invoker.getOperations()
-                        .stream()
-                        .filter(o -> o.getName().equals(method.getName()))
-                        .findFirst()
-                        .orElse(null);
-
-                if (fv != null && fv.getRequest() != null && fv.getRequest().getHeader() != null) {
-                    Map<String, String> header1 = fv.getRequest().getHeader();
-                    if (header == null) {
-                        header = new HashMap<>();
-                    }
-
-                    for (Map.Entry<String, String> entry : header1.entrySet()) {
-                        if (!header.containsKey(entry.getKey())) {
-                            header.put(entry.getKey(), entry.getValue());
-                        }
-                    }
-                    method.getRequest().setHeader(header);
-                }
-            }
-        }
     }
 }
