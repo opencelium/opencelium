@@ -31,7 +31,10 @@ const SHORTCUT_GROUPS: ShortcutGroup[] = [
   },
   {
     titleKey: 'shortcutsDialog.groups.general',
-    items: [{ keys: ['esc'], descKey: 'shortcutsDialog.items.close' }],
+    items: [
+      { keys: ['ctrl', 's'], descKey: 'shortcutsDialog.items.save' },
+      { keys: ['esc'], descKey: 'shortcutsDialog.items.close' },
+    ],
   },
 ];
 
