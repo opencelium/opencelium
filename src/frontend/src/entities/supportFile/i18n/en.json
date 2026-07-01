@@ -6,7 +6,7 @@
     "deletedConnection": "DELETED CONNECTION",
     "columns": {
       "status": "Status",
-      "connection": "Connection",
+      "connection": "Workflow",
       "filePath": "File Path",
       "timestamp": "Timestamp"
     },
