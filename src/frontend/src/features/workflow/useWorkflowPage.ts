@@ -90,6 +90,44 @@ const resolvePlaceholderCollision = (
   return shift;
 };
 
+const isFinitePosition = (pos?: XY): boolean =>
+  !!pos && Number.isFinite(pos.x) && Number.isFinite(pos.y);
+
+const sanitizeGraphNodes = (nodes: WorkflowNodeModel[]): WorkflowNodeModel[] => {
+  const seen = new Set<string>();
+  const result: WorkflowNodeModel[] = [];
+  nodes.forEach((node) => {
+    if (!node || typeof node.id !== 'string' || seen.has(node.id)) return;
+    seen.add(node.id);
+    if (isFinitePosition(node.position)) {
+      result.push(node);
+      return;
+    }
+    result.push({
+      ...node,
+      position: {
+        x: Number.isFinite(node.position?.x) ? node.position.x : 0,
+        y: Number.isFinite(node.position?.y) ? node.position.y : 0,
+      },
+    });
+  });
+  return result;
+};
+
+const sanitizeGraphEdges = (
+  nodes: WorkflowNodeModel[],
+  edges: WorkflowEdgeModel[],
+): WorkflowEdgeModel[] => {
+  const nodeIds = new Set(nodes.map((node) => node.id));
+  const seen = new Set<string>();
+  return edges.filter((edge) => {
+    if (!edge || typeof edge.id !== 'string' || seen.has(edge.id)) return false;
+    if (!nodeIds.has(edge.source) || !nodeIds.has(edge.target)) return false;
+    seen.add(edge.id);
+    return true;
+  });
+};
+
 export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
   const confirm = useConfirm();
   const { t } = useI18n('workflow');
@@ -776,8 +814,9 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
   };
 
   const clearAllDragPreviewState = (snapshot: NonNullable<typeof dragSnapshot.current>) => {
-    setNodes(clearDragFlags(clearDragPreviewNodes(snapshot.nodes)));
-    setEdges(clearEdgeDragFlags(clearDragPreviewEdges(snapshot.edges)));
+    const restoredNodes = sanitizeGraphNodes(clearDragFlags(clearDragPreviewNodes(snapshot.nodes)));
+    setNodes(restoredNodes);
+    setEdges(sanitizeGraphEdges(restoredNodes, clearEdgeDragFlags(clearDragPreviewEdges(snapshot.edges))));
   };
 
   const computeGhostRootPosition = (
@@ -799,7 +838,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
   ) => {
     const snapshotRoot = snapshot.nodes.find((item) => item.id === sourceNodeId);
     const ghostRoot = snapshot.lastGhostRootPosition;
-    if (!snapshotRoot || !ghostRoot) {
+    if (!snapshotRoot || !ghostRoot || !isFinitePosition(ghostRoot)) {
       clearAllDragPreviewState(snapshot);
       return;
     }
@@ -810,8 +849,9 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     const repositioned = snapshot.nodes.map((item) => item.id === sourceNodeId
       ? { ...item, position: { x: item.position.x + delta.x, y: item.position.y + delta.y } }
       : item);
-    setNodes(clearDragFlags(clearDragPreviewNodes(repositioned)));
-    setEdges(clearEdgeDragFlags(clearDragPreviewEdges(snapshot.edges)));
+    const restoredNodes = sanitizeGraphNodes(clearDragFlags(clearDragPreviewNodes(repositioned)));
+    setNodes(restoredNodes);
+    setEdges(sanitizeGraphEdges(restoredNodes, clearEdgeDragFlags(clearDragPreviewEdges(snapshot.edges))));
   };
 
   return {
@@ -850,95 +890,114 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     },
     onConnect: (connection: Connection) => setEdges((currentEdges) => addEdge({ ...connection, type: 'workflow-edge' }, currentEdges) as WorkflowEdgeModel[]),
     onNodeDragStart: (event: any, node: WorkflowNodeModel) => {
-      const stableNodes = stabilizeMethodColors(nodes);
-      const draggedNode = stableNodes.find((item) => item.id === node.id);
-      const highlightedBranch = draggedNode && (draggedNode.type === 'if' || draggedNode.type === 'loop')
-        ? getOperatorBottomBranch(draggedNode.id, stableNodes, edges)
-        : { nodeIds: new Set<string>(), edgeIds: new Set<string>() };
-      const mode: WorkflowDropMode = event?.ctrlKey ? 'copy' : 'move';
-      const draggedIds = getDragSubtreeNodeIds(node.id, stableNodes, edges);
-      draggedPositionLockRef.current = new Set(draggedIds);
-      const instance = reactFlowInstance.current;
-      const pointerOffsetFromRoot = draggedNode && instance
-        && typeof event?.clientX === 'number' && typeof event?.clientY === 'number'
-        ? (() => {
-            const pointer = instance.screenToFlowPosition({ x: event.clientX, y: event.clientY });
-            return { x: pointer.x - draggedNode.position.x, y: pointer.y - draggedNode.position.y };
-          })()
-        : undefined;
-      dragSnapshot.current = {
-        nodes: stableNodes,
-        edges,
-        mode,
-        operatorConfigs: new Map(
-          stableNodes
-            .filter((item) => (item.type === 'if' || item.type === 'loop') && item.data.conditionConfig)
-            .map((item) => [item.id, item.data.conditionConfig as ConditionConfig]),
-        ),
-        highlightedNodeIds: highlightedBranch.nodeIds,
-        highlightedEdgeIds: highlightedBranch.edgeIds,
-        pointerOffsetFromRoot,
-        lastGhostRootPosition: draggedNode ? { ...draggedNode.position } : undefined,
-      };
+      try {
+        const stableNodes = sanitizeGraphNodes(stabilizeMethodColors(nodes));
+        const stableEdges = sanitizeGraphEdges(stableNodes, edges);
+        const draggedNode = stableNodes.find((item) => item.id === node.id);
+        if (!draggedNode) {
+          dragSnapshot.current = null;
+          draggedPositionLockRef.current = null;
+          return;
+        }
+        const mode: WorkflowDropMode = event?.ctrlKey ? 'copy' : 'move';
+        const draggedIds = getDragSubtreeNodeIds(node.id, stableNodes, stableEdges);
+        draggedPositionLockRef.current = new Set(draggedIds);
+        const instance = reactFlowInstance.current;
+        const pointerOffsetFromRoot = instance
+          && typeof event?.clientX === 'number' && typeof event?.clientY === 'number'
+          ? (() => {
+              const pointer = instance.screenToFlowPosition({ x: event.clientX, y: event.clientY });
+              return { x: pointer.x - draggedNode.position.x, y: pointer.y - draggedNode.position.y };
+            })()
+          : undefined;
+        dragSnapshot.current = {
+          nodes: stableNodes,
+          edges: stableEdges,
+          mode,
+          operatorConfigs: new Map(
+            stableNodes
+              .filter((item) => (item.type === 'if' || item.type === 'loop') && item.data.conditionConfig)
+              .map((item) => [item.id, item.data.conditionConfig as ConditionConfig]),
+          ),
+          highlightedNodeIds: new Set<string>(),
+          highlightedEdgeIds: new Set<string>(),
+          pointerOffsetFromRoot,
+          lastGhostRootPosition: { ...draggedNode.position },
+        };
 
-      setNodes((currentNodes) => currentNodes.map((item) => ({
-        ...item,
-        data: {
-          ...item.data,
-          highlighted: false,
-          hideAddControls: draggedIds.has(item.id),
-          suppressHoverAddControls: draggedIds.has(item.id),
-          dragSourceMoving: false,
-          dragSourceFaint: false,
-        },
-      })));
+        setNodes((currentNodes) => currentNodes.map((item) => ({
+          ...item,
+          data: {
+            ...item.data,
+            highlighted: false,
+            hideAddControls: draggedIds.has(item.id),
+            suppressHoverAddControls: draggedIds.has(item.id),
+            dragSourceMoving: false,
+            dragSourceFaint: false,
+          },
+        })));
+      } catch {
+        dragSnapshot.current = null;
+        draggedPositionLockRef.current = null;
+      }
     },
     onNodeDrag: (event: any, node: WorkflowNodeModel) => {
       const snapshot = dragSnapshot.current;
       if (!snapshot || node.type === 'start') return;
-      const snapshotRoot = snapshot.nodes.find((item) => item.id === node.id);
-      const rootPosition = computeGhostRootPosition(event, snapshot) ?? node.position ?? snapshotRoot?.position;
-      if (rootPosition) snapshot.lastGhostRootPosition = rootPosition;
-      const delta = rootPosition && snapshotRoot
-        ? { x: rootPosition.x - snapshotRoot.position.x, y: rootPosition.y - snapshotRoot.position.y }
-        : { x: 0, y: 0 };
-      const dropTarget = resolveStickyDropTarget(
-        snapshot,
-        findDropTarget(event, node.id, snapshot.nodes, snapshot.edges),
-      );
-      if (!dropTarget) {
+      try {
+        const snapshotRoot = snapshot.nodes.find((item) => item.id === node.id);
+        if (!snapshotRoot) return;
+        const rootPosition = computeGhostRootPosition(event, snapshot) ?? node.position ?? snapshotRoot.position;
+        if (isFinitePosition(rootPosition)) snapshot.lastGhostRootPosition = rootPosition;
+        const delta = isFinitePosition(rootPosition)
+          ? { x: rootPosition.x - snapshotRoot.position.x, y: rootPosition.y - snapshotRoot.position.y }
+          : { x: 0, y: 0 };
+        const dropTarget = resolveStickyDropTarget(
+          snapshot,
+          findDropTarget(event, node.id, snapshot.nodes, snapshot.edges),
+        );
+        if (!dropTarget) {
+          snapshot.activeDropTarget = undefined;
+          snapshot.lastInsertionPreview = undefined;
+          snapshot.previewNodeKey = undefined;
+          const freeNodes = sanitizeGraphNodes(buildFreeDragNodes(node.id, snapshot.nodes, delta));
+          setNodes(freeNodes);
+          updateDragPreviewEdges(
+            snapshot,
+            `${snapshot.mode}:free`,
+            sanitizeGraphEdges(freeNodes, clearEdgeDragFlags(clearDragPreviewEdges(snapshot.edges))),
+          );
+          return;
+        }
+        const { preview, invalid } = buildPreviewGraphForTarget(
+          node.id,
+          dropTarget.target,
+          snapshot.mode,
+          snapshot.nodes,
+          snapshot.edges,
+        );
+        const layout = computeInsertionLayout(dropTarget, node.id, snapshot.nodes, snapshot.edges, preview, snapshot.mode, false);
+        snapshot.lastInsertionPreview = {
+          sourceNodeId: node.id,
+          targetNodeId: dropTarget.target.nodeId,
+          direction: dropTarget.target.direction,
+          layout,
+        };
+        const previewKey = `${snapshot.mode}:${dropTarget.target.nodeId}:${dropTarget.target.direction}:${invalid}`;
+        const previewNodes = sanitizeGraphNodes(buildInsertionPreviewNodes(layout, snapshot.nodes, preview, invalid));
+        const previewEdges = sanitizeGraphEdges(
+          previewNodes,
+          buildInsertionPreviewEdges(node.id, snapshot.nodes, snapshot.edges, preview, invalid),
+        );
+        updateDragPreviewNodes(snapshot, previewKey, () => previewNodes);
+        updateDragPreviewEdges(snapshot, previewKey, previewEdges);
+      } catch {
+        clearAllDragPreviewState(snapshot);
         snapshot.activeDropTarget = undefined;
         snapshot.lastInsertionPreview = undefined;
         snapshot.previewNodeKey = undefined;
-        setNodes(buildFreeDragNodes(node.id, snapshot.nodes, delta));
-        updateDragPreviewEdges(
-          snapshot,
-          `${snapshot.mode}:free`,
-          clearEdgeDragFlags(clearDragPreviewEdges(snapshot.edges)),
-        );
-        return;
+        snapshot.previewEdgeKey = undefined;
       }
-      const { preview, invalid } = buildPreviewGraphForTarget(
-        node.id,
-        dropTarget.target,
-        snapshot.mode,
-        snapshot.nodes,
-        snapshot.edges,
-      );
-      const layout = computeInsertionLayout(dropTarget, node.id, snapshot.nodes, snapshot.edges, preview, snapshot.mode, false);
-      snapshot.lastInsertionPreview = {
-        sourceNodeId: node.id,
-        targetNodeId: dropTarget.target.nodeId,
-        direction: dropTarget.target.direction,
-        layout,
-      };
-      const previewKey = `${snapshot.mode}:${dropTarget.target.nodeId}:${dropTarget.target.direction}:${invalid}`;
-      updateDragPreviewNodes(snapshot, previewKey, () => buildInsertionPreviewNodes(layout, snapshot.nodes, preview, invalid));
-      updateDragPreviewEdges(
-        snapshot,
-        previewKey,
-        buildInsertionPreviewEdges(node.id, snapshot.nodes, snapshot.edges, preview, invalid),
-      );
     },
     onNodeDragStop: async (event: any, node: WorkflowNodeModel) => {
       const snapshot = dragSnapshot.current;
@@ -1003,9 +1062,12 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
         const restored = restoreStableNodeData(next.nodes, snapshot.nodes, snapshot.operatorConfigs);
         const positionedNodes = applyInsertionPreviewPositions(snapshot.mode, restored, next.idMap, commitLayout);
 
-        setNodes(clearDragFlags(positionedNodes));
-        setEdges(clearEdgeDragFlags(next.edges));
+        const finalNodes = sanitizeGraphNodes(clearDragFlags(positionedNodes));
+        setNodes(finalNodes);
+        setEdges(sanitizeGraphEdges(finalNodes, clearEdgeDragFlags(next.edges)));
         options.onFieldBindingsChange?.(next.fieldBindings);
+      } catch {
+        clearAllDragPreviewState(snapshot);
       } finally {
         requestAnimationFrame(() => { draggedPositionLockRef.current = null; });
       }
