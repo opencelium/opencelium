@@ -112,6 +112,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 updateSystemConfig: string
                 changeTheme: string
                 uploadTemplate: string
+                downloadTemplate: string
                 uploadInvoker: string
                 downloadInvoker: string
                 systemCheck: string
