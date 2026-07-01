@@ -17,6 +17,7 @@ type Props = {
   connection: Connection;
   currentMethod: MethodWithId;
   onApply: (reference: string) => void;
+  showWebhookOption?: boolean;
 };
 
 type WorkflowEdgeLike = {
@@ -52,7 +53,7 @@ const getUpstreamNodeIds = (currentMethodId: string, edges: WorkflowEdgeLike[]) 
   return upstream;
 };
 
-export function LegacyBodyReferenceGenerator({ connection, currentMethod, onApply }: Props) {
+export function LegacyBodyReferenceGenerator({ connection, currentMethod, onApply, showWebhookOption = true }: Props) {
   const { t } = useI18n('workflow');
   const [referenceType, setReferenceType] = useState<'direct' | 'webhook'>('direct');
   const [responseType, setResponseType] = useState<ResponseType>('body');
@@ -79,31 +80,35 @@ export function LegacyBodyReferenceGenerator({ connection, currentMethod, onAppl
     () => getIteratorsForMethod(connection, currentMethod),
     [connection, currentMethod],
   );
-  const shellClassName =
-    referenceType === 'webhook'
-      ? 'bodyLegacyGeneratorShell bodyLegacyGeneratorShellWebhook'
-      : 'bodyLegacyGeneratorShell';
+  const shellClassName = [
+    'bodyLegacyGeneratorShell',
+    referenceType === 'webhook' ? 'bodyLegacyGeneratorShellWebhook' : '',
+    !showWebhookOption ? 'bodyLegacyGeneratorShellNoToggle' : '',
+  ].filter(Boolean).join(' ');
 
   return (
     <div className={shellClassName}>
-      <div className='bodyLegacyGeneratorSwitch compactRadioGroup'>
-        <Radio
-          checked={referenceType === 'direct'}
-          onChange={() => setReferenceType('direct')}
-          label={<span className='bodyLegacyRadioIcon'><ApiOutlined /></span>}
-        />
-        <Radio
-          checked={referenceType === 'webhook'}
-          onChange={() => setReferenceType('webhook')}
-          label={<span className='bodyLegacyRadioIcon'><LinkOutlined /></span>}
-        />
-      </div>
+      {showWebhookOption ? (
+        <div className='bodyLegacyGeneratorSwitch compactRadioGroup'>
+          <Radio
+            checked={referenceType === 'direct'}
+            onChange={() => setReferenceType('direct')}
+            label={<span className='bodyLegacyRadioIcon'><ApiOutlined /></span>}
+          />
+          <Radio
+            checked={referenceType === 'webhook'}
+            onChange={() => setReferenceType('webhook')}
+            label={<span className='bodyLegacyRadioIcon'><LinkOutlined /></span>}
+          />
+        </div>
+      ) : null}
       {referenceType === 'direct' ? (
         <>
           <Select
             placeholder={t('placeholders.selectMethod')}
             value={methodId}
             className='bodyLegacyGeneratorSelect'
+            size='large'
             showSearch
             filterOption={(input, option) => {
               const term = input.toLowerCase();
