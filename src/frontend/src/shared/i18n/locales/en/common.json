@@ -81,6 +81,7 @@
     "prev": "Back",
     "submit": "Submit",
     "next": "Next",
+    "ctrlEnterHint": "Shortcut: Ctrl+Enter",
     "create": "Create",
     "view": "View",
     "edit": "Edit",

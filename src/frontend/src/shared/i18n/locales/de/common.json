@@ -81,6 +81,7 @@
     "prev": "Zurück",
     "submit": "Absenden",
     "next": "Weiter",
+    "ctrlEnterHint": "Tastenkombination: Strg+Enter",
     "create": "Erstellen",
     "view": "Ansehen",
     "edit": "Bearbeiten",
