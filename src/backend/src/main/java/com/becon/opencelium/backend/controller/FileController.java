@@ -24,7 +24,6 @@ import com.becon.opencelium.backend.database.mysql.service.UserDetailServiceImpl
 import com.becon.opencelium.backend.database.mysql.service.UserRoleServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.exception.StorageException;
-import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.User;
@@ -68,24 +67,16 @@ import org.w3c.dom.Document;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -523,26 +514,8 @@ public class FileController {
                 "attachment; filename=\"" + file.getFilename() + "\"").body(file);
     }
 
-    @ExceptionHandler(StorageFileNotFoundException.class)
-    public ResponseEntity<?> handleStorageFileNotFound(StorageFileNotFoundException exc) {
-        return ResponseEntity.notFound().build();
-    }
-
     private boolean checkImageExtension(String extension){
         return FileNameUtils.isSupportedImageExtension(extension);
-    }
-
-    private static String readJsonContent(InputStream inputStream) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            StringBuilder content = new StringBuilder();
-
-            String line;
-            while ((line = reader.readLine()) != null) {
-                content.append(line);
-            }
-
-            return content.toString();
-        }
     }
 
     private URI getUri(String name) {
@@ -556,29 +529,6 @@ public class FileController {
                 .build();
 
         return uriComponents.toUri();
-    }
-
-    private List<Document> getAllInvokers(){
-        Path location = Paths.get(PathConstant.INVOKER);
-        try {
-            Stream<Path> allInvokers = Files.walk(location, 1)
-                    .filter(path -> !path.equals(location))
-                    .map(location::relativize);
-
-            return allInvokers.map(p -> new File(location.toString() + "/" + p.getFileName()))
-                    .map(file -> {
-                        try {
-                            DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-                            return dBuilder.parse(file);
-                        }
-                        catch (Exception e){
-                            throw new RuntimeException(e);
-                        }
-                    }).collect(Collectors.toList());
-        }
-        catch (IOException e) {
-            throw new StorageException("Failed to read stored files", e);
-        }
     }
 
     private void updateTemplate(Template template){
