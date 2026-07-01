@@ -50,6 +50,7 @@
       "changeTheme": "Change the application theme",
       "uploadTemplate": "Upload a workflow template file",
       "uploadInvoker": "Upload an invoker file",
+      "downloadInvoker": "Download an invoker file",
       "systemCheck": "Open the system check page"
     },
     "footer": {

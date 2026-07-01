@@ -10,6 +10,10 @@
       },
       "success": "Invoker uploaded successfully: {{name}}",
       "error": "Failed to upload invoker file."
+    },
+    "download": {
+      "success": "Invoker downloaded: {{name}}",
+      "error": "Failed to download invoker file."
     }
   },
   "fields": {

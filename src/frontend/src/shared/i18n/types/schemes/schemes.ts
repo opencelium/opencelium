@@ -113,6 +113,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 changeTheme: string
                 uploadTemplate: string
                 uploadInvoker: string
+                downloadInvoker: string
                 systemCheck: string
             }
             footer: {
