@@ -141,6 +141,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             switchToMainMenu: string
             profile: string
             createWorkflow: string
+            createWorkflowHint: string
         }
     },
 }
