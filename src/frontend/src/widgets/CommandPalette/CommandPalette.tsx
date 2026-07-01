@@ -320,7 +320,7 @@ export const CommandPalette = ({ collapsible = false, forceMode }: CommandPalett
                                                             <Icon name={s.icon} size={16}/>
                                                         </span>
                                                     )}
-                                                    <span className="cmdk-item-value">{s.value}</span>
+                                                    <span className="cmdk-item-value">{s.label ?? s.value}</span>
                                                     {s.description && (
                                                         <span className="cmdk-item-description">
                                                             {tCommon(s.description as never)}
