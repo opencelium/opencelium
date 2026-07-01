@@ -145,7 +145,7 @@ public class FileController {
         String extension = FileNameUtils.getExtension(file.getOriginalFilename());
 
         // Check image extension. It should be JPEG, PNG or JPG
-        if (!checkImageExtension(extension)){
+        if (!FileNameUtils.isSupportedImageExtension(extension)){
             throw new StorageException("File should be jpg or png");
         }
 
@@ -195,7 +195,7 @@ public class FileController {
         String extension = FileNameUtils.getExtension(file.getOriginalFilename());
         Objects.requireNonNull(extension);
         // Check image extension. It should be JPEG, PNG or JPG
-        if (!checkImageExtension(extension)){
+        if (!FileNameUtils.isSupportedImageExtension(extension)){
             throw new StorageException("File should be jpg or png");
         }
 
@@ -239,13 +239,11 @@ public class FileController {
     public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file) {
         // Get extension
         String extension = FileNameUtils.getExtension(file.getOriginalFilename());
-        if (extension == null) {
-            throw new RuntimeException("Extension not found");
+        if (!"json".equalsIgnoreCase(extension)){
+            throw new StorageException("File should be JSON");
         }
+
         try {
-            if (!checkJsonExtension(extension)){
-                throw new StorageException("File should be JSON");
-            }
             String id;
             //Generate new file name
             ObjectMapper objectMapper = new ObjectMapper();
@@ -296,7 +294,7 @@ public class FileController {
 
         try (
                 InputStream inputStream = zip.getInputStream();
-                ZipInputStream zis = new ZipInputStream(inputStream);
+                ZipInputStream zis = new ZipInputStream(inputStream, StandardCharsets.UTF_8);
         ) {
             ZipEntry zipEntry;
 
@@ -409,7 +407,7 @@ public class FileController {
 
         try (
                 InputStream inputStream = file.getInputStream();
-                ZipInputStream zis = new ZipInputStream(inputStream)
+                ZipInputStream zis = new ZipInputStream(inputStream, StandardCharsets.UTF_8)
         ) {
             ZipEntry zipEntry;
 
@@ -498,13 +496,6 @@ public class FileController {
         return ResponseEntity.ok().body(connectorMapper.toDTO(connector));
     }
 
-    private boolean checkJsonExtension(String extension){
-        if (!(extension.equals("json") || extension.equals("JSON"))){
-            return false;
-        }
-        return true;
-    }
-
     @GetMapping("/files/{filename:.+}")
     @ResponseBody
     public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
@@ -512,10 +503,6 @@ public class FileController {
         Resource file = storageService.loadAsResource(filename);
         return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=\"" + file.getFilename() + "\"").body(file);
-    }
-
-    private boolean checkImageExtension(String extension){
-        return FileNameUtils.isSupportedImageExtension(extension);
     }
 
     private URI getUri(String name) {

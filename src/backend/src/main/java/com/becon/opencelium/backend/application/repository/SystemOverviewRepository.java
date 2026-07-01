@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.Objects;
 import java.util.Properties;
@@ -72,7 +73,7 @@ public class SystemOverviewRepository {
     }
 
     public String getVersionFromStream(InputStream inputStream) {
-        try (ZipInputStream zis = new ZipInputStream(inputStream)) {
+        try (ZipInputStream zis = new ZipInputStream(inputStream, StandardCharsets.UTF_8)) {
             ZipEntry zipEntry;
             byte[] buffer = new byte[1024];
 
@@ -86,7 +87,7 @@ public class SystemOverviewRepository {
                     int read;
 
                     while ((read = zis.read(buffer)) != -1) {
-                        content.append(new String(buffer, 0, read));
+                        content.append(new String(buffer, 0, read, StandardCharsets.UTF_8));
                     }
 
                     String version = extractValueFromYaml(content.toString(), "opencelium.version");
@@ -106,13 +107,10 @@ public class SystemOverviewRepository {
 
     private static String extractValueFromYaml(String yamlContent, String path) {
         YamlPropertiesFactoryBean yamlFactory = new YamlPropertiesFactoryBean();
-        Resource resource = new ByteArrayResource(yamlContent.getBytes());
+        Resource resource = new ByteArrayResource(yamlContent.getBytes(StandardCharsets.UTF_8));
         yamlFactory.setResources(resource);
 
         Properties properties = yamlFactory.getObject();
-        if (properties != null) {
-            return properties.getProperty(path);
-        }
-        return null;
+        return properties == null ? null : properties.getProperty(path);
     }
 }
