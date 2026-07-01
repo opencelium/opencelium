@@ -277,18 +277,6 @@ public class SchedulerServiceImp implements SchedulerService {
     }
 
     @Override
-    public List<ConnectionDTO> filterByTestFlag(List<ConnectionDTO> connections, boolean test) {
-        Set<Long> runningIds = test ? getRunningConnectionIds() : Set.of();
-        return connectionService.filterTestConnections(connections, test, runningIds);
-    }
-
-    @Override
-    public List<Connection> filterEntitiesByTestFlag(List<Connection> connections, boolean test) {
-        Set<Long> runningIds = test ? getRunningConnectionIds() : Set.of();
-        return connectionService.filterTestConnectionEntities(connections, test, runningIds);
-    }
-
-    @Override
     public void saveEntity(Scheduler scheduler) {
         schedulerRepository.save(scheduler);
     }

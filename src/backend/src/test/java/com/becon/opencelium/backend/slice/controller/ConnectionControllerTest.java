@@ -52,7 +52,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Slice tests for {@link ConnectionController}: the {@code test} request parameter on the
+ * Slice tests for {@link ConnectionController}: the {@code includeTest} request parameter on the
  * listing endpoints and the guarded bulk delete.
  *
  * Run with: ./gradlew test --tests "*.ConnectionControllerTest"
@@ -111,44 +111,44 @@ class ConnectionControllerTest {
     // ── GET /connection/all ───────────────────────────────────────────────────
 
     @Test
-    @DisplayName("GET /connection/all defaults the test flag to false")
-    void getAllPassesTestFalseToSchedulerServiceByDefault() throws Exception {
-        when(schedulerService.filterByTestFlag(any(), anyBoolean())).thenReturn(List.of());
+    @DisplayName("GET /connection/all defaults includeTest to false")
+    void getAllDefaultsIncludeTestToFalse() throws Exception {
+        when(connectionService.getAllFullConnection(anyBoolean())).thenReturn(List.of());
 
         mockMvc.perform(get("/connection/all").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
         ArgumentCaptor<Boolean> flag = ArgumentCaptor.forClass(Boolean.class);
-        verify(schedulerService).filterByTestFlag(any(), flag.capture());
+        verify(connectionService).getAllFullConnection(flag.capture());
         assertThat(flag.getValue()).isFalse();
     }
 
     @Test
-    @DisplayName("GET /connection/all?test=true forwards the test flag")
-    void getAllPassesTestTrueWhenParamSet() throws Exception {
-        when(schedulerService.filterByTestFlag(any(), anyBoolean())).thenReturn(List.of());
+    @DisplayName("GET /connection/all?includeTest=true forwards the flag")
+    void getAllForwardsIncludeTestTrue() throws Exception {
+        when(connectionService.getAllFullConnection(anyBoolean())).thenReturn(List.of());
 
-        mockMvc.perform(get("/connection/all").param("test", "true").accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/connection/all").param("includeTest", "true").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
         ArgumentCaptor<Boolean> flag = ArgumentCaptor.forClass(Boolean.class);
-        verify(schedulerService).filterByTestFlag(any(), flag.capture());
+        verify(connectionService).getAllFullConnection(flag.capture());
         assertThat(flag.getValue()).isTrue();
     }
 
     // ── GET /connection/all/meta ──────────────────────────────────────────────
 
     @Test
-    @DisplayName("GET /connection/all/meta?test=true forwards the test flag to the entity filter")
-    void getAllMetaPassesTestTrueWhenParamSet() throws Exception {
-        when(schedulerService.filterEntitiesByTestFlag(any(), anyBoolean())).thenReturn(List.of());
+    @DisplayName("GET /connection/all/meta?includeTest=true forwards the flag to findAll")
+    void getAllMetaForwardsIncludeTestTrue() throws Exception {
+        when(connectionService.findAll(anyBoolean())).thenReturn(List.of());
         when(connectionResourceMapper.toDTOAll(any())).thenReturn(new ArrayList<>());
 
-        mockMvc.perform(get("/connection/all/meta").param("test", "true").accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get("/connection/all/meta").param("includeTest", "true").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
         ArgumentCaptor<Boolean> flag = ArgumentCaptor.forClass(Boolean.class);
-        verify(schedulerService).filterEntitiesByTestFlag(any(), flag.capture());
+        verify(connectionService).findAll(flag.capture());
         assertThat(flag.getValue()).isTrue();
     }
 

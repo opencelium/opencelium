@@ -51,6 +51,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -143,7 +144,7 @@ public class StorageConfiguration {
         }
 
         // removes connections that contain prefix in their names !*test_connection_
-        connectionService.cleanupAllTestConnections();
+        connectionService.cleanupAllTestConnections(Set.of());
 
         // deleting old version zip files
         cleanOldFiles(PathConstant.ASSISTANT + PathConstant.VERSIONS, File::isDirectory, "");
