@@ -129,8 +129,8 @@ export const connectionTemplateDefinition: EntityDefinition = {
             children: [
                 {
                     type: 'literal',
-                    value: 'template',
-                    aliases: ['workflow-template', 'connection-template'],
+                    value: 'workflow-template',
+                    aliases: ['template', 'connection-template'],
                     icon: 'upload',
                     description: 'commandPalette.descriptions.uploadTemplate',
                     execute: async (_, ctx) => {
@@ -177,8 +177,8 @@ export const connectionTemplateDefinition: EntityDefinition = {
             children: [
                 {
                     type: 'literal',
-                    value: 'template',
-                    aliases: ['workflow-template', 'connection-template'],
+                    value: 'workflow-template',
+                    aliases: ['template', 'connection-template'],
                     icon: 'download',
                     description: 'commandPalette.descriptions.downloadTemplate',
                     children: [
