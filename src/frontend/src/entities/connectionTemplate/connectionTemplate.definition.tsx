@@ -14,10 +14,7 @@ import {
 import { downloadConnectionTemplate } from '@entities/connectionTemplate/lib/downloadConnectionTemplate'
 import { resolveConnectionTemplateIds } from '@entities/connectionTemplate/command/resolvers/resolveConnectionTemplateIds'
 import { resolveConnectionTemplateNames } from '@entities/connectionTemplate/command/resolvers/resolveConnectionTemplateNames'
-import {
-    ensureConnectionTemplatesLoaded,
-    findConnectionTemplateIdByName,
-} from '@entities/connectionTemplate/command/connectionTemplateCache'
+import { extractTemplateIdFromSuggestion } from '@entities/connectionTemplate/command/connectionTemplateCache'
 
 const baseKey = 'connection-template'
 
@@ -232,13 +229,12 @@ export const connectionTemplateDefinition: EntityDefinition = {
                                             resolve: resolveConnectionTemplateNames,
                                             execute: async (args, ctx) => {
                                                 const tEntities = i18n.getFixedT(i18n.language, 'entities')
-                                                const name = args.identifier as string
+                                                const suggestion = args.identifier as string
                                                 ctx.setLoading(true)
                                                 try {
-                                                    const templates = await ensureConnectionTemplatesLoaded()
-                                                    const templateId = findConnectionTemplateIdByName(templates, name)
+                                                    const templateId = extractTemplateIdFromSuggestion(suggestion)
                                                     if (templateId === undefined) {
-                                                        throw new Error(`Template not found: ${name}`)
+                                                        throw new Error(`Template not found: ${suggestion}`)
                                                     }
                                                     const downloaded = await downloadConnectionTemplate(templateId)
                                                     message.success(

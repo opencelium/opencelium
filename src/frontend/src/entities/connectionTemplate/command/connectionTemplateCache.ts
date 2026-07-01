@@ -16,10 +16,15 @@ export async function ensureConnectionTemplatesLoaded(): Promise<ConnectionTempl
     return []
 }
 
-export function findConnectionTemplateIdByName(
-    templates: ConnectionTemplateMeta[],
-    name: string,
-): string | number | undefined {
-    const match = templates.find((t) => t.name === name)
-    return match?.templateId ?? match?.id
+const SUGGESTION_ID_PATTERN = /\(#([^()]+)\)$/
+
+// Template names are not unique, but templateId is — the suggestion string
+// carries the id so a duplicate name can still be picked unambiguously.
+export function formatConnectionTemplateSuggestion(template: ConnectionTemplateMeta): string {
+    const id = template.templateId ?? template.id
+    return `${template.name} (#${id})`
+}
+
+export function extractTemplateIdFromSuggestion(value: string): string | undefined {
+    return value.match(SUGGESTION_ID_PATTERN)?.[1]
 }
