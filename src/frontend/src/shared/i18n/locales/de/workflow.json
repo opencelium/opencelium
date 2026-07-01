@@ -26,7 +26,13 @@
     "loadTitle": "Vorlage laden",
     "nameLabel": "Name",
     "selectPlaceholder": "Vorlage auswählen",
-    "loadWarning": "Wenn Sie eine Vorlage laden, werden alle Ihre aktuellen Workflow-Änderungen ersetzt."
+    "loadWarning": "Wenn Sie eine Vorlage laden, werden alle Ihre aktuellen Workflow-Änderungen ersetzt.",
+    "replaceConfirm": {
+      "title": "Namen und Beschreibung ersetzen?",
+      "message": "Möchten Sie auch den Namen und die Beschreibung ersetzen?",
+      "replace": "Ja",
+      "keep": "Nein"
+    }
   },
   "history": {
     "title": "Versionsverlauf",

@@ -26,7 +26,13 @@
     "loadTitle": "Load Template",
     "nameLabel": "Name",
     "selectPlaceholder": "Select template",
-    "loadWarning": "If you load a template, all your current workflow changes will be replaced."
+    "loadWarning": "If you load a template, all your current workflow changes will be replaced.",
+    "replaceConfirm": {
+      "title": "Replace name and description?",
+      "message": "Do you want to replace also the name and description?",
+      "replace": "Yes",
+      "keep": "No"
+    }
   },
   "history": {
     "title": "Version History",

@@ -107,8 +107,6 @@ const EMPTY_NAME_LABEL = '[Empty Name]';
 const EMPTY_DESCRIPTION_LABEL = '[Empty Description]';
 
 const isHeaderNameEmpty = (title: string) => !title.trim() || title.trim() === EMPTY_NAME_LABEL;
-const isHeaderDescriptionEmpty = (description: string) =>
-  !description.trim() || description.trim() === EMPTY_DESCRIPTION_LABEL;
 
 const toDisplayDescription = (description?: string) =>
   description && description.trim() ? description : EMPTY_DESCRIPTION_LABEL;
@@ -558,13 +556,23 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       setLoadedFieldBindings(state.fieldBindings);
       const templateName = selectedTemplate.name?.trim();
       const templateDescription = selectedTemplate.description?.trim();
-      setHeaderState((prev) => ({
-        title: isHeaderNameEmpty(prev.title) && templateName ? templateName : prev.title,
-        description:
-          isHeaderDescriptionEmpty(prev.description) && templateDescription
-            ? toDisplayDescription(templateDescription)
-            : prev.description,
-      }));
+      const applyTemplateNameAndDescription = () =>
+        setHeaderState((prev) => ({
+          title: templateName ? templateName : prev.title,
+          description: templateDescription ? toDisplayDescription(templateDescription) : prev.description,
+        }));
+
+      if (isHeaderNameEmpty(headerState.title)) {
+        applyTemplateNameAndDescription();
+      } else {
+        const shouldReplace = await confirm({
+          title: t('template.replaceConfirm.title'),
+          message: t('template.replaceConfirm.message'),
+          confirmText: t('template.replaceConfirm.replace'),
+          cancelText: t('template.replaceConfirm.keep'),
+        });
+        if (shouldReplace) applyTemplateNameAndDescription();
+      }
       setLoadTemplateDialogOpen(false);
       setSelectedTemplateId(undefined);
       message.success(`Template "${selectedTemplate.name ?? selectedTemplate.templateId}" loaded`);
