@@ -145,6 +145,20 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 		setSaveComment('');
 	};
 
+	const openSaveDialogRef = useRef(openSaveDialog);
+	openSaveDialogRef.current = openSaveDialog;
+
+	useEffect(() => {
+		const handleSaveShortcut = (event: KeyboardEvent) => {
+			if (!(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== 's') return;
+			event.preventDefault();
+			if (readOnly || saveDisabled || saveDialogOpen) return;
+			void openSaveDialogRef.current();
+		};
+		window.addEventListener('keydown', handleSaveShortcut);
+		return () => window.removeEventListener('keydown', handleSaveShortcut);
+	}, [readOnly, saveDisabled, saveDialogOpen]);
+
 	return (
 		<>
 			<div className={`headerCard ${nameError ? 'headerCardWithInlineError' : ''}`}>

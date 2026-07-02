@@ -36,6 +36,7 @@ import {
     FullscreenExit,
     ContentCopy,
     AccountTree,
+    Refresh,
 } from '@mui/icons-material';
 
 import type { IconComponent } from './Icon.types';
@@ -78,6 +79,7 @@ const iconMap = {
     'arrow-switch': SwapHoriz,
     'content-copy': ContentCopy,
     workflow: AccountTree,
+    refresh: Refresh,
 };
 
 export const MaterialIcon: IconComponent = ({

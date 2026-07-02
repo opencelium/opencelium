@@ -49,7 +49,9 @@
       "updateSystemConfig": "Update on-disk application configuration",
       "changeTheme": "Change the application theme",
       "uploadTemplate": "Upload a workflow template file",
+      "downloadTemplate": "Download a workflow template file",
       "uploadInvoker": "Upload an invoker file",
+      "downloadInvoker": "Download an invoker file",
       "systemCheck": "Open the system check page"
     },
     "footer": {
@@ -81,6 +83,7 @@
     "prev": "Back",
     "submit": "Submit",
     "next": "Next",
+    "ctrlEnterHint": "Shortcut: Ctrl+Enter",
     "create": "Create",
     "view": "View",
     "edit": "Edit",
@@ -93,6 +96,22 @@
     "updateWithoutMasterPassword": "You can save without entering the master password — only the general data will be updated. To change the required credentials, enter the master password first."
   },
   "hintLabel": "Hint",
+  "errorBoundary": {
+    "retry": "Try again",
+    "reload": "Reload page",
+    "app": {
+      "title": "Something went wrong",
+      "subtitle": "The application ran into an unexpected error. You can try again or reload the page."
+    },
+    "page": {
+      "title": "This page ran into a problem",
+      "subtitle": "An unexpected error occurred while displaying this page. The rest of the app is still available."
+    },
+    "widget": {
+      "title": "This section failed to load",
+      "subtitle": "An unexpected error occurred here. The rest of the page still works."
+    }
+  },
   "notFound": {
     "code": "404",
     "title": "Page not found",

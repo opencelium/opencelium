@@ -10,6 +10,10 @@
       },
       "success": "Invoker erfolgreich hochgeladen: {{name}}",
       "error": "Hochladen der Invoker-Datei fehlgeschlagen."
+    },
+    "download": {
+      "success": "Invoker heruntergeladen: {{name}}",
+      "error": "Herunterladen der Invoker-Datei fehlgeschlagen."
     }
   },
   "fields": {

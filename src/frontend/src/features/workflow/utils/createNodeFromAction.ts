@@ -2,7 +2,7 @@ import { MarkerType } from '@xyflow/react';
 import type { CreateNodeFromActionArgs, WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.types';
 import { OFFSETS, SUBTITLES, TITLES } from './graph.constants';
 import { getDefaultSourceHandle, getDefaultTargetHandle, getNodeType } from './graph.handles';
-import { findFreePosition, getBranchMaxX, rebalanceOperatorRightChains, shiftNodesByIds } from './graph.layout';
+import { getBranchMaxX, rebalanceOperatorRightChains, shiftNodesByIds } from './graph.layout';
 import { collectDescendantNodeIds } from './graph.traversal';
 import { createMethodConfigFromOperation } from './requestConfig';
 import { createShortId } from '@shared/lib/createId';
@@ -25,7 +25,7 @@ function buildNewNode(args: CreateNodeFromActionArgs, sourceNode: WorkflowNodeMo
     ? getBranchMaxX(sourceNode.id, args.nodes, args.edges)
     : sourceNode.position.x;
   const targetPosition = args.action.direction === 'right'
-    ? interceptedTargetNode ? { x: baseX + OFFSETS.right.x, y: sourceNode.position.y } : findFreePosition(args.nodes, baseX + OFFSETS.right.x, sourceNode.position.y, 'right')
+    ? { x: baseX + OFFSETS.right.x, y: sourceNode.position.y }
     : { x: sourceNode.position.x, y: sourceNode.position.y + OFFSETS.bottom.y };
 
   const branch = sourceNode.type === 'if' ? (args.action.direction === 'bottom' ? 'true' : 'false') : undefined;

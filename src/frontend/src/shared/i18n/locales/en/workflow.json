@@ -26,7 +26,13 @@
     "loadTitle": "Load Template",
     "nameLabel": "Name",
     "selectPlaceholder": "Select template",
-    "loadWarning": "If you load a template, all your current workflow changes will be replaced."
+    "loadWarning": "If you load a template, all your current workflow changes will be replaced.",
+    "replaceConfirm": {
+      "title": "Replace name and description?",
+      "message": "Do you want to replace also the name and description?",
+      "replace": "Yes",
+      "keep": "No"
+    }
   },
   "history": {
     "title": "Version History",
@@ -150,7 +156,9 @@
       "click": "Click",
       "doubleClick": "Double-click",
       "ctrl": "Ctrl",
-      "esc": "Esc"
+      "esc": "Esc",
+      "s": "S",
+      "delete": "Delete"
     },
     "items": {
       "pan": "Pan the canvas",
@@ -159,6 +167,8 @@
       "moveNode": "Move a node",
       "duplicate": "Duplicate a node instead of moving it",
       "multiSelect": "Select multiple nodes",
+      "deleteNode": "Delete the selected node",
+      "save": "Save the workflow",
       "close": "Close the open menu, dialog, or panel"
     }
   },

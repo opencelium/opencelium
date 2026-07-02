@@ -69,6 +69,7 @@ export function LegacyResponseFieldSelect({ method, type, value, disabled, itera
         value={undefined}
         searchValue={type === 'status' ? 'status' : displayPath}
         className='bodyLegacyGeneratorSelect'
+        size='large'
         disabled={disabled || type === 'status'}
         showSearch
         filterOption={false}

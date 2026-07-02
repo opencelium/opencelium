@@ -26,3 +26,11 @@ export type BoundaryError = {
 }
 
 export type BoundaryErrorScope = 'app' | 'page' | 'widget'
+
+// Props handed to a boundary fallback so it can offer recovery.
+export type CrashFallbackProps = {
+    // Clears the caught error and re-mounts the boundary's subtree.
+    reset: () => void
+    scope: BoundaryErrorScope
+    error?: Error
+}

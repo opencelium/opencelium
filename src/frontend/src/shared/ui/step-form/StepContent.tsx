@@ -1,6 +1,7 @@
 import { useStepForm } from "./context"
 import type {StepActionDefinition, StepDefinition} from "./types"
 import { Button } from "@shared/ui/primitives/Button"
+import { Tooltip } from "@shared/ui/primitives/Tooltip"
 import HelpIcon from "@shared/ui/tour/HelpIcon.tsx";
 import React, {useMemo, useRef} from "react";
 import type {PartialStepProps} from "@shared/ui/tour/Tour.tsx";
@@ -118,13 +119,17 @@ export function StepContent({
                 ))}
 
                 {isLast ? onSubmit && !readOnly ? (
-                    <Button type="primary" onClick={onSubmit} loading={isSubmitting} disabled={runningActionId != null} testId={buildTestId(testScope, 'wizard', 'submit')}>
-                        {step?.actions?.submitLabel ? tEntities(step.actions.submitLabel as any) : tCommon('actions.submit')}
-                    </Button>
+                    <Tooltip content={tCommon('actions.ctrlEnterHint')}>
+                        <Button type="primary" onClick={onSubmit} loading={isSubmitting} disabled={runningActionId != null} testId={buildTestId(testScope, 'wizard', 'submit')}>
+                            {step?.actions?.submitLabel ? tEntities(step.actions.submitLabel as any) : tCommon('actions.submit')}
+                        </Button>
+                    </Tooltip>
                 ) : null : (
-                    <Button onClick={next} loading={isSubmitting} testId={buildTestId(testScope, 'wizard', 'next')}>
-                        {step.actions?.nextLabel ? tEntities(step.actions.nextLabel as any) : tCommon('actions.next')}
-                    </Button>
+                    <Tooltip content={tCommon('actions.ctrlEnterHint')}>
+                        <Button onClick={next} loading={isSubmitting} testId={buildTestId(testScope, 'wizard', 'next')}>
+                            {step.actions?.nextLabel ? tEntities(step.actions.nextLabel as any) : tCommon('actions.next')}
+                        </Button>
+                    </Tooltip>
                 )}
             </div>
         </div>

@@ -30,7 +30,7 @@ export function AppProviders({ children }: Props) {
                         <NotificationProvider>
                             <BoundaryProvider>
                                 <ApiErrorProvider>
-                                    <ErrorBoundary fallback={<AppCrash />} scope="app">
+                                    <ErrorBoundary fallback={(props) => <AppCrash {...props} />} scope="app">
                                         <Auth>
                                             <AuthBootstrap>
                                                 <SocketProvider>

@@ -2,6 +2,8 @@ import { Layout } from 'antd';
 import { useLayoutStore } from '../layout.store';
 import { Sidebar } from './Sidebar';
 import {useBreakpoints} from "@app/hooks/useBreakpoints.tsx";
+import {ErrorBoundary} from "@shared/errors/boundary/ErrorBoundary.tsx";
+import {WidgetCrash} from "@shared/ui/feedback/crash/WidgetCrash.tsx";
 
 const { Sider } = Layout;
 
@@ -31,7 +33,9 @@ export const LayoutSidebar = () => {
                 borderRight: '1px solid var(--color-sidebar-border)',
             }}
         >
-            <Sidebar />
+            <ErrorBoundary scope="widget" fallback={(props) => <WidgetCrash {...props} />}>
+                <Sidebar />
+            </ErrorBoundary>
         </Sider>
     );
 };

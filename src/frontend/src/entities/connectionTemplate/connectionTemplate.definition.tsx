@@ -11,6 +11,10 @@ import {
     pickConnectionTemplateFile,
     uploadConnectionTemplate,
 } from '@entities/connectionTemplate/lib/uploadConnectionTemplate'
+import { downloadConnectionTemplate } from '@entities/connectionTemplate/lib/downloadConnectionTemplate'
+import { resolveConnectionTemplateIds } from '@entities/connectionTemplate/command/resolvers/resolveConnectionTemplateIds'
+import { resolveConnectionTemplateNames } from '@entities/connectionTemplate/command/resolvers/resolveConnectionTemplateNames'
+import { extractTemplateIdFromSuggestion } from '@entities/connectionTemplate/command/connectionTemplateCache'
 
 const baseKey = 'connection-template'
 
@@ -127,8 +131,8 @@ export const connectionTemplateDefinition: EntityDefinition = {
             children: [
                 {
                     type: 'literal',
-                    value: 'template',
-                    aliases: ['workflow-template', 'connection-template'],
+                    value: 'workflow-template',
+                    aliases: ['template', 'connection-template'],
                     icon: 'upload',
                     description: 'commandPalette.descriptions.uploadTemplate',
                     execute: async (_, ctx) => {
@@ -162,6 +166,97 @@ export const connectionTemplateDefinition: EntityDefinition = {
                             ctx.setLoading(false)
                         }
                     },
+                },
+            ],
+        },
+        {
+            type: 'literal',
+            value: 'download',
+            aliases: ['export'],
+            group: 'manage',
+            icon: 'download',
+            description: 'commandPalette.descriptions.downloadTemplate',
+            children: [
+                {
+                    type: 'literal',
+                    value: 'workflow-template',
+                    aliases: ['template', 'connection-template'],
+                    icon: 'download',
+                    description: 'commandPalette.descriptions.downloadTemplate',
+                    children: [
+                        {
+                            type: 'literal',
+                            value: 'by',
+                            children: [
+                                {
+                                    type: 'literal',
+                                    value: 'templateId',
+                                    children: [
+                                        {
+                                            type: 'entity',
+                                            name: 'identifier',
+                                            resolve: resolveConnectionTemplateIds,
+                                            execute: async (args, ctx) => {
+                                                const tEntities = i18n.getFixedT(i18n.language, 'entities')
+                                                const templateId = args.identifier as string
+                                                ctx.setLoading(true)
+                                                try {
+                                                    const downloaded = await downloadConnectionTemplate(templateId)
+                                                    message.success(
+                                                        tEntities('connection-template.list.download.success', {
+                                                            name: downloaded,
+                                                        }),
+                                                    )
+                                                } catch (err) {
+                                                    console.error(err)
+                                                    message.error(
+                                                        tEntities('connection-template.list.download.error'),
+                                                    )
+                                                } finally {
+                                                    ctx.setLoading(false)
+                                                }
+                                            },
+                                        },
+                                    ],
+                                },
+                                {
+                                    type: 'literal',
+                                    value: 'name',
+                                    children: [
+                                        {
+                                            type: 'entity',
+                                            name: 'identifier',
+                                            resolve: resolveConnectionTemplateNames,
+                                            execute: async (args, ctx) => {
+                                                const tEntities = i18n.getFixedT(i18n.language, 'entities')
+                                                const suggestion = args.identifier as string
+                                                ctx.setLoading(true)
+                                                try {
+                                                    const templateId = extractTemplateIdFromSuggestion(suggestion)
+                                                    if (templateId === undefined) {
+                                                        throw new Error(`Template not found: ${suggestion}`)
+                                                    }
+                                                    const downloaded = await downloadConnectionTemplate(templateId)
+                                                    message.success(
+                                                        tEntities('connection-template.list.download.success', {
+                                                            name: downloaded,
+                                                        }),
+                                                    )
+                                                } catch (err) {
+                                                    console.error(err)
+                                                    message.error(
+                                                        tEntities('connection-template.list.download.error'),
+                                                    )
+                                                } finally {
+                                                    ctx.setLoading(false)
+                                                }
+                                            },
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
                 },
             ],
         },

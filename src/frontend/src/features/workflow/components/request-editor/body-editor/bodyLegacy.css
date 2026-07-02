@@ -180,20 +180,28 @@
   position: relative;
   flex: 1;
   min-height: 0;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  overflow: hidden;
 }
 
-.bodyLegacyEnhancementScriptEditor > * {
+.bodyLegacyEnhancementScriptEditor > :not(.bodyLegacyScriptToggle) {
   position: absolute;
   inset: 0;
   width: auto !important;
 }
 
+/* Light-gray active line so it reads as selected without blending into the enhancement container. */
+.bodyLegacyEnhancementScriptEditor .ace_marker-layer .ace_active-line,
+.bodyLegacyEnhancementScriptEditor .ace_gutter-active-line {
+  background: var(--color-background-disabled);
+}
+
 .bodyLegacyScriptToggle {
   position: absolute;
-  top: 0;
-  right: 6px;
+  top: 6px;
+  right: 8px;
   z-index: 5;
-  background: var(--color-background-surface);
 }
 
 .bodyLegacyEnhancementScriptMaximized {
@@ -235,8 +243,14 @@
   min-width: 452px;
 }
 
+.bodyLegacyGeneratorShellNoToggle {
+  grid-template-columns: minmax(160px, 1fr) auto minmax(160px, 1fr) 22px;
+  width: 100%;
+}
+
 .bodyLegacyGeneratorResponse {
-  margin-left: 2px;
+  margin-left: 9px;
+  width: 40px;
 }
 
 .bodyLegacyGeneratorResponse .ant-radio-wrapper > span:last-child {
@@ -298,15 +312,10 @@
   width: 100%;
 }
 
-.bodyLegacyGeneratorSelect .ant-select-selector {
+.bodyLegacyGeneratorSelect.ant-select {
   border-radius: 2px !important;
-  min-height: 38px !important;
   padding-inline: 10px !important;
-}
-
-.bodyLegacyGeneratorSelect .ant-select-selection-placeholder,
-.bodyLegacyGeneratorSelect .ant-select-selection-item {
-  line-height: 36px !important;
+  font-size: 14px !important;
 }
 
 .bodyLegacyWebhookSelect {
