@@ -16,7 +16,6 @@ type Props = {
 	onChange?: (values: { title: string; description: string }) => void;
 	onMenuItemSelect?: (item: WorkflowHeaderMenuItem) => void;
 	menuLoadingItemId?: string | null;
-	/** Async title check; returns a translated error message to show inline, or null when the title is acceptable. */
 	validateTitle?: (title: string) => Promise<string | null>;
 	saveDisabled?: boolean;
 	readOnly?: boolean;
@@ -100,7 +99,6 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 		}
 		const titleError = await runTitleCheck(nextName);
 		if (titleError) {
-			// Reject the duplicate: keep editing, refocus, don't accept the value.
 			focusNameWithError(nextName, titleError);
 			return;
 		}

@@ -77,9 +77,7 @@ const storeCanvas = (connectionId: string | number | undefined, ui?: any) => {
 			source: 'current-save',
 			ui,
 		}));
-	} catch {
-		// Ignore storage failures; backend ui remains the primary source.
-	}
+	} catch {}
 };
 
 const normalizeVersion = (version: ConnectionVersionResource, fallbackIndex: number): HistoryVersionItem => {

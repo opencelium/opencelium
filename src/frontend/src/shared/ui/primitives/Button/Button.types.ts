@@ -3,7 +3,10 @@ import type { CSSProperties } from 'react';
 import type { IconName } from '@shared/ui/primitives/Icon/Icon.types.ts';
 import type {ButtonColorType} from "antd/es/button/buttonHelpers";
 
-export type ButtonVariant = 'outlined' | 'dashed' | 'solid' | 'filled' | 'text' | 'link'
+// Antd-flavoured variants (forwarded to the antd Button) plus the semantic
+// variants used by the material/custom implementations and the confirm dialog.
+export type AntButtonVariant = 'outlined' | 'dashed' | 'solid' | 'filled' | 'text' | 'link';
+export type ButtonVariant = AntButtonVariant | 'primary' | 'secondary' | 'danger';
 
 export interface ButtonProps {
 	children?: React.ReactNode;

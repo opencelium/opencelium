@@ -15,7 +15,7 @@ export const useMethodContext = () => {
 
 interface MethodProviderProps {
     value: MethodContextValue;
-    children: ReactNode; // ✅ declare children here
+    children: ReactNode;
 }
 
 export const MethodProvider: React.FC<MethodProviderProps> = ({ value, children }) => (

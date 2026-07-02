@@ -5,7 +5,6 @@ export function updateEnhancementInConnection(
     updatedEnhancement: Enhancement,
     onRemoveFieldBinding?: () => void,
 ): Connection {
-    // Determine if only RESULT_VAR remains
     const argKeys = Object.keys(updatedEnhancement.args || {}).filter(
         (key) => key !== "RESULT_VAR"
     );
@@ -20,11 +19,10 @@ export function updateEnhancementInConnection(
                 if (binding.enhancement.enhanceId !== updatedEnhancement.enhanceId)
                     return binding;
 
-                // Remove this binding completely if it has no more args
                 if (shouldRemove) return null;
 
                 return { ...binding, enhancement: { ...updatedEnhancement } };
             })
-            .filter(Boolean) as typeof connection.fieldBindings, // filter out null
+            .filter(Boolean) as typeof connection.fieldBindings,
     };
 }

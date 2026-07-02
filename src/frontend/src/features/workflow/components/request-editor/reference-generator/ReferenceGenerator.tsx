@@ -260,7 +260,7 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 					) as HTMLInputElement | null
 				)?.focus?.();
 			} catch {
-				//
+				
 			}
 		});
 	}, [resetKey, open]);

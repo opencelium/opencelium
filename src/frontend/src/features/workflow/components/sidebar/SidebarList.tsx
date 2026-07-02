@@ -10,7 +10,6 @@ type SidebarItem = {
 type Props = {
   items: readonly SidebarItem[];
   onSelect: (key: string) => void;
-  /** When set, each item emits `${testIdPrefix}-item-${key}` as data-testid. */
   testIdPrefix?: string;
 };
 

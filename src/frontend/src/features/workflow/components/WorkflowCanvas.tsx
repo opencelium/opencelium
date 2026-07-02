@@ -115,12 +115,6 @@ export function WorkflowCanvas({
     ? getOperatorBottomBranch(selectedOperator.id, nodes, edges)
     : { nodeIds: new Set<string>(), edgeIds: new Set<string>() };
 
-  // Tag connector/system nodes that reuse the same connector+method with a
-  // 1-based index + a guaranteed badge color, so the otherwise-identical
-  // instances can be told apart on the canvas. A node may lack a stored color
-  // (e.g. loaded workflows), so fall back to a distinct palette color —
-  // otherwise the first instance's badge wouldn't render and numbers would
-  // appear to start at 2.
   const methodInstanceById = new Map<string, { index: number; color: string }>();
   {
     const groups = new Map<string, WorkflowNodeModel[]>();

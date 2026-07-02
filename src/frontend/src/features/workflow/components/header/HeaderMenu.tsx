@@ -8,7 +8,6 @@ type Props = {
   items: WorkflowHeaderMenuItem[];
   onClose: () => void;
   onSelect?: (item: WorkflowHeaderMenuItem) => void;
-  /** Id of the item whose async action is currently in flight; renders a spinner beside its label. */
   loadingItemId?: string | null;
 };
 
@@ -19,7 +18,6 @@ export function HeaderMenu({ open, items, onClose, onSelect, loadingItemId }: Pr
 
   useEffect(() => {
     const isLoading = loadingItemId != null;
-    // Close the menu once a kept-open async action finishes (loading → idle).
     if (wasLoadingRef.current && !isLoading) onClose();
     wasLoadingRef.current = isLoading;
   }, [loadingItemId, onClose]);

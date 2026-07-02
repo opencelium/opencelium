@@ -374,8 +374,6 @@
 	justify-content: center;
 }
 
-/* The response-type switcher follows the method select, so keep a separating
-   gap on its left; every other seam (radio→its select) stays flush. */
 .conditionResponseTypeSwitcher {
 	margin-left: 8px;
 }
@@ -497,8 +495,6 @@
 	color: var(--color-action-danger);
 }
 
-/* antd's text-button hover color has very high specificity, so force ours to
-   keep the delete affordance red on hover/focus. */
 .conditionDeleteButton.ant-btn:not(:disabled):hover,
 .conditionDeleteButton.ant-btn:not(:disabled):focus {
 	color: var(--color-action-danger-hover) !important;

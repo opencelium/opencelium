@@ -75,8 +75,6 @@ const compareIndexPath = (left: number[], right: number[]) => {
 const sortByIndex = <T extends { path: number[] }>(items: T[]) =>
 	[...items].sort((left, right) => compareIndexPath(left.path, right.path));
 
-// The node subtitle is the user-facing label: prefer the saved label, falling
-// back to the operation name (legacy connections only carried `name`).
 const getMethodName = (method: any, index: number) => method?.label ?? method?.name ?? `Method ${index + 1}`;
 
 const getNodePosition = (path: number[]) => {

@@ -39,8 +39,6 @@ function TestRunResultLine({ result }: { result: TestRunResult }) {
 	}
 }
 
-// Header toggle between the URL and method-name views, styled to match the
-// panel's clear/maximize icon buttons. Lives inside MethodViewModeProvider.
 function MethodViewButton() {
 	const { t: tLogs } = useI18n('logs');
 	const { mode, setMode } = useMethodViewMode();
@@ -75,8 +73,6 @@ export function WorkflowLogs() {
 	const hasLogs = !isOrphaned && logTree.rootKeys.length > 0;
 	const isExpanded = panel !== 'minimized';
 
-	// Render-phase adjustment: open the panel while a test runs or while we wait
-	// to reveal a failure, so the loading state and the reveal are visible.
 	const isActive = isRunning || revealPending;
 	const [wasActive, setWasActive] = useState(false);
 	if (isActive !== wasActive) {

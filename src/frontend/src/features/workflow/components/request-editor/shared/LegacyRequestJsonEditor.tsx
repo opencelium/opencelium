@@ -229,9 +229,6 @@ export function LegacyRequestJsonEditor({ messageProperty, source, readOnly }: P
           max: '74%',
           content: (
             <div className='bodyLegacyLeft'>
-              {/* Disable collapse motion: the height animation expands the panel to
-                  full content height before flex clamps it to ~50%, causing a visible
-                  "open full then jump up" glitch. Instant toggle avoids it. */}
               <ConfigProvider theme={{ token: { motion: false } }}>
                 <Collapse className='bodyLegacyLeftCollapse' items={leftItems} defaultActiveKeys={['requestData']} />
               </ConfigProvider>

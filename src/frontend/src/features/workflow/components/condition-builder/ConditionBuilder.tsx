@@ -258,7 +258,6 @@ const getCurrentLoopIterator = (
 	return ITERATOR_NAMES[getLoopAncestors(connection, node).length];
 };
 
-// The collection the loop iterates over is the first rule's left-hand reference.
 const getFirstRuleLeftField = (group: ConditionGroup): string | undefined => {
 	for (const item of group.items ?? []) {
 		if (item.type === 'rule') {
@@ -271,7 +270,6 @@ const getFirstRuleLeftField = (group: ConditionGroup): string | undefined => {
 	return undefined;
 };
 
-// The chosen loop operator (for / forin / SplitString) — taken from the first rule.
 const getFirstRuleOperator = (group: ConditionGroup): string | undefined => {
 	for (const item of group.items ?? []) {
 		if (item.type === 'rule') {
@@ -802,8 +800,6 @@ export function ConditionBuilderDialog({
 		[isLoop, tree],
 	);
 	const loopExample = useMemo(() => {
-		// Only show once the operator, method and field (the collection reference)
-		// are all chosen.
 		if (!isLoop || !loopOperator || !loopCollectionRef) return undefined;
 		const method = parseMethodFromReference(allMethods, loopCollectionRef);
 		if (!method) return undefined;

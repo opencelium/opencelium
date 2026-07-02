@@ -46,9 +46,7 @@ export type WorkflowNodeData = {
 	isLeaf?: boolean;
 	rightLeaf?: boolean;
 	bottomLeaf?: boolean;
-	/** Derived at render time: 1-based position among nodes that reuse the same connector+method, so duplicates can be told apart by a color badge. Unset when the method is used only once. */
 	duplicateMethodIndex?: number;
-	/** Derived at render time: the badge color for a duplicate instance — `color` when present, otherwise a distinct palette fallback so the badge always renders. */
 	duplicateMethodColor?: string;
 	alwaysShowRightAdd?: boolean;
 	highlighted?: boolean;
@@ -57,6 +55,7 @@ export type WorkflowNodeData = {
 	dragGhost?: boolean;
 	dropPlaceholder?: boolean;
 	dragSourceMoving?: boolean;
+	dragSourceFaint?: boolean;
 	hideAddControls?: boolean;
 	suppressHoverAddControls?: boolean;
 	lockVisibleAddControls?: boolean;
@@ -99,11 +98,8 @@ export type WorkflowHeaderMenuItem = {
 	id: string;
 	labelKey: string;
 	section?: 'template' | 'editor' | 'exit';
-	/** Keep the menu open after selecting (for async actions that show in-place loading). */
 	keepOpenOnSelect?: boolean;
-	/** Render the item non-interactive (e.g. a feature not yet shipped). */
 	disabled?: boolean;
-	/** i18n key for a small badge shown next to the label (e.g. "In development"). */
 	badgeKey?: string;
 };
 

@@ -100,8 +100,6 @@ export function HistoryPanel({ open, items, onClose, onDeleteVersion, onDownload
 	const selectVersion = async (id: string) => {
 		if (id === state.selectedId) return;
 		if (hasUnsavedChanges) {
-			// The version load runs inside onConfirm, so the confirm button shows
-			// its progress; nothing left to do once the dialog settles.
 			await confirm({
 				title: t('history.unsavedChanges.title'),
 				message: tEntities('connection.messages.history.unsavedVersionSwitch'),

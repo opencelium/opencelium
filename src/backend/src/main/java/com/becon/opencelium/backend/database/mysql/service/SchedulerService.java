@@ -66,8 +66,6 @@ public interface SchedulerService {
     List<RunningJobsResource> getAllRunningJobs() throws Exception;
     List<RunningJobsResource> getAllRunningJobsExcludingOne(int schedulerId);
     Set<Long> getRunningConnectionIds();
-    List<ConnectionDTO> filterByTestFlag(List<ConnectionDTO> connections, boolean test);
-    List<Connection> filterEntitiesByTestFlag(List<Connection> connections, boolean test);
     List<EventNotification> getAllNotifications(int schedulerId);
     Optional<EventNotification> getNotification(int notificationId);
     EventNotification toNotificationEntity(NotificationResource resource);

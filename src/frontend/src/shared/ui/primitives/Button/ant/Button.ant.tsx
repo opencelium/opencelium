@@ -1,6 +1,8 @@
 import React, {CSSProperties} from 'react';
 import { Button as AntButtonBase } from 'antd';
-import type { ButtonComponent } from '../Button.types.ts';
+import type { AntButtonVariant, ButtonComponent } from '../Button.types.ts';
+
+const ANT_VARIANTS: readonly AntButtonVariant[] = ['outlined', 'dashed', 'solid', 'filled', 'text', 'link'];
 import './button.ant.css';
 import {Icon} from "@shared/ui/primitives/Icon";
 import {Loading} from "@shared/ui/primitives/Loading/Loading.tsx";
@@ -19,6 +21,11 @@ export const AntButton: ButtonComponent = ({
 }) => {
     const additionalStyles: CSSProperties = {minWidth: '51px'};
     style = style ? {...style, ...additionalStyles} : additionalStyles;
+    // antd only understands its own variants; semantic ones (primary/secondary/
+    // danger) are handled by the material/custom impls, so drop them here.
+    const antVariant = variant && ANT_VARIANTS.includes(variant as AntButtonVariant)
+        ? (variant as AntButtonVariant)
+        : undefined;
     return (
         <AntButtonBase
             {...rest}
@@ -26,7 +33,7 @@ export const AntButton: ButtonComponent = ({
             style={style}
             loading={false}
             color={color}
-            variant={variant}
+            variant={antVariant}
             disabled={disabled || loading}
         >
             {!loading && iconLeft && (

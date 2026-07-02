@@ -3,17 +3,12 @@
   min-height: 0;
 }
 
-/* antd stretches each splitter panel to full height but without an explicit
-   `height`, so percentage-height children don't resolve. Make the panel a flex
-   column and let the panes fill with flex:1 instead. */
 .bodyLegacyLayout .ant-splitter-panel {
   display: flex;
   flex-direction: column;
   min-height: 0;
 }
 
-/* Left Splitter pane: the two sections share the height and each scrolls inside
-   itself, so the pane never scrolls as a whole. */
 .bodyLegacyLeft {
   flex: 1;
   min-height: 0;
@@ -39,14 +34,10 @@
   overflow-y: auto;
 }
 
-/* Open sections split the free space (~50% each when both are open; a single
-   open section takes it all). */
 .bodyLegacyLeftCollapse .ant-collapse-item-active {
   flex: 1;
 }
 
-/* Only OPEN sections get the flex display — scoping to -active leaves a closed
-   section's panel at antd's hidden default, so the toggle keeps working. */
 .bodyLegacyLeftCollapse .ant-collapse-item-active > .ant-collapse-panel {
   display: flex;
   flex-direction: column;
@@ -54,7 +45,6 @@
   min-height: 0;
 }
 
-/* Scroll lives inside each section's body (vertical), not the pane. */
 .bodyLegacyLeftCollapse .ant-collapse-item-active > .ant-collapse-panel > .ant-collapse-body {
   flex: 1;
   min-height: 0;
@@ -108,8 +98,6 @@
   z-index: 20;
 }
 
-/* Splitter draws the divider now; the pane just needs breathing room from the bar.
-   The enhancement is a static (non-toggleable) panel that always fills the pane. */
 .bodyLegacyEnhancement {
   min-width: 0;
   flex: 1;
@@ -120,9 +108,6 @@
   overflow: hidden;
 }
 
-/* Pure-flex chain (no percentage heights) so the enhancement fills the pane and
-   the script can flex-grow. antd Collapse internals must each be flex:1 columns,
-   otherwise the chain breaks at the animated content region. */
 .bodyLegacyEnhancementContent {
   display: flex;
   flex-direction: column;
@@ -137,10 +122,6 @@
   min-height: 0;
 }
 
-/* Direct-child combinators only: these flex rules must apply to the OUTER
-   enhancement collapse, not the nested Variable Information / Description
-   collapses (forcing display:flex on their panels would break their toggle).
-   antd v6 class names: -panel is the content region, -body the padded inner box. */
 .bodyLegacyEnhancementCollapse > .ant-collapse-item {
   display: flex;
   flex-direction: column;
@@ -187,11 +168,6 @@
   margin-bottom: 10px;
 }
 
-/* Script grows to fill the remaining enhancement height. The ACE editor's own
-   container uses inline height:100%, which won't resolve against a flex item — so
-   pin it absolutely to this relative box, which the flex chain sizes definitely. */
-/* Flex column: the label (and the maximize toggle) sit at the top and stay
-   visible in both normal and maximized views; the editor fills below. */
 .bodyLegacyEnhancementScript {
   flex: 1;
   min-height: 0;
@@ -200,8 +176,6 @@
   flex-direction: column;
 }
 
-/* The editor wrapper fills the remaining height; the ACE container inside pins
-   absolutely to this relative box. */
 .bodyLegacyEnhancementScriptEditor {
   position: relative;
   flex: 1;
@@ -222,8 +196,6 @@
   background: var(--color-background-surface);
 }
 
-/* Maximized: pinned (via inline position:fixed + the modal-body rect) to fill the
-   dialog body, not the viewport. This rule supplies the surface/elevation. */
 .bodyLegacyEnhancementScriptMaximized {
   z-index: 1100;
   flex: none;
@@ -263,23 +235,14 @@
   min-width: 452px;
 }
 
-/* The response (B/H/S) switcher follows the method select; keep it close to the
-   select on its left (it still hugs its own field select on the right, grid gap
-   is 0). */
 .bodyLegacyGeneratorResponse {
   margin-left: 2px;
 }
 
-/* The B/H/S labels sit directly before the field select — drop antd's default
-   right padding on the label so they don't leave a trailing gap. */
 .bodyLegacyGeneratorResponse .ant-radio-wrapper > span:last-child {
   padding-inline-end: 0;
 }
 
-/* Shared compact radio group: vertical stack of small radios sized so a
-   2–3 option stack stays close to a single select field's height. Used by the
-   body reference generator, the condition source/response switchers, and the
-   reference-generator response-type picker. */
 .compactRadioGroup {
   display: flex;
   flex-direction: column;

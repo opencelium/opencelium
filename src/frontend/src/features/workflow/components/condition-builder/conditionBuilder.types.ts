@@ -79,8 +79,6 @@ export const LoopOperatorName = {
 
 export type LoopOperatorName = (typeof LoopOperatorName)[keyof typeof LoopOperatorName];
 
-// i18n keys (workflow namespace) for each operator label; symbol operators
-// resolve to the symbol itself in every language.
 export const IF_OPERATOR_LABEL_KEYS: Record<IfOperatorName, string> = {
 	[IfOperatorName.Equal]: 'conditionBuilder.operators.if.equal',
 	[IfOperatorName.NotEqual]: 'conditionBuilder.operators.if.notEqual',

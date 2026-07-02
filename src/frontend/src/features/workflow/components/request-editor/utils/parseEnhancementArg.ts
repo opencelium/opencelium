@@ -1,4 +1,3 @@
-// src/core/references/utils/parseEnhancementArg.ts
 export interface ParsedArg {
 	color: string;
 	direction: 'request' | 'response';

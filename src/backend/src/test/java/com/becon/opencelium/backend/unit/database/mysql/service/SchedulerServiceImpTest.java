@@ -8,19 +8,15 @@
 
 package com.becon.opencelium.backend.unit.database.mysql.service;
 
-import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
 import com.becon.opencelium.backend.database.mysql.service.SchedulerServiceImp;
 import com.becon.opencelium.backend.quartz.SchedulingStrategy;
-import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.schedule.RunningJob;
 import com.becon.opencelium.backend.testutil.fixture.RunningJobFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
@@ -32,11 +28,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -53,9 +45,6 @@ class SchedulerServiceImpTest {
 
     @Mock
     private ConnectionService connectionService;
-
-    @Captor
-    private ArgumentCaptor<Set<Long>> runningIdsCaptor;
 
     private SchedulerService schedulerService;
 
@@ -103,65 +92,5 @@ class SchedulerServiceImpTest {
 
         assertThatThrownBy(() -> result.add(99L))
                 .isInstanceOf(UnsupportedOperationException.class);
-    }
-
-    // ── filterByTestFlag (List<ConnectionDTO>) ────────────────────────────────
-
-    @Test
-    void filterByTestFlagPassesEmptyRunningIdsWhenTestIsFalse() {
-        List<ConnectionDTO> input = List.of(dto("1", "Regular"));
-        List<ConnectionDTO> delegated = List.of(dto("1", "Regular"));
-        when(connectionService.filterTestConnections(eq(input), eq(false), any())).thenReturn(delegated);
-
-        List<ConnectionDTO> result = schedulerService.filterByTestFlag(input, false);
-
-        assertThat(result).isSameAs(delegated);
-        verify(connectionService).filterTestConnections(eq(input), eq(false), runningIdsCaptor.capture());
-        assertThat(runningIdsCaptor.getValue()).isEmpty();
-        verify(schedulingStrategy, never()).getRunningJobs();
-    }
-
-    @Test
-    void filterByTestFlagPassesRunningIdsWhenTestIsTrue() {
-        List<ConnectionDTO> input = List.of(dto("7", "!*test_connection_1700000000000_X"));
-        List<ConnectionDTO> delegated = List.of();
-        when(schedulingStrategy.getRunningJobs()).thenReturn(List.of(RunningJobFixture.aRunningJob(7L, 2, 1L)));
-        when(connectionService.filterTestConnections(eq(input), eq(true), any())).thenReturn(delegated);
-
-        List<ConnectionDTO> result = schedulerService.filterByTestFlag(input, true);
-
-        assertThat(result).isSameAs(delegated);
-        verify(connectionService).filterTestConnections(eq(input), eq(true), runningIdsCaptor.capture());
-        assertThat(runningIdsCaptor.getValue()).containsExactly(7L);
-    }
-
-    // ── filterEntitiesByTestFlag (List<Connection>) ───────────────────────────
-
-    @Test
-    void filterEntitiesByTestFlagPassesRunningIdsWhenTestIsTrue() {
-        List<Connection> input = List.of(entity(7L, "!*test_connection_1700000000000_X"));
-        List<Connection> delegated = List.of();
-        when(schedulingStrategy.getRunningJobs()).thenReturn(List.of(RunningJobFixture.aRunningJob(7L, 2, 1L)));
-        when(connectionService.filterTestConnectionEntities(eq(input), eq(true), any())).thenReturn(delegated);
-
-        List<Connection> result = schedulerService.filterEntitiesByTestFlag(input, true);
-
-        assertThat(result).isSameAs(delegated);
-        verify(connectionService).filterTestConnectionEntities(eq(input), eq(true), runningIdsCaptor.capture());
-        assertThat(runningIdsCaptor.getValue()).containsExactly(7L);
-    }
-
-    private static ConnectionDTO dto(String id, String title) {
-        ConnectionDTO dto = new ConnectionDTO();
-        dto.setId(id);
-        dto.setTitle(title);
-        return dto;
-    }
-
-    private static Connection entity(Long id, String title) {
-        Connection connection = new Connection();
-        connection.setId(id);
-        connection.setTitle(title);
-        return connection;
     }
 }
