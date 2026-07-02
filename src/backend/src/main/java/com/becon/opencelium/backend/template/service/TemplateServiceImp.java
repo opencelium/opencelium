@@ -24,6 +24,7 @@ import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.old.ConnectionOldDTO;
 import com.becon.opencelium.backend.resource.template.CtionTemplateResource;
+import com.becon.opencelium.backend.resource.template.TemplateMetadata;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.utility.FileNameUtils;
@@ -89,6 +90,58 @@ public class TemplateServiceImp implements TemplateService {
         templateResource.setConnection(template.getConnection());
         templateResource.setLink(PathConstant.TEMPLATE_URL + template.getTemplateId());
         return templateResource;
+    }
+
+    @Override
+    public List<TemplateResource> getAllMetadata() {
+        return getAllMetadata(PathConstant.TEMPLATE).stream()
+                .filter(Objects::nonNull)
+                .map(this::toResource)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<TemplateResource> getMetadataById(String id) {
+        Path path = Paths.get(PathConstant.TEMPLATE).resolve(id.concat(".json"));
+        if (Files.notExists(path)) {
+            return Optional.empty();
+        }
+        try {
+            String json = Files.readString(path, StandardCharsets.UTF_8);
+            return Optional.of(toResource(objectMapper.readValue(json, TemplateMetadata.class)));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read template metadata: " + path, e);
+        }
+    }
+
+    private TemplateResource toResource(TemplateMetadata metadata) {
+        TemplateResource templateResource = new TemplateResource();
+        templateResource.setTemplateId(metadata.getTemplateId());
+        templateResource.setName(metadata.getName());
+        templateResource.setDescription(metadata.getDescription());
+        templateResource.setVersion(metadata.getVersion());
+        templateResource.setLink(PathConstant.TEMPLATE_URL + metadata.getTemplateId());
+        // connection intentionally left null for metadata-only responses
+        return templateResource;
+    }
+
+    private List<TemplateMetadata> getAllMetadata(String folder) {
+        try (Stream<Path> walk = Files.walk(Paths.get(folder))) {
+            return walk.filter(Files::isRegularFile)
+                    .filter(path -> FileNameUtils.getExtension(path.toString()).equals("json"))
+                    .map(path -> {
+                        try {
+                            String json = Files.readString(path, StandardCharsets.UTF_8);
+                            return objectMapper.readValue(json, TemplateMetadata.class);
+                        } catch (IOException e) {
+                            log.error("Failed to read template metadata from file '{}': {}", path.getFileName(), e.getMessage());
+                            return null;
+                        }
+                    })
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
