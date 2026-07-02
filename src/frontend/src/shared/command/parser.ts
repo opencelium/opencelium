@@ -1,7 +1,7 @@
 import {getDynamicCommandTree} from './tree';
 import type {ASTNode} from "@shared/command/ast.ts";
 import {PolicyContext, policyEngine} from "@/engine/policy";
-import type {CommandNode, Suggestion} from "@shared/command/types.ts";
+import type {CommandNode, Suggestion, SuggestionOption} from "@shared/command/types.ts";
 
 type ParseResult = {
     ast: ASTNode[];
@@ -44,10 +44,11 @@ export async function parseTokens(tokens: string[], policyContext: PolicyContext
 
     const toResolvedSuggestions = (
         node: CommandNode<any>,
-        values: string[],
+        values: SuggestionOption[],
         inheritedGroup: string | undefined,
     ): Suggestion[] => values.map(v => ({
-        value: v,
+        value: typeof v === 'string' ? v : v.value,
+        label: typeof v === 'string' ? undefined : v.label,
         icon: node.icon,
         group: node.group ?? inheritedGroup,
         description: node.description,

@@ -13,6 +13,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             delete: string
             view: string
             edit: string
+            ctrlEnterHint: string
         }
         status: {
             loading: string
@@ -111,7 +112,9 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 updateSystemConfig: string
                 changeTheme: string
                 uploadTemplate: string
+                downloadTemplate: string
                 uploadInvoker: string
+                downloadInvoker: string
                 systemCheck: string
             }
             footer: {

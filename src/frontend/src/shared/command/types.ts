@@ -46,7 +46,7 @@ export interface CommandNode<Entity> {
 
     access?: PolicyDefinition;
 
-    resolve?: (input?: unknown) => Promise<string[]>; // ⚡ async suggestions
+    resolve?: (input?: unknown) => Promise<SuggestionOption[]>; // ⚡ async suggestions
 
     execute?: (
         args: Entity,
@@ -62,3 +62,9 @@ export type Suggestion = {
     description?: string;
     shortcut?: string[];
 };
+
+// A resolver can return a plain string (value === label) or an object pairing
+// the value substituted into the palette input with a separate display label
+// — used when the value must carry extra disambiguating data (e.g. an id)
+// that shouldn't be shown to the user.
+export type SuggestionOption = string | { value: string; label: string };

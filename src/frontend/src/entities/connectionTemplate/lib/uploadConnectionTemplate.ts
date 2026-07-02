@@ -10,7 +10,7 @@ const FETCH_URL = (id: string) => `/template/${encodeURIComponent(id)}`
 const ACCEPT = '.json,.zip,application/json,application/zip'
 
 /** Existence is checked by the bare template name, so drop a trailing upload extension. */
-const stripTemplateExtension = (fileName: string) => fileName.replace(/\.(json|zip)$/i, '')
+export const stripTemplateExtension = (fileName: string) => fileName.replace(/\.(json|zip)$/i, '')
 
 async function uploadFile(file: File): Promise<{ id: string; path: string }> {
     const token = selectAccessToken(store.getState())

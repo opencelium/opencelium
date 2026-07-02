@@ -26,7 +26,13 @@
     "loadTitle": "Vorlage laden",
     "nameLabel": "Name",
     "selectPlaceholder": "Vorlage auswählen",
-    "loadWarning": "Wenn Sie eine Vorlage laden, werden alle Ihre aktuellen Workflow-Änderungen ersetzt."
+    "loadWarning": "Wenn Sie eine Vorlage laden, werden alle Ihre aktuellen Workflow-Änderungen ersetzt.",
+    "replaceConfirm": {
+      "title": "Namen und Beschreibung ersetzen?",
+      "message": "Möchten Sie auch den Namen und die Beschreibung ersetzen?",
+      "replace": "Ja",
+      "keep": "Nein"
+    }
   },
   "history": {
     "title": "Versionsverlauf",
@@ -150,7 +156,9 @@
       "click": "Klick",
       "doubleClick": "Doppelklick",
       "ctrl": "Strg",
-      "esc": "Esc"
+      "esc": "Esc",
+      "s": "S",
+      "delete": "Entf"
     },
     "items": {
       "pan": "Arbeitsfläche verschieben",
@@ -159,6 +167,8 @@
       "moveNode": "Knoten verschieben",
       "duplicate": "Knoten duplizieren statt verschieben",
       "multiSelect": "Mehrere Knoten auswählen",
+      "deleteNode": "Ausgewählten Knoten löschen",
+      "save": "Workflow speichern",
       "close": "Geöffnetes Menü, Dialog oder Panel schließen"
     }
   },

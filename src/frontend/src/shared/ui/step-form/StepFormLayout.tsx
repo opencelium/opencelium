@@ -161,6 +161,18 @@ export function StepFormLayout({
             setCurrentStep((s) => s - 1),
         isLast,
     }
+    // Ctrl/Cmd+Enter advances the wizard: Next on intermediate steps, Submit on the last one.
+    // Scoped to this container (not window) so it only fires while the form has focus.
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+        if (!(event.ctrlKey || event.metaKey) || event.key !== 'Enter') return
+        if (isSuccess || isSubmitting || runningActionId != null) return
+        event.preventDefault()
+        if (isLast) {
+            if (!readOnly && !hideSubmit) void handleSubmit()
+        } else {
+            void next()
+        }
+    }
     return (
         <StepFormContext.Provider value={ctx}>
             <div
@@ -169,6 +181,7 @@ export function StepFormLayout({
                     borderRadius: 12,
                 }}
                 ref={ref}
+                onKeyDown={handleKeyDown}
             >
                 <StepHeader
                     containerRef={ref}

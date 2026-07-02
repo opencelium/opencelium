@@ -6,7 +6,7 @@
     "columns": {
       "executions": "Executions",
       "status": "Status",
-      "connection": "Connection",
+      "connection": "Workflow",
       "cronExp": "Cron",
       "lastSuccessExecution": "Last Success",
       "lastFailExecution": "Last Fail",
@@ -138,7 +138,7 @@
       "label": "Title"
     },
     "connection": {
-      "label": "Connection"
+      "label": "Workflow"
     },
     "debugMode": {
       "label": "Logs",

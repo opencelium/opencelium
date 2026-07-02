@@ -1,5 +1,5 @@
 import { Background } from '@xyflow/react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button, Input, Modal, Select, message } from 'antd';
 import { Loading } from '@shared/ui/primitives/Loading/Loading';
@@ -28,6 +28,11 @@ import { store } from '@app/store/store';
 import { genericApi } from '@shared/api/genericApi';
 import { useAppSelector } from '@shared/lib/storeHooks';
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
+import {
+  pickConnectionTemplateFile,
+  stripTemplateExtension,
+  uploadConnectionTemplate,
+} from '@entities/connectionTemplate/lib/uploadConnectionTemplate';
 import type { Connector } from '@entities/connector/model/types';
 import type { AuthUser } from '@entities/auth/model/types';
 import type { HistoryVersionItem } from './types/history.types';
@@ -102,8 +107,6 @@ const EMPTY_NAME_LABEL = '[Empty Name]';
 const EMPTY_DESCRIPTION_LABEL = '[Empty Description]';
 
 const isHeaderNameEmpty = (title: string) => !title.trim() || title.trim() === EMPTY_NAME_LABEL;
-const isHeaderDescriptionEmpty = (description: string) =>
-  !description.trim() || description.trim() === EMPTY_DESCRIPTION_LABEL;
 
 const toDisplayDescription = (description?: string) =>
   description && description.trim() ? description : EMPTY_DESCRIPTION_LABEL;
@@ -245,6 +248,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>();
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
   const [isApplyingTemplate, setIsApplyingTemplate] = useState(false);
+  const [isUploadingTemplate, setIsUploadingTemplate] = useState(false);
   const [isDownloadingTemplate, setIsDownloadingTemplate] = useState(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const hydratedNodes = useMemo(
@@ -480,21 +484,55 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     }
   };
 
+  const fetchTemplates = async (): Promise<Template[]> => {
+    const response = await apiExecutor({
+      url: '/template/all',
+      method: 'GET',
+    });
+    const nextTemplates = Array.isArray(response) ? response : [];
+    setTemplates(nextTemplates);
+    return nextTemplates;
+  };
+
   const openLoadTemplateDialog = async () => {
     setLoadTemplateDialogOpen(true);
     setSelectedTemplateId(undefined);
     setIsLoadingTemplates(true);
     try {
-      const response = await apiExecutor({
-        url: '/template/all',
-        method: 'GET',
-      });
-      const nextTemplates = Array.isArray(response) ? response : [];
-      setTemplates(nextTemplates);
+      await fetchTemplates();
     } catch {
       message.error(t('messages.loadTemplatesFailed'));
     } finally {
       setIsLoadingTemplates(false);
+    }
+  };
+
+  const uploadTemplateInLoadDialog = async () => {
+    const file = await pickConnectionTemplateFile();
+    if (!file) return;
+
+    setIsUploadingTemplate(true);
+    try {
+      const uploaded = await uploadConnectionTemplate(file, () =>
+        confirm({
+          title: tEntities('connection-template.list.upload.confirmReplace.title'),
+          message: tEntities('connection-template.list.upload.confirmReplace.message'),
+        }),
+      );
+      if (uploaded) {
+        message.success(tEntities('connection-template.list.upload.success', { name: file.name }));
+        const nextTemplates = await fetchTemplates();
+        const uploadedName = stripTemplateExtension(file.name);
+        const matched = nextTemplates.find((template) => template.name === uploadedName);
+        if (matched) {
+          setSelectedTemplateId(String(matched.templateId));
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      message.error(tEntities('connection-template.list.upload.error'));
+    } finally {
+      setIsUploadingTemplate(false);
     }
   };
 
@@ -518,13 +556,23 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       setLoadedFieldBindings(state.fieldBindings);
       const templateName = selectedTemplate.name?.trim();
       const templateDescription = selectedTemplate.description?.trim();
-      setHeaderState((prev) => ({
-        title: isHeaderNameEmpty(prev.title) && templateName ? templateName : prev.title,
-        description:
-          isHeaderDescriptionEmpty(prev.description) && templateDescription
-            ? toDisplayDescription(templateDescription)
-            : prev.description,
-      }));
+      const applyTemplateNameAndDescription = () =>
+        setHeaderState((prev) => ({
+          title: templateName ? templateName : prev.title,
+          description: templateDescription ? toDisplayDescription(templateDescription) : prev.description,
+        }));
+
+      if (isHeaderNameEmpty(headerState.title)) {
+        applyTemplateNameAndDescription();
+      } else {
+        const shouldReplace = await confirm({
+          title: t('template.replaceConfirm.title'),
+          message: t('template.replaceConfirm.message'),
+          confirmText: t('template.replaceConfirm.replace'),
+          cancelText: t('template.replaceConfirm.keep'),
+        });
+        if (shouldReplace) applyTemplateNameAndDescription();
+      }
       setLoadTemplateDialogOpen(false);
       setSelectedTemplateId(undefined);
       message.success(`Template "${selectedTemplate.name ?? selectedTemplate.templateId}" loaded`);
@@ -571,6 +619,35 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       toConnector: null,
     };
   }, [connectionId, headerState.description, headerState.title, hydratedNodes, loadedFieldBindings, tEntities, workflow]);
+
+  const deleteSelectedNode = () => {
+    if (readOnly) return;
+    if (
+      workflow.methodEditor ||
+      workflow.conditionEditor ||
+      workflow.historyOpen ||
+      templateDialogOpen ||
+      loadTemplateDialogOpen ||
+      isShortcutsOpen
+    ) return;
+    const selected = workflow.nodes.find((node) => node.selected && node.type !== 'start');
+    if (!selected) return;
+    void workflow.onDeleteNode(selected.id);
+  };
+  const deleteSelectedNodeRef = useRef(deleteSelectedNode);
+  deleteSelectedNodeRef.current = deleteSelectedNode;
+
+  useEffect(() => {
+    const handleDeleteShortcut = (event: KeyboardEvent) => {
+      if (event.key !== 'Delete') return;
+      const target = event.target as HTMLElement | null;
+      // Don't hijack Delete while the user is editing text or a code editor.
+      if (target?.closest('input, textarea, select, [contenteditable="true"], .ace_editor')) return;
+      deleteSelectedNodeRef.current();
+    };
+    window.addEventListener('keydown', handleDeleteShortcut);
+    return () => window.removeEventListener('keydown', handleDeleteShortcut);
+  }, []);
 
   const handleOpenHistory = () => {
     workflow.setHistoryOpen(true);
@@ -665,14 +742,26 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         onCancel={closeLoadTemplateDialog}
         destroyOnHidden
         width={520}
-        footer={[
-          <Button key="cancel" onClick={closeLoadTemplateDialog} disabled={isApplyingTemplate} data-testid="workflow-load-template-cancel">
-            {t('actions.cancel')}
-          </Button>,
-          <Button key="load" type="primary" loading={isApplyingTemplate} onClick={applySelectedTemplate} data-testid="workflow-load-template-load">
-            {t('actions.load')}
-          </Button>,
-        ]}
+        footer={
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Button
+              loading={isUploadingTemplate}
+              disabled={isApplyingTemplate}
+              onClick={uploadTemplateInLoadDialog}
+              data-testid="workflow-load-template-upload"
+            >
+              {tEntities('connection-template.list.upload.button')}
+            </Button>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <Button onClick={closeLoadTemplateDialog} disabled={isApplyingTemplate} data-testid="workflow-load-template-cancel">
+                {t('actions.cancel')}
+              </Button>
+              <Button type="primary" loading={isApplyingTemplate} onClick={applySelectedTemplate} data-testid="workflow-load-template-load">
+                {t('actions.load')}
+              </Button>
+            </div>
+          </div>
+        }
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{ color: 'var(--color-text-secondary)' }}>

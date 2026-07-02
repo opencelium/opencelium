@@ -49,7 +49,9 @@
       "updateSystemConfig": "Update on-disk application configuration",
       "changeTheme": "Change the application theme",
       "uploadTemplate": "Upload a workflow template file",
+      "downloadTemplate": "Download a workflow template file",
       "uploadInvoker": "Upload an invoker file",
+      "downloadInvoker": "Download an invoker file",
       "systemCheck": "Open the system check page"
     },
     "footer": {
@@ -81,6 +83,7 @@
     "prev": "Back",
     "submit": "Submit",
     "next": "Next",
+    "ctrlEnterHint": "Shortcut: Ctrl+Enter",
     "create": "Create",
     "view": "View",
     "edit": "Edit",

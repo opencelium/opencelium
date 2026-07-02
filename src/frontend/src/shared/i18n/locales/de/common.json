@@ -49,7 +49,9 @@
       "updateSystemConfig": "Anwendungskonfiguration auf der Festplatte bearbeiten",
       "changeTheme": "Anwendungsdesign wechseln",
       "uploadTemplate": "Workflow-Vorlagendatei hochladen",
+      "downloadTemplate": "Workflow-Vorlagendatei herunterladen",
       "uploadInvoker": "Invoker-Datei hochladen",
+      "downloadInvoker": "Invoker-Datei herunterladen",
       "systemCheck": "Systemprüfungsseite öffnen"
     },
     "footer": {
@@ -81,6 +83,7 @@
     "prev": "Zurück",
     "submit": "Absenden",
     "next": "Weiter",
+    "ctrlEnterHint": "Tastenkombination: Strg+Enter",
     "create": "Erstellen",
     "view": "Ansehen",
     "edit": "Bearbeiten",
