@@ -74,10 +74,11 @@
     "switchToGerman": "Switch to German",
     "switchToEnglish": "Switch to English",
     "notifications": "Notifications",
-    "switchToAdminMenu": "Switch to admin menu",
-    "switchToMainMenu": "Switch to main menu",
+    "switchToAdminMenu": "Switch to admin menu (Alt+M)",
+    "switchToMainMenu": "Switch to main menu (Alt+M)",
     "profile": "Profile",
-    "createWorkflow": "Create Workflow"
+    "createWorkflow": "Create Workflow",
+    "createWorkflowHint": "Create Workflow (Alt+W)"
   },
   "actions": {
     "prev": "Back",

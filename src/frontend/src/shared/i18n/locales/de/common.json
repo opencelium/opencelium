@@ -74,10 +74,11 @@
     "switchToGerman": "Auf Deutsch umschalten",
     "switchToEnglish": "Auf Englisch umschalten",
     "notifications": "Benachrichtigungen",
-    "switchToAdminMenu": "Zum Admin-Menü wechseln",
-    "switchToMainMenu": "Zum Hauptmenü wechseln",
+    "switchToAdminMenu": "Zum Admin-Menü wechseln (Alt+M)",
+    "switchToMainMenu": "Zum Hauptmenü wechseln (Alt+M)",
     "profile": "Profil",
-    "createWorkflow": "Workflow erstellen"
+    "createWorkflow": "Workflow erstellen",
+    "createWorkflowHint": "Workflow erstellen (Alt+W)"
   },
   "actions": {
     "prev": "Zurück",
