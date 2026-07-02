@@ -41,6 +41,7 @@ type InsertionLayout = {
   placeholderIds: Set<string>;
   positionsByRealId: Map<string, XY>;
   sourcePositionByDraggedId: Map<string, XY>;
+  sourceDimmedPositionByDraggedId: Map<string, XY>;
   placeholderPositionByDraggedId: Map<string, XY>;
   placeholderPositionByPreviewId: Map<string, XY>;
 };
@@ -55,6 +56,15 @@ const COLLISION_PADDING = 56;
 const COLLISION_MAX_STEPS = 24;
 
 type Bounds = { minX: number; minY: number; maxX: number; maxY: number };
+
+const distanceToSegment = (p: XY, a: XY, b: XY): number => {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const lengthSq = dx * dx + dy * dy;
+  if (lengthSq === 0) return Math.hypot(p.x - a.x, p.y - a.y);
+  const t = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / lengthSq));
+  return Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy));
+};
 
 const boundsFromPosition = (pos: XY): Bounds => ({
   minX: pos.x,
@@ -292,11 +302,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
           x: targetNode.position.x + targetWidth / 2,
           y: targetNode.position.y + targetHeight / 2,
         };
-        const mid = {
-          x: (sourceCenter.x + targetCenter.x) / 2,
-          y: (sourceCenter.y + targetCenter.y) / 2,
-        };
-        const distance = Math.hypot(point.x - mid.x, point.y - mid.y);
+        const distance = distanceToSegment(point, sourceCenter, targetCenter);
         const direction = edge.targetHandle === 'top' || edge.sourceHandle === 'true' || edge.sourceHandle === 'bottom'
           ? 'bottom'
           : 'right';
@@ -390,10 +396,12 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     snapshotNodes: WorkflowNodeModel[],
     draggedIds: Set<string>,
     faint: boolean,
+    positionByDraggedId?: Map<string, XY>,
   ) => snapshotNodes
     .filter((item) => draggedIds.has(item.id))
     .map((item) => ({
       ...item,
+      position: positionByDraggedId?.get(item.id) ?? item.position,
       selected: false,
       draggable: false,
       selectable: false,
@@ -493,6 +501,43 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     const direction = dropTarget.target.direction;
     const offset = OFFSETS[direction];
 
+    const nestedOperatorCount = draggedNodes.filter((item) => item.type === 'if' || item.type === 'loop').length;
+    if (nestedOperatorCount > 1) {
+      const previewPosById = new Map(preview.nodes.map((item) => [item.id, item.position]));
+      const positionsByRealId = new Map<string, XY>();
+      snapshotNodes
+        .filter((item) => !draggedIds.has(item.id))
+        .forEach((item) => {
+          const p = previewPosById.get(item.id);
+          positionsByRealId.set(item.id, p ? { x: p.x, y: p.y } : { x: item.position.x, y: item.position.y });
+        });
+      const placeholderPositionByDraggedId = new Map<string, XY>();
+      const placeholderPositionByPreviewId = new Map<string, XY>();
+      preview.nodes
+        .filter((item) => placeholderIds.has(item.id))
+        .forEach((item) => {
+          const pos = { x: item.position.x, y: item.position.y };
+          placeholderPositionByDraggedId.set(item.id.slice(COPY_PREVIEW_PREFIX.length), pos);
+          placeholderPositionByPreviewId.set(item.id, pos);
+        });
+      const sourcePositionByDraggedId = new Map<string, XY>();
+      const sourceDimmedPositionByDraggedId = new Map<string, XY>();
+      draggedNodes.forEach((item) => {
+        const p = previewPosById.get(item.id);
+        sourcePositionByDraggedId.set(item.id, p ? { x: p.x, y: p.y } : { x: item.position.x, y: item.position.y });
+        sourceDimmedPositionByDraggedId.set(item.id, { x: item.position.x, y: item.position.y });
+      });
+      return {
+        draggedIds,
+        placeholderIds,
+        positionsByRealId,
+        sourcePositionByDraggedId,
+        sourceDimmedPositionByDraggedId,
+        placeholderPositionByDraggedId,
+        placeholderPositionByPreviewId,
+      };
+    }
+
     const removalShiftById = new Map<string, XY>();
     if (mode === 'move' && includeRemovalGapFill) {
       snapshotEdges
@@ -553,8 +598,15 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
         return { minX: p.x, minY: p.y, maxX: p.x + width, maxY: p.y + height };
       });
 
+    let anchorRightClearX = anchorA ? posOf(anchorA).x : 0;
+    if (anchorA && direction === 'right' && (anchorA.type === 'if' || anchorA.type === 'loop')) {
+      getOperatorBottomBranch(anchorA.id, snapshotNodes, snapshotEdges).nodeIds.forEach((id) => {
+        const branchNode = snapshotById.get(id);
+        if (branchNode && !draggedIds.has(id)) anchorRightClearX = Math.max(anchorRightClearX, posOf(branchNode).x);
+      });
+    }
     const placeholderBase = anchorA && draggedRoot
-      ? { x: posOf(anchorA).x + offset.x, y: posOf(anchorA).y + offset.y }
+      ? { x: anchorRightClearX + offset.x, y: posOf(anchorA).y + offset.y }
       : undefined;
     const placeholderPositionByDraggedId = new Map<string, XY>();
     const placeholderPositionByPreviewId = new Map<string, XY>();
@@ -587,12 +639,13 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     }
 
     let shift: XY = { x: 0, y: 0 };
+    let makeRoomX = Number.POSITIVE_INFINITY;
     const insertionShiftIds = new Set<string>();
     if (makeRoomRoot && placeholderPositionByDraggedId.size > 0) {
       const placeholderMaxX = Math.max(...[...placeholderPositionByDraggedId.values()].map((pos) => pos.x));
       const requiredX = placeholderMaxX + OFFSETS.right.x;
-      const downstreamX = posOf(makeRoomRoot).x;
-      shift = { x: Math.max(0, requiredX - downstreamX), y: 0 };
+      makeRoomX = posOf(makeRoomRoot).x;
+      shift = { x: Math.max(0, requiredX - makeRoomX), y: 0 };
       if (shift.x !== 0) {
         const ancestors = new Set<string>();
         let frontier: string[] = [makeRoomRoot.id];
@@ -608,7 +661,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
         }
         snapshotNodes.forEach((item) => {
           if (draggedIds.has(item.id) || ancestors.has(item.id)) return;
-          if (posOf(item).x >= downstreamX) insertionShiftIds.add(item.id);
+          if (posOf(item).x >= makeRoomX) insertionShiftIds.add(item.id);
         });
       }
     }
@@ -624,14 +677,23 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
           y: base.y + insertionShift.y,
         });
       });
+    const sourceDimmedShift = draggedRoot && shift.x !== 0 && draggedRoot.position.x >= makeRoomX
+      ? shift
+      : { x: 0, y: 0 };
     const sourcePositionByDraggedId = new Map<string, XY>();
-    draggedNodes.forEach((item) => sourcePositionByDraggedId.set(item.id, { x: item.position.x, y: item.position.y }));
+    const sourceDimmedPositionByDraggedId = new Map<string, XY>();
+    draggedNodes.forEach((item) => {
+      const pos = { x: item.position.x + sourceDimmedShift.x, y: item.position.y + sourceDimmedShift.y };
+      sourcePositionByDraggedId.set(item.id, pos);
+      sourceDimmedPositionByDraggedId.set(item.id, pos);
+    });
 
     return {
       draggedIds,
       placeholderIds,
       positionsByRealId,
       sourcePositionByDraggedId,
+      sourceDimmedPositionByDraggedId,
       placeholderPositionByDraggedId,
       placeholderPositionByPreviewId,
     };
@@ -661,7 +723,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       }));
     return [
       ...existingNodes,
-      ...buildSourceDimmedNodesFromSnapshot(snapshotNodes, layout.draggedIds, true),
+      ...buildSourceDimmedNodesFromSnapshot(snapshotNodes, layout.draggedIds, true, layout.sourceDimmedPositionByDraggedId),
       ...buildPlaceholderNodes(preview.nodes, layout.placeholderIds, invalid, layout.placeholderPositionByPreviewId),
     ];
   };
@@ -1060,7 +1122,12 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
         }
 
         const restored = restoreStableNodeData(next.nodes, snapshot.nodes, snapshot.operatorConfigs);
-        const positionedNodes = applyInsertionPreviewPositions(snapshot.mode, restored, next.idMap, commitLayout);
+        const draggedForCommit = getDragSubtreeNodeIds(node.id, snapshot.nodes, snapshot.edges);
+        const nestedOperatorCommit = snapshot.nodes
+          .filter((item) => draggedForCommit.has(item.id) && (item.type === 'if' || item.type === 'loop')).length > 1;
+        const positionedNodes = nestedOperatorCommit
+          ? restored
+          : applyInsertionPreviewPositions(snapshot.mode, restored, next.idMap, commitLayout);
 
         const finalNodes = sanitizeGraphNodes(clearDragFlags(positionedNodes));
         setNodes(finalNodes);
