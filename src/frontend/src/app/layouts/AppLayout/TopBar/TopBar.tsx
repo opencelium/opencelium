@@ -28,13 +28,15 @@ export const TopBar = () => {
             {/* LEFT */}
             <div style={{display: 'flex', alignItems: 'center'}}>
                 {!isTabletOrMobile && (
-                    <Button
-                        type="primary"
-                        iconLeft="workflow"
-                        onClick={() => navigate('/workflow/create')}
-                    >
-                        {tCommon('topbar.createWorkflow')}
-                    </Button>
+                    <Tooltip content={tCommon('topbar.createWorkflowHint')}>
+                        <Button
+                            type="primary"
+                            iconLeft="workflow"
+                            onClick={() => navigate('/workflow/create')}
+                        >
+                            {tCommon('topbar.createWorkflow')}
+                        </Button>
+                    </Tooltip>
                 )}
             </div>
 
