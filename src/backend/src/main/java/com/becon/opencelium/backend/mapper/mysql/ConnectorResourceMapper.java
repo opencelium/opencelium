@@ -31,7 +31,9 @@ public interface ConnectorResourceMapper extends Mapper<Connector, ConnectorReso
             @Mapping(target = "icon", expression = "java(StringUtility.resolveImagePath(entity.getIcon()))"),
             @Mapping(target = "invoker", qualifiedByName = {"helperMapper", "getInvokerDTO"}),
             @Mapping(target = "requestData", qualifiedByName = {"requestDataMapper", "toDTO"}),
-            @Mapping(target = "sslCert", source = "sslValidation")
+            @Mapping(target = "sslCert", source = "sslValidation"),
+            @Mapping(target = "lastTestPassed", source = "lastTestPassed"),
+            @Mapping(target = "lastTestError", source = "lastTestError")
     })
     ConnectorResource toDTO(Connector entity);
 

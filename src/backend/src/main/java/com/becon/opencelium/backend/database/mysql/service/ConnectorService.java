@@ -56,6 +56,11 @@ public interface ConnectorService {
 
     ResponseEntity<?> checkCommunication(Connector connector) throws JsonProcessingException;
 
+    /**
+     * Persists the outcome of the most recent remote-API test on a saved connector.
+     */
+    void updateTestResult(int connectorId, boolean passed, String error);
+
     ResponseEntity<?> getAuthorization(Connector connector);
 
     List<RequestData> buildRequestData(Connector connector);
