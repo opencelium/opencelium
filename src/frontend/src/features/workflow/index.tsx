@@ -486,7 +486,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
 
   const fetchTemplates = async (): Promise<Template[]> => {
     const response = await apiExecutor({
-      url: '/template/all',
+      url: '/template/all?metadataOnly=true',
       method: 'GET',
     });
     const nextTemplates = Array.isArray(response) ? response : [];
@@ -544,14 +544,22 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
 
   const applySelectedTemplate = async () => {
     const selectedTemplate = templates.find((template) => String(template.templateId) === selectedTemplateId);
-    if (!selectedTemplate?.connection) {
+    if (!selectedTemplate) {
       message.error(t('messages.selectTemplate'));
       return;
     }
 
     setIsApplyingTemplate(true);
     try {
-      const state = mapConnectionToWorkflowState(selectedTemplate.connection);
+      const fullTemplate = await apiExecutor({
+        url: `/template/${encodeURIComponent(String(selectedTemplate.templateId))}`,
+        method: 'GET',
+      });
+      if (!fullTemplate?.connection) {
+        message.error(t('messages.loadTemplateFailed'));
+        return;
+      }
+      const state = mapConnectionToWorkflowState(fullTemplate.connection);
       workflow.setWorkflowGraph(state.nodes, state.edges, state.viewport, { centerStart: true });
       setLoadedFieldBindings(state.fieldBindings);
       const templateName = selectedTemplate.name?.trim();
