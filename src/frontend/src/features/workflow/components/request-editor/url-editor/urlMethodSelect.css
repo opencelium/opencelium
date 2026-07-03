@@ -1,0 +1,27 @@
+.wfUrlMethodSelect {
+	width: 94px;
+}
+
+.wfUrlMethodSelect .ant-select-custom {
+	width: 100%;
+}
+
+.wfUrlMethodSelect .ant-select-custom .ant-select-selector {
+	height: 32px !important;
+	padding: 0 11px !important;
+	border-radius: 8px !important;
+	border: 1px solid var(--color-border-default) !important;
+	display: flex;
+	align-items: center;
+}
+
+.wfUrlMethodSelect .ant-select-custom .ant-select-selection-item {
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	line-height: 30px;
+}
+
+.wfUrlMethodSelect .ant-select-custom.ant-select-focused .ant-select-selector,
+.wfUrlMethodSelect .ant-select-custom .ant-select-selector:hover {
+	border-color: var(--color-primary, var(--color-border-default)) !important;
+}
