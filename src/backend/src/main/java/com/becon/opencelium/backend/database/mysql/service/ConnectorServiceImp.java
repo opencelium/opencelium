@@ -222,6 +222,17 @@ public class ConnectorServiceImp implements ConnectorService {
     }
 
     @Override
+    public void updateTestResult(int connectorId, boolean passed, String error) {
+        // Load the raw (still-encrypted) entity and touch only the two test-result columns so the
+        // rest of the connector's persisted state (including encrypted request data) is untouched.
+        connectorRepository.findById(connectorId).ifPresent(connector -> {
+            connector.setLastTestPassed(passed);
+            connector.setLastTestError(passed ? null : error);
+            connectorRepository.save(connector);
+        });
+    }
+
+    @Override
     public ResponseEntity<?> getAuthorization(Connector connector) {
         InvokerRequestBuilder invokerRequestBuilder = new InvokerRequestBuilder();
         FunctionInvoker function = invokerService.getAuthFunction(connector.getInvoker());

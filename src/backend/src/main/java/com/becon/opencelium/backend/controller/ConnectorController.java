@@ -382,6 +382,11 @@ public class ConnectorController {
             responseEntity = connectorService.checkCommunication(connector);
         } catch (Exception ex) {
             ex.printStackTrace();
+            // The remote request could not be completed (e.g. host unreachable): record it as a
+            // failed test on the saved connector before surfacing the error to the caller.
+            if (connectorResource.getConnectorId() > 0 && connectorService.existsById(connectorResource.getConnectorId())) {
+                connectorService.updateTestResult(connectorResource.getConnectorId(), false, ex.getMessage());
+            }
             throw new CommunicationFailedException();
         }
 
@@ -401,7 +406,27 @@ public class ConnectorController {
             response = responseEntity.getBody().toString();
         }
 
+        // Classify the outcome once, so it can be both persisted (for saved connectors) and returned.
+        boolean passed;
+        String remoteError = null;
         if ((responseEntity.getStatusCode() == HttpStatus.OK) && hasError(fail, response)) {
+            passed = false;
+            remoteError = response;
+        } else if (responseEntity.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+            passed = false;
+            remoteError = responseEntity.getBody() != null
+                    ? responseEntity.getBody().toString()
+                    : "Error in remote system";
+        } else {
+            passed = true;
+        }
+
+        // Persist the latest result only for a saved connector; an unsaved/new connector has no row.
+        if (connectorResource.getConnectorId() > 0 && connectorService.existsById(connectorResource.getConnectorId())) {
+            connectorService.updateTestResult(connectorResource.getConnectorId(), passed, remoteError);
+        }
+
+        if ((responseEntity.getStatusCode() == HttpStatus.OK) && !passed) {
             return ResponseEntity.ok().body("{\"status\":\"401\", \"error\":\"401\"}");
         }
 

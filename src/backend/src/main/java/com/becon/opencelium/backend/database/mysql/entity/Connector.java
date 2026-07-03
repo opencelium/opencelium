@@ -79,6 +79,14 @@ public class Connector {
     @Column(name = "timeout")
     private int timeout;
 
+    // null = never tested, true = passed, false = failed.
+    @Column(name = "last_test_passed")
+    private Boolean lastTestPassed;
+
+    // Remote error message from the last failed test; null when passed or never tested.
+    @Column(name = "last_test_error", columnDefinition = "TEXT")
+    private String lastTestError;
+
     @OneToMany(mappedBy = "connector", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<RequestData> requestData = new ArrayList<>();
 
@@ -168,6 +176,22 @@ public class Connector {
 
     public void setTimeout(int timeout) {
         this.timeout = timeout;
+    }
+
+    public Boolean getLastTestPassed() {
+        return lastTestPassed;
+    }
+
+    public void setLastTestPassed(Boolean lastTestPassed) {
+        this.lastTestPassed = lastTestPassed;
+    }
+
+    public String getLastTestError() {
+        return lastTestError;
+    }
+
+    public void setLastTestError(String lastTestError) {
+        this.lastTestError = lastTestError;
     }
 
     public List<RequestData> getRequestData() {
