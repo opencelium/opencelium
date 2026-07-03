@@ -12,8 +12,11 @@ import type {
 import {
 	updateEndpoint,
 	updateQueryParams,
+	updateRequestMethod,
 	upsertEndpointArg,
 } from '../../../store/connection/connectionSlice';
+import { Select } from '@shared/ui/primitives/Select';
+import './urlMethodSelect.css';
 
 import { UrlEndpointField } from './UrlEndpointField';
 import { UrlQueryParamsTable } from './UrlQueryParamsTable';
@@ -36,6 +39,9 @@ import {
 import {
 	setFocusByCaretPositionInDivEditable,
 } from './utils/contentEditable';
+
+const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'];
+const methodOptions = HTTP_METHODS.map((value) => ({ value, label: value }));
 
 const TOKEN_ID_RE = /#{%\s*([A-Za-z0-9_-]+)\s*%}/g;
 const extractTokenIds = (s: string) =>
@@ -452,6 +458,16 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 		[commitParamsToEndpoint, queryParams],
 	);
 
+	const isSimpleHttpRequest = method.connector == null;
+	const selectedMethod = (method.request.method || 'GET').toUpperCase();
+	const handleMethodChange = useCallback(
+		(value: string) => {
+			if (readOnly) return;
+			dispatch(updateRequestMethod({ methodId: method.id, method: value } as any));
+		},
+		[dispatch, method.id, readOnly],
+	);
+
 	if (!connection) return null;
 
 	return (
@@ -462,6 +478,20 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 			<UrlEndpointField
 				readOnly={readOnly}
 				value={endpointRaw}
+				beforeNode={
+					isSimpleHttpRequest ? (
+						<div className="wfUrlMethodSelect" data-testid="workflow-url-method">
+							<Select
+								value={selectedMethod}
+								onChange={handleMethodChange}
+								options={methodOptions}
+								sortOptions={false}
+								readOnly={readOnly}
+								testId="workflow-url-method-select"
+							/>
+						</div>
+					) : null
+				}
 				endpointArgs={endpointArgsState}
 				endpointArgsRef={endpointArgsRef}
 				divRef={endpointDivRef}
