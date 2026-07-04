@@ -30,7 +30,6 @@ import { useAppSelector } from '@shared/lib/storeHooks';
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import {
   pickConnectionTemplateFile,
-  stripTemplateExtension,
   uploadConnectionTemplate,
 } from '@entities/connectionTemplate/lib/uploadConnectionTemplate';
 import type { Connector } from '@entities/connector/model/types';
@@ -486,7 +485,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
 
   const fetchTemplates = async (): Promise<Template[]> => {
     const response = await apiExecutor({
-      url: '/template/all',
+      url: '/template/all?metadataOnly=true',
       method: 'GET',
     });
     const nextTemplates = Array.isArray(response) ? response : [];
@@ -513,20 +512,16 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
 
     setIsUploadingTemplate(true);
     try {
-      const uploaded = await uploadConnectionTemplate(file, () =>
+      const uploadedId = await uploadConnectionTemplate(file, () =>
         confirm({
           title: tEntities('connection-template.list.upload.confirmReplace.title'),
           message: tEntities('connection-template.list.upload.confirmReplace.message'),
         }),
       );
-      if (uploaded) {
+      if (uploadedId) {
         message.success(tEntities('connection-template.list.upload.success', { name: file.name }));
-        const nextTemplates = await fetchTemplates();
-        const uploadedName = stripTemplateExtension(file.name);
-        const matched = nextTemplates.find((template) => template.name === uploadedName);
-        if (matched) {
-          setSelectedTemplateId(String(matched.templateId));
-        }
+        await fetchTemplates();
+        setSelectedTemplateId(String(uploadedId));
       }
     } catch (err) {
       console.error(err);
@@ -544,14 +539,22 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
 
   const applySelectedTemplate = async () => {
     const selectedTemplate = templates.find((template) => String(template.templateId) === selectedTemplateId);
-    if (!selectedTemplate?.connection) {
+    if (!selectedTemplate) {
       message.error(t('messages.selectTemplate'));
       return;
     }
 
     setIsApplyingTemplate(true);
     try {
-      const state = mapConnectionToWorkflowState(selectedTemplate.connection);
+      const fullTemplate = await apiExecutor({
+        url: `/template/${encodeURIComponent(String(selectedTemplate.templateId))}`,
+        method: 'GET',
+      });
+      if (!fullTemplate?.connection) {
+        message.error(t('messages.loadTemplateFailed'));
+        return;
+      }
+      const state = mapConnectionToWorkflowState(fullTemplate.connection);
       workflow.setWorkflowGraph(state.nodes, state.edges, state.viewport, { centerStart: true });
       setLoadedFieldBindings(state.fieldBindings);
       const templateName = selectedTemplate.name?.trim();

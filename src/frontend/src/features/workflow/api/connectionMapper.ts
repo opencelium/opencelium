@@ -4,6 +4,7 @@ import type { HistoryVersionItem } from '../types/history.types';
 import { initialEdges, initialNodes } from '../data/initialGraph';
 import { OFFSETS } from '../utils/graph.constants';
 import { getBottomSourceHandle, getRightSourceHandle } from '../utils/graph.handles';
+import { normalizeWorkflowPositions } from '../utils/graph.dragDrop';
 import { normalizeConnectionPayload } from './connectionPayload';
 
 export type WorkflowConnectionState = {
@@ -497,6 +498,19 @@ const buildEdges = (entries: IndexedWorkflowEntry[]): WorkflowEdgeModel[] => {
 	return edges;
 };
 
+const hasStackedNodes = (list: WorkflowNodeModel[]) => {
+	const placed = list.filter((node) => node.type !== 'start');
+	for (let i = 0; i < placed.length; i += 1) {
+		for (let j = i + 1; j < placed.length; j += 1) {
+			if (Math.abs(placed[i].position.x - placed[j].position.x) < 40
+				&& Math.abs(placed[i].position.y - placed[j].position.y) < 40) {
+				return true;
+			}
+		}
+	}
+	return false;
+};
+
 export function mapConnectionToWorkflowState(
 	payload: unknown,
 	fallbackViewport?: { x: number; y: number; zoom: number },
@@ -532,7 +546,10 @@ export function mapConnectionToWorkflowState(
 		? savedUiEdges.length > 0
 		: entries.length > 0 && savedUiEdges.length > 0 && !invalidSavedEdgeReason;
 	const edges = useSavedEdges ? savedUiEdges : entries.length ? buildEdges(entries) : initialEdges;
-	const normalizedNodes = withLeafState(nodes, edges);
+	const shouldAutoLayout = entries.length > 0
+		&& ((!restoredFromUi && savedUiNodes.length === 0) || hasStackedNodes(nodes));
+	const positionedNodes = shouldAutoLayout ? normalizeWorkflowPositions(nodes, edges) : nodes;
+	const normalizedNodes = withLeafState(positionedNodes, edges);
 
 	return {
 		title: connection.title,

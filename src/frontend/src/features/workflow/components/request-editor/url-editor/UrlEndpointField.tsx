@@ -24,6 +24,7 @@ import {
 type Props = {
 	readOnly?: boolean;
 	value: string;
+	beforeNode?: React.ReactNode;
 	afterNode?: React.ReactNode;
 
 	endpointArgs: Record<string, EndpointArg>;
@@ -69,6 +70,7 @@ const getCaretFromRawChange = (
 export const UrlEndpointField: React.FC<Props> = ({
 	readOnly,
 	value,
+	beforeNode,
 	afterNode,
 	endpointArgs,
 	endpointArgsRef,
@@ -350,6 +352,9 @@ export const UrlEndpointField: React.FC<Props> = ({
 				background: readOnly ? 'var(--color-background-disabled)' : 'var(--color-background-surface)',
 			}}
 		>
+			{beforeNode ? (
+				<div style={{ flexShrink: 0 }}>{beforeNode}</div>
+			) : null}
 			<div
 				ref={divRef}
 				contentEditable={!readOnly}

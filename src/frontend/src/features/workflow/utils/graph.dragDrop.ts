@@ -359,7 +359,7 @@ const findDirectionalEdge = (
   });
 };
 
-const normalizeWorkflowPositions = (
+export const normalizeWorkflowPositions = (
   nodes: WorkflowNodeModel[],
   edges: WorkflowEdgeModel[],
 ) => {
