@@ -1,6 +1,6 @@
 import { Handle, Position } from '@xyflow/react';
 import type { NodeProps } from '@xyflow/react';
-import { Globe } from 'lucide-react';
+import { Icon } from '@shared/ui/primitives/Icon';
 import { NodeShell } from './NodeShell';
 import { MethodColorBadge } from './MethodColorBadge';
 import { resolveConnectorIconUrl } from '@entities/connector/model/iconUrl';
@@ -32,7 +32,7 @@ export function ConnectorMethodNode({
         {connectorIconUrl ? (
           <img className="circleNodeImage" src={connectorIconUrl} alt="" />
         ) : (
-          <Globe size={24} />
+          <Icon name="api" size={24} />
         )}
         <MethodColorBadge color={data.duplicateMethodColor} index={data.duplicateMethodIndex} />
         {connectorStatus ? (

@@ -37,6 +37,7 @@ import {
     ContentCopy,
     AccountTree,
     Refresh,
+    Api,
 } from '@mui/icons-material';
 
 import type { IconComponent } from './Icon.types';
@@ -80,6 +81,7 @@ const iconMap = {
     'content-copy': ContentCopy,
     workflow: AccountTree,
     refresh: Refresh,
+    api: Api,
 };
 
 export const MaterialIcon: IconComponent = ({
