@@ -5,7 +5,7 @@ import { NodeShell } from './NodeShell';
 import { MethodColorBadge } from './MethodColorBadge';
 import { resolveConnectorIconUrl } from '@entities/connector/model/iconUrl';
 import type { ConnectorWorkflowNode } from '../types/workflow.types';
-import { useConnectorStatus } from '../connector-status/useConnectorStatus';
+import { getConnectorStatus } from '../connector-status/getConnectorStatus';
 import { ConnectorStatusDot } from '../connector-status/ConnectorStatusDot';
 
 export function ConnectorMethodNode({
@@ -14,8 +14,7 @@ export function ConnectorMethodNode({
   selected,
 }: NodeProps<ConnectorWorkflowNode>) {
   const connectorIconUrl = resolveConnectorIconUrl(data.connector?.icon);
-  const { getStatus } = useConnectorStatus();
-  const connectorStatus = data.connector ? getStatus(data.connector.connectorId) : undefined;
+  const connectorStatus = getConnectorStatus(data.connector?.lastTestPassed);
 
   return (
     <NodeShell
@@ -38,7 +37,11 @@ export function ConnectorMethodNode({
         <MethodColorBadge color={data.duplicateMethodColor} index={data.duplicateMethodIndex} />
         {connectorStatus ? (
           <div className="circleNodeStatus">
-            <ConnectorStatusDot status={connectorStatus} testId={`workflow-node-connector-status-${id}`} />
+            <ConnectorStatusDot
+              status={connectorStatus}
+              testId={`workflow-node-connector-status-${id}`}
+              tooltipOverride={connectorStatus === 'failed' ? data.connector?.lastTestError : undefined}
+            />
           </div>
         ) : null}
       </div>

@@ -16,7 +16,7 @@ import {
 } from './sidebar/sidebar.helpers';
 import { getMethodSidebarCopy, getSecondarySidebarCopy, type SecondarySidebarMode } from './sidebar/sidebarSecondary';
 import { resolveConnectorIconUrl } from '@entities/connector/model/iconUrl';
-import { useConnectorStatus } from '../connector-status/useConnectorStatus';
+import { getConnectorStatus } from '../connector-status/getConnectorStatus';
 
 const getConnectorKey = (connectorId: number) => String(connectorId);
 const getMethodKey = (operation: InvokerOperation, index: number) => `${index}:${operation.name}`;
@@ -53,7 +53,6 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
   }, [action]);
 
   const hasMainSearch = mainSearch.trim().length > 0;
-  const { getStatus, checkConnectors } = useConnectorStatus();
   const {
     data: connectors = [],
     isFetching: connectorsFetching,
@@ -62,12 +61,6 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
     { page: 0, limit: 1000 },
     { skip: activeSecondaryPanel !== 'connector' && !hasMainSearch },
   );
-
-  useEffect(() => {
-    if (connectorsFetching || connectors.length === 0) return;
-    if (activeSecondaryPanel !== 'connector' && !hasMainSearch) return;
-    checkConnectors(connectors.map((connector) => connector.connectorId));
-  }, [activeSecondaryPanel, hasMainSearch, connectors, connectorsFetching, checkConnectors]);
 
   const mainQuery = normalizeSidebarQuery(mainSearch);
   const secondaryQuery = normalizeSidebarQuery(secondarySearch);
@@ -83,14 +76,18 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
   const filteredSidebarItems = translatedSidebarItems.filter((item) => matchesSidebarTitle(item.title, mainQuery, hasMainSearch));
   const selectedConnector = connectors.find((item) => getConnectorKey(item.connectorId) === selectedConnectorKey);
   const connectorItems = useMemo(
-    () => connectors.map((connector) => ({
-      key: getConnectorKey(connector.connectorId),
-      title: connector.title,
-      text: connector.description || t('sidebar.connectorMethodsFallback', { invoker: connector.invoker?.name ?? connector.title }),
-      imageUrl: resolveConnectorIconUrl(normalizeConnectorIcon(connector.icon)),
-      status: getStatus(connector.connectorId),
-    })),
-    [connectors, t, getStatus],
+    () => connectors.map((connector) => {
+      const status = getConnectorStatus(connector.lastTestPassed);
+      return {
+        key: getConnectorKey(connector.connectorId),
+        title: connector.title,
+        text: connector.description || t('sidebar.connectorMethodsFallback', { invoker: connector.invoker?.name ?? connector.title }),
+        imageUrl: resolveConnectorIconUrl(normalizeConnectorIcon(connector.icon)),
+        status,
+        statusError: status === 'failed' ? connector.lastTestError : undefined,
+      };
+    }),
+    [connectors, t],
   );
   const methodOperations = useMemo(
     () => selectedConnector?.invoker?.operations ?? [],

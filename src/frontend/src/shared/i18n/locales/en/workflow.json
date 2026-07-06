@@ -124,10 +124,8 @@
       "description": "There are no connectors matching this search."
     },
     "connectorStatus": {
-      "checking": "Checking connection...",
       "passed": "Connection check passed",
-      "failed": "Connection check failed",
-      "locked": "Unlock the master password to check this connector"
+      "failed": "Connection check failed"
     },
     "methodsEmpty": {
       "title": "No methods found",

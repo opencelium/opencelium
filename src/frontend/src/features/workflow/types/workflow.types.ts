@@ -39,6 +39,10 @@ export type WorkflowNodeData = {
 		connectorId: number;
 		title: string;
 		icon?: string | null;
+		// Persisted result of the connector's most recent POST /connector/check; hydrated
+		// from the connector list, not fetched per-node. null = never tested.
+		lastTestPassed?: boolean | null;
+		lastTestError?: string | null;
 	};
 	methodConfig?: WorkflowMethodConfig;
 	conditionConfig?: ConditionConfig;

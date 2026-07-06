@@ -63,6 +63,10 @@
   line-height: 1.35;
 }
 
+.sidebarItem .sidebarItemError {
+  color: var(--color-status-error-fg);
+}
+
 .sidebarItemMuted {
   opacity: 0.75;
   cursor: default;

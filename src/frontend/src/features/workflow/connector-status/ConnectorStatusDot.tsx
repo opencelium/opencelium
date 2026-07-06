@@ -1,22 +1,19 @@
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
-import type { ConnectorStatus } from './ConnectorStatusContext';
+
+export type ConnectorStatus = 'passed' | 'failed';
 
 type Appearance = {
   color: string;
-  tooltipKey: 'checking' | 'passed' | 'failed' | 'locked';
+  tooltipKey: 'passed' | 'failed';
 };
 
 const statusToAppearance = (status: ConnectorStatus): Appearance => {
   switch (status) {
-    case 'checking':
-      return { color: 'var(--color-status-warning-fg)', tooltipKey: 'checking' };
     case 'passed':
       return { color: 'var(--color-status-success-fg)', tooltipKey: 'passed' };
     case 'failed':
       return { color: 'var(--color-status-error-fg)', tooltipKey: 'failed' };
-    case 'locked':
-      return { color: 'var(--color-text-secondary)', tooltipKey: 'locked' };
     default: {
       const _exhaustive: never = status;
       return _exhaustive;
@@ -29,14 +26,18 @@ type Props = {
   size?: number;
   className?: string;
   testId?: string;
+  // Overrides the default tooltip text — used to surface the connector's actual
+  // lastTestError on hover instead of the generic "check failed" copy.
+  tooltipOverride?: string | null;
 };
 
-export function ConnectorStatusDot({ status, size = 9, className, testId }: Props) {
+export function ConnectorStatusDot({ status, size = 9, className, testId, tooltipOverride }: Props) {
   const { t } = useI18n('workflow');
   const { color, tooltipKey } = statusToAppearance(status);
+  const tooltipContent = tooltipOverride || t(`sidebar.connectorStatus.${tooltipKey}`);
 
   return (
-    <Tooltip content={t(`sidebar.connectorStatus.${tooltipKey}`)}>
+    <Tooltip content={tooltipContent}>
       <span
         className={className}
         data-testid={testId}
