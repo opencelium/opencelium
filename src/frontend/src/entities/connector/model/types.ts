@@ -9,6 +9,9 @@ export type Connector = {
   requestData?: Record<string, string>
   sslCert: boolean
   timeout: number
+  // Persisted result of the most recent POST /connector/check: null = never tested.
+  lastTestPassed?: boolean | null
+  lastTestError?: string | null
 }
 
 export type ConnectorCreateDto = Omit<Connector, "connectorId" | "invoker" | "timeout"> & {

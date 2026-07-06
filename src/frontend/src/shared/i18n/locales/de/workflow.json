@@ -123,6 +123,12 @@
       "title": "Keine Konnektoren gefunden",
       "description": "Es gibt keine Konnektoren, die zu dieser Suche passen."
     },
+    "connectorStatus": {
+      "checking": "Verbindung wird geprüft...",
+      "passed": "Verbindungsprüfung erfolgreich",
+      "failed": "Verbindungsprüfung fehlgeschlagen",
+      "locked": "Entsperren Sie das Master-Passwort, um diesen Konnektor zu prüfen"
+    },
     "methodsEmpty": {
       "title": "Keine Methoden gefunden",
       "description": "Es gibt keine Methoden, die zu dieser Suche passen."

@@ -24,7 +24,7 @@ export const connectorApi = baseApi.injectEndpoints({
               ],
     }),
     getConnector: b.mutation<
-      any,
+      Connector,
       { id: string, masterPassword: string }
     >({
       query: ({ masterPassword, id }) => ({
@@ -33,6 +33,18 @@ export const connectorApi = baseApi.injectEndpoints({
           headers: {
               'x-master-password': masterPassword,
           },
+      }),
+    }),
+    checkConnector: b.mutation<
+      { status: string; error?: string; data?: { message?: string } },
+      Pick<Connector, 'connectorId' | 'title' | 'description' | 'sslCert' | 'timeout' | 'requestData'> & {
+        invoker: { name: string }
+      }
+    >({
+      query: (body) => ({
+          url: `/connector/check`,
+          method: 'POST',
+          body,
       }),
     }),
     saveRequestData: b.mutation<
@@ -55,4 +67,5 @@ export const {
     useGetConnectorsQuery,
     useGetConnectorMutation,
     useSaveRequestDataMutation,
+    useCheckConnectorMutation,
 } = connectorApi

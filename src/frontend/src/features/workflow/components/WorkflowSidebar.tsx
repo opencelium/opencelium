@@ -16,6 +16,7 @@ import {
 } from './sidebar/sidebar.helpers';
 import { getMethodSidebarCopy, getSecondarySidebarCopy, type SecondarySidebarMode } from './sidebar/sidebarSecondary';
 import { resolveConnectorIconUrl } from '@entities/connector/model/iconUrl';
+import { useConnectorStatus } from '../connector-status/useConnectorStatus';
 
 const getConnectorKey = (connectorId: number) => String(connectorId);
 const getMethodKey = (operation: InvokerOperation, index: number) => `${index}:${operation.name}`;
@@ -52,6 +53,7 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
   }, [action]);
 
   const hasMainSearch = mainSearch.trim().length > 0;
+  const { getStatus, checkConnectors } = useConnectorStatus();
   const {
     data: connectors = [],
     isFetching: connectorsFetching,
@@ -60,6 +62,12 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
     { page: 0, limit: 1000 },
     { skip: activeSecondaryPanel !== 'connector' && !hasMainSearch },
   );
+
+  useEffect(() => {
+    if (connectorsFetching || connectors.length === 0) return;
+    if (activeSecondaryPanel !== 'connector' && !hasMainSearch) return;
+    checkConnectors(connectors.map((connector) => connector.connectorId));
+  }, [activeSecondaryPanel, hasMainSearch, connectors, connectorsFetching, checkConnectors]);
 
   const mainQuery = normalizeSidebarQuery(mainSearch);
   const secondaryQuery = normalizeSidebarQuery(secondarySearch);
@@ -80,8 +88,9 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
       title: connector.title,
       text: connector.description || t('sidebar.connectorMethodsFallback', { invoker: connector.invoker?.name ?? connector.title }),
       imageUrl: resolveConnectorIconUrl(normalizeConnectorIcon(connector.icon)),
+      status: getStatus(connector.connectorId),
     })),
-    [connectors, t],
+    [connectors, t, getStatus],
   );
   const methodOperations = useMemo(
     () => selectedConnector?.invoker?.operations ?? [],

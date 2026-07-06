@@ -5,6 +5,8 @@ import { NodeShell } from './NodeShell';
 import { MethodColorBadge } from './MethodColorBadge';
 import { resolveConnectorIconUrl } from '@entities/connector/model/iconUrl';
 import type { ConnectorWorkflowNode } from '../types/workflow.types';
+import { useConnectorStatus } from '../connector-status/useConnectorStatus';
+import { ConnectorStatusDot } from '../connector-status/ConnectorStatusDot';
 
 export function ConnectorMethodNode({
   id,
@@ -12,6 +14,8 @@ export function ConnectorMethodNode({
   selected,
 }: NodeProps<ConnectorWorkflowNode>) {
   const connectorIconUrl = resolveConnectorIconUrl(data.connector?.icon);
+  const { getStatus } = useConnectorStatus();
+  const connectorStatus = data.connector ? getStatus(data.connector.connectorId) : undefined;
 
   return (
     <NodeShell
@@ -32,6 +36,11 @@ export function ConnectorMethodNode({
           <Globe size={24} />
         )}
         <MethodColorBadge color={data.duplicateMethodColor} index={data.duplicateMethodIndex} />
+        {connectorStatus ? (
+          <div className="circleNodeStatus">
+            <ConnectorStatusDot status={connectorStatus} testId={`workflow-node-connector-status-${id}`} />
+          </div>
+        ) : null}
       </div>
 
       <Handle

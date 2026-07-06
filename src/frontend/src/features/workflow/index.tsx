@@ -19,6 +19,8 @@ import { buildLegacyConnection } from './components/request-editor/legacyAdapter
 import { useWorkflowPage } from './useWorkflowPage';
 import { useUnsavedChangesGuard } from './useUnsavedChangesGuard';
 import { TestRunProvider } from './test-run/TestRunProvider';
+import { ConnectorStatusProvider } from './connector-status/ConnectorStatusProvider';
+import { useConnectorStatus } from './connector-status/useConnectorStatus';
 import { loadConnectionVersions, loadWorkflowConnection, loadWorkflowConnectionVersion, removeConnectionVersion, saveConnectionVersionComment, saveWorkflowConnection } from './api/connectionService';
 import { mapConnectionToWorkflowState } from './api/connectionMapper';
 import { buildConnectionPayload, buildFromConnectorPayload } from './api/connectionPayload';
@@ -193,13 +195,14 @@ const triggerJsonDownload = (filename: string, payload: unknown) => {
   URL.revokeObjectURL(url);
 };
 
-export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
+function WorkflowInner({ readOnly = false }: WorkflowProps = {}) {
   const { connectionId } = useParams<{ connectionId: string }>();
   const navigate = useNavigate();
   const { t: tEntities } = useI18n('entities');
   const { t } = useI18n('workflow');
   const confirm = useConfirm();
   const authUser = useAppSelector(selectAuthUser);
+  const { checkConnectors } = useConnectorStatus();
   const { data: connectors = [], isLoading: isConnectorsLoading } = useGetConnectorsQuery({ page: 0, limit: 1000 });
   const [createdConnectionId, setCreatedConnectionId] = useState<string>();
   const [headerState, setHeaderState] = useState({
@@ -313,6 +316,13 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
             ? currentSelectedId
             : state.versions.find((version) => version.current)?.id ?? state.versions[0]?.id ?? null,
         );
+        const usedConnectorIds = [...new Set(
+          state.nodes
+            .filter((node) => node.type === 'connector')
+            .map((node) => node.data.connector?.connectorId)
+            .filter((connectorId): connectorId is number => typeof connectorId === 'number'),
+        )];
+        if (usedConnectorIds.length > 0) checkConnectors(usedConnectorIds);
       })
       .finally(() => {
         if (!cancelled) setIsConnectionLoading(false);
@@ -320,7 +330,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     return () => {
       cancelled = true;
     };
-  }, [connectionId]);
+  }, [connectionId, checkConnectors]);
 
   const isLoading = isConnectionLoading || isConnectorsLoading;
   const hasConnectionChanges = baselineSnapshot !== null && currentChangeSnapshot !== baselineSnapshot;
@@ -924,5 +934,13 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       />
     </div>
     </TestRunProvider>
+  );
+}
+
+export default function Workflow(props: WorkflowProps = {}) {
+  return (
+    <ConnectorStatusProvider>
+      <WorkflowInner {...props} />
+    </ConnectorStatusProvider>
   );
 }
