@@ -12,7 +12,6 @@ import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngServic
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.repository.ConnectionRepository;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionServiceImp;
-import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.versionmanager.EntityVersionManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -62,96 +62,69 @@ class ConnectionServiceImpTest {
                 null, null, null, null, null, null, entityVersionManager, null, null);
     }
 
-    // ── filterTestConnections (List<ConnectionDTO>) ───────────────────────────
+    // ── findAll(includeTest) ──────────────────────────────────────────────────
 
     @Test
-    void filterTestConnectionsKeepsNonTestConnectionsWhenTestIsFalse() {
-        List<ConnectionDTO> input = List.of(dto("1", NORMAL_TITLE));
+    void findAllIncludesEveryConnectionWhenIncludeTestTrue() {
+        when(connectionRepository.findAll())
+                .thenReturn(List.of(entity(1L, NORMAL_TITLE), entity(2L, TEST_TITLE)));
 
-        List<ConnectionDTO> result = connectionService.filterTestConnections(input, false, Set.of());
-
-        assertThat(result).extracting(ConnectionDTO::getTitle).containsExactly(NORMAL_TITLE);
-    }
-
-    @Test
-    void filterTestConnectionsExcludesTestConnectionsWhenTestIsFalse() {
-        List<ConnectionDTO> input = List.of(dto("1", NORMAL_TITLE), dto("2", TEST_TITLE));
-
-        List<ConnectionDTO> result = connectionService.filterTestConnections(input, false, Set.of());
-
-        assertThat(result).extracting(ConnectionDTO::getTitle).containsExactly(NORMAL_TITLE);
-    }
-
-    @Test
-    void filterTestConnectionsIncludesTestConnectionsWhenTestIsTrue() {
-        List<ConnectionDTO> input = List.of(dto("1", NORMAL_TITLE), dto("2", TEST_TITLE));
-
-        List<ConnectionDTO> result = connectionService.filterTestConnections(input, true, Set.of());
-
-        assertThat(result).extracting(ConnectionDTO::getTitle)
-                .containsExactlyInAnyOrder(NORMAL_TITLE, TEST_TITLE);
-    }
-
-    @Test
-    void filterTestConnectionsExcludesRunningTestConnectionWhenTestIsTrue() {
-        List<ConnectionDTO> input = List.of(dto("5", TEST_TITLE), dto("6", OTHER_TEST_TITLE));
-
-        List<ConnectionDTO> result = connectionService.filterTestConnections(input, true, Set.of(5L));
-
-        assertThat(result).extracting(ConnectionDTO::getTitle).containsExactly(OTHER_TEST_TITLE);
-    }
-
-    @Test
-    void filterTestConnectionsReturnsEmptyWhenInputEmpty() {
-        List<ConnectionDTO> result = connectionService.filterTestConnections(List.of(), true, Set.of(1L));
-
-        assertThat(result).isEmpty();
-    }
-
-    // ── filterTestConnectionEntities (List<Connection>) ───────────────────────
-
-    @Test
-    void filterTestConnectionEntitiesKeepsNonTestConnectionsWhenTestIsFalse() {
-        List<Connection> input = List.of(entity(1L, NORMAL_TITLE));
-
-        List<Connection> result = connectionService.filterTestConnectionEntities(input, false, Set.of());
-
-        assertThat(result).extracting(Connection::getTitle).containsExactly(NORMAL_TITLE);
-    }
-
-    @Test
-    void filterTestConnectionEntitiesExcludesTestConnectionsWhenTestIsFalse() {
-        List<Connection> input = List.of(entity(1L, NORMAL_TITLE), entity(2L, TEST_TITLE));
-
-        List<Connection> result = connectionService.filterTestConnectionEntities(input, false, Set.of());
-
-        assertThat(result).extracting(Connection::getTitle).containsExactly(NORMAL_TITLE);
-    }
-
-    @Test
-    void filterTestConnectionEntitiesIncludesTestConnectionsWhenTestIsTrue() {
-        List<Connection> input = List.of(entity(1L, NORMAL_TITLE), entity(2L, TEST_TITLE));
-
-        List<Connection> result = connectionService.filterTestConnectionEntities(input, true, Set.of());
+        List<Connection> result = connectionService.findAll(true);
 
         assertThat(result).extracting(Connection::getTitle)
                 .containsExactlyInAnyOrder(NORMAL_TITLE, TEST_TITLE);
     }
 
     @Test
-    void filterTestConnectionEntitiesExcludesRunningTestConnectionWhenTestIsTrue() {
-        List<Connection> input = List.of(entity(5L, TEST_TITLE), entity(6L, OTHER_TEST_TITLE));
+    void findAllExcludesTestConnectionsWhenIncludeTestFalse() {
+        when(connectionRepository.findAll())
+                .thenReturn(List.of(entity(1L, NORMAL_TITLE), entity(2L, TEST_TITLE)));
 
-        List<Connection> result = connectionService.filterTestConnectionEntities(input, true, Set.of(5L));
+        List<Connection> result = connectionService.findAll(false);
 
-        assertThat(result).extracting(Connection::getTitle).containsExactly(OTHER_TEST_TITLE);
+        assertThat(result).extracting(Connection::getTitle).containsExactly(NORMAL_TITLE);
     }
 
     @Test
-    void filterTestConnectionEntitiesReturnsEmptyWhenInputEmpty() {
-        List<Connection> result = connectionService.filterTestConnectionEntities(List.of(), true, Set.of(1L));
+    void findAllIncludesTestConnectionsRegardlessOfRunningStateWhenIncludeTestTrue() {
+        // Running state must NOT affect listing: includeTest=true returns all test connections.
+        when(connectionRepository.findAll())
+                .thenReturn(List.of(entity(5L, TEST_TITLE), entity(6L, OTHER_TEST_TITLE)));
 
-        assertThat(result).isEmpty();
+        List<Connection> result = connectionService.findAll(true);
+
+        assertThat(result).extracting(Connection::getTitle)
+                .containsExactlyInAnyOrder(TEST_TITLE, OTHER_TEST_TITLE);
+    }
+
+    @Test
+    void findAllReturnsEmptyWhenRepositoryEmpty() {
+        when(connectionRepository.findAll()).thenReturn(List.of());
+
+        assertThat(connectionService.findAll(false)).isEmpty();
+    }
+
+    // ── findAllByConnectorId(includeTest) ─────────────────────────────────────
+
+    @Test
+    void findAllByConnectorIdExcludesTestConnectionsWhenIncludeTestFalse() {
+        when(connectionRepository.findAllByConnectorId(7))
+                .thenReturn(new LinkedList<>(List.of(entity(1L, NORMAL_TITLE), entity(2L, TEST_TITLE))));
+
+        List<Connection> result = connectionService.findAllByConnectorId(7, false);
+
+        assertThat(result).extracting(Connection::getTitle).containsExactly(NORMAL_TITLE);
+    }
+
+    @Test
+    void findAllByConnectorIdKeepsTestConnectionsWhenIncludeTestTrue() {
+        when(connectionRepository.findAllByConnectorId(7))
+                .thenReturn(new LinkedList<>(List.of(entity(1L, NORMAL_TITLE), entity(2L, TEST_TITLE))));
+
+        List<Connection> result = connectionService.findAllByConnectorId(7, true);
+
+        assertThat(result).extracting(Connection::getTitle)
+                .containsExactlyInAnyOrder(NORMAL_TITLE, TEST_TITLE);
     }
 
     // ── deleteByIds ───────────────────────────────────────────────────────────
@@ -207,13 +180,6 @@ class ConnectionServiceImpTest {
         connectionService.deleteByIds(java.util.Collections.singletonList(null), Set.of());
 
         verifyNoInteractions(connectionRepository, connectionMngService);
-    }
-
-    private static ConnectionDTO dto(String id, String title) {
-        ConnectionDTO dto = new ConnectionDTO();
-        dto.setId(id);
-        dto.setTitle(title);
-        return dto;
     }
 
     private static Connection entity(Long id, String title) {

@@ -33,6 +33,10 @@ public class ConnectorResource {
     private boolean sslCert;
     private int timeout;
     private Map<String, String> requestData;
+    // Result of the most recent remote-API test: null = never tested, true = passed, false = failed.
+    private Boolean lastTestPassed;
+    // Remote error message from the last failed test.
+    private String lastTestError;
 
     public int getConnectorId() {
         return connectorId;
@@ -96,5 +100,21 @@ public class ConnectorResource {
 
     public void setRequestData(Map<String, String> requestData) {
         this.requestData = requestData;
+    }
+
+    public Boolean getLastTestPassed() {
+        return lastTestPassed;
+    }
+
+    public void setLastTestPassed(Boolean lastTestPassed) {
+        this.lastTestPassed = lastTestPassed;
+    }
+
+    public String getLastTestError() {
+        return lastTestError;
+    }
+
+    public void setLastTestError(String lastTestError) {
+        this.lastTestError = lastTestError;
     }
 }

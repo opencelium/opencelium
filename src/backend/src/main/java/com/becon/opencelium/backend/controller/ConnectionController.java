@@ -27,6 +27,7 @@ import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
+import com.becon.opencelium.backend.database.mysql.service.ConnectionServiceImp;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
 import com.becon.opencelium.backend.exception.ConcurrentTestIsForbidden;
@@ -148,8 +149,8 @@ public class ConnectionController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping(path = "/all")
-    public ResponseEntity<?> getAll(@RequestParam(name = "test", defaultValue = "false") boolean test) {
-        List<ConnectionDTO> all = schedulerService.filterByTestFlag(connectionService.getAllFullConnection(), test);
+    public ResponseEntity<?> getAll(@RequestParam(name = "includeTest", defaultValue = "false") Boolean includeTest) {
+        List<ConnectionDTO> all = connectionService.getAllFullConnection(includeTest);
         return ResponseEntity.ok(connectionOldDTOMapper.toDTOAll(all));
     }
 
@@ -167,14 +168,17 @@ public class ConnectionController {
     })
     @GetMapping(path = "/dependency/{invokerName}")
     public ResponseEntity<?> getByInvokerName(@PathVariable String invokerName,
-                                              @RequestParam(name = "test", defaultValue = "false") boolean test) {
-        List<Integer> connectorIds = connectorService.findAllByInvoker(invokerName).stream().map(Connector::getId).toList();
+                                              @RequestParam(name = "includeTest", defaultValue = "false") boolean includeTest) {
+        List<Integer> connectorIds = connectorService.findAllByInvoker(invokerName)
+                .stream()
+                .map(Connector::getId)
+                .toList();
 
         List<ConnectionDTO> connections = new ArrayList<>();
         Set<Long> connectionIds = new HashSet<>();
 
         for (Integer connectorId : connectorIds) {
-            List<Connection> connectionsByConnectorId = connectionService.findAllByConnectorId(connectorId);
+            List<Connection> connectionsByConnectorId = connectionService.findAllByConnectorId(connectorId, includeTest);
 
             for (Connection connection : connectionsByConnectorId) {
                 if (connectionIds.add(connection.getId())) {
@@ -182,11 +186,7 @@ public class ConnectionController {
                 }
             }
         }
-
-        List<ConnectionOldDTO> result = schedulerService.filterByTestFlag(connections, test).stream()
-                .map(connectionOldDTOMapper::toDTO)
-                .toList();
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(connectionOldDTOMapper.toDTOAll(connections));
     }
 
     @Operation(summary = "Retrieves all Metadata of connections from database")
@@ -202,8 +202,8 @@ public class ConnectionController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping(path = "/all/meta")
-    public ResponseEntity<?> getAllMeta(@RequestParam(name = "test", defaultValue = "false") boolean test) {
-        List<Connection> connections = schedulerService.filterEntitiesByTestFlag(connectionService.findAll(), test);
+    public ResponseEntity<?> getAllMeta(@RequestParam(name = "includeTest", defaultValue = "false") Boolean includeTest) {
+        List<Connection> connections = connectionService.findAll(includeTest);
         List<ConnectionResource> connectionResources = connectionResourceMapper.toDTOAll(connections);
         //unnecessary fields
         connectionResources.forEach(c -> {
@@ -234,8 +234,8 @@ public class ConnectionController {
     })
     @PostMapping(path = "/all/by-ids")
     public ResponseEntity<?> getAllMetaById(@RequestBody IdentifiersDTO<Long> ids,
-                                            @RequestParam(name = "test", defaultValue = "false") boolean test) {
-        List<Connection> connections = schedulerService.filterEntitiesByTestFlag(connectionService.findAllByIds(ids), test);
+                                            @RequestParam(name = "includeTest", defaultValue = "false") boolean includeTest) {
+        List<Connection> connections = connectionService.findAllByIds(ids, includeTest);
         List<ConnectionResource> connectionResources = connectionResourceMapper.toDTOAll(connections);
         //unnecessary fields
         connectionResources.forEach(c -> {
@@ -751,6 +751,23 @@ public class ConnectionController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Removes all leftover test connections (titles prefixed with !*test_connection_). " +
+            "Any test connection currently running is excluded from deletion.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Test connections have been cleaned up",
+                    content = @Content(schema = @Schema(implementation = ConnectionServiceImp.CleanupResult.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @DeleteMapping(path = "/test")
+    public ResponseEntity<ConnectionServiceImp.CleanupResult> deleteTestConnections() {
+        return ResponseEntity.ok(connectionService.cleanupAllTestConnections(schedulerService.getRunningConnectionIds()));
+    }
 
     @Operation(summary = "Removes webhook")
     @ApiResponses(value = {

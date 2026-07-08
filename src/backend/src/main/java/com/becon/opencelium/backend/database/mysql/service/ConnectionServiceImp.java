@@ -313,12 +313,22 @@ public class ConnectionServiceImp implements ConnectionService {
 
     @Override
     public List<Connection> findAll() {
-        return connectionRepository.findAll();
+        return findAll(false);
+    }
+
+    @Override
+    public List<Connection> findAll(Boolean includeTest) {
+        return excludeTestIfNeeded(connectionRepository.findAll(), includeTest);
     }
 
     @Override
     public List<Connection> findAllByConnectorId(int connectorId) {
-        return connectionRepository.findAllByConnectorId(connectorId);
+        return findAllByConnectorId(connectorId, false);
+    }
+
+    @Override
+    public List<Connection> findAllByConnectorId(int connectorId, Boolean includeTest) {
+        return excludeTestIfNeeded(connectionRepository.findAllByConnectorId(connectorId), includeTest);
     }
 
     @Override
@@ -402,7 +412,12 @@ public class ConnectionServiceImp implements ConnectionService {
 
     @Override
     public List<ConnectionDTO> getAllFullConnection() {
-        List<Connection> all = findAll();
+        return getAllFullConnection(false);
+    }
+
+    @Override
+    public List<ConnectionDTO> getAllFullConnection(Boolean includeTest) {
+        List<Connection> all = findAll(includeTest);
         List<ConnectionDTO> res = new ArrayList<>();
         for (Connection connection : all) {
             res.add(getFullConnection(connection.getId()));
@@ -548,11 +563,16 @@ public class ConnectionServiceImp implements ConnectionService {
 
     @Override
     public List<Connection> findAllByIds(IdentifiersDTO<Long> ids) {
+        return findAllByIds(ids, false);
+    }
+
+    @Override
+    public List<Connection> findAllByIds(IdentifiersDTO<Long> ids, Boolean includeTest) {
         if (ids == null || CollectionUtils.isEmpty(ids.getIdentifiers())) {
             return Collections.emptyList();
         }
 
-        return connectionRepository.findAllById(ids.getIdentifiers());
+        return excludeTestIfNeeded(connectionRepository.findAllById(ids.getIdentifiers()), includeTest);
     }
 
     @Override
@@ -625,9 +645,15 @@ public class ConnectionServiceImp implements ConnectionService {
      */
     @Override
     @Transactional
-    public CleanupResult cleanupAllTestConnections() {
-        log.info("Test connection cleanup completed started");
-        List<Long> ids = connectionRepository.findIdsByTitleLike(TEST_PREFIX_LIKE);
+    public CleanupResult cleanupAllTestConnections(Set<Long> runningConnectionIds) {
+        log.info("Test connection cleanup started");
+        Set<Long> running = runningConnectionIds == null ? Set.of() : runningConnectionIds;
+
+        // exclude connections with a test currently running so an active test is never deleted
+        List<Long> ids = connectionRepository.findIdsByTitleLike(TEST_PREFIX_LIKE).stream()
+                .filter(id -> !running.contains(id))
+                .toList();
+
         if (ids.isEmpty()) return new CleanupResult(0, 0, 0);
 
         long totalMongoDeleted = 0;
@@ -651,31 +677,15 @@ public class ConnectionServiceImp implements ConnectionService {
     }
 
     /**
-     * Filters out test connections (titles matching {@code !*test_connection_...}) unless {@code includeTest} is true.
-     * A test connection that is currently running (its id present in {@code runningConnectionIds}) is always excluded,
-     * so an active test is never offered for cleanup.
+     * Returns {@code connections} as-is when {@code includeTest} is true; otherwise drops every test
+     * connection (title matching {@code !*test_connection_...}).
      */
-    @Override
-    public List<ConnectionDTO> filterTestConnections(List<ConnectionDTO> connections, boolean includeTest, Set<Long> runningConnectionIds) {
-        if (connections == null || connections.isEmpty()) {
+    private List<Connection> excludeTestIfNeeded(List<Connection> connections, Boolean includeTest) {
+        if (Boolean.TRUE.equals(includeTest) || connections == null || connections.isEmpty()) {
             return connections;
         }
-        Set<Long> runningIds = runningConnectionIds == null ? Set.of() : runningConnectionIds;
         return connections.stream()
-                .filter(c -> !isTestConnection(c.getTitle())
-                        || (includeTest && c.getId() != null && !runningIds.contains(Long.valueOf(c.getId()))))
-                .toList();
-    }
-
-    @Override
-    public List<Connection> filterTestConnectionEntities(List<Connection> connections, boolean includeTest, Set<Long> runningConnectionIds) {
-        if (connections == null || connections.isEmpty()) {
-            return connections;
-        }
-        Set<Long> runningIds = runningConnectionIds == null ? Set.of() : runningConnectionIds;
-        return connections.stream()
-                .filter(c -> !isTestConnection(c.getTitle())
-                        || (includeTest && c.getId() != null && !runningIds.contains(c.getId())))
+                .filter(c -> !isTestConnection(c.getTitle()))
                 .toList();
     }
 

@@ -46,11 +46,22 @@ public interface ConnectionService {
 
     List<Connection> findAll();
 
+    /**
+     * @param includeTest when {@code false}, test connections (titles matching
+     *                    {@code !*test_connection_...}) are excluded from the result
+     */
+    List<Connection> findAll(Boolean includeTest);
+
     boolean existsByName(String name);
 
     boolean existsById(Long id);
 
     List<Connection> findAllByConnectorId(int connectorId);
+
+    /**
+     * @param includeTest when {@code false}, test connections are excluded from the result
+     */
+    List<Connection> findAllByConnectorId(int connectorId, Boolean includeTest);
 
     List<Connection> findAllByNameContains(String name);
 
@@ -73,6 +84,11 @@ public interface ConnectionService {
     List<Connection> getAllByCategoryId(Integer categoryId);
 
     List<ConnectionDTO> getAllFullConnection();
+
+    /**
+     * @param includeTest when {@code false}, test connections are excluded from the result
+     */
+    List<ConnectionDTO> getAllFullConnection(Boolean includeTest);
 
     void updateCategory(Connection connection, Integer newCategory);
 
@@ -98,12 +114,12 @@ public interface ConnectionService {
 
     List<Connection> findAllByIds(IdentifiersDTO<Long> ids);
 
+    /**
+     * @param includeTest when {@code false}, test connections are excluded from the result
+     */
+    List<Connection> findAllByIds(IdentifiersDTO<Long> ids, Boolean includeTest);
 
-    ConnectionServiceImp.CleanupResult cleanupAllTestConnections();
-
-    List<ConnectionDTO> filterTestConnections(List<ConnectionDTO> connections, boolean includeTest, Set<Long> runningConnectionIds);
-
-    List<Connection> filterTestConnectionEntities(List<Connection> connections, boolean includeTest, Set<Long> runningConnectionIds);
+    ConnectionServiceImp.CleanupResult cleanupAllTestConnections(Set<Long> runningConnectionIds);
 
     void deleteByIds(List<Long> ids, Set<Long> runningConnectionIds);
 

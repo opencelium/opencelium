@@ -1,8 +1,8 @@
 import React, { useRef, useState } from 'react';
 import { ConfigProvider } from 'antd';
+import { Maximize2, Minimize2 } from 'lucide-react';
 import { Collapse } from '@shared/ui/primitives/Collapse';
 import { Empty } from '@shared/ui/primitives/Empty';
-import { IconButton } from '@shared/ui/primitives/IconButton';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { useDispatch, useSelector } from 'react-redux';
 import { EnhancementArgs } from './Args';
@@ -100,17 +100,19 @@ const ReferenceEnhancement = ({ enhancement, readOnly }: EnhancementProps) => {
 									style={isScriptMaximized ? maximizedStyle : undefined}
 								>
 									<div className='bodyLegacyEnhancementLabel'>{t('enhancement.script')}</div>
-									<span className='bodyLegacyScriptToggle'>
-										<Tooltip content={t(isScriptMaximized ? 'actions.minimizeScript' : 'actions.maximizeScript')}>
-											<IconButton
-												iconProps={{ name: isScriptMaximized ? 'minimize' : 'maximize', color: isScriptMaximized ? 'inherit' : 'default' }}
-												size='xs'
-												type={isScriptMaximized ? 'primary' : 'text'}
-												onClick={toggleScriptMaximized}
-											/>
-										</Tooltip>
-									</span>
 									<div className='bodyLegacyEnhancementScriptEditor'>
+										<span className='bodyLegacyScriptToggle'>
+											<Tooltip content={t(isScriptMaximized ? 'actions.minimizeScript' : 'actions.maximizeScript')}>
+												<button
+													type='button'
+													className='logsHeaderIconButton logsHeaderIconButton--active'
+													onClick={toggleScriptMaximized}
+													aria-label={t(isScriptMaximized ? 'actions.minimizeScript' : 'actions.maximizeScript')}
+												>
+													{isScriptMaximized ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+												</button>
+											</Tooltip>
+										</span>
 										<Script readOnly={readOnly} enhancement={enhancement!} onChangeScript={onChangeScript} />
 									</div>
 								</div>

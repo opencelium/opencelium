@@ -12,12 +12,15 @@ import type {
 import {
 	updateEndpoint,
 	updateQueryParams,
+	updateRequestMethod,
 	upsertEndpointArg,
 } from '../../../store/connection/connectionSlice';
+import { Select } from '@shared/ui/primitives/Select';
+import './urlMethodSelect.css';
 
 import { UrlEndpointField } from './UrlEndpointField';
 import { UrlQueryParamsTable } from './UrlQueryParamsTable';
-import ReferenceGenerator from '../reference-generator/ReferenceGenerator';
+import { LegacyBodyReferenceGenerator } from '../body-editor/LegacyBodyReferenceGenerator';
 
 import {
 	buildQueryFromParams,
@@ -36,6 +39,9 @@ import {
 import {
 	setFocusByCaretPositionInDivEditable,
 } from './utils/contentEditable';
+
+const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'];
+const methodOptions = HTTP_METHODS.map((value) => ({ value, label: value }));
 
 const TOKEN_ID_RE = /#{%\s*([A-Za-z0-9_-]+)\s*%}/g;
 const extractTokenIds = (s: string) =>
@@ -452,6 +458,16 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 		[commitParamsToEndpoint, queryParams],
 	);
 
+	const isSimpleHttpRequest = method.connector == null;
+	const selectedMethod = (method.request.method || 'GET').toUpperCase();
+	const handleMethodChange = useCallback(
+		(value: string) => {
+			if (readOnly) return;
+			dispatch(updateRequestMethod({ methodId: method.id, method: value } as any));
+		},
+		[dispatch, method.id, readOnly],
+	);
+
 	if (!connection) return null;
 
 	return (
@@ -462,6 +478,20 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 			<UrlEndpointField
 				readOnly={readOnly}
 				value={endpointRaw}
+				beforeNode={
+					isSimpleHttpRequest ? (
+						<div className="wfUrlMethodSelect" data-testid="workflow-url-method">
+							<Select
+								value={selectedMethod}
+								onChange={handleMethodChange}
+								options={methodOptions}
+								sortOptions={false}
+								readOnly={readOnly}
+								testId="workflow-url-method-select"
+							/>
+						</div>
+					) : null
+				}
 				endpointArgs={endpointArgsState}
 				endpointArgsRef={endpointArgsRef}
 				divRef={endpointDivRef}
@@ -506,6 +536,15 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 				}
 			/>
 
+			{!readOnly && isEndpointReferenceGeneratorOpen ? (
+				<LegacyBodyReferenceGenerator
+					connection={connection}
+					currentMethod={method}
+					showWebhookOption={false}
+					onApply={(reference: string) => applyReferenceToEndpoint(reference)}
+				/>
+			) : null}
+
 			<UrlQueryParamsTable
 				readOnly={readOnly}
 				rows={queryParams}
@@ -517,26 +556,6 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 					queryCaretTargetRef.current = target;
 				}}
 			/>
-
-			{!readOnly && isEndpointReferenceGeneratorOpen ? (
-				<div
-					style={{
-						border: '1px solid var(--color-border-subtle)',
-						borderRadius: 12,
-						background: 'var(--color-background-surface)',
-						padding: 12,
-					}}
-				>
-					<ReferenceGenerator
-						open
-						connection={connection}
-						currentMethod={method}
-						allowResponseTypes={['body', 'header', 'status']}
-						onClose={() => setIsEndpointReferenceGeneratorOpen(false)}
-						onApply={(reference: string) => applyReferenceToEndpoint(reference)}
-					/>
-				</div>
-			) : null}
 		</div>
 	);
 };

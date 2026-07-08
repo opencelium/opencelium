@@ -44,6 +44,7 @@ export type IconName =
     | 'minimize'
     | 'arrow-switch'
     | 'workflow'
+    | 'refresh'
 
 export type IconColor =
     | 'default'

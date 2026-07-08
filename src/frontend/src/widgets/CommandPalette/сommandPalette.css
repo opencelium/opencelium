@@ -83,6 +83,7 @@
 [cmdk-list] {
     max-height: 250px;
     overflow-y: auto;
+    overflow-x: hidden;
 }
 
 /* Footer */
@@ -132,6 +133,7 @@
     align-items: center;
     gap: 10px;
     width: 100%;
+    min-width: 0;
 }
 .cmdk-item-icon {
     display: inline-flex;
@@ -141,11 +143,16 @@
     width: 18px;
 }
 .cmdk-item-value {
-    flex: 0 0 auto;
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 .cmdk-item-description {
-    margin-left: auto;
+    flex: 0 0 auto;
     font-size: 12px;
     color: inherit;
     opacity: 0.7;
+    white-space: nowrap;
 }

@@ -666,6 +666,23 @@ export function normalizeConnectionPayload(payload: any) {
 			? sourceFromConnector.operator
 			: [];
 
+	const rootOffset = sourceMethods.length + sourceOperators.length;
+	const shiftRootIndex = (value: unknown, fallback: number) => {
+		const parts = normalizeIndex(value, fallback).split('_');
+		parts[0] = String((Number(parts[0]) || 0) + rootOffset);
+		return parts.join('_');
+	};
+	const toMethods = Array.isArray(payload?.toConnector?.methods) ? payload.toConnector.methods : [];
+	const toOperators = Array.isArray(payload?.toConnector?.operators) ? payload.toConnector.operators : [];
+	const combinedMethods = [
+		...sourceMethods.map((method: any, index: number) => ({ ...method, index: normalizeIndex(method?.index, index) })),
+		...toMethods.map((method: any, index: number) => ({ ...method, index: shiftRootIndex(method?.index, sourceMethods.length + index) })),
+	];
+	const combinedOperators = [
+		...sourceOperators.map((operator: any, index: number) => ({ ...operator, index: normalizeIndex(operator?.index, index) })),
+		...toOperators.map((operator: any, index: number) => ({ ...operator, index: shiftRootIndex(operator?.index, sourceOperators.length + index) })),
+	];
+
 	return {
 		...payload,
 		title: payload?.title ?? payload?.name ?? 'Workflow Connection',
@@ -676,9 +693,8 @@ export function normalizeConnectionPayload(payload: any) {
 			...sourceFromConnector,
 			connectorId: -1,
 			title: 'DEFAULT',
-			method: sourceMethods.map((method: any, index: number) => ({
+			method: combinedMethods.map((method: any) => ({
 				...method,
-				index: normalizeIndex(method?.index, index),
 				connector: method?.connector === null
 					? null
 					: {
@@ -687,9 +703,8 @@ export function normalizeConnectionPayload(payload: any) {
 						icon: method?.connector?.icon ?? null,
 					},
 			})),
-			operator: sourceOperators.map((operator: any, index: number) => ({
+			operator: combinedOperators.map((operator: any) => ({
 				...operator,
-				index: normalizeIndex(operator?.index, index),
 			})),
 		},
 		toConnector: null,

@@ -10,7 +10,7 @@ const FETCH_URL = (id: string) => `/template/${encodeURIComponent(id)}`
 const ACCEPT = '.json,.zip,application/json,application/zip'
 
 /** Existence is checked by the bare template name, so drop a trailing upload extension. */
-const stripTemplateExtension = (fileName: string) => fileName.replace(/\.(json|zip)$/i, '')
+export const stripTemplateExtension = (fileName: string) => fileName.replace(/\.(json|zip)$/i, '')
 
 async function uploadFile(file: File): Promise<{ id: string; path: string }> {
     const token = selectAccessToken(store.getState())
@@ -53,7 +53,7 @@ export function pickConnectionTemplateFile(): Promise<File | null> {
 export async function uploadConnectionTemplate(
     file: File,
     confirmReplace: () => Promise<boolean>,
-): Promise<boolean> {
+): Promise<string | false> {
     const exists = (await apiExecutor({
         url: CHECK_URL(stripTemplateExtension(file.name)),
         method: 'GET',
@@ -66,6 +66,6 @@ export async function uploadConnectionTemplate(
 
     const { id } = await uploadFile(file)
     await apiExecutor({ url: FETCH_URL(id), method: 'GET' })
-    store.dispatch(baseApi.util.invalidateTags([{ type: 'Entity' as any, id: '/template/all' }]))
-    return true
+    store.dispatch(baseApi.util.invalidateTags([{ type: 'Entity', id: '/template/all' }] as any))
+    return id
 }

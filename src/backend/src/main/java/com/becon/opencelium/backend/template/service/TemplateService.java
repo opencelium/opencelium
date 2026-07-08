@@ -43,6 +43,16 @@ public interface TemplateService {
 
     TemplateResource getByConnectionId(Long connectionId);
 
+    /**
+     * Reads all templates as metadata-only resources (no {@code connection} payload)
+     */
+    List<TemplateResource> getAllMetadata();
+
+    /**
+     * Reads a single template as a metadata-only resource (no {@code connection} payload).
+     */
+    Optional<TemplateResource> getMetadataById(String id);
+
     void updateTemplatesToCurrentVersion();
 
 }

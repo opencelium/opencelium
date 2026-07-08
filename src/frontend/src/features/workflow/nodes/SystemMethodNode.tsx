@@ -15,7 +15,7 @@ export function SystemMethodNode({
 			id={id}
 			data={data}
 			selected={selected}
-			bottomLabel={data.subtitle || data.title}
+			bottomLabel={data.methodConfig?.method || data.subtitle || data.title}
 			rightAdd={{
 				action: { sourceNodeId: id, direction: 'right' },
 				showAlways: !!data.isLeaf,

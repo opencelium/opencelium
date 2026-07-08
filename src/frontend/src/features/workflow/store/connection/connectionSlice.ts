@@ -29,6 +29,11 @@ interface UpdateEndpointAction {
 	endpoint: string;
 }
 
+interface UpdateMethodTypeAction {
+	methodId: string;
+	method: string;
+}
+
 interface UpdateQueryParamsAction {
 	methodId: string;
 	queryParams: any[];
@@ -197,6 +202,26 @@ export const connectionSlice = createSlice({
 				},
 			};
 		},
+		updateRequestMethod: (state, action: PayloadAction<UpdateMethodTypeAction>) => {
+			const { methodId, method: httpMethod } = action.payload;
+			if (!state.connection) return;
+
+			const methods = state.connection.fromConnector.method;
+			const methodIndex = methods.findIndex(
+				(m) => m.id === methodId
+			);
+			if (methodIndex === -1) return;
+
+			const method = methods[methodIndex];
+
+			methods[methodIndex] = {
+				...method,
+				request: {
+					...method.request,
+					method: httpMethod,
+				},
+			};
+		},
 		updateQueryParams: (
 			state,
 			action: PayloadAction<UpdateQueryParamsAction>
@@ -335,6 +360,7 @@ export const {
 	addOperator,
 	removeOperator,
 	updateEndpoint,
+	updateRequestMethod,
 	updateQueryParams,
 	upsertEndpointArg,
 	removeEndpointArg,

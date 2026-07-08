@@ -236,6 +236,7 @@ export function WorkflowCanvas({
         elementsSelectable
         selectionOnDrag={false}
         selectionKeyCode={null}
+        deleteKeyCode={null}
         panOnDrag
         zoomOnScroll
       >
