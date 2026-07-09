@@ -141,6 +141,23 @@
   pointer-events: none;
 }
 
+.circleNodeStatus {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 14px;
+  height: 14px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--color-background-surface);
+  border: 2px solid var(--color-background-surface);
+  z-index: 7;
+  pointer-events: auto;
+}
+
 .startNode {
   color: var(--color-text-secondary);
 }

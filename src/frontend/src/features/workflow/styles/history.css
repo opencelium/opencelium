@@ -6,6 +6,7 @@
 }
 
 .sidebarItem {
+  position: relative;
   width: 100%;
   text-align: left;
   border: 1px solid var(--color-border-subtle);
@@ -18,6 +19,13 @@
   flex-direction: column;
   gap: 6px;
   transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.sidebarItemStatus {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1;
 }
 
 .sidebarItemWithImage {
@@ -53,6 +61,10 @@
   color: var(--color-text-secondary);
   font-size: 12px;
   line-height: 1.35;
+}
+
+.sidebarItem .sidebarItemError {
+  color: var(--color-status-error-fg);
 }
 
 .sidebarItemMuted {

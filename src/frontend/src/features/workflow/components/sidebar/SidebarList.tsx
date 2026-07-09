@@ -1,10 +1,14 @@
 import { buildTestId } from '@shared/testing/testId';
+import { ConnectorStatusDot, type ConnectorStatus } from '../../connector-status/ConnectorStatusDot';
 
 type SidebarItem = {
   key: string;
   title: string;
   text: string;
   imageUrl?: string | null;
+  status?: ConnectorStatus;
+  // Only set when status === 'failed' — the connector's persisted lastTestError.
+  statusError?: string | null;
 };
 
 type Props = {
@@ -26,6 +30,17 @@ export function SidebarList({ items, onSelect, testIdPrefix }: Props) {
         >
           <strong>{item.title}</strong>
           <span>{item.text}</span>
+          {item.statusError ? (
+            <span className="sidebarItemError">{item.statusError}</span>
+          ) : null}
+          {item.status ? (
+            <div className="sidebarItemStatus">
+              <ConnectorStatusDot
+                status={item.status}
+                testId={buildTestId(testIdPrefix, 'status', item.key)}
+              />
+            </div>
+          ) : null}
           {item.imageUrl ? (
             <div className="sidebarItemImage" aria-hidden="true">
               <img src={item.imageUrl} alt="" />

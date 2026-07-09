@@ -24,7 +24,7 @@ export const connectorApi = baseApi.injectEndpoints({
               ],
     }),
     getConnector: b.mutation<
-      any,
+      Connector,
       { id: string, masterPassword: string }
     >({
       query: ({ masterPassword, id }) => ({

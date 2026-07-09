@@ -1,10 +1,12 @@
 import { Handle, Position } from '@xyflow/react';
 import type { NodeProps } from '@xyflow/react';
-import { Globe } from 'lucide-react';
+import { Icon } from '@shared/ui/primitives/Icon';
 import { NodeShell } from './NodeShell';
 import { MethodColorBadge } from './MethodColorBadge';
 import { resolveConnectorIconUrl } from '@entities/connector/model/iconUrl';
 import type { ConnectorWorkflowNode } from '../types/workflow.types';
+import { getConnectorStatus } from '../connector-status/getConnectorStatus';
+import { ConnectorStatusDot } from '../connector-status/ConnectorStatusDot';
 
 export function ConnectorMethodNode({
   id,
@@ -12,6 +14,7 @@ export function ConnectorMethodNode({
   selected,
 }: NodeProps<ConnectorWorkflowNode>) {
   const connectorIconUrl = resolveConnectorIconUrl(data.connector?.icon);
+  const connectorStatus = getConnectorStatus(data.connector?.lastTestPassed);
 
   return (
     <NodeShell
@@ -29,9 +32,18 @@ export function ConnectorMethodNode({
         {connectorIconUrl ? (
           <img className="circleNodeImage" src={connectorIconUrl} alt="" />
         ) : (
-          <Globe size={24} />
+          <Icon name="api" size={24} />
         )}
         <MethodColorBadge color={data.duplicateMethodColor} index={data.duplicateMethodIndex} />
+        {connectorStatus ? (
+          <div className="circleNodeStatus">
+            <ConnectorStatusDot
+              status={connectorStatus}
+              testId={`workflow-node-connector-status-${id}`}
+              tooltipOverride={connectorStatus === 'failed' ? data.connector?.lastTestError : undefined}
+            />
+          </div>
+        ) : null}
       </div>
 
       <Handle

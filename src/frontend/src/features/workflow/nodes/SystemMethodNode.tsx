@@ -1,6 +1,6 @@
 import { Handle, Position } from '@xyflow/react';
 import type { NodeProps } from '@xyflow/react';
-import { Database } from 'lucide-react';
+import { Globe } from 'lucide-react';
 import { NodeShell } from './NodeShell';
 import { MethodColorBadge } from './MethodColorBadge';
 import type { SystemWorkflowNode } from '../types/workflow.types';
@@ -23,7 +23,7 @@ export function SystemMethodNode({
 			}}
 		>
 			<div className='circleNode systemNode'>
-				<Database size={24} />
+				<Globe size={24} />
 				<MethodColorBadge color={data.duplicateMethodColor} index={data.duplicateMethodIndex} />
 			</div>
 

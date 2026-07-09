@@ -45,6 +45,7 @@ export type IconName =
     | 'arrow-switch'
     | 'workflow'
     | 'refresh'
+    | 'api'
 
 export type IconColor =
     | 'default'

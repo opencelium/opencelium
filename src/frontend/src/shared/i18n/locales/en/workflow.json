@@ -123,6 +123,10 @@
       "title": "No connectors found",
       "description": "There are no connectors matching this search."
     },
+    "connectorStatus": {
+      "passed": "Connection check passed",
+      "failed": "Connection check failed"
+    },
     "methodsEmpty": {
       "title": "No methods found",
       "description": "There are no methods matching this search."

@@ -73,6 +73,8 @@ const hydrateNodesWithOperationResponses = (
               connectorId: connector.connectorId,
               title: connector.title,
               icon: normalizeConnectorIcon(connector.icon),
+              lastTestPassed: connector.lastTestPassed,
+              lastTestError: connector.lastTestError,
             }
           : node.data.connector,
         methodConfig: operation?.response
@@ -800,7 +802,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         ) : (
           <>
             <WorkflowCanvas
-              nodes={workflow.nodes}
+              nodes={hydratedNodes}
               edges={workflow.edges}
               restoredViewport={workflow.restoredViewport}
               viewportRestoreVersion={workflow.viewportRestoreVersion}

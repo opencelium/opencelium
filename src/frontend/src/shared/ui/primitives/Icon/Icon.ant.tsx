@@ -28,6 +28,7 @@ import {
     FullscreenOutlined,
     FullscreenExitOutlined,
     ReloadOutlined,
+    ApiOutlined,
 } from '@ant-design/icons';
 
 import type { IconComponent } from './Icon.types';
@@ -82,6 +83,7 @@ const iconMap = {
     'arrow-switch': GoArrowSwitch,
     workflow: GoWorkflow,
     refresh: ReloadOutlined,
+    api: ApiOutlined,
 };
 
 export const AntIcon: IconComponent = ({
