@@ -4,13 +4,21 @@ import com.becon.opencelium.backend.ocel.exception.ApplyOperatorException;
 import com.becon.opencelium.backend.ocel.operator.BinaryOperator;
 import com.becon.opencelium.backend.ocel.operator.OperatorEnum;
 import com.becon.opencelium.backend.ocel.operator.SidesType;
+import com.becon.opencelium.backend.ocel.utils.Utils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 class ContainsSubStr implements BinaryOperator {
     @Override
     public Object apply(Object o1, Object o2) throws ApplyOperatorException {
+        // Normalize: convert String operands that contain arrays into real Lists
+        o1 = normalize(o1);
+        o2 = normalize(o2);
+
         List<?> values;
         Object value;
 
@@ -29,16 +37,64 @@ class ContainsSubStr implements BinaryOperator {
         }
 
         for (Object o : values) {
-            if (!(o instanceof String str)) {
-                throw ApplyOperatorException.invalidOperandValueException(getOperatorType(), o);
-            }
-
-            if (str.contains(value.toString())) {
+            if (o != null && o.toString().contains(value.toString())) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * Returns a List if the object is (or can be parsed as) an array,
+     * otherwise returns the object unchanged.
+     */
+    private Object normalize(Object o) {
+        List<?> parsed = tryParseArray(o);
+        return parsed != null ? parsed : o;
+    }
+
+    /**
+     * Tries to interpret an object as an array. Returns null if it can't.
+     * Handles Strings like "[a, b, c]" or JSON arrays like ["a","b","c"].
+     */
+    private List<?> tryParseArray(Object o) {
+        if (o instanceof List<?>) {
+            return (List<?>) o;
+        }
+        if (!(o instanceof String)) {
+            return null;
+        }
+
+        String s = ((String) o).trim();
+        if (s.length() < 2 || s.charAt(0) != '[' || s.charAt(s.length() - 1) != ']') {
+            return null;
+        }
+
+        // Try proper JSON parsing first (handles quoted strings, numbers, nested commas, etc.)
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(s, List.class);
+        } catch (Exception ignored) {
+            // Fall back to a naive split for non-JSON strings like "[a, b, c]"
+        }
+
+        String inner = s.substring(1, s.length() - 1).trim();
+        if (inner.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<String> result = new ArrayList<>();
+        for (String part : inner.split(",")) {
+            String trimmed = part.trim();
+            if (trimmed.length() >= 2
+                    && ((trimmed.startsWith("\"") && trimmed.endsWith("\""))
+                    || (trimmed.startsWith("'") && trimmed.endsWith("'")))) {
+                trimmed = trimmed.substring(1, trimmed.length() - 1);
+            }
+            result.add(trimmed);
+        }
+        return result;
     }
 
     private boolean isUnaryRight(Object o2) {
