@@ -32,6 +32,23 @@ import {BulkNotificationsDialogContent} from "@entities/schedule/ui/BulkNotifica
 
 const baseKey = 'schedule';
 
+// resolveScheduleConnectionTitles suggests "{connection title} [{schedulerId}]" —
+// the id rides along in brackets since the connection title alone isn't unique/fetchable.
+const resolveScheduleId = (value: string): string => {
+    if (/^\d+$/.test(value)) return value
+    const match = value.match(/\[(\d+)]\s*$/)
+    return match ? match[1] : value
+}
+
+const buildScheduleFetchUrl = (value: string): string =>
+    `/scheduler/${encodeURIComponent(resolveScheduleId(value))}`
+
+const buildSchedulePageUrl = (value: string): string =>
+    `/schedule/update/${encodeURIComponent(resolveScheduleId(value))}`
+
+const buildScheduleViewPageUrl = (value: string): string =>
+    `/schedule/view/${encodeURIComponent(resolveScheduleId(value))}`
+
 const Dot = ({color}: {color: string}) => (
     <span
         style={{
@@ -446,11 +463,18 @@ export const scheduleDefinition: EntityDefinition = {
             ...createEntityCommands({def, config: {}, dsl: {
                     update: {
                         by: [
-                            { field: 'connection.title', resolve: resolveScheduleConnectionTitles },
+                            {
+                                field: 'workflow.title',
+                                resolve: resolveScheduleConnectionTitles,
+                                buildFetchUrl: (_def, value) => buildScheduleFetchUrl(value),
+                                buildNavigationUrl: (_def, value) => buildSchedulePageUrl(value),
+                            },
                             {
                                 field: 'id',
                                 resolve: resolveScheduleIds,
                                 customPath: true,
+                                buildFetchUrl: (_def, value) => buildScheduleFetchUrl(value),
+                                buildNavigationUrl: (_def, value) => buildSchedulePageUrl(value),
                             }
                         ]
                     },
@@ -460,6 +484,7 @@ export const scheduleDefinition: EntityDefinition = {
                                 field: 'id',
                                 resolve: resolveScheduleIds,
                                 customPath: true,
+                                buildDeleteUrl: (_def, value) => buildScheduleFetchUrl(value),
                                 afterDelete: async () => {
                                     await store.dispatch(
                                         scheduleApi.util.invalidateTags([
@@ -473,8 +498,9 @@ export const scheduleDefinition: EntityDefinition = {
                                 }
                             },
                             {
-                                field: 'connection.title',
+                                field: 'workflow.title',
                                 resolve: resolveScheduleConnectionTitles,
+                                buildDeleteUrl: (_def, value) => buildScheduleFetchUrl(value),
                                 confirmMessage: (connectionTitle) => {
                                     const t = i18n.getFixedT(i18n.language, 'entities');
                                     return t(`${baseKey}.confirmation.delete.byConnectionTitle`, {connectionTitle});
@@ -488,10 +514,14 @@ export const scheduleDefinition: EntityDefinition = {
                                 field: 'id',
                                 resolve: resolveScheduleIds,
                                 customPath: true,
+                                buildFetchUrl: (_def, value) => buildScheduleFetchUrl(value),
+                                buildNavigationUrl: (_def, value) => buildScheduleViewPageUrl(value),
                             },
                             {
-                                field: 'connection.title',
-                                resolve: resolveScheduleConnectionTitles
+                                field: 'workflow.title',
+                                resolve: resolveScheduleConnectionTitles,
+                                buildFetchUrl: (_def, value) => buildScheduleFetchUrl(value),
+                                buildNavigationUrl: (_def, value) => buildScheduleViewPageUrl(value),
                             }
                         ]
                     }
