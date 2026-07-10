@@ -15,7 +15,7 @@ export async function _resolveUserIds(
     );
 
     if ('data' in result && result.data) {
-        return result.data.map(u => u.userId);
+        return result.data.map(u => String(u.userId));
     }
 
     return [];

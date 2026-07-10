@@ -15,7 +15,7 @@ export async function _resolveRoleIds(
     );
 
     if ('data' in result && result.data) {
-        return result.data.map(u => u.groupId);
+        return result.data.map(u => String(u.groupId));
     }
 
     return [];

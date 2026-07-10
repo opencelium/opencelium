@@ -15,7 +15,7 @@ export async function _resolveConnectorIds(
     );
 
     if ('data' in result && result.data) {
-        return result.data.map(u => u.connectorId);
+        return result.data.map(u => String(u.connectorId));
     }
 
     return [];
