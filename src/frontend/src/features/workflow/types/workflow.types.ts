@@ -63,6 +63,7 @@ export type WorkflowNodeData = {
 	hideAddControls?: boolean;
 	suppressHoverAddControls?: boolean;
 	lockVisibleAddControls?: boolean;
+	isAnyNodeDragging?: boolean;
 	onAddStep?: (action: WorkflowAction) => void;
 	onOpenContextMenu?: (menu: WorkflowContextMenu | null) => void;
 	onDeleteNode?: (nodeId: string) => void;

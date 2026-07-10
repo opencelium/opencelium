@@ -12,6 +12,7 @@ export function StartNode({
 	id,
 	data,
 	selected,
+	dragging,
 }: NodeProps<StartWorkflowNode>) {
 	const testRun = useTestRun();
 	const { t: tEntities } = useI18n('entities');
@@ -108,7 +109,7 @@ export function StartNode({
 				<div className='startNode'>
 					<Play size={26} />
 				</div>
-			) : isSocketConnected && !isSubscriptionBlocked && !isOtherTestRunning ? (
+			) : isSocketConnected && !isSubscriptionBlocked && !isOtherTestRunning && !dragging && !data.isAnyNodeDragging ? (
 				<Tooltip
 					content={tEntities(isRunning ? 'connection.test.stop' : 'connection.test.start')}
 				>

@@ -822,6 +822,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
             <WorkflowCanvas
               nodes={hydratedNodes}
               edges={workflow.edges}
+              isAnyNodeDragging={workflow.isAnyNodeDragging}
               restoredViewport={workflow.restoredViewport}
               viewportRestoreVersion={workflow.viewportRestoreVersion}
               centerStartVersion={workflow.centerStartVersion}
