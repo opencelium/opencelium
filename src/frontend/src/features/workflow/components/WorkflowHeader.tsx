@@ -226,7 +226,7 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 				</div>
 
 				<div className='headerActions'>
-					<CommandPalette collapsible forceMode="modal" />
+					<CommandPalette collapsible forceMode="modal" hideSuccessRecommendations />
 					{schedulesSlot}
 					{!readOnly && (
 						<button

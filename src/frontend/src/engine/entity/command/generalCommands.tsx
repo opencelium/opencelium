@@ -64,12 +64,12 @@ export const getCreateCommand = ({ def, config, name }: GeneralCommandType): Com
 
                 if (mode === 'modal') {
                     if (config?.overrides?.create) return ctx.openModal(config.overrides.create(def, ctx));
-                    return ctx.openModal(<GenericCreateWizard entityName={def.name} />);
+                    return ctx.openModal(<GenericCreateWizard entityName={def.name} hideRecommendations={ctx.hideRecommendations} />);
                 }
                 // If a specific create flow is needed — use the override
                 if (config?.overrides?.create) return config.overrides.create(def, ctx);
                 // Otherwise — the standard Generic Wizard
-                ctx.render(<GenericCreateWizard entityName={def.name} />);
+                ctx.render(<GenericCreateWizard entityName={def.name} hideRecommendations={ctx.hideRecommendations} />);
             }
         }
     ],

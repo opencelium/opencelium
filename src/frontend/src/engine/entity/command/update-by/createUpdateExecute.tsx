@@ -32,6 +32,7 @@ export const createUpdateExecute = ({ def, config, by }) => {
                     entityName={def.name}
                     identifier={value}
                     initialRecord={result}
+                    hideRecommendations={ctx.hideRecommendations}
                 />
             );
 

@@ -42,9 +42,13 @@ type CommandPaletteProps = {
      * The workflow editor passes 'modal' so commands open as dialogs over the
      * canvas instead of navigating away, opening a new tab, or rendering inline. */
     forceMode?: CommandRenderMode;
+    /** Skip the recommendation tags on create/update wizard success screens.
+     * The workflow editor sets this — its embedded palette's wizards shouldn't
+     * surface links to unrelated top-level pages. */
+    hideSuccessRecommendations?: boolean;
 };
 
-export const CommandPalette = ({ collapsible = false, forceMode }: CommandPaletteProps = {}) => {
+export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessRecommendations }: CommandPaletteProps = {}) => {
     const {isMobile} = useBreakpoints();
     const { showCommandContent, toggleCommandContent } = useLayoutStore();
     const {t: tCommon} = useI18n('common');
@@ -77,6 +81,7 @@ export const CommandPalette = ({ collapsible = false, forceMode }: CommandPalett
         }
         await executeAST(ast, {
             setLoading: (loading) => setIsLoading(loading),
+            hideRecommendations: hideSuccessRecommendations,
             render: (node) => {
                 // When a mode is forced to 'modal', commands that hard-code inline
                 // rendering (ignoring the store mode) must still open as a dialog.
