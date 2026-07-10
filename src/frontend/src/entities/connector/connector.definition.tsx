@@ -9,6 +9,7 @@ import type {Connector, ConnectorUpdateDto} from "@entities/connector/model/type
 import {store} from "@app/store/store.ts";
 import {i18n} from "@shared/i18n/config/i18n.ts";
 import {resolveConnectorIds} from "@entities/connector/command/resolvers/resolveConnectorId.ts";
+import {findConnectorIdByTitle} from "@entities/connector/command/connectorCache.ts";
 import {CONNECTOR_TAG} from "@entities/connector/api/connector.tags.ts";
 import {connectorApi} from "@entities/connector/api/connectorApi.ts";
 import {showApiError} from "@shared/api/handleApiError.ts";
@@ -18,6 +19,20 @@ import {deleteConnectorIcon, hasConnectorIconFile, shouldDeleteConnectorIcon, up
 import type {StepRemoteProps} from "@shared/ui/form/FormControl/FormControl.type.ts";
 
 const baseKey = 'connector';
+
+const resolveConnectorId = (value: string): string => {
+    if (/^\d+$/.test(value)) return value
+    return String(findConnectorIdByTitle(value) ?? value)
+}
+
+const buildConnectorFetchUrl = (value: string): string =>
+    `/connector/${encodeURIComponent(resolveConnectorId(value))}`
+
+const buildConnectorPageUrl = (value: string): string =>
+    `/connector/update/${encodeURIComponent(resolveConnectorId(value))}`
+
+const buildConnectorViewPageUrl = (value: string): string =>
+    `/connector/view/${encodeURIComponent(resolveConnectorId(value))}`
 
 /**
  * The `/connector/check` connection test. Shared by the credentials step's submit-time gate
@@ -445,11 +460,18 @@ export const connectorDefinition: EntityDefinition = {
             ...createEntityCommands({def, config: {}, dsl: {
                     update: {
                         by: [
-                            { field: 'title', resolve: resolveConnectorTitles },
+                            {
+                                field: 'title',
+                                resolve: resolveConnectorTitles,
+                                buildFetchUrl: (_def, value) => buildConnectorFetchUrl(value),
+                                buildNavigationUrl: (_def, value) => buildConnectorPageUrl(value),
+                            },
                             {
                                 field: 'id',
                                 resolve: resolveConnectorIds,
                                 customPath: true,
+                                buildFetchUrl: (_def, value) => buildConnectorFetchUrl(value),
+                                buildNavigationUrl: (_def, value) => buildConnectorPageUrl(value),
                             }
                         ]
                     },
@@ -459,6 +481,7 @@ export const connectorDefinition: EntityDefinition = {
                                 field: 'id',
                                 resolve: resolveConnectorIds,
                                 customPath: true,
+                                buildDeleteUrl: (_def, value) => buildConnectorFetchUrl(value),
                                 afterDelete: async () => {
                                     await store.dispatch(
                                         connectorApi.util.invalidateTags([
@@ -474,6 +497,7 @@ export const connectorDefinition: EntityDefinition = {
                             {
                                 field: 'title',
                                 resolve: resolveConnectorTitles,
+                                buildDeleteUrl: (_def, value) => buildConnectorFetchUrl(value),
                                 confirmMessage: (title) => {
                                     const t = i18n.getFixedT(i18n.language, 'entities');
                                     return t(`${baseKey}.confirmation.delete.byTitle`, {title});
@@ -487,10 +511,14 @@ export const connectorDefinition: EntityDefinition = {
                                 field: 'id',
                                 resolve: resolveConnectorIds,
                                 customPath: true,
+                                buildFetchUrl: (_def, value) => buildConnectorFetchUrl(value),
+                                buildNavigationUrl: (_def, value) => buildConnectorViewPageUrl(value),
                             },
                             {
                                 field: 'title',
-                                resolve: resolveConnectorTitles
+                                resolve: resolveConnectorTitles,
+                                buildFetchUrl: (_def, value) => buildConnectorFetchUrl(value),
+                                buildNavigationUrl: (_def, value) => buildConnectorViewPageUrl(value),
                             }
                         ]
                     }
