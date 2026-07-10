@@ -61,6 +61,7 @@
     "selectTemplate": "Bitte wählen Sie eine Vorlage aus",
     "loadTemplateFailed": "Vorlage konnte nicht geladen werden",
     "downloadTemplateFailed": "Vorlage konnte nicht heruntergeladen werden.",
+    "downloadTemplateRequiresSave": "Bitte speichern Sie den Workflow, bevor Sie ihn als Vorlage herunterladen.",
     "copySnapshotIdSuccess": "Snapshot-ID in die Zwischenablage kopiert",
     "deleteVersionSuccess": "Version gelöscht",
     "unsavedLeaveConfirm": "Sie haben ungespeicherte Änderungen, die verloren gehen. Möchten Sie diese Seite wirklich verlassen, ohne zu speichern?"

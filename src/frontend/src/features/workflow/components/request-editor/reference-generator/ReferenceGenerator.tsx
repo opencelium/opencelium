@@ -161,8 +161,12 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 	const getMethodLabel = (m: MethodWithId) =>
 		String(m.label || m.name || (m as any).index || m.id);
 
+	const duplicateIndexByColor = useMemo(
+		() => getDuplicateMethodIndexByColor(connection?.fromConnector.method ?? []),
+		[connection],
+	);
+
 	const methodOptions = useMemo(() => {
-			const duplicateIndexByColor = getDuplicateMethodIndexByColor(methods);
 			return methods.map((m) => ({
 				value: m.id,
 				searchLabel: getMethodLabel(m),
@@ -200,7 +204,7 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 					</span>
 				),
 			}));
-	}, [methods]);
+	}, [methods, duplicateIndexByColor]);
 
 	const handleMethodChange = (id: string) => {
 		setSelectedMethodId(id);
