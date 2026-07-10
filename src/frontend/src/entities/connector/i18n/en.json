@@ -101,7 +101,7 @@
   },
   "confirmation": {
     "delete": {
-      "byName": "Delete connector by title \"{{title}}\"?",
+      "byTitle": "Delete connector by title \"{{title}}\"?",
       "byId": "Delete connector by id \"{{id}}\"?"
     }
   },

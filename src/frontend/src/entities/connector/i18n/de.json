@@ -84,6 +84,12 @@
       }
     }
   },
+  "confirmation": {
+    "delete": {
+      "byTitle": "Konnektor mit dem Titel \"{{title}}\" löschen?",
+      "byId": "Konnektor mit der ID \"{{id}}\" löschen?"
+    }
+  },
   "lifecycle": {
     "uploadIcon": {
       "failed": "Konnektor gespeichert, aber das Hochladen des Symbols ist fehlgeschlagen. Sie können es im Bearbeitungsmodus erneut versuchen."
