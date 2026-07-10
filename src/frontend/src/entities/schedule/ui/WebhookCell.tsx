@@ -13,9 +13,10 @@ import type { Schedule, ScheduleWebhook } from '../model/types'
 
 type Props = {
     schedule: Schedule
+    tooltipPlacement?: 'top' | 'bottom' | 'left' | 'right'
 }
 
-export const WebhookCell = memo(function WebhookCell({ schedule }: Props) {
+export const WebhookCell = memo(function WebhookCell({ schedule, tooltipPlacement }: Props) {
     const { t: tEntities } = useI18n('entities')
     const confirm = useConfirm()
     const [generalRequest] = useGeneralRequestMutation()
@@ -89,7 +90,7 @@ export const WebhookCell = memo(function WebhookCell({ schedule }: Props) {
 
     if (!webhook) {
         return (
-            <Tooltip content={tEntities('schedule.webhook.createTooltip')}>
+            <Tooltip content={tEntities('schedule.webhook.createTooltip')} placement={tooltipPlacement}>
                 <IconButton
                     iconProps={{ name: 'webhook', color: 'primary' }}
                     size="xs"
@@ -103,7 +104,7 @@ export const WebhookCell = memo(function WebhookCell({ schedule }: Props) {
 
     return (
         <span style={{ display: 'inline-flex', gap: 4, alignItems: 'center' }}>
-            <Tooltip content={tEntities('schedule.webhook.copyTooltip')}>
+            <Tooltip content={tEntities('schedule.webhook.copyTooltip')} placement={tooltipPlacement}>
                 <IconButton
                     iconProps={{ name: 'content-copy', color: 'primary' }}
                     size="xs"
@@ -111,7 +112,7 @@ export const WebhookCell = memo(function WebhookCell({ schedule }: Props) {
                     onClick={handleCopy}
                 />
             </Tooltip>
-            <Tooltip content={tEntities('schedule.webhook.deleteTooltip')}>
+            <Tooltip content={tEntities('schedule.webhook.deleteTooltip')} placement={tooltipPlacement}>
                 <IconButton
                     iconProps={{ name: 'delete', color: 'danger' }}
                     size="xs"

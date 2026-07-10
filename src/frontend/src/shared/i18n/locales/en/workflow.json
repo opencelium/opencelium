@@ -34,6 +34,41 @@
       "keep": "No"
     }
   },
+  "schedules": {
+    "title": "Schedules",
+    "add": "Add schedule",
+    "nextRun": "Next run in {{duration}}",
+    "manual": "Manual only",
+    "expand": "Show details",
+    "collapse": "Hide details",
+    "empty": "No schedules for this workflow yet.",
+    "saveFirst": "Save the workflow to attach schedules.",
+    "pill": {
+      "tooltip": "Schedules for this workflow"
+    },
+    "aggregate": {
+      "running": "A schedule is running",
+      "error": "Last run failed",
+      "ok": "All schedules healthy",
+      "idle": "No recent runs"
+    },
+    "actions": {
+      "delete": "Delete schedule"
+    },
+    "create": {
+      "title": "New schedule",
+      "subtitle": "Create a schedule for \"{{title}}\".",
+      "submit": "Create",
+      "cancel": "Cancel",
+      "success": "Schedule for \"{{title}}\" created.",
+      "error": "Could not create the schedule."
+    },
+    "delete": {
+      "title": "Delete schedule",
+      "message": "Are you sure you want to delete the schedule \"{{title}}\"?",
+      "success": "Schedule \"{{title}}\" deleted."
+    }
+  },
   "history": {
     "title": "Version History",
     "author": "Author: {{name}}",
@@ -143,8 +178,7 @@
     "downloadAsTemplate": "Download as Template",
     "saveAsTemplate": "Save as Template",
     "loadTemplate": "Load Template",
-    "editorAppearance": "Editor Appearance",
-    "inDevelopment": "In development",
+    "versionHistory": "Version History",
     "shortcuts": "Shortcuts",
     "exit": "Exit"
   },

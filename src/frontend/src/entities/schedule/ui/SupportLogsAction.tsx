@@ -7,9 +7,10 @@ import { SupportLogsDialogContent } from './SupportLogsDialogContent'
 
 type Props = {
     schedule: Schedule
+    tooltipPlacement?: 'top' | 'bottom' | 'left' | 'right'
 }
 
-export function SupportLogsAction({ schedule }: Props) {
+export function SupportLogsAction({ schedule, tooltipPlacement }: Props) {
     const { t: tEntities } = useI18n('entities')
     const dialog = useDialog()
 
@@ -27,7 +28,7 @@ export function SupportLogsAction({ schedule }: Props) {
     }
 
     return (
-        <Tooltip content={tEntities('schedule.supportLogs.tooltip')}>
+        <Tooltip content={tEntities('schedule.supportLogs.tooltip')} placement={tooltipPlacement}>
             <IconButton
                 iconProps={{ name: 'journal-text', color: 'primary' }}
                 size="xs"

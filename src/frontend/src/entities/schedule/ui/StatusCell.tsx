@@ -8,6 +8,9 @@ import './StatusCell.css'
 
 type Props = {
     schedule: Schedule
+    // The workflow schedule panel shows a readable "next run" text elsewhere and
+    // suppresses the inline countdown to avoid duplicating it.
+    showCountdown?: boolean
 }
 
 function computeEndTime(run?: ScheduleExecutionRun): number {
@@ -22,7 +25,7 @@ function resolveRing(schedule: Schedule): RingStatus | null {
     return successEnd >= failEnd ? 'success' : 'exception'
 }
 
-export const StatusCell = memo(function StatusCell({schedule}: Props) {
+export const StatusCell = memo(function StatusCell({schedule, showCountdown = true}: Props) {
     const {t: tEntities} = useI18n('entities')
     const {issue} = useSubscriptionIssue()
     const blockedHint = issue ? tEntities(`subscription.banner.${issue}` as never) : null
@@ -32,7 +35,7 @@ export const StatusCell = memo(function StatusCell({schedule}: Props) {
     return (
         <div className="status-cell">
             <PlayControl schedule={schedule} variant={variant} blockedHint={blockedHint} />
-            {!issue && <CronCountdown cronExp={schedule.cronExp} />}
+            {showCountdown && !issue && <CronCountdown cronExp={schedule.cronExp} />}
         </div>
     )
 })
