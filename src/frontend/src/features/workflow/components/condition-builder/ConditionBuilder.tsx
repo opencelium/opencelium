@@ -328,13 +328,11 @@ function ResponseTypeSwitcher({
 
 function MethodSelect({
 	methods,
-	allMethods,
 	selectedMethod,
 	value,
 	onChange,
 }: {
 	methods: MethodWithId[];
-	allMethods: MethodWithId[];
 	selectedMethod?: MethodWithId;
 	value?: string;
 	onChange: (value?: string) => void;
@@ -344,7 +342,7 @@ function MethodSelect({
 	const options = selectedMethod && !methods.some((method) => method.id === selectedMethod.id)
 		? [selectedMethod, ...methods]
 		: methods;
-	const duplicateIndexByColor = getDuplicateMethodIndexByColor(allMethods);
+	const duplicateIndexByColor = getDuplicateMethodIndexByColor(options);
 	return (
 		<Select
 			placeholder={t('placeholders.selectMethod')}
@@ -469,7 +467,6 @@ function ConditionValueInput({
 			<SourceSwitcher value={source} onChange={setSource} />
 			<MethodSelect
 				methods={methods}
-				allMethods={allMethods}
 				selectedMethod={selectedMethod}
 				value={methodId}
 				onChange={(value) => {

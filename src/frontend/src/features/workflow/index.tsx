@@ -418,12 +418,9 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   };
 
   const downloadConnectionTemplate = async () => {
+    if (!activeConnectionId) return;
     setIsDownloadingTemplate(true);
     try {
-      if (!activeConnectionId) {
-        message.error(t('messages.downloadTemplateRequiresSave'));
-        return;
-      }
       const template = (await apiExecutor({
         url: `/template/connection/${activeConnectionId}`,
         method: 'GET',

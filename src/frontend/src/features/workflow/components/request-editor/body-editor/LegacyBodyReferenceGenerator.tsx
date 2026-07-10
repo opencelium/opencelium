@@ -75,10 +75,7 @@ export function LegacyBodyReferenceGenerator({ connection, currentMethod, onAppl
   }, [connection, currentMethod.index, currentMethod.id]);
 
   const selectedMethod = methods.find((method) => method.id === methodId);
-  const duplicateIndexByColor = useMemo(
-    () => getDuplicateMethodIndexByColor(connection.fromConnector.method),
-    [connection],
-  );
+  const duplicateIndexByColor = useMemo(() => getDuplicateMethodIndexByColor(methods), [methods]);
   const currentMethodIterators = useMemo(
     () => getIteratorsForMethod(connection, currentMethod),
     [connection, currentMethod],
