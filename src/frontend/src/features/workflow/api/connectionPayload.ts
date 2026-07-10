@@ -369,7 +369,7 @@ const serializeHeaderReferences = (value: unknown, endpointArgs?: Record<string,
 const serializePayloadData = (body: unknown, endpointArgs?: Record<string, any>, format = 'json') =>
 	serializeHeaderReferences(normalizePayloadData(body, format), endpointArgs);
 
-const buildMethodPayload = (node: WorkflowNodeModel, index: string, order: number) => {
+const buildMethodPayload = (node: WorkflowNodeModel, index: string, order: number, resolvedColor?: string) => {
 	const config = node.data.methodConfig as any;
 	const endpointArgs = config?.endpointArgs ?? {};
 	const isHttpRequest = nodeKind(node) === 'system';
@@ -394,7 +394,7 @@ const buildMethodPayload = (node: WorkflowNodeModel, index: string, order: numbe
 		name: config?.name ?? node.data.subtitle,
 		...(node.data.labelEdited ? { label: node.data.subtitle } : {}),
 		index,
-		color: normalizeColor((node.data as any).color, ALL_COLORS[order % ALL_COLORS.length]),
+		color: normalizeColor(resolvedColor ?? (node.data as any).color, ALL_COLORS[order % ALL_COLORS.length]),
 		connector: isHttpRequest ? null : node.data.connector,
 		request: {
 			endpoint: serializeReferenceString(config?.url ?? '', endpointArgs),
@@ -597,9 +597,26 @@ const normalizeFieldBindings = (fieldBindings: any) =>
 
 export function buildFromConnectorPayload(nodes: WorkflowNodeModel[], edges: WorkflowEdgeModel[]) {
 	const workflowIndexes = buildWorkflowIndexes(nodes, edges);
-	const methods = nodes
-		.filter(isMethodNode)
-		.map((node, index) => buildMethodPayload(node, normalizeIndex(workflowIndexes.get(node.id), index), index))
+	const methodNodes = nodes.filter(isMethodNode);
+	const usedMethodColors = new Set<string>();
+	methodNodes.forEach((node) => {
+		const raw = typeof node.data.color === 'string' ? node.data.color.trim() : '';
+		if (raw) usedMethodColors.add(raw.toLowerCase());
+	});
+	const colorByNodeId = new Map<string, string>();
+	methodNodes.forEach((node) => {
+		const raw = typeof node.data.color === 'string' ? node.data.color.trim() : '';
+		if (raw) {
+			colorByNodeId.set(node.id, raw);
+			return;
+		}
+		const free = ALL_COLORS.find((color) => !usedMethodColors.has(color.toLowerCase()))
+			?? ALL_COLORS[colorByNodeId.size % ALL_COLORS.length];
+		usedMethodColors.add(free.toLowerCase());
+		colorByNodeId.set(node.id, free);
+	});
+	const methods = methodNodes
+		.map((node, index) => buildMethodPayload(node, normalizeIndex(workflowIndexes.get(node.id), index), index, colorByNodeId.get(node.id)))
 		.sort(compareIndex);
 	const operatorEntries = nodes
 		.filter(isOperatorNode)

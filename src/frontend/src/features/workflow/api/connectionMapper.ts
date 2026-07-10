@@ -5,6 +5,7 @@ import { initialEdges, initialNodes } from '../data/initialGraph';
 import { OFFSETS } from '../utils/graph.constants';
 import { getBottomSourceHandle, getRightSourceHandle } from '../utils/graph.handles';
 import { normalizeWorkflowPositions } from '../utils/graph.dragDrop';
+import { ALL_COLORS } from '../constants/colors';
 import { normalizeConnectionPayload } from './connectionPayload';
 
 export type WorkflowConnectionState = {
@@ -498,6 +499,24 @@ const buildEdges = (entries: IndexedWorkflowEntry[]): WorkflowEdgeModel[] => {
 	return edges;
 };
 
+const assignMissingMethodColors = (list: WorkflowNodeModel[]): WorkflowNodeModel[] => {
+	const usedColors = new Set<string>();
+	list.forEach((node) => {
+		if (node.type !== 'connector' && node.type !== 'system') return;
+		const raw = typeof node.data.color === 'string' ? node.data.color.trim() : '';
+		if (raw) usedColors.add(raw.toLowerCase());
+	});
+	return list.map((node) => {
+		if (node.type !== 'connector' && node.type !== 'system') return node;
+		const raw = typeof node.data.color === 'string' ? node.data.color.trim() : '';
+		if (raw) return node;
+		const free = ALL_COLORS.find((color) => !usedColors.has(color.toLowerCase()))
+			?? ALL_COLORS[usedColors.size % ALL_COLORS.length];
+		usedColors.add(free.toLowerCase());
+		return { ...node, data: { ...node.data, color: free } };
+	});
+};
+
 const hasStackedNodes = (list: WorkflowNodeModel[]) => {
 	const placed = list.filter((node) => node.type !== 'start');
 	for (let i = 0; i < placed.length; i += 1) {
@@ -549,7 +568,7 @@ export function mapConnectionToWorkflowState(
 	const shouldAutoLayout = entries.length > 0
 		&& ((!restoredFromUi && savedUiNodes.length === 0) || hasStackedNodes(nodes));
 	const positionedNodes = shouldAutoLayout ? normalizeWorkflowPositions(nodes, edges) : nodes;
-	const normalizedNodes = withLeafState(positionedNodes, edges);
+	const normalizedNodes = withLeafState(assignMissingMethodColors(positionedNodes), edges);
 
 	return {
 		title: connection.title,
