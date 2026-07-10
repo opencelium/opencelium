@@ -92,6 +92,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
         }
         commandPalette: {
             placeholder: string
+            noResults: string
             groups: {
                 recent: string
                 navigate: string

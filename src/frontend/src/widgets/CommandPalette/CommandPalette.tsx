@@ -11,6 +11,7 @@ import type {Suggestion} from "@shared/command/types.ts";
 import {CommandPalettePortal} from "@widgets/CommandPalette/CommanPalettePortal.tsx";
 import {useAuth} from "@features/auth/useAuth.ts";
 import {Loading} from "@shared/ui/primitives/Loading/Loading.tsx";
+import {Empty} from "@shared/ui/primitives/Empty";
 import {useLayoutStore} from "@app/layouts/AppLayout/layout.store.ts";
 import {useCommandPaletteUIStore, type CommandRenderMode} from "@widgets/CommandPalette/command-palette.store.ts";
 import {openModalStore} from "@app/layouts/AppLayout/GlobalModal/GlobalModal.tsx";
@@ -306,37 +307,43 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
                         </div>
                     <HotKey/>
 
-                    {isActive && hasItems &&
+                    {isActive && !isLoading && (hasItems || value.trim().length > 0) &&
                         <div className="cmdk-dropdown">
-                            <Command.List>
-                                {displayGroups.map(group => group.items.length > 0 && (
-                                    <Command.Group key={group.key} heading={group.heading}>
-                                        {group.items.map((s) => (
-                                            <Command.Item
-                                                key={`${group.key}:${s.value}`}
-                                                value={`${group.key}:${s.value}`}
-                                                data-testid={buildTestId('command-palette-item', group.key, s.value)}
-                                                onMouseDown={(e) => e.preventDefault()}
-                                                onSelect={() => group.key === 'recent' ? handleSelectRecent(s.value) : handleSelect(s.value)}
-                                            >
-                                                <div className="cmdk-item-row">
-                                                    {s.icon && (
-                                                        <span className="cmdk-item-icon">
-                                                            <Icon name={s.icon} size={16}/>
-                                                        </span>
-                                                    )}
-                                                    <span className="cmdk-item-value" title={s.label ?? s.value}>{s.label ?? s.value}</span>
-                                                    {s.description && (
-                                                        <span className="cmdk-item-description">
-                                                            {tCommon(s.description as never)}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </Command.Item>
-                                        ))}
-                                    </Command.Group>
-                                ))}
-                            </Command.List>
+                            {hasItems ? (
+                                <Command.List>
+                                    {displayGroups.map(group => group.items.length > 0 && (
+                                        <Command.Group key={group.key} heading={group.heading}>
+                                            {group.items.map((s) => (
+                                                <Command.Item
+                                                    key={`${group.key}:${s.value}`}
+                                                    value={`${group.key}:${s.value}`}
+                                                    data-testid={buildTestId('command-palette-item', group.key, s.value)}
+                                                    onMouseDown={(e) => e.preventDefault()}
+                                                    onSelect={() => group.key === 'recent' ? handleSelectRecent(s.value) : handleSelect(s.value)}
+                                                >
+                                                    <div className="cmdk-item-row">
+                                                        {s.icon && (
+                                                            <span className="cmdk-item-icon">
+                                                                <Icon name={s.icon} size={16}/>
+                                                            </span>
+                                                        )}
+                                                        <span className="cmdk-item-value" title={s.label ?? s.value}>{s.label ?? s.value}</span>
+                                                        {s.description && (
+                                                            <span className="cmdk-item-description">
+                                                                {tCommon(s.description as never)}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </Command.Item>
+                                            ))}
+                                        </Command.Group>
+                                    ))}
+                                </Command.List>
+                            ) : (
+                                <div className="cmdk-empty" data-testid="command-palette-empty">
+                                    <Empty description={tCommon('commandPalette.noResults')} />
+                                </div>
+                            )}
                             <PaletteFooter/>
                         </div>
                     }

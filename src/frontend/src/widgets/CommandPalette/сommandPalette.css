@@ -86,6 +86,11 @@
     overflow-x: hidden;
 }
 
+/* Empty state — no suggestions matched the typed command */
+.cmdk-empty {
+    padding: 16px;
+}
+
 /* Footer */
 .cmdk-footer {
     display: flex;
