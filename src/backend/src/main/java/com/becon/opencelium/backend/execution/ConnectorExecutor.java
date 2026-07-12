@@ -93,14 +93,7 @@ public class ConnectorExecutor {
         try {
             executionManager.setCurrentCtorId(connectorId);
 
-            int headPointer = 0;
-            while (headPointer < executables.size()) {
-                int tailPointer = getTailPointer(headPointer);
-
-                execute(headPointer, tailPointer);
-
-                headPointer = tailPointer + 1;
-            }
+            execute(0, executables.size() - 1);
         } catch (RuntimeException e) {
             logger.logAndSend(e);
             throw e;
@@ -109,75 +102,93 @@ public class ConnectorExecutor {
         }
     }
 
-    private void execute(int headPointer, int tailPointer) {
+    private Integer execute(int headPointer, int tailPointer) {
         checkInterrupted();
 
-        if (headPointer > tailPointer) {
-            return;
+        int pointer = headPointer;
+
+        while (pointer <= tailPointer) {
+            checkInterrupted();
+
+            int tail = getTailPointer(pointer);
+            Integer jumpPointer = null;
+
+            Object executable = executables.get(pointer);
+            String index = extractIndex(executable);
+            if (executable instanceof OperationDTO operation) {
+                logger.getLogEntity().setMethodData(new MethodData(operation.getOperationId()));
+                logger.logAndSend(String.format("phase=OPERATION_START indexPath=%s name=\"%s\" %s", index, operation.getName(), getLoopData()));
+                endPhases.push(String.format("phase=OPERATION_END indexPath=%s name=\"%s\" %s", index, operation.getName(), getLoopData()));
+                executionManager.setCurrentCtorId(operation.getConnectorId());
+
+                executeOperation(operation);
+
+                executionManager.setCurrentCtorId(connectorId);
+                logger.logAndSend(endPhases.pop());
+                logger.getLogEntity().setMethodData(null);
+
+                jumpPointer = resolveJumpPointer(operation);
+            } else if (executable instanceof OperatorEx operator && "if".equals(operator.getType())) {
+                logger.logAndSend(String.format("phase=IF_START indexPath=%s expression=(%s) %s", index, operator.getExpression(), getLoopData()));
+                endPhases.push(String.format("phase=IF_END indexPath=%s %s", index, getLoopData()));
+                endPhases.push("segment=IF_RESULT data=unknown"); // if exception occurs this will be logged, otherwise will just be skipped
+
+                boolean result = (Boolean) expressionProcessor.evaluate(
+                        operator.getExpression(),
+                        executionManager::getValue,
+                        logger,
+                        masking
+                );
+
+                endPhases.pop(); // potential exception case message is skipped
+                logger.logAndSend("segment=IF_RESULT data=" + result);
+
+                if (result) {
+                    jumpPointer = execute(pointer + 1, tail);
+                }
+                logger.logAndSend(endPhases.pop());
+            } else if (executable instanceof OperatorEx operator) { // LOOP cases = [for, forin, SplitString]
+                Loop loop = Loop.fromOperator(operator);
+                List<String> values = buildLoopValues(loop);
+                int length = values.size();
+
+                logger.logAndSend(String.format("phase=LOOP_START indexPath=%s expression=(%s) size=%d iterator=\"%s\" %s", index, loop.getRef(), length, loop.getIterator(), getLoopData()));
+                logger.logAndSend(String.format("segment=LOOP_REF ref=(%s) data=%s", loop.getRef(), values.stream().collect(Collectors.joining(", ", "[", "]"))));
+                endPhases.push(String.format("phase=LOOP_END indexPath=%s %s", index, getLoopData()));
+
+                executionManager.getLoops().add(loop);
+                for (int i = 0; i < length; i++) {
+                    // update currently executing loops' data
+                    loop.setIndex(i);
+                    loop.setValue(values.get(i));
+
+                    jumpPointer = execute(pointer + 1, tail);
+
+                    if (jumpPointer != null) {
+                        break;
+                    }
+                }
+
+                // remove executed loops' data
+                executionManager.getLoops().remove(loop);
+                logger.logAndSend(endPhases.pop());
+            } else {
+                throw new RuntimeException("Wrong type is supplied");
+            }
+
+            if (jumpPointer != null) {
+                if (jumpPointer >= headPointer && jumpPointer <= tailPointer) {
+                    pointer = jumpPointer;
+                    continue;
+                }
+
+                return jumpPointer;
+            }
+
+            pointer = tail + 1;
         }
 
-        // points to the end of the operator body
-        int tail = getTailPointer(headPointer);
-
-        Object executable = executables.get(headPointer);
-        String index = extractIndex(executable);
-        if (executable instanceof OperationDTO operation) {
-            logger.getLogEntity().setMethodData(new MethodData(operation.getOperationId()));
-            logger.logAndSend(String.format("phase=OPERATION_START indexPath=%s name=\"%s\" %s", index, operation.getName(), getLoopData()));
-            endPhases.push(String.format("phase=OPERATION_END indexPath=%s name=\"%s\" %s", index, operation.getName(), getLoopData()));
-            executionManager.setCurrentCtorId(operation.getConnectorId());
-
-            executeOperation(operation);
-
-            executionManager.setCurrentCtorId(connectorId);
-            logger.logAndSend(endPhases.pop());
-            logger.getLogEntity().setMethodData(null);
-        } else if (executable instanceof OperatorEx operator && "if".equals(operator.getType())) {
-            logger.logAndSend(String.format("phase=IF_START indexPath=%s expression=(%s) %s", index, operator.getExpression(), getLoopData()));
-            endPhases.push(String.format("phase=IF_END indexPath=%s %s", index, getLoopData()));
-            endPhases.push("segment=IF_RESULT data=unknown"); // if exception occurs this will be logged, otherwise will just be skipped
-
-            boolean result = (Boolean) expressionProcessor.evaluate(
-                    operator.getExpression(),
-                    executionManager::getValue,
-                    logger,
-                    masking
-            );
-
-            endPhases.pop(); // potential exception case message is skipped
-            logger.logAndSend("segment=IF_RESULT data=" + result);
-
-            if (result) {
-                execute(headPointer + 1, tail);
-            }
-            logger.logAndSend(endPhases.pop());
-        } else if (executable instanceof OperatorEx operator) { // LOOP cases = [for, forin, SplitString]
-            Loop loop = Loop.fromOperator(operator);
-            List<String> values = buildLoopValues(loop);
-            int length = values.size();
-
-            logger.logAndSend(String.format("phase=LOOP_START indexPath=%s expression=(%s) size=%d iterator=\"%s\" %s", index, loop.getRef(), length, loop.getIterator(), getLoopData()));
-            logger.logAndSend(String.format("segment=LOOP_REF ref=(%s) data=%s", loop.getRef(), values.stream().collect(Collectors.joining(", ", "[", "]"))));
-            endPhases.push(String.format("phase=LOOP_END indexPath=%s %s", index, getLoopData()));
-
-            executionManager.getLoops().add(loop);
-            for (int i = 0; i < length; i++) {
-                // update currently executing loops' data
-                loop.setIndex(i);
-                loop.setValue(values.get(i));
-
-                execute(headPointer + 1, tail);
-            }
-
-            // remove executed loops' data
-            executionManager.getLoops().remove(loop);
-            logger.logAndSend(endPhases.pop());
-        } else {
-            throw new RuntimeException("Wrong type is supplied");
-        }
-
-        // we already executed operations'/operators' body, now start executing next body
-        execute(tail + 1, tailPointer);
+        return null;
     }
 
     private void executeOperation(OperationDTO dto) {
@@ -434,5 +445,23 @@ public class ConnectorExecutor {
         while (!endPhases.isEmpty()) {
             logger.logAndSend(endPhases.pop());
         }
+    }
+
+    private Integer resolveJumpPointer(OperationDTO operation) {
+        String jumpTarget = operation.getJumpTarget();
+
+        if (jumpTarget == null || jumpTarget.isBlank()) {
+            return null;
+        }
+
+        for (int i = 0; i < executables.size(); i++) {
+            if (jumpTarget.equals(extractIndex(executables.get(i)))) {
+                return i;
+            }
+        }
+
+        throw new IllegalStateException(
+                "Jump target with index '" + jumpTarget + "' does not exist."
+        );
     }
 }
