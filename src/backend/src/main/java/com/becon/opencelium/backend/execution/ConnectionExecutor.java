@@ -4,7 +4,6 @@ import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
 import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.execution.masking.MaskingService;
 import com.becon.opencelium.backend.execution.masking.MaskingServiceImp;
-import com.becon.opencelium.backend.execution.oc721.FieldBind;
 import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.invoker.entity.Pagination;
 import com.becon.opencelium.backend.resource.execution.ConnectionEx;
@@ -19,7 +18,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
 public class ConnectionExecutor {
     private final Map<String, Object> webhookVars;
@@ -39,7 +37,7 @@ public class ConnectionExecutor {
     public void start() {
         executionManager = new ExecutionManagerImpl(
                 webhookVars,
-                getFieldBind(),
+                connection.getFieldBind(),
                 getRequestData(),
                 getRestTemplate(),
                 getPagination()
@@ -61,13 +59,6 @@ public class ConnectionExecutor {
             return List.of();
         }
         return executionManager.getAllOperations();
-    }
-
-
-    private List<FieldBind> getFieldBind() {
-        return connection.getFieldBind().stream()
-                .map(FieldBind::fromEx)
-                .collect(Collectors.toList());
     }
 
     private Map<Integer, RestTemplate> getRestTemplate() {
