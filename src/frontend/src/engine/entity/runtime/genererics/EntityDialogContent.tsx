@@ -18,7 +18,10 @@ export const EntityDialogContent: React.FC<Props> = ({ entityName, mode, identif
     const { data, isLoading } = useFetchEntitiesQuery(
         // Page wrappers (GenericViewPage / GenericUpdatePage) pass the same { url } shape
         // even though the query is typed as `string`; baseQuery accepts both.
-        { url: `${entity.api?.baseUrl}/${identifier}` } as any,
+        // ignoreError: a mutation elsewhere (e.g. deleting this same record from the
+        // command palette) broadly invalidates the 'Entity' tag, so this still-mounted
+        // query refetches and 404s — the "Not found" state below already covers it.
+        { url: `${entity.api?.baseUrl}/${identifier}`, customOptions: { ignoreError: true } } as any,
         { skip },
     );
 

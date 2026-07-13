@@ -109,9 +109,6 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
                 );
             },
 
-            notify: (message) => {
-                alert(message);
-            },
             setInputValue: (v: string) => setValue(v),
             focusInput: () => inputRef.current?.focus(),
         });

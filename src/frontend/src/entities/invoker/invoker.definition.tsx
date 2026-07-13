@@ -306,6 +306,7 @@ export const invokerDefinition: EntityDefinition = {
                         {
                             field: 'name',
                             resolve: resolveInvokerNames,
+                            customPath: true,
                             confirmMessage: (name) => {
                                 const t = i18n.getFixedT(i18n.language, 'entities')
                                 return t(`${baseKey}.confirmation.delete.byName`, { name })
@@ -330,7 +331,6 @@ export const invokerDefinition: EntityDefinition = {
                 {
                     type: 'literal',
                     value: 'invoker',
-                    aliases: ['invokers'],
                     icon: 'upload',
                     description: 'commandPalette.descriptions.uploadInvoker',
                     execute: async (_, ctx) => {
@@ -372,7 +372,6 @@ export const invokerDefinition: EntityDefinition = {
                 {
                     type: 'literal',
                     value: 'invoker',
-                    aliases: ['invokers'],
                     icon: 'download',
                     description: 'commandPalette.descriptions.downloadInvoker',
                     children: [

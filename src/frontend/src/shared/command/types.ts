@@ -16,8 +16,6 @@ export interface CommandExecutionContext {
 
     confirm: (options: string | CommandConfirmOptions) => Promise<boolean>;
 
-    notify: (message: string, type?: 'success' | 'error') => void;
-
     setInputValue: (v: string) => void,
 
     /** Return keyboard focus to the palette input (e.g. after a modal closes). */
