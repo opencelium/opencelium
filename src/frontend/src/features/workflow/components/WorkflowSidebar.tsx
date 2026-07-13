@@ -34,9 +34,10 @@ type Props = {
     connector?: { connectorId: number; title: string; icon?: string | null },
     methodOperation?: InvokerOperation,
   ) => void;
+  onStartJoint?: (sourceNodeId: string) => void;
 };
 
-export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Props) {
+export function WorkflowSidebar({ action, selectedNode, onClose, onSelect, onStartJoint }: Props) {
   const { t } = useI18n('workflow');
   const [activeSecondaryPanel, setActiveSecondaryPanel] = useState<SecondarySidebarMode | null>(null);
   const [selectedConnectorKey, setSelectedConnectorKey] = useState<string | null>(null);
@@ -68,11 +69,14 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
   const hasSecondarySearch = secondarySearch.trim().length > 0;
   const hasMethodSearch = methodSearch.trim().length > 0;
 
-  const translatedSidebarItems = sidebarItems.map((item) => ({
-    key: item.key,
-    title: t(item.titleKey),
-    text: t(item.textKey),
-  }));
+  const isMethodSource = selectedNode?.data.kind === 'connector' || selectedNode?.data.kind === 'system';
+  const translatedSidebarItems = sidebarItems
+    .filter((item) => item.key !== 'joint' || isMethodSource)
+    .map((item) => ({
+      key: item.key,
+      title: t(item.titleKey),
+      text: t(item.textKey),
+    }));
   const filteredSidebarItems = translatedSidebarItems.filter((item) => matchesSidebarTitle(item.title, mainQuery, hasMainSearch));
   const selectedConnector = connectors.find((item) => getConnectorKey(item.connectorId) === selectedConnectorKey);
   const connectorItems = useMemo(
@@ -150,6 +154,11 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
     if (key === 'system') {
       resetSidebar();
       return onSelect('system');
+    }
+    if (key === 'joint') {
+      resetSidebar();
+      if (selectedNode) onStartJoint?.(selectedNode.id);
+      return;
     }
     setSelectedConnectorKey(null);
     setActiveSecondaryPanel('connector');

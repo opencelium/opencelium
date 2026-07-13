@@ -6,7 +6,7 @@ import { OFFSETS } from '../utils/graph.constants';
 import { getBottomSourceHandle, getRightSourceHandle } from '../utils/graph.handles';
 import { normalizeWorkflowPositions } from '../utils/graph.dragDrop';
 import { ALL_COLORS } from '../constants/colors';
-import { normalizeConnectionPayload } from './connectionPayload';
+import { buildWorkflowIndexes, normalizeConnectionPayload } from './connectionPayload';
 
 export type WorkflowConnectionState = {
 	title: string;
@@ -108,6 +108,7 @@ const toMethodEntry = (method: any, index: number): IndexedWorkflowEntry => {
 				labelEdited: Boolean(method?.label),
 				kind: method?.connector === null ? 'system' as const : 'connector' as const,
 				color: method?.color,
+				...(method?.jumpTo ? { jumpTo: String(method.jumpTo) } : {}),
 				...(method?.connector === null
 					? {}
 					: {
@@ -569,11 +570,19 @@ export function mapConnectionToWorkflowState(
 		&& ((!restoredFromUi && savedUiNodes.length === 0) || hasStackedNodes(nodes));
 	const positionedNodes = shouldAutoLayout ? normalizeWorkflowPositions(nodes, edges) : nodes;
 	const normalizedNodes = withLeafState(assignMissingMethodColors(positionedNodes), edges);
+	const jumpIndexToId = new Map<string, string>();
+	buildWorkflowIndexes(normalizedNodes, edges).forEach((index, id) => jumpIndexToId.set(index, id));
+	const nodesWithJumps = normalizedNodes.map((node) => {
+		const jump = node.data.jumpTo;
+		if (!jump) return node;
+		const targetId = jumpIndexToId.get(jump);
+		return { ...node, data: { ...node.data, jumpTo: targetId && targetId !== node.id ? targetId : undefined } };
+	});
 
 	return {
 		title: connection.title,
 		description: connection.description ?? '',
-		nodes: normalizedNodes,
+		nodes: nodesWithJumps,
 		edges,
 		fieldBindings: Array.isArray(connection.fieldBinding)
 			? connection.fieldBinding

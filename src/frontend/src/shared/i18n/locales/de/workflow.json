@@ -7,6 +7,7 @@
     "close": "Schließen",
     "ok": "Ok",
     "delete": "Löschen",
+    "removeJoint": "Verbindung entfernen",
     "edit": "Bearbeiten",
     "createNew": "Neu erstellen",
     "insertReference": "Referenz einfügen",
@@ -112,6 +113,10 @@
     "addHttpRequest": {
       "title": "HTTP-Anfrage hinzufügen",
       "description": "Fügen Sie eine einfache HTTP-Anfrage hinzu und geben Sie Ihre URL ein."
+    },
+    "addJoint": {
+      "title": "Joint hinzufügen",
+      "description": "Verbindet zwei Knoten miteinander."
     },
     "operatorOption": {
       "if": {

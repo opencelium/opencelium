@@ -1,4 +1,4 @@
-import { Controls, ReactFlow } from '@xyflow/react';
+import { Controls, MarkerType, ReactFlow } from '@xyflow/react';
 import type {
   OnConnect,
   OnEdgesChange,
@@ -32,6 +32,11 @@ type Props = PropsWithChildren<{
   nodes: WorkflowNodeModel[];
   edges: WorkflowEdgeModel[];
   activeAction: WorkflowAction | null;
+  jointSourceId?: string | null;
+  jointTargetIds?: Set<string>;
+  onConfirmJoint?: (targetNodeId: string) => void;
+  onCancelJoint?: () => void;
+  onRemoveJoint?: (nodeId: string) => void;
   onNodesChange: OnNodesChange<WorkflowNodeModel>;
   onEdgesChange: OnEdgesChange<WorkflowEdgeModel>;
   onConnect: OnConnect;
@@ -84,6 +89,11 @@ export function WorkflowCanvas({
   nodes,
   edges,
   activeAction,
+  jointSourceId,
+  jointTargetIds,
+  onConfirmJoint,
+  onCancelJoint,
+  onRemoveJoint,
   onNodesChange,
   onEdgesChange,
   onConnect,
@@ -174,11 +184,14 @@ export function WorkflowCanvas({
         duplicateMethodColor: methodInstanceById.get(node.id)?.color,
         alwaysShowRightAdd: !isPreviewNode && node.type === 'start' && onlyStartNode,
         highlighted: Boolean(node.data.highlighted) || highlightedBranch.nodeIds.has(node.id),
+        jointCandidate: Boolean(jointTargetIds?.has(node.id)),
+        jointSource: node.id === jointSourceId,
         suppressHoverAddControls: isPreviewNode || activeAction?.sourceNodeId === node.id,
         lockVisibleAddControls: !isPreviewNode && activeAction?.sourceNodeId === node.id,
         onAddStep: onOpenAddStep,
         onOpenContextMenu,
         onDeleteNode,
+        onRemoveJoint,
       },
     };
   });
@@ -190,6 +203,28 @@ export function WorkflowCanvas({
       highlighted: Boolean(edge.data?.highlighted) || highlightedBranch.edgeIds.has(edge.id),
     },
   }));
+
+  const nodeIdSet = new Set(nodes.map((node) => node.id));
+  const jumpEdges = nodes.flatMap((node) => {
+    const targetId = node.data.jumpTo;
+    if (!targetId || targetId === node.id || !nodeIdSet.has(targetId)) return [];
+    return [{
+      id: `jump-${node.id}`,
+      source: node.id,
+      target: targetId,
+      sourceHandle: 'right',
+      targetHandle: 'left',
+      type: 'default',
+      selectable: false,
+      deletable: false,
+      focusable: false,
+      animated: false,
+      style: { stroke: 'var(--color-status-success-fg, #52c41a)', strokeWidth: 1.5, strokeDasharray: '5 4' },
+      markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color-status-success-fg, #52c41a)' },
+      data: { jump: true },
+    }];
+  });
+  const renderedEdges = [...preparedEdges, ...jumpEdges] as unknown as WorkflowEdgeModel[];
 
   useEffect(() => {
     if (!restoredViewport || !reactFlowInstance.current) return;
@@ -211,7 +246,7 @@ export function WorkflowCanvas({
     <div className="canvasCard">
       <ReactFlow<WorkflowNodeModel, WorkflowEdgeModel>
         nodes={preparedNodes}
-        edges={preparedEdges}
+        edges={renderedEdges}
         proOptions={{ hideAttribution: true }}
         onInit={(instance) => {
           reactFlowInstance.current = instance;
@@ -229,6 +264,11 @@ export function WorkflowCanvas({
         onNodeDragStart={onNodeDragStart}
         onNodeDrag={onNodeDrag}
         onNodeDragStop={onNodeDragStop}
+        onNodeClick={(_, node) => {
+          if (!jointSourceId) return;
+          if (jointTargetIds?.has(node.id)) onConfirmJoint?.(node.id);
+          else onCancelJoint?.();
+        }}
         onNodeDoubleClick={onNodeDoubleClick}
         onPaneClick={onPaneClick}
         nodesDraggable

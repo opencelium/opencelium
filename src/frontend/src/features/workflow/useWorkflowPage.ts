@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { addEdge, useEdgesState, useNodesState } from '@xyflow/react';
 import type { Connection } from '@xyflow/react';
 import type { ReactFlowInstance, Viewport } from '@xyflow/react';
@@ -12,6 +12,7 @@ import { createNodeFromAction, deleteNodeGraph } from './utils/graphUtils';
 import { collectDescendantNodeIds, getOperatorBottomBranch } from './utils/graph.traversal';
 import { OFFSETS } from './utils/graph.constants';
 import { getRightSourceHandle } from './utils/graph.handles';
+import { getValidJumpTargetIds } from './utils/jumpValidator';
 import {
   moveOrCopyWorkflowNodes,
   type InvalidReference,
@@ -163,6 +164,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
   } | null>(null);
   const [nodes, setNodes, onNodesChange] = useNodesState<WorkflowNodeModel>(initialNodes);
   const draggedPositionLockRef = useRef<Set<string> | null>(null);
+  const multiDragRef = useRef(false);
   const handleNodesChange: typeof onNodesChange = (changes) => {
     const locked = draggedPositionLockRef.current;
     if (!locked || locked.size === 0) {
@@ -174,6 +176,11 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
   };
   const [edges, setEdges, onEdgesChange] = useEdgesState<WorkflowEdgeModel>(initialEdges);
   const [sidebarAction, setSidebarAction] = useState<WorkflowAction | null>(null);
+  const [jointSourceId, setJointSourceId] = useState<string | null>(null);
+  const jointTargetIds = useMemo(
+    () => (jointSourceId ? getValidJumpTargetIds(jointSourceId, nodes, edges, options.fieldBindings ?? []) : new Set<string>()),
+    [jointSourceId, nodes, edges, options.fieldBindings],
+  );
   const [contextMenu, setContextMenu] = useState<WorkflowContextMenu | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [methodEditor, setMethodEditor] = useState<WorkflowMethodEditorState | null>(null);
@@ -920,6 +927,8 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     nodes,
     edges,
     sidebarAction,
+    jointSourceId,
+    jointTargetIds,
     contextMenu,
     historyOpen,
     methodEditor,
@@ -953,6 +962,14 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     onConnect: (connection: Connection) => setEdges((currentEdges) => addEdge({ ...connection, type: 'workflow-edge' }, currentEdges) as WorkflowEdgeModel[]),
     onNodeDragStart: (event: any, node: WorkflowNodeModel) => {
       try {
+        const selectedNodes = nodes.filter((item) => item.selected && item.type !== 'start');
+        if (selectedNodes.length > 1 && selectedNodes.some((item) => item.id === node.id)) {
+          multiDragRef.current = true;
+          dragSnapshot.current = null;
+          draggedPositionLockRef.current = null;
+          return;
+        }
+        multiDragRef.current = false;
         const stableNodes = sanitizeGraphNodes(stabilizeMethodColors(nodes));
         const stableEdges = sanitizeGraphEdges(stableNodes, edges);
         const draggedNode = stableNodes.find((item) => item.id === node.id);
@@ -1004,6 +1021,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       }
     },
     onNodeDrag: (event: any, node: WorkflowNodeModel) => {
+      if (multiDragRef.current) return;
       const snapshot = dragSnapshot.current;
       if (!snapshot || node.type === 'start') return;
       try {
@@ -1062,6 +1080,11 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       }
     },
     onNodeDragStop: async (event: any, node: WorkflowNodeModel) => {
+      if (multiDragRef.current) {
+        multiDragRef.current = false;
+        draggedPositionLockRef.current = null;
+        return;
+      }
       const snapshot = dragSnapshot.current;
       dragSnapshot.current = null;
       if (!snapshot || node.type === 'start') {
@@ -1140,6 +1163,24 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       }
     },
     onOpenAddStep: (action: WorkflowAction) => { setSidebarAction(action); setContextMenu(null); setHistoryOpen(false); setMethodEditor(null); setConditionEditor(null); },
+    onStartJoint: (sourceNodeId: string) => {
+      setSidebarAction(null);
+      setContextMenu(null);
+      setJointSourceId(sourceNodeId);
+    },
+    onConfirmJoint: (targetNodeId: string) => {
+      if (!jointSourceId || !jointTargetIds.has(targetNodeId)) return;
+      setNodes((current) => current.map((item) =>
+        item.id === jointSourceId ? { ...item, data: { ...item.data, jumpTo: targetNodeId } } : item,
+      ));
+      setJointSourceId(null);
+    },
+    onCancelJoint: () => setJointSourceId(null),
+    onRemoveJoint: (nodeId: string) => {
+      setNodes((current) => current.map((item) =>
+        item.id === nodeId ? { ...item, data: { ...item.data, jumpTo: undefined } } : item,
+      ));
+    },
     onAddStep: (
       kind: WorkflowAction['kind'],
       methodName?: string,
