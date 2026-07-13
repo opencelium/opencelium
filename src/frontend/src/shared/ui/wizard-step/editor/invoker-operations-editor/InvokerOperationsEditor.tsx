@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import AceEditor from 'react-ace'
 import 'ace-builds/src-noconflict/mode-json'
-import 'ace-builds/src-noconflict/theme-github'
+import 'ace-builds/src-noconflict/theme-tomorrow'
+import 'ace-builds/src-noconflict/theme-tomorrow_night'
 import { useController, useFormContext, useWatch } from 'react-hook-form'
 import { Radio } from 'antd'
 import { FieldArrayEditor } from '@shared/ui/wizard-step/editor/general/FieldArrayEditor'
@@ -9,6 +10,7 @@ import { FormInput } from '@shared/ui/form/FormInput'
 import { IconButton } from '@shared/ui/primitives/IconButton'
 import { Tabs } from '@shared/ui/primitives/Tabs'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
+import { useTheme } from '@shared/theme/hooks/useTheme'
 import type { Mode } from '@/engine/entity/EntityDefinition'
 import { FormControl } from '@shared/ui/form/FormControl'
 import { FormSwitch } from '@shared/ui/form/FormSwitch'
@@ -124,6 +126,8 @@ function JsonEditorField({
     const { control } = useFormContext()
     const { field } = useController({ name, control })
     const [localError, setLocalError] = useState<string | undefined>()
+    const { themeMode } = useTheme()
+    const aceTheme = themeMode === 'dark' ? 'tomorrow_night' : 'tomorrow'
 
     const value = typeof field.value === 'string' ? field.value : '{}'
 
@@ -142,7 +146,7 @@ function JsonEditorField({
             <div style={{ border: '1px solid var(--color-border-default)', borderRadius: 4, overflow: 'hidden', width: '100%' }}>
                 <AceEditor
                     mode="json"
-                    theme="github"
+                    theme={aceTheme}
                     name={`ace_${name.replace(/\./g, '_')}`}
                     value={value}
                     onChange={readOnly ? undefined : handleChange}

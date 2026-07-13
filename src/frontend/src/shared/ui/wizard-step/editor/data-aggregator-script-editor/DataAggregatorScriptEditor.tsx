@@ -1,9 +1,11 @@
 import React, { useMemo } from 'react'
 import AceEditor from 'react-ace'
 import 'ace-builds/src-noconflict/mode-javascript'
-import 'ace-builds/src-noconflict/theme-github'
+import 'ace-builds/src-noconflict/theme-tomorrow'
+import 'ace-builds/src-noconflict/theme-tomorrow_night'
 import { useController, useFormContext, useWatch } from 'react-hook-form'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
+import { useTheme } from '@shared/theme/hooks/useTheme'
 import type { Mode } from '@/engine/entity/EntityDefinition'
 import { buildVarDeclarations, findOcArgNotExistMarkersInScript, SECTION1_HEADER, SECTION2_COMMENT } from '@entities/dataAggregator/lib/scriptUtils'
 import type { DataAggregatorArg } from '@entities/dataAggregator/model/types'
@@ -30,6 +32,8 @@ const panelHeaderStyle: React.CSSProperties = {
 
 export function DataAggregatorScriptEditor({ name, label, mode }: DataAggregatorScriptEditorProps) {
     const { t } = useI18n('entities')
+    const { themeMode } = useTheme()
+    const aceTheme = themeMode === 'dark' ? 'tomorrow_night' : 'tomorrow'
     const { control, formState: { errors } } = useFormContext()
     const { field } = useController({ name, control })
     const args = (useWatch({ name: 'args', control }) ?? []) as DataAggregatorArg[]
@@ -78,7 +82,7 @@ export function DataAggregatorScriptEditor({ name, label, mode }: DataAggregator
                 </pre>
                 <AceEditor
                     mode="javascript"
-                    theme="github"
+                    theme={aceTheme}
                     value={varDeclarations}
                     readOnly={true}
                     name="ace_script_section1"
@@ -108,7 +112,7 @@ export function DataAggregatorScriptEditor({ name, label, mode }: DataAggregator
                 </pre>
                 <AceEditor
                     mode="javascript"
-                    theme="github"
+                    theme={aceTheme}
                     onChange={field.onChange}
                     value={field.value ?? ''}
                     name={`ace_${name}`}
