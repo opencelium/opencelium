@@ -136,7 +136,7 @@ export function WorkflowLogs() {
 						</button>
 					</Tooltip>
 				)}
-				<Tooltip content={tLogs(isExpanded ? 'live.collapse' : 'live.expand')}>
+				<Tooltip placement={"topLeft"} content={tLogs(isExpanded ? 'live.collapse' : 'live.expand')}>
 					<button
 						className='logsHeaderIconButton'
 						type='button'
