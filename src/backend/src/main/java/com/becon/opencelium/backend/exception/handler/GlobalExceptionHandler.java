@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.exception.handler;
 
 import com.becon.opencelium.backend.exception.GeneralServiceException;
+import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
 import com.becon.opencelium.backend.ocel.exception.InvalidExpressionException;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import org.springframework.http.HttpStatus;
@@ -41,5 +42,10 @@ public class GlobalExceptionHandler {
         errorResource.setStatus(ex.getStatus());
         return ResponseEntity.status(ex.getStatus())
                 .body(errorResource);
+    }
+
+    @ExceptionHandler(StorageFileNotFoundException.class)
+    public ResponseEntity<?> handleStorageFileNotFound(StorageFileNotFoundException exc) {
+        return ResponseEntity.notFound().build();
     }
 }

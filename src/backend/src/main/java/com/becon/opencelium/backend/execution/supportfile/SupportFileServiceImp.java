@@ -58,7 +58,7 @@ public class SupportFileServiceImp implements SupportFileService {
     private final int supportFileFailLimit;
 
     public static final String GET_URL = "/connection/support-file/%d/%s";
-    private static final Logger logger = LoggerFactory.getLogger(SupportFileService.class);
+    private static final Logger logger = LoggerFactory.getLogger(SupportFileServiceImp.class);
 
     public SupportFileServiceImp (
             ConnectionService connectionSqlService, TemplateService templateService,
