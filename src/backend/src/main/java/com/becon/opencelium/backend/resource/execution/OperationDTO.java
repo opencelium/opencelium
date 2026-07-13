@@ -15,7 +15,7 @@ public class OperationDTO {
     private String operationId;
     private String invoker; // TODO: need for RequestEntity building when invoker = CheckMK, will be removed in future refactoring
     private String execOrder;
-    private String jumpTarget;
+    private String jump;
     private Integer aggregatorId;
     private List<ParameterDTO> parameters;
     private RequestBodyDTO requestBody;
@@ -81,12 +81,12 @@ public class OperationDTO {
         this.execOrder = execOrder;
     }
 
-    public String getJumpTarget() {
-        return jumpTarget;
+    public String getJump() {
+        return jump;
     }
 
-    public void setJumpTarget(String jumpTarget) {
-        this.jumpTarget = jumpTarget;
+    public void setJump(String jump) {
+        this.jump = jump;
     }
 
     public Integer getAggregatorId() {

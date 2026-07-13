@@ -448,7 +448,7 @@ public class ConnectorExecutor {
     }
 
     private Integer resolveJumpPointer(OperationDTO operation) {
-        String jumpTarget = operation.getJumpTarget();
+        String jumpTarget = operation.getJump();
 
         if (jumpTarget == null || jumpTarget.isBlank()) {
             return null;
