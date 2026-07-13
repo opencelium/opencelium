@@ -2,18 +2,30 @@ package com.becon.opencelium.backend.execution;
 
 import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
 import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
+import com.becon.opencelium.backend.exception.JumpValidationException;
+import com.becon.opencelium.backend.execution.jump.ExecutionJumpGraphBuilder;
+import com.becon.opencelium.backend.execution.jump.JumpGraph;
+import com.becon.opencelium.backend.execution.jump.JumpNode;
+import com.becon.opencelium.backend.execution.jump.JumpValidator;
+import com.becon.opencelium.backend.execution.jump.JumpViolation;
 import com.becon.opencelium.backend.execution.masking.MaskingService;
 import com.becon.opencelium.backend.execution.masking.MaskingServiceImp;
 import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.invoker.entity.Pagination;
 import com.becon.opencelium.backend.resource.execution.ConnectionEx;
+import com.becon.opencelium.backend.resource.execution.ConnectorEx;
 import com.becon.opencelium.backend.resource.execution.ExecutionConnector;
 import com.becon.opencelium.backend.resource.execution.ExecutionObj;
+import com.becon.opencelium.backend.resource.execution.FieldBindEx;
+import com.becon.opencelium.backend.resource.execution.OperationDTO;
 import com.becon.opencelium.backend.resource.execution.ProxyEx;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +47,8 @@ public class ConnectionExecutor {
     }
 
     public void start() {
+        validateJumps();
+
         executionManager = new ExecutionManagerImpl(
                 webhookVars,
                 connection.getFieldBind(),
@@ -59,6 +73,46 @@ public class ConnectionExecutor {
             return List.of();
         }
         return executionManager.getAllOperations();
+    }
+
+    private void validateJumps() {
+        if (connection.getTarget() != null) {
+            // We don't have to validate old-structure(double-connector) connection
+            return;
+        }
+
+        List<JumpViolation> violations = collectJumpViolations(connection.getSource(), connection.getFieldBind());
+
+        if (!violations.isEmpty()) {
+            throw new JumpValidationException(violations);
+        }
+    }
+
+    private List<JumpViolation> collectJumpViolations(ConnectorEx connector, List<FieldBindEx> fieldBindings) {
+        if (connector == null || connector.getMethods() == null) {
+            return Collections.emptyList();
+        }
+
+        if (connector.getMethods().stream().noneMatch(m -> StringUtils.isNotBlank(m.getJump()))) {
+            return Collections.emptyList();
+        }
+
+        JumpGraph graph = ExecutionJumpGraphBuilder.build(connector, fieldBindings);
+
+        List<JumpViolation> jumpViolations = new ArrayList<>();
+
+        for (OperationDTO operation : connector.getMethods()) {
+            if (StringUtils.isBlank(operation.getJump())) {
+                continue;
+            }
+
+            JumpNode source = graph.byIndex(operation.getExecOrder());
+            if (source != null) {
+                jumpViolations.addAll(JumpValidator.validate(source, operation.getJump(), graph));
+            }
+        }
+
+        return jumpViolations;
     }
 
     private Map<Integer, RestTemplate> getRestTemplate() {
