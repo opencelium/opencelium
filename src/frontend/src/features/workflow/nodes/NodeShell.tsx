@@ -72,6 +72,8 @@ export function NodeShell({
         <NodeToolbar
           canDelete={data.kind !== 'start'}
           onDelete={() => data.onDeleteNode?.(id)}
+          canRemoveJoint={Boolean(data.jumpTo)}
+          onRemoveJoint={() => data.onRemoveJoint?.(id)}
         />
       )}
 
@@ -82,7 +84,7 @@ export function NodeShell({
           data.highlighted ? 'nodeBodyHighlighted' : ''
         } ${data.dropTarget ? 'nodeBodyDropTarget' : ''} ${
           data.dropInvalid ? 'nodeBodyDropInvalid' : ''
-        }`}
+        } ${data.jointCandidate ? 'nodeBodyJointCandidate' : ''}`}
       >
         {children}
 

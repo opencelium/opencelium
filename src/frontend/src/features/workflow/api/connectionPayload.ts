@@ -369,7 +369,7 @@ const serializeHeaderReferences = (value: unknown, endpointArgs?: Record<string,
 const serializePayloadData = (body: unknown, endpointArgs?: Record<string, any>, format = 'json') =>
 	serializeHeaderReferences(normalizePayloadData(body, format), endpointArgs);
 
-const buildMethodPayload = (node: WorkflowNodeModel, index: string, order: number, resolvedColor?: string) => {
+const buildMethodPayload = (node: WorkflowNodeModel, index: string, order: number, resolvedColor?: string, resolvedJumpTo?: string) => {
 	const config = node.data.methodConfig as any;
 	const endpointArgs = config?.endpointArgs ?? {};
 	const isHttpRequest = nodeKind(node) === 'system';
@@ -395,6 +395,7 @@ const buildMethodPayload = (node: WorkflowNodeModel, index: string, order: numbe
 		...(node.data.labelEdited ? { label: node.data.subtitle } : {}),
 		index,
 		color: normalizeColor(resolvedColor ?? (node.data as any).color, ALL_COLORS[order % ALL_COLORS.length]),
+		...(resolvedJumpTo ? { jumpTo: resolvedJumpTo } : {}),
 		connector: isHttpRequest ? null : node.data.connector,
 		request: {
 			endpoint: serializeReferenceString(config?.url ?? '', endpointArgs),
@@ -616,7 +617,13 @@ export function buildFromConnectorPayload(nodes: WorkflowNodeModel[], edges: Wor
 		colorByNodeId.set(node.id, free);
 	});
 	const methods = methodNodes
-		.map((node, index) => buildMethodPayload(node, normalizeIndex(workflowIndexes.get(node.id), index), index, colorByNodeId.get(node.id)))
+		.map((node, index) => buildMethodPayload(
+			node,
+			normalizeIndex(workflowIndexes.get(node.id), index),
+			index,
+			colorByNodeId.get(node.id),
+			node.data.jumpTo ? workflowIndexes.get(node.data.jumpTo) : undefined,
+		))
 		.sort(compareIndex);
 	const operatorEntries = nodes
 		.filter(isOperatorNode)

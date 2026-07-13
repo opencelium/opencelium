@@ -82,6 +82,12 @@
   box-shadow: 0 0 0 4px var(--color-status-error-bg);
 }
 
+.nodeBodyJointCandidate .circleNode {
+  border-color: var(--color-status-success-fg);
+  box-shadow: 0 0 0 4px var(--color-status-success-bg);
+  cursor: pointer;
+}
+
 .nodeTopLabel {
   position: absolute;
   left: 50%;

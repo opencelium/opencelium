@@ -828,6 +828,11 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
               centerStartVersion={workflow.centerStartVersion}
               onInit={workflow.setReactFlowInstance}
               activeAction={workflow.sidebarAction}
+              jointSourceId={workflow.jointSourceId}
+              jointTargetIds={workflow.jointTargetIds}
+              onConfirmJoint={workflow.onConfirmJoint}
+              onCancelJoint={workflow.onCancelJoint}
+              onRemoveJoint={workflow.onRemoveJoint}
               onNodesChange={workflow.onNodesChange}
               onEdgesChange={workflow.onEdgesChange}
               onConnect={workflow.onConnect}
@@ -853,7 +858,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
                 }
               }}
               onDeleteNode={workflow.onDeleteNode}
-              onPaneClick={() => { workflow.setSidebarAction(null); workflow.setContextMenu(null); workflow.setHistoryOpen(false); workflow.setConditionEditor(null); }}
+              onPaneClick={() => { workflow.setSidebarAction(null); workflow.setContextMenu(null); workflow.setHistoryOpen(false); workflow.setConditionEditor(null); workflow.onCancelJoint(); }}
             >
               <Background gap={16} size={1} />
             </WorkflowCanvas>
@@ -861,7 +866,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           </>
         )}
       </div>
-      <WorkflowSidebar action={workflow.sidebarAction} selectedNode={selectedNode} onClose={() => workflow.setSidebarAction(null)} onSelect={workflow.onAddStep} />
+      <WorkflowSidebar action={workflow.sidebarAction} selectedNode={selectedNode} onClose={() => workflow.setSidebarAction(null)} onSelect={workflow.onAddStep} onStartJoint={workflow.onStartJoint} />
       <WorkflowSchedulesPanel
         open={schedulesOpen}
         connectionId={activeConnectionId}

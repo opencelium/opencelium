@@ -39,8 +39,6 @@ export type WorkflowNodeData = {
 		connectorId: number;
 		title: string;
 		icon?: string | null;
-		// Persisted result of the connector's most recent POST /connector/check; hydrated
-		// from the connector list, not fetched per-node. null = never tested.
 		lastTestPassed?: boolean | null;
 		lastTestError?: string | null;
 	};
@@ -54,6 +52,9 @@ export type WorkflowNodeData = {
 	duplicateMethodColor?: string;
 	alwaysShowRightAdd?: boolean;
 	highlighted?: boolean;
+	jumpTo?: string;
+	jointCandidate?: boolean;
+	jointSource?: boolean;
 	dropTarget?: boolean;
 	dropInvalid?: boolean;
 	dragGhost?: boolean;
@@ -67,6 +68,7 @@ export type WorkflowNodeData = {
 	onAddStep?: (action: WorkflowAction) => void;
 	onOpenContextMenu?: (menu: WorkflowContextMenu | null) => void;
 	onDeleteNode?: (nodeId: string) => void;
+	onRemoveJoint?: (nodeId: string) => void;
 };
 
 export type WorkflowEdgeData = {

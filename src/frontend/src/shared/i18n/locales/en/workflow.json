@@ -7,6 +7,7 @@
     "close": "Close",
     "ok": "Ok",
     "delete": "Delete",
+    "removeJoint": "Remove joint",
     "edit": "Edit",
     "createNew": "Create new",
     "insertReference": "Insert reference",
@@ -112,6 +113,10 @@
     "addHttpRequest": {
       "title": "Add HTTP Request",
       "description": "Add a simple http request and add your url."
+    },
+    "addJoint": {
+      "title": "Add Joint",
+      "description": "Brings together two nodes."
     },
     "operatorOption": {
       "if": {

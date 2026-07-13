@@ -16,6 +16,11 @@ export const sidebarItems = [
     titleKey: 'sidebar.addHttpRequest.title',
     textKey: 'sidebar.addHttpRequest.description',
   },
+  {
+    key: 'joint',
+    titleKey: 'sidebar.addJoint.title',
+    textKey: 'sidebar.addJoint.description',
+  },
 ] as const;
 
 export const operatorItems: {
