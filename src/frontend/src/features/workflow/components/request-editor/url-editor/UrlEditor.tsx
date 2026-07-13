@@ -490,7 +490,11 @@ const UrlEditor: React.FC<{ readOnly?: boolean }> = ({ readOnly }) => {
 								testId="workflow-url-method-select"
 							/>
 						</div>
-					) : null
+					) : (
+						<div className="wfUrlMethodReadonly" data-testid="workflow-url-method-readonly">
+							{selectedMethod}
+						</div>
+					)
 				}
 				endpointArgs={endpointArgsState}
 				endpointArgsRef={endpointArgsRef}
