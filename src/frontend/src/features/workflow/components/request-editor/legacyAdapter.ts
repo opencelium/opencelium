@@ -26,7 +26,7 @@ const buildMethodResponse = (
   if (response) return response;
   const emptyBody = buildPayload({});
 
-  if (node.type === 'system') {
+  if (node.type === 'system' || node.type === 'trigger-connection') {
     return type === 'success'
       ? {
         status: '200',
@@ -90,7 +90,7 @@ const collectFieldBindings = (methods: MethodWithId[]): FieldBinding[] => {
 };
 
 export const buildLegacyConnection = (nodes: WorkflowNodeModel[]): Connection => {
-  const methodNodes = nodes.filter((node) => node.type === 'connector' || node.type === 'system');
+  const methodNodes = nodes.filter((node) => node.type === 'connector' || node.type === 'system' || node.type === 'trigger-connection');
   const usedMethodColors = new Set<string>();
   methodNodes.forEach((node) => {
     const raw = typeof node.data.color === 'string' ? node.data.color.trim() : '';
@@ -107,7 +107,7 @@ export const buildLegacyConnection = (nodes: WorkflowNodeModel[]): Connection =>
           ?? ALL_COLORS[index % ALL_COLORS.length];
         usedMethodColors.add(color.toLowerCase());
       }
-      const isHttpRequest = node.type === 'system';
+      const isHttpRequest = node.type === 'system' || node.type === 'trigger-connection';
       return {
         id: node.id,
         index: String(index),

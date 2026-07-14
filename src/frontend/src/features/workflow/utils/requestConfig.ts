@@ -46,6 +46,12 @@ export const createMethodConfigFromOperation = (operation?: InvokerOperation): W
   };
 };
 
+export const createMethodConfigFromWebhookUrl = (url: string): WorkflowMethodConfig => ({
+  ...createEmptyMethodConfig(),
+  url,
+  queryParams: buildQueryParamsFromEndpoint(url),
+});
+
 export const ensureMethodConfig = (config?: Partial<WorkflowMethodConfig>): WorkflowMethodConfig => ({
   name: config?.name,
   url: config?.url ?? createEmptyMethodConfig().url,

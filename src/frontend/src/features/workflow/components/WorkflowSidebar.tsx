@@ -2,11 +2,14 @@ import { useEffect, useMemo, useState } from 'react';
 import { useGetConnectorsQuery } from '@entities/connector/api/connectorApi';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { InvokerOperation } from '@entities/invoker/model/types';
-import type { WorkflowAction, WorkflowCreateKind, WorkflowNodeModel } from '../types/workflow.types';
+import type { WorkflowAction, WorkflowCreateKind, WorkflowNodeModel, WorkflowTriggerConnectionRef } from '../types/workflow.types';
 import { Loading } from '@shared/ui/primitives/Loading/Loading';
 import { SidebarDrawer } from './sidebar/SidebarDrawer';
 import { SidebarList } from './sidebar/SidebarList';
 import { SidebarSearch } from './sidebar/SidebarSearch';
+import { TriggerConnectionPanel } from './sidebar/TriggerConnectionPanel';
+import { TriggerConnectionScheduleDialog } from './sidebar/TriggerConnectionScheduleDialog';
+import { useTriggerConnectionStep } from './sidebar/useTriggerConnectionStep';
 import {
   operatorItems,
   sidebarItems,
@@ -28,16 +31,18 @@ const normalizeConnectorIcon = (icon?: string | File | null) =>
 type Props = {
   action: WorkflowAction | null;
   selectedNode: WorkflowNodeModel | null;
+  connectionId?: string;
   onClose: () => void;
   onSelect: (
     kind: WorkflowCreateKind,
     methodName?: string,
     connector?: { connectorId: number; title: string; icon?: string | null },
     methodOperation?: InvokerOperation,
+    triggerConnection?: WorkflowTriggerConnectionRef,
   ) => void;
 };
 
-export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Props) {
+export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, onSelect }: Props) {
   const { t } = useI18n('workflow');
   const [activeSecondaryPanel, setActiveSecondaryPanel] = useState<SecondarySidebarMode | null>(null);
   const [selectedConnectorKey, setSelectedConnectorKey] = useState<string | null>(null);
@@ -63,11 +68,21 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
     { skip: activeSecondaryPanel !== 'connector' && !hasMainSearch },
   );
 
+  const triggerConnectionStep = useTriggerConnectionStep({
+    active: activeSecondaryPanel === 'trigger-connection',
+    excludeConnectionId: connectionId ? Number(connectionId) : undefined,
+    onFinalize: (triggerConnection) => {
+      onSelect('trigger-connection', undefined, undefined, undefined, triggerConnection);
+      resetSidebar();
+    },
+  });
+
   const mainQuery = normalizeSidebarQuery(mainSearch);
   const secondaryQuery = normalizeSidebarQuery(secondarySearch);
   const methodQuery = normalizeSidebarQuery(methodSearch);
   const hasSecondarySearch = secondarySearch.trim().length > 0;
   const hasMethodSearch = methodSearch.trim().length > 0;
+  const filteredTriggerConnectionItems = triggerConnectionStep.items.filter((item) => matchesSidebarTitle(item.title, secondaryQuery, hasSecondarySearch));
 
   const translatedSidebarItems = sidebarItems.map((item) => ({
     key: item.key,
@@ -234,7 +249,15 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
         ) : (
           <>
             <SidebarList items={filteredSidebarItems} onSelect={onSelectMain} testIdPrefix="workflow-sidebar-main" />
-            <button className="sidebarItem sidebarItemMuted sidebarItemStandalone" type="button">
+            <button
+              className="sidebarItem sidebarItemStandalone"
+              type="button"
+              data-testid="workflow-sidebar-main-item-trigger-connection"
+              onClick={() => {
+                setSelectedConnectorKey(null);
+                setActiveSecondaryPanel('trigger-connection');
+              }}
+            >
               <strong>{t('sidebar.triggerConnection.title')}</strong>
               <span>{t('sidebar.triggerConnection.description')}</span>
             </button>
@@ -281,6 +304,13 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
               <span>{t('sidebar.connectorsEmpty.description')}</span>
             </button>
           )
+        ) : activeSecondaryPanel === 'trigger-connection' ? (
+          <TriggerConnectionPanel
+            isFetching={triggerConnectionStep.isFetching}
+            isError={triggerConnectionStep.isError}
+            items={filteredTriggerConnectionItems}
+            onSelect={triggerConnectionStep.onSelectConnection}
+          />
         ) : (
           <SidebarList
             items={filteredOperatorItems}
@@ -334,6 +364,15 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
           </button>
         )}
       </SidebarDrawer>
+
+      <TriggerConnectionScheduleDialog
+        key={triggerConnectionStep.scheduleDialogTarget?.connection.id ?? 'closed'}
+        open={!!triggerConnectionStep.scheduleDialogTarget}
+        connectionTitle={triggerConnectionStep.scheduleDialogTarget?.connection.title ?? ''}
+        schedules={triggerConnectionStep.scheduleDialogTarget?.schedules ?? []}
+        onCancel={triggerConnectionStep.onCancelScheduleDialog}
+        onConfirm={triggerConnectionStep.onConfirmScheduleDialog}
+      />
     </>
   );
 }

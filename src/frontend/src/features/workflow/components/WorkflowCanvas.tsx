@@ -15,6 +15,7 @@ import { IfOperatorNode } from '../nodes/IfOperatorNode';
 import { LoopOperatorNode } from '../nodes/LoopOperatorNode';
 import { StartNode } from '../nodes/StartNode';
 import { SystemMethodNode } from '../nodes/SystemMethodNode';
+import { TriggerConnectionNode } from '../nodes/TriggerConnectionNode';
 import {
   getOperatorBottomBranch,
   getOutgoingCount,
@@ -54,6 +55,7 @@ const nodeTypes = {
   start: StartNode,
   connector: ConnectorMethodNode,
   system: SystemMethodNode,
+  'trigger-connection': TriggerConnectionNode,
   if: IfOperatorNode,
   loop: LoopOperatorNode,
 };
@@ -121,9 +123,11 @@ export function WorkflowCanvas({
   {
     const groups = new Map<string, WorkflowNodeModel[]>();
     for (const node of nodes) {
-      if (node.type !== 'connector' && node.type !== 'system') continue;
+      if (node.type !== 'connector' && node.type !== 'system' && node.type !== 'trigger-connection') continue;
       if (node.data.dragGhost || node.data.dropPlaceholder) continue;
-      const key = `${node.data.connector?.connectorId ?? 'system'}::${node.data.subtitle ?? node.data.title}`;
+      const key = node.type === 'trigger-connection'
+        ? `trigger-connection::${node.data.triggerConnection?.connectionId}::${node.data.triggerConnection?.schedulerId}`
+        : `${node.data.connector?.connectorId ?? 'system'}::${node.data.subtitle ?? node.data.title}`;
       const list = groups.get(key) ?? [];
       list.push(node);
       groups.set(key, list);

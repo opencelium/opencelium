@@ -146,6 +146,34 @@
       "title": "Workflow auslösen",
       "description": "Führt einen anderen Workflow aus, wenn dieser Schritt erfolgreich abgeschlossen wurde."
     },
+    "triggerConnectionStep": {
+      "header": "Workflow wählen",
+      "subtitle": "Wählen Sie den Workflow, den Sie auslösen möchten",
+      "searchPlaceholder": "Workflow suchen",
+      "noSchedule": "Dieser Workflow hat noch keinen Zeitplan.",
+      "scheduleCount": "{{count}} Zeitpläne",
+      "scheduleCount_one": "{{count}} Zeitplan",
+      "loadError": {
+        "title": "Workflows konnten nicht geladen werden",
+        "description": "Überprüfen Sie die Backend-Verbindung und versuchen Sie es erneut."
+      },
+      "empty": {
+        "title": "Keine Workflows gefunden",
+        "description": "Es sind keine weiteren Workflows verfügbar, die ausgelöst werden können."
+      },
+      "confirmCreateWebhook": {
+        "title": "Noch kein Webhook",
+        "message": "„{{connection}}“ hat noch keinen Webhook. Möchten Sie jetzt einen erstellen?"
+      },
+      "selectScheduleDialog": {
+        "title": "Zeitplan auswählen",
+        "description": "„{{connection}}“ hat mehrere Zeitpläne. Wählen Sie, welcher durch diesen Schritt ausgelöst werden soll.",
+        "placeholder": "Zeitplan suchen",
+        "submit": "Weiter",
+        "cancel": "Abbrechen",
+        "hasWebhookTooltip": "Dieser Zeitplan hat bereits einen Webhook"
+      }
+    },
     "connectorsError": {
       "title": "Konnektoren konnten nicht geladen werden",
       "description": "Überprüfen Sie die Backend-Verbindung und versuchen Sie es erneut."

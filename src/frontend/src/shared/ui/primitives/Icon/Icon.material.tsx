@@ -38,6 +38,7 @@ import {
     AccountTree,
     Refresh,
     AltRoute,
+    Webhook,
 } from '@mui/icons-material';
 
 import type { IconComponent } from './Icon.types';
@@ -82,6 +83,7 @@ const iconMap = {
     workflow: AccountTree,
     refresh: Refresh,
     connector: AltRoute,
+    webhook: Webhook,
 };
 
 export const MaterialIcon: IconComponent = ({

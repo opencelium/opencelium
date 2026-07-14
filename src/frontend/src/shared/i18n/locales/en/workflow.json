@@ -146,6 +146,34 @@
       "title": "Trigger Connection",
       "description": "Runs another connection if this step is successfully finished."
     },
+    "triggerConnectionStep": {
+      "header": "Choose connection",
+      "subtitle": "Select the connection you want to trigger",
+      "searchPlaceholder": "search connection",
+      "noSchedule": "This workflow doesn't have a schedule yet.",
+      "scheduleCount": "{{count}} schedules",
+      "scheduleCount_one": "{{count}} schedule",
+      "loadError": {
+        "title": "Failed to load connections",
+        "description": "Check the backend connection and try again."
+      },
+      "empty": {
+        "title": "No connections found",
+        "description": "There are no other connections available to trigger."
+      },
+      "confirmCreateWebhook": {
+        "title": "No webhook yet",
+        "message": "\"{{connection}}\" doesn't have a webhook yet. Do you want to create one now?"
+      },
+      "selectScheduleDialog": {
+        "title": "Select a schedule",
+        "description": "\"{{connection}}\" has multiple schedules. Choose which one this step should trigger.",
+        "placeholder": "search schedule",
+        "submit": "Continue",
+        "cancel": "Cancel",
+        "hasWebhookTooltip": "This schedule already has a webhook"
+      }
+    },
     "connectorsError": {
       "title": "Failed to load connectors",
       "description": "Check the backend connection and try again."
