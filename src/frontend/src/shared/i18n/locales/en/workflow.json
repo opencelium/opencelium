@@ -336,7 +336,8 @@
   },
   "response": {
     "success": "Success",
-    "fail": "Fail"
+    "fail": "Fail",
+    "status": "Status"
   },
   "xmlBody": {
     "tree": "Tree",
