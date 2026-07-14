@@ -22,11 +22,16 @@ const createId = () => createShortId();
 const normalizeObject = (value: unknown): Record<string, unknown> =>
   value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
 
+const normalizeAttributes = (value: unknown): XmlAttributes =>
+  Object.fromEntries(
+    Object.entries(normalizeObject(value)).map(([key, item]) => [key, item == null ? '' : String(item)]),
+  );
+
 const toArray = (value: unknown) => (Array.isArray(value) ? value : [value]);
 
 const parseNode = (name: string, raw: unknown): XmlTreeNode => {
   const object = normalizeObject(raw);
-  const attributes = normalizeObject(object[ATTR]) as XmlAttributes;
+  const attributes = normalizeAttributes(object[ATTR]);
   const text = typeof object[VALUE] === 'string' ? object[VALUE] : '';
   const children: XmlTreeNode[] = [];
   Object.entries(object).forEach(([key, value]) => {

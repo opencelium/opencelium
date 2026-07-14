@@ -41,8 +41,9 @@ export function XmlFieldEditor({
   inlineEditable = false,
 }: Props) {
   const { t } = useI18n('workflow');
-  const referenceOnly = hasOnlyReferences(value);
-  const preview = value.trim() ? value : placeholder || t('xmlNode.empty');
+  const stringValue = typeof value === 'string' ? value : value == null ? '' : String(value);
+  const referenceOnly = hasOnlyReferences(stringValue);
+  const preview = stringValue.trim() ? stringValue : placeholder || t('xmlNode.empty');
   return (
     <div className="xmlField" style={{ display: 'grid', gap: 6 }}>
       <Space className="xmlFieldHeader" style={{ justifyContent: 'space-between', width: '100%' }}>
@@ -81,7 +82,7 @@ export function XmlFieldEditor({
       </Space>
       {referenceOnly ? (
         <XmlReferenceTokens
-          value={value}
+          value={stringValue}
           readOnly={readOnly}
           onChange={onChange}
           onClick={() => {
@@ -92,7 +93,7 @@ export function XmlFieldEditor({
       ) : inlineEditable ? (
         <Input.TextArea
           className="xmlFieldInput"
-          value={value}
+          value={stringValue}
           placeholder={placeholder}
           autoSize={{ minRows: 1, maxRows: 4 }}
           readOnly={readOnly}
