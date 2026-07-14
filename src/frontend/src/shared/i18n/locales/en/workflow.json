@@ -331,7 +331,12 @@
   "methodConfig": {
     "body": "Body",
     "header": "Header",
-    "requestUrl": "Request Url"
+    "requestUrl": "Request Url",
+    "response": "Response"
+  },
+  "response": {
+    "success": "Success",
+    "fail": "Fail"
   },
   "xmlBody": {
     "tree": "Tree",
