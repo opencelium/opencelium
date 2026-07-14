@@ -39,6 +39,7 @@ import {
     Refresh,
     AltRoute,
     Webhook,
+    Bolt,
 } from '@mui/icons-material';
 
 import type { IconComponent } from './Icon.types';
@@ -84,6 +85,7 @@ const iconMap = {
     refresh: Refresh,
     connector: AltRoute,
     webhook: Webhook,
+    flash: Bolt,
 };
 
 export const MaterialIcon: IconComponent = ({

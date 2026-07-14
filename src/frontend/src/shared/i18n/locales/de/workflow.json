@@ -144,7 +144,7 @@
     "searchPlaceholder": "suchen",
     "triggerConnection": {
       "title": "Workflow auslösen",
-      "description": "Führt einen anderen Workflow aus, wenn dieser Schritt erfolgreich abgeschlossen wurde."
+      "description": "Startet den Zeitplan eines anderen Workflows über dessen Webhook, wenn dieser Schritt erfolgreich war, ohne auf dessen Abschluss zu warten."
     },
     "triggerConnectionStep": {
       "header": "Workflow wählen",
@@ -250,7 +250,8 @@
     "if": "If",
     "loop": "Loop",
     "branchTrue": "true",
-    "branchFalse": "false"
+    "branchFalse": "false",
+    "asyncBadge": "Asynchrone Anfrage — löst den anderen Workflow aus und wartet nicht auf dessen Antwort."
   },
   "saveDialog": {
     "title": "Version speichern",

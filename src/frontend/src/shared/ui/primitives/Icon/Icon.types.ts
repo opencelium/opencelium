@@ -46,6 +46,7 @@ export type IconName =
     | 'workflow'
     | 'refresh'
     | 'connector'
+    | 'flash'
 
 export type IconColor =
     | 'default'

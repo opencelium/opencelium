@@ -143,23 +143,23 @@
     "willBeAddedAfter": "It will be added after: {{name}}",
     "searchPlaceholder": "search",
     "triggerConnection": {
-      "title": "Trigger Connection",
-      "description": "Runs another connection if this step is successfully finished."
+      "title": "Trigger Workflow",
+      "description": "Starts another workflow's schedule via its webhook when this step succeeds, without waiting for it to finish."
     },
     "triggerConnectionStep": {
-      "header": "Choose connection",
-      "subtitle": "Select the connection you want to trigger",
-      "searchPlaceholder": "search connection",
+      "header": "Choose workflow",
+      "subtitle": "Select the workflow you want to trigger",
+      "searchPlaceholder": "search workflow",
       "noSchedule": "This workflow doesn't have a schedule yet.",
       "scheduleCount": "{{count}} schedules",
       "scheduleCount_one": "{{count}} schedule",
       "loadError": {
-        "title": "Failed to load connections",
+        "title": "Failed to load workflows",
         "description": "Check the backend connection and try again."
       },
       "empty": {
-        "title": "No connections found",
-        "description": "There are no other connections available to trigger."
+        "title": "No workflows found",
+        "description": "There are no other workflows available to trigger."
       },
       "confirmCreateWebhook": {
         "title": "No webhook yet",
@@ -250,7 +250,8 @@
     "if": "If",
     "loop": "Loop",
     "branchTrue": "true",
-    "branchFalse": "false"
+    "branchFalse": "false",
+    "asyncBadge": "Asynchronous request — triggers the other workflow and does not wait for its response."
   },
   "saveDialog": {
     "title": "Save Version",
