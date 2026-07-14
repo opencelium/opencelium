@@ -20,9 +20,14 @@ export const GenericUpdatePage: React.FC<Props> = ({ entityName }) => {
     const entity = entityRegistry.get(entityName);
 
     // 🔥 fetch entity
+    // A mutation elsewhere (e.g. a command-palette delete of this same record)
+    // broadly invalidates the 'Entity' tag, so this still-mounted query refetches
+    // and 404s. ignoreError skips the global error toast — the "Not found" state
+    // below already covers a missing record.
     const { data, isLoading } = useFetchEntitiesQuery(
         {
             url: `${entity.api?.baseUrl}/${id}`,
+            customOptions: { ignoreError: true },
         },
         {
             skip: !id || !entity.api,

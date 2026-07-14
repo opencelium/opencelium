@@ -56,7 +56,7 @@
     },
     "recommendations": {
       "1": "Create another Connector",
-      "2": "Create Connection",
+      "2": "Create Workflow",
       "3": "Create Invoker"
     },
     "steps": {
