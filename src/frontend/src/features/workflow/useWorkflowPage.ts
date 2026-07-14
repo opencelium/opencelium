@@ -163,10 +163,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
   } | null>(null);
   const [nodes, setNodes, onNodesChange] = useNodesState<WorkflowNodeModel>(initialNodes);
   const draggedPositionLockRef = useRef<Set<string> | null>(null);
-  // Any active node drag continuously shifts positions across the whole canvas
-  // (not just the dragged node), which can make an already-open Tooltip elsewhere
-  // on the canvas re-align in a tight loop. Nodes use this to suppress their
-  // Tooltips for the duration of any drag, not just their own.
+  const multiDragRef = useRef(false);
   const [isAnyNodeDragging, setIsAnyNodeDragging] = useState(false);
   const handleNodesChange: typeof onNodesChange = (changes) => {
     const locked = draggedPositionLockRef.current;
@@ -962,6 +959,14 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     onNodeDragStart: (event: any, node: WorkflowNodeModel) => {
       setIsAnyNodeDragging(true);
       try {
+        const selectedNodes = nodes.filter((item) => item.selected && item.type !== 'start');
+        if (selectedNodes.length > 1 && selectedNodes.some((item) => item.id === node.id)) {
+          multiDragRef.current = true;
+          dragSnapshot.current = null;
+          draggedPositionLockRef.current = null;
+          return;
+        }
+        multiDragRef.current = false;
         const stableNodes = sanitizeGraphNodes(stabilizeMethodColors(nodes));
         const stableEdges = sanitizeGraphEdges(stableNodes, edges);
         const draggedNode = stableNodes.find((item) => item.id === node.id);
@@ -1013,6 +1018,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       }
     },
     onNodeDrag: (event: any, node: WorkflowNodeModel) => {
+      if (multiDragRef.current) return;
       const snapshot = dragSnapshot.current;
       if (!snapshot || node.type === 'start') return;
       try {
@@ -1072,6 +1078,11 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     },
     onNodeDragStop: async (event: any, node: WorkflowNodeModel) => {
       setIsAnyNodeDragging(false);
+      if (multiDragRef.current) {
+        multiDragRef.current = false;
+        draggedPositionLockRef.current = null;
+        return;
+      }
       const snapshot = dragSnapshot.current;
       dragSnapshot.current = null;
       if (!snapshot || node.type === 'start') {
