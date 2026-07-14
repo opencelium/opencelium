@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -58,11 +59,16 @@ public class TemplateSyncService {
         Objects.requireNonNull(zipBytes);
         List<String> details = new ArrayList<>();
 
-        // update invoker files that have not been modified manually
-        try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(zipBytes))) {
+        // update template files that have not been modified manually
+        try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(zipBytes), StandardCharsets.UTF_8)) {
             ZipEntry entry; // = template file
+
             while ((entry = zis.getNextEntry()) != null) {
-                if (entry.getName().endsWith(".json")) {
+                try {
+                    if (!entry.getName().endsWith(".json")) {
+                        continue;
+                    }
+
                     byte[] jsonBytes = zis.readAllBytes();
                     Template template = objectMapper.readValue(jsonBytes, Template.class);
 
@@ -77,8 +83,9 @@ public class TemplateSyncService {
                     } catch (Exception e) {
                         logger.warn("Failed to sync template file: ", e);
                     }
+                } finally {
+                    zis.closeEntry();
                 }
-                zis.closeEntry();
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

@@ -24,7 +24,6 @@ import com.becon.opencelium.backend.database.mysql.service.UserDetailServiceImpl
 import com.becon.opencelium.backend.database.mysql.service.UserRoleServiceImpl;
 import com.becon.opencelium.backend.database.mysql.service.UserServiceImpl;
 import com.becon.opencelium.backend.exception.StorageException;
-import com.becon.opencelium.backend.exception.StorageFileNotFoundException;
 import com.becon.opencelium.backend.invoker.service.InvokerServiceImp;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.User;
@@ -68,24 +67,16 @@ import org.w3c.dom.Document;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -154,7 +145,7 @@ public class FileController {
         String extension = FileNameUtils.getExtension(file.getOriginalFilename());
 
         // Check image extension. It should be JPEG, PNG or JPG
-        if (!checkImageExtension(extension)){
+        if (!FileNameUtils.isSupportedImageExtension(extension)){
             throw new StorageException("File should be jpg or png");
         }
 
@@ -204,7 +195,7 @@ public class FileController {
         String extension = FileNameUtils.getExtension(file.getOriginalFilename());
         Objects.requireNonNull(extension);
         // Check image extension. It should be JPEG, PNG or JPG
-        if (!checkImageExtension(extension)){
+        if (!FileNameUtils.isSupportedImageExtension(extension)){
             throw new StorageException("File should be jpg or png");
         }
 
@@ -248,13 +239,11 @@ public class FileController {
     public ResponseEntity<?> upload(@RequestParam("file") MultipartFile file) {
         // Get extension
         String extension = FileNameUtils.getExtension(file.getOriginalFilename());
-        if (extension == null) {
-            throw new RuntimeException("Extension not found");
+        if (!"json".equalsIgnoreCase(extension)){
+            throw new StorageException("File should be JSON");
         }
+
         try {
-            if (!checkJsonExtension(extension)){
-                throw new StorageException("File should be JSON");
-            }
             String id;
             //Generate new file name
             ObjectMapper objectMapper = new ObjectMapper();
@@ -294,48 +283,53 @@ public class FileController {
     })
     @PostMapping(value = "/template/zip", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadZip(@RequestParam("file") MultipartFile zip) {
-        // Get extension
         String extension = FileNameUtils.getExtension(zip.getOriginalFilename());
-        if (extension == null) {
-            throw new RuntimeException("Extension not found");
+
+        if (!"zip".equalsIgnoreCase(extension)) {
+            throw new RuntimeException("ZIP_FILE_REQUIRED");
         }
 
         List<FileDTO> files = new ArrayList<>();
-        try {
-            if (extension.equals("zip")) {
+        List<Template> templates = new ArrayList<>();
+
+        try (
                 InputStream inputStream = zip.getInputStream();
-                ZipInputStream zis = new ZipInputStream(inputStream);
-                ObjectMapper objectMapper = new ObjectMapper();
-                ZipEntry zipEntry;
-                List<Template> templates = new ArrayList<>();
-                while ((zipEntry = zis.getNextEntry()) != null) {
+                ZipInputStream zis = new ZipInputStream(inputStream, StandardCharsets.UTF_8);
+        ) {
+            ZipEntry zipEntry;
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            while ((zipEntry = zis.getNextEntry()) != null) {
+                try {
                     if (zipEntry.isDirectory() || !zipEntry.getName().endsWith(".json")) {
                         continue;
                     }
+
                     //Generate new file name
                     String id = UUID.randomUUID().toString();
                     String jsonContent = new String(zis.readAllBytes(), StandardCharsets.UTF_8);
+
                     Template template = objectMapper.readValue(jsonContent, Template.class);
                     template.setTemplateId(id);
+
                     updateTemplate(template);
                     templates.add(template);
+                } finally {
+                    zis.closeEntry();
                 }
-                zis.close();
-
-                templates.forEach(tmpl -> {
-                    templateService.save(tmpl);
-                    URI uri = getUri(tmpl.getTemplateId() + ".json");
-                    FileDTO fileDTO = new FileDTO(tmpl.getTemplateId(), uri.toString());
-                    files.add(fileDTO);
-                });
-            } else {
-                throw new RuntimeException("Zip file is required");
             }
-        } catch (Exception e) {
+
+            templates.forEach(tmpl -> {
+                templateService.save(tmpl);
+
+                URI uri = getUri(tmpl.getTemplateId() + ".json");
+                files.add(new FileDTO(tmpl.getTemplateId(), uri.toString()));
+            });
+
+            return ResponseEntity.ok().body(files);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        return ResponseEntity.ok().body(files);
     }
 
     @Operation(summary = "Uploads invoker xml file")
@@ -396,46 +390,50 @@ public class FileController {
     public ResponseEntity<?> uploadInvokerZip(@RequestParam("file") MultipartFile file) {
         String filename = file.getOriginalFilename();
         String extension = FileNameUtils.getExtension(file.getOriginalFilename());
+
+        if (file.isEmpty()) {
+            throw new StorageException("Failed to store empty file " + filename);
+        }
+
+        if (filename == null || filename.isBlank()) {
+            throw new StorageException("Failed to store file with empty name");
+        }
+
+        if (!"zip".equalsIgnoreCase(extension)) {
+            throw new RuntimeException("ZIP_FILE_REQUIRED");
+        }
+
         List<FileDTO> fileDTOList = new ArrayList<>();
-        try {
-            if (file.isEmpty()) {
-                throw new StorageException("Failed to store empty file " + filename);
-            }
-            Objects.requireNonNull(filename);
-            if (filename.contains("..")) {
-                // This is a security check
-                throw new StorageException(
-                        "Cannot store file with relative path outside current directory "
-                                + filename);
-            }
-            Objects.requireNonNull(extension);
-            if (extension.equals("zip")) {
+
+        try (
                 InputStream inputStream = file.getInputStream();
-                ZipInputStream zis = new ZipInputStream(inputStream);
-                ZipEntry zipEntry;
-                while ((zipEntry = zis.getNextEntry()) != null) {
-                    if(zipEntry.isDirectory() || !zipEntry.getName().endsWith(".xml")) {
+                ZipInputStream zis = new ZipInputStream(inputStream, StandardCharsets.UTF_8)
+        ) {
+            ZipEntry zipEntry;
+
+            while ((zipEntry = zis.getNextEntry()) != null) {
+                try {
+                    if (zipEntry.isDirectory() || !zipEntry.getName().endsWith(".xml")) {
                         continue;
                     }
+
                     Xml xml = saveXmlFile(zis, zipEntry.getName());
                     String name = xml.getValueByXPath("//invoker/name");
-                    FileDTO fileDTO = new FileDTO(name);
-                    fileDTOList.add(fileDTO);
+
+                    fileDTOList.add(new FileDTO(name));
 
                     // update invoker sync table to store latest files information
                     invokerSyncService.updateSync(name);
+                } finally {
+                    zis.closeEntry();
                 }
-                zis.close();
-            } else {
-                throw new RuntimeException("ZIP_FILE_REQUIRED");
             }
+
+            return ResponseEntity.ok(fileDTOList);
         } catch (Exception e) {
-            fileDTOList.forEach(f -> {
-                invokerServiceImp.delete(f.getId());
-            });
+            fileDTOList.forEach(f -> invokerServiceImp.delete(f.getId()));
             throw new StorageException("Failed to store file " + filename, e);
         }
-        return ResponseEntity.ok(fileDTOList);
     }
 
     private Xml saveXmlFile(InputStream inputStream, String filename) {
@@ -498,13 +496,6 @@ public class FileController {
         return ResponseEntity.ok().body(connectorMapper.toDTO(connector));
     }
 
-    private boolean checkJsonExtension(String extension){
-        if (!(extension.equals("json") || extension.equals("JSON"))){
-            return false;
-        }
-        return true;
-    }
-
     @GetMapping("/files/{filename:.+}")
     @ResponseBody
     public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
@@ -512,28 +503,6 @@ public class FileController {
         Resource file = storageService.loadAsResource(filename);
         return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=\"" + file.getFilename() + "\"").body(file);
-    }
-
-    @ExceptionHandler(StorageFileNotFoundException.class)
-    public ResponseEntity<?> handleStorageFileNotFound(StorageFileNotFoundException exc) {
-        return ResponseEntity.notFound().build();
-    }
-
-    private boolean checkImageExtension(String extension){
-        return FileNameUtils.isSupportedImageExtension(extension);
-    }
-
-    private static String readJsonContent(InputStream inputStream) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            StringBuilder content = new StringBuilder();
-
-            String line;
-            while ((line = reader.readLine()) != null) {
-                content.append(line);
-            }
-
-            return content.toString();
-        }
     }
 
     private URI getUri(String name) {
@@ -547,29 +516,6 @@ public class FileController {
                 .build();
 
         return uriComponents.toUri();
-    }
-
-    private List<Document> getAllInvokers(){
-        Path location = Paths.get(PathConstant.INVOKER);
-        try {
-            Stream<Path> allInvokers = Files.walk(location, 1)
-                    .filter(path -> !path.equals(location))
-                    .map(location::relativize);
-
-            return allInvokers.map(p -> new File(location.toString() + "/" + p.getFileName()))
-                    .map(file -> {
-                        try {
-                            DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-                            return dBuilder.parse(file);
-                        }
-                        catch (Exception e){
-                            throw new RuntimeException(e);
-                        }
-                    }).collect(Collectors.toList());
-        }
-        catch (IOException e) {
-            throw new StorageException("Failed to read stored files", e);
-        }
     }
 
     private void updateTemplate(Template template){

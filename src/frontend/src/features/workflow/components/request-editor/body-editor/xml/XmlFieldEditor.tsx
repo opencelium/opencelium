@@ -1,6 +1,7 @@
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button, Input, Space, Typography } from 'antd';
 import { hasOnlyReferences } from '../bodyReference';
+import { setLastBodyReferenceTriggerRect } from '../InlineBodyReferenceEditor';
 import { XmlReferenceTokens } from './XmlReferenceTokens';
 import type { XmlSelection } from './xmlTree';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
@@ -53,7 +54,18 @@ export function XmlFieldEditor({
                 className="xmlActionButton"
                 size="small"
                 type="text"
-                onClick={() => {
+                onClick={(event) => {
+                  const rect = event.currentTarget.getBoundingClientRect();
+                  const container = event.currentTarget.closest('.bodyLegacyLeft') as HTMLElement | null;
+                  const containerRect = container?.getBoundingClientRect();
+                  setLastBodyReferenceTriggerRect({
+                    left: rect.left,
+                    top: rect.top,
+                    width: rect.width,
+                    height: rect.height,
+                    containerLeft: containerRect?.left,
+                    containerRight: containerRect?.right,
+                  });
                   onSelect(selection);
                   onInsertReference(selection);
                 }}
