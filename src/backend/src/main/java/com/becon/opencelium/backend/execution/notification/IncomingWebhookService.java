@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URI;
 import java.util.Objects;
 
 @Service
@@ -29,8 +30,8 @@ public class IncomingWebhookService implements CommunicationTool {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         HttpEntity<Object> httpEntity = new HttpEntity <Object> (body, httpHeaders);
-
-        restTemplate.exchange(destination, method, httpEntity, String.class);
+        URI uri = URI.create(destination);
+        restTemplate.exchange(uri, method, httpEntity, String.class);
 
         return true;
     }
