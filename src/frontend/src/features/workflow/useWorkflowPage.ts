@@ -1168,9 +1168,10 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       methodName?: string,
       connector?: WorkflowAction['connector'],
       methodOperation?: InvokerOperation,
+      triggerConnection?: WorkflowAction['triggerConnection'],
     ) => {
       if (!sidebarAction || !kind) return;
-      const result = createNodeFromAction({ action: { ...sidebarAction, kind, methodName, connector, methodOperation }, nodes, edges });
+      const result = createNodeFromAction({ action: { ...sidebarAction, kind, methodName, connector, methodOperation, triggerConnection }, nodes, edges });
       setNodes(result.nodes);
       setEdges(result.edges);
       setSidebarAction(null);

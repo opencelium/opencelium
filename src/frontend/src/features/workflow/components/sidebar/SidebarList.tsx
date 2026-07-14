@@ -9,6 +9,7 @@ type SidebarItem = {
   status?: ConnectorStatus;
   // Only set when status === 'failed' — the connector's persisted lastTestError.
   statusError?: string | null;
+  disabled?: boolean;
 };
 
 type Props = {
@@ -23,10 +24,11 @@ export function SidebarList({ items, onSelect, testIdPrefix }: Props) {
       {items.map((item) => (
         <button
           key={item.key}
-          className={`sidebarItem${item.imageUrl ? ' sidebarItemWithImage' : ''}`}
+          className={`sidebarItem${item.imageUrl ? ' sidebarItemWithImage' : ''}${item.disabled ? ' sidebarItemMuted' : ''}`}
           type="button"
+          disabled={item.disabled}
           data-testid={buildTestId(testIdPrefix, 'item', item.key)}
-          onClick={() => onSelect(item.key)}
+          onClick={() => { if (item.disabled) return; onSelect(item.key); }}
         >
           <strong>{item.title}</strong>
           <span>{item.text}</span>

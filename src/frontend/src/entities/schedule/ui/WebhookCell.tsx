@@ -4,12 +4,11 @@ import { IconButton } from '@shared/ui/primitives/IconButton'
 import { Tooltip } from '@shared/ui/primitives/Tooltip'
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
-import { apiExecutor } from '@shared/api/apiExecutor'
 import { copyToClipboard } from '@shared/utils/copyToClipboard'
-import { genericApi, useGeneralRequestMutation } from '@shared/api/genericApi'
-import { selectAuthUser } from '@entities/auth/model/authSelectors'
-import { store } from '@app/store/store'
-import type { Schedule, ScheduleWebhook } from '../model/types'
+import { useGeneralRequestMutation } from '@shared/api/genericApi'
+import { createScheduleWebhook } from '../model/createScheduleWebhook'
+import { resolveWebhookUrl } from '../model/resolveWebhookUrl'
+import type { Schedule } from '../model/types'
 
 type Props = {
     schedule: Schedule
@@ -26,8 +25,7 @@ export const WebhookCell = memo(function WebhookCell({ schedule, tooltipPlacemen
 
     const handleCopy = async () => {
         if (!webhook?.url) return
-        const baseUrl = (import.meta.env.VITE_API_URL as string) ?? ''
-        if (await copyToClipboard(`${baseUrl}${webhook.url}`)) {
+        if (await copyToClipboard(resolveWebhookUrl(webhook.url))) {
             message.success(tEntities('schedule.webhook.copied'))
         }
         // clipboard rejection is non-critical
@@ -57,32 +55,10 @@ export const WebhookCell = memo(function WebhookCell({ schedule, tooltipPlacemen
     }
 
     const handleCreate = async () => {
-        const userId = selectAuthUser(store.getState())?.userId
-        if (userId == null) return
-
         setPending(true)
         try {
-            const response = (await apiExecutor({
-                url: `/webhook/url/${userId}/${schedule.schedulerId}`,
-                method: 'GET',
-            })) as ScheduleWebhook | undefined
-
-            if (response?.url && response?.webhookId != null) {
-                const created: ScheduleWebhook = {
-                    url: response.url,
-                    webhookId: response.webhookId,
-                }
-                store.dispatch(
-                    genericApi.util.updateQueryData('fetchEntities', '/scheduler/all', (draft) => {
-                        if (!Array.isArray(draft)) return
-                        const row = draft.find(
-                            (r: Schedule) => r.schedulerId === schedule.schedulerId,
-                        )
-                        if (row) row.webhook = created
-                    }),
-                )
-                message.success(tEntities('schedule.webhook.created'))
-            }
+            const created = await createScheduleWebhook(schedule.schedulerId)
+            if (created) message.success(tEntities('schedule.webhook.created'))
         } finally {
             setPending(false)
         }

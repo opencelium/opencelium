@@ -8,6 +8,7 @@ export const OFFSETS = {
 export const TITLES: Record<WorkflowCreateKind, string> = {
   connector: 'Connector',
   system: 'HTTP Request',
+  'trigger-connection': 'Trigger Workflow',
   if: 'If',
   loop: 'Loop',
 };

@@ -25,8 +25,14 @@
     },
     "icon": {
       "label": "Symbol",
-      "uploadHint": "Klicken, um ein Symbol hochzuladen (PNG oder JPG)",
-      "delete": "Symbol löschen"
+      "uploadButton": "Logo hochladen",
+      "hint": "PNG oder JPG",
+      "replace": "Symbol ersetzen",
+      "delete": "Symbol löschen",
+      "confirmDelete": {
+        "title": "Logo entfernen?",
+        "message": "Dies kann nicht widerrufen werden."
+      }
     },
     "url": {
       "label": "Url"

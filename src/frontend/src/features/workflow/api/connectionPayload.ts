@@ -57,7 +57,12 @@ const nodeKind = (node: WorkflowNodeModel) => {
 
 const isMethodNode = (node: WorkflowNodeModel) => {
 	const kind = nodeKind(node);
-	return kind === 'connector' || kind === 'system';
+	return kind === 'connector' || kind === 'system' || kind === 'trigger-connection';
+};
+
+const isConnectorlessMethodNode = (node: WorkflowNodeModel) => {
+	const kind = nodeKind(node);
+	return kind === 'system' || kind === 'trigger-connection';
 };
 
 const isOperatorNode = (node: WorkflowNodeModel) => {
@@ -372,7 +377,7 @@ const serializePayloadData = (body: unknown, endpointArgs?: Record<string, any>,
 const buildMethodPayload = (node: WorkflowNodeModel, index: string, order: number, resolvedColor?: string) => {
 	const config = node.data.methodConfig as any;
 	const endpointArgs = config?.endpointArgs ?? {};
-	const isHttpRequest = nodeKind(node) === 'system';
+	const isHttpRequest = isConnectorlessMethodNode(node);
 	const response = config?.response ?? (isHttpRequest
 		? {
 			responseId: `response-${node.id}`,

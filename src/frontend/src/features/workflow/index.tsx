@@ -608,7 +608,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
 
   const buildTestPayload = useCallback(() => {
     const hasMethodNode = hydratedNodes.some(
-      (node) => node.type === 'connector' || node.type === 'system',
+      (node) => node.type === 'connector' || node.type === 'system' || node.type === 'trigger-connection',
     );
     if (!hasMethodNode) {
       message.error(tEntities('connection.test.noMethods'));
@@ -842,7 +842,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
                 workflow.setContextMenu(null);
                 workflow.setHistoryOpen(false);
 
-                if (node.type === 'connector' || node.type === 'system') {
+                if (node.type === 'connector' || node.type === 'system' || node.type === 'trigger-connection') {
                   workflow.setConditionEditor(null);
                   workflow.setMethodEditor({ nodeId: node.id, mode: 'body' });
                   return;
@@ -862,7 +862,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           </>
         )}
       </div>
-      <WorkflowSidebar action={workflow.sidebarAction} selectedNode={selectedNode} onClose={() => workflow.setSidebarAction(null)} onSelect={workflow.onAddStep} />
+      <WorkflowSidebar action={workflow.sidebarAction} selectedNode={selectedNode} connectionId={activeConnectionId} onClose={() => workflow.setSidebarAction(null)} onSelect={workflow.onAddStep} />
       <WorkflowSchedulesPanel
         open={schedulesOpen}
         connectionId={activeConnectionId}

@@ -143,12 +143,36 @@
     "willBeAddedAfter": "It will be added after: {{name}}",
     "searchPlaceholder": "search",
     "triggerConnection": {
-      "title": "Trigger Connection",
-      "description": "Runs another connection if this step is successfully finished."
+      "title": "Trigger Workflow",
+      "description": "Starts another workflow's schedule via its webhook when this step succeeds, without waiting for it to finish."
     },
-    "connectorsLoading": {
-      "title": "Loading connectors...",
-      "description": "Please wait while connectors are loaded."
+    "triggerConnectionStep": {
+      "header": "Choose workflow",
+      "subtitle": "Select the workflow you want to trigger",
+      "searchPlaceholder": "search workflow",
+      "noSchedule": "This workflow doesn't have a schedule yet.",
+      "scheduleCount": "{{count}} schedules",
+      "scheduleCount_one": "{{count}} schedule",
+      "loadError": {
+        "title": "Failed to load workflows",
+        "description": "Check the backend connection and try again."
+      },
+      "empty": {
+        "title": "No workflows found",
+        "description": "There are no other workflows available to trigger."
+      },
+      "confirmCreateWebhook": {
+        "title": "No webhook yet",
+        "message": "\"{{connection}}\" doesn't have a webhook yet. Do you want to create one now?"
+      },
+      "selectScheduleDialog": {
+        "title": "Select a schedule",
+        "description": "\"{{connection}}\" has multiple schedules. Choose which one this step should trigger.",
+        "placeholder": "search schedule",
+        "submit": "Continue",
+        "cancel": "Cancel",
+        "hasWebhookTooltip": "This schedule already has a webhook"
+      }
     },
     "connectorsError": {
       "title": "Failed to load connectors",
@@ -226,7 +250,8 @@
     "if": "If",
     "loop": "Loop",
     "branchTrue": "true",
-    "branchFalse": "false"
+    "branchFalse": "false",
+    "asyncBadge": "Asynchronous request — triggers the other workflow and does not wait for its response."
   },
   "saveDialog": {
     "title": "Save Version",
