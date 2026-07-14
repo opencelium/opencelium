@@ -146,10 +146,6 @@
       "title": "Workflow auslösen",
       "description": "Führt einen anderen Workflow aus, wenn dieser Schritt erfolgreich abgeschlossen wurde."
     },
-    "connectorsLoading": {
-      "title": "Konnektoren werden geladen...",
-      "description": "Bitte warten Sie, während die Konnektoren geladen werden."
-    },
     "connectorsError": {
       "title": "Konnektoren konnten nicht geladen werden",
       "description": "Überprüfen Sie die Backend-Verbindung und versuchen Sie es erneut."

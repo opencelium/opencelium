@@ -146,10 +146,6 @@
       "title": "Trigger Connection",
       "description": "Runs another connection if this step is successfully finished."
     },
-    "connectorsLoading": {
-      "title": "Loading connectors...",
-      "description": "Please wait while connectors are loaded."
-    },
     "connectorsError": {
       "title": "Failed to load connectors",
       "description": "Check the backend connection and try again."

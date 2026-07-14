@@ -3,6 +3,7 @@ import { useGetConnectorsQuery } from '@entities/connector/api/connectorApi';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { InvokerOperation } from '@entities/invoker/model/types';
 import type { WorkflowAction, WorkflowCreateKind, WorkflowNodeModel } from '../types/workflow.types';
+import { Loading } from '@shared/ui/primitives/Loading/Loading';
 import { SidebarDrawer } from './sidebar/SidebarDrawer';
 import { SidebarList } from './sidebar/SidebarList';
 import { SidebarSearch } from './sidebar/SidebarSearch';
@@ -179,10 +180,9 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
         <SidebarSearch placeholder={t('sidebar.searchPlaceholder')} value={mainSearch} onChange={setMainSearch} testId="workflow-sidebar-search-main" autoFocus={!!action} />
         {hasMainSearch ? (
           connectorsFetching ? (
-            <button className="sidebarItem sidebarItemMuted" type="button" disabled>
-              <strong>{t('sidebar.connectorsLoading.title')}</strong>
-              <span>{t('sidebar.connectorsLoading.description')}</span>
-            </button>
+            <div className="sidebarLoading">
+              <Loading />
+            </div>
           ) : mainSearchConnectorItems.length === 0 && mainSearchOperatorItems.length === 0 && mainSearchMethodItems.length === 0 ? (
             <button className="sidebarItem sidebarItemMuted" type="button" disabled>
               <strong>{t('sidebar.searchEmpty.title')}</strong>
@@ -258,10 +258,9 @@ export function WorkflowSidebar({ action, selectedNode, onClose, onSelect }: Pro
         <SidebarSearch placeholder={secondaryPlaceholder} value={secondarySearch} onChange={setSecondarySearch} testId="workflow-sidebar-search-secondary" autoFocus={!!activeSecondaryPanel} />
         {activeSecondaryPanel === 'connector' ? (
           connectorsFetching ? (
-            <button className="sidebarItem sidebarItemMuted" type="button" disabled>
-              <strong>{t('sidebar.connectorsLoading.title')}</strong>
-              <span>{t('sidebar.connectorsLoading.description')}</span>
-            </button>
+            <div className="sidebarLoading">
+              <Loading />
+            </div>
           ) : connectorsError ? (
             <button className="sidebarItem sidebarItemMuted" type="button" disabled>
               <strong>{t('sidebar.connectorsError.title')}</strong>
