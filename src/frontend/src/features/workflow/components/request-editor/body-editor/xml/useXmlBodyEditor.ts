@@ -48,7 +48,7 @@ export function useXmlBodyEditor() {
     return {
       label: selection.kind === 'text' ? `${nodePath.join('.')}.text` : `${nodePath.join('.')}.@${selection.attribute}`,
       name,
-      namespace: namespace.slice(0, -1),
+      namespace: selection.kind === 'text' ? namespace : namespace.slice(0, -1),
       value: getSelectedValue(tree, selection),
     };
   }, [selection, tree]);
