@@ -70,7 +70,7 @@
     },
     "recommendations": {
       "1": "Create another Connector",
-      "2": "Create Connection",
+      "2": "Create Workflow",
       "3": "Create Invoker",
       "4": "Invoker List"
     },
@@ -101,7 +101,7 @@
   },
   "confirmation": {
     "delete": {
-      "byName": "Delete connector by title \"{{title}}\"?",
+      "byTitle": "Delete connector by title \"{{title}}\"?",
       "byId": "Delete connector by id \"{{id}}\"?"
     }
   },

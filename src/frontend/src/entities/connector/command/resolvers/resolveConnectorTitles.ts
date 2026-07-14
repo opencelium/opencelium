@@ -1,25 +1,15 @@
-import {store} from "@app/store/store.ts";
-import {connectorApi} from "@entities/connector/api/connectorApi.ts";
-import {debouncePromise} from "@shared/utils/debouncePromise.ts";
+import { debouncePromise } from '@shared/utils/debouncePromise'
+import { ensureConnectorMetaLoaded } from '@entities/connector/command/connectorCache'
 
+const SUGGESTION_LIMIT = 20
 
-export async function _resolveConnectorTitles(
-    input: string
-): Promise<string[]> {
-
-    const result = await store.dispatch(
-        connectorApi.endpoints.getConnectors.initiate(
-            { page: 1, limit: 2, search: input },
-            { subscribe: false }
-        )
-    );
-
-    if ('data' in result && result.data) {
-        return result.data.map(u => u.title);
-    }
-
-    return [];
+async function _resolveConnectorTitles(input: string): Promise<string[]> {
+    const list = await ensureConnectorMetaLoaded()
+    const needle = (input ?? '').toLowerCase()
+    const matches = needle
+        ? list.filter((c) => c.title.toLowerCase().includes(needle))
+        : list
+    return matches.slice(0, SUGGESTION_LIMIT).map((c) => c.title)
 }
 
-export const resolveConnectorTitles =
-    debouncePromise(_resolveConnectorTitles, 300);
+export const resolveConnectorTitles = debouncePromise(_resolveConnectorTitles, 300)

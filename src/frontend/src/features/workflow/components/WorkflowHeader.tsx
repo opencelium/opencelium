@@ -1,5 +1,5 @@
-import { Clock3, MoreHorizontal } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { MoreHorizontal } from 'lucide-react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { HeaderEditableField } from './header/HeaderEditableField';
 import { HeaderMenu } from './header/HeaderMenu';
 import { HeaderSaveDialog } from './header/HeaderSaveDialog';
@@ -20,11 +20,12 @@ type Props = {
 	saveDisabled?: boolean;
 	readOnly?: boolean;
 	loading?: boolean;
+	schedulesSlot?: ReactNode;
 };
 type EditField = 'name' | 'description' | null;
 const EMPTY_NAME_LABEL = '[Empty Name]';
 
-export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initialDescription = 'This interface delivering data into znuny and creates a ticket if the specified object is missing.', onOpenHistory, onSave, onChange, onMenuItemSelect, menuLoadingItemId, validateTitle, saveDisabled = false, readOnly = false, loading = false }: Props) {
+export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initialDescription = 'This interface delivering data into znuny and creates a ticket if the specified object is missing.', onOpenHistory, onSave, onChange, onMenuItemSelect, menuLoadingItemId, validateTitle, saveDisabled = false, readOnly = false, loading = false, schedulesSlot }: Props) {
 	const { t } = useI18n('workflow');
 	const [name, setName] = useState(initialName);
 	const [description, setDescription] = useState(initialDescription);
@@ -158,6 +159,13 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 		window.addEventListener('keydown', handleSaveShortcut);
 		return () => window.removeEventListener('keydown', handleSaveShortcut);
 	}, [readOnly, saveDisabled, saveDialogOpen]);
+	const handleMenuItemSelect = (item: WorkflowHeaderMenuItem) => {
+		if (item.id === 'version-history') {
+			onOpenHistory();
+			return;
+		}
+		onMenuItemSelect?.(item);
+	};
 
 	return (
 		<>
@@ -218,7 +226,8 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 				</div>
 
 				<div className='headerActions'>
-					<CommandPalette collapsible forceMode="modal" />
+					<CommandPalette collapsible forceMode="modal" hideSuccessRecommendations />
+					{schedulesSlot}
 					{!readOnly && (
 						<button
 							className='primaryButton headerPrimaryButton'
@@ -230,17 +239,6 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 							{t('actions.save')}
 						</button>
 					)}
-					<button
-						className='iconButton'
-						type='button'
-						data-testid='workflow-history'
-						onClick={() => {
-							setMenuOpen(false);
-							onOpenHistory();
-						}}
-					>
-						<Clock3 size={16} />
-					</button>
 					<div className='headerActionWrap'>
 						<button
 							className='iconButton'
@@ -254,7 +252,7 @@ export function WorkflowHeader({ initialName = 'i-doit 2 Znuny example', initial
 							open={menuOpen}
 							items={headerMenuItems}
 							onClose={() => setMenuOpen(false)}
-							onSelect={onMenuItemSelect}
+							onSelect={handleMenuItemSelect}
 							loadingItemId={menuLoadingItemId}
 						/>
 					</div>

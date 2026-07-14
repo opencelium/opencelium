@@ -163,6 +163,8 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
   } | null>(null);
   const [nodes, setNodes, onNodesChange] = useNodesState<WorkflowNodeModel>(initialNodes);
   const draggedPositionLockRef = useRef<Set<string> | null>(null);
+  const multiDragRef = useRef(false);
+  const [isAnyNodeDragging, setIsAnyNodeDragging] = useState(false);
   const handleNodesChange: typeof onNodesChange = (changes) => {
     const locked = draggedPositionLockRef.current;
     if (!locked || locked.size === 0) {
@@ -177,6 +179,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
   const [contextMenu, setContextMenu] = useState<WorkflowContextMenu | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [methodEditor, setMethodEditor] = useState<WorkflowMethodEditorState | null>(null);
+  const [responseNodeId, setResponseNodeId] = useState<string | null>(null);
   const [conditionEditor, setConditionEditor] = useState<WorkflowConditionEditorState | null>(null);
   const [restoredViewport, setRestoredViewport] = useState<Viewport | undefined>();
   const [viewportRestoreVersion, setViewportRestoreVersion] = useState(0);
@@ -919,10 +922,12 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
   return {
     nodes,
     edges,
+    isAnyNodeDragging,
     sidebarAction,
     contextMenu,
     historyOpen,
     methodEditor,
+    responseNodeId,
     conditionEditor,
     restoredViewport,
     viewportRestoreVersion,
@@ -952,7 +957,16 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     },
     onConnect: (connection: Connection) => setEdges((currentEdges) => addEdge({ ...connection, type: 'workflow-edge' }, currentEdges) as WorkflowEdgeModel[]),
     onNodeDragStart: (event: any, node: WorkflowNodeModel) => {
+      setIsAnyNodeDragging(true);
       try {
+        const selectedNodes = nodes.filter((item) => item.selected && item.type !== 'start');
+        if (selectedNodes.length > 1 && selectedNodes.some((item) => item.id === node.id)) {
+          multiDragRef.current = true;
+          dragSnapshot.current = null;
+          draggedPositionLockRef.current = null;
+          return;
+        }
+        multiDragRef.current = false;
         const stableNodes = sanitizeGraphNodes(stabilizeMethodColors(nodes));
         const stableEdges = sanitizeGraphEdges(stableNodes, edges);
         const draggedNode = stableNodes.find((item) => item.id === node.id);
@@ -1004,6 +1018,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       }
     },
     onNodeDrag: (event: any, node: WorkflowNodeModel) => {
+      if (multiDragRef.current) return;
       const snapshot = dragSnapshot.current;
       if (!snapshot || node.type === 'start') return;
       try {
@@ -1062,6 +1077,12 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       }
     },
     onNodeDragStop: async (event: any, node: WorkflowNodeModel) => {
+      setIsAnyNodeDragging(false);
+      if (multiDragRef.current) {
+        multiDragRef.current = false;
+        draggedPositionLockRef.current = null;
+        return;
+      }
       const snapshot = dragSnapshot.current;
       dragSnapshot.current = null;
       if (!snapshot || node.type === 'start') {
@@ -1139,6 +1160,8 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
         requestAnimationFrame(() => { draggedPositionLockRef.current = null; });
       }
     },
+    onShowResponse: (nodeId: string) => { setResponseNodeId(nodeId); setContextMenu(null); },
+    onCloseResponse: () => setResponseNodeId(null),
     onOpenAddStep: (action: WorkflowAction) => { setSidebarAction(action); setContextMenu(null); setHistoryOpen(false); setMethodEditor(null); setConditionEditor(null); },
     onAddStep: (
       kind: WorkflowAction['kind'],

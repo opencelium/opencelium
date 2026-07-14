@@ -5,7 +5,7 @@ export const openModalStore = (node: React.ReactNode, options?: ModalOptions) =>
     useModalStore.getState().open(node, options);
 };
 export const GlobalModal = () => {
-    const { isOpen, content, close, width } = useModalStore();
+    const { isOpen, content, contentKey, close, width } = useModalStore();
 
     return (
         <Modal
@@ -18,7 +18,7 @@ export const GlobalModal = () => {
                 paddingBottom: '50px',
             }}
         >
-            {content}
+            <React.Fragment key={contentKey}>{content}</React.Fragment>
         </Modal>
     );
 };

@@ -23,15 +23,30 @@ export const createUpdateExecute = ({ def, config, by }) => {
         const mode = useCommandPaletteUIStore.getState().resolveMode();
 
         try {
+            // subscribe: false — this is a one-off fetch to seed the wizard's
+            // initialRecord. A plain dispatch (no owning component/hook) never
+            // unsubscribes on its own, which would otherwise leak a permanent
+            // RTK Query subscription that keeps refetching this URL on every
+            // future entity mutation for the rest of the session.
             const result = await store.dispatch(
-                genericApi.endpoints.fetchEntities.initiate(fetchUrl)
+                genericApi.endpoints.fetchEntities.initiate(fetchUrl, { subscribe: false })
             ).unwrap();
+
+            // `value` is whatever the user typed/selected (title, name, id, ...);
+            // the submit URL must use the real primary key, which is only known
+            // once the record is fetched — resolving by title otherwise sends
+            // the title itself as the PUT path segment.
+            const primaryKey = def.api?.primaryKey;
+            const resolvedIdentifier = primaryKey && result && typeof result === 'object' && primaryKey in result
+                ? String((result as Record<string, unknown>)[primaryKey])
+                : value;
 
             const wizard = (
                 <GenericUpdateWizard
                     entityName={def.name}
-                    identifier={value}
+                    identifier={resolvedIdentifier}
                     initialRecord={result}
+                    hideRecommendations={ctx.hideRecommendations}
                 />
             );
 

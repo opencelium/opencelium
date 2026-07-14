@@ -12,6 +12,7 @@ export function ConnectorMethodNode({
   id,
   data,
   selected,
+  dragging,
 }: NodeProps<ConnectorWorkflowNode>) {
   const connectorIconUrl = resolveConnectorIconUrl(data.connector?.icon);
   const connectorStatus = getConnectorStatus(data.connector?.lastTestPassed);
@@ -41,6 +42,7 @@ export function ConnectorMethodNode({
               status={connectorStatus}
               testId={`workflow-node-connector-status-${id}`}
               tooltipOverride={connectorStatus === 'failed' ? data.connector?.lastTestError : undefined}
+              suppressTooltip={dragging || data.isAnyNodeDragging}
             />
           </div>
         ) : null}

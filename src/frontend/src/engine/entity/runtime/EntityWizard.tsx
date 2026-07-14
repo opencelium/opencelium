@@ -41,6 +41,8 @@ type Props<EntityFormValues> = {
      * change instead. The final step has no submit; changes apply on the fly.
      */
     liveUpdate?: boolean
+    /** Omit the success screen's recommendation tags even if the entity defines them. */
+    hideRecommendations?: boolean
 }
 
 export function EntityWizard<EntityFormValues>({
@@ -53,6 +55,7 @@ export function EntityWizard<EntityFormValues>({
     subheader,
     skipSuccessState,
     liveUpdate,
+    hideRecommendations,
 }: Props<EntityFormValues>) {
 
     const { user, normalizedUser } = useAuth()
@@ -243,7 +246,7 @@ export function EntityWizard<EntityFormValues>({
                                 ?? entity.wizard.modes?.[mode]?.successMessage
                                 ?? 'success'
                             }
-                            recommendations={entity.wizard?.recommendations}
+                            recommendations={hideRecommendations ? undefined : entity.wizard?.recommendations}
                             image={wizardImage}
                             form={form}
                             skipSuccessState={skipSuccessState}

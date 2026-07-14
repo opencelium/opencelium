@@ -4,6 +4,7 @@ import {createEntityCommands} from "@/engine/entity/command/createEntityCommands
 import {resolveUserEmails} from "@entities/user/command/resolvers/resolveUserEmails.ts";
 import {store} from "@app/store/store.ts";
 import {resolveUserIds} from "@entities/user/command/resolvers/resolveUserId.ts";
+import {findUserIdByEmail} from "@entities/user/command/userCache.ts";
 import {userApi} from "@entities/user/api/userApi.ts";
 import type {User, UserUpdateDto} from "@entities/user/model/types.ts";
 import {i18n} from "@shared/i18n/config/i18n.ts";
@@ -15,6 +16,20 @@ import {apiExecutor} from "@shared/api/apiExecutor.ts";
 import {message} from "antd";
 import {selectAuthUser} from "@entities/auth/model/authSelectors.ts";
 const baseKey = 'user';
+
+const resolveUserId = (value: string): string => {
+    if (/^\d+$/.test(value)) return value
+    return String(findUserIdByEmail(value) ?? value)
+}
+
+const buildUserFetchUrl = (value: string): string =>
+    `/user/${encodeURIComponent(resolveUserId(value))}`
+
+const buildUserPageUrl = (value: string): string =>
+    `/user/update/${encodeURIComponent(resolveUserId(value))}`
+
+const buildUserViewPageUrl = (value: string): string =>
+    `/user/view/${encodeURIComponent(resolveUserId(value))}`
 
 export const userDefinition: EntityDefinition = {
     name: baseKey,
@@ -480,11 +495,18 @@ export const userDefinition: EntityDefinition = {
             ...createEntityCommands({def, config: {}, dsl: {
                 update: {
                     by: [
-                        { field: 'email', resolve: resolveUserEmails },
+                        {
+                            field: 'email',
+                            resolve: resolveUserEmails,
+                            buildFetchUrl: (_def, value) => buildUserFetchUrl(value),
+                            buildNavigationUrl: (_def, value) => buildUserPageUrl(value),
+                        },
                         {
                             field: 'id',
                             resolve: resolveUserIds,
                             customPath: true,
+                            buildFetchUrl: (_def, value) => buildUserFetchUrl(value),
+                            buildNavigationUrl: (_def, value) => buildUserPageUrl(value),
                         }
                     ]
                 },
@@ -494,6 +516,7 @@ export const userDefinition: EntityDefinition = {
                             field: 'id',
                             resolve: resolveUserIds,
                             customPath: true,
+                            buildDeleteUrl: (_def, value) => buildUserFetchUrl(value),
                             afterDelete: async () => {
                                 await store.dispatch(
                                     userApi.util.invalidateTags([
@@ -509,6 +532,7 @@ export const userDefinition: EntityDefinition = {
                         {
                             field: 'email',
                             resolve: resolveUserEmails,
+                            buildDeleteUrl: (_def, value) => buildUserFetchUrl(value),
                             confirmMessage: (email) => {
                                 const t = i18n.getFixedT(i18n.language, 'entities');
                                 return t(`${baseKey}.confirmation.delete.byEmail`, {email});
@@ -522,10 +546,14 @@ export const userDefinition: EntityDefinition = {
                             field: 'id',
                             resolve: resolveUserIds,
                             customPath: true,
+                            buildFetchUrl: (_def, value) => buildUserFetchUrl(value),
+                            buildNavigationUrl: (_def, value) => buildUserViewPageUrl(value),
                         },
                         {
                             field: 'email',
-                            resolve: resolveUserEmails
+                            resolve: resolveUserEmails,
+                            buildFetchUrl: (_def, value) => buildUserFetchUrl(value),
+                            buildNavigationUrl: (_def, value) => buildUserViewPageUrl(value),
                         }
                     ]
                 }

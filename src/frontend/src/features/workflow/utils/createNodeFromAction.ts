@@ -14,7 +14,7 @@ function findOutgoingEdgeForAction(sourceNodeId: string, action: CreateNodeFromA
   );
 }
 
-function buildNewNode(args: CreateNodeFromActionArgs, sourceNode: WorkflowNodeModel, interceptedTargetNode?: WorkflowNodeModel) {
+function buildNewNode(args: CreateNodeFromActionArgs, sourceNode: WorkflowNodeModel) {
   const nodeType = getNodeType(args.action.kind!);
   const nextId = createShortId(args.action.kind);
   const usedColors = new Set(args.nodes.map((node) => node.data.color?.toLowerCase()).filter(Boolean));
@@ -85,7 +85,7 @@ export function createNodeFromAction(args: CreateNodeFromActionArgs) {
   if (!sourceNode || !args.action.kind) return { nodes: args.nodes, edges: args.edges };
   const interceptedEdge = findOutgoingEdgeForAction(sourceNode.id, args.action, args.edges);
   const interceptedTargetNode = args.nodes.find((node) => node.id === interceptedEdge?.target);
-  const built = buildNewNode(args, sourceNode, interceptedTargetNode);
+  const built = buildNewNode(args, sourceNode);
   if (interceptedEdge && interceptedTargetNode) {
     return reconnectExistingBranch(args, sourceNode, interceptedEdge, interceptedTargetNode, built);
   }

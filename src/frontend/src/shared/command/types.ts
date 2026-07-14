@@ -16,12 +16,15 @@ export interface CommandExecutionContext {
 
     confirm: (options: string | CommandConfirmOptions) => Promise<boolean>;
 
-    notify: (message: string, type?: 'success' | 'error') => void;
-
     setInputValue: (v: string) => void,
 
     /** Return keyboard focus to the palette input (e.g. after a modal closes). */
     focusInput?: () => void,
+
+    /** Set by the workflow editor's embedded command palette — create/update
+     * wizards opened from there skip the success screen's recommendation tags,
+     * since they point to unrelated top-level pages that don't fit the in-editor flow. */
+    hideRecommendations?: boolean,
 }
 
 export type CommandNodeType =

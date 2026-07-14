@@ -29,28 +29,34 @@ type Props = {
   // Overrides the default tooltip text — used to surface the connector's actual
   // lastTestError on hover instead of the generic "check failed" copy.
   tooltipOverride?: string | null;
+  // Set while the hosting node is being dragged on the canvas — a Tooltip whose
+  // anchor keeps moving via CSS transform never settles, which can trip React's
+  // "Maximum update depth exceeded" guard inside rc-trigger's alignment effect.
+  suppressTooltip?: boolean;
 };
 
-export function ConnectorStatusDot({ status, size = 9, className, testId, tooltipOverride }: Props) {
+export function ConnectorStatusDot({ status, size = 9, className, testId, tooltipOverride, suppressTooltip }: Props) {
   const { t } = useI18n('workflow');
   const { color, tooltipKey } = statusToAppearance(status);
   const tooltipContent = tooltipOverride || t(`sidebar.connectorStatus.${tooltipKey}`);
 
-  return (
-    <Tooltip content={tooltipContent}>
-      <span
-        className={className}
-        data-testid={testId}
-        style={{
-          display: 'inline-block',
-          width: size,
-          height: size,
-          minWidth: size,
-          borderRadius: size,
-          background: color,
-          flexShrink: 0,
-        }}
-      />
-    </Tooltip>
+  const dot = (
+    <span
+      className={className}
+      data-testid={testId}
+      style={{
+        display: 'inline-block',
+        width: size,
+        height: size,
+        minWidth: size,
+        borderRadius: size,
+        background: color,
+        flexShrink: 0,
+      }}
+    />
   );
+
+  if (suppressTooltip) return dot;
+
+  return <Tooltip content={tooltipContent}>{dot}</Tooltip>;
 }

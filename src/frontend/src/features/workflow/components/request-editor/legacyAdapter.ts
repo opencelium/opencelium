@@ -90,12 +90,23 @@ const collectFieldBindings = (methods: MethodWithId[]): FieldBinding[] => {
 };
 
 export const buildLegacyConnection = (nodes: WorkflowNodeModel[]): Connection => {
-  const methods: MethodWithId[] = nodes
-    .filter((node) => node.type === 'connector' || node.type === 'system')
+  const methodNodes = nodes.filter((node) => node.type === 'connector' || node.type === 'system');
+  const usedMethodColors = new Set<string>();
+  methodNodes.forEach((node) => {
+    const raw = typeof node.data.color === 'string' ? node.data.color.trim() : '';
+    if (raw) usedMethodColors.add(raw.toLowerCase());
+  });
+  const methods: MethodWithId[] = methodNodes
     .map((node, index) => {
       const config = deserializeMethodConfigReferences(ensureMethodConfig(node.data.methodConfig));
       const name = node.data.subtitle || node.data.title || node.id;
-      const color = node.data.color ?? ALL_COLORS[index % ALL_COLORS.length];
+      const explicitColor = typeof node.data.color === 'string' ? node.data.color.trim() : '';
+      let color = explicitColor;
+      if (!color) {
+        color = ALL_COLORS.find((candidate) => !usedMethodColors.has(candidate.toLowerCase()))
+          ?? ALL_COLORS[index % ALL_COLORS.length];
+        usedMethodColors.add(color.toLowerCase());
+      }
       const isHttpRequest = node.type === 'system';
       return {
         id: node.id,

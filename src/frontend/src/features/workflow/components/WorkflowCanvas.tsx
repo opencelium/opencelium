@@ -31,6 +31,7 @@ import type {
 type Props = PropsWithChildren<{
   nodes: WorkflowNodeModel[];
   edges: WorkflowEdgeModel[];
+  isAnyNodeDragging?: boolean;
   activeAction: WorkflowAction | null;
   onNodesChange: OnNodesChange<WorkflowNodeModel>;
   onEdgesChange: OnEdgesChange<WorkflowEdgeModel>;
@@ -83,6 +84,7 @@ const centerStartNode = (
 export function WorkflowCanvas({
   nodes,
   edges,
+  isAnyNodeDragging = false,
   activeAction,
   onNodesChange,
   onEdgesChange,
@@ -176,6 +178,7 @@ export function WorkflowCanvas({
         highlighted: Boolean(node.data.highlighted) || highlightedBranch.nodeIds.has(node.id),
         suppressHoverAddControls: isPreviewNode || activeAction?.sourceNodeId === node.id,
         lockVisibleAddControls: !isPreviewNode && activeAction?.sourceNodeId === node.id,
+        isAnyNodeDragging,
         onAddStep: onOpenAddStep,
         onOpenContextMenu,
         onDeleteNode,

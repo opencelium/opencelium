@@ -9,6 +9,7 @@ interface Props {
     initialRecord?: unknown
     onSuccess?: () => void
     skipSuccessState?: boolean
+    hideRecommendations?: boolean
 }
 
 export const GenericUpdateWizard: React.FC<Props> = ({
@@ -17,6 +18,7 @@ export const GenericUpdateWizard: React.FC<Props> = ({
     initialRecord,
     onSuccess,
     skipSuccessState,
+    hideRecommendations,
 }) => {
     const entity = entityRegistry.get(entityName)
     if (!entity) throw new Error(`Entity "${entityName}" not found in registry`)
@@ -40,6 +42,7 @@ export const GenericUpdateWizard: React.FC<Props> = ({
             initialValues={initialValues}
             onSubmit={handleSubmit}
             skipSuccessState={skipSuccessState}
+            hideRecommendations={hideRecommendations}
             header={entity.wizard.modes?.update?.header || `${entity.name}: ${identifier}`}
             subheader={entity.wizard.modes?.update?.subheader}
         />

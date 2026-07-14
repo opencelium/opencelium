@@ -29,6 +29,7 @@
   },
   "commandPalette": {
     "placeholder": "Type a command...",
+    "noResults": "No results found",
     "groups": {
       "recent": "Recent",
       "navigate": "Navigate",

@@ -9,9 +9,10 @@ import './CronCell.css'
 
 type Props = {
     schedule: Schedule
+    tooltipPlacement?: 'top' | 'bottom' | 'left' | 'right'
 }
 
-export const CronCell = memo(function CronCell({ schedule }: Props) {
+export const CronCell = memo(function CronCell({ schedule, tooltipPlacement }: Props) {
     const { t: tEntities } = useI18n('entities')
     const dialog = useDialog()
 
@@ -31,7 +32,7 @@ export const CronCell = memo(function CronCell({ schedule }: Props) {
     if (schedule.cronExp) {
         return (
             <span className="cron-cell">
-                <Tooltip content={tEntities('schedule.cronEdit.tooltip')}>
+                <Tooltip content={tEntities('schedule.cronEdit.tooltip')} placement={tooltipPlacement}>
                     <code className="cron-cell__chip" onClick={open}>
                         {schedule.cronExp}
                     </code>

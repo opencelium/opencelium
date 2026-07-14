@@ -63,6 +63,7 @@ export type WorkflowNodeData = {
 	hideAddControls?: boolean;
 	suppressHoverAddControls?: boolean;
 	lockVisibleAddControls?: boolean;
+	isAnyNodeDragging?: boolean;
 	onAddStep?: (action: WorkflowAction) => void;
 	onOpenContextMenu?: (menu: WorkflowContextMenu | null) => void;
 	onDeleteNode?: (nodeId: string) => void;
@@ -101,7 +102,7 @@ export type CreateNodeFromActionArgs = {
 export type WorkflowHeaderMenuItem = {
 	id: string;
 	labelKey: string;
-	section?: 'template' | 'editor' | 'exit';
+	section?: 'template' | 'history' | 'shortcuts' | 'exit';
 	keepOpenOnSelect?: boolean;
 	disabled?: boolean;
 	badgeKey?: string;
