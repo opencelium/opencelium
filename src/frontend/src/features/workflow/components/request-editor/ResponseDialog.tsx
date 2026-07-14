@@ -25,8 +25,6 @@ export function ResponseDialog({ open, node, onClose }: Props) {
   if (!open || !node) return null;
 
   const config = node.data.methodConfig;
-  const method = (config?.method || 'GET').toUpperCase();
-  const url = config?.url ?? '';
   const response = config?.response;
   const rjvTheme = themeMode === 'dark' ? 'twilight' : 'rjv-default';
 
@@ -58,9 +56,9 @@ export function ResponseDialog({ open, node, onClose }: Props) {
   const column = (title: string, result?: MethodResponse) => (
     <div className="responseColumn">
       <div className="responseColumnTitle">{title}</div>
-      <div className="responseUrlLine">
-        <span className="responseMethod">{method}</span>
-        <span className="responseUrl">{url}</span>
+      <div className="responseStatusField">
+        <div className="responseStatusLabel">{t('response.status')}</div>
+        <div className="responseStatusValue">{result?.status ?? ''}</div>
       </div>
       <Collapse items={headerItems(result)} defaultActiveKeys={[]} />
       <Collapse items={bodyItems(result)} defaultActiveKeys={['body']} />

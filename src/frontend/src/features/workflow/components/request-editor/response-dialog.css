@@ -24,36 +24,27 @@
   color: var(--color-text-primary);
 }
 
-.responseUrlLine {
+.responseStatusField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.responseStatusLabel {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.responseStatusValue {
   display: flex;
   align-items: center;
-  gap: 10px;
   min-height: 48px;
-  padding: 8px 12px;
+  padding: 8px 14px;
   border: 1px solid var(--color-border-default);
   border-radius: 8px;
   background: var(--color-background-input);
-}
-
-.responseMethod {
-  display: inline-flex;
-  align-items: center;
-  height: 30px;
-  padding: 0 12px;
-  border: 1px solid var(--color-border-default);
-  border-radius: 8px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: var(--color-text-secondary);
-  background: var(--color-background-disabled, transparent);
-  flex-shrink: 0;
-}
-
-.responseUrl {
-  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
-  font-size: 13px;
   color: var(--color-text-primary);
-  word-break: break-all;
+  font-size: 13px;
 }
 
 .responseJsonWrap {
