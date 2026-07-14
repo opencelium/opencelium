@@ -17,6 +17,7 @@ import { HistoryPanel } from './components/header/HistoryPanel';
 import { ShortcutsDialog } from './components/header/ShortcutsDialog';
 import { ConditionBuilderDialog } from './components/condition-builder/ConditionBuilder';
 import { MethodConfigDialog } from './components/request-editor/MethodConfigDialog';
+import { ResponseDialog } from './components/request-editor/ResponseDialog';
 import { buildLegacyConnection } from './components/request-editor/legacyAdapter';
 import { useWorkflowPage } from './useWorkflowPage';
 import { useUnsavedChangesGuard } from './useUnsavedChangesGuard';
@@ -922,7 +923,13 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         onChangeLabel={workflow.onChangeNodeLabel}
         onOpenRequestEditor={(nodeId, mode) => workflow.setMethodEditor({ nodeId, mode })}
         onOpenConditionEditor={(nodeId) => workflow.setConditionEditor({ nodeId })}
+        onShowResponse={workflow.onShowResponse}
         onClose={() => workflow.setContextMenu(null)}
+      />
+      <ResponseDialog
+        open={!!workflow.responseNodeId}
+        node={hydratedNodes.find((node) => node.id === workflow.responseNodeId) ?? null}
+        onClose={workflow.onCloseResponse}
       />
       <MethodConfigDialog
         open={!!workflow.methodEditor}

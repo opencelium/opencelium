@@ -182,6 +182,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
   const [contextMenu, setContextMenu] = useState<WorkflowContextMenu | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [methodEditor, setMethodEditor] = useState<WorkflowMethodEditorState | null>(null);
+  const [responseNodeId, setResponseNodeId] = useState<string | null>(null);
   const [conditionEditor, setConditionEditor] = useState<WorkflowConditionEditorState | null>(null);
   const [restoredViewport, setRestoredViewport] = useState<Viewport | undefined>();
   const [viewportRestoreVersion, setViewportRestoreVersion] = useState(0);
@@ -929,6 +930,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     contextMenu,
     historyOpen,
     methodEditor,
+    responseNodeId,
     conditionEditor,
     restoredViewport,
     viewportRestoreVersion,
@@ -1147,6 +1149,8 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
         requestAnimationFrame(() => { draggedPositionLockRef.current = null; });
       }
     },
+    onShowResponse: (nodeId: string) => { setResponseNodeId(nodeId); setContextMenu(null); },
+    onCloseResponse: () => setResponseNodeId(null),
     onOpenAddStep: (action: WorkflowAction) => { setSidebarAction(action); setContextMenu(null); setHistoryOpen(false); setMethodEditor(null); setConditionEditor(null); },
     onAddStep: (
       kind: WorkflowAction['kind'],

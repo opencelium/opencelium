@@ -15,9 +15,10 @@ type Props = {
   onChangeLabel: (nodeId: string, label: string) => void;
   onOpenRequestEditor: (nodeId: string, mode: 'url' | 'body' | 'header') => void;
   onOpenConditionEditor: (nodeId: string) => void;
+  onShowResponse: (nodeId: string) => void;
 };
 
-export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequestEditor, onOpenConditionEditor }: Props) {
+export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequestEditor, onOpenConditionEditor, onShowResponse }: Props) {
   const { t } = useI18n('workflow');
   const ref = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -86,6 +87,7 @@ export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequ
                       if (entry.item.id === 'edit-url') onOpenRequestEditor(menu.nodeId, 'url');
                       if (entry.item.id === 'edit-headers') onOpenRequestEditor(menu.nodeId, 'header');
                       if (entry.item.id === 'edit-body') onOpenRequestEditor(menu.nodeId, 'body');
+                      if (entry.item.id === 'show-response') onShowResponse(menu.nodeId);
                       onClose();
                     }}
                   >
