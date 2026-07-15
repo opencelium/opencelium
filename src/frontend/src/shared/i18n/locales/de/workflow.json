@@ -446,5 +446,12 @@
     "legacyTitle": "Referenzinformationen",
     "empty": "(ist jetzt leer)"
   },
-  "requestData": "Anfragedaten"
+  "requestData": "Anfragedaten",
+  "graphqlBody": {
+    "masterPasswordTitle": "Geben Sie das Master-Passwort ein, um auf die GraphQL-API dieses Connectors zuzugreifen",
+    "autocompleteHint": "Drücken Sie Strg + Leertaste, um die Autovervollständigung anzuzeigen.",
+    "connectorFailed": "Der Connector konnte nicht geladen werden. Überprüfen Sie die Backend-Verbindung und versuchen Sie es erneut.",
+    "loginFailed": "Die Authentifizierung bei der GraphQL-API dieses Connectors ist fehlgeschlagen. Überprüfen Sie dessen Zugangsdaten und versuchen Sie es erneut.",
+    "retry": "Erneut versuchen"
+  }
 }

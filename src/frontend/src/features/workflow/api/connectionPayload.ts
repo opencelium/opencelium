@@ -289,10 +289,10 @@ const stripPluralConnectorLists = (connector: any) => {
 	return rest;
 };
 
-const buildPayloadData = (body: unknown, format = 'json') => ({
+const buildPayloadData = (body: unknown, format = 'json', data = 'raw') => ({
 	type: Array.isArray(body) ? 'array' : 'object',
 	format,
-	data: 'raw',
+	data,
 	fields: body ?? {},
 });
 
@@ -303,12 +303,12 @@ const isPayloadData = (body: unknown) =>
 	'format' in body &&
 	'fields' in body;
 
-const normalizePayloadData = (body: unknown, format = 'json') => {
-	if (!isPayloadData(body)) return buildPayloadData(body, format);
+const normalizePayloadData = (body: unknown, format = 'json', data = 'raw') => {
+	if (!isPayloadData(body)) return buildPayloadData(body, format, data);
 	const payload = body as Record<string, unknown>;
 	return {
 		...payload,
-		data: payload.data ?? 'raw',
+		data: payload.data ?? data,
 	};
 };
 
@@ -371,8 +371,8 @@ const serializeHeaderReferences = (value: unknown, endpointArgs?: Record<string,
 	return value;
 };
 
-const serializePayloadData = (body: unknown, endpointArgs?: Record<string, any>, format = 'json') =>
-	serializeHeaderReferences(normalizePayloadData(body, format), endpointArgs);
+const serializePayloadData = (body: unknown, endpointArgs?: Record<string, any>, format = 'json', data = 'raw') =>
+	serializeHeaderReferences(normalizePayloadData(body, format, data), endpointArgs);
 
 const buildMethodPayload = (node: WorkflowNodeModel, index: string, order: number, resolvedColor?: string) => {
 	const config = node.data.methodConfig as any;
@@ -405,7 +405,7 @@ const buildMethodPayload = (node: WorkflowNodeModel, index: string, order: numbe
 			endpoint: serializeReferenceString(config?.url ?? '', endpointArgs),
 			method: config?.method ?? 'GET',
 			header: serializeHeaderReferences(config?.headers ?? {}, endpointArgs),
-			body: serializePayloadData(config?.body, endpointArgs, config?.bodyFormat),
+			body: serializePayloadData(config?.body, endpointArgs, config?.bodyFormat, config?.bodyData),
 		},
 		...(response ? { response } : {}),
 	};

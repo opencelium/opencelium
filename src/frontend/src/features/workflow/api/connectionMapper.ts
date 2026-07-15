@@ -26,6 +26,7 @@ const methodToConfig = (method: any): WorkflowMethodConfig => ({
 	queryParams: method?.request?.queryParams ?? [],
 	endpointArgs: method?.request?.endpointArgs ?? {},
 	bodyFormat: method?.request?.body?.format ?? 'json',
+	bodyData: method?.request?.body?.data ?? 'raw',
 	body: method?.request?.body?.fields ?? {},
 	response: method?.response,
 });

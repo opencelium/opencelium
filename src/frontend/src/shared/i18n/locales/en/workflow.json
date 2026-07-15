@@ -446,5 +446,12 @@
     "legacyTitle": "Reference information",
     "empty": "(is empty now)"
   },
-  "requestData": "Request data"
+  "requestData": "Request data",
+  "graphqlBody": {
+    "masterPasswordTitle": "Enter the master password to access this connector's GraphQL API",
+    "autocompleteHint": "Press Ctrl + Space to see the autocomplete.",
+    "connectorFailed": "Could not load the connector. Check the backend connection and try again.",
+    "loginFailed": "Could not authenticate with this connector's GraphQL API. Check its credentials and try again.",
+    "retry": "Try again"
+  }
 }

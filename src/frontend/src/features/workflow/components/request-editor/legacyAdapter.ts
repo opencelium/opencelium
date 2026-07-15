@@ -10,10 +10,10 @@ import type { WorkflowNodeModel } from '../../types/workflow.types';
 import { ensureMethodConfig } from '../../utils/requestConfig';
 import { ALL_COLORS } from '../../constants/colors';
 
-const buildPayload = (fields: any): PayloadData => ({
+const buildPayload = (fields: any, data: PayloadData['data'] = 'raw'): PayloadData => ({
   type: 'object' as any,
   format: 'json' as any,
-  data: 'raw' as any,
+  data,
   fields,
 });
 
@@ -127,7 +127,7 @@ export const buildLegacyConnection = (nodes: WorkflowNodeModel[]): Connection =>
           method: config.method || 'GET',
           header: config.headers,
           body: {
-            ...buildPayload(config.body),
+            ...buildPayload(config.body, config.bodyData as any),
             format: config.bodyFormat as any,
           },
           queryParams: config.queryParams,
@@ -172,6 +172,7 @@ export const extractWorkflowMethodConfig = (connection: Connection | null, nodeI
     queryParams,
     endpointArgs: (method.request.endpointArgs || {}) as any,
     bodyFormat: (method.request.body?.format as WorkflowMethodConfig['bodyFormat']) || 'json',
+    bodyData: (method.request.body?.data as WorkflowMethodConfig['bodyData']) || 'raw',
     body: method.request.body?.fields ?? {},
     response: method.response,
   });
