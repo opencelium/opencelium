@@ -4,7 +4,7 @@ import { Icon } from '@shared/ui/primitives/Icon';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import type { TriggerConnectionWorkflowNode } from '../../types/workflow.types';
 import { MethodColorBadge } from '../MethodColorBadge';
-import { NodeShell } from '../NodeShell';
+import { NodeShell } from '../NodeShell/NodeShell';
 import { StandardNodeHandles } from '../StandardNodeHandles/StandardNodeHandles';
 
 export function TriggerConnectionNode({ id, data, selected, dragging }: NodeProps<TriggerConnectionWorkflowNode>) {

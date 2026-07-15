@@ -5,7 +5,7 @@ import { ConnectorStatusDot } from '../../connector-status/ConnectorStatusDot';
 import { getConnectorStatus } from '../../connector-status/getConnectorStatus';
 import type { ConnectorWorkflowNode } from '../../types/workflow.types';
 import { MethodColorBadge } from '../MethodColorBadge';
-import { NodeShell } from '../NodeShell';
+import { NodeShell } from '../NodeShell/NodeShell';
 import { StandardNodeHandles } from '../StandardNodeHandles/StandardNodeHandles';
 
 export function ConnectorMethodNode({ id, data, selected, dragging }: NodeProps<ConnectorWorkflowNode>) {

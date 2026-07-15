@@ -4,7 +4,7 @@ import { Loader2, Play, Square, TriangleAlert } from 'lucide-react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import type { StartWorkflowNode } from '../../types/workflow.types';
-import { NodeShell } from '../NodeShell';
+import { NodeShell } from '../NodeShell/NodeShell';
 import { useStartNodeState } from './useStartNodeState';
 
 export function StartNode({ id, data, selected, dragging }: NodeProps<StartWorkflowNode>) {
