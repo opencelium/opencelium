@@ -15,7 +15,7 @@ import { IfOperatorNode } from '../nodes/IfOperatorNode';
 import { LoopOperatorNode } from '../nodes/LoopOperatorNode';
 import { StartNode } from '../nodes/StartNode/StartNode';
 import { SystemMethodNode } from '../nodes/SystemMethodNode/SystemMethodNode';
-import { TriggerConnectionNode } from '../nodes/TriggerConnectionNode';
+import { TriggerConnectionNode } from '../nodes/TriggerConnectionNode/TriggerConnectionNode';
 import {
   getOperatorBottomBranch,
   getOutgoingCount,
