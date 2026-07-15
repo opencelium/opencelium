@@ -10,7 +10,7 @@ import type {
 } from '@xyflow/react';
 import { useEffect, useRef, type PropsWithChildren } from 'react';
 import { WorkflowEdge } from '../edges/WorkflowEdge';
-import { ConnectorMethodNode } from '../nodes/ConnectorMethodNode';
+import { ConnectorMethodNode } from '../nodes/ConnectorMethodNode/ConnectorMethodNode';
 import { IfOperatorNode } from '../nodes/IfOperatorNode';
 import { LoopOperatorNode } from '../nodes/LoopOperatorNode';
 import { StartNode } from '../nodes/StartNode/StartNode';
