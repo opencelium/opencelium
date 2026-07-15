@@ -1,11 +1,11 @@
 import type { NodeProps } from '@xyflow/react';
-import { Handle, Position } from '@xyflow/react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Icon } from '@shared/ui/primitives/Icon';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import type { TriggerConnectionWorkflowNode } from '../../types/workflow.types';
 import { MethodColorBadge } from '../MethodColorBadge';
 import { NodeShell } from '../NodeShell';
+import { StandardNodeHandles } from '../StandardNodeHandles/StandardNodeHandles';
 
 export function TriggerConnectionNode({ id, data, selected, dragging }: NodeProps<TriggerConnectionWorkflowNode>) {
 	const { t } = useI18n('workflow');
@@ -34,10 +34,7 @@ export function TriggerConnectionNode({ id, data, selected, dragging }: NodeProp
 				{suppressTooltip ? asyncBadge : <Tooltip content={t('node.asyncBadge')}>{asyncBadge}</Tooltip>}
 			</div>
 
-			<Handle id='left' type='target' position={Position.Left} className='handleInvisible' />
-			<Handle id='top' type='target' position={Position.Top} className='handleInvisible' />
-			<Handle id='right' type='source' position={Position.Right} className='handleInvisible' />
-			<Handle id='bottom' type='source' position={Position.Bottom} className='handleInvisible' />
+			<StandardNodeHandles />
 		</NodeShell>
 	);
 }

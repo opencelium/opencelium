@@ -1,9 +1,9 @@
 import type { NodeProps } from '@xyflow/react';
-import { Handle, Position } from '@xyflow/react';
 import { Globe } from 'lucide-react';
 import type { SystemWorkflowNode } from '../../types/workflow.types';
 import { MethodColorBadge } from '../MethodColorBadge';
 import { NodeShell } from '../NodeShell';
+import { StandardNodeHandles } from '../StandardNodeHandles/StandardNodeHandles';
 
 export function SystemMethodNode({ id, data, selected }: NodeProps<SystemWorkflowNode>) {
 	return (
@@ -23,10 +23,7 @@ export function SystemMethodNode({ id, data, selected }: NodeProps<SystemWorkflo
 				<MethodColorBadge color={data.duplicateMethodColor} index={data.duplicateMethodIndex} />
 			</div>
 
-			<Handle id='left' type='target' position={Position.Left} className='handleInvisible' />
-			<Handle id='top' type='target' position={Position.Top} className='handleInvisible' />
-			<Handle id='right' type='source' position={Position.Right} className='handleInvisible' />
-			<Handle id='bottom' type='source' position={Position.Bottom} className='handleInvisible' />
+			<StandardNodeHandles />
 		</NodeShell>
 	);
 }
