@@ -2,6 +2,7 @@ import type { WorkflowEdgeModel, WorkflowNodeData, WorkflowNodeModel } from '../
 import { buildLegacyConnection } from '../components/request-editor/legacyAdapter';
 import { ITERATOR_NAMES } from '../components/request-editor/body-editor/requestReferenceOptions';
 import { ALL_COLORS } from '../constants/colors';
+import { MethodType } from '../types/connection';
 
 type BuildConnectionPayloadArgs = {
 	connectionId?: string | number;
@@ -63,6 +64,14 @@ const isMethodNode = (node: WorkflowNodeModel) => {
 const isConnectorlessMethodNode = (node: WorkflowNodeModel) => {
 	const kind = nodeKind(node);
 	return kind === 'system' || kind === 'trigger-connection';
+};
+
+const resolveMethodType = (node: WorkflowNodeModel): MethodType => {
+	switch (nodeKind(node)) {
+		case 'system': return MethodType.HttpRequest;
+		case 'trigger-connection': return MethodType.Webhook;
+		default: return MethodType.Connector;
+	}
 };
 
 const isOperatorNode = (node: WorkflowNodeModel) => {
@@ -399,6 +408,7 @@ const buildMethodPayload = (node: WorkflowNodeModel, index: string, order: numbe
 		name: config?.name ?? node.data.subtitle,
 		...(node.data.labelEdited ? { label: node.data.subtitle } : {}),
 		index,
+		methodType: resolveMethodType(node),
 		color: normalizeColor(resolvedColor ?? (node.data as any).color, ALL_COLORS[order % ALL_COLORS.length]),
 		connector: isHttpRequest ? null : node.data.connector,
 		request: {

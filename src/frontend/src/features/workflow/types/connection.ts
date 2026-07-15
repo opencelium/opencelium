@@ -51,6 +51,7 @@ export interface Method {
     color: string,
     label?: string,
     dataAggregator?: string | null,
+    methodType: MethodType,
     request: MethodRequest,
     response: MainResponse,
 }
@@ -63,6 +64,14 @@ export interface MethodWithId extends Method {
         icon?: string | null,
     } | null,
 }
+
+export const MethodType = {
+    Connector: 'CONNECTOR',
+    HttpRequest: 'HTTP_REQUEST',
+    Webhook: 'WEBHOOK',
+} as const;
+
+export type MethodType = (typeof MethodType)[keyof typeof MethodType];
 
 export interface EndpointArg {
 	id: string;
