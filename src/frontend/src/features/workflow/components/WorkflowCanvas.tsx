@@ -14,7 +14,7 @@ import { ConnectorMethodNode } from '../nodes/ConnectorMethodNode/ConnectorMetho
 import { IfOperatorNode } from '../nodes/IfOperatorNode';
 import { LoopOperatorNode } from '../nodes/LoopOperatorNode';
 import { StartNode } from '../nodes/StartNode/StartNode';
-import { SystemMethodNode } from '../nodes/SystemMethodNode';
+import { SystemMethodNode } from '../nodes/SystemMethodNode/SystemMethodNode';
 import { TriggerConnectionNode } from '../nodes/TriggerConnectionNode';
 import {
   getOperatorBottomBranch,
