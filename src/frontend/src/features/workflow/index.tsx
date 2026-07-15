@@ -5,6 +5,7 @@ import { Button, Input, Modal, Select, message } from 'antd';
 import { Loading } from '@shared/ui/primitives/Loading/Loading';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { apiExecutor } from '@shared/api/apiExecutor';
+import { ApiFetchError } from '@shared/api/apiFetch';
 import './styles.css';
 import { NodeContextMenu } from './components/NodeContextMenu';
 import { WorkflowCanvas } from './components/WorkflowCanvas';
@@ -383,8 +384,12 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         fieldBindings: loadedFieldBindings,
       });
     } catch (error) {
+      const errorBody = error instanceof ApiFetchError ? (error.body as { message?: string; error?: string } | undefined) : undefined;
+      const isConnectorNotFound = errorBody?.message === 'CONNECTOR_NOT_FOUND' || errorBody?.error === 'CONNECTOR_NOT_FOUND';
       message.error(
-        tEntities(isCreate ? 'connection.messages.saveFailed.create' : 'connection.messages.saveFailed.update', { title }),
+        isConnectorNotFound
+          ? tEntities('connection.messages.saveFailed.connectorNotFound')
+          : tEntities(isCreate ? 'connection.messages.saveFailed.create' : 'connection.messages.saveFailed.update', { title }),
       );
       throw error;
     }
