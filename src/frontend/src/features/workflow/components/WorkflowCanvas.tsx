@@ -13,7 +13,7 @@ import { WorkflowEdge } from '../edges/WorkflowEdge';
 import { ConnectorMethodNode } from '../nodes/ConnectorMethodNode';
 import { IfOperatorNode } from '../nodes/IfOperatorNode';
 import { LoopOperatorNode } from '../nodes/LoopOperatorNode';
-import { StartNode } from '../nodes/StartNode';
+import { StartNode } from '../nodes/StartNode/StartNode';
 import { SystemMethodNode } from '../nodes/SystemMethodNode';
 import { TriggerConnectionNode } from '../nodes/TriggerConnectionNode';
 import {
