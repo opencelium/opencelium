@@ -1,6 +1,7 @@
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button, Input, Space, Typography } from 'antd';
 import { hasOnlyReferences } from '../bodyReference';
+import { setLastBodyReferenceTriggerRect } from '../InlineBodyReferenceEditor';
 import { XmlReferenceTokens } from './XmlReferenceTokens';
 import type { XmlSelection } from './xmlTree';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
@@ -40,8 +41,9 @@ export function XmlFieldEditor({
   inlineEditable = false,
 }: Props) {
   const { t } = useI18n('workflow');
-  const referenceOnly = hasOnlyReferences(value);
-  const preview = value.trim() ? value : placeholder || t('xmlNode.empty');
+  const stringValue = typeof value === 'string' ? value : value == null ? '' : String(value);
+  const referenceOnly = hasOnlyReferences(stringValue);
+  const preview = stringValue.trim() ? stringValue : placeholder || t('xmlNode.empty');
   return (
     <div className="xmlField" style={{ display: 'grid', gap: 6 }}>
       <Space className="xmlFieldHeader" style={{ justifyContent: 'space-between', width: '100%' }}>
@@ -53,7 +55,18 @@ export function XmlFieldEditor({
                 className="xmlActionButton"
                 size="small"
                 type="text"
-                onClick={() => {
+                onClick={(event) => {
+                  const rect = event.currentTarget.getBoundingClientRect();
+                  const container = event.currentTarget.closest('.bodyLegacyLeft') as HTMLElement | null;
+                  const containerRect = container?.getBoundingClientRect();
+                  setLastBodyReferenceTriggerRect({
+                    left: rect.left,
+                    top: rect.top,
+                    width: rect.width,
+                    height: rect.height,
+                    containerLeft: containerRect?.left,
+                    containerRight: containerRect?.right,
+                  });
                   onSelect(selection);
                   onInsertReference(selection);
                 }}
@@ -69,7 +82,7 @@ export function XmlFieldEditor({
       </Space>
       {referenceOnly ? (
         <XmlReferenceTokens
-          value={value}
+          value={stringValue}
           readOnly={readOnly}
           onChange={onChange}
           onClick={() => {
@@ -80,7 +93,7 @@ export function XmlFieldEditor({
       ) : inlineEditable ? (
         <Input.TextArea
           className="xmlFieldInput"
-          value={value}
+          value={stringValue}
           placeholder={placeholder}
           autoSize={{ minRows: 1, maxRows: 4 }}
           readOnly={readOnly}

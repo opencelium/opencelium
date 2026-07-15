@@ -33,7 +33,7 @@ export function ConnectorMethodNode({
         {connectorIconUrl ? (
           <img className="circleNodeImage" src={connectorIconUrl} alt="" />
         ) : (
-          <Icon name="api" size={24} />
+          <Icon name="connector" size={24} />
         )}
         <MethodColorBadge color={data.duplicateMethodColor} index={data.duplicateMethodIndex} />
         {connectorStatus ? (

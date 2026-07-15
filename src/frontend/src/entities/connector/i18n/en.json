@@ -33,8 +33,14 @@
     },
     "icon": {
       "label": "Icon",
-      "uploadHint": "Click to upload an icon (PNG or JPG)",
-      "delete": "Delete icon"
+      "uploadButton": "Upload logo",
+      "hint": "PNG or JPG",
+      "replace": "Replace icon",
+      "delete": "Delete icon",
+      "confirmDelete": {
+        "title": "Remove logo?",
+        "message": "This can't be undone."
+      }
     },
     "url": {
       "label": "Url"

@@ -1,0 +1,73 @@
+import { Handle, Position } from '@xyflow/react';
+import type { NodeProps } from '@xyflow/react';
+import { Icon } from '@shared/ui/primitives/Icon';
+import { Tooltip } from '@shared/ui/primitives/Tooltip';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { NodeShell } from './NodeShell';
+import { MethodColorBadge } from './MethodColorBadge';
+import type { TriggerConnectionWorkflowNode } from '../types/workflow.types';
+
+export function TriggerConnectionNode({
+	id,
+	data,
+	selected,
+	dragging,
+}: NodeProps<TriggerConnectionWorkflowNode>) {
+	const { t } = useI18n('workflow');
+	const suppressTooltip = dragging || data.isAnyNodeDragging;
+
+	return (
+		<NodeShell
+			id={id}
+			data={data}
+			selected={selected}
+			bottomLabel={data.subtitle || data.title}
+			rightAdd={{
+				action: { sourceNodeId: id, direction: 'right' },
+				showAlways: !!data.isLeaf,
+				lineVisible: !!data.isLeaf,
+			}}
+		>
+			<div className='circleNode systemNode'>
+				<Icon name='webhook' size={24} />
+				<MethodColorBadge color={data.duplicateMethodColor} index={data.duplicateMethodIndex} />
+				{suppressTooltip ? (
+					<span className='circleNodeAsyncBadge'>
+						<Icon name='flash' size={12} color='inherit' />
+					</span>
+				) : (
+					<Tooltip content={t('node.asyncBadge')}>
+						<span className='circleNodeAsyncBadge'>
+							<Icon name='flash' size={12} color='inherit' />
+						</span>
+					</Tooltip>
+				)}
+			</div>
+
+			<Handle
+				id='left'
+				type='target'
+				position={Position.Left}
+				className='handleInvisible'
+			/>
+			<Handle
+				id='top'
+				type='target'
+				position={Position.Top}
+				className='handleInvisible'
+			/>
+			<Handle
+				id='right'
+				type='source'
+				position={Position.Right}
+				className='handleInvisible'
+			/>
+			<Handle
+				id='bottom'
+				type='source'
+				position={Position.Bottom}
+				className='handleInvisible'
+			/>
+		</NodeShell>
+	);
+}

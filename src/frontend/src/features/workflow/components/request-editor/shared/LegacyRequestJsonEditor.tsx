@@ -6,7 +6,6 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { useRequestObjectEditor } from './useRequestObjectEditor';
 import ReferenceEnhancement from '../enhancement/Enhancement';
 import ReactJson from 'react-json-view';
-import { Splitter } from '@shared/ui/primitives/Splitter';
 import { Collapse } from '@shared/ui/primitives/Collapse';
 import type { CollapseItem } from '@shared/ui/primitives/Collapse/Collapse.types';
 import { Empty } from '@shared/ui/primitives/Empty';
@@ -219,31 +218,19 @@ export function LegacyRequestJsonEditor({ messageProperty, source, readOnly }: P
   ];
 
   return (
-    <Splitter
-      className='bodyLegacyLayout'
-      panels={[
-        {
-          key: 'left',
-          defaultSize: '52%',
-          min: '32%',
-          max: '74%',
-          content: (
-            <div className='bodyLegacyLeft'>
-              <ConfigProvider theme={{ token: { motion: false } }}>
-                <Collapse className='bodyLegacyLeftCollapse' items={leftItems} defaultActiveKeys={['requestData']} />
-              </ConfigProvider>
-            </div>
-          ),
-        },
-        {
-          key: 'enhancement',
-          content: (
-            <div className='bodyLegacyEnhancement'>
-              <ReferenceEnhancement readOnly={readOnly} enhancement={editor.currentEnhancement} />
-            </div>
-          ),
-        },
-      ]}
-    />
+    <div className='bodyLegacyLayout'>
+      <div className='bodyLegacyLeftPane'>
+        <div className='bodyLegacyLeft'>
+          <ConfigProvider theme={{ token: { motion: false } }}>
+            <Collapse className='bodyLegacyLeftCollapse' items={leftItems} defaultActiveKeys={['requestData']} />
+          </ConfigProvider>
+        </div>
+      </div>
+      <div className='bodyLegacyEnhancementPane'>
+        <div className='bodyLegacyEnhancement'>
+          <ReferenceEnhancement readOnly={readOnly} enhancement={editor.currentEnhancement} />
+        </div>
+      </div>
+    </div>
   );
 }

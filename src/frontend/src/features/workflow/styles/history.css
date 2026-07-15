@@ -76,6 +76,12 @@
   margin-top: 8px;
 }
 
+.sidebarLoading {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
+}
+
 .historyItem {
   border: 1px solid var(--color-border-subtle);
   background: var(--color-background-surface);

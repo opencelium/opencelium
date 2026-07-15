@@ -3,11 +3,20 @@ import type { WorkflowMethodConfig } from './request-config.types';
 import type { ConditionConfig } from '../components/condition-builder/conditionBuilder.types';
 import type { InvokerOperation } from '@entities/invoker/model/types';
 
-export type WorkflowNodeType = 'start' | 'connector' | 'system' | 'if' | 'loop';
+export type WorkflowNodeType = 'start' | 'connector' | 'system' | 'trigger-connection' | 'if' | 'loop';
 
 export type WorkflowAddDirection = 'right' | 'bottom';
-export type WorkflowCreateKind = 'connector' | 'system' | 'if' | 'loop';
+export type WorkflowCreateKind = 'connector' | 'system' | 'trigger-connection' | 'if' | 'loop';
 export type WorkflowOperatorKind = 'if' | 'loop';
+
+export type WorkflowTriggerConnectionRef = {
+	connectionId: number;
+	connectionTitle: string;
+	schedulerId: number;
+	scheduleTitle: string;
+	// Full absolute URL (VITE_API_URL + the schedule's webhook path).
+	webhookUrl: string;
+};
 
 export type WorkflowAction = {
 	sourceNodeId: string;
@@ -21,6 +30,7 @@ export type WorkflowAction = {
 		title: string;
 		icon?: string | null;
 	};
+	triggerConnection?: WorkflowTriggerConnectionRef;
 };
 
 export type WorkflowContextMenu = {
@@ -46,6 +56,7 @@ export type WorkflowNodeData = {
 	};
 	methodConfig?: WorkflowMethodConfig;
 	conditionConfig?: ConditionConfig;
+	triggerConnection?: WorkflowTriggerConnectionRef;
 	labelEdited?: boolean;
 	isLeaf?: boolean;
 	rightLeaf?: boolean;
@@ -81,6 +92,7 @@ export type WorkflowEdgeData = {
 export type StartWorkflowNode = Node<WorkflowNodeData, 'start'>;
 export type ConnectorWorkflowNode = Node<WorkflowNodeData, 'connector'>;
 export type SystemWorkflowNode = Node<WorkflowNodeData, 'system'>;
+export type TriggerConnectionWorkflowNode = Node<WorkflowNodeData, 'trigger-connection'>;
 export type IfWorkflowNode = Node<WorkflowNodeData, 'if'>;
 export type LoopWorkflowNode = Node<WorkflowNodeData, 'loop'>;
 
@@ -88,6 +100,7 @@ export type WorkflowNodeModel =
 	| StartWorkflowNode
 	| ConnectorWorkflowNode
 	| SystemWorkflowNode
+	| TriggerConnectionWorkflowNode
 	| IfWorkflowNode
 	| LoopWorkflowNode;
 
