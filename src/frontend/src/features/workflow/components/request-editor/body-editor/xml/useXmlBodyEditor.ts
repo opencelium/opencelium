@@ -15,6 +15,12 @@ import {
   type XmlSelection,
 } from './xmlTree';
 
+const XML_JS_OPTIONS = {
+  compact: true,
+  attributesKey: '__oc__attributes',
+  textKey: '__oc__value',
+} as const;
+
 export function useXmlBodyEditor() {
   const dispatch = useDispatch();
   const { method } = useMethodContext();
@@ -32,7 +38,7 @@ export function useXmlBodyEditor() {
 
   useEffect(() => {
     try {
-      setRawXml(js2xml(serializeCompactXml(tree), { compact: true, spaces: 2 }));
+      setRawXml(js2xml(serializeCompactXml(tree), { ...XML_JS_OPTIONS, spaces: 2 }));
       setRawError(null);
     } catch {
       setRawXml('');
@@ -97,7 +103,7 @@ export function useXmlBodyEditor() {
     applyRawXml: (readOnly?: boolean) => {
       if (readOnly) return;
       try {
-        const parsed = xml2js(rawXml || '<root />', { compact: true });
+        const parsed = xml2js(rawXml || '<root />', XML_JS_OPTIONS);
         const nextTree = createTreeFromCompactXml(parsed);
         setTree(nextTree);
         setRawError(null);
