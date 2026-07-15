@@ -1,7 +1,7 @@
 import type { NodeProps } from '@xyflow/react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { LoopWorkflowNode } from '../../types/workflow.types';
-import { NodeShell } from '../NodeShell';
+import { NodeShell } from '../NodeShell/NodeShell';
 import { StandardNodeHandles } from '../StandardNodeHandles/StandardNodeHandles';
 
 export function LoopOperatorNode({ id, data, selected }: NodeProps<LoopWorkflowNode>) {

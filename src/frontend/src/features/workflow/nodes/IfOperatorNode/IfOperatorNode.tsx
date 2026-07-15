@@ -2,7 +2,7 @@ import type { NodeProps } from '@xyflow/react';
 import { Handle, Position } from '@xyflow/react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { IfWorkflowNode } from '../../types/workflow.types';
-import { NodeShell } from '../NodeShell';
+import { NodeShell } from '../NodeShell/NodeShell';
 
 export function IfOperatorNode({ id, data, selected }: NodeProps<IfWorkflowNode>) {
 	const { t } = useI18n('workflow');

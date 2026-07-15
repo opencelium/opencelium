@@ -2,7 +2,7 @@ import type { NodeProps } from '@xyflow/react';
 import { Globe } from 'lucide-react';
 import type { SystemWorkflowNode } from '../../types/workflow.types';
 import { MethodColorBadge } from '../MethodColorBadge';
-import { NodeShell } from '../NodeShell';
+import { NodeShell } from '../NodeShell/NodeShell';
 import { StandardNodeHandles } from '../StandardNodeHandles/StandardNodeHandles';
 
 export function SystemMethodNode({ id, data, selected }: NodeProps<SystemWorkflowNode>) {
