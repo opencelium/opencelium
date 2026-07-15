@@ -19,6 +19,7 @@ import { ShortcutsDialog } from './components/header/ShortcutsDialog';
 import { ConditionBuilderDialog } from './components/condition-builder/ConditionBuilder';
 import { MethodConfigDialog } from './components/request-editor/MethodConfigDialog';
 import { ResponseDialog } from './components/request-editor/ResponseDialog';
+import { AggregatorConfigDialog } from './components/aggregator/AggregatorConfigDialog';
 import { buildLegacyConnection } from './components/request-editor/legacyAdapter';
 import { useWorkflowPage } from './useWorkflowPage';
 import { useUnsavedChangesGuard } from './useUnsavedChangesGuard';
@@ -281,6 +282,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const contextMenuNode = hydratedNodes.find((node) => node.id === workflow.contextMenu?.nodeId) ?? null;
   const editorNode = hydratedNodes.find((node) => node.id === workflow.methodEditor?.nodeId) ?? null;
   const conditionNode = hydratedNodes.find((node) => node.id === workflow.conditionEditor?.nodeId) ?? null;
+  const aggregatorNode = hydratedNodes.find((node) => node.id === workflow.aggregatorEditor?.nodeId) ?? null;
   const conditionConnection = useMemo(() => {
     const legacyConnection = buildLegacyConnection(hydratedNodes);
     const fromConnector = buildFromConnectorPayload(hydratedNodes, workflow.edges) as any;
@@ -639,6 +641,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     if (
       workflow.methodEditor ||
       workflow.conditionEditor ||
+      workflow.aggregatorEditor ||
       workflow.historyOpen ||
       templateDialogOpen ||
       loadTemplateDialogOpen ||
@@ -929,6 +932,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         onOpenRequestEditor={(nodeId, mode) => workflow.setMethodEditor({ nodeId, mode })}
         onOpenConditionEditor={(nodeId) => workflow.setConditionEditor({ nodeId })}
         onShowResponse={workflow.onShowResponse}
+        onOpenAggregatorEditor={(nodeId) => workflow.setAggregatorEditor({ nodeId })}
         onClose={() => workflow.setContextMenu(null)}
       />
       <ResponseDialog
@@ -960,6 +964,12 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         connection={conditionConnection}
         onClose={() => workflow.setConditionEditor(null)}
         onSave={workflow.onSaveConditionConfig}
+      />
+      <AggregatorConfigDialog
+        open={!!workflow.aggregatorEditor}
+        node={aggregatorNode}
+        onClose={() => workflow.setAggregatorEditor(null)}
+        onSave={workflow.onSaveDataAggregator}
       />
     </div>
     </TestRunProvider>

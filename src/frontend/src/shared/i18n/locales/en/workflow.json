@@ -8,6 +8,7 @@
     "ok": "Ok",
     "delete": "Delete",
     "edit": "Edit",
+    "select": "Select",
     "createNew": "Create new",
     "insertReference": "Insert reference",
     "addAttribute": "Add attribute",
@@ -245,6 +246,16 @@
     "editBody": "Edit Body",
     "showResponse": "Show Response",
     "newLabelPlaceholder": "New label"
+  },
+  "aggregatorDialog": {
+    "title": "Configure Aggregator",
+    "selectPlaceholder": "Select a data aggregator",
+    "createNewTooltip": "Create new data aggregator",
+    "emptyState": "Select an existing data aggregator or create a new one.",
+    "confirmUnassign": {
+      "title": "Delete the assigned data aggregator?",
+      "message": "This removes the data aggregator from this step. The data aggregator entry itself will not be deleted and remains available for other steps."
+    }
   },
   "node": {
     "if": "If",

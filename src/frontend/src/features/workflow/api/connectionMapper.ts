@@ -132,6 +132,7 @@ const toMethodEntry = (method: any, index: number): IndexedWorkflowEntry => {
 						},
 					}
 					: {}),
+				dataAggregator: method?.dataAggregator ?? undefined,
 				methodConfig: methodToConfig(method),
 			},
 		},
@@ -154,6 +155,7 @@ const toOperatorEntry = (operator: any, index: number, fallbackIndex: number): I
 				title: operator?.type === 'loop' ? 'Loop' : 'If',
 				subtitle: operator?.expression || operator?.type || 'Condition',
 				kind: operator?.type === 'loop' ? 'loop' as const : 'if' as const,
+				dataAggregator: operator?.dataAggregator ?? undefined,
 				conditionConfig: {
 					operatorType: operator?.type === 'loop' ? 'loop' : 'if',
 					tree: {
@@ -395,15 +397,17 @@ const restoreNodesFromUi = (
 			}
 			usedEntryIds.add(entry.node.id);
 
+			const mergedData = {
+				...mergeSavedNodeData(entry.node.data, savedNode.data),
+				kind: entry.node.data.kind,
+				...(entry.node.type === 'system' ? { connector: undefined } : {}),
+			};
+
 			return {
 				...entry.node,
 				id: savedNode.id,
 				position: savedNode.position,
-				data: {
-					...mergeSavedNodeData(entry.node.data, savedNode.data),
-					kind: entry.node.data.kind,
-					...(entry.node.type === 'system' ? { connector: undefined } : {}),
-				},
+				data: mergedData,
 				draggable: savedNode.draggable ?? entry.node.draggable,
 				deletable: savedNode.deletable ?? entry.node.deletable,
 			};

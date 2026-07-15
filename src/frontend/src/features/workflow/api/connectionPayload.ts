@@ -239,6 +239,7 @@ const sanitizeNodeData = (data: WorkflowNodeData) => {
 		connector: data.connector,
 		methodConfig: sanitizeMethodConfig(data.methodConfig),
 		conditionConfig: stripEnhancementObjects(data.conditionConfig),
+		dataAggregator: data.dataAggregator,
 	};
 
 	return Object.fromEntries(
@@ -409,6 +410,7 @@ const buildMethodPayload = (node: WorkflowNodeModel, index: string, order: numbe
 		...(node.data.labelEdited ? { label: node.data.subtitle } : {}),
 		index,
 		methodType: resolveMethodType(node),
+		dataAggregator: node.data.dataAggregator ?? null,
 		color: normalizeColor(resolvedColor ?? (node.data as any).color, ALL_COLORS[order % ALL_COLORS.length]),
 		connector: isHttpRequest ? null : node.data.connector,
 		request: {
@@ -453,6 +455,7 @@ const buildOperatorPayload = (node: WorkflowNodeModel, index: string, iterator?:
 		id: node.id,
 		index,
 		type,
+		dataAggregator: node.data.dataAggregator ?? null,
 		expression: normalizeOperatorExpression(node.data.conditionConfig?.expression ?? '', type),
 		...(type === 'loop' && iterator
 			? { iterator }

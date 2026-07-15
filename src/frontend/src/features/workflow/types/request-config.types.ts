@@ -43,3 +43,7 @@ export type WorkflowMethodEditorState = {
 export type WorkflowConditionEditorState = {
   nodeId: string;
 };
+
+export type WorkflowAggregatorEditorState = {
+  nodeId: string;
+};

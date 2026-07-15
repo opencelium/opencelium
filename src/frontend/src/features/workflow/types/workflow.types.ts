@@ -57,6 +57,7 @@ export type WorkflowNodeData = {
 	methodConfig?: WorkflowMethodConfig;
 	conditionConfig?: ConditionConfig;
 	triggerConnection?: WorkflowTriggerConnectionRef;
+	dataAggregator?: number | null;
 	labelEdited?: boolean;
 	isLeaf?: boolean;
 	rightLeaf?: boolean;

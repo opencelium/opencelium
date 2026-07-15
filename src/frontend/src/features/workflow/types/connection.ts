@@ -50,7 +50,7 @@ export interface Method {
     name: string,
     color: string,
     label?: string,
-    dataAggregator?: string | null,
+    dataAggregator?: number | null,
     methodType: MethodType,
     request: MethodRequest,
     response: MainResponse,
@@ -148,7 +148,7 @@ export type OperatorWithId = IfOperatorWithId | LoopOperatorWithId
 export interface GeneralOperator  {
     index: string,
     ui?: string | null,
-    dataAggregator?: string | null,
+    dataAggregator?: number | null,
     expression?: string,
 }
 export interface GeneralOperatorWithId extends GeneralOperator {

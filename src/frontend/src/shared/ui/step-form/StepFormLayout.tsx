@@ -32,6 +32,7 @@ export function StepFormLayout({
     form,
     skipSuccessState,
     hideSubmit,
+    hideHeader,
 }: GenericStepFormProps) {
     const {isTabletOrMobile} = useBreakpoints();
     const {t: tEntities} = useI18n('entities')
@@ -183,13 +184,15 @@ export function StepFormLayout({
                 ref={ref}
                 onKeyDown={handleKeyDown}
             >
-                <StepHeader
-                    containerRef={ref}
-                    info={info}
-                    header={header}
-                    subheader={subheader}
-                    image={image}
-                />
+                {!hideHeader && (
+                    <StepHeader
+                        containerRef={ref}
+                        info={info}
+                        header={header}
+                        subheader={subheader}
+                        image={image}
+                    />
+                )}
 
                 <div
                     style={{

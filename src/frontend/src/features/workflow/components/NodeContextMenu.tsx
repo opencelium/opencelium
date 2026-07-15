@@ -16,9 +16,10 @@ type Props = {
   onOpenRequestEditor: (nodeId: string, mode: 'url' | 'body' | 'header') => void;
   onOpenConditionEditor: (nodeId: string) => void;
   onShowResponse: (nodeId: string) => void;
+  onOpenAggregatorEditor: (nodeId: string) => void;
 };
 
-export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequestEditor, onOpenConditionEditor, onShowResponse }: Props) {
+export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequestEditor, onOpenConditionEditor, onShowResponse, onOpenAggregatorEditor }: Props) {
   const { t } = useI18n('workflow');
   const ref = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -88,6 +89,7 @@ export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequ
                       if (entry.item.id === 'edit-headers') onOpenRequestEditor(menu.nodeId, 'header');
                       if (entry.item.id === 'edit-body') onOpenRequestEditor(menu.nodeId, 'body');
                       if (entry.item.id === 'show-response') onShowResponse(menu.nodeId);
+                      if (entry.item.id === 'configure-aggregator') onOpenAggregatorEditor(menu.nodeId);
                       onClose();
                     }}
                   >
