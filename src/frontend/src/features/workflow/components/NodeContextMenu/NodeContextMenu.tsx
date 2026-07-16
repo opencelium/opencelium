@@ -3,7 +3,7 @@ import { buildTestId } from '@shared/testing/testId';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ContextMenuEditor } from '../context-menu/ContextMenuEditor';
+import { ContextMenuEditor } from '../context-menu/ContextMenuEditor/ContextMenuEditor';
 import { menuByType } from '../context-menu/contextMenuData';
 import { buildContextMenuEntries, filterEntriesForSection } from '../context-menu/contextMenuEntries';
 import type { NodeContextMenuProps } from './NodeContextMenu.types';
