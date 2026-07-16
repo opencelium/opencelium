@@ -46,7 +46,7 @@ import {
 import { LoopInfoPanel } from './LoopInfoPanel';
 import { Radio } from '@shared/ui/primitives/Radio';
 import { ConnectorIcon } from '@entities/connector/ui/ConnectorIcon';
-import { MethodColorDot } from '../MethodColorDot';
+import { MethodColorDot } from '../MethodColorDot/MethodColorDot';
 import { getDuplicateMethodIndexByColor } from '../../utils/methodColor';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import '../request-editor/body-editor/bodyLegacy.css';

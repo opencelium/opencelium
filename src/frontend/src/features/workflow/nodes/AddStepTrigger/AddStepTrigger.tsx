@@ -1,15 +1,6 @@
 import { Plus } from 'lucide-react';
 import type { MouseEvent } from 'react';
-import type { WorkflowAction } from '../types/workflow.types';
-
-type Props = {
-	direction: 'right' | 'bottom';
-	action: WorkflowAction;
-	showAlways?: boolean;
-	lineVisible?: boolean;
-	locked?: boolean;
-	onAdd: (action: WorkflowAction) => void;
-};
+import type { AddStepTriggerProps } from './AddStepTrigger.types';
 
 export function AddStepTrigger({
 	direction,
@@ -18,14 +9,12 @@ export function AddStepTrigger({
 	lineVisible = true,
 	locked = false,
 	onAdd,
-}: Props) {
+}: AddStepTriggerProps) {
 	const onClick = (event: MouseEvent<HTMLButtonElement>) => {
 		event.stopPropagation();
 		onAdd(action);
 	};
-
-	const triggerClass =
-		direction === 'right' ? 'addTriggerRight' : 'addTriggerBottom';
+	const triggerClass = direction === 'right' ? 'addTriggerRight' : 'addTriggerBottom';
 	const displayClass = showAlways ? 'always' : 'hoverOnly';
 	const modeClass = lineVisible ? 'withLine' : 'circleOnly';
 	const lockedClass = locked ? 'addTriggerLocked' : '';

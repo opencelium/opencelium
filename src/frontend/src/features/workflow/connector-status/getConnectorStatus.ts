@@ -1,7 +1,5 @@
-import type { ConnectorStatus } from './ConnectorStatusDot';
+import type { ConnectorStatus } from './ConnectorStatusDot/ConnectorStatusDot.types';
 
-// Derived straight from the persisted result of the connector's most recent
-// POST /connector/check (GET /connector/all already returns it) — no live request needed.
 export function getConnectorStatus(lastTestPassed: boolean | null | undefined): ConnectorStatus | undefined {
   if (lastTestPassed === true) return 'passed';
   if (lastTestPassed === false) return 'failed';

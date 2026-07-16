@@ -1,25 +1,14 @@
 /* eslint-disable react-hooks/set-state-in-effect */
+import { buildTestId } from '@shared/testing/testId';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import type { WorkflowContextMenu, WorkflowNodeModel } from '../types/workflow.types';
-import { ContextMenuEditor } from './context-menu/ContextMenuEditor';
-import { buildContextMenuEntries, filterEntriesForSection } from './context-menu/contextMenuEntries';
-import { menuByType } from './context-menu/contextMenuData';
-import { useI18n } from '@shared/i18n/hooks/useI18n';
-import { buildTestId } from '@shared/testing/testId';
+import { ContextMenuEditor } from '../context-menu/ContextMenuEditor/ContextMenuEditor';
+import { menuByType } from '../context-menu/contextMenuData';
+import { buildContextMenuEntries, filterEntriesForSection } from '../context-menu/contextMenuEntries';
+import type { NodeContextMenuProps } from './NodeContextMenu.types';
 
-type Props = {
-  menu: WorkflowContextMenu | null;
-  node: WorkflowNodeModel | null;
-  onClose: () => void;
-  onChangeLabel: (nodeId: string, label: string) => void;
-  onOpenRequestEditor: (nodeId: string, mode: 'url' | 'body' | 'header') => void;
-  onOpenConditionEditor: (nodeId: string) => void;
-  onShowResponse: (nodeId: string) => void;
-  onOpenAggregatorEditor: (nodeId: string) => void;
-};
-
-export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequestEditor, onOpenConditionEditor, onShowResponse, onOpenAggregatorEditor }: Props) {
+export function NodeContextMenu({ menu, node, onClose, onChangeLabel, onOpenRequestEditor, onOpenConditionEditor, onShowResponse, onOpenAggregatorEditor }: NodeContextMenuProps) {
   const { t } = useI18n('workflow');
   const ref = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);

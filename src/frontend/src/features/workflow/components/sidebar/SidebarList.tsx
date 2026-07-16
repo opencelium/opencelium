@@ -1,5 +1,6 @@
 import { buildTestId } from '@shared/testing/testId';
-import { ConnectorStatusDot, type ConnectorStatus } from '../../connector-status/ConnectorStatusDot';
+import { ConnectorStatusDot } from '../../connector-status/ConnectorStatusDot/ConnectorStatusDot';
+import type { ConnectorStatus } from '../../connector-status/ConnectorStatusDot/ConnectorStatusDot.types';
 
 type SidebarItem = {
   key: string;
@@ -7,7 +8,6 @@ type SidebarItem = {
   text: string;
   imageUrl?: string | null;
   status?: ConnectorStatus;
-  // Only set when status === 'failed' — the connector's persisted lastTestError.
   statusError?: string | null;
   disabled?: boolean;
 };

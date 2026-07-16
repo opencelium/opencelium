@@ -3,7 +3,7 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Icon } from '@shared/ui/primitives/Icon';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import type { TriggerConnectionWorkflowNode } from '../../types/workflow.types';
-import { MethodColorBadge } from '../MethodColorBadge';
+import { MethodColorBadge } from '../MethodColorBadge/MethodColorBadge';
 import { NodeShell } from '../NodeShell/NodeShell';
 import { StandardNodeHandles } from '../StandardNodeHandles/StandardNodeHandles';
 

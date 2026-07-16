@@ -1,6 +1,6 @@
 import type { MouseEvent } from 'react';
-import { NodeToolbar } from '../../components/node/NodeToolbar';
-import { AddStepTrigger } from '../AddStepTrigger';
+import { NodeToolbar } from '../../components/node/NodeToolbar/NodeToolbar';
+import { AddStepTrigger } from '../AddStepTrigger/AddStepTrigger';
 import type { NodeShellProps } from './NodeShell.types';
 
 export function NodeShell({

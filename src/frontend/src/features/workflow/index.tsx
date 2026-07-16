@@ -7,7 +7,7 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { apiExecutor } from '@shared/api/apiExecutor';
 import { ApiFetchError } from '@shared/api/apiFetch';
 import './styles.css';
-import { NodeContextMenu } from './components/NodeContextMenu';
+import { NodeContextMenu } from './components/NodeContextMenu/NodeContextMenu';
 import { WorkflowCanvas } from './components/WorkflowCanvas';
 import { WorkflowHeader } from './components/WorkflowHeader';
 import { WorkflowLogs } from './components/WorkflowLogs';
