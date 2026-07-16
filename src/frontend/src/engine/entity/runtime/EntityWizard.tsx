@@ -43,6 +43,11 @@ type Props<EntityFormValues> = {
     liveUpdate?: boolean
     /** Omit the success screen's recommendation tags even if the entity defines them. */
     hideRecommendations?: boolean
+    /**
+     * When true, omit the header/subheader/image block entirely — just steps and form
+     * inputs. Used when the wizard is embedded inside a host that already has its own title.
+     */
+    hideHeader?: boolean
 }
 
 export function EntityWizard<EntityFormValues>({
@@ -56,6 +61,7 @@ export function EntityWizard<EntityFormValues>({
     skipSuccessState,
     liveUpdate,
     hideRecommendations,
+    hideHeader,
 }: Props<EntityFormValues>) {
 
     const { user, normalizedUser } = useAuth()
@@ -251,6 +257,7 @@ export function EntityWizard<EntityFormValues>({
                             form={form}
                             skipSuccessState={skipSuccessState}
                             hideSubmit={liveUpdate}
+                            hideHeader={hideHeader}
                         />
                     </form>
                 </FormConstraintsProvider>

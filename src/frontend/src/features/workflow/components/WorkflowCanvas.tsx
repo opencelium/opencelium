@@ -11,11 +11,11 @@ import type {
 import { useEffect, useRef, type PropsWithChildren } from 'react';
 import { WorkflowEdge } from '../edges/WorkflowEdge';
 import { ConnectorMethodNode } from '../nodes/ConnectorMethodNode/ConnectorMethodNode';
-import { IfOperatorNode } from '../nodes/IfOperatorNode';
-import { LoopOperatorNode } from '../nodes/LoopOperatorNode';
+import { IfOperatorNode } from '../nodes/IfOperatorNode/IfOperatorNode';
+import { LoopOperatorNode } from '../nodes/LoopOperatorNode/LoopOperatorNode';
 import { StartNode } from '../nodes/StartNode/StartNode';
 import { SystemMethodNode } from '../nodes/SystemMethodNode/SystemMethodNode';
-import { TriggerConnectionNode } from '../nodes/TriggerConnectionNode';
+import { TriggerConnectionNode } from '../nodes/TriggerConnectionNode/TriggerConnectionNode';
 import {
   getOperatorBottomBranch,
   getOutgoingCount,

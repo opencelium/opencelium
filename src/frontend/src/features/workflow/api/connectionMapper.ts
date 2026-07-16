@@ -2,11 +2,23 @@ import type { WorkflowEdgeModel, WorkflowNodeModel } from '../types/workflow.typ
 import type { WorkflowMethodConfig } from '../types/request-config.types';
 import type { HistoryVersionItem } from '../types/history.types';
 import { initialEdges, initialNodes } from '../data/initialGraph';
-import { OFFSETS } from '../utils/graph.constants';
+import { OFFSETS, TITLES } from '../utils/graph.constants';
 import { getBottomSourceHandle, getRightSourceHandle } from '../utils/graph.handles';
 import { normalizeWorkflowPositions } from '../utils/graph.dragDrop';
 import { ALL_COLORS } from '../constants/colors';
 import { normalizeConnectionPayload } from './connectionPayload';
+import { MethodType } from '../types/connection';
+
+type MethodNodeKind = 'connector' | 'system' | 'trigger-connection';
+
+const resolveMethodNodeKind = (method: any): MethodNodeKind => {
+	switch (method?.methodType) {
+		case MethodType.HttpRequest: return 'system';
+		case MethodType.Webhook: return 'trigger-connection';
+		case MethodType.Connector: return 'connector';
+		default: return 'connector';
+	}
+};
 
 export type WorkflowConnectionState = {
 	title: string;
@@ -26,6 +38,7 @@ const methodToConfig = (method: any): WorkflowMethodConfig => ({
 	queryParams: method?.request?.queryParams ?? [],
 	endpointArgs: method?.request?.endpointArgs ?? {},
 	bodyFormat: method?.request?.body?.format ?? 'json',
+	bodyData: method?.request?.body?.data ?? 'raw',
 	body: method?.request?.body?.fields ?? {},
 	response: method?.response,
 });
@@ -93,6 +106,8 @@ const getNodePosition = (path: number[]) => {
 const toMethodEntry = (method: any, index: number): IndexedWorkflowEntry => {
 	const methodIndex = normalizeIndex(method?.index, index);
 	const path = parseIndexPath(methodIndex);
+	const nodeKind = resolveMethodNodeKind(method);
+	const hasConnector = nodeKind === 'connector';
 
 	return {
 		index: methodIndex,
@@ -100,23 +115,24 @@ const toMethodEntry = (method: any, index: number): IndexedWorkflowEntry => {
 		source: method,
 		node: {
 			id: method?.id ?? `method-${index}`,
-			type: method?.connector === null ? 'system' as const : 'connector' as const,
+			type: nodeKind,
 			position: getNodePosition(path),
 			data: {
-				title: method?.connector === null ? 'HTTP Request' : method?.connector?.title ?? 'Connector',
+				title: hasConnector ? method?.connector?.title ?? 'Connector' : TITLES[nodeKind],
 				subtitle: getMethodName(method, index),
 				labelEdited: Boolean(method?.label),
-				kind: method?.connector === null ? 'system' as const : 'connector' as const,
+				kind: nodeKind,
 				color: method?.color,
-				...(method?.connector === null
-					? {}
-					: {
+				...(hasConnector
+					? {
 						connector: {
 							connectorId: method?.connector?.connectorId ?? -1,
 							title: method?.connector?.title ?? 'DEFAULT',
 							icon: method?.connector?.icon ?? null,
 						},
-					}),
+					}
+					: {}),
+				dataAggregator: method?.dataAggregator ?? undefined,
 				methodConfig: methodToConfig(method),
 			},
 		},
@@ -139,6 +155,7 @@ const toOperatorEntry = (operator: any, index: number, fallbackIndex: number): I
 				title: operator?.type === 'loop' ? 'Loop' : 'If',
 				subtitle: operator?.expression || operator?.type || 'Condition',
 				kind: operator?.type === 'loop' ? 'loop' as const : 'if' as const,
+				dataAggregator: operator?.dataAggregator ?? undefined,
 				conditionConfig: {
 					operatorType: operator?.type === 'loop' ? 'loop' : 'if',
 					tree: {
@@ -380,15 +397,17 @@ const restoreNodesFromUi = (
 			}
 			usedEntryIds.add(entry.node.id);
 
+			const mergedData = {
+				...mergeSavedNodeData(entry.node.data, savedNode.data),
+				kind: entry.node.data.kind,
+				...(entry.node.type === 'system' ? { connector: undefined } : {}),
+			};
+
 			return {
 				...entry.node,
 				id: savedNode.id,
 				position: savedNode.position,
-				data: {
-					...mergeSavedNodeData(entry.node.data, savedNode.data),
-					kind: entry.node.data.kind,
-					...(entry.node.type === 'system' ? { connector: undefined } : {}),
-				},
+				data: mergedData,
 				draggable: savedNode.draggable ?? entry.node.draggable,
 				deletable: savedNode.deletable ?? entry.node.deletable,
 			};

@@ -53,6 +53,10 @@
       }
     }
   },
+  "scriptEditor": {
+    "maximize": "Maximize script",
+    "minimize": "Minimize script"
+  },
   "validation": {
     "scriptContainsNotExistedArgs": "Script contains not existed arguments.",
     "argNameInvalid": "Must start with a letter, _ or $ and contain only letters, digits, _ or $."

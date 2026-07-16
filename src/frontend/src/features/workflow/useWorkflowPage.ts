@@ -5,7 +5,7 @@ import type { ReactFlowInstance, Viewport } from '@xyflow/react';
 import type { InvokerOperation } from '@entities/invoker/model/types';
 import { initialEdges, initialNodes } from './data/initialGraph';
 import type { WorkflowAction, WorkflowContextMenu, WorkflowEdgeModel, WorkflowNodeModel } from './types/workflow.types';
-import type { WorkflowConditionEditorState, WorkflowMethodConfig, WorkflowMethodEditorState } from './types/request-config.types';
+import type { WorkflowAggregatorEditorState, WorkflowConditionEditorState, WorkflowMethodConfig, WorkflowMethodEditorState } from './types/request-config.types';
 import type { ConditionConfig } from './components/condition-builder/conditionBuilder.types';
 import { ALL_COLORS } from './constants/colors';
 import { createNodeFromAction, deleteNodeGraph } from './utils/graphUtils';
@@ -181,6 +181,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
   const [methodEditor, setMethodEditor] = useState<WorkflowMethodEditorState | null>(null);
   const [responseNodeId, setResponseNodeId] = useState<string | null>(null);
   const [conditionEditor, setConditionEditor] = useState<WorkflowConditionEditorState | null>(null);
+  const [aggregatorEditor, setAggregatorEditor] = useState<WorkflowAggregatorEditorState | null>(null);
   const [restoredViewport, setRestoredViewport] = useState<Viewport | undefined>();
   const [viewportRestoreVersion, setViewportRestoreVersion] = useState(0);
   const [centerStartVersion, setCenterStartVersion] = useState(1);
@@ -929,6 +930,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     methodEditor,
     responseNodeId,
     conditionEditor,
+    aggregatorEditor,
     restoredViewport,
     viewportRestoreVersion,
     centerStartVersion,
@@ -943,6 +945,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     setSidebarAction,
     setMethodEditor,
     setConditionEditor,
+    setAggregatorEditor,
     setWorkflowGraph: (
       nextNodes: WorkflowNodeModel[],
       nextEdges: WorkflowEdgeModel[],
@@ -1162,7 +1165,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     },
     onShowResponse: (nodeId: string) => { setResponseNodeId(nodeId); setContextMenu(null); },
     onCloseResponse: () => setResponseNodeId(null),
-    onOpenAddStep: (action: WorkflowAction) => { setSidebarAction(action); setContextMenu(null); setHistoryOpen(false); setMethodEditor(null); setConditionEditor(null); },
+    onOpenAddStep: (action: WorkflowAction) => { setSidebarAction(action); setContextMenu(null); setHistoryOpen(false); setMethodEditor(null); setConditionEditor(null); setAggregatorEditor(null); },
     onAddStep: (
       kind: WorkflowAction['kind'],
       methodName?: string,
@@ -1207,6 +1210,10 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     onSaveConditionConfig: (nodeId: string, conditionConfig: ConditionConfig) => {
       setNodes((currentNodes) => currentNodes.map((node) => node.id === nodeId ? { ...node, data: { ...node.data, conditionConfig } } : node));
       setConditionEditor(null);
+    },
+    onSaveDataAggregator: (nodeId: string, dataAggregator: number | null) => {
+      setNodes((currentNodes) => currentNodes.map((node) => node.id === nodeId ? { ...node, data: { ...node.data, dataAggregator } } : node));
+      setAggregatorEditor(null);
     },
   };
 }

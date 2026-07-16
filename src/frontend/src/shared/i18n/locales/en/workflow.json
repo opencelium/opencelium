@@ -8,6 +8,7 @@
     "ok": "Ok",
     "delete": "Delete",
     "edit": "Edit",
+    "select": "Select",
     "createNew": "Create new",
     "insertReference": "Insert reference",
     "addAttribute": "Add attribute",
@@ -246,6 +247,16 @@
     "showResponse": "Show Response",
     "newLabelPlaceholder": "New label"
   },
+  "aggregatorDialog": {
+    "title": "Configure Aggregator",
+    "selectPlaceholder": "Select a data aggregator",
+    "createNewTooltip": "Create new data aggregator",
+    "emptyState": "Select an existing data aggregator or create a new one.",
+    "confirmUnassign": {
+      "title": "Delete the assigned data aggregator?",
+      "message": "This removes the data aggregator from this step. The data aggregator entry itself will not be deleted and remains available for other steps."
+    }
+  },
   "node": {
     "if": "If",
     "loop": "Loop",
@@ -446,5 +457,12 @@
     "legacyTitle": "Reference information",
     "empty": "(is empty now)"
   },
-  "requestData": "Request data"
+  "requestData": "Request data",
+  "graphqlBody": {
+    "masterPasswordTitle": "Enter the master password to access this connector's GraphQL API",
+    "autocompleteHint": "Press Ctrl + Space to see the autocomplete.",
+    "connectorFailed": "Could not load the connector. Check the backend connection and try again.",
+    "loginFailed": "Could not authenticate with this connector's GraphQL API. Check its credentials and try again.",
+    "retry": "Try again"
+  }
 }

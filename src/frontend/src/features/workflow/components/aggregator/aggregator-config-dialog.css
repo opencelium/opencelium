@@ -1,0 +1,18 @@
+.aggregatorDialogHeader {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+}
+
+.aggregatorDialogSelect {
+  flex: 1;
+  min-width: 0;
+}
+
+.aggregatorDialogEmpty {
+  padding: 24px 0;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  text-align: center;
+}

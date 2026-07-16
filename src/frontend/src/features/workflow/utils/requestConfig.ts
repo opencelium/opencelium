@@ -22,6 +22,7 @@ export const createEmptyMethodConfig = (): WorkflowMethodConfig => ({
   queryParams: [createTemplateRow()],
   endpointArgs: {},
   bodyFormat: 'json',
+  bodyData: 'raw',
   body: {},
 });
 
@@ -37,6 +38,7 @@ export const createMethodConfigFromOperation = (operation?: InvokerOperation): W
     queryParams: buildQueryParamsFromEndpoint(request.endpoint || fallback.url),
     endpointArgs: {},
     bodyFormat: request.body?.format || 'json',
+    bodyData: request.body?.data || 'raw',
     body: request.body?.fields ?? {},
     response: {
       responseId: `response-${operation.name}`,
@@ -60,6 +62,7 @@ export const ensureMethodConfig = (config?: Partial<WorkflowMethodConfig>): Work
   queryParams: config?.queryParams?.length ? config.queryParams : createEmptyMethodConfig().queryParams,
   endpointArgs: config?.endpointArgs ?? {},
   bodyFormat: config?.bodyFormat ?? 'json',
+  bodyData: config?.bodyData ?? 'raw',
   body: config?.body ?? {},
   response: config?.response,
 });

@@ -85,4 +85,9 @@ export interface GenericStepFormProps {
      * changes live (no explicit submit).
      */
     hideSubmit?: boolean
+    /**
+     * When true, omit the header/subheader/image block entirely. Used when the wizard
+     * is embedded inside a host that already provides its own title (e.g. a dialog).
+     */
+    hideHeader?: boolean
 }

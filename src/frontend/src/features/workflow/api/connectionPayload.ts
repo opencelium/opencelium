@@ -2,6 +2,7 @@ import type { WorkflowEdgeModel, WorkflowNodeData, WorkflowNodeModel } from '../
 import { buildLegacyConnection } from '../components/request-editor/legacyAdapter';
 import { ITERATOR_NAMES } from '../components/request-editor/body-editor/requestReferenceOptions';
 import { ALL_COLORS } from '../constants/colors';
+import { MethodType } from '../types/connection';
 
 type BuildConnectionPayloadArgs = {
 	connectionId?: string | number;
@@ -63,6 +64,14 @@ const isMethodNode = (node: WorkflowNodeModel) => {
 const isConnectorlessMethodNode = (node: WorkflowNodeModel) => {
 	const kind = nodeKind(node);
 	return kind === 'system' || kind === 'trigger-connection';
+};
+
+const resolveMethodType = (node: WorkflowNodeModel): MethodType => {
+	switch (nodeKind(node)) {
+		case 'system': return MethodType.HttpRequest;
+		case 'trigger-connection': return MethodType.Webhook;
+		default: return MethodType.Connector;
+	}
 };
 
 const isOperatorNode = (node: WorkflowNodeModel) => {
@@ -230,6 +239,7 @@ const sanitizeNodeData = (data: WorkflowNodeData) => {
 		connector: data.connector,
 		methodConfig: sanitizeMethodConfig(data.methodConfig),
 		conditionConfig: stripEnhancementObjects(data.conditionConfig),
+		dataAggregator: data.dataAggregator,
 	};
 
 	return Object.fromEntries(
@@ -289,10 +299,10 @@ const stripPluralConnectorLists = (connector: any) => {
 	return rest;
 };
 
-const buildPayloadData = (body: unknown, format = 'json') => ({
+const buildPayloadData = (body: unknown, format = 'json', data = 'raw') => ({
 	type: Array.isArray(body) ? 'array' : 'object',
 	format,
-	data: 'raw',
+	data,
 	fields: body ?? {},
 });
 
@@ -303,12 +313,12 @@ const isPayloadData = (body: unknown) =>
 	'format' in body &&
 	'fields' in body;
 
-const normalizePayloadData = (body: unknown, format = 'json') => {
-	if (!isPayloadData(body)) return buildPayloadData(body, format);
+const normalizePayloadData = (body: unknown, format = 'json', data = 'raw') => {
+	if (!isPayloadData(body)) return buildPayloadData(body, format, data);
 	const payload = body as Record<string, unknown>;
 	return {
 		...payload,
-		data: payload.data ?? 'raw',
+		data: payload.data ?? data,
 	};
 };
 
@@ -371,8 +381,8 @@ const serializeHeaderReferences = (value: unknown, endpointArgs?: Record<string,
 	return value;
 };
 
-const serializePayloadData = (body: unknown, endpointArgs?: Record<string, any>, format = 'json') =>
-	serializeHeaderReferences(normalizePayloadData(body, format), endpointArgs);
+const serializePayloadData = (body: unknown, endpointArgs?: Record<string, any>, format = 'json', data = 'raw') =>
+	serializeHeaderReferences(normalizePayloadData(body, format, data), endpointArgs);
 
 const buildMethodPayload = (node: WorkflowNodeModel, index: string, order: number, resolvedColor?: string) => {
 	const config = node.data.methodConfig as any;
@@ -399,13 +409,15 @@ const buildMethodPayload = (node: WorkflowNodeModel, index: string, order: numbe
 		name: config?.name ?? node.data.subtitle,
 		...(node.data.labelEdited ? { label: node.data.subtitle } : {}),
 		index,
+		methodType: resolveMethodType(node),
+		dataAggregator: node.data.dataAggregator ?? null,
 		color: normalizeColor(resolvedColor ?? (node.data as any).color, ALL_COLORS[order % ALL_COLORS.length]),
 		connector: isHttpRequest ? null : node.data.connector,
 		request: {
 			endpoint: serializeReferenceString(config?.url ?? '', endpointArgs),
 			method: config?.method ?? 'GET',
 			header: serializeHeaderReferences(config?.headers ?? {}, endpointArgs),
-			body: serializePayloadData(config?.body, endpointArgs, config?.bodyFormat),
+			body: serializePayloadData(config?.body, endpointArgs, config?.bodyFormat, config?.bodyData),
 		},
 		...(response ? { response } : {}),
 	};
@@ -443,6 +455,7 @@ const buildOperatorPayload = (node: WorkflowNodeModel, index: string, iterator?:
 		id: node.id,
 		index,
 		type,
+		dataAggregator: node.data.dataAggregator ?? null,
 		expression: normalizeOperatorExpression(node.data.conditionConfig?.expression ?? '', type),
 		...(type === 'loop' && iterator
 			? { iterator }
