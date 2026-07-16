@@ -14,7 +14,7 @@ import {
 import { Radio } from '@shared/ui/primitives/Radio';
 import { Select } from '@shared/ui/primitives/Select';
 import { ConnectorIcon } from '@entities/connector/ui/ConnectorIcon';
-import { MethodColorDot } from '../../MethodColorDot';
+import { MethodColorDot } from '../../MethodColorDot/MethodColorDot';
 import { getDuplicateMethodIndexByColor } from '../../../utils/methodColor';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import '../body-editor/bodyLegacy.css';
