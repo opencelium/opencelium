@@ -338,9 +338,9 @@ export const connectorDefinition: EntityDefinition = {
                                         return true;
                                     }
                                 }
-                                for (let param in value) {
+                                /*for (let param in value) {
                                     if (!value[param]) return false;
-                                }
+                                }*/
                                 return true;
                             },
 
