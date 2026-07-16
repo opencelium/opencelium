@@ -1,7 +1,7 @@
 import type { NodeProps } from '@xyflow/react';
 import { Globe } from 'lucide-react';
 import type { SystemWorkflowNode } from '../../types/workflow.types';
-import { MethodColorBadge } from '../MethodColorBadge';
+import { MethodColorBadge } from '../MethodColorBadge/MethodColorBadge';
 import { NodeShell } from '../NodeShell/NodeShell';
 import { StandardNodeHandles } from '../StandardNodeHandles/StandardNodeHandles';
 

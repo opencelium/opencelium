@@ -4,7 +4,7 @@ import { Icon } from '@shared/ui/primitives/Icon';
 import { ConnectorStatusDot } from '../../connector-status/ConnectorStatusDot';
 import { getConnectorStatus } from '../../connector-status/getConnectorStatus';
 import type { ConnectorWorkflowNode } from '../../types/workflow.types';
-import { MethodColorBadge } from '../MethodColorBadge';
+import { MethodColorBadge } from '../MethodColorBadge/MethodColorBadge';
 import { NodeShell } from '../NodeShell/NodeShell';
 import { StandardNodeHandles } from '../StandardNodeHandles/StandardNodeHandles';
 
