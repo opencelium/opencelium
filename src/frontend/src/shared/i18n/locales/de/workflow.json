@@ -394,6 +394,8 @@
     "level": "Ebene {{depth}}",
     "text": "Text",
     "textValue": "Textwert",
+    "textPlaceholder": "Kein Textinhalt",
+    "addChild": "Unterelement",
     "attributePlaceholder": "Attribut {{name}}",
     "empty": "Leer"
   },

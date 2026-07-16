@@ -37,21 +37,26 @@ export function XmlNodeCard({ node, depth = 0, readOnly, selected, onChangeNode,
           <span className="xmlBracket">&lt;</span>
           <span className="xmlTagName">{node.name || 'tag'}</span>
           <span className="xmlBracket">&gt;</span>
-          <span className="xmlMeta">{t('xmlNode.level', { depth })}</span>
           {!readOnly ? <Button className="xmlIconButton" type="text" size="small" icon={<EditOutlined />} onClick={() => setIsTagDialogOpen(true)} /> : null}
+          <span className="xmlLevelBadge">{`L${depth}`}</span>
         </div>
         {!readOnly ? (
           <Space className="xmlNodeActions">
-            <Button className="xmlIconButton" type="text" icon={<PlusOutlined />} onClick={() => onAddChild(node.id)} />
+            <Button className="xmlAddChild" size="small" icon={<PlusOutlined />} onClick={() => onAddChild(node.id)}>{t('xmlNode.addChild')}</Button>
             {depth > 0 ? <Button className="xmlIconButton" danger type="text" icon={<DeleteOutlined />} onClick={() => onRemove(node.id)} /> : null}
           </Space>
         ) : null}
       </div>
       <div className="xmlNodeBody">
         <XmlFieldEditor
-          label={t('xmlNode.text')}
+          variant="text"
+          label={(
+            <span className="xmlSectionBadge xmlSectionBadgeText">
+              {t('xmlNode.text')}
+            </span>
+          )}
           value={node.text}
-          placeholder={t('xmlNode.textValue')}
+          placeholder={t('xmlNode.textPlaceholder')}
           selection={{ nodeId: node.id, kind: 'text' }}
           selected={selectedText}
           readOnly={readOnly}
@@ -67,7 +72,13 @@ export function XmlNodeCard({ node, depth = 0, readOnly, selected, onChangeNode,
         {Object.entries(node.attributes).map(([attribute, value]) => (
           <XmlFieldEditor
             key={attribute}
-            label={`@${attribute}`}
+            variant="attribute"
+            label={(
+              <span className="xmlAttrLabel">
+                <span className="xmlAttrName">@{attribute}</span>
+                <span className="xmlAttrEq">=</span>
+              </span>
+            )}
             value={value}
             placeholder={t('xmlNode.attributePlaceholder', { name: attribute })}
             selection={{ nodeId: node.id, kind: 'attribute', attribute }}
@@ -96,6 +107,7 @@ export function XmlNodeCard({ node, depth = 0, readOnly, selected, onChangeNode,
               onSelect({ nodeId: node.id, kind: 'attribute', attribute: name });
             }}
           >
+            <span className="xmlSectionBadgeIcon">@</span>
             {t('actions.addAttribute')}
           </Button>
         ) : null}

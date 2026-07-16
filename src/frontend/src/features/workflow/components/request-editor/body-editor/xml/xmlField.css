@@ -1,19 +1,40 @@
-.xmlField {
-  padding-left: 14px;
-  border-left: 2px solid var(--color-border-subtle);
+.xmlFieldRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+  padding: 4px 10px;
+  border-left: 3px solid var(--color-border-subtle);
+  border-radius: 6px;
+  background: var(--color-background-hover);
 }
 
-.xmlFieldHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
+.xmlFieldRowText {
+  border-left-color: var(--color-status-success-fg);
+}
+
+.xmlFieldRowAttr {
+  border-left-color: var(--color-status-warning-fg);
+}
+
+.xmlFieldRowSelected {
+  box-shadow: 0 0 0 1px var(--color-status-warning-border);
 }
 
 .xmlFieldLabel {
   color: var(--color-text-secondary);
   font-size: 12px;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+}
+
+.xmlFieldValue {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
 }
 
 .xmlFieldInput textarea,
@@ -23,36 +44,22 @@
 }
 
 .xmlFieldPreview {
-  border: 1px solid var(--color-border-subtle);
-  border-radius: 6px;
-  background: var(--color-background-hover);
+  border: none;
+  background: transparent;
   color: var(--color-text-primary);
   cursor: pointer;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 13px;
   line-height: 1.5;
-  min-height: 34px;
-  padding: 7px 10px;
+  padding: 2px 0;
   text-align: left;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
   width: 100%;
   word-break: break-word;
 }
 
-.xmlFieldPreview:hover {
-  background: var(--color-background-hover);
-  border-color: var(--color-border-default);
-}
-
-.xmlFieldPreviewSelected {
-  border-color: var(--color-status-warning-border);
-  box-shadow: 0 0 0 1px var(--color-status-warning-border);
-}
-
-.xmlFieldInput textarea {
-  border-radius: 6px;
-  border-color: var(--color-border-subtle);
-  background: var(--color-background-hover);
+.xmlFieldPreviewEmpty {
+  color: var(--color-text-disabled);
+  font-style: italic;
 }
 
 .xmlField:hover .xmlFieldActions {
@@ -62,6 +69,7 @@
 .xmlFieldActions {
   opacity: 0.35;
   transition: opacity 0.15s ease;
+  flex-shrink: 0;
 }
 
 .xmlIconButton {

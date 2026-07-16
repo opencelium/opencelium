@@ -394,6 +394,8 @@
     "level": "level {{depth}}",
     "text": "Text",
     "textValue": "Text value",
+    "textPlaceholder": "No text content",
+    "addChild": "Child",
     "attributePlaceholder": "Attribute {{name}}",
     "empty": "Empty"
   },
