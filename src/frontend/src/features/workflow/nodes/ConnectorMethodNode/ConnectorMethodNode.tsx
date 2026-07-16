@@ -1,7 +1,7 @@
 import { resolveConnectorIconUrl } from '@entities/connector/model/iconUrl';
 import type { NodeProps } from '@xyflow/react';
 import { Icon } from '@shared/ui/primitives/Icon';
-import { ConnectorStatusDot } from '../../connector-status/ConnectorStatusDot';
+import { ConnectorStatusDot } from '../../connector-status/ConnectorStatusDot/ConnectorStatusDot';
 import { getConnectorStatus } from '../../connector-status/getConnectorStatus';
 import type { ConnectorWorkflowNode } from '../../types/workflow.types';
 import { MethodColorBadge } from '../MethodColorBadge/MethodColorBadge';
