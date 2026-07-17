@@ -28,6 +28,8 @@ import { loadConnectionVersions, loadWorkflowConnection, loadWorkflowConnectionV
 import { mapConnectionToWorkflowState } from './api/connectionMapper';
 import { buildConnectionPayload, buildFromConnectorPayload } from './api/connectionPayload';
 import { useGetConnectorsQuery } from '@entities/connector/api/connectorApi';
+import { useGetInvokersQuery } from '@entities/invoker/api/invokerApi';
+import type { Invoker } from '@entities/invoker/model/types';
 import { selectAuthUser } from '@entities/auth/model/authSelectors';
 import { store } from '@app/store/store';
 import { genericApi } from '@shared/api/genericApi';
@@ -55,8 +57,9 @@ const normalizeConnectorIcon = (icon: Connector['icon']) =>
 const hydrateNodesWithOperationResponses = (
   nodes: WorkflowNodeModel[],
   connectors: Connector[],
+  invokers: Invoker[] = [],
 ): WorkflowNodeModel[] => {
-  if (!connectors.length) return nodes;
+  if (!connectors.length && !invokers.length) return nodes;
 
   return nodes.map((node) => {
     if (node.type !== 'connector' && node.type !== 'system') return node;
@@ -66,7 +69,11 @@ const hydrateNodesWithOperationResponses = (
 
     const connector = connectors.find((item) => item.connectorId === connectorId);
     const operation = connector?.invoker?.operations?.find((item) => item.name.toLowerCase() === methodName.toLowerCase());
-    if (!connector && !operation?.response) return node;
+    const invokerName = node.data.connector?.invokerName;
+    const invokerIcon = !node.data.connector?.icon && invokerName
+      ? invokers.find((item) => (item.name ?? '').toLowerCase() === invokerName.toLowerCase())?.icon ?? null
+      : null;
+    if (!connector && !operation?.response && !invokerIcon) return node;
 
     return {
       ...node,
@@ -77,11 +84,13 @@ const hydrateNodesWithOperationResponses = (
               ...node.data.connector,
               connectorId: connector.connectorId,
               title: connector.title,
-              icon: normalizeConnectorIcon(connector.icon),
+              icon: normalizeConnectorIcon(connector.icon) ?? normalizeConnectorIcon(connector.invoker?.icon) ?? invokerIcon ?? node.data.connector?.icon ?? null,
               lastTestPassed: connector.lastTestPassed,
               lastTestError: connector.lastTestError,
             }
-          : node.data.connector,
+          : invokerIcon && node.data.connector
+            ? { ...node.data.connector, icon: invokerIcon }
+            : node.data.connector,
         methodConfig: operation?.response
           ? {
               ...createEmptyMethodConfig(),
@@ -208,6 +217,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const confirm = useConfirm();
   const authUser = useAppSelector(selectAuthUser);
   const { data: connectors = [], isLoading: isConnectorsLoading } = useGetConnectorsQuery({ page: 0, limit: 1000 });
+  const { data: invokers = [] } = useGetInvokersQuery();
   const [createdConnectionId, setCreatedConnectionId] = useState<string>();
   const [headerState, setHeaderState] = useState({
     title: '[Empty Name]',
@@ -259,8 +269,8 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [schedulesOpen, setSchedulesOpen] = useState(false);
   const hydratedNodes = useMemo(
-    () => hydrateNodesWithOperationResponses(workflow.nodes, connectors),
-    [connectors, workflow.nodes],
+    () => hydrateNodesWithOperationResponses(workflow.nodes, connectors, invokers),
+    [connectors, invokers, workflow.nodes],
   );
   const activeConnectionId = createdConnectionId ?? connectionId;
   const displayedHistoryVersions = useMemo(
@@ -888,7 +898,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           if (!activeConnectionId) return;
           setSelectedHistoryVersionId(snapshotId);
           const state = await loadWorkflowConnectionVersion(activeConnectionId, snapshotId);
-          const nextNodes = hydrateNodesWithOperationResponses(state.nodes, connectors);
+          const nextNodes = hydrateNodesWithOperationResponses(state.nodes, connectors, invokers);
           const nextSnapshot = buildWorkflowChangeSnapshot({
             connectionId: activeConnectionId,
             title: state.title,

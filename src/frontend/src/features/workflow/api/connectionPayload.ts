@@ -709,9 +709,11 @@ export function normalizeConnectionPayload(payload: any) {
 	};
 	const toMethods = Array.isArray(payload?.toConnector?.methods) ? payload.toConnector.methods : [];
 	const toOperators = Array.isArray(payload?.toConnector?.operators) ? payload.toConnector.operators : [];
+	const fromInvokerName = payload?.fromConnector?.invoker?.name ?? sourceFromConnector?.invoker?.name;
+	const toInvokerName = payload?.toConnector?.invoker?.name;
 	const combinedMethods = [
-		...sourceMethods.map((method: any, index: number) => ({ ...method, index: normalizeIndex(method?.index, index) })),
-		...toMethods.map((method: any, index: number) => ({ ...method, index: shiftRootIndex(method?.index, sourceMethods.length + index) })),
+		...sourceMethods.map((method: any, index: number) => ({ ...method, index: normalizeIndex(method?.index, index), invokerName: method?.invokerName ?? fromInvokerName })),
+		...toMethods.map((method: any, index: number) => ({ ...method, index: shiftRootIndex(method?.index, sourceMethods.length + index), invokerName: method?.invokerName ?? toInvokerName })),
 	];
 	const combinedOperators = [
 		...sourceOperators.map((operator: any, index: number) => ({ ...operator, index: normalizeIndex(operator?.index, index) })),
@@ -736,6 +738,7 @@ export function normalizeConnectionPayload(payload: any) {
 						connectorId: method?.connector?.connectorId ?? method?.connectorId ?? -1,
 						title: method?.connector?.title ?? method?.connectorTitle ?? method?.connector?.name ?? 'DEFAULT',
 						icon: method?.connector?.icon ?? null,
+						invokerName: method?.invokerName ?? method?.connector?.invokerName ?? null,
 					},
 			})),
 			operator: combinedOperators.map((operator: any) => ({
