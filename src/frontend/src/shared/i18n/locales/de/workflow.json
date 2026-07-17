@@ -184,8 +184,9 @@
       "description": "Es gibt keine Konnektoren, die zu dieser Suche passen."
     },
     "connectorStatus": {
-      "passed": "Verbindungsprüfung erfolgreich",
-      "failed": "Verbindungsprüfung fehlgeschlagen"
+      "passed": "Verbindungstest erfolgreich — dieser Connector ist einsatzbereit.",
+      "failed": "Verbindungstest fehlgeschlagen — Zugangsdaten und Einstellungen des Connectors prüfen.",
+      "failedWithReason": "Verbindungstest fehlgeschlagen: {{reason}}"
     },
     "methodsEmpty": {
       "title": "Keine Methoden gefunden",
@@ -262,7 +263,9 @@
     "loop": "Loop",
     "branchTrue": "true",
     "branchFalse": "false",
-    "asyncBadge": "Asynchrone Anfrage — löst den anderen Workflow aus und wartet nicht auf dessen Antwort."
+    "asyncBadge": "Asynchrone Anfrage — löst den anderen Workflow aus und wartet nicht auf dessen Antwort.",
+    "aggregatorBadge": "Führt Ergebnisse mehrerer Aufrufe mit dem Daten-Aggregator \"{{name}}\" zusammen.",
+    "methodColorBadge": "Knoten mit derselben Farbe und Nummer rufen dieselbe Methode desselben Connectors auf."
   },
   "saveDialog": {
     "title": "Version speichern",

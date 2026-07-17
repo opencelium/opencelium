@@ -29,7 +29,9 @@ export function ConnectorStatusDot({
 }: ConnectorStatusDotProps) {
 	const { t } = useI18n('workflow');
 	const { color, tooltipKey } = statusToAppearance(status);
-	const tooltipContent = tooltipOverride || t(`sidebar.connectorStatus.${tooltipKey}`);
+	const tooltipContent = tooltipOverride
+		? t('sidebar.connectorStatus.failedWithReason', { reason: tooltipOverride })
+		: t(`sidebar.connectorStatus.${tooltipKey}`);
 	const dot = (
 		<span
 			className={className}

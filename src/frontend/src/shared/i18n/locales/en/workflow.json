@@ -184,8 +184,9 @@
       "description": "There are no connectors matching this search."
     },
     "connectorStatus": {
-      "passed": "Connection check passed",
-      "failed": "Connection check failed"
+      "passed": "Connection test passed — this connector is ready to use.",
+      "failed": "Connection test failed — check the connector's credentials and settings.",
+      "failedWithReason": "Connection test failed: {{reason}}"
     },
     "methodsEmpty": {
       "title": "No methods found",
@@ -262,7 +263,9 @@
     "loop": "Loop",
     "branchTrue": "true",
     "branchFalse": "false",
-    "asyncBadge": "Asynchronous request — triggers the other workflow and does not wait for its response."
+    "asyncBadge": "Asynchronous request — triggers the other workflow and does not wait for its response.",
+    "aggregatorBadge": "Combines results from multiple calls using the \"{{name}}\" data aggregator.",
+    "methodColorBadge": "Nodes sharing this color and number call the same method on the same connector."
   },
   "saveDialog": {
     "title": "Save Version",
