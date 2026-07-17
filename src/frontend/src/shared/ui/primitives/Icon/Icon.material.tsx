@@ -40,6 +40,7 @@ import {
     AltRoute,
     Webhook,
     Bolt,
+    Public,
 } from '@mui/icons-material';
 
 import type { IconComponent } from './Icon.types';
@@ -86,6 +87,7 @@ const iconMap = {
     connector: AltRoute,
     webhook: Webhook,
     flash: Bolt,
+    'http-request': Public,
 };
 
 export const MaterialIcon: IconComponent = ({

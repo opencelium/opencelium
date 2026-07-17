@@ -47,6 +47,7 @@ export type IconName =
     | 'refresh'
     | 'connector'
     | 'flash'
+    | 'http-request'
 
 export type IconColor =
     | 'default'

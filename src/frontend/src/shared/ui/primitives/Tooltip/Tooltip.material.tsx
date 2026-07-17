@@ -17,6 +17,7 @@ const muiPlacement: Record<TooltipPlacement, MuiTooltipProps['placement']> = {
 export const MaterialTooltip: TooltipComponent = ({
     content,
     placement = 'top',
+    zIndex,
     children,
 }) => {
     return (
@@ -33,9 +34,10 @@ export const MaterialTooltip: TooltipComponent = ({
                         fontSize: 12,
                     },
                 },
+                popper: zIndex ? { style: { zIndex } } : undefined,
             }}
         >
-            <span>{children}</span>
+            <span style={{ display: 'inline-flex', minWidth: 0 }}>{children}</span>
         </MuiTooltip>
     );
 };

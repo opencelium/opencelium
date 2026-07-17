@@ -438,7 +438,8 @@
   "refGenerator": {
     "connector": "Connector",
     "method": "Method",
-    "field": "Field"
+    "field": "Field",
+    "webhookTriggerHint": "Webhook trigger — this response is only the trigger acknowledgement, not the result of the triggered workflow."
   },
   "webhook": {
     "noWebhooks": "No webhooks yet",

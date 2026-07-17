@@ -438,7 +438,8 @@
   "refGenerator": {
     "connector": "Konnektor",
     "method": "Methode",
-    "field": "Feld"
+    "field": "Feld",
+    "webhookTriggerHint": "Webhook-Trigger — diese Antwort ist nur die Trigger-Bestätigung, nicht das Ergebnis des ausgelösten Workflows."
   },
   "webhook": {
     "noWebhooks": "Noch keine Webhooks",
