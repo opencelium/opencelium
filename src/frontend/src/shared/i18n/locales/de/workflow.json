@@ -16,6 +16,8 @@
     "openScriptNewWindow": "Skript in neuem Fenster öffnen",
     "maximizeScript": "Skript maximieren",
     "minimizeScript": "Skript minimieren",
+    "maximizeRequestData": "Anfragedaten maximieren",
+    "minimizeRequestData": "Anfragedaten minimieren",
     "load": "Laden"
   },
   "confirmDelete": {

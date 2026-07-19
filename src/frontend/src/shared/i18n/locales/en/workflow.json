@@ -16,6 +16,8 @@
     "openScriptNewWindow": "Open script in new window",
     "maximizeScript": "Maximize script",
     "minimizeScript": "Minimize script",
+    "maximizeRequestData": "Maximize request data",
+    "minimizeRequestData": "Minimize request data",
     "load": "Load"
   },
   "confirmDelete": {

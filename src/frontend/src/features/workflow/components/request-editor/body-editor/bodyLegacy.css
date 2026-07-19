@@ -81,6 +81,12 @@
   min-height: 0;
 }
 
+.bodyLegacyXmlContentMaximized {
+  z-index: 1100;
+  padding: 8px;
+  background: var(--color-background-surface);
+}
+
 .bodyLegacyXmlCard {
   display: flex;
   flex: 1;

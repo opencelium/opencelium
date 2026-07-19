@@ -1,4 +1,6 @@
+import { useRef, useState, type CSSProperties } from 'react';
 import { Alert, Card, ConfigProvider, Input, Segmented, Space, Tag } from 'antd';
+import { Maximize2, Minimize2 } from 'lucide-react';
 import ReferenceEnhancement from '../enhancement/Enhancement';
 import { ReferenceInfo } from '../reference-info/ReferenceInfo';
 import { InlineBodyReferenceEditor } from './InlineBodyReferenceEditor';
@@ -9,6 +11,7 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Collapse } from '@shared/ui/primitives/Collapse';
 import type { CollapseItem } from '@shared/ui/primitives/Collapse/Collapse.types';
 import { Empty } from '@shared/ui/primitives/Empty';
+import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import './bodyLegacy.css';
 
 type Props = { readOnly?: boolean };
@@ -16,10 +19,30 @@ type Props = { readOnly?: boolean };
 export function XmlBodyEditor({ readOnly }: Props) {
   const { t } = useI18n('workflow');
   const editor = useXmlBodyEditor();
+  const [isMaximized, setIsMaximized] = useState(false);
+  const [maximizedStyle, setMaximizedStyle] = useState<CSSProperties | undefined>();
+  const contentBoxRef = useRef<HTMLDivElement>(null);
   const hasReferenceInfo = !!editor.connection?.fieldBindings.some((binding) => {
     const result = binding.enhancement?.args?.RESULT_VAR;
     return typeof result === 'string' && result.startsWith(`${editor.method.color}.(request).body.$`);
   });
+
+  // Matches Enhancement's toggleScriptMaximized: stays within the parent dialog's own
+  // body (position: fixed to its rect) instead of a real viewport-filling dialog.
+  const toggleMaximized = () => {
+    setIsMaximized((prev) => {
+      const next = !prev;
+      if (next) {
+        const body = contentBoxRef.current?.closest('.ant-modal-body') as HTMLElement | null;
+        const rect = body?.getBoundingClientRect();
+        setMaximizedStyle(
+          rect ? { position: 'fixed', top: rect.top, left: rect.left, width: rect.width, height: rect.height } : undefined,
+        );
+      }
+      return next;
+    });
+    setTimeout(() => window.dispatchEvent(new Event('resize')), 0);
+  };
 
   const leftItems: CollapseItem[] = [
     {
@@ -35,8 +58,12 @@ export function XmlBodyEditor({ readOnly }: Props) {
       key: 'requestData',
       label: t('requestData'),
       content: (
-        <div className="bodyLegacyXmlContent">
-          <Space>
+        <div
+          ref={contentBoxRef}
+          className={isMaximized ? 'bodyLegacyXmlContent bodyLegacyXmlContentMaximized' : 'bodyLegacyXmlContent'}
+          style={isMaximized ? maximizedStyle : undefined}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Segmented<'tree' | 'raw'>
               value={editor.mode}
               onChange={(nextMode) => {
@@ -50,7 +77,18 @@ export function XmlBodyEditor({ readOnly }: Props) {
                 { label: t('xmlBody.rawData'), value: 'raw' },
               ]}
             />
-          </Space>
+            <Tooltip content={t(isMaximized ? 'actions.minimizeRequestData' : 'actions.maximizeRequestData')}>
+              <button
+                type="button"
+                className="logsHeaderIconButton logsHeaderIconButton--active"
+                onClick={toggleMaximized}
+                aria-label={t(isMaximized ? 'actions.minimizeRequestData' : 'actions.maximizeRequestData')}
+                data-testid="workflow-xml-body-fullscreen"
+              >
+                {isMaximized ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+              </button>
+            </Tooltip>
+          </div>
           {editor.rawError ? <Alert type="error" message={editor.rawError} /> : null}
           {editor.mode === 'raw' ? (
             <Card title={t('xmlBody.rawXml')} className="bodyLegacyXmlCard">
@@ -72,10 +110,10 @@ export function XmlBodyEditor({ readOnly }: Props) {
               title={t('xmlBody.xmlBody')}
               className="bodyLegacyXmlCard"
               extra={
-            <Space size={12}>
-              {editor.selectionInfo ? <Tag color="blue">{editor.selectionInfo.label}</Tag> : null}
-            </Space>
-          }
+                <Space size={12}>
+                  {editor.selectionInfo ? <Tag color="blue">{editor.selectionInfo.label}</Tag> : null}
+                </Space>
+              }
             >
               <div className="xmlTreePanel">
                 <XmlNodeCard
