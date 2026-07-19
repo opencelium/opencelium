@@ -143,7 +143,7 @@ public class StorageConfiguration {
             changeSetDao.createAll(YAMLMigrator.getChangeSetsToSave());
         }
 
-        // removes connections that contain prefix in their names !*test_connection_
+        // removes all test connections
         connectionService.cleanupAllTestConnections(Set.of());
 
         // deleting old version zip files
