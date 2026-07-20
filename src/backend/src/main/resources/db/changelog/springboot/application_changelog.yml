@@ -232,3 +232,15 @@ versions:
         operation: add
         value: 10
         path: opencelium.config.backup.keep
+      - changeset: 5
+        operation: add
+        value: true
+        path: opencelium.sweeper.test-connection.enabled
+      - changeset: 6
+        operation: add
+        value: 300000
+        path: opencelium.sweeper.test-connection.fixed-delay
+      - changeset: 7
+        operation: add
+        value: 0
+        path: opencelium.sweeper.test-connection.initial-delay

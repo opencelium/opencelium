@@ -4,11 +4,12 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { InvokerOperation } from '@entities/invoker/model/types';
 import type { WorkflowAction, WorkflowCreateKind, WorkflowNodeModel, WorkflowTriggerConnectionRef } from '../types/workflow.types';
 import { Loading } from '@shared/ui/primitives/Loading/Loading';
-import { SidebarDrawer } from './sidebar/SidebarDrawer';
-import { SidebarList } from './sidebar/SidebarList';
-import { SidebarSearch } from './sidebar/SidebarSearch';
-import { TriggerConnectionPanel } from './sidebar/TriggerConnectionPanel';
-import { TriggerConnectionScheduleDialog } from './sidebar/TriggerConnectionScheduleDialog';
+import { SidebarDrawer } from './sidebar/SidebarDrawer/SidebarDrawer';
+import { SidebarList } from './sidebar/SidebarList/SidebarList';
+import { SidebarMessage } from './sidebar/SidebarMessage/SidebarMessage';
+import { SidebarSearch } from './sidebar/SidebarSearch/SidebarSearch';
+import { TriggerConnectionPanel } from './sidebar/TriggerConnectionPanel/TriggerConnectionPanel';
+import { TriggerConnectionScheduleDialog } from './sidebar/TriggerConnectionScheduleDialog/TriggerConnectionScheduleDialog';
 import { useTriggerConnectionStep } from './sidebar/useTriggerConnectionStep';
 import {
   operatorItems,
@@ -199,10 +200,7 @@ export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, o
               <Loading />
             </div>
           ) : mainSearchConnectorItems.length === 0 && mainSearchOperatorItems.length === 0 && mainSearchMethodItems.length === 0 ? (
-            <button className="sidebarItem sidebarItemMuted" type="button" disabled>
-              <strong>{t('sidebar.searchEmpty.title')}</strong>
-              <span>{t('sidebar.searchEmpty.description')}</span>
-            </button>
+            <SidebarMessage title={t('sidebar.searchEmpty.title')} description={t('sidebar.searchEmpty.description')} />
           ) : (
             <>
               {mainSearchConnectorItems.length > 0 && (
@@ -285,10 +283,7 @@ export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, o
               <Loading />
             </div>
           ) : connectorsError ? (
-            <button className="sidebarItem sidebarItemMuted" type="button" disabled>
-              <strong>{t('sidebar.connectorsError.title')}</strong>
-              <span>{t('sidebar.connectorsError.description')}</span>
-            </button>
+            <SidebarMessage title={t('sidebar.connectorsError.title')} description={t('sidebar.connectorsError.description')} />
           ) : filteredConnectorItems.length ? (
             <SidebarList
               items={filteredConnectorItems}
@@ -299,10 +294,7 @@ export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, o
               }}
             />
           ) : (
-            <button className="sidebarItem sidebarItemMuted" type="button" disabled>
-              <strong>{t('sidebar.connectorsEmpty.title')}</strong>
-              <span>{t('sidebar.connectorsEmpty.description')}</span>
-            </button>
+            <SidebarMessage title={t('sidebar.connectorsEmpty.title')} description={t('sidebar.connectorsEmpty.description')} />
           )
         ) : activeSecondaryPanel === 'trigger-connection' ? (
           <TriggerConnectionPanel
@@ -358,10 +350,7 @@ export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, o
             }}
           />
         ) : (
-          <button className="sidebarItem sidebarItemMuted" type="button" disabled>
-            <strong>{t('sidebar.methodsEmpty.title')}</strong>
-            <span>{t('sidebar.methodsEmpty.description')}</span>
-          </button>
+          <SidebarMessage title={t('sidebar.methodsEmpty.title')} description={t('sidebar.methodsEmpty.description')} />
         )}
       </SidebarDrawer>
 
