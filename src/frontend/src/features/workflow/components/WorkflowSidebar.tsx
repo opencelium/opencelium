@@ -2,10 +2,6 @@ import { useEffect, useState } from 'react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { InvokerOperation } from '@entities/invoker/model/types';
 import type { WorkflowAction, WorkflowCreateKind, WorkflowNodeModel, WorkflowTriggerConnectionRef } from '../types/workflow.types';
-import { SidebarDrawer } from './sidebar/SidebarDrawer/SidebarDrawer';
-import { SidebarList } from './sidebar/SidebarList/SidebarList';
-import { SidebarMessage } from './sidebar/SidebarMessage/SidebarMessage';
-import { SidebarSearch } from './sidebar/SidebarSearch/SidebarSearch';
 import { TriggerConnectionScheduleDialog } from './sidebar/TriggerConnectionScheduleDialog/TriggerConnectionScheduleDialog';
 import { useTriggerConnectionStep } from './sidebar/useTriggerConnectionStep';
 import { getMethodSidebarCopy, getSecondarySidebarCopy, type SecondarySidebarMode } from './sidebar/sidebarSecondary';
@@ -14,6 +10,7 @@ import { resolveConnectorIconUrl } from '@entities/connector/model/iconUrl';
 import { getMethodKey, normalizeConnectorIcon, useWorkflowSidebarItems } from './WorkflowSidebar/useWorkflowSidebarItems';
 import { MainSidebarDrawer } from './WorkflowSidebar/MainSidebarDrawer';
 import { SecondarySidebarDrawer } from './WorkflowSidebar/SecondarySidebarDrawer';
+import { MethodSidebarDrawer } from './WorkflowSidebar/MethodSidebarDrawer';
 
 type Props = {
   action: WorkflowAction | null;
@@ -182,44 +179,37 @@ export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, o
         onSelectTrigger={triggerConnectionStep.onSelectConnection}
       />
 
-      <SidebarDrawer
+      <MethodSidebarDrawer
         open={methodOpen}
         title={methodTitle}
         subtitle={methodSubtitle}
         iconUrl={selectedConnectorIconUrl}
+        placeholder={methodPlaceholder}
+        search={methodSearch}
+        items={filteredMethodItems}
+        onSearchChange={setMethodSearch}
         onClose={() => {
           setSelectedConnectorKey(null);
           setMethodSearch('');
         }}
-        tertiary
-      >
-        <SidebarSearch placeholder={methodPlaceholder} value={methodSearch} onChange={setMethodSearch} testId="workflow-sidebar-search-method" autoFocus={methodOpen} />
-        {filteredMethodItems.length ? (
-          <SidebarList
-            items={filteredMethodItems}
-            testIdPrefix="workflow-sidebar-method"
-            onSelect={(methodKey) => {
-              const methodOperation = methodOperations.find((operation, index) => getMethodKey(operation, index) === methodKey);
-              const methodName = methodOperation?.name;
-              onSelect(
-                'connector',
-                methodName,
-                selectedConnector
-                  ? {
-                      connectorId: selectedConnector.connectorId,
-                      title: selectedConnector.title,
-                      icon: normalizeConnectorIcon(selectedConnector.icon),
-                    }
-                  : undefined,
-                methodOperation,
-              );
-              resetSidebar();
-            }}
-          />
-        ) : (
-          <SidebarMessage title={t('sidebar.methodsEmpty.title')} description={t('sidebar.methodsEmpty.description')} />
-        )}
-      </SidebarDrawer>
+        onSelect={(methodKey) => {
+          const methodOperation = methodOperations.find((operation, index) => getMethodKey(operation, index) === methodKey);
+          const methodName = methodOperation?.name;
+          onSelect(
+            'connector',
+            methodName,
+            selectedConnector
+              ? {
+                  connectorId: selectedConnector.connectorId,
+                  title: selectedConnector.title,
+                  icon: normalizeConnectorIcon(selectedConnector.icon),
+                }
+              : undefined,
+            methodOperation,
+          );
+          resetSidebar();
+        }}
+      />
 
       <TriggerConnectionScheduleDialog
         key={triggerConnectionStep.scheduleDialogTarget?.connection.id ?? 'closed'}
