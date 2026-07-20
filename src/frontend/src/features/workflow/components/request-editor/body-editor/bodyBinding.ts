@@ -55,7 +55,15 @@ export const updateRequestFieldBindings = (
     (binding) => binding.enhancement?.args?.RESULT_VAR === resultVar,
   );
   const next = buildBodyEnhancement(previous?.enhancement.enhanceId || createShortId(), resultVar, refs);
-  return { ...connection, fieldBindings: [...current, { enhancement: next }] };
+  const merged = previous
+    ? {
+        ...next,
+        language: previous.enhancement.language,
+        script: previous.enhancement.script,
+        description: previous.enhancement.description,
+      }
+    : next;
+  return { ...connection, fieldBindings: [...current, { enhancement: merged }] };
 };
 
 export const removeDeletedRequestBindings = (
