@@ -4,10 +4,10 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { InvokerOperation } from '@entities/invoker/model/types';
 import type { WorkflowAction, WorkflowCreateKind, WorkflowNodeModel, WorkflowTriggerConnectionRef } from '../types/workflow.types';
 import { Loading } from '@shared/ui/primitives/Loading/Loading';
-import { SidebarDrawer } from './sidebar/SidebarDrawer';
-import { SidebarList } from './sidebar/SidebarList';
-import { SidebarSearch } from './sidebar/SidebarSearch';
-import { TriggerConnectionPanel } from './sidebar/TriggerConnectionPanel';
+import { SidebarDrawer } from './sidebar/SidebarDrawer/SidebarDrawer';
+import { SidebarList } from './sidebar/SidebarList/SidebarList';
+import { SidebarSearch } from './sidebar/SidebarSearch/SidebarSearch';
+import { TriggerConnectionPanel } from './sidebar/TriggerConnectionPanel/TriggerConnectionPanel';
 import { TriggerConnectionScheduleDialog } from './sidebar/TriggerConnectionScheduleDialog';
 import { useTriggerConnectionStep } from './sidebar/useTriggerConnectionStep';
 import {

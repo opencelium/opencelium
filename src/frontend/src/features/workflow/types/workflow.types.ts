@@ -14,7 +14,6 @@ export type WorkflowTriggerConnectionRef = {
 	connectionTitle: string;
 	schedulerId: number;
 	scheduleTitle: string;
-	// Full absolute URL (VITE_API_URL + the schedule's webhook path).
 	webhookUrl: string;
 };
 
@@ -49,8 +48,7 @@ export type WorkflowNodeData = {
 		connectorId: number;
 		title: string;
 		icon?: string | null;
-		// Persisted result of the connector's most recent POST /connector/check; hydrated
-		// from the connector list, not fetched per-node. null = never tested.
+		invokerName?: string | null;
 		lastTestPassed?: boolean | null;
 		lastTestError?: string | null;
 	};
