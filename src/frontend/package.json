@@ -39,7 +39,7 @@
     "cron-validate": "^1.5.3",
     "framer-motion": "^12.34.2",
     "graphiql": "^5.2.4",
-    "graphql": "^17.0.2",
+    "graphql": "16.11.0",
     "i18next": "^25.8.0",
     "lucide-react": "^1.7.0",
     "react": "19.2.0",
