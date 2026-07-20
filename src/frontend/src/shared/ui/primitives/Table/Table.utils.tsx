@@ -1,12 +1,11 @@
 import type { ReactNode } from 'react';
 import type { Cell, RowData } from '@tanstack/react-table';
 
-const MAX_CELL_TEXT_LENGTH = 150;
-
 // A single token (no whitespace) longer than this can't wrap, so it stretches the column —
 // and with it the whole table — regardless of table-layout/overflow CSS. Truncating the
-// actual string is the only fix that's guaranteed to work independent of table CSS.
-const LONG_WORD_LENGTH = 24;
+// actual string is the only fix that's guaranteed to work independent of table CSS. Text
+// that contains a space is left untouched, however long, since it can wrap normally.
+const LONG_WORD_LENGTH = 14;
 
 /**
  * Hard-truncates `text` when it contains a word (whitespace-delimited token) longer than
@@ -33,9 +32,6 @@ export const isRowClickIgnored = (target: EventTarget | null): boolean => {
 export const truncateCellNode = (node: ReactNode): ReactNode => {
     if (typeof node !== 'string' && typeof node !== 'number') return node;
     const text = String(node);
-    if (text.length > MAX_CELL_TEXT_LENGTH) {
-        return <span title={text}>{text.slice(0, MAX_CELL_TEXT_LENGTH) + '…'}</span>;
-    }
     const shortened = truncateUnbreakableText(text);
     if (shortened !== text) return <span title={text}>{shortened}</span>;
     return node;
