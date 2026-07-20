@@ -82,6 +82,13 @@
   box-shadow: 0 0 0 4px var(--color-status-error-bg);
 }
 
+.nodeBodyError .startNode,
+.nodeBodyError .circleNode,
+.nodeBodyError .ifNode {
+  border-color: var(--color-status-error-fg);
+  box-shadow: 0 0 0 4px var(--color-status-error-bg);
+}
+
 .nodeTopLabel {
   position: absolute;
   left: 50%;

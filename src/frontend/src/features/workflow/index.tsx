@@ -5,7 +5,6 @@ import { Button, Input, Modal, Select, message } from 'antd';
 import { Loading } from '@shared/ui/primitives/Loading/Loading';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { apiExecutor } from '@shared/api/apiExecutor';
-import { ApiFetchError } from '@shared/api/apiFetch';
 import './styles.css';
 import { NodeContextMenu } from './components/NodeContextMenu/NodeContextMenu';
 import { WorkflowCanvas } from './components/WorkflowCanvas';
@@ -27,6 +26,7 @@ import { TestRunProvider } from './test-run/TestRunProvider';
 import { loadConnectionVersions, loadWorkflowConnection, loadWorkflowConnectionVersion, removeConnectionVersion, saveConnectionVersionComment, saveWorkflowConnection } from './api/connectionService';
 import { mapConnectionToWorkflowState } from './api/connectionMapper';
 import { buildConnectionPayload, buildFromConnectorPayload } from './api/connectionPayload';
+import { RESOLVED_WORKFLOW_ERROR_MESSAGE_DURATION_SEC, resolveWorkflowApiError } from './utils/workflowApiErrors';
 import { useGetConnectorsQuery } from '@entities/connector/api/connectorApi';
 import { useGetInvokersQuery } from '@entities/invoker/api/invokerApi';
 import type { Invoker } from '@entities/invoker/model/types';
@@ -375,12 +375,29 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     return null;
   }, [persistedTitle, t]);
 
+  // Recognizes known backend validation error codes (e.g. an operator with an empty
+  // expression), highlights the node it names, and returns a specific translated
+  // message — or null when the error is unrecognized, so callers fall back to their
+  // own generic "failed to save/start" message. Shared between handleSave and the
+  // test-run start flow (passed to TestRunProvider) since both hit the same backend
+  // validation on the same node/edge graph.
+  const resolveAndHighlightWorkflowError = useCallback((error: unknown): string | null => {
+    const resolution = resolveWorkflowApiError(error, hydratedNodes, workflow.edges);
+    if (!resolution) return null;
+    const specificMessage = tEntities(resolution.messageKey, resolution.messageParams);
+    if (resolution.nodeId) {
+      workflow.onSetNodeError(resolution.nodeId, specificMessage);
+    }
+    return specificMessage;
+  }, [hydratedNodes, workflow, tEntities]);
+
   const handleSave = async ({ title, description, comment }: { title: string; description: string; comment: string }) => {
     if (!title.trim() || title.trim() === '[Empty Name]') {
       message.error(t('messages.enterWorkflowName'));
       throw new Error('Connection name is required');
     }
 
+    workflow.onClearNodeErrors();
     const normalizedDescription = toPayloadDescription(description);
     const isCreate = !activeConnectionId;
     let response;
@@ -396,12 +413,11 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         fieldBindings: loadedFieldBindings,
       });
     } catch (error) {
-      const errorBody = error instanceof ApiFetchError ? (error.body as { message?: string; error?: string } | undefined) : undefined;
-      const isConnectorNotFound = errorBody?.message === 'CONNECTOR_NOT_FOUND' || errorBody?.error === 'CONNECTOR_NOT_FOUND';
+      const specificMessage = resolveAndHighlightWorkflowError(error);
       message.error(
-        isConnectorNotFound
-          ? tEntities('connection.messages.saveFailed.connectorNotFound')
-          : tEntities(isCreate ? 'connection.messages.saveFailed.create' : 'connection.messages.saveFailed.update', { title }),
+        specificMessage ??
+          tEntities(isCreate ? 'connection.messages.saveFailed.create' : 'connection.messages.saveFailed.update', { title }),
+        specificMessage ? RESOLVED_WORKFLOW_ERROR_MESSAGE_DURATION_SEC : undefined,
       );
       throw error;
     }
@@ -624,6 +640,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   };
 
   const buildTestPayload = useCallback(() => {
+    workflow.onClearNodeErrors();
     const hasMethodNode = hydratedNodes.some(
       (node) => node.type === 'connector' || node.type === 'system' || node.type === 'trigger-connection',
     );
@@ -695,7 +712,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   };
 
   return (
-    <TestRunProvider connectionId={connectionId} connectionTitle={headerState.title} buildTestPayload={buildTestPayload}>
+    <TestRunProvider connectionId={connectionId} connectionTitle={headerState.title} buildTestPayload={buildTestPayload} onResolveStartError={resolveAndHighlightWorkflowError}>
     <div className="page" data-testid="workflow-page">
       <WorkflowHeader
         initialName={headerState.title}

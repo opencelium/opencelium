@@ -21,6 +21,7 @@ import {
 	type TestRunResult,
 } from './TestRunContext';
 import { clearActiveTestRun, getActiveTestRun, saveActiveTestRun } from './testRunStorage';
+import { RESOLVED_WORKFLOW_ERROR_MESSAGE_DURATION_SEC } from '../utils/workflowApiErrors';
 import { useTestRunLeaveGuard } from './useTestRunLeaveGuard';
 import {createId} from "@shared/lib/createId.ts";
 
@@ -73,10 +74,14 @@ type Props = {
 	// Returns the save-shaped connection body, or null when the graph is not
 	// testable (the builder is responsible for surfacing the reason).
 	buildTestPayload: () => unknown | null;
+	// Recognizes known backend validation error codes and, when it does, highlights
+	// the offending node and returns a specific translated message. Returns null for
+	// errors it doesn't recognize, so the generic "failed to start" message is used.
+	onResolveStartError?: (error: unknown) => string | null;
 	children: ReactNode;
 };
 
-export function TestRunProvider({ connectionId, connectionTitle = '', buildTestPayload, children }: Props) {
+export function TestRunProvider({ connectionId, connectionTitle = '', buildTestPayload, onResolveStartError, children }: Props) {
 	const { client, status } = useSocket();
 	const { t: tEntities } = useI18n('entities');
 	const confirm = useConfirm();
@@ -351,10 +356,14 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 			if (unsubscribeRef.current) setPhase('running');
 		} catch (err) {
 			console.error(err);
-			message.error(tEntities('connection.test.startFailed'));
+			const specificMessage = onResolveStartError?.(err);
+			message.error(
+				specificMessage ?? tEntities('connection.test.startFailed'),
+				specificMessage ? RESOLVED_WORKFLOW_ERROR_MESSAGE_DURATION_SEC : undefined,
+			);
 			finishRun();
 		}
-	}, [phase, client, status, isConflictingTestRunning, buildTestPayload, connectionId, handleSocketLog, finishRun, tEntities]);
+	}, [phase, client, status, isConflictingTestRunning, buildTestPayload, connectionId, handleSocketLog, finishRun, tEntities, onResolveStartError]);
 
 	const stopTest = useCallback(async () => {
 		if (phase !== 'running' && phase !== 'starting') return;
