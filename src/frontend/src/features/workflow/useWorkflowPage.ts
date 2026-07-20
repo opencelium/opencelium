@@ -251,6 +251,8 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       dropTarget: false,
       dropInvalid: false,
       hideAddControls: false,
+      suppressHoverAddControls: false,
+      lockVisibleAddControls: false,
       dragSourceMoving: false,
       dragSourceFaint: false,
     },
@@ -1088,7 +1090,12 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       }
       const snapshot = dragSnapshot.current;
       dragSnapshot.current = null;
-      if (!snapshot || node.type === 'start') {
+      if (!snapshot) {
+        draggedPositionLockRef.current = null;
+        return;
+      }
+      if (node.type === 'start') {
+        setNodes((currentNodes) => sanitizeGraphNodes(clearDragFlags(clearDragPreviewNodes(currentNodes))));
         draggedPositionLockRef.current = null;
         return;
       }

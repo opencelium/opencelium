@@ -27,9 +27,15 @@ export function NodeShell({
 		data.onOpenContextMenu?.({ nodeId: id, x: event.clientX, y: event.clientY, kind: data.kind });
 	};
 	const showRightAddTrigger =
-		!!rightAdd && !!onAddStep && !data.hideAddControls && !(data.suppressHoverAddControls && !rightAdd.showAlways);
+		!!rightAdd &&
+		!!onAddStep &&
+		(!data.hideAddControls || rightAdd.showAlways) &&
+		!(data.suppressHoverAddControls && !rightAdd.showAlways);
 	const showBottomAddTrigger =
-		!!bottomAdd && !!onAddStep && !data.hideAddControls && !(data.suppressHoverAddControls && !bottomAdd.showAlways);
+		!!bottomAdd &&
+		!!onAddStep &&
+		(!data.hideAddControls || bottomAdd.showAlways) &&
+		!(data.suppressHoverAddControls && !bottomAdd.showAlways);
 
 	return (
 		<div

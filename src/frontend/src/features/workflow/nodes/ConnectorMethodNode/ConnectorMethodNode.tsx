@@ -1,5 +1,6 @@
 import { resolveConnectorIconUrl } from '@entities/connector/model/iconUrl';
 import type { NodeProps } from '@xyflow/react';
+import { useEffect, useState } from 'react';
 import { Icon } from '@shared/ui/primitives/Icon';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { ConnectorStatusDot } from '../../connector-status/ConnectorStatusDot/ConnectorStatusDot';
@@ -14,11 +15,18 @@ export function ConnectorMethodNode({ id, data, selected, dragging }: NodeProps<
   const connectorIconUrl = resolveConnectorIconUrl(data.connector?.icon);
   const connectorStatus = getConnectorStatus(data.connector?.lastTestPassed);
   const suppressTooltip = dragging || data.isAnyNodeDragging;
-  const icon = connectorIconUrl ? (
-    <img className="circleNodeImage" src={connectorIconUrl} alt="" />
+  const [iconFailed, setIconFailed] = useState(false);
+  const icon = connectorIconUrl && !iconFailed ? (
+    <img className="circleNodeImage" src={connectorIconUrl} alt="" onError={() => setIconFailed(true)} />
   ) : (
     <Icon name="connector" size={24} />
   );
+
+  useEffect(() => {
+    if (iconFailed) {
+      setIconFailed(false);
+    }
+  }, [connectorIconUrl]);
 
   return (
     <NodeShell
