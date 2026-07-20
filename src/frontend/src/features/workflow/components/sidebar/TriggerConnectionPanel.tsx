@@ -1,6 +1,6 @@
 import { Loading } from '@shared/ui/primitives/Loading/Loading';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
-import { SidebarList } from './SidebarList';
+import { SidebarList } from './SidebarList/SidebarList';
 
 type Props = {
   isFetching: boolean;
