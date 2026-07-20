@@ -238,7 +238,7 @@ versions:
         path: opencelium.sweeper.test-connection.enabled
       - changeset: 6
         operation: add
-        value: 300000
+        value: 900000
         path: opencelium.sweeper.test-connection.fixed-delay
       - changeset: 7
         operation: add
