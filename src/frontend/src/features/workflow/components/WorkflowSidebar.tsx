@@ -2,12 +2,10 @@ import { useEffect, useState } from 'react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { InvokerOperation } from '@entities/invoker/model/types';
 import type { WorkflowAction, WorkflowCreateKind, WorkflowNodeModel, WorkflowTriggerConnectionRef } from '../types/workflow.types';
-import { Loading } from '@shared/ui/primitives/Loading/Loading';
 import { SidebarDrawer } from './sidebar/SidebarDrawer/SidebarDrawer';
 import { SidebarList } from './sidebar/SidebarList/SidebarList';
 import { SidebarMessage } from './sidebar/SidebarMessage/SidebarMessage';
 import { SidebarSearch } from './sidebar/SidebarSearch/SidebarSearch';
-import { TriggerConnectionPanel } from './sidebar/TriggerConnectionPanel/TriggerConnectionPanel';
 import { TriggerConnectionScheduleDialog } from './sidebar/TriggerConnectionScheduleDialog/TriggerConnectionScheduleDialog';
 import { useTriggerConnectionStep } from './sidebar/useTriggerConnectionStep';
 import { getMethodSidebarCopy, getSecondarySidebarCopy, type SecondarySidebarMode } from './sidebar/sidebarSecondary';
@@ -15,6 +13,7 @@ import { matchesSidebarTitle, normalizeSidebarQuery } from './sidebar/sidebar.he
 import { resolveConnectorIconUrl } from '@entities/connector/model/iconUrl';
 import { getMethodKey, normalizeConnectorIcon, useWorkflowSidebarItems } from './WorkflowSidebar/useWorkflowSidebarItems';
 import { MainSidebarDrawer } from './WorkflowSidebar/MainSidebarDrawer';
+import { SecondarySidebarDrawer } from './WorkflowSidebar/SecondarySidebarDrawer';
 
 type Props = {
   action: WorkflowAction | null;
@@ -151,57 +150,37 @@ export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, o
         }}
       />
 
-      <SidebarDrawer
-        open={!!activeSecondaryPanel}
+      <SecondarySidebarDrawer
+        mode={activeSecondaryPanel}
         title={secondaryTitle}
         subtitle={secondarySubtitle}
+        placeholder={secondaryPlaceholder}
+        search={secondarySearch}
+        shifted={methodOpen}
+        connectorsFetching={connectorsFetching}
+        connectorsError={connectorsError}
+        connectorItems={filteredConnectorItems}
+        operatorItems={filteredOperatorItems}
+        triggerItems={filteredTriggerConnectionItems}
+        triggerFetching={triggerConnectionStep.isFetching}
+        triggerError={triggerConnectionStep.isError}
+        onSearchChange={setSecondarySearch}
         onClose={() => {
           setActiveSecondaryPanel(null);
           setSelectedConnectorKey(null);
           setSecondarySearch('');
           setMethodSearch('');
         }}
-        secondary
-        shifted={methodOpen}
-      >
-        <SidebarSearch placeholder={secondaryPlaceholder} value={secondarySearch} onChange={setSecondarySearch} testId="workflow-sidebar-search-secondary" autoFocus={!!activeSecondaryPanel} />
-        {activeSecondaryPanel === 'connector' ? (
-          connectorsFetching ? (
-            <div className="sidebarLoading">
-              <Loading />
-            </div>
-          ) : connectorsError ? (
-            <SidebarMessage title={t('sidebar.connectorsError.title')} description={t('sidebar.connectorsError.description')} />
-          ) : filteredConnectorItems.length ? (
-            <SidebarList
-              items={filteredConnectorItems}
-              testIdPrefix="workflow-sidebar-connector"
-              onSelect={(connectorKey) => {
-                setSelectedConnectorKey(connectorKey);
-                setMethodSearch('');
-              }}
-            />
-          ) : (
-            <SidebarMessage title={t('sidebar.connectorsEmpty.title')} description={t('sidebar.connectorsEmpty.description')} />
-          )
-        ) : activeSecondaryPanel === 'trigger-connection' ? (
-          <TriggerConnectionPanel
-            isFetching={triggerConnectionStep.isFetching}
-            isError={triggerConnectionStep.isError}
-            items={filteredTriggerConnectionItems}
-            onSelect={triggerConnectionStep.onSelectConnection}
-          />
-        ) : (
-          <SidebarList
-            items={filteredOperatorItems}
-            testIdPrefix="workflow-sidebar-operator"
-            onSelect={(key) => {
-              onSelect(key as WorkflowCreateKind);
-              resetSidebar();
-            }}
-          />
-        )}
-      </SidebarDrawer>
+        onSelectConnector={(connectorKey) => {
+          setSelectedConnectorKey(connectorKey);
+          setMethodSearch('');
+        }}
+        onSelectOperator={(key) => {
+          onSelect(key as WorkflowCreateKind);
+          resetSidebar();
+        }}
+        onSelectTrigger={triggerConnectionStep.onSelectConnection}
+      />
 
       <SidebarDrawer
         open={methodOpen}
