@@ -1,5 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useGetConnectorsQuery } from '@entities/connector/api/connectorApi';
+import { useEffect, useState } from 'react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { InvokerOperation } from '@entities/invoker/model/types';
 import type { WorkflowAction, WorkflowCreateKind, WorkflowNodeModel, WorkflowTriggerConnectionRef } from '../types/workflow.types';
@@ -11,23 +10,10 @@ import { SidebarSearch } from './sidebar/SidebarSearch/SidebarSearch';
 import { TriggerConnectionPanel } from './sidebar/TriggerConnectionPanel/TriggerConnectionPanel';
 import { TriggerConnectionScheduleDialog } from './sidebar/TriggerConnectionScheduleDialog/TriggerConnectionScheduleDialog';
 import { useTriggerConnectionStep } from './sidebar/useTriggerConnectionStep';
-import {
-  operatorItems,
-  sidebarItems,
-} from './sidebar/sidebar.data';
-import {
-  matchesSidebarTitle,
-  normalizeSidebarQuery,
-} from './sidebar/sidebar.helpers';
 import { getMethodSidebarCopy, getSecondarySidebarCopy, type SecondarySidebarMode } from './sidebar/sidebarSecondary';
+import { matchesSidebarTitle, normalizeSidebarQuery } from './sidebar/sidebar.helpers';
 import { resolveConnectorIconUrl } from '@entities/connector/model/iconUrl';
-import { getConnectorStatus } from '../connector-status/getConnectorStatus';
-
-const getConnectorKey = (connectorId: number) => String(connectorId);
-const getMethodKey = (operation: InvokerOperation, index: number) => `${index}:${operation.name}`;
-
-const normalizeConnectorIcon = (icon?: string | File | null) =>
-  typeof icon === 'string' ? icon : null;
+import { getMethodKey, normalizeConnectorIcon, useWorkflowSidebarItems } from './WorkflowSidebar/useWorkflowSidebarItems';
 
 type Props = {
   action: WorkflowAction | null;
@@ -59,15 +45,20 @@ export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, o
     setMethodSearch('');
   }, [action]);
 
-  const hasMainSearch = mainSearch.trim().length > 0;
   const {
-    data: connectors = [],
-    isFetching: connectorsFetching,
-    isError: connectorsError,
-  } = useGetConnectorsQuery(
-    { page: 0, limit: 1000 },
-    { skip: activeSecondaryPanel !== 'connector' && !hasMainSearch },
-  );
+    connectorsError,
+    connectorsFetching,
+    filteredConnectorItems,
+    filteredMethodItems,
+    filteredOperatorItems,
+    filteredSidebarItems,
+    hasMainSearch,
+    mainSearchConnectorItems,
+    mainSearchMethodItems,
+    mainSearchOperatorItems,
+    methodOperations,
+    selectedConnector,
+  } = useWorkflowSidebarItems({ activeSecondaryPanel, selectedConnectorKey, mainSearch, secondarySearch, methodSearch });
 
   const triggerConnectionStep = useTriggerConnectionStep({
     active: activeSecondaryPanel === 'trigger-connection',
@@ -78,71 +69,9 @@ export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, o
     },
   });
 
-  const mainQuery = normalizeSidebarQuery(mainSearch);
-  const secondaryQuery = normalizeSidebarQuery(secondarySearch);
-  const methodQuery = normalizeSidebarQuery(methodSearch);
   const hasSecondarySearch = secondarySearch.trim().length > 0;
-  const hasMethodSearch = methodSearch.trim().length > 0;
+  const secondaryQuery = normalizeSidebarQuery(secondarySearch);
   const filteredTriggerConnectionItems = triggerConnectionStep.items.filter((item) => matchesSidebarTitle(item.title, secondaryQuery, hasSecondarySearch));
-
-  const translatedSidebarItems = sidebarItems.map((item) => ({
-    key: item.key,
-    title: t(item.titleKey),
-    text: t(item.textKey),
-  }));
-  const filteredSidebarItems = translatedSidebarItems.filter((item) => matchesSidebarTitle(item.title, mainQuery, hasMainSearch));
-  const selectedConnector = connectors.find((item) => getConnectorKey(item.connectorId) === selectedConnectorKey);
-  const connectorItems = useMemo(
-    () => connectors.map((connector) => {
-      const status = getConnectorStatus(connector.lastTestPassed);
-      return {
-        key: getConnectorKey(connector.connectorId),
-        title: connector.title,
-        text: connector.description || t('sidebar.connectorMethodsFallback', { invoker: connector.invoker?.name ?? connector.title }),
-        imageUrl: resolveConnectorIconUrl(normalizeConnectorIcon(connector.icon)),
-        status,
-        statusError: status === 'failed' ? connector.lastTestError : undefined,
-      };
-    }),
-    [connectors, t],
-  );
-  const methodOperations = useMemo(
-    () => selectedConnector?.invoker?.operations ?? [],
-    [selectedConnector],
-  );
-  const methodItems = useMemo(
-    () => methodOperations.map((operation, index) => ({
-      key: getMethodKey(operation, index),
-      title: operation.name,
-      text: t('sidebar.methodItemText'),
-    })),
-    [methodOperations, t],
-  );
-  const translatedOperatorItems = operatorItems.map((item) => ({
-    key: item.key,
-    title: t(item.titleKey),
-    text: t(item.textKey),
-  }));
-  const filteredConnectorItems = connectorItems.filter((item) => matchesSidebarTitle(item.title, secondaryQuery, hasSecondarySearch));
-  const filteredMethodItems = methodItems.filter((item) => matchesSidebarTitle(item.title, methodQuery, hasMethodSearch));
-  const filteredOperatorItems = translatedOperatorItems.filter((item) => matchesSidebarTitle(item.title, secondaryQuery, hasSecondarySearch));
-  const mainSearchConnectorItems = connectorItems.filter((item) => matchesSidebarTitle(item.title, mainQuery, hasMainSearch));
-  const mainSearchOperatorItems = translatedOperatorItems.filter((item) => matchesSidebarTitle(item.title, mainQuery, hasMainSearch));
-  const allMethodItems = useMemo(
-    () => connectors.flatMap((connector) =>
-      (connector.invoker?.operations ?? []).map((operation, index) => ({
-        key: `${connector.connectorId}:${index}:${operation.name}`,
-        title: operation.name,
-        text: connector.title,
-        imageUrl: resolveConnectorIconUrl(normalizeConnectorIcon(connector.icon)),
-        connectorId: connector.connectorId,
-        connectorIcon: normalizeConnectorIcon(connector.icon),
-        operation,
-      }))
-    ),
-    [connectors],
-  );
-  const mainSearchMethodItems = allMethodItems.filter((item) => matchesSidebarTitle(item.title, mainQuery, hasMainSearch));
 
   const resetSidebar = () => {
     setActiveSecondaryPanel(null);
