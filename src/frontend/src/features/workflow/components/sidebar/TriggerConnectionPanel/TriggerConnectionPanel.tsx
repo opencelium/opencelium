@@ -1,6 +1,7 @@
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { Loading } from '@shared/ui/primitives/Loading/Loading';
 import { SidebarList } from '../SidebarList/SidebarList';
+import { SidebarMessage } from '../SidebarMessage/SidebarMessage';
 import type { TriggerConnectionPanelProps } from './TriggerConnectionPanel.types';
 
 export function TriggerConnectionPanel({ isFetching, isError, items, onSelect }: TriggerConnectionPanelProps) {
@@ -10,20 +11,10 @@ export function TriggerConnectionPanel({ isFetching, isError, items, onSelect }:
 		return <div className='sidebarLoading'><Loading /></div>;
 	}
 	if (isError) {
-		return (
-			<button className='sidebarItem sidebarItemMuted' type='button' disabled>
-				<strong>{t('sidebar.triggerConnectionStep.loadError.title')}</strong>
-				<span>{t('sidebar.triggerConnectionStep.loadError.description')}</span>
-			</button>
-		);
+		return <SidebarMessage title={t('sidebar.triggerConnectionStep.loadError.title')} description={t('sidebar.triggerConnectionStep.loadError.description')} />;
 	}
 	if (!items.length) {
-		return (
-			<button className='sidebarItem sidebarItemMuted' type='button' disabled>
-				<strong>{t('sidebar.triggerConnectionStep.empty.title')}</strong>
-				<span>{t('sidebar.triggerConnectionStep.empty.description')}</span>
-			</button>
-		);
+		return <SidebarMessage title={t('sidebar.triggerConnectionStep.empty.title')} description={t('sidebar.triggerConnectionStep.empty.description')} />;
 	}
 
 	return <SidebarList items={items} testIdPrefix='workflow-sidebar-trigger-connection' onSelect={onSelect} />;
