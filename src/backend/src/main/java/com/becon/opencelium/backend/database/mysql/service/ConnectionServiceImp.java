@@ -41,6 +41,7 @@ import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
 import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.utility.LogFileUtility;
+import com.becon.opencelium.backend.utility.TestNameUtils;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.becon.opencelium.backend.versionmanager.EntityUpdater;
 import com.becon.opencelium.backend.versionmanager.EntityVersionManager;
@@ -521,7 +522,7 @@ public class ConnectionServiceImp implements ConnectionService {
 
         for (Long id : ids) {
             Connection connection = getById(id);
-            if (Utils.compare(targetVersion, connection.getOcVersion()) > 0 && !isTestConnection(connection.getTitle())) {
+            if (Utils.compare(targetVersion, connection.getOcVersion()) > 0 && TestNameUtils.isNotTestConnection(connection.getTitle())) {
 
                 List<ConnectionMng> connections = connectionMngService.getAllByConnectionIdRaw(connection.getId());
                 if (connections.isEmpty()) {
@@ -677,15 +678,14 @@ public class ConnectionServiceImp implements ConnectionService {
     }
 
     /**
-     * Returns {@code connections} as-is when {@code includeTest} is true; otherwise drops every test
-     * connection (title matching {@code !*test_connection_...}).
+     * Returns {@code connections} as-is when {@code includeTest} is true; otherwise drops every test connection
      */
     private List<Connection> excludeTestIfNeeded(List<Connection> connections, Boolean includeTest) {
         if (Boolean.TRUE.equals(includeTest) || connections == null || connections.isEmpty()) {
             return connections;
         }
         return connections.stream()
-                .filter(c -> !isTestConnection(c.getTitle()))
+                .filter(c -> TestNameUtils.isNotTestConnection(c.getTitle()))
                 .toList();
     }
 
@@ -714,7 +714,7 @@ public class ConnectionServiceImp implements ConnectionService {
                 log.info("Skipping deletion of connection id={}: already removed", id);
                 continue;
             }
-            if (running.contains(id) && isTestConnection(connection.get().getTitle())) {
+            if (running.contains(id) && TestNameUtils.isTestConnection(connection.get().getTitle())) {
                 log.info("Skipping deletion of running test connection id={}", id);
                 continue;
             }
@@ -742,10 +742,6 @@ public class ConnectionServiceImp implements ConnectionService {
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
     // private methods
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    private boolean isTestConnection(String title) {
-        return title != null && title.matches(RegExpression.TEST_CONNECTION_REGEX);
-    }
 
     private String resolveVersion(Connection connection) {
         return connection.getToConnector() == null

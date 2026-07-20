@@ -16,7 +16,6 @@
 
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.commons.FileDescriptor;
 import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
 import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.constant.Constant;
@@ -46,7 +45,7 @@ import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.request.SchedulerRequestResource;
 import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
-import com.becon.opencelium.backend.utility.LogFileUtility;
+import com.becon.opencelium.backend.utility.TestNameUtils;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -429,14 +428,14 @@ public class ConnectionController {
         // check if there is no running job for given connection
         schedulerService.getAllRunningJobs().forEach(job -> {
             String schedulerTitle = job.getTitle();
-            if (schedulerTitle.startsWith("!*test_schedule_") && schedulerTitle.endsWith(connectionOldDTO.getTitle())) {
+            if (TestNameUtils.isTestScheduler(schedulerTitle, connectionOldDTO.getTitle())) {
                 throw new ConcurrentTestIsForbidden(0L);
             }
         });
 
-        // create temporary connection, will be deleted after execution finished
-        String postfix = System.currentTimeMillis() + "_" + connectionOldDTO.getTitle();
-        connectionOldDTO.setTitle("!*test_connection_" + postfix);
+        String title = connectionOldDTO.getTitle();
+
+        connectionOldDTO.setTitle(TestNameUtils.generateTestConnectionName(title));
         ConnectionDTO connectionDTO = connectionOldDTOMapper.toEntity(connectionOldDTO);
         Connection connection = connectionMapper.toEntity(connectionDTO);
         ConnectionMng connectionMng = connectionMngMapper.toEntity(connectionDTO);
@@ -445,7 +444,7 @@ public class ConnectionController {
         // create temporary scheduler for above connection, will be deleted after execution finished
         SchedulerRequestResource resource = new SchedulerRequestResource();
         resource.setConnectionId(connectionId);
-        resource.setTitle("!*test_schedule_" + postfix);
+        resource.setTitle(TestNameUtils.generateTestSchedulerName(title));
         resource.setStatus(true);
         resource.setCronExp(Constant.NEVER_TRIGGERED_CRON);
         resource.setDebugMode(true);
@@ -751,8 +750,7 @@ public class ConnectionController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Removes all leftover test connections (titles prefixed with !*test_connection_). " +
-            "Any test connection currently running is excluded from deletion.")
+    @Operation(summary = "Removes all leftover test connections. Any test connection currently running is excluded from deletion.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Test connections have been cleaned up",
