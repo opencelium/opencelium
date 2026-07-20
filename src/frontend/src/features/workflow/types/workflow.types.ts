@@ -64,6 +64,8 @@ export type WorkflowNodeData = {
 	duplicateMethodColor?: string;
 	alwaysShowRightAdd?: boolean;
 	highlighted?: boolean;
+	hasError?: boolean;
+	errorMessage?: string;
 	dropTarget?: boolean;
 	dropInvalid?: boolean;
 	dragGhost?: boolean;

@@ -473,7 +473,7 @@ public class OperationExMapper {
                 String queryFieldName = "query"; // Is this the only field that could be used as a query?
                 Map<String, Object> map = body.getFields();
                 if (map.containsKey(queryFieldName) && map.get(queryFieldName) instanceof String query) {
-                    map.put(queryFieldName, query.replace("\n", ""));
+                    map.put(queryFieldName, query.replaceAll("\\R", " "));
                 }
             }
             if (body.getFormat().equals("xml")) {

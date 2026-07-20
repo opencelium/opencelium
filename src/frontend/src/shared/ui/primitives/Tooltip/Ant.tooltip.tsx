@@ -5,6 +5,7 @@ import './tooltip.ant.css';
 export const AntTooltip: TooltipComponent = ({
     content,
     placement = 'top',
+    zIndex,
     children,
 }) => {
     return (
@@ -12,8 +13,9 @@ export const AntTooltip: TooltipComponent = ({
             title={content}
             placement={placement}
             classNames={{ root: 'ant-tooltip-custom' }}
+            styles={zIndex ? { root: { zIndex } } : undefined}
         >
-            <span style={{justifyContent: 'center', alignItems: 'center', display: 'flex'}}>{children}</span>
+            <span style={{justifyContent: 'center', alignItems: 'center', display: 'flex', minWidth: 0}}>{children}</span>
         </AntTooltipBase>
     );
 };

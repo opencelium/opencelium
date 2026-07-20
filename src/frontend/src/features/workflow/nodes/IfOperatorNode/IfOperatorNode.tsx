@@ -2,9 +2,10 @@ import type { NodeProps } from '@xyflow/react';
 import { Handle, Position } from '@xyflow/react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { IfWorkflowNode } from '../../types/workflow.types';
+import { AggregatorBadge } from '../AggregatorBadge/AggregatorBadge';
 import { NodeShell } from '../NodeShell/NodeShell';
 
-export function IfOperatorNode({ id, data, selected }: NodeProps<IfWorkflowNode>) {
+export function IfOperatorNode({ id, data, selected, dragging }: NodeProps<IfWorkflowNode>) {
 	const { t } = useI18n('workflow');
 
 	return (
@@ -26,6 +27,11 @@ export function IfOperatorNode({ id, data, selected }: NodeProps<IfWorkflowNode>
 			<div className='ifNode'>
 				<div className='operatorInnerText'>{t('node.if')}</div>
 			</div>
+			<AggregatorBadge
+				dataAggregator={data.dataAggregator}
+				testId={`workflow-node-aggregator-${id}`}
+				suppressTooltip={dragging || data.isAnyNodeDragging}
+			/>
 			<div className='ifFalseLabel'>{t('node.branchFalse')}</div>
 			<div className='ifTrueLabel'>{t('node.branchTrue')}</div>
 

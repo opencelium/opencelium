@@ -28,12 +28,13 @@ type Props = { readOnly?: boolean };
 //
 // <GraphiQL> forwards its `children` prop all the way down into the same GraphiQLProvider
 // context it uses internally, so rendering this here gives direct, reliable access to that
-// action. Two delayed attempts hedge against slower first-time worker/editor startup; both are
+// action. Three delayed attempts hedge against slower first-time worker/editor startup (the
+// third, longer delay covers cold starts where worker init itself pushes past 1500ms); all are
 // safe since @graphiql/react's schema store discards all but the latest in-flight introspection.
 function ForceIntrospection() {
   const { introspect } = useGraphiQLActions();
   useEffect(() => {
-    const timers = [setTimeout(introspect, 400), setTimeout(introspect, 1500)];
+    const timers = [setTimeout(introspect, 400), setTimeout(introspect, 1500), setTimeout(introspect, 4000)];
     return () => timers.forEach(clearTimeout);
   }, [introspect]);
   return null;

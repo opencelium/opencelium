@@ -9,7 +9,7 @@ import { useController, useFormContext, useWatch } from 'react-hook-form'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { useTheme } from '@shared/theme/hooks/useTheme'
 import type { Mode } from '@/engine/entity/EntityDefinition'
-import { buildVarDeclarations, findOcArgNotExistMarkersInScript, SECTION1_HEADER, SECTION2_COMMENT } from '@entities/dataAggregator/lib/scriptUtils'
+import { buildVarDeclarations, findOcArgNotExistMarkersInScript, RUNTIME_BINDING_FIELD_NAMES, RUNTIME_BINDING_NAMES, SECTION1_HEADER, SECTION2_COMMENT } from '@entities/dataAggregator/lib/scriptUtils'
 import type { DataAggregatorArg } from '@entities/dataAggregator/model/types'
 import { EntityText } from '@shared/ui/primitives/Text'
 import { Collapse } from '@shared/ui/primitives/Collapse'
@@ -33,6 +33,12 @@ type AceCompleter = {
     ) => void
 }
 type EditorWithCompleters = Ace.Editor & { completers?: AceCompleter[] }
+
+// Matches text ending in e.g. "Responses[0]." or "Requests[i]." — captures which binding
+// so its own field set (Requests has no status) is offered instead of the top-level names.
+const RUNTIME_BINDING_MEMBER_ACCESS_RE = new RegExp(
+    `(${RUNTIME_BINDING_NAMES.join('|')})\\s*\\[[^\\]]*\\]\\s*\\.\\s*$`,
+)
 
 const panelStyle: React.CSSProperties = {
     border: '1px solid var(--color-border-default)',
@@ -86,13 +92,34 @@ export function DataAggregatorScriptEditor({ name, label, mode }: DataAggregator
 
     const handleScriptEditorLoad = (editor: Ace.Editor) => {
         const variableCompleter: AceCompleter = {
-            getCompletions: (_editor, _session, _pos, _prefix, callback) => {
-                callback(null, argsRef.current.map((arg) => ({
+            getCompletions: (_editor, session, pos, prefix, callback) => {
+                const line = session.getLine(pos.row)
+                const textBeforePrefix = line.slice(0, pos.column - prefix.length)
+                const memberAccessMatch = textBeforePrefix.match(RUNTIME_BINDING_MEMBER_ACCESS_RE)
+                if (memberAccessMatch) {
+                    const bindingName = memberAccessMatch[1] as (typeof RUNTIME_BINDING_NAMES)[number]
+                    callback(null, RUNTIME_BINDING_FIELD_NAMES[bindingName].map((field) => ({
+                        caption: field,
+                        value: field,
+                        meta: 'field',
+                        score: 1000,
+                    })))
+                    return
+                }
+
+                const argCompletions = argsRef.current.map((arg) => ({
                     caption: arg.name,
                     value: arg.name,
                     meta: 'variable',
                     score: 1000,
-                })))
+                }))
+                const runtimeBindingCompletions = RUNTIME_BINDING_NAMES.map((name) => ({
+                    caption: name,
+                    value: name,
+                    meta: 'runtime binding',
+                    score: 1000,
+                }))
+                callback(null, [...argCompletions, ...runtimeBindingCompletions])
             },
         }
         const editorWithCompleters = editor as EditorWithCompleters

@@ -40,18 +40,21 @@ export function useTriggerConnectionStep({ active, excludeConnectionId, onFinali
   const schedulesForConnection = (connectionId: number) =>
     schedules.filter((schedule) => schedule.connection?.connectionId === connectionId);
 
-  const items = connections.map((connection) => {
-    const connectionSchedules = schedulesForConnection(connection.id);
-    const disabled = connectionSchedules.length === 0;
-    return {
-      key: String(connection.id),
-      title: connection.title,
-      text: disabled
-        ? t('sidebar.triggerConnectionStep.noSchedule')
-        : t('sidebar.triggerConnectionStep.scheduleCount', { count: connectionSchedules.length }),
-      disabled,
-    };
-  });
+  // Workflows with a schedule first (sorted by name), then workflows without one (sorted by name).
+  const items = connections
+    .map((connection) => {
+      const connectionSchedules = schedulesForConnection(connection.id);
+      const disabled = connectionSchedules.length === 0;
+      return {
+        key: String(connection.id),
+        title: connection.title,
+        text: disabled
+          ? t('sidebar.triggerConnectionStep.noSchedule')
+          : t('sidebar.triggerConnectionStep.scheduleCount', { count: connectionSchedules.length }),
+        disabled,
+      };
+    })
+    .sort((a, b) => Number(a.disabled) - Number(b.disabled) || a.title.localeCompare(b.title));
 
   const finalize = async (connection: ConnectionMeta, schedule: Schedule) => {
     let webhook = schedule.webhook;

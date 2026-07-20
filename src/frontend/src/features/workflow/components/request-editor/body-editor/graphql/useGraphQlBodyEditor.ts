@@ -28,7 +28,10 @@ const fetchConnector = (id: string, masterPassword: string) =>
   apiExecutor({
     url: `/connector/${encodeURIComponent(id)}`,
     method: 'GET',
-    options: { headers: { 'x-master-password': masterPassword }, ignoreError: true },
+    options: {
+      ...(masterPassword ? { headers: { 'x-master-password': masterPassword } } : {}),
+      ignoreError: true,
+    },
   }) as Promise<Connector | unknown>;
 
 export function useGraphQlBodyEditor() {
@@ -61,7 +64,11 @@ export function useGraphQlBodyEditor() {
   }, []);
 
   useEffect(() => {
-    if (!masterPassword || connectorId == null) return;
+    // No `!masterPassword` guard here: this hook only ever mounts as a child of
+    // <MasterPasswordGate>, which renders children either once a password has been
+    // entered or once it has confirmed the backend has no master password configured
+    // at all — either way, there's nothing left to wait on before fetching.
+    if (connectorId == null) return;
     let cancelled = false;
 
     setStatus('fetching-connector');

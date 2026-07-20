@@ -7,9 +7,8 @@ import {Loading} from "@shared/ui/primitives/Loading/Loading.tsx";
 import {Hint} from "@shared/ui/primitives/Hint";
 import {capitalizeWords} from "@shared/utils/stringUtils.ts";
 import {useI18n} from "@shared/i18n/hooks/useI18n.ts";
-import {MasterPasswordDialog} from "@features/master-password";
+import {MasterPasswordDialog, useCheckMasterPasswordExistsQuery, useMasterPasswordStore} from "@features/master-password";
 import type {Mode} from "@/engine/entity/EntityDefinition.ts";
-import {useMasterPasswordStore} from "@features/master-password";
 import {useGetConnectorMutation} from "@entities/connector/api/connectorApi.ts";
 import {useParams} from "react-router-dom";
 interface CredentialEditorProps {
@@ -73,6 +72,7 @@ export const CredentialEditor: React.FC<CredentialEditorProps> = ({ name, label,
     const { t: commonT } = useI18n('common');
     const { watch, setValue } = useFormContext();
     const {masterPassword} = useMasterPasswordStore();
+    const { data: masterPasswordExists, isLoading: isCheckingMasterPasswordExists } = useCheckMasterPasswordExistsQuery();
     const { id: routeId } = useParams();
     const {
         formState,
@@ -88,13 +88,13 @@ export const CredentialEditor: React.FC<CredentialEditorProps> = ({ name, label,
     const { data = [] ,  isLoading = false } = useGetInvokersQuery();
     const allInvokers: Invoker[] = data ?? [];
     const fetchRequestData = useCallback(async () => {
-        if (!connectorId || !masterPassword) {
+        if (!connectorId || (!masterPassword && masterPasswordExists !== false)) {
             return;
         }
 
         const result = await getConnector({masterPassword, id: connectorId});
         setValue('requestData', result.data.requestData, {shouldDirty: true});
-    }, [connectorId, getConnector, masterPassword, setValue]);
+    }, [connectorId, getConnector, masterPassword, masterPasswordExists, setValue]);
     useEffect(() => {
         if (mode === 'create') {
             toggleHasAccess(true)
@@ -106,13 +106,21 @@ export const CredentialEditor: React.FC<CredentialEditorProps> = ({ name, label,
             void fetchRequestData()
         }
     }, [fetchRequestData, masterPassword]);
+    // No master password configured system-wide — there is nothing to unlock,
+    // so skip the blur/dialog overlay the same way 'create' mode does.
+    useEffect(() => {
+        if (masterPasswordExists === false) {
+            toggleHasAccess(true);
+            void fetchRequestData()
+        }
+    }, [fetchRequestData, masterPasswordExists]);
     useEffect(() => {
         const foundInvoker = allInvokers.find(i => i.name === invokerName)
         if (foundInvoker) {
             setRequestData(foundInvoker.requiredData);
         }
     }, [invokerName, data]);
-    if (isLoading || gettingConnector) {
+    if (isLoading || gettingConnector || isCheckingMasterPasswordExists) {
         return <div style={{
             width: '100%',
             justifyContent: 'center',
@@ -152,7 +160,7 @@ export const CredentialEditor: React.FC<CredentialEditorProps> = ({ name, label,
             {!hasAccess && <div style={{position: 'absolute', top: 0, width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                 <MasterPasswordDialog/>
             </div>}
-            {mode === 'update' && !masterPassword && (
+            {mode === 'update' && !masterPassword && masterPasswordExists !== false && (
                 <div style={{ bottom: '-60px', position: 'absolute'}}>
                     <Hint noPrefix>{commonT('credentialEditor.updateWithoutMasterPassword')}</Hint>
                 </div>

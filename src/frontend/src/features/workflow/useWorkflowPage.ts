@@ -1209,18 +1209,24 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       setEdges(result.edges);
       setContextMenu(null);
     },
-    onChangeNodeLabel: (nodeId: string, label: string) => setNodes((currentNodes) => currentNodes.map((node) => node.id === nodeId ? { ...node, data: { ...node.data, subtitle: label, labelEdited: true } } : node)),
+    onChangeNodeLabel: (nodeId: string, label: string) => setNodes((currentNodes) => currentNodes.map((node) => node.id === nodeId ? { ...node, data: { ...node.data, subtitle: label, labelEdited: true, hasError: false, errorMessage: undefined } } : node)),
     onSaveMethodConfig: (nodeId: string, methodConfig: WorkflowMethodConfig) => {
-      setNodes((currentNodes) => currentNodes.map((node) => node.id === nodeId ? { ...node, data: { ...node.data, methodConfig: { ...methodConfig, name: methodConfig.name ?? node.data.methodConfig?.name } } } : node));
+      setNodes((currentNodes) => currentNodes.map((node) => node.id === nodeId ? { ...node, data: { ...node.data, methodConfig: { ...methodConfig, name: methodConfig.name ?? node.data.methodConfig?.name }, hasError: false, errorMessage: undefined } } : node));
       setMethodEditor(null);
     },
     onSaveConditionConfig: (nodeId: string, conditionConfig: ConditionConfig) => {
-      setNodes((currentNodes) => currentNodes.map((node) => node.id === nodeId ? { ...node, data: { ...node.data, conditionConfig } } : node));
+      setNodes((currentNodes) => currentNodes.map((node) => node.id === nodeId ? { ...node, data: { ...node.data, conditionConfig, hasError: false, errorMessage: undefined } } : node));
       setConditionEditor(null);
     },
     onSaveDataAggregator: (nodeId: string, dataAggregator: number | null) => {
-      setNodes((currentNodes) => currentNodes.map((node) => node.id === nodeId ? { ...node, data: { ...node.data, dataAggregator } } : node));
+      setNodes((currentNodes) => currentNodes.map((node) => node.id === nodeId ? { ...node, data: { ...node.data, dataAggregator, hasError: false, errorMessage: undefined } } : node));
       setAggregatorEditor(null);
+    },
+    onSetNodeError: (nodeId: string, errorMessage: string) => {
+      setNodes((currentNodes) => currentNodes.map((node) => node.id === nodeId ? { ...node, data: { ...node.data, hasError: true, errorMessage } } : node));
+    },
+    onClearNodeErrors: () => {
+      setNodes((currentNodes) => currentNodes.map((node) => node.data.hasError ? { ...node, data: { ...node.data, hasError: false, errorMessage: undefined } } : node));
     },
   };
 }

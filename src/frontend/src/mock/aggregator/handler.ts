@@ -5,7 +5,7 @@ export let aggregators: DataAggregator[] = [
     {
         id: 1,
         name: 'userAggregator',
-        script: '/* \n\tHere are variables that came from arguments and can be used\n\tin the script. All responses of the method are stored in Responses \n\tvariable.\n\t\tThe response has next structure:\n\t\tsuccess - for success response\n\t\t\theader - header data of the success\n\t\t\tpayload - response data of the success\n\t\tfail - for fail response\n\t\t\theader - header data of the fail\n\t\t\tpayload - response data of the fail \n*/\nvar firstName;\nvar lastName;\nvar email;\n\n/*\nPlease, define the initial value for your variables.\nIn this section you can define a logic of your script.\n*/\n',
+        script: '/* \n\tHere are variables that came from arguments and can be used\n\tin the script. Requests and Responses variables hold the method\'s\n\tHTTP calls as arrays of objects, one per call:\n\t\theader - header data\n\t\tbody - request/response body data\n\t\tstatus - HTTP status code (Responses only; Requests entries have no status)\n*/\nvar firstName;\nvar lastName;\nvar email;\n\n/*\nPlease, define the initial value for your variables.\nIn this section you can define a logic of your script.\n*/\n',
         active: true,
         args: [
             { id: 101, name: 'firstName', description: 'User first name' },
@@ -16,7 +16,7 @@ export let aggregators: DataAggregator[] = [
     {
         id: 2,
         name: 'orderAggregator',
-        script: '/* \n\tHere are variables that came from arguments and can be used\n\tin the script. All responses of the method are stored in Responses \n\tvariable.\n\t\tThe response has next structure:\n\t\tsuccess - for success response\n\t\t\theader - header data of the success\n\t\t\tpayload - response data of the success\n\t\tfail - for fail response\n\t\t\theader - header data of the fail\n\t\t\tpayload - response data of the fail \n*/\nvar orderId;\nvar total;\n\n/*\nPlease, define the initial value for your variables.\nIn this section you can define a logic of your script.\n*/\n',
+        script: '/* \n\tHere are variables that came from arguments and can be used\n\tin the script. Requests and Responses variables hold the method\'s\n\tHTTP calls as arrays of objects, one per call:\n\t\theader - header data\n\t\tbody - request/response body data\n\t\tstatus - HTTP status code (Responses only; Requests entries have no status)\n*/\nvar orderId;\nvar total;\n\n/*\nPlease, define the initial value for your variables.\nIn this section you can define a logic of your script.\n*/\n',
         active: false,
         args: [
             { id: 201, name: 'orderId', description: 'Order identifier' },

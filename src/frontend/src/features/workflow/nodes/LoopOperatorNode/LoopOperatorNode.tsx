@@ -1,10 +1,11 @@
 import type { NodeProps } from '@xyflow/react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { LoopWorkflowNode } from '../../types/workflow.types';
+import { AggregatorBadge } from '../AggregatorBadge/AggregatorBadge';
 import { NodeShell } from '../NodeShell/NodeShell';
 import { StandardNodeHandles } from '../StandardNodeHandles/StandardNodeHandles';
 
-export function LoopOperatorNode({ id, data, selected }: NodeProps<LoopWorkflowNode>) {
+export function LoopOperatorNode({ id, data, selected, dragging }: NodeProps<LoopWorkflowNode>) {
 	const { t } = useI18n('workflow');
 
 	return (
@@ -26,6 +27,11 @@ export function LoopOperatorNode({ id, data, selected }: NodeProps<LoopWorkflowN
 			<div className='ifNode'>
 				<div className='operatorInnerText'>{t('node.loop')}</div>
 			</div>
+			<AggregatorBadge
+				dataAggregator={data.dataAggregator}
+				testId={`workflow-node-aggregator-${id}`}
+				suppressTooltip={dragging || data.isAnyNodeDragging}
+			/>
 			<StandardNodeHandles />
 		</NodeShell>
 	);
