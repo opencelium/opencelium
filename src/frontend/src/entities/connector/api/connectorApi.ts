@@ -30,9 +30,7 @@ export const connectorApi = baseApi.injectEndpoints({
       query: ({ masterPassword, id }) => ({
           url: `/connector/${id}`,
           method: 'GET',
-          headers: {
-              'x-master-password': masterPassword,
-          },
+          ...(masterPassword ? { headers: { 'x-master-password': masterPassword } } : {}),
       }),
     }),
     saveRequestData: b.mutation<
@@ -43,9 +41,7 @@ export const connectorApi = baseApi.injectEndpoints({
           url: `/connector/${id}/required-data`,
           method: 'PUT',
           body: requestData,
-          headers: {
-              'x-master-password': masterPassword,
-          },
+          ...(masterPassword ? { headers: { 'x-master-password': masterPassword } } : {}),
       }),
     }),
   }),

@@ -5,7 +5,7 @@ import {useModalStore} from '@app/layouts/AppLayout/GlobalModal/global-modal.sto
 import {isContainerNode} from '@entities/systemConfig/model/types'
 import {buildNodeByPathMap} from '@entities/systemConfig/model/helpers'
 import {ConfigLeafEditDialog} from '@entities/systemConfig/ui/ConfigLeafEditDialog'
-import {loadConfigFields, resolveSystemConfig} from './resolveSystemConfig'
+import {checkMasterPasswordExists, loadConfigFields, resolveSystemConfig} from './resolveSystemConfig'
 
 const ROOT_INPUT = 'system config '
 
@@ -17,7 +17,7 @@ function returnToSearch(ctx: CommandExecutionContext) {
 }
 
 async function executeSystemConfig(args: {query?: string}, ctx: CommandExecutionContext) {
-    if (!useMasterPasswordStore.getState().masterPassword) {
+    if (!useMasterPasswordStore.getState().masterPassword && await checkMasterPasswordExists()) {
         ctx.openModal(<MasterPasswordDialog bare onUnlock={() => returnToSearch(ctx)} />)
         return
     }
