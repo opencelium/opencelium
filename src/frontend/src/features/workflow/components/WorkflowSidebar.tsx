@@ -1,16 +1,16 @@
-import { useEffect, useState } from 'react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { InvokerOperation } from '@entities/invoker/model/types';
 import type { WorkflowAction, WorkflowCreateKind, WorkflowNodeModel, WorkflowTriggerConnectionRef } from '../types/workflow.types';
 import { TriggerConnectionScheduleDialog } from './sidebar/TriggerConnectionScheduleDialog/TriggerConnectionScheduleDialog';
 import { useTriggerConnectionStep } from './sidebar/useTriggerConnectionStep';
-import { getMethodSidebarCopy, getSecondarySidebarCopy, type SecondarySidebarMode } from './sidebar/sidebarSecondary';
+import { getMethodSidebarCopy, getSecondarySidebarCopy } from './sidebar/sidebarSecondary';
 import { matchesSidebarTitle, normalizeSidebarQuery } from './sidebar/sidebar.helpers';
 import { resolveConnectorIconUrl } from '@entities/connector/model/iconUrl';
 import { getMethodKey, normalizeConnectorIcon, useWorkflowSidebarItems } from './WorkflowSidebar/useWorkflowSidebarItems';
 import { MainSidebarDrawer } from './WorkflowSidebar/MainSidebarDrawer';
 import { SecondarySidebarDrawer } from './WorkflowSidebar/SecondarySidebarDrawer';
 import { MethodSidebarDrawer } from './WorkflowSidebar/MethodSidebarDrawer';
+import { useWorkflowSidebarState } from './WorkflowSidebar/useWorkflowSidebarState';
 
 type Props = {
   action: WorkflowAction | null;
@@ -28,19 +28,12 @@ type Props = {
 
 export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, onSelect }: Props) {
   const { t } = useI18n('workflow');
-  const [activeSecondaryPanel, setActiveSecondaryPanel] = useState<SecondarySidebarMode | null>(null);
-  const [selectedConnectorKey, setSelectedConnectorKey] = useState<string | null>(null);
-  const [mainSearch, setMainSearch] = useState('');
-  const [secondarySearch, setSecondarySearch] = useState('');
-  const [methodSearch, setMethodSearch] = useState('');
-  useEffect(() => {
-    if (action) return;
-    setActiveSecondaryPanel(null);
-    setSelectedConnectorKey(null);
-    setMainSearch('');
-    setSecondarySearch('');
-    setMethodSearch('');
-  }, [action]);
+  const sidebar = useWorkflowSidebarState({
+    open: !!action,
+    onClose,
+    onSelectSystem: () => onSelect('system'),
+  });
+  const { activeSecondaryPanel, selectedConnectorKey, mainSearch, secondarySearch, methodSearch, resetSidebar } = sidebar;
 
   const {
     connectorsError,
@@ -70,34 +63,6 @@ export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, o
   const secondaryQuery = normalizeSidebarQuery(secondarySearch);
   const filteredTriggerConnectionItems = triggerConnectionStep.items.filter((item) => matchesSidebarTitle(item.title, secondaryQuery, hasSecondarySearch));
 
-  const resetSidebar = () => {
-    setActiveSecondaryPanel(null);
-    setSelectedConnectorKey(null);
-    setMainSearch('');
-    setSecondarySearch('');
-    setMethodSearch('');
-  };
-
-  const closeSidebar = () => {
-    resetSidebar();
-    onClose();
-  };
-
-  const onSelectMain = (key: string) => {
-    setSecondarySearch('');
-    setMethodSearch('');
-    if (key === 'operator') {
-      setSelectedConnectorKey(null);
-      return setActiveSecondaryPanel('operator');
-    }
-    if (key === 'system') {
-      resetSidebar();
-      return onSelect('system');
-    }
-    setSelectedConnectorKey(null);
-    setActiveSecondaryPanel('connector');
-  };
-
   const [secondaryTitle, secondarySubtitle, secondaryPlaceholder] = getSecondarySidebarCopy(activeSecondaryPanel ?? 'connector', t);
   const [methodTitle, methodSubtitle, methodPlaceholder] = getMethodSidebarCopy(t, selectedConnector?.title);
   const methodOpen = activeSecondaryPanel === 'connector' && !!selectedConnectorKey;
@@ -109,7 +74,7 @@ export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, o
 
   return (
     <>
-      <div className={`drawerOverlay ${action ? 'drawerOverlayOpen' : ''}`} onClick={closeSidebar} />
+      <div className={`drawerOverlay ${action ? 'drawerOverlayOpen' : ''}`} onClick={sidebar.closeSidebar} />
       <MainSidebarDrawer
         open={!!action}
         shifted={!!activeSecondaryPanel}
@@ -122,15 +87,10 @@ export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, o
         connectorItems={mainSearchConnectorItems}
         operatorItems={mainSearchOperatorItems}
         methodItems={mainSearchMethodItems}
-        onSearchChange={setMainSearch}
-        onClose={closeSidebar}
-        onSelectMain={onSelectMain}
-        onSelectConnector={(connectorKey) => {
-          setSelectedConnectorKey(connectorKey);
-          setActiveSecondaryPanel('connector');
-          setSecondarySearch('');
-          setMethodSearch('');
-        }}
+        onSearchChange={sidebar.setMainSearch}
+        onClose={sidebar.closeSidebar}
+        onSelectMain={sidebar.onSelectMain}
+        onSelectConnector={sidebar.openConnector}
         onSelectOperator={(key) => {
           onSelect(key as WorkflowCreateKind);
           resetSidebar();
@@ -141,10 +101,7 @@ export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, o
           onSelect('connector', found.operation.name, { connectorId: found.connectorId, title: found.text, icon: found.connectorIcon }, found.operation);
           resetSidebar();
         }}
-        onSelectTriggerConnection={() => {
-          setSelectedConnectorKey(null);
-          setActiveSecondaryPanel('trigger-connection');
-        }}
+        onSelectTriggerConnection={sidebar.openTriggerConnection}
       />
 
       <SecondarySidebarDrawer
@@ -161,17 +118,9 @@ export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, o
         triggerItems={filteredTriggerConnectionItems}
         triggerFetching={triggerConnectionStep.isFetching}
         triggerError={triggerConnectionStep.isError}
-        onSearchChange={setSecondarySearch}
-        onClose={() => {
-          setActiveSecondaryPanel(null);
-          setSelectedConnectorKey(null);
-          setSecondarySearch('');
-          setMethodSearch('');
-        }}
-        onSelectConnector={(connectorKey) => {
-          setSelectedConnectorKey(connectorKey);
-          setMethodSearch('');
-        }}
+        onSearchChange={sidebar.setSecondarySearch}
+        onClose={sidebar.closeSecondary}
+        onSelectConnector={sidebar.selectConnector}
         onSelectOperator={(key) => {
           onSelect(key as WorkflowCreateKind);
           resetSidebar();
@@ -187,11 +136,8 @@ export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, o
         placeholder={methodPlaceholder}
         search={methodSearch}
         items={filteredMethodItems}
-        onSearchChange={setMethodSearch}
-        onClose={() => {
-          setSelectedConnectorKey(null);
-          setMethodSearch('');
-        }}
+        onSearchChange={sidebar.setMethodSearch}
+        onClose={sidebar.closeMethod}
         onSelect={(methodKey) => {
           const methodOperation = methodOperations.find((operation, index) => getMethodKey(operation, index) === methodKey);
           const methodName = methodOperation?.name;
