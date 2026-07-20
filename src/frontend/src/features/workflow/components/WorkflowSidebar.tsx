@@ -14,6 +14,7 @@ import { getMethodSidebarCopy, getSecondarySidebarCopy, type SecondarySidebarMod
 import { matchesSidebarTitle, normalizeSidebarQuery } from './sidebar/sidebar.helpers';
 import { resolveConnectorIconUrl } from '@entities/connector/model/iconUrl';
 import { getMethodKey, normalizeConnectorIcon, useWorkflowSidebarItems } from './WorkflowSidebar/useWorkflowSidebarItems';
+import { MainSidebarDrawer } from './WorkflowSidebar/MainSidebarDrawer';
 
 type Props = {
   action: WorkflowAction | null;
@@ -113,84 +114,42 @@ export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, o
   return (
     <>
       <div className={`drawerOverlay ${action ? 'drawerOverlayOpen' : ''}`} onClick={closeSidebar} />
-      <SidebarDrawer
+      <MainSidebarDrawer
         open={!!action}
-        title={t('sidebar.chooseNextStep')}
-        subtitle={t('sidebar.willBeAddedAfter', { name: sourceNodeLabel })}
-        onClose={closeSidebar}
         shifted={!!activeSecondaryPanel}
         shiftedFar={methodOpen}
-        secondary
-      >
-        <SidebarSearch placeholder={t('sidebar.searchPlaceholder')} value={mainSearch} onChange={setMainSearch} testId="workflow-sidebar-search-main" autoFocus={!!action} />
-        {hasMainSearch ? (
-          connectorsFetching ? (
-            <div className="sidebarLoading">
-              <Loading />
-            </div>
-          ) : mainSearchConnectorItems.length === 0 && mainSearchOperatorItems.length === 0 && mainSearchMethodItems.length === 0 ? (
-            <SidebarMessage title={t('sidebar.searchEmpty.title')} description={t('sidebar.searchEmpty.description')} />
-          ) : (
-            <>
-              {mainSearchConnectorItems.length > 0 && (
-                <SidebarList
-                  items={mainSearchConnectorItems}
-                  testIdPrefix="workflow-sidebar-search-connector"
-                  onSelect={(connectorKey) => {
-                    setSelectedConnectorKey(connectorKey);
-                    setActiveSecondaryPanel('connector');
-                    setSecondarySearch('');
-                    setMethodSearch('');
-                  }}
-                />
-              )}
-              {mainSearchOperatorItems.length > 0 && (
-                <SidebarList
-                  items={mainSearchOperatorItems}
-                  testIdPrefix="workflow-sidebar-search-operator"
-                  onSelect={(key) => {
-                    onSelect(key as WorkflowCreateKind);
-                    resetSidebar();
-                  }}
-                />
-              )}
-              {mainSearchMethodItems.length > 0 && (
-                <SidebarList
-                  items={mainSearchMethodItems}
-                  testIdPrefix="workflow-sidebar-search-method"
-                  onSelect={(key) => {
-                    const found = mainSearchMethodItems.find((item) => item.key === key);
-                    if (!found) return;
-                    onSelect(
-                      'connector',
-                      found.operation.name,
-                      { connectorId: found.connectorId, title: found.text, icon: found.connectorIcon },
-                      found.operation,
-                    );
-                    resetSidebar();
-                  }}
-                />
-              )}
-            </>
-          )
-        ) : (
-          <>
-            <SidebarList items={filteredSidebarItems} onSelect={onSelectMain} testIdPrefix="workflow-sidebar-main" />
-            <button
-              className="sidebarItem sidebarItemStandalone"
-              type="button"
-              data-testid="workflow-sidebar-main-item-trigger-connection"
-              onClick={() => {
-                setSelectedConnectorKey(null);
-                setActiveSecondaryPanel('trigger-connection');
-              }}
-            >
-              <strong>{t('sidebar.triggerConnection.title')}</strong>
-              <span>{t('sidebar.triggerConnection.description')}</span>
-            </button>
-          </>
-        )}
-      </SidebarDrawer>
+        sourceNodeLabel={sourceNodeLabel}
+        search={mainSearch}
+        hasSearch={hasMainSearch}
+        isFetching={connectorsFetching}
+        defaultItems={filteredSidebarItems}
+        connectorItems={mainSearchConnectorItems}
+        operatorItems={mainSearchOperatorItems}
+        methodItems={mainSearchMethodItems}
+        onSearchChange={setMainSearch}
+        onClose={closeSidebar}
+        onSelectMain={onSelectMain}
+        onSelectConnector={(connectorKey) => {
+          setSelectedConnectorKey(connectorKey);
+          setActiveSecondaryPanel('connector');
+          setSecondarySearch('');
+          setMethodSearch('');
+        }}
+        onSelectOperator={(key) => {
+          onSelect(key as WorkflowCreateKind);
+          resetSidebar();
+        }}
+        onSelectMethod={(key) => {
+          const found = mainSearchMethodItems.find((item) => item.key === key);
+          if (!found) return;
+          onSelect('connector', found.operation.name, { connectorId: found.connectorId, title: found.text, icon: found.connectorIcon }, found.operation);
+          resetSidebar();
+        }}
+        onSelectTriggerConnection={() => {
+          setSelectedConnectorKey(null);
+          setActiveSecondaryPanel('trigger-connection');
+        }}
+      />
 
       <SidebarDrawer
         open={!!activeSecondaryPanel}
