@@ -8,7 +8,7 @@ import { SidebarDrawer } from './sidebar/SidebarDrawer/SidebarDrawer';
 import { SidebarList } from './sidebar/SidebarList/SidebarList';
 import { SidebarSearch } from './sidebar/SidebarSearch/SidebarSearch';
 import { TriggerConnectionPanel } from './sidebar/TriggerConnectionPanel/TriggerConnectionPanel';
-import { TriggerConnectionScheduleDialog } from './sidebar/TriggerConnectionScheduleDialog';
+import { TriggerConnectionScheduleDialog } from './sidebar/TriggerConnectionScheduleDialog/TriggerConnectionScheduleDialog';
 import { useTriggerConnectionStep } from './sidebar/useTriggerConnectionStep';
 import {
   operatorItems,
