@@ -1,3 +1,5 @@
+
+//import './monacoWorkers';
 import { useEffect } from 'react';
 import { GraphiQL } from 'graphiql';
 // graphiql.css only carries the container/layout rules — the design tokens (--color-base,
@@ -5,8 +7,9 @@ import { GraphiQL } from 'graphiql';
 // every themed element (buttons, tabs, sidebar) falls back to unstyled browser defaults.
 import 'graphiql/style.css';
 import 'graphiql/graphiql.css';
-import './monacoWorkers';
-import { useGraphiQLActions } from '@graphiql/react';
+// Must load after the two imports above so its higher z-index wins the cascade.
+import './graphiqlOverrides.css';
+import { useGraphiQLActions, type TabsState } from '@graphiql/react';
 import { MasterPasswordGate } from '@features/master-password';
 import { Alert } from '@shared/ui/primitives/Alert';
 import { Button } from '@shared/ui/primitives/Button';
@@ -69,20 +72,29 @@ function GraphQlBodyEditorContent({ readOnly }: Props) {
     );
   }
 
+  // Fires on every tab-state change — editing the active tab, switching tabs, adding/closing
+  // a tab — not just edits. That's what makes "the active tab" actually authoritative for
+  // what gets saved: without this, switching to a tab you haven't typed in yet would leave
+  // the previously-active tab's query as the persisted one, contradicting what's on screen.
+  const handleTabChange = (tabState: TabsState) => {
+    const activeQuery = tabState.tabs[tabState.activeTabIndex]?.query ?? '';
+    updateQuery(activeQuery);
+  };
+
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: 8 }} data-testid="workflow-graphql-editor">
       <div style={{ flex: 1, minHeight: 0 }}>
         <GraphiQL
           fetcher={fetcher}
           initialQuery={initialQuery}
-          onEditQuery={(query) => updateQuery(query)}
+          onTabChange={handleTabChange}
           forcedTheme={themeMode}
           isHeadersEditorEnabled={!readOnly}
         >
           <ForceIntrospection />
         </GraphiQL>
       </div>
-      <Hint>{t('graphqlBody.autocompleteHint')}</Hint>
+      <Hint>{t('graphqlBody.editorHint')}</Hint>
     </div>
   );
 }

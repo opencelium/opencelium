@@ -1,6 +1,10 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import * as path from "node:path";
+import _monacoEditorPlugin from 'vite-plugin-monaco-editor';
+
+// Extract the hidden default constructor safely for ESM/CJS interop
+const monacoEditorPlugin = (_monacoEditorPlugin as any).default || _monacoEditorPlugin;
 
 const alias = {
   '@': path.resolve(__dirname, './src'),
@@ -13,11 +17,31 @@ const alias = {
   '@widgets': path.resolve(__dirname, './src/widgets'),
 };
 
-// https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    monacoEditorPlugin({
+      languageWorkers: ['editorWorkerService', 'json'],
+      customWorkers: [
+        {
+          label: 'graphql',
+          entry: 'monaco-graphql/esm/graphql.worker.js'
+        }
+      ]
+    })
+  ],
   resolve: {
     alias,
+    dedupe: ['react', 'react-dom', 'graphiql', '@graphiql/react'],
+  },
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'graphiql',
+      '@graphiql/react',
+      'react-compiler-runtime'
+    ],
   },
   define: {
     global: 'globalThis',

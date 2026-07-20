@@ -468,7 +468,7 @@
   "requestData": "Anfragedaten",
   "graphqlBody": {
     "masterPasswordTitle": "Geben Sie das Master-Passwort ein, um auf die GraphQL-API dieses Connectors zuzugreifen",
-    "autocompleteHint": "Drücken Sie Strg + Leertaste, um die Autovervollständigung anzuzeigen.",
+    "editorHint": "Strg + Leertaste für die Autovervollständigung. Nur die Abfrage des aktiven Tabs wird ausgeführt, wenn diese Methode läuft — Tabs werden nach dem Operationsnamen der Abfrage benannt (z. B. \"query MyQuery {...}\"), anonyme Abfragen bleiben daher \"<untitled>\".",
     "connectorFailed": "Der Connector konnte nicht geladen werden. Überprüfen Sie die Backend-Verbindung und versuchen Sie es erneut.",
     "loginFailed": "Die Authentifizierung bei der GraphQL-API dieses Connectors ist fehlgeschlagen. Überprüfen Sie dessen Zugangsdaten und versuchen Sie es erneut.",
     "retry": "Erneut versuchen"

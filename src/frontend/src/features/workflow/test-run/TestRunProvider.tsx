@@ -177,7 +177,6 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 
 	const handleSocketLog = useCallback(
 		(log: ExecutionSocketLog) => {
-			console.log(log)
 			setLogTree((tree) => reduceLiveLog(tree, log));
 
 			const isExecutionEnd =
