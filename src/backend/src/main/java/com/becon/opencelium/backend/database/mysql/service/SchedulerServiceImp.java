@@ -36,6 +36,7 @@ import com.becon.opencelium.backend.resource.request.SchedulerRequestResource;
 import com.becon.opencelium.backend.resource.schedule.RunningJob;
 import com.becon.opencelium.backend.resource.schedule.RunningJobsResource;
 import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
+import com.becon.opencelium.backend.utility.TestNameUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.lang.NonNull;
@@ -145,6 +146,13 @@ public class SchedulerServiceImp implements SchedulerService {
     @Override
     public List<Scheduler> findAllByTitleContains(String title) {
         return schedulerRepository.findAllByTitleContains(title);
+    }
+
+    @Override
+    public List<Scheduler> excludeTestSchedulers(List<Scheduler> schedulers) {
+        return schedulers.stream()
+                .filter(s -> TestNameUtils.isNotTestScheduler(s.getTitle()))
+                .toList();
     }
 
     @Override
