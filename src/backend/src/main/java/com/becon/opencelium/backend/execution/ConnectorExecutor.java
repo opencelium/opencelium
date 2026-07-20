@@ -152,13 +152,21 @@ public class ConnectorExecutor {
             }
             logger.logAndSend(endPhases.pop());
         } else if (executable instanceof OperatorEx operator) { // LOOP cases = [for, forin, SplitString]
-            Loop loop = Loop.fromOperator(operator);
-            List<String> values = buildLoopValues(loop);
-            int length = values.size();
+            Loop loop;
+            List<String> values;
+            int length = - 1;
 
-            logger.logAndSend("phase=LOOP_START indexPath=%s expression=(%s) size=%d iterator=\"%s\" %s".formatted(index, operator.getExpression(), length, loop.getIterator(), getLoopData()));
-            logger.logAndSend("segment=LOOP_REF ref=(%s) data=%s".formatted(loop.getRef(), values.stream().collect(Collectors.joining(", ", "[", "]"))));
             endPhases.push("phase=LOOP_END indexPath=%s %s".formatted(index, getLoopData()));
+
+            try {
+                loop = Loop.fromOperator(operator);
+                values = buildLoopValues(loop);
+                length = values.size();
+            } finally {
+                logger.logAndSend("phase=LOOP_START indexPath=%s expression=(%s) size=%d iterator=\"%s\" %s".formatted(index, operator.getExpression(), length, operator.getIterator(), getLoopData()));
+            }
+
+            logger.logAndSend("segment=LOOP_REF ref=(%s) data=%s".formatted(loop.getRef(), values.stream().collect(Collectors.joining(", ", "[", "]"))));
 
             executionManager.getLoops().add(loop);
             for (int i = 0; i < length; i++) {
