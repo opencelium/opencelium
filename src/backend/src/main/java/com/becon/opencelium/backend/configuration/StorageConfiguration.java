@@ -143,9 +143,6 @@ public class StorageConfiguration {
             changeSetDao.createAll(YAMLMigrator.getChangeSetsToSave());
         }
 
-        // removes all test connections
-        connectionService.cleanupAllTestConnections(Set.of());
-
         // deleting old version zip files
         cleanOldFiles(PathConstant.ASSISTANT + PathConstant.VERSIONS, File::isDirectory, "");
     }
