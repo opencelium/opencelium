@@ -28,15 +28,18 @@ import {
     hasAnyNodeComment,
 } from './buildTree'
 import {CommentTooltipBody} from './CommentInfo'
-import {MasterPasswordGate, useMasterPasswordStore} from '@features/master-password'
+import {MasterPasswordGate, useCheckMasterPasswordExistsQuery, useMasterPasswordStore} from '@features/master-password'
 
 type LeafValue = ConfigScalar | ConfigScalar[]
 
 export function SystemConfigPage() {
     const {t, lang} = useI18n('entities')
     const {masterPassword} = useMasterPasswordStore()
+    // If no master password is configured at all, there's nothing to unlock — fetch
+    // directly instead of waiting on a password that will never be entered.
+    const {data: masterPasswordExists} = useCheckMasterPasswordExistsQuery()
     const {data, isLoading, isFetching, isError, refetch} = useGetApplicationConfigQuery(undefined, {
-        skip: !masterPassword,
+        skip: !masterPassword && masterPasswordExists !== false,
     })
     const [updateConfig, {isLoading: isSaving}] = useUpdateApplicationConfigMutation()
     const [edits, setEdits] = useState<Record<string, NodeEdit>>({})
