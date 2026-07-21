@@ -712,8 +712,8 @@ export function normalizeConnectionPayload(payload: any) {
 	const fromInvokerName = payload?.fromConnector?.invoker?.name ?? sourceFromConnector?.invoker?.name;
 	const toInvokerName = payload?.toConnector?.invoker?.name;
 	const combinedMethods = [
-		...sourceMethods.map((method: any, index: number) => ({ ...method, index: normalizeIndex(method?.index, index), invokerName: method?.invokerName ?? fromInvokerName })),
-		...toMethods.map((method: any, index: number) => ({ ...method, index: shiftRootIndex(method?.index, sourceMethods.length + index), invokerName: method?.invokerName ?? toInvokerName })),
+		...sourceMethods.map((method: any, index: number) => ({ ...method, index: normalizeIndex(method?.index, index), fallbackInvokerName: fromInvokerName })),
+		...toMethods.map((method: any, index: number) => ({ ...method, index: shiftRootIndex(method?.index, sourceMethods.length + index), fallbackInvokerName: toInvokerName })),
 	];
 	const combinedOperators = [
 		...sourceOperators.map((operator: any, index: number) => ({ ...operator, index: normalizeIndex(operator?.index, index) })),
@@ -730,17 +730,33 @@ export function normalizeConnectionPayload(payload: any) {
 			...sourceFromConnector,
 			connectorId: -1,
 			title: 'DEFAULT',
-			method: combinedMethods.map((method: any) => ({
-				...method,
-				connector: method?.connector === null
-					? null
-					: {
-						connectorId: method?.connector?.connectorId ?? method?.connectorId ?? -1,
-						title: method?.connector?.title ?? method?.connectorTitle ?? method?.connector?.name ?? 'DEFAULT',
-						icon: method?.connector?.icon ?? null,
-						invokerName: method?.invokerName ?? method?.connector?.invokerName ?? null,
-					},
-			})),
+			method: combinedMethods.map((method: any) => {
+				// method.connector.invoker is the per-connector-instance source of truth (added so multi-connector
+				// templates resolve correctly). The backend sends it as a plain string, but tolerate a {name}
+				// object too since that's the shape fromConnector/toConnector.invoker already use. The flat fields
+				// and fallbackInvokerName only cover older templates that carried a single invoker name for the
+				// whole fromConnector/toConnector side.
+				const rawConnectorInvoker = method?.connector?.invoker;
+				const connectorInvokerName = typeof rawConnectorInvoker === 'string'
+					? rawConnectorInvoker
+					: rawConnectorInvoker?.name;
+
+				return {
+					...method,
+					connector: method?.connector === null
+						? null
+						: {
+							connectorId: method?.connector?.connectorId ?? method?.connectorId ?? -1,
+							title: method?.connector?.title ?? method?.connectorTitle ?? method?.connector?.name ?? 'DEFAULT',
+							icon: method?.connector?.icon ?? null,
+							invokerName: connectorInvokerName
+								?? method?.invokerName
+								?? method?.connector?.invokerName
+								?? method?.fallbackInvokerName
+								?? null,
+						},
+				};
+			}),
 			operator: combinedOperators.map((operator: any) => ({
 				...operator,
 			})),

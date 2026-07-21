@@ -18,8 +18,7 @@
     "minimizeScript": "Minimize script",
     "maximizeRequestData": "Maximize request data",
     "minimizeRequestData": "Minimize request data",
-    "load": "Load",
-    "back": "Back"
+    "load": "Load"
   },
   "confirmDelete": {
     "title": "Delete step",
@@ -264,12 +263,10 @@
   "templateConnectorMapping": {
     "title": "Map template connectors",
     "intro": "This template was created with connectors from another environment. Choose which connector in this environment each one should use before the workflow is loaded.",
-    "invokerHint": "Invoker: {{invoker}}",
     "noInvokerHint": "No invoker hint available",
     "usedBy": "Used by: {{methods}}",
+    "unknownConnector": "Connector #{{id}}",
     "selectPlaceholder": "Select a connector",
-    "suggested": "Suggested",
-    "allConnectors": "All connectors",
     "createNewTooltip": "Create new connector"
   },
   "node": {

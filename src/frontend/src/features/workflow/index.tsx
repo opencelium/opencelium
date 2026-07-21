@@ -898,6 +898,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         open={connectorMappingDialogOpen}
         groups={connectorMappingGroups}
         connectors={connectors}
+        invokers={invokers}
         onConfirm={handleConfirmConnectorMapping}
         onCancel={handleCancelConnectorMapping}
       />

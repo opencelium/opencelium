@@ -8,7 +8,8 @@
       "create": "Workflow \"{{title}}\" konnte nicht erstellt werden",
       "update": "Workflow \"{{title}}\" konnte nicht aktualisiert werden",
       "connectorNotFound": "Einer der in diesem Workflow verwendeten Konnektoren wurde nicht gefunden. Er wurde möglicherweise gelöscht — bitte aktualisieren oder ersetzen Sie den Konnektor-Knoten, bevor Sie erneut speichern.",
-      "operatorExpressionEmpty": "Der markierte \"{{type}}\"-Operator hat keine Bedingung. Legen Sie einen Ausdruck fest, bevor Sie speichern."
+      "operatorExpressionEmpty": "Der markierte \"{{type}}\"-Operator hat keine Bedingung. Legen Sie einen Ausdruck fest, bevor Sie speichern.",
+      "titleTaken": "Ein Workflow mit diesem Titel existiert bereits"
     },
     "history": {
       "activeDeleteBlocked": "Die ausgewählte Version ist aktiv und kann daher nicht gelöscht werden.",

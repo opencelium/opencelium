@@ -42,6 +42,15 @@ export const resolveWorkflowApiError = (
 	edges: WorkflowEdgeModel[],
 ): WorkflowApiErrorResolution | null => {
 	const body = error instanceof ApiFetchError ? (error.body as WorkflowErrorBody | undefined) : undefined;
+
+	// Thrown as a plain RuntimeException (ConnectionServiceImp.save/update), so it falls
+	// through to the generic 500 handler: `error` stays "INTERNAL_SERVER_ERROR" and the
+	// actual code lands in `message` instead of `error`, unlike the GeneralServiceException
+	// cases below.
+	if (body?.message === 'TITLE_HAS_ALREADY_TAKEN') {
+		return { messageKey: 'connection.messages.saveFailed.titleTaken' };
+	}
+
 	const code = body?.error;
 	if (!code) return null;
 

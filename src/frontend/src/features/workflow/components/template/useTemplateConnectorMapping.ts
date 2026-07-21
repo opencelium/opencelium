@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState } from 'react';
 import type { Connector } from '@entities/connector/model/types';
+import type { Invoker } from '@entities/invoker/model/types';
 import { useWizardSubmit } from '@/engine/entity/runtime/genererics/useWizardSubmit';
 import type { ConnectorMappingGroup } from './templateConnectorMapping.utils';
 
@@ -8,67 +9,67 @@ type Args = {
   open: boolean;
   groups: ConnectorMappingGroup[];
   connectors: Connector[];
+  invokers: Invoker[];
 };
 
-const matchesInvoker = (connector: Connector, invokerName: string) =>
-  connector.invoker?.name?.toLowerCase() === invokerName.toLowerCase();
+const findInvoker = (invokers: Invoker[], invokerName: string | null) =>
+  invokerName ? invokers.find((invoker) => invoker.name.toLowerCase() === invokerName.toLowerCase()) : undefined;
 
-export function useTemplateConnectorMapping({ open, groups, connectors }: Args) {
+const connectorsForInvoker = (connectors: Connector[], invoker: Invoker) =>
+  connectors.filter((connector) => connector.invoker?.name?.toLowerCase() === invoker.name.toLowerCase());
+
+export function useTemplateConnectorMapping({ open, groups, connectors, invokers }: Args) {
   const [mapping, setMapping] = useState<Record<number, number | undefined>>({});
-  const [creatingForId, setCreatingForId] = useState<number | null>(null);
+
+  const suggestedConnectors = (group: ConnectorMappingGroup): Connector[] => {
+    const invoker = findInvoker(invokers, group.invokerName);
+    return invoker ? connectorsForInvoker(connectors, invoker) : [];
+  };
 
   useEffect(() => {
     if (!open) return;
-    setCreatingForId(null);
     setMapping(() => {
       const next: Record<number, number | undefined> = {};
       groups.forEach((group) => {
-        const sameId = connectors.find((connector) => connector.connectorId === group.oldConnectorId);
-        if (sameId) {
-          next[group.oldConnectorId] = sameId.connectorId;
+        // Only ever preselect from the suggested set — an old connectorId that happens to
+        // collide with a real one here but doesn't match the invoker is a coincidence, not a
+        // signal, so an empty suggestion list means no preselection at all.
+        const suggested = suggestedConnectors(group);
+        if (suggested.length === 0) {
+          next[group.oldConnectorId] = undefined;
           return;
         }
-        const suggested = group.invokerName
-          ? connectors.filter((connector) => matchesInvoker(connector, group.invokerName!))
-          : [];
-        next[group.oldConnectorId] = suggested.length === 1 ? suggested[0].connectorId : undefined;
+        const sameId = suggested.find((connector) => connector.connectorId === group.oldConnectorId);
+        next[group.oldConnectorId] = sameId
+          ? sameId.connectorId
+          : suggested.length === 1
+            ? suggested[0].connectorId
+            : undefined;
       });
       return next;
     });
-  }, [open, groups, connectors]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, groups, connectors, invokers]);
 
   const selectConnector = (oldConnectorId: number, connectorId: number) => {
     setMapping((prev) => ({ ...prev, [oldConnectorId]: connectorId }));
   };
 
-  const groupedConnectors = (group: ConnectorMappingGroup): { suggested: Connector[]; rest: Connector[] } => {
-    if (!group.invokerName) return { suggested: [], rest: connectors };
-    const suggested = connectors.filter((connector) => matchesInvoker(connector, group.invokerName!));
-    const suggestedIds = new Set(suggested.map((connector) => connector.connectorId));
-    return { suggested, rest: connectors.filter((connector) => !suggestedIds.has(connector.connectorId)) };
-  };
-
   const createSubmit = useWizardSubmit({ entityName: 'connector', mode: 'create' });
 
-  const startCreate = (oldConnectorId: number) => setCreatingForId(oldConnectorId);
-  const cancelCreate = () => setCreatingForId(null);
-
-  const handleCreateSubmit = async (data: unknown) => {
+  const createConnectorForGroup = async (oldConnectorId: number, data: unknown) => {
     const created = (await createSubmit(data)) as Connector;
-    if (creatingForId != null) selectConnector(creatingForId, created.connectorId);
-    setCreatingForId(null);
+    selectConnector(oldConnectorId, created.connectorId);
+    return created;
   };
 
   const isComplete = groups.length > 0 && groups.every((group) => mapping[group.oldConnectorId] != null);
 
   return {
     mapping,
-    creatingForId,
     selectConnector,
-    groupedConnectors,
-    startCreate,
-    cancelCreate,
-    handleCreateSubmit,
+    suggestedConnectors,
+    createConnectorForGroup,
     isComplete,
   };
 }

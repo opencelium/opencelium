@@ -18,8 +18,7 @@
     "minimizeScript": "Skript minimieren",
     "maximizeRequestData": "Anfragedaten maximieren",
     "minimizeRequestData": "Anfragedaten minimieren",
-    "load": "Laden",
-    "back": "Zurück"
+    "load": "Laden"
   },
   "confirmDelete": {
     "title": "Schritt löschen",
@@ -264,12 +263,10 @@
   "templateConnectorMapping": {
     "title": "Vorlagen-Connectoren zuordnen",
     "intro": "Diese Vorlage wurde mit Connectoren aus einer anderen Umgebung erstellt. Wählen Sie für jeden Connector, welcher Connector in dieser Umgebung verwendet werden soll, bevor der Workflow geladen wird.",
-    "invokerHint": "Invoker: {{invoker}}",
     "noInvokerHint": "Kein Invoker-Hinweis verfügbar",
     "usedBy": "Verwendet von: {{methods}}",
+    "unknownConnector": "Connector Nr. {{id}}",
     "selectPlaceholder": "Connector auswählen",
-    "suggested": "Vorgeschlagen",
-    "allConnectors": "Alle Connectoren",
     "createNewTooltip": "Neuen Connector erstellen"
   },
   "node": {
