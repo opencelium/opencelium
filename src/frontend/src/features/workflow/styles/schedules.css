@@ -196,7 +196,3 @@
 .wf-schedule-execs > * {
   flex: 0 0 auto;
 }
-
-.wf-schedule-exec-empty {
-  color: var(--color-text-disabled);
-}
