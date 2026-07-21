@@ -199,6 +199,11 @@ public class ConnectorServiceImp implements ConnectorService {
     }
 
     @Override
+    public List<Connector> getAllById(Set<Integer> ids) {
+        return connectorRepository.findAllById(ids);
+    }
+
+    @Override
     public ResponseEntity<?> checkCommunication(Connector connector) {
         InvokerRequestBuilder invokerRequestBuilder = new InvokerRequestBuilder();
         FunctionInvoker function = invokerService.getTestFunction(connector.getInvoker());

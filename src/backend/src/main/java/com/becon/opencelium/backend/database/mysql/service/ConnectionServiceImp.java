@@ -34,10 +34,7 @@ import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
-import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
-import com.becon.opencelium.backend.resource.connection.ConnectionVersionUpdateRequest;
-import com.becon.opencelium.backend.resource.connection.ConnectionVersionedDTO;
-import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
+import com.becon.opencelium.backend.resource.connection.*;
 import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.utility.LogFileUtility;
@@ -60,6 +57,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -381,6 +379,8 @@ public class ConnectionServiceImp implements ConnectionService {
                 connectionDTOMng.setFromConnector(connectorMapper.toDTO(connectorService.getById(connection.getFromConnector())));
                 connectionDTOMng.getFromConnector().setOperators(temp.getOperators() == null ? new ArrayList<>() : temp.getOperators());
                 connectionDTOMng.getFromConnector().setMethods(temp.getMethods() == null ? new ArrayList<>() : temp.getMethods());
+            } else {
+                fillMethodInvoker(connectionDTOMng.getFromConnector());
             }
         }
 
@@ -398,6 +398,27 @@ public class ConnectionServiceImp implements ConnectionService {
         }
         fieldBindingMngService.detach(connectionDTOMng);
         return connectionDTOMng;
+    }
+
+    private void fillMethodInvoker(ConnectorDTO connector) {
+        if (connector == null || CollectionUtils.isEmpty(connector.getMethods())) {
+            return;
+        }
+
+        Set<Integer> ids = connector.getMethods().stream()
+                .map(x -> x.getConnector() != null && x.getConnector().getInvoker() == null ? x.getConnector().getConnectorId() : null)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        Map<Integer, Connector> connectorById = connectorService.getAllById(ids).stream()
+                .collect(Collectors.toMap(Connector::getId, Function.identity()));
+
+        for (MethodDTO method : connector.getMethods()) {
+            if (method.getConnector() != null && method.getConnector().getInvoker() == null) {
+                Connector methodConnector = connectorById.get(method.getConnector().getConnectorId());
+                method.getConnector().setInvoker(methodConnector != null ? methodConnector.getInvoker() : null);
+            }
+        }
     }
 
     @Override

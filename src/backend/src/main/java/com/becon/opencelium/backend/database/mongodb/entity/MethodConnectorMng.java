@@ -28,6 +28,8 @@ public class MethodConnectorMng {
     @Field(name = "title")
     private String title;
 
+    private String invoker;
+
     public Integer getConnectorId() {
         return connectorId;
     }
@@ -42,5 +44,13 @@ public class MethodConnectorMng {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getInvoker() {
+        return invoker;
+    }
+
+    public void setInvoker(String invoker) {
+        this.invoker = invoker;
     }
 }
