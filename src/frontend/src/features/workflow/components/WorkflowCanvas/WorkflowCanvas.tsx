@@ -4,10 +4,10 @@ import { useEffect, useRef } from 'react';
 import type {
   WorkflowEdgeModel,
   WorkflowNodeModel,
-} from '../types/workflow.types';
-import type { WorkflowCanvasProps } from './WorkflowCanvas/WorkflowCanvas.types';
-import { workflowEdgeTypes, workflowNodeTypes } from './WorkflowCanvas/workflowCanvasTypes';
-import { prepareWorkflowElements } from './WorkflowCanvas/prepareWorkflowElements';
+} from '../../types/workflow.types';
+import type { WorkflowCanvasProps } from './WorkflowCanvas.types';
+import { workflowEdgeTypes, workflowNodeTypes } from './workflowCanvasTypes';
+import { prepareWorkflowElements } from './prepareWorkflowElements';
 
 const START_NODE_SIZE = 62;
 
