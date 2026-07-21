@@ -16,6 +16,8 @@
     "openScriptNewWindow": "Open script in new window",
     "maximizeScript": "Maximize script",
     "minimizeScript": "Minimize script",
+    "maximizeRequestData": "Maximize request data",
+    "minimizeRequestData": "Minimize request data",
     "load": "Load"
   },
   "confirmDelete": {
@@ -184,8 +186,9 @@
       "description": "There are no connectors matching this search."
     },
     "connectorStatus": {
-      "passed": "Connection check passed",
-      "failed": "Connection check failed"
+      "passed": "Connection test passed — this connector is ready to use.",
+      "failed": "Connection test failed — check the connector's credentials and settings.",
+      "failedWithReason": "Connection test failed: {{reason}}"
     },
     "methodsEmpty": {
       "title": "No methods found",
@@ -262,7 +265,9 @@
     "loop": "Loop",
     "branchTrue": "true",
     "branchFalse": "false",
-    "asyncBadge": "Asynchronous request — triggers the other workflow and does not wait for its response."
+    "asyncBadge": "Asynchronous request — triggers the other workflow and does not wait for its response.",
+    "aggregatorBadge": "Combines results from multiple calls using the \"{{name}}\" data aggregator.",
+    "methodColorBadge": "Nodes sharing this color and number call the same method on the same connector."
   },
   "saveDialog": {
     "title": "Save Version",
@@ -438,7 +443,8 @@
   "refGenerator": {
     "connector": "Connector",
     "method": "Method",
-    "field": "Field"
+    "field": "Field",
+    "webhookTriggerHint": "Webhook trigger — this response is only the trigger acknowledgement, not the result of the triggered workflow."
   },
   "webhook": {
     "noWebhooks": "No webhooks yet",
@@ -462,7 +468,7 @@
   "requestData": "Request data",
   "graphqlBody": {
     "masterPasswordTitle": "Enter the master password to access this connector's GraphQL API",
-    "autocompleteHint": "Press Ctrl + Space to see the autocomplete.",
+    "editorHint": "Ctrl + Space for autocomplete. Only the active tab's query runs when this method executes — tabs are named after the query's operation name (e.g. \"query MyQuery {...}\"), so anonymous queries stay \"<untitled>\".",
     "connectorFailed": "Could not load the connector. Check the backend connection and try again.",
     "loginFailed": "Could not authenticate with this connector's GraphQL API. Check its credentials and try again.",
     "retry": "Try again"

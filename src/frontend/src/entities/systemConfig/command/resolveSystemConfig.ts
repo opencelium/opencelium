@@ -1,6 +1,6 @@
 import {store} from '@app/store/store'
 import {systemConfigApi} from '@entities/systemConfig/api/systemConfigApi'
-import {useMasterPasswordStore} from '@features/master-password'
+import {masterPasswordApi, useMasterPasswordStore} from '@features/master-password'
 import type {ConfigNode} from '@entities/systemConfig/model/types'
 import {isContainerNode} from '@entities/systemConfig/model/types'
 import {buildNodeByPathMap, searchConfigByLabel} from '@entities/systemConfig/model/helpers'
@@ -21,8 +21,16 @@ export async function loadConfigFields(): Promise<ConfigNode[]> {
     return 'data' in result && result.data ? result.data.fields : []
 }
 
+/** Whether a master password is configured on the backend at all — if not, there's nothing to unlock. */
+export async function checkMasterPasswordExists(): Promise<boolean> {
+    const result = await store.dispatch(
+        masterPasswordApi.endpoints.checkMasterPasswordExists.initiate(undefined, {subscribe: false}),
+    )
+    return !('data' in result && result.data === false)
+}
+
 async function _resolveSystemConfig(input: string): Promise<string[]> {
-    if (!useMasterPasswordStore.getState().masterPassword) {
+    if (!useMasterPasswordStore.getState().masterPassword && await checkMasterPasswordExists()) {
         return [provideMasterPasswordLabel()]
     }
 

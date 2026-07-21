@@ -7,7 +7,8 @@
     "saveFailed": {
       "create": "Failed to create workflow \"{{title}}\"",
       "update": "Failed to update workflow \"{{title}}\"",
-      "connectorNotFound": "One of the connectors used in this workflow could not be found. It may have been deleted — please update or replace the connector node before saving again."
+      "connectorNotFound": "One of the connectors used in this workflow could not be found. It may have been deleted — please update or replace the connector node before saving again.",
+      "operatorExpressionEmpty": "The highlighted \"{{type}}\" operator has no condition set. Define its expression before saving."
     },
     "history": {
       "activeDeleteBlocked": "The selected version is active and therefore cannot be deleted.",

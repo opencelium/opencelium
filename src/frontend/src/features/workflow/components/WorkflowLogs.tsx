@@ -1,13 +1,12 @@
-import { ChevronUp, Loader2, Maximize2, Minimize2, Trash2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
-import { Tooltip } from '@shared/ui/primitives/Tooltip';
-import { Icon } from '@shared/ui/primitives/Icon';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
-import { EMPTY_LIVE_LOG_TREE, LiveExecutionLogTree, MethodViewModeProvider, useMethodViewMode } from '@features/logs';
+import { EMPTY_LIVE_LOG_TREE, LiveExecutionLogTree, MethodViewModeProvider } from '@features/logs';
 import { useTestRun } from '../test-run/useTestRun';
 import type { TestRunResult } from '../test-run/TestRunContext';
+import { WorkflowLogsHeader } from './WorkflowLogs/WorkflowLogsHeader';
+import type { WorkflowLogsPanelState } from './WorkflowLogs/WorkflowLogs.types';
 
-type PanelState = 'minimized' | 'normal' | 'full';
 
 const formatDuration = (ms: number) => {
 	if (ms < 1000) return `${ms}ms`;
@@ -39,28 +38,9 @@ function TestRunResultLine({ result }: { result: TestRunResult }) {
 	}
 }
 
-function MethodViewButton() {
-	const { t: tLogs } = useI18n('logs');
-	const { mode, setMode } = useMethodViewMode();
-	const active = mode === 'name';
-	return (
-		<Tooltip content={tLogs('methodView.tooltip')}>
-			<button
-				className={`logsHeaderIconButton ${active ? 'logsHeaderIconButton--active' : ''}`}
-				type='button'
-				onClick={() => setMode(active ? 'url' : 'name')}
-				aria-label={tLogs('methodView.tooltip')}
-			>
-				<Icon name='arrow-switch' size={15} color='inherit' />
-			</button>
-		</Tooltip>
-	);
-}
-
 export function WorkflowLogs() {
-	const [panel, setPanel] = useState<PanelState>('minimized');
+	const [panel, setPanel] = useState<WorkflowLogsPanelState>('minimized');
 	const { t: tLogs } = useI18n('logs');
-	const { t: tCommon } = useI18n('common');
 	const testRun = useTestRun();
 
 	const phase = testRun?.phase ?? 'idle';
@@ -92,64 +72,15 @@ export function WorkflowLogs() {
 				panel === 'full' ? 'logsCardFull' : ''
 			}`}
 		>
-			<div className='logsHeaderRow'>
-				<button
-					className='logsHeader'
-					type='button'
-					onClick={toggleMinimized}
-					aria-label={tLogs(isExpanded ? 'live.collapse' : 'live.expand')}
-				>
-					<span className='logsHeaderTitle'>
-						<span>{tLogs('live.title')}</span>
-						{isRunning && (
-							<span className='logsRunning'>
-								<Loader2 size={13} className='logsRunningSpinner' />
-								{tLogs('live.running')}
-							</span>
-						)}
-					</span>
-				</button>
-				{isExpanded && hasLogs && <MethodViewButton />}
-				{isExpanded && hasLogs && !isRunning && (
-					<Tooltip content={tLogs('live.clear')}>
-						<button
-							className='logsHeaderIconButton'
-							type='button'
-							onClick={() => testRun?.clearLogs()}
-							aria-label={tLogs('live.clear')}
-						>
-							<Trash2 size={15} />
-						</button>
-					</Tooltip>
-				)}
-				{isExpanded && (
-					<Tooltip
-						content={tCommon(panel === 'full' ? 'dialog.restore' : 'dialog.maximize')}
-					>
-						<button
-							className='logsHeaderIconButton'
-							type='button'
-							onClick={toggleFull}
-							aria-label={tCommon(panel === 'full' ? 'dialog.restore' : 'dialog.maximize')}
-						>
-							{panel === 'full' ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
-						</button>
-					</Tooltip>
-				)}
-				<Tooltip placement={"topLeft"} content={tLogs(isExpanded ? 'live.collapse' : 'live.expand')}>
-					<button
-						className='logsHeaderIconButton'
-						type='button'
-						onClick={toggleMinimized}
-						aria-label={tLogs(isExpanded ? 'live.collapse' : 'live.expand')}
-					>
-						<ChevronUp
-							size={18}
-							className={`logsCaret ${isExpanded ? 'logsCaretExpanded' : ''}`}
-						/>
-					</button>
-				</Tooltip>
-			</div>
+			<WorkflowLogsHeader
+				panel={panel}
+				isExpanded={isExpanded}
+				hasLogs={hasLogs}
+				isRunning={isRunning}
+				onToggleMinimized={toggleMinimized}
+				onToggleFull={toggleFull}
+				onClear={() => testRun?.clearLogs()}
+			/>
 
 			{isExpanded && (
 				<div className={`logsBody ${hasLogs ? 'logsBodyTree' : ''}`}>

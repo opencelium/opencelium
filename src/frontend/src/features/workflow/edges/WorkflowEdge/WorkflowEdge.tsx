@@ -1,6 +1,6 @@
 import { BaseEdge, getBezierPath, getSmoothStepPath } from '@xyflow/react';
 import type { EdgeProps } from '@xyflow/react';
-import type { WorkflowEdgeModel } from '../types/workflow.types';
+import type { WorkflowEdgeModel } from '../../types/workflow.types';
 
 export function WorkflowEdge({
 	id,

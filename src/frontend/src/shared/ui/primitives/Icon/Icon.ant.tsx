@@ -30,6 +30,7 @@ import {
     ReloadOutlined,
     BranchesOutlined,
     ThunderboltOutlined,
+    GlobalOutlined,
 } from '@ant-design/icons';
 
 import type { IconComponent } from './Icon.types';
@@ -38,6 +39,7 @@ import {MdKeyboardCommandKey, MdContentCopy, MdPlayArrow, MdStop, MdUnfoldMore, 
 import {TbWebhook} from "react-icons/tb";
 import {BsJournalText} from "react-icons/bs";
 import {GoArrowSwitch, GoWorkflow} from "react-icons/go";
+import {GrAggregate} from "react-icons/gr";
 
 const iconMap = {
     check: CheckOutlined,
@@ -86,6 +88,8 @@ const iconMap = {
     refresh: ReloadOutlined,
     connector: BranchesOutlined,
     flash: ThunderboltOutlined,
+    'http-request': GlobalOutlined,
+    aggregator: GrAggregate,
 };
 
 export const AntIcon: IconComponent = ({

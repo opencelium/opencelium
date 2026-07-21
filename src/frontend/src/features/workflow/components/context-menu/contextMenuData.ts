@@ -9,7 +9,6 @@ const operatorMenu: MenuSection[] = [
   {
     id: 'main',
     items: [
-      { id: 'change-label', labelKey: 'contextMenu.changeLabel' },
       { id: 'open-config', labelKey: 'contextMenu.openConfiguration' },
       { id: 'configure-aggregator', labelKey: 'contextMenu.configureAggregator' },
     ],

@@ -70,15 +70,6 @@ export function LiveExecutionLogTree({
 }) {
   const { t } = useI18n("logs");
 
-  // TEMP diagnostic: surface what was captured from the socket so we can see
-  // whether the reveal has anything to work with and what the loopIndex base is.
-  useEffect(() => {
-    if (revealNonce > 0) {
-      // eslint-disable-next-line no-console
-      console.log("[logs reveal] errorLocations:", JSON.stringify(tree.errorLocations));
-    }
-  }, [revealNonce, tree.errorLocations]);
-
   const errorCtx = useMemo<LogErrorTrace>(() => {
     const matcher = makeErrorTraceMatcher(tree.errorLocations);
     return {

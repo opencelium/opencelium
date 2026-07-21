@@ -57,6 +57,18 @@
   border-color: var(--color-border-default);
 }
 
+/* A long, space-less name (e.g. a slug) can't wrap, so without this it overflows the
+   fixed-width sidebar instead of respecting it. */
+.sidebarItem strong,
+.sidebarItem span {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .sidebarItem span {
   color: var(--color-text-secondary);
   font-size: 12px;

@@ -17,7 +17,14 @@ export const masterPasswordApi = baseApi.injectEndpoints({
                 },
             }),
         }),
+
+        checkMasterPasswordExists: b.query<boolean, void>({
+            query: () => ({
+                url: `/connector/master-password/status/exist`,
+                method: 'GET',
+            }),
+        }),
     }),
 })
 
-export const { useCheckMasterPasswordMutation } = masterPasswordApi
+export const { useCheckMasterPasswordMutation, useCheckMasterPasswordExistsQuery } = masterPasswordApi
