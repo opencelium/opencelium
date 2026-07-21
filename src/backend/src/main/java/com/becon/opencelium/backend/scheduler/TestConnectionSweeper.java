@@ -42,7 +42,7 @@ public class TestConnectionSweeper {
     }
 
     @Scheduled(
-            fixedDelayString = "${opencelium.sweeper.test-connection.fixed-delay:300000}",
+            fixedDelayString = "${opencelium.sweeper.test-connection.fixed-delay:900000}",
             initialDelayString = "${opencelium.sweeper.test-connection.initial-delay:0}"
     )
     public void sweep() {

@@ -222,7 +222,7 @@ opencelium:
   sweeper:
     test-connection:
       enabled: true
-      fixed-delay: 300000
+      fixed-delay: 900000
       initial-delay: 0
   ###########################################################################
   #                                                                         #
