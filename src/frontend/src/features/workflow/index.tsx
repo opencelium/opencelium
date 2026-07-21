@@ -7,7 +7,7 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { apiExecutor } from '@shared/api/apiExecutor';
 import './styles.css';
 import { NodeContextMenu } from './components/NodeContextMenu/NodeContextMenu';
-import { WorkflowCanvas } from './components/WorkflowCanvas';
+import { WorkflowCanvas } from './components/WorkflowCanvas/WorkflowCanvas';
 import { WorkflowHeader } from './components/WorkflowHeader';
 import { WorkflowLogs } from './components/WorkflowLogs';
 import { WorkflowSidebar } from './components/WorkflowSidebar/WorkflowSidebar';
