@@ -1,38 +1,20 @@
 import { useI18n } from '@shared/i18n/hooks/useI18n';
-import type { InvokerOperation } from '@entities/invoker/model/types';
-import type { WorkflowAction, WorkflowCreateKind, WorkflowNodeModel, WorkflowTriggerConnectionRef } from '../types/workflow.types';
-import { TriggerConnectionScheduleDialog } from './sidebar/TriggerConnectionScheduleDialog/TriggerConnectionScheduleDialog';
-import { useTriggerConnectionStep } from './sidebar/useTriggerConnectionStep';
-import { getMethodSidebarCopy, getSecondarySidebarCopy } from './sidebar/sidebarSecondary';
-import { matchesSidebarTitle, normalizeSidebarQuery } from './sidebar/sidebar.helpers';
+import type { WorkflowCreateKind } from '../../types/workflow.types';
+import { TriggerConnectionScheduleDialog } from '../sidebar/TriggerConnectionScheduleDialog/TriggerConnectionScheduleDialog';
+import { useTriggerConnectionStep } from '../sidebar/useTriggerConnectionStep';
+import { getMethodSidebarCopy, getSecondarySidebarCopy } from '../sidebar/sidebarSecondary';
+import { matchesSidebarTitle, normalizeSidebarQuery } from '../sidebar/sidebar.helpers';
 import { resolveConnectorIconUrl } from '@entities/connector/model/iconUrl';
-import { getMethodKey, normalizeConnectorIcon, useWorkflowSidebarItems } from './WorkflowSidebar/useWorkflowSidebarItems';
-import { MainSidebarDrawer } from './WorkflowSidebar/MainSidebarDrawer';
-import { SecondarySidebarDrawer } from './WorkflowSidebar/SecondarySidebarDrawer';
-import { MethodSidebarDrawer } from './WorkflowSidebar/MethodSidebarDrawer';
-import { useWorkflowSidebarState } from './WorkflowSidebar/useWorkflowSidebarState';
+import { getMethodKey, normalizeConnectorIcon, useWorkflowSidebarItems } from './useWorkflowSidebarItems';
+import { MainSidebarDrawer } from './MainSidebarDrawer';
+import { SecondarySidebarDrawer } from './SecondarySidebarDrawer';
+import { MethodSidebarDrawer } from './MethodSidebarDrawer';
+import { useWorkflowSidebarState } from './useWorkflowSidebarState';
+import type { WorkflowSidebarProps } from './WorkflowSidebar.types';
 
-type Props = {
-  action: WorkflowAction | null;
-  selectedNode: WorkflowNodeModel | null;
-  connectionId?: string;
-  onClose: () => void;
-  onSelect: (
-    kind: WorkflowCreateKind,
-    methodName?: string,
-    connector?: { connectorId: number; title: string; icon?: string | null },
-    methodOperation?: InvokerOperation,
-    triggerConnection?: WorkflowTriggerConnectionRef,
-  ) => void;
-};
-
-export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, onSelect }: Props) {
+export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, onSelect }: WorkflowSidebarProps) {
   const { t } = useI18n('workflow');
-  const sidebar = useWorkflowSidebarState({
-    open: !!action,
-    onClose,
-    onSelectSystem: () => onSelect('system'),
-  });
+  const sidebar = useWorkflowSidebarState({ open: !!action, onClose, onSelectSystem: () => onSelect('system') });
   const { activeSecondaryPanel, selectedConnectorKey, mainSearch, secondarySearch, methodSearch, resetSidebar } = sidebar;
 
   const {
@@ -59,17 +41,15 @@ export function WorkflowSidebar({ action, selectedNode, connectionId, onClose, o
     },
   });
 
-  const hasSecondarySearch = secondarySearch.trim().length > 0;
-  const secondaryQuery = normalizeSidebarQuery(secondarySearch);
+  const hasSecondarySearch = secondarySearch.trim().length > 0, secondaryQuery = normalizeSidebarQuery(secondarySearch);
   const filteredTriggerConnectionItems = triggerConnectionStep.items.filter((item) => matchesSidebarTitle(item.title, secondaryQuery, hasSecondarySearch));
 
   const [secondaryTitle, secondarySubtitle, secondaryPlaceholder] = getSecondarySidebarCopy(activeSecondaryPanel ?? 'connector', t);
   const [methodTitle, methodSubtitle, methodPlaceholder] = getMethodSidebarCopy(t, selectedConnector?.title);
   const methodOpen = activeSecondaryPanel === 'connector' && !!selectedConnectorKey;
-  const sourceNodeLabel =
-    selectedNode?.data.kind === 'connector'
-      ? selectedNode.data.subtitle || selectedNode.data.title
-      : selectedNode?.data.title || selectedNode?.id || '';
+  const sourceNodeLabel = selectedNode?.data.kind === 'connector'
+    ? selectedNode.data.subtitle || selectedNode.data.title
+    : selectedNode?.data.title || selectedNode?.id || '';
   const selectedConnectorIconUrl = resolveConnectorIconUrl(normalizeConnectorIcon(selectedConnector?.icon));
 
   return (

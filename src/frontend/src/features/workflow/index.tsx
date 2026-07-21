@@ -10,7 +10,7 @@ import { NodeContextMenu } from './components/NodeContextMenu/NodeContextMenu';
 import { WorkflowCanvas } from './components/WorkflowCanvas';
 import { WorkflowHeader } from './components/WorkflowHeader';
 import { WorkflowLogs } from './components/WorkflowLogs';
-import { WorkflowSidebar } from './components/WorkflowSidebar';
+import { WorkflowSidebar } from './components/WorkflowSidebar/WorkflowSidebar';
 import { WorkflowSchedulesPill } from './components/schedules/WorkflowSchedulesPill';
 import { WorkflowSchedulesPanel } from './components/schedules/WorkflowSchedulesPanel';
 import { HistoryPanel } from './components/header/HistoryPanel';
