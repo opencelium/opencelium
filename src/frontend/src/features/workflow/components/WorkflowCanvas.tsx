@@ -1,21 +1,6 @@
 import { Controls, ReactFlow } from '@xyflow/react';
-import type {
-  OnConnect,
-  OnEdgesChange,
-  OnNodeDrag,
-  NodeMouseHandler,
-  OnNodesChange,
-  ReactFlowInstance,
-  Viewport,
-} from '@xyflow/react';
-import { useEffect, useRef, type PropsWithChildren } from 'react';
-import { WorkflowEdge } from '../edges/WorkflowEdge';
-import { ConnectorMethodNode } from '../nodes/ConnectorMethodNode/ConnectorMethodNode';
-import { IfOperatorNode } from '../nodes/IfOperatorNode/IfOperatorNode';
-import { LoopOperatorNode } from '../nodes/LoopOperatorNode/LoopOperatorNode';
-import { StartNode } from '../nodes/StartNode/StartNode';
-import { SystemMethodNode } from '../nodes/SystemMethodNode/SystemMethodNode';
-import { TriggerConnectionNode } from '../nodes/TriggerConnectionNode/TriggerConnectionNode';
+import type { ReactFlowInstance } from '@xyflow/react';
+import { useEffect, useRef } from 'react';
 import {
   getOperatorBottomBranch,
   getOutgoingCount,
@@ -23,46 +8,11 @@ import {
 } from '../utils/graphUtils';
 import { ALL_COLORS } from '../constants/colors';
 import type {
-  WorkflowAction,
-  WorkflowContextMenu,
   WorkflowEdgeModel,
   WorkflowNodeModel,
 } from '../types/workflow.types';
-
-type Props = PropsWithChildren<{
-  nodes: WorkflowNodeModel[];
-  edges: WorkflowEdgeModel[];
-  isAnyNodeDragging?: boolean;
-  activeAction: WorkflowAction | null;
-  onNodesChange: OnNodesChange<WorkflowNodeModel>;
-  onEdgesChange: OnEdgesChange<WorkflowEdgeModel>;
-  onConnect: OnConnect;
-  onNodeDragStart?: OnNodeDrag<WorkflowNodeModel>;
-  onNodeDrag?: OnNodeDrag<WorkflowNodeModel>;
-  onNodeDragStop?: OnNodeDrag<WorkflowNodeModel>;
-  onOpenAddStep: (action: WorkflowAction) => void;
-  onOpenContextMenu: (menu: WorkflowContextMenu | null) => void;
-  onNodeDoubleClick?: NodeMouseHandler<WorkflowNodeModel>;
-  onDeleteNode: (nodeId: string) => void;
-  onPaneClick?: () => void;
-  restoredViewport?: Viewport;
-  viewportRestoreVersion?: number;
-  centerStartVersion?: number;
-  onInit?: (instance: ReactFlowInstance<WorkflowNodeModel, WorkflowEdgeModel>) => void;
-}>;
-
-const nodeTypes = {
-  start: StartNode,
-  connector: ConnectorMethodNode,
-  system: SystemMethodNode,
-  'trigger-connection': TriggerConnectionNode,
-  if: IfOperatorNode,
-  loop: LoopOperatorNode,
-};
-
-const edgeTypes = {
-  'workflow-edge': WorkflowEdge,
-};
+import type { WorkflowCanvasProps } from './WorkflowCanvas/WorkflowCanvas.types';
+import { workflowEdgeTypes, workflowNodeTypes } from './WorkflowCanvas/workflowCanvasTypes';
 
 const START_NODE_SIZE = 62;
 
@@ -104,7 +54,7 @@ export function WorkflowCanvas({
   centerStartVersion = 0,
   onInit,
   children,
-}: Props) {
+}: WorkflowCanvasProps) {
   const reactFlowInstance = useRef<ReactFlowInstance<WorkflowNodeModel, WorkflowEdgeModel> | null>(null);
   const restoredViewportKey = restoredViewport
     ? `${viewportRestoreVersion}:${restoredViewport.x}:${restoredViewport.y}:${restoredViewport.zoom}`
@@ -228,8 +178,8 @@ export function WorkflowCanvas({
             centerStartNode(instance, nodes, restoredViewport?.zoom ?? 1);
           }
         }}
-        nodeTypes={nodeTypes}
-        edgeTypes={edgeTypes}
+        nodeTypes={workflowNodeTypes}
+        edgeTypes={workflowEdgeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
