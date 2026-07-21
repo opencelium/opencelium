@@ -1,4 +1,4 @@
-import { WorkflowEdge } from '../../edges/WorkflowEdge';
+import { WorkflowEdge } from '../../edges/WorkflowEdge/WorkflowEdge';
 import { ConnectorMethodNode } from '../../nodes/ConnectorMethodNode/ConnectorMethodNode';
 import { IfOperatorNode } from '../../nodes/IfOperatorNode/IfOperatorNode';
 import { LoopOperatorNode } from '../../nodes/LoopOperatorNode/LoopOperatorNode';
