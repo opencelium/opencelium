@@ -387,7 +387,7 @@ alter table enhancement change expert_var variables text;
 alter table connection change name title varchar(128);
 
 --changeset 4.0:9 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
-create table connection_history(
+create table if not exists connection_history(
     id BIGINT AUTO_INCREMENT PRIMARY KEY ,
     connection_id INT(11) NOT NULL ,
     user_id INT(11) NOT NULL,
@@ -395,21 +395,12 @@ create table connection_history(
     created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     json_patch JSON,
     action  VARCHAR(45),
-    FOREIGN KEY (connection_id) REFERENCES connection(id),
+    CONSTRAINT fk_connection_history_connection FOREIGN KEY (connection_id) REFERENCES connection(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES user(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --changeset 4.0:10 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 alter table enhancement change variables args text;
-
---changeset 4.0:11 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
-alter table connection_history
-    drop foreign key connection_history_ibfk_1;
-
-alter table connection_history
-    add constraint connection_history_ibfk_1
-        foreign key (connection_id) references connection (id)
-            on delete cascade;
 
 --changeset 4.0:12 runOnChange:true stripComments:true splitStatements:true endDelimiter:;
 CREATE TABLE category (
