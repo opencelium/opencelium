@@ -115,6 +115,7 @@ public class Template50Updater implements TemplateUpdater {
         MethodConnectorDTO ref = new MethodConnectorDTO();
         ref.setConnectorId(connector.getConnectorId());
         ref.setTitle(connector.getTitle());
+        ref.setInvoker(connector.getInvoker() != null ? connector.getInvoker().getName() : null);
         return ref;
     }
 
