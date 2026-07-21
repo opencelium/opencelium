@@ -4,9 +4,10 @@ import {
     Autocomplete,
     createFilterOptions,
     IconButton,
+    ListSubheader,
 } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import type { SelectComponent } from './Select.types';
+import { isGroupedOptions, type SelectComponent } from './Select.types';
 
 const filter = createFilterOptions<any>();
 
@@ -71,16 +72,28 @@ export const MaterialSelect: SelectComponent = ({
         }
     };
 
+    const grouped = isGroupedOptions(options);
+    const flatOptions = grouped
+        ? options.flatMap((group) => group.options.map((opt) => ({ ...opt, __group: String(group.label) })))
+        : options;
+
     const mappedValue = multiple
-        ? options.filter((opt) => value?.includes(opt.value))
-        : options.find((opt) => opt.value === value) || null;
+        ? flatOptions.filter((opt) => value?.includes(opt.value))
+        : flatOptions.find((opt) => opt.value === value) || null;
 
     return (
         <Autocomplete
             multiple={multiple}
             freeSolo={creatable}
             disabled={disabled || readOnly}
-            options={options}
+            options={flatOptions}
+            groupBy={grouped ? (option: any) => option.__group : undefined}
+            renderGroup={(params) => (
+                <li key={params.key}>
+                    <ListSubheader component="div">{params.group}</ListSubheader>
+                    {params.children}
+                </li>
+            )}
             value={mappedValue}
             onChange={handleChange}
             inputValue={inputValue}

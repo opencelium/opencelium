@@ -18,7 +18,8 @@
     "minimizeScript": "Minimize script",
     "maximizeRequestData": "Maximize request data",
     "minimizeRequestData": "Minimize request data",
-    "load": "Load"
+    "load": "Load",
+    "back": "Back"
   },
   "confirmDelete": {
     "title": "Delete step",
@@ -259,6 +260,17 @@
       "title": "Delete the assigned data aggregator?",
       "message": "This removes the data aggregator from this step. The data aggregator entry itself will not be deleted and remains available for other steps."
     }
+  },
+  "templateConnectorMapping": {
+    "title": "Map template connectors",
+    "intro": "This template was created with connectors from another environment. Choose which connector in this environment each one should use before the workflow is loaded.",
+    "invokerHint": "Invoker: {{invoker}}",
+    "noInvokerHint": "No invoker hint available",
+    "usedBy": "Used by: {{methods}}",
+    "selectPlaceholder": "Select a connector",
+    "suggested": "Suggested",
+    "allConnectors": "All connectors",
+    "createNewTooltip": "Create new connector"
   },
   "node": {
     "if": "If",

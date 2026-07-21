@@ -19,12 +19,14 @@ import { ConditionBuilderDialog } from './components/condition-builder/Condition
 import { MethodConfigDialog } from './components/request-editor/MethodConfigDialog';
 import { ResponseDialog } from './components/request-editor/ResponseDialog';
 import { AggregatorConfigDialog } from './components/aggregator/AggregatorConfigDialog';
+import { TemplateConnectorMappingDialog } from './components/template/TemplateConnectorMappingDialog';
+import { extractConnectorGroups, applyConnectorMapping, type ConnectorMappingGroup } from './components/template/templateConnectorMapping.utils';
 import { buildLegacyConnection } from './components/request-editor/legacyAdapter';
 import { useWorkflowPage } from './useWorkflowPage';
 import { useUnsavedChangesGuard } from './useUnsavedChangesGuard';
 import { TestRunProvider } from './test-run/TestRunProvider';
 import { loadConnectionVersions, loadWorkflowConnection, loadWorkflowConnectionVersion, removeConnectionVersion, saveConnectionVersionComment, saveWorkflowConnection } from './api/connectionService';
-import { mapConnectionToWorkflowState } from './api/connectionMapper';
+import { mapConnectionToWorkflowState, type WorkflowConnectionState } from './api/connectionMapper';
 import { buildConnectionPayload, buildFromConnectorPayload } from './api/connectionPayload';
 import { RESOLVED_WORKFLOW_ERROR_MESSAGE_DURATION_SEC, resolveWorkflowApiError } from './utils/workflowApiErrors';
 import { useGetConnectorsQuery } from '@entities/connector/api/connectorApi';
@@ -265,6 +267,12 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
   const [isApplyingTemplate, setIsApplyingTemplate] = useState(false);
   const [isUploadingTemplate, setIsUploadingTemplate] = useState(false);
+  const [connectorMappingDialogOpen, setConnectorMappingDialogOpen] = useState(false);
+  const [connectorMappingGroups, setConnectorMappingGroups] = useState<ConnectorMappingGroup[]>([]);
+  const [pendingTemplateApply, setPendingTemplateApply] = useState<{
+    state: WorkflowConnectionState;
+    selectedTemplate: Template;
+  } | null>(null);
   const [isDownloadingTemplate, setIsDownloadingTemplate] = useState(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [schedulesOpen, setSchedulesOpen] = useState(false);
@@ -576,6 +584,33 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     setSelectedTemplateId(undefined);
   };
 
+  const finishApplyTemplate = async (state: WorkflowConnectionState, selectedTemplate: Template) => {
+    workflow.setWorkflowGraph(state.nodes, state.edges, state.viewport, { centerStart: true });
+    setLoadedFieldBindings(state.fieldBindings);
+    const templateName = selectedTemplate.name?.trim();
+    const templateDescription = selectedTemplate.description?.trim();
+    const applyTemplateNameAndDescription = () =>
+      setHeaderState((prev) => ({
+        title: templateName ? templateName : prev.title,
+        description: templateDescription ? toDisplayDescription(templateDescription) : prev.description,
+      }));
+
+    if (isHeaderNameEmpty(headerState.title)) {
+      applyTemplateNameAndDescription();
+    } else {
+      const shouldReplace = await confirm({
+        title: t('template.replaceConfirm.title'),
+        message: t('template.replaceConfirm.message'),
+        confirmText: t('template.replaceConfirm.replace'),
+        cancelText: t('template.replaceConfirm.keep'),
+      });
+      if (shouldReplace) applyTemplateNameAndDescription();
+    }
+    setLoadTemplateDialogOpen(false);
+    setSelectedTemplateId(undefined);
+    message.success(`Template "${selectedTemplate.name ?? selectedTemplate.templateId}" loaded`);
+  };
+
   const applySelectedTemplate = async () => {
     const selectedTemplate = templates.find((template) => String(template.templateId) === selectedTemplateId);
     if (!selectedTemplate) {
@@ -594,35 +629,46 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         return;
       }
       const state = mapConnectionToWorkflowState(fullTemplate.connection);
-      workflow.setWorkflowGraph(state.nodes, state.edges, state.viewport, { centerStart: true });
-      setLoadedFieldBindings(state.fieldBindings);
-      const templateName = selectedTemplate.name?.trim();
-      const templateDescription = selectedTemplate.description?.trim();
-      const applyTemplateNameAndDescription = () =>
-        setHeaderState((prev) => ({
-          title: templateName ? templateName : prev.title,
-          description: templateDescription ? toDisplayDescription(templateDescription) : prev.description,
-        }));
-
-      if (isHeaderNameEmpty(headerState.title)) {
-        applyTemplateNameAndDescription();
-      } else {
-        const shouldReplace = await confirm({
-          title: t('template.replaceConfirm.title'),
-          message: t('template.replaceConfirm.message'),
-          confirmText: t('template.replaceConfirm.replace'),
-          cancelText: t('template.replaceConfirm.keep'),
-        });
-        if (shouldReplace) applyTemplateNameAndDescription();
+      const groups = extractConnectorGroups(state.nodes);
+      if (groups.length > 0) {
+        setPendingTemplateApply({ state, selectedTemplate });
+        setConnectorMappingGroups(groups);
+        setConnectorMappingDialogOpen(true);
+        setLoadTemplateDialogOpen(false);
+        return;
       }
-      setLoadTemplateDialogOpen(false);
-      setSelectedTemplateId(undefined);
-      message.success(`Template "${selectedTemplate.name ?? selectedTemplate.templateId}" loaded`);
+      await finishApplyTemplate(state, selectedTemplate);
     } catch {
       message.error(t('messages.loadTemplateFailed'));
     } finally {
       setIsApplyingTemplate(false);
     }
+  };
+
+  const handleConfirmConnectorMapping = async (mapping: Record<number, number>) => {
+    if (!pendingTemplateApply) return;
+    setConnectorMappingDialogOpen(false);
+    setIsApplyingTemplate(true);
+    try {
+      const mappedNodes = applyConnectorMapping(pendingTemplateApply.state.nodes, mapping, connectors);
+      await finishApplyTemplate(
+        { ...pendingTemplateApply.state, nodes: mappedNodes },
+        pendingTemplateApply.selectedTemplate,
+      );
+    } catch {
+      message.error(t('messages.loadTemplateFailed'));
+    } finally {
+      setIsApplyingTemplate(false);
+      setPendingTemplateApply(null);
+      setConnectorMappingGroups([]);
+    }
+  };
+
+  const handleCancelConnectorMapping = () => {
+    setConnectorMappingDialogOpen(false);
+    setPendingTemplateApply(null);
+    setConnectorMappingGroups([]);
+    setSelectedTemplateId(undefined);
   };
 
   const handleHeaderMenuSelect = (item: WorkflowHeaderMenuItem) => {
@@ -672,6 +718,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       workflow.historyOpen ||
       templateDialogOpen ||
       loadTemplateDialogOpen ||
+      connectorMappingDialogOpen ||
       isShortcutsOpen
     ) return;
     const selected = workflow.nodes.find((node) => node.selected && node.type !== 'start');
@@ -847,6 +894,13 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           />
         </div>
       </Modal>
+      <TemplateConnectorMappingDialog
+        open={connectorMappingDialogOpen}
+        groups={connectorMappingGroups}
+        connectors={connectors}
+        onConfirm={handleConfirmConnectorMapping}
+        onCancel={handleCancelConnectorMapping}
+      />
       <ShortcutsDialog open={isShortcutsOpen} onClose={() => setIsShortcutsOpen(false)} />
       <div className="workflowMain">
         {isLoading ? (
