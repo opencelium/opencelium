@@ -376,7 +376,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const validateTitle = useCallback(async (title: string): Promise<string | null> => {
     const trimmed = title.trim();
     if (!trimmed || trimmed === '[Empty Name]' || trimmed === persistedTitle) return null;
-    const check = await apiExecutor({ url: `/connection/check/${encodeURIComponent(trimmed)}`, method: 'GET' });
+    const check = await apiExecutor({ url: `/connection/check?name=${encodeURIComponent(trimmed)}`, method: 'GET' });
     if (check && typeof check === 'object' && 'message' in check && (check as { message?: string }).message === 'EXISTS') {
       return t('messages.workflowNameExists');
     }
