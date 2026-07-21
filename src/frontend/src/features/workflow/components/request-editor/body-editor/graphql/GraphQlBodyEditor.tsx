@@ -49,13 +49,19 @@ function GraphQlBodyEditorContent({ readOnly }: Props) {
   const { status, errorKey, fetcher, updateQuery, initialQuery, retry } = useGraphQlBodyEditor();
 
   if (status === 'error') {
+    const isMasterPasswordNotConfigured = errorKey === 'masterPasswordNotConfigured';
     return (
       <div style={{ height: '100%', display: 'grid', placeItems: 'center' }}>
         <div
           data-testid="workflow-graphql-error"
           style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}
         >
-          <Alert type="error" showIcon message={t(`graphqlBody.${errorKey ?? 'loginFailed'}`)} />
+          <Alert
+            type={isMasterPasswordNotConfigured ? 'warning' : 'error'}
+            showIcon
+            message={t(`graphqlBody.${errorKey ?? 'loginFailed'}`)}
+            description={isMasterPasswordNotConfigured ? t('graphqlBody.masterPasswordNotConfiguredDescription') : undefined}
+          />
           <Button onClick={retry} testId="workflow-graphql-retry">
             {t('graphqlBody.retry')}
           </Button>

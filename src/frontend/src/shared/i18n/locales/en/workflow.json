@@ -471,6 +471,8 @@
     "editorHint": "Ctrl + Space for autocomplete. Only the active tab's query runs when this method executes — tabs are named after the query's operation name (e.g. \"query MyQuery {...}\"), so anonymous queries stay \"<untitled>\".",
     "connectorFailed": "Could not load the connector. Check the backend connection and try again.",
     "loginFailed": "Could not authenticate with this connector's GraphQL API. Check its credentials and try again.",
+    "masterPasswordNotConfigured": "No master password is configured",
+    "masterPasswordNotConfiguredDescription": "Ask an administrator to set opencelium.connector.master-password in /backend/src/main/resources/application.yml and restart the backend to enable browsing this connector's GraphQL API.",
     "retry": "Try again"
   }
 }

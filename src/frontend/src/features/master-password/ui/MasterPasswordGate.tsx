@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { Typography } from '@shared/ui/primitives/Typography'
 import { Loading } from '@shared/ui/primitives/Loading/Loading'
-import { apiExecutor } from '@shared/api/apiExecutor'
 import { useMasterPasswordStore } from '@features/master-password/model/masterPasswordStore'
+import { checkMasterPasswordExistsRaw } from '@features/master-password/model/checkMasterPasswordExists'
 import { MasterPasswordDialog } from '@features/master-password/ui/MasterPasswordDialog'
 
 type MasterPasswordGateProps = {
@@ -11,9 +11,6 @@ type MasterPasswordGateProps = {
     label?: string
     info?: { title: string; content: string }
 }
-
-const isApiExecutorError = (response: unknown): boolean =>
-    !!response && typeof response === 'object' && ('status' in response || 'error' in response)
 
 /**
  * Renders `children` only once a master password has been entered; otherwise
@@ -31,21 +28,10 @@ export const MasterPasswordGate: React.FC<MasterPasswordGateProps> = ({ children
     useEffect(() => {
         if (masterPassword) return
         let cancelled = false
-        // Routed through apiExecutor (not an RTK Query hook) because this gate can be
-        // rendered inside the workflow editor's isolated legacy redux <Provider> (see
-        // GraphQlBodyEditor), which only mounts the `connection` reducer — not the real
-        // app's baseApi/middleware. A hook-bound dispatch would bind to that wrong store.
-        // apiExecutor dispatches against the real app store directly, sidestepping that.
         void (async () => {
-            const response = await apiExecutor({
-                url: '/connector/master-password/status/exist',
-                method: 'GET',
-                options: { ignoreError: true },
-            })
+            const exists = await checkMasterPasswordExistsRaw()
             if (cancelled) return
-            // Fail-safe: on an API error, assume a master password exists rather than
-            // accidentally exposing gated content.
-            setExistsState(isApiExecutorError(response) ? true : Boolean(response))
+            setExistsState(exists)
         })()
         return () => {
             cancelled = true
