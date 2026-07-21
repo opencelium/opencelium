@@ -107,13 +107,13 @@ export const CredentialEditor: React.FC<CredentialEditorProps> = ({ name, label,
         }
     }, [fetchRequestData, masterPassword]);
     // No master password configured system-wide — there is nothing to unlock,
-    // so skip the blur/dialog overlay the same way 'create' mode does.
+    // so skip the blur/dialog overlay the same way 'create' mode does. The
+    // Hint below still tells the user that credentials themselves won't save.
     useEffect(() => {
         if (masterPasswordExists === false) {
             toggleHasAccess(true);
-            void fetchRequestData()
         }
-    }, [fetchRequestData, masterPasswordExists]);
+    }, [masterPasswordExists]);
     useEffect(() => {
         const foundInvoker = allInvokers.find(i => i.name === invokerName)
         if (foundInvoker) {
@@ -134,35 +134,47 @@ export const CredentialEditor: React.FC<CredentialEditorProps> = ({ name, label,
     if (!requestData) {
         return null;
     }
+    // No master password configured system-wide while updating — the stored
+    // credentials can never be fetched or saved from this step, so there is
+    // nothing meaningful to show; only the explanatory Hint below is rendered.
+    const hideCredentialInputs = mode === 'update' && masterPasswordExists === false;
     return (
         <div style={{position: 'relative'}}>
-            <div style={{
-                display: 'grid',
-                filter: hasAccess ? 'none' : 'blur(6px)',
-            }}>
-                {Object.keys(requestData).map((fieldKey, key) => {
-                    const lower = fieldKey.toLowerCase();
-                    const isPassword = SENSITIVE_KEYS.some(keyword => lower.includes(keyword));
-                    return (
-                        <FormInput
-                            key={key}
-                            placeholder={hasAccess ? '' : '**************'}
-                            error={error && !watch(`requestData.${fieldKey}`) ? commonT('field.required') : ''}
-                            autoFocus={key === 0 && hasAccess}
-                            name={`requestData.${fieldKey}`}
-                            label={formatLabel(fieldKey)}
-                            type={isPassword ? 'password' : 'text'}
-                            disabled={!hasAccess}
-                        />
-                    )
-                })}
-            </div>
-            {!hasAccess && <div style={{position: 'absolute', top: 0, width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-                <MasterPasswordDialog/>
-            </div>}
-            {mode === 'update' && !masterPassword && masterPasswordExists !== false && (
-                <div style={{ bottom: '-60px', position: 'absolute'}}>
-                    <Hint noPrefix>{commonT('credentialEditor.updateWithoutMasterPassword')}</Hint>
+            {!hideCredentialInputs && (
+                <>
+                    <div style={{
+                        display: 'grid',
+                        filter: hasAccess ? 'none' : 'blur(6px)',
+                    }}>
+                        {Object.keys(requestData).map((fieldKey, key) => {
+                            const lower = fieldKey.toLowerCase();
+                            const isPassword = SENSITIVE_KEYS.some(keyword => lower.includes(keyword));
+                            return (
+                                <FormInput
+                                    key={key}
+                                    placeholder={hasAccess ? '' : '**************'}
+                                    error={error && !watch(`requestData.${fieldKey}`) ? commonT('field.required') : ''}
+                                    autoFocus={key === 0 && hasAccess}
+                                    name={`requestData.${fieldKey}`}
+                                    label={formatLabel(fieldKey)}
+                                    type={isPassword ? 'password' : 'text'}
+                                    disabled={!hasAccess}
+                                />
+                            )
+                        })}
+                    </div>
+                    {!hasAccess && <div style={{position: 'absolute', top: 0, width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+                        <MasterPasswordDialog/>
+                    </div>}
+                </>
+            )}
+            {mode === 'update' && !masterPassword && (
+                <div style={hideCredentialInputs ? undefined : { bottom: '-60px', position: 'absolute'}}>
+                    <Hint noPrefix type="warning">
+                        {commonT(masterPasswordExists === false
+                            ? 'credentialEditor.masterPasswordNotConfigured'
+                            : 'credentialEditor.updateWithoutMasterPassword')}
+                    </Hint>
                 </div>
             )}
         </div>

@@ -13,6 +13,8 @@ export type ApiExecutorOptions = {
     responseType?: 'arraybuffer' | 'blob'
     /** Text encoding used when responseType is 'arraybuffer'. Defaults to 'utf-8'. */
     encoding?: string
+    /** Skip invalidating the shared 'Entity' RTK Query cache tag after this request. */
+    skipEntityInvalidation?: boolean
 }
 
 type ApiExecutorArgs = {

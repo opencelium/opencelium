@@ -95,7 +95,8 @@
     "required": "Pflichtfeld"
   },
   "credentialEditor": {
-    "updateWithoutMasterPassword": "Sie können auch ohne Master-Passwort speichern – es werden dann nur die allgemeinen Daten aktualisiert. Um die erforderlichen Anmeldedaten zu ändern, geben Sie zuerst das Master-Passwort ein."
+    "updateWithoutMasterPassword": "Sie können auch ohne Master-Passwort speichern – es werden dann nur die allgemeinen Daten aktualisiert. Um die erforderlichen Anmeldedaten zu ändern, geben Sie zuerst das Master-Passwort ein.",
+    "masterPasswordNotConfigured": "Sie können auch ohne Master-Passwort speichern – es werden dann nur die allgemeinen Daten aktualisiert. Um die erforderlichen Anmeldedaten zu ändern, bitten Sie einen Administrator, opencelium.connector.master-password in /backend/src/main/resources/application.yml zu setzen und das Backend neu zu starten."
   },
   "hintLabel": "Hinweis",
   "errorBoundary": {

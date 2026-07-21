@@ -66,7 +66,7 @@ export function UpdateAssistantRunButton({ name, label, mode }: Props) {
                 />
             )}
 
-            <Hint>
+            <Hint type="warning">
                 {t('update-assistant.update.hint')}
             </Hint>
         </div>

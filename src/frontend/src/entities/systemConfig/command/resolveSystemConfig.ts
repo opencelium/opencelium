@@ -6,12 +6,18 @@ import {isContainerNode} from '@entities/systemConfig/model/types'
 import {buildNodeByPathMap, searchConfigByLabel} from '@entities/systemConfig/model/helpers'
 import {debouncePromise} from '@shared/utils/debouncePromise'
 import {i18n} from '@shared/i18n/config/i18n'
+import type {SuggestionOption} from '@shared/command/types'
 
 const SUGGESTION_LIMIT = 20
 
 /** Single suggestion shown while the config is still locked. */
 export function provideMasterPasswordLabel(): string {
     return i18n.getFixedT(i18n.language, 'entities')('system-config.commandPalette.provideMasterPassword')
+}
+
+/** Single suggestion shown when no master password is configured on the backend at all. */
+export function masterPasswordNotConfiguredLabel(): string {
+    return i18n.getFixedT(i18n.language, 'entities')('system-config.commandPalette.masterPasswordNotConfigured')
 }
 
 export async function loadConfigFields(): Promise<ConfigNode[]> {
@@ -29,8 +35,12 @@ export async function checkMasterPasswordExists(): Promise<boolean> {
     return !('data' in result && result.data === false)
 }
 
-async function _resolveSystemConfig(input: string): Promise<string[]> {
-    if (!useMasterPasswordStore.getState().masterPassword && await checkMasterPasswordExists()) {
+async function _resolveSystemConfig(input: string): Promise<SuggestionOption[]> {
+    if (!useMasterPasswordStore.getState().masterPassword) {
+        if (!await checkMasterPasswordExists()) {
+            const label = masterPasswordNotConfiguredLabel()
+            return [{value: label, label, disabled: true}]
+        }
         return [provideMasterPasswordLabel()]
     }
 

@@ -91,6 +91,7 @@
         "test": {
           "button": "Test connection",
           "success": "Connection test succeeded",
+          "needsMasterPassword": "Enter the master password to test the connection with the stored credentials.",
           "confirm": {
             "title": "Connection test failed",
             "message": "The connection test failed. Do you still want to save this connector?"

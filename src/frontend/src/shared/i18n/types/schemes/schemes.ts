@@ -21,6 +21,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
         }
         credentialEditor: {
             updateWithoutMasterPassword: string
+            masterPasswordNotConfigured: string
         }
         errorBoundary: {
             retry: string

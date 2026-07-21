@@ -94,7 +94,7 @@ function GraphQlBodyEditorContent({ readOnly }: Props) {
           <ForceIntrospection />
         </GraphiQL>
       </div>
-      <Hint>{t('graphqlBody.editorHint')}</Hint>
+      <Hint type="warning">{t('graphqlBody.editorHint')}</Hint>
     </div>
   );
 }

@@ -132,6 +132,16 @@
     background: var(--color-action-primary);
     color: var(--color-text-inverted);
 }
+[cmdk-item][data-disabled="true"] {
+    cursor: default;
+    color: var(--color-text-secondary);
+    opacity: 0.7;
+}
+[cmdk-item][data-disabled="true"]:hover,
+[cmdk-item][data-disabled="true"][aria-selected="true"] {
+    background: transparent;
+    color: var(--color-text-secondary);
+}
 
 .cmdk-item-row {
     display: flex;

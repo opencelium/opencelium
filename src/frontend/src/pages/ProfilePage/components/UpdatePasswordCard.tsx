@@ -69,7 +69,7 @@ export function UpdatePasswordCard() {
                             label="profile.fields.repeatNewPassword.label"
                             type="password"
                         />
-                        <Hint>
+                        <Hint type="warning">
                             <EntityText i18nKey="profile.hints.sessionWillExpire" />
                         </Hint>
                         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>

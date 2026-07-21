@@ -283,7 +283,7 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
                                 return;
                             }
                             if (e.key === 'Tab') {
-                                const all = displayGroups.flatMap(g => g.items);
+                                const all = displayGroups.flatMap(g => g.items).filter(s => !s.disabled);
                                 const fromHighlight = all.find(
                                     s => `${s.group ?? 'general'}:${s.value}` === highlighted,
                                 );
@@ -314,9 +314,10 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
                                                 <Command.Item
                                                     key={`${group.key}:${s.value}`}
                                                     value={`${group.key}:${s.value}`}
+                                                    disabled={s.disabled}
                                                     data-testid={buildTestId('command-palette-item', group.key, s.value)}
                                                     onMouseDown={(e) => e.preventDefault()}
-                                                    onSelect={() => group.key === 'recent' ? handleSelectRecent(s.value) : handleSelect(s.value)}
+                                                    onSelect={() => !s.disabled && (group.key === 'recent' ? handleSelectRecent(s.value) : handleSelect(s.value))}
                                                 >
                                                     <div className="cmdk-item-row">
                                                         {s.icon && (

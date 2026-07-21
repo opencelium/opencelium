@@ -13,7 +13,7 @@ import {findConnectorIdByTitle} from "@entities/connector/command/connectorCache
 import {CONNECTOR_TAG} from "@entities/connector/api/connector.tags.ts";
 import {connectorApi} from "@entities/connector/api/connectorApi.ts";
 import {showApiError} from "@shared/api/handleApiError.ts";
-import {useMasterPasswordStore} from "@features/master-password";
+import {masterPasswordApi, useMasterPasswordStore} from "@features/master-password";
 import {renderConnectorTitle} from "@entities/connector/ui/renderConnectorTitle";
 import {deleteConnectorIcon, hasConnectorIconFile, shouldDeleteConnectorIcon, uploadConnectorIcon} from "@entities/connector/model/connectorIconUpload";
 import type {StepRemoteProps} from "@shared/ui/form/FormControl/FormControl.type.ts";
@@ -34,6 +34,16 @@ const buildConnectorPageUrl = (value: string): string =>
 const buildConnectorViewPageUrl = (value: string): string =>
     `/connector/view/${encodeURIComponent(resolveConnectorId(value))}`
 
+// Update mode keeps the stored credentials encrypted until the master password is
+// entered — there is nothing to test, edit, or save until then, whether or not a
+// master password is configured system-wide (with none configured, there's simply no
+// way to unlock them from this step). A create has no connectorId and always carries
+// the freshly typed credentials, so it's never gated.
+const connectorCredentialsLocked = (values?: { connectorId?: string }): boolean => {
+    const masterPassword = useMasterPasswordStore.getState().masterPassword
+    return !!values?.connectorId && !masterPassword
+}
+
 /**
  * The `/connector/check` connection test. Shared by the credentials step's submit-time gate
  * (`remote`) and its "Test connection" action button so both fire the exact same request.
@@ -44,6 +54,10 @@ const connectorCheckRemote: StepRemoteProps = {
     transKey: `${baseKey}.wizard.steps.credentials.remote.error`,
     encodeParams: false,
     ignoreError: true,
+    // Read-only diagnostic call — it must not invalidate the 'Entity' cache tag, or the
+    // still-mounted getConnector/fetchEntities query for this connector refetches and
+    // EntityWizard's initialValues-driven form.reset wipes out unsaved credential edits.
+    skipEntityInvalidation: true,
     map: (_fieldValue, formValues) => {
         // Drop a freshly-picked icon File: the connection test doesn't need it,
         // and a File serializes to {} which the backend's String `icon` rejects (400).
@@ -55,12 +69,19 @@ const connectorCheckRemote: StepRemoteProps = {
         }
     },
     shouldSkip: (values) => {
-        // Update mode keeps the stored credentials encrypted until the master
-        // password is entered — there is nothing to test until then. A create
-        // has no connectorId and always carries the freshly typed credentials,
-        // so the test must always run there.
-        const masterPassword = useMasterPasswordStore.getState().masterPassword
-        return !!values?.connectorId && !masterPassword;
+        const needsMasterPassword = connectorCredentialsLocked(values)
+        // Only warn when a master password exists but wasn't entered — when none is
+        // configured at all, the credentials step's own Hint already explains this.
+        if (needsMasterPassword) {
+            const masterPasswordExists = masterPasswordApi.endpoints.checkMasterPasswordExists.select(undefined)(store.getState()).data
+            if (masterPasswordExists !== false) {
+                showApiError({
+                    namespace: 'entities',
+                    transKey: `${baseKey}.wizard.steps.credentials.test.needsMasterPassword`,
+                })
+            }
+        }
+        return needsMasterPassword;
     },
     handleResponse: (data, error) => {
         if (data?.status === "200") {
@@ -445,6 +466,7 @@ export const connectorDefinition: EntityDefinition = {
                         type: 'primary',
                         successMessage: `${baseKey}.wizard.steps.credentials.test.success`,
                         remote: connectorCheckRemote,
+                        disabled: connectorCredentialsLocked,
                     },
                 ],
                 confirmOnRemoteFailure: {

@@ -64,10 +64,13 @@ export type Suggestion = {
     group?: CommandGroup;
     description?: string;
     shortcut?: string[];
+    /** Inert, informational row — not highlightable/selectable via keyboard or click. */
+    disabled?: boolean;
 };
 
 // A resolver can return a plain string (value === label) or an object pairing
 // the value substituted into the palette input with a separate display label
 // — used when the value must carry extra disambiguating data (e.g. an id)
-// that shouldn't be shown to the user.
-export type SuggestionOption = string | { value: string; label: string };
+// that shouldn't be shown to the user. `disabled` marks a purely informational
+// suggestion (e.g. a "nothing to show" message) that can't be selected.
+export type SuggestionOption = string | { value: string; label: string; disabled?: boolean };

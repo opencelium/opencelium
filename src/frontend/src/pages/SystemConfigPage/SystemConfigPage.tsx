@@ -35,11 +35,11 @@ type LeafValue = ConfigScalar | ConfigScalar[]
 export function SystemConfigPage() {
     const {t, lang} = useI18n('entities')
     const {masterPassword} = useMasterPasswordStore()
-    // If no master password is configured at all, there's nothing to unlock — fetch
-    // directly instead of waiting on a password that will never be entered.
+    // With no master password configured at all, the config can never be unlocked from
+    // here — the page shows a notConfigured message instead of fetching or rendering it.
     const {data: masterPasswordExists} = useCheckMasterPasswordExistsQuery()
     const {data, isLoading, isFetching, isError, refetch} = useGetApplicationConfigQuery(undefined, {
-        skip: !masterPassword && masterPasswordExists !== false,
+        skip: !masterPassword,
     })
     const [updateConfig, {isLoading: isSaving}] = useUpdateApplicationConfigMutation()
     const [edits, setEdits] = useState<Record<string, NodeEdit>>({})
@@ -245,6 +245,17 @@ export function SystemConfigPage() {
                         content: t('system-config.masterPassword.info.content'),
                     }}
                 >
+                {masterPasswordExists === false ? (
+                    <div style={{marginTop: 16}}>
+                        <Alert
+                            type="warning"
+                            showIcon
+                            message={t('system-config.masterPassword.notConfigured.message')}
+                            description={t('system-config.masterPassword.notConfigured.description')}
+                        />
+                    </div>
+                ) : (
+                <>
                 <div style={{marginTop: 16}}>
                     {isLoading && (
                         <div
@@ -389,6 +400,8 @@ export function SystemConfigPage() {
                         </Button>
                     </div>
                 </div>
+                </>
+                )}
                 </MasterPasswordGate>
             </div>
         </PageWrapper>

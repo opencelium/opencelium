@@ -17,7 +17,12 @@ function returnToSearch(ctx: CommandExecutionContext) {
 }
 
 async function executeSystemConfig(args: {query?: string}, ctx: CommandExecutionContext) {
-    if (!useMasterPasswordStore.getState().masterPassword && await checkMasterPasswordExists()) {
+    if (!useMasterPasswordStore.getState().masterPassword) {
+        // Nothing to unlock when no master password is configured at all — the
+        // resolved suggestion is purely informational, so selecting it is a no-op.
+        if (!await checkMasterPasswordExists()) {
+            return
+        }
         ctx.openModal(<MasterPasswordDialog bare onUnlock={() => returnToSearch(ctx)} />)
         return
     }

@@ -32,6 +32,8 @@ export interface StepActionDefinition {
     successMessage?: string
     /** Validate the step's fields before firing the request. Defaults to true. */
     validateBeforeRun?: boolean
+    /** Disable the button (beyond the built-in isSubmitting/runningActionId checks) based on current form values. */
+    disabled?: (values?: any) => boolean
 }
 
 export interface StepDefinition {

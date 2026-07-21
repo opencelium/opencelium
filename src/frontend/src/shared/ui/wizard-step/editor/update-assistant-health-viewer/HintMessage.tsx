@@ -4,7 +4,7 @@ import {Hint} from "@shared/ui/primitives/Hint";
 
 const HintMessage = () => {
     return (
-        <Hint>
+        <Hint type="warning">
             <Trans i18nKey="update-assistant.health.hint" ns="entity">
                 {"Please, do not forget to create a backup of the system, before you start the update (see "}
                 <a
