@@ -10,6 +10,8 @@ import {Tree} from '@shared/ui/primitives/Tree'
 import {Tooltip} from '@shared/ui/primitives/Tooltip'
 import {Icon} from '@shared/ui/primitives/Icon'
 import {useI18n} from '@shared/i18n/hooks/useI18n'
+import {useAuth} from '@features/auth/useAuth'
+import {hasComponentPermission} from '@/engine/policy'
 import {
     useGetApplicationConfigQuery,
     useUpdateApplicationConfigMutation,
@@ -34,6 +36,8 @@ type LeafValue = ConfigScalar | ConfigScalar[]
 
 export function SystemConfigPage() {
     const {t, lang} = useI18n('entities')
+    const {normalizedUser} = useAuth()
+    const canUpdate = hasComponentPermission(normalizedUser?.permissions ?? [], 'APP', 'UPDATE')
     const {masterPassword} = useMasterPasswordStore()
     // With no master password configured at all, the config can never be unlocked from
     // here — the page shows a notConfigured message instead of fetching or rendering it.
@@ -105,8 +109,9 @@ export function SystemConfigPage() {
             onValueChange: handleValueChange,
             onToggleStatus: handleToggleStatus,
             statusLabels,
+            readOnly: !canUpdate,
         })
-    }, [fields, edits, handleValueChange, handleToggleStatus, statusLabels])
+    }, [fields, edits, handleValueChange, handleToggleStatus, statusLabels, canUpdate])
 
     const allExpandableKeys = useMemo(
         () => collectExpandableKeys(treeData),
@@ -381,24 +386,26 @@ export function SystemConfigPage() {
                         </div>
                     )}
 
-                    <div style={{display: 'flex', gap: 8, marginTop: 12, justifyContent: 'flex-end'}}>
-                        <Button
-                            type="primary"
-                            onClick={handleReset}
-                            loading={isFetching}
-                            disabled={isSaving}
-                        >
-                            {t('system-config.actions.reset')}
-                        </Button>
-                        <Button
-                            type="primary"
-                            onClick={handleSave}
-                            loading={isSaving}
-                            disabled={!isDirty}
-                        >
-                            {t('system-config.actions.save')}
-                        </Button>
-                    </div>
+                    {canUpdate && (
+                        <div style={{display: 'flex', gap: 8, marginTop: 12, justifyContent: 'flex-end'}}>
+                            <Button
+                                type="primary"
+                                onClick={handleReset}
+                                loading={isFetching}
+                                disabled={isSaving}
+                            >
+                                {t('system-config.actions.reset')}
+                            </Button>
+                            <Button
+                                type="primary"
+                                onClick={handleSave}
+                                loading={isSaving}
+                                disabled={!isDirty}
+                            >
+                                {t('system-config.actions.save')}
+                            </Button>
+                        </div>
+                    )}
                 </div>
                 </>
                 )}

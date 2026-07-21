@@ -46,6 +46,10 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             goBack: string
             goHome: string
         }
+        accessDenied: {
+            title: string
+            subtitle: string
+        }
         dialog: {
             maximize: string
             restore: string

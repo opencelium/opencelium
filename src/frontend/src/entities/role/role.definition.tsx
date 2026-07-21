@@ -31,6 +31,7 @@ const buildRoleViewPageUrl = (value: string): string =>
 
 export const roleDefinition: EntityDefinition = {
     name: baseKey,
+    permissionComponent: 'USERGROUP',
     routes: [
         { type: 'create' },
         { type: 'view' },

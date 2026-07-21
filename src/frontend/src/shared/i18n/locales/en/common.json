@@ -122,6 +122,10 @@
     "goBack": "Go back",
     "goHome": "Go to Dashboard"
   },
+  "accessDenied": {
+    "title": "Access denied",
+    "subtitle": "You don't have permission to perform this action."
+  },
   "dialog": {
     "maximize": "Maximize",
     "restore": "Restore"

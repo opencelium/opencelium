@@ -9,12 +9,18 @@ import {useI18n} from "@shared/i18n/hooks/useI18n.ts";
 import {IconButton} from "@shared/ui/primitives/IconButton";
 import {Tooltip} from "@shared/ui/primitives/Tooltip";
 import {MenuSwitcher} from "@app/layouts/AppLayout/Sidebar/MenuSwitcher.tsx";
+import {useAuth} from "@features/auth/useAuth.ts";
+import {hasComponentPermission} from "@/engine/policy";
 
 export const TopBar = () => {
     const {isTabletOrMobile, isMobile} = useBreakpoints();
     const {setLang, lang} = useI18n();
     const {t: tCommon} = useI18n('common');
     const navigate = useNavigate();
+    const {normalizedUser} = useAuth();
+    const permissions = normalizedUser?.permissions ?? [];
+    const canCreateWorkflow = hasComponentPermission(permissions, 'CONNECTION', 'CREATE');
+    const canReadProfile = hasComponentPermission(permissions, 'MYPROFILE', 'READ');
     return (
         <div
             style={{
@@ -27,7 +33,7 @@ export const TopBar = () => {
         >
             {/* LEFT */}
             <div style={{display: 'flex', alignItems: 'center'}}>
-                {!isTabletOrMobile && (
+                {!isTabletOrMobile && canCreateWorkflow && (
                     <Tooltip content={tCommon('topbar.createWorkflowHint')}>
                         <Button
                             type="primary"
@@ -83,14 +89,16 @@ export const TopBar = () => {
                     />
                 </Tooltip>*/}
                 <MenuSwitcher/>
-                <Tooltip content={tCommon('topbar.profile')}>
-                    <IconButton
-                        size="xs"
-                        type={'text'}
-                        iconProps={{name: 'profile', color: 'primary'}}
-                        onClick={() => navigate('/profile')}
-                    />
-                </Tooltip>
+                {canReadProfile && (
+                    <Tooltip content={tCommon('topbar.profile')}>
+                        <IconButton
+                            size="xs"
+                            type={'text'}
+                            iconProps={{name: 'profile', color: 'primary'}}
+                            onClick={() => navigate('/profile')}
+                        />
+                    </Tooltip>
+                )}
             </div>
         </div>
     );

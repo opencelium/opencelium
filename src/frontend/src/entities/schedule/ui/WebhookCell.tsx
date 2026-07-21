@@ -8,6 +8,7 @@ import { copyToClipboard } from '@shared/utils/copyToClipboard'
 import { useGeneralRequestMutation } from '@shared/api/genericApi'
 import { createScheduleWebhook } from '../model/createScheduleWebhook'
 import { resolveWebhookUrl } from '../model/resolveWebhookUrl'
+import { useScheduleUpdatePermission } from '../model/useScheduleUpdatePermission'
 import type { Schedule } from '../model/types'
 
 type Props = {
@@ -19,6 +20,7 @@ export const WebhookCell = memo(function WebhookCell({ schedule, tooltipPlacemen
     const { t: tEntities } = useI18n('entities')
     const confirm = useConfirm()
     const [generalRequest] = useGeneralRequestMutation()
+    const canUpdate = useScheduleUpdatePermission()
     const [pending, setPending] = useState(false)
 
     const webhook = schedule.webhook
@@ -65,6 +67,7 @@ export const WebhookCell = memo(function WebhookCell({ schedule, tooltipPlacemen
     }
 
     if (!webhook) {
+        if (!canUpdate) return null
         return (
             <Tooltip content={tEntities('schedule.webhook.createTooltip')} placement={tooltipPlacement}>
                 <IconButton
@@ -88,15 +91,17 @@ export const WebhookCell = memo(function WebhookCell({ schedule, tooltipPlacemen
                     onClick={handleCopy}
                 />
             </Tooltip>
-            <Tooltip content={tEntities('schedule.webhook.deleteTooltip')} placement={tooltipPlacement}>
-                <IconButton
-                    iconProps={{ name: 'delete', color: 'danger' }}
-                    size="xs"
-                    type="text"
-                    loading={pending}
-                    onClick={handleDelete}
-                />
-            </Tooltip>
+            {canUpdate && (
+                <Tooltip content={tEntities('schedule.webhook.deleteTooltip')} placement={tooltipPlacement}>
+                    <IconButton
+                        iconProps={{ name: 'delete', color: 'danger' }}
+                        size="xs"
+                        type="text"
+                        loading={pending}
+                        onClick={handleDelete}
+                    />
+                </Tooltip>
+            )}
         </span>
     )
 })

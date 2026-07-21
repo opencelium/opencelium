@@ -9,6 +9,7 @@ type Props = {
     path: string
     value: LeafValue
     onChange: (value: LeafValue) => void
+    readOnly?: boolean
 }
 
 const SECRET_PATTERN = /password|secret|token|api[-_]?key/i
@@ -33,6 +34,7 @@ const TextLikeInput: React.FC<Props & {kind: 'number' | 'string' | 'array' | 'nu
     value,
     onChange,
     kind,
+    readOnly,
 }) => {
     const external = valueToText(value)
     const [draft, setDraft] = useState(external)
@@ -81,23 +83,24 @@ const TextLikeInput: React.FC<Props & {kind: 'number' | 'string' | 'array' | 'nu
             placeholder={kind === 'null' ? 'null' : undefined}
             onChange={(e) => setDraft(e.target.value)}
             onBlur={commit}
+            readOnly={readOnly}
             style={{width: kind === 'number' ? 140 : 320, flexShrink: 0}}
         />
     )
 }
 
-export const ConfigLeafEditor: React.FC<Props> = ({path, value, onChange}) => {
+export const ConfigLeafEditor: React.FC<Props> = ({path, value, onChange, readOnly}) => {
     if (typeof value === 'boolean') {
-        return <Switch checked={value} onChange={(checked) => onChange(checked)} />
+        return <Switch checked={value} disabled={readOnly} onChange={(checked) => onChange(checked)} />
     }
     if (Array.isArray(value)) {
-        return <TextLikeInput path={path} value={value} onChange={onChange} kind="array" />
+        return <TextLikeInput path={path} value={value} onChange={onChange} kind="array" readOnly={readOnly} />
     }
     if (typeof value === 'number') {
-        return <TextLikeInput path={path} value={value} onChange={onChange} kind="number" />
+        return <TextLikeInput path={path} value={value} onChange={onChange} kind="number" readOnly={readOnly} />
     }
     if (value === null) {
-        return <TextLikeInput path={path} value={value} onChange={onChange} kind="null" />
+        return <TextLikeInput path={path} value={value} onChange={onChange} kind="null" readOnly={readOnly} />
     }
-    return <TextLikeInput path={path} value={value} onChange={onChange} kind="string" />
+    return <TextLikeInput path={path} value={value} onChange={onChange} kind="string" readOnly={readOnly} />
 }

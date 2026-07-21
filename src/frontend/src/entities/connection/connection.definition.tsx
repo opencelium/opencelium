@@ -25,6 +25,7 @@ const buildConnectionFetchUrl = (value: string): string =>
 
 export const connectionDefinition: EntityDefinition = {
     name: baseKey,
+    permissionComponent: 'CONNECTION',
 
     routes: [
         // The list lives at /workflow (the create/view/update editor pages are the
@@ -50,6 +51,7 @@ export const connectionDefinition: EntityDefinition = {
         headerActions: [
             {
                 key: 'create-connection',
+                permissionAction: 'CREATE',
                 render: () => <CreateConnectionButton />,
             },
         ],
@@ -57,6 +59,7 @@ export const connectionDefinition: EntityDefinition = {
             {
                 type: 'custom',
                 key: 'duplicate-connection',
+                permissionAction: 'CREATE',
                 render: ({ row }) => <DuplicateConnectionAction row={row as Connection} />,
             },
             {

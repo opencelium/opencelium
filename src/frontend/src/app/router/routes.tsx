@@ -5,7 +5,8 @@ import { AuthGuard } from './guards/AuthGuard'
 import {AppLayout} from "@app/layouts/AppLayout/AppLayout.tsx";
 import {PublicLayout} from "@app/layouts/PublicLayout.tsx";
 import {Sandbox} from "@features/sandbox/ui/Sandbox.tsx";
-import Workflow from "@features/workflow";
+import {WorkflowRouteGuard} from "@features/workflow/WorkflowRouteGuard.tsx";
+import {RequireComponentRead} from "@app/router/guards/RequireComponentRead.tsx";
 import {buildEntityRoutes} from "@app/router/buildEntityRoutes.tsx";
 import ResettableRoute from "@app/router/wrappers/ResettableRoute.tsx";
 import CreateConnectorPage from "@pages/ConnectorPage/CreateConnector.tsx";
@@ -58,8 +59,8 @@ export function getRoutes(): RouteConfig[] {
             children: [{
                 element: <AppLayout isNotCard/>,
                 children: [
-                    {path: '/', element: <DashboardPage/>},
-                    {path: '/profile', element: <ProfilePage/>},
+                    {path: '/', element: <RequireComponentRead component="DASHBOARD"><DashboardPage/></RequireComponentRead>},
+                    {path: '/profile', element: <RequireComponentRead component="MYPROFILE"><ProfilePage/></RequireComponentRead>},
                     {path: '*', element: <NotFoundPage/>},
                 ],
             }],
@@ -71,11 +72,11 @@ export function getRoutes(): RouteConfig[] {
                 children: [
                     {
                         path: '/workflow/create',
-                        element: <ResettableRoute><Workflow/></ResettableRoute>
+                        element: <ResettableRoute><WorkflowRouteGuard mode="create"/></ResettableRoute>
                     },
                     {
                         path: '/workflow/update/:connectionId',
-                        element: <ResettableRoute><Workflow/></ResettableRoute>
+                        element: <ResettableRoute><WorkflowRouteGuard mode="update"/></ResettableRoute>
                     },
                 ],
             }],

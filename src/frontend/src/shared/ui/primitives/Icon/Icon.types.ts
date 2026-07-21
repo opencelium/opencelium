@@ -49,6 +49,7 @@ export type IconName =
     | 'flash'
     | 'http-request'
     | 'aggregator'
+    | 'lock'
 
 export type IconColor =
     | 'default'

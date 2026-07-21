@@ -122,6 +122,10 @@
     "goBack": "Zurück",
     "goHome": "Zum Dashboard"
   },
+  "accessDenied": {
+    "title": "Zugriff verweigert",
+    "subtitle": "Sie haben keine Berechtigung, diese Aktion auszuführen."
+  },
   "dialog": {
     "maximize": "Maximieren",
     "restore": "Wiederherstellen"

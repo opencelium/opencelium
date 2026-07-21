@@ -98,6 +98,7 @@ const connectorCheckRemote: StepRemoteProps = {
 
 export const connectorDefinition: EntityDefinition = {
     name: baseKey,
+    permissionComponent: 'CONNECTOR',
     routes: [
         { type: 'create' },
         { type: 'view' },

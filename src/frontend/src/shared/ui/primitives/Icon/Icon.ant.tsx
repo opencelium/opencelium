@@ -31,6 +31,7 @@ import {
     BranchesOutlined,
     ThunderboltOutlined,
     GlobalOutlined,
+    LockOutlined,
 } from '@ant-design/icons';
 
 import type { IconComponent } from './Icon.types';
@@ -90,6 +91,7 @@ const iconMap = {
     flash: ThunderboltOutlined,
     'http-request': GlobalOutlined,
     aggregator: GrAggregate,
+    lock: LockOutlined,
 };
 
 export const AntIcon: IconComponent = ({

@@ -9,13 +9,15 @@ import { Hint } from '@shared/ui/primitives/Hint'
 import { EntityText } from '@shared/ui/primitives/Text'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { useAuth } from '@features/auth/useAuth'
+import { hasComponentPermission } from '@/engine/policy'
 import { useChangePasswordMutation } from '@entities/user/api/userApi'
 import { useChangePasswordForm } from '@pages/ProfilePage/hooks/useChangePasswordForm'
 import type { ChangePasswordValues } from '@pages/ProfilePage/schemas/changePassword.schema'
 
 export function UpdatePasswordCard() {
     const { t } = useI18n('entities')
-    const { logout } = useAuth()
+    const { logout, normalizedUser } = useAuth()
+    const canUpdate = hasComponentPermission(normalizedUser?.permissions ?? [], 'MYPROFILE', 'UPDATE')
     const { form, constraints } = useChangePasswordForm()
     const [changePassword, { isLoading }] = useChangePasswordMutation()
 
@@ -45,6 +47,8 @@ export function UpdatePasswordCard() {
         },
         [changePassword, form, logout, t],
     )
+
+    if (!canUpdate) return null
 
     return (
         <Card title={<EntityText i18nKey="profile.sections.updatePassword" typoProps={{ isBold: true }} />}>

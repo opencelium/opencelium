@@ -42,6 +42,7 @@ import {
     Bolt,
     Public,
     Merge,
+    Lock,
 } from '@mui/icons-material';
 
 import type { IconComponent } from './Icon.types';
@@ -90,6 +91,7 @@ const iconMap = {
     flash: Bolt,
     'http-request': Public,
     aggregator: Merge,
+    lock: Lock,
 };
 
 export const MaterialIcon: IconComponent = ({

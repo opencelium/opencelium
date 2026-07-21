@@ -72,7 +72,7 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
     const policyContext = useMemo(() => ({
         user: setUserPolicyContext(user, normalizedUser),
         resource: 'command-palette'
-    }), [user]);
+    }), [user, normalizedUser]);
     const inputRef = useRef<HTMLInputElement | null>(null);
     const executeWithContext = async (ast: ASTNode[]) => {
         const last = ast[ast.length - 1];
