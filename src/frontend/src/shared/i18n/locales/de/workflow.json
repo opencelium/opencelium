@@ -18,7 +18,8 @@
     "minimizeScript": "Skript minimieren",
     "maximizeRequestData": "Anfragedaten maximieren",
     "minimizeRequestData": "Anfragedaten minimieren",
-    "load": "Laden"
+    "load": "Laden",
+    "back": "Zurück"
   },
   "confirmDelete": {
     "title": "Schritt löschen",
@@ -259,6 +260,17 @@
       "title": "Zugewiesenen Datenaggregator löschen?",
       "message": "Dadurch wird der Datenaggregator von diesem Schritt entfernt. Der Datenaggregator selbst wird nicht gelöscht und bleibt für andere Schritte verfügbar."
     }
+  },
+  "templateConnectorMapping": {
+    "title": "Vorlagen-Connectoren zuordnen",
+    "intro": "Diese Vorlage wurde mit Connectoren aus einer anderen Umgebung erstellt. Wählen Sie für jeden Connector, welcher Connector in dieser Umgebung verwendet werden soll, bevor der Workflow geladen wird.",
+    "invokerHint": "Invoker: {{invoker}}",
+    "noInvokerHint": "Kein Invoker-Hinweis verfügbar",
+    "usedBy": "Verwendet von: {{methods}}",
+    "selectPlaceholder": "Connector auswählen",
+    "suggested": "Vorgeschlagen",
+    "allConnectors": "Alle Connectoren",
+    "createNewTooltip": "Neuen Connector erstellen"
   },
   "node": {
     "if": "If",

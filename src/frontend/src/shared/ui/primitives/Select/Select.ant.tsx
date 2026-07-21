@@ -5,7 +5,7 @@ import {
     UpOutlined,
     ReloadOutlined,
 } from '@ant-design/icons';
-import type { SelectComponent } from './Select.types';
+import { isGroupedOptions, type SelectComponent } from './Select.types';
 import './select.ant.css';
 
 export const AntSelectImpl: SelectComponent = ({
@@ -74,6 +74,27 @@ export const AntSelectImpl: SelectComponent = ({
 
         setInputValue('');
     };
+
+    const flatOptions = isGroupedOptions(options) ? options.flatMap((group) => group.options) : options;
+
+    const mapLeaf = (opt: (typeof flatOptions)[number]) => ({
+        value: opt.value,
+        label: opt.label,
+        disabled: opt.disabled,
+        searchLabel: opt.searchLabel,
+    });
+    const sortText = (opt: ReturnType<typeof mapLeaf>) =>
+        opt.searchLabel ?? (typeof opt.label === 'string' ? opt.label : '');
+    const sortLeaves = (leaves: ReturnType<typeof mapLeaf>[]) =>
+        sortOptions ? [...leaves].sort((a, b) => sortText(a).localeCompare(sortText(b))) : leaves;
+
+    const antOptions = isGroupedOptions(options)
+        ? options.map((group) => ({
+              label: group.label,
+              options: sortLeaves(group.options.map(mapLeaf)),
+          }))
+        : sortLeaves(flatOptions.map(mapLeaf));
+
     return (
         <AntSelect
             ref={selectRef}
@@ -98,19 +119,7 @@ export const AntSelectImpl: SelectComponent = ({
             onDropdownVisibleChange={setIsOpen}
             suffixIcon={suffixIcon}
             loading={isLoading}
-            options={(() => {
-                const mapped = options.map((opt) => ({
-                    value: opt.value,
-                    label: opt.label,
-                    disabled: opt.disabled,
-                    searchLabel: opt.searchLabel,
-                }));
-                const sortText = (opt: (typeof mapped)[number]) =>
-                    opt.searchLabel ?? (typeof opt.label === 'string' ? opt.label : '');
-                return sortOptions
-                    ? mapped.sort((a, b) => sortText(a).localeCompare(sortText(b)))
-                    : mapped;
-            })()}
+            options={antOptions}
             dropdownRender={(menu) => (
                 <>
                     {createOptionUrl && (
@@ -128,7 +137,7 @@ export const AntSelectImpl: SelectComponent = ({
                         </div>
                     )}
                     {menu}
-                    {creatable && inputValue && !options.some(o => o.label === inputValue) && (
+                    {creatable && inputValue && !flatOptions.some(o => o.label === inputValue) && (
                         <div
                             style={{
                                 padding: 8,

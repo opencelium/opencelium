@@ -9,6 +9,12 @@ export interface SelectOption<T = string> {
     searchLabel?: string;
 }
 
+/** A labeled cluster of options, e.g. "Suggested" vs "All connectors". */
+export interface SelectOptionGroup<T = string> {
+    label: ReactNode;
+    options: SelectOption<T>[];
+}
+
 export interface AsyncOptionsConfig {
     url: string;
     map: (data: any) => { value: string | number; label: string; disabled?: boolean }[];
@@ -21,7 +27,7 @@ export interface SelectProps<T = string> {
     disabled?: boolean;
     autoFocus?: boolean;
 
-    options: SelectOption<T>[];
+    options: SelectOption<T>[] | SelectOptionGroup<T>[];
 
     placeholder?: string;
 
@@ -49,3 +55,9 @@ export interface SelectProps<T = string> {
 }
 
 export type SelectComponent<T = string> = React.FC<SelectProps<T>>;
+
+export function isGroupedOptions<T = string>(
+    options: SelectOption<T>[] | SelectOptionGroup<T>[],
+): options is SelectOptionGroup<T>[] {
+    return options.length > 0 && Object.prototype.hasOwnProperty.call(options[0], 'options');
+}
