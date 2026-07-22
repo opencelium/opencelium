@@ -162,7 +162,12 @@ export function XmlBodyEditor({ readOnly }: Props) {
         </div>
         <div className="bodyLegacyEnhancementPane">
           <div className="bodyLegacyEnhancement">
-            <ReferenceEnhancement readOnly={readOnly} enhancement={editor.currentEnhancement} />
+            <ReferenceEnhancement
+              readOnly={readOnly}
+              enhancement={editor.currentEnhancement}
+              directReference={editor.directReference}
+              onCreateEnhancement={editor.createEnhancement}
+            />
           </div>
         </div>
       </div>

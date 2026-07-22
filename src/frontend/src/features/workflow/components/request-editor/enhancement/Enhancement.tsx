@@ -7,12 +7,14 @@ import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { useDispatch, useSelector } from 'react-redux';
 import { EnhancementArgs } from './Args';
 import Description from './Description';
+import DirectReferenceInfo from './DirectReferenceInfo';
 import ScriptLanguage from './Language';
 import Script from './Script';
 import { updateConnection } from '../../../store/connection/connectionSlice';
 import { Language } from '../../../types/connection';
 import type { Enhancement } from '../../../types/connection';
 import type { RootState } from '../../../store';
+import type { DirectReferenceInfo as DirectReferenceInfoData } from '../body-editor/bodyBinding';
 import { updateEnhancementInConnection } from '../../../store/connection/utils';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import '../body-editor/bodyLegacy.css';
@@ -20,9 +22,11 @@ import '../body-editor/bodyLegacy.css';
 interface EnhancementProps {
 	enhancement?: Enhancement;
 	readOnly?: boolean;
+	directReference?: DirectReferenceInfoData | null;
+	onCreateEnhancement?: () => void;
 }
 
-const ReferenceEnhancement = ({ enhancement, readOnly }: EnhancementProps) => {
+const ReferenceEnhancement = ({ enhancement, readOnly, directReference, onCreateEnhancement }: EnhancementProps) => {
 	const { t } = useI18n('workflow');
 	const dispatch = useDispatch();
 	const connection = useSelector((state: RootState) => state.connection.connection);
@@ -124,6 +128,12 @@ const ReferenceEnhancement = ({ enhancement, readOnly }: EnhancementProps) => {
 									/>
 								</div>
 							</div>
+						) : directReference ? (
+							<DirectReferenceInfo
+								directReference={directReference}
+								readOnly={readOnly}
+								onCreate={() => onCreateEnhancement?.()}
+							/>
 						) : (
 							<div className='bodyLegacyEnhancementEmpty'>
 								<Empty description={t('enhancement.emptyState')} />

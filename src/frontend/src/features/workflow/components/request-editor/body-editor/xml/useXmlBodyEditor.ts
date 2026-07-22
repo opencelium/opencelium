@@ -4,7 +4,7 @@ import { js2xml, xml2js } from 'xml-js';
 import { useMethodContext } from '../../../../providers/MethodContext';
 import type { RootState } from '../../../../store';
 import { updateConnection, updatePayload } from '../../../../store/connection/connectionSlice';
-import { findRequestEnhancement, replaceRequestBindings } from '../bodyBinding';
+import { createDirectReferenceEnhancement, findRequestEnhancement, getDirectReferenceInfo, replaceRequestBindings } from '../bodyBinding';
 import { mergeReferenceValue } from '../bodyValue';
 import {
   applySelectionValue,
@@ -72,6 +72,28 @@ export function useXmlBodyEditor() {
         : undefined,
     [connection, selectedEnhanceId],
   );
+  const directReference = useMemo(
+    () =>
+      !currentEnhancement && selectionInfo
+        ? getDirectReferenceInfo('body', selectionInfo.namespace, selectionInfo.name, selectionInfo.value)
+        : null,
+    [currentEnhancement, selectionInfo],
+  );
+
+  const createEnhancement = () => {
+    if (!connection || !selectionInfo) return;
+    const created = createDirectReferenceEnhancement(
+      connection,
+      method.color,
+      'body',
+      selectionInfo.namespace,
+      selectionInfo.name,
+      selectionInfo.value,
+    );
+    if (!created) return;
+    dispatch(updateConnection({ fieldBindings: created.connection.fieldBindings } as never));
+    setSelectedEnhanceId(created.enhanceId);
+  };
 
   const syncBody = (nextTree = tree) => {
     const nextBody = serializeCompactXml(nextTree);
@@ -83,7 +105,9 @@ export function useXmlBodyEditor() {
 
   return {
     connection,
+    createEnhancement,
     currentEnhancement,
+    directReference,
     isReferenceOpen,
     method,
     mode,
