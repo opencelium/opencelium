@@ -5,9 +5,9 @@ export function LimitedAceEditorContainer({ children, style }: PropsWithChildren
   return <div style={{ position: 'relative', height: '100%', ...style }}>{children}</div>;
 }
 
-export function LimitedAceEditorCounter({ top, right, children }: PropsWithChildren<LimitedAceEditorCounterProps>) {
+export function LimitedAceEditorCounter({ top, right, bottom, children }: PropsWithChildren<LimitedAceEditorCounterProps>) {
   return (
-    <div style={{ position: 'absolute', bottom: '-10px', top, right: right || '0', fontSize: 12, zIndex: 1 }}>
+    <div style={{ position: 'absolute', bottom: top ? undefined : (bottom || '-10px'), top, right: right || '0', fontSize: 12, zIndex: 1 }}>
       {children}
     </div>
   );
