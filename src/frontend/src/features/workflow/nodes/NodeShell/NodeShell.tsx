@@ -45,7 +45,7 @@ export function NodeShell({
 			{selected && <NodeToolbar canDelete={data.kind !== 'start'} onDelete={() => data.onDeleteNode?.(id)} />}
 			{topLabel && <div className='nodeTopLabel'>{topLabel}</div>}
 			<div
-				className={`nodeBody ${selected ? 'nodeBodySelected' : ''} ${data.highlighted ? 'nodeBodyHighlighted' : ''} ${data.dropTarget ? 'nodeBodyDropTarget' : ''} ${data.dropInvalid ? 'nodeBodyDropInvalid' : ''} ${data.hasError ? 'nodeBodyError' : ''}`}
+				className={`nodeBody ${selected ? 'nodeBodySelected' : ''} ${data.highlighted ? 'nodeBodyHighlighted' : ''} ${data.dropTarget ? 'nodeBodyDropTarget' : ''} ${data.dropInvalid ? 'nodeBodyDropInvalid' : ''} ${data.hasError ? 'nodeBodyError' : ''} ${data.searchHighlighted ? 'nodeBodySearchHighlighted' : ''}`}
 				title={data.hasError ? data.errorMessage : undefined}
 			>
 				{children}

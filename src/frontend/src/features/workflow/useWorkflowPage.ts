@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { addEdge, useEdgesState, useNodesState } from '@xyflow/react';
 import type { Connection } from '@xyflow/react';
 import type { ReactFlowInstance, Viewport } from '@xyflow/react';
@@ -20,6 +20,7 @@ import {
 } from './utils/graph.dragDrop';
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { deactivateWorkflowCommandBridge, workflowCommandBridgeStore } from './command/workflowCommandBridge';
 
 type UseWorkflowPageOptions = {
   onDeleteNodes?: (deletedNodeIds: string[], previousNodes: WorkflowNodeModel[]) => void;
@@ -921,6 +922,44 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     setNodes(restoredNodes);
     setEdges(sanitizeGraphEdges(restoredNodes, clearEdgeDragFlags(clearDragPreviewEdges(snapshot.edges))));
   };
+
+  // Kept current via effect (not the initial closure) so the command
+  // palette's `getNodes()` never reads a stale snapshot from mount time.
+  const nodesRef = useRef(nodes);
+  useEffect(() => {
+    nodesRef.current = nodes;
+  }, [nodes]);
+
+  const setSearchHighlightedNodeIds = (ids: string[]) => {
+    const matchSet = new Set(ids);
+    setNodes((currentNodes) => currentNodes.map((node) => {
+      const shouldHighlight = matchSet.has(node.id);
+      if (!!node.data.searchHighlighted === shouldHighlight) return node;
+      return { ...node, data: { ...node.data, searchHighlighted: shouldHighlight } };
+    }));
+  };
+
+  const hasOpenDialogRef = useRef(false);
+  useEffect(() => {
+    hasOpenDialogRef.current =
+      methodEditor !== null ||
+      conditionEditor !== null ||
+      aggregatorEditor !== null ||
+      responseNodeId !== null ||
+      historyOpen;
+  }, [methodEditor, conditionEditor, aggregatorEditor, responseNodeId, historyOpen]);
+
+  useEffect(() => {
+    workflowCommandBridgeStore.setState({
+      isActive: true,
+      getNodes: () => nodesRef.current,
+      setSearchHighlightedNodeIds,
+      hasSearchHighlights: () => nodesRef.current.some((node) => node.data.searchHighlighted),
+      clearSearchHighlights: () => setSearchHighlightedNodeIds([]),
+      hasOpenDialog: () => hasOpenDialogRef.current,
+    });
+    return () => deactivateWorkflowCommandBridge();
+  }, []);
 
   return {
     nodes,

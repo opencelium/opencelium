@@ -46,7 +46,8 @@ const Script = ({enhancement, onChangeScript, readOnly}: ScriptProps) => {
         <CustomAceEditor
             hasDiffLang
             // maxLength={Validation.TextLength.Long}
-            maxLength={255}
+            maxLength={65535}
+            counterStyles={{ bottom: '-2px' }}
             ref={scriptRef}
             style={{
                 marginBottom: 0,

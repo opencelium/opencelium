@@ -31,6 +31,7 @@
     "placeholder": "Type a command...",
     "noResults": "No results found",
     "groups": {
+      "workflow": "Workflow",
       "recent": "Recent",
       "navigate": "Navigate",
       "create": "Create",
@@ -53,7 +54,8 @@
       "downloadTemplate": "Download a workflow template file",
       "uploadInvoker": "Upload an invoker file",
       "downloadInvoker": "Download an invoker file",
-      "systemCheck": "Open the system check page"
+      "systemCheck": "Open the system check page",
+      "workflow": "Search the current workflow"
     },
     "footer": {
       "select": "Select",

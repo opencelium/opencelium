@@ -243,7 +243,12 @@ export function LegacyRequestJsonEditor({ messageProperty, source, readOnly }: P
       </div>
       <div className='bodyLegacyEnhancementPane'>
         <div className='bodyLegacyEnhancement'>
-          <ReferenceEnhancement readOnly={readOnly} enhancement={editor.currentEnhancement} />
+          <ReferenceEnhancement
+            readOnly={readOnly}
+            enhancement={editor.currentEnhancement}
+            directReference={editor.directReference}
+            onCreateEnhancement={editor.createEnhancement}
+          />
         </div>
       </div>
     </div>

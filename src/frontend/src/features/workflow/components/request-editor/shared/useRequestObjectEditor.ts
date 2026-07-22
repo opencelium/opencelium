@@ -5,7 +5,9 @@ import { useMethodContext } from '../../../providers/MethodContext';
 import type { RootState } from '../../../store';
 import { updateConnection, updatePayload } from '../../../store/connection/connectionSlice';
 import {
+  createDirectReferenceEnhancement,
   findRequestEnhancement,
+  getDirectReferenceInfo,
   removeDeletedRequestBindings,
   updateRequestFieldBindings,
 } from '../body-editor/bodyBinding';
@@ -39,6 +41,13 @@ export function useRequestObjectEditor({ messageProperty, source }: Props) {
         ? connection?.fieldBindings.find((binding) => binding.enhancement.enhanceId === selectedEnhanceId)?.enhancement
         : undefined,
     [connection, selectedEnhanceId],
+  );
+  const directReference = useMemo(
+    () =>
+      !currentEnhancement && selection
+        ? getDirectReferenceInfo(messageProperty, selection.namespace, selection.name, currentValue)
+        : null,
+    [currentEnhancement, currentValue, messageProperty, selection],
   );
 
   const getNextConnection = (updatedSource: unknown, namespace: string[], name: string | undefined, newValue: unknown) => {
@@ -100,10 +109,27 @@ export function useRequestObjectEditor({ messageProperty, source }: Props) {
     setSelection({ ...selection, value: nextValue });
   };
 
+  const createEnhancement = () => {
+    if (!connection || !selection) return;
+    const created = createDirectReferenceEnhancement(
+      connection,
+      method.color,
+      messageProperty,
+      selection.namespace,
+      selection.name,
+      currentValue,
+    );
+    if (!created) return;
+    dispatch(updateConnection({ fieldBindings: created.connection.fieldBindings } as never));
+    setSelectedEnhanceId(created.enhanceId);
+  };
+
   return {
     connection,
+    createEnhancement,
     currentEnhancement,
     currentValue,
+    directReference,
     isReferenceOpen,
     method,
     onSelect,

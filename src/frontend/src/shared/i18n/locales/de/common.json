@@ -31,6 +31,7 @@
     "placeholder": "Befehl eingeben...",
     "noResults": "Keine Ergebnisse gefunden",
     "groups": {
+      "workflow": "Workflow",
       "recent": "Zuletzt verwendet",
       "navigate": "Navigieren",
       "create": "Erstellen",
@@ -53,7 +54,8 @@
       "downloadTemplate": "Workflow-Vorlagendatei herunterladen",
       "uploadInvoker": "Invoker-Datei hochladen",
       "downloadInvoker": "Invoker-Datei herunterladen",
-      "systemCheck": "Systemprüfungsseite öffnen"
+      "systemCheck": "Systemprüfungsseite öffnen",
+      "workflow": "Den aktuellen Workflow durchsuchen"
     },
     "footer": {
       "select": "Auswählen",

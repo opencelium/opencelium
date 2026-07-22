@@ -431,7 +431,13 @@ const wrapExpressionReferences = (expression: string) =>
 
 const unwrapWholeExpression = (expression: string) => {
 	const match = expression.match(/^\{%\s*(.*)\s*%}$/);
-	return match ? match[1].trim() : expression;
+	if (!match) return expression;
+	// Only strip the outer wrap when it's a single redundant {% ... %} around the whole
+	// expression (a legacy artifact). If the captured middle still contains another wrap
+	// boundary, the leading/trailing {%/%} actually belong to two separate references that
+	// happen to bookend the string (e.g. `{%ref1%} NotContains {%ref2%}`) — leave it alone.
+	if (match[1].includes('{%') || match[1].includes('%}')) return expression;
+	return match[1].trim();
 };
 
 const wrapIfExpression = (expression: string) => {

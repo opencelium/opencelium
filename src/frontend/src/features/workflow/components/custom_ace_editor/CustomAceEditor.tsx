@@ -82,6 +82,7 @@ const CustomAceEditor = React.forwardRef<any, LimitedAceEditorProps>(
 					<LimitedAceEditorCounter
 						top={counterStyles?.top}
 						right={counterStyles?.right}
+						bottom={counterStyles?.bottom}
 					>
 						{currentValue?.length || 0}/{maxLength}
 					</LimitedAceEditorCounter>
