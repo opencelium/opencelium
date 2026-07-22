@@ -23,5 +23,8 @@ public class ExecutionArgumentServiceIml implements ExecutionArgumentService {
         return executionArgumentRepository.findAllByExecutionId(id);
     }
 
-
+    @Override
+    public void deleteByConnectionId(Long connectionId) {
+        executionArgumentRepository.deleteByConnectionId(connectionId);
+    }
 }
