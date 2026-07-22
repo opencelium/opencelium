@@ -2,13 +2,14 @@ package com.becon.opencelium.backend.database.mongodb.service;
 
 import com.becon.opencelium.backend.constant.ExceptionConstant;
 import com.becon.opencelium.backend.constant.ExceptionMessages;
+import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.constant.props.OpenceliumProps;
-import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
-import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
-import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
-import com.becon.opencelium.backend.database.mongodb.entity.OperatorMng;
+import com.becon.opencelium.backend.database.mongodb.entity.*;
 import com.becon.opencelium.backend.database.mongodb.repository.ConnectionMngRepository;
+import com.becon.opencelium.backend.database.mysql.entity.Connector;
+import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
+import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.mapper.mongo.ConnectionMngMapper;
 import com.becon.opencelium.backend.resource.connection.ConnectionVersionUpdateRequest;
 import com.becon.opencelium.backend.versionmanager.EntityUpdater;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class ConnectionMngServiceImp implements ConnectionMngService {
@@ -33,19 +35,26 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     private final ConnectionMngMapper connectionMngMapper;
     private final EntityUpdater<ConnectionMng> connectionMngEntityUpdater;
     private final OperatorMngService operatorMngService;
+    private final ConnectorService connectorService;
+    private final InvokerService invokerService;
 
     public ConnectionMngServiceImp(
             ConnectionMngRepository connectionMngRepository,
             @Qualifier("fieldBindingMngServiceImp") FieldBindingMngService fieldBindingMngService,
-            OpenceliumProps ocProps, ConnectionMngMapper connectionMngMapper,
-            EntityVersionManager entityVersionManager, OperatorMngService operatorMngService
-    ) {
+            OpenceliumProps ocProps,
+            ConnectionMngMapper connectionMngMapper,
+            EntityVersionManager entityVersionManager,
+            OperatorMngService operatorMngService,
+            ConnectorService connectorService,
+            InvokerService invokerService) {
         this.connectionMngRepository = connectionMngRepository;
         this.fieldBindingMngService = fieldBindingMngService;
         this.ocProps = ocProps;
         this.connectionMngMapper = connectionMngMapper;
         this.connectionMngEntityUpdater = entityVersionManager.getUpdater(ConnectionMng.class);
         this.operatorMngService = operatorMngService;
+        this.connectorService = connectorService;
+        this.invokerService = invokerService;
     }
 
     @Override
@@ -222,9 +231,61 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
 
     private void validateMethods(List<MethodMng> methods) {
         for (MethodMng method : methods) {
-            if (StringUtils.isBlank(method.getName())) {
-                throw new GeneralServiceException(ExceptionConstant.INVALID_DATA, ExceptionMessages.METHOD_NAME_MUST_BE_NON_NULL);
-            }
+            validateMethod(method);
+        }
+    }
+
+    private void validateMethod(MethodMng method) {
+        if (StringUtils.isBlank(method.getName())) {
+            throw new GeneralServiceException(ExceptionConstant.INVALID_DATA, ExceptionMessages.METHOD_NAME_MUST_BE_NON_NULL);
+        }
+
+        validateMethodConnector(method);
+    }
+
+    /**
+     * Validates the connector reference carried by a single method before the connection is persisted.
+     */
+    private void validateMethodConnector(MethodMng method) {
+        MethodConnectorMng connector = method.getConnector();
+
+        // No connector: this is a plain HTTP request / webhook method, nothing to validate.
+        if (connector == null) {
+            return;
+        }
+
+        // A connector reference is present but nameless — it cannot be resolved to a real connector.
+        if (connector.getConnectorId() == null) {
+            throw new GeneralServiceException(
+                    ExceptionConstant.INVALID_DATA,
+                    String.format(ExceptionMessages.METHOD_CONNECTOR_REQUIRED, method.getName(), method.getIndex()));
+        }
+
+        Optional<Connector> connectorOpt = connectorService.findById(connector.getConnectorId());
+
+        // The referenced connector id does not exist locally.
+        if (connectorOpt.isEmpty()) {
+            throw new GeneralServiceException(
+                    ExceptionConstant.INVALID_DATA,
+                    String.format(ExceptionMessages.METHOD_CONNECTOR_NOT_FOUND, connector.getConnectorId(), method.getName(), method.getIndex()));
+        }
+
+        String invoker = connector.getInvoker();
+
+        // The invoker must be loaded in the container; if it is missing the user has to drop its XML into
+        // PathConstant.INVOKER and restart, which is what the error message tells them.
+        if (invoker == null || !invokerService.existsByName(invoker)) {
+            throw new GeneralServiceException(
+                    ExceptionConstant.INVALID_DATA,
+                    String.format(ExceptionMessages.METHOD_INVOKER_NOT_FOUND, invoker, method.getName(), method.getIndex(), PathConstant.INVOKER));
+        }
+
+        // Both sides exist but disagree: the method's invoker must be the one the chosen connector runs on,
+        // otherwise the connection would execute against a different invoker than the connector defines.
+        if (!Objects.equals(connectorOpt.get().getInvoker(), invoker)) {
+            throw new GeneralServiceException(
+                    ExceptionConstant.INVALID_DATA,
+                    String.format(ExceptionMessages.METHOD_INVOKER_AND_CONNECTOR_NOT_MATCH, invoker, connectorOpt.get().getInvoker(), method.getName(), method.getIndex()));
         }
     }
 }
