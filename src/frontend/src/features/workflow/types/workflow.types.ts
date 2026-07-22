@@ -64,6 +64,10 @@ export type WorkflowNodeData = {
 	duplicateMethodColor?: string;
 	alwaysShowRightAdd?: boolean;
 	highlighted?: boolean;
+	/** Set by the command-palette `workflow find method/property` search — a
+	 * live match ring distinct from the drag-preview `highlighted` state and
+	 * the `hasError` state, so all three can coexist without visual collision. */
+	searchHighlighted?: boolean;
 	hasError?: boolean;
 	errorMessage?: string;
 	dropTarget?: boolean;

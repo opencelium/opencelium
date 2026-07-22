@@ -47,6 +47,11 @@ export interface CommandNode<Entity> {
     description?: string;
     shortcut?: string[];
 
+    /** Selecting this literal locks it as a readonly pill before the caret
+     * instead of appending it as editable text — narrows subsequent parsing
+     * to this node's subtree. See CommandPalette.tsx's `lockedScope`. */
+    lockAsChip?: boolean;
+
     access?: PolicyDefinition;
 
     resolve?: (input?: unknown) => Promise<SuggestionOption[]>; // ⚡ async suggestions
@@ -66,6 +71,9 @@ export type Suggestion = {
     shortcut?: string[];
     /** Inert, informational row — not highlightable/selectable via keyboard or click. */
     disabled?: boolean;
+    /** Mirrors CommandNode.lockAsChip — selecting this suggestion should lock
+     * it as a pill instead of appending it as editable text. */
+    lockAsChip?: boolean;
 };
 
 // A resolver can return a plain string (value === label) or an object pairing

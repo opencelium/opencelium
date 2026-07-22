@@ -36,6 +36,7 @@ export async function parseTokens(tokens: string[], policyContext: PolicyContext
                     group: n.group ?? inheritedGroup,
                     description: n.description,
                     shortcut: n.shortcut,
+                    lockAsChip: n.lockAsChip,
                 });
             });
         });

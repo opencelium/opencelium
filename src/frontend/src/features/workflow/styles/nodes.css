@@ -89,6 +89,12 @@
   box-shadow: 0 0 0 4px var(--color-status-error-bg);
 }
 
+.nodeBodySearchHighlighted .circleNode,
+.nodeBodySearchHighlighted .ifNode {
+  border-color: var(--color-status-warning-fg);
+  box-shadow: 0 0 0 4px var(--color-status-warning-bg);
+}
+
 .nodeTopLabel {
   position: absolute;
   left: 50%;
