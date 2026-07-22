@@ -40,6 +40,9 @@ type Props = {
     getRecordStatus?: (record: unknown, index: number) => RecordStatus
 
     renderActions?: (ctx: RenderActionsCtx) => ReactNode
+
+    /** When true, renders every record read-only: no "Add" button, no `renderActions`. */
+    readOnly?: boolean
 }
 
 const POLICY_CONTEXT = { user: { id: 0, roles: [], permissions: [] } }
@@ -58,6 +61,7 @@ export function MultiRecordForm({
     getRecordSubtitle,
     getRecordStatus,
     renderActions,
+    readOnly,
 }: Props) {
     const { control } = useFormContext()
     const { fields, append, remove } = useFieldArray({ control, name })
@@ -128,14 +132,16 @@ export function MultiRecordForm({
                         {fields.length > 0 && (
                             <Steps items={items} status="process" current={selected} />
                         )}
-                        <div style={{ marginTop: fields.length > 0 ? 16 : 0 }}>
-                            <Button
-                                onClick={() => append(defaultRecord)}
-                                iconLeft="plus"
-                            >
-                                <EntityText i18nKey={addLabel} />
-                            </Button>
-                        </div>
+                        {!readOnly && (
+                            <div style={{ marginTop: fields.length > 0 ? 16 : 0 }}>
+                                <Button
+                                    onClick={() => append(defaultRecord)}
+                                    iconLeft="plus"
+                                >
+                                    <EntityText i18nKey={addLabel} />
+                                </Button>
+                            </div>
+                        )}
                     </div>
 
                     <div style={{ flex: 3, paddingLeft: isTabletOrMobile ? 0 : 48 }}>
@@ -151,12 +157,12 @@ export function MultiRecordForm({
                                                 ...field,
                                                 name: `${name}.${selected}.${fieldName}`,
                                             }}
-                                            mode="create"
+                                            mode={readOnly ? 'view' : 'create'}
                                         />
                                     )
                                 })}
 
-                                {renderActions && (
+                                {renderActions && !readOnly && (
                                     <div
                                         style={{
                                             marginTop: 24,

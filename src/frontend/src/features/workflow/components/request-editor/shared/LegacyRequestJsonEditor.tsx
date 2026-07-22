@@ -123,6 +123,18 @@ export function LegacyRequestJsonEditor({ messageProperty, source, readOnly }: P
     });
   };
 
+  const editPointer = (pointer: string, pointers: string[], reference: string) => {
+    const targetPointers = pointers.map((item) => item.trim()).filter(Boolean);
+    updateReferencedField((value) => {
+      const refs = splitReferences(value);
+      const sameField = refs.length === targetPointers.length && refs.every((item, index) => item === targetPointers[index]);
+      if (!(sameField && refs.includes(pointer))) return null;
+      const indexToReplace = refs.findIndex((item) => item === pointer);
+      if (indexToReplace === -1) return null;
+      return refs.map((item, index) => (index === indexToReplace ? reference : item)).join(';');
+    });
+  };
+
   const pointerComponent = useMemo(() => ({
     id: `${method.id}_${messageProperty}_pointer`,
     getComponent: (params: Record<string, unknown>) => (
@@ -132,9 +144,12 @@ export function LegacyRequestJsonEditor({ messageProperty, source, readOnly }: P
         submitEdit={params.submitEdit as (() => void) | undefined}
         onClick={params.onClick as ((event?: unknown) => void) | undefined}
         onRemove={removePointer}
+        onEdit={readOnly ? undefined : editPointer}
+        connection={readOnly ? undefined : editor.connection ?? undefined}
+        currentMethod={readOnly ? undefined : editor.method}
       />
     ),
-  }), [messageProperty, method.id, removePointer]);
+  }), [messageProperty, method.id, removePointer, editPointer, readOnly, editor.connection, editor.method]);
 
   const webhookComponent = useMemo(() => ({
     id: `${method.id}_${messageProperty}_webhook`,
@@ -228,7 +243,12 @@ export function LegacyRequestJsonEditor({ messageProperty, source, readOnly }: P
       </div>
       <div className='bodyLegacyEnhancementPane'>
         <div className='bodyLegacyEnhancement'>
-          <ReferenceEnhancement readOnly={readOnly} enhancement={editor.currentEnhancement} />
+          <ReferenceEnhancement
+            readOnly={readOnly}
+            enhancement={editor.currentEnhancement}
+            directReference={editor.directReference}
+            onCreateEnhancement={editor.createEnhancement}
+          />
         </div>
       </div>
     </div>

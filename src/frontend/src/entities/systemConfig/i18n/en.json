@@ -37,10 +37,15 @@
     "info": {
       "title": "Master Password",
       "content": "The system configuration is protected. Enter the master password to unlock it."
+    },
+    "notConfigured": {
+      "message": "No master password is configured",
+      "description": "Ask an administrator to set opencelium.connector.master-password in /backend/src/main/resources/application.yml and restart the backend to enable browsing and editing the system configuration."
     }
   },
   "commandPalette": {
     "provideMasterPassword": "Provide master password to search the configuration",
+    "masterPasswordNotConfigured": "No master password is configured in application.yml",
     "editTitle": "Edit configuration value",
     "valueLabel": "Value",
     "statusLabel": "Enabled"

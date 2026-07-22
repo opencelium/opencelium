@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public interface ConnectorService {
 
@@ -87,4 +88,6 @@ public interface ConnectorService {
     Boolean existsMasterPassword();
 
     List<Connector> findByIds(IdentifiersDTO<Integer> ids);
+
+    List<Connector> getAllById(Set<Integer> ids);
 }

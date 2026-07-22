@@ -1,5 +1,5 @@
 import type {PartialStepProps} from "@shared/ui/tour/Tour.tsx";
-import type {PolicyDefinition} from "@/engine/policy";
+import type {CrudAction, PermissionComponent, PolicyDefinition} from "@/engine/policy";
 import type {CommandNode} from "@shared/command/types.ts";
 import type {FormRemoteProps, StepRemoteProps} from "@shared/ui/form/FormControl/FormControl.type.ts";
 import type {StepActionDefinition} from "@shared/ui/step-form/types.ts";
@@ -314,6 +314,11 @@ export type CustomActionConfig = {
     type: 'custom'
     /** Stable key used for React reconciliation. */
     key: string
+    /**
+     * When set, the action only renders if the user has this CRUD permission on
+     * `entity.permissionComponent`. Unset = ungated (today's behavior).
+     */
+    permissionAction?: CrudAction
     render: (ctx: CustomActionContext) => React.ReactNode
 }
 
@@ -416,6 +421,11 @@ export type HeaderActionContext = {
 export type HeaderAction = {
     /** Stable React key. */
     key: string
+    /**
+     * When set, the button only renders if the user has this CRUD permission on
+     * `entity.permissionComponent`. Unset = ungated (today's behavior).
+     */
+    permissionAction?: CrudAction
     render: (ctx: HeaderActionContext) => React.ReactNode
 }
 
@@ -495,6 +505,11 @@ export type BulkAction = {
         titleKey: string
         messageKey: string
     }
+    /**
+     * When set, the button only renders if the user has this CRUD permission on
+     * `entity.permissionComponent`. Unset = ungated (today's behavior).
+     */
+    permissionAction?: CrudAction
     /** Action handler. Receives selected rows + ids and helpers. */
     run: (ctx: BulkActionContext) => Promise<void> | void
 }
@@ -506,6 +521,13 @@ export type EntityDefinition = {
     routes?: EntityRoute[];
 
     access?: PolicyDefinition
+    /**
+     * Backend permission component (`AuthUser.userGroup.components[].name`) this entity's
+     * CRUD affordances are gated by. Drives EntityWizard's create/update access, the list's
+     * create button and update/delete row actions, and the create/update/delete
+     * command-palette entries. Unset = ungated (today's behavior).
+     */
+    permissionComponent?: PermissionComponent
     crossValidations?: CrossFieldValidation[]
 
     api?: EntityApi,

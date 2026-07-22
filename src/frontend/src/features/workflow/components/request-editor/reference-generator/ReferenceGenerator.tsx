@@ -5,7 +5,7 @@ import type { Connection, MethodWithId } from '../../../types/connection';
 import {
 	buildReferenceValue,
 	getIteratorsForMethod,
-	getMethodConnectorIcon,
+	getMethodConnectorChipInfo,
 	getMethodConnectorTitle,
 	getReferenceOptions,
 	isExpandableReferencePath,
@@ -13,7 +13,8 @@ import {
 } from '../body-editor/requestReferenceOptions';
 import { Radio } from '@shared/ui/primitives/Radio';
 import { Select } from '@shared/ui/primitives/Select';
-import { ConnectorIcon } from '@entities/connector/ui/ConnectorIcon';
+import { Tooltip } from '@shared/ui/primitives/Tooltip';
+import { MethodConnectorChip } from '../body-editor/MethodConnectorChip';
 import { MethodColorDot } from '../../MethodColorDot/MethodColorDot';
 import { getDuplicateMethodIndexByColor } from '../../../utils/methodColor';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
@@ -163,10 +164,9 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 
 	const methodOptions = useMemo(() => {
 			const duplicateIndexByColor = getDuplicateMethodIndexByColor(methods);
-			return methods.map((m) => ({
-				value: m.id,
-				searchLabel: getMethodLabel(m),
-				label: (
+			return methods.map((m) => {
+				const isWebhook = getMethodConnectorChipInfo(m).kind === 'webhook';
+				const row = (
 					<span
 						style={{
 							display: 'flex',
@@ -185,22 +185,20 @@ const ReferenceGenerator: React.FC<ReferenceGeneratorProps> = ({
 								{getMethodLabel(m)}
 							</span>
 						</span>
-						<span
-							style={{
-								display: 'inline-flex',
-								alignItems: 'center',
-								gap: 6,
-								flexShrink: 0,
-								color: 'var(--color-text-secondary)',
-							}}
-						>
-							<ConnectorIcon icon={getMethodConnectorIcon(m)} size={16} style={{ flexShrink: 0 }} />
-							<span style={{ fontSize: 12 }}>{getMethodConnectorTitle(m)}</span>
-						</span>
+						<MethodConnectorChip method={m} tooltipZIndex={13020} disableTooltip={isWebhook} />
 					</span>
-				),
-			}));
-	}, [methods]);
+				);
+				return {
+					value: m.id,
+					searchLabel: getMethodLabel(m),
+					label: isWebhook ? (
+						<Tooltip content={t('refGenerator.webhookTriggerHint')} placement='right' zIndex={13020}>
+							{row}
+						</Tooltip>
+					) : row,
+				};
+			});
+	}, [methods, t]);
 
 	const handleMethodChange = (id: string) => {
 		setSelectedMethodId(id);

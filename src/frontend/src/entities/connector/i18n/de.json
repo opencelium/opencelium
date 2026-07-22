@@ -82,6 +82,7 @@
         "test": {
           "button": "Verbindung testen",
           "success": "Verbindungstest erfolgreich",
+          "needsMasterPassword": "Geben Sie das Master-Passwort ein, um die Verbindung mit den gespeicherten Zugangsdaten zu testen.",
           "confirm": {
             "title": "Verbindungstest fehlgeschlagen",
             "message": "Der Verbindungstest ist fehlgeschlagen. Möchten Sie diesen Konnektor trotzdem speichern?"

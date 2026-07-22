@@ -13,6 +13,7 @@ import { pickInvokerFile, uploadInvoker } from '@entities/invoker/lib/uploadInvo
 import { buildInvokerXml } from '@entities/invoker/lib/invokerXml'
 import { mapInvokerToForm } from '@entities/invoker/lib/mapInvokerToForm'
 import { downloadInvoker } from '@entities/invoker/lib/downloadInvoker'
+import { buildActionAccess } from '@/engine/policy'
 
 const baseKey = 'invoker'
 
@@ -23,6 +24,7 @@ const baseKey = 'invoker'
 export const invokerDefinition: EntityDefinition = {
     name: baseKey,
     plural: 'invokers',
+    permissionComponent: 'INVOKER',
 
     routes: [
         { type: 'create' },
@@ -40,7 +42,7 @@ export const invokerDefinition: EntityDefinition = {
             { type: 'delete' },
         ],
         headerActions: [
-            { key: 'upload', render: () => <InvokerUploadButton /> },
+            { key: 'upload', permissionAction: 'CREATE', render: () => <InvokerUploadButton /> },
         ],
     },
 
@@ -333,6 +335,9 @@ export const invokerDefinition: EntityDefinition = {
                     value: 'invoker',
                     icon: 'upload',
                     description: 'commandPalette.descriptions.uploadInvoker',
+                    // The outer "upload" literal is shared/merged with other entities'
+                    // upload commands (e.g. connectionTemplate) — access must live here.
+                    access: buildActionAccess('INVOKER', 'CREATE'),
                     execute: async (_, ctx) => {
                         const tEntities = i18n.getFixedT(i18n.language, 'entities')
                         const file = await pickInvokerFile()

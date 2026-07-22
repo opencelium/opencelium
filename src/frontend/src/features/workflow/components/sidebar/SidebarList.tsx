@@ -30,8 +30,8 @@ export function SidebarList({ items, onSelect, testIdPrefix }: Props) {
           data-testid={buildTestId(testIdPrefix, 'item', item.key)}
           onClick={() => { if (item.disabled) return; onSelect(item.key); }}
         >
-          <strong>{item.title}</strong>
-          <span>{item.text}</span>
+          <strong title={item.title}>{item.title}</strong>
+          <span title={item.text}>{item.text}</span>
           {item.statusError ? (
             <span className="sidebarItemError">{item.statusError}</span>
           ) : null}

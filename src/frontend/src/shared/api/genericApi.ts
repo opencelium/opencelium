@@ -39,7 +39,9 @@ export const genericApi = baseApi.injectEndpoints({
             { url: string; method: string; body?: any, options: any }
         >({
             invalidatesTags: (_result, _error, arg) =>
-                arg.method?.toUpperCase() === 'GET' ? [] : ['Entity' as any],
+                arg.method?.toUpperCase() === 'GET' || arg.options?.skipEntityInvalidation
+                    ? []
+                    : ['Entity' as any],
             async queryFn(args, api, extraOptions, baseQuery) {
                 const result = await baseQuery(
                 {

@@ -1,4 +1,4 @@
-import { OperatorType, type Connection, type LoopOperatorWithId, type MethodWithId, type OperatorWithId } from '../../../types/connection';
+import { MethodType, OperatorType, type Connection, type LoopOperatorWithId, type MethodWithId, type OperatorWithId } from '../../../types/connection';
 
 export type ResponseType = 'body' | 'header' | 'status';
 
@@ -9,6 +9,31 @@ export const getMethodConnectorTitle = (method: MethodWithId) =>
 
 export const getMethodConnectorIcon = (method: MethodWithId) =>
   method.connector?.icon ?? null;
+
+// Method pickers show a "which connector/source is this method from" chip. A `WEBHOOK`
+// (trigger-connection) method has no connector — its chip shows a generic "Webhook" label
+// and the webhook icon, plus a hint that the response is only the trigger acknowledgement,
+// not the result of the workflow it triggers (referencing the ack's own status/body is
+// still valid, so it isn't filtered out of the picker).
+export type MethodConnectorChipInfo =
+  | { kind: 'connector'; title: string; iconUrl: string | null }
+  | { kind: 'http-request'; title: string }
+  | { kind: 'webhook'; title: string };
+
+export const getMethodConnectorChipInfo = (method: MethodWithId): MethodConnectorChipInfo => {
+  switch (method.methodType) {
+    case MethodType.Webhook:
+      return { kind: 'webhook', title: 'Webhook' };
+    case MethodType.HttpRequest:
+      return { kind: 'http-request', title: getMethodConnectorTitle(method) };
+    case MethodType.Connector:
+      return { kind: 'connector', title: getMethodConnectorTitle(method), iconUrl: getMethodConnectorIcon(method) };
+    default: {
+      const _exhaustive: never = method.methodType;
+      return _exhaustive;
+    }
+  }
+};
 
 const PATH_RE = /[^.[\]]+|\[\*]|\[\d+]|\[\w+]/g;
 

@@ -47,6 +47,9 @@ export type IconName =
     | 'refresh'
     | 'connector'
     | 'flash'
+    | 'http-request'
+    | 'aggregator'
+    | 'lock'
 
 export type IconColor =
     | 'default'

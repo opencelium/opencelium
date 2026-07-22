@@ -1,3 +1,5 @@
+
+//import './monacoWorkers';
 import { useEffect } from 'react';
 import { GraphiQL } from 'graphiql';
 // graphiql.css only carries the container/layout rules — the design tokens (--color-base,
@@ -5,8 +7,9 @@ import { GraphiQL } from 'graphiql';
 // every themed element (buttons, tabs, sidebar) falls back to unstyled browser defaults.
 import 'graphiql/style.css';
 import 'graphiql/graphiql.css';
-import './monacoWorkers';
-import { useGraphiQLActions } from '@graphiql/react';
+// Must load after the two imports above so its higher z-index wins the cascade.
+import './graphiqlOverrides.css';
+import { useGraphiQLActions, type TabsState } from '@graphiql/react';
 import { MasterPasswordGate } from '@features/master-password';
 import { Alert } from '@shared/ui/primitives/Alert';
 import { Button } from '@shared/ui/primitives/Button';
@@ -28,12 +31,13 @@ type Props = { readOnly?: boolean };
 //
 // <GraphiQL> forwards its `children` prop all the way down into the same GraphiQLProvider
 // context it uses internally, so rendering this here gives direct, reliable access to that
-// action. Two delayed attempts hedge against slower first-time worker/editor startup; both are
+// action. Three delayed attempts hedge against slower first-time worker/editor startup (the
+// third, longer delay covers cold starts where worker init itself pushes past 1500ms); all are
 // safe since @graphiql/react's schema store discards all but the latest in-flight introspection.
 function ForceIntrospection() {
   const { introspect } = useGraphiQLActions();
   useEffect(() => {
-    const timers = [setTimeout(introspect, 400), setTimeout(introspect, 1500)];
+    const timers = [setTimeout(introspect, 400), setTimeout(introspect, 1500), setTimeout(introspect, 4000)];
     return () => timers.forEach(clearTimeout);
   }, [introspect]);
   return null;
@@ -45,13 +49,19 @@ function GraphQlBodyEditorContent({ readOnly }: Props) {
   const { status, errorKey, fetcher, updateQuery, initialQuery, retry } = useGraphQlBodyEditor();
 
   if (status === 'error') {
+    const isMasterPasswordNotConfigured = errorKey === 'masterPasswordNotConfigured';
     return (
       <div style={{ height: '100%', display: 'grid', placeItems: 'center' }}>
         <div
           data-testid="workflow-graphql-error"
           style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}
         >
-          <Alert type="error" showIcon message={t(`graphqlBody.${errorKey ?? 'loginFailed'}`)} />
+          <Alert
+            type={isMasterPasswordNotConfigured ? 'warning' : 'error'}
+            showIcon
+            message={t(`graphqlBody.${errorKey ?? 'loginFailed'}`)}
+            description={isMasterPasswordNotConfigured ? t('graphqlBody.masterPasswordNotConfiguredDescription') : undefined}
+          />
           <Button onClick={retry} testId="workflow-graphql-retry">
             {t('graphqlBody.retry')}
           </Button>
@@ -68,20 +78,29 @@ function GraphQlBodyEditorContent({ readOnly }: Props) {
     );
   }
 
+  // Fires on every tab-state change — editing the active tab, switching tabs, adding/closing
+  // a tab — not just edits. That's what makes "the active tab" actually authoritative for
+  // what gets saved: without this, switching to a tab you haven't typed in yet would leave
+  // the previously-active tab's query as the persisted one, contradicting what's on screen.
+  const handleTabChange = (tabState: TabsState) => {
+    const activeQuery = tabState.tabs[tabState.activeTabIndex]?.query ?? '';
+    updateQuery(activeQuery);
+  };
+
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: 8 }} data-testid="workflow-graphql-editor">
       <div style={{ flex: 1, minHeight: 0 }}>
         <GraphiQL
           fetcher={fetcher}
           initialQuery={initialQuery}
-          onEditQuery={(query) => updateQuery(query)}
+          onTabChange={handleTabChange}
           forcedTheme={themeMode}
           isHeadersEditorEnabled={!readOnly}
         >
           <ForceIntrospection />
         </GraphiQL>
       </div>
-      <Hint>{t('graphqlBody.autocompleteHint')}</Hint>
+      <Hint type="warning">{t('graphqlBody.editorHint')}</Hint>
     </div>
   );
 }

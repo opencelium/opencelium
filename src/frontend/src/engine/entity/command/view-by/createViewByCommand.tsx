@@ -1,6 +1,7 @@
 import type {GeneralCommandType, ViewByConfig} from "@/engine/entity/command/types.ts";
 import type {CommandNode} from "@shared/command/types.ts";
 import {createViewExecute} from "@/engine/entity/command/view-by/createViewExecute.tsx";
+import {buildActionAccess} from "@/engine/policy";
 
 export const createViewByCommand = ({
     def,
@@ -14,6 +15,9 @@ export const createViewByCommand = ({
         value: name,
         group: 'navigate',
         icon: 'search',
+        // The outer "find" literal is shared/merged across every entity's view
+        // command — access must live on this entity-specific child node.
+        access: def.permissionComponent ? buildActionAccess(def.permissionComponent, 'READ') : undefined,
         children: [
             {
                 type: 'literal',

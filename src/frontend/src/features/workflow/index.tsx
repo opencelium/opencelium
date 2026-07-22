@@ -5,13 +5,12 @@ import { Button, Input, Modal, Select, message } from 'antd';
 import { Loading } from '@shared/ui/primitives/Loading/Loading';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { apiExecutor } from '@shared/api/apiExecutor';
-import { ApiFetchError } from '@shared/api/apiFetch';
 import './styles.css';
 import { NodeContextMenu } from './components/NodeContextMenu/NodeContextMenu';
-import { WorkflowCanvas } from './components/WorkflowCanvas';
+import { WorkflowCanvas } from './components/WorkflowCanvas/WorkflowCanvas';
 import { WorkflowHeader } from './components/WorkflowHeader';
 import { WorkflowLogs } from './components/WorkflowLogs';
-import { WorkflowSidebar } from './components/WorkflowSidebar';
+import { WorkflowSidebar } from './components/WorkflowSidebar/WorkflowSidebar';
 import { WorkflowSchedulesPill } from './components/schedules/WorkflowSchedulesPill';
 import { WorkflowSchedulesPanel } from './components/schedules/WorkflowSchedulesPanel';
 import { HistoryPanel } from './components/header/HistoryPanel';
@@ -20,14 +19,19 @@ import { ConditionBuilderDialog } from './components/condition-builder/Condition
 import { MethodConfigDialog } from './components/request-editor/MethodConfigDialog';
 import { ResponseDialog } from './components/request-editor/ResponseDialog';
 import { AggregatorConfigDialog } from './components/aggregator/AggregatorConfigDialog';
+import { TemplateConnectorMappingDialog } from './components/template/TemplateConnectorMappingDialog';
+import { extractConnectorGroups, applyConnectorMapping, type ConnectorMappingGroup } from './components/template/templateConnectorMapping.utils';
 import { buildLegacyConnection } from './components/request-editor/legacyAdapter';
 import { useWorkflowPage } from './useWorkflowPage';
 import { useUnsavedChangesGuard } from './useUnsavedChangesGuard';
 import { TestRunProvider } from './test-run/TestRunProvider';
 import { loadConnectionVersions, loadWorkflowConnection, loadWorkflowConnectionVersion, removeConnectionVersion, saveConnectionVersionComment, saveWorkflowConnection } from './api/connectionService';
-import { mapConnectionToWorkflowState } from './api/connectionMapper';
+import { mapConnectionToWorkflowState, type WorkflowConnectionState } from './api/connectionMapper';
 import { buildConnectionPayload, buildFromConnectorPayload } from './api/connectionPayload';
+import { RESOLVED_WORKFLOW_ERROR_MESSAGE_DURATION_SEC, resolveWorkflowApiError } from './utils/workflowApiErrors';
 import { useGetConnectorsQuery } from '@entities/connector/api/connectorApi';
+import { useGetInvokersQuery } from '@entities/invoker/api/invokerApi';
+import type { Invoker } from '@entities/invoker/model/types';
 import { selectAuthUser } from '@entities/auth/model/authSelectors';
 import { store } from '@app/store/store';
 import { genericApi } from '@shared/api/genericApi';
@@ -55,8 +59,9 @@ const normalizeConnectorIcon = (icon: Connector['icon']) =>
 const hydrateNodesWithOperationResponses = (
   nodes: WorkflowNodeModel[],
   connectors: Connector[],
+  invokers: Invoker[] = [],
 ): WorkflowNodeModel[] => {
-  if (!connectors.length) return nodes;
+  if (!connectors.length && !invokers.length) return nodes;
 
   return nodes.map((node) => {
     if (node.type !== 'connector' && node.type !== 'system') return node;
@@ -66,7 +71,11 @@ const hydrateNodesWithOperationResponses = (
 
     const connector = connectors.find((item) => item.connectorId === connectorId);
     const operation = connector?.invoker?.operations?.find((item) => item.name.toLowerCase() === methodName.toLowerCase());
-    if (!connector && !operation?.response) return node;
+    const invokerName = node.data.connector?.invokerName;
+    const invokerIcon = !node.data.connector?.icon && invokerName
+      ? invokers.find((item) => (item.name ?? '').toLowerCase() === invokerName.toLowerCase())?.icon ?? null
+      : null;
+    if (!connector && !operation?.response && !invokerIcon) return node;
 
     return {
       ...node,
@@ -77,11 +86,13 @@ const hydrateNodesWithOperationResponses = (
               ...node.data.connector,
               connectorId: connector.connectorId,
               title: connector.title,
-              icon: normalizeConnectorIcon(connector.icon),
+              icon: normalizeConnectorIcon(connector.icon) ?? normalizeConnectorIcon(connector.invoker?.icon) ?? invokerIcon ?? node.data.connector?.icon ?? null,
               lastTestPassed: connector.lastTestPassed,
               lastTestError: connector.lastTestError,
             }
-          : node.data.connector,
+          : invokerIcon && node.data.connector
+            ? { ...node.data.connector, icon: invokerIcon }
+            : node.data.connector,
         methodConfig: operation?.response
           ? {
               ...createEmptyMethodConfig(),
@@ -208,6 +219,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const confirm = useConfirm();
   const authUser = useAppSelector(selectAuthUser);
   const { data: connectors = [], isLoading: isConnectorsLoading } = useGetConnectorsQuery({ page: 0, limit: 1000 });
+  const { data: invokers = [] } = useGetInvokersQuery();
   const [createdConnectionId, setCreatedConnectionId] = useState<string>();
   const [headerState, setHeaderState] = useState({
     title: '[Empty Name]',
@@ -255,12 +267,18 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
   const [isApplyingTemplate, setIsApplyingTemplate] = useState(false);
   const [isUploadingTemplate, setIsUploadingTemplate] = useState(false);
+  const [connectorMappingDialogOpen, setConnectorMappingDialogOpen] = useState(false);
+  const [connectorMappingGroups, setConnectorMappingGroups] = useState<ConnectorMappingGroup[]>([]);
+  const [pendingTemplateApply, setPendingTemplateApply] = useState<{
+    state: WorkflowConnectionState;
+    selectedTemplate: Template;
+  } | null>(null);
   const [isDownloadingTemplate, setIsDownloadingTemplate] = useState(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [schedulesOpen, setSchedulesOpen] = useState(false);
   const hydratedNodes = useMemo(
-    () => hydrateNodesWithOperationResponses(workflow.nodes, connectors),
-    [connectors, workflow.nodes],
+    () => hydrateNodesWithOperationResponses(workflow.nodes, connectors, invokers),
+    [connectors, invokers, workflow.nodes],
   );
   const activeConnectionId = createdConnectionId ?? connectionId;
   const displayedHistoryVersions = useMemo(
@@ -358,12 +376,28 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const validateTitle = useCallback(async (title: string): Promise<string | null> => {
     const trimmed = title.trim();
     if (!trimmed || trimmed === '[Empty Name]' || trimmed === persistedTitle) return null;
-    const check = await apiExecutor({ url: `/connection/check/${encodeURIComponent(trimmed)}`, method: 'GET' });
+    const check = await apiExecutor({ url: `/connection/check?name=${encodeURIComponent(trimmed)}`, method: 'GET' });
     if (check && typeof check === 'object' && 'message' in check && (check as { message?: string }).message === 'EXISTS') {
       return t('messages.workflowNameExists');
     }
     return null;
   }, [persistedTitle, t]);
+
+  // Recognizes known backend validation error codes (e.g. an operator with an empty
+  // expression), highlights the node it names, and returns a specific translated
+  // message — or null when the error is unrecognized, so callers fall back to their
+  // own generic "failed to save/start" message. Shared between handleSave and the
+  // test-run start flow (passed to TestRunProvider) since both hit the same backend
+  // validation on the same node/edge graph.
+  const resolveAndHighlightWorkflowError = useCallback((error: unknown): string | null => {
+    const resolution = resolveWorkflowApiError(error, hydratedNodes, workflow.edges);
+    if (!resolution) return null;
+    const specificMessage = tEntities(resolution.messageKey, resolution.messageParams);
+    if (resolution.nodeId) {
+      workflow.onSetNodeError(resolution.nodeId, specificMessage);
+    }
+    return specificMessage;
+  }, [hydratedNodes, workflow, tEntities]);
 
   const handleSave = async ({ title, description, comment }: { title: string; description: string; comment: string }) => {
     if (!title.trim() || title.trim() === '[Empty Name]') {
@@ -371,6 +405,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       throw new Error('Connection name is required');
     }
 
+    workflow.onClearNodeErrors();
     const normalizedDescription = toPayloadDescription(description);
     const isCreate = !activeConnectionId;
     let response;
@@ -386,12 +421,11 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         fieldBindings: loadedFieldBindings,
       });
     } catch (error) {
-      const errorBody = error instanceof ApiFetchError ? (error.body as { message?: string; error?: string } | undefined) : undefined;
-      const isConnectorNotFound = errorBody?.message === 'CONNECTOR_NOT_FOUND' || errorBody?.error === 'CONNECTOR_NOT_FOUND';
+      const specificMessage = resolveAndHighlightWorkflowError(error);
       message.error(
-        isConnectorNotFound
-          ? tEntities('connection.messages.saveFailed.connectorNotFound')
-          : tEntities(isCreate ? 'connection.messages.saveFailed.create' : 'connection.messages.saveFailed.update', { title }),
+        specificMessage ??
+          tEntities(isCreate ? 'connection.messages.saveFailed.create' : 'connection.messages.saveFailed.update', { title }),
+        specificMessage ? RESOLVED_WORKFLOW_ERROR_MESSAGE_DURATION_SEC : undefined,
       );
       throw error;
     }
@@ -550,6 +584,33 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     setSelectedTemplateId(undefined);
   };
 
+  const finishApplyTemplate = async (state: WorkflowConnectionState, selectedTemplate: Template) => {
+    workflow.setWorkflowGraph(state.nodes, state.edges, state.viewport, { centerStart: true });
+    setLoadedFieldBindings(state.fieldBindings);
+    const templateName = selectedTemplate.name?.trim();
+    const templateDescription = selectedTemplate.description?.trim();
+    const applyTemplateNameAndDescription = () =>
+      setHeaderState((prev) => ({
+        title: templateName ? templateName : prev.title,
+        description: templateDescription ? toDisplayDescription(templateDescription) : prev.description,
+      }));
+
+    if (isHeaderNameEmpty(headerState.title)) {
+      applyTemplateNameAndDescription();
+    } else {
+      const shouldReplace = await confirm({
+        title: t('template.replaceConfirm.title'),
+        message: t('template.replaceConfirm.message'),
+        confirmText: t('template.replaceConfirm.replace'),
+        cancelText: t('template.replaceConfirm.keep'),
+      });
+      if (shouldReplace) applyTemplateNameAndDescription();
+    }
+    setLoadTemplateDialogOpen(false);
+    setSelectedTemplateId(undefined);
+    message.success(`Template "${selectedTemplate.name ?? selectedTemplate.templateId}" loaded`);
+  };
+
   const applySelectedTemplate = async () => {
     const selectedTemplate = templates.find((template) => String(template.templateId) === selectedTemplateId);
     if (!selectedTemplate) {
@@ -568,35 +629,46 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         return;
       }
       const state = mapConnectionToWorkflowState(fullTemplate.connection);
-      workflow.setWorkflowGraph(state.nodes, state.edges, state.viewport, { centerStart: true });
-      setLoadedFieldBindings(state.fieldBindings);
-      const templateName = selectedTemplate.name?.trim();
-      const templateDescription = selectedTemplate.description?.trim();
-      const applyTemplateNameAndDescription = () =>
-        setHeaderState((prev) => ({
-          title: templateName ? templateName : prev.title,
-          description: templateDescription ? toDisplayDescription(templateDescription) : prev.description,
-        }));
-
-      if (isHeaderNameEmpty(headerState.title)) {
-        applyTemplateNameAndDescription();
-      } else {
-        const shouldReplace = await confirm({
-          title: t('template.replaceConfirm.title'),
-          message: t('template.replaceConfirm.message'),
-          confirmText: t('template.replaceConfirm.replace'),
-          cancelText: t('template.replaceConfirm.keep'),
-        });
-        if (shouldReplace) applyTemplateNameAndDescription();
+      const groups = extractConnectorGroups(state.nodes);
+      if (groups.length > 0) {
+        setPendingTemplateApply({ state, selectedTemplate });
+        setConnectorMappingGroups(groups);
+        setConnectorMappingDialogOpen(true);
+        setLoadTemplateDialogOpen(false);
+        return;
       }
-      setLoadTemplateDialogOpen(false);
-      setSelectedTemplateId(undefined);
-      message.success(`Template "${selectedTemplate.name ?? selectedTemplate.templateId}" loaded`);
+      await finishApplyTemplate(state, selectedTemplate);
     } catch {
       message.error(t('messages.loadTemplateFailed'));
     } finally {
       setIsApplyingTemplate(false);
     }
+  };
+
+  const handleConfirmConnectorMapping = async (mapping: Record<number, number>) => {
+    if (!pendingTemplateApply) return;
+    setConnectorMappingDialogOpen(false);
+    setIsApplyingTemplate(true);
+    try {
+      const mappedNodes = applyConnectorMapping(pendingTemplateApply.state.nodes, mapping, connectors);
+      await finishApplyTemplate(
+        { ...pendingTemplateApply.state, nodes: mappedNodes },
+        pendingTemplateApply.selectedTemplate,
+      );
+    } catch {
+      message.error(t('messages.loadTemplateFailed'));
+    } finally {
+      setIsApplyingTemplate(false);
+      setPendingTemplateApply(null);
+      setConnectorMappingGroups([]);
+    }
+  };
+
+  const handleCancelConnectorMapping = () => {
+    setConnectorMappingDialogOpen(false);
+    setPendingTemplateApply(null);
+    setConnectorMappingGroups([]);
+    setSelectedTemplateId(undefined);
   };
 
   const handleHeaderMenuSelect = (item: WorkflowHeaderMenuItem) => {
@@ -614,6 +686,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   };
 
   const buildTestPayload = useCallback(() => {
+    workflow.onClearNodeErrors();
     const hasMethodNode = hydratedNodes.some(
       (node) => node.type === 'connector' || node.type === 'system' || node.type === 'trigger-connection',
     );
@@ -645,6 +718,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       workflow.historyOpen ||
       templateDialogOpen ||
       loadTemplateDialogOpen ||
+      connectorMappingDialogOpen ||
       isShortcutsOpen
     ) return;
     const selected = workflow.nodes.find((node) => node.selected && node.type !== 'start');
@@ -685,7 +759,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   };
 
   return (
-    <TestRunProvider connectionId={connectionId} connectionTitle={headerState.title} buildTestPayload={buildTestPayload}>
+    <TestRunProvider connectionId={connectionId} connectionTitle={headerState.title} buildTestPayload={buildTestPayload} onResolveStartError={resolveAndHighlightWorkflowError}>
     <div className="page" data-testid="workflow-page">
       <WorkflowHeader
         initialName={headerState.title}
@@ -820,6 +894,14 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           />
         </div>
       </Modal>
+      <TemplateConnectorMappingDialog
+        open={connectorMappingDialogOpen}
+        groups={connectorMappingGroups}
+        connectors={connectors}
+        invokers={invokers}
+        onConfirm={handleConfirmConnectorMapping}
+        onCancel={handleCancelConnectorMapping}
+      />
       <ShortcutsDialog open={isShortcutsOpen} onClose={() => setIsShortcutsOpen(false)} />
       <div className="workflowMain">
         {isLoading ? (
@@ -888,7 +970,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
           if (!activeConnectionId) return;
           setSelectedHistoryVersionId(snapshotId);
           const state = await loadWorkflowConnectionVersion(activeConnectionId, snapshotId);
-          const nextNodes = hydrateNodesWithOperationResponses(state.nodes, connectors);
+          const nextNodes = hydrateNodesWithOperationResponses(state.nodes, connectors, invokers);
           const nextSnapshot = buildWorkflowChangeSnapshot({
             connectionId: activeConnectionId,
             title: state.title,

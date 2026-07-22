@@ -111,9 +111,9 @@ export const ScheduleCard = memo(function ScheduleCard({ item }: Props) {
 
             {expanded && (
                 <div className="wf-schedule-card__details">
-                    <Row label={tEntities('schedule.list.columns.executions')} fill>
+                    <Row label={tEntities('schedule.list.columns.executions')} fill={executions.length > 0}>
                         {executions.length === 0 ? (
-                            <span className="wf-schedule-exec-empty">—</span>
+                            <>-</>
                         ) : (
                             <div className="wf-schedule-execs">
                                 {executions.map((execution) => (

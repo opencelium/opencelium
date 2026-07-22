@@ -9,6 +9,9 @@ import { createEntityCommands } from '@/engine/entity/command/createEntityComman
 import { resolveConnectionTitles } from '@entities/connection/command/resolvers/resolveConnectionTitles'
 import { resolveConnectionIds } from '@entities/connection/command/resolvers/resolveConnectionIds'
 import { findConnectionIdByTitle } from '@entities/connection/command/connectionCache'
+import type { CommandNode } from '@shared/command/types'
+import { workflowCommandBridgeStore } from '@features/workflow/command/workflowCommandBridge'
+import { resolveMethodSearch, resolvePropertySearch } from '@features/workflow/command/workflowCommandResolvers'
 
 const baseKey = 'connection'
 
@@ -25,6 +28,7 @@ const buildConnectionFetchUrl = (value: string): string =>
 
 export const connectionDefinition: EntityDefinition = {
     name: baseKey,
+    permissionComponent: 'CONNECTION',
 
     routes: [
         // The list lives at /workflow (the create/view/update editor pages are the
@@ -50,6 +54,7 @@ export const connectionDefinition: EntityDefinition = {
         headerActions: [
             {
                 key: 'create-connection',
+                permissionAction: 'CREATE',
                 render: () => <CreateConnectionButton />,
             },
         ],
@@ -57,6 +62,7 @@ export const connectionDefinition: EntityDefinition = {
             {
                 type: 'custom',
                 key: 'duplicate-connection',
+                permissionAction: 'CREATE',
                 render: ({ row }) => <DuplicateConnectionAction row={row as Connection} />,
             },
             {
@@ -108,6 +114,42 @@ export const connectionDefinition: EntityDefinition = {
     },
 
     commands: (def) => [
+        // A new, standalone top-level "workflow" command — distinct from the
+        // "update workflow by id/title" command generated below (that one
+        // nests "workflow" as a child of the shared "update" literal). Only
+        // present while a workflow editor instance is mounted (see
+        // workflowCommandBridgeStore) — it never appears in the app-wide
+        // palette, since /workflow/* routes never render that instance.
+        ...(workflowCommandBridgeStore.getState().isActive ? [{
+            type: 'literal',
+            value: 'workflow',
+            icon: 'workflow',
+            group: 'workflow',
+            lockAsChip: true,
+            description: 'commandPalette.descriptions.workflow',
+            children: [
+                {
+                    type: 'literal',
+                    value: 'find',
+                    children: [
+                        {
+                            type: 'literal',
+                            value: 'method',
+                            children: [
+                                { type: 'entity', name: 'methodName', resolve: resolveMethodSearch },
+                            ],
+                        },
+                        {
+                            type: 'literal',
+                            value: 'property',
+                            children: [
+                                { type: 'entity', name: 'propertyName', resolve: resolvePropertySearch },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        } as CommandNode<any>] : []),
         ...createEntityCommands({
             def,
             commandName: 'workflow',

@@ -3,6 +3,7 @@ import { message } from 'antd'
 import { Switch } from '@shared/ui/primitives/Switch'
 import { useGeneralRequestMutation } from '@shared/api/genericApi'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
+import { useScheduleUpdatePermission } from '../model/useScheduleUpdatePermission'
 import type { Schedule } from '../model/types'
 
 type Props = {
@@ -12,6 +13,7 @@ type Props = {
 export const DebugModeCell = memo(function DebugModeCell({ schedule }: Props) {
     const [generalRequest] = useGeneralRequestMutation()
     const { t: tEntities } = useI18n('entities')
+    const canUpdate = useScheduleUpdatePermission()
     const [pending, setPending] = useState(false)
     const [optimistic, setOptimistic] = useState<boolean | null>(null)
 
@@ -41,5 +43,5 @@ export const DebugModeCell = memo(function DebugModeCell({ schedule }: Props) {
         }
     }
 
-    return <Switch checked={checked} loading={pending} onChange={handleChange} />
+    return <Switch checked={checked} loading={pending} disabled={!canUpdate} onChange={handleChange} />
 })

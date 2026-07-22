@@ -2,12 +2,13 @@ import { ApiOutlined, LinkOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button, Select } from 'antd';
 import { useMemo, useState } from 'react';
 import type { Connection, MethodWithId } from '../../../types/connection';
-import { buildReferenceValue, getIteratorsForMethod, getMethodConnectorIcon, getMethodConnectorTitle, type ResponseType } from './requestReferenceOptions';
+import { buildReferenceValue, getIteratorsForMethod, getMethodConnectorChipInfo, type ResponseType } from './requestReferenceOptions';
 import { LegacyWebhookReferenceSelect } from './LegacyWebhookReferenceSelect';
 import { LegacyResponseFieldSelect } from './LegacyResponseFieldSelect';
+import { MethodConnectorChip } from './MethodConnectorChip';
 import { webhookSnippet } from './bodyWebhook';
 import { Radio } from '@shared/ui/primitives/Radio';
-import { ConnectorIcon } from '@entities/connector/ui/ConnectorIcon';
+import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { MethodColorDot } from '../../MethodColorDot/MethodColorDot';
 import { getDuplicateMethodIndexByColor } from '../../../utils/methodColor';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
@@ -119,9 +120,7 @@ export function LegacyBodyReferenceGenerator({ connection, currentMethod, onAppl
               );
             }}
             prefix={selectedMethod ? (
-              <span title={getMethodConnectorTitle(selectedMethod)} style={{ display: 'inline-flex' }}>
-                <ConnectorIcon icon={getMethodConnectorIcon(selectedMethod)} size={18} />
-              </span>
+              <MethodConnectorChip method={selectedMethod} iconOnly iconSize={18} tooltipZIndex={13020} />
             ) : undefined}
             onChange={(value) => {
               setMethodId(value);
@@ -130,28 +129,31 @@ export function LegacyBodyReferenceGenerator({ connection, currentMethod, onAppl
             options={methods.map((method) => ({
               label: method.label || method.name,
               value: method.id,
-              connectorTitle: getMethodConnectorTitle(method),
-              connectorIcon: getMethodConnectorIcon(method),
+              connectorTitle: getMethodConnectorChipInfo(method).title,
               color: method.color,
               dupIndex: method.color ? duplicateIndexByColor.get(method.color.toLowerCase()) : undefined,
+              method,
             }))}
             optionRender={(option) => {
-              const data = option.data as { connectorTitle?: string; connectorIcon?: string | null; color?: string; dupIndex?: number };
-              return (
+              const data = option.data as { connectorTitle?: string; color?: string; dupIndex?: number; method: MethodWithId };
+              const isWebhook = getMethodConnectorChipInfo(data.method).kind === 'webhook';
+              const row = (
                 <span style={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
                     <MethodColorDot color={data.color} index={data.dupIndex} />
                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{option.label}</span>
                   </span>
-                  <span title={data.connectorTitle} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, flex: '0 0 auto', maxWidth: '50%', color: 'var(--color-text-secondary)', fontSize: 11, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    <ConnectorIcon icon={data.connectorIcon} size={16} style={{ flexShrink: 0 }} />
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{data.connectorTitle}</span>
-                  </span>
+                  <MethodConnectorChip method={data.method} tooltipZIndex={13020} disableTooltip={isWebhook} />
                 </span>
               );
+              return isWebhook ? (
+                <Tooltip content={t('refGenerator.webhookTriggerHint')} placement='right' zIndex={13020}>
+                  {row}
+                </Tooltip>
+              ) : row;
             }}
             getPopupContainer={() => document.body}
-            popupMatchSelectWidth={320}
+            popupMatchSelectWidth={420}
             styles={{ popup: { root: { zIndex: 13010 } } }}
           />
           <div className='bodyLegacyGeneratorResponse compactRadioGroup'>

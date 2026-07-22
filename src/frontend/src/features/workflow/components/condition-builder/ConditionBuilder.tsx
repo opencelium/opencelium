@@ -13,12 +13,13 @@ import { LegacyResponseFieldSelect } from '../request-editor/body-editor/LegacyR
 import { LegacyWebhookReferenceSelect } from '../request-editor/body-editor/LegacyWebhookReferenceSelect';
 import {
 	buildReferenceValue,
+	getMethodConnectorChipInfo,
 	getMethodConnectorIcon,
-	getMethodConnectorTitle,
 	ITERATOR_NAMES,
 	type ResponseType,
 } from '../request-editor/body-editor/requestReferenceOptions';
 import { extractWebhookValue, webhookSnippet } from '../request-editor/body-editor/bodyWebhook';
+import { MethodConnectorChip } from '../request-editor/body-editor/MethodConnectorChip';
 import {
 	IF_OPERATOR_LABEL_KEYS,
 	IfOperatorName,
@@ -45,7 +46,7 @@ import {
 } from './conditionBuilder.utils';
 import { LoopInfoPanel } from './LoopInfoPanel';
 import { Radio } from '@shared/ui/primitives/Radio';
-import { ConnectorIcon } from '@entities/connector/ui/ConnectorIcon';
+import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { MethodColorDot } from '../MethodColorDot/MethodColorDot';
 import { getDuplicateMethodIndexByColor } from '../../utils/methodColor';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
@@ -358,36 +359,37 @@ function MethodSelect({
 				);
 			}}
 			prefix={selected ? (
-				<span title={getMethodConnectorTitle(selected)} style={{ display: 'inline-flex' }}>
-					<ConnectorIcon icon={getMethodConnectorIcon(selected)} size={18} />
-				</span>
+				<MethodConnectorChip method={selected} iconOnly iconSize={18} tooltipZIndex={13020} />
 			) : undefined}
 			onChange={onChange}
 			options={options.map((method) => ({
 				value: method.id,
 				label: getMethodLabel(method),
-				connectorTitle: getMethodConnectorTitle(method),
-				connectorIcon: getMethodConnectorIcon(method),
+				connectorTitle: getMethodConnectorChipInfo(method).title,
 				color: method.color,
 				dupIndex: method.color ? duplicateIndexByColor.get(method.color.toLowerCase()) : undefined,
+				method,
 			}))}
 			optionRender={(option) => {
-				const data = option.data as { connectorTitle?: string; connectorIcon?: string | null; color?: string; dupIndex?: number };
-				return (
+				const data = option.data as { connectorTitle?: string; color?: string; dupIndex?: number; method: MethodWithId };
+				const isWebhook = getMethodConnectorChipInfo(data.method).kind === 'webhook';
+				const row = (
 					<span className="conditionMethodOption">
 						<span className="conditionMethodLeft">
 							<MethodColorDot color={data.color} index={data.dupIndex} />
 							<span className="conditionMethodName">{option.label}</span>
 						</span>
-						<span className="conditionMethodConnector" title={data.connectorTitle}>
-							<ConnectorIcon icon={data.connectorIcon} size={16} style={{ flexShrink: 0 }} />
-							<span className="conditionMethodConnectorName">{data.connectorTitle}</span>
-						</span>
+						<MethodConnectorChip method={data.method} tooltipZIndex={13020} disableTooltip={isWebhook} />
 					</span>
 				);
+				return isWebhook ? (
+					<Tooltip content={t('refGenerator.webhookTriggerHint')} placement='right' zIndex={13020}>
+						{row}
+					</Tooltip>
+				) : row;
 			}}
 			getPopupContainer={() => document.body}
-			popupMatchSelectWidth={320}
+			popupMatchSelectWidth={420}
 			styles={{ popup: { root: { zIndex: 13010 } } }}
 		/>
 	);

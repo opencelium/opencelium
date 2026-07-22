@@ -21,6 +21,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
         }
         credentialEditor: {
             updateWithoutMasterPassword: string
+            masterPasswordNotConfigured: string
         }
         errorBoundary: {
             retry: string
@@ -44,6 +45,10 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             subtitle: string
             goBack: string
             goHome: string
+        }
+        accessDenied: {
+            title: string
+            subtitle: string
         }
         dialog: {
             maximize: string
@@ -94,6 +99,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             placeholder: string
             noResults: string
             groups: {
+                workflow: string
                 recent: string
                 navigate: string
                 create: string
@@ -117,6 +123,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 uploadInvoker: string
                 downloadInvoker: string
                 systemCheck: string
+                workflow: string
             }
             footer: {
                 select: string

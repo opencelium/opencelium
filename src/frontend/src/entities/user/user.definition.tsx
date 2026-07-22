@@ -33,6 +33,7 @@ const buildUserViewPageUrl = (value: string): string =>
 
 export const userDefinition: EntityDefinition = {
     name: baseKey,
+    permissionComponent: 'USER',
     routes: [
         { type: 'create' },
         { type: 'view' },
@@ -64,6 +65,7 @@ export const userDefinition: EntityDefinition = {
                 key: 'enableTotp',
                 labelKey: `${baseKey}.totp.bulkEnable.label`,
                 field: 'userId',
+                permissionAction: 'UPDATE',
                 run: async ({ ids, clearSelection }) => {
                     await apiExecutor({
                         url: '/user/list/totp/enable',

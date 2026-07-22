@@ -85,6 +85,7 @@ function buildScheduleSuccessMessage(mode: 'create' | 'update', formData: Schedu
 
 export const scheduleDefinition: EntityDefinition = {
     name: baseKey,
+    permissionComponent: 'SCHEDULE',
     api: {
         baseUrl: '/scheduler',
         identifierField: 'id',
@@ -119,6 +120,7 @@ export const scheduleDefinition: EntityDefinition = {
             {
                 key: 'notifications',
                 labelKey: `${baseKey}.notifications.bulk.button`,
+                permissionAction: 'CREATE',
                 run: ({ ids, dialog, clearSelection }) => {
                     const schedulerIds = ids
                         .map(Number)

@@ -9,7 +9,7 @@ import type {StepDefinition} from "@shared/ui/step-form/types.ts";
 import {SectionRenderer} from "@/engine/entity/runtime/SectionRenderer.tsx";
 import {StepFormLayout} from "@shared/ui/step-form/StepFormLayout.tsx";
 import {FormConstraintsProvider} from "@shared/form/FormConstraintsContext.tsx";
-import {createPolicyContext, policyEngine, setUserPolicyContext} from "@/engine/policy";
+import {buildEntityAccess, createPolicyContext, policyEngine, setUserPolicyContext} from "@/engine/policy";
 import {useAuth} from "@features/auth/useAuth.ts";
 import {PolicyProvider} from "@/engine/policy/PolicyReactContext.tsx";
 import {TestScopeProvider} from "@shared/testing/TestScopeContext.tsx";
@@ -78,9 +78,10 @@ export function EntityWizard<EntityFormValues>({
                 entity: entity.name,
                 record: initialValues
             }),
-        [user, mode, entity.name, initialValues])
+        [user, normalizedUser, mode, entity.name, initialValues])
+    const access = entity.access ?? (entity.permissionComponent ? buildEntityAccess(entity.permissionComponent) : undefined)
     const entityDecision = policyEngine.evaluate(
-        entity.access,
+        access,
         {
             ...policyContext,
             resource: `entity:${entity.name}`

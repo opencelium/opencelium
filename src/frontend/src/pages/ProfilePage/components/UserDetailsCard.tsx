@@ -8,6 +8,7 @@ import { FormConstraintsProvider } from '@shared/form/FormConstraintsContext'
 import { EntityText } from '@shared/ui/primitives/Text'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { useAuth } from '@features/auth/useAuth'
+import { hasComponentPermission } from '@/engine/policy'
 import { useAppDispatch, useAppSelector } from '@/shared/lib/storeHooks'
 import { authActions } from '@entities/auth/model/authSlice'
 import { selectAuthSession } from '@entities/auth/model/authSelectors'
@@ -34,7 +35,8 @@ function toFormValues(user: AuthUser): ProfileDetailsValues {
 }
 
 export function UserDetailsCard({ style }: { style?: React.CSSProperties }) {
-    const { user } = useAuth()
+    const { user, normalizedUser } = useAuth()
+    const canUpdate = hasComponentPermission(normalizedUser?.permissions ?? [], 'MYPROFILE', 'UPDATE')
     const session = useAppSelector(selectAuthSession)
     const dispatch = useAppDispatch()
     const { t } = useI18n('entities')
@@ -88,18 +90,20 @@ export function UserDetailsCard({ style }: { style?: React.CSSProperties }) {
                         onSubmit={form.handleSubmit(onSubmit)}
                         style={{ display: 'flex', flexDirection: 'column', gap: 16 }}
                     >
-                        <UserTitleField />
-                        <FormInput name="name" label="profile.fields.name.label" autoFocus />
-                        <FormInput name="surname" label="profile.fields.surname.label" />
-                        <FormInput name="department" label="profile.fields.department.label" />
-                        <FormInput name="organization" label="profile.fields.organization.label" />
-                        <FormInput name="phoneNumber" label="profile.fields.phoneNumber.label" />
-                        <FormInput name="email" label="profile.fields.email.label" />
-                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                            <Button htmlType="submit" type="primary" loading={isLoading}>
-                                {t('profile.actions.save')}
-                            </Button>
-                        </div>
+                        <UserTitleField readOnly={!canUpdate} />
+                        <FormInput name="name" label="profile.fields.name.label" autoFocus readOnly={!canUpdate} />
+                        <FormInput name="surname" label="profile.fields.surname.label" readOnly={!canUpdate} />
+                        <FormInput name="department" label="profile.fields.department.label" readOnly={!canUpdate} />
+                        <FormInput name="organization" label="profile.fields.organization.label" readOnly={!canUpdate} />
+                        <FormInput name="phoneNumber" label="profile.fields.phoneNumber.label" readOnly={!canUpdate} />
+                        <FormInput name="email" label="profile.fields.email.label" readOnly={!canUpdate} />
+                        {canUpdate && (
+                            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                <Button htmlType="submit" type="primary" loading={isLoading}>
+                                    {t('profile.actions.save')}
+                                </Button>
+                            </div>
+                        )}
                     </form>
                 </FormConstraintsProvider>
             </FormProvider>

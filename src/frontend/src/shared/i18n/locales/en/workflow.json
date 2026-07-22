@@ -16,7 +16,10 @@
     "openScriptNewWindow": "Open script in new window",
     "maximizeScript": "Maximize script",
     "minimizeScript": "Minimize script",
-    "load": "Load"
+    "maximizeRequestData": "Maximize request data",
+    "minimizeRequestData": "Minimize request data",
+    "load": "Load",
+    "createEnhancement": "Create enhancement"
   },
   "confirmDelete": {
     "title": "Delete step",
@@ -184,8 +187,9 @@
       "description": "There are no connectors matching this search."
     },
     "connectorStatus": {
-      "passed": "Connection check passed",
-      "failed": "Connection check failed"
+      "passed": "Connection test passed — this connector is ready to use.",
+      "failed": "Connection test failed — check the connector's credentials and settings.",
+      "failedWithReason": "Connection test failed: {{reason}}"
     },
     "methodsEmpty": {
       "title": "No methods found",
@@ -257,12 +261,23 @@
       "message": "This removes the data aggregator from this step. The data aggregator entry itself will not be deleted and remains available for other steps."
     }
   },
+  "templateConnectorMapping": {
+    "title": "Map template connectors",
+    "intro": "This template was created with connectors from another environment. Choose which connector in this environment each one should use before the workflow is loaded.",
+    "noInvokerHint": "No invoker hint available",
+    "usedBy": "Used by: {{methods}}",
+    "unknownConnector": "Connector #{{id}}",
+    "selectPlaceholder": "Select a connector",
+    "createNewTooltip": "Create new connector"
+  },
   "node": {
     "if": "If",
     "loop": "Loop",
     "branchTrue": "true",
     "branchFalse": "false",
-    "asyncBadge": "Asynchronous request — triggers the other workflow and does not wait for its response."
+    "asyncBadge": "Asynchronous request — triggers the other workflow and does not wait for its response.",
+    "aggregatorBadge": "Combines results from multiple calls using the \"{{name}}\" data aggregator.",
+    "methodColorBadge": "Nodes sharing this color and number call the same method on the same connector."
   },
   "saveDialog": {
     "title": "Save Version",
@@ -394,6 +409,8 @@
     "level": "level {{depth}}",
     "text": "Text",
     "textValue": "Text value",
+    "textPlaceholder": "No text content",
+    "addChild": "Child",
     "attributePlaceholder": "Attribute {{name}}",
     "empty": "Empty"
   },
@@ -401,7 +418,12 @@
     "title": "Enhancement",
     "language": "Language",
     "script": "Script",
-    "emptyState": "Please, click on the reference to see its enhancement."
+    "emptyState": "Please, click on the reference to see its enhancement.",
+    "directReference": {
+      "title": "Direct reference",
+      "description": "This field has no enhancement — it is a direct, one-to-one reference between the two fields below, with no script running in between. Direct references execute faster than a scripted enhancement.",
+      "descriptionMany": "This field has no enhancement — it is a direct reference between the fields below, with no script running in between. Direct references execute faster than a scripted enhancement."
+    }
   },
   "description": {
     "label": "Description",
@@ -436,7 +458,8 @@
   "refGenerator": {
     "connector": "Connector",
     "method": "Method",
-    "field": "Field"
+    "field": "Field",
+    "webhookTriggerHint": "Webhook trigger — this response is only the trigger acknowledgement, not the result of the triggered workflow."
   },
   "webhook": {
     "noWebhooks": "No webhooks yet",
@@ -460,9 +483,11 @@
   "requestData": "Request data",
   "graphqlBody": {
     "masterPasswordTitle": "Enter the master password to access this connector's GraphQL API",
-    "autocompleteHint": "Press Ctrl + Space to see the autocomplete.",
+    "editorHint": "Ctrl + Space for autocomplete. Only the active tab's query runs when this method executes — tabs are named after the query's operation name (e.g. \"query MyQuery {...}\"), so anonymous queries stay \"<untitled>\".",
     "connectorFailed": "Could not load the connector. Check the backend connection and try again.",
     "loginFailed": "Could not authenticate with this connector's GraphQL API. Check its credentials and try again.",
+    "masterPasswordNotConfigured": "No master password is configured",
+    "masterPasswordNotConfiguredDescription": "Ask an administrator to set opencelium.connector.master-password in /backend/src/main/resources/application.yml and restart the backend to enable browsing this connector's GraphQL API.",
     "retry": "Try again"
   }
 }

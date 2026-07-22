@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import type { Fetcher, FetcherParams } from '@graphiql/toolkit';
-import { useMasterPasswordStore } from '@features/master-password';
+import { checkMasterPasswordExistsRaw, useMasterPasswordStore } from '@features/master-password';
 import { apiExecutor } from '@shared/api/apiExecutor';
 import type { Connector } from '@entities/connector/model/types';
 import { useMethodContext } from '../../../../providers/MethodContext';
@@ -28,7 +28,10 @@ const fetchConnector = (id: string, masterPassword: string) =>
   apiExecutor({
     url: `/connector/${encodeURIComponent(id)}`,
     method: 'GET',
-    options: { headers: { 'x-master-password': masterPassword }, ignoreError: true },
+    options: {
+      ...(masterPassword ? { headers: { 'x-master-password': masterPassword } } : {}),
+      ignoreError: true,
+    },
   }) as Promise<Connector | unknown>;
 
 export function useGraphQlBodyEditor() {
@@ -37,7 +40,7 @@ export function useGraphQlBodyEditor() {
   const { masterPassword } = useMasterPasswordStore();
 
   const [status, setStatus] = useState<GraphQlBodyEditorStatus>('idle');
-  const [errorKey, setErrorKey] = useState<'connectorFailed' | 'loginFailed' | null>(null);
+  const [errorKey, setErrorKey] = useState<'connectorFailed' | 'loginFailed' | 'masterPasswordNotConfigured' | null>(null);
   const [connector, setConnector] = useState<Connector | null>(null);
   const [accessToken, setAccessToken] = useState('');
   const [retryCount, setRetryCount] = useState(0);
@@ -61,11 +64,27 @@ export function useGraphQlBodyEditor() {
   }, []);
 
   useEffect(() => {
-    if (!masterPassword || connectorId == null) return;
+    // This hook only ever mounts as a child of <MasterPasswordGate>, which renders
+    // children either once a password has been entered or once it has confirmed the
+    // backend has no master password configured at all. A bare `!masterPassword` here
+    // can therefore only mean the latter — re-verify locally (rather than assume) since
+    // fetching the connector without it would return masked credentials the login/query
+    // strategies can't actually use.
+    if (connectorId == null) return;
     let cancelled = false;
 
     setStatus('fetching-connector');
     void (async () => {
+      if (!masterPassword) {
+        const exists = await checkMasterPasswordExistsRaw();
+        if (cancelled) return;
+        if (!exists) {
+          setStatus('error');
+          setErrorKey('masterPasswordNotConfigured');
+          return;
+        }
+      }
+
       const response = await fetchConnector(String(connectorId), masterPassword);
       if (cancelled) return;
       if (isApiExecutorError(response)) {

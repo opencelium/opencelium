@@ -47,8 +47,7 @@ public interface ConnectionService {
     List<Connection> findAll();
 
     /**
-     * @param includeTest when {@code false}, test connections (titles matching
-     *                    {@code !*test_connection_...}) are excluded from the result
+     * @param includeTest when {@code false}, test connections are excluded from the result
      */
     List<Connection> findAll(Boolean includeTest);
 

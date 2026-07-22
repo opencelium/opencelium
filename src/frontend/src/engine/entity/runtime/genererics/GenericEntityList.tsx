@@ -21,6 +21,9 @@ import { apiExecutor } from '@shared/api/apiExecutor';
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import { getValueByPath } from '@shared/utils/getValueByPath';
 import { buildTestId } from '@shared/testing/testId';
+import { useAuth } from '@features/auth/useAuth';
+import { hasComponentPermission, type CrudAction } from '@/engine/policy';
+import NoAccess from '@shared/ui/feedback/NoAccess';
 
 import { Table } from '@shared/ui/primitives/Table';
 import { Input } from '@shared/ui/primitives/Input';
@@ -97,9 +100,14 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
     const confirm = useConfirm();
     const { t: tEntities } = useI18n('entities');
     const { t: tCommon } = useI18n('common');
+    const { normalizedUser } = useAuth();
+    const permissions = normalizedUser?.permissions ?? [];
+    const canForAction = (action: CrudAction) =>
+        !entity.permissionComponent || hasComponentPermission(permissions, entity.permissionComponent, action);
+    const hasReadAccess = !entity.permissionComponent || hasComponentPermission(permissions, entity.permissionComponent, 'READ');
 
     const fetchUrl = entity.list?.fetchUrl ?? `${entity.api?.baseUrl ?? `/${entity.name}`}/all`;
-    const { data, isLoading } = useFetchEntitiesQuery(fetchUrl, { skip: !entity.api });
+    const { data, isLoading } = useFetchEntitiesQuery(fetchUrl, { skip: !entity.api || !hasReadAccess });
 
     const useRowDecoration = entity.list?.useRowDecoration ?? emptyRowDecoration;
     const { rowClassName } = useRowDecoration();
@@ -117,14 +125,24 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
         return normalizeRows(data);
     }, [data, entity.list?.mapToRows]);
 
-    const actions: ListAction[] = entity.list?.actions ?? defaultActionsForEntity(entity);
-    const hasCreateRoute = (entity.routes ?? []).some((r) => r.type === 'create');
+    const actions: ListAction[] = (entity.list?.actions ?? defaultActionsForEntity(entity)).filter((a) => {
+        if (a.type === 'update') return canForAction('UPDATE');
+        if (a.type === 'delete') return canForAction('DELETE');
+        if (a.type === 'custom') return !a.permissionAction || canForAction(a.permissionAction);
+        return true;
+    });
+    const hasCreateRoute = (entity.routes ?? []).some((r) => r.type === 'create') && canForAction('CREATE');
     const searchable = entity.list?.searchable ?? entity.fields.some((f) => f.table?.searchable);
     const bulkConfig = resolveBulkConfig(entity);
-    const bulkActions = entity.list?.bulkActions ?? [];
+    const bulkActions = (entity.list?.bulkActions ?? []).filter(
+        (a) => !a.permissionAction || canForAction(a.permissionAction),
+    );
+    const headerActions = (entity.list?.headerActions ?? []).filter(
+        (a) => !a.permissionAction || canForAction(a.permissionAction),
+    );
     const filters = entity.list?.filters ?? [];
     const hasFilters = filters.length > 0;
-    const selectable = !!bulkConfig || bulkActions.length > 0 || !!entity.list?.selectable;
+    const selectable = (!!bulkConfig && canForAction('DELETE')) || bulkActions.length > 0 || !!entity.list?.selectable;
     const rowKey = entity.list?.rowKey ?? entity.api?.primaryKey ?? 'id';
     const bulkField = bulkConfig?.field ?? rowKey;
 
@@ -274,9 +292,13 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
             : tEntities(entity.list.subtitleKey)
         : tCommon('list.manage', { name: entity.name });
 
-    const showBulkDeleteButton = !!bulkConfig;
+    const showBulkDeleteButton = !!bulkConfig && canForAction('DELETE');
     const isBulkDeleteDisabled = selectedIds.length === 0;
     const isBulkDeleting = pendingDeleteIds.length > 0;
+
+    if (!hasReadAccess) {
+        return <NoAccess />;
+    }
 
     return (
         <div data-testid={buildTestId(entity.name, 'list')} style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -318,7 +340,7 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
                             {tCommon('list.deleteSelected', { count: selectedIds.length })}
                         </Button>
                     )}
-                    {(entity.list?.headerActions ?? []).map((action) => (
+                    {headerActions.map((action) => (
                         <React.Fragment key={action.key}>
                             {action.render({ entity })}
                         </React.Fragment>

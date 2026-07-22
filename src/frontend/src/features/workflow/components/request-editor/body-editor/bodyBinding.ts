@@ -1,6 +1,45 @@
 import { type Connection, type Enhancement } from '../../../types/connection';
-import { buildBodyEnhancement, buildRequestResultField, getParsedReferences } from './bodyReference';
+import { buildBodyEnhancement, buildRequestResultField, getParsedReferences, type ParsedReference } from './bodyReference';
 import { createShortId } from '@shared/lib/createId';
+
+export type DirectReferenceInfo = {
+  leftField: string;
+  refs: ParsedReference[];
+};
+
+// A field can hold a raw reference token with no matching fieldBinding — e.g. a template
+// imported with body/header JSON that already contains `{%...%}` tokens the UI never ran
+// through updateRequestFieldBindings for. Surfaces that "direct reference" so the enhancement
+// panel can explain the 1:1 mapping instead of just showing an empty state.
+export const getDirectReferenceInfo = (
+  messageProperty: 'body' | 'header',
+  namespace: string[],
+  name: string,
+  value: unknown,
+): DirectReferenceInfo | null => {
+  const refs = getParsedReferences(typeof value === 'string' ? value : '');
+  if (refs.length === 0) return null;
+  return { leftField: buildRequestResultField(messageProperty, namespace, name), refs };
+};
+
+export const createDirectReferenceEnhancement = (
+  connection: Connection,
+  methodColor: string,
+  messageProperty: 'body' | 'header',
+  namespace: string[],
+  name: string,
+  value: unknown,
+): { connection: Connection; enhanceId: string } | null => {
+  const direct = getDirectReferenceInfo(messageProperty, namespace, name, value);
+  if (!direct) return null;
+  const resultVar = `${methodColor}.(request).${direct.leftField}`;
+  const enhanceId = createShortId();
+  const enhancement = buildBodyEnhancement(enhanceId, resultVar, direct.refs);
+  return {
+    connection: { ...connection, fieldBindings: [...(connection.fieldBindings || []), { enhancement }] },
+    enhanceId,
+  };
+};
 
 type BodyEditData = {
   namespace?: string[];
@@ -55,7 +94,15 @@ export const updateRequestFieldBindings = (
     (binding) => binding.enhancement?.args?.RESULT_VAR === resultVar,
   );
   const next = buildBodyEnhancement(previous?.enhancement.enhanceId || createShortId(), resultVar, refs);
-  return { ...connection, fieldBindings: [...current, { enhancement: next }] };
+  const merged = previous
+    ? {
+        ...next,
+        language: previous.enhancement.language,
+        script: previous.enhancement.script,
+        description: previous.enhancement.description,
+      }
+    : next;
+  return { ...connection, fieldBindings: [...current, { enhancement: merged }] };
 };
 
 export const removeDeletedRequestBindings = (
@@ -119,9 +166,18 @@ export const findRequestEnhancement = (
   const refs = getParsedReferences(typeof value === 'string' ? value : '');
   if (refs.length === 0) return undefined;
   const refValues = refs.map((reference) => `${reference.color}.(${reference.type}).${reference.field}`);
+  const resultVarPrefix = `${methodColor}.(request).${messageProperty}.$`;
 
+  // Recovers a binding whose exact RESULT_VAR path drifted (e.g. an array index shifted) by
+  // re-anchoring on its source value(s) instead. Scoped to this same method+section and to an
+  // exact var-count match — otherwise two unrelated fields that happen to share a source
+  // reference (very common: the same response field feeding several different targets) would
+  // match whichever binding appears first in the array, regardless of which field it's actually for.
   return connection?.fieldBindings.find((binding) => {
     const args = binding.enhancement?.args || {};
+    if (!String(args.RESULT_VAR || '').startsWith(resultVarPrefix)) return false;
+    const varCount = Object.keys(args).filter((key) => /^VAR_\d+$/.test(key)).length;
+    if (varCount !== refValues.length) return false;
     return refValues.every((refValue, index) => args[`VAR_${index}`] === refValue);
   })?.enhancement;
 };

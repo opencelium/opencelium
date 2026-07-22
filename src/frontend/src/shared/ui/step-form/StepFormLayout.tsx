@@ -229,6 +229,7 @@ export function StepFormLayout({
                                 onRunAction={runAction}
                                 isSubmitting={isSubmitting}
                                 runningActionId={runningActionId}
+                                form={form}
                             />
                         )}
                     </div>

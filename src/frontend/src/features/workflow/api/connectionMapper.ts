@@ -129,6 +129,7 @@ const toMethodEntry = (method: any, index: number): IndexedWorkflowEntry => {
 							connectorId: method?.connector?.connectorId ?? -1,
 							title: method?.connector?.title ?? 'DEFAULT',
 							icon: method?.connector?.icon ?? null,
+							invokerName: method?.connector?.invokerName ?? method?.invokerName ?? null,
 						},
 					}
 					: {}),

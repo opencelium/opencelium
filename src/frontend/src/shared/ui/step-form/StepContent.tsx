@@ -18,6 +18,7 @@ interface Props {
     isSubmitting: boolean
     runningActionId?: string | null
     readOnly?: boolean
+    form: any
 }
 
 export function StepContent({
@@ -27,6 +28,7 @@ export function StepContent({
     isSubmitting,
     runningActionId,
     readOnly,
+    form,
 }: Props) {
     const {isTabletOrMobile} = useBreakpoints();
     const {t: tCommon} = useI18n('common')
@@ -37,6 +39,10 @@ export function StepContent({
         useStepForm()
 
     const step = steps[currentStep]
+    // Subscribes to every field so action-button `disabled` predicates (and anything
+    // else derived from form values) re-evaluate on any change, including programmatic
+    // setValue calls made outside this component (e.g. after unlocking the master password).
+    const values = form?.watch ? form.watch() : undefined
 
     const infoSteps: PartialStepProps[] = useMemo(() => {
         if (!step.info) return [];
@@ -111,7 +117,11 @@ export function StepContent({
                         type={action.type ?? 'primary'}
                         onClick={() => onRunAction(action)}
                         loading={runningActionId === action.id}
-                        disabled={isSubmitting || (runningActionId != null && runningActionId !== action.id)}
+                        disabled={
+                            isSubmitting ||
+                            (runningActionId != null && runningActionId !== action.id) ||
+                            !!action.disabled?.(values)
+                        }
                         testId={buildTestId(testScope, 'wizard', `action-${action.id}`)}
                     >
                         {tEntities(action.label as any)}

@@ -27,9 +27,15 @@ export function NodeShell({
 		data.onOpenContextMenu?.({ nodeId: id, x: event.clientX, y: event.clientY, kind: data.kind });
 	};
 	const showRightAddTrigger =
-		!!rightAdd && !!onAddStep && !data.hideAddControls && !(data.suppressHoverAddControls && !rightAdd.showAlways);
+		!!rightAdd &&
+		!!onAddStep &&
+		(!data.hideAddControls || rightAdd.showAlways) &&
+		!(data.suppressHoverAddControls && !rightAdd.showAlways);
 	const showBottomAddTrigger =
-		!!bottomAdd && !!onAddStep && !data.hideAddControls && !(data.suppressHoverAddControls && !bottomAdd.showAlways);
+		!!bottomAdd &&
+		!!onAddStep &&
+		(!data.hideAddControls || bottomAdd.showAlways) &&
+		!(data.suppressHoverAddControls && !bottomAdd.showAlways);
 
 	return (
 		<div
@@ -39,7 +45,8 @@ export function NodeShell({
 			{selected && <NodeToolbar canDelete={data.kind !== 'start'} onDelete={() => data.onDeleteNode?.(id)} />}
 			{topLabel && <div className='nodeTopLabel'>{topLabel}</div>}
 			<div
-				className={`nodeBody ${selected ? 'nodeBodySelected' : ''} ${data.highlighted ? 'nodeBodyHighlighted' : ''} ${data.dropTarget ? 'nodeBodyDropTarget' : ''} ${data.dropInvalid ? 'nodeBodyDropInvalid' : ''}`}
+				className={`nodeBody ${selected ? 'nodeBodySelected' : ''} ${data.highlighted ? 'nodeBodyHighlighted' : ''} ${data.dropTarget ? 'nodeBodyDropTarget' : ''} ${data.dropInvalid ? 'nodeBodyDropInvalid' : ''} ${data.hasError ? 'nodeBodyError' : ''} ${data.searchHighlighted ? 'nodeBodySearchHighlighted' : ''}`}
+				title={data.hasError ? data.errorMessage : undefined}
 			>
 				{children}
 				{showRightAddTrigger && rightAdd && onAddStep && (

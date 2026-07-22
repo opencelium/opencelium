@@ -132,6 +132,16 @@
     background: var(--color-action-primary);
     color: var(--color-text-inverted);
 }
+[cmdk-item][data-disabled="true"] {
+    cursor: default;
+    color: var(--color-text-secondary);
+    opacity: 0.7;
+}
+[cmdk-item][data-disabled="true"]:hover,
+[cmdk-item][data-disabled="true"][aria-selected="true"] {
+    background: transparent;
+    color: var(--color-text-secondary);
+}
 
 .cmdk-item-row {
     display: flex;
@@ -160,4 +170,32 @@
     color: inherit;
     opacity: 0.7;
     white-space: nowrap;
+}
+
+/* Input row — hosts the optional locked-scope chip beside the text input */
+.cmdk-input-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+}
+.cmdk-input-row [cmdk-input] {
+    width: auto;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.cmdk-scope-chip {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 6px;
+    gap: 4px;
+    flex: 0 0 auto;
+    padding: 3px 8px;
+    border-radius: var(--radius-md);
+    background: var(--color-action-primary-subtle);
+    color: var(--color-action-primary);
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    user-select: none;
 }

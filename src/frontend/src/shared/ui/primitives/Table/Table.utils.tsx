@@ -1,7 +1,22 @@
 import type { ReactNode } from 'react';
 import type { Cell, RowData } from '@tanstack/react-table';
 
-const MAX_CELL_TEXT_LENGTH = 150;
+// A single token (no whitespace) longer than this can't wrap, so it stretches the column —
+// and with it the whole table — regardless of table-layout/overflow CSS. Truncating the
+// actual string is the only fix that's guaranteed to work independent of table CSS. Text
+// that contains a space is left untouched, however long, since it can wrap normally.
+const LONG_WORD_LENGTH = 14;
+
+/**
+ * Hard-truncates `text` when it contains a word (whitespace-delimited token) longer than
+ * `LONG_WORD_LENGTH` — e.g. a slug or filename with no spaces. Safe to call on any string;
+ * normal multi-word text is returned unchanged.
+ */
+export const truncateUnbreakableText = (text: string): string => {
+    const hasUnbreakableWord = text.split(/\s+/).some((word) => word.length > LONG_WORD_LENGTH);
+    if (!hasUnbreakableWord) return text;
+    return text.length > LONG_WORD_LENGTH ? `${text.slice(0, LONG_WORD_LENGTH)}…` : text;
+};
 
 /**
  * True when a row click originated from an interactive element (action buttons,
@@ -17,12 +32,13 @@ export const isRowClickIgnored = (target: EventTarget | null): boolean => {
 export const truncateCellNode = (node: ReactNode): ReactNode => {
     if (typeof node !== 'string' && typeof node !== 'number') return node;
     const text = String(node);
-    if (text.length <= MAX_CELL_TEXT_LENGTH) return node;
-    return <span title={text}>{text.slice(0, MAX_CELL_TEXT_LENGTH) + '…'}</span>;
+    const shortened = truncateUnbreakableText(text);
+    if (shortened !== text) return <span title={text}>{shortened}</span>;
+    return node;
 };
 
 /**
- * Render a tanstack cell with the 150-char truncation applied.
+ * Render a tanstack cell with truncation applied.
  *
  * `flexRender` always wraps a function-form `cell` in `<Comp {...props}/>`, so
  * the rendered output is a React element — `truncateCellNode` only sees a
@@ -32,7 +48,9 @@ export const truncateCellNode = (node: ReactNode): ReactNode => {
  *
  * Cell renderers in this codebase are pure (no hooks), so calling them
  * outside React's render tree is safe. Cells that return JSX pass through
- * unchanged.
+ * unchanged — a custom cell renderer with free-text content (e.g. a name/title
+ * column) must call `truncateUnbreakableText` itself, since this can't safely
+ * rewrite arbitrary JSX.
  */
 export const renderTruncatedCell = <TData extends RowData>(
     cell: Cell<TData, unknown> | undefined,

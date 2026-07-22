@@ -32,18 +32,20 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     private final OpenceliumProps ocProps;
     private final ConnectionMngMapper connectionMngMapper;
     private final EntityUpdater<ConnectionMng> connectionMngEntityUpdater;
+    private final OperatorMngService operatorMngService;
 
     public ConnectionMngServiceImp(
             ConnectionMngRepository connectionMngRepository,
             @Qualifier("fieldBindingMngServiceImp") FieldBindingMngService fieldBindingMngService,
             OpenceliumProps ocProps, ConnectionMngMapper connectionMngMapper,
-            EntityVersionManager entityVersionManager
+            EntityVersionManager entityVersionManager, OperatorMngService operatorMngService
     ) {
         this.connectionMngRepository = connectionMngRepository;
         this.fieldBindingMngService = fieldBindingMngService;
         this.ocProps = ocProps;
         this.connectionMngMapper = connectionMngMapper;
         this.connectionMngEntityUpdater = entityVersionManager.getUpdater(ConnectionMng.class);
+        this.operatorMngService = operatorMngService;
     }
 
     @Override
@@ -201,6 +203,20 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
 
         if (connectionMng.getToConnector() != null && connectionMng.getToConnector().getMethods() != null) {
             validateMethods(connectionMng.getToConnector().getMethods());
+        }
+
+        if (connectionMng.getFromConnector() != null && connectionMng.getFromConnector().getOperators() != null) {
+            validateOperators(connectionMng.getFromConnector().getOperators());
+        }
+
+        if (connectionMng.getToConnector() != null && connectionMng.getToConnector().getOperators() != null) {
+            validateOperators(connectionMng.getToConnector().getOperators());
+        }
+    }
+
+    private void validateOperators(List<OperatorMng> operators) {
+        for (OperatorMng operator : operators) {
+            operatorMngService.validate(operator);
         }
     }
 

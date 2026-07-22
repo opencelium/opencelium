@@ -16,7 +16,10 @@
     "openScriptNewWindow": "Skript in neuem Fenster öffnen",
     "maximizeScript": "Skript maximieren",
     "minimizeScript": "Skript minimieren",
-    "load": "Laden"
+    "maximizeRequestData": "Anfragedaten maximieren",
+    "minimizeRequestData": "Anfragedaten minimieren",
+    "load": "Laden",
+    "createEnhancement": "Enhancement erstellen"
   },
   "confirmDelete": {
     "title": "Schritt löschen",
@@ -184,8 +187,9 @@
       "description": "Es gibt keine Konnektoren, die zu dieser Suche passen."
     },
     "connectorStatus": {
-      "passed": "Verbindungsprüfung erfolgreich",
-      "failed": "Verbindungsprüfung fehlgeschlagen"
+      "passed": "Verbindungstest erfolgreich — dieser Connector ist einsatzbereit.",
+      "failed": "Verbindungstest fehlgeschlagen — Zugangsdaten und Einstellungen des Connectors prüfen.",
+      "failedWithReason": "Verbindungstest fehlgeschlagen: {{reason}}"
     },
     "methodsEmpty": {
       "title": "Keine Methoden gefunden",
@@ -257,12 +261,23 @@
       "message": "Dadurch wird der Datenaggregator von diesem Schritt entfernt. Der Datenaggregator selbst wird nicht gelöscht und bleibt für andere Schritte verfügbar."
     }
   },
+  "templateConnectorMapping": {
+    "title": "Vorlagen-Connectoren zuordnen",
+    "intro": "Diese Vorlage wurde mit Connectoren aus einer anderen Umgebung erstellt. Wählen Sie für jeden Connector, welcher Connector in dieser Umgebung verwendet werden soll, bevor der Workflow geladen wird.",
+    "noInvokerHint": "Kein Invoker-Hinweis verfügbar",
+    "usedBy": "Verwendet von: {{methods}}",
+    "unknownConnector": "Connector Nr. {{id}}",
+    "selectPlaceholder": "Connector auswählen",
+    "createNewTooltip": "Neuen Connector erstellen"
+  },
   "node": {
     "if": "If",
     "loop": "Loop",
     "branchTrue": "true",
     "branchFalse": "false",
-    "asyncBadge": "Asynchrone Anfrage — löst den anderen Workflow aus und wartet nicht auf dessen Antwort."
+    "asyncBadge": "Asynchrone Anfrage — löst den anderen Workflow aus und wartet nicht auf dessen Antwort.",
+    "aggregatorBadge": "Führt Ergebnisse mehrerer Aufrufe mit dem Daten-Aggregator \"{{name}}\" zusammen.",
+    "methodColorBadge": "Knoten mit derselben Farbe und Nummer rufen dieselbe Methode desselben Connectors auf."
   },
   "saveDialog": {
     "title": "Version speichern",
@@ -394,6 +409,8 @@
     "level": "Ebene {{depth}}",
     "text": "Text",
     "textValue": "Textwert",
+    "textPlaceholder": "Kein Textinhalt",
+    "addChild": "Unterelement",
     "attributePlaceholder": "Attribut {{name}}",
     "empty": "Leer"
   },
@@ -401,7 +418,12 @@
     "title": "Enhancement",
     "language": "Sprache",
     "script": "Skript",
-    "emptyState": "Bitte klicken Sie auf die Referenz, um ihr Enhancement anzuzeigen."
+    "emptyState": "Bitte klicken Sie auf die Referenz, um ihr Enhancement anzuzeigen.",
+    "directReference": {
+      "title": "Direkte Referenz",
+      "description": "Dieses Feld hat kein Enhancement — es besteht eine direkte Eins-zu-eins-Referenz zwischen den beiden unten stehenden Feldern, ohne dazwischenliegendes Skript. Direkte Referenzen werden schneller ausgeführt als ein Enhancement mit Skript.",
+      "descriptionMany": "Dieses Feld hat kein Enhancement — es besteht eine direkte Referenz zwischen den unten stehenden Feldern, ohne dazwischenliegendes Skript. Direkte Referenzen werden schneller ausgeführt als ein Enhancement mit Skript."
+    }
   },
   "description": {
     "label": "Beschreibung",
@@ -436,7 +458,8 @@
   "refGenerator": {
     "connector": "Konnektor",
     "method": "Methode",
-    "field": "Feld"
+    "field": "Feld",
+    "webhookTriggerHint": "Webhook-Trigger — diese Antwort ist nur die Trigger-Bestätigung, nicht das Ergebnis des ausgelösten Workflows."
   },
   "webhook": {
     "noWebhooks": "Noch keine Webhooks",
@@ -460,9 +483,11 @@
   "requestData": "Anfragedaten",
   "graphqlBody": {
     "masterPasswordTitle": "Geben Sie das Master-Passwort ein, um auf die GraphQL-API dieses Connectors zuzugreifen",
-    "autocompleteHint": "Drücken Sie Strg + Leertaste, um die Autovervollständigung anzuzeigen.",
+    "editorHint": "Strg + Leertaste für die Autovervollständigung. Nur die Abfrage des aktiven Tabs wird ausgeführt, wenn diese Methode läuft — Tabs werden nach dem Operationsnamen der Abfrage benannt (z. B. \"query MyQuery {...}\"), anonyme Abfragen bleiben daher \"<untitled>\".",
     "connectorFailed": "Der Connector konnte nicht geladen werden. Überprüfen Sie die Backend-Verbindung und versuchen Sie es erneut.",
     "loginFailed": "Die Authentifizierung bei der GraphQL-API dieses Connectors ist fehlgeschlagen. Überprüfen Sie dessen Zugangsdaten und versuchen Sie es erneut.",
+    "masterPasswordNotConfigured": "Es ist kein Master-Passwort konfiguriert",
+    "masterPasswordNotConfiguredDescription": "Bitten Sie einen Administrator, opencelium.connector.master-password in /backend/src/main/resources/application.yml zu setzen und das Backend neu zu starten, um auf die GraphQL-API dieses Connectors zugreifen zu können.",
     "retry": "Erneut versuchen"
   }
 }

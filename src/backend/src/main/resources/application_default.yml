@@ -211,6 +211,21 @@ opencelium:
       keep: 10
   ###########################################################################
   #                                                                         #
+  #   Sweepers                                                              #
+  #                                                                         #
+  #   test-connection — permanently removes leftover test connections       #
+  #     enabled       — turn the sweeper on/off (default: true)             #
+  #     fixed-delay   — ms between runs, non-overlapping (default: 1h)      #
+  #     initial-delay — ms before the first run; 0 also cleans at startup   #
+  #                                                                         #
+  ###########################################################################
+  sweeper:
+    test-connection:
+      enabled: true
+      fixed-delay: 900000
+      initial-delay: 0
+  ###########################################################################
+  #                                                                         #
   #   Is customizable                                                       #
   #                                                                         #
   ###########################################################################
