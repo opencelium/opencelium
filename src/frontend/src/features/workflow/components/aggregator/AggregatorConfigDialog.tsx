@@ -36,7 +36,12 @@ export function AggregatorConfigDialog({ open, node, onClose, onSave }: Props) {
 
   if (!open || !node) return null;
 
-  const options = aggregators.map((aggregator) => ({ value: String(aggregator.id), label: aggregator.name }));
+  // Archived aggregators are hidden from selection, except one already assigned to this
+  // node — otherwise the dropdown would show blank for a node whose aggregator was
+  // archived after being assigned.
+  const options = aggregators
+    .filter((aggregator) => aggregator.active || aggregator.id === assignedId)
+    .map((aggregator) => ({ value: String(aggregator.id), label: aggregator.name }));
 
   const handleSelectClick = () => {
     if (!selectedAggregator) return;
