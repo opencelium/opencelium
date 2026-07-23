@@ -1,5 +1,5 @@
 import { MoreHorizontal } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { CommandPalette } from '@widgets/CommandPalette/CommandPalette';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { workflowCommandBridgeStore } from '../../command/workflowCommandBridge';
@@ -12,13 +12,23 @@ import { useWorkflowHeaderState } from './useWorkflowHeaderState';
 
 export function WorkflowHeader({
 	onOpenHistory, onSave, onMenuItemSelect, menuLoadingItemId,
-	saveDisabled = false, readOnly = false, loading = false, schedulesSlot, ...stateProps
+	saveDisabled = false, readOnly = false, loading = false, schedulesSlot, hasSavedConnection = false, ...stateProps
 }: WorkflowHeaderProps) {
 	const { t } = useI18n('workflow');
 	const state = useWorkflowHeaderState(stateProps);
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [saveDialogOpen, setSaveDialogOpen] = useState(false);
 	const [saveComment, setSaveComment] = useState('');
+	const menuItems = useMemo(
+		() => headerMenuItems.map((item) => item.id === 'download-template'
+			? {
+				...item,
+				disabled: !hasSavedConnection,
+				disabledTooltipKey: 'headerMenu.downloadAsTemplateDisabledHint',
+			}
+			: item),
+		[hasSavedConnection],
+	);
 
 	const openSaveDialog = async () => {
 		if (await state.prepareSave(t('messages.enterWorkflowName'))) setSaveDialogOpen(true);
@@ -74,7 +84,7 @@ export function WorkflowHeader({
 							onClick={() => setMenuOpen((open) => !open)}>
 							<MoreHorizontal size={16} />
 						</button>
-						<HeaderMenu open={menuOpen} items={headerMenuItems}
+						<HeaderMenu open={menuOpen} items={menuItems}
 							onClose={() => setMenuOpen(false)}
 							onSelect={(item) => item.id === 'version-history'
 								? onOpenHistory() : onMenuItemSelect?.(item)}

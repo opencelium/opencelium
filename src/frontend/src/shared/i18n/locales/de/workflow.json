@@ -204,6 +204,7 @@
   },
   "headerMenu": {
     "downloadAsTemplate": "Als Vorlage herunterladen",
+    "downloadAsTemplateDisabledHint": "Speichern Sie den Workflow zuerst, um ihn als Vorlage herunterzuladen",
     "saveAsTemplate": "Als Vorlage speichern",
     "loadTemplate": "Vorlage laden",
     "versionHistory": "Versionsverlauf",

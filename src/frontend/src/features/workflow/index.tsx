@@ -800,6 +800,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         onOpenHistory={handleOpenHistory}
         readOnly={readOnly}
         loading={isConnectionLoading}
+        hasSavedConnection={!!activeConnectionId}
         schedulesSlot={
           activeConnectionId ? (
             <WorkflowSchedulesPill

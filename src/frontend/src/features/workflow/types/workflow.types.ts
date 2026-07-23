@@ -124,6 +124,8 @@ export type WorkflowHeaderMenuItem = {
 	section?: 'template' | 'history' | 'shortcuts' | 'exit';
 	keepOpenOnSelect?: boolean;
 	disabled?: boolean;
+	/** Tooltip shown while `disabled` explaining why the action is unavailable. */
+	disabledTooltipKey?: string;
 	badgeKey?: string;
 };
 
