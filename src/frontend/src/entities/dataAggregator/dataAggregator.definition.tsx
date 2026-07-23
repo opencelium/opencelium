@@ -46,7 +46,6 @@ export const dataAggregatorDefinition: EntityDefinition = {
             ntLink: <Link to="/notification-template" />,
         },
         defaultSort: { field: 'name', direction: 'asc' },
-        bulkDelete: true,
         actions: [
             { type: 'view' },
             { type: 'update' },
