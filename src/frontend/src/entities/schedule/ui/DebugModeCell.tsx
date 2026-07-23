@@ -4,7 +4,7 @@ import { Switch } from '@shared/ui/primitives/Switch'
 import { useGeneralRequestMutation } from '@shared/api/genericApi'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { useScheduleUpdatePermission } from '../model/useScheduleUpdatePermission'
-import type { Schedule } from '../model/types'
+import type { Schedule, ScheduleUpdateDTO } from '../model/types'
 
 type Props = {
     schedule: Schedule
@@ -22,15 +22,20 @@ export const DebugModeCell = memo(function DebugModeCell({ schedule }: Props) {
     const handleChange = async (next: boolean) => {
         setOptimistic(next)
         setPending(true)
+        const body: ScheduleUpdateDTO = {
+            schedulerId: schedule.schedulerId,
+            title: schedule.title,
+            debugMode: next,
+            status: schedule.status,
+            cronExp: schedule.cronExp,
+            connectionId: String(schedule.connection?.connectionId),
+        }
+
         try {
             await generalRequest({
                 url: `/scheduler/${schedule.schedulerId}`,
                 method: 'PUT',
-                body: {
-                    ...schedule,
-                    debugMode: next,
-                    connectionId: schedule.connection?.connectionId,
-                },
+                body,
                 options: {},
             }).unwrap()
             message.success(
