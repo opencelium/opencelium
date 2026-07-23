@@ -11,7 +11,7 @@ server:
   address: 127.0.0.1
   forward-headers-strategy: native
 websocket:
-  endpoint: /websocket
+s  endpoint: /ws
 #  ssl:
 #    enabled: true
 #    key-store-type: PKCS12
