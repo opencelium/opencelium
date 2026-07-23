@@ -83,6 +83,7 @@ export type WorkflowNodeData = {
 	onAddStep?: (action: WorkflowAction) => void;
 	onOpenContextMenu?: (menu: WorkflowContextMenu | null) => void;
 	onDeleteNode?: (nodeId: string) => void;
+	onOpenAggregatorEditor?: (nodeId: string) => void;
 };
 
 export type WorkflowEdgeData = {

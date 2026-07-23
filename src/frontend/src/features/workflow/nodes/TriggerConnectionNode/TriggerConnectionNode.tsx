@@ -48,6 +48,7 @@ export function TriggerConnectionNode({ id, data, selected, dragging }: NodeProp
 					dataAggregator={data.dataAggregator}
 					testId={`workflow-node-aggregator-${id}`}
 					suppressTooltip={suppressTooltip}
+					onOpenAggregatorEditor={() => data.onOpenAggregatorEditor?.(id)}
 				/>
 				{asyncBadge}
 			</div>

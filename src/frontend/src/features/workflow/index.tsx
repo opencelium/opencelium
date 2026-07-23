@@ -969,6 +969,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
                 }
               }}
               onDeleteNode={workflow.onDeleteNode}
+              onOpenAggregatorEditor={(nodeId) => workflow.setAggregatorEditor({ nodeId })}
               onPaneClick={() => { workflow.setSidebarAction(null); workflow.setContextMenu(null); workflow.setHistoryOpen(false); workflow.setConditionEditor(null); }}
             >
               <Background gap={16} size={1} />

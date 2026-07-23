@@ -53,6 +53,7 @@ export function ConnectorMethodNode({ id, data, selected, dragging }: NodeProps<
           dataAggregator={data.dataAggregator}
           testId={`workflow-node-aggregator-${id}`}
           suppressTooltip={suppressTooltip}
+          onOpenAggregatorEditor={() => data.onOpenAggregatorEditor?.(id)}
         />
         {connectorStatus ? (
           <div className="circleNodeStatus">
