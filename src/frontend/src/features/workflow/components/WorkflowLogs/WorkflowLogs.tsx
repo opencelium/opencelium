@@ -2,10 +2,10 @@ import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { EMPTY_LIVE_LOG_TREE, LiveExecutionLogTree, MethodViewModeProvider } from '@features/logs';
-import { useTestRun } from '../test-run/useTestRun';
-import type { TestRunResult } from '../test-run/TestRunContext';
-import { WorkflowLogsHeader } from './WorkflowLogs/WorkflowLogsHeader';
-import type { WorkflowLogsPanelState } from './WorkflowLogs/WorkflowLogs.types';
+import { useTestRun } from '../../test-run/useTestRun';
+import type { TestRunResult } from '../../test-run/TestRunContext';
+import { WorkflowLogsHeader } from './WorkflowLogsHeader';
+import type { WorkflowLogsPanelState } from './WorkflowLogs.types';
 
 
 const formatDuration = (ms: number) => {
