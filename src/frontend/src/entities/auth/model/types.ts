@@ -77,7 +77,6 @@ export type LoginResult =
 export type TotpValidateInput = {
     code: string
     sessionId: string
-    rememberMe?: boolean
 }
 
 // --- Main Auth User ---

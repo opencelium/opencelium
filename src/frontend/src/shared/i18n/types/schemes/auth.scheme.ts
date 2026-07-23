@@ -12,9 +12,6 @@ export interface AuthSchema {
                 placeholder: string
                 required: string
             }
-            rememberMe: {
-                label: string
-            }
         }
         actions: {
             signIn: string
