@@ -1,21 +1,45 @@
-// Reads the deploy-time overridable settings from window.__OC_CONFIG__ (set by
-// /public/config.js, loaded via a <script> tag ahead of the app bundle in
-// index.html — see that file). Falls back to the build-time VITE_* env vars so
-// local dev keeps working if config.js is left at its checked-in default.
+// Deploy-time overridable settings, fetched from /public/config.json at app startup
+// (see loadRuntimeConfig, awaited in main.tsx before the app renders). Because it's
+// fetched rather than baked into the bundle, editing config.json in a deployed
+// dist/ output repoints the app at a different backend/websocket host — no rebuild
+// needed. Falls back to the build-time VITE_* env vars if the fetch fails, so local
+// dev keeps working even without a config.json present.
+export type OcServerSettings = {
+    protocol?: string
+    hostname?: string
+    port?: string | number
+    prefix?: string
+}
+
 export type OcRuntimeConfig = {
-    API_URL?: string
-    SOCKET_URL?: string
+    server?: OcServerSettings
+    socket?: OcServerSettings
 }
-
-declare global {
-    interface Window {
-        __OC_CONFIG__?: OcRuntimeConfig
-    }
-}
-
-const windowConfig = typeof window !== 'undefined' ? window.__OC_CONFIG__ : undefined
 
 export const runtimeConfig = {
-    apiUrl: windowConfig?.API_URL ?? (import.meta.env.VITE_API_URL as string | undefined) ?? '',
-    socketUrl: windowConfig?.SOCKET_URL ?? (import.meta.env.VITE_SOCKET_URL as string | undefined),
+    apiUrl: (import.meta.env.VITE_API_URL as string | undefined) ?? '',
+    socketUrl: import.meta.env.VITE_SOCKET_URL as string | undefined,
+}
+
+const buildOrigin = (settings: OcServerSettings | undefined) => {
+    const protocol = settings?.protocol || window.location.protocol
+    const hostname = settings?.hostname || window.location.hostname
+    const port = settings?.port
+    return `${protocol}//${hostname}${port ? `:${port}` : ''}`
+}
+
+export async function loadRuntimeConfig(): Promise<void> {
+    try {
+        const response = await fetch('/config.json', { cache: 'no-store' })
+        if (!response.ok) return
+        const settings = (await response.json()) as OcRuntimeConfig
+
+        const serverPrefix = settings.server?.prefix?.trim() || '/'
+        runtimeConfig.apiUrl = `${buildOrigin(settings.server)}${serverPrefix}`.replace(/\/+$/, '')
+
+        const socketPrefix = settings.socket?.prefix?.trim() || ''
+        runtimeConfig.socketUrl = `${buildOrigin(settings.socket)}${socketPrefix}`
+    } catch {
+        // config.json missing/unreachable — keep the VITE_* dev fallback above.
+    }
 }
