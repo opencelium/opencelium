@@ -13,6 +13,12 @@ type BuildConnectionPayloadArgs = {
 	edges: WorkflowEdgeModel[];
 	viewport?: { x: number; y: number; zoom: number };
 	fieldBindings?: any[];
+	/** Templates are applied against a different environment, where `connectorId` is
+	 * meaningless — `TemplateConnectorMappingDialog` re-resolves each method's connector
+	 * by invoker name instead. Set this when building a template payload so each
+	 * `methods[i].connector.invoker` carries that name; regular connection saves leave
+	 * it unset since `connectorId` alone already identifies the connector there. */
+	includeInvoker?: boolean;
 };
 
 const normalizeIndex = (value: unknown, fallback: number) =>
@@ -384,10 +390,17 @@ const serializeHeaderReferences = (value: unknown, endpointArgs?: Record<string,
 const serializePayloadData = (body: unknown, endpointArgs?: Record<string, any>, format = 'json', data = 'raw') =>
 	serializeHeaderReferences(normalizePayloadData(body, format, data), endpointArgs);
 
-const buildMethodPayload = (node: WorkflowNodeModel, index: string, order: number, resolvedColor?: string) => {
+const buildMethodPayload = (
+	node: WorkflowNodeModel,
+	index: string,
+	order: number,
+	resolvedColor?: string,
+	includeInvoker?: boolean,
+) => {
 	const config = node.data.methodConfig as any;
 	const endpointArgs = config?.endpointArgs ?? {};
 	const isHttpRequest = isConnectorlessMethodNode(node);
+	const connectorData = isHttpRequest ? null : node.data.connector;
 	const response = config?.response ?? (isHttpRequest
 		? {
 			responseId: `response-${node.id}`,
@@ -412,7 +425,9 @@ const buildMethodPayload = (node: WorkflowNodeModel, index: string, order: numbe
 		methodType: resolveMethodType(node),
 		dataAggregator: node.data.dataAggregator ?? null,
 		color: normalizeColor(resolvedColor ?? (node.data as any).color, ALL_COLORS[order % ALL_COLORS.length]),
-		connector: isHttpRequest ? null : node.data.connector,
+		connector: connectorData && includeInvoker
+			? { ...connectorData, invoker: connectorData.invokerName ?? null }
+			: connectorData,
 		request: {
 			endpoint: serializeReferenceString(config?.url ?? '', endpointArgs),
 			method: config?.method ?? 'GET',
@@ -619,7 +634,11 @@ const normalizeFieldBinding = (binding: any) => {
 const normalizeFieldBindings = (fieldBindings: any) =>
 	Array.isArray(fieldBindings) ? fieldBindings.map(normalizeFieldBinding) : [];
 
-export function buildFromConnectorPayload(nodes: WorkflowNodeModel[], edges: WorkflowEdgeModel[]) {
+export function buildFromConnectorPayload(
+	nodes: WorkflowNodeModel[],
+	edges: WorkflowEdgeModel[],
+	options?: { includeInvoker?: boolean },
+) {
 	const workflowIndexes = buildWorkflowIndexes(nodes, edges);
 	const methodNodes = nodes.filter(isMethodNode);
 	const usedMethodColors = new Set<string>();
@@ -640,7 +659,13 @@ export function buildFromConnectorPayload(nodes: WorkflowNodeModel[], edges: Wor
 		colorByNodeId.set(node.id, free);
 	});
 	const methods = methodNodes
-		.map((node, index) => buildMethodPayload(node, normalizeIndex(workflowIndexes.get(node.id), index), index, colorByNodeId.get(node.id)))
+		.map((node, index) => buildMethodPayload(
+			node,
+			normalizeIndex(workflowIndexes.get(node.id), index),
+			index,
+			colorByNodeId.get(node.id),
+			options?.includeInvoker,
+		))
 		.sort(compareIndex);
 	const operatorEntries = nodes
 		.filter(isOperatorNode)
@@ -679,6 +704,7 @@ export function buildConnectionPayload({
 	edges,
 	viewport,
 	fieldBindings,
+	includeInvoker,
 }: BuildConnectionPayloadArgs) {
 	const connection = buildLegacyConnection(nodes);
 	return {
@@ -687,7 +713,7 @@ export function buildConnectionPayload({
 		name: title,
 		description,
 		fieldBinding: serializeFieldBindings(fieldBindings ?? connection.fieldBindings),
-		fromConnector: buildFromConnectorPayload(nodes, edges),
+		fromConnector: buildFromConnectorPayload(nodes, edges, { includeInvoker }),
 		toConnector: null,
 		ui: buildUiPayload(nodes, edges, viewport),
 	};

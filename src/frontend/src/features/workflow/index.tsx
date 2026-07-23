@@ -93,6 +93,7 @@ const hydrateNode = (
             icon: normalizeConnectorIcon(connector.icon) ?? normalizeConnectorIcon(connector.invoker?.icon) ?? invokerIcon ?? node.data.connector?.icon ?? null,
             lastTestPassed: connector.lastTestPassed,
             lastTestError: connector.lastTestError,
+            invokerName: connector.invoker?.name ?? node.data.connector?.invokerName ?? null,
           }
         : invokerIcon && node.data.connector
           ? { ...node.data.connector, icon: invokerIcon }
@@ -532,6 +533,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         edges: workflow.edges,
         viewport: workflow.getViewport(),
         fieldBindings: loadedFieldBindings,
+        includeInvoker: true,
       });
 
       const response = await apiExecutor({
