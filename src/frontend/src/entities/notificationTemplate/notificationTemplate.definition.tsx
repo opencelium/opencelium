@@ -29,7 +29,7 @@ const buildNotificationTemplateViewPageUrl = (value: string): string =>
 
 export const notificationTemplateDefinition: EntityDefinition = {
     name: baseKey,
-    plural: 'notificationTemplates',
+    plural: 'notification-templates',
 
     routes: [
         { type: 'create' },
