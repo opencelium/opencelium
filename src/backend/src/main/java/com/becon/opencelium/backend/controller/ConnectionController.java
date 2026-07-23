@@ -733,6 +733,10 @@ public class ConnectionController {
     })
     @PostMapping(path = "/remoteapi", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> sendRequestToApi(@RequestBody ApiDataResource apiDataResource) {
+        // TODO: rename isSslON
+        // temporary fix
+        boolean disableSslValidation = !apiDataResource.isSslOn();
+        apiDataResource.setSslOn(disableSslValidation);
         HttpHeaders headers = new HttpHeaders();
         if (apiDataResource.getHeader() != null) {
             headers.setAll(apiDataResource.getHeader());
