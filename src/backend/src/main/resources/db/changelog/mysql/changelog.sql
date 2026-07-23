@@ -723,3 +723,8 @@ ALTER TABLE `webhook` ADD CONSTRAINT `uq_webhook_uuid` UNIQUE (`uuid`);
 --changeset 5.0:4 stripComments:true splitStatements:true endDelimiter:;
 ALTER TABLE `connector` ADD COLUMN IF NOT EXISTS `last_test_passed` TINYINT(1) DEFAULT NULL;
 ALTER TABLE `connector` ADD COLUMN IF NOT EXISTS `last_test_error` TEXT DEFAULT NULL;
+--changeset 5.0:5 stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE `execution_argument` DROP FOREIGN KEY IF EXISTS `execution_argument_ibfk_1`;
+ALTER TABLE `execution_argument` ADD CONSTRAINT `fk_execution_argument_execution1` FOREIGN KEY (`execution_id`) REFERENCES `execution` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
+ALTER TABLE `execution` DROP FOREIGN KEY IF EXISTS `fk_execution_scheduler1`;
+ALTER TABLE `execution` ADD CONSTRAINT `fk_execution_scheduler1` FOREIGN KEY (`scheduler_id`) REFERENCES `scheduler` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;

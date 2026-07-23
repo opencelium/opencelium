@@ -24,4 +24,13 @@ public interface ExecutionArgumentRepository extends JpaRepository<ExecutionArgu
             WHERE s.connection_id = :connectionId
             """, nativeQuery = true)
     void deleteByConnectionId(@Param("connectionId") Long connectionId);
+
+    @Modifying
+    @Transactional
+    @Query(value = """
+            DELETE ea FROM execution_argument ea
+            JOIN execution e ON e.id = ea.execution_id
+            WHERE e.scheduler_id = :schedulerId
+            """, nativeQuery = true)
+    void deleteBySchedulerId(@Param("schedulerId") int schedulerId);
 }
