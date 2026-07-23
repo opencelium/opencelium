@@ -45,7 +45,9 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -428,23 +430,27 @@ public class InvokerServiceImp implements InvokerService {
         if (!FileNameUtils.getExtension(file.getName()).equals("xml")) {
             return null;
         }
+        if (!file.exists()) {
+            return null;
+        }
         DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        return file.exists() ? dBuilder.parse(file) : null;
+        try (InputStream is = new FileInputStream(file)) {
+            return dBuilder.parse(is);
+        }
     }
 
     @Override
     public List<Document> getAllInvokerDocuments() {
-        try {
-            Stream<Path> allInvokers = Files.walk(filePath, 1)
-                    .filter(path -> !path.equals(filePath))
-                    .map(filePath::relativize);
+        try (Stream<Path> allInvokers = Files.walk(filePath, 1)
+                .filter(path -> !path.equals(filePath))
+                .map(filePath::relativize)) {
 
             return allInvokers.map(p -> new File(filePath + "/" + p.getFileName()))
                     .filter(f -> f.getName().endsWith(".xml"))
                     .map(file -> {
-                        try {
+                        try (InputStream is = new FileInputStream(file)) {
                             DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-                            return dBuilder.parse(file);
+                            return dBuilder.parse(is);
                         } catch (Exception e) {
                             log.error("Failed to parse Invoker[name: {}]", file.getName());
                             e.printStackTrace();
@@ -495,10 +501,10 @@ public class InvokerServiceImp implements InvokerService {
     }
 
     private static String getNodeValue(File xmlFile, String xpathExpression) {
-        try {
+        try (InputStream is = new FileInputStream(xmlFile)) {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
-            Document doc = builder.parse(xmlFile);
+            Document doc = builder.parse(is);
 
             XPathFactory xPathFactory = XPathFactory.newInstance();
             XPath xpath = xPathFactory.newXPath();
