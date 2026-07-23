@@ -9,7 +9,7 @@ import './styles.css';
 import { NodeContextMenu } from './components/NodeContextMenu/NodeContextMenu';
 import { WorkflowCanvas } from './components/WorkflowCanvas/WorkflowCanvas';
 import { WorkflowHeader } from './components/WorkflowHeader';
-import { WorkflowLogs } from './components/WorkflowLogs';
+import { WorkflowLogs } from './components/WorkflowLogs/WorkflowLogs';
 import { WorkflowSidebar } from './components/WorkflowSidebar/WorkflowSidebar';
 import { WorkflowSchedulesPill } from './components/schedules/WorkflowSchedulesPill';
 import { WorkflowSchedulesPanel } from './components/schedules/WorkflowSchedulesPanel';
@@ -56,53 +56,84 @@ const toWorkflowResponse = (nodeId: string, response: NonNullable<Connector['inv
 const normalizeConnectorIcon = (icon: Connector['icon']) =>
   typeof icon === 'string' ? icon : null;
 
+type HydrateCacheEntry = {
+  node: WorkflowNodeModel;
+  connectors: Connector[];
+  invokers: Invoker[];
+  result: WorkflowNodeModel;
+};
+
+const hydrateNode = (
+  node: WorkflowNodeModel,
+  connectors: Connector[],
+  invokers: Invoker[],
+): WorkflowNodeModel => {
+  if (node.type !== 'connector' && node.type !== 'system') return node;
+  const connectorId = node.data.connector?.connectorId;
+  const methodName = node.data.subtitle;
+  if (!connectorId || !methodName) return node;
+
+  const connector = connectors.find((item) => item.connectorId === connectorId);
+  const operation = connector?.invoker?.operations?.find((item) => item.name.toLowerCase() === methodName.toLowerCase());
+  const invokerName = node.data.connector?.invokerName;
+  const invokerIcon = !node.data.connector?.icon && invokerName
+    ? invokers.find((item) => (item.name ?? '').toLowerCase() === invokerName.toLowerCase())?.icon ?? null
+    : null;
+  if (!connector && !operation?.response && !invokerIcon) return node;
+
+  return {
+    ...node,
+    data: {
+      ...node.data,
+      connector: connector
+        ? {
+            ...node.data.connector,
+            connectorId: connector.connectorId,
+            title: connector.title,
+            icon: normalizeConnectorIcon(connector.icon) ?? normalizeConnectorIcon(connector.invoker?.icon) ?? invokerIcon ?? node.data.connector?.icon ?? null,
+            lastTestPassed: connector.lastTestPassed,
+            lastTestError: connector.lastTestError,
+          }
+        : invokerIcon && node.data.connector
+          ? { ...node.data.connector, icon: invokerIcon }
+          : node.data.connector,
+      methodConfig: operation?.response
+        ? {
+            ...createEmptyMethodConfig(),
+            ...node.data.methodConfig,
+            response: toWorkflowResponse(node.id, operation.response),
+          }
+        : node.data.methodConfig,
+    },
+  };
+};
+
 const hydrateNodesWithOperationResponses = (
   nodes: WorkflowNodeModel[],
   connectors: Connector[],
   invokers: Invoker[] = [],
+  cache?: Map<string, HydrateCacheEntry>,
 ): WorkflowNodeModel[] => {
   if (!connectors.length && !invokers.length) return nodes;
 
-  return nodes.map((node) => {
-    if (node.type !== 'connector' && node.type !== 'system') return node;
-    const connectorId = node.data.connector?.connectorId;
-    const methodName = node.data.subtitle;
-    if (!connectorId || !methodName) return node;
-
-    const connector = connectors.find((item) => item.connectorId === connectorId);
-    const operation = connector?.invoker?.operations?.find((item) => item.name.toLowerCase() === methodName.toLowerCase());
-    const invokerName = node.data.connector?.invokerName;
-    const invokerIcon = !node.data.connector?.icon && invokerName
-      ? invokers.find((item) => (item.name ?? '').toLowerCase() === invokerName.toLowerCase())?.icon ?? null
-      : null;
-    if (!connector && !operation?.response && !invokerIcon) return node;
-
-    return {
-      ...node,
-      data: {
-        ...node.data,
-        connector: connector
-          ? {
-              ...node.data.connector,
-              connectorId: connector.connectorId,
-              title: connector.title,
-              icon: normalizeConnectorIcon(connector.icon) ?? normalizeConnectorIcon(connector.invoker?.icon) ?? invokerIcon ?? node.data.connector?.icon ?? null,
-              lastTestPassed: connector.lastTestPassed,
-              lastTestError: connector.lastTestError,
-            }
-          : invokerIcon && node.data.connector
-            ? { ...node.data.connector, icon: invokerIcon }
-            : node.data.connector,
-        methodConfig: operation?.response
-          ? {
-              ...createEmptyMethodConfig(),
-              ...node.data.methodConfig,
-              response: toWorkflowResponse(node.id, operation.response),
-            }
-          : node.data.methodConfig,
-      },
-    };
+  const result = nodes.map((node) => {
+    const cached = cache?.get(node.id);
+    if (cached && cached.node === node && cached.connectors === connectors && cached.invokers === invokers) {
+      return cached.result;
+    }
+    const hydrated = hydrateNode(node, connectors, invokers);
+    cache?.set(node.id, { node, connectors, invokers, result: hydrated });
+    return hydrated;
   });
+
+  if (cache) {
+    const liveIds = new Set(nodes.map((node) => node.id));
+    for (const key of cache.keys()) {
+      if (!liveIds.has(key)) cache.delete(key);
+    }
+  }
+
+  return result;
 };
 
 type WorkflowProps = {
@@ -276,8 +307,9 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const [isDownloadingTemplate, setIsDownloadingTemplate] = useState(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [schedulesOpen, setSchedulesOpen] = useState(false);
+  const hydrateCacheRef = useRef<Map<string, HydrateCacheEntry>>(new Map());
   const hydratedNodes = useMemo(
-    () => hydrateNodesWithOperationResponses(workflow.nodes, connectors, invokers),
+    () => hydrateNodesWithOperationResponses(workflow.nodes, connectors, invokers, hydrateCacheRef.current),
     [connectors, invokers, workflow.nodes],
   );
   const activeConnectionId = createdConnectionId ?? connectionId;
@@ -383,12 +415,6 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     return null;
   }, [persistedTitle, t]);
 
-  // Recognizes known backend validation error codes (e.g. an operator with an empty
-  // expression), highlights the node it names, and returns a specific translated
-  // message — or null when the error is unrecognized, so callers fall back to their
-  // own generic "failed to save/start" message. Shared between handleSave and the
-  // test-run start flow (passed to TestRunProvider) since both hit the same backend
-  // validation on the same node/edge graph.
   const resolveAndHighlightWorkflowError = useCallback((error: unknown): string | null => {
     const resolution = resolveWorkflowApiError(error, hydratedNodes, workflow.edges);
     if (!resolution) return null;
@@ -732,7 +758,6 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     const handleDeleteShortcut = (event: KeyboardEvent) => {
       if (event.key !== 'Delete') return;
       const target = event.target as HTMLElement | null;
-      // Don't hijack Delete while the user is editing text or a code editor.
       if (target?.closest('input, textarea, select, [contenteditable="true"], .ace_editor')) return;
       deleteSelectedNodeRef.current();
     };

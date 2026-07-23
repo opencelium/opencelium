@@ -1,13 +1,13 @@
 import { Controls, ReactFlow } from '@xyflow/react';
 import type { ReactFlowInstance } from '@xyflow/react';
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import type {
   WorkflowEdgeModel,
   WorkflowNodeModel,
 } from '../../types/workflow.types';
 import type { WorkflowCanvasProps } from './WorkflowCanvas.types';
 import { workflowEdgeTypes, workflowNodeTypes } from './workflowCanvasTypes';
-import { prepareWorkflowElements } from './prepareWorkflowElements';
+import { prepareWorkflowElements, type PrepareWorkflowCache } from './prepareWorkflowElements';
 
 const START_NODE_SIZE = 62;
 
@@ -56,14 +56,23 @@ export function WorkflowCanvas({
     : undefined;
   const appliedViewportKey = useRef<string | undefined>(undefined);
   const centeredStartVersion = useRef<number>(0);
+  const prepareCacheRef = useRef<PrepareWorkflowCache>({ nodes: new Map(), edges: new Map() });
+
+  const callbacksRef = useRef({ onOpenAddStep, onOpenContextMenu, onDeleteNode });
+  callbacksRef.current = { onOpenAddStep, onOpenContextMenu, onDeleteNode };
+  const stableOnOpenAddStep = useCallback<NonNullable<typeof onOpenAddStep>>((...args) => callbacksRef.current.onOpenAddStep?.(...args), []);
+  const stableOnOpenContextMenu = useCallback<NonNullable<typeof onOpenContextMenu>>((...args) => callbacksRef.current.onOpenContextMenu?.(...args), []);
+  const stableOnDeleteNode = useCallback<NonNullable<typeof onDeleteNode>>((...args) => callbacksRef.current.onDeleteNode?.(...args), []);
+
   const { preparedEdges, preparedNodes } = prepareWorkflowElements({
     nodes,
     edges,
     activeAction,
     isAnyNodeDragging,
-    onOpenAddStep,
-    onOpenContextMenu,
-    onDeleteNode,
+    onOpenAddStep: stableOnOpenAddStep,
+    onOpenContextMenu: stableOnOpenContextMenu,
+    onDeleteNode: stableOnDeleteNode,
+    cache: prepareCacheRef.current,
   });
 
   useEffect(() => {
@@ -106,6 +115,7 @@ export function WorkflowCanvas({
         onNodeDragStop={onNodeDragStop}
         onNodeDoubleClick={onNodeDoubleClick}
         onPaneClick={onPaneClick}
+        nodeDragThreshold={4}
         nodesDraggable
         nodesConnectable={false}
         elementsSelectable
