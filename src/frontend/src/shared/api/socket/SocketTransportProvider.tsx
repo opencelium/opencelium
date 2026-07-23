@@ -5,11 +5,11 @@ import {selectAccessToken} from "@entities/auth/model/authSelectors"
 import {createSocketClient, destroySocketClient} from "./socketClient"
 import {SocketContext} from "./SocketContext"
 import type {SocketContextValue, SocketStatus} from "./types"
+import {runtimeConfig} from "@shared/config/runtimeConfig"
 
 type Props = {children: ReactNode}
 
-const SOCKET_URL =
-    import.meta.env.VITE_SOCKET_URL ?? `${import.meta.env.VITE_API_URL}/websocket`
+const SOCKET_URL = runtimeConfig.socketUrl ?? `${runtimeConfig.apiUrl}/websocket`
 
 export function SocketTransportProvider({children}: Props) {
     const token = useAppSelector(selectAccessToken)
