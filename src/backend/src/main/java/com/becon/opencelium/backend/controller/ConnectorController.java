@@ -104,7 +104,11 @@ public class ConnectorController {
     @GetMapping
     public ResponseEntity<?> getByTitle(@RequestParam String title) {
         return connectorService.findAllByTitle(title)
-                .map(c -> ResponseEntity.ok().body(connectorResourceMapper.toDTO(c)))
+                .map(c -> {
+                    ConnectorResource resource = connectorResourceMapper.toDTO(c);
+                    resource.setSslCert(!resource.isSslCert());
+                    return ResponseEntity.ok().body(resource);
+                })
                 .orElseThrow(() -> new ConnectorNotFoundException(title));
     }
 
@@ -133,7 +137,11 @@ public class ConnectorController {
     @GetMapping(path = "/{id}")
     public ResponseEntity<?> get(@PathVariable int id) {
         return connectorService.findById(id)
-                .map(c -> ResponseEntity.ok().body(connectorResourceMapper.toDTO(c)))
+                .map(c -> {
+                    ConnectorResource resource = connectorResourceMapper.toDTO(c);
+                    resource.setSslCert(!resource.isSslCert());
+                    return ResponseEntity.ok().body(resource);
+                })
                 .orElseThrow(() -> new ConnectorNotFoundException(id));
     }
 
@@ -161,6 +169,10 @@ public class ConnectorController {
     @GetMapping("/all")
     public ResponseEntity<List<ConnectorResource>> getAll() {
         List<ConnectorResource> connectorResources = connectorResourceMapper.toDTOAll(connectorService.findAll());
+        connectorResources.stream().forEach(ctor -> {
+            boolean validationSslDisabled = !ctor.isSslCert();
+            ctor.setSslCert(validationSslDisabled);
+        });
         return ResponseEntity.ok(connectorResources);
     }
 
@@ -183,6 +195,8 @@ public class ConnectorController {
         connectorResources.forEach(x -> {
             x.getInvoker().setOperations(null);
             x.getInvoker().setRequiredData(null);
+            boolean validationSslDisabled = !x.isSslCert();
+            x.setSslCert(validationSslDisabled);
         });
 
         return ResponseEntity.ok(connectorResources);
