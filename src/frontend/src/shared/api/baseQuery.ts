@@ -4,9 +4,10 @@ import { normalizeError } from '@shared/errors/api/normalizeError.ts'
 import { errorBus } from '@shared/errors/api/errorBus.ts'
 import { selectAccessToken } from '@entities/auth/model/authSelectors'
 import type { RootState } from '@app/store/types'
+import { runtimeConfig } from '@shared/config/runtimeConfig'
 
 const rawBaseQuery = fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_API_URL,
+    baseUrl: runtimeConfig.apiUrl,
     credentials: 'include',
     prepareHeaders: (headers, { getState, extra, arg }) => {
         const isMultipart =

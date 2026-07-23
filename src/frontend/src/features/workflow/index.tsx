@@ -8,7 +8,7 @@ import { apiExecutor } from '@shared/api/apiExecutor';
 import './styles.css';
 import { NodeContextMenu } from './components/NodeContextMenu/NodeContextMenu';
 import { WorkflowCanvas } from './components/WorkflowCanvas/WorkflowCanvas';
-import { WorkflowHeader } from './components/WorkflowHeader';
+import { WorkflowHeader } from './components/WorkflowHeader/WorkflowHeader';
 import { WorkflowLogs } from './components/WorkflowLogs/WorkflowLogs';
 import { WorkflowSidebar } from './components/WorkflowSidebar/WorkflowSidebar';
 import { WorkflowSchedulesPill } from './components/schedules/WorkflowSchedulesPill';
@@ -93,6 +93,7 @@ const hydrateNode = (
             icon: normalizeConnectorIcon(connector.icon) ?? normalizeConnectorIcon(connector.invoker?.icon) ?? invokerIcon ?? node.data.connector?.icon ?? null,
             lastTestPassed: connector.lastTestPassed,
             lastTestError: connector.lastTestError,
+            invokerName: connector.invoker?.name ?? node.data.connector?.invokerName ?? null,
           }
         : invokerIcon && node.data.connector
           ? { ...node.data.connector, icon: invokerIcon }
@@ -532,6 +533,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         edges: workflow.edges,
         viewport: workflow.getViewport(),
         fieldBindings: loadedFieldBindings,
+        includeInvoker: true,
       });
 
       const response = await apiExecutor({
@@ -798,6 +800,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         onOpenHistory={handleOpenHistory}
         readOnly={readOnly}
         loading={isConnectionLoading}
+        hasSavedConnection={!!activeConnectionId}
         schedulesSlot={
           activeConnectionId ? (
             <WorkflowSchedulesPill
@@ -969,6 +972,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
                 }
               }}
               onDeleteNode={workflow.onDeleteNode}
+              onOpenAggregatorEditor={(nodeId) => workflow.setAggregatorEditor({ nodeId })}
               onPaneClick={() => { workflow.setSidebarAction(null); workflow.setContextMenu(null); workflow.setHistoryOpen(false); workflow.setConditionEditor(null); }}
             >
               <Background gap={16} size={1} />

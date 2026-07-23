@@ -27,6 +27,7 @@ const buildCategoryViewPageUrl = (value: string): string =>
 
 export const categoryDefinition: EntityDefinition = {
     name: baseKey,
+    plural: 'categories',
 
     routes: [
         { type: 'create' },

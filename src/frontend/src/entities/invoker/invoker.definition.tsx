@@ -301,7 +301,7 @@ export const invokerDefinition: EntityDefinition = {
     commands: (def) => ([
         ...createEntityCommands({
             def,
-            config: { include: ['create', 'delete', 'view'] },
+            config: { include: ['create', 'delete', 'list', 'view'] },
             dsl: {
                 delete: {
                     by: [
@@ -355,6 +355,7 @@ export const invokerDefinition: EntityDefinition = {
                                 message.success(
                                     tEntities('invoker.list.upload.success', { name: file.name }),
                                 )
+                                ctx.setInputValue('')
                             }
                         } catch (err) {
                             console.error(err)

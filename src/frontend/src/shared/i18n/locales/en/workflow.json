@@ -204,6 +204,7 @@
   },
   "headerMenu": {
     "downloadAsTemplate": "Download as Template",
+    "downloadAsTemplateDisabledHint": "Save the workflow first to download it as a template",
     "saveAsTemplate": "Save as Template",
     "loadTemplate": "Load Template",
     "versionHistory": "Version History",

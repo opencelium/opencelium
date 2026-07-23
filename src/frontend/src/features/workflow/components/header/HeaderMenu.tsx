@@ -69,6 +69,7 @@ export function HeaderMenu({ open, items, onClose, onSelect, loadingItemId }: Pr
                 label={t(item.labelKey)}
                 loading={isLoading}
                 disabled={item.disabled}
+                tooltip={item.disabled && item.disabledTooltipKey ? t(item.disabledTooltipKey) : undefined}
                 badge={item.badgeKey ? <span className="headerMenuBadge">{t(item.badgeKey)}</span> : undefined}
                 onClick={() => {
                   if (item.disabled) return;

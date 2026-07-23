@@ -23,7 +23,8 @@ export function SupportLogsAction({ schedule, tooltipPlacement }: Props) {
                     onClose={() => dialog.close()}
                 />
             ),
-            width: 720,
+            width: 1000,
+            top: 18,
         })
     }
 

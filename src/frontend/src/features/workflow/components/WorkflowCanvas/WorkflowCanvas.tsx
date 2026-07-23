@@ -43,6 +43,7 @@ export function WorkflowCanvas({
   onOpenContextMenu,
   onNodeDoubleClick,
   onDeleteNode,
+  onOpenAggregatorEditor,
   onPaneClick,
   restoredViewport,
   viewportRestoreVersion = 0,
@@ -58,11 +59,12 @@ export function WorkflowCanvas({
   const centeredStartVersion = useRef<number>(0);
   const prepareCacheRef = useRef<PrepareWorkflowCache>({ nodes: new Map(), edges: new Map() });
 
-  const callbacksRef = useRef({ onOpenAddStep, onOpenContextMenu, onDeleteNode });
-  callbacksRef.current = { onOpenAddStep, onOpenContextMenu, onDeleteNode };
+  const callbacksRef = useRef({ onOpenAddStep, onOpenContextMenu, onDeleteNode, onOpenAggregatorEditor });
+  callbacksRef.current = { onOpenAddStep, onOpenContextMenu, onDeleteNode, onOpenAggregatorEditor };
   const stableOnOpenAddStep = useCallback<NonNullable<typeof onOpenAddStep>>((...args) => callbacksRef.current.onOpenAddStep?.(...args), []);
   const stableOnOpenContextMenu = useCallback<NonNullable<typeof onOpenContextMenu>>((...args) => callbacksRef.current.onOpenContextMenu?.(...args), []);
   const stableOnDeleteNode = useCallback<NonNullable<typeof onDeleteNode>>((...args) => callbacksRef.current.onDeleteNode?.(...args), []);
+  const stableOnOpenAggregatorEditor = useCallback<NonNullable<typeof onOpenAggregatorEditor>>((...args) => callbacksRef.current.onOpenAggregatorEditor?.(...args), []);
 
   const { preparedEdges, preparedNodes } = prepareWorkflowElements({
     nodes,
@@ -72,6 +74,7 @@ export function WorkflowCanvas({
     onOpenAddStep: stableOnOpenAddStep,
     onOpenContextMenu: stableOnOpenContextMenu,
     onDeleteNode: stableOnDeleteNode,
+    onOpenAggregatorEditor: stableOnOpenAggregatorEditor,
     cache: prepareCacheRef.current,
   });
 

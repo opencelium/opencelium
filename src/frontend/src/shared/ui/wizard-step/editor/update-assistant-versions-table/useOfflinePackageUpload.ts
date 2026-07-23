@@ -5,6 +5,7 @@ import { updateAssistantApi } from '@entities/updateAssistant/api/updateAssistan
 import { UPDATE_ASSISTANT_TAG } from '@entities/updateAssistant/api/updateAssistant.tags'
 import { errorBus } from '@shared/errors/api/errorBus'
 import { normalizeError } from '@shared/errors/api/normalizeError'
+import { runtimeConfig } from '@shared/config/runtimeConfig'
 
 const UPLOAD_URL = '/assistant/zipfile'
 
@@ -27,7 +28,7 @@ export function useOfflinePackageUpload() {
             const xhr = new XMLHttpRequest()
             xhrRef.current = xhr
 
-            const baseUrl = (import.meta.env.VITE_API_URL as string) ?? ''
+            const baseUrl = runtimeConfig.apiUrl
             xhr.open('POST', `${baseUrl}${UPLOAD_URL}`)
             if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`)
 

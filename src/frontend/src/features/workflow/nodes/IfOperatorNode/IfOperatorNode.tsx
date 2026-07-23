@@ -31,6 +31,7 @@ export function IfOperatorNode({ id, data, selected, dragging }: NodeProps<IfWor
 				dataAggregator={data.dataAggregator}
 				testId={`workflow-node-aggregator-${id}`}
 				suppressTooltip={dragging || data.isAnyNodeDragging}
+				onOpenAggregatorEditor={() => data.onOpenAggregatorEditor?.(id)}
 			/>
 			<div className='ifFalseLabel'>{t('node.branchFalse')}</div>
 			<div className='ifTrueLabel'>{t('node.branchTrue')}</div>

@@ -9,6 +9,7 @@ type NodeCacheEntry = {
 	onAddStep: Params['onOpenAddStep'];
 	onOpenContextMenu: Params['onOpenContextMenu'];
 	onDeleteNode: Params['onDeleteNode'];
+	onOpenAggregatorEditor: Params['onOpenAggregatorEditor'];
 	out: WorkflowNodeModel;
 };
 
@@ -70,7 +71,7 @@ const buildTopologySignature = (nodes: WorkflowNodeModel[], edges: WorkflowEdgeM
 
 type Params = Pick<
 	WorkflowCanvasProps,
-	'nodes' | 'edges' | 'activeAction' | 'isAnyNodeDragging' | 'onOpenAddStep' | 'onOpenContextMenu' | 'onDeleteNode'
+	'nodes' | 'edges' | 'activeAction' | 'isAnyNodeDragging' | 'onOpenAddStep' | 'onOpenContextMenu' | 'onDeleteNode' | 'onOpenAggregatorEditor'
 > & { cache?: PrepareWorkflowCache };
 
 const getMethodInstanceData = (nodes: WorkflowNodeModel[]) => {
@@ -110,6 +111,7 @@ export function prepareWorkflowElements({
 	onOpenAddStep,
 	onOpenContextMenu,
 	onDeleteNode,
+	onOpenAggregatorEditor,
 	cache,
 }: Params) {
 	let topology = cache?.topology;
@@ -159,6 +161,7 @@ export function prepareWorkflowElements({
 			&& cached.onAddStep === onOpenAddStep
 			&& cached.onOpenContextMenu === onOpenContextMenu
 			&& cached.onDeleteNode === onDeleteNode
+			&& cached.onOpenAggregatorEditor === onOpenAggregatorEditor
 		) {
 			return cached.out;
 		}
@@ -182,9 +185,10 @@ export function prepareWorkflowElements({
 				onAddStep: onOpenAddStep,
 				onOpenContextMenu,
 				onDeleteNode,
+				onOpenAggregatorEditor,
 			},
 		};
-		cache?.nodes.set(node.id, { src: node, sig, onAddStep: onOpenAddStep, onOpenContextMenu, onDeleteNode, out });
+		cache?.nodes.set(node.id, { src: node, sig, onAddStep: onOpenAddStep, onOpenContextMenu, onDeleteNode, onOpenAggregatorEditor, out });
 		return out;
 	});
 	const preparedEdges: WorkflowEdgeModel[] = edges.map((edge) => {
