@@ -728,3 +728,6 @@ ALTER TABLE `execution_argument` DROP FOREIGN KEY IF EXISTS `execution_argument_
 ALTER TABLE `execution_argument` ADD CONSTRAINT `fk_execution_argument_execution1` FOREIGN KEY (`execution_id`) REFERENCES `execution` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 ALTER TABLE `execution` DROP FOREIGN KEY IF EXISTS `fk_execution_scheduler1`;
 ALTER TABLE `execution` ADD CONSTRAINT `fk_execution_scheduler1` FOREIGN KEY (`scheduler_id`) REFERENCES `scheduler` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
+
+--changeset 5.0:6 stripComments:true splitStatements:true endDelimiter:;
+INSERT IGNORE INTO role_has_permission (role_id,component_id,permission_id) VALUES (2,7,1),(2,7,2),(2,7,3),(2,7,4);

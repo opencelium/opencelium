@@ -12,6 +12,7 @@ import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngServic
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.repository.ConnectionRepository;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionServiceImp;
+import com.becon.opencelium.backend.database.mysql.service.ExecutionArgumentService;
 import com.becon.opencelium.backend.versionmanager.EntityVersionManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -56,10 +57,12 @@ class ConnectionServiceImpTest {
     void setUp() {
         // The constructor calls entityVersionManager.getUpdater(...), so it cannot be left null;
         // construct with the collaborators these tests exercise and a mock version manager for the rest.
+        // deleteById strips execution_argument rows, so executionArgumentService cannot be null either.
         EntityVersionManager entityVersionManager = mock(EntityVersionManager.class);
+        ExecutionArgumentService executionArgumentService = mock(ExecutionArgumentService.class);
         connectionService = new ConnectionServiceImp(
                 connectionRepository, null, connectionMngService, null, null, null, null, null,
-                null, null, null, null, null, null, entityVersionManager, null, null);
+                null, null, null, null, null, null, executionArgumentService, entityVersionManager, null, null);
     }
 
     // ── findAll(includeTest) ──────────────────────────────────────────────────
