@@ -550,6 +550,38 @@ const hasStackedNodes = (list: WorkflowNodeModel[]) => {
 	return false;
 };
 
+// Older saved connections/templates never stamped `invokerName` onto
+// `ui.workflowNodes[].data.connector` (that field was added later). When the UI-restored
+// node data is missing it, backfill from the per-method `methods[].connector.invoker` info
+// (reliably resolved by normalizeConnectionPayload) so invoker-based features — e.g. the
+// template connector-mapping dialog — still work for templates saved before that field existed.
+const backfillMissingInvokerNames = (
+	nodes: WorkflowNodeModel[],
+	entries: IndexedWorkflowEntry[],
+): WorkflowNodeModel[] => {
+	const invokerNameByConnectorId = new Map<number, string>();
+	entries.forEach((entry) => {
+		const connector = entry.node.data.connector;
+		if (connector && connector.connectorId !== -1 && connector.invokerName) {
+			invokerNameByConnectorId.set(connector.connectorId, connector.invokerName);
+		}
+	});
+
+	if (invokerNameByConnectorId.size === 0) return nodes;
+
+	return nodes.map((node) => {
+		const connector = node.data.connector;
+		if (!connector || connector.invokerName) return node;
+		const invokerName = invokerNameByConnectorId.get(connector.connectorId);
+		if (!invokerName) return node;
+
+		return {
+			...node,
+			data: { ...node.data, connector: { ...connector, invokerName } },
+		} as WorkflowNodeModel;
+	});
+};
+
 export function mapConnectionToWorkflowState(
 	payload: unknown,
 	fallbackViewport?: { x: number; y: number; zoom: number },
@@ -588,7 +620,10 @@ export function mapConnectionToWorkflowState(
 	const shouldAutoLayout = entries.length > 0
 		&& ((!restoredFromUi && savedUiNodes.length === 0) || hasStackedNodes(nodes));
 	const positionedNodes = shouldAutoLayout ? normalizeWorkflowPositions(nodes, edges) : nodes;
-	const normalizedNodes = withLeafState(assignMissingMethodColors(positionedNodes), edges);
+	const normalizedNodes = backfillMissingInvokerNames(
+		withLeafState(assignMissingMethodColors(positionedNodes), edges),
+		entries,
+	);
 
 	return {
 		title: connection.title,
