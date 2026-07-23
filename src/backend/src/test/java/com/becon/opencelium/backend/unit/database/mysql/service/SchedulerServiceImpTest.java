@@ -54,7 +54,7 @@ class SchedulerServiceImpTest {
         // injected directly — construct with the dependencies under test and swap in the mock strategy.
         SchedulerFactoryBean schedulerFactoryBean = mock(SchedulerFactoryBean.class);
         schedulerService = new SchedulerServiceImp(
-                connectionService, null, null, null, null, null, null, null, schedulerFactoryBean, null, null);
+                connectionService, null, null, null, null, null, null, null, schedulerFactoryBean, null, null, null);
         ReflectionTestUtils.setField(schedulerService, "schedulingStrategy", schedulingStrategy);
     }
 

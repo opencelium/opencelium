@@ -9,4 +9,6 @@ public interface ExecutionArgumentService {
     List<ExecutionArgument> findAllByExecId(Long id);
 
     void deleteByConnectionId(Long connectionId);
+
+    void deleteBySchedulerId(int schedulerId);
 }
