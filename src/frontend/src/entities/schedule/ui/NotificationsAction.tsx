@@ -23,7 +23,8 @@ export function NotificationsAction({ schedule, tooltipPlacement }: Props) {
                     {tEntities('schedule.notifications.close')}
                 </Button>
             ),
-            width: 960,
+            width: 1000,
+            top: 18,
         })
     }
 
