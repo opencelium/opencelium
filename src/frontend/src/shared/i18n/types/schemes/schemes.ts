@@ -124,12 +124,25 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 downloadInvoker: string
                 systemCheck: string
                 workflow: string
+                help: string
             }
             footer: {
                 select: string
                 autocomplete: string
                 navigate: string
                 close: string
+            }
+            help: {
+                title: string
+                subtitle: string
+                keyboardTitle: string
+                empty: string
+                searchPlaceholder: string
+                noResults: string
+                shortcuts: {
+                    open: string
+                    clearScope: string
+                }
             }
         }
         sidebar: {

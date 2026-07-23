@@ -55,13 +55,26 @@
       "uploadInvoker": "Upload an invoker file",
       "downloadInvoker": "Download an invoker file",
       "systemCheck": "Open the system check page",
-      "workflow": "Search the current workflow"
+      "workflow": "Search the current workflow",
+      "help": "View all commands"
     },
     "footer": {
       "select": "Select",
       "autocomplete": "Autocomplete",
       "navigate": "Navigate",
       "close": "Close"
+    },
+    "help": {
+      "title": "Command reference",
+      "subtitle": "Everything you can do from the command palette.",
+      "keyboardTitle": "Keyboard",
+      "empty": "No commands available",
+      "searchPlaceholder": "Search commands...",
+      "noResults": "No commands match \"{{query}}\"",
+      "shortcuts": {
+        "open": "Open the command palette",
+        "clearScope": "Exit a locked scope (empty input)"
+      }
     }
   },
   "sidebar": {

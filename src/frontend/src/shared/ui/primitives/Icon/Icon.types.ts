@@ -50,6 +50,7 @@ export type IconName =
     | 'http-request'
     | 'aggregator'
     | 'lock'
+    | 'help'
 
 export type IconColor =
     | 'default'
