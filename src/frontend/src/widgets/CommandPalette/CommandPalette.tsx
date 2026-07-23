@@ -144,6 +144,11 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
     }, [content]);
     useEffect(() => {
         const source = changeSourceRef.current;
+        // Reset immediately (not after execution) so a re-render triggered
+        // while `execute` is still running — e.g. a confirm dialog stealing
+        // focus, which blurs/refocuses the input and flips `isActive` — can't
+        // be mistaken for a fresh selection and replay the same command.
+        changeSourceRef.current = 'input';
         (async () => {
             try {
                 setIsLoading(true);

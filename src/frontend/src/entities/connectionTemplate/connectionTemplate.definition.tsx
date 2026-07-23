@@ -157,6 +157,7 @@ export const connectionTemplateDefinition: EntityDefinition = {
                                         name: file.name,
                                     }),
                                 )
+                                ctx.setInputValue('')
                             }
                         } catch (err) {
                             console.error(err)

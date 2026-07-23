@@ -355,6 +355,7 @@ export const invokerDefinition: EntityDefinition = {
                                 message.success(
                                     tEntities('invoker.list.upload.success', { name: file.name }),
                                 )
+                                ctx.setInputValue('')
                             }
                         } catch (err) {
                             console.error(err)
