@@ -74,7 +74,18 @@ public class InvokerServiceImp implements InvokerService {
     @Autowired
     private InvokerSyncService invokerSyncService;
 
-    private final Path filePath = Paths.get(PathConstant.INVOKER);
+    private final Path filePath;
+
+    public InvokerServiceImp() {
+        this.filePath = Paths.get(PathConstant.INVOKER);
+    }
+
+    // Visible for testing: points the service at a temporary invoker directory.
+    public InvokerServiceImp(InvokerContainer invokerContainer, InvokerSyncService invokerSyncService, Path filePath) {
+        this.invokerContainer = invokerContainer;
+        this.invokerSyncService = invokerSyncService;
+        this.filePath = filePath;
+    }
 
     @Override
     public FunctionInvoker getTestFunction(String invokerName) {
@@ -132,20 +143,18 @@ public class InvokerServiceImp implements InvokerService {
 
     @Override
     public void deleteInvokerFile(String name) {
-        try {
-            Path file = findFileByInvokerName(name).toPath();
-            if (invokerContainer.existsByName(name)) {
-                invokerContainer.remove(name);
+        // Delete the file first: if the OS refuses (e.g. the file is locked on Windows),
+        // the container keeps the invoker so the UI stays consistent with the disk.
+        findInvokerFile(name).ifPresent(file -> {
+            try {
+                Files.deleteIfExists(file.toPath().toAbsolutePath());
+            } catch (IOException e) {
+                throw new StorageException(
+                        "Failed to delete invoker file '" + file.getName() + "': " + e.getMessage(), e);
             }
-            if (exists(file)) {
-                Files.delete(file.toAbsolutePath());
-
-                // delete invoker sync record
-                invokerSyncService.delete(name);
-            }
-        } catch (IOException e) {
-            throw new StorageException("Failed to delete stored file", e);
-        }
+        });
+        invokerContainer.remove(name);
+        invokerSyncService.delete(name);
     }
 
     @Override
@@ -473,20 +482,28 @@ public class InvokerServiceImp implements InvokerService {
 
     @Override
     public File findFileByInvokerName(String invokerName) {
-        File directory = new File(PathConstant.INVOKER);
-        File[] files = directory.listFiles((dir, name) -> name.endsWith(".xml"));
+        return findInvokerFile(invokerName)
+                .orElseThrow(() -> new RuntimeException("Invoker '" + invokerName + "' not found."));
+    }
 
-        if (files != null) {
-            Optional<File> foundFile = Arrays.stream(files)
-                    .filter(file -> hasInvokerName(file, invokerName))
-                    .findFirst();
-
-            if (foundFile.isEmpty()) {
-                throw new RuntimeException("Invoker " + "'" + invokerName + "' not found.");
-            }
-            return foundFile.get();
+    private Optional<File> findInvokerFile(String invokerName) {
+        File[] files = filePath.toFile().listFiles((dir, name) -> name.endsWith(".xml"));
+        if (files == null) {
+            return Optional.empty();
         }
-        throw new RuntimeException("Invokers not found.");
+
+        List<File> matches = Arrays.stream(files)
+                .filter(file -> hasInvokerName(file, invokerName))
+                .sorted(Comparator.comparing(File::getName))
+                .toList();
+
+        if (matches.size() > 1) {
+            log.warn("Multiple invoker files declare the name '{}': {}. Using '{}'.",
+                    invokerName,
+                    matches.stream().map(File::getName).collect(Collectors.joining(", ")),
+                    matches.get(0).getName());
+        }
+        return matches.isEmpty() ? Optional.empty() : Optional.of(matches.get(0));
     }
 
     private Boolean hasInvokerName(File file, String nodeName) {
