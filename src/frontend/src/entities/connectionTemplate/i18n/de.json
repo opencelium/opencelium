@@ -30,5 +30,11 @@
     "toInvoker": {
       "label": "Zum Invoker"
     }
+  },
+  "confirmation": {
+    "delete": {
+      "byId": "Workflowvorlage anhand der id \"{{templateId}}\" löschen?",
+      "byName": "Workflowvorlage anhand des Namens \"{{name}}\" löschen?"
+    }
   }
 }
