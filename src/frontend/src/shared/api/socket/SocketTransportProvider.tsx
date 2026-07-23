@@ -9,8 +9,6 @@ import {runtimeConfig} from "@shared/config/runtimeConfig"
 
 type Props = {children: ReactNode}
 
-const SOCKET_URL = runtimeConfig.socketUrl ?? `${runtimeConfig.apiUrl}/websocket`
-
 export function SocketTransportProvider({children}: Props) {
     const token = useAppSelector(selectAccessToken)
     const [client, setClient] = useState<Client | null>(null)
@@ -33,7 +31,7 @@ export function SocketTransportProvider({children}: Props) {
         setError(null)
         const next = createSocketClient({
             token,
-            url: SOCKET_URL,
+            url: runtimeConfig.socketUrl ?? `${runtimeConfig.apiUrl}/ws`,
             onConnect: () => setStatus('connected'),
             onDisconnect: () => setStatus('disconnected'),
             onStompError: (message) => {

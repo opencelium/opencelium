@@ -4,11 +4,17 @@ import './index.css'
 import App from './app/index.tsx'
 import {registerEntities} from "@/engine/entity/entityRegistration.ts";
 import {initEntityI18n} from "@shared/i18n/config/registerEntities.ts";
+import {loadRuntimeConfig} from "@shared/config/runtimeConfig";
 import '@xyflow/react/dist/style.css';
 import { ReactFlowProvider } from '@xyflow/react';
 
 registerEntities()
 initEntityI18n();
+
+// Fetches /config.json and resolves runtimeConfig.apiUrl/socketUrl before anything else
+// runs — every RTK Query/apiExecutor/socket call reads runtimeConfig at call time, so
+// this must finish before the app renders and starts firing requests.
+await loadRuntimeConfig();
 
 // Mocks run in dev unless explicitly disabled with VITE_ENABLE_MOCKS=false,
 // in which case every request goes to the real backend at the configured API_URL
