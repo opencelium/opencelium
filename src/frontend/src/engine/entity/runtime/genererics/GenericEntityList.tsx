@@ -237,7 +237,7 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
             : {}),
         // Sub-rows start collapsed — the user reveals them via the expander column.
         initialState: {
-            pagination: { pageIndex: 0, pageSize: entity.list?.pageSize ?? 15 },
+            pagination: { pageIndex: 0, pageSize: entity.list?.pageSize ?? 10 },
         },
     });
 

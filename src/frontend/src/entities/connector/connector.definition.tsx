@@ -109,7 +109,6 @@ export const connectorDefinition: EntityDefinition = {
         titleKey: `${baseKey}.list.title`,
         subtitleKey: `${baseKey}.list.subTitle`,
         defaultSort: { field: 'title', direction: 'asc' },
-        pageSize: 10,
         bulkDelete: true,
     },
     i18n: {
