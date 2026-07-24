@@ -16,7 +16,7 @@ const operatorMenu: MenuSection[] = [
 ];
 
 const methodMenu: MenuSection[] = [
-  { id: 'main', items: [{ id: 'change-label', labelKey: 'contextMenu.changeLabel' }, { id: 'run-call', labelKey: 'contextMenu.runThisCallOnly' }, { id: 'configure-aggregator', labelKey: 'contextMenu.configureAggregator' }] },
+  { id: 'main', items: [{ id: 'change-label', labelKey: 'contextMenu.changeLabel' }, { id: 'configure-aggregator', labelKey: 'contextMenu.configureAggregator' }] },
   { id: 'request', items: [{ id: 'request', labelKey: 'contextMenu.request' }, { id: 'edit-url', labelKey: 'contextMenu.editUrl' }, { id: 'edit-headers', labelKey: 'contextMenu.editHeader' }, { id: 'edit-body', labelKey: 'contextMenu.editBody' }] },
   { id: 'response', items: [{ id: 'show-response', labelKey: 'contextMenu.showResponse' }] },
 ];
