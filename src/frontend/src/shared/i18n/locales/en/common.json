@@ -55,6 +55,7 @@
       "uploadInvoker": "Upload an invoker file",
       "downloadInvoker": "Download an invoker file",
       "systemCheck": "Open the system check page",
+      "ldapCheck": "Open the LDAP connectivity check page",
       "workflow": "Search the current workflow",
       "help": "View all commands"
     },

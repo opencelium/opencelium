@@ -123,6 +123,7 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 uploadInvoker: string
                 downloadInvoker: string
                 systemCheck: string
+                ldapCheck: string
                 workflow: string
                 help: string
             }
