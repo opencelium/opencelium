@@ -181,6 +181,22 @@ export const removeChildById = (group: ConditionGroup, childId: string): Conditi
 		.map((child) => (child.type === 'group' ? removeChildById(child, childId) : child)),
 });
 
+const cloneConditionRule = (rule: ConditionRule): ConditionRule => ({
+	...rule,
+	id: createConditionId('rule'),
+	properties: rule.properties ? { ...rule.properties } : undefined,
+});
+
+export const duplicateRuleById = (group: ConditionGroup, ruleId: string): ConditionGroup => ({
+	...group,
+	items: (group.items || []).flatMap((child) => {
+		if (child.type === 'rule') {
+			return child.id === ruleId ? [child, cloneConditionRule(child)] : [child];
+		}
+		return [duplicateRuleById(child, ruleId)];
+	}),
+});
+
 const DIRECT_REFERENCE_PATTERN = /^#?[A-Fa-f0-9]{6}\.\(response\)\./;
 const WRAPPED_DIRECT_REFERENCE_PATTERN = /^\{%#?[A-Fa-f0-9]{6}\.\(response\)\..*%}$/;
 

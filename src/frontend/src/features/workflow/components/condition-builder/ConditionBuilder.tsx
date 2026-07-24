@@ -1,5 +1,6 @@
 import {
 	ApiOutlined,
+	CopyOutlined,
 	DeleteOutlined,
 	DownOutlined,
 	LinkOutlined,
@@ -38,6 +39,7 @@ import {
 	buildConditionConfig,
 	createEmptyGroup,
 	createEmptyRule,
+	duplicateRuleById,
 	getInitialTreeFromConfig,
 	removeChildById,
 	updateGroupConjunction,
@@ -519,6 +521,7 @@ function RuleRow({
 	canDelete,
 	onChange,
 	onDelete,
+	onDuplicate,
 }: {
 	rule: ConditionRule;
 	operatorType: 'if' | 'loop';
@@ -528,6 +531,7 @@ function RuleRow({
 	canDelete: boolean;
 	onChange: (patch: Partial<ConditionRuleProperties>) => void;
 	onDelete: () => void;
+	onDuplicate: () => void;
 }) {
 	const { t } = useI18n('workflow');
 	const properties = rule.properties || {};
@@ -603,12 +607,22 @@ function RuleRow({
 					onChange={onChange}
 				/>
 			) : null}
-			{canDelete ? <Button
-				type="text"
-				className="conditionDeleteButton"
-				icon={<DeleteOutlined />}
-				onClick={onDelete}
-			/> : null}
+			{canDelete ? (
+				<div className="conditionRuleActions">
+					<Button
+						type="text"
+						className="conditionDuplicateButton"
+						icon={<CopyOutlined />}
+						onClick={onDuplicate}
+					/>
+					<Button
+						type="text"
+						className="conditionDeleteButton"
+						icon={<DeleteOutlined />}
+						onClick={onDelete}
+					/>
+				</div>
+			) : null}
 		</div>
 	);
 }
@@ -736,6 +750,7 @@ function GroupEditor({
 							iterators={iterators}
 							canDelete={operatorType === 'if'}
 							onDelete={() => onChange(removeChildById(group, child.id))}
+							onDuplicate={() => onChange(duplicateRuleById(group, child.id))}
 							onChange={(patch) => onChange(updateRuleProperties(group, child.id, patch))}
 						/>
 					) : (
