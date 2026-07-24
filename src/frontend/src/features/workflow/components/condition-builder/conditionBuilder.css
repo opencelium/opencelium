@@ -509,3 +509,12 @@
 .conditionDeleteButton.ant-btn:not(:disabled):focus {
 	color: var(--color-action-danger-hover) !important;
 }
+
+.conditionDuplicateButton {
+	color: var(--color-action-primary);
+}
+
+.conditionDuplicateButton.ant-btn:not(:disabled):hover,
+.conditionDuplicateButton.ant-btn:not(:disabled):focus {
+	color: var(--color-action-primary-hover) !important;
+}
