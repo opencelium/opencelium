@@ -434,6 +434,19 @@
   font-size: 14px !important;
 }
 
+/* This select always displays its value through the search <input> (searchValue,
+   never a selection-item span — see LegacyResponseFieldSelect). Safari/macOS doesn't
+   vertically center text inside a native <input> via line-height the way it does for
+   a span, so pin it with flexbox instead, which is metrics-independent. */
+.bodyLegacyGeneratorSelect .ant-select-selection-search {
+  display: flex;
+  align-items: center;
+}
+
+.bodyLegacyGeneratorSelect .ant-select-selection-search-input {
+  height: 100%;
+}
+
 .bodyLegacyWebhookSelect {
   width: 100%;
 }
