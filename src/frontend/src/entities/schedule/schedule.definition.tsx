@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import type { EntityDefinition } from '@/engine/entity/EntityDefinition'
 import scheduleWizardImage from '@/assets/images/wizard/schedule.gif'
 import {createEntityCommands} from "@/engine/entity/command/createEntityCommands.tsx";
@@ -57,10 +58,27 @@ const Dot = ({color}: {color: string}) => (
             height: 10,
             borderRadius: '50%',
             backgroundColor: color,
-            marginRight: 4,
-            verticalAlign: 'middle',
+            flexShrink: 0,
         }}
     />
+)
+
+// Groups a dot with its label as one unbreakable chip, so wrapping never
+// splits a status color from the text explaining what it means.
+const LegendChip = ({color, children}: {color: string; children?: ReactNode}) => (
+    <span style={{display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap'}}>
+        <Dot color={color} />
+        {children}
+    </span>
+)
+
+// `display: flex` on a span still blockifies (CSS outer-display rules), so this
+// wraps onto its own line below the description sentence without needing a <div>
+// (which would be invalid nested inside the subtitle's inline Typography wrapper).
+const LegendRow = ({children}: {children?: ReactNode}) => (
+    <span style={{display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '4px 16px', marginTop: 6}}>
+        {children}
+    </span>
 )
 
 type ConnectionMeta = { id: number; title: string }
@@ -108,10 +126,11 @@ export const scheduleDefinition: EntityDefinition = {
         titleKey: `${baseKey}.list.title`,
         subtitleKey: `${baseKey}.list.subTitle`,
         subtitleComponents: {
-            blueDot: <Dot color="var(--color-status-info-fg)" />,
-            greenDot: <Dot color="var(--color-status-success-fg)" />,
-            redDot: <Dot color="var(--color-status-error-fg)" />,
-            grayDot: <Dot color="var(--color-text-disabled)" />,
+            legend: <LegendRow />,
+            legendRunning: <LegendChip color="var(--color-status-info-fg)" />,
+            legendSucceeded: <LegendChip color="var(--color-status-success-fg)" />,
+            legendFailed: <LegendChip color="var(--color-status-error-fg)" />,
+            legendNone: <LegendChip color="var(--color-text-disabled)" />,
         },
         searchPlaceholderKey: `${baseKey}.list.searchPlaceholder`,
         defaultSort: { field: 'connectionTitle', direction: 'asc' },
