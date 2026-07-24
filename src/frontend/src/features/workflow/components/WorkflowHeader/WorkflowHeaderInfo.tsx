@@ -21,7 +21,7 @@ export function WorkflowHeaderInfo({ loading, readOnly, state }: Props) {
 						onSubmit={state.commitName}
 						onBlur={state.commitName}
 						onCancel={state.cancelEdit}
-						loading={state.isCheckingName}
+						loading={state.isCheckingName || state.isSavingName}
 						inputRef={state.nameInputRef}
 					/>
 					{state.nameError && <div className='headerInlineErrorMessage'>{state.nameError}</div>}

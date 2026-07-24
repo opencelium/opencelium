@@ -281,7 +281,8 @@
   },
   "saveDialog": {
     "title": "Save Version",
-    "commentPlaceholder": "Comment"
+    "commentPlaceholder": "Comment",
+    "autoNameChangeComment": "Changing Workflow Name to {{name}}"
   },
   "placeholders": {
     "selectMethod": "Select Method...",

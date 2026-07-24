@@ -6,13 +6,18 @@ export const EMPTY_NAME_LABEL = '[Empty Name]';
 type StateProps = Pick<
 	WorkflowHeaderProps,
 	'initialName' | 'initialDescription' | 'onChange' | 'validateTitle'
->;
+> & {
+	/** Called after an inline name edit commits to an actual new name, so the workflow
+	 * is saved immediately instead of waiting for the explicit Save button. */
+	onNameCommitted?: (title: string, description: string) => void | Promise<void>;
+};
 
 export function useWorkflowHeaderState({
 	initialName = 'i-doit 2 Znuny example',
 	initialDescription = 'This interface delivering data into znuny and creates a ticket if the specified object is missing.',
 	onChange,
 	validateTitle,
+	onNameCommitted,
 }: StateProps) {
 	const [name, setName] = useState(initialName);
 	const [description, setDescription] = useState(initialDescription);
@@ -21,6 +26,7 @@ export function useWorkflowHeaderState({
 	const [editing, setEditing] = useState<EditField>(null);
 	const [nameError, setNameError] = useState('');
 	const [isCheckingName, setIsCheckingName] = useState(false);
+	const [isSavingName, setIsSavingName] = useState(false);
 	const nameInputRef = useRef<HTMLInputElement | null>(null);
 	const descriptionInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -81,9 +87,20 @@ export function useWorkflowHeaderState({
 		}
 		const titleError = await runTitleCheck(nextName);
 		if (titleError) return focusNameWithError(nextName, titleError);
+		const didRename = nextName !== name;
 		setName(nextName);
 		setNameError('');
 		onChange?.({ title: nextName, description });
+		if (didRename && onNameCommitted) {
+			setIsSavingName(true);
+			try {
+				await onNameCommitted(nextName, description);
+			} catch {
+
+			} finally {
+				setIsSavingName(false);
+			}
+		}
 		setEditing(null);
 	};
 
@@ -115,7 +132,7 @@ export function useWorkflowHeaderState({
 	};
 
 	return {
-		name, description, draftName, draftDescription, editing, nameError, isCheckingName,
+		name, description, draftName, draftDescription, editing, nameError, isCheckingName, isSavingName,
 		nameInputRef, descriptionInputRef, setDraftName, setDraftDescription, setEditing,
 		cancelEdit, commitName, commitDescription, prepareSave,
 	};

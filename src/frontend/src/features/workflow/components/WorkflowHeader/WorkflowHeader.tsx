@@ -15,7 +15,11 @@ export function WorkflowHeader({
 	saveDisabled = false, readOnly = false, loading = false, schedulesSlot, hasSavedConnection = false, ...stateProps
 }: WorkflowHeaderProps) {
 	const { t } = useI18n('workflow');
-	const state = useWorkflowHeaderState(stateProps);
+	const state = useWorkflowHeaderState({
+		...stateProps,
+		onNameCommitted: (title, description) =>
+			onSave({ title, description, comment: t('saveDialog.autoNameChangeComment', { name: title }) }),
+	});
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [saveDialogOpen, setSaveDialogOpen] = useState(false);
 	const [saveComment, setSaveComment] = useState('');
