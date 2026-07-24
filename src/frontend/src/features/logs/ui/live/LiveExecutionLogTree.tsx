@@ -19,6 +19,7 @@ import {
 
 function LiveConnectorRow({ tree, node }: { tree: LiveLogTree; node: LiveLogNode }) {
   const [expanded, setExpanded] = useState(true);
+  const { t } = useI18n("logs");
   const { nonce, isOnTrace } = useLogErrorTrace();
   const onTrace = isOnTrace(node.indexPath, node.loopIndex) && node.status !== "FAIL";
 
@@ -38,7 +39,7 @@ function LiveConnectorRow({ tree, node }: { tree: LiveLogTree; node: LiveLogNode
         onToggle={() => setExpanded((v) => !v)}
         left={
           <Typography variant="label" isBold isUppercase>
-            {node.connectorName !== "DEFAULT" ? node.connectorName : "WORKFLOW"}
+            {node.connectorName !== "DEFAULT" ? node.connectorName : t("live.testRunDetails")}
           </Typography>
         }
         right={

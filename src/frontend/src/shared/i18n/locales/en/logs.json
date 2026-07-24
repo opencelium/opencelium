@@ -28,7 +28,8 @@
     "tooltip": "Toggle URL / name"
   },
   "live": {
-    "title": "Logs",
+    "title": "Execution Logs",
+    "testRunDetails": "TEST RUN DETAILS",
     "empty": "No logs yet. Run a test to see execution logs.",
     "running": "Running…",
     "collecting": "Collecting logs…",
