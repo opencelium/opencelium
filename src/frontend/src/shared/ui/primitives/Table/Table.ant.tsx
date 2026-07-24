@@ -2,7 +2,7 @@
 import { Table, Pagination } from 'antd';
 import { flexRender } from '@tanstack/react-table';
 import React, { useCallback, useMemo } from 'react';
-import { isRowClickIgnored, renderTruncatedCell } from './Table.utils';
+import { findStretchColumnId, isRowClickIgnored, renderTruncatedCell } from './Table.utils';
 
 const PAGE_SIZE_OPTIONS = ['10', '20', '50', '100'];
 
@@ -80,6 +80,10 @@ export const AntTable = ({
     );
 
     const columnCount = flatHeaders.length;
+    const stretchColumnId = useMemo(
+        () => findStretchColumnId(flatHeaders.map((header) => header.column)),
+        [flatHeaders],
+    );
 
     const columns = useMemo(
         () =>
@@ -94,7 +98,11 @@ export const AntTable = ({
                 return {
                     key: column.id,
                     dataIndex: column.id,
-                    ...(explicitSize !== undefined ? { width: explicitSize } : {}),
+                    ...(explicitSize !== undefined
+                        ? { width: explicitSize }
+                        : column.id === stretchColumnId
+                            ? { width: '100%' }
+                            : {}),
                     ...(align ? { align } : {}),
                     // Full-width rows (e.g. an empty-state placeholder under an expanded
                     // parent) collapse all data columns into one spanning cell.
@@ -139,7 +147,7 @@ export const AntTable = ({
                     },
                 };
             }),
-        [flatHeaders, rows, columnCount],
+        [flatHeaders, rows, columnCount, stretchColumnId],
     );
 
     const dataSource = useMemo(
