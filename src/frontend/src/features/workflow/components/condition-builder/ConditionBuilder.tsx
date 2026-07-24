@@ -49,6 +49,7 @@ import {
 import { LoopInfoPanel } from './LoopInfoPanel';
 import { Radio } from '@shared/ui/primitives/Radio';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
+import { CopyButton } from '@shared/ui/actions/CopyButton';
 import { MethodColorDot } from '../MethodColorDot/MethodColorDot';
 import { getDuplicateMethodIndexByColor } from '../../utils/methodColor';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
@@ -347,53 +348,56 @@ function MethodSelect({
 		: methods;
 	const duplicateIndexByColor = getDuplicateMethodIndexByColor(options);
 	return (
-		<Select
-			placeholder={t('placeholders.selectMethod')}
-			value={value}
-			className="conditionMethodSelect"
-			showSearch
-			filterOption={(input, option) => {
-				const term = input.toLowerCase();
-				const data = option as { label?: unknown; connectorTitle?: string };
-				return (
-					String(data?.label ?? '').toLowerCase().includes(term) ||
-					String(data?.connectorTitle ?? '').toLowerCase().includes(term)
-				);
-			}}
-			prefix={selected ? (
-				<MethodConnectorChip method={selected} iconOnly iconSize={18} tooltipZIndex={13020} />
-			) : undefined}
-			onChange={onChange}
-			options={options.map((method) => ({
-				value: method.id,
-				label: getMethodLabel(method),
-				connectorTitle: getMethodConnectorChipInfo(method).title,
-				color: method.color,
-				dupIndex: method.color ? duplicateIndexByColor.get(method.color.toLowerCase()) : undefined,
-				method,
-			}))}
-			optionRender={(option) => {
-				const data = option.data as { connectorTitle?: string; color?: string; dupIndex?: number; method: MethodWithId };
-				const isWebhook = getMethodConnectorChipInfo(data.method).kind === 'webhook';
-				const row = (
-					<span className="conditionMethodOption">
-						<span className="conditionMethodLeft">
-							<MethodColorDot color={data.color} index={data.dupIndex} />
-							<span className="conditionMethodName">{option.label}</span>
+		<div className="selectCopyHost">
+			<CopyButton value={selected ? getMethodLabel(selected) : ''} className="selectCopyButton" />
+			<Select
+				placeholder={t('placeholders.selectMethod')}
+				value={value}
+				className="conditionMethodSelect"
+				showSearch
+				filterOption={(input, option) => {
+					const term = input.toLowerCase();
+					const data = option as { label?: unknown; connectorTitle?: string };
+					return (
+						String(data?.label ?? '').toLowerCase().includes(term) ||
+						String(data?.connectorTitle ?? '').toLowerCase().includes(term)
+					);
+				}}
+				prefix={selected ? (
+					<MethodConnectorChip method={selected} iconOnly iconSize={18} tooltipZIndex={13020} />
+				) : undefined}
+				onChange={onChange}
+				options={options.map((method) => ({
+					value: method.id,
+					label: getMethodLabel(method),
+					connectorTitle: getMethodConnectorChipInfo(method).title,
+					color: method.color,
+					dupIndex: method.color ? duplicateIndexByColor.get(method.color.toLowerCase()) : undefined,
+					method,
+				}))}
+				optionRender={(option) => {
+					const data = option.data as { connectorTitle?: string; color?: string; dupIndex?: number; method: MethodWithId };
+					const isWebhook = getMethodConnectorChipInfo(data.method).kind === 'webhook';
+					const row = (
+						<span className="conditionMethodOption">
+							<span className="conditionMethodLeft">
+								<MethodColorDot color={data.color} index={data.dupIndex} />
+								<span className="conditionMethodName">{option.label}</span>
+							</span>
+							<MethodConnectorChip method={data.method} tooltipZIndex={13020} disableTooltip={isWebhook} />
 						</span>
-						<MethodConnectorChip method={data.method} tooltipZIndex={13020} disableTooltip={isWebhook} />
-					</span>
-				);
-				return isWebhook ? (
-					<Tooltip content={t('refGenerator.webhookTriggerHint')} placement='right' zIndex={13020}>
-						{row}
-					</Tooltip>
-				) : row;
-			}}
-			getPopupContainer={() => document.body}
-			popupMatchSelectWidth={420}
-			styles={{ popup: { root: { zIndex: 13010 } } }}
-		/>
+					);
+					return isWebhook ? (
+						<Tooltip content={t('refGenerator.webhookTriggerHint')} placement='right' zIndex={13020}>
+							{row}
+						</Tooltip>
+					) : row;
+				}}
+				getPopupContainer={() => document.body}
+				popupMatchSelectWidth={420}
+				styles={{ popup: { root: { zIndex: 13010 } } }}
+			/>
+		</div>
 	);
 }
 

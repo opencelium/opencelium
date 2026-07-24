@@ -107,6 +107,12 @@
     "edit": "Bearbeiten",
     "delete": "Löschen"
   },
+  "copy": {
+    "tooltip": "In die Zwischenablage kopieren",
+    "empty": "Nichts zu kopieren",
+    "success": "In die Zwischenablage kopiert",
+    "failed": "Kopieren in die Zwischenablage fehlgeschlagen"
+  },
   "field": {
     "required": "Pflichtfeld"
   },

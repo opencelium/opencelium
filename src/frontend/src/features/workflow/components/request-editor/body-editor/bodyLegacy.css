@@ -447,6 +447,28 @@
   height: 100%;
 }
 
+/* Reveals a copy-to-clipboard icon next to a select's dropdown arrow only while
+   hovering the select, mirroring the row-level oc-copy-on-hover pattern. */
+.selectCopyHost {
+  position: relative;
+}
+
+.selectCopyButton {
+  position: absolute;
+  top: 50%;
+  right: 26px;
+  transform: translateY(-50%);
+  z-index: 2;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+
+.selectCopyHost:hover .selectCopyButton {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 .bodyLegacyWebhookSelect {
   width: 100%;
 }
