@@ -18,6 +18,10 @@ public class Execution2MetadataMapping {
     private final ConcurrentMap<Long, Metadata> mapping = new ConcurrentHashMap<>();
     private static final Logger logger = LoggerFactory.getLogger(Execution2MetadataMapping.class);
 
+    public boolean exists(long executionId) {
+        return mapping.containsKey(executionId);
+    }
+
     public long getConnectionId(Long executionId) {
         return require(executionId).connectionId;
     }
@@ -78,7 +82,9 @@ public class Execution2MetadataMapping {
     private Metadata require(long executionId) {
         Metadata metadata = mapping.get(executionId);
         if (metadata == null) {
-            logger.error("Execution metadata not found for id=" + executionId);
+            // fail loudly instead of returning null: callers dereference the result,
+            // and a bare NPE hides which execution the lookup was for
+            throw new IllegalStateException("Execution metadata not found for id=" + executionId);
         }
 
         return metadata;
