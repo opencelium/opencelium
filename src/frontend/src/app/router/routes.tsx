@@ -1,6 +1,6 @@
 import {lazy} from 'react'
 import type { JSX } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Navigate, Outlet } from 'react-router-dom'
 import { AuthGuard } from './guards/AuthGuard'
 import {AppLayout} from "@app/layouts/AppLayout/AppLayout.tsx";
 import {PublicLayout} from "@app/layouts/PublicLayout.tsx";
@@ -46,6 +46,8 @@ export function getRoutes(): RouteConfig[] {
                 children: [
                     {path: '/sandbox', element: <Sandbox/>},
                     ...appRoutes,
+                    // Old URL — kept so bookmarks/links from before the update-assistant path was hyphenated still work.
+                    {path: '/update_assistant', element: <Navigate to="/update-assistant" replace/>},
                     {path: '/ldap/check', element: <CheckLdapPage/>},
                     {
                         path: '/ui/config',
