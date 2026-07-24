@@ -572,7 +572,9 @@ function RuleRow({
 					className="conditionOperatorSelect"
 					showSearch
 					optionFilterProp="label"
-					options={IF_OPERATOR_OPTIONS.map((option) => ({ value: option.value, label: t(option.labelKey) }))}
+					options={IF_OPERATOR_OPTIONS
+						.map((option) => ({ value: option.value, label: t(option.labelKey) }))
+						.sort((a, b) => a.label.localeCompare(b.label))}
 					onChange={(value) => onChange({ operator: value, rightField: undefined })}
 					suffixIcon={<DownOutlined />}
 					getPopupContainer={() => document.body}
@@ -609,18 +611,22 @@ function RuleRow({
 			) : null}
 			{canDelete ? (
 				<div className="conditionRuleActions">
-					<Button
-						type="text"
-						className="conditionDuplicateButton"
-						icon={<CopyOutlined />}
-						onClick={onDuplicate}
-					/>
-					<Button
-						type="text"
-						className="conditionDeleteButton"
-						icon={<DeleteOutlined />}
-						onClick={onDelete}
-					/>
+					<Tooltip content={t('actions.duplicate')}>
+						<Button
+							type="text"
+							className="conditionDuplicateButton"
+							icon={<CopyOutlined />}
+							onClick={onDuplicate}
+						/>
+					</Tooltip>
+					<Tooltip content={t('actions.delete')}>
+						<Button
+							type="text"
+							className="conditionDeleteButton"
+							icon={<DeleteOutlined />}
+							onClick={onDelete}
+						/>
+					</Tooltip>
 				</div>
 			) : null}
 		</div>
