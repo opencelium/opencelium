@@ -24,7 +24,7 @@ export function ConnectorLogRow({
         onToggle={() => setExpanded((v) => !v)}
         left={
           <Typography variant="label-sm" isBold isUppercase>
-            {log.connectorName !== 'DEFAULT' ? log.connectorName : t("testRunDetails")}
+            {log.connectorName !== 'DEFAULT' ? log.connectorName : t("logsLabel")}
           </Typography>
         }
       />

@@ -28,6 +28,7 @@
     "tooltip": "Toggle URL / name"
   },
   "testRunDetails": "TEST RUN DETAILS",
+  "logsLabel": "LOGS",
   "live": {
     "title": "Execution Logs",
     "empty": "No logs yet. Run a test to see execution logs.",

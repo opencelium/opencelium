@@ -28,6 +28,7 @@
     "tooltip": "URL / Name umschalten"
   },
   "testRunDetails": "TESTLAUFDETAILS",
+  "logsLabel": "LOGS",
   "live": {
     "title": "Ausführungs-Logs",
     "empty": "Noch keine Logs. Starten Sie einen Test, um Ausführungs-Logs zu sehen.",
