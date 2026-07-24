@@ -38,8 +38,8 @@ function LiveConnectorRow({ tree, node }: { tree: LiveLogTree; node: LiveLogNode
         expanded={expanded}
         onToggle={() => setExpanded((v) => !v)}
         left={
-          <Typography variant="label" isBold isUppercase>
-            {node.connectorName !== "DEFAULT" ? node.connectorName : t("live.testRunDetails")}
+          <Typography variant="label-sm" isBold isUppercase>
+            {node.connectorName !== "DEFAULT" ? node.connectorName : t("testRunDetails")}
           </Typography>
         }
         right={

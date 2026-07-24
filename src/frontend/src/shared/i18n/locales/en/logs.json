@@ -27,9 +27,9 @@
   "methodView": {
     "tooltip": "Toggle URL / name"
   },
+  "testRunDetails": "TEST RUN DETAILS",
   "live": {
     "title": "Execution Logs",
-    "testRunDetails": "TEST RUN DETAILS",
     "empty": "No logs yet. Run a test to see execution logs.",
     "running": "Running…",
     "collecting": "Collecting logs…",

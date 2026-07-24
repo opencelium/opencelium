@@ -27,9 +27,9 @@
   "methodView": {
     "tooltip": "URL / Name umschalten"
   },
+  "testRunDetails": "TESTLAUFDETAILS",
   "live": {
     "title": "Ausführungs-Logs",
-    "testRunDetails": "TESTLAUFDETAILS",
     "empty": "Noch keine Logs. Starten Sie einen Test, um Ausführungs-Logs zu sehen.",
     "running": "Läuft…",
     "collecting": "Logs werden gesammelt…",
