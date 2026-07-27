@@ -19,6 +19,12 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             ctrlEnterHint: string
             cmdEnterHint: string
         }
+        copy: {
+            tooltip: string
+            empty: string
+            success: string
+            failed: string
+        }
         status: {
             loading: string
             empty: string

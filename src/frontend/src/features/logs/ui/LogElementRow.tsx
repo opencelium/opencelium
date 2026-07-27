@@ -8,7 +8,7 @@ import type { FlowchartChildLog } from "../model/types";
 import { LogRow, Meta, MethodBadge, OperatorLabel, StatusBadge, TraceDot, Url } from "./logRowUi";
 import { MethodLogDetails } from "./MethodLogDetails";
 import { LoopPager } from "./LoopPager";
-import { CopyButton } from "./CopyButton";
+import { CopyButton } from "@shared/ui/actions/CopyButton";
 import { serializeLogElement } from "./serializeLogElement";
 import { useMethodViewMode } from "./methodViewMode";
 import { methodDisplayText } from "./methodView";

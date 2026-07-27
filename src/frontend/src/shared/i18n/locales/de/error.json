@@ -12,7 +12,8 @@
     "login": {
       "network": "Der Server ist nicht erreichbar. Bitte versuchen Sie es erneut.",
       "invalidCredentials": "Ungültige E-Mail oder Passwort",
-      "failed": "Anmeldung fehlgeschlagen"
+      "failed": "Anmeldung fehlgeschlagen",
+      "sessionLoadFailed": "Sie wurden angemeldet, aber Ihr Konto konnte nicht geladen werden. Bitte versuchen Sie es erneut."
     },
     "forgotPassword": {
       "emailNotExists": "Für diese E-Mail-Adresse ist kein Konto registriert.",

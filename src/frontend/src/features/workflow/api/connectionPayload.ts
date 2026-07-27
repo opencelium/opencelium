@@ -130,23 +130,31 @@ const buildUiPayload = (
 	nodes: WorkflowNodeModel[],
 	edges: WorkflowEdgeModel[],
 	viewport?: { x: number; y: number; zoom: number },
-) => ({
-	viewport,
-	workflowNodes: nodes.map((node) => sanitizeUiNode(node)),
-	workflowEdges: edges.map((edge) => ({ ...edge })),
-	flowcharts: nodes.map((node) => ({
-		flowId: node.id,
-		x: node.position.x,
-		y: node.position.y,
-	})),
-	flowchartEdges: edges.map((edge) => ({
-		id: edge.id,
-		source: edge.source,
-		target: edge.target,
-		sourceHandle: edge.sourceHandle,
-		targetHandle: edge.targetHandle,
-	})),
-});
+) => {
+	// Reused on load to re-match a saved node to its current method/operator by tree
+	// position instead of by id — ids are position-derived (`method-3`) and shift
+	// whenever a sibling is inserted earlier in the tree, which used to misattach a
+	// node's saved color/config to whatever entry now happens to share its old id.
+	const workflowIndexes = buildWorkflowIndexes(nodes, edges);
+
+	return {
+		viewport,
+		workflowNodes: nodes.map((node) => sanitizeUiNode(node, workflowIndexes.get(node.id))),
+		workflowEdges: edges.map((edge) => ({ ...edge })),
+		flowcharts: nodes.map((node) => ({
+			flowId: node.id,
+			x: node.position.x,
+			y: node.position.y,
+		})),
+		flowchartEdges: edges.map((edge) => ({
+			id: edge.id,
+			source: edge.source,
+			target: edge.target,
+			sourceHandle: edge.sourceHandle,
+			targetHandle: edge.targetHandle,
+		})),
+	};
+};
 
 const UI_ENDPOINT_ARG_TOKEN_RE = /#\{%\s*([A-Za-z0-9_-]+)\s*%}/g;
 
@@ -253,10 +261,11 @@ const sanitizeNodeData = (data: WorkflowNodeData) => {
 	);
 };
 
-const sanitizeUiNode = (node: WorkflowNodeModel) => ({
+const sanitizeUiNode = (node: WorkflowNodeModel, index?: string) => ({
 	id: node.id,
 	type: node.type,
 	position: node.position,
+	index,
 	data: sanitizeNodeData(node.data as WorkflowNodeData),
 	draggable: node.draggable,
 	deletable: node.deletable,

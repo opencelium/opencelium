@@ -18,6 +18,7 @@ export const MaterialTooltip: TooltipComponent = ({
     content,
     placement = 'top',
     zIndex,
+    maxWidth,
     children,
 }) => {
     return (
@@ -32,6 +33,7 @@ export const MaterialTooltip: TooltipComponent = ({
                         color: 'var(--color-text-primary)',
                         borderRadius: 'var(--radius-md)',
                         fontSize: 12,
+                        ...(maxWidth && { maxWidth }),
                     },
                 },
                 popper: zIndex ? { style: { zIndex } } : undefined,
