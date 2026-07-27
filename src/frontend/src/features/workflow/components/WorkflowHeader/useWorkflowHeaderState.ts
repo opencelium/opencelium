@@ -10,6 +10,8 @@ type StateProps = Pick<
 	/** Called after an inline name edit commits to an actual new name, so the workflow
 	 * is saved immediately instead of waiting for the explicit Save button. */
 	onNameCommitted?: (title: string, description: string) => void | Promise<void>;
+	/** Same as onNameCommitted, but for description edits. */
+	onDescriptionCommitted?: (title: string, description: string) => void | Promise<void>;
 };
 
 export function useWorkflowHeaderState({
@@ -18,6 +20,7 @@ export function useWorkflowHeaderState({
 	onChange,
 	validateTitle,
 	onNameCommitted,
+	onDescriptionCommitted,
 }: StateProps) {
 	const [name, setName] = useState(initialName);
 	const [description, setDescription] = useState(initialDescription);
@@ -27,6 +30,7 @@ export function useWorkflowHeaderState({
 	const [nameError, setNameError] = useState('');
 	const [isCheckingName, setIsCheckingName] = useState(false);
 	const [isSavingName, setIsSavingName] = useState(false);
+	const [isSavingDescription, setIsSavingDescription] = useState(false);
 	const nameInputRef = useRef<HTMLInputElement | null>(null);
 	const descriptionInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -104,10 +108,21 @@ export function useWorkflowHeaderState({
 		setEditing(null);
 	};
 
-	const commitDescription = () => {
+	const commitDescription = async () => {
 		const nextDescription = draftDescription.trim();
+		const didChangeDescription = nextDescription !== description;
 		setDescription(nextDescription);
 		onChange?.({ title: name, description: nextDescription });
+		if (didChangeDescription && onDescriptionCommitted) {
+			setIsSavingDescription(true);
+			try {
+				await onDescriptionCommitted(name, nextDescription);
+			} catch {
+
+			} finally {
+				setIsSavingDescription(false);
+			}
+		}
 		setEditing(null);
 	};
 
@@ -133,7 +148,7 @@ export function useWorkflowHeaderState({
 
 	return {
 		name, description, draftName, draftDescription, editing, nameError, isCheckingName, isSavingName,
-		nameInputRef, descriptionInputRef, setDraftName, setDraftDescription, setEditing,
+		isSavingDescription, nameInputRef, descriptionInputRef, setDraftName, setDraftDescription, setEditing,
 		cancelEdit, commitName, commitDescription, prepareSave,
 	};
 }

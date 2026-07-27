@@ -19,6 +19,8 @@ export function WorkflowHeader({
 		...stateProps,
 		onNameCommitted: (title, description) =>
 			onSave({ title, description, comment: t('saveDialog.autoNameChangeComment', { name: title }) }),
+		onDescriptionCommitted: (title, description) =>
+			onSave({ title, description, comment: t('saveDialog.autoDescriptionChangeComment', { description }) }),
 	});
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [saveDialogOpen, setSaveDialogOpen] = useState(false);
