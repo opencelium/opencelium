@@ -3,6 +3,7 @@ import { Controller, FormProvider } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { useLoginForm } from '../model/useLoginForm'
 import { useAuth } from '@features/auth/useAuth'
+import { SessionHydrationError } from '@features/auth/strategies/PasswordStrategy'
 import { API_TIMEOUT_ERROR_NAME, ApiFetchError } from '@shared/api/apiFetch'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { FormConstraintsProvider } from '@shared/form/FormConstraintsContext.tsx'
@@ -49,6 +50,11 @@ export function LoginForm() {
                 errorBus.emit({ type: 'NETWORK', messageKey: 'login.network' })
             } else if (e instanceof TypeError) {
                 errorBus.emit({ type: 'NETWORK', messageKey: 'login.network' })
+            } else if (e instanceof SessionHydrationError) {
+                // The credentials were correct — /login already succeeded — this is a
+                // separate failure to load the account, so don't report it as bad
+                // credentials (see PasswordStrategy.completeLogin).
+                errorBus.emit({ type: 'UNKNOWN', messageKey: 'login.sessionLoadFailed' })
             } else if (e instanceof ApiFetchError && isBadCredentials(e)) {
                 errorBus.emit({ type: 'VALIDATION', messageKey: 'login.invalidCredentials' })
             } else {

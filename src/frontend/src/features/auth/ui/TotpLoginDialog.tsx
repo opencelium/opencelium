@@ -1,6 +1,7 @@
 import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAuth } from '@features/auth/useAuth'
+import { SessionHydrationError } from '@features/auth/strategies/PasswordStrategy'
 import { API_TIMEOUT_ERROR_NAME, ApiFetchError } from '@shared/api/apiFetch'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { FormConstraintsProvider } from '@shared/form/FormConstraintsContext'
@@ -52,11 +53,16 @@ export function TotpLoginDialog({ open, challenge, onClose }: Props) {
             const isNetworkError =
                 (e instanceof Error && e.name === API_TIMEOUT_ERROR_NAME) ||
                 (e instanceof TypeError && e.message === 'Failed to fetch')
+            // The code was correct — /totp-validate already succeeded — this is a
+            // separate failure to load the account, so don't report it as an
+            // invalid code (see PasswordStrategy.completeLogin).
             const messageKey: AuthKey = isNetworkError
                 ? 'errors.network'
-                : e instanceof ApiFetchError && e.status === 401
-                  ? 'totp.errors.invalidCode'
-                  : 'errors.failed'
+                : e instanceof SessionHydrationError
+                  ? 'errors.sessionLoadFailed'
+                  : e instanceof ApiFetchError && e.status === 401
+                    ? 'totp.errors.invalidCode'
+                    : 'errors.failed'
             form.setError('code', { type: 'server', message: messageKey })
         }
     }

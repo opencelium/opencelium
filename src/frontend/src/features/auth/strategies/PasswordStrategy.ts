@@ -18,8 +18,20 @@ import {
 } from '@features/auth/session/sessionTiming'
 
 const TOKEN_KEY = 'oc_auth_token'
+const USER_FETCH_RETRY_DELAY_MS = 500
 
 type LoginPayload = { email: string; password: string }
+
+/** Thrown when /login (or /totp-validate) succeeded but the follow-up user
+ * fetch that hydrates the session never did — the credentials/code were
+ * correct, so callers must not report this as invalid-credentials. */
+export class SessionHydrationError extends Error {
+    constructor(cause: unknown) {
+        super('Login succeeded but the account could not be loaded')
+        this.name = 'SessionHydrationError'
+        this.cause = cause
+    }
+}
 
 /**
  * A 2FA-enabled account gets a challenge body instead of a token. A bare { sessionId }
@@ -87,7 +99,16 @@ export class PasswordStrategy implements AuthStrategy<LoginPayload> {
     private async completeLogin(headers: Headers): Promise<AuthSession> {
         const accessToken = (headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '')
         writeToken(accessToken)
-        const user = await this.fetchUser(accessToken)
+        let user: AuthUser
+        try {
+            user = await this.fetchUser(accessToken)
+        } catch (e) {
+            // The token we just wrote is unusable without a hydrated user — drop it
+            // rather than leaving an orphaned token that doesn't correspond to a
+            // Redux session behind in storage.
+            clearToken()
+            throw new SessionHydrationError(e)
+        }
         const normalizedUser = extractNormalizedUser(user)
         return { accessToken, user, normalizedUser }
     }
@@ -122,8 +143,21 @@ export class PasswordStrategy implements AuthStrategy<LoginPayload> {
         }).catch(() => null)
     }
 
+    /** One retry after a short delay — a freshly issued token can occasionally
+     * not be recognized yet by whatever service backs /user (auth/user-service
+     * eventual consistency), which would otherwise surface a spurious failure
+     * despite /login having just succeeded. */
     private async fetchUser(token: string): Promise<AuthUser> {
         const { userId } = decodeJwt<{ userId: number }>(token)
+        try {
+            return await this.fetchUserOnce(userId, token)
+        } catch {
+            await new Promise((resolve) => setTimeout(resolve, USER_FETCH_RETRY_DELAY_MS))
+            return await this.fetchUserOnce(userId, token)
+        }
+    }
+
+    private async fetchUserOnce(userId: number, token: string): Promise<AuthUser> {
         const { data } = await apiFetchWithHeaders<AuthUser>(`/user/${userId}`, { token })
         if (!data) throw new Error('Empty user response')
         return data

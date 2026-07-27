@@ -7,7 +7,7 @@ import type { WorkflowNodeData } from '../types/workflow.types';
  * resolve/execute callbacks (no React context available) and whichever
  * workflow editor instance is currently mounted. `useWorkflowPage` sets
  * this on mount and clears it on unmount — see connection.definition.tsx's
- * `workflow find method/property` commands for the read side.
+ * `workflow search <term>` command for the read side.
  */
 type WorkflowCommandBridge = {
   isActive: boolean;
