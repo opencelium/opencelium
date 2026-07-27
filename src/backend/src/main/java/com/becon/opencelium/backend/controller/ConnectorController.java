@@ -218,6 +218,8 @@ public class ConnectorController {
     public ResponseEntity<?> add(@RequestBody ConnectorResource connectorResource) {
         // TODO: fix naming.
         // to prevent confusion.
+//        SSL Validation is activated:   false
+//        SSL Validation is deactivated: true
 //        boolean enableSllValidation = !connectorResource.isSslCert();
 //        connectorResource.setSslCert(enableSllValidation);
         if (connectorService.existByTitle(connectorResource.getTitle())) {
@@ -246,6 +248,8 @@ public class ConnectorController {
     public ResponseEntity<ConnectorResource> update(@PathVariable Integer id, @RequestBody ConnectorResource connectorResource) {
         // TODO: fix naming.
         // to prevent confusion.
+//        SSL Validation is activated:   false
+//        SSL Validation is deactivated: true
 //        boolean enableSllValidation = !connectorResource.isSslCert();
 //        connectorResource.setSslCert(enableSllValidation);
         return ResponseEntity.ok(
@@ -399,6 +403,8 @@ public class ConnectorController {
         // TODO: fix naming.
         // to prevent confusion.
         // commented due to a frontend sends as it was before.
+//        SSL Validation is activated:   false
+//        SSL Validation is deactivated: true
 //        boolean enableSllValidation = !connectorResource.isSslCert();
 //        connectorResource.setSslCert(enableSllValidation);
 //        Invoker invoker = invokerService.findByName(connector.getInvoker());
