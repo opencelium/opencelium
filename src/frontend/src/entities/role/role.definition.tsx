@@ -120,6 +120,9 @@ export const roleDefinition: EntityDefinition = {
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.name.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {
@@ -139,6 +142,9 @@ export const roleDefinition: EntityDefinition = {
                 order: 2,
                 searchable: true,
                 labelKey: `${baseKey}.fields.description.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
 

@@ -88,7 +88,8 @@ export type TableFieldDefinition = {
     labelKey?: string
     /** Literal fallback header. Falls back to FieldDefinition.label / .labelKey / .name. */
     label?: string
-    width?: number
+    /** Fixed pixel width (number) or a CSS width string (e.g. `'20%'`). */
+    width?: number | string
     align?: ColumnAlign
     /** Transform the raw cell value before sort / search / render. */
     mapToValue?: (row: unknown, raw: unknown) => unknown

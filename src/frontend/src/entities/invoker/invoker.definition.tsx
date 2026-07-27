@@ -1,6 +1,5 @@
 import { message } from 'antd'
 import type { EntityDefinition } from '@/engine/entity/EntityDefinition'
-import type { CommandNode } from '@shared/command/types'
 import invokerWizardImage from '@assets/images/wizard/invoker-wizard.gif'
 import { createEntityCommands } from '@/engine/entity/command/createEntityCommands.tsx'
 import { i18n } from '@shared/i18n/config/i18n.ts'
@@ -97,6 +96,9 @@ export const invokerDefinition: EntityDefinition = {
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.name.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {
@@ -113,6 +115,9 @@ export const invokerDefinition: EntityDefinition = {
                 visible: true,
                 order: 2,
                 labelKey: `${baseKey}.fields.description.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {

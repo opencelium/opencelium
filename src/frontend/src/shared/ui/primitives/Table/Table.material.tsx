@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { flexRender } from '@tanstack/react-table';
 import {
     Table as MuiTable,
+    TableContainer,
     TableHead,
     TableBody,
     TableRow,
@@ -10,6 +11,7 @@ import {
     Checkbox,
 } from '@mui/material';
 import { findStretchColumnId, isRowClickIgnored, renderTruncatedCell } from './Table.utils';
+import type { TableColumnMeta } from './Table.types';
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
@@ -45,6 +47,20 @@ export const MaterialTable = ({
 
     return (
         <>
+        {/* minWidth: 0 lets this shrink below its content width inside a flex-column
+            parent (GenericEntityList's page wrapper) — without it, overflowX never
+            actually engages since the container just grows to fit the table instead
+            of clipping/scrolling it. overflowY is 'hidden', not 'visible' — per the
+            CSS spec, pairing overflow-x:auto with overflow-y:visible gets the
+            'visible' one silently promoted to 'auto' too (they can't differ that
+            way), which let a vertical scrollbar sneak in here. 'hidden' isn't
+            'visible', so it isn't subject to that coupling, and there's nothing to
+            clip vertically anyway since this container always sizes to its own
+            content. whiteSpace 'nowrap' (inherited by every cell's text) keeps row
+            height fixed: without it, the browser's only way to shrink a column
+            below its content's natural width is to wrap the text, growing the row
+            taller instead of scrolling horizontally. */}
+        <TableContainer sx={{ overflowX: 'auto', overflowY: 'hidden', minWidth: 0, whiteSpace: 'nowrap' }}>
         <MuiTable>
             <TableHead>
                 {headerGroups.map((headerGroup) => (
@@ -70,7 +86,8 @@ export const MaterialTable = ({
                             const sorted = column.getIsSorted();
                             const canSort = column.getCanSort();
                             const explicitSize = column.columnDef.size;
-                            const align = (column.columnDef.meta as { align?: 'left' | 'center' | 'right' } | undefined)?.align;
+                            const meta = column.columnDef.meta as TableColumnMeta | undefined;
+                            const align = meta?.align;
 
                             return (
                                 <TableCell
@@ -85,9 +102,11 @@ export const MaterialTable = ({
                                         cursor: canSort ? 'pointer' : 'default',
                                         ...(explicitSize !== undefined
                                             ? { width: explicitSize }
-                                            : column.id === stretchColumnId
-                                                ? { width: '100%' }
-                                                : {}),
+                                            : meta?.width !== undefined
+                                                ? { width: meta.width }
+                                                : column.id === stretchColumnId
+                                                    ? { width: '100%' }
+                                                    : {}),
                                     }}
                                 >
                                     {flexRender(
@@ -160,7 +179,8 @@ export const MaterialTable = ({
                             )}
 
                             {row.getVisibleCells().map((cell) => {
-                                const align = (cell.column.columnDef.meta as { align?: 'left' | 'center' | 'right' } | undefined)?.align;
+                                const meta = cell.column.columnDef.meta as TableColumnMeta | undefined;
+                                const align = meta?.align;
                                 const explicitSize = cell.column.columnDef.size;
                                 return (
                                     <TableCell
@@ -169,9 +189,11 @@ export const MaterialTable = ({
                                         style={
                                             explicitSize !== undefined
                                                 ? { width: explicitSize }
-                                                : cell.column.id === stretchColumnId
-                                                    ? { width: '100%' }
-                                                    : undefined
+                                                : meta?.width !== undefined
+                                                    ? { width: meta.width }
+                                                    : cell.column.id === stretchColumnId
+                                                        ? { width: '100%' }
+                                                        : undefined
                                         }
                                     >
                                         {renderTruncatedCell(cell)}
@@ -183,6 +205,7 @@ export const MaterialTable = ({
                 })}
             </TableBody>
         </MuiTable>
+        </TableContainer>
         {isPaginated && totalRows > pageSize && (
             <TablePagination
                 component="div"

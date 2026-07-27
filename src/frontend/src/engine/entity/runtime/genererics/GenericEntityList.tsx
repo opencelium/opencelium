@@ -9,6 +9,7 @@ import {
     getPaginationRowModel,
     getExpandedRowModel,
     type ColumnDef,
+    type PaginationState,
     type Row,
     type RowSelectionState,
     type SortingState,
@@ -175,6 +176,14 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
     const [sorting, setSorting] = useState<SortingState>(initialSorting);
     const [globalFilter, setGlobalFilter] = useState('');
     const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+    // Controlled (not left to tanstack's uncontrolled default) so a row action's
+    // refetch — which hands the table a new `data` array reference even when the
+    // rows are unchanged — doesn't trigger tanstack's autoResetPageIndex and snap
+    // the user back to page 1.
+    const [pagination, setPagination] = useState<PaginationState>({
+        pageIndex: 0,
+        pageSize: entity.list?.pageSize ?? 10,
+    });
     const [pendingDeleteIds, setPendingDeleteIds] = useState<string[]>([]);
     const [filterState, setFilterState] = useState<ListFilterState>(() =>
         buildInitialFilterState(filters),
@@ -200,7 +209,7 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
     const table = useReactTable({
         data: tableRows,
         columns,
-        state: { sorting, globalFilter, rowSelection },
+        state: { sorting, globalFilter, rowSelection, pagination },
         // Sub-rows (depth > 0) are decorative children of their parent and never selectable.
         enableRowSelection: selectable
             ? hasSubRows
@@ -212,6 +221,7 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
         onSortingChange: setSorting,
         onGlobalFilterChange: setGlobalFilter,
         onRowSelectionChange: setRowSelection,
+        onPaginationChange: setPagination,
         getRowId:
             selectable || hasSubRows
                 ? (row, index, parent) => {
@@ -235,10 +245,6 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
                   autoResetExpanded: false,
               }
             : {}),
-        // Sub-rows start collapsed — the user reveals them via the expander column.
-        initialState: {
-            pagination: { pageIndex: 0, pageSize: entity.list?.pageSize ?? 10 },
-        },
     });
 
     const selectedRows = selectable ? table.getSelectedRowModel().rows : [];

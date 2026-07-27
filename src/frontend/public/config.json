@@ -2,13 +2,13 @@
   "server": {
     "protocol": "",
     "hostname": "",
-    "port": "",
-    "prefix": "/api"
+    "port": "9090",
+    "prefix": ""
   },
   "socket": {
     "protocol": "",
     "hostname": "",
-    "port": "",
+    "port": "9090",
     "prefix": "/ws"
   }
 }
