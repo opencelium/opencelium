@@ -102,6 +102,7 @@
     "submit": "Absenden",
     "next": "Weiter",
     "ctrlEnterHint": "Tastenkombination: Strg+Enter",
+    "cmdEnterHint": "Tastenkombination: ⌘+Enter",
     "create": "Erstellen",
     "view": "Ansehen",
     "edit": "Bearbeiten",

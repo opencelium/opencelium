@@ -122,7 +122,35 @@ spring:
   #   logging.level.org.springframework.security.ldap: DEBUG settings      #
   #                                                                    #
   ######################################################################
-#  springframework
+#  security:
+#    ldap:
+#      # LDAP server URL
+#      urls: ldap://localhost:7389
+#      # User search base
+#      user-search-base: ou=User,ou=group,dc=domain,dc=com
+#      # Group search base
+#      group-search-base: ou=Groups,ou=group,dc=domain,dc=com
+#      # LDAP manager credentials
+#      username: uid=super_user,ou=User,ou=group,dc=domain,dc=com
+#      password: PASSWORD
+#      # Where to search for roles/groups
+#      # Usually, the unique identifier for OpenLDAP is uniqueMember={0},
+#      # while for Active Directory, it is member={0} but check your LDAP settings
+#      group-search-filter: (member={0})
+#      # User search filter
+#      # Usually, the unique identifier for OpenLDAP is mailPrimaryAddress={0},
+#      # while for Active Directory, it is mail={0} but check your LDAP settings
+#      user-search-filter: (mailPrimaryAddress={0})
+#      # Maps groups between LDAP and the application
+#      group-role-mapping:
+#        - ldap-group: cn=AdminLdap, ou=Groups,ou=group,dc=domain,dc=com
+#          oc-role: Admin
+#        - ldap-group: cn=UserLdap,ou=Groups,ou=group,dc=domain,dc=com
+#          oc-role: User
+#      # Default role if no mapping is found between LDAP and the application
+#      default-role: User
+#      # Timeout for LDAP authentication (in milliseconds)
+#      timeout: 30000
 
 springdoc:
   swagger-ui:

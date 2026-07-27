@@ -1,19 +1,16 @@
-import React from 'react';
 import type {StepsComponent} from "@shared/ui/primitives/Steps/Divider.types.tsx";
-import { Step, StepLabel, Stepper} from "@mui/material";
+import { Step, StepContent, StepLabel, Stepper} from "@mui/material";
 import {Typography} from "@shared/ui/primitives/Typography";
-import {StepContent} from "@shared/ui/step-form/StepContent.tsx";
 
 const MaterialSteps: StepsComponent =
     ({
          current,
-         status,
          items,
      }) => {
         return (
             <Stepper activeStep={current} orientation="vertical">
                 {items.map((step, index) => (
-                    <Step key={step.header}>
+                    <Step key={index}>
                         <StepLabel
                             optional={
                                 index === items.length - 1 ? (
