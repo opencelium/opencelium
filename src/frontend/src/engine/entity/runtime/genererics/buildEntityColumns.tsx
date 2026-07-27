@@ -1,6 +1,7 @@
 import React from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
 import type { EntityDefinition, FieldDefinition } from '@/engine/entity/EntityDefinition';
+import type { TableColumnMeta } from '@shared/ui/primitives/Table/Table.types';
 import { getValueByPath } from '@shared/utils/getValueByPath';
 
 export type EntityColumnsContext = {
@@ -69,8 +70,15 @@ export function buildEntityColumns<T extends Record<string, unknown>>(
             enableGlobalFilter: !!tableCfg.searchable,
         };
 
-        if (tableCfg.width !== undefined) column.size = tableCfg.width;
-        if (tableCfg.align) (column as ColumnDef<T> & { meta?: { align: string } }).meta = { align: tableCfg.align };
+        // Numeric width maps to tanstack's own (pixel-only) column.size; a string
+        // width (e.g. '20%') can't go through column.size — tanstack's sizing
+        // feature is strictly numeric — so it rides in meta.width instead, and
+        // the table primitives apply it as a raw CSS width themselves.
+        if (typeof tableCfg.width === 'number') column.size = tableCfg.width;
+        const meta: TableColumnMeta = {};
+        if (tableCfg.align) meta.align = tableCfg.align;
+        if (typeof tableCfg.width === 'string') meta.width = tableCfg.width;
+        if (Object.keys(meta).length > 0) (column as ColumnDef<T> & { meta?: TableColumnMeta }).meta = meta;
 
         return column;
     });

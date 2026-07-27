@@ -3,6 +3,7 @@ import { Table, Pagination } from 'antd';
 import { flexRender } from '@tanstack/react-table';
 import React, { useCallback, useMemo } from 'react';
 import { findStretchColumnId, isRowClickIgnored, renderTruncatedCell } from './Table.utils';
+import type { TableColumnMeta } from './Table.types';
 
 const PAGE_SIZE_OPTIONS = ['10', '20', '50', '100'];
 
@@ -92,7 +93,8 @@ export const AntTable = ({
                 const sorted = column.getIsSorted();
                 const canSort = column.getCanSort();
                 const explicitSize = column.columnDef.size;
-                const align = (column.columnDef.meta as { align?: 'left' | 'center' | 'right' } | undefined)?.align;
+                const meta = column.columnDef.meta as TableColumnMeta | undefined;
+                const align = meta?.align;
                 const isFirstColumn = colIndex === 0;
 
                 return {
@@ -100,9 +102,11 @@ export const AntTable = ({
                     dataIndex: column.id,
                     ...(explicitSize !== undefined
                         ? { width: explicitSize }
-                        : column.id === stretchColumnId
-                            ? { width: '100%' }
-                            : {}),
+                        : meta?.width !== undefined
+                            ? { width: meta.width }
+                            : column.id === stretchColumnId
+                                ? { width: '100%' }
+                                : {}),
                     ...(align ? { align } : {}),
                     // Full-width rows (e.g. an empty-state placeholder under an expanded
                     // parent) collapse all data columns into one spanning cell.
@@ -191,16 +195,36 @@ export const AntTable = ({
             : 0;
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <Table
-                loading={isLoading}
-                dataSource={dataSource}
-                columns={columns}
-                rowSelection={rowSelection}
-                onRow={onRow}
-                pagination={false}
-                locale={{ emptyText: emptyState }}
-            />
+        // minWidth: 0 lets this shrink below its content width inside a flex-column
+        // parent (GenericEntityList's page wrapper) — without it, the overflowX
+        // below never actually engages since the wrapper just grows to fit the
+        // table instead of clipping/scrolling it.
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
+            {/* No `scroll.x` here on purpose — that forces every column to its full
+                natural (max-content) width, which skips straight to "always scroll"
+                instead of letting columns that don't need the space stay compact.
+                overflowY is 'hidden', not 'visible' — per the CSS spec, pairing
+                overflow-x:auto with overflow-y:visible gets the 'visible' one
+                silently promoted to 'auto' too (they can't differ that way), which
+                let a vertical scrollbar sneak in here. 'hidden' isn't 'visible', so
+                it isn't subject to that coupling, and there's nothing to clip
+                vertically anyway since this div always sizes to its own content.
+                whiteSpace 'nowrap' (inherited by every cell's text) is what actually
+                keeps row height fixed: without it, the browser's only way to shrink
+                a column below its content's natural width is to wrap the text,
+                which grows the row taller instead of scrolling horizontally — so a
+                column only ever falls back to the scrollbar below, never to wrapping. */}
+            <div style={{ overflowX: 'auto', overflowY: 'hidden', whiteSpace: 'nowrap' }}>
+                <Table
+                    loading={isLoading}
+                    dataSource={dataSource}
+                    columns={columns}
+                    rowSelection={rowSelection}
+                    onRow={onRow}
+                    pagination={false}
+                    locale={{ emptyText: emptyState }}
+                />
+            </div>
             {isPaginated && totalRows > pageSize && (
                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                     <Pagination
