@@ -91,6 +91,11 @@ export const connectionDefinition: EntityDefinition = {
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.list.columns.title`,
+                // Override the list's default single-line/ellipsis cell behavior —
+                // title wraps across multiple lines instead of truncating.
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {
@@ -103,6 +108,9 @@ export const connectionDefinition: EntityDefinition = {
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.list.columns.description`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
     ],

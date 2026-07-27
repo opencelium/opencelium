@@ -134,6 +134,9 @@ export const userDefinition: EntityDefinition = {
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.userDetail.name.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             }
         },
         {
@@ -155,6 +158,9 @@ export const userDefinition: EntityDefinition = {
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.userDetail.surname.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             }
         },
         {
@@ -250,6 +256,9 @@ export const userDefinition: EntityDefinition = {
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.email.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },/*
             access: {
                 strategy: 'disable',
@@ -344,6 +353,9 @@ export const userDefinition: EntityDefinition = {
                     }
                     return undefined;
                 },
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {

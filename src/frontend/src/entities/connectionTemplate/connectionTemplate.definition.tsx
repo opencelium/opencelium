@@ -72,6 +72,9 @@ export const connectionTemplateDefinition: EntityDefinition = {
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.name.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {
@@ -86,6 +89,9 @@ export const connectionTemplateDefinition: EntityDefinition = {
                 order: 2,
                 searchable: true,
                 labelKey: `${baseKey}.fields.description.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {
@@ -100,6 +106,9 @@ export const connectionTemplateDefinition: EntityDefinition = {
                 order: 3,
                 searchable: true,
                 labelKey: `${baseKey}.fields.fromInvoker.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {
@@ -114,6 +123,9 @@ export const connectionTemplateDefinition: EntityDefinition = {
                 order: 4,
                 searchable: true,
                 labelKey: `${baseKey}.fields.toInvoker.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
     ],

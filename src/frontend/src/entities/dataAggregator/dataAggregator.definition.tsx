@@ -140,6 +140,9 @@ export const dataAggregatorDefinition: EntityDefinition = {
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.name.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {
