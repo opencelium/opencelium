@@ -22,6 +22,7 @@ export interface AuthSchema {
             failed: string
             invalidCredentials: string
             network: string
+            sessionLoadFailed: string
         }
         forgotPassword: {
             notAvailable: string

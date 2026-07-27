@@ -12,7 +12,8 @@
     "login": {
       "network": "Could not reach the server. Please try again.",
       "invalidCredentials": "Invalid email or password",
-      "failed": "Login failed"
+      "failed": "Login failed",
+      "sessionLoadFailed": "You signed in, but we couldn't load your account. Please try again."
     },
     "forgotPassword": {
       "emailNotExists": "No account is registered with this email address.",
