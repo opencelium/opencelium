@@ -30,5 +30,11 @@
     "toInvoker": {
       "label": "To Invoker"
     }
+  },
+  "confirmation": {
+    "delete": {
+      "byId": "Delete workflow template by id \"{{templateId}}\"?",
+      "byName": "Delete workflow template by name \"{{name}}\"?"
+    }
   }
 }

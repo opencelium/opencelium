@@ -7,6 +7,7 @@ import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { parseEnhancementArg } from '../utils/parseEnhancementArg';
 import type { Connection, MethodWithId } from '../../../types/connection';
 import { LegacyBodyReferenceGenerator } from './LegacyBodyReferenceGenerator';
+import './BodyPointer.css';
 
 type Props = {
   pointer: string;
@@ -81,39 +82,21 @@ export function BodyPointer({ pointer, pointers, onClick, onRemove, onEdit, conn
         cursor: 'pointer',
       }}
     >
-      {hovered && canEdit ? (
-        <button
-          type='button'
-          onClick={openEditor}
-          style={{
-            position: 'absolute',
-            left: -5,
-            top: -12,
-            border: 0,
-            background: 'transparent',
-            padding: 0,
-            cursor: 'pointer',
-          }}
-        >
-          <EditOutlined style={{ fontSize: 10, color: 'var(--color-text-primary)' }} />
-        </button>
-      ) : null}
       {hovered ? (
-        <button
-          type='button'
-          onClick={remove}
-          style={{
-            position: 'absolute',
-            right: -5,
-            top: -12,
-            border: 0,
-            background: 'transparent',
-            padding: 0,
-            cursor: 'pointer',
-          }}
-        >
-          <DeleteOutlined style={{ fontSize: 10, color: 'var(--color-text-primary)' }} />
-        </button>
+        <div className='bodyPointerMenu'>
+          <div className='bodyPointerMenuList'>
+            {canEdit && (
+              <button type='button' className='bodyPointerMenuItem' onClick={openEditor}>
+                <EditOutlined style={{ fontSize: 12 }} />
+                {tWorkflow('actions.edit')}
+              </button>
+            )}
+            <button type='button' className='bodyPointerMenuItem bodyPointerMenuItem--danger' onClick={remove}>
+              <DeleteOutlined style={{ fontSize: 12 }} />
+              {tWorkflow('actions.delete')}
+            </button>
+          </div>
+        </div>
       ) : null}
       {editorPos && connection && currentMethod
         ? createPortal(

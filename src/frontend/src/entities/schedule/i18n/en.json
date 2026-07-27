@@ -1,7 +1,7 @@
 {
   "list": {
     "title": "Schedules",
-    "subTitle": "Schedules determine when specific workflows are executed, either on a defined timetable or based on triggers. Status legend: <blueDot/> running, <greenDot/> last run succeeded, <redDot/> last run failed, <grayDot/> no cron and no run history. The number under the circle is a countdown to the next cron trigger.",
+    "subTitle": "Schedules determine when specific workflows are executed, either on a defined timetable or based on triggers. The number under a status circle is a countdown to its next cron trigger.<legend>Status legend: <legendRunning>Running</legendRunning><legendSucceeded>Last run succeeded</legendSucceeded><legendFailed>Last run failed</legendFailed><legendNone>No cron and no run history</legendNone></legend>",
     "searchPlaceholder": "Search by connection name",
     "columns": {
       "executions": "Executions",

@@ -1,4 +1,8 @@
 {
+  "list": {
+    "title": "Benutzer",
+    "subTitle": "In diesem Bereich können Administratoren Systembenutzer verwalten, Gruppen zuweisen, die Zwei-Faktor-Authentifizierung (2FA) aktivieren und Zugriffsberechtigungen steuern."
+  },
   "crossValidations": {
     "repeatPassword": {
       "message": "Passwörter stimmen nicht überein"

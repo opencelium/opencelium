@@ -43,6 +43,7 @@ import {
     Public,
     Merge,
     Lock,
+    HelpOutline,
 } from '@mui/icons-material';
 
 import type { IconComponent } from './Icon.types';
@@ -92,6 +93,7 @@ const iconMap = {
     'http-request': Public,
     aggregator: Merge,
     lock: Lock,
+    help: HelpOutline,
 };
 
 export const MaterialIcon: IconComponent = ({

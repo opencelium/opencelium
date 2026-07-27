@@ -171,7 +171,7 @@ export const ldapDefinition: EntityDefinition = {
         modes: {
             view: {
                 header: `${baseKey}.wizard.modes.view.header`,
-                subheader: `${baseKey}.wizard.modes.view.header`,
+                subheader: `${baseKey}.wizard.modes.view.subheader`,
             }
         },
 
@@ -198,7 +198,7 @@ export const ldapDefinition: EntityDefinition = {
                 remote: {
                     url: `/ldap/test`,
                     method: 'POST',
-                    transKey: `${baseKey}.wizard.steps.configuration.remote.error`,
+                    transKey: `${baseKey}.wizard.steps.configurations.remote.error`,
                     ignoreError: true,
                     encodeParams: false,
                     map: (fieldValue, formValues) => formValues,
@@ -232,10 +232,16 @@ export const ldapDefinition: EntityDefinition = {
             {
                 type: 'literal',
                 value: 'check',
+                group: 'navigate',
+                icon: 'check',
+                description: 'commandPalette.descriptions.ldapCheck',
                 children: [
                     {
                         type: 'literal',
                         value: 'ldap',
+                        group: 'navigate',
+                        icon: 'check',
+                        description: 'commandPalette.descriptions.ldapCheck',
                         execute: (_, ctx) => {
                             const url = `/ldap/check`;
                             const mode = useCommandPaletteUIStore.getState().resolveMode();

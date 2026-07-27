@@ -16,7 +16,6 @@ import { Typography } from '@shared/ui/primitives/Typography'
 type Props = {
     open: boolean
     challenge: TotpChallenge | null
-    rememberMe: boolean
     onClose: () => void
 }
 
@@ -29,7 +28,7 @@ function formatSecret(secret: string): string {
 
 const constraints = { code: getStringConstraints(totpCodeSchema, 'code') }
 
-export function TotpLoginDialog({ open, challenge, rememberMe, onClose }: Props) {
+export function TotpLoginDialog({ open, challenge, onClose }: Props) {
     const { validateTotp } = useAuth()
     const { t } = useI18n('auth')
     const form = useForm<TotpCodeValues>({
@@ -46,7 +45,7 @@ export function TotpLoginDialog({ open, challenge, rememberMe, onClose }: Props)
         try {
             // On success the session lands in Redux and LoginPage redirects away — the
             // dialog unmounts with the rest of the login screen, so there is nothing to close.
-            await validateTotp({ code: code.trim(), sessionId: challenge.sessionId, rememberMe })
+            await validateTotp({ code: code.trim(), sessionId: challenge.sessionId })
         } catch (e) {
             // Only a genuine fetch failure ("Failed to fetch") is a network error;
             // other TypeErrors are programming bugs and must not be hidden as such.

@@ -42,7 +42,7 @@
     "failures": "Fehler"
   },
   "resourceUsage": {
-    "title": "Ressourcenverbrauch",
+    "title": "Ressourcennutzung",
     "cpu": "CPU",
     "memory": "Speicher"
   },

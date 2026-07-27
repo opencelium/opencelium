@@ -8,7 +8,7 @@ export interface CommandConfirmOptions {
 }
 
 export interface CommandExecutionContext {
-    openModal: (node: React.ReactNode, options?: {width?: number | string}) => void;
+    openModal: (node: React.ReactNode, options?: {width?: number | string; top?: number}) => void;
     navigate: (url: string) => void;
     openNewTab: (url: string) => void;
     render: (node: React.ReactNode) => void;

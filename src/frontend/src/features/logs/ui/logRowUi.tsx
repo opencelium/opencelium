@@ -69,7 +69,7 @@ export function Url({ children, isError = false }: { children: string; isError?:
 export function OperatorLabel({ label, hint }: { label: string; hint?: string }) {
   return (
     <span style={{ display: "inline-flex", alignItems: "baseline", gap: 6 }}>
-      <Typography variant="label" isBold>
+      <Typography variant="label-sm" isBold>
         {label}
       </Typography>
       {hint ? (

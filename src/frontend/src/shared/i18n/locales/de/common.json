@@ -55,13 +55,27 @@
       "uploadInvoker": "Invoker-Datei hochladen",
       "downloadInvoker": "Invoker-Datei herunterladen",
       "systemCheck": "Systemprüfungsseite öffnen",
-      "workflow": "Den aktuellen Workflow durchsuchen"
+      "ldapCheck": "LDAP-Verbindungsprüfungsseite öffnen",
+      "workflow": "Den aktuellen Workflow durchsuchen",
+      "help": "Alle Befehle anzeigen"
     },
     "footer": {
       "select": "Auswählen",
       "autocomplete": "Vervollständigen",
       "navigate": "Navigieren",
       "close": "Schließen"
+    },
+    "help": {
+      "title": "Befehlsübersicht",
+      "subtitle": "Alles, was Sie über die Befehlspalette tun können.",
+      "keyboardTitle": "Tastatur",
+      "empty": "Keine Befehle verfügbar",
+      "searchPlaceholder": "Befehle suchen...",
+      "noResults": "Keine Befehle entsprechen \"{{query}}\"",
+      "shortcuts": {
+        "open": "Befehlspalette öffnen",
+        "clearScope": "Gesperrten Bereich verlassen (leere Eingabe)"
+      }
     }
   },
   "sidebar": {
@@ -92,6 +106,12 @@
     "view": "Ansehen",
     "edit": "Bearbeiten",
     "delete": "Löschen"
+  },
+  "copy": {
+    "tooltip": "In die Zwischenablage kopieren",
+    "empty": "Nichts zu kopieren",
+    "success": "In die Zwischenablage kopiert",
+    "failed": "Kopieren in die Zwischenablage fehlgeschlagen"
   },
   "field": {
     "required": "Pflichtfeld"

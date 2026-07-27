@@ -7,7 +7,7 @@ import { LoopPager } from "../LoopPager";
 import { ElementChildren } from "../LogElementRow";
 import { MethodLogDetails } from "../MethodLogDetails";
 import { ErrorDetail } from "../ErrorDetail";
-import { CopyButton } from "../CopyButton";
+import { CopyButton } from "@shared/ui/actions/CopyButton";
 import { serializeLogElement } from "../serializeLogElement";
 import { useMethodViewMode } from "../methodViewMode";
 import { methodDisplayText } from "../methodView";

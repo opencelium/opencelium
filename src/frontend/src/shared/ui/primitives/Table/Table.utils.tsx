@@ -29,6 +29,21 @@ export const isRowClickIgnored = (target: EventTarget | null): boolean => {
     return !!el?.closest?.('button, a, input, select, textarea, label, [data-row-click-ignore]');
 };
 
+/**
+ * The last column without an explicit `size` in its columnDef stretches to fill
+ * whatever width the fixed-size columns (checkbox, expander, row-actions) leave
+ * behind, instead of every unsized column competing for space based on raw
+ * content width. Returns null when every column has an explicit size.
+ */
+export const findStretchColumnId = (
+    columns: { id: string; columnDef: { size?: number } }[],
+): string | null => {
+    for (let i = columns.length - 1; i >= 0; i--) {
+        if (columns[i].columnDef.size === undefined) return columns[i].id;
+    }
+    return null;
+};
+
 export const truncateCellNode = (node: ReactNode): ReactNode => {
     if (typeof node !== 'string' && typeof node !== 'number') return node;
     const text = String(node);

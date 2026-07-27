@@ -9,7 +9,6 @@ import './сommandPalette.css';
 import type {ASTNode} from "@shared/command/ast.ts";
 import type {Suggestion} from "@shared/command/types.ts";
 import {CommandPalettePortal} from "@widgets/CommandPalette/CommanPalettePortal.tsx";
-import {useAuth} from "@features/auth/useAuth.ts";
 import {Loading} from "@shared/ui/primitives/Loading/Loading.tsx";
 import {Empty} from "@shared/ui/primitives/Empty";
 import {useLayoutStore} from "@app/layouts/AppLayout/layout.store.ts";
@@ -21,19 +20,12 @@ import HotKey from "@widgets/CommandPalette/HotKey.tsx";
 import {Icon} from "@shared/ui/primitives/Icon";
 import {useConfirm} from "@shared/ui/confirm/ConfirmDialogContext.tsx";
 import {useBreakpoints} from "@app/hooks/useBreakpoints.tsx";
-import {setUserPolicyContext} from "@/engine/policy";
+import {useCommandPolicyContext} from "@shared/command/useCommandPolicyContext.ts";
 import {useI18n} from "@shared/i18n/hooks/useI18n.ts";
 import {getRecentCommands, pushRecentCommand} from "@widgets/CommandPalette/recent.ts";
 import {PaletteFooter} from "@widgets/CommandPalette/PaletteFooter.tsx";
 import {buildTestId} from "@shared/testing/testId.ts";
-
-const GROUP_ORDER = ['workflow', 'recent', 'navigate', 'create', 'manage', 'system', 'general'];
-
-const orderGroups = (groups: string[]): string[] => {
-    const known = GROUP_ORDER.filter(g => groups.includes(g));
-    const unknown = groups.filter(g => !GROUP_ORDER.includes(g)).sort();
-    return [...known, ...unknown];
-};
+import {orderGroups} from "@shared/command/groupOrder.ts";
 
 type CommandPaletteProps = {
     /** Render as a compact icon + hotkey pill that animates open to the full
@@ -67,7 +59,6 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
     const navigate = useNavigate();
 
     const confirmAction = useConfirm();
-    const { user, normalizedUser } = useAuth()
     const [value, setValue] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
@@ -84,10 +75,7 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
     const [lockedScope, setLockedScope] = useState<Suggestion | null>(null);
     const requestIdRef = useRef(0);
     const changeSourceRef = useRef<'input' | 'select'>('input');
-    const policyContext = useMemo(() => ({
-        user: setUserPolicyContext(user, normalizedUser),
-        resource: 'command-palette'
-    }), [user, normalizedUser]);
+    const policyContext = useCommandPolicyContext();
     const inputRef = useRef<HTMLInputElement | null>(null);
     const buildTokens = (raw: string): string[] => {
         const base = raw.trim().length === 0 ? [] : raw.trim().split(/\s+/);

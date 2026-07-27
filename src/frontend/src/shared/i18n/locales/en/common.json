@@ -55,13 +55,27 @@
       "uploadInvoker": "Upload an invoker file",
       "downloadInvoker": "Download an invoker file",
       "systemCheck": "Open the system check page",
-      "workflow": "Search the current workflow"
+      "ldapCheck": "Open the LDAP connectivity check page",
+      "workflow": "Search the current workflow",
+      "help": "View all commands"
     },
     "footer": {
       "select": "Select",
       "autocomplete": "Autocomplete",
       "navigate": "Navigate",
       "close": "Close"
+    },
+    "help": {
+      "title": "Command reference",
+      "subtitle": "Everything you can do from the command palette.",
+      "keyboardTitle": "Keyboard",
+      "empty": "No commands available",
+      "searchPlaceholder": "Search commands...",
+      "noResults": "No commands match \"{{query}}\"",
+      "shortcuts": {
+        "open": "Open the command palette",
+        "clearScope": "Exit a locked scope (empty input)"
+      }
     }
   },
   "sidebar": {
@@ -92,6 +106,12 @@
     "view": "View",
     "edit": "Edit",
     "delete": "Delete"
+  },
+  "copy": {
+    "tooltip": "Copy to clipboard",
+    "empty": "Nothing to copy",
+    "success": "Copied to clipboard",
+    "failed": "Failed to copy to clipboard"
   },
   "field": {
     "required": "Required field"

@@ -237,7 +237,7 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
             : {}),
         // Sub-rows start collapsed — the user reveals them via the expander column.
         initialState: {
-            pagination: { pageIndex: 0, pageSize: entity.list?.pageSize ?? 15 },
+            pagination: { pageIndex: 0, pageSize: entity.list?.pageSize ?? 10 },
         },
     });
 
@@ -302,71 +302,71 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
 
     return (
         <div data-testid={buildTestId(entity.name, 'list')} style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
-                <div style={{ flex: 1 }}>
-                    <h1 style={{ marginBottom: 8 }}>
+            <header style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <h1 style={{ margin: 0 }}>
                         <Typography variant="headline" as="span">{titleText}</Typography>
                     </h1>
-                    <div style={{ color: 'var(--color-text-secondary)' }}>
-                        <Typography variant="body">{subtitleNode}</Typography>
+                    <div style={{ display: 'flex', gap: 8, alignSelf: 'flex-start' }}>
+                        {bulkActions.map((action) => {
+                            const field = action.field ?? rowKey;
+                            const ids = selectedRows
+                                .map((r) => String(getValueByPath(r.original, field) ?? ''))
+                                .filter(Boolean);
+                            const rows = selectedRows.map((r) => r.original);
+                            return (
+                                <BulkActionButton
+                                    key={action.key}
+                                    action={action}
+                                    entity={entity}
+                                    rows={rows}
+                                    ids={ids}
+                                    clearSelection={() => setRowSelection({})}
+                                />
+                            );
+                        })}
+                        {showBulkDeleteButton && (
+                            <Button
+                                type="primary"
+                                loading={isBulkDeleting}
+                                disabled={isBulkDeleteDisabled}
+                                onClick={handleBulkDelete}
+                                testId={buildTestId(entity.name, 'bulk-delete')}
+                            >
+                                {tCommon('list.deleteSelected', { count: selectedIds.length })}
+                            </Button>
+                        )}
+                        {headerActions.map((action) => (
+                            <React.Fragment key={action.key}>
+                                {action.render({ entity })}
+                            </React.Fragment>
+                        ))}
+                        {hasCreateRoute && (
+                            <Button
+                                type="primary"
+                                testId={buildTestId(entity.name, 'create')}
+                                onClick={() => {
+                                    const id = dialog.open({
+                                        width: 1000,
+                                        top: 18,
+                                        testId: buildTestId(entity.name, 'create-dialog'),
+                                        content: (
+                                            <EntityDialogContent
+                                                entityName={entity.name}
+                                                mode="create"
+                                                onSuccess={() => dialog.closeById(id)}
+                                            />
+                                        ),
+                                    });
+                                }}
+                            >
+                                {tCommon('actions.create')}
+                            </Button>
+                        )}
                     </div>
                 </div>
-                <div style={{ display: 'flex', gap: 8, alignSelf: 'flex-start' }}>
-                    {bulkActions.map((action) => {
-                        const field = action.field ?? rowKey;
-                        const ids = selectedRows
-                            .map((r) => String(getValueByPath(r.original, field) ?? ''))
-                            .filter(Boolean);
-                        const rows = selectedRows.map((r) => r.original);
-                        return (
-                            <BulkActionButton
-                                key={action.key}
-                                action={action}
-                                entity={entity}
-                                rows={rows}
-                                ids={ids}
-                                clearSelection={() => setRowSelection({})}
-                            />
-                        );
-                    })}
-                    {showBulkDeleteButton && (
-                        <Button
-                            type="primary"
-                            loading={isBulkDeleting}
-                            disabled={isBulkDeleteDisabled}
-                            onClick={handleBulkDelete}
-                            testId={buildTestId(entity.name, 'bulk-delete')}
-                        >
-                            {tCommon('list.deleteSelected', { count: selectedIds.length })}
-                        </Button>
-                    )}
-                    {headerActions.map((action) => (
-                        <React.Fragment key={action.key}>
-                            {action.render({ entity })}
-                        </React.Fragment>
-                    ))}
-                    {hasCreateRoute && (
-                        <Button
-                            type="primary"
-                            testId={buildTestId(entity.name, 'create')}
-                            onClick={() => {
-                                const id = dialog.open({
-                                    width: 1000,
-                                    top: 18,
-                                    testId: buildTestId(entity.name, 'create-dialog'),
-                                    content: (
-                                        <EntityDialogContent
-                                            entityName={entity.name}
-                                            mode="create"
-                                            onSuccess={() => dialog.closeById(id)}
-                                        />
-                                    ),
-                                });
-                            }}
-                        >
-                            {tCommon('actions.create')}
-                        </Button>
-                    )}
+                <div style={{ color: 'var(--color-text-secondary)' }}>
+                    <Typography variant="body">{subtitleNode}</Typography>
                 </div>
             </header>
 

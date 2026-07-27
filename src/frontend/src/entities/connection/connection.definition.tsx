@@ -130,7 +130,7 @@ export const connectionDefinition: EntityDefinition = {
             children: [
                 {
                     type: 'literal',
-                    value: 'find',
+                    value: 'search',
                     children: [
                         {
                             type: 'literal',

@@ -20,6 +20,9 @@
     },
     "groupSearchFilter": {
       "label": "Group Search Filter"
+    },
+    "logs": {
+      "label": "Logs"
     }
   },
   "sections": {

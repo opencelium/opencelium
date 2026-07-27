@@ -9,7 +9,7 @@ import {
     TablePagination,
     Checkbox,
 } from '@mui/material';
-import { isRowClickIgnored, renderTruncatedCell } from './Table.utils';
+import { findStretchColumnId, isRowClickIgnored, renderTruncatedCell } from './Table.utils';
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
@@ -26,6 +26,9 @@ export const MaterialTable = ({
     const rows = tableInstance.getRowModel().rows;
     const hasRowSelection = tableInstance.options.enableRowSelection !== false;
     const disabledIdSet = new Set<string>(disabledRowIds ?? []);
+    const stretchColumnId = findStretchColumnId(
+        (headerGroups[0]?.headers ?? []).map((header) => header.column),
+    );
 
     const isServerPaginated = typeof serverTotal === 'number';
     const isPaginated = isServerPaginated || !!tableInstance.options.getPaginationRowModel;
@@ -80,7 +83,11 @@ export const MaterialTable = ({
                                     }
                                     style={{
                                         cursor: canSort ? 'pointer' : 'default',
-                                        ...(explicitSize !== undefined ? { width: explicitSize } : {}),
+                                        ...(explicitSize !== undefined
+                                            ? { width: explicitSize }
+                                            : column.id === stretchColumnId
+                                                ? { width: '100%' }
+                                                : {}),
                                     }}
                                 >
                                     {flexRender(
@@ -154,8 +161,19 @@ export const MaterialTable = ({
 
                             {row.getVisibleCells().map((cell) => {
                                 const align = (cell.column.columnDef.meta as { align?: 'left' | 'center' | 'right' } | undefined)?.align;
+                                const explicitSize = cell.column.columnDef.size;
                                 return (
-                                    <TableCell key={cell.id} align={align}>
+                                    <TableCell
+                                        key={cell.id}
+                                        align={align}
+                                        style={
+                                            explicitSize !== undefined
+                                                ? { width: explicitSize }
+                                                : cell.column.id === stretchColumnId
+                                                    ? { width: '100%' }
+                                                    : undefined
+                                        }
+                                    >
                                         {renderTruncatedCell(cell)}
                                     </TableCell>
                                 );

@@ -19,7 +19,7 @@ export const MaterialEmpty: EmptyComponent = ({ description, image, children, cl
                 textAlign: 'center',
             }}
         >
-            {image ?? <InboxOutlinedIcon sx={{ fontSize: 48, opacity: 0.45 }} />}
+            {image === undefined ? <InboxOutlinedIcon sx={{ fontSize: 48, opacity: 0.45 }} /> : image}
             {description != null && (
                 <Typography variant="body2" color="text.secondary">
                     {description}

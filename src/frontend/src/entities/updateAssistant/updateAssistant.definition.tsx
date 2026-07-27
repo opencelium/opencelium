@@ -1,7 +1,6 @@
 import React from 'react'
 import type { EntityDefinition } from '@/engine/entity/EntityDefinition'
 import assistantWizardImage from '@assets/images/wizard/update-assistant-wizard.gif'
-import { createEntityCommands } from '@/engine/entity/command/createEntityCommands.tsx'
 import en from '@entities/updateAssistant/i18n/en.json'
 import de from '@entities/updateAssistant/i18n/de.json'
 import { resolveUpdateAssistantNames } from '@entities/updateAssistant/command/resolvers/resolveUpdateAssistantNames'
@@ -188,20 +187,4 @@ export const updateAssistantDefinition: EntityDefinition = {
             },
         ],
     },
-
-    /* ===============================
-       COMMANDS
-    ================================ */
-
-    commands: (def) => ([
-        ...createEntityCommands({
-            def,
-            config: { include: ['view'] },
-            dsl: {
-                view: {
-                    by: [],
-                },
-            },
-        }),
-    ]),
 }

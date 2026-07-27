@@ -1,7 +1,7 @@
 {
   "list": {
     "title": "Zeitpläne",
-    "subTitle": "Zeitpläne bestimmen, wann bestimmte Worflows ausgeführt werden — nach festem Zeitplan oder durch Auslöser. Statuslegende: <blueDot/> läuft, <greenDot/> letzte Ausführung erfolgreich, <redDot/> letzte Ausführung fehlgeschlagen, <grayDot/> kein Cron und keine Historie. Die Zahl unter dem Kreis zählt bis zum nächsten Cron-Trigger herunter.",
+    "subTitle": "Zeitpläne bestimmen, wann bestimmte Worflows ausgeführt werden — nach festem Zeitplan oder durch Auslöser. Die Zahl unter einem Statuskreis zählt bis zu dessen nächstem Cron-Trigger herunter.<legend>Statuslegende: <legendRunning>Läuft</legendRunning><legendSucceeded>Letzte Ausführung erfolgreich</legendSucceeded><legendFailed>Letzte Ausführung fehlgeschlagen</legendFailed><legendNone>Kein Cron und keine Historie</legendNone></legend>",
     "searchPlaceholder": "Nach Workflowsname suchen",
     "columns": {
       "executions": "Ausführungen",
