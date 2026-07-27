@@ -38,6 +38,7 @@
     "cron-parser": "^5.5.0",
     "cron-validate": "^1.5.3",
     "framer-motion": "^12.34.2",
+    "fuse.js": "^7.5.0",
     "graphiql": "^5.2.4",
     "graphql": "16.11.0",
     "i18next": "^25.8.0",

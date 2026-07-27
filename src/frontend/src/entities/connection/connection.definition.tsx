@@ -11,7 +11,7 @@ import { resolveConnectionIds } from '@entities/connection/command/resolvers/res
 import { findConnectionIdByTitle } from '@entities/connection/command/connectionCache'
 import type { CommandNode } from '@shared/command/types'
 import { workflowCommandBridgeStore } from '@features/workflow/command/workflowCommandBridge'
-import { resolveMethodSearch, resolvePropertySearch } from '@features/workflow/command/workflowCommandResolvers'
+import { resolveWorkflowSearch } from '@features/workflow/command/workflowCommandResolvers'
 
 const baseKey = 'connection'
 
@@ -132,20 +132,7 @@ export const connectionDefinition: EntityDefinition = {
                     type: 'literal',
                     value: 'search',
                     children: [
-                        {
-                            type: 'literal',
-                            value: 'method',
-                            children: [
-                                { type: 'entity', name: 'methodName', resolve: resolveMethodSearch },
-                            ],
-                        },
-                        {
-                            type: 'literal',
-                            value: 'property',
-                            children: [
-                                { type: 'entity', name: 'propertyName', resolve: resolvePropertySearch },
-                            ],
-                        },
+                        { type: 'entity', name: 'term', resolve: resolveWorkflowSearch },
                     ],
                 },
             ],
