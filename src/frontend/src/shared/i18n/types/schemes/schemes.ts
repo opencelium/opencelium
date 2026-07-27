@@ -8,12 +8,16 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
         items: string,
         simple: string,
         actions: {
+            prev: string
+            submit: string
+            next: string
             create: string
             update: string
             delete: string
             view: string
             edit: string
             ctrlEnterHint: string
+            cmdEnterHint: string
         }
         status: {
             loading: string

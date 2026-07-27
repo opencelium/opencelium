@@ -102,6 +102,7 @@
     "submit": "Submit",
     "next": "Next",
     "ctrlEnterHint": "Shortcut: Ctrl+Enter",
+    "cmdEnterHint": "Shortcut: ⌘+Enter",
     "create": "Create",
     "view": "View",
     "edit": "Edit",

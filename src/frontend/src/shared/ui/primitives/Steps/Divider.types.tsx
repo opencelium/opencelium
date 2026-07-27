@@ -5,9 +5,9 @@ export interface StepsProps {
     current: number,
     status?: 'wait' | 'process' | 'finish' | 'error',
     items: {
-        header: string,
-        subheader: string,
-        content: React.ReactNode,
+        header: React.ReactNode,
+        subheader?: React.ReactNode,
+        content?: React.ReactNode,
         status?: 'wait' | 'process' | 'finish' | 'error';
         onClick?: React.MouseEventHandler<HTMLElement>;
     }[]

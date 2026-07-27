@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react';
+import {useMemo} from 'react';
 import {Steps} from "antd";
 import './Steps.css';
 import type {StepsComponent} from "@shared/ui/primitives/Steps/Divider.types.tsx";
