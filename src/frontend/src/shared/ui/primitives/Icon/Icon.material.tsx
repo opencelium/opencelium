@@ -44,6 +44,7 @@ import {
     Merge,
     Lock,
     HelpOutline,
+    Analytics,
 } from '@mui/icons-material';
 
 import type { IconComponent } from './Icon.types';
@@ -94,6 +95,7 @@ const iconMap = {
     aggregator: Merge,
     lock: Lock,
     help: HelpOutline,
+    'report-analytics': Analytics,
 };
 
 export const MaterialIcon: IconComponent = ({

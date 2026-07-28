@@ -3,6 +3,7 @@ export interface DashboardSchema {
         header: {
             title: string
             subtitle: string
+            dateRangeLabel: string
         }
         comingSoon: string
         waitingApi: string

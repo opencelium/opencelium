@@ -1,7 +1,8 @@
 {
   "header": {
     "title": "Dashboard",
-    "subtitle": "Operational overview of your OpenCelium environment"
+    "subtitle": "Operational overview of your OpenCelium environment",
+    "dateRangeLabel": "Last 7 days"
   },
   "comingSoon": "Coming soon",
   "waitingApi": "Waiting API",
