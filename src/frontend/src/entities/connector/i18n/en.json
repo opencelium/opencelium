@@ -25,10 +25,10 @@
       }
     },
     "sslCert": {
-      "label": "Enable SSL Validation",
+      "label": "SSL Certificate",
       "text": {
-        "on": "SSL Validation is activated",
-        "off": "SSL Validation is deactivated"
+        "on": "Trust certificate",
+        "off": "Don't trust certificate"
       }
     },
     "icon": {

@@ -17,10 +17,10 @@
       "label": "Timeout"
     },
     "sslCert": {
-      "label": "Enable SSL Validation",
+      "label": "SSL-Zertifikat",
       "text": {
-        "on": "SSL Validation is activated",
-        "off": "SSL Validation is deactivated"
+        "on": "Zertifikat vertrauen",
+        "off": "Zertifikat nicht vertrauen"
       }
     },
     "icon": {
