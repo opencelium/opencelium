@@ -1,4 +1,7 @@
 {
+  "installationCheck": {
+    "unavailable": "Update Assistant ist für den Installationstyp \"{{type}}\" nicht verfügbar. Bitte überprüfen Sie die Datei application.yml auf dem Server."
+  },
   "fields": {
     "systemHealth": {
       "label": "Systemzustand"
