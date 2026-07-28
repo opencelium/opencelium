@@ -31,7 +31,7 @@ public interface ConnectorResourceMapper extends Mapper<Connector, ConnectorReso
             @Mapping(target = "icon", expression = "java(StringUtility.resolveImagePath(entity.getIcon()))"),
             @Mapping(target = "invoker", qualifiedByName = {"helperMapper", "getInvokerDTO"}),
             @Mapping(target = "requestData", qualifiedByName = {"requestDataMapper", "toDTO"}),
-            @Mapping(target = "sslCert", source = "sslValidation"),
+            @Mapping(target = "sslCert", source = "trustCertificate"),
             @Mapping(target = "lastTestPassed", source = "lastTestPassed"),
             @Mapping(target = "lastTestError", source = "lastTestError")
     })
@@ -42,7 +42,7 @@ public interface ConnectorResourceMapper extends Mapper<Connector, ConnectorReso
             @Mapping(target = "invoker", source = "invoker.name"),
             @Mapping(target = "icon", expression = "java(StringUtility.findImageFromUrl(dto.getIcon()))"),
             @Mapping(target = "requestData", expression = "java(helperMapper.processRequestData(dto))"),
-            @Mapping(target = "sslValidation", source = "sslCert")
+            @Mapping(target = "trustCertificate", source = "sslCert")
     })
     Connector toEntity(ConnectorResource dto);
 }
