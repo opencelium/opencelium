@@ -209,7 +209,7 @@ export function StepFormLayout({
                         display: isTabletOrMobile ? "grid" : "flex",
                     }}
                 >
-                    {!isSuccess && <div style={{flex: 1, marginBottom: isTabletOrMobile ? 30 : 0}}>
+                    {!isSuccess && <div style={{flex: 1, minWidth: 0, marginBottom: isTabletOrMobile ? 30 : 0}}>
                         <div
                             style={{
                                 overflow: 'hidden',
@@ -223,7 +223,7 @@ export function StepFormLayout({
                             />
                         </div>
                     </div>}
-                    <div style={{flex: 3}}>
+                    <div style={{flex: 3, minWidth: 0}}>
 
                         {isSuccess ? (
                             <SuccessState

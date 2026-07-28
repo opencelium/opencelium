@@ -62,7 +62,7 @@ export function SectionRenderer({
     ============================== */
 
     const defaultRender = () => (
-        <div style={{ marginBottom: 32, display: 'grid' }}>
+        <div style={{ marginBottom: 32, display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)' }}>
 
 
             {fields.map(field => (

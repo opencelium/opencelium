@@ -4,6 +4,8 @@ import com.becon.opencelium.backend.execution.logger.pubsub.event.ExecutionEvent
 import com.becon.opencelium.backend.execution.logger.pubsub.transport.AbstractExecutionEventTransport;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +17,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 @Primary
 @Component
 public class AsyncQueueExecutionEventTransport extends AbstractExecutionEventTransport {
+    private static final Logger logger = LoggerFactory.getLogger(AsyncQueueExecutionEventTransport.class);
+
     private final BlockingQueue<ExecutionEvent> queue = new LinkedBlockingQueue<>(100_000);
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -38,7 +42,13 @@ public class AsyncQueueExecutionEventTransport extends AbstractExecutionEventTra
         while (running) {
             try {
                 ExecutionEvent event = queue.take();
-                super.consume(event);
+                try {
+                    super.consume(event);
+                } catch (Exception e) {
+                    // a failing event must never kill the consumer thread: it is the only
+                    // reader of the queue, so its death silences all executions until restart
+                    logger.error("Failed to process execution event {}; event skipped", event, e);
+                }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
