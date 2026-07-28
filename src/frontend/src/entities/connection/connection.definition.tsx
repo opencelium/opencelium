@@ -86,6 +86,7 @@ export const connectionDefinition: EntityDefinition = {
             type: 'string',
             ui: { component: 'input' },
             table: {
+                width: '35%',
                 visible: true,
                 order: 1,
                 sortable: true,

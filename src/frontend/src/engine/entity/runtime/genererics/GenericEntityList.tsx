@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Trans } from 'react-i18next';
 import { message } from 'antd';
 import {
@@ -27,6 +27,7 @@ import { hasComponentPermission, type CrudAction } from '@/engine/policy';
 import NoAccess from '@shared/ui/feedback/NoAccess';
 
 import { Table } from '@shared/ui/primitives/Table';
+import { tableDefaultColumn } from '@shared/ui/primitives/Table/Table.utils';
 import { Input } from '@shared/ui/primitives/Input';
 import { Icon } from '@shared/ui/primitives/Icon';
 import { Button } from '@shared/ui/primitives/Button';
@@ -176,10 +177,9 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
     const [sorting, setSorting] = useState<SortingState>(initialSorting);
     const [globalFilter, setGlobalFilter] = useState('');
     const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-    // Controlled (not left to tanstack's uncontrolled default) so a row action's
-    // refetch — which hands the table a new `data` array reference even when the
-    // rows are unchanged — doesn't trigger tanstack's autoResetPageIndex and snap
-    // the user back to page 1.
+    // Controlled (not left to tanstack's uncontrolled default) — see the
+    // `autoResetPageIndex: false` note below for why this alone isn't enough
+    // to keep the page put across a row-action refetch.
     const [pagination, setPagination] = useState<PaginationState>({
         pageIndex: 0,
         pageSize: entity.list?.pageSize ?? 10,
@@ -202,13 +202,37 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
         [attachSubRows, filteredRows],
     );
 
+    const resetToFirstPage = () => setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+
+    // With autoResetPageIndex disabled (below), deleting the last row(s) on the
+    // current page would otherwise leave the user stranded on a now-empty page —
+    // clamp back to the new last valid page instead.
+    useEffect(() => {
+        const lastPageIndex = Math.max(0, Math.ceil(filteredRows.length / pagination.pageSize) - 1);
+        if (pagination.pageIndex > lastPageIndex) {
+            setPagination((prev) => ({ ...prev, pageIndex: lastPageIndex }));
+        }
+    }, [filteredRows.length, pagination.pageIndex, pagination.pageSize]);
+
     const handleFilterChange = (key: string, value: ListFilterValue) => {
         setFilterState((prev) => ({ ...prev, [key]: value }));
+        resetToFirstPage();
+    };
+
+    const handleGlobalFilterChange = (value: string) => {
+        setGlobalFilter(value);
+        resetToFirstPage();
+    };
+
+    const handleSortingChange: typeof setSorting = (updater) => {
+        setSorting(updater);
+        resetToFirstPage();
     };
 
     const table = useReactTable({
         data: tableRows,
         columns,
+        defaultColumn: tableDefaultColumn,
         state: { sorting, globalFilter, rowSelection, pagination },
         // Sub-rows (depth > 0) are decorative children of their parent and never selectable.
         enableRowSelection: selectable
@@ -218,10 +242,18 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
             : false,
         enableSorting: true,
         enableGlobalFilter: true,
-        onSortingChange: setSorting,
-        onGlobalFilterChange: setGlobalFilter,
+        onSortingChange: handleSortingChange,
+        onGlobalFilterChange: handleGlobalFilterChange,
         onRowSelectionChange: setRowSelection,
         onPaginationChange: setPagination,
+        // Tanstack's row-pagination feature resets to page 0 on its own whenever the
+        // filtered/sorted row model recomputes — which fires on every `data` reference
+        // change, including a same-content refetch after a row action (update, delete,
+        // a schedule start/stop toggle, etc.) invalidates the entity query. Controlling
+        // `pagination` state isn't enough to stop that internal auto-reset, so it's
+        // disabled here and re-triggered explicitly only for the user-driven cases
+        // (search, filters, sorting) where jumping back to page 1 is actually wanted.
+        autoResetPageIndex: false,
         getRowId:
             selectable || hasSubRows
                 ? (row, index, parent) => {
@@ -388,7 +420,7 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
                                             : tCommon('list.searchPlaceholder')
                                     }
                                     value={globalFilter}
-                                    onChange={(e) => setGlobalFilter(e.target.value)}
+                                    onChange={(e) => handleGlobalFilterChange(e.target.value)}
                                     leftSlot={<Icon name="search" size={16} isSubtle />}
                                     testId={buildTestId(entity.name, 'search')}
                                 />

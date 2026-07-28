@@ -129,6 +129,7 @@ export const userDefinition: EntityDefinition = {
                 max: 255
             },
             table: {
+                width: '25%',
                 visible: true,
                 order: 2,
                 sortable: true,
@@ -153,6 +154,7 @@ export const userDefinition: EntityDefinition = {
                 max: 255
             },
             table: {
+                width: '25%',
                 visible: true,
                 order: 3,
                 sortable: true,
@@ -251,6 +253,7 @@ export const userDefinition: EntityDefinition = {
                 }
             },
             table: {
+                width: '25%',
                 visible: true,
                 order: 1,
                 sortable: true,

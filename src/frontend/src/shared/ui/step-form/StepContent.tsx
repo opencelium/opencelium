@@ -7,8 +7,7 @@ import {useBreakpoints} from "@app/hooks/useBreakpoints.tsx";
 import {useTestScope} from "@shared/testing/TestScopeContext.tsx";
 import {buildTestId} from "@shared/testing/testId.ts";
 import {useI18n} from "@shared/i18n/hooks/useI18n.ts";
-
-const IS_MAC = typeof navigator !== 'undefined' && /Mac|iP(hone|ad|od)/i.test(navigator.platform || navigator.userAgent || '');
+import {IS_MAC} from "@shared/utils/platform.ts";
 
 interface Props {
     steps: StepDefinition[]

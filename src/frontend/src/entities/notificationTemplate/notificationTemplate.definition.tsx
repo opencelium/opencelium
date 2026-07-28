@@ -127,6 +127,7 @@ export const notificationTemplateDefinition: EntityDefinition = {
                 max: 255,
             },
             table: {
+                width: '60%',
                 visible: true,
                 order: 1,
                 sortable: true,
@@ -152,10 +153,14 @@ export const notificationTemplateDefinition: EntityDefinition = {
             },
             validation: { required: true },
             table: {
+                width: '20%',
                 visible: true,
                 order: 2,
                 searchable: true,
                 labelKey: `${baseKey}.fields.type.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {

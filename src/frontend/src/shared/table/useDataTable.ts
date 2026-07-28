@@ -7,6 +7,7 @@ import {
     type ColumnDef,
 } from '@tanstack/react-table';
 import { useState } from 'react';
+import { tableDefaultColumn } from '@shared/ui/primitives/Table/Table.utils';
 
 export function useDataTable<T>({
     data,
@@ -23,6 +24,7 @@ export function useDataTable<T>({
     const table = useReactTable({
         data,
         columns,
+        defaultColumn: tableDefaultColumn,
         state: {
             sorting,
             globalFilter,
