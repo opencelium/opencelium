@@ -64,7 +64,7 @@ export function StepContent({
     }
     return (
         <div style={{ flex: 1, paddingLeft: isTabletOrMobile ? 0 : 48 }} ref={containerRef}>
-            <div style={{display: 'grid', gap: 15}}>
+            <div style={{display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: 15}}>
                 {step.render({
                     currentStep,
                     next,
