@@ -26,6 +26,7 @@ import {getRecentCommands, pushRecentCommand} from "@widgets/CommandPalette/rece
 import {PaletteFooter} from "@widgets/CommandPalette/PaletteFooter.tsx";
 import {buildTestId} from "@shared/testing/testId.ts";
 import {orderGroups} from "@shared/command/groupOrder.ts";
+import {IS_MAC} from "@shared/utils/platform.ts";
 
 type CommandPaletteProps = {
     /** Render as a compact icon + hotkey pill that animates open to the full
@@ -369,7 +370,7 @@ export const CommandPalette = ({ collapsible = false, forceMode, hideSuccessReco
                         <div className="cmdk-loading">
                             {isLoading ? (
                                 <div style={{marginLeft: 1, marginTop: 2}}><Loading size={'sm'}/></div>
-                            ) : <Icon isSubtle name={'command'}/>}
+                            ) : <Icon isSubtle name={IS_MAC ? 'command' : 'search'}/>}
                         </div>
                     </div>
                     <HotKey/>

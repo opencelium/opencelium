@@ -67,6 +67,7 @@ export const connectionTemplateDefinition: EntityDefinition = {
                 props: { labelKey: `${baseKey}.fields.name.label` },
             },
             table: {
+                width: '25%',
                 visible: true,
                 order: 1,
                 sortable: true,
@@ -102,6 +103,7 @@ export const connectionTemplateDefinition: EntityDefinition = {
                 props: { labelKey: `${baseKey}.fields.fromInvoker.label` },
             },
             table: {
+                width: '10%',
                 visible: true,
                 order: 3,
                 searchable: true,
@@ -119,6 +121,7 @@ export const connectionTemplateDefinition: EntityDefinition = {
                 props: { labelKey: `${baseKey}.fields.toInvoker.label` },
             },
             table: {
+                width: '10%',
                 visible: true,
                 order: 4,
                 searchable: true,

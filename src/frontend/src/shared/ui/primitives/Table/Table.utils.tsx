@@ -2,6 +2,20 @@ import type { ReactNode } from 'react';
 import type { Cell, RowData } from '@tanstack/react-table';
 import type { TableColumnMeta } from './Table.types';
 
+/**
+ * Tanstack's `ColumnSizing` feature unconditionally merges a `size: 150`
+ * default into every column's resolved `columnDef` (see
+ * `defaultColumnSizing` in `@tanstack/table-core`), so `column.columnDef.size`
+ * is never actually `undefined` unless a table instance opts out. That
+ * defeats the `size === undefined` sentinel `findStretchColumnId` and the
+ * Ant/Material adapters rely on to tell "no explicit width" apart from "sized
+ * to 150" — the last-column stretch never triggers and percentage
+ * `meta.width` columns are always shadowed by the phantom 150. Spread this
+ * into every `useReactTable({ defaultColumn: ... })` call that feeds the
+ * shared `Table` primitive to keep unset sizes genuinely `undefined`.
+ */
+export const tableDefaultColumn = { size: undefined } as const;
+
 // A single token (no whitespace) longer than this can't wrap, so it stretches the column —
 // and with it the whole table — regardless of table-layout/overflow CSS. Truncating the
 // actual string is the only fix that's guaranteed to work independent of table CSS. Text

@@ -6,6 +6,7 @@ import {
 } from '@tanstack/react-table';
 import { useState } from 'react';
 import type {User} from "@entities/user/model/types.ts";
+import { tableDefaultColumn } from '@shared/ui/primitives/Table/Table.utils';
 
 export function useUsersTable(data: User[]) {
     const [sorting, setSorting] = useState([]);
@@ -32,6 +33,7 @@ export function useUsersTable(data: User[]) {
     const table = useReactTable({
         data,
         columns,
+        defaultColumn: tableDefaultColumn,
         state: {
             sorting,
         },

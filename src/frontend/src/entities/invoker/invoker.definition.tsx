@@ -91,6 +91,7 @@ export const invokerDefinition: EntityDefinition = {
                 }
             },
             table: {
+                width: '25%',
                 visible: true,
                 order: 1,
                 sortable: true,
@@ -112,6 +113,7 @@ export const invokerDefinition: EntityDefinition = {
             },
             validation: { max: 5000 },
             table: {
+                width: '45%',
                 visible: true,
                 order: 2,
                 labelKey: `${baseKey}.fields.description.label`,
@@ -152,6 +154,9 @@ export const invokerDefinition: EntityDefinition = {
                 visible: true,
                 order: 3,
                 labelKey: `${baseKey}.fields.authType.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {
@@ -218,6 +223,9 @@ export const invokerDefinition: EntityDefinition = {
                         .filter(Boolean)
                         .join(', ');
                 },
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
     ],

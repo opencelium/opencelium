@@ -223,7 +223,7 @@ export const connectorDefinition: EntityDefinition = {
             },
 
             table: {
-                width: '20%',
+                width: '35%',
                 visible: true,
                 order: 1,
                 sortable: true,
@@ -246,6 +246,7 @@ export const connectorDefinition: EntityDefinition = {
             },
 
             table: {
+                width: '45%',
                 visible: true,
                 order: 2,
                 searchable: true,
@@ -275,7 +276,7 @@ export const connectorDefinition: EntityDefinition = {
                 required: true,
             },
             table: {
-                width: '20%',
+                width: '25%',
                 visible: true,
                 order: 3,
                 searchable: true,
@@ -287,6 +288,9 @@ export const connectorDefinition: EntityDefinition = {
                     }
                     return undefined;
                 },
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {

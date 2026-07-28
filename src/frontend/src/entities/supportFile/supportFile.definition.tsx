@@ -64,6 +64,7 @@ export const supportFileDefinition: EntityDefinition = {
             type: 'string',
             ui: { component: 'input' },
             table: {
+                width: '35%',
                 visible: true,
                 order: 1,
                 sortable: true,
@@ -88,6 +89,7 @@ export const supportFileDefinition: EntityDefinition = {
             type: 'other',
             ui: { component: 'input' },
             table: {
+                width: '15%',
                 visible: true,
                 order: 3,
                 sortable: true,

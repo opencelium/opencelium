@@ -135,6 +135,7 @@ export const dataAggregatorDefinition: EntityDefinition = {
                 }
             },
             table: {
+                width: '25%',
                 visible: true,
                 order: 1,
                 sortable: true,
@@ -177,6 +178,9 @@ export const dataAggregatorDefinition: EntityDefinition = {
                         .filter(Boolean)
                         .join(', ')
                 },
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {
@@ -185,6 +189,7 @@ export const dataAggregatorDefinition: EntityDefinition = {
             defaultValue: true,
             ui: { component: 'switch' },
             table: {
+                width: '10%',
                 visible: true,
                 order: 3,
                 align: 'center',

@@ -12,6 +12,7 @@ import type { UpdateMode, UpdateVersion, UpdateVersionStatus } from '@entities/u
 import { OfflinePackageUploader } from './OfflinePackageUploader'
 import { EntityText } from '@shared/ui/primitives/Text'
 import { Table } from '@shared/ui/primitives/Table'
+import { tableDefaultColumn } from '@shared/ui/primitives/Table/Table.utils'
 import { Button } from '@shared/ui/primitives/Button'
 import { IconButton } from '@shared/ui/primitives/IconButton'
 import { Radio } from '@shared/ui/primitives/Radio'
@@ -194,6 +195,7 @@ export function UpdateAssistantVersionsTable({ name, label }: Props) {
     const tableInstance = useReactTable({
         data: versions,
         columns,
+        defaultColumn: tableDefaultColumn,
         enableRowSelection: false,
         getCoreRowModel: getCoreRowModel(),
     })
