@@ -9,7 +9,7 @@ import { i18n } from '@shared/i18n/config/i18n';
 import type { DeleteActionProps } from './types';
 import { buildDeleteUrl, resolveActionValue } from './resolveAction';
 
-export const DeleteAction: React.FC<DeleteActionProps> = ({ entity, row, rowId, config, testId }) => {
+export const DeleteAction: React.FC<DeleteActionProps> = ({ entity, row, rowId, config, testId, iconSize, tooltipPlacement }) => {
     const confirm = useConfirm();
     const { t: tCommon } = useI18n('common');
     const [deleteEntity, { isLoading }] = useDeleteEntityMutation();
@@ -49,7 +49,7 @@ export const DeleteAction: React.FC<DeleteActionProps> = ({ entity, row, rowId, 
 
     const button = (
         <IconButton
-            iconProps={{ name: 'delete', color: 'danger', size: 15 }}
+            iconProps={{ name: 'delete', color: 'danger', size: iconSize }}
             loading={isLoading}
             disabled={!!disabledReason}
             onClick={handleClick}
@@ -59,5 +59,5 @@ export const DeleteAction: React.FC<DeleteActionProps> = ({ entity, row, rowId, 
         />
     );
 
-    return <Tooltip content={disabledReason ?? tCommon('actions.delete')} placement="top">{button}</Tooltip>;
+    return <Tooltip content={disabledReason ?? tCommon('actions.delete')} placement={tooltipPlacement}>{button}</Tooltip>;
 };
