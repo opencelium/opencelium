@@ -24,6 +24,7 @@ export function SidebarList({ items, onSelect, testIdPrefix }: SidebarListProps)
 							<ConnectorStatusDot
 								status={item.status}
 								testId={buildTestId(testIdPrefix, 'status', item.key)}
+								tooltipPlacement="topLeft"
 							/>
 						</div>
 					) : null}

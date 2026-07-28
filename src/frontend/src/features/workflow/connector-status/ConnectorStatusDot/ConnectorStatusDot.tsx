@@ -26,6 +26,7 @@ export function ConnectorStatusDot({
 	testId,
 	tooltipOverride,
 	suppressTooltip,
+	tooltipPlacement = 'top',
 }: ConnectorStatusDotProps) {
 	const { t } = useI18n('workflow');
 	const { color, tooltipKey } = statusToAppearance(status);
@@ -49,5 +50,5 @@ export function ConnectorStatusDot({
 	);
 
 	if (suppressTooltip) return dot;
-	return <Tooltip content={tooltipContent}>{dot}</Tooltip>;
+	return <Tooltip content={tooltipContent} placement={tooltipPlacement}>{dot}</Tooltip>;
 }
