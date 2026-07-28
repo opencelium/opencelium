@@ -129,7 +129,9 @@
   },
   "confirmation": {
     "delete": {
-      "byName": "Delete invoker \"{{name}}\"?"
+      "byName": "Warning: invoker \"{{name}}\" may be in use by one or more connectors. Deleting it can break those connectors.\n\nAre you sure you want to continue?",
+      "bulkMessage": "Warning: the {{count}} selected invokers may be in use by one or more connectors. Deleting them can break those connectors.\n\nAre you sure you want to continue?",
+      "bulkMessage_one": "Warning: the selected invoker may be in use by one or more connectors. Deleting it can break those connectors.\n\nAre you sure you want to continue?"
     }
   }
 }
