@@ -27,8 +27,8 @@
     "sslCert": {
       "label": "SSL Certificate",
       "text": {
-        "on": "Trust certificate",
-        "off": "Don't trust certificate"
+        "on": "Trust any certificate",
+        "off": "Trust verified certificate"
       }
     },
     "icon": {

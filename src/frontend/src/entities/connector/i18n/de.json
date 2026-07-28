@@ -19,8 +19,8 @@
     "sslCert": {
       "label": "SSL-Zertifikat",
       "text": {
-        "on": "Zertifikat vertrauen",
-        "off": "Zertifikat nicht vertrauen"
+        "on": "Jedem Zertifikat vertrauen",
+        "off": "Nur verifiziertem Zertifikat vertrauen"
       }
     },
     "icon": {
