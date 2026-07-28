@@ -258,7 +258,8 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Override
     public synchronized void startNow(Scheduler scheduler) {
-        throwIfConnectionIsBeingExecuted(scheduler.getConnection().getId());
+        // Schedules and webhooks must be able to trigger multiple executions.
+//        throwIfConnectionIsBeingExecuted(scheduler.getConnection().getId());
         schedulingStrategy.runJob(scheduler);
     }
 
