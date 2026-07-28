@@ -93,8 +93,10 @@
   },
   "confirmation": {
     "delete": {
-      "byTitle": "Konnektor mit dem Titel \"{{title}}\" löschen?",
-      "byId": "Konnektor mit der ID \"{{id}}\" löschen?"
+      "byTitle": "Warnung: Der Konnektor \"{{title}}\" wird möglicherweise in einem oder mehreren Workflows verwendet. Das Löschen kann diese Workflows beeinträchtigen.\n\nMöchten Sie fortfahren?",
+      "byId": "Warnung: Der Konnektor mit der ID \"{{id}}\" wird möglicherweise in einem oder mehreren Workflows verwendet. Das Löschen kann diese Workflows beeinträchtigen.\n\nMöchten Sie fortfahren?",
+      "bulkMessage": "Warnung: Die {{count}} ausgewählten Konnektoren werden möglicherweise in einem oder mehreren Workflows verwendet. Das Löschen kann diese Workflows beeinträchtigen.\n\nMöchten Sie fortfahren?",
+      "bulkMessage_one": "Warnung: Der ausgewählte Konnektor wird möglicherweise in einem oder mehreren Workflows verwendet. Das Löschen kann diesen Workflow beeinträchtigen.\n\nMöchten Sie fortfahren?"
     }
   },
   "lifecycle": {

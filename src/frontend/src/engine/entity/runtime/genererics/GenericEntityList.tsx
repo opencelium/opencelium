@@ -294,10 +294,12 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
 
         const confirmed = await confirm({
             title: tCommon('list.confirmDelete.title'),
-            message: tCommon('list.confirmDelete.bulkMessage', {
-                count: selectedIds.length,
-                name: entity.name,
-            }),
+            message:
+                bulkConfig.confirmMessage?.(selectedIds, selectedRows.map((r) => r.original), entity) ??
+                tCommon('list.confirmDelete.bulkMessage', {
+                    count: selectedIds.length,
+                    name: entity.name,
+                }),
             onConfirm: async () => {
                 setPendingDeleteIds(selectedIds);
                 try {
