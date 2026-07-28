@@ -72,7 +72,7 @@ public class Connector {
     @Column(name = "icon")
     private String icon;
 
-    @Column(name = "ssl_validation")
+    @Column(name = "trust_certificate")
     private boolean sslValidation;
 
     // millisecond

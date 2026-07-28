@@ -731,3 +731,6 @@ ALTER TABLE `execution` ADD CONSTRAINT `fk_execution_scheduler1` FOREIGN KEY (`s
 
 --changeset 5.0:6 stripComments:true splitStatements:true endDelimiter:;
 INSERT IGNORE INTO role_has_permission (role_id,component_id,permission_id) VALUES (2,7,1),(2,7,2),(2,7,3),(2,7,4);
+
+--changeset 5.0:7 stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE connector CHANGE ssl_validation trust_certificate TINYINT(4) DEFAULT NULL;
