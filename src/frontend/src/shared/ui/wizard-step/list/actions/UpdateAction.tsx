@@ -10,9 +10,9 @@ export const UpdateAction: React.FC<UpdateActionProps> = ({ entity, row, rowId, 
     const { t: tCommon } = useI18n('common');
 
     return (
-        <Tooltip content={tCommon('actions.edit')} placement="right">
+        <Tooltip content={tCommon('actions.edit')} placement="top">
             <IconButton
-                iconProps={{ name: 'edit', color: 'primary' }}
+                iconProps={{ name: 'edit', color: 'primary', size: 15 }}
                 type={'text'}
                 size={'xs'}
                 onClick={() => openUpdate(entity, config, row, rowId)}

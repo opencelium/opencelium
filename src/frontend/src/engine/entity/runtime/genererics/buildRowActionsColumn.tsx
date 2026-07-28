@@ -1,15 +1,17 @@
 import React from 'react';
-import { Popover } from 'antd';
 import type { ColumnDef } from '@tanstack/react-table';
 import type { EntityDefinition, ListAction } from '@/engine/entity/EntityDefinition';
 import { getValueByPath } from '@shared/utils/getValueByPath';
-import { IconButton } from '@shared/ui/primitives/IconButton';
 import { buildTestId } from '@shared/testing/testId';
 import {
     ViewAction,
     UpdateAction,
     DeleteAction,
 } from '@shared/ui/wizard-step/list/actions';
+
+// Rough per-button footprint (icon button + gap) used to size the column so
+// all actions fit in a row without wrapping.
+const ACTION_BUTTON_WIDTH = 36;
 
 const renderAction = (
     action: ListAction,
@@ -48,7 +50,7 @@ export function buildRowActionsColumn<T extends Record<string, unknown>>(
     return {
         id: '__row_actions__',
         header: () => null,
-        size: 48,
+        size: actions.length * ACTION_BUTTON_WIDTH + 16,
         enableSorting: false,
         enableGlobalFilter: false,
         meta: { align: 'center' },
@@ -58,20 +60,12 @@ export function buildRowActionsColumn<T extends Record<string, unknown>>(
             const original = row.original;
             const rowId = String(getValueByPath(original as Record<string, unknown>, rowKey) ?? '');
             return (
-                <div data-row-click-ignore data-testid={buildTestId(entity.name, 'row', rowId)} style={{ display: 'flex', justifyContent: 'center' }}>
-                    <Popover
-                        trigger={['hover', 'click']}
-                        placement="leftTop"
-                        arrow={false}
-                        overlayInnerStyle={{ padding: 4 }}
-                        content={
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                {actions.map((action, index) => renderAction(action, index, entity, original, rowId))}
-                            </div>
-                        }
-                    >
-                        <IconButton iconProps={{ name: 'more' }} type="text" size="xs" testId={buildTestId(entity.name, 'row-actions-trigger', rowId)} />
-                    </Popover>
+                <div
+                    data-row-click-ignore
+                    data-testid={buildTestId(entity.name, 'row', rowId)}
+                    style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 4 }}
+                >
+                    {actions.map((action, index) => renderAction(action, index, entity, original, rowId))}
                 </div>
             );
         },

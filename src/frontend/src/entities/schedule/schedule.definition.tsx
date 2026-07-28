@@ -176,12 +176,12 @@ export const scheduleDefinition: EntityDefinition = {
             {
                 type: 'custom',
                 key: 'support-logs',
-                render: ({ row }) => <SupportLogsAction schedule={row as Schedule} />,
+                render: ({ row }) => <SupportLogsAction schedule={row as Schedule} iconSize={15} tooltipPlacement="top" />,
             },
             {
                 type: 'custom',
                 key: 'notifications',
-                render: ({ row }) => <NotificationsAction schedule={row as Schedule} />,
+                render: ({ row }) => <NotificationsAction schedule={row as Schedule} iconSize={15} tooltipPlacement="top" />,
             },
             { type: 'delete' },
         ],

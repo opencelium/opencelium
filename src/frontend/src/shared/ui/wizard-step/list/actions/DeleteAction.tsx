@@ -49,7 +49,7 @@ export const DeleteAction: React.FC<DeleteActionProps> = ({ entity, row, rowId, 
 
     const button = (
         <IconButton
-            iconProps={{ name: 'delete', color: 'danger' }}
+            iconProps={{ name: 'delete', color: 'danger', size: 15 }}
             loading={isLoading}
             disabled={!!disabledReason}
             onClick={handleClick}
@@ -59,5 +59,5 @@ export const DeleteAction: React.FC<DeleteActionProps> = ({ entity, row, rowId, 
         />
     );
 
-    return <Tooltip content={disabledReason ?? tCommon('actions.delete')} placement="right">{button}</Tooltip>;
+    return <Tooltip content={disabledReason ?? tCommon('actions.delete')} placement="top">{button}</Tooltip>;
 };
