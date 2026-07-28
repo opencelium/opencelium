@@ -51,6 +51,7 @@ export type IconName =
     | 'aggregator'
     | 'lock'
     | 'help'
+    | 'report-analytics'
 
 export type IconColor =
     | 'default'

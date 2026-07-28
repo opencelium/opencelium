@@ -1,9 +1,14 @@
 import { baseApi } from '@shared/api/baseApi'
-import type { SystemHealth, UpdateVersion } from '../model/types'
+import type { InstallationInfo, SystemHealth, UpdateVersion } from '../model/types'
 import { UPDATE_ASSISTANT_TAG } from './updateAssistant.tags'
 
 export const updateAssistantApi = baseApi.injectEndpoints({
     endpoints: (b) => ({
+        getInstallationInfo: b.query<InstallationInfo, void>({
+            query: () => '/assistant/oc/installation',
+            providesTags: [{ type: UPDATE_ASSISTANT_TAG as any, id: 'INSTALLATION' }],
+        }),
+
         getSystemHealth: b.query<SystemHealth, void>({
             query: () => '/actuator/health',
             providesTags: [{ type: UPDATE_ASSISTANT_TAG as any, id: 'HEALTH' }],
@@ -38,6 +43,7 @@ export const updateAssistantApi = baseApi.injectEndpoints({
 })
 
 export const {
+    useGetInstallationInfoQuery,
     useGetSystemHealthQuery,
     useGetOnlineVersionsQuery,
     useGetOfflineVersionsQuery,

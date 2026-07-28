@@ -38,7 +38,7 @@ import {
 import type { IconComponent } from './Icon.types';
 import {RiListSettingsLine, RiListSettingsFill  } from "react-icons/ri";
 import {MdKeyboardCommandKey, MdContentCopy, MdPlayArrow, MdStop, MdUnfoldMore, MdUnfoldLess, MdToggleOn, MdToggleOff} from "react-icons/md";
-import {TbWebhook} from "react-icons/tb";
+import {TbWebhook, TbReportAnalytics} from "react-icons/tb";
 import {BsJournalText} from "react-icons/bs";
 import {GoArrowSwitch, GoWorkflow} from "react-icons/go";
 import {GrAggregate} from "react-icons/gr";
@@ -94,6 +94,7 @@ const iconMap = {
     aggregator: GrAggregate,
     lock: LockOutlined,
     help: QuestionCircleOutlined,
+    'report-analytics': TbReportAnalytics,
 };
 
 export const AntIcon: IconComponent = ({

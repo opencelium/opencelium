@@ -134,6 +134,10 @@ export const scheduleDefinition: EntityDefinition = {
         },
         searchPlaceholderKey: `${baseKey}.list.searchPlaceholder`,
         defaultSort: { field: 'connectionTitle', direction: 'asc' },
+        // This list carries more row actions (support logs, notifications, delete)
+        // than most — collapse them behind a hover "more" menu instead of an
+        // inline row.
+        rowActionsDisplay: 'menu',
         bulkDelete: true,
         bulkActions: [
             {
@@ -176,12 +180,12 @@ export const scheduleDefinition: EntityDefinition = {
             {
                 type: 'custom',
                 key: 'support-logs',
-                render: ({ row }) => <SupportLogsAction schedule={row as Schedule} />,
+                render: ({ row }) => <SupportLogsAction schedule={row as Schedule} tooltipPlacement="right" />,
             },
             {
                 type: 'custom',
                 key: 'notifications',
-                render: ({ row }) => <NotificationsAction schedule={row as Schedule} />,
+                render: ({ row }) => <NotificationsAction schedule={row as Schedule} tooltipPlacement="right" />,
             },
             { type: 'delete' },
         ],

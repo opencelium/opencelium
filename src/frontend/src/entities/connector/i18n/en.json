@@ -28,7 +28,7 @@
       "label": "SSL Certificate",
       "text": {
         "on": "Trust any certificate",
-        "off": "Trust verified certificate"
+        "off": "Trust any certificate"
       }
     },
     "icon": {

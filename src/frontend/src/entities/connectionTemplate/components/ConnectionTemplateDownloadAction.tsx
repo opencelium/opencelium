@@ -33,9 +33,9 @@ export const ConnectionTemplateDownloadAction: React.FC<Props> = ({ row, rowId }
     }
 
     return (
-        <Tooltip content={tEntities('connection-template.list.download.tooltip')}>
+        <Tooltip content={tEntities('connection-template.list.download.tooltip')} placement="top">
             <IconButton
-                iconProps={{ name: 'download', color: 'primary' }}
+                iconProps={{ name: 'download', color: 'primary', size: 15 }}
                 type={'text'}
                 size={'xs'}
                 loading={isLoading}

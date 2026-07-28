@@ -367,6 +367,14 @@ export type ListDefinition = {
      * Pass an explicit array (possibly empty) to take full control.
      */
     actions?: ListAction[]
+    /**
+     * How per-row actions are presented. `'inline'` (default) renders every
+     * action as its own icon button in a row. `'menu'` collapses them behind a
+     * "more" trigger that reveals the actions in a hover-only popover — use
+     * this when a list carries enough per-row actions that an inline row would
+     * crowd the column (see `schedule.definition.tsx`).
+     */
+    rowActionsDisplay?: 'inline' | 'menu'
     /** Field used to build view/update URLs and to identify rows. Defaults to api.primaryKey ?? 'id'. */
     rowKey?: string
     /** Page size for client-side pagination. Defaults to 15. */
