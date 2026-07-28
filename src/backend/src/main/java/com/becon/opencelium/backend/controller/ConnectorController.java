@@ -202,12 +202,6 @@ public class ConnectorController {
     })
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> add(@RequestBody ConnectorResource connectorResource) {
-        // TODO: fix naming.
-        // to prevent confusion.
-//        SSL Validation is activated:   false
-//        SSL Validation is deactivated: true
-//        boolean enableSllValidation = !connectorResource.isSslCert();
-//        connectorResource.setSslCert(enableSllValidation);
         if (connectorService.existByTitle(connectorResource.getTitle())) {
             throw new ConnectorAlreadyExistsException("CONNECTOR_ALREADY_EXISTS");
         }
@@ -232,12 +226,6 @@ public class ConnectorController {
     })
     @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ConnectorResource> update(@PathVariable Integer id, @RequestBody ConnectorResource connectorResource) {
-        // TODO: fix naming.
-        // to prevent confusion.
-//        SSL Validation is activated:   false
-//        SSL Validation is deactivated: true
-//        boolean enableSllValidation = !connectorResource.isSslCert();
-//        connectorResource.setSslCert(enableSllValidation);
         return ResponseEntity.ok(
                 connectorResourceMapper.toDTO(
                         connectorService.update(id, connectorResource)
@@ -385,14 +373,6 @@ public class ConnectorController {
     @PostMapping(path = "/check", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> checkCommunication(@RequestBody ConnectorResource connectorResource) throws JsonProcessingException, IOException {
         Connector connector = connectorResourceMapper.toEntity(connectorResource);
-
-        // TODO: fix naming.
-        // to prevent confusion.
-        // commented due to a frontend sends as it was before.
-//        SSL Validation is activated:   false
-//        SSL Validation is deactivated: true
-//        boolean enableSllValidation = !connectorResource.isSslCert();
-//        connectorResource.setSslCert(enableSllValidation);
 //        Invoker invoker = invokerService.findByName(connector.getInvoker());
 //        AuthFactory authFactory = new AuthFactory();
 //        ApiAuth authenticationType = authFactory.generateAuth(invoker);
