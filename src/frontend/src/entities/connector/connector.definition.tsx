@@ -109,7 +109,24 @@ export const connectorDefinition: EntityDefinition = {
         titleKey: `${baseKey}.list.title`,
         subtitleKey: `${baseKey}.list.subTitle`,
         defaultSort: { field: 'title', direction: 'asc' },
-        bulkDelete: true,
+        bulkDelete: {
+            confirmMessage: (ids) => {
+                const t = i18n.getFixedT(i18n.language, 'entities');
+                return t(`${baseKey}.confirmation.delete.bulkMessage`, { count: ids.length });
+            },
+        },
+        actions: [
+            { type: 'view' },
+            { type: 'update' },
+            {
+                type: 'delete',
+                confirmMessage: (value, _entity, row) => {
+                    const t = i18n.getFixedT(i18n.language, 'entities');
+                    const title = (row as Connector)?.title ?? value;
+                    return t(`${baseKey}.confirmation.delete.byTitle`, { title });
+                },
+            },
+        ],
     },
     i18n: {
         en,

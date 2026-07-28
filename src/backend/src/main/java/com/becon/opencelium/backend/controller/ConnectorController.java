@@ -106,7 +106,7 @@ public class ConnectorController {
         return connectorService.findAllByTitle(title)
                 .map(c -> {
                     ConnectorResource resource = connectorResourceMapper.toDTO(c);
-                    resource.setSslCert(!resource.isSslCert());
+                    resource.setSslCert(resource.isSslCert());
                     return ResponseEntity.ok().body(resource);
                 })
                 .orElseThrow(() -> new ConnectorNotFoundException(title));
@@ -139,7 +139,7 @@ public class ConnectorController {
         return connectorService.findById(id)
                 .map(c -> {
                     ConnectorResource resource = connectorResourceMapper.toDTO(c);
-                    resource.setSslCert(!resource.isSslCert());
+                    resource.setSslCert(resource.isSslCert());
                     return ResponseEntity.ok().body(resource);
                 })
                 .orElseThrow(() -> new ConnectorNotFoundException(id));

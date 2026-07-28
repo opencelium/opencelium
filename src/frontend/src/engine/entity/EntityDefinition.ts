@@ -441,6 +441,8 @@ export type BulkDeleteConfig = {
     buildPayload?: (ids: string[]) => unknown
     /** Hook called after a successful bulk delete. */
     afterDelete?: (ids: string[]) => Promise<void> | void
+    /** Override the confirm-dialog message. Receives the selected ids and their raw rows. */
+    confirmMessage?: (ids: string[], rows: unknown[], entity: EntityDefinition) => string
 }
 
 export type BulkActionContext = {

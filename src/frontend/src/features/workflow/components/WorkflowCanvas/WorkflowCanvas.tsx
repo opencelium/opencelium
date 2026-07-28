@@ -9,21 +9,34 @@ import type { WorkflowCanvasProps } from './WorkflowCanvas.types';
 import { workflowEdgeTypes, workflowNodeTypes } from './workflowCanvasTypes';
 import { prepareWorkflowElements, type PrepareWorkflowCache } from './prepareWorkflowElements';
 
-const START_NODE_SIZE = 62;
+// Where the graph's top-left-most point lands in the viewport on open —
+// offset from the pane's top-left corner rather than dead center, clear of
+// the top-left zoom Controls.
+const GRAPH_VIEWPORT_OFFSET = { x: 200, y: 140 };
 
-const centerStartNode = (
+// Some workflows have nodes positioned above/left of the start node (e.g. a
+// branch dragged upward), so anchoring on the start node alone can push that
+// node off-screen above/left of the viewport. Anchor on the whole graph's
+// bounding-box corner instead — `node.position` is already each node's own
+// top-left corner, so the min across all nodes is the graph's top-left corner.
+const positionGraphNearTopLeft = (
   instance: ReactFlowInstance<WorkflowNodeModel, WorkflowEdgeModel> | null,
   nodes: WorkflowNodeModel[],
   zoom: number,
 ) => {
-  const startNode = nodes.find((node) => node.type === 'start');
-  if (!startNode || !instance) return;
+  if (!instance || nodes.length === 0) return;
+
+  const minX = Math.min(...nodes.map((node) => node.position.x));
+  const minY = Math.min(...nodes.map((node) => node.position.y));
 
   requestAnimationFrame(() => {
-    instance.setCenter(
-      startNode.position.x + START_NODE_SIZE / 2,
-      startNode.position.y + START_NODE_SIZE / 2,
-      { zoom, duration: 0 },
+    instance.setViewport(
+      {
+        x: GRAPH_VIEWPORT_OFFSET.x - minX * zoom,
+        y: GRAPH_VIEWPORT_OFFSET.y - minY * zoom,
+        zoom,
+      },
+      { duration: 0 },
     );
   });
 };
@@ -91,7 +104,7 @@ export function WorkflowCanvas({
     if (!centerStartVersion || centeredStartVersion.current === centerStartVersion) return;
     if (!reactFlowInstance.current) return;
     centeredStartVersion.current = centerStartVersion;
-    centerStartNode(reactFlowInstance.current, nodes, restoredViewport?.zoom ?? 1);
+    positionGraphNearTopLeft(reactFlowInstance.current, nodes, restoredViewport?.zoom ?? 1);
   }, [centerStartVersion, nodes, restoredViewport?.zoom]);
 
   return (
@@ -105,7 +118,7 @@ export function WorkflowCanvas({
           onInit?.(instance);
           if (centerStartVersion && centeredStartVersion.current !== centerStartVersion) {
             centeredStartVersion.current = centerStartVersion;
-            centerStartNode(instance, nodes, restoredViewport?.zoom ?? 1);
+            positionGraphNearTopLeft(instance, nodes, restoredViewport?.zoom ?? 1);
           }
         }}
         nodeTypes={workflowNodeTypes}

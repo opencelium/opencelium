@@ -35,10 +35,22 @@ export const invokerDefinition: EntityDefinition = {
         titleKey: `${baseKey}.list.title`,
         subtitleKey: `${baseKey}.list.subTitle`,
         defaultSort: { field: 'name', direction: 'asc' },
-        bulkDelete: true,
+        bulkDelete: {
+            confirmMessage: (ids) => {
+                const t = i18n.getFixedT(i18n.language, 'entities');
+                return t(`${baseKey}.confirmation.delete.bulkMessage`, { count: ids.length });
+            },
+        },
         actions: [
             { type: 'view' },
-            { type: 'delete' },
+            {
+                type: 'delete',
+                confirmMessage: (value, _entity, row) => {
+                    const t = i18n.getFixedT(i18n.language, 'entities');
+                    const name = (row as Invoker)?.name ?? value;
+                    return t(`${baseKey}.confirmation.delete.byName`, { name });
+                },
+            },
         ],
         headerActions: [
             { key: 'upload', permissionAction: 'CREATE', render: () => <InvokerUploadButton /> },

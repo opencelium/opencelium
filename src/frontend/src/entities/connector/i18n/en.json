@@ -25,10 +25,10 @@
       }
     },
     "sslCert": {
-      "label": "Enable SSL Validation",
+      "label": "SSL Certificate",
       "text": {
-        "on": "SSL Validation is activated",
-        "off": "SSL Validation is deactivated"
+        "on": "Trust any certificate",
+        "off": "Trust verified certificate"
       }
     },
     "icon": {
@@ -108,8 +108,10 @@
   },
   "confirmation": {
     "delete": {
-      "byTitle": "Delete connector by title \"{{title}}\"?",
-      "byId": "Delete connector by id \"{{id}}\"?"
+      "byTitle": "Warning: connector \"{{title}}\" may be in use by one or more workflows. Deleting it can break them.\n\nAre you sure you want to continue?",
+      "byId": "Warning: connector with id \"{{id}}\" may be in use by one or more workflows. Deleting it can break them.\n\nAre you sure you want to continue?",
+      "bulkMessage": "Warning: the {{count}} selected connectors may be in use by one or more workflows. Deleting them can break those workflows.\n\nAre you sure you want to continue?",
+      "bulkMessage_one": "Warning: the selected connector may be in use by one or more workflows. Deleting it can break them.\n\nAre you sure you want to continue?"
     }
   },
   "lifecycle": {
