@@ -30,6 +30,7 @@ import com.github.fge.jsonpatch.JsonPatch;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public interface ConnectionService {
@@ -123,6 +124,8 @@ public interface ConnectionService {
     void deleteByIds(List<Long> ids, Set<Long> runningConnectionIds);
 
     List<ConnectionVersionedDTO> getConnectionVersions(Long connectionId);
+
+    Map<Long, ConnectionVersionedDTO> getLastVersions(List<Connection> connections);
 
     void deleteSnapshot(Long connectionId, String snapshotId);
 

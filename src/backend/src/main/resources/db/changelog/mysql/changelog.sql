@@ -741,3 +741,9 @@ UPDATE `connector` SET `status` = CASE WHEN `last_test_passed` = 1 THEN 'UP'
                                        WHEN `last_test_passed` = 0 THEN 'DOWN'
                                        ELSE 'UNKNOWN' END;
 ALTER TABLE `connector` DROP COLUMN IF EXISTS `last_test_passed`;
+
+--changeset 5.0:9 stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE `connection` CHANGE COLUMN IF EXISTS `created_on` `created_at` TIMESTAMP NULL DEFAULT NULL;
+ALTER TABLE `connection` CHANGE COLUMN IF EXISTS `modified_on` `modified_at` TIMESTAMP NULL DEFAULT NULL;
+ALTER TABLE `connector` CHANGE COLUMN IF EXISTS `created_on` `created_at` TIMESTAMP NULL DEFAULT NULL;
+ALTER TABLE `connector` CHANGE COLUMN IF EXISTS `modified_on` `modified_at` TIMESTAMP NULL DEFAULT NULL;

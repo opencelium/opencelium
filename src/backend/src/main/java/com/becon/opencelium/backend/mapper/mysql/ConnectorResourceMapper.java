@@ -1,6 +1,5 @@
 package com.becon.opencelium.backend.mapper.mysql;
 
-
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.mapper.utils.HelperMapper;
@@ -38,7 +37,9 @@ public interface ConnectorResourceMapper extends Mapper<Connector, ConnectorReso
             @Mapping(target = "sslCert", source = "trustCertificate"),
             @Mapping(target = "status", source = "status"),
             @Mapping(target = "lastTestError", source = "lastTestError"),
-            @Mapping(target = "lastCheckedAt", source = "lastCheckedAt", qualifiedByName = "dateToEpochMillis")
+            @Mapping(target = "lastCheckedAt", source = "lastCheckedAt", qualifiedByName = "dateToEpochMillis"),
+            @Mapping(target = "modifiedBy", source = "modifiedBy"),
+            @Mapping(target = "modifiedAt", expression = "java(entity.getModifiedAt() != null ? entity.getModifiedAt().getTime() : null)")
     })
     ConnectorResource toDTO(Connector entity);
 
@@ -80,7 +81,11 @@ public interface ConnectorResourceMapper extends Mapper<Connector, ConnectorReso
             @Mapping(target = "trustCertificate", source = "sslCert"),
             // Health fields are written only by the backend's own check flow, never from client input.
             @Mapping(target = "status", ignore = true),
-            @Mapping(target = "lastCheckedAt", ignore = true)
+            @Mapping(target = "lastCheckedAt", ignore = true),
+            // audit fields are maintained by the persistence layer, never taken from the request
+            @Mapping(target = "modifiedBy", ignore = true),
+            @Mapping(target = "modifiedAt", ignore = true)
+
     })
     Connector toEntity(ConnectorResource dto);
 }
