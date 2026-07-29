@@ -163,7 +163,7 @@
     "modes": {
       "create": {
         "header": "Zeitplan erstellen",
-        "subheader": "Folgen Sie den 3 einfachen Schritten zur Erstellung des Zeitplans.",
+        "subheader": "Richten Sie einen Zeitplan ein, um einen Workflow automatisch anhand eines Cron-Ausdrucks auszuführen.",
         "successMessage": "Zeitplan für das Workflow \"{{connectionTitle}}\" wurde erfolgreich erstellt",
         "successMessageWithCron": "Zeitplan für das Workflow \"{{connectionTitle}}\" mit Cron \"{{cronExp}}\" wurde erfolgreich erstellt"
       },

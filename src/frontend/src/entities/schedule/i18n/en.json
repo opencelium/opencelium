@@ -163,7 +163,7 @@
     "modes": {
       "create": {
         "header": "Create Schedule",
-        "subheader": "Follow the simple 3 steps to complete schedule creation.",
+        "subheader": "Configure a schedule to run a workflow automatically based on a cron expression.",
         "successMessage": "Schedule for connection \"{{connectionTitle}}\" was successfully created",
         "successMessageWithCron": "Schedule for connection \"{{connectionTitle}}\" with cron \"{{cronExp}}\" was successfully created"
       },
