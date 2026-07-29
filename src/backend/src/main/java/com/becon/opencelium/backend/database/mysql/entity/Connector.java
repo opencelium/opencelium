@@ -80,10 +80,11 @@ public class Connector {
     @Column(name = "timeout")
     private int timeout;
 
-    // Health status determined by the most recent communication check.
+    // Health status determined by the most recent communication check. Defaults to UNKNOWN so
+    // inserts of never-checked connectors satisfy the column's NOT NULL constraint.
     @Enumerated(EnumType.STRING)
-    @Column(name = "status")
-    private ConnectorStatus status;
+    @Column(name = "status", nullable = false)
+    private ConnectorStatus status = ConnectorStatus.UNKNOWN;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_checked_at")
