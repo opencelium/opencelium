@@ -1,8 +1,7 @@
-package com.becon.opencelium.backend.execution.logger.pubsub.transport.local;
+package com.becon.opencelium.backend.execution.logger.pubsub.transport;
 
 import com.becon.opencelium.backend.execution.logger.pubsub.ExecutionEventConsumer;
 import com.becon.opencelium.backend.execution.logger.pubsub.event.ExecutionEvent;
-import com.becon.opencelium.backend.execution.logger.pubsub.transport.ExecutionEventTransport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
