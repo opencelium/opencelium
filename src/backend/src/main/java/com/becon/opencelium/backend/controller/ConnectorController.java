@@ -26,10 +26,9 @@ import com.becon.opencelium.backend.exception.CommunicationFailedException;
 import com.becon.opencelium.backend.exception.ConnectorAlreadyExistsException;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
-import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
-import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
+import com.becon.opencelium.backend.database.mysql.service.ConnectorHealthService;
 import com.becon.opencelium.backend.enums.ConnectorStatus;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
@@ -37,8 +36,6 @@ import com.becon.opencelium.backend.resource.application.ResultDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -65,18 +62,18 @@ import java.util.*;
 public class ConnectorController {
 
     private final ConnectorService connectorService;
-    private final InvokerService invokerService;
+    private final ConnectorHealthService connectorHealthService;
     private final ConnectionService connectionService;
     private final Mapper<Connector, ConnectorResource> connectorResourceMapper;
 
     public ConnectorController(
             @Qualifier("connectorServiceImp") ConnectorService connectorService,
-            @Qualifier("invokerServiceImp") InvokerService invokerService,
+            ConnectorHealthService connectorHealthService,
             @Qualifier("connectionServiceImp") ConnectionService connectionService,
             Mapper<Connector, ConnectorResource> connectorResourceMapper
     ) {
         this.connectorService = connectorService;
-        this.invokerService = invokerService;
+        this.connectorHealthService = connectorHealthService;
         this.connectionService = connectionService;
         this.connectorResourceMapper = connectorResourceMapper;
     }
@@ -374,122 +371,26 @@ public class ConnectorController {
     @PostMapping(path = "/check", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> checkCommunication(@RequestBody ConnectorResource connectorResource) throws JsonProcessingException, IOException {
         Connector connector = connectorResourceMapper.toEntity(connectorResource);
-//        Invoker invoker = invokerService.findByName(connector.getInvoker());
-//        AuthFactory authFactory = new AuthFactory();
-//        ApiAuth authenticationType = authFactory.generateAuth(invoker);
-//        authenticationType.getAccessCredentials(connector);
-        ResponseEntity<?> responseEntity;
-        try {
-            responseEntity = connectorService.checkCommunication(connector);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            // The remote request could not be completed (e.g. host unreachable): record it as a
-            // failed test on the saved connector before surfacing the error to the caller.
-            if (connectorResource.getConnectorId() > 0 && connectorService.existsById(connectorResource.getConnectorId())) {
-                connectorService.updateStatus(connectorResource.getConnectorId(), ConnectorStatus.DOWN, ex.getMessage());
-            }
-            throw new CommunicationFailedException();
-        }
-
-        FunctionInvoker functionInvoker = invokerService.getTestFunction(connector.getInvoker());
-
-        Map<String, Object> failBody = null;
-        String formatType = "";
-        if (functionInvoker.getResponse().getFail() != null && functionInvoker.getResponse().getFail().getBody() != null) {
-            formatType = functionInvoker.getResponse().getFail().getBody().getFormat();
-            failBody = functionInvoker.getResponse().getFail().getBody().getFields();
-        }
-
-        String response = "";
-        String fail = convertMapToJson(failBody);
-        if (formatType.equals("json")) {
-            System.out.println(responseEntity.getBody());
-            response = responseEntity.getBody().toString();
-        }
-
-        // Classify the outcome once, so it can be both persisted (for saved connectors) and returned.
-        ConnectorStatus status;
-        String remoteError = null;
-        if ((responseEntity.getStatusCode() == HttpStatus.OK) && hasError(fail, response)) {
-            status = ConnectorStatus.AUTH_FAILED;
-            remoteError = response;
-        } else if (responseEntity.getStatusCode() == HttpStatus.UNAUTHORIZED) {
-            status = ConnectorStatus.AUTH_FAILED;
-            remoteError = responseEntity.getBody() != null
-                    ? responseEntity.getBody().toString()
-                    : "Error in remote system";
-        } else {
-            status = ConnectorStatus.UP;
-        }
+        ConnectorHealthService.CheckResult result = connectorHealthService.check(connector);
 
         // Persist the latest result only for a saved connector; an unsaved/new connector has no row.
         if (connectorResource.getConnectorId() > 0 && connectorService.existsById(connectorResource.getConnectorId())) {
-            connectorService.updateStatus(connectorResource.getConnectorId(), status, remoteError);
+            connectorService.updateStatus(connectorResource.getConnectorId(), result.status(), result.error());
         }
 
-        if ((responseEntity.getStatusCode() == HttpStatus.OK) && status != ConnectorStatus.UP) {
+        if (result.status() == ConnectorStatus.DOWN) {
+            // The remote request could not be completed (e.g. host unreachable).
+            throw new CommunicationFailedException();
+        }
+
+        if ((result.httpStatus() == HttpStatus.OK) && result.status() != ConnectorStatus.UP) {
             return ResponseEntity.ok().body("{\"status\":\"401\", \"error\":\"401\"}");
         }
 
-        if (responseEntity.getStatusCode() == HttpStatus.UNAUTHORIZED) {
-            return ResponseEntity.ok().body("{\"status\":\"" + responseEntity.getStatusCode() + "\",\"error\":\"Error in remote system\"}");
+        if (result.httpStatus() == HttpStatus.UNAUTHORIZED) {
+            return ResponseEntity.ok().body("{\"status\":\"" + result.httpStatus() + "\",\"error\":\"Error in remote system\"}");
         }
         return ResponseEntity.ok().body("{\"status\":\"200\"}");
-    }
-
-    public static String convertMapToJson(Map<String, Object> map) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            return objectMapper.writeValueAsString(map);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    private boolean hasError(String failBody, String response) {
-        if (failBody == null || failBody.isEmpty()) {
-            return false;
-        }
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode invFailNode = objectMapper.readTree(failBody);
-            JsonNode responseNode = objectMapper.readTree(response);
-
-            return containsProperties(responseNode, invFailNode);
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private boolean containsProperties(JsonNode jsonNode1, JsonNode jsonNode2) {
-        if (jsonNode2.isObject()) {
-            for (String key : iterable(jsonNode2.fieldNames())) {
-                if (!jsonNode1.has(key)) {
-                    return false;
-                }
-                if (!containsProperties(jsonNode1.get(key), jsonNode2.get(key))) {
-                    return false;
-                }
-            }
-        } else if (jsonNode2.isArray()) {
-            if (!jsonNode1.isArray() || jsonNode1.size() < jsonNode2.size()) {
-                return false;
-            }
-            for (int i = 0; i < jsonNode2.size(); i++) {
-                if (!containsProperties(jsonNode1.get(i), jsonNode2.get(i))) {
-                    return false;
-                }
-            }
-        } else {
-            return jsonNode1.isValueNode() && jsonNode2.isValueNode();
-        }
-        return true;
-    }
-
-    private <T> Iterable<T> iterable(final java.util.Iterator<T> iterator) {
-        return () -> iterator;
     }
 
     @Operation(summary = "Verifies uniqueness of connector title")

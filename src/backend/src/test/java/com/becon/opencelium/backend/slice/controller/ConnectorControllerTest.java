@@ -12,9 +12,9 @@ import com.becon.opencelium.backend.configuration.interceptors.MasterPasswordInt
 import com.becon.opencelium.backend.controller.ConnectorController;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
+import com.becon.opencelium.backend.database.mysql.service.ConnectorHealthService;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
-import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.security.AuthenticationFilter;
@@ -73,8 +73,8 @@ class ConnectorControllerTest {
     @MockBean(name = "connectorServiceImp")
     private ConnectorService connectorService;
 
-    @MockBean(name = "invokerServiceImp")
-    private InvokerService invokerService;
+    @MockBean
+    private ConnectorHealthService connectorHealthService;
 
     @MockBean(name = "connectionServiceImp")
     private ConnectionService connectionService;
