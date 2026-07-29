@@ -87,6 +87,7 @@ export const categoryDefinition: EntityDefinition = {
                     map: (fieldValue) => ({ name: fieldValue }),
                     transKey: `${baseKey}.fields.name.errors.name_already_exists`,
                     encodeParams: false,
+                    skipIfUnchanged: true,
                     handleResponse: (data, error) => {
                         return data.message === 'NOT_EXISTS';
                     }
