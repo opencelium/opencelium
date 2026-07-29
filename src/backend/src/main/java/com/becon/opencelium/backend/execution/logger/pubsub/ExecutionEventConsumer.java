@@ -2,8 +2,6 @@ package com.becon.opencelium.backend.execution.logger.pubsub;
 
 import com.becon.opencelium.backend.execution.logger.pubsub.event.ExecutionEvent;
 import com.becon.opencelium.backend.execution.logger.pubsub.handler.ExecutionEventHandler;
-import com.becon.opencelium.backend.execution.logger.pubsub.transport.ExecutionEventTransport;
-import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -15,16 +13,9 @@ public class ExecutionEventConsumer {
     private static final Logger logger = LoggerFactory.getLogger(ExecutionEventConsumer.class);
 
     private final List<ExecutionEventHandler> handlers;
-    private final ExecutionEventTransport transport;
 
-    public ExecutionEventConsumer(List<ExecutionEventHandler> handlers, ExecutionEventTransport transport) {
-        this.handlers = handlers;
-        this.transport = transport;
-    }
-
-    @PostConstruct
-    public void init() {
-        transport.setConsumer(this::dispatch);
+    public ExecutionEventConsumer(List<ExecutionEventHandler> handlers) {
+        this.handlers = List.copyOf(handlers);
     }
 
     public void dispatch(ExecutionEvent event) {

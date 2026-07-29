@@ -10,14 +10,23 @@ public class ExecutionEventPublisher {
     }
 
     static void init(ExecutionEventTransport transport) {
+        if (transport == null) {
+            throw new IllegalStateException("ExecutionEventTransport is null");
+        }
+
         ExecutionEventPublisher.transport = transport;
     }
 
     public static void publish(ExecutionEvent event) {
-        if (transport == null) {
-            throw new IllegalStateException("ExecutionEventTransport not initialized");
+        ExecutionEventTransport current = transport;
+        if (current == null) {
+            throw new IllegalStateException("Execution event pipeline is not initialized");
         }
 
-        transport.accept(event);
+        current.accept(event);
+    }
+
+    static void clear() {
+        transport = null;
     }
 }
