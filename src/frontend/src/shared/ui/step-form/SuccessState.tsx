@@ -29,6 +29,7 @@ export function SuccessState({
                 title={message ? <EntityText i18nKey={message} typoProps={{variant: 'title'}}/> : "Success"}
             />
 
+            {content}
 
             {recommendations && (
                 <RecommendationTags items={recommendations}/>

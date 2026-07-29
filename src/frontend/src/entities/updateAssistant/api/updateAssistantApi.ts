@@ -24,10 +24,11 @@ export const updateAssistantApi = baseApi.injectEndpoints({
             providesTags: [{ type: UPDATE_ASSISTANT_TAG as any, id: 'OFFLINE_VERSIONS' }],
         }),
 
-        runUpdate: b.mutation<void, void>({
-            query: () => ({
-                url: '/assistant/oc/update',
+        migrateUpdate: b.mutation<void, { version: string }>({
+            query: (body) => ({
+                url: '/assistant/oc/migrate',
                 method: 'POST',
+                body,
             }),
         }),
 
@@ -47,6 +48,6 @@ export const {
     useGetSystemHealthQuery,
     useGetOnlineVersionsQuery,
     useGetOfflineVersionsQuery,
-    useRunUpdateMutation,
+    useMigrateUpdateMutation,
     useDeleteOfflineVersionMutation,
 } = updateAssistantApi
