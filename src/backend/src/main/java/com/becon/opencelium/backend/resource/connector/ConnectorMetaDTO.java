@@ -18,25 +18,24 @@ package com.becon.opencelium.backend.resource.connector;
 
 import com.becon.opencelium.backend.enums.ConnectorStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import jakarta.annotation.Resource;
 
-import java.util.Map;
-
-@Resource
+/**
+ * Lightweight connector view for health/status consumers (the {@code /connector/meta/all}
+ * snapshot, the status WebSocket topic, and the manual refresh endpoint). Carries no
+ * credentials, so it can be built without decrypting request data.
+ */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ConnectorResource {
+public class ConnectorMetaDTO {
 
     private int connectorId;
     private String title;
-    private String description;
     private String icon;
-    private InvokerDTO invoker;
     private boolean sslCert;
     private int timeout;
-    private Map<String, String> requestData;
+    private InvokerMetaDTO invoker;
     // Health status determined by the most recent communication check.
     private ConnectorStatus status;
-    // Remote error message from the last failed test.
+    // Remote error message from the last failed check.
     private String lastTestError;
     // Epoch millis of the most recent health check; null = never checked.
     private Long lastCheckedAt;
@@ -57,28 +56,12 @@ public class ConnectorResource {
         this.title = title;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public String getIcon() {
         return icon;
     }
 
     public void setIcon(String icon) {
         this.icon = icon;
-    }
-
-    public InvokerDTO getInvoker() {
-        return invoker;
-    }
-
-    public void setInvoker(InvokerDTO invoker) {
-        this.invoker = invoker;
     }
 
     public boolean isSslCert() {
@@ -97,12 +80,12 @@ public class ConnectorResource {
         this.timeout = timeout;
     }
 
-    public Map<String, String> getRequestData() {
-        return requestData;
+    public InvokerMetaDTO getInvoker() {
+        return invoker;
     }
 
-    public void setRequestData(Map<String, String> requestData) {
-        this.requestData = requestData;
+    public void setInvoker(InvokerMetaDTO invoker) {
+        this.invoker = invoker;
     }
 
     public ConnectorStatus getStatus() {
@@ -113,6 +96,14 @@ public class ConnectorResource {
         this.status = status;
     }
 
+    public String getLastTestError() {
+        return lastTestError;
+    }
+
+    public void setLastTestError(String lastTestError) {
+        this.lastTestError = lastTestError;
+    }
+
     public Long getLastCheckedAt() {
         return lastCheckedAt;
     }
@@ -121,11 +112,25 @@ public class ConnectorResource {
         this.lastCheckedAt = lastCheckedAt;
     }
 
-    public String getLastTestError() {
-        return lastTestError;
-    }
+    /** Invoker reference reduced to its name — the meta view never ships operations. */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class InvokerMetaDTO {
 
-    public void setLastTestError(String lastTestError) {
-        this.lastTestError = lastTestError;
+        private String name;
+
+        public InvokerMetaDTO() {
+        }
+
+        public InvokerMetaDTO(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
     }
 }

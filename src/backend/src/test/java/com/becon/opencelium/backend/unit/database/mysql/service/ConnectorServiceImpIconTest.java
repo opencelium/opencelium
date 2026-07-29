@@ -3,6 +3,7 @@ package com.becon.opencelium.backend.unit.database.mysql.service;
 import com.becon.opencelium.backend.constant.props.ConnectorProps;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.repository.ConnectorRepository;
+import com.becon.opencelium.backend.database.mysql.service.ConnectorHealthService;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorServiceImp;
 import com.becon.opencelium.backend.database.mysql.service.RequestDataServiceImp;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
@@ -52,13 +53,14 @@ class ConnectorServiceImpIconTest {
     @Mock private Encoder encoder;
     @Mock private Environment env;
     @Mock private StorageService storageService;
+    @Mock private ConnectorHealthService connectorHealthService;
 
     private ConnectorServiceImp service;
 
     private ConnectorServiceImp newService() {
         return new ConnectorServiceImp(
                 connectorProps, connectorRepository, invokerService,
-                requestDataService, encoder, env, storageService);
+                requestDataService, encoder, env, storageService, connectorHealthService);
     }
 
     private Connector aConnector(int id, String icon) {

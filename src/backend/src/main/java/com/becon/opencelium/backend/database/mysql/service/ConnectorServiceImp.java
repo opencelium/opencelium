@@ -23,6 +23,7 @@ import com.becon.opencelium.backend.constant.ExceptionMessages;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.RequestData;
 import com.becon.opencelium.backend.database.mysql.repository.ConnectorRepository;
+import com.becon.opencelium.backend.enums.ConnectorStatus;
 import com.becon.opencelium.backend.exception.ConnectorAlreadyExistsException;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
@@ -42,6 +43,7 @@ import com.becon.opencelium.backend.utility.StringUtility;
 import com.becon.opencelium.backend.utility.crypto.Encoder;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -62,6 +64,7 @@ public class ConnectorServiceImp implements ConnectorService {
     private final RequestDataService requestDataService;
     private final Environment env;
     private final StorageService storageService;
+    private final ConnectorHealthService connectorHealthService;
 
     public ConnectorServiceImp(
             ConnectorProps connectorProps, ConnectorRepository connectorRepository,
@@ -69,7 +72,9 @@ public class ConnectorServiceImp implements ConnectorService {
             @Qualifier("requestDataServiceImp") RequestDataServiceImp requestDataService,
             Encoder encoder,
             Environment env,
-            StorageService storageService
+            StorageService storageService,
+            // @Lazy breaks the constructor cycle: the health service itself depends on this service.
+            @Lazy ConnectorHealthService connectorHealthService
     ) {
         this.connectorProps = connectorProps;
         this.connectorRepository = connectorRepository;
@@ -78,6 +83,7 @@ public class ConnectorServiceImp implements ConnectorService {
         this.requestDataService = requestDataService;
         this.env = env;
         this.storageService = storageService;
+        this.connectorHealthService = connectorHealthService;
     }
 
     @Override
@@ -125,11 +131,14 @@ public class ConnectorServiceImp implements ConnectorService {
     @Override
     public void deleteById(int id) {
         connectorRepository.deleteById(id);
+        connectorHealthService.evict(id);
     }
 
     @Override
     public void deleteByInvoker(String invokerName) {
+        List<Connector> deleted = connectorRepository.findAllByInvoker(invokerName);
         connectorRepository.deleteByInvoker(invokerName);
+        deleted.forEach(connector -> connectorHealthService.evict(connector.getId()));
     }
 
     @Override
@@ -163,6 +172,17 @@ public class ConnectorServiceImp implements ConnectorService {
             list.forEach(this::decrypt);
         }
         return list;
+    }
+
+    @Override
+    public List<Connector> findAllRaw() {
+        return connectorRepository.findAll();
+    }
+
+    @Override
+    public Connector getByIdRaw(int id) {
+        return connectorRepository.findById(id)
+                .orElseThrow(() -> new ConnectorNotFoundException(id));
     }
 
     @Override
@@ -226,12 +246,20 @@ public class ConnectorServiceImp implements ConnectorService {
     }
 
     @Override
-    public void updateTestResult(int connectorId, boolean passed, String error) {
-        // Load the raw (still-encrypted) entity and touch only the two test-result columns so the
+    public void updateStatus(int connectorId, ConnectorStatus status, String error) {
+        // Load the raw (still-encrypted) entity and touch only the two health columns so the
         // rest of the connector's persisted state (including encrypted request data) is untouched.
         connectorRepository.findById(connectorId).ifPresent(connector -> {
-            connector.setLastTestPassed(passed);
-            connector.setLastTestError(passed ? null : error);
+            connector.setStatus(status);
+            connector.setLastTestError(status == ConnectorStatus.UP ? null : error);
+            connectorRepository.save(connector);
+        });
+    }
+
+    @Override
+    public void updateLastCheckedAt(int connectorId, Date checkedAt) {
+        connectorRepository.findById(connectorId).ifPresent(connector -> {
+            connector.setLastCheckedAt(checkedAt);
             connectorRepository.save(connector);
         });
     }

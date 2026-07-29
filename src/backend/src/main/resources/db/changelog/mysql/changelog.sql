@@ -734,3 +734,10 @@ INSERT IGNORE INTO role_has_permission (role_id,component_id,permission_id) VALU
 
 --changeset 5.0:7 stripComments:true splitStatements:true endDelimiter:;
 ALTER TABLE connector CHANGE ssl_validation trust_certificate TINYINT(4) DEFAULT NULL;
+--changeset 5.0:8 stripComments:true splitStatements:true endDelimiter:;
+ALTER TABLE `connector` ADD COLUMN IF NOT EXISTS `status` VARCHAR(20) NOT NULL DEFAULT 'UNKNOWN';
+ALTER TABLE `connector` ADD COLUMN IF NOT EXISTS `last_checked_at` TIMESTAMP NULL DEFAULT NULL;
+UPDATE `connector` SET `status` = CASE WHEN `last_test_passed` = 1 THEN 'UP'
+                                       WHEN `last_test_passed` = 0 THEN 'DOWN'
+                                       ELSE 'UNKNOWN' END;
+ALTER TABLE `connector` DROP COLUMN IF EXISTS `last_test_passed`;
