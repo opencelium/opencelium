@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { Icon } from '@shared/ui/primitives/Icon';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { ConnectorStatusDot } from '../../connector-status/ConnectorStatusDot/ConnectorStatusDot';
-import { getConnectorStatus } from '../../connector-status/getConnectorStatus';
 import type { ConnectorWorkflowNode } from '../../types/workflow.types';
 import { AggregatorBadge } from '../AggregatorBadge/AggregatorBadge';
 import { MethodColorBadge } from '../MethodColorBadge/MethodColorBadge';
@@ -13,7 +12,7 @@ import { StandardNodeHandles } from '../StandardNodeHandles/StandardNodeHandles'
 
 export function ConnectorMethodNode({ id, data, selected, dragging }: NodeProps<ConnectorWorkflowNode>) {
   const connectorIconUrl = resolveConnectorIconUrl(data.connector?.icon);
-  const connectorStatus = getConnectorStatus(data.connector?.lastTestPassed);
+  const connectorStatus = data.connector?.status;
   const suppressTooltip = dragging || data.isAnyNodeDragging;
   const [iconFailed, setIconFailed] = useState(false);
   const icon = connectorIconUrl && !iconFailed ? (
@@ -60,7 +59,7 @@ export function ConnectorMethodNode({ id, data, selected, dragging }: NodeProps<
             <ConnectorStatusDot
               status={connectorStatus}
               testId={`workflow-node-connector-status-${id}`}
-              tooltipOverride={connectorStatus === 'failed' ? data.connector?.lastTestError : undefined}
+              tooltipOverride={connectorStatus === 'AUTH_FAILED' || connectorStatus === 'DOWN' ? data.connector?.lastTestError : undefined}
               suppressTooltip={suppressTooltip}
             />
           </div>

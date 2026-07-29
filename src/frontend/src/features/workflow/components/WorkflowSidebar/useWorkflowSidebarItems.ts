@@ -1,9 +1,8 @@
-import { useGetConnectorsQuery } from '@entities/connector/api/connectorApi';
+import { useGetConnectorsMetaQuery, useGetConnectorsQuery } from '@entities/connector/api/connectorApi';
 import { resolveConnectorIconUrl } from '@entities/connector/model/iconUrl';
 import type { InvokerOperation } from '@entities/invoker/model/types';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { useMemo } from 'react';
-import { getConnectorStatus } from '../../connector-status/getConnectorStatus';
 import { operatorItems, sidebarItems } from '../sidebar/sidebar.data';
 import { matchesSidebarTitle, normalizeSidebarQuery } from '../sidebar/sidebar.helpers';
 import type { SecondarySidebarMode } from '../sidebar/sidebarSecondary';
@@ -24,11 +23,18 @@ type Params = {
 export function useWorkflowSidebarItems(params: Params) {
 	const { t } = useI18n('workflow');
 	const hasMainSearch = params.mainSearch.trim().length > 0;
+	const skipConnectorFetch = params.activeSecondaryPanel !== 'connector' && !hasMainSearch;
+	// Full connector data (needed for invoker.operations — selectedConnector/methodItems
+	// and the cross-connector method search) still comes from /connector/all.
 	const { data: connectors = [], isFetching: connectorsFetching, isError: connectorsError } =
 		useGetConnectorsQuery(
 			{ page: 0, limit: 1000 },
-			{ skip: params.activeSecondaryPanel !== 'connector' && !hasMainSearch },
+			{ skip: skipConnectorFetch },
 		);
+	// The connector-browsing list itself only needs title/icon/status, so it's served by
+	// the cheaper /connector/meta/all snapshot (no credential decryption server-side).
+	const { data: connectorsMeta = [], isFetching: connectorsMetaFetching, isError: connectorsMetaError } =
+		useGetConnectorsMetaQuery(undefined, { skip: skipConnectorFetch });
 	const mainQuery = normalizeSidebarQuery(params.mainSearch);
 	const secondaryQuery = normalizeSidebarQuery(params.secondarySearch);
 	const methodQuery = normalizeSidebarQuery(params.methodSearch);
@@ -48,18 +54,18 @@ export function useWorkflowSidebarItems(params: Params) {
 		(item) => String(item.connectorId) === params.selectedConnectorKey,
 	);
 	const connectorItems = useMemo(
-		() => connectors.map((connector) => {
-			const status = getConnectorStatus(connector.lastTestPassed);
+		() => connectorsMeta.map((connector) => {
+			const status = connector.status;
 			return {
 				key: String(connector.connectorId),
 				title: connector.title,
-				text: connector.description || t('sidebar.connectorMethodsFallback', { invoker: connector.invoker?.name ?? connector.title }),
+				text: t('sidebar.connectorMethodsFallback', { invoker: connector.invoker?.name ?? connector.title }),
 				imageUrl: resolveConnectorIconUrl(normalizeConnectorIcon(connector.icon)),
 				status,
-				statusError: status === 'failed' ? connector.lastTestError : undefined,
+				statusError: status === 'AUTH_FAILED' || status === 'DOWN' ? connector.lastTestError : undefined,
 			};
 		}),
-		[connectors, t],
+		[connectorsMeta, t],
 	);
 	const methodOperations = useMemo(() => selectedConnector?.invoker?.operations ?? [], [selectedConnector]);
 	const methodItems = useMemo(
@@ -85,8 +91,11 @@ export function useWorkflowSidebarItems(params: Params) {
 	const matches = (title: string, query: string, enabled: boolean) => matchesSidebarTitle(title, query, enabled);
 
 	return {
-		connectorsError,
-		connectorsFetching,
+		// Combined: the main-search view mixes connector items (meta fetch) with method
+		// items (full fetch), and the connector-browse panel needs the meta fetch alone —
+		// either one still in flight/errored should surface as such to both consumers.
+		connectorsError: connectorsError || connectorsMetaError,
+		connectorsFetching: connectorsFetching || connectorsMetaFetching,
 		filteredConnectorItems: connectorItems.filter((item) => matches(item.title, secondaryQuery, hasSecondarySearch)),
 		filteredMethodItems: methodItems.filter((item) => matches(item.title, methodQuery, hasMethodSearch)),
 		filteredOperatorItems: translatedOperatorItems.filter((item) => matches(item.title, secondaryQuery, hasSecondarySearch)),

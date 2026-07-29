@@ -188,8 +188,10 @@
       "description": "There are no connectors matching this search."
     },
     "connectorStatus": {
-      "passed": "Connection test passed — this connector is ready to use.",
-      "failed": "Connection test failed — check the connector's credentials and settings.",
+      "up": "Connection test passed — this connector is ready to use.",
+      "authFailed": "Connection test failed — the connector's credentials were rejected.",
+      "down": "Connection test failed — the connector could not be reached.",
+      "unknown": "This connector hasn't been tested yet.",
       "failedWithReason": "Connection test failed: {{reason}}"
     },
     "methodsEmpty": {

@@ -8,10 +8,14 @@ import type {
 
 const statusToAppearance = (status: ConnectorStatus): ConnectorStatusAppearance => {
 	switch (status) {
-		case 'passed':
-			return { color: 'var(--color-status-success-fg)', tooltipKey: 'passed' };
-		case 'failed':
-			return { color: 'var(--color-status-error-fg)', tooltipKey: 'failed' };
+		case 'UP':
+			return { color: 'var(--color-status-success-fg)', tooltipKey: 'up' };
+		case 'AUTH_FAILED':
+			return { color: 'var(--color-status-warning-fg)', tooltipKey: 'authFailed' };
+		case 'DOWN':
+			return { color: 'var(--color-status-error-fg)', tooltipKey: 'down' };
+		case 'UNKNOWN':
+			return { color: 'var(--color-text-disabled)', tooltipKey: 'unknown' };
 		default: {
 			const exhaustive: never = status;
 			return exhaustive;

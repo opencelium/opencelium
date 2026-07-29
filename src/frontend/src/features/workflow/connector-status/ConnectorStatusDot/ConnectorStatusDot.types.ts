@@ -1,10 +1,11 @@
 import type { TooltipPlacement } from '@shared/ui/primitives/Tooltip/Tooltip.types';
+import type { ConnectorHealthStatus } from '@entities/connector/model/types';
 
-export type ConnectorStatus = 'passed' | 'failed';
+export type ConnectorStatus = ConnectorHealthStatus;
 
 export type ConnectorStatusAppearance = {
 	color: string;
-	tooltipKey: ConnectorStatus;
+	tooltipKey: 'up' | 'authFailed' | 'down' | 'unknown';
 };
 
 export type ConnectorStatusDotProps = {
