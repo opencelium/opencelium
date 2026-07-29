@@ -6,7 +6,7 @@ import { DownloadAsTemplateAction } from '@entities/connection/ui/DownloadAsTemp
 import { DuplicateConnectionAction } from '@entities/connection/ui/DuplicateConnectionAction'
 import { CreateConnectionButton } from '@entities/connection/ui/CreateConnectionButton'
 import { CategoryNameCell } from '@entities/connection/ui/CategoryNameCell'
-import { SnapshotIdCell } from '@entities/connection/ui/SnapshotIdCell'
+import { CurrentVersionCell } from '@entities/connection/ui/CurrentVersionCell'
 import { UserNameCell } from '@entities/user/ui/UserNameCell'
 import { createEntityCommands } from '@/engine/entity/command/createEntityCommands'
 import { resolveConnectionTitles } from '@entities/connection/command/resolvers/resolveConnectionTitles'
@@ -164,11 +164,11 @@ export const connectionDefinition: EntityDefinition = {
             type: 'other',
             ui: { component: 'input' },
             table: {
-                width: 140,
+                width: 260,
                 visible: true,
                 order: 6,
-                labelKey: `${baseKey}.list.columns.snapshotId`,
-                render: (_row, value) => <SnapshotIdCell lastVersion={value as ConnectionVersionResource | null} />,
+                labelKey: `${baseKey}.list.columns.currentVersion`,
+                render: (_row, value) => <CurrentVersionCell lastVersion={value as ConnectionVersionResource | null} />,
             },
         },
     ],

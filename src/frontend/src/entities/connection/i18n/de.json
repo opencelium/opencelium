@@ -26,7 +26,7 @@
       "category": "Kategorie",
       "modifiedAt": "Geändert am",
       "modifiedBy": "Geändert von",
-      "snapshotId": "Snapshot-ID"
+      "currentVersion": "Aktuelle Version"
     },
     "downloadTemplate": {
       "tooltip": "Als Vorlage herunterladen",

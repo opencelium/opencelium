@@ -26,7 +26,7 @@
       "category": "Category",
       "modifiedAt": "Modified At",
       "modifiedBy": "Modified By",
-      "snapshotId": "Snapshot Id"
+      "currentVersion": "Current Version"
     },
     "downloadTemplate": {
       "tooltip": "Download as template",
