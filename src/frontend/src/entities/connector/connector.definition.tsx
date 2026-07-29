@@ -16,6 +16,7 @@ import {showApiError} from "@shared/api/handleApiError.ts";
 import {masterPasswordApi, useMasterPasswordStore} from "@features/master-password";
 import {renderConnectorTitle} from "@entities/connector/ui/renderConnectorTitle";
 import {UserNameCell} from "@entities/user/ui/UserNameCell";
+import {TruncatedTextCell} from "@shared/table/TruncatedTextCell";
 import {deleteConnectorIcon, hasConnectorIconFile, shouldDeleteConnectorIcon, uploadConnectorIcon} from "@entities/connector/model/connectorIconUpload";
 import type {StepRemoteProps} from "@shared/ui/form/FormControl/FormControl.type.ts";
 
@@ -284,9 +285,7 @@ export const connectorDefinition: EntityDefinition = {
                 order: 2,
                 searchable: true,
                 labelKey: `${baseKey}.fields.description.label`,
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             }
         },
         {

@@ -18,6 +18,7 @@ import { downloadConnectionTemplate } from '@entities/connectionTemplate/lib/dow
 import { resolveConnectionTemplateIds } from '@entities/connectionTemplate/command/resolvers/resolveConnectionTemplateIds'
 import { resolveConnectionTemplateNames } from '@entities/connectionTemplate/command/resolvers/resolveConnectionTemplateNames'
 import { extractTemplateIdFromSuggestion } from '@entities/connectionTemplate/command/connectionTemplateCache'
+import { TruncatedTextCell } from '@shared/table/TruncatedTextCell'
 
 const baseKey = 'connection-template'
 
@@ -90,9 +91,7 @@ export const connectionTemplateDefinition: EntityDefinition = {
                 order: 2,
                 searchable: true,
                 labelKey: `${baseKey}.fields.description.label`,
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },
         },
         {

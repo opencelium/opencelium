@@ -17,6 +17,7 @@ import { workflowCommandBridgeStore } from '@features/workflow/command/workflowC
 import { resolveWorkflowSearch } from '@features/workflow/command/workflowCommandResolvers'
 import { i18n } from '@shared/i18n/config/i18n'
 import type { ConnectionVersionResource } from '@features/workflow/types/history.types'
+import { TruncatedTextCell } from '@shared/table/TruncatedTextCell'
 
 const baseKey = 'connection'
 
@@ -114,9 +115,7 @@ export const connectionDefinition: EntityDefinition = {
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.list.columns.description`,
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },
         },
         {

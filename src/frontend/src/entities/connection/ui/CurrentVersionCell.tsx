@@ -2,7 +2,7 @@ import React from 'react'
 import { Tooltip } from '@shared/ui/primitives/Tooltip'
 import type { ConnectionVersionResource } from '@features/workflow/types/history.types'
 
-const MAX_COMMENT_LENGTH = 150
+const MAX_COMMENT_LENGTH = 100
 
 type Props = {
     lastVersion: ConnectionVersionResource | null | undefined
