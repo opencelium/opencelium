@@ -23,7 +23,10 @@
     "columns": {
       "title": "Title",
       "description": "Description",
-      "category": "Category"
+      "category": "Category",
+      "modifiedAt": "Modified At",
+      "modifiedBy": "Modified By",
+      "snapshotId": "Snapshot Id"
     },
     "downloadTemplate": {
       "tooltip": "Download as template",

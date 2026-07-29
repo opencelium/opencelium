@@ -19,6 +19,12 @@
     "timeout": {
       "label": "Timeout"
     },
+    "modifiedAt": {
+      "label": "Modified At"
+    },
+    "modifiedBy": {
+      "label": "Modified By"
+    },
     "requestData":  {
       "error": {
         "required": "Required field"
