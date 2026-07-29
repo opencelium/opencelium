@@ -9,6 +9,7 @@ import com.becon.opencelium.backend.database.mysql.service.RequestDataServiceImp
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.exception.StorageException;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
+import com.becon.opencelium.backend.security.SecurityAuditorAware;
 import com.becon.opencelium.backend.storage.StorageService;
 import com.becon.opencelium.backend.utility.crypto.Encoder;
 import org.junit.jupiter.api.DisplayName;
@@ -54,13 +55,15 @@ class ConnectorServiceImpIconTest {
     @Mock private Environment env;
     @Mock private StorageService storageService;
     @Mock private ConnectorHealthService connectorHealthService;
+    @Mock private SecurityAuditorAware securityAuditorAware;
 
     private ConnectorServiceImp service;
 
     private ConnectorServiceImp newService() {
         return new ConnectorServiceImp(
                 connectorProps, connectorRepository, invokerService,
-                requestDataService, encoder, env, storageService, connectorHealthService);
+                requestDataService, encoder, env, storageService, connectorHealthService,
+                securityAuditorAware);
     }
 
     private Connector aConnector(int id, String icon) {

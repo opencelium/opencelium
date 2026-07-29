@@ -37,6 +37,7 @@ import com.becon.opencelium.backend.invoker.entity.RequiredData;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
+import com.becon.opencelium.backend.security.SecurityAuditorAware;
 import com.becon.opencelium.backend.storage.StorageService;
 import com.becon.opencelium.backend.utility.FileNameUtils;
 import com.becon.opencelium.backend.utility.StringUtility;
@@ -65,6 +66,7 @@ public class ConnectorServiceImp implements ConnectorService {
     private final Environment env;
     private final StorageService storageService;
     private final ConnectorHealthService connectorHealthService;
+    private final SecurityAuditorAware securityAuditorAware;
 
     public ConnectorServiceImp(
             ConnectorProps connectorProps, ConnectorRepository connectorRepository,
@@ -74,7 +76,8 @@ public class ConnectorServiceImp implements ConnectorService {
             Environment env,
             StorageService storageService,
             // @Lazy breaks the constructor cycle: the health service itself depends on this service.
-            @Lazy ConnectorHealthService connectorHealthService
+            @Lazy ConnectorHealthService connectorHealthService,
+            SecurityAuditorAware securityAuditorAware
     ) {
         this.connectorProps = connectorProps;
         this.connectorRepository = connectorRepository;
@@ -84,6 +87,7 @@ public class ConnectorServiceImp implements ConnectorService {
         this.env = env;
         this.storageService = storageService;
         this.connectorHealthService = connectorHealthService;
+        this.securityAuditorAware = securityAuditorAware;
     }
 
     @Override
@@ -247,21 +251,15 @@ public class ConnectorServiceImp implements ConnectorService {
 
     @Override
     public void updateStatus(int connectorId, ConnectorStatus status, String error) {
-        // Load the raw (still-encrypted) entity and touch only the two health columns so the
-        // rest of the connector's persisted state (including encrypted request data) is untouched.
-        connectorRepository.findById(connectorId).ifPresent(connector -> {
-            connector.setStatus(status);
-            connector.setLastTestError(status == ConnectorStatus.UP ? null : error);
-            connectorRepository.save(connector);
-        });
+        // Bulk JPQL update touches only the health columns, so the connector's audit fields
+        // (modified_by/modified_at) are not stamped by the background health monitor.
+        connectorRepository.updateStatus(
+                connectorId, status, status == ConnectorStatus.UP ? null : error);
     }
 
     @Override
     public void updateLastCheckedAt(int connectorId, Date checkedAt) {
-        connectorRepository.findById(connectorId).ifPresent(connector -> {
-            connector.setLastCheckedAt(checkedAt);
-            connectorRepository.save(connector);
-        });
+        connectorRepository.updateLastCheckedAt(connectorId, checkedAt);
     }
 
     @Override
@@ -393,6 +391,11 @@ public class ConnectorServiceImp implements ConnectorService {
         }
 
         requestDataService.saveAll(new ArrayList<>(existingMap.values()));
+
+        // Editing request data only dirties child rows, so the connector entity itself stays
+        // clean and JPA auditing never fires — stamp the audit columns explicitly.
+        connectorRepository.touchAudit(
+                connectorId, securityAuditorAware.getCurrentAuditor().orElse(null), new Date());
     }
 
     @Override
