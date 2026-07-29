@@ -12,6 +12,9 @@ export type Connector = {
   // Persisted result of the most recent POST /connector/check: null = never tested.
   lastTestPassed?: boolean | null
   lastTestError?: string | null
+  // Epoch millis of the last modification, and the id of the user who made it.
+  modifiedAt?: number | null
+  modifiedBy?: number | null
 }
 
 export type ConnectorCreateDto = Omit<Connector, "connectorId" | "invoker" | "timeout"> & {
