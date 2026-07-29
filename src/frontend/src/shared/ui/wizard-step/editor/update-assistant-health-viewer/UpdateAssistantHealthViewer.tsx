@@ -60,7 +60,7 @@ export function UpdateAssistantHealthViewer({ name }: Props) {
             {
                 accessorKey: 'key',
                 enableSorting: false,
-                size: 250,
+                meta: { width: '50%' },
                 header: () => t('update-assistant.health.columns.component' as any),
                 cell: ({ row }) =>
                     t(`update-assistant.health.components.${row.original.key}` as any, {
@@ -70,6 +70,7 @@ export function UpdateAssistantHealthViewer({ name }: Props) {
             {
                 accessorKey: 'status',
                 enableSorting: false,
+                meta: { width: '50%' },
                 header: () => t('update-assistant.health.columns.status' as any),
                 cell: ({ row }) => {
                     const status = row.original.status

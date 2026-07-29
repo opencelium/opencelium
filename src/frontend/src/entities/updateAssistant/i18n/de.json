@@ -112,9 +112,16 @@
     }
   },
   "update": {
-    "confirm": "Möchten Sie das Update wirklich anwenden? Das System wird neu gestartet.",
-    "success": "Update erfolgreich gestartet",
-    "error": "Update konnte nicht gestartet werden"
+    "confirmRun": {
+      "title": "Update ausführen",
+      "message": "Möchten Sie OpenCelium wirklich auf Version {{version}} aktualisieren? Das System wird neu gestartet und Sie werden automatisch abgemeldet, sobald das Update beginnt.",
+      "confirm": "Update ausführen",
+      "cancel": "Abbrechen"
+    },
+    "successTitle": "Update gestartet",
+    "success": "Das Update von OpenCelium auf Version {{version}} wurde erfolgreich gestartet.",
+    "successLogoutNotice": "Damit das Update wirksam wird, werden Sie in {{count}} Sekunden automatisch abgemeldet.",
+    "successLogoutNotice_one": "Damit das Update wirksam wird, werden Sie in {{count}} Sekunde automatisch abgemeldet."
   },
   "changelog": {
     "title": "Changelog von {{version}}",

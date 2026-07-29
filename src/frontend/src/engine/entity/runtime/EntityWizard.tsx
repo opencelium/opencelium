@@ -253,6 +253,7 @@ export function EntityWizard<EntityFormValues>({
                                 ?? entity.wizard.modes?.[mode]?.successMessage
                                 ?? 'success'
                             }
+                            successContent={entity.wizard.modes?.[mode]?.getSuccessContent?.(form.getValues())}
                             recommendations={hideRecommendations ? undefined : entity.wizard?.recommendations}
                             image={wizardImage}
                             form={form}

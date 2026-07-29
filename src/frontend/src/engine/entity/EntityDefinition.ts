@@ -154,6 +154,13 @@ export type WizardModeConfig = {
     info?: PartialStepProps[],
     onSubmit?: (formData: any) => void,
     getSuccessMessage?: (formData: T) => string,
+    /**
+     * Custom content rendered below the success screen's title/icon, in place of
+     * the plain translated `successMessage`. Use when the confirmation needs more
+     * than static text (e.g. an interpolated value, a live countdown, a side effect
+     * like an automatic logout) — see `updateAssistantDefinition` for the reference case.
+     */
+    getSuccessContent?: (formData: any) => React.ReactNode,
 }
 
 export type WizardDefinition = {
