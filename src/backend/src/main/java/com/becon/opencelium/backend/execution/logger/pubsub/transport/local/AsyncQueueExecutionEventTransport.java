@@ -1,9 +1,8 @@
 package com.becon.opencelium.backend.execution.logger.pubsub.transport.local;
 
+import com.becon.opencelium.backend.execution.logger.pubsub.ExecutionEventConsumer;
 import com.becon.opencelium.backend.execution.logger.pubsub.event.ExecutionEvent;
-import com.becon.opencelium.backend.execution.logger.pubsub.transport.AbstractExecutionEventTransport;
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
+import com.becon.opencelium.backend.execution.logger.pubsub.transport.ExecutionEventTransport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
@@ -13,24 +12,43 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 @Primary
 @Component
-public class AsyncQueueExecutionEventTransport extends AbstractExecutionEventTransport {
+public class AsyncQueueExecutionEventTransport implements ExecutionEventTransport {
     private static final Logger logger = LoggerFactory.getLogger(AsyncQueueExecutionEventTransport.class);
 
     private final BlockingQueue<ExecutionEvent> queue = new LinkedBlockingQueue<>(100_000);
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final ExecutionEventConsumer consumer;
 
-    private volatile boolean running = true;
+    private volatile State state = State.NEW;
 
-    @PostConstruct
-    void init() {
+    public AsyncQueueExecutionEventTransport(ExecutionEventConsumer consumer) {
+        this.consumer = consumer;
+    }
+
+    @Override
+    public synchronized void start() {
+        if (state == State.RUNNING) {
+            return;
+        }
+
+        if (state != State.NEW) {
+            throw new IllegalStateException("Execution event transport cannot be restarted");
+        }
+
+        state = State.RUNNING;
         executor.submit(this::loop);
     }
 
     @Override
     public void accept(ExecutionEvent event) {
+        if (state != State.RUNNING) {
+            throw new IllegalStateException("Execution event transport is not running");
+        }
+
         try {
             queue.put(event);
         } catch (InterruptedException e) {
@@ -39,11 +57,11 @@ public class AsyncQueueExecutionEventTransport extends AbstractExecutionEventTra
     }
 
     private void loop() {
-        while (running) {
+        while (state == State.RUNNING || !queue.isEmpty()) {
             try {
                 ExecutionEvent event = queue.take();
                 try {
-                    super.consume(event);
+                    consumer.dispatch(event);
                 } catch (Exception e) {
                     // a failing event must never kill the consumer thread: it is the only
                     // reader of the queue, so its death silences all executions until restart
@@ -53,11 +71,36 @@ public class AsyncQueueExecutionEventTransport extends AbstractExecutionEventTra
                 Thread.currentThread().interrupt();
             }
         }
+
+        state = State.TERMINATED;
     }
 
-    @PreDestroy
-    void stop() {
-        running = false;
-        executor.shutdownNow();
+    @Override
+    public synchronized void stop() {
+        if (state != State.RUNNING) {
+            return;
+        }
+
+        state = State.STOPPING;
+        executor.shutdown();
+
+        try {
+            if (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
+                logger.warn("Execution event transport did not stop gracefully; forcing shutdown");
+                executor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executor.shutdownNow();
+            Thread.currentThread().interrupt();
+        } finally {
+            state = State.TERMINATED;
+        }
+    }
+
+    private enum State {
+        NEW,
+        RUNNING,
+        STOPPING,
+        TERMINATED
     }
 }
