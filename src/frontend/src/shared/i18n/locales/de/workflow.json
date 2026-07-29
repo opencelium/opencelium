@@ -40,22 +40,22 @@
     }
   },
   "schedules": {
-    "title": "Zeitpläne",
+    "title": "Laufpläne",
     "add": "Zeitplan hinzufügen",
     "nextRun": "Nächste Ausführung in {{duration}}",
     "manual": "Nur manuell",
     "expand": "Details anzeigen",
     "collapse": "Details ausblenden",
-    "empty": "Noch keine Zeitpläne für diesen Workflow.",
-    "saveFirst": "Speichern Sie den Workflow, um Zeitpläne hinzuzufügen.",
+    "empty": "Noch keine Laufpläne für diesen Workflow.",
+    "saveFirst": "Speichern Sie den Workflow, um Laufpläne hinzuzufügen.",
     "pill": {
-      "tooltip": "Zeitpläne für diesen Workflow"
+      "tooltip": "Laufpläne für diesen Workflow"
     },
     "aggregate": {
       "running": "Ein Zeitplan wird ausgeführt",
       "error": "Letzte Ausführung fehlgeschlagen",
-      "ok": "Alle Zeitpläne fehlerfrei",
-      "idle": "Keine kürzlichen Ausführungen"
+      "ok": "Alle Laufpläne fehlerfrei",
+      "idle": "Keine kürzlichen Läufe"
     },
     "actions": {
       "delete": "Zeitplan löschen"
@@ -148,7 +148,7 @@
     "willBeAddedAfter": "Wird hinzugefügt nach: {{name}}",
     "searchPlaceholder": "suchen",
     "triggerConnection": {
-      "title": "Workflow auslösen",
+      "title": "Workflow anstoßen",
       "description": "Startet den Zeitplan eines anderen Workflows über dessen Webhook, wenn dieser Schritt erfolgreich war, ohne auf dessen Abschluss zu warten."
     },
     "triggerConnectionStep": {
@@ -156,7 +156,7 @@
       "subtitle": "Wählen Sie den Workflow, den Sie auslösen möchten",
       "searchPlaceholder": "Workflow suchen",
       "noSchedule": "Dieser Workflow hat noch keinen Zeitplan.",
-      "scheduleCount": "{{count}} Zeitpläne",
+      "scheduleCount": "{{count}} Laufpläne",
       "scheduleCount_one": "{{count}} Zeitplan",
       "loadError": {
         "title": "Workflows konnten nicht geladen werden",
@@ -172,7 +172,7 @@
       },
       "selectScheduleDialog": {
         "title": "Zeitplan auswählen",
-        "description": "„{{connection}}“ hat mehrere Zeitpläne. Wählen Sie, welcher durch diesen Schritt ausgelöst werden soll.",
+        "description": "„{{connection}}“ hat mehrere Laufpläne. Wählen Sie, welcher durch diesen Schritt ausgelöst werden soll.",
         "placeholder": "Zeitplan suchen",
         "submit": "Weiter",
         "cancel": "Abbrechen",
@@ -204,6 +204,8 @@
     "connectorMethodsFallback": "Methoden vom Invoker {{invoker}}."
   },
   "headerMenu": {
+    "assignCategory": "Kategorie zuweisen",
+    "assignCategoryDisabledHint": "Speichern Sie den Workflow zuerst, um ihm eine Kategorie zuzuweisen",
     "downloadAsTemplate": "Als Vorlage herunterladen",
     "downloadAsTemplateDisabledHint": "Speichern Sie den Workflow zuerst, um ihn als Vorlage herunterzuladen",
     "saveAsTemplate": "Als Vorlage speichern",
@@ -211,6 +213,15 @@
     "versionHistory": "Versionsverlauf",
     "shortcuts": "Tastenkürzel",
     "exit": "Beenden"
+  },
+  "assignCategoryDialog": {
+    "title": "Kategorie zuweisen",
+    "description": "Wählen Sie eine Kategorie, um diesen Workflow zu organisieren.",
+    "selectPlaceholder": "Kategorie auswählen...",
+    "confirmUnassign": {
+      "title": "Kategoriezuweisung entfernen",
+      "message": "Möchten Sie die Kategoriezuweisung dieses Workflows wirklich entfernen?"
+    }
   },
   "shortcutsDialog": {
     "title": "Tastatur- und Maus-Kurzbefehle",
@@ -277,14 +288,16 @@
     "branchTrue": "true",
     "branchFalse": "false",
     "asyncBadge": "Asynchrone Anfrage — löst den anderen Workflow aus und wartet nicht auf dessen Antwort.",
-    "aggregatorBadge": "Führt Ergebnisse mehrerer Aufrufe mit dem Daten-Aggregator \"{{name}}\" zusammen.",
+    "aggregatorBadge": "Führt Ergebnisse mehrerer Aufrufe mit dem Datensammler \"{{name}}\" zusammen.",
     "methodColorBadge": "Knoten mit derselben Farbe und Nummer rufen dieselbe Methode desselben Connectors auf."
   },
   "saveDialog": {
     "title": "Version speichern",
     "commentPlaceholder": "Kommentar",
     "autoNameChangeComment": "Workflow-Name wird zu {{name}} geändert",
-    "autoDescriptionChangeComment": "Workflow-Beschreibung wird zu {{description}} geändert"
+    "autoDescriptionChangeComment": "Workflow-Beschreibung wird zu {{description}} geändert",
+    "autoCategoryAssignedComment": "Kategorie \"{{category}}\" wird zugewiesen",
+    "autoCategoryClearedComment": "Kategoriezuweisung wird entfernt"
   },
   "placeholders": {
     "selectMethod": "Methode auswählen...",

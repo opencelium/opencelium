@@ -1,10 +1,10 @@
 {
   "list": {
-    "title": "Zeitpläne",
-    "subTitle": "Zeitpläne bestimmen, wann bestimmte Worflows ausgeführt werden — nach festem Zeitplan oder durch Auslöser. Die Zahl unter einem Statuskreis zählt bis zu dessen nächstem Cron-Trigger herunter.<legend>Statuslegende: <legendRunning>Läuft</legendRunning><legendSucceeded>Letzte Ausführung erfolgreich</legendSucceeded><legendFailed>Letzte Ausführung fehlgeschlagen</legendFailed><legendNone>Kein Cron und keine Historie</legendNone></legend>",
+    "title": "Laufpläne",
+    "subTitle": "Laufpläne bestimmen, wann bestimmte Worflows ausgeführt werden — nach festem Zeitplan oder durch Auslöser. Die Zahl unter einem Statuskreis zählt bis zu dessen nächstem Cron-Trigger herunter.<legend>Statuslegende: <legendRunning>Läuft</legendRunning><legendSucceeded>Letzter Lauf erfolgreich</legendSucceeded><legendFailed>Letzter Lauf fehlgeschlagen</legendFailed><legendNone>Kein Cron und keine Historie</legendNone></legend>",
     "searchPlaceholder": "Nach Workflowsname suchen",
     "columns": {
-      "executions": "Ausführungen",
+      "executions": "Läufe",
       "status": "Status",
       "connection": "Workflow",
       "cronExp": "Cron",
@@ -14,7 +14,7 @@
       "debugMode": "Debug",
       "webhook": "Webhook"
     },
-    "noExecutions": "Keine laufenden Ausführungen"
+    "noExecutions": "Keine aktuellen Läufe"
   },
   "webhook": {
     "copied": "Webhook-URL in die Zwischenablage kopiert",
@@ -86,7 +86,7 @@
     },
     "bulk": {
       "button": "Benachrichtigungen",
-      "title": "Benachrichtigung zu ausgewählten Zeitplänen hinzufügen",
+      "title": "Benachrichtigung zu ausgewählten Laufplänen hinzufügen",
       "subtitle": "Diese Benachrichtigung wird für {{count}} ausgewählte(n) Zeitplan/-pläne erstellt.",
       "create": "Für {{count}} Zeitplan/-pläne erstellen",
       "success": "Benachrichtigung für {{count}} Zeitplan/-pläne erstellt",
@@ -143,27 +143,27 @@
     "debugMode": {
       "label": "Logs",
       "text": {
-        "on": "Logs are activated",
-        "off": "Logs are deactivated"
+        "on": "Logs sind aktiviert",
+        "off": "Logs sind deaktiviert"
       }
     },
     "cronExp": {
-      "label": "Cron Expression",
+      "label": "Cron-Ausdruck",
       "error": {
-        "invalid": "Invalid cron expression"
+        "invalid": "Ungültiger Cron-Ausdruck"
       }
     }
   },
   "sections": {
     "general-data": {
-      "title": "General Data"
+      "title": "Allgemeine Daten"
     }
   },
   "wizard": {
     "modes": {
       "create": {
         "header": "Zeitplan erstellen",
-        "subheader": "Folgen Sie den 3 einfachen Schritten zur Erstellung des Zeitplans.",
+        "subheader": "Richten Sie einen Zeitplan ein, um einen Workflow automatisch anhand eines Cron-Ausdrucks auszuführen.",
         "successMessage": "Zeitplan für das Workflow \"{{connectionTitle}}\" wurde erfolgreich erstellt",
         "successMessageWithCron": "Zeitplan für das Workflow \"{{connectionTitle}}\" mit Cron \"{{cronExp}}\" wurde erfolgreich erstellt"
       },
@@ -174,20 +174,26 @@
         "successMessageWithCron": "Zeitplan für das Workflow \"{{connectionTitle}}\" mit Cron \"{{cronExp}}\" wurde erfolgreich aktualisiert"
       },
       "view": {
-        "header": "Schedule Details",
-        "subheader": "View schedule information."
+        "header": "Zeitplandetails",
+        "subheader": "Zeitplaninformationen anzeigen."
       }
     },
     "recommendations": {
-      "1": "Create Schedule",
-      "2": "Create Workflow",
-      "3": "Create Connector"
+      "1": "Zeitplan erstellen",
+      "2": "Workflow erstellen",
+      "3": "Konnektor erstellen"
     },
     "steps": {
       "general-data": {
-        "header": "General Data",
-        "subheader": "General information about schedule"
+        "header": "Allgemeine Daten",
+        "subheader": "Allgemeine Informationen zum Zeitplan"
       }
+    }
+  },
+  "confirmation": {
+    "delete": {
+      "byConnectionTitle": "Zeitplan anhand des Verbindungstitels \"{{connectionTitle}}\" löschen?",
+      "byId": "Zeitplan anhand der ID \"{{id}}\" löschen?"
     }
   }
 }

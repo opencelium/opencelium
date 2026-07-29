@@ -1,5 +1,5 @@
 {
-  "title": "Ausführungs-Logs",
+  "title": "Lauf-Logs",
   "subtitle": "Wählen Sie eine Ausführung, um deren Konnektor-, Methoden- und Operator-Logs einzusehen.",
   "selectLabel": "Ausführung",
   "selectPlaceholder": "Ausführung auswählen",
@@ -24,7 +24,7 @@
   "testRunDetails": "TESTLAUFDETAILS",
   "logsLabel": "LOGS",
   "live": {
-    "title": "Ausführungs-Logs",
+    "title": "Lauf-Logs",
     "empty": "Noch keine Logs. Starten Sie einen Test, um Ausführungs-Logs zu sehen.",
     "running": "Läuft…",
     "collecting": "Logs werden gesammelt…",

@@ -6,4 +6,5 @@ export type Connection = {
     description: string
     fromConnector: Connector
     toConnector: Connector
+    categoryId?: number | null
 }

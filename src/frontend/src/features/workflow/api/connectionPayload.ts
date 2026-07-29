@@ -13,6 +13,7 @@ type BuildConnectionPayloadArgs = {
 	edges: WorkflowEdgeModel[];
 	viewport?: { x: number; y: number; zoom: number };
 	fieldBindings?: any[];
+	categoryId?: number | null;
 	/** Templates are applied against a different environment, where `connectorId` is
 	 * meaningless — `TemplateConnectorMappingDialog` re-resolves each method's connector
 	 * by invoker name instead. Set this when building a template payload so each
@@ -713,6 +714,7 @@ export function buildConnectionPayload({
 	edges,
 	viewport,
 	fieldBindings,
+	categoryId,
 	includeInvoker,
 }: BuildConnectionPayloadArgs) {
 	const connection = buildLegacyConnection(nodes);
@@ -721,6 +723,7 @@ export function buildConnectionPayload({
 		title,
 		name: title,
 		description,
+		categoryId: categoryId ?? null,
 		fieldBinding: serializeFieldBindings(fieldBindings ?? connection.fieldBindings),
 		fromConnector: buildFromConnectorPayload(nodes, edges, { includeInvoker }),
 		toConnector: null,
