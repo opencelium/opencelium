@@ -370,7 +370,7 @@ export const connectorDefinition: EntityDefinition = {
                 align: 'center',
                 labelKey: `${baseKey}.fields.sslCert.label`,
             },
-        },
+        },/*
         {
             // Read-only audit columns set by the backend on save — not part of any
             // section/wizard step, only surfaced as list columns.
@@ -400,7 +400,7 @@ export const connectorDefinition: EntityDefinition = {
                 labelKey: `${baseKey}.fields.modifiedBy.label`,
                 render: (_row, value) => <UserNameCell userId={typeof value === 'number' ? value : null} />,
             },
-        },
+        },*/
         {
             // The icon is edited from the wizard's top-right image (ConnectorWizardImage),
             // not as a form field — so it is intentionally left out of every section.
