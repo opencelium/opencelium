@@ -46,10 +46,12 @@ const connectorCredentialsLocked = (values?: { connectorId?: string }): boolean 
 }
 
 /**
- * The `/connector/check` connection test. Shared by the credentials step's submit-time gate
- * (`remote`) and its "Test connection" action button so both fire the exact same request.
+ * The shared `/connector/check` request config, minus `shouldSkip` — the credentials
+ * step's submit-time gate and its "Test connection" action button fire the exact same
+ * request, but need different `shouldSkip` behavior (see below), so each builds its own
+ * `StepRemoteProps` from this base.
  */
-const connectorCheckRemote: StepRemoteProps = {
+const connectorCheckRequestBase: Omit<StepRemoteProps, 'shouldSkip'> = {
     url: `/connector/check`,
     method: 'POST',
     transKey: `${baseKey}.wizard.steps.credentials.remote.error`,
@@ -69,6 +71,31 @@ const connectorCheckRemote: StepRemoteProps = {
             invoker: {name: formValues.invoker},
         }
     },
+    handleResponse: (data, error) => {
+        if (data?.status === "200") {
+            return true;
+        } else {
+            showApiError({
+                namespace: 'entities',
+                transKey:  `${baseKey}.wizard.steps.credentials.remote.error.${data.data.message}`,
+            })
+            return false;
+        }
+    },
+};
+
+// The credentials step's submit-time gate: saving general-data-only changes without
+// entering the master password is a valid, expected flow (not a failed test attempt),
+// so this silently skips the connection test — no toast.
+const connectorCheckRemote: StepRemoteProps = {
+    ...connectorCheckRequestBase,
+    shouldSkip: (values) => connectorCredentialsLocked(values),
+};
+
+// The explicit "Test connection" action button: same skip condition, but tells the
+// user why the test didn't run.
+const connectorTestActionRemote: StepRemoteProps = {
+    ...connectorCheckRequestBase,
     shouldSkip: (values) => {
         const needsMasterPassword = connectorCredentialsLocked(values)
         // Only warn when a master password exists but wasn't entered — when none is
@@ -83,17 +110,6 @@ const connectorCheckRemote: StepRemoteProps = {
             }
         }
         return needsMasterPassword;
-    },
-    handleResponse: (data, error) => {
-        if (data?.status === "200") {
-            return true;
-        } else {
-            showApiError({
-                namespace: 'entities',
-                transKey:  `${baseKey}.wizard.steps.credentials.remote.error.${data.data.message}`,
-            })
-            return false;
-        }
     },
 };
 
@@ -264,7 +280,6 @@ export const connectorDefinition: EntityDefinition = {
             },
 
             table: {
-                width: '45%',
                 visible: true,
                 order: 2,
                 searchable: true,
@@ -324,6 +339,7 @@ export const connectorDefinition: EntityDefinition = {
                 max: 11
             },
             table: {
+                width: 100,
                 visible: true,
                 order: 4,
                 sortable: true,
@@ -334,7 +350,7 @@ export const connectorDefinition: EntityDefinition = {
         {
             name: 'sslCert',
             type: 'boolean',
-            defaultValue: true,
+            defaultValue: false,
             ui: {
                 component: 'switch',
                 props: {
@@ -346,6 +362,7 @@ export const connectorDefinition: EntityDefinition = {
                 }
             },
             table: {
+                width: 100,
                 visible: true,
                 order: 5,
                 align: 'center',
@@ -359,6 +376,7 @@ export const connectorDefinition: EntityDefinition = {
             type: 'number',
             ui: { component: 'input' },
             table: {
+                width: 160,
                 visible: true,
                 order: 6,
                 sortable: true,
@@ -372,6 +390,7 @@ export const connectorDefinition: EntityDefinition = {
             type: 'number',
             ui: { component: 'input' },
             table: {
+                width: 160,
                 visible: true,
                 order: 7,
                 labelKey: `${baseKey}.fields.modifiedBy.label`,
@@ -527,7 +546,7 @@ export const connectorDefinition: EntityDefinition = {
                         label: `${baseKey}.wizard.steps.credentials.test.button`,
                         type: 'primary',
                         successMessage: `${baseKey}.wizard.steps.credentials.test.success`,
-                        remote: connectorCheckRemote,
+                        remote: connectorTestActionRemote,
                         disabled: connectorCredentialsLocked,
                     },
                 ],
