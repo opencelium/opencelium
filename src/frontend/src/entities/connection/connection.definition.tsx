@@ -6,8 +6,11 @@ import { DownloadAsTemplateAction } from '@entities/connection/ui/DownloadAsTemp
 import { DuplicateConnectionAction } from '@entities/connection/ui/DuplicateConnectionAction'
 import { CreateConnectionButton } from '@entities/connection/ui/CreateConnectionButton'
 import { CategoryNameCell } from '@entities/connection/ui/CategoryNameCell'
-import { SnapshotIdCell } from '@entities/connection/ui/SnapshotIdCell'
+import { CurrentVersionCell } from '@entities/connection/ui/CurrentVersionCell'
 import { UserNameCell } from '@entities/user/ui/UserNameCell'
+import { userApi } from '@entities/user/api/userApi'
+import { getCategoriesFromCache } from '@entities/category/command/categoryCache'
+import { store } from '@app/store/store'
 import { createEntityCommands } from '@/engine/entity/command/createEntityCommands'
 import { resolveConnectionTitles } from '@entities/connection/command/resolvers/resolveConnectionTitles'
 import { resolveConnectionIds } from '@entities/connection/command/resolvers/resolveConnectionIds'
@@ -17,6 +20,7 @@ import { workflowCommandBridgeStore } from '@features/workflow/command/workflowC
 import { resolveWorkflowSearch } from '@features/workflow/command/workflowCommandResolvers'
 import { i18n } from '@shared/i18n/config/i18n'
 import type { ConnectionVersionResource } from '@features/workflow/types/history.types'
+import { TruncatedTextCell } from '@shared/table/TruncatedTextCell'
 
 const baseKey = 'connection'
 
@@ -114,9 +118,7 @@ export const connectionDefinition: EntityDefinition = {
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.list.columns.description`,
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },
         },
         {
@@ -126,9 +128,18 @@ export const connectionDefinition: EntityDefinition = {
             table: {
                 width: 140,
                 visible: true,
-                order: 3,
+                order: 4,
+                searchable: true,
                 labelKey: `${baseKey}.list.columns.category`,
-                render: (_row, value) => <CategoryNameCell categoryId={value as number | null} />,
+                // Search matches the rendered category name, not the raw id — resolve it
+                // from the categories cache while leaving the cell's own value (the id)
+                // untouched for CategoryNameCell to render.
+                mapToValue: (_row, raw) => {
+                    const categoryId = typeof raw === 'number' ? raw : null
+                    if (categoryId == null) return ''
+                    return getCategoriesFromCache().find((c) => c.id === categoryId)?.name ?? ''
+                },
+                render: (row) => <CategoryNameCell categoryId={(row as Connection).categoryId ?? null} />,
             },
         },
         {
@@ -140,11 +151,18 @@ export const connectionDefinition: EntityDefinition = {
             table: {
                 width: 160,
                 visible: true,
-                order: 4,
+                order: 5,
                 sortable: true,
+                searchable: true,
                 labelKey: `${baseKey}.list.columns.modifiedAt`,
-                render: (_row, value) =>
-                    typeof value === 'number' ? <span>{new Date(value).toLocaleString(i18n.language)}</span> : null,
+                mapToValue: (_row, raw) =>
+                    typeof raw === 'number' ? new Date(raw).toLocaleString(i18n.language) : '',
+                render: (row) => {
+                    const modifiedAt = (row as Connection).modifiedAt
+                    return typeof modifiedAt === 'number'
+                        ? <span>{new Date(modifiedAt).toLocaleString(i18n.language)}</span>
+                        : null
+                },
             },
         },
         {
@@ -154,9 +172,18 @@ export const connectionDefinition: EntityDefinition = {
             table: {
                 width: 160,
                 visible: true,
-                order: 5,
+                order: 6,
+                searchable: true,
                 labelKey: `${baseKey}.list.columns.modifiedBy`,
-                render: (_row, value) => <UserNameCell userId={typeof value === 'number' ? value : null} />,
+                // Search matches the rendered "name surname", not the raw user id.
+                mapToValue: (_row, raw) => {
+                    const userId = typeof raw === 'number' ? raw : null
+                    if (userId == null) return ''
+                    const users = userApi.endpoints.getUsers.select({ page: 1, limit: 1000 })(store.getState()).data ?? []
+                    const user = users.find((u) => u.userId === userId)
+                    return user ? `${user.userDetail.name} ${user.userDetail.surname}` : ''
+                },
+                render: (row) => <UserNameCell userId={(row as Connection).modifiedBy ?? null} />,
             },
         },
         {
@@ -164,11 +191,15 @@ export const connectionDefinition: EntityDefinition = {
             type: 'other',
             ui: { component: 'input' },
             table: {
-                width: 140,
+                width: 260,
                 visible: true,
-                order: 6,
-                labelKey: `${baseKey}.list.columns.snapshotId`,
-                render: (_row, value) => <SnapshotIdCell lastVersion={value as ConnectionVersionResource | null} />,
+                order: 3,
+                searchable: true,
+                labelKey: `${baseKey}.list.columns.currentVersion`,
+                mapToValue: (_row, raw) => (raw as ConnectionVersionResource | null)?.comment ?? '',
+                render: (row) => (
+                    <CurrentVersionCell lastVersion={(row as Connection).lastVersion ?? null} />
+                ),
             },
         },
     ],

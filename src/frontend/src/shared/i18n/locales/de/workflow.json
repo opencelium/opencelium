@@ -188,9 +188,12 @@
       "description": "Es gibt keine Konnektoren, die zu dieser Suche passen."
     },
     "connectorStatus": {
-      "passed": "Verbindungstest erfolgreich — dieser Connector ist einsatzbereit.",
-      "failed": "Verbindungstest fehlgeschlagen — Zugangsdaten und Einstellungen des Connectors prüfen.",
-      "failedWithReason": "Verbindungstest fehlgeschlagen: {{reason}}"
+      "up": "Verbindungstest erfolgreich — dieser Connector ist einsatzbereit.",
+      "authFailed": "Verbindungstest fehlgeschlagen — die Zugangsdaten des Connectors wurden abgelehnt.",
+      "down": "Verbindungstest fehlgeschlagen — der Connector konnte nicht erreicht werden.",
+      "unknown": "Dieser Connector wurde noch nicht getestet.",
+      "failedWithReason": "Verbindungstest fehlgeschlagen. Fehler: \"{{reason}}\".",
+      "checkedAt": "{{message}} Geprüft {{time}}."
     },
     "methodsEmpty": {
       "title": "Keine Methoden gefunden",

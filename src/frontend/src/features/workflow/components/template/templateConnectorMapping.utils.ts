@@ -65,8 +65,9 @@ export function applyConnectorMapping(
           title: targetConnector.title,
           icon: typeof targetConnector.icon === 'string' ? targetConnector.icon : null,
           invokerName: targetConnector.invoker?.name ?? null,
-          lastTestPassed: targetConnector.lastTestPassed ?? null,
+          status: targetConnector.status,
           lastTestError: targetConnector.lastTestError ?? null,
+          lastCheckedAt: targetConnector.lastCheckedAt ?? null,
         },
       },
     } as WorkflowNodeModel;

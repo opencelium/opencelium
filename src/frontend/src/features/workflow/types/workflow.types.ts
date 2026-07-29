@@ -2,6 +2,7 @@ import type { Edge, Node } from '@xyflow/react';
 import type { WorkflowMethodConfig } from './request-config.types';
 import type { ConditionConfig } from '../components/condition-builder/conditionBuilder.types';
 import type { InvokerOperation } from '@entities/invoker/model/types';
+import type { ConnectorHealthStatus } from '@entities/connector/model/types';
 
 export type WorkflowNodeType = 'start' | 'connector' | 'system' | 'trigger-connection' | 'if' | 'loop';
 
@@ -49,8 +50,9 @@ export type WorkflowNodeData = {
 		title: string;
 		icon?: string | null;
 		invokerName?: string | null;
-		lastTestPassed?: boolean | null;
+		status?: ConnectorHealthStatus;
 		lastTestError?: string | null;
+		lastCheckedAt?: number | null;
 	};
 	methodConfig?: WorkflowMethodConfig;
 	conditionConfig?: ConditionConfig;

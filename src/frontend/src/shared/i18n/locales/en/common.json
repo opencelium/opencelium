@@ -97,6 +97,9 @@
     "createWorkflow": "Create Workflow",
     "createWorkflowHint": "Create Workflow (Alt+W)"
   },
+  "user": {
+    "unknown": "Unknown User"
+  },
   "actions": {
     "prev": "Back",
     "submit": "Submit",

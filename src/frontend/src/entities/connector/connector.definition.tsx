@@ -15,7 +15,7 @@ import {connectorApi} from "@entities/connector/api/connectorApi.ts";
 import {showApiError} from "@shared/api/handleApiError.ts";
 import {masterPasswordApi, useMasterPasswordStore} from "@features/master-password";
 import {renderConnectorTitle} from "@entities/connector/ui/renderConnectorTitle";
-import {UserNameCell} from "@entities/user/ui/UserNameCell";
+import {TruncatedTextCell} from "@shared/table/TruncatedTextCell";
 import {deleteConnectorIcon, hasConnectorIconFile, shouldDeleteConnectorIcon, uploadConnectorIcon} from "@entities/connector/model/connectorIconUpload";
 import type {StepRemoteProps} from "@shared/ui/form/FormControl/FormControl.type.ts";
 
@@ -46,10 +46,12 @@ const connectorCredentialsLocked = (values?: { connectorId?: string }): boolean 
 }
 
 /**
- * The `/connector/check` connection test. Shared by the credentials step's submit-time gate
- * (`remote`) and its "Test connection" action button so both fire the exact same request.
+ * The shared `/connector/check` request config, minus `shouldSkip` — the credentials
+ * step's submit-time gate and its "Test connection" action button fire the exact same
+ * request, but need different `shouldSkip` behavior (see below), so each builds its own
+ * `StepRemoteProps` from this base.
  */
-const connectorCheckRemote: StepRemoteProps = {
+const connectorCheckRequestBase: Omit<StepRemoteProps, 'shouldSkip'> = {
     url: `/connector/check`,
     method: 'POST',
     transKey: `${baseKey}.wizard.steps.credentials.remote.error`,
@@ -69,6 +71,31 @@ const connectorCheckRemote: StepRemoteProps = {
             invoker: {name: formValues.invoker},
         }
     },
+    handleResponse: (data, error) => {
+        if (data?.status === "200") {
+            return true;
+        } else {
+            showApiError({
+                namespace: 'entities',
+                transKey:  `${baseKey}.wizard.steps.credentials.remote.error.${data.data.message}`,
+            })
+            return false;
+        }
+    },
+};
+
+// The credentials step's submit-time gate: saving general-data-only changes without
+// entering the master password is a valid, expected flow (not a failed test attempt),
+// so this silently skips the connection test — no toast.
+const connectorCheckRemote: StepRemoteProps = {
+    ...connectorCheckRequestBase,
+    shouldSkip: (values) => connectorCredentialsLocked(values),
+};
+
+// The explicit "Test connection" action button: same skip condition, but tells the
+// user why the test didn't run.
+const connectorTestActionRemote: StepRemoteProps = {
+    ...connectorCheckRequestBase,
     shouldSkip: (values) => {
         const needsMasterPassword = connectorCredentialsLocked(values)
         // Only warn when a master password exists but wasn't entered — when none is
@@ -84,17 +111,6 @@ const connectorCheckRemote: StepRemoteProps = {
         }
         return needsMasterPassword;
     },
-    handleResponse: (data, error) => {
-        if (data?.status === "200") {
-            return true;
-        } else {
-            showApiError({
-                namespace: 'entities',
-                transKey:  `${baseKey}.wizard.steps.credentials.remote.error.${data.data.message}`,
-            })
-            return false;
-        }
-    },
 };
 
 export const connectorDefinition: EntityDefinition = {
@@ -109,6 +125,7 @@ export const connectorDefinition: EntityDefinition = {
     list: {
         titleKey: `${baseKey}.list.title`,
         subtitleKey: `${baseKey}.list.subTitle`,
+        searchPlaceholderKey: `${baseKey}.list.searchPlaceholder`,
         defaultSort: { field: 'title', direction: 'asc' },
         bulkDelete: {
             confirmMessage: (ids) => {
@@ -264,14 +281,11 @@ export const connectorDefinition: EntityDefinition = {
             },
 
             table: {
-                width: '45%',
                 visible: true,
                 order: 2,
                 searchable: true,
                 labelKey: `${baseKey}.fields.description.label`,
-                render: (_row, value) => (
-                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
-                ),
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             }
         },
         {
@@ -324,9 +338,11 @@ export const connectorDefinition: EntityDefinition = {
                 max: 11
             },
             table: {
+                width: 100,
                 visible: true,
                 order: 4,
                 sortable: true,
+                searchable: true,
                 align: 'center',
                 labelKey: `${baseKey}.fields.timeout.label`,
             },
@@ -334,7 +350,7 @@ export const connectorDefinition: EntityDefinition = {
         {
             name: 'sslCert',
             type: 'boolean',
-            defaultValue: true,
+            defaultValue: false,
             ui: {
                 component: 'switch',
                 props: {
@@ -346,36 +362,12 @@ export const connectorDefinition: EntityDefinition = {
                 }
             },
             table: {
+                width: 100,
                 visible: true,
                 order: 5,
+                searchable: true,
                 align: 'center',
                 labelKey: `${baseKey}.fields.sslCert.label`,
-            },
-        },
-        {
-            // Read-only audit columns set by the backend on save — not part of any
-            // section/wizard step, only surfaced as list columns.
-            name: 'modifiedAt',
-            type: 'number',
-            ui: { component: 'input' },
-            table: {
-                visible: true,
-                order: 6,
-                sortable: true,
-                labelKey: `${baseKey}.fields.modifiedAt.label`,
-                render: (_row, value) =>
-                    typeof value === 'number' ? <span>{new Date(value).toLocaleString(i18n.language)}</span> : null,
-            },
-        },
-        {
-            name: 'modifiedBy',
-            type: 'number',
-            ui: { component: 'input' },
-            table: {
-                visible: true,
-                order: 7,
-                labelKey: `${baseKey}.fields.modifiedBy.label`,
-                render: (_row, value) => <UserNameCell userId={typeof value === 'number' ? value : null} />,
             },
         },
         {
@@ -527,7 +519,7 @@ export const connectorDefinition: EntityDefinition = {
                         label: `${baseKey}.wizard.steps.credentials.test.button`,
                         type: 'primary',
                         successMessage: `${baseKey}.wizard.steps.credentials.test.success`,
-                        remote: connectorCheckRemote,
+                        remote: connectorTestActionRemote,
                         disabled: connectorCredentialsLocked,
                     },
                 ],
