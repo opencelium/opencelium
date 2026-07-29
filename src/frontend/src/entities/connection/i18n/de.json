@@ -22,7 +22,8 @@
     "searchPlaceholder": "Nach Titel oder Beschreibung suchen",
     "columns": {
       "title": "Titel",
-      "description": "Beschreibung"
+      "description": "Beschreibung",
+      "category": "Kategorie"
     },
     "downloadTemplate": {
       "tooltip": "Als Vorlage herunterladen",

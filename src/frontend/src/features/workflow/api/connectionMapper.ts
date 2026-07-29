@@ -28,6 +28,7 @@ export type WorkflowConnectionState = {
 	fieldBindings: any[];
 	versions: HistoryVersionItem[];
 	viewport?: { x: number; y: number; zoom: number };
+	categoryId: number | null;
 };
 
 const methodToConfig = (method: any): WorkflowMethodConfig => ({
@@ -644,5 +645,6 @@ export function mapConnectionToWorkflowState(
 				: [],
 		versions: [],
 		viewport: savedViewport,
+		categoryId: connection.categoryId ?? null,
 	};
 }

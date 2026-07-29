@@ -26,13 +26,23 @@ export function WorkflowHeader({
 	const [saveDialogOpen, setSaveDialogOpen] = useState(false);
 	const [saveComment, setSaveComment] = useState('');
 	const menuItems = useMemo(
-		() => headerMenuItems.map((item) => item.id === 'download-template'
-			? {
-				...item,
-				disabled: !hasSavedConnection,
-				disabledTooltipKey: 'headerMenu.downloadAsTemplateDisabledHint',
+		() => headerMenuItems.map((item) => {
+			if (item.id === 'download-template') {
+				return {
+					...item,
+					disabled: !hasSavedConnection,
+					disabledTooltipKey: 'headerMenu.downloadAsTemplateDisabledHint',
+				};
 			}
-			: item),
+			if (item.id === 'assign-category') {
+				return {
+					...item,
+					disabled: !hasSavedConnection,
+					disabledTooltipKey: 'headerMenu.assignCategoryDisabledHint',
+				};
+			}
+			return item;
+		}),
 		[hasSavedConnection],
 	);
 

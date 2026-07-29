@@ -15,6 +15,7 @@ import { WorkflowSchedulesPill } from './components/schedules/WorkflowSchedulesP
 import { WorkflowSchedulesPanel } from './components/schedules/WorkflowSchedulesPanel';
 import { HistoryPanel } from './components/header/HistoryPanel';
 import { ShortcutsDialog } from './components/header/ShortcutsDialog';
+import { AssignCategoryDialog } from './components/header/AssignCategoryDialog';
 import { ConditionBuilderDialog } from './components/condition-builder/ConditionBuilder';
 import { MethodConfigDialog } from './components/request-editor/MethodConfigDialog';
 import { ResponseDialog } from './components/request-editor/ResponseDialog';
@@ -308,6 +309,9 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const [isDownloadingTemplate, setIsDownloadingTemplate] = useState(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [schedulesOpen, setSchedulesOpen] = useState(false);
+  const [categoryId, setCategoryId] = useState<number | null>(null);
+  const [assignCategoryOpen, setAssignCategoryOpen] = useState(false);
+  const [isAssigningCategory, setIsAssigningCategory] = useState(false);
   const hydrateCacheRef = useRef<Map<string, HydrateCacheEntry>>(new Map());
   const hydratedNodes = useMemo(
     () => hydrateNodesWithOperationResponses(workflow.nodes, connectors, invokers, hydrateCacheRef.current),
@@ -354,6 +358,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     setBaselineSnapshot(null);
     setChangeSource('clean');
     setHistoryPreviewSnapshot(null);
+    setCategoryId(null);
     if (!connectionId) {
       setIsConnectionLoading(false);
       return;
@@ -367,6 +372,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         setHeaderState({ title: state.title, description: toDisplayDescription(state.description) });
         setPersistedTitle(state.title);
         setLoadedFieldBindings(state.fieldBindings);
+        setCategoryId(state.categoryId);
         setHistoryVersions(state.versions);
         setSelectedHistoryVersionId((currentSelectedId) =>
           currentSelectedId && state.versions.some((version) => version.id === currentSelectedId)
@@ -426,7 +432,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     return specificMessage;
   }, [hydratedNodes, workflow, tEntities]);
 
-  const handleSave = async ({ title, description, comment }: { title: string; description: string; comment: string }) => {
+  const handleSave = async ({ title, description, comment, categoryId: categoryIdOverride }: { title: string; description: string; comment: string; categoryId?: number | null }) => {
     if (!title.trim() || title.trim() === '[Empty Name]') {
       message.error(t('messages.enterWorkflowName'));
       throw new Error('Connection name is required');
@@ -434,6 +440,9 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
 
     workflow.onClearNodeErrors();
     const normalizedDescription = toPayloadDescription(description);
+    // Preserve the currently-assigned category on every regular save; only an
+    // explicit override (from the Assign Category dialog) changes it.
+    const nextCategoryId = categoryIdOverride !== undefined ? categoryIdOverride : categoryId;
     const isCreate = !activeConnectionId;
     let response;
     try {
@@ -446,6 +455,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         edges: workflow.edges,
         viewport: workflow.getViewport(),
         fieldBindings: loadedFieldBindings,
+        categoryId: nextCategoryId,
       });
     } catch (error) {
       const specificMessage = resolveAndHighlightWorkflowError(error);
@@ -460,6 +470,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     const nextConnectionId = activeConnectionId ?? savedId;
     setHeaderState({ title, description: toDisplayDescription(normalizedDescription) });
     setPersistedTitle(title);
+    setCategoryId(nextCategoryId);
     setBaselineSnapshot(buildWorkflowChangeSnapshot({
       connectionId: nextConnectionId ? String(nextConnectionId) : activeConnectionId,
       title,
@@ -700,7 +711,9 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   };
 
   const handleHeaderMenuSelect = (item: WorkflowHeaderMenuItem) => {
-    if (item.id === 'download-template') {
+    if (item.id === 'assign-category') {
+      setAssignCategoryOpen(true);
+    } else if (item.id === 'download-template') {
       void downloadConnectionTemplate();
     } else if (item.id === 'save-template') {
       openSaveTemplateDialog();
@@ -710,6 +723,25 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       setIsShortcutsOpen(true);
     } else if (item.id === 'exit') {
       navigate('/workflow');
+    }
+  };
+
+  const handleAssignCategory = async (nextCategoryId: number | null, categoryName: string | null) => {
+    setIsAssigningCategory(true);
+    try {
+      await handleSave({
+        title: headerState.title,
+        description: headerState.description,
+        comment: nextCategoryId
+          ? t('saveDialog.autoCategoryAssignedComment', { category: categoryName })
+          : t('saveDialog.autoCategoryClearedComment'),
+        categoryId: nextCategoryId,
+      });
+      setAssignCategoryOpen(false);
+    } catch {
+      // handleSave already surfaces the error via message.error
+    } finally {
+      setIsAssigningCategory(false);
     }
   };
 
@@ -931,6 +963,13 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         onCancel={handleCancelConnectorMapping}
       />
       <ShortcutsDialog open={isShortcutsOpen} onClose={() => setIsShortcutsOpen(false)} />
+      <AssignCategoryDialog
+        open={assignCategoryOpen}
+        currentCategoryId={categoryId}
+        loading={isAssigningCategory}
+        onClose={() => setAssignCategoryOpen(false)}
+        onAssign={handleAssignCategory}
+      />
       <div className="workflowMain">
         {isLoading ? (
           <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

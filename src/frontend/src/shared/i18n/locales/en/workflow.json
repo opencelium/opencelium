@@ -204,6 +204,8 @@
     "connectorMethodsFallback": "Methods from {{invoker}} invoker."
   },
   "headerMenu": {
+    "assignCategory": "Assign Category",
+    "assignCategoryDisabledHint": "Save the workflow first to assign it a category",
     "downloadAsTemplate": "Download as Template",
     "downloadAsTemplateDisabledHint": "Save the workflow first to download it as a template",
     "saveAsTemplate": "Save as Template",
@@ -211,6 +213,15 @@
     "versionHistory": "Version History",
     "shortcuts": "Shortcuts",
     "exit": "Exit"
+  },
+  "assignCategoryDialog": {
+    "title": "Assign Category",
+    "description": "Choose a category to organize this workflow under.",
+    "selectPlaceholder": "Select category...",
+    "confirmUnassign": {
+      "title": "Remove category assignment",
+      "message": "Are you sure you want to remove this workflow's category assignment?"
+    }
   },
   "shortcutsDialog": {
     "title": "Keyboard & mouse shortcuts",
@@ -284,7 +295,9 @@
     "title": "Save Version",
     "commentPlaceholder": "Comment",
     "autoNameChangeComment": "Changing Workflow Name to {{name}}",
-    "autoDescriptionChangeComment": "Changing Workflow Description to {{description}}"
+    "autoDescriptionChangeComment": "Changing Workflow Description to {{description}}",
+    "autoCategoryAssignedComment": "Assigning category \"{{category}}\"",
+    "autoCategoryClearedComment": "Removing category assignment"
   },
   "placeholders": {
     "selectMethod": "Select Method...",

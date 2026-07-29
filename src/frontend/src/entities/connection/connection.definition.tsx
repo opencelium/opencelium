@@ -5,6 +5,7 @@ import type { Connection } from '@entities/connection/model/types'
 import { DownloadAsTemplateAction } from '@entities/connection/ui/DownloadAsTemplateAction'
 import { DuplicateConnectionAction } from '@entities/connection/ui/DuplicateConnectionAction'
 import { CreateConnectionButton } from '@entities/connection/ui/CreateConnectionButton'
+import { CategoryNameCell } from '@entities/connection/ui/CategoryNameCell'
 import { createEntityCommands } from '@/engine/entity/command/createEntityCommands'
 import { resolveConnectionTitles } from '@entities/connection/command/resolvers/resolveConnectionTitles'
 import { resolveConnectionIds } from '@entities/connection/command/resolvers/resolveConnectionIds'
@@ -112,6 +113,17 @@ export const connectionDefinition: EntityDefinition = {
                 render: (_row, value) => (
                     <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
                 ),
+            },
+        },
+        {
+            name: 'categoryId',
+            type: 'number',
+            ui: { component: 'input' },
+            table: {
+                visible: true,
+                order: 3,
+                labelKey: `${baseKey}.list.columns.category`,
+                render: (_row, value) => <CategoryNameCell categoryId={value as number | null} />,
             },
         },
     ],

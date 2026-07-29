@@ -204,6 +204,8 @@
     "connectorMethodsFallback": "Methoden vom Invoker {{invoker}}."
   },
   "headerMenu": {
+    "assignCategory": "Kategorie zuweisen",
+    "assignCategoryDisabledHint": "Speichern Sie den Workflow zuerst, um ihm eine Kategorie zuzuweisen",
     "downloadAsTemplate": "Als Vorlage herunterladen",
     "downloadAsTemplateDisabledHint": "Speichern Sie den Workflow zuerst, um ihn als Vorlage herunterzuladen",
     "saveAsTemplate": "Als Vorlage speichern",
@@ -211,6 +213,15 @@
     "versionHistory": "Versionsverlauf",
     "shortcuts": "Tastenkürzel",
     "exit": "Beenden"
+  },
+  "assignCategoryDialog": {
+    "title": "Kategorie zuweisen",
+    "description": "Wählen Sie eine Kategorie, um diesen Workflow zu organisieren.",
+    "selectPlaceholder": "Kategorie auswählen...",
+    "confirmUnassign": {
+      "title": "Kategoriezuweisung entfernen",
+      "message": "Möchten Sie die Kategoriezuweisung dieses Workflows wirklich entfernen?"
+    }
   },
   "shortcutsDialog": {
     "title": "Tastatur- und Maus-Kurzbefehle",
@@ -284,7 +295,9 @@
     "title": "Version speichern",
     "commentPlaceholder": "Kommentar",
     "autoNameChangeComment": "Workflow-Name wird zu {{name}} geändert",
-    "autoDescriptionChangeComment": "Workflow-Beschreibung wird zu {{description}} geändert"
+    "autoDescriptionChangeComment": "Workflow-Beschreibung wird zu {{description}} geändert",
+    "autoCategoryAssignedComment": "Kategorie \"{{category}}\" wird zugewiesen",
+    "autoCategoryClearedComment": "Kategoriezuweisung wird entfernt"
   },
   "placeholders": {
     "selectMethod": "Methode auswählen...",
