@@ -27,7 +27,6 @@ import com.becon.opencelium.backend.exception.ConnectorAlreadyExistsException;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.exception.StorageException;
-import com.becon.opencelium.backend.execution.logger.mapper.ParsedLogLineMapper;
 import com.becon.opencelium.backend.execution.rdata.RequiredDataService;
 import com.becon.opencelium.backend.execution.rdata.RequiredDataServiceImp;
 import com.becon.opencelium.backend.invoker.InvokerRequestBuilder;
@@ -222,7 +221,7 @@ public class ConnectorServiceImp implements ConnectorService {
                 .setProxyUser(user)
                 .setProxyPass(password)
                 .setTimeout(connector.getTimeout())
-                .setSslCert(connector.isSslValidation())
+                .setSslCert(connector.isTrustCertificate())
                 .sendRequest();
     }
 
@@ -279,7 +278,7 @@ public class ConnectorServiceImp implements ConnectorService {
         // prepended twice when the entity is mapped back to a DTO (icon path doubling on update).
         connector.setIcon(StringUtility.findImageFromUrl(connectorResource.getIcon()));
         connector.setDescription(connectorResource.getDescription());
-        connector.setSslValidation(connectorResource.isSslCert());
+        connector.setTrustCertificate(connectorResource.isSslCert());
         connector.setTimeout(connectorResource.getTimeout());
 
         connectorRepository.save(connector);
