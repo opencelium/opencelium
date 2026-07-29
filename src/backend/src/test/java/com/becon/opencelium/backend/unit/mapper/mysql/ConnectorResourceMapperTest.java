@@ -73,13 +73,12 @@ class ConnectorResourceMapperTest {
     }
 
     @Test
-    void toDtoMapsStatusToNullWhenEntityStatusIsNull() {
+    void toDtoMapsStatusToUnknownWhenEntityWasNeverChecked() {
         Connector entity = aConnector();
 
         ConnectorResource dto = mapper.toDTO(entity);
 
-        // @JsonInclude(NON_NULL) on the DTO omits a null status from the JSON.
-        assertThat(dto.getStatus()).isNull();
+        assertThat(dto.getStatus()).isEqualTo(ConnectorStatus.UNKNOWN);
     }
 
     @Test
@@ -121,7 +120,8 @@ class ConnectorResourceMapperTest {
 
         Connector entity = mapper.toEntity(dto);
 
-        assertThat(entity.getStatus()).isNull();
+        // Client input is discarded; the entity keeps its never-checked default.
+        assertThat(entity.getStatus()).isEqualTo(ConnectorStatus.UNKNOWN);
     }
 
     @Test
@@ -169,7 +169,7 @@ class ConnectorResourceMapperTest {
         var meta = mapper.toMetaDTO(aConnector());
 
         assertThat(meta.getLastCheckedAt()).isNull();
-        assertThat(meta.getStatus()).isNull();
+        assertThat(meta.getStatus()).isEqualTo(ConnectorStatus.UNKNOWN);
     }
 
     @Test
