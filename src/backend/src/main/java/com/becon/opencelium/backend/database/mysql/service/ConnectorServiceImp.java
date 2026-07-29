@@ -23,6 +23,7 @@ import com.becon.opencelium.backend.constant.ExceptionMessages;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.RequestData;
 import com.becon.opencelium.backend.database.mysql.repository.ConnectorRepository;
+import com.becon.opencelium.backend.enums.ConnectorStatus;
 import com.becon.opencelium.backend.exception.ConnectorAlreadyExistsException;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
@@ -226,12 +227,12 @@ public class ConnectorServiceImp implements ConnectorService {
     }
 
     @Override
-    public void updateTestResult(int connectorId, boolean passed, String error) {
-        // Load the raw (still-encrypted) entity and touch only the two test-result columns so the
+    public void updateStatus(int connectorId, ConnectorStatus status, String error) {
+        // Load the raw (still-encrypted) entity and touch only the two health columns so the
         // rest of the connector's persisted state (including encrypted request data) is untouched.
         connectorRepository.findById(connectorId).ifPresent(connector -> {
-            connector.setLastTestPassed(passed);
-            connector.setLastTestError(passed ? null : error);
+            connector.setStatus(status);
+            connector.setLastTestError(status == ConnectorStatus.UP ? null : error);
             connectorRepository.save(connector);
         });
     }

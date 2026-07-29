@@ -30,6 +30,7 @@ import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
+import com.becon.opencelium.backend.enums.ConnectorStatus;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.application.ResultDTO;
@@ -385,7 +386,7 @@ public class ConnectorController {
             // The remote request could not be completed (e.g. host unreachable): record it as a
             // failed test on the saved connector before surfacing the error to the caller.
             if (connectorResource.getConnectorId() > 0 && connectorService.existsById(connectorResource.getConnectorId())) {
-                connectorService.updateTestResult(connectorResource.getConnectorId(), false, ex.getMessage());
+                connectorService.updateStatus(connectorResource.getConnectorId(), ConnectorStatus.DOWN, ex.getMessage());
             }
             throw new CommunicationFailedException();
         }
@@ -407,26 +408,26 @@ public class ConnectorController {
         }
 
         // Classify the outcome once, so it can be both persisted (for saved connectors) and returned.
-        boolean passed;
+        ConnectorStatus status;
         String remoteError = null;
         if ((responseEntity.getStatusCode() == HttpStatus.OK) && hasError(fail, response)) {
-            passed = false;
+            status = ConnectorStatus.AUTH_FAILED;
             remoteError = response;
         } else if (responseEntity.getStatusCode() == HttpStatus.UNAUTHORIZED) {
-            passed = false;
+            status = ConnectorStatus.AUTH_FAILED;
             remoteError = responseEntity.getBody() != null
                     ? responseEntity.getBody().toString()
                     : "Error in remote system";
         } else {
-            passed = true;
+            status = ConnectorStatus.UP;
         }
 
         // Persist the latest result only for a saved connector; an unsaved/new connector has no row.
         if (connectorResource.getConnectorId() > 0 && connectorService.existsById(connectorResource.getConnectorId())) {
-            connectorService.updateTestResult(connectorResource.getConnectorId(), passed, remoteError);
+            connectorService.updateStatus(connectorResource.getConnectorId(), status, remoteError);
         }
 
-        if ((responseEntity.getStatusCode() == HttpStatus.OK) && !passed) {
+        if ((responseEntity.getStatusCode() == HttpStatus.OK) && status != ConnectorStatus.UP) {
             return ResponseEntity.ok().body("{\"status\":\"401\", \"error\":\"401\"}");
         }
 

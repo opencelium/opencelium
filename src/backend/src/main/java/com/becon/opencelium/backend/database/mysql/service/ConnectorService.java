@@ -18,6 +18,7 @@ package com.becon.opencelium.backend.database.mysql.service;
 
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.RequestData;
+import com.becon.opencelium.backend.enums.ConnectorStatus;
 import com.becon.opencelium.backend.execution.logger.mapper.ParsedLogLineMapper;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
@@ -58,9 +59,10 @@ public interface ConnectorService {
     ResponseEntity<?> checkCommunication(Connector connector) throws JsonProcessingException;
 
     /**
-     * Persists the outcome of the most recent remote-API test on a saved connector.
+     * Persists the health status of the most recent remote-API check on a saved connector.
+     * The error is cleared when the status is {@link ConnectorStatus#UP}.
      */
-    void updateTestResult(int connectorId, boolean passed, String error);
+    void updateStatus(int connectorId, ConnectorStatus status, String error);
 
     ResponseEntity<?> getAuthorization(Connector connector);
 

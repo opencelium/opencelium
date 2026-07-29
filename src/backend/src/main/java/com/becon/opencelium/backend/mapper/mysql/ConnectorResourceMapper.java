@@ -11,6 +11,8 @@ import org.mapstruct.Mappings;
 import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
+import java.util.Date;
+
 @org.mapstruct.Mapper(
         componentModel = "spring",
         unmappedTargetPolicy = ReportingPolicy.IGNORE,
@@ -32,17 +34,26 @@ public interface ConnectorResourceMapper extends Mapper<Connector, ConnectorReso
             @Mapping(target = "invoker", qualifiedByName = {"helperMapper", "getInvokerDTO"}),
             @Mapping(target = "requestData", qualifiedByName = {"requestDataMapper", "toDTO"}),
             @Mapping(target = "sslCert", source = "trustCertificate"),
-            @Mapping(target = "lastTestPassed", source = "lastTestPassed"),
-            @Mapping(target = "lastTestError", source = "lastTestError")
+            @Mapping(target = "status", source = "status"),
+            @Mapping(target = "lastTestError", source = "lastTestError"),
+            @Mapping(target = "lastCheckedAt", source = "lastCheckedAt", qualifiedByName = "dateToEpochMillis")
     })
     ConnectorResource toDTO(Connector entity);
+
+    @Named("dateToEpochMillis")
+    static Long dateToEpochMillis(Date date) {
+        return date == null ? null : date.getTime();
+    }
 
     @Mappings({
             @Mapping(target = "id", source = "connectorId"),
             @Mapping(target = "invoker", source = "invoker.name"),
             @Mapping(target = "icon", expression = "java(StringUtility.findImageFromUrl(dto.getIcon()))"),
             @Mapping(target = "requestData", expression = "java(helperMapper.processRequestData(dto))"),
-            @Mapping(target = "trustCertificate", source = "sslCert")
+            @Mapping(target = "trustCertificate", source = "sslCert"),
+            // Health fields are written only by the backend's own check flow, never from client input.
+            @Mapping(target = "status", ignore = true),
+            @Mapping(target = "lastCheckedAt", ignore = true)
     })
     Connector toEntity(ConnectorResource dto);
 }
