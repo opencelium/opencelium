@@ -54,4 +54,28 @@ public interface AppYamlPath {
 
     // Default log (*.log) files limit for failed execution per connection is 3
     String LOG_FILE_FAIL_LIMIT = "opencelium.log.retention.per-connection.fail";
+
+    // Connector health monitor variables:
+    // Master switch for the periodic background health sweep. Default: true
+    String CONNECTOR_HEALTH_ENABLED = "opencelium.connector-health.enabled";
+
+    // Delay between two sweeps in milliseconds. Default: 300000 (5 minutes)
+    String CONNECTOR_HEALTH_INTERVAL = "opencelium.connector-health.interval";
+
+    // Delay before the first sweep after startup in milliseconds. Default: 60000
+    String CONNECTOR_HEALTH_INITIAL_DELAY = "opencelium.connector-health.initial-delay";
+
+    // Consecutive failed checks before a connector's status transitions to
+    // DOWN/AUTH_FAILED (flap damping). Recovery to UP needs a single success. Default: 3
+    String CONNECTOR_HEALTH_FAILURE_THRESHOLD = "opencelium.connector-health.failure-threshold";
+
+    // How many connectors are checked concurrently by the monitor. Default: 4
+    String CONNECTOR_HEALTH_PARALLELISM = "opencelium.connector-health.parallelism";
+
+    // Log every health-check request and its response (method, endpoint template,
+    // HTTP status, latency, truncated response body) at INFO level. Default: false
+    String CONNECTOR_HEALTH_LOG_ENABLED = "opencelium.connector-health.request-logging.enabled";
+
+    // Maximum number of response-body characters included in one log line. Default: 500
+    String CONNECTOR_HEALTH_LOG_MAX_BODY_LENGTH = "opencelium.connector-health.request-logging.max-body-length";
 }

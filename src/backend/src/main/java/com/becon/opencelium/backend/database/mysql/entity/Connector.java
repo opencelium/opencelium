@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.database.mysql.entity;
 
+import com.becon.opencelium.backend.enums.ConnectorStatus;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
@@ -57,8 +58,8 @@ public class Connector {
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_on", updatable = false)
-    private Date createdOn;
+    @Column(name = "created_at", updatable = false)
+    private Date createdAt;
 
     @LastModifiedBy
     @Column(name = "modified_by")
@@ -66,22 +67,27 @@ public class Connector {
 
     @UpdateTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "modified_on")
-    private Date modifiedOn;
+    @Column(name = "modified_at")
+    private Date modifiedAt;
 
     @Column(name = "icon")
     private String icon;
 
-    @Column(name = "ssl_validation")
-    private boolean sslValidation;
+    @Column(name = "trust_certificate")
+    private boolean trustCertificate;
 
     // millisecond
     @Column(name = "timeout")
     private int timeout;
 
-    // null = never tested, true = passed, false = failed.
-    @Column(name = "last_test_passed")
-    private Boolean lastTestPassed;
+    // Health status determined by the most recent communication check.
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private ConnectorStatus status;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "last_checked_at")
+    private Date lastCheckedAt;
 
     // Remote error message from the last failed test; null when passed or never tested.
     @Column(name = "last_test_error", columnDefinition = "TEXT")
@@ -130,12 +136,12 @@ public class Connector {
         this.createdBy = createdBy;
     }
 
-    public Date getCreatedOn() {
-        return createdOn;
+    public Date getCreatedAt() {
+        return createdAt;
     }
 
-    public void setCreatedOn(Date createdOn) {
-        this.createdOn = createdOn;
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
 
     public Integer getModifiedBy() {
@@ -146,12 +152,12 @@ public class Connector {
         this.modifiedBy = modifiedBy;
     }
 
-    public Date getModifiedOn() {
-        return modifiedOn;
+    public Date getModifiedAt() {
+        return modifiedAt;
     }
 
-    public void setModifiedOn(Date modifiedOn) {
-        this.modifiedOn = modifiedOn;
+    public void setModifiedAt(Date modifiedAt) {
+        this.modifiedAt = modifiedAt;
     }
 
     public String getIcon() {
@@ -162,12 +168,12 @@ public class Connector {
         this.icon = icon;
     }
 
-    public boolean isSslValidation() {
-        return sslValidation;
+    public boolean isTrustCertificate() {
+        return trustCertificate;
     }
 
-    public void setSslValidation(boolean sslValidation) {
-        this.sslValidation = sslValidation;
+    public void setTrustCertificate(boolean trustCertificate) {
+        this.trustCertificate = trustCertificate;
     }
 
     public int getTimeout() {
@@ -178,12 +184,20 @@ public class Connector {
         this.timeout = timeout;
     }
 
-    public Boolean getLastTestPassed() {
-        return lastTestPassed;
+    public ConnectorStatus getStatus() {
+        return status;
     }
 
-    public void setLastTestPassed(Boolean lastTestPassed) {
-        this.lastTestPassed = lastTestPassed;
+    public void setStatus(ConnectorStatus status) {
+        this.status = status;
+    }
+
+    public Date getLastCheckedAt() {
+        return lastCheckedAt;
+    }
+
+    public void setLastCheckedAt(Date lastCheckedAt) {
+        this.lastCheckedAt = lastCheckedAt;
     }
 
     public String getLastTestError() {

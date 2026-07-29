@@ -48,6 +48,7 @@ import com.github.fge.jsonpatch.JsonPatch;
 import jakarta.persistence.EntityNotFoundException;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -616,17 +617,40 @@ public class ConnectionServiceImp implements ConnectionService {
         List<ConnectionMng> connections = connectionMngService.getAllByConnectionId(connectionId);
 
         return connections.stream()
-                .map(x -> {
-                    ConnectionVersionedDTO versionedDTO = new ConnectionVersionedDTO();
-                    versionedDTO.setConnectionId(connection.getId());
-                    versionedDTO.setTitle(connection.getTitle());
-                    versionedDTO.setSnapshotId(x.getId());
-                    versionedDTO.setCreatedAt(x.getCreatedAt() != null ? x.getCreatedAt().toEpochMilli() : null);
-                    versionedDTO.setCurrent(Objects.equals(connection.getSnapshotId(), x.getId()));
-                    versionedDTO.setAuthor(x.getCreatedBy());
-                    versionedDTO.setComment(x.getComment());
-                    return versionedDTO;
-                }).toList();
+                .map(x -> toVersionedDTO(connection, x))
+                .toList();
+    }
+
+    @Override
+    public Map<Long, ConnectionVersionedDTO> getLastVersions(List<Connection> connections) {
+        if (CollectionUtils.isEmpty(connections)) {
+            return Map.of();
+        }
+
+        Map<String, Connection> connectionBySnapshotId = connections.stream()
+                .filter(c -> c.getId() != null && StringUtils.isNotBlank(c.getSnapshotId()))
+                .collect(Collectors.toMap(Connection::getSnapshotId, Function.identity(), (a, b) -> a));
+
+        Map<Long, ConnectionVersionedDTO> lastVersions = new HashMap<>();
+        for (ConnectionMng snapshot : connectionMngService.getVersionMetaByIds(connectionBySnapshotId.keySet())) {
+            Connection connection = connectionBySnapshotId.get(snapshot.getId());
+            if (connection != null) {
+                lastVersions.put(connection.getId(), toVersionedDTO(connection, snapshot));
+            }
+        }
+        return lastVersions;
+    }
+
+    private ConnectionVersionedDTO toVersionedDTO(Connection connection, ConnectionMng snapshot) {
+        ConnectionVersionedDTO versionedDTO = new ConnectionVersionedDTO();
+        versionedDTO.setConnectionId(connection.getId());
+        versionedDTO.setTitle(connection.getTitle());
+        versionedDTO.setSnapshotId(snapshot.getId());
+        versionedDTO.setCreatedAt(snapshot.getCreatedAt() != null ? snapshot.getCreatedAt().toEpochMilli() : null);
+        versionedDTO.setCurrent(Objects.equals(connection.getSnapshotId(), snapshot.getId()));
+        versionedDTO.setAuthor(snapshot.getCreatedBy());
+        versionedDTO.setComment(snapshot.getComment());
+        return versionedDTO;
     }
 
     @Override

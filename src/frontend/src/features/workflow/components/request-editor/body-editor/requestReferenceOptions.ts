@@ -35,7 +35,7 @@ export const getMethodConnectorChipInfo = (method: MethodWithId): MethodConnecto
   }
 };
 
-const PATH_RE = /[^.[\]]+|\[\*]|\[\d+]|\[\w+]/g;
+const PATH_RE = /\['(?:\\'|[^'])*']|\["(?:\\"|[^"])*"]|\[[^\]]+]|[^.[\]]+/g;
 
 export const ITERATOR_NAMES = [
   'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
@@ -55,8 +55,26 @@ const normalizePath = (path: string) => path.replace(/^\$\.?/, '');
 
 const isRootPath = (path: string) => path === '$' || path === '$.';
 
+const unquotePathPart = (part: string) => {
+  const singleQuoted = part.match(/^\['((?:\\'|[^'])*)']$/);
+  if (singleQuoted) return singleQuoted[1].replace(/\\'/g, "'");
+  const doubleQuoted = part.match(/^\["((?:\\"|[^"])*)"]$/);
+  if (doubleQuoted) return doubleQuoted[1].replace(/\\"/g, '"');
+  return part;
+};
+
+const isBracketPathPart = (part: string) => part.startsWith('[') && part.endsWith(']');
+
+const isArrayPathPart = (part: string) =>
+  isBracketPathPart(part) && !part.startsWith("['") && !part.startsWith('["');
+
+const serializeObjectKey = (key: string) =>
+  /^[A-Za-z_][A-Za-z0-9_-]*$/.test(key)
+    ? key
+    : `['${key.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}']`;
+
 const getArrayAccessIterator = (part: string) =>
-  part.startsWith('[') && part.endsWith(']') ? part.slice(1, -1) : '';
+  isArrayPathPart(part) ? part.slice(1, -1) : '';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   !!value && typeof value === 'object' && !Array.isArray(value);
@@ -84,7 +102,7 @@ const exactReadAtPath = (source: unknown, path: string, iterators: string[] = []
       continue;
     }
     if (isRecord(current)) {
-      current = current[part];
+      current = current[unquotePathPart(part)];
       continue;
     }
     return undefined;
@@ -93,8 +111,9 @@ const exactReadAtPath = (source: unknown, path: string, iterators: string[] = []
 };
 
 const appendPath = (base: string, part: string) => {
-  if (base === '$') return part.startsWith('[') ? `$.${part}` : `$.${part}`;
-  return base ? `${base}${part.startsWith('[') ? '' : '.'}${part}` : part;
+  const serializedPart = isArrayPathPart(part) ? part : serializeObjectKey(unquotePathPart(part));
+  if (base === '$') return `$.${serializedPart}`;
+  return base ? `${base}${isArrayPathPart(serializedPart) ? '' : '.'}${serializedPart}` : serializedPart;
 };
 
 const normalizeRootArrayPath = (path: string) => {
@@ -122,9 +141,10 @@ const getContext = (
       lastValidPath = appendPath(lastValidPath, part);
       continue;
     }
-    if (isRecord(current) && part in current) {
-      current = current[part];
-      lastValidPath = appendPath(lastValidPath, part);
+    const objectKey = unquotePathPart(part);
+    if (isRecord(current) && objectKey in current) {
+      current = current[objectKey];
+      lastValidPath = appendPath(lastValidPath, objectKey);
       continue;
     }
     break;
