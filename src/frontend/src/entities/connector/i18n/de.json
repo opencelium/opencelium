@@ -20,12 +20,6 @@
     "timeout": {
       "label": "Timeout"
     },
-    "modifiedAt": {
-      "label": "Geändert am"
-    },
-    "modifiedBy": {
-      "label": "Geändert von"
-    },
     "requestData": {
       "error": {
         "required": "Pflichtfeld"

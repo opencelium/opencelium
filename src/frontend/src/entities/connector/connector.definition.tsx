@@ -15,8 +15,6 @@ import {connectorApi} from "@entities/connector/api/connectorApi.ts";
 import {showApiError} from "@shared/api/handleApiError.ts";
 import {masterPasswordApi, useMasterPasswordStore} from "@features/master-password";
 import {renderConnectorTitle} from "@entities/connector/ui/renderConnectorTitle";
-import {UserNameCell} from "@entities/user/ui/UserNameCell";
-import {userApi} from "@entities/user/api/userApi";
 import {TruncatedTextCell} from "@shared/table/TruncatedTextCell";
 import {deleteConnectorIcon, hasConnectorIconFile, shouldDeleteConnectorIcon, uploadConnectorIcon} from "@entities/connector/model/connectorIconUpload";
 import type {StepRemoteProps} from "@shared/ui/form/FormControl/FormControl.type.ts";
@@ -370,50 +368,6 @@ export const connectorDefinition: EntityDefinition = {
                 searchable: true,
                 align: 'center',
                 labelKey: `${baseKey}.fields.sslCert.label`,
-            },
-        },
-        {
-            // Read-only audit columns set by the backend on save — not part of any
-            // section/wizard step, only surfaced as list columns.
-            name: 'modifiedAt',
-            type: 'number',
-            ui: { component: 'input' },
-            table: {
-                width: 160,
-                visible: true,
-                order: 6,
-                sortable: true,
-                searchable: true,
-                labelKey: `${baseKey}.fields.modifiedAt.label`,
-                mapToValue: (_row, raw) =>
-                    typeof raw === 'number' ? new Date(raw).toLocaleString(i18n.language) : '',
-                render: (row) => {
-                    const modifiedAt = (row as Connector).modifiedAt
-                    return typeof modifiedAt === 'number'
-                        ? <span>{new Date(modifiedAt).toLocaleString(i18n.language)}</span>
-                        : null
-                },
-            },
-        },
-        {
-            name: 'modifiedBy',
-            type: 'number',
-            ui: { component: 'input' },
-            table: {
-                width: 160,
-                visible: true,
-                order: 7,
-                searchable: true,
-                labelKey: `${baseKey}.fields.modifiedBy.label`,
-                // Search matches the rendered "name surname", not the raw user id.
-                mapToValue: (_row, raw) => {
-                    const userId = typeof raw === 'number' ? raw : null
-                    if (userId == null) return ''
-                    const users = userApi.endpoints.getUsers.select({ page: 1, limit: 1000 })(store.getState()).data ?? []
-                    const user = users.find((u) => u.userId === userId)
-                    return user ? `${user.userDetail.name} ${user.userDetail.surname}` : ''
-                },
-                render: (row) => <UserNameCell userId={(row as Connector).modifiedBy ?? null} />,
             },
         },
         {
