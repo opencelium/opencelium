@@ -26,7 +26,6 @@ export const invokerDefinition: EntityDefinition = {
     permissionComponent: 'INVOKER',
 
     routes: [
-        { type: 'create' },
         { type: 'view' },
         { type: 'list' },
     ],
@@ -285,10 +284,6 @@ export const invokerDefinition: EntityDefinition = {
 
         recommendations: [
             {
-                title: `${baseKey}.wizard.recommendations.1`,
-                link: '/invoker/create',
-            },
-            {
                 title: `${baseKey}.wizard.recommendations.2`,
                 link: '/connector/create',
             },
@@ -326,7 +321,7 @@ export const invokerDefinition: EntityDefinition = {
     commands: (def) => ([
         ...createEntityCommands({
             def,
-            config: { include: ['create', 'delete', 'list', 'view'] },
+            config: { include: ['delete', 'list', 'view'] },
             dsl: {
                 delete: {
                     by: [
