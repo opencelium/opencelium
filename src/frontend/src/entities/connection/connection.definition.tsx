@@ -6,6 +6,8 @@ import { DownloadAsTemplateAction } from '@entities/connection/ui/DownloadAsTemp
 import { DuplicateConnectionAction } from '@entities/connection/ui/DuplicateConnectionAction'
 import { CreateConnectionButton } from '@entities/connection/ui/CreateConnectionButton'
 import { CategoryNameCell } from '@entities/connection/ui/CategoryNameCell'
+import { SnapshotIdCell } from '@entities/connection/ui/SnapshotIdCell'
+import { UserNameCell } from '@entities/user/ui/UserNameCell'
 import { createEntityCommands } from '@/engine/entity/command/createEntityCommands'
 import { resolveConnectionTitles } from '@entities/connection/command/resolvers/resolveConnectionTitles'
 import { resolveConnectionIds } from '@entities/connection/command/resolvers/resolveConnectionIds'
@@ -13,6 +15,8 @@ import { findConnectionIdByTitle } from '@entities/connection/command/connection
 import type { CommandNode } from '@shared/command/types'
 import { workflowCommandBridgeStore } from '@features/workflow/command/workflowCommandBridge'
 import { resolveWorkflowSearch } from '@features/workflow/command/workflowCommandResolvers'
+import { i18n } from '@shared/i18n/config/i18n'
+import type { ConnectionVersionResource } from '@features/workflow/types/history.types'
 
 const baseKey = 'connection'
 
@@ -120,10 +124,51 @@ export const connectionDefinition: EntityDefinition = {
             type: 'number',
             ui: { component: 'input' },
             table: {
+                width: 140,
                 visible: true,
                 order: 3,
                 labelKey: `${baseKey}.list.columns.category`,
                 render: (_row, value) => <CategoryNameCell categoryId={value as number | null} />,
+            },
+        },
+        {
+            // Read-only audit columns set by the backend on save — not part of any
+            // section/wizard step, only surfaced as list columns.
+            name: 'modifiedAt',
+            type: 'number',
+            ui: { component: 'input' },
+            table: {
+                width: 160,
+                visible: true,
+                order: 4,
+                sortable: true,
+                labelKey: `${baseKey}.list.columns.modifiedAt`,
+                render: (_row, value) =>
+                    typeof value === 'number' ? <span>{new Date(value).toLocaleString(i18n.language)}</span> : null,
+            },
+        },
+        {
+            name: 'modifiedBy',
+            type: 'number',
+            ui: { component: 'input' },
+            table: {
+                width: 160,
+                visible: true,
+                order: 5,
+                labelKey: `${baseKey}.list.columns.modifiedBy`,
+                render: (_row, value) => <UserNameCell userId={typeof value === 'number' ? value : null} />,
+            },
+        },
+        {
+            name: 'lastVersion',
+            type: 'other',
+            ui: { component: 'input' },
+            table: {
+                width: 140,
+                visible: true,
+                order: 6,
+                labelKey: `${baseKey}.list.columns.snapshotId`,
+                render: (_row, value) => <SnapshotIdCell lastVersion={value as ConnectionVersionResource | null} />,
             },
         },
     ],

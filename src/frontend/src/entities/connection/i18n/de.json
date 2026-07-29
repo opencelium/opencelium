@@ -23,7 +23,10 @@
     "columns": {
       "title": "Titel",
       "description": "Beschreibung",
-      "category": "Kategorie"
+      "category": "Kategorie",
+      "modifiedAt": "Geändert am",
+      "modifiedBy": "Geändert von",
+      "snapshotId": "Snapshot-ID"
     },
     "downloadTemplate": {
       "tooltip": "Als Vorlage herunterladen",
