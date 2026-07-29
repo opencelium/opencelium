@@ -12,6 +12,7 @@ import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorHealthService.CheckResult;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorHealthServiceImp;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
+import com.becon.opencelium.backend.database.mysql.service.ConnectorStatusListener;
 import com.becon.opencelium.backend.enums.ConnectorStatus;
 import com.becon.opencelium.backend.invoker.entity.Body;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
@@ -23,15 +24,26 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.net.SocketTimeoutException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 /**
@@ -49,11 +61,19 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ConnectorHealthServiceImpTest {
 
+    private static final int FAILURE_THRESHOLD = 3;
+
     @Mock
     private ConnectorService connectorService;
 
     @Mock
     private InvokerService invokerService;
+
+    @Mock
+    private ObjectProvider<ConnectorStatusListener> statusListenerProvider;
+
+    @Mock
+    private ConnectorStatusListener statusListener;
 
     private ConnectorHealthServiceImp service;
 
@@ -61,7 +81,9 @@ class ConnectorHealthServiceImpTest {
 
     @BeforeEach
     void setUp() {
-        service = new ConnectorHealthServiceImp(connectorService, invokerService);
+        when(statusListenerProvider.getIfAvailable(any())).thenReturn(statusListener);
+        service = new ConnectorHealthServiceImp(
+                connectorService, invokerService, statusListenerProvider, FAILURE_THRESHOLD);
         connector = new Connector();
         connector.setId(7);
         connector.setTitle("jira");
@@ -166,7 +188,133 @@ class ConnectorHealthServiceImpTest {
         assertThat(result.httpStatus()).isNull();
     }
 
+    // ── runCheck — the damped write path ──────────────────────────────────────
+
+    @Test
+    void runCheckWritesTimestampButNotStatusWhenStatusIsUnchanged() throws Exception {
+        connector.setStatus(ConnectorStatus.UP);
+        stubCheckReturningUp();
+
+        service.runCheck(connector);
+
+        verify(connectorService).updateLastCheckedAt(eq(7), any());
+        verify(connectorService, never()).updateStatus(anyInt(), any(), any());
+        verifyNoInteractions(statusListener);
+    }
+
+    @Test
+    void runCheckPublishesUpWithClearedErrorWhenConnectorRecovers() throws Exception {
+        connector.setStatus(ConnectorStatus.DOWN);
+        stubCheckReturningUp();
+
+        service.runCheck(connector);
+
+        // Recovery is published on the first successful check, with the error cleared,
+        // and the listener fires strictly after the database write.
+        var order = inOrder(connectorService, statusListener);
+        order.verify(connectorService).updateStatus(7, ConnectorStatus.UP, null);
+        order.verify(statusListener).onStatusTransition(eq(connector), eq(ConnectorStatus.UP), any());
+    }
+
+    @Test
+    void runCheckPublishesDownOnlyWhenFailuresReachThreshold() throws Exception {
+        connector.setStatus(ConnectorStatus.UP);
+        when(connectorService.checkCommunication(connector))
+                .thenThrow(new RuntimeException("Connection refused"));
+
+        service.runCheck(connector);
+        service.runCheck(connector);
+        verify(connectorService, never()).updateStatus(anyInt(), any(), any());
+
+        service.runCheck(connector);
+
+        verify(connectorService).updateStatus(7, ConnectorStatus.DOWN, "Connection refused");
+        verify(statusListener, times(1)).onStatusTransition(eq(connector), eq(ConnectorStatus.DOWN), any());
+        // The timestamp is written on every check, transition or not.
+        verify(connectorService, times(3)).updateLastCheckedAt(eq(7), any());
+    }
+
+    @Test
+    void runCheckDampsAuthFailedLikeDown() throws Exception {
+        connector.setStatus(ConnectorStatus.UP);
+        doReturn(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build())
+                .when(connectorService).checkCommunication(connector);
+        when(invokerService.getTestFunction("Jira")).thenReturn(aTestFunctionWithoutFailBody());
+
+        service.runCheck(connector);
+        service.runCheck(connector);
+        verify(connectorService, never()).updateStatus(anyInt(), any(), any());
+
+        service.runCheck(connector);
+
+        verify(connectorService).updateStatus(7, ConnectorStatus.AUTH_FAILED, "Error in remote system");
+    }
+
+    @Test
+    void runCheckTreatsClassificationErrorAsDown() throws Exception {
+        ConnectorHealthServiceImp impatientService = new ConnectorHealthServiceImp(
+                connectorService, invokerService, statusListenerProvider, 1);
+        connector.setStatus(ConnectorStatus.UP);
+        doReturn(ResponseEntity.ok("{}")).when(connectorService).checkCommunication(connector);
+        when(invokerService.getTestFunction("Jira")).thenThrow(new RuntimeException("Invoker not found"));
+
+        impatientService.runCheck(connector);
+
+        verify(connectorService).updateLastCheckedAt(eq(7), any());
+        verify(connectorService).updateStatus(7, ConnectorStatus.DOWN, "Invoker not found");
+    }
+
+    @Test
+    void runCheckSkipsWhenCheckForSameConnectorIsInFlight() throws Exception {
+        connector.setStatus(ConnectorStatus.UP);
+        CountDownLatch entered = new CountDownLatch(1);
+        CountDownLatch release = new CountDownLatch(1);
+        when(connectorService.checkCommunication(connector)).thenAnswer(invocation -> {
+            entered.countDown();
+            release.await(5, TimeUnit.SECONDS);
+            return ResponseEntity.ok("{}");
+        });
+        when(invokerService.getTestFunction("Jira")).thenReturn(aTestFunctionWithoutFailBody());
+        Thread firstCheck = new Thread(() -> service.runCheck(connector));
+        firstCheck.start();
+        assertThat(entered.await(5, TimeUnit.SECONDS)).isTrue();
+
+        // While the first check still holds the in-flight flag, a second call must
+        // return immediately without touching the remote API or the database.
+        service.runCheck(connector);
+
+        release.countDown();
+        firstCheck.join(TimeUnit.SECONDS.toMillis(5));
+        verify(connectorService, times(1)).checkCommunication(connector);
+        verify(connectorService, times(1)).updateLastCheckedAt(eq(7), any());
+    }
+
+    @Test
+    void runCheckRestartsFailureCounterWhenStateWasEvicted() throws Exception {
+        connector.setStatus(ConnectorStatus.UP);
+        when(connectorService.checkCommunication(connector))
+                .thenThrow(new RuntimeException("Connection refused"));
+
+        service.runCheck(connector);
+        service.runCheck(connector);
+        service.evict(7);
+        // Without the eviction the third failure would have crossed the threshold.
+        service.runCheck(connector);
+        service.runCheck(connector);
+        verify(connectorService, never()).updateStatus(anyInt(), any(), any());
+
+        service.runCheck(connector);
+
+        verify(connectorService, times(1)).updateStatus(7, ConnectorStatus.DOWN, "Connection refused");
+    }
+
     // ── fixtures ──────────────────────────────────────────────────────────────
+
+    private void stubCheckReturningUp() throws Exception {
+        doReturn(ResponseEntity.ok("{\"user\":\"admin\"}"))
+                .when(connectorService).checkCommunication(connector);
+        when(invokerService.getTestFunction("Jira")).thenReturn(aTestFunctionWithoutFailBody());
+    }
 
     /** Test function whose fail body declares {@code {"errorMessages": [...]}} in json format. */
     private static FunctionInvoker aTestFunctionWithFailBody() {

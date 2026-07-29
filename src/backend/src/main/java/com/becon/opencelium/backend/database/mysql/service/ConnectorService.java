@@ -26,6 +26,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -63,6 +64,11 @@ public interface ConnectorService {
      * The error is cleared when the status is {@link ConnectorStatus#UP}.
      */
     void updateStatus(int connectorId, ConnectorStatus status, String error);
+
+    /**
+     * Persists the time of the most recent health check without touching the status.
+     */
+    void updateLastCheckedAt(int connectorId, Date checkedAt);
 
     ResponseEntity<?> getAuthorization(Connector connector);
 

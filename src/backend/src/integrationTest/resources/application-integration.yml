@@ -1,0 +1,11 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  Spring profile: integration
+#
+#  Activated by the @IntegrationTest composed annotation. Database coordinates
+#  are injected per test class via @DynamicPropertySource from Testcontainers.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Background jobs are disabled so integration tests never fire real remote requests.
+opencelium:
+  connector-health:
+    enabled: false

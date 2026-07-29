@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
+import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.enums.ConnectorStatus;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
@@ -24,7 +25,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -32,7 +35,10 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 public class ConnectorHealthServiceImp implements ConnectorHealthService {
@@ -41,13 +47,22 @@ public class ConnectorHealthServiceImp implements ConnectorHealthService {
 
     private final ConnectorService connectorService;
     private final InvokerService invokerService;
+    private final ConnectorStatusListener statusListener;
+    private final int failureThreshold;
+
+    /** In-memory flap-damping state per connector id, lazily seeded from the persisted status. */
+    private final ConcurrentHashMap<Integer, HealthState> states = new ConcurrentHashMap<>();
 
     public ConnectorHealthServiceImp(
             @Qualifier("connectorServiceImp") ConnectorService connectorService,
-            @Qualifier("invokerServiceImp") InvokerService invokerService
+            @Qualifier("invokerServiceImp") InvokerService invokerService,
+            ObjectProvider<ConnectorStatusListener> statusListenerProvider,
+            @Value("${" + AppYamlPath.CONNECTOR_HEALTH_FAILURE_THRESHOLD + ":3}") int failureThreshold
     ) {
         this.connectorService = connectorService;
         this.invokerService = invokerService;
+        this.statusListener = statusListenerProvider.getIfAvailable(() -> (connector, status, result) -> { });
+        this.failureThreshold = failureThreshold;
     }
 
     @Override
@@ -96,8 +111,88 @@ public class ConnectorHealthServiceImp implements ConnectorHealthService {
         return new CheckResult(status, error, latencyMs, new Date(), responseEntity.getStatusCode());
     }
 
+    @Override
+    public void runCheck(Connector connector) {
+        HealthState state = states.computeIfAbsent(
+                connector.getId(), id -> new HealthState(connector.getStatus()));
+        if (!state.tryAcquire()) {
+            log.debug("Health check for connector '{}' already in flight — skipped", connector.getTitle());
+            return;
+        }
+        try {
+            CheckResult result;
+            try {
+                result = check(connector);
+            } catch (Exception ex) {
+                // check() only shields the remote request itself; classification errors
+                // (unknown invoker, unparsable response, ...) also count as DOWN here.
+                log.debug("Health check failed for connector '{}'", connector.getTitle(), ex);
+                result = new CheckResult(ConnectorStatus.DOWN, ex.getMessage(), 0, new Date(), null);
+            }
+            connectorService.updateLastCheckedAt(connector.getId(), result.checkedAt());
+            CheckResult outcome = result;
+            state.apply(result.status(), failureThreshold).ifPresent(newStatus -> {
+                connectorService.updateStatus(connector.getId(), newStatus, outcome.error());
+                statusListener.onStatusTransition(connector, newStatus, outcome);
+            });
+        } finally {
+            state.release();
+        }
+    }
+
+    @Override
+    public void evict(int connectorId) {
+        states.remove(connectorId);
+    }
+
     private static long elapsedMs(long startNanos) {
         return TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanos);
+    }
+
+    /**
+     * Flap-damping state machine for one connector. A failure ({@code DOWN} or
+     * {@code AUTH_FAILED}) is published only after {@code threshold} consecutive
+     * failed checks; recovery to {@code UP} is published on the first success.
+     */
+    static final class HealthState {
+
+        private final AtomicBoolean inFlight = new AtomicBoolean(false);
+        private ConnectorStatus publishedStatus;
+        private int consecutiveFailures;
+
+        HealthState(ConnectorStatus initial) {
+            this.publishedStatus = initial == null ? ConnectorStatus.UNKNOWN : initial;
+        }
+
+        boolean tryAcquire() {
+            return inFlight.compareAndSet(false, true);
+        }
+
+        void release() {
+            inFlight.set(false);
+        }
+
+        /**
+         * Feeds one raw check outcome into the state machine. Returns the new status
+         * exactly when a damped transition happens, empty otherwise.
+         */
+        synchronized Optional<ConnectorStatus> apply(ConnectorStatus raw, int threshold) {
+            if (raw == ConnectorStatus.UP) {
+                consecutiveFailures = 0;
+                if (publishedStatus != ConnectorStatus.UP) {
+                    publishedStatus = ConnectorStatus.UP;
+                    return Optional.of(ConnectorStatus.UP);
+                }
+                return Optional.empty();
+            }
+            // DOWN and AUTH_FAILED are damped identically.
+            consecutiveFailures++;
+            if (consecutiveFailures >= threshold && publishedStatus != raw) {
+                publishedStatus = raw;
+                return Optional.of(raw);
+            }
+            return Optional.empty();
+        }
     }
 
     private static String convertMapToJson(Map<String, Object> map) {

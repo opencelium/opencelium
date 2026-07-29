@@ -37,6 +37,23 @@ public interface ConnectorHealthService {
     CheckResult check(Connector connector);
 
     /**
+     * The single write path used by the background monitor and the manual refresh:
+     * runs {@link #check}, always persists {@code lastCheckedAt}, and — only when the
+     * flap-damped state machine reports a status transition — persists the new status
+     * and notifies the registered {@link ConnectorStatusListener} strictly afterwards.
+     *
+     * <p>Silently returns when a check for the same connector is already in flight, so
+     * overlapping sweeps and manual refreshes never double-check a connector. The
+     * connector must carry decrypted request data.
+     */
+    void runCheck(Connector connector);
+
+    /**
+     * Drops the in-memory health state of a deleted connector.
+     */
+    void evict(int connectorId);
+
+    /**
      * Outcome of a single health check.
      *
      * @param status     classified health of the remote API

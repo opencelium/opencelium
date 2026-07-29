@@ -227,6 +227,25 @@ opencelium:
       initial-delay: 0
   ###########################################################################
   #                                                                         #
+  #   Background connector health monitor                                   #
+  #                                                                         #
+  #   enabled           — master switch for the periodic sweep              #
+  #   interval          — delay between two sweeps in milliseconds          #
+  #   initial-delay     — delay before the first sweep after startup (ms)   #
+  #   failure-threshold — consecutive failed checks before a connector's    #
+  #                       status transitions to DOWN/AUTH_FAILED            #
+  #                       (flap damping); recovery needs a single success   #
+  #   parallelism       — how many connectors are checked concurrently      #
+  #                                                                         #
+  ###########################################################################
+  connector-health:
+    enabled: true
+    interval: 300000
+    initial-delay: 60000
+    failure-threshold: 3
+    parallelism: 4
+  ###########################################################################
+  #                                                                         #
   #   Is customizable                                                       #
   #                                                                         #
   ###########################################################################
