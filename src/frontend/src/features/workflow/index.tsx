@@ -94,6 +94,7 @@ const hydrateNode = (
             icon: normalizeConnectorIcon(connector.icon) ?? normalizeConnectorIcon(connector.invoker?.icon) ?? invokerIcon ?? node.data.connector?.icon ?? null,
             status: connector.status,
             lastTestError: connector.lastTestError,
+            lastCheckedAt: connector.lastCheckedAt,
             invokerName: connector.invoker?.name ?? node.data.connector?.invokerName ?? null,
           }
         : invokerIcon && node.data.connector

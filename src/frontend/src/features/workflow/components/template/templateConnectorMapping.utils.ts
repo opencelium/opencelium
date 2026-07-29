@@ -67,6 +67,7 @@ export function applyConnectorMapping(
           invokerName: targetConnector.invoker?.name ?? null,
           status: targetConnector.status,
           lastTestError: targetConnector.lastTestError ?? null,
+          lastCheckedAt: targetConnector.lastCheckedAt ?? null,
         },
       },
     } as WorkflowNodeModel;

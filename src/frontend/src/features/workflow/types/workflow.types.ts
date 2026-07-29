@@ -52,6 +52,7 @@ export type WorkflowNodeData = {
 		invokerName?: string | null;
 		status?: ConnectorHealthStatus;
 		lastTestError?: string | null;
+		lastCheckedAt?: number | null;
 	};
 	methodConfig?: WorkflowMethodConfig;
 	conditionConfig?: ConditionConfig;

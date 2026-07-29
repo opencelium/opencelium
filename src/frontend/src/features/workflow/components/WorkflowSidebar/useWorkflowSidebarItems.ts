@@ -63,6 +63,7 @@ export function useWorkflowSidebarItems(params: Params) {
 				imageUrl: resolveConnectorIconUrl(normalizeConnectorIcon(connector.icon)),
 				status,
 				statusError: status === 'AUTH_FAILED' || status === 'DOWN' ? connector.lastTestError : undefined,
+				lastCheckedAt: connector.lastCheckedAt,
 			};
 		}),
 		[connectorsMeta, t],

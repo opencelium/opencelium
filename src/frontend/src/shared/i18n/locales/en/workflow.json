@@ -192,7 +192,8 @@
       "authFailed": "Connection test failed — the connector's credentials were rejected.",
       "down": "Connection test failed — the connector could not be reached.",
       "unknown": "This connector hasn't been tested yet.",
-      "failedWithReason": "Connection test failed: {{reason}}"
+      "failedWithReason": "Connection test failed. Error: \"{{reason}}\".",
+      "checkedAt": "{{message}} Checked {{time}}."
     },
     "methodsEmpty": {
       "title": "No methods found",

@@ -7,6 +7,7 @@ export type SidebarListItem = {
 	imageUrl?: string | null;
 	status?: ConnectorStatus;
 	statusError?: string | null;
+	lastCheckedAt?: number | null;
 	disabled?: boolean;
 };
 

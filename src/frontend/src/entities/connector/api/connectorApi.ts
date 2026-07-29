@@ -28,16 +28,19 @@ export const connectorApi = baseApi.injectEndpoints({
     // description, invoker.operations, ...) isn't needed.
     getConnectorsMeta: b.query<ConnectorMetaDTO[], void>({
       query: () => '/connector/meta/all',
+      // 'META_LIST' (not 'LIST') so the /connector/status socket provider can
+      // invalidate this snapshot on reconnect without dragging in a refetch of
+      // the much heavier getConnectors ('/connector/all') cache.
       providesTags: (result) =>
           result
               ? [
                 { type: 'Entity' as any, id: '/connector/meta/all' },
-                { type: CONNECTOR_TAG, id: 'LIST' },
+                { type: CONNECTOR_TAG, id: 'META_LIST' },
                 ...result.map((c) => ({ type: CONNECTOR_TAG, id: c.connectorId })),
               ]
               : [
                 { type: 'Entity' as any, id: '/connector/meta/all' },
-                { type: CONNECTOR_TAG, id: 'LIST' },
+                { type: CONNECTOR_TAG, id: 'META_LIST' },
               ],
     }),
     getConnector: b.mutation<

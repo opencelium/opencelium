@@ -192,7 +192,8 @@
       "authFailed": "Verbindungstest fehlgeschlagen — die Zugangsdaten des Connectors wurden abgelehnt.",
       "down": "Verbindungstest fehlgeschlagen — der Connector konnte nicht erreicht werden.",
       "unknown": "Dieser Connector wurde noch nicht getestet.",
-      "failedWithReason": "Verbindungstest fehlgeschlagen: {{reason}}"
+      "failedWithReason": "Verbindungstest fehlgeschlagen. Fehler: \"{{reason}}\".",
+      "checkedAt": "{{message}} Geprüft {{time}}."
     },
     "methodsEmpty": {
       "title": "Keine Methoden gefunden",
