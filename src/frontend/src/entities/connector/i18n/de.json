@@ -5,10 +5,13 @@
   },
   "fields": {
     "title": {
-      "label": "Title"
+      "label": "Titel",
+      "errors": {
+        "title_already_exists": "Ein Konnektor mit diesem Titel wurde bereits erstellt"
+      }
     },
     "description": {
-      "label": "Description"
+      "label": "Beschreibung"
     },
     "invoker": {
       "label": "Invoker"
@@ -16,11 +19,16 @@
     "timeout": {
       "label": "Timeout"
     },
+    "requestData": {
+      "error": {
+        "required": "Pflichtfeld"
+      }
+    },
     "sslCert": {
       "label": "SSL-Zertifikat",
       "text": {
         "on": "Jedem Zertifikat vertrauen",
-        "off": "edem Zertifikat vertrauen"
+        "off": "Jedem Zertifikat vertrauen"
       }
     },
     "icon": {
@@ -38,15 +46,15 @@
       "label": "Url"
     },
     "password": {
-      "label": "Password"
+      "label": "Passwort"
     }
   },
   "sections": {
     "general-data": {
-      "title": "General Data"
+      "title": "Allgemeine Daten"
     },
     "credentials": {
-      "title": "Credentials"
+      "title": "Zugangsdaten"
     }
   },
   "wizard": {
@@ -62,23 +70,23 @@
         "successMessage": "Konnektor \"{{title}}\" wurde erfolgreich aktualisiert"
       },
       "view": {
-        "header": "Connector Details",
-        "subheader": "View connector information."
+        "header": "Konnektordetails",
+        "subheader": "Konnektorinformationen anzeigen."
       }
     },
     "recommendations": {
-      "1": "Create another Connector",
-      "2": "Create Workflow",
+      "1": "Weiteren Konnektor erstellen",
+      "2": "Workflow erstellen",
       "4": "Invoker-Liste"
     },
     "steps": {
       "general-data": {
-        "header": "General Data",
-        "subheader": "General information about connector"
+        "header": "Allgemeine Daten",
+        "subheader": "Dieser Abschnitt legt die Grundkonfiguration des Konnektors fest, einschließlich Name, Beschreibung, Ausführungseinstellungen und des ausgewählten Invokers."
       },
       "credentials": {
-        "header": "Credentials",
-        "subheader": "Authentication data",
+        "header": "Zugangsdaten",
+        "subheader": "Enthält invoker-spezifische Konfigurationsfelder, die zur Authentifizierung und Kommunikation mit dem Zielsystem erforderlich sind.",
         "test": {
           "button": "Verbindung testen",
           "success": "Verbindungstest erfolgreich",
@@ -86,6 +94,12 @@
           "confirm": {
             "title": "Verbindungstest fehlgeschlagen",
             "message": "Der Verbindungstest ist fehlgeschlagen. Möchten Sie diesen Konnektor trotzdem speichern?"
+          }
+        },
+        "remote": {
+          "error": {
+            "default": "Unbekannter Fehler beim Testen des Konnektors",
+            "COMMUNICATION_FAILED": "Verbindung ist fehlgeschlagen"
           }
         }
       }

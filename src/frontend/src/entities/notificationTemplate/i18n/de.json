@@ -1,7 +1,7 @@
 {
   "list": {
     "title": "Benachrichtigungsvorlagen",
-    "subTitle": "Verwalten Sie wiederverwendbare Vorlagen, die für Benachrichtigungen in Zeitplänen verwendet werden."
+    "subTitle": "Verwalten Sie wiederverwendbare Vorlagen, die für Benachrichtigungen in Laufplänen verwendet werden."
   },
   "fields": {
     "name": {

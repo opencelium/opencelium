@@ -40,22 +40,22 @@
     }
   },
   "schedules": {
-    "title": "Zeitpläne",
+    "title": "Laufpläne",
     "add": "Zeitplan hinzufügen",
     "nextRun": "Nächste Ausführung in {{duration}}",
     "manual": "Nur manuell",
     "expand": "Details anzeigen",
     "collapse": "Details ausblenden",
-    "empty": "Noch keine Zeitpläne für diesen Workflow.",
-    "saveFirst": "Speichern Sie den Workflow, um Zeitpläne hinzuzufügen.",
+    "empty": "Noch keine Laufpläne für diesen Workflow.",
+    "saveFirst": "Speichern Sie den Workflow, um Laufpläne hinzuzufügen.",
     "pill": {
-      "tooltip": "Zeitpläne für diesen Workflow"
+      "tooltip": "Laufpläne für diesen Workflow"
     },
     "aggregate": {
       "running": "Ein Zeitplan wird ausgeführt",
       "error": "Letzte Ausführung fehlgeschlagen",
-      "ok": "Alle Zeitpläne fehlerfrei",
-      "idle": "Keine kürzlichen Ausführungen"
+      "ok": "Alle Laufpläne fehlerfrei",
+      "idle": "Keine kürzlichen Läufe"
     },
     "actions": {
       "delete": "Zeitplan löschen"
@@ -148,7 +148,7 @@
     "willBeAddedAfter": "Wird hinzugefügt nach: {{name}}",
     "searchPlaceholder": "suchen",
     "triggerConnection": {
-      "title": "Workflow auslösen",
+      "title": "Workflow anstoßen",
       "description": "Startet den Zeitplan eines anderen Workflows über dessen Webhook, wenn dieser Schritt erfolgreich war, ohne auf dessen Abschluss zu warten."
     },
     "triggerConnectionStep": {
@@ -156,7 +156,7 @@
       "subtitle": "Wählen Sie den Workflow, den Sie auslösen möchten",
       "searchPlaceholder": "Workflow suchen",
       "noSchedule": "Dieser Workflow hat noch keinen Zeitplan.",
-      "scheduleCount": "{{count}} Zeitpläne",
+      "scheduleCount": "{{count}} Laufpläne",
       "scheduleCount_one": "{{count}} Zeitplan",
       "loadError": {
         "title": "Workflows konnten nicht geladen werden",
@@ -172,7 +172,7 @@
       },
       "selectScheduleDialog": {
         "title": "Zeitplan auswählen",
-        "description": "„{{connection}}“ hat mehrere Zeitpläne. Wählen Sie, welcher durch diesen Schritt ausgelöst werden soll.",
+        "description": "„{{connection}}“ hat mehrere Laufpläne. Wählen Sie, welcher durch diesen Schritt ausgelöst werden soll.",
         "placeholder": "Zeitplan suchen",
         "submit": "Weiter",
         "cancel": "Abbrechen",
@@ -277,7 +277,7 @@
     "branchTrue": "true",
     "branchFalse": "false",
     "asyncBadge": "Asynchrone Anfrage — löst den anderen Workflow aus und wartet nicht auf dessen Antwort.",
-    "aggregatorBadge": "Führt Ergebnisse mehrerer Aufrufe mit dem Daten-Aggregator \"{{name}}\" zusammen.",
+    "aggregatorBadge": "Führt Ergebnisse mehrerer Aufrufe mit dem Datensammler \"{{name}}\" zusammen.",
     "methodColorBadge": "Knoten mit derselben Farbe und Nummer rufen dieselbe Methode desselben Connectors auf."
   },
   "saveDialog": {
