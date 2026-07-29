@@ -14,8 +14,10 @@ import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorHealthService;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
+import com.becon.opencelium.backend.enums.ConnectorStatus;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
-import com.becon.opencelium.backend.mapper.base.Mapper;
+import com.becon.opencelium.backend.mapper.mysql.ConnectorResourceMapper;
+import com.becon.opencelium.backend.resource.connector.ConnectorMetaDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.security.AuthenticationFilter;
 import com.becon.opencelium.backend.security.AuthorizationFilter;
@@ -32,19 +34,27 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import org.mockito.InOrder;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Slice tests for the icon endpoints of {@link ConnectorController}
- * ({@code POST/DELETE /connector/{id}/icon}).
+ * Slice tests for the icon endpoints ({@code POST/DELETE /connector/{id}/icon}) and the
+ * health/status endpoints ({@code GET /connector/meta/all},
+ * {@code POST /connector/{id}/status/refresh}) of {@link ConnectorController}.
  *
  * Web layer only — service beans are mocked. Security filters are excluded so
  * MockMvc reaches the controller directly. RuntimeExceptions thrown by the
@@ -64,7 +74,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         )
 )
 @ActiveProfiles("test")
-@DisplayName("ConnectorController — icon endpoints web slice")
+@DisplayName("ConnectorController — icon and health endpoints web slice")
 class ConnectorControllerTest {
 
     @Autowired
@@ -80,7 +90,7 @@ class ConnectorControllerTest {
     private ConnectionService connectionService;
 
     @MockBean
-    private Mapper<Connector, ConnectorResource> connectorResourceMapper;
+    private ConnectorResourceMapper connectorResourceMapper;
 
     @MockBean
     private MasterPasswordInterceptor masterPasswordInterceptor;
@@ -147,5 +157,99 @@ class ConnectorControllerTest {
 
         mockMvc.perform(delete("/connector/{id}/icon", 99))
                 .andExpect(status().isInternalServerError());
+    }
+
+    // ── GET /connector/meta/all ───────────────────────────────────────────────
+
+    @Test
+    void getAllMetaReturnsCredentialFreeViewWhenConnectorsExist() throws Exception {
+        Connector raw = new Connector();
+        raw.setId(7);
+        when(connectorService.findAllRaw()).thenReturn(java.util.List.of(raw));
+        when(connectorResourceMapper.toMetaDTOAll(java.util.List.of(raw)))
+                .thenReturn(java.util.List.of(aMetaDto()));
+
+        mockMvc.perform(get("/connector/meta/all"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].connectorId").value(7))
+                .andExpect(jsonPath("$[0].title").value("jira"))
+                .andExpect(jsonPath("$[0].sslCert").value(true))
+                .andExpect(jsonPath("$[0].timeout").value(5000))
+                .andExpect(jsonPath("$[0].status").value("DOWN"))
+                .andExpect(jsonPath("$[0].lastTestError").value("refused"))
+                // Epoch millis, same convention as ConnectorResource.
+                .andExpect(jsonPath("$[0].lastCheckedAt").value(1722249600000L))
+                // The nested invoker is reduced to its name — nothing else is shipped.
+                .andExpect(jsonPath("$[0].invoker.name").value("Jira"))
+                .andExpect(jsonPath("$[0].invoker.operations").doesNotExist())
+                .andExpect(jsonPath("$[0].invoker.requiredData").doesNotExist());
+
+        // The snapshot must never trigger the decrypting read.
+        verify(connectorService, never()).findAll();
+    }
+
+    // ── POST /connector/{id}/status/refresh ───────────────────────────────────
+
+    @Test
+    void refreshStatusRunsCheckAndReturnsPersistedStateWhenConnectorExists() throws Exception {
+        Connector decrypted = new Connector();
+        decrypted.setId(7);
+        Connector persisted = new Connector();
+        persisted.setId(7);
+        when(connectorService.getById(7)).thenReturn(decrypted);
+        when(connectorService.getByIdRaw(7)).thenReturn(persisted);
+        when(connectorResourceMapper.toMetaDTO(persisted)).thenReturn(aMetaDto());
+
+        mockMvc.perform(post("/connector/{id}/status/refresh", 7))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.connectorId").value(7))
+                .andExpect(jsonPath("$.status").value("DOWN"));
+
+        InOrder order = inOrder(connectorHealthService, connectorService);
+        order.verify(connectorHealthService).runCheck(decrypted);
+        order.verify(connectorService).getByIdRaw(7);
+    }
+
+    @Test
+    void refreshStatusReturns500WhenConnectorDoesNotExist() throws Exception {
+        // ConnectorNotFoundException follows the controller's existing not-found style,
+        // which the catch-all exception handler maps to HTTP 500.
+        when(connectorService.getById(99)).thenThrow(new ConnectorNotFoundException(99));
+
+        mockMvc.perform(post("/connector/{id}/status/refresh", 99))
+                .andExpect(status().isInternalServerError());
+
+        verify(connectorHealthService, never()).runCheck(any());
+    }
+
+    @Test
+    void refreshStatusReturnsCurrentStateWhenCheckIsAlreadyInFlight() throws Exception {
+        Connector decrypted = new Connector();
+        decrypted.setId(7);
+        Connector persisted = new Connector();
+        persisted.setId(7);
+        when(connectorService.getById(7)).thenReturn(decrypted);
+        when(connectorService.getByIdRaw(7)).thenReturn(persisted);
+        when(connectorResourceMapper.toMetaDTO(persisted)).thenReturn(aMetaDto());
+        // An in-flight check makes runCheck a silent no-op — the endpoint must still
+        // answer 200 with the currently stored state instead of erroring.
+        doNothing().when(connectorHealthService).runCheck(decrypted);
+
+        mockMvc.perform(post("/connector/{id}/status/refresh", 7))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("DOWN"));
+    }
+
+    private static ConnectorMetaDTO aMetaDto() {
+        ConnectorMetaDTO meta = new ConnectorMetaDTO();
+        meta.setConnectorId(7);
+        meta.setTitle("jira");
+        meta.setSslCert(true);
+        meta.setTimeout(5000);
+        meta.setInvoker(new ConnectorMetaDTO.InvokerMetaDTO("Jira"));
+        meta.setStatus(ConnectorStatus.DOWN);
+        meta.setLastTestError("refused");
+        meta.setLastCheckedAt(1_722_249_600_000L);
+        return meta;
     }
 }

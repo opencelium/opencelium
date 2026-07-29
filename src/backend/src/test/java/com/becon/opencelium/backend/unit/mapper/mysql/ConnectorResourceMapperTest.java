@@ -134,6 +134,49 @@ class ConnectorResourceMapperTest {
         assertThat(entity.getLastCheckedAt()).isNull();
     }
 
+    // ── toMetaDTO — credential-free health view ───────────────────────────────
+
+    @Test
+    void toMetaDtoMapsIdentityAndHealthFieldsWhenEntityIsComplete() {
+        Connector entity = aConnector();
+        entity.setTrustCertificate(true);
+        entity.setTimeout(5000);
+        entity.setStatus(ConnectorStatus.DOWN);
+        entity.setLastTestError("refused");
+        entity.setLastCheckedAt(new Date(1_722_249_600_000L));
+
+        var meta = mapper.toMetaDTO(entity);
+
+        assertThat(meta.getConnectorId()).isEqualTo(7);
+        assertThat(meta.getTitle()).isEqualTo("jira");
+        assertThat(meta.isSslCert()).isTrue();
+        assertThat(meta.getTimeout()).isEqualTo(5000);
+        assertThat(meta.getStatus()).isEqualTo(ConnectorStatus.DOWN);
+        assertThat(meta.getLastTestError()).isEqualTo("refused");
+        assertThat(meta.getLastCheckedAt()).isEqualTo(1_722_249_600_000L);
+    }
+
+    @Test
+    void toMetaDtoNestsInvokerAsNameOnlyObjectWhenEntityHasInvoker() {
+        var meta = mapper.toMetaDTO(aConnector());
+
+        assertThat(meta.getInvoker()).isNotNull();
+        assertThat(meta.getInvoker().getName()).isEqualTo("Jira");
+    }
+
+    @Test
+    void toMetaDtoMapsLastCheckedAtToNullWhenEntityWasNeverChecked() {
+        var meta = mapper.toMetaDTO(aConnector());
+
+        assertThat(meta.getLastCheckedAt()).isNull();
+        assertThat(meta.getStatus()).isNull();
+    }
+
+    @Test
+    void toMetaDtoReturnsNullWhenEntityIsNull() {
+        assertThat(mapper.toMetaDTO(null)).isNull();
+    }
+
     // ── dateToEpochMillis — the @Named conversion itself ──────────────────────
 
     @Test

@@ -175,6 +175,17 @@ public class ConnectorServiceImp implements ConnectorService {
     }
 
     @Override
+    public List<Connector> findAllRaw() {
+        return connectorRepository.findAll();
+    }
+
+    @Override
+    public Connector getByIdRaw(int id) {
+        return connectorRepository.findById(id)
+                .orElseThrow(() -> new ConnectorNotFoundException(id));
+    }
+
+    @Override
     public List<Connector> findAllByTitleContains(String title) {
         List<Connector> list = connectorRepository.findAllByTitleContains(title);
         if (list != null && !list.isEmpty()) {

@@ -4,6 +4,7 @@ package com.becon.opencelium.backend.mapper.mysql;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.mapper.utils.HelperMapper;
+import com.becon.opencelium.backend.resource.connector.ConnectorMetaDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.utility.StringUtility;
 import org.mapstruct.Mapping;
@@ -12,6 +13,7 @@ import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
 import java.util.Date;
+import java.util.List;
 
 @org.mapstruct.Mapper(
         componentModel = "spring",
@@ -43,6 +45,31 @@ public interface ConnectorResourceMapper extends Mapper<Connector, ConnectorReso
     @Named("dateToEpochMillis")
     static Long dateToEpochMillis(Date date) {
         return date == null ? null : date.getTime();
+    }
+
+    /**
+     * Maps to the lightweight health/status view. Touches no request data, so it is
+     * safe on raw (still-encrypted) entities.
+     */
+    default ConnectorMetaDTO toMetaDTO(Connector entity) {
+        if (entity == null) {
+            return null;
+        }
+        ConnectorMetaDTO dto = new ConnectorMetaDTO();
+        dto.setConnectorId(entity.getId());
+        dto.setTitle(entity.getTitle());
+        dto.setIcon(StringUtility.resolveImagePath(entity.getIcon()));
+        dto.setSslCert(entity.isTrustCertificate());
+        dto.setTimeout(entity.getTimeout());
+        dto.setInvoker(new ConnectorMetaDTO.InvokerMetaDTO(entity.getInvoker()));
+        dto.setStatus(entity.getStatus());
+        dto.setLastTestError(entity.getLastTestError());
+        dto.setLastCheckedAt(dateToEpochMillis(entity.getLastCheckedAt()));
+        return dto;
+    }
+
+    default List<ConnectorMetaDTO> toMetaDTOAll(List<Connector> entities) {
+        return entities.stream().map(this::toMetaDTO).toList();
     }
 
     @Mappings({

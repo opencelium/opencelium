@@ -30,9 +30,10 @@ import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorHealthService;
 import com.becon.opencelium.backend.enums.ConnectorStatus;
-import com.becon.opencelium.backend.mapper.base.Mapper;
+import com.becon.opencelium.backend.mapper.mysql.ConnectorResourceMapper;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.application.ResultDTO;
+import com.becon.opencelium.backend.resource.connector.ConnectorMetaDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -64,13 +65,13 @@ public class ConnectorController {
     private final ConnectorService connectorService;
     private final ConnectorHealthService connectorHealthService;
     private final ConnectionService connectionService;
-    private final Mapper<Connector, ConnectorResource> connectorResourceMapper;
+    private final ConnectorResourceMapper connectorResourceMapper;
 
     public ConnectorController(
             @Qualifier("connectorServiceImp") ConnectorService connectorService,
             ConnectorHealthService connectorHealthService,
             @Qualifier("connectionServiceImp") ConnectionService connectionService,
-            Mapper<Connector, ConnectorResource> connectorResourceMapper
+            ConnectorResourceMapper connectorResourceMapper
     ) {
         this.connectorService = connectorService;
         this.connectorHealthService = connectorHealthService;
@@ -160,6 +161,47 @@ public class ConnectorController {
     public ResponseEntity<List<ConnectorResource>> getAll() {
         List<ConnectorResource> connectorResources = connectorResourceMapper.toDTOAll(connectorService.findAll());
         return ResponseEntity.ok(connectorResources);
+    }
+
+    @Operation(summary = "Retrieves the credential-free health/status view of all connectors")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Connector meta data has been successfully retrieved",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConnectorMetaDTO.class)))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/meta/all")
+    public ResponseEntity<List<ConnectorMetaDTO>> getAllMeta() {
+        // Raw read on purpose: the meta view carries no credentials, so decryption is skipped.
+        return ResponseEntity.ok(connectorResourceMapper.toMetaDTOAll(connectorService.findAllRaw()));
+    }
+
+    @Operation(summary = "Runs an immediate health check of the connector and returns its current status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Current connector status; if a check is already in flight, the "
+                            + "stored state is returned without triggering another one",
+                    content = @Content(schema = @Schema(implementation = ConnectorMetaDTO.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PostMapping("/{id}/status/refresh")
+    public ResponseEntity<ConnectorMetaDTO> refreshStatus(@PathVariable int id) {
+        // getById decrypts the request data the check needs and throws the usual
+        // not-found exception for unknown ids.
+        Connector connector = connectorService.getById(id);
+        connectorHealthService.runCheck(connector);
+        // Reload raw to reflect exactly what runCheck persisted.
+        return ResponseEntity.ok(connectorResourceMapper.toMetaDTO(connectorService.getByIdRaw(id)));
     }
 
     @Operation(summary = "Retrieves all connectors with IDs")

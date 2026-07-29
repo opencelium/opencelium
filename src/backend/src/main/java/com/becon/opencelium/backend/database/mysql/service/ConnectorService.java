@@ -57,6 +57,19 @@ public interface ConnectorService {
 
     List<Connector> findAll();
 
+    /**
+     * All connectors without decrypting request data — for credential-free views
+     * (e.g. the health/status meta endpoints) only.
+     */
+    List<Connector> findAllRaw();
+
+    /**
+     * One connector without decrypting request data — for credential-free views only.
+     *
+     * @throws com.becon.opencelium.backend.exception.ConnectorNotFoundException when absent
+     */
+    Connector getByIdRaw(int id);
+
     ResponseEntity<?> checkCommunication(Connector connector) throws JsonProcessingException;
 
     /**
