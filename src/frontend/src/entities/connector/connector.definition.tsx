@@ -16,6 +16,7 @@ import {showApiError} from "@shared/api/handleApiError.ts";
 import {masterPasswordApi, useMasterPasswordStore} from "@features/master-password";
 import {renderConnectorTitle} from "@entities/connector/ui/renderConnectorTitle";
 import {UserNameCell} from "@entities/user/ui/UserNameCell";
+import {userApi} from "@entities/user/api/userApi";
 import {TruncatedTextCell} from "@shared/table/TruncatedTextCell";
 import {deleteConnectorIcon, hasConnectorIconFile, shouldDeleteConnectorIcon, uploadConnectorIcon} from "@entities/connector/model/connectorIconUpload";
 import type {StepRemoteProps} from "@shared/ui/form/FormControl/FormControl.type.ts";
@@ -126,6 +127,7 @@ export const connectorDefinition: EntityDefinition = {
     list: {
         titleKey: `${baseKey}.list.title`,
         subtitleKey: `${baseKey}.list.subTitle`,
+        searchPlaceholderKey: `${baseKey}.list.searchPlaceholder`,
         defaultSort: { field: 'title', direction: 'asc' },
         bulkDelete: {
             confirmMessage: (ids) => {
@@ -342,6 +344,7 @@ export const connectorDefinition: EntityDefinition = {
                 visible: true,
                 order: 4,
                 sortable: true,
+                searchable: true,
                 align: 'center',
                 labelKey: `${baseKey}.fields.timeout.label`,
             },
@@ -364,6 +367,7 @@ export const connectorDefinition: EntityDefinition = {
                 width: 100,
                 visible: true,
                 order: 5,
+                searchable: true,
                 align: 'center',
                 labelKey: `${baseKey}.fields.sslCert.label`,
             },
@@ -379,9 +383,16 @@ export const connectorDefinition: EntityDefinition = {
                 visible: true,
                 order: 6,
                 sortable: true,
+                searchable: true,
                 labelKey: `${baseKey}.fields.modifiedAt.label`,
-                render: (_row, value) =>
-                    typeof value === 'number' ? <span>{new Date(value).toLocaleString(i18n.language)}</span> : null,
+                mapToValue: (_row, raw) =>
+                    typeof raw === 'number' ? new Date(raw).toLocaleString(i18n.language) : '',
+                render: (row) => {
+                    const modifiedAt = (row as Connector).modifiedAt
+                    return typeof modifiedAt === 'number'
+                        ? <span>{new Date(modifiedAt).toLocaleString(i18n.language)}</span>
+                        : null
+                },
             },
         },
         {
@@ -392,8 +403,17 @@ export const connectorDefinition: EntityDefinition = {
                 width: 160,
                 visible: true,
                 order: 7,
+                searchable: true,
                 labelKey: `${baseKey}.fields.modifiedBy.label`,
-                render: (_row, value) => <UserNameCell userId={typeof value === 'number' ? value : null} />,
+                // Search matches the rendered "name surname", not the raw user id.
+                mapToValue: (_row, raw) => {
+                    const userId = typeof raw === 'number' ? raw : null
+                    if (userId == null) return ''
+                    const users = userApi.endpoints.getUsers.select({ page: 1, limit: 1000 })(store.getState()).data ?? []
+                    const user = users.find((u) => u.userId === userId)
+                    return user ? `${user.userDetail.name} ${user.userDetail.surname}` : ''
+                },
+                render: (row) => <UserNameCell userId={(row as Connector).modifiedBy ?? null} />,
             },
         },
         {

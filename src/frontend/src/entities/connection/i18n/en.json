@@ -19,7 +19,7 @@
   "list": {
     "title": "Workflows",
     "subTitle": "Workflows define how connectors interact with each other, including request flow, data mapping, and communication logic.",
-    "searchPlaceholder": "Search by title or description",
+    "searchPlaceholder": "Search",
     "columns": {
       "title": "Title",
       "description": "Description",

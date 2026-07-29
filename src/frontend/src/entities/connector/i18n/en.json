@@ -1,7 +1,8 @@
 {
   "list": {
     "title": "Connectors",
-    "subTitle": "Connectors are core components of OpenCelium. They represent external or internal systems used to send requests and receive responses."
+    "subTitle": "Connectors are core components of OpenCelium. They represent external or internal systems used to send requests and receive responses.",
+    "searchPlaceholder": "Search"
   },
   "fields": {
     "title": {

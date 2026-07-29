@@ -19,7 +19,7 @@
   "list": {
     "title": "Workflows",
     "subTitle": "Workflows definieren, wie Konnektoren miteinander interagieren – einschließlich Anforderungsablauf, Datenzuordnung und Kommunikationslogik.",
-    "searchPlaceholder": "Nach Titel oder Beschreibung suchen",
+    "searchPlaceholder": "Suchen",
     "columns": {
       "title": "Titel",
       "description": "Beschreibung",

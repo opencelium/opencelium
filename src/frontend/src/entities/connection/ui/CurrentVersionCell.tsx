@@ -10,7 +10,7 @@ type Props = {
 
 export const CurrentVersionCell: React.FC<Props> = ({ lastVersion }) => {
     const comment = lastVersion?.comment
-    if (!comment) return null
+    if (!comment) return <span style={{ display: 'block', textAlign: 'center' }}>-</span>
 
     const truncated = comment.length > MAX_COMMENT_LENGTH ? `${comment.slice(0, MAX_COMMENT_LENGTH)}...` : comment
 

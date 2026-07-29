@@ -8,6 +8,9 @@ import { CreateConnectionButton } from '@entities/connection/ui/CreateConnection
 import { CategoryNameCell } from '@entities/connection/ui/CategoryNameCell'
 import { CurrentVersionCell } from '@entities/connection/ui/CurrentVersionCell'
 import { UserNameCell } from '@entities/user/ui/UserNameCell'
+import { userApi } from '@entities/user/api/userApi'
+import { getCategoriesFromCache } from '@entities/category/command/categoryCache'
+import { store } from '@app/store/store'
 import { createEntityCommands } from '@/engine/entity/command/createEntityCommands'
 import { resolveConnectionTitles } from '@entities/connection/command/resolvers/resolveConnectionTitles'
 import { resolveConnectionIds } from '@entities/connection/command/resolvers/resolveConnectionIds'
@@ -125,9 +128,18 @@ export const connectionDefinition: EntityDefinition = {
             table: {
                 width: 140,
                 visible: true,
-                order: 3,
+                order: 4,
+                searchable: true,
                 labelKey: `${baseKey}.list.columns.category`,
-                render: (_row, value) => <CategoryNameCell categoryId={value as number | null} />,
+                // Search matches the rendered category name, not the raw id — resolve it
+                // from the categories cache while leaving the cell's own value (the id)
+                // untouched for CategoryNameCell to render.
+                mapToValue: (_row, raw) => {
+                    const categoryId = typeof raw === 'number' ? raw : null
+                    if (categoryId == null) return ''
+                    return getCategoriesFromCache().find((c) => c.id === categoryId)?.name ?? ''
+                },
+                render: (row) => <CategoryNameCell categoryId={(row as Connection).categoryId ?? null} />,
             },
         },
         {
@@ -139,11 +151,18 @@ export const connectionDefinition: EntityDefinition = {
             table: {
                 width: 160,
                 visible: true,
-                order: 4,
+                order: 5,
                 sortable: true,
+                searchable: true,
                 labelKey: `${baseKey}.list.columns.modifiedAt`,
-                render: (_row, value) =>
-                    typeof value === 'number' ? <span>{new Date(value).toLocaleString(i18n.language)}</span> : null,
+                mapToValue: (_row, raw) =>
+                    typeof raw === 'number' ? new Date(raw).toLocaleString(i18n.language) : '',
+                render: (row) => {
+                    const modifiedAt = (row as Connection).modifiedAt
+                    return typeof modifiedAt === 'number'
+                        ? <span>{new Date(modifiedAt).toLocaleString(i18n.language)}</span>
+                        : null
+                },
             },
         },
         {
@@ -153,9 +172,18 @@ export const connectionDefinition: EntityDefinition = {
             table: {
                 width: 160,
                 visible: true,
-                order: 5,
+                order: 6,
+                searchable: true,
                 labelKey: `${baseKey}.list.columns.modifiedBy`,
-                render: (_row, value) => <UserNameCell userId={typeof value === 'number' ? value : null} />,
+                // Search matches the rendered "name surname", not the raw user id.
+                mapToValue: (_row, raw) => {
+                    const userId = typeof raw === 'number' ? raw : null
+                    if (userId == null) return ''
+                    const users = userApi.endpoints.getUsers.select({ page: 1, limit: 1000 })(store.getState()).data ?? []
+                    const user = users.find((u) => u.userId === userId)
+                    return user ? `${user.userDetail.name} ${user.userDetail.surname}` : ''
+                },
+                render: (row) => <UserNameCell userId={(row as Connection).modifiedBy ?? null} />,
             },
         },
         {
@@ -165,9 +193,13 @@ export const connectionDefinition: EntityDefinition = {
             table: {
                 width: 260,
                 visible: true,
-                order: 6,
+                order: 3,
+                searchable: true,
                 labelKey: `${baseKey}.list.columns.currentVersion`,
-                render: (_row, value) => <CurrentVersionCell lastVersion={value as ConnectionVersionResource | null} />,
+                mapToValue: (_row, raw) => (raw as ConnectionVersionResource | null)?.comment ?? '',
+                render: (row) => (
+                    <CurrentVersionCell lastVersion={(row as Connection).lastVersion ?? null} />
+                ),
             },
         },
     ],
