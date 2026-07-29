@@ -58,8 +58,8 @@ public class Connector {
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_on", updatable = false)
-    private Date createdOn;
+    @Column(name = "created_at", updatable = false)
+    private Date createdAt;
 
     @LastModifiedBy
     @Column(name = "modified_by")
@@ -67,8 +67,8 @@ public class Connector {
 
     @UpdateTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "modified_on")
-    private Date modifiedOn;
+    @Column(name = "modified_at")
+    private Date modifiedAt;
 
     @Column(name = "icon")
     private String icon;
@@ -136,12 +136,12 @@ public class Connector {
         this.createdBy = createdBy;
     }
 
-    public Date getCreatedOn() {
-        return createdOn;
+    public Date getCreatedAt() {
+        return createdAt;
     }
 
-    public void setCreatedOn(Date createdOn) {
-        this.createdOn = createdOn;
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
 
     public Integer getModifiedBy() {
@@ -152,12 +152,12 @@ public class Connector {
         this.modifiedBy = modifiedBy;
     }
 
-    public Date getModifiedOn() {
-        return modifiedOn;
+    public Date getModifiedAt() {
+        return modifiedAt;
     }
 
-    public void setModifiedOn(Date modifiedOn) {
-        this.modifiedOn = modifiedOn;
+    public void setModifiedAt(Date modifiedAt) {
+        this.modifiedAt = modifiedAt;
     }
 
     public String getIcon() {

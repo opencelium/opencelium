@@ -40,6 +40,10 @@ public class ConnectorResource {
     private String lastTestError;
     // Epoch millis of the most recent health check; null = never checked.
     private Long lastCheckedAt;
+    // ID of the user who modified the connector last.
+    private Integer modifiedBy;
+    // Timestamp of the last modification, in epoch millis.
+    private Long modifiedAt;
 
     public int getConnectorId() {
         return connectorId;
@@ -127,5 +131,21 @@ public class ConnectorResource {
 
     public void setLastTestError(String lastTestError) {
         this.lastTestError = lastTestError;
+    }
+
+    public Integer getModifiedBy() {
+        return modifiedBy;
+    }
+
+    public void setModifiedBy(Integer modifiedBy) {
+        this.modifiedBy = modifiedBy;
+    }
+
+    public Long getModifiedAt() {
+        return modifiedAt;
+    }
+
+    public void setModifiedAt(Long modifiedAt) {
+        this.modifiedAt = modifiedAt;
     }
 }
