@@ -243,8 +243,8 @@ opencelium:
   ###########################################################################
   connector-health:
     enabled: true
-    interval: 300000
-    initial-delay: 60000
+    interval: 60000
+    initial-delay: 10000
     failure-threshold: 3
     parallelism: 4
     request-logging:
