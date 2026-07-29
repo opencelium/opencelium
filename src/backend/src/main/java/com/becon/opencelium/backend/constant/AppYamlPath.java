@@ -71,4 +71,11 @@ public interface AppYamlPath {
 
     // How many connectors are checked concurrently by the monitor. Default: 4
     String CONNECTOR_HEALTH_PARALLELISM = "opencelium.connector-health.parallelism";
+
+    // Log every health-check request and its response (method, endpoint template,
+    // HTTP status, latency, truncated response body) at INFO level. Default: false
+    String CONNECTOR_HEALTH_LOG_ENABLED = "opencelium.connector-health.request-logging.enabled";
+
+    // Maximum number of response-body characters included in one log line. Default: 500
+    String CONNECTOR_HEALTH_LOG_MAX_BODY_LENGTH = "opencelium.connector-health.request-logging.max-body-length";
 }

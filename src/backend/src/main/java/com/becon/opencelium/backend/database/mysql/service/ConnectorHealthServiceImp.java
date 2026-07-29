@@ -49,6 +49,8 @@ public class ConnectorHealthServiceImp implements ConnectorHealthService {
     private final InvokerService invokerService;
     private final ConnectorStatusListener statusListener;
     private final int failureThreshold;
+    private final boolean requestLoggingEnabled;
+    private final int logMaxBodyLength;
 
     /** In-memory flap-damping state per connector id, lazily seeded from the persisted status. */
     private final ConcurrentHashMap<Integer, HealthState> states = new ConcurrentHashMap<>();
@@ -57,12 +59,16 @@ public class ConnectorHealthServiceImp implements ConnectorHealthService {
             @Qualifier("connectorServiceImp") ConnectorService connectorService,
             @Qualifier("invokerServiceImp") InvokerService invokerService,
             ObjectProvider<ConnectorStatusListener> statusListenerProvider,
-            @Value("${" + AppYamlPath.CONNECTOR_HEALTH_FAILURE_THRESHOLD + ":3}") int failureThreshold
+            @Value("${" + AppYamlPath.CONNECTOR_HEALTH_FAILURE_THRESHOLD + ":3}") int failureThreshold,
+            @Value("${" + AppYamlPath.CONNECTOR_HEALTH_LOG_ENABLED + ":false}") boolean requestLoggingEnabled,
+            @Value("${" + AppYamlPath.CONNECTOR_HEALTH_LOG_MAX_BODY_LENGTH + ":500}") int logMaxBodyLength
     ) {
         this.connectorService = connectorService;
         this.invokerService = invokerService;
         this.statusListener = statusListenerProvider.getIfAvailable(() -> (connector, status, result) -> { });
         this.failureThreshold = failureThreshold;
+        this.requestLoggingEnabled = requestLoggingEnabled;
+        this.logMaxBodyLength = logMaxBodyLength;
     }
 
     @Override
@@ -73,8 +79,10 @@ public class ConnectorHealthServiceImp implements ConnectorHealthService {
             responseEntity = connectorService.checkCommunication(connector);
         } catch (Exception ex) {
             log.debug("Health check request failed for connector '{}'", connector.getTitle(), ex);
-            return new CheckResult(
+            CheckResult failed = new CheckResult(
                     ConnectorStatus.DOWN, ex.getMessage(), elapsedMs(startNanos), new Date(), null);
+            logCheck(connector, failed, null);
+            return failed;
         }
         long latencyMs = elapsedMs(startNanos);
 
@@ -108,7 +116,51 @@ public class ConnectorHealthServiceImp implements ConnectorHealthService {
         } else {
             status = ConnectorStatus.UP;
         }
-        return new CheckResult(status, error, latencyMs, new Date(), responseEntity.getStatusCode());
+        CheckResult result = new CheckResult(status, error, latencyMs, new Date(), responseEntity.getStatusCode());
+        logCheck(connector, result, responseEntity.getBody());
+        return result;
+    }
+
+    /**
+     * Logs one health-check request/response pair at INFO when
+     * {@code opencelium.connector-health.request-logging.enabled} is on. The endpoint is
+     * logged as the invoker's template (placeholders unresolved) on purpose, so
+     * credentials injected into the URL or query string never reach the log. The
+     * response body is truncated to the configured maximum.
+     */
+    private void logCheck(Connector connector, CheckResult result, Object responseBody) {
+        if (!requestLoggingEnabled) {
+            return;
+        }
+        String method = "?";
+        String endpoint = "?";
+        try {
+            FunctionInvoker testFunction = invokerService.getTestFunction(connector.getInvoker());
+            method = testFunction.getRequest().getMethod();
+            endpoint = testFunction.getRequest().getEndpoint();
+        } catch (Exception ignored) {
+            // Unknown or incomplete invoker — the log line still carries the outcome.
+        }
+        String payload = responseBody != null ? String.valueOf(responseBody) : result.error();
+        log.info("Health check: connector='{}' (id={}), request={} {}, outcome={}, http={}, latency={}ms, response={}",
+                connector.getTitle(),
+                connector.getId(),
+                method,
+                endpoint,
+                result.status(),
+                result.httpStatus() == null ? "-" : result.httpStatus(),
+                result.latencyMs(),
+                truncate(payload));
+    }
+
+    private String truncate(String value) {
+        if (value == null) {
+            return "-";
+        }
+        if (value.length() <= logMaxBodyLength) {
+            return value;
+        }
+        return value.substring(0, logMaxBodyLength) + "... (truncated)";
     }
 
     @Override

@@ -83,7 +83,7 @@ class ConnectorHealthServiceImpTest {
     void setUp() {
         when(statusListenerProvider.getIfAvailable(any())).thenReturn(statusListener);
         service = new ConnectorHealthServiceImp(
-                connectorService, invokerService, statusListenerProvider, FAILURE_THRESHOLD);
+                connectorService, invokerService, statusListenerProvider, FAILURE_THRESHOLD, false, 500);
         connector = new Connector();
         connector.setId(7);
         connector.setTitle("jira");
@@ -253,7 +253,7 @@ class ConnectorHealthServiceImpTest {
     @Test
     void runCheckTreatsClassificationErrorAsDown() throws Exception {
         ConnectorHealthServiceImp impatientService = new ConnectorHealthServiceImp(
-                connectorService, invokerService, statusListenerProvider, 1);
+                connectorService, invokerService, statusListenerProvider, 1, false, 500);
         connector.setStatus(ConnectorStatus.UP);
         doReturn(ResponseEntity.ok("{}")).when(connectorService).checkCommunication(connector);
         when(invokerService.getTestFunction("Jira")).thenThrow(new RuntimeException("Invoker not found"));

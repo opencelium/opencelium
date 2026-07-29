@@ -236,6 +236,9 @@ opencelium:
   #                       status transitions to DOWN/AUTH_FAILED            #
   #                       (flap damping); recovery needs a single success   #
   #   parallelism       — how many connectors are checked concurrently      #
+  #   request-logging   — INFO-log each check's request (method + endpoint  #
+  #                       template, never resolved credentials) and its     #
+  #                       response (status, latency, truncated body)        #
   #                                                                         #
   ###########################################################################
   connector-health:
@@ -244,6 +247,9 @@ opencelium:
     initial-delay: 60000
     failure-threshold: 3
     parallelism: 4
+    request-logging:
+      enabled: false
+      max-body-length: 500
   ###########################################################################
   #                                                                         #
   #   Is customizable                                                       #

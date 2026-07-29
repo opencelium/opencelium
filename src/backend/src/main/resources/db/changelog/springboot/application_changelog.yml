@@ -264,3 +264,11 @@ versions:
         operation: add
         value: 4
         path: opencelium.connector-health.parallelism
+      - changeset: 13
+        operation: add
+        value: false
+        path: opencelium.connector-health.request-logging.enabled
+      - changeset: 14
+        operation: add
+        value: 500
+        path: opencelium.connector-health.request-logging.max-body-length
