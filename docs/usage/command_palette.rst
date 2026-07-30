@@ -59,6 +59,10 @@ The general shape is::
 
    <verb> <entity> [by <field> <value>]
 
+.. image:: ../img/command/OC5_command_palette.png
+   :align: center
+   :width: 700
+
 .. list-table::
    :header-rows: 1
    :widths: 14 40 46
@@ -235,6 +239,10 @@ The command reference
 palette*. The dialog is generated from the live command tree, so it always
 matches the commands your installation and your permissions actually offer. It
 has its own search field and lists the palette's keyboard shortcuts.
+
+.. image:: ../img/command/OC5_command_reference.png
+   :align: center
+   :width: 900
 
 This is the authoritative list for your installation; the tables above describe a
 default 5.0 setup.

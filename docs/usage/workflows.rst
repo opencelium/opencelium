@@ -108,6 +108,10 @@ Per row you can:
 Select several rows via their checkboxes to enable the bulk actions (for example
 **Delete Selected**).
 
+.. image:: ../img/workflow/OC5_workflow-list.png
+   :align: center
+   :width: 1000
+
 The search field above the list filters by title and description. Titles must be
 unique; the check runs before an add or an update is performed and also when you
 rename a workflow inside the editor.
@@ -132,16 +136,23 @@ from a category bar above the workflow list — see
 Workflow Editor
 """""""""""""""
 
-Opening or creating a workflow leads to the workflow editor, which fills the
-whole window (no application header). It has four areas:
+Opening or creating a workflow leads to the workflow editor. It replaces the
+application header with its own, while the navigation sidebar stays where it is.
+The editor itself has four areas:
 
 * the **header** with title, description, actions and the command palette,
 * the **canvas** in the middle, holding the workflow graph,
-* the **sidebar**, which slides in when you add a step,
-* the **logs panel** at the bottom, used by the test run.
+* the **step drawer**, which slides in from the right when you add a step (not
+  to be confused with the application's navigation sidebar on the left),
+* the **Execution Logs** panel at the bottom, collapsed until a test run
+  produces output.
 
 The editor is reached at ``/workflow/create`` and ``/workflow/update/<id>``.
 Press ``Alt+W`` anywhere in the application to create a new workflow.
+
+.. image:: ../img/workflow/OC5_workflow-editor.png
+   :align: center
+   :width: 800
 
 Header
 ======
@@ -183,6 +194,10 @@ Next to them you find:
      * - Exit
        - Leaves the editor.
 
+.. image:: ../img/workflow/OC5_workflow-header-menu.png
+   :align: center
+   :width: 500
+
 If you leave the editor with unsaved changes — by closing the tab, reloading, or
 navigating inside the application — a confirmation dialog appears.
 
@@ -219,6 +234,10 @@ define the order of execution.
 
 Deleting a step asks for confirmation, because every step nested inside it is
 removed as well.
+
+.. image:: ../img/workflow/OC5_workflow-shortcuts.png
+   :align: center
+   :width: 620
 
 Node types and badges
 =====================
@@ -294,6 +313,10 @@ The search field at the top searches across connectors, operators and methods at
 once. Empty states tell you explicitly when nothing matched, and load errors
 suggest checking the backend connection.
 
+.. image:: ../img/workflow/OC5_add-step-sidebar.png
+   :align: center
+   :width: 1000
+
 Configuring a step
 """"""""""""""""""
 
@@ -308,6 +331,10 @@ menu offers:
   steps.
 * **Request → Edit URL / Edit Header / Edit Body**
 * **Show Response** – opens the response definition (body, header, status).
+
+.. image:: ../img/workflow/OC5_node-context-menu.png
+   :align: center
+   :width: 620
 
 Request URL
 ===========
@@ -346,6 +373,10 @@ Three body formats are supported:
      none is configured, set ``opencelium.connector.master-password`` in
      ``application.yml`` and restart the backend — or use the
      :ref:`System Configuration <admin_panel-system_config>` page.
+
+.. image:: ../img/workflow/OC5_body-dialog.png
+   :align: center
+   :width: 1000
 
 References and Enhancements
 """""""""""""""""""""""""""
@@ -511,6 +542,10 @@ Every side of a condition takes its value from one of three sources:
 * **Method** – the response of an earlier step, as *Body*, *Header* or
   *Status*,
 * **Webhook** – a webhook parameter.
+
+.. image:: ../img/workflow/OC5_condition-builder.png
+   :align: center
+   :width: 1000
 
 Loop operators
 ==============
@@ -1084,6 +1119,10 @@ creates a schedule scoped to this workflow.
 
 The full schedule management is described in :doc:`schedules`.
 
+.. image:: ../img/workflow/OC5_schedules-drawer.png
+   :align: center
+   :width: 1000
+
 .. _usage-workflow-history:
 
 Version History
@@ -1102,6 +1141,10 @@ Saving opens the **Save Version** dialog for a comment. Renaming the workflow or
 changing its description saves automatically with a generated comment
 (*Changing Workflow Name to …*) and skips the dialog.
 
+.. image:: ../img/workflow/OC5_version-history.png
+   :align: center
+   :width: 1000
+
 .. _usage-workflow-templates:
 
 Workflow Templates
@@ -1115,6 +1158,10 @@ new workflows quickly. Templates are managed under
 * **Load Template** – replaces the current graph with the template.
 * **Download as Template** / **Upload Template** – exchange templates between
   environments as JSON files. The Load Template dialog has an upload button.
+
+.. image:: ../img/workflow/OC5_load-template.png
+   :align: center
+   :width: 700
 
 .. warning::
    Loading a template replaces all current workflow changes. If the workflow
