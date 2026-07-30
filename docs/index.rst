@@ -1,8 +1,14 @@
-##################
+###################################
 Welcome to OpenCelium documentation
-##################
+###################################
 
-This documentation is organized into a couple of sections:
+This documentation covers OpenCelium 5.0 and is organized into a couple of
+sections.
+
+.. note::
+   5.0 renamed *Connections* to **Workflows** and lifted the two-connector
+   limit. If you are updating from 4.x, start with
+   :doc:`gettinginvolved/updating`, then read :ref:`usage-workflow-model`.
 
 .. toctree::
    :caption: Getting Started
@@ -18,10 +24,12 @@ This documentation is organized into a couple of sections:
    :caption: Usage Guide
    :maxdepth: 2
 
+   usage/dashboard
    usage/login
    usage/application_management
+   usage/command_palette
    usage/connectors
-   usage/connections
+   usage/workflows
    usage/schedules
    usage/admin
 
@@ -62,6 +70,7 @@ This documentation is organized into a couple of sections:
    :caption: REST API
 
    api/overview
+   api/changes_5_0
 
 ##################
 License

@@ -4,63 +4,57 @@
 Data Aggregator
 ###############
 
+A **data aggregator** is a script that collects and transforms data across the
+calls of a workflow, so the result can be used in a notification after the
+workflow has been triggered (this happens in *Schedules*).
 
-*Aggregator* is a feature that provides a possibility to notify a user after the
-triggered connection (this happens in *Schedules*).
+Managing aggregators
+""""""""""""""""""""
 
-**You, as an admin, want to manage aggregator in the OpenCelium.**
+Open the admin menu and go to **Configurations → Data Aggregator**. The list
+shows the *name*, the *arguments* and the *archived* status of each aggregator.
 
-Please, open the *Admin Panel* and click on *Data Aggregator*. It will show you
-the list of aggregators: *name, *arguments* and *archived* status.
+The archived status marks aggregators that should be disabled and invisible in
+the rest of the system. Click the status to switch it, and use the switcher above
+the list to show archived aggregators.
 
-|data_aggregator_list|
+Creating an aggregator
+""""""""""""""""""""""
 
-The archive status means what aggregators should be disabled and invisible in the system.
-You can switch it clicking on the status. If you want to see the archived aggregators then
-toggle the switcher.
+Aggregators are created on the **Data Aggregator** page, from the command palette
+with ``create data-aggregator``, or directly from a workflow — the *Configure
+Aggregator* dialog has a **Create new** button.
 
-|data_aggregator_archive_switcher|
+The wizard has two steps:
 
-**You, as an admin, want to create an aggregator in the OpenCelium.**
+* **General Data** – the *name* and the *arguments*. The arguments are what you
+  reference later in the notification template.
+* **Script** – the aggregation logic. Assign the accumulated value to the
+  arguments here. The editor offers autocomplete.
 
-You can create an aggregator inside of the *Admin Panel*/*Data Aggregator* or directly in
-*Connections* menu. Click on *Add Aggregator*. Here, you need to provide a *name*, *arguments* and the *script*.
-*Arguments* are used inside of the notification it self. You should assign to them an accumulated
-value inside of the script section.
+Using an aggregator
+"""""""""""""""""""
 
-|data_aggregator_form|
+**1. Assign it to a workflow step.** Open the workflow and either
 
-**You, as an admin, want to use an aggregator in the OpenCelium.**
+* right-click the step and choose **Configure Aggregator**, or
+* click the step's aggregator badge, which opens the same dialog.
 
-First of all, you need to apply the aggregator to the method. Please, open the needed connection and apply aggregator
-to the method. You can do it in two ways: setting *Methods* inside of the data aggregator form
+In the dialog you select an existing aggregator or create a new one. A step with
+an aggregator shows a badge whose tooltip reads *Combines results from multiple
+calls using the "<name>" data aggregator*.
 
-|data_aggregator_methods|
+.. note::
+   **Unassigning** an aggregator from a step only removes it from that step. The
+   aggregator entry itself is kept and stays available for other steps.
 
-or after selecting a method inside of the *Details* panel.
+**2. Reference its arguments in the notification template.** Go to
+**Configurations → Notification Templates** and place the aggregator's arguments
+into the *body* — the template form lets you click an argument to insert it.
 
-Second thing, go to the *Notification Template* and bring aggregator's *arguments* inside of the *body*.
+**3. Create the notification.** Go to **Schedules**, open the *Notifications*
+action of the schedule and create a notification with the **post** event type.
 
-|notification_template_form|
-
-The last step, go the *Schedules* and create a notification with a *post* event type.
-
-|schedule_notification_add_form|
-
-
-.. |data_aggregator_form| image:: ../img/data_aggregator/form.png
-   :align: middle
-.. |data_aggregator_list| image:: ../img/data_aggregator/list.png
-   :align: middle
-.. |data_aggregator_methods| image:: ../img/data_aggregator/methods.png
-   :align: middle
-   :width: 400
-.. |data_aggregator_archive_switcher| image:: ../img/data_aggregator/archive_switcher.png
-   :width: 120
-   :align: middle
-.. |schedule_notification_add_form| image:: ../img/data_aggregator/schedule_notification_add_form.png
-   :width: 400
-   :align: middle
-.. |notification_template_form| image:: ../img/management/notification_templates/form.png
-   :align: middle
-
+.. note::
+   A data aggregator only takes effect for **post** notifications. The
+   notification dialog states this as a hint.

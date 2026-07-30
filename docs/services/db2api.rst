@@ -24,7 +24,8 @@ First of all add a connector to your target csv file.
 
 |image0|
 
-After that you can use it in a connection. Add a DBQuery process to start a request.
+After that you can use it in a workflow. Add a DBQuery step via *Use Connector*
+to start a request.
 
 |image1|
 

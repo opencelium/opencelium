@@ -76,7 +76,8 @@ First of all add a connector to your db.
 
 |image0|
 
-After that you can use it in a connection. Add a GetDataSources process to make a request to retrieve data from csv.
+After that you can use it in a workflow. Add a GetDataSources step via
+*Use Connector* to make a request that retrieves data from the csv.
 
 |image1|
 

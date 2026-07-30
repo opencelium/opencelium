@@ -41,7 +41,7 @@ Request
 	}
 
 Get All Connectors
-==========
+==================
 
 .. parsed-literal::
     # Http request

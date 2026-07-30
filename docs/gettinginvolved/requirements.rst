@@ -29,3 +29,19 @@ We recommend using the following setup:
 
 - open frontend 80 / 443 (SSL)
 - open backend 9090
+
+.. note::
+   The hardware and software requirements are unchanged in 5.0 — it still runs on
+   Java 17.
+
+   5.0 does make more use of the WebSocket channel than earlier versions: the
+   workflow test run, the live dashboard metrics and the support-log
+   notifications all depend on it. The backend serves it under ``/ws`` on the
+   same port, so no additional port has to be opened, but a reverse proxy in
+   front of OpenCelium must proxy ``/ws`` with the ``Upgrade`` headers. The
+   shipped ``conf/nginx_default.conf`` already does this.
+
+**Browser:**
+
+- A current version of Chrome, Edge, Firefox or Safari. The frontend is an
+  ES-module build and does not support Internet Explorer.

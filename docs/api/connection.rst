@@ -2,8 +2,22 @@
 Connection
 **********
 
+.. warning::
+   **This page describes a legacy payload structure and is kept for reference
+   only.** The examples below predate several releases — they still show
+   ``startAction``/``nextAction``, ``enhanceId``, port 8080 and the Neo4j data
+   store — and they do not reflect the 5.0 model, in which all steps live under a
+   single ``fromConnector`` container and every method carries its own
+   ``connector`` and ``methodType``.
+
+   For current information use, in this order:
+
+   * the generated OpenAPI reference linked from :doc:`index`,
+   * :doc:`changes_5_0` for what changed in 5.0 and the current payload shape,
+   * :doc:`../usage/workflows` for the concepts behind it.
+
 In this section you can find, examples of HTTP requests and responses for
-managing **Connections**
+managing **Connections** (called *Workflows* in the user interface since 5.0).
 
 -----------------------------------------------------------------------------
 
@@ -2054,14 +2068,10 @@ In response you will get enhanceId of each object that was used in json data.
         "path" : "/api/connection/all"
     }
 
-If you look up to the neo4j database you will find visual representation of created data.
-
-.. image:: img/graph.png
-    :align: center
 
 
 Get all Connections
-==================
+===================
 
 .. parsed-literal::
     # Http request to create permission
@@ -2273,9 +2283,13 @@ Response
     }
 
 Check if Connection name already exists in DB.
-=================
+==============================================
 
-When Connection deleted it also delete all his children
+.. note::
+   Since 5.0 the preferred form is ``GET /connection/check?name=<name>``, which
+   takes the name as a query parameter so titles containing spaces, slashes or
+   apostrophes work reliably. The path form shown below still works but is
+   deprecated. See :doc:`changes_5_0`.
 
 .. parsed-literal::
     # Http request

@@ -16,9 +16,20 @@ Copy it to ``application.yml`` and adapt the following blocks:
   credentials created during installation.
 - ``spring.data.mongodb.uri`` – contains ``oc_admin`` credentials and hosts the
   graph database.  Only the URI string needs to change.
-- ``spring.mail`` / ``spring.rabbitmq`` / ``spring.ldap`` – optional third party
-  services.  The LDAP structure mirrors the UI instructions in
-  ``docs_new/management/authentication.rst`` and drives ``SecurityConfiguration``.
+- ``spring.mail`` / ``spring.rabbitmq`` / ``spring.security.ldap`` – optional
+  third party services.  The LDAP structure mirrors the UI instructions in
+  :doc:`../management/authentication` and drives ``SecurityConfiguration``.
+
+  .. note::
+     The LDAP block moved from ``spring.data.ldap`` to ``spring.security.ldap``
+     in 5.0, and its debug switch from
+     ``logging.level.org.springframework.data.ldap`` to
+     ``logging.level.org.springframework.security.ldap``.
+
+- ``spring.jpa.hibernate.ddl-auto`` – note the spelling; earlier default files
+  shipped a typo (``dll-auto``) that silently did nothing.
+- ``spring.web.resources.add-mappings`` – a plain boolean key in 5.0
+  (previously written as ``add-mappings=false:``).
 
 Scheduling & Persistence
 ========================
@@ -45,6 +56,14 @@ The ``opencelium`` section collects platform-specific settings:
 - ``version`` and ``debug_mode`` toggle UI hints and backend logging.
 - ``token`` contains the JWT secret, session activity timeout, and expiration
   window used by ``JwtTokenUtil``.
+- ``config`` (new in 5.0) tells the ``/application-config`` endpoint which file to
+  read and write (``file-path``) and where to keep the pre-write backups
+  (``backup.directory``, ``backup.keep``).
+- ``sweeper.test-connection`` (new in 5.0) controls the background job that
+  removes leftover test connections: ``enabled``, ``fixed-delay`` and
+  ``initial-delay`` in milliseconds.
+- ``connector.master-password`` protects connector credentials and additionally
+  gates the GraphQL schema browser and the System Configuration page.
 - ``notification.tools`` configures webhook URLs used when schedules trigger
   external systems.
 - ``installation.type`` differentiates ``sources`` vs packaged setups (used by
@@ -54,17 +73,42 @@ The ``opencelium`` section collects platform-specific settings:
 - Optional ``rest_template.proxy`` values supply the proxy credentials consumed
   by ``ExecutionObjectServiceImp`` when building runtime requests.
 
+Editing application.yml from the UI
+===================================
+Since 5.0 the whole file can be edited under **License & System →
+Configurations**, backed by ``GET``/``PATCH /application-config``. The editor
+preserves the inline comments of ``application_default.yml``, comments sections
+in and out with a cascading enable/disable, masks secrets, and writes a backup
+before every change. A restart is still required.
+See :ref:`admin_panel-system_config`.
+
 Frontend Runtime Configuration
 ==============================
-The React app reads two layers of configuration before rendering:
+The SPA is built with Vite and reads a single runtime file, ``config.json``,
+served next to ``index.html``. ``src/main.tsx`` awaits ``loadRuntimeConfig()``
+before rendering, so ``runtimeConfig.apiUrl`` and ``runtimeConfig.socketUrl`` are
+resolved before the first request is fired.
 
-1. ``src/frontend/src/scripts/config.js`` exposes ``window.config.env.urlInfo``
-   with default ports for API (9090), socket (8082), Kibana (5601), and the
-   development server.  Override this file when bundling custom appliances.
-2. ``/settings.json`` (fetched by ``App.tsx`` during bootstrap) can override the
-   protocol, hostname, exposed ports, and backend path prefix.  When present it
-   sets ``Urls.baseUrl``, ``Urls.baseUrlApi``, ``Urls.socketServer``, and
-   ``Urls.kibanaUrl`` that drive every request helper and the STOMP socket.
+.. code-block:: json
+
+   {
+     "server": { "protocol": "", "hostname": "", "port": "", "prefix": "/api" },
+     "socket": { "protocol": "", "hostname": "", "port": "", "prefix": "/ws" }
+   }
+
+Empty ``protocol``/``hostname`` mean "same origin as the frontend". Because the
+file is read at runtime, endpoints can be changed in a deployed installation
+without rebuilding.
+
+- ``public/config.json`` holds the **development** defaults (direct ``:9090``,
+  no prefix).
+- ``scripts/write-production-config.cjs`` runs as the last step of
+  ``npm run build`` and overwrites ``dist/config.json`` with the reverse-proxy
+  values (``/api``, ``/ws``) that production deployments need.
+
+.. note::
+   ``settings.json`` and ``window.config.env.urlInfo`` of earlier versions are no
+   longer used.
 
 Secrets & Certificates
 ======================
