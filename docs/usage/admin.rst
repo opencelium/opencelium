@@ -216,9 +216,14 @@ Categories
 """"""""""
 
 **Configurations → Categories** organises and groups workflows and schedules.
-Categories can be nested — select a parent category to create a hierarchy.
-Changes propagate immediately to the category filters of :doc:`workflows`,
-:doc:`schedules` and the dashboard.
+Categories can be nested — select a parent category to create a hierarchy. A
+workflow carries its category on the workflow itself (``categoryId``); this page
+is where the taxonomy is created, renamed and deleted.
+
+.. note::
+   In 5.0 categories are curated here only. The category bar that earlier
+   versions showed above the workflow and schedule lists is not part of the
+   rebuilt lists.
 
 .. warning::
     Deleting a category recursively removes all subcategories and the workflows

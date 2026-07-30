@@ -48,10 +48,12 @@ The status legend is:
 * **Last run failed**,
 * **No cron and no run history**.
 
-The search field filters by workflow name. Above the list you find the
-categories; they are defined on the :ref:`Categories page
-<admin_panel-categories>` and cannot be edited here, but all schedules can be
-filtered by the category of their workflow.
+The search field filters by workflow name.
+
+.. note::
+   Categories are maintained on the :ref:`Categories page
+   <admin_panel-categories>`. The category bar that earlier versions showed above
+   the schedule list is not part of the rebuilt list.
 
 Parallel executions
 ===================
