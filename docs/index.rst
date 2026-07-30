@@ -1,82 +1,74 @@
-###################################
-Welcome to OpenCelium documentation
-###################################
+######################
+OpenCelium 5.0
+######################
 
-This documentation covers OpenCelium 5.0 and is organized into a couple of
-sections.
+OpenCelium is an integration platform: you connect APIs, move and enrich data
+between them, and control the whole flow from a browser.
 
-.. note::
-   5.0 renamed *Connections* to **Workflows** and lifted the two-connector
-   limit. If you are updating from 4.x, start with
-   :doc:`gettinginvolved/updating`, then read :ref:`usage-workflow-model`.
+This documentation is organised by what you are trying to do.
+
+**New here?** Start with :doc:`start/introduction` for the ideas, then
+:doc:`start/first-workflow` builds a working integration end to end.
+
+**Upgrading from 4.x?** Read :doc:`start/upgrade-to-5` first — workflows replaced
+connections, and two ``application.yml`` keys moved.
+
+**Looking for how to do one specific thing?** The :doc:`guides/index` are
+task-oriented recipes.
+
+**Need exact values, fields or endpoints?** See :doc:`reference/index`.
+
+**Running the server?** See :doc:`operations/index`.
 
 .. toctree::
-   :caption: Getting Started
+   :caption: Get started
    :maxdepth: 2
 
-   gettinginvolved/introduction
-   gettinginvolved/requirements
-   gettinginvolved/installation
-   gettinginvolved/updating
-   gettinginvolved/administration
+   start/index
 
 .. toctree::
-   :caption: Usage Guide
+   :caption: Concepts
    :maxdepth: 2
 
-   usage/dashboard
-   usage/login
-   usage/application_management
-   usage/command_palette
-   usage/connectors
-   usage/workflows
-   usage/schedules
-   usage/admin
+   concepts/index
 
 .. toctree::
-   :caption: Management Reference
+   :caption: How-to guides
    :maxdepth: 2
 
-   management/authentication
-   management/license_management
-   management/template
-   management/notification_template
-   management/aggregator
-   management/invoker
-   management/smart_sync
+   guides/index
 
 .. toctree::
-   :caption: Services & Tools
+   :caption: Reference
    :maxdepth: 2
 
-   services/db2api
-   services/csv2api
-   tools/idoit
-   tools/otrs
+   reference/index
 
 .. toctree::
-   :caption: Media & Sources
+   :caption: Operations
    :maxdepth: 2
 
-    Website <https://opencelium.io>
-    Service Portal (only for subscribers) <https://service.opencelium.io>
-    Video Tutorials <https://www.youtube.com/playlist?list=PLh_5t7kd2fySIqh6XxCB94lGXvU5lXbQ4>
-    Webinars <https://www.youtube.com/playlist?list=PLh_5t7kd2fyScueyWSRhOn16acRFEBmgO>
-    Download <https://packagecloud.io/becon/opencelium/>
-    Repository <https://github.com/opencelium/opencelium/>
-    Changelog <https://github.com/opencelium/opencelium/blob/prod/CHANGELOG.rst>
+   operations/index
 
 .. toctree::
-   :caption: REST API
+   :caption: Integrations
+   :maxdepth: 2
 
-   api/overview
-   api/changes_5_0
+   integrations/index
 
-##################
-License
-##################
+.. toctree::
+   :caption: About
+   :maxdepth: 1
 
-`OpenCelium`_ © 2020-2026 OpenCelium GmbH
+   about/index
 
-.. _OpenCelium: LICENSE.html
-      
+.. toctree::
+   :caption: Elsewhere
+   :maxdepth: 1
+
+   Website <https://opencelium.io>
+   Service Portal (subscribers) <https://service.opencelium.io>
+   Video tutorials <https://www.youtube.com/playlist?list=PLh_5t7kd2fySIqh6XxCB94lGXvU5lXbQ4>
+   Webinars <https://www.youtube.com/playlist?list=PLh_5t7kd2fyScueyWSRhOn16acRFEBmgO>
+   Downloads <https://packagecloud.io/becon/opencelium/>
+   Source <https://github.com/opencelium/opencelium/>
