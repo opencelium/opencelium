@@ -92,6 +92,14 @@ The user wizard has three steps:
 .. note::
    The user who is currently signed in cannot be deleted.
 
+.. image:: ../img/admin5/OC5_user-list.png
+   :align: center
+   :width: 1000
+
+.. image:: ../img/admin5/OC5_user-wizard.png
+   :align: center
+   :width: 1000
+
 Groups
 """"""
 
@@ -106,6 +114,10 @@ The wizard has two steps:
 * **Permissions** – first select the components this group should have access
   to, then tick the permissions per component. At least one component
   permission is required. The *admin* column ticks all permissions of a row.
+
+.. image:: ../img/admin5/OC5_role-list.png
+   :align: center
+   :width: 1000
 
 The available components are:
 
@@ -141,6 +153,10 @@ LDAP Check
 you test it. It has two steps: **Configurations**, which displays the values
 currently in effect, and **Logs**, which shows the result of the test.
 
+.. image:: ../img/admin5/OC5_ldap-check.png
+   :align: center
+   :width: 1000
+
 LDAP itself is configured in ``application.yml``. In 5.0 the section moved from
 ``spring.data.ldap`` to ``spring.security.ldap``, and the debug switch moved
 accordingly — see :ref:`getting_started-administration-ldap`.
@@ -160,6 +176,10 @@ archive, from the list or from the command palette
 
 :ref:`Here <management-invoker>` you can read how to manage invokers in detail.
 
+.. image:: ../img/admin5/OC5_invoker-list.png
+   :align: center
+   :width: 1000
+
 Workflow Templates
 """"""""""""""""""
 
@@ -171,6 +191,10 @@ Templates are created and applied from the workflow editor; see
 :ref:`usage-workflow-templates` for saving, loading, and mapping a template's
 connectors onto the connectors of the current environment.
 :ref:`Here <management-business_template>` you can read how to manage them.
+
+.. image:: ../img/admin5/OC5_workflow-template-list.png
+   :align: center
+   :width: 1000
 
 .. _admin_panel-data_aggregator:
 
@@ -186,6 +210,10 @@ Aggregators are assigned to a workflow step via *Configure Aggregator* in the
 node context menu or by clicking the node's aggregator badge; a step that has one
 shows *Combines results from multiple calls using the "<name>" data aggregator*.
 :ref:`Here <management-data_aggregator>` you can read how to manage them.
+
+.. image:: ../img/admin5/OC5_data-aggregator-list.png
+   :align: center
+   :width: 1000
 
 .. note::
    In schedule notifications, a data aggregator only takes effect for the
@@ -210,6 +238,10 @@ write subject and body; aggregator arguments insert dynamic values.
 :ref:`Here <management-notification_template>` you can read how to manage
 notification templates.
 
+.. image:: ../img/admin5/OC5_notification-template-list.png
+   :align: center
+   :width: 1000
+
 .. _admin_panel-categories:
 
 Categories
@@ -228,6 +260,10 @@ is where the taxonomy is created, renamed and deleted.
 .. warning::
     Deleting a category recursively removes all subcategories and the workflows
     assigned to them.
+
+.. image:: ../img/admin5/OC5_category-list.png
+   :align: center
+   :width: 1000
 
 Support Files
 """""""""""""
@@ -251,6 +287,10 @@ All files follow the same layout
 which makes the screen a quick way to correlate a support ticket with the
 matching execution ID.
 
+.. image:: ../img/admin5/OC5_support-file-list.png
+   :align: center
+   :width: 1000
+
 Support files are also created on demand from the schedule list — with
 selectable masking levels — see :ref:`scheduler_support_logs`.
 
@@ -268,6 +308,10 @@ frontend to contact the Service Portal. The embedded detail view traces API
 usage back to specific workflows when you debug an overage.
 
 The command palette shortcut is ``check license``.
+
+.. image:: ../img/admin5/OC5_license.png
+   :align: center
+   :width: 1000
 
 .. _admin_panel-update_assistant:
 
@@ -294,6 +338,10 @@ is found in the package cloud, it is announced here. The page has three steps:
 .. note::
    The page moved from ``/update_assistant`` to ``/update-assistant``. The old
    URL still redirects, so existing bookmarks keep working.
+
+.. image:: ../img/admin5/OC5_update-assistant.png
+   :align: center
+   :width: 1000
 
 To follow the update in the log, see
 :ref:`Logging <getting_started-administration-logging>`.
@@ -330,6 +378,10 @@ of the external services OpenCelium integrates with. It replaces the
 Each row reports a status — **Operational**, **Down**, or **Unknown** — plus an
 info and an error column, so a failing component names its own reason.
 
+.. image:: ../img/admin5/OC5_system-check.png
+   :align: center
+   :width: 1000
+
 The command palette shortcut is ``system check``.
 
 .. _admin_panel-system_config:
@@ -365,6 +417,10 @@ How it works
   fold the tree.
 * **Reset** discards your edits and reloads the configuration from the server.
 
+.. image:: ../img/admin5/OC5_system-config-tree.png
+   :align: center
+   :width: 1000
+
 Every write is backed up first. The backup location and retention are
 themselves configured in ``application.yml``:
 
@@ -399,3 +455,7 @@ The top-level **UI** entry (``/ui/config``) holds the appearance settings of the
 application, most notably the **theme**. The palette equivalent is ``ui theme``.
 Themes are applied per user, and all pages — including published log and
 dashboard views — follow the selected light or dark theme.
+
+.. image:: ../img/admin5/OC5_ui-config.png
+   :align: center
+   :width: 1000

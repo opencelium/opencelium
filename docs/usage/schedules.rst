@@ -48,6 +48,10 @@ The status legend is:
 * **Last run failed**,
 * **No cron and no run history**.
 
+.. image:: ../img/schedule/OC5_schedule-list.png
+   :align: center
+   :width: 1000
+
 The search field filters by workflow name.
 
 .. note::
@@ -221,6 +225,10 @@ configure the notification once, and it is created for every selected schedule.
 The result message reports how many schedules it was created for, and names how
 many failed if some did.
 
+.. image:: ../img/schedule/OC5_schedule-notifications.png
+   :align: center
+   :width: 1000
+
 .. _scheduler_execution_log:
 
 Execution Logs
@@ -253,12 +261,18 @@ or scheduled job. Older logs exceeding the limits are removed automatically.
    Logs are only created when they are activated for the respective job — the
    toggle in the **Debug** column must be on.
 
-The entries in **Last Success** and **Last Fail** give direct access to the
-corresponding logs: click the job number to open it in the log viewer. The three
-dots give access to the logs of earlier jobs, if configured.
+The **Last Success** and **Last Fail** cells show the timestamp of the run and a
+**see logs** link underneath it. The link opens the **Execution Logs** dialog,
+which first asks you to *pick an execution to inspect its connector, method and
+operator logs* — the retained runs of that schedule are offered in a drop-down.
+Choosing one renders its log tree; the dialog can be maximised for more room.
 
 The viewer is the :ref:`UI log viewer <connection_ui_logger>` also used for the
 test run.
+
+.. image:: ../img/schedule/OC5_execution-log-tree.png
+   :align: center
+   :width: 1000
 
 .. _scheduler_support_logs:
 

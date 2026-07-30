@@ -65,6 +65,10 @@ the live metrics socket.
 together with their failure rate. It is backed by
 ``GET /widget/top-workflows?limit=5``.
 
+.. image:: ../img/dashboard/OC5_dashboard.png
+   :align: center
+   :width: 1000
+
 .. note::
    Three further cards — **Attention required**, **Recent activity** and
    **System health** — are already laid out but marked *Coming soon*. They are

@@ -13,6 +13,10 @@ for your e-mail address and your password; the e-mail address serves as the
 username. The eye icon in the password field toggles between showing and hiding
 what you type.
 
+.. image:: ../img/login/OC5_login.png
+   :align: center
+   :width: 420
+
 The default admin user has the following credentials:
 
    * **login:** admin@opencelium.io
@@ -39,6 +43,10 @@ Forgot password
 New in 5.0: **Forgot password?** on the login page leads to a form where you
 enter the e-mail address of your account. OpenCelium then sends you an e-mail
 with a link to reset your password.
+
+.. image:: ../img/login/OC5_forgot_password.png
+   :align: center
+   :width: 420
 
 .. note::
    Password reset needs a working mail server. If none is configured, the page
