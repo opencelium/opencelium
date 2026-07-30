@@ -2,8 +2,8 @@
 Usage Guide
 ###########
 
-Here you can find compehensive walkthroughs for the most imprtant topics (login,
-connectors, connections, schedules, etc.)
+Here you can find comprehensive walkthroughs for the most important topics
+(login, connectors, workflows, schedules, etc.)
 
 .. toctree::
    :maxdepth: 2
@@ -11,7 +11,8 @@ connectors, connections, schedules, etc.)
    dashboard
    login
    application_management
+   command_palette
    connectors
-   connections
+   workflows
    schedules
    admin

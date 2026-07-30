@@ -1,129 +1,150 @@
-﻿######################
+######################
 Application Management
 ######################
 
 .. contents::
    :local:
 
-OpenCelium presents a unified interface across every module, so once you
-learn the navigation, the patterns repeat everywhere.
+OpenCelium presents a unified interface across every module, so once you learn
+the navigation the patterns repeat everywhere. 5.0 rebuilt the frontend on Ant
+Design, with a unified iconography and a consistent list/wizard structure.
 
-Navigation
-==========
+Layout
+======
 
-The left-hand menu shows icon-only shortcuts by default. Hover over the
-rail (or click the burger icon |burger_icon|) to expand it and reveal
-labels. Administrative items expose sub-menus that can be expanded or
-collapsed individually.
+The application shell consists of:
 
-|menu|
+* the **sidebar** on the left with the navigation,
+* the **top bar** with the command palette and the global actions,
+* the **content area**, and
+* a **subscription alert** strip above the content when the license needs
+  attention.
 
-Top Bar & Global Search
-=======================
+Sidebar
+=======
 
-Every page shares the same top bar:
+The sidebar can be collapsed to icons and expanded again with the toggle at its
+top; the tooltip states which action the button performs. Groups in the admin
+menu expand and collapse individually.
 
-- **Global search** – typing part of a connector, connection, or schedule
-  title sends a query to ``/search/{title}`` and displays grouped
-  results. Selecting one navigates directly to that module and pre-fills
-  the search filter.
-- **Notification bell** – opens the notification drawer regardless of
-  where you are in the app.
-- **Profile avatar** – opens the profile page so you can adjust personal
-  settings (see :ref:`usage-my_profile`).
+There are **two menus**:
 
-Notification Panel
-==================
+* the **main menu** – Dashboard, Connectors, Workflows, Schedules,
+* the **admin menu** – Users & Access, Configurations, License & System, UI.
 
-Actions such as create, update, and delete always produce a toast. Each
-toast is also added to the notification panel, which records the type
-(info, warning, error), timestamp, and message. Use the chevron icon to
-expand long messages, click entity links to jump to the affected record,
-or clear individual/all entries with the trash buttons.
+Switch between them with the menu switcher or with ``Alt+M``. The last page you
+visited in a menu is restored when you switch back to it. Every leaf entry is a
+real link, so ``Ctrl``/``⌘``/middle-click opens it in a new browser tab.
 
-|notification_panel|
+At the bottom of the sidebar you find **Sign Out**, which asks for confirmation.
 
-List & Grid Views
-=================
+Menu entries are filtered by permissions: an entry whose component you cannot
+read is hidden entirely. Missing ``CREATE``/``UPDATE``/``DELETE`` permissions
+only hide those specific actions.
 
-Data-heavy modules offer both table and card layouts. In table view you
-can:
+Top bar
+=======
 
-- Sort by clicking the title column |title_sort_icon|.
-- Inline-edit names and descriptions (Connections, Connectors, Schedules)
-  by double-clicking the value |connector_inline_name_update|.
-- Select multiple rows for bulk actions.
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
 
-|list_view|
+   * - Element
+     - Description
+   * - **Create Workflow**
+     - Jumps straight into a new workflow. Shortcut ``Alt+W``.
+   * - **Command palette**
+     - The central input. Type a command instead of navigating; see
+       :doc:`command_palette`. Shortcut ``Ctrl+K`` / ``⌘+K``.
+   * - **Language**
+     - Toggles the interface between English and German.
+   * - **Menu switcher**
+     - Switches between the main and the admin menu (``Alt+M``).
+   * - **Profile**
+     - Opens the profile dialog. Only shown with ``MYPROFILE`` read permission.
 
-Switch to the grid view |grid_icon| to see cards with icons. You can
-upload a new icon directly from the grid |upload_image_icon|. Both
-layout modes honor pagination |paginator| and the universal search box.
+.. note::
+   The global search field of earlier versions has been replaced by the command
+   palette, which searches entities, commands and the open workflow.
 
-|grid_view|
+Messages and errors
+===================
 
-Add/Update Forms
-================
+Actions such as create, update and delete produce a toast. Errors are reported
+with the specific backend message where one exists — for example
+``CONNECTOR_NOT_FOUND`` when saving a workflow whose connector was deleted, or
+``CONCURRENT_TEST_IS_FORBIDDEN`` when a schedule is already running — instead of
+a generic failure. Toast lifetimes are per-message, so longer explanations stay
+readable.
 
-Entry creation flows all follow the same pattern: click **Add
-<Element>**, complete each form section, and submit. Validation only runs
-when the section is submitted, so required fields stay highlighted until
-they are filled.
+Long-running background work reports over the WebSocket. Creating support logs,
+for instance, first confirms that collection started and later notifies you that
+the file is ready.
 
-|form_section|
+Screens are wrapped in scoped **error boundaries**. If one card or panel throws,
+it shows a recoverable fallback and the rest of the page keeps working.
 
-Some sections are conditional—for example, a subsection might only
-appear after you choose a connector. This ensures dependencies are met
-before additional options are shown.
+If a request is answered with ``401`` or ``403``, you are signed out
+automatically, open dialogs are closed, and the route is remembered so you
+return to it after signing in again.
+
+A themed **404** page is shown for unknown routes inside the application shell.
+
+Lists
+=====
+
+Data-heavy modules use one list engine, so they behave identically:
+
+- a title and an explanatory subtitle at the top,
+- a search field, whose placeholder names the fields it searches,
+- sortable columns, some with percentage-based widths,
+- per-row **view / update / delete** icons, each with a tooltip,
+- row checkboxes that enable the bulk actions of the list,
+- expandable **sub-rows** where a row has detail (for example the running
+  executions of a schedule).
+
+Destructive actions ask for confirmation. The confirm dialog focuses **Cancel**
+by default and shows a loading state while the request runs, so a slow delete
+cannot be triggered twice.
+
+Wizards
+=======
+
+Create, update and view all use the same wizard:
+
+- steps with their own header and subtitle,
+- validation per step, so required fields stay highlighted until filled,
+- conditional sections — for example, credential fields appear only after an
+  invoker is chosen,
+- step actions such as *Test connection*, which can gate the submit and ask you
+  to confirm when the remote call failed,
+- ``Ctrl+Enter`` to advance or submit, shown as a tooltip on Next/Submit,
+- a success screen with recommended follow-up actions.
+
+Wizards opened from the workflow editor's command palette skip the
+recommendations, so you stay in your editing flow.
 
 .. _usage-my_profile:
 
-Profile & Theme Sync
-====================
+Profile
+=======
 
-The profile page stores personal details and two platform-wide toggles:
+The profile dialog has three sections:
 
-- **Theme** – select a theme to apply it immediately; the choice is saved
-  with your account.
-- **Online Service Sync** – when enabled, OpenCelium loads a Service
-  Portal iframe to synchronize avatars (Gravatar), custom themes, and
-  online license activation (see :doc:`../management/license_management`).
+- **User Details** – title, name, surname, department, organization, phone
+  number, e-mail.
+- **Update Password** – current password plus a new password that must contain an
+  uppercase letter, a lowercase letter, a number and a special character, and be
+  repeated identically.
+- **Permissions** – the permissions your group grants you.
 
-Both settings update the backend via the user-detail API, so your
-account must have permission to edit itself.
+.. warning::
+   Changing your password logs you out immediately; the dialog says so before
+   you save.
 
-Dashboard Overview
-==================
+Theme
+=====
 
-The :doc:`dashboard` follows the same layout conventions described here
-but adds draggable widgets. Use the pencil icon to enter edit mode,
-drag/drop or remove widgets, and save. Widget preferences are stored per
-user through the ``/widget`` and ``/widget_setting`` endpoints, so your
-layout persists across browsers.
-
-
-.. |bell| image:: ../img/management/bell.png
-.. |burger_icon| image:: ../img/management/burger_icon.png
-.. |form_section| image:: ../img/management/form_section.png
-   :align: middle
-.. |grid_icon| image:: ../img/management/grid_icon.png
-.. |connector_inline_name_update| image:: ../img/management/connector_inline_name_update.png
-   :align: middle
-   :width: 400
-.. |grid_view| image:: ../img/management/grid_view.png
-   :align: middle
-.. |list_view| image:: ../img/management/list_view.png
-   :align: middle
-.. |menu| image:: ../img/management/menu.png
-   :align: middle
-.. |more_multiple_actions| image:: ../img/management/more_multiple_actions.png
-   :align: middle
-.. |notification| image:: ../img/management/notification.png
-   :align: middle
-.. |notification_alert| image:: ../img/management/notification_alert.png
-   :align: middle
-.. |notification_panel| image:: ../img/management/notification_panel.png
-   :align: middle
-.. |paginator| image:: ../img/management/paginator.png
-.. |title_sort_icon| image:: ../img/management/title_sort_icon.png
-.. |upload_image_icon| image:: ../img/management/upload_image_icon.png
+The theme is switched from the top bar and on the **UI** page, and it is stored
+with your account. Both light and dark themes are supported throughout,
+including the workflow canvas, dialogs and the log viewer.

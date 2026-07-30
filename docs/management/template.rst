@@ -1,91 +1,113 @@
 .. _management-business_template:
 
-#################
-Business Template
-#################
+##################
+Workflow Templates
+##################
 
-Business Templates can be managed both from UI and from server directly. Let us consider the next use cases.
+A **workflow template** is a stored workflow configuration that is reused to
+create new workflows quickly. Templates were called *business templates* before
+5.0; the admin screen is now **Configurations → Workflow Templates** and the
+command-palette name is ``workflow-template``.
 
-**You, as a user, want to have a template in the OpenCelium.**
+Templates can be managed from the UI and directly on the server. Let us consider
+the use cases.
 
-That can happen in several ways: Add Template or Import Template. To add a template you go firstly in *Add Connection*
-form. After selecting connectors and adding at lease one method the *Add Template* button will be enabled.
+Getting a template into OpenCelium
+""""""""""""""""""""""""""""""""""
 
-Provide a name, a short description and click on the *Ok* button.
+**From the workflow editor.** Open the workflow you want to keep, then choose
+**Save as Template** in the header menu and provide a name. Everything the
+workflow contains — all steps with their connectors, operators, references and
+enhancements — is stored with it.
 
-|add_template_dialog|
+Since 5.0 each method in a template also carries the **name of its invoker**
+(``methods[i].connector.invoker``). That is what makes a template portable
+between environments, where connector IDs mean nothing.
 
-To import an existing template from UI go to the *Admin* page and open the *Templates* item. There you will see
-an *+ Import* button. Click on it and upload your template (*json* format). Clicking on *OK* your template will be imported.
+**By upload.** Go to **Configurations → Workflow Templates** and upload a
+template file in ``json`` format. The same upload is available:
 
-|import_template_dialog|
+* from the **Load Template** dialog in the workflow editor, and
+* from the command palette with ``upload workflow-template``.
 
-There is also an opportunity to import a template via server. Go to the root folder and find there *src/main/resources/templates* folder.
+Templates can also be uploaded as a ZIP archive containing several files.
 
-|template_backend_placement|
+**Via the server.** Copy the ``json`` file into
 
-Copy your template and paste it in this folder. The templated will be catched by the system automatically.
+.. code-block::
 
-**You, as a user, want to download the template from OpenCelium.**
+   src/backend/src/main/resources/templates
 
-Go to the *Admin* page and click on the *Templates* card. Here you see all existing templates.
-Each template has its correspondence *Download* icon. Click on it to get the template in *json* format |download_icon|.
+The file is picked up by the system automatically.
 
-**You, as a user, want to use the template in OpenCelium.**
+Downloading a template
+""""""""""""""""""""""
 
-The template itself we need during the adding of connection. Go to *Connection* page and press on *+ Add* button.
-Provide required information and go further clicking on the arrow. Now you should see two choices of mode:
-*Expert* and *Template*.
+Templates are downloaded as ``json``:
 
-|choose_mode_form|
+* from **Configurations → Workflow Templates** with the download icon of a row,
+* from the workflow list with **Download as template** on a row,
+* from the workflow editor header menu with **Download as Template** (enabled
+  once the workflow has been saved),
+* from **Version History**, to download one specific version as a template,
+* from the command palette with
+  ``download workflow-template by templateId <id>`` or
+  ``download workflow-template by name <name>``.
 
-Clicking on the *Template* the system loads all existing templates to the corresponded connectors.
+Using a template
+""""""""""""""""
 
-|choose_template|
+Open the workflow editor and choose **Load Template** from the header menu, then
+select the template. Its short description is shown before you apply it.
 
-Selecting one of it you will see its short description.
+.. warning::
+   Loading a template replaces all current changes in the editor. If the
+   workflow already has a title and a description, you are asked whether those
+   should be replaced too; they are applied silently only when both are still
+   empty.
 
-|selected_template|
+.. note::
+   The *Expert* / *Template* mode choice of the old connection wizard no longer
+   exists. In 5.0 you always start from the editor and load a template into it
+   if you want one.
 
-Click on the arrow again to use the template.
+Mapping the template's connectors
+=================================
 
-**You, as a user, want to upgrade the template in OpenCelium.**
+A template created in another environment references connectors that do not
+exist here. In that case the **Map template connectors** dialog opens and asks
+which connector of *this* environment each one should use. For every entry it
+shows the invoker hint and the methods that use that connector, and it lets you
+create a missing connector on the spot.
 
-Starting from OpenCelium 1.3 version, there is a changed structure inside on the template. It means,
-to use the older templates in a new version, you need to upgrade them. There are two ways to perform that.
-First, you can go to the *Templates* page using *Admin*, as it is described above. There you can upgrade one
-specific template clicking on the icon |list_upgrade_icon| or pressing on the *Convert All* button to convert all
-templates to the latest version.
+Upgrading a template
+""""""""""""""""""""
 
-Second option is to convert the template directly when you use it in *Connections*. If the template has older
-version it will be disabled and with conversion icon |list_upgrade_icon| clicking on it, you will convert the template.
+The internal structure of templates has changed several times across versions.
+Older templates are converted so they can still be used:
 
-**You, as a user, want to change the template in OpenCelium.**
+* On the **Workflow Templates** page you can upgrade a single template with its
+  convert icon, or convert all of them at once.
+* When a template of an older version is offered in the editor, it is marked
+  with the conversion icon; converting it makes it usable.
 
-There is no way to change the template via UI for now, but you can change it directly on the server in
-*src/main/resources/templates* folder in *json* file. But strongly recommended to not do it! Slightly
-wrong changes in the file (json syntax, logic error) or saving with the incorrect encoding brings you
-to the error on the *Add Connection* page. We recommend you to create a new template as it is described above.
+For 5.0 the conversion to the new multi-connector layout happens **on the read
+path, in memory** — the stored template file is not rewritten until it is saved
+again. See :ref:`usage-workflow-migration`.
 
-**You, as a user, want to delete the template from OpenCelium.**
+Changing a template
+"""""""""""""""""""
 
-The template can be for sure deleted. You can find the deletion in two places: *Admin/Templates*
-or *Connections/Add*. The first place shows you a list of all templates and a corresponded *Delete*
-functionality for each template. The second deletion is on the second form section of adding connection,
-when you choose the *Template Mode*.
+There is no way to edit a template's content in the UI. You can change the
+``json`` file on the server in ``src/backend/src/main/resources/templates``, but
+this is strongly discouraged: a small mistake (JSON syntax, a logic error, the
+wrong encoding) breaks loading the template in the editor. Prefer loading the
+template, editing the workflow, and saving it as a new template.
 
+Deleting a template
+"""""""""""""""""""
 
-.. |add_template_dialog| image:: ../img/management/templates/add_template_dialog.png
-   :align: middle
-.. |import_template_dialog| image:: ../img/management/templates/import_template_dialog.png
-   :align: middle
-.. |template_backend_placement| image:: ../img/management/templates/template_backend_placement.png
-   :align: middle
-.. |download_icon| image:: ../img/management/templates/download_icon.png
-.. |choose_mode_form| image:: ../img/management/templates/choose_mode_form.png
-   :align: middle
-.. |choose_template| image:: ../img/management/templates/choose_template.png
-   :align: middle
-.. |selected_template| image:: ../img/management/templates/selected_template.png
-   :align: middle
-.. |list_upgrade_icon| image:: ../img/management/templates/list_upgrade_icon.png
+Templates are deleted on the **Configurations → Workflow Templates** page, with
+the delete action of a row or as a bulk action for several selected rows. The
+command palette offers ``delete workflow-template by templateId <id>`` and
+``delete workflow-template by name <name>``.
