@@ -115,10 +115,15 @@ rename a workflow inside the editor.
 Categories
 ==========
 
-Categories group workflows and schedules and can be nested. In 5.0 categories
-are maintained on their own admin page (**Configurations → Categories**), not
-inside the workflow list — see :ref:`admin_panel-categories`. The category
-filter itself is still available above the list.
+Categories group workflows and schedules and can be nested. In 5.0 they are
+maintained on their own admin page, **Configurations → Categories**, rather than
+from a category bar above the workflow list — see
+:ref:`admin_panel-categories`.
+
+.. note::
+   The workflow list itself filters by *title* and *description* through its
+   search field. The in-list category browser of earlier versions is not part of
+   the rebuilt list.
 
 .. warning::
     Deleting a category recursively removes all subcategories and the assigned
