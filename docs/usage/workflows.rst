@@ -411,31 +411,41 @@ Supported languages
 Repository of the engine:
 `opencelium/polyglot-engine <https://github.com/opencelium/polyglot-engine>`_
 
-The engine must be reachable by the core. It is configured in the ``polyglot``
-section of ``application.yml``:
+The engine must be reachable by the core. It is configured in the
+``opencelium.polyglot`` section of ``application.yml``:
 
 .. code-block:: yaml
 
-   polyglot:
-     # Enables or disables the polyglot service integration. Default: false
-     enabled: false
-     # Communication protocol. Supported: grpc (default), http (future)
-     protocol: grpc
-     host: '127.0.0.1'
-     port: 6566
-     # Automatically start the polyglot service JAR if it is not running.
-     auto-start: false
-     launch:
-       # Path to the polyglot service JAR. Required only if auto-start is true.
-       jarPath:
-       args:
-       waitTimeoutSec: 30
-       jvmArgs: '-Xms64m -Xmx256m'
-       external-log-enabled: false
+   opencelium:
+     polyglot:
+       # Enables or disables the polyglot service integration. Default: false
+       enabled: false
+       # Communication protocol. Supported: grpc (default), http (future)
+       protocol: grpc
+       host: '127.0.0.1'
+       port: 6566
+       # Automatically start the polyglot service JAR if it is not running.
+       auto-start: false
+       launch:
+         # Path to the polyglot service JAR. Required only if auto-start is true.
+         jarPath:
+         args:
+         waitTimeoutSec: 30
+         jvmArgs: '-Xms64m -Xmx256m'
+         external-log-enabled: false
 
-While ``polyglot.enabled`` is ``false``, enhancements run internally with the
-JavaScript engine. If the service is enabled but unreachable, execution falls
-back to JavaScript-only mode.
+.. warning::
+   The block belongs **under** ``opencelium:``, not at the top level of the file
+   — the backend binds it from the prefix ``opencelium.polyglot``. A top-level
+   ``polyglot:`` block is silently ignored, and enhancements keep running on the
+   internal JavaScript engine with no error to explain why.
+
+While ``opencelium.polyglot.enabled`` is ``false``, enhancements run internally
+with the JavaScript engine. If the service is enabled but unreachable, execution
+falls back to JavaScript-only mode.
+
+Whether the engine is reachable is reported on the
+:ref:`System Check <admin_panel-system_check>` page as the **Polyglot** row.
 
 Webhooks in a workflow
 """"""""""""""""""""""
