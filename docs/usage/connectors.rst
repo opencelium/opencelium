@@ -22,6 +22,14 @@ tooltip.
 Viewing a connector shows the description of the connector itself and the
 information about its invoker: title, description, hint and operations.
 
+.. image:: ../img/connector/OC5_connector-list.png
+   :align: center
+   :width: 1000
+
+.. image:: ../img/connector/OC5_connector-wizard.png
+   :align: center
+   :width: 1000
+
 Creating and updating a connector
 """""""""""""""""""""""""""""""""
 

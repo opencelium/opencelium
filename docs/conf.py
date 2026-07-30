@@ -20,7 +20,7 @@ source_suffix = ['.rst','.md']
 copyright = str(datetime.now().year)
 version = 'latest'
 release = 'latest'
-exclude_patterns = ['_build']
+exclude_patterns = ['_build', '_tools']
 htmlhelp_basename = 'openceliumapi'
 
 html_static_path = ['_static']
