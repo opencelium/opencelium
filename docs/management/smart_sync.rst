@@ -38,26 +38,42 @@ The OpenCelium Service Portal is a SaaS platform available for subscription user
 Configuration
 ==================
 
-The synchronization behavior can be configured in the backend settings (`application.yml`):
+The synchronization behavior can be configured in the backend settings
+(`application.yml`), under ``opencelium``:
 
 .. code-block:: yaml
 
-   online-services:
-     invoker-sync:
-       # Cron expression for automatic invoker sync
-       time: 0 0 0 * * *
-       # Enable or disable automatic invoker sync
-       active: "false"
-     template-sync:
-       # Cron expression for automatic template sync
-       time: 0 0 0 * * *
-       # Enable or disable automatic template sync
-       active: "false"
-     # Master switch for the online services
-     active: "false"
+   opencelium:
+     online-services:
+       invoker-sync:
+         # Cron expression for automatic invoker sync
+         time: 0 0 0 * * *
+         # Enable or disable automatic invoker sync
+         active: false
+       template-sync:
+         # Cron expression for automatic template sync
+         time: 0 0 0 * * *
+         # Enable or disable automatic template sync
+         active: false
+       # Master switch for the online services
+       active: false
+
+The section can also be edited from the UI under
+:ref:`License & System → Configurations <admin_panel-system_config>`.
 
 **Notes:**
 
-- The `time` field uses standard cron syntax to define automatic sync schedules.  
-- The `active` flags control whether the sync is enabled for invokers, templates, or both.  
-- If the master `online-services.active` is set to `"false"`, all online syncing is disabled regardless of the individual flags.
+- The `time` field uses standard cron syntax to define automatic sync schedules.
+- The `active` flags control whether the sync is enabled for invokers, templates, or both.
+- If the master `online-services.active` is set to `false`, all online syncing is disabled regardless of the individual flags.
+
+.. note::
+   In 5.0 the ``active`` flags are plain booleans (``false``). Earlier versions
+   wrote them as quoted strings (``"false"``); if you carry an old
+   ``application.yml`` over, drop the quotes.
+
+.. note::
+   Synchronised templates are **workflow templates**; see
+   :ref:`management-business_template`. Templates coming from the Service Portal
+   are converted to the current structure on read, so templates built for older
+   versions remain usable.

@@ -4,120 +4,119 @@ Connectors
 
 .. contents::
    :local:
-   
-Connector is a core component in OpenCelium. It is a system to which we
-will send requests and get responses. They can be different throw
-different protocols: HTTP, JSON-RPC, SOAP, and so on. Currently, HTTP
-and JSON-RPC are available. Connector uses invokers. Invoker is a
-special file filled in with instructions.
 
-Each item of the connector's list displays a title and an icon. The grid
-view provides also description and invoker name.
+A connector is a core component of OpenCelium. It represents an external or
+internal system to which requests are sent and from which responses are
+received. Connectors can use different protocols — HTTP, JSON-RPC, SOAP and so
+on; currently HTTP and JSON-RPC are available. A connector always uses an
+**invoker**, the file that describes the system's authentication and operations.
 
-|image0|
+Connector List
+""""""""""""""
 
-Viewing the connector you can read a description of the connector itself
-and information about invoker to which it was assigned, like: title,
-description, hint, and operations.
+Each row displays the connector's title, its icon, the description and the
+invoker it was assigned to. The search field filters the list, the columns are
+sortable, and the per-row actions are *view*, *update* and *delete*, each with a
+tooltip.
 
-|image1|
+Viewing a connector shows the description of the connector itself and the
+information about its invoker: title, description, hint and operations.
 
-The *title* you can change directly inline double clicking on its text.
+Creating and updating a connector
+"""""""""""""""""""""""""""""""""
 
-|image6|
+The wizard has two steps.
 
-Adding/Updating connector consists of two steps: general data and
-credentials. General data step has four input fields: *title*,
-*description*, *invoker*, *invoker description*, *timeout*, *ssl certificate* and *icon*.
-The *title* and *invoker* are required fields. The *timeout* is a
-timeout for connection; has a default value equals to 1000.
-The *ssl certificate* flag enables/disables the secure protocol; disabled as a default.
+**General Data** defines the basic configuration:
 
-|image2|
+.. list-table::
+   :header-rows: 1
+   :widths: 25 75
 
-Credentials step has several input fields. We need this step to set up a
-connection to the system that describes invoker. A type of field
-depends on the chosen invoker. Different invokers have different
-authentication systems, that are described inside of the invoker. All
-fields usually are required. If the invoker has a *password* field, you
-can click on the checkbox on the right to see what you are typing
-instead of asterix. Before adding/updating you test the connection. If
-it was completed successfully you can finish the process.
+   * - Field
+     - Description
+   * - **Title**
+     - Required. Checked for uniqueness.
+   * - **Description**
+     - Free text.
+   * - **Invoker**
+     - Required. Determines which credential fields the next step shows.
+   * - **Invoker description**
+     - Shown read-only for the selected invoker.
+   * - **Timeout**
+     - Connection timeout, default ``1000``.
+   * - **SSL certificate**
+     - Enables or disables the secure protocol. Disabled by default.
+   * - **Icon**
+     - An image for the connector.
 
-|image3|
+When you update a connector, the icon field offers a **radio choice** instead of
+a delete checkbox: *leave the current icon*, *delete it*, or *set a new one*.
+Icons have their own endpoints in 5.0 (``POST``/``DELETE /connector/{id}/icon``).
 
-After filling all data you can test your credential data pressing on the
-*Test* button. If it is failed, you will be notified.
+**Credentials** contains the invoker-specific fields required to authenticate
+and communicate with the target system. Which fields appear, and whether they
+are mandatory, comes from the invoker. Password fields have a visibility toggle.
 
-|image4|
+Testing the connection
+======================
 
-After adding a connector you will be redirected to the list. You can also
-press on *Add & Go to Add Connection*, if you want to be redirected to the
-create connection page. The adding can be easily canceled and drive you
-to the list pressing on the *cancel* button.
+Use **Test connection** in the credentials step before you submit. If the test
+fails you are notified, and the wizard asks you to confirm explicitly before
+saving anyway — so a failing connector is never stored by accident.
 
-|image5|
+Connectors are also health-checked from the workflow editor: the method sidebar
+and the connector nodes show a live status dot per connector. See
+:ref:`usage-workflow` for the meaning of the colours.
+
+Required data
+=============
+
+A connector's required data can be updated on its own
+(``PUT /connector/{id}/required-data``) without going through the whole wizard.
+The credentials step shows a hint about this, and fields that the invoker marks
+as disabled are shown as such.
+
+.. note::
+   Validation of the credentials is only enforced when a master password is
+   configured. See below.
 
 Master Password
-"""""""""""""""""
+"""""""""""""""
 
-The *Master Password* is a function for protecting the credentials of a connector.
-Normally, the information for authentication to an API is stored in the respective
-connection and can be viewed.
+The *Master Password* protects the credentials of a connector. Normally the
+authentication information of an API is stored with the connector and can be
+viewed by anyone who may read it.
 
-To protect this sensitive data, it is possible to activate the master password. This
-means that the credentials are only visible once the corresponding password has been
-entered.
+With the master password active, credentials are only revealed after the password
+has been entered.
 
-|image_master_password_1|
-
-To activate the function, you must make an entry in the *application.yml* and set
-the desired password. 
-
-Open the *application.yml* that can be found under the following path:
+To enable it, set the password in ``application.yml``. Either edit the file
+directly:
 
 .. code-block::
 
    /opt/opencelium/src/backend/src/main/resources/application.yml
-
-Add the following entry underneath *opencelium*
 
 .. code-block::
 
    opencelium:
       [...]
       connector:
-         master-password {YOURPASSWORD}
- 
-Save the file and restart the backend.
+         master-password: {YOURPASSWORD}
 
-After restarting and logging in again, the function is active. Enter the password you
-have set. After confirmation, the credentials are displayed.
+…or use the :ref:`System Configuration <admin_panel-system_config>` page, which
+edits the same file from the UI.
 
-|image_master_password_2|
+Save and restart the backend. After restarting and logging in again the function
+is active; enter the password to display the credentials.
 
 .. note::
-   If the master password has been entered, the credentials of all connectors are displayed
-   until the browser is closed again.
+   Once the master password has been entered, the credentials of all connectors
+   are displayed until the browser is closed again.
 
-
-.. |image0| image:: ../img/connector/0.png
-   :align: middle
-.. |image1| image:: ../img/connector/1.png
-.. |image2| image:: ../img/connector/2.png
-   :align: middle
-.. |image3| image:: ../img/connector/3.png
-   :align: middle
-.. |image4| image:: ../img/connector/4.png
-   :align: middle
-.. |image5| image:: ../img/connector/5.png
-   :align: middle
-.. |image6| image:: ../img/connector/6.png
-   :align: middle
-   :width: 400
-.. |image_master_password_1| image:: ../img/connector/OC_master_password_1.png
-   :align: middle
-   :width: 400
-.. |image_master_password_2| image:: ../img/connector/OC_master_password_2.png
-   :align: middle
-   :width: 400
+.. note::
+   The master password only accepts ASCII characters. It also gates two 5.0
+   features that read connector configuration: browsing a connector's GraphQL
+   schema in the workflow editor, and the
+   :ref:`System Configuration <admin_panel-system_config>` page.

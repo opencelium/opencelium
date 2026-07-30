@@ -6,7 +6,9 @@ Starting from v4.2 OpenCelium has license management. The license limits the amo
 of API requests in schedules. When user installs the application, automatically it has
 Free License with 10.000 API calls per month. If you update the OpenCelium from the
 previous version, then you do not have any license and it should be activated on the
-License Management page. You can find it in *Admin Panel*.
+License Management page. You can find it in the admin menu under
+**License & System → License Management**, or reach it from the command palette
+with ``check license``.
 
 |image1|
 
@@ -14,12 +16,12 @@ This page provide you such information like *status*, *expiration date*, *curren
 amount*.
 
 The *Detail View* section is used to track the activity of API requests in terms of the number of operations executed
-between different services. You can see a list of connections that was triggered by schedule.
+between different services. You can see a list of workflows that were triggered by a schedule.
 *API Operations* column shows the summarized number of API operations has performed.
 
 |image5|
 
-Clicking on the corresponded connection, you can see the history of each execution: its time and
+Clicking on the corresponded workflow, you can see the history of each execution: its time and
 number of calls.
 
 |image6|

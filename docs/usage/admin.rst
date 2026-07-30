@@ -1,367 +1,396 @@
 ##################
-Admin Panel
+Administration
 ##################
 
 .. contents::
    :local:
 
-The admin panel can be accessed via the gear symbol or the “Admin”
-menu item in the left-hand navigation. If the menu is expanded, you
-also have direct access to the most important tools. Clicking on the
-three dots at the bottom of the list opens the admin panel with all
-the tools.
+Navigation
+""""""""""
 
-|image_user_0|
+5.0 replaced the admin panel of earlier versions with a second, structured
+**admin menu** in the left-hand sidebar. Switch between the main menu
+(Dashboard, Connectors, Workflows, Schedules) and the admin menu with the
+switcher at the top of the sidebar or with ``Alt+M``. When you switch back, the
+last page you visited in that menu is restored.
 
-Admin Panel includes necessary tools for working with OpenCelium.
-There are:
+The admin menu is grouped:
 
-   * Users
-   * Groups
-   * LDAP check
-   * Support Files
-   * Licence Management
-   * Invokers
-   * Templates
-   * Data Aggregator
-   * Notification Templates
-   * Update Assistant
-   * External Applications
-   * Migration
-   * Categories
+.. list-table::
+   :header-rows: 1
+   :widths: 25 75
+
+   * - Group
+     - Entries
+   * - **Users & Access**
+     - Users, Groups, LDAP Check
+   * - **Configurations**
+     - Invokers, Workflow Templates, Data Aggregator, Notification Templates,
+       Categories, Support Files
+   * - **License & System**
+     - License Management, Update Assistant, System Check, Configurations
+   * - *(top level)*
+     - UI
+
+Menu entries are filtered by your permissions: an entry whose backend component
+you may not read is not shown at all. Missing ``CREATE``/``UPDATE``/``DELETE``
+permissions only hide the corresponding actions, not the entry.
+
+Every leaf entry is a real link, so ``Ctrl``/``⌘``/middle-click opens it in a
+new browser tab.
+
+.. note::
+   The **External Applications** and the **Migration from 3.x to 4.x** cards of
+   earlier versions no longer exist. Component health is now reported by
+   :ref:`admin_panel-system_check`; the Neo4j migration was retired with the
+   4.x line.
+
+Lists and wizards
+"""""""""""""""""
+
+All administration screens follow the same two patterns in 5.0.
+
+**Lists** have a title, an explanatory subtitle, a search field, sortable
+columns and per-row *view / update / delete* icons with tooltips. Selecting rows
+via their checkboxes enables the bulk actions of that list.
+
+**Wizards** are used for create, update and view. They walk through named steps,
+each with its own header and subtitle, and end on a success screen that
+recommends sensible follow-up actions. ``Ctrl+Enter`` advances to the next step
+or submits the wizard; the Next/Submit button shows this as a tooltip. Steps that
+talk to a remote system (for example the connector's *Test connection*) let you
+confirm before submitting when the remote call failed.
 
 Users
-"""""""""""""""""
+"""""
 
-The “Users” panel contains all users who have access to OpenCelium and
-shows all the necessary details and authorizations. The list shows the
-user's e-mail address and group. Two-factor authentication can also be
-activated for each user. The functions for viewing, editing and deleting
-a user are available on the right-hand side of each list entry. Please
-note that the currently logged in user cannot be deleted.
+**Users & Access → Users** lists everyone who can access OpenCelium. The list
+shows name, surname, e-mail address, group, and whether two-factor
+authentication is enabled; name and surname are sortable and searchable, the 2FA
+column is narrow and centred.
 
-|image_user_1|
+The user wizard has three steps:
 
-Clicking on a list entry opens the detailed view of the respective user
-in edit mode, which consists of three categories:
+.. list-table::
+   :header-rows: 1
+   :widths: 25 75
 
-   * User Details
-   * Credentials
-   * User Group
+   * - Step
+     - Content
+   * - **User Details**
+     - Basic personal information: title, name, surname, department,
+       organization, phone number and the user image. If no image was uploaded, a
+       placeholder is shown.
+   * - **Credentials**
+     - The login credentials; the e-mail address serves as the username. The
+       e-mail must be valid and at most 255 characters, the password between
+       8 and 64 characters.
+   * - **Role**
+     - The group that defines the permission level and access rights of the
+       user.
 
-The user details contain all important information about a user, such as
-title, name, surname, department, organization and phone number. The user
-image is only shown if the user has uploaded an image. Otherwise a place holder
-is shown instead.
-
-|image_user_2|
-
-The credentials consist of the user's e-mail address and the password 
-fields for setting a password. All three fields are mandatory. If a password
-is set, it must be between 8 and 64 characters long. The e-mail address
-must be valid and a maximum of 255 characters long.
-
-|image_user_3|
-
-The User Group is showing the group the user belongs to. Meaning of the
-user group you can find in the chapter *Groups*.
-
-|image_user_4|
-
-To add a new user, click on the “Add user” button in the user panel. 
-
-|image_user_5|
-
-An empty input mask opens in which all details must be entered. All fields
-marked with an asterisk (*) are mandatory. The e-mail address must be valid
-and must not be longer than 255 characters. The password must be between
-8 and 64 characters long. 
-
-|image_user_6|
-
-Once all details are complete, the user can be added by clicking the “Add” button.
-
-|image_user_7|
+.. note::
+   The user who is currently signed in cannot be deleted.
 
 Groups
-"""""""""""""""""
+""""""
 
-The “Group” panel contains all groups created in OpenCelium. A group or
-user group is a group of users with certain authorizations. The list view
-shows the name of a group, a description and the assigned components for
-which the respective group is authorized.Group or User Group is a set of
-users with defined permissions. The functions for viewing and deleting
-a group are available on the right-hand side of each list entry.
+**Users & Access → Groups** lists all groups. A group defines a role and a
+permission level: it controls what its users may create, read, update and
+delete. The list shows the name, the description and the assigned components.
 
-|image_group_1|
+The wizard has two steps:
 
-Clicking on a list entry opens the detailed view of the respective group
-in view mode, which consists of three categories:
+* **Role Details** – name, description and optionally an icon. The name is
+  mandatory.
+* **Permissions** – first select the components this group should have access
+  to, then tick the permissions per component. At least one component
+  permission is required. The *admin* column ticks all permissions of a row.
 
-   * Group Details
-   * Components
-   * Permissions
+The available components are:
 
-The group details contain name of the group and a brief description.
+.. list-table::
+   :header-rows: 1
+   :widths: 25 75
 
-|image_group_2|
+   * - Component
+     - Covers
+   * - ``APP``
+     - Application-wide administration, including System Configuration.
+   * - ``CONNECTION``
+     - Workflows (the component keeps its previous name).
+   * - ``CONNECTOR``
+     - Connectors.
+   * - ``DASHBOARD``
+     - The dashboard.
+   * - ``INVOKER``
+     - Invokers.
+   * - ``MYPROFILE``
+     - The user's own profile page.
+   * - ``SCHEDULE``
+     - Schedules.
+   * - ``USER``
+     - Users.
+   * - ``USERGROUP``
+     - Groups.
 
-The category with the components shows the different components which have
-been assigned to this group.
+LDAP Check
+""""""""""
 
-|image_group_3|
+**Users & Access → LDAP Check** shows the effective LDAP configuration and lets
+you test it. It has two steps: **Configurations**, which displays the values
+currently in effect, and **Logs**, which shows the result of the test.
 
-The category with the permissions shows the different permissions per component
-a user within this group has. A distinction is made between Create, Read, Write
-and Delete. A plus sign (+) means that the rights for the respective component
-are available, whereas a minus sign (-) indicates that the rights for the component
-have not been assigned.
-
-|image_group_4|
-
-To add a new group, click on the “Add Group" button in the group panel. 
-
-|image_group_5|
-
-An empty input mask opens in which all details must be entered. All fields
-marked with an asterisk (*) are mandatory. Creating a new groups consists of three
-parts: group details, components and permissions.
-
-Please enter a *name* and a *description* for the new group. Additionally, you can upload
-an *icon* for the new group too. The *name* is a mandatory field.
-
-|image_group_6|
-
-Next, you have to select the components which you want to assign to this new group. Open
-the drop down list and select the desired components. In total there are the following
-components available:
-
-   * App
-   * Connection
-   * Connector
-   * Dashboard
-   * Invoker
-   * Myprofile
-   * Schedule
-   * User
-   * Usergroup
-
-|image_group_7|
-
-Every selected component will be listed in a row. Clicking on the "X" removes the
-component again.
-
-|image_group_8|
-
-The section with the permissions shows a table of the permissions related to the previously
-selected components. You have to set the permission for at least one component to get the
-new group created. Please tick the checkboxes in order to define what a user is allowed to do
-with the respective component (create, read, update, or delete). The column admin just checks all
-permissions for the corresponding row.
-
-|image_group_9|
-
-Once all details are complete, the group can be added by clicking the “Add” button.
-
-|image_group_10|
-
-Support Files
-"""""""""""""""""
-
-Every connection execution can archive its request/response payloads as a support
-file.  The Admin → **Support Files** card exposes these bundles so operators can
-download them or clean up disk space.
-
-- The grid lists the **connection title**, the stored **file path**, the
-  detected **timestamp**, and a **status** cell.  A green cell indicates that a
-  success archive (``*_s_*.zip``) exists; a red cell highlights that only a
-  failure archive (``*_f_*.zip``) was created for that run.
-- Click the download icon to fetch the ZIP.  Each archive contains the
-  serialized request/response bodies that were captured during execution, so it
-  can be shared with support without re-running the workflow.
-- Use the trash icon on a row to delete a single archive.  Selecting multiple
-  entries in list view enables the **Delete Selected** action so bulk cleanups
-  can be performed before rotating disks or backing up.
-
-All files follow the same directory layout
-(``/upload-dir/support-files/<connection>/<timestamp>_<status>_<execution>.zip``),
-so the screen is also a quick way to correlate a support ticket with the
-matching execution ID before handing the archive over to engineering.
-
-External Applications
-"""""""""""""""""""""
-
-The applications menu displays a list of software that OpenCelium connected with.
-If they are installed and configured on your machine,
-you can open them clicking on the card and see relations to OC. If not,
-you will see the notification message, that this system is down. Also,
-the corresponded item shows its status: enabled or disabled.
-
-|image_admin_0|
-
-For this moment, there are two items: *MongoDB* and *MariaDB*. "MongoDB" collects all required
-information about connections. *MariaDB* stores the rest data of OpenCelium, like users, groups,
-schedules etc.
+LDAP itself is configured in ``application.yml``. In 5.0 the section moved from
+``spring.data.ldap`` to ``spring.security.ldap``, and the debug switch moved
+accordingly — see :ref:`getting_started-administration-ldap`.
 
 Invokers
-"""""""""""""""""
+""""""""
 
-Invoker is a special configuration file to work with APIs. There you describe the authentication
-part and calls that should be used in *Connection*.
+An invoker is the configuration file that describes how to talk to an API: the
+authentication type, the required data fields, and the HTTP operations that
+connectors of this invoker expose.
 
-|image_admin_2|
+**Configurations → Invokers** lists all configured invokers. The wizard has
+three steps — **General Data**, **Authentication** and **Operations**.
+Invoker files can be uploaded and downloaded as XML, individually or as a ZIP
+archive, from the list or from the command palette
+(``upload invoker``, ``download invoker by name <name>``).
 
-For subscribers there is also a possibility to add and to update actions. 
-:ref:`Here <management-invoker>`, you can read how to manage with them.
+:ref:`Here <management-invoker>` you can read how to manage invokers in detail.
 
-Templates
-"""""""""""""""""
+Workflow Templates
+""""""""""""""""""
 
-These are business templates. In other words, they are connections that are saved as templates for
-often use. :ref:`Here <management-business_template>`, you can read how to manage with them.
+**Configurations → Workflow Templates** holds predefined workflow
+configurations that are reused to create new workflows quickly. They were called
+*Templates* (business templates) before 5.0.
+
+Templates are created and applied from the workflow editor; see
+:ref:`usage-workflow-templates` for saving, loading, and mapping a template's
+connectors onto the connectors of the current environment.
+:ref:`Here <management-business_template>` you can read how to manage them.
 
 .. _admin_panel-data_aggregator:
 
 Data Aggregator
 """""""""""""""
 
-Data Aggregator is a feature that provides a possibility to notify a user after the
-triggered connection (this happens in *Schedules*). :ref:`Here <management-data_aggregator>`, you can read how to manage with them.
+A data aggregator is a script that collects and transforms data for use in
+notification templates after a workflow has been triggered. Its wizard has two
+steps: **General Data** (name and arguments) and **Script** (the aggregation
+logic, with autocomplete in the editor).
+
+Aggregators are assigned to a workflow step via *Configure Aggregator* in the
+node context menu or by clicking the node's aggregator badge; a step that has one
+shows *Combines results from multiple calls using the "<name>" data aggregator*.
+:ref:`Here <management-data_aggregator>` you can read how to manage them.
+
+.. note::
+   In schedule notifications, a data aggregator only takes effect for the
+   **Post** event type.
 
 Notification Templates
-"""""""""""""""""""""""
+""""""""""""""""""""""
 
-Notification Templates are templates that are used in scheduler jobs to notify users for three event
-types: *pre*, *post*, and *alert*.  :ref:`Here <management-notification_template>`, you can read how to manage with them.
+Notification templates define the content and format of the messages the system
+sends from schedules, for the event types *pre*, *post* and *alert*. The wizard
+has **General Data** and **Template Content**, where you pick the aggregator and
+write subject and body; aggregator arguments insert dynamic values.
+
+5.0 ships message payload templates for the common notification channels in
+``src/backend/src/main/resources/notification/``:
+
+* ``default.json`` – plain ``${subject}`` / ``${text}``,
+* ``slack.json`` – a Slack *blocks* payload with a header and a ``mrkdwn``
+  section,
+* ``teams.json`` – a Microsoft Teams adaptive card.
+
+:ref:`Here <management-notification_template>` you can read how to manage
+notification templates.
+
+.. _admin_panel-categories:
+
+Categories
+""""""""""
+
+**Configurations → Categories** organises and groups workflows and schedules.
+Categories can be nested — select a parent category to create a hierarchy.
+Changes propagate immediately to the category filters of :doc:`workflows`,
+:doc:`schedules` and the dashboard.
+
+.. warning::
+    Deleting a category recursively removes all subcategories and the workflows
+    assigned to them.
+
+Support Files
+"""""""""""""
+
+Support files are diagnostic bundles produced by workflow runs.
+**Configurations → Support Files** lists them so you can download a bundle to
+share it with support, or remove ones you no longer need.
+
+* The grid lists the **workflow title**, the stored **file path**, the detected
+  **timestamp** and a **status** cell. A green cell means a success archive
+  (``*_s_*.zip``) exists; a red cell means only a failure archive
+  (``*_f_*.zip``) was created for that run.
+* The download icon fetches the ZIP. Each archive contains the serialized
+  request/response bodies captured during execution, so it can be handed over
+  without re-running the workflow.
+* The trash icon deletes a single archive; selecting several rows enables
+  **Delete Selected**.
+
+All files follow the same layout
+(``/upload-dir/support-files/<connection>/<timestamp>_<status>_<execution>.zip``),
+which makes the screen a quick way to correlate a support ticket with the
+matching execution ID.
+
+Support files are also created on demand from the schedule list — with
+selectable masking levels — see :ref:`scheduler_support_logs`.
 
 License Management
-"""""""""""""""""""
+""""""""""""""""""
 
-The License Management card mirrors the full workflow described in
-:doc:`../management/license_management`. It surfaces the current
-subscription, warns if the API-call quota is exhausted, and exposes
-“Request Activation Request”, “Import License”, and “Activate Online” actions.
-Online activation only appears when the user has enabled **Online
-Service Sync** in their profile (:ref:`usage-my_profile`), because that
-permission allows the frontend to contact the Service Portal. The
-embedded *Detail View* lets you trace API usage back to specific
-connections when debugging overages.
+**License & System → License Management** mirrors the workflow described in
+:doc:`../management/license_management`. It shows the current subscription,
+warns when the API-call quota is exhausted, and exposes *Request Activation
+Request*, *Import License* and *Activate Online*.
+
+Online activation only appears when the user has enabled **Online Service Sync**
+in their profile (:ref:`usage-my_profile`), because that permission allows the
+frontend to contact the Service Portal. The embedded detail view traces API
+usage back to specific workflows when you debug an overage.
+
+The command palette shortcut is ``check license``.
 
 .. _admin_panel-update_assistant:
 
 Update Assistant
-"""""""""""""""""
+""""""""""""""""
 
-The *Update Assistant* helps you to update OpenCelium to newer version. If the system recognizes
-a new version in the package cloud, it shows the message that it is available. The update process
-consists of several steps, let's consider them.
+The **Update Assistant** updates OpenCelium to a newer version. If a new version
+is found in the package cloud, it is announced here. The page has three steps:
 
-The *System Check* tests your machine if everything set up. Also it notifies you to make a backup of the
-system before update.
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
 
-|image_update_assistant_0|
+   * - Step
+     - Content
+   * - **System Check**
+     - Reviews the current health status of all system components and reminds
+       you to back up before updating.
+   * - **Available Updates**
+     - Browse online (package cloud) or offline (uploaded) update packages.
+   * - **Apply Update**
+     - Executes the system update.
 
-| The *Update Assistant* provides two options: 
-| * **Online:** get the new versions via package cloud 
-| * **Offline:** download the version and upload it offline
+.. note::
+   The page moved from ``/update_assistant`` to ``/update-assistant``. The old
+   URL still redirects, so existing bookmarks keep working.
 
-|image_update_assistant_1|
+To follow the update in the log, see
+:ref:`Logging <getting_started-administration-logging>`.
 
-After choosing the right version click on the *Update OC* to finish the procedure. If you want to see logs, please
-read the  :ref:`Logging <getting_started-administration-logging>` paragraph.
+.. _admin_panel-system_check:
 
-.. _admin_panel-migration:
+System Check
+""""""""""""
 
-Migration from 3.x to 4.x
-"""""""""""""""""""""""""
-Since version 4.0, OpenCelium uses MongoDB to store your connection data.
-The *Migration* tool helps you to migrate your data from Neo4j to MongoDB,
-in case of updating from an old OpenCelium version to 4.x.
-The migration has to be done as last step after updating OpenCelium application.
+New in 5.0. **License & System → System Check** displays the status and health
+of the external services OpenCelium integrates with. It replaces the
+*External Applications* card.
 
-Enter predefined Neo4j Url, User and Password.
-See old application.yml (in your backup directory).
-Click on *Migrate* to start data migration.
+.. list-table::
+   :header-rows: 1
+   :widths: 25 75
 
-|image_migration_0|
+   * - Service
+     - Description
+   * - **OpenCelium**
+     - The application itself.
+   * - **MariaDB**
+     - Stores users, groups, connectors, schedules and the remaining
+       transactional data.
+   * - **MongoDB**
+     - Stores the workflow documents.
+   * - **Email**
+     - The mail server used for notifications and password resets.
+   * - **Polyglot**
+     - The ``polyglot-engine`` service for Python and Ruby enhancements.
+   * - **Operating System**
+     - Host-level information.
 
-Categories
-"""""""""""""""""
+Each row reports a status — **Operational**, **Down**, or **Unknown** — plus an
+info and an error column, so a failing component names its own reason.
 
-The *Categories* card centralizes the hierarchy that was previously only
-available from the Connections page. It lets you create, rename, or
-delete categories (including recursive deletes that remove subfolders and
-dependent connections). Changes propagate immediately to the category
-filters shown in :doc:`connections`, :doc:`schedules`, and the
-dashboard widgets, so this card is the preferred place to curate your
-taxonomy.
+The command palette shortcut is ``system check``.
 
-.. |image_admin_0| image:: ../img/admin/0.png
-   :align: middle
-.. |image_admin_2| image:: ../img/admin/2.png
-   :align: middle
+.. _admin_panel-system_config:
 
-.. |image_user_0| image:: ../img/user/OC_menu_admin.png
-   :align: middle
-   :width: 200
-.. |image_user_1| image:: ../img/user/OC_users_user_list.png
-   :align: middle
-   :width: 600
-.. |image_user_2| image:: ../img/user/OC_users_user_details.png
-   :align: middle
-   :width: 400
-.. |image_user_3| image:: ../img/user/OC_users_credentials.png
-   :align: middle
-   :width: 400
-.. |image_user_4| image:: ../img/user/OC_users_user_group.png
-   :align: middle
-   :width: 400
-.. |image_user_5| image:: ../img/user/OC_users_button_add_user.png
-   :align: middle
-   :height: 30
-.. |image_user_6| image:: ../img/user/OC_users_add_user_details.png
-   :align: middle
-   :width: 600
-.. |image_user_7| image:: ../img/user/OC_users_button_add.png
-   :align: middle
-   :height: 30
+System Configuration
+""""""""""""""""""""
 
-.. |image_group_1| image:: ../img/group/OC_groups_group_list.png
-   :align: middle
-   :width: 600
-.. |image_group_2| image:: ../img/group/OC_groups_details.png
-   :align: middle
-   :width: 400
-.. |image_group_3| image:: ../img/group/OC_groups_components.png
-   :align: middle
-   :width: 400
-.. |image_group_4| image:: ../img/group/OC_groups_permissions.png
-   :align: middle
-   :width: 400
-.. |image_group_5| image:: ../img/group/OC_groups_button_add_group.png
-   :align: middle
-   :height: 30
-.. |image_group_6| image:: ../img/group/OC_groups_add_group_details.png
-   :align: middle
-   :width: 400
-.. |image_group_7| image:: ../img/group/OC_groups_add_group_add_components.png
-   :align: middle
-   :width: 400 
-.. |image_group_8| image:: ../img/group/OC_groups_add_group_components.png
-   :align: middle
-   :width: 400
-.. |image_group_9| image:: ../img/group/OC_groups_add_group_permissions.png
-   :align: middle
-   :width: 400   
-.. |image_group_10| image:: ../img/group/OC_groups_button_add.png
-   :align: middle
-   :height: 30
+New in 5.0. **License & System → Configurations** edits the on-disk
+``application.yml`` directly from the UI, so a configuration change no longer
+requires shell access to the server.
 
+.. warning::
+   Changes are written to the file immediately but only take effect after the
+   application has been **restarted**. The page shows a *Restart required*
+   notice after a successful save.
 
-.. |image_update_assistant_0| image:: ../img/update_assistant/0.png
-   :align: middle
-.. |image_update_assistant_1| image:: ../img/update_assistant/1.png
-   :align: middle
-   
-.. |image_migration_0| image:: ../img/admin/4.png
-   :align: middle
+How it works
+============
+
+* The file is presented as a **tree of configuration nodes**. Each node has a
+  path, a value and a status.
+* A node can be **enabled or disabled** with its checkbox. Disabling comments
+  the line out on save, enabling uncomments it. The change **cascades**:
+  disabling a section disables its contents, and enabling a nested key also
+  enables the parent keys it needs. If disabling a key would leave a section
+  without any active child, that section is commented out too.
+* **Comments in the file are preserved.** Nodes whose YAML carries a comment
+  show an info icon; hover it to read the comment. This is how the inline
+  documentation of ``application_default.yml`` stays available in the UI.
+* **Secrets are masked.** Passwords and tokens are not sent back to the browser
+  in clear text — type a new value to replace them.
+* **Search** filters the tree by field name; *Expand all* and *Collapse all*
+  fold the tree.
+* **Reset** discards your edits and reloads the configuration from the server.
+
+Every write is backed up first. The backup location and retention are
+themselves configured in ``application.yml``:
+
+.. code-block:: yaml
+
+   opencelium:
+     config:
+       file-path: ./application.yml
+       backup:
+         directory: runtime/backup/application
+         keep: 10
+
+Backups are written as ``<file>.bak.<epochMillis>`` and the newest ``keep``
+copies per target file are retained.
+
+Access
+======
+
+The page requires the **master password**, and the underlying endpoints
+(``GET``/``PATCH /application-config``) require the ``Admin`` authority. If no
+master password is configured, the page says so and asks an administrator to set
+``opencelium.connector.master-password`` in ``application.yml`` and restart the
+backend.
+
+The command palette can read and edit single values with
+``update system-config``.
+
+UI
+""
+
+The top-level **UI** entry (``/ui/config``) holds the appearance settings of the
+application, most notably the **theme**. The palette equivalent is ``ui theme``.
+Themes are applied per user, and all pages — including published log and
+dashboard views — follow the selected light or dark theme.

@@ -2,59 +2,88 @@
 Dashboard
 ##################
 
-The dashboard is now the first screen you see after signing in.  It
-surfaces subscription health, current schedules, monitoring widgets and a
-graph of active connectors, and each user can curate the layout.
-
 .. contents::
    :local:
 
-Widgets & Layout
-================
-- **Subscription Overview** – shows the active license, usage counters,
-  and expiry dates.  It reuses the same component as the License
-  Management detail view and honors free/paid subscription states.
-- **Monitoring** – embeds a Netdata ``oc-mode.html`` page.  By default it
-  calls ``https://<host>:19999/oc-mode.html`` and only renders if the
-  endpoint responds with HTTP 200.  You can swap the URL by adding
-  ``dashboard.settings.url`` to the user profile (see :ref:`usage-my_profile`).
-  The Netdata template we ship lives at
-  ``docs_new/files/oc-mode.html``—deploy it next to your Netdata
-  dashboard to mirror the example layout.
-- **Current Scheduler** – read-only table of schedules with the same
-  filters as the Scheduler page.  It helps operators see failing jobs
-  without leaving the dashboard.
-- **Connection Overview** – renders the connectors currently used by any
-  connection and links them to the central OpenCelium node.  Hovering a
-  node reveals the invoker description, so this doubles as a topology map.
+The dashboard is the first screen after signing in and gives an *operational
+overview of your OpenCelium environment*. 5.0 replaced the configurable widget
+board of earlier versions with a fixed, purpose-built layout that is fed by the
+backend and by a live metrics socket.
 
-Click the pencil icon in the header to unlock drag-and-drop editing.
-While editing, drag widgets to new coordinates or remove them with the
-``x`` icon; the toolbox on the left keeps removed widgets so you can add
-them back later.  Widget settings are stored per user via the backend
-``/widget`` and ``/widget_setting`` endpoints, so the layout persists
-across browsers.
+Live data
+"""""""""
 
-License Alerts
-==============
-If OpenCelium is running without a license, or if the current license
-exhausts its API operation quota, a red alert banner appears above the
-widgets.  Clicking the link forwards you to the License Management page.
-These alerts are powered by the same subscription service that drives
-the dashboard widget, and they refresh automatically in the background.
+System metrics stream over the WebSocket connection, so the numbers update
+without reloading. Each metric tile carries a small status dot in its corner
+that reports the state of that connection:
 
-Netdata Dependency
-==================
-The monitoring card uses the front-end ``requestRemoteApi`` helper to
-fetch ``oc-mode.html`` from the Netdata server.  Ensure Netdata is
-listening on ``:19999`` or adjust ``dashboard.settings.url`` in the user
-profile to point to your monitoring stack.  If the HTTP status is not
-200, the widget falls back to a “Feature not installed” text so the
-failure is visible but non-blocking.
+* **Live — synced in real time**,
+* **Connecting to live updates…**,
+* **Connection lost — data may be stale**.
 
-Related Pages
-=============
-- :doc:`application_management` – explains the notification panel,
-  layout behavior, and other shared UI concepts.
-- :doc:`admin` – lists the administrative cards that complement the
-  dashboard widgets (e.g., License Management, Update Assistant).
+Cards that fetch from REST endpoints have their own **Refresh** button and show a
+theme-aware loading overlay while they refetch. Each card is wrapped in its own
+error boundary: if one card fails it shows a recoverable fallback instead of
+taking the whole page down.
+
+Metric tiles
+""""""""""""
+
+A row of tiles across the top summarises the current state:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - Tile
+     - Content
+   * - **Executions**
+     - Total number of executions.
+   * - **Failure rate**
+     - Share of executions that failed.
+   * - **Avg runtime**
+     - Average runtime of an execution.
+   * - **Run time**
+     - Accumulated run time.
+   * - **Logs**
+     - Size of the execution log data.
+
+Tiles with no data yet show ``—`` rather than a zero, so "nothing measured" is
+distinguishable from "measured zero".
+
+Cards
+"""""
+
+**Executions & failures** plots executions and failures per day. It is backed by
+``GET /widget/executions-timeline?days=7`` — seven days of history by default,
+which is new in 5.0.
+
+**Resource usage** shows CPU and memory of the host as radial gauges, fed from
+the live metrics socket.
+
+**Top workflows** lists the workflows with the most executions of all time,
+together with their failure rate. It is backed by
+``GET /widget/top-workflows?limit=5``.
+
+.. note::
+   Three further cards — **Attention required**, **Recent activity** and
+   **System health** — are already laid out but marked *Coming soon*. They are
+   placeholders in 5.0 and do not yet display live data.
+
+License alerts
+""""""""""""""
+
+If OpenCelium runs without a license, or the current license has exhausted its
+API operation quota, an alert banner appears above the cards. Its link leads to
+the License Management page. The alert is driven by the same subscription
+service as the license page and refreshes in the background.
+
+Related pages
+"""""""""""""
+
+- :doc:`admin` – the administrative screens, including
+  :ref:`System Check <admin_panel-system_check>`, which reports the health of
+  MariaDB, MongoDB, the mail server and the polyglot engine.
+- :doc:`command_palette` – reach any screen by typing instead of clicking.
+- :doc:`application_management` – the notification panel and other shared UI
+  concepts.

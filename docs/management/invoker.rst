@@ -4,61 +4,60 @@
 Invoker
 #######
 
+An **invoker** defines the HTTP operations and the authentication configuration
+for communicating with an external system. Connectors reference an invoker, and
+workflow steps call the operations it exposes.
 
-Invoker can be managed both from UI and from server directly. Let us consider the Add Invoker use case.
+Invokers can be managed both from the UI and on the server directly.
 
-**You, as an admin, want to add an invoker in the OpenCelium.**
+Adding an invoker on the server
+"""""""""""""""""""""""""""""""
 
-To add an invoker directly to the server, go to the root folder of the application and find there
-*src/main/resources/invoker* folder. Paste the invoker file (*xml* format) and restart the project.
+Go to the root folder of the application, find the
+``src/backend/src/main/resources/invoker`` folder, paste the invoker file
+(``xml`` format) and restart the backend.
 
-There is also an option to add an invoker from UI. Go to *Admin/Invokers* page. There is a button *+ Add Invoker*.
-|image0| Press on it. Provide a *Name*, *Description*, and a *Hint*. The *Hint* will be displayed and helpful, when you create
-a *Connector*.
+Adding an invoker from the UI
+"""""""""""""""""""""""""""""
 
-|image1|
+Go to **Configurations → Invokers** and create a new one. The wizard has three
+steps.
 
-Choose an *Authentication Type*. Right now 4 types are available: *API key*, *Token*, *Basic* and *Endpoint* Authentication.
+**General Data** – the *Name*, the *Description* and the *Hint*. The hint is
+displayed when a *Connector* is created, so use it to explain what the target
+system expects.
 
-|image2|
+**Authentication** – choose an *Authentication Type* and fill in the required
+data fields. Four types are available: *API key*, *Token*, *Basic* and *Endpoint*
+authentication. This step also holds the method that is used as the **test
+connection**.
 
-After, you need to provide information about the method that will be used as a test connection.
+A *Name* is required and unique. The *Path* of each request can differ; the main
+url is ``{url}`` — type it and add the endpoint if necessary. Choose a *Method*
+and enter the *Request* and the *Response* (*Success* / *Error*) data in the
+tabs that appear. Hover the icon next to *Headers* to see the hints. The *Body*
+is entered in the editor, or pasted as a JSON string in the popup window.
 
-|image3|
+**Operations** – the HTTP operations this invoker exposes. These are the calls
+you pick in the workflow editor under *Use Connector*. Provide the information
+the same way as in the previous step and add each operation.
 
-A *Name* is a required and unique field. A *Path* of each request can be different. The main url is *{url}*. Type it and
-provide endpoint if it is necessary. Choose a *Method* and enter a *Request* and a *Response* (*Success*/*Error*)
-data in the appeared tabs.
+Uploading and downloading invoker files
+"""""""""""""""""""""""""""""""""""""""
 
-|image4|
+Invoker files are exchanged as XML:
 
-You can see hints for *Headers* if mouse is over the corresponded icon.
+* upload a single file or a ZIP archive from the **Invokers** page,
+* upload from the command palette with ``upload invoker``,
+* download from the list, or with ``download invoker by name <name>``.
 
-|image5|
+Synchronising invokers with the Service Portal
+"""""""""""""""""""""""""""""""""""""""""""""""
 
-The *Body* can be input throw the engine or click on this icon |image6| and paste the json string inside the popup window.
+Subscribers can have invokers synchronised automatically from the OpenCelium
+Service Portal — see :ref:`management-smart_sync`.
 
-|image7|
-
-The last but not least step you add operations that will be used during *Connection* creation. Just provide information
-(similar to the previous step) and click on plus icon.
-
-|image8|
-
-
-.. |image0| image:: ../img/management/invokers/add_0.png
-.. |image1| image:: ../img/management/invokers/add_1.png
-   :align: middle
-.. |image2| image:: ../img/management/invokers/add_2.png
-   :align: middle
-.. |image3| image:: ../img/management/invokers/add_3.png
-   :align: middle
-.. |image4| image:: ../img/management/invokers/add_4.png
-   :align: middle
-.. |image5| image:: ../img/management/invokers/add_5.png
-   :align: middle
-.. |image6| image:: ../img/management/invokers/add_6.png
-.. |image7| image:: ../img/management/invokers/add_7.png
-   :align: middle
-.. |image8| image:: ../img/management/invokers/add_8.png
-   :align: middle
+.. note::
+   When you change an invoker file manually, workflows that already use it are
+   **not** updated automatically, because that is not always wanted. Synchronise
+   them explicitly when you need the change to propagate.

@@ -7,26 +7,29 @@ Platform Overview
 
 About OpenCelium
 ================
-The original introduction (``docs_new/getting_started/introduction.rst``) describes OpenCelium as a
-smart integration platform that lets administrators connect APIs, move data, and
-control the flow through a browser.  Under the hood the application exposes a
-Spring Boot backend and a React/Redux single-page frontend that orchestrate
-connectors, mappings, schedulers, and notifications.
+OpenCelium is a smart integration platform that lets administrators connect APIs,
+move data, and control the flow through a browser.  Under the hood the
+application exposes a Spring Boot backend and a React single-page frontend that
+orchestrate connectors, mappings, schedulers, and notifications.
 
 Key Capabilities
 ================
 - **Connector catalog** – each connector wraps the connectivity rules extracted
   from invoker XML definitions (see :doc:`extensibility`).  The usage guide in
-  ``docs_new/usage/connectors.rst`` still applies for UI details.
-- **Connection designer** – visual editor for mapping requests/responses between
-  connectors, including operators, aggregators, and enhancements (see
-  ``docs_new/usage/connections.rst``).
+  :doc:`../usage/connectors` covers the UI details.
+- **Workflow editor** – a graph editor for a freely branching sequence of steps
+  across any number of connectors, including operators, aggregators, references
+  and enhancements (see :doc:`../usage/workflows`).
+- **Command interface** – a global command palette (``Ctrl+K``) that searches and
+  executes across the platform (see :doc:`../usage/command_palette`).
 - **Scheduler & automation** – cron-based executions, live logs via WebSockets,
   and event notifications (:doc:`operations`).
 - **Administration suite** – license control, notification templates, LDAP/TOTP
-  authentication, and invoker management (``docs_new/management``).
-- **Service Portal integration** – optional online sync for licenses and brand
-  assets when the ``service_portal`` block in ``application.yml`` is configured.
+  authentication, invoker management, system health checks and in-UI editing of
+  ``application.yml`` (see :doc:`../usage/admin`).
+- **Service Portal integration** – optional online sync for licenses, invokers,
+  templates and brand assets when the ``service_portal`` block in
+  ``application.yml`` is configured.
 
 Component Landscape
 ===================
@@ -37,15 +40,15 @@ source tree:
 
    +----------------+       +----------------------+        +------------------+
    | React SPA      |<----->| Spring Boot REST API |<----+  | MariaDB (SQL)    |
-   | (src/frontend) |  WS   | (src/backend)        |     |  |  - users,        |
-   |                |  HTTP |                      |     |  |    connectors,   |
+   | (src/frontend) |  /ws  | (src/backend)        |     |  |  - users,        |
+   |   Vite build   |  /api |                      |     |  |    connectors,   |
    +----------------+       +----------------------+     |  |    schedules     |
            ^                          ^                   |  +------------------+
            |                          |                   |
            |                          |                   v
    +----------------+       +----------------------+   +--------------------+
-   | settings.json  |       | Liquibase/YAML setup |   | MongoDB            |
-   | window.config  |       | Invoker XML parser   |   |  - connection graph|
+   | config.json    |       | Liquibase/YAML setup |   | MongoDB            |
+   | (runtime)      |       | Invoker XML parser   |   |  - workflow graph  |
    +----------------+       +----------------------+   +--------------------+
 
 Workflow Building Blocks
@@ -54,14 +57,23 @@ The platform revolves around the following entities:
 
 1. **Invokers** define requests/responses for a remote API.  They are stored as
    XML files (``src/backend/src/main/resources/invoker``) or created through the
-   admin UI (``docs_new/management/invoker.rst``).
+   admin UI (:doc:`../management/invoker`).
 2. **Connectors** wrap invokers, store credentials, and expose a REST resource at
    ``/connector`` (``ConnectorController``).  The UI process is covered in
-   ``docs_new/usage/connectors.rst``.
-3. **Connections** pair two connectors, define ordered methods/operators, and
-   optionally include enhancements or aggregators (``ConnectionController``).
-4. **Schedulers** trigger a connection via cron or webhook, log output over
-   WebSockets, and can notify via email/webhook templates (``docs_new/usage/schedules.rst``).
+   :doc:`../usage/connectors`.
+3. **Workflows** are a freely branching sequence of steps. Each step carries its
+   own connector and a method type (a connector method, a plain HTTP request, or a
+   webhook that triggers another workflow), plus optional enhancements and
+   aggregators (``ConnectionController``).
+
+   .. note::
+      Workflows were called *Connections* before 5.0 and were limited to a
+      *from* and a *to* connector. The REST API and the Java packages keep the
+      old name; see :ref:`usage-workflow-model`.
+
+4. **Schedulers** trigger a workflow via cron or webhook, log output over
+   WebSockets, and can notify via email/webhook templates
+   (:doc:`../usage/schedules`).
 
 Documentation Map
 =================
