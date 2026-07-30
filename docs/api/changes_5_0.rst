@@ -239,13 +239,56 @@ Changed endpoints
        (spaces, slashes, apostrophes) work reliably.
    * - ``GET /connection/check/{name}``
      - **Deprecated.** Use ``GET /connection/check?name=<name>``.
-   * - ``GET /template``, ``GET /template/{id}``
+   * - ``GET /template/all``, ``GET /template/{id}``
      - New ``metadataOnly`` query parameter, default ``false``. With ``true``
        only the template metadata is returned, without the full body — used by
        the template pickers to stay responsive.
    * - ``PUT /role/{id}/component``
      - Now transactional. A failure no longer leaves the role's permissions
        partially deleted.
+
+Deprecated
+==========
+
+These still work but should not be used in new integrations. They are marked
+``deprecated`` in the OpenAPI spec:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 45 55
+
+   * - Endpoint
+     - Use instead
+   * - ``GET /connection/check/{name}``
+     - ``GET /connection/check?name=<name>``
+   * - ``POST /storage/connector``
+     - ``POST /connector/{id}/icon``
+   * - ``GET /template/all/{fromConnectorId}/{toConnectorId}``
+     - ``GET /template/all`` — looking templates up by a *pair* of connectors no
+       longer matches the data model, because a workflow is not bound to two
+       connectors. Filter the list instead, or let the
+       *Map template connectors* flow resolve them.
+
+Removed
+=======
+
+.. list-table::
+   :header-rows: 1
+   :widths: 45 55
+
+   * - Endpoint
+     - Note
+   * - ``POST /assistant/db/migrate``
+     - The Neo4j-to-MongoDB migration. Run it while still on the 4.x line; see
+       :doc:`../gettinginvolved/updating`.
+   * - ``GET /connection/execution/{executionId}``,
+       ``GET /execution/log/{executionId}/flowchart/{flowId}``,
+       ``GET /execution/log/{executionId}/meta/list``
+     - Replaced by the new log structure:
+       ``GET /execution/logs/children``,
+       ``GET /execution/log/element/{elementId}/children``,
+       ``GET /execution/log/element/{elementId}/details``,
+       ``GET /execution/{executionId}/raw/log`` and ``GET /execution/log-files``.
 
 Unchanged but worth knowing
 ===========================
