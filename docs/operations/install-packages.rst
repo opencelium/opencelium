@@ -15,7 +15,7 @@ Installing from packages
 	| please set additional permissions to /opt/opencelium. 
 	| Otherwise nginx is not able to access the files. 
 
-Debian/Ubuntu (example for 24.04 LTS)
+ZIP Debian/Ubuntu (example for 24.04 LTS)
 """""""""""""""""""""""""""""""""""""
 
 Prepare environment
@@ -183,7 +183,7 @@ Finally start OpenCelium backend.
 		journalctl -xe -u opencelium -f
 		
 
-SUSE Linux Enterprise Server (example for SLES 15 SP5)
+ZIP SUSE Linux Enterprise Server (example for SLES 15 SP5)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Prepare environment
@@ -361,7 +361,7 @@ Finally start OpenCelium backend.
 		journalctl -xe -u opencelium -f
 		
 
-Red Hat Enterprise Linux (example for Red Hat 9.2)
+ZIP Red Hat Enterprise Linux (example for Red Hat 9.2)
 """""""""""""""""""""""""""""""""""""""""""""""""""
 
 Prepare environment
