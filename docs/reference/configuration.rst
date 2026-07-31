@@ -36,7 +36,7 @@ backups.
    opencelium:
      config:
        # the application.yml on disk to read and write
-       file-path: ./application.yml
+       file-path: src/main/resources/application.yml
        backup:
          # pre-write backups, named <file>.bak.<epochMillis>
          directory: runtime/backup/application
