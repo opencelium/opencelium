@@ -92,4 +92,4 @@ Where to go next
 
 * :doc:`install` — get a server running.
 * :doc:`first-workflow` — build a working integration end to end.
-* :doc:`../concepts/index` — understand the model properly.
+* :doc:`../concepts/workflow-model` — understand the model properly.
