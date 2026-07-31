@@ -5,6 +5,7 @@ import { useMethodContext } from '../../../../providers/MethodContext';
 import type { RootState } from '../../../../store';
 import { updateConnection, updatePayload } from '../../../../store/connection/connectionSlice';
 import { createDirectReferenceEnhancement, findRequestEnhancement, getDirectReferenceInfo, replaceRequestBindings } from '../bodyBinding';
+import { countEnhancementReferences } from '../bodyReference';
 import { mergeReferenceValue } from '../bodyValue';
 import {
   applySelectionValue,
@@ -95,6 +96,14 @@ export function useXmlBodyEditor() {
     setSelectedEnhanceId(created.enhanceId);
   };
 
+  const deleteEnhancement = () => {
+    if (!connection || !currentEnhancement) return;
+    if (countEnhancementReferences(currentEnhancement) > 1) return;
+    dispatch(updateConnection({
+      fieldBindings: connection.fieldBindings.filter((binding) => binding.enhancement.enhanceId !== currentEnhancement.enhanceId),
+    } as never));
+  };
+
   const syncBody = (nextTree = tree) => {
     const nextBody = serializeCompactXml(nextTree);
     dispatch(updatePayload({ methodId: method.id, newFields: nextBody, messageProperty: 'body' } as never));
@@ -107,6 +116,7 @@ export function useXmlBodyEditor() {
     connection,
     createEnhancement,
     currentEnhancement,
+    deleteEnhancement,
     directReference,
     isReferenceOpen,
     method,

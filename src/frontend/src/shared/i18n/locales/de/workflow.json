@@ -20,7 +20,9 @@
     "maximizeRequestData": "Anfragedaten maximieren",
     "minimizeRequestData": "Anfragedaten minimieren",
     "load": "Laden",
-    "createEnhancement": "Enhancement erstellen"
+    "createEnhancement": "Enhancement erstellen",
+    "deleteEnhancement": "Enhancement löschen",
+    "deleteReference": "Referenz löschen"
   },
   "confirmDelete": {
     "title": "Schritt löschen",
@@ -438,6 +440,7 @@
     "language": "Sprache",
     "script": "Skript",
     "emptyState": "Bitte klicken Sie auf die Referenz, um ihr Enhancement anzuzeigen.",
+    "deleteDisabledMultipleReferences": "Dieses Feld hat mehr als eine Referenz, daher muss es in ein Enhancement eingebettet bleiben.",
     "directReference": {
       "title": "Direkte Referenz",
       "description": "Dieses Feld hat kein Enhancement — es besteht eine direkte Eins-zu-eins-Referenz zwischen den beiden unten stehenden Feldern, ohne dazwischenliegendes Skript. Direkte Referenzen werden schneller ausgeführt als ein Enhancement mit Skript.",

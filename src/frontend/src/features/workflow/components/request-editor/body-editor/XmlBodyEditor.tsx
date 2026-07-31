@@ -49,7 +49,7 @@ export function XmlBodyEditor({ readOnly }: Props) {
       key: 'referenceInfo',
       label: t('referenceInfo.legacyTitle'),
       content: hasReferenceInfo ? (
-        <ReferenceInfo messageProperty="body" data={{}} onReferenceClick={editor.setSelectedEnhanceId} />
+        <ReferenceInfo messageProperty="body" data={{}} readOnly={readOnly} onReferenceClick={editor.setSelectedEnhanceId} />
       ) : (
         <Empty description={t('referenceInfo.empty')} />
       ),
@@ -167,6 +167,7 @@ export function XmlBodyEditor({ readOnly }: Props) {
               enhancement={editor.currentEnhancement}
               directReference={editor.directReference}
               onCreateEnhancement={editor.createEnhancement}
+              onDeleteEnhancement={editor.deleteEnhancement}
             />
           </div>
         </div>

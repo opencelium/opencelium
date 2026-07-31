@@ -185,7 +185,13 @@ export function LegacyRequestJsonEditor({ messageProperty, source, readOnly }: P
       key: 'referenceInfo',
       label: t('referenceInfo.legacyTitle'),
       content: hasReferenceInfo ? (
-        <ReferenceInfo messageProperty={messageProperty} data={{}} onReferenceClick={editor.setSelectedEnhanceId} />
+        <ReferenceInfo
+          messageProperty={messageProperty}
+          data={{}}
+          readOnly={readOnly}
+          onReferenceClick={editor.setSelectedEnhanceId}
+          onDeleteReference={editor.deleteReferenceAtPath}
+        />
       ) : (
         <Empty description={t('referenceInfo.empty')} />
       ),
@@ -248,6 +254,7 @@ export function LegacyRequestJsonEditor({ messageProperty, source, readOnly }: P
             enhancement={editor.currentEnhancement}
             directReference={editor.directReference}
             onCreateEnhancement={editor.createEnhancement}
+            onDeleteEnhancement={editor.deleteEnhancement}
           />
         </div>
       </div>
