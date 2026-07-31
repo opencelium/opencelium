@@ -12,10 +12,10 @@ We recommend using the following setup:
 
 **Software:**
 
-- nginx 1.26.0 https://nginx.org/en/download.html (stable version)
-- mongodb 7.0.5 https://www.mongodb.com/download-center/community/releases 
+- nginx 1.30.4 https://nginx.org/en/download.html (stable version)
+- mongodb 8.3 https://www.mongodb.com/docs/manual/administration/install-on-linux/ 
 - java 17 (jdk) https://www.oracle.com/technetwork/java/javase/downloads/index.html
-- mariadb 10 (lts) https://mariadb.com/kb/en/mariadb-server-release-dates/ 
+- mariadb 11.8 (lts) https://mariadb.com/kb/en/mariadb-server-release-dates/ 
 
 **Operating System:**
 
