@@ -1,0 +1,19 @@
+{
+  "masterPassword": {
+    "input": {
+      "label": "Master-Passwort",
+      "info": {
+        "title": "Master-Passwort",
+        "content": "Der Abschnitt „Request Data“ definiert die Nutzdaten, die an das Zielsystem gesendet werden. Sie können statische Werte angeben oder dynamisch auf Daten aus vorherigen Anfrageergebnissen und Webhooks verweisen."
+      }
+    },
+    "button": {
+      "label": "Senden"
+    },
+    "error": {
+      "MASTER_PASSWORD_WRONG": "Ungültiges Master-Passwort",
+      "default": "Unbekannter Fehler",
+      "nonAsciiError": "Das Passwort enthält <1>nicht-ASCII</1>-Zeichen!"
+    }
+  }
+}

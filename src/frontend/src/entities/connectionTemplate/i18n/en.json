@@ -1,0 +1,40 @@
+{
+  "list": {
+    "title": "Workflow Templates",
+    "subTitle": "The Templates section contains predefined connection configurations that can be reused to quickly create new Workflows.",
+    "upload": {
+      "button": "Upload",
+      "confirmReplace": {
+        "title": "Replace existing template?",
+        "message": "The template with such filename already exists. It will be replaced. Are you sure?"
+      },
+      "success": "Template uploaded successfully: {{name}}",
+      "error": "Failed to upload template file."
+    },
+    "download": {
+      "tooltip": "Download",
+      "success": "Template downloaded: {{name}}",
+      "error": "Failed to download template."
+    }
+  },
+  "fields": {
+    "name": {
+      "label": "Name"
+    },
+    "description": {
+      "label": "Description"
+    },
+    "fromInvoker": {
+      "label": "From Invoker"
+    },
+    "toInvoker": {
+      "label": "To Invoker"
+    }
+  },
+  "confirmation": {
+    "delete": {
+      "byId": "Delete workflow template by id \"{{templateId}}\"?",
+      "byName": "Delete workflow template by name \"{{name}}\"?"
+    }
+  }
+}

@@ -1,12 +1,69 @@
 package com.becon.opencelium.backend.ocel.utils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 public class ValueUtils {
 
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     private ValueUtils() {
+    }
+
+    /**
+     * Returns a List if the object is (or can be parsed as) an array,
+     * otherwise returns the object unchanged.
+     */
+    public static Object normalizeArray(Object o) {
+        List<?> parsed = tryParseArray(o);
+        return parsed != null ? parsed : o;
+    }
+
+    /**
+     * Tries to interpret an object as an array. Returns null if it can't.
+     * Handles Strings like "[a, b, c]" or JSON arrays like ["a","b","c"].
+     */
+    public static List<?> tryParseArray(Object o) {
+        if (o instanceof List<?>) {
+            return (List<?>) o;
+        }
+        if (!(o instanceof String)) {
+            return null;
+        }
+
+        String s = ((String) o).trim();
+        if (s.length() < 2 || s.charAt(0) != '[' || s.charAt(s.length() - 1) != ']') {
+            return null;
+        }
+
+        // Try proper JSON parsing first (handles quoted strings, numbers, nested commas, etc.)
+        try {
+            return OBJECT_MAPPER.readValue(s, List.class);
+        } catch (Exception ignored) {
+            // Fall back to a naive split for non-JSON strings like "[a, b, c]"
+        }
+
+        String inner = s.substring(1, s.length() - 1).trim();
+        if (inner.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<String> result = new ArrayList<>();
+        for (String part : inner.split(",")) {
+            String trimmed = part.trim();
+            if (trimmed.length() >= 2
+                    && ((trimmed.startsWith("\"") && trimmed.endsWith("\""))
+                    || (trimmed.startsWith("'") && trimmed.endsWith("'")))) {
+                trimmed = trimmed.substring(1, trimmed.length() - 1);
+            }
+            result.add(trimmed);
+        }
+        return result;
     }
 
     public static double compareTo(Number n1, Number n2) {

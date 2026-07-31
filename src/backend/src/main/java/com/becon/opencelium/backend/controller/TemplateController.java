@@ -28,6 +28,7 @@ import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.template.service.TemplateServiceImp;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -61,7 +62,12 @@ public class TemplateController {
     @Autowired
     private ConnectorServiceImp connectorService;
 
-    @Operation(summary = "Retrieves a template from the database based on the provided template 'id'")
+    @Operation(summary = "Retrieves a template from the database based on the provided template 'id'",
+            parameters = {
+                @Parameter(name = "metadataOnly",
+                        description = "When true, returns only parent-level template fields (templateId, name, " +
+                                "description, version, link) and omits the heavy 'connection' payload. Defaults to false.")
+            })
     @ApiResponses(value = {
         @ApiResponse( responseCode = "200",
                 description = "Template has been retrieved successfully",
@@ -74,7 +80,14 @@ public class TemplateController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/{id}")
-    public ResponseEntity<?> get(@PathVariable String id){
+    public ResponseEntity<?> get(@PathVariable String id,
+                                 @RequestParam(defaultValue = "false") boolean metadataOnly){
+
+        if (metadataOnly) {
+            TemplateResource metadata = templateService.getMetadataById(id)
+                    .orElseThrow(() -> new RuntimeException("TEMPLATE_NOT_FOUND"));
+            return ResponseEntity.ok().body(metadata);
+        }
 
         Template template = templateService
                 .findById(id)
@@ -131,6 +144,7 @@ public class TemplateController {
                 description = "Internal Error",
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
+    @Deprecated
     @GetMapping("/all/{fromConnectorId}/{toConnectorId}")
     public ResponseEntity<List<TemplateResource>> getAllByConnectors(@PathVariable int fromConnectorId, @PathVariable int toConnectorId){
         Connector fromConnector = connectorService.findById(fromConnectorId)
@@ -156,7 +170,12 @@ public class TemplateController {
         return ResponseEntity.ok().body(templateResources);
     }
 
-    @Operation(summary = "Retrieves all templates from database")
+    @Operation(summary = "Retrieves all templates from database",
+            parameters = {
+                @Parameter(name = "metadataOnly",
+                        description = "When true, returns only parent-level template fields (templateId, name, " +
+                                "description, version, link) and omits the heavy 'connection' payload. Defaults to false.")
+            })
     @ApiResponses(value = {
             @ApiResponse( responseCode = "200",
                     description = "All templates have been retrieved successfully",
@@ -169,7 +188,12 @@ public class TemplateController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/all")
-    public ResponseEntity<List<TemplateResource>> getAll(){
+    public ResponseEntity<List<TemplateResource>> getAll(@RequestParam(defaultValue = "false") boolean metadataOnly){
+
+        if (metadataOnly) {
+            List<TemplateResource> metadata = templateService.getAllMetadata();
+            return ResponseEntity.ok().body(metadata);
+        }
 
         List<Template> templates = templateService.findAll();
 

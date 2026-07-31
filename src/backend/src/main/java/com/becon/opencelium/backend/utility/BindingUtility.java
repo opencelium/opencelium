@@ -5,6 +5,7 @@ import com.becon.opencelium.backend.database.mongodb.entity.BodyMng;
 import com.becon.opencelium.backend.database.mongodb.entity.FieldBindingMng;
 import com.becon.opencelium.backend.database.mongodb.entity.LinkedFieldMng;
 import com.becon.opencelium.backend.database.mongodb.entity.MethodMng;
+import com.becon.opencelium.backend.exception.FieldTypeMismatchException;
 
 import java.util.*;
 
@@ -227,13 +228,12 @@ public class BindingUtility {
         return resultMap;
     }
 
-    @SuppressWarnings("unchecked")
     private static Object processJSON(Object value, List<String> fieldPaths, String id, String index) {
         if (index == null) {
             if (fieldPaths.isEmpty()) { // primitive type
                 return putIdToBody(value, id);
             } else { // object
-                Map<String, Object> map = (Map<String, Object>) value;
+                Map<String, Object> map = asObject(value);
                 return doWithJsonBody(map, "object", fieldPaths, id);
             }
         } else { // array
@@ -245,9 +245,9 @@ public class BindingUtility {
                 //ex. param[1]
                 //it means that this field's type is array. We just need to look through 1st element of an array
                 int idx = Integer.parseInt(index);
-                List<Object> list = (List<Object>) value;
+                List<Object> list = asArray(value);
                 if (list.get(idx) instanceof Map<?, ?>) { //array of objects
-                    List<Map<String, Object>> mapList = (List<Map<String, Object>>) value;
+                    List<Map<String, Object>> mapList = asArrayOfObjects(value);
                     mapList.set(idx, doWithJsonBody(mapList.get(idx), "object", fieldPaths, id));
                     return mapList;
                 } else { // array of primitives
@@ -257,9 +257,9 @@ public class BindingUtility {
             } else {
                 //ex. param[i]
                 //it means that this field's type is array. We need to look through every element of an array
-                List<Object> list = (List<Object>) value;
+                List<Object> list = asArray(value);
                 if (list.get(0) instanceof Map<?, ?>) { // array of objects
-                    List<Map<String, Object>> mapList = (List<Map<String, Object>>) value;
+                    List<Map<String, Object>> mapList = asArrayOfObjects(value);
                     return mapList.stream()
                             .map(f -> doWithJsonBody(f, "object", fieldPaths, id));
                 } else { // array of primitives
@@ -323,7 +323,7 @@ public class BindingUtility {
                 }
                 return putIdToBody(value, id);
             } else { // object
-                Map<String, Object> map = (Map<String, Object>) value;
+                Map<String, Object> map = asObject(value);
                 return doWithXMLBody(map, "object", fieldPaths, id);
             }
         } else { // array
@@ -335,9 +335,9 @@ public class BindingUtility {
                 //ex. param[1]
                 //it means that this field's type is array. We just need to look through 1st element of an array
                 int idx = Integer.parseInt(index);
-                List<Object> list = (List<Object>) value;
+                List<Object> list = asArray(value);
                 if (list.get(idx) instanceof Map<?, ?>) { //array of objects
-                    List<Map<String, Object>> mapList = (List<Map<String, Object>>) value;
+                    List<Map<String, Object>> mapList = asArrayOfObjects(value);
                     mapList.set(idx, doWithXMLBody(mapList.get(idx), "object", fieldPaths, id));
                     return mapList;
                 } else { // array of primitives
@@ -347,9 +347,9 @@ public class BindingUtility {
             } else {
                 //ex. param[i]
                 //it means that this field's type is array. We need to look through every element of an array
-                List<Object> list = (List<Object>) value;
+                List<Object> list = asArray(value);
                 if (list.get(0) instanceof Map<?, ?>) { // array of objects
-                    List<Map<String, Object>> mapList = (List<Map<String, Object>>) value;
+                    List<Map<String, Object>> mapList = asArrayOfObjects(value);
                     return mapList.stream()
                             .map(f -> doWithXMLBody(f, "object", fieldPaths, id));
                 } else { // array of primitives
@@ -367,5 +367,38 @@ public class BindingUtility {
     private static String putIdToBody(Object value, String id) {
         //just returns 'wrapped' id. Might be changed!
         return "#{%" + id + "%}";
+    }
+
+//--------------------------------------------------------------------------------------------------------//
+//----------------------------------------- type-checked casts -------------------------------------------//
+
+    /**
+     * Casts the body value to a JSON object, failing with a descriptive {@link FieldTypeMismatchException}
+     * when the binding path expects an object but the actual value is of another type.
+     */
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> asObject(Object value) {
+        if (!(value instanceof Map<?, ?>)) {
+            throw new FieldTypeMismatchException("object", value);
+        }
+        return (Map<String, Object>) value;
+    }
+
+    /**
+     * Casts the body value to a JSON array, failing with a descriptive {@link FieldTypeMismatchException}
+     * when the binding path expects an array but the actual value is of another type.
+     */
+    @SuppressWarnings("unchecked")
+    private static List<Object> asArray(Object value) {
+        if (!(value instanceof List<?>)) {
+            throw new FieldTypeMismatchException("array", value);
+        }
+        return (List<Object>) value;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<Map<String, Object>> asArrayOfObjects(Object value) {
+        asArray(value);
+        return (List<Map<String, Object>>) value;
     }
 }

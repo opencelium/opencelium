@@ -1,0 +1,19 @@
+.data-table {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.toolbar {
+    display: flex;
+    gap: 8px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+
+    background: var(--color-background-surface);
+    padding: 12px;
+
+    border-bottom: 1px solid var(--color-border-default);
+}

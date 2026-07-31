@@ -42,7 +42,7 @@ public class ActivationRequestServiceImp implements ActivationRequestService{
     }
 
     @Override
-    public ActivationRequest generateActivReq() {
+    public ActivationRequest generateActiveReq() {
         ActivationRequest ar = new ActivationRequest();
         ar.setId(UUID.randomUUID().toString());
         ar.setCreatedAt(LocalDateTime.now());

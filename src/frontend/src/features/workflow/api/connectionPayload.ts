@@ -1,0 +1,810 @@
+import type { WorkflowEdgeModel, WorkflowNodeData, WorkflowNodeModel } from '../types/workflow.types';
+import { buildLegacyConnection } from '../components/request-editor/legacyAdapter';
+import { ITERATOR_NAMES } from '../components/request-editor/body-editor/requestReferenceOptions';
+import { ALL_COLORS } from '../constants/colors';
+import { MethodType } from '../types/connection';
+
+type BuildConnectionPayloadArgs = {
+	connectionId?: string | number;
+	title: string;
+	description: string;
+	comment?: string;
+	nodes: WorkflowNodeModel[];
+	edges: WorkflowEdgeModel[];
+	viewport?: { x: number; y: number; zoom: number };
+	fieldBindings?: any[];
+	categoryId?: number | null;
+	/** Templates are applied against a different environment, where `connectorId` is
+	 * meaningless — `TemplateConnectorMappingDialog` re-resolves each method's connector
+	 * by invoker name instead. Set this when building a template payload so each
+	 * `methods[i].connector.invoker` carries that name; regular connection saves leave
+	 * it unset since `connectorId` alone already identifies the connector there. */
+	includeInvoker?: boolean;
+};
+
+const normalizeIndex = (value: unknown, fallback: number) =>
+	typeof value === 'string' ? value : String(value ?? fallback);
+
+const parseIndexPath = (value: unknown) =>
+	String(value ?? '')
+		.split('_')
+		.map((part) => Number(part))
+		.map((part) => (Number.isFinite(part) ? part : 0));
+
+const compareIndex = (left: { index?: unknown }, right: { index?: unknown }) => {
+	const leftPath = parseIndexPath(left.index);
+	const rightPath = parseIndexPath(right.index);
+	const length = Math.max(leftPath.length, rightPath.length);
+
+	for (let index = 0; index < length; index += 1) {
+		const leftPart = leftPath[index] ?? -1;
+		const rightPart = rightPath[index] ?? -1;
+
+		if (leftPart !== rightPart) return leftPart - rightPart;
+	}
+
+	return leftPath.length - rightPath.length;
+};
+
+const operatorBottomHandle = (node: WorkflowNodeModel) => {
+	if (node.type === 'if') return 'true';
+	if (node.type === 'loop') return 'bottom';
+	return undefined;
+};
+
+const nodeRightHandle = (node: WorkflowNodeModel) => {
+	if (node.type === 'if') return 'false';
+	if (node.type === 'loop') return 'right';
+	return undefined;
+};
+
+const nodeKind = (node: WorkflowNodeModel) => {
+	const data = node.data as WorkflowNodeData;
+	return node.type || data.kind;
+};
+
+const isMethodNode = (node: WorkflowNodeModel) => {
+	const kind = nodeKind(node);
+	return kind === 'connector' || kind === 'system' || kind === 'trigger-connection';
+};
+
+const isConnectorlessMethodNode = (node: WorkflowNodeModel) => {
+	const kind = nodeKind(node);
+	return kind === 'system' || kind === 'trigger-connection';
+};
+
+const resolveMethodType = (node: WorkflowNodeModel): MethodType => {
+	switch (nodeKind(node)) {
+		case 'system': return MethodType.HttpRequest;
+		case 'trigger-connection': return MethodType.Webhook;
+		default: return MethodType.Connector;
+	}
+};
+
+const isOperatorNode = (node: WorkflowNodeModel) => {
+	const kind = nodeKind(node);
+	return kind === 'if' || kind === 'loop';
+};
+
+const getTargetHandleForDirection = (direction: 'right' | 'bottom') =>
+	direction === 'bottom' ? 'top' : 'left';
+
+const findOutgoingEdge = (
+	edges: WorkflowEdgeModel[],
+	nodes: Map<string, WorkflowNodeModel>,
+	nodeId: string,
+	sourceHandle: string | undefined,
+	direction: 'right' | 'bottom',
+	visited: Set<string>,
+) => {
+	const sourceNode = nodes.get(nodeId);
+	const targetHandle = getTargetHandleForDirection(direction);
+	const candidates = edges
+		.filter((edge) => edge.source === nodeId && (edge.sourceHandle ?? undefined) === sourceHandle)
+		.filter((edge) => !visited.has(edge.target))
+		.filter((edge) => !edge.targetHandle || edge.targetHandle === targetHandle)
+		.filter((edge) => nodes.has(edge.target));
+
+	return candidates.sort((left, right) => {
+		const leftNode = nodes.get(left.target);
+		const rightNode = nodes.get(right.target);
+		if (!sourceNode || !leftNode || !rightNode) return 0;
+
+		const leftPrimaryDistance = direction === 'right'
+			? Math.abs(leftNode.position.y - sourceNode.position.y)
+			: Math.abs(leftNode.position.x - sourceNode.position.x);
+		const rightPrimaryDistance = direction === 'right'
+			? Math.abs(rightNode.position.y - sourceNode.position.y)
+			: Math.abs(rightNode.position.x - sourceNode.position.x);
+
+		if (leftPrimaryDistance !== rightPrimaryDistance) {
+			return leftPrimaryDistance - rightPrimaryDistance;
+		}
+
+		return direction === 'right'
+			? leftNode.position.x - rightNode.position.x
+			: leftNode.position.y - rightNode.position.y;
+	})[0];
+};
+
+const buildUiPayload = (
+	nodes: WorkflowNodeModel[],
+	edges: WorkflowEdgeModel[],
+	viewport?: { x: number; y: number; zoom: number },
+) => {
+	// Reused on load to re-match a saved node to its current method/operator by tree
+	// position instead of by id — ids are position-derived (`method-3`) and shift
+	// whenever a sibling is inserted earlier in the tree, which used to misattach a
+	// node's saved color/config to whatever entry now happens to share its old id.
+	const workflowIndexes = buildWorkflowIndexes(nodes, edges);
+
+	return {
+		viewport,
+		workflowNodes: nodes.map((node) => sanitizeUiNode(node, workflowIndexes.get(node.id))),
+		workflowEdges: edges.map((edge) => ({ ...edge })),
+		flowcharts: nodes.map((node) => ({
+			flowId: node.id,
+			x: node.position.x,
+			y: node.position.y,
+		})),
+		flowchartEdges: edges.map((edge) => ({
+			id: edge.id,
+			source: edge.source,
+			target: edge.target,
+			sourceHandle: edge.sourceHandle,
+			targetHandle: edge.targetHandle,
+		})),
+	};
+};
+
+const UI_ENDPOINT_ARG_TOKEN_RE = /#\{%\s*([A-Za-z0-9_-]+)\s*%}/g;
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+	!!value && typeof value === 'object' && !Array.isArray(value);
+
+const stripEnhancementObjects = (value: unknown): unknown => {
+	if (Array.isArray(value)) return value.map(stripEnhancementObjects);
+	if (isRecord(value)) {
+		return Object.fromEntries(
+			Object.entries(value)
+				.filter(([key]) => key !== 'enhancement' && key !== 'endpointArgs')
+				.map(([key, nested]) => [key, stripEnhancementObjects(nested)]),
+		);
+	}
+	return value;
+};
+
+const sanitizeUiReferenceString = (value: string, endpointArgs?: Record<string, any>) =>
+	value.replace(UI_ENDPOINT_ARG_TOKEN_RE, (token, argId: string) => {
+		const source = endpointArgs?.[argId]?.source;
+		return typeof source === 'string' ? wrapReference(source) : token;
+	});
+
+const sanitizeUiReferences = (value: unknown, endpointArgs?: Record<string, any>): unknown => {
+	if (typeof value === 'string') return sanitizeUiReferenceString(value, endpointArgs);
+	if (Array.isArray(value)) return value.map((item) => sanitizeUiReferences(item, endpointArgs));
+	if (isRecord(value)) {
+		return Object.fromEntries(
+			Object.entries(value).map(([key, nested]) => [
+				key,
+				sanitizeUiReferences(nested, endpointArgs),
+			]),
+		);
+	}
+	return value;
+};
+
+const WRAPPED_REFERENCE_RE =
+	/(\{%\s*#[A-Fa-f0-9]{6}\.\((?:request|response)\)\.(?:body|header|status)(?:\.[^%{}]*)?\s*%})/g;
+
+const encodeUrlPartPreservingReferences = (value: string) =>
+	String(value || '')
+		.split(WRAPPED_REFERENCE_RE)
+		.map((part) => {
+			if (!part) return part;
+			if (WRAPPED_REFERENCE_RE.test(part)) {
+				WRAPPED_REFERENCE_RE.lastIndex = 0;
+				return part;
+			}
+			WRAPPED_REFERENCE_RE.lastIndex = 0;
+			try {
+				return encodeURIComponent(decodeURIComponent(part.replace(/\+/g, ' ')));
+			} catch {
+				return encodeURIComponent(part);
+			}
+		})
+		.join('');
+
+const sanitizeQueryParams = (queryParams: unknown, endpointArgs?: Record<string, any>) =>
+	Array.isArray(queryParams)
+		? queryParams
+			.filter((param: any) => param?.enabled && String(param?.key ?? '').trim() !== '')
+			.map((param) => {
+				const sanitized = stripEnhancementObjects(sanitizeUiReferences(param, endpointArgs)) as any;
+				if (!sanitized || typeof sanitized !== 'object' || sanitized.autoEncode === false) {
+					return sanitized;
+				}
+				return {
+					...sanitized,
+					key: encodeUrlPartPreservingReferences(String(sanitized.key ?? '')),
+					value: encodeUrlPartPreservingReferences(String(sanitized.value ?? '')),
+				};
+			})
+		: queryParams;
+
+const sanitizeMethodConfig = (methodConfig: unknown) => {
+	if (!isRecord(methodConfig)) return methodConfig;
+	const { endpointArgs, queryParams, ...rest } = methodConfig;
+	const safeEndpointArgs = isRecord(endpointArgs)
+		? endpointArgs as Record<string, any>
+		: {};
+	const sanitizedRest = sanitizeUiReferences(rest, safeEndpointArgs);
+
+	return stripEnhancementObjects({
+		...(isRecord(sanitizedRest) ? sanitizedRest : {}),
+		...(queryParams !== undefined ? { queryParams: sanitizeQueryParams(queryParams, safeEndpointArgs) } : {}),
+	});
+};
+
+const sanitizeNodeData = (data: WorkflowNodeData) => {
+	const safeData = {
+		title: data.title,
+		subtitle: data.subtitle,
+		kind: data.kind,
+		connector: data.connector,
+		methodConfig: sanitizeMethodConfig(data.methodConfig),
+		conditionConfig: stripEnhancementObjects(data.conditionConfig),
+		dataAggregator: data.dataAggregator,
+	};
+
+	return Object.fromEntries(
+		Object.entries(safeData).filter(([, value]) => value !== undefined),
+	);
+};
+
+const sanitizeUiNode = (node: WorkflowNodeModel, index?: string) => ({
+	id: node.id,
+	type: node.type,
+	position: node.position,
+	index,
+	data: sanitizeNodeData(node.data as WorkflowNodeData),
+	draggable: node.draggable,
+	deletable: node.deletable,
+});
+
+export const buildWorkflowIndexes = (nodes: WorkflowNodeModel[], edges: WorkflowEdgeModel[]) => {
+	const nodeById = new Map(nodes.map((node) => [node.id, node]));
+	const indexes = new Map<string, string>();
+	const visited = new Set<string>();
+
+	const walkChain = (
+		sourceId: string,
+		sourceHandle: string | undefined,
+		direction: 'right' | 'bottom',
+		prefix?: string,
+	) => {
+		let edge = findOutgoingEdge(edges, nodeById, sourceId, sourceHandle, direction, visited);
+		let order = 0;
+
+		while (edge) {
+			const node = nodeById.get(edge.target);
+			if (!node || visited.has(node.id)) break;
+
+			const nodeIndex = prefix ? `${prefix}_${order}` : String(order);
+			indexes.set(node.id, nodeIndex);
+			visited.add(node.id);
+
+			const bottomHandle = operatorBottomHandle(node);
+			if (bottomHandle) {
+				walkChain(node.id, bottomHandle, 'bottom', nodeIndex);
+			}
+
+			edge = findOutgoingEdge(edges, nodeById, node.id, nodeRightHandle(node), 'right', visited);
+			order += 1;
+		}
+	};
+
+	walkChain('start-1', undefined, 'right');
+
+	return indexes;
+};
+
+const stripPluralConnectorLists = (connector: any) => {
+	if (!connector) return connector;
+	const { methods, operators, ...rest } = connector;
+	return rest;
+};
+
+const buildPayloadData = (body: unknown, format = 'json', data = 'raw') => ({
+	type: Array.isArray(body) ? 'array' : 'object',
+	format,
+	data,
+	fields: body ?? {},
+});
+
+const isPayloadData = (body: unknown) =>
+	!!body &&
+	typeof body === 'object' &&
+	'type' in body &&
+	'format' in body &&
+	'fields' in body;
+
+const normalizePayloadData = (body: unknown, format = 'json', data = 'raw') => {
+	if (!isPayloadData(body)) return buildPayloadData(body, format, data);
+	const payload = body as Record<string, unknown>;
+	return {
+		...payload,
+		data: payload.data ?? data,
+	};
+};
+
+const normalizeColor = (color: unknown, fallback: string) => {
+	const value = typeof color === 'string' && color.trim() ? color.trim() : fallback;
+	return value.startsWith('#') ? value : `#${value}`;
+};
+
+const REFERENCE_RE =
+	/\{%\s*#(?:[A-Fa-f0-9]{6})\.\((?:request|response)\)\.(?:body|header|status)(?:\.[^%{}]*)?\s*%}|#(?:[A-Fa-f0-9]{6})\.\((?:request|response)\)\.(?:body|header|status)(?:\.[^;{}\s%]*)?/g;
+
+const ENDPOINT_ARG_TOKEN_RE = /#\{%\s*([A-Za-z0-9_-]+)\s*%}/g;
+
+const wrapReference = (value: string) =>
+	value.trim().startsWith('{%') ? value : `{%${value}%}`;
+
+const serializeReferenceString = (value: string, endpointArgs?: Record<string, any>) =>
+	value
+		.replace(ENDPOINT_ARG_TOKEN_RE, (_, argId: string) => {
+			const source = endpointArgs?.[argId]?.source;
+			return typeof source === 'string' ? wrapReference(source) : `#{%${argId}%}`;
+		})
+		.replace(REFERENCE_RE, (reference) => wrapReference(reference));
+
+const serializeReferences = (value: unknown, endpointArgs?: Record<string, any>): unknown => {
+	if (typeof value === 'string') return serializeReferenceString(value, endpointArgs);
+	if (Array.isArray(value)) return value.map((item) => serializeReferences(item, endpointArgs));
+	if (value && typeof value === 'object') {
+		return Object.fromEntries(
+			Object.entries(value as Record<string, unknown>).map(([key, nested]) => [
+				key,
+				serializeReferences(nested, endpointArgs),
+			]),
+		);
+	}
+	return value;
+};
+
+const serializeHeaderReferenceString = (value: string, endpointArgs?: Record<string, any>) =>
+	value
+		.replace(ENDPOINT_ARG_TOKEN_RE, (token, argId: string) => {
+			const source = endpointArgs?.[argId]?.source;
+			return typeof source === 'string'
+				? source.replace(/^\{%\s*/, '').replace(/\s*%}$/, '')
+				: token;
+		})
+		.replace(/\{%\s*(#[A-Fa-f0-9]{6}\.\((?:request|response)\)\.(?:body|header|status)(?:\.[^%{}]*)?)\s*%}/g, '$1');
+
+const serializeHeaderReferences = (value: unknown, endpointArgs?: Record<string, any>): unknown => {
+	if (typeof value === 'string') return serializeHeaderReferenceString(value, endpointArgs);
+	if (Array.isArray(value)) return value.map((item) => serializeHeaderReferences(item, endpointArgs));
+	if (value && typeof value === 'object') {
+		return Object.fromEntries(
+			Object.entries(value as Record<string, unknown>).map(([key, nested]) => [
+				key,
+				serializeHeaderReferences(nested, endpointArgs),
+			]),
+		);
+	}
+	return value;
+};
+
+const serializePayloadData = (body: unknown, endpointArgs?: Record<string, any>, format = 'json', data = 'raw') =>
+	serializeHeaderReferences(normalizePayloadData(body, format, data), endpointArgs);
+
+const buildMethodPayload = (
+	node: WorkflowNodeModel,
+	index: string,
+	order: number,
+	resolvedColor?: string,
+	includeInvoker?: boolean,
+) => {
+	const config = node.data.methodConfig as any;
+	const endpointArgs = config?.endpointArgs ?? {};
+	const isHttpRequest = isConnectorlessMethodNode(node);
+	const connectorData = isHttpRequest ? null : node.data.connector;
+	const response = config?.response ?? (isHttpRequest
+		? {
+			responseId: `response-${node.id}`,
+			success: {
+				status: '200',
+				header: {},
+				body: buildPayloadData({}),
+			},
+			fail: {
+				status: '500',
+				header: {},
+				body: buildPayloadData({}),
+			},
+		}
+		: undefined);
+
+	return {
+		id: node.id,
+		name: config?.name ?? node.data.subtitle,
+		...(node.data.labelEdited ? { label: node.data.subtitle } : {}),
+		index,
+		methodType: resolveMethodType(node),
+		dataAggregator: node.data.dataAggregator ?? null,
+		color: normalizeColor(resolvedColor ?? (node.data as any).color, ALL_COLORS[order % ALL_COLORS.length]),
+		connector: connectorData && includeInvoker
+			? { ...connectorData, invoker: connectorData.invokerName ?? null }
+			: connectorData,
+		request: {
+			endpoint: serializeReferenceString(config?.url ?? '', endpointArgs),
+			method: config?.method ?? 'GET',
+			header: serializeHeaderReferences(config?.headers ?? {}, endpointArgs),
+			body: serializePayloadData(config?.body, endpointArgs, config?.bodyFormat, config?.bodyData),
+		},
+		...(response ? { response } : {}),
+	};
+};
+
+const wrapExpressionReferences = (expression: string) =>
+	expression.replace(
+		/(?<!\{%)(#[A-Za-z0-9]{6}\.\((?:response|request)\)\.[^\s)%]+)/g,
+		'{%$1%}',
+	);
+
+const unwrapWholeExpression = (expression: string) => {
+	const match = expression.match(/^\{%\s*(.*)\s*%}$/);
+	if (!match) return expression;
+	// Only strip the outer wrap when it's a single redundant {% ... %} around the whole
+	// expression (a legacy artifact). If the captured middle still contains another wrap
+	// boundary, the leading/trailing {%/%} actually belong to two separate references that
+	// happen to bookend the string (e.g. `{%ref1%} NotContains {%ref2%}`) — leave it alone.
+	if (match[1].includes('{%') || match[1].includes('%}')) return expression;
+	return match[1].trim();
+};
+
+const wrapIfExpression = (expression: string) => {
+	const value = expression.trim();
+	if (!value) return '';
+	return value.startsWith('(') && value.endsWith(')') ? value : `(${value})`;
+};
+
+const normalizeOperatorExpression = (expression: string, type: string) => {
+	const value = wrapExpressionReferences(unwrapWholeExpression(String(expression ?? '').trim()));
+	if (!value) return '';
+	if (type !== 'if') {
+		return value;
+	}
+	return wrapIfExpression(value);
+};
+
+const buildOperatorPayload = (node: WorkflowNodeModel, index: string, iterator?: string) => {
+	const type = nodeKind(node);
+	return {
+		id: node.id,
+		index,
+		type,
+		dataAggregator: node.data.dataAggregator ?? null,
+		expression: normalizeOperatorExpression(node.data.conditionConfig?.expression ?? '', type),
+		...(type === 'loop' && iterator
+			? { iterator }
+			: {}),
+	};
+};
+
+const getParentIndex = (index: string, depth: number) =>
+	index.split('_').slice(0, -depth).join('_');
+
+const getLoopIterator = (
+	node: WorkflowNodeModel,
+	index: string,
+	operators: Array<{ index: string; type: string; iterator?: string }>,
+) => {
+	const existing = (node.data.conditionConfig as any)?.iterator;
+	if (existing) return existing;
+
+	let result = ITERATOR_NAMES[0];
+	const splitOperatorIndex = index.split('_');
+
+	if (splitOperatorIndex.length > 1) {
+		let decreaseIterator = 1;
+		let previousOperator: { type: string; iterator?: string } | undefined;
+
+		while (true) {
+			const decreasedOperatorIndex = getParentIndex(index, decreaseIterator);
+			previousOperator = operators.find((operator) => operator.index === decreasedOperatorIndex);
+			if (!previousOperator || previousOperator.type === 'loop') break;
+			decreaseIterator += 1;
+		}
+
+		if (previousOperator?.iterator) {
+			const previousIteratorIndex = ITERATOR_NAMES.indexOf(previousOperator.iterator);
+			if (previousIteratorIndex >= 0) {
+				result = ITERATOR_NAMES[previousIteratorIndex + 1] ?? 'ii';
+			}
+		}
+	}
+
+	return result;
+};
+
+const parseBindingReference = (reference: unknown) => {
+	const match = String(reference ?? '')
+		.trim()
+		.replace(/^\{%\s*/, '')
+		.replace(/\s*%}$/, '')
+		.match(/^(#[A-Fa-f0-9]{6})\.\((request|response)\)\.(.+)$/);
+	if (!match) return undefined;
+	return {
+		color: match[1],
+		type: match[2],
+		field: match[3],
+	};
+};
+
+const serializeFieldBinding = (binding: any) => {
+	const args = binding?.enhancement?.args;
+	if (!args?.RESULT_VAR) return binding;
+
+	const to = parseBindingReference(args.RESULT_VAR);
+	const from = Object.keys(args)
+		.filter((key) => /^VAR_\d+$/.test(key))
+		.sort((left, right) => Number(left.slice(4)) - Number(right.slice(4)))
+		.map((key) => parseBindingReference(args[key]))
+		.filter(Boolean);
+
+	if (!to || from.length === 0) return binding;
+
+	const expertVar = [
+		`//var RESULT_VAR = ${args.RESULT_VAR};`,
+		...from.map((item: any, index) => `//var VAR_${index} = ${item.color}.(${item.type}).${item.field};`),
+	].join('\n');
+
+	return {
+		...(binding?.id ? { id: binding.id } : {}),
+		from,
+		to: [to],
+		enhancement: {
+			...(Number.isInteger(Number(binding?.enhancement?.enhanceId))
+				? { enhancementId: Number(binding.enhancement.enhanceId) }
+				: {}),
+			name: binding?.enhancement?.name ?? '',
+			description: binding?.enhancement?.description ?? '',
+			language: binding?.enhancement?.language ?? 'js',
+			simpleCode: binding?.enhancement?.simpleCode ?? null,
+			expertVar,
+			expertCode: binding?.enhancement?.script?.endsWith(';')
+				? binding.enhancement.script
+				: `${binding?.enhancement?.script ?? 'RESULT_VAR = VAR_0'};`,
+		},
+	};
+};
+
+const serializeFieldBindings = (fieldBindings: any) =>
+	Array.isArray(fieldBindings)
+		? fieldBindings
+			.filter((binding) => {
+				const result = parseBindingReference(binding?.enhancement?.args?.RESULT_VAR);
+				return result?.type !== 'request' || result.field !== 'endpoint';
+			})
+			.map(serializeFieldBinding)
+		: fieldBindings;
+
+const buildBindingReference = (reference: any) => {
+	if (!reference?.color || !reference?.type || !reference?.field) return undefined;
+	return `${reference.color}.(${reference.type}).${reference.field}`;
+};
+
+const stableBindingId = (value: string) => {
+	let hash = 0;
+	for (let index = 0; index < value.length; index += 1) {
+		hash = (hash * 31 + value.charCodeAt(index)) >>> 0;
+	}
+	return `enh_${hash.toString(16)}`;
+};
+
+const normalizeFieldBinding = (binding: any) => {
+	const enhancement = binding?.enhancement;
+	if (!enhancement) return binding;
+
+	if (enhancement.enhanceId && enhancement.args) {
+		return {
+			...binding,
+			enhancement: {
+				...enhancement,
+				enhanceId: String(enhancement.enhanceId),
+			},
+		};
+	}
+
+	const to = Array.isArray(binding?.to) ? binding.to[0] : undefined;
+	const from: any[] = Array.isArray(binding?.from) ? binding.from : [];
+	const resultVar = buildBindingReference(to);
+	const fromArgs = from.reduce<Record<string, string>>((args, item: any, index: number) => {
+		const value = buildBindingReference(item);
+		if (typeof value === 'string') {
+			args[`VAR_${index}`] = value;
+		}
+		return args;
+	}, {});
+
+	return {
+		...binding,
+		enhancement: {
+			...enhancement,
+			enhanceId: String(enhancement.enhancementId ?? enhancement.enhanceId ?? binding.id ?? stableBindingId(resultVar ?? JSON.stringify(binding))),
+			script: enhancement.script ?? enhancement.expertCode ?? 'RESULT_VAR = VAR_0;',
+			args: resultVar ? { RESULT_VAR: resultVar, ...fromArgs } : enhancement.args ?? {},
+		},
+	};
+};
+
+const normalizeFieldBindings = (fieldBindings: any) =>
+	Array.isArray(fieldBindings) ? fieldBindings.map(normalizeFieldBinding) : [];
+
+export function buildFromConnectorPayload(
+	nodes: WorkflowNodeModel[],
+	edges: WorkflowEdgeModel[],
+	options?: { includeInvoker?: boolean },
+) {
+	const workflowIndexes = buildWorkflowIndexes(nodes, edges);
+	const methodNodes = nodes.filter(isMethodNode);
+	const usedMethodColors = new Set<string>();
+	methodNodes.forEach((node) => {
+		const raw = typeof node.data.color === 'string' ? node.data.color.trim() : '';
+		if (raw) usedMethodColors.add(raw.toLowerCase());
+	});
+	const colorByNodeId = new Map<string, string>();
+	methodNodes.forEach((node) => {
+		const raw = typeof node.data.color === 'string' ? node.data.color.trim() : '';
+		if (raw) {
+			colorByNodeId.set(node.id, raw);
+			return;
+		}
+		const free = ALL_COLORS.find((color) => !usedMethodColors.has(color.toLowerCase()))
+			?? ALL_COLORS[colorByNodeId.size % ALL_COLORS.length];
+		usedMethodColors.add(free.toLowerCase());
+		colorByNodeId.set(node.id, free);
+	});
+	const methods = methodNodes
+		.map((node, index) => buildMethodPayload(
+			node,
+			normalizeIndex(workflowIndexes.get(node.id), index),
+			index,
+			colorByNodeId.get(node.id),
+			options?.includeInvoker,
+		))
+		.sort(compareIndex);
+	const operatorEntries = nodes
+		.filter(isOperatorNode)
+		.map((node, index) => ({
+			node,
+			index: workflowIndexes.get(node.id) ?? String(methods.length + index),
+		}))
+		.sort(compareIndex);
+	const builtOperators: Array<{ index: string; type: string; iterator?: string }> = [];
+	const operators = operatorEntries
+		.map(({ node, index }) => {
+			const iterator = nodeKind(node) === 'loop'
+				? getLoopIterator(node, index, builtOperators)
+				: undefined;
+			const operator = buildOperatorPayload(node, index, iterator);
+			builtOperators.push(operator);
+			return operator;
+		})
+		.sort(compareIndex);
+
+	const fromConnector = {
+		connectorId: -1,
+		title: 'DEFAULT',
+		methods,
+		operators,
+	};
+
+	return fromConnector;
+}
+
+export function buildConnectionPayload({
+	connectionId,
+	title,
+	description,
+	nodes,
+	edges,
+	viewport,
+	fieldBindings,
+	categoryId,
+	includeInvoker,
+}: BuildConnectionPayloadArgs) {
+	const connection = buildLegacyConnection(nodes);
+	return {
+		...(connectionId ? { connectionId: Number(connectionId) } : {}),
+		title,
+		name: title,
+		description,
+		categoryId: categoryId ?? null,
+		fieldBinding: serializeFieldBindings(fieldBindings ?? connection.fieldBindings),
+		fromConnector: buildFromConnectorPayload(nodes, edges, { includeInvoker }),
+		toConnector: null,
+		ui: buildUiPayload(nodes, edges, viewport),
+	};
+}
+
+export function normalizeConnectionPayload(payload: any) {
+	const fromConnector = stripPluralConnectorLists(payload?.fromConnector);
+	const sourceFromConnector = fromConnector;
+	const sourceMethods = Array.isArray(payload?.fromConnector?.methods)
+		? payload.fromConnector.methods
+		: Array.isArray(sourceFromConnector?.method)
+			? sourceFromConnector.method
+			: [];
+	const sourceOperators = Array.isArray(payload?.fromConnector?.operators)
+		? payload.fromConnector.operators
+		: Array.isArray(sourceFromConnector?.operator)
+			? sourceFromConnector.operator
+			: [];
+
+	const rootOffset = sourceMethods.length + sourceOperators.length;
+	const shiftRootIndex = (value: unknown, fallback: number) => {
+		const parts = normalizeIndex(value, fallback).split('_');
+		parts[0] = String((Number(parts[0]) || 0) + rootOffset);
+		return parts.join('_');
+	};
+	const toMethods = Array.isArray(payload?.toConnector?.methods) ? payload.toConnector.methods : [];
+	const toOperators = Array.isArray(payload?.toConnector?.operators) ? payload.toConnector.operators : [];
+	const fromInvokerName = payload?.fromConnector?.invoker?.name ?? sourceFromConnector?.invoker?.name;
+	const toInvokerName = payload?.toConnector?.invoker?.name;
+	const combinedMethods = [
+		...sourceMethods.map((method: any, index: number) => ({ ...method, index: normalizeIndex(method?.index, index), fallbackInvokerName: fromInvokerName })),
+		...toMethods.map((method: any, index: number) => ({ ...method, index: shiftRootIndex(method?.index, sourceMethods.length + index), fallbackInvokerName: toInvokerName })),
+	];
+	const combinedOperators = [
+		...sourceOperators.map((operator: any, index: number) => ({ ...operator, index: normalizeIndex(operator?.index, index) })),
+		...toOperators.map((operator: any, index: number) => ({ ...operator, index: shiftRootIndex(operator?.index, sourceOperators.length + index) })),
+	];
+
+	return {
+		...payload,
+		title: payload?.title ?? payload?.name ?? 'Workflow Connection',
+		name: payload?.name ?? payload?.title ?? 'Workflow Connection',
+		fieldBinding: normalizeFieldBindings(payload?.fieldBinding),
+		fieldBindings: normalizeFieldBindings(payload?.fieldBindings),
+		fromConnector: {
+			...sourceFromConnector,
+			connectorId: -1,
+			title: 'DEFAULT',
+			method: combinedMethods.map((method: any) => {
+				// method.connector.invoker is the per-connector-instance source of truth (added so multi-connector
+				// templates resolve correctly). The backend sends it as a plain string, but tolerate a {name}
+				// object too since that's the shape fromConnector/toConnector.invoker already use. The flat fields
+				// and fallbackInvokerName only cover older templates that carried a single invoker name for the
+				// whole fromConnector/toConnector side.
+				const rawConnectorInvoker = method?.connector?.invoker;
+				const connectorInvokerName = typeof rawConnectorInvoker === 'string'
+					? rawConnectorInvoker
+					: rawConnectorInvoker?.name;
+
+				return {
+					...method,
+					connector: method?.connector === null
+						? null
+						: {
+							connectorId: method?.connector?.connectorId ?? method?.connectorId ?? -1,
+							title: method?.connector?.title ?? method?.connectorTitle ?? method?.connector?.name ?? 'DEFAULT',
+							icon: method?.connector?.icon ?? null,
+							invokerName: connectorInvokerName
+								?? method?.invokerName
+								?? method?.connector?.invokerName
+								?? method?.fallbackInvokerName
+								?? null,
+						},
+				};
+			}),
+			operator: combinedOperators.map((operator: any) => ({
+				...operator,
+			})),
+		},
+		toConnector: null,
+	};
+}

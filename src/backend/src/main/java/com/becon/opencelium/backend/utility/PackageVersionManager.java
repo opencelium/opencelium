@@ -42,8 +42,8 @@ public class PackageVersionManager {
     }
 
     public static int compareVersions(String version1, String version2) {
-        String[] parts1 = version1.split("\\.");
-        String[] parts2 = version2.split("\\.");
+        String[] parts1 = version1.trim().split("\\.");
+        String[] parts2 = version2.trim().split("\\.");
 
         int length = Math.max(parts1.length, parts2.length);
         for (int i = 0; i < length; i++) {
@@ -56,7 +56,7 @@ public class PackageVersionManager {
     }
 
     public static List<Integer> parseVersion(String version) {
-        return Arrays.stream(version.split("\\."))
+        return Arrays.stream(version.trim().split("\\."))
                 .map(Integer::parseInt)
                 .collect(Collectors.toList());
     }

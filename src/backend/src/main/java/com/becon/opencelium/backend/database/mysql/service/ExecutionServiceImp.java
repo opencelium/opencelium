@@ -24,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -84,19 +83,29 @@ public class ExecutionServiceImp implements ExecutionService {
                 .orElseThrow(() -> new RuntimeException("EXECUTION_NOT_FOUND"));
     }
 
+    @Override
+    public void deleteBySchedulerId(int schedulerId) {
+        cache.remove(STATS_KEY);
+        log.debug("[Cache] '{}' evicted", STATS_KEY);
+        executionRepository.deleteBySchedulerId(schedulerId);
+    }
+
+    @Override
     public double getAvgDurationOfExecution(int schedulerId) {
-        List<Execution> executions = getExecutionsBySchedulerId(schedulerId);
-        List<Long> diffArray = new ArrayList<>();
-        for (Execution e : executions) {
-            if (e.getEndTime() == null || !e.getStatus().equals("S")) {
-                continue;
-            }
-            long endTime = e.getEndTime().getTime();
-            long startTime = e.getStartTime().getTime();
+        return getExecutionsBySchedulerId(schedulerId).stream()
+                .filter(this::isSuccessfulFinishedExecution)
+                .mapToLong(this::getDuration)
+                .average()
+                .orElse(0);
+    }
 
-            diffArray.add(endTime - startTime);
-        }
+    private boolean isSuccessfulFinishedExecution(Execution execution) {
+        return execution.getStartTime() != null
+                && execution.getEndTime() != null
+                && "S".equals(execution.getStatus());
+    }
 
-        return diffArray.stream().mapToDouble((x) -> x).average().orElse(0);
+    private long getDuration(Execution execution) {
+        return execution.getEndTime().getTime() - execution.getStartTime().getTime();
     }
 }

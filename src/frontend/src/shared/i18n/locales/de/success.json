@@ -1,0 +1,8 @@
+{
+  "api": {
+    "deleted": "Erfolgreich gelöscht"
+  },
+  "connection": {
+    "reconnected": "Live-Verbindung wiederhergestellt. Metriken werden wieder aktualisiert."
+  }
+}

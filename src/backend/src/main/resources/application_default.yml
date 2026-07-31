@@ -90,7 +90,7 @@ spring:
         id:
           new_generator_mappings: false
     hibernate:
-      dll-auto: validate
+      ddl-auto: validate
     open-in-view: false
   servlet:
     multipart:
@@ -114,14 +114,15 @@ spring:
     throw-exception-if-no-handler-found: true #enables exception handling for endpoints that is not defined in controllers
   web:
     resources:
-      add-mappings=false:
+      add-mappings: false
   ######################################################################
   #                                                                    #
   #   LDAP configuration section.                                      #
   #   LDAP DEBUG mode can be enabled with the                          #
-  #   logging.level.org.springframework.data.ldap: DEBUG settings      #
+  #   logging.level.org.springframework.security.ldap: DEBUG settings      #
   #                                                                    #
   ######################################################################
+#  security:
 #    ldap:
 #      # LDAP server URL
 #      urls: ldap://localhost:7389
@@ -176,7 +177,7 @@ logging:
   level:
     org:
       springframework:
-        data:
+        security:
           # Activate or deactivate logs during LDAP authentication
           ldap: OFF # OFF or DEBUG;
 
@@ -194,7 +195,65 @@ management:
           UP: 200
 
 opencelium:
+<<<<<<< HEAD
   version: 4.8.4
+=======
+  version: 5.0
+  ###########################################################################
+  #                                                                         #
+  #   /application-config endpoint                                          #
+  #                                                                         #
+  #   file-path        — application.yml on disk to read and write          #
+  #   backup.directory — where pre-write backups go (.bak.<epochMillis>)    #
+  #   backup.keep      — how many recent backups to retain per target file  #
+  #                                                                         #
+  ###########################################################################
+  config:
+    file-path: ./application.yml
+    backup:
+      directory: runtime/backup/application
+      keep: 10
+  ###########################################################################
+  #                                                                         #
+  #   Sweepers                                                              #
+  #                                                                         #
+  #   test-connection — permanently removes leftover test connections       #
+  #     enabled       — turn the sweeper on/off (default: true)             #
+  #     fixed-delay   — ms between runs, non-overlapping (default: 1h)      #
+  #     initial-delay — ms before the first run; 0 also cleans at startup   #
+  #                                                                         #
+  ###########################################################################
+  sweeper:
+    test-connection:
+      enabled: true
+      fixed-delay: 900000
+      initial-delay: 0
+  ###########################################################################
+  #                                                                         #
+  #   Background connector health monitor                                   #
+  #                                                                         #
+  #   enabled           — master switch for the periodic sweep              #
+  #   interval          — delay between two sweeps in milliseconds          #
+  #   initial-delay     — delay before the first sweep after startup (ms)   #
+  #   failure-threshold — consecutive failed checks before a connector's    #
+  #                       status transitions to DOWN/AUTH_FAILED            #
+  #                       (flap damping); recovery needs a single success   #
+  #   parallelism       — how many connectors are checked concurrently      #
+  #   request-logging   — INFO-log each check's request (method + endpoint  #
+  #                       template, never resolved credentials) and its     #
+  #                       response (status, latency, truncated body)        #
+  #                                                                         #
+  ###########################################################################
+  connector-health:
+    enabled: true
+    interval: 60000
+    initial-delay: 10000
+    failure-threshold: 3
+    parallelism: 4
+    request-logging:
+      enabled: false
+      max-body-length: 500
+>>>>>>> origin/version5.0
   ###########################################################################
   #                                                                         #
   #   Is customizable                                                       #
@@ -309,8 +368,8 @@ opencelium:
 #  online-services:
 #    invoker-sync:
 #      time: 0 0 0 * * *
-#      active: "false"
+#      active: false
 #    template-sync:
 #      time: 0 0 0 * * *
-#      active: "false"
-#    active: "false"
+#      active: false
+#    active: false

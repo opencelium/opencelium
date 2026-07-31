@@ -75,7 +75,7 @@ public class SchedulerController {
     })
     @GetMapping("/all")
     public ResponseEntity<List<SchedulerResource>> getAll() throws Exception {
-        List<Scheduler> schedulers = schedulerService.findAll();
+        List<Scheduler> schedulers = schedulerService.excludeTestSchedulers(schedulerService.findAll());
         List<SchedulerResource> scheduleList = schedulers.stream()
             .map(s -> schedulerService.toResource(s)).collect(Collectors.toList());
 
@@ -100,7 +100,7 @@ public class SchedulerController {
     })
     @PostMapping("/all/by-ids")
     public ResponseEntity<List<SchedulerResource>> getAllByIds(@RequestBody IdentifiersDTO<Integer> ids) {
-        List<Scheduler> schedulers = schedulerService.findAllById(ids.getIdentifiers());
+        List<Scheduler> schedulers = schedulerService.excludeTestSchedulers(schedulerService.findAllById(ids.getIdentifiers()));
 
         List<SchedulerResource> scheduleList = schedulers.stream()
                 .map(s -> schedulerService.toResource(s, Boolean.FALSE))
@@ -464,7 +464,7 @@ public class SchedulerController {
     @PostMapping(value = "/list/get", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<SchedulerResource>> getSchedulersByIds(@RequestBody IdentifiersDTO<Integer> payload){
         ArrayList<Integer> schedulerIds = payload.getIdentifiers();
-        List<Scheduler> schedulers = schedulerService.findAllById(schedulerIds);
+        List<Scheduler> schedulers = schedulerService.excludeTestSchedulers(schedulerService.findAllById(schedulerIds));
         List<SchedulerResource> scheduleList = schedulers.stream()
                 .map(sch -> schedulerService.toResource(sch)).collect(Collectors.toList());
         return ResponseEntity.ok(scheduleList);

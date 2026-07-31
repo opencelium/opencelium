@@ -1,0 +1,40 @@
+.row-expander {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.row-expander__anchor {
+    position: relative;
+    display: inline-flex;
+}
+
+/* Live cue: count of hidden sub-rows shown while collapsed, gently pulsing so the
+   user notices there is something running to expand. Theme-aware via tokens. */
+.row-expander__badge {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    min-width: 15px;
+    height: 15px;
+    padding: 0 4px;
+    border-radius: 8px;
+    background-color: var(--color-action-primary);
+    color: var(--color-text-on-action);
+    font-size: 9px;
+    font-weight: 600;
+    line-height: 15px;
+    text-align: center;
+    pointer-events: none;
+    animation: row-expander-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes row-expander-pulse {
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 var(--color-action-primary-subtle);
+    }
+    50% {
+        box-shadow: 0 0 0 4px transparent;
+    }
+}

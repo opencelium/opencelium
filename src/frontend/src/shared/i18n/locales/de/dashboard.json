@@ -1,0 +1,56 @@
+{
+  "header": {
+    "title": "Dashboard",
+    "subtitle": "Betrieblicher Überblick über Ihre OpenCelium-Umgebung",
+    "dateRangeLabel": "Letzte 7 Tage"
+  },
+  "comingSoon": "Demnächst verfügbar",
+  "waitingApi": "Warten auf API",
+  "refresh": "Aktualisieren",
+  "connection": {
+    "statusConnected": "Live — in Echtzeit synchronisiert",
+    "statusConnecting": "Verbindung zu Live-Updates wird hergestellt…",
+    "statusDisconnected": "Verbindung verloren — Daten möglicherweise veraltet"
+  },
+  "metrics": {
+    "executions": "Läufe",
+    "failureRate": "Fehlerquote",
+    "avgRuntime": "Ø Laufzeit",
+    "runtime": "Laufzeit",
+    "logs": "Logs",
+    "noData": "—"
+  },
+  "attention": {
+    "title": "Erfordert Aufmerksamkeit",
+    "viewAll": "Alle anzeigen",
+    "empty": "Aktuell ist nichts zu tun"
+  },
+  "recentActivity": {
+    "title": "Letzte Aktivität",
+    "viewAll": "Alle anzeigen",
+    "empty": "Keine kürzliche Aktivität"
+  },
+  "systemHealth": {
+    "title": "Systemzustand",
+    "healthy": "Gesund",
+    "warning": "Warnung",
+    "critical": "Kritisch",
+    "statusHealthy": "Gesund"
+  },
+  "executionsChart": {
+    "title": "Läufe & Fehler",
+    "executions": "Läufe",
+    "failures": "Fehler"
+  },
+  "resourceUsage": {
+    "title": "Ressourcenverbrauch",
+    "cpu": "CPU",
+    "memory": "Speicher"
+  },
+  "topConnectors": {
+    "title": "Top-Konnektoren",
+    "name": "Konnektor",
+    "executions": "Läufe",
+    "failureRate": "Fehlerquote"
+  }
+}

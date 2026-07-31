@@ -1,0 +1,111 @@
+.tooltip__body {
+    position: relative;
+    max-width: 360px;
+
+    background: var(--color-background-surface);
+    border-radius: var(--radius-lg);
+    padding: 16px 16px 14px;
+
+    border: 1px solid var(--color-border-subtle);
+
+    box-shadow: var(--shadow-md);
+
+    color: var(--color-text-primary);
+}
+
+/* Close button (X) */
+.tooltip__close {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+
+    background: transparent;
+    border: none;
+
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+
+    color: var(--color-text-secondary);
+
+    transition: color 0.15s ease;
+}
+
+.tooltip__close:hover {
+    color: var(--color-text-primary);
+}
+
+/* Title */
+.tooltip__title {
+    margin: 0 24px 8px 0;
+    font-size: 16px;
+    font-weight: 600;
+
+    color: var(--color-text-primary);
+}
+
+/* Content */
+.tooltip__content {
+    font-size: 14px;
+    line-height: 1.5;
+
+    color: var(--color-text-secondary);
+}
+
+/* Footer */
+.tooltip__footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-top: 14px;
+    gap: 8px;
+}
+
+/* Buttons */
+.tooltip__button {
+    appearance: none;
+    border: none;
+
+    background: transparent;
+
+    font-size: 13px;
+    padding: 6px 10px;
+    border-radius: var(--radius-md);
+
+    cursor: pointer;
+
+    color: var(--color-text-secondary);
+
+    transition:
+            background 0.15s ease,
+            color 0.15s ease;
+}
+
+.tooltip__button:hover {
+    background: var(--color-background-elevated);
+    color: var(--color-text-primary);
+}
+
+/* Primary button (Next / Finish) */
+.tooltip__button--primary {
+    background: var(--color-action-primary);
+    color: var(--color-text-inverted);
+
+    font-weight: 500;
+}
+
+.tooltip__button--primary:hover {
+    background: var(--color-action-primary-hover);
+}
+
+/* Spacer for Back + Next */
+.tooltip__spacer {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.__floater__arrow span svg polygon{
+    fill: var(--color-background-surface);
+    stroke: var(--color-border-subtle);
+}

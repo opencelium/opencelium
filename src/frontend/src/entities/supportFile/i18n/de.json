@@ -1,0 +1,22 @@
+{
+  "list": {
+    "title": "Support-Dateien",
+    "subTitle": "Diagnose-Pakete, die von Workflowsausführungen erzeugt wurden. Laden Sie ein Paket herunter, um es an den Support weiterzugeben, oder entfernen Sie nicht mehr benötigte Pakete.",
+    "searchPlaceholder": "Nach Workflow suchen",
+    "deletedConnection": "Gelöschte Workflow",
+    "columns": {
+      "status": "Status",
+      "connection": "Workflow",
+      "filePath": "Dateipfad",
+      "timestamp": "Zeitstempel"
+    },
+    "download": {
+      "tooltip": "Support-Datei herunterladen",
+      "success": "Support-Datei heruntergeladen",
+      "error": "Support-Datei konnte nicht heruntergeladen werden"
+    }
+  },
+  "events": {
+    "created": "Support-Datei ist bereit"
+  }
+}

@@ -20,13 +20,20 @@ import java.util.Base64;
 @Service
 public class TotpServiceImpl implements TotpService {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+    private final SessionService sessionService;
+    private final GoogleAuthenticator provider;
 
     @Autowired
-    private SessionService sessionService;
+    public TotpServiceImpl(UserService userService, SessionService sessionService) {
+        this(userService, sessionService, new GoogleAuthenticator());
+    }
 
-    private final GoogleAuthenticator provider = new GoogleAuthenticator();
+    public TotpServiceImpl(UserService userService, SessionService sessionService, GoogleAuthenticator provider) {
+        this.userService = userService;
+        this.sessionService = sessionService;
+        this.provider = provider;
+    }
 
 
     @Override

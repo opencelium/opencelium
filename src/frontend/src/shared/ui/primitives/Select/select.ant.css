@@ -1,0 +1,3 @@
+.ant-select-custom .ant-select-selector {
+    border-radius: var(--radius-md);
+}

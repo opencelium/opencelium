@@ -1,0 +1,130 @@
+{
+  "list": {
+    "title": "Benutzer",
+    "subTitle": "In diesem Bereich können Administratoren Systembenutzer verwalten, Gruppen zuweisen, die Zwei-Faktor-Authentifizierung (2FA) aktivieren und Zugriffsberechtigungen steuern."
+  },
+  "crossValidations": {
+    "repeatPassword": {
+      "message": "Passwörter stimmen nicht überein"
+    }
+  },
+  "fields": {
+    "userDetail": {
+      "name": {
+        "label": "Name",
+        "info": "Der Bereich „Benutzerdetails“ enthält persönliche und organisatorische Informationen zum Konto, einschließlich Kontaktdaten und rollenbezogener Metadaten."
+      },
+      "surname": {
+        "label": "Nachname"
+      },
+      "department": {
+        "label": "Abteilung"
+      },
+      "organization": {
+        "label": "Organisation"
+      },
+      "phoneNumber": {
+        "label": "Telefonnummer",
+        "validation1": "Ungültiges Telefonnummernformat"
+      },
+      "documents": {
+        "label": "Dokumente"
+      }
+    },
+    "email": {
+      "label": "E-Mail",
+      "errors": {
+        "email_already_exists": "Ein Benutzer mit dieser E-Mail existiert bereits"
+      }
+    },
+    "password": {
+      "label": "Passwort",
+      "info": "Das Passwort muss mindestens 8 Zeichen lang sein und mindestens einen Großbuchstaben, einen Kleinbuchstaben, eine Zahl und ein Sonderzeichen enthalten.",
+      "validation1": "Muss einen Großbuchstaben enthalten",
+      "validation2": "Muss einen Kleinbuchstaben enthalten",
+      "validation3": "Muss eine Zahl enthalten",
+      "validation4": "Muss ein Sonderzeichen enthalten"
+    },
+    "repeatPassword": {
+      "label": "Passwort wiederholen"
+    },
+    "userGroup": {
+      "label": "Rolle"
+    },
+    "totpEnabled": {
+      "label": "2FA"
+    }
+  },
+  "sections": {
+    "details": {
+      "title": "Benutzerdetails"
+    },
+    "credentials": {
+      "title": "Zugangsdaten"
+    },
+    "role": {
+      "title": "Rolle"
+    }
+  },
+  "wizard": {
+    "modes": {
+      "create": {
+        "header": "Benutzer erstellen",
+        "subheader": "Ein Benutzer in OpenCelium bezieht sich auf die Verwaltung aller Personen, die Zugriff auf das System haben, einschließlich ihrer Zugangsdaten, persönlichen Informationen und zugewiesenen Rollen/Gruppen. Administratoren können Benutzer erstellen, bearbeiten, anzeigen und löschen sowie deren Berechtigungen und Sicherheitseinstellungen wie 2FA verwalten.",
+        "successMessage": "Benutzer \"{{name}}\" wurde erfolgreich erstellt",
+        "info": "Folgen Sie den einfachen 3 Schritten, um die Benutzererstellung abzuschließen."
+      },
+      "update": {
+        "header": "Benutzer aktualisieren",
+        "subheader": "Benutzerdaten ändern und speichern.",
+        "successMessage": "Benutzer \"{{name}}\" wurde erfolgreich aktualisiert"
+      },
+      "view": {
+        "header": "Benutzerdetails",
+        "subheader": "Benutzerinformationen anzeigen."
+      }
+    },
+    "recommendations": {
+      "1": "Connector erstellen",
+      "2": "Rolle erstellen"
+    },
+    "steps": {
+      "details": {
+        "header": "Benutzerdetails",
+        "subheader": "Grundlegende persönliche Informationen des Benutzers. Diese Felder definieren das Benutzerprofil im System.",
+        "info": "Der Bereich „Benutzerdetails“ enthält persönliche und organisatorische Informationen zum Konto, einschließlich Kontaktdaten und rollenbezogener Metadaten."
+      },
+      "credentials": {
+        "header": "Zugangsdaten",
+        "subheader": "Anmeldedaten für den Zugriff auf das System. Die E-Mail dient als Benutzername."
+      },
+      "role": {
+        "header": "Rolle",
+        "subheader": "Definiert die Berechtigungsstufe und Zugriffsrechte des Benutzers im System."
+      }
+    }
+  },
+  "confirmation": {
+    "delete": {
+      "byEmail": "Benutzer mit der E-Mail „{{email}}“ löschen?",
+      "byId": "Benutzer mit der ID „{{id}}“ löschen?"
+    }
+  },
+  "actions": {
+    "delete": {
+      "cannotDeleteSelf": "Sie können den angemeldeten Benutzer nicht löschen."
+    }
+  },
+  "totp": {
+    "confirmDisable": {
+      "title": "2FA deaktivieren",
+      "message": "Möchten Sie die Zwei-Faktor-Authentifizierung für diesen Benutzer wirklich deaktivieren?"
+    },
+    "enableSuccess": "Zwei-Faktor-Authentifizierung aktiviert",
+    "disableSuccess": "Zwei-Faktor-Authentifizierung deaktiviert",
+    "bulkEnable": {
+      "label": "2FA aktivieren",
+      "success": "Zwei-Faktor-Authentifizierung für {{count}} Benutzer aktiviert"
+    }
+  }
+}

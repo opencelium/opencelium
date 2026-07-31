@@ -17,6 +17,7 @@
 package com.becon.opencelium.backend.configuration;
 
 import com.becon.opencelium.backend.constant.PathConstant;
+import com.becon.opencelium.backend.database.mongodb.converter.MethodTypeConverters;
 import com.becon.opencelium.backend.enums.RepositoryEnum;
 import jakarta.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -39,6 +40,7 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
+import java.util.List;
 
 @Configuration
 @EnableMongoRepositories(basePackages = PathConstant.MONGODB)
@@ -79,6 +81,15 @@ public class DatabaseConfiguration {
         JpaTransactionManager transactionManager = new JpaTransactionManager();
         transactionManager.setEntityManagerFactory(entityManagerFactory);
         return transactionManager;
+    }
+
+    // Replaces Boot's empty auto-configured MongoCustomConversions; picked up by
+    // mappingMongoConverter below. Keeps MethodType stored as its wire value.
+    @Bean
+    public MongoCustomConversions mongoCustomConversions() {
+        return new MongoCustomConversions(List.of(
+                MethodTypeConverters.MethodTypeWritingConverter.INSTANCE,
+                MethodTypeConverters.MethodTypeReadingConverter.INSTANCE));
     }
 
     @Bean

@@ -1,0 +1,116 @@
+.sidebarList,
+.historyPanelList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebarItem {
+  position: relative;
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--color-border-subtle);
+  background: var(--color-background-surface);
+  color: var(--color-text-primary);
+  border-radius: 12px;
+  padding: 14px 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.sidebarItemStatus {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1;
+}
+
+.sidebarItemWithImage {
+  position: relative;
+  padding-right: 76px;
+}
+
+.sidebarItemImage {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  width: 52px;
+  height: 52px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebarItemImage img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.sidebarItem:hover {
+  background: var(--color-background-hover);
+  border-color: var(--color-border-default);
+}
+
+/* A long, space-less name (e.g. a slug) can't wrap, so without this it overflows the
+   fixed-width sidebar instead of respecting it. */
+.sidebarItem strong,
+.sidebarItem span {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebarItem span {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.sidebarItem .sidebarItemError {
+  color: var(--color-status-error-fg);
+}
+
+.sidebarItemMuted {
+  opacity: 0.75;
+  cursor: default;
+}
+
+.sidebarItemStandalone {
+  margin-top: 8px;
+}
+
+.sidebarLoading {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
+}
+
+.historyItem {
+  border: 1px solid var(--color-border-subtle);
+  background: var(--color-background-surface);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.historyItem:hover {
+  background: var(--color-background-hover);
+}
+
+.historyItem span,
+.historyItem small {
+  color: var(--color-text-secondary);
+}

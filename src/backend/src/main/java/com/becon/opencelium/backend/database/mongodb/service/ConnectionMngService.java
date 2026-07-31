@@ -3,6 +3,7 @@ package com.becon.opencelium.backend.database.mongodb.service;
 import com.becon.opencelium.backend.database.mongodb.entity.ConnectionMng;
 import com.becon.opencelium.backend.resource.connection.ConnectionVersionUpdateRequest;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface ConnectionMngService {
@@ -15,6 +16,10 @@ public interface ConnectionMngService {
     ConnectionMng getById(String id);
 
     List<ConnectionMng> getAllByConnectionId(Long id);
+
+    List<ConnectionMng> getAllByConnectionIdRaw(Long id);
+
+    List<ConnectionMng> getVersionMetaByIds(Collection<String> snapshotIds);
 
     long deleteByConnectionIdIn(List<Long> chunk);
 

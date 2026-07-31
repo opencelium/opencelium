@@ -1,0 +1,30 @@
+`fallback` is a render prop receiving { reset, scope, error } so the fallback
+can offer a "Try again" button (reset() clears the error and re-mounts the
+subtree). Pass `resetKeys` to auto-recover when a value changes (e.g. route).
+
+App-level
+<ErrorBoundary fallback={(p) => <AppCrash {...p} />} scope="app">
+  <AppRouter />
+</ErrorBoundary>
+
+
+Page-level (auto-resets on navigation)
+<ErrorBoundary fallback={(p) => <PageCrash {...p} />} scope="page" resetKeys={[pathname]}>
+  <ConnectorsPage />
+</ErrorBoundary>
+
+
+Widget-level
+<ErrorBoundary fallback={(p) => <WidgetCrash {...p} />} scope="widget">
+  <ExecutionChart />
+</ErrorBoundary>
+
+
+Lazy-loading + boundaries
+const ConnectorsPage = lazy(() => import('./ConnectorsPage'))
+
+<Suspense fallback={<PageLoader />}>
+  <ErrorBoundary fallback={(p) => <PageCrash {...p} />} scope="page">
+    <ConnectorsPage />
+  </ErrorBoundary>
+</Suspense>

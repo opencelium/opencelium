@@ -1,0 +1,61 @@
+{
+  "fields": {
+    "urls": {
+      "label": "URL"
+    },
+    "userDN": {
+      "label": "UserDN"
+    },
+    "groupDN": {
+      "label": "GroupDN"
+    },
+    "username": {
+      "label": "Lesekonto-DN"
+    },
+    "password": {
+      "label": "Lesekonto-Passwort"
+    },
+    "userSearchFilter": {
+      "label": "Benutzersuchfilter"
+    },
+    "groupSearchFilter": {
+      "label": "Gruppensuchfilter"
+    },
+    "logs": {
+      "label": "Protokolle"
+    }
+  },
+  "sections": {
+    "configurations": {
+      "title": "Konfigurationen"
+    }
+  },
+  "wizard": {
+    "modes": {
+      "view": {
+        "header": "LDAP-Konfigurationen",
+        "subheader": "Testen Sie es."
+      }
+    },
+    "recommendations": {
+      "1": "Benutzer erstellen",
+      "2": "Rolle erstellen"
+    },
+    "steps": {
+      "configurations": {
+        "header": "Konfigurationen",
+        "subheader": "LDAP-Konfiguration. Sie können die Einstellungen in der Datei application.yml festlegen",
+        "actions": {
+          "nextLabel": "Testen"
+        },
+        "remote": {
+          "error": "LDAP-Verbindung konnte nicht getestet werden"
+        }
+      },
+      "logs": {
+        "header": "Protokolle",
+        "subheader": "Protokolle des Testergebnisses"
+      }
+    }
+  }
+}

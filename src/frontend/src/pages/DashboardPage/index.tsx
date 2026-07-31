@@ -1,0 +1,82 @@
+import { Typography } from '@shared/ui/primitives/Typography'
+import { Input } from '@shared/ui/primitives/Input'
+import { Icon } from '@shared/ui/primitives/Icon'
+import { useI18n } from '@shared/i18n/hooks/useI18n'
+import PageWrapper from '@pages/PageWrapper/PageWrapper'
+import { MetricTiles } from './components/MetricTiles'
+import { AttentionRequiredCard } from './components/AttentionRequiredCard'
+import { RecentActivityCard } from './components/RecentActivityCard'
+import { SystemHealthCard } from './components/SystemHealthCard'
+import { ExecutionsChartCard } from './components/ExecutionsChartCard'
+import { ResourceUsageCard } from './components/ResourceUsageCard'
+import { TopConnectorsCard } from './components/TopConnectorsCard'
+import { ComingSoonOverlay } from './components/ComingSoonOverlay'
+import { DashboardCardBoundary } from './components/DashboardCardBoundary'
+import { useSocketConnectionNotifications } from './useSocketConnectionNotifications'
+
+export default function DashboardPage() {
+    const { t } = useI18n('dashboard')
+
+    useSocketConnectionNotifications()
+
+    return (
+        <PageWrapper>
+            <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
+                    <div>
+                        <Typography variant="headline">{t('header.title')}</Typography>
+                        <div style={{ marginTop: 4 }}>
+                            <Typography isSubtle>{t('header.subtitle')}</Typography>
+                        </div>
+                    </div>
+
+                    <div style={{ width: 180, flexShrink: 0 }}>
+                        <Input
+                            readOnly
+                            value={t('header.dateRangeLabel')}
+                            leftSlot={<Icon name="report-analytics" size={16} isSubtle />}
+                        />
+                    </div>
+                </div>
+
+                <MetricTiles />
+
+                <div
+                    style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+                        gap: 16,
+                    }}
+                >
+                    <DashboardCardBoundary>
+                        <ExecutionsChartCard />
+                    </DashboardCardBoundary>
+                    <DashboardCardBoundary>
+                        <ResourceUsageCard />
+                    </DashboardCardBoundary>
+                    <DashboardCardBoundary>
+                        <TopConnectorsCard />
+                    </DashboardCardBoundary>
+                </div>
+
+                <div
+                    style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                        gap: 16,
+                    }}
+                >
+                    <ComingSoonOverlay>
+                        <AttentionRequiredCard />
+                    </ComingSoonOverlay>
+                    <ComingSoonOverlay>
+                        <RecentActivityCard />
+                    </ComingSoonOverlay>
+                    <ComingSoonOverlay>
+                        <SystemHealthCard />
+                    </ComingSoonOverlay>
+                </div>
+            </div>
+        </PageWrapper>
+    )
+}

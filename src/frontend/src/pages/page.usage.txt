@@ -1,0 +1,20 @@
+hooks with data and side-effects live in Pages / Features
+
+import React from 'react';
+export function ConnectorsPage() {
+    const { data, error, isLoading } = useGetConnectorsQuery()
+
+    if (isLoading) {
+        return <PageLoader />
+    }
+
+    if (error) {
+        return <PageError />
+    }
+
+    if (!data?.length) {
+        return <PageEmpty />
+    }
+
+    return <ConnectorsTable data={data} />
+}

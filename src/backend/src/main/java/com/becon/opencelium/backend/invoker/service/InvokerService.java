@@ -38,7 +38,7 @@ public interface InvokerService {
     List<Invoker> findAll();
     void delete(String name);
     Map<String, Invoker> containerize(List<Document> invokers);
-    DataType findFieldType(String name, String methodName, LinkedList<String> hierarchy);
+    DataType findFieldType(Invoker invokers, String methodName, LinkedList<String> hierarchy);
     String findFieldByPath(String invoker, String method, String path);
     Document getDocument(String name) throws Exception;
     List<Document> getAllInvokerDocuments();

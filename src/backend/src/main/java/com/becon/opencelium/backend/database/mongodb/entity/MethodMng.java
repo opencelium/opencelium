@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.database.mongodb.entity;
 
+import com.becon.opencelium.backend.enums.MethodType;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -26,11 +27,28 @@ public class MethodMng {
     private String name;
     private String color;
     private String label;
+
+    /**
+     * Persisted as the wire value ({@code "CONNECTOR"}, {@code "HTTP_REQUEST"}, {@code "WEBHOOK"})
+     * via the {@link MethodType} Mongo converters. {@code null} for documents saved before
+     * method types existed — see {@link MethodType} for the legacy fallback semantics.
+     */
+    @Field(name = "method_type")
+    private MethodType methodType;
+
     @Field(name = "data_integrator")
     private Integer dataAggregator;
     private RequestMng request;
     private ResponseMng response;
 
+    /**
+     * Connector reference for multi-connector connections.
+     * <p>
+     * <b>Null for legacy (two-connector) connections</b> — in that case the connector
+     * is determined by whether this method lives under {@code fromConnector} or {@code toConnector} on {@link ConnectionMng}
+     */
+    @Field("connector")
+    private MethodConnectorMng connector;
 
     public MethodMng() {
     }
@@ -75,6 +93,14 @@ public class MethodMng {
         this.label = label;
     }
 
+    public MethodType getMethodType() {
+        return methodType;
+    }
+
+    public void setMethodType(MethodType methodType) {
+        this.methodType = methodType;
+    }
+
     public RequestMng getRequest() {
         return request;
     }
@@ -102,5 +128,13 @@ public class MethodMng {
     @Override
     public boolean equals(Object obj) {
         return this == obj;
+    }
+
+    public MethodConnectorMng getConnector() {
+        return connector;
+    }
+
+    public void setConnector(MethodConnectorMng connector) {
+        this.connector = connector;
     }
 }

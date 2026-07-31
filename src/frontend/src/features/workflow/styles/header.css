@@ -1,0 +1,96 @@
+.headerInlineDescription {
+  color: var(--color-text-secondary);
+}
+
+.headerInlineLoading {
+  display: inline-block;
+  width: 280px;
+  height: 18px;
+  border-radius: var(--radius-sm);
+  background: var(--color-background-hover);
+  opacity: 0.7;
+}
+
+.headerInlineDivider {
+  color: var(--color-text-disabled);
+  flex: 0 0 auto;
+}
+
+.headerInlineEditor {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.headerInlineEditorWide {
+  flex: 0 1 auto;
+}
+
+.headerInlineFieldWrap {
+  display: inline-flex;
+  flex-direction: column;
+  min-width: 0;
+  position: relative;
+}
+
+.headerInlineInput {
+  border: 1px solid var(--color-border-default);
+  outline: 0;
+  background: var(--color-background-input);
+  color: var(--color-text-primary);
+  border-radius: 8px;
+  padding: 6px 10px;
+  min-width: 0;
+  height: 34px;
+}
+
+.headerInlineInputError {
+  border-color: var(--color-status-error-fg);
+}
+
+.headerInlineInputError:focus {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-status-error-fg) 20%, transparent);
+}
+
+.headerInlineErrorText {
+  color: var(--color-status-error-fg);
+}
+
+.headerInlineErrorMessage {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  color: var(--color-status-error-fg);
+  font-size: 12px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.headerInlineNameInput {
+  width: 260px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.headerInlineDescriptionInput {
+  width: 520px;
+  color: var(--color-text-secondary);
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.headerPrimaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.headerActionWrap {
+  position: relative;
+}

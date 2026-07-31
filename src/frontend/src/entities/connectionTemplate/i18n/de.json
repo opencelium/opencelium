@@ -1,0 +1,40 @@
+{
+  "list": {
+    "title": "Workflow Templates",
+    "subTitle": "Der Bereich Vorlagen enthält vordefinierte Workflowskonfigurationen, die wiederverwendet werden können, um schnell neue Workflows zu erstellen.",
+    "upload": {
+      "button": "Hochladen",
+      "confirmReplace": {
+        "title": "Vorhandene Vorlage ersetzen?",
+        "message": "Eine Vorlage mit diesem Dateinamen existiert bereits. Sie wird ersetzt. Sind Sie sicher?"
+      },
+      "success": "Vorlage erfolgreich hochgeladen: {{name}}",
+      "error": "Hochladen der Vorlagendatei fehlgeschlagen."
+    },
+    "download": {
+      "tooltip": "Herunterladen",
+      "success": "Vorlage heruntergeladen: {{name}}",
+      "error": "Herunterladen der Vorlage fehlgeschlagen."
+    }
+  },
+  "fields": {
+    "name": {
+      "label": "Name"
+    },
+    "description": {
+      "label": "Beschreibung"
+    },
+    "fromInvoker": {
+      "label": "Vom Invoker"
+    },
+    "toInvoker": {
+      "label": "Zum Invoker"
+    }
+  },
+  "confirmation": {
+    "delete": {
+      "byId": "Workflowvorlage anhand der id \"{{templateId}}\" löschen?",
+      "byName": "Workflowvorlage anhand des Namens \"{{name}}\" löschen?"
+    }
+  }
+}

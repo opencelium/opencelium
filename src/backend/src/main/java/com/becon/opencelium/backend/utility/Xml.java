@@ -18,10 +18,13 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -188,16 +191,21 @@ public class Xml {
         return getNodeListByXpath(xPath).item(0) != null;
     }
 
-    public void save() throws FileNotFoundException, TransformerException {
+    public void save() throws IOException, TransformerException {
+        writeTo(Paths.get(PathConstant.INVOKER, fileName));
+    }
+
+    // The transformer must not own the stream: it only closes streams it opens itself,
+    // and an unclosed handle keeps the file locked on Windows until GC.
+    public void writeTo(Path target) throws IOException, TransformerException {
         TransformerFactory transformerFactory = TransformerFactory
                 .newInstance();
         Transformer transformer = transformerFactory.newTransformer();
         DOMSource source = new DOMSource(document);
 
-        String f = PathConstant.INVOKER + fileName;
-        FileOutputStream output = new FileOutputStream(f);
-        StreamResult result = new StreamResult(output);
-        transformer.transform(source, result);
+        try (OutputStream output = Files.newOutputStream(target)) {
+            transformer.transform(source, new StreamResult(output));
+        }
     }
 
     private List<Element> mapToNode(Map<String, Object> map) {

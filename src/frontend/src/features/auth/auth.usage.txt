@@ -1,0 +1,10 @@
+const { login } = useAuth()
+
+Login/Password
+login({ email, password })
+
+ApiKey
+login({ apiKey })
+
+OAuth
+login()

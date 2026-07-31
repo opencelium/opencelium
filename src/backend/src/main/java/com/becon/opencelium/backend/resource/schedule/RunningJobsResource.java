@@ -17,16 +17,27 @@
 package com.becon.opencelium.backend.resource.schedule;
 
 import jakarta.annotation.Resource;
-import org.springframework.hateoas.RepresentationModel;
+
+import java.util.Date;
 
 @Resource
 public class RunningJobsResource {
-
+    private long connectionId;
     private int schedulerId;
+    private long execId;
     private String title;
+    private Date startTime;
     private double avgDuration;
     private String fromConnector;
     private String toConnector;
+
+    public long getConnectionId() {
+        return connectionId;
+    }
+
+    public void setConnectionId(long connectionId) {
+        this.connectionId = connectionId;
+    }
 
     public int getSchedulerId() {
         return schedulerId;
@@ -36,12 +47,28 @@ public class RunningJobsResource {
         this.schedulerId = schedulerId;
     }
 
+    public long getExecId() {
+        return execId;
+    }
+
+    public void setExecId(long execId) {
+        this.execId = execId;
+    }
+
     public String getTitle() {
         return title;
     }
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public Date getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(Date startTime) {
+        this.startTime = startTime;
     }
 
     public double getAvgDuration() {
@@ -70,9 +97,12 @@ public class RunningJobsResource {
 
     @Override
     public String toString() {
-        return "RunningJobsResource{" +
-                "schedulerId=" + schedulerId +
+        return "RunningJobResource{" +
+                "connectionId=" + connectionId +
+                ", schedulerId=" + schedulerId +
+                ", execId=" + execId +
                 ", title='" + title + '\'' +
+                ", startTime=" + startTime +
                 ", avgDuration=" + avgDuration +
                 ", fromConnector='" + fromConnector + '\'' +
                 ", toConnector='" + toConnector + '\'' +

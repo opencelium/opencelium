@@ -2,14 +2,11 @@ package com.becon.opencelium.backend.mapper.execution;
 
 import com.becon.opencelium.backend.constant.RegExpression;
 import com.becon.opencelium.backend.database.mongodb.entity.*;
-import com.becon.opencelium.backend.database.mongodb.service.ConnectionMngService;
-import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.enums.execution.DataType;
 import com.becon.opencelium.backend.enums.execution.ParamLocation;
 import com.becon.opencelium.backend.enums.execution.ParamStyle;
 import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
-import com.becon.opencelium.backend.invoker.entity.Invoker;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.resource.execution.*;
 import com.becon.opencelium.backend.utility.PathAndReferenceUtility;
@@ -25,7 +22,6 @@ import java.util.*;
 @Component
 public class OperationExMapper {
     private final InvokerService invokerService;
-    private final ConnectionMngService connectionMngService;
     private final ConnectorService connectorService;
     private static final String REGEX_DEEP_OBJECT_IN_QUERY = ".+[\\[.+\\]]";
     private static final String REGEX_ARRAY_PARAMETER_IN_PATH = ".+[&|,\\s]+.*";
@@ -36,33 +32,60 @@ public class OperationExMapper {
 
     public OperationExMapper(
             @Qualifier("invokerServiceImp") InvokerService invokerService,
-            @Qualifier("connectionMngServiceImp") ConnectionMngService connectionMngService,
             @Qualifier("connectorServiceImp") ConnectorService connectorService
     ) {
         this.invokerService = invokerService;
-        this.connectionMngService = connectionMngService;
         this.connectorService = connectorService;
     }
 
-    public List<OperationDTO> toOperationAll(List<MethodMng> methods, String connectionId, String invoker) {
+    public List<OperationDTO> toOperationAll(List<MethodMng> methods, String invoker) {
         if (methods == null || methods.isEmpty()) {
             return Collections.emptyList();
         }
         List<OperationDTO> operations = new ArrayList<>();
         for (MethodMng method : methods) {
-            operations.add(toOperation(method, connectionId, invoker));
+            if (invoker == null) {
+                if (method.getConnector() == null) {
+                    // fromConnector/toConnector are not set and method's own connector is null
+
+                    operations.add(toOperation(method, null));
+                } else {
+                    // fromConnector/toConnector are not set and method has its own connector
+
+                    String methodInvoker = connectorService.getById(method.getConnector().getConnectorId()).getInvoker();
+                    operations.add(toOperation(method, methodInvoker));
+                }
+            } else {
+                // method is within either fromConnector or toConnector
+                operations.add(toOperation(method, invoker));
+            }
         }
         return operations;
     }
 
-    public OperationDTO toOperation(@NonNull MethodMng method, String connectionId, String invokerStr) {
-        Invoker invoker = invokerService.findByName(invokerStr);
-        List<FunctionInvoker> operations = invoker.getOperations();
-        FunctionInvoker fiv = operations.stream()
-                .filter(o -> o.getName().equals(method.getName()))
-                .findAny()
-                .orElseThrow(() -> new RuntimeException("No operation found for name: " + method.getName()));
-        MediaType mediaType = getMediaType(method, fiv);
+    public OperationDTO toOperation(@NonNull MethodMng method, String invokerStr) {
+        MediaType requestMediaType;
+        MediaType responseMediaType;
+        if (invokerStr != null) {
+            FunctionInvoker fiv = invokerService.findByName(invokerStr).getOperations().stream()
+                    .filter(o -> o.getName().equals(method.getName()))
+                    .findAny()
+                    .orElseThrow(() -> new RuntimeException("No operation found for name: " + method.getName()));
+
+            // determines request mediaType from operation on invoker
+            requestMediaType = getMediaType(method, fiv);
+
+            // determines response mediaType from operation on invoker
+            responseMediaType = fiv.getResponse().getSuccess().getBody() != null
+                    ? getMediaTypeFromBody(fiv.getResponse().getSuccess().getBody().getFormat())
+                    : MediaType.APPLICATION_JSON;
+        } else {
+            // determines request mediaType from method itself
+            requestMediaType = getMediaType(method);
+
+            // falls back to request's media-type because method hasn't invoker, and we cannot determine its response format
+            responseMediaType = requestMediaType;
+        }
 
         OperationDTO operationDTO = new OperationDTO();
         operationDTO.setOperationId(method.getColor());
@@ -71,9 +94,10 @@ public class OperationExMapper {
         operationDTO.setAggregatorId(method.getDataAggregator());
         operationDTO.setPath(method.getRequest().getEndpoint());
         operationDTO.setExecOrder(method.getIndex());
-        operationDTO.setRequestBody(getRequestBody(method.getRequest().getBody(), connectionId, method.getName(), mediaType));
-        operationDTO.setResponses(getResponses(method.getResponse(), fiv));
-        operationDTO.setParameters(getParameters(method.getRequest(), mediaType));
+        operationDTO.setConnectorId(method.getConnector() != null ? method.getConnector().getConnectorId() : null);
+        operationDTO.setRequestBody(getRequestBody(method.getRequest().getBody(), requestMediaType));
+        operationDTO.setResponses(getResponses(method.getResponse(), responseMediaType));
+        operationDTO.setParameters(getParameters(method.getRequest(), requestMediaType));
         return operationDTO;
     }
 
@@ -97,6 +121,22 @@ public class OperationExMapper {
                 || (mediaType = getMediaTypeFromBody(fiv.getRequest().getBody().getFormat())) == null
                 ? MediaType.APPLICATION_JSON
                 : mediaType;
+    }
+
+    private MediaType getMediaType(MethodMng methodMng) {
+        MediaType mediaType;
+        if ((mediaType = getContentTypeFromHeader(methodMng.getRequest().getHeader())) != null) {
+            return mediaType;
+        }
+
+        if (methodMng.getRequest().getBody() != null
+                && methodMng.getRequest().getBody().getFormat() != null
+                && (mediaType = getMediaTypeFromBody(methodMng.getRequest().getBody().getFormat())) != null) {
+            return mediaType;
+        }
+
+        // fallback
+        return MediaType.APPLICATION_JSON;
     }
 
     private MediaType getContentTypeFromHeader(Map<String, String> header) {
@@ -124,7 +164,7 @@ public class OperationExMapper {
         };
     }
 
-    private List<ResponseDTO> getResponses(ResponseMng response, FunctionInvoker fiv) {
+    private List<ResponseDTO> getResponses(ResponseMng response, MediaType mediaType) {
         List<ResponseDTO> res = new ArrayList<>(2);
         if (response == null) {
             return res;
@@ -138,10 +178,7 @@ public class OperationExMapper {
                 success.setData(response.getSuccess().getBody().getData());
             }
             res.add(success);
-            MediaType mt = fiv.getResponse().getSuccess().getBody() != null
-                    ? getMediaTypeFromBody(fiv.getResponse().getSuccess().getBody().getFormat())
-                    : MediaType.APPLICATION_JSON;
-            success.setContent(mt == null ? MediaType.APPLICATION_JSON : mt);
+            success.setContent(mediaType);
         }
         if (response.getFail() != null) {
             ResponseDTO fail = new ResponseDTO();
@@ -152,10 +189,7 @@ public class OperationExMapper {
                 fail.setData(response.getFail().getBody().getData());
             }
             res.add(fail);
-            MediaType mt = fiv.getResponse().getFail().getBody() != null
-                    ? getMediaTypeFromBody(fiv.getResponse().getFail().getBody().getFormat())
-                    : MediaType.APPLICATION_JSON;
-            fail.setContent(mt == null ? MediaType.APPLICATION_JSON : mt);
+            fail.setContent(mediaType);
         }
         return res;
     }
@@ -382,13 +416,13 @@ public class OperationExMapper {
         return parameters;
     }
 
-    private RequestBodyDTO getRequestBody(BodyMng body, String connectionId, String methodName, MediaType mediaType) {
+    private RequestBodyDTO getRequestBody(BodyMng body, MediaType mediaType) {
         if (body == null || body.getFormat() == null || body.getFields() == null) {
             return null;
         }
         RequestBodyDTO requestBodyDTO = new RequestBodyDTO();
         requestBodyDTO.setContent(mediaType);
-        requestBodyDTO.setSchema(getSchema(body, connectionId, methodName));
+        requestBodyDTO.setSchema(getSchema(body));
         return requestBodyDTO;
     }
 
@@ -403,7 +437,7 @@ public class OperationExMapper {
         };
     }
 
-    private SchemaDTO getSchema(BodyMng body, String connectionId, String methodName) {
+    private SchemaDTO getSchema(BodyMng body) {
         Map<String, Object> fields = body.getFields();
         if (fields == null) {
             return null;
@@ -416,7 +450,7 @@ public class OperationExMapper {
             body.setType("object");
             schemaDTO.setType(DataType.ARRAY);
             schemaDTO.setItems(new ArrayList<>() {{
-                add(getSchema(body, connectionId, methodName));
+                add(getSchema(body));
             }});
             return schemaDTO;
         }
@@ -425,13 +459,11 @@ public class OperationExMapper {
 
         Map<String, SchemaDTO> props = new LinkedHashMap<>();
         for (Map.Entry<String, Object> entry : fields.entrySet()) {
-            LinkedList<String> hierarchy = new LinkedList<>();
-            hierarchy.add(entry.getKey());
             if (body.getData().equals("graphql")) {
                 String queryFieldName = "query"; // Is this the only field that could be used as a query?
                 Map<String, Object> map = body.getFields();
                 if (map.containsKey(queryFieldName) && map.get(queryFieldName) instanceof String query) {
-                    map.put(queryFieldName, query.replace("\n", ""));
+                    map.put(queryFieldName, query.replaceAll("\\R", " "));
                 }
             }
             if (body.getFormat().equals("xml")) {
@@ -439,9 +471,9 @@ public class OperationExMapper {
                 if (name.matches("^[a-zA-Z ]+:.*$")) {
                     name = name.substring(name.indexOf(":") + 1);
                 }
-                props.put(name, getSchemaFromObjectXML(hierarchy, entry.getValue(), connectionId, methodName));
+                props.put(name, getSchemaFromObjectXML(entry.getValue()));
             } else {
-                props.put(entry.getKey(), getSchemaFromObjectJSON(hierarchy, entry.getValue(), connectionId, methodName));
+                props.put(entry.getKey(), getSchemaFromObjectJSON(entry.getValue()));
             }
         }
         if (body.getFormat().equals("xml")) {
@@ -492,7 +524,7 @@ public class OperationExMapper {
         currSchema.setXml(xmlObjectDTO);
     }
 
-    private SchemaDTO getSchemaFromObjectXML(LinkedList<String> hierarchy, Object value, String connectionId, String methodName) {
+    private SchemaDTO getSchemaFromObjectXML(Object value) {
         SchemaDTO schemaDTO = new SchemaDTO();
         DataType type = getType(value);
 
@@ -503,7 +535,7 @@ public class OperationExMapper {
             // INTEGER, NUMBER, STRING, BOOLEAN
 
             String stringVal = String.valueOf(value);
-            schemaDTO.setType(findTypeOfReference(stringVal, connectionId, methodName, hierarchy));
+            schemaDTO.setType(findTypeOfReference(stringVal));
             schemaDTO.setValue(stringVal);
         } else if (type == DataType.OBJECT) {
             Map<String, Object> map = (Map<String, Object>) value;
@@ -517,9 +549,7 @@ public class OperationExMapper {
                 } else if (map.get(OC_VALUE) instanceof Number) {
                     schemaDTO.setType(DataType.NUMBER);
                 } else {
-                    hierarchy.add(OC_VALUE);
-                    schemaDTO.setType(findTypeOfReference(strVal, connectionId, methodName, hierarchy));
-                    hierarchy.remove(OC_VALUE);
+                    schemaDTO.setType(findTypeOfReference(strVal));
                 }
                 Object attr = map.get(OC_ATTRIBUTES);
                 if (attr != null && !attr.equals("")) {
@@ -546,8 +576,7 @@ public class OperationExMapper {
                         if (name.contains(":")) {
                             name = name.split(":")[1];
                         }
-                        hierarchy.add(entry.getKey());
-                        fields.put(name, getSchemaFromObjectXML(hierarchy, entry.getValue(), connectionId, methodName));
+                        fields.put(name, getSchemaFromObjectXML(entry.getValue()));
                     }
                 }
             }
@@ -556,9 +585,8 @@ public class OperationExMapper {
             schemaDTO.setType(DataType.ARRAY);
             List<SchemaDTO> elements = new ArrayList<>();
             schemaDTO.setItems(elements);
-            for (int i = 0; i < items.size(); i++) {
-                hierarchy.add("[" + i + "]");
-                elements.add(getSchemaFromObjectXML(hierarchy, items.get(i), connectionId, methodName));
+            for (Object item : items) {
+                elements.add(getSchemaFromObjectXML(item));
             }
             XmlObjectDTO xod = new XmlObjectDTO();
             schemaDTO.setXml(xod);
@@ -567,19 +595,18 @@ public class OperationExMapper {
 
             schemaDTO.setType(type);
         }
-        hierarchy.removeLast();
         return schemaDTO;
     }
 
     @SuppressWarnings("unchecked")
-    private SchemaDTO getSchemaFromObjectJSON(LinkedList<String> hierarchy, Object obj, String connectionId, String methodName) {
+    private SchemaDTO getSchemaFromObjectJSON(Object obj) {
         SchemaDTO schemaDTO = new SchemaDTO();
         DataType type = getType(obj);
         if (obj == null || type == null)
             return null;
         if (type == DataType.STRING) {
             String value = String.valueOf(obj);
-            schemaDTO.setType(findTypeOfReference(value, connectionId, methodName, hierarchy));
+            schemaDTO.setType(findTypeOfReference(value));
             schemaDTO.setValue(value);
         } else if (type != DataType.OBJECT && type != DataType.ARRAY) {
             schemaDTO.setType(type);
@@ -587,9 +614,8 @@ public class OperationExMapper {
         } else if (obj instanceof List<?> items) {
             schemaDTO.setType(DataType.ARRAY);
             List<SchemaDTO> elements = new ArrayList<>();
-            for (int i = 0; i < items.size(); i++) {
-                hierarchy.add("[" + i + "]");
-                elements.add(getSchemaFromObjectJSON(hierarchy, items.get(i), connectionId, methodName));
+            for (Object item : items) {
+                elements.add(getSchemaFromObjectJSON(item));
             }
             schemaDTO.setItems(elements);
         } else {
@@ -597,33 +623,19 @@ public class OperationExMapper {
             schemaDTO.setType(DataType.OBJECT);
             Map<String, SchemaDTO> fields = new LinkedHashMap<>();
             for (Map.Entry<String, ?> entry : map.entrySet()) {
-                hierarchy.add(entry.getKey());
-                fields.put(entry.getKey(), getSchemaFromObjectJSON(hierarchy, entry.getValue(), connectionId, methodName));
+                fields.put(entry.getKey(), getSchemaFromObjectJSON(entry.getValue()));
             }
             schemaDTO.setProperties(fields);
         }
-        hierarchy.removeLast();
         return schemaDTO;
     }
 
-    private DataType findTypeOfReference(String value, String connectionId, String methodName, LinkedList<String> hierarchy) {
+    private DataType findTypeOfReference(String value) {
         if (value.matches(RegExpression.requiredData)
                 || value.matches(RegExpression.enhancement)
                 || value.matches(RegExpression.directRef)
                 || value.matches(RegExpression.webhook)) {
-
-            ConnectionMng connectionMng = connectionMngService.getById(connectionId);
-            Connector fromConnector = connectorService.getById(connectionMng.getFromConnector().getConnectorId());
-            Connector toConnector = connectorService.getById(connectionMng.getToConnector().getConnectorId());
-
-            DataType dataType = invokerService.findFieldType(fromConnector.getInvoker(), methodName, (LinkedList<String>) hierarchy.clone());
-            if (dataType == null) {
-                dataType = invokerService.findFieldType(toConnector.getInvoker(), methodName, (LinkedList<String>) hierarchy.clone());
-                if (dataType == null) {
-                    throw new RuntimeException("METHOD_NOT_FOUND_IN_INVOKER");
-                }
-            }
-            return dataType;
+            return DataType.UNDEFINED;
         } else {
             return DataType.STRING;
         }

@@ -1,0 +1,50 @@
+
+.ant-dialog-custom {
+    padding-bottom: 40px;
+}
+
+.ant-dialog-custom .ant-modal-container {
+    border-radius: var(--radius-lg);
+}
+
+.ant-dialog-custom .ant-modal-content:focus,
+.ant-dialog-custom .ant-modal-content:focus-visible {
+    outline-offset: 0;
+}
+
+.ant-dialog-fullscreen {
+    top: 0 !important;
+    /* Override antd's default centering + max-width that otherwise leave a gap,
+       and pin the modal element itself to the full viewport height. */
+    max-width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.ant-dialog-fullscreen .ant-modal-container {
+    display: flex !important;
+    flex-direction: column;
+    height: 100vh !important;
+    border-radius: 0;
+}
+
+/* flex:1 fills the remaining height whether or not a header is present, so no
+   bottom gap when the dialog has no title bar. */
+.ant-dialog-fullscreen .ant-modal-body {
+    flex: 1 1 auto !important;
+    min-height: 0;
+    overflow: auto;
+}
+
+/* Header action icons (content-contributed actions + maximize/restore) sit
+   just left of antd's close icon (top-right). */
+.ant-dialog-header-actions {
+    position: absolute;
+    top: 12px;
+    inset-inline-end: 52px;
+    z-index: 10;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}

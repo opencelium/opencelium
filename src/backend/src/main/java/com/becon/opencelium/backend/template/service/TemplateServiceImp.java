@@ -24,15 +24,16 @@ import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.connection.old.ConnectionOldDTO;
 import com.becon.opencelium.backend.resource.template.CtionTemplateResource;
+import com.becon.opencelium.backend.resource.template.TemplateMetadata;
 import com.becon.opencelium.backend.resource.template.TemplateResource;
 import com.becon.opencelium.backend.template.entity.Template;
 import com.becon.opencelium.backend.utility.FileNameUtils;
 import com.becon.opencelium.backend.versionmanager.EntityUpdater;
 import com.becon.opencelium.backend.versionmanager.EntityVersionManager;
 import com.becon.opencelium.backend.versionmanager.backup.FileBackupManager;
+import com.becon.opencelium.backend.versionmanager.base.UpdaterVersion;
 import com.becon.opencelium.backend.versionmanager.base.Utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +41,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -59,6 +59,7 @@ public class TemplateServiceImp implements TemplateService {
     private final Mapper<ConnectionDTO, ConnectionOldDTO> oldDTOMapper;
     private final OpenceliumProps ocProps;
     private final EntityUpdater<Template> templateEntityUpdater;
+    private final EntityUpdater<Template> templateStartupUpdater;
     private final ObjectMapper objectMapper;
 
     public TemplateServiceImp(
@@ -73,6 +74,7 @@ public class TemplateServiceImp implements TemplateService {
         this.oldDTOMapper = oldDTOMapper;
         this.ocProps = ocProps;
         this.templateEntityUpdater = entityVersionManager.getUpdater(Template.class);
+        this.templateStartupUpdater = entityVersionManager.getUpdater(Template.class, UpdaterVersion.VERSION_4_4);
         this.objectMapper = objectMapper;
     }
 
@@ -86,6 +88,58 @@ public class TemplateServiceImp implements TemplateService {
         templateResource.setConnection(template.getConnection());
         templateResource.setLink(PathConstant.TEMPLATE_URL + template.getTemplateId());
         return templateResource;
+    }
+
+    @Override
+    public List<TemplateResource> getAllMetadata() {
+        return getAllMetadata(PathConstant.TEMPLATE).stream()
+                .filter(Objects::nonNull)
+                .map(this::toResource)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<TemplateResource> getMetadataById(String id) {
+        Path path = Paths.get(PathConstant.TEMPLATE).resolve(id.concat(".json"));
+        if (Files.notExists(path)) {
+            return Optional.empty();
+        }
+        try {
+            String json = Files.readString(path, StandardCharsets.UTF_8);
+            return Optional.of(toResource(objectMapper.readValue(json, TemplateMetadata.class)));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read template metadata: " + path, e);
+        }
+    }
+
+    private TemplateResource toResource(TemplateMetadata metadata) {
+        TemplateResource templateResource = new TemplateResource();
+        templateResource.setTemplateId(metadata.getTemplateId());
+        templateResource.setName(metadata.getName());
+        templateResource.setDescription(metadata.getDescription());
+        templateResource.setVersion(metadata.getVersion());
+        templateResource.setLink(PathConstant.TEMPLATE_URL + metadata.getTemplateId());
+        // connection intentionally left null for metadata-only responses
+        return templateResource;
+    }
+
+    private List<TemplateMetadata> getAllMetadata(String folder) {
+        try (Stream<Path> walk = Files.walk(Paths.get(folder))) {
+            return walk.filter(Files::isRegularFile)
+                    .filter(path -> FileNameUtils.getExtension(path.toString()).equals("json"))
+                    .map(path -> {
+                        try {
+                            String json = Files.readString(path, StandardCharsets.UTF_8);
+                            return objectMapper.readValue(json, TemplateMetadata.class);
+                        } catch (IOException e) {
+                            log.error("Failed to read template metadata from file '{}': {}", path.getFileName(), e.getMessage());
+                            return null;
+                        }
+                    })
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -158,6 +212,9 @@ public class TemplateServiceImp implements TemplateService {
         moveTemplatesToNewLocation();
 
         Map<String, Template> templateMap = getAllAsMap();
+
+        // Startup migration stops at 4.4; the 5.0 transform is applied on the read path only.
+        String targetVersion = UpdaterVersion.VERSION_4_4.getVersion();
         for (Map.Entry<String, Template> entry : templateMap.entrySet()) {
             String fileName = entry.getKey();
             Template template = entry.getValue();
@@ -169,15 +226,15 @@ public class TemplateServiceImp implements TemplateService {
                 continue;
             }
 
-            if (Utils.compare(ocProps.getVersion(), template.getVersion()) > 0) {
+            if (Utils.compare(targetVersion, template.getVersion()) > 0) {
                 try {
                     String oldVersion = template.getVersion();
-                    templateEntityUpdater.updateToCurrentVersion(template)
+                    templateStartupUpdater.updateToCurrentVersion(template)
                             .ifUpdated(x -> {
-                                template.setVersion(ocProps.getVersion());
-                                FileBackupManager.doBackup(backup, oldVersion, ocProps.getVersion());
+                                template.setVersion(targetVersion);
+                                FileBackupManager.doBackup(backup, oldVersion, targetVersion);
                                 save(template, fileName);
-                                log.info("Template[id={}, name={}] is successfully updated to {} version", template.getTemplateId(), template.getName(), ocProps.getVersion());
+                                log.info("Template[id={}, name={}] is successfully updated to {} version", template.getTemplateId(), template.getName(), targetVersion);
                             });
                 } catch (Exception e) {
                     log.error("Failed to update Template[id={}, name={}]", template.getTemplateId(), template.getName(), e);
@@ -211,16 +268,16 @@ public class TemplateServiceImp implements TemplateService {
 
     @Override
     public void deleteById(String templateId) {
-        Map<String, Template> templates = getAllAsMap();
-        String fileName = templates.entrySet().stream().filter(entry -> entry.getValue().getTemplateId().equals(templateId))
-                .findFirst().map(entry -> entry.getKey()).orElse(null);
-//        String path = PathConstant.TEMPLATE + templateId.concat(".json");
-        if (fileName == null) {
-            throw new RuntimeException("FILE_NOT_FOUND");
-        }
-        File file = Paths.get(PathConstant.TEMPLATE).resolve(fileName).toFile();
-        if (!file.delete()) {
-            throw new RuntimeException("FILE_NOT_DELETED");
+        Path filePath = getAllAsMap().entrySet().stream()
+                .filter(entry -> Objects.equals(entry.getValue().getTemplateId(), templateId))
+                .map(entry -> Paths.get(PathConstant.TEMPLATE).resolve(entry.getKey()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("FILE_NOT_FOUND"));
+
+        try {
+            Files.delete(filePath);
+        } catch (IOException e) {
+            throw new RuntimeException("FILE_NOT_DELETED", e);
         }
     }
 
@@ -235,13 +292,26 @@ public class TemplateServiceImp implements TemplateService {
             e.printStackTrace();
         }
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         try {
             Template template = objectMapper.readValue(contentBuilder.toString(), Template.class);
+            applyVersionUpdater(template);
             return Optional.of(template);
         } catch (Exception e) {
             throw new RuntimeException("ERROR while converting from json to Template object");
+        }
+    }
+
+    /**
+     * Migrates the in-memory Template to the running version without persisting the change.
+     * The stored JSON file stays at its original version; conversion happens only on the read path.
+     */
+    private void applyVersionUpdater(Template template) {
+        if (template == null) return;
+        try {
+            templateEntityUpdater.updateToCurrentVersion(template);
+        } catch (Exception e) {
+            log.error("Failed to convert Template[id={}, name={}, version={}] to current version on read",
+                    template.getTemplateId(), template.getName(), template.getVersion(), e);
         }
     }
 
@@ -249,7 +319,6 @@ public class TemplateServiceImp implements TemplateService {
     private void save(Template template, String fileName) {
         try {
             String id = template.getTemplateId();
-            ObjectMapper objectMapper = new ObjectMapper();
             template.setTemplateId(id);
 
             Path filePath = Paths.get(PathConstant.TEMPLATE).resolve(fileName);
@@ -261,20 +330,17 @@ public class TemplateServiceImp implements TemplateService {
         }
     }
 
-    private List<Template> getAll(String folder) throws WrongEncode {
+    private List<Template> getAll(String folder) {
         try (Stream<Path> walk = Files.walk(Paths.get(folder))) {
-            ObjectMapper objectMapper = new ObjectMapper();
             return walk.filter(Files::isRegularFile)
                     .filter(path -> FileNameUtils.getExtension(path.toString()).equals("json"))
                     .map(path -> {
-//                        if(!FilenameUtils.getExtension(path.toString()).equals("json")){
-//                            return null;
-//                        }
                         StringBuilder contentBuilder = new StringBuilder();
                         try (Stream<String> stream = Files.lines(Paths.get(path.toString()), StandardCharsets.UTF_8)) {
                             stream.forEach(s -> contentBuilder.append(s).append("\n"));
-//                            System.out.println(Paths.get(path.toString()).getFileName().toString());
-                            return objectMapper.readValue(contentBuilder.toString(), Template.class);
+                            Template template = objectMapper.readValue(contentBuilder.toString(), Template.class);
+                            applyVersionUpdater(template);
+                            return template;
                         } catch (Exception e) {
                             e.printStackTrace();
                             throw new WrongEncode("UTF8");
@@ -287,7 +353,6 @@ public class TemplateServiceImp implements TemplateService {
 
     private Map<String, Template> getAllAsMap() {
         try (Stream<Path> walk = Files.walk(Paths.get(PathConstant.TEMPLATE))) {
-            ObjectMapper objectMapper = new ObjectMapper();
             return walk
                     .filter(Files::isRegularFile)
                     .filter(path -> path.toString().endsWith(".json"))
@@ -296,7 +361,9 @@ public class TemplateServiceImp implements TemplateService {
                             path -> {
                                 try {
                                     String json = Files.readString(path, StandardCharsets.UTF_8);
-                                    return objectMapper.readValue(json, Template.class);
+                                    Template template = objectMapper.readValue(json, Template.class);
+                                    applyVersionUpdater(template);
+                                    return template;
                                 } catch (IOException e) {
                                     throw new RuntimeException("Failed to read template: " + path, e);
                                 }

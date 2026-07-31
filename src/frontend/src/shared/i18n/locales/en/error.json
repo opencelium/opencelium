@@ -1,0 +1,41 @@
+{
+  "api": {
+    "unauthorized": "Your session has expired. Please log in again.",
+    "forbidden": "Your session is expired",
+    "unknown": "An unexpected error occurred. Please try again.",
+    "validation": "The request was rejected as invalid. Please check your input.",
+    "notFound": "The requested resource was not found.",
+    "default": "An unexpected error occurred. Please try again.",
+    "unknownError": "Unknown Error in {{place}}",
+    "CATEGORY_NOT_FOUND": "This category was not found. It may have already been deleted.",
+    "socketDisconnected": "Live connection lost. Metrics are no longer updating.",
+    "login": {
+      "network": "Could not reach the server. Please try again.",
+      "invalidCredentials": "Invalid email or password",
+      "failed": "Login failed",
+      "sessionLoadFailed": "You signed in, but we couldn't load your account. Please try again."
+    },
+    "forgotPassword": {
+      "emailNotExists": "No account is registered with this email address.",
+      "tooManyAttempts": "Too many attempts. Please try again later.",
+      "emailRecoveryFailed": "There is an issue with your email configuration. For security reasons, the detailed error message has been written to your Opencelium logs. Please review the logs for more information.",
+      "network": "Could not reach the server. Please try again.",
+      "failed": "Could not send the recovery email. Please try again."
+    },
+    "setPassword": {
+      "invalidToken": "The reset link is invalid or has expired. Please request a new one.",
+      "network": "Could not reach the server. Please try again.",
+      "failed": "Could not reset password. Please try again."
+    }
+  },
+  "field": {
+    "required": "Required field",
+    "minLength": "Minimum {{min}} characters",
+    "maxLength": "Maximum {{max}} characters",
+    "invalidEmail": "Invalid email",
+    "mustNumber": "Must be a number",
+    "mustFile": "Must be a file",
+    "fileTooLarge": "File is too large (max {{max}} bytes)",
+    "failedAsyncOptions": "Failed to fetch options"
+  }
+}

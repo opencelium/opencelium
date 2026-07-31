@@ -22,7 +22,11 @@ plugins {
 }
 
 group = 'com.becon'
+<<<<<<< HEAD
 version = '4.8.4'
+=======
+version = '5.0'
+>>>>>>> origin/version5.0
 sourceCompatibility = '17'
 
 repositories {
@@ -58,6 +62,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation:3.0.4'
 	implementation 'org.mariadb.jdbc:mariadb-java-client:3.1.2'
 	implementation 'org.liquibase:liquibase-core'
+<<<<<<< HEAD
 	implementation 'org.openjdk.nashorn:nashorn-core:15.4'
 	implementation 'com.nimbusds:nimbus-jose-jwt:9.30.2'
 	implementation 'org.eclipse.jgit:org.eclipse.jgit:6.5.0.202303070854-r'
@@ -82,6 +87,79 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testImplementation 'org.mockito:mockito-inline:5.2.0'
+=======
+	runtimeOnly    'mysql:mysql-connector-java'
+
+	// ── gRPC / Protobuf ───────────────────────────────────────────────────────
+	implementation "io.grpc:grpc-protobuf:${grpcVersion}"
+	implementation "io.grpc:grpc-stub:${grpcVersion}"
+	implementation "io.grpc:grpc-netty-shaded:${grpcVersion}"
+	implementation "com.google.protobuf:protobuf-java-util:${protobufVersion}"
+
+	// ── Security & auth ───────────────────────────────────────────────────────
+	implementation "com.nimbusds:nimbus-jose-jwt:${nimbusJwtVersion}"
+	implementation "com.warrenstrange:googleauth:${googleAuthVersion}"
+	implementation "com.google.zxing:core:${zxingVersion}"
+
+	// ── HTTP & web utilities ──────────────────────────────────────────────────
+	implementation "org.apache.httpcomponents.client5:httpclient5:${httpclient5Version}"
+	implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
+	implementation "wsdl4j:wsdl4j:1.6.3"
+	implementation "org.jsoup:jsoup:${jsoupVersion}"
+
+	// ── Data processing ───────────────────────────────────────────────────────
+	implementation "com.github.java-json-tools:json-patch:${jsonPatchVersion}"
+	implementation "javax.json:javax.json-api:${javaxJsonVersion}"
+	implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonJsr310Ver}"
+
+	// Comment-aware YAML parser used by the application-config endpoints to
+	// round-trip application.yml without losing comments.
+	implementation 'org.snakeyaml:snakeyaml-engine:2.7'
+
+	// ── Scripting & tooling ───────────────────────────────────────────────────
+	implementation "org.openjdk.nashorn:nashorn-core:${nashornVersion}"
+	implementation "org.eclipse.jgit:org.eclipse.jgit:${jgitVersion}"
+
+	// ── Code generation (compile-time only) ───────────────────────────────────
+	compileOnly         "org.mapstruct:mapstruct:${mapstructVersion}"
+	compileOnly         "org.apache.tomcat:annotations-api:${tomcatAnnotVer}"
+	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+
+	// ── Unit + slice test dependencies ────────────────────────────────────────
+	// spring-boot-starter-test pulls in JUnit 5, Mockito, AssertJ, MockMvc,
+	// JSONassert, and JsonPath — do not declare these individually.
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testImplementation "org.mockito:mockito-inline:${mockitoInlineVer}"
+
+	// ── Testcontainers ────────────────────────────────────────────────────────
+	// The BOM aligns all Testcontainers module versions — never pin individual
+	// module versions manually, always rely on the BOM.
+	testImplementation platform("org.testcontainers:testcontainers-bom:${testcontainersVersion}")
+	testImplementation 'org.testcontainers:junit-jupiter'  // @Container lifecycle
+	testImplementation 'org.testcontainers:mariadb'        // MariaDBContainer
+	testImplementation 'org.testcontainers:mongodb'        // MongoDBContainer
+
+	// ── Async assertions ──────────────────────────────────────────────────────
+	// Use await().untilAsserted(…) instead of Thread.sleep() in event-driven
+	// and async tests.
+	testImplementation "org.awaitility:awaitility:${awaitilityVersion}"
+
+	// ── Embedded LDAP ─────────────────────────────────────────────────────────
+	// In-process directory server for slice-testing LdapVerificationService.
+	// Test-scope only — never reachable from src/main, never in the boot JAR.
+	testImplementation 'com.unboundid:unboundid-ldapsdk:6.0.11'
+
+	// ── Test runtime ──────────────────────────────────────────────────────────
+	// H2 — in-memory database for @DataJpaTest slice tests (no Docker needed).
+	testRuntimeOnly 'com.h2database:h2'
+
+	// MariaDB JDBC driver — required at runtime so Testcontainers can open a
+	// JDBC connection to the MariaDB container in integration tests.
+	// Without this, Spring throws "No suitable driver found for jdbc:mariadb://…"
+	// even though the container started successfully.
+	testRuntimeOnly "org.mariadb.jdbc:mariadb-java-client:${mariadbVersion}"
+>>>>>>> origin/version5.0
 }
 
 def generatedFilesBaseDir = "${buildDir}/generated/source/proto"

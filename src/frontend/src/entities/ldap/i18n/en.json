@@ -1,0 +1,61 @@
+{
+  "fields": {
+    "urls": {
+      "label": "Url"
+    },
+    "userDN": {
+      "label": "UserDN"
+    },
+    "groupDN": {
+      "label": "GroupDN"
+    },
+    "username": {
+      "label": "Read Account DN"
+    },
+    "password": {
+      "label": "Read Account Password"
+    },
+    "userSearchFilter": {
+      "label": "User Search Filter"
+    },
+    "groupSearchFilter": {
+      "label": "Group Search Filter"
+    },
+    "logs": {
+      "label": "Logs"
+    }
+  },
+  "sections": {
+    "configurations": {
+      "title": "Configurations"
+    }
+  },
+  "wizard": {
+    "modes": {
+      "view": {
+        "header": "LDAP Configurations",
+        "subheader": "Test it."
+      }
+    },
+    "recommendations": {
+      "1": "Create User",
+      "2": "Create Role"
+    },
+    "steps": {
+      "configurations": {
+        "header": "Configurations",
+        "subheader": "LDAP configurations. You can set configurations in application.yml file",
+        "actions": {
+          "nextLabel": "Test"
+        },
+        "remote": {
+          "error": "Could not test ldap connection"
+        }
+      },
+      "logs": {
+        "header": "Logs",
+        "subheader": "Test result logs"
+      }
+    }
+  }
+}

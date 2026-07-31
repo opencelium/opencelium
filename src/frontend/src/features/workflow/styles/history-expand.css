@@ -1,0 +1,60 @@
+.historyCommentWrap {
+	position: relative;
+	margin-top: 10px;
+}
+
+.historyExpandButton {
+	position: absolute;
+	top: 6px;
+	right: 15px;
+	width: 28px;
+	height: 28px;
+	border: 1px solid var(--color-border-default);
+	border-radius: 8px;
+	background: var(--color-background-surface);
+	color: var(--color-text-primary);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	z-index: 2;
+}
+
+.historyExpandButtonActive {
+	background: var(--color-action-primary);
+	border-color: var(--color-action-primary);
+	color: var(--color-text-on-action);
+}
+
+.historyComment {
+	width: 100%;
+	min-height: 84px;
+	box-sizing: border-box;
+	border: 1px solid var(--color-border-default);
+	border-radius: 0;
+	padding: 10px 12px;
+	resize: none;
+	outline: 0;
+	background: var(--color-background-input);
+	color: var(--color-text-primary);
+	font-size: 14px;
+	line-height: 1.45;
+}
+
+.historyComment:focus {
+	border-color: var(--color-border-default);
+	box-shadow: none;
+}
+
+.historyComment::placeholder {
+	color: var(--color-text-disabled);
+}
+
+.historyCommentEmpty:not(:focus) {
+	min-height: 84px;
+	color: var(--color-text-primary);
+}
+
+.historyCommentExpanded {
+	min-height: 200px;
+}

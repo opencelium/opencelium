@@ -1,0 +1,21 @@
+{
+  "step": {
+    "field": {
+      "general_section": {
+        "label": "General"
+      },
+      "ui_section": {
+        "label": "UI"
+      },
+      "table_section": {
+        "label": "Table"
+      },
+      "validation_section": {
+        "label": "Validation"
+      },
+      "policy_section": {
+        "label": "Access Policy"
+      }
+    }
+  }
+}

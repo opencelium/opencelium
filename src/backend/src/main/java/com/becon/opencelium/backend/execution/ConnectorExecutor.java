@@ -7,7 +7,11 @@ import com.becon.opencelium.backend.execution.builder.RequestEntityBuilder;
 import com.becon.opencelium.backend.execution.logger.msg.ConnectorLog;
 import com.becon.opencelium.backend.execution.logger.msg.ExecutionLog;
 import com.becon.opencelium.backend.execution.logger.msg.MethodData;
+<<<<<<< HEAD
 import com.becon.opencelium.backend.execution.oc721.Connector;
+=======
+import com.becon.opencelium.backend.execution.masking.MaskingService;
+>>>>>>> origin/version5.0
 import com.becon.opencelium.backend.execution.oc721.Loop;
 import com.becon.opencelium.backend.execution.oc721.Operation;
 import com.becon.opencelium.backend.invoker.entity.Pagination;
@@ -33,7 +37,6 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
-import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -43,6 +46,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Stack;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
@@ -52,9 +56,7 @@ import static com.becon.opencelium.backend.utility.MediaTypeUtility.isJsonCompat
 
 public class ConnectorExecutor {
     private final ExpressionProcessor expressionProcessor;
-    private final Connector connector;
     private final ExecutionManager executionManager;
-    private final RestTemplate restTemplate;
     private final List<Object> executables;
     private final OcLogger<ExecutionLog> logger;
     private final MaskingService masking;
@@ -69,33 +71,22 @@ public class ConnectorExecutor {
 
     public ConnectorExecutor(
             ConnectorEx connectorEx, ExecutionManager executionManager,
+<<<<<<< HEAD
             RestTemplate restTemplate, OcLogger<ExecutionLog> logger,
+=======
+>>>>>>> origin/version5.0
             MaskingService masking, String direction
     ) {
         this.expressionProcessor = ExpressionProcessorFactory.get(ProcessorType.POSTFIX);
         this.executionManager = executionManager;
+<<<<<<< HEAD
         this.restTemplate = restTemplate;
         this.logger = logger;
+=======
+        this.executables = buildExecutables(connectorEx);
+        this.logger = ThreadLocalOcLogger.get();
+>>>>>>> origin/version5.0
         this.masking = masking;
-
-        this.executables = new ArrayList<>();
-        if (Objects.nonNull(connectorEx.getMethods())) {
-            connectorEx.getMethods().forEach(o -> {
-                o.setInvoker(connectorEx.getInvoker());
-                executables.add(o);
-            });
-        }
-        if (Objects.nonNull(connectorEx.getOperators())) {
-            this.executables.addAll(connectorEx.getOperators());
-        }
-        this.executables.sort(
-                Comparator.comparing(
-                        ConnectorExecutor::extractIndex,
-                        Comparators.NUMERIC_PARTS
-                )
-        );
-
-        this.connector = Connector.fromEx(connectorEx);
 
         // initialize log related variables:
         this.flowId = connectorEx.getFchartId();
@@ -107,8 +98,8 @@ public class ConnectorExecutor {
     public void start() {
         logger.getLogEntity().setType(LogType.INFO);
         logger.getLogEntity().setConnector(new ConnectorLog(connectorName, "source".equals(direction) ? "CONN1" : "CONN2"));
-        logger.logAndSend(String.format("phase=FLOWCHART_START flowId=%s connectorId=%d connectorName=%s direction=%s", flowId, connectorId, connectorName, direction));
-        endPhases.push(String.format("phase=FLOWCHART_END flowId=%s connectorId=%d connectorName=%s direction=%s", flowId, connectorId, connectorName, direction));
+        logger.logAndSend("phase=FLOWCHART_START flowId=%s connectorId=%d connectorName=%s direction=%s".formatted(flowId, connectorId, connectorName, direction));
+        endPhases.push("phase=FLOWCHART_END flowId=%s connectorId=%d connectorName=%s direction=%s".formatted(flowId, connectorId, connectorName, direction));
 
         try {
             executionManager.setCurrentCtorId(connector.getId());
@@ -142,8 +133,9 @@ public class ConnectorExecutor {
 
         if (executables.get(headPointer) instanceof OperationDTO operation) {
             logger.getLogEntity().setMethodData(new MethodData(operation.getOperationId()));
-            logger.logAndSend(String.format("phase=OPERATION_START indexPath=%s name=\"%s\" %s", index, operation.getName(), getLoopData()));
-            endPhases.push(String.format("phase=OPERATION_END indexPath=%s name=\"%s\" %s", index, operation.getName(), getLoopData()));
+            logger.logAndSend("phase=OPERATION_START indexPath=%s name=\"%s\" %s".formatted(index, operation.getName(), getLoopData()));
+            endPhases.push("phase=OPERATION_END indexPath=%s name=\"%s\" %s".formatted(index, operation.getName(), getLoopData()));
+            executionManager.setCurrentCtorId(operation.getConnectorId());
 
             if (headPointer != tail) {
                 throw new RuntimeException("Methods cannot have body");
@@ -151,8 +143,10 @@ public class ConnectorExecutor {
 
             executeOperation(operation);
 
+            executionManager.setCurrentCtorId(connectorId);
             logger.logAndSend(endPhases.pop());
             logger.getLogEntity().setMethodData(null);
+<<<<<<< HEAD
         } else if (executables.get(headPointer) instanceof OperatorEx operator) {
             if (Objects.equals(operator.getType(), "if")) {
                 logger.logAndSend(String.format("phase=IF_START indexPath=%s expression=(%s) %s", index, operator.getExpression(), getLoopData()));
@@ -222,6 +216,56 @@ public class ConnectorExecutor {
             }
         } else {
             throw new RuntimeException("Wrong type is supplied");
+=======
+        } else if (executable instanceof OperatorEx operator && "if".equals(operator.getType())) {
+            logger.logAndSend("phase=IF_START indexPath=%s expression=(%s) %s".formatted(index, operator.getExpression(), getLoopData()));
+            endPhases.push("phase=IF_END indexPath=%s %s".formatted(index, getLoopData()));
+            endPhases.push("segment=IF_RESULT data=unknown"); // if exception occurs this will be logged, otherwise will just be skipped
+
+            boolean result = (Boolean) expressionProcessor.evaluate(
+                    operator.getExpression(),
+                    executionManager::getValue,
+                    logger,
+                    masking
+            );
+
+            endPhases.pop(); // potential exception case message is skipped
+            logger.logAndSend("segment=IF_RESULT data=" + result);
+
+            if (result) {
+                execute(headPointer + 1, tail);
+            }
+            logger.logAndSend(endPhases.pop());
+        } else if (executable instanceof OperatorEx operator) { // LOOP cases = [for, forin, SplitString]
+            Loop loop;
+            List<String> values;
+            int length = - 1;
+
+            endPhases.push("phase=LOOP_END indexPath=%s %s".formatted(index, getLoopData()));
+
+            try {
+                loop = Loop.fromOperator(operator);
+                values = buildLoopValues(loop);
+                length = values.size();
+            } finally {
+                logger.logAndSend("phase=LOOP_START indexPath=%s expression=(%s) size=%d iterator=\"%s\" %s".formatted(index, operator.getExpression(), length, operator.getIterator(), getLoopData()));
+            }
+
+            logger.logAndSend("segment=LOOP_REF ref=(%s) data=%s".formatted(loop.getRef(), values.stream().collect(Collectors.joining(", ", "[", "]"))));
+
+            executionManager.getLoops().add(loop);
+            for (int i = 0; i < length; i++) {
+                // update currently executing loops' data
+                loop.setIndex(i);
+                loop.setValue(values.get(i));
+
+                execute(headPointer + 1, tail);
+            }
+
+            // remove executed loops' data
+            executionManager.getLoops().remove(loop);
+            logger.logAndSend(endPhases.pop());
+>>>>>>> origin/version5.0
         }
 
         // we already executed operations'/operators' body, now start executing next body
@@ -264,9 +308,9 @@ public class ConnectorExecutor {
                 }
             }
 
-            logger.logAndSend(String.format("segment=REQUEST url=%s http_method=%s", masking.applyMask(uri, toRef.apply("request", "url")), requestEntity.getMethod()));
-            logger.logAndSend(String.format("segment=REQUEST_HEADER data=%s", masking.applyMask(requestEntity.getHeaders(), toRef.apply("request", "header"))));
-            logger.logAndSend(String.format("segment=REQUEST_PAYLOAD data=%s", masking.applyMask(requestEntity.getBody(), toRef.apply("request", "body"))));
+            logger.logAndSend("segment=REQUEST url=%s http_method=%s".formatted(masking.applyMask(uri, toRef.apply("request", "url")), requestEntity.getMethod()));
+            logger.logAndSend("segment=REQUEST_HEADER data=%s".formatted(masking.applyMask(requestEntity.getHeaders(), toRef.apply("request", "header"))));
+            logger.logAndSend("segment=REQUEST_PAYLOAD data=%s".formatted(masking.applyMask(requestEntity.getBody(), toRef.apply("request", "body"))));
 
             long startTime = System.currentTimeMillis();
             responseEntity = sendRequest(uri, requestEntity, responseType);
@@ -297,9 +341,9 @@ public class ConnectorExecutor {
             pagination = null;
             executionManager.setPagination(pagination);
         }
-        logger.logAndSend(String.format("segment=RESPONSE status=%d duration=%dms", responseEntity.getStatusCode().value(), duration));
-        logger.logAndSend(String.format("segment=RESPONSE_HEADER data=%s", masking.applyMask(responseEntity.getHeaders(), toRef.apply("response", "header"))));
-        logger.logAndSend(String.format("segment=RESPONSE_PAYLOAD data=%s", masking.applyMask(responseEntity.getBody(), toRef.apply("response", "body"))));
+        logger.logAndSend("segment=RESPONSE status=%d duration=%dms".formatted(responseEntity.getStatusCode().value(), duration));
+        logger.logAndSend("segment=RESPONSE_HEADER data=%s".formatted(masking.applyMask(responseEntity.getHeaders(), toRef.apply("response", "header"))));
+        logger.logAndSend("segment=RESPONSE_PAYLOAD data=%s".formatted(masking.applyMask(responseEntity.getBody(), toRef.apply("response", "body"))));
 
         Operation operation = executionManager.findOperationByColor(dto.getOperationId())
                 .orElseGet(() -> {
@@ -321,7 +365,7 @@ public class ConnectorExecutor {
         HttpEntity<Object> httpEntity = new HttpEntity<>(requestEntity.getBody(), requestEntity.getHeaders());
 
         try {
-            return this.restTemplate.exchange(uri, requestEntity.getMethod(), httpEntity, responseType);
+            return executionManager.resolveRestTemplate().exchange(uri, requestEntity.getMethod(), httpEntity, responseType);
         } catch (Exception e) {
             return convertException(e);
         }
@@ -400,7 +444,7 @@ public class ConnectorExecutor {
                 .map(loop -> String.valueOf(loop.getIndex()))
                 .collect(Collectors.joining(","));
 
-        return String.format("loopIterator=\"%s\" loopIndex=\"%s\"", loopIterator, loopIndex);
+        return "loopIterator=\"%s\" loopIndex=\"%s\"".formatted(loopIterator, loopIndex);
     }
 
     private static String extractIndex(Object o) {
@@ -412,4 +456,93 @@ public class ConnectorExecutor {
 
         throw new IllegalArgumentException("Unsupported executable type: " + o.getClass());
     }
+<<<<<<< HEAD
+=======
+
+    private Pagination resolvePagination(OperationDTO dto) {
+        if (dto.getOperationType() == OpType.PAGINATION) {
+            Pagination pagination = Optional.ofNullable(dto.getPagination())
+                    .orElseGet(executionManager::resolvePagination);
+
+            if (pagination != null) {
+                return pagination.clone();
+            }
+        }
+
+        return null;
+    }
+
+    private URI resolveURI(URI uri, Pagination pagination) {
+        if (pagination == null || !pagination.existsParam(PageParam.LINK)) {
+            return uri;
+        }
+
+        String nextLink = pagination.findParam(PageParam.LINK).getValue();
+        if (nextLink == null || nextLink.isBlank()) {
+            return uri;
+        }
+
+        try {
+            return new URI(nextLink);
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("Invalid pagination link URI: " + nextLink, e);
+        }
+    }
+
+    private List<String> buildLoopValues(Loop loop) {
+        Object referencedList = executionManager.getValue(loop.getRef());
+        if (ObjectUtils.isEmpty(referencedList)) {
+            return Collections.emptyList();
+        }
+
+        return switch (loop.getOperator()) {
+            case FOR -> IntStream.range(0, ((List<Object>) referencedList).size())
+                    .mapToObj(String::valueOf)
+                    .toList();
+
+            case FOR_IN -> (List<String>) referencedList;
+
+            case SPLIT_STRING -> List.of(((String) referencedList).split(loop.getDelimiter()));
+
+            default -> Collections.emptyList();
+        };
+    }
+
+    private void checkInterrupted() {
+        if (Thread.currentThread().isInterrupted()) {
+            Thread.interrupted(); // clear the flag
+            throw new ExecutionTerminatedException("Execution terminated.");
+        }
+    }
+
+    private List<Object> buildExecutables(ConnectorEx connector) {
+        List<Object> result = new ArrayList<>();
+
+        if (Objects.nonNull(connector.getMethods())) {
+            connector.getMethods().forEach(o -> {
+                o.setInvoker(connector.getInvoker());
+                result.add(o);
+            });
+        }
+
+        if (Objects.nonNull(connector.getOperators())) {
+            result.addAll(connector.getOperators());
+        }
+
+        result.sort(
+                Comparator.comparing(
+                        ConnectorExecutor::extractIndex,
+                        Comparators.NUMERIC_PARTS
+                )
+        );
+
+        return result;
+    }
+
+    private void flushEndPhases() {
+        while (!endPhases.isEmpty()) {
+            logger.logAndSend(endPhases.pop());
+        }
+    }
+>>>>>>> origin/version5.0
 }

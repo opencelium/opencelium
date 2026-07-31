@@ -4,20 +4,20 @@ import com.becon.opencelium.backend.ocel.operator.BinaryOperator;
 import com.becon.opencelium.backend.ocel.operator.OperatorEnum;
 import com.becon.opencelium.backend.ocel.operator.SidesType;
 import com.becon.opencelium.backend.ocel.exception.ApplyOperatorException;
+import com.becon.opencelium.backend.ocel.utils.Utils;
 
 import java.util.regex.Pattern;
 
 class Like implements BinaryOperator {
     @Override
     public Object apply(Object o1, Object o2) throws ApplyOperatorException {
-//        if (!(o1 instanceof String s1) || !(o2 instanceof String s2))
-//            throw ApplyOperatorException.invalidTypePairsException(getOperatorType(), o1, o2);
-//
-//        String regex = "(?i)^" + s2.replace("%", ".*") + "$";
-//        return Pattern.compile(regex, Pattern.DOTALL).matcher(s1).find();
-
-        if (!(o1 instanceof String s1) || !(o2 instanceof String s2))
+        // Accept any primitive scalar on both sides and coerce via toString();
+        // null remains invalid.
+        if (!Utils.isPrimitiveType(o1) || !Utils.isPrimitiveType(o2))
             throw ApplyOperatorException.invalidTypePairsException(getOperatorType(), o1, o2);
+
+        String s1 = o1.toString();
+        String s2 = o2.toString();
 
         // 1. Escape all regex special characters first
         String escaped = Pattern.quote(s2);
@@ -28,7 +28,7 @@ class Like implements BinaryOperator {
                 .replace("%", "\\E.*\\Q")  // Close quote, add wildcard, reopen quote
                 .replace("_", "\\E.\\Q");   // Close quote, add single char wildcard, reopen quote
 
-        // 3. Clean up empty quotes and wrap in anchors
+        // 3. Wrap in anchors
         regex = "^" + regex + "$";
 
         // Use CASE_INSENSITIVE for SQL-like behavior
@@ -39,12 +39,12 @@ class Like implements BinaryOperator {
 
     @Override
     public boolean isValidOperand(SidesType sidesType, Object operand) {
-        return operand instanceof String;
+        return Utils.isPrimitiveType(operand);
     }
 
     @Override
     public boolean isValidType(SidesType side, Class<?> type) {
-        return type.equals(String.class);
+        return Utils.isPrimitiveType(type);
     }
 
     @Override
