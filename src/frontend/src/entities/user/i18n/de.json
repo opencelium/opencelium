@@ -1,7 +1,10 @@
 {
   "list": {
     "title": "Benutzer",
-    "subTitle": "In diesem Bereich können Administratoren Systembenutzer verwalten, Gruppen zuweisen, die Zwei-Faktor-Authentifizierung (2FA) aktivieren und Zugriffsberechtigungen steuern."
+    "subTitle": "In diesem Bereich können Administratoren Systembenutzer verwalten, Gruppen zuweisen, die Zwei-Faktor-Authentifizierung (2FA) aktivieren und Zugriffsberechtigungen steuern.",
+    "confirmDelete": {
+      "message": "Sind Sie sicher, dass Sie den Benutzer mit der E-Mail \"{{email}}\" löschen möchten?"
+    }
   },
   "crossValidations": {
     "repeatPassword": {
