@@ -56,9 +56,12 @@ Open **License & System → System Check** (admin menu, ``Alt+M``). MariaDB,
 MongoDB, OpenCelium and the operating system should all report *Operational*.
 
 Email is *Down* until you configure ``spring.mail`` — password resets and e-mail
-notifications need it. Polyglot is *Down* until you deploy the polyglot engine,
-which is only needed for Python and Ruby enhancements. Both are configured in
-:ref:`ref-configuration`.
+notifications need it. Polyglot is *Down* until you deploy the polyglot engine
+(:ref:`ref-config-polyglot-service`), which is only needed for Python and Ruby
+enhancements. Both are configured in :ref:`ref-configuration`.
+
+Neither one being *Down* stops OpenCelium from working — both are optional
+components.
 
 Where to go next
 ================
