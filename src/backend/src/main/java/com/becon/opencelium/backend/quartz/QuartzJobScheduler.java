@@ -6,6 +6,7 @@ import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.exception.ConnectionNotFoundException;
 import com.becon.opencelium.backend.exception.SchedulerNotFoundException;
+import com.becon.opencelium.backend.resource.schedule.RunningJob;
 import org.quartz.CronExpression;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
@@ -21,6 +22,8 @@ import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -35,6 +38,11 @@ import java.util.stream.Collectors;
 import static org.quartz.TriggerBuilder.newTrigger;
 
 public class QuartzJobScheduler implements SchedulingStrategy {
+    private static final Logger logger = LoggerFactory.getLogger(QuartzJobScheduler.class);
+
+    private static final int DELETE_JOB_MAX_ATTEMPTS = 3;
+    private static final long DELETE_JOB_RETRY_DELAY_MS = 200;
+
     private final org.quartz.Scheduler quartzScheduler;
 
     public QuartzJobScheduler(org.quartz.Scheduler quartzScheduler) {
@@ -89,14 +97,34 @@ public class QuartzJobScheduler implements SchedulingStrategy {
         final String jobName = getJobName(scheduler);
         JobKey jobKey = new JobKey(jobName, "connection");
 
-        try {
-            boolean deleted = quartzScheduler.deleteJob(jobKey); //Deleting a job and unScheduling all of its Triggers
+        SchedulerException lastFailure = null;
+        for (int attempt = 1; attempt <= DELETE_JOB_MAX_ATTEMPTS; attempt++) {
+            try {
+                boolean deleted = quartzScheduler.deleteJob(jobKey); //Deleting a job and unScheduling all of its Triggers
 
-            if (!deleted) {
-                System.err.println("JOB_NOT_FOUND");
+                if (!deleted) {
+                    logger.warn("JOB_NOT_FOUND: {}", jobKey);
+                }
+                return;
+            } catch (SchedulerException e) {
+                // right after a fire-once trigger completes, quartz's own cleanup of the
+                // trigger row races this delete ("Record has changed since last read");
+                // the conflict is transient, so retry before giving up
+                lastFailure = e;
+                logger.warn("Attempt {}/{} to delete quartz job {} failed: {}",
+                        attempt, DELETE_JOB_MAX_ATTEMPTS, jobKey, e.getMessage());
+                sleepQuietly(DELETE_JOB_RETRY_DELAY_MS);
             }
-        } catch (SchedulerException e) {
-            throw new RuntimeException(e);
+        }
+
+        throw new RuntimeException(lastFailure);
+    }
+
+    private static void sleepQuietly(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 
@@ -273,15 +301,21 @@ public class QuartzJobScheduler implements SchedulingStrategy {
     }
 
     @Override
-    public Map<Long, Integer> getRunningJobs() {
+    public List<RunningJob> getRunningJobs() {
         try {
             return quartzScheduler.getCurrentlyExecutingJobs()
                     .stream()
-                    .map(JobExecutionContext::getJobDetail)
-                    .map(JobDetail::getKey)
-                    .filter(k -> k.getName().split("-")[0].matches("-?\\d+(\\.\\d+)?") && k.getName().split("-")[1].matches("-?\\d+(\\.\\d+)?"))
-                    .collect(Collectors.toMap(e ->
-                            Long.valueOf(e.getName().split("-")[0]), e -> Integer.parseInt(e.getName().split("-")[1])));
+                    .map(JobExecutionContext::getMergedJobDataMap)
+                    .map(jdm -> {
+                        QuartzJobScheduler.ScheduleData data = (QuartzJobScheduler.ScheduleData) jdm.get("data");
+
+                        long connectionId = jdm.getLong("connectionId");
+                        int schedulerId = data.getScheduleId();
+                        long execId = jdm.getLong("execId");
+
+                        return new RunningJob(connectionId, schedulerId, execId);
+                    })
+                    .toList();
         } catch (SchedulerException e) {
             throw new RuntimeException(e);
         }

@@ -30,6 +30,8 @@ import com.github.fge.jsonpatch.JsonPatch;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public interface ConnectionService {
 
@@ -45,11 +47,21 @@ public interface ConnectionService {
 
     List<Connection> findAll();
 
+    /**
+     * @param includeTest when {@code false}, test connections are excluded from the result
+     */
+    List<Connection> findAll(Boolean includeTest);
+
     boolean existsByName(String name);
 
     boolean existsById(Long id);
 
     List<Connection> findAllByConnectorId(int connectorId);
+
+    /**
+     * @param includeTest when {@code false}, test connections are excluded from the result
+     */
+    List<Connection> findAllByConnectorId(int connectorId, Boolean includeTest);
 
     List<Connection> findAllByNameContains(String name);
 
@@ -72,6 +84,11 @@ public interface ConnectionService {
     List<Connection> getAllByCategoryId(Integer categoryId);
 
     List<ConnectionDTO> getAllFullConnection();
+
+    /**
+     * @param includeTest when {@code false}, test connections are excluded from the result
+     */
+    List<ConnectionDTO> getAllFullConnection(Boolean includeTest);
 
     void updateCategory(Connection connection, Integer newCategory);
 
@@ -97,10 +114,18 @@ public interface ConnectionService {
 
     List<Connection> findAllByIds(IdentifiersDTO<Long> ids);
 
+    /**
+     * @param includeTest when {@code false}, test connections are excluded from the result
+     */
+    List<Connection> findAllByIds(IdentifiersDTO<Long> ids, Boolean includeTest);
 
-    ConnectionServiceImp.CleanupResult cleanupAllTestConnections();
+    ConnectionServiceImp.CleanupResult cleanupAllTestConnections(Set<Long> runningConnectionIds);
+
+    void deleteByIds(List<Long> ids, Set<Long> runningConnectionIds);
 
     List<ConnectionVersionedDTO> getConnectionVersions(Long connectionId);
+
+    Map<Long, ConnectionVersionedDTO> getLastVersions(List<Connection> connections);
 
     void deleteSnapshot(Long connectionId, String snapshotId);
 

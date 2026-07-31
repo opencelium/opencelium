@@ -1,0 +1,5 @@
+/* textarea.ant.css */
+.ant-textarea-custom {
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+}

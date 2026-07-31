@@ -34,21 +34,21 @@ import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.mapper.base.Mapper;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.PatchConnectionDetails;
-import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
-import com.becon.opencelium.backend.resource.connection.ConnectionVersionUpdateRequest;
-import com.becon.opencelium.backend.resource.connection.ConnectionVersionedDTO;
-import com.becon.opencelium.backend.resource.connection.ConnectorDTO;
+import com.becon.opencelium.backend.resource.connection.*;
 import com.becon.opencelium.backend.resource.connection.masking.RuleDTO;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
 import com.becon.opencelium.backend.utility.LogFileUtility;
+import com.becon.opencelium.backend.utility.TestNameUtils;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.becon.opencelium.backend.versionmanager.EntityUpdater;
 import com.becon.opencelium.backend.versionmanager.EntityVersionManager;
+import com.becon.opencelium.backend.versionmanager.base.UpdaterVersion;
 import com.becon.opencelium.backend.versionmanager.base.Utils;
 import com.github.fge.jsonpatch.JsonPatch;
 import jakarta.persistence.EntityNotFoundException;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -58,6 +58,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -80,10 +81,11 @@ public class ConnectionServiceImp implements ConnectionService {
     private final Mapper<Connection, ConnectionDTO> connectionMapper;
     private final ConnectionUpdateTracker updateTracker;
     private final MaskingRuleRepository ruleRepository;
+    private final ExecutionArgumentService executionArgumentService;
     private final PatchHelper patchHelper;
     private final WebhookService webhookService;
     private final OpenceliumProps ocProps;
-    private final EntityUpdater<ConnectionMng> connectionMngEntityUpdater;
+    private final EntityUpdater<ConnectionMng> connectionMngStartupUpdater;
     private final OwnershipSecurity ownershipSecurity;
 
     public ConnectionServiceImp(
@@ -101,6 +103,7 @@ public class ConnectionServiceImp implements ConnectionService {
             Mapper<Connection, ConnectionDTO> connectionMapper,
             ConnectionUpdateTracker updateTracker,
             MaskingRuleRepository ruleRepository,
+            ExecutionArgumentService executionArgumentService,
             EntityVersionManager entityVersionManager,
             OpenceliumProps ocProps,
             OwnershipSecurity ownershipSecurity
@@ -119,8 +122,9 @@ public class ConnectionServiceImp implements ConnectionService {
         this.schedulerService = schedulerService;
         this.webhookService = webhookService;
         this.ruleRepository = ruleRepository;
+        this.executionArgumentService = executionArgumentService;
         this.ocProps = ocProps;
-        this.connectionMngEntityUpdater = entityVersionManager.getUpdater(ConnectionMng.class);
+        this.connectionMngStartupUpdater = entityVersionManager.getUpdater(ConnectionMng.class, UpdaterVersion.VERSION_4_8);
         this.ownershipSecurity = ownershipSecurity;
     }
 
@@ -134,15 +138,24 @@ public class ConnectionServiceImp implements ConnectionService {
             throw new RuntimeException("TITLE_HAS_ALREADY_TAKEN");
         }
 
-        //checking existence of connectors
-        Connector from = connectorService.getById(connection.getToConnector());
-        Connector to = connectorService.getById(connection.getFromConnector());
-
-        connectionMng.getFromConnector().setTitle(from.getTitle());
-        connectionMng.getToConnector().setTitle(to.getTitle());
+        if (connection.getFromConnector() == null) {
+            throw new GeneralServiceException(ExceptionConstant.CONNECTOR_NOT_FOUND, ExceptionMessages.FROM_CONNECTOR_IS_NULL);
+        }
 
         connectionMng.getFromConnector().setFlowId(UUID.randomUUID().toString());
-        connectionMng.getToConnector().setFlowId(UUID.randomUUID().toString());
+
+        if (Objects.equals(connection.getFromConnector(), ConnectionConstants.DEFAULT_CONNECTOR_ID)) {
+            connectionMng.getFromConnector().setTitle(ConnectionConstants.DEFAULT_CONNECTOR_NAME);
+        } else {
+            Connector from = connectorService.getById(connection.getFromConnector());
+            connectionMng.getFromConnector().setTitle(from.getTitle());
+        }
+
+        if (connection.getToConnector() != null) {
+            Connector to = connectorService.getById(connection.getToConnector());
+            connectionMng.getToConnector().setTitle(to.getTitle());
+            connectionMng.getToConnector().setFlowId(UUID.randomUUID().toString());
+        }
 
         //checking existence of category
         if (connection.getCategoryId() != null) {
@@ -151,11 +164,13 @@ public class ConnectionServiceImp implements ConnectionService {
 
         ConnectionMng savedMng = connectionMngService.create(connectionMng);
 
-        connection.setOcVersion(ocProps.getVersion());
+        String version = resolveVersion(connection);
+        connection.setOcVersion(version);
         connection.setSnapshotId(savedMng.getId());
         Connection savedConnection = connectionRepository.save(connection);
 
         savedMng.setConnectionId(savedConnection.getId());
+        savedMng.setVersion(version);
         connectionMngService.save(savedMng);
 
         connectionHistoryService.makeHistoryAndSave(savedConnection, null, Action.CREATE);
@@ -175,15 +190,24 @@ public class ConnectionServiceImp implements ConnectionService {
 
         ConnectionMng oldMng = connectionMngService.getById(sCon.getSnapshotId());
 
-        //checking existence of connectors
-        Connector from = connectorService.getById(connection.getToConnector());
-        Connector to = connectorService.getById(connection.getFromConnector());
-
-        connectionMng.getFromConnector().setTitle(from.getTitle());
-        connectionMng.getToConnector().setTitle(to.getTitle());
+        if (connection.getFromConnector() == null) {
+            throw new GeneralServiceException(ExceptionConstant.CONNECTOR_NOT_FOUND, ExceptionMessages.FROM_CONNECTOR_IS_NULL);
+        }
 
         connectionMng.getFromConnector().setFlowId(oldMng.getFromConnector().getFlowId());
-        connectionMng.getToConnector().setFlowId(oldMng.getToConnector().getFlowId());
+
+        if (Objects.equals(connection.getFromConnector(), ConnectionConstants.DEFAULT_CONNECTOR_ID)) {
+            connectionMng.getFromConnector().setTitle(ConnectionConstants.DEFAULT_CONNECTOR_NAME);
+        } else {
+            Connector from = connectorService.getById(connection.getFromConnector());
+            connectionMng.getFromConnector().setTitle(from.getTitle());
+        }
+
+        if (connection.getToConnector() != null) {
+            Connector to = connectorService.getById(connection.getToConnector());
+            connectionMng.getToConnector().setTitle(to.getTitle());
+            connectionMng.getToConnector().setFlowId(oldMng.getToConnector().getFlowId());
+        }
 
         //checking existence of category
         if (connection.getCategoryId() != null && !connection.getCategoryId().equals(sCon.getCategoryId())) {
@@ -194,7 +218,11 @@ public class ConnectionServiceImp implements ConnectionService {
         connectionMng.setConnectionId(connection.getId());
         ConnectionMng savedMng = connectionMngService.create(connectionMng);
 
-        connection.setOcVersion(ocProps.getVersion());
+        String version = resolveVersion(connection);
+        savedMng.setVersion(version);
+        connectionMngService.save(savedMng);
+
+        connection.setOcVersion(version);
         connection.setSnapshotId(savedMng.getId());
         connection.setRevision(sCon.getRevision());
         connectionRepository.save(connection);
@@ -242,6 +270,9 @@ public class ConnectionServiceImp implements ConnectionService {
     public void deleteById(Long id) {
         Connection connection = getById(id);
 
+        // Strip execution_argument rows
+        executionArgumentService.deleteByConnectionId(id);
+
         deleteSchedules(connection);
 
         connectionRepository.deleteById(id);
@@ -263,6 +294,9 @@ public class ConnectionServiceImp implements ConnectionService {
     public void deleteAndTrackIt(Long id) {
         Connection connection = getById(id);
 
+        // Strip execution_argument rows
+        executionArgumentService.deleteByConnectionId(id);
+
         deleteSchedules(connection);
 
         connectionRepository.deleteById(id);
@@ -276,6 +310,10 @@ public class ConnectionServiceImp implements ConnectionService {
     @Transactional
     public void deleteOnlyConnection(Long id) {
         Connection connection = getById(id);
+
+        // Strip execution_argument rows
+        executionArgumentService.deleteByConnectionId(id);
+
         deleteSchedules(connection);
         connectionRepository.deleteById(id);
     }
@@ -288,12 +326,22 @@ public class ConnectionServiceImp implements ConnectionService {
 
     @Override
     public List<Connection> findAll() {
-        return connectionRepository.findAll();
+        return findAll(false);
+    }
+
+    @Override
+    public List<Connection> findAll(Boolean includeTest) {
+        return excludeTestIfNeeded(connectionRepository.findAll(), includeTest);
     }
 
     @Override
     public List<Connection> findAllByConnectorId(int connectorId) {
-        return connectionRepository.findAllByConnectorId(connectorId);
+        return findAllByConnectorId(connectorId, false);
+    }
+
+    @Override
+    public List<Connection> findAllByConnectorId(int connectorId, Boolean includeTest) {
+        return excludeTestIfNeeded(connectionRepository.findAllByConnectorId(connectorId), includeTest);
     }
 
     @Override
@@ -340,17 +388,23 @@ public class ConnectionServiceImp implements ConnectionService {
         connectionDTOMng.setCategoryId(connectionDTO.getCategoryId());
 
         if (connectionDTOMng.getFromConnector() != null) {
-            ConnectorDTO temp = connectionDTOMng.getFromConnector();
-            connectionDTOMng.setFromConnector(connectorMapper.toDTO(connectorService.getById(connection.getFromConnector())));
-            connectionDTOMng.getFromConnector().setOperators(temp.getOperators() == null ? new ArrayList<>() : temp.getOperators());
-            connectionDTOMng.getFromConnector().setMethods(temp.getMethods() == null ? new ArrayList<>() : temp.getMethods());
+            if(!Objects.equals(ConnectionConstants.DEFAULT_CONNECTOR_ID, connectionDTOMng.getFromConnector().getConnectorId())) {
+                ConnectorDTO temp = connectionDTOMng.getFromConnector();
+                connectionDTOMng.setFromConnector(connectorMapper.toDTO(connectorService.getById(connection.getFromConnector())));
+                connectionDTOMng.getFromConnector().setOperators(temp.getOperators() == null ? new ArrayList<>() : temp.getOperators());
+                connectionDTOMng.getFromConnector().setMethods(temp.getMethods() == null ? new ArrayList<>() : temp.getMethods());
+            } else {
+                fillMethodInvoker(connectionDTOMng.getFromConnector());
+            }
         }
 
-        if (connectionDTOMng.getToConnector() != null) {
+        if (connection.getToConnector() != null) {
             ConnectorDTO temp = connectionDTOMng.getToConnector();
-            connectionDTOMng.setToConnector(connectorMapper.toDTO(connectorService.getById(connection.getToConnector())));
-            connectionDTOMng.getToConnector().setOperators(temp.getOperators() == null ? new ArrayList<>() : temp.getOperators());
-            connectionDTOMng.getToConnector().setMethods(temp.getMethods() == null ? new ArrayList<>() : temp.getMethods());
+            if (temp != null) {
+                connectionDTOMng.setToConnector(connectorMapper.toDTO(connectorService.getById(connection.getToConnector())));
+                connectionDTOMng.getToConnector().setOperators(temp.getOperators() == null ? new ArrayList<>() : temp.getOperators());
+                connectionDTOMng.getToConnector().setMethods(temp.getMethods() == null ? new ArrayList<>() : temp.getMethods());
+            }
         }
 
         if (connectionDTOMng.getFieldBinding() == null) {
@@ -358,6 +412,27 @@ public class ConnectionServiceImp implements ConnectionService {
         }
         fieldBindingMngService.detach(connectionDTOMng);
         return connectionDTOMng;
+    }
+
+    private void fillMethodInvoker(ConnectorDTO connector) {
+        if (connector == null || CollectionUtils.isEmpty(connector.getMethods())) {
+            return;
+        }
+
+        Set<Integer> ids = connector.getMethods().stream()
+                .map(x -> x.getConnector() != null && x.getConnector().getInvoker() == null ? x.getConnector().getConnectorId() : null)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        Map<Integer, Connector> connectorById = connectorService.getAllById(ids).stream()
+                .collect(Collectors.toMap(Connector::getId, Function.identity()));
+
+        for (MethodDTO method : connector.getMethods()) {
+            if (method.getConnector() != null && method.getConnector().getInvoker() == null) {
+                Connector methodConnector = connectorById.get(method.getConnector().getConnectorId());
+                method.getConnector().setInvoker(methodConnector != null ? methodConnector.getInvoker() : null);
+            }
+        }
     }
 
     @Override
@@ -373,7 +448,12 @@ public class ConnectionServiceImp implements ConnectionService {
 
     @Override
     public List<ConnectionDTO> getAllFullConnection() {
-        List<Connection> all = findAll();
+        return getAllFullConnection(false);
+    }
+
+    @Override
+    public List<ConnectionDTO> getAllFullConnection(Boolean includeTest) {
+        List<Connection> all = findAll(includeTest);
         List<ConnectionDTO> res = new ArrayList<>();
         for (Connection connection : all) {
             res.add(getFullConnection(connection.getId()));
@@ -471,13 +551,15 @@ public class ConnectionServiceImp implements ConnectionService {
 
     @Override
     public void updateConnectionsToCurrentVersion() {
+        // Startup migration stops at 4.8; the 5.0 transform is applied on the read path only.
+        String targetVersion = UpdaterVersion.VERSION_4_8.getVersion();
         List<Long> ids = connectionRepository.findIds();
 
         for (Long id : ids) {
             Connection connection = getById(id);
-            if (Utils.compare(ocProps.getVersion(), connection.getOcVersion()) > 0 && !isTestConnection(connection.getTitle())) {
+            if (Utils.compare(targetVersion, connection.getOcVersion()) > 0 && TestNameUtils.isNotTestConnection(connection.getTitle())) {
 
-                List<ConnectionMng> connections = connectionMngService.getAllByConnectionId(connection.getId());
+                List<ConnectionMng> connections = connectionMngService.getAllByConnectionIdRaw(connection.getId());
                 if (connections.isEmpty()) {
                     log.error("Failed to find Connection[id={}, name={}] on MongoDB. Skipped updating", connection.getId(), connection.getTitle());
                     continue;
@@ -485,8 +567,7 @@ public class ConnectionServiceImp implements ConnectionService {
 
                 try {
                     for (ConnectionMng connectionMng : connections) {
-                        connectionMngEntityUpdater.updateToCurrentVersion(connectionMng);
-                        connectionMng.setVersion(ocProps.getVersion());
+                        connectionMngStartupUpdater.updateToCurrentVersion(connectionMng);
 
                         if (connectionMng.getCreatedBy() == null) {
                             connectionMng.setCreatedBy(connection.getCreatedBy());
@@ -494,7 +575,7 @@ public class ConnectionServiceImp implements ConnectionService {
                         connectionMngService.save(connectionMng);
                     }
 
-                    log.info("Connection[id={}, name={}, version={}] successfully updated to {} version", connection.getId(), connection.getTitle(), connection.getOcVersion(), ocProps.getVersion());
+                    log.info("Connection[id={}, name={}, version={}] successfully updated to {} version", connection.getId(), connection.getTitle(), connection.getOcVersion(), targetVersion);
                 } catch (Exception e) {
                     log.error("Failed to update Connection[id={}, name={}, version={}]", connection.getId(), connection.getTitle(), connection.getOcVersion(), e);
                     continue;
@@ -505,7 +586,7 @@ public class ConnectionServiceImp implements ConnectionService {
                     connection.setSnapshotId(lastConnection.getId());
                 }
 
-                connection.setOcVersion(ocProps.getVersion());
+                connection.setOcVersion(targetVersion);
                 connectionRepository.save(connection);
             }
         }
@@ -518,11 +599,16 @@ public class ConnectionServiceImp implements ConnectionService {
 
     @Override
     public List<Connection> findAllByIds(IdentifiersDTO<Long> ids) {
+        return findAllByIds(ids, false);
+    }
+
+    @Override
+    public List<Connection> findAllByIds(IdentifiersDTO<Long> ids, Boolean includeTest) {
         if (ids == null || CollectionUtils.isEmpty(ids.getIdentifiers())) {
             return Collections.emptyList();
         }
 
-        return connectionRepository.findAllById(ids.getIdentifiers());
+        return excludeTestIfNeeded(connectionRepository.findAllById(ids.getIdentifiers()), includeTest);
     }
 
     @Override
@@ -531,17 +617,40 @@ public class ConnectionServiceImp implements ConnectionService {
         List<ConnectionMng> connections = connectionMngService.getAllByConnectionId(connectionId);
 
         return connections.stream()
-                .map(x -> {
-                    ConnectionVersionedDTO versionedDTO = new ConnectionVersionedDTO();
-                    versionedDTO.setConnectionId(connection.getId());
-                    versionedDTO.setTitle(connection.getTitle());
-                    versionedDTO.setSnapshotId(x.getId());
-                    versionedDTO.setCreatedAt(x.getCreatedAt() != null ? x.getCreatedAt().toEpochMilli() : null);
-                    versionedDTO.setCurrent(Objects.equals(connection.getSnapshotId(), x.getId()));
-                    versionedDTO.setAuthor(x.getCreatedBy());
-                    versionedDTO.setComment(x.getComment());
-                    return versionedDTO;
-                }).toList();
+                .map(x -> toVersionedDTO(connection, x))
+                .toList();
+    }
+
+    @Override
+    public Map<Long, ConnectionVersionedDTO> getLastVersions(List<Connection> connections) {
+        if (CollectionUtils.isEmpty(connections)) {
+            return Map.of();
+        }
+
+        Map<String, Connection> connectionBySnapshotId = connections.stream()
+                .filter(c -> c.getId() != null && StringUtils.isNotBlank(c.getSnapshotId()))
+                .collect(Collectors.toMap(Connection::getSnapshotId, Function.identity(), (a, b) -> a));
+
+        Map<Long, ConnectionVersionedDTO> lastVersions = new HashMap<>();
+        for (ConnectionMng snapshot : connectionMngService.getVersionMetaByIds(connectionBySnapshotId.keySet())) {
+            Connection connection = connectionBySnapshotId.get(snapshot.getId());
+            if (connection != null) {
+                lastVersions.put(connection.getId(), toVersionedDTO(connection, snapshot));
+            }
+        }
+        return lastVersions;
+    }
+
+    private ConnectionVersionedDTO toVersionedDTO(Connection connection, ConnectionMng snapshot) {
+        ConnectionVersionedDTO versionedDTO = new ConnectionVersionedDTO();
+        versionedDTO.setConnectionId(connection.getId());
+        versionedDTO.setTitle(connection.getTitle());
+        versionedDTO.setSnapshotId(snapshot.getId());
+        versionedDTO.setCreatedAt(snapshot.getCreatedAt() != null ? snapshot.getCreatedAt().toEpochMilli() : null);
+        versionedDTO.setCurrent(Objects.equals(connection.getSnapshotId(), snapshot.getId()));
+        versionedDTO.setAuthor(snapshot.getCreatedBy());
+        versionedDTO.setComment(snapshot.getComment());
+        return versionedDTO;
     }
 
     @Override
@@ -595,9 +704,15 @@ public class ConnectionServiceImp implements ConnectionService {
      */
     @Override
     @Transactional
-    public CleanupResult cleanupAllTestConnections() {
-        log.info("Test connection cleanup completed started");
-        List<Long> ids = connectionRepository.findIdsByTitleLike(TEST_PREFIX_LIKE);
+    public CleanupResult cleanupAllTestConnections(Set<Long> runningConnectionIds) {
+        log.info("Test connection cleanup started");
+        Set<Long> running = runningConnectionIds == null ? Set.of() : runningConnectionIds;
+
+        // exclude connections with a test currently running so an active test is never deleted
+        List<Long> ids = connectionRepository.findIdsByTitleLike(TEST_PREFIX_LIKE).stream()
+                .filter(id -> !running.contains(id))
+                .toList();
+
         if (ids.isEmpty()) return new CleanupResult(0, 0, 0);
 
         long totalMongoDeleted = 0;
@@ -618,6 +733,51 @@ public class ConnectionServiceImp implements ConnectionService {
                 cleanupResult.sqlDeleted()
         );
         return cleanupResult;
+    }
+
+    /**
+     * Returns {@code connections} as-is when {@code includeTest} is true; otherwise drops every test connection
+     */
+    private List<Connection> excludeTestIfNeeded(List<Connection> connections, Boolean includeTest) {
+        if (Boolean.TRUE.equals(includeTest) || connections == null || connections.isEmpty()) {
+            return connections;
+        }
+        return connections.stream()
+                .filter(c -> TestNameUtils.isNotTestConnection(c.getTitle()))
+                .toList();
+    }
+
+    /**
+     * Deletes connections by id, tolerating concurrent changes:
+     * <ul>
+     *   <li>ids that no longer exist are skipped (e.g. a test connection finished and was auto-cleaned
+     *       between listing and this call), so a stale id never aborts the whole batch;</li>
+     *   <li>a test connection that is currently running (its id present in {@code runningConnectionIds})
+     *       is skipped, so an active test in progress is never removed.</li>
+     * </ul>
+     */
+    @Override
+    @Transactional
+    public void deleteByIds(List<Long> ids, Set<Long> runningConnectionIds) {
+        if (ids == null || ids.isEmpty()) {
+            return;
+        }
+        Set<Long> running = runningConnectionIds == null ? Set.of() : runningConnectionIds;
+        for (Long id : ids) {
+            if (id == null) {
+                continue;
+            }
+            Optional<Connection> connection = connectionRepository.findById(id);
+            if (connection.isEmpty()) {
+                log.info("Skipping deletion of connection id={}: already removed", id);
+                continue;
+            }
+            if (running.contains(id) && TestNameUtils.isTestConnection(connection.get().getTitle())) {
+                log.info("Skipping deletion of running test connection id={}", id);
+                continue;
+            }
+            deleteById(id);
+        }
     }
 
     @Transactional
@@ -641,8 +801,10 @@ public class ConnectionServiceImp implements ConnectionService {
     // private methods
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    private boolean isTestConnection(String title) {
-        return title != null && title.matches(RegExpression.TEST_CONNECTION_REGEX);
+    private String resolveVersion(Connection connection) {
+        return connection.getToConnector() == null
+                ? ocProps.getVersion()
+                : UpdaterVersion.VERSION_4_8.getVersion();
     }
 
     private void extractVars(Object json, List<String> varList) {

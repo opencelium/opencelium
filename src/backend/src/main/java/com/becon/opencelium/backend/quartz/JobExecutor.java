@@ -26,6 +26,7 @@ import com.becon.opencelium.backend.execution.service.ExecutionObjectServiceImp;
 import com.becon.opencelium.backend.execution.socket.WebSocketNotificationService;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.execution.ExecutionObj;
+import com.becon.opencelium.backend.utility.TestNameUtils;
 import org.quartz.InterruptableJob;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -105,7 +106,7 @@ public class JobExecutor extends QuartzJobBean implements InterruptableJob {
 
             // increments current_usage in subscription and saves entity in current_usage_history.
             String connectionName = executionObj.getConnection().getConnectionName();
-            if (connectionName != null && !connectionName.contains("!*test_connection_") && data.getExecType() != QuartzJobScheduler.TriggerType.SUPPORT_FILE) {
+            if (TestNameUtils.isNotTestConnection(connectionName) && data.getExecType() != QuartzJobScheduler.TriggerType.SUPPORT_FILE) {
                 long operationUsage = executor.getOperations().stream().mapToInt(o -> o.getRequests().size()).sum();
                 logger.info("Operation usage for Connection {} is {}", connectionName, operationUsage);
                 subscriptionService.updateUsage(activeSub.getId(), executionObj.getConnection(), operationUsage, startTime);

@@ -30,7 +30,7 @@ public class WebhookResource {
 
     public WebhookResource(Webhook webhook) {
         this.webhookId  = webhook.getId();
-        this.url = webhook.getToken();
+        this.url = webhook.getUuid();
     }
 
     public String getUrl() {

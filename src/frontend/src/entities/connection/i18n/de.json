@@ -1,0 +1,73 @@
+{
+  "messages": {
+    "saved": {
+      "create": "Workflow \"{{title}}\" erstellt",
+      "update": "Workflow \"{{title}}\" aktualisiert"
+    },
+    "saveFailed": {
+      "create": "Workflow \"{{title}}\" konnte nicht erstellt werden",
+      "update": "Workflow \"{{title}}\" konnte nicht aktualisiert werden",
+      "connectorNotFound": "Einer der in diesem Workflow verwendeten Konnektoren wurde nicht gefunden. Er wurde möglicherweise gelöscht — bitte aktualisieren oder ersetzen Sie den Konnektor-Knoten, bevor Sie erneut speichern.",
+      "operatorExpressionEmpty": "Der markierte \"{{type}}\"-Operator hat keine Bedingung. Legen Sie einen Ausdruck fest, bevor Sie speichern.",
+      "titleTaken": "Ein Workflow mit diesem Titel existiert bereits"
+    },
+    "history": {
+      "activeDeleteBlocked": "Die ausgewählte Version ist aktiv und kann daher nicht gelöscht werden.",
+      "unsavedVersionSwitch": "Sie haben ungespeicherte Änderungen. Wenn Sie eine andere Version öffnen, ohne zu speichern, gehen diese Änderungen verloren."
+    }
+  },
+  "list": {
+    "title": "Workflows",
+    "subTitle": "Workflows definieren, wie Konnektoren miteinander interagieren – einschließlich Anforderungsablauf, Datenzuordnung und Kommunikationslogik.",
+    "searchPlaceholder": "Suchen",
+    "columns": {
+      "title": "Titel",
+      "description": "Beschreibung",
+      "category": "Kategorie",
+      "modifiedAt": "Geändert am",
+      "modifiedBy": "Geändert von",
+      "currentVersion": "Aktuelle Version"
+    },
+    "downloadTemplate": {
+      "tooltip": "Als Vorlage herunterladen",
+      "success": "Vorlage \"{{name}}\" heruntergeladen",
+      "error": "Vorlage konnte nicht heruntergeladen werden"
+    },
+    "duplicate": {
+      "tooltip": "Duplizieren",
+      "dialogTitle": "Workflow duplizieren",
+      "titleLabel": "Titel",
+      "descriptionLabel": "Beschreibung",
+      "titleRequired": "Titel ist ein Pflichtfeld",
+      "titleExists": "Ein Workflow mit diesem Titel existiert bereits",
+      "defaultTitle": "{{title}} (Kopie)",
+      "cancel": "Abbrechen",
+      "submit": "Duplizieren",
+      "success": "Workflow \"{{name}}\" dupliziert",
+      "error": "Workflow konnte nicht dupliziert werden"
+    }
+  },
+  "fields": {
+    "title": {
+      "label": "Titel"
+    },
+    "description": {
+      "label": "Beschreibung"
+    }
+  },
+  "test": {
+    "start": "Testlauf",
+    "stop": "Test stoppen",
+    "socketConnecting": "WebSocket wird verbunden…",
+    "socketDisconnected": "WebSocket ist nicht verbunden",
+    "noMethods": "Fügen Sie mindestens eine Methode hinzu, bevor Sie einen Test starten",
+    "startFailed": "Testlauf konnte nicht gestartet werden",
+    "stopFailed": "Testlauf konnte nicht gestoppt werden",
+    "terminated": "Testlauf abgebrochen",
+    "otherTestRunning": "Für diese Verbindung läuft bereits ein Test. Warten Sie, bis er fertig ist, oder stoppen Sie ihn zuerst.",
+    "leaveConfirm": {
+      "title": "Laufenden Test stoppen?",
+      "message": "Ihr Test läuft. Wenn Sie diese Seite verlassen, wird der Test abgebrochen. Möchten Sie fortfahren?"
+    }
+  }
+}

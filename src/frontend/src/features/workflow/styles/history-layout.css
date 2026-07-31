@@ -1,0 +1,120 @@
+.historyBody {
+  padding: 14px 18px 16px 14px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.historyScroll {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 3px;
+}
+
+.historyEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.historyTimeline {
+  position: relative;
+  overflow: visible;
+}
+
+.historyTimelineLine {
+  position: absolute;
+  left: 41px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--color-border-subtle);
+}
+
+.historyDateRow,
+.historyEntryRow {
+  display: flex;
+  gap: 14px;
+  overflow: visible;
+}
+
+.historyDateRow {
+  align-items: center;
+  margin: 8px 0 12px;
+}
+
+.historyDateSpacer,
+.historyTimeCol {
+  width: 54px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.historyDateInner {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.historyDateHr {
+  flex: 1;
+  height: 1px;
+  background: var(--color-border-subtle);
+}
+
+.historyDateLabel,
+.historyTimeLabel {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+.historyTimeLabel {
+  position: absolute;
+  left: 0;
+  top: 13px;
+  width: 32px;
+  text-align: right;
+}
+
+.historyDot {
+  position: absolute;
+  left: 36px;
+  top: 15px;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--color-border-subtle);
+  border: 1px solid var(--color-border-default);
+  z-index: 1;
+}
+
+.historyDotCurrent {
+  background: var(--color-action-primary);
+}
+
+.historyPanelDrawer {
+  width: 420px;
+  overflow: hidden;
+}
+
+.historyPanelDrawer .drawerHeader {
+  padding: 16px 18px;
+  align-items: center;
+}
+
+.historyPanelDrawer .drawerTitle {
+  font-size: 18px;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.historyPanelDrawer .iconButton {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  padding: 0;
+}

@@ -46,10 +46,17 @@ public class Connection {
     private String description;
 
     @Column(name = "from_connector")
-    private int fromConnector;
+    private Integer fromConnector;
 
+    /**
+     * ID of the target connector in legacy (two-connector) connections.
+     * <p>
+     * <b>Null for multi-connector connections</b> — in that mode each method on
+     * {@code fromConnector} carries its own connector reference via
+     * {@code MethodMng.connector.connectorId}.
+     */
     @Column(name = "to_connector")
-    private int toConnector;
+    private Integer toConnector;
 
     @CreatedBy
     @Column(name = "created_by", updatable = false)
@@ -57,8 +64,8 @@ public class Connection {
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_on", updatable = false)
-    private Date createdOn;
+    @Column(name = "created_at", updatable = false)
+    private Date createdAt;
 
     @LastModifiedBy
     @Column(name = "modified_by")
@@ -66,8 +73,8 @@ public class Connection {
 
     @UpdateTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "modified_on")
-    private Date modifiedOn;
+    @Column(name = "modified_at")
+    private Date modifiedAt;
 
     @Column(name = "icon")
     private String icon;
@@ -119,19 +126,19 @@ public class Connection {
         this.description = description;
     }
 
-    public int getFromConnector() {
+    public Integer getFromConnector() {
         return fromConnector;
     }
 
-    public void setFromConnector(int fromConnector) {
+    public void setFromConnector(Integer fromConnector) {
         this.fromConnector = fromConnector;
     }
 
-    public int getToConnector() {
+    public Integer getToConnector() {
         return toConnector;
     }
 
-    public void setToConnector(int toConnector) {
+    public void setToConnector(Integer toConnector) {
         this.toConnector = toConnector;
     }
 
@@ -143,12 +150,12 @@ public class Connection {
         this.createdBy = createdBy;
     }
 
-    public Date getCreatedOn() {
-        return createdOn;
+    public Date getCreatedAt() {
+        return createdAt;
     }
 
-    public void setCreatedOn(Date createdOn) {
-        this.createdOn = createdOn;
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
 
     public Integer getModifiedBy() {
@@ -159,12 +166,12 @@ public class Connection {
         this.modifiedBy = modifiedBy;
     }
 
-    public Date getModifiedOn() {
-        return modifiedOn;
+    public Date getModifiedAt() {
+        return modifiedAt;
     }
 
-    public void setModifiedOn(Date modifiedOn) {
-        this.modifiedOn = modifiedOn;
+    public void setModifiedAt(Date modifiedAt) {
+        this.modifiedAt = modifiedAt;
     }
 
     public String getIcon() {
@@ -216,9 +223,9 @@ public class Connection {
                 ", fromConnector=" + fromConnector +
                 ", toConnector=" + toConnector +
                 ", createdBy=" + createdBy +
-                ", createdOn=" + createdOn +
+                ", createdAt=" + createdAt +
                 ", modifiedBy=" + modifiedBy +
-                ", modifiedOn=" + modifiedOn +
+                ", modifiedAt=" + modifiedAt +
                 ", schedulers=" + schedulers +
                 ", businessLayout=" + businessLayout +
                 ", icon=" + icon +

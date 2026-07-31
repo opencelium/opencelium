@@ -16,7 +16,6 @@
 
 package com.becon.opencelium.backend.controller;
 
-import com.becon.opencelium.backend.commons.FileDescriptor;
 import com.becon.opencelium.backend.configuration.cutomizer.RestCustomizer;
 import com.becon.opencelium.backend.constant.AppYamlPath;
 import com.becon.opencelium.backend.constant.Constant;
@@ -27,6 +26,7 @@ import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
+import com.becon.opencelium.backend.database.mysql.service.ConnectionServiceImp;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorService;
 import com.becon.opencelium.backend.database.mysql.service.SchedulerService;
 import com.becon.opencelium.backend.exception.ConcurrentTestIsForbidden;
@@ -45,7 +45,7 @@ import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.request.SchedulerRequestResource;
 import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
 import com.becon.opencelium.backend.resource.webhook.WebhookParamDTO;
-import com.becon.opencelium.backend.utility.LogFileUtility;
+import com.becon.opencelium.backend.utility.TestNameUtils;
 import com.becon.opencelium.backend.utility.patch.PatchHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -83,11 +83,11 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -148,8 +148,8 @@ public class ConnectionController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping(path = "/all")
-    public ResponseEntity<?> getAll() {
-        List<ConnectionDTO> all = connectionService.getAllFullConnection();
+    public ResponseEntity<?> getAll(@RequestParam(name = "includeTest", defaultValue = "false") Boolean includeTest) {
+        List<ConnectionDTO> all = connectionService.getAllFullConnection(includeTest);
         return ResponseEntity.ok(connectionOldDTOMapper.toDTOAll(all));
     }
 
@@ -166,14 +166,18 @@ public class ConnectionController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping(path = "/dependency/{invokerName}")
-    public ResponseEntity<?> getByInvokerName(@PathVariable String invokerName) {
-        List<Integer> connectorIds = connectorService.findAllByInvoker(invokerName).stream().map(Connector::getId).toList();
+    public ResponseEntity<?> getByInvokerName(@PathVariable String invokerName,
+                                              @RequestParam(name = "includeTest", defaultValue = "false") boolean includeTest) {
+        List<Integer> connectorIds = connectorService.findAllByInvoker(invokerName)
+                .stream()
+                .map(Connector::getId)
+                .toList();
 
         List<ConnectionDTO> connections = new ArrayList<>();
         Set<Long> connectionIds = new HashSet<>();
 
         for (Integer connectorId : connectorIds) {
-            List<Connection> connectionsByConnectorId = connectionService.findAllByConnectorId(connectorId);
+            List<Connection> connectionsByConnectorId = connectionService.findAllByConnectorId(connectorId, includeTest);
 
             for (Connection connection : connectionsByConnectorId) {
                 if (connectionIds.add(connection.getId())) {
@@ -181,11 +185,7 @@ public class ConnectionController {
                 }
             }
         }
-
-        List<ConnectionOldDTO> result = connections.stream()
-                .map(connectionOldDTOMapper::toDTO)
-                .toList();
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(connectionOldDTOMapper.toDTOAll(connections));
     }
 
     @Operation(summary = "Retrieves all Metadata of connections from database")
@@ -201,19 +201,10 @@ public class ConnectionController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping(path = "/all/meta")
-    public ResponseEntity<?> getAllMeta() {
-        List<Connection> connections = connectionService.findAll();
+    public ResponseEntity<?> getAllMeta(@RequestParam(name = "includeTest", defaultValue = "false") Boolean includeTest) {
+        List<Connection> connections = connectionService.findAll(includeTest);
         List<ConnectionResource> connectionResources = connectionResourceMapper.toDTOAll(connections);
-        //unnecessary fields
-        connectionResources.forEach(c -> {
-            c.getFromConnector().setRequestData(null);
-            c.getFromConnector().getInvoker().setOperations(null);
-            c.getFromConnector().getInvoker().setRequiredData(null);
-
-            c.getToConnector().setRequestData(null);
-            c.getToConnector().getInvoker().setOperations(null);
-            c.getToConnector().getInvoker().setRequiredData(null);
-        });
+        prepareForList(connections, connectionResources);
         return ResponseEntity.ok(connectionResources);
     }
 
@@ -230,20 +221,38 @@ public class ConnectionController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PostMapping(path = "/all/by-ids")
-    public ResponseEntity<?> getAllMeta(@RequestBody IdentifiersDTO<Long> ids) {
-        List<Connection> connections = connectionService.findAllByIds(ids);
+    public ResponseEntity<?> getAllMetaById(@RequestBody IdentifiersDTO<Long> ids,
+                                            @RequestParam(name = "includeTest", defaultValue = "false") boolean includeTest) {
+        List<Connection> connections = connectionService.findAllByIds(ids, includeTest);
         List<ConnectionResource> connectionResources = connectionResourceMapper.toDTOAll(connections);
-        //unnecessary fields
+        prepareForList(connections, connectionResources);
+        return ResponseEntity.ok(connectionResources);
+    }
+
+    /**
+     * Trims the parts that a connection list never renders and adds the last version of every
+     * connection, which lives in MongoDB and therefore is not filled in by the mapper.
+     */
+    private void prepareForList(List<Connection> connections, List<ConnectionResource> connectionResources) {
+        if (connectionResources.isEmpty()) {
+            return;
+        }
+
+        Map<Long, ConnectionVersionedDTO> lastVersions = connectionService.getLastVersions(connections);
         connectionResources.forEach(c -> {
+            //unnecessary fields
             c.getFromConnector().setRequestData(null);
             c.getFromConnector().getInvoker().setOperations(null);
             c.getFromConnector().getInvoker().setRequiredData(null);
 
-            c.getToConnector().setRequestData(null);
-            c.getToConnector().getInvoker().setOperations(null);
-            c.getToConnector().getInvoker().setRequiredData(null);
+            if (c.getToConnector() != null) {
+                c.getToConnector().setRequestData(null);
+                c.getToConnector().getInvoker().setOperations(null);
+                c.getToConnector().getInvoker().setRequiredData(null);
+            }
+
+            c.setLastVersion(lastVersions.get(c.getId()));
         });
-        return ResponseEntity.ok(connectionResources);
     }
 
     @Operation(summary = "Retrieves a connection from database by provided connection ID")
@@ -423,14 +432,14 @@ public class ConnectionController {
         // check if there is no running job for given connection
         schedulerService.getAllRunningJobs().forEach(job -> {
             String schedulerTitle = job.getTitle();
-            if (schedulerTitle.startsWith("!*test_schedule_") && schedulerTitle.endsWith(connectionOldDTO.getTitle())) {
+            if (TestNameUtils.isTestScheduler(schedulerTitle, connectionOldDTO.getTitle())) {
                 throw new ConcurrentTestIsForbidden(0L);
             }
         });
 
-        // create temporary connection, will be deleted after execution finished
-        String postfix = System.currentTimeMillis() + "_" + connectionOldDTO.getTitle();
-        connectionOldDTO.setTitle("!*test_connection_" + postfix);
+        String title = connectionOldDTO.getTitle();
+
+        connectionOldDTO.setTitle(TestNameUtils.generateTestConnectionName(title));
         ConnectionDTO connectionDTO = connectionOldDTOMapper.toEntity(connectionOldDTO);
         Connection connection = connectionMapper.toEntity(connectionDTO);
         ConnectionMng connectionMng = connectionMngMapper.toEntity(connectionDTO);
@@ -439,7 +448,7 @@ public class ConnectionController {
         // create temporary scheduler for above connection, will be deleted after execution finished
         SchedulerRequestResource resource = new SchedulerRequestResource();
         resource.setConnectionId(connectionId);
-        resource.setTitle("!*test_schedule_" + postfix);
+        resource.setTitle(TestNameUtils.generateTestSchedulerName(title));
         resource.setStatus(true);
         resource.setCronExp(Constant.NEVER_TRIGGERED_CRON);
         resource.setDebugMode(true);
@@ -663,7 +672,28 @@ public class ConnectionController {
         return ResponseEntity.badRequest().build();
     }
 
-    @Operation(summary = "Validates name of connection for uniqueness")
+    @Operation(summary = "Validates name of connection for uniqueness. Accepts the name as a query"
+            + " parameter, which allows names containing '/' (rejected by the server when sent as"
+            + " a path variable, even URL-encoded).")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Connection Name has been successfully validate. Return EXISTS or NOT_EXISTS values in 'message' property.",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/check")
+    public ResponseEntity<?> existsByName(@RequestParam("name") String name) {
+        return checkNameUniqueness(name);
+    }
+
+    @Operation(summary = "Validates name of connection for uniqueness. Deprecated: use"
+            + " GET /check?name= instead — names containing '/' cannot be passed as a path variable.",
+            deprecated = true)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Connection Name has been successfully validate. Return EXISTS or NOT_EXISTS values in 'message' property.",
@@ -676,7 +706,11 @@ public class ConnectionController {
                     content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @GetMapping("/check/{name}")
-    public ResponseEntity<?> existsByName(@PathVariable("name") String name) throws IOException {
+    public ResponseEntity<?> existsByNameInPath(@PathVariable("name") String name) {
+        return checkNameUniqueness(name);
+    }
+
+    private ResponseEntity<?> checkNameUniqueness(String name) {
         RuntimeException ex;
         if (connectionService.existsByName(name)) {
             ex = new RuntimeException("EXISTS");
@@ -704,6 +738,10 @@ public class ConnectionController {
     })
     @PostMapping(path = "/remoteapi", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> sendRequestToApi(@RequestBody ApiDataResource apiDataResource) {
+        // TODO: rename isSslON
+        // temporary fix
+        boolean disableSslValidation = !apiDataResource.isSslOn();
+        apiDataResource.setSslOn(disableSslValidation);
         HttpHeaders headers = new HttpHeaders();
         if (apiDataResource.getHeader() != null) {
             headers.setAll(apiDataResource.getHeader());
@@ -741,10 +779,26 @@ public class ConnectionController {
     })
     @PutMapping(path = "/list/delete")
     public ResponseEntity<?> deleteCtionByIdIn(@RequestBody IdentifiersDTO<Long> ids) {
-        ids.getIdentifiers().forEach(connectionService::deleteById);
+        connectionService.deleteByIds(ids.getIdentifiers(), schedulerService.getRunningConnectionIds());
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Removes all leftover test connections. Any test connection currently running is excluded from deletion.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Test connections have been cleaned up",
+                    content = @Content(schema = @Schema(implementation = ConnectionServiceImp.CleanupResult.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @DeleteMapping(path = "/test")
+    public ResponseEntity<ConnectionServiceImp.CleanupResult> deleteTestConnections() {
+        return ResponseEntity.ok(connectionService.cleanupAllTestConnections(schedulerService.getRunningConnectionIds()));
+    }
 
     @Operation(summary = "Removes webhook")
     @ApiResponses(value = {
@@ -968,4 +1022,5 @@ public class ConnectionController {
         ResultDTO<List<String>> logFileNames = new ResultDTO<>(connectionService.getLogFileNameListById(connectionId));
         return ResponseEntity.ok(logFileNames);
     }
+
 }

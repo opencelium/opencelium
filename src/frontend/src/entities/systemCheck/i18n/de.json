@@ -1,0 +1,26 @@
+{
+  "list": {
+    "title": "Systemprüfung",
+    "subTitle": "Dieser Bereich zeigt den Status und Zustand der mit OpenCelium integrierten externen Dienste.",
+    "empty": "Keine Dienste zum Anzeigen",
+    "columns": {
+      "component": "Dienst",
+      "status": "Status",
+      "info": "Info",
+      "error": "Fehler"
+    },
+    "status": {
+      "UP": "Betriebsbereit",
+      "DOWN": "Ausgefallen",
+      "UNKNOWN": "Unbekannt"
+    },
+    "components": {
+      "email": "E-Mail",
+      "mariaDB": "MariaDB",
+      "mongoDB": "MongoDB",
+      "opencelium": "OpenCelium",
+      "os": "Betriebssystem",
+      "polyglot": "Polyglot"
+    }
+  }
+}

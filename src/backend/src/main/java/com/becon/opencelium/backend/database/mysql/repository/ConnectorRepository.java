@@ -17,10 +17,15 @@
 package com.becon.opencelium.backend.database.mysql.repository;
 
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
+import com.becon.opencelium.backend.enums.ConnectorStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,4 +44,35 @@ public interface ConnectorRepository extends JpaRepository<Connector, Integer> {
     List<Connector> findAllByTitleContains(String title);
 
     List<Connector> findAllByInvoker(String invokerName);
+
+    /**
+     * Updates only the health-status columns. A bulk JPQL update bypasses entity lifecycle
+     * callbacks, so the audit columns ({@code modified_by}/{@code modified_at}) are not
+     * overwritten by the background health monitor.
+     */
+    @Modifying
+    @Transactional
+    @Query("UPDATE Connector c SET c.status = :status, c.lastTestError = :error WHERE c.id = :id")
+    void updateStatus(
+            @Param("id") int id, @Param("status") ConnectorStatus status, @Param("error") String error);
+
+    /**
+     * Updates only {@code last_checked_at}. See {@link #updateStatus} for why this is a bulk
+     * update rather than an entity save.
+     */
+    @Modifying
+    @Transactional
+    @Query("UPDATE Connector c SET c.lastCheckedAt = :checkedAt WHERE c.id = :id")
+    void updateLastCheckedAt(@Param("id") int id, @Param("checkedAt") Date checkedAt);
+
+    /**
+     * Stamps the audit columns without touching the rest of the row. Used when a user edit
+     * changes only child rows (e.g. request data), which leaves the connector entity clean and
+     * would otherwise not move {@code modified_by}/{@code modified_at}.
+     */
+    @Modifying
+    @Transactional
+    @Query("UPDATE Connector c SET c.modifiedBy = :userId, c.modifiedAt = :modifiedAt WHERE c.id = :id")
+    void touchAudit(
+            @Param("id") int id, @Param("userId") Integer userId, @Param("modifiedAt") Date modifiedAt);
 }
