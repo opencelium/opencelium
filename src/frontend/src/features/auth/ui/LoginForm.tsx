@@ -3,6 +3,7 @@ import { Controller, FormProvider } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { useLoginForm } from '../model/useLoginForm'
 import { useAuth } from '@features/auth/useAuth'
+import { SessionHydrationError } from '@features/auth/strategies/PasswordStrategy'
 import { API_TIMEOUT_ERROR_NAME, ApiFetchError } from '@shared/api/apiFetch'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { FormConstraintsProvider } from '@shared/form/FormConstraintsContext.tsx'
@@ -12,7 +13,6 @@ import type { TotpChallenge } from '@entities/auth/model/types'
 import { TotpLoginDialog } from './TotpLoginDialog'
 import { Button } from '@shared/ui/primitives/Button'
 import { Card } from '@shared/ui/primitives/Card'
-import { Checkbox } from '@shared/ui/primitives/Checkbox'
 import { Input } from '@shared/ui/primitives/Input'
 import { Typography } from '@shared/ui/primitives/Typography'
 
@@ -36,20 +36,25 @@ export function LoginForm() {
     const { t } = useI18n('auth')
     const navigate = useNavigate()
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [totp, setTotp] = useState<{ challenge: TotpChallenge; rememberMe: boolean } | null>(null)
+    const [totp, setTotp] = useState<TotpChallenge | null>(null)
 
     const onSubmit = async (data: LoginFormValues) => {
         setIsSubmitting(true)
         try {
             const result = await login(data)
             if (result.status === 'totp-required') {
-                setTotp({ challenge: result.challenge, rememberMe: data.rememberMe ?? false })
+                setTotp(result.challenge)
             }
         } catch (e) {
             if (e instanceof Error && e.name === API_TIMEOUT_ERROR_NAME) {
                 errorBus.emit({ type: 'NETWORK', messageKey: 'login.network' })
             } else if (e instanceof TypeError) {
                 errorBus.emit({ type: 'NETWORK', messageKey: 'login.network' })
+            } else if (e instanceof SessionHydrationError) {
+                // The credentials were correct — /login already succeeded — this is a
+                // separate failure to load the account, so don't report it as bad
+                // credentials (see PasswordStrategy.completeLogin).
+                errorBus.emit({ type: 'UNKNOWN', messageKey: 'login.sessionLoadFailed' })
             } else if (e instanceof ApiFetchError && isBadCredentials(e)) {
                 errorBus.emit({ type: 'VALIDATION', messageKey: 'login.invalidCredentials' })
             } else {
@@ -137,22 +142,10 @@ export function LoginForm() {
                             style={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                justifyContent: 'space-between',
+                                justifyContent: 'flex-end',
                                 gap: 12,
                             }}
                         >
-                            <Controller
-                                name="rememberMe"
-                                control={control}
-                                render={({ field }) => (
-                                    <Checkbox
-                                        checked={!!field.value}
-                                        onChange={field.onChange}
-                                        label={t('fields.rememberMe.label')}
-                                        testId="login-remember-me"
-                                    />
-                                )}
-                            />
                             <Button type="link" onClick={handleForgotPassword} testId="login-forgot-password">
                                 {t('actions.forgotPassword')}
                             </Button>
@@ -173,8 +166,7 @@ export function LoginForm() {
         </Card>
         <TotpLoginDialog
             open={!!totp}
-            challenge={totp?.challenge ?? null}
-            rememberMe={totp?.rememberMe ?? false}
+            challenge={totp}
             onClose={() => setTotp(null)}
         />
         </>

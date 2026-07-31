@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -113,6 +114,14 @@ public class ConnectionMngServiceImp implements ConnectionMngService {
     @Override
     public List<ConnectionMng> getAllByConnectionIdRaw(Long id) {
         return connectionMngRepository.findAllByConnectionIdOrderByConnectionIdDesc(id);
+    }
+
+    @Override
+    public List<ConnectionMng> getVersionMetaByIds(Collection<String> snapshotIds) {
+        if (snapshotIds == null || snapshotIds.isEmpty()) {
+            return List.of();
+        }
+        return connectionMngRepository.findVersionMetaByIdIn(snapshotIds);
     }
 
     /**

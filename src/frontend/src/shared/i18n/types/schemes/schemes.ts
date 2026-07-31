@@ -8,12 +8,22 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
         items: string,
         simple: string,
         actions: {
+            prev: string
+            submit: string
+            next: string
             create: string
             update: string
             delete: string
             view: string
             edit: string
             ctrlEnterHint: string
+            cmdEnterHint: string
+        }
+        copy: {
+            tooltip: string
+            empty: string
+            success: string
+            failed: string
         }
         status: {
             loading: string
@@ -123,13 +133,27 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
                 uploadInvoker: string
                 downloadInvoker: string
                 systemCheck: string
+                ldapCheck: string
                 workflow: string
+                help: string
             }
             footer: {
                 select: string
                 autocomplete: string
                 navigate: string
                 close: string
+            }
+            help: {
+                title: string
+                subtitle: string
+                keyboardTitle: string
+                empty: string
+                searchPlaceholder: string
+                noResults: string
+                shortcuts: {
+                    open: string
+                    clearScope: string
+                }
             }
         }
         sidebar: {
@@ -150,6 +174,9 @@ export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
             profile: string
             createWorkflow: string
             createWorkflowHint: string
+        }
+        user: {
+            unknown: string
         }
     },
 }

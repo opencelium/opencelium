@@ -8,13 +8,14 @@ import { apiExecutor } from '@shared/api/apiExecutor';
 import './styles.css';
 import { NodeContextMenu } from './components/NodeContextMenu/NodeContextMenu';
 import { WorkflowCanvas } from './components/WorkflowCanvas/WorkflowCanvas';
-import { WorkflowHeader } from './components/WorkflowHeader';
-import { WorkflowLogs } from './components/WorkflowLogs';
+import { WorkflowHeader } from './components/WorkflowHeader/WorkflowHeader';
+import { WorkflowLogs } from './components/WorkflowLogs/WorkflowLogs';
 import { WorkflowSidebar } from './components/WorkflowSidebar/WorkflowSidebar';
 import { WorkflowSchedulesPill } from './components/schedules/WorkflowSchedulesPill';
 import { WorkflowSchedulesPanel } from './components/schedules/WorkflowSchedulesPanel';
 import { HistoryPanel } from './components/header/HistoryPanel';
 import { ShortcutsDialog } from './components/header/ShortcutsDialog';
+import { AssignCategoryDialog } from './components/header/AssignCategoryDialog';
 import { ConditionBuilderDialog } from './components/condition-builder/ConditionBuilder';
 import { MethodConfigDialog } from './components/request-editor/MethodConfigDialog';
 import { ResponseDialog } from './components/request-editor/ResponseDialog';
@@ -56,53 +57,86 @@ const toWorkflowResponse = (nodeId: string, response: NonNullable<Connector['inv
 const normalizeConnectorIcon = (icon: Connector['icon']) =>
   typeof icon === 'string' ? icon : null;
 
+type HydrateCacheEntry = {
+  node: WorkflowNodeModel;
+  connectors: Connector[];
+  invokers: Invoker[];
+  result: WorkflowNodeModel;
+};
+
+const hydrateNode = (
+  node: WorkflowNodeModel,
+  connectors: Connector[],
+  invokers: Invoker[],
+): WorkflowNodeModel => {
+  if (node.type !== 'connector' && node.type !== 'system') return node;
+  const connectorId = node.data.connector?.connectorId;
+  const methodName = node.data.subtitle;
+  if (!connectorId || !methodName) return node;
+
+  const connector = connectors.find((item) => item.connectorId === connectorId);
+  const operation = connector?.invoker?.operations?.find((item) => item.name.toLowerCase() === methodName.toLowerCase());
+  const invokerName = node.data.connector?.invokerName;
+  const invokerIcon = !node.data.connector?.icon && invokerName
+    ? invokers.find((item) => (item.name ?? '').toLowerCase() === invokerName.toLowerCase())?.icon ?? null
+    : null;
+  if (!connector && !operation?.response && !invokerIcon) return node;
+
+  return {
+    ...node,
+    data: {
+      ...node.data,
+      connector: connector
+        ? {
+            ...node.data.connector,
+            connectorId: connector.connectorId,
+            title: connector.title,
+            icon: normalizeConnectorIcon(connector.icon) ?? normalizeConnectorIcon(connector.invoker?.icon) ?? invokerIcon ?? node.data.connector?.icon ?? null,
+            status: connector.status,
+            lastTestError: connector.lastTestError,
+            lastCheckedAt: connector.lastCheckedAt,
+            invokerName: connector.invoker?.name ?? node.data.connector?.invokerName ?? null,
+          }
+        : invokerIcon && node.data.connector
+          ? { ...node.data.connector, icon: invokerIcon }
+          : node.data.connector,
+      methodConfig: operation?.response
+        ? {
+            ...createEmptyMethodConfig(),
+            ...node.data.methodConfig,
+            response: toWorkflowResponse(node.id, operation.response),
+          }
+        : node.data.methodConfig,
+    },
+  };
+};
+
 const hydrateNodesWithOperationResponses = (
   nodes: WorkflowNodeModel[],
   connectors: Connector[],
   invokers: Invoker[] = [],
+  cache?: Map<string, HydrateCacheEntry>,
 ): WorkflowNodeModel[] => {
   if (!connectors.length && !invokers.length) return nodes;
 
-  return nodes.map((node) => {
-    if (node.type !== 'connector' && node.type !== 'system') return node;
-    const connectorId = node.data.connector?.connectorId;
-    const methodName = node.data.subtitle;
-    if (!connectorId || !methodName) return node;
-
-    const connector = connectors.find((item) => item.connectorId === connectorId);
-    const operation = connector?.invoker?.operations?.find((item) => item.name.toLowerCase() === methodName.toLowerCase());
-    const invokerName = node.data.connector?.invokerName;
-    const invokerIcon = !node.data.connector?.icon && invokerName
-      ? invokers.find((item) => (item.name ?? '').toLowerCase() === invokerName.toLowerCase())?.icon ?? null
-      : null;
-    if (!connector && !operation?.response && !invokerIcon) return node;
-
-    return {
-      ...node,
-      data: {
-        ...node.data,
-        connector: connector
-          ? {
-              ...node.data.connector,
-              connectorId: connector.connectorId,
-              title: connector.title,
-              icon: normalizeConnectorIcon(connector.icon) ?? normalizeConnectorIcon(connector.invoker?.icon) ?? invokerIcon ?? node.data.connector?.icon ?? null,
-              lastTestPassed: connector.lastTestPassed,
-              lastTestError: connector.lastTestError,
-            }
-          : invokerIcon && node.data.connector
-            ? { ...node.data.connector, icon: invokerIcon }
-            : node.data.connector,
-        methodConfig: operation?.response
-          ? {
-              ...createEmptyMethodConfig(),
-              ...node.data.methodConfig,
-              response: toWorkflowResponse(node.id, operation.response),
-            }
-          : node.data.methodConfig,
-      },
-    };
+  const result = nodes.map((node) => {
+    const cached = cache?.get(node.id);
+    if (cached && cached.node === node && cached.connectors === connectors && cached.invokers === invokers) {
+      return cached.result;
+    }
+    const hydrated = hydrateNode(node, connectors, invokers);
+    cache?.set(node.id, { node, connectors, invokers, result: hydrated });
+    return hydrated;
   });
+
+  if (cache) {
+    const liveIds = new Set(nodes.map((node) => node.id));
+    for (const key of cache.keys()) {
+      if (!liveIds.has(key)) cache.delete(key);
+    }
+  }
+
+  return result;
 };
 
 type WorkflowProps = {
@@ -276,8 +310,12 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const [isDownloadingTemplate, setIsDownloadingTemplate] = useState(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [schedulesOpen, setSchedulesOpen] = useState(false);
+  const [categoryId, setCategoryId] = useState<number | null>(null);
+  const [assignCategoryOpen, setAssignCategoryOpen] = useState(false);
+  const [isAssigningCategory, setIsAssigningCategory] = useState(false);
+  const hydrateCacheRef = useRef<Map<string, HydrateCacheEntry>>(new Map());
   const hydratedNodes = useMemo(
-    () => hydrateNodesWithOperationResponses(workflow.nodes, connectors, invokers),
+    () => hydrateNodesWithOperationResponses(workflow.nodes, connectors, invokers, hydrateCacheRef.current),
     [connectors, invokers, workflow.nodes],
   );
   const activeConnectionId = createdConnectionId ?? connectionId;
@@ -321,6 +359,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     setBaselineSnapshot(null);
     setChangeSource('clean');
     setHistoryPreviewSnapshot(null);
+    setCategoryId(null);
     if (!connectionId) {
       setIsConnectionLoading(false);
       return;
@@ -334,6 +373,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         setHeaderState({ title: state.title, description: toDisplayDescription(state.description) });
         setPersistedTitle(state.title);
         setLoadedFieldBindings(state.fieldBindings);
+        setCategoryId(state.categoryId);
         setHistoryVersions(state.versions);
         setSelectedHistoryVersionId((currentSelectedId) =>
           currentSelectedId && state.versions.some((version) => version.id === currentSelectedId)
@@ -383,12 +423,6 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     return null;
   }, [persistedTitle, t]);
 
-  // Recognizes known backend validation error codes (e.g. an operator with an empty
-  // expression), highlights the node it names, and returns a specific translated
-  // message — or null when the error is unrecognized, so callers fall back to their
-  // own generic "failed to save/start" message. Shared between handleSave and the
-  // test-run start flow (passed to TestRunProvider) since both hit the same backend
-  // validation on the same node/edge graph.
   const resolveAndHighlightWorkflowError = useCallback((error: unknown): string | null => {
     const resolution = resolveWorkflowApiError(error, hydratedNodes, workflow.edges);
     if (!resolution) return null;
@@ -399,7 +433,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     return specificMessage;
   }, [hydratedNodes, workflow, tEntities]);
 
-  const handleSave = async ({ title, description, comment }: { title: string; description: string; comment: string }) => {
+  const handleSave = async ({ title, description, comment, categoryId: categoryIdOverride }: { title: string; description: string; comment: string; categoryId?: number | null }) => {
     if (!title.trim() || title.trim() === '[Empty Name]') {
       message.error(t('messages.enterWorkflowName'));
       throw new Error('Connection name is required');
@@ -407,6 +441,9 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
 
     workflow.onClearNodeErrors();
     const normalizedDescription = toPayloadDescription(description);
+    // Preserve the currently-assigned category on every regular save; only an
+    // explicit override (from the Assign Category dialog) changes it.
+    const nextCategoryId = categoryIdOverride !== undefined ? categoryIdOverride : categoryId;
     const isCreate = !activeConnectionId;
     let response;
     try {
@@ -419,6 +456,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         edges: workflow.edges,
         viewport: workflow.getViewport(),
         fieldBindings: loadedFieldBindings,
+        categoryId: nextCategoryId,
       });
     } catch (error) {
       const specificMessage = resolveAndHighlightWorkflowError(error);
@@ -433,6 +471,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     const nextConnectionId = activeConnectionId ?? savedId;
     setHeaderState({ title, description: toDisplayDescription(normalizedDescription) });
     setPersistedTitle(title);
+    setCategoryId(nextCategoryId);
     setBaselineSnapshot(buildWorkflowChangeSnapshot({
       connectionId: nextConnectionId ? String(nextConnectionId) : activeConnectionId,
       title,
@@ -506,6 +545,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         edges: workflow.edges,
         viewport: workflow.getViewport(),
         fieldBindings: loadedFieldBindings,
+        includeInvoker: true,
       });
 
       const response = await apiExecutor({
@@ -672,7 +712,9 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   };
 
   const handleHeaderMenuSelect = (item: WorkflowHeaderMenuItem) => {
-    if (item.id === 'download-template') {
+    if (item.id === 'assign-category') {
+      setAssignCategoryOpen(true);
+    } else if (item.id === 'download-template') {
       void downloadConnectionTemplate();
     } else if (item.id === 'save-template') {
       openSaveTemplateDialog();
@@ -682,6 +724,25 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       setIsShortcutsOpen(true);
     } else if (item.id === 'exit') {
       navigate('/workflow');
+    }
+  };
+
+  const handleAssignCategory = async (nextCategoryId: number | null, categoryName: string | null) => {
+    setIsAssigningCategory(true);
+    try {
+      await handleSave({
+        title: headerState.title,
+        description: headerState.description,
+        comment: nextCategoryId
+          ? t('saveDialog.autoCategoryAssignedComment', { category: categoryName })
+          : t('saveDialog.autoCategoryClearedComment'),
+        categoryId: nextCategoryId,
+      });
+      setAssignCategoryOpen(false);
+    } catch {
+      // handleSave already surfaces the error via message.error
+    } finally {
+      setIsAssigningCategory(false);
     }
   };
 
@@ -732,7 +793,6 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     const handleDeleteShortcut = (event: KeyboardEvent) => {
       if (event.key !== 'Delete') return;
       const target = event.target as HTMLElement | null;
-      // Don't hijack Delete while the user is editing text or a code editor.
       if (target?.closest('input, textarea, select, [contenteditable="true"], .ace_editor')) return;
       deleteSelectedNodeRef.current();
     };
@@ -773,6 +833,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         onOpenHistory={handleOpenHistory}
         readOnly={readOnly}
         loading={isConnectionLoading}
+        hasSavedConnection={!!activeConnectionId}
         schedulesSlot={
           activeConnectionId ? (
             <WorkflowSchedulesPill
@@ -903,6 +964,13 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         onCancel={handleCancelConnectorMapping}
       />
       <ShortcutsDialog open={isShortcutsOpen} onClose={() => setIsShortcutsOpen(false)} />
+      <AssignCategoryDialog
+        open={assignCategoryOpen}
+        currentCategoryId={categoryId}
+        loading={isAssigningCategory}
+        onClose={() => setAssignCategoryOpen(false)}
+        onAssign={handleAssignCategory}
+      />
       <div className="workflowMain">
         {isLoading ? (
           <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -944,6 +1012,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
                 }
               }}
               onDeleteNode={workflow.onDeleteNode}
+              onOpenAggregatorEditor={(nodeId) => workflow.setAggregatorEditor({ nodeId })}
               onPaneClick={() => { workflow.setSidebarAction(null); workflow.setContextMenu(null); workflow.setHistoryOpen(false); workflow.setConditionEditor(null); }}
             >
               <Background gap={16} size={1} />

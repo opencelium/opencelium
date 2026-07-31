@@ -30,6 +30,7 @@ export type WorkflowCanvasProps = PropsWithChildren<{
 	onOpenContextMenu: (menu: WorkflowContextMenu | null) => void;
 	onNodeDoubleClick?: NodeMouseHandler<WorkflowNodeModel>;
 	onDeleteNode: (nodeId: string) => void;
+	onOpenAggregatorEditor: (nodeId: string) => void;
 	onPaneClick?: () => void;
 	restoredViewport?: Viewport;
 	viewportRestoreVersion?: number;

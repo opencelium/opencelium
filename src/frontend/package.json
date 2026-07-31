@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "node scripts/patch-react-json-view.cjs && vite",
-    "build": "node scripts/patch-react-json-view.cjs && node --max-old-space-size=8192 ./node_modules/vite/bin/vite.js build",
+    "build": "node scripts/patch-react-json-view.cjs && node --max-old-space-size=8192 ./node_modules/vite/bin/vite.js build && node scripts/write-production-config.cjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "format": "prettier --write src",
@@ -38,6 +38,7 @@
     "cron-parser": "^5.5.0",
     "cron-validate": "^1.5.3",
     "framer-motion": "^12.34.2",
+    "fuse.js": "^7.5.0",
     "graphiql": "^5.2.4",
     "graphql": "16.11.0",
     "i18next": "^25.8.0",

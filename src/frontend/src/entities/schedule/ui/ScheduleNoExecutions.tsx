@@ -6,7 +6,7 @@ export function ScheduleNoExecutions() {
     const {t: tEntities} = useI18n('entities')
     return (
         <div style={{padding: '8px 0'}}>
-            <Empty description={tEntities('schedule.list.noExecutions')} />
+            <Empty description={tEntities('schedule.list.noExecutions')} image={null} />
         </div>
     )
 }

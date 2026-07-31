@@ -109,7 +109,6 @@
       }
     },
     "recommendations": {
-      "1": "Weiteren Invoker erstellen",
       "2": "Connector erstellen"
     },
     "steps": {
@@ -129,7 +128,9 @@
   },
   "confirmation": {
     "delete": {
-      "byName": "Invoker \"{{name}}\" löschen?"
+      "byName": "Warnung: Der Invoker \"{{name}}\" wird möglicherweise von einem oder mehreren Konnektoren verwendet. Das Löschen kann diese Konnektoren beeinträchtigen.\n\nMöchten Sie fortfahren?",
+      "bulkMessage": "Warnung: Die {{count}} ausgewählten Invoker werden möglicherweise von einem oder mehreren Konnektoren verwendet. Das Löschen kann diese Konnektoren beeinträchtigen.\n\nMöchten Sie fortfahren?",
+      "bulkMessage_one": "Warnung: Der ausgewählte Invoker wird möglicherweise von einem oder mehreren Konnektoren verwendet. Das Löschen kann diese Konnektoren beeinträchtigen.\n\nMöchten Sie fortfahren?"
     }
   }
 }

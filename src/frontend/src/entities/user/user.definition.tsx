@@ -129,11 +129,15 @@ export const userDefinition: EntityDefinition = {
                 max: 255
             },
             table: {
+                width: '25%',
                 visible: true,
                 order: 2,
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.userDetail.name.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             }
         },
         {
@@ -150,11 +154,15 @@ export const userDefinition: EntityDefinition = {
                 max: 255
             },
             table: {
+                width: '25%',
                 visible: true,
                 order: 3,
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.userDetail.surname.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             }
         },
         {
@@ -245,11 +253,15 @@ export const userDefinition: EntityDefinition = {
                 }
             },
             table: {
+                width: '25%',
                 visible: true,
                 order: 1,
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.email.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },/*
             access: {
                 strategy: 'disable',
@@ -344,6 +356,9 @@ export const userDefinition: EntityDefinition = {
                     }
                     return undefined;
                 },
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {

@@ -48,7 +48,6 @@ export function CurrentSchedulesProvider({children}: Props) {
     const previousRunningRef = useRef<Map<number, RunningExecution>>(new Map())
 
     const handleMessage = useCallback((executions: CurrentExecution[]) => {
-        console.log(executions)
         const now = Date.now()
         const prev = previousRunningRef.current
         const incomingIds = new Set(executions.map((e) => e.execId))

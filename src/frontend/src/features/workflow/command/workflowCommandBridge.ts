@@ -7,7 +7,7 @@ import type { WorkflowNodeData } from '../types/workflow.types';
  * resolve/execute callbacks (no React context available) and whichever
  * workflow editor instance is currently mounted. `useWorkflowPage` sets
  * this on mount and clears it on unmount — see connection.definition.tsx's
- * `workflow find method/property` commands for the read side.
+ * `workflow search <term>` command for the read side.
  */
 type WorkflowCommandBridge = {
   isActive: boolean;
@@ -15,6 +15,9 @@ type WorkflowCommandBridge = {
   setSearchHighlightedNodeIds: (ids: string[]) => void;
   hasSearchHighlights: () => boolean;
   clearSearchHighlights: () => void;
+  /** Pans (and keeps the current zoom) so the given node is centered in the
+   * viewport — used to bring the best search match into view as the user types. */
+  centerOnNode: (nodeId: string) => void;
   /** True while any editor-owned dialog (method config, condition builder,
    * data aggregator, response viewer, history panel) is open — these live in
    * useWorkflowPage's own state, invisible to the command palette's generic
@@ -29,6 +32,7 @@ const INACTIVE_BRIDGE: WorkflowCommandBridge = {
   setSearchHighlightedNodeIds: () => {},
   hasSearchHighlights: () => false,
   clearSearchHighlights: () => {},
+  centerOnNode: () => {},
   hasOpenDialog: () => false,
 };
 

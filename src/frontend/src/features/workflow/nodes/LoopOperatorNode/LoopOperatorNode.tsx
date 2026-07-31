@@ -31,6 +31,7 @@ export function LoopOperatorNode({ id, data, selected, dragging }: NodeProps<Loo
 				dataAggregator={data.dataAggregator}
 				testId={`workflow-node-aggregator-${id}`}
 				suppressTooltip={dragging || data.isAnyNodeDragging}
+				onOpenAggregatorEditor={() => data.onOpenAggregatorEditor?.(id)}
 			/>
 			<StandardNodeHandles />
 		</NodeShell>

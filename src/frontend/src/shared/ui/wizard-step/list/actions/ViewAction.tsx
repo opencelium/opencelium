@@ -9,7 +9,7 @@ import type { ViewActionProps } from './types';
 import { resolveActionValue } from './resolveAction';
 import { buildTestId } from '@shared/testing/testId';
 
-export const ViewAction: React.FC<ViewActionProps> = ({ entity, row, rowId, config, testId }) => {
+export const ViewAction: React.FC<ViewActionProps> = ({ entity, row, rowId, config, testId, iconSize, tooltipPlacement }) => {
     const dialog = useDialog();
     const navigate = useNavigate();
     const { t: tCommon } = useI18n('common');
@@ -38,8 +38,8 @@ export const ViewAction: React.FC<ViewActionProps> = ({ entity, row, rowId, conf
     };
 
     return (
-        <Tooltip content={tCommon('actions.view')} placement="right">
-            <IconButton iconProps={{ name: 'info', color: 'primary' }} type={'text'} size={'xs'} onClick={handleClick} testId={testId} />
+        <Tooltip content={tCommon('actions.view')} placement={tooltipPlacement}>
+            <IconButton iconProps={{ name: 'info', color: 'primary', size: iconSize }} type={'text'} size={'xs'} onClick={handleClick} testId={testId} />
         </Tooltip>
     );
 };

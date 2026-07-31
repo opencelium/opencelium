@@ -23,11 +23,11 @@ import com.becon.opencelium.backend.constant.ExceptionMessages;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.RequestData;
 import com.becon.opencelium.backend.database.mysql.repository.ConnectorRepository;
+import com.becon.opencelium.backend.enums.ConnectorStatus;
 import com.becon.opencelium.backend.exception.ConnectorAlreadyExistsException;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
 import com.becon.opencelium.backend.exception.StorageException;
-import com.becon.opencelium.backend.execution.logger.mapper.ParsedLogLineMapper;
 import com.becon.opencelium.backend.execution.rdata.RequiredDataService;
 import com.becon.opencelium.backend.execution.rdata.RequiredDataServiceImp;
 import com.becon.opencelium.backend.invoker.InvokerRequestBuilder;
@@ -37,12 +37,14 @@ import com.becon.opencelium.backend.invoker.entity.RequiredData;
 import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
+import com.becon.opencelium.backend.security.SecurityAuditorAware;
 import com.becon.opencelium.backend.storage.StorageService;
 import com.becon.opencelium.backend.utility.FileNameUtils;
 import com.becon.opencelium.backend.utility.StringUtility;
 import com.becon.opencelium.backend.utility.crypto.Encoder;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -63,6 +65,8 @@ public class ConnectorServiceImp implements ConnectorService {
     private final RequestDataService requestDataService;
     private final Environment env;
     private final StorageService storageService;
+    private final ConnectorHealthService connectorHealthService;
+    private final SecurityAuditorAware securityAuditorAware;
 
     public ConnectorServiceImp(
             ConnectorProps connectorProps, ConnectorRepository connectorRepository,
@@ -70,7 +74,10 @@ public class ConnectorServiceImp implements ConnectorService {
             @Qualifier("requestDataServiceImp") RequestDataServiceImp requestDataService,
             Encoder encoder,
             Environment env,
-            StorageService storageService
+            StorageService storageService,
+            // @Lazy breaks the constructor cycle: the health service itself depends on this service.
+            @Lazy ConnectorHealthService connectorHealthService,
+            SecurityAuditorAware securityAuditorAware
     ) {
         this.connectorProps = connectorProps;
         this.connectorRepository = connectorRepository;
@@ -79,6 +86,8 @@ public class ConnectorServiceImp implements ConnectorService {
         this.requestDataService = requestDataService;
         this.env = env;
         this.storageService = storageService;
+        this.connectorHealthService = connectorHealthService;
+        this.securityAuditorAware = securityAuditorAware;
     }
 
     @Override
@@ -126,11 +135,14 @@ public class ConnectorServiceImp implements ConnectorService {
     @Override
     public void deleteById(int id) {
         connectorRepository.deleteById(id);
+        connectorHealthService.evict(id);
     }
 
     @Override
     public void deleteByInvoker(String invokerName) {
+        List<Connector> deleted = connectorRepository.findAllByInvoker(invokerName);
         connectorRepository.deleteByInvoker(invokerName);
+        deleted.forEach(connector -> connectorHealthService.evict(connector.getId()));
     }
 
     @Override
@@ -164,6 +176,17 @@ public class ConnectorServiceImp implements ConnectorService {
             list.forEach(this::decrypt);
         }
         return list;
+    }
+
+    @Override
+    public List<Connector> findAllRaw() {
+        return connectorRepository.findAll();
+    }
+
+    @Override
+    public Connector getByIdRaw(int id) {
+        return connectorRepository.findById(id)
+                .orElseThrow(() -> new ConnectorNotFoundException(id));
     }
 
     @Override
@@ -222,19 +245,21 @@ public class ConnectorServiceImp implements ConnectorService {
                 .setProxyUser(user)
                 .setProxyPass(password)
                 .setTimeout(connector.getTimeout())
-                .setSslCert(connector.isSslValidation())
+                .setSslCert(connector.isTrustCertificate())
                 .sendRequest();
     }
 
     @Override
-    public void updateTestResult(int connectorId, boolean passed, String error) {
-        // Load the raw (still-encrypted) entity and touch only the two test-result columns so the
-        // rest of the connector's persisted state (including encrypted request data) is untouched.
-        connectorRepository.findById(connectorId).ifPresent(connector -> {
-            connector.setLastTestPassed(passed);
-            connector.setLastTestError(passed ? null : error);
-            connectorRepository.save(connector);
-        });
+    public void updateStatus(int connectorId, ConnectorStatus status, String error) {
+        // Bulk JPQL update touches only the health columns, so the connector's audit fields
+        // (modified_by/modified_at) are not stamped by the background health monitor.
+        connectorRepository.updateStatus(
+                connectorId, status, status == ConnectorStatus.UP ? null : error);
+    }
+
+    @Override
+    public void updateLastCheckedAt(int connectorId, Date checkedAt) {
+        connectorRepository.updateLastCheckedAt(connectorId, checkedAt);
     }
 
     @Override
@@ -279,7 +304,7 @@ public class ConnectorServiceImp implements ConnectorService {
         // prepended twice when the entity is mapped back to a DTO (icon path doubling on update).
         connector.setIcon(StringUtility.findImageFromUrl(connectorResource.getIcon()));
         connector.setDescription(connectorResource.getDescription());
-        connector.setSslValidation(connectorResource.isSslCert());
+        connector.setTrustCertificate(connectorResource.isSslCert());
         connector.setTimeout(connectorResource.getTimeout());
 
         connectorRepository.save(connector);
@@ -366,6 +391,11 @@ public class ConnectorServiceImp implements ConnectorService {
         }
 
         requestDataService.saveAll(new ArrayList<>(existingMap.values()));
+
+        // Editing request data only dirties child rows, so the connector entity itself stays
+        // clean and JPA auditing never fires — stamp the audit columns explicitly.
+        connectorRepository.touchAudit(
+                connectorId, securityAuditorAware.getCurrentAuditor().orElse(null), new Date());
     }
 
     @Override

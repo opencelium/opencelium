@@ -162,11 +162,17 @@ export function StepFormLayout({
             setCurrentStep((s) => s - 1),
         isLast,
     }
-    // Ctrl/Cmd+Enter advances the wizard: Next on intermediate steps, Submit on the last one.
-    // Scoped to this container (not window) so it only fires while the form has focus.
-    const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const shortcutRef = useRef<(event: KeyboardEvent) => void>(() => {})
+    shortcutRef.current = (event: KeyboardEvent) => {
         if (!(event.ctrlKey || event.metaKey) || event.key !== 'Enter') return
         if (isSuccess || isSubmitting || runningActionId != null) return
+        const container = ref.current as HTMLElement | null
+        if (!container) return
+        const selector = '[data-testid$="wizard-next"],[data-testid$="wizard-submit"]'
+        const myButton = container.querySelector(selector)
+        if (!myButton) return
+        const allButtons = document.querySelectorAll(selector)
+        if (allButtons[allButtons.length - 1] !== myButton) return
         event.preventDefault()
         if (isLast) {
             if (!readOnly && !hideSubmit) void handleSubmit()
@@ -174,6 +180,11 @@ export function StepFormLayout({
             void next()
         }
     }
+    useEffect(() => {
+        const handler = (event: KeyboardEvent) => shortcutRef.current(event)
+        document.addEventListener('keydown', handler)
+        return () => document.removeEventListener('keydown', handler)
+    }, [])
     return (
         <StepFormContext.Provider value={ctx}>
             <div
@@ -182,7 +193,6 @@ export function StepFormLayout({
                     borderRadius: 12,
                 }}
                 ref={ref}
-                onKeyDown={handleKeyDown}
             >
                 {!hideHeader && (
                     <StepHeader
@@ -199,7 +209,7 @@ export function StepFormLayout({
                         display: isTabletOrMobile ? "grid" : "flex",
                     }}
                 >
-                    {!isSuccess && <div style={{flex: 1, marginBottom: isTabletOrMobile ? 30 : 0}}>
+                    {!isSuccess && <div style={{flex: 1, minWidth: 0, marginBottom: isTabletOrMobile ? 30 : 0}}>
                         <div
                             style={{
                                 overflow: 'hidden',
@@ -213,7 +223,7 @@ export function StepFormLayout({
                             />
                         </div>
                     </div>}
-                    <div style={{flex: 3}}>
+                    <div style={{flex: 3, minWidth: 0}}>
 
                         {isSuccess ? (
                             <SuccessState

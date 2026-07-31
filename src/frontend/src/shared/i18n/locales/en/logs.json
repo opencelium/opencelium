@@ -18,17 +18,13 @@
     "responseHeader": "Response Header",
     "responseBody": "Response Body"
   },
-  "copy": {
-    "tooltip": "Copy to clipboard",
-    "empty": "Nothing to copy",
-    "success": "Copied to clipboard",
-    "failed": "Failed to copy to clipboard"
-  },
   "methodView": {
     "tooltip": "Toggle URL / name"
   },
+  "testRunDetails": "TEST RUN DETAILS",
+  "logsLabel": "LOGS",
   "live": {
-    "title": "Logs",
+    "title": "Execution Logs",
     "empty": "No logs yet. Run a test to see execution logs.",
     "running": "Running…",
     "collecting": "Collecting logs…",

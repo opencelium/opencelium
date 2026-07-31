@@ -244,3 +244,31 @@ versions:
         operation: add
         value: 0
         path: opencelium.sweeper.test-connection.initial-delay
+      - changeset: 8
+        operation: add
+        value: true
+        path: opencelium.connector-health.enabled
+      - changeset: 9
+        operation: add
+        value: 300000
+        path: opencelium.connector-health.interval
+      - changeset: 10
+        operation: add
+        value: 60000
+        path: opencelium.connector-health.initial-delay
+      - changeset: 11
+        operation: add
+        value: 3
+        path: opencelium.connector-health.failure-threshold
+      - changeset: 12
+        operation: add
+        value: 4
+        path: opencelium.connector-health.parallelism
+      - changeset: 13
+        operation: add
+        value: false
+        path: opencelium.connector-health.request-logging.enabled
+      - changeset: 14
+        operation: add
+        value: 500
+        path: opencelium.connector-health.request-logging.max-body-length

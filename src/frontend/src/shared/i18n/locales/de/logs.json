@@ -1,5 +1,5 @@
 {
-  "title": "Ausführungs-Logs",
+  "title": "Lauf-Logs",
   "subtitle": "Wählen Sie eine Ausführung, um deren Konnektor-, Methoden- und Operator-Logs einzusehen.",
   "selectLabel": "Ausführung",
   "selectPlaceholder": "Ausführung auswählen",
@@ -18,17 +18,13 @@
     "responseHeader": "Antwort-Header",
     "responseBody": "Antwort-Body"
   },
-  "copy": {
-    "tooltip": "In die Zwischenablage kopieren",
-    "empty": "Nichts zu kopieren",
-    "success": "In die Zwischenablage kopiert",
-    "failed": "Kopieren in die Zwischenablage fehlgeschlagen"
-  },
   "methodView": {
     "tooltip": "URL / Name umschalten"
   },
+  "testRunDetails": "TESTLAUFDETAILS",
+  "logsLabel": "LOGS",
   "live": {
-    "title": "Logs",
+    "title": "Lauf-Logs",
     "empty": "Noch keine Logs. Starten Sie einen Test, um Ausführungs-Logs zu sehen.",
     "running": "Läuft…",
     "collecting": "Logs werden gesammelt…",

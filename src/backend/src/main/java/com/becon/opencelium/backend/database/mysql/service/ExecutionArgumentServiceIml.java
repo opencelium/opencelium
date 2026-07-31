@@ -27,4 +27,9 @@ public class ExecutionArgumentServiceIml implements ExecutionArgumentService {
     public void deleteByConnectionId(Long connectionId) {
         executionArgumentRepository.deleteByConnectionId(connectionId);
     }
+
+    @Override
+    public void deleteBySchedulerId(int schedulerId) {
+        executionArgumentRepository.deleteBySchedulerId(schedulerId);
+    }
 }

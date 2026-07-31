@@ -1,6 +1,5 @@
 import { message } from 'antd'
 import type { EntityDefinition } from '@/engine/entity/EntityDefinition'
-import type { CommandNode } from '@shared/command/types'
 import invokerWizardImage from '@assets/images/wizard/invoker-wizard.gif'
 import { createEntityCommands } from '@/engine/entity/command/createEntityCommands.tsx'
 import { i18n } from '@shared/i18n/config/i18n.ts'
@@ -27,7 +26,6 @@ export const invokerDefinition: EntityDefinition = {
     permissionComponent: 'INVOKER',
 
     routes: [
-        { type: 'create' },
         { type: 'view' },
         { type: 'list' },
     ],
@@ -36,10 +34,22 @@ export const invokerDefinition: EntityDefinition = {
         titleKey: `${baseKey}.list.title`,
         subtitleKey: `${baseKey}.list.subTitle`,
         defaultSort: { field: 'name', direction: 'asc' },
-        bulkDelete: true,
+        bulkDelete: {
+            confirmMessage: (ids) => {
+                const t = i18n.getFixedT(i18n.language, 'entities');
+                return t(`${baseKey}.confirmation.delete.bulkMessage`, { count: ids.length });
+            },
+        },
         actions: [
             { type: 'view' },
-            { type: 'delete' },
+            {
+                type: 'delete',
+                confirmMessage: (value, _entity, row) => {
+                    const t = i18n.getFixedT(i18n.language, 'entities');
+                    const name = (row as Invoker)?.name ?? value;
+                    return t(`${baseKey}.confirmation.delete.byName`, { name });
+                },
+            },
         ],
         headerActions: [
             { key: 'upload', permissionAction: 'CREATE', render: () => <InvokerUploadButton /> },
@@ -92,11 +102,15 @@ export const invokerDefinition: EntityDefinition = {
                 }
             },
             table: {
+                width: '25%',
                 visible: true,
                 order: 1,
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.name.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {
@@ -110,9 +124,13 @@ export const invokerDefinition: EntityDefinition = {
             },
             validation: { max: 5000 },
             table: {
+                width: '45%',
                 visible: true,
                 order: 2,
                 labelKey: `${baseKey}.fields.description.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {
@@ -147,6 +165,9 @@ export const invokerDefinition: EntityDefinition = {
                 visible: true,
                 order: 3,
                 labelKey: `${baseKey}.fields.authType.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {
@@ -213,6 +234,9 @@ export const invokerDefinition: EntityDefinition = {
                         .filter(Boolean)
                         .join(', ');
                 },
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
     ],
@@ -260,10 +284,6 @@ export const invokerDefinition: EntityDefinition = {
 
         recommendations: [
             {
-                title: `${baseKey}.wizard.recommendations.1`,
-                link: '/invoker/create',
-            },
-            {
                 title: `${baseKey}.wizard.recommendations.2`,
                 link: '/connector/create',
             },
@@ -301,7 +321,7 @@ export const invokerDefinition: EntityDefinition = {
     commands: (def) => ([
         ...createEntityCommands({
             def,
-            config: { include: ['create', 'delete', 'view'] },
+            config: { include: ['delete', 'list', 'view'] },
             dsl: {
                 delete: {
                     by: [
@@ -355,6 +375,7 @@ export const invokerDefinition: EntityDefinition = {
                                 message.success(
                                     tEntities('invoker.list.upload.success', { name: file.name }),
                                 )
+                                ctx.setInputValue('')
                             }
                         } catch (err) {
                             console.error(err)

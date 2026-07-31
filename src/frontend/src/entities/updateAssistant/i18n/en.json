@@ -1,4 +1,7 @@
 {
+  "installationCheck": {
+    "unavailable": "Update Assistant is not available for installation type: \"{{type}}\". Please check your application.yml file on the server."
+  },
   "fields": {
     "systemHealth": {
       "label": "System Health"
@@ -111,9 +114,16 @@
     }
   },
   "update": {
-    "confirm": "Are you sure you want to apply the update? The system will restart.",
-    "success": "Update started successfully",
-    "error": "Update failed to start",
+    "confirmRun": {
+      "title": "Run Update",
+      "message": "Are you sure you want to update OpenCelium to version {{version}}? The system will restart and you will be logged out automatically once the update starts.",
+      "confirm": "Run Update",
+      "cancel": "Cancel"
+    },
+    "successTitle": "Update Started",
+    "success": "The update of OpenCelium to version {{version}} has been started successfully.",
+    "successLogoutNotice": "For the update to take effect, you will be logged out automatically in {{count}} seconds.",
+    "successLogoutNotice_one": "For the update to take effect, you will be logged out automatically in {{count}} second.",
     "hint": "Don't forget to clear browser cache (especially the javascript cache)."
   },
   "changelog": {

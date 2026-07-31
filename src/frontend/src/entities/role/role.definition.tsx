@@ -115,11 +115,15 @@ export const roleDefinition: EntityDefinition = {
                 }
             },
             table: {
+                width: '30%',
                 visible: true,
                 order: 1,
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.name.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {
@@ -135,10 +139,14 @@ export const roleDefinition: EntityDefinition = {
                 max: 5000,
             },
             table: {
+                width: '50%',
                 visible: true,
                 order: 2,
                 searchable: true,
                 labelKey: `${baseKey}.fields.description.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
 
@@ -177,6 +185,7 @@ export const roleDefinition: EntityDefinition = {
                 required: true,
             },
             table: {
+                width: '30%',
                 visible: true,
                 order: 3,
                 searchable: true,
@@ -188,6 +197,9 @@ export const roleDefinition: EntityDefinition = {
                         .filter(Boolean)
                         .join(', ');
                 },
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {

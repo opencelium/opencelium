@@ -76,7 +76,7 @@ public abstract class HelperMapper {
         if (connector != null) {
             connectorDTO.setIcon(connector.getIcon());
             connectorDTO.setTimeout(connector.getTimeout());
-            connectorDTO.setSslCert(connector.isSslValidation());
+            connectorDTO.setSslCert(connector.isTrustCertificate());
             connectorDTO.setInvoker(getInvokerDTO(connector.getInvoker()));
         }
         return connectorDTO;

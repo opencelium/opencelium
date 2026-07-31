@@ -11,7 +11,7 @@ server:
   address: 127.0.0.1
   forward-headers-strategy: native
 websocket:
-  endpoint: /websocket
+  endpoint: /ws
 #  ssl:
 #    enabled: true
 #    key-store-type: PKCS12
@@ -119,9 +119,10 @@ spring:
   #                                                                    #
   #   LDAP configuration section.                                      #
   #   LDAP DEBUG mode can be enabled with the                          #
-  #   logging.level.org.springframework.data.ldap: DEBUG settings      #
+  #   logging.level.org.springframework.security.ldap: DEBUG settings      #
   #                                                                    #
   ######################################################################
+#  security:
 #    ldap:
 #      # LDAP server URL
 #      urls: ldap://localhost:7389
@@ -176,7 +177,7 @@ logging:
   level:
     org:
       springframework:
-        data:
+        security:
           # Activate or deactivate logs during LDAP authentication
           ldap: OFF # OFF or DEBUG;
 
@@ -224,6 +225,31 @@ opencelium:
       enabled: true
       fixed-delay: 900000
       initial-delay: 0
+  ###########################################################################
+  #                                                                         #
+  #   Background connector health monitor                                   #
+  #                                                                         #
+  #   enabled           — master switch for the periodic sweep              #
+  #   interval          — delay between two sweeps in milliseconds          #
+  #   initial-delay     — delay before the first sweep after startup (ms)   #
+  #   failure-threshold — consecutive failed checks before a connector's    #
+  #                       status transitions to DOWN/AUTH_FAILED            #
+  #                       (flap damping); recovery needs a single success   #
+  #   parallelism       — how many connectors are checked concurrently      #
+  #   request-logging   — INFO-log each check's request (method + endpoint  #
+  #                       template, never resolved credentials) and its     #
+  #                       response (status, latency, truncated body)        #
+  #                                                                         #
+  ###########################################################################
+  connector-health:
+    enabled: true
+    interval: 60000
+    initial-delay: 10000
+    failure-threshold: 3
+    parallelism: 4
+    request-logging:
+      enabled: false
+      max-body-length: 500
   ###########################################################################
   #                                                                         #
   #   Is customizable                                                       #

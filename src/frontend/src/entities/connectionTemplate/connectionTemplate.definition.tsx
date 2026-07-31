@@ -2,6 +2,9 @@ import { message } from 'antd'
 import type { EntityDefinition } from '@/engine/entity/EntityDefinition'
 import type { CommandNode } from '@shared/command/types'
 import { i18n } from '@shared/i18n/config/i18n'
+import { createEntityCommands } from '@/engine/entity/command/createEntityCommands'
+import { useCommandPaletteUIStore } from '@widgets/CommandPalette/command-palette.store'
+import { GenericEntityList } from '@/engine/entity/runtime/genererics/GenericEntityList'
 import en from '@entities/connectionTemplate/i18n/en.json'
 import de from '@entities/connectionTemplate/i18n/de.json'
 import type { ConnectionTemplate } from '@entities/connectionTemplate/model/types'
@@ -15,6 +18,7 @@ import { downloadConnectionTemplate } from '@entities/connectionTemplate/lib/dow
 import { resolveConnectionTemplateIds } from '@entities/connectionTemplate/command/resolvers/resolveConnectionTemplateIds'
 import { resolveConnectionTemplateNames } from '@entities/connectionTemplate/command/resolvers/resolveConnectionTemplateNames'
 import { extractTemplateIdFromSuggestion } from '@entities/connectionTemplate/command/connectionTemplateCache'
+import { TruncatedTextCell } from '@shared/table/TruncatedTextCell'
 
 const baseKey = 'connection-template'
 
@@ -64,11 +68,15 @@ export const connectionTemplateDefinition: EntityDefinition = {
                 props: { labelKey: `${baseKey}.fields.name.label` },
             },
             table: {
+                width: '25%',
                 visible: true,
                 order: 1,
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.name.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {
@@ -83,6 +91,7 @@ export const connectionTemplateDefinition: EntityDefinition = {
                 order: 2,
                 searchable: true,
                 labelKey: `${baseKey}.fields.description.label`,
+                render: (_row, value) => <TruncatedTextCell value={value} />,
             },
         },
         {
@@ -93,10 +102,14 @@ export const connectionTemplateDefinition: EntityDefinition = {
                 props: { labelKey: `${baseKey}.fields.fromInvoker.label` },
             },
             table: {
+                width: '10%',
                 visible: true,
                 order: 3,
                 searchable: true,
                 labelKey: `${baseKey}.fields.fromInvoker.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {
@@ -107,10 +120,14 @@ export const connectionTemplateDefinition: EntityDefinition = {
                 props: { labelKey: `${baseKey}.fields.toInvoker.label` },
             },
             table: {
+                width: '10%',
                 visible: true,
                 order: 4,
                 searchable: true,
                 labelKey: `${baseKey}.fields.toInvoker.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
     ],
@@ -121,7 +138,72 @@ export const connectionTemplateDefinition: EntityDefinition = {
         steps: [],
     },
 
-    commands: (): CommandNode<unknown>[] => [
+    commands: (def): CommandNode<unknown>[] => [
+        {
+            type: 'literal',
+            value: 'list',
+            aliases: ['collections'],
+            group: 'navigate',
+            icon: 'list',
+            description: 'commandPalette.descriptions.list',
+            children: [
+                {
+                    type: 'literal',
+                    value: 'workflow-templates',
+                    group: 'navigate',
+                    icon: 'list',
+                    execute: (_, ctx) => {
+                        // List route lives at /workflow-template, not /connection-template
+                        // (see routes above) — can't use the generic getListCommand helper.
+                        const url = '/workflow-template'
+                        const mode = useCommandPaletteUIStore.getState().resolveMode()
+
+                        if (mode === 'route') return ctx.navigate(url)
+                        if (mode === 'new-tab') return ctx.openNewTab(url)
+                        if (mode === 'modal') return ctx.openModal(<GenericEntityList entityName={def.name} />)
+                        ctx.render(<GenericEntityList entityName={def.name} />)
+                    },
+                },
+            ],
+        },
+        ...createEntityCommands({
+            def,
+            commandName: 'workflow-template',
+            config: { include: ['delete'] },
+            dsl: {
+                delete: {
+                    by: [
+                        {
+                            field: 'id',
+                            customPath: true,
+                            resolve: resolveConnectionTemplateIds,
+                            confirmMessage: (templateId) => {
+                                const t = i18n.getFixedT(i18n.language, 'entities')
+                                return t(`${baseKey}.confirmation.delete.byId`, { templateId })
+                            },
+                        },
+                        {
+                            field: 'name',
+                            resolve: resolveConnectionTemplateNames,
+                            // Resolve the suggestion back to its templateId, then delete
+                            // through the exact same /template/{templateId} endpoint used
+                            // by "delete workflow-template by id".
+                            buildDeleteUrl: (_def, value) => {
+                                const templateId = extractTemplateIdFromSuggestion(value)
+                                if (templateId === undefined) {
+                                    throw new Error(`Template not found: ${value}`)
+                                }
+                                return `/template/${encodeURIComponent(templateId)}`
+                            },
+                            confirmMessage: (name) => {
+                                const t = i18n.getFixedT(i18n.language, 'entities')
+                                return t(`${baseKey}.confirmation.delete.byName`, { name })
+                            },
+                        },
+                    ],
+                },
+            },
+        }) as CommandNode<unknown>[],
         {
             type: 'literal',
             value: 'upload',
@@ -157,6 +239,7 @@ export const connectionTemplateDefinition: EntityDefinition = {
                                         name: file.name,
                                     }),
                                 )
+                                ctx.setInputValue('')
                             }
                         } catch (err) {
                             console.error(err)

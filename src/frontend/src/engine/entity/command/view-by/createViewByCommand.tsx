@@ -42,8 +42,8 @@ export const createViewByCommand = ({
 
     return {
         type: 'literal',
-        value: 'find',
-        aliases: ['open', 'view', 'get'],
+        value: 'search',
+        aliases: ['find', 'open', 'view', 'get'],
         group: 'navigate',
         icon: 'search',
         description: 'commandPalette.descriptions.find',

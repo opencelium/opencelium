@@ -29,7 +29,7 @@ const buildNotificationTemplateViewPageUrl = (value: string): string =>
 
 export const notificationTemplateDefinition: EntityDefinition = {
     name: baseKey,
-    plural: 'notificationTemplates',
+    plural: 'notification-templates',
 
     routes: [
         { type: 'create' },
@@ -127,11 +127,15 @@ export const notificationTemplateDefinition: EntityDefinition = {
                 max: 255,
             },
             table: {
+                width: '60%',
                 visible: true,
                 order: 1,
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.name.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {
@@ -149,10 +153,14 @@ export const notificationTemplateDefinition: EntityDefinition = {
             },
             validation: { required: true },
             table: {
+                width: '20%',
                 visible: true,
                 order: 2,
                 searchable: true,
                 labelKey: `${baseKey}.fields.type.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {

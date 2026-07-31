@@ -40,6 +40,7 @@ export function ScheduleCreateDialogContent({ connectionId, connectionTitle, onS
     })
 
     const handleSubmit = form.handleSubmit(async ({ title, debugMode, cronExp }) => {
+        const normalizedTitle = title.trim()
         if (cronExp && !cron(stripSeconds(cronExp), { override: { useBlankDay: true } }).isValid()) {
             message.error(tEntities('schedule.fields.cronExp.error.invalid'))
             return
@@ -47,7 +48,12 @@ export function ScheduleCreateDialogContent({ connectionId, connectionTitle, onS
 
         setSaving(true)
         try {
-            await submit({ title, debugMode, cronExp, connectionId: Number(connectionId) })
+            await submit({
+                title: normalizedTitle,
+                debugMode,
+                cronExp: cronExp.trim(),
+                connectionId: Number(connectionId),
+            })
             message.success(t('schedules.create.success', { title: connectionTitle }))
             onSuccess()
         } catch {
@@ -74,7 +80,12 @@ export function ScheduleCreateDialogContent({ connectionId, connectionTitle, onS
                             label={tEntities('schedule.fields.title.label')}
                             autoFocus
                             showCounter
-                            rules={{ required: tCommon('field.required') }}
+                            rules={{
+                                required: tCommon('field.required'),
+                                validate: value =>
+                                    (typeof value === 'string' && value.trim().length > 0)
+                                    || tCommon('field.required'),
+                            }}
                         />
                         <Controller
                             name="debugMode"

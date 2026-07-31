@@ -87,6 +87,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -203,18 +204,7 @@ public class ConnectionController {
     public ResponseEntity<?> getAllMeta(@RequestParam(name = "includeTest", defaultValue = "false") Boolean includeTest) {
         List<Connection> connections = connectionService.findAll(includeTest);
         List<ConnectionResource> connectionResources = connectionResourceMapper.toDTOAll(connections);
-        //unnecessary fields
-        connectionResources.forEach(c -> {
-            c.getFromConnector().setRequestData(null);
-            c.getFromConnector().getInvoker().setOperations(null);
-            c.getFromConnector().getInvoker().setRequiredData(null);
-
-            if (c.getToConnector() != null) {
-                c.getToConnector().setRequestData(null);
-                c.getToConnector().getInvoker().setOperations(null);
-                c.getToConnector().getInvoker().setRequiredData(null);
-            }
-        });
+        prepareForList(connections, connectionResources);
         return ResponseEntity.ok(connectionResources);
     }
 
@@ -235,8 +225,22 @@ public class ConnectionController {
                                             @RequestParam(name = "includeTest", defaultValue = "false") boolean includeTest) {
         List<Connection> connections = connectionService.findAllByIds(ids, includeTest);
         List<ConnectionResource> connectionResources = connectionResourceMapper.toDTOAll(connections);
-        //unnecessary fields
+        prepareForList(connections, connectionResources);
+        return ResponseEntity.ok(connectionResources);
+    }
+
+    /**
+     * Trims the parts that a connection list never renders and adds the last version of every
+     * connection, which lives in MongoDB and therefore is not filled in by the mapper.
+     */
+    private void prepareForList(List<Connection> connections, List<ConnectionResource> connectionResources) {
+        if (connectionResources.isEmpty()) {
+            return;
+        }
+
+        Map<Long, ConnectionVersionedDTO> lastVersions = connectionService.getLastVersions(connections);
         connectionResources.forEach(c -> {
+            //unnecessary fields
             c.getFromConnector().setRequestData(null);
             c.getFromConnector().getInvoker().setOperations(null);
             c.getFromConnector().getInvoker().setRequiredData(null);
@@ -246,8 +250,9 @@ public class ConnectionController {
                 c.getToConnector().getInvoker().setOperations(null);
                 c.getToConnector().getInvoker().setRequiredData(null);
             }
+
+            c.setLastVersion(lastVersions.get(c.getId()));
         });
-        return ResponseEntity.ok(connectionResources);
     }
 
     @Operation(summary = "Retrieves a connection from database by provided connection ID")
@@ -733,6 +738,10 @@ public class ConnectionController {
     })
     @PostMapping(path = "/remoteapi", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> sendRequestToApi(@RequestBody ApiDataResource apiDataResource) {
+        // TODO: rename isSslON
+        // temporary fix
+        boolean disableSslValidation = !apiDataResource.isSslOn();
+        apiDataResource.setSslOn(disableSslValidation);
         HttpHeaders headers = new HttpHeaders();
         if (apiDataResource.getHeader() != null) {
             headers.setAll(apiDataResource.getHeader());

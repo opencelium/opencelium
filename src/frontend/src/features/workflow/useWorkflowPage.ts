@@ -939,6 +939,21 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
     }));
   };
 
+  const centerOnNode = (nodeId: string) => {
+    const instance = reactFlowInstance.current;
+    const node = instance?.getNode(nodeId);
+    if (!instance || !node) return;
+    const width = node.measured?.width ?? 0;
+    const height = node.measured?.height ?? 0;
+    requestAnimationFrame(() => {
+      instance.setCenter(
+        node.position.x + width / 2,
+        node.position.y + height / 2,
+        { zoom: instance.getZoom(), duration: 200 },
+      );
+    });
+  };
+
   const hasOpenDialogRef = useRef(false);
   useEffect(() => {
     hasOpenDialogRef.current =
@@ -956,6 +971,7 @@ export function useWorkflowPage(options: UseWorkflowPageOptions = {}) {
       setSearchHighlightedNodeIds,
       hasSearchHighlights: () => nodesRef.current.some((node) => node.data.searchHighlighted),
       clearSearchHighlights: () => setSearchHighlightedNodeIds([]),
+      centerOnNode,
       hasOpenDialog: () => hasOpenDialogRef.current,
     });
     return () => deactivateWorkflowCommandBridge();

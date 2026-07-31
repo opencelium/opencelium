@@ -13,12 +13,9 @@ const createTemplateRow = (): WorkflowQueryParam => ({
 });
 
 export const createEmptyMethodConfig = (): WorkflowMethodConfig => ({
-  url: '{url}/unit',
+  url: 'https://your-domain.com',
   method: 'GET',
-  headers: {
-    'Content-Type': 'application/json',
-    Accept: 'application/json',
-  },
+  headers: {},
   queryParams: [createTemplateRow()],
   endpointArgs: {},
   bodyFormat: 'json',

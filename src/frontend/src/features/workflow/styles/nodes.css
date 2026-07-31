@@ -204,6 +204,7 @@
   border: 2px solid var(--color-background-surface);
   z-index: 7;
   pointer-events: auto;
+  cursor: pointer;
 }
 
 .startNode {

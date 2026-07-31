@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Trans } from 'react-i18next';
 import { message } from 'antd';
 import {
@@ -9,6 +9,7 @@ import {
     getPaginationRowModel,
     getExpandedRowModel,
     type ColumnDef,
+    type PaginationState,
     type Row,
     type RowSelectionState,
     type SortingState,
@@ -26,6 +27,7 @@ import { hasComponentPermission, type CrudAction } from '@/engine/policy';
 import NoAccess from '@shared/ui/feedback/NoAccess';
 
 import { Table } from '@shared/ui/primitives/Table';
+import { tableDefaultColumn } from '@shared/ui/primitives/Table/Table.utils';
 import { Input } from '@shared/ui/primitives/Input';
 import { Icon } from '@shared/ui/primitives/Icon';
 import { Button } from '@shared/ui/primitives/Button';
@@ -175,6 +177,13 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
     const [sorting, setSorting] = useState<SortingState>(initialSorting);
     const [globalFilter, setGlobalFilter] = useState('');
     const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+    // Controlled (not left to tanstack's uncontrolled default) — see the
+    // `autoResetPageIndex: false` note below for why this alone isn't enough
+    // to keep the page put across a row-action refetch.
+    const [pagination, setPagination] = useState<PaginationState>({
+        pageIndex: 0,
+        pageSize: entity.list?.pageSize ?? 10,
+    });
     const [pendingDeleteIds, setPendingDeleteIds] = useState<string[]>([]);
     const [filterState, setFilterState] = useState<ListFilterState>(() =>
         buildInitialFilterState(filters),
@@ -193,14 +202,38 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
         [attachSubRows, filteredRows],
     );
 
+    const resetToFirstPage = () => setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+
+    // With autoResetPageIndex disabled (below), deleting the last row(s) on the
+    // current page would otherwise leave the user stranded on a now-empty page —
+    // clamp back to the new last valid page instead.
+    useEffect(() => {
+        const lastPageIndex = Math.max(0, Math.ceil(filteredRows.length / pagination.pageSize) - 1);
+        if (pagination.pageIndex > lastPageIndex) {
+            setPagination((prev) => ({ ...prev, pageIndex: lastPageIndex }));
+        }
+    }, [filteredRows.length, pagination.pageIndex, pagination.pageSize]);
+
     const handleFilterChange = (key: string, value: ListFilterValue) => {
         setFilterState((prev) => ({ ...prev, [key]: value }));
+        resetToFirstPage();
+    };
+
+    const handleGlobalFilterChange = (value: string) => {
+        setGlobalFilter(value);
+        resetToFirstPage();
+    };
+
+    const handleSortingChange: typeof setSorting = (updater) => {
+        setSorting(updater);
+        resetToFirstPage();
     };
 
     const table = useReactTable({
         data: tableRows,
         columns,
-        state: { sorting, globalFilter, rowSelection },
+        defaultColumn: tableDefaultColumn,
+        state: { sorting, globalFilter, rowSelection, pagination },
         // Sub-rows (depth > 0) are decorative children of their parent and never selectable.
         enableRowSelection: selectable
             ? hasSubRows
@@ -209,9 +242,18 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
             : false,
         enableSorting: true,
         enableGlobalFilter: true,
-        onSortingChange: setSorting,
-        onGlobalFilterChange: setGlobalFilter,
+        onSortingChange: handleSortingChange,
+        onGlobalFilterChange: handleGlobalFilterChange,
         onRowSelectionChange: setRowSelection,
+        onPaginationChange: setPagination,
+        // Tanstack's row-pagination feature resets to page 0 on its own whenever the
+        // filtered/sorted row model recomputes — which fires on every `data` reference
+        // change, including a same-content refetch after a row action (update, delete,
+        // a schedule start/stop toggle, etc.) invalidates the entity query. Controlling
+        // `pagination` state isn't enough to stop that internal auto-reset, so it's
+        // disabled here and re-triggered explicitly only for the user-driven cases
+        // (search, filters, sorting) where jumping back to page 1 is actually wanted.
+        autoResetPageIndex: false,
         getRowId:
             selectable || hasSubRows
                 ? (row, index, parent) => {
@@ -235,10 +277,6 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
                   autoResetExpanded: false,
               }
             : {}),
-        // Sub-rows start collapsed — the user reveals them via the expander column.
-        initialState: {
-            pagination: { pageIndex: 0, pageSize: entity.list?.pageSize ?? 15 },
-        },
     });
 
     const selectedRows = selectable ? table.getSelectedRowModel().rows : [];
@@ -256,10 +294,12 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
 
         const confirmed = await confirm({
             title: tCommon('list.confirmDelete.title'),
-            message: tCommon('list.confirmDelete.bulkMessage', {
-                count: selectedIds.length,
-                name: entity.name,
-            }),
+            message:
+                bulkConfig.confirmMessage?.(selectedIds, selectedRows.map((r) => r.original), entity) ??
+                tCommon('list.confirmDelete.bulkMessage', {
+                    count: selectedIds.length,
+                    name: entity.name,
+                }),
             onConfirm: async () => {
                 setPendingDeleteIds(selectedIds);
                 try {
@@ -302,71 +342,71 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
 
     return (
         <div data-testid={buildTestId(entity.name, 'list')} style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
-                <div style={{ flex: 1 }}>
-                    <h1 style={{ marginBottom: 8 }}>
+            <header style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <h1 style={{ margin: 0 }}>
                         <Typography variant="headline" as="span">{titleText}</Typography>
                     </h1>
-                    <div style={{ color: 'var(--color-text-secondary)' }}>
-                        <Typography variant="body">{subtitleNode}</Typography>
+                    <div style={{ display: 'flex', gap: 8, alignSelf: 'flex-start' }}>
+                        {bulkActions.map((action) => {
+                            const field = action.field ?? rowKey;
+                            const ids = selectedRows
+                                .map((r) => String(getValueByPath(r.original, field) ?? ''))
+                                .filter(Boolean);
+                            const rows = selectedRows.map((r) => r.original);
+                            return (
+                                <BulkActionButton
+                                    key={action.key}
+                                    action={action}
+                                    entity={entity}
+                                    rows={rows}
+                                    ids={ids}
+                                    clearSelection={() => setRowSelection({})}
+                                />
+                            );
+                        })}
+                        {showBulkDeleteButton && (
+                            <Button
+                                type="primary"
+                                loading={isBulkDeleting}
+                                disabled={isBulkDeleteDisabled}
+                                onClick={handleBulkDelete}
+                                testId={buildTestId(entity.name, 'bulk-delete')}
+                            >
+                                {tCommon('list.deleteSelected', { count: selectedIds.length })}
+                            </Button>
+                        )}
+                        {headerActions.map((action) => (
+                            <React.Fragment key={action.key}>
+                                {action.render({ entity })}
+                            </React.Fragment>
+                        ))}
+                        {hasCreateRoute && (
+                            <Button
+                                type="primary"
+                                testId={buildTestId(entity.name, 'create')}
+                                onClick={() => {
+                                    const id = dialog.open({
+                                        width: 1000,
+                                        top: 18,
+                                        testId: buildTestId(entity.name, 'create-dialog'),
+                                        content: (
+                                            <EntityDialogContent
+                                                entityName={entity.name}
+                                                mode="create"
+                                                onSuccess={() => dialog.closeById(id)}
+                                            />
+                                        ),
+                                    });
+                                }}
+                            >
+                                {tCommon('actions.create')}
+                            </Button>
+                        )}
                     </div>
                 </div>
-                <div style={{ display: 'flex', gap: 8, alignSelf: 'flex-start' }}>
-                    {bulkActions.map((action) => {
-                        const field = action.field ?? rowKey;
-                        const ids = selectedRows
-                            .map((r) => String(getValueByPath(r.original, field) ?? ''))
-                            .filter(Boolean);
-                        const rows = selectedRows.map((r) => r.original);
-                        return (
-                            <BulkActionButton
-                                key={action.key}
-                                action={action}
-                                entity={entity}
-                                rows={rows}
-                                ids={ids}
-                                clearSelection={() => setRowSelection({})}
-                            />
-                        );
-                    })}
-                    {showBulkDeleteButton && (
-                        <Button
-                            type="primary"
-                            loading={isBulkDeleting}
-                            disabled={isBulkDeleteDisabled}
-                            onClick={handleBulkDelete}
-                            testId={buildTestId(entity.name, 'bulk-delete')}
-                        >
-                            {tCommon('list.deleteSelected', { count: selectedIds.length })}
-                        </Button>
-                    )}
-                    {headerActions.map((action) => (
-                        <React.Fragment key={action.key}>
-                            {action.render({ entity })}
-                        </React.Fragment>
-                    ))}
-                    {hasCreateRoute && (
-                        <Button
-                            type="primary"
-                            testId={buildTestId(entity.name, 'create')}
-                            onClick={() => {
-                                const id = dialog.open({
-                                    width: 1000,
-                                    top: 18,
-                                    testId: buildTestId(entity.name, 'create-dialog'),
-                                    content: (
-                                        <EntityDialogContent
-                                            entityName={entity.name}
-                                            mode="create"
-                                            onSuccess={() => dialog.closeById(id)}
-                                        />
-                                    ),
-                                });
-                            }}
-                        >
-                            {tCommon('actions.create')}
-                        </Button>
-                    )}
+                <div style={{ color: 'var(--color-text-secondary)' }}>
+                    <Typography variant="body">{subtitleNode}</Typography>
                 </div>
             </header>
 
@@ -382,7 +422,7 @@ export const GenericEntityList: React.FC<Props> = ({ entityName }) => {
                                             : tCommon('list.searchPlaceholder')
                                     }
                                     value={globalFilter}
-                                    onChange={(e) => setGlobalFilter(e.target.value)}
+                                    onChange={(e) => handleGlobalFilterChange(e.target.value)}
                                     leftSlot={<Icon name="search" size={16} isSubtle />}
                                     testId={buildTestId(entity.name, 'search')}
                                 />

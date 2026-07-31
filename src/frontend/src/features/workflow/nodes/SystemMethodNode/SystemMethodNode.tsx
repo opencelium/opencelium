@@ -42,6 +42,7 @@ export function SystemMethodNode({ id, data, selected, dragging }: NodeProps<Sys
 					dataAggregator={data.dataAggregator}
 					testId={`workflow-node-aggregator-${id}`}
 					suppressTooltip={suppressTooltip}
+					onOpenAggregatorEditor={() => data.onOpenAggregatorEditor?.(id)}
 				/>
 			</div>
 

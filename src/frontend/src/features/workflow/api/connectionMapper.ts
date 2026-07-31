@@ -28,6 +28,7 @@ export type WorkflowConnectionState = {
 	fieldBindings: any[];
 	versions: HistoryVersionItem[];
 	viewport?: { x: number; y: number; zoom: number };
+	categoryId: number | null;
 };
 
 const methodToConfig = (method: any): WorkflowMethodConfig => ({
@@ -317,9 +318,14 @@ const findSavedNode = (
 	usedSavedNodeIds: Set<string>,
 ) => {
 	const source = entry?.source;
+	// Tree index first: ids are position-derived (`method-3`) and shift whenever a
+	// sibling is inserted earlier in the tree, which would otherwise match this node
+	// to whatever entry now coincidentally holds its old id. The index survives that
+	// shift (it names this node's own tree position, not its array offset), so it
+	// only falls back to id matching for saves made before the index was persisted.
 	const matchStages = [
-		[[node.id, source?.id, source?.nodeId], (savedNode: SavedUiNode) => [savedNode.id, savedNode.nodeId]],
 		[[entry?.index, source?.index], (savedNode: SavedUiNode) => [savedNode.index]],
+		[[node.id, source?.id, source?.nodeId], (savedNode: SavedUiNode) => [savedNode.id, savedNode.nodeId]],
 	] as const;
 
 	for (const [sourceValues, getSavedValues] of matchStages) {
@@ -343,9 +349,11 @@ const findEntryForSavedNode = (
 	entries: IndexedWorkflowEntry[],
 	usedEntryIds: Set<string>,
 ) => {
+	// Tree index first — see findSavedNode for why id-based matching alone shifts
+	// colors/config onto the wrong node once a sibling is inserted earlier in the tree.
 	const matchStages = [
-		[[savedNode.id, savedNode.nodeId], (entry: IndexedWorkflowEntry) => [entry.node.id, entry.source?.id, entry.source?.nodeId]],
 		[[savedNode.index], (entry: IndexedWorkflowEntry) => [entry.index, entry.source?.index]],
+		[[savedNode.id, savedNode.nodeId], (entry: IndexedWorkflowEntry) => [entry.node.id, entry.source?.id, entry.source?.nodeId]],
 	] as const;
 
 	for (const [savedValues, getEntryValues] of matchStages) {
@@ -550,6 +558,38 @@ const hasStackedNodes = (list: WorkflowNodeModel[]) => {
 	return false;
 };
 
+// Older saved connections/templates never stamped `invokerName` onto
+// `ui.workflowNodes[].data.connector` (that field was added later). When the UI-restored
+// node data is missing it, backfill from the per-method `methods[].connector.invoker` info
+// (reliably resolved by normalizeConnectionPayload) so invoker-based features — e.g. the
+// template connector-mapping dialog — still work for templates saved before that field existed.
+const backfillMissingInvokerNames = (
+	nodes: WorkflowNodeModel[],
+	entries: IndexedWorkflowEntry[],
+): WorkflowNodeModel[] => {
+	const invokerNameByConnectorId = new Map<number, string>();
+	entries.forEach((entry) => {
+		const connector = entry.node.data.connector;
+		if (connector && connector.connectorId !== -1 && connector.invokerName) {
+			invokerNameByConnectorId.set(connector.connectorId, connector.invokerName);
+		}
+	});
+
+	if (invokerNameByConnectorId.size === 0) return nodes;
+
+	return nodes.map((node) => {
+		const connector = node.data.connector;
+		if (!connector || connector.invokerName) return node;
+		const invokerName = invokerNameByConnectorId.get(connector.connectorId);
+		if (!invokerName) return node;
+
+		return {
+			...node,
+			data: { ...node.data, connector: { ...connector, invokerName } },
+		} as WorkflowNodeModel;
+	});
+};
+
 export function mapConnectionToWorkflowState(
 	payload: unknown,
 	fallbackViewport?: { x: number; y: number; zoom: number },
@@ -588,7 +628,10 @@ export function mapConnectionToWorkflowState(
 	const shouldAutoLayout = entries.length > 0
 		&& ((!restoredFromUi && savedUiNodes.length === 0) || hasStackedNodes(nodes));
 	const positionedNodes = shouldAutoLayout ? normalizeWorkflowPositions(nodes, edges) : nodes;
-	const normalizedNodes = withLeafState(assignMissingMethodColors(positionedNodes), edges);
+	const normalizedNodes = backfillMissingInvokerNames(
+		withLeafState(assignMissingMethodColors(positionedNodes), edges),
+		entries,
+	);
 
 	return {
 		title: connection.title,
@@ -602,5 +645,6 @@ export function mapConnectionToWorkflowState(
 				: [],
 		versions: [],
 		viewport: savedViewport,
+		categoryId: connection.categoryId ?? null,
 	};
 }

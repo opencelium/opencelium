@@ -7,6 +7,7 @@
     "close": "Close",
     "ok": "Ok",
     "delete": "Delete",
+    "duplicate": "Duplicate",
     "edit": "Edit",
     "select": "Select",
     "createNew": "Create new",
@@ -187,9 +188,12 @@
       "description": "There are no connectors matching this search."
     },
     "connectorStatus": {
-      "passed": "Connection test passed — this connector is ready to use.",
-      "failed": "Connection test failed — check the connector's credentials and settings.",
-      "failedWithReason": "Connection test failed: {{reason}}"
+      "up": "Connection test passed — this connector is ready to use.",
+      "authFailed": "Connection test failed — the connector's credentials were rejected.",
+      "down": "Connection test failed — the connector could not be reached.",
+      "unknown": "This connector hasn't been tested yet.",
+      "failedWithReason": "Connection test failed. Error: \"{{reason}}\".",
+      "checkedAt": "{{message}} Checked {{time}}."
     },
     "methodsEmpty": {
       "title": "No methods found",
@@ -203,12 +207,24 @@
     "connectorMethodsFallback": "Methods from {{invoker}} invoker."
   },
   "headerMenu": {
+    "assignCategory": "Assign Category",
+    "assignCategoryDisabledHint": "Save the workflow first to assign it a category",
     "downloadAsTemplate": "Download as Template",
+    "downloadAsTemplateDisabledHint": "Save the workflow first to download it as a template",
     "saveAsTemplate": "Save as Template",
     "loadTemplate": "Load Template",
     "versionHistory": "Version History",
     "shortcuts": "Shortcuts",
     "exit": "Exit"
+  },
+  "assignCategoryDialog": {
+    "title": "Assign Category",
+    "description": "Choose a category to organize this workflow under.",
+    "selectPlaceholder": "Select category...",
+    "confirmUnassign": {
+      "title": "Remove category assignment",
+      "message": "Are you sure you want to remove this workflow's category assignment?"
+    }
   },
   "shortcutsDialog": {
     "title": "Keyboard & mouse shortcuts",
@@ -243,7 +259,6 @@
     "changeLabel": "Change Label",
     "openConfiguration": "Open Configuration",
     "configureAggregator": "Configure Aggregator",
-    "runThisCallOnly": "Run This Call Only",
     "request": "Request",
     "editUrl": "Edit URL",
     "editHeader": "Edit Header",
@@ -281,7 +296,11 @@
   },
   "saveDialog": {
     "title": "Save Version",
-    "commentPlaceholder": "Comment"
+    "commentPlaceholder": "Comment",
+    "autoNameChangeComment": "Changing Workflow Name to {{name}}",
+    "autoDescriptionChangeComment": "Changing Workflow Description to {{description}}",
+    "autoCategoryAssignedComment": "Assigning category \"{{category}}\"",
+    "autoCategoryClearedComment": "Removing category assignment"
   },
   "placeholders": {
     "selectMethod": "Select Method...",
@@ -349,14 +368,14 @@
     },
     "operators": {
       "if": {
-        "equal": "=",
-        "notEqual": "!=",
+        "equal": "Equal",
+        "notEqual": "Not Equal",
         "like": "Like",
         "notLike": "Not Like",
-        "greaterThan": ">",
-        "greaterOrEqual": ">=",
-        "lessThan": "<",
-        "lessOrEqual": "<=",
+        "greaterThan": "Greater Than",
+        "greaterOrEqual": "Greater Or Equal",
+        "lessThan": "Less Than",
+        "lessOrEqual": "Less Or Equal",
         "contains": "Contains",
         "notContains": "Not Contains",
         "containsSubStr": "Contains Substring",

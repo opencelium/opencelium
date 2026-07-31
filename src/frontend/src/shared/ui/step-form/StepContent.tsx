@@ -2,14 +2,12 @@ import { useStepForm } from "./context"
 import type {StepActionDefinition, StepDefinition} from "./types"
 import { Button } from "@shared/ui/primitives/Button"
 import { Tooltip } from "@shared/ui/primitives/Tooltip"
-import HelpIcon from "@shared/ui/tour/HelpIcon.tsx";
-import React, {useMemo, useRef} from "react";
-import type {PartialStepProps} from "@shared/ui/tour/Tour.tsx";
-import {EntityText} from "@shared/ui/primitives/Text";
+import {useRef} from "react";
 import {useBreakpoints} from "@app/hooks/useBreakpoints.tsx";
 import {useTestScope} from "@shared/testing/TestScopeContext.tsx";
 import {buildTestId} from "@shared/testing/testId.ts";
 import {useI18n} from "@shared/i18n/hooks/useI18n.ts";
+import {IS_MAC} from "@shared/utils/platform.ts";
 
 interface Props {
     steps: StepDefinition[]
@@ -44,17 +42,6 @@ export function StepContent({
     // setValue calls made outside this component (e.g. after unlocking the master password).
     const values = form?.watch ? form.watch() : undefined
 
-    const infoSteps: PartialStepProps[] = useMemo(() => {
-        if (!step.info) return [];
-        return step.info.map(s => ({
-            ...s,
-            content: <EntityText i18nKey={s.content} />,
-            title: <EntityText i18nKey={s.title || step.header} />,
-            target: '',
-            placement: 'bottom',
-            disableBeacon: true,
-        }));
-    }, [currentStep, steps])
     const next = async () => {
         const step = steps[currentStep]
 
@@ -64,7 +51,7 @@ export function StepContent({
             const result = step.stepSchema.safeParse(values)
 
             if (!result.success) {
-                result.error.errors.forEach((err) => {
+                result.error.issues.forEach((err) => {
                     form.setError(
                         err.path.join('.') as any,
                         { message: err.message }
@@ -77,16 +64,7 @@ export function StepContent({
     }
     return (
         <div style={{ flex: 1, paddingLeft: isTabletOrMobile ? 0 : 48 }} ref={containerRef}>
-            {/*<h2 style={{marginBottom: 28, marginTop: 0}}>
-                <span style={{position: 'relative'}}>
-                    <EntityText i18nKey={step.header} variant={'title'} />
-                    {step.info && <div style={{position: 'absolute', right: -20, top: -20}}>
-                        <HelpIcon steps={infoSteps} inputRef={containerRef}/>
-                    </div>}
-                </span>
-            </h2>
-*/}
-            <div style={{display: 'grid', gap: 15}}>
+            <div style={{display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: 15}}>
                 {step.render({
                     currentStep,
                     next,
@@ -129,13 +107,13 @@ export function StepContent({
                 ))}
 
                 {isLast ? onSubmit && !readOnly ? (
-                    <Tooltip content={tCommon('actions.ctrlEnterHint')}>
+                    <Tooltip content={tCommon(IS_MAC ? 'actions.cmdEnterHint' : 'actions.ctrlEnterHint')}>
                         <Button type="primary" onClick={onSubmit} loading={isSubmitting} disabled={runningActionId != null} testId={buildTestId(testScope, 'wizard', 'submit')}>
                             {step?.actions?.submitLabel ? tEntities(step.actions.submitLabel as any) : tCommon('actions.submit')}
                         </Button>
                     </Tooltip>
                 ) : null : (
-                    <Tooltip content={tCommon('actions.ctrlEnterHint')}>
+                    <Tooltip content={tCommon(IS_MAC ? 'actions.cmdEnterHint' : 'actions.ctrlEnterHint')}>
                         <Button onClick={next} loading={isSubmitting} testId={buildTestId(testScope, 'wizard', 'next')}>
                             {step.actions?.nextLabel ? tEntities(step.actions.nextLabel as any) : tCommon('actions.next')}
                         </Button>

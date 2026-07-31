@@ -5,7 +5,7 @@ import { useI18n } from "@shared/i18n/hooks/useI18n";
 import { useGetMethodDetailsQuery } from "../api/logsApi";
 import { ResizableJsonView } from "./ResizableJsonView";
 import { useMethodDetailViewState } from "./methodDetailViewState";
-import { CopyButton } from "./CopyButton";
+import { CopyButton } from "@shared/ui/actions/CopyButton";
 import { ErrorDetail } from "./ErrorDetail";
 
 // A tab label with a copy button (for the tab's raw content) next to the text.

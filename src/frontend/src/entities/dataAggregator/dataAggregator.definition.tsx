@@ -46,7 +46,6 @@ export const dataAggregatorDefinition: EntityDefinition = {
             ntLink: <Link to="/notification-template" />,
         },
         defaultSort: { field: 'name', direction: 'asc' },
-        bulkDelete: true,
         actions: [
             { type: 'view' },
             { type: 'update' },
@@ -136,11 +135,15 @@ export const dataAggregatorDefinition: EntityDefinition = {
                 }
             },
             table: {
+                width: '25%',
                 visible: true,
                 order: 1,
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.name.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {
@@ -175,6 +178,9 @@ export const dataAggregatorDefinition: EntityDefinition = {
                         .filter(Boolean)
                         .join(', ')
                 },
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {
@@ -183,6 +189,7 @@ export const dataAggregatorDefinition: EntityDefinition = {
             defaultValue: true,
             ui: { component: 'switch' },
             table: {
+                width: '10%',
                 visible: true,
                 order: 3,
                 align: 'center',
@@ -296,7 +303,7 @@ export const dataAggregatorDefinition: EntityDefinition = {
     commands: (def) => ([
         ...createEntityCommands({
             def,
-            config: {},
+            config: { exclude: ['delete'] },
             dsl: {
                 update: {
                     by: [
@@ -312,29 +319,6 @@ export const dataAggregatorDefinition: EntityDefinition = {
                             customPath: true,
                             buildFetchUrl: (_def, value) => buildDataAggregatorFetchUrl(value),
                             buildNavigationUrl: (_def, value) => buildDataAggregatorPageUrl(value),
-                        },
-                    ],
-                },
-                delete: {
-                    by: [
-                        {
-                            field: 'name',
-                            resolve: resolveDataAggregatorNames,
-                            buildDeleteUrl: (_def, value) => buildDataAggregatorFetchUrl(value),
-                            confirmMessage: (name) => {
-                                const t = i18n.getFixedT(i18n.language, 'entities')
-                                return t(`${baseKey}.confirmation.delete.byName`, { name })
-                            },
-                        },
-                        {
-                            field: 'id',
-                            resolve: resolveDataAggregatorIds,
-                            customPath: true,
-                            buildDeleteUrl: (_def, value) => buildDataAggregatorFetchUrl(value),
-                            confirmMessage: (id) => {
-                                const t = i18n.getFixedT(i18n.language, 'entities')
-                                return t(`${baseKey}.confirmation.delete.byId`, { id })
-                            },
                         },
                     ],
                 },

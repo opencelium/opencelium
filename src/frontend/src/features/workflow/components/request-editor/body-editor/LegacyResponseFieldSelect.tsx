@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { MethodWithId } from '../../../types/connection';
 import { getReferenceOptions, isExpandableReferencePath, type ResponseType } from './requestReferenceOptions';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
+import { CopyButton } from '@shared/ui/actions/CopyButton';
+import './bodyLegacy.css';
 
 type Props = {
   method?: MethodWithId;
@@ -57,6 +59,7 @@ export function LegacyResponseFieldSelect({ method, type, value, disabled, itera
   return (
     <div
       ref={wrapperRef}
+      className='selectCopyHost'
       onMouseDownCapture={() => {
         userInteractionRef.current = true;
       }}
@@ -64,6 +67,7 @@ export function LegacyResponseFieldSelect({ method, type, value, disabled, itera
         userInteractionRef.current = true;
       }}
     >
+      <CopyButton value={displayPath} className='selectCopyButton' />
       <Select
         placeholder={type === 'status' ? t('references.responseStatus') : method ? t('placeholders.selectField') : t('placeholders.selectMethod')}
         value={undefined}

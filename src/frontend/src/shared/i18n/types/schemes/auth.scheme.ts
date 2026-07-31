@@ -12,9 +12,6 @@ export interface AuthSchema {
                 placeholder: string
                 required: string
             }
-            rememberMe: {
-                label: string
-            }
         }
         actions: {
             signIn: string
@@ -25,6 +22,7 @@ export interface AuthSchema {
             failed: string
             invalidCredentials: string
             network: string
+            sessionLoadFailed: string
         }
         forgotPassword: {
             notAvailable: string

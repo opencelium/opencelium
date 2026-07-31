@@ -27,6 +27,7 @@ const buildCategoryViewPageUrl = (value: string): string =>
 
 export const categoryDefinition: EntityDefinition = {
     name: baseKey,
+    plural: 'categories',
 
     routes: [
         { type: 'create' },
@@ -86,6 +87,7 @@ export const categoryDefinition: EntityDefinition = {
                     map: (fieldValue) => ({ name: fieldValue }),
                     transKey: `${baseKey}.fields.name.errors.name_already_exists`,
                     encodeParams: false,
+                    skipIfUnchanged: true,
                     handleResponse: (data, error) => {
                         return data.message === 'NOT_EXISTS';
                     }
@@ -97,6 +99,9 @@ export const categoryDefinition: EntityDefinition = {
                 sortable: true,
                 searchable: true,
                 labelKey: `${baseKey}.fields.name.label`,
+                render: (_row, value) => (
+                    <div style={{ whiteSpace: 'normal' }}>{typeof value === 'string' ? value : ''}</div>
+                ),
             },
         },
         {

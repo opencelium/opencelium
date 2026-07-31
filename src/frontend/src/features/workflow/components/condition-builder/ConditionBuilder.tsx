@@ -1,5 +1,6 @@
 import {
 	ApiOutlined,
+	CopyOutlined,
 	DeleteOutlined,
 	DownOutlined,
 	LinkOutlined,
@@ -38,6 +39,7 @@ import {
 	buildConditionConfig,
 	createEmptyGroup,
 	createEmptyRule,
+	duplicateRuleById,
 	getInitialTreeFromConfig,
 	removeChildById,
 	updateGroupConjunction,
@@ -47,6 +49,7 @@ import {
 import { LoopInfoPanel } from './LoopInfoPanel';
 import { Radio } from '@shared/ui/primitives/Radio';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
+import { CopyButton } from '@shared/ui/actions/CopyButton';
 import { MethodColorDot } from '../MethodColorDot/MethodColorDot';
 import { getDuplicateMethodIndexByColor } from '../../utils/methodColor';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
@@ -345,53 +348,56 @@ function MethodSelect({
 		: methods;
 	const duplicateIndexByColor = getDuplicateMethodIndexByColor(options);
 	return (
-		<Select
-			placeholder={t('placeholders.selectMethod')}
-			value={value}
-			className="conditionMethodSelect"
-			showSearch
-			filterOption={(input, option) => {
-				const term = input.toLowerCase();
-				const data = option as { label?: unknown; connectorTitle?: string };
-				return (
-					String(data?.label ?? '').toLowerCase().includes(term) ||
-					String(data?.connectorTitle ?? '').toLowerCase().includes(term)
-				);
-			}}
-			prefix={selected ? (
-				<MethodConnectorChip method={selected} iconOnly iconSize={18} tooltipZIndex={13020} />
-			) : undefined}
-			onChange={onChange}
-			options={options.map((method) => ({
-				value: method.id,
-				label: getMethodLabel(method),
-				connectorTitle: getMethodConnectorChipInfo(method).title,
-				color: method.color,
-				dupIndex: method.color ? duplicateIndexByColor.get(method.color.toLowerCase()) : undefined,
-				method,
-			}))}
-			optionRender={(option) => {
-				const data = option.data as { connectorTitle?: string; color?: string; dupIndex?: number; method: MethodWithId };
-				const isWebhook = getMethodConnectorChipInfo(data.method).kind === 'webhook';
-				const row = (
-					<span className="conditionMethodOption">
-						<span className="conditionMethodLeft">
-							<MethodColorDot color={data.color} index={data.dupIndex} />
-							<span className="conditionMethodName">{option.label}</span>
+		<div className="selectCopyHost">
+			<CopyButton value={selected ? getMethodLabel(selected) : ''} className="selectCopyButton" />
+			<Select
+				placeholder={t('placeholders.selectMethod')}
+				value={value}
+				className="conditionMethodSelect"
+				showSearch
+				filterOption={(input, option) => {
+					const term = input.toLowerCase();
+					const data = option as { label?: unknown; connectorTitle?: string };
+					return (
+						String(data?.label ?? '').toLowerCase().includes(term) ||
+						String(data?.connectorTitle ?? '').toLowerCase().includes(term)
+					);
+				}}
+				prefix={selected ? (
+					<MethodConnectorChip method={selected} iconOnly iconSize={18} tooltipZIndex={13020} />
+				) : undefined}
+				onChange={onChange}
+				options={options.map((method) => ({
+					value: method.id,
+					label: getMethodLabel(method),
+					connectorTitle: getMethodConnectorChipInfo(method).title,
+					color: method.color,
+					dupIndex: method.color ? duplicateIndexByColor.get(method.color.toLowerCase()) : undefined,
+					method,
+				}))}
+				optionRender={(option) => {
+					const data = option.data as { connectorTitle?: string; color?: string; dupIndex?: number; method: MethodWithId };
+					const isWebhook = getMethodConnectorChipInfo(data.method).kind === 'webhook';
+					const row = (
+						<span className="conditionMethodOption">
+							<span className="conditionMethodLeft">
+								<MethodColorDot color={data.color} index={data.dupIndex} />
+								<span className="conditionMethodName">{option.label}</span>
+							</span>
+							<MethodConnectorChip method={data.method} tooltipZIndex={13020} disableTooltip={isWebhook} />
 						</span>
-						<MethodConnectorChip method={data.method} tooltipZIndex={13020} disableTooltip={isWebhook} />
-					</span>
-				);
-				return isWebhook ? (
-					<Tooltip content={t('refGenerator.webhookTriggerHint')} placement='right' zIndex={13020}>
-						{row}
-					</Tooltip>
-				) : row;
-			}}
-			getPopupContainer={() => document.body}
-			popupMatchSelectWidth={420}
-			styles={{ popup: { root: { zIndex: 13010 } } }}
-		/>
+					);
+					return isWebhook ? (
+						<Tooltip content={t('refGenerator.webhookTriggerHint')} placement='right' zIndex={13020}>
+							{row}
+						</Tooltip>
+					) : row;
+				}}
+				getPopupContainer={() => document.body}
+				popupMatchSelectWidth={420}
+				styles={{ popup: { root: { zIndex: 13010 } } }}
+			/>
+		</div>
 	);
 }
 
@@ -519,6 +525,7 @@ function RuleRow({
 	canDelete,
 	onChange,
 	onDelete,
+	onDuplicate,
 }: {
 	rule: ConditionRule;
 	operatorType: 'if' | 'loop';
@@ -528,6 +535,7 @@ function RuleRow({
 	canDelete: boolean;
 	onChange: (patch: Partial<ConditionRuleProperties>) => void;
 	onDelete: () => void;
+	onDuplicate: () => void;
 }) {
 	const { t } = useI18n('workflow');
 	const properties = rule.properties || {};
@@ -568,7 +576,9 @@ function RuleRow({
 					className="conditionOperatorSelect"
 					showSearch
 					optionFilterProp="label"
-					options={IF_OPERATOR_OPTIONS.map((option) => ({ value: option.value, label: t(option.labelKey) }))}
+					options={IF_OPERATOR_OPTIONS
+						.map((option) => ({ value: option.value, label: t(option.labelKey) }))
+						.sort((a, b) => a.label.localeCompare(b.label))}
 					onChange={(value) => onChange({ operator: value, rightField: undefined })}
 					suffixIcon={<DownOutlined />}
 					getPopupContainer={() => document.body}
@@ -603,12 +613,26 @@ function RuleRow({
 					onChange={onChange}
 				/>
 			) : null}
-			{canDelete ? <Button
-				type="text"
-				className="conditionDeleteButton"
-				icon={<DeleteOutlined />}
-				onClick={onDelete}
-			/> : null}
+			{canDelete ? (
+				<div className="conditionRuleActions">
+					<Tooltip content={t('actions.duplicate')}>
+						<Button
+							type="text"
+							className="conditionDuplicateButton"
+							icon={<CopyOutlined />}
+							onClick={onDuplicate}
+						/>
+					</Tooltip>
+					<Tooltip content={t('actions.delete')}>
+						<Button
+							type="text"
+							className="conditionDeleteButton"
+							icon={<DeleteOutlined />}
+							onClick={onDelete}
+						/>
+					</Tooltip>
+				</div>
+			) : null}
 		</div>
 	);
 }
@@ -736,6 +760,7 @@ function GroupEditor({
 							iterators={iterators}
 							canDelete={operatorType === 'if'}
 							onDelete={() => onChange(removeChildById(group, child.id))}
+							onDuplicate={() => onChange(duplicateRuleById(group, child.id))}
 							onChange={(patch) => onChange(updateRuleProperties(group, child.id, patch))}
 						/>
 					) : (

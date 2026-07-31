@@ -88,7 +88,8 @@ export type TableFieldDefinition = {
     labelKey?: string
     /** Literal fallback header. Falls back to FieldDefinition.label / .labelKey / .name. */
     label?: string
-    width?: number
+    /** Fixed pixel width (number) or a CSS width string (e.g. `'20%'`). */
+    width?: number | string
     align?: ColumnAlign
     /** Transform the raw cell value before sort / search / render. */
     mapToValue?: (row: unknown, raw: unknown) => unknown
@@ -153,6 +154,13 @@ export type WizardModeConfig = {
     info?: PartialStepProps[],
     onSubmit?: (formData: any) => void,
     getSuccessMessage?: (formData: T) => string,
+    /**
+     * Custom content rendered below the success screen's title/icon, in place of
+     * the plain translated `successMessage`. Use when the confirmation needs more
+     * than static text (e.g. an interpolated value, a live countdown, a side effect
+     * like an automatic logout) — see `updateAssistantDefinition` for the reference case.
+     */
+    getSuccessContent?: (formData: any) => React.ReactNode,
 }
 
 export type WizardDefinition = {
@@ -366,6 +374,14 @@ export type ListDefinition = {
      * Pass an explicit array (possibly empty) to take full control.
      */
     actions?: ListAction[]
+    /**
+     * How per-row actions are presented. `'inline'` (default) renders every
+     * action as its own icon button in a row. `'menu'` collapses them behind a
+     * "more" trigger that reveals the actions in a hover-only popover — use
+     * this when a list carries enough per-row actions that an inline row would
+     * crowd the column (see `schedule.definition.tsx`).
+     */
+    rowActionsDisplay?: 'inline' | 'menu'
     /** Field used to build view/update URLs and to identify rows. Defaults to api.primaryKey ?? 'id'. */
     rowKey?: string
     /** Page size for client-side pagination. Defaults to 15. */
@@ -440,6 +456,8 @@ export type BulkDeleteConfig = {
     buildPayload?: (ids: string[]) => unknown
     /** Hook called after a successful bulk delete. */
     afterDelete?: (ids: string[]) => Promise<void> | void
+    /** Override the confirm-dialog message. Receives the selected ids and their raw rows. */
+    confirmMessage?: (ids: string[], rows: unknown[], entity: EntityDefinition) => string
 }
 
 export type BulkActionContext = {

@@ -39,7 +39,7 @@ export const createDeleteByCommand = ({
                                         type: 'entity',
                                         name: 'identifier',
                                         resolve: by.resolve ?? def.api?.resolveIdentifier,
-                                        execute: createDeleteExecute({ def, config, by })
+                                        execute: createDeleteExecute({ def, name, config, by })
                                     }
                                 ]
                             }

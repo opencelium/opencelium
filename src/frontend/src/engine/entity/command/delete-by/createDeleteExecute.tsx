@@ -16,8 +16,16 @@ const isViewingRecord = (def, resolvedId: string): boolean => {
     );
 };
 
-export const createDeleteExecute = ({ def, config, by }) => {
+export const createDeleteExecute = ({ def, name, config, by }) => {
     return async (args, ctx) => {
+
+        // The command palette's literal token for this entity — normally def.name,
+        // but overridable via commandName (createEntityCommands) when the
+        // user-facing word should differ from the registry key (see
+        // connectionTemplate.definition.tsx: registry name 'connection-template',
+        // typed command word 'workflow-template'). The re-prefilled input text
+        // below must echo the word the user actually typed, not the registry key.
+        const commandWord = name ?? def.name;
 
         const successTrans = i18n.getFixedT(i18n.language, 'success');
         const commonTrans = i18n.getFixedT(i18n.language, 'common');
@@ -34,7 +42,7 @@ export const createDeleteExecute = ({ def, config, by }) => {
         const confirmed = await ctx.confirm(confirmMessage);
         if (!confirmed) {
             ctx.setInputValue?.(
-                `delete ${def.name} by ${by.field} `
+                `delete ${commandWord} by ${by.field} `
             );
             return;
         }
@@ -67,7 +75,7 @@ export const createDeleteExecute = ({ def, config, by }) => {
                 ctx.navigate(`/${routeName}`);
             } else {
                 ctx.setInputValue?.(
-                    `delete ${def.name} by ${by.field} `
+                    `delete ${commandWord} by ${by.field} `
                 );
             }
             message.success(successTrans('api.deleted'));

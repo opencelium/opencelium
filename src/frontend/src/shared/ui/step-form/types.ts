@@ -1,4 +1,5 @@
 import React from "react";
+import type {ZodTypeAny} from "zod";
 import type {PartialStepProps} from "@shared/ui/tour/Tour.tsx";
 import type {StepRemoteProps} from "@shared/ui/form/FormControl/FormControl.type.ts";
 import type {ButtonProps} from "@shared/ui/primitives/Button/Button.types.ts";
@@ -39,6 +40,8 @@ export interface StepActionDefinition {
 export interface StepDefinition {
     header: string
     subheader?: string
+    status?: 'wait' | 'process' | 'finish' | 'error'
+    stepSchema?: ZodTypeAny
     render: (ctx?: StepContext) => React.ReactNode
     validate?: () => Promise<boolean>
     info?: PartialStepProps[],

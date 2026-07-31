@@ -2,6 +2,7 @@ import type { Edge, Node } from '@xyflow/react';
 import type { WorkflowMethodConfig } from './request-config.types';
 import type { ConditionConfig } from '../components/condition-builder/conditionBuilder.types';
 import type { InvokerOperation } from '@entities/invoker/model/types';
+import type { ConnectorHealthStatus } from '@entities/connector/model/types';
 
 export type WorkflowNodeType = 'start' | 'connector' | 'system' | 'trigger-connection' | 'if' | 'loop';
 
@@ -49,8 +50,9 @@ export type WorkflowNodeData = {
 		title: string;
 		icon?: string | null;
 		invokerName?: string | null;
-		lastTestPassed?: boolean | null;
+		status?: ConnectorHealthStatus;
 		lastTestError?: string | null;
+		lastCheckedAt?: number | null;
 	};
 	methodConfig?: WorkflowMethodConfig;
 	conditionConfig?: ConditionConfig;
@@ -64,7 +66,7 @@ export type WorkflowNodeData = {
 	duplicateMethodColor?: string;
 	alwaysShowRightAdd?: boolean;
 	highlighted?: boolean;
-	/** Set by the command-palette `workflow find method/property` search — a
+	/** Set by the command-palette `workflow search <term>` fuzzy search — a
 	 * live match ring distinct from the drag-preview `highlighted` state and
 	 * the `hasError` state, so all three can coexist without visual collision. */
 	searchHighlighted?: boolean;
@@ -83,6 +85,7 @@ export type WorkflowNodeData = {
 	onAddStep?: (action: WorkflowAction) => void;
 	onOpenContextMenu?: (menu: WorkflowContextMenu | null) => void;
 	onDeleteNode?: (nodeId: string) => void;
+	onOpenAggregatorEditor?: (nodeId: string) => void;
 };
 
 export type WorkflowEdgeData = {
@@ -123,6 +126,8 @@ export type WorkflowHeaderMenuItem = {
 	section?: 'template' | 'history' | 'shortcuts' | 'exit';
 	keepOpenOnSelect?: boolean;
 	disabled?: boolean;
+	/** Tooltip shown while `disabled` explaining why the action is unavailable. */
+	disabledTooltipKey?: string;
 	badgeKey?: string;
 };
 
