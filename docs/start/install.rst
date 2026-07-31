@@ -1,6 +1,6 @@
-##########
-Installing
-##########
+#############
+Quick install
+#############
 
 The fast path. For the full per-distribution commands, SSL, Docker and Apache,
 see :doc:`../operations/install-packages`.
