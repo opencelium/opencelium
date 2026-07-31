@@ -2,18 +2,19 @@
 Quick install
 #############
 
-The fast path. For the full per-distribution commands, SSL, Docker and Apache,
-see :doc:`../operations/install-packages`.
+The fast path to a running instance.
 
-Before you start
-================
+Check the requirements
+======================
 
-Check :doc:`../operations/requirements`. In short: 2 vCPUs, 8 GB RAM, 50 GB disk,
-Java 17, MariaDB 10 LTS, MongoDB 7, nginx 1.26, on Debian 12 / Ubuntu 24.04 /
-SLES 15 SP5 / RHEL 9.
+Make sure the host meets :doc:`../operations/requirements`.
 
-Packages
-========
+Install the packages
+====================
+
+The commands below cover the common case. For the full per-distribution
+instructions, SSL, Docker and Apache, see
+:doc:`../operations/install-packages`.
 
 **Debian / Ubuntu**
 

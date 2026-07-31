@@ -20,6 +20,12 @@ source_suffix = ['.rst','.md']
 copyright = str(datetime.now().year)
 version = 'latest'
 release = 'latest'
+
+# |year| resolves to the year the docs are built, so copyright notices in the
+# content do not have to be touched every January.
+rst_epilog = """
+.. |year| replace:: {year}
+""".format(year=datetime.now().year)
 exclude_patterns = ['_build', '_tools']
 htmlhelp_basename = 'openceliumapi'
 
