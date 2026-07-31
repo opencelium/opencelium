@@ -154,4 +154,4 @@ Where to go next
 * :doc:`../guides/debug-a-workflow` — when it does not work.
 * :doc:`../guides/reuse-with-templates` — turn this into a template for the next
   environment.
-* :doc:`../concepts/index` — the model behind what you just did.
+* :doc:`../concepts/workflow-model` — the model behind what you just did.

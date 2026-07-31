@@ -13,54 +13,86 @@ This documentation is organised by what you are trying to do.
 **Upgrading from 4.x?** Read :doc:`start/upgrade-to-5` first — workflows replaced
 connections, and two ``application.yml`` keys moved.
 
-**Looking for how to do one specific thing?** The :doc:`guides/index` are
-task-oriented recipes.
+**Looking for how to do one specific thing?** The *How-to guides* in the sidebar
+are task-oriented recipes; :doc:`guides/build-a-workflow` is the usual entry
+point.
 
-**Need exact values, fields or endpoints?** See :doc:`reference/index`.
+**Need exact values, fields or endpoints?** The *Reference* section has them —
+for example :doc:`reference/configuration` and :doc:`reference/api`.
 
-**Running the server?** See :doc:`operations/index`.
+**Running the server?** See :doc:`operations/requirements` and
+:doc:`operations/updating`.
 
 .. toctree::
    :caption: Get started
    :maxdepth: 2
 
-   start/index
+   start/introduction
+   start/install
+   start/first-workflow
+   start/upgrade-to-5
 
 .. toctree::
    :caption: Concepts
    :maxdepth: 2
 
-   concepts/index
+   concepts/workflow-model
+   concepts/connectors-and-invokers
+   concepts/data-mapping
+   concepts/execution
 
 .. toctree::
    :caption: How-to guides
    :maxdepth: 2
 
-   guides/index
+   guides/build-a-workflow
+   guides/branch-and-loop
+   guides/call-any-api
+   guides/chain-workflows
+   guides/schedule-and-notify
+   guides/debug-a-workflow
+   guides/reuse-with-templates
+   guides/users-and-permissions
+   guides/configure-the-system
 
 .. toctree::
    :caption: Reference
    :maxdepth: 2
 
-   reference/index
+   reference/screens
+   reference/command-palette
+   reference/operators
+   reference/configuration
+   reference/permissions
+   reference/shortcuts
+   reference/api
 
 .. toctree::
    :caption: Operations
    :maxdepth: 2
 
-   operations/index
+   operations/requirements
+   operations/install-packages
+   operations/updating
+   operations/backup-and-restore
+   operations/monitoring
+   operations/troubleshooting
 
 .. toctree::
    :caption: Integrations
    :maxdepth: 2
 
-   integrations/index
+   integrations/idoit
+   integrations/otrs
+   integrations/db2api
+   integrations/csv2api
 
 .. toctree::
    :caption: About
    :maxdepth: 1
 
-   about/index
+   about/license
+   about/sources
 
 .. toctree::
    :caption: Elsewhere
