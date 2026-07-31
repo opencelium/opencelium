@@ -16,7 +16,7 @@ Installing from packages
 	| Otherwise nginx is not able to access the files. 
 
 ZIP Debian/Ubuntu (example for 24.04 LTS)
-"""""""""""""""""""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""
 
 Prepare environment
 ===================
@@ -184,7 +184,7 @@ Finally start OpenCelium backend.
 		
 
 ZIP SUSE Linux Enterprise Server (example for SLES 15 SP5)
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Prepare environment
 ===================
@@ -362,7 +362,7 @@ Finally start OpenCelium backend.
 		
 
 ZIP Red Hat Enterprise Linux (example for Red Hat 9.2)
-"""""""""""""""""""""""""""""""""""""""""""""""""""
+""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Prepare environment
 ===================
