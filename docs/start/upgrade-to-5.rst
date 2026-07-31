@@ -57,7 +57,29 @@ anything. Templates are converted the same way.
 Adjust application.yml
 ======================
 
-The upgrade does not touch your ``application.yml``. Two keys moved:
+The backend migrates ``application.yml`` **itself** on the first start after the
+upgrade. It copies the file to ``application_copy.yml`` first, applies the
+changesets for every version newer than the one recorded in the file, keeps your
+comments, and rolls the copy back if writing fails.
+
+For 5.0 it adds these keys automatically — you do not have to:
+
+.. code-block:: yaml
+
+   opencelium:
+     version: 5.0
+     config:                     # the /application-config endpoint
+       file-path: src/main/resources/application.yml
+       backup:
+         directory: runtime/backup/application
+         keep: 10
+     sweeper:
+       test-connection:          # removes leftover test connections
+         enabled: true
+         fixed-delay: 900000
+         initial-delay: 0
+
+What it does **not** do is move renamed keys. Two of those need your hand:
 
 .. code-block:: yaml
 
@@ -84,21 +106,9 @@ spelling:
 And ``opencelium.online-services.*`` ``active`` flags are real booleans now
 (``false``), not quoted strings (``"false"``).
 
-New optional sections you may want:
-
-.. code-block:: yaml
-
-   opencelium:
-     config:                     # the /application-config endpoint
-       file-path: ./application.yml
-       backup:
-         directory: runtime/backup/application
-         keep: 10
-     sweeper:
-       test-connection:          # removes leftover test connections
-         enabled: true
-         fixed-delay: 900000
-         initial-delay: 0
+.. note::
+   The LDAP move is not part of the automatic migration. If you skip it, LDAP
+   logins stop working silently — the old block is simply ignored.
 
 See :doc:`../reference/configuration`.
 

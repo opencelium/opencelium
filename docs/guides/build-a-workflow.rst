@@ -28,13 +28,6 @@ stays. Four areas:
    :align: center
    :width: 800
 
-Name it
-=======
-
-Click the title in the header and type. Titles are unique and checked as you
-type. Committing a title or description change **auto-saves** with a generated
-version comment, so a rename never loses a version.
-
 Add steps
 =========
 
