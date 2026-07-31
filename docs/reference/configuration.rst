@@ -106,6 +106,71 @@ The external engine that executes Python and Ruby enhancements.
 
 Reachability is reported as the **Polyglot** row on :ref:`ref-system-check`.
 
+.. _ref-config-polyglot-service:
+
+Deploying the engine
+--------------------
+
+The engine is a separate Spring Boot gRPC service and is **not** part of the
+OpenCelium package. Build it from source:
+
+.. code-block:: sh
+
+   git clone https://github.com/opencelium/polyglot-engine.git
+   cd polyglot-engine
+   ./mvnw -B package -DskipTests
+
+.. note::
+   The resulting JAR is large (roughly 350 MB) because it bundles the GraalVM
+   language runtimes for Python and Ruby.
+
+Install it and run it as a service rather than by hand, so it survives a reboot:
+
+.. code-block:: sh
+
+   install -d /opt/opencelium/polyglot
+   cp target/oc-polyglot-engine-*.jar /opt/opencelium/polyglot/oc-polyglot-engine.jar
+
+``/etc/systemd/system/opencelium-polyglot.service``:
+
+.. code-block:: ini
+
+   [Unit]
+   Description=OpenCelium Polyglot Engine
+   After=syslog.target network.target
+   Before=opencelium.service
+
+   [Service]
+   Type=simple
+   Restart=on-failure
+   RestartSec=5s
+   Environment=GRPC_SERVER_PORT=6566
+   WorkingDirectory=/opt/opencelium/polyglot
+   ExecStart=/usr/lib/jvm/java-17-openjdk-amd64/bin/java -Xms64m -Xmx512m \
+     -jar /opt/opencelium/polyglot/oc-polyglot-engine.jar
+   ExecStop=/bin/kill -15 $MAINPID
+
+   [Install]
+   WantedBy=multi-user.target
+
+.. code-block:: sh
+
+   systemctl daemon-reload
+   systemctl enable --now opencelium-polyglot
+
+Then set ``enabled: true`` in the block above and restart the backend. The
+**Polyglot** row on :ref:`ref-system-check` turns *Operational* once the gRPC
+health service answers on the configured port.
+
+.. note::
+   ``GRPC_SERVER_PORT`` in the unit and ``opencelium.polyglot.port`` in
+   ``application.yml`` must match.
+
+.. note::
+   ``auto-start: true`` with ``launch.jarPath`` lets the backend start the JAR
+   itself instead. A separate unit is usually preferable: the engine's lifecycle,
+   logs and memory limits stay independent of the backend.
+
 opencelium.online-services
 ==========================
 
