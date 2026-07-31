@@ -527,6 +527,11 @@ Install it and run it as a service so it survives a reboot:
    systemctl daemon-reload
    systemctl enable --now opencelium-polyglot
 
+.. warning::
+   Do not overwrite the JAR in place while the service is running — the JVM has
+   the file mapped, and replacing it under a live process can make it fail in
+   confusing ways. Stop the service, copy the new JAR, start it again.
+
 Then set ``enabled: true`` in the section above and restart the backend.
 
 .. note::
