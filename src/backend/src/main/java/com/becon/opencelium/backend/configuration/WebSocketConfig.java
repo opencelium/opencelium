@@ -19,6 +19,7 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketTransportRegistration;
 
+import static com.becon.opencelium.backend.execution.socket.SocketConstant.CONNECTOR_DESTINATION_PREFIX;
 import static com.becon.opencelium.backend.execution.socket.SocketConstant.EXECUTION_DESTINATION_PREFIX;
 import static com.becon.opencelium.backend.execution.socket.SocketConstant.NOTIFICATION_DESTINATION_PREFIX;
 import static com.becon.opencelium.backend.execution.socket.SocketConstant.PATH;
@@ -48,7 +49,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 EXECUTION_DESTINATION_PREFIX,
                 NOTIFICATION_DESTINATION_PREFIX,
                 SCHEDULER_DESTINATION_PREFIX,
-                USER_SESSION_DESTINATION_PREFIX
+                USER_SESSION_DESTINATION_PREFIX,
+                CONNECTOR_DESTINATION_PREFIX
         );
         registry.setApplicationDestinationPrefixes("/oc");
         registry.setUserDestinationPrefix("/user");

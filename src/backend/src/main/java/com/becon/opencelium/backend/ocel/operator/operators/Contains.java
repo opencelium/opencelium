@@ -5,6 +5,7 @@ import com.becon.opencelium.backend.ocel.operator.BinaryOperator;
 import com.becon.opencelium.backend.ocel.operator.OperatorEnum;
 import com.becon.opencelium.backend.ocel.operator.SidesType;
 import com.becon.opencelium.backend.ocel.utils.Utils;
+import com.becon.opencelium.backend.ocel.utils.ValueUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -12,6 +13,10 @@ import java.util.Objects;
 class Contains implements BinaryOperator {
     @Override
     public Object apply(Object o1, Object o2) throws ApplyOperatorException {
+        // Normalize: convert String operands that contain arrays into real Lists
+        o1 = ValueUtils.normalizeArray(o1);
+        o2 = ValueUtils.normalizeArray(o2);
+
         List<?> values;
         Object value;
 
@@ -29,11 +34,18 @@ class Contains implements BinaryOperator {
             throw ApplyOperatorException.invalidOperandValueException(getOperatorType(), o1, o2);
         }
 
-        values = values.stream()
-                .map(Object::toString)
-                .toList();
+        if (value == null) {
+            return values.stream().anyMatch(Objects::isNull);
+        }
 
-        return values.contains(value.toString());
+        String target = value.toString();
+        for (Object o : values) {
+            if (o != null && o.toString().equals(target)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override
@@ -57,23 +69,15 @@ class Contains implements BinaryOperator {
     }
 
     private boolean isUnaryRight(Object o2) {
-        return o2 instanceof List<?> list && Utils.isPrimitiveType(list.get(0)) && list.get(1) instanceof List<?>;
+        return o2 instanceof List<?> list && list.size() == 2
+                && Utils.isPrimitiveType(list.get(0)) && list.get(1) instanceof List<?>;
     }
 
     private boolean isArrayRight(Object o1, Object o2) {
-        return o2 instanceof List<?> list && Utils.isPrimitiveType(o1) && isPrimitiveArray(list);
-    }
-
-    private boolean isPrimitiveArray(List<?> list) {
-        for (Object o : list) {
-            if (!Utils.isPrimitiveType(o)) {
-                return false;
-            }
-        }
-        return true;
+        return o2 instanceof List<?> && Utils.isPrimitiveType(o1) && !isUnaryRight(o2);
     }
 
     private boolean isArrayLeft(Object o1, Object o2) {
-        return o1 instanceof List<?> && Utils.isPrimitiveType(o2);
+        return o1 instanceof List<?> && (o2 == null || Utils.isPrimitiveType(o2));
     }
 }

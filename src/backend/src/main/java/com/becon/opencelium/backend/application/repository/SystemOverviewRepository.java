@@ -1,28 +1,24 @@
 package com.becon.opencelium.backend.application.repository;
 
 import com.becon.opencelium.backend.application.entity.SystemOverview;
-import com.becon.opencelium.backend.constant.PathConstant;
 import com.becon.opencelium.backend.constant.AppYamlPath;
+import com.becon.opencelium.backend.constant.PathConstant;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
-import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Objects;
+import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -30,13 +26,11 @@ import java.util.zip.ZipInputStream;
 public class SystemOverviewRepository {
 
     private final DataSource dataSource;
-    private final JdbcTemplate jdbcTemplate;
     private final MongoClient mongoClient;
     private final Environment env;
 
-    public SystemOverviewRepository(DataSource dataSource, JdbcTemplate jdbcTemplate, Environment environment, MongoClient mongoClient) {
+    public SystemOverviewRepository(DataSource dataSource, Environment environment, MongoClient mongoClient) {
         this.dataSource = dataSource;
-        this.jdbcTemplate = jdbcTemplate;
         this.mongoClient = mongoClient;
         this.env = environment;
     }
@@ -50,7 +44,7 @@ public class SystemOverviewRepository {
         try {
             String dbVersion = dataSource.getConnection().getMetaData().getDatabaseProductVersion();
             systemOverview.setMariadb(dbVersion);
-        } catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
             systemOverview.setMariadb("Service is down. Unable to detect version. ");
         }
@@ -61,7 +55,7 @@ public class SystemOverviewRepository {
             Document buildInfo = database.runCommand(new Document("buildInfo", 1));
             String mongoVersion = buildInfo.getString("version");
             systemOverview.setMongodb(mongoVersion);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             systemOverview.setMongodb("Service is down. Unable to detect version. ");
         }
@@ -72,59 +66,40 @@ public class SystemOverviewRepository {
     // return current version
     public String getCurrentVersion() {
         try {
-//            return jdbcTemplate
-//                    .queryForList("select AUTHOR from DATABASECHANGELOG order by AUTHOR DESC LIMIT 1", String.class)
-//                    .get(0);
             return Objects.requireNonNull(env.getProperty(AppYamlPath.OC_VERSION));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public String getVersionFromGit() {
-        try	{
-            FileRepositoryBuilder builder = new FileRepositoryBuilder();
-            Path path = Paths.get("");
-            File workTree = new File(path.toUri()).toPath().getParent().getParent().toFile();
-            File gitDir = new File(workTree.getPath() + "/.git");
-            Repository repository = builder.setGitDir(gitDir).setWorkTree(workTree)
-                    .build();
-            Git git = new Git(repository);
-            String version = git.describe().call();
-            if (version == null) {
-                throw new RuntimeException("OC_VERSION_NOT_DETERMINED");
-            }
-            if (version.length() > 7) {
-                version = version.charAt(4) == '-' ? version.substring(0,4) : version.substring(0,6);
-            }
-            return version;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return "";
-    }
-
     public String getVersionFromStream(InputStream inputStream) {
-        try {
-            ZipInputStream zis = new ZipInputStream(inputStream);
-            ZipEntry zipEntry = zis.getNextEntry();
+        try (ZipInputStream zis = new ZipInputStream(inputStream, StandardCharsets.UTF_8)) {
+            ZipEntry zipEntry;
             byte[] buffer = new byte[1024];
-            int read = 0;
-            StringBuilder stringBuilder = new StringBuilder();
-            while (zipEntry != null) {
-                if (zipEntry.getName().contains("backend/" + PathConstant.APP_DEFAULT_YML)) {
-                    while ((read = zis.read(buffer, 0, 1024)) >= 0) {
-                        stringBuilder.append(new String(buffer, 0, read));
+
+            while ((zipEntry = zis.getNextEntry()) != null) {
+                try {
+                    if (!zipEntry.getName().contains("backend/" + PathConstant.APP_DEFAULT_YML)) {
+                        continue;
                     }
-                    String version = extractValueFromYaml(stringBuilder.toString(), "opencelium.version");
-                    if (version == null || version.isEmpty()) {
-                        return "VERSION_IN_APPLICATION_DEFAULT_NOT_FOUND";
+
+                    StringBuilder content = new StringBuilder();
+                    int read;
+
+                    while ((read = zis.read(buffer)) != -1) {
+                        content.append(new String(buffer, 0, read, StandardCharsets.UTF_8));
                     }
-                    return version;
+
+                    String version = extractValueFromYaml(content.toString(), "opencelium.version");
+
+                    return (version == null || version.isBlank())
+                            ? "VERSION_IN_APPLICATION_DEFAULT_NOT_FOUND"
+                            : version;
+                } finally {
+                    zis.closeEntry();
                 }
-                zipEntry = zis.getNextEntry();
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
         return "APPLICATION_DEFAULT_NOT_FOUND";
@@ -132,19 +107,10 @@ public class SystemOverviewRepository {
 
     private static String extractValueFromYaml(String yamlContent, String path) {
         YamlPropertiesFactoryBean yamlFactory = new YamlPropertiesFactoryBean();
-        Resource resource = new ByteArrayResource(yamlContent.getBytes());
+        Resource resource = new ByteArrayResource(yamlContent.getBytes(StandardCharsets.UTF_8));
         yamlFactory.setResources(resource);
 
         Properties properties = yamlFactory.getObject();
-        if (properties != null) {
-            return properties.getProperty(path);
-        }
-        return null;
+        return properties == null ? null : properties.getProperty(path);
     }
-
-    // Kibana getting request
-//    private ResponseEntity<String> getRestResponse(String host, String port, String httpMethod) throws Exception {
-//        HttpEntity<Object> httpEntity = new HttpEntity <Object> (data, header);
-//        return restTemplate.exchange(host, httpMethod ,httpEntity, String.class);
-//    }
 }

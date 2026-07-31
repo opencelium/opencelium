@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.quartz;
 import com.becon.opencelium.backend.database.mysql.entity.MaskingRule;
 import com.becon.opencelium.backend.database.mysql.entity.Scheduler;
+import com.becon.opencelium.backend.resource.schedule.RunningJob;
 
 import java.util.List;
 import java.util.Map;
@@ -15,7 +16,7 @@ public interface SchedulingStrategy {
     void runJob(Scheduler scheduler, List<MaskingRule> rules);
     void resumeJob(Scheduler scheduler);
     void pauseJob(Scheduler scheduler);
-    Map<Long,Integer> getRunningJobs();
+    List<RunningJob> getRunningJobs();
     void validateCron(String cron);
     void terminate(Scheduler scheduler);
 }

@@ -19,11 +19,11 @@ public class WidgetSettingServiceImp implements WidgetSettingService {
     private WidgetSettingRepository widgetSettingRepository;
 
     @Autowired
-    private WidgetServiceImp widgetServiceImp;
+    private WidgetService widgetServiceImp;
 
     @Autowired
     @Lazy
-    private UserServiceImpl userService;
+    private UserService userService;
 
     @Override
     public void create(WidgetSetting widgetSetting) {
@@ -88,7 +88,7 @@ public class WidgetSettingServiceImp implements WidgetSettingService {
         Widget widget = widgetServiceImp.findById(widgetSettingResource.getWidgetId())
                 .orElseThrow(() -> new RuntimeException("Widget not found"));
         User user = userService.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Widget not found"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
         return new WidgetSetting(widgetSettingResource, widget, user);
     }
 

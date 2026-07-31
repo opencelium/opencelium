@@ -37,6 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import com.becon.opencelium.backend.resource.application.ResultDTO;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
@@ -158,25 +159,21 @@ public class RoleController {
                 content = @Content(schema = @Schema(implementation = ErrorResource.class))),
     })
     @PutMapping(value = "{id}/component", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Transactional
     public ResponseEntity<UserRoleResource> changeComponent(@PathVariable("id") int id,
                                                              @RequestBody UserRoleResource userRoleResource) throws IOException {
 
-        UserRole uRoleBackUp = userRoleService.findById(id).orElseThrow(() -> new RuntimeException("UserGroup id: " + id + "not found"));
-        boolean isIdenticalName = uRoleBackUp.getName().equals(userRoleResource.getName());
+        UserRole existing = userRoleService.findById(id).orElseThrow(() -> new RuntimeException("UserGroup id: " + id + "not found"));
+        boolean isIdenticalName = existing.getName().equals(userRoleResource.getName());
         if (!isIdenticalName && userRoleService.existsByRole(userRoleResource.getName())){
             throw new RoleExistsException(userRoleResource.getName());
         }
         userRoleResource.setGroupId(id);
-        roleHasPermissionServiceImp.deleteByUserRoleId(uRoleBackUp.getId());
-        UserRole uRole;
-        try {
-            uRole = userRoleService.toEntity(userRoleResource);
-            userRoleService.save(uRole);
-        }
-        catch (Exception e){
-            userRoleService.save(uRoleBackUp);
-            throw new RuntimeException(e);
-        }
+
+        roleHasPermissionServiceImp.deleteByUserRoleId(existing.getId());
+        UserRole uRole = userRoleService.toEntity(userRoleResource);
+        userRoleService.save(uRole);
+
         return userRoleService.findById(id)
                 .map(p -> ResponseEntity.ok(new UserRoleResource(p)))
                 .orElseThrow(() -> new RoleNotFoundException(id));

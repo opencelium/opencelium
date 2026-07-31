@@ -1,0 +1,14 @@
+{
+  "server": {
+    "protocol": "",
+    "hostname": "",
+    "port": "9090",
+    "prefix": ""
+  },
+  "socket": {
+    "protocol": "",
+    "hostname": "",
+    "port": "9090",
+    "prefix": "/ws"
+  }
+}

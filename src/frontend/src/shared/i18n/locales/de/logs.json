@@ -1,0 +1,39 @@
+{
+  "title": "Lauf-Logs",
+  "subtitle": "Wählen Sie eine Ausführung, um deren Konnektor-, Methoden- und Operator-Logs einzusehen.",
+  "selectLabel": "Ausführung",
+  "selectPlaceholder": "Ausführung auswählen",
+  "selectHint": "Wählen Sie eine Ausführung, um deren Logs anzuzeigen.",
+  "empty": "Keine Logs vorhanden.",
+  "childrenError": "Log-Elemente konnten nicht geladen werden.",
+  "detailsError": "Methodendetails konnten nicht geladen werden.",
+  "download": {
+    "tooltip": "Logs herunterladen",
+    "error": "Logs konnten nicht heruntergeladen werden",
+    "tooBig": "Das Log ist zu groß zum Herunterladen. Sie finden es auf dem Server unter {{path}}."
+  },
+  "tabs": {
+    "requestHeader": "Anfrage-Header",
+    "requestBody": "Anfrage-Body",
+    "responseHeader": "Antwort-Header",
+    "responseBody": "Antwort-Body"
+  },
+  "methodView": {
+    "tooltip": "URL / Name umschalten"
+  },
+  "testRunDetails": "TESTLAUFDETAILS",
+  "logsLabel": "LOGS",
+  "live": {
+    "title": "Lauf-Logs",
+    "empty": "Noch keine Logs. Starten Sie einen Test, um Ausführungs-Logs zu sehen.",
+    "running": "Läuft…",
+    "collecting": "Logs werden gesammelt…",
+    "finished": "TEST BEENDET in {{time}}",
+    "stopped": "TEST GESTOPPT",
+    "failed": "TEST FEHLGESCHLAGEN",
+    "expand": "Log-Panel ausklappen",
+    "collapse": "Log-Panel einklappen",
+    "clear": "Logs löschen",
+    "orphaned": "Dieser Test wurde gestartet, bevor die Seite erneut geöffnet wurde. Daher sind die Live-Logs nicht mehr verfügbar. Bitte stoppen Sie den Test und führen Sie ihn erneut aus, um die Logs zu sehen."
+  }
+}

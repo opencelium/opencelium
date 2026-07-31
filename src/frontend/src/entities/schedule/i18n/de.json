@@ -1,0 +1,199 @@
+{
+  "list": {
+    "title": "Laufpläne",
+    "subTitle": "Laufpläne bestimmen, wann bestimmte Worflows ausgeführt werden — nach festem Zeitplan oder durch Auslöser. Die Zahl unter einem Statuskreis zählt bis zu dessen nächstem Cron-Trigger herunter.<legend>Statuslegende: <legendRunning>Läuft</legendRunning><legendSucceeded>Letzter Lauf erfolgreich</legendSucceeded><legendFailed>Letzter Lauf fehlgeschlagen</legendFailed><legendNone>Kein Cron und keine Historie</legendNone></legend>",
+    "searchPlaceholder": "Nach Workflowsname suchen",
+    "columns": {
+      "executions": "Läufe",
+      "status": "Status",
+      "connection": "Workflow",
+      "cronExp": "Cron",
+      "lastSuccessExecution": "Letzter Erfolg",
+      "lastFailExecution": "Letzter Fehler",
+      "lastDuration": "Ø Dauer",
+      "debugMode": "Debug",
+      "webhook": "Webhook"
+    },
+    "noExecutions": "Keine aktuellen Läufe"
+  },
+  "webhook": {
+    "copied": "Webhook-URL in die Zwischenablage kopiert",
+    "copyTooltip": "Webhook-URL kopieren",
+    "createTooltip": "Webhook-URL erzeugen",
+    "created": "Webhook-URL erstellt",
+    "deleteTooltip": "Webhook entfernen",
+    "deleted": "Webhook entfernt",
+    "confirmDelete": {
+      "title": "Webhook entfernen?",
+      "message": "Die Webhook-URL funktioniert sofort nicht mehr. Diese Aktion kann nicht rückgängig gemacht werden."
+    }
+  },
+  "start": {
+    "tooltip": "Ausführung starten",
+    "success": "Zeitplan-Ausführung gestartet",
+    "error": {
+      "concurrentForbidden": "Ein anderer Zeitplan für dies Workflow läuft bereits. Warten Sie, bis er abgeschlossen ist, bevor Sie diesen starten.",
+      "failed": "Zeitplan-Ausführung konnte nicht gestartet werden"
+    }
+  },
+  "terminate": {
+    "tooltip": "Ausführung beenden",
+    "success": "Zeitplan-Ausführung beendet"
+  },
+  "notifications": {
+    "tooltip": "Benachrichtigungen",
+    "dialogTitle": "Benachrichtigungen",
+    "subtitle": "Legen Sie fest, wer benachrichtigt wird, wenn dieser Zeitplan ausgeführt wird.",
+    "addButton": "Benachrichtigung hinzufügen",
+    "empty": "Noch keine Benachrichtigungen.",
+    "close": "Schließen",
+    "cancel": "Abbrechen",
+    "unnamedItem": "Unbenannte Benachrichtigung",
+    "deleteTooltip": "Benachrichtigung löschen",
+    "aggregatorHint": "Datenaggregator funktioniert nur für Post",
+    "created": "Benachrichtigung erstellt",
+    "updated": "Benachrichtigung aktualisiert",
+    "deleted": "Benachrichtigung gelöscht",
+    "fields": {
+      "name": "Name",
+      "eventType": "Ereignistyp",
+      "notificationType": "Benachrichtigungstyp",
+      "template": "Vorlage",
+      "recipients": "Empfänger",
+      "webhookUrl": "Webhook-URL"
+    },
+    "eventTypeOptions": {
+      "pre": "Pre",
+      "post": "Post",
+      "alert": "Alert"
+    },
+    "actions": {
+      "create": "Erstellen",
+      "update": "Aktualisieren",
+      "delete": "Löschen"
+    },
+    "errors": {
+      "nameRequired": "Name ist erforderlich",
+      "notificationTypeRequired": "Benachrichtigungstyp ist erforderlich",
+      "templateRequired": "Vorlage ist erforderlich",
+      "recipientsEmailsRequired": "Mindestens einen Empfänger auswählen",
+      "webhookUrlRequired": "Webhook-URL ist erforderlich",
+      "eventTypeInvalid": "Ungültiger Ereignistyp"
+    },
+    "confirmDelete": {
+      "title": "Benachrichtigung löschen?",
+      "message": "Diese Benachrichtigung wird unwiderruflich entfernt."
+    },
+    "bulk": {
+      "button": "Benachrichtigungen",
+      "title": "Benachrichtigung zu ausgewählten Laufplänen hinzufügen",
+      "subtitle": "Diese Benachrichtigung wird für {{count}} ausgewählte(n) Zeitplan/-pläne erstellt.",
+      "create": "Für {{count}} Zeitplan/-pläne erstellen",
+      "success": "Benachrichtigung für {{count}} Zeitplan/-pläne erstellt",
+      "partialError": "Benachrichtigung für {{count}} Zeitplan/-pläne konnte nicht erstellt werden"
+    }
+  },
+  "supportLogs": {
+    "tooltip": "Support-Logs",
+    "title": "Support-Logs",
+    "titleHint": "Erzeugt eine maskierte Support-Logs-Datei für dieses Workflow. Wählen Sie über die Augen-Schalter, welche Teile vor dem Download maskiert werden.",
+    "levelLabel": "Maskierungsstufe",
+    "levels": {
+      "custom": "Benutzerdefiniert",
+      "light": "Leicht",
+      "medium": "Mittel",
+      "strict": "Streng"
+    },
+    "sections": {
+      "url": "URL",
+      "headers": "Header",
+      "request": "Anfrage",
+      "response": "Antwort"
+    },
+    "mask": "Diesen Abschnitt maskieren",
+    "unmask": "Maskierung dieses Abschnitts aufheben",
+    "submit": "Support-Logs erstellen",
+    "cancel": "Abbrechen",
+    "started": "Sammlung der Support-Logs für \"{{connectionTitle}}\" gestartet. Sie werden benachrichtigt, sobald die Datei bereit ist.",
+    "error": "Sammlung der Support-Logs konnte nicht gestartet werden"
+  },
+  "executionLogs": {
+    "seeLogs": "Logs anzeigen"
+  },
+  "debugMode": {
+    "enableSuccess": "Debug-Modus aktiviert",
+    "disableSuccess": "Debug-Modus deaktiviert"
+  },
+  "cronEdit": {
+    "tooltip": "Cron-Ausdruck bearbeiten",
+    "title": "Cron-Ausdruck bearbeiten",
+    "subtitle": "Ändern Sie, wann dieser Zeitplan ausgeführt wird. Beim Speichern wird der Zeitplan mit dem neuen Cron-Ausdruck aktualisiert.",
+    "submit": "Speichern",
+    "cancel": "Abbrechen",
+    "success": "Der Cron-Ausdruck für die Connection \"{{connectionTitle}}\" wurde erfolgreich auf \"{{cronExp}}\" aktualisiert",
+    "error": "Cron-Ausdruck konnte nicht aktualisiert werden"
+  },
+  "fields": {
+    "title": {
+      "label": "Titel"
+    },
+    "connection": {
+      "label": "Workflow"
+    },
+    "debugMode": {
+      "label": "Logs",
+      "text": {
+        "on": "Logs sind aktiviert",
+        "off": "Logs sind deaktiviert"
+      }
+    },
+    "cronExp": {
+      "label": "Cron-Ausdruck",
+      "error": {
+        "invalid": "Ungültiger Cron-Ausdruck"
+      }
+    }
+  },
+  "sections": {
+    "general-data": {
+      "title": "Allgemeine Daten"
+    }
+  },
+  "wizard": {
+    "modes": {
+      "create": {
+        "header": "Zeitplan erstellen",
+        "subheader": "Richten Sie einen Zeitplan ein, um einen Workflow automatisch anhand eines Cron-Ausdrucks auszuführen.",
+        "successMessage": "Zeitplan für das Workflow \"{{connectionTitle}}\" wurde erfolgreich erstellt",
+        "successMessageWithCron": "Zeitplan für das Workflow \"{{connectionTitle}}\" mit Cron \"{{cronExp}}\" wurde erfolgreich erstellt"
+      },
+      "update": {
+        "header": "Zeitplan bearbeiten",
+        "subheader": "Zeitplan-Informationen ändern und Änderungen speichern.",
+        "successMessage": "Zeitplan für das Workflow \"{{connectionTitle}}\" wurde erfolgreich aktualisiert",
+        "successMessageWithCron": "Zeitplan für das Workflow \"{{connectionTitle}}\" mit Cron \"{{cronExp}}\" wurde erfolgreich aktualisiert"
+      },
+      "view": {
+        "header": "Zeitplandetails",
+        "subheader": "Zeitplaninformationen anzeigen."
+      }
+    },
+    "recommendations": {
+      "1": "Zeitplan erstellen",
+      "2": "Workflow erstellen",
+      "3": "Konnektor erstellen"
+    },
+    "steps": {
+      "general-data": {
+        "header": "Allgemeine Daten",
+        "subheader": "Allgemeine Informationen zum Zeitplan"
+      }
+    }
+  },
+  "confirmation": {
+    "delete": {
+      "byConnectionTitle": "Zeitplan anhand des Verbindungstitels \"{{connectionTitle}}\" löschen?",
+      "byId": "Zeitplan anhand der ID \"{{id}}\" löschen?"
+    }
+  }
+}

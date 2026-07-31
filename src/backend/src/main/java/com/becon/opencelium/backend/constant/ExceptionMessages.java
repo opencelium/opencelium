@@ -15,4 +15,8 @@ public interface ExceptionMessages {
     String CANT_REMOVE_LAST_VERSION_CONNECTION = "Can't remove last version connection";
     String ONLY_OWNER_CAN_PERFORM_ACTION = "Only owner can perform this action";
     String ONLY_OWNER_OR_ADMIN_CAN_PERFORM_ACTION = "Only owner or admin can perform this action";
+    String FROM_CONNECTOR_IS_NULL = "fromConnector is null";
+    String OPERATOR_EXPRESSION_IS_EMPTY = "Operator (index=%s, type=%s) has null or empty expression";
+    String METHOD_NAME_MUST_BE_NON_NULL = "Method name must not be null";
+    String SCHEDULER_NOT_FOUND = "Scheduler not found";
 }

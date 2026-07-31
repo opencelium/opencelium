@@ -33,6 +33,11 @@ src/test/java/com/becon/opencelium/backend/ApplicationTests.java
 !src/test/EvaluationTest.java
 .DS_Store
 
+### CLAUDE ###
+CLAUDE.md
+.claude
+docs/service_test_coverage.md
+
 ### STS ###
 .apt_generated
 .classpath

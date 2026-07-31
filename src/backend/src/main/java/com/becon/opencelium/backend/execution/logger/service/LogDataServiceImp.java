@@ -21,10 +21,20 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
 
-import static com.becon.opencelium.backend.execution.logger.enums.PhaseCategory.*;
+import static com.becon.opencelium.backend.execution.logger.enums.PhaseCategory.EXECUTION;
+import static com.becon.opencelium.backend.execution.logger.enums.PhaseCategory.FLOWCHART;
+import static com.becon.opencelium.backend.execution.logger.enums.PhaseCategory.OPERATION;
 
 /**
  * LogMetaDataServiceImp handles persistence and enrichment of parsed execution blocks (e.g. IF, LOOP, METHOD).
@@ -230,26 +240,17 @@ public class LogDataServiceImp implements LogDataService {
     @Override
     public synchronized void bufferAndFlush(LogDataMng block) {
         LogDataMng toPersist = prepareForPersist(block);
-        List<LogDataMng> batchToFlush = buffer.buffer(toPersist);
-        boolean executionComplete = isExecutionComplete(toPersist);
-        if (executionComplete) {
-            // 1) put this block into the buffer first
-            List<LogDataMng> fromThreshold = buffer.buffer(toPersist);
 
-            // 2) flush everything that is still in memory (including this block)
-            List<LogDataMng> allRemaining = buffer.flushAll();
+        // buffer exactly once; a non-empty result means the size threshold was reached
+        List<LogDataMng> batchToFlush = new ArrayList<>(buffer.buffer(toPersist));
 
-            // merge both (fromThreshold is usually empty, but keep it correct)
-            if (!fromThreshold.isEmpty() || !allRemaining.isEmpty()) {
-                batchToFlush = new ArrayList<>(fromThreshold.size() + allRemaining.size());
-                batchToFlush.addAll(fromThreshold);
-                batchToFlush.addAll(allRemaining);
-            }
-        } else {
-            // normal path: only flush when threshold is reached
-            batchToFlush = buffer.buffer(toPersist);
+        if (isExecutionComplete(toPersist)) {
+            // execution is over: drain whatever is still in memory (including this block,
+            // unless the threshold flush above already carried it out)
+            batchToFlush.addAll(buffer.flushAll());
         }
-        if (!batchToFlush.isEmpty() ) {
+
+        if (!batchToFlush.isEmpty()) {
             metaDataLogRepository.saveAll(batchToFlush);
         }
     }
@@ -335,6 +336,7 @@ public class LogDataServiceImp implements LogDataService {
         return metaDataLogRepository.findById(phaseId)
                 .or(() -> metaDataLogRepository.findByExecutionIdAndType(phaseId, EXECUTION.name()))
                 .or(() -> metaDataLogRepository.findByFlowIdAndType(phaseId, FLOWCHART.name()))
+                .or(() -> buffer.findById(phaseId))
                 .orElseThrow(() -> new RuntimeException("LogData element not found with specified id = " + phaseId));
     }
 
@@ -356,7 +358,13 @@ public class LogDataServiceImp implements LogDataService {
     private List<LogDataMng> executionChildren(LogDataMng entity) {
         String executionId = entity.getExecutionId();
 
-        return metaDataLogRepository.findChildren(executionId, FLOWCHART.name(), SORT_ASCENDING);
+        var savedChildren = metaDataLogRepository.findChildren(executionId, FLOWCHART.name(), SORT_ASCENDING);
+
+        var bufferedChildren = buffer.findAllByExecutionId(executionId).stream()
+                .filter(child -> child.getType() == FLOWCHART)
+                .toList();
+
+        return mergeChildren(savedChildren, bufferedChildren);
     }
 
     private List<LogDataMng> flowchartChildren(LogDataMng entity) {
@@ -364,7 +372,11 @@ public class LogDataServiceImp implements LogDataService {
         String flowchartId = entity.getFlowId();
         String regex = "^[0-9]+$"; // filters only numbers (first level children)
 
-        return metaDataLogRepository.findChildren(executionId, flowchartId, regex, SORT_ASCENDING);
+        var savedChildren = metaDataLogRepository.findChildren(executionId, flowchartId, regex, SORT_ASCENDING);
+
+        var bufferedChildren = findBufferedChildren(executionId, flowchartId, regex, null);
+
+        return mergeChildren(savedChildren, bufferedChildren);
     }
 
     private List<LogDataMng> ifChildren(LogDataMng entity) {
@@ -372,14 +384,16 @@ public class LogDataServiceImp implements LogDataService {
         String flowchartId = entity.getFlowId();
         String indexPath = entity.getIndexPath();
         String regex = "^" + Pattern.quote(indexPath) + "_[0-9]+$"; // filters only first-level children
-        String nearestLoopIndex = (String) entity.getProperties().getOrDefault("loopIndex", "");
 
-        if (nearestLoopIndex.isBlank()) {
-            // IF is outside any LOOP
-            return metaDataLogRepository.findChildren(executionId, flowchartId, regex, SORT_ASCENDING);
-        } else {
-            return metaDataLogRepository.findChildren(executionId, flowchartId, regex, nearestLoopIndex, SORT_ASCENDING);
-        }
+        var savedChildren = hasLoopIndex(entity)
+                ? metaDataLogRepository.findChildren(executionId, flowchartId, regex, getLoopIndex(entity), SORT_ASCENDING)
+                : metaDataLogRepository.findChildren(executionId, flowchartId, regex, SORT_ASCENDING); // IF is outside any LOOP
+
+        var bufferedChildren = hasLoopIndex(entity)
+                ? findBufferedChildren(executionId, flowchartId, regex, getLoopIndex(entity))
+                : findBufferedChildren(executionId, flowchartId, regex, null);
+
+        return mergeChildren(savedChildren, bufferedChildren);
     }
 
     private List<LogDataMng> loopChildren(LogDataMng entity, String loopIndex) { // default loopIndex = 0
@@ -388,10 +402,49 @@ public class LogDataServiceImp implements LogDataService {
         String indexPath = entity.getIndexPath();
         String regex = "^" + Pattern.quote(indexPath) + "_[0-9]+$"; // filters only first-level children
 
-        String nearestLoopIndex = (String) entity.getProperties().getOrDefault("loopIndex", "");
-        String currentLoopIndex = nearestLoopIndex.isBlank() ? loopIndex : nearestLoopIndex + "," + loopIndex;
+        String currentLoopIndex = hasLoopIndex(entity)
+                ? getLoopIndex(entity) + "," + loopIndex
+                : loopIndex;
 
-        return metaDataLogRepository.findChildren(executionId, flowchartId, regex, currentLoopIndex, SORT_ASCENDING);
+        var savedChildren = metaDataLogRepository.findChildren(executionId, flowchartId, regex, currentLoopIndex, SORT_ASCENDING);
+
+        var bufferedChildren = findBufferedChildren(executionId, flowchartId, regex, currentLoopIndex);
+
+        return mergeChildren(savedChildren, bufferedChildren);
+    }
+
+    private List<LogDataMng> findBufferedChildren(String executionId, String flowchartId, String regex, String loopIndex) {
+        Pattern pattern = Pattern.compile(regex);
+
+        return buffer.findAllByExecutionId(executionId).stream()
+                .filter(child -> Objects.equals(child.getFlowId(), flowchartId))
+                .filter(child -> child.getIndexPath() != null)
+                .filter(child -> pattern.matcher(child.getIndexPath()).matches())
+                .filter(child -> loopIndex == null || (hasLoopIndex(child) && Objects.equals(getLoopIndex(child), loopIndex)))
+                .toList();
+    }
+
+    /**
+     * Merges children log data elements by removing duplicated.
+     * Notice. Both lists are already sorted in ascending order by 'createdDate'
+     * so no need to sort here again
+     *
+     * @param savedChildren    - saved children, sorted in ascending order by 'createdDate'
+     * @param bufferedChildren - buffered children, sorted in ascending order by 'createdDate'
+     * @return list of completed children
+     */
+    private List<LogDataMng> mergeChildren(List<LogDataMng> savedChildren, List<LogDataMng> bufferedChildren) {
+        Map<String, LogDataMng> merged = new LinkedHashMap<>();
+
+        for (LogDataMng child : savedChildren) {
+            merged.put(buildKey(child), child);
+        }
+
+        for (LogDataMng child : bufferedChildren) {
+            merged.put(buildKey(child), child);
+        }
+
+        return new ArrayList<>(merged.values());
     }
 
     // ------------------------------------------------------------------------------------
@@ -439,7 +492,7 @@ public class LogDataServiceImp implements LogDataService {
      * First check in-memory buffer, then DB.
      */
     private Optional<LogDataMng> findExistingBlock(LogDataMng block) {
-        Optional<LogDataMng> inBuffer = buffer.findInBuffer(block);
+        Optional<LogDataMng> inBuffer = buffer.findByKey(block);
         if (inBuffer.isPresent()) {
             return inBuffer;
         }

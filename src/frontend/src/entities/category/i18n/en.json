@@ -1,0 +1,56 @@
+{
+  "list": {
+    "title": "Categories",
+    "subTitle": "Categories are used to organize and group Workflows and Schedules for better structure and navigation."
+  },
+  "fields": {
+    "name": {
+      "label": "Name",
+      "errors": {
+        "name_already_exists": "A category with this name already exists"
+      }
+    },
+    "parentCategory": {
+      "label": "Parent Category"
+    }
+  },
+  "sections": {
+    "general-data": {
+      "title": "General Data"
+    }
+  },
+  "wizard": {
+    "modes": {
+      "create": {
+        "header": "Create Category",
+        "subheader": "Categories are used to organize and group Workflows and Schedules for better structure and navigation.",
+        "successMessage": "Category \"{{name}}\" was successfully created"
+      },
+      "update": {
+        "header": "Update Category",
+        "subheader": "Categories are used to organize and group Workflows and Schedules for better structure and navigation.",
+        "successMessage": "Category \"{{name}}\" was successfully updated"
+      },
+      "view": {
+        "header": "Category Details",
+        "subheader": "Categories are used to organize and group Workflows and Schedules for better structure and navigation."
+      }
+    },
+    "recommendations": {
+      "1": "Create another Category",
+      "2": "Create Workflow"
+    },
+    "steps": {
+      "general-data": {
+        "header": "General Data",
+        "subheader": "Define the basic information for the new category. Select a parent category to create a nested (hierarchical) structure."
+      }
+    }
+  },
+  "confirmation": {
+    "delete": {
+      "byName": "Delete category by name \"{{name}}\"?",
+      "byId": "Delete category by id \"{{id}}\"?"
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "fields": {
+    "theme": {
+      "label": "Theme"
+    },
+    "commandNode": {
+      "label": "Mode Appearance"
+    }
+  },
+  "wizard": {
+    "steps": {
+      "theme": {
+        "header": "Theme",
+        "subheader": "Choose between the light and dark appearance for the whole application."
+      },
+      "commander": {
+        "header": "Commander",
+        "subheader": "It enables users to quickly search, navigate, and execute actions through a keyboard-driven interface, triggered by shortcuts like Ctrl + K"
+      }
+    },
+    "modes": {
+      "update": {
+        "header": "UI Settings",
+        "subheader": "Here you can update configurations for User Interface, like menu, commander, connection editor.",
+        "successMessage": "UI settings updated"
+      }
+    }
+  },
+  "messages": {
+    "themeUpdated": "Theme updated",
+    "commandModeUpdated": "Commander mode updated"
+  },
+  "customTheme": {
+    "title": "Custom theme",
+    "description": "Pick your four main colors — primary, accent, neutral tone and sidebar. A full light and dark theme is generated from them and added to the theme list.",
+    "primary": "Primary color",
+    "accent": "Accent color",
+    "neutral": "Neutral tone",
+    "sidebar": "Sidebar color",
+    "apply": "Apply custom theme",
+    "remove": "Remove custom theme",
+    "applied": "Custom theme applied",
+    "removed": "Custom theme removed"
+  }
+}

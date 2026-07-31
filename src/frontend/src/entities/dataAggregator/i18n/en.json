@@ -1,0 +1,70 @@
+{
+  "list": {
+    "title": "Data Aggregator",
+    "subTitle": "A Data Aggregator is a feature that enables structured notification handling after a Connection is triggered in a Schedule. When a Schedule executes a Connection, the Aggregator processes the execution data and prepares it for notification delivery (e.g., via <ntLink>Notification Templates</ntLink>).",
+    "filters": {
+      "showArchived": "Show archived"
+    }
+  },
+  "fields": {
+    "name": {
+      "label": "Name",
+      "errors": {
+        "name_already_exists": "An aggregator with this name already exists"
+      }
+    },
+    "args": { "label": "Arguments" },
+    "script": { "label": "Script" },
+    "archived": { "label": "Archived" }
+  },
+  "sections": {
+    "general-data": { "title": "General Data" },
+    "code": { "title": "Code" }
+  },
+  "wizard": {
+    "modes": {
+      "create": {
+        "header": "Create Data Aggregator",
+        "subheader": "Data aggregators define scripts that collect and transform data for use in notification templates.",
+        "successMessage": "Data aggregator \"{{name}}\" was successfully created"
+      },
+      "update": {
+        "header": "Update Data Aggregator",
+        "subheader": "Data aggregators define scripts that collect and transform data for use in notification templates.",
+        "successMessage": "Data aggregator \"{{name}}\" was successfully updated"
+      },
+      "view": {
+        "header": "Data Aggregator Details",
+        "subheader": "Data aggregators define scripts that collect and transform data for use in notification templates."
+      }
+    },
+    "recommendations": {
+      "1": "Create another Data Aggregator",
+      "2": "Create Notification Template"
+    },
+    "steps": {
+      "general-data": {
+        "header": "General Data",
+        "subheader": "Define the name and arguments for the data aggregator."
+      },
+      "code": {
+        "header": "Script",
+        "subheader": "Define the aggregation script logic."
+      }
+    }
+  },
+  "scriptEditor": {
+    "maximize": "Maximize script",
+    "minimize": "Minimize script"
+  },
+  "validation": {
+    "scriptContainsNotExistedArgs": "Script contains not existed arguments.",
+    "argNameInvalid": "Must start with a letter, _ or $ and contain only letters, digits, _ or $."
+  },
+  "confirmation": {
+    "delete": {
+      "byName": "Delete data aggregator by name \"{{name}}\"?",
+      "byId": "Delete data aggregator by id \"{{id}}\"?"
+    }
+  }
+}

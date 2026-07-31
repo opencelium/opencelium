@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -102,23 +103,23 @@ public class WidgetServiceImp implements WidgetService {
 
     private void populateMemoryUsage(SystemMetricsDTO dto) {
         try {
-            java.lang.management.OperatingSystemMXBean base = ManagementFactory.getOperatingSystemMXBean();
-            if (base instanceof OperatingSystemMXBean os) {
-                dto.setMemoryUsage(os.getCommittedVirtualMemorySize() / 1024);
-                dto.setMaxMemorySize(os.getTotalMemorySize() / 1024);
-            } else {
-                // fallback: JVM heap + non-heap committed / max
-                long heapCommitted    = (long) meterRegistry.get("jvm.memory.committed").tag("area", "heap").gauge().value();
-                long nonHeapCommitted = (long) meterRegistry.get("jvm.memory.committed").tag("area", "nonheap").gauge().value();
-                dto.setMemoryUsage((heapCommitted + nonHeapCommitted) / 1024);
-
-                long heapMax    = (long) meterRegistry.get("jvm.memory.max").tag("area", "heap").gauge().value();
-                long nonHeapMax = (long) meterRegistry.get("jvm.memory.max").tag("area", "nonheap").gauge().value();
-                dto.setMaxMemorySize((heapMax + nonHeapMax) / 1024);
-            }
+            // memory actually in use by the JVM, not the reserved virtual address space
+            MemoryMXBean memory = ManagementFactory.getMemoryMXBean();
+            long used = memory.getHeapMemoryUsage().getUsed() + memory.getNonHeapMemoryUsage().getUsed();
+            dto.setMemoryUsage(used / 1024);
+            dto.setMaxMemorySize(totalMemorySize() / 1024);
         } catch (Exception e) {
             log.error("Failed to retrieve memory usage", e);
         }
+    }
+
+    // physical memory of the host, or the container limit when running under cgroups
+    private long totalMemorySize() {
+        java.lang.management.OperatingSystemMXBean base = ManagementFactory.getOperatingSystemMXBean();
+        if (base instanceof OperatingSystemMXBean os) {
+            return os.getTotalMemorySize();
+        }
+        return Runtime.getRuntime().maxMemory();
     }
 
     private void populateExecLogSize(SystemMetricsDTO dto) {

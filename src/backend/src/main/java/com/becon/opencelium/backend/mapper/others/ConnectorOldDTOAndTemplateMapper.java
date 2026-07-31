@@ -20,7 +20,7 @@ public interface ConnectorOldDTOAndTemplateMapper extends Mapper<ConnectorOldDTO
     @Named("toDTO")
     @Mappings({
             @Mapping(target = "nodeId", ignore = true),
-            @Mapping(target = "invoker", expression = "java(new InvokerTemplateResource(entity.getInvoker().getName()))")
+            @Mapping(target = "invoker", expression = "java(entity.getInvoker() != null ? new InvokerTemplateResource(entity.getInvoker().getName()) : null)")
     })
     CtorTemplateResource toDTO(ConnectorOldDTO entity);
 

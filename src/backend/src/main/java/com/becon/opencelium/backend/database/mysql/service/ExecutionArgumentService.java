@@ -7,4 +7,8 @@ import java.util.List;
 public interface ExecutionArgumentService {
     void saveAll(List<ExecutionArgument> executionArguments);
     List<ExecutionArgument> findAllByExecId(Long id);
+
+    void deleteByConnectionId(Long connectionId);
+
+    void deleteBySchedulerId(int schedulerId);
 }

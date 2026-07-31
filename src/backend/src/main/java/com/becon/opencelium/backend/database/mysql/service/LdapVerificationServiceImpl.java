@@ -5,7 +5,6 @@ import com.becon.opencelium.backend.resource.LdapConfigDTO;
 import com.becon.opencelium.backend.resource.LdapVerificationMessageDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ldap.NameNotFoundException;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.core.support.LdapContextSource;
@@ -27,10 +26,13 @@ import static org.springframework.ldap.query.LdapQueryBuilder.query;
 @Service
 public class LdapVerificationServiceImpl implements LdapVerificationService {
 
-    @Autowired
-    private LdapProperties properties;
+    private final LdapProperties properties;
 
     private static final Logger logger = LoggerFactory.getLogger(LdapVerificationService.class);
+
+    public LdapVerificationServiceImpl(LdapProperties properties) {
+        this.properties = properties;
+    }
 
     @Override
     public void validateAndLog(Object principal, Object credentials) {

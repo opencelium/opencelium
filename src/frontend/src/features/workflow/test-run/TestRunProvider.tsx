@@ -1,0 +1,462 @@
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { message } from 'antd';
+import type { IMessage } from '@stomp/stompjs';
+import { useSocket } from '@shared/api/socket/useSocket';
+import { useStompSubscription } from '@shared/api/socket/useStompSubscription';
+import { apiExecutor } from '@shared/api/apiExecutor';
+import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
+import {
+	EMPTY_LIVE_LOG_TREE,
+	failPendingNodes,
+	reduceLiveLog,
+	type ExecutionSocketLog,
+} from '@features/logs';
+import { apiFetchWithHeaders } from '@shared/api/apiFetch';
+import { testConnectionExecution } from '../api/connectionApi';
+import {
+	TestRunContext,
+	type TestRunContextValue,
+	type TestRunPhase,
+	type TestRunResult,
+} from './TestRunContext';
+import { clearActiveTestRun, getActiveTestRun, saveActiveTestRun } from './testRunStorage';
+import { RESOLVED_WORKFLOW_ERROR_MESSAGE_DURATION_SEC } from '../utils/workflowApiErrors';
+import { useTestRunLeaveGuard } from './useTestRunLeaveGuard';
+import {createId} from "@shared/lib/createId.ts";
+
+const TIMEOUT_TO_COLLECT_LOGS = 3000;
+// Backend names every temporary test scheduler "!*test_schedule_<millis>_<title>"
+// (ConnectionController.test). The running-jobs feed lists them while they run.
+const TEST_SCHEDULE_TITLE_PREFIX = '!*test_schedule_';
+
+type RunningJob = { schedulerId: number; title?: string };
+
+// A running job conflicts with starting/running a test on this connection only
+// when it is a test scheduler for the SAME connection. The backend now allows
+// parallel tests across different connections and gates duplicates by matching
+// the connection title as a suffix of the scheduler title — `endsWith(title)` in
+// ConnectionController.test (the feed exposes no connectionId, so title is the
+// only available discriminator). We mirror that predicate exactly so the start
+// button reflects what the backend will actually accept.
+// `excludeSchedulerId` is our own run's scheduler, which must not count as a
+// conflict — neither while it executes nor during the lag window after we stop
+// it, before the running-jobs feed drops it.
+const isConflictingTest = (job: RunningJob, connectionTitle: string): boolean =>
+	typeof job?.title === 'string' &&
+	job.title.startsWith(TEST_SCHEDULE_TITLE_PREFIX) &&
+	job.title.endsWith(connectionTitle);
+
+const hasConflictingTest = (
+	jobs: unknown,
+	connectionTitle: string,
+	excludeSchedulerId: number | null,
+): boolean =>
+	!!connectionTitle &&
+	Array.isArray(jobs) &&
+	jobs.some(
+		(job) =>
+			isConflictingTest(job as RunningJob, connectionTitle) &&
+			(job as RunningJob).schedulerId !== excludeSchedulerId,
+	);
+
+const isOwnJobListed = (jobs: unknown, ownSchedulerId: number | null): boolean =>
+	ownSchedulerId != null &&
+	Array.isArray(jobs) &&
+	jobs.some((job) => (job as RunningJob)?.schedulerId === ownSchedulerId);
+
+type Props = {
+	connectionId?: string;
+	// This connection's title — the backend keys the single-test-per-connection
+	// rule on it (see hasConflictingTest). Must be the same value sent as the
+	// payload title so the conflict prediction matches the backend's decision.
+	connectionTitle?: string;
+	// Returns the save-shaped connection body, or null when the graph is not
+	// testable (the builder is responsible for surfacing the reason).
+	buildTestPayload: () => unknown | null;
+	// Recognizes known backend validation error codes and, when it does, highlights
+	// the offending node and returns a specific translated message. Returns null for
+	// errors it doesn't recognize, so the generic "failed to start" message is used.
+	onResolveStartError?: (error: unknown) => string | null;
+	children: ReactNode;
+};
+
+export function TestRunProvider({ connectionId, connectionTitle = '', buildTestPayload, onResolveStartError, children }: Props) {
+	const { client, status } = useSocket();
+	const { t: tEntities } = useI18n('entities');
+	const confirm = useConfirm();
+	// Read from a ref inside the feed/snapshot callbacks so editing the title
+	// doesn't churn the STOMP subscription (handleRunningJobs stays stable).
+	const connectionTitleRef = useRef(connectionTitle);
+	connectionTitleRef.current = connectionTitle;
+	// Resume a run started in a previous page session that may still be executing
+	// on the backend. Read once on first render, keyed by connectionId (which is
+	// the STOMP channelId for a saved connection — see startTest). Seeds the
+	// state and refs below so the stop button is shown without replaying logs.
+	const [resumedRun] = useState(() => (connectionId ? getActiveTestRun(connectionId) : null));
+	const [phase, setPhase] = useState<TestRunPhase>(resumedRun ? 'running' : 'idle');
+	const [logTree, setLogTree] = useState(EMPTY_LIVE_LOG_TREE);
+	const [result, setResult] = useState<TestRunResult | null>(null);
+	const [isOrphaned, setIsOrphaned] = useState(!!resumedRun);
+	// Whether a test for THIS connection is already running elsewhere (another tab
+	// or user) — the only thing that now blocks starting here. Our own run is
+	// excluded (see ownSchedulerIdRef).
+	const [isConflictingTestRunning, setIsConflictingTestRunning] = useState(false);
+	// Bumped once per failed run so the logs panel reveals the failing element.
+	const [errorRevealNonce, setErrorRevealNonce] = useState(0);
+	const hasRevealedErrorRef = useRef(false);
+	// True during the short pause after a failure before the reveal starts — the
+	// backend needs a moment to finish persisting the run before we can fetch the
+	// failing element's path. The panel shows a loading state meanwhile.
+	const [revealPending, setRevealPending] = useState(false);
+	const revealTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const schedulerIdRef = useRef<number | null>(resumedRun?.schedulerId ?? null);
+	// The scheduler of our own run, kept alive past finishRun() so the lingering
+	// entry in the running-jobs feed is not mistaken for another test. Cleared
+	// only once the feed confirms our job is actually gone (see handleRunningJobs).
+	const ownSchedulerIdRef = useRef<number | null>(resumedRun?.schedulerId ?? null);
+	const channelIdRef = useRef<string | null>(resumedRun?.channelId ?? null);
+	const unsubscribeRef = useRef<(() => void) | null>(null);
+	const startTimeRef = useRef(resumedRun?.startedAt ?? 0);
+
+	// The first outcome wins: a specific error line must not be overwritten by
+	// the generic EXECUTION FAIL line that follows it.
+	const settleResult = useCallback((next: TestRunResult) => {
+		setResult((current) => current ?? next);
+	}, []);
+
+	const finishRun = useCallback(() => {
+		unsubscribeRef.current?.();
+		unsubscribeRef.current = null;
+		if (channelIdRef.current) clearActiveTestRun(channelIdRef.current);
+		channelIdRef.current = null;
+		schedulerIdRef.current = null;
+		setIsOrphaned(false);
+		setPhase('idle');
+		// Our run was the only test allowed for this connection, so no conflict
+		// remains now. Clear the flag immediately instead of waiting for the feed to
+		// drop our (briefly lingering) own job, which would otherwise flash "another
+		// test running". ownSchedulerIdRef stays set so that lingering entry is
+		// ignored by the snapshot/feed until the backend actually drops it.
+		setIsConflictingTestRunning(false);
+		// No more lines will arrive — turn leftover spinners into red dots so
+		// the user can see where an interrupted/failed run stopped.
+		setLogTree(failPendingNodes);
+	}, []);
+
+	useEffect(
+		() => () => {
+			unsubscribeRef.current?.();
+			if (revealTimerRef.current) clearTimeout(revealTimerRef.current);
+		},
+		[],
+	);
+
+	// If the transport drops mid-run the backend can no longer reach this
+	// channel — reset so the button doesn't stay stuck on "stop". The phase
+	// reset is a render-phase adjustment; the subscription teardown stays in
+	// an effect because it touches the external STOMP client. Orphaned runs are
+	// exempt: their backend run outlives this page session, so we keep the stop
+	// button while the socket (re)connects.
+	if (status !== 'connected' && phase !== 'idle' && !isOrphaned) {
+		setPhase('idle');
+		// The run died with the connection — mark in-flight rows as failed.
+		setLogTree(failPendingNodes);
+		settleResult({ kind: 'stopped' });
+	}
+	useEffect(() => {
+		if (status === 'connected') return;
+		// Transport down: drop the now-dead subscription so it is re-created on
+		// reconnect (the orphan-resume effect re-subscribes). A normal run also
+		// forgets its schedulerId; an orphaned run keeps it so the user can still
+		// terminate the backend execution after the socket comes back.
+		unsubscribeRef.current?.();
+		unsubscribeRef.current = null;
+		if (!isOrphaned) schedulerIdRef.current = null;
+	}, [status, isOrphaned]);
+
+	const handleSocketLog = useCallback(
+		(log: ExecutionSocketLog) => {
+			setLogTree((tree) => reduceLiveLog(tree, log));
+
+			const isExecutionEnd =
+				log.type === 'EXECUTION' && (log.status === 'COMPLETE' || log.status === 'FAIL');
+			if (log.error?.message || (log.type === 'EXECUTION' && log.status === 'FAIL')) {
+				settleResult({ kind: 'failed' });
+				// First failure of the run drives the panel to expand to the error.
+				// Wait ~1.5s before revealing: the backend needs a moment to finish
+				// persisting the run, otherwise the on-demand child fetches race it.
+				// Show a loading state during the pause.
+				if (!hasRevealedErrorRef.current) {
+					hasRevealedErrorRef.current = true;
+					setRevealPending(true);
+					revealTimerRef.current = setTimeout(() => {
+						setRevealPending(false);
+						setErrorRevealNonce((n) => n + 1);
+					}, TIMEOUT_TO_COLLECT_LOGS);
+				}
+			} else if (log.type === 'EXECUTION' && log.status === 'COMPLETE') {
+				settleResult({
+					kind: 'finished',
+					executionTimeMs: Date.now() - startTimeRef.current,
+				});
+			}
+			if (isExecutionEnd || log.error?.message) finishRun();
+		},
+		[settleResult, finishRun],
+	);
+
+	// Orphaned runs can't replay the logs they already emitted, so we don't
+	// rebuild the tree — we only watch for the end line to clear the stop button.
+	const handleOrphanLog = useCallback(
+		(log: ExecutionSocketLog) => {
+			const isExecutionEnd =
+				log.type === 'EXECUTION' && (log.status === 'COMPLETE' || log.status === 'FAIL');
+			if (isExecutionEnd || log.error?.message) finishRun();
+		},
+		[finishRun],
+	);
+
+	// A run that finished while the page was closed leaves a stale localStorage
+	// record: its end line went to a topic nobody was subscribed to, so the
+	// orphan subscription above will never receive it and the stop button would
+	// hang forever. Verify liveness once on resume against the backend's
+	// running-jobs list (the debug test scheduler is listed there while it runs)
+	// and clear the stale state when the run is already gone.
+	useEffect(() => {
+		if (!isOrphaned) return;
+		let cancelled = false;
+		void (async () => {
+			const schedulerId = schedulerIdRef.current;
+			// No schedulerId means the run was never confirmed started — treat as done.
+			if (schedulerId == null) {
+				finishRun();
+				return;
+			}
+			const running = (await apiExecutor({
+				url: '/scheduler/running/all',
+				method: 'GET',
+				options: { ignoreError: true },
+			})) as { schedulerId: number }[] | { status?: number; error?: unknown };
+			if (cancelled) return;
+			// On a failed request, keep the stop button rather than guess.
+			if (!Array.isArray(running)) return;
+			if (!running.some((job) => job?.schedulerId === schedulerId)) finishRun();
+		})();
+		return () => {
+			cancelled = true;
+		};
+	}, [isOrphaned, finishRun]);
+
+	// Subscribe an orphaned run once the socket is up so a still-running backend
+	// execution can clear the stop button when it finishes.
+	useEffect(() => {
+		if (!isOrphaned || status !== 'connected' || !client) return;
+		if (unsubscribeRef.current) return;
+		const channelId = channelIdRef.current;
+		if (!channelId) return;
+		const subscription = client.subscribe(`/execution/logs/${channelId}`, (frame: IMessage) => {
+			try {
+				handleOrphanLog(JSON.parse(frame.body) as ExecutionSocketLog);
+			} catch (err) {
+				console.error('[test-run] failed to parse execution log', err);
+			}
+		});
+		unsubscribeRef.current = () => subscription.unsubscribe();
+	}, [isOrphaned, status, client, handleOrphanLog]);
+
+	// Only one test per connection may run at a time (parallel tests on different
+	// connections are allowed). Track whether a test for THIS connection is running
+	// elsewhere: live via the running-jobs feed, plus an initial REST snapshot (the
+	// feed only pushes on job start/finish, so a test already running at page load
+	// wouldn't be seen otherwise). Re-snapshot whenever our own run settles so the
+	// block lifts promptly.
+	const handleRunningJobs = useCallback((jobs: RunningJob[]) => {
+		// Once the feed no longer lists our own run, stop excluding it — a future
+		// scheduler reusing the same id must then count as a real conflict.
+		if (ownSchedulerIdRef.current != null && !isOwnJobListed(jobs, ownSchedulerIdRef.current)) {
+			ownSchedulerIdRef.current = null;
+		}
+		setIsConflictingTestRunning(
+			hasConflictingTest(jobs, connectionTitleRef.current, ownSchedulerIdRef.current),
+		);
+	}, []);
+	useStompSubscription<RunningJob[]>(
+		client,
+		status === 'connected',
+		'/scheduler/running/all',
+		handleRunningJobs,
+	);
+	useEffect(() => {
+		if (status !== 'connected' || phase !== 'idle') return;
+		let cancelled = false;
+		void (async () => {
+			const jobs = await apiExecutor({
+				url: '/scheduler/running/all',
+				method: 'GET',
+				options: { ignoreError: true },
+			});
+			if (!cancelled)
+				setIsConflictingTestRunning(
+					hasConflictingTest(jobs, connectionTitleRef.current, ownSchedulerIdRef.current),
+				);
+		})();
+		return () => {
+			cancelled = true;
+		};
+	}, [status, phase]);
+
+	const startTest = useCallback(async () => {
+		if (phase !== 'idle' || !client || status !== 'connected') return;
+		// Enforce the single-test-per-connection rule (the button is also disabled,
+		// this guards against a race where a test for this connection started moments ago).
+		if (isConflictingTestRunning) {
+			message.error(tEntities('connection.test.otherTestRunning'));
+			return;
+		}
+		const payload = buildTestPayload();
+		if (!payload) return;
+
+		const channelId = connectionId || createId();
+		channelIdRef.current = channelId;
+		const startedAt = Date.now();
+		setLogTree(EMPTY_LIVE_LOG_TREE);
+		setResult(null);
+		setIsOrphaned(false);
+		hasRevealedErrorRef.current = false;
+		if (revealTimerRef.current) clearTimeout(revealTimerRef.current);
+		setRevealPending(false);
+		startTimeRef.current = startedAt;
+		setPhase('starting');
+		// Persist before the run is triggered so a page reload mid-test can still
+		// detect the active run. The schedulerId is filled in once the POST returns.
+		saveActiveTestRun({ channelId, schedulerId: null, startedAt });
+
+		// Subscribe before triggering the run so the first PENDING lines are not lost.
+		const subscription = client.subscribe(`/execution/logs/${channelId}`, (frame: IMessage) => {
+			try {
+				handleSocketLog(JSON.parse(frame.body) as ExecutionSocketLog);
+			} catch (err) {
+				console.error('[test-run] failed to parse execution log', err);
+			}
+		});
+		unsubscribeRef.current = () => subscription.unsubscribe();
+
+		try {
+			const response = await testConnectionExecution(payload, channelId);
+			schedulerIdRef.current = response.data?.schedulerId ?? null;
+			ownSchedulerIdRef.current = schedulerIdRef.current;
+			// The run may have finished (and cleared the record) while the POST was
+			// in flight — only persist the schedulerId if this run is still active.
+			if (channelIdRef.current === channelId) {
+				saveActiveTestRun({ channelId, schedulerId: schedulerIdRef.current, startedAt });
+			}
+			// The run may already have finished while the POST was in flight.
+			if (unsubscribeRef.current) setPhase('running');
+		} catch (err) {
+			console.error(err);
+			const specificMessage = onResolveStartError?.(err);
+			message.error(
+				specificMessage ?? tEntities('connection.test.startFailed'),
+				specificMessage ? RESOLVED_WORKFLOW_ERROR_MESSAGE_DURATION_SEC : undefined,
+			);
+			finishRun();
+		}
+	}, [phase, client, status, isConflictingTestRunning, buildTestPayload, connectionId, handleSocketLog, finishRun, tEntities, onResolveStartError]);
+
+	const stopTest = useCallback(async () => {
+		if (phase !== 'running' && phase !== 'starting') return;
+		const schedulerId = schedulerIdRef.current;
+		setPhase('stopping');
+		if (schedulerId != null) {
+			const response = await apiExecutor({
+				url: `/scheduler/terminate/${schedulerId}`,
+				method: 'GET',
+				options: { ignoreError: true },
+			});
+			// apiExecutor returns the RTK error object instead of throwing.
+			const isTerminateFailed =
+				!!response && typeof response === 'object' &&
+				('status' in response || 'error' in response);
+			if (isTerminateFailed) {
+				// The run is still alive on the backend — keep the subscription
+				// and the stop button so the user can retry.
+				message.error(tEntities('connection.test.stopFailed'));
+				setPhase('running');
+				return;
+			}
+		}
+		message.info(tEntities('connection.test.terminated'));
+		settleResult({ kind: 'stopped' });
+		finishRun(); // unsubscribes from the socket
+	}, [phase, settleResult, finishRun, tEntities]);
+
+	const clearLogs = useCallback(() => {
+		if (phase !== 'idle') return;
+		setLogTree(EMPTY_LIVE_LOG_TREE);
+		setResult(null);
+	}, [phase]);
+
+	// Leaving the page mid-test: confirm, then terminate the backend run before
+	// the navigation proceeds. Returns whether the navigation should continue.
+	const confirmLeaveDuringTest = useCallback(async () => {
+		const ok = await confirm({
+			title: tEntities('connection.test.leaveConfirm.title'),
+			message: tEntities('connection.test.leaveConfirm.message'),
+		});
+		if (!ok) return false;
+		// Best-effort terminate — the user has chosen to leave regardless of the
+		// outcome; a survivor is picked up by the orphan-resume on return.
+		const schedulerId = schedulerIdRef.current;
+		if (schedulerId != null) {
+			await apiExecutor({
+				url: `/scheduler/terminate/${schedulerId}`,
+				method: 'GET',
+				options: { ignoreError: true },
+			});
+		}
+		finishRun();
+		return true;
+	}, [confirm, tEntities, finishRun]);
+
+	// Tab close / reload: the document is unloading and React state is gone, so
+	// fire a best-effort keepalive terminate (outlives the page) and drop the
+	// stored record so the run isn't resumed as an orphan on reopen. No await —
+	// the request is sent and the page is free to die.
+	const terminateOnUnload = useCallback(() => {
+		const schedulerId = schedulerIdRef.current;
+		if (schedulerId != null) {
+			void apiFetchWithHeaders(`/scheduler/terminate/${schedulerId}`, {
+				method: 'GET',
+				keepalive: true,
+				timeoutMs: null,
+			});
+		}
+		if (channelIdRef.current) clearActiveTestRun(channelIdRef.current);
+	}, []);
+
+	useTestRunLeaveGuard(phase !== 'idle', confirmLeaveDuringTest, terminateOnUnload);
+
+	// A test for this connection running elsewhere blocks us only when we have no
+	// run of our own.
+	const isOtherTestRunning = phase === 'idle' && isConflictingTestRunning;
+
+	const value = useMemo<TestRunContextValue>(
+		() => ({
+			socketStatus: status,
+			phase,
+			logTree,
+			result,
+			isOrphaned,
+			isOtherTestRunning,
+			errorRevealNonce,
+			revealPending,
+			startTest,
+			stopTest,
+			clearLogs,
+		}),
+		[status, phase, logTree, result, isOrphaned, isOtherTestRunning, errorRevealNonce, revealPending, startTest, stopTest, clearLogs],
+	);
+
+	return <TestRunContext.Provider value={value}>{children}</TestRunContext.Provider>;
+}

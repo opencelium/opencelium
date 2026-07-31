@@ -67,6 +67,18 @@ public class FileNameUtils {
         return fileName.substring(index + 1);
     }
 
+    /**
+     * Returns {@code true} if the given file extension denotes a supported image type
+     * (jpg, jpeg or png), case-insensitively.
+     */
+    public static boolean isSupportedImageExtension(final String extension) {
+        if (extension == null) {
+            return false;
+        }
+        String ext = extension.toLowerCase();
+        return ext.equals("jpg") || ext.equals("jpeg") || ext.equals("png");
+    }
+
     public static String removeExtension(final String fileName) {
         if (fileName == null) {
             return null;

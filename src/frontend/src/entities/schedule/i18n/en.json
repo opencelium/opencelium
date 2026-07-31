@@ -1,0 +1,199 @@
+{
+  "list": {
+    "title": "Schedules",
+    "subTitle": "Schedules determine when specific workflows are executed, either on a defined timetable or based on triggers. The number under a status circle is a countdown to its next cron trigger.<legend>Status legend: <legendRunning>Running</legendRunning><legendSucceeded>Last run succeeded</legendSucceeded><legendFailed>Last run failed</legendFailed><legendNone>No cron and no run history</legendNone></legend>",
+    "searchPlaceholder": "Search by connection name",
+    "columns": {
+      "executions": "Executions",
+      "status": "Status",
+      "connection": "Workflow",
+      "cronExp": "Cron",
+      "lastSuccessExecution": "Last Success",
+      "lastFailExecution": "Last Fail",
+      "lastDuration": "Avg Duration",
+      "debugMode": "Debug",
+      "webhook": "Webhook"
+    },
+    "noExecutions": "No running executions"
+  },
+  "webhook": {
+    "copied": "Webhook URL copied to clipboard",
+    "copyTooltip": "Copy webhook URL",
+    "createTooltip": "Generate webhook URL",
+    "created": "Webhook URL generated",
+    "deleteTooltip": "Remove webhook",
+    "deleted": "Webhook removed",
+    "confirmDelete": {
+      "title": "Remove webhook?",
+      "message": "The webhook URL will stop working immediately. This action cannot be undone."
+    }
+  },
+  "start": {
+    "tooltip": "Start execution",
+    "success": "Schedule execution started",
+    "error": {
+      "concurrentForbidden": "Another schedule for this connection is already running. Wait for it to finish before starting this one.",
+      "failed": "Could not start the schedule execution"
+    }
+  },
+  "terminate": {
+    "tooltip": "Terminate execution",
+    "success": "Schedule execution terminated"
+  },
+  "notifications": {
+    "tooltip": "Notifications",
+    "dialogTitle": "Notifications",
+    "subtitle": "Configure who gets notified when this schedule runs.",
+    "addButton": "Add notification",
+    "empty": "No notifications yet.",
+    "close": "Close",
+    "cancel": "Cancel",
+    "unnamedItem": "Untitled notification",
+    "deleteTooltip": "Delete notification",
+    "aggregatorHint": "Data Aggregator works only for Post",
+    "created": "Notification created",
+    "updated": "Notification updated",
+    "deleted": "Notification deleted",
+    "fields": {
+      "name": "Name",
+      "eventType": "Event type",
+      "notificationType": "Notification type",
+      "template": "Template",
+      "recipients": "Recipients",
+      "webhookUrl": "Webhook URL"
+    },
+    "eventTypeOptions": {
+      "pre": "Pre",
+      "post": "Post",
+      "alert": "Alert"
+    },
+    "actions": {
+      "create": "Create",
+      "update": "Update",
+      "delete": "Delete"
+    },
+    "errors": {
+      "nameRequired": "Name is required",
+      "notificationTypeRequired": "Notification type is required",
+      "templateRequired": "Template is required",
+      "recipientsEmailsRequired": "Select at least one recipient",
+      "webhookUrlRequired": "Webhook URL is required",
+      "eventTypeInvalid": "Invalid event type"
+    },
+    "confirmDelete": {
+      "title": "Delete notification?",
+      "message": "This notification will be removed permanently."
+    },
+    "bulk": {
+      "button": "Notifications",
+      "title": "Add notification to selected schedules",
+      "subtitle": "This notification will be created for {{count}} selected schedule(s).",
+      "create": "Create for {{count}} schedule(s)",
+      "success": "Notification created for {{count}} schedule(s)",
+      "partialError": "Failed to create notification for {{count}} schedule(s)"
+    }
+  },
+  "supportLogs": {
+    "tooltip": "Support logs",
+    "title": "Support Logs",
+    "titleHint": "Generate a masked support-logs file for this connection. Use the eye toggles to choose which parts are masked before downloading.",
+    "levelLabel": "Level Of Masking",
+    "levels": {
+      "custom": "Custom",
+      "light": "Light",
+      "medium": "Medium",
+      "strict": "Strict"
+    },
+    "sections": {
+      "url": "URL",
+      "headers": "Headers",
+      "request": "Request",
+      "response": "Response"
+    },
+    "mask": "Mask this section",
+    "unmask": "Unmask this section",
+    "submit": "Create Support-Logs",
+    "cancel": "Cancel",
+    "started": "Started collecting support logs for \"{{connectionTitle}}\". You'll be notified when the file is ready.",
+    "error": "Failed to start collecting support logs"
+  },
+  "executionLogs": {
+    "seeLogs": "see logs"
+  },
+  "debugMode": {
+    "enableSuccess": "Debug mode enabled",
+    "disableSuccess": "Debug mode disabled"
+  },
+  "cronEdit": {
+    "tooltip": "Edit cron expression",
+    "title": "Edit Cron Expression",
+    "subtitle": "Change when this schedule runs. Saving updates the schedule with the new cron expression.",
+    "submit": "Save",
+    "cancel": "Cancel",
+    "success": "Cron expression for connection \"{{connectionTitle}}\" was successfully updated to \"{{cronExp}}\"",
+    "error": "Failed to update cron expression"
+  },
+  "fields": {
+    "title": {
+      "label": "Title"
+    },
+    "connection": {
+      "label": "Workflow"
+    },
+    "debugMode": {
+      "label": "Logs",
+      "text": {
+        "on": "Logs are activated",
+        "off": "Logs are deactivated"
+      }
+    },
+    "cronExp": {
+      "label": "Cron Expression",
+      "error": {
+        "invalid": "Invalid cron expression"
+      }
+    }
+  },
+  "sections": {
+    "general-data": {
+      "title": "General Data"
+    }
+  },
+  "wizard": {
+    "modes": {
+      "create": {
+        "header": "Create Schedule",
+        "subheader": "Configure a schedule to run a workflow automatically based on a cron expression.",
+        "successMessage": "Schedule for connection \"{{connectionTitle}}\" was successfully created",
+        "successMessageWithCron": "Schedule for connection \"{{connectionTitle}}\" with cron \"{{cronExp}}\" was successfully created"
+      },
+      "update": {
+        "header": "Update Schedule",
+        "subheader": "Modify schedule information and save changes.",
+        "successMessage": "Schedule for connection \"{{connectionTitle}}\" was successfully updated",
+        "successMessageWithCron": "Schedule for connection \"{{connectionTitle}}\" with cron \"{{cronExp}}\" was successfully updated"
+      },
+      "view": {
+        "header": "Schedule Details",
+        "subheader": "View schedule information."
+      }
+    },
+    "recommendations": {
+      "1": "Create Schedule",
+      "2": "Create Workflow",
+      "3": "Create Connector"
+    },
+    "steps": {
+      "general-data": {
+        "header": "General Data",
+        "subheader": "General information about schedule"
+      }
+    }
+  },
+  "confirmation": {
+    "delete": {
+      "byConnectionTitle": "Delete schedule by connection title \"{{connectionTitle}}\"?",
+      "byId": "Delete schedule by id \"{{id}}\"?"
+    }
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "header": {
+    "title": "Dashboard",
+    "subtitle": "Operational overview of your OpenCelium environment",
+    "dateRangeLabel": "Last 7 days"
+  },
+  "comingSoon": "Coming soon",
+  "waitingApi": "Waiting API",
+  "refresh": "Refresh",
+  "connection": {
+    "statusConnected": "Live — synced in real time",
+    "statusConnecting": "Connecting to live updates…",
+    "statusDisconnected": "Connection lost — data may be stale"
+  },
+  "metrics": {
+    "executions": "Executions",
+    "failureRate": "Failure rate",
+    "avgRuntime": "Avg runtime",
+    "runtime": "Run time",
+    "logs": "Logs",
+    "noData": "—"
+  },
+  "attention": {
+    "title": "Attention required",
+    "viewAll": "View all",
+    "empty": "Nothing needs attention right now"
+  },
+  "recentActivity": {
+    "title": "Recent activity",
+    "viewAll": "View all",
+    "empty": "No recent activity"
+  },
+  "systemHealth": {
+    "title": "System health",
+    "healthy": "Healthy",
+    "warning": "Warning",
+    "critical": "Critical",
+    "statusHealthy": "Healthy"
+  },
+  "executionsChart": {
+    "title": "Executions & failures",
+    "executions": "Executions",
+    "failures": "Failures"
+  },
+  "resourceUsage": {
+    "title": "Resource usage",
+    "cpu": "CPU",
+    "memory": "Memory"
+  },
+  "topConnectors": {
+    "title": "Top workflows",
+    "name": "Workflow",
+    "executions": "Executions",
+    "failureRate": "Failure rate"
+  }
+}

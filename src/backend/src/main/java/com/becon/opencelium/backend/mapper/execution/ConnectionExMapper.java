@@ -15,8 +15,15 @@ public class ConnectionExMapper {
 
     public ConnectionEx toEntity(ConnectionMng dto){
         ConnectionEx connectionEx = new ConnectionEx();
-        connectionEx.setSource(connectorExMapper.toEntity(dto.getFromConnector(), dto.getId()));
-        connectionEx.setTarget(connectorExMapper.toEntity(dto.getToConnector(), dto.getId()));
+
+        connectionEx.setSource(connectorExMapper.toEntity(dto.getFromConnector()));
+
+        if (dto.getToConnector() != null) {
+            connectionEx.setTarget(connectorExMapper.toEntity(dto.getToConnector()));
+        } else {
+            connectionEx.setConnectors(connectorExMapper.toMethodConnectorMap(dto.getFromConnector()));
+        }
+
         connectionEx.setFieldBind(fieldBindExMapper.toEntityAll(dto.getFieldBindings()));
         return connectionEx;
     }

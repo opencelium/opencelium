@@ -60,7 +60,7 @@ public class ReferenceUtility {
     }
 
     public static String[] splitPaths(String paths) {
-        if (paths.isEmpty()) {
+        if (paths.isBlank()) {
             return new String[]{""};
         }
 

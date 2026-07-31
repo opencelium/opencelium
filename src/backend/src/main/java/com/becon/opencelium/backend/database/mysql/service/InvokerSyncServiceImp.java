@@ -30,6 +30,7 @@ import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -159,7 +160,7 @@ public class InvokerSyncServiceImp implements InvokerSyncService {
         List<String> details = new ArrayList<>();
 
         // update invoker files that have not been modified manually
-        try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(zipBytes))) {
+        try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(zipBytes), StandardCharsets.UTF_8)) {
             ZipEntry entry; // = invoker file
             while ((entry = zis.getNextEntry()) != null) {
                 if (entry.getName().endsWith(".xml")) {

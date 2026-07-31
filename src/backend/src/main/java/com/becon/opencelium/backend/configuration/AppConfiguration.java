@@ -40,6 +40,18 @@ public class AppConfiguration {
                 .setReadTimeout(Duration.ofMillis(SecurityConstant.READ_TIMEOUT)).build();
     }
 
+    /**
+     * Dedicated client for outgoing incoming-webhook notifications. Kept separate from the shared
+     * {@link #restTemplate()} used by connector execution so its connect/read timeouts never affect it.
+     */
+    @Bean(name = "webhookRestTemplate")
+    public RestTemplate webhookRestTemplate() {
+        return new RestTemplateBuilder()
+                .setConnectTimeout(Duration.ofMillis(SecurityConstant.CONN_TIMEOUT))
+                .setReadTimeout(Duration.ofMillis(SecurityConstant.READ_TIMEOUT))
+                .build();
+    }
+
 //    @Bean
 //    public YamlPropertiesFactoryBean getYamlProps() {
 //        YamlPropertiesFactoryBean yamlFactory = new YamlPropertiesFactoryBean();

@@ -26,18 +26,17 @@ import com.becon.opencelium.backend.exception.CommunicationFailedException;
 import com.becon.opencelium.backend.exception.ConnectorAlreadyExistsException;
 import com.becon.opencelium.backend.exception.ConnectorNotFoundException;
 import com.becon.opencelium.backend.exception.GeneralServiceException;
-import com.becon.opencelium.backend.invoker.entity.FunctionInvoker;
-import com.becon.opencelium.backend.invoker.service.InvokerService;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
-import com.becon.opencelium.backend.mapper.base.Mapper;
+import com.becon.opencelium.backend.database.mysql.service.ConnectorHealthService;
+import com.becon.opencelium.backend.enums.ConnectorStatus;
+import com.becon.opencelium.backend.mapper.mysql.ConnectorResourceMapper;
 import com.becon.opencelium.backend.resource.IdentifiersDTO;
 import com.becon.opencelium.backend.resource.application.ResultDTO;
+import com.becon.opencelium.backend.resource.connector.ConnectorMetaDTO;
 import com.becon.opencelium.backend.resource.connector.ConnectorResource;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -52,6 +51,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
@@ -63,18 +63,18 @@ import java.util.*;
 public class ConnectorController {
 
     private final ConnectorService connectorService;
-    private final InvokerService invokerService;
+    private final ConnectorHealthService connectorHealthService;
     private final ConnectionService connectionService;
-    private final Mapper<Connector, ConnectorResource> connectorResourceMapper;
+    private final ConnectorResourceMapper connectorResourceMapper;
 
     public ConnectorController(
             @Qualifier("connectorServiceImp") ConnectorService connectorService,
-            @Qualifier("invokerServiceImp") InvokerService invokerService,
+            ConnectorHealthService connectorHealthService,
             @Qualifier("connectionServiceImp") ConnectionService connectionService,
-            Mapper<Connector, ConnectorResource> connectorResourceMapper
+            ConnectorResourceMapper connectorResourceMapper
     ) {
         this.connectorService = connectorService;
-        this.invokerService = invokerService;
+        this.connectorHealthService = connectorHealthService;
         this.connectionService = connectionService;
         this.connectorResourceMapper = connectorResourceMapper;
     }
@@ -163,6 +163,47 @@ public class ConnectorController {
         return ResponseEntity.ok(connectorResources);
     }
 
+    @Operation(summary = "Retrieves the credential-free health/status view of all connectors")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Connector meta data has been successfully retrieved",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ConnectorMetaDTO.class)))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/meta/all")
+    public ResponseEntity<List<ConnectorMetaDTO>> getAllMeta() {
+        // Raw read on purpose: the meta view carries no credentials, so decryption is skipped.
+        return ResponseEntity.ok(connectorResourceMapper.toMetaDTOAll(connectorService.findAllRaw()));
+    }
+
+    @Operation(summary = "Runs an immediate health check of the connector and returns its current status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Current connector status; if a check is already in flight, the "
+                            + "stored state is returned without triggering another one",
+                    content = @Content(schema = @Schema(implementation = ConnectorMetaDTO.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PostMapping("/{id}/status/refresh")
+    public ResponseEntity<ConnectorMetaDTO> refreshStatus(@PathVariable int id) {
+        // getById decrypts the request data the check needs and throws the usual
+        // not-found exception for unknown ids.
+        Connector connector = connectorService.getById(id);
+        connectorHealthService.runCheck(connector);
+        // Reload raw to reflect exactly what runCheck persisted.
+        return ResponseEntity.ok(connectorResourceMapper.toMetaDTO(connectorService.getByIdRaw(id)));
+    }
+
     @Operation(summary = "Retrieves all connectors with IDs")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
@@ -230,6 +271,43 @@ public class ConnectorController {
                         connectorService.update(id, connectorResource)
                 )
         );
+    }
+
+    @Operation(summary = "Uploads (or replaces) the icon of a connector by its ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Connector icon has been successfully stored",
+                    content = @Content(schema = @Schema(implementation = ConnectorResource.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @PostMapping(path = "/{id}/icon", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ConnectorResource> uploadIcon(@PathVariable int id,
+                                                        @RequestParam("file") MultipartFile file) {
+        Connector connector = connectorService.storeIcon(id, file);
+        return ResponseEntity.ok(connectorResourceMapper.toDTO(connector));
+    }
+
+    @Operation(summary = "Deletes the icon of a connector by its ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204",
+                    description = "Connector icon has been successfully deleted",
+                    content = @Content),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @DeleteMapping(path = "/{id}/icon")
+    public ResponseEntity<?> deleteIcon(@PathVariable int id) {
+        connectorService.deleteIcon(id);
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Modifies connector's required data")
@@ -335,97 +413,26 @@ public class ConnectorController {
     @PostMapping(path = "/check", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> checkCommunication(@RequestBody ConnectorResource connectorResource) throws JsonProcessingException, IOException {
         Connector connector = connectorResourceMapper.toEntity(connectorResource);
-//        Invoker invoker = invokerService.findByName(connector.getInvoker());
-//        AuthFactory authFactory = new AuthFactory();
-//        ApiAuth authenticationType = authFactory.generateAuth(invoker);
-//        authenticationType.getAccessCredentials(connector);
-        ResponseEntity<?> responseEntity;
-        try {
-            responseEntity = connectorService.checkCommunication(connector);
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        ConnectorHealthService.CheckResult result = connectorHealthService.check(connector);
+
+        // Persist the latest result only for a saved connector; an unsaved/new connector has no row.
+        if (connectorResource.getConnectorId() > 0 && connectorService.existsById(connectorResource.getConnectorId())) {
+            connectorService.updateStatus(connectorResource.getConnectorId(), result.status(), result.error());
+        }
+
+        if (result.status() == ConnectorStatus.DOWN) {
+            // The remote request could not be completed (e.g. host unreachable).
             throw new CommunicationFailedException();
         }
 
-        FunctionInvoker functionInvoker = invokerService.getTestFunction(connector.getInvoker());
-
-        Map<String, Object> failBody = null;
-        String formatType = "";
-        if (functionInvoker.getResponse().getFail() != null && functionInvoker.getResponse().getFail().getBody() != null) {
-            formatType = functionInvoker.getResponse().getFail().getBody().getFormat();
-            failBody = functionInvoker.getResponse().getFail().getBody().getFields();
-        }
-
-        String response = "";
-        String fail = convertMapToJson(failBody);
-        if (formatType.equals("json")) {
-            System.out.println(responseEntity.getBody());
-            response = responseEntity.getBody().toString();
-        }
-
-        if ((responseEntity.getStatusCode() == HttpStatus.OK) && hasError(fail, response)) {
+        if ((result.httpStatus() == HttpStatus.OK) && result.status() != ConnectorStatus.UP) {
             return ResponseEntity.ok().body("{\"status\":\"401\", \"error\":\"401\"}");
         }
 
-        if (responseEntity.getStatusCode() == HttpStatus.UNAUTHORIZED) {
-            return ResponseEntity.ok().body("{\"status\":\"" + responseEntity.getStatusCode() + "\",\"error\":\"Error in remote system\"}");
+        if (result.httpStatus() == HttpStatus.UNAUTHORIZED) {
+            return ResponseEntity.ok().body("{\"status\":\"" + result.httpStatus() + "\",\"error\":\"Error in remote system\"}");
         }
         return ResponseEntity.ok().body("{\"status\":\"200\"}");
-    }
-
-    public static String convertMapToJson(Map<String, Object> map) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            return objectMapper.writeValueAsString(map);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    private boolean hasError(String failBody, String response) {
-        if (failBody == null || failBody.isEmpty()) {
-            return false;
-        }
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode invFailNode = objectMapper.readTree(failBody);
-            JsonNode responseNode = objectMapper.readTree(response);
-
-            return containsProperties(responseNode, invFailNode);
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private boolean containsProperties(JsonNode jsonNode1, JsonNode jsonNode2) {
-        if (jsonNode2.isObject()) {
-            for (String key : iterable(jsonNode2.fieldNames())) {
-                if (!jsonNode1.has(key)) {
-                    return false;
-                }
-                if (!containsProperties(jsonNode1.get(key), jsonNode2.get(key))) {
-                    return false;
-                }
-            }
-        } else if (jsonNode2.isArray()) {
-            if (!jsonNode1.isArray() || jsonNode1.size() < jsonNode2.size()) {
-                return false;
-            }
-            for (int i = 0; i < jsonNode2.size(); i++) {
-                if (!containsProperties(jsonNode1.get(i), jsonNode2.get(i))) {
-                    return false;
-                }
-            }
-        } else {
-            return jsonNode1.isValueNode() && jsonNode2.isValueNode();
-        }
-        return true;
-    }
-
-    private <T> Iterable<T> iterable(final java.util.Iterator<T> iterator) {
-        return () -> iterator;
     }
 
     @Operation(summary = "Verifies uniqueness of connector title")

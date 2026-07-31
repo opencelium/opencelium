@@ -1,0 +1,11 @@
+export type I18nNamespace =
+    | 'common'
+    | 'auth'
+    | 'entities'
+    | 'meta'
+    | 'error'
+    | 'success'
+    | 'widget'
+    | 'dashboard'
+    | 'logs'
+    | 'workflow'

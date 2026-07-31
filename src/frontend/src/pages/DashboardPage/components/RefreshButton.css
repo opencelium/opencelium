@@ -1,0 +1,25 @@
+.dashboardRefreshButton {
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    padding: 8px;
+    display: inline-flex;
+    align-items: center;
+    color: var(--color-action-primary);
+    border-radius: 6px;
+}
+
+.dashboardRefreshButton:hover {
+    background: var(--color-background-hover);
+    color: var(--color-action-primary-hover);
+}
+
+.dashboardRefreshSpin {
+    animation: dashboardRefreshSpin 0.9s linear infinite;
+}
+
+@keyframes dashboardRefreshSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}

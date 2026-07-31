@@ -1,0 +1,20 @@
+Widget
+export function ExecutionWidget() {
+  const { data, error } = useGetExecutionsQuery()
+
+  return (
+    <Widget>
+      {error && <WidgetError />}
+      {data && <ExecutionList data={data} />}
+    </Widget>
+  )
+}
+
+Form
+const mutation = useCreateConnectorMutation()
+
+useEffect(() => {
+  if (mutation.error?.type === 'VALIDATION') {
+    applyServerErrors(form, mutation.error.details)
+  }
+}, [mutation.error])

@@ -1,0 +1,74 @@
+Component
+const { t } = useI18n('auth')
+<Index>{t('login.title')}</Index>
+
+Notification
+const { t } = useI18n('connector')
+notify.success(t('notifications.created'))
+
+Permission
+<Can permission="connector.update">
+  <Button>{t('common.actions.update')}</Button>
+</Can>
+
+Form
+<Input
+  label={t('connector.fields.name')}
+  placeholder={t('connector.placeholders.name')}
+/>
+
+Change language
+const { setLang, lang } = useI18n()
+<button onClick={() => setLang('de')}>
+  DE
+</button>
+
+Outside react component
+import { i18n } from '@/shared/i18n/config/i18n'
+i18n.t('common.actions.create')
+
+Many entities
+const { t: tCommon } = useI18n('common')
+const { t: tConnector } = useI18n('connector')
+
+Plural
+t('items', { count })
+en
+{
+  "items_one": "{{count}} item",
+  "items_other": "{{count}} items"
+}
+ru
+{
+  "items_one": "{{count}} элемент",
+  "items_few": "{{count}} элемента",
+  "items_many": "{{count}} элементов"
+}
+i18next decides itself
+
+Styled translation
+{
+  "notifications": {
+    "deleted": "Deleted <strong>{{count}}</strong> connectors"
+  }
+}
+<Index>
+  <Trans
+    i18nKey="notifications.deleted"
+    ns="connector"
+    values={{ count }}
+    components={{
+      strong: <strong />,
+    }}
+  />
+</Index>
+or
+{
+  "warning": "This action will delete <highlight>{{count}}</highlight> items"
+}
+const Highlight = ({ children }) => (
+  <span style={{ fontWeight: 600, color: 'red' }}>
+    {children}
+  </span>
+)
+

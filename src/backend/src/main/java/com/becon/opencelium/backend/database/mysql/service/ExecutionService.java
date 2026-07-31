@@ -35,4 +35,8 @@ public interface ExecutionService {
     Optional<Execution> findById(long id);
 
     Execution getById(long id);
+
+    void deleteBySchedulerId(int schedulerId);
+
+    double getAvgDurationOfExecution(int schedulerId);
 }

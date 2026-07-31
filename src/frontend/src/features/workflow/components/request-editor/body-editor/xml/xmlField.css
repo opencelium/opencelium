@@ -1,0 +1,86 @@
+.xmlFieldRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+  padding: 4px 10px;
+  border-left: 3px solid var(--color-border-subtle);
+  border-radius: 6px;
+  background: var(--color-background-hover);
+}
+
+.xmlFieldRowText {
+  border-left-color: var(--color-status-success-fg);
+}
+
+.xmlFieldRowAttr {
+  border-left-color: var(--color-status-warning-fg);
+}
+
+.xmlFieldRowSelected {
+  box-shadow: 0 0 0 1px var(--color-status-warning-border);
+}
+
+.xmlFieldLabel {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+}
+
+.xmlFieldValue {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+.xmlFieldInput textarea,
+.xmlFieldInput input,
+.xmlRaw textarea {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.xmlFieldPreview {
+  border: none;
+  background: transparent;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 2px 0;
+  text-align: left;
+  width: 100%;
+  word-break: break-word;
+}
+
+.xmlFieldPreviewEmpty {
+  color: var(--color-text-disabled);
+  font-style: italic;
+}
+
+.xmlField:hover .xmlFieldActions {
+  opacity: 1;
+}
+
+.xmlFieldActions {
+  opacity: 0.35;
+  transition: opacity 0.15s ease;
+  flex-shrink: 0;
+}
+
+.xmlIconButton {
+  opacity: 0.45;
+}
+
+.xmlIconButton:not(.ant-btn-dangerous) {
+  color: var(--color-action-primary);
+}
+
+.xmlActionButton {
+  font-size: 12px;
+  opacity: 0.75;
+}

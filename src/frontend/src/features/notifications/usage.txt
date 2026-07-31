@@ -1,0 +1,5 @@
+notify.success('api.success')
+notify.error('api.error')
+notify.info('api.info')
+notify.warning('api.warning')
+

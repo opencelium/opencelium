@@ -1,0 +1,182 @@
+import type {MetaSchema} from "@shared/i18n/types/schemes/meta.scheme.ts";
+import type {DashboardSchema} from "@shared/i18n/types/schemes/dashboard.scheme.ts";
+import type {AuthSchema} from "@shared/i18n/types/schemes/auth.scheme.ts";
+
+export interface I18nSchema extends MetaSchema, DashboardSchema, AuthSchema {
+    common: {
+        welcome: string,
+        items: string,
+        simple: string,
+        actions: {
+            prev: string
+            submit: string
+            next: string
+            create: string
+            update: string
+            delete: string
+            view: string
+            edit: string
+            ctrlEnterHint: string
+            cmdEnterHint: string
+        }
+        copy: {
+            tooltip: string
+            empty: string
+            success: string
+            failed: string
+        }
+        status: {
+            loading: string
+            empty: string
+        }
+        credentialEditor: {
+            updateWithoutMasterPassword: string
+            masterPasswordNotConfigured: string
+        }
+        errorBoundary: {
+            retry: string
+            reload: string
+            app: {
+                title: string
+                subtitle: string
+            }
+            page: {
+                title: string
+                subtitle: string
+            }
+            widget: {
+                title: string
+                subtitle: string
+            }
+        }
+        notFound: {
+            code: string
+            title: string
+            subtitle: string
+            goBack: string
+            goHome: string
+        }
+        accessDenied: {
+            title: string
+            subtitle: string
+        }
+        dialog: {
+            maximize: string
+            restore: string
+        }
+        list: {
+            searchPlaceholder: string
+            empty: string
+            actions: string
+            manage: string
+            deleteSelected: string
+            deleteSelectedSuccess: string
+            deleteSelectedSuccess_one: string
+            filtersTooltip: string
+            expandRow: string
+            collapseRow: string
+            confirmDelete: {
+                title: string
+                message: string
+                bulkMessage: string
+                bulkMessage_one: string
+            }
+        }
+        menu: {
+            dashboard: string
+            connectors: string
+            connections: string
+            schedules: string
+            usersAccess: string
+            users: string
+            groups: string
+            ldapCheck: string
+            configurations: string
+            invokers: string
+            connectionTemplates: string
+            dataAggregator: string
+            notificationTemplates: string
+            categories: string
+            supportFiles: string
+            licenseSystem: string
+            licenseManagement: string
+            updateAssistant: string
+            systemCheck: string
+            config: string
+            ui: string
+        }
+        commandPalette: {
+            placeholder: string
+            noResults: string
+            groups: {
+                workflow: string
+                recent: string
+                navigate: string
+                create: string
+                manage: string
+                system: string
+                general: string
+            }
+            descriptions: {
+                create: string
+                update: string
+                delete: string
+                find: string
+                list: string
+                login: string
+                system: string
+                checkLicense: string
+                updateSystemConfig: string
+                changeTheme: string
+                uploadTemplate: string
+                downloadTemplate: string
+                uploadInvoker: string
+                downloadInvoker: string
+                systemCheck: string
+                ldapCheck: string
+                workflow: string
+                help: string
+            }
+            footer: {
+                select: string
+                autocomplete: string
+                navigate: string
+                close: string
+            }
+            help: {
+                title: string
+                subtitle: string
+                keyboardTitle: string
+                empty: string
+                searchPlaceholder: string
+                noResults: string
+                shortcuts: {
+                    open: string
+                    clearScope: string
+                }
+            }
+        }
+        sidebar: {
+            expand: string
+            collapse: string
+            logout: string
+            confirmLogout: {
+                title: string
+                message: string
+            }
+        }
+        topbar: {
+            switchToGerman: string
+            switchToEnglish: string
+            notifications: string
+            switchToAdminMenu: string
+            switchToMainMenu: string
+            profile: string
+            createWorkflow: string
+            createWorkflowHint: string
+        }
+        user: {
+            unknown: string
+        }
+    },
+}

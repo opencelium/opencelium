@@ -1,0 +1,53 @@
+{
+  "page": {
+    "title": "Systemkonfiguration",
+    "subtitle": "Bearbeiten Sie die auf der Festplatte gespeicherte application.yml über diese Oberfläche. Änderungen werden gespeichert, erfordern aber einen Neustart der Anwendung. Passwörter und Tokens sind maskiert – geben Sie einen neuen Wert ein, um sie zu ersetzen."
+  },
+  "comments": {
+    "label": "Kommentare",
+    "hint": "Felder mit dem Info-Symbol haben einen Kommentar — bewegen Sie den Mauszeiger darüber, um ihn zu lesen."
+  },
+  "search": {
+    "placeholder": "Nach Feld suchen…",
+    "empty": "Keine Felder entsprechen Ihrer Suche."
+  },
+  "status": {
+    "enable": "Aktivieren (beim Speichern einkommentieren). Das Aktivieren eines Abschnitts aktiviert auch dessen Inhalt.",
+    "disable": "Deaktivieren (beim Speichern auskommentieren). Das Deaktivieren eines Abschnitts deaktiviert auch dessen Inhalt."
+  },
+  "actions": {
+    "save": "Speichern",
+    "reset": "Zurücksetzen",
+    "expandAll": "Alle aufklappen",
+    "collapseAll": "Alle einklappen"
+  },
+  "messages": {
+    "saved": "Konfiguration gespeichert.",
+    "noChanges": "Keine Änderungen zum Speichern.",
+    "saveFailed": "Konfiguration konnte nicht gespeichert werden.",
+    "loadFailed": "Konfiguration konnte nicht geladen werden.",
+    "reset": "Konfiguration vom Server neu geladen."
+  },
+  "restart": {
+    "title": "Neustart erforderlich",
+    "message": "Konfiguration gespeichert. Starten Sie den Server neu, damit die Änderungen wirksam werden."
+  },
+  "masterPassword": {
+    "title": "Geben Sie das Master-Passwort ein, um die Systemkonfiguration anzuzeigen und zu bearbeiten.",
+    "info": {
+      "title": "Master-Passwort",
+      "content": "Die Systemkonfiguration ist geschützt. Geben Sie das Master-Passwort ein, um sie freizuschalten."
+    },
+    "notConfigured": {
+      "message": "Es ist kein Master-Passwort konfiguriert",
+      "description": "Bitten Sie einen Administrator, opencelium.connector.master-password in /backend/src/main/resources/application.yml zu setzen und das Backend neu zu starten, um die Systemkonfiguration durchsuchen und bearbeiten zu können."
+    }
+  },
+  "commandPalette": {
+    "provideMasterPassword": "Master-Passwort eingeben, um die Konfiguration zu durchsuchen",
+    "masterPasswordNotConfigured": "In application.yml ist kein Master-Passwort konfiguriert",
+    "editTitle": "Konfigurationswert bearbeiten",
+    "valueLabel": "Wert",
+    "statusLabel": "Aktiviert"
+  }
+}

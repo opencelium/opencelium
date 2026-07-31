@@ -1,6 +1,7 @@
 package com.becon.opencelium.backend.execution.supportfile;
 
 import com.becon.opencelium.backend.constant.AppYamlPath;
+import com.becon.opencelium.backend.constant.ConnectionConstants;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.service.ConnectionService;
@@ -30,6 +31,7 @@ import java.nio.file.Path;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -56,7 +58,7 @@ public class SupportFileServiceImp implements SupportFileService {
     private final int supportFileFailLimit;
 
     public static final String GET_URL = "/connection/support-file/%d/%s";
-    private static final Logger logger = LoggerFactory.getLogger(SupportFileService.class);
+    private static final Logger logger = LoggerFactory.getLogger(SupportFileServiceImp.class);
 
     public SupportFileServiceImp (
             ConnectionService connectionSqlService, TemplateService templateService,
@@ -218,16 +220,20 @@ public class SupportFileServiceImp implements SupportFileService {
             addToZip(zipOutputStream, template, "connection_template.json");
 
             // Add invoker files:
-            int fromConnectorId = dto.getFromConnector().getConnectorId();
-            Connector fromConnector = connectorSqlService.getById(fromConnectorId);
-            File fromInvoker = invokerService.findFileByInvokerName(fromConnector.getInvoker());
-            addToZip(zipOutputStream, fromInvoker, fromConnector.getInvoker() + ".xml");
+            Integer fromConnectorId = dto.getFromConnector().getConnectorId();
+            if(!Objects.equals(fromConnectorId, ConnectionConstants.DEFAULT_CONNECTOR_ID)){
+                Connector fromConnector = connectorSqlService.getById(fromConnectorId);
+                File fromInvoker = invokerService.findFileByInvokerName(fromConnector.getInvoker());
+                addToZip(zipOutputStream, fromInvoker, fromConnector.getInvoker() + ".xml");
+            }
 
-            int toConnectorId = dto.getToConnector().getConnectorId();
-            if (fromConnectorId != toConnectorId) {
-                Connector toConnector = connectorSqlService.getById(toConnectorId);
-                File toInvoker = invokerService.findFileByInvokerName(toConnector.getInvoker());
-                addToZip(zipOutputStream, toInvoker, toConnector.getInvoker() + ".xml");
+            if (dto.getToConnector() != null) {
+                int toConnectorId = dto.getToConnector().getConnectorId();
+                if (fromConnectorId != toConnectorId) {
+                    Connector toConnector = connectorSqlService.getById(toConnectorId);
+                    File toInvoker = invokerService.findFileByInvokerName(toConnector.getInvoker());
+                    addToZip(zipOutputStream, toInvoker, toConnector.getInvoker() + ".xml");
+                }
             }
 
             // copy temporary uncategorized log file into zip, then delete it:

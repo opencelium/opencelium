@@ -29,8 +29,6 @@ public interface WebhookService {
 
     Webhook save(int userId, Scheduler schedulerId);
 
-    String generateWebhookToken(int userId, String uuid, int schedulerId);
-
     String buildUrl(Webhook webhook);
 
     int getConnectionIdByUrl();

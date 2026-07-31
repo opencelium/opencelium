@@ -2,7 +2,10 @@ package com.becon.opencelium.backend.controller;
 
 
 import com.becon.opencelium.backend.database.mysql.entity.Widget;
+import com.becon.opencelium.backend.database.mysql.service.WidgetDataService;
 import com.becon.opencelium.backend.database.mysql.service.WidgetService;
+import com.becon.opencelium.backend.resource.application.ExecutionsTimelineDTO;
+import com.becon.opencelium.backend.resource.application.TopWorkflowsDTO;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.user.WidgetResource;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,9 +15,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
 import java.net.URI;
@@ -27,9 +32,11 @@ import java.util.stream.Collectors;
 public class WidgetController {
 
     private final WidgetService widgetService;
+    private final WidgetDataService widgetDataService;
 
-    public WidgetController(WidgetService widgetService) {
+    public WidgetController(WidgetService widgetService, WidgetDataService widgetDataService) {
         this.widgetService = widgetService;
+        this.widgetDataService = widgetDataService;
     }
 
     @Operation(summary = "Creates a new widget in the system by accepting widget data in the request body")
@@ -112,5 +119,53 @@ public class WidgetController {
     public ResponseEntity<?> view(@PathVariable("id") int id){
         Widget widget = widgetService.findById(id).orElseThrow(() -> new RuntimeException("Widget not found"));
         return ResponseEntity.ok().body(widget);
+    }
+
+    @Operation(summary = "Returns executions and failures per day for the last 'days' days (inclusive of today)")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Timeline data successfully retrieved",
+                    content = @Content(schema = @Schema(implementation = ExecutionsTimelineDTO.class))),
+            @ApiResponse( responseCode = "400",
+                    description = "'days' must be a positive number",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/executions-timeline")
+    public ResponseEntity<ExecutionsTimelineDTO> getExecutionsTimeline(
+            @RequestParam(name = "days", defaultValue = "7") int days) {
+        if (days < 1) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "'days' must be a positive number");
+        }
+        return ResponseEntity.ok(widgetDataService.getExecutionsTimeline(days));
+    }
+
+    @Operation(summary = "Returns the top connections by all-time execution count, with their failure rate")
+    @ApiResponses(value = {
+            @ApiResponse( responseCode = "200",
+                    description = "Top workflows successfully retrieved",
+                    content = @Content(schema = @Schema(implementation = TopWorkflowsDTO.class))),
+            @ApiResponse( responseCode = "400",
+                    description = "'limit' must be a positive number",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "401",
+                    description = "Unauthorized",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+            @ApiResponse( responseCode = "500",
+                    description = "Internal Error",
+                    content = @Content(schema = @Schema(implementation = ErrorResource.class))),
+    })
+    @GetMapping("/top-workflows")
+    public ResponseEntity<TopWorkflowsDTO> getTopWorkflows(
+            @RequestParam(name = "limit", defaultValue = "5") int limit) {
+        if (limit < 1) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "'limit' must be a positive number");
+        }
+        return ResponseEntity.ok(widgetDataService.getTopWorkflows(limit));
     }
 }

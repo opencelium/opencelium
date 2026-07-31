@@ -1,0 +1,86 @@
+{
+  "wizard": {
+    "header": "Abonnement",
+    "subheader": "Überprüfen Sie Ihre Lizenz, die monatliche API-Nutzung und die Ausführungshistorie pro Workflow."
+  },
+  "steps": {
+    "license": {
+      "header": "Lizenzinformationen",
+      "subheader": "Aktueller Plan, Limits und monatlicher Verbrauch."
+    },
+    "operationUsage": {
+      "header": "Nutzung pro Workflow",
+      "subheader": "API-Aufrufe summiert pro Workflow.",
+      "rowHint": "Klicken Sie auf eine Zeile, um die Läufe anzuzeigen."
+    },
+    "operationDetails": {
+      "header": "Läufe der Workflow",
+      "subheader": "Verbrauch pro Ausführung für die gewählte Workflow."
+    }
+  },
+  "license": {
+    "status": "Status",
+    "type": "Typ",
+    "totalOperations": "Anzahl API-Aufrufe",
+    "expirationDate": "Ablaufdatum",
+    "monthlyPeriod": "Monatszeitraum",
+    "extraOps": "Zusätzliche Aufrufe",
+    "valid": "Gültig",
+    "invalid": "Ungültig",
+    "infinite": "∞",
+    "usageOf": "{{used}} / {{total}}"
+  },
+  "banner": {
+    "noSubscription": "Es ist kein aktives Abonnement vorhanden. Bitte aktivieren Sie eine Lizenz.",
+    "expired": "Ihr Abonnement ist abgelaufen. Bitte erneuern Sie Ihre Lizenz.",
+    "opsLimit": "Sie haben Ihr Limit an API-Aufrufen erreicht. Bitte erweitern Sie Ihre Lizenz.",
+    "link": "Zur Lizenzseite"
+  },
+  "manage": {
+    "noSubscription": "Kein aktives Abonnement.",
+    "error": "Die Aktion ist fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    "generateRequest": {
+      "button": "Aktivierungsanfrage erstellen",
+      "success": "Aktivierungsanfrage wurde heruntergeladen."
+    },
+    "importLicense": {
+      "button": "Lizenz importieren",
+      "success": "Lizenz wurde importiert."
+    },
+    "activate": {
+      "button": "Aktivieren",
+      "dialogTitle": "Lizenz aktivieren",
+      "placeholder": "Abonnement auswählen…",
+      "cancel": "Abbrechen",
+      "submit": "Lizenz aktivieren",
+      "success": "Lizenz wurde aktiviert."
+    },
+    "extraOps": {
+      "button": "Extra Ops",
+      "success": "Zusätzliche Aufrufe wurden importiert."
+    },
+    "deleteLicense": {
+      "button": "Lizenz löschen",
+      "confirmTitle": "Lizenz löschen",
+      "confirmMessage": "Möchten Sie die aktuelle Lizenz wirklich löschen?",
+      "success": "Lizenz wurde gelöscht."
+    },
+    "activateFree": {
+      "button": "Kostenlose Lizenz aktivieren",
+      "success": "Kostenlose Lizenz wurde aktiviert."
+    }
+  },
+  "columns": {
+    "connection": "Workflow",
+    "apiOperations": "API-Aufrufe",
+    "startDate": "Startdatum"
+  },
+  "actions": {
+    "back": "Zurück",
+    "details": "Details anzeigen"
+  },
+  "empty": {
+    "operations": "Für diesen Zeitraum wurden keine API-Aufrufe erfasst.",
+    "details": "Keine Läufe gefunden."
+  }
+}

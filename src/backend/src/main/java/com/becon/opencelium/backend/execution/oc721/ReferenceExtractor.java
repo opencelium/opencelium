@@ -23,6 +23,7 @@ import jakarta.annotation.Nullable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -165,7 +166,7 @@ public class ReferenceExtractor implements Extractor {
         //   CASE 1.4: '#ababab.(response).[*].body'
 
         if (ref.getPart() == DirectReference.Part.ALL) {
-            if (path == null) { // CASE 1.1
+            if (path.isBlank()) { // CASE 1.1
                 TreeMap<String, ResponseEx> responses = new TreeMap<>(NUMERIC_PARTS);
                 operation.getResponses().forEach((K, V) -> responses.put(K, ResponseEx.of(V)));
 
@@ -209,6 +210,10 @@ public class ReferenceExtractor implements Extractor {
         final HttpEntity<?> entity;
         if (ref.getExchangeType() == ExchangeType.RESPONSE) {
             entity = operation.getResponses().get(key);
+
+            if (isErrorResponse(entity)) {
+                throw new RuntimeException((String) entity.getBody());
+            }
         } else {
             entity = operation.getRequests().get(key);
         }
@@ -258,8 +263,15 @@ public class ReferenceExtractor implements Extractor {
         String headerName = path;
         Integer index = null;
         boolean allValues = false;
+        String cookieAttribute = null;
 
-        if (path.endsWith("[*]")) {
+        int attrStart = headerName.lastIndexOf("[\"");
+        int attrEnd = headerName.lastIndexOf("\"]");
+
+        if (attrStart > 0 && attrEnd == headerName.length() - 2) {
+            cookieAttribute = headerName.substring(attrStart + 2, attrEnd);
+            headerName = headerName.substring(0, attrStart);
+        } else if (path.endsWith("[*]")) {
             headerName = path.substring(0, path.length() - 3);
             allValues = true;
         } else {
@@ -281,6 +293,10 @@ public class ReferenceExtractor implements Extractor {
             return allValues ? Collections.emptyList() : "";
         }
 
+        if (cookieAttribute != null) {
+            return extractCookieAttribute(values, cookieAttribute);
+        }
+
         if (allValues) {
             return List.copyOf(values);
         }
@@ -290,6 +306,44 @@ public class ReferenceExtractor implements Extractor {
         }
 
         return headers.getFirst(headerName);
+    }
+
+    private String extractCookieAttribute(List<String> cookies, String requestedAttribute) {
+        for (String cookie : cookies) {
+            String value = extractCookieAttribute(cookie, requestedAttribute);
+            if (!value.isEmpty()) {
+                return value;
+            }
+        }
+
+        return "";
+    }
+
+    private String extractCookieAttribute(String cookie, String requestedAttribute) {
+        if (cookie == null || cookie.isBlank() || requestedAttribute == null || requestedAttribute.isBlank()) {
+            return "";
+        }
+
+        String[] parts = cookie.split(";");
+
+        for (String part : parts) {
+            String trimmed = part.trim();
+
+            int equalsIndex = trimmed.indexOf('=');
+
+            if (equalsIndex > 0) {
+                String name = trimmed.substring(0, equalsIndex).trim();
+                String value = trimmed.substring(equalsIndex + 1).trim();
+
+                if (name.equalsIgnoreCase(requestedAttribute)) {
+                    return value;
+                }
+            } else if (trimmed.equalsIgnoreCase(requestedAttribute)) {
+                return trimmed;
+            }
+        }
+
+        return "";
     }
 
     private Object getFromJSON(Object body, String paths) {
@@ -311,7 +365,7 @@ public class ReferenceExtractor implements Extractor {
         // C1: 'parts' contains values supported by JsonPath -> extract at once
         if (!hasForInKey && !hasSplit) {
             String resolvedPath = resolveLoops(paths);
-            String jsonPath = resolvedPath.startsWith("[") ? "$" + resolvedPath : "$." + resolvedPath;
+            String jsonPath = toJsonPath(resolvedPath);
 
             return JsonPath.read(normalizedBody, jsonPath);
         }
@@ -344,7 +398,7 @@ public class ReferenceExtractor implements Extractor {
         if (basePath.isEmpty()) {
             base = body;
         } else {
-            String jsonPath = basePath.startsWith("[") ? "$" + basePath : "$." + basePath;
+            String jsonPath = toJsonPath(basePath);
             base = JsonPath.read(normalizedBody, jsonPath);
         }
 
@@ -525,6 +579,10 @@ public class ReferenceExtractor implements Extractor {
         return input;
     }
 
+    private boolean isErrorResponse(HttpEntity<?> entity) {
+        return entity instanceof ResponseEntity<?> responseEntity && responseEntity.getStatusCode().isError();
+    }
+
     private Loop getLoopByIterator(String iterator) {
         return executionManager.getLoops().stream()
                 .filter(loop -> Objects.equals(loop.getIterator(), iterator))
@@ -567,6 +625,12 @@ public class ReferenceExtractor implements Extractor {
         }
 
         return path;
+    }
+
+    private String toJsonPath(String paths) {
+        return paths.startsWith("[") || paths.isBlank()
+                ? "$" + paths
+                : "$." + paths;
     }
 
     private List<String> getFieldNames(Object body) {

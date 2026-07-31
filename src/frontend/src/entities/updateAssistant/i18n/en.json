@@ -1,0 +1,134 @@
+{
+  "installationCheck": {
+    "unavailable": "Update Assistant is not available for installation type: \"{{type}}\". Please check your application.yml file on the server."
+  },
+  "fields": {
+    "systemHealth": {
+      "label": "System Health"
+    },
+    "updateMode": {
+      "label": "Update Mode",
+      "options": {
+        "online": "Online",
+        "offline": "Offline"
+      }
+    },
+    "versionsDisplay": {
+      "label": "Versions"
+    },
+    "file": {
+      "label": "Update Package",
+      "hint": "Upload an offline update package (.zip)"
+    },
+    "runUpdateAction": {
+      "label": "Run Update"
+    }
+  },
+  "wizard": {
+    "modes": {
+      "view": {
+        "header": "Update Assistant",
+        "subheader": "Manage system health and apply updates"
+      }
+    },
+    "steps": {
+      "system-check": {
+        "header": "System Check",
+        "subheader": "Review the current health status of all system components"
+      },
+      "available-updates": {
+        "header": "Available Updates",
+        "subheader": "Browse online or offline update packages"
+      },
+      "update-process": {
+        "header": "Apply Update",
+        "subheader": "Execute the system update",
+        "actions": {
+          "runUpdate": "Run Update"
+        }
+      }
+    },
+    "recommendations": {
+      "1": "Check system health before applying updates",
+      "2": "Back up data before starting an update"
+    }
+  },
+  "health": {
+    "groups": {
+      "required": "Required",
+      "optional": "Optional"
+    },
+    "columns": {
+      "component": "Service",
+      "status": "Status"
+    },
+    "status": {
+      "UP": "Operational",
+      "DOWN": "Down",
+      "UNKNOWN": "Unknown"
+    },
+    "components": {
+      "email": "Email",
+      "mariaDB": "MariaDB",
+      "mongoDB": "MongoDB",
+      "opencelium": "OpenCelium",
+      "os": "Operating System",
+      "polyglot": "Polyglot"
+    },
+    "hint": "Please, do not forget to create a backup of the system, before you start the update (see <1>docs</1>)."
+  },
+  "validation": {
+    "requiredComponentsDown": "One or more required components are not operational. All required services must be running before you can proceed with the update.",
+    "versionNotSelected": "Please select a version to proceed with the update."
+  },
+  "versions": {
+    "columns": {
+      "select": "Select",
+      "name": "Version",
+      "status": "Status",
+      "changelog": "Changelog",
+      "action": "Action"
+    },
+    "status": {
+      "old": "Outdated",
+      "current": "Current",
+      "available": "Available"
+    },
+    "empty": "No versions available",
+    "actions": {
+      "delete": "Delete version",
+      "deleteConfirm": {
+        "title": "Delete version {{version}}",
+        "message": "Are you sure you want to delete version {{version}}? This action cannot be undone.",
+        "confirm": "Delete",
+        "cancel": "Cancel"
+      },
+      "deleteSuccess": "Version {{version}} deleted successfully"
+    },
+    "upload": {
+      "button": "Upload Package",
+      "success": "Package uploaded successfully",
+      "error": "Failed to upload package",
+      "uploading": "Uploading {{fileName}} — {{progress}}%",
+      "cancel": "Cancel"
+    }
+  },
+  "update": {
+    "confirmRun": {
+      "title": "Run Update",
+      "message": "Are you sure you want to update OpenCelium to version {{version}}? The system will restart and you will be logged out automatically once the update starts.",
+      "confirm": "Run Update",
+      "cancel": "Cancel"
+    },
+    "successTitle": "Update Started",
+    "success": "The update of OpenCelium to version {{version}} has been started successfully.",
+    "successLogoutNotice": "For the update to take effect, you will be logged out automatically in {{count}} seconds.",
+    "successLogoutNotice_one": "For the update to take effect, you will be logged out automatically in {{count}} second.",
+    "hint": "Don't forget to clear browser cache (especially the javascript cache)."
+  },
+  "changelog": {
+    "title": "Changelog of {{version}}",
+    "close": "Close",
+    "error": "Failed to load changelog"
+  }
+}

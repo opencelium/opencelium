@@ -8,21 +8,17 @@ import com.becon.opencelium.backend.ocel.exception.ApplyOperatorException;
 class NotLike implements BinaryOperator {
     @Override
     public Object apply(Object o1, Object o2) throws ApplyOperatorException {
-        try {
-            return !(Boolean) new Like().apply(o1, o2);
-        } catch (ApplyOperatorException e) {
-            throw ApplyOperatorException.invalidTypePairsException(getOperatorType(), o1, o2);
-        }
+        return !(Boolean) new Like().apply(o1, o2);
     }
 
     @Override
     public boolean isValidOperand(SidesType sidesType, Object operand) {
-        return operand instanceof String;
+        return new Like().isValidOperand(sidesType, operand);
     }
 
     @Override
     public boolean isValidType(SidesType side, Class<?> type) {
-        return type.equals(String.class);
+        return new Like().isValidType(side, type);
     }
 
     @Override

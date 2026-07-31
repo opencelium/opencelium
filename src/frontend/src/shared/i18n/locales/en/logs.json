@@ -1,0 +1,39 @@
+{
+  "title": "Execution Logs",
+  "subtitle": "Pick an execution to inspect its connector, method and operator logs.",
+  "selectLabel": "Execution",
+  "selectPlaceholder": "Select an execution",
+  "selectHint": "Select an execution to view its logs.",
+  "empty": "No logs to display.",
+  "childrenError": "Failed to load log elements.",
+  "detailsError": "Failed to load method details.",
+  "download": {
+    "tooltip": "Download logs",
+    "error": "Failed to download logs",
+    "tooBig": "The log is too big to download. You can find it on the server at {{path}}."
+  },
+  "tabs": {
+    "requestHeader": "Request Header",
+    "requestBody": "Request Body",
+    "responseHeader": "Response Header",
+    "responseBody": "Response Body"
+  },
+  "methodView": {
+    "tooltip": "Toggle URL / name"
+  },
+  "testRunDetails": "TEST RUN DETAILS",
+  "logsLabel": "LOGS",
+  "live": {
+    "title": "Execution Logs",
+    "empty": "No logs yet. Run a test to see execution logs.",
+    "running": "Running…",
+    "collecting": "Collecting logs…",
+    "finished": "TEST FINISHED in {{time}}",
+    "stopped": "TEST STOPPED",
+    "failed": "TEST FAILED",
+    "expand": "Expand logs panel",
+    "collapse": "Collapse logs panel",
+    "clear": "Clear logs",
+    "orphaned": "This test was started before the page was reopened, so its live logs are no longer available. Please stop the test and run it again to see the logs."
+  }
+}

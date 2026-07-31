@@ -1,0 +1,128 @@
+import React from 'react';
+import {
+    Check,
+    Close,
+    Person,
+    Delete,
+    Edit,
+    Info,
+    PlusOne,
+    Settings,
+    Download,
+    Upload,
+    Key,
+    SwapHoriz,
+    FilterAlt,
+    PlayArrow,
+    Stop,
+    Search,
+    List as ListIcon,
+    Login,
+    Logout,
+    History,
+    ArrowBack,
+    MoreVert,
+    UnfoldMore,
+    UnfoldLess,
+    ToggleOn,
+    ToggleOff,
+    Description,
+    Visibility,
+    VisibilityOff,
+    ChevronRight,
+    ChevronLeft,
+    ExpandMore,
+    Fullscreen,
+    FullscreenExit,
+    ContentCopy,
+    AccountTree,
+    Refresh,
+    AltRoute,
+    Webhook,
+    Bolt,
+    Public,
+    Merge,
+    Lock,
+    HelpOutline,
+    Analytics,
+} from '@mui/icons-material';
+
+import type { IconComponent } from './Icon.types';
+
+const iconMap = {
+    check: Check,
+    close: Close,
+    user: Person,
+    delete: Delete,
+    edit: Edit,
+    info: Info,
+    plus: PlusOne,
+    settings: Settings,
+    play: PlayArrow,
+    stop: Stop,
+    download: Download,
+    upload: Upload,
+    key: Key,
+    convert: SwapHoriz,
+    filter: FilterAlt,
+    search: Search,
+    list: ListIcon,
+    login: Login,
+    logout: Logout,
+    history: History,
+    'arrow-left': ArrowBack,
+    more: MoreVert,
+    expand: UnfoldMore,
+    collapse: UnfoldLess,
+    'toggle-on': ToggleOn,
+    'toggle-off': ToggleOff,
+    'journal-text': Description,
+    eye: Visibility,
+    'eye-off': VisibilityOff,
+    'chevron-right': ChevronRight,
+    'chevron-left': ChevronLeft,
+    'chevron-down': ExpandMore,
+    maximize: Fullscreen,
+    minimize: FullscreenExit,
+    'arrow-switch': SwapHoriz,
+    'content-copy': ContentCopy,
+    workflow: AccountTree,
+    refresh: Refresh,
+    connector: AltRoute,
+    webhook: Webhook,
+    flash: Bolt,
+    'http-request': Public,
+    aggregator: Merge,
+    lock: Lock,
+    help: HelpOutline,
+    'report-analytics': Analytics,
+};
+
+export const MaterialIcon: IconComponent = ({
+    name,
+    size = 20,
+    color = 'default',
+    className,
+    onClick,
+}) => {
+    const Component = iconMap[name];
+
+    const colorMap = {
+        default: 'var(--color-text-primary)',
+        primary: 'var(--color-action-primary)',
+        secondary: 'var(--color-action-secondary)',
+        danger: 'var(--color-action-danger)',
+        inherit: 'currentColor',
+    };
+
+    return (
+        <Component
+            className={className}
+            sx={{
+                fontSize: size,
+                color: colorMap[color],
+            }}
+            onClick={onClick}
+        />
+    );
+};

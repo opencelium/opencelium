@@ -17,4 +17,5 @@ public interface RegExpression {
     String array = "\\[.*\\]";
     String referencePath = "(body\\.\\$\\..+)|(header\\.\\$\\..+)|(path)";
     String TEST_CONNECTION_REGEX = "^!\\*test_connection_\\d+_.+";
+    String TEST_SCHEDULE_REGEX = "^!\\*test_schedule_\\d+_.+";
 }

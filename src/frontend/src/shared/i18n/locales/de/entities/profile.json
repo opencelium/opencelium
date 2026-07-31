@@ -1,0 +1,55 @@
+{
+  "sections": {
+    "userDetails": "Benutzerdetails",
+    "updatePassword": "Passwort aktualisieren",
+    "permissions": "Berechtigungen"
+  },
+  "fields": {
+    "userTitle": {
+      "label": "Anrede",
+      "options": {
+        "mr": "Herr",
+        "mrs": "Frau"
+      }
+    },
+    "name": { "label": "Name" },
+    "surname": { "label": "Nachname" },
+    "department": { "label": "Abteilung" },
+    "organization": { "label": "Organisation" },
+    "phoneNumber": {
+      "label": "Telefonnummer",
+      "validation1": "Ungültiges Telefonnummernformat"
+    },
+    "email": { "label": "E-Mail" },
+    "currentPassword": {
+      "label": "Aktuelles Passwort",
+      "wrong": "Aktuelles Passwort ist falsch"
+    },
+    "newPassword": {
+      "label": "Neues Passwort",
+      "validation1": "Muss einen Großbuchstaben enthalten",
+      "validation2": "Muss einen Kleinbuchstaben enthalten",
+      "validation3": "Muss eine Zahl enthalten",
+      "validation4": "Muss ein Sonderzeichen enthalten"
+    },
+    "repeatNewPassword": {
+      "label": "Neues Passwort wiederholen",
+      "mismatch": "Passwörter stimmen nicht überein"
+    }
+  },
+  "actions": {
+    "update": "Aktualisieren",
+    "save": "Speichern"
+  },
+  "hints": {
+    "sessionWillExpire": "Ihre Sitzung wird nach dem Update sofort beendet."
+  },
+  "messages": {
+    "detailsUpdated": "Profildaten aktualisiert",
+    "passwordUpdated": "Passwort aktualisiert. Sie werden abgemeldet."
+  },
+  "validation": {
+    "required": "Pflichtfeld"
+  },
+  "title": "Profil"
+}

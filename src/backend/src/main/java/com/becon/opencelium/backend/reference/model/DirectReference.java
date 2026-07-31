@@ -166,7 +166,7 @@ public final class DirectReference implements Reference {
         if (p < rawReference.length()) {
             path = rawReference.substring(p); // remove ".$."
         } else {
-            path = null;
+            path = "";
         }
 
         return new DirectReference(

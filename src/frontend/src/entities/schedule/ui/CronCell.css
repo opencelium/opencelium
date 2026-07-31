@@ -1,0 +1,36 @@
+.cron-cell {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+}
+
+.cron-cell__chip {
+    font-family: var(--typography-font-family-mono);
+    font-size: var(--typography-font-size-sm);
+    line-height: 1.4;
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border-subtle);
+    background: var(--color-background-app);
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    cursor: pointer;
+    text-decoration: none;
+    text-underline-offset: 2px;
+    transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.cron-cell__chip:hover {
+    color: var(--color-action-primary);
+    border-color: var(--color-action-primary);
+}
+
+.cron-cell__chip--readonly {
+    cursor: default;
+}
+
+.cron-cell__chip--readonly:hover {
+    color: var(--color-text-primary);
+    border-color: var(--color-border-subtle);
+}

@@ -1,0 +1,9 @@
+/* Reveal row-level copy buttons only while the row is hovered or focused. */
+.oc-log-row .oc-copy-on-hover {
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+.oc-log-row:hover .oc-copy-on-hover,
+.oc-log-row:focus-within .oc-copy-on-hover {
+  opacity: 1;
+}

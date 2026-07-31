@@ -1,0 +1,69 @@
+{
+  "list": {
+    "title": "Notification Templates",
+    "subTitle": "Manage reusable templates used for notifications in Schedules."
+  },
+  "fields": {
+    "name": {
+      "label": "Name"
+    },
+    "type": {
+      "label": "Type"
+    },
+    "aggregator": {
+      "label": "Aggregator"
+    },
+    "subject": {
+      "label": "Subject"
+    },
+    "body": {
+      "label": "Body"
+    }
+  },
+  "sections": {
+    "general-data": {
+      "title": "General Data"
+    },
+    "template-content": {
+      "title": "Template Content"
+    }
+  },
+  "wizard": {
+    "modes": {
+      "create": {
+        "header": "Create Notification Template",
+        "subheader": "Notification templates define the content and format of messages sent by the system. Manage reusable templates used for notifications in Schedules.",
+        "successMessage": "Notification template \"{{name}}\" was successfully created"
+      },
+      "update": {
+        "header": "Update Notification Template",
+        "subheader": "Notification templates define the content and format of messages sent by the system. Manage reusable templates used for notifications in Schedules.",
+        "successMessage": "Notification template \"{{name}}\" was successfully updated"
+      },
+      "view": {
+        "header": "Notification Template Details",
+        "subheader": "Notification templates define the content and format of messages sent by the system. Manage reusable templates used for notifications in Schedules."
+      }
+    },
+    "recommendations": {
+      "1": "Create another Notification Template",
+      "2": "Create Schedule"
+    },
+    "steps": {
+      "general-data": {
+        "header": "General Data",
+        "subheader": "Define the basic information for the notification template."
+      },
+      "template-content": {
+        "header": "Template Content",
+        "subheader": "Define the aggregator, subject and body of the notification template. Use aggregator arguments to insert dynamic values."
+      }
+    }
+  },
+  "confirmation": {
+    "delete": {
+      "byName": "Delete notification template by name \"{{name}}\"?",
+      "byId": "Delete notification template by id \"{{id}}\"?"
+    }
+  }
+}

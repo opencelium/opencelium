@@ -6,6 +6,7 @@ import com.becon.opencelium.backend.gc.base.GCRunner;
 import com.becon.opencelium.backend.gc.base.RunGCEvent;
 import com.becon.opencelium.backend.gc.base.strategy.StrategyConfig;
 import com.becon.opencelium.backend.gc.base.strategy.TriggerStrategyFactory;
+import com.becon.opencelium.backend.utility.TestNameUtils;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
@@ -62,8 +63,7 @@ public class ConnectionGCRunner extends GCRunner<ConnectionForGC> {
 
     private Criteria<ConnectionForGC> setCriteria() {
         return Criteria.<ConnectionForGC>builder()
-                .and(c -> c.getConnection().getTitle() != null)
-                .and(c -> !c.getConnection().getTitle().matches("!\\*test_connection_[0-9]{13}.*"))
+                .and(x -> TestNameUtils.isNotTestConnection(x.getConnection().getTitle()))
                 .build();
     }
 }

@@ -1,0 +1,22 @@
+.connectorStatusDot {
+  transition: background-color 0.25s ease;
+}
+
+.connectorStatusDot--changed {
+  animation: connectorStatusPulse 1s ease-out;
+}
+
+@keyframes connectorStatusPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 color-mix(in srgb, currentColor 70%, transparent);
+  }
+  30% {
+    transform: scale(1.6);
+    box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 45%, transparent);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 8px color-mix(in srgb, currentColor 0%, transparent);
+  }
+}

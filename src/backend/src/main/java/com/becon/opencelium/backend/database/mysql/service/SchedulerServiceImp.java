@@ -16,6 +16,7 @@
 
 package com.becon.opencelium.backend.database.mysql.service;
 
+import com.becon.opencelium.backend.constant.ConnectionConstants;
 import com.becon.opencelium.backend.database.mysql.entity.Connection;
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.entity.EventNotification;
@@ -32,8 +33,12 @@ import com.becon.opencelium.backend.quartz.SchedulingStrategy;
 import com.becon.opencelium.backend.resource.connection.ConnectionDTO;
 import com.becon.opencelium.backend.resource.notification.NotificationResource;
 import com.becon.opencelium.backend.resource.request.SchedulerRequestResource;
+import com.becon.opencelium.backend.resource.schedule.RunningJob;
 import com.becon.opencelium.backend.resource.schedule.RunningJobsResource;
 import com.becon.opencelium.backend.resource.schedule.SchedulerResource;
+import com.becon.opencelium.backend.utility.TestNameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.lang.NonNull;
@@ -48,6 +53,8 @@ import java.util.stream.Collectors;
 @Service
 public class SchedulerServiceImp implements SchedulerService {
 
+    private static final Logger log = LoggerFactory.getLogger(SchedulerServiceImp.class);
+
     private final ConnectionService connectionService;
     private final WebhookService webhookService;
     private final ConnectorService connectorService;
@@ -57,7 +64,8 @@ public class SchedulerServiceImp implements SchedulerService {
     private final SchedulingStrategy schedulingStrategy;
     private final SchedulerRepository schedulerRepository;
     private final NotificationRepository notificationRepository;
-    private final ExecutionServiceImp executionServiceImp;
+    private final ExecutionService executionService;
+    private final ExecutionArgumentService executionArgumentService;
     private final Mapper<Connection, ConnectionDTO> connectionMapper;
 
 
@@ -71,7 +79,8 @@ public class SchedulerServiceImp implements SchedulerService {
             SchedulerRepository schedulerRepository,
             NotificationRepository notificationRepository,
             SchedulerFactoryBean schedulerFactoryBean,
-            ExecutionServiceImp executionServiceImp,
+            ExecutionService executionService,
+            ExecutionArgumentService executionArgumentService,
             Mapper<Connection, ConnectionDTO> connectionMapper
     ) {
         this.connectionService = connectionService;
@@ -82,7 +91,8 @@ public class SchedulerServiceImp implements SchedulerService {
         this.schedulingStrategy = SchedulerFactory.createQuartzScheduler(schedulerFactoryBean.getScheduler());
         this.notificationRepository = notificationRepository;
         this.schedulerRepository = schedulerRepository;
-        this.executionServiceImp = executionServiceImp;
+        this.executionService = executionService;
+        this.executionArgumentService = executionArgumentService;
         this.connectionMapper = connectionMapper;
         this.connectorService = connectorService;
     }
@@ -90,9 +100,10 @@ public class SchedulerServiceImp implements SchedulerService {
     @Override
     @Transactional(rollbackFor = {RuntimeException.class})
     public void save(@NonNull Scheduler scheduler) {
-        if (existsByTitle(scheduler.getTitle())) {
-            throw new RuntimeException("TITLE_ALREADY_EXISTS");
-        }
+        // As requested by the UI team, the title in the scheduler will no longer be used.
+//        if (existsByTitle(scheduler.getTitle())) {
+//            throw new RuntimeException("TITLE_ALREADY_EXISTS");
+//        }
         Scheduler saved = schedulerRepository.save(scheduler);
         schedulingStrategy.addJob(saved);
     }
@@ -118,9 +129,14 @@ public class SchedulerServiceImp implements SchedulerService {
     }
 
     @Override
+    @Transactional
     public void deleteById(int id) {
         Scheduler scheduler = getById(id);
         schedulingStrategy.deleteJob(scheduler);
+        // Strip execution history explicitly: the execution/execution_argument FKs are
+        // ON DELETE NO ACTION, and entity-level cascade misses rows written concurrently.
+        executionArgumentService.deleteBySchedulerId(id);
+        executionService.deleteBySchedulerId(id);
         schedulerRepository.delete(scheduler);
     }
 
@@ -129,7 +145,8 @@ public class SchedulerServiceImp implements SchedulerService {
         for (Integer id : schedulerIds) {
             try {
                 deleteById(id);
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                log.warn("Failed to delete scheduler {}", id, e);
             }
         }
     }
@@ -142,6 +159,13 @@ public class SchedulerServiceImp implements SchedulerService {
     @Override
     public List<Scheduler> findAllByTitleContains(String title) {
         return schedulerRepository.findAllByTitleContains(title);
+    }
+
+    @Override
+    public List<Scheduler> excludeTestSchedulers(List<Scheduler> schedulers) {
+        return schedulers.stream()
+                .filter(s -> TestNameUtils.isNotTestScheduler(s.getTitle()))
+                .toList();
     }
 
     @Override
@@ -234,7 +258,8 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Override
     public synchronized void startNow(Scheduler scheduler) {
-        throwIfConnectionIsBeingExecuted(scheduler.getConnection().getId());
+        // Schedules and webhooks must be able to trigger multiple executions.
+//        throwIfConnectionIsBeingExecuted(scheduler.getConnection().getId());
         schedulingStrategy.runJob(scheduler);
     }
 
@@ -258,9 +283,19 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Override
     public void throwIfConnectionIsBeingExecuted(long connectionId) {
-        if (schedulingStrategy.getRunningJobs().containsKey(connectionId)) {
+        boolean isBeingExecuted = schedulingStrategy.getRunningJobs().stream()
+                .anyMatch(rj -> rj.connectionId() == connectionId);
+
+        if (isBeingExecuted) {
             throw new ConcurrentTestIsForbidden(connectionId);
         }
+    }
+
+    @Override
+    public Set<Long> getRunningConnectionIds() {
+        return schedulingStrategy.getRunningJobs().stream()
+                .map(RunningJob::connectionId)
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
@@ -286,55 +321,17 @@ public class SchedulerServiceImp implements SchedulerService {
 
     @Override
     public List<RunningJobsResource> getAllRunningJobs() {
-        Map<Long, Integer> runningJobs = schedulingStrategy.getRunningJobs();
-        List<RunningJobsResource> runningJobsResources = new ArrayList<>();
-        runningJobs.forEach((connId, schedId) -> {
-            RunningJobsResource jobsResource = new RunningJobsResource();
-            Scheduler scheduler = getById(schedId);
-            jobsResource.setSchedulerId(scheduler.getId());
-            jobsResource.setTitle(scheduler.getTitle());
-
-            // TODO: need to rework calculation of avg time
-            double avg = executionServiceImp.getAvgDurationOfExecution(schedId);
-            jobsResource.setAvgDuration(avg);
-
-            Connection connection = connectionService.getById(connId);
-            Connector fromCotr = connectorService.getById(connection.getFromConnector());
-            Connector toCtor = connectorService.getById(connection.getToConnector());
-            jobsResource.setToConnector(toCtor.getTitle());
-            jobsResource.setFromConnector(fromCotr.getTitle());
-
-            runningJobsResources.add(jobsResource);
-        });
-        return runningJobsResources;
+        return schedulingStrategy.getRunningJobs().stream()
+                .map(this::toRunningJobResource)
+                .toList();
     }
 
     @Override
     public List<RunningJobsResource> getAllRunningJobsExcludingOne(int schedulerId) {
-        Map<Long, Integer> runningJobs = schedulingStrategy.getRunningJobs();
-        List<RunningJobsResource> runningJobsResources = new ArrayList<>();
-        runningJobs.forEach((connId, schedId) -> {
-            if (schedulerId != schedId) {
-                RunningJobsResource jobsResource = new RunningJobsResource();
-                Scheduler scheduler = getById(schedId);
-                jobsResource.setSchedulerId(scheduler.getId());
-                jobsResource.setTitle(scheduler.getTitle());
-
-                // TODO: need to rework calculation of avg time
-                double avg = executionServiceImp.getAvgDurationOfExecution(schedId);
-                jobsResource.setAvgDuration(avg);
-
-                Connection connection = connectionService.getById(connId);
-                Connector fromCotr = connectorService.getById(connection.getFromConnector());
-                Connector toCtor = connectorService.getById(connection.getToConnector());
-                jobsResource.setToConnector(toCtor.getTitle());
-                jobsResource.setFromConnector(fromCotr.getTitle());
-
-                runningJobsResources.add(jobsResource);
-            }
-        });
-
-        return runningJobsResources;
+        return schedulingStrategy.getRunningJobs().stream()
+                .filter(runningJob -> runningJob.schedulerId() != schedulerId)
+                .map(this::toRunningJobResource)
+                .toList();
     }
 
     @Override
@@ -380,5 +377,36 @@ public class SchedulerServiceImp implements SchedulerService {
     @Override
     public void deleteNotificationById(int id) {
         notificationRepository.deleteById(id);
+    }
+
+
+    private RunningJobsResource toRunningJobResource(RunningJob runningJob) {
+        long connectionId = runningJob.connectionId();
+        int schedulerId = runningJob.schedulerId();
+        long execId = runningJob.execId();
+
+        RunningJobsResource resource = new RunningJobsResource();
+
+        resource.setConnectionId(connectionId);
+        resource.setSchedulerId(schedulerId);
+        resource.setExecId(execId);
+        resource.setTitle(getById(schedulerId).getTitle());
+        resource.setStartTime(executionService.getById(execId).getStartTime());
+        resource.setAvgDuration(executionService.getAvgDurationOfExecution(schedulerId));
+        setConnectorTitles(resource, connectionService.getById(connectionId));
+
+        return resource;
+    }
+
+    private void setConnectorTitles(RunningJobsResource resource, Connection connection) {
+        if (!Objects.equals(connection.getFromConnector(), ConnectionConstants.DEFAULT_CONNECTOR_ID)) {
+            Connector fromConnector = connectorService.getById(connection.getFromConnector());
+            resource.setFromConnector(fromConnector.getTitle());
+        }
+
+        if (connection.getToConnector() != null) {
+            Connector toConnector = connectorService.getById(connection.getToConnector());
+            resource.setToConnector(toConnector.getTitle());
+        }
     }
 }

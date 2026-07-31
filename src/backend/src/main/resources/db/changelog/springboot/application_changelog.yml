@@ -214,10 +214,11 @@ versions:
         operation: add
         value: 4.8.2
         path: opencelium.version
-  - version: 4.8.3
+  - version: 5.0
     changes:
       - changeset: 1
         operation: add
+<<<<<<< HEAD
         value: 4.8.3
         path: opencelium.version
   - version: 4.8.4
@@ -226,3 +227,59 @@ versions:
         operation: add
         value: 4.8.4
         path: opencelium.version
+=======
+        value: 5.0
+        path: opencelium.version
+      - changeset: 2
+        operation: add
+        value: src/main/resources/application.yml
+        path: opencelium.config.file-path
+      - changeset: 3
+        operation: add
+        value: runtime/backup/application
+        path: opencelium.config.backup.directory
+      - changeset: 4
+        operation: add
+        value: 10
+        path: opencelium.config.backup.keep
+      - changeset: 5
+        operation: add
+        value: true
+        path: opencelium.sweeper.test-connection.enabled
+      - changeset: 6
+        operation: add
+        value: 900000
+        path: opencelium.sweeper.test-connection.fixed-delay
+      - changeset: 7
+        operation: add
+        value: 0
+        path: opencelium.sweeper.test-connection.initial-delay
+      - changeset: 8
+        operation: add
+        value: true
+        path: opencelium.connector-health.enabled
+      - changeset: 9
+        operation: add
+        value: 300000
+        path: opencelium.connector-health.interval
+      - changeset: 10
+        operation: add
+        value: 60000
+        path: opencelium.connector-health.initial-delay
+      - changeset: 11
+        operation: add
+        value: 3
+        path: opencelium.connector-health.failure-threshold
+      - changeset: 12
+        operation: add
+        value: 4
+        path: opencelium.connector-health.parallelism
+      - changeset: 13
+        operation: add
+        value: false
+        path: opencelium.connector-health.request-logging.enabled
+      - changeset: 14
+        operation: add
+        value: 500
+        path: opencelium.connector-health.request-logging.max-body-length
+>>>>>>> origin/version5.0

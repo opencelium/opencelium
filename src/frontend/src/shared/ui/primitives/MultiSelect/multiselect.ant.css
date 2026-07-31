@@ -1,0 +1,50 @@
+/* shared/ui/primitives/MultiSelect/multiselect.ant.css */
+
+.ant-select.ant-select-multiple.ant-select-custom
+.ant-select-selector {
+    border-radius: var(--radius-md);
+    padding: 4px 8px;
+    min-height: 36px;
+    border-color: var(--color-border-default);
+}
+
+/* selected tags */
+.ant-select-multiple
+.ant-select-selection-item {
+    background: var(--color-action-secondary);
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-primary);
+    padding: 0 6px;
+}
+
+/* remove icon */
+.ant-select-multiple
+.ant-select-selection-item-remove {
+    color: var(--color-text-secondary);
+}
+
+.ant-select-multiple
+.ant-select-selection-item-remove:hover {
+    color: var(--color-action-danger);
+}
+
+/* placeholder */
+.ant-select-multiple
+.ant-select-selection-placeholder {
+    color: var(--color-text-secondary);
+}
+
+/* focus */
+.ant-select-focused
+.ant-select-selector {
+    border-color: var(--color-action-primary);
+    box-shadow: 0 0 0 1px var(--color-action-primary);
+}
+
+/* disabled */
+.ant-select-disabled
+.ant-select-selector {
+    background: var(--color-background-disabled);
+    color: var(--color-text-disabled);
+}
