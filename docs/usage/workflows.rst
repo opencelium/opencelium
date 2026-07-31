@@ -478,6 +478,66 @@ falls back to JavaScript-only mode.
 Whether the engine is reachable is reported on the
 :ref:`System Check <admin_panel-system_check>` page as the **Polyglot** row.
 
+Deploying the engine
+====================
+
+The engine is **not** part of the OpenCelium package — build it from source:
+
+.. code-block:: sh
+
+   git clone https://github.com/opencelium/polyglot-engine.git
+   cd polyglot-engine
+   ./mvnw -B package -DskipTests
+
+.. note::
+   The resulting JAR is around 350 MB, because it bundles the GraalVM language
+   runtimes for Python and Ruby.
+
+Install it and run it as a service so it survives a reboot:
+
+.. code-block:: sh
+
+   install -d /opt/opencelium/polyglot
+   cp target/oc-polyglot-engine-*.jar /opt/opencelium/polyglot/oc-polyglot-engine.jar
+
+``/etc/systemd/system/opencelium-polyglot.service``:
+
+.. code-block:: ini
+
+   [Unit]
+   Description=OpenCelium Polyglot Engine
+   After=syslog.target network.target
+   Before=opencelium.service
+
+   [Service]
+   Type=simple
+   Restart=on-failure
+   RestartSec=5s
+   Environment=GRPC_SERVER_PORT=6566
+   WorkingDirectory=/opt/opencelium/polyglot
+   ExecStart=/usr/lib/jvm/java-17-openjdk-amd64/bin/java -Xms64m -Xmx512m \
+     -jar /opt/opencelium/polyglot/oc-polyglot-engine.jar
+   ExecStop=/bin/kill -15 $MAINPID
+
+   [Install]
+   WantedBy=multi-user.target
+
+.. code-block:: sh
+
+   systemctl daemon-reload
+   systemctl enable --now opencelium-polyglot
+
+Then set ``enabled: true`` in the section above and restart the backend.
+
+.. note::
+   ``GRPC_SERVER_PORT`` in the unit and ``opencelium.polyglot.port`` in
+   ``application.yml`` have to match.
+
+.. note::
+   ``auto-start: true`` together with ``launch.jarPath`` lets the backend launch
+   the JAR itself. A separate unit is usually preferable, because the engine's
+   lifecycle, logs and memory limits then stay independent of the backend.
+
 Webhooks in a workflow
 """"""""""""""""""""""
 
