@@ -20,7 +20,9 @@
     "maximizeRequestData": "Maximize request data",
     "minimizeRequestData": "Minimize request data",
     "load": "Load",
-    "createEnhancement": "Create enhancement"
+    "createEnhancement": "Create enhancement",
+    "deleteEnhancement": "Delete enhancement",
+    "deleteReference": "Delete reference"
   },
   "confirmDelete": {
     "title": "Delete step",
@@ -438,6 +440,7 @@
     "language": "Language",
     "script": "Script",
     "emptyState": "Please, click on the reference to see its enhancement.",
+    "deleteDisabledMultipleReferences": "This field has more than one reference, so it must stay wrapped in an enhancement.",
     "directReference": {
       "title": "Direct reference",
       "description": "This field has no enhancement — it is a direct, one-to-one reference between the two fields below, with no script running in between. Direct references execute faster than a scripted enhancement.",

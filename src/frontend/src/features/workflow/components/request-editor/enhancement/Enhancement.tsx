@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { ConfigProvider } from 'antd';
-import { Maximize2, Minimize2 } from 'lucide-react';
+import { Maximize2, Minimize2, Trash2 } from 'lucide-react';
 import { Collapse } from '@shared/ui/primitives/Collapse';
 import { Empty } from '@shared/ui/primitives/Empty';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
@@ -16,6 +16,7 @@ import type { Enhancement } from '../../../types/connection';
 import type { RootState } from '../../../store';
 import type { DirectReferenceInfo as DirectReferenceInfoData } from '../body-editor/bodyBinding';
 import { updateEnhancementInConnection } from '../../../store/connection/utils';
+import { countEnhancementReferences } from '../body-editor/bodyReference';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import '../body-editor/bodyLegacy.css';
 
@@ -24,9 +25,10 @@ interface EnhancementProps {
 	readOnly?: boolean;
 	directReference?: DirectReferenceInfoData | null;
 	onCreateEnhancement?: () => void;
+	onDeleteEnhancement?: () => void;
 }
 
-const ReferenceEnhancement = ({ enhancement, readOnly, directReference, onCreateEnhancement }: EnhancementProps) => {
+const ReferenceEnhancement = ({ enhancement, readOnly, directReference, onCreateEnhancement, onDeleteEnhancement }: EnhancementProps) => {
 	const { t } = useI18n('workflow');
 	const dispatch = useDispatch();
 	const connection = useSelector((state: RootState) => state.connection.connection);
@@ -52,6 +54,7 @@ const ReferenceEnhancement = ({ enhancement, readOnly, directReference, onCreate
 	if (!connection) return null;
 
 	const hasEnhancement = !!enhancement;
+	const canDeleteEnhancement = hasEnhancement && countEnhancementReferences(enhancement) <= 1;
 
 	const onChangeEnhancement = (newEnhancement: Enhancement) => {
 		dispatch(updateConnection(updateEnhancementInConnection(connection, { ...newEnhancement })));
@@ -78,7 +81,28 @@ const ReferenceEnhancement = ({ enhancement, readOnly, directReference, onCreate
 				items={[
 					{
 						key: 'enhancement',
-						label: t('enhancement.title'),
+						label: (
+							<div className='bodyLegacyEnhancementHeader'>
+								<span>{t('enhancement.title')}</span>
+								{hasEnhancement && onDeleteEnhancement ? (
+									<Tooltip content={t(canDeleteEnhancement ? 'actions.deleteEnhancement' : 'enhancement.deleteDisabledMultipleReferences')}>
+										<button
+											type='button'
+											className='logsHeaderIconButton bodyLegacyEnhancementDeleteButton'
+											disabled={readOnly || !canDeleteEnhancement}
+											onClick={(event) => {
+												event.stopPropagation();
+												onDeleteEnhancement();
+											}}
+											aria-label={t('actions.deleteEnhancement')}
+											data-testid='workflow-enhancement-delete'
+										>
+											<Trash2 size={15} />
+										</button>
+									</Tooltip>
+								) : null}
+							</div>
+						),
 						showArrow: false,
 						content: hasEnhancement ? (
 							<div className='bodyLegacyEnhancementBody'>

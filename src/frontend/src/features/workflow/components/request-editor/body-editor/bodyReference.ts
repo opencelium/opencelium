@@ -74,3 +74,24 @@ export const buildBodyEnhancement = (
   });
   return enhancement;
 };
+
+export const countEnhancementReferences = (enhancement?: Enhancement) =>
+  Object.keys(enhancement?.args || {}).filter((key) => /^VAR_\d+$/.test(key)).length;
+
+// Inverse of buildRequestResultField: turns a dotted resultVar path (e.g. "items.[0].name") back
+// into the namespace/name pair getBodySelectionValue/setBodySelectionValue expect.
+export const parseFieldPath = (path: string) => {
+  const segments = String(path || '')
+    .split('.')
+    .filter(Boolean)
+    .map((segment) => segment.match(/^\[(\d+)]$/)?.[1] ?? segment);
+  const name = segments.pop() || '';
+  return { namespace: segments, name };
+};
+
+export const removeReferenceValue = (current: unknown, pointer: string): string | null => {
+  if (typeof current !== 'string') return null;
+  const refs = splitReferences(current);
+  if (!refs.includes(pointer)) return null;
+  return refs.filter((item) => item !== pointer).join(';');
+};
