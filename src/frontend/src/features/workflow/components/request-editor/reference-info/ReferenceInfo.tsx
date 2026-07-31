@@ -1,10 +1,15 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useState } from 'react';
+import { Trash2 } from 'lucide-react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Tooltip } from '@shared/ui/primitives/Tooltip';
+import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { parseEnhancementArg } from '../utils/parseEnhancementArg';
 import type { MessageProperty } from '../shared/messageProperty';
 import type { RootState } from '../../../store';
 import type { Method } from '../../../types/connection';
 import { useMethodContext } from '../../../providers/MethodContext';
+import { updateConnection } from '../../../store/connection/connectionSlice';
+import '../body-editor/bodyLegacy.css';
 
 const parseIndex = (value?: string) =>
 	String(value ?? '')
@@ -55,18 +60,31 @@ const isReferenceVisible = (providerIndex?: string, consumerIndex?: string) => {
 interface ReferenceInfoProps {
 	messageProperty: MessageProperty;
 	data: any;
+	readOnly?: boolean;
 	onReferenceClick?: (enhanceId: string) => void;
+	// When provided (JSON body/header editor), deleting a reference removes just that one
+	// reference token from the field's raw value — fieldPath is the dotted resultVar path (e.g.
+	// "items.[0].name"), pointer is the literal reference token to remove. When omitted (XML,
+	// which has no reliable way to resolve a dotted path back to a tree node), delete falls back
+	// to removing the whole enhancement, only when it wraps a single reference.
+	onDeleteReference?: (fieldPath: string, pointer: string) => void;
 }
 
 export const ReferenceInfo: React.FC<ReferenceInfoProps> = ({
 	messageProperty,
 	data,
+	readOnly,
 	onReferenceClick,
+	onDeleteReference,
 }) => {
+	const { t } = useI18n('workflow');
+	const dispatch = useDispatch();
 	const connection = useSelector(
 		(state: RootState) => state.connection.connection,
 	);
 	const { method: currentMethod } = useMethodContext();
+	const [hoveredField, setHoveredField] = useState<string | null>(null);
+	const [hoveredRef, setHoveredRef] = useState<string | null>(null);
 
 	if (!connection || !currentMethod) {
 		return null;
@@ -85,6 +103,7 @@ export const ReferenceInfo: React.FC<ReferenceInfoProps> = ({
 			color: string;
 			enhanceId: string;
 			sourceMessageProperty: string;
+			direction: string;
 		}[]
 	> = {};
 
@@ -124,6 +143,7 @@ export const ReferenceInfo: React.FC<ReferenceInfoProps> = ({
 					color: parsed.color,
 					enhanceId,
 					sourceMessageProperty: parsed.messageProperty,
+					direction: parsed.direction,
 				});
 				fieldReferences[keyPath] = arr;
 			});
@@ -151,15 +171,33 @@ export const ReferenceInfo: React.FC<ReferenceInfoProps> = ({
 		return f ? `${messagePropertyName}.$.${f}` : `${messagePropertyName}.$`;
 	};
 
+	// Mirrors parseReference's field-building logic (bodyReference.ts) in reverse, so the
+	// reconstructed token is byte-for-byte the same string that appears in the field's raw value.
+	const buildReferenceToken = (color: string, direction: string, sourceMessageProperty: string, target: string) => {
+		if (sourceMessageProperty === 'status') return `${color}.(${direction}).status`;
+		const field = target ? `${sourceMessageProperty}.$.${target}` : `${sourceMessageProperty}.$`;
+		return `${color}.(${direction}).${field}`;
+	};
+
+	const deleteWholeEnhancement = (enhanceId: string) => {
+		if (!connection || !enhanceId) return;
+		dispatch(updateConnection({
+			fieldBindings: connection.fieldBindings.filter((binding) => binding.enhancement?.enhanceId !== enhanceId),
+		} as never));
+	};
+
 	return (
 		<div style={{ fontFamily: 'Inter, sans-serif', fontSize: 14 }}>
 			{Object.entries(fieldReferences).map(([field, refs]) => {
 				if (!refs.length) return null;
 				const enhanceId = refs[0].enhanceId;
+				const rowKey = field || '__empty_field__';
+				const isRowHovered = hoveredField === rowKey;
+				const canDeleteWholeEnhancement = refs.length <= 1;
 
 				return (
 					<div
-						key={field || '__empty_field__'}
+						key={rowKey}
 						onClick={() => {
 							if (enhanceId && onReferenceClick) {
 								onReferenceClick(enhanceId);
@@ -170,18 +208,12 @@ export const ReferenceInfo: React.FC<ReferenceInfoProps> = ({
 							cursor: 'pointer',
 							padding: '6px 4px',
 							borderRadius: 6,
+							boxShadow: isRowHovered ? 'var(--shadow-md)' : 'none',
+							background: isRowHovered ? 'var(--color-background-hover)' : 'transparent',
 							transition: 'box-shadow 0.15s ease, background 0.15s ease',
 						}}
-						onMouseEnter={(e) => {
-							const el = e.currentTarget as HTMLDivElement;
-							el.style.boxShadow = 'var(--shadow-md)';
-							el.style.background = 'var(--color-background-hover)';
-						}}
-						onMouseLeave={(e) => {
-							const el = e.currentTarget as HTMLDivElement;
-							el.style.boxShadow = 'none';
-							el.style.background = 'transparent';
-						}}
+						onMouseEnter={() => setHoveredField(rowKey)}
+						onMouseLeave={() => setHoveredField((prev) => (prev === rowKey ? null : prev))}
 					>
 						<div style={{ marginBottom: 4 }}>
 							<span
@@ -203,45 +235,77 @@ export const ReferenceInfo: React.FC<ReferenceInfoProps> = ({
 								gap: '8px',
 							}}
 						>
-							{refs.map((r, i) => (
-								<div
-									key={i}
-									style={{
-										display: 'inline-flex',
-										flexWrap: 'wrap',
-										alignItems: 'center',
-										gap: 4,
-										padding: '4px 6px',
-										borderRadius: 6,
-										border: '1px solid var(--color-border-subtle)',
-										background: 'var(--color-background-hover)',
-									}}
-								>
-									<span
+							{refs.map((r, i) => {
+								const refKey = `${rowKey}__${i}`;
+								const isRefHovered = hoveredRef === refKey;
+								const canDelete = onDeleteReference ? true : canDeleteWholeEnhancement;
+
+								return (
+									<div
+										key={i}
+										className='bodyLegacyReferenceItem'
+										onMouseEnter={() => setHoveredRef(refKey)}
+										onMouseLeave={() => setHoveredRef((prev) => (prev === refKey ? null : prev))}
 										style={{
-											backgroundColor: r.method?.color || r.color,
-											color: 'var(--color-text-on-action)',
-											padding: '2px 6px',
-											borderRadius: 4,
-											fontWeight: 600,
-											fontSize: 12,
+											display: 'inline-flex',
+											flexWrap: 'wrap',
+											alignItems: 'center',
+											gap: 4,
+											padding: '4px 24px 4px 6px',
+											borderRadius: 6,
+											border: '1px solid var(--color-border-subtle)',
+											background: 'var(--color-background-hover)',
 										}}
 									>
-										{r.method?.name || 'UnknownMethod'}
-									</span>
-									<span> bound with </span>
-									<span
-										style={{
-											color: r.color,
-											fontFamily: 'monospace',
-											fontWeight: 500,
-										}}
-									>
-										{formatSourceField(r.sourceMessageProperty, r.target)}
-									</span>
-									<span>{i === refs.length - 1 ? ' field.' : ' field; '}</span>
-								</div>
-							))}
+										<span
+											style={{
+												backgroundColor: r.method?.color || r.color,
+												color: 'var(--color-text-on-action)',
+												padding: '2px 6px',
+												borderRadius: 4,
+												fontWeight: 600,
+												fontSize: 12,
+											}}
+										>
+											{r.method?.name || 'UnknownMethod'}
+										</span>
+										<span> bound with </span>
+										<span
+											style={{
+												color: r.color,
+												fontFamily: 'monospace',
+												fontWeight: 500,
+											}}
+										>
+											{formatSourceField(r.sourceMessageProperty, r.target)}
+										</span>
+										<span>{i === refs.length - 1 ? ' field.' : ' field; '}</span>
+
+										{isRefHovered && !readOnly ? (
+											<Tooltip content={t(canDelete ? 'actions.deleteReference' : 'enhancement.deleteDisabledMultipleReferences')}>
+												<button
+													type='button'
+													className='logsHeaderIconButton bodyLegacyEnhancementDeleteButton'
+													style={{ position: 'absolute', top: '50%', right: 2, transform: 'translateY(-50%)' }}
+													disabled={!canDelete}
+													onClick={(event) => {
+														event.stopPropagation();
+														if (onDeleteReference) {
+															onDeleteReference(field, buildReferenceToken(r.color, r.direction, r.sourceMessageProperty, r.target));
+														} else {
+															deleteWholeEnhancement(enhanceId);
+														}
+													}}
+													aria-label={t('actions.deleteReference')}
+													data-testid={`workflow-reference-info-delete-${refKey}`}
+												>
+													<Trash2 size={13} />
+												</button>
+											</Tooltip>
+										) : null}
+									</div>
+								);
+							})}
 						</div>
 					</div>
 				);

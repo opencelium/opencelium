@@ -17,6 +17,7 @@ import {
   mergeReferenceValue,
   setBodySelectionValue,
 } from '../body-editor/bodyValue';
+import { countEnhancementReferences, parseFieldPath, removeReferenceValue } from '../body-editor/bodyReference';
 import { isInvalidMixedReferenceInteraction } from './requestFieldRules';
 
 type MessageProperty = 'body' | 'header';
@@ -122,10 +123,42 @@ export function useRequestObjectEditor({ messageProperty, source }: Props) {
     dispatch(updateConnection({ fieldBindings: created.connection.fieldBindings } as never));
   };
 
+  const deleteEnhancement = () => {
+    if (!connection || !currentEnhancement) return;
+    if (countEnhancementReferences(currentEnhancement) > 1) return;
+    dispatch(updateConnection({
+      fieldBindings: connection.fieldBindings.filter((binding) => binding.enhancement.enhanceId !== currentEnhancement.enhanceId),
+    } as never));
+  };
+
+  // Removes one reference token from a field's raw value (identified by its dotted resultVar
+  // path, e.g. "items.[0].name") — same mechanism BodyPointer's own remove action uses. Letting
+  // the normal commit pipeline resync afterward keeps fieldBindings/args consistent with the
+  // edited value, instead of editing args directly and leaving the raw value out of sync.
+  const deleteReferenceAtPath = (fieldPath: string, pointer: string) => {
+    const { namespace, name } = parseFieldPath(fieldPath);
+    if (!name) return;
+    const target = { namespace, name, value: undefined, pathLabel: '' };
+    const existingValue = getBodySelectionValue(source, target);
+    const nextValue = removeReferenceValue(existingValue, pointer);
+    if (nextValue === null) return;
+    const updated = setBodySelectionValue(source, { ...target, value: existingValue }, nextValue);
+    commit({
+      updated_src: updated,
+      existing_src: source,
+      namespace,
+      name,
+      existing_value: existingValue as never,
+      new_value: nextValue as never,
+    });
+  };
+
   return {
     connection,
     createEnhancement,
     currentEnhancement,
+    deleteEnhancement,
+    deleteReferenceAtPath,
     currentValue,
     directReference,
     isReferenceOpen,

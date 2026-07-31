@@ -171,6 +171,30 @@
   min-height: 0;
 }
 
+.bodyLegacyEnhancementHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.bodyLegacyEnhancementDeleteButton {
+  color: var(--color-status-error-fg);
+}
+
+.bodyLegacyEnhancementDeleteButton:hover:not(:disabled) {
+  background: var(--color-status-error-bg);
+}
+
+.bodyLegacyEnhancementDeleteButton:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.bodyLegacyReferenceItem {
+  position: relative;
+}
+
 .bodyLegacyEnhancementCollapse > .ant-collapse-item {
   display: flex;
   flex-direction: column;
