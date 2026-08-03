@@ -204,7 +204,7 @@ export function LogElementRow({
             }
             right={
               <Meta>
-                {response?.status ? <StatusBadge status={response.status} /> : null}
+                {response?.status && !hasError ? <StatusBadge status={response.status} /> : null}
                 {response?.duration ? (
                   <Typography variant="caption" isSubtle>
                     {response.duration}
