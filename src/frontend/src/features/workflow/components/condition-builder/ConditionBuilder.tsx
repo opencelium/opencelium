@@ -10,8 +10,8 @@ import { Button, Input, Modal, Select } from 'antd';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import type { Connection, MethodWithId } from '../../types/connection';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../../types/workflow.types';
-import { LegacyResponseFieldSelect } from '../request-editor/body-editor/LegacyResponseFieldSelect';
-import { LegacyWebhookReferenceSelect } from '../request-editor/body-editor/LegacyWebhookReferenceSelect';
+import { LegacyResponseFieldSelect } from '../request-editor/body-editor/LegacyResponseFieldSelect/LegacyResponseFieldSelect';
+import { LegacyWebhookReferenceSelect } from '../request-editor/body-editor/LegacyWebhookReferenceSelect/LegacyWebhookReferenceSelect';
 import {
 	buildReferenceValue,
 	getMethodConnectorChipInfo,
@@ -20,7 +20,7 @@ import {
 	type ResponseType,
 } from '../request-editor/body-editor/requestReferenceOptions';
 import { extractWebhookValue, webhookSnippet } from '../request-editor/body-editor/bodyWebhook';
-import { MethodConnectorChip } from '../request-editor/body-editor/MethodConnectorChip';
+import { MethodConnectorChip } from '../request-editor/body-editor/MethodConnectorChip/MethodConnectorChip';
 import {
 	IF_OPERATOR_LABEL_KEYS,
 	IfOperatorName,

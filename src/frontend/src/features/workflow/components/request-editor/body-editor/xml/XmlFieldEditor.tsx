@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { DeleteOutlined } from '@ant-design/icons';
 import { Button, Space } from 'antd';
 import { hasOnlyReferences } from '../bodyReference';
-import { setLastBodyReferenceTriggerRect } from '../InlineBodyReferenceEditor';
+import { setLastBodyReferenceTriggerRect } from '../InlineBodyReferenceEditor/InlineBodyReferenceEditor';
 import { XmlReferenceTokens } from './XmlReferenceTokens';
 import type { XmlSelection } from './xmlTree';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
