@@ -87,6 +87,12 @@
   background: var(--color-background-surface);
 }
 
+.bodyLegacyXmlToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .bodyLegacyXmlCard {
   display: flex;
   flex: 1;
@@ -145,6 +151,27 @@
   top: 34px;
   left: 20px;
   z-index: 20;
+}
+
+.bodyLegacyMethodOption {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bodyLegacyMethodOptionName {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.bodyLegacyMethodOptionLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .bodyLegacyEnhancement {

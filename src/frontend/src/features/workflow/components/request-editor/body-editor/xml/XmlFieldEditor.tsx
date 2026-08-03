@@ -3,7 +3,7 @@ import { Button, Space } from 'antd';
 import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { hasOnlyReferences } from '../bodyReference';
-import { setLastBodyReferenceTriggerRect } from '../InlineBodyReferenceEditor';
+import { setLastBodyReferenceTriggerRect } from '../InlineBodyReferenceEditor/InlineBodyReferenceEditor';
 import { XmlReferenceTokens } from './XmlReferenceTokens';
 import type { XmlSelection } from './xmlTree';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
