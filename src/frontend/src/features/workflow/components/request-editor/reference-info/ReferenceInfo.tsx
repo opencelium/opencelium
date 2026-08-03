@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Trash2 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
+import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { parseEnhancementArg } from '../utils/parseEnhancementArg';
@@ -282,26 +282,25 @@ export const ReferenceInfo: React.FC<ReferenceInfoProps> = ({
 										<span>{i === refs.length - 1 ? ' field.' : ' field; '}</span>
 
 										{isRefHovered && !readOnly ? (
-											<Tooltip content={t(canDelete ? 'actions.deleteReference' : 'enhancement.deleteDisabledMultipleReferences')}>
-												<button
-													type='button'
-													className='logsHeaderIconButton bodyLegacyEnhancementDeleteButton'
-													style={{ position: 'absolute', top: '50%', right: 2, transform: 'translateY(-50%)' }}
-													disabled={!canDelete}
-													onClick={(event) => {
-														event.stopPropagation();
-														if (onDeleteReference) {
-															onDeleteReference(field, buildReferenceToken(r.color, r.direction, r.sourceMessageProperty, r.target));
-														} else {
-															deleteWholeEnhancement(enhanceId);
-														}
-													}}
-													aria-label={t('actions.deleteReference')}
-													data-testid={`workflow-reference-info-delete-${refKey}`}
-												>
-													<Trash2 size={13} />
-												</button>
-											</Tooltip>
+											<span
+												style={{ position: 'absolute', top: '50%', right: 2, transform: 'translateY(-50%)' }}
+												onClick={(event) => event.stopPropagation()}
+											>
+												<Tooltip content={t(canDelete ? 'actions.deleteReference' : 'enhancement.deleteDisabledMultipleReferences')}>
+													<DeleteIconButton
+														iconSize={13}
+														disabled={!canDelete}
+														testId={`workflow-reference-info-delete-${refKey}`}
+														onClick={() => {
+															if (onDeleteReference) {
+																onDeleteReference(field, buildReferenceToken(r.color, r.direction, r.sourceMessageProperty, r.target));
+															} else {
+																deleteWholeEnhancement(enhanceId);
+															}
+														}}
+													/>
+												</Tooltip>
+											</span>
 										) : null}
 									</div>
 								);

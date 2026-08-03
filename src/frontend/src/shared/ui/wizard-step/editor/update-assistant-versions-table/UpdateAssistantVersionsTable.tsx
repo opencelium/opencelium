@@ -14,8 +14,9 @@ import { EntityText } from '@shared/ui/primitives/Text'
 import { Table } from '@shared/ui/primitives/Table'
 import { tableDefaultColumn } from '@shared/ui/primitives/Table/Table.utils'
 import { Button } from '@shared/ui/primitives/Button'
-import { IconButton } from '@shared/ui/primitives/IconButton'
+import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton'
 import { Radio } from '@shared/ui/primitives/Radio'
+import { Tooltip } from '@shared/ui/primitives/Tooltip'
 import { useDialog } from '@shared/ui/dialog/useDialog'
 import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext'
 import { ChangelogDialogContent } from './ChangelogDialogContent'
@@ -51,6 +52,7 @@ type Props = {
 
 export function UpdateAssistantVersionsTable({ name, label }: Props) {
     const { t } = useI18n('entities')
+    const { t: tCommon } = useI18n('common')
     const dialog = useDialog()
     const confirm = useConfirm()
     const { watch, setValue, control } = useFormContext()
@@ -190,20 +192,20 @@ export function UpdateAssistantVersionsTable({ name, label }: Props) {
                     cell: ({ row }) => {
                         const isRowDeleting = deletingVersion === row.original.name
                         return (
-                            <IconButton
-                                type="text"
-                                size={'sm'}
-                                iconProps={{ name: 'delete' }}
-                                onClick={() => handleDelete(row.original.name)}
-                                loading={isRowDeleting}
-                                disabled={deletingVersion !== null && !isRowDeleting}
-                            />
+                            <Tooltip content={tCommon('actions.delete')}>
+                                <DeleteIconButton
+                                    iconSize={15}
+                                    onClick={() => handleDelete(row.original.name)}
+                                    loading={isRowDeleting}
+                                    disabled={deletingVersion !== null && !isRowDeleting}
+                                />
+                            </Tooltip>
                         )
                     },
                 } as ColumnDef<UpdateVersion>]
                 : []),
         ],
-        [t, name, selectedVersion, dialog, isOffline, handleDelete, deletingVersion, equalColumnWidth],
+        [t, tCommon, name, selectedVersion, dialog, isOffline, handleDelete, deletingVersion, equalColumnWidth],
     )
 
     const tableInstance = useReactTable({

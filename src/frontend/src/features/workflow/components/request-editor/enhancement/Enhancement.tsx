@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { ConfigProvider } from 'antd';
-import { Maximize2, Minimize2, Trash2 } from 'lucide-react';
+import { Maximize2, Minimize2 } from 'lucide-react';
+import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton';
 import { Collapse } from '@shared/ui/primitives/Collapse';
 import { Empty } from '@shared/ui/primitives/Empty';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
@@ -86,19 +87,14 @@ const ReferenceEnhancement = ({ enhancement, readOnly, directReference, onCreate
 								<span>{t('enhancement.title')}</span>
 								{hasEnhancement && onDeleteEnhancement ? (
 									<Tooltip content={t(canDeleteEnhancement ? 'actions.deleteEnhancement' : 'enhancement.deleteDisabledMultipleReferences')}>
-										<button
-											type='button'
-											className='logsHeaderIconButton bodyLegacyEnhancementDeleteButton'
-											disabled={readOnly || !canDeleteEnhancement}
-											onClick={(event) => {
-												event.stopPropagation();
-												onDeleteEnhancement();
-											}}
-											aria-label={t('actions.deleteEnhancement')}
-											data-testid='workflow-enhancement-delete'
-										>
-											<Trash2 size={15} />
-										</button>
+										<span onClick={(event) => event.stopPropagation()}>
+											<DeleteIconButton
+												iconSize={15}
+												disabled={readOnly || !canDeleteEnhancement}
+												testId='workflow-enhancement-delete'
+												onClick={onDeleteEnhancement}
+											/>
+										</span>
 									</Tooltip>
 								) : null}
 							</div>

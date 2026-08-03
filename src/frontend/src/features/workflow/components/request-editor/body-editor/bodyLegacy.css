@@ -178,19 +178,6 @@
   width: 100%;
 }
 
-.bodyLegacyEnhancementDeleteButton {
-  color: var(--color-status-error-fg);
-}
-
-.bodyLegacyEnhancementDeleteButton:hover:not(:disabled) {
-  background: var(--color-status-error-bg);
-}
-
-.bodyLegacyEnhancementDeleteButton:disabled {
-  cursor: default;
-  opacity: 0.4;
-}
-
 .bodyLegacyReferenceItem {
   position: relative;
 }
@@ -583,17 +570,7 @@
   position: absolute;
   top: -5px;
   right: -6px;
-  width: 12px;
-  min-width: 12px;
-  height: 14px;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  color: var(--color-text-primary);
-  font-size: 11px;
-  cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
 }

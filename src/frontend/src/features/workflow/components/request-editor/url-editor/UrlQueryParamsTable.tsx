@@ -1,7 +1,7 @@
 import React from 'react';
-import { DeleteOutlined } from '@ant-design/icons';
-import { Button, Checkbox, Input, Switch, Table, Tooltip } from 'antd';
+import { Checkbox, Input, Switch, Table, Tooltip } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
+import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton';
 import type { EndpointArg, QueryParam } from '../../../types/connection';
 import {
 	ARG_TOKEN_RE,
@@ -194,11 +194,9 @@ export const UrlQueryParamsTable: React.FC<Props> = ({
 							/>
 						</Tooltip>
 						<Tooltip title="Delete param">
-							<Button
-								type="text"
-								size="small"
+							<DeleteIconButton
+								iconSize={14}
 								disabled={disabled}
-								icon={<DeleteOutlined />}
 								onClick={() => onRemoveParamRow(row.id)}
 							/>
 						</Tooltip>
