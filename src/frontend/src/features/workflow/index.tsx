@@ -47,6 +47,7 @@ import type { AuthUser } from '@entities/auth/model/types';
 import type { HistoryVersionItem } from './types/history.types';
 import type { WorkflowEdgeModel, WorkflowHeaderMenuItem, WorkflowNodeModel } from './types/workflow.types';
 import { createEmptyMethodConfig } from './utils/requestConfig';
+import { isDirectReferenceEnhancement } from './components/request-editor/body-editor/bodyReference';
 
 const toWorkflowResponse = (nodeId: string, response: NonNullable<Connector['invoker']>['operations'][number]['response']) => ({
   responseId: `response-${nodeId}`,
@@ -445,6 +446,27 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
     // explicit override (from the Assign Category dialog) changes it.
     const nextCategoryId = categoryIdOverride !== undefined ? categoryIdOverride : categoryId;
     const isCreate = !activeConnectionId;
+
+    let fieldBindingsToSave = loadedFieldBindings;
+    const directReferenceBindings = (loadedFieldBindings ?? []).filter((binding: any) =>
+      isDirectReferenceEnhancement(binding?.enhancement),
+    );
+    if (directReferenceBindings.length > 0) {
+      const applyOptimizations = await confirm({
+        title: t('enhancement.optimizeDirectReferences.title'),
+        message: t('enhancement.optimizeDirectReferences.message', { count: directReferenceBindings.length }),
+        confirmText: t('actions.apply'),
+        cancelText: t('actions.cancel'),
+      });
+      if (applyOptimizations) {
+        const directReferenceIds = new Set(directReferenceBindings.map((binding: any) => binding.enhancement.enhanceId));
+        fieldBindingsToSave = (loadedFieldBindings ?? []).filter(
+          (binding: any) => !directReferenceIds.has(binding?.enhancement?.enhanceId),
+        );
+        setLoadedFieldBindings(fieldBindingsToSave);
+      }
+    }
+
     let response;
     try {
       response = await saveWorkflowConnection({
@@ -455,7 +477,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
         nodes: hydratedNodes,
         edges: workflow.edges,
         viewport: workflow.getViewport(),
-        fieldBindings: loadedFieldBindings,
+        fieldBindings: fieldBindingsToSave,
         categoryId: nextCategoryId,
       });
     } catch (error) {
@@ -478,7 +500,7 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
       description: normalizedDescription,
       nodes: hydratedNodes,
       edges: workflow.edges,
-      fieldBindings: loadedFieldBindings,
+      fieldBindings: fieldBindingsToSave,
     }));
     setChangeSource('clean');
     setHistoryPreviewSnapshot(null);

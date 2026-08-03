@@ -58,6 +58,8 @@ export const buildRequestResultField = (
   return `${messageProperty}.$.${parts.join('.').replace(/\.\./g, '.')}`.replace(/\.$/, '');
 };
 
+export const DEFAULT_ENHANCEMENT_SCRIPT = 'RESULT_VAR = VAR_0';
+
 export const buildBodyEnhancement = (
   enhanceId: string,
   resultVar: string,
@@ -66,7 +68,7 @@ export const buildBodyEnhancement = (
   const enhancement: Enhancement = {
     enhanceId,
     language: Language.JavaScript,
-    script: 'RESULT_VAR = VAR_0',
+    script: DEFAULT_ENHANCEMENT_SCRIPT,
     args: { RESULT_VAR: resultVar },
   };
   references.forEach((reference, index) => {
@@ -77,6 +79,14 @@ export const buildBodyEnhancement = (
 
 export const countEnhancementReferences = (enhancement?: Enhancement) =>
   Object.keys(enhancement?.args || {}).filter((key) => /^VAR_\d+$/.test(key)).length;
+
+// A "direct reference" enhancement only wraps a single source reference in the default,
+// no-op script — it transforms nothing and is functionally identical to no enhancement
+// at all (the raw reference token embedded in the field resolves the same either way).
+// Flags it as safe to strip before save so the field falls back to that faster direct path.
+export const isDirectReferenceEnhancement = (enhancement?: Enhancement) =>
+  countEnhancementReferences(enhancement) === 1 &&
+  String(enhancement?.script ?? '').trim().replace(/;$/, '') === DEFAULT_ENHANCEMENT_SCRIPT;
 
 // Inverse of buildRequestResultField: turns a dotted resultVar path (e.g. "items.[0].name") back
 // into the namespace/name pair getBodySelectionValue/setBodySelectionValue expect.
