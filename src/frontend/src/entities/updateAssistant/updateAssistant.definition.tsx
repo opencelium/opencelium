@@ -8,6 +8,7 @@ import { UpdateAssistantPage } from '@pages/UpdateAssistantPage/UpdateAssistantP
 import {
     REQUIRED_COMPONENTS
 } from "@shared/ui/wizard-step/editor/update-assistant-health-viewer/UpdateAssistantHealthViewer.tsx";
+import { UpdateAssistantSuccessContent } from "@shared/ui/wizard-step/editor/update-assistant-run-button/UpdateAssistantSuccessContent.tsx";
 
 const baseKey = 'update-assistant'
 
@@ -40,10 +41,6 @@ export const updateAssistantDefinition: EntityDefinition = {
             },
             uploadOffline: {
                 url: '/assistant/zipfile',
-                method: 'POST',
-            },
-            runUpdate: {
-                url: '/assistant/oc/update',
                 method: 'POST',
             },
         },
@@ -158,6 +155,14 @@ export const updateAssistantDefinition: EntityDefinition = {
             view: {
                 header: `${baseKey}.wizard.modes.view.header`,
                 subheader: `${baseKey}.wizard.modes.view.subheader`,
+            },
+            create: {
+                successMessage: `${baseKey}.update.successTitle`,
+                getSuccessContent: (formData: { versionsDisplay?: unknown }) => (
+                    <UpdateAssistantSuccessContent
+                        version={typeof formData?.versionsDisplay === 'string' ? formData.versionsDisplay : undefined}
+                    />
+                ),
             },
         },
 

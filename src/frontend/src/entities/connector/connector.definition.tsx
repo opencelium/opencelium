@@ -15,6 +15,7 @@ import {connectorApi} from "@entities/connector/api/connectorApi.ts";
 import {showApiError} from "@shared/api/handleApiError.ts";
 import {masterPasswordApi, useMasterPasswordStore} from "@features/master-password";
 import {renderConnectorTitle} from "@entities/connector/ui/renderConnectorTitle";
+import {UserNameCell} from "@entities/user/ui/UserNameCell";
 import {TruncatedTextCell} from "@shared/table/TruncatedTextCell";
 import {deleteConnectorIcon, hasConnectorIconFile, shouldDeleteConnectorIcon, uploadConnectorIcon} from "@entities/connector/model/connectorIconUpload";
 import type {StepRemoteProps} from "@shared/ui/form/FormControl/FormControl.type.ts";
@@ -369,7 +370,37 @@ export const connectorDefinition: EntityDefinition = {
                 align: 'center',
                 labelKey: `${baseKey}.fields.sslCert.label`,
             },
+        },/*
+        {
+            // Read-only audit columns set by the backend on save — not part of any
+            // section/wizard step, only surfaced as list columns.
+            name: 'modifiedAt',
+            type: 'number',
+            ui: { component: 'input' },
+            table: {
+                width: 160,
+                visible: true,
+                order: 6,
+                sortable: true,
+                searchable: true,
+                labelKey: `${baseKey}.fields.modifiedAt.label`,
+                render: (_row, value) =>
+                    typeof value === 'number' ? <span>{new Date(value).toLocaleString(i18n.language)}</span> : null,
+            },
         },
+        {
+            name: 'modifiedBy',
+            type: 'number',
+            ui: { component: 'input' },
+            table: {
+                width: 160,
+                visible: true,
+                order: 7,
+                searchable: true,
+                labelKey: `${baseKey}.fields.modifiedBy.label`,
+                render: (_row, value) => <UserNameCell userId={typeof value === 'number' ? value : null} />,
+            },
+        },*/
         {
             // The icon is edited from the wizard's top-right image (ConnectorWizardImage),
             // not as a form field — so it is intentionally left out of every section.

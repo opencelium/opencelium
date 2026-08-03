@@ -20,13 +20,19 @@
     "timeout": {
       "label": "Timeout"
     },
+    "modifiedAt": {
+      "label": "Geändert am"
+    },
+    "modifiedBy": {
+      "label": "Geändert von"
+    },
     "requestData": {
       "error": {
         "required": "Pflichtfeld"
       }
     },
     "sslCert": {
-      "label": "SSL-Zertifikat",
+      "label": "Jedem Zertifikat vertrauen",
       "text": {
         "on": "Jedem Zertifikat vertrauen",
         "off": "Jedem Zertifikat vertrauen"
