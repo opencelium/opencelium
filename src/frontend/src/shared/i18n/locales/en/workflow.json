@@ -441,6 +441,10 @@
     "script": "Script",
     "emptyState": "Please, click on the reference to see its enhancement.",
     "deleteDisabledMultipleReferences": "This field has more than one reference, so it must stay wrapped in an enhancement.",
+    "confirmDelete": {
+      "title": "Delete enhancement?",
+      "message": "This will permanently remove the enhancement and its script. This action cannot be undone."
+    },
     "directReference": {
       "title": "Direct reference",
       "description": "This field has no enhancement — it is a direct, one-to-one reference between the two fields below, with no script running in between. Direct references execute faster than a scripted enhancement.",
@@ -500,7 +504,11 @@
   "referenceInfo": {
     "title": "Reference Information",
     "legacyTitle": "Reference information",
-    "empty": "(is empty now)"
+    "empty": "(is empty now)",
+    "confirmDelete": {
+      "title": "Delete reference?",
+      "message": "This will permanently remove this reference. This action cannot be undone."
+    }
   },
   "requestData": "Request data",
   "graphqlBody": {

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
-import { DeleteOutlined } from '@ant-design/icons';
 import { Button, Space } from 'antd';
+import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton';
+import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { hasOnlyReferences } from '../bodyReference';
 import { setLastBodyReferenceTriggerRect } from '../InlineBodyReferenceEditor';
 import { XmlReferenceTokens } from './XmlReferenceTokens';
@@ -99,7 +100,11 @@ export function XmlFieldEditor({
             </Button>
           ) : null}
           {onEdit ? <Button className="xmlActionButton" size="small" type="text" onClick={onEdit}>{t('actions.edit')}</Button> : null}
-          {onRemove ? <Button className="xmlIconButton" size="small" danger type="text" icon={<DeleteOutlined />} onClick={onRemove} /> : null}
+          {onRemove ? (
+            <Tooltip content={t('actions.delete')}>
+              <DeleteIconButton iconSize={14} onClick={onRemove} />
+            </Tooltip>
+          ) : null}
         </Space>
       ) : null}
     </div>

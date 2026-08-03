@@ -4,7 +4,8 @@ import { FormTextarea } from '@shared/ui/form/FormTextarea'
 import { FormControl } from '@shared/ui/form/FormControl'
 import { Input } from '@shared/ui/primitives/Input'
 import { FieldArrayEditor } from '@shared/ui/wizard-step/editor/general/FieldArrayEditor'
-import { IconButton } from '@shared/ui/primitives/IconButton'
+import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton'
+import { Tooltip } from '@shared/ui/primitives/Tooltip'
 import type { Mode } from '@/engine/entity/EntityDefinition'
 import { useI18n } from '@shared/i18n/hooks/useI18n'
 import { renameVariableInScript, replaceDeletedArgInScript } from '@entities/dataAggregator/lib/scriptUtils'
@@ -50,6 +51,7 @@ function ArgNameInput({ fieldName, readOnly }: { fieldName: string; readOnly: bo
 
 export function DataAggregatorArgsEditor({ name, label, mode }: DataAggregatorArgsEditorProps) {
     const { t } = useI18n('entities')
+    const { t: tCommon } = useI18n('common')
     const { control, formState: { errors }, getValues, setValue } = useFormContext()
     const args = (useWatch({ name, control }) ?? []) as { name: string; description: string }[]
     const prevNamesRef = useRef<string[]>([])
@@ -118,12 +120,9 @@ export function DataAggregatorArgsEditor({ name, label, mode }: DataAggregatorAr
                     />
                     {!readOnly && (
                         <div style={{ paddingTop: 24 }}>
-                            <IconButton
-                                size="sm"
-                                type={'text'}
-                                iconProps={{ name: 'delete' }}
-                                onClick={() => remove(index)}
-                            />
+                            <Tooltip content={tCommon('actions.delete')}>
+                                <DeleteIconButton onClick={() => remove(index)} />
+                            </Tooltip>
                         </div>
                     )}
                 </div>

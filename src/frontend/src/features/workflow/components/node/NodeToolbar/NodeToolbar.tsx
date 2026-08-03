@@ -1,4 +1,5 @@
-import { Trash2 } from 'lucide-react';
+import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton';
+import { Tooltip } from '@shared/ui/primitives/Tooltip';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import type { NodeToolbarProps } from './NodeToolbar.types';
 
@@ -8,15 +9,9 @@ export function NodeToolbar({ canDelete, onDelete }: NodeToolbarProps) {
 
 	return (
 		<div className='nodeToolbar'>
-			<button
-				className='nodeToolbarButton nodeToolbarButtonDanger'
-				type='button'
-				title={t('actions.delete')}
-				data-testid='workflow-node-delete'
-				onClick={onDelete}
-			>
-				<Trash2 size={14} />
-			</button>
+			<Tooltip content={t('actions.delete')}>
+				<DeleteIconButton iconSize={14} onClick={onDelete} testId='workflow-node-delete' />
+			</Tooltip>
 		</div>
 	);
 }

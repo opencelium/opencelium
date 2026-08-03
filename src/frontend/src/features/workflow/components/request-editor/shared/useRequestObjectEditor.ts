@@ -17,7 +17,7 @@ import {
   mergeReferenceValue,
   setBodySelectionValue,
 } from '../body-editor/bodyValue';
-import { countEnhancementReferences, parseFieldPath, removeReferenceValue } from '../body-editor/bodyReference';
+import { countEnhancementReferences, removeReferenceValue, resolveFieldPathAgainstSource } from '../body-editor/bodyReference';
 import { isInvalidMixedReferenceInteraction } from './requestFieldRules';
 
 type MessageProperty = 'body' | 'header';
@@ -136,7 +136,7 @@ export function useRequestObjectEditor({ messageProperty, source }: Props) {
   // the normal commit pipeline resync afterward keeps fieldBindings/args consistent with the
   // edited value, instead of editing args directly and leaving the raw value out of sync.
   const deleteReferenceAtPath = (fieldPath: string, pointer: string) => {
-    const { namespace, name } = parseFieldPath(fieldPath);
+    const { namespace, name } = resolveFieldPathAgainstSource(source, fieldPath);
     if (!name) return;
     const target = { namespace, name, value: undefined, pathLabel: '' };
     const existingValue = getBodySelectionValue(source, target);

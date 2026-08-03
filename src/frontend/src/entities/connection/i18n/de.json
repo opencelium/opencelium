@@ -45,6 +45,9 @@
       "submit": "Duplizieren",
       "success": "Workflow \"{{name}}\" dupliziert",
       "error": "Workflow konnte nicht dupliziert werden"
+    },
+    "confirmDelete": {
+      "message": "Sind Sie sicher, dass Sie den Workflow mit dem Titel \"{{title}}\" löschen möchten?"
     }
   },
   "fields": {

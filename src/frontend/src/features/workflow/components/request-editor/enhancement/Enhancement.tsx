@@ -1,9 +1,11 @@
 import React, { useRef, useState } from 'react';
 import { ConfigProvider } from 'antd';
-import { Maximize2, Minimize2, Trash2 } from 'lucide-react';
+import { Maximize2, Minimize2 } from 'lucide-react';
+import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton';
 import { Collapse } from '@shared/ui/primitives/Collapse';
 import { Empty } from '@shared/ui/primitives/Empty';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
+import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import { useDispatch, useSelector } from 'react-redux';
 import { EnhancementArgs } from './Args';
 import Description from './Description';
@@ -30,6 +32,7 @@ interface EnhancementProps {
 
 const ReferenceEnhancement = ({ enhancement, readOnly, directReference, onCreateEnhancement, onDeleteEnhancement }: EnhancementProps) => {
 	const { t } = useI18n('workflow');
+	const confirm = useConfirm();
 	const dispatch = useDispatch();
 	const connection = useSelector((state: RootState) => state.connection.connection);
 	const [isScriptMaximized, setIsScriptMaximized] = useState(false);
@@ -85,21 +88,25 @@ const ReferenceEnhancement = ({ enhancement, readOnly, directReference, onCreate
 							<div className='bodyLegacyEnhancementHeader'>
 								<span>{t('enhancement.title')}</span>
 								{hasEnhancement && onDeleteEnhancement ? (
-									<Tooltip content={t(canDeleteEnhancement ? 'actions.deleteEnhancement' : 'enhancement.deleteDisabledMultipleReferences')}>
-										<button
-											type='button'
-											className='logsHeaderIconButton bodyLegacyEnhancementDeleteButton'
-											disabled={readOnly || !canDeleteEnhancement}
-											onClick={(event) => {
-												event.stopPropagation();
-												onDeleteEnhancement();
-											}}
-											aria-label={t('actions.deleteEnhancement')}
-											data-testid='workflow-enhancement-delete'
-										>
-											<Trash2 size={15} />
-										</button>
-									</Tooltip>
+									<span
+										onClick={async (event) => {
+											event.stopPropagation();
+											const ok = await confirm({
+												title: t('enhancement.confirmDelete.title'),
+												message: t('enhancement.confirmDelete.message'),
+											});
+											if (!ok) return;
+											onDeleteEnhancement();
+										}}
+									>
+										<Tooltip content={t(canDeleteEnhancement ? 'actions.deleteEnhancement' : 'enhancement.deleteDisabledMultipleReferences')}>
+											<DeleteIconButton
+												iconSize={15}
+												disabled={readOnly || !canDeleteEnhancement}
+												testId='workflow-enhancement-delete'
+											/>
+										</Tooltip>
+									</span>
 								) : null}
 							</div>
 						),

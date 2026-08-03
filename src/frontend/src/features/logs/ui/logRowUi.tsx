@@ -123,6 +123,10 @@ type LogRowProps = {
   onToggle?: () => void;
   left: ReactNode;
   right?: ReactNode;
+  // True for a few seconds right after the test-run reveal scrolls this row
+  // into view (the element the error actually happened on) — plays a red
+  // pulse so the row is easy to spot once the tree has finished expanding.
+  highlighted?: boolean;
 };
 
 export function LogRow({
@@ -132,10 +136,11 @@ export function LogRow({
   onToggle,
   left,
   right,
+  highlighted = false,
 }: LogRowProps) {
   return (
     <div
-      className="oc-log-row"
+      className={`oc-log-row${highlighted ? " oc-log-row--error-target" : ""}`}
       onClick={expandable ? onToggle : undefined}
       style={{
         display: "flex",

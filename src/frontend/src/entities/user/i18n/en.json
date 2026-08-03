@@ -1,7 +1,10 @@
 {
   "list": {
     "title": "Users",
-    "subTitle": "This section allows administrators to manage system users, assign groups, enable two-factor authentication (2FA), and control access permissions."
+    "subTitle": "This section allows administrators to manage system users, assign groups, enable two-factor authentication (2FA), and control access permissions.",
+    "confirmDelete": {
+      "message": "Are you sure you want to delete user with email \"{{email}}\"?"
+    }
   },
   "crossValidations": {
     "repeatPassword": {
