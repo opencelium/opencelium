@@ -44,7 +44,7 @@
         "header": "Apply Update",
         "subheader": "Execute the system update",
         "actions": {
-          "runUpdate": "Run Update"
+          "runUpdate": "Update OC"
         }
       }
     },

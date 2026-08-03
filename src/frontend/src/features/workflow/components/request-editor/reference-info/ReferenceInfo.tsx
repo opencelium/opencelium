@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Trash2 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
+import { DeleteIconButton } from '@shared/ui/actions/DeleteIconButton';
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
+import { useConfirm } from '@shared/ui/confirm/ConfirmDialogContext';
 import { useI18n } from '@shared/i18n/hooks/useI18n';
 import { parseEnhancementArg } from '../utils/parseEnhancementArg';
 import type { MessageProperty } from '../shared/messageProperty';
@@ -78,6 +79,7 @@ export const ReferenceInfo: React.FC<ReferenceInfoProps> = ({
 	onDeleteReference,
 }) => {
 	const { t } = useI18n('workflow');
+	const confirm = useConfirm();
 	const dispatch = useDispatch();
 	const connection = useSelector(
 		(state: RootState) => state.connection.connection,
@@ -282,26 +284,31 @@ export const ReferenceInfo: React.FC<ReferenceInfoProps> = ({
 										<span>{i === refs.length - 1 ? ' field.' : ' field; '}</span>
 
 										{isRefHovered && !readOnly ? (
-											<Tooltip content={t(canDelete ? 'actions.deleteReference' : 'enhancement.deleteDisabledMultipleReferences')}>
-												<button
-													type='button'
-													className='logsHeaderIconButton bodyLegacyEnhancementDeleteButton'
-													style={{ position: 'absolute', top: '50%', right: 2, transform: 'translateY(-50%)' }}
-													disabled={!canDelete}
-													onClick={(event) => {
-														event.stopPropagation();
-														if (onDeleteReference) {
-															onDeleteReference(field, buildReferenceToken(r.color, r.direction, r.sourceMessageProperty, r.target));
-														} else {
-															deleteWholeEnhancement(enhanceId);
-														}
-													}}
-													aria-label={t('actions.deleteReference')}
-													data-testid={`workflow-reference-info-delete-${refKey}`}
-												>
-													<Trash2 size={13} />
-												</button>
-											</Tooltip>
+											<span
+												style={{ position: 'absolute', top: '50%', right: 2, transform: 'translateY(-50%)' }}
+												onClick={async (event) => {
+													event.stopPropagation();
+													const pointer = buildReferenceToken(r.color, r.direction, r.sourceMessageProperty, r.target);
+													const ok = await confirm({
+														title: t('referenceInfo.confirmDelete.title'),
+														message: t('referenceInfo.confirmDelete.message'),
+													});
+													if (!ok) return;
+													if (onDeleteReference) {
+														onDeleteReference(field, pointer);
+													} else {
+														deleteWholeEnhancement(enhanceId);
+													}
+												}}
+											>
+												<Tooltip content={t(canDelete ? 'actions.deleteReference' : 'enhancement.deleteDisabledMultipleReferences')}>
+													<DeleteIconButton
+														iconSize={13}
+														disabled={!canDelete}
+														testId={`workflow-reference-info-delete-${refKey}`}
+													/>
+												</Tooltip>
+											</span>
 										) : null}
 									</div>
 								);

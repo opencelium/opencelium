@@ -83,7 +83,13 @@ export const connectionDefinition: EntityDefinition = {
                 type: 'update',
                 buildNavigationUrl: (_entity, value) => `/workflow/update/${encodeURIComponent(value)}`,
             },
-            { type: 'delete' },
+            {
+                type: 'delete',
+                confirmMessage: (_value, _entity, row) => {
+                    const t = i18n.getFixedT(i18n.language, 'entities')
+                    return t(`${baseKey}.list.confirmDelete.message`, { title: (row as Connection).title })
+                },
+            },
         ],
     },
 

@@ -50,6 +50,10 @@ export const userDefinition: EntityDefinition = {
             { type: 'update' },
             {
                 type: 'delete',
+                confirmMessage: (_value, _entity, row) => {
+                    const t = i18n.getFixedT(i18n.language, 'entities');
+                    return t(`${baseKey}.list.confirmDelete.message`, { email: (row as User).email });
+                },
                 disabledReason: (row) => {
                     const currentUser = selectAuthUser(store.getState());
                     if (!currentUser) return null;

@@ -46,7 +46,13 @@ export const notificationTemplateDefinition: EntityDefinition = {
         actions: [
             { type: 'view' },
             { type: 'update' },
-            { type: 'delete' },
+            {
+                type: 'delete',
+                confirmMessage: (_value, _entity, row) => {
+                    const t = i18n.getFixedT(i18n.language, 'entities')
+                    return t(`${baseKey}.list.confirmDelete.message`, { name: (row as NotificationTemplate).name })
+                },
+            },
         ],
     },
 

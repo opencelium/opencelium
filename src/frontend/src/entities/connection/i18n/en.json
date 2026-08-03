@@ -45,6 +45,9 @@
       "submit": "Duplicate",
       "success": "Workflow \"{{name}}\" duplicated",
       "error": "Failed to duplicate workflow"
+    },
+    "confirmDelete": {
+      "message": "Are you sure you want to delete workflow with title \"{{title}}\"?"
     }
   },
   "fields": {
