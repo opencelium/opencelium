@@ -358,6 +358,9 @@ const OperationItem = React.memo(function OperationItem({
                 readOnly={readOnly}
                 rules={readOnly ? undefined : {
                     required: t('invoker.fields.operations.errors.nameRequired', { defaultValue: 'Name is required' }),
+                    validate: value =>
+                        (typeof value === 'string' && value.trim().length > 0)
+                        || t('invoker.fields.operations.errors.nameRequired', { defaultValue: 'Name is required' }),
                 }}
             />
             <FormInput
@@ -366,6 +369,9 @@ const OperationItem = React.memo(function OperationItem({
                 readOnly={readOnly}
                 rules={readOnly ? undefined : {
                     required: t('invoker.fields.operations.errors.endpointRequired', { defaultValue: 'Endpoint is required' }),
+                    validate: value =>
+                        (typeof value === 'string' && value.trim().length > 0)
+                        || t('invoker.fields.operations.errors.endpointRequired', { defaultValue: 'Endpoint is required' }),
                 }}
             />
             {!readOnly && !hideDeleteButton && (
