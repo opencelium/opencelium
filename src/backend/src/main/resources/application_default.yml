@@ -195,9 +195,6 @@ management:
           UP: 200
 
 opencelium:
-<<<<<<< HEAD
-  version: 4.8.4
-=======
   version: 5.0
   ###########################################################################
   #                                                                         #
@@ -253,7 +250,6 @@ opencelium:
     request-logging:
       enabled: false
       max-body-length: 500
->>>>>>> origin/version5.0
   ###########################################################################
   #                                                                         #
   #   Is customizable                                                       #
