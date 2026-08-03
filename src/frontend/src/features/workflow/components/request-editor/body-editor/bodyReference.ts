@@ -89,6 +89,48 @@ export const parseFieldPath = (path: string) => {
   return { namespace: segments, name };
 };
 
+// parseFieldPath's naive dot-split is ambiguous for a JSON key that itself contains a literal dot
+// (e.g. OData's "@odata.id") — it can't tell that apart from two nested segments "@odata"/"id".
+// This walks the actual source object level by level, at each step preferring the shortest
+// segment merge that exists as a real key (the common, dot-free case) and only falling back to
+// merging more segments together when the short lookup doesn't resolve — recovering the original,
+// unambiguous namespace/name split. Falls back to parseFieldPath's naive split if source doesn't
+// contain a matching path at all (e.g. the field was already removed).
+export const resolveFieldPathAgainstSource = (
+  source: unknown,
+  path: string,
+): { namespace: string[]; name: string } => {
+  const segments = String(path || '')
+    .split('.')
+    .filter(Boolean)
+    .map((segment) => segment.match(/^\[(\d+)]$/)?.[1] ?? segment);
+
+  const resolve = (current: unknown, remaining: string[]): string[] | null => {
+    if (remaining.length === 0) return [];
+    for (let take = 1; take <= remaining.length; take += 1) {
+      const candidateKey = remaining.slice(0, take).join('.');
+      let next: unknown;
+      if (Array.isArray(current)) {
+        if (take !== 1) continue;
+        const index = Number(remaining[0]);
+        if (Number.isNaN(index)) continue;
+        next = current[index];
+      } else if (current && typeof current === 'object' && candidateKey in (current as Record<string, unknown>)) {
+        next = (current as Record<string, unknown>)[candidateKey];
+      } else {
+        continue;
+      }
+      const rest = resolve(next, remaining.slice(take));
+      if (rest !== null) return [candidateKey, ...rest];
+    }
+    return null;
+  };
+
+  const resolved = resolve(source, segments) ?? segments;
+  const name = resolved.pop() || '';
+  return { namespace: resolved, name };
+};
+
 export const removeReferenceValue = (current: unknown, pointer: string): string | null => {
   if (typeof current !== 'string') return null;
   const refs = splitReferences(current);
