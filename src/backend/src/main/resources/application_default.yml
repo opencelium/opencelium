@@ -198,11 +198,21 @@ opencelium:
   version: 5.0
   ###########################################################################
   #                                                                         #
-  #   /application-config endpoint                                          #
+  #   /application-config endpoint (admin-only application.yml editor)      #
+  #                                                                         #
+  #   Powers the GET/PATCH /application-config REST endpoint, which lets    #
+  #   an admin view and edit this very configuration file from the UI       #
+  #   without shell access to the server. Before every write the current    #
+  #   file is backed up and the new content is written atomically, so a     #
+  #   bad edit can always be rolled back from a backup.                     #
   #                                                                         #
   #   file-path        — application.yml on disk to read and write          #
   #   backup.directory — where pre-write backups go (.bak.<epochMillis>)    #
   #   backup.keep      — how many recent backups to retain per target file  #
+  #                                                                         #
+  #   DO NOT modify or remove this block. The endpoint reads and writes     #
+  #   the file that file-path points at — changing these values can break   #
+  #   the config editor or make it write to the wrong file.                 #
   #                                                                         #
   ###########################################################################
   config:
