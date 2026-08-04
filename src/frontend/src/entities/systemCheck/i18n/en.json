@@ -1,0 +1,26 @@
+{
+  "list": {
+    "title": "System Check",
+    "subTitle": "This section displays the status and health of external services integrated with OpenCelium.",
+    "empty": "No services to display",
+    "columns": {
+      "component": "Service",
+      "status": "Status",
+      "info": "Info",
+      "error": "Error"
+    },
+    "status": {
+      "UP": "Operational",
+      "DOWN": "Down",
+      "UNKNOWN": "Unknown"
+    },
+    "components": {
+      "email": "Email",
+      "mariaDB": "MariaDB",
+      "mongoDB": "MongoDB",
+      "opencelium": "OpenCelium",
+      "os": "Operating System",
+      "polyglot": "Polyglot"
+    }
+  }
+}

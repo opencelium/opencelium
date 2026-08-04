@@ -1,0 +1,131 @@
+{
+  "list": {
+    "title": "Connectors",
+    "subTitle": "Connectors are core components of OpenCelium. They represent external or internal systems used to send requests and receive responses.",
+    "searchPlaceholder": "Search"
+  },
+  "fields": {
+    "title": {
+      "label": "Title",
+      "errors": {
+        "title_already_exists": "The connector with this title is already created"
+      }
+    },
+    "description": {
+      "label": "Description"
+    },
+    "invoker": {
+      "label": "Invoker"
+    },
+    "timeout": {
+      "label": "Timeout"
+    },
+    "modifiedAt": {
+      "label": "Modified At"
+    },
+    "modifiedBy": {
+      "label": "Modified By"
+    },
+    "requestData":  {
+      "error": {
+        "required": "Required field"
+      }
+    },
+    "sslCert": {
+      "label": "Trust any Certificate",
+      "text": {
+        "on": "Trust any certificate",
+        "off": "Trust any certificate"
+      }
+    },
+    "icon": {
+      "label": "Icon",
+      "uploadButton": "Upload logo",
+      "hint": "PNG or JPG",
+      "replace": "Replace icon",
+      "delete": "Delete icon",
+      "confirmDelete": {
+        "title": "Remove logo?",
+        "message": "This can't be undone."
+      }
+    },
+    "url": {
+      "label": "Url"
+    },
+    "password": {
+      "label": "Password"
+    }
+  },
+  "sections": {
+    "general-data": {
+      "title": "General Data"
+    },
+    "credentials": {
+      "title": "Credentials"
+    }
+  },
+  "wizard": {
+    "modes": {
+      "create": {
+        "header": "Create Connector",
+        "subheader": "Connector is a core component of OpenCelium. It represents an external or an internal system used to send requests and receive responses.",
+        "successMessage": "Connector \"{{title}}\" was successfully created"
+      },
+      "update": {
+        "header": "Update Connector",
+        "subheader": "Modify connector information and save changes.",
+        "successMessage": "Connector \"{{title}}\" was successfully updated"
+      },
+      "view": {
+        "header": "Connector Details",
+        "subheader": "View connector information."
+      }
+    },
+    "recommendations": {
+      "1": "Create another Connector",
+      "2": "Create Workflow",
+      "4": "Invoker List"
+    },
+    "steps": {
+      "general-data": {
+        "header": "General Data",
+        "subheader": "This section defines the basic configuration of the connector, including its name, description, execution settings, and the selected invoker."
+      },
+      "credentials": {
+        "header": "Credentials",
+        "subheader": "It contains invoker-specific configuration fields required to authenticate and communicate with the target system.",
+        "test": {
+          "button": "Test connection",
+          "success": "Connection test succeeded",
+          "needsMasterPassword": "Enter the master password to test the connection with the stored credentials.",
+          "confirm": {
+            "title": "Connection test failed",
+            "message": "The connection test failed. Do you still want to save this connector?"
+          }
+        },
+        "remote": {
+          "error": {
+            "default": "Unknown error during the connector test",
+            "COMMUNICATION_FAILED": "Connection was failed"
+          }
+        }
+      }
+    }
+  },
+  "confirmation": {
+    "delete": {
+      "byTitle": "Warning: connector \"{{title}}\" may be in use by one or more workflows. Deleting it can break them.\n\nAre you sure you want to continue?",
+      "byId": "Warning: connector with id \"{{id}}\" may be in use by one or more workflows. Deleting it can break them.\n\nAre you sure you want to continue?",
+      "bulkMessage": "Warning: the {{count}} selected connectors may be in use by one or more workflows. Deleting them can break those workflows.\n\nAre you sure you want to continue?",
+      "bulkMessage_one": "Warning: the selected connector may be in use by one or more workflows. Deleting it can break them.\n\nAre you sure you want to continue?"
+    }
+  },
+  "lifecycle": {
+    "uploadIcon": {
+      "failed": "Connector saved, but the icon upload failed. You can retry from edit."
+    },
+    "deleteIcon": {
+      "failed": "Connector saved, but removing the icon failed. You can retry from edit."
+    }
+  }
+}

@@ -1,0 +1,24 @@
+.wfDialog .ant-modal-header {
+	margin: 0;
+	padding: 18px 24px;
+	border-bottom: 1px solid var(--color-border-subtle);
+	border-radius: 4px 4px 0 0;
+	background: var(--color-background-surface);
+}
+
+.wfDialog .ant-modal-title {
+	font-size: 16px;
+	font-weight: 400;
+}
+
+.wfDialog .ant-modal-close {
+	top: 16px;
+	right: 18px;
+	color: var(--color-action-primary);
+}
+
+.wfDialogClose {
+	font-size: 22px;
+	font-weight: 300;
+	line-height: 1;
+}

@@ -1,0 +1,80 @@
+{
+  "list": {
+    "title": "Groups",
+    "subTitle": "Groups define roles and permission levels within the system. Each group controls what users are allowed to create, view, update, or delete."
+  },
+  "actions": {
+    "delete": {
+      "cannotDeleteOwnRole": "You cannot delete the role assigned to the current user."
+    }
+  },
+  "fields": {
+    "name": {
+      "label": "Name",
+      "errors": {
+        "name_already_exists": "The role with such name is already created"
+      }
+    },
+    "description": {
+      "label": "Description"
+    },
+    "groupIcon": {
+      "label": "Image"
+    },
+    "components": {
+      "label": "Components"
+    },
+    "permissions": {
+      "label": "Permissions",
+      "errors": {
+        "required": "Each component must have at least one permission"
+      }
+    }
+  },
+  "sections": {
+    "group-details": {
+      "title": "Group Details"
+    },
+    "components": {
+      "title": "Components"
+    }
+  },
+  "wizard": {
+    "modes": {
+      "create": {
+        "header": "Create Role",
+        "subheader": "Groups define roles and permission levels within the system. Each group controls what users are allowed to create, view, update, or delete.",
+        "successMessage": "Role \"{{name}}\" was successfully created"
+      },
+      "update": {
+        "header": "Update Role",
+        "subheader": "Modify role information and save changes.",
+        "successMessage": "Role \"{{name}}\" was successfully updated"
+      },
+      "view": {
+        "header": "Role Details",
+        "subheader": "View role information."
+      }
+    },
+    "recommendations": {
+      "1": "Create Connector",
+      "2": "Create Workflow"
+    },
+    "steps": {
+      "group-details": {
+        "header": "Role Details",
+        "subheader": "Basic information that defines the role identity."
+      },
+      "permissions": {
+        "header": "Permissions",
+        "subheader": "Select the system modules that this group will have access to."
+      }
+    }
+  },
+  "confirmation": {
+    "delete": {
+      "byName": "Delete role by name \"{{name}}\"?",
+      "byId": "Delete role by id \"{{id}}\"?"
+    }
+  }
+}

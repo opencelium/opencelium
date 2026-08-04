@@ -1,0 +1,15 @@
+[Unit]
+Description=OpenCelium API Hub
+After=syslog.target network.target
+
+[Service]
+Restart=on-failure
+RestartSec=5s
+Type=simple
+
+WorkingDirectory=/opt/opencelium/src/backend
+ExecStart=/usr/bin/oc systemd
+ExecStop=/bin/kill -15 $MAINPID
+
+[Install]
+WantedBy=multi-user.target

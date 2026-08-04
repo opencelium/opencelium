@@ -1,0 +1,575 @@
+.bodyLegacyLayout {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  width: 100%;
+}
+
+.bodyLegacyLeftPane {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 52%;
+  max-width: 74%;
+  min-height: 0;
+  min-width: 32%;
+}
+
+.bodyLegacyEnhancementPane {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.bodyLegacyLeft {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding-right: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.bodyLegacyLeftCollapse {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.bodyLegacyLeftCollapse .ant-collapse-item {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.bodyLegacyLeftCollapse .ant-collapse-item .ant-collapse-panel{
+  overflow-y: auto;
+}
+
+.bodyLegacyLeftCollapse .ant-collapse-item-active {
+  flex: 1;
+}
+
+.bodyLegacyLeftCollapse .ant-collapse-item-active > .ant-collapse-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.bodyLegacyLeftCollapse .ant-collapse-item-active > .ant-collapse-panel > .ant-collapse-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.bodyLegacyJsonWrap {
+  position: relative;
+  min-height: 160px;
+  overflow: auto;
+  background: var(--color-background-input);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+}
+
+.bodyLegacyXmlContent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  min-height: 0;
+}
+
+.bodyLegacyXmlContentMaximized {
+  z-index: 1100;
+  padding: 8px;
+  background: var(--color-background-surface);
+}
+
+.bodyLegacyXmlCard {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  border-radius: 12px;
+}
+
+.bodyLegacyXmlCard > .ant-card-body {
+  display: grid;
+  flex: 1;
+  gap: 12px;
+  min-height: 0;
+  overflow: auto;
+}
+
+.bodyLegacyXmlRaw {
+  height: 100% !important;
+  min-height: 0 !important;
+  resize: none;
+}
+
+.bodyLegacyJsonWrap .copy-to-clipboard-container,
+.bodyLegacyJsonWrap .click-to-edit,
+.bodyLegacyJsonWrap .click-to-reference {
+  align-items: center;
+  margin-top: -1px !important;
+  margin-left: 2px !important;
+  margin-right: 4px !important;
+  vertical-align: middle;
+}
+
+.bodyLegacyJsonWrap .click-to-remove {
+  align-items: center;
+  margin-top: -1px !important;
+  margin-left: 0 !important;
+  margin-right: 2px !important;
+  vertical-align: middle;
+}
+
+.bodyLegacyJsonWrap .click-to-reference {
+  transform: rotate(-30deg);
+}
+
+.bodyLegacyJsonWrap .copy-to-clipboard-icon,
+.bodyLegacyJsonWrap .click-to-edit-icon,
+.bodyLegacyJsonWrap .click-to-reference-icon,
+.bodyLegacyJsonWrap .click-to-remove-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bodyLegacyGenerator {
+  position: absolute;
+  top: 34px;
+  left: 20px;
+  z-index: 20;
+}
+
+.bodyLegacyEnhancement {
+  min-width: 0;
+  flex: 1;
+  padding-left: 16px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.bodyLegacyEnhancementContent {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.bodyLegacyEnhancementCollapse {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.bodyLegacyEnhancementCollapse > .ant-collapse-item {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.bodyLegacyEnhancementCollapse > .ant-collapse-item > .ant-collapse-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.bodyLegacyEnhancementCollapse > .ant-collapse-item > .ant-collapse-panel > .ant-collapse-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.bodyLegacyEnhancementBody {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.bodyLegacyEnhancementArgs {
+  margin-bottom: 12px;
+}
+
+.bodyLegacyEnhancementArgs .ant-collapse-panel {
+  overflow-y: auto;
+}
+
+.bodyLegacyEnhancementLabel {
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.bodyLegacyEnhancementLanguage {
+  margin-bottom: 10px;
+}
+
+.bodyLegacyEnhancementScript {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.bodyLegacyEnhancementScriptEditor {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.bodyLegacyEnhancementScriptEditor > :not(.bodyLegacyScriptToggle) {
+  position: absolute;
+  inset: 0;
+  width: auto !important;
+}
+
+/* Light-gray active line so it reads as selected without blending into the enhancement container. */
+.bodyLegacyEnhancementScriptEditor .ace_marker-layer .ace_active-line,
+.bodyLegacyEnhancementScriptEditor .ace_gutter-active-line {
+  background: var(--color-background-disabled);
+}
+
+.bodyLegacyScriptToggle {
+  position: absolute;
+  top: 6px;
+  right: 22px;
+  z-index: 5;
+}
+
+.bodyLegacyEnhancementScriptMaximized {
+  z-index: 1100;
+  flex: none;
+  padding: 8px;
+  background: var(--color-background-surface);
+}
+
+.bodyLegacyEnhancementDescription {
+  margin-top: 10px;
+}
+
+.bodyLegacyEnhancementEmpty {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  flex: 1;
+  min-height: 240px;
+  padding-top: 54px;
+  text-align: center;
+}
+
+.bodyLegacyDirectReference {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 4px;
+}
+
+.bodyLegacyDirectReferenceTitle {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.bodyLegacyDirectReferenceDescription {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.bodyLegacyDirectReferenceMap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 8px;
+  background: var(--color-background-hover);
+}
+
+.bodyLegacyDirectReferenceField {
+  font-family: monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-action-primary);
+  word-break: break-all;
+}
+
+.bodyLegacyDirectReferenceArrow {
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+.bodyLegacyDirectReferenceRefs {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.bodyLegacyDirectReferenceRef {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.bodyLegacyDirectReferenceBadge {
+  color: var(--color-text-on-action);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-weight: 600;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.bodyLegacyDirectReferenceCreateButton {
+  align-self: center;
+}
+
+.bodyLegacyGeneratorShell {
+  display: grid;
+  grid-template-columns: 40px 214px auto 214px 22px;
+  gap: 0;
+  align-items: center;
+  min-height: 52px;
+  padding: 6px 10px;
+  background: var(--color-background-elevated);
+  border: 1px solid var(--color-border-default);
+  border-radius: 2px;
+  box-shadow: var(--shadow-md);
+}
+
+.bodyLegacyGeneratorShellWebhook {
+  grid-template-columns: 28px 1fr 26px;
+  min-width: 452px;
+}
+
+.bodyLegacyGeneratorShellNoToggle {
+  grid-template-columns: minmax(160px, 1fr) auto minmax(160px, 1fr) 22px;
+  width: 100%;
+}
+
+.bodyLegacyGeneratorResponse {
+  margin-left: 9px;
+  width: 40px;
+}
+
+.bodyLegacyGeneratorResponse .ant-radio-wrapper > span:last-child {
+  padding-inline-end: 0;
+}
+
+.compactRadioGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.compactRadioGroup .ant-radio-wrapper {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1;
+  align-items: center;
+  color: var(--color-text-primary);
+}
+
+.compactRadioGroup .ant-radio-wrapper > span:last-child {
+  padding-inline-start: 5px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.compactRadioGroup .ant-radio,
+.compactRadioGroup .ant-radio-inner {
+  width: 12px;
+  height: 12px;
+}
+
+.compactRadioGroup .ant-radio-inner::after {
+  width: 12px;
+  height: 12px;
+  margin-block-start: -6px;
+  margin-inline-start: -6px;
+}
+
+.bodyLegacyRadioIcon {
+  width: 14px;
+  height: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--color-text-primary);
+}
+
+.bodyLegacyGeneratorAction {
+  justify-self: center;
+  color: var(--color-text-primary);
+  width: 22px;
+  min-width: 22px;
+  height: 24px;
+  padding: 0;
+}
+
+.bodyLegacyGeneratorSelect {
+  width: 100%;
+}
+
+.bodyLegacyGeneratorSelect.ant-select {
+  border-radius: 2px !important;
+  padding-inline: 10px !important;
+  font-size: 14px !important;
+}
+
+/* This select always displays its value through the search <input> (searchValue,
+   never a selection-item span — see LegacyResponseFieldSelect). Safari/macOS doesn't
+   vertically center text inside a native <input> via line-height the way it does for
+   a span, so pin it with flexbox instead, which is metrics-independent. */
+.bodyLegacyGeneratorSelect .ant-select-selection-search {
+  display: flex;
+  align-items: center;
+}
+
+.bodyLegacyGeneratorSelect .ant-select-selection-search-input {
+  height: 100%;
+}
+
+/* Reveals a copy-to-clipboard icon next to a select's dropdown arrow only while
+   hovering the select, mirroring the row-level oc-copy-on-hover pattern. */
+.selectCopyHost {
+  position: relative;
+}
+
+.selectCopyButton {
+  position: absolute;
+  top: 50%;
+  right: 26px;
+  transform: translateY(-50%);
+  z-index: 2;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+
+.selectCopyHost:hover .selectCopyButton {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.bodyLegacyWebhookSelect {
+  width: 100%;
+}
+
+.bodyLegacyWebhookSelect .ant-select-selector {
+  border-radius: 2px !important;
+  min-height: 38px !important;
+  padding-inline: 10px !important;
+}
+
+.bodyLegacyWebhookSelect .ant-select-selection-search-input,
+.bodyLegacyWebhookSelect .ant-select-selection-placeholder,
+.bodyLegacyWebhookSelect .ant-select-selection-item {
+  line-height: 36px !important;
+}
+
+.bodyLegacyWebhookCreate {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+  background: var(--color-background-surface);
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bodyLegacyWebhookCreate:hover {
+  background: var(--color-background-hover);
+}
+
+.bodyLegacyWebhookCreatePlus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  background: var(--color-action-primary);
+  color: var(--color-text-on-action);
+  font-size: 12px;
+}
+
+.bodyLegacyWebhookModalInput,
+.bodyLegacyWebhookModalSelect {
+  border-bottom: 1px solid var(--color-border-default);
+  border-radius: 0 !important;
+}
+
+.bodyLegacyWebhookModalInput .ant-input,
+.bodyLegacyWebhookModalSelect .ant-select-selector {
+  padding-left: 0 !important;
+}
+
+.bodyLegacyWebhookModalSelect .ant-select-selector {
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.bodyLegacyWebhookWrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 2px;
+  vertical-align: middle;
+}
+
+.bodyLegacyWebhookBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 10px;
+  border-radius: 0;
+  background: var(--color-background-hover);
+  color: var(--color-text-primary);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 22px;
+  white-space: nowrap;
+}
+
+.bodyLegacyWebhookRemove {
+  position: absolute;
+  top: -5px;
+  right: -6px;
+  width: 12px;
+  min-width: 12px;
+  height: 14px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-size: 11px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}

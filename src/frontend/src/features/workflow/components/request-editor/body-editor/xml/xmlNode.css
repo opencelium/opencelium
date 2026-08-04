@@ -1,0 +1,142 @@
+.xmlTreePanel {
+  display: grid;
+  gap: 12px;
+}
+
+.xmlNode {
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 10px;
+  background: var(--color-background-surface);
+  padding: 8px 10px;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.xmlNode:hover {
+  border-color: var(--color-border-default);
+  box-shadow: var(--shadow-md);
+}
+
+.xmlNodeSelected {
+  border-color: var(--color-status-warning-border);
+  box-shadow: 0 0 0 1px var(--color-status-warning-border);
+  background: var(--color-status-warning-bg);
+}
+
+.xmlNodeHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.xmlNodeTitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  min-width: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 14px;
+}
+
+.xmlBracket {
+  color: var(--color-text-primary);
+}
+
+.xmlTagName {
+  color: var(--color-status-error-fg);
+  font-weight: 600;
+}
+
+.xmlMeta {
+  color: var(--color-text-disabled);
+  font-size: 12px;
+  font-family: Inter, sans-serif;
+}
+
+.xmlNodeActions {
+  opacity: 0.22;
+  transition: opacity 0.15s ease;
+}
+
+.xmlNode:hover .xmlNodeActions,
+.xmlNode:hover .xmlIconButton,
+.xmlNode:hover .xmlFieldActions {
+  opacity: 1;
+}
+
+.xmlNodeBody {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.xmlSectionBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  white-space: nowrap;
+}
+
+.xmlSectionBadgeText {
+  color: var(--color-status-success-fg);
+  background: var(--color-status-success-bg);
+}
+
+.xmlSectionBadgeAttr {
+  color: var(--color-status-warning-fg);
+  background: var(--color-status-warning-bg);
+}
+
+.xmlSectionBadgeIcon {
+  font-weight: 700;
+}
+
+.xmlAttrLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.xmlAttrName {
+  color: var(--color-status-warning-fg);
+}
+
+.xmlAttrEq {
+  color: var(--color-text-disabled);
+}
+
+.xmlLevelBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--color-background-hover);
+  color: var(--color-text-disabled);
+  font-size: 11px;
+  font-weight: 600;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.xmlAddAttribute .xmlSectionBadgeIcon {
+  margin-right: 6px;
+}
+
+.xmlChildren {
+  display: grid;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.xmlAddAttribute {
+  justify-self: start;
+}

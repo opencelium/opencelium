@@ -1,0 +1,6 @@
+.ant-tooltip-custom .ant-tooltip-inner {
+    background: var(--color-background-surface);
+    color: var(--color-text-primary);
+    border-radius: var(--radius-md);
+    font-size: 12px;
+}

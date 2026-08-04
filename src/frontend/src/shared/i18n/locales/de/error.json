@@ -1,0 +1,41 @@
+{
+  "api": {
+    "unauthorized": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
+    "forbidden": "Ihre Sitzung ist abgelaufen",
+    "unknown": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+    "validation": "Die Anfrage wurde als ungültig abgelehnt. Bitte überprüfen Sie Ihre Eingaben.",
+    "notFound": "Die angeforderte Ressource wurde nicht gefunden.",
+    "default": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+    "unknownError": "Unbekannter Fehler in {{place}}",
+    "CATEGORY_NOT_FOUND": "Diese Kategorie wurde nicht gefunden. Sie wurde möglicherweise bereits gelöscht.",
+    "socketDisconnected": "Live-Verbindung verloren. Metriken werden nicht mehr aktualisiert.",
+    "login": {
+      "network": "Der Server ist nicht erreichbar. Bitte versuchen Sie es erneut.",
+      "invalidCredentials": "Ungültige E-Mail oder Passwort",
+      "failed": "Anmeldung fehlgeschlagen",
+      "sessionLoadFailed": "Sie wurden angemeldet, aber Ihr Konto konnte nicht geladen werden. Bitte versuchen Sie es erneut."
+    },
+    "forgotPassword": {
+      "emailNotExists": "Für diese E-Mail-Adresse ist kein Konto registriert.",
+      "tooManyAttempts": "Zu viele Versuche. Bitte versuchen Sie es später erneut.",
+      "emailRecoveryFailed": "Es gibt ein Problem mit Ihrer E-Mail-Konfiguration. Aus Sicherheitsgründen wurde die detaillierte Fehlermeldung in die Opencelium-Logs geschrieben. Bitte prüfen Sie die Logs für weitere Informationen.",
+      "network": "Der Server ist nicht erreichbar. Bitte versuchen Sie es erneut.",
+      "failed": "Die Wiederherstellungs-E-Mail konnte nicht gesendet werden. Bitte versuchen Sie es erneut."
+    },
+    "setPassword": {
+      "invalidToken": "Der Zurücksetzungslink ist ungültig oder abgelaufen. Bitte fordern Sie einen neuen an.",
+      "network": "Der Server ist nicht erreichbar. Bitte versuchen Sie es erneut.",
+      "failed": "Das Passwort konnte nicht zurückgesetzt werden. Bitte versuchen Sie es erneut."
+    }
+  },
+  "field": {
+    "required": "Pflichtfeld",
+    "minLength": "Mindestens {{min}} Zeichen",
+    "maxLength": "Maximal {{max}} Zeichen",
+    "invalidEmail": "Ungültige E-Mail-Adresse",
+    "mustNumber": "Muss eine Zahl sein",
+    "mustFile": "Muss eine Datei sein",
+    "fileTooLarge": "Datei ist zu groß (max. {{max}} Bytes)",
+    "failedAsyncOptions": "Optionen konnten nicht geladen werden"
+  }
+}

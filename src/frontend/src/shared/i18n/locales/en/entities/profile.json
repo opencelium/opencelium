@@ -1,0 +1,55 @@
+{
+  "sections": {
+    "userDetails": "User Details",
+    "updatePassword": "Update Password",
+    "permissions": "Permissions"
+  },
+  "fields": {
+    "userTitle": {
+      "label": "Title",
+      "options": {
+        "mr": "Mr",
+        "mrs": "Mrs"
+      }
+    },
+    "name": { "label": "Name" },
+    "surname": { "label": "Surname" },
+    "department": { "label": "Department" },
+    "organization": { "label": "Organization" },
+    "phoneNumber": {
+      "label": "Phone Number",
+      "validation1": "Invalid phone number format"
+    },
+    "email": { "label": "Email" },
+    "currentPassword": {
+      "label": "Current Password",
+      "wrong": "Wrong current password"
+    },
+    "newPassword": {
+      "label": "New Password",
+      "validation1": "Must contain uppercase letter",
+      "validation2": "Must contain lowercase letter",
+      "validation3": "Must contain a number",
+      "validation4": "Must contain special character"
+    },
+    "repeatNewPassword": {
+      "label": "Repeat New Password",
+      "mismatch": "Passwords do not match"
+    }
+  },
+  "actions": {
+    "update": "Update",
+    "save": "Save"
+  },
+  "hints": {
+    "sessionWillExpire": "Your session will be immediately expired after update."
+  },
+  "messages": {
+    "detailsUpdated": "Profile details updated",
+    "passwordUpdated": "Password updated. You will be logged out."
+  },
+  "validation": {
+    "required": "Required field"
+  },
+  "title": "Profile"
+}
