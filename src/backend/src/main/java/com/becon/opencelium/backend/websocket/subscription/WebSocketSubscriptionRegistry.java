@@ -17,11 +17,9 @@ public class WebSocketSubscriptionRegistry {
     }
 
     public void remove(int userId, String destination) {
-        userSubscriptions.get(userId).remove(destination);
-    }
-
-    public void remove(int userId) {
-        userSubscriptions.remove(userId);
+        if (destination != null) {
+            userSubscriptions.get(userId).remove(destination);
+        }
     }
 
     public boolean hasSubscription(String destination) {

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionConnectEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
+import org.springframework.web.socket.messaging.SessionUnsubscribeEvent;
 
 import static com.becon.opencelium.backend.websocket.config.JwtWebSocketHandshakeInterceptor.USER_ID_ATTRIBUTE;
 
@@ -33,14 +34,14 @@ public class WebSocketSessionEventListener {
     }
 
     @EventListener
-    public void onConnected(SessionConnectEvent event) {
+    public void onConnect(SessionConnectEvent event) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
 
         connectionRegistry.handleConnect(accessor);
     }
 
     @EventListener
-    public void onSubscribed(SessionSubscribeEvent event) {
+    public void onSubscribe(SessionSubscribeEvent event) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
 
         Integer userId = (Integer) accessor
@@ -58,7 +59,7 @@ public class WebSocketSessionEventListener {
     }
 
     @EventListener
-    public void onDisconnected(SessionDisconnectEvent event) {
+    public void onUnsubscribe(SessionUnsubscribeEvent event) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
 
         Integer userId = (Integer) accessor
@@ -66,12 +67,13 @@ public class WebSocketSessionEventListener {
                 .get(USER_ID_ATTRIBUTE);
         String destination = accessor.getDestination();
 
-        connectionRegistry.handleDisconnect(accessor);
+        subscriptionRegistry.remove(userId, destination);
+    }
 
-        if (destination != null) {
-            subscriptionRegistry.remove(userId, destination);
-        } else {
-            subscriptionRegistry.remove(userId);
-        }
+    @EventListener
+    public void onDisconnect(SessionDisconnectEvent event) {
+        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
+
+        connectionRegistry.handleDisconnect(accessor);
     }
 }
