@@ -449,6 +449,11 @@
       "title": "Direct reference",
       "description": "This field has no enhancement — it is a direct, one-to-one reference between the two fields below, with no script running in between. Direct references execute faster than a scripted enhancement.",
       "descriptionMany": "This field has no enhancement — it is a direct reference between the fields below, with no script running in between. Direct references execute faster than a scripted enhancement."
+    },
+    "optimizeDirectReferences": {
+      "title": "Optimization available",
+      "message": "There are {{count}} references that can be optimized for better performance. Would you like to apply this optimization before saving?",
+      "message_one": "There is a reference that can be optimized for better performance. Would you like to apply this optimization before saving?"
     }
   },
   "description": {
