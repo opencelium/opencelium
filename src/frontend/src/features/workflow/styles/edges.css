@@ -41,6 +41,39 @@
   fill: var(--color-action-primary);
 }
 
+/* Live test-run indicator: a moving dash showing data flowing along the edge
+   feeding whichever method/operator is currently executing. */
+.workflowEdgePathActive {
+  stroke: var(--color-action-primary);
+  color: var(--color-action-primary);
+  stroke-dasharray: 6 4;
+  animation: workflowEdgeFlow 0.6s linear infinite;
+}
+
+.edgeStartPointActive {
+  fill: var(--color-action-primary);
+  stroke: var(--color-action-primary);
+  stroke-width: 0;
+}
+
+@keyframes workflowEdgeFlow {
+  from {
+    stroke-dashoffset: 10;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Softer, static cue for edges nested inside a currently-running loop/if body —
+   marks the scope's extent without competing with the animated active edge. */
+.workflowEdgePathInScope {
+  stroke: var(--color-action-primary);
+  color: var(--color-action-primary);
+  opacity: 0.5;
+  stroke-dasharray: 4 4;
+}
+
 .rightDrawerShifted {
   transform: translateX(-300px);
 }

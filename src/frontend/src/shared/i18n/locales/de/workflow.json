@@ -294,7 +294,9 @@
     "branchFalse": "false",
     "asyncBadge": "Asynchrone Anfrage — löst den anderen Workflow aus und wartet nicht auf dessen Antwort.",
     "aggregatorBadge": "Führt Ergebnisse mehrerer Aufrufe mit dem Datensammler \"{{name}}\" zusammen.",
-    "methodColorBadge": "Knoten mit derselben Farbe und Nummer rufen dieselbe Methode desselben Connectors auf."
+    "methodColorBadge": "Knoten mit derselben Farbe und Nummer rufen dieselbe Methode desselben Connectors auf.",
+    "testRunIteration": "{{iterator}} = {{count}}",
+    "testRunIterationFast": "{{iterator}} = ..."
   },
   "saveDialog": {
     "title": "Version speichern",

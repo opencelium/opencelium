@@ -16,6 +16,12 @@ export function WorkflowEdge({
 	const isHighlighted = !!data?.highlighted;
 	const isDropInvalid = !!data?.dropInvalid;
 	const isPreviewEdge = !!data?.dragGhost || !!data?.dropPlaceholder;
+	// Live test-run status takes priority over hover/path-selection highlight,
+	// but never during a drag/drop preview or an invalid-drop state.
+	const isTestRunActive = !!data?.testRunActive && !isDropInvalid && !isPreviewEdge;
+	// Softer cue for edges nested inside a currently-running loop/if body —
+	// marks the scope's extent without competing with the active/highlighted edge.
+	const isTestRunInScope = !!data?.testRunInScope && !isDropInvalid && !isPreviewEdge && !isTestRunActive && !isHighlighted;
 
 	const GAP = 3;
 
@@ -64,18 +70,26 @@ export function WorkflowEdge({
 				cx={sourceX}
 				cy={sourceY}
 				r={3}
-				className={`edgeStartPoint ${isHighlighted ? 'edgeStartPointHighlighted' : ''}`}
+				className={`edgeStartPoint ${isTestRunActive ? 'edgeStartPointActive' : isHighlighted ? 'edgeStartPointHighlighted' : ''}`}
 			/>
 
 			<BaseEdge
 				id={String(id)}
 				path={path}
 				markerEnd={
-					isHighlighted
+					isTestRunActive || isHighlighted
 						? 'url(#workflow-arrow-highlighted)'
 						: 'url(#workflow-arrow)'
 				}
-				className={`workflowEdgePath ${isHighlighted ? 'workflowEdgePathHighlighted' : ''}`}
+				className={`workflowEdgePath ${
+					isTestRunActive
+						? 'workflowEdgePathActive'
+						: isHighlighted
+						? 'workflowEdgePathHighlighted'
+						: isTestRunInScope
+						? 'workflowEdgePathInScope'
+						: ''
+				}`}
 				style={
 					isDropInvalid
 						? {
@@ -89,10 +103,22 @@ export function WorkflowEdge({
 								color: 'var(--color-action-primary)',
 								strokeDasharray: data?.dropPlaceholder ? '6 6' : undefined,
 							}
+						: isTestRunActive
+						? {
+								stroke: 'var(--color-action-primary)',
+								color: 'var(--color-action-primary)',
+							}
 						: isHighlighted
 						? {
 								stroke: 'var(--color-action-primary)',
 								color: 'var(--color-action-primary)',
+							}
+						: isTestRunInScope
+						? {
+								stroke: 'var(--color-action-primary)',
+								color: 'var(--color-action-primary)',
+								opacity: 0.5,
+								strokeDasharray: '4 4',
 							}
 						: undefined
 				}

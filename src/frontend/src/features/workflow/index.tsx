@@ -26,6 +26,7 @@ import { buildLegacyConnection } from './components/request-editor/legacyAdapter
 import { useWorkflowPage } from './useWorkflowPage';
 import { useUnsavedChangesGuard } from './useUnsavedChangesGuard';
 import { TestRunProvider } from './test-run/TestRunProvider';
+import { buildLoopAncestorsByIndexPath } from './test-run/liveGraphStatus';
 import { loadConnectionVersions, loadWorkflowConnection, loadWorkflowConnectionVersion, removeConnectionVersion, saveConnectionVersionComment, saveWorkflowConnection } from './api/connectionService';
 import { mapConnectionToWorkflowState, type WorkflowConnectionState } from './api/connectionMapper';
 import { buildConnectionPayload, buildFromConnectorPayload } from './api/connectionPayload';
@@ -318,6 +319,10 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   const hydratedNodes = useMemo(
     () => hydrateNodesWithOperationResponses(workflow.nodes, connectors, invokers, hydrateCacheRef.current),
     [connectors, invokers, workflow.nodes],
+  );
+  const loopAncestorsByIndexPath = useMemo(
+    () => buildLoopAncestorsByIndexPath(hydratedNodes, workflow.edges),
+    [hydratedNodes, workflow.edges],
   );
   const activeConnectionId = createdConnectionId ?? connectionId;
   const displayedHistoryVersions = useMemo(
@@ -841,7 +846,13 @@ export default function Workflow({ readOnly = false }: WorkflowProps = {}) {
   };
 
   return (
-    <TestRunProvider connectionId={connectionId} connectionTitle={headerState.title} buildTestPayload={buildTestPayload} onResolveStartError={resolveAndHighlightWorkflowError}>
+    <TestRunProvider
+      connectionId={connectionId}
+      connectionTitle={headerState.title}
+      buildTestPayload={buildTestPayload}
+      onResolveStartError={resolveAndHighlightWorkflowError}
+      loopAncestorsByIndexPath={loopAncestorsByIndexPath}
+    >
     <div className="page" data-testid="workflow-page">
       <WorkflowHeader
         initialName={headerState.title}

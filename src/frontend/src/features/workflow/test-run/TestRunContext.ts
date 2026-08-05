@@ -1,6 +1,7 @@
 import { createContext } from 'react';
 import type { LiveLogTree } from '@features/logs';
 import type { SocketStatus } from '@shared/api/socket/types';
+import type { LiveGraphStatus } from './liveGraphStatus';
 
 export type TestRunPhase = 'idle' | 'starting' | 'running' | 'stopping';
 
@@ -18,6 +19,10 @@ export type TestRunContextValue = {
 	// Log tree of the current (or last finished) test run, assembled entirely
 	// from the socket stream — no REST requests happen during a run.
 	logTree: LiveLogTree;
+	// Flat per-node run status (not memory-bounded like logTree — see
+	// liveGraphStatus.ts) driving the canvas's live edge/node/iteration
+	// animation, keyed by workflow tree-path index.
+	liveGraphStatus: LiveGraphStatus;
 	result: TestRunResult | null;
 	// True when the running state was resumed from a previous page session: the
 	// test was started before the page was reloaded/reopened, so its logs are no

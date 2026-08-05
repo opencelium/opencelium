@@ -2,6 +2,7 @@ import { ALL_COLORS } from '../../constants/colors';
 import type { WorkflowEdgeModel, WorkflowNodeModel } from '../../types/workflow.types';
 import { getOperatorBottomBranch, getOutgoingCount, isLeafNode } from '../../utils/graphUtils';
 import type { WorkflowCanvasProps } from './WorkflowCanvas.types';
+import { EMPTY_TEST_RUN_SCOPE, type TestRunScope } from './testRunScope.utils';
 
 type NodeCacheEntry = {
 	src: WorkflowNodeModel;
@@ -16,6 +17,8 @@ type NodeCacheEntry = {
 type EdgeCacheEntry = {
 	src: WorkflowEdgeModel;
 	highlighted: boolean;
+	testRunActive: boolean;
+	testRunInScope: boolean;
 	out: WorkflowEdgeModel;
 };
 
@@ -72,7 +75,7 @@ const buildTopologySignature = (nodes: WorkflowNodeModel[], edges: WorkflowEdgeM
 type Params = Pick<
 	WorkflowCanvasProps,
 	'nodes' | 'edges' | 'activeAction' | 'isAnyNodeDragging' | 'onOpenAddStep' | 'onOpenContextMenu' | 'onDeleteNode' | 'onOpenAggregatorEditor'
-> & { cache?: PrepareWorkflowCache };
+> & { cache?: PrepareWorkflowCache; testRunScope?: TestRunScope };
 
 const getMethodInstanceData = (nodes: WorkflowNodeModel[]) => {
 	const result = new Map<string, { index: number; color: string }>();
@@ -113,6 +116,7 @@ export function prepareWorkflowElements({
 	onDeleteNode,
 	onOpenAggregatorEditor,
 	cache,
+	testRunScope = EMPTY_TEST_RUN_SCOPE,
 }: Params) {
 	let topology = cache?.topology;
 	const topologySig = buildTopologySignature(nodes, edges);
@@ -147,10 +151,21 @@ export function prepareWorkflowElements({
 		const highlighted = Boolean(node.data.highlighted) || highlightedBranch.nodeIds.has(node.id);
 		const suppressHoverAddControls = isPreviewNode || activeAction?.sourceNodeId === node.id;
 		const lockVisibleAddControls = !isPreviewNode && activeAction?.sourceNodeId === node.id;
+		const testRunFailed = testRunScope.failedNodeIds.has(node.id);
+		const testRunActive = !testRunFailed && testRunScope.activeNodeIds.has(node.id);
+		const testRunInScope = !testRunFailed && !testRunActive && testRunScope.scopeNodeIds.has(node.id);
+		const testRunFailedMessage = testRunFailed ? testRunScope.failedNodeErrorByNodeId.get(node.id) : undefined;
+		const testRunIteration = testRunScope.iterationByNodeId.get(node.id);
+		const testRunIterationSig = testRunIteration
+			? testRunIteration.kind === 'fast'
+				? `fast:${testRunIteration.iterator}`
+				: `count:${testRunIteration.iterator}:${testRunIteration.count}`
+			: '';
 		const sig = [
 			selectable, draggable, isLeaf, nextRightLeaf, nextBottomLeaf,
 			duplicateMethodIndex, duplicateMethodColor, alwaysShowRightAdd,
 			highlighted, suppressHoverAddControls, lockVisibleAddControls, isAnyNodeDragging,
+			testRunActive, testRunInScope, testRunIterationSig, testRunFailed, testRunFailedMessage,
 		].join('|');
 
 		const cached = cache?.nodes.get(node.id);
@@ -182,6 +197,11 @@ export function prepareWorkflowElements({
 				suppressHoverAddControls,
 				lockVisibleAddControls,
 				isAnyNodeDragging,
+				testRunActive,
+				testRunInScope,
+				testRunIteration,
+				testRunFailed,
+				testRunFailedMessage,
 				onAddStep: onOpenAddStep,
 				onOpenContextMenu,
 				onDeleteNode,
@@ -193,8 +213,16 @@ export function prepareWorkflowElements({
 	});
 	const preparedEdges: WorkflowEdgeModel[] = edges.map((edge) => {
 		const highlighted = Boolean(edge.data?.highlighted) || highlightedBranch.edgeIds.has(edge.id);
+		const testRunActive = testRunScope.activeEdgeIds.has(edge.id);
+		const testRunInScope = !testRunActive && testRunScope.scopeEdgeIds.has(edge.id);
 		const cached = cache?.edges.get(edge.id);
-		if (cached && cached.src === edge && cached.highlighted === highlighted) {
+		if (
+			cached
+			&& cached.src === edge
+			&& cached.highlighted === highlighted
+			&& cached.testRunActive === testRunActive
+			&& cached.testRunInScope === testRunInScope
+		) {
 			return cached.out;
 		}
 		const out: WorkflowEdgeModel = {
@@ -202,9 +230,11 @@ export function prepareWorkflowElements({
 			data: {
 				...edge.data,
 				highlighted,
+				testRunActive,
+				testRunInScope,
 			},
 		};
-		cache?.edges.set(edge.id, { src: edge, highlighted, out });
+		cache?.edges.set(edge.id, { src: edge, highlighted, testRunActive, testRunInScope, out });
 		return out;
 	});
 

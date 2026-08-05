@@ -95,6 +95,35 @@
   box-shadow: 0 0 0 4px var(--color-status-warning-bg);
 }
 
+/* Live test-run indicators. The exact method/operator currently executing
+   gets a pulsing ring — distinct from the static hover/path-selection
+   highlight above. Nodes inside a currently-running loop/if body (but not
+   themselves the active step) get a lighter dashed outline marking the
+   scope's extent. */
+.nodeBodyTestRunActive .startNode,
+.nodeBodyTestRunActive .circleNode,
+.nodeBodyTestRunActive .ifNode {
+  border-color: var(--color-action-primary);
+  animation: nodeTestRunPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes nodeTestRunPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-action-primary) 35%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 8px color-mix(in srgb, var(--color-action-primary) 10%, transparent);
+  }
+}
+
+.nodeBodyTestRunScope .startNode,
+.nodeBodyTestRunScope .circleNode,
+.nodeBodyTestRunScope .ifNode {
+  border-style: dashed;
+  border-color: var(--color-action-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-action-primary) 18%, transparent);
+}
+
 .nodeTopLabel {
   position: absolute;
   left: 50%;

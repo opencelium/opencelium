@@ -24,6 +24,7 @@ import { clearActiveTestRun, getActiveTestRun, saveActiveTestRun } from './testR
 import { RESOLVED_WORKFLOW_ERROR_MESSAGE_DURATION_SEC } from '../utils/workflowApiErrors';
 import { useTestRunLeaveGuard } from './useTestRunLeaveGuard';
 import {createId} from "@shared/lib/createId.ts";
+import { EMPTY_LIVE_GRAPH_STATUS, failPendingGraphStatus, reduceLiveGraphStatus, type LiveGraphStatus } from './liveGraphStatus';
 
 const TIMEOUT_TO_COLLECT_LOGS = 3000;
 // Backend names every temporary test scheduler "!*test_schedule_<millis>_<title>"
@@ -78,10 +79,16 @@ type Props = {
 	// the offending node and returns a specific translated message. Returns null for
 	// errors it doesn't recognize, so the generic "failed to start" message is used.
 	onResolveStartError?: (error: unknown) => string | null;
+	// Precomputed once per graph (see buildLoopAncestorsByIndexPath) — lets
+	// liveGraphStatus attribute a socket line's loopIndex components to the
+	// right enclosing loop nodes without this provider knowing the graph shape.
+	loopAncestorsByIndexPath?: Map<string, string[]>;
 	children: ReactNode;
 };
 
-export function TestRunProvider({ connectionId, connectionTitle = '', buildTestPayload, onResolveStartError, children }: Props) {
+const EMPTY_LOOP_ANCESTORS = new Map<string, string[]>();
+
+export function TestRunProvider({ connectionId, connectionTitle = '', buildTestPayload, onResolveStartError, loopAncestorsByIndexPath = EMPTY_LOOP_ANCESTORS, children }: Props) {
 	const { client, status } = useSocket();
 	const { t: tEntities } = useI18n('entities');
 	const confirm = useConfirm();
@@ -96,6 +103,11 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 	const [resumedRun] = useState(() => (connectionId ? getActiveTestRun(connectionId) : null));
 	const [phase, setPhase] = useState<TestRunPhase>(resumedRun ? 'running' : 'idle');
 	const [logTree, setLogTree] = useState(EMPTY_LIVE_LOG_TREE);
+	const [liveGraphStatus, setLiveGraphStatus] = useState<LiveGraphStatus>(EMPTY_LIVE_GRAPH_STATUS);
+	// Read from a ref so handleSocketLog (a stable callback) always sees the
+	// latest graph shape without needing to be recreated when it changes.
+	const loopAncestorsRef = useRef(loopAncestorsByIndexPath);
+	loopAncestorsRef.current = loopAncestorsByIndexPath;
 	const [result, setResult] = useState<TestRunResult | null>(null);
 	const [isOrphaned, setIsOrphaned] = useState(!!resumedRun);
 	// Whether a test for THIS connection is already running elsewhere (another tab
@@ -142,6 +154,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		// No more lines will arrive — turn leftover spinners into red dots so
 		// the user can see where an interrupted/failed run stopped.
 		setLogTree(failPendingNodes);
+		setLiveGraphStatus(failPendingGraphStatus);
 	}, []);
 
 	useEffect(
@@ -162,6 +175,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		setPhase('idle');
 		// The run died with the connection — mark in-flight rows as failed.
 		setLogTree(failPendingNodes);
+		setLiveGraphStatus(failPendingGraphStatus);
 		settleResult({ kind: 'stopped' });
 	}
 	useEffect(() => {
@@ -178,6 +192,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 	const handleSocketLog = useCallback(
 		(log: ExecutionSocketLog) => {
 			setLogTree((tree) => reduceLiveLog(tree, log));
+			setLiveGraphStatus((current) => reduceLiveGraphStatus(current, log, loopAncestorsRef.current));
 
 			const isExecutionEnd =
 				log.type === 'EXECUTION' && (log.status === 'COMPLETE' || log.status === 'FAIL');
@@ -321,6 +336,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 		channelIdRef.current = channelId;
 		const startedAt = Date.now();
 		setLogTree(EMPTY_LIVE_LOG_TREE);
+		setLiveGraphStatus(EMPTY_LIVE_GRAPH_STATUS);
 		setResult(null);
 		setIsOrphaned(false);
 		hasRevealedErrorRef.current = false;
@@ -394,6 +410,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 	const clearLogs = useCallback(() => {
 		if (phase !== 'idle') return;
 		setLogTree(EMPTY_LIVE_LOG_TREE);
+		setLiveGraphStatus(EMPTY_LIVE_GRAPH_STATUS);
 		setResult(null);
 	}, [phase]);
 
@@ -446,6 +463,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 			socketStatus: status,
 			phase,
 			logTree,
+			liveGraphStatus,
 			result,
 			isOrphaned,
 			isOtherTestRunning,
@@ -455,7 +473,7 @@ export function TestRunProvider({ connectionId, connectionTitle = '', buildTestP
 			stopTest,
 			clearLogs,
 		}),
-		[status, phase, logTree, result, isOrphaned, isOtherTestRunning, errorRevealNonce, revealPending, startTest, stopTest, clearLogs],
+		[status, phase, logTree, liveGraphStatus, result, isOrphaned, isOtherTestRunning, errorRevealNonce, revealPending, startTest, stopTest, clearLogs],
 	);
 
 	return <TestRunContext.Provider value={value}>{children}</TestRunContext.Provider>;
