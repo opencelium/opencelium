@@ -30,9 +30,9 @@ import com.becon.opencelium.backend.database.mysql.service.UserRoleService;
 import com.becon.opencelium.backend.database.mysql.service.UserService;
 import com.becon.opencelium.backend.enums.AuthMethod;
 import com.becon.opencelium.backend.enums.LangEnum;
-import com.becon.opencelium.backend.execution.socket.Event;
-import com.becon.opencelium.backend.execution.socket.SocketConstant;
-import com.becon.opencelium.backend.execution.socket.WebSocketNotificationQueue;
+import com.becon.opencelium.backend.websocket.Event;
+import com.becon.opencelium.backend.websocket.constant.SocketConstant;
+import com.becon.opencelium.backend.websocket.notification.WebSocketNotificationQueue;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.subs.SubsDTO;
 import com.becon.opencelium.backend.resource.user.TotpResource;
@@ -70,7 +70,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.becon.opencelium.backend.execution.socket.SocketConstant.USER_SESSION_DESTINATION;
+import static com.becon.opencelium.backend.websocket.constant.SocketConstant.USER_SESSION_DESTINATION;
 
 @Component
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {

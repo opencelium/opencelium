@@ -8,7 +8,7 @@ import com.becon.opencelium.backend.execution.logger.pubsub.event.ExecutionEvent
 import com.becon.opencelium.backend.execution.logger.pubsub.event.ExecutionFinishedEvent;
 import com.becon.opencelium.backend.execution.logger.pubsub.event.ExecutionStartedEvent;
 import com.becon.opencelium.backend.execution.logger.service.LogDataService;
-import com.becon.opencelium.backend.execution.socket.Connection2WebSocketChannelMapping;
+import com.becon.opencelium.backend.websocket.Connection2WebSocketChannelMapping;
 import com.becon.opencelium.backend.execution.supportfile.SupportFileService;
 import com.becon.opencelium.backend.utility.LogFileUtility;
 import org.slf4j.Logger;

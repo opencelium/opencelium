@@ -1,5 +1,6 @@
-package com.becon.opencelium.backend.execution.socket;
+package com.becon.opencelium.backend.websocket.connection;
 
+import com.becon.opencelium.backend.websocket.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
@@ -13,23 +14,32 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.becon.opencelium.backend.execution.socket.SocketConstant.USER_SESSION_DESTINATION;
+import static com.becon.opencelium.backend.websocket.config.JwtWebSocketHandshakeInterceptor.OC_SESSION_ID_ATTRIBUTE;
+import static com.becon.opencelium.backend.websocket.config.JwtWebSocketHandshakeInterceptor.PRINCIPAL_NAME_ATTRIBUTE;
+import static com.becon.opencelium.backend.websocket.config.JwtWebSocketHandshakeInterceptor.USER_ID_ATTRIBUTE;
+import static com.becon.opencelium.backend.websocket.constant.SocketConstant.USER_SESSION_DESTINATION;
 
 @Component
-public class WebSocketEventHandler {
+public class WebSocketConnectionRegistry {
     private final Map<Integer, Connection> connections = new ConcurrentHashMap<>();
     private final SimpMessagingTemplate messagingTemplate;
-    private static final Logger logger = LoggerFactory.getLogger(WebSocketEventHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(WebSocketConnectionRegistry.class);
 
-    public WebSocketEventHandler(@Lazy SimpMessagingTemplate messagingTemplate) {
+    public WebSocketConnectionRegistry(@Lazy SimpMessagingTemplate messagingTemplate) {
         this.messagingTemplate = messagingTemplate;
     }
 
     public void handleConnect(StompHeaderAccessor accessor) {
-        Integer userId = (Integer) accessor.getSessionAttributes().get("userId");
-        String principal = (String) accessor.getSessionAttributes().get("principal");
+        Integer userId = (Integer) accessor
+                .getSessionAttributes()
+                .get(USER_ID_ATTRIBUTE);
+        String principal = (String) accessor
+                .getSessionAttributes()
+                .get(PRINCIPAL_NAME_ATTRIBUTE);
+        String ocSessionId = (String) accessor
+                .getSessionAttributes()
+                .get(OC_SESSION_ID_ATTRIBUTE);
         String wsSessionId = accessor.getSessionId();
-        String ocSessionId = (String) accessor.getSessionAttributes().get("ocSessionId");
 
         if (userId == null || wsSessionId == null) {
             logger.error("Missing userId or wsSessionId in STOMP headers.");
@@ -57,7 +67,9 @@ public class WebSocketEventHandler {
     }
 
     public void handleDisconnect(StompHeaderAccessor accessor) {
-        Integer userId = (Integer) accessor.getSessionAttributes().get("userId");
+        Integer userId = (Integer) accessor
+                .getSessionAttributes()
+                .get(USER_ID_ATTRIBUTE);
         String wsSessionId = accessor.getSessionId();
 
         if (connections.containsKey(userId)) {
@@ -72,7 +84,7 @@ public class WebSocketEventHandler {
         }
     }
 
-    private class Connection {
+    private static class Connection {
         private final String principal;
         private final String ocSessionId;
         private final Set<String> wsSessionIds = new HashSet<>();

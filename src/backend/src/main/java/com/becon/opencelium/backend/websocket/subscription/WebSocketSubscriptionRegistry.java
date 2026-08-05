@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.execution.socket;
+package com.becon.opencelium.backend.websocket.subscription;
 
 import org.springframework.stereotype.Component;
 
@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-public class WebSocketUserSubscriptionRegistry {
+public class WebSocketSubscriptionRegistry {
     private final Map<Integer, Set<String>> userSubscriptions = new ConcurrentHashMap<>();
 
     public synchronized boolean add(int userId, String destination) {

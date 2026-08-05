@@ -1,8 +1,6 @@
-package com.becon.opencelium.backend.execution.socket;
+package com.becon.opencelium.backend.websocket.constant;
 
 public interface SocketConstant {
-    String PATH = "/websocket"; // WebSocket connection endpoint
-
     String EXECUTION_DESTINATION_PREFIX = "/execution"; // Message broker prefix for execution
     String LOGS_DESTINATION = "/execution/logs"; // WebSocket topic for execution logs
     String SUPPORT_FILE_DESTINATION = "/execution/support-file"; // WebSocket topic for support file

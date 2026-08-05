@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.execution.socket;
+package com.becon.opencelium.backend.websocket;
 
 public record Event(String event, String reason){
     public static Event of(String event, String reason) {

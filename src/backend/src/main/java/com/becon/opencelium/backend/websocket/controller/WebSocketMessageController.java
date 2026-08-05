@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.execution.socket;
+package com.becon.opencelium.backend.websocket.controller;
 
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;

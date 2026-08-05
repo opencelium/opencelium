@@ -3,7 +3,7 @@ package com.becon.opencelium.backend.security;
 import com.becon.opencelium.backend.constant.SecurityConstant;
 import com.becon.opencelium.backend.database.mysql.entity.Session;
 import com.becon.opencelium.backend.database.mysql.entity.User;
-import com.becon.opencelium.backend.execution.socket.Event;
+import com.becon.opencelium.backend.websocket.Event;
 import com.becon.opencelium.backend.resource.error.ErrorResource;
 import com.becon.opencelium.backend.resource.user.TotpResource;
 import com.becon.opencelium.backend.resource.user.UserResource;
@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Optional;
 
-import static com.becon.opencelium.backend.execution.socket.SocketConstant.USER_SESSION_DESTINATION;
+import static com.becon.opencelium.backend.websocket.constant.SocketConstant.USER_SESSION_DESTINATION;
 
 @Component
 public class TotpAuthenticationFilter extends AuthenticationFilter {
