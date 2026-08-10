@@ -1,7 +1,9 @@
-package com.becon.opencelium.backend.execution.socket;
+package com.becon.opencelium.backend.websocket;
 
 import com.becon.opencelium.backend.database.mysql.service.WidgetService;
 import com.becon.opencelium.backend.resource.application.SystemMetricsDTO;
+import com.becon.opencelium.backend.websocket.constant.SocketConstant;
+import com.becon.opencelium.backend.websocket.subscription.WebSocketSubscriptionRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -14,12 +16,12 @@ public class SystemMetricsBroadcaster {
 
     private final WidgetService widgetService;
     private final WebSocketNotificationService notificationService;
-    private final WebSocketUserSubscriptionRegistry subscriptionRegistry;
+    private final WebSocketSubscriptionRegistry subscriptionRegistry;
 
     public SystemMetricsBroadcaster(
             WidgetService widgetService,
             WebSocketNotificationService notificationService,
-            WebSocketUserSubscriptionRegistry subscriptionRegistry
+            WebSocketSubscriptionRegistry subscriptionRegistry
     ) {
         this.widgetService = widgetService;
         this.notificationService = notificationService;

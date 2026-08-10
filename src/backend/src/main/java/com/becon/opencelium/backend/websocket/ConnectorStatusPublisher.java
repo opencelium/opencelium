@@ -6,7 +6,7 @@
  * the Free Software Foundation, version 3 of the License.
  */
 
-package com.becon.opencelium.backend.execution.socket;
+package com.becon.opencelium.backend.websocket;
 
 import com.becon.opencelium.backend.database.mysql.entity.Connector;
 import com.becon.opencelium.backend.database.mysql.service.ConnectorHealthService.CheckResult;
@@ -14,6 +14,7 @@ import com.becon.opencelium.backend.database.mysql.service.ConnectorStatusListen
 import com.becon.opencelium.backend.enums.ConnectorStatus;
 import com.becon.opencelium.backend.mapper.mysql.ConnectorResourceMapper;
 import com.becon.opencelium.backend.resource.connector.ConnectorMetaDTO;
+import com.becon.opencelium.backend.websocket.constant.SocketConstant;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 

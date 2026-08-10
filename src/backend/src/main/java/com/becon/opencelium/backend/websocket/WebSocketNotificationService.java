@@ -1,5 +1,6 @@
-package com.becon.opencelium.backend.execution.socket;
+package com.becon.opencelium.backend.websocket;
 
+import com.becon.opencelium.backend.websocket.constant.SocketConstant;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
@@ -10,7 +11,8 @@ public class WebSocketNotificationService {
 
     public WebSocketNotificationService(
             SimpMessagingTemplate simpMessagingTemplate,
-            Connection2WebSocketChannelMapping connection2ChannelMapping) {
+            Connection2WebSocketChannelMapping connection2ChannelMapping
+    ) {
         this.simpMessagingTemplate = simpMessagingTemplate;
         this.connection2ChannelMapping = connection2ChannelMapping;
     }

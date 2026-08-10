@@ -1,4 +1,4 @@
-package com.becon.opencelium.backend.execution.socket;
+package com.becon.opencelium.backend.websocket;
 
 import org.springframework.stereotype.Component;
 

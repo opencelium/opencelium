@@ -1,5 +1,7 @@
-package com.becon.opencelium.backend.execution.socket;
+package com.becon.opencelium.backend.websocket.notification;
 
+import com.becon.opencelium.backend.websocket.WebSocketNotificationService;
+import com.becon.opencelium.backend.websocket.subscription.WebSocketSubscriptionRegistry;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -10,11 +12,11 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 @Component
 public class WebSocketNotificationQueue {
     private final Map<String, Queue<Object>> destinationMessages = new ConcurrentHashMap<>();
-    private final WebSocketUserSubscriptionRegistry subscriptionRegistry;
+    private final WebSocketSubscriptionRegistry subscriptionRegistry;
     private final WebSocketNotificationService notificationService;
 
     public WebSocketNotificationQueue(
-            WebSocketUserSubscriptionRegistry subscriptionRegistry,
+            WebSocketSubscriptionRegistry subscriptionRegistry,
             WebSocketNotificationService notificationService) {
         this.subscriptionRegistry = subscriptionRegistry;
         this.notificationService = notificationService;
