@@ -1,5 +1,5 @@
 import { Tooltip } from '@shared/ui/primitives/Tooltip';
-import { HeaderEditableField } from '../header/HeaderEditableField';
+import { HeaderEditableField } from '../header/HeaderEditableField/HeaderEditableField';
 import { EMPTY_NAME_LABEL } from './useWorkflowHeaderState';
 
 type Props = {

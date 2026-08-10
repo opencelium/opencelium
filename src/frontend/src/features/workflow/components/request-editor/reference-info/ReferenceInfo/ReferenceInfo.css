@@ -1,0 +1,10 @@
+.referenceInfo { font-family: Inter, sans-serif; font-size: 14px; }
+.referenceInfoRow { margin-bottom: 8px; cursor: pointer; padding: 6px 4px; border-radius: 6px; transition: box-shadow .15s ease, background .15s ease; }
+.referenceInfoRow:hover { box-shadow: var(--shadow-md); background: var(--color-background-hover); }
+.referenceInfoTitle { margin-bottom: 4px; }
+.referenceInfoTarget { color: var(--color-action-primary); font-family: monospace; font-weight: 600; }
+.referenceInfoBindings { margin-top: 4px; display: grid; gap: 8px; }
+.referenceInfoBinding { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 4px 6px; border-radius: 6px; border: 1px solid var(--color-border-subtle); background: var(--color-background-hover); }
+.referenceInfoMethod { color: var(--color-text-on-action); padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 12px; }
+.referenceInfoSource { font-family: monospace; font-weight: 500; }
+.referenceInfoEmpty { opacity: .6; }
