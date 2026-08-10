@@ -1,6 +1,7 @@
 import type { WorkflowEdgeModel, WorkflowNodeData, WorkflowNodeModel } from '../types/workflow.types';
 import { buildLegacyConnection } from '../components/request-editor/legacyAdapter';
 import { ITERATOR_NAMES } from '../components/request-editor/body-editor/requestReferenceOptions';
+import { DEFAULT_ENHANCEMENT_SCRIPT } from '../components/request-editor/body-editor/bodyReference';
 import { ALL_COLORS } from '../constants/colors';
 import { MethodType } from '../types/connection';
 
@@ -577,7 +578,7 @@ const serializeFieldBinding = (binding: any) => {
 			expertVar,
 			expertCode: binding?.enhancement?.script?.endsWith(';')
 				? binding.enhancement.script
-				: `${binding?.enhancement?.script ?? 'RESULT_VAR = VAR_0'};`,
+				: `${binding?.enhancement?.script ?? DEFAULT_ENHANCEMENT_SCRIPT};`,
 		},
 	};
 };
@@ -635,7 +636,7 @@ const normalizeFieldBinding = (binding: any) => {
 		enhancement: {
 			...enhancement,
 			enhanceId: String(enhancement.enhancementId ?? enhancement.enhanceId ?? binding.id ?? stableBindingId(resultVar ?? JSON.stringify(binding))),
-			script: enhancement.script ?? enhancement.expertCode ?? 'RESULT_VAR = VAR_0;',
+			script: enhancement.script ?? enhancement.expertCode ?? `${DEFAULT_ENHANCEMENT_SCRIPT};`,
 			args: resultVar ? { RESULT_VAR: resultVar, ...fromArgs } : enhancement.args ?? {},
 		},
 	};

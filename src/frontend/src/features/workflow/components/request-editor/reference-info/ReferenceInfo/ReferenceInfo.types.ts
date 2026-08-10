@@ -4,7 +4,9 @@ import type { MethodWithId } from '../../../../types/connection';
 export type ReferenceInfoProps = {
 	messageProperty: MessageProperty;
 	data: any;
+	readOnly?: boolean;
 	onReferenceClick?: (enhanceId: string) => void;
+	onDeleteReference?: (fieldPath: string, pointer: string) => void;
 };
 
 export type FieldReference = {
@@ -13,4 +15,5 @@ export type FieldReference = {
 	color: string;
 	enhanceId: string;
 	sourceMessageProperty: string;
+	direction: string;
 };

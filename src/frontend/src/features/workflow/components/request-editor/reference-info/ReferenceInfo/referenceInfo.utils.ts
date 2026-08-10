@@ -53,7 +53,8 @@ export const buildFieldReferences = (connection: Connection, currentMethod: Meth
 				.sort((left, right) => compareIndex(right.index, left.index))[0] ?? null;
 			const key = (resultVar.path || '').trim();
 			(references[key] ??= []).push({ target: parsed.path, method, color: parsed.color,
-				enhanceId: enhancement.enhanceId, sourceMessageProperty: parsed.messageProperty });
+				enhanceId: enhancement.enhanceId, sourceMessageProperty: parsed.messageProperty,
+				direction: parsed.direction });
 		});
 	});
 	return references;
@@ -68,4 +69,14 @@ export const formatTargetField = (messageProperty: string, field: string, paramK
 export const formatSourceField = (messageProperty: string, field: string) => {
 	const value = (field || '').trim();
 	return value ? `${messageProperty}.$.${value}` : `${messageProperty}.$`;
+};
+
+export const buildReferenceToken = (reference: FieldReference) => {
+	if (reference.sourceMessageProperty === 'status') {
+		return `${reference.color}.(${reference.direction}).status`;
+	}
+	const field = reference.target
+		? `${reference.sourceMessageProperty}.$.${reference.target}`
+		: `${reference.sourceMessageProperty}.$`;
+	return `${reference.color}.(${reference.direction}).${field}`;
 };

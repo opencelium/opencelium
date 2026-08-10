@@ -20,7 +20,7 @@ export function XmlBodyEditor({ readOnly }: XmlBodyEditorProps) {
 	});
 	const leftItems: CollapseItem[] = [
 		{ key: 'referenceInfo', label: t('referenceInfo.legacyTitle'),
-			content: hasReferenceInfo ? <ReferenceInfo messageProperty='body' data={{}}
+			content: hasReferenceInfo ? <ReferenceInfo messageProperty='body' data={{}} readOnly={readOnly}
 				onReferenceClick={editor.setSelectedEnhanceId} />
 				: <Empty description={t('referenceInfo.empty')} /> },
 		{ key: 'requestData', label: t('requestData'),
@@ -35,7 +35,8 @@ export function XmlBodyEditor({ readOnly }: XmlBodyEditorProps) {
 			</div></div>
 			<div className='bodyLegacyEnhancementPane'><div className='bodyLegacyEnhancement'>
 				<ReferenceEnhancement readOnly={readOnly} enhancement={editor.currentEnhancement}
-					directReference={editor.directReference} onCreateEnhancement={editor.createEnhancement} />
+					directReference={editor.directReference} onCreateEnhancement={editor.createEnhancement}
+					onDeleteEnhancement={editor.deleteEnhancement} />
 			</div></div>
 		</div>
 		{editor.connection && editor.isReferenceOpen && (

@@ -4,7 +4,8 @@
 .referenceInfoTitle { margin-bottom: 4px; }
 .referenceInfoTarget { color: var(--color-action-primary); font-family: monospace; font-weight: 600; }
 .referenceInfoBindings { margin-top: 4px; display: grid; gap: 8px; }
-.referenceInfoBinding { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 4px 6px; border-radius: 6px; border: 1px solid var(--color-border-subtle); background: var(--color-background-hover); }
+.referenceInfoBinding { position: relative; display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 4px 24px 4px 6px; border-radius: 6px; border: 1px solid var(--color-border-subtle); background: var(--color-background-hover); }
+.referenceInfoDelete { position: absolute; top: 50%; right: 2px; transform: translateY(-50%); }
 .referenceInfoMethod { color: var(--color-text-on-action); padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 12px; }
 .referenceInfoSource { font-family: monospace; font-weight: 500; }
 .referenceInfoEmpty { opacity: .6; }

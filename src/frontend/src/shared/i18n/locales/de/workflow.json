@@ -449,6 +449,11 @@
       "title": "Direkte Referenz",
       "description": "Dieses Feld hat kein Enhancement — es besteht eine direkte Eins-zu-eins-Referenz zwischen den beiden unten stehenden Feldern, ohne dazwischenliegendes Skript. Direkte Referenzen werden schneller ausgeführt als ein Enhancement mit Skript.",
       "descriptionMany": "Dieses Feld hat kein Enhancement — es besteht eine direkte Referenz zwischen den unten stehenden Feldern, ohne dazwischenliegendes Skript. Direkte Referenzen werden schneller ausgeführt als ein Enhancement mit Skript."
+    },
+    "optimizeDirectReferences": {
+      "title": "Optimierung verfügbar",
+      "message": "Es gibt {{count}} Referenzen, die für eine bessere Leistung optimiert werden können. Möchten Sie diese Optimierung vor dem Speichern anwenden?",
+      "message_one": "Es gibt eine Referenz, die für eine bessere Leistung optimiert werden kann. Möchten Sie diese Optimierung vor dem Speichern anwenden?"
     }
   },
   "description": {
