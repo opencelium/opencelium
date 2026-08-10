@@ -111,14 +111,16 @@ export const reduceLiveGraphStatus = (
 			const context = loopIndexParts.slice(0, position).join(',');
 			const existing = next[loopPath];
 			if (!existing || existing.iterationContext !== context) {
-				// Fresh invocation of this loop — reset the counter. Only start timing
-				// iteration 1 if speed isn't already known from an earlier invocation;
-				// once classified, it stays classified for the rest of the run so a
-				// loop re-entered many times by an outer loop doesn't re-measure (and
+				// Fresh invocation of this loop — it is definitely running again right
+				// now, so status always resets to PENDING here, even if the previous
+				// invocation left it COMPLETE/FAIL. Only start timing iteration 1 if
+				// speed isn't already known from an earlier invocation; once
+				// classified, it stays classified for the rest of the run so a loop
+				// re-entered many times by an outer loop doesn't re-measure (and
 				// re-hide) itself every single time.
 				next[loopPath] = {
 					...existing,
-					status: existing?.status ?? 'PENDING',
+					status: 'PENDING',
 					iterationContext: context,
 					lastIterationValue: value,
 					iterationCount: 1,

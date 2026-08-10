@@ -5,7 +5,18 @@ import type { LiveGraphNodeStatus, LiveGraphStatus } from '../../test-run/liveGr
 import type { WorkflowEdgeModel, WorkflowLoopIterationDisplay, WorkflowNodeModel } from '../../types/workflow.types';
 
 export type TestRunScope = {
-	// The exact method/operator currently executing (PENDING right now).
+	// Nodes that get the pulsing "active" ring: every LOOP/IF operator (any
+	// nesting depth) that currently has a pending leaf structurally nested
+	// under it, plus a top-level method/leaf (no enclosing operator) while
+	// it's the one PENDING right now. Deliberately keyed off "is anything
+	// under me still going", not the operator's own status line — a loop's
+	// own PENDING/COMPLETE line toggles once per iteration on the backend, and
+	// reacting to that directly made the whole loop body flash on and off
+	// every single pass. This way the ring turns on once when the operator is
+	// entered and stays on continuously through every iteration. A method
+	// nested inside an operator is never added here even while it's the exact
+	// PENDING step — it only ever sits in scopeNodeIds (see below), so the ring
+	// doesn't hop from sibling to sibling as execution moves through the body.
 	activeNodeIds: Set<string>;
 	// The edge feeding each active node — the "data flowing" cue.
 	activeEdgeIds: Set<string>;
@@ -86,7 +97,11 @@ export const getTestRunScope = (
 	if (entries.length === 0) return EMPTY_TEST_RUN_SCOPE;
 
 	const nodeIdByIndex = new Map<string, string>();
-	buildWorkflowIndexes(nodes, edges).forEach((index, nodeId) => nodeIdByIndex.set(index, nodeId));
+	const indexByNodeId = new Map<string, string>();
+	buildWorkflowIndexes(nodes, edges).forEach((index, nodeId) => {
+		nodeIdByIndex.set(index, nodeId);
+		indexByNodeId.set(nodeId, index);
+	});
 	const nodeById = new Map(nodes.map((node) => [node.id, node]));
 
 	const failedNodeIds = new Set<string>();
@@ -104,43 +119,63 @@ export const getTestRunScope = (
 		return { ...EMPTY_TEST_RUN_SCOPE, failedNodeIds, failedNodeErrorByNodeId };
 	}
 
+	// Structural pass: for every currently-pending leaf, walk its index path's
+	// own prefix chain (outermost first, itself last) and mark every LOOP/IF
+	// found along the way as an "active operator" — regardless of what that
+	// operator's own status line currently says. A top-level leaf (single
+	// segment, no enclosing operator) is marked active in its own right.
+	const activeOperatorIds = new Set<string>();
 	const activeNodeIds = new Set<string>();
-	const scopeNodeIds = new Set<string>();
-	const scopeEdgeIds = new Set<string>();
-	const iterationByNodeId = new Map<string, WorkflowLoopIterationDisplay>();
-
 	for (const indexPath of pendingIndexPaths) {
-		const nodeId = nodeIdByIndex.get(indexPath);
-		const node = nodeId ? nodeById.get(nodeId) : undefined;
-		if (!nodeId || !node) continue;
-		activeNodeIds.add(nodeId);
-
-		const status = liveGraphStatus[indexPath];
-
-		if (node.type === 'if' || node.type === 'loop') {
-			const scope = getActiveOperatorScope(node, status, edges);
-			scope.nodeIds.forEach((id) => scopeNodeIds.add(id));
-			scope.edgeIds.forEach((id) => scopeEdgeIds.add(id));
-		}
-
-		if (node.type === 'loop' && status.iterationCount) {
-			const iterator = status.iterator ?? '';
-			if (status.speed === 'fast') {
-				// Already known to be fast (possibly from an earlier invocation) —
-				// show the static badge right away, no re-measuring/hiding this time.
-				iterationByNodeId.set(nodeId, { kind: 'fast', iterator });
-			} else if (status.speed === 'slow' || status.iterationCount >= 2) {
-				// Either already known to be a readable speed, or (this loop's very
-				// first invocation) we've just timed enough to know it isn't fast.
-				iterationByNodeId.set(nodeId, { kind: 'count', iterator, count: status.iterationCount });
+		const segments = indexPath.split('_');
+		for (let take = 1; take <= segments.length; take += 1) {
+			const prefix = segments.slice(0, take).join('_');
+			const nodeId = nodeIdByIndex.get(prefix);
+			const node = nodeId ? nodeById.get(nodeId) : undefined;
+			if (!nodeId || !node) continue;
+			if (node.type === 'if' || node.type === 'loop') {
+				activeOperatorIds.add(nodeId);
+				activeNodeIds.add(nodeId);
+			} else if (take === segments.length && segments.length === 1) {
+				activeNodeIds.add(nodeId);
 			}
-			// else: still on iteration 1 of this loop's very first-ever invocation —
-			// nothing to show yet, timing is in progress.
 		}
 	}
 
 	if (activeNodeIds.size === 0) {
 		return { ...EMPTY_TEST_RUN_SCOPE, failedNodeIds, failedNodeErrorByNodeId };
+	}
+
+	const scopeNodeIds = new Set<string>();
+	const scopeEdgeIds = new Set<string>();
+	const iterationByNodeId = new Map<string, WorkflowLoopIterationDisplay>();
+
+	for (const nodeId of activeOperatorIds) {
+		const node = nodeById.get(nodeId);
+		const operatorIndex = indexByNodeId.get(nodeId);
+		if (!node || !operatorIndex) continue;
+		// Read straight from the flat map rather than requiring this exact line
+		// be the one that's PENDING right now — iterationCount/iterator/speed
+		// (and ifResult) persist on the entry regardless of what its `status`
+		// field currently says, so they stay correct even while this operator's
+		// own line is between PENDING/COMPLETE for the current iteration.
+		const status = liveGraphStatus[operatorIndex] ?? { status: 'PENDING' as const };
+
+		const scope = getActiveOperatorScope(node, status, edges);
+		scope.nodeIds.forEach((id) => scopeNodeIds.add(id));
+		scope.edgeIds.forEach((id) => scopeEdgeIds.add(id));
+
+		if (node.type === 'loop' && status.iterationCount && status.speed !== 'fast') {
+			// A fast loop (iterates in under a second) shows nothing at all, not
+			// even a placeholder — a live count for those would just flicker
+			// unreadably. Otherwise: already known to be a readable speed, or
+			// (this loop's very first invocation) we've just timed enough to know
+			// it isn't fast — else still on iteration 1 of the very first
+			// invocation, nothing to show yet while timing is in progress.
+			if (status.speed === 'slow' || status.iterationCount >= 2) {
+				iterationByNodeId.set(nodeId, { iterator: status.iterator ?? '', count: status.iterationCount });
+			}
+		}
 	}
 
 	const activeEdgeIds = new Set(edges.filter((edge) => activeNodeIds.has(edge.target)).map((edge) => edge.id));

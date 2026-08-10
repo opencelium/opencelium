@@ -6,15 +6,13 @@ import type { ConnectorHealthStatus } from '@entities/connector/model/types';
 
 export type WorkflowNodeType = 'start' | 'connector' | 'system' | 'trigger-connection' | 'if' | 'loop';
 
-// What a LOOP node shows while running, set by WorkflowCanvas. 'count' updates
-// live ("i = 3"); 'fast' is a static fallback ("i = …") for loops whose first
-// iteration took under a second — a live count for those would just flicker
-// unreadably. Nothing is shown at all before iteration 2 begins: there's no
-// speed measurement yet, and no useful number to show either (see
+// What a LOOP node shows while running, set by WorkflowCanvas — a live count
+// ("i = 3"), refreshed on every iteration. Nothing is shown at all before
+// iteration 2 begins (no speed measurement yet), or once the loop is
+// classified as fast (its first iteration took under a second) — a live
+// count for those would just flicker unreadably (see
 // getTestRunScope/reduceLiveGraphStatus).
-export type WorkflowLoopIterationDisplay =
-	| { kind: 'count'; iterator: string; count: number }
-	| { kind: 'fast'; iterator: string };
+export type WorkflowLoopIterationDisplay = { iterator: string; count: number };
 
 export type WorkflowAddDirection = 'right' | 'bottom';
 export type WorkflowCreateKind = 'connector' | 'system' | 'trigger-connection' | 'if' | 'loop';

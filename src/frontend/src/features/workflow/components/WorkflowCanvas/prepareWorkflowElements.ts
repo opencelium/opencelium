@@ -157,9 +157,7 @@ export function prepareWorkflowElements({
 		const testRunFailedMessage = testRunFailed ? testRunScope.failedNodeErrorByNodeId.get(node.id) : undefined;
 		const testRunIteration = testRunScope.iterationByNodeId.get(node.id);
 		const testRunIterationSig = testRunIteration
-			? testRunIteration.kind === 'fast'
-				? `fast:${testRunIteration.iterator}`
-				: `count:${testRunIteration.iterator}:${testRunIteration.count}`
+			? `${testRunIteration.iterator}:${testRunIteration.count}`
 			: '';
 		const sig = [
 			selectable, draggable, isLeaf, nextRightLeaf, nextBottomLeaf,

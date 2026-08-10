@@ -295,8 +295,7 @@
     "asyncBadge": "Asynchronous request — triggers the other workflow and does not wait for its response.",
     "aggregatorBadge": "Combines results from multiple calls using the \"{{name}}\" data aggregator.",
     "methodColorBadge": "Nodes sharing this color and number call the same method on the same connector.",
-    "testRunIteration": "{{iterator}} = {{count}}",
-    "testRunIterationFast": "{{iterator}} = ..."
+    "testRunIteration": "{{iterator}} = {{count}}"
   },
   "saveDialog": {
     "title": "Save Version",

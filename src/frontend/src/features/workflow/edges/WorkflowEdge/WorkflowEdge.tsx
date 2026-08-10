@@ -70,14 +70,22 @@ export function WorkflowEdge({
 				cx={sourceX}
 				cy={sourceY}
 				r={3}
-				className={`edgeStartPoint ${isTestRunActive ? 'edgeStartPointActive' : isHighlighted ? 'edgeStartPointHighlighted' : ''}`}
+				className={`edgeStartPoint ${
+					isTestRunActive
+						? 'edgeStartPointActive'
+						: isHighlighted
+						? 'edgeStartPointHighlighted'
+						: isTestRunInScope
+						? 'edgeStartPointInScope'
+						: ''
+				}`}
 			/>
 
 			<BaseEdge
 				id={String(id)}
 				path={path}
 				markerEnd={
-					isTestRunActive || isHighlighted
+					isTestRunActive || isHighlighted || isTestRunInScope
 						? 'url(#workflow-arrow-highlighted)'
 						: 'url(#workflow-arrow)'
 				}

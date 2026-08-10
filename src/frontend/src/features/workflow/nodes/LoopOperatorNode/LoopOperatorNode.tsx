@@ -8,20 +8,10 @@ import { StandardNodeHandles } from '../StandardNodeHandles/StandardNodeHandles'
 export function LoopOperatorNode({ id, data, selected, dragging }: NodeProps<LoopWorkflowNode>) {
 	const { t } = useI18n('workflow');
 
-	const iterationLabel = (() => {
-		const iteration = data.testRunIteration;
-		if (!iteration) return undefined;
-		switch (iteration.kind) {
-			case 'count':
-				return t('node.testRunIteration', { iterator: iteration.iterator, count: iteration.count });
-			case 'fast':
-				return t('node.testRunIterationFast', { iterator: iteration.iterator });
-			default: {
-				const _exhaustive: never = iteration;
-				return _exhaustive;
-			}
-		}
-	})();
+	const iteration = data.testRunIteration;
+	const iterationLabel = iteration
+		? t('node.testRunIteration', { iterator: iteration.iterator, count: iteration.count })
+		: undefined;
 
 	return (
 		<NodeShell

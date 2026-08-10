@@ -74,6 +74,13 @@
   stroke-dasharray: 4 4;
 }
 
+.edgeStartPointInScope {
+  fill: var(--color-action-primary);
+  stroke: var(--color-action-primary);
+  stroke-width: 0;
+  opacity: 0.5;
+}
+
 .rightDrawerShifted {
   transform: translateX(-300px);
 }

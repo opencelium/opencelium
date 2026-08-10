@@ -95,11 +95,13 @@
   box-shadow: 0 0 0 4px var(--color-status-warning-bg);
 }
 
-/* Live test-run indicators. The exact method/operator currently executing
-   gets a pulsing ring — distinct from the static hover/path-selection
-   highlight above. Nodes inside a currently-running loop/if body (but not
-   themselves the active step) get a lighter dashed outline marking the
-   scope's extent. */
+/* Live test-run indicators. A currently-open LOOP/IF operator (any nesting
+   depth), or a top-level method with no enclosing operator, gets a pulsing
+   ring — distinct from the static hover/path-selection highlight above.
+   Everything nested inside a currently-running operator's body gets a
+   lighter dashed outline marking the scope's extent instead — deliberately
+   never the pulsing ring, so the ring doesn't hop from sibling to sibling as
+   execution moves through the body; only the enclosing operator animates. */
 .nodeBodyTestRunActive .startNode,
 .nodeBodyTestRunActive .circleNode,
 .nodeBodyTestRunActive .ifNode {
