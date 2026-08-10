@@ -119,7 +119,6 @@ export const ScheduleCard = memo(function ScheduleCard({ item }: Props) {
                                 {executions.map((execution) => (
                                     <RunningExecBadge
                                         key={execution.execId}
-                                        localStartTime={execution.localStartTime}
                                         serverStartTime={execution.serverStartTime}
                                         avgDuration={execution.avgDuration}
                                     />
